@@ -1,0 +1,10 @@
+.index-frame {
+	display : flex;
+	justify-content : center;
+	min-height : 100vh;
+	min-width : 100vw;
+	background-image : url(../images/index/party_orig.jpg);
+	background-size : cover;
+	align-items : center;
+	text-align:center;
+}
