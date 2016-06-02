@@ -1,9 +1,9 @@
 {
-  "name": "wensun",
+  "name": "winsun",
   "version": "1.0.0",
   "description": "wensun",
   "private": true,
-  "main": "src/app/app.js",
+  "main": "main.js",
   "scripts": {
     "start": "electron main.js"
   },
