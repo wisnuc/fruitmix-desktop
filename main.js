@@ -16,9 +16,11 @@ server ='http://192.168.5.132:80';
 //user
 var user = {};
 //files
-var allFiles = null;
+var allFiles = [];
 var tree = {};
 var map = new Map();
+//share
+var shareFiles = [];
 //directory
 var currentDirectory = {};
 var children = [];
@@ -60,9 +62,9 @@ ipcMain.on('getRootData', ()=> {
 		children = data.filter(item=>item.parent=='');
 		children = children.map((item)=>Object.assign({},{checked:false},item));
 		mainWindow.webContents.send('receive', currentDirectory,children,parent,path);
+		classifyShareFiles();
 		let tree = getTree(allFiles);
 		mainWindow.webContents.send('setTree',tree[0]);
-
 	});
 });
 
@@ -90,13 +92,12 @@ ipcMain.on('enterChildren', (event,selectItem) => {
 	children = children.map((item)=>Object.assign({},{checked:false},item));
 	getChildren(selectItem);
 	//path
-
 	try {
 		path.length = 0;
 		let obj = map.get(selectItem.uuid);
 		getPath(obj);
-		console.log('path!!!');
-	console.log(path);
+	// 	console.log('path!!!');
+	// console.log(path);
 	}catch(e) {
 		console.log(e);        
 		path.length=0;
@@ -353,6 +354,10 @@ function getPath(obj) {
 		getPath(obj.parent);
 	}
 }
+function classifyShareFiles() {
+	let userUUID = user.uuid;
+	console.log(userUUID); 
+}
 function getTree(f) {
 	let files = f.map((item)=>{
 		return {
@@ -370,6 +375,7 @@ function getTree(f) {
 	tree.forEach((item)=>{
 		map.set(item.uuid,item);
 	});
+	// console.log(tree);
 	return tree;
 }
 function deleteFile(obj) {
@@ -576,17 +582,15 @@ function createNewUser(username,password,email) {
 	return promise;
 }
 function share(file,users) {
-	console.log('000');
 	var s = new Promise((resolve,reject)=>{
-		console.log('111');
 		console.log(users);
+		var y = [];
 		var options = {
 			headers: {
 				Authorization: user.type+' '+user.token
 			},
-			form: {readlist:users,writelist:[]}
+			form: {readlist:JSON.stringify(users),writelist:JSON.stringify(y)}
 		}
-		console.log('222');
 		function callback (err,res,body) {
 			console.log(res);
 			if (!err && res.statusCode == 200) {
@@ -599,7 +603,7 @@ function share(file,users) {
 			}
 		};
 		console.log('333');
-		// request.patch(server+'/files/'+file.uuid+'?type=permission',options,callback);
+		request.patch(server+'/files/'+file.uuid+'?type=permission',options,callback);
 	});
 	return s;
 }

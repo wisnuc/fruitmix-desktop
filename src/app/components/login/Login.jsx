@@ -49,16 +49,15 @@ class Index extends React.Component {
 	}
 
 	submit() {
-		// let username = this.refs.username.value;
-		// let password = this.refs.password.value;
-		// this.props.dispatch(Action.login(username,password));
+		let username = this.refs.username.input.value;
+		let password = this.refs.password.input.value;
 		this.props.dispatch({
 		      type: "LOGIN"
 		})
-		// 		setTimeout( () => {
-		// 	this.props.dispatch(Login.login());
-		// },2);
-		ipc.send('login','111111','111111');
+		console.log(username);
+		console.log(password);
+		ipc.send('login',username,password);
+		// ipc.send('login','222222','222222');
 	}
 
 	render() {
@@ -68,7 +67,7 @@ class Index extends React.Component {
 			flexDirection : 'column',
 			alignItems: 'center',
 			justifyContent: 'center',
-			height: 120,
+			height: 170,
 			width: 300,
 			padding: 10
 		}
@@ -77,7 +76,8 @@ class Index extends React.Component {
 			<div className='index-frame' key='login'>
 				<Paper style={paperStyle} zDepth={4}>
 				{ !!busy && <CircularProgress /> }
-				{ !busy && <TextField  stype={{marginBottom: 10}} hintText="password" type="password" fullWidth={true} />}
+				{ !busy && <TextField ref='username'  stype={{marginBottom: 10}} hintText="username" type="username" fullWidth={true} />}
+				{ !busy && <TextField ref='password' stype={{marginBottom: 10}} hintText="password" type="password" fullWidth={true} />}
 				{ !busy && <FlatButton style={{marginTop: 10}} label='UNLOCK' onTouchTap={this.submit.bind(this)} />}
 				</Paper>
 			{/*
