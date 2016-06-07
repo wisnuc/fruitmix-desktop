@@ -46,8 +46,8 @@ class Main extends Component {
 		var _this = this;
 		ipc.send('getRootData');
 		this.props.dispatch(Action.filesLoading());
-		ipc.on('receive',function (err,dir,children,parent,path) {
-			_this.props.dispatch(Action.setDirctory(dir,children,parent,path));
+		ipc.on('receive',function (err,dir,children,parent,path,shareChildren) {
+			_this.props.dispatch(Action.setDirctory(dir,children,parent,path,shareChildren));
 		});
 		ipc.on('setTree',(err,tree)=>{
 			this.props.dispatch(Action.setTree(tree));
@@ -67,8 +67,6 @@ class Main extends Component {
 
 		ipc.on('uploadSuccess',(err,file,children)=>{
 			console.log('uploadSuccess');
-			console.log(file);
-			console.log(children);
 			// this.props.dispatch(Action.removeFile(obj));
 			if (file.dir.uuid == this.props.data.directory.uuid) {
 				this.props.dispatch(Action.refreshDir(children));

@@ -39,13 +39,14 @@ var actions = {
 		}
 	},
 
-	setDirctory(dir,children,parent,path) {
+	setDirctory(dir,children,parent,path,shareChildren) {
 		return {
 			type: 'SET_DIRECTORY',
 			directory: dir,
 			children: children,
 			parent: parent,
-			path:path
+			path:path,
+			shareChildren:shareChildren
 		}
 	},
 
@@ -197,8 +198,6 @@ var actions = {
 			b: b
 		}
 	}
-
-
 }
 
 module.exports = actions;

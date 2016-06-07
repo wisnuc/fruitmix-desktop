@@ -8,7 +8,8 @@ var configuration = require('./configuration');
 var request = require('request');
 var http = require('http');
 var fs = require ('fs');
-var stream = require('stream')
+var stream = require('stream');
+var _ = require('lodash');
 var mainWindow = null;
 
 var server = 'http://211.144.201.201:8888';
@@ -23,6 +24,7 @@ var map = new Map();
 var shareFiles = [];
 var shareTree = [];
 var shareMap = new Map();
+var shareChildren = [];
 //directory
 var currentDirectory = {};
 var children = [];
@@ -60,51 +62,24 @@ ipcMain.on('login',function(event,username,password){
 //get all files
 ipcMain.on('getRootData', ()=> {
 	getFiles().then((data)=>{
-		//set allfiles
-		allFiles = data;
-		allFiles.forEach((item)=>{item.share = false});
-		// set children
-		children = data.filter(item=>item.parent=='');
-		children = children.map((item)=>Object.assign({},{checked:false},item));
-		//set path
-		path.push({key:''});
-		//separate shared files from allfiles
-		classifyShareFiles();
-		tree = getTree(allFiles,'file');
-		//send to client
-		mainWindow.webContents.send('receive', currentDirectory,children,parent,path);
+		dealWithData(data);
+		mainWindow.webContents.send('receive', currentDirectory,children,parent,path,shareChildren);
 		mainWindow.webContents.send('setTree',tree[0]);
 	});
 });
 
 ipcMain.on('enterChildren', (event,selectItem) => {
-
-	console.log('...');
-	console.log(selectItem);
 	//parent
-	var parentUUID = selectItem.parent;
-	if (parentUUID != '') {
-		for (let item of allFiles) {
-			if (item.uuid == parentUUID) {
-				parent = item;
-			}
-		}
-	}
+	var parent = map.get(selectItem.parent);
 	//currentDirectory
 	currentDirectory = selectItem;
 	//children
-	children.length = 0;
-	children = getChildren(selectItem);
-	console.log(children);
+	children = map.get(selectItem.uuid).children;
 	//path
 	try {
-		// path.length = 0;
-		// let obj = map.get(selectItem.uuid);
-		// console.log('///');
-		// console.log(obj);
-		// getPath(obj);
-		// console.log('============>');
-		// console.log(path);
+		path.length = 0;
+		getPath(selectItem);
+		path = _.cloneDeep(path);
 	}catch(e) {
 		console.log(e);        
 		path.length=0;
@@ -120,7 +95,6 @@ ipcMain.on('getFile',(e,uuid)=>{
 });
 
 ipcMain.on('uploadFile',(e,file)=>{
-
 	var body = 0;
 	var t = 0;
 	var interval = setInterval(function() {
@@ -129,7 +103,7 @@ ipcMain.on('uploadFile',(e,file)=>{
 		if (upLoadProcess >= 1) {
 			clearInterval(interval);
 		}
-	},500);
+	},800);
 	var transform = new stream.Transform({
 		transform: function(chunk, encoding, next) {
 			body+=chunk.length;
@@ -139,12 +113,9 @@ ipcMain.on('uploadFile',(e,file)=>{
 	})
 
 	function callback (err,res,body) {
-		console.log('err');
-		console.log(err);
-		console.log('body');
-		console.log(body);
 		if (!err && res.statusCode == 200) {
 			var uuid = body;
+			console.log(uuid);
 			uuid = uuid.slice(1,uuid.length-1);
 			modifyData(file,uuid);
 		}else {
@@ -168,8 +139,6 @@ ipcMain.on('uploadFile',(e,file)=>{
 });
 
 ipcMain.on('upLoadFolder',(e,name,dir)=>{
-
-
 	var r = request.post(server+'/files/'+dir.uuid+'?type=folder',{
 		headers: {
 			Authorization: user.type+' '+user.token
@@ -191,15 +160,7 @@ ipcMain.on('upLoadFolder',(e,name,dir)=>{
 
 ipcMain.on('refresh',(e,uuid)=>{
 	getFiles().then((data)=>{
-		allFiles = data;
-		//children
-		children.length = 0;
-		for (let item of allFiles) {
-			if (item.parent == uuid) {
-				children.push(item);
-			}
-		}
-		children = children.map((item)=>Object.assign({},{checked:false},item));
+		dealWithData(data);
 		mainWindow.webContents.send('refresh',children);
 	});
 });
@@ -343,27 +304,35 @@ function getFiles() {
 	});
 	return files;
 }
+function dealWithData(data) {
+	//set allfiles
+	allFiles = data;
+	allFiles = allFiles.map((item)=>{item.share = false;item.checked = false;return item});
+	//separate shared files from allfiles
+	classifyShareFiles();
+	//set tree
+	tree = getTree(allFiles,'file');
+	shareTree = getTree(shareFiles,'share');
+	// set children
+	children = tree.filter(item=>item.parent=='');
+	shareTree.forEach((item)=>{if (item.hasParent == false) {shareChildren.push(item)}});
+	//set path
+	path.length = 0;
+	path.push({key:''});
+}
 function getChildren(selectItem) {
 	let uuid = selectItem.children;
-	let children = [];
-	allFiles.forEach((item)=>{
-		if (item.uuid == uuid) {
-			children.push(item);
-		}
-	});
-	return children;
+	return map.get(uuid).children;
 }
 function getPath(obj) {
-	console.log('-_-');
-	console.log(obj);
-	path.unshift({key:obj.name,value:obj});
-	console.log('^_^');
-	console.log(path);
+	//insert obj to path
+	path.unshift({key:obj.attribute.name,value:allFiles.find((item)=>{return item.uuid == obj.uuid})});
+	//obj is root?
 	if (obj.parent == undefined || obj.parent == '') {
 		path.unshift({key:'',value:{}});
 		return; 
 	}else {
-		getPath(obj.parent);
+		getPath(allFiles.find((item)=>{return item.uuid == obj.parent}));
 	}
 }
 function classifyShareFiles() {
@@ -415,17 +384,32 @@ function getTree(f,type) {
 	let files = [];
 	f.forEach((item)=>{
 		if ((type == 'file' && !item.share)||(type == 'share' && item.share)) {
+			let hasParent = true;
+			if (type == 'share') {
+				let r = f.find((i)=>{return i.uuid == item.parent});
+				if (r == undefined ) { hasParent = false}
+			}
 			files.push({
 				uuid:item.uuid,
 				name:item.attribute.name,
 				parent: item.parent,
 				children: item.children,
-				share:item.share
+				share:item.share,
+				type:item.type,
+				checked:item.checked,
+				attribute:{
+					changetime:item.attribute.changetime,
+					modifytime:item.attribute.modifytime,
+					createtime:item.attribute.modifytime,
+					size:item.attribute.size,
+					name:item.attribute.name
+				},
+				hasParent:hasParent
 			});
 		}
 	});
 	let tree = files.map((node,index)=>{
-		node.parent = files.find((item1)=>{return (item1.uuid == node.parent)});
+		// node.parent = files.find((item1)=>{return (item1.uuid == node.parent)});
 		node.children = files.filter((item2)=>{return (item2.parent == node.uuid)});
 		return node
 	});
@@ -499,18 +483,18 @@ function rename(uuid,name,oldName) {
 }
 function download(item) {
 	var download = new Promise((resolve,reject)=>{
-			var body = 0;
-			var options = {
-				method: 'GET',
-				url: server+'/files/'+item.uuid+'?type=media',
-				headers: {
-					Authorization: user.type+' '+user.token
-				}
-			};
+		var body = 0;
+		var options = {
+			method: 'GET',
+			url: server+'/files/'+item.uuid+'?type=media',
+			headers: {
+				Authorization: user.type+' '+user.token
+			}
+		};
 
-			function callback (err,res,body) {
-				if (!err && res.statusCode == 200) {
-					console.log('res');
+		function callback (err,res,body) {
+			if (!err && res.statusCode == 200) {
+				console.log('res');
 					// console.log(res);
 					resolve(body);
 				}else {
@@ -541,57 +525,58 @@ function download(item) {
 					next();
 				}
 			});	
-	})
+		})
 	return download;
 }
 function modifyData(file,uuid) {
-	//modify allfiles
-		for (let item of allFiles) {
-			if (item.uuid == file.dir.uuid) {
-				item.children.push(uuid);
-				break;
-			}
-		}
-
-		var f= {
-			uuid:uuid,
-			path: file.dir.path+'/'+file.name,
-			parent: file.dir.uuid,
-			hash:file.path,
-			checked: false,
-			attribute: {
-				name:file.name,
-				size:file.size	,
-				changetime: "2016-04-25T10:31:52.089Z",
-      				createtime: "2016-04-25T10:31:52.089Z",
-			},
-			type: 'file'
-		}
-		allFiles.push(f);
-		if (currentDirectory.uuid == file.dir.uuid) {
-			children.push(f);
-		}
-		mainWindow.webContents.send('uploadSuccess',file,children)
+	//insert uuid 	
+	let item = allFiles.find((item)=>{return item.uuid == file.dir.uuid});
+	item.children.push(uuid);
+	//insert obj
+	var f= {
+		uuid:uuid,
+		parent: file.dir.uuid,
+		checked: false,
+		share:false,
+		attribute: {
+			name:file.name,
+			size:file.size	,
+			changetime: "",
+			createtime: "",
+		},
+		type: 'file',
+		path: item.path
+	}
+	allFiles.push(f);
+	//get new tree 
+	tree = getTree(allFiles,'file');
+	//get children
+	if (currentDirectory.uuid == file.dir.uuid) {
+		children.push(f);
+	}
+	mainWindow.webContents.send('uploadSuccess',file,children)
 }
 function modifyFolder(name,dir,folderuuid) {
 	for (let item of allFiles) {
 		if (item.uuid == dir.uuid) {
-			console.log('1');
 			item.children.push(folderuuid);
 			break;
 		}
 	}
+	//insert uuid
+	let item = allFiles.find((item)=>{return item.uuid == dir.uuid});
+	item.children.push(uuid);
+
 	var folder = {
 		uuid:folderuuid,
-		path: dir.path+'/'+name,
 		parent: dir.uuid,
-		hash:dir.path+'/'+name,
 		checked: false,
+		share:false,
 		attribute: {
 			name:name,
 			size: 4096,
-			changetime: "2016-04-25T10:31:52.089Z",
-			createtime: "2016-04-25T10:31:52.089Z",
+			changetime: "",
+			createtime: "",
 		},
 		type: 'folder',
 		dir:dir,

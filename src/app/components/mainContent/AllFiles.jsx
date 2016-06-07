@@ -84,7 +84,7 @@ class AllFiles extends Component {
 			        >
 			        	<div className='share-user-list-container'>
 			        	{this.props.login.obj.allUser.map((item,index)=>{
-			        		return <Checkbox label={item.username} style={styles.checkbox} labelPosition="left" onCheck={this.checkUser.bind(this,item.uuid)}/>
+			        		return <Checkbox key={item.username} label={item.username} style={styles.checkbox} labelPosition="left" onCheck={this.checkUser.bind(this,item.uuid)}/>
 			        	})}
 			        	</div>
 			        </Dialog>
@@ -124,6 +124,7 @@ class AllFiles extends Component {
 	}
 
 	selectBreadCrumb(obj) {
+		console.log(obj);
 		$('.bezierFrame').empty().append('<div class="bezierTransition1"></div><div class="bezierTransition2"></div>');
 		if (obj.key == '') {
 			ipc.send('getRootData');
@@ -184,6 +185,7 @@ class AllFiles extends Component {
 	upLoadFile(e) {
 		for (let i=0;i<e.nativeEvent.target.files.length;i++) {
 			var f = e.nativeEvent.target.files[i];
+			console.log(f);
 			var t = new Date();
 			var file = {
 				name:f.name,

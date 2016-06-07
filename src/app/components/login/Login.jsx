@@ -54,8 +54,6 @@ class Index extends React.Component {
 		this.props.dispatch({
 		      type: "LOGIN"
 		})
-		console.log(username);
-		console.log(password);
 		// ipc.send('login',username,password);
 		ipc.send('login','222222','222222');
 	}

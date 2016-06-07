@@ -21,7 +21,7 @@ const directory = (state=defaultDirectory,action)=> {
 			let position = action.children.map((item,index)=>{
 				return {top:index*51+58+48+8+64,bottom:(index+1)*51+58+48+8+64}
 			})
-			return Object.assign({}, state,{directory:action.directory,children:action.children,parent:action.parent,path:action.path,position:position,state:'READY',selectAll:false});
+			return Object.assign({}, state,{directory:action.directory,children:action.children,parent:action.parent,path:action.path,position:position,state:'READY',selectAll:false,shareChildren:action.shareChildren});
 
 		case 'SET_TREE':
 			return Object.assign({},state,{tree:action.tree});	

@@ -34,7 +34,7 @@
     "copy-webpack-plugin": "^1.1.1",
     "css-loader": "~0.9.0",
     "electron-builder": "^3.25.0",
-    "electron-prebuilt": "^1.2.0",
+    "electron-prebuilt": "1.2.0",
     "eslint": "^0.21.2",
     "eslint-loader": "^0.11.2",
     "eslint-plugin-react": "^2.4.0",
