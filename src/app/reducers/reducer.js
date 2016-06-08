@@ -4,13 +4,15 @@ import { combineReducers } from 'redux'
 import login from './login';
 import navigation from './navigation';
 import data from './data';
-import multiple from './multiple'
+import multiple from './multiple';
+import snack from './snack';
 
 const reducer = combineReducers({
 	login,
 	navigation,
 	data,
-	multiple
+	multiple,
+	snack
 });
 
 export default reducer; 

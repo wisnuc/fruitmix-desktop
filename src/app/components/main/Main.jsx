@@ -12,7 +12,7 @@
  import CSS from '../../utils/transition';
 
 //require material
-import { AppBar, TextField, Drawer, Paper } from 'material-ui';
+import { AppBar, TextField, Drawer, Paper, Snackbar } from 'material-ui';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 
@@ -46,6 +46,7 @@ class Main extends Component {
 		var _this = this;
 		ipc.send('getRootData');
 		this.props.dispatch(Action.filesLoading());
+
 		ipc.on('receive',function (err,dir,children,parent,path,shareChildren) {
 			_this.props.dispatch(Action.setDirctory(dir,children,parent,path,shareChildren));
 		});
@@ -86,6 +87,10 @@ class Main extends Component {
 				this.props.dispatch(Action.refreshDir(children));
 			}
 		});
+
+		ipc.on('message',(err,message,code)=>{
+			this.props.dispatch(Action.setSnack(message,true));
+		});
 	}
 
 	triggerClick(e) {
@@ -119,6 +124,7 @@ class Main extends Component {
 				<Paper className={"content-container "+(this.props.navigation.menu?'content-has-left-padding':'no-padding')} style={{paddingTop:64}} zDepth={0}>
 					<Content nav={this.props.navigation.nav}></Content>
 				</Paper>
+				<Snackbar open={this.props.snack.open} message={this.props.snack.text} autoHideDuration={3000}/>
 			</div></CSS>
 			);
 	}
@@ -199,7 +205,8 @@ function mapStateToProps (state) {
 		navigation: state.navigation,
 		login: state.login,
 		data: state.data,
-		multiple:state.multiple
+		multiple:state.multiple,
+		snack: state.snack
 	}
 }
 

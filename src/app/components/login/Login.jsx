@@ -12,7 +12,7 @@ import Base from '../../utils/Base';
 // require action
 import Login from'../../actions/action';
 //require material
-import { Paper, TextField, FlatButton, CircularProgress } from 'material-ui'
+import { Paper, TextField, FlatButton, CircularProgress, Snackbar } from 'material-ui'
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import darkBaseTheme from 'material-ui/styles/baseThemes/darkBaseTheme';
 
@@ -46,6 +46,12 @@ class Index extends React.Component {
 		ipc.on('loginFailed',()=>{
 			this.props.dispatch(Login.loginFailed());
 		})
+		ipc.on('message',(err,message,code)=>{
+			this.props.dispatch(Login.setSnack(message,true));
+			if (code == 0 ) {
+				this.props.dispatch(Login.loginFailed());		
+			}
+		});
 	}
 
 	submit() {
@@ -84,6 +90,7 @@ class Index extends React.Component {
 				<button onClick={this.submit}>submit</button>
 				<div>{this.props.login.state}</div>
 			*/}
+			<Snackbar open={this.props.snack.open} message={this.props.snack.text} autoHideDuration={3000}/>
 			</div>
 			);
 	}
@@ -97,7 +104,8 @@ Index.childContextTypes = {
 
 function mapStateToProps (state) {
 	return {
-		login: state.login
+		login: state.login,
+		snack: state.snack
 	}
 }
 

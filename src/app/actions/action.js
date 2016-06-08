@@ -197,6 +197,14 @@ var actions = {
 			uuid: uuid,
 			b: b
 		}
+	},
+
+	setSnack(message,open) {
+		return {
+			type: 'SET_SNACK',
+			text: message,
+			open: open
+		}
 	}
 }
 

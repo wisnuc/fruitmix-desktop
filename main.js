@@ -24,6 +24,7 @@ var map = new Map();
 var shareFiles = [];
 var shareTree = [];
 var shareMap = new Map();
+var filesShared = [];
 var shareChildren = [];
 //directory
 var currentDirectory = {};
@@ -56,7 +57,7 @@ ipcMain.on('login',function(event,username,password){
 		user.allUser = users;
 		mainWindow.webContents.send('loggedin',user);
 	}).catch((err)=>{
-		mainWindow.webContents.send('loginFailed');
+		mainWindow.webContents.send('message','loginFailed',0);
 	});
 });
 //get all files
@@ -65,6 +66,8 @@ ipcMain.on('getRootData', ()=> {
 		dealWithData(data);
 		mainWindow.webContents.send('receive', currentDirectory,children,parent,path,shareChildren);
 		mainWindow.webContents.send('setTree',tree[0]);
+	}).catch((err)=>{
+		mainWindow.webContents.send('message','get data error',1);	
 	});
 });
 
@@ -239,6 +242,7 @@ function getToken(uuid,password) {
 			    'sendImmediately': false
 			  }
 		},function(err,res,body) {
+			console.log();
 			if (!err && res.statusCode == 200) {
 				resolve(JSON.parse(body));
 			}else {
@@ -397,6 +401,7 @@ function getTree(f,type) {
 				share:item.share,
 				type:item.type,
 				checked:item.checked,
+				owner:item.permission.owner,
 				attribute:{
 					changetime:item.attribute.changetime,
 					modifytime:item.attribute.modifytime,
