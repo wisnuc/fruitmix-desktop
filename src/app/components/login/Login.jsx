@@ -39,7 +39,6 @@ class Index extends React.Component {
 
 	componentDidMount() {
 		ipc.on('loggedin',(err,user,allUser)=>{
-			console.log(allUser);
 			this.props.dispatch(Login.login(user));
 		});
 
@@ -61,7 +60,9 @@ class Index extends React.Component {
 		      type: "LOGIN"
 		})
 		// ipc.send('login',username,password);
-		ipc.send('login','222222','222222');
+		// ipc.send('login','111111','111111');
+		// ipc.send('login','222222','222222');
+		ipc.send('login','6','6');
 	}
 
 	render() {

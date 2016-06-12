@@ -32,7 +32,7 @@ class SharedFiles extends Component {
 							<TableRow key={item.uuid}>
 								<TableRowColumn>{item.name}</TableRowColumn>
 								<TableRowColumn>{this.getShareUser(item.owner)}</TableRowColumn>
-								<TableRowColumn><span style={{cursor:'pointer'}}>{svg.download()}</span></TableRowColumn>
+								<TableRowColumn><span onClick={this.download.bind(this,item)} style={{cursor:'pointer'}}>{svg.download()}</span></TableRowColumn>
 							</TableRow>
 							)})}
 					</TableBody>
@@ -45,6 +45,11 @@ class SharedFiles extends Component {
 		let user = this.props.login.obj.allUser.find((i)=>{return item == i.uuid});
 		return user.username;
 		console.log(user);
+	}
+
+	download(item) {
+		this.props.dispatch(Action.addDownload(item));
+		ipc.send('download',item);	
 	}
 }
 

@@ -161,6 +161,12 @@ ipcMain.on('upLoadFolder',(e,name,dir)=>{
 	form.append('foldername',name);
 });
 
+ipcMain.on('download',(e,file)=>{
+	download(file).then(data=>{
+		console.log(file.attribute.name + ' download success');
+	});
+})
+
 ipcMain.on('refresh',(e,uuid)=>{
 	getFiles().then((data)=>{
 		dealWithData(data);
@@ -191,12 +197,6 @@ ipcMain.on('rename',(e,uuid,name,oldName)=>{
 	rename(uuid,name,oldName).then(()=>{
 		console.log('ok');
 	})
-})
-
-ipcMain.on('download',(e,file)=>{
-	download(file).then(data=>{
-		console.log(file.attribute.name + ' download success');
-	});
 })
 
 ipcMain.on('close-main-window', function () {
@@ -465,7 +465,8 @@ function rename(uuid,name,oldName) {
 			url: server+'/files/'+uuid,
 			headers: {
 					Authorization: user.type+' '+user.token
-				}
+				},
+			form: {filename:name}
 		};
 
 		function callback (err,res,body) {
@@ -480,9 +481,7 @@ function rename(uuid,name,oldName) {
 				}
 			}
 
-		var r = request(options,callback);
-		var form = r.form();
-		form.append('filename',name);
+		request(options,callback);
 	});
 	return rename;
 }
@@ -500,8 +499,7 @@ function download(item) {
 		function callback (err,res,body) {
 			if (!err && res.statusCode == 200) {
 				console.log('res');
-					// console.log(res);
-					resolve(body);
+				resolve(body);
 				}else {
 					// reject(err)
 					console.log('err');
@@ -536,7 +534,7 @@ function download(item) {
 function modifyData(file,uuid) {
 	//insert uuid 	
 	let item = allFiles.find((item)=>{return item.uuid == file.dir.uuid});
-	item.children.push(uuid);
+	item != undefined && item.children.push(uuid);
 	//insert obj
 	var f= {
 		uuid:uuid,
@@ -550,27 +548,37 @@ function modifyData(file,uuid) {
 			createtime: "",
 		},
 		type: 'file',
-		path: item.path
+		name:file.name,
 	}
-	allFiles.push(f);
-	//get new tree 
-	tree = getTree(allFiles,'file');
-	//get children
-	if (currentDirectory.uuid == file.dir.uuid) {
-		children.push(f);
+	allFiles.push(_.cloneDeep(f));
+	insertTree(tree[0]);
+	function insertTree(obj) {
+		if (obj.uuid == file.dir.uuid) {
+			obj.children.push(f);
+			return
+		}else {
+			if (obj.children.length != 0) {
+				for (let i = 0;i < obj.children.length; i++) {
+					insertTree(obj.children[i]);
+				}
+			}
+		}
 	}
+	//insert folder obj into map
+	map.set(uuid,f);
+	console.log(children);
+	// //get new tree 
+	// tree = getTree(allFiles,'file');
+	// //get children
+	// if (currentDirectory.uuid == file.dir.uuid) {
+	// 	children.push(f);
+	// }
 	mainWindow.webContents.send('uploadSuccess',file,children)
 }
 function modifyFolder(name,dir,folderuuid) {
-	for (let item of allFiles) {
-		if (item.uuid == dir.uuid) {
-			item.children.push(folderuuid);
-			break;
-		}
-	}
 	//insert uuid
 	let item = allFiles.find((item)=>{return item.uuid == dir.uuid});
-	item.children.push(uuid);
+	item != undefined && item.children.push(folderuuid);
 
 	var folder = {
 		uuid:folderuuid,
@@ -584,31 +592,29 @@ function modifyFolder(name,dir,folderuuid) {
 			createtime: "",
 		},
 		type: 'folder',
-		dir:dir,
-		children:[]
+		children:[],
+		name:name,
+	};
+	//insert folder obj into allfiles
+	allFiles.push(_.cloneDeep(folder));
+	//insert folder obj into tree
+	insertTree(tree[0]);
+	function insertTree(obj) {
+		if (obj.uuid == dir.uuid) {
+			obj.children.push(folder);
+			return
+		}else {
+			if (obj.children.length != 0) {
+				for (let i = 0;i < obj.children.length; i++) {
+					insertTree(obj.children[i]);
+				}
+			}
+		}
 	}
-	allFiles.push(folder);
-	if (currentDirectory.uuid == dir.uuid) {
-		console.log('2');
-		children.push({
-			uuid:folderuuid,
-			path: dir.path+'/'+name,
-			parent: dir.uuid,
-			hash:dir.path+'/'+name,
-			checked: false,
-			attribute: {
-				name:name,
-				size: 4096,
-				changetime: "2016-04-25T10:31:52.089Z",
-				createtime: "2016-04-25T10:31:52.089Z",
-			},
-			type: 'folder',
-			dir:dir,
-			children:[]
-		});
-	}
-	console.log(children)
-	mainWindow.webContents.send('uploadSuccess',folder,children)
+	//insert folder obj into map
+	map.set(folderuuid,folder);
+	//ipc
+	mainWindow.webContents.send('uploadSuccess',folder,_.cloneDeep(children),tree);
 }
 function createNewUser(username,password,email) {
 	let promise = new Promise((resolve,reject)=>{

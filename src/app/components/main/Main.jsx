@@ -69,7 +69,9 @@ class Main extends Component {
 		ipc.on('uploadSuccess',(err,file,children)=>{
 			console.log('uploadSuccess');
 			// this.props.dispatch(Action.removeFile(obj));
-			if (file.dir.uuid == this.props.data.directory.uuid) {
+			console.log(file);
+			if (file.parent == this.props.data.directory.uuid) {
+				console.log('enter');
 				this.props.dispatch(Action.refreshDir(children));
 			}
 		});
@@ -90,6 +92,10 @@ class Main extends Component {
 
 		ipc.on('message',(err,message,code)=>{
 			this.props.dispatch(Action.setSnack(message,true));
+			switch(code) {
+				case 1:
+					this.props.dispatch(Action.getDataFailed());
+			}
 		});
 	}
 
