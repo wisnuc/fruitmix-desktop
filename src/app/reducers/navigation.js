@@ -18,8 +18,8 @@ let navDefault = [
 	 { name: '上传/下载', parent: null, selected: false, type:'leftNav', icon:'star' },
 	 { name: '分享给我的文件', parent: null, selected: false, type:'leftNav', icon:'sharedToMe' },
 	 { name: '我分享的文件', parent: null, selected: false, type:'leftNav', icon:'sharedByMe' },
-	 { name: '最近使用的文件', parent: null, selected: false, type:'leftNav', icon:'recentUse' },
-        { name: '已删除文件', parent: null, selected: false, type: 'other', icon:'deleteFiles'},
+	 // { name: '最近使用的文件', parent: null, selected: false, type:'leftNav', icon:'recentUse' },
+  //       { name: '已删除文件', parent: null, selected: false, type: 'other', icon:'deleteFiles'},
         { name: '设置', parent: null, selected: false, type: 'other', icon:'settings'}
 ];
 

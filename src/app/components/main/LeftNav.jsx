@@ -7,16 +7,12 @@
 
  // require core module
  import React, { findDOMNode, Component, PropTypes } from 'react';
-
+ import { connect } from 'react-redux';
 //require material
 import { Menu, MenuItem } from 'material-ui';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 import svg from '../../utils/SVGIcon';
-
  //import CSS
 import css  from  '../../../assets/css/main';
-
 //import action 
 import Action from '../../actions/action';
 const style = {
@@ -32,19 +28,10 @@ const listStyle = {
 }
 
 class leftNav extends Component {
-
-	itemSelect (name,index,e) {
-		this.props.dispatch(Action.changeSelectedNavItem(name));
-	}
-
-	getChildContext() {
-		const muiTheme = getMuiTheme(lightBaseTheme);
-		return {muiTheme};
-	}
-
 	render () {
 		return (
 			<div className="left-nav-container" style={{position:'relative',height:'100%'}}>
+				{/*top navigation*/}
 				<Menu style={style}>
 				{this.props.nav.nav.map((item,index) => {
 					if (item.type == 'leftNav') {
@@ -63,8 +50,8 @@ class leftNav extends Component {
 						}
 				})}
 				</Menu>
+				{/*bottom navigation*/}
 				<div style={{position:'absolute',bottom:0,width:'100%'}}>
-					
 					<div>
 						<Menu>
 							{this.props.nav.nav.map((item,index) => (
@@ -83,10 +70,16 @@ class leftNav extends Component {
 			</div>
 			)
 	}
+	//select navigation
+	itemSelect (name,index,e) {
+		this.props.dispatch(Action.changeSelectedNavItem(name));
+	}
 }
 
-leftNav.childContextTypes = {
-	muiTheme: React.PropTypes.object.isRequired
+function mapStateToProps (state) {
+	return {
+		nav: state.navigation
+	}
 }
 
-export default leftNav
+export default  connect(mapStateToProps)(leftNav)

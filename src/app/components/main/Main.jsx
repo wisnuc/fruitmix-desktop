@@ -8,11 +8,11 @@
  'use strict';
 // require core module
  import React, { findDOMNode, Component, PropTypes } from 'react';
- import { connect, bindActionCreators } from 'react-redux'
+ import { connect } from 'react-redux';
  import CSS from '../../utils/transition';
 
 //require material
-import { AppBar, TextField, Drawer, Paper, Snackbar } from 'material-ui';
+import { AppBar, TextField, Drawer, Paper, Snackbar, FlatButton } from 'material-ui';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 
@@ -37,11 +37,6 @@ class Main extends Component {
 		const muiTheme = getMuiTheme(lightBaseTheme);
 		return {muiTheme}; 
 	}
-
-	leftNavClick() {
-		this.props.dispatch(Action.navToggle());
-	}
-
 	componentDidMount() {
 		var _this = this;
 		ipc.send('getRootData');
@@ -66,14 +61,15 @@ class Main extends Component {
 			console.log(data);
 		});
 
-		ipc.on('uploadSuccess',(err,file,children)=>{
+		ipc.on('uploadSuccess',(err,file,children,tree)=>{
 			console.log('uploadSuccess');
 			// this.props.dispatch(Action.removeFile(obj));
-			console.log(file);
-			if (file.parent == this.props.data.directory.uuid) {
-				console.log('enter');
+
+			console.log(tree);
+			console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+
 				this.props.dispatch(Action.refreshDir(children));
-			}
+			
 		});
 
 		ipc.on('refreshStatusOfUpload',(err,file,status)=>{
@@ -99,49 +95,47 @@ class Main extends Component {
 		});
 	}
 
-	triggerClick(e) {
-		if (this.props.data.menu.show) {
-			this.props.dispatch(Action.toggleMenu());
-		}
-	}
-
 	render() {
 		return (<CSS opts={['app',true,true,true,500,5000,5000]}>
 			<div className="main" key='main' onMouseMove={this.mouseMove.bind(this)} onMouseUp={this.mouseUp.bind(this)} onClick={this.triggerClick.bind(this)}>
-				{/*Bar*/}
+				{/*Multiple select frame*/}
 				<Multiple/>
+				{/*Bar*/}
 				<AppBar 
-				className='app-bar' title='my cloud' iconElementRight={
-					<div>
-					<TextField
-					      hintText="search"
-					      className='search-input'
-					/>
-					<span style={{color:'white'}}>{this.props.login.obj.username}</span></div>
-				}
+				className='app-bar' title='my cloud' iconElementRight={<FlatButton label={this.props.login.obj.username} />}
 				onLeftIconButtonTouchTap={this.leftNavClick.bind(this)}
 				>
 				</AppBar>
 				{/*Left Nav*/}
 				<Drawer width={200} open={this.props.navigation.menu} className='left-nav'>
-					<LeftNav nav={this.props.navigation} dispatch={this.props.dispatch}/>
+					<LeftNav/>
 				</Drawer>
 				{/*Content*/}
 				<Paper className={"content-container "+(this.props.navigation.menu?'content-has-left-padding':'no-padding')} style={{paddingTop:64}} zDepth={0}>
-					<Content nav={this.props.navigation.nav}></Content>
+					<Content></Content>
 				</Paper>
-				<Snackbar open={this.props.snack.open} message={this.props.snack.text} autoHideDuration={3000}/>
+				<Snackbar open={false} message={this.props.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
 			</div></CSS>
 			);
 	}
 
+	triggerClick(e) {
+		if (this.props.data.menu.show) {
+			this.props.dispatch(Action.toggleMenu());
+		}
+	}
+	//toggle left navigation
+	leftNavClick() {
+		this.props.dispatch(Action.navToggle());
+	}
+	//draw multiple select frame
 	mouseMove(e) {
 		 e.preventDefault(); e.stopPropagation();
 		if (this.props.multiple.multiple.isShow == true&&this.props.data.state != 'BUSY') {
 			this.props.dispatch(Action.mouseMove(e.nativeEvent.x,e.nativeEvent.y));
 		}
 	}
-
+	//multiple select and hide frame
 	mouseUp() {
 		if (this.props.multiple.multiple.isShow == true) {
 		let mul = this.props.multiple.multiple;
@@ -199,6 +193,10 @@ class Main extends Component {
 
 			this.props.dispatch(Action.mouseUp());
 		}
+	}
+	//close snackbar
+	cleanSnack() {
+		this.props.dispatch(Action.cleanSnack());
 	}
 }
 

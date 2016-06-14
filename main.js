@@ -14,6 +14,7 @@ var mainWindow = null;
 
 var server = 'http://211.144.201.201:8888';
 server ='http://192.168.5.132:80';
+// server ='http://192.168.5.165:80';
 //user
 var user = {};
 //files
@@ -116,14 +117,15 @@ ipcMain.on('uploadFile',(e,file)=>{
 	})
 
 	function callback (err,res,body) {
+		console.log(res);
 		if (!err && res.statusCode == 200) {
 			var uuid = body;
 			console.log(uuid);
 			uuid = uuid.slice(1,uuid.length-1);
 			modifyData(file,uuid);
 		}else {
+			console.log('upload failed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
 			console.log(err);
-			reject(err)
 		}
 	}
 
@@ -323,10 +325,6 @@ function dealWithData(data) {
 	//set path
 	path.length = 0;
 	path.push({key:''});
-}
-function getChildren(selectItem) {
-	let uuid = selectItem.children;
-	return map.get(uuid).children;
 }
 function getPath(obj) {
 	//insert obj to path
@@ -533,12 +531,12 @@ function download(item) {
 }
 function modifyData(file,uuid) {
 	//insert uuid 	
-	let item = allFiles.find((item)=>{return item.uuid == file.dir.uuid});
+	let item = allFiles.find((item)=>{return item.uuid == file.parent.uuid});
 	item != undefined && item.children.push(uuid);
 	//insert obj
 	var f= {
 		uuid:uuid,
-		parent: file.dir.uuid,
+		parent: file.parent.uuid,
 		checked: false,
 		share:false,
 		attribute: {
@@ -548,12 +546,13 @@ function modifyData(file,uuid) {
 			createtime: "",
 		},
 		type: 'file',
+		children : [],
 		name:file.name,
 	}
 	allFiles.push(_.cloneDeep(f));
 	insertTree(tree[0]);
 	function insertTree(obj) {
-		if (obj.uuid == file.dir.uuid) {
+		if (obj.uuid == file.parent.uuid) {
 			obj.children.push(f);
 			return
 		}else {
@@ -567,13 +566,7 @@ function modifyData(file,uuid) {
 	//insert folder obj into map
 	map.set(uuid,f);
 	console.log(children);
-	// //get new tree 
-	// tree = getTree(allFiles,'file');
-	// //get children
-	// if (currentDirectory.uuid == file.dir.uuid) {
-	// 	children.push(f);
-	// }
-	mainWindow.webContents.send('uploadSuccess',file,children)
+	mainWindow.webContents.send('uploadSuccess',file,children,_.cloneDeep(tree[0]))
 }
 function modifyFolder(name,dir,folderuuid) {
 	//insert uuid
@@ -602,6 +595,7 @@ function modifyFolder(name,dir,folderuuid) {
 	function insertTree(obj) {
 		if (obj.uuid == dir.uuid) {
 			obj.children.push(folder);
+			console.log('insert');
 			return
 		}else {
 			if (obj.children.length != 0) {
@@ -614,7 +608,7 @@ function modifyFolder(name,dir,folderuuid) {
 	//insert folder obj into map
 	map.set(folderuuid,folder);
 	//ipc
-	mainWindow.webContents.send('uploadSuccess',folder,_.cloneDeep(children),tree);
+	mainWindow.webContents.send('uploadSuccess',folder,_.cloneDeep(children),_.cloneDeep(tree[0]));
 }
 function createNewUser(username,password,email) {
 	let promise = new Promise((resolve,reject)=>{

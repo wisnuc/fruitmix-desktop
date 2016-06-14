@@ -8,7 +8,7 @@
   'use strict';
 // require core module
 import React, { findDOMNode, Component, PropTypes } from 'react';
-import { connect, bindActionCreators } from 'react-redux';
+import { connect } from 'react-redux';
 //require material
 import { Paper, Menu, MenuItem } from 'material-ui';
 //import Action
@@ -40,17 +40,18 @@ class PopMenu extends Component {
 					</Menu>
 				</Paper>
 			</div>
-			)
+		)
 	}
-
+	//open detail of files
 	detail() {
 		this.props.dispatch(Action.setDetail(this.props.data.menu.objArr));
 	}
-
+	//rename
 	rename() {
 		let uuid = this.props.data.menu.objArr[0].uuid;
 		let dom = $('div[data-uuid='+uuid+']>span:eq(1)')[0];
 		let oldName = dom.innerHTML;
+		//edit position point to end
 		var editor = dom;
 		$('div[data-uuid='+uuid+']>span:eq(1)').attr('contenteditable','true').focus(function(){
 			var sel,range;
@@ -70,7 +71,6 @@ class PopMenu extends Component {
 				range.select();
 			}
 		}).keydown(function(e){
-			console.log(e.keyCode);
 			if (e.keyCode == 13) {
 				$(this).trigger('blur');
 			}
@@ -79,7 +79,7 @@ class PopMenu extends Component {
 			let name = dom.innerHTML;
 			ipc.send('rename',uuid,name,oldName);
 		});
-
+		//resolve bug that dom will blur when be focused
 		setTimeout(function(){
 			dom.focus();
 		},0)
@@ -88,39 +88,45 @@ class PopMenu extends Component {
 	moveto() {
 
 	}
-
+	//toggle dialog of share
 	share() {
-		let arrOfShare = [];
-		this.props.data.children.forEach((item,index)=>{
-			if (item.checked) {arrOfShare.push(item)}
-		});
 		this.props.dispatch(Action.toggleShare(true));
 	}
 
 	remove() {
 		var arr = [];
-		arr.push(this.props.data.menu.objArr[0]);
-		for (let item of this.props.data.children) {
-			if (item.checked&&item.uuid!=arr[0].uuid) {
-				arr.push(item);
+		// arr.push(this.props.data.menu.objArr[0]);
+		// for (let item of this.props.data.children) {
+		// 	if (item.checked&&item.uuid!=arr[0].uuid) {
+		// 		arr.push(item);
+		// 	}
+		// }
+		this.props.data.children.forEach(item=>{
+			if (item.checked) {
+				arr.push(item)
 			}
-		}
-		console.log(arr[0].uuid);
+		});
 		ipc.send('delete',arr,this.props.data.directory);
 	}
 
 	dowload() {
-		let arr = [];
-		arr.push(this.props.data.menu.objArr[0]);
-		for (let item of this.props.data.children) {
-			if (item.checked&&item.uuid!=arr[0].uuid) {
-				arr.push(item);
+		// let arr = [];
+		// arr.push(this.props.data.menu.objArr[0]);
+		// for (let item of this.props.data.children) {
+		// 	if (item.checked&&item.uuid!=arr[0].uuid) {
+		// 		arr.push(item);
+		// 	}
+		// }
+		this.props.data.children.forEach(item=>{
+			if (item.checked) {
+				this.props.dispatch(Action.addDownload(item));
+				ipc.send('download',item);		
 			}
-		}
-		arr.forEach((item,index)=>{
-			this.props.dispatch(Action.addDownload(item));
-			ipc.send('download',item);	
 		});
+		// arr.forEach((item,index)=>{
+		// 	this.props.dispatch(Action.addDownload(item));
+		// 	ipc.send('download',item);	
+		// });
 		
 	}
 

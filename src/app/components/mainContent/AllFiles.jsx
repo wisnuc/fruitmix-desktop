@@ -7,11 +7,10 @@
   'use strict';
 // require core module
  import React, { findDOMNode, Component, PropTypes } from 'react';
- import { connect, bindActionCreators } from 'react-redux';
+ import { connect } from 'react-redux';
 //require material
-import { Paper, FontIcon, SvgIcon,Snackbar, IconMenu, MenuItem, Dialog, FlatButton, RaisedButton, TextField, Checkbox } from 'material-ui';
+import { Paper, FontIcon, SvgIcon, IconMenu, MenuItem, Dialog, FlatButton, RaisedButton, TextField, Checkbox } from 'material-ui';
 import { Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn } from 'material-ui/Table';
-import {RadioButton, RadioButtonGroup} from 'material-ui/RadioButton';
 import { CircularProgress } from 'material-ui'
 import {blue500, red500, greenA200} from 'material-ui/styles/colors';
 import svg from '../../utils/SVGIcon';
@@ -25,9 +24,6 @@ import Detail from './Detail';
 class AllFiles extends Component {
 	render() {
 		var _this = this;
-		var children = this.props.data.children;
-		var content = this.getTable();
-
 		const folderActions = [
 			<FlatButton
 				label="Cancel"
@@ -64,10 +60,12 @@ class AllFiles extends Component {
 		};
 		return (
 			<div className='all-my-files' style={{height:(document.body.clientHeight-64)+'px'}}>
-				{content}
+				{this.getTable()}
+				{/*file detail*/}
 				<Paper className='file-detail' style={{width:this.props.data.detail.length==0?'0px':'350px'}}>
 					<Detail></Detail>
 				</Paper>
+				{/*create new folder dialog*/}
 				<Dialog
 					title="新建文件夹"
 					actions={folderActions}
@@ -75,8 +73,9 @@ class AllFiles extends Component {
 					open={this.props.data.dialogOfFolder}
 					onRequestClose={this.handleClose}
 			        >
-			          <TextField hintText="名称" id='folder-name'/>
+			       		<TextField hintText="名称" id='folder-name'/>
 			        </Dialog>
+			        {/*share dialog*/}
 			        <Dialog 
 			        	title='分享' 
 			        	actions={shareActions}
@@ -91,6 +90,67 @@ class AllFiles extends Component {
 			</div>
 		)
 	}
+	//get table 
+	getTable() {
+		const listStyle = {
+			height: 48,
+			lineHeight:'48px'
+		}
+
+		if (this.props.data.state=='BUSY') {
+			return (<div className='data-loading '><CircularProgress/></div>)
+		}else {
+			return (
+				<Paper className='file-area' onMouseDown={this.mouseDown.bind(this)}>
+					{/*upload input*/}
+					<input className='upload-input' type="file" multiple={true} onChange={this.upLoadFile.bind(this)}/>
+					{/*bread crumb*/}
+					<div className='breadcrumb'>
+						<SvgIcon onClick={this.backToParent.bind(this)} color={greenA200} style={{marginLeft:10,marginRight:14,cursor:'pointer'}}>
+						{svg['back']()}
+						</SvgIcon>
+						{this.getBreadCrumb()}
+						<IconMenu style={{display:'flex',alignItems:'center',marginRight:10}}
+						      iconButtonElement={<span style={{cursor:'pointer'}}>{svg.add()}</span>}
+						      anchorOrigin={{horizontal: 'left', vertical: 'top'}}
+						      targetOrigin={{horizontal: 'left', vertical: 'top'}}
+						    >
+						    	<MenuItem innerDivStyle={listStyle} primaryText="新建文件夹" onClick={this.toggleUploadFolder.bind(this,true)}/>
+							<MenuItem innerDivStyle={listStyle} primaryText="上传文件" onClick={this.openInputFile.bind(this)}/>
+						</IconMenu>
+					</div>
+					{/*file table body*/}
+					<div className="all-files-container">
+						<FilesTable/>
+						<Menu></Menu>
+					</div>
+				</Paper>
+				)
+		}
+	}
+	//open multiple select
+	mouseDown(e) {
+		this.props.dispatch(Action.mouseDown(e.nativeEvent.x,e.nativeEvent.y));
+	}
+	//upload file
+	upLoadFile(e) {
+		for (let i=0;i<e.nativeEvent.target.files.length;i++) {
+			var f = e.nativeEvent.target.files[i];
+			var t = new Date();
+			var file = {
+				name:f.name,
+				path:f.path,
+				size:f.size,
+				lastModifiedDate:f.lastModifiedDate,
+				parent : this.props.data.directory,
+				uploadTime :  Date.parse(t),
+				status:0
+			}
+			this.props.dispatch(Action.addUpload(file));
+			ipc.send('uploadFile',file);	
+		}	
+	}
+	//get  bread
 	getBreadCrumb(){
 		var _this = this;
 		var path = this.props.data.path;
@@ -108,7 +168,7 @@ class AllFiles extends Component {
 		return pathArr;
 
 	}
-
+	//back
 	backToParent () {
 		$('.bezierFrame').empty().append('<div class="bezierTransition1"></div><div class="bezierTransition2"></div>');
 		let parent = this.props.data.parent;
@@ -119,108 +179,41 @@ class AllFiles extends Component {
 			ipc.send('getRootData');
 			this.props.dispatch(Action.filesLoading());
 		}else {
+			this.props.dispatch(Action.cleanDetail());
 			ipc.send('enterChildren',parent);
 		}
 	}
-
+	//select bread crumb
 	selectBreadCrumb(obj) {
 		console.log(obj);
 		$('.bezierFrame').empty().append('<div class="bezierTransition1"></div><div class="bezierTransition2"></div>');
 		if (obj.key == '') {
 			ipc.send('getRootData');
-			// this.props.dispatch(Action.cleanDetail());
 			this.props.dispatch(Action.filesLoading());
 		}else {
-			// this.props.dispatch(Action.cleanDetail());
+			this.props.dispatch(Action.cleanDetail());
 			ipc.send('enterChildren',obj.value);
 		}
 	}
-
-	mouseDown(e) {
-		this.props.dispatch(Action.mouseDown(e.nativeEvent.x,e.nativeEvent.y));
-	}
-
-	getTable() {
-		const listStyle = {
-			height: 48,
-			lineHeight:'48px'
-		}
-
-		if (this.props.data.state=='BUSY') {
-			return (<div className='data-loading '><CircularProgress/></div>)
-		}else {
-			return (
-				<Paper className='file-area' onMouseDown={this.mouseDown.bind(this)}>
-					<input className='upload-input' type="file" multiple={true} onChange={this.upLoadFile.bind(this)}/>
-					<div className='breadcrumb'>
-						<SvgIcon onClick={this.backToParent.bind(this)} color={greenA200} style={{marginLeft:10,marginRight:14,cursor:'pointer'}}>
-						{svg['back']()}
-						</SvgIcon>
-						{this.getBreadCrumb()}
-
-						<IconMenu style={{display:'flex',alignItems:'center',marginRight:10}}
-						      iconButtonElement={<span style={{cursor:'pointer'}}>{svg.add()}</span>}
-						      anchorOrigin={{horizontal: 'left', vertical: 'top'}}
-						      targetOrigin={{horizontal: 'left', vertical: 'top'}}
-						    >
-						    	<MenuItem innerDivStyle={listStyle} primaryText="新建文件夹" onClick={this.toggleUploadFolder.bind(this,true)}/>
-							<MenuItem innerDivStyle={listStyle} primaryText="上传文件" onClick={this.openInputFile.bind(this)}/>
-						</IconMenu>
-					</div>
-					<div className="all-files-container">
-						<FilesTable/>
-						<Menu></Menu>
-					</div>
-					{/*
-					<Snackbar
-				          open={this.props.data.snackbar!=''?true:false}
-				          message={this.props.data.snackbar}
-				        />
-					*/}
-				</Paper>
-				)
-		}
-	}
-
-	upLoadFile(e) {
-		for (let i=0;i<e.nativeEvent.target.files.length;i++) {
-			var f = e.nativeEvent.target.files[i];
-			console.log(f);
-			var t = new Date();
-			var file = {
-				name:f.name,
-				path:f.path,
-				size:f.size,
-				lastModifiedDate:f.lastModifiedDate,
-				dir : this.props.data.directory,
-				uploadTime :  Date.parse(t),
-				status:0
-
-			}
-			this.props.dispatch(Action.addUpload(file));
-			ipc.send('uploadFile',file);	
-		}
-		
-	}
-
+	//create new folder
 	upLoadFolder() {
 		let name = $('#folder-name')[0].value;
 		ipc.send('upLoadFolder',name,this.props.data.directory);
 		this.toggleUploadFolder(false);
 	}
-
+	//open input of files
 	openInputFile() {
 		$('.upload-input').trigger('click');
 	}
-
+	//toggle dialog of upload
 	toggleUploadFolder(b) {
 		this.props.dispatch(Action.toggleDialogOfUploadFolder(b));
 	}
-
+	//toggle dialog of share
 	toggleShare(b) {
 		this.props.dispatch(Action.toggleShare(b));
 	}
-
+	//share files or folders
 	share() {
 		let files = [];
 		let users = [];
@@ -240,7 +233,7 @@ class AllFiles extends Component {
 		console.log(users[0]);
 		ipc.send('share',files,users);
 	}
-
+	// select users be shared
 	checkUser(uuid,obj,b) {
 		this.props.dispatch(Action.checkUser(uuid,b));
 	}

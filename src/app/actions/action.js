@@ -31,7 +31,7 @@ var actions = {
 			type: 'NAV_MENU_TOGGLE' 
 		}
 	},
-
+	//select left navigation
 	changeSelectedNavItem(name,index) {
 		return {
 			type: 'NAV_SELECT',
@@ -85,7 +85,7 @@ var actions = {
 			selected:selected
 		}
 	},
-
+	//open detail of files
 	setDetail(objArr) {
 		return {
 			type : 'SET_DETAIL',
@@ -116,9 +116,13 @@ var actions = {
 	},
 
 	filesLoading() {
-		return {
+		return dispatch =>{
+			dispatch({type: 'CLEAN_DETAIL'});
+			return {
 			type: 'FILES_LOADING'
 		}
+		}
+		
 	},
 
 	cleanDetail() {
@@ -204,6 +208,12 @@ var actions = {
 			type: 'SET_SNACK',
 			text: message,
 			open: open
+		}
+	},
+
+	cleanSnack() {
+		return {
+			type: 'CLEAN_SNACK'
 		}
 	}
 }

@@ -33,7 +33,8 @@ class Index extends React.Component {
 
 	componentWillReceiveProps(nextProps) {
 		if (nextProps.login.state == 'LOGGEDIN') {
-			window.location.hash = '/main'
+			// this.props.dispatch(Login.cleanSnack());
+			window.location.hash = '/main';
 		}
 	}
 
@@ -60,9 +61,7 @@ class Index extends React.Component {
 		      type: "LOGIN"
 		})
 		// ipc.send('login',username,password);
-		// ipc.send('login','111111','111111');
-		// ipc.send('login','222222','222222');
-		ipc.send('login','6','6');
+		ipc.send('login','1','1');
 	}
 
 	render() {
