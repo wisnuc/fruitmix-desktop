@@ -61,7 +61,7 @@ class Index extends React.Component {
 		      type: "LOGIN"
 		})
 		// ipc.send('login',username,password);
-		ipc.send('login','1','1');
+		ipc.send('login','b','b');
 	}
 
 	render() {

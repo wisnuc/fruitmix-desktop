@@ -18,6 +18,7 @@ class AllFilesTable extends Component {
 		var _this = this;
 		return (
 			<table className="allFileTable">
+				{/*table header*/}
 				<thead>
 					<tr>
 						<th onClick={this.selectAllChildren.bind(this)}>
@@ -32,11 +33,12 @@ class AllFilesTable extends Component {
 						<th>大小</th>
 					</tr>
 				</thead>
+			{/*table body*/}
 				<tbody>
 					{this.props.data.children.map((item,index)=>{
 						return (
 							<tr key={index} onTouchTap={_this.selectChildren.bind(_this,index)} onDoubleClick={_this.enterChildren.bind(_this,index)} 
-							className={item.checked==true?'tr-selected-background':''}>
+								className={item.checked==true?'tr-selected-background':''}>
 								<td onClick={this.addBezier.bind(this,index)} data-selected={item.checked} className='first-td'>
 									<div className='selectBox'>
 										<div>{item.checked==false?svg.blackFrame():svg.select()}</div>
@@ -57,17 +59,11 @@ class AllFilesTable extends Component {
 			</table>
 			)
 		}
-
-	enterChildren (rowNumber) {
-		//bezier 
-		$('.bezierFrame').empty().append('<div class="bezierTransition1"></div><div class="bezierTransition2"></div>');
-
-		var children = this.props.data.children;
-		if (children[rowNumber] && children[rowNumber].type == 'folder') {
-			ipc.send('enterChildren',children[rowNumber]);
-		}
+	//select all
+	selectAllChildren() {
+ 		this.props.dispatch(Action.selectAllChildren());
 	}
-
+	//select files
 	selectChildren (rowNumber,e) {
 		//bezier
 		if (this.props.data.children[rowNumber].checked == true) {
@@ -90,6 +86,18 @@ class AllFilesTable extends Component {
 		}
 		
 	}
+	//double click
+	enterChildren (rowNumber) {
+		//bezier 
+		$('.bezierFrame').empty().append('<div class="bezierTransition1"></div><div class="bezierTransition2"></div>');
+
+		var children = this.props.data.children;
+		if (children[rowNumber] && children[rowNumber].type == 'folder') {
+			console.log('double-click __________________________');
+			console.log(new Date());
+			ipc.send('enterChildren',children[rowNumber]);
+		}
+	}
 
 	addBezier (rowNumber) {
 		if (this.props.data.children[rowNumber].checked == false) {
@@ -111,9 +119,7 @@ class AllFilesTable extends Component {
 		$('tbody>tr:eq('+rowNumber+') .bezierFrame').append('<div class="bezierTransition2"></div>');
 	}
 
-	selectAllChildren() {
- 		this.props.dispatch(Action.selectAllChildren());
-	}
+
 
 	getTime(date) {
 		let t = date.indexOf('T');

@@ -1,18 +1,4 @@
 var actions = {
-	// login: (username,password) => {
-	// 	return dispatch => {
-	// 		dispatch({type:'LOGIN',username: username, password: password})
-	// 		fmacloud.User.logIn(username,password, {
-	// 			success(data) {
-	// 				dispatch({type:'LOGGEDIN',username:username,password:password})
-	// 			},
-	// 			error(err) {
-	// 				console.log();
-	// 			}
-	// 		});	
-	// 	}
-	// }
-
 	login(obj) {
 		return {
 			type: 'LOGGEDIN',
@@ -116,11 +102,9 @@ var actions = {
 	},
 
 	filesLoading() {
-		return dispatch =>{
-			dispatch({type: 'CLEAN_DETAIL'});
-			return {
+
+		return {
 			type: 'FILES_LOADING'
-		}
 		}
 		
 	},
@@ -131,10 +115,10 @@ var actions = {
 		}
 	},
 
-	addUpload(obj) {
+	addUpload(objArr) {
 		return {
 			type: 'ADD_UPLOAD',
-			obj: obj
+			obj: objArr
 		}
 	},
 

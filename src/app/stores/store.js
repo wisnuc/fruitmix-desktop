@@ -13,7 +13,13 @@ const createStoreWithMiddleware = applyMiddleware(
 	loggerMiddleware
 )(createStore);
 
+const s = createStore(reducer);
+
 export default function configureStore(initialState) {
 	return createStoreWithMiddleware(reducer, initialState);
 }
+
+// export default function configureStore() {
+// 	return s
+// }
 

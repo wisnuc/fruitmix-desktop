@@ -14,7 +14,7 @@ var mainWindow = null;
 
 var server = 'http://211.144.201.201:8888';
 server ='http://192.168.5.132:80';
-// server ='http://192.168.5.165:80';
+// server ='http://192.168.5.108:80';
 //user
 var user = {};
 //files
@@ -33,6 +33,9 @@ var children = [];
 var parent = {};
 var path = [];
 var tree = {};
+//upload 
+var uploadQueueWait = [];
+var uploadQueue = [];
 
 //app ready and open window
 app.on('ready', function() {
@@ -74,11 +77,11 @@ ipcMain.on('getRootData', ()=> {
 
 ipcMain.on('enterChildren', (event,selectItem) => {
 	//parent
-	var parent = map.get(selectItem.parent);
+	var parent = Object.assign({},map.get(selectItem.parent),{children:null});
 	//currentDirectory
 	currentDirectory = selectItem;
 	//children
-	children = map.get(selectItem.uuid).children;
+	children = map.get(selectItem.uuid).children.map(item=>Object.assign({},item,{children:null}));
 	//path
 	try {
 		path.length = 0;
@@ -88,7 +91,7 @@ ipcMain.on('enterChildren', (event,selectItem) => {
 		console.log(e);        
 		path.length=0;
 	}finally {
-		mainWindow.webContents.send('receive',currentDirectory,children,parent,path);
+		mainWindow.webContents.send('receive',currentDirectory,children,parent,path,shareChildren);
 	}
 });
 
@@ -98,50 +101,83 @@ ipcMain.on('getFile',(e,uuid)=>{
 	})
 });
 
-ipcMain.on('uploadFile',(e,file)=>{
-	var body = 0;
-	var t = 0;
-	var interval = setInterval(function() {
-		var upLoadProcess = body/file.size;
-		mainWindow.webContents.send('refreshStatusOfUpload',file,upLoadProcess);
-		if (upLoadProcess >= 1) {
-			clearInterval(interval);
+ipcMain.on('uploadFile',(e,files)=>{
+	uploadQueueWait = uploadQueueWait.concat(files);
+	dealUploadQueue();
+});
+
+function dealUploadQueue() {
+	if (uploadQueueWait.length == 0) {
+		return;
+	}else  {
+		if (uploadQueue.length < 10) {
+			let times =10- uploadQueue.length;
+			// console.log('times:'+ times);
+			for (let i =0; i < times ;i++) {
+				if (uploadQueueWait.length == 0 ) {break;}
+				let file = uploadQueueWait.shift();
+				uploadQueue.push(file);
+				uploadFile(file);
+			}
+		}else {
+			return
 		}
-	},800);
-	var transform = new stream.Transform({
+	}
+}
+
+function uploadFile(file) {
+	let body = 0;
+	// let interval = setInterval(function() {
+	// 	let upLoadProcess = body/file.size;
+	// 	// mainWindow.webContents.send('refreshStatusOfUpload',file,upLoadProcess);
+	// 	if (upLoadProcess >= 1) {
+	// 		mainWindow.webContents.send('refreshStatusOfUpload',file,upLoadProcess);
+	// 		clearInterval(interval);
+	// 	}
+	// },800);
+	//transform
+	let transform = new stream.Transform({
 		transform: function(chunk, encoding, next) {
 			body+=chunk.length;
 			this.push(chunk)
 			next();
 		}
 	})
-
+	//callback
 	function callback (err,res,body) {
-		console.log(res);
 		if (!err && res.statusCode == 200) {
 			var uuid = body;
+			console.log('success');
 			console.log(uuid);
+			let index = uploadQueue.findIndex((item,index)=>{
+				return item.path == file.path;
+			});
+			uploadQueue.splice(index,1);
+			if (uploadQueue.length == 0) {
+				dealUploadQueue();
+			}
 			uuid = uuid.slice(1,uuid.length-1);
 			modifyData(file,uuid);
 		}else {
 			console.log('upload failed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+			console.log(res.statusCode);
+			console.log(res.body);
 			console.log(err);
 		}
 	}
-
-	var fakeserver = 'http://127.0.0.1:23456'
-
-	var r = request.post(server+'/files/'+currentDirectory.uuid+'?type=file',{
+	//request
+	let r = request.post(server+'/files/'+currentDirectory.uuid+'?type=file',{
 		headers: {
 			Authorization: user.type+' '+user.token
 		},
 	},callback)
+	//add file
+	let form = r.form();
+	let tempStream = fs.createReadStream(file.path).pipe(transform);
 
-	var form = r.form();
-	var tempStream = fs.createReadStream(file.path).pipe(transform)
 	tempStream.path = file.path
 	form.append('file', tempStream);	
-});
+}
 
 ipcMain.on('upLoadFolder',(e,name,dir)=>{
 	var r = request.post(server+'/files/'+dir.uuid+'?type=folder',{
@@ -156,6 +192,7 @@ ipcMain.on('upLoadFolder',(e,name,dir)=>{
 			modifyFolder(name,dir,uuid);
 		}else {
 			console.log('err');
+			console.log(res);
 			console.log(err);
 		}
 	});
@@ -179,25 +216,38 @@ ipcMain.on('refresh',(e,uuid)=>{
 ipcMain.on('delete',(e,objArr,dir)=>{
 	for (let item of objArr) {
 		deleteFile(item).then(()=>{
-			//delete file in data
-			let index = allFiles.findIndex((value)=>{
-				return value.uuid == item.uuid
-			})
-			if (index != -1) {
-				allFiles.splice(index,1);
-			}
 			//delete file in children
 			let index2 = children.findIndex((value)=>value.uuid == item.uuid);
-			if (index2 != -1) {children.splice(index2,1)}
-			
-			mainWindow.webContents.send('deleteSuccess',item,children,dir);
+			if (index2 != -1) {
+				children.splice(index2,1)
+			}
+
+			let index = map.get(dir.uuid).children.findIndex( (value) => value.uuid == item.uuid);
+			if (index != -1) {
+				 map.get(dir.uuid).children.splice(index,1)
+			}
+
+			if (currentDirectory.uuid == dir.uuid) {
+				mainWindow.webContents.send('deleteSuccess',item,children,dir);	
+			}
+
+
+
+			//delete file in data
+			// let index = allFiles.findIndex((value)=>{
+			// 	return value.uuid == item.uuid
+			// })
+			// if (index != -1) {
+			// 	allFiles.splice(index,1);
+			// }
 		});
 	}
 });
 
 ipcMain.on('rename',(e,uuid,name,oldName)=>{
 	rename(uuid,name,oldName).then(()=>{
-		console.log('ok');
+		map.get(uuid).name = name;
+		map.get(uuid).attribute.name = name;
 	})
 })
 
@@ -320,7 +370,8 @@ function dealWithData(data) {
 	tree = getTree(allFiles,'file');
 	shareTree = getTree(shareFiles,'share');
 	// set children
-	children = tree.filter(item=>item.parent=='');
+	// children = Object.assign({},tree.filter(item=>item.parent==''),{children:null});
+	children = tree.filter(item=>item.parent=='').map(item=>Object.assign({},item,{children:{}}));
 	shareTree.forEach((item)=>{if (item.hasParent == false) {shareChildren.push(item)}});
 	//set path
 	path.length = 0;
@@ -334,14 +385,12 @@ function getPath(obj) {
 		path.unshift({key:'',value:{}});
 		return; 
 	}else {
-		getPath(allFiles.find((item)=>{return item.uuid == obj.parent}));
+		getPath(map.get(obj.parent));
 	}
 }
 function classifyShareFiles() {
 	let userUUID = user.uuid;
 	allFiles.forEach((item,index)=>{
-		// console.log('************************************');
-		// console.log('forEach');
 		// owner is user ?
 		if (item.permission.owner[0] != userUUID ) {
 			// console.log('is not user');
@@ -350,12 +399,10 @@ function classifyShareFiles() {
 			});
 			if (result != undefined) {
 				//file is shared to user
-				// console.log('is shared file');
 				shareFiles.push(item);
 				allFiles[index].share = true;
 			}else {
 				//is file included in shareFolder?
-				// console.log('find parent');
 				var findParent = function(i) {
 					if (i.parent == '') {
 						//file belong to user but is not upload by client
@@ -422,7 +469,9 @@ function getTree(f,type) {
 		});
 	}else {
 		tree.forEach((item)=>{
-			map.set(item.uuid,item);
+			if (item.type == 'folder') {
+				map.set(item.uuid,item);	
+			}	
 		});
 	}
 	return tree;	
@@ -531,8 +580,8 @@ function download(item) {
 }
 function modifyData(file,uuid) {
 	//insert uuid 	
-	let item = allFiles.find((item)=>{return item.uuid == file.parent.uuid});
-	item != undefined && item.children.push(uuid);
+	// let item = allFiles.find((item)=>{return item.uuid == file.parent.uuid});
+	// item != undefined && item.children.push(uuid);
 	//insert obj
 	var f= {
 		uuid:uuid,
@@ -549,24 +598,27 @@ function modifyData(file,uuid) {
 		children : [],
 		name:file.name,
 	}
-	allFiles.push(_.cloneDeep(f));
-	insertTree(tree[0]);
-	function insertTree(obj) {
-		if (obj.uuid == file.parent.uuid) {
-			obj.children.push(f);
-			return
-		}else {
-			if (obj.children.length != 0) {
-				for (let i = 0;i < obj.children.length; i++) {
-					insertTree(obj.children[i]);
-				}
-			}
-		}
-	}
+	// allFiles.push(_.cloneDeep(f));
+	// insertTree(tree[0]);
+	// function insertTree(obj) {
+	// 	if (obj.uuid == file.parent.uuid) {
+	// 		obj.children.push(f);
+	// 		return
+	// 	}else {
+	// 		if (obj.children.length != 0) {
+	// 			for (let i = 0;i < obj.children.length; i++) {
+	// 				insertTree(obj.children[i]);
+	// 			}
+	// 		}
+	// 	}
+	// }
+	let d = map.get(file.parent.uuid);
+	d.children.push(f);
 	//insert folder obj into map
 	map.set(uuid,f);
-	console.log(children);
-	mainWindow.webContents.send('uploadSuccess',file,children,_.cloneDeep(tree[0]))
+	//get children 
+	children = d.children.map(item=>Object.assign({},item,{children:null}));
+	mainWindow.webContents.send('uploadSuccess',file,children)
 }
 function modifyFolder(name,dir,folderuuid) {
 	//insert uuid
@@ -589,26 +641,30 @@ function modifyFolder(name,dir,folderuuid) {
 		name:name,
 	};
 	//insert folder obj into allfiles
-	allFiles.push(_.cloneDeep(folder));
+	// allFiles.push(_.cloneDeep(folder));
 	//insert folder obj into tree
-	insertTree(tree[0]);
-	function insertTree(obj) {
-		if (obj.uuid == dir.uuid) {
-			obj.children.push(folder);
-			console.log('insert');
-			return
-		}else {
-			if (obj.children.length != 0) {
-				for (let i = 0;i < obj.children.length; i++) {
-					insertTree(obj.children[i]);
-				}
-			}
-		}
-	}
+	// insertTree(tree[0]);
+	// function insertTree(obj) {
+	// 	if (obj.uuid == dir.uuid) {
+	// 		obj.children.push(folder);
+	// 		console.log('insert');
+	// 		return
+	// 	}else {
+	// 		if (obj.children.length != 0) {
+	// 			for (let i = 0;i < obj.children.length; i++) {
+	// 				insertTree(obj.children[i]);
+	// 			}
+	// 		}
+	// 	}
+	// }
 	//insert folder obj into map
 	map.set(folderuuid,folder);
+	let a = map.get(dir.uuid);
+	a.children.push(folder)
+	//get children
+	children = a.children.map(item => Object.assign({},item,{children:null}))
 	//ipc
-	mainWindow.webContents.send('uploadSuccess',folder,_.cloneDeep(children),_.cloneDeep(tree[0]));
+	mainWindow.webContents.send('uploadSuccess',folder,_.cloneDeep(children));
 }
 function createNewUser(username,password,email) {
 	let promise = new Promise((resolve,reject)=>{

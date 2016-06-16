@@ -82,7 +82,7 @@ const directory = (state=defaultDirectory,action)=> {
 		case 'CLEAN_DETAIL':
 			return Object.assign({},state,{detail:[]});
 		case 'ADD_UPLOAD':
-			var upload = state.upload.concat([action.obj]);
+			var upload = state.upload.concat(action.obj);
 			return Object.assign({},state,{upload:upload});
 		case 'ADD_DOWNLOAD':
 			var dowload = state.dowload.concat([action.obj]);

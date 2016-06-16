@@ -43,6 +43,8 @@ class Main extends Component {
 		this.props.dispatch(Action.filesLoading());
 
 		ipc.on('receive',function (err,dir,children,parent,path,shareChildren) {
+						console.log('uploadSuccess____________________________________');
+			console.log(new Date());
 			_this.props.dispatch(Action.setDirctory(dir,children,parent,path,shareChildren));
 		});
 		ipc.on('setTree',(err,tree)=>{
@@ -61,15 +63,8 @@ class Main extends Component {
 			console.log(data);
 		});
 
-		ipc.on('uploadSuccess',(err,file,children,tree)=>{
-			console.log('uploadSuccess');
-			// this.props.dispatch(Action.removeFile(obj));
-
-			console.log(tree);
-			console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-
+		ipc.on('uploadSuccess',(err,file,children)=>{
 				this.props.dispatch(Action.refreshDir(children));
-			
 		});
 
 		ipc.on('refreshStatusOfUpload',(err,file,status)=>{
@@ -114,7 +109,7 @@ class Main extends Component {
 				<Paper className={"content-container "+(this.props.navigation.menu?'content-has-left-padding':'no-padding')} style={{paddingTop:64}} zDepth={0}>
 					<Content></Content>
 				</Paper>
-				<Snackbar open={false} message={this.props.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
+				<Snackbar open={this.props.snack.open} message={this.props.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
 			</div></CSS>
 			);
 	}

@@ -94,13 +94,7 @@ class PopMenu extends Component {
 	}
 
 	remove() {
-		var arr = [];
-		// arr.push(this.props.data.menu.objArr[0]);
-		// for (let item of this.props.data.children) {
-		// 	if (item.checked&&item.uuid!=arr[0].uuid) {
-		// 		arr.push(item);
-		// 	}
-		// }
+		let arr = [];
 		this.props.data.children.forEach(item=>{
 			if (item.checked) {
 				arr.push(item)
@@ -110,24 +104,12 @@ class PopMenu extends Component {
 	}
 
 	dowload() {
-		// let arr = [];
-		// arr.push(this.props.data.menu.objArr[0]);
-		// for (let item of this.props.data.children) {
-		// 	if (item.checked&&item.uuid!=arr[0].uuid) {
-		// 		arr.push(item);
-		// 	}
-		// }
 		this.props.data.children.forEach(item=>{
 			if (item.checked) {
 				this.props.dispatch(Action.addDownload(item));
 				ipc.send('download',item);		
 			}
 		});
-		// arr.forEach((item,index)=>{
-		// 	this.props.dispatch(Action.addDownload(item));
-		// 	ipc.send('download',item);	
-		// });
-		
 	}
 
 	triggerClick(e) {
