@@ -14,7 +14,7 @@ var mainWindow = null;
 
 var server = 'http://211.144.201.201:8888';
 server ='http://192.168.5.132:80';
-// server ='http://192.168.5.108:80';
+server ='http://192.168.5.108:80';
 //user
 var user = {};
 //files
@@ -34,9 +34,14 @@ var parent = {};
 var path = [];
 var tree = {};
 //upload 
-var uploadQueueWait = [];
+// var uploadQueueWait = [];
+// var uploadQueue = [];
+//-------------------------------------------------------------------------------------------------------------
 var uploadQueue = [];
+var uploadNow = [];
+var uploadMap = new Map();
 
+var c = console.log
 //app ready and open window
 app.on('ready', function() {
 	mainWindow = new BrowserWindow({
@@ -64,215 +69,6 @@ ipcMain.on('login',function(event,username,password){
 		mainWindow.webContents.send('message','loginFailed',0);
 	});
 });
-//get all files
-ipcMain.on('getRootData', ()=> {
-	getFiles().then((data)=>{
-		dealWithData(data);
-		mainWindow.webContents.send('receive', currentDirectory,children,parent,path,shareChildren);
-		mainWindow.webContents.send('setTree',tree[0]);
-	}).catch((err)=>{
-		mainWindow.webContents.send('message','get data error',1);	
-	});
-});
-
-ipcMain.on('enterChildren', (event,selectItem) => {
-	//parent
-	var parent = Object.assign({},map.get(selectItem.parent),{children:null});
-	//currentDirectory
-	currentDirectory = selectItem;
-	//children
-	children = map.get(selectItem.uuid).children.map(item=>Object.assign({},item,{children:null}));
-	//path
-	try {
-		path.length = 0;
-		getPath(selectItem);
-		path = _.cloneDeep(path);
-	}catch(e) {
-		console.log(e);        
-		path.length=0;
-	}finally {
-		mainWindow.webContents.send('receive',currentDirectory,children,parent,path,shareChildren);
-	}
-});
-
-ipcMain.on('getFile',(e,uuid)=>{
-	getFile(uuid).then((data)=>{
-		mainWindow.webContents.send('receiveFile',data);
-	})
-});
-
-ipcMain.on('uploadFile',(e,files)=>{
-	uploadQueueWait = uploadQueueWait.concat(files);
-	dealUploadQueue();
-});
-
-function dealUploadQueue() {
-	if (uploadQueueWait.length == 0) {
-		return;
-	}else  {
-		if (uploadQueue.length < 10) {
-			let times =10- uploadQueue.length;
-			// console.log('times:'+ times);
-			for (let i =0; i < times ;i++) {
-				if (uploadQueueWait.length == 0 ) {break;}
-				let file = uploadQueueWait.shift();
-				uploadQueue.push(file);
-				uploadFile(file);
-			}
-		}else {
-			return
-		}
-	}
-}
-
-function uploadFile(file) {
-	let body = 0;
-	// let interval = setInterval(function() {
-	// 	let upLoadProcess = body/file.size;
-	// 	// mainWindow.webContents.send('refreshStatusOfUpload',file,upLoadProcess);
-	// 	if (upLoadProcess >= 1) {
-	// 		mainWindow.webContents.send('refreshStatusOfUpload',file,upLoadProcess);
-	// 		clearInterval(interval);
-	// 	}
-	// },800);
-	//transform
-	let transform = new stream.Transform({
-		transform: function(chunk, encoding, next) {
-			body+=chunk.length;
-			this.push(chunk)
-			next();
-		}
-	})
-	//callback
-	function callback (err,res,body) {
-		if (!err && res.statusCode == 200) {
-			var uuid = body;
-			console.log('success');
-			console.log(uuid);
-			let index = uploadQueue.findIndex((item,index)=>{
-				return item.path == file.path;
-			});
-			uploadQueue.splice(index,1);
-			if (uploadQueue.length == 0) {
-				dealUploadQueue();
-			}
-			uuid = uuid.slice(1,uuid.length-1);
-			modifyData(file,uuid);
-		}else {
-			console.log('upload failed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-			console.log(res.statusCode);
-			console.log(res.body);
-			console.log(err);
-		}
-	}
-	//request
-	let r = request.post(server+'/files/'+currentDirectory.uuid+'?type=file',{
-		headers: {
-			Authorization: user.type+' '+user.token
-		},
-	},callback)
-	//add file
-	let form = r.form();
-	let tempStream = fs.createReadStream(file.path).pipe(transform);
-
-	tempStream.path = file.path
-	form.append('file', tempStream);	
-}
-
-ipcMain.on('upLoadFolder',(e,name,dir)=>{
-	var r = request.post(server+'/files/'+dir.uuid+'?type=folder',{
-		headers: {
-			Authorization: user.type+' '+user.token
-		},
-	},function (err,res,body) {
-		if (!err && res.statusCode == 200) {
-			console.log('res');
-			var uuid = body;
-			uuid = uuid.slice(1,uuid.length-1);
-			modifyFolder(name,dir,uuid);
-		}else {
-			console.log('err');
-			console.log(res);
-			console.log(err);
-		}
-	});
-	var form = r.form();
-	form.append('foldername',name);
-});
-
-ipcMain.on('download',(e,file)=>{
-	download(file).then(data=>{
-		console.log(file.attribute.name + ' download success');
-	});
-})
-
-ipcMain.on('refresh',(e,uuid)=>{
-	getFiles().then((data)=>{
-		dealWithData(data);
-		mainWindow.webContents.send('refresh',children);
-	});
-});
-
-ipcMain.on('delete',(e,objArr,dir)=>{
-	for (let item of objArr) {
-		deleteFile(item).then(()=>{
-			//delete file in children
-			let index2 = children.findIndex((value)=>value.uuid == item.uuid);
-			if (index2 != -1) {
-				children.splice(index2,1)
-			}
-
-			let index = map.get(dir.uuid).children.findIndex( (value) => value.uuid == item.uuid);
-			if (index != -1) {
-				 map.get(dir.uuid).children.splice(index,1)
-			}
-
-			if (currentDirectory.uuid == dir.uuid) {
-				mainWindow.webContents.send('deleteSuccess',item,children,dir);	
-			}
-
-
-
-			//delete file in data
-			// let index = allFiles.findIndex((value)=>{
-			// 	return value.uuid == item.uuid
-			// })
-			// if (index != -1) {
-			// 	allFiles.splice(index,1);
-			// }
-		});
-	}
-});
-
-ipcMain.on('rename',(e,uuid,name,oldName)=>{
-	rename(uuid,name,oldName).then(()=>{
-		map.get(uuid).name = name;
-		map.get(uuid).attribute.name = name;
-	})
-})
-
-ipcMain.on('close-main-window', function () {
-    app.quit();
-});
-
-ipcMain.on('create-new-user',function(err,u,p,e){
-	createNewUser(u,p,e).then(()=>{
-		console.log('register success');
-	}).catch(()=>{
-		console.log('failed');
-	});
-});
-
-ipcMain.on('share',function(err,files,users){
-	console.log('ipc enter');
-	files.forEach((item)=>{
-		console.log('for each');
-		share(item,users).then(()=>{
-			console.log('then le');
-		});
-	});
-});
-
 function login() {
 	let login = new Promise((resolve,reject)=>{
 		request(server+'/login',function(err,res,body){
@@ -324,21 +120,22 @@ function getAllUser() {
 	});
 	return promise
 }
-function getFile(uuid) {
-	var file = new Promise((resolve,reject)=>{
-		request
-			.get(server+'/files/'+uuid)
-			.set('Authorization',user.type+' '+user.token)
-			.end((err,res)=>{
-				if (res.ok) {
-					resolve(eval(res.body));
-				}else {
-					reject(err);
-				}
-			});
+//get all files
+ipcMain.on('getRootData', ()=> {
+	getFiles().then((data)=>{
+		dealWithData(data);
+		mainWindow.webContents.send('receive', currentDirectory,children,parent,path,shareChildren);
+		mainWindow.webContents.send('setTree',tree[0]);
+	}).catch((err)=>{
+		mainWindow.webContents.send('message','get data error',1);	
 	});
-	return file;
-}
+});
+ipcMain.on('refresh',(e,uuid)=>{
+	getFiles().then((data)=>{
+		dealWithData(data);
+		mainWindow.webContents.send('refresh',children);
+	});
+});
 function getFiles() {
 	var files = new Promise((resolve,reject)=>{ 
 			var options = {
@@ -376,17 +173,6 @@ function dealWithData(data) {
 	//set path
 	path.length = 0;
 	path.push({key:''});
-}
-function getPath(obj) {
-	//insert obj to path
-	path.unshift({key:obj.attribute.name,value:allFiles.find((item)=>{return item.uuid == obj.uuid})});
-	//obj is root?
-	if (obj.parent == undefined || obj.parent == '') {
-		path.unshift({key:'',value:{}});
-		return; 
-	}else {
-		getPath(map.get(obj.parent));
-	}
 }
 function classifyShareFiles() {
 	let userUUID = user.uuid;
@@ -443,9 +229,9 @@ function getTree(f,type) {
 				name:item.attribute.name,
 				parent: item.parent,
 				children: item.children,
-				share:item.share,
+				share:item.share==true?true:false,
 				type:item.type,
-				checked:item.checked,
+				checked:false,
 				owner:item.permission.owner,
 				attribute:{
 					changetime:item.attribute.changetime,
@@ -476,62 +262,257 @@ function getTree(f,type) {
 	}
 	return tree;	
 }
-function deleteFile(obj) {
-	var deleteF = new Promise((resolve,reject)=>{
-			var options = {
-				method: 'delete',
-				url: server+'/files/'+obj.uuid,
-				headers: {
-					Authorization: user.type+' '+user.token
-				}
-
-			};
-
-			function callback (err,res,body) {
-				if (!err && res.statusCode == 200) {
-					console.log('res');
-					console.log(body)
-					resolve(JSON.parse(body));
-				}else {
-					console.log('err');
-					console.log(res);
-					console.log(err);
-					reject(err)
+ipcMain.on('enterChildren', (event,selectItem) => {
+	//parent
+	var parent = Object.assign({},map.get(selectItem.parent),{children:null});
+	//currentDirectory
+	currentDirectory = selectItem;
+	//children
+	children = map.get(selectItem.uuid).children.map(item=>Object.assign({},item,{children:null}));
+	//path
+	try {
+		path.length = 0;
+		getPath(selectItem);
+		path = _.cloneDeep(path);
+	}catch(e) {
+		console.log(e);        
+		path.length=0;
+	}finally {
+		mainWindow.webContents.send('receive',currentDirectory,children,parent,path,shareChildren);
+	}
+});
+function getPath(obj) {
+	//insert obj to path
+	path.unshift({key:obj.attribute.name,value:allFiles.find((item)=>{return item.uuid == obj.uuid})});
+	//obj is root?
+	if (obj.parent == undefined || obj.parent == '') {
+		path.unshift({key:'',value:{}});
+		return; 
+	}else {
+		getPath(map.get(obj.parent));
+	}
+}
+ipcMain.on('getFile',(e,uuid)=>{
+	getFile(uuid).then((data)=>{
+		mainWindow.webContents.send('receiveFile',data);
+	})
+});
+ipcMain.on('uploadFile',(e,files)=>{
+	// uploadQueueWait = uploadQueueWait.concat(files);
+	// dealUploadQueue();
+	//-------------------------------------------------------------------------------------------------------------
+	uploadQueue.push(files);
+	dealUploadQueue();
+});
+function dealUploadQueue() {
+	// if (uploadQueueWait.length == 0) {
+	// 	return;
+	// }else  {
+	// 	if (uploadQueue.length < 10) {
+	// 		let times =10- uploadQueue.length;
+	// 		// console.log('times:'+ times);
+	// 		for (let i =0; i < times ;i++) {
+	// 			console.log(uploadQueueWait.length);
+	// 			if (uploadQueueWait.length == 0 ) {break;}
+	// 			let file = uploadQueueWait.shift();
+	// 			uploadQueue.push(file);
+	// 			uploadFile(file);
+	// 		}
+	// 	}else {
+	// 		return
+	// 	}
+	// }
+	//-------------------------------------------------------------------------------------------------------------
+	if (uploadQueue.length == 0) {
+		return
+	}else {
+		if (uploadQueue[0].index == uploadQueue[0].length && uploadNow.length == 0) {
+			modifyData(uploadQueue.shift());
+			console.log('a upload task over');
+			console.log(uploadQueue);
+			dealUploadQueue();
+		}else {
+			if (uploadNow.length < 10) {
+				let gap = 10 - uploadNow.length;
+				for (let i = 0; i < gap; i++) {
+					let index = uploadQueue[0].index;
+					console.log(index);
+					if (index > uploadQueue[0].length-1) {
+						return
+					}
+					uploadNow.push(uploadQueue[0].data[index]);
+					uploadFile(uploadQueue[0].data[index]);
+					uploadQueue[0].index++;
 				}
 			}
-
-			request(options,callback);
-
-	});
-	return deleteF;
+			console.log(uploadQueue);
+		}
+	}
 }
-function rename(uuid,name,oldName) {
-	let rename = new Promise((resolve,reject)=>{
-		var options = {
-			method: 'patch',
-			url: server+'/files/'+uuid,
-			headers: {
-					Authorization: user.type+' '+user.token
-				},
-			form: {filename:name}
+function uploadFile(file) {
+	let body = 0;
+	let transform = new stream.Transform({
+		transform: function(chunk, encoding, next) {
+			body+=chunk.length;
+			this.push(chunk)
+			next();
+		}
+	})
+	//callback
+	function callback (err,res,body) {
+		if (!err && res.statusCode == 200) {
+			var uuid = body;
+			console.log('success');
+			console.log(uuid);
+			// let index = uploadQueue.findIndex((item,index)=>{
+			// 	return item.path == file.path;
+			// });
+			// uploadQueue.splice(index,1);
+			// if (uploadQueue.length == 0) {
+			// 	dealUploadQueue();
+			// }
+			//-------------------------------------------------------------------------------------------------------------
+			let fileObj = uploadQueue[0].data.find(item2=>file.path == item2.path);
+			let index = uploadNow.findIndex(item=>item.path == file.path);
+			uploadNow.splice(index,1);
+
+			if (fileObj != undefined) {
+				fileObj.uuid = uuid;
+			}
+			if (uploadNow.length == 0) {
+				dealUploadQueue();
+			}
+		}else {
+			let index = uploadNow.findIndex(item3=>item3.path == file.path);
+			uploadNow.splice(index,1);
+			console.log('upload failed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+			console.log(res.statusCode);
+			console.log(res.body);
+			console.log(err);
+		}
+	}
+	//request
+	let r = request.post(server+'/files/'+currentDirectory.uuid+'?type=file',{
+		headers: {
+			Authorization: user.type+' '+user.token
+		},
+	},callback)
+	//add file
+	let form = r.form();
+	let tempStream = fs.createReadStream(file.path).pipe(transform);
+
+	tempStream.path = file.path
+	form.append('file', tempStream);	
+}
+function modifyData(files,uuid) {
+	//insert obj
+/*	var f= {
+		uuid:uuid,
+		parent: file.parent.uuid,
+		checked: false,
+		share:false,
+		attribute: {
+			name:file.name,
+			size:file.size	,
+			changetime: "",
+			createtime: "",
+		},
+		type: 'file',
+		children : [],
+		name:file.name,
+	}
+	let d = map.get(file.parent.uuid);
+	d.children.push(f);
+	//insert folder obj into map
+	map.set(uuid,f);
+	//get children 
+	children = d.children.map(item=>Object.assign({},item,{children:null}));
+	mainWindow.webContents.send('uploadSuccess',file,children);	*/
+	//-------------------------------------------------------------------------------------------------------------
+	let dir = map.get(files.parent);
+	for (let item of files.data) {
+		let o = {
+			uuid:item.uuid,
+			parent: item.parent,
+			checked: false,
+			share:false,
+			attribute: {
+				name:item.name,
+				size:item.size	,
+				changetime: "",
+				createtime: "",
+			},
+			type: 'file',
+			children : [],
+			name:item.name,
 		};
+		map.set(item.uuid,Object.assign({},item,o));
+		dir.children.push(o);
+	}
+	if (files.parent == currentDirectory.uuid) {
+		c('after');
 
-		function callback (err,res,body) {
-			console.log(res);
-				if (!err && res.statusCode == 200) {
-					console.log('res');
-					resolve(body);
-				}else {
-					console.log('err');
-					console.log(err);
-					reject(err)
-				}
-			}
-
-		request(options,callback);
-	});
-	return rename;
+		children = dir.children.map(i => Object.assign({},i,{children:null}));
+		console.log(children);
+		mainWindow.webContents.send('uploadSuccess',{},children);
+	}
 }
+ipcMain.on('upLoadFolder',(e,name,dir)=>{
+	var r = request.post(server+'/files/'+dir.uuid+'?type=folder',{
+		headers: {
+			Authorization: user.type+' '+user.token
+		},
+	},function (err,res,body) {
+		if (!err && res.statusCode == 200) {
+			console.log('res');
+			var uuid = body;
+			uuid = uuid.slice(1,uuid.length-1);
+			modifyFolder(name,dir,uuid);
+		}else {
+			console.log('err');
+			console.log(res);
+			console.log(err);
+		}
+	});
+	var form = r.form();
+	form.append('foldername',name);
+});
+function modifyFolder(name,dir,folderuuid) {
+	//insert uuid
+	let item = allFiles.find((item)=>{return item.uuid == dir.uuid});
+	item != undefined && item.children.push(folderuuid);
+
+	var folder = {
+		uuid:folderuuid,
+		parent: dir.uuid,
+		checked: false,
+		share:false,
+		attribute: {
+			name:name,
+			size: 4096,
+			changetime: "",
+			createtime: "",
+		},
+		type: 'folder',
+		children:[],
+		name:name,
+	};
+	//insert folder obj into map
+	map.set(folderuuid,folder);
+	let a = map.get(dir.uuid);
+	a.children.push(folder)
+	if (dir.uuid == currentDirectory.uuid) {
+		//get children
+		children = a.children.map(item => Object.assign({},item,{children:null}))
+		//ipc
+		mainWindow.webContents.send('uploadSuccess',folder,_.cloneDeep(children));
+	}
+}
+ipcMain.on('download',(e,file)=>{
+	download(file).then(data=>{
+		console.log(file.attribute.name + ' download success');
+	});
+})
 function download(item) {
 	var download = new Promise((resolve,reject)=>{
 		var body = 0;
@@ -578,94 +559,108 @@ function download(item) {
 		})
 	return download;
 }
-function modifyData(file,uuid) {
-	//insert uuid 	
-	// let item = allFiles.find((item)=>{return item.uuid == file.parent.uuid});
-	// item != undefined && item.children.push(uuid);
-	//insert obj
-	var f= {
-		uuid:uuid,
-		parent: file.parent.uuid,
-		checked: false,
-		share:false,
-		attribute: {
-			name:file.name,
-			size:file.size	,
-			changetime: "",
-			createtime: "",
-		},
-		type: 'file',
-		children : [],
-		name:file.name,
-	}
-	// allFiles.push(_.cloneDeep(f));
-	// insertTree(tree[0]);
-	// function insertTree(obj) {
-	// 	if (obj.uuid == file.parent.uuid) {
-	// 		obj.children.push(f);
-	// 		return
-	// 	}else {
-	// 		if (obj.children.length != 0) {
-	// 			for (let i = 0;i < obj.children.length; i++) {
-	// 				insertTree(obj.children[i]);
-	// 			}
-	// 		}
-	// 	}
-	// }
-	let d = map.get(file.parent.uuid);
-	d.children.push(f);
-	//insert folder obj into map
-	map.set(uuid,f);
-	//get children 
-	children = d.children.map(item=>Object.assign({},item,{children:null}));
-	mainWindow.webContents.send('uploadSuccess',file,children)
-}
-function modifyFolder(name,dir,folderuuid) {
-	//insert uuid
-	let item = allFiles.find((item)=>{return item.uuid == dir.uuid});
-	item != undefined && item.children.push(folderuuid);
+ipcMain.on('delete',(e,objArr,dir)=>{
+	for (let item of objArr) {
+		deleteFile(item).then(()=>{
+			//delete file in children
+			let index2 = children.findIndex((value)=>value.uuid == item.uuid);
+			if (index2 != -1) {
+				children.splice(index2,1)
+			}
 
-	var folder = {
-		uuid:folderuuid,
-		parent: dir.uuid,
-		checked: false,
-		share:false,
-		attribute: {
-			name:name,
-			size: 4096,
-			changetime: "",
-			createtime: "",
-		},
-		type: 'folder',
-		children:[],
-		name:name,
-	};
-	//insert folder obj into allfiles
-	// allFiles.push(_.cloneDeep(folder));
-	//insert folder obj into tree
-	// insertTree(tree[0]);
-	// function insertTree(obj) {
-	// 	if (obj.uuid == dir.uuid) {
-	// 		obj.children.push(folder);
-	// 		console.log('insert');
-	// 		return
-	// 	}else {
-	// 		if (obj.children.length != 0) {
-	// 			for (let i = 0;i < obj.children.length; i++) {
-	// 				insertTree(obj.children[i]);
-	// 			}
-	// 		}
-	// 	}
-	// }
-	//insert folder obj into map
-	map.set(folderuuid,folder);
-	let a = map.get(dir.uuid);
-	a.children.push(folder)
-	//get children
-	children = a.children.map(item => Object.assign({},item,{children:null}))
-	//ipc
-	mainWindow.webContents.send('uploadSuccess',folder,_.cloneDeep(children));
+			let index = map.get(dir.uuid).children.findIndex( (value) => value.uuid == item.uuid);
+			if (index != -1) {
+				 map.get(dir.uuid).children.splice(index,1)
+			}
+
+			if (currentDirectory.uuid == dir.uuid) {
+				mainWindow.webContents.send('deleteSuccess',item,children,dir);	
+			}
+
+
+
+			//delete file in data
+			// let index = allFiles.findIndex((value)=>{
+			// 	return value.uuid == item.uuid
+			// })
+			// if (index != -1) {
+			// 	allFiles.splice(index,1);
+			// }
+		});
+	}
+});
+function deleteFile(obj) {
+	var deleteF = new Promise((resolve,reject)=>{
+			var options = {
+				method: 'delete',
+				url: server+'/files/'+obj.uuid,
+				headers: {
+					Authorization: user.type+' '+user.token
+				}
+
+			};
+
+			function callback (err,res,body) {
+				if (!err && res.statusCode == 200) {
+					console.log('res');
+					console.log(body)
+					resolve(JSON.parse(body));
+				}else {
+					console.log('err');
+					console.log(res);
+					console.log(err);
+					reject(err)
+				}
+			}
+
+			request(options,callback);
+
+	});
+	return deleteF;
 }
+ipcMain.on('rename',(e,uuid,name,oldName)=>{
+	rename(uuid,name,oldName).then(()=>{
+		map.get(uuid).name = name;
+		map.get(uuid).attribute.name = name;
+	})
+})
+function rename(uuid,name,oldName) {
+	let rename = new Promise((resolve,reject)=>{
+		var options = {
+			method: 'patch',
+			url: server+'/files/'+uuid,
+			headers: {
+					Authorization: user.type+' '+user.token
+				},
+			form: {filename:name}
+		};
+
+		function callback (err,res,body) {
+			console.log(res);
+				if (!err && res.statusCode == 200) {
+					console.log('res');
+					resolve(body);
+				}else {
+					console.log('err');
+					console.log(err);
+					reject(err)
+				}
+			}
+
+		request(options,callback);
+	});
+	return rename;
+}
+ipcMain.on('close-main-window', function () {
+    app.quit();
+});
+ipcMain.on('create-new-user',function(err,u,p,e){
+	createNewUser(u,p,e).then(()=>{
+		console.log('register success');
+	}).catch(()=>{
+		console.log('failed');
+	});
+});
 function createNewUser(username,password,email) {
 	let promise = new Promise((resolve,reject)=>{
 		var options = {
@@ -689,6 +684,15 @@ function createNewUser(username,password,email) {
 	});
 	return promise;
 }
+ipcMain.on('share',function(err,files,users){
+	console.log('ipc enter');
+	files.forEach((item)=>{
+		console.log('for each');
+		share(item,users).then(()=>{
+			console.log('then le');
+		});
+	});
+});
 function share(file,users) {
 	var s = new Promise((resolve,reject)=>{
 		console.log(users);
@@ -715,6 +719,33 @@ function share(file,users) {
 	});
 	return s;
 }
+function getFile(uuid) {
+	var file = new Promise((resolve,reject)=>{
+		request
+			.get(server+'/files/'+uuid)
+			.set('Authorization',user.type+' '+user.token)
+			.end((err,res)=>{
+				if (res.ok) {
+					resolve(eval(res.body));
+				}else {
+					reject(err);
+				}
+			});
+	});
+	return file;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // function setGlobalShortcuts() {

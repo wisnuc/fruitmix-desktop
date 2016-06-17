@@ -134,7 +134,27 @@ class AllFiles extends Component {
 	}
 	//upload file
 	upLoadFile(e) {
+		// let files = [];
+		// for (let i=0;i<e.nativeEvent.target.files.length;i++) {
+		// 	var f = e.nativeEvent.target.files[i];
+		// 	var t = new Date();
+		// 	var file = {
+		// 		name:f.name,
+		// 		path:f.path,
+		// 		size:f.size,
+		// 		lastModifiedDate:f.lastModifiedDate,
+		// 		parent : {uuid:this.props.data.directory.uuid},
+		// 		uploadTime :  Date.parse(t),
+		// 		status:0
+		// 	}
+		// 	files.push(file);
+		// }
+		// this.props.dispatch(Action.addUpload(files));
+		// ipc.send('uploadFile',files);	
+		// this.props.dispatch(Action.setSnack(files.length+' 个文件添加到下载队列',true));
+		//--------------------------------------------------------------------------------------------------------------------------------------------------------
 		let files = [];
+		let obj = {};
 		for (let i=0;i<e.nativeEvent.target.files.length;i++) {
 			var f = e.nativeEvent.target.files[i];
 			var t = new Date();
@@ -145,12 +165,13 @@ class AllFiles extends Component {
 				lastModifiedDate:f.lastModifiedDate,
 				parent : {uuid:this.props.data.directory.uuid},
 				uploadTime :  Date.parse(t),
-				status:0
+				status:0,
+				uuid:null
 			}
 			files.push(file);
 		}
-		this.props.dispatch(Action.addUpload(files));
-		ipc.send('uploadFile',files);	
+		let fileObj = {data:files,length:files.length,failed:0,index:0,status:'ready',parent:this.props.data.directory.uuid};
+		ipc.send('uploadFile',fileObj);	
 		this.props.dispatch(Action.setSnack(files.length+' 个文件添加到下载队列',true));
 	}
 	//get  bread
