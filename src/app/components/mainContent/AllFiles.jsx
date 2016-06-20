@@ -130,7 +130,7 @@ class AllFiles extends Component {
 	}
 	//open multiple select
 	mouseDown(e) {
-		this.props.dispatch(Action.mouseDown(e.nativeEvent.x,e.nativeEvent.y));
+		// this.props.dispatch(Action.mouseDown(e.nativeEvent.x,e.nativeEvent.y));
 	}
 	//upload file
 	upLoadFile(e) {
@@ -155,6 +155,7 @@ class AllFiles extends Component {
 		//--------------------------------------------------------------------------------------------------------------------------------------------------------
 		let files = [];
 		let obj = {};
+		let map = new Map();
 		for (let i=0;i<e.nativeEvent.target.files.length;i++) {
 			var f = e.nativeEvent.target.files[i];
 			var t = new Date();
@@ -169,8 +170,10 @@ class AllFiles extends Component {
 				uuid:null
 			}
 			files.push(file);
+			map.set(f.path+Date.parse(t),file);
 		}
-		let fileObj = {data:files,length:files.length,failed:0,index:0,status:'ready',parent:this.props.data.directory.uuid};
+		let fileObj = {data:files,length:files.length,failed:0,index:0,status:'ready',parent:this.props.data.directory.uuid,map:map};
+		this.props.dispatch(Action.addUpload(fileObj));
 		ipc.send('uploadFile',fileObj);	
 		this.props.dispatch(Action.setSnack(files.length+' 个文件添加到下载队列',true));
 	}
@@ -209,7 +212,6 @@ class AllFiles extends Component {
 	}
 	//select bread crumb
 	selectBreadCrumb(obj) {
-		console.log(obj);
 		$('.bezierFrame').empty().append('<div class="bezierTransition1"></div><div class="bezierTransition2"></div>');
 		if (obj.key == '') {
 			ipc.send('getRootData');

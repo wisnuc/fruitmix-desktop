@@ -41,7 +41,7 @@ var uploadQueue = [];
 var uploadNow = [];
 var uploadMap = new Map();
 
-var c = console.log
+var c = console.log;
 //app ready and open window
 app.on('ready', function() {
 	mainWindow = new BrowserWindow({
@@ -262,6 +262,7 @@ function getTree(f,type) {
 	}
 	return tree;	
 }
+//select children
 ipcMain.on('enterChildren', (event,selectItem) => {
 	//parent
 	var parent = Object.assign({},map.get(selectItem.parent),{children:null});
@@ -297,6 +298,7 @@ ipcMain.on('getFile',(e,uuid)=>{
 		mainWindow.webContents.send('receiveFile',data);
 	})
 });
+//upload file
 ipcMain.on('uploadFile',(e,files)=>{
 	// uploadQueueWait = uploadQueueWait.concat(files);
 	// dealUploadQueue();
@@ -351,6 +353,15 @@ function dealUploadQueue() {
 }
 function uploadFile(file) {
 	let body = 0;
+	let countStatus;
+	if (file.size > 10000000) {
+		countStatus = setInterval(()=>{
+			let status = body/file.size;
+			mainWindow.webContents.send('refreshStatusOfUpload',file.path+file.uploadTime,status);
+			c(file.path+ ' ======== ' + status);
+		},1000);
+	}
+	
 	let transform = new stream.Transform({
 		transform: function(chunk, encoding, next) {
 			body+=chunk.length;
@@ -360,9 +371,11 @@ function uploadFile(file) {
 	})
 	//callback
 	function callback (err,res,body) {
+		clearInterval(countStatus);
 		if (!err && res.statusCode == 200) {
+			mainWindow.webContents.send('refreshStatusOfUpload',file.path+file.uploadTime,1);
 			var uuid = body;
-			console.log('success');
+			console.log('upload success');
 			console.log(uuid);
 			// let index = uploadQueue.findIndex((item,index)=>{
 			// 	return item.path == file.path;
@@ -383,12 +396,10 @@ function uploadFile(file) {
 				dealUploadQueue();
 			}
 		}else {
+			mainWindow.webContents.send('refreshStatusOfUpload',file.path+file.uploadTime,1.01);
 			let index = uploadNow.findIndex(item3=>item3.path == file.path);
 			uploadNow.splice(index,1);
 			console.log('upload failed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-			console.log(res.statusCode);
-			console.log(res.body);
-			console.log(err);
 		}
 	}
 	//request
@@ -406,28 +417,28 @@ function uploadFile(file) {
 }
 function modifyData(files,uuid) {
 	//insert obj
-/*	var f= {
-		uuid:uuid,
-		parent: file.parent.uuid,
-		checked: false,
-		share:false,
-		attribute: {
-			name:file.name,
-			size:file.size	,
-			changetime: "",
-			createtime: "",
-		},
-		type: 'file',
-		children : [],
-		name:file.name,
-	}
-	let d = map.get(file.parent.uuid);
-	d.children.push(f);
-	//insert folder obj into map
-	map.set(uuid,f);
-	//get children 
-	children = d.children.map(item=>Object.assign({},item,{children:null}));
-	mainWindow.webContents.send('uploadSuccess',file,children);	*/
+	// var f= {
+	// 	uuid:uuid,
+	// 	parent: file.parent.uuid,
+	// 	checked: false,
+	// 	share:false,
+	// 	attribute: {
+	// 		name:file.name,
+	// 		size:file.size	,
+	// 		changetime: "",
+	// 		createtime: "",
+	// 	},
+	// 	type: 'file',
+	// 	children : [],
+	// 	name:file.name,
+	// }
+	// let d = map.get(file.parent.uuid);
+	// d.children.push(f);
+	// //insert folder obj into map
+	// map.set(uuid,f);
+	// //get children 
+	// children = d.children.map(item=>Object.assign({},item,{children:null}));
+	// mainWindow.webContents.send('uploadSuccess',file,children);	
 	//-------------------------------------------------------------------------------------------------------------
 	let dir = map.get(files.parent);
 	for (let item of files.data) {
@@ -457,6 +468,7 @@ function modifyData(files,uuid) {
 		mainWindow.webContents.send('uploadSuccess',{},children);
 	}
 }
+//create folder
 ipcMain.on('upLoadFolder',(e,name,dir)=>{
 	var r = request.post(server+'/files/'+dir.uuid+'?type=folder',{
 		headers: {
@@ -508,6 +520,7 @@ function modifyFolder(name,dir,folderuuid) {
 		mainWindow.webContents.send('uploadSuccess',folder,_.cloneDeep(children));
 	}
 }
+//download
 ipcMain.on('download',(e,file)=>{
 	download(file).then(data=>{
 		console.log(file.attribute.name + ' download success');
@@ -559,6 +572,7 @@ function download(item) {
 		})
 	return download;
 }
+//delete
 ipcMain.on('delete',(e,objArr,dir)=>{
 	for (let item of objArr) {
 		deleteFile(item).then(()=>{
@@ -618,6 +632,7 @@ function deleteFile(obj) {
 	});
 	return deleteF;
 }
+//rename
 ipcMain.on('rename',(e,uuid,name,oldName)=>{
 	rename(uuid,name,oldName).then(()=>{
 		map.get(uuid).name = name;
@@ -651,9 +666,11 @@ function rename(uuid,name,oldName) {
 	});
 	return rename;
 }
+//close
 ipcMain.on('close-main-window', function () {
     app.quit();
 });
+//create user
 ipcMain.on('create-new-user',function(err,u,p,e){
 	createNewUser(u,p,e).then(()=>{
 		console.log('register success');
@@ -684,6 +701,7 @@ function createNewUser(username,password,email) {
 	});
 	return promise;
 }
+//share
 ipcMain.on('share',function(err,files,users){
 	console.log('ipc enter');
 	files.forEach((item)=>{

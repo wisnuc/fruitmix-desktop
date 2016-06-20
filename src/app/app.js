@@ -29,7 +29,7 @@ import Main from './components/main/Main';//main
 //import store
 import configureStore from './stores/store';
 const store = configureStore();
-
+window.c = console;
 //APP component
 var App = React.createClass({
 	render() {

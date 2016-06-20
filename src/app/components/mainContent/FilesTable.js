@@ -36,6 +36,9 @@ class AllFilesTable extends Component {
 			{/*table body*/}
 				<tbody>
 					{this.props.data.children.map((item,index)=>{
+						if (index > this.props.data.showSize) {
+							return false
+						}
 						return (
 							<tr key={index} onTouchTap={_this.selectChildren.bind(_this,index)} onDoubleClick={_this.enterChildren.bind(_this,index)} 
 								className={item.checked==true?'tr-selected-background':''}>
@@ -59,6 +62,24 @@ class AllFilesTable extends Component {
 			</table>
 			)
 		}
+	
+	componentDidMount() {
+		this.bindWindowScrollEvent(true);
+	}
+	componentWillUnmount() {
+		this.bindWindowScrollEvent(false);
+	}
+	//bindScroll event
+	bindWindowScrollEvent(options) {
+		var dom = $('.allFileTable');
+
+		$(window)[options?'bind':'unbind']('scroll',function() {
+			$(this).remove();
+		});
+	}
+	scrollCallback() {
+		console.log('!!!!!!!!!!!!!!!!!!!!');
+	}
 	//select all
 	selectAllChildren() {
  		this.props.dispatch(Action.selectAllChildren());
@@ -93,8 +114,6 @@ class AllFilesTable extends Component {
 
 		var children = this.props.data.children;
 		if (children[rowNumber] && children[rowNumber].type == 'folder') {
-			console.log('double-click __________________________');
-			console.log(new Date());
 			ipc.send('enterChildren',children[rowNumber]);
 		}
 	}

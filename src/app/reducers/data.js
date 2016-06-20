@@ -13,6 +13,9 @@ const defaultDirectory = {
 	dialogOfShare: false,
 	upload:[],
 	dowload: [],
+	showSize:100,
+	uploadSize:100,
+	downloadSize:100
 }
 
 const directory = (state=defaultDirectory,action)=> {
@@ -82,8 +85,9 @@ const directory = (state=defaultDirectory,action)=> {
 		case 'CLEAN_DETAIL':
 			return Object.assign({},state,{detail:[]});
 		case 'ADD_UPLOAD':
-			var upload = state.upload.concat(action.obj);
-			return Object.assign({},state,{upload:upload});
+			var up = state.upload;
+			up.push(action.obj);
+			return Object.assign({},state,{upload:up});
 		case 'ADD_DOWNLOAD':
 			var dowload = state.dowload.concat([action.obj]);
 			//add property status for each item
@@ -111,21 +115,31 @@ const directory = (state=defaultDirectory,action)=> {
 		case 'TOGGLE_SHARE':
 			return Object.assign({},state,{dialogOfShare:action.isOpen});
 		case 'REFRESH_STATUS_UPLOAD':
-			var newUploadArr = state.upload;
-			var uploadArrIndex = null;
-			for (let i = 0;i<newUploadArr.length;i++) {
-				if (newUploadArr[i].name == action.file.name) {
-					uploadArrIndex = i;
-					break;
-				}
+			// var newUploadArr = state.upload;
+			// var uploadArrIndex = null;
+			// for (let i = 0;i<newUploadArr.length;i++) {
+			// 	if (newUploadArr[i].name == action.file.name) {
+			// 		uploadArrIndex = i;
+			// 		break;
+			// 	}
 				
-			}
-			newUploadArr[uploadArrIndex].status = action.status;
-			if (uploadArrIndex !=null) {
-				return Object.assign({},state,{upload:newUploadArr})
-			}else {
-				return state;
-			}
+			// }
+			// newUploadArr[uploadArrIndex].status = action.status;
+			// if (uploadArrIndex !=null) {
+			// 	return Object.assign({},state,{upload:newUploadArr})
+			// }else {
+			// 	return state;
+			// }
+			// for (let item of status.upload) {
+			// 	item.map.get();
+			// }
+			state.upload.forEach(item=>{
+				var uploadFIle = item.map.get(action.file);
+				if (uploadFIle != undefined) {
+					uploadFIle.status = action.status;
+				}
+			});
+			return state
 		case 'REFRESH_STATUS_DOWNLOAD':
 			var newDownloadArr = state.dowload;
 			var downloadArrIndex = null;

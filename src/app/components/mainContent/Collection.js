@@ -14,23 +14,45 @@ import {Tabs, Tab} from 'material-ui/Tabs';
 
 class Collection extends Component {
 	render() {
+		console.log('renderrenderrenderrenderrenderrenderrenderrenderrenderrenderrenderrenderrenderrenderrender');
 		return (
 			<div>
 				<Tabs tabItemContainerStyle={{backgroundColor:'#fff',width:'500px',color:'red'}}>
 					<Tab label='upload list' style={{color:'#000'}}>
+						{/*
 						<Table selectable={false}>
-						<TableBody displayRowCheckbox={false}>
-						{this.props.data.upload.map((item,index)=>{
+							<TableBody displayRowCheckbox={false}>
+							{this.props.data.upload.map((item,index)=>{
+								return (
+									<TableRow>
+										<TableRowColumn>{item.name}</TableRowColumn>
+										<TableRowColumn>{this.getSize(item.size)}</TableRowColumn>
+										<TableRowColumn>{this.getStutus(item.status)}</TableRowColumn>
+									</TableRow>
+									)
+							})}
+							</TableBody>
+						</Table>
+						*/}
+						
+						{this.props.data.upload.map(item=>{
 							return (
-								<TableRow>
-									<TableRowColumn>{item.name}</TableRowColumn>
-									<TableRowColumn>{this.getSize(item.size)}</TableRowColumn>
-									<TableRowColumn>{this.getStutus(item.status)}</TableRowColumn>
-								</TableRow>
+								<Table selectable={false} key={item}>
+								<TableBody displayRowCheckbox={false}>
+								{item.data.map(item1=>{
+									return (
+										<TableRow key={item1}>
+											<TableRowColumn title={item1.name}>{item1.name}</TableRowColumn>
+											<TableRowColumn>{this.getSize(item1.size)}</TableRowColumn>
+											<TableRowColumn>{this.getStutus(item1.status)}</TableRowColumn>
+										</TableRow>
+										)
+								})}
+								</TableBody>
+								</Table>
 								)
 						})}
-						</TableBody>
-						</Table>
+						
 					</Tab>
 					<Tab label='download list' style={{color:'#000'}}>
 						<Table selectable={false}>

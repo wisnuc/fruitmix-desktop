@@ -115,10 +115,10 @@ var actions = {
 		}
 	},
 
-	addUpload(objArr) {
+	addUpload(obj) {
 		return {
 			type: 'ADD_UPLOAD',
-			obj: objArr
+			obj: obj
 		}
 	},
 
