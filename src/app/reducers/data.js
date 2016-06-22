@@ -30,23 +30,26 @@ const directory = (state=defaultDirectory,action)=> {
 			return Object.assign({},state,{tree:action.tree});	
 
 		case 'SELECT_CHILDREN':
+		console.log('2  '+(new Date()).getTime());
 			var allSelected = true;
 			//setSelectedChildren
-			// var newState = state.children.map((item,index)=>{
-			// 	return index == action.rowNumber?Object.assign({},item,{checked:!item.checked}):item
-			// });
-			
-			// var newChildren = Object.assign({},state);
-			state.children[action.rowNumber].checked = !state.children[action.rowNumber].checked; 
-			//is all children selected?
-			for (let item of state.children) {
+			var newChildren = state.children.map((item,index)=>{
+				return index == action.rowNumber?Object.assign({},item,{checked:!item.checked}):item
+			});
+			console.log('3  '+(new Date()).getTime());
+			// //is all children selected?
+			for (let item of newChildren) {
 				if (item.checked == false) {
 					allSelected = false;
 					break;
 				}
 			}
-			state.selectAll = allSelected;
-			return Object.assign({},state);
+			console.log('4  '+(new Date()).getTime());
+			return Object.assign({},state,{children:newChildren,selectAll:allSelected});
+			// state.children[action.rowNumber].checked = !state.children[action.rowNumber].checked; 
+			
+			// state.selectAll = allSelected;
+			// return Object.assign({},state);
 
 		case 'CANCEL_SELECT':
 			let children = state.children.map((item,index)=>{

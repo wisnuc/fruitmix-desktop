@@ -13,7 +13,7 @@ var _ = require('lodash');
 var mainWindow = null;
 
 var server = 'http://211.144.201.201:8888';
-server ='http://192.168.5.132:80';
+// server ='http://192.168.5.132:80';
 // server ='http://192.168.5.108:80';
 //user
 var user = {};

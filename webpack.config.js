@@ -59,7 +59,7 @@ module.exports = {
 
     plugins: [
         new webpack.HotModuleReplacementPlugin(),
-        new HtmlWebpackPlugin({template: 'src/index.html'}),
+        // new HtmlWebpackPlugin({template: 'src/index.html'}),
         new CopyWebpackPlugin([
             { from:  path.resolve(SRC_PATH,'electron-index.js'), to: 'electron-index.js' }
         ])

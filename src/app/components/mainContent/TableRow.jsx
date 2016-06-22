@@ -3,8 +3,6 @@ import { connect, bindActionCreators } from 'react-redux';
 import svg from '../../utils/SVGIcon';
 class Row extends Component {
 	shouldComponentUpdate(nextP) {
-		console.log(nextP.item.checked)
-		c.log(this.props.item.checked)
 		if (nextP.item.name == this.props.item.name && nextP.item.checked == this.props.item.checked) {
 			return false
 		}else {

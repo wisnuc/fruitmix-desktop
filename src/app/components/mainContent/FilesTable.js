@@ -37,11 +37,12 @@ class AllFilesTable extends Component {
 				{/*table body*/}
 				<tbody>
 					{this.props.data.children.map((item,index)=>{
+						console.log('5.5  '+(new Date()).getTime());
 						if (index > this.props.data.showSize) {
 							return false
 						}
 						return (
-							<Row dispatch={this.props.dispatch} data={this.props.data} index={index} item={item} key={index} selectChildren={this.selectChildren} enterChildren={this.enterChildren} getTypeOfFile={this.getTypeOfFile} getSize={this.getSize} getTime={this.getTime} addBezier={this.addBezier}></Row>
+							<Row dispatch={this.props.dispatch} data={this.props.data} index={index} item={item} key={index} selectChildren={this.selectChildren} enterChildren={this.enterChildren} getTypeOfFile={this.getTypeOfFile} getSize={this.getSize} getTime={this.getTime} addBezier={this.addBezier.bind(this)}></Row>
 							)
 					{/*						return (
 							<tr key={index} onTouchTap={_this.selectChildren.bind(_this,index)} onDoubleClick={_this.enterChildren.bind(_this,index)} 
@@ -66,7 +67,12 @@ class AllFilesTable extends Component {
 			</table>
 			)
 		}
-	
+	componentWillUpdate(){
+		console.log('5  '+(new Date()).getTime());
+	}
+	componentDidUpdate() {
+		console.log('6  '+(new Date()).getTime());
+	}
 	componentDidMount() {
 		this.bindWindowScrollEvent(true);
 	}
@@ -90,6 +96,7 @@ class AllFilesTable extends Component {
 	}
 	//select files
 	selectChildren (rowNumber,e) {
+		console.log('0  '+(new Date()).getTime());
 		//bezier
 		// if (this.props.data.children[rowNumber].checked == true) {
 		// 	this.bez1(rowNumber);
@@ -107,6 +114,7 @@ class AllFilesTable extends Component {
 			}
 		}else {
 			//left click
+			console.log('1  '+(new Date()).getTime());
 			this.props.dispatch(Action.selectChildren(rowNumber));	
 		}
 		
@@ -123,14 +131,14 @@ class AllFilesTable extends Component {
 	}
 
 	addBezier (rowNumber) {
-		// if (this.props.data.children[rowNumber].checked == false) {
-		// 	this.bez2(rowNumber);
-		// 	$('tbody>tr:eq('+rowNumber+') .bezierFrame').children('.bezierTransition1').addClass('open');
-		// }else {
-		// 	this.bez1(rowNumber);
-		// 	$('tbody>tr:eq('+rowNumber+') .bezierFrame').children('.bezierTransition2').addClass('open');
+		if (this.props.data.children[rowNumber].checked == false) {
+			this.bez2(rowNumber);
+			$('tbody>tr:eq('+rowNumber+') .bezierFrame').children('.bezierTransition1').addClass('open');
+		}else {
+			this.bez1(rowNumber);
+			$('tbody>tr:eq('+rowNumber+') .bezierFrame').children('.bezierTransition2').addClass('open');
 			
-		// }
+		}
 	}
 	bez1 (rowNumber) {
 		$('tbody>tr:eq('+rowNumber+') .bezierFrame').children('.bezierTransition1').remove();

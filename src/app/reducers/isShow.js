@@ -2,6 +2,7 @@ const defaultState = {
 	dialogOfFolder: false,
 	dialogOfShare: false,
 	detail:[],
+	move: {open:false,x:0,y:0,data:[]}
 }
 
 const isShow = (state=defaultState,action)=>{
