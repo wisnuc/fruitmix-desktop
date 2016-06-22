@@ -15,7 +15,7 @@ import Action from '../../actions/action';
 
  class Detail extends Component {
  	render() {
- 		let data = this.props.data.detail[0];
+ 		let data = this.props.isShow.detail[0];
 
  		if (data) {
  			 		let style = {
@@ -46,7 +46,7 @@ import Action from '../../actions/action';
 
 function mapStateToProps (state) {
 	return {
-		data: state.data
+		isShow: state.isShow
 	}
 }
 

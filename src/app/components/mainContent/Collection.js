@@ -34,7 +34,7 @@ class Collection extends Component {
 						</Table>
 						*/}
 						
-						{this.props.data.upload.map(item=>{
+						{this.props.transmission.upload.map(item=>{
 							return (
 								<Table selectable={false} key={item.key}>
 								<TableBody displayRowCheckbox={false}>
@@ -56,7 +56,7 @@ class Collection extends Component {
 					<Tab label='download list' style={{color:'#000'}}>
 						<Table selectable={false}>
 						<TableBody displayRowCheckbox={false}>
-						{this.props.data.dowload.map((item,index)=>{
+						{this.props.transmission.dowload.map((item,index)=>{
 							return (
 								<TableRow>
 									<TableRowColumn>{item.attribute.name}</TableRowColumn>
@@ -103,7 +103,7 @@ class Collection extends Component {
 
 function mapStateToProps (state) {
 	return {
-		data: state.data
+		transmission: state.transmission
 	}
 }
 

@@ -11,6 +11,7 @@ import { connect, bindActionCreators } from 'react-redux';
 //import Action
 import Action from '../../actions/action';
 import svg from '../../utils/SVGIcon';
+import Row from './TableRow';
 
 
 class AllFilesTable extends Component {
@@ -40,6 +41,9 @@ class AllFilesTable extends Component {
 							return false
 						}
 						return (
+							<Row dispatch={this.props.dispatch} data={this.props.data} index={index} item={item} key={index} selectChildren={this.selectChildren} enterChildren={this.enterChildren} getTypeOfFile={this.getTypeOfFile} getSize={this.getSize} getTime={this.getTime} addBezier={this.addBezier}></Row>
+							)
+					{/*						return (
 							<tr key={index} onTouchTap={_this.selectChildren.bind(_this,index)} onDoubleClick={_this.enterChildren.bind(_this,index)} 
 								className={item.checked==true?'tr-selected-background':''}>
 								<td onClick={this.addBezier.bind(this,index)} data-selected={item.checked} className='first-td'>
@@ -56,7 +60,7 @@ class AllFilesTable extends Component {
 								<td title={item.attribute.changetime}>{this.getTime(item.attribute.changetime)}</td>
 								<td title={item.attribute.size}>{this.getSize(item.attribute.size)}</td>
 							</tr>
-							)
+							)*/}
 					})}
 				</tbody>
 			</table>
@@ -87,11 +91,11 @@ class AllFilesTable extends Component {
 	//select files
 	selectChildren (rowNumber,e) {
 		//bezier
-		if (this.props.data.children[rowNumber].checked == true) {
-			this.bez1(rowNumber);
-		}else {
-			this.bez2(rowNumber);
-		}
+		// if (this.props.data.children[rowNumber].checked == true) {
+		// 	this.bez1(rowNumber);
+		// }else {
+		// 	this.bez2(rowNumber);
+		// }
 		if (e.nativeEvent.button == 2) {
 			//right click
 			let x = e.nativeEvent.pageX;
@@ -119,14 +123,14 @@ class AllFilesTable extends Component {
 	}
 
 	addBezier (rowNumber) {
-		if (this.props.data.children[rowNumber].checked == false) {
-			this.bez2(rowNumber);
-			$('tbody>tr:eq('+rowNumber+') .bezierFrame').children('.bezierTransition1').addClass('open');
-		}else {
-			this.bez1(rowNumber);
-			$('tbody>tr:eq('+rowNumber+') .bezierFrame').children('.bezierTransition2').addClass('open');
+		// if (this.props.data.children[rowNumber].checked == false) {
+		// 	this.bez2(rowNumber);
+		// 	$('tbody>tr:eq('+rowNumber+') .bezierFrame').children('.bezierTransition1').addClass('open');
+		// }else {
+		// 	this.bez1(rowNumber);
+		// 	$('tbody>tr:eq('+rowNumber+') .bezierFrame').children('.bezierTransition2').addClass('open');
 			
-		}
+		// }
 	}
 	bez1 (rowNumber) {
 		$('tbody>tr:eq('+rowNumber+') .bezierFrame').children('.bezierTransition1').remove();

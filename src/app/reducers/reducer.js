@@ -6,13 +6,17 @@ import navigation from './navigation';
 import data from './data';
 import multiple from './multiple';
 import snack from './snack';
+import transmission from './transmission';
+import isShow from './isShow';
 
 const reducer = combineReducers({
 	login,
 	navigation,
 	data,
 	multiple,
-	snack
+	snack,
+	transmission,
+	isShow
 });
 
 export default reducer; 

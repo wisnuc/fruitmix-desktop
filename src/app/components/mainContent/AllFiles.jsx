@@ -62,7 +62,7 @@ class AllFiles extends Component {
 			<div className='all-my-files' style={{height:(document.body.clientHeight-64)+'px'}}>
 				{this.getTable()}
 				{/*file detail*/}
-				<Paper className='file-detail' style={{width:this.props.data.detail.length==0?'0px':'350px'}}>
+				<Paper className='file-detail' style={{width:this.props.isShow.detail.length==0?'0px':'350px'}}>
 					<Detail></Detail>
 				</Paper>
 				{/*create new folder dialog*/}
@@ -70,7 +70,7 @@ class AllFiles extends Component {
 					title="新建文件夹"
 					actions={folderActions}
 					modal={false}
-					open={this.props.data.dialogOfFolder}
+					open={this.props.isShow.dialogOfFolder}
 					onRequestClose={this.handleClose}
 			        >
 			       		<TextField hintText="名称" id='folder-name'/>
@@ -79,7 +79,7 @@ class AllFiles extends Component {
 			        <Dialog 
 			        	title='分享' 
 			        	actions={shareActions}
-			        	open={this.props.data.dialogOfShare}
+			        	open={this.props.isShow.dialogOfShare}
 			        >
 			        	<div className='share-user-list-container'>
 			        	{this.props.login.obj.allUser.map((item,index)=>{
@@ -271,7 +271,8 @@ class AllFiles extends Component {
 function mapStateToProps (state) {
 	return {
 		data: state.data,
-		login: state.login
+		login: state.login,
+		isShow: state.isShow
 	}
 }
 export default connect(mapStateToProps)(AllFiles);

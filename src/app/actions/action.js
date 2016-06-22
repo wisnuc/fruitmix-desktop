@@ -199,7 +199,7 @@ var actions = {
 		return {
 			type: 'CLEAN_SNACK'
 		}
-	}
+	},
 
 	toggleMove(open) {
 		return {

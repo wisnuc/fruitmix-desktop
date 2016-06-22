@@ -8,14 +8,14 @@ const defaultDirectory = {
 	selectAll:false, 
 	position:[],
 	menu:{show:false,objArr:[]},
-	detail:[],
-	dialogOfFolder: false,
-	dialogOfShare: false,
-	upload:[],
-	dowload: [],
+	// detail:[],
+	// dialogOfFolder: false,
+	// dialogOfShare: false,
+	// upload:[],
+	// dowload: [],
 	showSize:100,
-	uploadSize:100,
-	downloadSize:100
+	// uploadSize:100,
+	// downloadSize:100
 }
 
 const directory = (state=defaultDirectory,action)=> {
@@ -35,8 +35,9 @@ const directory = (state=defaultDirectory,action)=> {
 			// var newState = state.children.map((item,index)=>{
 			// 	return index == action.rowNumber?Object.assign({},item,{checked:!item.checked}):item
 			// });
-			state.children[action.rowNumber].checked = !state.children[action.rowNumber].checked; 
+			
 			// var newChildren = Object.assign({},state);
+			state.children[action.rowNumber].checked = !state.children[action.rowNumber].checked; 
 			//is all children selected?
 			for (let item of state.children) {
 				if (item.checked == false) {
@@ -45,7 +46,7 @@ const directory = (state=defaultDirectory,action)=> {
 				}
 			}
 			state.selectAll = allSelected;
-			return Object.assign({},state)
+			return Object.assign({},state);
 
 		case 'CANCEL_SELECT':
 			let children = state.children.map((item,index)=>{
@@ -85,8 +86,8 @@ const directory = (state=defaultDirectory,action)=> {
 				return Object.assign({},state,{menu:{show:false,objArr:[]}});
 			}
 
-		case 'SET_DETAIL':
-			return Object.assign({},state,{detail:action.objArr});
+		// case 'SET_DETAIL':
+		// 	return Object.assign({},state,{detail:action.objArr});
 
 		case 'FILES_LOADING':
 			return Object.assign({},state,{state:'BUSY'});
@@ -94,18 +95,18 @@ const directory = (state=defaultDirectory,action)=> {
 		case 'CLEAN_DETAIL':
 			return Object.assign({},state,{detail:[]});
 
-		case 'ADD_UPLOAD':
-			var up = state.upload;
-			up.push(action.obj);
-			return Object.assign({},state,{upload:up});
+		// case 'ADD_UPLOAD':
+		// 	var up = state.upload;
+		// 	up.push(action.obj);
+		// 	return Object.assign({},state,{upload:up});
 
-		case 'ADD_DOWNLOAD':
-			var dowload = state.dowload.concat([action.obj]);
-			//add property status for each item
-			for (let i =0; i < dowload.length; i++) {
-				dowload[i].status = 0
-			}
-			return Object.assign({},state,{dowload:dowload});
+		// case 'ADD_DOWNLOAD':
+		// 	var dowload = state.dowload.concat([action.obj]);
+		// 	//add property status for each item
+		// 	for (let i =0; i < dowload.length; i++) {
+		// 		dowload[i].status = 0
+		// 	}
+		// 	return Object.assign({},state,{dowload:dowload});
 
 		case 'REFRESH_DIR':
 			var position = action.obj.map((item,index)=>{
@@ -113,65 +114,65 @@ const directory = (state=defaultDirectory,action)=> {
 			})
 			return Object.assign({},state,{children:action.obj,position:position});
 
-		case 'REMOVE':
-			for (var i=0;i<state.upload.length;i++) {
-				if (state.upload[i].path == action.obj.path) {
-					a = state.upload.slice(i,1);
-					break
-				}
-			}
-			return Object.assign({},state,{upload:a});
+		// case 'REMOVE':
+		// 	for (var i=0;i<state.upload.length;i++) {
+		// 		if (state.upload[i].path == action.obj.path) {
+		// 			a = state.upload.slice(i,1);
+		// 			break
+		// 		}
+		// 	}
+		// 	return Object.assign({},state,{upload:a});
 			
-		case 'TOGGLE_DIALOG_FOLDER':
-			return Object.assign({},state,{dialogOfFolder:action.isOpen});
+		// case 'TOGGLE_DIALOG_FOLDER':
+		// 	return Object.assign({},state,{dialogOfFolder:action.isOpen});
 
-		case 'TOGGLE_SHARE':
-			return Object.assign({},state,{dialogOfShare:action.isOpen});
+		// case 'TOGGLE_SHARE':
+		// 	return Object.assign({},state,{dialogOfShare:action.isOpen});
 
-		case 'REFRESH_STATUS_UPLOAD':
-			// var newUploadArr = state.upload;
-			// var uploadArrIndex = null;
-			// for (let i = 0;i<newUploadArr.length;i++) {
-			// 	if (newUploadArr[i].name == action.file.name) {
-			// 		uploadArrIndex = i;
-			// 		break;
-			// 	}
+		// case 'REFRESH_STATUS_UPLOAD':
+		// 	// var newUploadArr = state.upload;
+		// 	// var uploadArrIndex = null;
+		// 	// for (let i = 0;i<newUploadArr.length;i++) {
+		// 	// 	if (newUploadArr[i].name == action.file.name) {
+		// 	// 		uploadArrIndex = i;
+		// 	// 		break;
+		// 	// 	}
 				
-			// }
-			// newUploadArr[uploadArrIndex].status = action.status;
-			// if (uploadArrIndex !=null) {
-			// 	return Object.assign({},state,{upload:newUploadArr})
-			// }else {
-			// 	return state;
-			// }
-			// for (let item of status.upload) {
-			// 	item.map.get();
-			// }
-			state.upload.forEach(item=>{
-				var uploadFIle = item.map.get(action.file);
-				if (uploadFIle != undefined) {
-					uploadFIle.status = action.status;
-				}
-			});
-			return Object.assign({},state) 
+		// 	// }
+		// 	// newUploadArr[uploadArrIndex].status = action.status;
+		// 	// if (uploadArrIndex !=null) {
+		// 	// 	return Object.assign({},state,{upload:newUploadArr})
+		// 	// }else {
+		// 	// 	return state;
+		// 	// }
+		// 	// for (let item of status.upload) {
+		// 	// 	item.map.get();
+		// 	// }
+		// 	state.upload.forEach(item=>{
+		// 		var uploadFIle = item.map.get(action.file);
+		// 		if (uploadFIle != undefined) {
+		// 			uploadFIle.status = action.status;
+		// 		}
+		// 	});
+		// 	return Object.assign({},state) 
 
-		case 'REFRESH_STATUS_DOWNLOAD':
-			var newDownloadArr = state.dowload;
-			var downloadArrIndex = null;
-			for (let i=0;i<newDownloadArr.length;i++) {
-				console.log(newDownloadArr[i].uuid);
-				if (newDownloadArr[i].uuid == action.file.uuid) {
-					downloadArrIndex = i;
-					break;
-				}
+		// case 'REFRESH_STATUS_DOWNLOAD':
+		// 	var newDownloadArr = state.dowload;
+		// 	var downloadArrIndex = null;
+		// 	for (let i=0;i<newDownloadArr.length;i++) {
+		// 		console.log(newDownloadArr[i].uuid);
+		// 		if (newDownloadArr[i].uuid == action.file.uuid) {
+		// 			downloadArrIndex = i;
+		// 			break;
+		// 		}
 				
-			}
-			newDownloadArr[downloadArrIndex].status = action.status;
-			if (downloadArrIndex !=null) {
-				return Object.assign({},state,{download:newDownloadArr})
-			}else {
-				return state
-			}
+		// 	}
+		// 	newDownloadArr[downloadArrIndex].status = action.status;
+		// 	if (downloadArrIndex !=null) {
+		// 		return Object.assign({},state,{download:newDownloadArr})
+		// 	}else {
+		// 		return state
+		// 	}
 
 		default:
 			return state
