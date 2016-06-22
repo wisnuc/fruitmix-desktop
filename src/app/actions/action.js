@@ -200,6 +200,13 @@ var actions = {
 			type: 'CLEAN_SNACK'
 		}
 	}
+
+	toggleMove(open) {
+		return {
+			type: 'TOGGLE_MOVE',
+			open: open
+		}
+	}
 }
 
 module.exports = actions;

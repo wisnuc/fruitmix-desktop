@@ -87,6 +87,7 @@ class AllFiles extends Component {
 			        	})}
 			        	</div>
 			        </Dialog>
+
 			</div>
 		)
 	}
@@ -103,7 +104,7 @@ class AllFiles extends Component {
 			return (
 				<Paper className='file-area' onMouseDown={this.mouseDown.bind(this)}>
 					{/*upload input*/}
-					<input className='upload-input' type="file" multiple={true} onChange={this.upLoadFile.bind(this)}/>
+					<input className='upload-input' type="file" onChange={this.upLoadFile.bind(this)} multiple={true} webkitdirectory={true}/>
 					{/*bread crumb*/}
 					<div className='breadcrumb'>
 						<SvgIcon onClick={this.backToParent.bind(this)} color={greenA200} style={{marginLeft:10,marginRight:14,cursor:'pointer'}}>
@@ -121,6 +122,7 @@ class AllFiles extends Component {
 					</div>
 					{/*file table body*/}
 					<div className="all-files-container">
+					{/*<video src="http://192.168.5.181:9220/kktv4/get?api_name=Distro.FruitMix.Media.Data&reqid=39&sid=5fdeb8d8dd7bc970&xid=eba41e11964f360a464a740793c99463" controls="controls"></video>*/}
 						<FilesTable/>
 						<Menu></Menu>
 					</div>
@@ -156,6 +158,7 @@ class AllFiles extends Component {
 		let files = [];
 		let obj = {};
 		let map = new Map();
+		console.log(e.nativeEvent.target.files);
 		for (let i=0;i<e.nativeEvent.target.files.length;i++) {
 			var f = e.nativeEvent.target.files[i];
 			var t = new Date();
@@ -172,10 +175,10 @@ class AllFiles extends Component {
 			files.push(file);
 			map.set(f.path+Date.parse(t),file);
 		}
-		let fileObj = {data:files,length:files.length,failed:0,index:0,status:'ready',parent:this.props.data.directory.uuid,map:map};
+		let fileObj = {data:files,length:files.length,success:0,failed:0,index:0,status:'ready',parent:this.props.data.directory.uuid,map:map,key:Date.parse(new Date())};
 		this.props.dispatch(Action.addUpload(fileObj));
 		ipc.send('uploadFile',fileObj);	
-		this.props.dispatch(Action.setSnack(files.length+' 个文件添加到下载队列',true));
+		this.props.dispatch(Action.setSnack(files.length+' 个文件添加到上传队列',true));
 	}
 	//get  bread
 	getBreadCrumb(){

@@ -14,7 +14,6 @@ import {Tabs, Tab} from 'material-ui/Tabs';
 
 class Collection extends Component {
 	render() {
-		console.log('renderrenderrenderrenderrenderrenderrenderrenderrenderrenderrenderrenderrenderrenderrender');
 		return (
 			<div>
 				<Tabs tabItemContainerStyle={{backgroundColor:'#fff',width:'500px',color:'red'}}>
@@ -37,11 +36,11 @@ class Collection extends Component {
 						
 						{this.props.data.upload.map(item=>{
 							return (
-								<Table selectable={false} key={item}>
+								<Table selectable={false} key={item.key}>
 								<TableBody displayRowCheckbox={false}>
 								{item.data.map(item1=>{
 									return (
-										<TableRow key={item1}>
+										<TableRow key={item1.name+item1.uploadTime}>
 											<TableRowColumn title={item1.name}>{item1.name}</TableRowColumn>
 											<TableRowColumn>{this.getSize(item1.size)}</TableRowColumn>
 											<TableRowColumn>{this.getStutus(item1.status)}</TableRowColumn>

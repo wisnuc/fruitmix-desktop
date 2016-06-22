@@ -24,7 +24,7 @@ class PopMenu extends Component {
 			style = Object.assign({},style,{
 				display: menu.show?'block':'none',
 				left: menu.x-220,
-				top: menu.y-120
+				top: menu.y-120+document.getElementsByClassName('file-area')[0].scrollTop
 			});
 		}
 		return (
@@ -86,7 +86,7 @@ class PopMenu extends Component {
 	}
 
 	moveto() {
-
+		this.props.dispatch(Action.toggleMove(true));
 	}
 	//toggle dialog of share
 	share() {

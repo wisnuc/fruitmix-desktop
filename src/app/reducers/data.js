@@ -32,28 +32,34 @@ const directory = (state=defaultDirectory,action)=> {
 		case 'SELECT_CHILDREN':
 			var allSelected = true;
 			//setSelectedChildren
-			var newState = state.children.map((item,index)=>{
-				return index == action.rowNumber?Object.assign({},item,{checked:!item.checked}):item
-			});
+			// var newState = state.children.map((item,index)=>{
+			// 	return index == action.rowNumber?Object.assign({},item,{checked:!item.checked}):item
+			// });
+			state.children[action.rowNumber].checked = !state.children[action.rowNumber].checked; 
+			// var newChildren = Object.assign({},state);
 			//is all children selected?
-			for (let item of newState) {
+			for (let item of state.children) {
 				if (item.checked == false) {
 					allSelected = false;
+					break;
 				}
-				break;
 			}
-			return Object.assign({},state,{children:newState,selectAll:allSelected})
+			state.selectAll = allSelected;
+			return Object.assign({},state)
+
 		case 'CANCEL_SELECT':
 			let children = state.children.map((item,index)=>{
 				return Object.assign({},item,{checked:false});
 			});
 			return Object.assign({},state,{children:children,selectAll:false});
+
 		case 'SELECT_ALL_CHILDREN':
 			//setSelect
 			var children = state.children.map((item,index)=> {
 				return state.selectAll?Object.assign({},item,{checked:false}):Object.assign({},item,{checked:true});
 			});
 			return Object.assign({},state,{children:children,selectAll:!state.selectAll});
+
 		case 'TOGGLE_MENU':
 			if (action.objArr)  {
 				//open menu
@@ -78,16 +84,21 @@ const directory = (state=defaultDirectory,action)=> {
 				//close menu
 				return Object.assign({},state,{menu:{show:false,objArr:[]}});
 			}
+
 		case 'SET_DETAIL':
 			return Object.assign({},state,{detail:action.objArr});
+
 		case 'FILES_LOADING':
 			return Object.assign({},state,{state:'BUSY'});
+
 		case 'CLEAN_DETAIL':
 			return Object.assign({},state,{detail:[]});
+
 		case 'ADD_UPLOAD':
 			var up = state.upload;
 			up.push(action.obj);
 			return Object.assign({},state,{upload:up});
+
 		case 'ADD_DOWNLOAD':
 			var dowload = state.dowload.concat([action.obj]);
 			//add property status for each item
@@ -95,14 +106,14 @@ const directory = (state=defaultDirectory,action)=> {
 				dowload[i].status = 0
 			}
 			return Object.assign({},state,{dowload:dowload});
+
 		case 'REFRESH_DIR':
 			var position = action.obj.map((item,index)=>{
 				return {top:index*51+58+48+8+64,bottom:(index+1)*51+58+48+8+64}
 			})
 			return Object.assign({},state,{children:action.obj,position:position});
+
 		case 'REMOVE':
-		var a;
-		console.log(state.upload);
 			for (var i=0;i<state.upload.length;i++) {
 				if (state.upload[i].path == action.obj.path) {
 					a = state.upload.slice(i,1);
@@ -110,10 +121,13 @@ const directory = (state=defaultDirectory,action)=> {
 				}
 			}
 			return Object.assign({},state,{upload:a});
+			
 		case 'TOGGLE_DIALOG_FOLDER':
 			return Object.assign({},state,{dialogOfFolder:action.isOpen});
+
 		case 'TOGGLE_SHARE':
 			return Object.assign({},state,{dialogOfShare:action.isOpen});
+
 		case 'REFRESH_STATUS_UPLOAD':
 			// var newUploadArr = state.upload;
 			// var uploadArrIndex = null;
@@ -139,7 +153,8 @@ const directory = (state=defaultDirectory,action)=> {
 					uploadFIle.status = action.status;
 				}
 			});
-			return state
+			return Object.assign({},state) 
+
 		case 'REFRESH_STATUS_DOWNLOAD':
 			var newDownloadArr = state.dowload;
 			var downloadArrIndex = null;
@@ -157,6 +172,7 @@ const directory = (state=defaultDirectory,action)=> {
 			}else {
 				return state
 			}
+
 		default:
 			return state
 	}

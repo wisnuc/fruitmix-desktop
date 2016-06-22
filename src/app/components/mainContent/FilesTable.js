@@ -33,7 +33,7 @@ class AllFilesTable extends Component {
 						<th>大小</th>
 					</tr>
 				</thead>
-			{/*table body*/}
+				{/*table body*/}
 				<tbody>
 					{this.props.data.children.map((item,index)=>{
 						if (index > this.props.data.showSize) {

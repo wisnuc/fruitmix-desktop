@@ -14,7 +14,7 @@ var mainWindow = null;
 
 var server = 'http://211.144.201.201:8888';
 server ='http://192.168.5.132:80';
-server ='http://192.168.5.108:80';
+// server ='http://192.168.5.108:80';
 //user
 var user = {};
 //files
@@ -134,6 +134,8 @@ ipcMain.on('refresh',(e,uuid)=>{
 	getFiles().then((data)=>{
 		dealWithData(data);
 		mainWindow.webContents.send('refresh',children);
+	}).catch((err)=>{
+		mainWindow.webContents.send('message','get data error',1);	
 	});
 });
 function getFiles() {
@@ -150,7 +152,7 @@ function getFiles() {
 				if (!err && res.statusCode == 200) {
 					resolve(JSON.parse(body));
 				}else {
-					reject(err)
+					reject(err);
 				}
 			}
 			request(options,callback);
@@ -329,13 +331,14 @@ function dealUploadQueue() {
 		return
 	}else {
 		if (uploadQueue[0].index == uploadQueue[0].length && uploadNow.length == 0) {
+			mainWindow.webContents.send('message',uploadQueue[0].success+' 个文件上传成功 '+uploadQueue[0].failed+' 个文件上传失败');
 			modifyData(uploadQueue.shift());
 			console.log('a upload task over');
 			console.log(uploadQueue);
 			dealUploadQueue();
 		}else {
-			if (uploadNow.length < 10) {
-				let gap = 10 - uploadNow.length;
+			if (uploadNow.length < 3) {
+				let gap = 3 - uploadNow.length;
 				for (let i = 0; i < gap; i++) {
 					let index = uploadQueue[0].index;
 					console.log(index);
@@ -373,6 +376,7 @@ function uploadFile(file) {
 	function callback (err,res,body) {
 		clearInterval(countStatus);
 		if (!err && res.statusCode == 200) {
+			uploadQueue[0].success += 1;
 			mainWindow.webContents.send('refreshStatusOfUpload',file.path+file.uploadTime,1);
 			var uuid = body;
 			console.log('upload success');
@@ -396,10 +400,15 @@ function uploadFile(file) {
 				dealUploadQueue();
 			}
 		}else {
+			uploadQueue[0].failed += 1;
 			mainWindow.webContents.send('refreshStatusOfUpload',file.path+file.uploadTime,1.01);
 			let index = uploadNow.findIndex(item3=>item3.path == file.path);
 			uploadNow.splice(index,1);
+			if (uploadNow.length == 0) {
+				dealUploadQueue();
+			}
 			console.log('upload failed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+			mainWindow.webContents.send('message','upload failed');
 		}
 	}
 	//request
@@ -481,6 +490,7 @@ ipcMain.on('upLoadFolder',(e,name,dir)=>{
 			uuid = uuid.slice(1,uuid.length-1);
 			modifyFolder(name,dir,uuid);
 		}else {
+			mainWindow.webContents.send('message','新建文件夹失败');
 			console.log('err');
 			console.log(res);
 			console.log(err);
@@ -517,6 +527,7 @@ function modifyFolder(name,dir,folderuuid) {
 		//get children
 		children = a.children.map(item => Object.assign({},item,{children:null}))
 		//ipc
+		mainWindow.webContents.send('message','新建文件夹成功');
 		mainWindow.webContents.send('uploadSuccess',folder,_.cloneDeep(children));
 	}
 }
@@ -542,6 +553,7 @@ function download(item) {
 				console.log('res');
 				resolve(body);
 				}else {
+					mainWindow.webContents.send('message','文件 '+item.name+' 下载失败');
 					// reject(err)
 					console.log('err');
 					console.log(err);
@@ -586,20 +598,12 @@ ipcMain.on('delete',(e,objArr,dir)=>{
 			if (index != -1) {
 				 map.get(dir.uuid).children.splice(index,1)
 			}
-
+			mainWindow.webContents.send('message','文件删除成功');	
 			if (currentDirectory.uuid == dir.uuid) {
 				mainWindow.webContents.send('deleteSuccess',item,children,dir);	
 			}
-
-
-
-			//delete file in data
-			// let index = allFiles.findIndex((value)=>{
-			// 	return value.uuid == item.uuid
-			// })
-			// if (index != -1) {
-			// 	allFiles.splice(index,1);
-			// }
+		}).catch((err)=>{
+			mainWindow.webContents.send('message','文件删除失败');	
 		});
 	}
 });
@@ -637,7 +641,9 @@ ipcMain.on('rename',(e,uuid,name,oldName)=>{
 	rename(uuid,name,oldName).then(()=>{
 		map.get(uuid).name = name;
 		map.get(uuid).attribute.name = name;
-	})
+	}).catch((err)=>{
+		mainWindow.webContents.send('message','文件重命名失败');	
+	});
 })
 function rename(uuid,name,oldName) {
 	let rename = new Promise((resolve,reject)=>{
@@ -752,6 +758,8 @@ function getFile(uuid) {
 	});
 	return file;
 }
+//copy 
+// ipcMain.on('copy'，);
 
 
 
