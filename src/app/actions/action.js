@@ -208,6 +208,12 @@ var actions = {
 			type: 'SET_TREE',
 			tree: tree
 		}
+	},
+
+	closeMove() {
+		return {
+			type: 'CLOSE_MOVE'
+		}
 	}
 }
 

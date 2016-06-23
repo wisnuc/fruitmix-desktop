@@ -86,7 +86,12 @@ class PopMenu extends Component {
 	}
 
 	moveto() {
-		ipc.send('getTreeChildren');
+		if (!!this.props.data.directory.uuid) {
+			ipc.send('getTreeChildren',this.props.data.directory.uuid);
+		}else {
+			ipc.send('getTreeChildren');
+		}
+		
 		this.props.dispatch(Action.toggleMove(true,this.props.data.menu.x,this.props.data.menu.y));
 	}
 	//toggle dialog of share

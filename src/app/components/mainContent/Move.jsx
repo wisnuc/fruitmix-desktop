@@ -23,21 +23,25 @@ class Move extends Component {
 			top:top,
 			left:left,
 		}
-		if (this.props.tree.tree.isNull) {
+		if (this.props.tree.isNull) {
 			return null
 		}
 		return (
 			<div style={style} className='move-dialog'>
 				<div className='move-title'>
 					<SvgIcon style={{marginLeft:'14px',cursor:'pointer'}}>{svg['back']()}</SvgIcon>
-					<span className='move-title-name'>this.props.tree.tree.name</span>
-					<SvgIcon className='move-close'>{svg['close']()}</SvgIcon>
+					<span className='move-title-name'>{this.props.tree.name}</span>
+					<SvgIcon className='move-close' onClick={this.closeMove.bind(this)}>{svg['close']()}</SvgIcon>
 				</div>
 				<div className='move-content'>
 				
 				</div>
 			</div>
 			)
+	}
+
+	closeMove() {
+		this.props.dispatch(Action.closeMove());
 	}
 }
 

@@ -20,6 +20,8 @@ const isShow = (state=defaultState,action)=>{
 			return Object.assign({},state,{detail:[]});
 		case 'TOGGLE_MOVE':
 			return Object.assign({},state,{move:{open:action.open,x:action.x,y:action.y}});
+		case 'CLOSE_MOVE': 
+			return Object.assign({},state,{move: {open:false,x:0,y:0,data:[]}})
 		default:
 			return state;
 	}

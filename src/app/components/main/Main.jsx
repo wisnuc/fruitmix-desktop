@@ -88,7 +88,6 @@ class Main extends Component {
 		});
 
 		ipc.on('treeChildren',(err,treeChildren)=>{
-			console.log(treeChildren);
 			this.props.dispatch(Action.setTree(treeChildren));
 		});
 	}
