@@ -20,6 +20,7 @@ import Action from '../../actions/action';
 import FilesTable from './FilesTable';
 import Menu from './Menu';
 import Detail from './Detail';
+import Move from './Move';
 
 class AllFiles extends Component {
 	render() {
@@ -73,21 +74,20 @@ class AllFiles extends Component {
 					open={this.props.isShow.dialogOfFolder}
 					onRequestClose={this.handleClose}
 			        >
-			       		<TextField hintText="名称" id='folder-name'/>
-			        </Dialog>
-			        {/*share dialog*/}
-			        <Dialog 
-			        	title='分享' 
-			        	actions={shareActions}
-			        	open={this.props.isShow.dialogOfShare}
-			        >
-			        	<div className='share-user-list-container'>
-			        	{this.props.login.obj.allUser.map((item,index)=>{
-			        		return <Checkbox key={item.username} label={item.username} style={styles.checkbox} labelPosition="left" onCheck={this.checkUser.bind(this,item.uuid)}/>
-			        	})}
-			        	</div>
-			        </Dialog>
-
+			    	<TextField hintText="名称" id='folder-name'/>
+			    </Dialog>
+				{/*share dialog*/}
+				<Dialog 
+					title='分享' 
+					actions={shareActions}
+					open={this.props.isShow.dialogOfShare}
+				>
+					<div className='share-user-list-container'>
+					{this.props.login.obj.allUser.map((item,index)=>{
+						return <Checkbox key={item.username} label={item.username} style={styles.checkbox} labelPosition="left" onCheck={this.checkUser.bind(this,item.uuid)}/>
+					})}
+					</div>
+				</Dialog>
 			</div>
 		)
 	}
@@ -125,6 +125,7 @@ class AllFiles extends Component {
 					{/*<video src="http://192.168.5.181:9220/kktv4/get?api_name=Distro.FruitMix.Media.Data&reqid=39&sid=5fdeb8d8dd7bc970&xid=eba41e11964f360a464a740793c99463" controls="controls"></video>*/}
 						<FilesTable/>
 						<Menu></Menu>
+						<Move></Move>
 					</div>
 				</Paper>
 				)

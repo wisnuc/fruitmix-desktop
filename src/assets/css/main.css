@@ -272,3 +272,39 @@
 .register-container>div{
 	margin: 0 auto;
 }
+
+/*move*/
+.move-dialog {
+	position:absolute;
+	width:248px;
+	height:311px;
+	border:1px solid rgba(0,0,0,.2);
+}
+.move-title {
+	height:48px;
+	background-color: #f1f1f1;
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: space-between;
+	align-items: center;
+}
+.move-title>span {
+	 flex-grow:0;
+	 flex-shrink:1;
+	 flex-basis: auto;
+}
+.move-title-name {
+	max-width:150px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height:24px;
+	line-height: 25px;
+}
+.move-close {
+	cursor: pointer;
+	margin-right:13px;
+	cursor: pointer;
+}
+.move-content {
+	height:261px;
+}

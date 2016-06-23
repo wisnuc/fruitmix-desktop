@@ -18,7 +18,8 @@ const isShow = (state=defaultState,action)=>{
 
 		case 'CLEAN_DETAIL':
 			return Object.assign({},state,{detail:[]});
-
+		case 'TOGGLE_MOVE':
+			return Object.assign({},state,{move:{open:action.open,x:action.x,y:action.y}});
 		default:
 			return state;
 	}

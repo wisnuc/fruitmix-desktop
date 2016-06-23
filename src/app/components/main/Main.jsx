@@ -43,8 +43,6 @@ class Main extends Component {
 		this.props.dispatch(Action.filesLoading());
 
 		ipc.on('receive',function (err,dir,children,parent,path,shareChildren) {
-						console.log('uploadSuccess____________________________________');
-			console.log(new Date());
 			_this.props.dispatch(Action.setDirctory(dir,children,parent,path,shareChildren));
 		});
 		ipc.on('setTree',(err,tree)=>{
@@ -87,6 +85,11 @@ class Main extends Component {
 				case 1:
 					this.props.dispatch(Action.getDataFailed());
 			}
+		});
+
+		ipc.on('treeChildren',(err,treeChildren)=>{
+			console.log(treeChildren);
+			this.props.dispatch(Action.setTree(treeChildren));
 		});
 	}
 

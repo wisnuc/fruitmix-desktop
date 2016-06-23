@@ -37,7 +37,6 @@ class AllFilesTable extends Component {
 				{/*table body*/}
 				<tbody>
 					{this.props.data.children.map((item,index)=>{
-						console.log('5.5  '+(new Date()).getTime());
 						if (index > this.props.data.showSize) {
 							return false
 						}
@@ -96,7 +95,6 @@ class AllFilesTable extends Component {
 	}
 	//select files
 	selectChildren (rowNumber,e) {
-		console.log('0  '+(new Date()).getTime());
 		//bezier
 		// if (this.props.data.children[rowNumber].checked == true) {
 		// 	this.bez1(rowNumber);
@@ -114,7 +112,6 @@ class AllFilesTable extends Component {
 			}
 		}else {
 			//left click
-			console.log('1  '+(new Date()).getTime());
 			this.props.dispatch(Action.selectChildren(rowNumber));	
 		}
 		

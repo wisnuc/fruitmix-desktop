@@ -13,8 +13,8 @@ var _ = require('lodash');
 var mainWindow = null;
 
 var server = 'http://211.144.201.201:8888';
-// server ='http://192.168.5.132:80';
-// server ='http://192.168.5.108:80';
+server ='http://192.168.5.132:80';
+server ='http://192.168.5.134:80';
 //user
 var user = {};
 //files
@@ -125,7 +125,7 @@ ipcMain.on('getRootData', ()=> {
 	getFiles().then((data)=>{
 		dealWithData(data);
 		mainWindow.webContents.send('receive', currentDirectory,children,parent,path,shareChildren);
-		mainWindow.webContents.send('setTree',tree[0]);
+		// mainWindow.webContents.send('setTree',tree[0]);
 	}).catch((err)=>{
 		mainWindow.webContents.send('message','get data error',1);	
 	});
@@ -758,6 +758,19 @@ function getFile(uuid) {
 	});
 	return file;
 }
+//getTreeChildren
+ipcMain.on('getTreeChildren',function(err,uuid) {
+	if (uuid) {
+		console.log('uuid');
+	}else {
+		let c = {isNull:false,children:children,name:null};
+		mainWindow.webContents.send('treeChildren',c);
+	}
+	// let result = map.get(uuid);
+	// result.children = result.children.map((item)=>{
+	// 	return Object.assign({},item,{children:null});
+	// });
+});
 //copy 
 // ipcMain.on('copy'，);
 

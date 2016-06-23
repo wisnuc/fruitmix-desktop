@@ -23,7 +23,7 @@ class PopMenu extends Component {
 		if (menu.show) {
 			style = Object.assign({},style,{
 				display: menu.show?'block':'none',
-				left: menu.x-220,
+				left: this.props.navigation.menu?menu.x-220:menu.x-20,
 				top: menu.y-120+document.getElementsByClassName('file-area')[0].scrollTop
 			});
 		}
@@ -86,7 +86,8 @@ class PopMenu extends Component {
 	}
 
 	moveto() {
-		this.props.dispatch(Action.toggleMove(true));
+		ipc.send('getTreeChildren');
+		this.props.dispatch(Action.toggleMove(true,this.props.data.menu.x,this.props.data.menu.y));
 	}
 	//toggle dialog of share
 	share() {
@@ -121,7 +122,8 @@ class PopMenu extends Component {
 
 function mapStateToProps (state) {
 	return {
-		data: state.data
+		data: state.data,
+		navigation: state.navigation
 	}
 }
 

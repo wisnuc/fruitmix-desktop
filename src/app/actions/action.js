@@ -36,13 +36,6 @@ var actions = {
 		}
 	},
 
-	setTree(tree) {
-		return {
-			type: 'SET_TREE',
-			tree: tree
-		}
-	},
-
 	selectChildren(rowNumber) {
 		return {
 			type: 'SELECT_CHILDREN',
@@ -132,7 +125,7 @@ var actions = {
 	refreshDir(obj) {
 		return {
 			type: 'REFRESH_DIR',
-			obj: obj
+			obj: obj,
 		}
 	},
 
@@ -201,10 +194,19 @@ var actions = {
 		}
 	},
 
-	toggleMove(open) {
+	toggleMove(open,x,y) {
 		return {
 			type: 'TOGGLE_MOVE',
-			open: open
+			open: open,
+			x: x,
+			y: y
+		}
+	},
+
+	setTree(tree) {
+		return {
+			type: 'SET_TREE',
+			tree: tree
 		}
 	}
 }

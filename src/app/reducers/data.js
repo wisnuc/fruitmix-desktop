@@ -4,7 +4,6 @@ const defaultDirectory = {
 	children:[],
 	parent: [],
 	path:[],
-	tree:[],
 	selectAll:false, 
 	position:[],
 	menu:{show:false,objArr:[]},
@@ -25,9 +24,6 @@ const directory = (state=defaultDirectory,action)=> {
 				return {top:index*51+58+48+8+64,bottom:(index+1)*51+58+48+8+64}
 			})
 			return Object.assign({}, state,{directory:action.directory,children:action.children,parent:action.parent,path:action.path,position:position,state:'READY',selectAll:false,shareChildren:action.shareChildren});
-
-		case 'SET_TREE':
-			return Object.assign({},state,{tree:action.tree});	
 
 		case 'SELECT_CHILDREN':
 		console.log('2  '+(new Date()).getTime());
