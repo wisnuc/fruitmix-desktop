@@ -14,11 +14,12 @@ var mdns = require('mdns-js');
 var mainWindow = null;
 
 var server = 'http://211.144.201.201:8888';
-server ='http://192.168.5.132:80';
-server ='http://192.168.5.134:80';
+// server ='http://192.168.5.132:80';
+// server ='http://192.168.5.134:80';
 //user
 var user = {};
 //files
+var rootNode= null;
 var allFiles = [];
 var tree = {};
 var map = new Map();
@@ -43,15 +44,14 @@ var uploadNow = [];
 var uploadMap = new Map();
 
 var c = console.log;
- var r2 = {fullName:'Wisnuc'}
 var browser = mdns.createBrowser(new mdns.ServiceType('http', 'tcp'));
 browser.on('ready', function () {
     browser.discover(); 
 });
 
 browser.on('update', function (data) {
-	console.log('---------------------------------------------------------------------------------------------------------------');
-    	console.log('data:', data);
+	// console.log('---------------------------------------------------------------------------------------------------------------');
+ //    	console.log('data:', data);
 });
 //app ready and open window
 app.on('ready', function() {
@@ -135,18 +135,16 @@ function getAllUser() {
 ipcMain.on('getRootData', ()=> {
 	getFiles().then((data)=>{
 		// //remove folder
-		// removeFolder(data);
-		
-
+		removeFolder(data);
 		dealWithData(data);
 		mainWindow.webContents.send('receive', currentDirectory,children,parent,path,shareChildren);
-		// mainWindow.webContents.send('setTree',tree[0]);
 	}).catch((err)=>{
 		mainWindow.webContents.send('message','get data error',1);	
 	});
 });
-ipcMain.on('refresh',(e,uuid)=>{
+ipcMain.on('refresh',()=>{
 	getFiles().then((data)=>{
+		removeFolder(data);
 		dealWithData(data);
 		mainWindow.webContents.send('refresh',children);
 	}).catch((err)=>{
@@ -161,19 +159,20 @@ function removeFolder(data) {
 	if (index == undefined) {
 		return 
 	}
-	uuid = data[index].children;
+	uuid = data[index].uuid;
 	data.splice(index,1);
-	console.log(data);
 	index = data.findIndex((item)=>{
-		item.uuid == uuid
+		return item.parent == uuid
 	})
 	console.log(index);
-	uuid= data[index].children
+	uuid= data[index].uuid
 	data.splice(index,1);
 	index = data.findIndex((item)=>{
-		item.uuid == uuid
+		return item.parent == uuid
 	})
 	data[index].parent = '';
+	data[index].attribute.name = 'my cloud';
+	rootNode = data[index]; 
 
 
 }
@@ -208,12 +207,12 @@ function dealWithData(data) {
 	tree = getTree(allFiles,'file');
 	shareTree = getTree(shareFiles,'share');
 	// set children
-	// children = Object.assign({},tree.filter(item=>item.parent==''),{children:null});
-	children = tree.filter(item=>item.parent=='').map(item=>Object.assign({},item,{children:{}}));
 	shareTree.forEach((item)=>{if (item.hasParent == false) {shareChildren.push(item)}});
-	//set path
-	path.length = 0;
-	path.push({key:''});
+	// children = tree.filter(item=>item.parent=='').map(item=>Object.assign({},item,{children:{}}));
+	// //set path
+	// path.length = 0;
+	// path.push({key:''});
+	enterChildren(rootNode);
 }
 function classifyShareFiles() {
 	let userUUID = user.uuid;
@@ -305,8 +304,15 @@ function getTree(f,type) {
 }
 //select children
 ipcMain.on('enterChildren', (event,selectItem) => {
+	enterChildren(selectItem);
+});
+function enterChildren(selectItem) {
 	//parent
-	var parent = Object.assign({},map.get(selectItem.parent),{children:null});
+	if (selectItem.parent == '') {
+		parent = {}
+	}else {
+		parent = Object.assign({},map.get(selectItem.parent),{children:null});	
+	}
 	//currentDirectory
 	currentDirectory = selectItem;
 	//children
@@ -322,7 +328,8 @@ ipcMain.on('enterChildren', (event,selectItem) => {
 	}finally {
 		mainWindow.webContents.send('receive',currentDirectory,children,parent,path,shareChildren);
 	}
-});
+}
+
 function getPath(obj) {
 	//insert obj to path
 	path.unshift({key:obj.attribute.name,value:allFiles.find((item)=>{return item.uuid == obj.uuid})});
@@ -799,7 +806,7 @@ function getFile(uuid) {
 }
 //getTreeChildren
 ipcMain.on('getTreeChildren',function(err,uuid) {
-	if (uuid) {
+	if (uuid && uuid!='') {
 		let item = map.get(uuid);
 		let name = item.name;
 		let ch = [];
@@ -808,11 +815,8 @@ ipcMain.on('getTreeChildren',function(err,uuid) {
 				ch.push({name:item.name,uuid:item.uuid,parent:item.parent});
 			}
 		});
-		let treeObj = {isNull:false,children:ch,name:name,parent:item.parent}
+		let treeObj = {isNull:false,children:ch,name:name,parent:item.parent,uuid:item.uuid}
 		mainWindow.webContents.send('treeChildren',treeObj);
-	}else {
-		let c = {isNull:false,children:children,name:null,checked:false,parent:parent};
-		mainWindow.webContents.send('treeChildren',c);
 	}
 	// let result = map.get(uuid);
 	// result.children = result.children.map((item)=>{

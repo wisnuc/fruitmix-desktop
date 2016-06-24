@@ -393,6 +393,10 @@
 	transition: all .218s;
 }
 
+.move-botton-disable {
+	opacity: 0.5
+}
+
 .move-botton:hover {
 	background-color: #357ae8
     	border: 1px solid #2f5bb7;

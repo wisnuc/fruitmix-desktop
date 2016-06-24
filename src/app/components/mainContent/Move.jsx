@@ -18,9 +18,10 @@ class Move extends Component {
 	render() {
 		let left = this.props.navigation.menu?this.props.isShow.move.x-220:this.props.isShow.move.x-20;
 		let top = this.props.isShow.move.y-120;  
+		let scroll = !!document.getElementsByClassName('file-area')[0]?document.getElementsByClassName('file-area')[0].scrollTop:0
 		const style = {
 			display: this.props.isShow.move.open==false?'none':'block',
-			top:top,
+			top:top+scroll,
 			left:left,
 		}
 		if (this.props.tree.isNull) {
@@ -39,12 +40,12 @@ class Move extends Component {
 							<div className={item.checked?'move-list-selected move-list':'move-list'} key={item.uuid}>
 								<span className='move-folder-icon'></span>
 								<span>{item.name}</span>
-								<span className='moveEnter' onClick={this.moveSelect.bind(this,item.uuid)}></span>
+								<span className='moveEnter'{this.shouldEnter.bind(this,item)} onClick={this.moveSelect.bind(this,item.uuid)}></span>
 							</div>
 						)}
 					</div>
 					<div className='move-button-container'>
-						<div className='move-botton'>move</div>
+						<div className={this.props.tree.uuid==this.props.data.directory.uuid?'move-botton move-botton-disable':'move-botton'} onClick={this.move.bind(this)}>move</div>
 					</div>
 				</div>
 			</div>
@@ -58,13 +59,20 @@ class Move extends Component {
 	moveSelect(uuid) {
 		ipc.send('getTreeChildren',uuid);
 	}
+
+	move() {
+		if (this.props.tree.uuid==this.props.data.directory.uuid) {
+			return false
+		}
+	}
 }
 
 function mapStateToProps(state) {
 	return {
 		isShow: state.isShow,
 		navigation: state.navigation,
-		tree: state.tree
+		tree: state.tree,
+		data:state.data
 	}
 }
 export default connect(mapStateToProps)(Move);
