@@ -10,6 +10,7 @@ var http = require('http');
 var fs = require ('fs');
 var stream = require('stream');
 var _ = require('lodash');
+var mdns = require('mdns-js');
 var mainWindow = null;
 
 var server = 'http://211.144.201.201:8888';
@@ -42,6 +43,16 @@ var uploadNow = [];
 var uploadMap = new Map();
 
 var c = console.log;
+ var r2 = {fullName:'Wisnuc'}
+var browser = mdns.createBrowser(new mdns.ServiceType('http', 'tcp'));
+browser.on('ready', function () {
+    browser.discover(); 
+});
+
+browser.on('update', function (data) {
+	console.log('---------------------------------------------------------------------------------------------------------------');
+    	console.log('data:', data);
+});
 //app ready and open window
 app.on('ready', function() {
 	mainWindow = new BrowserWindow({
@@ -123,6 +134,10 @@ function getAllUser() {
 //get all files
 ipcMain.on('getRootData', ()=> {
 	getFiles().then((data)=>{
+		// //remove folder
+		// removeFolder(data);
+		
+
 		dealWithData(data);
 		mainWindow.webContents.send('receive', currentDirectory,children,parent,path,shareChildren);
 		// mainWindow.webContents.send('setTree',tree[0]);
@@ -138,6 +153,30 @@ ipcMain.on('refresh',(e,uuid)=>{
 		mainWindow.webContents.send('message','get data error',1);	
 	});
 });
+function removeFolder(data) {
+	let uuid = null;
+	let index = data.findIndex((item,index)=>{
+		return item.parent == ''
+	});
+	if (index == undefined) {
+		return 
+	}
+	uuid = data[index].children;
+	data.splice(index,1);
+	console.log(data);
+	index = data.findIndex((item)=>{
+		item.uuid == uuid
+	})
+	console.log(index);
+	uuid= data[index].children
+	data.splice(index,1);
+	index = data.findIndex((item)=>{
+		item.uuid == uuid
+	})
+	data[index].parent = '';
+
+
+}
 function getFiles() {
 	var files = new Promise((resolve,reject)=>{ 
 			var options = {
@@ -766,13 +805,13 @@ ipcMain.on('getTreeChildren',function(err,uuid) {
 		let ch = [];
 		item.children.forEach(item=>{
 			if (item.type == 'folder') {
-				ch.push({name:item.name,uuid:item.uuid});
+				ch.push({name:item.name,uuid:item.uuid,parent:item.parent});
 			}
 		});
 		let treeObj = {isNull:false,children:ch,name:name,parent:item.parent}
 		mainWindow.webContents.send('treeChildren',treeObj);
 	}else {
-		let c = {isNull:false,children:children,name:null,checked:false};
+		let c = {isNull:false,children:children,name:null,checked:false,parent:parent};
 		mainWindow.webContents.send('treeChildren',c);
 	}
 	// let result = map.get(uuid);

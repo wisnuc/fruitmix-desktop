@@ -29,20 +29,23 @@ class Move extends Component {
 		return (
 			<div style={style} className='move-dialog'>
 				<div className='move-title'>
-					<SvgIcon style={{marginLeft:'14px',cursor:'pointer'}}>{svg['back']()}</SvgIcon>
+					<SvgIcon style={{marginLeft:'14px',cursor:'pointer'}} onClick={this.moveSelect.bind(this,this.props.tree.parent)}>{svg['back']()}</SvgIcon>
 					<span className='move-title-name'>{this.props.tree.name}</span>
 					<SvgIcon className='move-close' onClick={this.closeMove.bind(this)}>{svg['close']()}</SvgIcon>
 				</div>
 				<div className='move-content'>
 					<div className='move-list-container'>
 						{this.props.tree.children.map(item=>
-							<div className='move-list'>
+							<div className={item.checked?'move-list-selected move-list':'move-list'} key={item.uuid}>
 								<span className='move-folder-icon'></span>
 								<span>{item.name}</span>
+								<span className='moveEnter' onClick={this.moveSelect.bind(this,item.uuid)}></span>
 							</div>
 						)}
 					</div>
-					<div className='move-button-container'></div>
+					<div className='move-button-container'>
+						<div className='move-botton'>move</div>
+					</div>
 				</div>
 			</div>
 			)
@@ -50,6 +53,10 @@ class Move extends Component {
 
 	closeMove() {
 		this.props.dispatch(Action.closeMove());
+	}
+
+	moveSelect(uuid) {
+		ipc.send('getTreeChildren',uuid);
 	}
 }
 

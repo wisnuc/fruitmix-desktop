@@ -328,6 +328,15 @@
 	align-items: center;
 	line-height: 16px;
 	font-size: 13px;
+	position: relative;
+}
+.move-list-selected {
+	background-color: rgb(77, 144, 254);
+	color:white;
+}
+
+.move-list:hover {
+	background-color: #f1f1f1;
 }
 .move-folder-icon {
 	background: url('../images/index/move-folder-icon.png') no-repeat;
@@ -337,7 +346,55 @@
 	height:13px;
 	display: inline-block;
 }
+.move-list-selected .move-folder-icon {
+	background: url('../images/index/move-folder-icon.png') no-repeat;
+}
+.moveEnter{
+	/*border:1px solid rgb(208,208,208);*/
+	display: none;
+	width:21px;
+	height:21px;
+	position: absolute;
+	right:22px;
+	top:7px;
+	box-sizing: border-box;
+	background:no-repeat url('../images/index/move-enter.svg') 0 -436px;
+}
+.move-list:hover .moveEnter {
+	display: inline;
+	border:1px solid rgba(0,0,0,0);
+}
+.move-list:hover .moveEnter:hover{
+	border-color:#eee;
+	border:1px solid rgb(208,208,208);
+	
+}
 
 .move-button-container {
 	height:61px;
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: flex-start;
+	align-items: center;
+}
+.move-botton {
+	width:57px;
+	height:27px;
+	line-height: 27px;
+	text-align: center;
+	font-size:12px;
+	color:white;
+	background-color:rgb(77, 144, 254); 
+	background-image: -webkit-linear-gradient(top,#4d90fe,#4787ed); 
+	cursor: pointer;
+	margin-left:18px; 
+	border: 1px solid #3079ed
+	border-radius: 2px;
+	transition: all .218s;
+}
+
+.move-botton:hover {
+	background-color: #357ae8
+    	border: 1px solid #2f5bb7;
+    	box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
 }
