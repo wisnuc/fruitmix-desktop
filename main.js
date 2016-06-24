@@ -13,8 +13,8 @@ var _ = require('lodash');
 var mainWindow = null;
 
 var server = 'http://211.144.201.201:8888';
-// server ='http://192.168.5.132:80';
-// server ='http://192.168.5.134:80';
+server ='http://192.168.5.132:80';
+server ='http://192.168.5.134:80';
 //user
 var user = {};
 //files
@@ -769,10 +769,10 @@ ipcMain.on('getTreeChildren',function(err,uuid) {
 				ch.push({name:item.name,uuid:item.uuid});
 			}
 		});
-		let treeObj = {isNull:false,children:ch,name:name}
+		let treeObj = {isNull:false,children:ch,name:name,parent:item.parent}
 		mainWindow.webContents.send('treeChildren',treeObj);
 	}else {
-		let c = {isNull:false,children:children,name:null};
+		let c = {isNull:false,children:children,name:null,checked:false};
 		mainWindow.webContents.send('treeChildren',c);
 	}
 	// let result = map.get(uuid);

@@ -34,7 +34,15 @@ class Move extends Component {
 					<SvgIcon className='move-close' onClick={this.closeMove.bind(this)}>{svg['close']()}</SvgIcon>
 				</div>
 				<div className='move-content'>
-				
+					<div className='move-list-container'>
+						{this.props.tree.children.map(item=>
+							<div className='move-list'>
+								<span className='move-folder-icon'></span>
+								<span>{item.name}</span>
+							</div>
+						)}
+					</div>
+					<div className='move-button-container'></div>
 				</div>
 			</div>
 			)

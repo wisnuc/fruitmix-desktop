@@ -279,6 +279,7 @@
 	width:248px;
 	height:311px;
 	border:1px solid rgba(0,0,0,.2);
+	box-shadow: 0 0 20px 0 rgba(0,0,0,.2);
 }
 .move-title {
 	height:48px;
@@ -307,4 +308,36 @@
 }
 .move-content {
 	height:261px;
+	background-color: rgb(299,299,299);
+}
+.move-list-container {
+	-webkit-user-select:none;
+	height:198px;
+	padding-top:6px;
+	overflow: auto;
+	border-top:1px solid rgb(229, 229, 229);
+	border-bottom:1px solid rgb(229, 229, 229);
+}
+.move-list {
+	height:36px;
+	padding:10px;
+	box-sizing: border-box;
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: flex-start;
+	align-items: center;
+	line-height: 16px;
+	font-size: 13px;
+}
+.move-folder-icon {
+	background: url('../images/index/move-folder-icon.png') no-repeat;
+	margin-left: 8px;
+	margin-right:10px;
+	width:16px;
+	height:13px;
+	display: inline-block;
+}
+
+.move-button-container {
+	height:61px;
 }
