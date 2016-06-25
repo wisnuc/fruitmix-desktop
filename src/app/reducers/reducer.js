@@ -8,7 +8,8 @@ import multiple from './multiple';
 import snack from './snack';
 import transmission from './transmission';
 import isShow from './isShow';
-import tree from './tree'
+import tree from './tree';
+import media from './media'
 
 const reducer = combineReducers({
 	login,
@@ -18,7 +19,8 @@ const reducer = combineReducers({
 	snack,
 	transmission,
 	isShow,
-	tree
+	tree,
+	media
 });
 
 export default reducer; 

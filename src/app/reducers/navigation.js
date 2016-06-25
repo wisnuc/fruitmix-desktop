@@ -20,7 +20,8 @@ let navDefault = [
 	 { name: '我分享的文件', parent: null, selected: false, type:'leftNav', icon:'sharedByMe' },
 	 // { name: '最近使用的文件', parent: null, selected: false, type:'leftNav', icon:'recentUse' },
   //       { name: '已删除文件', parent: null, selected: false, type: 'other', icon:'deleteFiles'},
-        { name: '设置', parent: null, selected: false, type: 'other', icon:'settings'}
+        { name: '设置', parent: null, selected: false, type: 'other', icon:'settings'},
+        { name: 'media', parent: null, selected: false, type: 'leftNav', icon:'settings'}
 ];
 
 const nav = (state = navDefault, action) => {

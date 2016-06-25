@@ -40,6 +40,7 @@ class Main extends Component {
 	componentDidMount() {
 		var _this = this;
 		ipc.send('getRootData');
+		ipc.send('getMediaData');
 		this.props.dispatch(Action.filesLoading());
 
 		ipc.on('receive',function (err,dir,children,parent,path,shareChildren) {
@@ -89,6 +90,10 @@ class Main extends Component {
 
 		ipc.on('treeChildren',(err,treeChildren)=>{
 			this.props.dispatch(Action.setTree(treeChildren));
+		});
+
+		ipc.on('mediaFinish',(err,media)=>{
+			this.props.dispatch(Action.setMedia(media));
 		});
 	}
 

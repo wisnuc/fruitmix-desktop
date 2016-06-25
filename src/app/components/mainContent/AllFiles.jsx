@@ -9,9 +9,8 @@
  import React, { findDOMNode, Component, PropTypes } from 'react';
  import { connect } from 'react-redux';
 //require material
-import { Paper, FontIcon, SvgIcon, IconMenu, MenuItem, Dialog, FlatButton, RaisedButton, TextField, Checkbox } from 'material-ui';
+import { Paper, FontIcon, SvgIcon, IconMenu, MenuItem, Dialog, FlatButton, RaisedButton, TextField, Checkbox, CircularProgress } from 'material-ui';
 import { Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn } from 'material-ui/Table';
-import { CircularProgress } from 'material-ui'
 import {blue500, red500, greenA200} from 'material-ui/styles/colors';
 import svg from '../../utils/SVGIcon';
 //import Action
@@ -82,7 +81,7 @@ class AllFiles extends Component {
 					actions={shareActions}
 					open={this.props.isShow.dialogOfShare}
 				>
-					<div className='share-user-list-container'>
+					<div className='share-user-list-container' style={{'overflow-y':'scroll'}}>
 					{this.props.login.obj.allUser.map((item,index)=>{
 						return <Checkbox key={item.username} label={item.username} style={styles.checkbox} labelPosition="left" onCheck={this.checkUser.bind(this,item.uuid)}/>
 					})}

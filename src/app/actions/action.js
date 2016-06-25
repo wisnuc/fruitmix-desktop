@@ -214,6 +214,13 @@ var actions = {
 		return {
 			type: 'CLOSE_MOVE'
 		}
+	},
+
+	setMedia(data) {
+		return {
+			type: 'SET_MEDIA',
+			data: data
+		}
 	}
 }
 

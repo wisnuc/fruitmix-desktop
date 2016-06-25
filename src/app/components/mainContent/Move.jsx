@@ -40,7 +40,7 @@ class Move extends Component {
 							<div className={item.checked?'move-list-selected move-list':'move-list'} key={item.uuid}>
 								<span className='move-folder-icon'></span>
 								<span>{item.name}</span>
-								<span className='moveEnter'{this.shouldEnter.bind(this,item)} onClick={this.moveSelect.bind(this,item.uuid)}></span>
+								<span className={this.shouldEnter.apply(this,[item])}  onClick={this.moveSelect.bind(this,item.uuid)}></span>
 							</div>
 						)}
 					</div>
@@ -56,6 +56,17 @@ class Move extends Component {
 		this.props.dispatch(Action.closeMove());
 	}
 
+	shouldEnter(item) {
+		let selectitem = this.props.data.children.filter(i=>i.checked==true);
+		let isContainer = selectitem.find(i=>i.uuid == item.uuid);
+		if (isContainer == undefined) {
+			return 'moveEnter'	
+		}else {
+			return 'moveEnter-hidden'
+		}
+		
+	}
+
 	moveSelect(uuid) {
 		ipc.send('getTreeChildren',uuid);
 	}
@@ -64,6 +75,10 @@ class Move extends Component {
 		if (this.props.tree.uuid==this.props.data.directory.uuid) {
 			return false
 		}
+		let moveArr = this.props.data.children.filter(item=>item.checked==true);
+		let target = this.props.tree.uuid;
+		this.closeMove();
+		ipc.send('move',moveArr,target);
 	}
 }
 

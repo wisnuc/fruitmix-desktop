@@ -15,6 +15,7 @@ import Collection from '../mainContent/Collection';
 import SharedFiles from '../mainContent/SharedFiles';
 import SharedByMe from '../mainContent/SharedByMe';
 import Setting from '../mainContent/Setting';
+import Media from '../mainContent/Media'
 
 class MainContent extends Component {
 
@@ -24,7 +25,8 @@ class MainContent extends Component {
 		component.push(<Collection key={'b'}></Collection>); 
 		component.push(<SharedFiles key={'c'}></SharedFiles>); 
 		component.push(<SharedByMe key={'d'}></SharedByMe>); 
-		component.push(<Setting key={'g'}></Setting>)
+		component.push(<Setting key={'g'}></Setting>);
+		component.push(<Media key={'h'}></Media>);
 		// define the content is selected
 		let selectedItem = this.props.nav.nav.findIndex( (item, index, arr) => {
 			return item.selected == true

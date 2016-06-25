@@ -14,8 +14,8 @@ var mdns = require('mdns-js');
 var mainWindow = null;
 
 var server = 'http://211.144.201.201:8888';
-// server ='http://192.168.5.132:80';
-// server ='http://192.168.5.134:80';
+server ='http://192.168.5.132:80';
+server ='http://192.168.5.134:80';
 //user
 var user = {};
 //files
@@ -36,12 +36,12 @@ var parent = {};
 var path = [];
 var tree = {};
 //upload 
-// var uploadQueueWait = [];
-// var uploadQueue = [];
-//-------------------------------------------------------------------------------------------------------------
 var uploadQueue = [];
 var uploadNow = [];
 var uploadMap = new Map();
+//media
+var media = [];
+var mediaMap = new Map();
 
 var c = console.log;
 var browser = mdns.createBrowser(new mdns.ServiceType('http', 'tcp'));
@@ -136,16 +136,21 @@ ipcMain.on('getRootData', ()=> {
 	getFiles().then((data)=>{
 		// //remove folder
 		removeFolder(data);
+		console.log('6');
 		dealWithData(data);
 		mainWindow.webContents.send('receive', currentDirectory,children,parent,path,shareChildren);
 	}).catch((err)=>{
+		console.log(err);
 		mainWindow.webContents.send('message','get data error',1);	
 	});
 });
 ipcMain.on('refresh',()=>{
 	getFiles().then((data)=>{
+		c('1');
 		removeFolder(data);
+		c('2');
 		dealWithData(data);
+		c('3');
 		mainWindow.webContents.send('refresh',children);
 	}).catch((err)=>{
 		mainWindow.webContents.send('message','get data error',1);	
@@ -164,7 +169,6 @@ function removeFolder(data) {
 	index = data.findIndex((item)=>{
 		return item.parent == uuid
 	})
-	console.log(index);
 	uuid= data[index].uuid
 	data.splice(index,1);
 	index = data.findIndex((item)=>{
@@ -173,8 +177,6 @@ function removeFolder(data) {
 	data[index].parent = '';
 	data[index].attribute.name = 'my cloud';
 	rootNode = data[index]; 
-
-
 }
 function getFiles() {
 	var files = new Promise((resolve,reject)=>{ 
@@ -217,6 +219,7 @@ function dealWithData(data) {
 function classifyShareFiles() {
 	let userUUID = user.uuid;
 	allFiles.forEach((item,index)=>{
+		try{
 		// owner is user ?
 		if (item.permission.owner[0] != userUUID ) {
 			// console.log('is not user');
@@ -250,9 +253,13 @@ function classifyShareFiles() {
 						shareFiles.push(item);
 						allFiles[index].share = true;
 					}
-				}(item);
+				};
+				findParent((item));
 			}
 		}
+	}catch(e){
+		console.log(e);
+	}
 	})
 }
 function getTree(f,type) {
@@ -295,9 +302,8 @@ function getTree(f,type) {
 		});
 	}else {
 		tree.forEach((item)=>{
-			if (item.type == 'folder') {
 				map.set(item.uuid,item);	
-			}	
+		
 		});
 	}
 	return tree;	
@@ -823,6 +829,85 @@ ipcMain.on('getTreeChildren',function(err,uuid) {
 	// 	return Object.assign({},item,{children:null});
 	// });
 });
+
+ipcMain.on('move',function(err,arr,target) {
+	let allPromise = arr.map((item,index)=>move(item.uuid,target,index));
+	Promise.all(allPromise).then((result)=>{
+		console.log(result);
+		mainWindow.webContents.send('message',arr.length+' 个文件移动成功');
+		if (currentDirectory.uuid == arr[0].parent) {
+			enterChildren(currentDirectory);
+		}
+	}).catch(r=>{
+		c(r);
+		mainWindow.webContents.send('message','文件 '+arr[r].attribute.name+'移动失败');
+		if (currentDirectory.uuid == arr[0].parent) {
+			enterChildren(currentDirectory);
+		}
+	})
+});
+function move(uuid,target,index) {
+	let promise = new Promise((resolve,reject)=>{
+		var options = {
+			headers: {
+				Authorization: user.type+' '+user.token
+			},
+			form: {target:target}
+		};
+		function callback (err,res,body) {
+			if (!err && res.statusCode == 200) {
+				console.log('res');
+				resolve(body);
+				let currentNode = map.get(uuid);
+				let parent = map.get(currentNode.parent);
+				let targetNode = map.get(target);
+				parent.children.splice(parent.children.findIndex(item=>item.uuid==currentNode.uuid),1);
+				targetNode.children.push(currentNode);
+			}else {
+				console.log('err');
+				console.log(err);
+				reject(index);
+			}
+		};
+		request.patch(server+'/files/'+uuid,options,callback);
+	});
+	return promise
+}
+
+ipcMain.on('getMediaData',(err)=>{
+	getMediaData().then((data)=>{
+		data.forEach(item=>{
+			let obj = Object.assign({},item,{status:'notReady'});
+			media.push(obj);	
+			mediaMap.set(item.hash,item);
+		});
+		mainWindow.webContents.send('mediaFinish',media);
+	}).catch(err=>{
+		console.log(err);
+	});
+});
+function getMediaData() {
+	var media = new Promise((resolve,reject)=>{ 
+		var options = {
+			method: 'GET',
+			url: server+'/media',
+			headers: {
+				Authorization: user.type+' '+user.token
+			}
+
+		};
+		function callback (err,res,body) {
+			if (!err && res.statusCode == 200) {
+				resolve(JSON.parse(body));
+			}else {
+				reject(err);
+			}
+		}
+		request(options,callback);
+	});
+	return media;
+}
+
 //copy 
 // ipcMain.on('copy'，);
 

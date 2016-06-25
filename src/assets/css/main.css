@@ -366,8 +366,11 @@
 }
 .move-list:hover .moveEnter:hover{
 	border-color:#eee;
-	border:1px solid rgb(208,208,208);
-	
+	border:1px solid rgb(208,208,208);	
+}
+
+.moveEnter-hidden {
+	display: none;	
 }
 
 .move-button-container {
