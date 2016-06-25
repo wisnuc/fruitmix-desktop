@@ -6,15 +6,14 @@
  **/
   'use strict';
 // require core module
- import React, { findDOMNode, Component, PropTypes } from 'react';
-  import { connect } from 'react-redux';
-  import { CircularProgress } from 'material-ui';
-
+import React, { findDOMNode, Component, PropTypes } from 'react';
+import { connect } from 'react-redux';
+import { CircularProgress } from 'material-ui';
 // import Component 
+import M from './MediaImage';
 
 class Media extends Component {
 	render() {
-		
 		return (
 			<div className='all-my-files' style={{height:(document.body.clientHeight-64)+'px'}} >
 				{this.getContent()}
@@ -27,7 +26,9 @@ class Media extends Component {
 		}else {
 			return (
 				<div style={{width:'100%'}}>
-					2234
+					{this.props.media.data.map(item=>{
+						return <M key={item.hash} item={item}></M>
+					})}
 				</div>
 				)
 		}
