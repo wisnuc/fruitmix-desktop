@@ -221,6 +221,13 @@ var actions = {
 			type: 'SET_MEDIA',
 			data: data
 		}
+	},
+
+	setThumb(item) {
+		return {
+			type: 'SET_THUMB',
+			data: item
+		}
 	}
 }
 

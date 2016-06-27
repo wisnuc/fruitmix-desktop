@@ -1,12 +1,22 @@
 const defaultState = {
 	data: [],
-	status: 'busy'
+	status: 'busy',
+	map: null
 }
 
 const Media = (state=defaultState,action)=>{
 	switch(action.type) {
 		case 'SET_MEDIA':
-			return Object.assign({},state,{data:action.data,status:'ready'});
+			var m = new Map();
+			action.data.forEach(item=>{
+				m.set(item.hash,item);
+			});
+			return Object.assign({},state,{data:action.data,status:'ready',map:m});
+		case 'SET_THUMB':
+			var item = state.map.get(action.data.hash);
+			item.status = 'ready';
+			item.path = action.data.path;
+			return Object.assign({},state);
 		default:
 			return state;
 	}

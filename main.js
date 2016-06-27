@@ -2,7 +2,7 @@
 //corn module
 
 const electron = require('electron');
-const {app, BrowserWindow, ipcMain} = require('electron');
+const {app, BrowserWindow, ipcMain, dialog } = require('electron');
 
 var configuration = require('./configuration');
 var request = require('request');
@@ -15,7 +15,7 @@ var mainWindow = null;
 
 var server = 'http://211.144.201.201:8888';
 server ='http://192.168.5.132:80';
-server ='http://192.168.5.134:80';
+// server ='http://192.168.5.134:80';
 //user
 var user = {};
 //files
@@ -42,6 +42,8 @@ var uploadMap = new Map();
 //media
 var media = [];
 var mediaMap = new Map();
+var thumbQueue = [];
+var thumbIng = [];
 
 var c = console.log;
 var browser = mdns.createBrowser(new mdns.ServiceType('http', 'tcp'));
@@ -62,6 +64,7 @@ app.on('ready', function() {
 		width: 1366
 	});
 	mainWindow.webContents.openDevTools();
+	// dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']})
 	mainWindow.loadURL('file://' + __dirname + '/ele/index.html');
 });
 //get all user information
@@ -393,7 +396,6 @@ function dealUploadQueue() {
 				let gap = 3 - uploadNow.length;
 				for (let i = 0; i < gap; i++) {
 					let index = uploadQueue[0].index;
-					console.log(index);
 					if (index > uploadQueue[0].length-1) {
 						return
 					}
@@ -906,6 +908,92 @@ function getMediaData() {
 		request(options,callback);
 	});
 	return media;
+}
+
+ipcMain.on('getThumb',(err,item)=>{
+	thumbQueue.push(item);
+	dealThumbQueue();
+});
+
+function dealThumbQueue() {
+	if (thumbQueue.length == 0) {
+		return
+	}else {
+		if (thumbIng.length == 0) {
+			let gap = 3 - thumbIng.length;
+			for (var i=0;i<gap;i++) {
+				if (thumbQueue.length == 0) {
+					break;
+				}
+				let item = thumbQueue.shift();
+				thumbIng.push(item);
+				isThumbExist(item);
+			}
+
+		}
+	}
+}
+
+function isThumbExist(item) {
+	console.log(item.hash);
+	fs.readFile(__dirname+'/media/'+item.hash,(err,data)=>{
+		if (err) {
+			console.log('not exist');
+			downloadMedia(item).then((data)=>{
+				sendThumb(item);
+			}).catch(err=>{
+				let index = thumbIng.findIndex(i=>i.hash == item.hash);
+				let t = thumbIng[index];
+				thumbQueue.push(t);
+				thumbIng.splice(index,1);
+				dealThumbQueue();
+			});
+		}else {
+			console.log('exist');
+			sendThumb(item);	
+		}
+	});
+
+	function sendThumb(item){
+		let index = thumbIng.findIndex(i=>i.hash == item.hash);
+		thumbIng.splice(index,1);
+		dealThumbQueue();
+		item.path=__dirname+'/media/'+item.hash;
+		mainWindow.webContents.send('getThumbSuccess',item);
+	}
+}
+
+function downloadMedia(item) {
+	var download = new Promise((resolve,reject)=>{
+		var body = 0;
+		var options = {
+			method: 'GET',
+			url: server+'/media/'+item.hash+'?type=thumb&width=100&height=100',
+			headers: {
+				Authorization: user.type+' '+user.token
+			}
+		};
+
+		function callback (err,res,body) {
+			if (!err && res.statusCode == 200) {
+				console.log('res');
+				resolve(body);
+				}else {
+					console.log('err');
+					fs.unlink('media/'+item.hash, (err,data)=>{
+						console.log('remove');
+					});
+					console.log(res);
+					reject(err)
+				}
+			}
+			var stream = fs.createWriteStream('media/'+item.hash);
+
+			request(options,callback).on('data',function(d){
+				body += d.length;
+			}).pipe(stream);
+		})
+	return download;
 }
 
 //copy 

@@ -7,14 +7,27 @@
   'use strict';
 // require core module
  import React, { findDOMNode, Component, PropTypes } from 'react';
+ import { CircularProgress } from 'material-ui';
 // import Component 
 class Media extends Component {
 	render() {
 		return (
-			<div>
-				{this.props.item.hash}
+			<div className='media-image'>
+				{this.getImageContent()}
 			</div>
 		)
+	}
+
+	getImageContent() {
+		if (this.props.item.status == 'notReady') {
+			return <div><CircularProgress/></div>
+		}else {
+			return <div><img src={this.props.item.path} alt=""/></div>
+		}
+	}
+
+	componentDidMount() {
+		ipc.send('getThumb',this.props.item);
 	}
 
 }

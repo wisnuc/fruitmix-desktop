@@ -14,6 +14,7 @@ import M from './MediaImage';
 
 class Media extends Component {
 	render() {
+		c.log('`rrrrrrrrrrrrrrrrrrrrrrr');
 		return (
 			<div className='all-my-files' style={{height:(document.body.clientHeight-64)+'px'}} >
 				{this.getContent()}
@@ -25,8 +26,11 @@ class Media extends Component {
 			return (<div className='data-loading '><CircularProgress/></div>)
 		}else {
 			return (
-				<div style={{width:'100%'}}>
-					{this.props.media.data.map(item=>{
+				<div style={{width:'100%'}} className='mediaContainer'>
+					{this.props.media.data.map((item,index)=>{
+						if (index >300) {
+							return null
+						}
 						return <M key={item.hash} item={item}></M>
 					})}
 				</div>
