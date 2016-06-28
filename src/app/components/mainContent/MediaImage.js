@@ -12,18 +12,30 @@
 class Media extends Component {
 	render() {
 		return (
-			<div className='media-image'>
+			<div className='media-image' onClick={this.downloadImage.bind(this,this.props.item)}>
 				{this.getImageContent()}
 			</div>
 		)
 	}
 
+	// shouldComponentUpdate(nextprops){
+	// 	if (this.props.item.status == nextprops.item.status) {
+	// 		return false
+	// 	}else {
+	// 		return true
+	// 	}
+	// }
+
 	getImageContent() {
 		if (this.props.item.status == 'notReady') {
 			return <div><CircularProgress/></div>
 		}else {
-			return <div><img src={this.props.item.path} alt=""/></div>
+			return <div style={{cursor:'pointer'}}><img src={this.props.item.path} alt=""/></div>
 		}
+	}
+
+	downloadImage(item) {
+		ipc.send('getMediaImage',item);
 	}
 
 	componentDidMount() {

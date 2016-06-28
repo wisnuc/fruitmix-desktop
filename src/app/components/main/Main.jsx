@@ -97,7 +97,15 @@ class Main extends Component {
 		});
 
 		ipc.on('getThumbSuccess',(err,item)=>{
-			this.props.dispatch(Action.setThumb(item));
+			this.props.dispatch(Action.setThumb(item,'ready'));
+		});
+
+		ipc.on('getThumbFailed',(err,item)=>{
+			this.props.dispatch(Action.setThumb(item,'failed'));
+		});
+
+		ipc.on('donwloadMediaSuccess',(err,item)=>{
+
 		});
 	}
 
@@ -120,6 +128,9 @@ class Main extends Component {
 				<Paper className={"content-container "+(this.props.navigation.menu?'content-has-left-padding':'no-padding')} style={{paddingTop:64}} zDepth={0}>
 					<Content></Content>
 				</Paper>
+				<div style={{width:'100%',height:document.body.clientHeight+'px',background:'rgba(0,0,0,.5)',position:'absolute',zIndex:'1100'}}>
+				<img src="/home/wenshang/Documents/frame/1/media/c0ceaf321ec2894d3b8811fe0710614cc18395d5aedd9d47d0828715618cac86" alt=""/>
+				</div>
 				<Snackbar open={this.props.snack.open} message={this.props.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
 			</div></CSS>
 			);

@@ -1,7 +1,9 @@
 const defaultState = {
 	data: [],
 	status: 'busy',
-	map: null
+	map: null,
+	currentMediaImage:{status:'notReady',path:null},
+	size:20
 }
 
 const Media = (state=defaultState,action)=>{
@@ -14,7 +16,7 @@ const Media = (state=defaultState,action)=>{
 			return Object.assign({},state,{data:action.data,status:'ready',map:m});
 		case 'SET_THUMB':
 			var item = state.map.get(action.data.hash);
-			item.status = 'ready';
+			item.status = action.status;
 			item.path = action.data.path;
 			return Object.assign({},state);
 		default:

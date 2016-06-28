@@ -15,7 +15,7 @@ var mainWindow = null;
 
 var server = 'http://211.144.201.201:8888';
 server ='http://192.168.5.132:80';
-// server ='http://192.168.5.134:80';
+server ='http://192.168.5.134:80';
 //user
 var user = {};
 //files
@@ -875,11 +875,11 @@ function move(uuid,target,index) {
 	});
 	return promise
 }
-
+//getMediaData
 ipcMain.on('getMediaData',(err)=>{
 	getMediaData().then((data)=>{
 		data.forEach(item=>{
-			let obj = Object.assign({},item,{status:'notReady'});
+			let obj = Object.assign({},item,{status:'notReady',failed:0});
 			media.push(obj);	
 			mediaMap.set(item.hash,item);
 		});
@@ -909,48 +909,54 @@ function getMediaData() {
 	});
 	return media;
 }
-
+//getMediaThumb
 ipcMain.on('getThumb',(err,item)=>{
 	thumbQueue.push(item);
 	dealThumbQueue();
 });
 
 function dealThumbQueue() {
-	if (thumbQueue.length == 0) {
-		return
-	}else {
-		if (thumbIng.length == 0) {
-			let gap = 3 - thumbIng.length;
-			for (var i=0;i<gap;i++) {
-				if (thumbQueue.length == 0) {
-					break;
+	setTimeout(function(){
+		if (thumbQueue.length == 0) {
+			return
+		}else {
+			if (thumbIng.length == 0) {
+				console.log('run');
+				for (var i=0;i<3;i++) {
+					if (thumbQueue.length == 0) {
+						break;
+					}
+					let item = thumbQueue.shift();
+					thumbIng.push(item);
+					isThumbExist(item);
 				}
-				let item = thumbQueue.shift();
-				thumbIng.push(item);
-				isThumbExist(item);
 			}
-
 		}
-	}
+	},500);
 }
 
 function isThumbExist(item) {
-	console.log(item.hash);
-	fs.readFile(__dirname+'/media/'+item.hash,(err,data)=>{
+	fs.readFile(__dirname+'/media/'+item.hash+'thumb',(err,data)=>{
 		if (err) {
-			console.log('not exist');
 			downloadMedia(item).then((data)=>{
 				sendThumb(item);
+				console.log(thumbQueue.length+' length');
 			}).catch(err=>{
+				item.failed++;
 				let index = thumbIng.findIndex(i=>i.hash == item.hash);
 				let t = thumbIng[index];
-				thumbQueue.push(t);
 				thumbIng.splice(index,1);
+				if (item.failed <5) {
+					thumbQueue.push(t);
+				}else {
+					item.status='failed'
+					mainWindow.webContents.send('getThumbFailed',item);
+				}
 				dealThumbQueue();
+				console.log(thumbQueue.length+' length');
 			});
 		}else {
-			console.log('exist');
-			sendThumb(item);	
+			sendThumb(item);
 		}
 	});
 
@@ -958,14 +964,13 @@ function isThumbExist(item) {
 		let index = thumbIng.findIndex(i=>i.hash == item.hash);
 		thumbIng.splice(index,1);
 		dealThumbQueue();
-		item.path=__dirname+'/media/'+item.hash;
+		item.path=__dirname+'/media/'+item.hash+'thumb';
 		mainWindow.webContents.send('getThumbSuccess',item);
 	}
 }
 
 function downloadMedia(item) {
 	var download = new Promise((resolve,reject)=>{
-		var body = 0;
 		var options = {
 			method: 'GET',
 			url: server+'/media/'+item.hash+'?type=thumb&width=100&height=100',
@@ -978,24 +983,54 @@ function downloadMedia(item) {
 			if (!err && res.statusCode == 200) {
 				console.log('res');
 				resolve(body);
-				}else {
-					console.log('err');
-					fs.unlink('media/'+item.hash, (err,data)=>{
-						console.log('remove');
-					});
-					console.log(res);
-					reject(err)
-				}
+			}else {
+				console.log('err');
+				console.log(item.hash);
+				fs.unlink('media/'+item.hash+'thumb', (err,data)=>{
+				});
+				reject(err)
 			}
-			var stream = fs.createWriteStream('media/'+item.hash);
+		}
+			var stream = fs.createWriteStream('media/'+item.hash+'thumb');
 
-			request(options,callback).on('data',function(d){
-				body += d.length;
-			}).pipe(stream);
+			request(options,callback).pipe(stream);
 		})
 	return download;
 }
-
+//getMediaImage
+ipcMain.on('getMediaImage',(err,item)=>{
+	downloadMediaImage(item).then(()=>{
+		console.log('OK');
+		mainWindow.webContents.send('donwloadMediaSuccess',item);
+	}).catch(err=>{
+		c('not ok');
+	});
+})
+function downloadMediaImage(item) {
+	let promise = new Promise((resolve,reject)=>{
+		var options = {
+			method: 'GET',
+			url: server+'/media/'+item.hash+'?type=original',
+			headers: {
+				Authorization: user.type+' '+user.token
+			}
+		};
+		function callback (err,res,body) {
+			if (!err && res.statusCode == 200) {
+				console.log('res');
+				resolve();
+			}else {
+				console.log('err');
+				fs.unlink('media/'+item.hash+'thumb', (err,data)=>{
+				});
+				reject()
+			}
+		}
+		var stream = fs.createWriteStream('media/'+item.hash);
+		request(options,callback).pipe(stream);
+	});
+	return promise
+}
 //copy 
 // ipcMain.on('copy'，);
 

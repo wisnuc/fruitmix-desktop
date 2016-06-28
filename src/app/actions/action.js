@@ -223,10 +223,11 @@ var actions = {
 		}
 	},
 
-	setThumb(item) {
+	setThumb(item,status) {
 		return {
 			type: 'SET_THUMB',
-			data: item
+			data: item,
+			status:status
 		}
 	}
 }
