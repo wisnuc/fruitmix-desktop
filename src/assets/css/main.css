@@ -416,3 +416,10 @@
 	height:100px;
 	margin:10px;
 }
+.media-mask {
+	width:100%;
+	background:rgba(0,0,0,.5);
+	position: absolute;
+	z-index: 1100
+
+}

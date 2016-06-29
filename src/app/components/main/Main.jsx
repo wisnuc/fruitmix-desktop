@@ -17,7 +17,7 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 
 //import Action
-import Action from '../../actions/action'
+import Action from '../../actions/action';
 
 //import CSS
 import css  from  '../../../assets/css/main';
@@ -29,6 +29,8 @@ import Multiple from '../mainContent/Multiple';
 
 // require common mixins
 import ImageModules from '../Mixins/ImageModules'; 
+
+import Mask from './MediaMask'
 
 class Main extends Component {
 	mixins: [ImageModules]
@@ -105,7 +107,8 @@ class Main extends Component {
 		});
 
 		ipc.on('donwloadMediaSuccess',(err,item)=>{
-
+			// this.props.dispatch(Action.setMediaImage(item));
+			console.log(item);
 		});
 	}
 
@@ -128,9 +131,7 @@ class Main extends Component {
 				<Paper className={"content-container "+(this.props.navigation.menu?'content-has-left-padding':'no-padding')} style={{paddingTop:64}} zDepth={0}>
 					<Content></Content>
 				</Paper>
-				<div style={{width:'100%',height:document.body.clientHeight+'px',background:'rgba(0,0,0,.5)',position:'absolute',zIndex:'1100'}}>
-				<img src="/home/wenshang/Documents/frame/1/media/c0ceaf321ec2894d3b8811fe0710614cc18395d5aedd9d47d0828715618cac86" alt=""/>
-				</div>
+				<Mask></Mask>
 				<Snackbar open={this.props.snack.open} message={this.props.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
 			</div></CSS>
 			);

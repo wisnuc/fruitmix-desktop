@@ -12,7 +12,6 @@ var CopyWebpackPlugin = require('copy-webpack-plugin');
 var ELE_PATH = path.resolve(__dirname, 'ele');
 var SRC_PATH = path.resolve(__dirname, 'src');
 var HTML_PATH = path.resolve(__dirname, 'src/index.html');
-// console.log(__dirname);
 module.exports = {
 
     output: {
@@ -60,7 +59,7 @@ module.exports = {
 
     plugins: [
         new webpack.HotModuleReplacementPlugin(),
-        new HtmlWebpackPlugin({template: HTML_PATH}),
+        // new HtmlWebpackPlugin({template: path.resolve(__dirname, 'src/index.html')}),
         new CopyWebpackPlugin([
             { from:  path.resolve(SRC_PATH,'electron-index.js'), to: 'electron-index.js' }
         ])

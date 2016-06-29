@@ -4,18 +4,22 @@
  * @time 2016-6-25
  * @author liuhua
  **/
-  'use strict';
+ 'use strict';
 // require core module
- import React, { findDOMNode, Component, PropTypes } from 'react';
- import { CircularProgress } from 'material-ui';
+import React, { findDOMNode, Component, PropTypes } from 'react';
+import { CircularProgress } from 'material-ui';
+import { connect } from 'react-redux';
+//import Action
+import Action from '../../actions/action';
 // import Component 
 class Media extends Component {
 	render() {
 		return (
 			<div className='media-image' onClick={this.downloadImage.bind(this,this.props.item)}>
-				{this.getImageContent()}
+			
+			{this.getImageContent()}
 			</div>
-		)
+			)
 	}
 
 	// shouldComponentUpdate(nextprops){
@@ -35,13 +39,20 @@ class Media extends Component {
 	}
 
 	downloadImage(item) {
+		this.props.dispatch(Action.toggleMedia(true));
 		ipc.send('getMediaImage',item);
 	}
+
+
 
 	componentDidMount() {
 		ipc.send('getThumb',this.props.item);
 	}
 
 }
-
-export default Media;
+function mapStateToProps (state) {
+	return {
+		
+	}
+}
+export default connect(mapStateToProps)(Media);

@@ -2,7 +2,7 @@ const defaultState = {
 	data: [],
 	status: 'busy',
 	map: null,
-	currentMediaImage:{status:'notReady',path:null},
+	currentMediaImage:{status:'notReady',path:null,open: false},
 	size:20
 }
 
@@ -18,6 +18,9 @@ const Media = (state=defaultState,action)=>{
 			var item = state.map.get(action.data.hash);
 			item.status = action.status;
 			item.path = action.data.path;
+			return Object.assign({},state);
+		case 'TOGGLE_MEDIA':
+			state.currentMediaImage.open = action.open;
 			return Object.assign({},state);
 		default:
 			return state;

@@ -229,6 +229,13 @@ var actions = {
 			data: item,
 			status:status
 		}
+	},
+
+	toggleMedia(open) {
+		return {
+			type: 'TOGGLE_MEDIA',
+			open: open
+		}
 	}
 }
 
