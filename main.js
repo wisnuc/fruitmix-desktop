@@ -15,7 +15,7 @@ var mainWindow = null;
 
 var server = 'http://211.144.201.201:8888';
 server ='http://192.168.5.132:80';
-server ='http://192.168.5.134:80';
+// server ='http://192.168.5.134:80';
 //user
 var user = {};
 //files
@@ -878,7 +878,9 @@ function move(uuid,target,index) {
 //getMediaData
 ipcMain.on('getMediaData',(err)=>{
 	getMediaData().then((data)=>{
+		console.log(data);
 		data.forEach(item=>{
+			if (item == null) {return}
 			let obj = Object.assign({},item,{status:'notReady',failed:0});
 			media.push(obj);	
 			mediaMap.set(item.hash,item);
@@ -1032,6 +1034,20 @@ function downloadMediaImage(item) {
 	});
 	return promise
 }
+//enterShare
+ipcMain.on('enterShare',(err,item)=>{
+	let share = shareMap.get(item.uuid);
+	console.log(share.children);
+	let children = share.children.map(item=>{
+		return Object.assign({},item,{children:[]});
+	});
+	mainWindow.webContents.send('setShareChildren',children);
+});
+ipcMain.on('backShareRoot',err=>{
+	shareChildren.length = 0;
+	shareTree.forEach((item)=>{if (item.hasParent == false) {shareChildren.push(item);}});
+	mainWindow.webContents.send('setShareChildren',shareChildren);
+});
 //copy 
 // ipcMain.on('copy'，);
 

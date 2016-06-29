@@ -19,6 +19,7 @@ class SharedFiles extends Component {
 	render() {
 		return (
 			<div className='shared-files-container'>
+				<div onClick={this.backRoot}>back root</div>
 				<Table selectable={false}>
 					<TableHeader displaySelectAll={false} adjustForCheckbox={false}>
 							<TableRow>
@@ -29,7 +30,7 @@ class SharedFiles extends Component {
 						</TableHeader>
 					<TableBody displayRowCheckbox={false}>
 						{this.props.data.shareChildren.map((item)=>{return (
-							<TableRow key={item.uuid}>
+							<TableRow key={item.uuid} onDoubleClick={this.enterShare.bind(this,item)}>
 								<TableRowColumn>{item.name}</TableRowColumn>
 								<TableRowColumn>{this.getShareUser(item.owner)}</TableRowColumn>
 								<TableRowColumn><span onClick={this.download.bind(this,item)} style={{cursor:'pointer'}}>{svg.download()}</span></TableRowColumn>
@@ -50,6 +51,17 @@ class SharedFiles extends Component {
 	download(item) {
 		this.props.dispatch(Action.addDownload(item));
 		ipc.send('download',item);	
+	}
+
+	enterShare(item) {
+		console.log(item);
+		if (item.type == 'folder') {
+			ipc.send('enterShare',item);
+		}
+	}
+
+	backRoot() {
+		ipc.send('backShareRoot');
 	}
 }
 

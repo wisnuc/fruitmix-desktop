@@ -9,6 +9,8 @@
 import React, { findDOMNode, Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { CircularProgress } from 'material-ui';
+//import Action
+import Action from '../../actions/action';
 // import Component 
 import M from './MediaImage';
 
@@ -31,11 +33,16 @@ class Media extends Component {
 						if (index >20) {
 							return null
 						}
-						return <M key={item.hash} item={item}></M>
+						return <M key={item.hash} item={item} download={this.downloadImage.bind(this,item)}></M>
 					})}
 				</div>
 				)
 		}
+	}
+
+	downloadImage(item) {
+		this.props.dispatch(Action.toggleMedia(true));
+		ipc.send('getMediaImage',item);
 	}
 }
 

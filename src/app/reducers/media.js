@@ -20,8 +20,16 @@ const Media = (state=defaultState,action)=>{
 			item.path = action.data.path;
 			return Object.assign({},state);
 		case 'TOGGLE_MEDIA':
+			let currentMediaImage = state.currentMediaImage;
 			state.currentMediaImage.open = action.open;
-			return Object.assign({},state);
+
+			if (action.open == false) {
+				currentMediaImage = {status:'notReady',path:null,open: false};	
+			}
+			return Object.assign({},state,{currentMediaImage:currentMediaImage});
+		case 'SET_MEDIA_IMAGE':
+			let image = Object.assign({},state,{status:'ready',path:action.item.path,open:true});
+			return Object.assign({},state,{currentMediaImage:image});
 		default:
 			return state;
 	}

@@ -107,8 +107,12 @@ class Main extends Component {
 		});
 
 		ipc.on('donwloadMediaSuccess',(err,item)=>{
-			// this.props.dispatch(Action.setMediaImage(item));
+			this.props.dispatch(Action.setMediaImage(item));
 			console.log(item);
+		});
+
+		ipc.on('setShareChildren',(err,shareChildren)=>{
+			this.props.dispatch(Action.setShareChildren(shareChildren));
 		});
 	}
 

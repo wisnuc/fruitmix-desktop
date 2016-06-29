@@ -418,8 +418,19 @@
 }
 .media-mask {
 	width:100%;
-	background:rgba(0,0,0,.5);
+	background:rgba(0,0,0,.8);
 	position: absolute;
-	z-index: 1100
+	z-index: 1100;
+}
+.media-mask-close {
+	position: absolute;
+	right:10px;
+	top:10px;
+	color:white;
+}
 
+.media-mask-image {
+	display: block;
+	max-width:90%;
+	margin: 50px auto 0;
 }

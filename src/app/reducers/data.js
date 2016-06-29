@@ -13,6 +13,7 @@ const defaultDirectory = {
 	// upload:[],
 	// dowload: [],
 	showSize:100,
+	shareChildren: []
 	// uploadSize:100,
 	// downloadSize:100
 }
@@ -172,7 +173,8 @@ const directory = (state=defaultDirectory,action)=> {
 		// 	}else {
 		// 		return state
 		// 	}
-
+		case 'SET_SHARE_CHILDREN':
+			return Object.assign({},state,{shareChildren:action.shareChildren});
 		default:
 			return state
 	}

@@ -236,6 +236,20 @@ var actions = {
 			type: 'TOGGLE_MEDIA',
 			open: open
 		}
+	},
+
+	setMediaImage(item) {
+		return {
+			type: 'SET_MEDIA_IMAGE',
+			item: item
+		}
+	},
+
+	setShareChildren(shareChildren) {
+		return {
+			type: 'SET_SHARE_CHILDREN',
+			shareChildren: shareChildren
+		}
 	}
 }
 
