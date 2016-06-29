@@ -878,7 +878,6 @@ function move(uuid,target,index) {
 //getMediaData
 ipcMain.on('getMediaData',(err)=>{
 	getMediaData().then((data)=>{
-		console.log(data);
 		data.forEach(item=>{
 			if (item == null) {return}
 			let obj = Object.assign({},item,{status:'notReady',failed:0});

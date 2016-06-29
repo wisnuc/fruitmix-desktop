@@ -30,7 +30,7 @@ class Media extends Component {
 			return (
 				<div style={{width:'100%'}} className='mediaContainer'>
 					{this.props.media.data.map((item,index)=>{
-						if (index >20) {
+						if (index >100) {
 							return null
 						}
 						return <M key={item.hash} item={item} download={this.downloadImage.bind(this,item)}></M>

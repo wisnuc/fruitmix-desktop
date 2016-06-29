@@ -8,8 +8,7 @@
 // require core module
 import React, { findDOMNode, Component, PropTypes } from 'react';
 import { CircularProgress } from 'material-ui';
-//import Action
-import Action from '../../actions/action';
+
 // import Component 
 class Media extends Component {
 	render() {
@@ -33,6 +32,9 @@ class Media extends Component {
 
 
 	componentDidMount() {
+		if (this.props.item.status == 'ready') {
+			return
+		}
 		ipc.send('getThumb',this.props.item);
 	}
 
