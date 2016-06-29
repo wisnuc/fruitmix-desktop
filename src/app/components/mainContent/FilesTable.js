@@ -18,7 +18,7 @@ class AllFilesTable extends Component {
 	render() {
 		var _this = this;
 		return (
-			<table className="allFileTable">
+			<table className="allFileTable" onClick={this.windowScrollCallback.bind(this)}>
 				{/*table header*/}
 				<thead>
 					<tr>
@@ -66,29 +66,21 @@ class AllFilesTable extends Component {
 			</table>
 			)
 		}
-	componentWillUpdate(){
-		console.log('5  '+(new Date()).getTime());
-	}
-	componentDidUpdate() {
-		console.log('6  '+(new Date()).getTime());
-	}
 	componentDidMount() {
-		this.bindWindowScrollEvent(true);
+		this.bindWindowScrollEvent();
 	}
 	componentWillUnmount() {
-		this.bindWindowScrollEvent(false);
+		this.bindWindowScrollEvent({ isUnset:  true });
 	}
 	//bindScroll event
-	bindWindowScrollEvent(options) {
-		var dom = $('.allFileTable');
-
-		$(window)[options?'bind':'unbind']('scroll',function() {
-			$(this).remove();
-		});
-	}
-	scrollCallback() {
-		console.log('!!!!!!!!!!!!!!!!!!!!');
-	}
+    bindWindowScrollEvent(options) {
+        var isUnset = !!options && options.isUnset,
+            scrollCallback = this.windowScrollCallback.bind(this);
+        $('.all-files-container')[isUnset ? 'unbind' :  'click']('scroll', scrollCallback);
+    }
+    windowScrollCallback() {
+        c.log(document.getElementsByClassName('file-area')[0].scrollTop);
+    }
 	//select all
 	selectAllChildren() {
  		this.props.dispatch(Action.selectAllChildren());
