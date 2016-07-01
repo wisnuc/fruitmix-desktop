@@ -13,6 +13,7 @@
 
 //require material
 import { AppBar, TextField, Drawer, Paper, Snackbar, FlatButton, IconMenu, MenuItem, IconButton } from 'material-ui';
+import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 
@@ -60,10 +61,6 @@ class Main extends Component {
 			console.log(data);
 		});
 
-		ipc.on('sendMessage',(err,data)=>{
-			console.log(data);
-		});
-
 		ipc.on('uploadSuccess',(err,file,children)=>{
 				this.props.dispatch(Action.refreshDir(children));
 		});
@@ -108,7 +105,6 @@ class Main extends Component {
 
 		ipc.on('donwloadMediaSuccess',(err,item)=>{
 			this.props.dispatch(Action.setMediaImage(item));
-			console.log(item);
 		});
 
 		ipc.on('setShareChildren',(err,shareChildren)=>{
@@ -123,15 +119,16 @@ class Main extends Component {
 				<Multiple/>
 				{/*Bar*/}
 				<AppBar 
-				className='app-bar' title='my cloud' iconElementRight={<IconMenu
-          iconButtonElement={<IconButton></IconButton>}
-          open={false}
-        >
-          <MenuItem value="1" primaryText="Windows App" />
-          <MenuItem value="2" primaryText="Mac App" />
-          <MenuItem value="3" primaryText="Android App" />
-          <MenuItem value="4" primaryText="iOS App" />
-        </IconMenu>}
+				className='app-bar' title='my cloud'
+				iconElementRight={
+					<IconMenu
+          				iconButtonElement={<FlatButton label={this.props.login.obj.username}/>}
+          				anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}
+      					targetOrigin={{horizontal: 'right', vertical: 'bottom'}}
+        			>
+			          <MenuItem value="1" primaryText="用户管理" onTouchTap={this.openUser.bind(this)}/>
+			          <MenuItem value="2" primaryText="注销" onTouchTap={this.logOff.bind(this)}/>
+        			</IconMenu>}
 				onLeftIconButtonTouchTap={this.leftNavClick.bind(this)}
 				>
 				</AppBar>
@@ -227,6 +224,15 @@ class Main extends Component {
 	//close snackbar
 	cleanSnack() {
 		this.props.dispatch(Action.cleanSnack());
+	}
+
+	openUser() {
+		console.log('openuser');
+	}
+
+	logOff() {
+		ipc.send('loginOff');
+		window.location.hash = '/login';
 	}
 }
 

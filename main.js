@@ -4,7 +4,6 @@
 const electron = require('electron');
 const {app, BrowserWindow, ipcMain, dialog } = require('electron');
 
-var configuration = require('./configuration');
 var request = require('request');
 var http = require('http');
 var fs = require ('fs');
@@ -44,33 +43,55 @@ var media = [];
 var mediaMap = new Map();
 var thumbQueue = [];
 var thumbIng = [];
+//device
+var device = [];
 
 var c = console.log;
-var browser = mdns.createBrowser(new mdns.ServiceType('http', 'tcp'));
-browser.on('ready', function () {
-    browser.discover(); 
-});
+var browser = mdns.createBrowser(new mdns.ServiceType('http', '_tcp'));
 
-browser.on('update', function (data) {
-	// console.log('---------------------------------------------------------------------------------------------------------------');
- //    	console.log('data:', data);
-});
+
+try{
+	browser.on('ready', function () {
+		c('ready');
+	    browser.discover(); 
+	});
+	browser.on('update', function (data) {
+		console.log('----------------------------------------');
+		device.push(data);
+	    console.log(data.addresses[0]);
+	});
+
+	browser.on('error',err=>{
+		c(err);
+	});
+}catch(e){
+	console.log(e);
+}
+
 //app ready and open window
 app.on('ready', function() {
 	mainWindow = new BrowserWindow({
-		frame: true,
+		frame: false,
 		height: 768,
-		resizable: false,
-		width: 1366
+		resizable: true,
+		width: 1366,
+		minWidth:1024,
+		minHeight:768
 	});
 	mainWindow.webContents.openDevTools();
 	// dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']})
 	mainWindow.loadURL('file://' + __dirname + '/ele/index.html');
 });
+app.on('window-all-closed', () => {
+  app.quit();
+});
 //get all user information
 ipcMain.on('login',function(event,username,password){
 	login().then((data)=>{
 		user = data.find((item)=>{return item.username == username});
+		if (user == undefined) {
+			throw new error
+		}
 		return getToken(user.uuid,password);
 	}).then((token)=>{
 		user.token = token.token;
@@ -80,6 +101,7 @@ ipcMain.on('login',function(event,username,password){
 		user.allUser = users;
 		mainWindow.webContents.send('loggedin',user);
 	}).catch((err)=>{
+		console.log(err);
 		mainWindow.webContents.send('message','loginFailed',0);
 	});
 });
@@ -776,7 +798,7 @@ function share(file,users) {
 			headers: {
 				Authorization: user.type+' '+user.token
 			},
-			form: {readlist:JSON.stringify(users),writelist:JSON.stringify(y)}
+			form: {readlist:JSON.stringify(users),writelist:JSON.stringify(users)}
 		}
 		function callback (err,res,body) {
 			console.log(res);
@@ -789,7 +811,6 @@ function share(file,users) {
 				reject(err)
 			}
 		};
-		console.log('333');
 		request.patch(server+'/files/'+file.uuid+'?type=permission',options,callback);
 	});
 	return s;
@@ -973,9 +994,11 @@ function isThumbExist(item) {
 
 function downloadMedia(item) {
 	var download = new Promise((resolve,reject)=>{
+		let scale = item.width/item.height;
+		let height = 100/scale;
 		var options = {
 			method: 'GET',
-			url: server+'/media/'+item.hash+'?type=thumb&width=100&height=100',
+			url: server+'/media/'+item.hash+'?type=thumb&width=100&height='+height,
 			headers: {
 				Authorization: user.type+' '+user.token
 			}
@@ -1002,11 +1025,11 @@ function downloadMedia(item) {
 //getMediaImage
 ipcMain.on('getMediaImage',(err,item)=>{
 	downloadMediaImage(item).then(()=>{
-		console.log('OK');
+		c('download media image success');
 		item.path = __dirname+'/media/'+item.hash;
 		mainWindow.webContents.send('donwloadMediaSuccess',item);
 	}).catch(err=>{
-		c('not ok');
+		c('download media image failed');
 	});
 })
 function downloadMediaImage(item) {
@@ -1024,7 +1047,7 @@ function downloadMediaImage(item) {
 				resolve();
 			}else {
 				console.log('err');
-				fs.unlink('media/'+item.hash+'thumb', (err,data)=>{
+				fs.unlink('media/'+item.hash, (err,data)=>{
 				});
 				reject()
 			}
@@ -1047,6 +1070,36 @@ ipcMain.on('backShareRoot',err=>{
 	shareChildren.length = 0;
 	shareTree.forEach((item)=>{if (item.hasParent == false) {shareChildren.push(item);}});
 	mainWindow.webContents.send('setShareChildren',shareChildren);
+});
+//loginOff
+ipcMain.on('loginOff',err=>{
+	user = {};
+	//files
+	rootNode= null;
+	allFiles = [];
+	tree = {};
+	map = new Map();
+	//share
+	shareFiles = [];
+	shareTree = [];
+	shareMap = new Map();
+	filesShared = [];
+	shareChildren = [];
+	//directory
+	currentDirectory = {};
+	children = [];
+	parent = {};
+	path = [];
+	tree = {};
+	//upload 
+	uploadQueue = [];
+	uploadNow = [];
+	uploadMap = new Map();
+	//media
+	media = [];
+	mediaMap = new Map();
+	thumbQueue = [];
+	thumbIng = [];
 });
 //copy 
 // ipcMain.on('copy'，);

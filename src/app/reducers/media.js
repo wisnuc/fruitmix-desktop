@@ -28,7 +28,7 @@ const Media = (state=defaultState,action)=>{
 			}
 			return Object.assign({},state,{currentMediaImage:currentMediaImage});
 		case 'SET_MEDIA_IMAGE':
-			let image = Object.assign({},state,{status:'ready',path:action.item.path,open:true});
+			let image = Object.assign({},action.item,{status:'ready',path:action.item.path,open:true});
 			return Object.assign({},state,{currentMediaImage:image});
 		case 'SET_MEDIA_SIZE':
 			var size;

@@ -264,6 +264,11 @@ var actions = {
 			type: 'SET_MEDIA_SIZE',
 			reset: reset
 		}
+	},
+	logOut() {
+		return {
+			type: 'LOG_OUT'
+		}
 	}
 }
 

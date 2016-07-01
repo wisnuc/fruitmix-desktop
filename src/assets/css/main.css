@@ -419,6 +419,7 @@
 	height:100px;
 	margin:10px;
 	float:left;
+	overflow: hidden;
 }
 .media-mask {
 	width:100%;

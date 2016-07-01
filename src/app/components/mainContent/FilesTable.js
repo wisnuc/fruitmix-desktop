@@ -66,12 +66,6 @@ class AllFilesTable extends Component {
 			</table>
 			)
 		}
-	componentWillUpdate(){
-		console.log('5  '+(new Date()).getTime());
-	}
-	componentDidUpdate() {
-		console.log('6  '+(new Date()).getTime());
-	}
 	componentDidMount() {
 		this.bindWindowScrollEvent(true);
 	}
