@@ -524,10 +524,7 @@ function modifyData(files,uuid) {
 		dir.children.push(o);
 	}
 	if (files.parent == currentDirectory.uuid) {
-		c('after');
-
 		children = dir.children.map(i => Object.assign({},i,{children:null}));
-		console.log(children);
 		mainWindow.webContents.send('uploadSuccess',{},children);
 	}
 }
@@ -917,23 +914,26 @@ ipcMain.on('getThumb',(err,item)=>{
 });
 
 function dealThumbQueue() {
-	setTimeout(function(){
+	
 		if (thumbQueue.length == 0) {
 			return
 		}else {
-			if (thumbIng.length == 0) {
-				console.log('run');
-				for (var i=0;i<3;i++) {
-					if (thumbQueue.length == 0) {
-						break;
+			setTimeout(function(){
+				if (thumbIng.length == 0) {
+					c('----');
+					console.log('run');
+					for (var i=0;i<3;i++) {
+						if (thumbQueue.length == 0) {
+							break;
+						}
+						let item = thumbQueue.shift();
+						thumbIng.push(item);
+						isThumbExist(item);
 					}
-					let item = thumbQueue.shift();
-					thumbIng.push(item);
-					isThumbExist(item);
 				}
-			}
+			},500);
 		}
-	},500);
+	
 }
 
 function isThumbExist(item) {
@@ -959,6 +959,7 @@ function isThumbExist(item) {
 		}else {
 			sendThumb(item);
 		}
+		console.log('finish');
 	});
 
 	function sendThumb(item){

@@ -75,6 +75,7 @@
 	flex-wrap: nowrap;
 	justify-content: center;
 	align-items: flex-start;
+	overflow: hidden;
 
 }
 .file-area {
@@ -407,14 +408,17 @@
 }
 /*media*/
 .mediaContainer {
-	display: flex;
+/*	display: flex;
 	flex-flow: row wrap;
-	 justify-content: flex-start;
+	justify-content: flex-start;*/
+	height:100%;
+	overflow: auto;
 }
 .media-image {
 	width:100px;
 	height:100px;
 	margin:10px;
+	float:left;
 }
 .media-mask {
 	width:100%;

@@ -111,5 +111,5 @@ function mapStateToProps (state) {
 		snack: state.snack
 	}
 }
-
+	
 export default connect(mapStateToProps)(Index);

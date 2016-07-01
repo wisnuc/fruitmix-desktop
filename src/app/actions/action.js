@@ -250,6 +250,20 @@ var actions = {
 			type: 'SET_SHARE_CHILDREN',
 			shareChildren: shareChildren
 		}
+	},
+
+	setFilesSize(reset) {
+		return {
+			type: 'SET_FILES_SIZE',
+			reset: reset
+		}
+	},
+
+	setMediaSize(reset) {
+		return {
+			type: 'SET_MEDIA_SIZE',
+			reset: reset
+		}
 	}
 }
 

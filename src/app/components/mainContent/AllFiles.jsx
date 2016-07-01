@@ -101,7 +101,7 @@ class AllFiles extends Component {
 			return (<div className='data-loading '><CircularProgress/></div>)
 		}else {
 			return (
-				<Paper className='file-area' onMouseDown={this.mouseDown.bind(this)}>
+				<Paper className='file-area' onScroll={this.scrollEvent.bind(this)} onMouseDown={this.mouseDown.bind(this)}>
 					{/*upload input*/}
 					<input className='upload-input' type="file" onChange={this.upLoadFile.bind(this)} multiple={true} webkitdirectory={true}/>
 					{/*bread crumb*/}
@@ -265,6 +265,19 @@ class AllFiles extends Component {
 	// select users be shared
 	checkUser(uuid,obj,b) {
 		this.props.dispatch(Action.checkUser(uuid,b));
+	}
+	//scrollEvent 
+	scrollEvent() {
+		let dom = document.getElementsByClassName('file-area')[0]
+		let sTop = dom.scrollTop;
+		let sHeight = dom.scrollHeight;
+		let cHeight = dom.clientHeight;
+		if (cHeight+sTop == sHeight) {
+			if (this.props.data.children.length <= this.props.data.showSize) {
+				return
+			}
+			this.props.dispatch(Action.setFilesSize(false));
+		}
 	}
 }
 

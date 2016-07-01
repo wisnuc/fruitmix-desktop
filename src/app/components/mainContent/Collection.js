@@ -38,7 +38,10 @@ class Collection extends Component {
 							return (
 								<Table selectable={false} key={item.key}>
 								<TableBody displayRowCheckbox={false}>
-								{item.data.map(item1=>{
+								{item.data.map((item1,index)=>{
+									if (index>this.props.transmission.uploadSize) {
+										return
+									}
 									return (
 										<TableRow key={item1.name+item1.uploadTime}>
 											<TableRowColumn title={item1.name}>{item1.name}</TableRowColumn>
@@ -57,6 +60,9 @@ class Collection extends Component {
 						<Table selectable={false}>
 						<TableBody displayRowCheckbox={false}>
 						{this.props.transmission.dowload.map((item,index)=>{
+							if (index>this.props.transmission.downloadSize) {
+								return
+							}
 							return (
 								<TableRow>
 									<TableRowColumn>{item.attribute.name}</TableRowColumn>

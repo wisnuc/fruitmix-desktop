@@ -12,7 +12,7 @@ const defaultDirectory = {
 	// dialogOfShare: false,
 	// upload:[],
 	// dowload: [],
-	showSize:100,
+	showSize:50,
 	shareChildren: []
 	// uploadSize:100,
 	// downloadSize:100
@@ -175,6 +175,11 @@ const directory = (state=defaultDirectory,action)=> {
 		// 	}
 		case 'SET_SHARE_CHILDREN':
 			return Object.assign({},state,{shareChildren:action.shareChildren});
+		case 'SET_FILES_SIZE':
+			var size = state.showSize;
+			action.reset?size=50:size+=50
+			console.log(size);
+			return Object.assign({},state,{showSize:size});
 		default:
 			return state
 	}

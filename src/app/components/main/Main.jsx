@@ -12,7 +12,7 @@
  import CSS from '../../utils/transition';
 
 //require material
-import { AppBar, TextField, Drawer, Paper, Snackbar, FlatButton } from 'material-ui';
+import { AppBar, TextField, Drawer, Paper, Snackbar, FlatButton, IconMenu, MenuItem, IconButton } from 'material-ui';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 
@@ -123,7 +123,15 @@ class Main extends Component {
 				<Multiple/>
 				{/*Bar*/}
 				<AppBar 
-				className='app-bar' title='my cloud' iconElementRight={<FlatButton label={this.props.login.obj.username} />}
+				className='app-bar' title='my cloud' iconElementRight={<IconMenu
+          iconButtonElement={<IconButton></IconButton>}
+          open={false}
+        >
+          <MenuItem value="1" primaryText="Windows App" />
+          <MenuItem value="2" primaryText="Mac App" />
+          <MenuItem value="3" primaryText="Android App" />
+          <MenuItem value="4" primaryText="iOS App" />
+        </IconMenu>}
 				onLeftIconButtonTouchTap={this.leftNavClick.bind(this)}
 				>
 				</AppBar>
