@@ -25,14 +25,15 @@ var actions = {
 		}
 	},
 
-	setDirctory(dir,children,parent,path,shareChildren) {
+	setDirctory(dir,children,parent,path,shareChildren,filesSharedByMe) {
 		return {
 			type: 'SET_DIRECTORY',
 			directory: dir,
 			children: children,
 			parent: parent,
 			path:path,
-			shareChildren:shareChildren
+			shareChildren:shareChildren,
+			filesSharedByMe:filesSharedByMe
 		}
 	},
 

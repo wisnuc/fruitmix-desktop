@@ -20,13 +20,13 @@ var user = {};
 //files
 var rootNode= null;
 var allFiles = [];
+var filesSharedByMe = [];
 var tree = {};
 var map = new Map();
 //share
 var shareFiles = [];
 var shareTree = [];
 var shareMap = new Map();
-var filesShared = [];
 var shareChildren = [];
 //directory
 var currentDirectory = {};
@@ -47,7 +47,7 @@ var thumbIng = [];
 var device = [];
 
 var c = console.log;
-var browser = mdns.createBrowser(new mdns.ServiceType('http', '_tcp'));
+var browser = mdns.createBrowser();
 
 
 try{
@@ -62,6 +62,7 @@ try{
 	});
 
 	browser.on('error',err=>{
+		c('mdns err');
 		c(err);
 	});
 }catch(e){
@@ -71,7 +72,7 @@ try{
 //app ready and open window
 app.on('ready', function() {
 	mainWindow = new BrowserWindow({
-		frame: false,
+		frame: true,
 		height: 768,
 		resizable: true,
 		width: 1366,
@@ -102,7 +103,7 @@ ipcMain.on('login',function(event,username,password){
 		mainWindow.webContents.send('loggedin',user);
 	}).catch((err)=>{
 		console.log(err);
-		mainWindow.webContents.send('message','loginFailed',0);
+		mainWindow.webContents.send('message','登录失败',0);
 	});
 });
 function login() {
@@ -126,7 +127,6 @@ function getToken(uuid,password) {
 			    'sendImmediately': false
 			  }
 		},function(err,res,body) {
-			console.log();
 			if (!err && res.statusCode == 200) {
 				resolve(JSON.parse(body));
 			}else {
@@ -161,9 +161,9 @@ ipcMain.on('getRootData', ()=> {
 	getFiles().then((data)=>{
 		// //remove folder
 		removeFolder(data);
-		console.log('6');
 		dealWithData(data);
-		mainWindow.webContents.send('receive', currentDirectory,children,parent,path,shareChildren);
+		let copyFilesSharedByMe = filesSharedByMe.map(item=>Object.assign({},item,{children:null,writelist:[].concat(item.writelist)}));
+		mainWindow.webContents.send('receive', currentDirectory,children,parent,path,shareChildren,copyFilesSharedByMe);
 	}).catch((err)=>{
 		console.log(err);
 		mainWindow.webContents.send('message','get data error',1);	
@@ -181,6 +181,29 @@ ipcMain.on('refresh',()=>{
 		mainWindow.webContents.send('message','get data error',1);	
 	});
 });
+//getFils api
+function getFiles() {
+	var files = new Promise((resolve,reject)=>{ 
+			var options = {
+				method: 'GET',
+				url: server+'/files',
+				headers: {
+					Authorization: user.type+' '+user.token
+				}
+
+			};
+			function callback (err,res,body) {
+				if (!err && res.statusCode == 200) {
+					resolve(JSON.parse(body));
+				}else {
+					reject(err);
+				}
+			}
+			request(options,callback);
+	});
+	return files;
+}
+//remove folder fruitmix ...
 function removeFolder(data) {
 	let uuid = null;
 	let index = data.findIndex((item,index)=>{
@@ -203,42 +226,20 @@ function removeFolder(data) {
 	data[index].attribute.name = 'my cloud';
 	rootNode = data[index]; 
 }
-function getFiles() {
-	var files = new Promise((resolve,reject)=>{ 
-			var options = {
-				method: 'GET',
-				url: server+'/files',
-				headers: {
-					Authorization: user.type+' '+user.token
-				}
-
-			};
-			function callback (err,res,body) {
-				if (!err && res.statusCode == 200) {
-					resolve(JSON.parse(body));
-				}else {
-					reject(err);
-				}
-			}
-			request(options,callback);
-	});
-	return files;
-}
+//get shareFiles,tree,rootNode
 function dealWithData(data) {
 	//set allfiles
-	allFiles = data;
-	allFiles = allFiles.map((item)=>{item.share = false;item.checked = false;return item});
+	allFiles = data.map((item)=>{item.share = false;item.checked = false;return item});
 	//separate shared files from allfiles
 	classifyShareFiles();
 	//set tree
 	tree = getTree(allFiles,'file');
 	shareTree = getTree(shareFiles,'share');
-	// set children
+	//set children
 	shareTree.forEach((item)=>{if (item.hasParent == false) {shareChildren.push(item)}});
-	// children = tree.filter(item=>item.parent=='').map(item=>Object.assign({},item,{children:{}}));
-	// //set path
-	// path.length = 0;
-	// path.push({key:''});
+	//set filesSharedByMe
+	getFilesSharedByMe();
+	//show root file
 	enterChildren(rootNode);
 }
 function classifyShareFiles() {
@@ -305,6 +306,8 @@ function getTree(f,type) {
 				type:item.type,
 				checked:false,
 				owner:item.permission.owner,
+				readlist:item.permission.readlist,
+				writelist:item.permission.writelist,
 				attribute:{
 					changetime:item.attribute.changetime,
 					modifytime:item.attribute.modifytime,
@@ -327,11 +330,18 @@ function getTree(f,type) {
 		});
 	}else {
 		tree.forEach((item)=>{
-				map.set(item.uuid,item);	
+			map.set(item.uuid,item);	
 		
 		});
 	}
 	return tree;	
+}
+function getFilesSharedByMe() {
+	tree.forEach(item=>{
+		if (item.owner == user.uuid && item.readlist.length != 0 && item.writelist.length != 0 && item.readlist[0] != "" && item.writelist[0] != "") {
+			filesSharedByMe.push(item);
+		}
+	});
 }
 //select children
 ipcMain.on('enterChildren', (event,selectItem) => {
@@ -360,7 +370,7 @@ function enterChildren(selectItem) {
 		mainWindow.webContents.send('receive',currentDirectory,children,parent,path,shareChildren);
 	}
 }
-
+//get path
 function getPath(obj) {
 	//insert obj to path
 	path.unshift({key:obj.attribute.name,value:allFiles.find((item)=>{return item.uuid == obj.uuid})});
@@ -377,6 +387,21 @@ ipcMain.on('getFile',(e,uuid)=>{
 		mainWindow.webContents.send('receiveFile',data);
 	})
 });
+function getFile(uuid) {
+	var file = new Promise((resolve,reject)=>{
+		request
+			.get(server+'/files/'+uuid)
+			.set('Authorization',user.type+' '+user.token)
+			.end((err,res)=>{
+				if (res.ok) {
+					resolve(eval(res.body));
+				}else {
+					reject(err);
+				}
+			});
+	});
+	return file;
+}
 //upload file
 ipcMain.on('uploadFile',(e,files)=>{
 	// uploadQueueWait = uploadQueueWait.concat(files);
@@ -782,17 +807,24 @@ function createNewUser(username,password,email) {
 }
 //share
 ipcMain.on('share',function(err,files,users){
-	console.log('ipc enter');
 	files.forEach((item)=>{
-		console.log('for each');
 		share(item,users).then(()=>{
-			console.log('then le');
+			//changeShareData
+			let file = map.get(item.uuid);
+			file.readlist = users;
+			file.writelist = users;
+			//is exist in filesSharedByMe?
+			let index = filesSharedByMe.findIndex(f=>f.uuid == item.uuid);
+			if (index == -1) {
+				filesSharedByMe.push(map.get(item.uuid));
+
+			}
 		});
 	});
+	mainWindow.webContents.send('message',files.length + '个文件分享成功');
 });
 function share(file,users) {
 	var s = new Promise((resolve,reject)=>{
-		console.log(users);
 		var y = [];
 		var options = {
 			headers: {
@@ -801,34 +833,18 @@ function share(file,users) {
 			form: {readlist:JSON.stringify(users),writelist:JSON.stringify(users)}
 		}
 		function callback (err,res,body) {
-			console.log(res);
 			if (!err && res.statusCode == 200) {
 				console.log('res');
-				resolve(body);
+				resolve();
 			}else {
 				console.log('err');
 				console.log(err);
-				reject(err)
+				reject()
 			}
 		};
 		request.patch(server+'/files/'+file.uuid+'?type=permission',options,callback);
 	});
 	return s;
-}
-function getFile(uuid) {
-	var file = new Promise((resolve,reject)=>{
-		request
-			.get(server+'/files/'+uuid)
-			.set('Authorization',user.type+' '+user.token)
-			.end((err,res)=>{
-				if (res.ok) {
-					resolve(eval(res.body));
-				}else {
-					reject(err);
-				}
-			});
-	});
-	return file;
 }
 //getTreeChildren
 ipcMain.on('getTreeChildren',function(err,uuid) {
@@ -1077,13 +1093,13 @@ ipcMain.on('loginOff',err=>{
 	//files
 	rootNode= null;
 	allFiles = [];
+	filesSharedByMe = [];
 	tree = {};
 	map = new Map();
 	//share
 	shareFiles = [];
 	shareTree = [];
 	shareMap = new Map();
-	filesShared = [];
 	shareChildren = [];
 	//directory
 	currentDirectory = {};
@@ -1103,19 +1119,6 @@ ipcMain.on('loginOff',err=>{
 });
 //copy 
 // ipcMain.on('copy'，);
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // function setGlobalShortcuts() {
 //     globalShortcut.unregisterAll();

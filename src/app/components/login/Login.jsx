@@ -116,8 +116,6 @@ Index.childContextTypes = {
   muiTheme: React.PropTypes.object.isRequired,
 };
 
-
-
 function mapStateToProps (state) {
 	return {
 		login: state.login,

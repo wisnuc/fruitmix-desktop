@@ -81,7 +81,7 @@ class AllFiles extends Component {
 					actions={shareActions}
 					open={this.props.isShow.dialogOfShare}
 				>
-					<div className='share-user-list-container' style={{'overflow-y':'scroll'}}>
+					<div className='share-user-list-container' style={{'overflowY':'scroll'}}>
 					{this.props.login.obj.allUser.map((item,index)=>{
 						return <Checkbox key={item.username} label={item.username} style={styles.checkbox} labelPosition="left" onCheck={this.checkUser.bind(this,item.uuid)}/>
 					})}
@@ -136,25 +136,6 @@ class AllFiles extends Component {
 	}
 	//upload file
 	upLoadFile(e) {
-		// let files = [];
-		// for (let i=0;i<e.nativeEvent.target.files.length;i++) {
-		// 	var f = e.nativeEvent.target.files[i];
-		// 	var t = new Date();
-		// 	var file = {
-		// 		name:f.name,
-		// 		path:f.path,
-		// 		size:f.size,
-		// 		lastModifiedDate:f.lastModifiedDate,
-		// 		parent : {uuid:this.props.data.directory.uuid},
-		// 		uploadTime :  Date.parse(t),
-		// 		status:0
-		// 	}
-		// 	files.push(file);
-		// }
-		// this.props.dispatch(Action.addUpload(files));
-		// ipc.send('uploadFile',files);	
-		// this.props.dispatch(Action.setSnack(files.length+' 个文件添加到下载队列',true));
-		//--------------------------------------------------------------------------------------------------------------------------------------------------------
 		let files = [];
 		let obj = {};
 		let map = new Map();
@@ -258,8 +239,6 @@ class AllFiles extends Component {
 		});
 		this.props.dispatch(Action.toggleShare(false));
 		this.props.dispatch(Action.cancelUserCheck());
-		console.log(files);
-		console.log(users[0]);
 		ipc.send('share',files,users);
 	}
 	// select users be shared

@@ -31,7 +31,7 @@ class SharedFiles extends Component {
 							<TableRow>
 								<TableHeaderColumn>文件名</TableHeaderColumn>
 								<TableHeaderColumn>分享者</TableHeaderColumn>
-								<TableHeaderColumn>下载</TableHeaderColumn>
+								<TableHeaderColumn>操作</TableHeaderColumn>
 							</TableRow>
 						</TableHeader>
 					<TableBody displayRowCheckbox={false}>

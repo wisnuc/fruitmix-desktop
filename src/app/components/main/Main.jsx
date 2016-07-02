@@ -46,8 +46,10 @@ class Main extends Component {
 		ipc.send('getMediaData');
 		this.props.dispatch(Action.filesLoading());
 
-		ipc.on('receive',function (err,dir,children,parent,path,shareChildren) {
-			_this.props.dispatch(Action.setDirctory(dir,children,parent,path,shareChildren));
+		ipc.on('receive',function (err,dir,children,parent,path,shareChildren,filesSharedByMe) {
+			console.log('~~~~~~~~~~~~~~');
+			console.log(filesSharedByMe);
+			_this.props.dispatch(Action.setDirctory(dir,children,parent,path,shareChildren,filesSharedByMe));
 		});
 		ipc.on('setTree',(err,tree)=>{
 			this.props.dispatch(Action.setTree(tree));
@@ -141,7 +143,7 @@ class Main extends Component {
 					<Content></Content>
 				</Paper>
 				<Mask></Mask>
-				<Snackbar open={this.props.snack.open} message={this.props.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
+				<Snackbar style={{textAlign:'center'}} open={this.props.snack.open} message={this.props.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
 			</div></CSS>
 			);
 	}

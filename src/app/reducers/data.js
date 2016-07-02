@@ -7,15 +7,9 @@ const defaultDirectory = {
 	selectAll:false, 
 	position:[],
 	menu:{show:false,objArr:[]},
-	// detail:[],
-	// dialogOfFolder: false,
-	// dialogOfShare: false,
-	// upload:[],
-	// dowload: [],
 	showSize:50,
-	shareChildren: []
-	// uploadSize:100,
-	// downloadSize:100
+	shareChildren: [],
+	filesSharedByMe: [],
 }
 
 const directory = (state=defaultDirectory,action)=> {
@@ -23,8 +17,10 @@ const directory = (state=defaultDirectory,action)=> {
 		case 'SET_DIRECTORY':
 			let position = action.children.map((item,index)=>{
 				return {top:index*51+58+48+8+64,bottom:(index+1)*51+58+48+8+64}
-			})
-			return Object.assign({}, state,{directory:action.directory,children:action.children,parent:action.parent,path:action.path,position:position,state:'READY',selectAll:false,shareChildren:action.shareChildren});
+			});
+
+			var obj = {directory:action.directory,children:action.children,parent:action.parent,path:action.path,position:position,state:'READY',selectAll:false,shareChildren:action.shareChildren,filesSharedByMe:action.filesSharedByMe};
+			return Object.assign({}, state, obj);
 
 		case 'SELECT_CHILDREN':
 		console.log('2  '+(new Date()).getTime());
