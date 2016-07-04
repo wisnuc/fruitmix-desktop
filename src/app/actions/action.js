@@ -25,14 +25,15 @@ var actions = {
 		}
 	},
 
-	setDirctory(dir,children,parent,path,shareChildren) {
+	setDirctory(dir,children,parent,path,shareChildren,filesSharedByMe) {
 		return {
 			type: 'SET_DIRECTORY',
 			directory: dir,
 			children: children,
 			parent: parent,
 			path:path,
-			shareChildren:shareChildren
+			shareChildren:shareChildren,
+			filesSharedByMe:filesSharedByMe
 		}
 	},
 
@@ -249,6 +250,25 @@ var actions = {
 		return {
 			type: 'SET_SHARE_CHILDREN',
 			shareChildren: shareChildren
+		}
+	},
+
+	setFilesSize(reset) {
+		return {
+			type: 'SET_FILES_SIZE',
+			reset: reset
+		}
+	},
+
+	setMediaSize(reset) {
+		return {
+			type: 'SET_MEDIA_SIZE',
+			reset: reset
+		}
+	},
+	logOut() {
+		return {
+			type: 'LOG_OUT'
 		}
 	}
 }

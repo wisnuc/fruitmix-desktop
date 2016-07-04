@@ -12,7 +12,8 @@
  import CSS from '../../utils/transition';
 
 //require material
-import { AppBar, TextField, Drawer, Paper, Snackbar, FlatButton } from 'material-ui';
+import { AppBar, TextField, Drawer, Paper, Snackbar, FlatButton, IconMenu, MenuItem, IconButton } from 'material-ui';
+import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 
@@ -45,8 +46,10 @@ class Main extends Component {
 		ipc.send('getMediaData');
 		this.props.dispatch(Action.filesLoading());
 
-		ipc.on('receive',function (err,dir,children,parent,path,shareChildren) {
-			_this.props.dispatch(Action.setDirctory(dir,children,parent,path,shareChildren));
+		ipc.on('receive',function (err,dir,children,parent,path,shareChildren,filesSharedByMe) {
+			console.log('~~~~~~~~~~~~~~');
+			console.log(filesSharedByMe);
+			_this.props.dispatch(Action.setDirctory(dir,children,parent,path,shareChildren,filesSharedByMe));
 		});
 		ipc.on('setTree',(err,tree)=>{
 			this.props.dispatch(Action.setTree(tree));
@@ -57,10 +60,6 @@ class Main extends Component {
 
 		ipc.on('refresh',(err,data)=>{
 			console.log('refresh')
-			console.log(data);
-		});
-
-		ipc.on('sendMessage',(err,data)=>{
 			console.log(data);
 		});
 
@@ -108,11 +107,14 @@ class Main extends Component {
 
 		ipc.on('donwloadMediaSuccess',(err,item)=>{
 			this.props.dispatch(Action.setMediaImage(item));
-			console.log(item);
 		});
 
 		ipc.on('setShareChildren',(err,shareChildren)=>{
 			this.props.dispatch(Action.setShareChildren(shareChildren));
+		});
+
+		ipc.on('data',(err,data)=>{
+			c.log(data);
 		});
 	}
 
@@ -123,7 +125,16 @@ class Main extends Component {
 				<Multiple/>
 				{/*Bar*/}
 				<AppBar 
-				className='app-bar' title='my cloud' iconElementRight={<FlatButton label={this.props.login.obj.username} />}
+				className='app-bar' title='my cloud'
+				iconElementRight={
+					<IconMenu
+          				iconButtonElement={<FlatButton label={this.props.login.obj.username}/>}
+          				anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}
+      					targetOrigin={{horizontal: 'right', vertical: 'bottom'}}
+        			>
+			          <MenuItem value="1" primaryText="用户管理" onTouchTap={this.openUser.bind(this)}/>
+			          <MenuItem value="2" primaryText="注销" onTouchTap={this.logOff.bind(this)}/>
+        			</IconMenu>}
 				onLeftIconButtonTouchTap={this.leftNavClick.bind(this)}
 				>
 				</AppBar>
@@ -136,7 +147,7 @@ class Main extends Component {
 					<Content></Content>
 				</Paper>
 				<Mask></Mask>
-				<Snackbar open={this.props.snack.open} message={this.props.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
+				<Snackbar style={{textAlign:'center'}} open={this.props.snack.open} message={this.props.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
 			</div></CSS>
 			);
 	}
@@ -219,6 +230,15 @@ class Main extends Component {
 	//close snackbar
 	cleanSnack() {
 		this.props.dispatch(Action.cleanSnack());
+	}
+
+	openUser() {
+		console.log('openuser');
+	}
+
+	logOff() {
+		ipc.send('loginOff');
+		window.location.hash = '/login';
 	}
 }
 

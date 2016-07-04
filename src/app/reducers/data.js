@@ -7,24 +7,20 @@ const defaultDirectory = {
 	selectAll:false, 
 	position:[],
 	menu:{show:false,objArr:[]},
-	// detail:[],
-	// dialogOfFolder: false,
-	// dialogOfShare: false,
-	// upload:[],
-	// dowload: [],
-	showSize:100,
-	shareChildren: []
-	// uploadSize:100,
-	// downloadSize:100
+	showSize:50,
+	shareChildren: [],
+	filesSharedByMe: [],
 }
 
-const directory = (state=defaultDirectory,action)=> {
+const directory = (state = defaultDirectory,action)=> {
 	switch (action.type) {
 		case 'SET_DIRECTORY':
 			let position = action.children.map((item,index)=>{
 				return {top:index*51+58+48+8+64,bottom:(index+1)*51+58+48+8+64}
-			})
-			return Object.assign({}, state,{directory:action.directory,children:action.children,parent:action.parent,path:action.path,position:position,state:'READY',selectAll:false,shareChildren:action.shareChildren});
+			});
+
+			var obj = {directory:action.directory,children:action.children,parent:action.parent,path:action.path,position:position,state:'READY',selectAll:false,shareChildren:action.shareChildren,filesSharedByMe:action.filesSharedByMe};
+			return Object.assign({}, state, obj);
 
 		case 'SELECT_CHILDREN':
 		console.log('2  '+(new Date()).getTime());
@@ -175,6 +171,11 @@ const directory = (state=defaultDirectory,action)=> {
 		// 	}
 		case 'SET_SHARE_CHILDREN':
 			return Object.assign({},state,{shareChildren:action.shareChildren});
+		case 'SET_FILES_SIZE':
+			var size = state.showSize;
+			action.reset?size=50:size+=50
+			console.log(size);
+			return Object.assign({},state,{showSize:size});
 		default:
 			return state
 	}

@@ -62,4 +62,9 @@ const loginState = (state = defaultState, action) => {
 	}
 };
 
+var a = {1:'qwwe',2:'asfta'};
+var b = {1:'qqq'}
+Object.assign(a,b);
+a = {1:'qqq', 2:"asfta"};
+
 export default loginState;

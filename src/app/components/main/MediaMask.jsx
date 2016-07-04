@@ -16,9 +16,9 @@ import Action from '../../actions/action';
 class Mask extends Component {
 	render() {
 		let style = {
-			minHeight:document.body.clientHeight+'px',
+			height:document.body.clientHeight+'px',
 			display:this.props.media.currentMediaImage.open?'block':'none'
-		}
+		} 
 		return (
 			<div className='media-mask' style={style}>
 			<span className='media-mask-close' onClick={this.close.bind(this)}>close</span>
@@ -31,7 +31,27 @@ class Mask extends Component {
 		if (this.props.media.currentMediaImage.status == 'notReady') {
 			return <CircularProgress/>
 		}else {
-			return <img className='media-mask-image' src={this.props.media.currentMediaImage.path} alt=""/>
+			let item  = this.props.media.currentMediaImage;
+			let width = document.body.clientWidth;
+			let height = document.body.clientHeight;
+			let scale = width/height;
+			let imageScale = item.width/item.height;
+			let style = {};
+			if (item.width < width && item.height < height) {
+				console.log(item);
+				c.log(width);
+				c.log(height);
+				style = {marginTop:height/2+'px',marginLeft:width/2+'px',transform:'translate('+(-item.width/2)+'px,'+(-item.height/2)+'px)'};
+			}else {
+				c.log('2');
+				if (imageScale > scale) {
+					style = {maxWidth:'90%'};
+				}else {
+					style = {maxHeight:'90%'};
+				}	
+			}
+			
+			return <img style={style} className='media-mask-image' src={this.props.media.currentMediaImage.path} alt=""/>
 		}
 	}
 

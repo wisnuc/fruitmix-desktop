@@ -1,8 +1,8 @@
 const defaultState = {
 	upload:[],
 	dowload: [],
-	uploadSize:100,
-	downloadSize:100
+	uploadSize:20,
+	downloadSize:20
 }
 
 const transmission = (state=defaultState,action)=>{

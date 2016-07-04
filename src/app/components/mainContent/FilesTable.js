@@ -18,7 +18,7 @@ class AllFilesTable extends Component {
 	render() {
 		var _this = this;
 		return (
-			<table className="allFileTable" onClick={this.windowScrollCallback.bind(this)}>
+			<table className="fileTable hasCheckBox">
 				{/*table header*/}
 				<thead>
 					<tr>
@@ -36,32 +36,16 @@ class AllFilesTable extends Component {
 				</thead>
 				{/*table body*/}
 				<tbody>
-					{this.props.data.children.map((item,index)=>{
-						if (index > this.props.data.showSize) {
-							return false
-						}
-						return (
-							<Row dispatch={this.props.dispatch} data={this.props.data} index={index} item={item} key={index} selectChildren={this.selectChildren} enterChildren={this.enterChildren} getTypeOfFile={this.getTypeOfFile} getSize={this.getSize} getTime={this.getTime} addBezier={this.addBezier.bind(this)}></Row>
+					{
+						this.props.data.children.map((item,index)=>{
+							if (index > this.props.data.showSize) {
+								return false
+							}
+							return (
+								<Row dispatch={this.props.dispatch} data={this.props.data} index={index} item={item} key={index} selectChildren={this.selectChildren} enterChildren={this.enterChildren} getTypeOfFile={this.getTypeOfFile} getSize={this.getSize} getTime={this.getTime} addBezier={this.addBezier.bind(this)}></Row>
 							)
-					{/*						return (
-							<tr key={index} onTouchTap={_this.selectChildren.bind(_this,index)} onDoubleClick={_this.enterChildren.bind(_this,index)} 
-								className={item.checked==true?'tr-selected-background':''}>
-								<td onClick={this.addBezier.bind(this,index)} data-selected={item.checked} className='first-td'>
-									<div className='selectBox'>
-										<div>{item.checked==false?svg.blackFrame():svg.select()}</div>
-										<div className='bezierFrame' style={{width:48,height:48}}>
-											<div className="bezierTransition1"></div>
-											<div className="bezierTransition2"></div>
-										</div>
-										<div></div>
-									</div>
-								</td>
-								<td title={item.attribute.name}><div data-uuid={item.uuid}><span className={'file-type-icon '+this.getTypeOfFile(item)}></span><span className='file-name'>{item.attribute.name}</span></div></td>
-								<td title={item.attribute.changetime}>{this.getTime(item.attribute.changetime)}</td>
-								<td title={item.attribute.size}>{this.getSize(item.attribute.size)}</td>
-							</tr>
-							)*/}
-					})}
+						}
+					)}
 				</tbody>
 			</table>
 			)

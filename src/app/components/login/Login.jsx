@@ -20,6 +20,8 @@ import darkBaseTheme from 'material-ui/styles/baseThemes/darkBaseTheme';
 import ImageModules from '../Mixins/ImageModules'; 
 //import CSS
 import css  from  '../../../assets/css/login';
+//import Action
+import Action from '../../actions/action';
 
 // define Index component
 class Index extends React.Component {
@@ -84,7 +86,7 @@ class Index extends React.Component {
 				<Paper style={paperStyle} zDepth={4}>
 				{ !!busy && <CircularProgress /> }
 				{ !busy && <TextField ref='username'  stype={{marginBottom: 10}} hintText="username" type="username" fullWidth={true} />}
-				{ !busy && <TextField ref='password' stype={{marginBottom: 10}} hintText="password" type="password" fullWidth={true} />}
+				{ !busy && <TextField onKeyDown={this.kenDown.bind(this)} ref='password' stype={{marginBottom: 10}} hintText="password" type="password" fullWidth={true} />}
 				{ !busy && <FlatButton style={{marginTop: 10}} label='UNLOCK' onTouchTap={this.submit.bind(this)} />}
 				</Paper>
 			{/*
@@ -93,9 +95,20 @@ class Index extends React.Component {
 				<button onClick={this.submit}>submit</button>
 				<div>{this.props.login.state}</div>
 			*/}
-			<Snackbar open={this.props.snack.open} message={this.props.snack.text} autoHideDuration={3000}/>
+			<Snackbar open={this.props.snack.open} message={this.props.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
 			</div>
 			);
+	}
+
+	kenDown(e) {
+		if (e.nativeEvent.which == 13) {
+			this.submit();
+		}
+	}
+
+	//close snackbar
+	cleanSnack() {
+		this.props.dispatch(Action.cleanSnack());
 	}
 };
 
@@ -103,13 +116,11 @@ Index.childContextTypes = {
   muiTheme: React.PropTypes.object.isRequired,
 };
 
-
-
 function mapStateToProps (state) {
 	return {
 		login: state.login,
 		snack: state.snack
 	}
 }
-
+	
 export default connect(mapStateToProps)(Index);

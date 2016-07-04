@@ -81,7 +81,7 @@ class AllFiles extends Component {
 					actions={shareActions}
 					open={this.props.isShow.dialogOfShare}
 				>
-					<div className='share-user-list-container' style={{'overflow-y':'scroll'}}>
+					<div className='share-user-list-container' style={{'overflowY':'scroll'}}>
 					{this.props.login.obj.allUser.map((item,index)=>{
 						return <Checkbox key={item.username} label={item.username} style={styles.checkbox} labelPosition="left" onCheck={this.checkUser.bind(this,item.uuid)}/>
 					})}
@@ -101,7 +101,7 @@ class AllFiles extends Component {
 			return (<div className='data-loading '><CircularProgress/></div>)
 		}else {
 			return (
-				<Paper className='file-area' onScroll={this.scrollEvent.bind(this)}  onMouseDown={this.mouseDown.bind(this)}>
+				<Paper className='file-area' onScroll={this.scrollEvent.bind(this)} onMouseDown={this.mouseDown.bind(this)}>
 					{/*upload input*/}
 					<input className='upload-input' type="file" onChange={this.upLoadFile.bind(this)} multiple={true} webkitdirectory={true}/>
 					{/*bread crumb*/}
@@ -115,8 +115,9 @@ class AllFiles extends Component {
 						      anchorOrigin={{horizontal: 'left', vertical: 'top'}}
 						      targetOrigin={{horizontal: 'left', vertical: 'top'}}
 						    >
-						    	<MenuItem innerDivStyle={listStyle} primaryText="新建文件夹" onClick={this.toggleUploadFolder.bind(this,true)}/>
+						    <MenuItem innerDivStyle={listStyle} primaryText="新建文件夹" onClick={this.toggleUploadFolder.bind(this,true)}/>
 							<MenuItem innerDivStyle={listStyle} primaryText="上传文件" onClick={this.openInputFile.bind(this)}/>
+							<MenuItem innerDivStyle={listStyle} primaryText="上传文件夹" onClick={this.openInputFolder.bind(this)}/>
 						</IconMenu>
 					</div>
 					{/*file table body*/}
@@ -136,25 +137,6 @@ class AllFiles extends Component {
 	}
 	//upload file
 	upLoadFile(e) {
-		// let files = [];
-		// for (let i=0;i<e.nativeEvent.target.files.length;i++) {
-		// 	var f = e.nativeEvent.target.files[i];
-		// 	var t = new Date();
-		// 	var file = {
-		// 		name:f.name,
-		// 		path:f.path,
-		// 		size:f.size,
-		// 		lastModifiedDate:f.lastModifiedDate,
-		// 		parent : {uuid:this.props.data.directory.uuid},
-		// 		uploadTime :  Date.parse(t),
-		// 		status:0
-		// 	}
-		// 	files.push(file);
-		// }
-		// this.props.dispatch(Action.addUpload(files));
-		// ipc.send('uploadFile',files);	
-		// this.props.dispatch(Action.setSnack(files.length+' 个文件添加到下载队列',true));
-		//--------------------------------------------------------------------------------------------------------------------------------------------------------
 		let files = [];
 		let obj = {};
 		let map = new Map();
@@ -234,7 +216,11 @@ class AllFiles extends Component {
 	openInputFile() {
 		$('.upload-input').trigger('click');
 	}
-	//toggle dialog of upload
+	//toggle dialog of upload folder
+	openInputFolder() {
+		ipc.send('openInputOfFolder');
+	}
+	//toggle dialog of upload files
 	toggleUploadFolder(b) {
 		this.props.dispatch(Action.toggleDialogOfUploadFolder(b));
 	}
@@ -258,22 +244,23 @@ class AllFiles extends Component {
 		});
 		this.props.dispatch(Action.toggleShare(false));
 		this.props.dispatch(Action.cancelUserCheck());
-		console.log(files);
-		console.log(users[0]);
 		ipc.send('share',files,users);
 	}
 	// select users be shared
 	checkUser(uuid,obj,b) {
 		this.props.dispatch(Action.checkUser(uuid,b));
 	}
-
+	//scrollEvent 
 	scrollEvent() {
 		let dom = document.getElementsByClassName('file-area')[0]
 		let sTop = dom.scrollTop;
 		let sHeight = dom.scrollHeight;
 		let cHeight = dom.clientHeight;
 		if (cHeight+sTop == sHeight) {
-			console.log('111111111111');
+			if (this.props.data.children.length <= this.props.data.showSize) {
+				return
+			}
+			this.props.dispatch(Action.setFilesSize(false));
 		}
 	}
 }

@@ -16,7 +16,13 @@ import Action from '../../actions/action';
 // import Component 
 
 class SharedFiles extends Component {
+
+	constructor(props) {
+        super(props);
+        this.state = { deleteShow: false };
+    }
 	render() {
+		console.log(this);
 		return (
 			<div className='shared-files-container'>
 				<div onClick={this.backRoot}>back root</div>
@@ -25,7 +31,7 @@ class SharedFiles extends Component {
 							<TableRow>
 								<TableHeaderColumn>文件名</TableHeaderColumn>
 								<TableHeaderColumn>分享者</TableHeaderColumn>
-								<TableHeaderColumn>下载</TableHeaderColumn>
+								<TableHeaderColumn>操作</TableHeaderColumn>
 							</TableRow>
 						</TableHeader>
 					<TableBody displayRowCheckbox={false}>
@@ -33,7 +39,12 @@ class SharedFiles extends Component {
 							<TableRow key={item.uuid} onDoubleClick={this.enterShare.bind(this,item)}>
 								<TableRowColumn>{item.name}</TableRowColumn>
 								<TableRowColumn>{this.getShareUser(item.owner)}</TableRowColumn>
-								<TableRowColumn><span onClick={this.download.bind(this,item)} style={{cursor:'pointer'}}>{svg.download()}</span></TableRowColumn>
+								<TableRowColumn>
+									<span onClick={this.download.bind(this,item)} style={{cursor:'pointer'}}>
+										{svg.download()}
+									</span>
+									<span>删除</span>
+								</TableRowColumn>
 							</TableRow>
 							)})}
 					</TableBody>

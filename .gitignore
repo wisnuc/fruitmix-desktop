@@ -1,5 +1,6 @@
-/node_modules/
-/ele/
-/download
+/node_modules
+/ele
 /media
-
+/download
+/npm-debug.log
+/.swp

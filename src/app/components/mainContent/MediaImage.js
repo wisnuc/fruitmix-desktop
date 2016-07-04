@@ -23,7 +23,7 @@ class Media extends Component {
 		if (this.props.item.status == 'notReady') {
 			return <div><CircularProgress/></div>
 		}else {
-			return <div style={{cursor:'pointer'}}><img src={this.props.item.path} alt=""/></div>
+			return <img style={{cursor:'pointer'}} src={this.props.item.path} alt=""/>
 		}
 	}
 
@@ -33,7 +33,7 @@ class Media extends Component {
 
 	componentDidMount() {
 		if (this.props.item.status == 'ready') {
-			return
+			return	
 		}
 		ipc.send('getThumb',this.props.item);
 	}

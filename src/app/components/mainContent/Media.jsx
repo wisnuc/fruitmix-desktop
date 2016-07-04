@@ -28,9 +28,9 @@ class Media extends Component {
 			return (<div className='data-loading '><CircularProgress/></div>)
 		}else {
 			return (
-				<div style={{width:'100%'}} className='mediaContainer'>
+				<div style={{width:'100%'}} className='mediaContainer' onScroll={this.scrollEvent.bind(this)}>
 					{this.props.media.data.map((item,index)=>{
-						if (index >100) {
+						if (index >this.props.media.size) {
 							return null
 						}
 						return <M key={item.hash} item={item} download={this.downloadImage.bind(this,item)}></M>
@@ -43,6 +43,19 @@ class Media extends Component {
 	downloadImage(item) {
 		this.props.dispatch(Action.toggleMedia(true));
 		ipc.send('getMediaImage',item);
+	}
+
+	scrollEvent() {
+		let dom = document.getElementsByClassName('mediaContainer')[0]
+		let sTop = dom.scrollTop;
+		let sHeight = dom.scrollHeight;
+		let cHeight = dom.clientHeight;
+		if (cHeight+sTop == sHeight) {
+			if (this.props.media.data.length <= this.props.media.size) {
+				return
+			}
+			this.props.dispatch(Action.setMediaSize(false));
+		}
 	}
 }
 
