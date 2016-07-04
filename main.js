@@ -8,6 +8,7 @@ var request = require('request');
 var http = require('http');
 var fs = require ('fs');
 var stream = require('stream');
+var path = require('path');
 var _ = require('lodash');
 var mdns = require('mdns-js');
 var mainWindow = null;
@@ -32,7 +33,7 @@ var shareChildren = [];
 var currentDirectory = {};
 var children = [];
 var parent = {};
-var path = [];
+var dirPath = [];
 var tree = {};
 //upload 
 var uploadQueue = [];
@@ -47,27 +48,27 @@ var thumbIng = [];
 var device = [];
 
 var c = console.log;
-var browser = mdns.createBrowser();
+// var browser = mdns.createBrowser();
 
 
-try{
-	browser.on('ready', function () {
-		c('ready');
-	    browser.discover(); 
-	});
-	browser.on('update', function (data) {
-		console.log('----------------------------------------');
-		device.push(data);
-	    console.log(data.addresses[0]);
-	});
+// try{
+// 	browser.on('ready', function () {
+// 		c('ready');
+// 	    browser.discover(); 
+// 	});
+// 	browser.on('update', function (data) {
+// 		console.log('----------------------------------------');
+// 		device.push(data);
+// 	    console.log(data);
+// 	});
 
-	browser.on('error',err=>{
-		c('mdns err');
-		c(err);
-	});
-}catch(e){
-	console.log(e);
-}
+// 	browser.on('error',err=>{
+// 		c('mdns err');
+// 		c(err);
+// 	});
+// }catch(e){
+// 	console.log(e);
+// }
 
 //app ready and open window
 app.on('ready', function() {
@@ -82,7 +83,7 @@ app.on('ready', function() {
 	mainWindow.webContents.openDevTools();
 	// dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']})
 	mainWindow.loadURL('file://' + __dirname + '/ele/index.html');
-});
+});		
 app.on('window-all-closed', () => {
   app.quit();
 });
@@ -163,7 +164,7 @@ ipcMain.on('getRootData', ()=> {
 		removeFolder(data);
 		dealWithData(data);
 		let copyFilesSharedByMe = filesSharedByMe.map(item=>Object.assign({},item,{children:null,writelist:[].concat(item.writelist)}));
-		mainWindow.webContents.send('receive', currentDirectory,children,parent,path,shareChildren,copyFilesSharedByMe);
+		mainWindow.webContents.send('receive', currentDirectory,children,parent,dirPath,shareChildren,copyFilesSharedByMe);
 	}).catch((err)=>{
 		console.log(err);
 		mainWindow.webContents.send('message','get data error',1);	
@@ -302,7 +303,7 @@ function getTree(f,type) {
 				name:item.attribute.name,
 				parent: item.parent,
 				children: item.children,
-				share:item.share==true?true:false,
+				share:item.share,
 				type:item.type,
 				checked:false,
 				owner:item.permission.owner,
@@ -360,23 +361,23 @@ function enterChildren(selectItem) {
 	children = map.get(selectItem.uuid).children.map(item=>Object.assign({},item,{children:null}));
 	//path
 	try {
-		path.length = 0;
+		dirPath.length = 0;
 		getPath(selectItem);
 		path = _.cloneDeep(path);
 	}catch(e) {
 		console.log(e);        
 		path.length=0;
 	}finally {
-		mainWindow.webContents.send('receive',currentDirectory,children,parent,path,shareChildren);
+		mainWindow.webContents.send('receive',currentDirectory,children,parent,dirPath,shareChildren);
 	}
 }
 //get path
 function getPath(obj) {
 	//insert obj to path
-	path.unshift({key:obj.attribute.name,value:allFiles.find((item)=>{return item.uuid == obj.uuid})});
+	dirPath.unshift({key:obj.attribute.name,value:allFiles.find((item)=>{return item.uuid == obj.uuid})});
 	//obj is root?
 	if (obj.parent == undefined || obj.parent == '') {
-		path.unshift({key:'',value:{}});
+		dirPath.unshift({key:'',value:{}});
 		return; 
 	}else {
 		getPath(map.get(obj.parent));
@@ -482,14 +483,6 @@ function uploadFile(file) {
 			var uuid = body;
 			console.log('upload success');
 			console.log(uuid);
-			// let index = uploadQueue.findIndex((item,index)=>{
-			// 	return item.path == file.path;
-			// });
-			// uploadQueue.splice(index,1);
-			// if (uploadQueue.length == 0) {
-			// 	dealUploadQueue();
-			// }
-			//-------------------------------------------------------------------------------------------------------------
 			let fileObj = uploadQueue[0].data.find(item2=>file.path == item2.path);
 			let index = uploadNow.findIndex(item=>item.path == file.path);
 			uploadNow.splice(index,1);
@@ -586,7 +579,7 @@ ipcMain.on('upLoadFolder',(e,name,dir)=>{
 			console.log('res');
 			var uuid = body;
 			uuid = uuid.slice(1,uuid.length-1);
-			modifyFolder(name,dir,uuid);
+			modifyFolder(name,dir,uuid,true);
 		}else {
 			mainWindow.webContents.send('message','新建文件夹失败');
 			console.log('err');
@@ -597,7 +590,7 @@ ipcMain.on('upLoadFolder',(e,name,dir)=>{
 	var form = r.form();
 	form.append('foldername',name);
 });
-function modifyFolder(name,dir,folderuuid) {
+function modifyFolder(name,dir,folderuuid,send) {
 	//insert uuid
 	let item = allFiles.find((item)=>{return item.uuid == dir.uuid});
 	item != undefined && item.children.push(folderuuid);
@@ -625,10 +618,151 @@ function modifyFolder(name,dir,folderuuid) {
 		//get children
 		children = a.children.map(item => Object.assign({},item,{children:null}))
 		//ipc
-		mainWindow.webContents.send('message','新建文件夹成功');
+		if (send) {
+			mainWindow.webContents.send('message','新建文件夹成功');
+		}
 		mainWindow.webContents.send('uploadSuccess',folder,_.cloneDeep(children));
 	}
 }
+//upload folder
+ipcMain.on('openInputOfFolder', e=>{
+	dialog.showOpenDialog({properties: [ 'openDirectory']},function(folder){
+		let folderPath = folder[0];
+		genTask(folderPath,function(err,q,o){
+			uploadNode(o);
+		});
+	})
+});
+function genTask(rootpath, callback) {
+  	var q = [];
+  	let obj = {children:[],path:rootpath,status:'ready',parent:currentDirectory.uuid,type:'folder',name:rootpath.split('/')[rootpath.split('/').length-1]};
+  	var func = (dir, stat, cur) => {
+  		q.push({
+  			path: dir,
+  			type: stat?'folder':'file',
+  			times: 0,
+  			status: 'ready',
+  		})
+  		cur.push({
+  			path: dir,
+  			type: stat?'folder':'file',
+  			times: 0,
+  			status: 'ready',
+  			uuid:null,
+  			children:[],
+  			parent:null,
+  			name: dir.split('/')[dir.split('/').length-1]
+  		});
+  	}
+  	traverse(rootpath, func, () => callback(null, q, obj), obj.children)
+}
+function traverse(dir, visitor, callback, current) {
+  	fs.readdir(dir, (err, entries) => {
+  		if (err) return callback(err)
+		if (entries.length === 0) return callback(err)
+		var count = entries.length
+		entries.forEach(entry => {
+	  		let entryPath = path.join(dir, entry);
+	  		fs.stat(entryPath, (err, stat) => {
+			  	if (err || (!stat.isDirectory() && !stat.isFile())) {
+			  	  	count--
+			  	  	if (count === 0) callback()
+			  	  	return
+			  	}
+				visitor(entryPath, stat.isDirectory(), current)
+        		if (stat.isDirectory()) {
+        			let index = current.length;
+          			traverse(entryPath,visitor, () => {
+          			count--
+          			if (count === 0) callback()
+          				return
+          			},current[index-1].children);
+          			
+        		}
+        		else {
+          			count--
+		          	if (count === 0) callback()
+		          	return
+	        	}
+	  		})
+		})
+  	})
+}
+
+function uploadNode(node) {
+	if (node.type == 'folder') {
+		function create(node) {
+			createFolder({uuid:node.parent},node.name).then((uuid)=>{
+				if (node.children.length == 0) {
+					return
+				}
+				node.children.forEach((item,index)=>{
+					node.children[index].parent = uuid;
+					uploadNode(item);
+				});
+			}).catch(err=>{
+				create(node);
+			});
+		}
+		create(node);
+	}else {
+		// uploadFileInFolder({uuid:node.parent,path:node.path,name:node.name}).then(uuid=>{
+		// 	console.log('why');
+		// });
+	}
+}
+function createFolder(dir,name) {
+	let promise = new Promise((resolve,reject)=>{
+		var r = request.post(server+'/files/'+dir.uuid+'?type=folder',{
+			headers: {
+				Authorization: user.type+' '+user.token
+			},
+		},function (err,res,body) {
+			if (!err && res.statusCode == 200) {
+				console.log('upLoadFolder success   '+ name);
+				var uuid = body;
+				uuid = uuid.slice(1,uuid.length-1);
+				modifyFolder(name,dir,uuid,false);
+				resolve(uuid);
+			}else {
+				console.log('upLoadFolder error   '+ name);
+				reject();
+			}
+		});
+		var form = r.form();
+		form.append('foldername',name);
+	});
+	return promise
+}
+function uploadFileInFolder(node) {
+	var promise = new Promise((resolve,reject)=>{
+		//request
+		let r = request.post(server+'/files/'+node.parent+'?type=file',{
+			headers: {
+				Authorization: user.type+' '+user.token
+			},
+		},callback)
+		let callback = function(err,res,body) {
+			console.log('has res');
+			if (!err && res.statusCode == 200) {
+				c('uploadFile success   '+name.name);
+				resolve(body);
+			}else {
+				c('uploadFile err   '+node.name);
+				reject();
+			}
+		}
+		//add file
+		let form = r.form();
+		let tempStream = fs.createReadStream(node.path);
+		tempStream.path = node.path
+		form.append('file', tempStream);
+	});
+	return promise;
+}
+
+
+
 //download
 ipcMain.on('download',(e,file)=>{
 	download(file).then(data=>{
@@ -951,7 +1085,6 @@ ipcMain.on('getThumb',(err,item)=>{
 });
 
 function dealThumbQueue() {
-	
 		if (thumbQueue.length == 0) {
 			return
 		}else {
@@ -1105,7 +1238,7 @@ ipcMain.on('loginOff',err=>{
 	currentDirectory = {};
 	children = [];
 	parent = {};
-	path = [];
+	dirPath = [];
 	tree = {};
 	//upload 
 	uploadQueue = [];

@@ -12,7 +12,7 @@ const defaultDirectory = {
 	filesSharedByMe: [],
 }
 
-const directory = (state=defaultDirectory,action)=> {
+const directory = (state = defaultDirectory,action)=> {
 	switch (action.type) {
 		case 'SET_DIRECTORY':
 			let position = action.children.map((item,index)=>{

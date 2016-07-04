@@ -38,8 +38,12 @@ class Mask extends Component {
 			let imageScale = item.width/item.height;
 			let style = {};
 			if (item.width < width && item.height < height) {
+				console.log(item);
+				c.log(width);
+				c.log(height);
 				style = {marginTop:height/2+'px',marginLeft:width/2+'px',transform:'translate('+(-item.width/2)+'px,'+(-item.height/2)+'px)'};
 			}else {
+				c.log('2');
 				if (imageScale > scale) {
 					style = {maxWidth:'90%'};
 				}else {

@@ -112,6 +112,10 @@ class Main extends Component {
 		ipc.on('setShareChildren',(err,shareChildren)=>{
 			this.props.dispatch(Action.setShareChildren(shareChildren));
 		});
+
+		ipc.on('data',(err,data)=>{
+			c.log(data);
+		});
 	}
 
 	render() {
