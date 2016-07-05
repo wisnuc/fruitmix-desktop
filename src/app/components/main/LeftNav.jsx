@@ -9,7 +9,7 @@
  import React, { findDOMNode, Component, PropTypes } from 'react';
  import { connect } from 'react-redux';
 //require material
-import { Menu, MenuItem } from 'material-ui';
+import { Menu, MenuItem, SvgIcon } from 'material-ui';
 import svg from '../../utils/SVGIcon';
  //import CSS
 import css  from  '../../../assets/css/main';
@@ -17,14 +17,23 @@ import css  from  '../../../assets/css/main';
 import Action from '../../actions/action';
 const style = {
 	margin:0,
-	width:200,
+	width:"100%",
 	padding:0
 };
 
 const listStyle = {
-	height: 48,
-	lineHeight:'48px',
-	paddingLeft:50
+	height: 64,
+	lineHeight:'64px',
+	paddingLeft:50,
+	color:'#fff',
+	fontSize:'12px'
+}
+const selectedStyle = {
+	height: 64,
+	lineHeight:'64px',
+	paddingLeft:50,
+	color:'#ef6c00',
+	fontSize:'12px'	
 }
 
 class leftNav extends Component {
@@ -37,13 +46,12 @@ class leftNav extends Component {
 					if (item.type == 'leftNav') {
 						return (
 							<MenuItem 
-							className={item.selected?"list-selected":''}
+							className={item.selected?"list-selected left-menu-list":'left-menu-list'}
 							primaryText={item.name} 
 							key={item.name} 
 							desktop={true} 
 							onTouchTap={this.itemSelect.bind(this,item.name,index)}
-							style={style}
-							innerDivStyle={listStyle}
+							innerDivStyle={item.selected?selectedStyle:listStyle}
 							leftIcon={item.icon?svg[item.icon]():null}
 							/>
 							)

@@ -14,14 +14,12 @@ const menu = (state = true, action) => {
 };
 //define default data of nav
 let navDefault = [
-	 { name: '我的所有文件', parent: null, selected: true, type:'leftNav', icon:'cloud' }, 
-	 { name: '上传/下载', parent: null, selected: false, type:'leftNav', icon:'star' },
-	 { name: '分享给我的文件', parent: null, selected: false, type:'leftNav', icon:'sharedToMe' },
-	 { name: '我分享的文件', parent: null, selected: false, type:'leftNav', icon:'sharedByMe' },
-	 // { name: '最近使用的文件', parent: null, selected: false, type:'leftNav', icon:'recentUse' },
-  //       { name: '已删除文件', parent: null, selected: false, type: 'other', icon:'deleteFiles'},
-        { name: '设置', parent: null, selected: false, type: 'other', icon:'settings'},
-        { name: 'media', parent: null, selected: false, type: 'leftNav', icon:'settings'}
+{ name: '我的所有文件', parent: null, selected: true, type:'leftNav', icon:'cloud' }, 
+{ name: '上传/下载', parent: null, selected: false, type:'leftNav', icon:'transmission' },
+{ name: '分享给我的文件', parent: null, selected: false, type:'leftNav', icon:'sharedToMe' },
+{ name: '我分享的文件', parent: null, selected: false, type:'leftNav', icon:'sharedByMe' },
+{ name: '我的照片', parent: null, selected: false, type: 'leftNav', icon:'myPhoto'},
+{ name: '设置', parent: null, selected: false, type: 'other', icon:'settings'}
 ];
 
 const nav = (state = navDefault, action) => {

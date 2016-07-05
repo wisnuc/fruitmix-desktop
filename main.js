@@ -14,8 +14,8 @@ var mdns = require('mdns-js');
 var mainWindow = null;
 
 var server = 'http://211.144.201.201:8888';
-// server ='http://192.168.5.132:80';
-// server ='http://192.168.5.134:80';
+server ='http://192.168.5.132:80';
+server ='http://192.168.5.134:80';
 //user
 var user = {};
 //files
@@ -44,6 +44,7 @@ var media = [];
 var mediaMap = new Map();
 var thumbQueue = [];
 var thumbIng = [];
+var mediaPath = __dirname+'/media/';
 //device
 var device = [];
 
@@ -83,6 +84,16 @@ app.on('ready', function() {
 	mainWindow.webContents.openDevTools();
 	// dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']})
 	mainWindow.loadURL('file://' + __dirname + '/ele/index.html');
+	fs.exists(mediaPath,exists=>{
+		if (!exists) {
+			fs.mkdir(mediaPath,err=>{
+				if(err){
+					console.log(err);
+				}
+			});
+		}
+	});
+
 });		
 app.on('window-all-closed', () => {
   app.quit();
@@ -587,6 +598,9 @@ function modifyFolder(name,dir,folderuuid,send) {
 //upload folder
 ipcMain.on('openInputOfFolder', e=>{
 	dialog.showOpenDialog({properties: [ 'openDirectory']},function(folder){
+		if (folder.length == 0)　{
+			return
+		}
 		console.log(folder[0]);
 		let folderPath = path.normalize(folder[0]);
 		c(folderPath);

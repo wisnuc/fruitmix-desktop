@@ -1,4 +1,7 @@
 /*main*/
+* {
+	font-family: 'Microsoft YaHei'!important
+}
 .main {
 	width: 100%;
 	height: 100%;
@@ -7,22 +10,38 @@
 .app-bar {
 	box-sizing: border-box;
 	position: fixed!important;
+	background-color: #37474f!important;
 }
-.search-input {
-	width:200px!important;
-	margin-right:20px;
+.app-bar-right {
+	position: absolute!important;
+	right:10px;
+}
+.app-bar-username {
+	position: absolute;
+	right:50px;
+	height:64px;
+	line-height: 64px;
+	font-size:14px;
+	color:#ef6c00;
 }
 /*left nav*/
 .left-nav>div {
 	z-index:999!important;
+	background-color: #263238!important; 
 }
 .left-nav-container {
 	padding-top:64px;
 	overflow: hidden;
 	box-sizing: border-box;
+	color:#ffffff;
 }
 .list-selected {
 	background-color: rgba(0,0,0,.2)!important;
+}
+.left-menu-list svg {
+	height:40px!important;
+	color:#fff!important;
+	fill:#fff!important;
 }
 /*content*/
 .content-container {
@@ -31,7 +50,7 @@
 	top:0px;
 }
 .content-container.content-has-left-padding {
-	padding-left:220px;
+	padding-left:261px;
 }
 .content-container.no-padding {
 	padding-left: 20px; 

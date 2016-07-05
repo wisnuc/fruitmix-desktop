@@ -29,7 +29,8 @@ import Content from './Content';
 import Multiple from '../mainContent/Multiple';
 
 // require common mixins
-import ImageModules from '../Mixins/ImageModules'; 
+import ImageModules from '../Mixins/ImageModules';
+import svg from '../../utils/SVGIcon'; 
 
 import Mask from './MediaMask'
 
@@ -125,21 +126,23 @@ class Main extends Component {
 				<Multiple/>
 				{/*Bar*/}
 				<AppBar 
-				className='app-bar' title='my cloud'
+				className='app-bar' title='WISNUC' titleStyle={{fontSize:'18px'}}
 				iconElementRight={
 					<IconMenu
-          				iconButtonElement={<FlatButton label={this.props.login.obj.username}/>}
-          				anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}
-      					targetOrigin={{horizontal: 'right', vertical: 'bottom'}}
+						className='app-bar-right'
+          				iconButtonElement={<IconButton>{svg.expandMore()}</IconButton>}
+          				anchorOrigin={{horizontal: 'right', vertical: 'top'}}
+      					targetOrigin={{horizontal: 'right', vertical: 'top'}}
         			>
 			          <MenuItem value="1" primaryText="用户管理" onTouchTap={this.openUser.bind(this)}/>
 			          <MenuItem value="2" primaryText="注销" onTouchTap={this.logOff.bind(this)}/>
         			</IconMenu>}
 				onLeftIconButtonTouchTap={this.leftNavClick.bind(this)}
 				>
+				<div className='app-bar-username'>{this.props.login.obj.username}</div>
 				</AppBar>
 				{/*Left Nav*/}
-				<Drawer width={200} open={this.props.navigation.menu} className='left-nav'>
+				<Drawer width={241} open={this.props.navigation.menu} className='left-nav'>
 					<LeftNav/>
 				</Drawer>
 				{/*Content*/}

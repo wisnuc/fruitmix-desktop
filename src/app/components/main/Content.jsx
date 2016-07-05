@@ -24,9 +24,10 @@ class MainContent extends Component {
 		component.push(<AllFile key={'a'}></AllFile>);
 		component.push(<Collection key={'b'}></Collection>); 
 		component.push(<SharedFiles key={'c'}></SharedFiles>); 
-		component.push(<SharedByMe key={'d'}></SharedByMe>); 
-		component.push(<Setting key={'g'}></Setting>);
-		component.push(<Media key={'h'}></Media>);
+		component.push(<SharedByMe key={'d'}></SharedByMe>);
+		component.push(<Media key={'e'}></Media>);
+		component.push(<Setting key={'f'}></Setting>);
+		
 		// define the content is selected
 		let selectedItem = this.props.nav.nav.findIndex( (item, index, arr) => {
 			return item.selected == true
