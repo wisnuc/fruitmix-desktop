@@ -587,14 +587,23 @@ function modifyFolder(name,dir,folderuuid,send) {
 //upload folder
 ipcMain.on('openInputOfFolder', e=>{
 	dialog.showOpenDialog({properties: [ 'openDirectory']},function(folder){
-		let folderPath = folder[0];
+		console.log(folder[0]);
+		let folderPath = path.normalize(folder[0]);
+		c(folderPath);
 		genTask(folderPath,function(err,o){
-			uploadNode(o,function(){c('success end');},function(n){c('failed end')});
+			let f = function() {
+				if (o.times>5) {
+						o.status = 'failed';
+					}else {
+						uploadNode(o,function(){c('success end');},f);
+					}
+			}
+			uploadNode(o,function(){c('success end');},f);
 		});
 	})
 });
 function genTask(rootpath, callback) {
-  	let obj = {children:[],path:rootpath,status:'ready',parent:currentDirectory.uuid,type:'folder',name:rootpath.split('/')[rootpath.split('/').length-1]};
+  	let obj = {times:0,children:[],path:rootpath,status:'ready',parent:currentDirectory.uuid,type:'folder',name:rootpath.split('\\')[rootpath.split('\\').length-1]};
   	var func = (dir, stat, cur) => {
   		cur.push({
   			path: dir,
@@ -604,7 +613,7 @@ function genTask(rootpath, callback) {
   			uuid:null,
   			children:[],
   			parent:null,
-  			name: dir.split('/')[dir.split('/').length-1]
+  			name: dir.split('\\')[dir.split('\\').length-1]
   		});
   	}
   	traverse(rootpath, func, () => callback(null, obj), obj.children)
@@ -656,10 +665,7 @@ function uploadNode(node,callback,failedCallback) {
 			callback();
 		}).catch((err)=>{
 			node.times++;
-			if (node.times >5) {
-				return;
-			}
-			uploadNode(node,callback,failedCallback);
+			failedCallback();
 		});
 	}else {
 		let length = node.children.length;
@@ -682,15 +688,20 @@ function uploadNode(node,callback,failedCallback) {
 						uploadNode(node.children[index],c)
 					}
 				};
-				uploadNode(node.children[index],c)
+
+				let f = function() {
+					if (node.children[index].times>5) {
+						node.children[index].status = 'failed';
+					}else {
+						uploadNode(node.children[index],c,f);
+					}
+				}
+				uploadNode(node.children[index],c,f);
 			}
 		}).catch(()=>{
 			c('create folder failed: '+ node.name);
 			node.times++;
-			if (node.times >5) {
-				return;
-			}
-			uploadNode(node,callback,failedCallback);
+			failedCallback();
 		});
 	}
 }
@@ -707,7 +718,6 @@ function createFolder(dir,name) {
 				modifyFolder(name,dir,uuid,false);
 				resolve(uuid);
 			}else {
-				console.log('upLoadFolder error   '+ name);
 				reject();
 			}
 		});
