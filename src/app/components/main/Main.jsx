@@ -120,7 +120,7 @@ class Main extends Component {
 	}
 
 	render() {
-		return (<CSS opts={['app',true,true,true,500,5000,5000]}>
+		return (<CSS opts={['app',true,true,true,500,5000,5000]} style={{height:'100%'}}>
 			<div className="main" key='main' onMouseMove={this.mouseMove.bind(this)} onMouseUp={this.mouseUp.bind(this)} onClick={this.triggerClick.bind(this)}>
 				{/*Multiple select frame*/}
 				<Multiple/>
@@ -146,7 +146,7 @@ class Main extends Component {
 					<LeftNav/>
 				</Drawer>
 				{/*Content*/}
-				<Paper className={"content-container "+(this.props.navigation.menu?'content-has-left-padding':'no-padding')} style={{paddingTop:64}} zDepth={0}>
+				<Paper className={"content-container "+(this.props.navigation.menu?'content-has-left-padding':'no-padding')} zDepth={0}>
 					<Content></Content>
 				</Paper>
 				<Mask></Mask>

@@ -12,8 +12,8 @@
  import svg from '../../utils/SVGIcon';
  //import Action
 import Action from '../../actions/action';
-
 // import Component 
+import Row from './ShareTableRow'
 
 class SharedFiles extends Component {
 
@@ -25,30 +25,29 @@ class SharedFiles extends Component {
 		console.log(this);
 		return (
 			<div className='shared-files-container'>
-				<div onClick={this.backRoot}>back root</div>
-				<Table selectable={false}>
-					<TableHeader displaySelectAll={false} adjustForCheckbox={false}>
-							<TableRow>
-								<TableHeaderColumn>文件名</TableHeaderColumn>
-								<TableHeaderColumn>分享者</TableHeaderColumn>
-								<TableHeaderColumn>操作</TableHeaderColumn>
-							</TableRow>
-						</TableHeader>
-					<TableBody displayRowCheckbox={false}>
-						{this.props.data.shareChildren.map((item)=>{return (
-							<TableRow key={item.uuid} onDoubleClick={this.enterShare.bind(this,item)}>
-								<TableRowColumn>{item.name}</TableRowColumn>
-								<TableRowColumn>{this.getShareUser(item.owner)}</TableRowColumn>
-								<TableRowColumn>
-									<span onClick={this.download.bind(this,item)} style={{cursor:'pointer'}}>
-										{svg.download()}
-									</span>
-									<span>删除</span>
-								</TableRowColumn>
-							</TableRow>
-							)})}
-					</TableBody>
-				</Table>
+				{/*<div onClick={this.backRoot}>back root</div>*/}
+				<div className="breadcrumb"></div>
+	
+				<table className="fileTable">
+					<thead>
+						<tr>
+							<th>文件名</th>
+							<th>分享者</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						{this.props.data.shareChildren.map(item=>(
+							<Row 
+								key={item.uuid}
+								item={item}
+								getShareUser={this.getShareUser.bind(this)}
+								download={this.download.bind(this.item)}
+								enterShare={this.enterShare.bind(this,item)}
+							></Row>
+							))}
+					</tbody>
+				</table>
 			</div>
 		)
 	}

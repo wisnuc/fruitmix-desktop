@@ -7,6 +7,15 @@
 	height: 100%;
 	position: relative;
 }
+.app {
+	height: 100%
+}
+.app>div {
+	height: 100%
+}
+.app>div>div {
+	height: 100%
+}
 .app-bar {
 	box-sizing: border-box;
 	position: fixed!important;
@@ -46,14 +55,20 @@
 /*content*/
 .content-container {
 	width: 100%;
+	height: 100%;
 	position: absolute;
 	top:0px;
+	padding-top:72px;
+	background-color: #e2e2e2!important;
+}
+.content-container>div,.content-container>div>div{
+	height: 100%;
 }
 .content-container.content-has-left-padding {
-	padding-left:261px;
+	padding-left:249px;
 }
 .content-container.no-padding {
-	padding-left: 20px; 
+	padding-left: 0px; 
 }
 /*CSSTRANISTION*/
 .content-appear {
@@ -82,11 +97,39 @@
 }
 /*AllFiles*/
 .breadcrumb {
-	height:48px;
+	height:60px;
+	padding-left:26px;
 	display: flex;
 	flex-flow: row nowrap;
 	justify-content: flex-start;
 	align-items: center;
+	color:#404040;
+	font-size:14px;
+	position: relative;
+}
+.breadcrumb-home {
+	background: url(../images/index/home-page@2x.png) no-repeat;
+	display: inline-block;
+	width:20px;
+	height:20px;
+}
+.breadcrumb-arrow {
+	background: url(../images/index/-navigate-next@2x.png);
+	display: inline-block;
+	width:10px;
+	height:17px;
+	margin:0 10px;
+}
+.breadcrumb-add{
+	position:absolute!important;
+	right:10px!important;
+	top:20px;
+}
+.breadcrumb-text {
+	max-width: 120px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	cursor: pointer;
 }
 .all-my-files {
 	display: flex;
@@ -101,10 +144,8 @@
 	width:100%;
 	overflow-x:hidden;
 	height:100%;
-	padding-top:8px;
 	overflow-y: auto;
 	position: relative;
-	
 }
 .file-detail {
 	height: 100%;
@@ -126,7 +167,10 @@
 	border-collapse: collapse;
 }
 .fileTable>thead {
-	border-bottom:1px solid rgb(224,224,224);
+	border-bottom:1px solid #e0e0e0;
+	border-top:1px solid #e0e0e0;
+	box-sizing: border-box;
+	background-color:#f3f3f3 
 }
 .fileTable tbody {
 	position: relative;
@@ -134,22 +178,28 @@
 .hidden {
 	display: none
 }
-.fileTable tr:not(:last-child) {
-	border-bottom: 1px solid rgb(224, 224, 224);
-}
-.tr-selected-background {
-	background-color: rgb(224, 224, 224);	
+.fileTable tr {
+	height:60px;
+	color:#404040;
+	font-size: 14px;
 }
 .fileTable th {
 	color:rgb(158, 158, 158);
-	height:56px;	
+	font-size:14px;
+	color:#404040;
+	box-sizing: border-box;
+}
+.fileTable tr:not(:last-child) {
+	/*border-bottom: 1px solid rgb(224, 224, 224);*/
+}
+.tr-selected-background {
+	background-color: rgb(224, 224, 224);	
 }
 .fileTable.hasCheckBox th:nth-child(1),.fileTable.hasCheckBox td:nth-child(1){
 	cursor: pointer;
 }
 .fileTable td {
 	color:rgba(0, 0, 0, 0.870588);
-	height:48px;
 	cursor:default;
 }
 .fileTable th,.fileTable td {
@@ -171,7 +221,9 @@
 	align-items: center;
 }
 .fileTable.hasCheckBox th:nth-child(1),.fileTable.hasCheckBox td:nth-child(1) {
-	width:24px;
+	width:144px;
+	padding-left:80px;
+	padding-right:40px;
 }
 
 .fileTable .selectBox {
@@ -186,6 +238,9 @@
 	left:0px;
 	width:100%;
 	height:100%;
+}
+.fileTable .selectBox svg {
+	fill:#ef6c00;
 }
 .black-frame {
 	width: 24px; position: absolute; opacity: 1; display: inline-block; fill: rgba(0, 0, 0, 0.870588); height: 24px; transition: all 2s cubic-bezier(0.23, 1, 0.32, 1) 200ms; -webkit-user-select: none;
@@ -203,13 +258,12 @@
 	transform: scale(0); 
 	opacity: 1; 
 	transition: opacity 2s cubic-bezier(0.23, 1, 0.32, 1) 0ms, transform 1s cubic-bezier(0.23, 1, 0.32, 1) 0ms; 
-	background-color: rgba(0, 0, 0, 0.170588);
 }
 .bezierTransition1 {
 	background-color: rgba(0, 0, 0, 0.170588);	
 }
 .bezierTransition2 {
-	background-color: rgba(0, 188, 212,.2);
+	background-color: #ef6c00;
 }
 .bezierTransition1.open,.bezierTransition2.open {
 	transform: scale(1); 
@@ -220,8 +274,22 @@
 	top:50%;
 	margin-left:-35px;
 }
-.file-name {
-
+.create-folder-dialog-title {
+	background-color: #ef6c00;
+	font-size: 14px!important;
+	color:#fff!important;
+	height:64px!important;
+	line-height: 64px!important;
+	padding: 0 0 0 26px!important;
+	margin:0px!important;
+}
+.create-folder-dialog-label {
+	font-size: 10px;
+	color:#ef6c00;
+	margin-top: 24px;
+}
+.create-folder-dialog {
+	height: 264px;
 }
 /*Menu*/
 .MenuContainer {
@@ -287,6 +355,12 @@
 	bottom: 20px;
 	left:20px;
 	line-height: 36px;
+}
+/*transmission*/
+.transmission-container {
+	width:100%;
+	height: 100%;
+	background-color: #fff
 }
 /*setting*/
 .register-container>div{
@@ -457,4 +531,15 @@
 	display: block;
 	max-width:90%;
 	margin: 50px auto 0;
+}
+/*share files*/
+.shared-files-container {
+	width:100%;
+	height:100%;
+	background-color: #fff
+}
+.files-shared-byme-container {
+	width: 100%;
+	height: 100%;
+	background-color:#fff 
 }

@@ -26,28 +26,34 @@ class AllFiles extends Component {
 		var _this = this;
 		const folderActions = [
 			<FlatButton
-				label="Cancel"
+				label="取消"
 				primary={true}
 				onTouchTap={this.toggleUploadFolder.bind(this,false)}
+				labelStyle={{color:'#000',fontSize:'15px'}}
 			/>,
 			<FlatButton
-				label="Submit"
+				label="确认"
 				primary={true}
-				keyboardFocused={true}
 				onTouchTap={this.upLoadFolder.bind(this)}
+				backgroundColor='#ef6c00'
+				labelStyle={{color:'#fff',fontSize:'16px'}}
+				hoverColor='#ef6c00'
 			/>,
 			];
 		const shareActions = [
 			<FlatButton
-				label="Cancel"
+				label="取消"
 				primary={true}
 				onTouchTap={this.toggleShare.bind(this,false)}
+				labelStyle={{color:'#000',fontSize:'15px'}}
 			/>,
 			<FlatButton
-				label="Submit"
+				label="确认"
 				primary={true}
-				keyboardFocused={true}
 				onTouchTap={this.share.bind(this)}
+				backgroundColor='#ef6c00'
+				labelStyle={{color:'#fff',fontSize:'16px'}}
+				hoverColor='#ef6c00'
 			/>,
 		];
 		const styles = {
@@ -59,7 +65,7 @@ class AllFiles extends Component {
 			},
 		};
 		return (
-			<div className='all-my-files' style={{height:(document.body.clientHeight-64)+'px'}}>
+			<div className='all-my-files' style={{height:'100%'}}>
 				{this.getTable()}
 				{/*file detail*/}
 				<Paper className='file-detail' style={{width:this.props.isShow.detail.length==0?'0px':'350px'}}>
@@ -68,18 +74,23 @@ class AllFiles extends Component {
 				{/*create new folder dialog*/}
 				<Dialog
 					title="新建文件夹"
+					titleClassName='create-folder-dialog-title'
 					actions={folderActions}
 					modal={false}
 					open={this.props.isShow.dialogOfFolder}
 					onRequestClose={this.handleClose}
+					className='create-folder-dialog'
 			        >
-			    	<TextField hintText="名称" id='folder-name'/>
+			        <div className='create-folder-dialog-label'>名称</div>
+			    	<TextField fullWidth={true} hintText="名称" id='folder-name'/>
 			    </Dialog>
 				{/*share dialog*/}
 				<Dialog 
 					title='分享' 
+					titleClassName='create-folder-dialog-title'
 					actions={shareActions}
 					open={this.props.isShow.dialogOfShare}
+					className='create-folder-dialog'
 				>
 					<div className='share-user-list-container' style={{'overflowY':'scroll'}}>
 					{this.props.login.obj.allUser.map((item,index)=>{
@@ -106,11 +117,13 @@ class AllFiles extends Component {
 					<input className='upload-input' type="file" onChange={this.upLoadFile.bind(this)} multiple={true} webkitdirectory={true}/>
 					{/*bread crumb*/}
 					<div className='breadcrumb'>
+						{/*
 						<SvgIcon onClick={this.backToParent.bind(this)} color={greenA200} style={{marginLeft:10,marginRight:14,cursor:'pointer'}}>
 						{svg['back']()}
 						</SvgIcon>
+						*/}
 						{this.getBreadCrumb()}
-						<IconMenu style={{display:'flex',alignItems:'center',marginRight:10}}
+						<IconMenu className='breadcrumb-add'
 						      iconButtonElement={<span style={{cursor:'pointer'}}>{svg.add()}</span>}
 						      anchorOrigin={{horizontal: 'left', vertical: 'top'}}
 						      targetOrigin={{horizontal: 'left', vertical: 'top'}}
@@ -138,12 +151,11 @@ class AllFiles extends Component {
 	//upload file
 	upLoadFile(e) {
 		let files = [];
-		let obj = {};
 		let map = new Map();
-		console.log(e.nativeEvent.target.files);
+		var t = new Date();
 		for (let i=0;i<e.nativeEvent.target.files.length;i++) {
 			var f = e.nativeEvent.target.files[i];
-			var t = new Date();
+			
 			var file = {
 				name:f.name,
 				path:f.path,
@@ -167,16 +179,13 @@ class AllFiles extends Component {
 		var _this = this;
 		var path = this.props.data.path;
 		var pathArr = [];
-		pathArr = path.map((item,index)=>(
-				<span key={index} style={{display:'flex',alignItems:'center'}}>
-					<span 
-					style={{display:'flex',alignItems:'center',marginRight:10,cursor:'pointer'}}
-					onClick={_this.selectBreadCrumb.bind(_this,item)}>
-						{item.key!=''?item.key:<SvgIcon>{svg['home']()}</SvgIcon>}
-					</span>
-					<span style={{marginRight:5}}>></span>
+		pathArr = path.map((item,index)=>{
+			return(
+				<span key={index} style={{display:'flex',alignItems:'center'}} onClick={_this.selectBreadCrumb.bind(_this,item)}>
+					{item.key!=''?<span className='breadcrumb-text'>{item.key}</span>:<span className='breadcrumb-home'></span>}
+					<span className={index==path.length-1?'breadcrumb-arrow hidden':'breadcrumb-arrow'}></span>
 				</span>
-			));
+			)});
 		return pathArr;
 
 	}

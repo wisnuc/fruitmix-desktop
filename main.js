@@ -38,7 +38,9 @@ var tree = {};
 //upload 
 var uploadQueue = [];
 var uploadNow = [];
-var uploadMap = new Map();
+//download
+var downloadQueue = [];
+var downloadNow = [];
 //media
 var media = [];
 var mediaMap = new Map();
@@ -47,6 +49,7 @@ var thumbIng = [];
 var mediaPath = __dirname+'/media/';
 //device
 var device = [];
+var downloadPath = __dirname+'/download/';
 
 var c = console.log;
 // var browser = mdns.createBrowser();
@@ -87,6 +90,15 @@ app.on('ready', function() {
 	fs.exists(mediaPath,exists=>{
 		if (!exists) {
 			fs.mkdir(mediaPath,err=>{
+				if(err){
+					console.log(err);
+				}
+			});
+		}
+	});
+	fs.exists(downloadPath,exists=>{
+		if (!exists) {
+			fs.mkdir(downloadPath,err=>{
 				if(err){
 					console.log(err);
 				}
@@ -417,9 +429,6 @@ function getFile(uuid) {
 }
 //upload file
 ipcMain.on('uploadFile',(e,files)=>{
-	// uploadQueueWait = uploadQueueWait.concat(files);
-	// dealUploadQueue();
-	//-------------------------------------------------------------------------------------------------------------
 	uploadQueue.push(files);
 	dealUploadQueue();
 });
@@ -431,7 +440,6 @@ function dealUploadQueue() {
 			mainWindow.webContents.send('message',uploadQueue[0].success+' 个文件上传成功 '+uploadQueue[0].failed+' 个文件上传失败');
 			modifyData(uploadQueue.shift());
 			console.log('a upload task over');
-			console.log(uploadQueue);
 			dealUploadQueue();
 		}else {
 			if (uploadNow.length < 3) {
@@ -496,6 +504,7 @@ function uploadFile(file) {
 				dealUploadQueue();
 			}
 			console.log('upload failed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+			console.log(res);
 			mainWindow.webContents.send('message','upload failed');
 		}
 	}
@@ -537,6 +546,82 @@ function modifyData(files,uuid) {
 		children = dir.children.map(i => Object.assign({},i,{children:null}));
 		mainWindow.webContents.send('uploadSuccess',{},children);
 	}
+}
+//download
+ipcMain.on('download',(e,files)=>{
+	downloadQueue.push(files);
+	dealDownloadQueue();
+})
+function dealDownloadQueue() {
+	if (downloadQueue.length == 0) {
+		return
+	}else {
+		if (downloadQueue[0].index == downloadQueue[0].length && downloadNow.length == 0) {
+			mainWindow.webContents.send('message',downloadQueue[0].success+' 个文件上传成功 '+downloadQueue[0].failed+' 个文件上传失败');
+			console.log('a upload task over');
+			downloadQueue.shift()
+			dealDownloadQueue();
+		}else {
+			if (downloadNow.length < 3) {
+				let gap = 3 - downloadNow.length;
+				for (let i = 0; i < gap; i++) {
+					let index = downloadQueue[0].index;
+					if (index > downloadQueue[0].length-1) {
+						return
+					}
+					downloadNow.push(downloadQueue[0].data[index]);
+					download(downloadQueue[0].data[index]);
+					downloadQueue[0].index++;
+				}
+			}
+		}
+	}
+}
+function download(item) {
+	var body = 0;
+	let countStatus;
+	if (item.attribute.size > 10000000) {
+		countStatus = setInterval(()=>{
+			let status = body/item.attribute.size;
+			mainWindow.webContents.send('refreshStatusOfDownload',item.uuid+item.downloadTime,status);
+			c(item.name+ ' ======== ' + status);
+		},1000);
+	}
+	var options = {
+		method: 'GET',
+		url: server+'/files/'+item.uuid+'?type=media',
+		headers: {
+			Authorization: user.type+' '+user.token
+		}
+	};
+
+	function callback (err,res,body) {
+		if (!err && res.statusCode == 200) {
+			console.log('res');
+			downloadQueue[0].success += 1;
+			mainWindow.webContents.send('refreshStatusOfDownload',item.uuid+item.downloadTime,1);
+			var uuid = body;
+			console.log(uuid);
+			let index = downloadNow.findIndex(i=>i.uuid == item.uuid);
+			downloadNow.splice(index,1);
+			if (downloadNow.length == 0) {
+				dealDownloadQueue();
+			}
+		}else {
+			downloadQueue[0].failed += 1;
+			mainWindow.webContents.send('refreshStatusOfDownload',item.uuid+item.downloadTime,1.01);
+			let index = downloadNow.findIndex(item3=>item3.uuid == item.uuid);
+			downloadNow.splice(index,1);
+			if (downloadNow.length == 0) {
+				dealDownloadQueue();
+			}
+		}
+	}
+	var stream = fs.createWriteStream('download/'+item.attribute.name);
+
+	request(options,callback).on('data',function(d){
+		body += d.length;
+	}).pipe(stream);
 }
 //create folder
 ipcMain.on('upLoadFolder',(e,name,dir)=>{
@@ -598,7 +683,8 @@ function modifyFolder(name,dir,folderuuid,send) {
 //upload folder
 ipcMain.on('openInputOfFolder', e=>{
 	dialog.showOpenDialog({properties: [ 'openDirectory']},function(folder){
-		if (folder.length == 0)　{
+		console.log(folder);
+		if (folder == undefined)　{
 			return
 		}
 		console.log(folder[0]);
@@ -784,59 +870,7 @@ function uploadFileInFolder(node) {
 	});
 	return promise;
 }
-//download
-ipcMain.on('download',(e,file)=>{
-	download(file).then(data=>{
-		console.log(file.attribute.name + ' download success');
-	});
-})
-function download(item) {
-	var download = new Promise((resolve,reject)=>{
-		var body = 0;
-		var options = {
-			method: 'GET',
-			url: server+'/files/'+item.uuid+'?type=media',
-			headers: {
-				Authorization: user.type+' '+user.token
-			}
-		};
 
-		function callback (err,res,body) {
-			if (!err && res.statusCode == 200) {
-				console.log('res');
-				resolve(body);
-				}else {
-					mainWindow.webContents.send('message','文件 '+item.name+' 下载失败');
-					// reject(err)
-					console.log('err');
-					console.log(err);
-				}
-			}
-			var stream = fs.createWriteStream('download/'+item.attribute.name);
-
-			var interval = setInterval(function() {
-				var upLoadProcess = body/item.attribute.size;
-				mainWindow.webContents.send('refreshStatusOfDownload',item,upLoadProcess);
-				if (upLoadProcess >= 1) {
-					resolve();
-					clearInterval(interval);
-				}
-			},500);
-
-			request(options,callback).on('data',function(d){
-				body += d.length;
-			}).pipe(stream);
-			
-			var transform = new stream.Transform({
-				transform: function(chunk, encoding, next) {
-					body+=chunk.length;
-					this.push(chunk)
-					next();
-				}
-			});	
-		})
-	return download;
-}
 //delete
 ipcMain.on('delete',(e,objArr,dir)=>{
 	for (let item of objArr) {
@@ -1263,7 +1297,6 @@ ipcMain.on('loginOff',err=>{
 	//upload 
 	uploadQueue = [];
 	uploadNow = [];
-	uploadMap = new Map();
 	//media
 	media = [];
 	mediaMap = new Map();

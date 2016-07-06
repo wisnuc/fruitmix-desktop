@@ -110,12 +110,20 @@ class PopMenu extends Component {
 	}
 
 	dowload() {
+		let files = [];
+		let map = new Map();
+		var t = new Date();
 		this.props.data.children.forEach(item=>{
 			if (item.checked) {
-				this.props.dispatch(Action.addDownload(item));
-				ipc.send('download',item);		
+				let file = Object.assign({},item,{status:0,downloadTime:Date.parse(t)});
+				files.push(file);
+				map.set(item.uuid+Date.parse(t),file);	
 			}
 		});
+		let fileObj = {data:files,length:files.length,success:0,failed:0,index:0,status:'ready',map:map,key:Date.parse(new Date())};
+		this.props.dispatch(Action.addDownload(fileObj));
+		ipc.send('download',fileObj);	
+		this.props.dispatch(Action.setSnack(files.length+' 个文件添加到下载队列',true));
 	}
 
 	triggerClick(e) {

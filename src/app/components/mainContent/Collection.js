@@ -14,49 +14,65 @@ import {Tabs, Tab} from 'material-ui/Tabs';
 
 class Collection extends Component {
 	render() {
+		let t = this.props.transmission;
+		let uploadList = [];
+		let downloadList = [];
+		t.upload.forEach(item=>{
+			item.data.forEach(item1=>{
+				uploadList.push(
+					<tr key={item1.name+item1.uploadTime}>
+						<td title={item1.name}>{item1.name}</td>
+						<td>{this.getSize(item1.size)}</td>
+						<td>{this.getStutus(item1.status)}</td>
+					</tr>
+					);
+			});
+		})
+		t.download.forEach(item=>{
+			item.data.forEach(item1=>{
+				downloadList.push(
+					<tr key={item1.name+item1.uploadTime}>
+						<td title={item1.name}>{item1.name}</td>
+						<td>{this.getSize(item1.attribute.size)}</td>
+						<td>{this.getStutus(item1.status)}</td>
+					</tr>
+					);
+			});
+		})
 		return (
-			<div>
-				<Tabs tabItemContainerStyle={{backgroundColor:'#fff',width:'500px',color:'red'}}>
-					<Tab label='upload list' style={{color:'#000'}}>
-						{/*
-						<Table selectable={false}>
-							<TableBody displayRowCheckbox={false}>
-							{this.props.data.upload.map((item,index)=>{
-								return (
-									<TableRow>
-										<TableRowColumn>{item.name}</TableRowColumn>
-										<TableRowColumn>{this.getSize(item.size)}</TableRowColumn>
-										<TableRowColumn>{this.getStutus(item.status)}</TableRowColumn>
-									</TableRow>
-									)
-							})}
-							</TableBody>
-						</Table>
-						*/}
-						
-						{this.props.transmission.upload.map(item=>{
-							return (
-								<Table selectable={false} key={item.key}>
-								<TableBody displayRowCheckbox={false}>
-								{item.data.map((item1,index)=>{
-									if (index>this.props.transmission.uploadSize) {
-										return
-									}
-									return (
-										<TableRow key={item1.name+item1.uploadTime}>
-											<TableRowColumn title={item1.name}>{item1.name}</TableRowColumn>
-											<TableRowColumn>{this.getSize(item1.size)}</TableRowColumn>
-											<TableRowColumn>{this.getStutus(item1.status)}</TableRowColumn>
-										</TableRow>
-										)
-								})}
-								</TableBody>
-								</Table>
-								)
-						})}
+			<div className='transmission-container'>
+				<Tabs tabItemContainerStyle={{backgroundColor:'#f3f3f3',color:'#9a9a9a'}} inkBarStyle={{marginLeft:'12.5%',width:'25%',backgroundColor:'red'}}>
+					<Tab label='上传队列' style={{color:'#404040',fontSize:'14px'}}>
+						<table className="fileTable">
+							<thead>
+								<tr>
+									<th>文件名称</th>
+									<th>大小</th>
+									<th>状态</th>
+								</tr>
+							</thead>
+							<tbody>
+							{uploadList}
+							</tbody>
+						</table>
 						
 					</Tab>
-					<Tab label='download list' style={{color:'#000'}}>
+					<Tab label='下载队列' style={{color:'#000'}}>
+						<table className="fileTable">
+							<thead>
+								<tr>
+									<th>文件名称</th>
+									<th>大小</th>
+									<th>状态</th>
+								</tr>
+							</thead>
+							<tbody>
+							{downloadList}
+							</tbody>
+						</table>
+					</Tab>
+					{/*
+					<Tab label='下载队列' style={{color:'#000'}}>
 						<Table selectable={false}>
 						<TableBody displayRowCheckbox={false}>
 						{this.props.transmission.dowload.map((item,index)=>{
@@ -74,6 +90,7 @@ class Collection extends Component {
 						</TableBody>
 						</Table>
 					</Tab>
+					*/}
 				</Tabs>
 			</div>
 		)

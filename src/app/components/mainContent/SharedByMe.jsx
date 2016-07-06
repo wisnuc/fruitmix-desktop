@@ -15,6 +15,7 @@ import svg from '../../utils/SVGIcon';
 class SharedByMe extends Component {
 	render() {
 		return (
+			<div className='files-shared-byme-container'>
 			<table className="fileTable">
 				{/*table header*/}
 				<thead>
@@ -45,6 +46,7 @@ class SharedByMe extends Component {
 					}
 				</tbody>
 			</table>
+			</div>
 		)
 	}
 

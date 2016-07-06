@@ -22,15 +22,15 @@ const style = {
 };
 
 const listStyle = {
-	height: 64,
-	lineHeight:'64px',
+	height: 60,
+	lineHeight:'60px',
 	paddingLeft:50,
 	color:'#fff',
 	fontSize:'12px'
 }
 const selectedStyle = {
-	height: 64,
-	lineHeight:'64px',
+	height: 60,
+	lineHeight:'60px',
 	paddingLeft:50,
 	color:'#ef6c00',
 	fontSize:'12px'	
