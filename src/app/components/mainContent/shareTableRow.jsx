@@ -23,8 +23,8 @@ class SharedFilesRow extends Component {
 				<td>{item.name}</td>
 				<td>{p.getShareUser(item.owner)}</td>
 				<td  onMouseEnter={this.enter.bind(this)} onMouseLeave={this.leave.bind(this)} >
-					<span>下载</span>
-					<span style={this.state.deleteShow?{}:{display:'none'}}>删除</span>
+					<span>{svg.download()}</span>
+					<span style={this.state.deleteShow?{}:{display:'none'}}>{svg.deleteFiles()}</span>
 				</td>
 			</tr>
 			)

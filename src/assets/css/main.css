@@ -538,6 +538,12 @@
 	height:100%;
 	background-color: #fff
 }
+.shared-files-container td>span {
+	cursor: pointer;
+}
+.shared-files-container td>span svg {
+	fill:#666!important;
+}
 .files-shared-byme-container {
 	width: 100%;
 	height: 100%;
