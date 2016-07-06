@@ -14,8 +14,8 @@ var mdns = require('mdns-js');
 var mainWindow = null;
 
 var server = 'http://211.144.201.201:8888';
-server ='http://192.168.5.132:80';
-server ='http://192.168.5.134:80';
+// server ='http://192.168.5.132:80';
+// server ='http://192.168.5.134:80';
 //user
 var user = {};
 //files
@@ -41,6 +41,8 @@ var uploadNow = [];
 //download
 var downloadQueue = [];
 var downloadNow = [];
+var downloadFolderQueue = [];
+var downloadFolderNow = [];
 //media
 var media = [];
 var mediaMap = new Map();
@@ -1303,55 +1305,112 @@ ipcMain.on('loginOff',err=>{
 	thumbQueue = [];
 	thumbIng = [];
 });
-//copy 
-// ipcMain.on('copy'，);
+//download folder
+ipcMain.on('downloadFolder',(err,folder)=>{
+	folder.forEach(item=>{
+		let tree = map.get(item.uuid);
+		let count = getTreeCount(tree);
+		let obj = {count:count,failed:0,data:tree,type:'folder'};
+		downloadFolderQueue.push(obj);
+	});
+	if (downloadFolderNow.length == 0) {
+		downloadFolderNow.push(downloadFolderQueue[0]);
+		downloadFolder(downloadFolderNow[0]);
+	}
+})
+function getTreeCount(tree) {
+	let count = 0;
+	loopTree(tree,downloadPath);
+	function loopTree(tree,p) {
+		count++;
+		let nodepath = path.join(p,tree.name);
+		tree.path = nodepath;
+		tree.times = 0;
+		if (tree.children.length == 0) {
+			return
+		}else {
+			tree.children.forEach(item=>{
+				loopTree(item,nodepath);
+			});
+		}
+	}
+	return count
+}
 
-// function setGlobalShortcuts() {
-//     globalShortcut.unregisterAll();
+function downloadFolder(folder) {
+	console.log(folder.children);
+	looptree(folder.data,()=>{
+		console.log('finish');
+	},()=>{
+		c('not finish');
+	});
+	function looptree(tree,callback,failedCallback) {
+		if (tree.type == 'file') {
+			c(tree.name+' is file');
+			downloadFolderFile(tree.uuid,tree.path).then(()=>{
+				callback();
+			}).catch(err=>{
+				failedCallback();
+			});
+		}else {
+				c(tree.name+' is folder');
+			 fs.mkdir(tree.path,err=>{
+			 	if (err) {
+			 		console.log('folder failed');
+			 		failedCallback();
+			 	}else {
+			 		console.log('folder success');
+			 		let count = tree.children.length;
+			 		let index = 0;
+			 		let success = function () {
+			 			index++;
+			 			if (index == count) {
+			 				callback();
+			 			}else {
+			 				looptree(tree.children[index],success,failed);		
+			 			}
+			 		}
+			 		let failed = function () {
+			 			tree.children[index].time++;
+			 			if (tree.children[index].time>5) {
+			 				index++;
+			 				callback();
+			 			}else {
+			 				looptree(tree.children[index],success,failed);
+			 			}
+			 		}
+			 		if (count == 0) {
+			 			callback();
+			 		}
+			 		looptree(tree.children[index],success,failed);
+			 	}
+			 });
+		}
+	}
+}
+function downloadFolderFile(uuid,path) {
+	var promise = new Promise((resolve,reject)=>{
+		var options = {
+			method: 'GET',
+			url: server+'/files/'+uuid+'?type=media',
+			headers: {
+				Authorization: user.type+' '+user.token
+			}
+		};
+		function callback (err,res,body) {
+			if (!err && res.statusCode == 200) {
+				console.log('file res');
+				resolve();
+			}else {
+				console.log('file err');
+				reject();
+			}
+		}
+		var stream = fs.createWriteStream(path);
 
-//     var shortcutKeysSetting = configuration.readSettings('shortcutKeys');
-//     var shortcutPrefix = shortcutKeysSetting.length === 0 ? '' : shortcutKeysSetting.join('+') + '+';
-//     console.log(shortcutPrefix);
-
-//     globalShortcut.register(shortcutPrefix + '1', function () {
-//         mainWindow.webContents.send('global-shortcut', 0);
-//     });
-//     globalShortcut.register(shortcutPrefix + '2', function () {
-//         mainWindow.webContents.send('global-shortcut', 1);
-//     });
-// }
-
-
-
-// ipc.on('open-settings-window', function () {
-//     if (settingsWindow) {
-//         return;
-//     }
-
-//     settingsWindow = new BrowserWindow({
-//         frame: false,
-//         height: 768,
-//         resizable: false,
-//         width: 1366
-//     });
-
-//     settingsWindow.webContents.openDevTools();
-//     settingsWindow.loadUrl('http://localhost:8000/#/settings');
-
-//     settingsWindow.on('closed', function () {
-//         settingsWindow = null;
-//     });
-// });
-
-// ipc.on('close-settings-window', function () {
-//     if (settingsWindow) {
-//         settingsWindow.close();
-//     }
-// });
-
-// ipc.on('set-global-shortcuts', function () {
-//     setGlobalShortcuts();
-// });
-
+		request(options,callback).pipe(stream);
+	});
+	return promise;
+}
 
 
