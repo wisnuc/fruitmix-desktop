@@ -187,7 +187,6 @@ class AllFiles extends Component {
 				</span>
 			)});
 		return pathArr;
-
 	}
 	//back
 	backToParent () {

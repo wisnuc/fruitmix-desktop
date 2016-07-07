@@ -58,9 +58,9 @@ class SharedByMe extends Component {
 			let i = allUser.findIndex(i=>i.uuid==item);
 			if (i != -1) {
 				if (index == file.writelist.length-1) {
-					users += allUser[index].username;
+					users += allUser[i].username;
 				}else {
-					users += allUser[index].username+',';
+					users += allUser[i].username+',';
 				}
 				
 			}
@@ -69,7 +69,7 @@ class SharedByMe extends Component {
 	}
 
 	cancelShare(item) {
-		
+		ipc.send('cancelShare',item);
 	}
 
 	reShare() {

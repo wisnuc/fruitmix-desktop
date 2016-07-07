@@ -25,7 +25,7 @@ var actions = {
 		}
 	},
 
-	setDirctory(dir,children,parent,path,shareChildren,filesSharedByMe) {
+	setDirctory(dir,children,parent,path,shareChildren,filesSharedByMe,sharePath) {
 		return {
 			type: 'SET_DIRECTORY',
 			directory: dir,
@@ -33,7 +33,8 @@ var actions = {
 			parent: parent,
 			path:path,
 			shareChildren:shareChildren,
-			filesSharedByMe:filesSharedByMe
+			filesSharedByMe:filesSharedByMe,
+			sharePath: sharePath
 		}
 	},
 
@@ -262,10 +263,11 @@ var actions = {
 		}
 	},
 
-	setShareChildren(shareChildren) {
+	setShareChildren(shareChildren,sharePath) {
 		return {
 			type: 'SET_SHARE_CHILDREN',
-			shareChildren: shareChildren
+			shareChildren: shareChildren,
+			sharePath:sharePath
 		}
 	},
 
@@ -285,6 +287,13 @@ var actions = {
 	logOut() {
 		return {
 			type: 'LOG_OUT'
+		}
+	},
+
+	setFilesSharedByMe(files) {
+		return {
+			type: 'FILES_SHARED_BY_ME',
+			files:files
 		}
 	}
 }

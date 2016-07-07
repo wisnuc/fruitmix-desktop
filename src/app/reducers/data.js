@@ -4,6 +4,7 @@ const defaultDirectory = {
 	children:[],
 	parent: [],
 	path:[],
+	sharePath:[],
 	selectAll:false, 
 	position:[],
 	menu:{show:false,objArr:[]},
@@ -19,7 +20,7 @@ const directory = (state = defaultDirectory,action)=> {
 				return {top:index*51+58+48+8+64,bottom:(index+1)*51+58+48+8+64}
 			});
 
-			var obj = {directory:action.directory,children:action.children,parent:action.parent,path:action.path,position:position,state:'READY',selectAll:false,shareChildren:action.shareChildren,filesSharedByMe:action.filesSharedByMe};
+			var obj = {directory:action.directory,children:action.children,parent:action.parent,path:action.path,position:position,state:'READY',selectAll:false,shareChildren:action.shareChildren,filesSharedByMe:action.filesSharedByMe,sharePath:action.sharePath};
 			return Object.assign({}, state, obj);
 
 		case 'SELECT_CHILDREN':
@@ -170,12 +171,14 @@ const directory = (state = defaultDirectory,action)=> {
 		// 		return state
 		// 	}
 		case 'SET_SHARE_CHILDREN':
-			return Object.assign({},state,{shareChildren:action.shareChildren});
+			return Object.assign({},state,{shareChildren:action.shareChildren,sharePath:action.sharePath});
 		case 'SET_FILES_SIZE':
 			var size = state.showSize;
 			action.reset?size=50:size+=50
 			console.log(size);
 			return Object.assign({},state,{showSize:size});
+		case 'FILES_SHARED_BY_ME':
+			return Object.assign({},state,{filesSharedByMe:action.files});
 		default:
 			return state
 	}

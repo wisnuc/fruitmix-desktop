@@ -47,10 +47,10 @@ class Main extends Component {
 		ipc.send('getMediaData');
 		this.props.dispatch(Action.filesLoading());
 
-		ipc.on('receive',function (err,dir,children,parent,path,shareChildren,filesSharedByMe) {
+		ipc.on('receive',function (err,dir,children,parent,path,shareChildren,filesSharedByMe,sharePath) {
 			console.log('~~~~~~~~~~~~~~');
 			console.log(filesSharedByMe);
-			_this.props.dispatch(Action.setDirctory(dir,children,parent,path,shareChildren,filesSharedByMe));
+			_this.props.dispatch(Action.setDirctory(dir,children,parent,path,shareChildren,filesSharedByMe,sharePath));
 		});
 		ipc.on('setTree',(err,tree)=>{
 			this.props.dispatch(Action.setTree(tree));
@@ -119,8 +119,8 @@ class Main extends Component {
 			this.props.dispatch(Action.setMediaImage(item));
 		});
 
-		ipc.on('setShareChildren',(err,shareChildren)=>{
-			this.props.dispatch(Action.setShareChildren(shareChildren));
+		ipc.on('setShareChildren',(err,shareChildren,sharePath)=>{
+			this.props.dispatch(Action.setShareChildren(shareChildren,sharePath));
 		});
 
 		ipc.on('transmissionDownload',(err,obj)=>{
@@ -129,6 +129,10 @@ class Main extends Component {
 
 		ipc.on('transmissionUpload',(err,obj)=>{
 			this.props.dispatch(Action.addUpload(obj));
+		});
+
+		ipc.on('setFilesSharedByMe',(err,files)=>{
+			this.props.dispatch(Action.setFilesSharedByMe(files));
 		});
 	}
 
@@ -147,7 +151,7 @@ class Main extends Component {
           				anchorOrigin={{horizontal: 'right', vertical: 'top'}}
       					targetOrigin={{horizontal: 'right', vertical: 'top'}}
         			>
-			          <MenuItem value="1" primaryText="用户管理" onTouchTap={this.openUser.bind(this)}/>
+			          {/*<MenuItem value="1" primaryText="用户管理" onTouchTap={this.openUser.bind(this)}/>*/}
 			          <MenuItem value="2" primaryText="注销" onTouchTap={this.logOff.bind(this)}/>
         			</IconMenu>}
 				onLeftIconButtonTouchTap={this.leftNavClick.bind(this)}

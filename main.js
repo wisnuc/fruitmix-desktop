@@ -14,8 +14,8 @@ var mdns = require('mdns-js');
 var mainWindow = null;
 
 var server = 'http://211.144.201.201:8888';
-server ='http://192.168.5.132:80';
-server ='http://192.168.5.134:80';
+// server ='http://192.168.5.132:80';
+// server ='http://192.168.5.134:80';
 //user
 var user = {};
 //files
@@ -29,6 +29,7 @@ var shareFiles = [];
 var shareTree = [];
 var shareMap = new Map();
 var shareChildren = [];
+var sharePath = [];
 //directory
 var currentDirectory = {};
 var children = [];
@@ -48,14 +49,13 @@ var media = [];
 var mediaMap = new Map();
 var thumbQueue = [];
 var thumbIng = [];
-var mediaPath = __dirname+'/media/';
+var mediaPath = path.join(__dirname,'media');
 //device
 var device = [];
-var downloadPath = __dirname+'/download/';
+var downloadPath = path.join(__dirname,'download');
 
 var c = console.log;
 // var browser = mdns.createBrowser();
-
 
 // try{
 // 	browser.on('ready', function () {
@@ -86,7 +86,7 @@ app.on('ready', function() {
 		minWidth:1024,
 		minHeight:768
 	});
-	// mainWindow.webContents.openDevTools();
+	mainWindow.webContents.openDevTools();
 	// dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']})
 	mainWindow.loadURL('file://' + __dirname + '/ele/index.html');
 	fs.exists(mediaPath,exists=>{
@@ -186,10 +186,15 @@ function getAllUser() {
 ipcMain.on('getRootData', ()=> {
 	getFiles().then((data)=>{
 		// //remove folder
+		sharePath.length = 0;
+		shareChildren.length = 0
 		removeFolder(data);
 		dealWithData(data);
 		let copyFilesSharedByMe = filesSharedByMe.map(item=>Object.assign({},item,{children:null,writelist:[].concat(item.writelist)}));
-		mainWindow.webContents.send('receive', currentDirectory,children,parent,dirPath,shareChildren,copyFilesSharedByMe);
+
+		sharePath.push({key:'',value:{}});
+		c(sharePath);
+		mainWindow.webContents.send('receive', currentDirectory,children,parent,dirPath,shareChildren,copyFilesSharedByMe,sharePath);
 	}).catch((err)=>{
 		console.log(err);
 		mainWindow.webContents.send('message','get data error',1);	
@@ -405,7 +410,8 @@ function enterChildren(selectItem) {
 		console.log(e);        
 		path.length=0;
 	}finally {
-		mainWindow.webContents.send('receive',currentDirectory,children,parent,dirPath,shareChildren);
+		let copyFilesSharedByMe = filesSharedByMe.map(item=>Object.assign({},item,{children:null,writelist:[].concat(item.writelist)}));
+		mainWindow.webContents.send('receive',currentDirectory,children,parent,dirPath,shareChildren,copyFilesSharedByMe,sharePath);
 	}
 }
 //get path
@@ -634,7 +640,7 @@ function download(item) {
 			}
 		}
 	}
-	var stream = fs.createWriteStream('download/'+item.attribute.name);
+	var stream = fs.createWriteStream(path.join(downloadPath,item.attribute.name));
 
 	request(options,callback).on('data',function(d){
 		body += d.length;
@@ -705,12 +711,13 @@ ipcMain.on('openInputOfFolder', e=>{
 			return
 		}
 		let folderPath = path.normalize(folder[0]);
+		console.log(path.basename(folderPath));
 		let t = (new Date()).getTime();
 		uploadObj.key = folder+t;
 		genTask(folderPath,function(err,o){		
 			uploadObj.data = o;
 			console.log(folderPath);
-			uploadObj.name = folderPath.split('\\')[folderPath.split('\\').length-1];
+			uploadObj.name = path.basename(folderPath);
 			let st = setInterval(()=>{
 				mainWindow.webContents.send('refreshUploadStatusOfFolder',uploadObj.key,uploadObj.success+' / '+uploadObj.count);
 			},1000);
@@ -733,7 +740,7 @@ ipcMain.on('openInputOfFolder', e=>{
 		});
 	})
 	function genTask(rootpath, callback) {
-	  	let obj = {times:0,children:[],path:rootpath,status:'准备',parent:currentDirectory.uuid,type:'folder',name:rootpath.split('\\')[rootpath.split('\\').length-1]};
+	  	let obj = {times:0,children:[],path:rootpath,status:'准备',parent:currentDirectory.uuid,type:'folder',name:path.basename(rootpath)};
 	  	var func = (dir, stat, cur) => {
 	  		cur.push({
 	  			path: dir,
@@ -743,7 +750,7 @@ ipcMain.on('openInputOfFolder', e=>{
 	  			uuid:null,
 	  			children:[],
 	  			parent:null,
-	  			name: dir.split('\\')[dir.split('\\').length-1]
+	  			name: path.basename(dir)
 	  		});
 	  	}
 	  	traverse(rootpath, func, () => callback(null, obj), obj.children);
@@ -1037,17 +1044,24 @@ ipcMain.on('share',function(err,files,users){
 			//changeShareData
 			let file = map.get(item.uuid);
 			file.readlist = users;
-			file.writelist = users;
+			let u = _.clone(users);
+			file.writelist = u;
 			//is exist in filesSharedByMe?
 			let index = filesSharedByMe.findIndex(f=>f.uuid == item.uuid);
-			if (index == -1) {
-				filesSharedByMe.push(map.get(item.uuid));
-			}else {
 
+			if (index == -1) {
+				filesSharedByMe.push(file);
+				mainWindow.webContents.send('setFilesSharedByMe',filesSharedByMe);
+			}else {
+				filesSharedByMe[index] = file;
+				console.log('2');
+				mainWindow.webContents.send('setFilesSharedByMe',filesSharedByMe);
 			}
+			mainWindow.webContents.send('message',item.name + '分享成功');	
+		}).catch(err=>{
+			mainWindow.webContents.send('message',item.name+ '分享失败,请稍后再试');
 		});
 	});
-	mainWindow.webContents.send('message',files.length + '个文件分享成功');
 });
 function share(file,users) {
 	var s = new Promise((resolve,reject)=>{
@@ -1072,6 +1086,19 @@ function share(file,users) {
 	});
 	return s;
 }
+//cancel share
+ipcMain.on('cancelShare',(err,item)=>{
+	share(item,[]).then(()=>{
+		console.log('cancel success');
+		let index = filesSharedByMe.findIndex(i=>{
+			return item.uuid == i.uuid
+		});
+		filesSharedByMe.splice(index,1);
+		mainWindow.webContents.send('setFilesSharedByMe',filesSharedByMe);
+	}).catch(err=>{
+		c('cancel failed');
+	});
+});
 //getTreeChildren
 ipcMain.on('getTreeChildren',function(err,uuid) {
 	if (uuid && uuid!='') {
@@ -1180,10 +1207,8 @@ function dealThumbQueue() {
 	if (thumbQueue.length == 0) {
 		return
 	}else {
-		setTimeout(function(){
+		// setTimeout(function(){
 			if (thumbIng.length == 0) {
-				c('----');
-				console.log('run');
 				for (var i=0;i<3;i++) {
 					if (thumbQueue.length == 0) {
 						break;
@@ -1193,17 +1218,18 @@ function dealThumbQueue() {
 					isThumbExist(item);
 				}
 			}
-		},500);
+		// },500);
 	}
 }
 
 function isThumbExist(item) {
-	fs.readFile(__dirname+'/media/'+item.hash+'thumb',(err,data)=>{
+	fs.readFile(path.join(mediaPath,item.hash+'thumb'),(err,data)=>{
 		if (err) {
 			downloadMedia(item).then((data)=>{
 				sendThumb(item);
 				console.log(thumbQueue.length+' length');
 			}).catch(err=>{
+
 				item.failed++;
 				let index = thumbIng.findIndex(i=>i.hash == item.hash);
 				let t = thumbIng[index];
@@ -1227,7 +1253,7 @@ function isThumbExist(item) {
 		let index = thumbIng.findIndex(i=>i.hash == item.hash);
 		thumbIng.splice(index,1);
 		dealThumbQueue();
-		item.path=__dirname+'/media/'+item.hash+'thumb';
+		item.path = path.join(mediaPath,item.hash+'thumb');
 		mainWindow.webContents.send('getThumbSuccess',item);
 	}
 }
@@ -1256,7 +1282,7 @@ function downloadMedia(item) {
 				reject(err)
 			}
 		}
-			var stream = fs.createWriteStream('media/'+item.hash+'thumb');
+			var stream = fs.createWriteStream(path.join(mediaPath,item.hash+'thumb'));
 
 			request(options,callback).pipe(stream);
 		})
@@ -1303,12 +1329,36 @@ ipcMain.on('enterShare',(err,item)=>{
 	let children = share.children.map(item=>{
 		return Object.assign({},item,{children:[]});
 	});
-	mainWindow.webContents.send('setShareChildren',children);
+	sharePath = [];
+	c(share);
+	getSharePath(share);
+	// let sharePath = [];
+	mainWindow.webContents.send('setShareChildren',children,sharePath);
 });
+function getSharePath(obj) {
+	//insert obj to path
+	sharePath.unshift({key:obj.name,value:Object.assign({},obj,{children:null})});
+	//obj is root?
+	if (obj.parent == undefined || obj.parent == '') {
+		sharePath.unshift({key:'',value:{}});
+		return; 
+	}else {
+		let oo = shareMap.get(obj.parent);
+		if (oo == undefined) {
+			sharePath.unshift({key:'',value:{}});
+			return
+		}else {
+			getSharePath(oo);	
+		}
+		
+	}
+}
 ipcMain.on('backShareRoot',err=>{
 	shareChildren.length = 0;
 	shareTree.forEach((item)=>{if (item.hasParent == false) {shareChildren.push(item);}});
-	mainWindow.webContents.send('setShareChildren',shareChildren);
+	sharePath.length = 0;
+	sharePath.push({value:'',obj:{}})
+	mainWindow.webContents.send('setShareChildren',shareChildren,sharePath);
 });
 //loginOff
 ipcMain.on('loginOff',err=>{
@@ -1324,6 +1374,7 @@ ipcMain.on('loginOff',err=>{
 	shareTree = [];
 	shareMap = new Map();
 	shareChildren = [];
+	sharePath = [];
 	//directory
 	currentDirectory = {};
 	children = [];

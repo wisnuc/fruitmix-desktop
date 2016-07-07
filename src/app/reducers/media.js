@@ -3,7 +3,7 @@ const defaultState = {
 	status: 'busy',
 	map: null,
 	currentMediaImage:{status:'notReady',path:null,open: false},
-	size:20
+	size:50
 }
 
 const Media = (state=defaultState,action)=>{
@@ -31,9 +31,14 @@ const Media = (state=defaultState,action)=>{
 			let image = Object.assign({},action.item,{status:'ready',path:action.item.path,open:true});
 			return Object.assign({},state,{currentMediaImage:image});
 		case 'SET_MEDIA_SIZE':
-			var size;
-			action.reset?size=20:size+=20
-			return Object.assign({},state,{size:size});
+			var s;
+			if (action.reset) {
+				s = 50;
+			}else {
+				s = state.size+50;
+			}
+			console.log(s);
+			return Object.assign({},state,{size:s});
 		default:
 			return state;
 	}
