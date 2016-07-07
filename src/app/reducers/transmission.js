@@ -19,21 +19,39 @@ const transmission = (state=defaultState,action)=>{
 
 		case 'REFRESH_STATUS_DOWNLOAD':
 			state.download.forEach(item=>{
-				var uploadFIle = item.map.get(action.file);
-				if (uploadFIle != undefined) {
-					uploadFIle.status = action.status;
+				if (item.type == 'folder') {
+					return
+				}
+				var downloadFIle = item.map.get(action.file);
+				if (downloadFIle != undefined) {
+					downloadFIle.status = action.status;
 				}
 			});
 			return Object.assign({},state) 
 		case 'REFRESH_STATUS_UPLOAD':
 			state.upload.forEach(item=>{
+				if (item.type == 'folder') {
+					return
+				}
 				var uploadFIle = item.map.get(action.file);
 				if (uploadFIle != undefined) {
 					uploadFIle.status = action.status;
 				}
 			});
-			return Object.assign({},state) 
-
+			return Object.assign({},state);
+		case 'DOWNLOAD_STATUS_OF_FOLDER': 
+			var index = state.download.findIndex(item=>{
+				return item.type=='folder'&&item.key==action.key
+			})
+			state.download[index].status = action.status;
+			return Object.assign({},state);
+		case 'UPLOAD_STATUS_OF_FOLDER': 
+			var index = state.upload.findIndex(item=>{
+				return item.type=='folder'&&item.key==action.key
+			})
+			state.upload[index].status = action.status;
+			return Object.assign({},state);
+		
 		default:
 			return state
 	}

@@ -14,7 +14,7 @@ var mdns = require('mdns-js');
 var mainWindow = null;
 
 var server = 'http://211.144.201.201:8888';
-// server ='http://192.168.5.132:80';
+server ='http://192.168.5.132:80';
 // server ='http://192.168.5.134:80';
 //user
 var user = {};
@@ -86,7 +86,7 @@ app.on('ready', function() {
 		minWidth:1024,
 		minHeight:768
 	});
-	mainWindow.webContents.openDevTools();
+	// mainWindow.webContents.openDevTools();
 	// dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']})
 	mainWindow.loadURL('file://' + __dirname + '/ele/index.html');
 	fs.exists(mediaPath,exists=>{
@@ -551,6 +551,7 @@ function modifyData(files,uuid) {
 }
 //download
 ipcMain.on('download',(e,files)=>{
+	console.log(files)
 	downloadQueue.push(files);
 	dealDownloadQueue();
 })
@@ -559,7 +560,7 @@ function dealDownloadQueue() {
 		return
 	}else {
 		if (downloadQueue[0].index == downloadQueue[0].length && downloadNow.length == 0) {
-			mainWindow.webContents.send('message',downloadQueue[0].success+' 个文件上传成功 '+downloadQueue[0].failed+' 个文件上传失败');
+			mainWindow.webContents.send('message',downloadQueue[0].success+' 个文件下载成功 '+downloadQueue[0].failed+' 个文件下载失败');
 			console.log('a upload task over');
 			downloadQueue.shift()
 			dealDownloadQueue();
@@ -610,6 +611,8 @@ function download(item) {
 				dealDownloadQueue();
 			}
 		}else {
+			console.log('err');
+			console.log(err);
 			downloadQueue[0].failed += 1;
 			mainWindow.webContents.send('refreshStatusOfDownload',item.uuid+item.downloadTime,1.01);
 			let index = downloadNow.findIndex(item3=>item3.uuid == item.uuid);
@@ -684,129 +687,147 @@ function modifyFolder(name,dir,folderuuid,send) {
 }
 //upload folder
 ipcMain.on('openInputOfFolder', e=>{
+	var uploadObj = {status:'准备',data:{},success:0,count:0,key:'',type:'folder',name:''};
 	dialog.showOpenDialog({properties: [ 'openDirectory']},function(folder){
-		console.log(folder);
 		if (folder == undefined)　{
 			return
 		}
-		console.log(folder[0]);
 		let folderPath = path.normalize(folder[0]);
-		c(folderPath);
-		genTask(folderPath,function(err,o){
+		let t = (new Date()).getTime();
+		uploadObj.key = folder+t;
+		genTask(folderPath,function(err,o){		
+			uploadObj.data = o;
+			uploadObj.name = folderPath.split('\\')[folderPath.split('\\').length-1];
+			let st = setInterval(()=>{
+				mainWindow.webContents.send('refreshUploadStatusOfFolder',uploadObj.key,uploadObj.success+' / '+uploadObj.count);
+			},1000);
 			let f = function() {
 				if (o.times>5) {
 						o.status = 'failed';
+						clearInterval(st);
+						mainWindow.webContents.send('refreshUploadStatusOfFolder',uploadObj.key,'上传失败');
 					}else {
-						uploadNode(o,function(){c('success end');},f);
+						uploadNode(o,s,f);
 					}
 			}
-			uploadNode(o,function(){c('success end');},f);
+			let s = function() {
+				c('success end');
+				clearInterval(st);
+				mainWindow.webContents.send('refreshUploadStatusOfFolder',uploadObj.key,'已完成');
+			}
+			mainWindow.webContents.send('transmissionUpload',uploadObj);
+			uploadNode(o,s,f);
 		});
 	})
-});
-function genTask(rootpath, callback) {
-  	let obj = {times:0,children:[],path:rootpath,status:'ready',parent:currentDirectory.uuid,type:'folder',name:rootpath.split('\\')[rootpath.split('\\').length-1]};
-  	var func = (dir, stat, cur) => {
-  		cur.push({
-  			path: dir,
-  			type: stat?'folder':'file',
-  			times: 0,
-  			status: 'ready',
-  			uuid:null,
-  			children:[],
-  			parent:null,
-  			name: dir.split('\\')[dir.split('\\').length-1]
-  		});
-  	}
-  	traverse(rootpath, func, () => callback(null, obj), obj.children)
-}
-function traverse(dir, visitor, callback, current) {
-	//read directory
-  	fs.readdir(dir, (err, entries) => {
-  		//directory err
-  		if (err) return callback(err);
-		if (entries.length === 0) return callback(err);
-		//directory right
-		var count = entries.length;
-		//map children
-		entries.forEach(entry => {
-	  		let entryPath = path.join(dir, entry);
-	  		fs.stat(entryPath, (err, stat) => {
-	  			//is entry directory
-			  	if (err || (!stat.isDirectory() && !stat.isFile())) {
-			  	  	count--
-			  	  	if (count === 0) callback()
-			  	  	return
-			  	}
-			  	//insert file to tree
-				visitor(entryPath, stat.isDirectory(), current);
-        		if (stat.isDirectory()) {
-        			//recursion
-        			let index = current.length;
-          			traverse(entryPath,visitor, () => {
-          			count--
-          			if (count === 0) callback()
-          				return
-          			},current[index-1].children);
-          			
-        		}
-        		else {
-          			count--
-		          	if (count === 0) callback()
-		          	return
-	        	}
-	  		})
-		})
-  	})
-}
-function uploadNode(node,callback,failedCallback) {
-	console.log(node.name);
-	if (node.type == 'file') {
-		uploadFileInFolder(node).then(()=>{
-			c('create file success: '+ node.name);
-			callback();
-		}).catch((err)=>{
-			node.times++;
-			failedCallback();
-		});
-	}else {
-		let length = node.children.length;
-		let index = 0;
-		console.log(index+"-"+length);
-		createFolder({uuid:node.parent},node.name).then(uuid=>{
-			c('create folder success: '+ node.name);
-			if (length == 0) {
-				callback();
-			}else {
-				node.children.forEach((item,index)=>{
-					node.children[index].parent = uuid;
-				});
-				let c = function(){
-					index++;
-					console.log(index+"-"+length);
-					if (index >= length) {
-						callback();
-					}else {
-						uploadNode(node.children[index],c)
-					}
-				};
-
-				let f = function() {
-					if (node.children[index].times>5) {
-						node.children[index].status = 'failed';
-					}else {
-						uploadNode(node.children[index],c,f);
-					}
-				}
-				uploadNode(node.children[index],c,f);
-			}
-		}).catch(()=>{
-			c('create folder failed: '+ node.name);
-			node.times++;
-			failedCallback();
-		});
+	function genTask(rootpath, callback) {
+	  	let obj = {times:0,children:[],path:rootpath,status:'准备',parent:currentDirectory.uuid,type:'folder',name:rootpath.split('\\')[rootpath.split('\\').length-1]};
+	  	var func = (dir, stat, cur) => {
+	  		cur.push({
+	  			path: dir,
+	  			type: stat?'folder':'file',
+	  			times: 0,
+	  			status: 'ready',
+	  			uuid:null,
+	  			children:[],
+	  			parent:null,
+	  			name: dir.split('\\')[dir.split('\\').length-1]
+	  		});
+	  	}
+	  	traverse(rootpath, func, () => callback(null, obj), obj.children);
+	  	function traverse(dir, visitor, callback, current) {
+	  		uploadObj.count++;
+			//read directory
+		  	fs.readdir(dir, (err, entries) => {
+		  		//directory err
+		  		if (err) return callback(err);
+				if (entries.length === 0) return callback(err);
+				//directory right
+				var count = entries.length;
+				//map children
+				entries.forEach(entry => {
+			  		let entryPath = path.join(dir, entry);
+			  		fs.stat(entryPath, (err, stat) => {
+			  			//is entry directory
+					  	if (err || (!stat.isDirectory() && !stat.isFile())) {
+					  	  	count--
+					  	  	if (count === 0) callback()
+					  	  	return
+					  	}
+					  	//insert file to tree
+						visitor(entryPath, stat.isDirectory(), current);
+		        		if (stat.isDirectory()) {
+		        			//recursion
+		        			let index = current.length;
+		          			traverse(entryPath,visitor, () => {
+		          			count--
+		          			if (count === 0) callback()
+		          				return
+		          			},current[index-1].children);
+		          			
+		        		}
+		        		else {
+		        			uploadObj.count++;
+		          			count--
+				          	if (count === 0) callback()
+				          	return
+			        	}
+			  		})
+				})
+		  	})
+		}
 	}
-}
+	function uploadNode(node,callback,failedCallback) {
+		console.log(node.name);
+		if (node.type == 'file') {
+			uploadFileInFolder(node).then(()=>{
+				c('create file success: '+ node.name);
+				uploadObj.success++;
+				callback();
+			}).catch((err)=>{
+				node.times++;
+				failedCallback();
+			});
+		}else {
+			let length = node.children.length;
+			let index = 0;
+			console.log(index+"-"+length);
+			createFolder({uuid:node.parent},node.name).then(uuid=>{
+				c('create folder success: '+ node.name);
+				uploadObj.success++;
+				if (length == 0) {
+					callback();
+				}else {
+					node.children.forEach((item,index)=>{
+						node.children[index].parent = uuid;
+					});
+					let c = function(){
+						index++;
+						console.log(index+"-"+length);
+						if (index >= length) {
+							callback();
+						}else {
+							uploadNode(node.children[index],c)
+						}
+					};
+
+					let f = function() {
+						if (node.children[index].times>5) {
+							node.children[index].status = 'failed';
+						}else {
+							uploadNode(node.children[index],c,f);
+						}
+					}
+					uploadNode(node.children[index],c,f);
+				}
+			}).catch(()=>{
+				c('create folder failed: '+ node.name);
+				node.times++;
+				failedCallback();
+			});
+		}
+	}
+});
+
 function createFolder(dir,name) {
 	let promise = new Promise((resolve,reject)=>{
 		var r = request.post(server+'/files/'+dir.uuid+'?type=folder',{
@@ -1008,6 +1029,7 @@ ipcMain.on('share',function(err,files,users){
 			let index = filesSharedByMe.findIndex(f=>f.uuid == item.uuid);
 			if (index == -1) {
 				filesSharedByMe.push(map.get(item.uuid));
+			}else {
 
 			}
 		});
@@ -1029,7 +1051,7 @@ function share(file,users) {
 				resolve();
 			}else {
 				console.log('err');
-				console.log(err);
+				console.log(res);
 				reject()
 			}
 		};
@@ -1142,24 +1164,24 @@ ipcMain.on('getThumb',(err,item)=>{
 });
 
 function dealThumbQueue() {
-		if (thumbQueue.length == 0) {
-			return
-		}else {
-			setTimeout(function(){
-				if (thumbIng.length == 0) {
-					c('----');
-					console.log('run');
-					for (var i=0;i<3;i++) {
-						if (thumbQueue.length == 0) {
-							break;
-						}
-						let item = thumbQueue.shift();
-						thumbIng.push(item);
-						isThumbExist(item);
+	if (thumbQueue.length == 0) {
+		return
+	}else {
+		setTimeout(function(){
+			if (thumbIng.length == 0) {
+				c('----');
+				console.log('run');
+				for (var i=0;i<3;i++) {
+					if (thumbQueue.length == 0) {
+						break;
 					}
+					let item = thumbQueue.shift();
+					thumbIng.push(item);
+					isThumbExist(item);
 				}
-			},500);
-		}
+			}
+		},500);
+	}
 }
 
 function isThumbExist(item) {
@@ -1265,7 +1287,6 @@ function downloadMediaImage(item) {
 //enterShare
 ipcMain.on('enterShare',(err,item)=>{
 	let share = shareMap.get(item.uuid);
-	console.log(share.children);
 	let children = share.children.map(item=>{
 		return Object.assign({},item,{children:[]});
 	});
@@ -1306,12 +1327,20 @@ ipcMain.on('loginOff',err=>{
 	thumbIng = [];
 });
 //download folder
-ipcMain.on('downloadFolder',(err,folder)=>{
+ipcMain.on('downloadFolder',(err,folder,type)=>{
 	folder.forEach(item=>{
-		let tree = map.get(item.uuid);
+		let tree = null;
+		if (type == 'share') {
+			tree = shareMap.get(item.uuid);
+		}else {
+			tree = map.get(item.uuid);
+		}
+		
 		let count = getTreeCount(tree);
-		let obj = {count:count,failed:0,data:tree,type:'folder'};
+		let time = (new Date()).getTime();
+		let obj = {count:count,failed:[],success:0,data:tree,type:'folder',status:'ready',key:item.uuid+time};
 		downloadFolderQueue.push(obj);
+		mainWindow.webContents.send('transmissionDownload',obj);	
 	});
 	if (downloadFolderNow.length == 0) {
 		downloadFolderNow.push(downloadFolderQueue[0]);
@@ -1319,6 +1348,7 @@ ipcMain.on('downloadFolder',(err,folder)=>{
 	}
 })
 function getTreeCount(tree) {
+	c(tree);
 	let count = 0;
 	loopTree(tree,downloadPath);
 	function loopTree(tree,p) {
@@ -1338,16 +1368,36 @@ function getTreeCount(tree) {
 }
 
 function downloadFolder(folder) {
-	console.log(folder.children);
 	looptree(folder.data,()=>{
 		console.log('finish');
+		let obj = downloadFolderNow.shift();
+		dealwithQueue();
+		mainWindow.webContents.send('message','文件夹 '+folder.data.name+'下载完成');
+		mainWindow.webContents.send('refreshDownloadStatusOfFolder',folder.key,'已完成');
 	},()=>{
 		c('not finish');
+		let obj = downloadFolderNow.shift();
+		dealwithQueue();
+		mainWindow.webContents.send('message','文件夹 '+folder.data.name+'下载失败');
+		mainWindow.webContents.send('refreshDownloadStatusOfFolder',folder.key,'下载失败');
 	});
+	let s = setInterval(()=>{
+		mainWindow.webContents.send('refreshDownloadStatusOfFolder',folder.key,folder.success+' / '+folder.count);
+	},1000);
+	function dealwithQueue() {
+		downloadFolderQueue.shift();
+		if (downloadFolderQueue.length > 0) {
+			downloadFolderNow.push(downloadFolderQueue[0]);
+			downloadFolder(downloadFolderNow[0]);		
+		}
+		clearInterval(s);
+	}
 	function looptree(tree,callback,failedCallback) {
 		if (tree.type == 'file') {
 			c(tree.name+' is file');
 			downloadFolderFile(tree.uuid,tree.path).then(()=>{
+				folder.success++;
+				
 				callback();
 			}).catch(err=>{
 				failedCallback();
@@ -1360,6 +1410,7 @@ function downloadFolder(folder) {
 			 		failedCallback();
 			 	}else {
 			 		console.log('folder success');
+			 		folder.success++;
 			 		let count = tree.children.length;
 			 		let index = 0;
 			 		let success = function () {
@@ -1372,8 +1423,9 @@ function downloadFolder(folder) {
 			 		}
 			 		let failed = function () {
 			 			tree.children[index].time++;
-			 			if (tree.children[index].time>5) {
+			 			if (tree.children[index].times>5) {
 			 				index++;
+			 				folder.children[index].times++;
 			 				callback();
 			 			}else {
 			 				looptree(tree.children[index],success,failed);

@@ -124,7 +124,7 @@ class PopMenu extends Component {
 				folder.push(item);
 			}
 		});
-		let fileObj = {data:files,length:files.length,success:0,failed:0,index:0,status:'ready',map:map,key:Date.parse(new Date())};
+		let fileObj = {type:'file',data:files,length:files.length,success:0,failed:0,index:0,status:'ready',map:map,key:Date.parse(new Date())};
 		if (folder.length != 0) {
 			ipc.send('downloadFolder',folder);
 		}	
@@ -133,7 +133,6 @@ class PopMenu extends Component {
 			ipc.send('download',fileObj);	
 			this.props.dispatch(Action.setSnack(files.length+' 个文件添加到下载队列',true));
 		}
-		
 	}
 
 	triggerClick(e) {

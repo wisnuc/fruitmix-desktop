@@ -72,6 +72,9 @@ class SharedByMe extends Component {
 		
 	}
 
+	reShare() {
+		
+	}
 
 }
 

@@ -23,7 +23,7 @@ class SharedFilesRow extends Component {
 				<td>{item.name}</td>
 				<td>{p.getShareUser(item.owner)}</td>
 				<td  onMouseEnter={this.enter.bind(this)} onMouseLeave={this.leave.bind(this)} >
-					<span>{svg.download()}</span>
+					<span onClick={this.props.download}>{svg.download()}</span>
 					<span style={this.state.deleteShow?{}:{display:'none'}}>{svg.deleteFiles()}</span>
 				</td>
 			</tr>
@@ -32,7 +32,7 @@ class SharedFilesRow extends Component {
 
 	enter() {
 		this.setState({
-			deleteShow:true
+			deleteShow:false
 		});
 	}
 

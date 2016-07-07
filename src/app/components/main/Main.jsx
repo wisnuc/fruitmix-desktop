@@ -76,6 +76,15 @@ class Main extends Component {
 			this.props.dispatch(Action.refreshStatusOfDownload(file,status));
 		})
 
+		ipc.on('refreshDownloadStatusOfFolder',(err,key,status)=>{
+			this.props.dispatch(Action.refreshDownloadStatusOfFolder(key,status));
+		});
+
+		ipc.on('refreshUploadStatusOfFolder',(err,key,status)=>{
+			this.props.dispatch(Action.refreshUploadStatusOfFolder(key,status));
+		});
+		
+
 		ipc.on('deleteSuccess',(err,obj,children,dir)=>{
 			if (dir.uuid == this.props.data.directory.uuid) {
 				this.props.dispatch(Action.refreshDir(children));
@@ -114,8 +123,12 @@ class Main extends Component {
 			this.props.dispatch(Action.setShareChildren(shareChildren));
 		});
 
-		ipc.on('data',(err,data)=>{
-			c.log(data);
+		ipc.on('transmissionDownload',(err,obj)=>{
+			this.props.dispatch(Action.addDownload(obj));
+		});
+
+		ipc.on('transmissionUpload',(err,obj)=>{
+			this.props.dispatch(Action.addUpload(obj));
 		});
 	}
 

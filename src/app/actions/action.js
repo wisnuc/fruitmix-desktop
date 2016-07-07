@@ -173,6 +173,22 @@ var actions = {
 		}
 	},
 
+	refreshDownloadStatusOfFolder(key,status) {
+		return {
+			type: 'DOWNLOAD_STATUS_OF_FOLDER',
+			key: key,
+			status: status
+		}
+	},
+
+	refreshUploadStatusOfFolder(key,status) {
+		return {
+			type: 'UPLOAD_STATUS_OF_FOLDER',
+			key: key,
+			status: status
+		}
+	},
+
 	checkUser(uuid,b) {
 		return {
 			type: 'CHECK_USER',

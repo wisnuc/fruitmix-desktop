@@ -18,26 +18,47 @@ class Collection extends Component {
 		let uploadList = [];
 		let downloadList = [];
 		t.upload.forEach(item=>{
-			item.data.forEach(item1=>{
+			if (item.type == 'folder') {
 				uploadList.push(
-					<tr key={item1.name+item1.uploadTime}>
-						<td title={item1.name}>{item1.name}</td>
-						<td>{this.getSize(item1.size)}</td>
-						<td>{this.getStutus(item1.status)}</td>
+					<tr>
+						<td title={item.name}>{item.name}</td>
+						<td></td>
+						<td>{item.status}</td>
 					</tr>
 					);
-			});
+			}else {
+				item.data.forEach(item1=>{
+					uploadList.push(
+						<tr key={item1.name+item1.uploadTime}>
+							<td title={item1.name}>{item1.name}</td>
+							<td>{this.getSize(item1.size)}</td>
+							<td>{this.getStutus(item1.status)}</td>
+						</tr>
+						);
+				});
+			}
+			
 		})
 		t.download.forEach(item=>{
-			item.data.forEach(item1=>{
+			if (item.type == 'folder') {
 				downloadList.push(
-					<tr key={item1.name+item1.uploadTime}>
-						<td title={item1.name}>{item1.name}</td>
-						<td>{this.getSize(item1.attribute.size)}</td>
-						<td>{this.getStutus(item1.status)}</td>
+					<tr>
+						<td key={item.data.name}>{item.data.name+' (文件夹)'}</td>
+						<td></td>
+						<td>{item.status}</td>
 					</tr>
 					);
-			});
+			}else {
+				item.data.forEach(item1=>{
+					downloadList.push(
+						<tr key={item1.name+item1.uploadTime}>
+							<td title={item1.name}>{item1.name}</td>
+							<td>{this.getSize(item1.attribute.size)}</td>
+							<td>{this.getStutus(item1.status)}</td>
+						</tr>
+					);
+				});	
+			}
 		})
 		return (
 			<div className='transmission-container'>
