@@ -15,7 +15,7 @@ var mainWindow = null;
 
 var server = 'http://211.144.201.201:8888';
 server ='http://192.168.5.132:80';
-// server ='http://192.168.5.134:80';
+server ='http://192.168.5.134:80';
 //user
 var user = {};
 //files
@@ -235,22 +235,34 @@ function removeFolder(data) {
 	let index = data.findIndex((item,index)=>{
 		return item.parent == ''
 	});
-	if (index == undefined) {
+	if (index == -1) {
 		return 
+	}else {
+		rootNode = data[index]; 
 	}
+
 	uuid = data[index].uuid;
 	data.splice(index,1);
 	index = data.findIndex((item)=>{
 		return item.parent == uuid
 	})
+	if (index == -1) {
+		return
+	}else {
+		rootNode = data[index]; 	
+	}
 	uuid= data[index].uuid
 	data.splice(index,1);
 	index = data.findIndex((item)=>{
 		return item.parent == uuid
 	})
-	data[index].parent = '';
-	data[index].attribute.name = 'my cloud';
-	rootNode = data[index]; 
+	if (index == -1) {
+		return
+	}else {
+		data[index].parent = '';
+		data[index].attribute.name = 'my cloud';
+		rootNode = data[index]; 	
+	}
 }
 //get shareFiles,tree,rootNode
 function dealWithData(data) {
@@ -697,6 +709,7 @@ ipcMain.on('openInputOfFolder', e=>{
 		uploadObj.key = folder+t;
 		genTask(folderPath,function(err,o){		
 			uploadObj.data = o;
+			console.log(folderPath);
 			uploadObj.name = folderPath.split('\\')[folderPath.split('\\').length-1];
 			let st = setInterval(()=>{
 				mainWindow.webContents.send('refreshUploadStatusOfFolder',uploadObj.key,uploadObj.success+' / '+uploadObj.count);
@@ -874,7 +887,7 @@ function uploadFileInFolder(node) {
 				map.set(body,o);
 				resolve(body);
 			}else {
-				console.log(res);
+				console.log(res.body);
 				reject();
 			}
 		}
