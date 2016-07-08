@@ -33,7 +33,6 @@ var actions = {
 			parent: parent,
 			path:path,
 			shareChildren:shareChildren,
-			filesSharedByMe:filesSharedByMe,
 			sharePath: sharePath
 		}
 	},

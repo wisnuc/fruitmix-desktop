@@ -5,7 +5,6 @@ const electron = require('electron');
 const {app, BrowserWindow, ipcMain, dialog } = require('electron');
 
 var request = require('request');
-var http = require('http');
 var fs = require ('fs');
 var stream = require('stream');
 var path = require('path');
@@ -15,7 +14,7 @@ var mainWindow = null;
 
 var server = 'http://211.144.201.201:8888';
 server ='http://192.168.5.195:80';
-// server ='http://192.168.5.134:80';
+server ='http://192.168.5.132:80';
 //user
 var user = {};
 //files
@@ -90,7 +89,7 @@ app.on('ready', function() {
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	});
-	// mainWindow.webContents.openDevTools();
+	mainWindow.webContents.openDevTools();
 	// dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']})
 	mainWindow.loadURL('file://' + __dirname + '/ele/index.html');
 	fs.exists(mediaPath,exists=>{
@@ -195,10 +194,10 @@ ipcMain.on('getRootData', ()=> {
 		removeFolder(data);
 		dealWithData(data);
 		let copyFilesSharedByMe = filesSharedByMe.map(item=>Object.assign({},item,{children:null,writelist:[].concat(item.writelist)}));
-
 		sharePath.push({key:'',value:{}});
 		c(sharePath);
 		mainWindow.webContents.send('receive', currentDirectory,children,parent,dirPath,shareChildren,copyFilesSharedByMe,sharePath);
+		mainWindow.webContents.send('setFilesSharedByMe',filesSharedByMe);
 	}).catch((err)=>{
 		console.log(err);
 		mainWindow.webContents.send('message','get data error',1);	
@@ -289,6 +288,7 @@ function dealWithData(data) {
 	//show root file
 	enterChildren(rootNode);
 }
+//get share children
 function classifyShareFiles() {
 	let userUUID = user.uuid;
 	allFiles.forEach((item,index)=>{
@@ -335,6 +335,7 @@ function classifyShareFiles() {
 	}
 	})
 }
+//generate tree
 function getTree(f,type) {
 	let files = [];
 	f.forEach((item)=>{
@@ -383,6 +384,7 @@ function getTree(f,type) {
 	}
 	return tree;	
 }
+//seprate files shared by me from files
 function getFilesSharedByMe() {
 	tree.forEach(item=>{
 		if (item.owner == user.uuid && item.readlist.length != 0 && item.writelist.length != 0 && item.readlist[0] != "" && item.writelist[0] != "") {
@@ -506,7 +508,7 @@ function uploadFile(file) {
 		if (!err && res.statusCode == 200) {
 			uploadQueue[0].success += 1;
 			mainWindow.webContents.send('refreshStatusOfUpload',file.path+file.uploadTime,1);
-			var uuid = body;
+			let uuid = body.slice(1,body.length-1);
 			console.log('upload success');
 			console.log(uuid);
 			let fileObj = uploadQueue[0].data.find(item2=>file.path == item2.path);
@@ -878,9 +880,10 @@ function uploadFileInFolder(node) {
 	var promise = new Promise((resolve,reject)=>{
 		let callback = function(err,res,body) {
 			if (!err && res.statusCode == 200) {
+				let uuid = body.slice(1,body.length-1);
 				let dir = map.get(node.parent);
 				let o = {
-					uuid:body,
+					uuid:uuid,
 					parent: node.parent,
 					checked: false,
 					share:false,
@@ -895,8 +898,8 @@ function uploadFileInFolder(node) {
 					name:node.name,
 				};
 				dir.children.push(o);
-				map.set(body,o);
-				resolve(body);
+				map.set(uuid,o);
+				resolve(uuid);
 			}else {
 				console.log(res.body);
 				reject();
