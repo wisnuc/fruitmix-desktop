@@ -14,7 +14,7 @@ var mdns = require('mdns-js');
 var mainWindow = null;
 
 var server = 'http://211.144.201.201:8888';
-// server ='http://192.168.5.132:80';
+server ='http://192.168.5.195:80';
 // server ='http://192.168.5.134:80';
 //user
 var user = {};
@@ -84,9 +84,13 @@ app.on('ready', function() {
 		resizable: true,
 		width: 1366,
 		minWidth:1024,
-		minHeight:768
+		minHeight:768,
+		title:'wisnuc'
 	});
-	mainWindow.webContents.openDevTools();
+	mainWindow.on('page-title-updated',function(event){
+		event.preventDefault()
+	});
+	// mainWindow.webContents.openDevTools();
 	// dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']})
 	mainWindow.loadURL('file://' + __dirname + '/ele/index.html');
 	fs.exists(mediaPath,exists=>{
@@ -1292,7 +1296,10 @@ function downloadMedia(item) {
 ipcMain.on('getMediaImage',(err,item)=>{
 	downloadMediaImage(item).then(()=>{
 		c('download media image success');
-		item.path = __dirname+'/media/'+item.hash;
+		item.path = path.join(mediaPath,item.hash);
+		fs.stat(item.path,function(err,data){
+			c(data);
+		});
 		mainWindow.webContents.send('donwloadMediaSuccess',item);
 	}).catch(err=>{
 		c('download media image failed');
@@ -1313,12 +1320,12 @@ function downloadMediaImage(item) {
 				resolve();
 			}else {
 				console.log('err');
-				fs.unlink('media/'+item.hash, (err,data)=>{
+				fs.unlink(path.join(mediaPath,item.hash), (err,data)=>{
 				});
 				reject()
 			}
 		}
-		var stream = fs.createWriteStream('media/'+item.hash);
+		var stream = fs.createWriteStream(path.join(mediaPath,item.hash));
 		request(options,callback).pipe(stream);
 	});
 	return promise
