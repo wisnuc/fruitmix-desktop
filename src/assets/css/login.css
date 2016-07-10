@@ -8,3 +8,11 @@
 	align-items : center;
 	text-align:center;
 }
+
+.find-device-container{
+	position: absolute;
+	top:0px;
+	left:50%;
+	width:300px;
+	transform: translateX(-150px);
+}

@@ -4,17 +4,17 @@
 const electron = require('electron');
 const {app, BrowserWindow, ipcMain, dialog } = require('electron');
 
-var request = require('request');
-var fs = require ('fs');
-var stream = require('stream');
-var path = require('path');
-var _ = require('lodash');
-var mdns = require('mdns-js');
+const request = require('request');
+const fs = require ('fs');
+const stream = require('stream');
+const path = require('path');
+const _ = require('lodash');
+const mdns = require('mdns-js');
 var mainWindow = null;
-
+//server
 var server = 'http://211.144.201.201:8888';
-server ='http://192.168.5.195:80';
-server ='http://192.168.5.132:80';
+// server ='http://192.168.5.195:80';
+// server ='http://192.168.5.132:80';
 //user
 var user = {};
 //files
@@ -48,32 +48,36 @@ var media = [];
 var mediaMap = new Map();
 var thumbQueue = [];
 var thumbIng = [];
+//path
 var mediaPath = path.join(__dirname,'media');
+var downloadPath = path.join(__dirname,'download');
 //device
 var device = [];
-var downloadPath = path.join(__dirname,'download');
+var deviceCount = 0;
+var intervalFindDevice = null;
 
-var c = console.log;
-// var browser = mdns.createBrowser();
 
-// try{
-// 	browser.on('ready', function () {
-// 		c('ready');
-// 	    browser.discover(); 
-// 	});
-// 	browser.on('update', function (data) {
-// 		console.log('----------------------------------------');
-// 		device.push(data);
-// 	    console.log(data);
-// 	});
+const c = console.log;
+var browser = mdns.createBrowser();
 
-// 	browser.on('error',err=>{
-// 		c('mdns err');
-// 		c(err);
-// 	});
-// }catch(e){
-// 	console.log(e);
-// }
+try{
+	browser.on('ready', function () {
+		c('ready');
+	    browser.discover(); 
+	});
+	browser.on('update', function (data) {
+		console.log('----------------------------------------');
+		device.push(data);
+	    console.log(data);
+	});
+
+	browser.on('error',err=>{
+		c('mdns err');
+		c(err);
+	});
+}catch(e){
+	console.log(e);
+}
 
 //app ready and open window
 app.on('ready', function() {
@@ -86,12 +90,14 @@ app.on('ready', function() {
 		minHeight:768,
 		title:'wisnuc'
 	});
+	//window title
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	});
 	mainWindow.webContents.openDevTools();
 	// dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']})
 	mainWindow.loadURL('file://' + __dirname + '/ele/index.html');
+	//create folder
 	fs.exists(mediaPath,exists=>{
 		if (!exists) {
 			fs.mkdir(mediaPath,err=>{
@@ -110,8 +116,18 @@ app.on('ready', function() {
 			});
 		}
 	});
+	//find device
+	intervalFindDevice = setInterval(findDevice,1000);
+});
+function findDevice() {
+	if (device.length == deviceCount) {
+		return
+	}
+	device.forEach(item => {
+		//find fruit
 
-});		
+	});
+}
 app.on('window-all-closed', () => {
   app.quit();
 });

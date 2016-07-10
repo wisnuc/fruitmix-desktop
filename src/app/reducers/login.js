@@ -1,44 +1,34 @@
 //define default state
 const defaultState = {
 	state: 'READY', // READY, BUSY, REJECTED, TIMEOUT, ERROR, LOGGEDIN
-	username: null,
-  	password: null,
-  	obj: {}
+  	obj: {},
+  	device: [],
+  	ip: ''
 }
 
 const loginState = (state = defaultState, action) => {
 	switch (action.type) {
 		case 'LOGINOUT':
 			return Object.assign({}, state, {
-				state: 'READY',
-				username: null,
-				password: null
+				state: 'READY'
 			});
 		case 'LOGIN':
 			return Object.assign({}, state, {
-				state: 'BUSY',
-				username: action.username,
-				password: action.password
+				state: 'BUSY'
 			});
 		case 'REJECTED':
 			return Object.assign({}, state, {
-				state: 'REJECTED',
-				username: null,
-				password: null
+				state: 'REJECTED'
 			});
 		case 'TIMEOUT':
 			return Object.assign({}, state, {
-				state: 'TIMEOUT',
-				username: null,
-				password: null
+				state: 'TIMEOUT'
 			});
 		case 'LOGGEDIN':
 			var userListArr = action.obj.allUser.map((item)=>{return Object.assign({},item,{checked:false})});
 			action.obj.allUser = userListArr;
 			return Object.assign({}, state, {
 				state: 'LOGGEDIN',
-				username: action.username,
-				password: action.password,
 				obj:action.obj
 			});
 		case "CHECK_USER":
@@ -61,10 +51,5 @@ const loginState = (state = defaultState, action) => {
 			return state
 	}
 };
-
-var a = {1:'qwwe',2:'asfta'};
-var b = {1:'qqq'}
-Object.assign(a,b);
-a = {1:'qqq', 2:"asfta"};
 
 export default loginState;

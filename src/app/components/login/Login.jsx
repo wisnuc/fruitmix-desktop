@@ -12,7 +12,7 @@ import Base from '../../utils/Base';
 // require action
 import Login from'../../actions/action';
 //require material
-import { Paper, TextField, FlatButton, CircularProgress, Snackbar } from 'material-ui'
+import { Paper, TextField, FlatButton, CircularProgress, Snackbar, Tabs, Tab } from 'material-ui'
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import darkBaseTheme from 'material-ui/styles/baseThemes/darkBaseTheme';
 
@@ -82,18 +82,13 @@ class Index extends React.Component {
 		var busy = (this.props.login.state ==='BUSY');
 		return (
 			<div className='index-frame' key='login'>
+				<Paper className='find-device-container'>123</Paper>
 				<Paper style={paperStyle} zDepth={4}>
 				{ !!busy && <CircularProgress /> }
 				{ !busy && <TextField ref='username'  stype={{marginBottom: 10}} hintText="username" type="username" fullWidth={true} />}
 				{ !busy && <TextField onKeyDown={this.kenDown.bind(this)} ref='password' stype={{marginBottom: 10}} hintText="password" type="password" fullWidth={true} />}
 				{ !busy && <FlatButton style={{marginTop: 10}} label='UNLOCK' onTouchTap={this.submit.bind(this)} />}
 				</Paper>
-			{/*
-				<label ref='username'>username</label><input type="text" ref="username"/><br/>
-				<label ref="password">password</label><input type="password" ref="password"/><br/>
-				<button onClick={this.submit}>submit</button>
-				<div>{this.props.login.state}</div>
-			*/}
 			<Snackbar open={this.props.snack.open} message={this.props.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
 			</div>
 			);
