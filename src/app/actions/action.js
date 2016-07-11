@@ -12,6 +12,19 @@ var actions = {
 		}
 	},
 
+	setDevice(device) {
+		return {
+			type: 'SET_DEVICE',
+			device: device
+		}
+	},
+
+	toggleDevice() {
+		return {
+			type: 'TOGGLE_DEVICE'
+		}
+	},
+
 	navToggle() {
 		return {
 			type: 'NAV_MENU_TOGGLE' 
@@ -25,15 +38,13 @@ var actions = {
 		}
 	},
 
-	setDirctory(dir,children,parent,path,shareChildren,filesSharedByMe,sharePath) {
+	setDirctory(dir,children,parent,path) {
 		return {
 			type: 'SET_DIRECTORY',
 			directory: dir,
 			children: children,
 			parent: parent,
-			path:path,
-			shareChildren:shareChildren,
-			sharePath: sharePath
+			path:path
 		}
 	},
 

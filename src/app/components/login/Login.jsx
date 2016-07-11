@@ -22,6 +22,8 @@ import ImageModules from '../Mixins/ImageModules';
 import css  from  '../../../assets/css/login';
 //import Action
 import Action from '../../actions/action';
+//import component
+import Device from './Device'
 
 // define Index component
 class Index extends React.Component {
@@ -54,6 +56,10 @@ class Index extends React.Component {
 				this.props.dispatch(Login.loginFailed());		
 			}
 		});
+
+		ipc.on('device',(err,device)=>{
+			this.props.dispatch(Login.setDevice(device));
+		});
 	}
 
 	submit() {
@@ -65,7 +71,6 @@ class Index extends React.Component {
 		// ipc.send('login',username,password);
 		ipc.send('login','admin','123456');
 		// ipc.send('login','a','a');
-		// ipc.send('login','11','11');
 	}
 
 	render() {
@@ -79,16 +84,41 @@ class Index extends React.Component {
 			width: 300,
 			padding: 10
 		}
-		var busy = (this.props.login.state ==='BUSY');
-		return (
-			<div className='index-frame' key='login'>
-				<Paper className='find-device-container'>123</Paper>
+		let busy = (this.props.login.state ==='BUSY');
+		let findDevice = this.props.login.findDevice;
+		let device = this.props.login.device; 
+		let findDeviceContent = (
+				<Paper className='find-device-container'>
+					<Tabs>
+						<Tab label="自动匹配">
+							<Paper>
+							{this.props.login.device.map(item=>(
+								<Device key={item.addresses[0]} item={item}></Device>
+								))}
+							</Paper>
+						</Tab>
+						<Tab label="手动匹配">
+							<Paper className='setting-serverIP-container'>
+								<TextField  ref='serverIP' hintText='serverIP'/>
+								<FlatButton style={{marginTop: 10}} label='提交' onTouchTap={this.submitServer.bind(this)} />
+							</Paper>
+						</Tab>
+					</Tabs>
+				</Paper>
+			);
+		let loginContent = (
 				<Paper style={paperStyle} zDepth={4}>
 				{ !!busy && <CircularProgress /> }
 				{ !busy && <TextField ref='username'  stype={{marginBottom: 10}} hintText="username" type="username" fullWidth={true} />}
 				{ !busy && <TextField onKeyDown={this.kenDown.bind(this)} ref='password' stype={{marginBottom: 10}} hintText="password" type="password" fullWidth={true} />}
 				{ !busy && <FlatButton style={{marginTop: 10}} label='UNLOCK' onTouchTap={this.submit.bind(this)} />}
 				</Paper>
+			);
+		return (
+			<div className='index-frame' key='login'>
+				<div className='toggle-device' onClick={this.toggleDevice.bind(this)}>查找设备</div>
+				{!!findDevice && findDeviceContent}
+				{!findDevice && loginContent}
 			<Snackbar open={this.props.snack.open} message={this.props.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
 			</div>
 			);
@@ -103,6 +133,18 @@ class Index extends React.Component {
 	//close snackbar
 	cleanSnack() {
 		this.props.dispatch(Action.cleanSnack());
+	}
+
+	toggleDevice() {
+		this.props.dispatch(Action.toggleDevice());
+	}
+
+	submitServer() {
+
+	}
+
+	serverKeyDown() {
+
 	}
 };
 

@@ -47,8 +47,9 @@ class Main extends Component {
 		ipc.send('getMediaData');
 		this.props.dispatch(Action.filesLoading());
 
-		ipc.on('receive',function (err,dir,children,parent,path,shareChildren,sharePath) {
-			_this.props.dispatch(Action.setDirctory(dir,children,parent,path,shareChildren,sharePath));
+		ipc.on('receive',function (err,dir,children,parent,path) {
+			c.log('receive lots of data');
+			_this.props.dispatch(Action.setDirctory(dir,children,parent,path));
 		});
 		ipc.on('setTree',(err,tree)=>{
 			this.props.dispatch(Action.setTree(tree));

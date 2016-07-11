@@ -10,9 +10,17 @@
 }
 
 .find-device-container{
+	width:300px;
+	display:'flex';
+	flex-direction:'column';
+	align-items: 'center';
+	justify-content: 'center'
+}
+
+.toggle-device {
+	width:200px;
 	position: absolute;
 	top:0px;
-	left:50%;
-	width:300px;
-	transform: translateX(-150px);
+	left:0px;
+	background-color: #37474f!important
 }

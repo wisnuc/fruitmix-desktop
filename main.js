@@ -13,7 +13,7 @@ const mdns = require('mdns-js');
 var mainWindow = null;
 //server
 var server = 'http://211.144.201.201:8888';
-// server ='http://192.168.5.195:80';
+server ='http://192.168.5.159:80';
 // server ='http://192.168.5.132:80';
 //user
 var user = {};
@@ -52,28 +52,31 @@ var thumbIng = [];
 var mediaPath = path.join(__dirname,'media');
 var downloadPath = path.join(__dirname,'download');
 //device
+var dns = [];
 var device = [];
-var deviceCount = 0;
 var intervalFindDevice = null;
 
 
 const c = console.log;
-var browser = mdns.createBrowser();
+var browser = mdns.createBrowser(mdns.tcp('http'));
 
 try{
 	browser.on('ready', function () {
-		c('ready');
 	    browser.discover(); 
 	});
 	browser.on('update', function (data) {
-		console.log('----------------------------------------');
-		device.push(data);
-	    console.log(data);
+		if (!data.fullname) {
+			return
+		}
+		dns.push(Object.assign({},data,{checked:false}));
 	});
+
+	// browser.on('serviceUp', function(service) {
+	//   console.log("service up: ", service);
+	// });
 
 	browser.on('error',err=>{
 		c('mdns err');
-		c(err);
 	});
 }catch(e){
 	console.log(e);
@@ -117,16 +120,25 @@ app.on('ready', function() {
 		}
 	});
 	//find device
-	intervalFindDevice = setInterval(findDevice,1000);
+	intervalFindDevice = setInterval(findDevice,2000);
 });
 function findDevice() {
-	if (device.length == deviceCount) {
-		return
+	try{
+		dns.forEach(item => {
+			if (item.checked) {
+				return
+			}
+			item.checked = true;
+			let position = item.fullname.toLowerCase().indexOf('wisnuc appstation');
+			if (position != -1) {
+				device.push(item);
+			}
+		});
+		c(device);
+		mainWindow.webContents.send('device',device);
+	}catch(e){
+		c(e);
 	}
-	device.forEach(item => {
-		//find fruit
-
-	});
 }
 app.on('window-all-closed', () => {
   app.quit();
@@ -145,6 +157,7 @@ ipcMain.on('login',function(event,username,password){
 		return getAllUser();
 	}).then((users)=>{
 		user.allUser = users;
+		clearInterval(intervalFindDevice);
 		mainWindow.webContents.send('loggedin',user);
 	}).catch((err)=>{
 		console.log(err);
@@ -204,16 +217,16 @@ function getAllUser() {
 //get all files
 ipcMain.on('getRootData', ()=> {
 	getFiles().then((data)=>{
-		// //remove folder
-		sharePath.length = 0;
-		shareChildren.length = 0
+		//remove folder
 		removeFolder(data);
 		dealWithData(data);
-		let copyFilesSharedByMe = filesSharedByMe.map(item=>Object.assign({},item,{children:null,writelist:[].concat(item.writelist)}));
+		//share data
+		sharePath.length = 0;
+		shareChildren.length = 0;
 		sharePath.push({key:'',value:{}});
-		c(sharePath);
-		mainWindow.webContents.send('receive', currentDirectory,children,parent,dirPath,shareChildren,copyFilesSharedByMe,sharePath);
-		mainWindow.webContents.send('setFilesSharedByMe',filesSharedByMe);
+		let copyFilesSharedByMe = filesSharedByMe.map(item=>Object.assign({},item,{children:null,writelist:[].concat(item.writelist)}));
+		mainWindow.webContents.send('setFilesSharedByMe',copyFilesSharedByMe);
+		mainWindow.webContents.send('setShareChildren',shareChildren,sharePath);
 	}).catch((err)=>{
 		console.log(err);
 		mainWindow.webContents.send('message','get data error',1);	
@@ -433,7 +446,7 @@ function enterChildren(selectItem) {
 		path.length=0;
 	}finally {
 		let copyFilesSharedByMe = filesSharedByMe.map(item=>Object.assign({},item,{children:null,writelist:[].concat(item.writelist)}));
-		mainWindow.webContents.send('receive',currentDirectory,children,parent,dirPath,shareChildren,copyFilesSharedByMe,sharePath);
+		mainWindow.webContents.send('receive',currentDirectory,children,parent,dirPath);
 	}
 }
 //get path
@@ -639,6 +652,7 @@ function download(item) {
 	};
 
 	function callback (err,res,body) {
+		clearInterval(countStatus);
 		if (!err && res.statusCode == 200) {
 			console.log('res');
 			downloadQueue[0].success += 1;
@@ -1062,6 +1076,7 @@ function createNewUser(username,password,email) {
 }
 //share
 ipcMain.on('share',function(err,files,users){
+	c(files);
 	files.forEach((item)=>{
 		share(item,users).then(()=>{
 			//changeShareData
@@ -1077,7 +1092,6 @@ ipcMain.on('share',function(err,files,users){
 				mainWindow.webContents.send('setFilesSharedByMe',filesSharedByMe);
 			}else {
 				filesSharedByMe[index] = file;
-				console.log('2');
 				mainWindow.webContents.send('setFilesSharedByMe',filesSharedByMe);
 			}
 			mainWindow.webContents.send('message',item.name + '分享成功');	
@@ -1230,7 +1244,7 @@ function dealThumbQueue() {
 	if (thumbQueue.length == 0) {
 		return
 	}else {
-		// setTimeout(function(){
+		setTimeout(function(){
 			if (thumbIng.length == 0) {
 				for (var i=0;i<3;i++) {
 					if (thumbQueue.length == 0) {
@@ -1241,7 +1255,7 @@ function dealThumbQueue() {
 					isThumbExist(item);
 				}
 			}
-		// },500);
+		},500);
 	}
 }
 
@@ -1415,6 +1429,7 @@ ipcMain.on('loginOff',err=>{
 	mediaMap = new Map();
 	thumbQueue = [];
 	thumbIng = [];
+	// intervalFindDevice = setInterval(findDevice,2000);
 });
 //download folder
 ipcMain.on('downloadFolder',(err,folder,type)=>{
