@@ -150,12 +150,17 @@ ipcMain.on('getDeviceUsedRecently',err=>{
 		if (err) {
 			serverRecord = {ip:'',savePassword:false,autoLogin:false,username:null,password:null};
 			let j = JSON.stringify(serverRecord);
-			fs.writeFile(path.join(__dirname,'server'),(err,data)=>{
+			fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
 
 			});
-			return
+		}else {
+			serverRecord = JSON.parse(data);
+			if (serverRecord.ip != '') {
+				server = serverRecord.ip;
+				mainWindow.webContents.send('setDeviceUsedRecently',serverRecord.ip);
+			}
 		}
-		server = data;
+		
 	});
 });
 app.on('window-all-closed', () => {
@@ -165,12 +170,15 @@ app.on('window-all-closed', () => {
 ipcMain.on('setServeIp',(err,ip)=>{
 	server = 'http://' + ip;
 	mainWindow.webContents.send('message','ip设置成功');
-	// fs.readFile('server',{encoding: 'utf8'},(err,data)=>{
+	fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
+		let d = JSON.parse(data);
+		d.ip = ip;
+		let j = JSON.stringify(d);
+		fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
 
-	// });
-	// fs.writeFile('server',ip,()=>{
-
-	// });
+		});
+	});
+	
 });
 //get all user information
 ipcMain.on('login',function(event,username,password){
