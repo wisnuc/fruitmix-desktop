@@ -8,7 +8,32 @@
 	align-items : center;
 	text-align:center;
 }
+.login-container {
+	display: flex;
+	flex-direction: column;
 
+	justify-content: center;
+	width:350px;
+	padding: 10px;
+}
+.login-device-list {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+
+}
+.login-device-title {
+	text-align: left
+}
+.open-device-icon {
+	width:50px;
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+}
+.open-device-icon svg {
+	fill:#ffffff!important;
+}
 .find-device-container{
 	width:300px;
 	display:'flex';
@@ -17,10 +42,10 @@
 	justify-content: 'center'
 }
 
-.toggle-device {
-	width:200px;
-	position: absolute;
-	top:0px;
-	left:0px;
-	background-color: #37474f!important
+.setting-serverIP-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	padding:10px;
 }

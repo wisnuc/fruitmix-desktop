@@ -12,9 +12,10 @@ const _ = require('lodash');
 const mdns = require('mdns-js');
 var mainWindow = null;
 //server
-var server = 'http://211.144.201.201:8888';
-server ='http://192.168.5.159:80';
-// server ='http://192.168.5.132:80';
+var server = '';
+// server =	'http://211.144.201.201:8888';
+// server = 'http://192.168.5.159:80';
+// server = 'http://192.168.5.132:80';
 //user
 var user = {};
 //files
@@ -55,6 +56,7 @@ var downloadPath = path.join(__dirname,'download');
 var dns = [];
 var device = [];
 var intervalFindDevice = null;
+var serverRecord = null;
 
 
 const c = console.log;
@@ -124,6 +126,7 @@ app.on('ready', function() {
 });
 function findDevice() {
 	try{
+		let count = device.length;
 		dns.forEach(item => {
 			if (item.checked) {
 				return
@@ -131,17 +134,43 @@ function findDevice() {
 			item.checked = true;
 			let position = item.fullname.toLowerCase().indexOf('wisnuc appstation');
 			if (position != -1) {
-				device.push(item);
+				device.push(Object.assign({},item,{active:false}));
 			}
 		});
-		c(device);
-		mainWindow.webContents.send('device',device);
+		if (device.length != count) {
+			mainWindow.webContents.send('device',device);
+		}
 	}catch(e){
 		c(e);
 	}
 }
+ipcMain.on('getDeviceUsedRecently',err=>{
+	//have device used recently
+	fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
+		if (err) {
+			serverRecord = {ip:'',savePassword:false,autoLogin:false,username:null,password:null};
+			let j = JSON.stringify(serverRecord);
+			fs.writeFile(path.join(__dirname,'server'),(err,data)=>{
+
+			});
+			return
+		}
+		server = data;
+	});
+});
 app.on('window-all-closed', () => {
   app.quit();
+});
+//setIp
+ipcMain.on('setServeIp',(err,ip)=>{
+	server = 'http://' + ip;
+	mainWindow.webContents.send('message','ip设置成功');
+	// fs.readFile('server',{encoding: 'utf8'},(err,data)=>{
+
+	// });
+	// fs.writeFile('server',ip,()=>{
+
+	// });
 });
 //get all user information
 ipcMain.on('login',function(event,username,password){

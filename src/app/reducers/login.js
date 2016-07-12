@@ -3,8 +3,8 @@ const defaultState = {
 	state: 'READY', // READY, BUSY, REJECTED, TIMEOUT, ERROR, LOGGEDIN
   	obj: {},
   	device: [],
-  	findDevice: true,
-  	ip: ''
+  	findDevice: false,
+  	deviceUsedRecently: ''
 }
 
 const loginState = (state = defaultState, action) => {
@@ -52,6 +52,8 @@ const loginState = (state = defaultState, action) => {
 			return Object.assign({},state,{device: action.device});
 		case 'TOGGLE_DEVICE':
 			return Object.assign({},state,{findDevice:!state.findDevice});
+		case 'SET_DEVICE_USED_RECENTLY':
+			return Object.assign({},state,{deviceUsedRecently:action.ip});
 		default:
 			return state
 	}

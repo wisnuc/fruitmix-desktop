@@ -9,9 +9,22 @@
 import React, { findDOMNode, Component, PropTypes } from 'react';
 
 class Device extends React.Component {
+	constructor(props) {
+        super(props);
+        this.state = { show: true };
+    }
 	render() {
+		let setting = (
+			<div>123</div>
+			);
 		return (
-			<div>{this.props.item.addresses[0]}</div>
+			<div>
+				<div>
+					<span>{this.props.item.addresses[0]}</span>
+					<span></span>
+				</div>
+				{this.state.show && setting}
+			</div>
 			)
 	}
 }

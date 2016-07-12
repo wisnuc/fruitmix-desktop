@@ -19,9 +19,10 @@ var actions = {
 		}
 	},
 
-	toggleDevice() {
+	setDeviceUsedRecently(ip) {
 		return {
-			type: 'TOGGLE_DEVICE'
+			type: 'SET_DEVICE_USED_RECENTLY',
+			ip: ip
 		}
 	},
 
