@@ -69,6 +69,10 @@ class Index extends React.Component {
 		});
 	}
 
+	componentWillUnmount() {
+		ipc.removeAllListeners();
+	}
+
 	submit() {
 		let username = this.refs.username.input.value;
 		let password = this.refs.password.input.value;
@@ -82,35 +86,11 @@ class Index extends React.Component {
 
 	render() {
 		var _this = this;
-		
-		
 		let findDevice = this.props.login.findDevice;
-		let findDeviceContent = (
-				<Paper className='find-device-container'>
-					{/*
-					<Tabs style={{backgrountColor:'rgb(48,48,48)'}}>
-						<Tab label="自动匹配">
-							<Paper>
-							{this.props.login.device.map(item=>(
-								<Device key={item.addresses[0]} item={item}></Device>
-								))}
-							</Paper>
-						</Tab>
-						<Tab label="手动匹配">
-							<Paper className='setting-serverIP-container'>
-								<TextField  ref='serverIP' hintText='serverIP' fullWidth={true}/>
-								<FlatButton style={{marginTop: 10,width:'100px'}} label='提交' onTouchTap={this.submitServer.bind(this)} />
-							</Paper>
-						</Tab>
-					</Tabs>
-					*/}
-					123
-				</Paper>
-			);
-
 		let loginContent;
 		let busy = (this.props.login.state ==='BUSY');
 		let device = this.props.login.device; 
+		//login
 		if (!busy) {
 			loginContent = (
 				<Paper className='login-container' zDepth={4}>
@@ -123,9 +103,9 @@ class Index extends React.Component {
 						</SelectField>
 						<span className='open-device-icon' onClick={this.toggleDevice.bind(this)}>{svg.settings()}</span>
 					</div>
-					<TextField ref='username'  stype={{marginBottom: 10}} hintText="username" type="username" fullWidth={false} />
-					<TextField onKeyDown={this.kenDown.bind(this)} ref='password' stype={{marginBottom: 10}} hintText="password" type="password" fullWidth={false} />
-					<FlatButton style={{marginTop: 10}} label='UNLOCK' onTouchTap={this.submit.bind(this)} />
+					<TextField ref='username'  stype={{marginBottom: 10}} hintText="用户名" type="username" fullWidth={false} />
+					<TextField onKeyDown={this.kenDown.bind(this)} ref='password' stype={{marginBottom: 10}} hintText="密码" type="password" fullWidth={false} />
+					<FlatButton style={{marginTop: 10}} label='登录' onTouchTap={this.submit.bind(this)} />
 				</Paper>
 				)
 		}else {
@@ -135,6 +115,37 @@ class Index extends React.Component {
 				</Paper>
 				)
 		}
+
+		//add device
+		let addDevice = (
+			<div className='setting-serverIP-container'>
+				<TextField  ref='serverIP' hintText='serverIP' fullWidth={true}/>
+				<div>
+					<FlatButton style={{marginTop: 10,width:'100px'}} label='取消' onTouchTap={this.toggleAddDevice.bind(this)} />
+					<FlatButton style={{marginTop: 10,width:'100px'}} label='提交' onTouchTap={this.submitServer.bind(this)} />
+				</div>
+			</div>
+			);
+		let deviceList = (
+				<div className='add-device-list-container'>
+						{device.map(item=>(
+							<Device key={item.addresses[0]+item.host} item={item}></Device>
+						))}
+						</div>
+			);
+
+		let findDeviceContent = (
+				<Paper className='find-device-container' style={{maxHeight:document.body.clientHeight}}>
+					<div className='add-device-title'>已发现 {device.length} 台 wisnuc</div>
+					<div className='add-device-content'>
+						{this.props.login.addDevice?addDevice:deviceList}
+					</div>
+					<div className='add-device-button'>
+						<span onClick={this.toggleAddDevice.bind(this)}>添加设备</span>
+						<span  onClick={this.toggleDevice.bind(this)}>返回</span>
+					</div>
+				</Paper>
+			);
 
 		return (
 			<div className='index-frame' key='login'>
@@ -160,18 +171,20 @@ class Index extends React.Component {
 		this.props.dispatch(Action.toggleDevice());
 	}
 
+	toggleAddDevice() {
+		this.props.dispatch(Action.toggleAddDevice());
+	}
+
 	submitServer() {
 		let ip = this.refs.serverIP.input.value;
-		ipc.send('setServeIp',ip);
+		ipc.send('setServeIp',ip,true);
 		this.props.dispatch(Action.setDeviceUsedRecently(ip));
 	}
 
 	selectDevice(e,index) {
 		let ip = this.props.login.device[index].addresses[0];
-		c.log(ip);
-		ipc.send('setServeIp',ip);
+		ipc.send('setServeIp',ip,false);
 		this.props.dispatch(Action.setDeviceUsedRecently(ip));
-
 	}
 };
 

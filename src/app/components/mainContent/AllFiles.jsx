@@ -78,7 +78,6 @@ class AllFiles extends Component {
 					actions={folderActions}
 					modal={false}
 					open={this.props.isShow.dialogOfFolder}
-					onRequestClose={this.handleClose}
 					className='create-folder-dialog'
 			        >
 			        <div className='create-folder-dialog-label'>名称</div>

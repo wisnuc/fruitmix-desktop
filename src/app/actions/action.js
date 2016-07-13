@@ -12,6 +12,12 @@ var actions = {
 		}
 	},
 
+	loginoff() {
+		return {
+			type: 'LOGIN_OFF'
+		}
+	},
+
 	setDevice(device) {
 		return {
 			type: 'SET_DEVICE',
@@ -22,6 +28,12 @@ var actions = {
 	toggleDevice() {
 		return {
 			type: 'TOGGLE_DEVICE'
+		}
+	},
+
+	toggleAddDevice() {
+		return {
+			type: 'TOGGLE_ADD_DEVICE'
 		}
 	},
 

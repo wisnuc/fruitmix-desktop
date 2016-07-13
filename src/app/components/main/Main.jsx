@@ -12,7 +12,7 @@
  import CSS from '../../utils/transition';
 
 //require material
-import { AppBar, TextField, Drawer, Paper, Snackbar, FlatButton, IconMenu, MenuItem, IconButton } from 'material-ui';
+import { AppBar, TextField, Drawer, Paper, Snackbar, FlatButton, IconMenu, MenuItem, IconButton, Dialog } from 'material-ui';
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
@@ -27,6 +27,7 @@ import css  from  '../../../assets/css/main';
 import LeftNav from './LeftNav';
 import Content from './Content';
 import Multiple from '../mainContent/Multiple';
+import Users from './userDialog'
 
 // require common mixins
 import ImageModules from '../Mixins/ImageModules';
@@ -41,14 +42,18 @@ class Main extends Component {
 		const muiTheme = getMuiTheme(lightBaseTheme);
 		return {muiTheme}; 
 	}
+	constructor(props) {
+        super(props);
+        this.state = { userDialog: false};
+    }
 	componentDidMount() {
 		var _this = this;
 		ipc.send('getRootData');
 		ipc.send('getMediaData');
+
 		this.props.dispatch(Action.filesLoading());
 
 		ipc.on('receive',function (err,dir,children,parent,path) {
-			c.log('receive lots of data');
 			_this.props.dispatch(Action.setDirctory(dir,children,parent,path));
 		});
 		ipc.on('setTree',(err,tree)=>{
@@ -133,9 +138,31 @@ class Main extends Component {
 		ipc.on('setFilesSharedByMe',(err,files)=>{
 			this.props.dispatch(Action.setFilesSharedByMe(files));
 		});
+
+		ipc.on('setUsers',(err,user)=>{
+			this.props.dispatch({type:'SET_USER',user:user});
+		});
 	}
 
+	componentWillUnmount() {
+		ipc.removeAllListeners();
+	}
+	
 	render() {
+		let list = null;
+		var name = this.props.login.obj.username;
+		let index = this.props.login.obj.allUser.findIndex(item=>(item.username == name));
+		if ( this.props.login.obj.allUser[index].isAdmin) {
+			list = (<MenuItem value="1" primaryText="用户管理" onTouchTap={this.toggleUser.bind(this)}/>)
+		}
+		const folderActions = [
+			<FlatButton
+				label="取消"
+				primary={true}
+				onTouchTap={this.toggleUser.bind(this)}
+				labelStyle={{color:'#000',fontSize:'15px'}}
+			/>
+			];
 		return (<CSS opts={['app',true,true,true,500,5000,5000]} style={{height:'100%'}}>
 			<div className="main" key='main' onMouseMove={this.mouseMove.bind(this)} onMouseUp={this.mouseUp.bind(this)} onClick={this.triggerClick.bind(this)}>
 				{/*Multiple select frame*/}
@@ -150,7 +177,7 @@ class Main extends Component {
           				anchorOrigin={{horizontal: 'right', vertical: 'top'}}
       					targetOrigin={{horizontal: 'right', vertical: 'top'}}
         			>
-			          {/*<MenuItem value="1" primaryText="用户管理" onTouchTap={this.openUser.bind(this)}/>*/}
+			          {list}
 			          <MenuItem value="2" primaryText="注销" onTouchTap={this.logOff.bind(this)}/>
         			</IconMenu>}
 				onLeftIconButtonTouchTap={this.leftNavClick.bind(this)}
@@ -166,6 +193,14 @@ class Main extends Component {
 					<Content></Content>
 				</Paper>
 				<Mask></Mask>
+				<Dialog title="用户管理"
+					titleClassName='create-folder-dialog-title'
+					actions={folderActions}
+					modal={false}
+					open={this.state.userDialog}
+					className='create-folder-dialog'>
+					<Users login={this.props.login}></Users>
+			    </Dialog>
 				<Snackbar style={{textAlign:'center'}} open={this.props.snack.open} message={this.props.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
 			</div></CSS>
 			);
@@ -251,13 +286,16 @@ class Main extends Component {
 		this.props.dispatch(Action.cleanSnack());
 	}
 
-	openUser() {
-		console.log('openuser');
-	}
-
 	logOff() {
 		ipc.send('loginOff');
+		this.props.dispatch(Action.loginoff());
 		window.location.hash = '/login';
+	}
+
+	toggleUser() {
+		this.setState({
+			userDialog: !this.state.userDialog
+		});
 	}
 }
 

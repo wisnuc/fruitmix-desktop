@@ -7,6 +7,7 @@
 	background-size : cover;
 	align-items : center;
 	text-align:center;
+	font-size: 14px!important;
 }
 .login-container {
 	display: flex;
@@ -35,11 +36,12 @@
 	fill:#ffffff!important;
 }
 .find-device-container{
-	width:300px;
+	width:650px;
 	display:'flex';
 	flex-direction:'column';
 	align-items: 'center';
-	justify-content: 'center'
+	justify-content: 'center';
+	overflow: auto
 }
 
 .setting-serverIP-container {
@@ -48,4 +50,64 @@
 	justify-content: center;
 	align-items: center;
 	padding:10px;
+	height:200px;
+}
+
+.add-device-content {
+	min-height: 200px;
+}
+
+.add-device-list-container {
+	min-height:200px;
+	overflow: auto;
+}
+
+.add-device-title {
+	height:50px;
+	line-height: 50px;
+	border-bottom: 1px solid #999
+}
+
+.add-device-list {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	padding:0 10px;
+	height:35px;
+	line-height: 35px;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+.add-device-list svg {
+	fill:#ffffff!important;
+	height:35px!important;
+	width:17px;
+}
+
+.add-device-detail-icon {
+	cursor: pointer;
+}
+
+.add-device-detail {
+
+}
+
+.add-device-button {
+	height:40px;
+	
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+.add-device-button>span {
+	cursor: pointer;
+	width:80px;
+}
+
+.register-admin-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 }

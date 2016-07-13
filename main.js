@@ -11,6 +11,7 @@ const path = require('path');
 const _ = require('lodash');
 const mdns = require('mdns-js');
 var mainWindow = null;
+var fruitmixWindow = null
 //server
 var server = '';
 // server =	'http://211.144.201.201:8888';
@@ -60,7 +61,7 @@ var serverRecord = null;
 
 
 const c = console.log;
-var browser = mdns.createBrowser(mdns.tcp('http'));
+var browser = new mdns.createBrowser(mdns.tcp('http'));
 
 try{
 	browser.on('ready', function () {
@@ -70,12 +71,9 @@ try{
 		if (!data.fullname) {
 			return
 		}
+		c(data);
 		dns.push(Object.assign({},data,{checked:false}));
 	});
-
-	// browser.on('serviceUp', function(service) {
-	//   console.log("service up: ", service);
-	// });
 
 	browser.on('error',err=>{
 		c('mdns err');
@@ -99,7 +97,7 @@ app.on('ready', function() {
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	});
-	mainWindow.webContents.openDevTools();
+	// mainWindow.webContents.openDevTools();
 	// dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']})
 	mainWindow.loadURL('file://' + __dirname + '/ele/index.html');
 	//create folder
@@ -124,6 +122,9 @@ app.on('ready', function() {
 	//find device
 	intervalFindDevice = setInterval(findDevice,2000);
 });
+app.on('window-all-closed', () => {
+  app.quit();
+});
 function findDevice() {
 	try{
 		let count = device.length;
@@ -132,9 +133,12 @@ function findDevice() {
 				return
 			}
 			item.checked = true;
-			let position = item.fullname.toLowerCase().indexOf('wisnuc appstation');
-			if (position != -1) {
-				device.push(Object.assign({},item,{active:false}));
+			let fru = item.fullname.toLowerCase().indexOf('fruitmix');
+			let app = item.fullname.toLowerCase().indexOf('wisnuc appstation');
+			if (app != -1) {
+				device.push(Object.assign({},item,{active:false,isCustom:false,fruitmix:false,admin:false}));
+			}else if (fru != -1) {
+				device.push(Object.assign({},item,{active:false,isCustom:false,fruitmix:true,admin:false}));
 			}
 		});
 		if (device.length != count) {
@@ -148,7 +152,7 @@ ipcMain.on('getDeviceUsedRecently',err=>{
 	//have device used recently
 	fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
 		if (err) {
-			serverRecord = {ip:'',savePassword:false,autoLogin:false,username:null,password:null};
+			serverRecord = {ip:'',savePassword:false,autoLogin:false,username:null,password:null,customDevice:[]};
 			let j = JSON.stringify(serverRecord);
 			fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
 
@@ -156,29 +160,87 @@ ipcMain.on('getDeviceUsedRecently',err=>{
 		}else {
 			serverRecord = JSON.parse(data);
 			if (serverRecord.ip != '') {
-				server = serverRecord.ip;
+				server = 'http://'+serverRecord.ip;
 				mainWindow.webContents.send('setDeviceUsedRecently',serverRecord.ip);
+			}
+			if (serverRecord.customDevice.length !=0) {
+				device.concat(serverRecord.customDevice);
+				for (let item of serverRecord.customDevice) {
+					device.push(item);
+				}
+				mainWindow.webContents.send('device',device);
 			}
 		}
 		
 	});
 });
-app.on('window-all-closed', () => {
-  app.quit();
-});
 //setIp
-ipcMain.on('setServeIp',(err,ip)=>{
-	server = 'http://' + ip;
+ipcMain.on('setServeIp',(err,ip, isCustom)=>{
+	let index = device.findIndex(item=>{
+		return item.addresses[0] == ip;
+	});
+	if (index != -1) {
+		server = 'http://' + ip;
+	}else {
+		server = 'http://' + ip;
+	}
 	mainWindow.webContents.send('message','ip设置成功');
 	fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
 		let d = JSON.parse(data);
 		d.ip = ip;
+		if (isCustom) {
+			d.customDevice.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true});
+			device.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true});
+			mainWindow.webContents.send('device',device);
+		}
 		let j = JSON.stringify(d);
 		fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
 
 		});
 	});
-	
+});
+//find fruitmix
+ipcMain.on('findFruitmix',(e,item)=>{
+	c('find find find');
+	// let b = new mdns.createBrowser(mdns.tcp('http'));
+	// b.on('ready', function () {
+	//     b.discover(); 
+	// });
+	// b.on('update', function (data) {
+	// 	if (item.addresses[0]==data.addresses[0]) {
+	// 		let count = device.findIndex(d=>{
+	// 			return item.addresses[0]==d.addresses[0]
+	// 		});
+	// 		// if (data.fullname.indexOf('fruitmix')!=-1) {
+	// 		// 	device[count] = Object.assign({},data,{active:false,isCustom:false,fruitmix:true,admin:false});
+	// 		// }else {
+	// 		// 	device[count] = Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:false});
+	// 		// }
+	// 		// mainWindow.webContents.send('device',device);
+	// 	}
+	// });
+});
+//create fruitmix
+ipcMain.on('createFruitmix',(err,item)=>{
+	c(item.addresses[0]+':'+item.port);
+	fruitmixWindow = new BrowserWindow({
+		frame: true,
+		height: 768,
+		resizable: true,
+		width: 1366,
+		minWidth:1024,
+		minHeight:768,
+		title:'wisnuc'
+	});
+	//window title
+	fruitmixWindow.on('page-title-updated',function(event){
+		event.preventDefault()
+	});
+	fruitmixWindow.loadURL('http://'+item.addresses[0]+':'+item.port);
+});
+//get usersList
+ipcMain.on('getUserList',(e,item)=>{
+	c(item);
 });
 //get all user information
 ipcMain.on('login',function(event,username,password){
@@ -1111,6 +1173,42 @@ function createNewUser(username,password,email) {
 	});
 	return promise;
 }
+ipcMain.on('userInit',(err,s,u,p)=>{
+	var options = {
+		form: {username:u,password:p}
+	};
+	function callback (err,res,body) {
+		if (!err && res.statusCode == 200) {
+			console.log('res');
+			ipcMain.send('message','管理员注册成功');
+		}else {
+			console.log('err');
+		}
+	};
+	request.post(s+'/init',options,callback);
+});
+//delete user 
+ipcMain.on('deleteUser',(err,uuid)=>{
+	c(uuid);
+	var options = {
+			headers: {
+				Authorization: user.type+' '+user.token
+			},
+			form: {uuid:uuid}
+		}
+		function callback (err,res,body) {
+			if (!err && res.statusCode == 200) {
+				console.log('res');
+				getAllUser().then((users)=>{
+					user.allUser = users;
+					mainWindow.webContents.send('setUsers',user);
+				});
+			}else {
+				console.log('err');
+			}
+		};
+		request.del(server+'/users',options,callback);
+});
 //share
 ipcMain.on('share',function(err,files,users){
 	c(files);

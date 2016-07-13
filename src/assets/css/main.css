@@ -549,3 +549,20 @@
 	height: 100%;
 	background-color:#fff 
 }
+/*user dialog*/
+.user-dialog-list {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	font-size:14px;
+}
+.user-dialog-list>span {
+	width:100px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.user-dialog-list-container {
+	max-height:500px;
+	margin-top:10px;
+}
