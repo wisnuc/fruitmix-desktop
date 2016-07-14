@@ -20,7 +20,7 @@ const directory = (state = defaultDirectory,action)=> {
 				return {top:index*51+58+48+8+64,bottom:(index+1)*51+58+48+8+64}
 			});
 
-			var obj = {directory:action.directory,children:action.children,parent:action.parent,path:action.path,position:position,state:'READY',selectAll:false,shareChildren:action.shareChildren,sharePath:action.sharePath};
+			var obj = {directory:action.directory,children:action.children,parent:action.parent,path:action.path,position:position,state:'READY',selectAll:false};
 			return Object.assign({}, state, obj);
 
 		case 'SELECT_CHILDREN':

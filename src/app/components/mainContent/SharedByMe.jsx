@@ -38,7 +38,7 @@ class SharedByMe extends Component {
 									<td>{this.findUser(item)}</td>
 									<td>
 										<span onClick={this.cancelShare.bind(this,item)}>取消分享</span>
-										<span onClick={this.reShare.bind(this,item)}>重新分享</span>
+										{/*<span onClick={this.reShare.bind(this,item)}>重新分享</span>*/}
 									</td>
 								</tr>
 							)
