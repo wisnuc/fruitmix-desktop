@@ -10,6 +10,7 @@ const stream = require('stream');
 const path = require('path');
 const _ = require('lodash');
 const mdns = require('mdns-js');
+// const nmdns = require('mdns');
 var mainWindow = null;
 var fruitmixWindow = null
 //server
@@ -54,33 +55,96 @@ var thumbIng = [];
 var mediaPath = path.join(__dirname,'media');
 var downloadPath = path.join(__dirname,'download');
 //device
-var dns = [];
 var device = [];
 var intervalFindDevice = null;
 var serverRecord = null;
 
 
 const c = console.log;
-var browser = new mdns.createBrowser(mdns.tcp('http'));
+// mdns.excludeInterface('0.0.0.0');
+var browser = mdns.createBrowser(mdns.tcp('http'));
+// c(mdns);
 
-try{
-	browser.on('ready', function () {
-	    browser.discover(); 
-	});
-	browser.on('update', function (data) {
-		if (!data.fullname) {
+	browser.once('ready', browserDiscover);
+	browser.on('update', findDevice);
+
+function browserDiscover() {
+	browser.discover(); 
+}
+function findDevice(data) {
+	if (!data.fullname) {
 			return
 		}
-		c(data);
-		dns.push(Object.assign({},data,{checked:false}));
-	});
+		let fru = data.fullname.toLowerCase().indexOf('fruitmix');
+		let app = data.fullname.toLowerCase().indexOf('wisnuc appstation');
+		if (fru == -1 && app == -1) {
+			return
+		}
+		c(data.addresses[0]);
+		// is exist
+		let deviceIndex = device.findIndex(item=>{
+			return item.addresses[0] == data.addresses[0];
+		});
+		if (deviceIndex == -1) {
+			c('not exist');
+			//not exist
+			if (fru != -1) {
+				c('fruitmix');
+				//fruitmix server
+				request.get('http://'+data.addresses[0]+'/login',(err,res,body)=>{
+					if (!err && res.statusCode == 200) {
+						if (body.length == 0) {
+							device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:true,admin:false}));
+						}else {
+							device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:true,admin:true}));
+						}
+					}else {
+						console.log('wrong!!!');
+					}
+					mainWindow.webContents.send('device',device);
 
-	browser.on('error',err=>{
-		c('mdns err');
-	});
-}catch(e){
-	console.log(e);
+				});
+			}else if(app != -1){
+				c('wisnuc');
+				request.get('http://'+data.addresses[0]+'/login',(err,res,body)=>{
+					if (!err && res.statusCode == 200) {
+						if (body.length == 0) {
+							device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:false}));
+						}else {
+							device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:true}));
+						}
+					}else {
+						device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:false}));
+					}
+					mainWindow.webContents.send('device',device);
+				});
+			}
+		}else {
+			c('exist');
+			c(data.fullname);
+			//exist
+			if (device[deviceIndex].fullname == data.fullname) {
+				return
+			}else {
+				let f = fru==-1?false:true;
+				// device[deviceIndex] = Object.assign({},data,{});
+				// fru==-1?device[deviceIndex].fruitmix=false:device[deviceIndex].fruitmix=true;
+				request.get('http://'+data.addresses[0]+'/login',(err,res,body)=>{
+					if (!err && res.statusCode == 200) {
+						if (body.length == 0) {
+							device[deviceIndex] = Object.assign({},data,{active:false,isCustom:false,fruitmix:f,admin:false});
+						}else {
+							device[deviceIndex] = Object.assign({},data,{active:false,isCustom:false,fruitmix:f,admin:true});
+						}
+					}else {
+						device[deviceIndex] = Object.assign({},data,{active:false,isCustom:false,fruitmix:f,admin:false});
+					}
+					mainWindow.webContents.send('device',device);
+				});	
+			}
+		}	
 }
+
 
 //app ready and open window
 app.on('ready', function() {
@@ -97,7 +161,7 @@ app.on('ready', function() {
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	});
-	// mainWindow.webContents.openDevTools();
+	mainWindow.webContents.openDevTools();
 	// dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']})
 	mainWindow.loadURL('file://' + __dirname + '/ele/index.html');
 	//create folder
@@ -119,35 +183,8 @@ app.on('ready', function() {
 			});
 		}
 	});
-	//find device
-	intervalFindDevice = setInterval(findDevice,2000);
 });
-app.on('window-all-closed', () => {
-  app.quit();
-});
-function findDevice() {
-	try{
-		let count = device.length;
-		dns.forEach(item => {
-			if (item.checked) {
-				return
-			}
-			item.checked = true;
-			let fru = item.fullname.toLowerCase().indexOf('fruitmix');
-			let app = item.fullname.toLowerCase().indexOf('wisnuc appstation');
-			if (app != -1) {
-				device.push(Object.assign({},item,{active:false,isCustom:false,fruitmix:false,admin:false}));
-			}else if (fru != -1) {
-				device.push(Object.assign({},item,{active:false,isCustom:false,fruitmix:true,admin:false}));
-			}
-		});
-		if (device.length != count) {
-			mainWindow.webContents.send('device',device);
-		}
-	}catch(e){
-		c(e);
-	}
-}
+
 ipcMain.on('getDeviceUsedRecently',err=>{
 	//have device used recently
 	fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
@@ -184,7 +221,6 @@ ipcMain.on('setServeIp',(err,ip, isCustom)=>{
 	}else {
 		server = 'http://' + ip;
 	}
-	mainWindow.webContents.send('message','ip设置成功');
 	fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
 		let d = JSON.parse(data);
 		d.ip = ip;
@@ -201,11 +237,20 @@ ipcMain.on('setServeIp',(err,ip, isCustom)=>{
 });
 //find fruitmix
 ipcMain.on('findFruitmix',(e,item)=>{
-	c('find find find');
-	// let b = new mdns.createBrowser(mdns.tcp('http'));
-	// b.on('ready', function () {
-	//     b.discover(); 
-	// });
+	c('find find find————————');
+	let b = mdns.createBrowser(mdns.tcp('http'));
+	b.on('ready', function () {
+		c('ready');
+	    b.discover(); 
+	});
+	b.on('update', function (data) {
+		c('update');
+		findDevice(data);
+	});
+	setTimeout(function(){
+		b.removeAllListeners();
+		b = null;
+	},3000);
 	// b.on('update', function (data) {
 	// 	if (item.addresses[0]==data.addresses[0]) {
 	// 		let count = device.findIndex(d=>{
@@ -240,7 +285,7 @@ ipcMain.on('createFruitmix',(err,item)=>{
 });
 //get usersList
 ipcMain.on('getUserList',(e,item)=>{
-	c(item);
+	// c(item);
 });
 //get all user information
 ipcMain.on('login',function(event,username,password){
@@ -1381,7 +1426,7 @@ function dealThumbQueue() {
 	}else {
 		setTimeout(function(){
 			if (thumbIng.length == 0) {
-				for (var i=0;i<3;i++) {
+				for (var i=0;i<1;i++) {
 					if (thumbQueue.length == 0) {
 						break;
 					}
@@ -1704,5 +1749,8 @@ function downloadFolderFile(uuid,path) {
 	});
 	return promise;
 }
+app.on('window-all-closed', () => {
+  app.quit();
+});
 
 

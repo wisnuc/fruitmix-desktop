@@ -38,6 +38,7 @@ class Index extends React.Component {
 	}
 
 	componentWillReceiveProps(nextProps) {
+		c.log('sos');
 		if (nextProps.login.state == 'LOGGEDIN') {
 			// this.props.dispatch(Login.cleanSnack());
 			window.location.hash = '/main';
@@ -79,8 +80,8 @@ class Index extends React.Component {
 		this.props.dispatch({
 		      type: "LOGIN"
 		})
-		ipc.send('login',username,password);
-		// ipc.send('login','admin','123456');
+		// ipc.send('login',username,password);
+		ipc.send('login','admin','123456');
 		// ipc.send('login','a','a');
 	}
 
@@ -140,7 +141,7 @@ class Index extends React.Component {
 					<div className='add-device-content'>
 						{this.props.login.addDevice?addDevice:deviceList}
 					</div>
-					<div className='add-device-button'>
+					<div className='add-device-button' style={this.props.login.addDevice?{display:'none'}:{}}>
 						<span onClick={this.toggleAddDevice.bind(this)}>添加设备</span>
 						<span  onClick={this.toggleDevice.bind(this)}>返回</span>
 					</div>

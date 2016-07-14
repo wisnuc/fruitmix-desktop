@@ -25,17 +25,21 @@ class Device extends React.Component {
         this.state = { show: false, stepIndex:0 };
     }
 
+    componentWillReceiveProps() {
+    	c.log('help');
+    }
+
 	render() {
 		let item = this.props.item;
 		let haveDetail;
 		let stepIndex = this.state.stepIndex;
-		if (item.isCustom) {
-			haveDetail = null;
-		}else {
-			haveDetail = (
-				<span className='add-device-detail-icon' onClick={this.toggleDetail.bind(this)}>{svg.settings()}</span>
-				);
-		}
+		// if (item.isCustom||(item.fruitmix&&item.admin)) {
+		// 	haveDetail = null;
+		// }else {
+		// 	haveDetail = (
+		// 		<span className='add-device-detail-icon' onClick={this.toggleDetail.bind(this)}>{svg.settings()}</span>
+		// 		);
+		// }
 
 		let content = null;
 		if (this.state.show) {
@@ -61,15 +65,48 @@ class Device extends React.Component {
 				</div>
 				);
 		}
+		let allOk = this.props.item.fruitmix&&this.props.item.admin;
 		return (
 			<div>
-				<div className='add-device-list'>
-					<span>{item.host}</span>
+				<div className={allOk?'add-device-list':'add-device-list hover'} onClick={allOk?null:this.toggleDetail.bind(this)}>
+					<span>{item.host}({allOk?'服务已启动':'服务未启动'})</span>
 					{haveDetail}
 				</div>
 				{content}
 			</div>
 			)
+	}
+
+	getStepContent(stepIndex) {
+		let c = null;
+		let item = this.props.item;
+		console.log(item.fruitmix);
+		switch (stepIndex) {
+			case 0:
+				return (
+					<div>
+						<span>fruitmix状态 :{item.fruitmix?' 启动':' 未启动'}</span>
+						<FlatButton label="启动fruitmix" disabled={item.fruitmix} onTouchTap={this.createFruitmix.bind(this)}/>
+						<FlatButton label="刷新状态" onTouchTap={this.refreshFruitmix.bind(this)}/>
+					</div>
+					);
+			case 1:
+				let admin = this.props.item.admin;
+				return (
+					<div className='register-admin-container'>
+					{!admin && <TextField ref='username'  stype={{marginBottom: 10}} hintText="用户名" type="username" fullWidth={false} />}
+					{!admin && <TextField onKeyDown={this.keyDown.bind(this)} ref='password' stype={{marginBottom: 10}} hintText="密码" type="password" fullWidth={false} />}
+					{!admin && <FlatButton style={{marginTop: 10}} label='注册' onTouchTap={this.register.bind(this)} />}
+					{admin && <div style={{marginBottom:'15px'}}>管理员帐号已存在</div>}
+					</div>
+					);
+			case 2:
+				return (
+					<div>
+						<div style={{marginBottom:'15px'}}>设备IP : {item.addresses[0]}</div>
+					</div>
+					);
+		}
 	}
 
 	componentDidMount() {
@@ -96,36 +133,6 @@ class Device extends React.Component {
 	    }
 	}
 
-	getStepContent(stepIndex) {
-		let c = null;
-		let item = this.props.item;
-		console.log(item.fruitmix);
-		switch (stepIndex) {
-			case 0:
-				return (
-					<div>
-						<span>fruitmix状态 :{item.fruitmix?' 启动':' 未启动'}</span>
-						<FlatButton label="启动fruitmix" disabled={item.fruitmix} onTouchTap={this.createFruitmix.bind(this)}/>
-						{/*<FlatButton label="刷新状态" onTouchTap={this.refreshFruitmix.bind(this)}/>*/}
-					</div>
-					);
-			case 1:
-				return (
-					<div className='register-admin-container'>
-					<TextField ref='username'  stype={{marginBottom: 10}} hintText="用户名" type="username" fullWidth={false} />
-					<TextField onKeyDown={this.kenDown.bind(this)} ref='password' stype={{marginBottom: 10}} hintText="密码" type="password" fullWidth={false} />
-					<FlatButton style={{marginTop: 10}} label='注册' onTouchTap={this.register.bind(this)} />
-					</div>
-					);
-			case 2:
-				return (
-					<div>
-						<div>设备IP : {item.addresses[0]}</div>
-					</div>
-					);
-		}
-	}
-
 	refreshFruitmix() {
 		ipc.send('findFruitmix',this.props.item);
 	}
@@ -134,8 +141,10 @@ class Device extends React.Component {
 		ipc.send('createFruitmix',this.props.item);
 	}
 
-	kenDown() {
-
+	keyDown(e) {
+		if (e.nativeEvent.which == 13) {
+			this.register();
+		}
 	}
 
 	register() {
