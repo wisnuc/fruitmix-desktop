@@ -195,6 +195,7 @@ ipcMain.on('getDeviceUsedRecently',err=>{
 			fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
 
 			});
+			mainWindow.webContents.send('device',device);
 		}else {
 			serverRecord = JSON.parse(data);
 			downloadPath = serverRecord.download;

@@ -85,19 +85,6 @@
 	background-color: #444;
 	cursor: pointer;
 }
-.add-device-list svg {
-	fill:#ffffff!important;
-	height:35px!important;
-	width:17px;
-}
-
-.add-device-detail-icon {
-	cursor: pointer;
-}
-
-.add-device-detail {
-
-}
 
 .add-device-button {
 	height:40px;

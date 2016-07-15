@@ -25,8 +25,20 @@ class Device extends React.Component {
         this.state = { show: false, stepIndex:0 };
     }
 
-    componentWillReceiveProps() {
-    	c.log('help');
+    componentWillReceiveProps(nextProps) {
+    	if (nextProps.item.fruitmix == false) {
+    		this.setState({
+    			stepIndex:0
+    		});
+    	}else if(nextProps.item.fruitmix == true && nextProps.item.admin == false) {
+    		this.setState({
+    			stepIndex:1
+    		});
+    	}else if (nextProps.item.fruitmix == true && nextProps.item.admin == true) {
+    		this.setState({
+    			stepIndex:2
+    		});
+    	}
     }
 
 	render() {
@@ -59,8 +71,10 @@ class Device extends React.Component {
         			
         			<div>
         				{this.getStepContent(stepIndex)}
-        				<FlatButton label="上一步" disabled={stepIndex === 0} onTouchTap={this.handlePrev.bind(this)} style={{marginRight: 12}}/>
+        				{/*
+						<FlatButton label="上一步" disabled={stepIndex === 0} onTouchTap={this.handlePrev.bind(this)} style={{marginRight: 12}}/>
             			<RaisedButton label="下一步" disabled={stepIndex === 2} primary={true} onTouchTap={this.handleNext.bind(this)}/>
+        				*/}
         			</div>
 				</div>
 				);
@@ -70,7 +84,6 @@ class Device extends React.Component {
 			<div>
 				<div className={allOk?'add-device-list':'add-device-list hover'} onClick={allOk?null:this.toggleDetail.bind(this)}>
 					<span>{item.host}({allOk?'服务已启动':'服务未启动'})</span>
-					{haveDetail}
 				</div>
 				{content}
 			</div>
@@ -98,6 +111,7 @@ class Device extends React.Component {
 					{!admin && <TextField onKeyDown={this.keyDown.bind(this)} ref='password' stype={{marginBottom: 10}} hintText="密码" type="password" fullWidth={false} />}
 					{!admin && <FlatButton style={{marginTop: 10}} label='注册' onTouchTap={this.register.bind(this)} />}
 					{admin && <div style={{marginBottom:'15px'}}>管理员帐号已存在</div>}
+					<RaisedButton label="下一步" disabled={stepIndex === 2} primary={true} onTouchTap={this.handleNext.bind(this)}/>
 					</div>
 					);
 			case 2:
