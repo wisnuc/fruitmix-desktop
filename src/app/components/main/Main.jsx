@@ -142,6 +142,10 @@ class Main extends Component {
 		ipc.on('setUsers',(err,user)=>{
 			this.props.dispatch({type:'SET_USER',user:user});
 		});
+
+		ipc.on('setDownloadPath',(err,path)=>{
+			this.props.dispatch({type:'SET_DOWNLOAD_PATH',path:path});
+		});
 	}
 
 	componentWillUnmount() {
@@ -163,6 +167,11 @@ class Main extends Component {
 				labelStyle={{color:'#000',fontSize:'15px'}}
 			/>
 			];
+
+		let m = null;
+		if (this.props.media.currentMediaImage.open) {
+			m = <Mask></Mask>
+		}
 		return (<CSS opts={['app',true,true,true,500,5000,5000]} style={{height:'100%'}}>
 			<div className="main" key='main' onMouseMove={this.mouseMove.bind(this)} onMouseUp={this.mouseUp.bind(this)} onClick={this.triggerClick.bind(this)}>
 				{/*Multiple select frame*/}
@@ -192,7 +201,7 @@ class Main extends Component {
 				<Paper className={"content-container "+(this.props.navigation.menu?'content-has-left-padding':'no-padding')} zDepth={0}>
 					<Content></Content>
 				</Paper>
-				<Mask></Mask>
+				{m}
 				<Dialog title="用户管理"
 					titleClassName='create-folder-dialog-title'
 					actions={folderActions}
@@ -309,7 +318,8 @@ function mapStateToProps (state) {
 		login: state.login,
 		data: state.data,
 		multiple:state.multiple,
-		snack: state.snack
+		snack: state.snack,
+		media: state.media
 	}
 }
 

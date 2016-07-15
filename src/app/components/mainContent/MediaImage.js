@@ -21,15 +21,11 @@ class Media extends Component {
 
 	getImageContent() {
 		if (this.props.item.status == 'notReady') {
-			return <div><CircularProgress/></div>
+			return <div className='media-loading'></div>
 		}else {
 			return <img style={{cursor:'pointer'}} src={this.props.item.path} alt=""/>
 		}
 	}
-
-
-
-
 
 	componentDidMount() {
 		if (this.props.item.status == 'ready') {

@@ -10,7 +10,6 @@ const stream = require('stream');
 const path = require('path');
 const _ = require('lodash');
 const mdns = require('mdns-js');
-// const nmdns = require('mdns');
 var mainWindow = null;
 var fruitmixWindow = null
 //server
@@ -61,12 +60,16 @@ var serverRecord = null;
 
 
 const c = console.log;
-// mdns.excludeInterface('0.0.0.0');
+mdns.excludeInterface('0.0.0.0');
 var browser = mdns.createBrowser(mdns.tcp('http'));
 // c(mdns);
 
+try{
 	browser.once('ready', browserDiscover);
 	browser.on('update', findDevice);
+}catch(e){
+	c(e);
+}
 
 function browserDiscover() {
 	browser.discover(); 
@@ -144,8 +147,6 @@ function findDevice(data) {
 			}
 		}	
 }
-
-
 //app ready and open window
 app.on('ready', function() {
 	mainWindow = new BrowserWindow({
@@ -155,7 +156,7 @@ app.on('ready', function() {
 		width: 1366,
 		minWidth:1024,
 		minHeight:768,
-		title:'wisnuc'
+		title:'WISNUC'
 	});
 	//window title
 	mainWindow.on('page-title-updated',function(event){
@@ -189,13 +190,16 @@ ipcMain.on('getDeviceUsedRecently',err=>{
 	//have device used recently
 	fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
 		if (err) {
-			serverRecord = {ip:'',savePassword:false,autoLogin:false,username:null,password:null,customDevice:[]};
+			serverRecord = {ip:'',savePassword:false,autoLogin:false,username:null,password:null,customDevice:[],download: downloadPath};
 			let j = JSON.stringify(serverRecord);
 			fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
 
 			});
 		}else {
 			serverRecord = JSON.parse(data);
+			downloadPath = serverRecord.download;
+			c(downloadPath);
+			mainWindow.webContents.send('setDownloadPath',downloadPath);
 			if (serverRecord.ip != '') {
 				server = 'http://'+serverRecord.ip;
 				mainWindow.webContents.send('setDeviceUsedRecently',serverRecord.ip);
@@ -275,7 +279,7 @@ ipcMain.on('createFruitmix',(err,item)=>{
 		width: 1366,
 		minWidth:1024,
 		minHeight:768,
-		title:'wisnuc'
+		title:'WISNUC'
 	});
 	//window title
 	fruitmixWindow.on('page-title-updated',function(event){
@@ -1424,7 +1428,7 @@ function dealThumbQueue() {
 	if (thumbQueue.length == 0) {
 		return
 	}else {
-		setTimeout(function(){
+
 			if (thumbIng.length == 0) {
 				for (var i=0;i<1;i++) {
 					if (thumbQueue.length == 0) {
@@ -1435,18 +1439,18 @@ function dealThumbQueue() {
 					isThumbExist(item);
 				}
 			}
-		},500);
+
 	}
 }
 
 function isThumbExist(item) {
+	c(item.hash);
 	fs.readFile(path.join(mediaPath,item.hash+'thumb'),(err,data)=>{
 		if (err) {
 			downloadMedia(item).then((data)=>{
 				sendThumb(item);
 				console.log(thumbQueue.length+' length');
 			}).catch(err=>{
-
 				item.failed++;
 				let index = thumbIng.findIndex(i=>i.hash == item.hash);
 				let t = thumbIng[index];
@@ -1467,11 +1471,12 @@ function isThumbExist(item) {
 	});
 
 	function sendThumb(item){
+		c('over');
 		let index = thumbIng.findIndex(i=>i.hash == item.hash);
 		thumbIng.splice(index,1);
-		dealThumbQueue();
 		item.path = path.join(mediaPath,item.hash+'thumb');
 		mainWindow.webContents.send('getThumbSuccess',item);
+		setTimeout(dealThumbQueue,200);
 	}
 }
 
@@ -1751,6 +1756,35 @@ function downloadFolderFile(uuid,path) {
 }
 app.on('window-all-closed', () => {
   app.quit();
+});
+
+ipcMain.on('changeDownloadPath', e=>{
+	dialog.showOpenDialog({properties: [ 'openDirectory']},function(folder) {
+		if (folder == undefined)　{
+			return
+		}
+		let folderPath = path.normalize(folder[0]);
+		c(folderPath);
+		downloadPath = folderPath;
+		mainWindow.webContents.send('setDownloadPath',downloadPath);
+		fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
+			if (err) {
+				serverRecord = {ip:'',savePassword:false,autoLogin:false,username:null,password:null,customDevice:[],download: downloadPath};
+				let j = JSON.stringify(serverRecord);
+				fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
+
+				});
+			}else {
+				serverRecord = JSON.parse(data);
+				serverRecord.download = downloadPath;
+				let j = JSON.stringify(serverRecord);
+				fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
+
+				});
+			}
+			
+		});
+	});
 });
 
 

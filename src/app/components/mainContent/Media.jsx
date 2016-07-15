@@ -17,7 +17,7 @@ import M from './MediaImage';
 class Media extends Component {
 	render() {
 		return (
-			<div className='all-my-files' style={{height:(document.body.clientHeight-64)+'px'}} >
+			<div className='all-my-files' style={{height:'100%'}} >
 				{this.getContent()}
 			</div>
 		)
@@ -28,7 +28,7 @@ class Media extends Component {
 			return (<div className='data-loading '><CircularProgress/></div>)
 		}else {
 			return (
-				<div style={{width:'100%'}} className='mediaContainer' onScroll={this.scrollEvent.bind(this)}>
+				<div style={{width:'100%'}} className='mediaContainer' onWheel={this.scrollEvent.bind(this)}>
 					{this.props.media.data.map((item,index)=>{
 						if (index >this.props.media.size) {
 							return null
@@ -46,6 +46,7 @@ class Media extends Component {
 	}
 
 	scrollEvent() {
+		c.log('scroll');
 		let dom = document.getElementsByClassName('mediaContainer')[0]
 		let sTop = dom.scrollTop;
 		let sHeight = dom.scrollHeight;

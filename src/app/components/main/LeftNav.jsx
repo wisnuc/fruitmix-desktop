@@ -64,7 +64,7 @@ class leftNav extends Component {
 						<Menu>
 							{this.props.nav.nav.map((item,index) => (
 								item.type=='other'?<MenuItem primaryText={item.name}
-								className={item.selected?"list-selected":''}
+								className={item.selected?"list-selected left-menu-list":'left-menu-list'}
 								style={style}
 								innerDivStyle={listStyle}
 								leftIcon={item.icon?svg[item.icon]():null} 

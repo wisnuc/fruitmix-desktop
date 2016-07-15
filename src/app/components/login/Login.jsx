@@ -68,6 +68,10 @@ class Index extends React.Component {
 		ipc.on('setDeviceUsedRecently',(err,ip)=>{
 			this.props.dispatch(Action.setDeviceUsedRecently(ip));
 		});
+
+		ipc.on('setDownloadPath',(err,path)=>{
+			this.props.dispatch({type:'SET_DOWNLOAD_PATH',path:path});
+		});
 	}
 
 	componentWillUnmount() {
