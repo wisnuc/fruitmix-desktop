@@ -12,19 +12,40 @@
 .login-container {
 	display: flex;
 	flex-direction: column;
-
 	justify-content: center;
 	width:350px;
-	padding: 10px;
+	background: inherit;
+	font-size:14px!important;
 }
 .login-device-list {
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-
+	background-color: rgba(255,255,255,.85);
+	color:#000!important;
 }
 .login-device-title {
-	text-align: left
+	background: rgba(239,108,0,.75);
+	height:50px;
+	line-height: 50px;
+	text-align: center;
+	color:#fff;
+}
+.login-button {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	cursor: pointer;
+	margin-bottom: 10px;
+}
+
+.login-button div {
+	width:88px;
+	height:30px;
+	line-height: 30px;
+	color:#333;
+}
+.login-button>div:hover {
+	background: #ef6c00;
+	color:#fff;
 }
 .open-device-icon {
 	width:50px;
@@ -41,7 +62,7 @@
 	flex-direction:'column';
 	align-items: 'center';
 	justify-content: 'center';
-	overflow: auto
+	overflow: auto;
 }
 
 .setting-serverIP-container {
@@ -56,6 +77,8 @@
 
 .add-device-content {
 	min-height: 200px;
+	color:#000!important;
+	background-color: rgba(255,255,255,.85);
 }
 
 .add-device-list-container {
@@ -67,7 +90,9 @@
 .add-device-title {
 	height:50px;
 	line-height: 50px;
-	border-bottom: 1px solid #999
+	background: rgba(239,108,0,.75);
+	text-align: center;
+	color:#fff;
 }
 
 .add-device-list {
@@ -82,20 +107,30 @@
 	justify-content: space-between;
 }
 .add-device-list.hover:hover{
-	background-color: #444;
+	background-color: #999;
 	cursor: pointer;
+	color:#fff;
 }
 
 .add-device-button {
 	height:40px;
-	
+	background-color: rgba(255,255,255,.85);
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
+	padding:0 10px;
 }
 .add-device-button>span {
 	cursor: pointer;
-	width:80px;
+	width:88px;
+	height:30px;
+	line-height: 30px;
+	color:#333;
+}
+
+.add-device-button>span:hover{
+	background: #ef6c00;
+	color:#fff;
 }
 
 .register-admin-container {
@@ -103,4 +138,20 @@
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
+}
+
+.delete-server {
+	cursor: pointer;
+	width:88px;
+	height:30px;
+	line-height: 30px;
+}
+.delete-server:hover {
+	background: #ef6c00;
+	color:#fff;
+}
+
+.fruitmix-detail>div {
+	height:30px;
+	line-height: 30px;
 }

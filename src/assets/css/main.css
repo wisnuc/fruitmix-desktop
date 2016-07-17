@@ -6,6 +6,7 @@
 	width: 100%;
 	height: 100%;
 	position: relative;
+	-webkit-user-select:none!important;
 }
 .app {
 	height: 100%
@@ -46,6 +47,9 @@
 }
 .list-selected {
 	background-color: rgba(0,0,0,.2)!important;
+}
+.left-menu-list >*{
+	cursor: default;
 }
 .left-menu-list svg {
 	height:36px!important;
@@ -340,6 +344,12 @@
 .file-type-icon.jpg {
 	background-position: 0px -153px;
 }
+.file-type-icon.mp3 {
+	background-position: 0px -307px;
+}
+.file-type-icon.mp4 {
+	background-position: -104px -204px;
+}
 /*detail*/
 .detail-container{
 	box-sizing: border-box;
@@ -383,7 +393,7 @@
 }
 
 .setting-download input {
-	-webkit-user-select:all!important;
+	-webkit-user-select:none;
 }
 /*.register-container>div{
 	margin: 0 auto;

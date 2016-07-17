@@ -62,14 +62,14 @@ var serverRecord = null;
 const c = console.log;
 mdns.excludeInterface('0.0.0.0');
 var browser = mdns.createBrowser(mdns.tcp('http'));
-// c(mdns);
+// // c(mdns);
 
-try{
-	browser.once('ready', browserDiscover);
-	browser.on('update', findDevice);
-}catch(e){
-	c(e);
-}
+// try{
+// 	browser.once('ready', browserDiscover);
+// 	browser.on('update', findDevice);
+// }catch(e){
+// 	c(e);
+// }
 
 function browserDiscover() {
 	browser.discover(); 
@@ -96,7 +96,7 @@ function findDevice(data) {
 				//fruitmix server
 				request.get('http://'+data.addresses[0]+'/login',(err,res,body)=>{
 					if (!err && res.statusCode == 200) {
-						if (body.length == 0) {
+						if (JSON.parse(body).length == 0) {
 							device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:true,admin:false}));
 						}else {
 							device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:true,admin:true}));
@@ -111,7 +111,7 @@ function findDevice(data) {
 				c('wisnuc');
 				request.get('http://'+data.addresses[0]+'/login',(err,res,body)=>{
 					if (!err && res.statusCode == 200) {
-						if (body.length == 0) {
+						if (JSON.parse(body).length == 0) {
 							device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:false}));
 						}else {
 							device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:true}));
@@ -130,11 +130,9 @@ function findDevice(data) {
 				return
 			}else {
 				let f = fru==-1?false:true;
-				// device[deviceIndex] = Object.assign({},data,{});
-				// fru==-1?device[deviceIndex].fruitmix=false:device[deviceIndex].fruitmix=true;
 				request.get('http://'+data.addresses[0]+'/login',(err,res,body)=>{
 					if (!err && res.statusCode == 200) {
-						if (body.length == 0) {
+						if (JSON.parse(body).length == 0) {
 							device[deviceIndex] = Object.assign({},data,{active:false,isCustom:false,fruitmix:f,admin:false});
 						}else {
 							device[deviceIndex] = Object.assign({},data,{active:false,isCustom:false,fruitmix:f,admin:true});
@@ -240,35 +238,38 @@ ipcMain.on('setServeIp',(err,ip, isCustom)=>{
 		});
 	});
 });
+ipcMain.on('delServer',(err,i)=>{
+	let index = device.findIndex(item=>{
+		return item.addresses[0] == i.addresses[0];
+	});
+	device.splice(index,1);
+	fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
+		let d = JSON.parse(data); 
+		c(d);
+		let ind = d.customDevice.findIndex(item=>{
+			return item.addresses[0] == i.addresses[0]
+		});
+		if (ind != -1) {
+			d.customDevice.splice(ind,1);
+		}
+		let j = JSON.stringify(d);
+		fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
+
+		});
+	});
+	mainWindow.webContents.send('device',device);
+});
+ipcMain.on('beginFind',(err)=>{
+	browser.on('update', findDevice);
+	browser.discover();
+});
 //find fruitmix
 ipcMain.on('findFruitmix',(e,item)=>{
 	c('find find find————————');
 	let b = mdns.createBrowser(mdns.tcp('http'));
-	b.on('ready', function () {
-		c('ready');
+	b.once('ready', function () {
 	    b.discover(); 
 	});
-	b.on('update', function (data) {
-		c('update');
-		findDevice(data);
-	});
-	setTimeout(function(){
-		b.removeAllListeners();
-		b = null;
-	},3000);
-	// b.on('update', function (data) {
-	// 	if (item.addresses[0]==data.addresses[0]) {
-	// 		let count = device.findIndex(d=>{
-	// 			return item.addresses[0]==d.addresses[0]
-	// 		});
-	// 		// if (data.fullname.indexOf('fruitmix')!=-1) {
-	// 		// 	device[count] = Object.assign({},data,{active:false,isCustom:false,fruitmix:true,admin:false});
-	// 		// }else {
-	// 		// 	device[count] = Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:false});
-	// 		// }
-	// 		// mainWindow.webContents.send('device',device);
-	// 	}
-	// });
 });
 //create fruitmix
 ipcMain.on('createFruitmix',(err,item)=>{
@@ -286,7 +287,7 @@ ipcMain.on('createFruitmix',(err,item)=>{
 	fruitmixWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	});
-	fruitmixWindow.loadURL('http://'+item.addresses[0]+':'+item.port);
+	fruitmixWindow.loadURL('http://'+item.addresses[0]+':3000');
 });
 //get usersList
 ipcMain.on('getUserList',(e,item)=>{
@@ -1223,14 +1224,22 @@ function createNewUser(username,password,email) {
 	});
 	return promise;
 }
-ipcMain.on('userInit',(err,s,u,p)=>{
+ipcMain.on('userInit',(err,s,u,p,i)=>{
 	var options = {
 		form: {username:u,password:p}
 	};
 	function callback (err,res,body) {
 		if (!err && res.statusCode == 200) {
 			console.log('res');
-			ipcMain.send('message','管理员注册成功');
+			c(i);
+			mainWindow.webContents.send('message','管理员注册成功');
+			let index = device.findIndex(item=>{
+				return item.addresses[0] = i.addresses[0]
+			});
+			if (index != -1) {
+				device[index].admin = true;
+				mainWindow.webContents.send('device',device);
+			}
 		}else {
 			console.log('err');
 		}

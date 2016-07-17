@@ -31,7 +31,6 @@ import configureStore from './stores/store';
 const store = configureStore();
 window.c = console;
 window.onresize = function() {
-	console.log('rrrrrr');
 	store.dispatch({type:''});
 }
 //APP component

@@ -15,6 +15,7 @@ import Login from'../../actions/action';
 import { Paper, TextField, FlatButton, CircularProgress, Snackbar, SelectField, MenuItem } from 'material-ui';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import darkBaseTheme from 'material-ui/styles/baseThemes/darkBaseTheme';
+import baseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 
 // require common mixins
 import ImageModules from '../Mixins/ImageModules'; 
@@ -24,8 +25,7 @@ import css  from  '../../../assets/css/login';
 import Action from '../../actions/action';
 //import component
 import Device from './Device'
-//import svg
-import svg from '../../utils/SVGIcon';
+import {orange500, blue500} from 'material-ui/styles/colors';
 
 // define Index component
 class Index extends React.Component {
@@ -33,7 +33,7 @@ class Index extends React.Component {
 	mixins: [ImageModules]
 
 	getChildContext() {
-		const muiTheme = getMuiTheme(darkBaseTheme);
+		const muiTheme = getMuiTheme(baseTheme);
 		return {muiTheme};
 	}
 
@@ -47,6 +47,7 @@ class Index extends React.Component {
 
 	componentDidMount() {
 		ipc.send('getDeviceUsedRecently');
+		ipc.send('beginFind');
 		ipc.on('loggedin',(err,user,allUser)=>{
 			this.props.dispatch(Login.login(user));
 		});
@@ -62,6 +63,7 @@ class Index extends React.Component {
 		});
 
 		ipc.on('device',(err,device)=>{
+			c.log('err');
 			this.props.dispatch(Login.setDevice(device));
 		});
 
@@ -84,8 +86,8 @@ class Index extends React.Component {
 		this.props.dispatch({
 		      type: "LOGIN"
 		})
-		// ipc.send('login',username,password);
-		ipc.send('login','admin','123456');
+		ipc.send('login',username,password);
+		// ipc.send('login','admin','123456');
 		// ipc.send('login','a','a');
 	}
 
@@ -95,23 +97,41 @@ class Index extends React.Component {
 		let loginContent;
 		let busy = (this.props.login.state ==='BUSY');
 		let device = this.props.login.device; 
+		const styles = {
+  errorStyle: {
+    color: orange500,
+  },
+  underlineStyle: {
+    borderColor: orange500,
+  },
+  floatingLabelStyle: {
+    color: orange500,
+  },
+  floatingLabelFocusStyle: {
+    color: blue500,
+  },
+};
 		//login
 		if (!busy) {
 			loginContent = (
-				<Paper className='login-container' zDepth={4}>
+				<div className='login-container' zDepth={4}>
 					<div className='login-device-title'>已发现 {device.length} 台 wisnuc</div>
 					<div className='login-device-list'>
-						<SelectField value={this.props.login.deviceUsedRecently} autoWidth={true} onChange={this.selectDevice.bind(this)}>
-							{device.map(item=>(
-								<MenuItem key={item.addresses[0]} value={item.addresses[0]} primaryText={item.host}></MenuItem>
-								))}
-						</SelectField>
-						<span className='open-device-icon' onClick={this.toggleDevice.bind(this)}>{svg.settings()}</span>
+						
+							<SelectField iconStyle={{fill:'#666'}} underlineStyle={{borderColor:'rgba(255,255,255,0)'}}  value={this.props.login.deviceUsedRecently} onChange={this.selectDevice.bind(this)}>
+								{device.map(item=>(
+									<MenuItem key={item.addresses[0]} value={item.addresses[0]} primaryText={item.host}></MenuItem>
+									))}
+							</SelectField>
+			
+						<TextField underlineStyle={{borderColor:'#999'}} underlineFocusStyle={styles.underlineStyle} hintStyle={{color:'#999'}} ref='username' style={{marginBottom: 10}} hintText="用户名" type="username" />
+						<TextField underlineStyle={{borderColor:'#999'}} underlineFocusStyle={styles.underlineStyle} hintStyle={{color:'#999'}} ref='password' style={{marginBottom: 10}} hintText="密码" type="password" onKeyDown={this.kenDown.bind(this)}/>
+						<div className='login-button'>
+							<div onTouchTap={this.submit.bind(this)}>登录</div>
+							<div onTouchTap={this.toggleDevice.bind(this)}>设置</div>
+						</div>
 					</div>
-					<TextField ref='username'  stype={{marginBottom: 10}} hintText="用户名" type="username" fullWidth={false} />
-					<TextField onKeyDown={this.kenDown.bind(this)} ref='password' stype={{marginBottom: 10}} hintText="密码" type="password" fullWidth={false} />
-					<FlatButton style={{marginTop: 10}} label='登录' onTouchTap={this.submit.bind(this)} />
-				</Paper>
+				</div>
 				)
 		}else {
 			loginContent= (
@@ -124,10 +144,11 @@ class Index extends React.Component {
 		//add device
 		let addDevice = (
 			<div className='setting-serverIP-container'>
-				<TextField  ref='serverIP' hintText='serverIP' fullWidth={true}/>
-				<div>
-					<FlatButton style={{marginTop: 10,width:'100px'}} label='取消' onTouchTap={this.toggleAddDevice.bind(this)} />
-					<FlatButton style={{marginTop: 10,width:'100px'}} label='提交' onTouchTap={this.submitServer.bind(this)} />
+				<TextField underlineStyle={{borderColor:'#999'}} underlineFocusStyle={styles.underlineStyle} hintStyle={{color:'#999'}} ref='serverIP' hintText='serverIP' fullWidth={true}/>
+				<div className='login-button'>
+
+							<div onTouchTap={this.toggleAddDevice.bind(this)}>取消</div>
+							<div onTouchTap={this.submitServer.bind(this)}>提交</div>
 				</div>
 			</div>
 			);
@@ -140,7 +161,7 @@ class Index extends React.Component {
 			);
 
 		let findDeviceContent = (
-				<Paper className='find-device-container' style={{maxHeight:document.body.clientHeight}}>
+				<div className='find-device-container' style={{maxHeight:document.body.clientHeight}}>
 					<div className='add-device-title'>已发现 {device.length} 台 wisnuc</div>
 					<div className='add-device-content'>
 						{this.props.login.addDevice?addDevice:deviceList}
@@ -149,7 +170,7 @@ class Index extends React.Component {
 						<span onClick={this.toggleAddDevice.bind(this)}>添加设备</span>
 						<span  onClick={this.toggleDevice.bind(this)}>返回</span>
 					</div>
-				</Paper>
+				</div>
 			);
 
 		return (
@@ -184,6 +205,7 @@ class Index extends React.Component {
 		let ip = this.refs.serverIP.input.value;
 		ipc.send('setServeIp',ip,true);
 		this.props.dispatch(Action.setDeviceUsedRecently(ip));
+		this.props.dispatch(Action.toggleAddDevice());
 	}
 
 	selectDevice(e,index) {

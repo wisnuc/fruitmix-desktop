@@ -16,16 +16,26 @@ import {
 import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
 import {TextField} from 'material-ui';
+import {orange500, blue500} from 'material-ui/styles/colors';
 //import svg
 import svg from '../../utils/SVGIcon';
 
 class Device extends React.Component {
 	constructor(props) {
         super(props);
-        this.state = { show: false, stepIndex:0 };
+        let index = 0;
+        if (this.props.item.fruitmix == false) {
+    		index = 0;
+    	}else if(this.props.item.fruitmix == true && this.props.item.admin == false) {
+    		index = 1;
+    	}else if (this.props.item.fruitmix == true && this.props.item.admin == true) {
+    		index = 2;
+    	}
+        this.state = { show: false, stepIndex:index };
     }
 
     componentWillReceiveProps(nextProps) {
+    	c.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
     	if (nextProps.item.fruitmix == false) {
     		this.setState({
     			stepIndex:0
@@ -43,16 +53,7 @@ class Device extends React.Component {
 
 	render() {
 		let item = this.props.item;
-		let haveDetail;
 		let stepIndex = this.state.stepIndex;
-		// if (item.isCustom||(item.fruitmix&&item.admin)) {
-		// 	haveDetail = null;
-		// }else {
-		// 	haveDetail = (
-		// 		<span className='add-device-detail-icon' onClick={this.toggleDetail.bind(this)}>{svg.settings()}</span>
-		// 		);
-		// }
-
 		let content = null;
 		if (this.state.show) {
 			content = (
@@ -80,10 +81,17 @@ class Device extends React.Component {
 				);
 		}
 		let allOk = this.props.item.fruitmix&&this.props.item.admin;
+		let text = allOk?'(服务已启动)':'(服务未启动)';
+		let del = null;
+		if (this.props.item.isCustom) {
+			allOk = true;
+			text = null;
+			del = <span className='delete-server' onClick={this.delServer.bind(this)}>删除</span>
+		}
 		return (
 			<div>
 				<div className={allOk?'add-device-list':'add-device-list hover'} onClick={allOk?null:this.toggleDetail.bind(this)}>
-					<span>{item.host}({allOk?'服务已启动':'服务未启动'})</span>
+					<span>{item.host}{text}</span>{del}
 				</div>
 				{content}
 			</div>
@@ -93,25 +101,44 @@ class Device extends React.Component {
 	getStepContent(stepIndex) {
 		let c = null;
 		let item = this.props.item;
-		console.log(item.fruitmix);
+		const styles = {
+  errorStyle: {
+    color: orange500,
+  },
+  underlineStyle: {
+    borderColor: orange500,
+  },
+  floatingLabelStyle: {
+    color: orange500,
+  },
+  floatingLabelFocusStyle: {
+    color: blue500,
+  },
+};
 		switch (stepIndex) {
 			case 0:
 				return (
 					<div>
-						<span>fruitmix状态 :{item.fruitmix?' 启动':' 未启动'}</span>
+						<div className='fruitmix-detail'>
+							<div>1.配置磁盘卷</div>
+							<div>2.启动fruitmix(wisnuc对应服务)</div>
+							<div>fruitmix状态 :{item.fruitmix?' 启动':' 未启动'}</div>
+						</div>
+						
 						<FlatButton label="启动fruitmix" disabled={item.fruitmix} onTouchTap={this.createFruitmix.bind(this)}/>
 						<FlatButton label="刷新状态" onTouchTap={this.refreshFruitmix.bind(this)}/>
+						{/*<RaisedButton label="下一步" disabled={stepIndex === 2} primary={true} onTouchTap={this.handleNext.bind(this)}/>*/}
 					</div>
 					);
 			case 1:
 				let admin = this.props.item.admin;
 				return (
 					<div className='register-admin-container'>
-					{!admin && <TextField ref='username'  stype={{marginBottom: 10}} hintText="用户名" type="username" fullWidth={false} />}
-					{!admin && <TextField onKeyDown={this.keyDown.bind(this)} ref='password' stype={{marginBottom: 10}} hintText="密码" type="password" fullWidth={false} />}
+					{!admin && <TextField underlineStyle={{borderColor:'#999'}} underlineFocusStyle={styles.underlineStyle} hintStyle={{color:'#999'}} ref='username'  stype={{marginBottom: 10}} hintText="用户名" type="username" fullWidth={false} />}
+					{!admin && <TextField underlineStyle={{borderColor:'#999'}} underlineFocusStyle={styles.underlineStyle} hintStyle={{color:'#999'}} onKeyDown={this.keyDown.bind(this)} ref='password' stype={{marginBottom: 10}} hintText="密码" type="password" fullWidth={false} />}
 					{!admin && <FlatButton style={{marginTop: 10}} label='注册' onTouchTap={this.register.bind(this)} />}
 					{admin && <div style={{marginBottom:'15px'}}>管理员帐号已存在</div>}
-					<RaisedButton label="下一步" disabled={stepIndex === 2} primary={true} onTouchTap={this.handleNext.bind(this)}/>
+					{/*<RaisedButton label="下一步" disabled={stepIndex === 2} primary={true} onTouchTap={this.handleNext.bind(this)}/>*/}
 					</div>
 					);
 			case 2:
@@ -162,10 +189,14 @@ class Device extends React.Component {
 	}
 
 	register() {
-		let s = 'http://'+this.props.item.addresses+':'+this.props.item.port;
+		let s = 'http://'+this.props.item.addresses;
 		let username = this.refs.username.input.value;
 		let password = this.refs.password.input.value;
-		ipc.send('userInit',s,username,password);
+		ipc.send('userInit',s,username,password,this.props.item);
+	}
+
+	delServer() {
+		ipc.send('delServer',this.props.item);
 	}
 }
 
