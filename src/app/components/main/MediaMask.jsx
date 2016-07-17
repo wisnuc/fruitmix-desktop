@@ -21,7 +21,7 @@ class Mask extends Component {
 		} 
 		return (
 			<div className='media-mask' style={style}>
-			<span className='media-mask-close' onClick={this.close.bind(this)}>close</span>
+			<span className='media-mask-close' onClick={this.close.bind(this)}>关闭</span>
 			{this.getMediaImage()}
 			</div>
 			)

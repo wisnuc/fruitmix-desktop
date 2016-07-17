@@ -24,6 +24,12 @@ import Move from './Move';
 class AllFiles extends Component {
 	render() {
 		var _this = this;
+		let shareUserList = this.props.login.obj.allUser.map((item,index)=>{
+						if (item.username == this.props.login.obj.username) {
+							return
+						}
+						return <Checkbox key={item.username} label={item.username} style={styles.checkbox} labelPosition="left" onCheck={this.checkUser.bind(this,item.uuid)}/>
+					})
 		const folderActions = [
 			<FlatButton
 				label="取消"
@@ -91,10 +97,8 @@ class AllFiles extends Component {
 					open={this.props.isShow.dialogOfShare}
 					className='create-folder-dialog'
 				>
-					<div className='share-user-list-container' style={{'overflowY':'scroll'}}>
-					{this.props.login.obj.allUser.map((item,index)=>{
-						return <Checkbox key={item.username} label={item.username} style={styles.checkbox} labelPosition="left" onCheck={this.checkUser.bind(this,item.uuid)}/>
-					})}
+					<div className='share-user-list-container'>
+					{shareUserList}
 					</div>
 				</Dialog>
 			</div>
@@ -116,11 +120,6 @@ class AllFiles extends Component {
 					<input className='upload-input' type="file" onChange={this.upLoadFile.bind(this)} multiple={true} webkitdirectory={true}/>
 					{/*bread crumb*/}
 					<div className='breadcrumb'>
-						{/*
-						<SvgIcon onClick={this.backToParent.bind(this)} color={greenA200} style={{marginLeft:10,marginRight:14,cursor:'pointer'}}>
-						{svg['back']()}
-						</SvgIcon>
-						*/}
 						{this.getBreadCrumb()}
 						<IconMenu className='breadcrumb-add'
 						      iconButtonElement={<span style={{cursor:'pointer'}}>{svg.add()}</span>}
@@ -134,7 +133,6 @@ class AllFiles extends Component {
 					</div>
 					{/*file table body*/}
 					<div className="all-files-container">
-					{/*<video src="http://192.168.5.181:9220/kktv4/get?api_name=Distro.FruitMix.Media.Data&reqid=39&sid=5fdeb8d8dd7bc970&xid=eba41e11964f360a464a740793c99463" controls="controls"></video>*/}
 						<FilesTable/>
 						<Menu></Menu>
 						<Move></Move>
@@ -251,6 +249,9 @@ class AllFiles extends Component {
 		});
 		this.props.dispatch(Action.toggleShare(false));
 		this.props.dispatch(Action.cancelUserCheck());
+		if (users.length == 0) {
+			return
+		}
 		ipc.send('share',files,users);
 	}
 	// select users be shared

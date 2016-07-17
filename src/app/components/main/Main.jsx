@@ -146,6 +146,10 @@ class Main extends Component {
 		ipc.on('setDownloadPath',(err,path)=>{
 			this.props.dispatch({type:'SET_DOWNLOAD_PATH',path:path});
 		});
+
+		ipc.on('addUser',(err,user)=>{
+			this.props.dispatch(Action.login(user));
+		});
 	}
 
 	componentWillUnmount() {

@@ -55,7 +55,6 @@ var mediaPath = path.join(__dirname,'media');
 var downloadPath = path.join(__dirname,'download');
 //device
 var device = [];
-var intervalFindDevice = null;
 var serverRecord = null;
 
 
@@ -103,6 +102,7 @@ function findDevice(data) {
 						}
 					}else {
 						console.log('wrong!!!');
+						device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:true,admin:false}));
 					}
 					mainWindow.webContents.send('device',device);
 
@@ -197,7 +197,6 @@ ipcMain.on('getDeviceUsedRecently',err=>{
 		}else {
 			serverRecord = JSON.parse(data);
 			downloadPath = serverRecord.download;
-			c(downloadPath);
 			mainWindow.webContents.send('setDownloadPath',downloadPath);
 			if (serverRecord.ip != '') {
 				server = 'http://'+serverRecord.ip;
@@ -307,7 +306,6 @@ ipcMain.on('login',function(event,username,password){
 		return getAllUser();
 	}).then((users)=>{
 		user.allUser = users;
-		clearInterval(intervalFindDevice);
 		mainWindow.webContents.send('loggedin',user);
 	}).catch((err)=>{
 		console.log(err);
@@ -535,6 +533,7 @@ function getTree(f,type) {
 				owner:item.permission.owner,
 				readlist:item.permission.readlist,
 				writelist:item.permission.writelist,
+				path:item.path,
 				attribute:{
 					changetime:item.attribute.changetime,
 					modifytime:item.attribute.modifytime,
@@ -821,6 +820,9 @@ function download(item) {
 			mainWindow.webContents.send('refreshStatusOfDownload',item.uuid+item.downloadTime,1.01);
 			let index = downloadNow.findIndex(item3=>item3.uuid == item.uuid);
 			downloadNow.splice(index,1);
+			fs.unlink(path.join(downloadPath,item.attribute.name),err=>{
+				c('删除下载失败文件成功');
+			});
 			if (downloadNow.length == 0) {
 				dealDownloadQueue();
 			}
@@ -1197,6 +1199,13 @@ ipcMain.on('close-main-window', function () {
 ipcMain.on('create-new-user',function(err,u,p,e){
 	createNewUser(u,p,e).then(()=>{
 		console.log('register success');
+		mainWindow.webContents.send('message','注册新用户成功');
+		mainWindow.webContents.send('closeRegisterDialog');
+		getAllUser().then(users=>{
+			user.allUser = users;
+			mainWindow.webContents.send('addUser',user);
+		});
+		
 	}).catch(()=>{
 		console.log('failed');
 	});
@@ -1461,11 +1470,19 @@ function isThumbExist(item) {
 				sendThumb(item);
 				console.log(thumbQueue.length+' length');
 			}).catch(err=>{
+				c(item.hash+' failed');
 				item.failed++;
 				let index = thumbIng.findIndex(i=>i.hash == item.hash);
 				let t = thumbIng[index];
 				thumbIng.splice(index,1);
 				if (item.failed <5) {
+					fs.readFile(path.join(mediaPath,item.hash+'thumb'),(err,data)=>{
+						if (err) {
+
+						}else {
+							c('find cache');
+						}
+					});
 					thumbQueue.push(t);
 				}else {
 					item.status='failed'
@@ -1481,7 +1498,7 @@ function isThumbExist(item) {
 	});
 
 	function sendThumb(item){
-		c('over');
+		c(item.hash+' is over');
 		let index = thumbIng.findIndex(i=>i.hash == item.hash);
 		thumbIng.splice(index,1);
 		item.path = path.join(mediaPath,item.hash+'thumb');
@@ -1494,6 +1511,7 @@ function downloadMedia(item) {
 	var download = new Promise((resolve,reject)=>{
 		let scale = item.width/item.height;
 		let height = 100/scale;
+		c('100 '+height);
 		var options = {
 			method: 'GET',
 			url: server+'/media/'+item.hash+'?type=thumb&width=100&height='+height,
@@ -1507,11 +1525,10 @@ function downloadMedia(item) {
 				console.log('res');
 				resolve(body);
 			}else {
-				console.log('err');
-				console.log(item.hash);
-				fs.unlink('media/'+item.hash+'thumb', (err,data)=>{
+				fs.unlink(path.join(mediaPath,item.hash+'thumb'), (err,data)=>{
+					reject(err)	
 				});
-				reject(err)
+				
 			}
 		}
 			var stream = fs.createWriteStream(path.join(mediaPath,item.hash+'thumb'));
@@ -1549,8 +1566,9 @@ function downloadMediaImage(item) {
 			}else {
 				console.log('err');
 				fs.unlink(path.join(mediaPath,item.hash), (err,data)=>{
+					reject()
 				});
-				reject()
+				
 			}
 		}
 		var stream = fs.createWriteStream(path.join(mediaPath,item.hash));
@@ -1624,7 +1642,6 @@ ipcMain.on('loginOff',err=>{
 	mediaMap = new Map();
 	thumbQueue = [];
 	thumbIng = [];
-	// intervalFindDevice = setInterval(findDevice,2000);
 });
 //download folder
 ipcMain.on('downloadFolder',(err,folder,type)=>{

@@ -48,7 +48,7 @@ class Index extends React.Component {
 	componentDidMount() {
 		ipc.send('getDeviceUsedRecently');
 		ipc.send('beginFind');
-		ipc.on('loggedin',(err,user,allUser)=>{
+		ipc.on('loggedin',(err,user)=>{
 			this.props.dispatch(Login.login(user));
 		});
 
@@ -86,8 +86,8 @@ class Index extends React.Component {
 		this.props.dispatch({
 		      type: "LOGIN"
 		})
-		ipc.send('login',username,password);
-		// ipc.send('login','admin','123456');
+		// ipc.send('login',username,password);
+		ipc.send('login','admin','123456');
 		// ipc.send('login','a','a');
 	}
 

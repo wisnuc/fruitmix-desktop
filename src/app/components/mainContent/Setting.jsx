@@ -15,8 +15,8 @@
  			<div className='setting-container'>
 	 			<div className='setting-download'>
 	 				<span>下载内容保存位置 : </span>
-	 				<input type="text" value={this.props.setting.download}/>
-	 				<input type="button" value='修改' onClick={this.changeDownloadPath.bind(this)}/>
+	 				<input className='change-path-text' type="text" value={this.props.setting.download}/>
+	 				<input className='change-path-button' type="button" value='修改' onClick={this.changeDownloadPath.bind(this)}/>
 	 			</div>
  			</div>
  			)

@@ -23,8 +23,8 @@ class PopMenu extends Component {
 		if (menu.show) {
 			style = Object.assign({},style,{
 				display: menu.show?'block':'none',
-				left: this.props.navigation.menu?menu.x-220:menu.x-20,
-				top: menu.y-120+document.getElementsByClassName('file-area')[0].scrollTop
+				left: this.props.navigation.menu?menu.x-249:menu.x,
+				top: menu.y-132+document.getElementsByClassName('file-area')[0].scrollTop
 			});
 		}
 		return (

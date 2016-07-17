@@ -8,6 +8,7 @@
 // require core module
 import React, { findDOMNode, Component, PropTypes } from 'react';
 import {TextField, FlatButton } from 'material-ui';
+import {orange500, blue500} from 'material-ui/styles/colors';
 
 class User extends React.Component {
 	constructor(props) {
@@ -16,22 +17,38 @@ class User extends React.Component {
     }
 
 	render() {
+		const styles = {
+		  errorStyle: {
+		    color: orange500,
+		  },
+		  underlineStyle: {
+		    borderColor: orange500,
+		  },
+		  floatingLabelStyle: {
+		    color: orange500,
+		  },
+		  floatingLabelFocusStyle: {
+		    color: blue500,
+		  },
+		};
 		let login = this.props.login;
 		if (this.state.createUser) {
 			return (
 				<div className='Setting'>
 		 			<div className='register-container'>
 		 				<TextField
-			 			hintText="用户名" ref='username'
-			 			/><br />
+			 			hintText="用户名" ref='username' underlineStyle={{borderColor:'#999'}} underlineFocusStyle={styles.underlineStyle} 
+			 			/>
 			 			<TextField
-			 			hintText="密码" ref='password'
-			 			/><br />
+			 			hintText="密码" ref='password' underlineStyle={{borderColor:'#999'}} underlineFocusStyle={styles.underlineStyle} 
+			 			/>
 			 			<TextField
-			 			hintText="邮箱" ref='email'
-			 			/><br />
-			 			<FlatButton label="返回" primary={true} onTouchTap={this.toggleUser.bind(this)}/>
-	    				<FlatButton label="注册" secondary={true} onTouchTap={this.register.bind(this)}/>
+			 			hintText="邮箱" ref='email' underlineStyle={{borderColor:'#999'}} underlineFocusStyle={styles.underlineStyle} 
+			 			/>
+			 			<div>
+			 				<FlatButton label="返回" primary={true} onTouchTap={this.toggleUser.bind(this)}/>
+	    					<FlatButton label="注册" secondary={true} onTouchTap={this.register.bind(this)}/>
+			 			</div>
 		 			</div>
 	 			</div>
 				);
@@ -70,6 +87,15 @@ class User extends React.Component {
  		let p = this.refs.password.input.value;
  		let e = this.refs.email.input.value
  		ipc.send('create-new-user',u,p,e);
+	}
+
+	componentDidMount() {
+		let _this = this;
+		ipc.on('closeRegisterDialog',err=>{
+			this.setState({
+				createUser:false
+			});
+		});
 	}
 }
 

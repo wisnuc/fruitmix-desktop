@@ -127,7 +127,9 @@
 	line-height: 30px;
 	color:#333;
 }
-
+.change-path-text {
+	width:200px;
+}
 .add-device-button>span:hover{
 	background: #ef6c00;
 	color:#fff;

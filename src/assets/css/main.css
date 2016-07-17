@@ -162,6 +162,8 @@
 }
 .share-user-list-container {
 	max-height: 300px;
+	overflow: auto;
+	margin-top: 10px;
 }
 /*table*/
 .fileTable {
@@ -300,6 +302,7 @@
 	position: absolute;
 	left:0px;
 	top:0px;
+	cursor: default;
 }
 .MenuContainer .menu-list{
 	width:100%;
@@ -354,6 +357,8 @@
 .detail-container{
 	box-sizing: border-box;
 	position: relative;
+	font-size:14px;
+	cursor: default;
 }
 .detail-container>div{
 	margin-bottom: 10px;
@@ -387,6 +392,7 @@
 	align-items: center;
 	padding-left:10px;
 	font-size: 14px;
+	cursor: default;
 }
 .setting-download>*{
 	margin-right: 10px;
@@ -395,10 +401,26 @@
 .setting-download input {
 	-webkit-user-select:none;
 }
-/*.register-container>div{
-	margin: 0 auto;
+.register-container{
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 }
-*/
+.change-path-button {
+	cursor: pointer;
+	width:88px;
+	height:30px;
+	line-height: 30px;
+	color:#333;
+	background: none
+}
+.change-path-button:hover {
+	background: #ef6c00;
+	color:#fff;
+}
+
+
 /*move*/
 .move-dialog {
 	position:absolute;
@@ -561,7 +583,17 @@
 	position: absolute;
 	right:10px;
 	top:10px;
-	color:white;
+	cursor: pointer;
+	text-align: center;
+	width:88px;
+	height:30px;
+	line-height: 30px;
+	color:#999;
+	background: none
+}
+.media-mask-close:hover {
+	background: #ef6c00;
+	color:#fff;
 }
 
 .media-mask-image {
