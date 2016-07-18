@@ -63,7 +63,7 @@ class Device extends React.Component {
             				<StepLabel>WISNUC服务器设置</StepLabel>
           				</Step>
           				<Step>
-            				<StepLabel>注册Fruitmix管理员</StepLabel>
+            				<StepLabel>注册FruitMix管理员</StepLabel>
           				</Step>
           				<Step>
             				<StepLabel>配置成功</StepLabel>
@@ -123,11 +123,11 @@ class Device extends React.Component {
 					<div>
 						<div className='fruitmix-detail'>
 							<div>1.设置磁盘卷</div>
-							<div>2.启动fruitmix(wisnuc服务端)</div>
-							<div>fruitmix状态 :{item.fruitmix?' 启动':' 未启动'}</div>
+							<div>2.启动FruitMix(wisnuc服务端)</div>
+							<div>FruitMix状态 :{item.fruitmix?' 启动':' 未启动'}</div>
 						</div>
 						
-						<FlatButton label="启动fruitmix" disabled={item.fruitmix} onTouchTap={this.createFruitmix.bind(this)}/>
+						<FlatButton label="启动FruitMix" disabled={item.fruitmix} onTouchTap={this.createFruitmix.bind(this)}/>
 						<FlatButton label="刷新状态" onTouchTap={this.refreshFruitmix.bind(this)}/>
 						{/*<RaisedButton label="下一步" disabled={stepIndex === 2} primary={true} onTouchTap={this.handleNext.bind(this)}/>*/}
 					</div>
