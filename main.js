@@ -1245,7 +1245,7 @@ ipcMain.on('userInit',(err,s,u,p,i)=>{
 			c(i);
 			mainWindow.webContents.send('message','管理员注册成功');
 			let index = device.findIndex(item=>{
-				return item.addresses[0] = i.addresses[0];
+				return item.addresses[0] == i.addresses[0];
 			});
 			mainWindow.webContents.send('message',index);
 			if (index != -1) {
