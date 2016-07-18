@@ -60,13 +60,13 @@ class Device extends React.Component {
 				<div className='add-device-detail'>
 					<Stepper activeStep={stepIndex}>
           				<Step>
-            				<StepLabel>启动fruitmix</StepLabel>
+            				<StepLabel>WISNUC服务器设置</StepLabel>
           				</Step>
           				<Step>
-            				<StepLabel>注册管理员</StepLabel>
+            				<StepLabel>注册Fruitmix管理员</StepLabel>
           				</Step>
           				<Step>
-            				<StepLabel>欢迎使用</StepLabel>
+            				<StepLabel>配置成功</StepLabel>
           				</Step>
         			</Stepper>
         			
@@ -87,6 +87,8 @@ class Device extends React.Component {
 			allOk = true;
 			text = null;
 			del = <span className='delete-server' onClick={this.delServer.bind(this)}>删除</span>
+		}else {
+			del = <span>{this.props.item.addresses[0]}</span>
 		}
 		return (
 			<div>
@@ -120,8 +122,8 @@ class Device extends React.Component {
 				return (
 					<div>
 						<div className='fruitmix-detail'>
-							<div>1.配置磁盘卷</div>
-							<div>2.启动fruitmix(wisnuc对应服务)</div>
+							<div>1.设置磁盘卷</div>
+							<div>2.启动fruitmix(wisnuc服务端)</div>
 							<div>fruitmix状态 :{item.fruitmix?' 启动':' 未启动'}</div>
 						</div>
 						

@@ -118,7 +118,7 @@ class Index extends React.Component {
 					<div className='login-device-title'>已发现 {device.length} 台 wisnuc</div>
 					<div className='login-device-list'>
 						
-							<SelectField iconStyle={{fill:'#666'}} underlineStyle={{borderColor:'rgba(255,255,255,0)'}}  value={this.props.login.deviceUsedRecently} onChange={this.selectDevice.bind(this)}>
+							<SelectField iconStyle={{fill:'#666'}} underlineStyle={{borderColor:'rgba(255,255,255,0)'}}  value={this.getValue()} onChange={this.selectDevice.bind(this)}>
 								{device.map(item=>(
 									<MenuItem key={item.addresses[0]} value={item.addresses[0]} primaryText={item.host}></MenuItem>
 									))}
@@ -214,6 +214,22 @@ class Index extends React.Component {
 		let ip = this.props.login.device[index].addresses[0];
 		ipc.send('setServeIp',ip,false);
 		this.props.dispatch(Action.setDeviceUsedRecently(ip));
+	}
+
+	getValue() {
+		if (this.props.login.deviceUsedRecently != '') {
+			return this.props.login.deviceUsedRecently;
+		}else {
+			if (this.props.login.device.length == 0) {
+				return
+			}else {
+				c.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+				c.log(this.props.login.device);
+				let ip = this.props.login.device[0].addresses[0];
+				ipc.send('setServeIp',ip,false);
+				return ip
+			}
+		}
 	}
 };
 
