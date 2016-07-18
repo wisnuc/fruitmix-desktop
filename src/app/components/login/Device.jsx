@@ -81,7 +81,7 @@ class Device extends React.Component {
 				);
 		}
 		let allOk = this.props.item.fruitmix&&this.props.item.admin;
-		let text = allOk?'(服务已启动)':'(服务未启动)';
+		let text = allOk?'':'(未配置)';
 		let del = null;
 		if (this.props.item.isCustom) {
 			allOk = true;
@@ -123,11 +123,11 @@ class Device extends React.Component {
 					<div>
 						<div className='fruitmix-detail'>
 							<div>1.设置磁盘卷</div>
-							<div>2.启动FruitMix(wisnuc服务端)</div>
+							<div>2.启动FruitMix(WISNUC服务端)</div>
 							<div>FruitMix状态 :{item.fruitmix?' 启动':' 未启动'}</div>
 						</div>
 						
-						<FlatButton label="启动FruitMix" disabled={item.fruitmix} onTouchTap={this.createFruitmix.bind(this)}/>
+						<FlatButton className='fruitmix-button' label="启动FruitMix" disabled={item.fruitmix} onTouchTap={this.createFruitmix.bind(this)}/>
 						<FlatButton label="刷新状态" onTouchTap={this.refreshFruitmix.bind(this)}/>
 						{/*<RaisedButton label="下一步" disabled={stepIndex === 2} primary={true} onTouchTap={this.handleNext.bind(this)}/>*/}
 					</div>
@@ -146,6 +146,7 @@ class Device extends React.Component {
 			case 2:
 				return (
 					<div>
+						<div>配置成功，请返回登录</div>
 						<div style={{marginBottom:'15px'}}>设备IP : {item.addresses[0]}</div>
 					</div>
 					);

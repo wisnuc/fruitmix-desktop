@@ -641,3 +641,7 @@
 	max-height:500px;
 	margin-top:10px;
 }
+
+.fruitmix-button span{
+	text-transform:none!important 
+}

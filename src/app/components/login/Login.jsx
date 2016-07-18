@@ -120,7 +120,7 @@ class Index extends React.Component {
 						
 							<SelectField iconStyle={{fill:'#666'}} underlineStyle={{borderColor:'rgba(255,255,255,0)'}}  value={this.getValue()} onChange={this.selectDevice.bind(this)}>
 								{device.map(item=>(
-									<MenuItem key={item.addresses[0]} value={item.addresses[0]} primaryText={item.host}></MenuItem>
+									<MenuItem key={item.addresses[0]} value={item.addresses[0]} primaryText={item.admin&&item.fruitmix?item.host:item.host+"(未配置)"}></MenuItem>
 									))}
 							</SelectField>
 			

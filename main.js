@@ -61,14 +61,6 @@ var serverRecord = null;
 const c = console.log;
 mdns.excludeInterface('0.0.0.0');
 var browser = mdns.createBrowser(mdns.tcp('http'));
-// // c(mdns);
-
-// try{
-// 	browser.once('ready', browserDiscover);
-// 	browser.on('update', findDevice);
-// }catch(e){
-// 	c(e);
-// }
 
 function browserDiscover() {
 	browser.discover(); 
@@ -160,7 +152,7 @@ app.on('ready', function() {
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	});
-	// mainWindow.webContents.openDevTools();
+	mainWindow.webContents.openDevTools();
 	// dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']})
 	mainWindow.loadURL('file://' + __dirname + '/ele/index.html');
 	//create folder
@@ -1640,11 +1632,17 @@ ipcMain.on('loginOff',err=>{
 	//upload 
 	uploadQueue = [];
 	uploadNow = [];
+	//download
+	downloadQueue = [];
+	downloadNow = [];
+	downloadFolderQueue = [];
+	downloadFolderNow = [];
 	//media
 	media = [];
 	mediaMap = new Map();
 	thumbQueue = [];
 	thumbIng = [];
+
 });
 //download folder
 ipcMain.on('downloadFolder',(err,folder,type)=>{
