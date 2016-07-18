@@ -7,6 +7,13 @@ const defaultState = {
 
 const transmission = (state=defaultState,action)=>{
 	switch(action.type) {
+		case 'LOGIN_OFF':
+			return {
+	upload:[],
+	download: [],
+	uploadSize:20,
+	downloadSize:20
+}
 		case 'ADD_UPLOAD':
 			var up = state.upload;
 			up.push(action.obj);

@@ -407,6 +407,10 @@
 	justify-content: center;
 	align-items: center;
 }
+.change-path-text {
+	text-overflow: ellipsis;
+	width:250px;
+}
 .change-path-button {
 	cursor: pointer;
 	width:88px;

@@ -37,7 +37,7 @@ window.onresize = function() {
 var App = React.createClass({
 	render() {
 		return(
-			<div className="app" onselectstart="return false">
+			<div className="app">
 				<CSS opts={['app',true,true,true,500,5000,5000]}>
 					{this.props.children}
 				</CSS>

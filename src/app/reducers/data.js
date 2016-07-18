@@ -15,6 +15,8 @@ const defaultDirectory = {
 
 const directory = (state = defaultDirectory,action)=> {
 	switch (action.type) {
+		case 'LOGIN_OFF':
+			return defaultDirectory
 		case 'SET_DIRECTORY':
 			let position = action.children.map((item,index)=>{
 				return {top:index*51+58+48+8+64,bottom:(index+1)*51+58+48+8+64}

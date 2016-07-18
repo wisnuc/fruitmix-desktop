@@ -1702,6 +1702,9 @@ function downloadFolder(folder) {
 	let s = setInterval(()=>{
 		mainWindow.webContents.send('refreshDownloadStatusOfFolder',folder.key,folder.success+' / '+folder.count);
 	},1000);
+	ipcMain.on('loginOff',function() {
+		clearInterval(s);
+	});
 	function dealwithQueue() {
 		downloadFolderQueue.shift();
 		if (downloadFolderQueue.length > 0) {
@@ -1740,6 +1743,9 @@ function downloadFolder(folder) {
 			 			}
 			 		}
 			 		let failed = function () {
+			 			if (!tree.children[index].times) {
+			 					return		
+			 				}
 			 			tree.children[index].time++;
 			 			if (tree.children[index].times>5) {
 			 				index++;
