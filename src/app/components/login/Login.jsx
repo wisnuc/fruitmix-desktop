@@ -86,8 +86,8 @@ class Index extends React.Component {
 		this.props.dispatch({
 		      type: "LOGIN"
 		})
-		// ipc.send('login',username,password);
-		ipc.send('login','admin','123456');
+		ipc.send('login',username,password);
+		// ipc.send('login','admin','123456');
 		// ipc.send('login','a','a');
 	}
 
@@ -127,8 +127,9 @@ class Index extends React.Component {
 						<TextField underlineStyle={{borderColor:'#999'}} underlineFocusStyle={styles.underlineStyle} hintStyle={{color:'#999'}} ref='username' style={{marginBottom: 10}} hintText="用户名" type="username" />
 						<TextField underlineStyle={{borderColor:'#999'}} underlineFocusStyle={styles.underlineStyle} hintStyle={{color:'#999'}} ref='password' style={{marginBottom: 10}} hintText="密码" type="password" onKeyDown={this.kenDown.bind(this)}/>
 						<div className='login-button'>
-							<div onTouchTap={this.submit.bind(this)}>登录</div>
 							<div onTouchTap={this.toggleDevice.bind(this)}>设置</div>
+							<div onTouchTap={this.submit.bind(this)}>登录</div>
+							
 						</div>
 					</div>
 				</div>
@@ -167,8 +168,9 @@ class Index extends React.Component {
 						{this.props.login.addDevice?addDevice:deviceList}
 					</div>
 					<div className='add-device-button' style={this.props.login.addDevice?{display:'none'}:{}}>
-						<span onClick={this.toggleAddDevice.bind(this)}>添加设备</span>
+						
 						<span  onClick={this.toggleDevice.bind(this)}>返回</span>
+						<span onClick={this.toggleAddDevice.bind(this)}>添加设备</span>
 					</div>
 				</div>
 			);

@@ -24,11 +24,19 @@ import Move from './Move';
 class AllFiles extends Component {
 	render() {
 		var _this = this;
+		const styles = {
+			block: {
+				maxWidth: 250,
+			},
+			checkbox: {
+				marginBottom: 16,
+			},
+		};
 		let shareUserList = this.props.login.obj.allUser.map((item,index)=>{
 						if (item.username == this.props.login.obj.username) {
 							return
 						}
-						return <Checkbox key={item.username} label={item.username} style={styles.checkbox} labelPosition="left" onCheck={this.checkUser.bind(this,item.uuid)}/>
+						return <Checkbox key={item.username} label={item.username} style={{marginBottom: 16}} labelPosition="left" onCheck={this.checkUser.bind(this,item.uuid)}/>
 					})
 		const folderActions = [
 			<FlatButton
@@ -62,14 +70,7 @@ class AllFiles extends Component {
 				hoverColor='#ef6c00'
 			/>,
 		];
-		const styles = {
-			block: {
-				maxWidth: 250,
-			},
-			checkbox: {
-				marginBottom: 16,
-			},
-		};
+		
 		return (
 			<div className='all-my-files' style={{height:'100%'}}>
 				{this.getTable()}

@@ -299,6 +299,7 @@ ipcMain.on('login',function(event,username,password){
 		if (user == undefined) {
 			throw new error
 		}
+		c('pk');
 		return getToken(user.uuid,password);
 	}).then((token)=>{
 		user.token = token.token;
@@ -334,6 +335,7 @@ function getToken(uuid,password) {
 			  }
 		},function(err,res,body) {
 			if (!err && res.statusCode == 200) {
+				c(res.body);
 				resolve(JSON.parse(body));
 			}else {
 				reject(err)
@@ -1243,8 +1245,9 @@ ipcMain.on('userInit',(err,s,u,p,i)=>{
 			c(i);
 			mainWindow.webContents.send('message','管理员注册成功');
 			let index = device.findIndex(item=>{
-				return item.addresses[0] = i.addresses[0]
+				return item.addresses[0] = i.addresses[0];
 			});
+			mainWindow.webContents.send('message',index);
 			if (index != -1) {
 				device[index].admin = true;
 				mainWindow.webContents.send('device',device);

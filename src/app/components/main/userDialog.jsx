@@ -78,7 +78,7 @@ class User extends React.Component {
 	}
 
 	deleteUser(item) {
-		if (item.isAdmin) {return}
+		// if (item.isAdmin) {return}
 		ipc.send('deleteUser',item.uuid);
 	}
 
