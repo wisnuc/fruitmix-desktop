@@ -152,7 +152,7 @@ app.on('ready', function() {
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	});
-	mainWindow.webContents.openDevTools();
+	// mainWindow.webContents.openDevTools();
 	// dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']})
 	mainWindow.loadURL('file://' + __dirname + '/ele/index.html');
 	//create folder
@@ -359,12 +359,13 @@ function getAllUser() {
 //get all files
 ipcMain.on('getRootData', ()=> {
 	getFiles().then((data)=>{
-		//remove folder
-		removeFolder(data);
-		dealWithData(data);
 		//share data
 		sharePath.length = 0;
 		shareChildren.length = 0;
+		//remove folder
+		removeFolder(data);
+		dealWithData(data);
+		
 		sharePath.push({key:'',value:{}});
 		let copyFilesSharedByMe = filesSharedByMe.map(item=>Object.assign({},item,{children:null,writelist:[].concat(item.writelist)}));
 		mainWindow.webContents.send('setFilesSharedByMe',copyFilesSharedByMe);
@@ -979,6 +980,7 @@ ipcMain.on('openInputOfFolder', e=>{
 		}
 	}
 	function uploadNode(node,callback,failedCallback) {
+		try{
 		console.log(node.name);
 		if (node.type == 'file') {
 			uploadFileInFolder(node).then(()=>{
@@ -1027,6 +1029,9 @@ ipcMain.on('openInputOfFolder', e=>{
 				failedCallback();
 			});
 		}
+	}catch(e){
+
+	}
 	}
 });
 
@@ -1056,6 +1061,7 @@ function uploadFileInFolder(node) {
 	var promise = new Promise((resolve,reject)=>{
 		let callback = function(err,res,body) {
 			if (!err && res.statusCode == 200) {
+				try{
 				let uuid = body.slice(1,body.length-1);
 				let dir = map.get(node.parent);
 				let o = {
@@ -1076,6 +1082,9 @@ function uploadFileInFolder(node) {
 				dir.children.push(o);
 				map.set(uuid,o);
 				resolve(uuid);
+			}catch(e){
+
+			}
 			}else {
 				console.log(res.body);
 				reject();
@@ -1686,6 +1695,7 @@ function getTreeCount(tree) {
 }
 
 function downloadFolder(folder) {
+	try{
 	looptree(folder.data,()=>{
 		console.log('finish');
 		let obj = downloadFolderNow.shift();
@@ -1714,6 +1724,7 @@ function downloadFolder(folder) {
 		clearInterval(s);
 	}
 	function looptree(tree,callback,failedCallback) {
+		try{
 		if (tree.type == 'file') {
 			c(tree.name+' is file');
 			downloadFolderFile(tree.uuid,tree.path).then(()=>{
@@ -1762,7 +1773,11 @@ function downloadFolder(folder) {
 			 	}
 			 });
 		}
+	}catch(e){}
 	}
+}catch(e){
+
+}
 }
 function downloadFolderFile(uuid,path) {
 	var promise = new Promise((resolve,reject)=>{
