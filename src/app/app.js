@@ -22,7 +22,6 @@ require('../assets/css/app.css');
 
 //import component
 import Login  from'./components/login/Login';// login
-import NoFondPath  from'./components/404';//404
 import Main from './components/main/Main';//main
 
 
@@ -35,7 +34,7 @@ window.onresize = function() {
 }
 //APP component
 var App = React.createClass({
-	render() {
+	render: function(){
 		return(
 			<div className="app">
 				<CSS opts={['app',true,true,true,500,5000,5000]}>
@@ -53,7 +52,6 @@ var routes = (
 			<Route path="/" component={App}>
 		    		<Route key='login' path="login" component={Login}/>
 		    		<Route key='main' path='main' component={Main}/>
-		    		<Route key='*'path="*" component={NoFondPath}/>
 		    		<IndexRoute key='login' component={Login}/>
 		    	</Route>
 		</Router>

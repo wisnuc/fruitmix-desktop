@@ -46,11 +46,14 @@ module.exports = {
             {
                 test   : /\.(js|jsx)$/,
                 exclude: /node_modules/,
-                loader : 'react-hot!babel-loader'
-            }, {
+                loader : 'babel',
+                query  : { presets:['es2015','react'] }
+            }, 
+            {
                 test  : /\.css$/,
                 loader: 'style-loader!css-loader'
-            }, {
+            }, 
+            {
                 test  : /\.(png|jpg|jpeg|ico|gif|woff|woff2|ttf|eot|svg)$/,
                 loader: 'url-loader?limit=8192'
             }

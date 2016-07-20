@@ -29,14 +29,11 @@ import Content from './Content';
 import Multiple from '../mainContent/Multiple';
 import Users from './userDialog'
 
-// require common mixins
-import ImageModules from '../Mixins/ImageModules';
 import svg from '../../utils/SVGIcon'; 
 
 import Mask from './MediaMask'
 
 class Main extends Component {
-	mixins: [ImageModules]
 
 	getChildContext() {
 		const muiTheme = getMuiTheme(lightBaseTheme);

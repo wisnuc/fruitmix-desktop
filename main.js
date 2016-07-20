@@ -10,6 +10,7 @@ const stream = require('stream');
 const path = require('path');
 const _ = require('lodash');
 const mdns = require('mdns-js');
+// const m = require('mdns');
 var mainWindow = null;
 var fruitmixWindow = null
 //server
@@ -22,7 +23,6 @@ var user = {};
 //files
 var rootNode= null;
 var allFiles = [];
-var filesSharedByMe = [];
 var tree = {};
 var map = new Map();
 //share
@@ -31,6 +31,7 @@ var shareTree = [];
 var shareMap = new Map();
 var shareChildren = [];
 var sharePath = [];
+var filesSharedByMe = [];
 //directory
 var currentDirectory = {};
 var children = [];
@@ -80,10 +81,10 @@ function findDevice(data) {
 			return item.addresses[0] == data.addresses[0];
 		});
 		if (deviceIndex == -1) {
-			c('not exist');
+			c('ip not exist now');
 			//not exist
 			if (fru != -1) {
-				c('fruitmix');
+				c('type of ip is fruitmix');
 				//fruitmix server
 				request.get('http://'+data.addresses[0]+'/login',(err,res,body)=>{
 					if (!err && res.statusCode == 200) {
@@ -93,29 +94,31 @@ function findDevice(data) {
 							device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:true,admin:true}));
 						}
 					}else {
-						console.log('wrong!!!');
+						c('can not get users information');
 						device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:true,admin:false}));
 					}
 					mainWindow.webContents.send('device',device);
 
 				});
 			}else if(app != -1){
-				c('wisnuc');
-				request.get('http://'+data.addresses[0]+'/login',(err,res,body)=>{
-					if (!err && res.statusCode == 200) {
-						if (JSON.parse(body).length == 0) {
-							device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:false}));
-						}else {
-							device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:true}));
-						}
-					}else {
-						device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:false}));
-					}
-					mainWindow.webContents.send('device',device);
-				});
+				c('type of ip is wisnuc');
+				// request.get('http://'+data.addresses[0]+'/login',(err,res,body)=>{
+				// 	if (!err && res.statusCode == 200) {
+				// 		if (JSON.parse(body).length == 0) {
+				// 			device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:false}));
+				// 		}else {
+				// 			device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:true}));
+				// 		}
+				// 	}else {
+				// 		device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:false}));
+				// 	}
+				// 	mainWindow.webContents.send('device',device);
+				// });
+				device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:false}));
+				mainWindow.webContents.send('device',device);
 			}
 		}else {
-			c('exist');
+			c('ip exist now');
 			c(data.fullname);
 			//exist
 			if (device[deviceIndex].fullname == data.fullname) {
@@ -152,7 +155,7 @@ app.on('ready', function() {
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	});
-	// mainWindow.webContents.openDevTools();
+	mainWindow.webContents.openDevTools();
 	// dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']})
 	mainWindow.loadURL('file://' + __dirname + '/ele/index.html');
 	//create folder
@@ -175,23 +178,27 @@ app.on('ready', function() {
 		}
 	});
 });
-
 ipcMain.on('getDeviceUsedRecently',err=>{
+	c(' ');
 	//have device used recently
 	fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
 		if (err) {
+			c('not find server record');
 			serverRecord = {ip:'',savePassword:false,autoLogin:false,username:null,password:null,customDevice:[],download: downloadPath};
 			let j = JSON.stringify(serverRecord);
 			fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
 
 			});
 			mainWindow.webContents.send('device',device);
-		}else {
+		}else { 
+			c('find record');
 			serverRecord = JSON.parse(data);
 			downloadPath = serverRecord.download;
+			c('download path is : ' + downloadPath);
 			mainWindow.webContents.send('setDownloadPath',downloadPath);
 			if (serverRecord.ip != '') {
 				server = 'http://'+serverRecord.ip;
+				c('server ip is : ' + server);
 				mainWindow.webContents.send('setDeviceUsedRecently',serverRecord.ip);
 			}
 			if (serverRecord.customDevice.length !=0) {
@@ -206,7 +213,7 @@ ipcMain.on('getDeviceUsedRecently',err=>{
 	});
 });
 //setIp
-ipcMain.on('setServeIp',(err,ip, isCustom)=>{
+ipcMain.on('setServeIp',(err,ip, isCustom)=>{ 
 	let index = device.findIndex(item=>{
 		return item.addresses[0] == ip;
 	});
@@ -251,6 +258,7 @@ ipcMain.on('delServer',(err,i)=>{
 	mainWindow.webContents.send('device',device);
 });
 ipcMain.on('beginFind',(err)=>{
+	c('begin find ip');
 	browser.on('update', findDevice);
 	browser.discover();
 });
@@ -285,23 +293,27 @@ ipcMain.on('getUserList',(e,item)=>{
 	// c(item);
 });
 //get all user information
-ipcMain.on('login',function(event,username,password){
+ipcMain.on('login',function(err,username,password){
+	c(' ');
+	c('login : ');
 	login().then((data)=>{
+		c('get login data : ' + data.length + ' users');
 		user = data.find((item)=>{return item.username == username});
 		if (user == undefined) {
-			throw new error
+			throw 'username is not exist in login data'
 		}
-		c('pk');
 		return getToken(user.uuid,password);
 	}).then((token)=>{
+		c('get token : '+ token.type +token.token);
 		user.token = token.token;
 		user.type = token.type;
 		return getAllUser();
 	}).then((users)=>{
+		c('get users : ' + users.length);
 		user.allUser = users;
 		mainWindow.webContents.send('loggedin',user);
 	}).catch((err)=>{
-		console.log(err);
+		c('login failed : ' + err);
 		mainWindow.webContents.send('message','登录失败',0);
 	});
 });
@@ -327,7 +339,6 @@ function getToken(uuid,password) {
 			  }
 		},function(err,res,body) {
 			if (!err && res.statusCode == 200) {
-				c(res.body);
 				resolve(JSON.parse(body));
 			}else {
 				reject(err)
@@ -358,14 +369,18 @@ function getAllUser() {
 }
 //get all files
 ipcMain.on('getRootData', ()=> {
+	c(' ');
+	c('achieve data : ');
 	getFiles().then((data)=>{
+		c('get allfiles and length is : ' + data.length );
 		//share data
+		allFiles.length = 0;
+		shareFiles.length = 0;
 		sharePath.length = 0;
 		shareChildren.length = 0;
 		//remove folder
 		removeFolder(data);
 		dealWithData(data);
-		
 		sharePath.push({key:'',value:{}});
 		let copyFilesSharedByMe = filesSharedByMe.map(item=>Object.assign({},item,{children:null,writelist:[].concat(item.writelist)}));
 		mainWindow.webContents.send('setFilesSharedByMe',copyFilesSharedByMe);
@@ -411,37 +426,46 @@ function getFiles() {
 }
 //remove folder fruitmix ...
 function removeFolder(data) {
-	let uuid = null;
-	let index = data.findIndex((item,index)=>{
-		return item.parent == ''
-	});
-	if (index == -1) {
-		return 
-	}else {
-		rootNode = data[index]; 
-	}
+	try{
+		let uuid = null;
+		let fruitmixIndex = data.findIndex((item,index)=>{
+			return item.parent == ''
+		});
+		if (fruitmixIndex == -1) {
+			throw 'can not find fruitmix';
+			return 
+		}else {
+			rootNode = data[fruitmixIndex]; 
+		}
 
-	uuid = data[index].uuid;
-	data.splice(index,1);
-	index = data.findIndex((item)=>{
-		return item.parent == uuid
-	})
-	if (index == -1) {
-		return
-	}else {
-		rootNode = data[index]; 	
-	}
-	uuid= data[index].uuid
-	data.splice(index,1);
-	index = data.findIndex((item)=>{
-		return item.parent == uuid
-	})
-	if (index == -1) {
-		return
-	}else {
-		data[index].parent = '';
-		data[index].attribute.name = 'my cloud';
-		rootNode = data[index]; 	
+		let fruitmixuuid = data[fruitmixIndex].uuid;
+		data.splice(fruitmixIndex,1);
+		//data/fruitmix is removed
+		let driveIndex = data.findIndex((item)=>{
+			return item.parent == fruitmixuuid
+		})
+		if (driveIndex == -1) {
+			throw 'can not find drive';
+			return
+		}else {
+			rootNode = data[driveIndex]; 	
+		}
+		let driveuuid= data[driveIndex].uuid
+		data.splice(driveIndex,1);
+		let uuidindex = data.findIndex((item)=>{
+			return item.parent == driveuuid
+		})
+		if (uuidindex == -1) {
+			throw 'can not find uuid folder';
+			return
+		}else {
+			data[uuidindex].parent = '';
+			data[uuidindex].attribute.name = 'my cloud';
+			rootNode = data[uuidindex]; 	
+		}
+		c('remove folder and length is : ' + data.length );
+	}catch(e){
+		c(e);
 	}
 }
 //get shareFiles,tree,rootNode
@@ -464,10 +488,9 @@ function dealWithData(data) {
 function classifyShareFiles() {
 	let userUUID = user.uuid;
 	allFiles.forEach((item,index)=>{
-		try{
 		// owner is user ?
 		if (item.permission.owner[0] != userUUID ) {
-			// console.log('is not user');
+			// is not user
 			let result = item.permission.readlist.find((readUser)=>{
 				return readUser == userUUID
 			});
@@ -502,10 +525,8 @@ function classifyShareFiles() {
 				findParent((item));
 			}
 		}
-	}catch(e){
-		console.log(e);
-	}
 	})
+	c('screen out share and length is : ' + shareFiles.length );
 }
 //generate tree
 function getTree(f,type) {

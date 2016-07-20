@@ -118,7 +118,7 @@ class AllFiles extends Component {
 			return (
 				<Paper className='file-area' onScroll={this.scrollEvent.bind(this)} onMouseDown={this.mouseDown.bind(this)}>
 					{/*upload input*/}
-					<input className='upload-input' type="file" onChange={this.upLoadFile.bind(this)} multiple={true} webkitdirectory={true}/>
+					<input className='upload-input' type="file" onChange={this.upLoadFile.bind(this)} multiple={true}/>
 					{/*bread crumb*/}
 					<div className='breadcrumb'>
 						{this.getBreadCrumb()}

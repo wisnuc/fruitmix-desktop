@@ -17,8 +17,6 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import darkBaseTheme from 'material-ui/styles/baseThemes/darkBaseTheme';
 import baseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 
-// require common mixins
-import ImageModules from '../Mixins/ImageModules'; 
 //import CSS
 import css  from  '../../../assets/css/login';
 //import Action
@@ -30,17 +28,13 @@ import {orange500, blue500} from 'material-ui/styles/colors';
 // define Index component
 class Index extends React.Component {
 
-	mixins: [ImageModules]
-
 	getChildContext() {
 		const muiTheme = getMuiTheme(baseTheme);
 		return {muiTheme};
 	}
 
 	componentWillReceiveProps(nextProps) {
-		c.log('sos');
 		if (nextProps.login.state == 'LOGGEDIN') {
-			// this.props.dispatch(Login.cleanSnack());
 			window.location.hash = '/main';
 		}
 	}
@@ -62,8 +56,7 @@ class Index extends React.Component {
 			}
 		});
 
-		ipc.on('device',(err,device)=>{
-			c.log('err');
+		ipc.on('device',(err,device)=>{;
 			this.props.dispatch(Login.setDevice(device));
 		});
 
@@ -114,7 +107,7 @@ class Index extends React.Component {
 		//login
 		if (!busy) {
 			loginContent = (
-				<div className='login-container' zDepth={4}>
+				<div className='login-container'>
 					<div className='login-device-title'>已发现 {device.length} 台 wisnuc</div>
 					<div className='login-device-list'>
 						
