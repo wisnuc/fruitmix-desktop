@@ -213,15 +213,15 @@ class Index extends React.Component {
 		if (this.props.login.deviceUsedRecently != '') {
 			return this.props.login.deviceUsedRecently;
 		}else {
-			if (this.props.login.device.length == 0) {
-				return
-			}else {
-				c.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-				c.log(this.props.login.device);
-				let ip = this.props.login.device[0].addresses[0];
-				ipc.send('setServeIp',ip,false);
-				return ip
-			}
+			// if (this.props.login.device.length == 0) {
+			// 	return
+			// }else {
+			// 	c.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+			// 	c.log(this.props.login.device);
+			// 	let ip = this.props.login.device[0].addresses[0];
+			// 	ipc.send('setServeIp',ip,false);
+			// 	return ip
+			// }
 		}
 	}
 };

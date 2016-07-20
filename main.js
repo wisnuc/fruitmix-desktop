@@ -477,7 +477,7 @@ function dealWithData(data) {
 	//set tree
 	tree = getTree(allFiles,'file');
 	shareTree = getTree(shareFiles,'share');
-	//set children
+	//set share children
 	shareTree.forEach((item)=>{if (item.hasParent == false) {shareChildren.push(item)}});
 	//set filesSharedByMe
 	getFilesSharedByMe();
@@ -585,32 +585,39 @@ function getFilesSharedByMe() {
 			filesSharedByMe.push(item);
 		}
 	});
+	c('files shared by me length is : ' + filesSharedByMe.length );
+
 }
 //select children
 ipcMain.on('enterChildren', (event,selectItem) => {
 	enterChildren(selectItem);
 });
 function enterChildren(selectItem) {
+	c(' ');
+	c('open the folder : ' + selectItem.name);
 	//parent
 	if (selectItem.parent == '') {
 		parent = {}
 	}else {
 		parent = Object.assign({},map.get(selectItem.parent),{children:null});	
 	}
+	c('parent is : ' + parent.name);
 	//currentDirectory
 	currentDirectory = selectItem;
 	//children
 	children = map.get(selectItem.uuid).children.map(item=>Object.assign({},item,{children:null}));
+	c("number of this folder's children :"  + children.length);
 	//path
 	try {
 		dirPath.length = 0;
 		getPath(selectItem);
 		dirPath = _.cloneDeep(dirPath);
+		c('path length is : ' + path.length);
 	}catch(e) {
 		console.log(e);        
 		path.length=0;
 	}finally {
-		let copyFilesSharedByMe = filesSharedByMe.map(item=>Object.assign({},item,{children:null,writelist:[].concat(item.writelist)}));
+		// let copyFilesSharedByMe = filesSharedByMe.map(item=>Object.assign({},item,{children:null,writelist:[].concat(item.writelist)}));
 		mainWindow.webContents.send('receive',currentDirectory,children,parent,dirPath);
 	}
 }
