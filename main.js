@@ -58,87 +58,83 @@ var downloadPath = path.join(__dirname,'download');
 var device = [];
 var serverRecord = null;
 
-
 const c = console.log;
+
 mdns.excludeInterface('0.0.0.0');
 var browser = mdns.createBrowser(mdns.tcp('http'));
-
-function browserDiscover() {
-	browser.discover(); 
-}
+browser.on('update', findDevice);
 function findDevice(data) {
 	if (!data.fullname) {
-			return
-		}
-		let fru = data.fullname.toLowerCase().indexOf('fruitmix');
-		let app = data.fullname.toLowerCase().indexOf('wisnuc appstation');
-		if (fru == -1 && app == -1) {
-			return
-		}
-		c(data.addresses[0]);
-		// is exist
-		let deviceIndex = device.findIndex(item=>{
-			return item.addresses[0] == data.addresses[0];
-		});
-		if (deviceIndex == -1) {
-			c('ip not exist now');
-			//not exist
-			if (fru != -1) {
-				c('type of ip is fruitmix');
-				//fruitmix server
-				request.get('http://'+data.addresses[0]+'/login',(err,res,body)=>{
-					if (!err && res.statusCode == 200) {
-						if (JSON.parse(body).length == 0) {
-							device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:true,admin:false}));
-						}else {
-							device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:true,admin:true}));
-						}
+		return
+	}
+	let fru = data.fullname.toLowerCase().indexOf('fruitmix');
+	let app = data.fullname.toLowerCase().indexOf('wisnuc appstation');
+	if (fru == -1 && app == -1) {
+		return
+	}
+	c(data.addresses[0]);
+	// is exist
+	let deviceIndex = device.findIndex(item=>{
+		return item.addresses[0] == data.addresses[0];
+	});
+	if (deviceIndex == -1) {
+		c('ip not exist');
+		//not exist
+		if (fru != -1) {
+			c('type is fruitmix');
+			let index = device.length;
+			device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:true,admin:false}));
+			//fruitmix server
+			request.get('http://'+data.addresses[0]+'/login',(err,res,body)=>{
+				if (!err && res.statusCode == 200) {
+					if (JSON.parse(body).length == 0) {
+						device[index].admin = false;
 					}else {
-						c('can not get users information');
-						device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:true,admin:false}));
+						device[index].admin = true;
 					}
-					mainWindow.webContents.send('device',device);
-
-				});
-			}else if(app != -1){
-				c('type of ip is wisnuc');
-				// request.get('http://'+data.addresses[0]+'/login',(err,res,body)=>{
-				// 	if (!err && res.statusCode == 200) {
-				// 		if (JSON.parse(body).length == 0) {
-				// 			device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:false}));
-				// 		}else {
-				// 			device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:true}));
-				// 		}
-				// 	}else {
-				// 		device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:false}));
-				// 	}
-				// 	mainWindow.webContents.send('device',device);
-				// });
-				device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:false}));
+				}else {
+					c('can not get users information');
+					device[index].admin = false;
+				}
 				mainWindow.webContents.send('device',device);
-			}
+				c('------------------------------------------1');
+			});
+		}else if(app != -1){
+			c('type is wisnuc');
+			device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:false}));
+			mainWindow.webContents.send('device',device);
+			c('------------------------------------------2');
+		}
+	}else {
+		c('ip exist');
+		//exist
+		if (device[deviceIndex].fullname == data.fullname) {
+			return
 		}else {
-			c('ip exist now');
-			c(data.fullname);
-			//exist
-			if (device[deviceIndex].fullname == data.fullname) {
-				return
+			device[deviceIndex].fullname = data.fullname
+			let f = fru==-1?false:true;
+			if (!f) {
+				device[deviceIndex].fruitmix = false;
+				mainWindow.webContents.send('device',device);
+				c('------------------------------------------3');
 			}else {
-				let f = fru==-1?false:true;
+				device[deviceIndex].fruitmix = true;
 				request.get('http://'+data.addresses[0]+'/login',(err,res,body)=>{
 					if (!err && res.statusCode == 200) {
 						if (JSON.parse(body).length == 0) {
-							device[deviceIndex] = Object.assign({},data,{active:false,isCustom:false,fruitmix:f,admin:false});
+							device[deviceIndex].admin = false;
 						}else {
-							device[deviceIndex] = Object.assign({},data,{active:false,isCustom:false,fruitmix:f,admin:true});
+							device[deviceIndex].admin = true;
 						}
 					}else {
-						device[deviceIndex] = Object.assign({},data,{active:false,isCustom:false,fruitmix:f,admin:false});
+						device[deviceIndex].admin = false
 					}
 					mainWindow.webContents.send('device',device);
+					c('------------------------------------------4');
 				});	
 			}
-		}	
+		}
+	}	
 }
 //app ready and open window
 app.on('ready', function() {
@@ -257,18 +253,14 @@ ipcMain.on('delServer',(err,i)=>{
 	});
 	mainWindow.webContents.send('device',device);
 });
-ipcMain.on('beginFind',(err)=>{
-	c('begin find ip');
-	browser.on('update', findDevice);
-	browser.discover();
-});
 //find fruitmix
 ipcMain.on('findFruitmix',(e,item)=>{
-	c('find find find————————');
-	let b = mdns.createBrowser(mdns.tcp('http'));
-	b.once('ready', function () {
-	    b.discover(); 
-	});
+	browser.discover();
+	// let b = mdns.createBrowser(mdns.tcp('http'));
+	// c(b);
+	// b.once('ready', function () {
+	//     b.discover(); 
+	// });
 });
 //create fruitmix
 ipcMain.on('createFruitmix',(err,item)=>{
@@ -612,7 +604,7 @@ function enterChildren(selectItem) {
 		dirPath.length = 0;
 		getPath(selectItem);
 		dirPath = _.cloneDeep(dirPath);
-		c('path length is : ' + path.length);
+		c('path length is : ' + dirPath.length);
 	}catch(e) {
 		console.log(e);        
 		path.length=0;
@@ -666,11 +658,11 @@ function dealUploadQueue() {
 		if (uploadQueue[0].index == uploadQueue[0].length && uploadNow.length == 0) {
 			mainWindow.webContents.send('message',uploadQueue[0].success+' 个文件上传成功 '+uploadQueue[0].failed+' 个文件上传失败');
 			modifyData(uploadQueue.shift());
-			console.log('a upload task over');
+			console.log('one upload task over');
 			dealUploadQueue();
 		}else {
-			if (uploadNow.length < 3) {
-				let gap = 3 - uploadNow.length;
+			if (uploadNow.length < 1) {
+				let gap = 1 - uploadNow.length;
 				for (let i = 0; i < gap; i++) {
 					let index = uploadQueue[0].index;
 					if (index > uploadQueue[0].length-1) {
@@ -681,7 +673,6 @@ function dealUploadQueue() {
 					uploadQueue[0].index++;
 				}
 			}
-			console.log(uploadQueue);
 		}
 	}
 }
@@ -710,8 +701,7 @@ function uploadFile(file) {
 			uploadQueue[0].success += 1;
 			mainWindow.webContents.send('refreshStatusOfUpload',file.path+file.uploadTime,1);
 			let uuid = body.slice(1,body.length-1);
-			console.log('upload success');
-			console.log(uuid);
+			console.log(file.name + ' upload success ! uuid is ' + uuid);
 			let fileObj = uploadQueue[0].data.find(item2=>file.path == item2.path);
 			let index = uploadNow.findIndex(item=>item.path == file.path);
 			uploadNow.splice(index,1);
@@ -730,8 +720,7 @@ function uploadFile(file) {
 			if (uploadNow.length == 0) {
 				dealUploadQueue();
 			}
-			console.log('upload failed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-			console.log(res);
+			console.log(file.name + ' upload failed ! reson:' + res.body);
 			mainWindow.webContents.send('message','upload failed');
 		}
 	}
@@ -922,12 +911,11 @@ ipcMain.on('openInputOfFolder', e=>{
 			return
 		}
 		let folderPath = path.normalize(folder[0]);
-		console.log(path.basename(folderPath));
+		c('folder path is : ' + folderPath);
 		let t = (new Date()).getTime();
 		uploadObj.key = folder+t;
 		genTask(folderPath,function(err,o){		
 			uploadObj.data = o;
-			console.log(folderPath);
 			uploadObj.name = path.basename(folderPath);
 			let st = setInterval(()=>{
 				mainWindow.webContents.send('refreshUploadStatusOfFolder',uploadObj.key,uploadObj.success+' / '+uploadObj.count);
@@ -1009,57 +997,68 @@ ipcMain.on('openInputOfFolder', e=>{
 	}
 	function uploadNode(node,callback,failedCallback) {
 		try{
-		console.log(node.name);
-		if (node.type == 'file') {
-			uploadFileInFolder(node).then(()=>{
-				c('create file success: '+ node.name);
-				uploadObj.success++;
-				callback();
-			}).catch((err)=>{
-				node.times++;
-				failedCallback();
-			});
-		}else {
-			let length = node.children.length;
-			let index = 0;
-			console.log(index+"-"+length);
-			createFolder({uuid:node.parent},node.name).then(uuid=>{
-				c('create folder success: '+ node.name);
-				uploadObj.success++;
-				if (length == 0) {
+			console.log('current file/folder is : ' + node.name);
+			if (node.type == 'file') {
+				uploadFileInFolder(node).then(()=>{
+					c('create file success : '+ node.name);
+					uploadObj.success++;
 					callback();
-				}else {
-					node.children.forEach((item,index)=>{
-						node.children[index].parent = uuid;
-					});
-					let c = function(){
-						index++;
-						console.log(index+"-"+length);
-						if (index >= length) {
-							callback();
-						}else {
-							uploadNode(node.children[index],c)
-						}
-					};
+				}).catch((err)=>{
+					c('create file failed! : '+ node.name);
+					node.times++;
+					failedCallback();
+				});
+			}else {
+				let length = node.children.length;
+				let index = 0;
+				createFolder({uuid:node.parent},node.name).then(uuid=>{
+					c('create folder success : '+ node.name);
+					uploadObj.success++;
+					if (length == 0) {
+						callback();
+					}else {
+						node.children.forEach((item,index)=>{
+							node.children[index].parent = uuid;
+						});
+						let c = function(){
+							index++;
+							
+							if (index >= length) {
+								callback();
+							}else {
+								console.log('current ' + index+ "   "+length);
+								uploadNode(node.children[index],c)
+							}
+						};
 
-					let f = function() {
-						if (node.children[index].times>5) {
-							node.children[index].status = 'failed';
-						}else {
-							uploadNode(node.children[index],c,f);
+						let f = function() {
+							c('callback');
+							if (node.children[index].times>5) {
+								node.children[index].status = 'failed';
+								c(node.children[index].name + 'is absolute failed');
+								index++;
+								if (index >= length) {
+									
+									callback();
+								}else {
+									console.log('current ' + index+ "   "+length);
+									uploadNode(node.children[index],c)
+								}
+							}else {
+								uploadNode(node.children[index],c,f);
+							}
 						}
+						uploadNode(node.children[index],c,f);
 					}
-					uploadNode(node.children[index],c,f);
-				}
-			}).catch(()=>{
-				c('create folder failed: '+ node.name);
-				node.times++;
-				failedCallback();
-			});
-		}
-	}catch(e){
+				}).catch(()=>{
+					c('create folder failed: '+ node.name);
+					node.times++;
+					failedCallback();
+				});
+			}
+		}catch(e){
 
-	}
+		}
 	}
 });
 
@@ -1724,88 +1723,89 @@ function getTreeCount(tree) {
 
 function downloadFolder(folder) {
 	try{
-	looptree(folder.data,()=>{
-		console.log('finish');
-		let obj = downloadFolderNow.shift();
-		dealwithQueue();
-		mainWindow.webContents.send('message','文件夹 '+folder.data.name+'下载完成');
-		mainWindow.webContents.send('refreshDownloadStatusOfFolder',folder.key,'已完成');
-	},()=>{
-		c('not finish');
-		let obj = downloadFolderNow.shift();
-		dealwithQueue();
-		mainWindow.webContents.send('message','文件夹 '+folder.data.name+'下载失败');
-		mainWindow.webContents.send('refreshDownloadStatusOfFolder',folder.key,'下载失败');
-	});
-	let s = setInterval(()=>{
-		mainWindow.webContents.send('refreshDownloadStatusOfFolder',folder.key,folder.success+' / '+folder.count);
-	},1000);
-	ipcMain.on('loginOff',function() {
-		clearInterval(s);
-	});
-	function dealwithQueue() {
-		downloadFolderQueue.shift();
-		if (downloadFolderQueue.length > 0) {
-			downloadFolderNow.push(downloadFolderQueue[0]);
-			downloadFolder(downloadFolderNow[0]);		
+		looptree(folder.data,()=>{
+			console.log('finish');
+			let obj = downloadFolderNow.shift();
+			dealwithQueue();
+			mainWindow.webContents.send('message','文件夹 '+folder.data.name+'下载完成');
+			mainWindow.webContents.send('refreshDownloadStatusOfFolder',folder.key,'已完成');
+		},()=>{
+			c('not finish');
+			let obj = downloadFolderNow.shift();
+			dealwithQueue();
+			mainWindow.webContents.send('message','文件夹 '+folder.data.name+'下载失败');
+			mainWindow.webContents.send('refreshDownloadStatusOfFolder',folder.key,'下载失败');
+		});
+		let s = setInterval(()=>{
+			mainWindow.webContents.send('refreshDownloadStatusOfFolder',folder.key,folder.success+' / '+folder.count);
+		},1000);
+		
+		ipcMain.on('loginOff',function() {
+			clearInterval(s);
+		});
+		function dealwithQueue() {
+			downloadFolderQueue.shift();
+			if (downloadFolderQueue.length > 0) {
+				downloadFolderNow.push(downloadFolderQueue[0]);
+				downloadFolder(downloadFolderNow[0]);		
+			}
+			clearInterval(s);
 		}
-		clearInterval(s);
-	}
-	function looptree(tree,callback,failedCallback) {
-		try{
-		if (tree.type == 'file') {
-			c(tree.name+' is file');
-			downloadFolderFile(tree.uuid,tree.path).then(()=>{
-				folder.success++;
-				
-				callback();
-			}).catch(err=>{
-				failedCallback();
-			});
-		}else {
-				c(tree.name+' is folder');
-			 fs.mkdir(tree.path,err=>{
-			 	if (err) {
-			 		console.log('folder failed');
-			 		failedCallback();
-			 	}else {
-			 		console.log('folder success');
-			 		folder.success++;
-			 		let count = tree.children.length;
-			 		let index = 0;
-			 		let success = function () {
-			 			index++;
-			 			if (index == count) {
-			 				callback();
-			 			}else {
-			 				looptree(tree.children[index],success,failed);		
-			 			}
-			 		}
-			 		let failed = function () {
-			 			if (!tree.children[index].times) {
-			 					return		
-			 				}
-			 			tree.children[index].time++;
-			 			if (tree.children[index].times>5) {
-			 				index++;
-			 				folder.children[index].times++;
-			 				callback();
-			 			}else {
-			 				looptree(tree.children[index],success,failed);
-			 			}
-			 		}
-			 		if (count == 0) {
-			 			callback();
-			 		}
-			 		looptree(tree.children[index],success,failed);
-			 	}
-			 });
-		}
-	}catch(e){}
-	}
-}catch(e){
+		function looptree(tree,callback,failedCallback) {
+			try{
+				if (tree.type == 'file') {
+					c(tree.name+' is file');
+					downloadFolderFile(tree.uuid,tree.path).then(()=>{
+						folder.success++;
 
-}
+						callback();
+					}).catch(err=>{
+						failedCallback();
+					});
+				}else {
+					c(tree.name+' is folder');
+					fs.mkdir(tree.path,err=>{
+						if (err) {
+							console.log('folder failed');
+							failedCallback();
+						}else {
+							console.log('folder success');
+							folder.success++;
+							let count = tree.children.length;
+							let index = 0;
+							let success = function () {
+								index++;
+								if (index == count) {
+									callback();
+								}else {
+									looptree(tree.children[index],success,failed);		
+								}
+							}
+							let failed = function () {
+								if (!tree.children[index].times) {
+									return		
+								}
+								tree.children[index].time++;
+								if (tree.children[index].times>5) {
+									index++;
+									folder.children[index].times++;
+									callback();
+								}else {
+									looptree(tree.children[index],success,failed);
+								}
+							}
+							if (count == 0) {
+								callback();
+							}
+							looptree(tree.children[index],success,failed);
+						}
+					});
+				}
+			}catch(e){}
+		}
+	}catch(e){
+
+	}
 }
 function downloadFolderFile(uuid,path) {
 	var promise = new Promise((resolve,reject)=>{

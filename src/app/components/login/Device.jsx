@@ -128,7 +128,7 @@ class Device extends React.Component {
 						</div>
 						
 						<FlatButton className='fruitmix-button' label="启动FruitMix" disabled={item.fruitmix} onTouchTap={this.createFruitmix.bind(this)}/>
-						<FlatButton label="刷新状态" onTouchTap={this.refreshFruitmix.bind(this)}/>
+						{/*<FlatButton label="刷新状态" onTouchTap={this.refreshFruitmix.bind(this)}/>*/}
 						{/*<RaisedButton label="下一步" disabled={stepIndex === 2} primary={true} onTouchTap={this.handleNext.bind(this)}/>*/}
 					</div>
 					);

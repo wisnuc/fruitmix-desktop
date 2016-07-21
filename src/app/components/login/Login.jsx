@@ -41,7 +41,10 @@ class Index extends React.Component {
 
 	componentDidMount() {
 		ipc.send('getDeviceUsedRecently');
-		ipc.send('beginFind');
+		ipc.send('findFruitmix');
+		this.find = setInterval(function(){
+			ipc.send('findFruitmix');
+		},500);
 		ipc.on('loggedin',(err,user)=>{
 			this.props.dispatch(Login.login(user));
 		});
@@ -71,6 +74,8 @@ class Index extends React.Component {
 
 	componentWillUnmount() {
 		ipc.removeAllListeners();
+		console.log('leave');
+		clearInterval(this.find);
 	}
 
 	submit() {
