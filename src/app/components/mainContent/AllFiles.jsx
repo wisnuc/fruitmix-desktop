@@ -153,7 +153,14 @@ class AllFiles extends Component {
 		var t = new Date();
 		for (let i=0;i<e.nativeEvent.target.files.length;i++) {
 			var f = e.nativeEvent.target.files[i];
-			
+			c.log(f);
+			c.log(f.lastModifiedDate.toTimeString());
+			c.log(f.lastModifiedDate.toDateString());
+			c.log(f.lastModifiedDate.toString());
+			c.log(f.lastModifiedDate.toUTCString());
+			c.log(f.lastModifiedDate.toLocaleString());
+			c.log(f.lastModifiedDate.toLocaleTimeString());
+			c.log(f.lastModifiedDate.toLocaleDateString());
 			var file = {
 				name:f.name,
 				path:f.path,

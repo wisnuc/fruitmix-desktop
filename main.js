@@ -532,6 +532,7 @@ function getTree(f,type) {
 			}
 			files.push({
 				uuid:item.uuid,
+				path:item.path,
 				name:item.attribute.name,
 				parent: item.parent,
 				children: item.children,
@@ -541,14 +542,7 @@ function getTree(f,type) {
 				owner:item.permission.owner,
 				readlist:item.permission.readlist,
 				writelist:item.permission.writelist,
-				path:item.path,
-				attribute:{
-					changetime:item.attribute.changetime,
-					modifytime:item.attribute.modifytime,
-					createtime:item.attribute.modifytime,
-					size:item.attribute.size,
-					name:item.attribute.name
-				},
+				attribute:item.attribute,
 				hasParent:hasParent
 			});
 		}
@@ -578,7 +572,6 @@ function getFilesSharedByMe() {
 		}
 	});
 	c('files shared by me length is : ' + filesSharedByMe.length );
-
 }
 //select children
 ipcMain.on('enterChildren', (event,selectItem) => {
@@ -661,7 +654,7 @@ function dealUploadQueue() {
 			console.log('one upload task over');
 			dealUploadQueue();
 		}else {
-			if (uploadNow.length < 1) {
+			if (uploadNow.length == 0) {
 				let gap = 1 - uploadNow.length;
 				for (let i = 0; i < gap; i++) {
 					let index = uploadQueue[0].index;
@@ -702,26 +695,17 @@ function uploadFile(file) {
 			mainWindow.webContents.send('refreshStatusOfUpload',file.path+file.uploadTime,1);
 			let uuid = body.slice(1,body.length-1);
 			console.log(file.name + ' upload success ! uuid is ' + uuid);
-			let fileObj = uploadQueue[0].data.find(item2=>file.path == item2.path);
-			let index = uploadNow.findIndex(item=>item.path == file.path);
-			uploadNow.splice(index,1);
-
-			if (fileObj != undefined) {
-				fileObj.uuid = uuid;
-			}
-			if (uploadNow.length == 0) {
-				dealUploadQueue();
-			}
+			file.uuid = uuid;
 		}else {
 			uploadQueue[0].failed += 1;
 			mainWindow.webContents.send('refreshStatusOfUpload',file.path+file.uploadTime,1.01);
-			let index = uploadNow.findIndex(item3=>item3.path == file.path);
-			uploadNow.splice(index,1);
-			if (uploadNow.length == 0) {
-				dealUploadQueue();
-			}
 			console.log(file.name + ' upload failed ! reson:' + res.body);
 			mainWindow.webContents.send('message','upload failed');
+		}
+		let index = uploadNow.findIndex(item=>item.path == file.path);
+		uploadNow.splice(index,1);
+		if (uploadNow.length == 0) {
+			dealUploadQueue();
 		}
 	}
 	//request
@@ -733,7 +717,6 @@ function uploadFile(file) {
 	//add file
 	let form = r.form();
 	let tempStream = fs.createReadStream(file.path).pipe(transform);
-
 	tempStream.path = file.path
 	form.append('file', tempStream);	
 }
