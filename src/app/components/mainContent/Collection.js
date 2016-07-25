@@ -31,7 +31,7 @@ class Collection extends Component {
 					uploadList.push(
 						<tr key={item1.name+item1.uploadTime}>
 							<td title={item1.name}>{item1.name}</td>
-							<td>{this.getSize(item1.size)}</td>
+							<td>{this.getSize(item1.attribute.size)}</td>
 							<td>{this.getStutus(item1.status)}</td>
 						</tr>
 						);
@@ -92,26 +92,6 @@ class Collection extends Component {
 							</tbody>
 						</table>
 					</Tab>
-					{/*
-					<Tab label='下载队列' style={{color:'#000'}}>
-						<Table selectable={false}>
-						<TableBody displayRowCheckbox={false}>
-						{this.props.transmission.dowload.map((item,index)=>{
-							if (index>this.props.transmission.downloadSize) {
-								return
-							}
-							return (
-								<TableRow>
-									<TableRowColumn>{item.attribute.name}</TableRowColumn>
-									<TableRowColumn>{this.getSize(item.attribute.size)}</TableRowColumn>
-									<TableRowColumn>{this.getStutus(item.status)}</TableRowColumn>
-								</TableRow>
-								)
-						})}	
-						</TableBody>
-						</Table>
-					</Tab>
-					*/}
 				</Tabs>
 			</div>
 		)

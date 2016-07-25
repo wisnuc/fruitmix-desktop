@@ -672,9 +672,9 @@ function dealUploadQueue() {
 function uploadFile(file) {
 	let body = 0;
 	let countStatus;
-	if (file.size > 10000000) {
+	if (file.attribute.size > 10000000) {
 		countStatus = setInterval(()=>{
-			let status = body/file.size;
+			let status = body/file.attribute.size;
 			mainWindow.webContents.send('refreshStatusOfUpload',file.path+file.uploadTime,status);
 			c(file.path+ ' ======== ' + status);
 		},1000);
@@ -692,12 +692,14 @@ function uploadFile(file) {
 		clearInterval(countStatus);
 		if (!err && res.statusCode == 200) {
 			uploadQueue[0].success += 1;
+			file.status = 1;
 			mainWindow.webContents.send('refreshStatusOfUpload',file.path+file.uploadTime,1);
 			let uuid = body.slice(1,body.length-1);
 			console.log(file.name + ' upload success ! uuid is ' + uuid);
 			file.uuid = uuid;
 		}else {
 			uploadQueue[0].failed += 1;
+			file.status = 1.01;
 			mainWindow.webContents.send('refreshStatusOfUpload',file.path+file.uploadTime,1.01);
 			console.log(file.name + ' upload failed ! reson:' + res.body);
 			mainWindow.webContents.send('message','upload failed');
@@ -723,23 +725,11 @@ function uploadFile(file) {
 function modifyData(files,uuid) {
 	let dir = map.get(files.parent);
 	for (let item of files.data) {
-		let o = {
-			uuid:item.uuid,
-			parent: item.parent,
-			checked: false,
-			share:false,
-			attribute: {
-				name:item.name,
-				size:item.size	,
-				changetime: "",
-				createtime: "",
-			},
-			type: 'file',
-			children : [],
-			name:item.name,
-		};
-		map.set(item.uuid,Object.assign({},item,o));
-		dir.children.push(o);
+		if (item.status == 1.01) {
+			continue;
+		}
+		map.set(item.uuid,item);
+		dir.children.push(item);
 	}
 	if (files.parent == currentDirectory.uuid) {
 		children = dir.children.map(i => Object.assign({},i,{children:null}));
@@ -853,10 +843,7 @@ ipcMain.on('upLoadFolder',(e,name,dir)=>{
 });
 function modifyFolder(name,dir,folderuuid,send) {
 	//insert uuid
-
-	// let item = allFiles.find((item)=>{return item.uuid == dir.uuid});
-	// item != undefined && item.children.push(folderuuid);
-
+	var t = (new Date()).toLocaleString();
 	var folder = {
 		uuid:folderuuid,
 		parent: dir.uuid,
@@ -865,20 +852,23 @@ function modifyFolder(name,dir,folderuuid,send) {
 		attribute: {
 			name:name,
 			size: 4096,
-			changetime: "",
-			createtime: "",
+			changetime: t,
+			createtime: t,
 		},
 		type: 'folder',
 		children:[],
 		name:name,
+		owner:[''],
+		readlist:[''],
+		writelist:['']
 	};
 	//insert folder obj into map
 	map.set(folderuuid,folder);
-	let a = map.get(dir.uuid);
-	a.children.push(folder)
+	let parentNode = map.get(dir.uuid);
+	parentNode.children.push(folder)
 	if (dir.uuid == currentDirectory.uuid) {
 		//get children
-		children = a.children.map(item => Object.assign({},item,{children:null}))
+		children = parentNode.children.map(item => Object.assign({},item,{children:null}))
 		//ipc
 		if (send) {
 			mainWindow.webContents.send('message','新建文件夹成功');
@@ -1213,14 +1203,14 @@ ipcMain.on('create-new-user',function(err,u,p,e){
 	createNewUser(u,p,e).then(()=>{
 		console.log('register success');
 		mainWindow.webContents.send('message','注册新用户成功');
-		mainWindow.webContents.send('closeRegisterDialog');
+		// mainWindow.webContents.send('closeRegisterDialog');
 		getAllUser().then(users=>{
 			user.allUser = users;
 			mainWindow.webContents.send('addUser',user);
 		});
 		
 	}).catch(()=>{
-		console.log('failed');
+		mainWindow.webContents.send('message','注册新用户失败');
 	});
 });
 function createNewUser(username,password,email) {
@@ -1232,13 +1222,12 @@ function createNewUser(username,password,email) {
 			form: {username:username,password:password,email:email,isAdmin:false,isFirstUser:false}
 		};
 		function callback (err,res,body) {
-			console.log(res);
 			if (!err && res.statusCode == 200) {
 				console.log('res');
 				resolve(body);
 			}else {
 				console.log('err');
-				console.log(err);
+				c(res.body);
 				reject(err)
 			}
 		};
@@ -1376,13 +1365,11 @@ ipcMain.on('getTreeChildren',function(err,uuid) {
 ipcMain.on('move',function(err,arr,target) {
 	let allPromise = arr.map((item,index)=>move(item.uuid,target,index));
 	Promise.all(allPromise).then((result)=>{
-		console.log(result);
 		mainWindow.webContents.send('message',arr.length+' 个文件移动成功');
 		if (currentDirectory.uuid == arr[0].parent) {
 			enterChildren(currentDirectory);
 		}
 	}).catch(r=>{
-		c(r);
 		mainWindow.webContents.send('message','文件 '+arr[r].attribute.name+'移动失败');
 		if (currentDirectory.uuid == arr[0].parent) {
 			enterChildren(currentDirectory);
@@ -1399,16 +1386,18 @@ function move(uuid,target,index) {
 		};
 		function callback (err,res,body) {
 			if (!err && res.statusCode == 200) {
-				console.log('res');
+				console.log(uuid + 'move to '+ target +'success');
+				c(body);
 				resolve(body);
 				let currentNode = map.get(uuid);
 				let parent = map.get(currentNode.parent);
 				let targetNode = map.get(target);
+				currentNode.parent = target;
 				parent.children.splice(parent.children.findIndex(item=>item.uuid==currentNode.uuid),1);
 				targetNode.children.push(currentNode);
 			}else {
-				console.log('err');
-				console.log(err);
+				c(uuid + 'move to '+ target +'failed');
+				c(res.body);
 				reject(index);
 			}
 		};

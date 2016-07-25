@@ -87,15 +87,18 @@ class User extends React.Component {
  		let p = this.refs.password.input.value;
  		let e = this.refs.email.input.value
  		ipc.send('create-new-user',u,p,e);
+ 		this.setState({
+				createUser:false
+			});
 	}
 
 	componentDidMount() {
 		let _this = this;
-		ipc.on('closeRegisterDialog',err=>{
-			this.setState({
-				createUser:false
-			});
-		});
+		// ipc.on('closeRegisterDialog',err=>{
+		// 	this.setState({
+		// 		createUser:false
+		// 	});
+		// });
 	}
 }
 

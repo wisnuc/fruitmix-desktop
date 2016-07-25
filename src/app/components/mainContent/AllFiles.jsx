@@ -164,12 +164,24 @@ class AllFiles extends Component {
 			var file = {
 				name:f.name,
 				path:f.path,
-				size:f.size,
-				lastModifiedDate:f.lastModifiedDate,
-				parent : {uuid:this.props.data.directory.uuid},
+				attribute: {
+					size:f.size,
+					changetime:f.lastModifiedDate,
+					createtime:f.lastModifiedDate,
+					modifytime:f.lastModifiedDate,
+					name:f.name,
+				},
 				uploadTime :  Date.parse(t),
+				parent : this.props.data.directory.uuid,
 				status:0,
-				uuid:null
+				uuid:null,
+				checked:false,
+				share:false,
+				type:'file',
+				owner:[this.props.login.obj.uuid],
+				readlist:[''],
+				writelist:[''],
+				hasParent:true
 			}
 			files.push(file);
 			map.set(f.path+Date.parse(t),file);
