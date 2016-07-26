@@ -45,7 +45,7 @@ class Move extends Component {
 						)}
 					</div>
 					<div className='move-button-container'>
-						<div className={this.props.tree.uuid==this.props.data.directory.uuid?'move-botton move-botton-disable':'move-botton'} onClick={this.move.bind(this)}>move</div>
+						<div className={this.props.tree.uuid==this.props.data.directory.uuid?'move-botton move-botton-disable':'move-botton'} onClick={this.move.bind(this)}>移动</div>
 					</div>
 				</div>
 			</div>
