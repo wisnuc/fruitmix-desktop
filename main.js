@@ -72,7 +72,7 @@ function findDevice(data) {
 	if (fru == -1 && app == -1) {
 		return
 	}
-	c(data.addresses[0]);
+	// c(data.addresses[0]);
 	// is exist
 	let deviceIndex = device.findIndex(item=>{
 		return item.addresses[0] == data.addresses[0];
@@ -111,27 +111,31 @@ function findDevice(data) {
 		if (device[deviceIndex].fullname == data.fullname) {
 			return
 		}else {
+			c('ip has change');
 			device[deviceIndex].fullname = data.fullname
 			let f = fru==-1?false:true;
 			if (!f) {
 				device[deviceIndex].fruitmix = false;
 				mainWindow.webContents.send('device',device);
-				c('------------------------------------------3');
+				c('ip ' + data.addresses[0] + 'fruitmix close');
 			}else {
 				device[deviceIndex].fruitmix = true;
-				request.get('http://'+data.addresses[0]+'/login',(err,res,body)=>{
-					if (!err && res.statusCode == 200) {
-						if (JSON.parse(body).length == 0) {
-							device[deviceIndex].admin = false;
+				setTimeout(function(){
+					request.get('http://'+data.addresses[0]+'/login',(err,res,body)=>{
+						c(res,err)
+						if (!err && res.statusCode == 200) {
+							if (JSON.parse(body).length == 0) {
+								device[deviceIndex].admin = false;
+							}else {
+								device[deviceIndex].admin = true;
+							}
 						}else {
-							device[deviceIndex].admin = true;
+							device[deviceIndex].admin = false
 						}
-					}else {
-						device[deviceIndex].admin = false
-					}
-					mainWindow.webContents.send('device',device);
-					c('------------------------------------------4');
-				});	
+						mainWindow.webContents.send('device',device);
+						c('ip ' + data.addresses[0] + 'fruitmix open');
+					});	
+				},2000);
 			}
 		}
 	}	
@@ -152,7 +156,6 @@ app.on('ready', function() {
 		event.preventDefault()
 	});
 	mainWindow.webContents.openDevTools();
-	// dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']})
 	mainWindow.loadURL('file://' + __dirname + '/ele/index.html');
 	//create folder
 	fs.exists(mediaPath,exists=>{
