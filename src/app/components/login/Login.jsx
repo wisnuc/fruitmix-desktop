@@ -70,6 +70,16 @@ class Index extends React.Component {
 		ipc.on('setDownloadPath',(err,path)=>{
 			this.props.dispatch({type:'SET_DOWNLOAD_PATH',path:path});
 		});
+
+		setTimeout(()=>{
+			if (this.props.login.deviceUsedRecently == '') {
+				if (this.props.login.device.length == 0) {
+					return
+				}else {
+					this.selectDevice.apply(this,[null,0]);
+				}
+			}
+		},3000);
 	}
 
 	componentWillUnmount() {
@@ -85,8 +95,6 @@ class Index extends React.Component {
 		      type: "LOGIN"
 		})
 		ipc.send('login',username,password);
-		// ipc.send('login','admin','123456');
-		// ipc.send('login','a','a');
 	}
 
 	render() {
@@ -166,7 +174,6 @@ class Index extends React.Component {
 						{this.props.login.addDevice?addDevice:deviceList}
 					</div>
 					<div className='add-device-button' style={this.props.login.addDevice?{display:'none'}:{}}>
-						
 						<span  onClick={this.toggleDevice.bind(this)}>返回</span>
 						<span onClick={this.toggleAddDevice.bind(this)}>添加设备</span>
 					</div>
@@ -215,19 +222,7 @@ class Index extends React.Component {
 	}
 
 	getValue() {
-		if (this.props.login.deviceUsedRecently != '') {
 			return this.props.login.deviceUsedRecently;
-		}else {
-			// if (this.props.login.device.length == 0) {
-			// 	return
-			// }else {
-			// 	c.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-			// 	c.log(this.props.login.device);
-			// 	let ip = this.props.login.device[0].addresses[0];
-			// 	ipc.send('setServeIp',ip,false);
-			// 	return ip
-			// }
-		}
 	}
 };
 

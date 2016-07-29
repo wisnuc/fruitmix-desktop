@@ -155,7 +155,7 @@ app.on('ready', function() {
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	});
-	mainWindow.webContents.openDevTools();
+	// mainWindow.webContents.openDevTools();
 	mainWindow.loadURL('file://' + __dirname + '/ele/index.html');
 	//create folder
 	fs.exists(mediaPath,exists=>{
@@ -259,11 +259,6 @@ ipcMain.on('delServer',(err,i)=>{
 //find fruitmix
 ipcMain.on('findFruitmix',(e,item)=>{
 	browser.discover();
-	// let b = mdns.createBrowser(mdns.tcp('http'));
-	// c(b);
-	// b.once('ready', function () {
-	//     b.discover(); 
-	// });
 });
 //create fruitmix
 ipcMain.on('createFruitmix',(err,item)=>{
