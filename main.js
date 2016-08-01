@@ -156,7 +156,7 @@ app.on('ready', function() {
 		event.preventDefault()
 	});
 	mainWindow.webContents.openDevTools();
-	mainWindow.loadURL('file://' + __dirname + '/ele/index.html');
+	mainWindow.loadURL('file://' + __dirname + '/build/index.html');
 	//create folder
 	fs.exists(mediaPath,exists=>{
 		if (!exists) {

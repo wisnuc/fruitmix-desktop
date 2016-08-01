@@ -15,7 +15,7 @@ var HTML_PATH = path.resolve(__dirname, 'src/index.html');
 module.exports = {
 
     output: {
-        path: 'ele',
+        path: 'build',
         filename  : 'bundle.js',
         hash: true
     },
