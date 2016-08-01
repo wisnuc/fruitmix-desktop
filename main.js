@@ -4,61 +4,61 @@
 const electron = require('electron');
 const {app, BrowserWindow, ipcMain, dialog } = require('electron');
 
-const request = require('request');
-const fs = require ('fs');
-const stream = require('stream');
-const path = require('path');
-const _ = require('lodash');
-const mdns = require('mdns-js');
+global.request = require('request');
+global.fs = require ('fs');
+global.stream = require('stream');
+global.path = require('path');
+global._ = require('lodash');
+global.mdns = require('mdns-js');
 // const m = require('mdns');
-var mainWindow = null;
-var fruitmixWindow = null
+global.mainWindow = null;
+global.fruitmixWindow = null
 //server
-var server = '';
+global.server = '';
 // server =	'http://211.144.201.201:8888';
 // server = 'http://192.168.5.159:80';
 // server = 'http://192.168.5.132:80';
 //user
-var user = {};
+global.user = {};
 //files
-var rootNode= null;
-var allFiles = [];
-var tree = {};
-var map = new Map();
+global.rootNode= null;
+global.allFiles = [];
+global.tree = {};
+global.map = new Map();
 //share
-var shareFiles = [];
-var shareTree = [];
-var shareMap = new Map();
-var shareChildren = [];
-var sharePath = [];
-var filesSharedByMe = [];
+global.shareFiles = [];
+global.shareTree = [];
+global.shareMap = new Map();
+global.shareChildren = [];
+global.sharePath = [];
+global.filesSharedByMe = [];
 //directory
-var currentDirectory = {};
-var children = [];
-var parent = {};
-var dirPath = [];
-var tree = {};
+global.currentDirectory = {};
+global.children = [];
+global.parent = {};
+global.dirPath = [];
+global.tree = {};
 //upload 
-var uploadQueue = [];
-var uploadNow = [];
+global.uploadQueue = [];
+global.uploadNow = [];
 //download
-var downloadQueue = [];
-var downloadNow = [];
-var downloadFolderQueue = [];
-var downloadFolderNow = [];
+global.downloadQueue = [];
+global.downloadNow = [];
+global.downloadFolderQueue = [];
+global.downloadFolderNow = [];
 //media
-var media = [];
-var mediaMap = new Map();
-var thumbQueue = [];
-var thumbIng = [];
+global.media = [];
+global.mediaMap = new Map();
+global.thumbQueue = [];
+global.thumbIng = [];
 //path
-var mediaPath = path.join(__dirname,'media');
-var downloadPath = path.join(__dirname,'download');
+global.mediaPath = path.join(__dirname,'media');
+global.downloadPath = path.join(__dirname,'download');
 //device
-var device = [];
-var serverRecord = null;
+global.device = [];
+global.serverRecord = null;
 
-const c = console.log;
+global.c = console.log;
 
 mdns.excludeInterface('0.0.0.0');
 var browser = mdns.createBrowser(mdns.tcp('http'));
@@ -140,6 +140,9 @@ function findDevice(data) {
 		}
 	}	
 }
+//require module
+var transimission = require('./lib/transimission');
+
 //app ready and open window ------------------------------------
 app.on('ready', function() {
 	mainWindow = new BrowserWindow({
@@ -1222,61 +1225,62 @@ function downloadMediaImage(item) {
 
 //create folder
 ipcMain.on('upLoadFolder',(e,name,dir)=>{
-	var r = request.post(server+'/files/'+dir.uuid+'?type=folder',{
-		headers: {
-			Authorization: user.type+' '+user.token
-		},
-	},function (err,res,body) {
-		if (!err && res.statusCode == 200) {
-			console.log('res');
-			var uuid = body;
-			uuid = uuid.slice(1,uuid.length-1);
-			modifyFolder(name,dir,uuid,true);
-		}else {
-			mainWindow.webContents.send('message','新建文件夹失败');
-			console.log('err');
-			console.log(res);
-			console.log(err);
-		}
-	});
-	var form = r.form();
-	form.append('foldername',name);
+	// var r = request.post(server+'/files/'+dir.uuid+'?type=folder',{
+	// 	headers: {
+	// 		Authorization: user.type+' '+user.token
+	// 	},
+	// },function (err,res,body) {
+	// 	if (!err && res.statusCode == 200) {
+	// 		console.log('res');
+	// 		var uuid = body;
+	// 		uuid = uuid.slice(1,uuid.length-1);
+	// 		modifyFolder(name,dir,uuid,true);
+	// 	}else {
+	// 		mainWindow.webContents.send('message','新建文件夹失败');
+	// 		console.log('err');
+	// 		console.log(res);
+	// 		console.log(err);
+	// 	}
+	// });
+	// var form = r.form();
+	// form.append('foldername',name);
+	transimission.createFolder(name,dir);
 });
-function modifyFolder(name,dir,folderuuid,send) {
-	//insert uuid
-	var t = (new Date()).toLocaleString();
-	var folder = {
-		uuid:folderuuid,
-		parent: dir.uuid,
-		checked: false,
-		share:false,
-		attribute: {
-			name:name,
-			size: 4096,
-			changetime: t,
-			createtime: t,
-		},
-		type: 'folder',
-		children:[],
-		name:name,
-		owner:[''],
-		readlist:[''],
-		writelist:['']
-	};
-	//insert folder obj into map
-	map.set(folderuuid,folder);
-	let parentNode = map.get(dir.uuid);
-	parentNode.children.push(folder)
-	if (dir.uuid == currentDirectory.uuid) {
-		//get children
-		children = parentNode.children.map(item => Object.assign({},item,{children:null}))
-		//ipc
-		if (send) {
-			mainWindow.webContents.send('message','新建文件夹成功');
-		}
-		mainWindow.webContents.send('uploadSuccess',folder,_.cloneDeep(children));
-	}
-}
+// function modifyFolder(name,dir,folderuuid,send) {
+// 	//insert uuid
+// 	var t = (new Date()).toLocaleString();
+// 	var folder = {
+// 		uuid:folderuuid,
+// 		parent: dir.uuid,
+// 		checked: false,
+// 		share:false,
+// 		attribute: {
+// 			name:name,
+// 			size: 4096,
+// 			changetime: t,
+// 			createtime: t,
+// 		},
+// 		type: 'folder',
+// 		children:[],
+// 		name:name,
+// 		owner:[''],
+// 		readlist:[''],
+// 		writelist:['']
+// 	};
+// 	//insert folder obj into map
+// 	map.set(folderuuid,folder);
+// 	let parentNode = map.get(dir.uuid);
+// 	parentNode.children.push(folder)
+// 	if (dir.uuid == currentDirectory.uuid) {
+// 		//get children
+// 		children = parentNode.children.map(item => Object.assign({},item,{children:null}))
+// 		//ipc
+// 		if (send) {
+// 			mainWindow.webContents.send('message','新建文件夹成功');
+// 		}
+// 		mainWindow.webContents.send('uploadSuccess',folder,_.cloneDeep(children));
+// 	}
+// }
 //upload file
 ipcMain.on('uploadFile',(e,files)=>{
 	uploadQueue.push(files);

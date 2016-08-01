@@ -23,6 +23,7 @@
     "redux": "^3.5.2",
     "redux-logger": "^2.6.1",
     "redux-thunk": "^2.1.0",
+    "request": "^2.74.0",
     "url-loader": "^0.5.7"
   },
   "devDependencies": {
