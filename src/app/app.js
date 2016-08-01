@@ -17,9 +17,10 @@ injectTapEventPlugin();
 // global import jQuery
 global.$ = global.jQuery = global.jQuery || require('jquery');
 
+var {ipcRenderer} = require('electron');
+window.ipc = ipcRenderer;
 //import css
 require('../assets/css/app.css');
-
 //import component
 import Login  from'./components/login/Login';// login
 import Main from './components/main/Main';//main

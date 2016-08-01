@@ -16,7 +16,7 @@ import Action from '../../actions/action';
 class Mask extends Component {
 	render() {
 		let style = {
-			height:document.body.clientHeight+'px',
+			height:'100%',
 			display:this.props.media.currentMediaImage.open?'block':'none'
 		} 
 		return (
