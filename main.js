@@ -1284,33 +1284,33 @@ ipcMain.on('upLoadFolder',(e,name,dir)=>{
 //upload file
 ipcMain.on('uploadFile',(e,files)=>{
 	uploadQueue.push(files);
-	dealUploadQueue();
+	transimission.dealUploadQueue;
 });
-function dealUploadQueue() {
-	if (uploadQueue.length == 0) {
-		return
-	}else {
-		if (uploadQueue[0].index == uploadQueue[0].length && uploadNow.length == 0) {
-			mainWindow.webContents.send('message',uploadQueue[0].success+' 个文件上传成功 '+uploadQueue[0].failed+' 个文件上传失败');
-			modifyData(uploadQueue.shift());
-			console.log('one upload task over');
-			dealUploadQueue();
-		}else {
-			if (uploadNow.length == 0) {
-				let gap = 1 - uploadNow.length;
-				for (let i = 0; i < gap; i++) {
-					let index = uploadQueue[0].index;
-					if (index > uploadQueue[0].length-1) {
-						return
-					}
-					uploadNow.push(uploadQueue[0].data[index]);
-					uploadFile(uploadQueue[0].data[index]);
-					uploadQueue[0].index++;
-				}
-			}
-		}
-	}
-}
+// function dealUploadQueue() {
+// 	if (uploadQueue.length == 0) {
+// 		return
+// 	}else {
+// 		if (uploadQueue[0].index == uploadQueue[0].length && uploadNow.length == 0) {
+// 			mainWindow.webContents.send('message',uploadQueue[0].success+' 个文件上传成功 '+uploadQueue[0].failed+' 个文件上传失败');
+// 			modifyData(uploadQueue.shift());
+// 			c('one upload task over');
+// 			dealUploadQueue();
+// 		}else {
+// 			if (uploadNow.length == 0) {
+// 				let gap = 1 - uploadNow.length;
+// 				for (let i = 0; i < gap; i++) {
+// 					let index = uploadQueue[0].index;
+// 					if (index > uploadQueue[0].length-1) {
+// 						return
+// 					}
+// 					uploadNow.push(uploadQueue[0].data[index]);
+// 					uploadFile(uploadQueue[0].data[index]);
+// 					uploadQueue[0].index++;
+// 				}
+// 			}
+// 		}
+// 	}
+// }
 function uploadFile(file) {
 	let body = 0;
 	let countStatus;
