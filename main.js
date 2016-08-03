@@ -1408,7 +1408,7 @@ function createFolder(dir,name) {
 			if (!err && res.statusCode == 200) {
 				var uuid = body;
 				uuid = uuid.slice(1,uuid.length-1);
-				modifyFolder(name,dir,uuid,false);
+				upload.modifyFolder(name,dir,uuid,false);
 				resolve(uuid);
 			}else {
 				reject();
