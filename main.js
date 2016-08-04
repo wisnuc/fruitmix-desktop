@@ -3,6 +3,7 @@
 
 const electron = require('electron');
 const {app, BrowserWindow, ipcMain, dialog } = require('electron');
+global.ipcMain = ipcMain;
 
 global.request = require('request');
 global.fs = require ('fs');
@@ -1484,7 +1485,7 @@ ipcMain.on('downloadFolder',(err,folder,type)=>{
 			tree = map.get(item.uuid);
 		}
 		
-		let count = getTreeCount(tree);
+		let count = download.getTreeCount(tree);
 		let time = (new Date()).getTime();
 		let obj = {count:count,failed:[],success:0,data:tree,type:'folder',status:'ready',key:item.uuid+time};
 		downloadFolderQueue.push(obj);
@@ -1492,136 +1493,7 @@ ipcMain.on('downloadFolder',(err,folder,type)=>{
 	});
 	if (downloadFolderNow.length == 0) {
 		downloadFolderNow.push(downloadFolderQueue[0]);
-		downloadFolder(downloadFolderNow[0]);
+		download.downloadFolder(downloadFolderNow[0]);
 	}
 })
-function getTreeCount(tree) {
-	c(tree);
-	let count = 0;
-	loopTree(tree,downloadPath);
-	function loopTree(tree,p) {
-		count++;
-		let nodepath = path.join(p,tree.name);
-		tree.path = nodepath;
-		tree.times = 0;
-		if (tree.children.length == 0) {
-			return
-		}else {
-			tree.children.forEach(item=>{
-				loopTree(item,nodepath);
-			});
-		}
-	}
-	return count
-}
-function downloadFolder(folder) {
-	try{
-		looptree(folder.data,()=>{
-			console.log('finish');
-			let obj = downloadFolderNow.shift();
-			dealwithQueue();
-			mainWindow.webContents.send('message','文件夹 '+folder.data.name+'下载完成');
-			mainWindow.webContents.send('refreshDownloadStatusOfFolder',folder.key,'已完成');
-		},()=>{
-			c('not finish');
-			let obj = downloadFolderNow.shift();
-			dealwithQueue();
-			mainWindow.webContents.send('message','文件夹 '+folder.data.name+'下载失败');
-			mainWindow.webContents.send('refreshDownloadStatusOfFolder',folder.key,'下载失败');
-		});
-		let s = setInterval(()=>{
-			mainWindow.webContents.send('refreshDownloadStatusOfFolder',folder.key,folder.success+' / '+folder.count);
-		},1000);
-		
-		ipcMain.on('loginOff',function() {
-			clearInterval(s);
-		});
-		function dealwithQueue() {
-			downloadFolderQueue.shift();
-			if (downloadFolderQueue.length > 0) {
-				downloadFolderNow.push(downloadFolderQueue[0]);
-				downloadFolder(downloadFolderNow[0]);		
-			}
-			clearInterval(s);
-		}
-		function looptree(tree,callback,failedCallback) {
-			try{
-				if (tree.type == 'file') {
-					c(tree.name+' is file');
-					downloadFolderFile(tree.uuid,tree.path).then(()=>{
-						folder.success++;
-
-						callback();
-					}).catch(err=>{
-						failedCallback();
-					});
-				}else {
-					c(tree.name+' is folder');
-					fs.mkdir(tree.path,err=>{
-						if (err) {
-							console.log('folder failed');
-							failedCallback();
-						}else {
-							console.log('folder success');
-							folder.success++;
-							let count = tree.children.length;
-							let index = 0;
-							let success = function () {
-								index++;
-								if (index == count) {
-									callback();
-								}else {
-									looptree(tree.children[index],success,failed);		
-								}
-							}
-							let failed = function () {
-								if (!tree.children[index].times) {
-									return		
-								}
-								tree.children[index].time++;
-								if (tree.children[index].times>5) {
-									index++;
-									folder.children[index].times++;
-									callback();
-								}else {
-									looptree(tree.children[index],success,failed);
-								}
-							}
-							if (count == 0) {
-								callback();
-							}
-							looptree(tree.children[index],success,failed);
-						}
-					});
-				}
-			}catch(e){}
-		}
-	}catch(e){
-
-	}
-}
-function downloadFolderFile(uuid,path) {
-	var promise = new Promise((resolve,reject)=>{
-		var options = {
-			method: 'GET',
-			url: server+'/files/'+uuid+'?type=media',
-			headers: {
-				Authorization: user.type+' '+user.token
-			}
-		};
-		function callback (err,res,body) {
-			if (!err && res.statusCode == 200) {
-				console.log('file res');
-				resolve();
-			}else {
-				console.log('file err');
-				reject();
-			}
-		}
-		var stream = fs.createWriteStream(path);
-
-		request(options,callback).pipe(stream);
-	});
-	return promise;
-}
 
