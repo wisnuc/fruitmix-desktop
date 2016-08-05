@@ -61,6 +61,7 @@ global.serverRecord = null;
 
 global.c = console.log;
 
+
 mdns.excludeInterface('0.0.0.0');
 var browser = mdns.createBrowser(mdns.tcp('http'));
 browser.on('update', findDevice);
@@ -144,6 +145,7 @@ function findDevice(data) {
 //require module
 var upload = require('./lib/upload');
 var download = require('./lib/download');
+var loginApi = require('./lib/login');
 
 //app ready and open window ------------------------------------
 app.on('ready', function() {
@@ -295,7 +297,7 @@ ipcMain.on('login',function(err,username,password){
 		c('get login data : ' + data.length + ' users');
 		user = data.find((item)=>{return item.username == username});
 		if (user == undefined) {
-			throw 'username is not exist in login data'
+			throw new Error('username is not exist in login data')
 		}
 		return getToken(user.uuid,password);
 	}).then((token)=>{
