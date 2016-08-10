@@ -143,9 +143,10 @@ function findDevice(data) {
 	}	
 }
 //require module
-var upload = require('./lib/upload');
-var download = require('./lib/download');
-var loginApi = require('./lib/login');
+const upload = require('./lib/upload');
+const download = require('./lib/download');
+const loginApi = require('./lib/login');
+const mediaApi = require('./lib/media');  
 
 //app ready and open window ------------------------------------
 app.on('ready', function() {
@@ -293,18 +294,18 @@ ipcMain.on('getUserList',(e,item)=>{
 ipcMain.on('login',function(err,username,password){
 	c(' ');
 	c('login : ');
-	login().then((data)=>{
+	loginApi.login().then((data)=>{
 		c('get login data : ' + data.length + ' users');
 		user = data.find((item)=>{return item.username == username});
 		if (user == undefined) {
 			throw new Error('username is not exist in login data')
 		}
-		return getToken(user.uuid,password);
+		return loginApi.getToken(user.uuid,password);
 	}).then((token)=>{
 		c('get token : '+ token.type +token.token);
 		user.token = token.token;
 		user.type = token.type;
-		return getAllUser();
+		return loginApi.getAllUser();
 	}).then((users)=>{
 		c('get users : ' + users.length);
 		user.allUser = users;
@@ -314,56 +315,6 @@ ipcMain.on('login',function(err,username,password){
 		mainWindow.webContents.send('message','登录失败',0);
 	});
 });
-function login() {
-	let login = new Promise((resolve,reject)=>{
-		request(server+'/login',function(err,res,body){
-			if (!err && res.statusCode == 200) {
-				resolve(eval(body));
-			}else {
-				reject(err)
-			}
-		})
-	});
-	return login;
-}
-function getToken(uuid,password) {
-	let a = new Promise((resolve,reject)=>{
-		request.get(server+'/token',{
-			'auth': {
-			    'user': uuid,
-			    'pass': password,
-			    'sendImmediately': false
-			  }
-		},function(err,res,body) {
-			if (!err && res.statusCode == 200) {
-				resolve(JSON.parse(body));
-			}else {
-				reject(err)
-			}
-		});
-	});
-	return a;
-}
-function getAllUser() {
-	var promise = new Promise((resolve,reject)=>{
-		var options = {
-			method: 'GET',
-			url: server+'/users',
-			headers: {
-				Authorization: user.type+' '+user.token
-			}
-		};
-		function callback (err,res,body) {
-			if (!err && res.statusCode == 200) {
-				resolve(JSON.parse(body));
-			}else {
-				reject(err)
-			}
-		}
-		request(options,callback);
-	});
-	return promise
-}
 //get all files -------------------------------------------------
 ipcMain.on('getRootData', ()=> {
 	c(' ');
@@ -1055,7 +1006,7 @@ ipcMain.on('changeDownloadPath', e=>{
 
 //getMediaData
 ipcMain.on('getMediaData',(err)=>{
-	getMediaData().then((data)=>{
+	mediaApi.getMediaData().then((data)=>{
 		data.forEach(item=>{
 			if (item == null) {return}
 			let obj = Object.assign({},item,{status:'notReady',failed:0});
@@ -1067,27 +1018,6 @@ ipcMain.on('getMediaData',(err)=>{
 		console.log(err);
 	});
 });
-function getMediaData() {
-	var media = new Promise((resolve,reject)=>{ 
-		var options = {
-			method: 'GET',
-			url: server+'/media',
-			headers: {
-				Authorization: user.type+' '+user.token
-			}
-
-		};
-		function callback (err,res,body) {
-			if (!err && res.statusCode == 200) {
-				resolve(JSON.parse(body));
-			}else {
-				reject(err);
-			}
-		}
-		request(options,callback);
-	});
-	return media;
-}
 //getMediaThumb
 ipcMain.on('getThumb',(err,item)=>{
 	thumbQueue.push(item);
