@@ -6,69 +6,66 @@
    **/
    
 //import core module
-import React from 'react';
-import { render } from 'react-dom';
+import React from 'react'
+import { render } from 'react-dom'
 import { Provider } from 'react-redux'
-import { Router, Route, Link, hashHistory, IndexRoute} from 'react-router';
- import CSS from './utils/transition';
-import injectTapEventPlugin from 'react-tap-event-plugin';
-injectTapEventPlugin();
+import { Router, Route, Link, hashHistory, IndexRoute} from 'react-router'
+ import CSS from './utils/transition'
+import injectTapEventPlugin from 'react-tap-event-plugin'
+injectTapEventPlugin()
 
 // global import jQuery
-global.$ = global.jQuery = global.jQuery || require('jquery');
+global.$ = global.jQuery = global.jQuery || require('jquery')
 
-var {ipcRenderer} = require('electron');
-window.ipc = ipcRenderer;
+var {ipcRenderer} = require('electron')
+window.ipc = ipcRenderer
 //import css
-require('../assets/css/app.css');
+require('../assets/css/app.css')
 //import component
-import Login  from'./components/login/Login';// login
-import Main from './components/main/Main';//main
+import Login  from'./components/login/Login'// login
+import Main from './components/main/Main'//main
 
 
 //import store
-import configureStore from './stores/store';
-const store = configureStore();
-window.c = console;
+import configureStore from './stores/store'
+const store = configureStore()
+
+window.c = console
 window.onresize = function() {
-	store.dispatch({type:''});
+	store.dispatch({type:''})
 }
 //APP component
 var App = React.createClass({
 	render: function(){
+		console.log('render >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+		let state = store.getState()
+		let isLogin = state.login.state == 'LOGGEDIN'?true:false
 		return(
-			<div className="app">
-				<CSS opts={['app',true,true,true,500,5000,5000]}>
-					{this.props.children}
-				</CSS>
-			</div>
+			<Provider store={store}>
+				<div className="app">	
+						{isLogin && <Main/>}
+						{!isLogin && <Login/>}	
+				</div>
+			</Provider>
 			)
 	},
-});
-
-//router
-var routes = (
-	<Provider store={store}>
-		<Router history={hashHistory}>
-			<Route path="/" component={App}>
-		    		<Route key='login' path="login" component={Login}/>
-		    		<Route key='main' path='main' component={Main}/>
-		    		<IndexRoute key='login' component={Login}/>
-		    	</Route>
-		</Router>
-	</Provider>
-	);
+})
 
 // define dom node
-var appMountElement = document.getElementById('app');
+var appMountElement = document.getElementById('app')
 
 //define render function
 var Render = () =>{
-	render(routes,appMountElement);
+	render(<App></App>,appMountElement)
 };
 
 //render
-Render();
+Render()
+
+//subscribe store change
+store.subscribe(()=>{
+	Render()
+})
 
 
 

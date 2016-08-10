@@ -34,9 +34,9 @@ class Index extends React.Component {
 	}
 
 	componentWillReceiveProps(nextProps) {
-		if (nextProps.login.state == 'LOGGEDIN') {
-			window.location.hash = '/main';
-		}
+		// if (nextProps.login.state == 'LOGGEDIN') {
+		// 	window.location.hash = '/main';
+		// }
 	}
 
 	componentDidMount() {
@@ -94,8 +94,8 @@ class Index extends React.Component {
 		this.props.dispatch({
 		      type: "LOGIN"
 		})
-		ipc.send('login',username,password);
-		// ipc.send('login','admin','123456');
+		// ipc.send('login',username,password);
+		ipc.send('login','admin','123456');
 	}
 
 	render() {
@@ -105,19 +105,10 @@ class Index extends React.Component {
 		let busy = (this.props.login.state ==='BUSY');
 		let device = this.props.login.device; 
 		const styles = {
-  errorStyle: {
-    color: orange500,
-  },
-  underlineStyle: {
-    borderColor: orange500,
-  },
-  floatingLabelStyle: {
-    color: orange500,
-  },
-  floatingLabelFocusStyle: {
-    color: blue500,
-  },
-};
+		  underlineStyle: {
+		    borderColor: orange500,
+		  },
+		};
 		//login
 		if (!busy) {
 			loginContent = (
@@ -149,6 +140,19 @@ class Index extends React.Component {
 				)
 		}
 
+		let findDeviceContent = (
+				<div className='find-device-container' style={{maxHeight:document.body.clientHeight}}>
+					<div className='add-device-title'>已发现 {device.length} 台 wisnuc</div>
+					<div className='add-device-content'>
+						{this.props.login.addDevice?addDevice:deviceList}
+					</div>
+					<div className='add-device-button' style={this.props.login.addDevice?{display:'none'}:{}}>
+						<span  onClick={this.toggleDevice.bind(this)}>返回</span>
+						<span onClick={this.toggleAddDevice.bind(this)}>添加设备</span>
+					</div>
+				</div>
+			);
+
 		//add device
 		let addDevice = (
 			<div className='setting-serverIP-container'>
@@ -166,19 +170,6 @@ class Index extends React.Component {
 							<Device key={item.addresses[0]+item.host} item={item}></Device>
 						))}
 						</div>
-			);
-
-		let findDeviceContent = (
-				<div className='find-device-container' style={{maxHeight:document.body.clientHeight}}>
-					<div className='add-device-title'>已发现 {device.length} 台 wisnuc</div>
-					<div className='add-device-content'>
-						{this.props.login.addDevice?addDevice:deviceList}
-					</div>
-					<div className='add-device-button' style={this.props.login.addDevice?{display:'none'}:{}}>
-						<span  onClick={this.toggleDevice.bind(this)}>返回</span>
-						<span onClick={this.toggleAddDevice.bind(this)}>添加设备</span>
-					</div>
-				</div>
 			);
 
 		return (
