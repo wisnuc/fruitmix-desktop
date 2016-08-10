@@ -7,7 +7,6 @@
  'use strict';
 // require core module
 import React, { findDOMNode, Component, PropTypes } from 'react';
-import { connect, bindActionCreators } from 'react-redux'
 import Base from '../../utils/Base';
 // require action
 import Login from'../../actions/action';
@@ -31,12 +30,6 @@ class Index extends React.Component {
 	getChildContext() {
 		const muiTheme = getMuiTheme(baseTheme);
 		return {muiTheme};
-	}
-
-	componentWillReceiveProps(nextProps) {
-		// if (nextProps.login.state == 'LOGGEDIN') {
-		// 	window.location.hash = '/main';
-		// }
 	}
 
 	componentDidMount() {
@@ -72,8 +65,8 @@ class Index extends React.Component {
 		});
 
 		setTimeout(()=>{
-			if (this.props.login.deviceUsedRecently == '') {
-				if (this.props.login.device.length == 0) {
+			if (this.props.state.login.deviceUsedRecently == '') {
+				if (this.props.state.login.device.length == 0) {
 					return
 				}else {
 					this.selectDevice.apply(this,[null,0]);
@@ -100,10 +93,10 @@ class Index extends React.Component {
 
 	render() {
 		var _this = this;
-		let findDevice = this.props.login.findDevice;
+		let findDevice = this.props.state.login.findDevice;
 		let loginContent;
-		let busy = (this.props.login.state ==='BUSY');
-		let device = this.props.login.device; 
+		let busy = (this.props.state.login.state ==='BUSY');
+		let device = this.props.state.login.device; 
 		const styles = {
 		  underlineStyle: {
 		    borderColor: orange500,
@@ -140,19 +133,6 @@ class Index extends React.Component {
 				)
 		}
 
-		let findDeviceContent = (
-				<div className='find-device-container' style={{maxHeight:document.body.clientHeight}}>
-					<div className='add-device-title'>已发现 {device.length} 台 wisnuc</div>
-					<div className='add-device-content'>
-						{this.props.login.addDevice?addDevice:deviceList}
-					</div>
-					<div className='add-device-button' style={this.props.login.addDevice?{display:'none'}:{}}>
-						<span  onClick={this.toggleDevice.bind(this)}>返回</span>
-						<span onClick={this.toggleAddDevice.bind(this)}>添加设备</span>
-					</div>
-				</div>
-			);
-
 		//add device
 		let addDevice = (
 			<div className='setting-serverIP-container'>
@@ -172,11 +152,24 @@ class Index extends React.Component {
 						</div>
 			);
 
+		let findDeviceContent = (
+				<div className='find-device-container' style={{maxHeight:document.body.clientHeight}}>
+					<div className='add-device-title'>已发现 {device.length} 台 wisnuc</div>
+					<div className='add-device-content'>
+						{this.props.state.login.addDevice?addDevice:deviceList}
+					</div>
+					<div className='add-device-button' style={this.props.state.login.addDevice?{display:'none'}:{}}>
+						<span  onClick={this.toggleDevice.bind(this)}>返回</span>
+						<span onClick={this.toggleAddDevice.bind(this)}>添加设备</span>
+					</div>
+				</div>
+			);
+
 		return (
 			<div className='index-frame' key='login'>
 				{!!findDevice && findDeviceContent}
 				{!findDevice && loginContent}
-				<Snackbar open={this.props.snack.open} message={this.props.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
+				<Snackbar open={this.props.state.snack.open} message={this.props.state.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
 			</div>
 			);
 	}
@@ -208,13 +201,13 @@ class Index extends React.Component {
 	}
 
 	selectDevice(e,index) {
-		let ip = this.props.login.device[index].addresses[0];
+		let ip = this.props.state.login.device[index].addresses[0];
 		ipc.send('setServeIp',ip,false);
 		this.props.dispatch(Action.setDeviceUsedRecently(ip));
 	}
 
 	getValue() {
-			return this.props.login.deviceUsedRecently;
+			return this.props.state.login.deviceUsedRecently;
 	}
 };
 
@@ -229,4 +222,4 @@ function mapStateToProps (state) {
 	}
 }
 	
-export default connect(mapStateToProps)(Index);
+export default Index

@@ -11,12 +11,12 @@
 .app {
 	height: 100%
 }
-.app>div {
+/*.app>div {
 	height: 100%
 }
 .app>div>div {
 	height: 100%
-}
+}*/
 .app-bar {
 	box-sizing: border-box;
 	position: fixed!important;

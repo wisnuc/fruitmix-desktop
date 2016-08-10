@@ -9,7 +9,6 @@
 import React from 'react'
 import { render } from 'react-dom'
 import { Provider } from 'react-redux'
-import { Router, Route, Link, hashHistory, IndexRoute} from 'react-router'
  import CSS from './utils/transition'
 import injectTapEventPlugin from 'react-tap-event-plugin'
 injectTapEventPlugin()
@@ -44,7 +43,7 @@ var App = React.createClass({
 			<Provider store={store}>
 				<div className="app">	
 						{isLogin && <Main/>}
-						{!isLogin && <Login/>}	
+						{!isLogin && <Login state={state} dispatch={store.dispatch}/>}	
 				</div>
 			</Provider>
 			)
