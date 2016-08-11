@@ -8,7 +8,6 @@
  'use strict';
 // require core module
  import React, { findDOMNode, Component, PropTypes } from 'react';
- import { connect } from 'react-redux';
  import CSS from '../../utils/transition';
 
 //require material
@@ -87,7 +86,7 @@ class Main extends Component {
 		
 
 		ipc.on('deleteSuccess',(err,obj,children,dir)=>{
-			if (dir.uuid == this.props.data.directory.uuid) {
+			if (dir.uuid == this.props.state.data.directory.uuid) {
 				this.props.dispatch(Action.refreshDir(children));
 			}
 		});
@@ -155,9 +154,9 @@ class Main extends Component {
 	
 	render() {
 		let list = null;
-		var name = this.props.login.obj.username;
-		let index = this.props.login.obj.allUser.findIndex(item=>(item.username == name));
-		if ( this.props.login.obj.allUser[index].isAdmin) {
+		var name = this.props.state.login.obj.username;
+		let index = this.props.state.login.obj.allUser.findIndex(item=>(item.username == name));
+		if ( this.props.state.login.obj.allUser[index].isAdmin) {
 			list = (<MenuItem value="1" primaryText="用户管理" onTouchTap={this.toggleUser.bind(this)}/>)
 		}
 		const folderActions = [
@@ -170,7 +169,7 @@ class Main extends Component {
 			];
 
 		let m = null;
-		if (this.props.media.currentMediaImage.open) {
+		if (this.props.state.media.currentMediaImage.open) {
 			m = <Mask></Mask>
 		}
 		return (<CSS opts={['app',true,true,true,500,5000,5000]} style={{height:'100%'}}>
@@ -192,14 +191,14 @@ class Main extends Component {
         			</IconMenu>}
 				onLeftIconButtonTouchTap={this.leftNavClick.bind(this)}
 				>
-				<div className='app-bar-username'>{this.props.login.obj.username}</div>
+				<div className='app-bar-username'>{this.props.state.login.obj.username}</div>
 				</AppBar>
 				{/*Left Nav*/}
-				<Drawer width={241} open={this.props.navigation.menu} className='left-nav'>
-					<LeftNav/>
+				<Drawer width={241} open={this.props.state.navigation.menu} className='left-nav'>
+					<LeftNav dispatch={this.props.dispatch} state={this.props.state}/>
 				</Drawer>
 				{/*Content*/}
-				<Paper className={"content-container "+(this.props.navigation.menu?'content-has-left-padding':'no-padding')} zDepth={0}>
+				<Paper className={"content-container "+(this.props.state.navigation.menu?'content-has-left-padding':'no-padding')} zDepth={0}>
 					<Content></Content>
 				</Paper>
 				{m}
@@ -209,15 +208,15 @@ class Main extends Component {
 					modal={false}
 					open={this.state.userDialog}
 					className='create-folder-dialog'>
-					<Users login={this.props.login}></Users>
+					<Users login={this.props.state.login}></Users>
 			    </Dialog>
-				<Snackbar style={{textAlign:'center'}} open={this.props.snack.open} message={this.props.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
+				<Snackbar style={{textAlign:'center'}} open={this.props.state.snack.open} message={this.props.state.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
 			</div></CSS>
 			);
 	}
 
 	triggerClick(e) {
-		if (this.props.data.menu.show) {
+		if (this.props.state.data.menu.show) {
 			this.props.dispatch(Action.toggleMenu());
 		}
 	}
@@ -228,32 +227,32 @@ class Main extends Component {
 	//draw multiple select frame
 	mouseMove(e) {
 		 e.preventDefault(); e.stopPropagation();
-		if (this.props.multiple.multiple.isShow == true&&this.props.data.state != 'BUSY') {
+		if (this.props.state.multiple.multiple.isShow == true&&this.props.state.data.state != 'BUSY') {
 			this.props.dispatch(Action.mouseMove(e.nativeEvent.x,e.nativeEvent.y));
 		}
 	}
 	//multiple select and hide frame
 	mouseUp() {
-		if (this.props.multiple.multiple.isShow == true) {
-		let mul = this.props.multiple.multiple;
+		if (this.props.state.multiple.multiple.isShow == true) {
+		let mul = this.props.state.multiple.multiple;
  			let height = Math.abs(mul.top-mul.height);;
  			let part = Math.ceil(height/51);
  			let top = Math.min(mul.top,mul.height)+document.getElementsByClassName('file-area')[0].scrollTop;
  			let bottom = Math.max(mul.top,mul.height)+document.getElementsByClassName('file-area')[0].scrollTop;
 
- 			let position = this.props.data.position;
+ 			let position = this.props.state.data.position;
  			for (let i = 0;i < position.length; i++) {
  				if (position[i].bottom<top) {
- 					if (this.props.data.children[i].checked == true) {
+ 					if (this.props.state.data.children[i].checked == true) {
  						this.props.dispatch(Action.selectChildren(i));	
  					}
  					continue;
  				}
  				if (position[i].bottom>top&&position[i].top<top) {
- 					if (this.props.data.children[i].checked == false) {
+ 					if (this.props.state.data.children[i].checked == false) {
  						this.props.dispatch(Action.selectChildren(i));	
- 						if (this.props.data.detail.length!=0) {
- 							this.props.dispatch(Action.setDetail([this.props.data.children[i]]));
+ 						if (this.props.state.data.detail.length!=0) {
+ 							this.props.dispatch(Action.setDetail([this.props.state.data.children[i]]));
  						}
  						
  					}
@@ -261,32 +260,32 @@ class Main extends Component {
  					continue;
  				}
  				if (position[i].bottom<bottom&&position[i].top>top) {
- 					if (this.props.data.children[i].checked == false) {
+ 					if (this.props.state.data.children[i].checked == false) {
  						this.props.dispatch(Action.selectChildren(i));	
- 						if (this.props.data.detail.length!=0) {
- 							this.props.dispatch(Action.setDetail([this.props.data.children[i]]));
+ 						if (this.props.state.data.detail.length!=0) {
+ 							this.props.dispatch(Action.setDetail([this.props.state.data.children[i]]));
  						}
  					}
  					continue;
  				}
  				if (position[i].top<bottom&&position[i].bottom>bottom) {
- 					if (this.props.data.children[i].checked == false) {
+ 					if (this.props.state.data.children[i].checked == false) {
  						this.props.dispatch(Action.selectChildren(i));	
- 						if (this.props.data.detail.length!=0) {
- 							this.props.dispatch(Action.setDetail([this.props.data.children[i]]));
+ 						if (this.props.state.data.detail.length!=0) {
+ 							this.props.dispatch(Action.setDetail([this.props.state.data.children[i]]));
  						}
  					}
  					continue;
  				}
  				if (position[i].top>bottom) {
- 					if (this.props.data.children[i].checked == true) {
+ 					if (this.props.state.data.children[i].checked == true) {
  						this.props.dispatch(Action.selectChildren(i));	
  					}
  					continue;	
  				}
  			}
 			var num = [];
-			var dis = this.props.data.multiple;
+			var dis = this.props.state.data.multiple;
 
 			this.props.dispatch(Action.mouseUp());
 		}
@@ -313,16 +312,7 @@ Main.childContextTypes = {
 	muiTheme: React.PropTypes.object.isRequired
 }
 
-function mapStateToProps (state) {
-	return {
-		navigation: state.navigation,
-		login: state.login,
-		data: state.data,
-		multiple:state.multiple,
-		snack: state.snack,
-		media: state.media
-	}
-}
+
 
 //export component
-export default connect(mapStateToProps)(Main);
+export default Main;

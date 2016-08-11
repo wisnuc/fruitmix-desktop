@@ -11,10 +11,10 @@
 .app {
 	height: 100%
 }
-/*.app>div {
+.app>div:not(.index-frame) {
 	height: 100%
 }
-.app>div>div {
+/*.app>div>div:not(.login-container) {
 	height: 100%
 }*/
 .app-bar {

@@ -696,12 +696,13 @@ ipcMain.on('create-new-user',function(err,u,p,e){
 		console.log('register success');
 		mainWindow.webContents.send('message','注册新用户成功');
 		// mainWindow.webContents.send('closeRegisterDialog');
-		getAllUser().then(users=>{
+		loginApi.getAllUser().then(users=>{
 			user.allUser = users;
 			mainWindow.webContents.send('addUser',user);
 		});
 		
-	}).catch(()=>{
+	}).catch((e)=>{
+		c(e);
 		mainWindow.webContents.send('message','注册新用户失败');
 	});
 });
@@ -762,7 +763,7 @@ ipcMain.on('deleteUser',(err,uuid)=>{
 		function callback (err,res,body) {
 			if (!err && res.statusCode == 200) {
 				console.log('res');
-				getAllUser().then((users)=>{
+				loginApi.getAllUser().then((users)=>{
 					user.allUser = users;
 					mainWindow.webContents.send('setUsers',user);
 				});
@@ -1428,4 +1429,13 @@ ipcMain.on('downloadFolder',(err,folder,type)=>{
 		download.downloadFolder(downloadFolderNow[0]);
 	}
 })
+
+ipcMain.on('store',(err,store)=>{
+	console.log(store);
+	c('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
+	var s = JSON.stringify(store);
+	fs.writeFile(path.join(__dirname,'testDate'),s,(err)=>{
+
+	});
+});
 

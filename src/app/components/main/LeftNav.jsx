@@ -90,4 +90,4 @@ function mapStateToProps (state) {
 	}
 }
 
-export default  connect(mapStateToProps)(leftNav)
+export default  leftNav

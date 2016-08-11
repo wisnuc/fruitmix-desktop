@@ -42,12 +42,18 @@ var App = React.createClass({
 		return(
 			<Provider store={store}>
 				<div className="app">	
-						{isLogin && <Main/>}
+						{isLogin && <Main state={state} dispatch={store.dispatch}/>}
 						{!isLogin && <Login state={state} dispatch={store.dispatch}/>}	
+						{/*<div onClick={this.submit}>submit>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>></div>*/}
 				</div>
 			</Provider>
 			)
 	},
+
+	submit : function () {
+		ipc.send('store', store.getState());
+		console.log('............................?');
+	}
 })
 
 // define dom node
