@@ -170,12 +170,12 @@ class Main extends Component {
 
 		let m = null;
 		if (this.props.state.media.currentMediaImage.open) {
-			m = <Mask></Mask>
+			m = <Mask dispatch={this.props.dispatch} state={this.props.state}/>
 		}
 		return (<CSS opts={['app',true,true,true,500,5000,5000]} style={{height:'100%'}}>
 			<div className="main" key='main' onMouseMove={this.mouseMove.bind(this)} onMouseUp={this.mouseUp.bind(this)} onClick={this.triggerClick.bind(this)}>
 				{/*Multiple select frame*/}
-				<Multiple/>
+				<Multiple dispatch={this.props.dispatch} state={this.props.state}/>
 				{/*Bar*/}
 				<AppBar 
 				className='app-bar' title='WISNUC' titleStyle={{fontSize:'18px'}}
@@ -199,7 +199,7 @@ class Main extends Component {
 				</Drawer>
 				{/*Content*/}
 				<Paper className={"content-container "+(this.props.state.navigation.menu?'content-has-left-padding':'no-padding')} zDepth={0}>
-					<Content></Content>
+					<Content dispatch={this.props.dispatch} state={this.props.state}/>
 				</Paper>
 				{m}
 				<Dialog title="用户管理"

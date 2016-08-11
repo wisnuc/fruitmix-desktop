@@ -8,7 +8,6 @@
 // require core module
  import React, { findDOMNode, Component, PropTypes } from 'react';
  import CSS from '../../utils/transition';
- import { connect } from 'react-redux';
 // import Component 
 import AllFile from '../mainContent/AllFiles';
 import Collection from '../mainContent/Collection';
@@ -29,7 +28,7 @@ class MainContent extends Component {
 		component.push(<Setting key={'f'}></Setting>);
 		
 		// define the content is selected
-		let selectedItem = this.props.nav.nav.findIndex( (item, index, arr) => {
+		let selectedItem = this.props.state.navigation.nav.findIndex( (item, index, arr) => {
 			return item.selected == true
 		});
 		return component[selectedItem]
@@ -46,10 +45,4 @@ class MainContent extends Component {
 	}
 }
 
-function mapStateToProps (state) {
-	return {
-		nav: state.navigation
-	}
-}
-
-export default connect(mapStateToProps)(MainContent);
+export default MainContent;

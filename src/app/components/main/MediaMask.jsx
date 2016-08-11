@@ -8,7 +8,6 @@
  'use strict';
 // require core module
 import React, { findDOMNode, Component, PropTypes } from 'react';
-import { connect } from 'react-redux';
 import { CircularProgress } from 'material-ui';
 //import Action
 import Action from '../../actions/action';
@@ -17,7 +16,7 @@ class Mask extends Component {
 	render() {
 		let style = {
 			height:'100%',
-			display:this.props.media.currentMediaImage.open?'block':'none'
+			display:this.props.state.media.currentMediaImage.open?'block':'none'
 		} 
 		return (
 			<div className='media-mask' style={style}>
@@ -28,10 +27,10 @@ class Mask extends Component {
 	}
 
 	getMediaImage() {
-		if (this.props.media.currentMediaImage.status == 'notReady') {
+		if (this.props.state.media.currentMediaImage.status == 'notReady') {
 			return <CircularProgress/>
 		}else {
-			// let item  = this.props.media.currentMediaImage;
+			// let item  = this.props.state.media.currentMediaImage;
 			// let width = document.body.clientWidth;
 			// let height = document.body.clientHeight;
 			// let scale = width/height;
@@ -51,7 +50,7 @@ class Mask extends Component {
 			// 	}	
 			// }
 			
-			return <img style={style} className='media-mask-image' src={this.props.media.currentMediaImage.path} alt=""/>
+			return <img style={style} className='media-mask-image' src={this.props.state.media.currentMediaImage.path} alt=""/>
 		}
 	}
 
@@ -66,4 +65,4 @@ function mapStateToProps (state) {
 	}
 }
 
-export default connect(mapStateToProps)(Mask)
+export default Mask

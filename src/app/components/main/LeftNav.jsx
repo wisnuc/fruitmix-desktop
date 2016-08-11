@@ -7,7 +7,6 @@
 
  // require core module
  import React, { findDOMNode, Component, PropTypes } from 'react';
- import { connect } from 'react-redux';
 //require material
 import { Menu, MenuItem, SvgIcon } from 'material-ui';
 import svg from '../../utils/SVGIcon';
@@ -42,7 +41,7 @@ class leftNav extends Component {
 			<div className="left-nav-container" style={{position:'relative',height:'100%'}}>
 				{/*top navigation*/}
 				<Menu style={style}>
-				{this.props.nav.nav.map((item,index) => {
+				{this.props.state.navigation.nav.map((item,index) => {
 					if (item.type == 'leftNav') {
 						return (
 							<MenuItem 
@@ -62,7 +61,7 @@ class leftNav extends Component {
 				<div style={{position:'absolute',bottom:0,width:'100%'}}>
 					<div>
 						<Menu>
-							{this.props.nav.nav.map((item,index) => (
+							{this.props.state.navigation.nav.map((item,index) => (
 								item.type=='other'?<MenuItem primaryText={item.name}
 								className={item.selected?"list-selected left-menu-list":'left-menu-list'}
 								style={style}
@@ -84,10 +83,5 @@ class leftNav extends Component {
 	}
 }
 
-function mapStateToProps (state) {
-	return {
-		nav: state.navigation
-	}
-}
 
 export default  leftNav

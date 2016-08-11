@@ -8,7 +8,6 @@
    'use strict';
   // require core module
  import React, { findDOMNode, Component, PropTypes } from 'react';
- import { connect, bindActionCreators } from 'react-redux';
 
  class Multiple extends Component {
  	render() {
@@ -21,7 +20,7 @@
  	}
 
  	getPositon() {
- 		let mul = this.props.multiple.multiple;
+ 		let mul = this.props.state.multiple.multiple;
  		if (mul.isShow) {
  			let startX,startY,width,height;
  			startX= Math.min(mul.left,mul.width);
@@ -55,4 +54,4 @@
 	}
 }
 
- export default connect(mapStateToProps)(Multiple);
+ export default Multiple;
