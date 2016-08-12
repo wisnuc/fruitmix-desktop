@@ -59,10 +59,4 @@ class Mask extends Component {
 	}
 }
 
-function mapStateToProps (state) {
-	return {
-		media: state.media,
-	}
-}
-
 export default Mask

@@ -7,7 +7,6 @@
   'use strict';
 // require core module
  import React, { findDOMNode, Component, PropTypes } from 'react';
- import { connect, bindActionCreators } from 'react-redux';
 
  class Setting extends Component {
  	render() {
@@ -15,7 +14,7 @@
  			<div className='setting-container'>
 	 			<div className='setting-download'>
 	 				<span>下载内容保存位置 : </span>
-	 				<input className='change-path-text' type="text" value={this.props.setting.download}/>
+	 				<input className='change-path-text' type="text" value={this.props.state.setting.download}/>
 	 				<input className='change-path-button' type="button" value='修改' onClick={this.changeDownloadPath.bind(this)}/>
 	 			</div>
  			</div>
@@ -27,10 +26,5 @@
  	}
  }
 
-function mapStateToProps (state) {
-	return {
-		setting: state.setting
-	}
-}
 
-export default connect(mapStateToProps)(Setting);
+export default Setting;

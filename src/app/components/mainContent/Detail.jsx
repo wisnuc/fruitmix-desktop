@@ -7,7 +7,6 @@
   'use strict';
   // require core module
  import React, { findDOMNode, Component, PropTypes } from 'react';
- import { connect, bindActionCreators } from 'react-redux';
  //require material
 import { Paper, Menu, MenuItem,RaisedButton } from 'material-ui';
 //import Action
@@ -15,7 +14,7 @@ import Action from '../../actions/action';
 
  class Detail extends Component {
  	render() {
- 		let data = this.props.isShow.detail[0];
+ 		let data = this.props.state.isShow.detail[0];
 
  		if (data) {
  			 		let style = {
@@ -43,7 +42,7 @@ import Action from '../../actions/action';
  		this.props.dispatch(Action.cleanDetail());
  	}
  	getOwner(owner) {
- 		let o = this.props.login.obj.allUser.find(item=>{
+ 		let o = this.props.state.login.obj.allUser.find(item=>{
  			return item.uuid = owner
  		});
  		if (o != undefined) {
@@ -73,4 +72,4 @@ function mapStateToProps (state) {
 	}
 }
 
- export default connect(mapStateToProps)(Detail);
+ export default Detail;

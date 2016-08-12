@@ -40,13 +40,11 @@ var App = React.createClass({
 		let state = store.getState()
 		let isLogin = state.login.state == 'LOGGEDIN'?true:false
 		return(
-			<Provider store={store}>
 				<div className="app">	
 						{isLogin && <Main state={state} dispatch={store.dispatch}/>}
 						{!isLogin && <Login state={state} dispatch={store.dispatch}/>}	
 						{/*<div onClick={this.submit}>submit>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>></div>*/}
 				</div>
-			</Provider>
 			)
 	},
 

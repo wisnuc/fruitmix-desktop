@@ -7,7 +7,6 @@
  'use strict';
 // require core module
 import React, { findDOMNode, Component, PropTypes } from 'react';
-import { connect, bindActionCreators } from 'react-redux';
 //import Action
 import Action from '../../actions/action';
 import svg from '../../utils/SVGIcon';
@@ -24,7 +23,7 @@ class AllFilesTable extends Component {
 					<tr>
 						<th onClick={this.selectAllChildren.bind(this)}>
 							<div className='selectBox' >
-								<div>{this.props.data.selectAll?svg.select():svg.blackFrame()}</div>
+								<div>{this.props.state.data.selectAll?svg.select():svg.blackFrame()}</div>
 								<div></div>
 								<div></div>
 							</div>
@@ -37,12 +36,12 @@ class AllFilesTable extends Component {
 				{/*table body*/}
 				<tbody>
 					{
-						this.props.data.children.map((item,index)=>{
-							if (index > this.props.data.showSize) {
+						this.props.state.data.children.map((item,index)=>{
+							if (index > this.props.state.data.showSize) {
 								return false
 							}
 							return (
-								<Row dispatch={this.props.dispatch} data={this.props.data} index={index} item={item} key={index} selectChildren={this.selectChildren} enterChildren={this.enterChildren} getTypeOfFile={this.getTypeOfFile} getSize={this.getSize} getTime={this.getTime} addBezier={this.addBezier.bind(this)}></Row>
+								<Row dispatch={this.props.dispatch} data={this.props.state.data} index={index} item={item} key={index} selectChildren={this.selectChildren.bind(this)} enterChildren={this.enterChildren.bind(this)} getTypeOfFile={this.getTypeOfFile.bind(this)} getSize={this.getSize.bind(this)} getTime={this.getTime.bind(this)} addBezier={this.addBezier.bind(this)}></Row>
 							)
 						}
 					)}
@@ -72,7 +71,7 @@ class AllFilesTable extends Component {
 	//select files
 	selectChildren (rowNumber,e) {
 		//bezier
-		// if (this.props.data.children[rowNumber].checked == true) {
+		// if (this.props.state.data.children[rowNumber].checked == true) {
 		// 	this.bez1(rowNumber);
 		// }else {
 		// 	this.bez2(rowNumber);
@@ -81,10 +80,10 @@ class AllFilesTable extends Component {
 			//right click
 			let x = e.nativeEvent.pageX;
 			let y = e.nativeEvent.pageY;
-			if (this.props.data.children[rowNumber].checked == false) {	
-				this.props.dispatch(Action.toggleMenu([this.props.data.children[rowNumber]],x,y,false));
+			if (this.props.state.data.children[rowNumber].checked == false) {	
+				this.props.dispatch(Action.toggleMenu([this.props.state.data.children[rowNumber]],x,y,false));
 			}else {
-				this.props.dispatch(Action.toggleMenu([this.props.data.children[rowNumber]],x,y,true));
+				this.props.dispatch(Action.toggleMenu([this.props.state.data.children[rowNumber]],x,y,true));
 			}
 		}else {
 			//left click
@@ -97,14 +96,14 @@ class AllFilesTable extends Component {
 		//bezier 
 		$('.bezierFrame').empty().append('<div class="bezierTransition1"></div><div class="bezierTransition2"></div>');
 
-		var children = this.props.data.children;
+		var children = this.props.state.data.children;
 		if (children[rowNumber] && children[rowNumber].type == 'folder') {
 			ipc.send('enterChildren',children[rowNumber]);
 		}
 	}
 
 	addBezier (rowNumber) {
-		if (this.props.data.children[rowNumber].checked == false) {
+		if (this.props.state.data.children[rowNumber].checked == false) {
 			this.bez2(rowNumber);
 			$('tbody>tr:eq('+rowNumber+') .bezierFrame').children('.bezierTransition1').addClass('open');
 		}else {
@@ -176,10 +175,5 @@ class AllFilesTable extends Component {
 	}
 }
 
-function mapStateToProps (state) {
-	return {
-		data: state.data
-	}
-}
 
-export default connect(mapStateToProps)(AllFilesTable);
+export default AllFilesTable;

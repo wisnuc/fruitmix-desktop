@@ -7,7 +7,6 @@
   'use strict';
 // require core module
  import React, { findDOMNode, Component, PropTypes } from 'react';
- import { connect } from 'react-redux';
 //require material
 import { Paper, FontIcon, SvgIcon, IconMenu, MenuItem, Dialog, FlatButton, RaisedButton, TextField, Checkbox, CircularProgress } from 'material-ui';
 import { Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn } from 'material-ui/Table';
@@ -32,8 +31,8 @@ class AllFiles extends Component {
 				marginBottom: 16,
 			},
 		};
-		let shareUserList = this.props.login.obj.allUser.map((item,index)=>{
-						if (item.username == this.props.login.obj.username) {
+		let shareUserList = this.props.state.login.obj.allUser.map((item,index)=>{
+						if (item.username == this.props.state.login.obj.username) {
 							return
 						}
 						return <Checkbox key={item.username} label={item.username} style={{marginBottom: 16}} labelPosition="left" onCheck={this.checkUser.bind(this,item.uuid)}/>
@@ -75,8 +74,8 @@ class AllFiles extends Component {
 			<div className='all-my-files' style={{height:'100%'}}>
 				{this.getTable()}
 				{/*file detail*/}
-				<Paper className='file-detail' style={{width:this.props.isShow.detail.length==0?'0px':'350px'}}>
-					<Detail></Detail>
+				<Paper className='file-detail' style={{width:this.props.state.isShow.detail.length==0?'0px':'350px'}}>
+					<Detail dispatch={this.props.dispatch} state={this.props.state}></Detail>
 				</Paper>
 				{/*create new folder dialog*/}
 				<Dialog
@@ -84,7 +83,7 @@ class AllFiles extends Component {
 					titleClassName='create-folder-dialog-title'
 					actions={folderActions}
 					modal={false}
-					open={this.props.isShow.dialogOfFolder}
+					open={this.props.state.isShow.dialogOfFolder}
 					className='create-folder-dialog'
 			        >
 			        <div className='create-folder-dialog-label'>名称</div>
@@ -95,7 +94,7 @@ class AllFiles extends Component {
 					title='分享' 
 					titleClassName='create-folder-dialog-title'
 					actions={shareActions}
-					open={this.props.isShow.dialogOfShare}
+					open={this.props.state.isShow.dialogOfShare}
 					className='create-folder-dialog'
 				>
 					<div className='share-user-list-container'>
@@ -112,7 +111,7 @@ class AllFiles extends Component {
 			lineHeight:'48px'
 		}
 
-		if (this.props.data.state=='BUSY') {
+		if (this.props.state.data.state=='BUSY') {
 			return (<div className='data-loading '><CircularProgress/></div>)
 		}else {
 			return (
@@ -134,9 +133,9 @@ class AllFiles extends Component {
 					</div>
 					{/*file table body*/}
 					<div className="all-files-container">
-						<FilesTable/>
-						<Menu></Menu>
-						<Move></Move>
+						<FilesTable dispatch={this.props.dispatch} state={this.props.state}/>
+						<Menu dispatch={this.props.dispatch} state={this.props.state}></Menu>
+						<Move dispatch={this.props.dispatch} state={this.props.state}></Move>
 					</div>
 				</Paper>
 				)
@@ -172,13 +171,13 @@ class AllFiles extends Component {
 					name:f.name,
 				},
 				uploadTime :  Date.parse(t),
-				parent : this.props.data.directory.uuid,
+				parent : this.props.state.data.directory.uuid,
 				status:0,
 				uuid:null,
 				checked:false,
 				share:false,
 				type:'file',
-				owner:[this.props.login.obj.uuid],
+				owner:[this.props.state.login.obj.uuid],
 				readlist:[''],
 				writelist:[''],
 				hasParent:true
@@ -186,7 +185,7 @@ class AllFiles extends Component {
 			files.push(file);
 			map.set(f.path+Date.parse(t),file);
 		}
-		let fileObj = {data:files,length:files.length,success:0,failed:0,index:0,status:'ready',parent:this.props.data.directory.uuid,map:map,key:Date.parse(new Date())};
+		let fileObj = {data:files,length:files.length,success:0,failed:0,index:0,status:'ready',parent:this.props.state.data.directory.uuid,map:map,key:Date.parse(new Date())};
 		this.props.dispatch(Action.addUpload(fileObj));
 		ipc.send('uploadFile',fileObj);	
 		this.props.dispatch(Action.setSnack(files.length+' 个文件添加到上传队列',true));
@@ -194,7 +193,7 @@ class AllFiles extends Component {
 	//get  bread
 	getBreadCrumb(){
 		var _this = this;
-		var path = this.props.data.path;
+		var path = this.props.state.data.path;
 		var pathArr = [];
 		pathArr = path.map((item,index)=>{
 			return(
@@ -208,8 +207,8 @@ class AllFiles extends Component {
 	//back
 	backToParent () {
 		$('.bezierFrame').empty().append('<div class="bezierTransition1"></div><div class="bezierTransition2"></div>');
-		let parent = this.props.data.parent;
-		let path = this.props.data.path;
+		let parent = this.props.state.data.parent;
+		let path = this.props.state.data.path;
 		if (path.length == 1) {
 			return;
 		}else if (path.length == 2) { 
@@ -234,7 +233,7 @@ class AllFiles extends Component {
 	//create new folder
 	upLoadFolder() {
 		let name = $('#folder-name')[0].value;
-		ipc.send('upLoadFolder',name,this.props.data.directory);
+		ipc.send('upLoadFolder',name,this.props.state.data.directory);
 		this.toggleUploadFolder(false);
 	}
 	//open input of files
@@ -257,12 +256,12 @@ class AllFiles extends Component {
 	share() {
 		let files = [];
 		let users = [];
-		this.props.data.children.forEach((item,index)=>{
+		this.props.state.data.children.forEach((item,index)=>{
 			if (item.checked) {
 				files.push(item);
 			}
 		});
-		this.props.login.obj.allUser.forEach((item,index)=>{
+		this.props.state.login.obj.allUser.forEach((item,index)=>{
 			if (item.checked) {
 				users.push(item.uuid);
 			}
@@ -285,7 +284,7 @@ class AllFiles extends Component {
 		let sHeight = dom.scrollHeight;
 		let cHeight = dom.clientHeight;
 		if (cHeight+sTop == sHeight) {
-			if (this.props.data.children.length <= this.props.data.showSize) {
+			if (this.props.state.data.children.length <= this.props.state.data.showSize) {
 				return
 			}
 			this.props.dispatch(Action.setFilesSize(false));
@@ -293,11 +292,4 @@ class AllFiles extends Component {
 	}
 }
 
-function mapStateToProps (state) {
-	return {
-		data: state.data,
-		login: state.login,
-		isShow: state.isShow
-	}
-}
-export default connect(mapStateToProps)(AllFiles);
+export default AllFiles;

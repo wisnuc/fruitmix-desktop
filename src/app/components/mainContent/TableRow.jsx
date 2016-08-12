@@ -1,5 +1,4 @@
 import React, { findDOMNode, Component, PropTypes } from 'react';
-import { connect, bindActionCreators } from 'react-redux';
 import svg from '../../utils/SVGIcon';
 class Row extends Component {
 	shouldComponentUpdate(nextP) {
@@ -36,10 +35,5 @@ class Row extends Component {
 			)
 	}
 
-}
-function mapStateToProps (state) {
-	return {
-		data: state.data
-	}
 }
 export default Row;

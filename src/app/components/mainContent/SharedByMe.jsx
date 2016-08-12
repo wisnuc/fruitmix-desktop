@@ -7,7 +7,6 @@
   'use strict';
 // require core module
  import React, { findDOMNode, Component, PropTypes } from 'react';
-import { connect, bindActionCreators } from 'react-redux';
 // import Component 
 import Action from '../../actions/action';
 import svg from '../../utils/SVGIcon';	
@@ -28,8 +27,8 @@ class SharedByMe extends Component {
 				{/*table body*/}
 				<tbody>
 					{
-						this.props.data.filesSharedByMe.map((item,index)=>{
-							if (index > this.props.data.showSize) {
+						this.props.state.data.filesSharedByMe.map((item,index)=>{
+							if (index > this.props.state.data.showSize) {
 								return false
 							}
 							return (
@@ -53,7 +52,7 @@ class SharedByMe extends Component {
 	findUser(file) {
 		c.log(file.writelist[0]);
 		let users = '';
-		let allUser = this.props.login.obj.allUser;
+		let allUser = this.props.state.login.obj.allUser;
 		file.writelist.forEach((item,index)=>{
 			let i = allUser.findIndex(i=>i.uuid==item);
 			if (i != -1) {
@@ -78,11 +77,4 @@ class SharedByMe extends Component {
 
 }
 
-function mapStateToProps (state) {
-	return {
-		data: state.data,
-		login: state.login
-	}
-}
-
-export default connect(mapStateToProps)(SharedByMe);
+export default SharedByMe;

@@ -20,12 +20,12 @@ class MainContent extends Component {
 
 	getContentSelected() {
 		let component = [];
-		component.push(<AllFile key={'a'}></AllFile>);
-		component.push(<Collection key={'b'}></Collection>); 
-		component.push(<SharedFiles key={'c'}></SharedFiles>); 
-		component.push(<SharedByMe key={'d'}></SharedByMe>);
-		component.push(<Media key={'e'}></Media>);
-		component.push(<Setting key={'f'}></Setting>);
+		component.push(<AllFile dispatch={this.props.dispatch} state={this.props.state} key={'a'}></AllFile>);
+		component.push(<Collection dispatch={this.props.dispatch} state={this.props.state} key={'b'}></Collection>); 
+		component.push(<SharedFiles dispatch={this.props.dispatch} state={this.props.state} key={'c'}></SharedFiles>); 
+		component.push(<SharedByMe dispatch={this.props.dispatch} state={this.props.state} key={'d'}></SharedByMe>);
+		component.push(<Media dispatch={this.props.dispatch} state={this.props.state} key={'e'}></Media>);
+		component.push(<Setting dispatch={this.props.dispatch} state={this.props.state} key={'f'}></Setting>);
 		
 		// define the content is selected
 		let selectedItem = this.props.state.navigation.nav.findIndex( (item, index, arr) => {

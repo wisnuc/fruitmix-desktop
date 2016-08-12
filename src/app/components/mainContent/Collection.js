@@ -7,14 +7,14 @@
   'use strict';
 // require core module
  import React, { findDOMNode, Component, PropTypes } from 'react';
- import { connect, bindActionCreators } from 'react-redux';
 import { Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn } from 'material-ui/Table';
 import {Tabs, Tab} from 'material-ui/Tabs';
 // import Component 
 
 class Collection extends Component {
 	render() {
-		let t = this.props.transmission;
+		let t = this.props.state.transmission;
+		console.log(t);
 		let uploadList = [];
 		let downloadList = [];
 		t.upload.forEach(item=>{
@@ -125,10 +125,4 @@ class Collection extends Component {
 
 }
 
-function mapStateToProps (state) {
-	return {
-		transmission: state.transmission
-	}
-}
-
-export default  connect(mapStateToProps)(Collection);
+export default Collection;

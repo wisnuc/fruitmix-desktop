@@ -7,7 +7,6 @@
   'use strict';
 // require core module
  import React, { findDOMNode, Component, PropTypes } from 'react';
- import { connect, bindActionCreators } from 'react-redux';
  import { Table,TableHeader, TableHeaderColumn, TableBody, TableRow, TableRowColumn } from 'material-ui/Table';
  import svg from '../../utils/SVGIcon';
  //import Action
@@ -39,7 +38,7 @@ class SharedFiles extends Component {
 						</tr>
 					</thead>
 					<tbody>
-						{this.props.data.shareChildren.map(item=>(
+						{this.props.state.data.shareChildren.map(item=>(
 							<Row 
 								key={item.uuid}
 								item={item}
@@ -57,7 +56,7 @@ class SharedFiles extends Component {
 	//get  bread
 	getBreadCrumb(){
 		var _this = this;
-		var path = this.props.data.sharePath;
+		var path = this.props.state.data.sharePath;
 		var pathArr = [];
 		pathArr = path.map((item,index)=>{
 			return(
@@ -70,7 +69,7 @@ class SharedFiles extends Component {
 	}
 
 	getShareUser(item) {
-		let user = this.props.login.obj.allUser.find((i)=>{return item == i.uuid});
+		let user = this.props.state.login.obj.allUser.find((i)=>{return item == i.uuid});
 		return user.username;
 		console.log(user);
 	}
@@ -115,4 +114,4 @@ function mapStateToProps (state) {
 	}
 }
 
-export default connect(mapStateToProps)(SharedFiles);
+export default SharedFiles;
