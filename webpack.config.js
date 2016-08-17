@@ -46,8 +46,7 @@ module.exports = {
             {
                 test   : /\.(js|jsx)$/,
                 exclude: /node_modules/,
-                loader : 'babel',
-                query  : { presets:['es2015','react'] }
+                loader : 'react-hot!babel-loader'
             }, 
             {
                 test  : /\.css$/,
@@ -63,10 +62,10 @@ module.exports = {
     plugins: [
         new webpack.HotModuleReplacementPlugin(),
         new HtmlWebpackPlugin({template: path.resolve(__dirname, 'src/index.html')}),
-        new CopyWebpackPlugin([
-            { from:  path.resolve(SRC_PATH,'electron-index.js'), to: 'electron-index.js' },
-            { from:  path.resolve(SRC_PATH,'index.html'), to: 'index.html' }
-        ])
+        // new CopyWebpackPlugin([
+        //     { from:  path.resolve(SRC_PATH,'electron-index.js'), to: 'electron-index.js' },
+        //     { from:  path.resolve(SRC_PATH,'index.html'), to: 'index.html' }
+        // ])
     ]
 
 };
