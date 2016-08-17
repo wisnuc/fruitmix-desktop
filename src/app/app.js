@@ -8,8 +8,6 @@
 //import core module
 import React from 'react'
 import { render } from 'react-dom'
-import { Provider } from 'react-redux'
- import CSS from './utils/transition'
 import injectTapEventPlugin from 'react-tap-event-plugin'
 injectTapEventPlugin()
 
