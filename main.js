@@ -1,4 +1,3 @@
-'use strict';
 //corn module
 
 const electron = require('electron');
@@ -1432,10 +1431,13 @@ ipcMain.on('downloadFolder',(err,folder,type)=>{
 
 ipcMain.on('store',(err,store)=>{
 	console.log(store);
-	c('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
 	var s = JSON.stringify(store);
 	fs.writeFile(path.join(__dirname,'testDate'),s,(err)=>{
 
 	});
+});
+
+ipcMain.on('dispatch',(err,action)=>{
+	c(action);
 });
 
