@@ -31,6 +31,13 @@ window.c = console
 window.onresize = function() {
 	store.dispatch({type:''})
 }
+window.mocha = false;
+if (mocha) {
+	window.dispatch = store.dispatch
+}else {
+	window.dispatch = store.dispatch
+}
+
 //APP component
 var App = React.createClass({
 	render: function(){
@@ -39,8 +46,8 @@ var App = React.createClass({
 		let isLogin = state.login.state == 'LOGGEDIN'?true:false
 		return(
 				<div className="app">	
-						{isLogin && <Main state={state} dispatch={store.dispatch}/>}
-						{!isLogin && <Login state={state} dispatch={store.dispatch}/>}	
+						{isLogin && <Main state={state} dispatch={dispatch}/>}
+						{!isLogin && <Login state={state} dispatch={dispatch}/>}	
 						{/*<div onClick={this.submit}>submit>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>></div>*/}
 				</div>
 			)
