@@ -92,6 +92,7 @@ class Index extends React.Component {
 	}
 
 	render() {
+		c.log(this.props.state)
 		var _this = this;
 		let findDevice = this.props.state.login.findDevice;
 		let loginContent;

@@ -36,7 +36,9 @@ window.onresize = function() {
 	// store.dispatch({type:''})
 }
 
-window.mocha = false;
+window.mocha = true
+// window.mocha = false
+window.mochaState = store.getState()
 
 if (mocha) {
 	window.dispatch = (action)=>{ipc.send('dispatch',action)}
@@ -49,20 +51,23 @@ var App = React.createClass({
 	render: function(){
 		console.log('render >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
 		let state = store.getState()
-		let isLogin = state.login.state == 'LOGGEDIN'?true:false
+		let isLogin 
+		if (mocha) {
+			isLogin = mochaState.login.state == 'LOGGEDIN'?true:false
+		}else {
+			isLogin = state.login.state == 'LOGGEDIN'?true:false
+		}
 		return(
 				<div className="app">	
 						{/*<button onClick={this.save}>store</button>*/}
-						<button onClick={this.save}>store</button>
-						{isLogin && <Main state={state} dispatch={dispatch}/>}
-						{!isLogin && <Login state={state} dispatch={dispatch}/>}	
+						{isLogin && <Main state={mocha?mochaState:state} dispatch={dispatch}/>}
+						{!isLogin && <Login state={mocha?mochaState:state} dispatch={dispatch}/>}	
 						{/*<div onClick={this.submit}>submit>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>></div>*/}
 				</div>
 			)
 	},
 
 	save : function () {
-		console.log('svae');
 		ipc.send('store', store.getState());
 	}
 })
@@ -80,6 +85,11 @@ Render()
 
 //subscribe store change
 store.subscribe(()=>{
+	Render()
+})
+
+ipc.on('stateUpdate',(err,data)=>{
+	mochaState = data
 	Render()
 })
 

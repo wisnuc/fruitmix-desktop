@@ -23,7 +23,10 @@ module.exports = {
     cache  : true,
     debug  : true,
     target: 'electron',
-
+    watchOptions: {  
+        poll: true
+    },
+    devtool: 'eval-source-map',
     entry: [
         'webpack/hot/poll?1000',
         // 'webpack/hot/only-dev-server',

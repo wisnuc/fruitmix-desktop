@@ -1432,12 +1432,31 @@ ipcMain.on('downloadFolder',(err,folder,type)=>{
 ipcMain.on('store',(err,store)=>{
 	console.log(store);
 	var s = JSON.stringify(store);
-	fs.writeFile(path.join(__dirname,'testDate'),s,(err)=>{
-
+	fs.writeFile(path.join(__dirname,'testData'),s,(err)=>{
+		if (err) {
+			c('save store failed : ' + err )
+		}else {
+			c('save store success ' )
+		}
 	});
 });
 
 ipcMain.on('dispatch',(err,action)=>{
+	c('=== dispatch begin ===');
 	c(action);
+	c('=== dispatch end ===');
+	let store ;
+	switch(action.type){
+		case "":
+			return {}
+		default :
+			fs.readFile(path.join(__dirname,'testData'),{encoding:'utf8'},(err,data)=>{
+				if (err) {
+					c(err)
+					return 
+				}
+				mainWindow.webContents.send('stateUpdate', JSON.parse(data));
+			});
+	}
 });
 
