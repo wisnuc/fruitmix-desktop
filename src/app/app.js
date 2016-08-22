@@ -28,6 +28,11 @@ require('../assets/css/app.css')
 import configureStore from './stores/store'
 
 const store = configureStore()
+
+var storeLock = false
+
+var waitForRender = null
+
 injectTapEventPlugin()
 
 window.c = console
@@ -36,9 +41,11 @@ window.onresize = function() {
 	// store.dispatch({type:''})
 }
 
-window.mocha = true
-// window.mocha = false
+window.mocha = false
+
 window.mochaState = store.getState()
+
+
 
 if (mocha) {
 	window.dispatch = (action)=>{ipc.send('dispatch',action)}
@@ -49,7 +56,6 @@ if (mocha) {
 //APP component
 var App = React.createClass({
 	render: function(){
-		console.log('render >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
 		let state = store.getState()
 		let isLogin 
 		if (mocha) {
@@ -68,7 +74,7 @@ var App = React.createClass({
 	},
 
 	save : function () {
-		ipc.send('store', store.getState());
+		ipc.send('store', store.getState())
 	}
 })
 
@@ -78,15 +84,27 @@ var appMountElement = document.getElementById('app')
 //define render function
 var Render = () =>{
 	render(<App></App>,appMountElement)
-};
+}
 
 //render
 Render()
 
 //subscribe store change
 store.subscribe(()=>{
-	Render()
+	if (storeLock) {
+		clearTimeout(waitForRender)
+		waitForRender = setTimeout(()=>{storeLock = false;Render()},50)
+	}else {
+		Render()
+		storeLock = true
+		waitForRender = setTimeout(()=>{storeLock = false},50)
+	}
+	
 })
+
+var clearLock = ()=>{
+	return setTimeout(()=>{storeLock = false; Render()},50)
+}
 
 ipc.on('stateUpdate',(err,data)=>{
 	mochaState = data
