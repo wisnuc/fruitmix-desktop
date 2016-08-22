@@ -1,4 +1,5 @@
-//corn module
+var Promise = require('bluebird')//corn module
+var deepEqual = require('deep-equal')
 
 const electron = require('electron');
 const {app, BrowserWindow, ipcMain, dialog } = require('electron');
@@ -7,7 +8,7 @@ global.ipcMain = ipcMain;
 global.request = require('request');
 global.fs = require ('fs');
 global.stream = require('stream');
-global.path = require('path');
+var path = require('path');
 global._ = require('lodash');
 global.mdns = require('mdns-js');
 // const m = require('mdns');
@@ -60,6 +61,7 @@ global.serverRecord = null;
 
 global.c = console.log;
 
+global.mocha = true
 
 mdns.excludeInterface('0.0.0.0');
 var browser = mdns.createBrowser(mdns.tcp('http'));
@@ -1441,6 +1443,9 @@ ipcMain.on('store',(err,store)=>{
 	});
 });
 
+var expecting = null
+
+/**
 ipcMain.on('dispatch',(err,action)=>{
 	c('=== dispatch begin ===');
 	c(action);
@@ -1459,4 +1464,83 @@ ipcMain.on('dispatch',(err,action)=>{
 			});
 	}
 });
+**/
+
+ipcMain.on('dispatch', (err, action) => {
+
+	if (action === undefined) return
+
+	if (expecting && typeof expecting ==='function') {
+		console.log('triggering expecting >>>>')
+		expecting(action)
+		console.log('triggering expecting done <<<<')
+		expecting = null
+	}
+	else {
+		console.log('no expecting')
+	}
+})
+
+function loadSendExpect(testcase, callback) {
+
+	console.log('debug ====')
+	console.log(testcase.data)
+
+	fs.readFile(testcase.data, (err, data) => {
+		if (err) return callback(err)
+		let parsed
+		try {
+			parsed = JSON.parse(data.toString())
+		}
+		catch(e) {
+			return callback(e)
+		}
+		console.log('sending parsed content to mainWindow')
+		mainWindow.webContents.send('stateUpdate', parsed)
+
+		console.log('testcase name:' + testcase.name)
+		console.log('hint:' + testcase.hint)
+
+		expecting = function(action) {
+			if (deepEqual(action, testcase.expectation)) {
+				console.log('passed.')
+				callback(null)
+			}
+			else {
+				console.log('assertion failed:' + testcase.name)
+				console.log('expectation:')
+				console.log(testcase.expectation)
+				console.log('actual:')
+				console.log(action)
+				callback(new Error('test failed'))
+			}
+		}
+	})
+}
+
+var loadSendExpectAsync = Promise.promisify(loadSendExpect)
+
+function testInit(callback) {
+	if (!mocha) {
+		return
+	}
+	fs.readdir('viewtest', (err, entries) => {
+		if (err) return callback(err)
+		console.log('=====')
+		console.log(entries)
+
+		let cases = require(path.join(process.cwd(), 'viewtest', entries[0]))()
+
+		console.log(cases)
+
+		loadSendExpectAsync(cases[0])
+			.then(() => callback(null))
+			.catch(e => callback(e))
+	})
+}
+
+setTimeout(() => testInit((err) => {
+	console.log(err)
+	console.log('test data sent to mainWindow')
+}), 3000)
 
