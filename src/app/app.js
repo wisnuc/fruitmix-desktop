@@ -10,16 +10,16 @@ import React from 'react'
 import { render } from 'react-dom'
 import injectTapEventPlugin from 'react-tap-event-plugin'
 
-
-// global import jQuery
-global.$ = global.jQuery = global.jQuery || require('jquery')
-
-var {ipcRenderer} = require('electron')
+import { ipcRenderer } from 'electron'
 window.ipc = ipcRenderer
 
 //import component
 import Login  from'./components/login/Login'// login
 import Main from './components/main/Main'//main
+
+
+// global import jQuery
+global.$ = global.jQuery = global.jQuery || require('jquery')
 
 //import css
 require('../assets/css/app.css')
@@ -29,11 +29,11 @@ import configureStore from './stores/store'
 
 const store = configureStore()
 
+injectTapEventPlugin()
+
 var storeLock = false
 
 var waitForRender = null
-
-injectTapEventPlugin()
 
 window.c = console
 
@@ -44,8 +44,6 @@ window.onresize = function() {
 window.mocha = false
 
 window.mochaState = store.getState()
-
-
 
 if (mocha) {
 	window.dispatch = (action)=>{ipc.send('dispatch',action)}

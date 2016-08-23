@@ -2,8 +2,9 @@ var Promise = require('bluebird')//corn module
 var deepEqual = require('deep-equal')
 
 const electron = require('electron');
-const {app, BrowserWindow, ipcMain, dialog } = require('electron');
+const {app, BrowserWindow, ipcMain, dialog, Menu, Tray } = require('electron');
 global.ipcMain = ipcMain;
+var appIcon = null
 
 global.request = require('request');
 global.fs = require ('fs');
@@ -158,7 +159,8 @@ app.on('ready', function() {
 		width: 1366,
 		minWidth:1024,
 		minHeight:768,
-		title:'WISNUC'
+		title:'WISNUC',
+		icon: path.join(__dirname,'180-180.png')
 	});
 	//window title
 	mainWindow.on('page-title-updated',function(event){
@@ -185,7 +187,23 @@ app.on('ready', function() {
 			});
 		}
 	});
+
+	//Tray
+	appIcon = new Tray(path.join(__dirname,'180-180.png'))
+	var contextMenu = Menu.buildFromTemplate([
+	    { label: 'Item1', type: 'radio' },
+	    { label: 'Item2', type: 'radio' },
+	    { label: 'Item3', type: 'radio', checked: true },
+	    { label: 'Item4', type: 'radio' }
+	]);
+	appIcon.setToolTip('This is my application.');
+  	appIcon.setContextMenu(contextMenu);
 });
+
+app.on('window-all-closed', () => {
+  app.quit();
+});
+
 ipcMain.on('getDeviceUsedRecently',err=>{
 	c(' ');
 	//have device used recently
@@ -971,9 +989,7 @@ ipcMain.on('loginOff',err=>{
 	thumbQueue = [];
 	thumbIng = [];
 });
-app.on('window-all-closed', () => {
-  app.quit();
-});
+
 ipcMain.on('changeDownloadPath', e=>{
 	dialog.showOpenDialog({properties: [ 'openDirectory']},function(folder) {
 		if (folder == undefined)　{
@@ -1181,6 +1197,7 @@ ipcMain.on('openInputOfFolder', e=>{
 		c('folder path is : ' + folderPath);
 		let t = (new Date()).getTime();
 		uploadObj.key = folder+t;
+		
 		genTask(folderPath,function(err,o){		
 			uploadObj.data = o;
 			uploadObj.name = path.basename(folderPath);
