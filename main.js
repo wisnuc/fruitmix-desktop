@@ -62,7 +62,7 @@ global.serverRecord = null;
 
 global.c = console.log;
 
-global.mocha = true
+global.mocha = false
 
 mdns.excludeInterface('0.0.0.0');
 var browser = mdns.createBrowser(mdns.tcp('http'));
