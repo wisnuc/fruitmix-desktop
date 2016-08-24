@@ -1560,4 +1560,4 @@ setTimeout(() => testInit((err) => {
 	console.log(err)
 	console.log('test data sent to mainWindow')
 }), 3000)
-//1
+
