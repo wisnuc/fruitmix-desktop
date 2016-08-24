@@ -4,7 +4,7 @@ var path = require('path');
 var folderPath
 folderPath = '/home/harry/Documents/winsun-electron/node_modules'
 folderPath = 'E:\\下载\\TestData'
-// folderPath = 'C:\\Program Files'
+folderPath = '/home/harry/Documents/TestData'
 // folderPath = 'E:\\winsun-electron\\src'
 
 var uploadObj = {
@@ -41,10 +41,10 @@ function traverse(filePath, position, callback ) {
 		}
 		uploadObj.count++
 		if (stat.isFile()) {
-			console.log('count : ' + uploadObj.count + ' ' + filePath + ' ----> file');
+			// console.log('count : ' + uploadObj.count + ' ' + filePath + ' ----> file');
 			return callback();
 		}
-		console.log('count : ' + uploadObj.count + ' ' + filePath + ' ----> directory');
+		// console.log('count : ' + uploadObj.count + ' ' + filePath + ' ----> directory');
 
 		fs.readdir(filePath, (err, entries) => {
 			if (entries.length == 0) {
@@ -68,6 +68,5 @@ function traverse(filePath, position, callback ) {
 			position.push({times: 0,children: [],path: path.join(filePath,entries[index]),status: '准备',parent: null,type: stat.isFile()?'file':'folder',name: entries[index]})
 			traverse(path.join(filePath,entries[index]),position[index].children,childrenCallback)
 		})
-		
 	})
 }
