@@ -1,8 +1,12 @@
 'use strict';
 global.fs = require ('fs');
 var path = require('path');
+var folderPath
+folderPath = '/home/harry/Documents/winsun-electron/node_modules'
+folderPath = 'E:\\下载\\TestData'
+// folderPath = 'C:\\Program Files'
+// folderPath = 'E:\\winsun-electron\\src'
 
-var folderPath = '/home/harry/Documents/winsun-electron/node_modules'
 var uploadObj = {
 	status: '准备',
 	data: {
@@ -20,12 +24,13 @@ var uploadObj = {
 	type: 'folder',
 	name: ''
 }
-
+console.log((new Date));
 traverse(folderPath, uploadObj.data.children, err => {
 	if (err) {
 		console.log(err)
 	}else {
-		console.log('finish');
+		console.log((new Date));
+		console.log(uploadObj);
 	}
 })
 
@@ -48,7 +53,6 @@ function traverse(filePath, position, callback ) {
 
 			let count = entries.length
 			let index = 0
-			// position.push({times: 0,children: [],path: path.join(filePath,entries[index]),status: '准备',parent: null,type: stat.isFile()?'file':'folder',name: entries[index]})
 			let childrenCallback = err => {
 				if (err) {
 					return callback(err)
@@ -57,10 +61,12 @@ function traverse(filePath, position, callback ) {
 				if (index == count) {
 					callback(null)
 				}else {
-					traverse(path.join(filePath,entries[index]),position,childrenCallback)
+					position.push({times: 0,children: [],path: path.join(filePath,entries[index]),status: '准备',parent: null,type: stat.isFile()?'file':'folder',name: entries[index]})
+					traverse(path.join(filePath,entries[index]),position[index].children,childrenCallback)
 				}
 			}
-			traverse(path.join(filePath,entries[index]),position,childrenCallback)
+			position.push({times: 0,children: [],path: path.join(filePath,entries[index]),status: '准备',parent: null,type: stat.isFile()?'file':'folder',name: entries[index]})
+			traverse(path.join(filePath,entries[index]),position[index].children,childrenCallback)
 		})
 		
 	})
