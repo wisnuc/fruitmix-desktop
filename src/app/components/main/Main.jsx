@@ -146,6 +146,10 @@ class Main extends Component {
 		ipc.on('addUser',(err,user)=>{
 			this.props.dispatch(Action.login(user));
 		});
+
+		ipc.on('showMessage',(err,data)=>{
+			c.log(data)
+		})
 	}
 
 	componentWillUnmount() {

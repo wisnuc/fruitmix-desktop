@@ -5,7 +5,7 @@ var folderPath
 folderPath = '/home/harry/Documents/winsun-electron/node_modules'
 folderPath = 'E:\\下载\\TestData'
 folderPath = '/home/harry/Documents/TestData'
-// folderPath = 'E:\\winsun-electron\\src'
+folderPath = '/home/harry/Documents/winsun-electron/src'
 
 var uploadObj = {
 	status: '准备',
@@ -34,25 +34,19 @@ traverse(folderPath, uploadObj.data.children, err => {
 	}
 })
 
-function traverse(filePath, position, callback ) {
-	fs.stat(filePath, (err, stat) => {
-		if (err || (!stat.isDirectory() && !stat.isFile())) {
-			return callback(err||'error')
-		}
-		uploadObj.count++
-		if (stat.isFile()) {
-			// console.log('count : ' + uploadObj.count + ' ' + filePath + ' ----> file');
-			return callback();
-		}
-		// console.log('count : ' + uploadObj.count + ' ' + filePath + ' ----> directory');
+	function traverse(filePath, position, callback ) {
 
 		fs.readdir(filePath, (err, entries) => {
+			if (err) {
+				callback(err)
+			}
 			if (entries.length == 0) {
 				return callback(null)
 			}
 
 			let count = entries.length
 			let index = 0
+
 			let childrenCallback = err => {
 				if (err) {
 					return callback(err)
@@ -61,12 +55,28 @@ function traverse(filePath, position, callback ) {
 				if (index == count) {
 					callback(null)
 				}else {
-					position.push({times: 0,children: [],path: path.join(filePath,entries[index]),status: '准备',parent: null,type: stat.isFile()?'file':'folder',name: entries[index]})
-					traverse(path.join(filePath,entries[index]),position[index].children,childrenCallback)
+					readEntry()
 				}
 			}
-			position.push({times: 0,children: [],path: path.join(filePath,entries[index]),status: '准备',parent: null,type: stat.isFile()?'file':'folder',name: entries[index]})
-			traverse(path.join(filePath,entries[index]),position[index].children,childrenCallback)
+
+			let readEntry = ()=>{
+				fs.stat(path.join(filePath,entries[index]),(err,stat)=>{
+
+					if (err || (!stat.isDirectory() && !stat.isFile())) {
+						return callback(err||'error')
+					}
+
+					uploadObj.count++
+					position.push({times: 0,children: [],path: path.join(filePath,entries[index]),status: '准备',parent: null,type: stat.isFile()?'file':'folder',name: entries[index]})
+					if (stat.isFile()) {
+						c('count : ' + uploadObj.count + '>>>' + path.join(filePath,entries[index]) + ' is a file')
+						childrenCallback(null)
+					}else {
+						c('count : ' + uploadObj.count + '>>>' + path.join(filePath,entries[index]) + ' is a folder')
+						traverse(path.join(filePath,entries[index]),position[index].children,childrenCallback)
+					}
+				})
+			}
+			readEntry()
 		})
-	})
-}
+	}

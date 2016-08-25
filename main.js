@@ -498,6 +498,7 @@ function classifyShareFiles() {
 //generate tree
 function getTree(f,type) {
 	let files = [];
+	c('date 1 : ' + (new Date))
 	f.forEach((item)=>{
 		if ((type == 'file' && !item.share)||(type == 'share' && item.share)) {
 			let hasParent = true;
@@ -522,11 +523,14 @@ function getTree(f,type) {
 			});
 		}
 	});
+	c('date 2 : ' + (new Date))
 	let tree = files.map((node,index)=>{
+		console.log(index);
 		// node.parent = files.find((item1)=>{return (item1.uuid == node.parent)});
 		node.children = files.filter((item2)=>{return (item2.parent == node.uuid)});
 		return node
 	});
+	c('date 3 : ' + (new Date))
 	if (type == 'share') {
 		tree.forEach((item)=>{
 			shareMap.set(item.uuid,item);
@@ -1188,22 +1192,62 @@ ipcMain.on('uploadFile',(e,files)=>{
 
 //upload folder
 ipcMain.on('openInputOfFolder', e=>{
-	var uploadObj = {status:'准备',data:{},success:0,count:0,key:'',type:'folder',name:''};
+	// initialize object
+	var uploadObj = {
+		status: '准备',
+		data: {
+			times: 0,
+			children: [],
+			path: null,
+			status: '准备',
+			parent: currentDirectory.uuid,
+			type: 'folder',
+			name: null
+		},
+		success: 0,
+		count: 1,
+		key: '',
+		type: 'folder',
+		name: ''
+	}
 	dialog.showOpenDialog({properties: [ 'openDirectory']},function(folder){
+
 		if (folder == undefined)　{
 			return
 		}
-		let folderPath = path.normalize(folder[0]);
-		c('folder path is : ' + folderPath);
-		let t = (new Date()).getTime();
-		uploadObj.key = folder+t;
+		// initialize object attribute
+		let folderPath = path.normalize(folder[0])
+		let t = (new Date()).getTime()
+		
+		uploadObj.name = path.basename(folderPath)
+		uploadObj.key = folder+t
+		uploadObj.data.path = folderPath 
+		uploadObj.data.name = path.basename(folderPath)
+		c('')
+		c('upload folder path is : ' + folderPath);
+
+		//send transmission task 
 		mainWindow.webContents.send('transmissionUpload',uploadObj);
-		traverse(folderPath,function(err,o){		
-			uploadObj.data = o;
-			uploadObj.name = path.basename(folderPath);
+
+		
+		c((new Date))
+
+		let showCountOfUpload = setInterval(()=>{
+			c('the number of folder ' + path.basename(folderPath) + ' is ' + uploadObj.count)
+		},3000)
+		// get upload folder tree and upload it 
+		traverse(folderPath, uploadObj.data.children, function(err,o){
+
+			clearInterval(showCountOfUpload)
+
+			c('folder : ' + folderPath + ' loop finish ')
+
+			c((new Date))
+			
 			let st = setInterval(()=>{
 				mainWindow.webContents.send('refreshUploadStatusOfFolder',uploadObj.key,uploadObj.success+' / '+uploadObj.count);
 			},1000);
+
 			let f = function() {
 				if (o.times>5) {
 						c('folder upload success !');
@@ -1220,104 +1264,54 @@ ipcMain.on('openInputOfFolder', e=>{
 				mainWindow.webContents.send('refreshUploadStatusOfFolder',uploadObj.key,'已完成');
 			}
 			
-			uploadNode(o,s,f);
+			uploadNode(uploadObj.data, s, f)
 		});
 	})
 	function traverse(filePath, position, callback ) {
-		fs.stat(filePath, (err, stat) => {
-			if (err || (!stat.isDirectory() && !stat.isFile())) {
-				return callback(err||'error')
-			}
-			uploadObj.count++
-			if (stat.isFile()) {
-				// console.log('count : ' + uploadObj.count + ' ' + filePath + ' ----> file');
-				return callback();
-			}
-			// console.log('count : ' + uploadObj.count + ' ' + filePath + ' ----> directory');
 
-			fs.readdir(filePath, (err, entries) => {
-				if (entries.length == 0) {
-					return callback(null)
+		fs.readdir(filePath, (err, entries) => {
+			if (err) {
+				callback(err)
+			}
+			if (entries.length == 0) {
+				return callback(null)
+			}
+
+			let count = entries.length
+			let index = 0
+
+			let childrenCallback = err => {
+				if (err) {
+					return callback(err)
 				}
+				index++
+				if (index == count) {
+					callback(null)
+				}else {
+					readEntry()
+				}
+			}
 
-				let count = entries.length
-				let index = 0
-				let childrenCallback = err => {
-					if (err) {
-						return callback(err)
+			let readEntry = ()=>{
+				fs.stat(path.join(filePath,entries[index]),(err,stat)=>{
+
+					if (err || (!stat.isDirectory() && !stat.isFile())) {
+						return callback(err||'error')
 					}
-					index++
-					if (index == count) {
-						callback(null)
+
+					uploadObj.count++
+					position.push({times: 0,children: [],path: path.join(filePath,entries[index]),status: '准备',parent: null,type: stat.isFile()?'file':'folder',name: entries[index]})
+					if (stat.isFile()) {
+						childrenCallback(null)
 					}else {
-						position.push({times: 0,children: [],path: path.join(filePath,entries[index]),status: '准备',parent: null,type: stat.isFile()?'file':'folder',name: entries[index]})
 						traverse(path.join(filePath,entries[index]),position[index].children,childrenCallback)
 					}
-				}
-				position.push({times: 0,children: [],path: path.join(filePath,entries[index]),status: '准备',parent: null,type: stat.isFile()?'file':'folder',name: entries[index]})
-				traverse(path.join(filePath,entries[index]),position[index].children,childrenCallback)
-			})
+				})
+			}
+			readEntry()
 		})
 	}
-	// function genTask(rootpath, callback) {
-	//   	let obj = {times:0,children:[],path:rootpath,status:'准备',parent:currentDirectory.uuid,type:'folder',name:path.basename(rootpath)};
-	//   	var func = (dir, stat, cur) => {
-	//   		cur.push({
-	//   			path: dir,
-	//   			type: stat?'folder':'file',
-	//   			times: 0,
-	//   			status: 'ready',
-	//   			uuid:null,
-	//   			children:[],
-	//   			parent:null,
-	//   			name: path.basename(dir)
-	//   		});
-	//   	}
-	//   	traverse(rootpath, func, () => callback(null, obj), obj.children);
-	//   	function traverse(dir, visitor, callback, current) {
-	//   		uploadObj.count++;
-	// 		//read directory
-	// 	  	fs.readdir(dir, (err, entries) => {
-	// 	  		//directory err
-	// 	  		if (err) return callback(err);
-	// 			if (entries.length === 0) return callback(err);
-	// 			//directory right
-	// 			var count = entries.length;
-	// 			//map children
-	// 			entries.forEach(entry => {
-	// 		  		let entryPath = path.join(dir, entry);
-	// 		  		fs.stat(entryPath, (err, stat) => {
-	// 		  			//is entry directory
-	// 				  	if (err || (!stat.isDirectory() && !stat.isFile())) {
-	// 				  	  	count--
-	// 				  	  	if (count === 0) callback()
-	// 				  	  	return
-	// 				  	}
-	// 				  	//insert file to tree
-	// 					visitor(entryPath, stat.isDirectory(), current);
-	// 	        		if (stat.isDirectory()) {
-	//   						c('count : ' + uploadObj.count + ' ' + entryPath + ' ----> directory');
-	// 	        			//recursion
-	// 	        			let index = current.length;
-	// 	          			traverse(entryPath,visitor, () => {
-	// 	          			count--
-	// 	          			if (count === 0) callback()
-	// 	          				return
-	// 	          			},current[index-1].children);
-		          			
-	// 	        		}
-	// 	        		else {
-	// 	        			uploadObj.count++;
-	// 	        			c('count : ' + uploadObj.count + ' ' + entryPath + ' ----> file');
-	// 	          			count--
-	// 			          	if (count === 0) callback()
-	// 			          	return
-	// 		        	}
-	// 		  		})
-	// 			})
-	// 	  	})
-	// 	}
-	// }
+
 	function uploadNode(node,callback,failedCallback) {
 		try{
 			c(' ');
