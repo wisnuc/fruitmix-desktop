@@ -3,7 +3,7 @@ var testcases = []
 testcases.push({
 	name: 'hello',
 	hint: 'please press login button',
-	data: 'testData',
+	data: 'testStore',
 	expectation: {	// action
 		type: 'FILES_LOADING'
 	}

@@ -13,7 +13,8 @@ var path = require('path');
 global._ = require('lodash');
 global.mdns = require('mdns-js');
 // const m = require('mdns');
-global.mainWindow = null;
+global.mainWindow = null
+global.testWindow = null
 global.fruitmixWindow = null
 //server
 global.server = '';
@@ -198,6 +199,21 @@ app.on('ready', function() {
 	]);
 	appIcon.setToolTip('This is my application.');
   	appIcon.setContextMenu(contextMenu);
+
+  	if (mocha) {
+		testWindow = new BrowserWindow({
+			frame: true,
+			height: 768,
+			resizable: true,
+			width: 1366,
+			minWidth:1024,
+			minHeight:768,
+			title:'WISNUC',
+			icon: path.join(__dirname,'180-180.png')
+		});
+		testWindow.webContents.openDevTools();
+		testWindow.loadURL('file://' + __dirname + '/test/storeTest.html')
+	}
 });
 
 app.on('window-all-closed', () => {
@@ -339,6 +355,9 @@ ipcMain.on('getRootData', ()=> {
 	c(' ');
 	c('achieve data : ');
 	getFiles().then((data)=>{
+		// fs.writeFile(path.join(__dirname,'testFileData'),JSON.stringify(data),(err,d)=>{
+		// 	if(err){c(err)}else{c(d)}
+		// })
 		c('get allfiles and length is : ' + data.length );
 		//share data
 		allFiles.length = 0;
@@ -525,7 +544,6 @@ function getTree(f,type) {
 	});
 	c('date 2 : ' + (new Date))
 	let tree = files.map((node,index)=>{
-		console.log(index);
 		// node.parent = files.find((item1)=>{return (item1.uuid == node.parent)});
 		node.children = files.filter((item2)=>{return (item2.parent == node.uuid)});
 		return node
@@ -1246,8 +1264,9 @@ ipcMain.on('openInputOfFolder', e=>{
 			
 			let st = setInterval(()=>{
 				mainWindow.webContents.send('refreshUploadStatusOfFolder',uploadObj.key,uploadObj.success+' / '+uploadObj.count);
+				c('folder upload precess : ' + uploadObj.success + '/' + uploadObj.count + ' failed : ' + uploadObj.failed)
 			},1000);
-
+ 		
 			let f = function() {
 				if (o.times>5) {
 						c('folder upload success !');
@@ -1314,15 +1333,15 @@ ipcMain.on('openInputOfFolder', e=>{
 
 	function uploadNode(node,callback,failedCallback) {
 		try{
-			c(' ');
-			console.log('current file/folder is : ' + node.name);
+			// c(' ');
+			// console.log('current file/folder is : ' + node.name);
 			if (node.type == 'file') {
 				uploadFileInFolder(node).then(()=>{
-					c('create file success : '+ node.name);
+					// c('create file success : '+ node.name);
 					uploadObj.success++;
 					callback();
 				}).catch((err)=>{
-					c('create file failed! : '+ node.name);
+					// c('create file failed! : '+ node.name);
 					node.times++;
 					failedCallback();
 				});
@@ -1330,7 +1349,7 @@ ipcMain.on('openInputOfFolder', e=>{
 				let length = node.children.length;
 				let index = 0;
 				createFolder({uuid:node.parent},node.name).then(uuid=>{
-					c('create folder success : '+ node.name);
+					// c('create folder success : '+ node.name);
 					uploadObj.success++;
 					if (length == 0) {
 						callback();
@@ -1344,16 +1363,17 @@ ipcMain.on('openInputOfFolder', e=>{
 							if (index >= length) {
 								callback();
 							}else {
-								console.log('current ' + index+ "   "+length);
-								uploadNode(node.children[index],c)
+								// c('current ' + index+ "   "+length);
+								uploadNode(node.children[index],c,f)
 							}
 						};
 
 						let f = function() {
 							c('callback');
 							if (node.children[index].times>5) {
-								node.children[index].status = 'failed';
-								c(node.children[index].name + 'is absolute failed');
+								// node.children[index].status = 'failed';
+								// c(node.children[index].name + 'is absolute failed');
+								uploadObj.failed++
 								index++;
 								if (index >= length) {
 									
@@ -1402,7 +1422,6 @@ function createFolder(dir,name) {
 	return promise
 }
 function uploadFileInFolder(node) {
-	console.log(node.name);
 	var promise = new Promise((resolve,reject)=>{
 		let callback = function(err,res,body) {
 			if (!err && res.statusCode == 200) {
@@ -1590,4 +1609,6 @@ setTimeout(() => testInit((err) => {
 	console.log(err)
 	console.log('test data sent to mainWindow')
 }), 3000)
+
+
 
