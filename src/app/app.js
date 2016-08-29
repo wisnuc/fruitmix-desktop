@@ -41,7 +41,7 @@ window.onresize = function() {
 	// store.dispatch({type:''})
 }
 
-window.mocha = false
+window.mocha = true
 
 window.mochaState = store.getState()
 
@@ -107,6 +107,8 @@ var clearLock = ()=>{
 ipc.on('stateUpdate',(err,data)=>{
 	mochaState = data
 	Render()
+
+	
 })
 
 

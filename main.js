@@ -63,7 +63,7 @@ global.serverRecord = null;
 
 global.c = console.log;
 
-global.mocha = false
+global.mocha = true
 
 mdns.excludeInterface('0.0.0.0');
 var browser = mdns.createBrowser(mdns.tcp('http'));
@@ -1508,9 +1508,6 @@ ipcMain.on('store',(err,store)=>{
 		}
 	});
 });
-
-var expecting = null
-
 /**
 ipcMain.on('dispatch',(err,action)=>{
 	c('=== dispatch begin ===');
@@ -1532,83 +1529,129 @@ ipcMain.on('dispatch',(err,action)=>{
 });
 **/
 
-ipcMain.on('dispatch', (err, action) => {
 
-	if (action === undefined) return
+// function loadSendExpect(testcase, callback) {
 
-	if (expecting && typeof expecting ==='function') {
-		console.log('triggering expecting >>>>')
-		expecting(action)
-		console.log('triggering expecting done <<<<')
-		expecting = null
-	}
-	else {
-		console.log('no expecting')
-	}
-})
+// 	console.log('debug ====')
+// 	console.log(testcase.data)
 
-function loadSendExpect(testcase, callback) {
+// 	fs.readFile(testcase.data, (err, data) => {
+// 		if (err) return callback(err)
+// 		let parsed
+// 		try {
+// 			parsed = JSON.parse(data.toString())
+// 		}
+// 		catch(e) {
+// 			return callback(e)
+// 		}
+// 		console.log('sending parsed content to mainWindow')
+// 		mainWindow.webContents.send('stateUpdate', parsed)
 
-	console.log('debug ====')
-	console.log(testcase.data)
+// 		console.log('testcase name:' + testcase.name)
+// 		console.log('hint:' + testcase.hint)
 
-	fs.readFile(testcase.data, (err, data) => {
-		if (err) return callback(err)
-		let parsed
-		try {
-			parsed = JSON.parse(data.toString())
-		}
-		catch(e) {
-			return callback(e)
-		}
-		console.log('sending parsed content to mainWindow')
-		mainWindow.webContents.send('stateUpdate', parsed)
+// 		expecting = function(action) {
+// 			if (deepEqual(action, testcase.expectation)) {
+// 				console.log('passed.')
+// 				callback(null)
+// 			}
+// 			else {
+// 				console.log('assertion failed:' + testcase.name)
+// 				console.log('expectation:')
+// 				console.log(testcase.expectation)
+// 				console.log('actual:')
+// 				console.log(action)
+// 				callback(new Error('test failed'))
+// 			}
+// 		}
+// 	})
+// }
 
-		console.log('testcase name:' + testcase.name)
-		console.log('hint:' + testcase.hint)
+// var loadSendExpectAsync = Promise.promisify(loadSendExpect)
 
-		expecting = function(action) {
-			if (deepEqual(action, testcase.expectation)) {
-				console.log('passed.')
-				callback(null)
-			}
-			else {
-				console.log('assertion failed:' + testcase.name)
-				console.log('expectation:')
-				console.log(testcase.expectation)
-				console.log('actual:')
-				console.log(action)
-				callback(new Error('test failed'))
-			}
-		}
-	})
+// function testInit1(callback) {
+// 	if (!mocha) {
+// 		return
+// 	}
+// 	fs.readdir('viewtest', (err, entries) => {
+// 		if (err) return callback(err)
+// 		console.log('=====')
+// 		console.log(entries)
+
+// 		let cases = require(path.join(process.cwd(), 'viewtest', entries[0]))()
+
+// 		console.log(cases)
+
+// 		loadSendExpectAsync(cases[0])
+// 			.then(() => callback(null))
+// 			.catch(e => callback(e))
+// 	})
+// }
+
+
+var currentTestCase = null
+
+if (mocha) {
+	setTimeout(() => {
+		testInit()
+	}, 1000)
 }
 
-var loadSendExpectAsync = Promise.promisify(loadSendExpect)
-
-function testInit(callback) {
-	if (!mocha) {
-		return
-	}
+function testInit() {
 	fs.readdir('viewtest', (err, entries) => {
-		if (err) return callback(err)
-		console.log('=====')
-		console.log(entries)
+		if (err) {
+			testWindow.webContents.send('errorMessage','read directory viewtest failed')
+			return
+		}
 
-		let cases = require(path.join(process.cwd(), 'viewtest', entries[0]))()
+		testWindow.webContents.send('viewtest',entries)
 
-		console.log(cases)
+		ipcMain.on('selectTestCase', (err,index) => {
+			currentTestCase = require(path.join(process.cwd(), 'viewtest', entries[index]))()
+			currentTestCase.cases = currentTestCase.cases.map(item => {
+				return Object.assign({}, item, {checked : false})
+			})
+			selectTestCase()
+		})
 
-		loadSendExpectAsync(cases[0])
-			.then(() => callback(null))
-			.catch(e => callback(e))
 	})
 }
 
-setTimeout(() => testInit((err) => {
-	console.log(err)
-	console.log('test data sent to mainWindow')
-}), 3000)
+function selectTestCase() {
+	testWindow.webContents.send('caseList',currentTestCase)
+	fs.readFile(path.join(__dirname,'test',currentTestCase.data),{encoding:'utf8'}, (err, data) => {
+		if (err) {
+			testWindow.webContents.send('errorMessage','read store file failed')
+			return	
+		}
+		mainWindow.webContents.send('stateUpdate', JSON.parse(data))
+	})
+}
 
+
+ipcMain.on('dispatch', (err, action) => {
+	testWindow.webContents.send('receiveDispatch',action)
+	if (action === undefined || currentTestCase == null) return;
+	let mapCaseIndex = currentTestCase.cases.findIndex((item, index) => {
+		return deepEqual(item.expectation, action)
+	})
+	if (mapCaseIndex != -1) {
+		currentTestCase.cases[mapCaseIndex].checked = true
+		testWindow.webContents.send('caseList',currentTestCase)
+	}
+
+
+
+
+	// if (expecting && typeof expecting ==='function') {
+	// 	console.log('triggering expecting >>>>')
+	// 	expecting(action)
+	// 	console.log('triggering expecting done <<<<')
+	// 	expecting = null
+	// }
+	// else {
+	// 	console.log('no expecting')
+	// }
+})
 
 
