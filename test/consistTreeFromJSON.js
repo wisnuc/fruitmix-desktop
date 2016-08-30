@@ -20,5 +20,5 @@ var getFiles = function() {
 
 
 getFiles().then((files)=>{
-	c(files)
+	c(files.length)
 })

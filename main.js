@@ -63,7 +63,7 @@ global.serverRecord = null;
 
 global.c = console.log;
 
-global.mocha = true
+global.mocha = false
 
 mdns.excludeInterface('0.0.0.0');
 var browser = mdns.createBrowser(mdns.tcp('http'));
@@ -353,7 +353,7 @@ ipcMain.on('login',function(err,username,password){
 //get all files -------------------------------------------------
 ipcMain.on('getRootData', ()=> {
 	c(' ');
-	c('achieve data : ');
+	c('achieve data ===> ');
 	getFiles().then((data)=>{
 		// fs.writeFile(path.join(__dirname,'testFileData'),JSON.stringify(data),(err,d)=>{
 		// 	if(err){c(err)}else{c(d)}
@@ -376,7 +376,7 @@ ipcMain.on('getRootData', ()=> {
 		mainWindow.webContents.send('message','get data error',1);	
 	});
 });
-ipcMain.on('refresh',()=>{
+ipcMain.on('refres  h',()=>{
 	getFiles().then((data)=>{
 		c('1');
 		removeFolder(data);
@@ -436,6 +436,7 @@ function removeFolder(data) {
 		}else {
 			rootNode = data[driveIndex]; 	
 		}
+
 		let driveuuid= data[driveIndex].uuid
 		data.splice(driveIndex,1);
 		let uuidindex = data.findIndex((item)=>{
@@ -1508,85 +1509,6 @@ ipcMain.on('store',(err,store)=>{
 		}
 	});
 });
-/**
-ipcMain.on('dispatch',(err,action)=>{
-	c('=== dispatch begin ===');
-	c(action);
-	c('=== dispatch end ===');
-	let store ;
-	switch(action.type){
-		case "":
-			return {}
-		default :
-			fs.readFile(path.join(__dirname,'testData'),{encoding:'utf8'},(err,data)=>{
-				if (err) {
-					c(err)
-					return 
-				}
-				mainWindow.webContents.send('stateUpdate', JSON.parse(data));
-			});
-	}
-});
-**/
-
-
-// function loadSendExpect(testcase, callback) {
-
-// 	console.log('debug ====')
-// 	console.log(testcase.data)
-
-// 	fs.readFile(testcase.data, (err, data) => {
-// 		if (err) return callback(err)
-// 		let parsed
-// 		try {
-// 			parsed = JSON.parse(data.toString())
-// 		}
-// 		catch(e) {
-// 			return callback(e)
-// 		}
-// 		console.log('sending parsed content to mainWindow')
-// 		mainWindow.webContents.send('stateUpdate', parsed)
-
-// 		console.log('testcase name:' + testcase.name)
-// 		console.log('hint:' + testcase.hint)
-
-// 		expecting = function(action) {
-// 			if (deepEqual(action, testcase.expectation)) {
-// 				console.log('passed.')
-// 				callback(null)
-// 			}
-// 			else {
-// 				console.log('assertion failed:' + testcase.name)
-// 				console.log('expectation:')
-// 				console.log(testcase.expectation)
-// 				console.log('actual:')
-// 				console.log(action)
-// 				callback(new Error('test failed'))
-// 			}
-// 		}
-// 	})
-// }
-
-// var loadSendExpectAsync = Promise.promisify(loadSendExpect)
-
-// function testInit1(callback) {
-// 	if (!mocha) {
-// 		return
-// 	}
-// 	fs.readdir('viewtest', (err, entries) => {
-// 		if (err) return callback(err)
-// 		console.log('=====')
-// 		console.log(entries)
-
-// 		let cases = require(path.join(process.cwd(), 'viewtest', entries[0]))()
-
-// 		console.log(cases)
-
-// 		loadSendExpectAsync(cases[0])
-// 			.then(() => callback(null))
-// 			.catch(e => callback(e))
-// 	})
-// }
 
 
 var currentTestCase = null
@@ -1630,6 +1552,7 @@ function selectTestCase() {
 
 
 ipcMain.on('dispatch', (err, action) => {
+	if (!mocha) {return}
 	testWindow.webContents.send('receiveDispatch',action)
 	if (action === undefined || currentTestCase == null) return;
 	let mapCaseIndex = currentTestCase.cases.findIndex((item, index) => {
@@ -1639,19 +1562,6 @@ ipcMain.on('dispatch', (err, action) => {
 		currentTestCase.cases[mapCaseIndex].checked = true
 		testWindow.webContents.send('caseList',currentTestCase)
 	}
-
-
-
-
-	// if (expecting && typeof expecting ==='function') {
-	// 	console.log('triggering expecting >>>>')
-	// 	expecting(action)
-	// 	console.log('triggering expecting done <<<<')
-	// 	expecting = null
-	// }
-	// else {
-	// 	console.log('no expecting')
-	// }
 })
 
 
