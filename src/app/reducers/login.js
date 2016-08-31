@@ -3,8 +3,6 @@ const defaultState = {
 	state: 'READY', // READY, BUSY, REJECTED, TIMEOUT, ERROR, LOGGEDIN
   	obj: {},
   	device: [],
-  	findDevice: false,
-  	addDevice: false,
   	deviceUsedRecently: ''
 }
 
@@ -53,10 +51,6 @@ const loginState = (state = defaultState, action) => {
 			return Object.assign({},state,{obj:Object.assign({},state.obj,{allUser:cancelUserArr})});
 		case 'SET_DEVICE':
 			return Object.assign({},state,{device: action.device});
-		case 'TOGGLE_DEVICE':
-			return Object.assign({},state,{findDevice:!state.findDevice});
-		case 'TOGGLE_ADD_DEVICE':
-			return Object.assign({},state,{addDevice:!state.addDevice});
 		case 'SET_DEVICE_USED_RECENTLY':
 			var i = state.device.findIndex(item=>{
 				return item.addresses[0] == action.ip

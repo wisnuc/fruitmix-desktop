@@ -33,7 +33,9 @@ class Index extends React.Component {
 	}
 
 	componentDidMount() {
-		ipc.send('getDeviceUsedRecently');
+		setTimeout(()=>{
+			ipc.send('getDeviceUsedRecently');
+		},500)
 		ipc.send('findFruitmix');
 		this.find = setInterval(function(){
 			ipc.send('findFruitmix');
@@ -87,14 +89,13 @@ class Index extends React.Component {
 		this.props.dispatch({
 		      type: "LOGIN"
 		})
-		ipc.send('login',username,password);
-		// ipc.send('login','admin','123456');
+		ipc.send('login',username,password)
 	}
 
 	render() {
 		c.log(this.props.state)
 		var _this = this;
-		let findDevice = this.props.state.login.findDevice;
+		let findDevice = this.props.state.view.findDevice;
 		let loginContent;
 		let busy = (this.props.state.login.state ==='BUSY');
 		let device = this.props.state.login.device; 
@@ -157,7 +158,7 @@ class Index extends React.Component {
 				<div className='find-device-container' style={{maxHeight:document.body.clientHeight}}>
 					<div className='add-device-title'>已发现 {device.length} 台 wisnuc</div>
 					<div className='add-device-content'>
-						{this.props.state.login.addDevice?addDevice:deviceList}
+						{this.props.state.view.addDevice?addDevice:deviceList}
 					</div>
 					<div className='add-device-button' style={this.props.state.login.addDevice?{display:'none'}:{}}>
 						<span  onClick={this.toggleDevice.bind(this)}>返回</span>

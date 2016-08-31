@@ -109,6 +109,11 @@ ipc.on('stateUpdate',(err,data)=>{
 	Render()	
 })
 
+ipc.on('adapter', (err, data) => {
+	console.log('adapter>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+	console.log(data)
+})
+
 
 
 

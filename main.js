@@ -6,68 +6,64 @@ const {app, BrowserWindow, ipcMain, dialog, Menu, Tray } = require('electron');
 global.ipcMain = ipcMain;
 var appIcon = null
 
-global.request = require('request');
-global.fs = require ('fs');
-global.stream = require('stream');
-var path = require('path');
-global._ = require('lodash');
-global.mdns = require('mdns-js');
-// const m = require('mdns');
+global.request = require('request')
+global.fs = require ('fs')
+global.stream = require('stream')
+var path = require('path')
+global._ = require('lodash')
+global.mdns = require('mdns-js')
 global.mainWindow = null
 global.testWindow = null
 global.fruitmixWindow = null
 //server
-global.server = '';
-// server =	'http://211.144.201.201:8888';
-// server = 'http://192.168.5.159:80';
-// server = 'http://192.168.5.132:80';
+global.server = ''
 //user
-global.user = {};
+global.user = {}
 //files
-global.rootNode= null;
-global.allFiles = [];
+global.rootNode= null
+global.allFiles = []
 global.tree = {};
-global.map = new Map();
+global.map = new Map()
 //share
-global.shareFiles = [];
-global.shareTree = [];
-global.shareMap = new Map();
-global.shareChildren = [];
-global.sharePath = [];
-global.filesSharedByMe = [];
+global.shareFiles = []
+global.shareTree = []
+global.shareMap = new Map()
+global.shareChildren = []
+global.sharePath = []
+global.filesSharedByMe = []
 //directory
-global.currentDirectory = {};
-global.children = [];
-global.parent = {};
-global.dirPath = [];
-global.tree = {};
+global.currentDirectory = {}
+global.children = []
+global.parent = {}
+global.dirPath = []
+global.tree = {}
 //upload 
-global.uploadQueue = [];
-global.uploadNow = [];
+global.uploadQueue = []
+global.uploadNow = []
 //download
-global.downloadQueue = [];
-global.downloadNow = [];
-global.downloadFolderQueue = [];
-global.downloadFolderNow = [];
+global.downloadQueue = []
+global.downloadNow = []
+global.downloadFolderQueue = []
+global.downloadFolderNow = []
 //media
-global.media = [];
-global.mediaMap = new Map();
-global.thumbQueue = [];
-global.thumbIng = [];
+global.media = []
+global.mediaMap = new Map()
+global.thumbQueue = []
+global.thumbIng = []
 //path
-global.mediaPath = path.join(__dirname,'media');
-global.downloadPath = path.join(__dirname,'download');
+global.mediaPath = path.join(__dirname,'media')
+global.downloadPath = path.join(__dirname,'download')
 //device
-global.device = [];
-global.serverRecord = null;
+global.device = []
+global.serverRecord = null
 
-global.c = console.log;
+global.c = console.log
 
 global.mocha = false
 
-mdns.excludeInterface('0.0.0.0');
-var browser = mdns.createBrowser(mdns.tcp('http'));
-browser.on('update', findDevice);
+mdns.excludeInterface('0.0.0.0')
+var browser = mdns.createBrowser(mdns.tcp('http'))
+browser.on('update', findDevice)
 function findDevice(data) {
 	if (!data.fullname) {
 		return
@@ -102,12 +98,14 @@ function findDevice(data) {
 					device[index].admin = false;
 				}
 				mainWindow.webContents.send('device',device);
+				dispatch(action.setDevice(device))
 				c('------------------------------------------1');
 			});
 		}else if(app != -1){
 			c('type is wisnuc');
 			device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:false}));
 			mainWindow.webContents.send('device',device);
+			dispatch(action.setDevice(device))
 			c('------------------------------------------2');
 		}
 	}else {
@@ -146,10 +144,25 @@ function findDevice(data) {
 	}	
 }
 //require module
-const upload = require('./lib/upload');
-const download = require('./lib/download');
-const loginApi = require('./lib/login');
-const mediaApi = require('./lib/media');  
+const upload = require('./lib/upload')
+const download = require('./lib/download')
+const loginApi = require('./lib/login')
+const mediaApi = require('./lib/media')
+
+//require store
+const action = require('./serve/action/action')
+const store = require('./serve/store/store')
+
+const dispatch = store.dispatch
+const adapter = () => {
+	return {
+		login : store.getState().login
+	}
+}
+
+store.subscribe(() => {
+	mainWindow.webContents.send('adapter',adapter())
+})
 
 //app ready and open window ------------------------------------
 app.on('ready', function() {
@@ -242,6 +255,7 @@ ipcMain.on('getDeviceUsedRecently',err=>{
 				server = 'http://'+serverRecord.ip;
 				c('server ip is : ' + server);
 				mainWindow.webContents.send('setDeviceUsedRecently',serverRecord.ip);
+				dispatch(action.setDeviceUsedRecently(serverRecord.ip))
 			}
 			if (serverRecord.customDevice.length !=0) {
 				device.concat(serverRecord.customDevice);
@@ -344,6 +358,7 @@ ipcMain.on('login',function(err,username,password){
 	}).then((users)=>{
 		c('get users : ' + users.length);
 		user.allUser = users;
+		dispatch(action.loggedin(user))
 		mainWindow.webContents.send('loggedin',user);
 	}).catch((err)=>{
 		c('login failed : ' + err);
