@@ -97,14 +97,14 @@ function findDevice(data) {
 					c('can not get users information');
 					device[index].admin = false;
 				}
-				mainWindow.webContents.send('device',device);
+				// mainWindow.webContents.send('device',device);
 				dispatch(action.setDevice(device))
 				c('------------------------------------------1');
 			});
 		}else if(app != -1){
 			c('type is wisnuc');
 			device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:false}));
-			mainWindow.webContents.send('device',device);
+			// mainWindow.webContents.send('device',device);
 			dispatch(action.setDevice(device))
 			c('------------------------------------------2');
 		}
@@ -119,7 +119,8 @@ function findDevice(data) {
 			let f = fru==-1?false:true;
 			if (!f) {
 				device[deviceIndex].fruitmix = false;
-				mainWindow.webContents.send('device',device);
+				// mainWindow.webContents.send('device',device);
+				dispatch(action.setDevice(device))
 				c('ip ' + data.addresses[0] + 'fruitmix close');
 			}else {
 				device[deviceIndex].fruitmix = true;
@@ -135,7 +136,8 @@ function findDevice(data) {
 						}else {
 							device[deviceIndex].admin = false
 						}
-						mainWindow.webContents.send('device',device);
+						// mainWindow.webContents.send('device',device);
+						dispatch(action.setDevice(device))
 						c('ip ' + data.addresses[0] + 'fruitmix open');
 					});	
 				},2000);
@@ -244,7 +246,8 @@ ipcMain.on('getDeviceUsedRecently',err=>{
 			fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
 
 			});
-			mainWindow.webContents.send('device',device);
+			dispatch(action.setDevice(device))
+			// mainWindow.webContents.send('device',device);
 		}else { 
 			c('find record');
 			serverRecord = JSON.parse(data);
@@ -254,7 +257,7 @@ ipcMain.on('getDeviceUsedRecently',err=>{
 			if (serverRecord.ip != '') {
 				server = 'http://'+serverRecord.ip;
 				c('server ip is : ' + server);
-				mainWindow.webContents.send('setDeviceUsedRecently',serverRecord.ip);
+				// mainWindow.webContents.send('setDeviceUsedRecently',serverRecord.ip);
 				dispatch(action.setDeviceUsedRecently(serverRecord.ip))
 			}
 			if (serverRecord.customDevice.length !=0) {
@@ -262,7 +265,7 @@ ipcMain.on('getDeviceUsedRecently',err=>{
 				for (let item of serverRecord.customDevice) {
 					device.push(item);
 				}
-				mainWindow.webContents.send('device',device);
+				// mainWindow.webContents.send('device',device);
 			}
 		}
 		
@@ -284,7 +287,8 @@ ipcMain.on('setServeIp',(err,ip, isCustom)=>{
 		if (isCustom) {
 			d.customDevice.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true});
 			device.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true});
-			mainWindow.webContents.send('device',device);
+			// mainWindow.webContents.send('device',device);
+			dispatch(action.setDevice(device))
 		}
 		let j = JSON.stringify(d);
 		fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
@@ -311,7 +315,8 @@ ipcMain.on('delServer',(err,i)=>{
 
 		});
 	});
-	mainWindow.webContents.send('device',device);
+	// mainWindow.webContents.send('device',device);
+	dispatch(action.setDevice(device))
 });
 //find fruitmix
 ipcMain.on('findFruitmix',(e,item)=>{
@@ -359,7 +364,7 @@ ipcMain.on('login',function(err,username,password){
 		c('get users : ' + users.length);
 		user.allUser = users;
 		dispatch(action.loggedin(user))
-		mainWindow.webContents.send('loggedin',user);
+		// mainWindow.webContents.send('loggedin',user);
 	}).catch((err)=>{
 		c('login failed : ' + err);
 		mainWindow.webContents.send('message','登录失败',0);
@@ -800,7 +805,8 @@ ipcMain.on('userInit',(err,s,u,p,i)=>{
 			mainWindow.webContents.send('message',index);
 			if (index != -1) {
 				device[index].admin = true;
-				mainWindow.webContents.send('device',device);
+				// mainWindow.webContents.send('device',device);
+				dispatch(action.setDevice(device))
 			}
 		}else {
 			console.log('err');

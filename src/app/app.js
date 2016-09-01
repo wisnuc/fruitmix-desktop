@@ -17,6 +17,9 @@ window.ipc = ipcRenderer
 import Login  from'./components/login/Login'// login
 import Main from './components/main/Main'//main
 
+//import Action
+import Action from './actions/action';
+
 
 // global import jQuery
 global.$ = global.jQuery = global.jQuery || require('jquery')
@@ -110,8 +113,7 @@ ipc.on('stateUpdate',(err,data)=>{
 })
 
 ipc.on('adapter', (err, data) => {
-	console.log('adapter>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
-	console.log(data)
+	dispatch(Action.adapter(data))
 })
 
 

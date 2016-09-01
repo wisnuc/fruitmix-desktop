@@ -163,19 +163,19 @@ class Device extends React.Component {
 		});
 	}
 
-	handlePrev() {
-		let stepIndex = this.state.stepIndex;
-	    if (stepIndex > 0) {
-	      	this.setState({stepIndex: stepIndex - 1});
-	    }
-	}
+	// handlePrev() {
+	// 	let stepIndex = this.state.stepIndex;
+	//     if (stepIndex > 0) {
+	//       	this.setState({stepIndex: stepIndex - 1});
+	//     }
+	// }
 
-	handleNext() {
-	    let stepIndex = this.state.stepIndex;
-	    if (stepIndex < 2) {
-	   		this.setState({stepIndex: stepIndex + 1});
-	    }
-	}
+	// handleNext() {
+	//     let stepIndex = this.state.stepIndex;
+	//     if (stepIndex < 2) {
+	//    		this.setState({stepIndex: stepIndex + 1});
+	//     }
+	// }
 
 	refreshFruitmix() {
 		ipc.send('findFruitmix',this.props.item);

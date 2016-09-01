@@ -22,6 +22,7 @@ const loginState = (state = defaultState, action) => {
 			if (i != -1) {
 				state.device[i].active = true;
 			}
+			return Object.assign({},state,{deviceUsedRecently:action.ip})
 
 		default:
 			return state

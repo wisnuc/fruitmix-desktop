@@ -324,6 +324,13 @@ var actions = {
 			type: 'FILES_SHARED_BY_ME',
 			files:files
 		}
+	},
+
+	adapter(data) {
+		return {
+			type: 'ADAPTER',
+			store: data
+		}
 	}
 }
 

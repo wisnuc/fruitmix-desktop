@@ -61,6 +61,8 @@ const loginState = (state = defaultState, action) => {
 			return Object.assign({},state,{deviceUsedRecently:action.ip});
 		case 'SET_USER':
 			return Object.assign({},state,{obj:action.user});
+		case 'ADAPTER':
+			return Object.assign({},state,action.store.login)
 		default:
 			return state
 	}

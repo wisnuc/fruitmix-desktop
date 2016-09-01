@@ -35,7 +35,7 @@ class Index extends React.Component {
 	componentDidMount() {
 		setTimeout(()=>{
 			ipc.send('getDeviceUsedRecently');
-		},500)
+		},5000)
 		ipc.send('findFruitmix');
 		this.find = setInterval(function(){
 			ipc.send('findFruitmix');
@@ -59,6 +59,7 @@ class Index extends React.Component {
 		});
 
 		ipc.on('setDeviceUsedRecently',(err,ip)=>{
+			console.log('should not happen>>>>>>>>>>>>>>>>')
 			this.props.dispatch(Action.setDeviceUsedRecently(ip));
 		});
 
