@@ -158,7 +158,8 @@ const store = require('./serve/store/store')
 const dispatch = store.dispatch
 const adapter = () => {
 	return {
-		login : store.getState().login
+		login : store.getState().login,
+		setting : store.getState().setting
 	}
 }
 
@@ -253,7 +254,8 @@ ipcMain.on('getDeviceUsedRecently',err=>{
 			serverRecord = JSON.parse(data);
 			downloadPath = serverRecord.download;
 			c('download path is : ' + downloadPath);
-			mainWindow.webContents.send('setDownloadPath',downloadPath);
+			// mainWindow.webContents.send('setDownloadPath',downloadPath);
+			dispatch(action.setDownloadPath(downloadPath))
 			if (serverRecord.ip != '') {
 				server = 'http://'+serverRecord.ip;
 				c('server ip is : ' + server);
@@ -1042,7 +1044,9 @@ ipcMain.on('changeDownloadPath', e=>{
 		let folderPath = path.normalize(folder[0]);
 		c(folderPath);
 		downloadPath = folderPath;
-		mainWindow.webContents.send('setDownloadPath',downloadPath);
+		// mainWindow.webContents.send('setDownloadPath',downloadPath)
+		dispatch(action.setDownloadPath(downloadPath))
+		
 		fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
 			if (err) {
 				serverRecord = {ip:'',savePassword:false,autoLogin:false,username:null,password:null,customDevice:[],download: downloadPath};
