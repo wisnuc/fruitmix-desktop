@@ -63,99 +63,19 @@ global.mocha = false
 
 mdns.excludeInterface('0.0.0.0')
 var browser = mdns.createBrowser(mdns.tcp('http'))
-browser.on('update', findDevice)
-function findDevice(data) {
-	if (!data.fullname) {
-		return
-	}
-	let fru = data.fullname.toLowerCase().indexOf('fruitmix');
-	let app = data.fullname.toLowerCase().indexOf('wisnuc appstation');
-	if (fru == -1 && app == -1) {
-		return
-	}
-	// c(data.addresses[0]);
-	// is exist
-	let deviceIndex = device.findIndex(item=>{
-		return item.addresses[0] == data.addresses[0];
-	});
-	if (deviceIndex == -1) {
-		c('ip not exist');
-		//not exist
-		if (fru != -1) {
-			c('type is fruitmix');
-			let index = device.length;
-			device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:true,admin:false}));
-			//fruitmix server
-			request.get('http://'+data.addresses[0]+'/login',(err,res,body)=>{
-				if (!err && res.statusCode == 200) {
-					if (JSON.parse(body).length == 0) {
-						device[index].admin = false;
-					}else {
-						device[index].admin = true;
-					}
-				}else {
-					c('can not get users information');
-					device[index].admin = false;
-				}
-				// mainWindow.webContents.send('device',device);
-				dispatch(action.setDevice(device))
-				c('------------------------------------------1');
-			});
-		}else if(app != -1){
-			c('type is wisnuc');
-			device.push(Object.assign({},data,{active:false,isCustom:false,fruitmix:false,admin:false}));
-			// mainWindow.webContents.send('device',device);
-			dispatch(action.setDevice(device))
-			c('------------------------------------------2');
-		}
-	}else {
-		c('ip exist');
-		//exist
-		if (device[deviceIndex].fullname == data.fullname) {
-			return
-		}else {
-			c('ip has change');
-			device[deviceIndex].fullname = data.fullname
-			let f = fru==-1?false:true;
-			if (!f) {
-				device[deviceIndex].fruitmix = false;
-				// mainWindow.webContents.send('device',device);
-				dispatch(action.setDevice(device))
-				c('ip ' + data.addresses[0] + 'fruitmix close');
-			}else {
-				device[deviceIndex].fruitmix = true;
-				setTimeout(function(){
-					request.get('http://'+data.addresses[0]+'/login',(err,res,body)=>{
-						c(res,err)
-						if (!err && res.statusCode == 200) {
-							if (JSON.parse(body).length == 0) {
-								device[deviceIndex].admin = false;
-							}else {
-								device[deviceIndex].admin = true;
-							}
-						}else {
-							device[deviceIndex].admin = false
-						}
-						// mainWindow.webContents.send('device',device);
-						dispatch(action.setDevice(device))
-						c('ip ' + data.addresses[0] + 'fruitmix open');
-					});	
-				},2000);
-			}
-		}
-	}	
-}
+
 //require module
 const upload = require('./lib/upload')
 const download = require('./lib/download')
 const loginApi = require('./lib/login')
 const mediaApi = require('./lib/media')
+const deviceApi = require('./lib/device')
 
 //require store
-const action = require('./serve/action/action')
+global.action = require('./serve/action/action')
 const store = require('./serve/store/store')
 
-const dispatch = store.dispatch
+global.dispatch = store.dispatch
 const adapter = () => {
 	return {
 		login : store.getState().login,
@@ -167,6 +87,8 @@ store.subscribe(() => {
 	mainWindow.webContents.send('adapter',adapter())
 })
 
+
+browser.on('update', deviceApi.findDevice)
 //app ready and open window ------------------------------------
 app.on('ready', function() {
 	mainWindow = new BrowserWindow({
@@ -237,41 +159,7 @@ app.on('window-all-closed', () => {
 });
 
 ipcMain.on('getDeviceUsedRecently',err=>{
-	c(' ');
-	//have device used recently
-	fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
-		if (err) {
-			c('not find server record');
-			serverRecord = {ip:'',savePassword:false,autoLogin:false,username:null,password:null,customDevice:[],download: downloadPath};
-			let j = JSON.stringify(serverRecord);
-			fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
-
-			});
-			dispatch(action.setDevice(device))
-			// mainWindow.webContents.send('device',device);
-		}else { 
-			c('find record');
-			serverRecord = JSON.parse(data);
-			downloadPath = serverRecord.download;
-			c('download path is : ' + downloadPath);
-			// mainWindow.webContents.send('setDownloadPath',downloadPath);
-			dispatch(action.setDownloadPath(downloadPath))
-			if (serverRecord.ip != '') {
-				server = 'http://'+serverRecord.ip;
-				c('server ip is : ' + server);
-				// mainWindow.webContents.send('setDeviceUsedRecently',serverRecord.ip);
-				dispatch(action.setDeviceUsedRecently(serverRecord.ip))
-			}
-			if (serverRecord.customDevice.length !=0) {
-				device.concat(serverRecord.customDevice);
-				for (let item of serverRecord.customDevice) {
-					device.push(item);
-				}
-				// mainWindow.webContents.send('device',device);
-			}
-		}
-		
-	});
+	deviceApi.findRecord()
 });
 //setIp
 ipcMain.on('setServeIp',(err,ip, isCustom)=>{ 
@@ -1042,7 +930,7 @@ ipcMain.on('changeDownloadPath', e=>{
 			return
 		}
 		let folderPath = path.normalize(folder[0]);
-		c(folderPath);
+		// c(folderPath);
 		downloadPath = folderPath;
 		// mainWindow.webContents.send('setDownloadPath',downloadPath)
 		dispatch(action.setDownloadPath(downloadPath))
