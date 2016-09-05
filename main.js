@@ -75,7 +75,11 @@ const deviceApi = require('./lib/device')
 global.action = require('./serve/action/action')
 const store = require('./serve/store/store')
 
-global.dispatch = store.dispatch
+// global.dispatch = store.dispatch
+global.dispatch = (action) => {
+	c(action.type)
+	store.dispatch(action)
+}
 const adapter = () => {
 	return {
 		login : store.getState().login,
@@ -162,7 +166,8 @@ ipcMain.on('getDeviceUsedRecently',err=>{
 	deviceApi.getRecord()
 });
 //setIp
-ipcMain.on('setServeIp',(err,ip, isCustom)=>{ 
+ipcMain.on('setServeIp',(err,ip, isCustom)=>{
+	dispatch(action.setDeviceUsedRecently(ip))
 	let index = device.findIndex(item=>{
 		return item.addresses[0] == ip;
 	});
@@ -238,6 +243,7 @@ ipcMain.on('getUserList',(e,item)=>{
 ipcMain.on('login',function(err,username,password){
 	c(' ');
 	c('login : ');
+	dispatch({type: "LOGIN"})
 	loginApi.login().then((data)=>{
 		c('get login data : ' + data.length + ' users');
 		user = data.find((item)=>{return item.username == username});
@@ -257,6 +263,7 @@ ipcMain.on('login',function(err,username,password){
 		// mainWindow.webContents.send('loggedin',user);
 	}).catch((err)=>{
 		c('login failed : ' + err);
+		dispatch(action.loginFailed())
 		mainWindow.webContents.send('message','登录失败',0);
 	});
 });
@@ -922,6 +929,8 @@ ipcMain.on('loginOff',err=>{
 	mediaMap = new Map();
 	thumbQueue = [];
 	thumbIng = [];
+
+	dispatch(action.loginoff())
 });
 
 ipcMain.on('changeDownloadPath', e=>{

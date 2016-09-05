@@ -1,29 +1,29 @@
 var actions = {
-	login(obj) {
-		return {
-			type: 'LOGGEDIN',
-			obj: obj
-		}
-	},
+	// login(obj) {
+	// 	return {
+	// 		type: 'LOGGEDIN',
+	// 		obj: obj
+	// 	}
+	// },
 
-	loginFailed() {
-		return {
-			type: 'REJECTED'
-		}
-	},
+	// loginFailed() {
+	// 	return {
+	// 		type: 'REJECTED'
+	// 	}
+	// },
 
-	loginoff() {
-		return {
-			type: 'LOGIN_OFF'
-		}
-	},
+	// loginoff() {
+	// 	return {
+	// 		type: 'LOGIN_OFF'
+	// 	}
+	// },
 
-	setDevice(device) {
-		return {
-			type: 'SET_DEVICE',
-			device: device
-		}
-	},
+	// setDevice(device) {
+	// 	return {
+	// 		type: 'SET_DEVICE',
+	// 		device: device
+	// 	}
+	// },
 
 	toggleDevice() {
 		return {
@@ -37,12 +37,12 @@ var actions = {
 		}
 	},
 
-	setDeviceUsedRecently(ip) {
-		return {
-			type: 'SET_DEVICE_USED_RECENTLY',
-			ip: ip
-		}
-	},
+	// setDeviceUsedRecently(ip) {
+	// 	return {
+	// 		type: 'SET_DEVICE_USED_RECENTLY',
+	// 		ip: ip
+	// 	}
+	// },
 
 	navToggle() {
 		return {

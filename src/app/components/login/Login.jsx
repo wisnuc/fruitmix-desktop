@@ -33,7 +33,7 @@ class Index extends React.Component {
 	}
 
 	componentDidMount() {
-		
+
 		setTimeout(()=>{
 			ipc.send('getDeviceUsedRecently');
 		},2000)
@@ -53,32 +53,32 @@ class Index extends React.Component {
 			}
 		},3000);
 
-		ipc.on('loggedin',(err,user)=>{
-			this.props.dispatch(Login.login(user));
-		});
+		// ipc.on('loggedin',(err,user)=>{
+		// 	this.props.dispatch(Login.login(user));
+		// });
 
-		ipc.on('loginFailed',()=>{
-			this.props.dispatch(Login.loginFailed());
-		})
+		// ipc.on('loginFailed',()=>{
+		// 	this.props.dispatch(Login.loginFailed());
+		// })
 		ipc.on('message',(err,message,code)=>{
 			this.props.dispatch(Login.setSnack(message,true));
-			if (code == 0 ) {
-				this.props.dispatch(Login.loginFailed());		
-			}
+			// if (code == 0 ) {
+			// 	this.props.dispatch(Login.loginFailed());		
+			// }
 		});
 
-		ipc.on('device',(err,device)=>{;
-			this.props.dispatch(Login.setDevice(device));
-		});
+		// ipc.on('device',(err,device)=>{;
+		// 	this.props.dispatch(Login.setDevice(device));
+		// });
 
-		ipc.on('setDeviceUsedRecently',(err,ip)=>{
-			console.log('should not happen>>>>>>>>>>>>>>>>')
-			this.props.dispatch(Action.setDeviceUsedRecently(ip));
-		});
+		// ipc.on('setDeviceUsedRecently',(err,ip)=>{
+		// 	console.log('should not happen>>>>>>>>>>>>>>>>')
+		// 	this.props.dispatch(Action.setDeviceUsedRecently(ip));
+		// });
 
-		ipc.on('setDownloadPath',(err,path)=>{
-			this.props.dispatch({type:'SET_DOWNLOAD_PATH',path:path});
-		});
+		// ipc.on('setDownloadPath',(err,path)=>{
+		// 	this.props.dispatch({type:'SET_DOWNLOAD_PATH',path:path});
+		// });
 
 
 	}
@@ -91,14 +91,13 @@ class Index extends React.Component {
 	submit() {
 		let username = this.refs.username.input.value;
 		let password = this.refs.password.input.value;
-		this.props.dispatch({
-		      type: "LOGIN"
-		})
+		// this.props.dispatch({
+		//       type: "LOGIN"
+		// })
 		ipc.send('login',username,password)
 	}
 
 	render() {
-		c.log(this.props.state)
 		var _this = this;
 		let findDevice = this.props.state.view.findDevice;
 		let loginContent;
@@ -115,19 +114,18 @@ class Index extends React.Component {
 				<div className='login-container'>
 					<div className='login-device-title'>已发现 {device.length} 台 wisnuc</div>
 					<div className='login-device-list'>
-						
-							<SelectField iconStyle={{fill:'#666'}} underlineStyle={{borderColor:'rgba(255,255,255,0)'}}  value={this.getValue()} onChange={this.selectDevice.bind(this)}>
-								{device.map(item=>(
-									<MenuItem key={item.addresses[0]} value={item.addresses[0]} primaryText={item.admin&&item.fruitmix?item.host:item.host+"(未配置)"}></MenuItem>
-									))}
-							</SelectField>
+
+						<SelectField iconStyle={{fill:'#666'}} underlineStyle={{borderColor:'rgba(255,255,255,0)'}}  value={this.getValue()} onChange={this.selectDevice.bind(this)}>
+							{device.map(item=>(
+								<MenuItem key={item.addresses[0]} value={item.addresses[0]} primaryText={item.admin&&item.fruitmix?item.host:item.host+"(未配置)"}></MenuItem>
+							))}
+						</SelectField>
 			
 						<TextField underlineStyle={{borderColor:'#999'}} underlineFocusStyle={styles.underlineStyle} hintStyle={{color:'#999'}} ref='username' style={{marginBottom: 10}} hintText="用户名" type="username" />
 						<TextField underlineStyle={{borderColor:'#999'}} underlineFocusStyle={styles.underlineStyle} hintStyle={{color:'#999'}} ref='password' style={{marginBottom: 10}} hintText="密码" type="password" onKeyDown={this.kenDown.bind(this)}/>
 						<div className='login-button'>
 							<div onTouchTap={this.toggleDevice.bind(this)}>设置</div>
 							<div onTouchTap={this.submit.bind(this)}>登录</div>
-							
 						</div>
 					</div>
 				</div>
@@ -210,7 +208,7 @@ class Index extends React.Component {
 	selectDevice(e,index) {
 		let ip = this.props.state.login.device[index].addresses[0];
 		ipc.send('setServeIp',ip,false);
-		this.props.dispatch(Action.setDeviceUsedRecently(ip));
+		// this.props.dispatch(Action.setDeviceUsedRecently(ip));
 	}
 
 	getValue() {
@@ -221,12 +219,5 @@ class Index extends React.Component {
 Index.childContextTypes = {
   muiTheme: React.PropTypes.object.isRequired,
 };
-
-function mapStateToProps (state) {
-	return {
-		login: state.login,
-		snack: state.snack
-	}
-}
 	
 export default Index

@@ -301,7 +301,7 @@ class Main extends Component {
 
 	logOff() {
 		ipc.send('loginOff');
-		this.props.dispatch(Action.loginoff());
+		// this.props.dispatch(Action.loginoff());
 		window.location.hash = '/login';
 	}
 

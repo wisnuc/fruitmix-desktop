@@ -8,8 +8,14 @@ const defaultState = {
 
 const loginState = (state = defaultState, action) => {
 	switch (action.type) {
+		case 'LOGIN':
+			return Object.assign({}, state, {state: 'BUSY'})
 		case 'LOGGEDIN':
 			return Object.assign({},state, {obj:action.obj,state:'LOGGEDIN'})
+		case 'REJECTED':
+			return Object.assign({}, state, {state: 'REJECTED'})
+		case 'LOGIN_OFF':
+			return Object.assign({}, state, {state: 'READY'})
 		case 'LOGINOUT':
 			return Object.assign({}, state, {state: 'READY'})
 
@@ -29,4 +35,4 @@ const loginState = (state = defaultState, action) => {
 	}
 };
 
-module.exports = loginState;                             
+module.exports = loginState
