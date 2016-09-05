@@ -9,7 +9,7 @@ var appIcon = null
 global.request = require('request')
 global.fs = require ('fs')
 global.stream = require('stream')
-var path = require('path')
+global.path = require('path')
 global._ = require('lodash')
 global.mdns = require('mdns-js')
 global.mainWindow = null
@@ -159,7 +159,7 @@ app.on('window-all-closed', () => {
 });
 
 ipcMain.on('getDeviceUsedRecently',err=>{
-	deviceApi.findRecord()
+	deviceApi.getRecord()
 });
 //setIp
 ipcMain.on('setServeIp',(err,ip, isCustom)=>{ 

@@ -33,13 +33,26 @@ class Index extends React.Component {
 	}
 
 	componentDidMount() {
+		
 		setTimeout(()=>{
 			ipc.send('getDeviceUsedRecently');
-		},5000)
+		},2000)
+
 		ipc.send('findFruitmix');
 		this.find = setInterval(function(){
 			ipc.send('findFruitmix');
-		},500);
+		},2000);
+
+		setTimeout(()=>{
+			if (this.props.state.login.deviceUsedRecently == '') {
+				if (this.props.state.login.device.length == 0) {
+					return
+				}else {
+					this.selectDevice.apply(this,[null,0]);
+				}
+			}
+		},3000);
+
 		ipc.on('loggedin',(err,user)=>{
 			this.props.dispatch(Login.login(user));
 		});
@@ -67,21 +80,12 @@ class Index extends React.Component {
 			this.props.dispatch({type:'SET_DOWNLOAD_PATH',path:path});
 		});
 
-		setTimeout(()=>{
-			if (this.props.state.login.deviceUsedRecently == '') {
-				if (this.props.state.login.device.length == 0) {
-					return
-				}else {
-					this.selectDevice.apply(this,[null,0]);
-				}
-			}
-		},3000);
+
 	}
 
 	componentWillUnmount() {
-		ipc.removeAllListeners();
-		console.log('leave');
-		clearInterval(this.find);
+		ipc.removeAllListeners()
+		clearInterval(this.find)
 	}
 
 	submit() {
