@@ -153,7 +153,7 @@ class Main extends Component {
 	}
 
 	componentWillUnmount() {
-		ipc.removeAllListeners();
+		// ipc.removeAllListeners();
 	}
 	
 	render() {

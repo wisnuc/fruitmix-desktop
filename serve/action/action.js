@@ -33,7 +33,6 @@ var actions = {
 	},
 
 	setDownloadPath(path) {
-		console.log('?why');
 		return {
 			type : 'SET_DOWNLOAD_PATH',
 			path : path

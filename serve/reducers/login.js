@@ -15,7 +15,7 @@ const loginState = (state = defaultState, action) => {
 		case 'REJECTED':
 			return Object.assign({}, state, {state: 'REJECTED'})
 		case 'LOGIN_OFF':
-			return Object.assign({}, state, {state: 'READY'})
+			return Object.assign({}, state, defaultState)
 		case 'LOGINOUT':
 			return Object.assign({}, state, {state: 'READY'})
 

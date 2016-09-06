@@ -11,7 +11,7 @@ import { render } from 'react-dom'
 import injectTapEventPlugin from 'react-tap-event-plugin'
 
 import { ipcRenderer } from 'electron'
-window.ipc = ipcRenderer
+global.ipc = ipcRenderer
 
 //import component
 import Login  from'./components/login/Login'// login
@@ -69,7 +69,6 @@ var App = React.createClass({
 						{/*<button onClick={this.save}>store</button>*/}
 						{isLogin && <Main state={mocha?mochaState:state} dispatch={dispatch}/>}
 						{!isLogin && <Login state={mocha?mochaState:state} dispatch={dispatch}/>}	
-						{/*<div onClick={this.submit}>submit>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>></div>*/}
 				</div>
 			)
 	},
@@ -113,6 +112,7 @@ ipc.on('stateUpdate',(err,data)=>{
 })
 
 ipc.on('adapter', (err, data) => {
+	c.log('data???')
 	dispatch(Action.adapter(data))
 })
 

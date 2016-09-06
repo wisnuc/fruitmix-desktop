@@ -91,7 +91,6 @@ store.subscribe(() => {
 	mainWindow.webContents.send('adapter',adapter())
 })
 
-
 browser.on('update', deviceApi.findDevice)
 //app ready and open window ------------------------------------
 app.on('ready', function() {

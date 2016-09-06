@@ -84,7 +84,7 @@ class Index extends React.Component {
 	}
 
 	componentWillUnmount() {
-		ipc.removeAllListeners()
+		// ipc.removeAllListeners()
 		clearInterval(this.find)
 	}
 
@@ -201,7 +201,7 @@ class Index extends React.Component {
 	submitServer() {
 		let ip = this.refs.serverIP.input.value;
 		ipc.send('setServeIp',ip,true);
-		this.props.dispatch(Action.setDeviceUsedRecently(ip));
+		// this.props.dispatch(Action.setDeviceUsedRecently(ip));
 		this.props.dispatch(Action.toggleAddDevice());
 	}
 
