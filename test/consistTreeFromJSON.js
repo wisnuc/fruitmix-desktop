@@ -34,8 +34,22 @@ var getFiles = function() {
 
 
 getFiles().then((files)=>{
+	// c((new Date()).getTime())
+	files.forEach(item => {
+		item.checked = false
+		item.share = false
+		item.owner = item.permission.owner
+		item.readlist = item.permission.readlist
+		item.writelist = item.permission.writelist
+		item.hasParent = true
+
+	})
 	removeFolder(files)
 	classifyShareFiles(files)
+	tree = getTree(files,'file')
+	shareTree = getTree(shareFiles,'share')
+
+	c(shareMap.size)
 
 })
 
@@ -146,4 +160,47 @@ function classifyShareFiles(allFiles) {
 		c(err)
 	}
 	c('screen out share and length is : ' + shareFiles.length );
+}
+
+function getTree(f,type) {
+
+	let fileMap = new Map()
+	f.forEach(item => {
+		fileMap.set(item.uuid, item)
+	})
+
+	f.forEach(item => {
+		let hasParent = true
+		if (type == 'share') {
+			let r = fileMap.get(item.parent)
+			if (r == undefined ) { hasParent = false}
+		}
+	})
+	
+	f.forEach(item => {
+		if (item.type == 'file' || item.children.length == 0) {
+			return
+		}
+		item.children.map((folderChildren,index) => {
+			item.children[index] = fileMap.get(folderChildren)
+		})
+
+	})
+
+	if (type == 'share') {
+		shareMap = fileMap
+	}else {
+		map = fileMap
+	}
+
+	return f
+}
+//seprate files shared by me from files
+function getFilesSharedByMe() {
+	tree.forEach(item=>{
+		if (item.owner == user.uuid && item.readlist.length != 0 && item.writelist.length != 0 && item.readlist[0] != "" && item.writelist[0] != "") {
+			filesSharedByMe.push(item);
+		}
+	});
+	c('files shared by me length is : ' + filesSharedByMe.length );
 }
