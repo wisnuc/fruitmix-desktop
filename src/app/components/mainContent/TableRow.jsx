@@ -2,7 +2,7 @@ import React, { findDOMNode, Component, PropTypes } from 'react';
 import svg from '../../utils/SVGIcon';
 class Row extends Component {
 	shouldComponentUpdate(nextP) {
-		if (nextP.item.name == this.props.item.name && nextP.item.checked == this.props.item.checked) {
+		if (nextP.item.permission.name == this.props.item.permission.name && nextP.item.checked == this.props.item.checked) {
 			return false
 		}else {
 			return true

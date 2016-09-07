@@ -270,21 +270,41 @@ ipcMain.on('login',function(err,username,password){
 ipcMain.on('getRootData', ()=> {
 	c(' ');
 	c('achieve data ===> ');
-	getFiles().then((data)=>{
+	getFiles().then((files)=>{
 		// fs.writeFile(path.join(__dirname,'testFileData'),JSON.stringify(data),(err,d)=>{
 		// 	if(err){c(err)}else{c(d)}
 		// })
-		c('get allfiles and length is : ' + data.length );
+		c('get allfiles and length is : ' + files.length );
 		//share data
 		allFiles.length = 0;
 		shareFiles.length = 0;
 		sharePath.length = 0;
 		shareChildren.length = 0;
+		
+		files.forEach(item => {
+			item.checked = false
+			item.share = false
+			item.hasParent = true
+
+		})
 		//remove folder
-		removeFolder(data);
-		dealWithData(data);
-		sharePath.push({key:'',value:{}});
+		removeFolder(files)
+		//seperate files shared to me
+		classifyShareFiles(files)
+		//consist tree
+		tree = getTree(files,'file')
+		shareTree = getTree(shareFiles,'share')
+		
+		//get root folder of share files
+		shareTree.forEach((item)=>{if (item.hasParent == false) {shareChildren.push(Object.assign({},item, {children:null}))}})
+		sharePath.push({key:'',value:{}})
+		//seperate files shared by me
+		getFilesSharedByMe()
 		let copyFilesSharedByMe = filesSharedByMe.map(item=>Object.assign({},item,{children:null,writelist:[].concat(item.writelist)}));
+
+		//enter root folder
+		enterChildren(rootNode)
+
 		mainWindow.webContents.send('setFilesSharedByMe',copyFilesSharedByMe);
 		mainWindow.webContents.send('setShareChildren',shareChildren,sharePath);
 	}).catch((err)=>{
@@ -371,117 +391,91 @@ function removeFolder(data) {
 		c(e);
 	}
 }
-//get shareFiles,tree,rootNode
-function dealWithData(data) {
-	//set allfiles
-	allFiles = data.map((item)=>{item.share = false;item.checked = false;return item});
-	//separate shared files from allfiles
-	classifyShareFiles();
-	//set tree
-	tree = getTree(allFiles,'file');
-	shareTree = getTree(shareFiles,'share');
-	//set share children
-	shareTree.forEach((item)=>{if (item.hasParent == false) {shareChildren.push(item)}});
-	//set filesSharedByMe
-	getFilesSharedByMe();
-	//show root file
-	enterChildren(rootNode);
-}
 //get share children
-function classifyShareFiles() {
-	let userUUID = user.uuid;
-	allFiles.forEach((item,index)=>{
-		// owner is user ?
-		if (item.permission.owner[0] != userUUID ) {
-			// is not user
-			let result = item.permission.readlist.find((readUser)=>{
-				return readUser == userUUID
-			});
-			if (result != undefined) {
-				//file is shared to user
-				shareFiles.push(item);
-				allFiles[index].share = true;
-			}else {
-				//is file included in shareFolder?
-				var findParent = function(i) {
-					if (i.parent == '') {
-						//file belong to user but is not upload by client
-						return
-					}
-					let re = allFiles.find((p)=>{
-						return i.parent == p.uuid
-					});
-					if (re.parent == '') {
-						return;
-					}
-					let rer = re.permission.readlist.find((parentReadItem,index)=>{
-						return parentReadItem == userUUID
-					})
-					if (rer == undefined) {
-						//find parent again
-						findParent(re);
-					}else {
-						shareFiles.push(item);
-						allFiles[index].share = true;
-					}
-				};
-				findParent((item));
+function classifyShareFiles(allFiles) {
+	try{
+		let userUUID = user.uuid;
+		allFiles.forEach((item,index)=>{
+			// owner is user ?
+			if (item.permission.owner[0] != userUUID ) {
+				// is not user
+				let result = item.permission.readlist.find((readUser)=>{
+					return readUser == userUUID
+				});
+				if (result != undefined) {
+					//file is shared to user
+					shareFiles.push(item);
+					allFiles[index].share = true;
+				}else {
+					//is file included in shareFolder?
+					var findParent = function(i) {
+						if (i.parent == '') {
+							//file belong to user but is not upload by client
+							return
+						}
+						let re = allFiles.find((p)=>{
+							return i.parent == p.uuid
+						});
+						if (re.parent == '') {
+							return;
+						}
+						let rer = re.permission.readlist.find((parentReadItem,index)=>{
+							return parentReadItem == userUUID
+						})
+						if (rer == undefined) {
+							//find parent again
+							findParent(re);
+						}else {
+							shareFiles.push(item);
+							item.share = true;
+						}
+					};
+					findParent((item));
+				}
 			}
-		}
-	})
+		})
+	}catch(err){
+		c(err)
+	}
 	c('screen out share and length is : ' + shareFiles.length );
 }
 //generate tree
 function getTree(f,type) {
-	let files = [];
-	c('date 1 : ' + (new Date))
-	f.forEach((item)=>{
-		if ((type == 'file' && !item.share)||(type == 'share' && item.share)) {
-			let hasParent = true;
-			if (type == 'share') {
-				let r = f.find((i)=>{return i.uuid == item.parent});
-				if (r == undefined ) { hasParent = false}
-			}
-			files.push({
-				uuid:item.uuid,
-				path:item.path,
-				name:item.attribute.name,
-				parent: item.parent,
-				children: item.children,
-				share:item.share,
-				type:item.type,
-				checked:false,
-				owner:item.permission.owner,
-				readlist:item.permission.readlist,
-				writelist:item.permission.writelist,
-				attribute:item.attribute,
-				hasParent:hasParent
-			});
-		}
-	});
-	c('date 2 : ' + (new Date))
-	let tree = files.map((node,index)=>{
-		// node.parent = files.find((item1)=>{return (item1.uuid == node.parent)});
-		node.children = files.filter((item2)=>{return (item2.parent == node.uuid)});
-		return node
-	});
-	c('date 3 : ' + (new Date))
+
+	let fileMap = new Map()
+	f.forEach(item => {
+		fileMap.set(item.uuid, item)
+	})
 	if (type == 'share') {
-		tree.forEach((item)=>{
-			shareMap.set(item.uuid,item);
-		});
-	}else {
-		tree.forEach((item)=>{
-			map.set(item.uuid,item);	
-		
-		});
+		f.forEach(item => {
+			let r = fileMap.get(item.parent)
+			if (r == undefined ) { item.hasParent = false}
+			
+		})
 	}
-	return tree;	
+	
+	f.forEach(item => {
+		if (item.type == 'file' || item.children.length == 0) {
+			return
+		}
+		item.children.map((folderChildren,index) => {
+			item.children[index] = fileMap.get(folderChildren)
+		})
+
+	})
+
+	if (type == 'share') {
+		shareMap = fileMap
+	}else {
+		map = fileMap
+	}
+
+	return f
 }
 //seprate files shared by me from files
 function getFilesSharedByMe() {
 	tree.forEach(item=>{
-		if (item.owner == user.uuid && item.readlist.length != 0 && item.writelist.length != 0 && item.readlist[0] != "" && item.writelist[0] != "") {
+		if (item.permission.owner == user.uuid && item.permission.readlist.length != 0 && item.permission.writelist.length != 0 && item.permission.readlist[0] != "" && item.permission.writelist[0] != "") {
 			filesSharedByMe.push(item);
 		}
 	});
@@ -493,18 +487,19 @@ ipcMain.on('enterChildren', (event,selectItem) => {
 });
 function enterChildren(selectItem) {
 	c(' ');
-	c('open the folder : ' + selectItem.name);
+	c('open the folder : ' + selectItem.attribute.name);
 	//parent
 	if (selectItem.parent == '') {
 		parent = {}
 	}else {
 		parent = Object.assign({},map.get(selectItem.parent),{children:null});	
 	}
-	c('parent is : ' + parent.name);
+	// c('parent is : ' + !!parent.attribute.name?parent.attribute.name:null);
 	//currentDirectory
-	currentDirectory = selectItem;
+	currentDirectory = Object.assign({},selectItem,{children:null});
 	//children
 	children = map.get(selectItem.uuid).children.map(item=>Object.assign({},item,{children:null}));
+
 	c("number of this folder's children :"  + children.length);
 	//path
 	try {
@@ -524,7 +519,7 @@ function enterChildren(selectItem) {
 function getPath(obj) {
 	//insert obj to path
 	let item = map.get(obj.uuid);
-	dirPath.unshift({key:item.name,value:Object.assign({},item,{children:null})});
+	dirPath.unshift({key:item.attribute.name,value:Object.assign({},item,{children:null})});
 	//obj is root?
 	if (obj.parent == undefined || obj.parent == '') {
 		dirPath.unshift({key:'',value:{}});

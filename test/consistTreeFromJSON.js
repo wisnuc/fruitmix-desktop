@@ -34,7 +34,7 @@ var getFiles = function() {
 
 
 getFiles().then((files)=>{
-	// c((new Date()).getTime())
+
 	files.forEach(item => {
 		item.checked = false
 		item.share = false
@@ -48,9 +48,7 @@ getFiles().then((files)=>{
 	classifyShareFiles(files)
 	tree = getTree(files,'file')
 	shareTree = getTree(shareFiles,'share')
-
-	c(shareMap.size)
-
+	c(tree[0])
 })
 
 function removeFolder(data) {
