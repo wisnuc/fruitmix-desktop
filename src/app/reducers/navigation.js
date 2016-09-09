@@ -18,8 +18,11 @@ let navDefault = [
 { name: '上传/下载', parent: null, selected: false, type:'leftNav', icon:'transmission' },
 { name: '分享给我的文件', parent: null, selected: false, type:'leftNav', icon:'sharedToMe' },
 { name: '我分享的文件', parent: null, selected: false, type:'leftNav', icon:'sharedByMe' },
+{ name: 'Transmission的文件', parent: null, selected: false, type: 'leftNav', icon:'transmission1'},
+{ name: 'Owncloud的文件', parent: null, selected: false, type: 'leftNav', icon:'cloud1'},
 { name: '我的照片', parent: null, selected: false, type: 'leftNav', icon:'myPhoto'},
-{ name: '设置', parent: null, selected: false, type: 'other', icon:'settings'}
+{ name: '设置', parent: null, selected: false, type: 'other', icon:'settings'},
+
 ];
 
 const nav = (state = navDefault, action) => {
