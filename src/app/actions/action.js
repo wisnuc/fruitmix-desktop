@@ -57,12 +57,11 @@ var actions = {
 		}
 	},
 
-	setDirctory(dir,children,parent,path) {
+	setDirctory(dir,children,path) {
 		return {
 			type: 'SET_DIRECTORY',
 			directory: dir,
 			children: children,
-			parent: parent,
 			path:path
 		}
 	},
@@ -300,12 +299,12 @@ var actions = {
 		}
 	},
 
-	setFilesSize(reset) {
-		return {
-			type: 'SET_FILES_SIZE',
-			reset: reset
-		}
-	},
+	// setFilesSize(reset) {
+	// 	return {
+	// 		type: 'SET_FILES_SIZE',
+	// 		reset: reset
+	// 	}
+	// },
 
 	setMediaSize(reset) {
 		return {

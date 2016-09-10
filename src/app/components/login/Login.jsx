@@ -4,110 +4,85 @@
  * @time 2016-4-5
  * @author liuhua
  **/
- 'use strict';
+ 'use strict'
 // require core module
-import React, { findDOMNode, Component, PropTypes } from 'react';
-import Base from '../../utils/Base';
+import React, { findDOMNode, Component, PropTypes } from 'react'
+import Base from '../../utils/Base'
 // require action
-import Login from'../../actions/action';
+import Login from'../../actions/action'
 //require material
-import { Paper, TextField, FlatButton, CircularProgress, Snackbar, SelectField, MenuItem } from 'material-ui';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import darkBaseTheme from 'material-ui/styles/baseThemes/darkBaseTheme';
-import baseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
+import { Paper, TextField, FlatButton, CircularProgress, Snackbar, SelectField, MenuItem } from 'material-ui'
+import getMuiTheme from 'material-ui/styles/getMuiTheme'
+import darkBaseTheme from 'material-ui/styles/baseThemes/darkBaseTheme'
+import baseTheme from 'material-ui/styles/baseThemes/lightBaseTheme'
 
 //import CSS
-import css  from  '../../../assets/css/login';
+import css  from  '../../../assets/css/login'
 //import Action
-import Action from '../../actions/action';
+import Action from '../../actions/action'
 //import component
 import Device from './Device'
-import {orange500, blue500} from 'material-ui/styles/colors';
+import {orange500, blue500} from 'material-ui/styles/colors'
 
 // define Index component
 class Index extends React.Component {
 
 	getChildContext() {
-		const muiTheme = getMuiTheme(baseTheme);
-		return {muiTheme};
+		const muiTheme = getMuiTheme(baseTheme)
+		return {muiTheme}
 	}
 
 	componentDidMount() {
 
 		setTimeout(()=>{
-			ipc.send('getDeviceUsedRecently');
+			ipc.send('getDeviceUsedRecently')
 		},2000)
 
-		ipc.send('findFruitmix');
+		ipc.send('findFruitmix')
 		this.find = setInterval(function(){
-			ipc.send('findFruitmix');
-		},2000);
+			ipc.send('findFruitmix')
+		},2000)
 
 		setTimeout(()=>{
 			if (this.props.state.login.deviceUsedRecently == '') {
 				if (this.props.state.login.device.length == 0) {
 					return
 				}else {
-					this.selectDevice.apply(this,[null,0]);
+					this.selectDevice.apply(this,[null,0])
 				}
 			}
-		},3000);
-
-		// ipc.on('loggedin',(err,user)=>{
-		// 	this.props.dispatch(Login.login(user));
-		// });
-
-		// ipc.on('loginFailed',()=>{
-		// 	this.props.dispatch(Login.loginFailed());
-		// })
+		},3000)
 		ipc.on('message',(err,message,code)=>{
-			this.props.dispatch(Login.setSnack(message,true));
+			this.props.dispatch(Login.setSnack(message,true))
 			// if (code == 0 ) {
-			// 	this.props.dispatch(Login.loginFailed());		
+			// 	this.props.dispatch(Login.loginFailed())		
 			// }
-		});
-
-		// ipc.on('device',(err,device)=>{;
-		// 	this.props.dispatch(Login.setDevice(device));
-		// });
-
-		// ipc.on('setDeviceUsedRecently',(err,ip)=>{
-		// 	console.log('should not happen>>>>>>>>>>>>>>>>')
-		// 	this.props.dispatch(Action.setDeviceUsedRecently(ip));
-		// });
-
-		// ipc.on('setDownloadPath',(err,path)=>{
-		// 	this.props.dispatch({type:'SET_DOWNLOAD_PATH',path:path});
-		// });
-
+		})
 
 	}
 
 	componentWillUnmount() {
-		// ipc.removeAllListeners()
 		clearInterval(this.find)
 	}
 
 	submit() {
-		let username = this.refs.username.input.value;
-		let password = this.refs.password.input.value;
-		// this.props.dispatch({
-		//       type: "LOGIN"
-		// })
-		ipc.send('login',username,password)
+		let username = this.refs.username.input.value
+		let password = this.refs.password.input.value
+		// ipc.send('login',username,password)
+		ipc.send('login','Alice','123456')
 	}
 
 	render() {
-		var _this = this;
-		let findDevice = this.props.state.view.findDevice;
-		let loginContent;
-		let busy = (this.props.state.login.state ==='BUSY');
-		let device = this.props.state.login.device; 
+		var _this = this
+		let findDevice = this.props.state.view.findDevice
+		let loginContent
+		let busy = (this.props.state.login.state ==='BUSY')
+		let device = this.props.state.login.device 
 		const styles = {
 		  underlineStyle: {
 		    borderColor: orange500,
 		  },
-		};
+		}
 		//login
 		if (!busy) {
 			loginContent = (
@@ -148,14 +123,14 @@ class Index extends React.Component {
 							<div onTouchTap={this.submitServer.bind(this)}>提交</div>
 				</div>
 			</div>
-			);
+			)
 		let deviceList = (
 				<div className='add-device-list-container'>
 						{device.map(item=>(
 							<Device key={item.addresses[0]+item.host} item={item}></Device>
 						))}
 						</div>
-			);
+			)
 
 		let findDeviceContent = (
 				<div className='find-device-container' style={{maxHeight:document.body.clientHeight}}>
@@ -168,7 +143,7 @@ class Index extends React.Component {
 						<span onClick={this.toggleAddDevice.bind(this)}>添加设备</span>
 					</div>
 				</div>
-			);
+			)
 
 		return (
 			<div className='index-frame' key='login'>
@@ -176,48 +151,46 @@ class Index extends React.Component {
 				{!findDevice && loginContent}
 				<Snackbar open={this.props.state.snack.open} message={this.props.state.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
 			</div>
-			);
+			)
 	}
 
 	kenDown(e) {
 		if (e.nativeEvent.which == 13) {
-			this.submit();
+			this.submit()
 		}
 	}
 
 	//close snackbar
 	cleanSnack() {
-		this.props.dispatch(Action.cleanSnack());
+		this.props.dispatch(Action.cleanSnack())
 	}
 
 	toggleDevice() {
-		this.props.dispatch(Action.toggleDevice());
+		this.props.dispatch(Action.toggleDevice())
 	}
 
 	toggleAddDevice() {
-		this.props.dispatch(Action.toggleAddDevice());
+		this.props.dispatch(Action.toggleAddDevice())
 	}
 
 	submitServer() {
-		let ip = this.refs.serverIP.input.value;
-		ipc.send('setServeIp',ip,true);
-		// this.props.dispatch(Action.setDeviceUsedRecently(ip));
-		this.props.dispatch(Action.toggleAddDevice());
+		let ip = this.refs.serverIP.input.value
+		ipc.send('setServeIp',ip,true)
+		this.props.dispatch(Action.toggleAddDevice())
 	}
 
 	selectDevice(e,index) {
-		let ip = this.props.state.login.device[index].addresses[0];
-		ipc.send('setServeIp',ip,false);
-		// this.props.dispatch(Action.setDeviceUsedRecently(ip));
+		let ip = this.props.state.login.device[index].addresses[0]
+		ipc.send('setServeIp',ip,false)
 	}
 
 	getValue() {
-			return this.props.state.login.deviceUsedRecently;
+			return this.props.state.login.deviceUsedRecently
 	}
-};
+}
 
 Index.childContextTypes = {
   muiTheme: React.PropTypes.object.isRequired,
-};
+}
 	
 export default Index

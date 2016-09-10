@@ -20,8 +20,8 @@ global.server = ''
 //user
 global.user = {}
 //files
-global.rootNode= null
-// global.allFiles = []
+global.drives = []
+global.rootNode = null
 global.tree = {};
 global.map = new Map()
 //share
@@ -36,7 +36,7 @@ global.currentDirectory = {}
 global.children = []
 global.parent = {}
 global.dirPath = []
-global.tree = {}
+global.tree = []
 //upload 
 global.uploadQueue = []
 global.uploadNow = []
@@ -260,7 +260,6 @@ ipcMain.on('login',function(err,username,password){
 		c('get users : ' + users.length);
 		user.allUser = users;
 		dispatch(action.loggedin(user))
-		// mainWindow.webContents.send('loggedin',user);
 	}).catch((err)=>{
 		c('login failed : ' + err);
 		dispatch(action.loginFailed())
@@ -271,10 +270,35 @@ ipcMain.on('login',function(err,username,password){
 ipcMain.on('getRootData', ()=> {
 	c(' ');
 	c('achieve data ===> ');
+	fileApi.getDrive().then((drivesArr) => {
+		drives = drivesArr
+		let drive = drives.find(item => {
+			if (item.owner[0] == user.uuid && item.label.indexOf('home') != -1) {return true}
+		})
+		if (drive == undefined) {
+			throw new Error('can not find root node')
+		}
+
+		tree.push(Object.assign({},drive,{children:[]}))
+		map.set(tree[0].uuid, tree[0])
+		rootNode = tree[0]
+
+		enterChildren(rootNode)
+		// return fileApi.getFile(drive.uuid)
+	})
+	// .then((files) => {
+	// 	rootNode.children = JSON.parse(files)
+	// 	c(tree)
+	// })
+	.catch((err) => {
+		c(err)
+		mainWindow.webContents.send('message','get data error',1);	
+	})
+
+	return 
+	c(' ');
+	c('achieve data ===> ');
 	fileApi.getFiles().then((files)=>{
-		// fs.writeFile(path.join(__dirname,'testFileData'),JSON.stringify(data),(err,d)=>{
-		// 	if(err){c(err)}else{c(d)}
-		// })
 		c('get allfiles and length is : ' + files.length );
 		//share data
 		// allFiles.length = 0;
@@ -312,32 +336,32 @@ ipcMain.on('getRootData', ()=> {
 		mainWindow.webContents.send('message','get data error',1);	
 	});
 });
-ipcMain.on('refres  h',()=>{
-	getFiles().then((data)=>{
-		c('1');
-		removeFolder(data);
-		c('2');
-		dealWithData(data);
-		c('3');
-		mainWindow.webContents.send('refresh',children);
-	}).catch((err)=>{
-		mainWindow.webContents.send('message','get data error',1);	
-	});
-});
-//seprate files shared by me from files
-function getFilesSharedByMe() {
-	tree.forEach(item=>{
-		if (item.permission.owner == user.uuid && item.permission.readlist.length != 0 && item.permission.writelist.length != 0 && item.permission.readlist[0] != "" && item.permission.writelist[0] != "") {
-			filesSharedByMe.push(item);
-		}
-	});
-	c('files shared by me length is : ' + filesSharedByMe.length );
-}
 //select children
 ipcMain.on('enterChildren', (event,selectItem) => {
 	enterChildren(selectItem);
 });
 function enterChildren(selectItem) {
+	c(' ');
+	c('open the folder : ' + selectItem.name);
+	fileApi.getFile(selectItem.uuid).then(file => {
+		let folder = map.get(selectItem.uuid)
+
+		JSON.parse(file).forEach((item, index) => {
+			tree.push(Object.assign({}, item, {parent:selectItem.uuid,children:[]}))
+			map.set(item.uuid, tree[tree.length-1])
+			folder.children.push(tree[tree.length-1])
+		})
+
+		currentDirectory = Object.assign({}, selectItem, {children:null})
+		children = map.get(selectItem.uuid).children.map(item=>Object.assign({},item,{children:null,checked:false}));
+		dirPath.length = 0
+		getPath(folder)
+		mainWindow.webContents.send('receive',currentDirectory,children,dirPath);
+	}).catch(err => {
+		c(err)
+	})
+	
+	return
 	c(' ');
 	c('open the folder : ' + selectItem.attribute.name);
 	//parent
@@ -364,21 +388,22 @@ function enterChildren(selectItem) {
 		path.length=0;
 	}finally {
 		// let copyFilesSharedByMe = filesSharedByMe.map(item=>Object.assign({},item,{children:null,writelist:[].concat(item.writelist)}));
-		mainWindow.webContents.send('receive',currentDirectory,children,parent,dirPath);
+		mainWindow.webContents.send('receive',currentDirectory,children,dirPath);
 	}
 }
 //get path
 function getPath(obj) {
-	//insert obj to path
-	let item = map.get(obj.uuid);
-	dirPath.unshift({key:item.attribute.name,value:Object.assign({},item,{children:null})});
 	//obj is root?
 	if (obj.parent == undefined || obj.parent == '') {
 		dirPath.unshift({key:'',value:{}});
-		return; 
+		return 
 	}else {
+		//insert obj to path
+		let item = map.get(obj.uuid);
+		dirPath.unshift({key:item.name,value:Object.assign({},item,{children:null})})
 		getPath(map.get(obj.parent));
 	}
+	
 }
 ipcMain.on('getFile',(e,uuid)=>{
 	getFile(uuid).then((data)=>{

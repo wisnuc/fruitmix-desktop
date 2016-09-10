@@ -8,31 +8,6 @@ const defaultState = {
 
 const loginState = (state = defaultState, action) => {
 	switch (action.type) {
-		case 'LOGINOUT':
-			return Object.assign({}, state, {
-				state: 'READY'
-			});
-		case 'LOGIN':
-			return Object.assign({}, state, {
-				state: 'BUSY'
-			});
-		case 'LOGIN_OFF':
-			return Object.assign({}, state, {state: 'READY'})
-		case 'REJECTED':
-			return Object.assign({}, state, {
-				state: 'REJECTED'
-			});
-		case 'TIMEOUT':
-			return Object.assign({}, state, {
-				state: 'TIMEOUT'
-			});
-		case 'LOGGEDIN':
-			var userListArr = action.obj.allUser.map((item)=>{return Object.assign({},item,{checked:false})});
-			action.obj.allUser = userListArr;
-			return Object.assign({}, state, {
-				state: 'LOGGEDIN',
-				obj:action.obj
-			});
 		case "CHECK_USER":
 			var checkedUserArr = state.obj.allUser.map((item)=>{
 				if (item.uuid == action.uuid) {

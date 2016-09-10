@@ -24,14 +24,14 @@ class Row extends Component {
 					<div></div>
 					</div>
 				</td>
-				<td title={this.props.item.attribute.name}>
+				<td title={this.props.item.name}>
 					<div data-uuid={this.props.item.uuid}>
 						<span className={'file-type-icon '+this.props.getTypeOfFile(this.props.item)}></span>
-						<span className='file-name'>{this.props.item.attribute.name}</span>
+						<span className='file-name'>{this.props.item.name}</span>
 					</div>
 				</td>
-				<td title={this.props.item.attribute.changetime}>{this.props.getTime(this.props.item.attribute.changetime)}</td>
-				<td title={this.props.item.attribute.size}>{this.props.getSize(this.props.item.attribute.size)}</td>
+				<td title={this.props.item.mtime}>{this.props.getTime(this.props.item.mtime)}</td>
+				<td title={this.props.item.size}>{this.props.getSize(this.props.item.size)}</td>
 			</tr>
 			)
 	}

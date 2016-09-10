@@ -125,6 +125,7 @@ class AllFilesTable extends Component {
 
 
 	getTime(date) {
+		return date
 		let t = date.indexOf('T');
 		let d = date.substring(0,t);
 		let time = date.substring(t+1,t+9);
@@ -167,7 +168,7 @@ class AllFilesTable extends Component {
 		];
 
 		for (let i =0;i<arr.length;i++) {
-			if (arr[i].reg.test(file.attribute.name)) {
+			if (arr[i].reg.test(file.name)) {
 				return arr[i].type
 			}
 		}

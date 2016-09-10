@@ -14,7 +14,6 @@ import {Tabs, Tab} from 'material-ui/Tabs';
 class Collection extends Component {
 	render() {
 		let t = this.props.state.transmission;
-		console.log(t);
 		let uploadList = [];
 		let downloadList = [];
 		t.upload.forEach(item=>{
