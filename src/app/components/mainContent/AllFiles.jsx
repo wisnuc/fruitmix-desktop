@@ -111,7 +111,7 @@ class AllFiles extends Component {
 			lineHeight:'48px'
 		}
 
-		if (this.props.state.data.state=='BUSY') {
+		if (this.props.state.file.view.state=='BUSY') {
 			return (<div className='data-loading '><CircularProgress/></div>)
 		}else {
 			return (
@@ -193,7 +193,7 @@ class AllFiles extends Component {
 	//get  bread
 	getBreadCrumb(){
 		var _this = this;
-		var path = this.props.state.data.path;
+		var path = this.props.state.file.current.path;
 		var pathArr = [];
 		pathArr = path.map((item,index)=>{
 			return(
@@ -203,21 +203,6 @@ class AllFiles extends Component {
 				</span>
 			)});
 		return pathArr;
-	}
-	//back
-	backToParent () {
-		$('.bezierFrame').empty().append('<div class="bezierTransition1"></div><div class="bezierTransition2"></div>');
-		let parent = this.props.state.data.parent;
-		let path = this.props.state.data.path;
-		if (path.length == 1) {
-			return;
-		}else if (path.length == 2) { 
-			ipc.send('getRootData');
-			this.props.dispatch(Action.filesLoading());
-		}else {
-			this.props.dispatch(Action.cleanDetail());
-			ipc.send('enterChildren',parent);
-		}
 	}
 	//select bread crumb
 	selectBreadCrumb(obj) {

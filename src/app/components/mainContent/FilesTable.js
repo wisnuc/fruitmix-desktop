@@ -23,7 +23,7 @@ class AllFilesTable extends Component {
 					<tr>
 						<th onClick={this.selectAllChildren.bind(this)}>
 							<div className='selectBox' >
-								<div>{this.props.state.data.selectAll?svg.select():svg.blackFrame()}</div>
+								<div>{this.props.state.file.view.selectAll?svg.select():svg.blackFrame()}</div>
 								<div></div>
 								<div></div>
 							</div>
@@ -36,12 +36,9 @@ class AllFilesTable extends Component {
 				{/*table body*/}
 				<tbody>
 					{
-						this.props.state.data.children.map((item,index)=>{
-							if (index > this.props.state.data.showSize) {
-								return false
-							}
+						this.props.state.file.current.children.map((item,index)=>{
 							return (
-								<Row dispatch={this.props.dispatch} data={this.props.state.data} index={index} item={item} key={index} selectChildren={this.selectChildren.bind(this)} enterChildren={this.enterChildren.bind(this)} getTypeOfFile={this.getTypeOfFile.bind(this)} getSize={this.getSize.bind(this)} getTime={this.getTime.bind(this)} addBezier={this.addBezier.bind(this)}></Row>
+								<Row dispatch={this.props.dispatch} index={index} item={item} key={index} selectChildren={this.selectChildren.bind(this)} enterChildren={this.enterChildren.bind(this)} getTypeOfFile={this.getTypeOfFile.bind(this)} getSize={this.getSize.bind(this)} getTime={this.getTime.bind(this)} addBezier={this.addBezier.bind(this)}></Row>
 							)
 						}
 					)}

@@ -56,11 +56,6 @@ class Main extends Component {
 			this.props.dispatch(Action.setTree(tree));
 		});
 
-		ipc.on('refresh',(err,data)=>{
-			console.log('refresh')
-			console.log(data);
-		});
-
 		ipc.on('uploadSuccess',(err,file,children)=>{
 				this.props.dispatch(Action.refreshDir(children));
 		});
@@ -143,10 +138,6 @@ class Main extends Component {
 		ipc.on('addUser',(err,user)=>{
 			this.props.dispatch(Action.login(user));
 		});
-
-		ipc.on('showMessage',(err,data)=>{
-			c.log(data)
-		})
 	}
 	
 	render() {
@@ -175,18 +166,18 @@ class Main extends Component {
 				<Multiple dispatch={this.props.dispatch} state={this.props.state}/>
 				{/*Bar*/}
 				<AppBar 
-				className='app-bar' title='WISNUC' titleStyle={{fontSize:'18px'}}
-				iconElementRight={
-					<IconMenu
-						className='app-bar-right'
-          				iconButtonElement={<IconButton>{svg.expandMore()}</IconButton>}
-          				anchorOrigin={{horizontal: 'right', vertical: 'top'}}
-      					targetOrigin={{horizontal: 'right', vertical: 'top'}}
-        			>
-			          {list}
-			          <MenuItem value="2" primaryText="注销" onTouchTap={this.logOff.bind(this)}/>
-        			</IconMenu>}
-				onLeftIconButtonTouchTap={this.leftNavClick.bind(this)}
+					className='app-bar' title='WISNUC' titleStyle={{fontSize:'18px'}}
+					iconElementRight={
+						<IconMenu
+							className='app-bar-right'
+	          				iconButtonElement={<IconButton>{svg.expandMore()}</IconButton>}
+	          				anchorOrigin={{horizontal: 'right', vertical: 'top'}}
+	      					targetOrigin={{horizontal: 'right', vertical: 'top'}}
+	        			>
+				          {list}
+				          <MenuItem value="2" primaryText="注销" onTouchTap={this.logOff.bind(this)}/>
+	        			</IconMenu>}
+					onLeftIconButtonTouchTap={this.leftNavClick.bind(this)}
 				>
 				<div className='app-bar-username'>{this.props.state.login.obj.username}</div>
 				</AppBar>
