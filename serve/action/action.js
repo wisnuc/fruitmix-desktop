@@ -37,6 +37,21 @@ var actions = {
 			type : 'SET_DOWNLOAD_PATH',
 			path : path
 		}
+	},
+	// files
+	loadingFile() {
+		return {
+			type : 'LOADING'
+		}
+	},
+
+	setDir(directory,children,dirPath) {
+		return {
+			type : 'SET_DIR',
+			directory : directory,
+			children : children,
+			path : dirPath
+		}
 	}
 }
 

@@ -84,7 +84,8 @@ global.dispatch = (action) => {
 const adapter = () => {
 	return {
 		login : store.getState().login,
-		setting : store.getState().setting
+		setting : store.getState().setting,
+		file : store.getState().file
 	}
 }
 
@@ -284,57 +285,13 @@ ipcMain.on('getRootData', ()=> {
 		rootNode = tree[0]
 
 		enterChildren(rootNode)
-		// return fileApi.getFile(drive.uuid)
+
+
 	})
-	// .then((files) => {
-	// 	rootNode.children = JSON.parse(files)
-	// 	c(tree)
-	// })
 	.catch((err) => {
 		c(err)
 		mainWindow.webContents.send('message','get data error',1);	
 	})
-
-	return 
-	c(' ');
-	c('achieve data ===> ');
-	fileApi.getFiles().then((files)=>{
-		c('get allfiles and length is : ' + files.length );
-		//share data
-		// allFiles.length = 0;
-		shareFiles.length = 0;
-		sharePath.length = 0;
-		shareChildren.length = 0;
-		
-		files.forEach(item => {
-			item.checked = false
-			item.share = false
-			item.hasParent = true
-		})
-		//remove folder
-		fileApi.removeFolder(files)
-		//seperate files shared to me
-		fileApi.classifyShareFiles(files)
-		//consist tree
-		tree = fileApi.getTree(files,'file')
-		shareTree = fileApi.getTree(shareFiles,'share')
-		
-		//get root folder of share files
-		shareTree.forEach((item)=>{if (item.hasParent == false) {shareChildren.push(Object.assign({},item, {children:null}))}})
-		sharePath.push({key:'',value:{}})
-		//seperate files shared by me
-		fileApi.getFilesSharedByMe()
-		let copyFilesSharedByMe = filesSharedByMe.map(item=>Object.assign({},item,{children:null,writelist:[].concat(item.writelist)}));
-
-		//enter root folder
-		enterChildren(rootNode)
-
-		mainWindow.webContents.send('setFilesSharedByMe',copyFilesSharedByMe);
-		mainWindow.webContents.send('setShareChildren',shareChildren,sharePath);
-	}).catch((err)=>{
-		console.log(err);
-		mainWindow.webContents.send('message','get data error',1);	
-	});
 });
 //select children
 ipcMain.on('enterChildren', (event,selectItem) => {
@@ -356,40 +313,14 @@ function enterChildren(selectItem) {
 		children = map.get(selectItem.uuid).children.map(item=>Object.assign({},item,{children:null,checked:false}));
 		dirPath.length = 0
 		getPath(folder)
+
+		dispatch(action.setDir(currentDirectory,children,dirPath))
 		mainWindow.webContents.send('receive',currentDirectory,children,dirPath);
 	}).catch(err => {
 		c(err)
 	})
 	
-	return
-	c(' ');
-	c('open the folder : ' + selectItem.attribute.name);
-	//parent
-	if (selectItem.parent == '') {
-		parent = {}
-	}else {
-		parent = Object.assign({},map.get(selectItem.parent),{children:null});	
-	}
-	// c('parent is : ' + !!parent.attribute.name?parent.attribute.name:null);
-	//currentDirectory
-	currentDirectory = Object.assign({},selectItem,{children:null});
-	//children
-	children = map.get(selectItem.uuid).children.map(item=>Object.assign({},item,{children:null}));
-
-	c("number of this folder's children :"  + children.length);
-	//path
-	try {
-		dirPath.length = 0;
-		getPath(selectItem);
-		dirPath = _.cloneDeep(dirPath);
-		c('path length is : ' + dirPath.length);
-	}catch(e) {
-		console.log(e);        
-		path.length=0;
-	}finally {
-		// let copyFilesSharedByMe = filesSharedByMe.map(item=>Object.assign({},item,{children:null,writelist:[].concat(item.writelist)}));
-		mainWindow.webContents.send('receive',currentDirectory,children,dirPath);
-	}
+	
 }
 //get path
 function getPath(obj) {

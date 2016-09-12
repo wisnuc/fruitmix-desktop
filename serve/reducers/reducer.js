@@ -2,12 +2,12 @@
 var combineReducers = require('redux').combineReducers
 var login = require('./login')
 var setting = require('./setting')
-var data = require('./data')
+var file = require('./file')
 
 const reducer = combineReducers({
 	login,
 	setting,
-	data
+	file
 })
 
 module.exports = reducer
