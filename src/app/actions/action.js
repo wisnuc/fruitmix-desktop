@@ -1,71 +1,5 @@
 var actions = {
-	// login(obj) {
-	// 	return {
-	// 		type: 'LOGGEDIN',
-	// 		obj: obj
-	// 	}
-	// },
-
-	// loginFailed() {
-	// 	return {
-	// 		type: 'REJECTED'
-	// 	}
-	// },
-
-	// loginoff() {
-	// 	return {
-	// 		type: 'LOGIN_OFF'
-	// 	}
-	// },
-
-	// setDevice(device) {
-	// 	return {
-	// 		type: 'SET_DEVICE',
-	// 		device: device
-	// 	}
-	// },
-
-	toggleDevice() {
-		return {
-			type: 'TOGGLE_DEVICE'
-		}
-	},
-
-	toggleAddDevice() {
-		return {
-			type: 'TOGGLE_ADD_DEVICE'
-		}
-	},
-
-	// setDeviceUsedRecently(ip) {
-	// 	return {
-	// 		type: 'SET_DEVICE_USED_RECENTLY',
-	// 		ip: ip
-	// 	}
-	// },
-
-	navToggle() {
-		return {
-			type: 'NAV_MENU_TOGGLE' 
-		}
-	},
-	//select left navigation
-	changeSelectedNavItem(name,index) {
-		return {
-			type: 'NAV_SELECT',
-			select: name
-		}
-	},
-
-	setDirctory(dir,children,path) {
-		return {
-			type: 'SET_DIRECTORY',
-			directory: dir,
-			children: children,
-			path:path
-		}
-	},
-
+	//files
 	selectChildren(rowNumber) {
 		return {
 			type: 'SELECT_CHILDREN',
@@ -78,30 +12,55 @@ var actions = {
 			type: 'SELECT_ALL_CHILDREN',
 		}
 	},
-
-	cancelSelect() {
+	//view
+	toggleDevice() {
 		return {
-			type: 'CANCEL_SELECT',
+			type: 'TOGGLE_DEVICE'
 		}
 	},
 
-	toggleMenu(objArr,x,y,selected) {
+	toggleAddDevice() {
+		return {
+			type: 'TOGGLE_ADD_DEVICE'
+		}
+	},
+
+	toggleMenu(obj,x,y,selected) {
 		return {
 			type: 'TOGGLE_MENU',
-			objArr : objArr,
+			obj : obj,
 			x: x,
 			y: y,
 			selected:selected
 		}
 	},
-	//open detail of files
-	setDetail(objArr) {
+
+	openDetail() {
 		return {
-			type : 'SET_DETAIL',
-			objArr : objArr
+			type : 'OPEN_DETAIL'
 		}
 	},
 
+	cleanDetail() {
+		return {
+			type: 'CLEAN_DETAIL'
+		}
+	},
+	//left navigation
+	changeSelectedNavItem(name,index) {
+		return {
+			type: 'NAV_SELECT',
+			select: name
+		}
+	},
+
+	navToggle() {
+		return {
+			type: 'NAV_MENU_TOGGLE' 
+		}
+	},
+
+	// no using
 	mouseDown(left,top) {
 		return {
 			type: 'MOUSE_DOWN',
@@ -121,20 +80,6 @@ var actions = {
 	mouseUp() {
 		return {
 			type: 'MOUSE_UP'
-		}
-	},
-
-	filesLoading() {
-
-		return {
-			type: 'FILES_LOADING'
-		}
-		
-	},
-
-	cleanDetail() {
-		return {
-			type: 'CLEAN_DETAIL'
 		}
 	},
 
@@ -298,13 +243,6 @@ var actions = {
 			sharePath:sharePath
 		}
 	},
-
-	// setFilesSize(reset) {
-	// 	return {
-	// 		type: 'SET_FILES_SIZE',
-	// 		reset: reset
-	// 	}
-	// },
 
 	setMediaSize(reset) {
 		return {

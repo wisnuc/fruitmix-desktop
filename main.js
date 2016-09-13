@@ -269,6 +269,7 @@ ipcMain.on('login',function(err,username,password){
 });
 //get all files -------------------------------------------------
 ipcMain.on('getRootData', ()=> {
+	dispatch(action.loadingFile())
 	c(' ');
 	c('achieve data ===> ');
 	fileApi.getDrive().then((drivesArr) => {
@@ -298,6 +299,7 @@ ipcMain.on('enterChildren', (event,selectItem) => {
 	enterChildren(selectItem);
 });
 function enterChildren(selectItem) {
+	dispatch(action.loadingFile())
 	c(' ');
 	c('open the folder : ' + selectItem.name);
 	fileApi.getFile(selectItem.uuid).then(file => {
@@ -315,12 +317,9 @@ function enterChildren(selectItem) {
 		getPath(folder)
 
 		dispatch(action.setDir(currentDirectory,children,dirPath))
-		mainWindow.webContents.send('receive',currentDirectory,children,dirPath);
 	}).catch(err => {
 		c(err)
 	})
-	
-	
 }
 //get path
 function getPath(obj) {

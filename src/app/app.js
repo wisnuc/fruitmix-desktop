@@ -112,8 +112,6 @@ ipc.on('stateUpdate',(err,data)=>{
 })
 
 ipc.on('adapter', (err, data) => {
-	c.log('new Store')
-	c.log(data)
 	dispatch(Action.adapter(data))
 })
 

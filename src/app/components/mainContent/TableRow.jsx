@@ -1,14 +1,15 @@
 import React, { findDOMNode, Component, PropTypes } from 'react';
 import svg from '../../utils/SVGIcon';
 class Row extends Component {
+
 	shouldComponentUpdate(nextP) {
-		// if (nextP.item.permission.name == this.props.item.permission.name && nextP.item.checked == this.props.item.checked) {
-		// 	return false
-		// }else {
-		// 	return true
-		// }
-		return true
+		if (this.props.item.checked == nextP.item.checked && this.props.item.name == nextP.item.name) {
+			return false
+		}else {
+			return true
+		}
 	}
+
 	render() {
 		var _this = this
 		return (
@@ -26,15 +27,72 @@ class Row extends Component {
 				</td>
 				<td title={this.props.item.name}>
 					<div data-uuid={this.props.item.uuid}>
-						<span className={'file-type-icon '+this.props.getTypeOfFile(this.props.item)}></span>
+						<span className={'file-type-icon '+this.getTypeOfFile(this.props.item)}></span>
 						<span className='file-name'>{this.props.item.name}</span>
 					</div>
 				</td>
-				<td title={this.props.item.mtime}>{this.props.getTime(this.props.item.mtime)}</td>
-				<td title={this.props.item.size}>{this.props.getSize(this.props.item.size)}</td>
+				<td >{this.getTime(this.props.item.mtime)}</td>
+				<td>{this.getSize(this.props.item.size)}</td>
 			</tr>
 			)
 	}
+
+	getSize(size) {
+		if (!size) {
+			return null
+		}
+		size = parseFloat(size);
+		if (size < 1024) {
+			return size.toFixed(2)+' B'
+		}else if (size < 1024*1024) {
+			return (size/1024).toFixed(2)+' KB'
+		}else if(size<1024*1024*1024) {
+			return (size/1024/1024).toFixed(2)+ ' M'
+		}else {
+			return (size/1024/1024/1024).toFixed(2)+ ' G'
+		}
+	}
+
+	getTime(mtime) {
+		if (!mtime) {
+			return null
+		}
+		let time = new Date()
+		time.setTime(parseInt(mtime))
+		return time.getFullYear() + ' ' + (time.getMonth() + 1) + ' ' + time.getDay()
+	}
+
+	getTypeOfFile(file){
+		if (file.type == 'folder') {
+			return 'folder'
+		}
+
+		let arr = [
+		{type:'txt',reg: new RegExp("^.*\\.txt$")},
+		{type:'doc',reg:new RegExp("^.*\\.doc$")},
+		{type:'docx',reg:new RegExp("^.*\\.docx$")},
+		{type:'wps',reg:new RegExp("^.*\\.wps$")},
+		{type:'ppt',reg:new RegExp("^.*\\.ppt$")},
+		{type:'pptx',reg:new RegExp("^.*\\.pptx$")},
+		{type:'xls',reg:new RegExp("^.*\\.xls$")},
+		{type:'psd',reg:new RegExp("^.*\\.psd$")},
+		{type:'pdf',reg:new RegExp("^.*\\.pdf$")},
+		{type:'jpg',reg:new RegExp("^.*\\.jpg$")},
+		{type:'png',reg:new RegExp("^.*\\.png$")},
+		{type:'gif',reg:new RegExp("^.*\\.gif$")},
+		{type:'mp3',reg:new RegExp("^.*\\.mp3$")},
+		{type:'mp4',reg:new RegExp("^.*\\.mp4$")}
+		];
+
+		for (let i =0;i<arr.length;i++) {
+			if (arr[i].reg.test(file.name)) {
+				return arr[i].type
+			}
+		}
+		return 'file'
+	}
+
+
 
 }
 export default Row;

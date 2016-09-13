@@ -74,7 +74,7 @@ class AllFiles extends Component {
 			<div className='all-my-files' style={{height:'100%'}}>
 				{this.getTable()}
 				{/*file detail*/}
-				<Paper className='file-detail' style={{width:this.props.state.isShow.detail.length==0?'0px':'350px'}}>
+				<Paper className='file-detail' style={{width:this.props.state.view.detail.length==0?'0px':'350px'}}>
 					<Detail dispatch={this.props.dispatch} state={this.props.state}></Detail>
 				</Paper>
 				{/*create new folder dialog*/}
@@ -83,7 +83,7 @@ class AllFiles extends Component {
 					titleClassName='create-folder-dialog-title'
 					actions={folderActions}
 					modal={false}
-					open={this.props.state.isShow.dialogOfFolder}
+					open={this.props.state.view.dialogOfFolder}
 					className='create-folder-dialog'
 			        >
 			        <div className='create-folder-dialog-label'>名称</div>
@@ -94,7 +94,7 @@ class AllFiles extends Component {
 					title='分享' 
 					titleClassName='create-folder-dialog-title'
 					actions={shareActions}
-					open={this.props.state.isShow.dialogOfShare}
+					open={this.props.state.view.dialogOfShare}
 					className='create-folder-dialog'
 				>
 					<div className='share-user-list-container'>
@@ -209,7 +209,7 @@ class AllFiles extends Component {
 		$('.bezierFrame').empty().append('<div class="bezierTransition1"></div><div class="bezierTransition2"></div>');
 		if (obj.key == '') {
 			ipc.send('getRootData');
-			this.props.dispatch(Action.filesLoading());
+			// this.props.dispatch(Action.filesLoading());
 		}else {
 			this.props.dispatch(Action.cleanDetail());
 			ipc.send('enterChildren',obj.value);
@@ -264,16 +264,16 @@ class AllFiles extends Component {
 	}
 	//scrollEvent 
 	scrollEvent() {
-		let dom = document.getElementsByClassName('file-area')[0]
-		let sTop = dom.scrollTop;
-		let sHeight = dom.scrollHeight;
-		let cHeight = dom.clientHeight;
-		if (cHeight+sTop == sHeight) {
-			if (this.props.state.data.children.length <= this.props.state.data.showSize) {
-				return
-			}
-			this.props.dispatch(Action.setFilesSize(false));
-		}
+		// let dom = document.getElementsByClassName('file-area')[0]
+		// let sTop = dom.scrollTop;
+		// let sHeight = dom.scrollHeight;
+		// let cHeight = dom.clientHeight;
+		// if (cHeight+sTop == sHeight) {
+		// 	if (this.props.state.data.children.length <= this.props.state.data.showSize) {
+		// 		return
+		// 	}
+		// 	this.props.dispatch(Action.setFilesSize(false));
+		// }
 	}
 }
 

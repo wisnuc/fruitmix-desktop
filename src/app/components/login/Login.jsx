@@ -36,12 +36,12 @@ class Index extends React.Component {
 
 		setTimeout(()=>{
 			ipc.send('getDeviceUsedRecently')
-		},2000)
+		},1000)
 
 		ipc.send('findFruitmix')
 		this.find = setInterval(function(){
 			ipc.send('findFruitmix')
-		},2000)
+		},500)
 
 		setTimeout(()=>{
 			if (this.props.state.login.deviceUsedRecently == '') {

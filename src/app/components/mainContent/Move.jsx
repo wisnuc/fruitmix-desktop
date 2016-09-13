@@ -15,11 +15,11 @@ import svg from '../../utils/SVGIcon';
 
 class Move extends Component {
 	render() {
-		let left = this.props.state.navigation.menu?this.props.state.isShow.move.x-220:this.props.state.isShow.move.x-20;
-		let top = this.props.state.isShow.move.y-120;  
+		let left = this.props.state.navigation.menu?this.props.state.view.move.x-220:this.props.state.view.move.x-20;
+		let top = this.props.state.view.move.y-120;  
 		let scroll = !!document.getElementsByClassName('file-area')[0]?document.getElementsByClassName('file-area')[0].scrollTop:0
 		const style = {
-			display: this.props.state.isShow.move.open==false?'none':'block',
+			display: this.props.state.view.move.open==false?'none':'block',
 			top:top+scroll,
 			left:left,
 		}
@@ -81,12 +81,4 @@ class Move extends Component {
 	}
 }
 
-function mapStateToProps(state) {
-	return {
-		isShow: state.isShow,
-		navigation: state.navigation,
-		tree: state.tree,
-		data:state.data
-	}
-}
 export default Move;

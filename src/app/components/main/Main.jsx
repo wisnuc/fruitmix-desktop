@@ -47,11 +47,11 @@ class Main extends Component {
 		ipc.send('getRootData');
 		ipc.send('getMediaData');
 
-		this.props.dispatch(Action.filesLoading());
+		// this.props.dispatch(Action.filesLoading());
 
-		ipc.on('receive',function (err,dir,children,path) {
-			_this.props.dispatch(Action.setDirctory(dir,children,path))
-		});
+		// ipc.on('receive',function (err,dir,children,path) {
+		// 	_this.props.dispatch(Action.setDirctory(dir,children,path))
+		// });
 		ipc.on('setTree',(err,tree)=>{
 			this.props.dispatch(Action.setTree(tree));
 		});
@@ -204,7 +204,7 @@ class Main extends Component {
 	}
 
 	triggerClick(e) {
-		if (this.props.state.data.menu.show) {
+		if (this.props.state.view.menu.show) {
 			this.props.dispatch(Action.toggleMenu());
 		}
 	}

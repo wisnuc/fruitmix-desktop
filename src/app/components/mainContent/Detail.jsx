@@ -14,7 +14,7 @@ import Action from '../../actions/action';
 
  class Detail extends Component {
  	render() {
- 		let data = this.props.state.isShow.detail[0];
+ 		let data = this.props.state.view.detail[0];
 
  		if (data) {
  			 		let style = {
@@ -25,11 +25,11 @@ import Action from '../../actions/action';
  			return(
 	 			<div style={style} className='detail-container'>
 	 				<div>类型&nbsp;&nbsp;:&nbsp;&nbsp;{data.type?data.type=='folder'?'文件夹':'文件':null}</div>
-	 				<div>大小&nbsp;&nbsp;:&nbsp;&nbsp;{data.type=='folder'?null:(this.getSize(data.attribute.size)||null)}</div>
+	 				<div>大小&nbsp;&nbsp;:&nbsp;&nbsp;{data.type=='folder'?null:(this.getSize(data.size)||null)}</div>
 	 				<div title={data.path||null}>位置&nbsp;&nbsp;:&nbsp;&nbsp;{data.path||null}</div>
 	 				<div>所有者&nbsp;&nbsp;:&nbsp;&nbsp;{this.getOwner(data.owner)||null}</div>
-	 				<div>上传时间&nbsp;&nbsp;:&nbsp;&nbsp;{data.attribute.createtime||null}</div>
-	 				<div>修改时间&nbsp;&nbsp;:&nbsp;&nbsp;{data.attribute.changetime||null}</div>
+	 				<div>上传时间&nbsp;&nbsp;:&nbsp;&nbsp;{data.mtime||null}</div>
+	 				<div>修改时间&nbsp;&nbsp;:&nbsp;&nbsp;{data.mtime||null}</div>
 	 				<RaisedButton label="close" onMouseUp={this.closeDetail.bind(this)} className='detail-close'/>
 	 			</div> 
 	 			)
@@ -65,11 +65,5 @@ import Action from '../../actions/action';
 	}
  }
 
-function mapStateToProps (state) {
-	return {
-		isShow: state.isShow,
-		login: state.login
-	}
-}
 
  export default Detail;

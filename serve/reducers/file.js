@@ -20,8 +20,8 @@ const directory = (state = defaultDirectory,action)=> {
 				children : action.children,
 				path : action.path
 			}
-			return Object.assign({},state,{current : newCurrent})
-
+			var newView = {state:'READY',selectAll:false}
+			return Object.assign({},state,{current : newCurrent,view:newView})
 		default:
 			return state
 	}

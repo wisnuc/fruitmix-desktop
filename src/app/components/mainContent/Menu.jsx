@@ -15,7 +15,7 @@ import Action from '../../actions/action';
 
 class PopMenu extends Component {
 	render() {
-		let menu = this.props.state.data.menu;
+		let menu = this.props.state.view.menu;
 		let style = {
 			display:'none'
 		}
@@ -43,7 +43,7 @@ class PopMenu extends Component {
 	}
 	//open detail of files
 	detail() {
-		this.props.dispatch(Action.setDetail(this.props.state.data.menu.objArr));
+		this.props.dispatch(Action.openDetail());
 	}
 	//rename
 	rename() {
@@ -131,12 +131,6 @@ class PopMenu extends Component {
 			this.props.dispatch(Action.addDownload(fileObj));
 			ipc.send('download',fileObj);	
 			this.props.dispatch(Action.setSnack(files.length+' 个文件添加到下载队列',true));
-		}
-	}
-
-	triggerClick(e) {
-		if (this.props.state.data.menu.show) {
-			this.props.dispatch(Action.toggleMenu());
 		}
 	}
 }
