@@ -56,9 +56,9 @@ class Main extends Component {
 			this.props.dispatch(Action.setTree(tree));
 		});
 
-		ipc.on('uploadSuccess',(err,file,children)=>{
-				this.props.dispatch(Action.refreshDir(children));
-		});
+		// ipc.on('uploadSuccess',(err,file,children)=>{
+		// 		this.props.dispatch(Action.refreshDir(children));
+		// });
 
 		ipc.on('refreshStatusOfUpload',(err,file,status)=>{
 			this.props.dispatch(Action.refreshStatusOfUpload(file,status));

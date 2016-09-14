@@ -22,6 +22,7 @@ class SharedFiles extends Component {
     }
 	render() {
 		console.log(this);
+		return <div>to be continued</div>
 		return (
 			<div className='shared-files-container'>
 				{/*<div onClick={this.backRoot}>back root</div>*/}

@@ -97,12 +97,12 @@ var actions = {
 		}
 	},
 
-	refreshDir(obj) {
-		return {
-			type: 'REFRESH_DIR',
-			obj: obj,
-		}
-	},
+	// refreshDir(obj) {
+	// 	return {
+	// 		type: 'REFRESH_DIR',
+	// 		obj: obj,
+	// 	}
+	// },
 
 	removeFile(obj) {
 		return {

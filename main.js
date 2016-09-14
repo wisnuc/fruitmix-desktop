@@ -12,6 +12,7 @@ global.stream = require('stream')
 global.path = require('path')
 global._ = require('lodash')
 global.mdns = require('mdns-js')
+global.crypto = require('crypto');
 global.mainWindow = null
 global.testWindow = null
 global.fruitmixWindow = null

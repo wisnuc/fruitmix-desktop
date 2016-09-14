@@ -15,6 +15,7 @@ import M from './MediaImage';
 
 class Media extends Component {
 	render() {
+		return <div>to be continued</div>
 		return (
 			<div className='all-my-files' style={{height:'100%'}} >
 				{this.getContent()}

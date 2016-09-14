@@ -13,6 +13,7 @@ import svg from '../../utils/SVGIcon';
 
 class SharedByMe extends Component {
 	render() {
+		return <div>to be continued</div>
 		return (
 			<div className='files-shared-byme-container'>
 			<table className="fileTable">

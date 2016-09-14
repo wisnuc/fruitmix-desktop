@@ -151,41 +151,23 @@ class AllFiles extends Component {
 		let map = new Map();
 		var t = new Date();
 		for (let i=0;i<e.nativeEvent.target.files.length;i++) {
-			var f = e.nativeEvent.target.files[i];
-			c.log(f);
-			c.log(f.lastModifiedDate.toTimeString());
-			c.log(f.lastModifiedDate.toDateString());
-			c.log(f.lastModifiedDate.toString());
-			c.log(f.lastModifiedDate.toUTCString());
-			c.log(f.lastModifiedDate.toLocaleString());
-			c.log(f.lastModifiedDate.toLocaleTimeString());
-			c.log(f.lastModifiedDate.toLocaleDateString());
+			var f = e.nativeEvent.target.files[i]
 			var file = {
-				name:f.name,
-				path:f.path,
-				attribute: {
-					size:f.size,
-					changetime:f.lastModifiedDate,
-					createtime:f.lastModifiedDate,
-					modifytime:f.lastModifiedDate,
-					name:f.name,
-				},
-				uploadTime :  Date.parse(t),
-				parent : this.props.state.data.directory.uuid,
+				uploadTime : Date.parse(t),
+				parent : this.props.state.file.current.directory.uuid,
 				status:0,
 				uuid:null,
 				checked:false,
-				share:false,
 				type:'file',
 				owner:[this.props.state.login.obj.uuid],
-				readlist:[''],
-				writelist:[''],
-				hasParent:true
+				size:f.size,
+				path:f.path,
+				name:f.name,
 			}
 			files.push(file);
 			map.set(f.path+Date.parse(t),file);
 		}
-		let fileObj = {data:files,length:files.length,success:0,failed:0,index:0,status:'ready',parent:this.props.state.data.directory.uuid,map:map,key:Date.parse(new Date())};
+		let fileObj = {data:files,length:files.length,success:0,failed:0,index:0,status:'ready',parent:this.props.state.file.current.directory.uuid,map:map,key:Date.parse(new Date())};
 		this.props.dispatch(Action.addUpload(fileObj));
 		ipc.send('uploadFile',fileObj);	
 		this.props.dispatch(Action.setSnack(files.length+' 个文件添加到上传队列',true));
@@ -218,7 +200,7 @@ class AllFiles extends Component {
 	//create new folder
 	upLoadFolder() {
 		let name = $('#folder-name')[0].value;
-		ipc.send('upLoadFolder',name,this.props.state.data.directory);
+		ipc.send('upLoadFolder',name,this.props.state.file.current.directory);
 		this.toggleUploadFolder(false);
 	}
 	//open input of files
