@@ -100,12 +100,12 @@ class PopMenu extends Component {
 
 	remove() {
 		let arr = [];
-		this.props.state.data.children.forEach(item=>{
+		this.props.state.file.current.children.forEach(item=>{
 			if (item.checked) {
 				arr.push(item)
 			}
 		});
-		ipc.send('delete',arr,this.props.state.data.directory);
+		ipc.send('delete',arr,this.props.state.file.current.directory);
 	}
 
 	dowload() {

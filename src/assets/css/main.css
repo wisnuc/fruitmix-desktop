@@ -353,6 +353,9 @@
 .file-type-icon.mp4 {
 	background-position: -104px -204px;
 }
+.file-type-icon.png {
+	background-position: -105px 464px;
+}
 /*detail*/
 .detail-container{
 	box-sizing: border-box;
