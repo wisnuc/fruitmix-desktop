@@ -1133,11 +1133,10 @@ function uploadFileInFolder(node) {
 			hash.end()
 			let sha = hash.read()
 
-			var tempStream = fs.createReadStream(file.path).pipe(transform);
-			tempStream.path = file.path
+			var tempStream = fs.createReadStream(node.path)
 
 			var options = {
-				url:server+'/files/'+currentDirectory.uuid,
+				url:server+'/files/'+node.parent,
 				method:'post',
 				headers: {
 					Authorization: user.type+' '+user.token
