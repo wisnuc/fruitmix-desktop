@@ -1,0 +1,19 @@
+@charset "UTF-8";
+
+.slide-enter {
+  max-height: 0;
+  transition: max-height .4s linear;
+}
+
+.slide-enter.slide-enter-active {
+  max-height: 500px;
+}
+
+.slide-leave {
+  max-height: 500px;
+  transition: max-height .4s linear;
+}
+
+.slide-leave.slide-leave-active {
+  max-height: 0;
+}

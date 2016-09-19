@@ -1,0 +1,19 @@
+@charset "UTF-8";
+
+@import "../../statics/themes/mixins/mixins";
+
+.borderRadius (@borderRadius) {
+  -webkit-border-radius: @borderRadius;
+  -moz-border-radius: @borderRadius;
+  border-radius: @borderRadius;
+}
+
+.border (@width: 1px, @style: solid, @color: #ccc) {
+  border: @arguments;
+}
+
+.popup {
+  .border();
+  .borderRadius(4px);
+  .position();
+}
