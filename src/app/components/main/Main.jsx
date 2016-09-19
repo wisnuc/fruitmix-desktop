@@ -138,6 +138,10 @@ class Main extends Component {
 		ipc.on('addUser',(err,user)=>{
 			this.props.dispatch(Action.login(user));
 		});
+
+		ipc.on('data',(err,d)=>{
+			c.log(d)
+		});
 	}
 	
 	render() {

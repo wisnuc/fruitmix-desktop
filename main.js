@@ -926,6 +926,7 @@ ipcMain.on('openInputOfFolder', e=>{
 		},
 		success: 0,
 		count: 1,
+		failed:0,
 		key: '',
 		type: 'folder',
 		name: ''
@@ -968,13 +969,13 @@ ipcMain.on('openInputOfFolder', e=>{
 			},1000)
  		
 			let f = function() {
-				if (o.times>5) {
-						c('folder upload success !')
+				if (uploadObj.data.times>5) {
+						c('root folder upload failed !')
 						o.status = 'failed'
 						clearInterval(st)
 						mainWindow.webContents.send('refreshUploadStatusOfFolder',uploadObj.key,'上传失败')
 					}else {
-						uploadNode(o,s,f)
+						uploadNode(uploadObj.data,s,f)
 					}
 			}
 			let s = function() {
@@ -1032,64 +1033,68 @@ ipcMain.on('openInputOfFolder', e=>{
 
 	function uploadNode(node,callback,failedCallback) {
 		try{
-			// c(' ')
-			// console.log('current file/folder is : ' + node.name)
+			c(' ')
+			console.log('current file/folder is : ' + node.name)
 			if (node.type == 'file') {
+				c('is file')
 				uploadFileInFolder(node).then(()=>{
 					c('create file success : '+ node.name)
 					uploadObj.success++
 					callback()
 				}).catch((err)=>{
+					c(err)
 					c('create file failed! : '+ node.name)
 					node.times++
-					failedCallback()
+					failedCallback(err)
 				})
 			}else {
 				let length = node.children.length
 				let index = 0
+				c('is folder and has ' + length + ' children')
 				createFolder({uuid:node.parent},node.name).then(uuid=>{
-					c('create folder success : '+ node.name)
+					node.uuid = uuid
+					c('create folder success : '+ node.name + ' uuid is : ' + uuid)
 					uploadObj.success++
 					if (length == 0) {
+						c('not have children')
 						callback()
 					}else {
+						c('have children')
 						node.children.forEach((item,index)=>{
 							node.children[index].parent = uuid
 						})
-						let c = function(){
+						let s = function(){
+							node.children[index].status = 'failed'
 							index++
-							
 							if (index >= length) {
 								callback()
 							}else {
-								// c('current ' + index+ "   "+length)
 								uploadNode(node.children[index],c,f)
 							}
 						}
 
 						let f = function() {
 							if (node.children[index].times>5) {
-								// node.children[index].status = 'failed'
-								// c(node.children[index].name + 'is absolute failed')
+								node.children[index].status = 'failed'
+								c(node.children[index].name + 'is absolute failed')
 								uploadObj.failed++
 								index++
 								if (index >= length) {
-									
 									callback()
 								}else {
-									console.log('current ' + index+ "   "+length)
 									uploadNode(node.children[index],c)
 								}
 							}else {
 								uploadNode(node.children[index],c,f)
 							}
 						}
-						uploadNode(node.children[index],c,f)
+						uploadNode(node.children[index],s,f)
 					}
-				}).catch(()=>{
+				}).catch((err)=>{
+					c(err)
 					c('create folder failed: '+ node.name)
 					node.times++
-					failedCallback()
+					failedCallback(err)
 				})
 			}
 		}catch(e){
@@ -1129,7 +1134,11 @@ function uploadFileInFolder(node) {
 		hash.setEncoding('hex')
 		let fileStream = fs.createReadStream(node.path)
 		// c('file name is' + node.name + 'parent uuid is : ' + node.parent)
+		fileStream.on('err',(err)=>{
+			c('you are not ok')
+		})
 		fileStream.on('end',() => {
+			c('are you ok?')
 			hash.end()
 			let sha = hash.read()
 
@@ -1148,24 +1157,12 @@ function uploadFileInFolder(node) {
 
 			}
 			request(options,function (err,res,body) {
-				clearInterval(countStatus)
 				if (!err && res.statusCode == 200) {
 					c('create file success')
-						uploadQueue[0].success += 1;
-						file.status = 1;
-						mainWindow.webContents.send('refreshStatusOfUpload',file.path+file.uploadTime,1);
-						file.uuid = JSON.parse(body).uuid
+						resolve(JSON.parse(body).uuid)
 				}else {
 					c('create folder failed')
-						uploadQueue[0].failed += 1;
-						file.status = 1.01;
-						mainWindow.webContents.send('refreshStatusOfUpload',file.path+file.uploadTime,1.01);
-						mainWindow.webContents.send('message','upload failed');
-				}
-				let index = uploadNow.findIndex(item=>item.path == file.path);
-				uploadNow.splice(index,1);
-				if (uploadNow.length == 0) {
-					_this.dealUploadQueue();
+					reject(err)
 				}
 			})
 			
@@ -1177,7 +1174,6 @@ function uploadFileInFolder(node) {
 }
 //download file
 ipcMain.on('download',(e,files)=>{
-	console.log(files)
 	downloadQueue.push(files)
 	download.dealDownloadQueue()
 })
@@ -1269,4 +1265,4 @@ ipcMain.on('dispatch', (err, action) => {
 	}
 })
 
-
+//.........
