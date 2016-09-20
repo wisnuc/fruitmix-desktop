@@ -14,7 +14,7 @@ function getStyles () {
     },
     rootInner: {
       position: 'fixed',
-      boxSizing: 'border-sizing',
+      borderSizing: 'border-sizing',
       width: '100%',
       borderLeft: '1px solid #e0e0e0',
       right: 0,
@@ -56,5 +56,5 @@ RightPanel.propTypes = {
   /**
     component width
   **/
-  width: PropTypes.string.isRequired
+  width: PropTypes.number.isRequired
 };

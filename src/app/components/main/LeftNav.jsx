@@ -24,20 +24,20 @@ const style = {
 };
 
 const listStyle = {
-	height: 50,
-	lineHeight:'50px',
+	height: 55,
+	lineHeight:'55px',
 	paddingLeft:50,
 	color:'#fff',
-	fontSize:'14px',
-	paddingLeft: '60px'
+	fontSize: 12,
+	paddingLeft: 60
 }
 const selectedStyle = {
-	height: 50,
-	lineHeight:'50px',
+	height: 55,
+	lineHeight:'55px',
 	paddingLeft:50,
 	color:'#ef6c00',
-	fontSize:'14px',
-	paddingLeft: '60px'
+	fontSize: 12,
+	paddingLeft: 60
 }
 
 function getStyles () {
@@ -45,7 +45,7 @@ function getStyles () {
 		header: {
 			textAlign: 'center',
 			lineHeight: '55px',
-			fontSize: 16,
+			fontSize: 14,
 			color: '#fff',
 			backgroundColor: 'rgba(0,0,0,.2)',
 			borderBottom: '1px solid rgba(0,0,0,.25)'

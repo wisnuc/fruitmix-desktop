@@ -10,7 +10,7 @@ function getStyles () {
   return {
     root: {
       boxSizing: 'border-box',
-      minHeight: 183
+      minHeight: 184
     },
     header: {
       textAlign: 'center',
@@ -24,7 +24,6 @@ function getStyles () {
     body: {
       margin: 0,
       padding: '10px 0 0 15px',
-      fontFamily: 'microsoft yahei',
       color: '#fff'
     },
     li: {
@@ -39,7 +38,6 @@ function getStyles () {
     },
     span: {
       paddingLeft: 10,
-      fontFamily: 'arial',
       vertical: 'middle',
       fontSize: 14,
       fontWeight: 700
