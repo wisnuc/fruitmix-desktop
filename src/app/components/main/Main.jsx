@@ -25,6 +25,7 @@ import css  from  '../../../assets/css/main';
 //import component
 import LeftNav from './LeftNav';
 import Content from './Content';
+import RightPanel from './RightPanel';
 import Multiple from '../mainContent/Multiple';
 import Users from './userDialog'
 
@@ -193,6 +194,10 @@ class Main extends Component {
 				<Paper className={"content-container "+(this.props.state.navigation.menu?'content-has-left-padding':'no-padding')} zDepth={0}>
 					<Content dispatch={this.props.dispatch} state={this.props.state}/>
 				</Paper>
+
+        {/* Right Panel */}
+        <RightPanel width={ 230 }></RightPanel>
+
 				{m}
 				<Dialog title="用户管理"
 					titleClassName='create-folder-dialog-title'

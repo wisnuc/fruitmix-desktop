@@ -74,14 +74,14 @@
 	height: 100%;
 	position: absolute;
 	top:0px;
-	padding-top:72px;
+	padding-top:64px;
 	background-color: #e2e2e2!important;
 }
 .content-container>div,.content-container>div>div{
 	height: 100%;
 }
 .content-container.content-has-left-padding {
-	padding-left:249px;
+	padding-left:241px;
 }
 .content-container.no-padding {
 	padding-left: 0px;
@@ -113,7 +113,7 @@
 }
 /*AllFiles*/
 .breadcrumb {
-	height:60px;
+	height:55px;
 	padding-left:26px;
 	display: flex;
 	flex-flow: row nowrap;
@@ -168,6 +168,7 @@
 }
 .all-files-container {
 	position: relative;
+	padding-right: 230px;
 }
 .upload-input{
 	display: none;
