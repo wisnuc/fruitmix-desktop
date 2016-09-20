@@ -50,9 +50,9 @@ class Collection extends Component {
 			}else {
 				item.data.forEach(item1=>{
 					downloadList.push(
-						<tr key={item1.name+item1.uploadTime}>
+						<tr key={item1.name+item1.downloadTime}>
 							<td title={item1.name}>{item1.name}</td>
-							<td>{this.getSize(item1.attribute.size)}</td>
+							<td>{this.getSize(item1.size)}</td>
 							<td>{this.getStutus(item1.status)}</td>
 						</tr>
 					);

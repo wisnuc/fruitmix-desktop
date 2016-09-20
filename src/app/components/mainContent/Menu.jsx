@@ -113,7 +113,7 @@ class PopMenu extends Component {
 		let folder = [];
 		let map = new Map();
 		let t = new Date();
-		this.props.state.data.children.forEach(item=>{
+		this.props.state.file.current.children.forEach(item=>{
 			if (item.checked && item.type != 'folder') {
 				let file = Object.assign({},item,{status:0,downloadTime:Date.parse(t)});
 				files.push(file);
