@@ -28,7 +28,7 @@ import Content from './Content';
 import Multiple from '../mainContent/Multiple';
 import Users from './userDialog'
 
-import svg from '../../utils/SVGIcon'; 
+import svg from '../../utils/SVGIcon';
 
 import Mask from './MediaMask'
 
@@ -36,7 +36,7 @@ class Main extends Component {
 
 	getChildContext() {
 		const muiTheme = getMuiTheme(lightBaseTheme);
-		return {muiTheme}; 
+		return {muiTheme};
 	}
 	constructor(props) {
         super(props);
@@ -75,7 +75,7 @@ class Main extends Component {
 		ipc.on('refreshUploadStatusOfFolder',(err,key,status)=>{
 			this.props.dispatch(Action.refreshUploadStatusOfFolder(key,status));
 		});
-		
+
 
 		ipc.on('deleteSuccess',(err,obj,children,dir)=>{
 			if (dir.uuid == this.props.state.data.directory.uuid) {
@@ -139,7 +139,7 @@ class Main extends Component {
 			this.props.dispatch(Action.login(user));
 		});
 	}
-	
+
 	render() {
 		let list = null;
 		var name = this.props.state.login.obj.username;
@@ -165,7 +165,7 @@ class Main extends Component {
 				{/*Multiple select frame*/}
 				<Multiple dispatch={this.props.dispatch} state={this.props.state}/>
 				{/*Bar*/}
-				<AppBar 
+				<AppBar
 					className='app-bar' title='WISNUC' titleStyle={{fontSize:'18px'}}
 					iconElementRight={
 						<IconMenu
@@ -232,24 +232,24 @@ class Main extends Component {
  			for (let i = 0;i < position.length; i++) {
  				if (position[i].bottom<top) {
  					if (this.props.state.data.children[i].checked == true) {
- 						this.props.dispatch(Action.selectChildren(i));	
+ 						this.props.dispatch(Action.selectChildren(i));
  					}
  					continue;
  				}
  				if (position[i].bottom>top&&position[i].top<top) {
  					if (this.props.state.data.children[i].checked == false) {
- 						this.props.dispatch(Action.selectChildren(i));	
+ 						this.props.dispatch(Action.selectChildren(i));
  						if (this.props.state.data.detail.length!=0) {
  							this.props.dispatch(Action.setDetail([this.props.state.data.children[i]]));
  						}
- 						
+
  					}
 
  					continue;
  				}
  				if (position[i].bottom<bottom&&position[i].top>top) {
  					if (this.props.state.data.children[i].checked == false) {
- 						this.props.dispatch(Action.selectChildren(i));	
+ 						this.props.dispatch(Action.selectChildren(i));
  						if (this.props.state.data.detail.length!=0) {
  							this.props.dispatch(Action.setDetail([this.props.state.data.children[i]]));
  						}
@@ -258,7 +258,7 @@ class Main extends Component {
  				}
  				if (position[i].top<bottom&&position[i].bottom>bottom) {
  					if (this.props.state.data.children[i].checked == false) {
- 						this.props.dispatch(Action.selectChildren(i));	
+ 						this.props.dispatch(Action.selectChildren(i));
  						if (this.props.state.data.detail.length!=0) {
  							this.props.dispatch(Action.setDetail([this.props.state.data.children[i]]));
  						}
@@ -267,9 +267,9 @@ class Main extends Component {
  				}
  				if (position[i].top>bottom) {
  					if (this.props.state.data.children[i].checked == true) {
- 						this.props.dispatch(Action.selectChildren(i));	
+ 						this.props.dispatch(Action.selectChildren(i));
  					}
- 					continue;	
+ 					continue;
  				}
  			}
 			var num = [];

@@ -27,4 +27,4 @@ const reducer = combineReducers({
 	share
 });
 
-export default reducer; 
+export default reducer;

@@ -6,33 +6,51 @@
  **/
 
  // require core module
- import React, { findDOMNode, Component, PropTypes } from 'react';
+import React, { findDOMNode, Component, PropTypes } from 'react';
+
 //require material
 import { Menu, MenuItem, SvgIcon } from 'material-ui';
 import svg from '../../utils/SVGIcon';
+
  //import CSS
 import css  from  '../../../assets/css/main';
-//import action 
+
+//import action
 import Action from '../../actions/action';
 const style = {
 	margin:0,
-	width:"100%",
-	padding:0
+	padding:0,
+	width: 241
 };
 
 const listStyle = {
-	height: 60,
-	lineHeight:'60px',
+	height: 50,
+	lineHeight:'50px',
 	paddingLeft:50,
 	color:'#fff',
-	fontSize:'12px'
+	fontSize:'14px',
+	paddingLeft: '60px'
 }
 const selectedStyle = {
-	height: 60,
-	lineHeight:'60px',
+	height: 50,
+	lineHeight:'50px',
 	paddingLeft:50,
 	color:'#ef6c00',
-	fontSize:'12px'	
+	fontSize:'14px',
+	paddingLeft: '60px'
+}
+
+function getStyles () {
+	return {
+		header: {
+			textAlign: 'center',
+			lineHeight: '55px',
+			fontSize: 16,
+			color: '#fff',
+			backgroundColor: 'rgba(0,0,0,.2)',
+			borderBottom: '1px solid rgba(0,0,0,.25)'
+		}
+	}
 }
 
 class leftNav extends Component {
@@ -40,25 +58,58 @@ class leftNav extends Component {
 		return (
 			<div className="left-nav-container" style={{position:'relative',height:'100%'}}>
 				{/*top navigation*/}
-				<Menu style={style}>
-				{this.props.state.navigation.nav.map((item,index) => {
-					if (item.type == 'leftNav') {
-						return (
-							<MenuItem 
-							className={item.selected?"list-selected left-menu-list":'left-menu-list'}
-							primaryText={item.name} 
-							key={item.name} 
-							desktop={true} 
-							onTouchTap={this.itemSelect.bind(this,item.name,index)}
-							innerDivStyle={item.selected?selectedStyle:listStyle}
-							leftIcon={item.icon?svg[item.icon]():null}
-							/>
-							)
-						}
-				})}
-				</Menu>
+				<div className="nav-inner">
+				  <div className="nav-item-box">
+						<div className="nav-item-header" style={ getStyles().header }>
+							文件
+						</div>
+						<div className="nav-item-body">
+							{this.props.state.navigation.nav.map((item,index) => {
+								if (item.type == 'leftNav') {
+									return (
+										<MenuItem
+										className={item.selected?"list-selected left-menu-list":'left-menu-list'}
+										primaryText={item.name}
+										key={item.name}
+										desktop={true}
+										onTouchTap={this.itemSelect.bind(this,item.name,index)}
+										innerDivStyle={item.selected?selectedStyle:listStyle}
+										leftIcon={item.icon?svg[item.icon]():null}
+										/>
+										)
+									}
+							})}
+						</div>
+				  </div>
+					<div className="nav-item-box">
+						<div className="nav-item-header" style={ getStyles().header }>
+							照片
+						</div>
+						<div className="nav-item-body">
+							{
+								this.props.state.navigation.photoMenu.map((item, index) => {
+									return (
+										<MenuItem
+										  className={ item.selected ? "list-selected left-menu-list" : 'left-menu-list' }
+											primaryText={ item.text }
+											key={ item.name }
+											desktop={ true }
+											onTouchTap={ this.itemSelect.bind(this,item.name,index) }
+											innerDivStyle={ item.selected ? selectedStyle : listStyle }
+											leftIcon={ item.icon ? svg[item.icon]() : null }>
+										</MenuItem>
+									);
+							  })
+						  }
+						</div>
+					</div>
+					<div className="nav-item-box">
+						<div className="nav-item-header" style={ getStyles().header }>系统</div>
+						<div className="nav-item-body"></div>
+					</div>
+				</div>
 				{/*bottom navigation*/}
-				<div style={{position:'absolute',bottom:0,width:'100%'}}>
+				{/*}<div style={{position:'absolute',bottom:0,width:'100%'}}>
 					<div>
 						<Menu>
 							{this.props.state.navigation.nav.map((item,index) => (
@@ -66,14 +117,14 @@ class leftNav extends Component {
 								className={item.selected?"list-selected left-menu-list":'left-menu-list'}
 								style={style}
 								innerDivStyle={listStyle}
-								leftIcon={item.icon?svg[item.icon]():null} 
+								leftIcon={item.icon?svg[item.icon]():null}
 								onTouchTap={this.itemSelect.bind(this,item.name,index)}
-								key={item.name} 
+								key={item.name}
 								 />:false
 								))}
 						</Menu>
 					</div>
-				</div>
+				</div>*/}
 			</div>
 			)
 	}

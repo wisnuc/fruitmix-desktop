@@ -2,9 +2,9 @@
 import { combineReducers } from 'redux'
 //define menu reducer
 const menu = (state = true, action) => {
-  
+
   	switch(action.type) {
-    
+
     	case 'NAV_MENU_TOGGLE':
       		return !state;
 
@@ -14,15 +14,22 @@ const menu = (state = true, action) => {
 };
 //define default data of nav
 let navDefault = [
-{ name: '我的所有文件', parent: null, selected: true, type:'leftNav', icon:'cloud' }, 
+{ name: '我的所有文件', parent: null, selected: true, type:'leftNav', icon:'cloud' },
 { name: '上传/下载', parent: null, selected: false, type:'leftNav', icon:'transmission' },
 { name: '分享给我的文件', parent: null, selected: false, type:'leftNav', icon:'sharedToMe' },
 { name: '我分享的文件', parent: null, selected: false, type:'leftNav', icon:'sharedByMe' },
 { name: 'Transmission的文件', parent: null, selected: false, type: 'leftNav', icon:'transmission1'},
-{ name: 'Owncloud的文件', parent: null, selected: false, type: 'leftNav', icon:'cloud1'},
-{ name: '我的照片', parent: null, selected: false, type: 'leftNav', icon:'myPhoto'},
-{ name: '设置', parent: null, selected: false, type: 'other', icon:'settings'},
+{ name: 'Owncloud的文件', parent: null, selected: false, type: 'leftNav', icon:'cloud1'}
+];
 
+/**
+ * V0.0.2
+**/
+const photoMenuData = [
+  { name: 'all_photo', text: '所有照片', selected: false, icon:'cloud' },
+  { name: 'album', text: '相册', selected: false, icon:'transmission' },
+  { name: 'video', text: '视频', selected: false, icon:'sharedToMe' },
+  { name: 'share', text: '分享', selected: false, icon:'sharedByMe' }
 ];
 
 const nav = (state = navDefault, action) => {
@@ -38,8 +45,8 @@ const nav = (state = navDefault, action) => {
 
       if (select === undefined) return state
 
-      // is menu 
-      	if (!select.parent) { 
+      // is menu
+      	if (!select.parent) {
 
        	if (select.selected) return state
 
@@ -51,7 +58,7 @@ const nav = (state = navDefault, action) => {
          	if (item === select)
           		return Object.assign({}, item, {selected: true})
          	 // unset previously selected item
-        	if (item.selected) 
+        	if (item.selected)
             		return Object.assign({}, item, {selected: false})
           	// other menus are irrelevent
           		return item
@@ -69,7 +76,7 @@ const nav = (state = navDefault, action) => {
         	if (select.selected) return state
 
         	let result = state.map((item) => {
-          
+
           	// menu is irrelevent
          	if (!item.parent) {
            		return item
@@ -88,11 +95,11 @@ const nav = (state = navDefault, action) => {
             		return Object.assign({}, item, {selected: false})
           	}
 
-          	return item   
+          	return item
        })
 
        return result
-      }      
+      }
       break
 
     default:
@@ -100,9 +107,38 @@ const nav = (state = navDefault, action) => {
   }
 }
 
+const photoMenu = (state = photoMenuData, action) => {
+  switch (action.type) {
+    case 'PHOTO_MENU_SELECT':
+       const selectedItem = state.find(item =>
+         item.name === action.name
+       );
+
+       if (!selectedItem) {
+         return state;
+       }
+
+       if (selectedItem.selected) {
+         return state;
+       }
+
+       return state.map(item => {
+         if (item === selectedItem) {
+           return Object.assign({}, item, { selected: true });
+         } else {
+           return Object.assign({}, item, { selected: false });
+         }
+       });
+
+    default:
+       return state;
+  }
+}
+
 const reducer = combineReducers({
-  	menu,
- 	nav
+  menu,
+ 	nav,
+  photoMenu
 })
 
 export default reducer
