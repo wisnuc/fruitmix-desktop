@@ -48,7 +48,8 @@ function getStyles () {
 			fontSize: 14,
 			color: '#fff',
 			backgroundColor: 'rgba(0,0,0,.2)',
-			borderBottom: '1px solid rgba(0,0,0,.25)'
+			borderBottom: '1px solid rgba(0,0,0,.25)',
+			borderTop: '1px solid rgba(0,0,0,.25)'
 		}
 	}
 }

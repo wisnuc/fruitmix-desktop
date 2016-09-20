@@ -34,12 +34,12 @@ function getStyles () {
       textAlign: 'right',
       display: 'inline-block',
       width: 60,
-      fontSize: 14
+      fontSize: 12
     },
     span: {
       paddingLeft: 10,
       vertical: 'middle',
-      fontSize: 14,
+      fontSize: 12,
       fontWeight: 700
     }
   };

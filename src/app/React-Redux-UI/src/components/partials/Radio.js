@@ -6,29 +6,35 @@
 
 import React, { Component, PropTypes } from 'react';
 
-class Radio extends Component {
-	check() {
-		const { radioCheck, radioUnCheck, checked } = this.props;
+function getStyles () {
+	return {
+		radio: {
+			verticalAlign: 'middle',
+			marginRight: 5
+		}
+	}
+}
 
-		!checked ? radioCheck(true) : radioUnCheck(false);
+class Radio extends Component {
+	constructor() {
+		super();
+
+		this.handleChange = this.handleChange.bind(this);
 	}
 
 	handleChange(e) {
-		const { readOnly, changeEventHandle, value } = this.props;
+		const {
+			dispatch,
+			readOnly,
+			checked,
+			changeEventHandle,
+			value } = this.props;
 
 		if (readOnly) {
-		  return;	
+		  return;
 		}
 
-		this.check();
-
-		if (changeEventHandle) {
-			setTimeout(() => {
-				const { checked } = this.props;
-
-				changeEventHandle.call(this, value, checked);
-			}, 0);
-		}
+		changeEventHandle && changeEventHandle(value, checked);
 	}
 
 	render() {
@@ -39,17 +45,19 @@ class Radio extends Component {
 			text,
 			type,
 			checked,
-			readOnly
-		} = this.props;
+			readOnly } = this.props;
+
+		const { radio } = getStyles();
 
 		return (
-			<label className={ className } style={{ style }}>
+			<label className={ className } style={ style }>
 				<input
-					type={ type }
+					type="radio"
+					style={ radio }
 					value={ value }
 					checked={ checked }
 					readOnly={ readOnly }
-					onChange={ this.handleChange.bind(this) } />
+					onChange={ this.handleChange } />
 				{ text }
 			</label>
 		);
@@ -57,16 +65,15 @@ class Radio extends Component {
 }
 
 Radio.propTypes = {
-	radioCheck: PropTypes.func,
-	radioUnCheck: PropTypes.func,
 	className: PropTypes.string,
+	checked: PropTypes.bool,
+	readOnly: PropTypes.bool,
 	style: PropTypes.object,
 	text: PropTypes.string,
 	changeEventHandle: PropTypes.func
 };
 
 Radio.defaultProps = {
-	type: 'radio',
 	checked: false,
 	readOnly: false
 };

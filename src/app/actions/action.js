@@ -54,13 +54,6 @@ var actions = {
 		}
 	},
 
-	changeSelectedPhotoMenuItem(name) {
-		return {
-			type: 'PHOTO_MENU_SELECT',
-			select: name
-		}
-	},
-
 	navToggle() {
 		return {
 			type: 'NAV_MENU_TOGGLE'
@@ -275,6 +268,16 @@ var actions = {
 			type: 'ADAPTER',
 			store: data
 		}
+	},
+
+	/**
+    v0.2.0
+	**/
+	changeSelectedPhotoMenuItem(name) {
+		return {
+			type: 'PHOTO_MENU_SELECT',
+			select: name
+		};
 	}
 }
 

@@ -3,6 +3,7 @@
 **/
 
 import React, { Component, PropTypes } from 'react';
+
 import PhotoInfo from '../mainContent/PhotoInfo';
 import Share from '../mainContent/Share';
 import Comment from '../mainContent/Comment';
@@ -28,24 +29,21 @@ function getStyles () {
 
 export default class RightPanel extends Component {
   render() {
-    const width = this.props.width;
+    const { dispatch, width, state } = this.props;
     const { root, rootInner } = getStyles();
     const newRootInnerStyle = Object.assign({}, rootInner, { width: width });
 
     return (
       <div className="right-panel" style={ root }>
-        <div
-          className="right-panel-inner"
-          style={ newRootInnerStyle }>
-
+        <div className="right-panel-inner" style={ newRootInnerStyle }>
           {/* 照片信息组件 */}
-          <PhotoInfo />
+          <PhotoInfo></PhotoInfo>
 
           {/* 分享组件 */}
-          <Share />
+          <Share dispatch={ dispatch } state={ state }></Share>
 
           {/* 评论组件 */}
-          <Comment />
+          <Comment></Comment>
         </div>
       </div>
     );
