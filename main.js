@@ -982,6 +982,9 @@ ipcMain.on('openInputOfFolder', e=>{
 				c('folder upload success !')
 				clearInterval(st)
 				mainWindow.webContents.send('refreshUploadStatusOfFolder',uploadObj.key,'已完成')
+				if (uploadObj.data.parent == currentDirectory.uuid) {
+					enterChildren({uuid : uploadObj.data.parent})
+				}
 			}
 			uploadNode(uploadObj.data, s, f)
 		})
@@ -1032,7 +1035,6 @@ ipcMain.on('openInputOfFolder', e=>{
 	}
 
 	function uploadNode(node,callback,failedCallback) {
-		try{
 			c(' ')
 			console.log('current file/folder is : ' + node.name)
 			if (node.type == 'file') {
@@ -1040,7 +1042,8 @@ ipcMain.on('openInputOfFolder', e=>{
 				uploadFileInFolder(node).then(()=>{
 					c('create file success : '+ node.name)
 					uploadObj.success++
-					callback()
+					return callback()
+
 				}).catch((err)=>{
 					c(err)
 					c('create file failed! : '+ node.name)
@@ -1053,23 +1056,23 @@ ipcMain.on('openInputOfFolder', e=>{
 				c('is folder and has ' + length + ' children')
 				createFolder({uuid:node.parent},node.name).then(uuid=>{
 					node.uuid = uuid
-					c('create folder success : '+ node.name + ' uuid is : ' + uuid)
+					c('create folder success : '+ node.name)
 					uploadObj.success++
 					if (length == 0) {
-						c('not have children')
 						callback()
 					}else {
-						c('have children')
 						node.children.forEach((item,index)=>{
 							node.children[index].parent = uuid
 						})
 						let s = function(){
-							node.children[index].status = 'failed'
+							node.children[index].status = 'success'
 							index++
 							if (index >= length) {
+								c('not have next')
 								callback()
 							}else {
-								uploadNode(node.children[index],c,f)
+								c('have next')
+								uploadNode(node.children[index],s,f)
 							}
 						}
 
@@ -1082,10 +1085,10 @@ ipcMain.on('openInputOfFolder', e=>{
 								if (index >= length) {
 									callback()
 								}else {
-									uploadNode(node.children[index],c)
+									uploadNode(node.children[index],s,f)
 								}
 							}else {
-								uploadNode(node.children[index],c,f)
+								uploadNode(node.children[index],s,f)
 							}
 						}
 						uploadNode(node.children[index],s,f)
@@ -1097,9 +1100,6 @@ ipcMain.on('openInputOfFolder', e=>{
 					failedCallback(err)
 				})
 			}
-		}catch(e){
-
-		}
 	}
 })
 
@@ -1133,12 +1133,7 @@ function uploadFileInFolder(node) {
 		let hash = crypto.createHash('sha256')
 		hash.setEncoding('hex')
 		let fileStream = fs.createReadStream(node.path)
-		// c('file name is' + node.name + 'parent uuid is : ' + node.parent)
-		fileStream.on('err',(err)=>{
-			c('you are not ok')
-		})
 		fileStream.on('end',() => {
-			c('are you ok?')
 			hash.end()
 			let sha = hash.read()
 
@@ -1158,10 +1153,8 @@ function uploadFileInFolder(node) {
 			}
 			request(options,function (err,res,body) {
 				if (!err && res.statusCode == 200) {
-					c('create file success')
 						resolve(JSON.parse(body).uuid)
 				}else {
-					c('create folder failed')
 					reject(err)
 				}
 			})
@@ -1169,6 +1162,7 @@ function uploadFileInFolder(node) {
 		})
 
 		fileStream.pipe(hash)
+		c('file is hashing')
 	})
 	return promise
 }
@@ -1180,6 +1174,8 @@ ipcMain.on('download',(e,files)=>{
 //download folder
 ipcMain.on('downloadFolder',(err,folder,type)=>{
 	folder.forEach(item=>{
+		getFolderTree(item)
+		return
 		let tree = null
 		if (type == 'share') {
 			tree = shareMap.get(item.uuid)
@@ -1193,11 +1189,54 @@ ipcMain.on('downloadFolder',(err,folder,type)=>{
 		downloadFolderQueue.push(obj)
 		mainWindow.webContents.send('transmissionDownload',obj)	
 	})
+	return
 	if (downloadFolderNow.length == 0) {
 		downloadFolderNow.push(downloadFolderQueue[0])
 		download.downloadFolder(downloadFolderNow[0])
 	}
 })
+
+function getFolderTree(folder) {
+	let tree = {uuid:folder.uuid,name:folder.name,path:downloadPath,children:[]}
+
+	function traverse(folder,position,callback) {
+		fileApi.getFile(folder.uuid).then(files => {
+			files = JSON.parse(files)
+			c(folder.name + ' has ' + files.length + ' children')
+			position = files.map(item => Object.assign({},item, {path : path.join(folderPath,item.name)}))
+			if (files.length == 0) {return callback()}
+			let count = files.length
+			let index = 0
+
+			let childrenCallback = function (err) {
+				if (err) {
+					return callback(err)
+				}
+				index++
+				if (index == count) {
+					return callback()
+				}
+				readEntry()
+			}
+			let readEntry = function (file,call) {
+				if (file.type == 'file') {
+					return call()
+				}else {
+					getFolderTree(file,file.children,call)
+				}
+			}
+			readEntry(position[index],childrenCallback)
+		})
+	}
+
+	traverse(folder, tree.children, (err) => {
+		if (err) {
+			c('failed')
+		}else {
+			c('success')
+		}
+	})
+}
 
 ipcMain.on('store',(err,store)=>{
 	console.log(store)
