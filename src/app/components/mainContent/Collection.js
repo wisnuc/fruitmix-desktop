@@ -116,6 +116,8 @@ class Collection extends Component {
 			return '已完成'
 		}else if (status == 1.01) {
 			return '失败'
+		}else if ((typeof status) == 'string' ){
+			return status
 		}else {
 			return (status*100).toFixed(2)+' %'
 		}
