@@ -1174,68 +1174,85 @@ ipcMain.on('download',(e,files)=>{
 //download folder
 ipcMain.on('downloadFolder',(err,folder,type)=>{
 	folder.forEach(item=>{
-		getFolderTree(item)
-		return
-		let tree = null
-		if (type == 'share') {
-			tree = shareMap.get(item.uuid)
-		}else {
-			tree = map.get(item.uuid)
-		}
+		getFolderTree(item,(err, tree) => {
+			if (err) {
+				c('get tree failed')
+				return
+			}
+			let count = download.getTreeCount(tree)	
+			let time = (new Date()).getTime()
+			let obj = {count:count,failed:[],success:0,data:tree,type:'folder',status:'ready',key:item.uuid+time}
+			downloadFolderQueue.push(obj)
+			mainWindow.webContents.send('transmissionDownload',obj)	
+			if (downloadFolderNow.length == 0) {
+				downloadFolderNow.push(downloadFolderQueue[0])
+				download.downloadFolder(downloadFolderNow[0])
+			}
+		})
 		
-		let count = download.getTreeCount(tree)
-		let time = (new Date()).getTime()
-		let obj = {count:count,failed:[],success:0,data:tree,type:'folder',status:'ready',key:item.uuid+time}
-		downloadFolderQueue.push(obj)
-		mainWindow.webContents.send('transmissionDownload',obj)	
 	})
-	return
-	if (downloadFolderNow.length == 0) {
-		downloadFolderNow.push(downloadFolderQueue[0])
-		download.downloadFolder(downloadFolderNow[0])
-	}
+	
 })
 
-function getFolderTree(folder) {
-	let tree = {uuid:folder.uuid,name:folder.name,path:downloadPath,children:[]}
+function getFolderTree(folderObj,call) {
+	let tree = {uuid:folderObj.uuid,name:folderObj.name,path:path.join(downloadPath,folderObj.name),children:[]}
 
-	function traverse(folder,position,callback) {
-		fileApi.getFile(folder.uuid).then(files => {
-			files = JSON.parse(files)
+	function traverse(folder,callback) {
+		fileApi.getFile(folder.uuid).then(result => {
+			let files = JSON.parse(result)
+			c()
 			c(folder.name + ' has ' + files.length + ' children')
-			position = files.map(item => Object.assign({},item, {path : path.join(folderPath,item.name)}))
-			if (files.length == 0) {return callback()}
+			files.forEach(item => {
+				folder.children.push(
+						Object.assign({},item, {children : [],path : path.join(folder.path,item.name)})
+					)
+				c(path.join(folder.path,item.name))
+			})
+		
+			if (files.length == 0) {c('this is empty folder');callback();return}
 			let count = files.length
 			let index = 0
 
 			let childrenCallback = function (err) {
 				if (err) {
-					return callback(err)
+					callback(err)
 				}
 				index++
+				c(index + ' / ' + count)
 				if (index == count) {
-					return callback()
+					c(folder.name + ' is end ')
+					c('should return prev function')
+					callback()
+					return
+				}else{
+					readEntry()	
 				}
-				readEntry()
+				
 			}
-			let readEntry = function (file,call) {
-				if (file.type == 'file') {
-					return call()
+			let readEntry = function () {
+				if (folder.children[index].type == 'file') {
+					c(folder.children[index].name + ' is file')
+					childrenCallback()
 				}else {
-					getFolderTree(file,file.children,call)
+					c(folder.children[index].name + ' is folder')
+					traverse(folder.children[index],childrenCallback)
 				}
 			}
-			readEntry(position[index],childrenCallback)
+			readEntry()
+		}).catch(e=>{
+			c(e)
 		})
 	}
 
-	traverse(folder, tree.children, (err) => {
+	traverse(tree, (err) => {
 		if (err) {
-			c('failed')
+			call(err)
 		}else {
-			c('success')
+			call(null,tree)
 		}
 	})
+
+	
 }
 
 ipcMain.on('store',(err,store)=>{
