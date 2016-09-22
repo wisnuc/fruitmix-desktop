@@ -192,7 +192,7 @@
 }
 .all-files-container {
 	position: relative;
-	padding-right: 230px;
+	/*padding-right: 230px;*/
 }
 .upload-input{
 	display: none;
@@ -446,6 +446,7 @@
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
+	margin-bottom:-20px;
 }
 .change-path-text {
 	text-overflow: ellipsis;
@@ -682,8 +683,9 @@
 	text-overflow: ellipsis;
 }
 .user-dialog-list-container {
-	max-height:500px;
+	max-height:400px;
 	margin-top:10px;
+	overflow: auto
 }
 
 .fruitmix-button span{

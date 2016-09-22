@@ -155,7 +155,7 @@ app.on('ready', function() {
 			title:'WISNUC',
 			icon: path.join(__dirname,'180-180.png')
 		})
-		testWindow.webContents.openDevTools()
+		// testWindow.webContents.openDevTools()
 		testWindow.loadURL('file://' + __dirname + '/test/storeTest.html')
 	}
 })
@@ -173,18 +173,18 @@ ipcMain.on('setServeIp',(err,ip, isCustom)=>{
 	let index = device.findIndex(item=>{
 		return item.addresses[0] == ip
 	})
-	if (index != -1) {
-		server = 'http://' + ip
-	}else {
-		server = 'http://' + ip
-	}
+	server = 'http://' + ip + ':3721'
+	// if (index != -1) {
+	// 	server = 'http://' + ip + ':3721'
+	// }else {
+	// 	server = 'http://' + ip + ':3721'
+	// }
 	fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
 		let d = JSON.parse(data)
 		d.ip = ip
 		if (isCustom) {
 			d.customDevice.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true})
 			device.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true})
-			// mainWindow.webContents.send('device',device)
 			dispatch(action.setDevice(device))
 		}
 		let j = JSON.stringify(d)
@@ -429,13 +429,14 @@ ipcMain.on('close-main-window', function () {
     app.quit()
 })
 //create user
-ipcMain.on('create-new-user',function(err,u,p,e){
-	createNewUser(u,p,e).then(()=>{
+ipcMain.on('create-new-user',function(err, u, p){
+	loginApi.createNewUser(u,p).then(()=>{
 		console.log('register success')
 		mainWindow.webContents.send('message','注册新用户成功')
 		// mainWindow.webContents.send('closeRegisterDialog')
 		loginApi.getAllUser().then(users=>{
 			user.allUser = users
+			dispatch(action.loggedin(user))
 			mainWindow.webContents.send('addUser',user)
 		})
 		
@@ -467,6 +468,20 @@ function createNewUser(username,password,email) {
 	return promise
 }
 ipcMain.on('userInit',(err,s,u,p,i)=>{
+	loginApi.userInit(s,u,p).then( () => {
+		c('success')
+		let index = device.findIndex(item=>{
+				return item.addresses[0] == i.addresses[0]
+			})
+		if (index != -1) {
+				device[index].admin = true
+				device[index].addresses[0] += ':3721'
+				dispatch(action.setDevice(device))
+			}
+	}).catch(err => {
+		c('err')
+	})
+	return
 	var options = {
 		form: {username:u,password:p}
 	}
@@ -493,24 +508,11 @@ ipcMain.on('userInit',(err,s,u,p,i)=>{
 //delete user 
 ipcMain.on('deleteUser',(err,uuid)=>{
 	c(uuid)
-	var options = {
-			headers: {
-				Authorization: user.type+' '+user.token
-			},
-			form: {uuid:uuid}
-		}
-		function callback (err,res,body) {
-			if (!err && res.statusCode == 200) {
-				console.log('res')
-				loginApi.getAllUser().then((users)=>{
-					user.allUser = users
-					mainWindow.webContents.send('setUsers',user)
-				})
-			}else {
-				console.log('err')
-			}
-		}
-		request.del(server+'/users',options,callback)
+	loginApi.deleteUser(uuid).then(() => {
+
+	}).catch(err => {
+		mainWindow.webContents.send('message','删除用户失败，接口貌似还不OK')
+	})
 })
 //share
 ipcMain.on('share',function(err,files,users){
@@ -1174,68 +1176,85 @@ ipcMain.on('download',(e,files)=>{
 //download folder
 ipcMain.on('downloadFolder',(err,folder,type)=>{
 	folder.forEach(item=>{
-		getFolderTree(item)
-		return
-		let tree = null
-		if (type == 'share') {
-			tree = shareMap.get(item.uuid)
-		}else {
-			tree = map.get(item.uuid)
-		}
+		getFolderTree(item,(err, tree) => {
+			if (err) {
+				c('get tree failed')
+				return
+			}
+			let count = download.getTreeCount(tree)	
+			let time = (new Date()).getTime()
+			let obj = {count:count,failed:[],success:0,data:tree,type:'folder',status:'ready',key:item.uuid+time}
+			downloadFolderQueue.push(obj)
+			mainWindow.webContents.send('transmissionDownload',obj)	
+			if (downloadFolderNow.length == 0) {
+				downloadFolderNow.push(downloadFolderQueue[0])
+				download.downloadFolder(downloadFolderNow[0])
+			}
+		})
 		
-		let count = download.getTreeCount(tree)
-		let time = (new Date()).getTime()
-		let obj = {count:count,failed:[],success:0,data:tree,type:'folder',status:'ready',key:item.uuid+time}
-		downloadFolderQueue.push(obj)
-		mainWindow.webContents.send('transmissionDownload',obj)	
 	})
-	return
-	if (downloadFolderNow.length == 0) {
-		downloadFolderNow.push(downloadFolderQueue[0])
-		download.downloadFolder(downloadFolderNow[0])
-	}
+	
 })
 
-function getFolderTree(folder) {
-	let tree = {uuid:folder.uuid,name:folder.name,path:downloadPath,children:[]}
+function getFolderTree(folderObj,call) {
+	let tree = {uuid:folderObj.uuid,name:folderObj.name,path:path.join(downloadPath,folderObj.name),children:[]}
 
-	function traverse(folder,position,callback) {
-		fileApi.getFile(folder.uuid).then(files => {
-			files = JSON.parse(files)
+	function traverse(folder,callback) {
+		fileApi.getFile(folder.uuid).then(result => {
+			let files = JSON.parse(result)
+			c()
 			c(folder.name + ' has ' + files.length + ' children')
-			position = files.map(item => Object.assign({},item, {path : path.join(folderPath,item.name)}))
-			if (files.length == 0) {return callback()}
+			files.forEach(item => {
+				folder.children.push(
+						Object.assign({},item, {children : [],path : path.join(folder.path,item.name)})
+					)
+				c(path.join(folder.path,item.name))
+			})
+		
+			if (files.length == 0) {c('this is empty folder');callback();return}
 			let count = files.length
 			let index = 0
 
 			let childrenCallback = function (err) {
 				if (err) {
-					return callback(err)
+					callback(err)
 				}
 				index++
+				c(index + ' / ' + count)
 				if (index == count) {
-					return callback()
+					c(folder.name + ' is end ')
+					c('should return prev function')
+					callback()
+					return
+				}else{
+					readEntry()	
 				}
-				readEntry()
+				
 			}
-			let readEntry = function (file,call) {
-				if (file.type == 'file') {
-					return call()
+			let readEntry = function () {
+				if (folder.children[index].type == 'file') {
+					c(folder.children[index].name + ' is file')
+					childrenCallback()
 				}else {
-					getFolderTree(file,file.children,call)
+					c(folder.children[index].name + ' is folder')
+					traverse(folder.children[index],childrenCallback)
 				}
 			}
-			readEntry(position[index],childrenCallback)
+			readEntry()
+		}).catch(e=>{
+			c(e)
 		})
 	}
 
-	traverse(folder, tree.children, (err) => {
+	traverse(tree, (err) => {
 		if (err) {
-			c('failed')
+			call(err)
 		}else {
-			c('success')
+			call(null,tree)
 		}
 	})
+
+	
 }
 
 ipcMain.on('store',(err,store)=>{

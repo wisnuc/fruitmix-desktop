@@ -42,9 +42,9 @@ class User extends React.Component {
 			 			<TextField
 			 			hintText="密码" ref='password' underlineStyle={{borderColor:'#999'}} underlineFocusStyle={styles.underlineStyle} 
 			 			/>
-			 			<TextField
+			 			{/*<TextField
 			 			hintText="邮箱" ref='email' underlineStyle={{borderColor:'#999'}} underlineFocusStyle={styles.underlineStyle} 
-			 			/>
+			 			/>*/}
 			 			<div>
 			 				<FlatButton label="返回" primary={true} onTouchTap={this.toggleUser.bind(this)}/>
 	    					<FlatButton label="注册" secondary={true} onTouchTap={this.register.bind(this)}/>
@@ -54,7 +54,8 @@ class User extends React.Component {
 				);
 		}else {
 			return (
-				<div className='user-dialog-list-container'>
+				<div>
+					<div className='user-dialog-list-container'>
 					{login.obj.allUser.map(item=>{
 						return (
 							<div key={item.username} className='user-dialog-list'>
@@ -64,6 +65,7 @@ class User extends React.Component {
 							</div>
 							);
 					})}
+					</div>
 					<div>
 						<FlatButton style={{marginTop:'10px'}} label="添加新用户" primary={true} onTouchTap={this.toggleUser.bind(this)}/>
 					</div>
@@ -78,27 +80,17 @@ class User extends React.Component {
 	}
 
 	deleteUser(item) {
-		if (item.isAdmin) {return}
 		ipc.send('deleteUser',item.uuid);
 	}
 
 	register() {
 		let u = this.refs.username.input.value;
  		let p = this.refs.password.input.value;
- 		let e = this.refs.email.input.value
- 		ipc.send('create-new-user',u,p,e);
+ 		// let e = this.refs.email.input.value
+ 		ipc.send('create-new-user',u,p);
  		this.setState({
-				createUser:false
-			});
-	}
-
-	componentDidMount() {
-		let _this = this;
-		// ipc.on('closeRegisterDialog',err=>{
-		// 	this.setState({
-		// 		createUser:false
-		// 	});
-		// });
+			createUser:false
+		});
 	}
 }
 

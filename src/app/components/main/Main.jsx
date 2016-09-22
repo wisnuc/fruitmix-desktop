@@ -50,9 +50,9 @@ class Main extends Component {
 
 		// this.props.dispatch(Action.filesLoading());
 
-		// ipc.on('receive',function (err,dir,children,path) {
-		// 	_this.props.dispatch(Action.setDirctory(dir,children,path))
-		// });
+		ipc.on('receive',function (err,dir,children,path) {
+			_this.props.dispatch(Action.setDirctory(dir,children,path))
+		});
 		ipc.on('setTree',(err,tree)=>{
 			this.props.dispatch(Action.setTree(tree));
 		});
@@ -136,9 +136,9 @@ class Main extends Component {
 			this.props.dispatch({type:'SET_DOWNLOAD_PATH',path:path});
 		});
 
-		ipc.on('addUser',(err,user)=>{
-			this.props.dispatch(Action.login(user));
-		});
+		// ipc.on('addUser',(err,user)=>{
+		// 	this.props.dispatch(Action.login(user));
+		// });
 
 		ipc.on('data',(err,d)=>{
 			c.log(d)
@@ -149,9 +149,9 @@ class Main extends Component {
 		let list = null;
 		var name = this.props.state.login.obj.username;
 		let index = this.props.state.login.obj.allUser.findIndex(item=>(item.username == name));
-		// if ( this.props.state.login.obj.allUser[index].isAdmin) {
-		// 	list = (<MenuItem value="1" primaryText="用户管理" onTouchTap={this.toggleUser.bind(this)}/>)
-		// }
+		if ( this.props.state.login.obj.allUser[index].isAdmin) {
+			list = (<MenuItem value="1" primaryText="用户管理" onTouchTap={this.toggleUser.bind(this)}/>)
+		}
 		const folderActions = [
 			<FlatButton
 				label="取消"
@@ -196,7 +196,7 @@ class Main extends Component {
 				</Paper>
 
         {/* Right Panel */}
-        <RightPanel width={ 230 } dispatch={ this.props.dispatch } state={ this.props.state }></RightPanel>
+        {/*<RightPanel width={ 230 } dispatch={ this.props.dispatch } state={ this.props.state }></RightPanel>*/}
 
 				{m}
 				<Dialog title="用户管理"
