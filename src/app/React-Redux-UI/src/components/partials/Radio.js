@@ -24,7 +24,6 @@ class Radio extends Component {
 
 	handleChange(e) {
 		const {
-			dispatch,
 			readOnly,
 			checked,
 			changeEventHandle,

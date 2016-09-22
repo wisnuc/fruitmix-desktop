@@ -49,10 +49,6 @@
 	background-color: rgba(0,0,0,.2)!important;
 }
 
-.nav-item-body > div {
-	margin-bottom: 8px;
-}
-
 .left-menu-list >*{
 	cursor: default;
 }
@@ -61,6 +57,21 @@
 	padding: 0!important;
 	display: block!important;
 	width: 100%!important;
+}
+
+.slide-emit {
+	display: none;
+}
+
+.nav-item-body {
+	overflow: hidden;
+	height: 330px;
+	max-height: 330px;
+	transition: max-height .5s cubic-bezier(0, 1, .5, 1);
+}
+
+.slide-emit:checked + div {
+	max-height: 0!important;
 }
 
 .left-menu-list svg {

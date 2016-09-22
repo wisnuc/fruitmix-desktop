@@ -43,6 +43,7 @@ const selectedStyle = {
 function getStyles () {
 	return {
 		header: {
+			display: 'block',
 			textAlign: 'center',
 			lineHeight: '55px',
 			fontSize: 14,
@@ -61,9 +62,8 @@ class leftNav extends Component {
 				{/*top navigation*/}
 				<div className="nav-inner">
 				  <div className="nav-item-box">
-						<div className="nav-item-header" style={ getStyles().header }>
-							文件
-						</div>
+						<label htmlFor="file_h" className="nav-item-header" style={ getStyles().header }>文件</label>
+						<input id="file_h" className="slide-emit" type="checkbox" />
 						<div className="nav-item-body">
 							{this.props.state.navigation.nav.map((item,index) => {
 								if (item.type == 'leftNav') {
@@ -83,9 +83,8 @@ class leftNav extends Component {
 						</div>
 				  </div>
 					<div className="nav-item-box">
-						<div className="nav-item-header" style={ getStyles().header }>
-							照片
-						</div>
+						<label htmlFor="photo_h" className="nav-item-header" style={ getStyles().header }>照片</label>
+						<input id="photo_h" className="slide-emit" type="checkbox" />
 						<div className="nav-item-body">
 							{
 								this.props.state.navigation.photoMenu.map((item, index) => {
