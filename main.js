@@ -111,7 +111,7 @@ app.on('ready', function() {
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	})
-	mainWindow.webContents.openDevTools()
+	// mainWindow.webContents.openDevTools()
 	mainWindow.loadURL('file://' + __dirname + '/build/index.html')
 	//create folder
 	fs.exists(mediaPath,exists=>{
@@ -155,7 +155,7 @@ app.on('ready', function() {
 			title:'WISNUC',
 			icon: path.join(__dirname,'180-180.png')
 		})
-		testWindow.webContents.openDevTools()
+		// testWindow.webContents.openDevTools()
 		testWindow.loadURL('file://' + __dirname + '/test/storeTest.html')
 	}
 })
@@ -174,9 +174,9 @@ ipcMain.on('setServeIp',(err,ip, isCustom)=>{
 		return item.addresses[0] == ip
 	})
 	if (index != -1) {
-		server = 'http://' + ip
+		server = 'http://' + ip + ':3721'
 	}else {
-		server = 'http://' + ip
+		server = 'http://' + ip + ':3721'
 	}
 	fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
 		let d = JSON.parse(data)
@@ -429,13 +429,14 @@ ipcMain.on('close-main-window', function () {
     app.quit()
 })
 //create user
-ipcMain.on('create-new-user',function(err,u,p,e){
-	createNewUser(u,p,e).then(()=>{
+ipcMain.on('create-new-user',function(err, u, p){
+	loginApi.createNewUser(u,p).then(()=>{
 		console.log('register success')
 		mainWindow.webContents.send('message','注册新用户成功')
 		// mainWindow.webContents.send('closeRegisterDialog')
 		loginApi.getAllUser().then(users=>{
 			user.allUser = users
+			dispatch(action.loggedin(user))
 			mainWindow.webContents.send('addUser',user)
 		})
 		
@@ -467,6 +468,24 @@ function createNewUser(username,password,email) {
 	return promise
 }
 ipcMain.on('userInit',(err,s,u,p,i)=>{
+	c(s)
+	c(u)
+	c(p)
+	c(i)
+	loginApi.userInit(s,u,p).then( () => {
+		c('success')
+		let index = device.findIndex(item=>{
+				return item.addresses[0] == i.addresses[0]
+			})
+		if (index != -1) {
+				device[index].admin = true
+				device[index].addresses[0] += ':3721'
+				dispatch(action.setDevice(device))
+			}
+	}).catch(err => {
+		c('err')
+	})
+	return
 	var options = {
 		form: {username:u,password:p}
 	}
@@ -493,24 +512,11 @@ ipcMain.on('userInit',(err,s,u,p,i)=>{
 //delete user 
 ipcMain.on('deleteUser',(err,uuid)=>{
 	c(uuid)
-	var options = {
-			headers: {
-				Authorization: user.type+' '+user.token
-			},
-			form: {uuid:uuid}
-		}
-		function callback (err,res,body) {
-			if (!err && res.statusCode == 200) {
-				console.log('res')
-				loginApi.getAllUser().then((users)=>{
-					user.allUser = users
-					mainWindow.webContents.send('setUsers',user)
-				})
-			}else {
-				console.log('err')
-			}
-		}
-		request.del(server+'/users',options,callback)
+	loginApi.deleteUser(uuid).then(() => {
+
+	}).catch(err => {
+		mainWindow.webContents.send('message','删除用户失败，接口貌似还不OK')
+	})
 })
 //share
 ipcMain.on('share',function(err,files,users){
