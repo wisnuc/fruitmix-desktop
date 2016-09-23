@@ -2,6 +2,12 @@
 * {
 	font-family: 'Microsoft YaHei'!important
 }
+.fl {
+	float: left;
+}
+.fr {
+	float: right;
+}
 .clearfix:after {
 	display: block;
 	content: "\0020";
@@ -90,6 +96,26 @@
 
 .image-item:last-child {
 	margin-right: 0!important;
+}
+
+.image-item.active i {
+	background-color: #999!important;
+}
+
+.image-item.hide i {
+	display: none!important;
+}
+
+.image-item.show i {
+	display: block!important;
+}
+
+/*.image-item:hover i {
+	display: block!important;
+}*/
+
+.image-item.active i {
+	display: block;
 }
 
 /*content*/

@@ -3,7 +3,7 @@
 **/
 
 import React, { Component, PropTypes } from 'react';
-import { replaceTemplate } from '../../utils';
+import { replaceTemplate, parseUpperToCable } from '../../utils';
 
 function getClientRect (el) {
 	const clientRect = el.getBoundingClientRect();
@@ -11,14 +11,15 @@ function getClientRect (el) {
 	return {
 		width: clientRect.width,
 		height: clientRect.height,
-		xPixel: clientRect.x + window.pageXOffset,
-		yPixel: clientRect.y + window.pageYOffset
+		xPixel: clientRect.left + window.pageXOffset,
+		yPixel: clientRect.top + window.pageYOffset
 	}
 }
 
 export default class Drag extends Component {
 	constructor() {
 		super();
+		this.hasMouseDown = false;
 
 		this.onMouseDown = this.onMouseDown.bind(this);
 		this.onMouseUp = this.onMouseUp.bind(this);
@@ -30,50 +31,61 @@ export default class Drag extends Component {
 			position: 'absolute',
 			width: replaceTemplate('${width}px', rect),
 			height: replaceTemplate('${height}px', rect),
-			left: replaceTemplate('${left}px', rect),
-			top: replaceTemplate('${top}px', rect)
+			left: replaceTemplate('${xPixel}px', rect),
+			top: replaceTemplate('${yPixel}px', rect)
 		};
 	}
 
 	createDragElement() {
 		const cloneNode = this.el.cloneNode(true);
-		const rect = getClientRect(cloneNode);
+		const rect = getClientRect(this.el);
 		const styles = Object.assign({}, this.createDragElementStyles(rect), { position: 'absolute', boxSizing: 'border-box', border: '2px dashed #666' });
+		cloneNode.style.cssText = parseUpperToCable(JSON.stringify(styles).replace(/['"{}]/g, '').replace(/,/g, ';'));
 		document.body.appendChild(cloneNode);
 
 		return cloneNode;
 	}
 
-	onMouseDown() {
-		this.cloneNode = this.createDragElement();
+	onMouseDown(e) {
+		if (this.el === e.target) {
+			this.cloneNode = this.createDragElement();
+			const clientRect = getClientRect(this.el);
 
-		const clientRect = getClientRect(this.cloneNode);
-
-		this.currentXPixel = clientRect.xPixel;
-		this.currentYPixel = clientRect.yPixel;
+			this.currentXPixel = e.clientX - clientRect.xPixel;
+			this.currentYPixel = e.clientY - clientRect.yPixel;
+			this.hasMouseDown = true;
+			this.hasCurrentNode = true;
+		}
 	}
 
 	onMouseMove(e) {
-		this.cloneNode.style.left = e.clientX;
-		this.cloneNode.style.top = e.clientY;
+
+		if (this.hasCurrentNode && this.hasMouseDown) {
+		  this.cloneNode.style.left = e.clientX - this.currentXPixel + 'px';
+			this.cloneNode.style.top = e.clientY - this.currentYPixel + 'px';
+		}
 	}
 
-	onMouseUp() {
+	onMouseUp(e) {
+		if (this.hasCurrentNode) {
+		  this.hasMouseDown = false;
+		}
+	}
 
+	componentWillMount() {
+		document.addEventListener('mousedown', this.onMouseDown);
+		document.addEventListener('mousemove', this.onMouseMove);
+		document.addEventListener('mouseup', this.onMouseUp);
 	}
 
 	render() {
 		const { className, children, style } = this.props;
-		const newStyle = Object.assign({}, style, { webkitUserSelect: 'none' });
+		const newStyle = Object.assign({}, style, { WebkitUserSelect: 'none' });
 
 		return (
 			<div
 			  ref={ el => this.el = el }
-			  draggable={ true }
 			  className={ className }
-				onMouseDown={ this.onMouseDown }
-				onMouseMove={ this.onMouseMove }
-				onMouseUp={ this.onMouseUp }
 				style={ newStyle }>
 				{ children }
 			</div>
