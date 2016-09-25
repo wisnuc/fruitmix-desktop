@@ -111,7 +111,7 @@ app.on('ready', function() {
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	})
-	// mainWindow.webContents.openDevTools()
+	mainWindow.webContents.openDevTools()
 	mainWindow.loadURL('file://' + __dirname + '/build/index.html')
 	//create folder
 	fs.exists(mediaPath,exists=>{
@@ -173,18 +173,18 @@ ipcMain.on('setServeIp',(err,ip, isCustom)=>{
 	let index = device.findIndex(item=>{
 		return item.addresses[0] == ip
 	})
-	if (index != -1) {
-		server = 'http://' + ip + ':3721'
-	}else {
-		server = 'http://' + ip + ':3721'
-	}
+	server = 'http://' + ip + ':3721'
+	// if (index != -1) {
+	// 	server = 'http://' + ip + ':3721'
+	// }else {
+	// 	server = 'http://' + ip + ':3721'
+	// }
 	fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
 		let d = JSON.parse(data)
 		d.ip = ip
 		if (isCustom) {
 			d.customDevice.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true})
 			device.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true})
-			// mainWindow.webContents.send('device',device)
 			dispatch(action.setDevice(device))
 		}
 		let j = JSON.stringify(d)
@@ -468,10 +468,6 @@ function createNewUser(username,password,email) {
 	return promise
 }
 ipcMain.on('userInit',(err,s,u,p,i)=>{
-	c(s)
-	c(u)
-	c(p)
-	c(i)
 	loginApi.userInit(s,u,p).then( () => {
 		c('success')
 		let index = device.findIndex(item=>{
