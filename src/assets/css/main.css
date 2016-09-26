@@ -179,7 +179,7 @@
 }
 .all-files-container {
 	position: relative;
-	padding-right: 230px;
+	/*padding-right: 230px;*/
 }
 .upload-input{
 	display: none;
