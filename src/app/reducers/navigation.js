@@ -18,18 +18,8 @@ let navDefault = [
 { name: '上传/下载', parent: null, selected: false, type:'leftNav', icon:'transmission' },
 { name: '分享给我的文件', parent: null, selected: false, type:'leftNav', icon:'sharedToMe' },
 { name: '我分享的文件', parent: null, selected: false, type:'leftNav', icon:'sharedByMe' },
-{ name: 'Transmission的文件', parent: null, selected: false, type: 'leftNav', icon:'transmission1'},
-{ name: 'Owncloud的文件', parent: null, selected: false, type: 'leftNav', icon:'cloud1'}
-];
-
-/**
- * V0.0.2
-**/
-const photoMenuData = [
-  { name: 'all_photo', text: '所有照片', selected: false, icon:'cloud' },
-  { name: 'album', text: '相册', selected: false, icon:'transmission' },
-  { name: 'video', text: '视频', selected: false, icon:'sharedToMe' },
-  { name: 'share', text: '分享', selected: false, icon:'sharedByMe' }
+{ name: '所有照片', selected: false, type: 'leftNav', icon:'cloud' },
+{ name: '相册', selected: false, type: 'leftNav', icon:'transmission' }
 ];
 
 const nav = (state = navDefault, action) => {
@@ -137,8 +127,7 @@ const photoMenu = (state = photoMenuData, action) => {
 
 const reducer = combineReducers({
   menu,
- 	nav,
-  photoMenu
+ 	nav
 })
 
 export default reducer

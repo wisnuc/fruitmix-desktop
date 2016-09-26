@@ -54,6 +54,13 @@ var actions = {
 		}
 	},
 
+	selectedNavItem(name) {
+    return {
+			type: 'PHOTO_MENU_SELECT',
+			name
+		};
+	},
+
 	navToggle() {
 		return {
 			type: 'NAV_MENU_TOGGLE'

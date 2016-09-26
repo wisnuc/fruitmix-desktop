@@ -66,7 +66,7 @@ class leftNav extends Component {
 						<input id="file_h" className="slide-emit" type="checkbox" />
 						<div className="nav-item-body">
 							{this.props.state.navigation.nav.map((item,index) => {
-								if (item.type == 'leftNav') {
+								if (item.type == 'leftNav' && index <= 3) {
 									return (
 										<MenuItem
 										className={item.selected?"list-selected left-menu-list":'left-menu-list'}
@@ -87,18 +87,20 @@ class leftNav extends Component {
 						<input id="photo_h" className="slide-emit" type="checkbox" />
 						<div className="nav-item-body">
 							{
-								this.props.state.navigation.photoMenu.map((item, index) => {
-									return (
-										<MenuItem
-										  className={ item.selected ? "list-selected left-menu-list" : 'left-menu-list' }
-											primaryText={ item.text }
-											key={ item.name }
-											desktop={ true }
-											onTouchTap={ this.itemSelect.bind(this,item.name,index) }
-											innerDivStyle={ item.selected ? selectedStyle : listStyle }
-											leftIcon={ item.icon ? svg[item.icon]() : null }>
-										</MenuItem>
-									);
+								this.props.state.navigation.nav.map((item, index) => {
+									if (item.type == 'leftNav' && index >= 4) {
+										return (
+											<MenuItem
+											  className={ item.selected ? "list-selected left-menu-list" : 'left-menu-list' }
+												primaryText={ item.name }
+												key={ item.name }
+												desktop={ true }
+												onTouchTap={ this.itemSelect.bind(this,item.name,index) }
+												innerDivStyle={ item.selected ? selectedStyle : listStyle }
+												leftIcon={ item.icon ? svg[item.icon]() : null }>
+											</MenuItem>
+										);
+									}
 							  })
 						  }
 						</div>
@@ -135,4 +137,4 @@ class leftNav extends Component {
 }
 
 
-export default  leftNav
+export default leftNav
