@@ -13,6 +13,9 @@ import view from './view'
 import file from './file'
 import share from './share'
 
+// import atom component reducer
+import { radio, shareRadio } from '../React-Redux-UI/src/reducers/reducer';
+
 const reducer = combineReducers({
 	login,
 	navigation,
@@ -24,7 +27,9 @@ const reducer = combineReducers({
 	setting,
 	view,
 	file,
-	share
+	share,
+	radio,
+	shareRadio
 });
 
-export default reducer; 
+export default reducer;

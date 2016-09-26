@@ -11,7 +11,7 @@ import {
   objectToArray,
   values,
   replacePlaceholder,
-  valuesToArray } from 'utils';
+  valuesToArray } from '../../utils';
 
 class CheckboxGroup extends Component {
 	constructor(props) {

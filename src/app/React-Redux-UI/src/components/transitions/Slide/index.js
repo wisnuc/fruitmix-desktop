@@ -154,7 +154,6 @@ class Slide extends Component {
     return (
       <div className={ className }>
           { components }
-
       </div>
     );
   }

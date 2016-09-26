@@ -4,7 +4,7 @@
    * @time 2016-04-05 12:00
    * @author liuhua
    **/
-   
+
 //import core module
 import React from 'react'
 import { render } from 'react-dom'
@@ -58,17 +58,17 @@ if (mocha) {
 var App = React.createClass({
 	render: function(){
 		let state = store.getState()
-		let isLogin 
+		let isLogin
 		if (mocha) {
 			isLogin = mochaState.login.state == 'LOGGEDIN'?true:false
 		}else {
 			isLogin = state.login.state == 'LOGGEDIN'?true:false
 		}
 		return(
-				<div className="app">	
+				<div className="app">
 						{/*<button onClick={this.save}>store</button>*/}
 						{isLogin && <Main state={mocha?mochaState:state} dispatch={dispatch}/>}
-						{!isLogin && <Login state={mocha?mochaState:state} dispatch={dispatch}/>}	
+						{!isLogin && <Login state={mocha?mochaState:state} dispatch={dispatch}/>}
 				</div>
 			)
 	},
@@ -99,7 +99,7 @@ store.subscribe(()=>{
 		storeLock = true
 		waitForRender = setTimeout(()=>{storeLock = false},50)
 	}
-	
+
 })
 
 var clearLock = ()=>{
@@ -108,17 +108,9 @@ var clearLock = ()=>{
 
 ipc.on('stateUpdate',(err,data)=>{
 	mochaState = data
-	Render()	
+	Render()
 })
 
 ipc.on('adapter', (err, data) => {
 	dispatch(Action.adapter(data))
 })
-
-
-
-
-
-
-
-
