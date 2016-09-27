@@ -111,7 +111,7 @@ app.on('ready', function() {
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	})
-	// mainWindow.webContents.openDevTools()
+	mainWindow.webContents.openDevTools()
 	mainWindow.loadURL('file://' + __dirname + '/build/index.html')
 	//create folder
 	fs.exists(mediaPath,exists=>{
@@ -392,7 +392,7 @@ ipcMain.on('delete',(e,objArr,dir)=>{
 ipcMain.on('rename',(e,uuid,name,oldName)=>{
 	rename(uuid,name,oldName).then(()=>{
 		map.get(uuid).name = name
-		map.get(uuid).attribute.name = name
+		// map.get(uuid).attribute.name = name
 	}).catch((err)=>{
 		mainWindow.webContents.send('message','文件重命名失败')	
 	})
@@ -401,11 +401,11 @@ function rename(uuid,name,oldName) {
 	let rename = new Promise((resolve,reject)=>{
 		var options = {
 			method: 'patch',
-			url: server+'/files/'+uuid,
+			url: server+'/files/'+ currentDirectory.uuid + '/' + uuid,
 			headers: {
 					Authorization: user.type+' '+user.token
 				},
-			form: {filename:name}
+			form: {name:name}
 		}
 
 		function callback (err,res,body) {

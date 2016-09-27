@@ -187,7 +187,7 @@ class Main extends Component {
 				<div className='app-bar-username'>{this.props.state.login.obj.username}</div>
 				</AppBar>
 				{/*Left Nav*/}
-				<Drawer width={241} open={this.props.state.navigation.menu} className='left-nav'>
+				<Drawer width={220} open={this.props.state.navigation.menu} className='left-nav'>
 					<LeftNav dispatch={this.props.dispatch} state={this.props.state}/>
 				</Drawer>
 				{/*Content*/}

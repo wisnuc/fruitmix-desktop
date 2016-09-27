@@ -67,8 +67,12 @@ export default class Drag extends Component {
 	}
 
 	onMouseUp(e) {
-		if (this.hasCurrentNode) {
+		if (this.hasCurrentNode && this.hasMouseDown) {
+			const { onDragEnd, date, index } = this.props;
+
 		  this.hasMouseDown = false;
+			onDragEnd(date, index, e.clientX - this.currentXPixel, e.clientY - this.currentYPixel, e.target);
+			document.body.removeChild(this.cloneNode);
 		}
 	}
 
@@ -103,7 +107,9 @@ Drag.propTypes = {
 
 	children: PropTypes.node,
 
-	style: PropTypes.object
+	style: PropTypes.object,
+
+	onDragEnd: PropTypes.func
 };
 
 Drag.defaultProps = {};

@@ -6,6 +6,8 @@ import React, { Component, PropTypes } from 'react';
 import { replaceTemplate } from '../../../utils';
 import Drag from '../../partials/Drag';
 
+import Action from '../../../actions/action';
+
 function getStyles (props) {
   return {
     root: {
@@ -129,13 +131,16 @@ export default class Carousel extends Component {
 
   createItemComponents() {
     const { item } = getStyles(this.props);
-    const { data } = this.props;
+    const { data, onDragEnd } = this.props;
 
     return data.map((dataItem, index) => {
       return (
         <Drag
           key={ index }
           className="carousel-item"
+          onDragEnd={ onDragEnd }
+          date={ dataItem.date }
+          index={ dataItem.index }
           style={ item }>
           { dataItem.text }
         </Drag>
@@ -163,6 +168,10 @@ export default class Carousel extends Component {
 		const blockItems = this.everyBlockItemCount * (this.currentBlockIndex + 1) > data.length
 		  ? data.length
 			: this.everyBlockItemCount * (this.currentBlockIndex + 1);
+
+    if (blockItems < this.everyBlockItemCount) {
+      return;
+    }
 
     this.currentItemIndex = nextItemIndex;
 
@@ -253,7 +262,12 @@ Carousel.propTypes = {
   /** @ignore **/
   itemWidth: PropTypes.number,
   /** @ignore **/
-  itemGap: PropTypes.number
+  itemGap: PropTypes.number,
+
+  /**
+    拖拽结束回调
+  **/
+  onDragEnd: PropTypes.func.isRequired
 };
 
 Carousel.defaultProps = {

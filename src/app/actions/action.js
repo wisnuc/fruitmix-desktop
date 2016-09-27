@@ -104,6 +104,23 @@ var actions = {
 		}
 	},
 
+	addDragImageItem(el, date, index) {
+    return {
+			type: 'ADD_DRAG_IMAGEITEM',
+			el,
+			date,
+			index
+		};
+	},
+
+	removeDragImageItem(date, index) {
+		return {
+      type: 'REMOVE_DRAG_IMAGEITEM',
+      date,
+      index
+    }
+	},
+
 	// refreshDir(obj) {
 	// 	return {
 	// 		type: 'REFRESH_DIR',

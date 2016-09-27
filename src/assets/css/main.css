@@ -1,6 +1,6 @@
 /*main*/
 * {
-	font-family: 'Microsoft YaHei'!important
+	font-family: sans-serif!important;
 }
 .fl {
 	float: left;
@@ -34,8 +34,18 @@
 .app-bar {
 	box-sizing: border-box;
 	position: fixed!important;
-	background-color: #37474f!important;
+	background-color: #3f52b4!important;
 }
+
+.app-bar > button {
+	margin-top: 0!important;
+}
+
+.app-bar > h1 {
+  height: 50px!important;
+	line-height: 50px!important;
+}
+
 .app-bar-right {
 	position: absolute!important;
 	right:10px;
@@ -43,24 +53,32 @@
 .app-bar-username {
 	position: absolute;
 	right:50px;
-	height:64px;
-	line-height: 64px;
+	height:50px;
+	line-height: 50px;
 	font-size:14px;
 	color:#ef6c00;
 }
 /*left nav*/
 .left-nav>div {
 	z-index:999!important;
-	background-color: #263238!important;
 }
 .left-nav-container {
-	padding-top:64px;
+	padding-top:50px;
 	overflow: hidden;
 	box-sizing: border-box;
 	color:#ffffff;
 }
+
 .list-selected {
-	background-color: rgba(0,0,0,.2)!important;
+	background-color: #f5f5f5!important;
+}
+
+.left-menu-list > div > div {
+	color: #121212!important;
+}
+
+.list-selected > div > div {
+	color: #5766bd!important;
 }
 
 .left-menu-list >*{
@@ -79,9 +97,22 @@
 
 .nav-item-body {
 	overflow: hidden;
-	height: 330px;
-	max-height: 330px;
+	/*height: 330px;
+	max-height: 330px;*/
 	transition: max-height .5s cubic-bezier(0, 1, .5, 1);
+}
+
+.nav-item-body > div > span > div > div {
+	height: 48px!important;
+	line-height: 48px!important;
+}
+
+.nav-item-body > div > span > div > div {
+	padding-left: 62px!important;
+}
+
+.nav-item-body > div > span > div > div:hover {
+	background: #f5f5f5!important;
 }
 
 .slide-emit:checked + div {
@@ -89,8 +120,9 @@
 }
 
 .left-menu-list svg {
+	left: 26px!important;
 	top: 13px!important;
-	color:#fff!important;
+	color:#121212!important;
 	fill:#fff!important;
 }
 

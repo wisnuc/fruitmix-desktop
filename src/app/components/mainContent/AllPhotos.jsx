@@ -6,6 +6,8 @@ import React, { Component, PropTypes } from 'react';
 
 import ImageByDate from './ImageByDate.jsx';
 
+import Action from '../../actions/action';
+
 // 图片轮播组件
 import Carousel from '../../React-Redux-UI/src/components/transitions/Carousel';
 
@@ -39,12 +41,7 @@ function getStyles () {
   }
 }
 
-
 export default class AllPhotos extends Component {
-  constructor() {
-    super();
-  }
-
   getDragElementRect() {
     const leftSideBarWidth = 241;
     const totalGap = 70;
@@ -60,18 +57,48 @@ export default class AllPhotos extends Component {
     }
   }
 
-  render() {
-    const { dragStyle, dragButtonStyle, operationBarStyle } = getStyles();
-    const dragElementRect = this.getDragElementRect();
-    const newDragStyle = Object.assign({}, dragStyle, dragElementRect);
-    const clearAllButtonStyle = Object.assign({}, dragButtonStyle, { marginRight: 0 });
+  selectedItemHandle(index, el, date, hasChecked) {
+    const { dispatch } = this.props;
 
-    return (
-      <div className="view-image">
-        <div className="image-group">
-          <ImageByDate imageInfo={ [1] } date="2016-8-12"></ImageByDate>
-        </div>
-        <div className="image-selected" style={ newDragStyle }>
+    if (hasChecked) {
+      dispatch(Action.addDragImageItem(el, date, index));
+    } else {
+      dispatch(Action.removeDragImageItem(date, index));
+    }
+  }
+
+  dragEndHandle(date, index, left, top, dragedEl) {
+    const width = parseInt(dragedEl.offsetWidth);
+    const height = parseInt(dragedEl.offsetHeight);
+
+    // 检测是否超出了容器
+    const container = this.getDragElementRect();
+    const containerTop = this.dragEl.getBoundingClientRect().top + window.pageYOffset;
+    const containerHeight = this.dragEl.getBoundingClientRect().height;
+
+    const detectLeft = (width + left) >= container.left;
+    const detectRight = left <= container.left + container.width;
+    const detectTop = (width + top) >= containerTop;
+    const detectBottom = top <= containerTop + containerHeight;
+
+    if (!detectLeft || !detectRight || !detectTop || !detectBottom) {
+      // 拖拽元素全部超出容器
+      dispatch(Action.removeDragImageItem(date, index));
+    }
+  }
+
+  createCarouselComponent() {
+    const { state, dispatch } = this.props;
+
+    if (state.imageItem && state.imageItem.length) {
+      const { dragStyle, dragButtonStyle, operationBarStyle } = getStyles();
+
+      const dragElementRect = this.getDragElementRect();
+      const newDragStyle = Object.assign({}, dragStyle, dragElementRect);
+      const clearAllButtonStyle = Object.assign({}, dragButtonStyle, { marginRight: 0 });
+
+      return (
+        <div ref={ el => this.dragEl = el } className="image-selected" style={ newDragStyle }>
           <div className="image-operation clearfix" style={ operationBarStyle }>
             <div className="operations fl">
               <button style={ dragButtonStyle }>分享</button>
@@ -84,12 +111,25 @@ export default class AllPhotos extends Component {
             {/* 图片轮播 */}
             <Carousel
               className="carousel"
-              width={ dragElementRect.width - 2 }
+              data={ state.imageItem }
+              dispatch={ dispatch }
               height={ 75 }
-              data={ [1, 2, 3, 4] }>
+              onDragEnd={ this.dragEndHandle.bind(this) }
+              width={ dragElementRect.width - 2 }>
             </Carousel>
           </div>
         </div>
+      );
+    }
+  }
+
+  render() {
+    return (
+      <div className="view-image">
+        <div className="image-group">
+          <ImageByDate onSelectedItem={ this.selectedItemHandle.bind(this, 0) } imageInfo={ [1] } date="2016-8-12"></ImageByDate>
+        </div>
+        { this.createCarouselComponent() }
       </div>
     );
   }

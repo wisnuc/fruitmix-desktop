@@ -48,6 +48,7 @@ export default class ImageByDate extends Component {
     this.outedHandle = this.outedHandle.bind(this);
     this.selectedItemHandle = this.selectedItemHandle.bind(this);
     this.changedHandle = this.changedHandle.bind(this);
+    this.lookBigPhotoHandle = this.lookBigPhotoHandle.bind(this);
     this.state = {
       hasAllSelected: false
     };
@@ -69,9 +70,24 @@ export default class ImageByDate extends Component {
   }
 
   selectedItemHandle(e) {
+    const { onSelectedItem, date } = this.props;
     const el = e.currentTarget.parentNode;
+
     el.classList.toggle('active');
     el.classList.toggle('show');
+    onSelectedItem(el, date, el.classList.contains('active'));
+    e.stopPropagation();
+  }
+
+  lookBigPhotoHandle(e) {
+    const el = e.currentTarget;
+
+    if (el.classList.contains('active')) {
+      el.classList.remove('active');
+      el.classList.remove('show');
+    } else {
+      alert('查看大图');
+    }
   }
 
   changedHandle(value, checked) {
@@ -90,7 +106,8 @@ export default class ImageByDate extends Component {
           <Checkbox value={ date } text={ date } onChange={ this.changedHandle }></Checkbox>
         </div>
         <div className="image-list" style={ listStyle }>
-          <div className={ this.state.hasAllSelected ? "image-item active show" : "image-item" } style={ itemStyle } onClick={ this.selectItemHandle } onMouseOver={ this.overedHandle } onMouseOut={ this.outedHandle }>
+          <div className={ this.state.hasAllSelected ? "image-item active show" : "image-item" } style={ itemStyle }
+            onClick={ this.lookBigPhotoHandle } onMouseOver={ this.overedHandle } onMouseOut={ this.outedHandle }>
             <i style={ selectStatusStyle } onClick={ this.selectedItemHandle }></i>
           </div>
         </div>
@@ -108,5 +125,10 @@ ImageByDate.propTypes = {
   /**
     日期
   **/
-  date: PropTypes.string.isRequired
+  date: PropTypes.string.isRequired,
+
+  /**
+    选中项回调
+  **/
+  onSelectedItem: PropTypes.func.isRequired
 };

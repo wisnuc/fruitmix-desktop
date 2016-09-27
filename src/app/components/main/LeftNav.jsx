@@ -20,7 +20,7 @@ import Action from '../../actions/action';
 const style = {
 	margin:0,
 	padding:0,
-	width: 241
+	width: 220
 };
 
 const listStyle = {
@@ -44,13 +44,12 @@ function getStyles () {
 	return {
 		header: {
 			display: 'block',
-			textAlign: 'center',
-			lineHeight: '55px',
+			lineHeight: '38px',
 			fontSize: 14,
-			color: '#fff',
-			backgroundColor: 'rgba(0,0,0,.2)',
-			borderBottom: '1px solid rgba(0,0,0,.25)',
-			borderTop: '1px solid rgba(0,0,0,.25)'
+			fontWeight: 700,
+			color: '#1e1e1e',
+			paddingLeft: 62,
+			backgroundColor: '#e5e5e5'
 		}
 	}
 }
