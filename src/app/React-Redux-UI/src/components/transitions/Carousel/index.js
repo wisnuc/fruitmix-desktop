@@ -3,7 +3,7 @@
 **/
 
 import React, { Component, PropTypes } from 'react';
-import { replaceTemplate } from '../../utils';
+import { replaceTemplate } from '../../../utils';
 import Drag from '../../partials/Drag';
 
 function getStyles (props) {
@@ -49,6 +49,8 @@ function getStyles (props) {
       width: replaceTemplate('${itemWidth}px', props),
       marginRight: replaceTemplate('${itemGap}px', props),
       height: replaceTemplate('${height}px', props),
+      position: 'relative',
+      zIndex: 10,
       backgroundColor: '#efefef'
     }
   }
