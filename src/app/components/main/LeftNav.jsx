@@ -66,7 +66,7 @@ class leftNav extends Component {
 						<input id="file_h" className="slide-emit" type="checkbox" />
 						<div className="nav-item-body">
 							{this.props.state.navigation.nav.map((item,index) => {
-								if (item.type == 'leftNav' && index <= 3) {
+								if (item.type == 'leftNav' && index <= 4) {
 									return (
 										<MenuItem
 										className={item.selected?"list-selected left-menu-list":'left-menu-list'}
@@ -88,7 +88,7 @@ class leftNav extends Component {
 						<div className="nav-item-body">
 							{
 								this.props.state.navigation.nav.map((item, index) => {
-									if (item.type == 'leftNav' && index >= 4) {
+									if (item.type == 'leftNav' && index >= 5) {
 										return (
 											<MenuItem
 											  className={ item.selected ? "list-selected left-menu-list" : 'left-menu-list' }

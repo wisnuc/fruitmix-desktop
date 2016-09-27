@@ -15,7 +15,6 @@ import M from './MediaImage';
 
 class Media extends Component {
 	render() {
-		return <div>to be continued</div>
 		return (
 			<div className='all-my-files' style={{height:'100%'}} >
 				{this.getContent()}
@@ -30,7 +29,7 @@ class Media extends Component {
 			return (
 				<div style={{width:'100%'}} className='mediaContainer' onWheel={this.scrollEvent.bind(this)}>
 					{this.props.state.media.data.map((item,index)=>{
-						if (index >this.props.state.media.size) {
+						if (index >this.props.state.view.mediaSize) {
 							return null
 						}
 						return <M key={item.hash} item={item} download={this.downloadImage.bind(this,item)}></M>

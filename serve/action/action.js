@@ -52,7 +52,15 @@ var actions = {
 			children : children,
 			path : dirPath
 		}
-	}
+	},
+
+	//media
+	setMedia(data) {
+		return {
+			type: 'SET_MEDIA',
+			data: data
+		}
+	},
 }
 
 module.exports = actions;

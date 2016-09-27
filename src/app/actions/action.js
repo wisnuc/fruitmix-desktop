@@ -214,12 +214,12 @@ var actions = {
 		}
 	},
 
-	setMedia(data) {
-		return {
-			type: 'SET_MEDIA',
-			data: data
-		}
-	},
+	// setMedia(data) {
+	// 	return {
+	// 		type: 'SET_MEDIA',
+	// 		data: data
+	// 	}
+	// },
 
 	setThumb(item,status) {
 		return {

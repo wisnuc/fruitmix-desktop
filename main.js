@@ -13,6 +13,7 @@ global.path = require('path')
 global._ = require('lodash')
 global.mdns = require('mdns-js')
 global.crypto = require('crypto')
+
 global.mainWindow = null
 global.testWindow = null
 global.fruitmixWindow = null
@@ -62,8 +63,8 @@ global.c = console.log
 
 global.mocha = false
 
-mdns.excludeInterface('0.0.0.0')
-var browser = mdns.createBrowser(mdns.tcp('http'))
+// mdns.excludeInterface('0.0.0.0')
+// var browser = mdns.createBrowser(mdns.tcp('http'))
 
 //require module
 const upload = require('./lib/upload')
@@ -72,6 +73,7 @@ const loginApi = require('./lib/login')
 const mediaApi = require('./lib/media')
 const deviceApi = require('./lib/device')
 const fileApi = require('./lib/file')
+var findDevice = require('./lib/mdns')
 
 //require store
 global.action = require('./serve/action/action')
@@ -86,7 +88,8 @@ const adapter = () => {
 	return {
 		login : store.getState().login,
 		setting : store.getState().setting,
-		file : store.getState().file
+		file : store.getState().file,
+		media : store.getState().media
 	}
 }
 
@@ -94,7 +97,9 @@ store.subscribe(() => {
 	mainWindow.webContents.send('adapter',adapter())
 })
 
-browser.on('update', deviceApi.findDevice) 
+// browser.on('update', deviceApi.findDevice) 
+
+
 //app ready and open window ------------------------------------
 app.on('ready', function() {
 	mainWindow = new BrowserWindow({
@@ -111,7 +116,7 @@ app.on('ready', function() {
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	})
-	mainWindow.webContents.openDevTools()
+	// mainWindow.webContents.openDevTools()
 	mainWindow.loadURL('file://' + __dirname + '/build/index.html')
 	//create folder
 	fs.exists(mediaPath,exists=>{
@@ -133,16 +138,22 @@ app.on('ready', function() {
 		}
 	})
 
+	setTimeout( () => {
+		var x = findDevice().on('stationUpdate', data => {
+			dispatch(action.setDevice(data))
+		})
+	},500)
+
 	//Tray
-	appIcon = new Tray(path.join(__dirname,'180-180.png'))
-	var contextMenu = Menu.buildFromTemplate([
-	    { label: 'Item1', type: 'radio' },
-	    { label: 'Item2', type: 'radio' },
-	    { label: 'Item3', type: 'radio', checked: true },
-	    { label: 'Item4', type: 'radio' }
-	])
-	appIcon.setToolTip('This is my application.')
-  	appIcon.setContextMenu(contextMenu)
+	// appIcon = new Tray(path.join(__dirname,'180-180.png'))
+	// var contextMenu = Menu.buildFromTemplate([
+	//     { label: 'Item1', type: 'radio' },
+	//     { label: 'Item2', type: 'radio' },
+	//     { label: 'Item3', type: 'radio', checked: true },
+	//     { label: 'Item4', type: 'radio' }
+	// ])
+	// appIcon.setToolTip('This is my application.')
+ //  	appIcon.setContextMenu(contextMenu)
 
   	if (mocha) {
 		testWindow = new BrowserWindow({
@@ -169,17 +180,22 @@ ipcMain.on('getDeviceUsedRecently',err=>{
 })
 //setIp
 ipcMain.on('setServeIp',(err,ip, isCustom)=>{
+	c('set ip !!')
 	dispatch(action.setDeviceUsedRecently(ip))
-	let index = device.findIndex(item=>{
-		return item.addresses[0] == ip
-	})
+	// let index = device.findIndex(item=>{
+	// 	return item.addresses == ip
+	// })
 	server = 'http://' + ip + ':3721'
+	c('set serve success')
 	// if (index != -1) {
 	// 	server = 'http://' + ip + ':3721'
 	// }else {
 	// 	server = 'http://' + ip + ':3721'
 	// }
 	fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
+		if (err) {
+			return
+		}
 		let d = JSON.parse(data)
 		d.ip = ip
 		if (isCustom) {
@@ -216,12 +232,12 @@ ipcMain.on('delServer',(err,i)=>{
 	dispatch(action.setDevice(device))
 })
 //find fruitmix
-ipcMain.on('findFruitmix',(e,item)=>{
-	browser.discover()
-})
+// ipcMain.on('findFruitmix',(e,item)=>{
+// 	browser.discover()
+// })
 //create fruitmix
 ipcMain.on('createFruitmix',(err,item)=>{
-	c(item.addresses[0]+':'+item.port)
+	c(item.address[0]+':'+item.port)
 	fruitmixWindow = new BrowserWindow({
 		frame: true,
 		height: 768,
@@ -235,11 +251,7 @@ ipcMain.on('createFruitmix',(err,item)=>{
 	fruitmixWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	})
-	fruitmixWindow.loadURL('http://'+item.addresses[0]+':3000')
-})
-//get usersList
-ipcMain.on('getUserList',(e,item)=>{
-	// c(item)
+	fruitmixWindow.loadURL('http://'+item.address+':3000')
 })
 //get all user information --------------------------------------
 ipcMain.on('login',function(err,username,password){
@@ -386,7 +398,6 @@ ipcMain.on('delete',(e,objArr,dir)=>{
 			c(err)
 		})
 	}
-	
 })
 //rename
 ipcMain.on('rename',(e,uuid,name,oldName)=>{
@@ -757,7 +768,8 @@ ipcMain.on('getMediaData',(err)=>{
 			media.push(obj)	
 			mediaMap.set(item.hash,item)
 		})
-		mainWindow.webContents.send('mediaFinish',media)
+		// mainWindow.webContents.send('mediaFinish',media)
+		dispatch(action.setMedia(media))
 	}).catch(err=>{
 		console.log(err)
 	})

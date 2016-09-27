@@ -3,7 +3,7 @@ const defaultState = {
 	state: 'READY', // READY, BUSY, REJECTED, TIMEOUT, ERROR, LOGGEDIN
   	obj: {},
   	device: [],
-  	deviceUsedRecently: ''
+  	selectIndex : 0
 }
 
 const loginState = (state = defaultState, action) => {

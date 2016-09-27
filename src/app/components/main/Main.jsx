@@ -96,9 +96,9 @@ class Main extends Component {
 			this.props.dispatch(Action.setTree(treeChildren));
 		});
 
-		ipc.on('mediaFinish',(err,media)=>{
-			this.props.dispatch(Action.setMedia(media));
-		});
+		// ipc.on('mediaFinish',(err,media)=>{
+		// 	this.props.dispatch(Action.setMedia(media));
+		// });
 
 		ipc.on('getThumbSuccess',(err,item)=>{
 			this.props.dispatch(Action.setThumb(item,'ready'));

@@ -7,6 +7,7 @@ const defaultState = {
 	detail:[],
 	move: {open:false,x:0,y:0,data:[]},
 	menu:{show:false,obj:{}},
+	mediaSize: 30
 }
 
 const loginState = (state = defaultState, action) => {
@@ -42,6 +43,16 @@ const loginState = (state = defaultState, action) => {
 				//close menu
 				return Object.assign({},state,{menu:{show:false,obj:{}}});
 			}
+
+		case 'SET_MEDIA_SIZE':
+			var s
+			if (action.reset) {
+				s = 30
+			}else {
+				s = state.mediaSize+30
+			}
+			return Object.assign({},state,{mediaSize:s});
+
 		default:
 			return state
 	}

@@ -36,22 +36,20 @@ class Index extends React.Component {
 
 		setTimeout(()=>{
 			ipc.send('getDeviceUsedRecently')
-		},1000)
+		},2000)
 
-		ipc.send('findFruitmix')
-		this.find = setInterval(function(){
-			ipc.send('findFruitmix')
-		},500)
+		// ipc.send('findFruitmix')
+
+		// this.find = setInterval(function(){
+		// 	ipc.send('findFruitmix')
+		// },500)
 
 		setTimeout(()=>{
-			if (this.props.state.login.deviceUsedRecently == '') {
-				if (this.props.state.login.device.length == 0) {
-					return
-				}else {
+				if (this.props.state.login.selectIndex == 0) {
+					c.log('auto select')
 					this.selectDevice.apply(this,[null,0])
 				}
-			}
-		},3000)
+		},1000)
 		ipc.on('message',(err,message,code)=>{
 			this.props.dispatch(Login.setSnack(message,true))
 			// if (code == 0 ) {
@@ -68,8 +66,8 @@ class Index extends React.Component {
 	submit() {
 		let username = this.refs.username.input.value
 		let password = this.refs.password.input.value
-		// ipc.send('login',username,password)
-		ipc.send('login','Alice','123456')
+		ipc.send('login',username,password)
+		// ipc.send('login','admin','123456')
 	}
 
 	render() {
@@ -91,8 +89,8 @@ class Index extends React.Component {
 					<div className='login-device-list'>
 
 						<SelectField iconStyle={{fill:'#666'}} underlineStyle={{borderColor:'rgba(255,255,255,0)'}}  value={this.getValue()} onChange={this.selectDevice.bind(this)}>
-							{device.map(item=>(
-								<MenuItem key={item.addresses[0]} value={item.addresses[0]} primaryText={item.admin&&item.fruitmix?item.host:item.host+"(未配置)"}></MenuItem>
+							{device.map((item,index)=>(
+								<MenuItem key={index} value={index} primaryText={_this.getTitle(item)}></MenuItem>
 							))}
 						</SelectField>
 			
@@ -127,7 +125,7 @@ class Index extends React.Component {
 		let deviceList = (
 				<div className='add-device-list-container'>
 						{device.map(item=>(
-							<Device key={item.addresses[0]+item.host} item={item}></Device>
+							<Device key={item.address} item={item}></Device>
 						))}
 						</div>
 			)
@@ -140,7 +138,7 @@ class Index extends React.Component {
 					</div>
 					<div className='add-device-button' style={this.props.state.login.addDevice?{display:'none'}:{}}>
 						<span  onClick={this.toggleDevice.bind(this)}>返回</span>
-						<span onClick={this.toggleAddDevice.bind(this)}>添加设备</span>
+						{/*<span onClick={this.toggleAddDevice.bind(this)}>添加设备</span>*/}
 					</div>
 				</div>
 			)
@@ -180,12 +178,20 @@ class Index extends React.Component {
 	}
 
 	selectDevice(e,index) {
-		let ip = this.props.state.login.device[index].addresses[0]
+		c.log('selec ......')
+		let ip = this.props.state.login.device[index].address
 		ipc.send('setServeIp',ip,false)
 	}
 
 	getValue() {
-			return this.props.state.login.deviceUsedRecently
+			return this.props.state.login.selectIndex
+	}
+
+	getTitle(item) {
+		let titleArr = item.host.split('-')
+		let title = titleArr[1]
+
+		return item.fruitmix=="INITIALIZED"?title:title+"(未配置)"
 	}
 }
 
