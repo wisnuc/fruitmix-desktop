@@ -87,7 +87,6 @@ export default class AllPhotos extends Component {
               width={ dragElementRect.width - 2 }
               height={ 75 }
               data={ [1, 2, 3, 4] }>
-
             </Carousel>
           </div>
         </div>
