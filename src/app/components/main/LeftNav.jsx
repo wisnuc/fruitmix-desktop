@@ -46,7 +46,6 @@ function getStyles () {
 			display: 'block',
 			lineHeight: '38px',
 			fontSize: 14,
-			fontWeight: 700,
 			color: '#1e1e1e',
 			paddingLeft: 56,
 			backgroundColor: '#e5e5e5'
@@ -105,8 +104,9 @@ class leftNav extends Component {
 						</div>
 					</div>
 					<div className="nav-item-box">
-						<div className="nav-item-header" style={ getStyles().header }>系统</div>
-						<div className="nav-item-body">
+						<label htmlFor="photo_s" className="nav-item-header" style={ getStyles().header }>系统</label>
+						<input id="photo_s" className="slide-emit" type="checkbox" />
+						<div className="nav-item-body system-item-body">
 							{
 								this.props.state.navigation.nav.map((item, index) => {
 									if (item.type == 'leftNav' && index >= 6) {

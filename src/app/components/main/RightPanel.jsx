@@ -11,7 +11,7 @@ import Comment from '../mainContent/Comment';
 function getStyles () {
   return {
     rootInner: {
-      position: 'fixed',
+      position: 'absolute',
       borderSizing: 'border-sizing',
       width: '100%',
       borderLeft: '1px solid #e0e0e0',
@@ -26,7 +26,6 @@ function getStyles () {
       textAlign: 'center',
 			lineHeight: '38px',
 			fontSize: 14,
-      fontWeight: 700,
 			color: '#949494',
       backgroundColor: '#f5f5f5'
     },

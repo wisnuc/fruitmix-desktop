@@ -112,7 +112,7 @@ body{
 	max-height: 192px;
 }
 
-.photo-item-body {
+.photo-item-body, .system-item-body {
 	max-height: 96px;
 }
 
