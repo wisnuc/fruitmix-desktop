@@ -1,13 +1,9 @@
 /*main*/
+
 * {
 	font-family: sans-serif;
 }
-.fl {
-	float: left;
-}
-.fr {
-	float: right;
-}
+
 .clearfix:after {
 	display: block;
 	content: "\0020";
@@ -52,6 +48,7 @@ body{
 .app-bar-right {
 	position: absolute!important;
 	right:10px;
+	top: 0!important;
 }
 .app-bar-username {
 	position: absolute;
@@ -90,6 +87,10 @@ body{
 
 .left-menu-list >*{
 	cursor: default;
+}
+
+.right-panel-inner.active {
+	right: 0!important;
 }
 
 .nav-inner {

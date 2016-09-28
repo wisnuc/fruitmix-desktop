@@ -7,7 +7,8 @@
 
  'use strict';
 // require core module
- import React, { findDOMNode, Component, PropTypes } from 'react';
+ import React, { Component, PropTypes } from 'react';
+ import { findDOMNode } from 'react-dom';
  import CSS from '../../utils/transition';
 
 //require material
@@ -197,11 +198,11 @@ class Main extends Component {
 				</Drawer>
 				{/*Content*/}
 				<Paper className={"content-container "+(this.props.state.navigation.menu?'content-has-left-padding':'no-padding')} zDepth={0}>
-					<Content dispatch={this.props.dispatch} state={this.props.state}/>
+					<Content onShowedRightPanel={ this.showedRightPanelHandler.bind(this) } dispatch={this.props.dispatch} state={this.props.state}/>
 				</Paper>
 
         {/* Right Panel */}
-        {/*<RightPanel width={ 230 } dispatch={ this.props.dispatch } state={ this.props.state }></RightPanel>*/}
+        <RightPanel ref="rightPanel" width={ 230 } dispatch={ this.props.dispatch } state={ this.props.state }></RightPanel>
 
 				{m}
 				<Dialog title="用户管理"
@@ -216,6 +217,10 @@ class Main extends Component {
 			</div></CSS>
 			);
 	}
+
+  showedRightPanelHandler() {
+    this.refs.rightPanel && findDOMNode(this.refs.rightPanel).lastElementChild.classList.toggle('active');
+  }
 
 	triggerClick(e) {
 		if (this.props.state.view.menu.show) {

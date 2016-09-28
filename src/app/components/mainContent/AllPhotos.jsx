@@ -198,7 +198,7 @@ export default class AllPhotos extends Component {
 
   scrollTo() {
     if (this.current > this.pages) {
-      alert('end');
+      alert('没有更多图片了');
       return;
     }
 

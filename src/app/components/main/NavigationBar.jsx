@@ -4,15 +4,33 @@
 
 import React, { Component, PropTypes } from 'react';
 
+import RightPanel from './RightPanel';
+
 function getStyles (props) {
   return {
-    backgroundColor: props.navigationBarBackgroundColor,
-    color: props.navigationBarTextStyle,
-    fontSize: props.navigationBarFontSize,
-    fontFamily: props.navigationBarFontFamily,
-    paddingLeft: props.navigationBarHorizontalPadding,
-    height: props.navigationBarHeight,
-    lineHeight: props.navigationBarHeight + 'px'
+    root: {
+      backgroundColor: props.navigationBarBackgroundColor,
+      color: props.navigationBarTextStyle,
+      fontSize: props.navigationBarFontSize,
+      fontFamily: props.navigationBarFontFamily,
+      paddingLeft: props.navigationBarHorizontalPadding,
+      height: props.navigationBarHeight,
+      lineHeight: props.navigationBarHeight + 'px',
+      borderBottom: '1px solid #efefef'
+    },
+    icon: {
+      display: 'inline-block',
+      fontFamily: 'Microsoft Yahei',
+      width: 20,
+      height: 20,
+      borderRadius: '100%',
+      marginRight: 20,
+      lineHeight: '20px',
+      fontSize: 14,
+      textAlign: 'center',
+      backgroundColor: '#586abf',
+      color: '#fff'
+    }
   }
 }
 
@@ -20,21 +38,48 @@ export default class NavigationBar extends Component {
   createTitleTextComponent() {
     const { navigationBarTitleTexts } = this.props;
 
-    return navigationBarTitleTexts.map((text, index) => {
-      if (index === navigationBarTitleTexts.length - 1) {
-        return <span>{ text }</span>
-      } else {
-        return <span>{ text } &gt; </span>
-      }
-    });
+    return (
+      <div className="fl">
+        {
+          navigationBarTitleTexts.map((text, index) => {
+            if (index === navigationBarTitleTexts.length - 1) {
+              return <span>{ text }</span>
+            } else {
+              return <span>{ text } &gt; </span>
+            }
+          })
+        }
+      </div>
+    );
+  }
+
+  createIconComponent() {
+    const { icons } = this.props;
+    const { icon } = getStyles(this.props);
+
+    return (
+      <div className="fr">
+        {
+          icons.map((iconObj, index) => {
+            return <i style={ icon } onClick={ this.iconClickHandler.bind(this, index, iconObj.text) }>{ iconObj.text }</i>
+          })
+        }
+      </div>
+    );
+  }
+
+  iconClickHandler() {
+    const { onShowedRightPanel } = this.props;
+    onShowedRightPanel && onShowedRightPanel();
   }
 
   render() {
-    const navigationBarStyle = getStyles(this.props);
+    const { root } = getStyles(this.props);
 
     return (
-      <div className="navigation-bar" style={ navigationBarStyle }>
+      <div className="navigation-bar clearfix" style={ root }>
         { this.createTitleTextComponent() }
+        { this.createIconComponent() }
       </div>
     );
   }
@@ -63,5 +108,5 @@ NavigationBar.defaultProps = {
   navigationBarFontSize: 12,
   navigationBarFontFamily: 'sans-serif',
   navigationBarHorizontalPadding: 15,
-  navigationBarHeight: 38
+  navigationBarHeight: 37
 };
