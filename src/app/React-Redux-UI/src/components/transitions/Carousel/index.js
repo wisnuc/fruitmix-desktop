@@ -89,12 +89,21 @@ function getTransformStyle () {
 export default class Carousel extends Component {
   constructor(props) {
     super(props);
-		const { data } = this.props;
 
-    this.transformStyle = getTransformStyle();
-		this.realWidth = this.getRealWidth();
-		this.everyBlockItemCount = this.getEveryBlockItemCountByRealWidth();
-		this.blockCount = this.getBlockCountByItemCount();
+    this.initial();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.initial(nextProps);
+  }
+
+  initial(props) {
+    const { data } = props || this.props;
+
+    this.transformStyle = getTransformStyle(props);
+		this.realWidth = this.getRealWidth(props);
+		this.everyBlockItemCount = this.getEveryBlockItemCountByRealWidth(props);
+		this.blockCount = this.getBlockCountByItemCount(props);
 
 		this.currentItemIndex = data.length >= this.everyBlockItemCount
 		 ? this.everyBlockItemCount - 1
@@ -104,34 +113,33 @@ export default class Carousel extends Component {
 		this.currentBlockIndex = 0;
   }
 
-	getRealWidth() {
-		const { data, itemWidth, itemGap } = this.props;
-
+	getRealWidth(props) {
+		const { data, itemWidth, itemGap } = props || this.props;
 		return data.length * (itemWidth + itemGap);
 	}
 
-	getWidth() {
-		const { width, arrowItemContainerWidth } = this.props;
+	getWidth(props) {
+		const { width, arrowItemContainerWidth } = props || this.props;
 
 		return width - arrowItemContainerWidth * 2;
 	}
 
-	getEveryBlockItemCountByRealWidth() {
-		const { itemWidth, itemGap } = this.props;
+	getEveryBlockItemCountByRealWidth(props) {
+		const { itemWidth, itemGap } = props || this.props;
 		const width = this.getWidth();
 
 		return Math.floor((width + itemGap) / (itemWidth + itemGap));
 	}
 
-	getBlockCountByItemCount() {
-		const { data } = this.props;
+	getBlockCountByItemCount(props) {
+		const { data } = props || this.props;
 
 		return Math.ceil(data.length / this.everyBlockItemCount);
 	}
 
-  createItemComponents() {
-    const { item } = getStyles(this.props);
-    const { data, onDragEnd } = this.props;
+  createItemComponents(props) {
+    const { item } = getStyles(props || this.props);
+    const { data, onDragEnd } = props || this.props;
 
     return data.map((dataItem, index) => {
       return (
@@ -148,9 +156,9 @@ export default class Carousel extends Component {
     });
   }
 
-  createContainerComponent() {
-    let { carouselRoot, carouselRootInner } = getStyles(this.props);
-    const { itemWidth } = this.props;
+  createContainerComponent(props) {
+    let { carouselRoot, carouselRootInner } = getStyles(props || this.props);
+    const { itemWidth } = props || this.props;
     const itemComponents = this.createItemComponents();
     const carouselNewRootInner = Object.assign({}, carouselRootInner, { width: this.realWidth });
 

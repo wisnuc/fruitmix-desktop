@@ -13,6 +13,7 @@ import view from './view'
 import file from './file'
 import share from './share'
 import imageItem from './imageitem';
+import navigationBarTitleTexts from './navigationBarTitleTexts';
 
 // import atom component reducer
 import { radio, shareRadio } from '../React-Redux-UI/src/reducers/reducer';
@@ -30,6 +31,7 @@ const reducer = combineReducers({
 	file,
 	share,
 	imageItem,
+	navigationBarTitleTexts,
 	radio,
 	shareRadio
 });

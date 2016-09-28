@@ -121,6 +121,20 @@ var actions = {
     }
 	},
 
+	toggleSelectStatusImageItem(checked) {
+    return {
+			type: 'TOGGLE_SELECT_STATUS_IMAGEITEM',
+			checked
+		}
+	},
+
+	toggleNavigator(titleTexts) {
+		return {
+			type: 'TOGGLE_NAVIGATOR',
+			titleTexts
+		}
+	},
+
 	// refreshDir(obj) {
 	// 	return {
 	// 		type: 'REFRESH_DIR',

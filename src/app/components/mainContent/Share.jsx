@@ -13,8 +13,8 @@ import RadioGroup from '../../React-Redux-UI/src/components/partials/RadioGroup'
 function getStyles () {
   return {
     body: {
-      padding: '10px 0 0 15px',
-      color: '#fff',
+      padding: '10px 0 0 20px',
+      color: '#757575',
       fontSize: 12
     },
     radio: {

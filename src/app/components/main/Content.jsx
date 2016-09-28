@@ -15,6 +15,7 @@ import SharedFiles from '../mainContent/SharedFiles';
 import SharedByMe from '../mainContent/SharedByMe';
 import Setting from '../mainContent/Setting';
 import Media from '../mainContent/Media';
+import NavigationBar from './NavigationBar';
 
 import AllPhoto from '../mainContent/AllPhotos';
 
@@ -43,10 +44,14 @@ class MainContent extends Component {
 
 	render() {
 		return (
-			<div className=''>
-				<CSS opts={['content', true, true, false, 800, 800, 500]}>
-				{this.getContentSelected()}
-				</CSS>
+			<div>
+        {/* NavigationBar */}
+        <NavigationBar navigationBarTitleTexts={ this.props.state.navigationBarTitleTexts } navigationBarHorizontalPadding={ 18 }></NavigationBar>
+        <div className="content">
+          <CSS opts={['content', true, true, false, 800, 800, 500]}>
+  				  {this.getContentSelected()}
+  				</CSS>
+        </div>
 			</div>
 		)
 	}

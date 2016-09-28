@@ -19,7 +19,8 @@ function getStyles (direction) {
   } else {
     return {
       display: 'block',
-      marginBottom: 15
+      marginBottom: 20,
+      fontWeight: 700
     };
   }
 }

@@ -10,24 +10,25 @@ function getStyles () {
   return {
     body: {
       margin: 0,
-      padding: '10px 0 0 15px',
-      color: '#fff'
+      padding: '20px',
+      color: '#757575'
     },
     li: {
       listStyle: 'none',
-      margin: '5px 0'
+      marginBottom: 6,
+      lineHeight: 1
+    },
+    lastLi: {
+      marginBottom: 0
     },
     label: {
-      textAlign: 'right',
       display: 'inline-block',
-      width: 60,
       fontSize: 12
     },
     span: {
       paddingLeft: 10,
       vertical: 'middle',
-      fontSize: 12,
-      fontWeight: 700
+      fontSize: 12
     }
   };
 }
@@ -37,9 +38,11 @@ export default class PhotoInfo extends Component {
     const {
       body,
       li,
+      lastLi,
       label,
       span
     } = getStyles();
+    const lastLiStyle = Object.assign({}, li, lastLi);
 
     return (
       <ul className="photo-info-body" style={ body }>
@@ -59,7 +62,7 @@ export default class PhotoInfo extends Component {
           <label style={ label }>拍摄日期:</label>
           <span style={ span }>2016-9-2 16:00:00</span>
         </li>
-        <li style={ li }>
+        <li style={ lastLiStyle }>
           <label style={ label }>尺寸:</label>
           <span style={ span }>300 * 300</span>
         </li>

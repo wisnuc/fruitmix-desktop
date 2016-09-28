@@ -11,6 +11,7 @@ export default function (state = [], action) {
         date: action.date,
         index: action.index
       });
+      console.log(cloneState, 'gg');
 
       return cloneState;
     case 'REMOVE_DRAG_IMAGEITEM':

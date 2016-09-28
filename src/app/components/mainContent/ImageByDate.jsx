@@ -8,27 +8,24 @@ import Checkbox from '../../React-Redux-UI/src/components/partials/Checkbox';
 
 function getStyles () {
   return {
-    listStyle: {
-      paddingTop: 10,
-    },
     itemStyle: {
-      border: '1px solid #a1a1a1',
-      borderRadius: 4,
       boxSizing: 'border-box',
       backgroundRepeat: 'no-repeat',
       backgroundPosition: '0 0',
       backgroundSize: 'cover',
-      backgroundColor: '#efefef',
+      backgroundColor: '#fff',
       float: 'left',
-      marginRight: '15px',
-      marginBottom: '15px',
       position: 'relative',
-      width: 106,
-      height: 106
+      width: 140,
+      height: 140,
+      marginRight: 10,
+      marginBottom: 10
     },
     selectStatusStyle: {
       borderRadius: '100%',
-      border: '1px solid #999',
+      borderWidth: 1,
+      borderStyle: 'solid',
+      borderColor: '#757575',
       boxSizing: 'border-box',
       display: 'none',
       position: 'absolute',
@@ -41,32 +38,30 @@ function getStyles () {
 }
 
 export default class ImageByDate extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
     this.overedHandle = this.overedHandle.bind(this);
     this.outedHandle = this.outedHandle.bind(this);
     this.selectedItemHandle = this.selectedItemHandle.bind(this);
     this.changedHandle = this.changedHandle.bind(this);
     this.lookBigPhotoHandle = this.lookBigPhotoHandle.bind(this);
+
     this.state = {
-      hasAllSelected: false
+      checked: false
     };
   }
 
-  overedHandle(e) {
-    const el = e.currentTarget;
-    el.classList.add('show');
+  overedHandle() {
+    this.el.classList.add('show');
   }
 
-  outedHandle(e) {
-    const el = e.currentTarget;
-
-    if (el.classList.contains('active')) {
+  outedHandle() {
+    if (this.el.classList.contains('active')) {
       return;
     }
 
-    el.classList.remove('show');
+    this.el.classList.remove('show');
   }
 
   selectedItemHandle(e) {
@@ -81,10 +76,22 @@ export default class ImageByDate extends Component {
 
   lookBigPhotoHandle(e) {
     const el = e.currentTarget;
+    const { date, detectImageItemActive } = this.props;
 
     if (el.classList.contains('active')) {
       el.classList.remove('active');
-      el.classList.remove('show');
+
+      if (!detectImageItemActive(date)) {
+        var b = Array
+         .prototype
+         .slice
+         .call(
+           document
+           .querySelectorAll('[data-date="'+ date +'"]'))
+         .forEach(el => {
+           el.classList.remove('show');
+         })
+      }
     } else {
       alert('查看大图');
     }
@@ -92,25 +99,19 @@ export default class ImageByDate extends Component {
 
   changedHandle(value, checked) {
     this.setState({
-      hasAllSelected: checked
+      checked
     });
   }
 
   render() {
-    const { date } = this.props;
-    let { itemStyle, listStyle, selectStatusStyle } = getStyles();
+    const { date, state } = this.props;
+    let { itemStyle, selectStatusStyle } = getStyles();
 
     return (
-      <div className="image-item">
-        <div className="image-item-header">
-          <Checkbox value={ date } text={ date } onChange={ this.changedHandle }></Checkbox>
-        </div>
-        <div className="image-list" style={ listStyle }>
-          <div className={ this.state.hasAllSelected ? "image-item active show" : "image-item" } style={ itemStyle }
-            onClick={ this.lookBigPhotoHandle } onMouseOver={ this.overedHandle } onMouseOut={ this.outedHandle }>
-            <i style={ selectStatusStyle } onClick={ this.selectedItemHandle }></i>
-          </div>
-        </div>
+      <div ref={ el => this.el = el } data-date={ date } className={ this.state.checked ? "image-item active show" : "image-item" } style={ itemStyle }
+        onClick={ this.lookBigPhotoHandle } onMouseOver={ this.overedHandle } onMouseOut={ this.outedHandle }>
+        <div className="selected-mask"></div>
+        <i style={ selectStatusStyle } onClick={ this.selectedItemHandle }></i>
       </div>
     );
   }
@@ -118,17 +119,17 @@ export default class ImageByDate extends Component {
 
 ImageByDate.propTypes = {
   /**
-    图片信息
-  **/
-  imageInfo: PropTypes.array.isRequired,
-
-  /**
-    日期
-  **/
-  date: PropTypes.string.isRequired,
-
-  /**
     选中项回调
   **/
-  onSelectedItem: PropTypes.func.isRequired
+  onSelectedItem: PropTypes.func.isRequired,
+
+  /**
+    图片加载状态
+  **/
+  status: PropTypes.string,
+
+  /**
+    检查当前这一组是否active
+  **/
+  detectImageItemActive: PropTypes.func
 };

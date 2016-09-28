@@ -27,7 +27,7 @@ import LeftNav from './LeftNav';
 import Content from './Content';
 import RightPanel from './RightPanel';
 import Multiple from '../mainContent/Multiple';
-import Users from './userDialog'
+import Users from './userDialog';
 
 import svg from '../../utils/SVGIcon';
 
