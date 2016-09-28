@@ -59,9 +59,15 @@ const loginState = (state = defaultState, action) => {
 			if (action.open == false) {
 				imgObj = {status:'notReady',path:null,open: false};	
 			}else {
-				
+				imgObj = {status:'notReady',path:null,open: true}
 			}
-			return Object.assign({},state,{currentMediaImage:currentMediaImage});
+			return Object.assign({},state,{currentMediaImage:imgObj});
+		case 'SET_MEDIA_IMAGE':
+
+			state.currentMediaImage.status = 'ready'
+			state.currentMediaImage.path = action.item.path
+			return state
+
 		default:
 			return state
 	}

@@ -4,12 +4,14 @@ var login = require('./login')
 var setting = require('./setting')
 var file = require('./file')
 var media = require('./media')
+var share = require('./share')
 
 const reducer = combineReducers({
 	login,
 	setting,
 	file,
-	media
+	media,
+	share
 })
 
 module.exports = reducer

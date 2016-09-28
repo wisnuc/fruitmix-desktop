@@ -188,7 +188,7 @@ body{
 	background: transparent!important;
 }
 .content-container>div,.content-container>div>div{
-	height: 100%;
+	height: -webkit-calc(100% - 38px);
 }
 .content-container.content-has-left-padding .content {
 	padding-left:238px;

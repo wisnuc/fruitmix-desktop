@@ -273,13 +273,13 @@ var actions = {
 		}
 	},
 
-	setShareChildren(shareChildren,sharePath) {
-		return {
-			type: 'SET_SHARE_CHILDREN',
-			shareChildren: shareChildren,
-			sharePath:sharePath
-		}
-	},
+	// setShareChildren(shareChildren,sharePath) {
+	// 	return {
+	// 		type: 'SET_SHARE_CHILDREN',
+	// 		shareChildren: shareChildren,
+	// 		sharePath:sharePath
+	// 	}
+	// },
 
 	setMediaSize(reset) {
 		return {
@@ -293,12 +293,12 @@ var actions = {
 		}
 	},
 
-	setFilesSharedByMe(files) {
-		return {
-			type: 'FILES_SHARED_BY_ME',
-			files:files
-		}
-	},
+	// setFilesSharedByMe(files) {
+	// 	return {
+	// 		type: 'FILES_SHARED_BY_ME',
+	// 		files:files
+	// 	}
+	// },
 
 	adapter(data) {
 		return {

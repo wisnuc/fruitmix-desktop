@@ -5,6 +5,7 @@
 import React, { Component, PropTypes } from 'react';
 
 import Checkbox from '../../React-Redux-UI/src/components/partials/Checkbox';
+import Action from '../../actions/action'
 
 function getStyles () {
   return {
@@ -82,7 +83,7 @@ export default class ImageByDate extends Component {
       el.classList.remove('active');
 
       if (!detectImageItemActive(date)) {
-        var b = Array
+          Array
          .prototype
          .slice
          .call(
@@ -93,7 +94,8 @@ export default class ImageByDate extends Component {
          })
       }
     } else {
-      alert('查看大图');
+      this.props.dispatch(Action.toggleMedia(true))
+      ipc.send('getMediaImage',this.props.hash);
     }
   }
 
