@@ -1,7 +1,7 @@
 const defaultShare = {
 	sharePath:[],
 	shareChildren: [],
-	filesSharedWithMe: []
+	filesSharedByMe: []
 }
 
 const directory = (state = defaultShare,action)=> {

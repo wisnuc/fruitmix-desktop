@@ -32,7 +32,7 @@ class PopMenu extends Component {
 					<Menu className='menu-list' desktop={true} autoWidth={false}>
 						<MenuItem primaryText='详细信息' onTouchTap={this.detail.bind(this)}></MenuItem>
 						<MenuItem primaryText='重命名' onClick={this.rename.bind(this)}></MenuItem>
-						<MenuItem primaryText='移至' onTouchTap={this.moveto.bind(this)}></MenuItem>
+						{/*<MenuItem primaryText='移至' onTouchTap={this.moveto.bind(this)}></MenuItem>*/}
 						<MenuItem primaryText='分享' onTouchTap={this.share.bind(this)}></MenuItem>
 						<MenuItem primaryText='删除' onTouchTap={this.remove.bind(this)}></MenuItem>
 						<MenuItem primaryText='下载' onClick={this.dowload.bind(this)}></MenuItem> 

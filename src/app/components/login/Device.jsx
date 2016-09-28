@@ -79,7 +79,7 @@ class Device extends React.Component {
 		let allOk = this.props.item.fruitmix=="INITIALIZED"
 		let text = allOk?'':'(未配置)';
 		let del = null;
-		if (this.props.item.custom) {
+		if (this.props.item.isCustom) {
 			allOk = true;
 			text = null;
 			del = <span className='delete-server' onClick={this.delServer.bind(this)}>删除</span>

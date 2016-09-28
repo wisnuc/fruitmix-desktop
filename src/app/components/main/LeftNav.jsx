@@ -86,14 +86,14 @@ class leftNav extends Component {
 						<div className="nav-item-body photo-item-body">
 							{
 								this.props.state.navigation.nav.map((item, index) => {
-									if (item.type == 'leftNav' && index >= 4 && index<6) {
+									if (item.type == 'leftNav' && index >= 4 && index<5) {
 										return (
 											<MenuItem
 											  className={ item.selected ? "list-selected left-menu-list" : 'left-menu-list' }
 												primaryText={ item.name }
 												key={ item.name }
 												desktop={ true }
-												onTouchTap={ this.itemSelect.bind(this,item.name,index) }
+												onTouchTap={this.itemSelect.bind(this,item.name,index)}
 												innerDivStyle={ item.selected ? selectedStyle : listStyle }
 												leftIcon={ item.icon ? svg[item.icon]() : null }>
 											</MenuItem>
@@ -109,7 +109,7 @@ class leftNav extends Component {
 						<div className="nav-item-body system-item-body">
 							{
 								this.props.state.navigation.nav.map((item, index) => {
-									if (item.type == 'leftNav' && index >= 6) {
+									if (item.type == 'leftNav' && index >= 5) {
 										return (
 											<MenuItem
 											  className={ item.selected ? "list-selected left-menu-list" : 'left-menu-list' }

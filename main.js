@@ -17,6 +17,7 @@ global.crypto = require('crypto')
 global.mainWindow = null
 global.testWindow = null
 global.fruitmixWindow = null
+global.appifiWindow = null
 //server
 global.server = ''
 //user
@@ -27,9 +28,10 @@ global.rootNode = null
 global.tree = []
 global.map = new Map()
 //share
-global.shareFiles = []
-global.shareTree = []
-global.shareMap = new Map()
+// global.shareFiles = []
+// global.shareTree = []
+// global.shareMap = new Map()
+global.shareRoot = []
 global.shareChildren = []
 global.sharePath = []
 //directory
@@ -183,11 +185,11 @@ ipcMain.on('setServeIp',(err,ip, isCustom, isStorage)=>{
 	c('set ip : ')
 	dispatch(action.setDeviceUsedRecently(ip))
 	server = 'http://' + ip + ':3721'
-	if (isCustom) {
-		c('??')
-		c(ip)
-		return
-	}
+	// if (isCustom) {
+	// 	c('??')
+	// 	c(ip)
+	// 	return
+	// }
 	if ( !isStorage) {
 		return
 	}
@@ -198,9 +200,7 @@ ipcMain.on('setServeIp',(err,ip, isCustom, isStorage)=>{
 		let d = JSON.parse(data)
 		d.ip = ip
 		if (isCustom) {
-			d.customDevice.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true})
-			// device.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true})
-			// dispatch(action.setDevice(device))
+			d.customDevice.push({address:ip,host:ip,appifi:{},name:ip,active:false,checked:true,isCustom:true})
 		}
 		let j = JSON.stringify(d)
 		fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
@@ -209,15 +209,17 @@ ipcMain.on('setServeIp',(err,ip, isCustom, isStorage)=>{
 	})
 })
 ipcMain.on('delServer',(err,i)=>{
-	let index = device.findIndex(item=>{
-		return item.addresses[0] == i.addresses[0]
-	})
-	device.splice(index,1)
+	// let index = device.findIndex(item=>{
+	// 	return item.addresses[0] == i.addresses[0]
+	// })
+	// device.splice(index,1)
+
+	dispatch(action.deleteServer(i))
 	fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
 		let d = JSON.parse(data) 
 		c(d)
 		let ind = d.customDevice.findIndex(item=>{
-			return item.addresses[0] == i.addresses[0]
+			return item.address == i.address
 		})
 		if (ind != -1) {
 			d.customDevice.splice(ind,1)
@@ -227,8 +229,8 @@ ipcMain.on('delServer',(err,i)=>{
 
 		})
 	})
-	// mainWindow.webContents.send('device',device)
-	dispatch(action.setDevice(device))
+
+	// dispatch(action.setDevice(device))
 })
 //create fruitmix
 ipcMain.on('createFruitmix',(err,item)=>{
@@ -247,6 +249,23 @@ ipcMain.on('createFruitmix',(err,item)=>{
 		event.preventDefault()
 	})
 	fruitmixWindow.loadURL('http://'+item.address+':3000')
+})
+
+ipcMain.on('openAppifi', (err)=>{
+	fruitmixWindow = new BrowserWindow({
+		frame: true,
+		height: 768,
+		resizable: true,
+		width: 1366,
+		minWidth:1024,
+		minHeight:768,
+		title:'WISNUC'
+	})
+	//window title
+	fruitmixWindow.on('page-title-updated',function(event){
+		event.preventDefault()
+	})
+	fruitmixWindow.loadURL(server.substring(0,server.length-4)+3000)
 })
 //get all user information --------------------------------------
 ipcMain.on('login',function(err,username,password){
@@ -375,21 +394,26 @@ function getFile(uuid) {
 	return file
 }
 
-ipcMain.on('getFilesSharedWithMe',()=>{
-	fileApi.getFilesSharedByMe().then(files=>{
-		c('我分享的文件获取成功')
-		c(files)
-		dispatch(action.setFilesSharedWithMe(files));
+ipcMain.on('getFilesSharedToMe',()=>{
+	fileApi.getFilesSharedWithMe().then(files=>{
+		c('分享给我的文件 获取成功')
+		c(files.length + '个文件')
+		shareRoot = files
+		shareChildren = files
+		dispatch(action.setShareChildren(shareChildren,sharePath))
 	}).catch(err=>{
-		c('我分享的文件获取失败')
+		c('分享给我的文件 获取失败')
 		c(err)
 	})
 })
 
 ipcMain.on('getFilesSharedToOthers',()=>{
-	fileApi.getFilesSharedByMe().then(item=>{
-		//??
-		dispatch(action.setFilesSharedByMe(files));
+	fileApi.getFilesSharedWithOthers().then(files=>{
+		c('我分享的文件 获取成功')
+		c(files.length + '个文件')
+		dispatch(action.setFilesSharedWithMe(files))
+	}).catch(err=>{
+		c('我分享的文件 获取失败')
 	})
 })
 
@@ -459,6 +483,7 @@ ipcMain.on('create-new-user',function(err, u, p){
 	})
 })
 ipcMain.on('userInit',(err,s,u,p,i)=>{
+	c(' ')
 	loginApi.userInit(s,u,p).then( () => {
 		c('管理员注册成功')
 		mainWindow.webContents.send('message','管理员注册成功')
@@ -502,6 +527,7 @@ ipcMain.on('deleteUser',(err,uuid)=>{
 })
 //share
 ipcMain.on('share',function(err,files,users){
+	c(' ')
 	var index = 0
 
 	function doShare(err) {
@@ -710,21 +736,25 @@ ipcMain.on('changeDownloadPath', e=>{
 
 //getMediaData
 ipcMain.on('getMediaData',(err)=>{
+	c(' ')
 	mediaApi.getMediaData().then((data)=>{
 		data.forEach(item=>{
 			if (item == null) {return}
 			let obj = Object.assign({},item,{status:'notReady',failed:0})
 			media.push(obj)	
-			mediaMap.set(item.hash,item)
+			mediaMap.set(item.digest,item)
 		})
-		// mainWindow.webContents.send('mediaFinish',media)
-		dispatch(action.setMedia(media))
+		c('media 列表获取成功')
+		mainWindow.webContents.send('mediaFinish',media)
+		// dispatch(action.setMedia(media))
 	}).catch(err=>{
+		c('media 列表获取失败')
 		console.log(err)
 	})
 })
 //getMediaThumb
 ipcMain.on('getThumb',(err,item)=>{
+	c(item)
 	thumbQueue.push(item)
 	dealThumbQueue()
 })
@@ -747,20 +777,20 @@ function dealThumbQueue() {
 	}
 }
 function isThumbExist(item) {
-	c(item.hash)
-	fs.readFile(path.join(mediaPath,item.hash+'thumb'),(err,data)=>{
+	c(item.digest)
+	fs.readFile(path.join(mediaPath,item.digest+'thumb'),(err,data)=>{
 		if (err) {
 			downloadMedia(item).then((data)=>{
 				sendThumb(item)
 				console.log(thumbQueue.length+' length')
 			}).catch(err=>{
-				c(item.hash+' failed')
+				c(item.digest+' failed')
 				item.failed++
-				let index = thumbIng.findIndex(i=>i.hash == item.hash)
+				let index = thumbIng.findIndex(i=>i.digest == item.digest)
 				let t = thumbIng[index]
 				thumbIng.splice(index,1)
 				if (item.failed <5) {
-					fs.readFile(path.join(mediaPath,item.hash+'thumb'),(err,data)=>{
+					fs.readFile(path.join(mediaPath,item.digest+'thumb'),(err,data)=>{
 						if (err) {
 
 						}else {
@@ -782,10 +812,10 @@ function isThumbExist(item) {
 	})
 
 	function sendThumb(item){
-		c(item.hash+' is over')
-		let index = thumbIng.findIndex(i=>i.hash == item.hash)
+		c(item.digest+' is over')
+		let index = thumbIng.findIndex(i=>i.digest == item.digest)
 		thumbIng.splice(index,1)
-		item.path = path.join(mediaPath,item.hash+'thumb')
+		item.path = path.join(mediaPath,item.digest+'thumb')
 		mainWindow.webContents.send('getThumbSuccess',item)
 		setTimeout(dealThumbQueue,200)
 	}
@@ -797,7 +827,7 @@ function downloadMedia(item) {
 		c('100 '+height)
 		var options = {
 			method: 'GET',
-			url: server+'/media/'+item.hash+'?type=thumb&width=100&height='+height,
+			url: server+'/media/'+item.digest+'/thumbnail?width=100',
 			headers: {
 				Authorization: user.type+' '+user.token
 			}
@@ -808,13 +838,15 @@ function downloadMedia(item) {
 				console.log('res')
 				resolve(body)
 			}else {
-				fs.unlink(path.join(mediaPath,item.hash+'thumb'), (err,data)=>{
+				c('err')
+				c(res.body)
+				fs.unlink(path.join(mediaPath,item.digest+'thumb'), (err,data)=>{
 					reject(err)	
 				})
 				
 			}
 		}
-			var stream = fs.createWriteStream(path.join(mediaPath,item.hash+'thumb'))
+			var stream = fs.createWriteStream(path.join(mediaPath,item.digest+'thumb'))
 
 			request(options,callback).pipe(stream)
 		})
@@ -849,6 +881,7 @@ ipcMain.on('getMoveData', () => {
 		})
 		mainWindow.webContents.send('setMoveData',tempArr)
 	}).catch(err => {
+		c(err)
 		c('get move data error !')
 	})
 })
@@ -859,6 +892,8 @@ function getMoveDataApi() {
 				if (!err && res.statusCode == 200) {
 					resolve(eval(body))
 				}else {
+					c(res.body)
+					c(err)
 					reject(err)
 				}
 			})

@@ -29,10 +29,17 @@ const loginState = (state = defaultState, action) => {
 			if (i != -1) {
 				return Object.assign({},state,{selectIndex:i})
 			}else {
-				return Object.assign({},state,{device:state.device.concat([{address:action.ip,ip:action.ip,host:action.ip,friutmix:"INITIALIZED",custom:true}]),selectIndex: state.device.length})
+				return Object.assign({},state,{device:state.device.concat([{address:action.ip,ip:action.ip,host:action.ip,friutmix:"INITIALIZED",isCustom:true}]),selectIndex: state.device.length})
 			}
 			return state
-
+		case 'DELETE_SERVER':
+			var IPIndex = state.device.findIndex(item => {
+				return item.address == action.item.address
+			})
+			if (IPIndex != -1) {
+				state.device.splice(IPIndex,1)
+			}
+			return state
 		default:
 			return state
 	}

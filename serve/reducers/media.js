@@ -2,8 +2,7 @@
 const defaultState = {
 	data: [],
 	status: 'busy',
-	map: null,
-	currentMediaImage:{status:'notReady',path:null,open: false},
+	map: null
 }
 
 const loginState = (state = defaultState, action) => {
@@ -18,18 +17,7 @@ const loginState = (state = defaultState, action) => {
 			var item = state.map.get(action.data.hash);
 			item.status = action.status;
 			item.path = action.data.path;
-			return Object.assign({},state);
-		case 'TOGGLE_MEDIA':
-			let currentMediaImage = state.currentMediaImage;
-			state.currentMediaImage.open = action.open;
-
-			if (action.open == false) {
-				currentMediaImage = {status:'notReady',path:null,open: false};	
-			}
-			return Object.assign({},state,{currentMediaImage:currentMediaImage});
-		case 'SET_MEDIA_IMAGE':
-			let image = Object.assign({},action.item,{status:'ready',path:action.item.path,open:true});
-			return Object.assign({},state,{currentMediaImage:image});
+			return Object.assign({},state)
 		default:
 			return state
 	}

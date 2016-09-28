@@ -49,7 +49,8 @@ class Main extends Component {
 		ipc.send('getRootData')
 		ipc.send('getMediaData')
 		ipc.send('getMoveData')
-		ipc.send('getFilesSharedWithMe')
+		ipc.send('getFilesSharedToMe')
+		ipc.send('getFilesSharedToOthers')
 
 		// this.props.dispatch(Action.filesLoading());
 
@@ -99,9 +100,9 @@ class Main extends Component {
 			this.props.dispatch(Action.setTree(treeChildren));
 		});
 
-		// ipc.on('mediaFinish',(err,media)=>{
-		// 	this.props.dispatch(Action.setMedia(media));
-		// });
+		ipc.on('mediaFinish',(err,media)=>{
+			this.props.dispatch(Action.setMedia(media));
+		});
 
 		ipc.on('getThumbSuccess',(err,item)=>{
 			this.props.dispatch(Action.setThumb(item,'ready'));
@@ -169,9 +170,9 @@ class Main extends Component {
 			];
 
 		let m = null;
-		// if (this.props.state.media.currentMediaImage.open) {
-		// 	m = <Mask dispatch={this.props.dispatch} state={this.props.state}/>
-		// }
+		if (this.props.state.view.currentMediaImage.open) {
+			m = <Mask dispatch={this.props.dispatch} state={this.props.state}/>
+		}
 		return (<CSS opts={['app',true,true,true,500,5000,5000]} style={{height:'100%'}}>
 			<div className="main" key='main' onMouseMove={this.mouseMove.bind(this)} onMouseUp={this.mouseUp.bind(this)} onClick={this.triggerClick.bind(this)}>
 				{/*Multiple select frame*/}
@@ -192,6 +193,7 @@ class Main extends Component {
 					onLeftIconButtonTouchTap={this.leftNavClick.bind(this)}
 				>
 				<div className='app-bar-username'>{this.props.state.login.obj.username}</div>
+				<div className='app-bar-appifi' onClick={this.openAppifi.bind(this)}></div>
 				</AppBar>
 				{/*Left Nav*/}
 				<Drawer width={220} open={this.props.state.navigation.menu} className='left-nav'>
@@ -313,6 +315,10 @@ class Main extends Component {
 		this.setState({
 			userDialog: !this.state.userDialog
 		});
+	}
+
+	openAppifi() {
+		ipc.send('openAppifi')
 	}
 }
 

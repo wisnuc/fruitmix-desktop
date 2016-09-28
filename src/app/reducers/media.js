@@ -10,11 +10,11 @@ const Media = (state=defaultState,action)=>{
 		case 'SET_MEDIA':
 			var m = new Map();
 			action.data.forEach(item=>{
-				m.set(item.hash,item);
-			});
+				m.set(item.digest,item);
+			})
 			return Object.assign({},state,{data:action.data,status:'ready',map:m});
 		case 'SET_THUMB':
-			var item = state.map.get(action.data.hash);
+			var item = state.map.get(action.data.digest);
 			item.status = action.status;
 			item.path = action.data.path;
 			return Object.assign({},state);
