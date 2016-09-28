@@ -22,12 +22,14 @@ const loginState = (state = defaultState, action) => {
 		case 'SET_DEVICE':
 			return Object.assign({},state,{device: action.device});
 		case 'SET_DEVICE_USED_RECENTLY':
+			c('ip is : ' + action.ip)
 			var i = state.device.findIndex(item=>{
 				return item.address == action.ip
 			});
 			if (i != -1) {
-				c('index != -1 : ' + i)
 				return Object.assign({},state,{selectIndex:i})
+			}else {
+				return Object.assign({},state,{device:state.device.concat([{ip:action.ip,host:action.ip,friutmix:"INITIALIZED",custom:true}]),selectIndex: state.device.length})
 			}
 			return state
 

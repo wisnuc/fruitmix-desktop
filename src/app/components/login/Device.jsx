@@ -77,10 +77,10 @@ class Device extends React.Component {
 				</div>
 				);
 		}
-		let allOk = this.props.item.fruitmix&&this.props.item.admin;
+		let allOk = this.props.item.fruitmix=="INITIALIZED"
 		let text = allOk?'':'(未配置)';
 		let del = null;
-		if (this.props.item.isCustom) {
+		if (this.props.item.custom) {
 			allOk = true;
 			text = null;
 			del = <span className='delete-server' onClick={this.delServer.bind(this)}>删除</span>
@@ -169,7 +169,7 @@ class Device extends React.Component {
 	}
 
 	register() {
-		let s = 'http://'+this.props.item.address;
+		let s = 'http://'+this.props.item.address+':3721';
 		let username = this.refs.username.input.value;
 		let password = this.refs.password.input.value;
 		ipc.send('userInit',s,username,password,this.props.item);

@@ -77,7 +77,7 @@ var findDevice = require('./lib/mdns')
 
 //require store
 global.action = require('./serve/action/action')
-const store = require('./serve/store/store')
+global.store = require('./serve/store/store')
 
 // global.dispatch = store.dispatch
 global.dispatch = (action) => {
@@ -116,7 +116,7 @@ app.on('ready', function() {
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	})
-	// mainWindow.webContents.openDevTools()
+	mainWindow.webContents.openDevTools()
 	mainWindow.loadURL('file://' + __dirname + '/build/index.html')
 	//create folder
 	fs.exists(mediaPath,exists=>{
@@ -179,30 +179,29 @@ ipcMain.on('getDeviceUsedRecently',err=>{
 	deviceApi.getRecord()
 })
 //setIp
-ipcMain.on('setServeIp',(err,ip, isCustom)=>{
-	c('set ip !!')
+ipcMain.on('setServeIp',(err,ip, isCustom, isStorage)=>{
+	c('set ip : ')
 	dispatch(action.setDeviceUsedRecently(ip))
-	// let index = device.findIndex(item=>{
-	// 	return item.addresses == ip
-	// })
 	server = 'http://' + ip + ':3721'
-	c('set serve success')
-	// if (index != -1) {
-	// 	server = 'http://' + ip + ':3721'
-	// }else {
-	// 	server = 'http://' + ip + ':3721'
-	// }
+	if (isCustom) {
+		c('??')
+		c(ip)
+		return
+	}
+	if ( !isStorage) {
+		return
+	}
 	fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
 		if (err) {
 			return
 		}
 		let d = JSON.parse(data)
 		d.ip = ip
-		if (isCustom) {
-			d.customDevice.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true})
-			device.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true})
-			dispatch(action.setDevice(device))
-		}
+		// if (isCustom) {
+		// 	d.customDevice.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true})
+		// 	device.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true})
+		// 	dispatch(action.setDevice(device))
+		// }
 		let j = JSON.stringify(d)
 		fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
 
@@ -231,10 +230,6 @@ ipcMain.on('delServer',(err,i)=>{
 	// mainWindow.webContents.send('device',device)
 	dispatch(action.setDevice(device))
 })
-//find fruitmix
-// ipcMain.on('findFruitmix',(e,item)=>{
-// 	browser.discover()
-// })
 //create fruitmix
 ipcMain.on('createFruitmix',(err,item)=>{
 	c(item.address[0]+':'+item.port)
@@ -480,17 +475,11 @@ function createNewUser(username,password,email) {
 }
 ipcMain.on('userInit',(err,s,u,p,i)=>{
 	loginApi.userInit(s,u,p).then( () => {
-		c('success')
-		let index = device.findIndex(item=>{
-				return item.addresses[0] == i.addresses[0]
-			})
-		if (index != -1) {
-				device[index].admin = true
-				device[index].addresses[0] += ':3721'
-				dispatch(action.setDevice(device))
-			}
+		c('管理员注册成功')
+		mainWindow.webContents.send('message','管理员注册成功')
 	}).catch(err => {
-		c('err')
+		c('管理员注册失败')
+		mainWindow.webContents.send('message','管理员注册失败')
 	})
 	return
 	var options = {

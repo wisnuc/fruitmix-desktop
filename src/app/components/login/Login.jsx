@@ -36,20 +36,14 @@ class Index extends React.Component {
 
 		setTimeout(()=>{
 			ipc.send('getDeviceUsedRecently')
-		},2000)
-
-		// ipc.send('findFruitmix')
-
-		// this.find = setInterval(function(){
-		// 	ipc.send('findFruitmix')
-		// },500)
+		},1500)
 
 		setTimeout(()=>{
-				if (this.props.state.login.selectIndex == 0) {
-					c.log('auto select')
-					this.selectDevice.apply(this,[null,0])
+				if (this.props.state.login.selectIndex == 0 && this.props.state.login.device.length != 0) {
+					this.selectDevice.apply(this,[null,0,false])
 				}
 		},1000)
+
 		ipc.on('message',(err,message,code)=>{
 			this.props.dispatch(Login.setSnack(message,true))
 			// if (code == 0 ) {
@@ -138,7 +132,7 @@ class Index extends React.Component {
 					</div>
 					<div className='add-device-button' style={this.props.state.login.addDevice?{display:'none'}:{}}>
 						<span  onClick={this.toggleDevice.bind(this)}>返回</span>
-						{/*<span onClick={this.toggleAddDevice.bind(this)}>添加设备</span>*/}
+						<span onClick={this.toggleAddDevice.bind(this)}>添加设备</span>
 					</div>
 				</div>
 			)
@@ -177,10 +171,10 @@ class Index extends React.Component {
 		this.props.dispatch(Action.toggleAddDevice())
 	}
 
-	selectDevice(e,index) {
-		c.log('selec ......')
+	selectDevice(e,index, isStorage) {
+		let s = isStorage==false?false:true
 		let ip = this.props.state.login.device[index].address
-		ipc.send('setServeIp',ip,false)
+		ipc.send('setServeIp',ip,false, isStorage)
 	}
 
 	getValue() {
@@ -188,8 +182,12 @@ class Index extends React.Component {
 	}
 
 	getTitle(item) {
+		if (item.custom) {
+			return item.host
+		}
 		let titleArr = item.host.split('-')
-		let title = titleArr[1]
+		let title = titleArr[2]
+		title = title.split('.')[0]
 
 		return item.fruitmix=="INITIALIZED"?title:title+"(未配置)"
 	}
