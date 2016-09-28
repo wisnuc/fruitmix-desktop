@@ -31,7 +31,7 @@ class AllFiles extends Component {
 				marginBottom: 16,
 			},
 		};
-		let shareUserList = this.props.state.login.obj.allUser.map((item,index)=>{
+		let shareUserList = this.props.state.login.obj.users.map((item,index)=>{
 						if (item.username == this.props.state.login.obj.username) {
 							return
 						}
@@ -221,28 +221,30 @@ class AllFiles extends Component {
 	}
 	//share files or folders
 	share() {
-		let files = [];
-		let users = [];
-		this.props.state.data.children.forEach((item,index)=>{
+		let files = []
+		let users = []
+		this.props.state.file.current.children.forEach(item => {
 			if (item.checked) {
-				files.push(item);
+				files.push(item.uuid)
 			}
-		});
-		this.props.state.login.obj.allUser.forEach((item,index)=>{
+		})
+		this.props.state.login.obj.users.forEach((item,index)=>{
 			if (item.checked) {
 				users.push(item.uuid);
 			}
-		});
-		this.props.dispatch(Action.toggleShare(false));
-		this.props.dispatch(Action.cancelUserCheck());
+		})
+
 		if (users.length == 0) {
 			return
 		}
+		this.props.dispatch(Action.toggleShare(false));
+		this.props.dispatch(Action.cancelUserCheck());
+		
 		ipc.send('share',files,users);
 	}
 	// select users be shared
-	checkUser(uuid,obj,b) {
-		this.props.dispatch(Action.checkUser(uuid,b));
+	checkUser(uuid) {
+		this.props.dispatch(Action.checkUser(uuid))
 	}
 	//scrollEvent 
 	scrollEvent() {

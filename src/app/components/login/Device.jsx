@@ -24,29 +24,29 @@ class Device extends React.Component {
 	constructor(props) {
         super(props);
         let index = 0;
-        if (this.props.item.fruitmix == false) {
-    		index = 0;
-    	}else if(this.props.item.fruitmix == true && this.props.item.admin == false) {
+        
+    	if(this.props.item.fruitmix == 'INITIAL' ) {
     		index = 1;
-    	}else if (this.props.item.fruitmix == true && this.props.item.admin == true) {
+    	}else if (this.props.item.fruitmix == 'INITIALIZED') {
     		index = 2;
+    	}else{
+    		index = 0;
     	}
         this.state = { show: false, stepIndex:index };
     }
 
     componentWillReceiveProps(nextProps) {
-    	c.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-    	if (nextProps.item.fruitmix == false) {
+    	if (nextProps.item.fruitmix == 'INITIALIZED') {
     		this.setState({
-    			stepIndex:0
+    			stepIndex:2
     		});
-    	}else if(nextProps.item.fruitmix == true && nextProps.item.admin == false) {
+    	}else if(nextProps.item.fruitmix == 'INITIAL') {
     		this.setState({
     			stepIndex:1
     		});
-    	}else if (nextProps.item.fruitmix == true && nextProps.item.admin == true) {
+    	}else {
     		this.setState({
-    			stepIndex:2
+    			stepIndex:0
     		});
     	}
     }
@@ -72,23 +72,19 @@ class Device extends React.Component {
         			
         			<div>
         				{this.getStepContent(stepIndex)}
-        				{/*
-						<FlatButton label="上一步" disabled={stepIndex === 0} onTouchTap={this.handlePrev.bind(this)} style={{marginRight: 12}}/>
-            			<RaisedButton label="下一步" disabled={stepIndex === 2} primary={true} onTouchTap={this.handleNext.bind(this)}/>
-        				*/}
         			</div>
 				</div>
 				);
 		}
-		let allOk = this.props.item.fruitmix&&this.props.item.admin;
+		let allOk = this.props.item.fruitmix=="INITIALIZED"
 		let text = allOk?'':'(未配置)';
 		let del = null;
-		if (this.props.item.isCustom) {
+		if (this.props.item.custom) {
 			allOk = true;
 			text = null;
 			del = <span className='delete-server' onClick={this.delServer.bind(this)}>删除</span>
 		}else {
-			del = <span>{this.props.item.addresses[0]}</span>
+			del = <span>{this.props.item.address}</span>
 		}
 		return (
 			<div>
@@ -127,9 +123,8 @@ class Device extends React.Component {
 							<div>FruitMix状态 :{item.fruitmix?' 启动':' 未启动'}</div>
 						</div>
 						
-						<FlatButton className='fruitmix-button' label="启动FruitMix" disabled={item.fruitmix} onTouchTap={this.createFruitmix.bind(this)}/>
-						{/*<FlatButton label="刷新状态" onTouchTap={this.refreshFruitmix.bind(this)}/>*/}
-						{/*<RaisedButton label="下一步" disabled={stepIndex === 2} primary={true} onTouchTap={this.handleNext.bind(this)}/>*/}
+						<FlatButton className='fruitmix-button' label="启动FruitMix" onTouchTap={this.createFruitmix.bind(this)}/>
+						
 					</div>
 					);
 			case 1:
@@ -140,45 +135,26 @@ class Device extends React.Component {
 					{!admin && <TextField underlineStyle={{borderColor:'#999'}} underlineFocusStyle={styles.underlineStyle} hintStyle={{color:'#999'}} onKeyDown={this.keyDown.bind(this)} ref='password' stype={{marginBottom: 10}} hintText="密码" type="password" fullWidth={false} />}
 					{!admin && <FlatButton style={{marginTop: 10}} label='注册' onTouchTap={this.register.bind(this)} />}
 					{admin && <div style={{marginBottom:'15px'}}>管理员帐号已存在</div>}
-					{/*<RaisedButton label="下一步" disabled={stepIndex === 2} primary={true} onTouchTap={this.handleNext.bind(this)}/>*/}
 					</div>
 					);
 			case 2:
 				return (
 					<div>
 						<div>配置成功，请返回登录</div>
-						<div style={{marginBottom:'15px'}}>设备IP : {item.addresses[0]}</div>
+						<div style={{marginBottom:'15px'}}>设备IP : {item.address}</div>
 					</div>
 					);
 		}
 	}
 
 	componentDidMount() {
-		ipc.send('getUserList',this.props.item);
+
 	}
 
 	toggleDetail() {
 		this.setState({
 			show: !this.state.show
 		});
-	}
-
-	// handlePrev() {
-	// 	let stepIndex = this.state.stepIndex;
-	//     if (stepIndex > 0) {
-	//       	this.setState({stepIndex: stepIndex - 1});
-	//     }
-	// }
-
-	// handleNext() {
-	//     let stepIndex = this.state.stepIndex;
-	//     if (stepIndex < 2) {
-	//    		this.setState({stepIndex: stepIndex + 1});
-	//     }
-	// }
-
-	refreshFruitmix() {
-		ipc.send('findFruitmix',this.props.item);
 	}
 
 	createFruitmix() {
@@ -192,7 +168,7 @@ class Device extends React.Component {
 	}
 
 	register() {
-		let s = 'http://'+this.props.item.addresses;
+		let s = 'http://'+this.props.item.address+':3721';
 		let username = this.refs.username.input.value;
 		let password = this.refs.password.input.value;
 		ipc.send('userInit',s,username,password,this.props.item);

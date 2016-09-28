@@ -3,7 +3,7 @@ const defaultState = {
 	state: 'READY', // READY, BUSY, REJECTED, TIMEOUT, ERROR, LOGGEDIN
   	obj: {},
   	device: [],
-  	deviceUsedRecently: ''   
+  	selectIndex : 0
 }
 
 const loginState = (state = defaultState, action) => {
@@ -15,20 +15,23 @@ const loginState = (state = defaultState, action) => {
 		case 'REJECTED':
 			return Object.assign({}, state, {state: 'REJECTED'})
 		case 'LOGIN_OFF':
-			return Object.assign({}, state, defaultState)
+			return Object.assign({}, state, {state: 'READY',obj: {}})
 		case 'LOGINOUT':
 			return Object.assign({}, state, {state: 'READY'})
 
 		case 'SET_DEVICE':
 			return Object.assign({},state,{device: action.device});
 		case 'SET_DEVICE_USED_RECENTLY':
+			c('ip is : ' + action.ip)
 			var i = state.device.findIndex(item=>{
-				return item.addresses[0] == action.ip
+				return item.address == action.ip
 			});
 			if (i != -1) {
-				state.device[i].active = true;
+				return Object.assign({},state,{selectIndex:i})
+			}else {
+				return Object.assign({},state,{device:state.device.concat([{address:action.ip,ip:action.ip,host:action.ip,friutmix:"INITIALIZED",custom:true}]),selectIndex: state.device.length})
 			}
-			return Object.assign({},state,{deviceUsedRecently:action.ip})
+			return state
 
 		default:
 			return state

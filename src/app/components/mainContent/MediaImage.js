@@ -31,6 +31,7 @@ class Media extends Component {
 		if (this.props.item.status == 'ready') {
 			return	
 		}
+		return;
 		ipc.send('getThumb',this.props.item);
 	}
 

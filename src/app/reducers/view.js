@@ -7,6 +7,8 @@ const defaultState = {
 	detail:[],
 	move: {open:false,x:0,y:0,data:[]},
 	menu:{show:false,obj:{}},
+	mediaSize: 30,
+	currentMediaImage:{status:'notReady',path:null,open: false},
 }
 
 const loginState = (state = defaultState, action) => {
@@ -42,6 +44,24 @@ const loginState = (state = defaultState, action) => {
 				//close menu
 				return Object.assign({},state,{menu:{show:false,obj:{}}});
 			}
+		//media
+		case 'SET_MEDIA_SIZE':
+			var s
+			if (action.reset) {
+				s = 30
+			}else {
+				s = state.mediaSize+30
+			}
+			return Object.assign({},state,{mediaSize:s});
+
+		case 'TOGGLE_MEDIA':
+			let imgObj = {}
+			if (action.open == false) {
+				imgObj = {status:'notReady',path:null,open: false};	
+			}else {
+				
+			}
+			return Object.assign({},state,{currentMediaImage:currentMediaImage});
 		default:
 			return state
 	}

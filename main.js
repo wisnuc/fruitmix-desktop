@@ -13,6 +13,7 @@ global.path = require('path')
 global._ = require('lodash')
 global.mdns = require('mdns-js')
 global.crypto = require('crypto')
+
 global.mainWindow = null
 global.testWindow = null
 global.fruitmixWindow = null
@@ -62,8 +63,8 @@ global.c = console.log
 
 global.mocha = false
 
-mdns.excludeInterface('0.0.0.0')
-var browser = mdns.createBrowser(mdns.tcp('http'))
+// mdns.excludeInterface('0.0.0.0')
+// var browser = mdns.createBrowser(mdns.tcp('http'))
 
 //require module
 const upload = require('./lib/upload')
@@ -72,10 +73,11 @@ const loginApi = require('./lib/login')
 const mediaApi = require('./lib/media')
 const deviceApi = require('./lib/device')
 const fileApi = require('./lib/file')
+var findDevice = require('./lib/mdns')
 
 //require store
 global.action = require('./serve/action/action')
-const store = require('./serve/store/store')
+global.store = require('./serve/store/store')
 
 // global.dispatch = store.dispatch
 global.dispatch = (action) => {
@@ -86,7 +88,8 @@ const adapter = () => {
 	return {
 		login : store.getState().login,
 		setting : store.getState().setting,
-		file : store.getState().file
+		file : store.getState().file,
+		media : store.getState().media
 	}
 }
 
@@ -94,7 +97,9 @@ store.subscribe(() => {
 	mainWindow.webContents.send('adapter',adapter())
 })
 
-browser.on('update', deviceApi.findDevice) 
+// browser.on('update', deviceApi.findDevice) 
+
+
 //app ready and open window ------------------------------------
 app.on('ready', function() {
 	mainWindow = new BrowserWindow({
@@ -133,16 +138,22 @@ app.on('ready', function() {
 		}
 	})
 
+	setTimeout( () => {
+		var x = findDevice().on('stationUpdate', data => {
+			dispatch(action.setDevice(data))
+		})
+	},500)
+
 	//Tray
-	appIcon = new Tray(path.join(__dirname,'180-180.png'))
-	var contextMenu = Menu.buildFromTemplate([
-	    { label: 'Item1', type: 'radio' },
-	    { label: 'Item2', type: 'radio' },
-	    { label: 'Item3', type: 'radio', checked: true },
-	    { label: 'Item4', type: 'radio' }
-	])
-	appIcon.setToolTip('This is my application.')
-  	appIcon.setContextMenu(contextMenu)
+	// appIcon = new Tray(path.join(__dirname,'180-180.png'))
+	// var contextMenu = Menu.buildFromTemplate([
+	//     { label: 'Item1', type: 'radio' },
+	//     { label: 'Item2', type: 'radio' },
+	//     { label: 'Item3', type: 'radio', checked: true },
+	//     { label: 'Item4', type: 'radio' }
+	// ])
+	// appIcon.setToolTip('This is my application.')
+ //  	appIcon.setContextMenu(contextMenu)
 
   	if (mocha) {
 		testWindow = new BrowserWindow({
@@ -168,24 +179,28 @@ ipcMain.on('getDeviceUsedRecently',err=>{
 	deviceApi.getRecord()
 })
 //setIp
-ipcMain.on('setServeIp',(err,ip, isCustom)=>{
+ipcMain.on('setServeIp',(err,ip, isCustom, isStorage)=>{
+	c('set ip : ')
 	dispatch(action.setDeviceUsedRecently(ip))
-	let index = device.findIndex(item=>{
-		return item.addresses[0] == ip
-	})
 	server = 'http://' + ip + ':3721'
-	// if (index != -1) {
-	// 	server = 'http://' + ip + ':3721'
-	// }else {
-	// 	server = 'http://' + ip + ':3721'
-	// }
+	if (isCustom) {
+		c('??')
+		c(ip)
+		return
+	}
+	if ( !isStorage) {
+		return
+	}
 	fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
+		if (err) {
+			return
+		}
 		let d = JSON.parse(data)
 		d.ip = ip
 		if (isCustom) {
 			d.customDevice.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true})
-			device.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true})
-			dispatch(action.setDevice(device))
+			// device.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true})
+			// dispatch(action.setDevice(device))
 		}
 		let j = JSON.stringify(d)
 		fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
@@ -215,13 +230,9 @@ ipcMain.on('delServer',(err,i)=>{
 	// mainWindow.webContents.send('device',device)
 	dispatch(action.setDevice(device))
 })
-//find fruitmix
-ipcMain.on('findFruitmix',(e,item)=>{
-	browser.discover()
-})
 //create fruitmix
 ipcMain.on('createFruitmix',(err,item)=>{
-	c(item.addresses[0]+':'+item.port)
+	c(item.address[0]+':'+item.port)
 	fruitmixWindow = new BrowserWindow({
 		frame: true,
 		height: 768,
@@ -235,23 +246,22 @@ ipcMain.on('createFruitmix',(err,item)=>{
 	fruitmixWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	})
-	fruitmixWindow.loadURL('http://'+item.addresses[0]+':3000')
-})
-//get usersList
-ipcMain.on('getUserList',(e,item)=>{
-	// c(item)
+	fruitmixWindow.loadURL('http://'+item.address+':3000')
 })
 //get all user information --------------------------------------
 ipcMain.on('login',function(err,username,password){
 	c(' ')
 	c('login : ')
 	dispatch({type: "LOGIN"})
+	var tempArr = []
 	loginApi.login().then((data)=>{
 		c('get login data : ' + data.length + ' users')
 		user = data.find((item)=>{return item.username == username})
 		if (user == undefined) {
 			throw new Error('username is not exist in login data')
 		}
+		user = Object.assign({},user)
+		tempArr = data
 		return loginApi.getToken(user.uuid,password)
 	}).then((token)=>{
 		c('get token : '+ token.type +token.token)
@@ -259,9 +269,15 @@ ipcMain.on('login',function(err,username,password){
 		user.type = token.type
 		return loginApi.getAllUser()
 	}).then((users)=>{
+
 		c('get users : ' + users.length)
+		tempArr.forEach(item => {
+			item.checked = false
+		})
+		user.users = tempArr
 		user.allUser = users
 		dispatch(action.loggedin(user))
+
 	}).catch((err)=>{
 		c('login failed : ' + err)
 		dispatch(action.loginFailed())
@@ -386,44 +402,16 @@ ipcMain.on('delete',(e,objArr,dir)=>{
 			c(err)
 		})
 	}
-	
 })
 //rename
 ipcMain.on('rename',(e,uuid,name,oldName)=>{
-	rename(uuid,name,oldName).then(()=>{
+	fileApi.rename(uuid,name,oldName).then(()=>{
 		map.get(uuid).name = name
 		// map.get(uuid).attribute.name = name
 	}).catch((err)=>{
 		mainWindow.webContents.send('message','文件重命名失败')	
 	})
 })
-function rename(uuid,name,oldName) {
-	let rename = new Promise((resolve,reject)=>{
-		var options = {
-			method: 'patch',
-			url: server+'/files/'+ currentDirectory.uuid + '/' + uuid,
-			headers: {
-					Authorization: user.type+' '+user.token
-				},
-			form: {name:name}
-		}
-
-		function callback (err,res,body) {
-			console.log(res)
-				if (!err && res.statusCode == 200) {
-					console.log('res')
-					resolve(body)
-				}else {
-					console.log('err')
-					console.log(err)
-					reject(err)
-				}
-			}
-
-		request(options,callback)
-	})
-	return rename
-}
 //close
 ipcMain.on('close-main-window', function () {
     app.quit()
@@ -433,11 +421,18 @@ ipcMain.on('create-new-user',function(err, u, p){
 	loginApi.createNewUser(u,p).then(()=>{
 		console.log('register success')
 		mainWindow.webContents.send('message','注册新用户成功')
-		// mainWindow.webContents.send('closeRegisterDialog')
 		loginApi.getAllUser().then(users=>{
 			user.allUser = users
 			dispatch(action.loggedin(user))
 			mainWindow.webContents.send('addUser',user)
+		})
+
+		loginApi.login().then(data=> {
+			data.forEach(item => {
+				item.checked = false
+			})
+			user.users = data
+			dispatch(action.loggedin(user))
 		})
 		
 	}).catch((e)=>{
@@ -445,41 +440,14 @@ ipcMain.on('create-new-user',function(err, u, p){
 		mainWindow.webContents.send('message','注册新用户失败')
 	})
 })
-function createNewUser(username,password,email) {
-	let promise = new Promise((resolve,reject)=>{
-		var options = {
-			headers: {
-				Authorization: user.type+' '+user.token
-			},
-			form: {username:username,password:password,email:email,isAdmin:false,isFirstUser:false}
-		}
-		function callback (err,res,body) {
-			if (!err && res.statusCode == 200) {
-				console.log('res')
-				resolve(body)
-			}else {
-				console.log('err')
-				c(res.body)
-				reject(err)
-			}
-		}
-		request.post(server+'/users/',options,callback)
-	})
-	return promise
-}
 ipcMain.on('userInit',(err,s,u,p,i)=>{
 	loginApi.userInit(s,u,p).then( () => {
-		c('success')
-		let index = device.findIndex(item=>{
-				return item.addresses[0] == i.addresses[0]
-			})
-		if (index != -1) {
-				device[index].admin = true
-				device[index].addresses[0] += ':3721'
-				dispatch(action.setDevice(device))
-			}
+		c('管理员注册成功')
+		mainWindow.webContents.send('message','管理员注册成功')
 	}).catch(err => {
-		c('err')
+		c(err)
+		c('管理员注册失败')
+		mainWindow.webContents.send('message','管理员注册失败')
 	})
 	return
 	var options = {
@@ -516,53 +484,27 @@ ipcMain.on('deleteUser',(err,uuid)=>{
 })
 //share
 ipcMain.on('share',function(err,files,users){
-	c(files)
-	files.forEach((item)=>{
-		share(item,users).then(()=>{
-			//changeShareData
-			let file = map.get(item.uuid)
-			file.readlist = users
-			let u = _.clone(users)
-			file.writelist = u
-			//is exist in filesSharedByMe?
-			let index = filesSharedByMe.findIndex(f=>f.uuid == item.uuid)
+	var index = 0
 
-			if (index == -1) {
-				filesSharedByMe.push(file)
-				mainWindow.webContents.send('setFilesSharedByMe',filesSharedByMe)
-			}else {
-				filesSharedByMe[index] = file
-				mainWindow.webContents.send('setFilesSharedByMe',filesSharedByMe)
-			}
-			mainWindow.webContents.send('message',item.name + '分享成功')	
-		}).catch(err=>{
-			mainWindow.webContents.send('message',item.name+ '分享失败,请稍后再试')
-		})
-	})
+	function doShare(err) {
+		if (err) {
+			console.log('err')
+			mainWindow.webContents.send('message',index + ' 个文件分享成功')	
+			return
+		}
+		index++
+		if (index == files.length) {
+			console.log('all share success')
+			mainWindow.webContents.send('message',files.length + ' 个文件分享成功')	
+			return
+		}else {
+			fileApi.share(files[index],users,doShare)
+		}
+	}
+
+	fileApi.share(files[index],users,doShare)
 })
-function share(file,users) {
-	var s = new Promise((resolve,reject)=>{
-		var y = []
-		var options = {
-			headers: {
-				Authorization: user.type+' '+user.token
-			},
-			form: {readlist:JSON.stringify(users),writelist:JSON.stringify(users)}
-		}
-		function callback (err,res,body) {
-			if (!err && res.statusCode == 200) {
-				console.log('res')
-				resolve()
-			}else {
-				console.log('err')
-				console.log(res)
-				reject()
-			}
-		}
-		request.patch(server+'/files/'+file.uuid+'?type=permission',options,callback)
-	})
-	return s
-}
+
 //cancel share
 ipcMain.on('cancelShare',(err,item)=>{
 	share(item,[]).then(()=>{
@@ -757,7 +699,8 @@ ipcMain.on('getMediaData',(err)=>{
 			media.push(obj)	
 			mediaMap.set(item.hash,item)
 		})
-		mainWindow.webContents.send('mediaFinish',media)
+		// mainWindow.webContents.send('mediaFinish',media)
+		dispatch(action.setMedia(media))
 	}).catch(err=>{
 		console.log(err)
 	})
@@ -897,6 +840,88 @@ function downloadMediaImage(item) {
 		request(options,callback).pipe(stream)
 	})
 	return promise
+}
+
+//data move
+ipcMain.on('getMoveData', () => {
+	c('begin get move data : ')
+	getMoveDataApi().then( data => {
+		c('get move data success')
+		var tempArr = []
+		data.forEach(item => {
+			if (item.children && item.children.length!=0) {
+				tempArr.push(item)
+			}
+		})
+		mainWindow.webContents.send('setMoveData',tempArr)
+	}).catch(err => {
+		c('get move data error !')
+	})
+})
+
+function getMoveDataApi() {
+		let login = new Promise((resolve,reject)=>{
+			request(server+'/winsun',function(err,res,body){
+				if (!err && res.statusCode == 200) {
+					resolve(eval(body))
+				}else {
+					reject(err)
+				}
+			})
+		})
+		return login
+}
+
+ipcMain.on('move-data',(err,path) => {
+	mainWindow.webContents.send('message','正在移动...')
+	moveDataApi(path).then( ()=>{
+		mainWindow.webContents.send('message','数据迁移成功')
+		getMoveDataApi().then( data => {
+			c('get move data success')
+			var tempArr = []
+			data.forEach(item => {
+				if (item.children && item.children.length!=0) {
+					tempArr.push(item)
+				}
+			})
+			mainWindow.webContents.send('setMoveData',tempArr)
+		}).catch(err => {
+			c('get move data error !')
+			mainWindow.webContents.send('message','数据迁移失败')
+		})		
+
+	}).catch( e=>{
+		c('failed')
+	})
+})
+
+function moveDataApi(path) {
+	var a = rootNode.uuid
+	var promise = new Promise((resolve,reject) => {
+			var options = {
+				method : 'post',
+				url : server + '/winsun',
+				headers : {
+					Authorization : user.type + ' ' + user.token,
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					src : path,
+					dst : rootNode.uuid
+				})
+			}
+
+			var callback = function(err, res, body) {
+				if (!err && res.statusCode == 200) {
+					c(res.body)
+					resolve()
+				}else {
+					reject(err)
+				}
+			}
+			request(options, callback)
+		})
+		return promise
 }
 
 // transimission api -------------------------------------

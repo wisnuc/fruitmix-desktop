@@ -52,6 +52,22 @@ var actions = {
 			children : children,
 			path : dirPath
 		}
+	},
+
+	//media
+	setMedia(data) {
+		return {
+			type: 'SET_MEDIA',
+			data: data
+		}
+	},
+
+	//DataMove
+	setMoveData(data) {
+		return {
+			type : 'SET_MOVE_DATA',
+			data : data
+		}
 	}
 }
 
