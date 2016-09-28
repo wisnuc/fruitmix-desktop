@@ -19,7 +19,8 @@ function getStyles () {
       top: 88,
       bottom: 0,
       height: '100%',
-      WebkitTransition: 'right .5s cubic-bezier(0, 1, .5, 1)'
+      WebkitTransition: 'right .5s cubic-bezier(0, 1, .5, 1)',
+      zIndex: 999
     },
     itemHeader: {
       display: 'block',

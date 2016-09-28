@@ -113,12 +113,33 @@ var actions = {
 		};
 	},
 
+	addDragImageList(els, date) {
+		return {
+			type: 'ADD_DRAG_IMAGELIST',
+			els,
+			date
+		}
+	},
+
 	removeDragImageItem(date, index) {
 		return {
       type: 'REMOVE_DRAG_IMAGEITEM',
       date,
       index
     }
+	},
+
+	removeDragImageList(date) {
+		return {
+			type: 'REMOVE_DRAG_IMAGELIST',
+			date	
+		}
+	},
+
+	clearDragImageItem() {
+		return {
+			type: 'CLEAR_DRAG_IMAGEITEM'
+		}
 	},
 
 	toggleSelectStatusImageItem(checked) {

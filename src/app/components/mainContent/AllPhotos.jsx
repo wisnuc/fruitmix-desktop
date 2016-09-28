@@ -7,6 +7,8 @@ import React, { Component, PropTypes } from 'react';
 import { findDOMNode } from 'react-dom';
 
 import Checkbox from '../../React-Redux-UI/src/components/partials/Checkbox';
+import NavigationBar from '../main/NavigationBar';
+import RightPanel from '../main/RightPanel';
 
 import ImageByDate from './ImageByDate.jsx';
 
@@ -124,14 +126,19 @@ export default class AllPhotos extends Component {
     Object.keys(this.refs).filter((key, index) => {
       if (key.indexOf(date) >= 0) {
         if (hasChecked) {
-          this.refs[key].overedHandle();
+          this.refs[key] && this.refs[key].overedHandle();
         } else {
           if (!(this.detectImageItemActive(date))) {
-            this.refs[key].outedHandle();
+            this.refs[key] && this.refs[key].outedHandle();
           }
         }
       }
     });
+  }
+
+  cancelSelectedItemHandle(index, date) {
+    const { dispatch } = this.props;
+    dispatch(Action.removeDragImageItem(date, index));
   }
 
   detectImageItemActive(date) {
@@ -208,7 +215,7 @@ export default class AllPhotos extends Component {
         data: []
       };
 
-      let tmp = (this.state.imageGroup ? this.state.imageGroup.data : []).concat(this.map.slice(this.current * 100, (this.current * 100) + this.strip));
+      let tmp = (this.state.imageGroup ? this.state.imageGroup.data : []).concat(this.map.slice(this.current * this.strip, (this.current * this.strip) + this.strip));
 
       let tmpKeys = tmp.map(t =>
         formatDate(t.datetime)
@@ -219,7 +226,7 @@ export default class AllPhotos extends Component {
       );
 
       uniqueKeys.forEach(key => {
-        store.dateStr.push(key);
+        key && store.dateStr.push(key);
       });
 
       store.data = tmp;
@@ -229,14 +236,24 @@ export default class AllPhotos extends Component {
     }
   }
 
-  changedHandle(value, checked) {
+  changedHandle(date, checked) {
+    const { dispatch } = this.props;
+    const checkedEls = [];
+
     Object.keys(this.refs).filter((key, index) => {
-      if (key.indexOf(value) >= 0) {
+      if (key.indexOf(date) >= 0) {
         this.refs[key].setState({
           checked
         });
+        checkedEls.push(findDOMNode(this.refs[key]));
       }
     });
+
+    if (checked) {
+      dispatch(Action.addDragImageList(checkedEls, date));
+    } else {
+      dispatch(Action.removeDragImageList(date));
+    }
   }
 
   createImageByDateComponent() {
@@ -268,8 +285,9 @@ export default class AllPhotos extends Component {
                         date={ date }
                         ref={ date + '-' + index }
                         onSelectedItem={ this.selectedItemHandle.bind(this, index) }
+                        onCancelSelectedItem={ this.cancelSelectedItemHandle.bind(this, index) }
                         detectImageItemActive={ this.detectImageItemActive }
-                        hash={entry.digest}
+                        hash={ entry.digest }
                         dispatch={ this.props.dispatch }>
                       </ImageByDate>
                     )
@@ -284,9 +302,26 @@ export default class AllPhotos extends Component {
 
     return (
       <div className="image-group">
+        {/* navigation bar */}
+        <NavigationBar
+          dispatch={ this.props.dispatch }
+          state={ this.props.state }
+          navigationBarTitleTexts={ this.props.state.navigationBarTitleTexts }
+          navigationBarHorizontalPadding={ 18 }
+          onShowedRightPanel={ this.showedRightPanelHandler.bind(this) }
+          icons={[ { text: 'i' } ]}>
+        </NavigationBar>
+
+        {/* right panel */}
+        <RightPanel ref="rightPanel" width={ 230 } dispatch={ this.props.dispatch } state={ this.props.state }></RightPanel>
+
         { component }
       </div>
     );
+  }
+
+  showedRightPanelHandler() {
+    this.refs.rightPanel && findDOMNode(this.refs.rightPanel).lastElementChild.classList.toggle('active');
   }
 
   detectScrollToBottom() {
@@ -305,7 +340,10 @@ export default class AllPhotos extends Component {
   }
 
   componentWillUnmount() {
+    const { dispatch } = this.props;
+
     this.mounted = false;
+    dispatch(Action.clearDragImageItem());
   }
 
   render() {

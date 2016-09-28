@@ -16,7 +16,8 @@ function getStyles (props) {
       paddingLeft: props.navigationBarHorizontalPadding,
       height: props.navigationBarHeight,
       lineHeight: props.navigationBarHeight + 'px',
-      borderBottom: '1px solid #efefef'
+      borderBottom: '1px solid #efefef',
+      marginLeft: -18
     },
     icon: {
       display: 'inline-block',

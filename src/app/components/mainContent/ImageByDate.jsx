@@ -46,7 +46,7 @@ export default class ImageByDate extends Component {
     this.outedHandle = this.outedHandle.bind(this);
     this.selectedItemHandle = this.selectedItemHandle.bind(this);
     this.changedHandle = this.changedHandle.bind(this);
-    this.lookBigPhotoHandle = this.lookBigPhotoHandle.bind(this);
+    this.lookLargePhotoHandle = this.lookLargePhotoHandle.bind(this);
 
     this.state = {
       checked: false
@@ -75,23 +75,23 @@ export default class ImageByDate extends Component {
     e.stopPropagation();
   }
 
-  lookBigPhotoHandle(e) {
+  lookLargePhotoHandle(e) {
     const el = e.currentTarget;
-    const { date, detectImageItemActive } = this.props;
+    const { date, detectImageItemActive, onCancelSelectedItem } = this.props;
 
     if (el.classList.contains('active')) {
       el.classList.remove('active');
+      onCancelSelectedItem(date);
 
       if (!detectImageItemActive(date)) {
           Array
          .prototype
          .slice
          .call(
-           document
-           .querySelectorAll('[data-date="'+ date +'"]'))
-         .forEach(el => {
+           document.querySelectorAll('[data-date="'+ date +'"]')
+         ).forEach(el => {
            el.classList.remove('show');
-         })
+         });
       }
     } else {
       this.props.dispatch(Action.toggleMedia(true))
@@ -111,7 +111,7 @@ export default class ImageByDate extends Component {
 
     return (
       <div ref={ el => this.el = el } data-date={ date } className={ this.state.checked ? "image-item active show" : "image-item" } style={ itemStyle }
-        onClick={ this.lookBigPhotoHandle } onMouseOver={ this.overedHandle } onMouseOut={ this.outedHandle }>
+        onClick={ this.lookLargePhotoHandle } onMouseOver={ this.overedHandle } onMouseOut={ this.outedHandle }>
         <div className="selected-mask"></div>
         <i style={ selectStatusStyle } onClick={ this.selectedItemHandle }></i>
       </div>
@@ -124,6 +124,11 @@ ImageByDate.propTypes = {
     选中项回调
   **/
   onSelectedItem: PropTypes.func.isRequired,
+
+  /**
+    取消选中处理函数
+  **/
+  onCancelSelectedItem: PropTypes.func.isRequired,
 
   /**
     图片加载状态

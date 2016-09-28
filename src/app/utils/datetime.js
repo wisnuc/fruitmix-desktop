@@ -21,7 +21,7 @@ export function toDateString (datetime) {
  * @return { String }
 */
 export function formatDate (datetime = '', formatStr = '-') {
-  const dateStr = toDateString(datetime);
+  const dateStr = toDateString(datetime || '');
 
   return dateStr.replace(/\//g, formatStr);
 }
