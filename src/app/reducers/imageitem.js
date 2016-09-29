@@ -17,7 +17,15 @@ export default function (state = [], action) {
     case 'ADD_DRAG_IMAGELIST':
       const cloneAddedState = state.slice();
       const date = action.date;
-      const cloneEls = action.els.map((el, index) =>({ el, date, index }));
+      const cloneEls = [];
+
+      action.els.forEach((el, index) => {
+        const elIndex = state.findIndex(ele => ele.el === el);
+
+        if (elIndex < 0) {
+          cloneEls.push({ el, date, index });
+        }
+      });
 
       return cloneAddedState.concat(cloneEls);
     case 'REMOVE_DRAG_IMAGEITEM':

@@ -284,6 +284,7 @@ export default class AllPhotos extends Component {
                         key={ '' + index + index }
                         date={ date }
                         ref={ date + '-' + index }
+                        figureItem={ entry }
                         onSelectedItem={ this.selectedItemHandle.bind(this, index) }
                         onCancelSelectedItem={ this.cancelSelectedItemHandle.bind(this, index) }
                         detectImageItemActive={ this.detectImageItemActive }

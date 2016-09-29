@@ -5,16 +5,14 @@
 import React, { Component, PropTypes } from 'react';
 
 import Checkbox from '../../React-Redux-UI/src/components/partials/Checkbox';
-import Action from '../../actions/action'
+import Action from '../../actions/action';
+import loadingIcon from '../../../assets/images/index/loading.gif';
 
 function getStyles () {
   return {
     itemStyle: {
       boxSizing: 'border-box',
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: '0 0',
-      backgroundSize: 'cover',
-      backgroundColor: '#fff',
+      border: '1px solid #e5e5e5',
       float: 'left',
       position: 'relative',
       width: 140,
@@ -34,6 +32,24 @@ function getStyles () {
       top: 10,
       width: 15,
       height: 15
+    },
+    figureStyle: {
+      width: '100%',
+      height: '100%',
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: '0 0',
+      backgroundSize: 'cover',
+    },
+    loadingStyle: {
+      position: 'absolute',
+      left: '50%',
+      top: '50%',
+      marginLeft: -8,
+      marginTop: -8,
+      width: 16,
+      height: 16,
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: '0 0'
     }
   };
 }
@@ -105,17 +121,40 @@ export default class ImageByDate extends Component {
     });
   }
 
+  createFigureComponent(figureItem) {
+    const { figureStyle, loadingStyle } = getStyles();
+
+    if (figureItem.path) {
+      return (
+        <div className="figure" style={ Object.assign({}, figureStyle, { backgroundImage: 'url('+ figureItem.path +')' }) }></div>
+      );
+    } else {
+      return (
+        <img style={ loadingStyle } src={ loadingIcon } />
+      );
+    }
+  }
+
   render() {
-    const { date, state } = this.props;
+    const { date, state, figureItem } = this.props;
     let { itemStyle, selectStatusStyle } = getStyles();
 
     return (
       <div ref={ el => this.el = el } data-date={ date } className={ this.state.checked ? "image-item active show" : "image-item" } style={ itemStyle }
         onClick={ this.lookLargePhotoHandle } onMouseOver={ this.overedHandle } onMouseOut={ this.outedHandle }>
         <div className="selected-mask"></div>
-        <i style={ selectStatusStyle } onClick={ this.selectedItemHandle }></i>
+
+        {/* 生成缩略图 */}
+        { this.createFigureComponent(figureItem) }
+
+        { figureItem.path && ( <i style={ selectStatusStyle } onClick={ this.selectedItemHandle }></i> ) }
       </div>
     );
+  }
+
+  componentDidMount() {
+    const { figureItem } = this.props;
+    ipc.send('getThumb',figureItem);
   }
 }
 
@@ -130,10 +169,10 @@ ImageByDate.propTypes = {
   **/
   onCancelSelectedItem: PropTypes.func.isRequired,
 
-  /**
-    图片加载状态
-  **/
-  status: PropTypes.string,
+  // /**
+  //   图片加载状态
+  // **/
+  // status: PropTypes.string,
 
   /**
     检查当前这一组是否active
