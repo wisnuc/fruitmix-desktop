@@ -344,7 +344,7 @@ function enterChildren(selectItem) {
 	let folder = map.get(selectItem.uuid)
 	fileApi.getFile(selectItem.uuid).then(file => {
 		folder.children.length = 0
-		JSON.parse(file).forEach((item, index) => {
+		file.forEach((item, index) => {
 			folder.children.push(Object.assign({}, item, {parent:selectItem.uuid,children:[]}))
 			map.set(item.uuid, folder.children[folder.children.length-1])
 		})
@@ -627,33 +627,17 @@ function move(uuid,target,index) {
 }
 //enterShare
 ipcMain.on('enterShare',(err,item)=>{
-	let share = shareMap.get(item.uuid)
-	let children = share.children.map(item=>{
-		return Object.assign({},item,{children:[]})
+	c(' ')
+	fileApi.getFile(item.uuid).then(data => {
+		getSharePath(item)
+		c('获取shareChildren成功')
+		dispatch(action.setShareChildren(data,sharePath))
+	}).catch(err => {
+		c('获取shareChildren失败')
 	})
-	sharePath = []
-	c(share)
-	getSharePath(share)
-	// let sharePath = []
-	mainWindow.webContents.send('setShareChildren',children,sharePath)
 })
-function getSharePath(obj) {
-	//insert obj to path
-	sharePath.unshift({key:obj.name,value:Object.assign({},obj,{children:null})})
-	//obj is root?
-	if (obj.parent == undefined || obj.parent == '') {
-		sharePath.unshift({key:'',value:{}})
-		return 
-	}else {
-		let oo = shareMap.get(obj.parent)
-		if (oo == undefined) {
-			sharePath.unshift({key:'',value:{}})
-			return
-		}else {
-			getSharePath(oo)	
-		}
-		
-	}
+function getSharePath(item) {
+
 }
 ipcMain.on('backShareRoot',err=>{
 	shareChildren.length = 0
@@ -827,7 +811,7 @@ function downloadMedia(item) {
 		c('100 '+height)
 		var options = {
 			method: 'GET',
-			url: server+'/media/'+item.digest+'/thumbnail?width=100',
+			url: server+'/media/'+item.digest+'/thumbnail?width=200',
 			headers: {
 				Authorization: user.type+' '+user.token
 			}
@@ -1268,7 +1252,7 @@ function getFolderTree(folderObj,call) {
 
 	function traverse(folder,callback) {
 		fileApi.getFile(folder.uuid).then(result => {
-			let files = JSON.parse(result)
+			let files = result
 			c()
 			c(folder.name + ' has ' + files.length + ' children')
 			files.forEach(item => {

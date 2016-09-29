@@ -41,6 +41,10 @@ class SharedFilesRow extends Component {
 			deleteShow:false
 		});
 	}
+
+	enterShare() {
+		ipc.send('enterShare',this.props.item)
+	}
 }
 
 export default SharedFilesRow;
