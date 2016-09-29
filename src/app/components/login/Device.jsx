@@ -36,12 +36,11 @@ class Device extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
-    	c.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
     	if (nextProps.item.fruitmix == 'INITIALIZED') {
     		this.setState({
     			stepIndex:2
     		});
-    	}else if(this.props.item.fruitmix == 'INITIAL') {
+    	}else if(nextProps.item.fruitmix == 'INITIAL') {
     		this.setState({
     			stepIndex:1
     		});
@@ -124,7 +123,7 @@ class Device extends React.Component {
 							<div>FruitMix状态 :{item.fruitmix?' 启动':' 未启动'}</div>
 						</div>
 						
-						<FlatButton className='fruitmix-button' label="启动FruitMix" disabled={item.fruitmix} onTouchTap={this.createFruitmix.bind(this)}/>
+						<FlatButton className='fruitmix-button' label="启动FruitMix" onTouchTap={this.createFruitmix.bind(this)}/>
 						
 					</div>
 					);
