@@ -29,8 +29,7 @@ function getStyles () {
       backgroundColor: '#fff',
     	boxSizing: 'border-box',
     	border: '1px solid #d3d3d3',
-    	borderRadius: 4,
-      boxShadow: "5px 5px 2px rgba(0,0,0,.25)",
+      boxShadow: "0 0 5px rgba(0,0,0,.25)",
     	height: 155
     },
     dragButtonStyle: {
@@ -101,7 +100,7 @@ export default class AllPhotos extends Component {
 
   getDragElementRect() {
     const leftSideBarWidth = 220;
-    const totalGap = 70;
+    const totalGap = 36;
     const bottom = 10;
     const rightPanelWidth = window.innerWidth - leftSideBarWidth;
     const width = rightPanelWidth - totalGap;
