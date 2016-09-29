@@ -868,6 +868,16 @@ ipcMain.on('getMediaImage',(err,hash)=>{
 	})
 })
 
+ipcMain.on('getMediaShare' , err => {
+	mediaApi.getMediaShare().then(data => {
+		mainWindow.webContents.send('mediaShare',data)
+	}).catch(err => {
+		c(err)
+	})
+})
+
+// data move api -----------------------------------------
+
 //data move
 ipcMain.on('getMoveData', () => {
 	c('begin get move data : ')
@@ -1229,12 +1239,15 @@ ipcMain.on('download',(e,files)=>{
 })
 //download folder
 ipcMain.on('downloadFolder',(err,folder,type)=>{
+	c('')
+	c('开始下载文件夹...')
 	folder.forEach(item=>{
 		getFolderTree(item,(err, tree) => {
 			if (err) {
 				c('get tree failed')
 				return
 			}
+			c('文件树组成')
 			let count = download.getTreeCount(tree)	
 			let time = (new Date()).getTime()
 			let obj = {count:count,failed:[],success:0,data:tree,type:'folder',status:'ready',key:item.uuid+time}
@@ -1260,7 +1273,7 @@ function getFolderTree(folderObj,call) {
 			c(folder.name + ' has ' + files.length + ' children')
 			files.forEach(item => {
 				folder.children.push(
-						Object.assign({},item, {children : [],path : path.join(folder.path,item.name)})
+						Object.assign({},item, {children : [],path : path.join(folder.path,item.name),times:0})
 					)
 				c(path.join(folder.path,item.name))
 			})
@@ -1307,8 +1320,6 @@ function getFolderTree(folderObj,call) {
 			call(null,tree)
 		}
 	})
-
-	
 }
 
 ipcMain.on('store',(err,store)=>{

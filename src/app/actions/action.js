@@ -264,7 +264,7 @@ var actions = {
 			type: 'CLOSE_MOVE'
 		}
 	},
-
+	//media ---------------------------------------------
 	setMedia(data) {
 		return {
 			type: 'SET_MEDIA',
@@ -308,6 +308,14 @@ var actions = {
 			reset: reset
 		}
 	},
+
+	setMediaShare(data) {
+		return {
+			type : 'SET_MEDIA_SHARE',
+			data : data
+		}
+	},
+
 	logOut() {
 		return {
 			type: 'LOG_OUT'
