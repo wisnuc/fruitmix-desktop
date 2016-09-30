@@ -89,7 +89,8 @@ const adapter = () => {
 		login : store.getState().login,
 		setting : store.getState().setting,
 		file : store.getState().file,
-		media : store.getState().media
+		media : store.getState().media,
+		share: store.getState().share
 	}
 }
 
@@ -374,6 +375,21 @@ function getFile(uuid) {
 	})
 	return file
 }
+
+ipcMain.on('getFilesSharedWithMe',()=>{
+	fileApi.getFilesSharedByMe().then(item=>{
+		//??
+		this.props.dispatch(Action.setShareChildren(shareChildren,sharePath));
+		this.props.dispatch(Action.setFilesSharedByMe(files));
+	})
+})
+
+ipcMain.on('getFilesSharedToOthers',()=>{
+	fileApi.getFilesSharedByMe().then(item=>{
+		//??
+		this.props.dispatch(Action.setFilesSharedByMe(files));
+	})
+})
 
 //file operation api ------------------------------------------
 

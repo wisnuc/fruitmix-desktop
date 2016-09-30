@@ -69,6 +69,8 @@ var actions = {
 			data : data
 		}
 	}
+
+	//share
 }
 
 module.exports = actions;

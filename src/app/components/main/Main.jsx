@@ -48,6 +48,7 @@ class Main extends Component {
 		ipc.send('getRootData')
 		ipc.send('getMediaData')
 		ipc.send('getMoveData')
+		ipc.send('getFilesSharedWithMe')
 
 		// this.props.dispatch(Action.filesLoading());
 
@@ -113,9 +114,9 @@ class Main extends Component {
 			this.props.dispatch(Action.setMediaImage(item));
 		});
 
-		ipc.on('setShareChildren',(err,shareChildren,sharePath)=>{
-			this.props.dispatch(Action.setShareChildren(shareChildren,sharePath));
-		});
+		// ipc.on('setShareChildren',(err,shareChildren,sharePath)=>{
+		// 	this.props.dispatch(Action.setShareChildren(shareChildren,sharePath));
+		// });
 
 		ipc.on('transmissionDownload',(err,obj)=>{
 			this.props.dispatch(Action.addDownload(obj));
@@ -125,9 +126,9 @@ class Main extends Component {
 			this.props.dispatch(Action.addUpload(obj));
 		});
 
-		ipc.on('setFilesSharedByMe',(err,files)=>{
-			this.props.dispatch(Action.setFilesSharedByMe(files));
-		});
+		// ipc.on('setFilesSharedByMe',(err,files)=>{
+		// 	this.props.dispatch(Action.setFilesSharedByMe(files));
+		// });
 
 		ipc.on('setUsers',(err,user)=>{
 			this.props.dispatch({type:'SET_USER',user:user});
