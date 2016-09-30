@@ -197,11 +197,11 @@ ipcMain.on('setServeIp',(err,ip, isCustom, isStorage)=>{
 		}
 		let d = JSON.parse(data)
 		d.ip = ip
-		// if (isCustom) {
-		// 	d.customDevice.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true})
-		// 	device.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true})
-		// 	dispatch(action.setDevice(device))
-		// }
+		if (isCustom) {
+			d.customDevice.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true})
+			// device.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true})
+			// dispatch(action.setDevice(device))
+		}
 		let j = JSON.stringify(d)
 		fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
 
@@ -253,12 +253,15 @@ ipcMain.on('login',function(err,username,password){
 	c(' ')
 	c('login : ')
 	dispatch({type: "LOGIN"})
+	var tempArr = []
 	loginApi.login().then((data)=>{
 		c('get login data : ' + data.length + ' users')
 		user = data.find((item)=>{return item.username == username})
 		if (user == undefined) {
 			throw new Error('username is not exist in login data')
 		}
+		user = Object.assign({},user)
+		tempArr = data
 		return loginApi.getToken(user.uuid,password)
 	}).then((token)=>{
 		c('get token : '+ token.type +token.token)
@@ -266,9 +269,15 @@ ipcMain.on('login',function(err,username,password){
 		user.type = token.type
 		return loginApi.getAllUser()
 	}).then((users)=>{
+
 		c('get users : ' + users.length)
+		tempArr.forEach(item => {
+			item.checked = false
+		})
+		user.users = tempArr
 		user.allUser = users
 		dispatch(action.loggedin(user))
+
 	}).catch((err)=>{
 		c('login failed : ' + err)
 		dispatch(action.loginFailed())
@@ -396,40 +405,13 @@ ipcMain.on('delete',(e,objArr,dir)=>{
 })
 //rename
 ipcMain.on('rename',(e,uuid,name,oldName)=>{
-	rename(uuid,name,oldName).then(()=>{
+	fileApi.rename(uuid,name,oldName).then(()=>{
 		map.get(uuid).name = name
 		// map.get(uuid).attribute.name = name
 	}).catch((err)=>{
 		mainWindow.webContents.send('message','文件重命名失败')	
 	})
 })
-function rename(uuid,name,oldName) {
-	let rename = new Promise((resolve,reject)=>{
-		var options = {
-			method: 'patch',
-			url: server+'/files/'+ currentDirectory.uuid + '/' + uuid,
-			headers: {
-					Authorization: user.type+' '+user.token
-				},
-			form: {name:name}
-		}
-
-		function callback (err,res,body) {
-			console.log(res)
-				if (!err && res.statusCode == 200) {
-					console.log('res')
-					resolve(body)
-				}else {
-					console.log('err')
-					console.log(err)
-					reject(err)
-				}
-			}
-
-		request(options,callback)
-	})
-	return rename
-}
 //close
 ipcMain.on('close-main-window', function () {
     app.quit()
@@ -439,11 +421,18 @@ ipcMain.on('create-new-user',function(err, u, p){
 	loginApi.createNewUser(u,p).then(()=>{
 		console.log('register success')
 		mainWindow.webContents.send('message','注册新用户成功')
-		// mainWindow.webContents.send('closeRegisterDialog')
 		loginApi.getAllUser().then(users=>{
 			user.allUser = users
 			dispatch(action.loggedin(user))
 			mainWindow.webContents.send('addUser',user)
+		})
+
+		loginApi.login().then(data=> {
+			data.forEach(item => {
+				item.checked = false
+			})
+			user.users = data
+			dispatch(action.loggedin(user))
 		})
 		
 	}).catch((e)=>{
@@ -451,33 +440,12 @@ ipcMain.on('create-new-user',function(err, u, p){
 		mainWindow.webContents.send('message','注册新用户失败')
 	})
 })
-function createNewUser(username,password,email) {
-	let promise = new Promise((resolve,reject)=>{
-		var options = {
-			headers: {
-				Authorization: user.type+' '+user.token
-			},
-			form: {username:username,password:password,email:email,isAdmin:false,isFirstUser:false}
-		}
-		function callback (err,res,body) {
-			if (!err && res.statusCode == 200) {
-				console.log('res')
-				resolve(body)
-			}else {
-				console.log('err')
-				c(res.body)
-				reject(err)
-			}
-		}
-		request.post(server+'/users/',options,callback)
-	})
-	return promise
-}
 ipcMain.on('userInit',(err,s,u,p,i)=>{
 	loginApi.userInit(s,u,p).then( () => {
 		c('管理员注册成功')
 		mainWindow.webContents.send('message','管理员注册成功')
 	}).catch(err => {
+		c(err)
 		c('管理员注册失败')
 		mainWindow.webContents.send('message','管理员注册失败')
 	})
@@ -516,53 +484,27 @@ ipcMain.on('deleteUser',(err,uuid)=>{
 })
 //share
 ipcMain.on('share',function(err,files,users){
-	c(files)
-	files.forEach((item)=>{
-		share(item,users).then(()=>{
-			//changeShareData
-			let file = map.get(item.uuid)
-			file.readlist = users
-			let u = _.clone(users)
-			file.writelist = u
-			//is exist in filesSharedByMe?
-			let index = filesSharedByMe.findIndex(f=>f.uuid == item.uuid)
+	var index = 0
 
-			if (index == -1) {
-				filesSharedByMe.push(file)
-				mainWindow.webContents.send('setFilesSharedByMe',filesSharedByMe)
-			}else {
-				filesSharedByMe[index] = file
-				mainWindow.webContents.send('setFilesSharedByMe',filesSharedByMe)
-			}
-			mainWindow.webContents.send('message',item.name + '分享成功')	
-		}).catch(err=>{
-			mainWindow.webContents.send('message',item.name+ '分享失败,请稍后再试')
-		})
-	})
+	function doShare(err) {
+		if (err) {
+			console.log('err')
+			mainWindow.webContents.send('message',index + ' 个文件分享成功')	
+			return
+		}
+		index++
+		if (index == files.length) {
+			console.log('all share success')
+			mainWindow.webContents.send('message',files.length + ' 个文件分享成功')	
+			return
+		}else {
+			fileApi.share(files[index],users,doShare)
+		}
+	}
+
+	fileApi.share(files[index],users,doShare)
 })
-function share(file,users) {
-	var s = new Promise((resolve,reject)=>{
-		var y = []
-		var options = {
-			headers: {
-				Authorization: user.type+' '+user.token
-			},
-			form: {readlist:JSON.stringify(users),writelist:JSON.stringify(users)}
-		}
-		function callback (err,res,body) {
-			if (!err && res.statusCode == 200) {
-				console.log('res')
-				resolve()
-			}else {
-				console.log('err')
-				console.log(res)
-				reject()
-			}
-		}
-		request.patch(server+'/files/'+file.uuid+'?type=permission',options,callback)
-	})
-	return s
-}
+
 //cancel share
 ipcMain.on('cancelShare',(err,item)=>{
 	share(item,[]).then(()=>{
@@ -898,6 +840,88 @@ function downloadMediaImage(item) {
 		request(options,callback).pipe(stream)
 	})
 	return promise
+}
+
+//data move
+ipcMain.on('getMoveData', () => {
+	c('begin get move data : ')
+	getMoveDataApi().then( data => {
+		c('get move data success')
+		var tempArr = []
+		data.forEach(item => {
+			if (item.children && item.children.length!=0) {
+				tempArr.push(item)
+			}
+		})
+		mainWindow.webContents.send('setMoveData',tempArr)
+	}).catch(err => {
+		c('get move data error !')
+	})
+})
+
+function getMoveDataApi() {
+		let login = new Promise((resolve,reject)=>{
+			request(server+'/winsun',function(err,res,body){
+				if (!err && res.statusCode == 200) {
+					resolve(eval(body))
+				}else {
+					reject(err)
+				}
+			})
+		})
+		return login
+}
+
+ipcMain.on('move-data',(err,path) => {
+	mainWindow.webContents.send('message','正在移动...')
+	moveDataApi(path).then( ()=>{
+		mainWindow.webContents.send('message','数据迁移成功')
+		getMoveDataApi().then( data => {
+			c('get move data success')
+			var tempArr = []
+			data.forEach(item => {
+				if (item.children && item.children.length!=0) {
+					tempArr.push(item)
+				}
+			})
+			mainWindow.webContents.send('setMoveData',tempArr)
+		}).catch(err => {
+			c('get move data error !')
+			mainWindow.webContents.send('message','数据迁移失败')
+		})		
+
+	}).catch( e=>{
+		c('failed')
+	})
+})
+
+function moveDataApi(path) {
+	var a = rootNode.uuid
+	var promise = new Promise((resolve,reject) => {
+			var options = {
+				method : 'post',
+				url : server + '/winsun',
+				headers : {
+					Authorization : user.type + ' ' + user.token,
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					src : path,
+					dst : rootNode.uuid
+				})
+			}
+
+			var callback = function(err, res, body) {
+				if (!err && res.statusCode == 200) {
+					c(res.body)
+					resolve()
+				}else {
+					reject(err)
+				}
+			}
+			request(options, callback)
+		})
+		return promise
 }
 
 // transimission api -------------------------------------

@@ -61,6 +61,14 @@ var actions = {
 			data: data
 		}
 	},
+
+	//DataMove
+	setMoveData(data) {
+		return {
+			type : 'SET_MOVE_DATA',
+			data : data
+		}
+	}
 }
 
 module.exports = actions;

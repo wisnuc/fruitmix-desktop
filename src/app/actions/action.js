@@ -173,8 +173,7 @@ var actions = {
 	checkUser(uuid,b) {
 		return {
 			type: 'CHECK_USER',
-			uuid: uuid,
-			b: b
+			uuid: uuid
 		}
 	},
 
@@ -274,6 +273,14 @@ var actions = {
 		return {
 			type: 'ADAPTER',
 			store: data
+		}
+	},
+
+	//move data
+	setMoveData(data) {
+		return {
+			type : 'SET_MOVE_DATA',
+			data : data 
 		}
 	},
 

@@ -79,7 +79,7 @@
 
 .nav-item-body {
 	overflow: hidden;
-	height: 330px;
+	/*height: 330px;*/
 	max-height: 330px;
 	transition: max-height .5s cubic-bezier(0, 1, .5, 1);
 }
@@ -716,4 +716,21 @@
 
 .fruitmix-button span{
 	text-transform:none!important
+}
+
+/*data move*/
+.data-move-container {
+	height:100%;
+	background-color: white
+}
+.datamovetable thead>tr>th:nth-child(1){
+	width:175px!important;
+}
+
+.datamovetable .hoverLight {
+	cursor: pointer;
+}
+
+.datamovetable td.hoverLight:hover {
+	color:#333;
 }

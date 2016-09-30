@@ -44,9 +44,10 @@ class Main extends Component {
         this.state = { userDialog: false};
     }
 	componentDidMount() {
-		var _this = this;
-		ipc.send('getRootData');
-		ipc.send('getMediaData');
+		var _this = this
+		ipc.send('getRootData')
+		ipc.send('getMediaData')
+		ipc.send('getMoveData')
 
 		// this.props.dispatch(Action.filesLoading());
 
@@ -143,6 +144,10 @@ class Main extends Component {
 		ipc.on('data',(err,d)=>{
 			c.log(d)
 		});
+
+		ipc.on('setMoveData', (err,data) => {
+			this.props.dispatch(Action.setMoveData(data))
+		})
 	}
 
 	render() {
