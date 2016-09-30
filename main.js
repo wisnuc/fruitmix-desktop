@@ -821,44 +821,20 @@ function downloadMedia(item) {
 	return download
 }
 //getMediaImage
-ipcMain.on('getMediaImage',(err,item)=>{
-	downloadMediaImage(item).then(()=>{
+ipcMain.on('getMediaImage',(err,hash)=>{
+	c(hash)
+	mediaApi.downloadMediaImage(hash).then(()=>{
 		c('download media image success')
-		item.path = path.join(mediaPath,item.hash)
-		fs.stat(item.path,function(err,data){
-			c(data)
-		})
-		mainWindow.webContents.send('donwloadMediaSuccess',item)
+		var imageObj = {}
+		imageObj.path = path.join(mediaPath,hash)
+		// fs.stat(item.path,function(err,data){
+		// 	c(data)
+		// })
+		mainWindow.webContents.send('donwloadMediaSuccess',imageObj)
 	}).catch(err=>{
 		c('download media image failed')
 	})
 })
-function downloadMediaImage(item) {
-	let promise = new Promise((resolve,reject)=>{
-		var options = {
-			method: 'GET',
-			url: server+'/media/'+item.hash+'?type=original',
-			headers: {
-				Authorization: user.type+' '+user.token
-			}
-		}
-		function callback (err,res,body) {
-			if (!err && res.statusCode == 200) {
-				console.log('res')
-				resolve()
-			}else {
-				console.log('err')
-				fs.unlink(path.join(mediaPath,item.hash), (err,data)=>{
-					reject()
-				})
-				
-			}
-		}
-		var stream = fs.createWriteStream(path.join(mediaPath,item.hash))
-		request(options,callback).pipe(stream)
-	})
-	return promise
-}
 
 //data move
 ipcMain.on('getMoveData', () => {

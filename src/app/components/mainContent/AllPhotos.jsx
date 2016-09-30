@@ -268,7 +268,9 @@ export default class AllPhotos extends Component {
                         date={ date }
                         ref={ date + '-' + index }
                         onSelectedItem={ this.selectedItemHandle.bind(this, index) }
-                        detectImageItemActive={ this.detectImageItemActive }>
+                        detectImageItemActive={ this.detectImageItemActive }
+                        hash={entry.digest}
+                        dispatch={ this.props.dispatch }>
                       </ImageByDate>
                     )
                   }
