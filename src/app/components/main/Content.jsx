@@ -30,12 +30,13 @@ class MainContent extends Component {
 
 		// component.push(<AllFile dispatch={this.props.dispatch} state={this.props.state} key={'f'}></AllFile>);
 		// component.push(<AllFile dispatch={this.props.dispatch} state={this.props.state} key={'g'}></AllFile>);
-		component.push(<Media dispatch={this.props.dispatch} state={this.props.state} key={'e'}></Media>);
+		//component.push(<Media dispatch={this.props.dispatch} state={this.props.state} key={'e'}></Media>);
 		// component.push(<Setting dispatch={this.props.dispatch} state={this.props.state} key={'f'}></Setting>);
 
     	component.push(<AllPhoto dispatch={ this.props.dispatch } state={ this.props.state } key={'g'}></AllPhoto>);
     	component.push(<Setting dispatch={this.props.dispatch} state={this.props.state} key={'f'}></Setting>)
     	component.push(<DataMove dispatch={this.props.dispatch} state={this.props.state} key={'f'}></DataMove>)
+
 
 		// define the content is selected
 		let selectedItem = this.props.state.navigation.nav.findIndex( (item, index, arr) => {

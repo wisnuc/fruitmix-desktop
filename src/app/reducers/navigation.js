@@ -99,34 +99,6 @@ const nav = (state = navDefault, action) => {
   }
 }
 
-const photoMenu = (state = photoMenuData, action) => {
-  switch (action.type) {
-    case 'PHOTO_MENU_SELECT':
-       const selectedItem = state.find(item =>
-         item.name === action.name
-       );
-
-       if (!selectedItem) {
-         return state;
-       }
-
-       if (selectedItem.selected) {
-         return state;
-       }
-
-       return state.map(item => {
-         if (item === selectedItem) {
-           return Object.assign({}, item, { selected: true });
-         } else {
-           return Object.assign({}, item, { selected: false });
-         }
-       });
-
-    default:
-       return state;
-  }
-}
-
 const reducer = combineReducers({
   menu,
  	nav
