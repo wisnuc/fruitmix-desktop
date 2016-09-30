@@ -27,7 +27,7 @@ import LeftNav from './LeftNav';
 import Content from './Content';
 import RightPanel from './RightPanel';
 import Multiple from '../mainContent/Multiple';
-import Users from './userDialog'
+import Users from './userDialog';
 
 import svg from '../../utils/SVGIcon';
 
@@ -193,7 +193,7 @@ class Main extends Component {
 				<div className='app-bar-username'>{this.props.state.login.obj.username}</div>
 				</AppBar>
 				{/*Left Nav*/}
-				<Drawer width={241} open={this.props.state.navigation.menu} className='left-nav'>
+				<Drawer width={220} open={this.props.state.navigation.menu} className='left-nav'>
 					<LeftNav dispatch={this.props.dispatch} state={this.props.state}/>
 				</Drawer>
 				{/*Content*/}

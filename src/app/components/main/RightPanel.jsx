@@ -19,24 +19,23 @@ function getStyles () {
       width: '100%',
       borderLeft: '1px solid #e0e0e0',
       right: 0,
-      top: 120,
+      top: 50,
       bottom: 0,
-      height: '100%',
-      backgroundColor: '#263238'
+      height: '100%'
     },
     itemHeader: {
       display: 'block',
       textAlign: 'center',
-			lineHeight: '40px',
-			fontSize: 12,
-			color: '#fff',
-			backgroundColor: 'rgba(0,0,0,.2)',
-			borderBottom: '1px solid rgba(0,0,0,.25)',
-      borderTop: '1px solid rgba(0,0,0,.25)'
+			lineHeight: '38px',
+			fontSize: 14,
+      fontWeight: 700,
+			color: '#949494',
+      backgroundColor: '#f5f5f5'
     },
     itemBody: {
       overflow: 'hidden',
-      transition: 'max-height .5s cubic-bezier(0, 1, .5, 1)'
+      transition: 'max-height .5s cubic-bezier(0, 1, .5, 1)',
+      backgroundColor: '#fff'
     },
     photoItemBody: {
       height: 144,

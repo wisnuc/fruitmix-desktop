@@ -104,6 +104,37 @@ var actions = {
 		}
 	},
 
+	addDragImageItem(el, date, index) {
+    return {
+			type: 'ADD_DRAG_IMAGEITEM',
+			el,
+			date,
+			index
+		};
+	},
+
+	removeDragImageItem(date, index) {
+		return {
+      type: 'REMOVE_DRAG_IMAGEITEM',
+      date,
+      index
+    }
+	},
+
+	toggleSelectStatusImageItem(checked) {
+    return {
+			type: 'TOGGLE_SELECT_STATUS_IMAGEITEM',
+			checked
+		}
+	},
+
+	toggleNavigator(titleTexts) {
+		return {
+			type: 'TOGGLE_NAVIGATOR',
+			titleTexts
+		}
+	},
+
 	// refreshDir(obj) {
 	// 	return {
 	// 		type: 'REFRESH_DIR',
@@ -280,7 +311,7 @@ var actions = {
 	setMoveData(data) {
 		return {
 			type : 'SET_MOVE_DATA',
-			data : data 
+			data : data
 		}
 	},
 

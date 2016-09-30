@@ -20,7 +20,7 @@ import Action from '../../actions/action';
 const style = {
 	margin:0,
 	padding:0,
-	width: 241
+	width: 220
 };
 
 const listStyle = {
@@ -44,13 +44,12 @@ function getStyles () {
 	return {
 		header: {
 			display: 'block',
-			textAlign: 'center',
-			lineHeight: '55px',
+			lineHeight: '38px',
 			fontSize: 14,
-			color: '#fff',
-			backgroundColor: 'rgba(0,0,0,.2)',
-			borderBottom: '1px solid rgba(0,0,0,.25)',
-			borderTop: '1px solid rgba(0,0,0,.25)'
+			fontWeight: 700,
+			color: '#1e1e1e',
+			paddingLeft: 56,
+			backgroundColor: '#e5e5e5'
 		}
 	}
 }
@@ -64,7 +63,7 @@ class leftNav extends Component {
 				  <div className="nav-item-box">
 						<label htmlFor="file_h" className="nav-item-header" style={ getStyles().header }>文件</label>
 						<input id="file_h" className="slide-emit" type="checkbox" />
-						<div className="nav-item-body">
+						<div className="nav-item-body file-item-body">
 							{this.props.state.navigation.nav.map((item,index) => {
 								if (item.type == 'leftNav' && index <= 3) {
 									return (
@@ -85,7 +84,7 @@ class leftNav extends Component {
 					<div className="nav-item-box">
 						<label htmlFor="photo_h" className="nav-item-header" style={ getStyles().header }>照片</label>
 						<input id="photo_h" className="slide-emit" type="checkbox" />
-						<div className="nav-item-body">
+						<div className="nav-item-body photo-item-body">
 							{
 								this.props.state.navigation.nav.map((item, index) => {
 									if (item.type == 'leftNav' && index >= 4 && index<6) {

@@ -1,4 +1,4 @@
-/**
+ /**
  * @component Index
  * @description 首页组件
  * @time 2016-4-5
@@ -47,7 +47,7 @@ class Index extends React.Component {
 		ipc.on('message',(err,message,code)=>{
 			this.props.dispatch(Login.setSnack(message,true))
 			// if (code == 0 ) {
-			// 	this.props.dispatch(Login.loginFailed())		
+			// 	this.props.dispatch(Login.loginFailed())
 			// }
 		})
 
@@ -60,6 +60,8 @@ class Index extends React.Component {
 	submit() {
 		let username = this.refs.username.input.value
 		let password = this.refs.password.input.value
+		//ipc.send('login',username,password)
+		//ipc.send('login','Alice','123456')
 		ipc.send('login',username,password)
 		// ipc.send('login','Alice','123456')
 	}
@@ -69,7 +71,7 @@ class Index extends React.Component {
 		let findDevice = this.props.state.view.findDevice
 		let loginContent
 		let busy = (this.props.state.login.state ==='BUSY')
-		let device = this.props.state.login.device 
+		let device = this.props.state.login.device
 		const styles = {
 		  underlineStyle: {
 		    borderColor: orange500,
@@ -87,7 +89,7 @@ class Index extends React.Component {
 								<MenuItem key={index} value={index} primaryText={_this.getTitle(item)}></MenuItem>
 							))}
 						</SelectField>
-			
+
 						<TextField underlineStyle={{borderColor:'#999'}} underlineFocusStyle={styles.underlineStyle} hintStyle={{color:'#999'}} ref='username' style={{marginBottom: 10}} hintText="用户名" type="username" />
 						<TextField underlineStyle={{borderColor:'#999'}} underlineFocusStyle={styles.underlineStyle} hintStyle={{color:'#999'}} ref='password' style={{marginBottom: 10}} hintText="密码" type="password" onKeyDown={this.kenDown.bind(this)}/>
 						<div className='login-button'>
@@ -196,5 +198,5 @@ class Index extends React.Component {
 Index.childContextTypes = {
   muiTheme: React.PropTypes.object.isRequired,
 }
-	
+
 export default Index
