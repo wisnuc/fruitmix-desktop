@@ -125,6 +125,11 @@ body{
 	max-height: 96px;
 }
 
+.photo-item-body *{
+	color:#999;
+	cursor: default!important;
+}
+
 .nav-item-body > div > span > div > div {
 	height: 48px!important;
 	line-height: 48px!important;

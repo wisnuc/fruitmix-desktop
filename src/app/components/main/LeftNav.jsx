@@ -94,7 +94,6 @@ class leftNav extends Component {
 												primaryText={ item.name }
 												key={ item.name }
 												desktop={ true }
-												onTouchTap={ this.itemSelect.bind(this,item.name,index) }
 												innerDivStyle={ item.selected ? selectedStyle : listStyle }
 												leftIcon={ item.icon ? svg[item.icon]() : null }>
 											</MenuItem>
