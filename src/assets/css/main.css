@@ -52,6 +52,7 @@ body{
 .app-bar-right {
 	position: absolute!important;
 	right:10px;
+	top:0px;
 }
 .app-bar-username {
 	position: absolute;
@@ -60,6 +61,15 @@ body{
 	line-height: 50px;
 	font-size:14px;
 	color:#ef6c00;
+}
+.app-bar-appifi {
+	width:42px;
+	height:12px;
+	background: url(../images/index/ic_appifi_1.png);
+	position: absolute;
+	right:80px;
+	top:20px;
+	cursor: pointer;
 }
 /*left nav*/
 .left-nav>div {
@@ -187,10 +197,18 @@ body{
 	background: transparent!important;
 }
 .content-container>div,.content-container>div>div{
-	height: -webkit-calc(100% - 38px);
+	/*height: -webkit-calc(100% - 19px);*/
+	height:100%;
 }
 .content-container.content-has-left-padding .content {
 	padding-left:238px;
+}
+.content-container.content-has-left-padding .navigation-bar {
+	padding-left:238px;
+}
+
+.content>div {
+	height: 100%
 }
 .navigation-bar {
 	margin-left: 220px;
@@ -783,10 +801,11 @@ body{
 /*data move*/
 .data-move-container {
 	height:100%;
-	background-color: white
+	background-color: white;
+	overflow:hidden;
 }
 .datamovetable thead>tr>th:nth-child(1){
-	width:175px!important;
+	width:275px!important;
 }
 
 .datamovetable .hoverLight {

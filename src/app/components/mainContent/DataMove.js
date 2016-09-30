@@ -15,7 +15,8 @@
  		var sambaArr = []
  		var userArr = []
  		this.props.state.moveData.data.forEach(item => {
- 			if (item.name.indexOf('nobody') == -1) {
+ 			c.log(item.path.indexOf('nobody'))
+ 			if (item.path.indexOf('nobody') == -1) {
 				userArr.push(item)
 			}else {
 				sambaArr.push(item)
@@ -23,7 +24,11 @@
  		})
  		var sambaDOM = null
  		if (sambaArr.length != 0) {
- 			sambaDOM= <Row item={{name:'共享文件夹',path:sambaArr}} samba={false}></Row>
+ 			sambaDOM= <tr>
+							<th>共享文件夹</th>
+							<th></th>
+							<th className='hoverLight' onClick={this.move.bind(this,sambaArr)}>迁移</th>
+						</tr>
  		}
  		return (
  			<div className='data-move-container'>
@@ -33,22 +38,27 @@
 						<tr>
 							<th>数据文件</th>
 							<th>路径</th>
-							<th>操作</th>
+							<th>迁移</th>
 						</tr>
 					</thead>
 					{/*table body*/}
 					<tbody>
 						{
 							userArr.map((item,index)=>{
-								return <Row item={item} samba={true}></Row>
+								return <Row key={item.name} item={item} samba={true}></Row>
 							})
 						}
-
 						{sambaDOM}
 					</tbody>
 				</table>
  			</div>
  			)
+ 	}
+
+ 	move(path) {
+ 		path.forEach(item => {
+				ipc.send('move-data',item.path)
+			})
  	}
  }
 

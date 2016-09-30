@@ -49,6 +49,7 @@ class Main extends Component {
 		ipc.send('getMediaData')
 		ipc.send('getMoveData')
 		ipc.send('getFilesSharedWithMe')
+		ipc.send('getFilesSharedWithOthers')
 
 		// this.props.dispatch(Action.filesLoading());
 
@@ -191,6 +192,7 @@ class Main extends Component {
 					onLeftIconButtonTouchTap={this.leftNavClick.bind(this)}
 				>
 				<div className='app-bar-username'>{this.props.state.login.obj.username}</div>
+				<div className='app-bar-appifi' onClick={this.openAppifi.bind(this)}></div>
 				</AppBar>
 				{/*Left Nav*/}
 				<Drawer width={220} open={this.props.state.navigation.menu} className='left-nav'>
@@ -308,6 +310,10 @@ class Main extends Component {
 		this.setState({
 			userDialog: !this.state.userDialog
 		});
+	}
+
+	openAppifi() {
+		ipc.send('openAppifi')
 	}
 }
 

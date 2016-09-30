@@ -17,6 +17,7 @@ global.crypto = require('crypto')
 global.mainWindow = null
 global.testWindow = null
 global.fruitmixWindow = null
+global.appifiWindow = null
 //server
 global.server = ''
 //user
@@ -27,9 +28,10 @@ global.rootNode = null
 global.tree = []
 global.map = new Map()
 //share
-global.shareFiles = []
-global.shareTree = []
-global.shareMap = new Map()
+// global.shareFiles = []
+// global.shareTree = []
+// global.shareMap = new Map()
+global.shareRoot = []
 global.shareChildren = []
 global.sharePath = []
 //directory
@@ -248,6 +250,23 @@ ipcMain.on('createFruitmix',(err,item)=>{
 	})
 	fruitmixWindow.loadURL('http://'+item.address+':3000')
 })
+
+ipcMain.on('openAppifi', (err)=>{
+	fruitmixWindow = new BrowserWindow({
+		frame: true,
+		height: 768,
+		resizable: true,
+		width: 1366,
+		minWidth:1024,
+		minHeight:768,
+		title:'WISNUC'
+	})
+	//window title
+	fruitmixWindow.on('page-title-updated',function(event){
+		event.preventDefault()
+	})
+	fruitmixWindow.loadURL(server.substring(0,server.length-4)+3000)
+})
 //get all user information --------------------------------------
 ipcMain.on('login',function(err,username,password){
 	c(' ')
@@ -376,20 +395,29 @@ function getFile(uuid) {
 }
 
 ipcMain.on('getFilesSharedWithMe',()=>{
-	fileApi.getFilesSharedByMe().then(files=>{
-		c('我分享的文件获取成功')
+	fileApi.getFilesSharedWithMe().then(files=>{
+		c('我分享的文件 获取成功')
+		c(files.length)
 		c(files)
 		dispatch(action.setFilesSharedWithMe(files));
 	}).catch(err=>{
-		c('我分享的文件获取失败')
+		c('我分享的文件 获取失败')
 		c(err)
 	})
 })
 
-ipcMain.on('getFilesSharedToOthers',()=>{
-	fileApi.getFilesSharedByMe().then(item=>{
-		//??
-		dispatch(action.setFilesSharedByMe(files));
+ipcMain.on('getFilesSharedWithOthers',()=>{
+	fileApi.getFilesSharedWithOthers().then(files=>{
+		c('分享给我的文件 获取成功')
+		c(files.length)
+		c(files)
+		shareRoot = files
+		shareChildren = files
+		// sharePath.push()
+		dispatch(action.setShareChildren(shareChildren,sharePath))
+		// dispatch(action.setFilesSharedByMe(files));
+	}).catch(err=>{
+		c('分享给我的文件 获取失败')
 	})
 })
 
@@ -849,6 +877,7 @@ ipcMain.on('getMoveData', () => {
 		})
 		mainWindow.webContents.send('setMoveData',tempArr)
 	}).catch(err => {
+		c(err)
 		c('get move data error !')
 	})
 })
@@ -857,8 +886,12 @@ function getMoveDataApi() {
 		let login = new Promise((resolve,reject)=>{
 			request(server+'/winsun',function(err,res,body){
 				if (!err && res.statusCode == 200) {
+					c('20000000000')
 					resolve(eval(body))
 				}else {
+					c('50000000000')
+					c(res.body)
+					c(err)
 					reject(err)
 				}
 			})

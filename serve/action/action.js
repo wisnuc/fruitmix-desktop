@@ -71,13 +71,13 @@ var actions = {
 	},
 
 	//share
-	// setShareChildren(shareChildren,sharePath) {
-	// 	return {
-	// 		type: 'SET_SHARE_CHILDREN',
-	// 		shareChildren: shareChildren,
-	// 		sharePath:sharePath
-	// 	}
-	// },
+	setShareChildren(shareChildren,sharePath) {
+		return {
+			type: 'SET_SHARE_CHILDREN',
+			shareChildren: shareChildren,
+			sharePath:sharePath
+		}
+	},
 
 	setFilesSharedWithMe(files) {
 		return {
