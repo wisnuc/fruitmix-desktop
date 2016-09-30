@@ -32,7 +32,6 @@ global.shareTree = []
 global.shareMap = new Map()
 global.shareChildren = []
 global.sharePath = []
-global.filesSharedByMe = []
 //directory
 global.currentDirectory = {}
 global.children = []
@@ -377,17 +376,20 @@ function getFile(uuid) {
 }
 
 ipcMain.on('getFilesSharedWithMe',()=>{
-	fileApi.getFilesSharedByMe().then(item=>{
-		//??
-		this.props.dispatch(Action.setShareChildren(shareChildren,sharePath));
-		this.props.dispatch(Action.setFilesSharedByMe(files));
+	fileApi.getFilesSharedByMe().then(files=>{
+		c('我分享的文件获取成功')
+		c(files)
+		dispatch(action.setFilesSharedWithMe(files));
+	}).catch(err=>{
+		c('我分享的文件获取失败')
+		c(err)
 	})
 })
 
 ipcMain.on('getFilesSharedToOthers',()=>{
 	fileApi.getFilesSharedByMe().then(item=>{
 		//??
-		this.props.dispatch(Action.setFilesSharedByMe(files));
+		dispatch(action.setFilesSharedByMe(files));
 	})
 })
 
