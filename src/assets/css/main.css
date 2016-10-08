@@ -1,13 +1,9 @@
 /*main*/
+
 * {
 	font-family: sans-serif;
 }
-.fl {
-	float: left;
-}
-.fr {
-	float: right;
-}
+
 .clearfix:after {
 	display: block;
 	content: "\0020";
@@ -52,7 +48,7 @@ body{
 .app-bar-right {
 	position: absolute!important;
 	right:10px;
-	top:0px;
+	top: 0!important;
 }
 .app-bar-username {
 	position: absolute;
@@ -102,6 +98,10 @@ body{
 	cursor: default;
 }
 
+.right-panel-inner.active {
+	right: 0!important;
+}
+
 .nav-inner {
 	padding: 0!important;
 	display: block!important;
@@ -121,7 +121,7 @@ body{
 	max-height: 192px;
 }
 
-.photo-item-body {
+.photo-item-body, .system-item-body {
 	max-height: 96px;
 }
 

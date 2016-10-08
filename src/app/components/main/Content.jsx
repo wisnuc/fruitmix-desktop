@@ -51,7 +51,15 @@ class MainContent extends Component {
 		return (
 			<div>
         {/* NavigationBar */}
-        {/*<NavigationBar navigationBarTitleTexts={ this.props.state.navigationBarTitleTexts } navigationBarHorizontalPadding={ 18 }></NavigationBar>*/}
+        <NavigationBar
+          dispatch={ this.props.dispatch }
+          state={ this.props.state }
+          navigationBarTitleTexts={ this.props.state.navigationBarTitleTexts }
+          navigationBarHorizontalPadding={ 18 }
+          onShowedRightPanel={ this.props.onShowedRightPanel }
+          icons={[ { text: 'i' } ]}>
+        </NavigationBar>
+        
         <div className="content">
           <CSS opts={['content', true, true, false, 800, 800, 500]}>
   				  {this.getContentSelected()}

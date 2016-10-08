@@ -198,7 +198,7 @@ export default class AllPhotos extends Component {
 
   scrollTo() {
     if (this.current > this.pages) {
-      alert('end');
+      alert('没有更多图片了');
       return;
     }
 
@@ -250,7 +250,7 @@ export default class AllPhotos extends Component {
         component = dateStr.map((date, index) => {
           return (
             <div className="clearfix">
-              <div style={{ margin: '15px 0', fontFamily: 'helvetica', color: '#6d6d6d', fontSize: 12 }}>
+              <div style={{ margin: '10px 0', fontFamily: 'helvetica', color: '#6d6d6d', fontSize: 12 }}>
                 <Checkbox
                  key={ index }
                  value={ date }
