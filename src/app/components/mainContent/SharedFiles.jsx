@@ -18,11 +18,9 @@ class SharedFiles extends Component {
 
 	constructor(props) {
         super(props);
-        this.state = { deleteShow: false };
+        // this.state = { deleteShow: false };
     }
 	render() {
-		console.log(this);
-		return <div>to be continued</div>
 		return (
 			<div className='shared-files-container'>
 				{/*<div onClick={this.backRoot}>back root</div>*/}
@@ -39,7 +37,7 @@ class SharedFiles extends Component {
 						</tr>
 					</thead>
 					<tbody>
-						{this.props.state.data.shareChildren.map(item=>(
+						{this.props.state.share.shareChildren.map(item=>(
 							<Row 
 								key={item.uuid}
 								item={item}
@@ -57,7 +55,7 @@ class SharedFiles extends Component {
 	//get  bread
 	getBreadCrumb(){
 		var _this = this;
-		var path = this.props.state.data.sharePath;
+		var path = this.props.state.share.sharePath;
 		var pathArr = [];
 		pathArr = path.map((item,index)=>{
 			return(

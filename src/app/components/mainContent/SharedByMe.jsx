@@ -13,7 +13,6 @@ import svg from '../../utils/SVGIcon';
 
 class SharedByMe extends Component {
 	render() {
-		return <div>to be continued</div>
 		return (
 			<div className='files-shared-byme-container'>
 			<table className="fileTable">
@@ -28,8 +27,8 @@ class SharedByMe extends Component {
 				{/*table body*/}
 				<tbody>
 					{
-						this.props.state.data.filesSharedByMe.map((item,index)=>{
-							if (index > this.props.state.data.showSize) {
+						this.props.state.share.filesSharedByMe.map((item,index)=>{
+							if (item.readlist.length == 0 && item.writelist.length == 0 ) {
 								return false
 							}
 							return (
@@ -51,7 +50,6 @@ class SharedByMe extends Component {
 	}
 
 	findUser(file) {
-		c.log(file.writelist[0]);
 		let users = '';
 		let allUser = this.props.state.login.obj.allUser;
 		file.writelist.forEach((item,index)=>{

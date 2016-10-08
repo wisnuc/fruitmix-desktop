@@ -394,30 +394,26 @@ function getFile(uuid) {
 	return file
 }
 
-ipcMain.on('getFilesSharedWithMe',()=>{
+ipcMain.on('getFilesSharedToMe',()=>{
 	fileApi.getFilesSharedWithMe().then(files=>{
-		c('我分享的文件 获取成功')
-		c(files.length)
-		c(files)
-		dispatch(action.setFilesSharedWithMe(files));
+		c('分享给我的文件 获取成功')
+		c(files.length + '个文件')
+		shareRoot = files
+		shareChildren = files
+		dispatch(action.setShareChildren(shareChildren,sharePath))
 	}).catch(err=>{
-		c('我分享的文件 获取失败')
+		c('分享给我的文件 获取失败')
 		c(err)
 	})
 })
 
-ipcMain.on('getFilesSharedWithOthers',()=>{
+ipcMain.on('getFilesSharedToOthers',()=>{
 	fileApi.getFilesSharedWithOthers().then(files=>{
-		c('分享给我的文件 获取成功')
-		c(files.length)
-		c(files)
-		shareRoot = files
-		shareChildren = files
-		// sharePath.push()
-		dispatch(action.setShareChildren(shareChildren,sharePath))
-		// dispatch(action.setFilesSharedByMe(files));
+		c('我分享的文件 获取成功')
+		c(files.length + '个文件')
+		dispatch(action.setFilesSharedWithMe(files))
 	}).catch(err=>{
-		c('分享给我的文件 获取失败')
+		c('我分享的文件 获取失败')
 	})
 })
 
@@ -743,7 +739,7 @@ ipcMain.on('getMediaData',(err)=>{
 			if (item == null) {return}
 			let obj = Object.assign({},item,{status:'notReady',failed:0})
 			media.push(obj)	
-			mediaMap.set(item.hash,item)
+			mediaMap.set(item.digest,item)
 		})
 		// mainWindow.webContents.send('mediaFinish',media)
 		dispatch(action.setMedia(media))
@@ -753,6 +749,7 @@ ipcMain.on('getMediaData',(err)=>{
 })
 //getMediaThumb
 ipcMain.on('getThumb',(err,item)=>{
+	c(item)
 	thumbQueue.push(item)
 	dealThumbQueue()
 })
@@ -775,20 +772,20 @@ function dealThumbQueue() {
 	}
 }
 function isThumbExist(item) {
-	c(item.hash)
-	fs.readFile(path.join(mediaPath,item.hash+'thumb'),(err,data)=>{
+	c(item.digest)
+	fs.readFile(path.join(mediaPath,item.digest+'thumb'),(err,data)=>{
 		if (err) {
 			downloadMedia(item).then((data)=>{
 				sendThumb(item)
 				console.log(thumbQueue.length+' length')
 			}).catch(err=>{
-				c(item.hash+' failed')
+				c(item.digest+' failed')
 				item.failed++
-				let index = thumbIng.findIndex(i=>i.hash == item.hash)
+				let index = thumbIng.findIndex(i=>i.digest == item.digest)
 				let t = thumbIng[index]
 				thumbIng.splice(index,1)
 				if (item.failed <5) {
-					fs.readFile(path.join(mediaPath,item.hash+'thumb'),(err,data)=>{
+					fs.readFile(path.join(mediaPath,item.digest+'thumb'),(err,data)=>{
 						if (err) {
 
 						}else {
@@ -810,10 +807,10 @@ function isThumbExist(item) {
 	})
 
 	function sendThumb(item){
-		c(item.hash+' is over')
-		let index = thumbIng.findIndex(i=>i.hash == item.hash)
+		c(item.digest+' is over')
+		let index = thumbIng.findIndex(i=>i.digest == item.digest)
 		thumbIng.splice(index,1)
-		item.path = path.join(mediaPath,item.hash+'thumb')
+		item.path = path.join(mediaPath,item.digest+'thumb')
 		mainWindow.webContents.send('getThumbSuccess',item)
 		setTimeout(dealThumbQueue,200)
 	}
@@ -825,7 +822,7 @@ function downloadMedia(item) {
 		c('100 '+height)
 		var options = {
 			method: 'GET',
-			url: server+'/media/'+item.hash+'?type=thumb&width=100&height='+height,
+			url: server+'/media/'+item.digest+'/thumbnail?width=100',
 			headers: {
 				Authorization: user.type+' '+user.token
 			}
@@ -836,13 +833,15 @@ function downloadMedia(item) {
 				console.log('res')
 				resolve(body)
 			}else {
-				fs.unlink(path.join(mediaPath,item.hash+'thumb'), (err,data)=>{
+				c('err')
+				c(res.body)
+				fs.unlink(path.join(mediaPath,item.digest+'thumb'), (err,data)=>{
 					reject(err)	
 				})
 				
 			}
 		}
-			var stream = fs.createWriteStream(path.join(mediaPath,item.hash+'thumb'))
+			var stream = fs.createWriteStream(path.join(mediaPath,item.digest+'thumb'))
 
 			request(options,callback).pipe(stream)
 		})
@@ -886,10 +885,8 @@ function getMoveDataApi() {
 		let login = new Promise((resolve,reject)=>{
 			request(server+'/winsun',function(err,res,body){
 				if (!err && res.statusCode == 200) {
-					c('20000000000')
 					resolve(eval(body))
 				}else {
-					c('50000000000')
 					c(res.body)
 					c(err)
 					reject(err)

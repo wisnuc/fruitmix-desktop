@@ -81,7 +81,7 @@ var actions = {
 
 	setFilesSharedWithMe(files) {
 		return {
-			type: 'FILES_SHARED_WITH_ME',
+			type: 'FILES_SHARED_BY_ME',
 			files:files
 		}
 	},

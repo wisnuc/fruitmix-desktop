@@ -126,8 +126,8 @@ body{
 }
 
 .photo-item-body *{
-	color:#999;
-	cursor: default!important;
+/*	color:#999;
+	cursor: default!important;*/
 }
 
 .nav-item-body > div > span > div > div {
