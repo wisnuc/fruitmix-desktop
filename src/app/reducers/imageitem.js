@@ -5,15 +5,21 @@
 export default function (state = [], action) {
   switch (action.type) {
     case 'ADD_DRAG_IMAGEITEM':
-      const cloneState = state.slice(0);
+      const cloneState = state.slice();
       cloneState.push({
         el: action.el,
         date: action.date,
         index: action.index
       });
-      console.log(cloneState, 'gg');
 
       return cloneState;
+
+    case 'ADD_DRAG_IMAGELIST':
+      const cloneAddedState = state.slice();
+      const date = action.date;
+      const cloneEls = action.els.map((el, index) =>({ el, date, index }));
+
+      return cloneAddedState.concat(cloneEls);
     case 'REMOVE_DRAG_IMAGEITEM':
       const dragedItem = state.find(item =>
         item.date === action.date
@@ -27,6 +33,12 @@ export default function (state = [], action) {
       return state.filter(item =>
         item !== dragedItem
       );
+    case 'REMOVE_DRAG_IMAGELIST':
+      return state.filter(item =>
+        item.date !== action.date
+      );
+    case 'CLEAR_DRAG_IMAGEITEM':
+      return [];
     default:
       return state;
   }

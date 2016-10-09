@@ -26,7 +26,6 @@ import css  from  '../../../assets/css/main';
 //import component
 import LeftNav from './LeftNav';
 import Content from './Content';
-import RightPanel from './RightPanel';
 import Multiple from '../mainContent/Multiple';
 import Users from './userDialog';
 
@@ -201,11 +200,8 @@ class Main extends Component {
 				</Drawer>
 				{/*Content*/}
 				<Paper className={"content-container "+(this.props.state.navigation.menu?'content-has-left-padding':'no-padding')} zDepth={0}>
-					<Content onShowedRightPanel={ this.showedRightPanelHandler.bind(this) } dispatch={this.props.dispatch} state={this.props.state}/>
+					<Content dispatch={this.props.dispatch} state={this.props.state}/>
 				</Paper>
-
-        {/* Right Panel */}
-        {/*<RightPanel ref="rightPanel" width={ 230 } dispatch={ this.props.dispatch } state={ this.props.state }></RightPanel>*/}
 
 				{m}
 				<Dialog title="用户管理"
@@ -220,10 +216,6 @@ class Main extends Component {
 			</div></CSS>
 			);
 	}
-
-  showedRightPanelHandler() {
-    this.refs.rightPanel && findDOMNode(this.refs.rightPanel).lastElementChild.classList.toggle('active');
-  }
 
 	triggerClick(e) {
 		if (this.props.state.view.menu.show) {
