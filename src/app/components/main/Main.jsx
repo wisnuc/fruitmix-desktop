@@ -205,7 +205,7 @@ class Main extends Component {
 				</Paper>
 
         {/* Right Panel */}
-        <RightPanel ref="rightPanel" width={ 230 } dispatch={ this.props.dispatch } state={ this.props.state }></RightPanel>
+        {/*<RightPanel ref="rightPanel" width={ 230 } dispatch={ this.props.dispatch } state={ this.props.state }></RightPanel>*/}
 
 				{m}
 				<Dialog title="用户管理"
