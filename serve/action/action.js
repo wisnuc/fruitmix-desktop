@@ -25,6 +25,13 @@ var actions = {
 		}
 	},
 
+	deleteServer(item) {
+		return {
+			type : 'DELETE_SERVER',
+			item : item
+		}
+	},
+
 	setDeviceUsedRecently(ip) {
 		return {
 			type: 'SET_DEVICE_USED_RECENTLY',
@@ -55,12 +62,12 @@ var actions = {
 	},
 
 	//media
-	setMedia(data) {
-		return {
-			type: 'SET_MEDIA',
-			data: data
-		}
-	},
+	// setMedia(data) {
+	// 	return {
+	// 		type: 'SET_MEDIA',
+	// 		data: data
+	// 	}
+	// },
 
 	//DataMove
 	setMoveData(data) {

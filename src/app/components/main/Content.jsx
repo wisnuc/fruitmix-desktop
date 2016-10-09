@@ -33,8 +33,8 @@ class MainContent extends Component {
 		// component.push(<Media dispatch={this.props.dispatch} state={this.props.state} key={'e'}></Media>);
 		// component.push(<Setting dispatch={this.props.dispatch} state={this.props.state} key={'f'}></Setting>);
 
-    	// component.push(<AllPhoto dispatch={ this.props.dispatch } state={ this.props.state } key={'g'}></AllPhoto>);
-    	component.push(<Media dispatch={this.props.dispatch} state={this.props.state} key={'e'}></Media>);
+    	component.push(<AllPhoto dispatch={ this.props.dispatch } state={ this.props.state } key={'g'}></AllPhoto>);
+    	// component.push(<Media dispatch={this.props.dispatch} state={this.props.state} key={'e'}></Media>);
     	component.push(<Setting dispatch={this.props.dispatch} state={this.props.state} key={'f'}></Setting>)
     	component.push(<DataMove dispatch={this.props.dispatch} state={this.props.state} key={'f'}></DataMove>)
 
@@ -51,15 +51,15 @@ class MainContent extends Component {
 		return (
 			<div>
         {/* NavigationBar */}
-        <NavigationBar
-          dispatch={ this.props.dispatch }
-          state={ this.props.state }
-          navigationBarTitleTexts={ this.props.state.navigationBarTitleTexts }
-          navigationBarHorizontalPadding={ 18 }
-          onShowedRightPanel={ this.props.onShowedRightPanel }
-          icons={[ { text: 'i' } ]}>
-        </NavigationBar>
-        
+        {/*<NavigationBar
+                  dispatch={ this.props.dispatch }
+                  state={ this.props.state }
+                  navigationBarTitleTexts={ this.props.state.navigationBarTitleTexts }
+                  navigationBarHorizontalPadding={ 18 }
+                  onShowedRightPanel={ this.props.onShowedRightPanel }
+                  icons={[ { text: 'i' } ]}>
+                </NavigationBar>*/}
+
         <div className="content">
           <CSS opts={['content', true, true, false, 800, 800, 500]}>
   				  {this.getContentSelected()}

@@ -36,13 +36,13 @@ class Index extends React.Component {
 
 		setTimeout(()=>{
 			ipc.send('getDeviceUsedRecently')
-		},1500)
+		},1000)
 
 		setTimeout(()=>{
 				if (this.props.state.login.selectIndex == 0 && this.props.state.login.device.length != 0) {
 					this.selectDevice.apply(this,[null,0,false])
 				}
-		},1000)
+		},1500)
 
 		ipc.on('message',(err,message,code)=>{
 			this.props.dispatch(Login.setSnack(message,true))
@@ -167,7 +167,7 @@ class Index extends React.Component {
 
 	submitServer() {
 		let ip = this.refs.serverIP.input.value
-		ipc.send('setServeIp',ip,true)
+		ipc.send('setServeIp',ip,true,true)
 		this.props.dispatch(Action.toggleAddDevice())
 	}
 
@@ -182,7 +182,7 @@ class Index extends React.Component {
 	}
 
 	getTitle(item) {
-		if (item.custom) {
+		if (item.isCustom) {
 			return item.host
 		}
 		let titleArr = item.host.split('-')

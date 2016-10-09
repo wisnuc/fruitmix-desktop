@@ -185,11 +185,11 @@ ipcMain.on('setServeIp',(err,ip, isCustom, isStorage)=>{
 	c('set ip : ')
 	dispatch(action.setDeviceUsedRecently(ip))
 	server = 'http://' + ip + ':3721'
-	if (isCustom) {
-		c('??')
-		c(ip)
-		return
-	}
+	// if (isCustom) {
+	// 	c('??')
+	// 	c(ip)
+	// 	return
+	// }
 	if ( !isStorage) {
 		return
 	}
@@ -200,9 +200,7 @@ ipcMain.on('setServeIp',(err,ip, isCustom, isStorage)=>{
 		let d = JSON.parse(data)
 		d.ip = ip
 		if (isCustom) {
-			d.customDevice.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true})
-			// device.push({addresses:[ip],host:ip,fullname:ip,active:false,checked:true,isCustom:true})
-			// dispatch(action.setDevice(device))
+			d.customDevice.push({address:ip,host:ip,appifi:{},name:ip,active:false,checked:true,isCustom:true})
 		}
 		let j = JSON.stringify(d)
 		fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
@@ -211,15 +209,17 @@ ipcMain.on('setServeIp',(err,ip, isCustom, isStorage)=>{
 	})
 })
 ipcMain.on('delServer',(err,i)=>{
-	let index = device.findIndex(item=>{
-		return item.addresses[0] == i.addresses[0]
-	})
-	device.splice(index,1)
+	// let index = device.findIndex(item=>{
+	// 	return item.addresses[0] == i.addresses[0]
+	// })
+	// device.splice(index,1)
+
+	dispatch(action.deleteServer(i))
 	fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
 		let d = JSON.parse(data) 
 		c(d)
 		let ind = d.customDevice.findIndex(item=>{
-			return item.addresses[0] == i.addresses[0]
+			return item.address == i.address
 		})
 		if (ind != -1) {
 			d.customDevice.splice(ind,1)
@@ -229,8 +229,8 @@ ipcMain.on('delServer',(err,i)=>{
 
 		})
 	})
-	// mainWindow.webContents.send('device',device)
-	dispatch(action.setDevice(device))
+
+	// dispatch(action.setDevice(device))
 })
 //create fruitmix
 ipcMain.on('createFruitmix',(err,item)=>{
@@ -483,6 +483,7 @@ ipcMain.on('create-new-user',function(err, u, p){
 	})
 })
 ipcMain.on('userInit',(err,s,u,p,i)=>{
+	c(' ')
 	loginApi.userInit(s,u,p).then( () => {
 		c('管理员注册成功')
 		mainWindow.webContents.send('message','管理员注册成功')
@@ -526,6 +527,7 @@ ipcMain.on('deleteUser',(err,uuid)=>{
 })
 //share
 ipcMain.on('share',function(err,files,users){
+	c(' ')
 	var index = 0
 
 	function doShare(err) {
@@ -734,6 +736,7 @@ ipcMain.on('changeDownloadPath', e=>{
 
 //getMediaData
 ipcMain.on('getMediaData',(err)=>{
+	c(' ')
 	mediaApi.getMediaData().then((data)=>{
 		data.forEach(item=>{
 			if (item == null) {return}
@@ -741,9 +744,11 @@ ipcMain.on('getMediaData',(err)=>{
 			media.push(obj)	
 			mediaMap.set(item.digest,item)
 		})
-		// mainWindow.webContents.send('mediaFinish',media)
-		dispatch(action.setMedia(media))
+		c('media 列表获取成功')
+		mainWindow.webContents.send('mediaFinish',media)
+		// dispatch(action.setMedia(media))
 	}).catch(err=>{
+		c('media 列表获取失败')
 		console.log(err)
 	})
 })
