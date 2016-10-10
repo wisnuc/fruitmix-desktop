@@ -868,6 +868,16 @@ ipcMain.on('getMediaImage',(err,hash)=>{
 	})
 })
 
+ipcMain.on('getMediaShare' , err => {
+	mediaApi.getMediaShare().then(data => {
+		mainWindow.webContents.send('mediaShare',data)
+	}).catch(err => {
+		c(err)
+	})
+})
+
+// data move api -----------------------------------------
+
 //data move
 ipcMain.on('getMoveData', () => {
 	c('begin get move data : ')

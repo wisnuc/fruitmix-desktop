@@ -50,6 +50,7 @@ class Main extends Component {
 		ipc.send('getMoveData')
 		ipc.send('getFilesSharedToMe')
 		ipc.send('getFilesSharedToOthers')
+		ipc.send('getMediaShare')
 
 		// this.props.dispatch(Action.filesLoading());
 
@@ -114,6 +115,10 @@ class Main extends Component {
 		ipc.on('donwloadMediaSuccess',(err,item)=>{
 			this.props.dispatch(Action.setMediaImage(item));
 		});
+
+		ipc.on('mediaShare', (err,data) => {
+			this.props.dispatch(Action.setMediaShare(data))
+		})
 
 		// ipc.on('setShareChildren',(err,shareChildren,sharePath)=>{
 		// 	this.props.dispatch(Action.setShareChildren(shareChildren,sharePath));

@@ -2,7 +2,8 @@ const defaultState = {
 	data: [],
 	status: 'busy',
 	map: null,
-	size:30
+	size:30,
+	mediaShare : []
 }
 
 const Media = (state=defaultState,action)=>{
@@ -26,7 +27,9 @@ const Media = (state=defaultState,action)=>{
 				s = state.size+30;
 			}
 			console.log(s);
-			return Object.assign({},state,{size:s});
+			return Object.assign({},state,{size:s})
+		case 'SET_MEDIA_SHARE':
+			return Object.assign({},state,{mediaShare:action.data})
 		case 'ADAPTER':
 			return Object.assign({},state,action.store.media)
 		default:
