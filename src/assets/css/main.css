@@ -281,6 +281,7 @@ body{
 	overflow: hidden;
 	text-overflow: ellipsis;
 	cursor: pointer;
+	white-space: nowrap;
 }
 .all-my-files {
 	display: flex;

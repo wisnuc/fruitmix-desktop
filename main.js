@@ -118,7 +118,7 @@ app.on('ready', function() {
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	})
-	mainWindow.webContents.openDevTools()
+	//mainWindow.webContents.openDevTools()
 	mainWindow.loadURL('file://' + __dirname + '/build/index.html')
 	//create folder
 	fs.exists(mediaPath,exists=>{
@@ -400,6 +400,8 @@ ipcMain.on('getFilesSharedToMe',()=>{
 		c(files.length + '个文件')
 		shareRoot = files
 		shareChildren = files
+		sharePath.length = 0
+		sharePath.push({key:'',value:{}})
 		dispatch(action.setShareChildren(shareChildren,sharePath))
 	}).catch(err=>{
 		c('分享给我的文件 获取失败')
@@ -525,43 +527,6 @@ ipcMain.on('deleteUser',(err,uuid)=>{
 		mainWindow.webContents.send('message','删除用户失败，接口貌似还不OK')
 	})
 })
-//share
-ipcMain.on('share',function(err,files,users){
-	c(' ')
-	var index = 0
-
-	function doShare(err) {
-		if (err) {
-			console.log('err')
-			mainWindow.webContents.send('message',index + ' 个文件分享成功')	
-			return
-		}
-		index++
-		if (index == files.length) {
-			console.log('all share success')
-			mainWindow.webContents.send('message',files.length + ' 个文件分享成功')	
-			return
-		}else {
-			fileApi.share(files[index],users,doShare)
-		}
-	}
-
-	fileApi.share(files[index],users,doShare)
-})
-
-//cancel share
-ipcMain.on('cancelShare',(err,item)=>{
-	share(item,[]).then(()=>{
-		console.log('cancel success')
-		let index = filesSharedByMe.findIndex(i=>{
-			return item.uuid == i.uuid
-		})
-		filesSharedByMe.splice(index,1)
-		mainWindow.webContents.send('setFilesSharedByMe',filesSharedByMe)
-	}).catch(err=>{
-		c('cancel failed')
-	})
-})
 //getTreeChildren
 ipcMain.on('getTreeChildren',function(err,uuid) {
 	if (uuid && uuid!='') {
@@ -625,6 +590,31 @@ function move(uuid,target,index) {
 	})
 	return promise
 }
+
+//share
+ipcMain.on('share',function(err,files,users){
+	c(' ')
+	var index = 0
+
+	function doShare(err) {
+		if (err) {
+			console.log('err')
+			mainWindow.webContents.send('message',index + ' 个文件分享成功')	
+			return
+		}
+		index++
+		if (index == files.length) {
+			console.log('all share success')
+			mainWindow.webContents.send('message',files.length + ' 个文件分享成功')	
+			return
+		}else {
+			fileApi.share(files[index],users,doShare)
+		}
+	}
+
+	fileApi.share(files[index],users,doShare)
+})
+
 //enterShare
 ipcMain.on('enterShare',(err,item)=>{
 	c(' ')
@@ -636,15 +626,34 @@ ipcMain.on('enterShare',(err,item)=>{
 		c('获取shareChildren失败')
 	})
 })
-function getSharePath(item) {
 
+function getSharePath(obj) {
+	var index = sharePath.findIndex(item => {
+		return item.value.uuid == obj.uuid
+	})
+	if (index != -1) {
+		sharePath.splice(index,sharePath.length - 1 -index)
+	}else {
+		sharePath.push({key:obj.name,value:obj})
+	}
 }
+
 ipcMain.on('backShareRoot',err=>{
-	shareChildren.length = 0
-	shareTree.forEach((item)=>{if (item.hasParent == false) {shareChildren.push(item)}})
-	sharePath.length = 0
-	sharePath.push({value:'',obj:{}})
 	mainWindow.webContents.send('setShareChildren',shareChildren,sharePath)
+})
+
+//cancel share
+ipcMain.on('cancelShare',(err,item)=>{
+	share(item,[]).then(()=>{
+		console.log('cancel success')
+		let index = filesSharedByMe.findIndex(i=>{
+			return item.uuid == i.uuid
+		})
+		filesSharedByMe.splice(index,1)
+		mainWindow.webContents.send('setFilesSharedByMe',filesSharedByMe)
+	}).catch(err=>{
+		c('cancel failed')
+	})
 })
 //loginOff
 ipcMain.on('loginOff',err=>{
@@ -808,7 +817,6 @@ function downloadMedia(item) {
 	var download = new Promise((resolve,reject)=>{
 		let scale = item.width/item.height
 		let height = 100/scale
-		c('100 '+height)
 		var options = {
 			method: 'GET',
 			url: server+'/media/'+item.digest+'/thumbnail?width=200',
