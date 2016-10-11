@@ -283,6 +283,7 @@ export default class AllPhotos extends Component {
 
   viewLargeImageHandle(date, currentThumbIndex) {
     const { dispatch } = this.props;
+
     dispatch(Action.getLargeImageList(document.querySelectorAll('[data-date="'+ date +'"]'), currentThumbIndex, date));
   }
 
@@ -356,6 +357,8 @@ export default class AllPhotos extends Component {
 
   shutdownMaskHandle() {
     const { dispatch } = this.props;
+    
+    dispatch(Action.toggleMedia(false));
     dispatch(Action.removeLargeImageList());
   }
 

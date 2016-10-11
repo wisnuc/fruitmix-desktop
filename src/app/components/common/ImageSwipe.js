@@ -119,7 +119,7 @@ export default class ImageSwipe extends Component {
   render() {
     const { root, rootInner } = getStyles(this.props);
     const { state, height } = this.props;
-
+    console.log(state.view.currentMediaImage.path, 'xxx');
     return (
       <div className="image-swipe-container" style={ root }>
         <div className="clearfix" style={{ padding: '0 100px' }}>
