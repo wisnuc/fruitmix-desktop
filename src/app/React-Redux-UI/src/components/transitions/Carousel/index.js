@@ -53,7 +53,9 @@ function getStyles (props) {
       height: replaceTemplate('${height}px', props),
       position: 'relative',
       zIndex: 10,
-      backgroundColor: '#efefef'
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: '0 0',
+      backgroundSize: 'cover'
     }
   }
 }
@@ -142,6 +144,7 @@ export default class Carousel extends Component {
     const { data, onDragEnd } = props || this.props;
 
     return data.map((dataItem, index) => {
+      console.log(dataItem.el.querySelector('.figure').style.backgroundImage, 'sdfsdfdsfdsfsd');
       return (
         <Drag
           key={ index }
@@ -149,7 +152,7 @@ export default class Carousel extends Component {
           onDragEnd={ onDragEnd }
           date={ dataItem.date }
           index={ dataItem.index }
-          style={ item }>
+          style={ Object.assign({}, item, { backgroundImage: dataItem.el.querySelector('.figure').style.backgroundImage }) }>
           { dataItem.text }
         </Drag>
       );
