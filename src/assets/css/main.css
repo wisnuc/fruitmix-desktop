@@ -821,3 +821,56 @@ body{
 .datamovetable td.hoverLight:hover {
 	color:#333;
 }
+
+.operations {
+	margin-top: 10px;
+}
+
+.operations > div {
+	display: inline-block!important;
+}
+
+.action-btn {
+	display: inline-block!important;
+	margin-right: 20px!important;
+	margin-bottom: 0!important;
+}
+
+.action-btn svg {
+	display: inline-block!important;
+	width: 18px!important;
+	height: 18px!important;
+	position: static!important;
+	top: 0!important;
+	margin: 0!important;
+	left: 0!important;
+}
+
+.action-btn > div > div {
+	padding: 0!important;
+}
+
+.arrow-left-btn svg,
+.arrow-right-btn svg {
+	border-radius: 100%;
+	margin-left: -12px!important;
+	margin-top: 20px!important;
+	width: 30px!important;
+	height: 30px!important;
+}
+
+.arrow-left-btn svg:hover,
+.arrow-right-btn svg:hover {
+	background-color: #e5e5e5;
+}
+
+.clear-operation > div {
+	display: inline-block!important;
+}
+
+.clear-operation label {
+	font-size: 12px;
+	color: #757575;
+	margin-left: -20px;
+	vertical-align: text-top;
+}

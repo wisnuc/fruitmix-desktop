@@ -82,22 +82,22 @@ export default class ImageByDate extends Component {
   }
 
   selectedItemHandle(e) {
-    const { onSelectedItem, date } = this.props;
+    const { onSelectedItem, date, dataIndex } = this.props;
     const el = e.currentTarget.parentNode;
 
     el.classList.toggle('active');
     el.classList.toggle('show');
-    onSelectedItem(el, date, el.classList.contains('active'));
+    onSelectedItem(dataIndex, el, date, el.classList.contains('active'));
     e.stopPropagation();
   }
 
   lookLargePhotoHandle(e) {
     const el = e.currentTarget;
-    const { date, detectImageItemActive, onCancelSelectedItem } = this.props;
+    const { date, detectImageItemActive, onCancelSelectedItem, dataIndex } = this.props;
 
     if (el.classList.contains('active')) {
       el.classList.remove('active');
-      onCancelSelectedItem(date);
+      onCancelSelectedItem(dataIndex, date);
 
       if (!detectImageItemActive(date)) {
           Array
@@ -136,11 +136,11 @@ export default class ImageByDate extends Component {
   }
 
   render() {
-    const { date, state, figureItem } = this.props;
+    const { date, state, dataIndex, figureItem } = this.props;
     let { itemStyle, selectStatusStyle } = getStyles();
 
     return (
-      <div ref={ el => this.el = el } data-date={ date } className={ this.state.checked ? "image-item active show" : "image-item" } style={ itemStyle }
+      <div ref={ el => this.el = el } data-date={ date } data-index={ dataIndex } className={ this.state.checked ? "image-item active show" : "image-item" } style={ itemStyle }
         onClick={ this.lookLargePhotoHandle } onMouseOver={ this.overedHandle } onMouseOut={ this.outedHandle }>
         <div className="selected-mask"></div>
 

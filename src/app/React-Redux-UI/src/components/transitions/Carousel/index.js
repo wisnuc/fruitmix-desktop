@@ -7,6 +7,9 @@ import { replaceTemplate } from '../../../utils';
 import Drag from '../../partials/Drag';
 
 import Action from '../../../actions/action';
+import svg from '../../../../../utils/SVGIcon';
+
+import { MenuItem } from 'material-ui';
 
 function getStyles (props) {
   return {
@@ -35,13 +38,11 @@ function getStyles (props) {
     },
 
     leftArrowItemContainer: {
-      left: 0,
-      backgroundColor: 'green'
+      left: 0
     },
 
     rightArrowItemContainer: {
-      right: 0,
-      backgroundColor: 'yellow'
+      right: 0
     },
 
     item: {
@@ -144,7 +145,6 @@ export default class Carousel extends Component {
     const { data, onDragEnd } = props || this.props;
 
     return data.map((dataItem, index) => {
-      console.log(dataItem.el.querySelector('.figure').style.backgroundImage, 'sdfsdfdsfdsfsd');
       return (
         <Drag
           key={ index }
@@ -217,8 +217,16 @@ export default class Carousel extends Component {
     const { className } = this.props;
     const { root } = getStyles(this.props);
     const { leftArrowItemContainerStyle, rightArrowItemContainerStyle } = getArrowItemContainerComponent(this.props);
-    const leftArrowItemContainerComponent = (<div className="arrow-left" onClick={ this.handleLeftArrowClick.bind(this) } style={ leftArrowItemContainerStyle }></div>);
-    const rightArrowItemContainerComponent = (<div className="arrow-right" onClick={ this.handleRightArrowClick.bind(this) } style={ rightArrowItemContainerStyle }></div>);
+    const leftArrowItemContainerComponent = (
+      <div className="arrow-left" onClick={ this.handleLeftArrowClick.bind(this) } style={ leftArrowItemContainerStyle }>
+        <MenuItem className="arrow-left-btn" desktop={ true } leftIcon={ svg.leftArrow() }></MenuItem>
+      </div>
+    );
+    const rightArrowItemContainerComponent = (
+      <div className="arrow-right" onClick={ this.handleRightArrowClick.bind(this) } style={ rightArrowItemContainerStyle }>
+        <MenuItem className="arrow-right-btn" desktop={ true } leftIcon={ svg.rightArrow() }></MenuItem>
+      </div>
+    );
 
     return (
       <div className={ className } style={ root }>
