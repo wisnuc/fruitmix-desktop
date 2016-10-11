@@ -127,9 +127,12 @@ export default class ImageByDate extends Component {
 
     if (figureItem.path) {
       return (
-        <div className="figure" style={ Object.assign({}, figureStyle, { backgroundImage: 'url('+ figureItem.path +')' }) }></div>
+        <img src={figureItem.path} style={figureStyle}/>
       );
     } else {
+        // c.log(this.props.state.media.map.size)
+         //c.log(this.props.state.media.map.get(figureItem.digest))
+        //c.log(figureItem)
       return (
         <img style={ loadingStyle } src={ loadingIcon } />
       );

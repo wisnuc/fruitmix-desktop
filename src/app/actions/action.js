@@ -287,11 +287,12 @@ var actions = {
 		}
 	},
 
-	setThumb(item,status) {
+	setThumb(item,path,status) {
 		return {
 			type: 'SET_THUMB',
 			data: item,
-			status:status
+			status:status,
+			path:path
 		}
 	},
 
