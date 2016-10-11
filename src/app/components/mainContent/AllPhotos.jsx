@@ -3,26 +3,26 @@
 **/
 
 import React, { Component, PropTypes } from 'react';
-
 import { findDOMNode } from 'react-dom';
 
 import Checkbox from '../../React-Redux-UI/src/components/partials/Checkbox';
 import NavigationBar from '../main/NavigationBar';
 import RightPanel from '../main/RightPanel';
-
 import ImageByDate from './ImageByDate.jsx';
+// 图片轮播组件
+import Carousel from '../../React-Redux-UI/src/components/transitions/Carousel';
+import { MenuItem } from 'material-ui';
 
 import Action from '../../actions/action';
 
-// 图片轮播组件
-import Carousel from '../../React-Redux-UI/src/components/transitions/Carousel';
+import svg from '../../utils/SVGIcon';
 
 import { formatDate } from '../../utils/datetime';
 
 function getStyles () {
   return {
     operationBarStyle: {
-      padding: '0 30px'
+      padding: '0 55px'
     },
     dragStyle: {
       position: 'fixed',
@@ -33,17 +33,13 @@ function getStyles () {
     	height: 155
     },
     dragButtonStyle: {
-      borderRadius: 4,
-      backgroundColor: '#ebebeb',
-      color: '#2196f3',
       display: 'inline-block',
-      fontSize: 14,
-      lineHeight: '30px',
       marginRight: 30,
       marginTop: 15,
       marginBottom: 15,
       textAlign: 'center',
-      width: 80
+      width: 16,
+      height: 16
     }
   }
 }
@@ -180,11 +176,32 @@ export default class AllPhotos extends Component {
         <div ref={ el => this.dragEl = el } className="image-selected" style={ newDragStyle }>
           <div className="image-operation clearfix" style={ operationBarStyle }>
             <div className="operations fl">
-              <button style={ dragButtonStyle }>分享</button>
-              <button style={ dragButtonStyle }>相册</button>
-              <button style={ dragButtonStyle }>下载</button>
+              <MenuItem
+                className="action-btn"
+                desktop={ true }
+                leftIcon={ svg.share() }>
+              </MenuItem>
+
+              <MenuItem
+                className="action-btn"
+                desktop={ true }
+                leftIcon={ svg.album() }>
+              </MenuItem>
+
+              <MenuItem
+                className="action-btn"
+                desktop={ true }
+                leftIcon={ svg.selectedDownload() }>
+              </MenuItem>
             </div>
-            <button className="fr" style={ clearAllButtonStyle }>清除全部</button>
+            <div className="clear-operation fr" onClick={ this.clearAllSelectedItem.bind(this) } style={{ marginTop: 10 }}>
+              <MenuItem
+                className="action-btn"
+                desktop={ true }
+                leftIcon={ svg.deleteAll() }>
+              </MenuItem>
+              <label>清除全部</label>
+            </div>
           </div>
           <div className="image-carousel">
             {/* 图片轮播 */}
@@ -197,9 +214,16 @@ export default class AllPhotos extends Component {
               width={ dragElementRect.width - 2 }>
             </Carousel>
           </div>
+          <div className="text-bar" style={{ textAlign: 'center', fontSize: 12, marginTop: 10, color: '#757575'  }}>选中<label style={{ fontSize: 14 }}>{ this.props.state.imageItem.length }</label>张图片</div>
         </div>
       );
     }
+  }
+
+  clearAllSelectedItem() {
+    const { dispatch } = this.props;
+
+    dispatch(Action.clearDragImageItem());
   }
 
   scrollTo() {
@@ -241,9 +265,9 @@ export default class AllPhotos extends Component {
 
     Object.keys(this.refs).filter((key, index) => {
       if (key.indexOf(date) >= 0) {
-        this.refs[key].setState({
-          checked
-        });
+        findDOMNode(this.refs[key]).classList.toggle('active');
+        findDOMNode(this.refs[key]).classList.toggle('show');
+
         checkedEls.push(findDOMNode(this.refs[key]));
       }
     });
@@ -282,10 +306,11 @@ export default class AllPhotos extends Component {
                       <ImageByDate
                         key={ '' + index + index }
                         date={ date }
+                        dataIndex={ index }
                         ref={ date + '-' + index }
                         figureItem={ entry }
-                        onSelectedItem={ this.selectedItemHandle.bind(this, index) }
-                        onCancelSelectedItem={ this.cancelSelectedItemHandle.bind(this, index) }
+                        onSelectedItem={ this.selectedItemHandle.bind(this) }
+                        onCancelSelectedItem={ this.cancelSelectedItemHandle.bind(this) }
                         detectImageItemActive={ this.detectImageItemActive }
                         hash={ entry.digest }
                         dispatch={ this.props.dispatch }>

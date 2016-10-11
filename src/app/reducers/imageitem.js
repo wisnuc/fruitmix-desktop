@@ -19,11 +19,11 @@ export default function (state = [], action) {
       const date = action.date;
       const cloneEls = [];
 
-      action.els.forEach((el, index) => {
+      action.els.forEach(el => {
         const elIndex = state.findIndex(ele => ele.el === el);
 
         if (elIndex < 0) {
-          cloneEls.push({ el, date, index });
+          cloneEls.push({ el, date, index: el.dataset.index });
         }
       });
 
@@ -31,7 +31,7 @@ export default function (state = [], action) {
     case 'REMOVE_DRAG_IMAGEITEM':
       const dragedItem = state.find(item =>
         item.date === action.date
-          && item.index === action.index
+          && item.index == action.index
       );
 
       if (!dragedItem) {
