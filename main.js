@@ -118,7 +118,7 @@ app.on('ready', function() {
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	})
-	//mainWindow.webContents.openDevTools()
+	mainWindow.webContents.openDevTools()
 	mainWindow.loadURL('file://' + __dirname + '/build/index.html')
 	//create folder
 	fs.exists(mediaPath,exists=>{
@@ -599,13 +599,16 @@ ipcMain.on('share',function(err,files,users){
 	function doShare(err) {
 		if (err) {
 			console.log('err')
-			mainWindow.webContents.send('message',index + ' 个文件分享成功')	
+			c(err)
+			c(files[index])
+			mainWindow.webContents.send('message',files[index].name + '分享失败')	
 			return
 		}
 		index++
 		if (index == files.length) {
 			console.log('all share success')
-			mainWindow.webContents.send('message',files.length + ' 个文件分享成功')	
+			mainWindow.webContents.send('message',files.length + ' 个文件分享成功')
+			ipcMain.emit('getFilesSharedToOthers')
 			return
 		}else {
 			fileApi.share(files[index],users,doShare)
@@ -644,15 +647,8 @@ ipcMain.on('backShareRoot',err=>{
 
 //cancel share
 ipcMain.on('cancelShare',(err,item)=>{
-	share(item,[]).then(()=>{
-		console.log('cancel success')
-		let index = filesSharedByMe.findIndex(i=>{
-			return item.uuid == i.uuid
-		})
-		filesSharedByMe.splice(index,1)
-		mainWindow.webContents.send('setFilesSharedByMe',filesSharedByMe)
-	}).catch(err=>{
-		c('cancel failed')
+	fileApi.share(item.uuid, [], (err,data) => {
+		ipcMain.emit('getFilesSharedToOthers')
 	})
 })
 //loginOff

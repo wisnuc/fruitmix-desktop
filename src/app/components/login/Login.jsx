@@ -60,9 +60,9 @@ class Index extends React.Component {
 	submit() {
 		let username = this.refs.username.input.value
 		let password = this.refs.password.input.value
-		// ipc.send('login','Alice','123456')
+		ipc.send('login','Alice','123456')
 		// ipc.send('login','Bob','123456')
-		ipc.send('login',username,password)
+		//ipc.send('login',username,password)
 	}
 
 	render() {
