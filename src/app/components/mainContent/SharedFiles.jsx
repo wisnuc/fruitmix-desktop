@@ -56,15 +56,13 @@ class SharedFiles extends Component {
 	getBreadCrumb(){
 		var _this = this;
 		var path = this.props.state.share.sharePath;
-		var pathArr = [];
-		pathArr = path.map((item,index)=>{
+		return path.map((item,index)=>{
 			return(
 				<span key={index} style={{display:'flex',alignItems:'center'}} onClick={_this.enterShare.bind(_this,item.value)}>
 					{item.key!=''?<span className='breadcrumb-text'>{item.key}</span>:<span onClick={this.backRoot} className='breadcrumb-home'></span>}
 					<span className={index==path.length-1?'breadcrumb-arrow hidden':'breadcrumb-arrow'}></span>
 				</span>
 			)});
-		return pathArr;
 	}
 
 	getShareUser(item) {
@@ -102,7 +100,7 @@ class SharedFiles extends Component {
 	}
 
 	backRoot() {
-		ipc.send('backShareRoot');
+		ipc.send('getFilesSharedToMe');
 	}
 }
 
