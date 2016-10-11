@@ -193,7 +193,7 @@ ipcMain.on('setServeIp',(err,ip, isCustom, isStorage)=>{
 	if ( !isStorage) {
 		return
 	}
-	fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
+	fs.readFile(path.join(process.cwd(),'server'),{encoding: 'utf8'},(err,data)=>{
 		if (err) {
 			return
 		}
@@ -743,7 +743,6 @@ ipcMain.on('getMediaData',(err)=>{
 })
 //getMediaThumb
 ipcMain.on('getThumb',(err,item)=>{
-	c(item)
 	thumbQueue.push(item)
 	dealThumbQueue()
 })
@@ -766,6 +765,7 @@ function dealThumbQueue() {
 	}
 }
 function isThumbExist(item) {
+	c(' ')
 	c(item.digest)
 	fs.readFile(path.join(mediaPath,item.digest+'thumb'),(err,data)=>{
 		if (err) {
@@ -804,8 +804,7 @@ function isThumbExist(item) {
 		c(item.digest+' is over')
 		let index = thumbIng.findIndex(i=>i.digest == item.digest)
 		thumbIng.splice(index,1)
-		item.path = path.join(mediaPath,item.digest+'thumb')
-		mainWindow.webContents.send('getThumbSuccess',item)
+		mainWindow.webContents.send('getThumbSuccess',item.digest,path.join(mediaPath,item.digest+'thumb'))
 		setTimeout(dealThumbQueue,200)
 	}
 }
@@ -828,6 +827,7 @@ function downloadMedia(item) {
 			}else {
 				c('err')
 				c(res.body)
+				c(item.digest)
 				fs.unlink(path.join(mediaPath,item.digest+'thumb'), (err,data)=>{
 					reject(err)	
 				})

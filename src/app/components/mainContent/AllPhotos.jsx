@@ -313,7 +313,8 @@ export default class AllPhotos extends Component {
                         onCancelSelectedItem={ this.cancelSelectedItemHandle.bind(this) }
                         detectImageItemActive={ this.detectImageItemActive }
                         hash={ entry.digest }
-                        dispatch={ this.props.dispatch }>
+                        dispatch={ this.props.dispatch }
+                        state={this.props.state}>
                       </ImageByDate>
                     )
                   }

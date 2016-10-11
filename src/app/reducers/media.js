@@ -15,9 +15,13 @@ const Media = (state=defaultState,action)=>{
 			})
 			return Object.assign({},state,{data:action.data,status:'ready',map:m});
 		case 'SET_THUMB':
-			var item = state.map.get(action.data.digest);
+			var item = state.map.get(action.data)
 			item.status = action.status;
-			item.path = action.data.path;
+			item.path = action.path;
+			if (action.data == '0c6a1d3d64f485ab58c431e2602f67acd855080c198fe794e040e110a823e54a') {
+				c.log(' ?!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+				c.log(item)
+			}
 			return Object.assign({},state);
 		case 'SET_MEDIA_SIZE':
 			var s;
