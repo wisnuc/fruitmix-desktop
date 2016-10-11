@@ -13,6 +13,7 @@ import view from './view'
 import file from './file'
 import share from './share'
 import imageItem from './imageitem';
+import largeImages from './largeImage';
 import navigationBarTitleTexts from './navigationBarTitleTexts';
 import moveData from './moveData';
 
@@ -32,6 +33,7 @@ const reducer = combineReducers({
 	file,
 	share,
 	imageItem,
+	largeImages,
 	navigationBarTitleTexts,
 	radio,
 	shareRadio,

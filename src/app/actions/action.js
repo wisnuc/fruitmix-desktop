@@ -132,7 +132,7 @@ var actions = {
 	removeDragImageList(date) {
 		return {
 			type: 'REMOVE_DRAG_IMAGELIST',
-			date	
+			date
 		}
 	},
 
@@ -140,6 +140,21 @@ var actions = {
 		return {
 			type: 'CLEAR_DRAG_IMAGEITEM'
 		}
+	},
+
+	getLargeImageList(largeImageEls, currentThumbIndex, date) {
+	  return {
+			type: 'LARGE_IMAGE',
+			date,
+			largeImageEls,
+			currentThumbIndex
+		};
+	},
+
+	removeLargeImageList() {
+		return {
+			type: 'REMOVE_LARGE_IMAGE'
+		};
 	},
 
 	toggleSelectStatusImageItem(checked) {
