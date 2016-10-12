@@ -66,9 +66,12 @@ class SharedFiles extends Component {
 	}
 
 	getShareUser(item) {
+		if (item.length == 0) {
+			return null
+		}
 		let user = this.props.state.login.obj.allUser.find((i)=>{return item == i.uuid});
-		return user.username;
-		console.log(user);
+		return user.username||null;
+		
 	}
 
 	download(item) {

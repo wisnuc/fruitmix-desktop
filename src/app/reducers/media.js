@@ -18,10 +18,6 @@ const Media = (state=defaultState,action)=>{
 			var item = state.map.get(action.data)
 			item.status = action.status;
 			item.path = action.path;
-			if (action.data == '0c6a1d3d64f485ab58c431e2602f67acd855080c198fe794e040e110a823e54a') {
-				c.log(' ?!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-				c.log(item)
-			}
 			return Object.assign({},state);
 		case 'SET_MEDIA_SIZE':
 			var s;

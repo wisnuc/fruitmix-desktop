@@ -59,7 +59,7 @@ global.downloadPath = path.join(__dirname,'download')
 //device
 global.device = []
 global.serverRecord = null
-
+global.isLogin = false
 global.c = console.log
 
 global.mocha = false
@@ -295,6 +295,7 @@ ipcMain.on('login',function(err,username,password){
 		})
 		user.users = tempArr
 		user.allUser = users
+		isLogin = true
 		dispatch(action.loggedin(user))
 
 	}).catch((err)=>{
@@ -594,13 +595,12 @@ function move(uuid,target,index) {
 //share
 ipcMain.on('share',function(err,files,users){
 	c(' ')
+	c(files)
+	c(users)
 	var index = 0
 
 	function doShare(err) {
 		if (err) {
-			console.log('err')
-			c(err)
-			c(files[index])
 			mainWindow.webContents.send('message',files[index].name + '分享失败')	
 			return
 		}
@@ -687,6 +687,7 @@ ipcMain.on('loginOff',err=>{
 	thumbIng = []
 
 	dispatch(action.loginoff())
+	isLogin = false
 })
 
 ipcMain.on('changeDownloadPath', e=>{
