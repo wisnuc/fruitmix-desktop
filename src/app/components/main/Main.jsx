@@ -31,7 +31,7 @@ import Users from './userDialog';
 
 import svg from '../../utils/SVGIcon';
 
-import Mask from './MediaMask'
+//import Mask from './MediaMask'
 
 class Main extends Component {
 

@@ -74,7 +74,7 @@ class AllFiles extends Component {
 			<div className='all-my-files' style={{height:'100%'}}>
 				{this.getTable()}
 				{/*file detail*/}
-				<Paper className='file-detail' style={{width:this.props.state.view.detail.length==0?'0px':'350px'}}>
+				<Paper className='file-detail' style={{width:this.props.state.view.detail.length==0?'0px':'220px'}}>
 					<Detail dispatch={this.props.dispatch} state={this.props.state}></Detail>
 				</Paper>
 				{/*create new folder dialog*/}

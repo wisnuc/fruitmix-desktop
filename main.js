@@ -594,13 +594,12 @@ function move(uuid,target,index) {
 //share
 ipcMain.on('share',function(err,files,users){
 	c(' ')
+	c(files)
+	c(users)
 	var index = 0
 
 	function doShare(err) {
 		if (err) {
-			console.log('err')
-			c(err)
-			c(files[index])
 			mainWindow.webContents.send('message',files[index].name + '分享失败')	
 			return
 		}

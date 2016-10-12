@@ -20,7 +20,7 @@ class SharedFilesRow extends Component {
 		let item = p.item;
 		return (
 			<tr onDoubleClick={p.enterShare} onHover={this.hover}>
-				<td>{item.name}</td>
+				<td>{item.name||null}</td>
 				<td>{p.getShareUser(item.owner)}</td>
 				<td  onMouseEnter={this.enter.bind(this)} onMouseLeave={this.leave.bind(this)} >
 					<span onClick={this.props.download}>{svg.download()}</span>
