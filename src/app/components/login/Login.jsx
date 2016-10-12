@@ -85,7 +85,7 @@ class Index extends React.Component {
 
 						<SelectField iconStyle={{fill:'#666'}} underlineStyle={{borderColor:'rgba(255,255,255,0)'}}  value={this.getValue()} onChange={this.selectDevice.bind(this)}>
 							{device.map((item,index)=>(
-								<MenuItem key={index} value={index} primaryText={_this.getTitle(item)}></MenuItem>
+								<MenuItem innerDivStyle={{overflow:'hidden',textOverflow:'ellipsis',maxWidth:'200px'}} key={index} value={index} primaryText={_this.getTitle(item)}></MenuItem>
 							))}
 						</SelectField>
 

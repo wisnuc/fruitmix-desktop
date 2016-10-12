@@ -55,7 +55,28 @@ class Detail extends Component {
 	 						<RadioButton value='custom' label='自定义' iconStyle={styles.radioIconStyle} labelStyle={styles.radioLabelStyle}/>
 	 					</RadioButtonGroup>
 	 					<div className='custom-share-container' style={this.state.type=='all'?{display:'none'}:{}}>
-						    {this.props.state.login.obj.allUser.map(item => {
+						    
+						    {this.getShareList(data)}
+	 					</div>
+	 					{/*<div className='detail-share-button'>
+	 						<span onClick={this.share.bind(this)}>分享</span>
+	 					</div>*/}
+	 				</div>
+	 				<div onMouseUp={this.closeDetail.bind(this)} className='detail-close'>close</div>
+	 			</div> 
+	 			)
+ 		}else {
+ 			return false
+ 		}
+ 	}
+
+ 	getShareList(data) {
+ 		var _this = this
+ 		if (!data.readlist) {
+ 			return <div>文件暂时无法进行分享</div>
+ 		}
+
+ 		return this.props.state.login.obj.allUser.map(item => {
 						    	let checked = false
 						    	let index = data.readlist.findIndex(i => {
 						    		return i == item.uuid
@@ -73,18 +94,7 @@ class Detail extends Component {
 								      	onCheck={this.checkUser.bind(_this,item.uuid)}
 								    />
 						    	)
-						    })}
-	 					</div>
-	 					{/*<div className='detail-share-button'>
-	 						<span onClick={this.share.bind(this)}>分享</span>
-	 					</div>*/}
-	 				</div>
-	 				<div onMouseUp={this.closeDetail.bind(this)} className='detail-close'>close</div>
-	 			</div> 
-	 			)
- 		}else {
- 			return false
- 		}
+						    })
  	}
 
  	closeDetail() {
