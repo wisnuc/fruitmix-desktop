@@ -147,6 +147,7 @@ export default class Carousel extends Component {
           onDragEnd={ onDragEnd }
           date={ dataItem.date }
           index={ dataItem.index }
+          src={dataItem.el.querySelector('img').getAttribute('src')}
           style={ Object.assign({}, item, { backgroundImage: 'url("'+ dataItem.el.querySelector('img').getAttribute('src') +'")' }) }>
           { dataItem.text }
         </Drag>

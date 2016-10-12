@@ -346,13 +346,6 @@ var actions = {
 		}
 	},
 
-	// setFilesSharedByMe(files) {
-	// 	return {
-	// 		type: 'FILES_SHARED_BY_ME',
-	// 		files:files
-	// 	}
-	// },
-
 	adapter(data) {
 		return {
 			type: 'ADAPTER',

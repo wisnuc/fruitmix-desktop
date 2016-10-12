@@ -84,6 +84,7 @@ global.store = require('./serve/store/store')
 
 // global.dispatch = store.dispatch
 global.dispatch = (action) => {
+	c(' ')
 	c(action.type)
 	store.dispatch(action)
 }
@@ -471,7 +472,7 @@ ipcMain.on('create-new-user',function(err, u, p){
 		loginApi.getAllUser().then(users=>{
 			user.allUser = users
 			dispatch(action.loggedin(user))
-			mainWindow.webContents.send('addUser',user)
+			//mainWindow.webContents.send('addUser',user)
 		})
 
 		loginApi.login().then(data=> {
@@ -939,6 +940,16 @@ ipcMain.on('getMediaImage',(err,hash)=>{
 ipcMain.on('getMediaShare' , err => {
 	mediaApi.getMediaShare().then(data => {
 		mainWindow.webContents.send('mediaShare',data)
+	}).catch(err => {
+		c(err)
+	})
+})
+
+ipcMain.on('createMediaShare',(err, medias, users, album) => {
+	c(' ')
+	c('create media share-----------------------------')
+	mediaApi.createMediaShare(medias, users, album).then(data => {
+		c(data)
 	}).catch(err => {
 		c(err)
 	})
