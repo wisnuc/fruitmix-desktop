@@ -104,8 +104,8 @@ class Main extends Component {
 			this.props.dispatch(Action.setMedia(media));
 		});
 
-		ipc.on('getThumbSuccess',(err,item)=>{
-			this.props.dispatch(Action.setThumb(item,'ready'));
+		ipc.on('getThumbSuccess',(err,item,path)=>{
+			this.props.dispatch(Action.setThumb(item,path,'ready'));
 		});
 
 		ipc.on('getThumbFailed',(err,item)=>{

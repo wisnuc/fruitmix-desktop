@@ -193,7 +193,7 @@ ipcMain.on('setServeIp',(err,ip, isCustom, isStorage)=>{
 	if ( !isStorage) {
 		return
 	}
-	fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
+	fs.readFile(path.join(process.cwd(),'server'),{encoding: 'utf8'},(err,data)=>{
 		if (err) {
 			return
 		}
@@ -599,13 +599,16 @@ ipcMain.on('share',function(err,files,users){
 	function doShare(err) {
 		if (err) {
 			console.log('err')
-			mainWindow.webContents.send('message',index + ' 个文件分享成功')	
+			c(err)
+			c(files[index])
+			mainWindow.webContents.send('message',files[index].name + '分享失败')	
 			return
 		}
 		index++
 		if (index == files.length) {
 			console.log('all share success')
-			mainWindow.webContents.send('message',files.length + ' 个文件分享成功')	
+			mainWindow.webContents.send('message',files.length + ' 个文件分享成功')
+			ipcMain.emit('getFilesSharedToOthers')
 			return
 		}else {
 			fileApi.share(files[index],users,doShare)
@@ -644,15 +647,8 @@ ipcMain.on('backShareRoot',err=>{
 
 //cancel share
 ipcMain.on('cancelShare',(err,item)=>{
-	share(item,[]).then(()=>{
-		console.log('cancel success')
-		let index = filesSharedByMe.findIndex(i=>{
-			return item.uuid == i.uuid
-		})
-		filesSharedByMe.splice(index,1)
-		mainWindow.webContents.send('setFilesSharedByMe',filesSharedByMe)
-	}).catch(err=>{
-		c('cancel failed')
+	fileApi.share(item.uuid, [], (err,data) => {
+		ipcMain.emit('getFilesSharedToOthers')
 	})
 })
 //loginOff
@@ -747,7 +743,6 @@ ipcMain.on('getMediaData',(err)=>{
 })
 //getMediaThumb
 ipcMain.on('getThumb',(err,item)=>{
-	c(item)
 	thumbQueue.push(item)
 	dealThumbQueue()
 })
@@ -770,6 +765,7 @@ function dealThumbQueue() {
 	}
 }
 function isThumbExist(item) {
+	c(' ')
 	c(item.digest)
 	fs.readFile(path.join(mediaPath,item.digest+'thumb'),(err,data)=>{
 		if (err) {
@@ -808,8 +804,7 @@ function isThumbExist(item) {
 		c(item.digest+' is over')
 		let index = thumbIng.findIndex(i=>i.digest == item.digest)
 		thumbIng.splice(index,1)
-		item.path = path.join(mediaPath,item.digest+'thumb')
-		mainWindow.webContents.send('getThumbSuccess',item)
+		mainWindow.webContents.send('getThumbSuccess',item.digest,path.join(mediaPath,item.digest+'thumb'))
 		setTimeout(dealThumbQueue,200)
 	}
 }
@@ -832,6 +827,7 @@ function downloadMedia(item) {
 			}else {
 				c('err')
 				c(res.body)
+				c(item.digest)
 				fs.unlink(path.join(mediaPath,item.digest+'thumb'), (err,data)=>{
 					reject(err)	
 				})
