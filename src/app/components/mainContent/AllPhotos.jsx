@@ -120,17 +120,17 @@ export default class AllPhotos extends Component {
       dispatch(Action.removeDragImageItem(date, index));
     }
 
-    Object.keys(this.refs).filter((key, index) => {
-      if (key.indexOf(date) >= 0) {
-        if (hasChecked) {
-          this.refs[key] && this.refs[key].overedHandle();
-        } else {
-          if (!(this.detectImageItemActive(date))) {
-            this.refs[key] && this.refs[key].outedHandle();
-          }
-        }
-      }
-    });
+    // Object.keys(this.refs).filter((key, index) => {
+    //   if (key.indexOf(date) >= 0) {
+    //     if (hasChecked) {
+    //       this.refs[key] && this.refs[key].overedHandle();
+    //     } else {
+    //       if (!(this.detectImageItemActive(date))) {
+    //         this.refs[key] && this.refs[key].outedHandle();
+    //       }
+    //     }
+    //   }
+    // });
   }
 
   cancelSelectedItemHandle(index, date) {
