@@ -11,6 +11,8 @@ import RightPanel from '../main/RightPanel';
 import ImageByDate from './ImageByDate.jsx';
 // 图片轮播组件
 import Carousel from '../../React-Redux-UI/src/components/transitions/Carousel';
+import Mask from '../../React-Redux-UI/src/components/partials/Mask';
+import ImageSwipe from '../common/ImageSwipe';
 import { MenuItem } from 'material-ui';
 
 import Action from '../../actions/action';
@@ -279,6 +281,11 @@ export default class AllPhotos extends Component {
     }
   }
 
+  viewLargeImageHandle(date, currentThumbIndex) {
+    const { dispatch } = this.props;
+    dispatch(Action.getLargeImageList(document.querySelectorAll('[data-date="'+ date +'"]'), currentThumbIndex, date));
+  }
+
   createImageByDateComponent() {
     let component;
 
@@ -311,6 +318,7 @@ export default class AllPhotos extends Component {
                         figureItem={ entry }
                         onSelectedItem={ this.selectedItemHandle.bind(this) }
                         onCancelSelectedItem={ this.cancelSelectedItemHandle.bind(this) }
+                        onViewLargeImage={ this.viewLargeImageHandle.bind(this) }
                         detectImageItemActive={ this.detectImageItemActive }
                         hash={ entry.digest }
                         dispatch={ this.props.dispatch }
@@ -346,6 +354,35 @@ export default class AllPhotos extends Component {
     );
   }
 
+  shutdownMaskHandle() {
+    const { dispatch } = this.props;
+    dispatch(Action.removeLargeImageList());
+  }
+
+  createMaskComponent() {
+    const { state } = this.props;
+
+    if (state.largeImages.data && state.largeImages.data.length) {
+      return (
+        <Mask className="large-image-mask" onShutdown={ this.shutdownMaskHandle.bind(this) }></Mask>
+      );
+    }
+  }
+
+  createImageSwipeComponent() {
+    const { state } = this.props;
+
+    if (state.largeImages.data && state.largeImages.data.length) {
+      return (
+        <ImageSwipe
+          width={ 960 }
+          height={ 700 }
+          state={ this.props.state }>
+        </ImageSwipe>
+      );
+    }
+  }
+
   showedRightPanelHandler() {
     this.refs.rightPanel && findDOMNode(this.refs.rightPanel).lastElementChild.classList.toggle('active');
   }
@@ -377,6 +414,8 @@ export default class AllPhotos extends Component {
       <div className="view-image">
         { this.createImageByDateComponent() }
         { this.createCarouselComponent() }
+        { this.createMaskComponent() }
+        { this.createImageSwipeComponent() }
       </div>
     );
   }

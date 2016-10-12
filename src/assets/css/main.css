@@ -153,6 +153,20 @@ body{
 	fill:#757575!important;
 }
 
+.large-arrow,
+.large-arrow > div > div {
+	position: static!important;
+}
+
+.large-arrow svg {
+	position: absolute!important;
+	width: 30px!important;
+	height: 30px!important;
+	left: 50%!important;
+	top: 335px!important;
+	margin-left: -15px!important;
+}
+
 .image-item:last-child {
 	margin-right: 0!important;
 }

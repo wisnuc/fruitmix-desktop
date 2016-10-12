@@ -15,19 +15,24 @@ function getStyles(props) {
       top: 0,
       right: 0,
       bottom: 0,
-      zIndex: 999,
+      zIndex: 1200,
       backgroundColor: 'rgba(0,0,0,.75)',
     }
   }
 }
 
 export default class Mask extends Component {
+  shutdownHandle() {
+    const { onShutdown } = this.props;
+    onShutdown();
+  }
+
   render() {
     const { root } = getStyles(this.props);
     const { className } = this.props;
 
     return (
-      <div className={ className } style={ root }></div>
+      <div className={ className } style={ root } onClick={ this.shutdownHandle.bind(this) }></div>
     );
   }
 }
@@ -36,7 +41,9 @@ Mask.propTypes = {
   /**
    * class
   */
-  className: PropTypes.string
+  className: PropTypes.string,
+
+  onShutdown: PropTypes.func.isRequired
 }
 
 Mask.defaultProps = {

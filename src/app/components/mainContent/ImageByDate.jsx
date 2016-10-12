@@ -93,7 +93,7 @@ export default class ImageByDate extends Component {
 
   lookLargePhotoHandle(e) {
     const el = e.currentTarget;
-    const { date, detectImageItemActive, onCancelSelectedItem, dataIndex } = this.props;
+    const { date, detectImageItemActive, onCancelSelectedItem, dataIndex, onViewLargeImage } = this.props;
 
     if (el.classList.contains('active')) {
       el.classList.remove('active');
@@ -110,7 +110,8 @@ export default class ImageByDate extends Component {
          });
       }
     } else {
-      this.props.dispatch(Action.toggleMedia(true))
+      //this.props.dispatch(Action.toggleMedia(true))
+      onViewLargeImage(date, dataIndex);
       ipc.send('getMediaImage',this.props.hash);
     }
   }
@@ -139,11 +140,11 @@ export default class ImageByDate extends Component {
   }
 
   render() {
-    const { date, state, dataIndex, figureItem } = this.props;
+    const { date, state, dataIndex, figureItem, hash } = this.props;
     let { itemStyle, selectStatusStyle } = getStyles();
 
     return (
-      <div ref={ el => this.el = el } data-date={ date } data-index={ dataIndex } className={ this.state.checked ? "image-item active show" : "image-item" } style={ itemStyle }
+      <div ref={ el => this.el = el } data-hash={ hash } data-date={ date } data-index={ dataIndex } className="image-item" style={ itemStyle }
         onClick={ this.lookLargePhotoHandle } onMouseOver={ this.overedHandle } onMouseOut={ this.outedHandle }>
         <div className="selected-mask"></div>
 
@@ -171,6 +172,11 @@ ImageByDate.propTypes = {
     取消选中处理函数
   **/
   onCancelSelectedItem: PropTypes.func.isRequired,
+
+  /**
+    点击查看大图
+  **/
+  onViewLargeImage: PropTypes.func.isRequired,
 
   // /**
   //   图片加载状态
