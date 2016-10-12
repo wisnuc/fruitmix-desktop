@@ -174,9 +174,9 @@ class Main extends Component {
 			];
 
 		let m = null;
-		if (this.props.state.view.currentMediaImage.open) {
-			m = <Mask dispatch={this.props.dispatch} state={this.props.state}/>
-		}
+		// if (this.props.state.view.currentMediaImage.open) {
+		// 	m = <Mask dispatch={this.props.dispatch} state={this.props.state}/>
+		// }
 		return (<CSS opts={['app',true,true,true,500,5000,5000]} style={{height:'100%'}}>
 			<div className="main" key='main' onMouseMove={this.mouseMove.bind(this)} onMouseUp={this.mouseUp.bind(this)} onClick={this.triggerClick.bind(this)}>
 				{/*Multiple select frame*/}

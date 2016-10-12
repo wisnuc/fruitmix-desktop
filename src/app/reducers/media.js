@@ -30,8 +30,8 @@ const Media = (state=defaultState,action)=>{
 			return Object.assign({},state,{size:s})
 		case 'SET_MEDIA_SHARE':
 			return Object.assign({},state,{mediaShare:action.data})
-		case 'ADAPTER':
-			return Object.assign({},state,action.store.media)
+		// case 'ADAPTER':
+		// 	return Object.assign({},state,action.store.media)
 		default:
 			return state;
 	}
