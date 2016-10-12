@@ -178,23 +178,26 @@ export default class AllPhotos extends Component {
         <div ref={ el => this.dragEl = el } className="image-selected" style={ newDragStyle }>
           <div className="image-operation clearfix" style={ operationBarStyle }>
             <div className="operations fl">
-              <MenuItem
-                className="action-btn"
-                desktop={ true }
-                leftIcon={ svg.share() }>
-              </MenuItem>
+              <div className="action-btn" title="分享">
+                <MenuItem
+                  desktop={ true }
+                  leftIcon={ svg.share() }>
+                </MenuItem>
+              </div>
 
-              <MenuItem
-                className="action-btn"
-                desktop={ true }
-                leftIcon={ svg.album() }>
-              </MenuItem>
+              <div className="action-btn" title="相册">
+                <MenuItem
+                  desktop={ true }
+                  leftIcon={ svg.album() }>
+                </MenuItem>
+              </div>
 
-              <MenuItem
-                className="action-btn"
-                desktop={ true }
-                leftIcon={ svg.selectedDownload() }>
-              </MenuItem>
+              <div className="action-btn" title="下载">
+                <MenuItem
+                  desktop={ true }
+                  leftIcon={ svg.selectedDownload() }>
+                </MenuItem>
+              </div>
             </div>
             <div className="clear-operation fr" onClick={ this.clearAllSelectedItem.bind(this) } style={{ marginTop: 10 }}>
               <MenuItem

@@ -911,6 +911,10 @@ body{
 	padding: 0!important;
 }
 
+.action-btn > div > span > div > div {
+	padding: 0!important;
+}
+
 .arrow-left-btn svg,
 .arrow-right-btn svg {
 	border-radius: 100%;
