@@ -16,7 +16,8 @@ import SharedByMe from '../mainContent/SharedByMe';
 import Setting from '../mainContent/Setting';
 import Media from '../mainContent/Media';
 import DataMove from '../mainContent/DataMove'
-import AllPhoto from '../mainContent/AllPhotos';
+import AllPhotos from '../mainContent/AllPhotos';
+import Albums from '../mainContent/Albums';
 
 class MainContent extends Component {
 
@@ -32,10 +33,11 @@ class MainContent extends Component {
 		// component.push(<Media dispatch={this.props.dispatch} state={this.props.state} key={'e'}></Media>);
 		// component.push(<Setting dispatch={this.props.dispatch} state={this.props.state} key={'f'}></Setting>);
 
-    	component.push(<AllPhoto onShowedRightPanel={ this.props.onShowedRightPanel } dispatch={ this.props.dispatch } state={ this.props.state } key={'g'}></AllPhoto>);
-    	// component.push(<Media dispatch={this.props.dispatch} state={this.props.state} key={'e'}></Media>);
-    	component.push(<Setting dispatch={this.props.dispatch} state={this.props.state} key={'f'}></Setting>)
-    	component.push(<DataMove dispatch={this.props.dispatch} state={this.props.state} key={'f'}></DataMove>)
+  	component.push(<AllPhotos onShowedRightPanel={ this.props.onShowedRightPanel } dispatch={ this.props.dispatch } state={ this.props.state } key={'g'}></AllPhotos>);
+    component.push(<Albums dispatch={ this.props.dispatch } state={ this.props.state }></Albums>);
+  	// component.push(<Media dispatch={this.props.dispatch} state={this.props.state} key={'e'}></Media>);
+  	component.push(<Setting dispatch={this.props.dispatch} state={this.props.state} key={'f'}></Setting>)
+  	component.push(<DataMove dispatch={this.props.dispatch} state={this.props.state} key={'f'}></DataMove>)
 
 
 		// define the content is selected

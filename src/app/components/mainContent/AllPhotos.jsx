@@ -8,7 +8,7 @@ import { findDOMNode } from 'react-dom';
 import Checkbox from '../../React-Redux-UI/src/components/partials/Checkbox';
 import NavigationBar from '../main/NavigationBar';
 import RightPanel from '../main/RightPanel';
-import ImageByDate from './ImageByDate.jsx';
+import ImageByDate from '../common/ImageByDate';
 // 图片轮播组件
 import Carousel from '../../React-Redux-UI/src/components/transitions/Carousel';
 import Mask from '../../React-Redux-UI/src/components/partials/Mask';
@@ -341,7 +341,6 @@ export default class AllPhotos extends Component {
         <NavigationBar
           dispatch={ this.props.dispatch }
           state={ this.props.state }
-          navigationBarTitleTexts={ this.props.state.navigationBarTitleTexts }
           navigationBarHorizontalPadding={ 18 }
           onShowedRightPanel={ this.showedRightPanelHandler.bind(this) }
           icons={[ { text: 'i' } ]}>
@@ -357,7 +356,7 @@ export default class AllPhotos extends Component {
 
   shutdownMaskHandle() {
     const { dispatch } = this.props;
-    
+
     dispatch(Action.toggleMedia(false));
     dispatch(Action.removeLargeImageList());
   }

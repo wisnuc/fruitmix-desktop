@@ -4,6 +4,10 @@
 	font-family: sans-serif;
 }
 
+img {
+	border: 0;
+}
+
 .clearfix:after {
 	display: block;
 	content: "\0020";

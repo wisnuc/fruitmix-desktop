@@ -37,7 +37,7 @@ function getStyles (props) {
 
 export default class NavigationBar extends Component {
   createTitleTextComponent() {
-    const { navigationBarTitleTexts } = this.props;
+    const { state: { navigationBarTitleTexts } } = this.props;
 
     return (
       <div className="fl">
@@ -98,9 +98,7 @@ NavigationBar.propTypes = {
   // horizontal 内边距
   navigationBarHorizontalPadding: PropTypes.number,
   // 高度
-  navigationBarHeight: PropTypes.number,
-  // 显示文字列表
-  navigationBarTitleTexts: PropTypes.array.isRequired
+  navigationBarHeight: PropTypes.number
 };
 
 NavigationBar.defaultProps = {

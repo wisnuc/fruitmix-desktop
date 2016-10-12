@@ -127,7 +127,7 @@ export default class ImageByDate extends Component {
 
     if (figureItem.path) {
       return (
-        <img src={figureItem.path} style={figureStyle}/>
+        <img src={ figureItem.path } style={ figureStyle }/>
       );
     } else {
         // c.log(this.props.state.media.map.size)
@@ -158,6 +158,7 @@ export default class ImageByDate extends Component {
 
   componentDidMount() {
     const { figureItem } = this.props;
+
     ipc.send('getThumb',figureItem);
   }
 }

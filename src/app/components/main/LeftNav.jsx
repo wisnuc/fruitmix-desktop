@@ -86,7 +86,7 @@ class leftNav extends Component {
 						<div className="nav-item-body photo-item-body">
 							{
 								this.props.state.navigation.nav.map((item, index) => {
-									if (item.type == 'leftNav' && index >= 4 && index<5) {
+									if (item.type == 'leftNav' && index >= 4 && index < 6) {
 										return (
 											<MenuItem
 											  className={ item.selected ? "list-selected left-menu-list" : 'left-menu-list' }
@@ -109,7 +109,7 @@ class leftNav extends Component {
 						<div className="nav-item-body system-item-body">
 							{
 								this.props.state.navigation.nav.map((item, index) => {
-									if (item.type == 'leftNav' && index >= 5) {
+									if (item.type == 'leftNav' && index >= 6) {
 										return (
 											<MenuItem
 											  className={ item.selected ? "list-selected left-menu-list" : 'left-menu-list' }
@@ -149,7 +149,13 @@ class leftNav extends Component {
 	}
 	//select navigation
 	itemSelect (name,index,e) {
-		this.props.dispatch(Action.changeSelectedNavItem(name));
+		const { dispatch } = this.props;
+
+		dispatch(Action.changeSelectedNavItem(name));
+
+		if (name === '所有照片' || name === '相册') {
+			dispatch(Action.toggleNavigator([ name ]));
+		}
 	}
 }
 
