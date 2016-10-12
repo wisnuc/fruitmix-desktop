@@ -884,7 +884,8 @@ function isThumbExist(item) {
 		let index = thumbIng.findIndex(i=>i.digest == item.digest)
 		thumbIng.splice(index,1)
 		mainWindow.webContents.send('getThumbSuccess',item.digest,path.join(mediaPath,item.digest+'thumb'))
-		setTimeout(dealThumbQueue,200)
+		// setTimeout(dealThumbQueue,200)
+		dealThumbQueue()
 	}
 }
 function downloadMedia(item) {

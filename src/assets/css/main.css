@@ -61,14 +61,17 @@ body{
 	line-height: 50px;
 	font-size:14px;
 	color:#ef6c00;
+	max-width: 60px;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 .app-bar-appifi {
 	width:42px;
 	height:12px;
 	background: url(../images/index/ic_appifi_1.png);
 	position: absolute;
-	right:80px;
-	top:20px;
+	right:120px;
+	top:19px;
 	cursor: pointer;
 }
 /*left nav*/

@@ -50,7 +50,7 @@ class Detail extends Component {
 	 				</div>
 	 				<div className='share-infor'>
 	 					<div className='detail-title'>分享</div>
-	 					<RadioButtonGroup valueSelected={this.state.type} onChange ={this.changeShareType.bind(this)} className='detail-share-radio-group'>
+	 					<RadioButtonGroup name="typeSelect" valueSelected={this.state.type} onChange ={this.changeShareType.bind(this)} className='detail-share-radio-group'>
 	 						<RadioButton value='all' label='所有人' iconStyle={styles.radioIconStyle} labelStyle={styles.radioLabelStyle}/>
 	 						<RadioButton value='custom' label='自定义' iconStyle={styles.radioIconStyle} labelStyle={styles.radioLabelStyle}/>
 	 					</RadioButtonGroup>
@@ -65,6 +65,7 @@ class Detail extends Component {
 						    	}
 						    	return (
 						    		<Checkbox
+						    			key={item.uuid}
 						    			defaultChecked={checked}
 								      	label={item.username}
 								      	labelPosition="left"
