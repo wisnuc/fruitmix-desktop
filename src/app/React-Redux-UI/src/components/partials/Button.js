@@ -55,4 +55,10 @@ Button.propTypes = {
 	multied: PropTypes.bool																		   // 是否多次点击
 };
 
+Button.defaultProps = {
+  type: 'button',
+  disabled: false,
+  multied: false
+};
+
 export default Button;
