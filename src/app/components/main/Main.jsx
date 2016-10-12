@@ -99,7 +99,7 @@ class Main extends Component {
 		ipc.on('treeChildren',(err,treeChildren)=>{
 			this.props.dispatch(Action.setTree(treeChildren));
 		});
-
+		//media--------------------------------------------------------------------------
 		ipc.on('mediaFinish',(err,media)=>{
 			this.props.dispatch(Action.setMedia(media));
 		});
@@ -120,10 +120,15 @@ class Main extends Component {
 			this.props.dispatch(Action.setMediaShare(data))
 		})
 
+		ipc.on('getShareThumbSuccess', (err, item, path) => {
+			this.props.dispatch(Action.setShareThumb(item,path))
+		})
+
 		// ipc.on('setShareChildren',(err,shareChildren,sharePath)=>{
 		// 	this.props.dispatch(Action.setShareChildren(shareChildren,sharePath));
 		// });
 
+		//transmission---------------------------------------------------------------------
 		ipc.on('transmissionDownload',(err,obj)=>{
 			this.props.dispatch(Action.addDownload(obj));
 		});
@@ -224,7 +229,7 @@ class Main extends Component {
 
 	triggerClick(e) {
 		if (this.props.state.view.menu.show) {
-			this.props.dispatch(Action.toggleMenu(-1,0,0,false));
+			this.props.dispatch(Action.toggleMenu(null,0,0,false));
 		}
 	}
 	//toggle left navigation

@@ -36,12 +36,12 @@ class Detail extends Component {
 				width:index == -1?'0px':'220px'
 			}
 			let data = this.props.state.file.current.children[index]
-			c.log(data)
  			return(
 	 			<div style={style} className='detail-container'>
 	 				<div className='file-infor'>
 	 					<div className='detail-title'>文件信息</div>
-	 					{/*<div>类型&nbsp;&nbsp;:&nbsp;&nbsp;{data.type?data.type=='folder'?'文件夹':'文件':null}</div>*/}
+	 					<div>类型&nbsp;&nbsp;:&nbsp;&nbsp;{data.type?data.type=='folder'?'文件夹':'文件':null}</div>
+	 					<div>name&nbsp;&nbsp;:&nbsp;&nbsp;{data.name||null}</div>
 		 				<div>大小&nbsp;&nbsp;:&nbsp;&nbsp;{data.type=='folder'?null:(this.getSize(data.size)||null)}</div>
 		 				<div title={data.path||null}>位置&nbsp;&nbsp;:&nbsp;&nbsp;{data.path||null}</div>
 		 				<div>所有者&nbsp;&nbsp;:&nbsp;&nbsp;{this.getOwner(data.owner)||null}</div>
@@ -78,7 +78,7 @@ class Detail extends Component {
 	 						<span onClick={this.share.bind(this)}>分享</span>
 	 					</div>*/}
 	 				</div>
-	 				<div onMouseUp={this.closeDetail.bind()} className='detail-close'>close</div>
+	 				<div onMouseUp={this.closeDetail.bind(this)} className='detail-close'>close</div>
 	 			</div> 
 	 			)
  		}else {
@@ -114,7 +114,8 @@ class Detail extends Component {
 
 	changeShareType(o,value) {
 		if (value == 'all') {
-			let files = [this.props.state.view.detail[0].uuid]
+			let index = this.props.state.view.menu.index
+			let files = [this.props.state.file.current.children[index].uuid]
 			let users = []
 			this.props.state.login.obj.allUser.forEach( item => {
 				if ((item.uuid != this.props.state.login.obj.uuid) && (typeof item.uuid == 'string') ) {
@@ -129,13 +130,19 @@ class Detail extends Component {
 	}
 
 	checkUser(uuid,obj,checked) {
-		let files = [this.props.state.view.detail[0].uuid]
-		let users = this.cloneFun(this.props.state.view.detail[0].readlist)
+		let index = this.props.state.view.menu.index
+		let files = [this.props.state.file.current.children[index].uuid]
+		let users = this.cloneFun(this.props.state.file.current.children[index].readlist)
+
 		if (checked) {
 			users.push(uuid)
 			ipc.send('share',files,users)
 		}else {
-
+			let index = users.findIndex(item => item == uuid)
+			if (index != -1) {
+				users.splice(index,1)
+				ipc.send('share',files,users)
+			}
 		}
 	}
 

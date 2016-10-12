@@ -9,24 +9,33 @@ const defaultState = {
 const Media = (state=defaultState,action)=>{
 	switch(action.type) {
 		case 'SET_MEDIA':
-			var m = new Map();
+			var m = new Map()
 			action.data.forEach(item=>{
-				m.set(item.digest,item);
+				m.set(item.digest,item)
 			})
-			return Object.assign({},state,{data:action.data,status:'ready',map:m});
+			return Object.assign({},state,{data:action.data,status:'ready',map:m})
 		case 'SET_THUMB':
 			var item = state.map.get(action.data)
-			item.status = action.status;
-			item.path = action.path;
-			return Object.assign({},state);
+			item.status = action.status
+			item.path = action.path
+			return Object.assign({},state)
+		case 'SET_SHARE_THUMB':
+			state.mediaShare.forEach(item => {
+				item.doc.contents.forEach( pic => {
+					if (pic.digest == action.data) {
+						pic.path = action.path
+					}
+				})
+			})
+
+			return Object.assign({},state)
 		case 'SET_MEDIA_SIZE':
-			var s;
+			var s
 			if (action.reset) {
-				s = 30;
+				s = 30
 			}else {
-				s = state.size+30;
+				s = state.size+30
 			}
-			console.log(s);
 			return Object.assign({},state,{size:s})
 		case 'SET_MEDIA_SHARE':
 			return Object.assign({},state,{mediaShare:action.data})
