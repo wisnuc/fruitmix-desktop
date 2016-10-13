@@ -74,7 +74,7 @@ class AllFiles extends Component {
 			<div className='all-my-files' style={{height:'100%'}}>
 				{this.getTable()}
 				{/*file detail*/}
-				<Paper className='file-detail' style={{width:this.props.state.view.detail.length==0?'0px':'220px'}}>
+				<Paper className='file-detail' style={{width:this.props.state.view.detail?'220px':'0px'}}>
 					<Detail dispatch={this.props.dispatch} state={this.props.state}></Detail>
 				</Paper>
 				{/*create new folder dialog*/}
@@ -95,8 +95,7 @@ class AllFiles extends Component {
 					titleClassName='create-folder-dialog-title'
 					actions={shareActions}
 					open={this.props.state.view.dialogOfShare}
-					className='create-folder-dialog'
-				>
+					className='create-folder-dialog'>
 					<div className='share-user-list-container'>
 					{shareUserList}
 					</div>

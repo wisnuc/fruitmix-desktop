@@ -23,25 +23,25 @@ const styles = {
 class Detail extends Component {
  	constructor(props) {
  		super(props)
- 		this.state = {type:'custom',arr:[]}
+ 		this.state = {type:'custom'}
  	}
 
  	render() {
- 		c.log(this.state.type)
- 		c.log(this.state.arr)
  		var _this = this
- 		let data = this.props.state.view.detail[0];
+ 		let index = this.props.state.view.menu.index
 
- 		if (data) {
- 			 	let style = {
-			 		height: (document.body.clientHeight-64)+'px',
-			 		width:data.length==0?'0px':'220px'
-			 	}
+ 		if (this.props.state.view.detail) {
+ 			let style = {
+			 	height: (document.body.clientHeight-64)+'px',
+				width:index == -1?'0px':'220px'
+			}
+			let data = this.props.state.file.current.children[index]
+			c.log(data)
  			return(
 	 			<div style={style} className='detail-container'>
 	 				<div className='file-infor'>
 	 					<div className='detail-title'>文件信息</div>
-	 					<div>类型&nbsp;&nbsp;:&nbsp;&nbsp;{data.type?data.type=='folder'?'文件夹':'文件':null}</div>
+	 					{/*<div>类型&nbsp;&nbsp;:&nbsp;&nbsp;{data.type?data.type=='folder'?'文件夹':'文件':null}</div>*/}
 		 				<div>大小&nbsp;&nbsp;:&nbsp;&nbsp;{data.type=='folder'?null:(this.getSize(data.size)||null)}</div>
 		 				<div title={data.path||null}>位置&nbsp;&nbsp;:&nbsp;&nbsp;{data.path||null}</div>
 		 				<div>所有者&nbsp;&nbsp;:&nbsp;&nbsp;{this.getOwner(data.owner)||null}</div>
@@ -57,7 +57,7 @@ class Detail extends Component {
 	 					<div className='custom-share-container' style={this.state.type=='all'?{display:'none'}:{}}>
 						    {this.props.state.login.obj.allUser.map(item => {
 						    	let checked = false
-						    	let index = this.props.state.view.detail[0].readlist.findIndex(i => {
+						    	let index = data.readlist.findIndex(i => {
 						    		return i == item.uuid
 						    	})
 						    	if (index != -1) {
@@ -113,29 +113,31 @@ class Detail extends Component {
 	}
 
 	changeShareType(o,value) {
+		if (value == 'all') {
+			let files = [this.props.state.view.detail[0].uuid]
+			let users = []
+			this.props.state.login.obj.allUser.forEach( item => {
+				if ((item.uuid != this.props.state.login.obj.uuid) && (typeof item.uuid == 'string') ) {
+					users.push(item.uuid)
+				}
+			})
+			ipc.send('share',files,users)
+		}
 		this.setState({
 			type:value
 		})
 	}
 
 	checkUser(uuid,obj,checked) {
-		c.log(uuid)
 		let files = [this.props.state.view.detail[0].uuid]
 		let users = this.cloneFun(this.props.state.view.detail[0].readlist)
-		c.log(users.length)
 		if (checked) {
 			users.push(uuid)
-			c.log(users.length)
 			ipc.send('share',files,users)
 		}else {
 
 		}
 	}
-
-	share() {
-
-	}
-
 
 	cloneFun(obj){
 	  if(!obj||"object" != typeof obj){

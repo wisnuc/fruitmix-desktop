@@ -79,10 +79,10 @@ class AllFilesTable extends Component {
 			let x = e.nativeEvent.pageX;
 			let y = e.nativeEvent.pageY;
 			if (this.props.state.file.current.children[rowNumber].checked == false) {	
-				this.props.dispatch(Action.toggleMenu(this.props.state.file.current.children[rowNumber],x,y,false));
+				this.props.dispatch(Action.toggleMenu(rowNumber,x,y,true));
 				this.props.dispatch(Action.selectChildren(rowNumber))
 			}else {
-				this.props.dispatch(Action.toggleMenu(this.props.state.file.current.children[rowNumber],x,y,false));
+				this.props.dispatch(Action.toggleMenu(rowNumber,x,y,true));
 			}
 			return
 		}

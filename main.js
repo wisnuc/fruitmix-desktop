@@ -59,7 +59,7 @@ global.downloadPath = path.join(__dirname,'download')
 //device
 global.device = []
 global.serverRecord = null
-
+global.isLogin = false
 global.c = console.log
 
 global.mocha = false
@@ -295,6 +295,7 @@ ipcMain.on('login',function(err,username,password){
 		})
 		user.users = tempArr
 		user.allUser = users
+		isLogin = true
 		dispatch(action.loggedin(user))
 
 	}).catch((err)=>{
@@ -686,6 +687,7 @@ ipcMain.on('loginOff',err=>{
 	thumbIng = []
 
 	dispatch(action.loginoff())
+	isLogin = false
 })
 
 ipcMain.on('changeDownloadPath', e=>{

@@ -4,9 +4,9 @@ const defaultState = {
   	addDevice: false,
   	dialogOfFolder: false,
 	dialogOfShare: false,
-	detail:[],
+	detail : false,
 	move: {open:false,x:0,y:0,data:[]},
-	menu:{show:false,obj:{}},
+	menu:{show:false,index:-1,x:0,y:0},
 	mediaSize: 30,
 	currentMediaImage:{status:'notReady',path:null,open: false},
 }
@@ -24,26 +24,16 @@ const loginState = (state = defaultState, action) => {
 			return Object.assign({},state,{dialogOfShare:action.isOpen});
 
 		case 'OPEN_DETAIL':
-			return Object.assign({},state,{detail:[state.menu.obj]});
+			return Object.assign({},state,{detail:true});
 
 		case 'CLEAN_DETAIL':
-			return Object.assign({},state,{detail:[]});
+			return Object.assign({},state,{detail:false});
 		case 'TOGGLE_MOVE':
 			return Object.assign({},state,{move:{open:action.open,x:action.x,y:action.y}});
 		case 'CLOSE_MOVE': 
 			return Object.assign({},state,{move: {open:false,x:0,y:0,data:[]}})
 		case 'TOGGLE_MENU':
-			if (action.obj)  {
-				if (action.selected) {
-					return Object.assign({},state,{menu:{show:false,obj:action.obj,x:action.x,y: action.y}});	
-				}else {
-					return Object.assign({},state,{menu:{show:true,obj:action.obj,x:action.x,y: action.y}});
-				}
-				
-			}else {
-				//close menu
-				return Object.assign({},state,{menu:{show:false,obj:{}}});
-			}
+			return Object.assign({},state,{menu:{show:action.selected,index:action.index,x:action.x,y: action.y}});
 		//media
 		case 'SET_MEDIA_SIZE':
 			var s

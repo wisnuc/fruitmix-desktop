@@ -224,7 +224,7 @@ class Main extends Component {
 
 	triggerClick(e) {
 		if (this.props.state.view.menu.show) {
-			this.props.dispatch(Action.toggleMenu());
+			this.props.dispatch(Action.toggleMenu(-1,0,0,false));
 		}
 	}
 	//toggle left navigation

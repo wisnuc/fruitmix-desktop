@@ -25,10 +25,10 @@ var actions = {
 		}
 	},
 
-	toggleMenu(obj,x,y,selected) {
+	toggleMenu(index,x,y,selected) {
 		return {
 			type: 'TOGGLE_MENU',
-			obj : obj,
+			index : index,
 			x: x,
 			y: y,
 			selected:selected
