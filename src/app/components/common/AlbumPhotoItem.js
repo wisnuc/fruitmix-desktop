@@ -162,10 +162,10 @@ export default class AlbumPhotoItem extends Component {
   }
 
   componentDidMount() {
-    const { digest, path } = this.props;
+    const { digest, path, isViewAllPhoto } = this.props;
 
     if (!path || path.charAt(0) !== '/') {
-      ipc.send('getAlbumThumb', { digest: digest });
+      isViewAllPhoto ? ipc.send('getThumb') : ipc.send('getAlbumThumb', { digest: digest });
     }
   }
 }
