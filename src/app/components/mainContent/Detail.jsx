@@ -72,7 +72,7 @@ class Detail extends Component {
 
  	getShareList(data) {
  		var _this = this
- 		if (!data.readlist) {
+ 		if (data.type == 'file') {
  			return <div>文件暂时无法进行分享</div>
  		}
 

@@ -18,7 +18,10 @@ import Login  from'./components/login/Login'// login
 import Main from './components/main/Main'//main
 
 //import Action
-import Action from './actions/action';
+import Action from './actions/action'
+
+//import provider
+import {Provider} from 'react-redux'
 
 
 // global import jQuery
@@ -65,11 +68,13 @@ var App = React.createClass({
 			isLogin = state.login.state == 'LOGGEDIN'?true:false
 		}
 		return(
+				
 				<div className="app">
 						{/*<button onClick={this.save}>store</button>*/}
 						{isLogin && <Main state={mocha?mochaState:state} dispatch={dispatch}/>}
 						{!isLogin && <Login state={mocha?mochaState:state} dispatch={dispatch}/>}
 				</div>
+				
 			)
 	},
 
@@ -83,7 +88,11 @@ var appMountElement = document.getElementById('app')
 
 //define render function
 var Render = () =>{
-	render(<App></App>,appMountElement)
+	render(
+		<Provider store={store}>
+			<App></App>
+		</Provider>,
+		appMountElement)
 }
 
 //render

@@ -800,8 +800,8 @@ function isShareThumbExist(item) {
 					})
 					shareThumbQueue.push(t)
 				}else {
-					item.status='failed'
-					mainWindow.webContents.send('getThumbFailed',item)
+					// item.status='failed'
+					// mainWindow.webContents.send('getThumbFailed',item)
 				}
 				dealShareThumbQueue()
 			})

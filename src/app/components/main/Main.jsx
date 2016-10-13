@@ -161,14 +161,7 @@ class Main extends Component {
 		if ( this.props.state.login.obj.allUser[index].isAdmin) {
 			list = (<MenuItem value="1" primaryText="用户管理" onTouchTap={this.toggleUser.bind(this)}/>)
 		}
-		const folderActions = [
-			<FlatButton
-				label="取消"
-				primary={true}
-				onTouchTap={this.toggleUser.bind(this)}
-				labelStyle={{color:'#000',fontSize:'15px'}}
-			/>
-			];
+		
 
 		let m = null;
 		// if (this.props.state.view.currentMediaImage.open) {
@@ -176,8 +169,10 @@ class Main extends Component {
 		// }
 		return (<CSS opts={['app',true,true,true,500,5000,5000]} style={{height:'100%'}}>
 			<div className="main" key='main' onMouseMove={this.mouseMove.bind(this)} onMouseUp={this.mouseUp.bind(this)} onClick={this.triggerClick.bind(this)}>
+
 				{/*Multiple select frame*/}
-				<Multiple dispatch={this.props.dispatch} state={this.props.state}/>
+				{/*<Multiple dispatch={this.props.dispatch} state={this.props.state}/>*/}
+
 				{/*Bar*/}
 				<AppBar
 					className='app-bar' title='WISNUC' titleStyle={{fontSize:'18px'}}
@@ -193,19 +188,40 @@ class Main extends Component {
 	        			</IconMenu>}
 					onLeftIconButtonTouchTap={this.leftNavClick.bind(this)}
 				>
-				<div className='app-bar-username'>{this.props.state.login.obj.username}</div>
-				<div className='app-bar-appifi' onClick={this.openAppifi.bind(this)}></div>
+					<div className='app-bar-username'>{this.props.state.login.obj.username}</div>
+					<div className='app-bar-appifi' onClick={this.openAppifi.bind(this)}></div>
 				</AppBar>
+
 				{/*Left Nav*/}
 				<Drawer width={220} open={this.props.state.navigation.menu} className='left-nav'>
 					<LeftNav dispatch={this.props.dispatch} state={this.props.state}/>
 				</Drawer>
+
 				{/*Content*/}
 				<Paper className={"content-container "+(this.props.state.navigation.menu?'content-has-left-padding':'no-padding')} zDepth={0}>
 					<Content dispatch={this.props.dispatch} state={this.props.state}/>
 				</Paper>
 
 				{m}
+				{this.getUserManager()}
+				<Snackbar style={{textAlign:'center'}} open={this.props.state.snack.open} message={this.props.state.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
+			</div></CSS>
+			);
+	}
+
+	getUserManager() {
+		if (!this.state.userDialog) {
+			return null
+		}else {
+			let folderActions = [
+			<FlatButton
+				label="取消"
+				primary={true}
+				onTouchTap={this.toggleUser.bind(this)}
+				labelStyle={{color:'#000',fontSize:'15px'}}
+			/>
+			]
+			return (
 				<Dialog title="用户管理"
 					titleClassName='create-folder-dialog-title'
 					actions={folderActions}
@@ -214,9 +230,8 @@ class Main extends Component {
 					className='create-folder-dialog'>
 					<Users login={this.props.state.login}></Users>
 			    </Dialog>
-				<Snackbar style={{textAlign:'center'}} open={this.props.state.snack.open} message={this.props.state.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
-			</div></CSS>
-			);
+				)
+		}
 	}
 
 	triggerClick(e) {
@@ -313,6 +328,16 @@ class Main extends Component {
 
 	openAppifi() {
 		ipc.send('openAppifi')
+	}
+
+	componentWillReceiveProps() {
+		c.log('-2')
+		c.log((new Date()).getTime())
+	}
+
+	componentDidUpdate() {
+		c.log('-1')
+		c.log((new Date()).getTime())	
 	}
 }
 
