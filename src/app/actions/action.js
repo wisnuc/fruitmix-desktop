@@ -296,6 +296,14 @@ var actions = {
 		}
 	},
 
+	setShareThumb(item, path, status) {
+		return {
+			type: 'SET_SHARE_THUMB',
+			data: item,
+			path: path
+		}
+	},
+
 	toggleMedia(open) {
 		return {
 			type: 'TOGGLE_MEDIA',

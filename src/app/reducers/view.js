@@ -33,6 +33,10 @@ const loginState = (state = defaultState, action) => {
 		case 'CLOSE_MOVE': 
 			return Object.assign({},state,{move: {open:false,x:0,y:0,data:[]}})
 		case 'TOGGLE_MENU':
+			if (action.index == null) {
+				var newMenu = Object.assign({}, state.menu, {show:false})
+				return Object.assign({},state,{menu:newMenu});	
+			}
 			return Object.assign({},state,{menu:{show:action.selected,index:action.index,x:action.x,y: action.y}});
 		//media
 		case 'SET_MEDIA_SIZE':

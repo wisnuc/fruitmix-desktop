@@ -53,6 +53,8 @@ global.media = []
 global.mediaMap = new Map()
 global.thumbQueue = []
 global.thumbIng = []
+global.shareThumbQueue = []
+global.shareThumbIng = []
 //path
 global.mediaPath = path.join(__dirname,'media')
 global.downloadPath = path.join(__dirname,'download')
@@ -685,6 +687,8 @@ ipcMain.on('loginOff',err=>{
 	mediaMap = new Map()
 	thumbQueue = []
 	thumbIng = []
+	shareThumbQueue = []
+	shareThumbIng = []
 
 	dispatch(action.loginoff())
 	isLogin = false
@@ -742,6 +746,80 @@ ipcMain.on('getMediaData',(err)=>{
 		console.log(err)
 	})
 })
+//getMediaShareThumb
+ipcMain.on('getAlbumThumb', (err, item) => {
+	shareThumbQueue.push(item)
+	dealShareThumbQueue()
+})
+
+function dealShareThumbQueue() {
+	c(' ')
+	if (shareThumbQueue.length == 0) {
+		return
+	}else {
+			c('shareThumbQueue.length ' + shareThumbQueue.length)
+			if (shareThumbIng.length == 0) {
+				c('not wait')
+				for (var i=0;i<1;i++) {
+					if (shareThumbQueue.length == 0) {
+						break
+					}
+					let item = shareThumbQueue.shift()
+					shareThumbIng.push(item)
+					isShareThumbExist(item)
+				}
+			}else {
+				c('wait')
+			}
+
+	}
+}
+function isShareThumbExist(item) {
+	c(item.digest)
+	fs.readFile(path.join(mediaPath,item.digest+'thumb'),(err,data)=>{
+		if (err) {
+			c('not exist')
+			downloadMedia(item).then((data)=>{
+				c('download success')
+				sendThumb(item)
+				console.log(shareThumbQueue.length+' length')
+			}).catch(err=>{
+				c(item.digest+' failed')
+				item.failed++
+				let index = thumbIng.findIndex(i=>i.digest == item.digest)
+				let t = thumbIng[index]
+				thumbIng.splice(index,1)
+				if (item.failed <5) {
+					fs.readFile(path.join(mediaPath,item.digest+'thumb'),(err,data)=>{
+						if (err) {
+
+						}else {
+							c('find cache')
+						}
+					})
+					shareThumbQueue.push(t)
+				}else {
+					item.status='failed'
+					mainWindow.webContents.send('getThumbFailed',item)
+				}
+				dealShareThumbQueue()
+			})
+		}else {
+			c('exist')
+			sendThumb(item)
+		}
+	})
+
+	function sendThumb(item){
+		c(item.digest+' is over')
+		let index = shareThumbIng.findIndex(i=>i.digest == item.digest)
+		shareThumbIng.splice(index,1)
+		mainWindow.webContents.send('getShareThumbSuccess',item.digest,path.join(mediaPath,item.digest+'thumb'))
+		setTimeout(dealShareThumbQueue,200)
+	}
+}
+
+
 //getMediaThumb
 ipcMain.on('getThumb',(err,item)=>{
 	thumbQueue.push(item)
@@ -815,7 +893,7 @@ function downloadMedia(item) {
 		let height = 100/scale
 		var options = {
 			method: 'GET',
-			url: server+'/media/'+item.digest+'/thumbnail?width=200',
+			url: server+'/media/'+item.digest+'/thumbnail?width=250',
 			headers: {
 				Authorization: user.type+' '+user.token
 			}
