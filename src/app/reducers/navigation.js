@@ -22,6 +22,7 @@ let navDefault = [
 { name: '相册', selected: false, type: 'leftNav', icon:'transmission' },
 { name: '设置', parent: null, selected: false, type:'leftNav', icon:'settings' },
 { name: '数据迁移', parent: null, selected: false, type:'leftNav', icon:'settings' },
+{ name: '相册查看', parent: null, selected: false }
 ];
 
 const nav = (state = navDefault, action) => {

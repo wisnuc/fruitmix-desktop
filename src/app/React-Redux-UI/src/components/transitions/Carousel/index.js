@@ -56,7 +56,8 @@ function getStyles (props) {
       zIndex: 10,
       backgroundRepeat: 'no-repeat',
       backgroundPosition: '0 0',
-      backgroundSize: 'cover'
+      backgroundSize: 'cover',
+      overflow: 'hidden'
     }
   }
 }

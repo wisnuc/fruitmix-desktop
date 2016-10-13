@@ -80,7 +80,7 @@ export default class Albums extends Component {
     const { state } = this.props;
 
     return state.media.mediaShare.map(album =>
-      <AlbumItem info={ album } state={ this.props.state }></AlbumItem>
+      <AlbumItem key={ album.digest } info={ album } dispatch={ this.props.dispatch } state={ this.props.state }></AlbumItem>
     );
   }
 
@@ -142,10 +142,6 @@ export default class Albums extends Component {
         </div>
       </div>
     );
-  }
-
-  clickHandle() {
-
   }
 
   toggleShowed() {

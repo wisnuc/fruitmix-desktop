@@ -15,6 +15,7 @@ import share from './share'
 import imageItem from './imageitem';
 import largeImages from './largeImage';
 import navigationBarTitleTexts from './navigationBarTitleTexts';
+import albumHash from './albumHash';
 import moveData from './moveData';
 
 // import atom component reducer
@@ -36,6 +37,7 @@ const reducer = combineReducers({
 	largeImages,
 	navigationBarTitleTexts,
 	radio,
+	albumHash,
 	shareRadio,
 	moveData
 });

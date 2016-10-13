@@ -18,6 +18,7 @@ import Media from '../mainContent/Media';
 import DataMove from '../mainContent/DataMove'
 import AllPhotos from '../mainContent/AllPhotos';
 import Albums from '../mainContent/Albums';
+import AlbumView from '../mainContent/AlbumView';
 
 class MainContent extends Component {
 
@@ -36,12 +37,13 @@ class MainContent extends Component {
   	component.push(<AllPhotos onShowedRightPanel={ this.props.onShowedRightPanel } dispatch={ this.props.dispatch } state={ this.props.state } key={'g'}></AllPhotos>);
     component.push(<Albums dispatch={ this.props.dispatch } state={ this.props.state }></Albums>);
   	// component.push(<Media dispatch={this.props.dispatch} state={this.props.state} key={'e'}></Media>);
-  	component.push(<Setting dispatch={this.props.dispatch} state={this.props.state} key={'f'}></Setting>)
-  	component.push(<DataMove dispatch={this.props.dispatch} state={this.props.state} key={'f'}></DataMove>)
+  	component.push(<Setting dispatch={this.props.dispatch} state={this.props.state} key={'f'}></Setting>);
+  	component.push(<DataMove dispatch={this.props.dispatch} state={this.props.state} key={'f'}></DataMove>);
+    component.push(<AlbumView dispatch={ this.props.dispatch } state={ this.props.state }></AlbumView>)
 
 
 		// define the content is selected
-		let selectedItem = this.props.state.navigation.nav.findIndex( (item, index, arr) => {
+		let selectedItem = this.props.state.navigation.nav.findIndex((item, index, arr) => {
 			return item.selected == true
 		});
 

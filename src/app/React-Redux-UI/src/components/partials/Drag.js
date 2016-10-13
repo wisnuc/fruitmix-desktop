@@ -59,7 +59,6 @@ export default class Drag extends Component {
 	}
 
 	onMouseMove(e) {
-
 		if (this.hasCurrentNode && this.hasMouseDown) {
 		  this.cloneNode.style.left = e.clientX - this.currentXPixel + 'px';
 			this.cloneNode.style.top = e.clientY - this.currentYPixel + 'px';
@@ -84,11 +83,10 @@ export default class Drag extends Component {
 
 	render() {
 		const { className, children, style, src } = this.props;
-		const newStyle = Object.assign({}, style, { WebkitUserSelect: 'none' });
+		const newStyle = Object.assign({}, style, { WebkitUserSelect: 'none', backgroundImage: 'url("'+ src +'")' });
 
 		return (
-
-			<img style={style} src={src} className={ className } alt="" />
+			<div ref={ el => this.el = el } className={ className } style={ style }></div>
 		);
 	}
 }

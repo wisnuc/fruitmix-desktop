@@ -171,6 +171,13 @@ var actions = {
 		}
 	},
 
+	getAlbumHash(hash) {
+		return {
+			type: 'GET_ALBUM_HASH',
+			hash
+		};
+	},
+
 	// refreshDir(obj) {
 	// 	return {
 	// 		type: 'REFRESH_DIR',
