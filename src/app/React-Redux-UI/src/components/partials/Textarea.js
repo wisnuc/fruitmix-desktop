@@ -59,6 +59,7 @@ class Textarea extends Component {
       'className',
       'style',
       'defaultValue',
+      'placeholder',
       'readOnly',
       'rows'
     ];
@@ -76,6 +77,7 @@ class Textarea extends Component {
 Textarea.propTypes = {
   className: PropTypes.string,
 	style: PropTypes.object,
+  placeholder: PropTypes.string,
   rows: PropTypes.number,
 	defaultValue: PropTypes.string,
 	readOnly: PropTypes.bool,
