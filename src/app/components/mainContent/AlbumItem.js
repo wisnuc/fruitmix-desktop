@@ -13,8 +13,12 @@ function getStyles () {
       color: '#757575',
       fontSize: 12,
       height: 290,
+      lineHeight: 1,
       margin: '0 5px 10px',
       width: 210
+    },
+    figureContainer: {
+      height: 210
     },
     figure: {
       objectFit: 'cover'
@@ -58,6 +62,7 @@ export default class AlbumItem extends Component {
   render() {
     const {
       root,
+      figureContainer,
       figure,
       inner,
       caption,
@@ -66,12 +71,11 @@ export default class AlbumItem extends Component {
     } = getStyles();
 
     const { info: { doc: { ctime, contents, author } } } = this.props;
-    const { state: { view: { currentMediaImage: { path } } } } = this.props
 
     return (
       <div className="album-item fl" style={ root }>
-        <div className="album-item-figure" style={ figure }>
-          <img src={ path || '' } width="100%" height="100%" />
+        <div className="album-item-figure" style={ figureContainer }>
+          <img src={ contents.length ? contents[0].path : '' } style={ figure } width="100%" height="100%" />
         </div>
         <div className="album-item-inner" style={ inner }>
           <div className="caption" style={ caption }>
