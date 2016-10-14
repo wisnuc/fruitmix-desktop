@@ -120,7 +120,7 @@ app.on('ready', function() {
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	})
-	mainWindow.webContents.openDevTools()
+	//mainWindow.webContents.openDevTools()
 	mainWindow.loadURL('file://' + __dirname + '/build/index.html')
 	//create folder
 	fs.exists(mediaPath,exists=>{
@@ -884,7 +884,8 @@ function isThumbExist(item) {
 		let index = thumbIng.findIndex(i=>i.digest == item.digest)
 		thumbIng.splice(index,1)
 		mainWindow.webContents.send('getThumbSuccess',item.digest,path.join(mediaPath,item.digest+'thumb'))
-		setTimeout(dealThumbQueue,200)
+		// setTimeout(dealThumbQueue,200)
+		dealThumbQueue()
 	}
 }
 function downloadMedia(item) {
