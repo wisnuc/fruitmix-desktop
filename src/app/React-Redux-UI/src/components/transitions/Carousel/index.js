@@ -82,11 +82,7 @@ function getTransformStyle () {
     'mozTransform'
   ];
 
-  for (const value of transformStyles) {
-    if (node.style[value] !== undefined) {
-      return value;
-    }
-  }
+  return transformStyles.find(name => node.style[name] !== undefined);
 }
 
 export default class Carousel extends Component {
@@ -107,7 +103,6 @@ export default class Carousel extends Component {
 		this.realWidth = this.getRealWidth(props);
 		this.everyBlockItemCount = this.getEveryBlockItemCountByRealWidth(props);
 		this.blockCount = this.getBlockCountByItemCount(props);
-
 		this.currentItemIndex = data.length >= this.everyBlockItemCount
 		 ? this.everyBlockItemCount - 1
 		 : data.length - 1;
@@ -152,7 +147,7 @@ export default class Carousel extends Component {
           onDragEnd={ onDragEnd }
           date={ dataItem.date }
           index={ dataItem.index }
-          style={ Object.assign({}, item, { backgroundImage: dataItem.el.querySelector('.figure').style.backgroundImage }) }>
+          style={ Object.assign({}, item, { backgroundImage: 'url("'+ dataItem.el.querySelector('img').getAttribute('src') +'")' }) }>
           { dataItem.text }
         </Drag>
       );
