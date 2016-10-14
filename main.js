@@ -894,7 +894,7 @@ function downloadMedia(item) {
 		let height = 100/scale
 		var options = {
 			method: 'GET',
-			url: server+'/media/'+item.digest+'/thumbnail?width=250',
+			url: server+'/media/'+item.digest+'/thumbnail?width=250&autoOrient=true',
 			headers: {
 				Authorization: user.type+' '+user.token
 			}

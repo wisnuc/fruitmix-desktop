@@ -59,7 +59,7 @@ class Row extends Component {
 		}
 		let time = new Date()
 		time.setTime(parseInt(mtime))
-		return time.getFullYear() + ' ' + (time.getMonth() + 1) + ' ' + time.getDay()
+		return time.getFullYear() + '/' + (time.getMonth() + 1) + '/' + time.getDay()
 	}
 
 	getTypeOfFile(file){
