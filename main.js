@@ -120,7 +120,7 @@ app.on('ready', function() {
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	})
-	//mainWindow.webContents.openDevTools()
+	mainWindow.webContents.openDevTools()
 	mainWindow.loadURL('file://' + __dirname + '/build/index.html')
 	//create folder
 	fs.exists(mediaPath,exists=>{
