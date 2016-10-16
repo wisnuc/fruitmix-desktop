@@ -83,16 +83,12 @@ export default class Drag extends Component {
 	}
 
 	render() {
-		const { className, children, style } = this.props;
+		const { className, children, style, src } = this.props;
 		const newStyle = Object.assign({}, style, { WebkitUserSelect: 'none' });
 
 		return (
-			<div
-			  ref={ el => this.el = el }
-			  className={ className }
-				style={ newStyle }>
-				{ children }
-			</div>
+
+			<img style={style} src={src} className={ className } alt="" />
 		);
 	}
 }

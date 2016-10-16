@@ -47,7 +47,8 @@ class PopMenu extends Component {
 	}
 	//rename
 	rename() {
-		let uuid = this.props.state.view.menu.obj.uuid;
+		let index = this.props.state.view.menu.index 
+		let uuid = this.props.state.file.current.children[index].uuid
 		let dom = $('div[data-uuid='+uuid+']>span:eq(1)')[0];
 		let oldName = dom.innerHTML;
 		//edit position point to end
