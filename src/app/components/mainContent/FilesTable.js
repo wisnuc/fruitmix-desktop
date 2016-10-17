@@ -68,6 +68,7 @@ class AllFilesTable extends Component {
 	}
 	//select files
 	selectChildren (rowNumber,e) {
+		c.log(e)
 		//bezier
 		if (this.props.state.file.current.children[rowNumber].checked == true) {
 			this.bez1(rowNumber);

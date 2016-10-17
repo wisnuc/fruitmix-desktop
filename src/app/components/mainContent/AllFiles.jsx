@@ -22,89 +22,19 @@ import Move from './Move';
 
 class AllFiles extends Component {
 	render() {
-		var _this = this;
-		const styles = {
-			block: {
-				maxWidth: 250,
-			},
-			checkbox: {
-				marginBottom: 16,
-			},
-		};
-		let shareUserList = this.props.state.login.obj.users.map((item,index)=>{
-						if (item.username == this.props.state.login.obj.username) {
-							return
-						}
-						return <Checkbox key={item.username} label={item.username} style={{marginBottom: 16}} labelPosition="left" onCheck={this.checkUser.bind(this,item.uuid)}/>
-					})
-		const folderActions = [
-			<FlatButton
-				label="取消"
-				primary={true}
-				onTouchTap={this.toggleUploadFolder.bind(this,false)}
-				labelStyle={{color:'#000',fontSize:'15px'}}
-			/>,
-			<FlatButton
-				label="确认"
-				primary={true}
-				onTouchTap={this.upLoadFolder.bind(this)}
-				backgroundColor='#ef6c00'
-				labelStyle={{color:'#fff',fontSize:'16px'}}
-				hoverColor='#ef6c00'
-			/>,
-			];
-		const shareActions = [
-			<FlatButton
-				label="取消"
-				primary={true}
-				onTouchTap={this.toggleShare.bind(this,false)}
-				labelStyle={{color:'#000',fontSize:'15px'}}
-			/>,
-			<FlatButton
-				label="确认"
-				primary={true}
-				onTouchTap={this.share.bind(this)}
-				backgroundColor='#ef6c00'
-				labelStyle={{color:'#fff',fontSize:'16px'}}
-				hoverColor='#ef6c00'
-			/>,
-		];
+		var _this = this
+		
 
-		let d = null
-		// if (this.props.state.view.detail) {
-		// 	d = <Detail dispatch={this.props.dispatch} state={this.props.state}></Detail>
-		// }
 		
 		return (
 			<div className='all-my-files' style={{height:'100%'}}>
 				{this.getTable()}
 				{/*file detail*/}
-				<Paper className='file-detail' style={{width:this.props.state.view.detail?'220px':'0px'}}>
-					{d}
-				</Paper>
+				{this.getDetail()}
 				{/*create new folder dialog*/}
-				<Dialog
-					title="新建文件夹"
-					titleClassName='create-folder-dialog-title'
-					actions={folderActions}
-					modal={false}
-					open={this.props.state.view.dialogOfFolder}
-					className='create-folder-dialog'
-			        >
-			        <div className='create-folder-dialog-label'>名称</div>
-			    	<TextField fullWidth={true} hintText="名称" id='folder-name'/>
-			    </Dialog>
+				{this.getCreateFolderDialog()}
 				{/*share dialog*/}
-				<Dialog 
-					title='分享' 
-					titleClassName='create-folder-dialog-title'
-					actions={shareActions}
-					open={this.props.state.view.dialogOfShare}
-					className='create-folder-dialog'>
-					<div className='share-user-list-container'>
-					{shareUserList}
-					</div>
-				</Dialog>
+				{this.getShareDialog()}
 			</div>
 		)
 	}
@@ -142,6 +72,96 @@ class AllFiles extends Component {
 						<Move dispatch={this.props.dispatch} state={this.props.state}></Move>
 					</div>
 				</Paper>
+				)
+		}
+	}
+
+	getDetail() {
+		if (!this.props.state.view.detail) {
+			return null
+		}else {
+			return (
+				<Paper className='file-detail' style={{width:this.props.state.view.detail?'220px':'0px'}}>
+					<Detail dispatch={this.props.dispatch} state={this.props.state}></Detail>
+				</Paper>
+				)
+		}
+	}
+
+	getCreateFolderDialog() {
+		if (!this.props.state.view.dialogOfFolder) {
+			return null
+		}else {
+			let folderActions = [
+			<FlatButton
+				label="取消"
+				primary={true}
+				onTouchTap={this.toggleUploadFolder.bind(this,false)}
+				labelStyle={{color:'#000',fontSize:'15px'}}
+			/>,
+			<FlatButton
+				label="确认"
+				primary={true}
+				onTouchTap={this.upLoadFolder.bind(this)}
+				backgroundColor='#ef6c00'
+				labelStyle={{color:'#fff',fontSize:'16px'}}
+				hoverColor='#ef6c00'
+			/>,
+			]
+			return (
+				<Dialog
+					title="新建文件夹"
+					titleClassName='create-folder-dialog-title'
+					actions={folderActions}
+					modal={false}
+					open={this.props.state.view.dialogOfFolder}
+					className='create-folder-dialog'
+				       >
+				    <div className='create-folder-dialog-label'>名称</div>
+				    <TextField fullWidth={true} hintText="名称" id='folder-name'/>
+				</Dialog>
+			)
+		}
+	}
+
+	getShareDialog() {
+		if (!this.props.state.view.dialogOfShare) {
+			return null
+		}else {
+			let shareUserList = this.props.state.login.obj.users.map((item,index)=>{
+						if (item.username == this.props.state.login.obj.username) {
+							return
+						}
+						return <Checkbox key={item.username} label={item.username} style={{marginBottom: 16}} labelPosition="left" onCheck={this.checkUser.bind(this,item.uuid)}/>
+					})
+			let shareActions = [
+				<FlatButton
+					label="取消"
+					primary={true}
+					onTouchTap={this.toggleShare.bind(this,false)}
+					labelStyle={{color:'#000',fontSize:'15px'}}
+				/>,
+				<FlatButton
+					label="确认"
+					primary={true}
+					onTouchTap={this.share.bind(this)}
+					backgroundColor='#ef6c00'
+					labelStyle={{color:'#fff',fontSize:'16px'}}
+					hoverColor='#ef6c00'
+				/>,
+			]
+
+			return (
+				<Dialog 
+					title='分享' 
+					titleClassName='create-folder-dialog-title'
+					actions={shareActions}
+					open={this.props.state.view.dialogOfShare}
+					className='create-folder-dialog'>
+					<div className='share-user-list-container'>
+					{shareUserList}
+					</div>
+				</Dialog>
 				)
 		}
 	}

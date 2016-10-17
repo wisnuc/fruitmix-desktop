@@ -4,10 +4,8 @@ class Row extends Component {
 
 	shouldComponentUpdate(nextP) {
 		if (this.props.item.checked == nextP.item.checked && this.props.item.name == nextP.item.name) {
-			c.log('false')
 			return false
 		}else {
-			c.log('true')
 			return true
 		}
 	}
@@ -92,16 +90,6 @@ class Row extends Component {
 			}
 		}
 		return 'file'
-	}
-
-	componentWillReceiveProps() {
-		c.log('4')
-		c.log((new Date()).getTime())
-	}
-
-	componentDidUpdate() {
-		c.log('5')
-		c.log((new Date()).getTime())	
 	}
 
 
