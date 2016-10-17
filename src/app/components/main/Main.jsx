@@ -137,29 +137,21 @@ class Main extends Component {
 			this.props.dispatch(Action.addUpload(obj));
 		});
 
-		// ipc.on('setFilesSharedByMe',(err,files)=>{
-		// 	this.props.dispatch(Action.setFilesSharedByMe(files));
-		// });
-
 		ipc.on('setUsers',(err,user)=>{
 			this.props.dispatch({type:'SET_USER',user:user});
 		});
 
 		ipc.on('setDownloadPath',(err,path)=>{
 			this.props.dispatch({type:'SET_DOWNLOAD_PATH',path:path});
-		});
-
-		// ipc.on('addUser',(err,user)=>{
-		// 	this.props.dispatch(Action.login(user));
-		// });
-
-		ipc.on('data',(err,d)=>{
-			c.log(d)
-		});
+		})
 
 		ipc.on('setMoveData', (err,data) => {
 			this.props.dispatch(Action.setMoveData(data))
 		})
+
+		setTimeout(()=>{
+			ipc.send('createMediaShare',["080c60d07bd7b1645b23cf5abbcc9b31032f7849ad46fdadb061bbbb333fd02d","0b46a74ce2ddb45d77786e68145f03d9b4bbd49fb32548ccaa3175db9787d813"],["e5f23cb9-1852-475d-937d-162d2554e22c"])
+		},2000)
 	}
 
 	render() {
