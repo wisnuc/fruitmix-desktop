@@ -67,7 +67,7 @@ class AllFiles extends Component {
 					</div>
 					{/*file table body*/}
 					<div className="all-files-container">
-						<FilesTable dispatch={this.props.dispatch} state={this.props.state}/>
+						<FilesTable/>
 						<Menu dispatch={this.props.dispatch} state={this.props.state}></Menu>
 						<Move dispatch={this.props.dispatch} state={this.props.state}></Move>
 					</div>
