@@ -149,9 +149,9 @@ class Main extends Component {
 			this.props.dispatch(Action.setMoveData(data))
 		})
 
-		setTimeout(()=>{
-			ipc.send('createMediaShare',["080c60d07bd7b1645b23cf5abbcc9b31032f7849ad46fdadb061bbbb333fd02d","0b46a74ce2ddb45d77786e68145f03d9b4bbd49fb32548ccaa3175db9787d813"],["e5f23cb9-1852-475d-937d-162d2554e22c"])
-		},2000)
+		// setTimeout(()=>{
+		// 	ipc.send('createMediaShare',["080c60d07bd7b1645b23cf5abbcc9b31032f7849ad46fdadb061bbbb333fd02d","0b46a74ce2ddb45d77786e68145f03d9b4bbd49fb32548ccaa3175db9787d813"],["e5f23cb9-1852-475d-937d-162d2554e22c"])
+		// },2000)
 	}
 
 	render() {
