@@ -7,7 +7,8 @@
 
   'use strict';
 // require core module
-import React, { findDOMNode, Component, PropTypes } from 'react';
+import React, { findDOMNode, Component, PropTypes } from 'react'
+import { connect } from 'react-redux'
 //require material
 import { Paper, Menu, MenuItem } from 'material-ui';
 //import Action
@@ -15,14 +16,14 @@ import Action from '../../actions/action';
 
 class PopMenu extends Component {
 	render() {
-		let menu = this.props.state.view.menu;
+		let menu = this.props.view.menu;
 		let style = {
 			display:'none'
 		}
 		if (menu.show) {
 			style = Object.assign({},style,{
 				display: menu.show?'block':'none',
-				left: this.props.state.navigation.menu?menu.x-249:menu.x,
+				left: this.props.navigation.menu?menu.x-249:menu.x,
 				top: menu.y-132+document.getElementsByClassName('file-area')[0].scrollTop
 			});
 		}
@@ -47,8 +48,8 @@ class PopMenu extends Component {
 	}
 	//rename
 	rename() {
-		let index = this.props.state.view.menu.index 
-		let uuid = this.props.state.file.current.children[index].uuid
+		let index = this.props.view.menu.index 
+		let uuid = this.props.file.current.children[index].uuid
 		let dom = $('div[data-uuid='+uuid+']>span:eq(1)')[0];
 		let oldName = dom.innerHTML;
 		//edit position point to end
@@ -86,13 +87,13 @@ class PopMenu extends Component {
 	}
 
 	moveto() {
-		if (!!this.props.state.data.directory.uuid) {
-			ipc.send('getTreeChildren',this.props.state.data.directory.uuid);
+		if (!!this.props.data.directory.uuid) {
+			ipc.send('getTreeChildren',this.props.data.directory.uuid);
 		}else {
 			ipc.send('getTreeChildren');
 		}
 		
-		this.props.dispatch(Action.toggleMove(true,this.props.state.data.menu.x,this.props.state.data.menu.y));
+		this.props.dispatch(Action.toggleMove(true,this.props.data.menu.x,this.props.data.menu.y));
 	}
 	//toggle dialog of share
 	share() {
@@ -101,12 +102,12 @@ class PopMenu extends Component {
 
 	remove() {
 		let arr = [];
-		this.props.state.file.current.children.forEach(item=>{
+		this.props.file.current.children.forEach(item=>{
 			if (item.checked) {
 				arr.push(item)
 			}
 		});
-		ipc.send('delete',arr,this.props.state.file.current.directory);
+		ipc.send('delete',arr,this.props.file.current.directory);
 	}
 
 	dowload() {
@@ -114,7 +115,7 @@ class PopMenu extends Component {
 		let folder = [];
 		let map = new Map();
 		let t = new Date();
-		this.props.state.file.current.children.forEach(item=>{
+		this.props.file.current.children.forEach(item=>{
 			if (item.checked && item.type != 'folder') {
 				let file = Object.assign({},item,{status:0,downloadTime:Date.parse(t)});
 				files.push(file);
@@ -136,4 +137,10 @@ class PopMenu extends Component {
 	}
 }
 
-export default PopMenu;
+var mapStateToProps = (state)=>({
+	     file: state.file,
+	     navigation: state.navigation,
+	     view: state.view,
+	})
+
+export default connect(mapStateToProps)(PopMenu)
