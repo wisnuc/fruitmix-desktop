@@ -38,7 +38,7 @@ class AllFilesTable extends Component {
 					{
 						this.props.state.file.current.children.map((item,index)=>{
 							return (
-								<Row index={index} item={item} key={index} selectChildren={this.selectChildren.bind(this)} enterChildren={this.enterChildren.bind(this)} addBezier={this.addBezier.bind(this)}></Row>
+								<Row index={index} item={item} key={item.uuid} selectChildren={this.selectChildren.bind(this)} enterChildren={this.enterChildren.bind(this)} addBezier={this.addBezier.bind(this)}></Row>
 							)
 						}
 					)}
@@ -118,6 +118,16 @@ class AllFilesTable extends Component {
 	bez2 (rowNumber) {
 		$('tbody>tr:eq('+rowNumber+') .bezierFrame').children('.bezierTransition2').remove();
 		$('tbody>tr:eq('+rowNumber+') .bezierFrame').append('<div class="bezierTransition2"></div>');
+	}
+
+	componentWillReceiveProps() {
+		c.log('2')
+		c.log((new Date()).getTime())
+	}
+
+	componentDidUpdate() {
+		c.log('3')
+		c.log((new Date()).getTime())	
 	}
 }
 

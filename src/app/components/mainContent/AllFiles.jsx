@@ -69,13 +69,18 @@ class AllFiles extends Component {
 				hoverColor='#ef6c00'
 			/>,
 		];
+
+		let d = null
+		// if (this.props.state.view.detail) {
+		// 	d = <Detail dispatch={this.props.dispatch} state={this.props.state}></Detail>
+		// }
 		
 		return (
 			<div className='all-my-files' style={{height:'100%'}}>
 				{this.getTable()}
 				{/*file detail*/}
 				<Paper className='file-detail' style={{width:this.props.state.view.detail?'220px':'0px'}}>
-					<Detail dispatch={this.props.dispatch} state={this.props.state}></Detail>
+					{d}
 				</Paper>
 				{/*create new folder dialog*/}
 				<Dialog
@@ -257,6 +262,16 @@ class AllFiles extends Component {
 		// 	}
 		// 	this.props.dispatch(Action.setFilesSize(false));
 		// }
+	}
+
+	componentWillReceiveProps() {
+		c.log('0')
+		c.log((new Date()).getTime())
+	}
+
+	componentDidUpdate() {
+		c.log('1')
+		c.log((new Date()).getTime())	
 	}
 }
 
