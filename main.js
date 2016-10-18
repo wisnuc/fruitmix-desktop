@@ -354,7 +354,7 @@ function enterChildren(selectItem) {
 		})
 
 		currentDirectory = Object.assign({}, selectItem, {children:null})
-		children = map.get(selectItem.uuid).children.map(item=>Object.assign({},item,{children:null,checked:false}))
+		children = file.map(item=>Object.assign({},item,{children:null,checked:false}))
 		dirPath.length = 0
 		getPath(folder)
 		dispatch(action.setDir(currentDirectory,children,dirPath))
@@ -777,10 +777,10 @@ function dealShareThumbQueue() {
 }
 function isShareThumbExist(item) {
 	c(item.digest)
-	fs.readFile(path.join(mediaPath,item.digest+'thumb'),(err,data)=>{
+	fs.readFile(path.join(mediaPath,item.digest+'thumb210'),(err,data)=>{
 		if (err) {
 			c('not exist')
-			downloadMedia(item).then((data)=>{
+			downloadMedia(item,true,item).then((data)=>{
 				c('download success')
 				sendThumb(item)
 				console.log(shareThumbQueue.length+' length')
@@ -791,7 +791,7 @@ function isShareThumbExist(item) {
 				let t = thumbIng[index]
 				thumbIng.splice(index,1)
 				if (item.failed <5) {
-					fs.readFile(path.join(mediaPath,item.digest+'thumb'),(err,data)=>{
+					fs.readFile(path.join(mediaPath,item.digest+'thumb210'),(err,data)=>{
 						if (err) {
 
 						}else {
@@ -815,7 +815,7 @@ function isShareThumbExist(item) {
 		c(item.digest+' is over')
 		let index = shareThumbIng.findIndex(i=>i.digest == item.digest)
 		shareThumbIng.splice(index,1)
-		mainWindow.webContents.send('getShareThumbSuccess',item.digest,path.join(mediaPath,item.digest+'thumb'))
+		mainWindow.webContents.send('getShareThumbSuccess',item.digest,path.join(mediaPath,item.digest+'thumb210'))
 		setTimeout(dealShareThumbQueue,200)
 	}
 }
@@ -847,9 +847,9 @@ function dealThumbQueue() {
 function isThumbExist(item) {
 	c(' ')
 	c(item.digest)
-	fs.readFile(path.join(mediaPath,item.digest+'thumb'),(err,data)=>{
+	fs.readFile(path.join(mediaPath,item.digest+'thumb138'),(err,data)=>{
 		if (err) {
-			downloadMedia(item).then((data)=>{
+			downloadMedia(item,false,item).then((data)=>{
 				sendThumb(item)
 				console.log(thumbQueue.length+' length')
 			}).catch(err=>{
@@ -884,18 +884,19 @@ function isThumbExist(item) {
 		c(item.digest+' is over')
 		let index = thumbIng.findIndex(i=>i.digest == item.digest)
 		thumbIng.splice(index,1)
-		mainWindow.webContents.send('getThumbSuccess',item.digest,path.join(mediaPath,item.digest+'thumb'))
+		mainWindow.webContents.send('getThumbSuccess',item.digest,path.join(mediaPath,item.digest+'thumb138'))
 		// setTimeout(dealThumbQueue,200)
 		dealThumbQueue()
 	}
 }
-function downloadMedia(item) {
+function downloadMedia(item,large,item) {
+	var size = large?'width=210&height=210':'width=138&height=138'
 	var download = new Promise((resolve,reject)=>{
 		let scale = item.width/item.height
 		let height = 100/scale
 		var options = {
 			method: 'GET',
-			url: server+'/media/'+item.digest+'/thumbnail?width=250&autoOrient=true',
+			url: server+'/media/'+item.digest+'/thumbnail?'+size+'&autoOrient=true&modifier=caret',
 			headers: {
 				Authorization: user.type+' '+user.token
 			}
@@ -915,7 +916,11 @@ function downloadMedia(item) {
 				
 			}
 		}
-			var stream = fs.createWriteStream(path.join(mediaPath,item.digest+'thumb'))
+			if (large) {
+				var stream = fs.createWriteStream(path.join(mediaPath,item.digest+'thumb210'))
+			}else {
+				var stream = fs.createWriteStream(path.join(mediaPath,item.digest+'thumb138'))
+			}
 
 			request(options,callback).pipe(stream)
 		})
@@ -950,8 +955,10 @@ ipcMain.on('createMediaShare',(err, medias, users, album) => {
 	c('create media share-----------------------------')
 	mediaApi.createMediaShare(medias, users, album).then(data => {
 		c(data)
+		mainWindow.webContents.send('message','创建相册成功')
 	}).catch(err => {
 		c(err)
+		mainWindow.webContents.send('message','创建相册失败')
 	})
 })
 

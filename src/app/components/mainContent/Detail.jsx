@@ -6,7 +6,8 @@
  **/
   'use strict';
   // require core module
- import React, { findDOMNode, Component, PropTypes } from 'react'
+import React, { findDOMNode, Component, PropTypes } from 'react'
+import { connect } from 'react-redux'
  //require material
 import { Paper, Menu, MenuItem, Checkbox } from 'material-ui'
 import {RadioButton, RadioButtonGroup} from 'material-ui/RadioButton'
@@ -28,14 +29,14 @@ class Detail extends Component {
 
  	render() {
  		var _this = this
- 		let index = this.props.state.view.menu.index
+ 		let index = this.props.view.menu.index
 
- 		if (this.props.state.view.detail) {
+ 		if (this.props.view.detail) {
  			let style = {
 			 	height: (document.body.clientHeight-64)+'px',
 				width:index == -1?'0px':'220px'
 			}
-			let data = this.props.state.file.current.children[index]
+			let data = this.props.file.children[index]
  			return(
 	 			<div style={style} className='detail-container'>
 	 				<div className='file-infor'>
@@ -76,7 +77,7 @@ class Detail extends Component {
  			return <div>文件暂时无法进行分享</div>
  		}
 
- 		return this.props.state.login.obj.allUser.map(item => {
+ 		return this.props.login.obj.allUser.map(item => {
 						    	let checked = false
 						    	let index = data.readlist.findIndex(i => {
 						    		return i == item.uuid
@@ -101,7 +102,7 @@ class Detail extends Component {
  		this.props.dispatch(Action.cleanDetail());
  	}
  	getOwner(owner) {
- 		let o = this.props.state.login.obj.allUser.find(item=>{
+ 		let o = this.props.login.obj.allUser.find(item=>{
  			return item.uuid = owner
  		});
  		if (o != undefined) {
@@ -125,11 +126,11 @@ class Detail extends Component {
 
 	changeShareType(o,value) {
 		if (value == 'all') {
-			let index = this.props.state.view.menu.index
-			let files = [this.props.state.file.current.children[index].uuid]
+			let index = this.props.view.menu.index
+			let files = [this.props.file.current.children[index].uuid]
 			let users = []
-			this.props.state.login.obj.allUser.forEach( item => {
-				if ((item.uuid != this.props.state.login.obj.uuid) && (typeof item.uuid == 'string') ) {
+			this.props.login.obj.allUser.forEach( item => {
+				if ((item.uuid != this.props.login.obj.uuid) && (typeof item.uuid == 'string') ) {
 					users.push(item.uuid)
 				}
 			})
@@ -141,9 +142,9 @@ class Detail extends Component {
 	}
 
 	checkUser(uuid,obj,checked) {
-		let index = this.props.state.view.menu.index
-		let files = [this.props.state.file.current.children[index].uuid]
-		let users = this.cloneFun(this.props.state.file.current.children[index].readlist)
+		let index = this.props.view.menu.index
+		let files = [this.props.file.current.children[index].uuid]
+		let users = this.cloneFun(this.props.file.current.children[index].readlist)
 
 		if (checked) {
 			users.push(uuid)
@@ -169,5 +170,10 @@ class Detail extends Component {
 	}
 }
 
+var mapStateToProps = (state)=>({
+	     file: state.file,
+	     view: state.view,
+	     login: state.login
+	})
 
- export default Detail;
+ export default connect(mapStateToProps)(Detail)

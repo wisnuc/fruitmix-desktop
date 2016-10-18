@@ -188,8 +188,10 @@ body{
 	display: none;
 }
 
+
 .image-item.active .selected-mask {
 	display: block;
+
 }
 
 .image-item.active i {
@@ -211,6 +213,12 @@ body{
 
 .image-item.active i {
 	display: block;
+}
+.image-item {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	overflow: hidden;
 }
 
 /*content*/

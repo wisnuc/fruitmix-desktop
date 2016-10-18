@@ -126,8 +126,24 @@ export default class ImageByDate extends Component {
     const { figureStyle, loadingStyle } = getStyles();
 
     if (figureItem.path) {
+      // let thumbStyle 
+      // if (figureItem.width < 136 && figureItem.height<136) {
+      //   thumbStyle = {
+      //     maxWidth:'100%',
+      //     maxHeight: '100%',
+      //     margin:'auto',
+      //     display: 'block'}
+      // }else {
+      //   if (figureItem.width > figureItem.height) {
+      //     thumbStyle = {
+      //       width:'100%',
+      //       position:'relative',
+      //       top:figureItem.width/250
+      //     }
+      //   }
+      // }
       return (
-        <img src={ figureItem.path } style={ figureStyle }/>
+        <img src={ figureItem.path }/>
       );
     } else {
       return (

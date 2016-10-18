@@ -7,11 +7,11 @@
  'use strict';
 // require core module
 import React, { findDOMNode, Component, PropTypes } from 'react'
-import { connect } from 'react-redux';
+import { connect } from 'react-redux'
 //import Action
-import Action from '../../actions/action';
-import svg from '../../utils/SVGIcon';
-import Row from './TableRow';
+import Action from '../../actions/action'
+import svg from '../../utils/SVGIcon'
+import Row from './TableRow'
 
 
 class AllFilesTable extends Component {
@@ -37,7 +37,7 @@ class AllFilesTable extends Component {
 				{/*table body*/}
 				<tbody>
 					{
-						this.props.file.current.children.map((item,index)=>{
+						this.props.file.children.map((item,index)=>{
 							return (
 								<Row index={index} item={item} key={item.uuid} selectChildren={this.selectChildren.bind(this)} enterChildren={this.enterChildren.bind(this)} addBezier={this.addBezier.bind(this)}></Row>
 							)
@@ -71,7 +71,7 @@ class AllFilesTable extends Component {
 	selectChildren (rowNumber,e) {
 		c.log(e)
 		//bezier
-		if (this.props.file.current.children[rowNumber].checked == true) {
+		if (this.props.file.children[rowNumber].checked == true) {
 			this.bez1(rowNumber);
 		}else {
 			this.bez2(rowNumber);
@@ -80,7 +80,7 @@ class AllFilesTable extends Component {
 			//right click
 			let x = e.nativeEvent.pageX;
 			let y = e.nativeEvent.pageY;
-			if (this.props.file.current.children[rowNumber].checked == false) {	
+			if (this.props.file.children[rowNumber].checked == false) {	
 				this.props.dispatch(Action.toggleMenu(rowNumber,x,y,true));
 				this.props.dispatch(Action.selectChildren(rowNumber))
 			}else {
@@ -96,14 +96,14 @@ class AllFilesTable extends Component {
 		//bezier 
 		$('.bezierFrame').empty().append('<div class="bezierTransition1"></div><div class="bezierTransition2"></div>');
 
-		var children = this.props.file.current.children;
+		var children = this.props.file.children;
 		if (children[rowNumber] && children[rowNumber].type == 'folder') {
 			ipc.send('enterChildren',children[rowNumber]);
 		}
 	}
 
 	addBezier (rowNumber) {
-		if (this.props.file.current.children[rowNumber].checked == false) {
+		if (this.props.file.children[rowNumber].checked == false) {
 			this.bez2(rowNumber);
 			$('tbody>tr:eq('+rowNumber+') .bezierFrame').children('.bezierTransition1').addClass('open');
 		}else {
