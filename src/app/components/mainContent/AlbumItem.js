@@ -3,6 +3,7 @@
 **/
 
 import React, { Component, PropTypes } from 'react';
+import Action from '../../actions/action';
 
 function getStyles () {
   return {
@@ -33,6 +34,7 @@ function getStyles () {
     },
     describe: {
       margin: 0,
+      minHeight: 12,
       paddingBottom: 5,
       whiteSpace: 'nowrap',
       overflow: 'hidden',
@@ -61,7 +63,15 @@ export default class AlbumItem extends Component {
     }else {
       return null
     }
-    
+
+  }
+
+  viewAlbumListHandle() {
+    const { dispatch, info: { digest, doc: { album: { title='武夷山' } } } } = this.props;
+
+    dispatch(Action.changeSelectedNavItem('相册查看'));
+    dispatch(Action.toggleNavigator([ '相册', title ]));
+    dispatch(Action.getAlbumHash(digest));
   }
 
   render() {
@@ -75,19 +85,19 @@ export default class AlbumItem extends Component {
       tail
     } = getStyles();
 
-    const { info: { doc: { ctime, contents, author } } } = this.props;
+    const { info: { doc: { ctime, contents, author, album } } } = this.props;
 
     return (
-      <div className="album-item fl" style={ root }>
+      <div className="album-item fl" style={ root } onClick={ this.viewAlbumListHandle.bind(this) }>
         <div className="album-item-figure" style={ figureContainer }>
           <img src={ contents.length ? contents[0].path : '' } style={ figure } width="100%" height="100%" />
         </div>
         <div className="album-item-inner" style={ inner }>
           <div className="caption" style={ caption }>
-          武夷山 * { contents.length }张
+          { album ? album.title : '武夷山' } * { contents.length }张
           </div>
           <p className="describe" style={ describe }>
-            这是相册的描述
+            { album ? album.text : '这是相册的描述' }
           </p>
           <div className="clearfix" style={ tail }>
             <label className="fl" style={{ width: '50%', textAlign: 'left' }}>{ this.toDate(ctime) }</label>

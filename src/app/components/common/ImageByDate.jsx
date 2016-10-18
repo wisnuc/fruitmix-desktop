@@ -172,7 +172,7 @@ export default class ImageByDate extends Component {
   componentDidMount() {
     const { figureItem } = this.props;
 
-    ipc.send('getThumb',figureItem);
+    ipc.send('getThumb', figureItem);
   }
 }
 

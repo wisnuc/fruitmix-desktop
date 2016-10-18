@@ -408,10 +408,8 @@ export default class AllPhotos extends Component {
   }
 
   componentWillUnmount() {
-    const { dispatch } = this.props;
-
     this.mounted = false;
-    dispatch(Action.clearDragImageItem());
+    this.clearAllSelectedItem();
   }
 
   render() {
