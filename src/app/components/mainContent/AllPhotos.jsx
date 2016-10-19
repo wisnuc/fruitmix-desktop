@@ -407,4 +407,4 @@ var mapStateToProps = (state)=>({
      view: state.view
 });
 
-export default connect(mapStateToProps)(AllPhotos)
+export default connect(mapStateToProps)(AllPhotos);
