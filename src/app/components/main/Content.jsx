@@ -6,58 +6,54 @@
  **/
   'use strict';
 // require core module
- import React, { findDOMNode, Component, PropTypes } from 'react';
- import CSS from '../../utils/transition';
+ import React, { findDOMNode, Component, PropTypes } from 'react'
+ import CSS from '../../utils/transition'
 // import Component
-import AllFile from '../mainContent/AllFiles';
-import Collection from '../mainContent/Collection';
-import SharedFiles from '../mainContent/SharedFiles';
-import SharedByMe from '../mainContent/SharedByMe';
-import Setting from '../mainContent/Setting';
-import Media from '../mainContent/Media';
+import AllFile from '../mainContent/AllFiles'
+import Collection from '../mainContent/Collection'
+import SharedFiles from '../mainContent/SharedFiles'
+import SharedByMe from '../mainContent/SharedByMe'
+import AllPhotos from '../mainContent/AllPhotos'
+import Albums from '../mainContent/Albums'
+import AlbumView from '../mainContent/AlbumView'
+import Setting from '../mainContent/Setting'
 import DataMove from '../mainContent/DataMove'
-import AllPhotos from '../mainContent/AllPhotos';
-import Albums from '../mainContent/Albums';
-import AlbumView from '../mainContent/AlbumView';
+import Media from '../mainContent/Media'
+
+
+
+
 
 class MainContent extends Component {
 
 	getContentSelected() {
-		let component = [];
-		component.push(<AllFile dispatch={this.props.dispatch} state={this.props.state} key={'a'}></AllFile>);
-		component.push(<Collection dispatch={this.props.dispatch} state={this.props.state} key={'b'}></Collection>);
-		component.push(<SharedFiles dispatch={this.props.dispatch} state={this.props.state} key={'c'}></SharedFiles>);
-		component.push(<SharedByMe dispatch={this.props.dispatch} state={this.props.state} key={'d'}></SharedByMe>);
-
-		// component.push(<AllFile dispatch={this.props.dispatch} state={this.props.state} key={'f'}></AllFile>);
-		// component.push(<AllFile dispatch={this.props.dispatch} state={this.props.state} key={'g'}></AllFile>);
-		// component.push(<Media dispatch={this.props.dispatch} state={this.props.state} key={'e'}></Media>);
-		// component.push(<Setting dispatch={this.props.dispatch} state={this.props.state} key={'f'}></Setting>);
-
-  	component.push(<AllPhotos onShowedRightPanel={ this.props.onShowedRightPanel } dispatch={ this.props.dispatch } state={ this.props.state } key={'g'}></AllPhotos>);
-    component.push(<Albums dispatch={ this.props.dispatch } state={ this.props.state }></Albums>);
-  	// component.push(<Media dispatch={this.props.dispatch} state={this.props.state} key={'e'}></Media>);
-  	component.push(<Setting dispatch={this.props.dispatch} state={this.props.state} key={'f'}></Setting>);
-  	component.push(<DataMove dispatch={this.props.dispatch} state={this.props.state} key={'f'}></DataMove>);
-    component.push(<AlbumView dispatch={ this.props.dispatch } state={ this.props.state }></AlbumView>)
-
-
 		// define the content is selected
-		let selectedItem = this.props.state.navigation.nav.findIndex((item, index, arr) => {
+		let selectedItem = this.props.state.navigation.nav.find((item, index, arr) => {
 			return item.selected == true
 		});
 
-		return component[selectedItem];
+		return selectedItem.name;
 	}
 
 	render() {
+		let componentMap = {
+			'我的所有文件' : <AllFile dispatch={this.props.dispatch} state={this.props.state} key={'a'}></AllFile>,
+			'上传/下载' : <Collection dispatch={this.props.dispatch} state={this.props.state} key={'b'}></Collection>,
+			'分享给我的文件' : <SharedFiles dispatch={this.props.dispatch} state={this.props.state} key={'c'}></SharedFiles>,
+			'我分享的文件' : <SharedByMe dispatch={this.props.dispatch} state={this.props.state} key={'d'}></SharedByMe>,
+			'所有照片' : <AllPhotos dispatch={this.props.dispatch} state={this.props.state} key={'e'}></AllPhotos>,
+			'相册' : <Albums dispatch={this.props.dispatch} state={this.props.state} key={'f'}></Albums>,
+			'相册查看' : <AlbumView dispatch={this.props.dispatch} state={this.props.state} key={'g'}></AlbumView>,
+			'设置' : <Setting dispatch={this.props.dispatch} state={this.props.state} key={'h'}></Setting>,
+			'数据迁移' : <DataMove dispatch={this.props.dispatch} state={this.props.state} key={'i'}></DataMove>
+		}
 		return (
 			<div>
-        <div className="content">
-          <CSS opts={['content', true, true, false, 800, 800, 500]}>
-  				  {this.getContentSelected()}
-  				</CSS>
-        </div>
+		        <div className="content">
+		          <CSS opts={['content', true, true, false, 800, 800, 500]}>
+		  				  {componentMap[this.getContentSelected()]}
+		  				</CSS>
+		        </div>
 			</div>
 		)
 	}

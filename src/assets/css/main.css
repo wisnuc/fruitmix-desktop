@@ -121,7 +121,7 @@ body{
 
 .nav-item-body {
 	overflow: hidden;
-	transition: max-height .5s cubic-bezier(0, 1, .5, 1);
+	transition: max-height .5s cubic-bezier(0, 1, .5, 1)
 }
 
 .file-item-body {

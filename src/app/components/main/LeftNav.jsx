@@ -55,6 +55,46 @@ function getStyles () {
 
 class leftNav extends Component {
 	render () {
+
+		return (
+			<Drawer width={220} open={this.props.navigation.menu} className='left-nav'>
+				<div className="left-nav-container" style={{position:'relative',height:'100%'}}>
+					<div className="nav-inner">
+						{this.props.navigation.nav.map(item => {
+							if (item.parent != null) {
+								return 
+							}
+							return (
+								<div className="nav-item-box" key={item.name}>
+									<label htmlFor={item.name} className="nav-item-header" style={ getStyles().header }>{item.name}</label>
+									<input id={item.name} className="slide-emit" type="checkbox" />
+									<div className="nav-item-body file-item-body">
+										{this.props.navigation.nav.map((item2,index) => {
+											if (item2.parent == item.name) {
+												if (item2.icon == null) {
+													return false
+												}
+												return (
+													<MenuItem
+													className={item2.selected?"list-selected left-menu-list":'left-menu-list'}
+													primaryText={item2.name}
+													key={item2.name}
+													desktop={true}
+													onTouchTap={this.itemSelect.bind(this,item2.name,index)}
+													innerDivStyle={item2.selected?selectedStyle:listStyle}
+													leftIcon={item2.icon?svg[item2.icon]():null}
+													/>
+													)
+												}
+										})}
+									</div>
+								</div>
+								)
+						})}
+					</div>
+				</div>
+			</Drawer>
+			)
 		return (
 			<Drawer width={220} open={this.props.navigation.menu} className='left-nav'>
 			<div className="left-nav-container" style={{position:'relative',height:'100%'}}>
@@ -160,8 +200,10 @@ class leftNav extends Component {
 		}
 	}
 
-	componentWillReceiveProps() {
+	componentWillReceiveProps(a) {
 		c.log('left navigation receive new props')
+		c.log(this.props)
+		c.log(a)
 	}
 }
 
