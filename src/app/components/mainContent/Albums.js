@@ -117,7 +117,19 @@ export default class Albums extends Component {
 
   getPhotoList() {
     const { state: { media: { data } } } = this.props;
-    return data.slice(0, 100).filter(l => !!l.datetime);
+    return data.slice(0, 100).filter(l => !!l.exifDateTime);
+  }
+
+  getDialogClientRect() {
+    const leftSidebarWidth = 220;
+    const rectWidth = window.innerWidth - leftSidebarWidth;
+    const paddingHorizontal = 36;
+    const dialogWidth = rectWidth - paddingHorizontal;
+
+    return {
+      width: dialogWidth,
+      left: parseInt((rectWidth - dialogWidth) / 2) + leftSidebarWidth
+    };
   }
 
   createAlbumItems() {
@@ -132,18 +144,21 @@ export default class Albums extends Component {
     const { add } = getStyles();
 
     return (
-      <div style={ add } onClick={ this.toggleShowed.bind(this, 'addAlbumPhotoListDialogShowedStatus') }>+</div>
+      <div style={ add } onClick={ this.toggleShowed.bind(this) }>+</div>
     );
   }
 
   createAddAlbumPhotoListDialog() {
+    const dialogRect = this.getDialogClientRect();
+
     return (
       <AddAlbumPhotoListDialog
-        dialogWidth={ 1000 }
         caption="新建相册"
-        onClose={ this.toggleShowed.bind(this, 'addAlbumPhotoListDialogShowedStatus') }
         content={ this.createAddAlbumPhotoListDialogContent() }
-        foot={ this.createAddAlbumPhotoListDialogFoot() }>
+        foot={ this.createAddAlbumPhotoListDialogFoot() }
+        style={{ left: dialogRect.left, width: dialogRect.width, WebkitTransform: 'translateY(-50%)' }}
+        orientation="custom"
+        onClose={ this.toggleShowed.bind(this, 'addAlbumPhotoListDialogShowedStatus') }>
       </AddAlbumPhotoListDialog>
     );
   }
@@ -152,14 +167,13 @@ export default class Albums extends Component {
     const photoList = this.getPhotoList();
 
     return (
-      <div style={{ height: 350, overflow: 'auto' }}>
+      <div style={{ height: 350, overflow: 'auto', boxSizing: 'border-box', padding: '10px 0 0 10px' }}>
         {
           photoList.map((photo, index) =>
             <AlbumPhotoItem
-              refs={ photo.digest + index }
               dataIndex={ index }
               isViewAllPhoto={ true }
-              date={ formatDate(photo.datetime) }
+              date={ formatDate(photo.exifDateTime) }
               key={ photo.digest }
               digest={ photo.digest }
               path={ photo.path }
@@ -173,7 +187,8 @@ export default class Albums extends Component {
   }
 
   createAddAlbumPhotoListDialogFoot() {
-    const { button } = getStyles();
+    let { button } = getStyles();
+    button = Object.assign({}, button, { margin: '10px 10px 10px 0' })
 
     return (
       <div className="clearfix">
@@ -181,7 +196,7 @@ export default class Albums extends Component {
           <Button
             className="cancel-btn"
             style={ button }
-            clickEventHandle={ this.toggleShowed.bind(this, 'addAlbumPhotoListDialogShowedStatus') }
+            clickEventHandle={ this.toggleShowed.bind(this, 'addAlbumTopicDialogShowedStatus', true) }
             text="下一步">
           </Button>
         </div>
@@ -190,19 +205,23 @@ export default class Albums extends Component {
   }
 
   createAddAlbumTopicDialog() {
+    const dialogRect = this.getDialogClientRect();
+
     return (
       <AddAlbumTopicDialog
-        dialogWidth={ 560 }
         caption="新建相册"
-        onClose={ this.toggleShowed.bind(this, 'addAlbumTopicDialogShowedStatus') }
         content={ this.createAlbumTopicDialogContent() }
-        foot={ this.createAlbumTopicDialogFoot() }>
+        style={{ left: dialogRect.left, width: dialogRect.width, WebkitTransform: 'translateY(-50%)' }}
+        foot={ this.createAlbumTopicDialogFoot() }
+        orientation="custom"
+        onClose={ this.toggleShowed.bind(this, 'addAlbumTopicDialogShowedStatus') }>
       </AddAlbumTopicDialog>
     );
   }
 
   createAlbumTopicDialogContent() {
-    const { dialogContent, input } = getStyles();
+    let { dialogContent, input } = getStyles();
+    dialogContent = Object.assign({}, dialogContent, { boxSizing: 'border-box', padding: '40px 80px' });
 
     return (
       <div style={ dialogContent }>
@@ -223,7 +242,7 @@ export default class Albums extends Component {
 
     return (
       <div className="clearfix">
-        <div className="fr">
+        <div className="fr" style={{ margin: '10px 10px 10px 0' }}>
           <Button
             className="cancel-btn"
             style={ button }
@@ -233,7 +252,7 @@ export default class Albums extends Component {
           <Button
             className="cancel-btn"
             style={ button }
-            clickEventHandle={ this.submitAddAlbumHandle.bind(this) }
+            clickEventHandle={ this.toggleShowed.bind(this, 'addAlbumTopicDialogShowedStatus') }
             text="确定">
           </Button>
         </div>
@@ -245,14 +264,27 @@ export default class Albums extends Component {
 
   }
 
-  toggleShowed(mark) {
-    const showedDialogState = { addAlbumIconShowedStatus: !this.state.addAlbumIconShowedStatus };
+  toggleShowed(mark, isSwitch) {
+    const showedDialogState = {};
 
-    if (mark) {
-      showedDialogState[mark] = !this.state[mark];
+    if (isSwitch === true) {
+      if (mark !== 'addAlbumPhotoListDialogShowedStatus') {
+        showedDialogState['addAlbumIconShowedStatus'] = false;
+        showedDialogState[mark] = true;
+        const specialKey = Object.keys(this.state).find(key => key !== 'addAlbumIconShowedStatus' && key !== mark);
+        showedDialogState[specialKey] = false;
+      } else {
+        showedDialogState['addAlbumTopicDialogShowedStatus'] = true;
+        showedDialogState['addAlbumPhotoListDialogShowedStatus'] = false;
+        showedDialogState['addAlbumTopicDialogShowedStatus'] = false;
+      }
+    } else if (typeof mark === 'string') {
+      showedDialogState['addAlbumIconShowedStatus'] = true;
+      showedDialogState[mark] = false;
     } else {
-      showedDialogState['addAlbumTopicDialogShowedStatus'] = !this.state.addAlbumTopicDialogShowedStatus;
-      showedDialogState['addAlbumPhotoListDialogShowedStatus'] = !this.state.addAlbumPhotoListDialogShowedStatus;
+      showedDialogState['addAlbumIconShowedStatus'] = false;
+      showedDialogState['addAlbumPhotoListDialogShowedStatus'] = true;
+      showedDialogState['addAlbumTopicDialogShowedStatus'] = false;
     }
 
     this.setState(showedDialogState);

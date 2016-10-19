@@ -5,6 +5,8 @@
 import React, { Component, PropTypes } from 'react';
 
 function getStyles(props) {
+  const { dialogWidth } = props;
+
   return {
     root: {
       boxShadow: '0 0 15px rgba(0,0,0,.5)',
@@ -12,7 +14,7 @@ function getStyles(props) {
       left: '50%',
       top: '50%',
       position: 'fixed',
-      width: props.dialogWidth,
+      width: dialogWidth,
       WebkitTransform: 'translate(-50%, -50%)'
     },
     head: {
@@ -23,9 +25,6 @@ function getStyles(props) {
       lineHeight: '80px',
       padding: '0 40px 0 80px',
       position: 'relative'
-    },
-    contentStyle: {
-      padding: '40px 80px'
     },
     close: {
       position: 'absolute',
@@ -38,8 +37,12 @@ function getStyles(props) {
 
 export default class Dialog extends Component {
   render() {
-    const { root, head, close, contentStyle } = getStyles(this.props);
-    const { caption, onClose, content, foot } = this.props;
+    let { root, head, close } = getStyles(this.props);
+    const { caption, onClose, content, foot, orientation, style } = this.props;
+
+    if (orientation === 'custom') {
+      root = Object.assign({}, root, style);
+    }
 
     return (
       <div className="dialog" style={ root }>
@@ -47,7 +50,7 @@ export default class Dialog extends Component {
           { caption }
           <label style={ close } onClick={ onClose }>x</label>
         </div>
-        <div className="dialog-body" style={ contentStyle }>
+        <div className="dialog-body">
           { content }
           { foot }
         </div>
@@ -57,9 +60,14 @@ export default class Dialog extends Component {
 }
 
 Dialog.propTypes = {
-  dialogWidth: PropTypes.number.isRequired,
+  dialogWidth: PropTypes.number,
+  orientation: PropTypes.oneOf(['custom', 'center']),
   caption: PropTypes.string.isRequired,
   onClose: PropTypes.func.isRequired,
   content: PropTypes.node.isRequired,
   foot: PropTypes.node
+};
+
+Dialog.defaultProps = {
+  orientation: 'center'
 };

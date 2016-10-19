@@ -44,9 +44,9 @@ export default class NavigationBar extends Component {
         {
           navigationBarTitleTexts.map((text, index) => {
             if (index === navigationBarTitleTexts.length - 1) {
-              return <span>{ text }</span>
+              return <span key={ index }>{ text }</span>
             } else {
-              return <span>{ text } &gt; </span>
+              return <span key={ index }>{ text } &gt; </span>
             }
           })
         }

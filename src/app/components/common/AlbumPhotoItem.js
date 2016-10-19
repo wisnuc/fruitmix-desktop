@@ -119,6 +119,8 @@ export default class AlbumPhotoItem extends Component {
     setTimeout(() => {
       onSelect(dataIndex, this.el, date, this.state.selectStatus === 'active')
     }, 0);
+
+    e.stopPropagation();
   }
 
   blockClickHandle() {
@@ -165,7 +167,7 @@ export default class AlbumPhotoItem extends Component {
     const { digest, path, isViewAllPhoto } = this.props;
 
     if (!path || path.charAt(0) !== '/') {
-      isViewAllPhoto ? ipc.send('getThumb') : ipc.send('getAlbumThumb', { digest: digest });
+      ipc.send(isViewAllPhoto ? 'getThumb' : 'getAlbumThumb', { digest })
     }
   }
 }
