@@ -6,10 +6,21 @@ import React, { Component, PropTypes } from 'react';
 
 import NavigationBar from '../main/NavigationBar';
 import AlbumItem from './AlbumItem';
-import AddAlbumDialog from '../common/Dialog';
+import AlbumPhotoItem from '../common/AlbumPhotoItem';
+import AddAlbumTopicDialog from '../common/Dialog';
+import AddAlbumPhotoListDialog from '../common/Dialog';
 import Input from '../../React-Redux-UI/src/components/partials/Input';
 import Textarea from '../../React-Redux-UI/src/components/partials/Textarea';
 import Button from '../../React-Redux-UI/src/components/partials/Button';
+import AllPhotos from './AllPhotos';
+import { formatDate } from '../../utils/datetime';
+import Carousel from '../../React-Redux-UI/src/components/transitions/Carousel';
+import Mask from '../../React-Redux-UI/src/components/partials/Mask';
+import ImageSwipe from '../common/ImageSwipe';
+import { MenuItem } from 'material-ui';
+
+import svg from '../../utils/SVGIcon';
+import Action from '../../actions/action';
 
 function getStyles () {
   return {
@@ -58,10 +69,10 @@ export default class Albums extends Component {
   constructor() {
     super();
 
-    this.toggleShowed = this.toggleShowed.bind(this);
     this.state = {
       addAlbumIconShowedStatus: true,
-      addAlbumDialogShowedStatus: false
+      addAlbumTopicDialogShowedStatus: false,
+      addAlbumPhotoListDialogShowedStatus: false
     }
   }
 
@@ -76,6 +87,51 @@ export default class Albums extends Component {
     );
   }
 
+  clearAllSelectedItem() {
+    const { dispatch } = this.props;
+
+    dispatch(Action.clearDragImageItem());
+  }
+
+  viewLargeImageHandle(date, currentThumbIndex) {
+    const { dispatch } = this.props;
+
+    dispatch(Action.getLargeImageList(document.querySelectorAll('[data-date="'+ date +'"]'), currentThumbIndex, date));
+  }
+
+  selectAlbumPhotoItemHandle(index, el, date, checked) {
+    const { dispatch } = this.props;
+
+    if (checked) {
+      Object
+        .keys(this.refs)
+        .forEach(key => this.refs[key].setState({ selectStatus: 'over' }));
+
+      setTimeout(() => {
+        dispatch(Action.addDragImageItem(el, date, index));
+      }, 0);
+    } else {
+      dispatch(Action.removeDragImageItem(date, index));
+    }
+  }
+
+  getPhotoList() {
+    const { state: { media: { data } } } = this.props;
+    return data.slice(0, 100).filter(l => !!l.exifDateTime);
+  }
+
+  getDialogClientRect() {
+    const leftSidebarWidth = 220;
+    const rectWidth = window.innerWidth - leftSidebarWidth;
+    const paddingHorizontal = 36;
+    const dialogWidth = rectWidth - paddingHorizontal;
+
+    return {
+      width: dialogWidth,
+      left: parseInt((rectWidth - dialogWidth) / 2) + leftSidebarWidth
+    };
+  }
+
   createAlbumItems() {
     const { state } = this.props;
 
@@ -88,24 +144,84 @@ export default class Albums extends Component {
     const { add } = getStyles();
 
     return (
-      <div style={ add } onClick={ this.toggleShowed }>+</div>
+      <div style={ add } onClick={ this.toggleShowed.bind(this) }>+</div>
     );
   }
 
-  createAddAlbumDialog() {
+  createAddAlbumPhotoListDialog() {
+    const dialogRect = this.getDialogClientRect();
+
     return (
-      <AddAlbumDialog
-        dialogWidth={ 560 }
+      <AddAlbumPhotoListDialog
         caption="新建相册"
-        onClose={ this.toggleShowed }
-        content={ this.createAlbumDialogContent() }
-        foot={ this.createAlbumDialogFoot() }>
-      </AddAlbumDialog>
+        content={ this.createAddAlbumPhotoListDialogContent() }
+        foot={ this.createAddAlbumPhotoListDialogFoot() }
+        style={{ left: dialogRect.left, width: dialogRect.width, WebkitTransform: 'translateY(-50%)' }}
+        orientation="custom"
+        onClose={ this.toggleShowed.bind(this, 'addAlbumPhotoListDialogShowedStatus') }>
+      </AddAlbumPhotoListDialog>
     );
   }
 
-  createAlbumDialogContent() {
-    const { dialogContent, input } = getStyles();
+  createAddAlbumPhotoListDialogContent() {
+    const photoList = this.getPhotoList();
+
+    return (
+      <div style={{ height: 350, overflow: 'auto', boxSizing: 'border-box', padding: '10px 0 0 10px' }}>
+        {
+          photoList.map((photo, index) =>
+            <AlbumPhotoItem
+              dataIndex={ index }
+              isViewAllPhoto={ true }
+              date={ formatDate(photo.exifDateTime) }
+              key={ photo.digest }
+              digest={ photo.digest }
+              path={ photo.path }
+              onViewLargeImage={ this.viewLargeImageHandle.bind(this) }
+              onSelect={ this.selectAlbumPhotoItemHandle.bind(this) }>
+            </AlbumPhotoItem>
+          )
+        }
+      </div>
+    );
+  }
+
+  createAddAlbumPhotoListDialogFoot() {
+    let { button } = getStyles();
+    button = Object.assign({}, button, { margin: '10px 10px 10px 0' })
+
+    return (
+      <div className="clearfix">
+        <div className="fr">
+          <Button
+            className="cancel-btn"
+            style={ button }
+            clickEventHandle={ this.toggleShowed.bind(this, 'addAlbumTopicDialogShowedStatus', true) }
+            text="下一步">
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  createAddAlbumTopicDialog() {
+    const dialogRect = this.getDialogClientRect();
+
+    return (
+      <AddAlbumTopicDialog
+        caption="新建相册"
+        content={ this.createAlbumTopicDialogContent() }
+        style={{ left: dialogRect.left, width: dialogRect.width, WebkitTransform: 'translateY(-50%)' }}
+        foot={ this.createAlbumTopicDialogFoot() }
+        orientation="custom"
+        onClose={ this.toggleShowed.bind(this, 'addAlbumTopicDialogShowedStatus') }>
+      </AddAlbumTopicDialog>
+    );
+  }
+
+  createAlbumTopicDialogContent() {
+    let { dialogContent, input } = getStyles();
+    dialogContent = Object.assign({}, dialogContent, { boxSizing: 'border-box', padding: '40px 80px' });
 
     return (
       <div style={ dialogContent }>
@@ -121,22 +237,22 @@ export default class Albums extends Component {
     );
   }
 
-  createAlbumDialogFoot() {
+  createAlbumTopicDialogFoot() {
     const { button } = getStyles();
 
     return (
       <div className="clearfix">
-        <div className="fr">
+        <div className="fr" style={{ margin: '10px 10px 10px 0' }}>
           <Button
             className="cancel-btn"
             style={ button }
-            clickEventHandle={ this.clickHandle.bind(this) }
+            clickEventHandle={ this.toggleShowed.bind(this, 'addAlbumTopicDialogShowedStatus') }
             text="取消">
           </Button>
           <Button
             className="cancel-btn"
             style={ button }
-            clickEventHandle={ this.clickHandle.bind(this) }
+            clickEventHandle={ this.toggleShowed.bind(this, 'addAlbumTopicDialogShowedStatus') }
             text="确定">
           </Button>
         </div>
@@ -144,11 +260,34 @@ export default class Albums extends Component {
     );
   }
 
-  toggleShowed() {
-    this.setState({
-      addAlbumIconShowedStatus: !this.state.addAlbumIconShowedStatus,
-      addAlbumDialogShowedStatus: !this.state.addAlbumDialogShowedStatus
-    })
+  submitAddAlbumHandle() {
+
+  }
+
+  toggleShowed(mark, isSwitch) {
+    const showedDialogState = {};
+
+    if (isSwitch === true) {
+      if (mark !== 'addAlbumPhotoListDialogShowedStatus') {
+        showedDialogState['addAlbumIconShowedStatus'] = false;
+        showedDialogState[mark] = true;
+        const specialKey = Object.keys(this.state).find(key => key !== 'addAlbumIconShowedStatus' && key !== mark);
+        showedDialogState[specialKey] = false;
+      } else {
+        showedDialogState['addAlbumTopicDialogShowedStatus'] = true;
+        showedDialogState['addAlbumPhotoListDialogShowedStatus'] = false;
+        showedDialogState['addAlbumTopicDialogShowedStatus'] = false;
+      }
+    } else if (typeof mark === 'string') {
+      showedDialogState['addAlbumIconShowedStatus'] = true;
+      showedDialogState[mark] = false;
+    } else {
+      showedDialogState['addAlbumIconShowedStatus'] = false;
+      showedDialogState['addAlbumPhotoListDialogShowedStatus'] = true;
+      showedDialogState['addAlbumTopicDialogShowedStatus'] = false;
+    }
+
+    this.setState(showedDialogState);
   }
 
   render() {
@@ -167,9 +306,16 @@ export default class Albums extends Component {
         {/* add icon */}
         { this.state.addAlbumIconShowedStatus && this.createAddAlbumIcon() }
 
-        {/* 新建相册对话框 */}
-        { this.state.addAlbumDialogShowedStatus && this.createAddAlbumDialog() }
+        {/* 新建相册主题对话框 */}
+        { this.state.addAlbumTopicDialogShowedStatus && this.createAddAlbumTopicDialog() }
+
+        {/* 新建相册所有照片对话框 */}
+        { this.state.addAlbumPhotoListDialogShowedStatus && this.createAddAlbumPhotoListDialog() }
       </div>
     );
+  }
+
+  componentWillUnmount() {
+    this.clearAllSelectedItem();
   }
 }

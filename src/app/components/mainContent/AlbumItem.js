@@ -67,7 +67,7 @@ export default class AlbumItem extends Component {
   }
 
   viewAlbumListHandle() {
-    const { dispatch, info: { digest, doc: { album: { title='武夷山' } } } } = this.props;
+    const { dispatch, info: { digest, doc: { album: { title = '武夷山' } } } } = this.props;
 
     dispatch(Action.changeSelectedNavItem('相册查看'));
     dispatch(Action.toggleNavigator([ '相册', title ]));

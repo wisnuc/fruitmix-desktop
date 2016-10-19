@@ -246,7 +246,7 @@ export default class AllPhotos extends Component {
       let tmp = (this.state.imageGroup ? this.state.imageGroup.data : []).concat(this.map.slice(this.current * this.strip, (this.current * this.strip) + this.strip));
 
       let tmpKeys = tmp.map(t =>
-        formatDate(t.datetime)
+        formatDate(t.exifDateTime)
       );
 
       let uniqueKeys = tmpKeys.filter((key, index) =>
@@ -311,7 +311,7 @@ export default class AllPhotos extends Component {
               </div>
               {
                 imageGroup.map((entry, index) => {
-                  if (formatDate(entry.datetime) === date) {
+                  if (formatDate(entry.exifDateTime) === date) {
 
                     return (
                       <ImageByDate
