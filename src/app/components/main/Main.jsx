@@ -12,7 +12,7 @@
  import CSS from '../../utils/transition';
 
 //require material
-import { AppBar, TextField, Drawer, Paper, Snackbar, FlatButton, IconMenu, MenuItem, IconButton, Dialog } from 'material-ui';
+import { TextField, Drawer, Paper, Snackbar, FlatButton, IconMenu, MenuItem, IconButton, Dialog } from 'material-ui';
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
@@ -27,9 +27,10 @@ import css  from  '../../../assets/css/main';
 import LeftNav from './LeftNav';
 import Content from './Content';
 import Multiple from '../mainContent/Multiple';
-import Users from './userDialog';
+//import Users from './userDialog';
+import AppBar from './AppBar'
 
-import svg from '../../utils/SVGIcon';
+import svg from '../../utils/SVGIcon'
 
 //import Mask from './MediaMask'
 
@@ -155,15 +156,6 @@ class Main extends Component {
 	}
 
 	render() {
-		let list = null;
-		var name = this.props.state.login.obj.username;
-		let index = this.props.state.login.obj.allUser.findIndex(item=>(item.username == name));
-		if ( this.props.state.login.obj.allUser[index].isAdmin) {
-			list = (<MenuItem value="1" primaryText="用户管理" onTouchTap={this.toggleUser.bind(this)}/>)
-		}
-		
-
-		let m = null;
 		// if (this.props.state.view.currentMediaImage.open) {
 		// 	m = <Mask dispatch={this.props.dispatch} state={this.props.state}/>
 		// }
@@ -174,77 +166,32 @@ class Main extends Component {
 				{/*<Multiple dispatch={this.props.dispatch} state={this.props.state}/>*/}
 
 				{/*Bar*/}
-				<AppBar
-					className='app-bar' title='WISNUC' titleStyle={{fontSize:'18px'}}
-					iconElementRight={
-						<IconMenu
-							className='app-bar-right'
-	          				iconButtonElement={<IconButton>{svg.expandMore()}</IconButton>}
-	          				anchorOrigin={{horizontal: 'right', vertical: 'top'}}
-	      					targetOrigin={{horizontal: 'right', vertical: 'top'}}
-	        			>
-				          {list}
-				          <MenuItem value="2" primaryText="注销" onTouchTap={this.logOff.bind(this)}/>
-	        			</IconMenu>}
-					onLeftIconButtonTouchTap={this.leftNavClick.bind(this)}
-				>
-					<div className='app-bar-username'>{this.props.state.login.obj.username}</div>
-					<div className='app-bar-appifi' onClick={this.openAppifi.bind(this)}></div>
-				</AppBar>
+				<AppBar/>
 
 				{/*Left Nav*/}
-				<Drawer width={220} open={this.props.state.navigation.menu} className='left-nav'>
-					<LeftNav dispatch={this.props.dispatch} state={this.props.state}/>
-				</Drawer>
+				<LeftNav/>
 
 				{/*Content*/}
 				<Paper className={"content-container "+(this.props.state.navigation.menu?'content-has-left-padding':'no-padding')} zDepth={0}>
 					<Content dispatch={this.props.dispatch} state={this.props.state}/>
 				</Paper>
 
-				{m}
-				{this.getUserManager()}
 				<Snackbar style={{textAlign:'center'}} open={this.props.state.snack.open} message={this.props.state.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
 			</div></CSS>
 			);
 	}
 
-	getUserManager() {
-		if (!this.state.userDialog) {
-			return null
-		}else {
-			let folderActions = [
-			<FlatButton
-				label="取消"
-				primary={true}
-				onTouchTap={this.toggleUser.bind(this)}
-				labelStyle={{color:'#000',fontSize:'15px'}}
-			/>
-			]
-			return (
-				<Dialog title="用户管理"
-					titleClassName='create-folder-dialog-title'
-					actions={folderActions}
-					modal={false}
-					open={this.state.userDialog}
-					className='create-folder-dialog'>
-					<Users login={this.props.state.login}></Users>
-			    </Dialog>
-				)
-		}
-	}
+	
 
 	triggerClick(e) {
+		return 
 		if (this.props.state.view.menu.show) {
 			this.props.dispatch(Action.toggleMenu(null,0,0,false));
 		}
 	}
-	//toggle left navigation
-	leftNavClick() {
-		this.props.dispatch(Action.navToggle());
-	}
 	//draw multiple select frame
 	mouseMove(e) {
+		return 
 		 e.preventDefault(); e.stopPropagation();
 		if (this.props.state.multiple.multiple.isShow == true&&this.props.state.data.state != 'BUSY') {
 			this.props.dispatch(Action.mouseMove(e.nativeEvent.x,e.nativeEvent.y));
@@ -252,6 +199,7 @@ class Main extends Component {
 	}
 	//multiple select and hide frame
 	mouseUp() {
+		return 
 		if (this.props.state.multiple.multiple.isShow == true) {
 		let mul = this.props.state.multiple.multiple;
  			let height = Math.abs(mul.top-mul.height);;
@@ -312,22 +260,6 @@ class Main extends Component {
 	//close snackbar
 	cleanSnack() {
 		this.props.dispatch(Action.cleanSnack());
-	}
-
-	logOff() {
-		ipc.send('loginOff');
-		// this.props.dispatch(Action.loginoff());
-		window.location.hash = '/login';
-	}
-
-	toggleUser() {
-		this.setState({
-			userDialog: !this.state.userDialog
-		});
-	}
-
-	openAppifi() {
-		ipc.send('openAppifi')
 	}
 
 	componentWillReceiveProps() {

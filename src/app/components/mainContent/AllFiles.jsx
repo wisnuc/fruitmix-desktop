@@ -69,7 +69,7 @@ class AllFiles extends Component {
 					<div className="all-files-container">
 						<FilesTable/>
 						<Menu></Menu>
-						<Move dispatch={this.props.dispatch} state={this.props.state}></Move>
+						{/*<Move dispatch={this.props.dispatch} state={this.props.state}></Move>*/}
 					</div>
 				</Paper>
 				)
@@ -82,7 +82,7 @@ class AllFiles extends Component {
 		}else {
 			return (
 				<Paper className='file-detail' style={{width:this.props.state.view.detail?'220px':'0px'}}>
-					<Detail dispatch={this.props.dispatch} state={this.props.state}></Detail>
+					<Detail></Detail>
 				</Paper>
 				)
 		}

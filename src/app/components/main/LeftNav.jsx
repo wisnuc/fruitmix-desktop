@@ -6,10 +6,10 @@
  **/
 
  // require core module
-import React, { findDOMNode, Component, PropTypes } from 'react';
-
+import React, { findDOMNode, Component, PropTypes } from 'react'
+import { connect } from 'react-redux'
 //require material
-import { Menu, MenuItem, SvgIcon } from 'material-ui';
+import { Menu, MenuItem, SvgIcon, Drawer } from 'material-ui';
 import svg from '../../utils/SVGIcon';
 
  //import CSS
@@ -56,6 +56,7 @@ function getStyles () {
 class leftNav extends Component {
 	render () {
 		return (
+			<Drawer width={220} open={this.props.navigation.menu} className='left-nav'>
 			<div className="left-nav-container" style={{position:'relative',height:'100%'}}>
 				{/*top navigation*/}
 				<div className="nav-inner">
@@ -63,7 +64,7 @@ class leftNav extends Component {
 						<label htmlFor="file_h" className="nav-item-header" style={ getStyles().header }>文件</label>
 						<input id="file_h" className="slide-emit" type="checkbox" />
 						<div className="nav-item-body file-item-body">
-							{this.props.state.navigation.nav.map((item,index) => {
+							{this.props.navigation.nav.map((item,index) => {
 								if (item.type == 'leftNav' && index <= 3) {
 									return (
 										<MenuItem
@@ -85,7 +86,7 @@ class leftNav extends Component {
 						<input id="photo_h" className="slide-emit" type="checkbox" />
 						<div className="nav-item-body photo-item-body">
 							{
-								this.props.state.navigation.nav.map((item, index) => {
+								this.props.navigation.nav.map((item, index) => {
 									if (item.type == 'leftNav' && index >= 4 && index < 6) {
 										return (
 											<MenuItem
@@ -108,7 +109,7 @@ class leftNav extends Component {
 						<input id="photo_s" className="slide-emit" type="checkbox" />
 						<div className="nav-item-body system-item-body">
 							{
-								this.props.state.navigation.nav.map((item, index) => {
+								this.props.navigation.nav.map((item, index) => {
 									if (item.type == 'leftNav' && index >= 6) {
 										return (
 											<MenuItem
@@ -145,6 +146,7 @@ class leftNav extends Component {
 					</div>
 				</div>*/}
 			</div>
+			</Drawer>
 			)
 	}
 	//select navigation
@@ -157,7 +159,13 @@ class leftNav extends Component {
 			dispatch(Action.toggleNavigator([ name ]));
 		}
 	}
+
+	componentWillReceiveProps() {
+		c.log('left navigation receive new props')
+	}
 }
 
-
-export default leftNav
+var mapStateToProps = (state)=>({
+	     navigation: state.navigation
+	})
+export default connect(mapStateToProps)(leftNav)

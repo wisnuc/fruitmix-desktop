@@ -7,7 +7,8 @@ const defaultDirectory = {
 	view : {
 		state: 'READY',
 		selectAll:false, 
-	}
+	},
+	children : []
 }
 
 const directory = (state = defaultDirectory,action)=> {
@@ -17,7 +18,7 @@ const directory = (state = defaultDirectory,action)=> {
 		case 'SELECT_CHILDREN':
 			var allSelected = true;
 			//setSelectedChildren
-			var newChildren = state.current.children.map((item,index)=>{
+			var newChildren = state.children.map((item,index)=>{
 				return index == action.rowNumber?Object.assign({},item,{checked:!item.checked}):item
 			});
 			// //is all children selected?
@@ -28,16 +29,17 @@ const directory = (state = defaultDirectory,action)=> {
 				}
 			}
 			return Object.assign({},state,{
-				current:Object.assign({},state.current,{children:newChildren}),
-				view:Object.assign({},state.view,{selectAll:allSelected})
+				view:Object.assign({},state.view,{selectAll:allSelected}),
+				children:newChildren
 			})
 		case 'SELECT_ALL_CHILDREN':
-			var children = state.current.children.map((item,index)=> {
+			var children = state.children.map((item,index)=> {
 				return state.view.selectAll?Object.assign({},item,{checked:false}):Object.assign({},item,{checked:true});
 			});
 			return Object.assign({},state,{
 				view:Object.assign({},state.view,{selectAll:!state.view.selectAll}),
-				current:Object.assign({},state.current,{children:children})
+				current:Object.assign({},state.current,{children:children}),
+				children:children
 			});		
 		default:
 			return state

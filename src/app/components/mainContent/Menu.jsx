@@ -49,7 +49,7 @@ class PopMenu extends Component {
 	//rename
 	rename() {
 		let index = this.props.view.menu.index 
-		let uuid = this.props.file.current.children[index].uuid
+		let uuid = this.props.file.children[index].uuid
 		let dom = $('div[data-uuid='+uuid+']>span:eq(1)')[0];
 		let oldName = dom.innerHTML;
 		//edit position point to end
@@ -102,7 +102,7 @@ class PopMenu extends Component {
 
 	remove() {
 		let arr = [];
-		this.props.file.current.children.forEach(item=>{
+		this.props.file.children.forEach(item=>{
 			if (item.checked) {
 				arr.push(item)
 			}
@@ -115,7 +115,7 @@ class PopMenu extends Component {
 		let folder = [];
 		let map = new Map();
 		let t = new Date();
-		this.props.file.current.children.forEach(item=>{
+		this.props.file.children.forEach(item=>{
 			if (item.checked && item.type != 'folder') {
 				let file = Object.assign({},item,{status:0,downloadTime:Date.parse(t)});
 				files.push(file);
