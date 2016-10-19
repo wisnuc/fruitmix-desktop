@@ -170,9 +170,7 @@ body{
 	position: absolute!important;
 	width: 30px!important;
 	height: 30px!important;
-	left: 50%!important;
 	top: 335px!important;
-	margin-left: -15px!important;
 }
 
 .image-item:last-child {
@@ -967,4 +965,13 @@ body{
 
 .popup-photoinfo-icon.active i {
 	background-color: #586abf!important;
+}
+
+.large-arrow-left svg {
+  left: 0!important;
+}
+
+.large-arrow-right svg {
+	left: auto!important;
+	right: 0!important;
 }

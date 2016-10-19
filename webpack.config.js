@@ -23,9 +23,10 @@ module.exports = {
     cache  : true,
     debug  : true,
     target: 'electron',
-    watchOptions: {  
+    watchOptions: {
         poll: true
     },
+    debug: true,
     devtool: 'eval-source-map',
     entry: [
         'webpack/hot/poll?1000',
@@ -50,11 +51,11 @@ module.exports = {
                 test   : /\.(js|jsx)$/,
                 exclude: /node_modules/,
                 loader : 'react-hot!babel-loader'
-            }, 
+            },
             {
                 test  : /\.css$/,
                 loader: 'style-loader!css-loader'
-            }, 
+            },
             {
                 test  : /\.(png|jpg|jpeg|ico|gif|woff|woff2|ttf|eot|svg)$/,
                 loader: 'url-loader?limit=8192'
