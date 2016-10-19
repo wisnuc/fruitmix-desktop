@@ -58,9 +58,10 @@ const loginState = (state = defaultState, action) => {
 			return Object.assign({},state,{currentMediaImage:imgObj});
 		case 'SET_MEDIA_IMAGE':
 
-			state.currentMediaImage.status = 'ready'
-			state.currentMediaImage.path = action.item.path
-			return state
+			var newCurrentImage = Object.assign({}, state.currentMediaImage)
+			newCurrentImage.status = 'ready'
+			newCurrentImage.path = action.item.path
+			return Object.assign({},state,{currentMediaImage:newCurrentImage})
 
 		default:
 			return state
