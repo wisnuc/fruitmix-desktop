@@ -21,7 +21,6 @@ function getStyles () {
       marginBottom: 10
     },
     selectStatusStyle: {
-      borderRadius: '100%',
       borderWidth: 1,
       borderStyle: 'solid',
       borderColor: '#757575',
@@ -70,45 +69,53 @@ export default class ImageByDate extends Component {
   }
 
   overedHandle() {
-    this.el.classList.add('show');
+    this.el.classList.add('active');
   }
 
   outedHandle() {
-    if (this.el.classList.contains('active')) {
+    if (this.el.classList.contains('show')) {
       return;
     }
 
-    this.el.classList.remove('show');
+    this.el.classList.remove('active');
   }
 
   selectedItemHandle(e) {
     const { onSelectedItem, date, dataIndex } = this.props;
     const el = e.currentTarget.parentNode;
 
-    el.classList.toggle('active');
     el.classList.toggle('show');
-    onSelectedItem(dataIndex, el, date, el.classList.contains('active'));
+    onSelectedItem(dataIndex, el, date, el.classList.contains('show'));
     e.stopPropagation();
   }
 
   lookLargePhotoHandle(e) {
     const el = e.currentTarget;
-    const { date, detectImageItemActive, onCancelSelectedItem, dataIndex, onViewLargeImage } = this.props;
+    const {
+      date,
+      detectImageItemActive,
+      onCancelSelectedItem,
+      dataIndex,
+      onViewLargeImage,
+      onSelectedItem } = this.props;
 
-    if (el.classList.contains('active')) {
-      el.classList.remove('active');
+    if (el.classList.contains('active') && !el.classList.contains('show')) {
+      el.classList.add('show');
+      onSelectedItem(dataIndex, el, date, true);
+    } else if (el.classList.contains('active') && el.classList.contains('show')) {
+      el.classList.remove('show');
       onCancelSelectedItem(dataIndex, date);
 
-      if (!detectImageItemActive(date)) {
-          Array
-         .prototype
-         .slice
-         .call(
-           document.querySelectorAll('[data-date="'+ date +'"]')
-         ).forEach(el => {
-           el.classList.remove('show');
-         });
-      }
+      // if (!detectImageItemActive(date)) {
+      //     Array
+      //    .prototype
+      //    .slice
+      //    .call(
+      //      document.querySelectorAll('[data-date="'+ date +'"]')
+      //    ).forEach(el => {
+      //      el.classList.remove('show');
+      //    });
+      // }
     } else {
       //this.props.dispatch(Action.toggleMedia(true))
       onViewLargeImage(date, dataIndex);
@@ -155,7 +162,7 @@ export default class ImageByDate extends Component {
   render() {
     const { date, state, dataIndex, figureItem, hash } = this.props;
     let { itemStyle, selectStatusStyle } = getStyles();
-    //console.log(figureItem, 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+
     return (
       <div ref={ el => this.el = el } data-hash={ hash } data-date={ date } data-index={ dataIndex } className="image-item" style={ itemStyle }
         onClick={ this.lookLargePhotoHandle } onMouseOver={ this.overedHandle } onMouseOut={ this.outedHandle }>

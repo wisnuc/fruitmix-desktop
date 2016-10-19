@@ -190,20 +190,12 @@ body{
 
 .image-item.active .selected-mask {
 	display: block;
-
-}
-
-.image-item.active i {
-	background-color: #5868c0!important;
-	border-color: #5868c0!important;
-}
-
-.image-item.hide i {
-	display: none!important;
 }
 
 .image-item.show i {
-	display: block!important;
+	display: block;
+	background-color: #5868c0!important;
+	border-color: #5868c0!important;
 }
 
 /*.image-item:hover i {
@@ -211,7 +203,7 @@ body{
 }*/
 
 .image-item.active i {
-	display: block;
+	display: block!important;
 }
 .image-item {
 	display: flex;
