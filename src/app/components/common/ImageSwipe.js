@@ -36,7 +36,7 @@ function getStyles (props) {
       right: -260,
       height: '100%',
       width: 260,
-      transition: 'transform .2s linear'
+      transition: 'right .2s linear'
     },
     leftArrow: {
       position: 'absolute',
@@ -69,7 +69,8 @@ export default class ImageSwipe extends Component {
 
     this.state = {
       arrowLeftStatus: this.currentImgIndex > 0,
-      arrowRightStatus: this.currentImgIndex < this.imgLength - 1
+      arrowRightStatus: this.currentImgIndex < this.imgLength - 1,
+      shareComponentEnterAnimateAble: false
     };
   }
 
@@ -114,6 +115,12 @@ export default class ImageSwipe extends Component {
     this.moveTo(this.currentImgIndex + 1);
   }
 
+  showedSharePanelHandle() {
+    this.setState({
+      shareComponentEnterAnimateAble: !this.state.shareComponentEnterAnimateAble
+    });
+  }
+
   createArrowComponent(mark) {
     const { leftArrow, rightArrow } = getStyles(this.props);
     const isLeftArrow = mark === 'left';
@@ -134,7 +141,7 @@ export default class ImageSwipe extends Component {
     const { icon } = getStyles(this.props);
 
     return (
-      <div className="icon-feature" style={ icon }>
+      <div className="icon-feature" style={ icon } onClick={ this.showedSharePanelHandle.bind(this) }>
         <MenuItem
           desktop={ true }
           leftIcon={ svg.share() }>
@@ -146,6 +153,7 @@ export default class ImageSwipe extends Component {
   render() {
     const { root, rootInner, featurePanel } = getStyles(this.props);
     const { state, view, height } = this.props;
+    const shareComponentClassName = this.state.shareComponentEnterAnimateAble ? 'share-enter-animate' : '';
 
     return (
       <div className="image-swipe-container" style={ root }>
@@ -153,7 +161,7 @@ export default class ImageSwipe extends Component {
           <img src={ view.currentMediaImage.path } width="100%" height="100%" style={{ objectFit: 'cover' }} />
 
           {/* 右侧功能面板 */}
-          <div style={ featurePanel }>
+          <div className={ shareComponentClassName } style={ featurePanel }>
             <div className="circle-header" style={{ padding: '40px 0 20px', fontSize: 16, textAlign: 'center', borderBottom: '1px solid rgba(0,0,0,.12)' }}>
               相册分享
             </div>

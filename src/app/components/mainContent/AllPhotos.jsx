@@ -329,7 +329,9 @@ class AllPhotos extends Component {
         {/* right panel */}
         <RightPanel ref="rightPanel" width={ 230 } dispatch={ this.props.dispatch } state={ this.props.state }></RightPanel>
 
-        { component }
+        <div style={{ marginTop: 52 }}>
+          { component }
+        </div>
       </div>
     );
   }

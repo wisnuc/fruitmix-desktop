@@ -975,3 +975,7 @@ body{
 	left: auto!important;
 	right: 0!important;
 }
+
+.share-enter-animate {
+	right: 0!important;
+}

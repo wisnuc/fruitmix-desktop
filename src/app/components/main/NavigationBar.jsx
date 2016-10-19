@@ -9,6 +9,7 @@ import RightPanel from './RightPanel';
 function getStyles (props) {
   return {
     root: {
+      borderBottom: '1px solid #efefef',
       backgroundColor: props.navigationBarBackgroundColor,
       color: props.navigationBarTextStyle,
       fontSize: props.navigationBarFontSize,
@@ -16,8 +17,12 @@ function getStyles (props) {
       paddingLeft: props.navigationBarHorizontalPadding,
       height: props.navigationBarHeight,
       lineHeight: props.navigationBarHeight + 'px',
-      borderBottom: '1px solid #efefef',
-      marginLeft: -18
+      marginLeft: 0,
+      position: 'fixed',
+      left: 220,
+      right: 0,
+      top: 50,
+      zIndex: 1000
     },
     iconBlock: {
       borderStyle: 'solid',
