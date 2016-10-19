@@ -184,7 +184,6 @@ class Main extends Component {
 	
 
 	triggerClick(e) {
-		return 
 		if (this.props.state.view.menu.show) {
 			this.props.dispatch(Action.toggleMenu(null,0,0,false));
 		}
