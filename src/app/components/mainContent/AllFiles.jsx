@@ -69,7 +69,7 @@ class AllFiles extends Component {
 					<div className="all-files-container">
 						<FilesTable/>
 						<Menu></Menu>
-						<Move dispatch={this.props.dispatch} state={this.props.state}></Move>
+						{/*<Move dispatch={this.props.dispatch} state={this.props.state}></Move>*/}
 					</div>
 				</Paper>
 				)

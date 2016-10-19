@@ -33,12 +33,13 @@ const directory = (state = defaultDirectory,action)=> {
 				children:newChildren
 			})
 		case 'SELECT_ALL_CHILDREN':
-			var children = state.current.children.map((item,index)=> {
+			var children = state.children.map((item,index)=> {
 				return state.view.selectAll?Object.assign({},item,{checked:false}):Object.assign({},item,{checked:true});
 			});
 			return Object.assign({},state,{
 				view:Object.assign({},state.view,{selectAll:!state.view.selectAll}),
-				current:Object.assign({},state.current,{children:children})
+				current:Object.assign({},state.current,{children:children}),
+				children:children
 			});		
 		default:
 			return state

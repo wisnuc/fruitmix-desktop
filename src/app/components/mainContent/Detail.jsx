@@ -127,7 +127,7 @@ class Detail extends Component {
 	changeShareType(o,value) {
 		if (value == 'all') {
 			let index = this.props.view.menu.index
-			let files = [this.props.file.current.children[index].uuid]
+			let files = [this.props.file.children[index].uuid]
 			let users = []
 			this.props.login.obj.allUser.forEach( item => {
 				if ((item.uuid != this.props.login.obj.uuid) && (typeof item.uuid == 'string') ) {
@@ -143,8 +143,8 @@ class Detail extends Component {
 
 	checkUser(uuid,obj,checked) {
 		let index = this.props.view.menu.index
-		let files = [this.props.file.current.children[index].uuid]
-		let users = this.cloneFun(this.props.file.current.children[index].readlist)
+		let files = [this.props.file.children[index].uuid]
+		let users = this.cloneFun(this.props.file.children[index].readlist)
 
 		if (checked) {
 			users.push(uuid)

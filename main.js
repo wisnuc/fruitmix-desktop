@@ -428,9 +428,12 @@ ipcMain.on('getFilesSharedToOthers',()=>{
 //delete
 ipcMain.on('delete',(e,objArr,dir)=>{
 	let count = 0
+	c(' ')
+	c('删除文件 : ')
 	deleteItem()
 	function deleteItem() {
 		fileApi.deleteFile(objArr[count].uuid,dir.uuid).then(()=>{
+			c(objArr[count].uuid,dir.uuid + ' 删除成功')
 			let index = map.get(dir.uuid).children.findIndex( (value) => value.uuid == objArr[count].uuid)
 			if (index != -1) {
 				 map.get(dir.uuid).children.splice(index,1)
@@ -438,17 +441,22 @@ ipcMain.on('delete',(e,objArr,dir)=>{
 				 delete obj
 				 map.delete(objArr[count].uuid)
 			}
-			count++
-			if (count != objArr.length) {
-				deleteItem()
-			}else {
-				if (dir.uuid == currentDirectory.uuid) {
-					enterChildren(dir)
-				}
-			}
+			operationFinish()
 		}).catch(err=>{
-			c(err)
+			c(objArr[count].uuid,dir.uuid + ' 删除失败')
+			operationFinish()
 		})
+	}
+
+	function operationFinish() {
+		count++
+		if (count != objArr.length) {
+			deleteItem()
+		}else {
+			if (dir.uuid == currentDirectory.uuid) {
+				enterChildren(dir)
+			}
+		}
 	}
 })
 //rename

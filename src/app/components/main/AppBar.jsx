@@ -7,17 +7,14 @@
   'use strict';
 // require core module
 import React, { findDOMNode, Component, PropTypes } from 'react'
- 
-import CSS from '../../utils/transition'
-
 import { connect } from 'react-redux'
+import CSS from '../../utils/transition'
 // import Component
 import { AppBar, TextField, Drawer, Paper, Snackbar, FlatButton, IconMenu, MenuItem, IconButton, Dialog } from 'material-ui'
 import Users from './userDialog';
 import svg from '../../utils/SVGIcon'
-
 //import Action
-import Action from '../../actions/action';
+import Action from '../../actions/action'
 
 class Bar extends Component {
 
@@ -105,11 +102,13 @@ class Bar extends Component {
 			userDialog: !this.state.userDialog
 		});
 	}
+
+	componentWillReceiveProps() {
+		c.log('app bar receive new props')
+	}
 }
 
 var mapStateToProps = (state)=>({
-	     file: state.file,
-	     view: state.view,
 	     login: state.login
 	})
 

@@ -169,9 +169,7 @@ class Main extends Component {
 				<AppBar/>
 
 				{/*Left Nav*/}
-				<Drawer width={220} open={this.props.state.navigation.menu} className='left-nav'>
-					<LeftNav/>
-				</Drawer>
+				<LeftNav/>
 
 				{/*Content*/}
 				<Paper className={"content-container "+(this.props.state.navigation.menu?'content-has-left-padding':'no-padding')} zDepth={0}>
@@ -186,12 +184,14 @@ class Main extends Component {
 	
 
 	triggerClick(e) {
+		return 
 		if (this.props.state.view.menu.show) {
 			this.props.dispatch(Action.toggleMenu(null,0,0,false));
 		}
 	}
 	//draw multiple select frame
 	mouseMove(e) {
+		return 
 		 e.preventDefault(); e.stopPropagation();
 		if (this.props.state.multiple.multiple.isShow == true&&this.props.state.data.state != 'BUSY') {
 			this.props.dispatch(Action.mouseMove(e.nativeEvent.x,e.nativeEvent.y));
@@ -199,6 +199,7 @@ class Main extends Component {
 	}
 	//multiple select and hide frame
 	mouseUp() {
+		return 
 		if (this.props.state.multiple.multiple.isShow == true) {
 		let mul = this.props.state.multiple.multiple;
  			let height = Math.abs(mul.top-mul.height);;
