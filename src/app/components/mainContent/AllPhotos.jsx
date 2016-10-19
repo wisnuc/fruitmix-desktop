@@ -345,8 +345,8 @@ export default class AllPhotos extends Component {
           dispatch={ this.props.dispatch }
           state={ this.props.state }
           navigationBarHorizontalPadding={ 18 }
-          onShowedRightPanel={ this.showedRightPanelHandler.bind(this) }
-          icons={[ { text: 'i' } ]}>
+          hasIconAble={ true } 
+          onShowedRightPanel={ this.showedRightPanelHandler.bind(this) }>
         </NavigationBar>
 
         {/* right panel */}
