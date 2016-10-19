@@ -68,7 +68,7 @@ export default class AlbumPhotoItem extends Component {
   getThumb() {
     const { figureStyle, loadingStyle } = getStyles();
     const { path } = this.props;
-    const isPath = path && path.charAt(0) === '/' ? true : false;
+    const isPath = path ? true : false;
 
     return (
       <img
