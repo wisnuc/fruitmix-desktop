@@ -99,7 +99,10 @@ export default class AlbumPhotoItem extends Component {
   }
 
   mouseoutHandle() {
-    if (this.state.selectStatus === 'active') {
+    const nodeList = Array.from(document.querySelectorAll('.image-item'));
+    const hasSelected = nodeList.some(node => node.classList.contains('show'))
+
+    if (this.state.selectStatus === 'active' || hasSelected) {
       return;
     }
 
@@ -130,7 +133,7 @@ export default class AlbumPhotoItem extends Component {
 
     if (isUnViewLargePhoto) {
       this.setState({
-        selectStatus: this.state.selectStatus === 'over' ? 'active' : void 0
+        selectStatus: this.state.selectStatus === 'over' ? 'active' : 'over'
       });
 
       setTimeout(() => {

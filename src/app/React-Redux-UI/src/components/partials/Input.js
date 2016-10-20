@@ -33,14 +33,14 @@ class Input extends Component {
 			if (!numberExp.test(value))
 			  return;
 		}
-
+		
 		// 如果需要每次输入就请求
 		if (isRealtimeRequest) {
 
 		}
 
-		iptGetValue(value);
-		changeEventHandle.call(this, value);
+		iptGetValue && iptGetValue(value);
+		changeEventHandle && changeEventHandle.call(this, value);
 	}
 
   render() {
