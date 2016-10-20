@@ -142,7 +142,7 @@ app.on('ready', function() {
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	})
-	//mainWindow.webContents.openDevTools()
+	mainWindow.webContents.openDevTools()
 	mainWindow.loadURL('file://' + __dirname + '/build/index.html')
 	//create folder
 	fs.exists(mediaPath,exists=>{
@@ -997,11 +997,18 @@ ipcMain.on('getMediaShare' , err => {
 	})
 })
 
+// medias   array   photo.digest
+// users    array   user.uuid  ['xxx','xxx,'xxx']
+// album    object  {title:'xxx',text:'xxx'}
+
 ipcMain.on('createMediaShare',(err, medias, users, album) => {
 	c(' ')
 	c('create media share-----------------------------')
 	mediaApi.createMediaShare(medias, users, album).then(data => {
 		c(data)
+		mediaShare.push(data)
+		mediaShareMap.set(data.digest,mediaShare[mediaShare.length-1])
+		dispatch(action.setMediaShare(mediaShare))
 		mainWindow.webContents.send('message','创建相册成功')
 	}).catch(err => {
 		c(err)

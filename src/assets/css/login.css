@@ -173,7 +173,6 @@
 }
 
 .login-wrap {
-	border: 1px solid red;
 	width:700px;
 	height:450px;
 	display: flex;
@@ -194,4 +193,18 @@
 
 .login-title>span:nth-child(2) {
 	font-size: 25px;
+}
+
+.login-content>div {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	height:300px;
+}
+.login-content>div>div {
+	flex:0 0 33%;	
+}
+
+.login-invisible {
+	opacity: 0
 }
