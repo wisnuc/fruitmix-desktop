@@ -18,11 +18,11 @@ function getStyles(props) {
       WebkitTransform: 'translate(-50%, -50%)'
     },
     head: {
-      backgroundColor: '#5c6bc0',
+      backgroundColor: '#ff9800',
       color: '#fff',
-      fontSize: 20,
-      height: 80,
-      lineHeight: '80px',
+      fontSize: 16,
+      height: 64,
+      lineHeight: '64px',
       padding: '0 40px 0 80px',
       position: 'relative'
     },

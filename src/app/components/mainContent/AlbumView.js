@@ -3,6 +3,7 @@
 **/
 
 import React, { Component, PropTypes } from 'react';
+import { connect } from 'react-redux';
 import NavigationBar from '../main/NavigationBar';
 import AlbumPhotoItem from '../common/AlbumPhotoItem';
 import Carousel from '../../React-Redux-UI/src/components/transitions/Carousel';
@@ -42,7 +43,7 @@ function getStyles () {
   };
 }
 
-export default class AlbumView extends Component {
+class AlbumView extends Component {
   getAlbumPhotoList() {
     const album = this.getAlbumByHash();
 
@@ -50,7 +51,7 @@ export default class AlbumView extends Component {
   }
 
   getAlbumByHash() {
-    const { state: { media: { mediaShare }, albumHash } } = this.props;
+    const { media: { mediaShare }, albumHash } = this.props;
 
     return mediaShare.filter(media => media.digest === albumHash)[0];
   }
@@ -83,9 +84,9 @@ export default class AlbumView extends Component {
   }
 
   createMaskComponent() {
-    const { state } = this.props;
+    const { largeImages } = this.props;
 
-    if (state.largeImages.data && state.largeImages.data.length) {
+    if (largeImages.data && largeImages.data.length) {
       return (
         <Mask className="large-image-mask" onShutdown={ this.shutdownMaskHandle.bind(this) }></Mask>
       );
@@ -93,14 +94,17 @@ export default class AlbumView extends Component {
   }
 
   createImageSwipeComponent() {
-    const { state } = this.props;
+    const { largeImages, shareComponentEnterAnimateAble, view, shareRadios } = this.props;
 
-    if (state.largeImages.data && state.largeImages.data.length) {
+    if (largeImages.data && largeImages.data.length) {
       return (
         <ImageSwipe
           width={ 960 }
           height={ 700 }
-          state={ this.props.state }>
+          shareComponentEnterAnimateAble={ shareComponentEnterAnimateAble }
+          largeImages={ largeImages }
+          view={ view }
+          shareRadios={ shareRadios }>
         </ImageSwipe>
       );
     }
@@ -114,6 +118,7 @@ export default class AlbumView extends Component {
     return albumPhotoHashList.map((albumPhoto, index) => (
       <AlbumPhotoItem
         refs={ albumHash + index }
+        albumDigest={ albumHash }
         dataIndex={ index }
         date={ this.toDate(ctime) }
         key={ albumPhoto.digest }
@@ -126,22 +131,21 @@ export default class AlbumView extends Component {
   }
 
   createNavigationBar() {
-    const { dispatch, state } = this.props;
+    const { dispatch, navigationBarTitleTexts } = this.props;
 
     return (
       <NavigationBar
         dispatch={ dispatch }
-        state={ state }
-        navigationBarHorizontalPadding={ 18 }
-        icons={[]}>
+        navigationBarTitleTexts={ navigationBarTitleTexts }
+        navigationBarHorizontalPadding={ 18 }>
       </NavigationBar>
     );
   }
 
   createCarouselComponent() {
-    const { state, dispatch } = this.props;
+    const { imageItem, dispatch } = this.props;
 
-    if (state.imageItem && state.imageItem.length) {
+    if (imageItem && imageItem.length) {
       const { dragStyle, dragButtonStyle, operationBarStyle } = getStyles();
       const dragElementRect = this.getDragElementRect();
       const newDragStyle = Object.assign({}, dragStyle, dragElementRect);
@@ -186,7 +190,7 @@ export default class AlbumView extends Component {
           <div className="image-carousel">
             <Carousel
               className="carousel"
-              data={ state.imageItem }
+              data={ imageItem }
               dispatch={ dispatch }
               height={ 75 }
               onDragEnd={ this.dragEndHandle.bind(this) }
@@ -197,7 +201,7 @@ export default class AlbumView extends Component {
           <div className="text-bar"
             style={{ textAlign: 'center', fontSize: 12, marginTop: 10, color: '#757575'  }}>
             选中
-              <label style={{ fontSize: 14 }}>{ this.props.state.imageItem.length }</label>
+              <label style={{ fontSize: 14 }}>{ imageItem.length }</label>
             张图片
           </div>
 
@@ -277,3 +281,16 @@ export default class AlbumView extends Component {
     this.clearAllSelectedItem();
   }
 };
+
+const mapStateToProps = (state) => ({
+  albumHash: state.albumHash,
+  media: state.media,
+  imageItem: state.imageItem,
+  navigationBarTitleTexts: state.navigationBarTitleTexts,
+  shareComponentEnterAnimateAble: state.shareComponentEnterAnimateAble,
+  view: state.view,
+  largeImages: state.largeImages,
+  shareRadios: state.shareRadio
+});
+
+export default connect(mapStateToProps)(AlbumView);

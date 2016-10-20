@@ -27,7 +27,7 @@ function getStyles () {
   return {
     list: {
       marginLeft: -5,
-      paddingTop: 10
+      paddingTop: 52
     },
     add: {
       bottom: 140,
@@ -162,7 +162,7 @@ class Albums extends Component {
         caption="新建相册"
         content={ this.createAddAlbumPhotoListDialogContent() }
         foot={ this.createAddAlbumPhotoListDialogFoot() }
-        style={{ left: dialogRect.left, width: dialogRect.width, WebkitTransform: 'translateY(-50%)' }}
+        style={{ left: 0, top: 0, width: '100%', transform: 'inherit', zIndex: 1200 }}
         orientation="custom"
         onClose={ this.toggleShowed.bind(this, 'addAlbumPhotoListDialogShowedStatus') }>
       </AddAlbumPhotoListDialog>
@@ -173,7 +173,7 @@ class Albums extends Component {
     const photoList = this.getPhotoList();
 
     return (
-      <div style={{ height: 350, overflow: 'auto', boxSizing: 'border-box', padding: '10px 0 0 10px' }}>
+      <div style={{ position: 'fixed', top: 64, bottom: 55, width: '100%', backgroundColor: '#fff', overflow: 'auto', boxSizing: 'border-box', padding: '10px 0 0 10px', boxSizing: 'border-box' }}>
         {
           photoList.map((photo, index) =>
             <AlbumPhotoItem
@@ -197,7 +197,7 @@ class Albums extends Component {
     button = Object.assign({}, button, { margin: '10px 10px 10px 0' })
 
     return (
-      <div className="clearfix">
+      <div className="clearfix" style={{ position: 'fixed', bottom: 0, height: 55, left: 0, width: '100%', backgroundColor: '' }}>
         <div className="fr">
           <Button
             className="cancel-btn"
@@ -333,4 +333,4 @@ var mapStateToProps = (state)=>({
      login:state.login
 })
 
-export default connect(mapStateToProps)(Albums)
+export default connect(mapStateToProps)(Albums);

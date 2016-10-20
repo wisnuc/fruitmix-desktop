@@ -4,7 +4,7 @@
 
 import React, { Component, PropTypes } from 'react';
 import { findDOMNode } from 'react-dom';
-import { connect } from 'react-redux'
+import { connect } from 'react-redux';
 
 import Checkbox from '../../React-Redux-UI/src/components/partials/Checkbox';
 import NavigationBar from '../main/NavigationBar';
@@ -321,7 +321,7 @@ class AllPhotos extends Component {
         component = dateStr.map((date, index) => {
           return (
             <div className="clearfix">
-              <div style={{ margin: '10px 0', fontFamily: 'helvetica', color: '#6d6d6d', fontSize: 12 }}>
+              <div style={{ margin: '0 0 10px', fontFamily: 'helvetica', color: '#6d6d6d', fontSize: 12 }}>
                 <Checkbox ref={ "select_datetime" + '_' + date }
                  key={ index }
                  value={ date }
@@ -404,7 +404,7 @@ class AllPhotos extends Component {
         <ImageSwipe
           width={ 960 }
           height={ 700 }
-          shareComponentEnterAnimateAble={ this.props.shareComponentEnterAnimateAble }
+          shareComponentEnterAnimateAble={ shareComponentEnterAnimateAble }
           largeImages={ largeImages }
           shareRadios={ shareRadios }
           view={ view }>
