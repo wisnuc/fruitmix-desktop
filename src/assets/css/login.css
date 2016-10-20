@@ -1,12 +1,13 @@
+/*old css is not work*/
 .index-frame {
 	display : flex;
 	justify-content : center;
+	align-items : center;
+	text-align:center;
 	min-height : 100vh;
 	min-width : 100vw;
 	background-image : url(../images/index/party_orig.jpg);
 	background-size : cover;
-	align-items : center;
-	text-align:center;
 	font-size: 14px!important;
 }
 .login-container {
@@ -157,3 +158,31 @@
 	height:30px;
 	line-height: 30px;
 }
+
+/*new css is working*/
+/*.index-frame {
+	display : flex;
+	justify-content : center;
+	align-items : center;
+	text-align:center;
+	min-height : 100vh;
+	min-width : 100vw;
+	background-image : url(../images/index/party_orig.jpg);
+	background-size : cover;
+	font-size: 14px!important;
+}
+
+.login-container {
+	border: 1px solid red;
+	width:700px;
+	height:450px;
+	display: flex;
+	flex-direction: column;
+	padding-top:15px;
+	background-color: #f2f2f2; 
+}
+
+.login-title {
+	
+}
+*/
