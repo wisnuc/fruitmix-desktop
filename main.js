@@ -98,8 +98,24 @@ const adapter = () => {
 	}
 }
 
-store.subscribe(() => {
-	mainWindow.webContents.send('adapter',adapter())
+var storeLock = false
+var waitForRender = null
+
+store.subscribe(() => { 
+	if (storeLock) {
+		clearTimeout(waitForRender)
+		waitForRender = setTimeout(()=>{
+			storeLock = false;
+			mainWindow.webContents.send('adapter',adapter())
+		},50)
+	}else {
+		mainWindow.webContents.send('adapter',adapter())
+		storeLock = true
+		waitForRender = setTimeout(()=>{
+			storeLock = false
+		},50)
+	}
+	
 })
 
 // browser.on('update', deviceApi.findDevice) 
@@ -740,14 +756,16 @@ ipcMain.on('changeDownloadPath', e=>{
 //getMediaData
 ipcMain.on('getMediaData',(err)=>{
 	c(' ')
+	c('获取media...')
 	mediaApi.getMediaData().then((data)=>{
-		data.forEach(item=>{
+		c('media 列表获取成功')
+		media = data
+		media.forEach(item=>{
 			if (item == null) {return}
-			let obj = Object.assign({},item,{status:'notReady',failed:0})
-			media.push(obj)	
+			let obj = Object.assign({},item,{failed:0})
+			item.failed = 0
 			mediaMap.set(item.digest,item)
 		})
-		c('media 列表获取成功')
 		mainWindow.webContents.send('mediaFinish',media)
 		// dispatch(action.setMedia(media))
 	}).catch(err=>{
@@ -827,7 +845,6 @@ function isShareThumbExist(item) {
 		setTimeout(dealShareThumbQueue,200)
 	}
 }
-
 
 //getMediaThumb
 ipcMain.on('getThumb',(err,item)=>{
@@ -950,6 +967,7 @@ ipcMain.on('getMediaImage',(err,hash)=>{
 	})
 })
 
+//getMediaShare
 ipcMain.on('getMediaShare' , err => {
 	mediaApi.getMediaShare().then(data => {
 		mainWindow.webContents.send('mediaShare',data)

@@ -38,7 +38,14 @@ function getStyles(props) {
 export default class Dialog extends Component {
   render() {
     let { root, head, close } = getStyles(this.props);
-    const { caption, onClose, content, foot, orientation, style } = this.props;
+    const {
+       caption,
+       onClose,
+       content,
+       foot,
+       orientation,
+       style
+     } = this.props;
 
     if (orientation === 'custom') {
       root = Object.assign({}, root, style);

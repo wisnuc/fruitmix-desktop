@@ -38,6 +38,7 @@ body{
 	box-sizing: border-box;
 	position: fixed!important;
 	background-color: #3f52b4!important;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4)!important;
 }
 
 .app-bar > button {
@@ -947,4 +948,23 @@ body{
 	color: #757575;
 	margin-left: -20px;
 	vertical-align: text-top;
+}
+
+.popup-photoinfo-icon:hover {
+	border-color: #efefef!important;
+	box-shadow: 0 1px 0 rgba(0,0,0,.25)!important;
+}
+
+.popup-photoinfo-icon:hover i {
+	background-color: #586abf!important;
+}
+
+.popup-photoinfo-icon.active {
+	border-color: #efefef!important;
+	background-color: #e0e0e0!important;
+	box-shadow: 0 1px 0 rgba(0,0,0,.25)!important;
+}
+
+.popup-photoinfo-icon.active i {
+	background-color: #586abf!important;
 }

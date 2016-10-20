@@ -79,11 +79,13 @@ class Detail extends Component {
 
  		return this.props.login.obj.allUser.map(item => {
 						    	let checked = false
-						    	let index = data.readlist.findIndex(i => {
-						    		return i == item.uuid
-						    	})
-						    	if (index != -1) {
-						    		checked = true
+						    	if(data.readlist) {
+						    		let index = data.readlist.findIndex(i => {
+							    		return i == item.uuid
+							    	})
+							    	if (index != -1) {
+							    		checked = true
+							    	}
 						    	}
 						    	return (
 						    		<Checkbox

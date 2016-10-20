@@ -61,13 +61,13 @@ var actions = {
 		}
 	},
 
-	//media
-	// setMedia(data) {
-	// 	return {
-	// 		type: 'SET_MEDIA',
-	// 		data: data
-	// 	}
-	// },
+	//media-----------------------------------------------
+	setMedia(data) {
+		return {
+			type: 'SET_MEDIA',
+			data: data
+		}
+	},
 
 	//DataMove
 	setMoveData(data) {

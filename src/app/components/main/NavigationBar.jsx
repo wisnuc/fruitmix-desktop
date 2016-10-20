@@ -19,23 +19,41 @@ function getStyles (props) {
       borderBottom: '1px solid #efefef',
       marginLeft: -18
     },
+    iconBlock: {
+      borderStyle: 'solid',
+      borderWidth: 1,
+      borderColor: 'transparent',
+      borderRadius: '2px',
+      float: 'right',
+      height: 32,
+      lineHeight: '32px',
+      textAlign: 'center',
+      width: 32
+    },
     icon: {
       display: 'inline-block',
       fontFamily: 'Microsoft Yahei',
       width: 20,
       height: 20,
       borderRadius: '100%',
-      marginRight: 20,
       lineHeight: '20px',
       fontSize: 14,
       textAlign: 'center',
-      backgroundColor: '#586abf',
+      backgroundColor: '#757575',
       color: '#fff'
     }
   }
 }
 
 export default class NavigationBar extends Component {
+  constructor() {
+    super();
+
+    this.state = {
+      addActiveClassAble: false
+    };
+  }
+
   createTitleTextComponent() {
     const { state: { navigationBarTitleTexts } } = this.props;
 
@@ -55,23 +73,40 @@ export default class NavigationBar extends Component {
   }
 
   createIconComponent() {
-    const { icons } = this.props;
-    const { icon } = getStyles(this.props);
+    const { icons, hasIconAble } = this.props;
+    const { icon, iconBlock } = getStyles(this.props);
+    const activeClass = 'popup-photoinfo-icon'
+      .split(' ')
+      .concat(this.state.addActiveClassAble ? 'active' : '')
+      .join(' ')
+      .trim();
 
-    return (
-      <div className="fr">
-        {
-          icons.map((iconObj, index) => {
-            return <i style={ icon } onClick={ this.iconClickHandler.bind(this, index, iconObj.text) }>{ iconObj.text }</i>
-          })
-        }
-      </div>
-    );
+    if (hasIconAble) {
+      return (
+        <div className="fr">
+          <div className={ activeClass } style={ iconBlock }>
+            <i
+              style={ icon }
+              onClick={ this.iconClickHandler.bind(this) }>
+              i
+            </i>
+          </div>
+        </div>
+      );
+    }
   }
 
-  iconClickHandler() {
+  iconClickHandler(e) {
     const { onShowedRightPanel } = this.props;
+
     onShowedRightPanel && onShowedRightPanel();
+    this.setState({
+      addActiveClassAble: !this.state.addActiveClassAble
+    })
+  }
+
+  changeIconBackgroundColor(iconEl) {
+    iconEl.classList.add('active');
   }
 
   render() {
@@ -98,7 +133,9 @@ NavigationBar.propTypes = {
   // horizontal 内边距
   navigationBarHorizontalPadding: PropTypes.number,
   // 高度
-  navigationBarHeight: PropTypes.number
+  navigationBarHeight: PropTypes.number,
+  // 是否显示图标
+  hasIconAble: PropTypes.oneOf([true, false])
 };
 
 NavigationBar.defaultProps = {
@@ -107,5 +144,6 @@ NavigationBar.defaultProps = {
   navigationBarFontSize: 12,
   navigationBarFontFamily: 'sans-serif',
   navigationBarHorizontalPadding: 15,
-  navigationBarHeight: 37
+  navigationBarHeight: 37,
+  hasIconAble: false
 };
