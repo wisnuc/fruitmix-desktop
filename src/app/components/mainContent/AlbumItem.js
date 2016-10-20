@@ -56,7 +56,7 @@ export default class AlbumItem extends Component {
   }
 
   getUserName(uuid) {
-    const { state: { login: { obj: { allUser } } } } = this.props;
+    const { login: { obj: { allUser } } } = this.props;
     let index = allUser.findIndex(user => user.uuid === uuid)
     if (index != -1) {
       return allUser[index].username
