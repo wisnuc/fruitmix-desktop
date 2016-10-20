@@ -34,13 +34,16 @@ function getStyles () {
       backgroundColor: '#fff'
     },
     photoItemBody: {
-      height: 144
+      height: 144,
+      maxHeight: 144
     },
     shareItemBody: {
-      height: 310
+      height: 310,
+      maxHeight: 310
     },
     commentItemBody: {
-      height: 144
+      height: 144,
+      maxHeight: 144
     }
   }
 }
@@ -88,7 +91,7 @@ export default class RightPanel extends Component {
             <div className="item-body" style={ newCommentItemBodyStyle }>
               {/* 评论组件 */}
               <Comment></Comment>
-            </div>  
+            </div>
           </div>
         </div>
       </div>
