@@ -3,6 +3,8 @@
 **/
 
 import React, { Component, PropTypes } from 'react';
+import { connect } from 'react-redux';
+
 import { MenuItem } from 'material-ui';
 import svg from '../../utils/SVGIcon';
 import Share from '../mainContent/Share';
@@ -60,7 +62,7 @@ function getStyles (props) {
   }
 }
 
-export default class ImageSwipe extends Component {
+class ImageSwipe extends Component {
   constructor(props) {
     super(props);
 
@@ -100,11 +102,11 @@ export default class ImageSwipe extends Component {
   }
 
   moveTo(nextIndex) {
-    const { state } = this.props;
+    const { largeImages } = this.props;
 
     this.currentImgIndex = this.detectIndex(nextIndex);
 
-    ipc.send('getMediaImage', state.largeImages.data[this.currentImgIndex]);
+    ipc.send('getMediaImage', largeImages.data[this.currentImgIndex]);
   }
 
   leftClickHandle() {
@@ -152,8 +154,8 @@ export default class ImageSwipe extends Component {
 
   render() {
     const { root, rootInner, featurePanel } = getStyles(this.props);
-    const { shareComponentEnterAnimateAble, view, height, shareRadios } = this.props;
-    const shareComponentClassName = shareComponentEnterAnimateAble ? 'share-enter-animate' : '';
+    const { view, height, shareRadio } = this.props;
+    const shareComponentClassName = this.state.shareComponentEnterAnimateAble ? 'share-enter-animate' : '';
 
     return (
       <div className="image-swipe-container" style={ root }>
@@ -168,7 +170,7 @@ export default class ImageSwipe extends Component {
             <div className="circle-body">
 
               {/* 分享组件 */}
-              <Share dispatch={ dispatch } shareRadios={ shareRadios }></Share>
+              <Share dispatch={ dispatch } shareRadios={ shareRadio }></Share>
             </div>
           </div>
         </div>
@@ -187,3 +189,11 @@ ImageSwipe.propTypes = {
   width: PropTypes.number,
   height: PropTypes.number
 };
+
+const mapStateToProps = ({
+  largeImages,
+  shareRadio,
+  view
+}) => ({ largeImages, shareRadio, view });
+
+export default connect(mapStateToProps)(ImageSwipe);

@@ -19,7 +19,6 @@ function getStyles () {
       marginBottom: 10
     },
     selectStatusStyle: {
-      borderRadius: '100%',
       borderWidth: 1,
       borderStyle: 'solid',
       borderColor: '#757575',
@@ -61,7 +60,7 @@ export default class AlbumPhotoItem extends Component {
     this.clickHandle = this.clickHandle.bind(this);
     this.blockClickHandle = this.blockClickHandle.bind(this);
     this.state = {
-      selectStatus: void 0,
+      selectStatus: void 0
     };
   }
 
@@ -123,23 +122,40 @@ export default class AlbumPhotoItem extends Component {
     e.stopPropagation();
   }
 
-  blockClickHandle() {
-    const { onViewLargeImage, dataIndex, date, digest } = this.props;
+  blockClickHandle(e) {
+    const {
+      onViewLargeImage, onSelect, dataIndex,
+      date, digest, isUnViewLargePhoto
+    } = this.props;
 
-    onViewLargeImage(date, dataIndex);
-    ipc.send('getMediaImage', digest);
+    if (isUnViewLargePhoto) {
+      this.setState({
+        selectStatus: this.state.selectStatus === 'over' ? 'active' : void 0
+      });
+
+      setTimeout(() => {
+        onSelect(dataIndex, this.el, date, this.state.selectStatus === 'active')
+      }, 0);
+
+    } else {
+      onViewLargeImage(date, dataIndex);
+      ipc.send('getMediaImage', digest);
+    }
+
+    e.stopPropagation();
   }
 
   render() {
-    const { date, digest }= this.props;
-    const { itemStyle } = getStyles();
+    const { date, digest, style }= this.props;
+    let { itemStyle } = getStyles();
     const selectStatus = this.state.selectStatus;
     let className = selectStatus
       ? selectStatus === 'over'
-         ? 'show'
+         ? 'active'
          : 'show active'
       : '';
     className = className.split(' ').concat(['image-item', 'fl']).join(' ').trim();
+    itemStyle = Object.assign({}, itemStyle, style);
 
     return (
       <div

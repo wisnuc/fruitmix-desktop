@@ -23,7 +23,7 @@ function getStyles(props) {
       fontSize: 16,
       height: 64,
       lineHeight: '64px',
-      padding: '0 40px 0 80px',
+      padding: '0 40px',
       position: 'relative'
     },
     close: {

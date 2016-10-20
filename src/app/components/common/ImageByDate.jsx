@@ -92,14 +92,13 @@ export default class ImageByDate extends Component {
   lookLargePhotoHandle(e) {
     const el = e.currentTarget;
     const {
-      date,
-      detectImageItemActive,
-      onCancelSelectedItem,
-      dataIndex,
-      onViewLargeImage,
-      onSelectedItem } = this.props;
+      date, detectImageItemActive, onCancelSelectedItem,
+      dataIndex, onViewLargeImage, onSelectedItem
+    } = this.props;
+    const nodeList = Array.from(document.querySelectorAll('[data-date="'+ date +'"]'));
+    const hasSelected = nodeList.some(node => node.classList.contains('show'));
 
-    if (el.classList.contains('active') && !el.classList.contains('show')) {
+    if (el.classList.contains('active') && !el.classList.contains('show') && hasSelected) {
       el.classList.add('show');
       onSelectedItem(dataIndex, el, date, true);
     } else if (el.classList.contains('active') && el.classList.contains('show')) {

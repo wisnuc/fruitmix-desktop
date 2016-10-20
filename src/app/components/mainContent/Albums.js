@@ -3,6 +3,7 @@
 **/
 
 import React, { Component, PropTypes } from 'react';
+import { findDOMNode } from 'react-dom';
 import { connect } from 'react-redux'
 
 import NavigationBar from '../main/NavigationBar';
@@ -107,11 +108,15 @@ class Albums extends Component {
     if (checked) {
       Object
         .keys(this.refs)
-        .forEach(key => this.refs[key].setState({ selectStatus: 'over' }));
+        .forEach(key => {
+          if (findDOMNode(this.refs[key]) !== el && this.refs[key].state.selectStatus !== 'active') {
+            this.refs[key].setState({ selectStatus: 'over' });
+          }
+        });
 
-      setTimeout(() => {
-        dispatch(Action.addDragImageItem(el, date, index));
-      }, 0);
+      // setTimeout(() => {
+      //   dispatch(Action.addDragImageItem(el, date, index));
+      // }, 0);
     } else {
       dispatch(Action.removeDragImageItem(date, index));
     }
@@ -173,14 +178,17 @@ class Albums extends Component {
     const photoList = this.getPhotoList();
 
     return (
-      <div style={{ position: 'fixed', top: 64, bottom: 55, width: '100%', backgroundColor: '#fff', overflow: 'auto', boxSizing: 'border-box', padding: '10px 0 0 10px', boxSizing: 'border-box' }}>
+      <div className="dialog-content" style={{ position: 'fixed', top: 64, bottom: 55, width: '100%', backgroundColor: '#fff', overflow: 'auto', boxSizing: 'border-box', padding: '10px 37px 0', boxSizing: 'border-box' }}>
         {
           photoList.map((photo, index) =>
             <AlbumPhotoItem
+              ref={ formatDate(photo.exifDateTime) + '_' + index }
               dataIndex={ index }
+              style={{ width: 111, height: 111, padding: '0', border: 'none', margin: '0 3px 6px'}}
               isViewAllPhoto={ true }
               date={ formatDate(photo.exifDateTime) }
               key={ photo.digest }
+              isUnViewLargePhoto={ true }
               digest={ photo.digest }
               path={ photo.path }
               onViewLargeImage={ this.viewLargeImageHandle.bind(this) }
@@ -197,7 +205,7 @@ class Albums extends Component {
     button = Object.assign({}, button, { margin: '10px 10px 10px 0' })
 
     return (
-      <div className="clearfix" style={{ position: 'fixed', bottom: 0, height: 55, left: 0, width: '100%', backgroundColor: '' }}>
+      <div className="clearfix" style={{ position: 'fixed', bottom: 0, height: 55, left: 0, width: '100%', backgroundColor: '#fff' }}>
         <div className="fr">
           <Button
             className="cancel-btn"
