@@ -62,7 +62,7 @@ class leftNav extends Component {
 					<div className="nav-inner">
 						{this.props.navigation.nav.map(item => {
 							if (item.parent != null) {
-								return 
+								return
 							}
 							return (
 								<div className="nav-item-box" key={item.name}>
@@ -127,7 +127,7 @@ class leftNav extends Component {
 						<div className="nav-item-body photo-item-body">
 							{
 								this.props.navigation.nav.map((item, index) => {
-									if (item.type == 'leftNav' && index >= 4 && index < 6) {
+									if (item.type == 'leftNav' && index >= 4 && index < 7) {
 										return (
 											<MenuItem
 											  className={ item.selected ? "list-selected left-menu-list" : 'left-menu-list' }
@@ -150,7 +150,7 @@ class leftNav extends Component {
 						<div className="nav-item-body system-item-body">
 							{
 								this.props.navigation.nav.map((item, index) => {
-									if (item.type == 'leftNav' && index >= 6) {
+									if (item.type == 'leftNav' && index >= 7) {
 										return (
 											<MenuItem
 											  className={ item.selected ? "list-selected left-menu-list" : 'left-menu-list' }

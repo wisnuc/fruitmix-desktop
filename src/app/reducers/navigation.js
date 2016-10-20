@@ -24,6 +24,7 @@ let navDefault = [
   { name: '所有照片', parent: '照片',selected: false, type: 'two-level', icon:'cloud' },
   { name: '相册', parent: '照片',selected: false, type: 'two-level', icon:'transmission' },
   { name: '相册查看', parent: '照片', selected: false, type:'two-level', icon:null },
+  { name: '分享', parent: '照片', selected: false, type:'two-level', icon:null },
   { name: '设置', parent: '系统', selected: false, type:'two-level', icon:'settings' },
   { name: '数据迁移', parent: '系统', selected: false, type:'two-level', icon:'settings' }
 ]
