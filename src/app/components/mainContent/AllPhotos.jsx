@@ -87,11 +87,6 @@ class AllPhotos extends Component {
     super(props);
 
     this.map = props.media ? props.media.data : [];
-    this.size = this.map.length;
-    this.strip = 100;
-    this.current = 0;
-    this.pages = Math.ceil(this.size / this.strip);
-    this.containDates = [];
     this.state = {
       imageGroup: void 0
     };
@@ -120,18 +115,6 @@ class AllPhotos extends Component {
     } else {
       dispatch(Action.removeDragImageItem(date, index));
     }
-
-    // Object.keys(this.refs).filter((key, index) => {
-    //   if (key.indexOf(date) >= 0) {
-    //     if (hasChecked) {
-    //       this.refs[key] && this.refs[key].overedHandle();
-    //     } else {
-    //       if (!(this.detectImageItemActive(date))) {
-    //         this.refs[key] && this.refs[key].outedHandle();
-    //       }
-    //     }
-    //   }
-    // });
   }
 
   cancelSelectedItemHandle(index, date) {
@@ -233,18 +216,13 @@ class AllPhotos extends Component {
   }
 
   scrollTo() {
-    if (this.current > this.pages) {
-      alert('没有更多图片了');
-      return;
-    }
-
     if (this.mounted || this.mounted === void 0) {
       let store = {
         dateStr: [],
         data: []
       };
 
-      let tmp = (this.state.imageGroup ? this.state.imageGroup.data : []).concat(this.map.slice(this.current * this.strip, (this.current * this.strip) + this.strip));
+      let tmp = this.map;
 
       let tmpKeys = tmp.map(t =>
         formatDate(t.exifDateTime)
@@ -259,8 +237,6 @@ class AllPhotos extends Component {
       });
 
       store.data = tmp;
-      this.current++;
-
       this.setState({ imageGroup: store });
     }
   }
@@ -346,7 +322,7 @@ class AllPhotos extends Component {
           dispatch={ this.props.dispatch }
           state={ this.props.state }
           navigationBarHorizontalPadding={ 18 }
-          hasIconAble={ true } 
+          hasIconAble={ true }
           onShowedRightPanel={ this.showedRightPanelHandler.bind(this) }>
         </NavigationBar>
 
@@ -383,7 +359,8 @@ class AllPhotos extends Component {
         <ImageSwipe
           width={ 960 }
           height={ 700 }
-          state={ this.props.state }>
+          state={ this.props.state }
+          view={ this.props.view }>
         </ImageSwipe>
       );
     }
@@ -391,16 +368,6 @@ class AllPhotos extends Component {
 
   showedRightPanelHandler() {
     this.refs.rightPanel && findDOMNode(this.refs.rightPanel).lastElementChild.classList.toggle('active');
-  }
-
-  detectScrollToBottom() {
-    if (window.innerHeight + document.body.scrollTop >= document.documentElement.scrollHeight) {
-      this.scrollTo();
-    }
-  }
-
-  componentWillMount() {
-    document.addEventListener('scroll', this.detectScrollToBottom.bind(this));
   }
 
   componentDidMount() {
@@ -414,12 +381,9 @@ class AllPhotos extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    c.log('AllPhotos receive new props')
-    c.log(nextProps)
     this.map = nextProps.media ? nextProps.media.data : [];
-    this.size = this.map.length;
-    this.pages = Math.ceil(this.size / this.strip);
-    this.scrollTo()
+
+    this.scrollTo();
   }
 
   render() {
@@ -436,8 +400,9 @@ class AllPhotos extends Component {
 
 var mapStateToProps = (state)=>({
        //state: state,
-       media: state.media,
-       navigation: state.navigation
-  })
+     media: state.media,
+     navigation: state.navigation,
+     view: state.view
+});
 
 export default connect(mapStateToProps)(AllPhotos)

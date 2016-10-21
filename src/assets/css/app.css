@@ -9,9 +9,11 @@
 /******** 全站通用 *********/
 *{
   -moz-user-select: none;
--webkit-user-select: none;
-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor:pointer;
 }
+
 .clearfix {
     display: block;
 }
@@ -36,10 +38,12 @@ user-select: none;
 .visible {
     visibility: visible !important;
 }
+
 html {
     width:100%;
     height:100%;
 }
+
 body {
     font-family: "Microsoft YaHei" !important;
     margin:0;
@@ -62,15 +66,17 @@ button {
     border: 0;
 }
 
+img[src=""] {
+  opacity: 0;
+}
+
 #app {
   width:100%;
   height:100%;
   overflow-x: hidden;
 }
+
 .app {
   width:100%;
   height:100%;
-}
-* {
-  cursor:pointer;
 }

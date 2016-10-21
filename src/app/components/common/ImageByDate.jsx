@@ -126,7 +126,7 @@ export default class ImageByDate extends Component {
     const { figureStyle, loadingStyle } = getStyles();
 
     if (figureItem.path) {
-      // let thumbStyle 
+      // let thumbStyle
       // if (figureItem.width < 136 && figureItem.height<136) {
       //   thumbStyle = {
       //     maxWidth:'100%',
@@ -155,7 +155,7 @@ export default class ImageByDate extends Component {
   render() {
     const { date, state, dataIndex, figureItem, hash } = this.props;
     let { itemStyle, selectStatusStyle } = getStyles();
-
+    //console.log(figureItem, 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
     return (
       <div ref={ el => this.el = el } data-hash={ hash } data-date={ date } data-index={ dataIndex } className="image-item" style={ itemStyle }
         onClick={ this.lookLargePhotoHandle } onMouseOver={ this.overedHandle } onMouseOut={ this.outedHandle }>

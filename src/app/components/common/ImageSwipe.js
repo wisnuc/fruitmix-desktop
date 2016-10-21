@@ -16,32 +16,46 @@ function getStyles (props) {
       left: '50%',
       top: '50%',
       WebkitTransform: 'translate(-50%, -50%)',
-      width: width + arrowContainerWidth * 2,
+      width: width,
       height,
       zIndex: 9999
     },
     rootInner: {
       boxSizing: 'border-box',
-      position: 'absolute',
+      position: 'relative',
       overflow: 'hidden',
-      width: width - 260,
-      height,
-      left: arrowContainerWidth,
+      width: width,
+      height
+    },
+    featurePanel: {
+      backgroundColor: '#fff',
+      boxSizing: 'border-box',
+      top: 0,
+      padding: '0 40px',
+      position: 'absolute',
+      right: -260,
+      height: '100%',
+      width: 260,
       transition: 'transform .2s linear'
     },
     leftArrow: {
       position: 'absolute',
-      left: 0,
+      left: -100,
       top: 0,
-      width: arrowContainerWidth,
-      height
+      width: arrowContainerWidth
     },
     rightArrow: {
       position: 'absolute',
-      right: 0,
+      right: -100,
       top: 0,
-      width: arrowContainerWidth,
-      height
+      width: arrowContainerWidth
+    },
+    icon: {
+      bottom: 2,
+      height: 24,
+      right: -70,
+      position: 'absolute',
+      width: 24
     }
   }
 }
@@ -107,7 +121,7 @@ export default class ImageSwipe extends Component {
     return (
       <div style={ isLeftArrow ? leftArrow : rightArrow }>
         <MenuItem
-          className={ isLeftArrow ? 'large-arrow' : 'large-arrow' }
+          className={ isLeftArrow ? 'large-arrow large-arrow-left' : 'large-arrow large-arrow-right' }
           desktop={ true }
           onTouchTap={ isLeftArrow ? this.leftClickHandle.bind(this) : this.rightClickHandle.bind(this) }
           leftIcon={ isLeftArrow ? svg.leftArrow() : svg.rightArrow() }>
@@ -116,21 +130,35 @@ export default class ImageSwipe extends Component {
     );
   }
 
+  createShareIcon() {
+    const { icon } = getStyles(this.props);
+
+    return (
+      <div className="icon-feature" style={ icon }>
+        <MenuItem
+          desktop={ true }
+          leftIcon={ svg.share() }>
+        </MenuItem>
+      </div>
+    );
+  }
+
   render() {
-    const { root, rootInner } = getStyles(this.props);
-    const { state, height } = this.props;
-    console.log(state.view.currentMediaImage.path, 'xxx');
+    const { root, rootInner, featurePanel } = getStyles(this.props);
+    const { state, view, height } = this.props;
+
     return (
       <div className="image-swipe-container" style={ root }>
-        <div className="clearfix" style={{ padding: '0 100px' }}>
-          <div style={ rootInner }>
-            <img src={ state.view.currentMediaImage.path || '' } width="100%" height="100%" style={{ objectFit: 'cover' }} />
-          </div>
-          <div style={{ width: 260, boxSizing: 'border-box', padding: '0 40px', marginLeft: 700, height, backgroundColor: '#fff' }}>
+        <div style={ rootInner }>
+          <img src={ view.currentMediaImage.path } width="100%" height="100%" style={{ objectFit: 'cover' }} />
+
+          {/* 右侧功能面板 */}
+          <div style={ featurePanel }>
             <div className="circle-header" style={{ padding: '40px 0 20px', fontSize: 16, textAlign: 'center', borderBottom: '1px solid rgba(0,0,0,.12)' }}>
               相册分享
             </div>
             <div className="circle-body">
+
               {/* 分享组件 */}
               <Share dispatch={ dispatch } state={ state }></Share>
             </div>
@@ -140,6 +168,8 @@ export default class ImageSwipe extends Component {
         { this.state.arrowLeftStatus && this.createArrowComponent('left') }
 
         { this.state.arrowRightStatus && this.createArrowComponent('right') }
+
+        { this.createShareIcon() }
       </div>
     );
   }
@@ -147,12 +177,5 @@ export default class ImageSwipe extends Component {
 
 ImageSwipe.propTypes = {
   width: PropTypes.number,
-  height: PropTypes.number,
-  currentImageHash: PropTypes.string.isRequired,
-  imageHashs: PropTypes.array.isRequired,
-  arrowContainerWidth: PropTypes.number
+  height: PropTypes.number
 };
-
-ImageSwipe.defaultProps = {
-  arrowContainerWidth: 100
-}
