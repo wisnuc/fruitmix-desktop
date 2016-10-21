@@ -56,10 +56,10 @@ export default class AlbumItem extends Component {
   }
 
   getUserName(uuid) {
-    const { login: { obj: { allUser } } } = this.props;
-    let index = allUser.findIndex(user => user.uuid === uuid)
+    const { login: { obj: { users } } } = this.props;
+    let index = users.findIndex(user => user.uuid === uuid)
     if (index != -1) {
-      return allUser[index].username
+      return users[index].username
     }else {
       return null
     }
