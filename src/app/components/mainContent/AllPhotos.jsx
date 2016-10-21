@@ -4,6 +4,7 @@
 
 import React, { Component, PropTypes } from 'react';
 import { findDOMNode } from 'react-dom';
+import { connect } from 'react-redux'
 
 import Checkbox from '../../React-Redux-UI/src/components/partials/Checkbox';
 import NavigationBar from '../main/NavigationBar';
@@ -81,11 +82,11 @@ function getMapByDateTimestamp (arr) {
   return result;
 }
 
-export default class AllPhotos extends Component {
+class AllPhotos extends Component {
   constructor(props) {
     super(props);
 
-    this.map = props.state.media ? props.state.media.data : [];
+    this.map = props.media ? props.media.data : [];
     this.size = this.map.length;
     this.strip = 100;
     this.current = 0;
@@ -412,6 +413,15 @@ export default class AllPhotos extends Component {
     this.clearAllSelectedItem();
   }
 
+  componentWillReceiveProps(nextProps) {
+    c.log('AllPhotos receive new props')
+    c.log(nextProps)
+    this.map = nextProps.media ? nextProps.media.data : [];
+    this.size = this.map.length;
+    this.pages = Math.ceil(this.size / this.strip);
+    scrollTo()
+  }
+
   render() {
     return (
       <div className="view-image">
@@ -423,3 +433,11 @@ export default class AllPhotos extends Component {
     );
   }
 }
+
+var mapStateToProps = (state)=>({
+       //state: state,
+       media: state.media,
+       navigation: state.navigation
+  })
+
+export default connect(mapStateToProps)(AllPhotos)

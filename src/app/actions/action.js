@@ -287,29 +287,29 @@ var actions = {
 		}
 	},
 	//media ---------------------------------------------
-	setMedia(data) {
-		return {
-			type: 'SET_MEDIA',
-			data: data
-		}
-	},
+	// setMedia(data) {
+	// 	return {
+	// 		type: 'SET_MEDIA',
+	// 		data: data
+	// 	}
+	// },
 
-	setThumb(item,path,status) {
-		return {
-			type: 'SET_THUMB',
-			data: item,
-			status:status,
-			path:path
-		}
-	},
+	// setThumb(item,path,status) {
+	// 	return {
+	// 		type: 'SET_THUMB',
+	// 		data: item,
+	// 		status:status,
+	// 		path:path
+	// 	}
+	// },
 
-	setShareThumb(item, path, status) {
-		return {
-			type: 'SET_SHARE_THUMB',
-			data: item,
-			path: path
-		}
-	},
+	// setShareThumb(item, path, status) {
+	// 	return {
+	// 		type: 'SET_SHARE_THUMB',
+	// 		data: item,
+	// 		path: path
+	// 	}
+	// },
 
 	toggleMedia(open) {
 		return {
@@ -340,12 +340,12 @@ var actions = {
 		}
 	},
 
-	setMediaShare(data) {
-		return {
-			type : 'SET_MEDIA_SHARE',
-			data : data
-		}
-	},
+	// setMediaShare(data) {
+	// 	return {
+	// 		type : 'SET_MEDIA_SHARE',
+	// 		data : data
+	// 	}
+	// },
 
 	logOut() {
 		return {

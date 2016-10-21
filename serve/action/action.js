@@ -69,6 +69,13 @@ var actions = {
 		}
 	},
 
+	setMediaShare(data) {
+		return {
+			type : 'SET_MEDIA_SHARE',
+			data : data
+		}
+	},
+
 	//DataMove
 	setMoveData(data) {
 		return {

@@ -42,7 +42,7 @@ class MainContent extends Component {
 			'分享给我的文件' : <SharedFiles dispatch={this.props.dispatch} state={this.props.state} key={'c'}></SharedFiles>,
 			'我分享的文件' : <SharedByMe dispatch={this.props.dispatch} state={this.props.state} key={'d'}></SharedByMe>,
 			'所有照片' : <AllPhotos dispatch={this.props.dispatch} state={this.props.state} key={'e'}></AllPhotos>,
-			'相册' : <Albums dispatch={this.props.dispatch} state={this.props.state} key={'f'}></Albums>,
+			'相册' : <Albums key={'f'}></Albums>,
 			'相册查看' : <AlbumView dispatch={this.props.dispatch} state={this.props.state} key={'g'}></AlbumView>,
 			'设置' : <Setting dispatch={this.props.dispatch} state={this.props.state} key={'h'}></Setting>,
 			'数据迁移' : <DataMove dispatch={this.props.dispatch} state={this.props.state} key={'i'}></DataMove>

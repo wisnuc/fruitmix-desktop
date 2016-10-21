@@ -55,15 +55,19 @@ class Main extends Component {
 
 		// this.props.dispatch(Action.filesLoading());
 
-		ipc.on('receive',function (err,dir,children,path) {
-			_this.props.dispatch(Action.setDirctory(dir,children,path))
-		});
+		// ipc.on('receive',function (err,dir,children,path) {
+		// 	_this.props.dispatch(Action.setDirctory(dir,children,path))
+		// });
 		ipc.on('setTree',(err,tree)=>{
 			this.props.dispatch(Action.setTree(tree));
 		});
 
 		// ipc.on('uploadSuccess',(err,file,children)=>{
 		// 		this.props.dispatch(Action.refreshDir(children));
+		// });
+
+		// ipc.on('setShareChildren',(err,shareChildren,sharePath)=>{
+		// 	this.props.dispatch(Action.setShareChildren(shareChildren,sharePath));
 		// });
 
 		ipc.on('refreshStatusOfUpload',(err,file,status)=>{
@@ -101,33 +105,29 @@ class Main extends Component {
 			this.props.dispatch(Action.setTree(treeChildren));
 		});
 		//media--------------------------------------------------------------------------
-		ipc.on('mediaFinish',(err,media)=>{
-			this.props.dispatch(Action.setMedia(media));
-		});
+		// ipc.on('mediaFinish',(err,media)=>{
+		// 	this.props.dispatch(Action.setMedia(media));
+		// });
 
-		ipc.on('getThumbSuccess',(err,item,path)=>{
-			this.props.dispatch(Action.setThumb(item,path,'ready'));
-		});
+		// ipc.on('getThumbSuccess',(err,item,path)=>{
+		// 	this.props.dispatch(Action.setThumb(item,path,'ready'));
+		// });
 
-		ipc.on('getThumbFailed',(err,item)=>{
-			this.props.dispatch(Action.setThumb(item,'failed'));
-		});
+		// ipc.on('getThumbFailed',(err,item)=>{
+		// 	this.props.dispatch(Action.setThumb(item,'failed'));
+		// });
 
 		ipc.on('donwloadMediaSuccess',(err,item)=>{
 			this.props.dispatch(Action.setMediaImage(item));
 		});
 
-		ipc.on('mediaShare', (err,data) => {
-			this.props.dispatch(Action.setMediaShare(data))
-		})
+		// ipc.on('mediaShare', (err,data) => {
+		// 	this.props.dispatch(Action.setMediaShare(data))
+		// })
 
-		ipc.on('getShareThumbSuccess', (err, item, path) => {
-			this.props.dispatch(Action.setShareThumb(item,path))
-		})
-
-		// ipc.on('setShareChildren',(err,shareChildren,sharePath)=>{
-		// 	this.props.dispatch(Action.setShareChildren(shareChildren,sharePath));
-		// });
+		// ipc.on('getShareThumbSuccess', (err, item, path) => {
+		// 	this.props.dispatch(Action.setShareThumb(item,path))
+		// })
 
 		//transmission---------------------------------------------------------------------
 		ipc.on('transmissionDownload',(err,obj)=>{

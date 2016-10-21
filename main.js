@@ -51,6 +51,8 @@ global.downloadFolderNow = []
 //media
 global.media = []
 global.mediaMap = new Map()
+global.mediaShare = []
+global.mediaShareMap = new Map()
 global.thumbQueue = []
 global.thumbIng = []
 global.shareThumbQueue = []
@@ -89,6 +91,7 @@ global.dispatch = (action) => {
 	store.dispatch(action)
 }
 const adapter = () => {
+	c('run dapter')
 	return {
 		login : store.getState().login,
 		setting : store.getState().setting,
@@ -766,8 +769,8 @@ ipcMain.on('getMediaData',(err)=>{
 			item.failed = 0
 			mediaMap.set(item.digest,item)
 		})
-		mainWindow.webContents.send('mediaFinish',media)
-		// dispatch(action.setMedia(media))
+		// mainWindow.webContents.send('mediaFinish',media)
+		dispatch(action.setMedia(media))
 	}).catch(err=>{
 		c('media 列表获取失败')
 		console.log(err)
@@ -841,7 +844,7 @@ function isShareThumbExist(item) {
 		c(item.digest+' is over')
 		let index = shareThumbIng.findIndex(i=>i.digest == item.digest)
 		shareThumbIng.splice(index,1)
-		mainWindow.webContents.send('getShareThumbSuccess',item.digest,path.join(mediaPath,item.digest+'thumb210'))
+		//mainWindow.webContents.send('getShareThumbSuccess',item.digest,path.join(mediaPath,item.digest+'thumb210'))
 		setTimeout(dealShareThumbQueue,200)
 	}
 }
@@ -902,14 +905,15 @@ function isThumbExist(item) {
 		}else {
 			sendThumb(item)
 		}
-		console.log('finish')
 	})
 
 	function sendThumb(item){
 		c(item.digest+' is over')
 		let index = thumbIng.findIndex(i=>i.digest == item.digest)
 		thumbIng.splice(index,1)
-		mainWindow.webContents.send('getThumbSuccess',item.digest,path.join(mediaPath,item.digest+'thumb138'))
+		mediaMap.get(item.digest).path = path.join(mediaPath,item.digest+'thumb138')
+		dispatch(action.setMedia(media))
+		//mainWindow.webContents.send('getThumbSuccess',item.digest,path.join(mediaPath,item.digest+'thumb138'))
 		// setTimeout(dealThumbQueue,200)
 		dealThumbQueue()
 	}
@@ -969,9 +973,14 @@ ipcMain.on('getMediaImage',(err,hash)=>{
 
 //getMediaShare
 ipcMain.on('getMediaShare' , err => {
+	c('获取mediaShare...')
 	mediaApi.getMediaShare().then(data => {
-		mainWindow.webContents.send('mediaShare',data)
+		c('获取mediaShare成功')
+		mediaShare = data
+		dispatch(action.setMediaShare(data))
+		//mainWindow.webContents.send('mediaShare',data)
 	}).catch(err => {
+		c('获取mediaShare失败')
 		c(err)
 	})
 })
