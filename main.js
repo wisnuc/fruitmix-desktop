@@ -1,6 +1,8 @@
 var Promise = require('bluebird')//corn module
 var deepEqual = require('deep-equal')
 
+var debug = require('debug')("main")
+
 const electron = require('electron')
 const {app, BrowserWindow, ipcMain, dialog, Menu, Tray } = require('electron')
 global.ipcMain = ipcMain
@@ -87,7 +89,7 @@ global.store = require('./serve/store/store')
 // global.dispatch = store.dispatch
 global.dispatch = (action) => {
 	c(' ')
-	c(action.type)
+	debug(action.type)
 	store.dispatch(action)
 }
 const adapter = () => {
@@ -118,7 +120,6 @@ store.subscribe(() => {
 			storeLock = false
 		},50)
 	}
-	
 })
 
 // browser.on('update', deviceApi.findDevice) 
@@ -777,7 +778,8 @@ ipcMain.on('getMediaData',(err)=>{
 	})
 })
 //getMediaShareThumb
-ipcMain.on('getAlbumThumb', (err, item) => {
+ipcMain.on('getAlbumThumb', (err, item, digest) => {
+	item.parent = digest
 	shareThumbQueue.push(item)
 	dealShareThumbQueue()
 })
@@ -845,7 +847,10 @@ function isShareThumbExist(item) {
 		let index = shareThumbIng.findIndex(i=>i.digest == item.digest)
 		shareThumbIng.splice(index,1)
 		//mainWindow.webContents.send('getShareThumbSuccess',item.digest,path.join(mediaPath,item.digest+'thumb210'))
-		setTimeout(dealShareThumbQueue,200)
+		let photo = mediaMap.get(item.parent).doc.contents.find(p => p.digest == item.digest)
+		photo.path = path.join(mediaPath,item.digest+'thumb210')
+		dispatch(action.setMedia(media))
+		// setTimeout(dealShareThumbQueue,200)
 	}
 }
 
@@ -977,7 +982,10 @@ ipcMain.on('getMediaShare' , err => {
 	mediaApi.getMediaShare().then(data => {
 		c('获取mediaShare成功')
 		mediaShare = data
-		dispatch(action.setMediaShare(data))
+		mediaShare.forEach(item => {
+			mediaShareMap.set(item.digest,item)
+		})
+		dispatch(action.setMediaShare(mediaShare))
 		//mainWindow.webContents.send('mediaShare',data)
 	}).catch(err => {
 		c('获取mediaShare失败')

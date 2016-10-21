@@ -419,7 +419,7 @@ class AllPhotos extends Component {
     this.map = nextProps.media ? nextProps.media.data : [];
     this.size = this.map.length;
     this.pages = Math.ceil(this.size / this.strip);
-    scrollTo()
+    this.scrollTo()
   }
 
   render() {
