@@ -89,7 +89,7 @@ global.store = require('./serve/store/store')
 // global.dispatch = store.dispatch
 global.dispatch = (action) => {
 	c(' ')
-	debug(action.type)
+	// debug(action.type)
 	store.dispatch(action)
 }
 const adapter = () => {
@@ -111,14 +111,16 @@ store.subscribe(() => {
 		clearTimeout(waitForRender)
 		waitForRender = setTimeout(()=>{
 			storeLock = false;
+			debug('subscribe doing .......' + (new Date).getTime())
 			mainWindow.webContents.send('adapter',adapter())
-		},50)
+		},200)
 	}else {
+		debug('subscribe doing .......' + (new Date).getTime())
 		mainWindow.webContents.send('adapter',adapter())
 		storeLock = true
 		waitForRender = setTimeout(()=>{
 			storeLock = false
-		},50)
+		},200)
 	}
 })
 

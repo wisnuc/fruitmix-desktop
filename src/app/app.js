@@ -121,5 +121,6 @@ ipc.on('stateUpdate',(err,data)=>{
 })
 
 ipc.on('adapter', (err, data) => {
+	c.log('subscribe doing .......' + (new Date).getTime())
 	dispatch(Action.adapter(data))
 })
