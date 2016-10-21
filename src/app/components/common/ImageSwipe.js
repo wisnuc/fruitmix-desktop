@@ -3,6 +3,7 @@
 **/
 
 import React, { Component, PropTypes } from 'react';
+import { findDOMNode } from 'react-dom';
 import { connect } from 'react-redux';
 
 import { MenuItem } from 'material-ui';
@@ -73,6 +74,12 @@ class ImageSwipe extends Component {
       arrowLeftStatus: this.currentImgIndex > 0,
       arrowRightStatus: this.currentImgIndex < this.imgLength - 1,
       shareComponentEnterAnimateAble: false
+    };
+
+    this.mapOrientation = {
+      8: -90,
+      3: -180,
+      6: 90
     };
   }
 
@@ -160,7 +167,7 @@ class ImageSwipe extends Component {
     return (
       <div className="image-swipe-container" style={ root }>
         <div style={ rootInner }>
-          <img src={ view.currentMediaImage.path } width="100%" height="100%" style={{ objectFit: 'cover' }} />
+          <img ref="img" src={ view.currentMediaImage.path } width="100%" height="100%" style={{ objectFit: 'cover' }} />
 
           {/* 右侧功能面板 */}
           <div className={ shareComponentClassName } style={ featurePanel }>
@@ -182,6 +189,11 @@ class ImageSwipe extends Component {
         { this.createShareIcon() }
       </div>
     );
+  }
+
+  componentDidMount() {
+    const el = findDOMNode(this.refs['img']);
+    el.style.transform = 'rotate('+ this.mapOrientation[el.dataset['exiforientation']] + 'deg)';
   }
 }
 

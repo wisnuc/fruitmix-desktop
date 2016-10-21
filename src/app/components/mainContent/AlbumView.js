@@ -120,6 +120,7 @@ class AlbumView extends Component {
         refs={ albumHash + index }
         albumDigest={ albumHash }
         dataIndex={ index }
+        dataExifOrientation={ albumPhoto.exifOrientation }
         date={ this.toDate(ctime) }
         key={ albumPhoto.digest }
         digest={ albumPhoto.digest }

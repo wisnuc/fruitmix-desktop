@@ -149,7 +149,7 @@ export default class AlbumPhotoItem extends Component {
   }
 
   render() {
-    const { date, digest, style }= this.props;
+    const { date, digest, style, dataExifOrientation }= this.props;
     let { itemStyle } = getStyles();
     const selectStatus = this.state.selectStatus;
     let className = selectStatus
@@ -159,11 +159,12 @@ export default class AlbumPhotoItem extends Component {
       : '';
     className = className.split(' ').concat(['image-item', 'fl']).join(' ').trim();
     itemStyle = Object.assign({}, itemStyle, style);
-
+    console.log(dataExifOrientation, 'gggggggggggggggggggggggggggg');
     return (
       <div
         ref={ el => this.el = el }
         data-date={ date }
+        data-exiforientation={ dataExifOrientation }
         data-hash={ digest }
         className={ className }
         style={ itemStyle }
@@ -185,7 +186,7 @@ export default class AlbumPhotoItem extends Component {
   componentDidMount() {
     const { digest, path, isViewAllPhoto, albumDigest } = this.props;
 
-    if (!path || path.charAt(0) !== '/') {
+    if (!path) {
       ipc.send(isViewAllPhoto ? 'getThumb' : 'getAlbumThumb', { digest }, albumDigest);
     }
   }

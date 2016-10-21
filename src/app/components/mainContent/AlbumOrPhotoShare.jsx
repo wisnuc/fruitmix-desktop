@@ -81,6 +81,7 @@ class AlbumOrPhotoShare extends Component {
 
     return (
       <PhotoMain
+        dispatch={ this.props.dispatch }
         isSingle={ isAlbum || isSinglePhoto }
         albumDigest={ media.digest }
         photoList={ contents.slice(0, 6) }>

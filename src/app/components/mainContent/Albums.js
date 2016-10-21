@@ -207,6 +207,7 @@ class Albums extends Component {
               isViewAllPhoto={ true }
               date={ formatDate(photo.exifDateTime) }
               key={ photo.digest }
+              exifOrientation={ photo.exifOrientation }
               isUnViewLargePhoto={ true }
               digest={ photo.digest }
               path={ photo.path }

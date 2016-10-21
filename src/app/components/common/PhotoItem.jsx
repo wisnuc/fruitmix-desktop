@@ -1,6 +1,7 @@
 // 图片项
 
 import React, { Component, PropTypes } from 'react';
+import { connect } from 'react-redux';
 
 import loadingIcon from '../../../assets/images/index/loading.gif';
 
@@ -26,28 +27,46 @@ function getStyles() {
   };
 }
 
-export default class PhotoItem extends Component {
+class PhotoItem extends Component {
   render() {
     const { imgStyle, loadingIconStyle } = getStyles();
-    const { path } = this.props;
-    const isPath = !!path;
+    const { path, isLargeImageVisible, largeImagePath } = this.props;
+    const isPath = isLargeImageVisible ? !!largeImagePath : !!path;
 
     return (
       <img
         style={ isPath ? imgStyle : loadingIconStyle }
-        src={ isPath ? path : loadingIcon }>
+        src={ isPath ? isLargeImageVisible ? largeImagePath : path : loadingIcon }>
       </img>
     );
   }
 
   componentDidMount() {
-    const { digest, path, albumDigest } = this.props;
-    !path && ipc.send('getAlbumThumb', { digest }, albumDigest);
+    const { digest, path, largeImagePath, albumDigest, isLargeImageVisible } = this.props;
+
+    if (isLargeImageVisible) {
+      if (!largeImagePath) {
+        ipc.send('getMediaImage', digest);
+      }
+    } else {
+      if (!path) {
+        ipc.send('getAlbumThumb', { digest }, albumDigest);
+      }
+    }
   }
 }
 
 PhotoItem.propTypes = {
   digest: PropTypes.string.isRequired,
   albumDigest: PropTypes.string.isRequired,
-  path: PropTypes.any
+  path: PropTypes.any,
+  isLargeImageVisible: PropTypes.bool
 };
+
+PhotoItem.propTypes = {
+  isLargeImageVisible: false
+};
+
+const mapStateToProps = ({ view: { currentMediaImage: { path } } }) => ({ largeImagePath: path });
+
+export default connect(mapStateToProps)(PhotoItem);
