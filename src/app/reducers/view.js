@@ -61,6 +61,7 @@ const loginState = (state = defaultState, action) => {
 			var newCurrentImage = Object.assign({}, state.currentMediaImage)
 			newCurrentImage.status = 'ready'
 			newCurrentImage.path = action.item.path
+			newCurrentImage.exifOrientation = action.item.exifOrientation
 			return Object.assign({},state,{currentMediaImage:newCurrentImage})
 
 		default:

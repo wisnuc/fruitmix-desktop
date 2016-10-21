@@ -15,7 +15,7 @@ global.ipc = ipcRenderer
 
 //import component
 import Login from'./components/login/Login'// login
-//import Login from './components/login/NewLogin'//login
+// import Login from './components/login/NewLogin'//login
 import Main from './components/main/Main'//main
 
 //import Action
@@ -122,5 +122,6 @@ ipc.on('stateUpdate',(err,data)=>{
 })
 
 ipc.on('adapter', (err, data) => {
+	c.log('subscribe doing .......' + (new Date).getTime())
 	dispatch(Action.adapter(data))
 })

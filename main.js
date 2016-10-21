@@ -91,7 +91,7 @@ global.store = require('./serve/store/store')
 // global.dispatch = store.dispatch
 global.dispatch = (action) => {
 	c(' ')
-	debug(action.type)
+	// debug(action.type)
 	store.dispatch(action)
 }
 const adapter = () => {
@@ -113,14 +113,16 @@ store.subscribe(() => {
 		clearTimeout(waitForRender)
 		waitForRender = setTimeout(()=>{
 			storeLock = false;
+			debug('subscribe doing .......' + (new Date).getTime())
 			mainWindow.webContents.send('adapter',adapter())
-		},50)
+		},200)
 	}else {
+		debug('subscribe doing .......' + (new Date).getTime())
 		mainWindow.webContents.send('adapter',adapter())
 		storeLock = true
 		waitForRender = setTimeout(()=>{
 			storeLock = false
-		},50)
+		},200)
 	}
 })
 
@@ -210,6 +212,7 @@ ipcMain.on('setServeIp',(err,ip, isCustom, isStorage)=>{
 	c('set ip : ')
 	dispatch(action.setDeviceUsedRecently(ip))
 	server = 'http://' + ip + ':3721'
+	// server = 'http://' + ip
 	OSServer = 'http://' + ip + ':3000'
 	// if (isCustom) {
 	// 	c('??')
@@ -291,7 +294,8 @@ ipcMain.on('openAppifi', (err)=>{
 	fruitmixWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	})
-	fruitmixWindow.loadURL(server.substring(0,server.length-4)+3000)
+	c(server)
+	fruitmixWindow.loadURL(server.substring(0,server.length-4)+3001)
 })
 //get all user information --------------------------------------
 ipcMain.on('login',function(err,username,password){
@@ -933,8 +937,6 @@ function isThumbExist(item) {
 		thumbIng.splice(index,1)
 		mediaMap.get(item.digest).path = path.join(mediaPath,item.digest+'thumb138')
 		dispatch(action.setMedia(media))
-		//mainWindow.webContents.send('getThumbSuccess',item.digest,path.join(mediaPath,item.digest+'thumb138'))
-		// setTimeout(dealThumbQueue,200)
 		dealThumbQueue()
 	}
 }
@@ -982,6 +984,12 @@ ipcMain.on('getMediaImage',(err,hash)=>{
 		c('download media image success')
 		var imageObj = {}
 		imageObj.path = path.join(mediaPath,hash)
+		let item = mediaMap.get(hash)
+		if (item != undefined) {
+			imageObj.exifOrientation = item.exifOrientation
+		}else {
+			imageObj.exifOrientation = null
+		}
 		// fs.stat(item.path,function(err,data){
 		// 	c(data)
 		// })
@@ -998,7 +1006,6 @@ ipcMain.on('getMediaShare' , err => {
 		c('获取mediaShare成功')
 
 		mediaShare = utils.quickSort(data)
-		console.log(data)
 		mediaShare.forEach(item => {
 			mediaShareMap.set(item.digest,item)
 		})
