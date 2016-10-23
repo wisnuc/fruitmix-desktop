@@ -22,6 +22,7 @@ global.fruitmixWindow = null
 global.appifiWindow = null
 //server
 global.server = ''
+global.OSServer - ''
 //user
 global.user = {}
 //files
@@ -208,6 +209,7 @@ ipcMain.on('setServeIp',(err,ip, isCustom, isStorage)=>{
 	c('set ip : ')
 	dispatch(action.setDeviceUsedRecently(ip))
 	server = 'http://' + ip + ':3721'
+	OSServer = 'http://' + ip + ':3000'
 	// if (isCustom) {
 	// 	c('??')
 	// 	c(ip)
