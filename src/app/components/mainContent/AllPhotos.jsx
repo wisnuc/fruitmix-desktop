@@ -405,6 +405,6 @@ var mapStateToProps = (state)=>({
      media: state.media,
      navigation: state.navigation,
      view: state.view
-});
+})
 
 export default connect(mapStateToProps)(AllPhotos)

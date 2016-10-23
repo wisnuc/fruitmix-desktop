@@ -3,6 +3,7 @@
 **/
 
 import React, { Component, PropTypes } from 'react';
+import { connect } from 'react-redux'
 
 import NavigationBar from '../main/NavigationBar';
 import AlbumItem from './AlbumItem';
@@ -65,7 +66,7 @@ function getStyles () {
   }
 }
 
-export default class Albums extends Component {
+class Albums extends Component {
   constructor() {
     super();
 
@@ -319,3 +320,12 @@ export default class Albums extends Component {
     this.clearAllSelectedItem();
   }
 }
+
+var mapStateToProps = (state)=>({
+       //state: state,
+     media: state.media,
+     navigation: state.navigation,
+     login:state.login
+})
+
+export default connect(mapStateToProps)(Albums) 
