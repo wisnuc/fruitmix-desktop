@@ -109,7 +109,7 @@ export default class AlbumItem extends Component {
   }
 
   componentDidMount() {
-    ipc.send('getAlbumThumb', this.props.info.doc.contents[0]);
+    ipc.send('getAlbumThumb', this.props.info.doc.contents[0], this.props.info.digest);
   }
 }
 

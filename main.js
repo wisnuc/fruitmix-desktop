@@ -810,6 +810,7 @@ function dealShareThumbQueue() {
 }
 function isShareThumbExist(item) {
 	c(item.digest)
+	console.log(item)
 	fs.readFile(path.join(mediaPath,item.digest+'thumb210'),(err,data)=>{
 		if (err) {
 			c('not exist')
@@ -849,9 +850,10 @@ function isShareThumbExist(item) {
 		let index = shareThumbIng.findIndex(i=>i.digest == item.digest)
 		shareThumbIng.splice(index,1)
 		//mainWindow.webContents.send('getShareThumbSuccess',item.digest,path.join(mediaPath,item.digest+'thumb210'))
-		let photo = mediaMap.get(item.parent).doc.contents.find(p => p.digest == item.digest)
+		let photo = mediaShareMap.get(item.parent).doc.contents.find(p => p.digest == item.digest)
 		photo.path = path.join(mediaPath,item.digest+'thumb210')
-		dispatch(action.setMedia(media))
+		dispatch(action.setMediaShare(mediaShare))
+		dealShareThumbQueue()
 		// setTimeout(dealShareThumbQueue,200)
 	}
 }
