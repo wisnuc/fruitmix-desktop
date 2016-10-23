@@ -11,14 +11,12 @@ import Comment from '../mainContent/Comment';
 function getStyles () {
   return {
     rootInner: {
-      position: 'absolute',
+      position: 'fixed',
       borderSizing: 'border-sizing',
       width: '100%',
       borderLeft: '1px solid #e0e0e0',
       right: -230,
       top: 88,
-      bottom: 0,
-      height: '100%',
       WebkitTransition: 'right .5s cubic-bezier(0, 1, .5, 1)',
       zIndex: 999
     },
@@ -36,28 +34,31 @@ function getStyles () {
       backgroundColor: '#fff'
     },
     photoItemBody: {
-      height: 144,
-      maxHeight: 144
+      height: 144
     },
     shareItemBody: {
-      height: 310,
-      maxHeight: 310
+      height: 310
+    },
+    commentItemBody: {
+      height: 144
     }
   }
 }
 
 export default class RightPanel extends Component {
   render() {
-    const { dispatch, width, state } = this.props;
+    const { dispatch, width, shareRadios } = this.props;
     const {
       rootInner,
       itemHeader,
       itemBody,
       photoItemBody,
-      shareItemBody } = getStyles();
+      shareItemBody,
+      commentItemBody } = getStyles();
     const newRootInnerStyle = Object.assign({}, rootInner, { width: width });
     const newPhotoItemBodyStyle = Object.assign({}, itemBody, photoItemBody);
     const newShareItemBodyStyle = Object.assign({}, itemBody, shareItemBody);
+    const newCommentItemBodyStyle = Object.assign({}, itemBody, commentItemBody);
 
     return (
       <div className="right-panel">
@@ -77,14 +78,17 @@ export default class RightPanel extends Component {
             <input id="share_f" type="checkbox" className="slide-emit" />
             <div className="item-body" style={ newShareItemBodyStyle }>
               {/* 分享组件 */}
-              <Share dispatch={ dispatch } state={ state }></Share>
+              <Share dispatch={ dispatch } shareRadios={ shareRadios }></Share>
             </div>
           </div>
 
           <div className="right-panel-inner-item" >
-            <div className="item-header" style={ itemHeader }>评论</div>
+            <label htmlFor="comment_f" className="item-header" style={ itemHeader }>评论</label>
+            <input id="comment_f" type="checkbox" className="slide-emit" />
+            <div className="item-body" style={ newCommentItemBodyStyle }>
               {/* 评论组件 */}
               <Comment></Comment>
+            </div>  
           </div>
         </div>
       </div>

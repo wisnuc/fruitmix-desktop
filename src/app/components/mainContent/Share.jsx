@@ -39,7 +39,7 @@ export default class Share extends Component {
   }
 
   render() {
-    const { dispatch, state } = this.props;
+    const { dispatch, shareRadios } = this.props;
     const { body, radio } = getStyles();
 
     return (
@@ -48,7 +48,7 @@ export default class Share extends Component {
         {/* 自定义类型 */}
         <RadioGroup
           dispatch={ dispatch }
-          radios={ state.shareRadio }
+          radios={ shareRadios }
           onSelectItemChange={ this.onSelectItemChange }>
         </RadioGroup>
 

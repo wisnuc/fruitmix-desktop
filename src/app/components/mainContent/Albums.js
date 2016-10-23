@@ -78,12 +78,13 @@ class Albums extends Component {
   }
 
   createNavigationBar() {
+    const { dispatch, navigationBarTitleTexts } = this.props;
+
     return (
       <NavigationBar
-        dispatch={ this.props.dispatch }
-        state={ this.props.state }
-        navigationBarHorizontalPadding={ 18 }
-        icons={[]}>
+        dispatch={ dispatch }
+        navigationBarTitleTexts={ navigationBarTitleTexts }
+        navigationBarHorizontalPadding={ 18 }>
       </NavigationBar>
     );
   }
@@ -117,8 +118,8 @@ class Albums extends Component {
   }
 
   getPhotoList() {
-    const { state: { media: { data } } } = this.props;
-    return data.slice(0, 100).filter(l => !!l.exifDateTime);
+    const { media } = this.props;
+    return media.data.slice(0, 100).filter(l => !!l.exifDateTime);
   }
 
   getDialogClientRect() {
@@ -134,11 +135,15 @@ class Albums extends Component {
   }
 
   createAlbumItems() {
-    const { state } = this.props;
+    const { media, dispatch, login } = this.props;
 
-    return state.media.mediaShare.map(album =>
-      <AlbumItem key={ album.digest } info={ album } dispatch={ this.props.dispatch } state={ this.props.state }></AlbumItem>
-    );
+    return media.mediaShare.map(album => {
+      if (album.doc.album) {
+        return (
+          <AlbumItem key={ album.digest } info={ album } dispatch={ dispatch } login={ login }></AlbumItem>
+        );
+      }
+    });
   }
 
   createAddAlbumIcon() {
@@ -324,8 +329,8 @@ class Albums extends Component {
 var mapStateToProps = (state)=>({
        //state: state,
      media: state.media,
-     navigation: state.navigation,
+     navigationBarTitleTexts: state.navigationBarTitleTexts,
      login:state.login
 })
 
-export default connect(mapStateToProps)(Albums) 
+export default connect(mapStateToProps)(Albums)

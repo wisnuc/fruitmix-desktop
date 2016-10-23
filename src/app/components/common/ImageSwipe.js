@@ -64,7 +64,7 @@ export default class ImageSwipe extends Component {
   constructor(props) {
     super(props);
 
-    this.imgLength = props.state.largeImages.data.length;
+    this.imgLength = props.largeImages.data.length;
     this.currentImgIndex = this.findIndex();
 
     this.state = {
@@ -89,9 +89,9 @@ export default class ImageSwipe extends Component {
   }
 
   findIndex() {
-    const { state } = this.props;
-    const currentThumbIndex = state.largeImages.currentThumbIndex;
-    const date = state.largeImages.date;
+    const { largeImages } = this.props;
+    const currentThumbIndex = largeImages.currentThumbIndex;
+    const date = largeImages.date;
     const els = Array.from(document.querySelectorAll('[data-date="'+ date +'"]'));
 
     return els.findIndex(el =>
@@ -152,8 +152,8 @@ export default class ImageSwipe extends Component {
 
   render() {
     const { root, rootInner, featurePanel } = getStyles(this.props);
-    const { state, view, height } = this.props;
-    const shareComponentClassName = this.state.shareComponentEnterAnimateAble ? 'share-enter-animate' : '';
+    const { shareComponentEnterAnimateAble, view, height, shareRadios } = this.props;
+    const shareComponentClassName = shareComponentEnterAnimateAble ? 'share-enter-animate' : '';
 
     return (
       <div className="image-swipe-container" style={ root }>
@@ -168,7 +168,7 @@ export default class ImageSwipe extends Component {
             <div className="circle-body">
 
               {/* 分享组件 */}
-              <Share dispatch={ dispatch } state={ state }></Share>
+              <Share dispatch={ dispatch } shareRadios={ shareRadios }></Share>
             </div>
           </div>
         </div>

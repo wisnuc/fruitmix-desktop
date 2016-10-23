@@ -60,7 +60,7 @@ export default class NavigationBar extends Component {
   }
 
   createTitleTextComponent() {
-    const { state: { navigationBarTitleTexts } } = this.props;
+    const { navigationBarTitleTexts } = this.props;
 
     return (
       <div className="fl">
