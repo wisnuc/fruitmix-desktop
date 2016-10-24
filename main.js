@@ -142,7 +142,7 @@ app.on('ready', function() {
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	})
-	mainWindow.webContents.openDevTools()
+	//mainWindow.webContents.openDevTools()
 	mainWindow.loadURL('file://' + __dirname + '/build/index.html')
 	//create folder
 	fs.exists(mediaPath,exists=>{
@@ -366,7 +366,7 @@ ipcMain.on('enterChildren', (event,selectItem) => {
 function enterChildren(selectItem) {
 	dispatch(action.loadingFile())
 	c(' ')
-	c('open the folder : ' + selectItem.name)
+	//c('open the folder : ' + selectItem.name?selectItem.name:'null')
 	let folder = map.get(selectItem.uuid)
 	fileApi.getFile(selectItem.uuid).then(file => {
 		folder.children.length = 0
@@ -642,6 +642,7 @@ ipcMain.on('share',function(err,files,users){
 			console.log('all share success')
 			mainWindow.webContents.send('message',files.length + ' 个文件分享成功')
 			ipcMain.emit('getFilesSharedToOthers')
+			ipcMain.emit('enterChildren',null,currentDirectory)
 			return
 		}else {
 			fileApi.share(files[index],users,doShare)
