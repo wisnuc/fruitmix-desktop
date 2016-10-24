@@ -16,7 +16,7 @@ import { Paper, TextField, FlatButton, CircularProgress, Snackbar, SelectField, 
 //import CSS
 import css  from  '../../../assets/css/login'
 //import component
-import Device from './Device'
+import UserList from './userList'
 
 class Index extends React.Component {
 
@@ -32,7 +32,7 @@ class Index extends React.Component {
 
 		setTimeout(()=>{
 				if (this.props.state.login.selectIndex == 0 && this.props.state.login.device.length != 0) {
-					this.selectDevice.apply(this,[null,0,false])
+					this.selectDevice.apply(this,[0,false, null])
 				}
 		},1500)
 
@@ -57,7 +57,11 @@ class Index extends React.Component {
 		this.props.dispatch(Action.cleanSnack())
 	}
 
-	selectDevice(e,index, isStorage) {
+	selectDevice(index, isStorage, e) {
+		if (index<0 || index==this.props.state.login.device.length) {
+			console.log('index is over range')
+			return
+		}
 		let s = isStorage==false?false:true
 		let ip = this.props.state.login.device[index].address
 		ipc.send('setServeIp',ip,false, isStorage)
@@ -77,19 +81,62 @@ class Index extends React.Component {
 	getLoginContent() {
 		let selectedIndex = this.props.state.login.selectIndex
 		let selectedItem = this.props.state.login.device[selectedIndex]
+		let content 
+		//content
+		if (this.props.state.login.device.length == 0) {
+				content = <div>not found</div>
+		}else {
+				content = (
+					<div>
+						<div onClick={this.selectDevice.bind(this,selectedIndex-1,true)} className={selectedIndex==0?'login-invisible':''}>prev</div>
+						<div>{selectedItem.address}</div>
+						<div onClick={this.selectDevice.bind(this,selectedIndex+1,true)} className={selectedIndex==this.props.state.login.device.length-1?'login-invisible':''}>next</div>
+					</div>
+					)
+		}
 		return (
 			<div className='login-wrap'>
 				<div className='login-title'>
 					<span>WISNUC</span>
 					<span>欢迎使用WISNUC</span>
-					<span>123</span>
+					<span>setting</span>
 				</div>
 				<div className='login-content'>
-
+					{content}
 				</div>
-				<div className=''>123</div>
+				<div className='login-footer'>
+					{this.getLoginFooter()}
+				</div>
 			</div>
 			)
+	}
+
+	getLoginFooter() {
+		let selectedIndex = this.props.state.login.selectIndex
+		let selectedItem = this.props.state.login.device[selectedIndex]
+		let busy = (this.props.state.login.state ==='BUSY')
+		if (busy) {
+			return <div>loading...</div>
+		}
+		if (!selectedItem) {
+			return <div>please add new device</div>
+		}else if (selectedItem.isCustom) {
+			return <div>the device is added by users</div>
+		}else if (selectedItem.appifi && selectedItem.appifi.code == "ECONNREFUSED") {
+			return <div>please install appifi</div>
+		}else if (!selectedItem.fruitmix) {
+			return <div>please configure your volume</div>
+		}else if (selectedItem.fruitmix && selectedItem.users.length == 0) {
+			return <div>the device has no users</div>
+		}else if (selectedItem.fruitmix && selectedItem.users.length != 0) {
+			return <div>
+				{selectedItem.users.map(item => {
+					return <div key={item.username}>{item.username}</div>
+				})}
+			</div>
+		}else {
+			return <div>the device is not map any station</div>
+		}
 	}
 
 }

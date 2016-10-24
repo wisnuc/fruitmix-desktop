@@ -69,8 +69,13 @@ class SharedFiles extends Component {
 		if (item.length == 0) {
 			return null
 		}
-		let user = this.props.state.login.obj.allUser.find((i)=>{return item == i.uuid});
-		return user.username||null;
+		let user = this.props.state.login.obj.users.find((i)=>{return item == i.uuid})
+
+		if (user) {
+			return user.username
+		}else {
+			return 'not found'
+		}
 		
 	}
 
