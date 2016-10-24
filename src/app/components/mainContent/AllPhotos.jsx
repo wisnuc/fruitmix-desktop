@@ -4,7 +4,7 @@
 
 import React, { Component, PropTypes } from 'react';
 import { findDOMNode } from 'react-dom';
-import { connect } from 'react-redux'
+import { connect } from 'react-redux';
 
 import Checkbox from '../../React-Redux-UI/src/components/partials/Checkbox';
 import NavigationBar from '../main/NavigationBar';
@@ -109,17 +109,49 @@ class AllPhotos extends Component {
 
   selectedItemHandle(index, el, date, hasChecked) {
     const { dispatch } = this.props;
+    const nodeList = Array.from(document.querySelectorAll('[data-date="'+ date +'"]'));
 
     if (hasChecked) {
       dispatch(Action.addDragImageItem(el, date, index));
     } else {
       dispatch(Action.removeDragImageItem(date, index));
     }
+
+    if (hasChecked) {
+      setTimeout(() => {
+        Object.keys(this.refs).forEach(ref => {
+          if (ref.indexOf(date) >= 0) {
+            findDOMNode(this.refs[ref]).classList.add('active');
+          }
+        });
+
+        const allChecked = nodeList.every(node => node.classList.contains('show'));
+
+        if (allChecked) {
+          this.refs["select_datetime" + '_' + date].setState({ checked: true });
+        }
+      }, 0);
+    } else {
+      const allUnChecked = nodeList.every(node => !node.classList.contains('show'));
+
+      if (allUnChecked) {
+        this.refs["select_datetime" + '_' + date].setState({ checked: false });
+      }
+    }
   }
 
   cancelSelectedItemHandle(index, date) {
     const { dispatch } = this.props;
+    const nodeList = Array.from(document.querySelectorAll('[data-date="'+ date +'"]'));
+
     dispatch(Action.removeDragImageItem(date, index));
+    setTimeout(() => {
+      const allUnChecked = nodeList.every(node => !node.classList.contains('show'));
+
+      if (allUnChecked) {
+        this.refs["select_datetime" + '_' + date].setState({ checked: false });
+      }
+    })
   }
 
   detectImageItemActive(date) {
@@ -145,14 +177,16 @@ class AllPhotos extends Component {
 
     if (!detectLeft || !detectRight || !detectTop || !detectBottom) {
       // 拖拽元素全部超出容器
+      findDOMNode(this.refs[date + '-' + index]).classList.remove('active');
+      findDOMNode(this.refs[date + '-' + index]).classList.remove('show');
       dispatch(Action.removeDragImageItem(date, index));
     }
   }
 
   createCarouselComponent() {
-    const { state, dispatch } = this.props;
+    const { imageItem, dispatch } = this.props;
 
-    if (state.imageItem && state.imageItem.length) {
+    if (imageItem && imageItem.length) {
       const { dragStyle, dragButtonStyle, operationBarStyle } = getStyles();
       const dragElementRect = this.getDragElementRect();
       const newDragStyle = Object.assign({}, dragStyle, dragElementRect);
@@ -196,14 +230,22 @@ class AllPhotos extends Component {
             {/* 图片轮播 */}
             <Carousel
               className="carousel"
-              data={ state.imageItem }
+              data={ imageItem }
               dispatch={ dispatch }
               height={ 75 }
               onDragEnd={ this.dragEndHandle.bind(this) }
               width={ dragElementRect.width - 2 }>
             </Carousel>
           </div>
-          <div className="text-bar" style={{ textAlign: 'center', fontSize: 12, marginTop: 10, color: '#757575'  }}>选中<label style={{ fontSize: 14 }}>{ this.props.state.imageItem.length }</label>张图片</div>
+          <div
+            className="text-bar"
+            style={{ textAlign: 'center', fontSize: 12, marginTop: 10, color: '#757575'  }}>
+              选中
+              <label style={{ fontSize: 14 }}>
+                { imageItem.length }
+              </label>
+              张图片
+          </div>
         </div>
       );
     }
@@ -245,10 +287,11 @@ class AllPhotos extends Component {
     const { dispatch } = this.props;
     const checkedEls = [];
 
-    Object.keys(this.refs).filter((key, index) => {
-      if (key.indexOf(date) >= 0) {
-        findDOMNode(this.refs[key]).classList.toggle('active');
-        findDOMNode(this.refs[key]).classList.toggle('show');
+    Object.keys(this.refs).forEach((key, index) => {
+      if (key.indexOf(date) == 0) {
+
+        findDOMNode(this.refs[key]).classList[checked ? 'add' : 'remove']('active');
+        findDOMNode(this.refs[key]).classList[checked ? 'add' : 'remove']('show');
 
         checkedEls.push(findDOMNode(this.refs[key]));
       }
@@ -278,8 +321,8 @@ class AllPhotos extends Component {
         component = dateStr.map((date, index) => {
           return (
             <div className="clearfix">
-              <div style={{ margin: '10px 0', fontFamily: 'helvetica', color: '#6d6d6d', fontSize: 12 }}>
-                <Checkbox
+              <div style={{ margin: '0 0 10px', fontFamily: 'helvetica', color: '#6d6d6d', fontSize: 12 }}>
+                <Checkbox ref={ "select_datetime" + '_' + date }
                  key={ index }
                  value={ date }
                  text={ date }
@@ -320,14 +363,14 @@ class AllPhotos extends Component {
         {/* navigation bar */}
         <NavigationBar
           dispatch={ this.props.dispatch }
-          state={ this.props.state }
+          navigationBarTitleTexts={ this.props.navigationBarTitleTexts }
           navigationBarHorizontalPadding={ 18 }
           hasIconAble={ true }
           onShowedRightPanel={ this.showedRightPanelHandler.bind(this) }>
         </NavigationBar>
 
         {/* right panel */}
-        <RightPanel ref="rightPanel" width={ 230 } dispatch={ this.props.dispatch } state={ this.props.state }></RightPanel>
+        <RightPanel ref="rightPanel" width={ 230 } dispatch={ this.props.dispatch } shareRadios={ this.props.shareRadios }></RightPanel>
 
         <div style={{ marginTop: 52 }}>
           { component }
@@ -344,9 +387,9 @@ class AllPhotos extends Component {
   }
 
   createMaskComponent() {
-    const { state } = this.props;
+    const { largeImages } = this.props;
 
-    if (state.largeImages.data && state.largeImages.data.length) {
+    if (largeImages.data && largeImages.data.length) {
       return (
         <Mask className="large-image-mask" onShutdown={ this.shutdownMaskHandle.bind(this) }></Mask>
       );
@@ -354,15 +397,13 @@ class AllPhotos extends Component {
   }
 
   createImageSwipeComponent() {
-    const { state } = this.props;
+    const { largeImages } = this.props;
 
-    if (state.largeImages.data && state.largeImages.data.length) {
+    if (largeImages.data && largeImages.data.length) {
       return (
         <ImageSwipe
           width={ 960 }
-          height={ 700 }
-          state={ this.props.state }
-          view={ this.props.view }>
+          height={ 700 }>
         </ImageSwipe>
       );
     }
@@ -404,7 +445,12 @@ var mapStateToProps = (state)=>({
        //state: state,
      media: state.media,
      navigation: state.navigation,
-     view: state.view
-});
+     view: state.view,
+     imageItem: state.imageItem,
+     largeImages: state.largeImages,
+     navigationBarTitleTexts: state.navigationBarTitleTexts,
+     shareRadios: state.shareRadio,
+     shareComponentEnterAnimateAble: state.shareComponentEnterAnimateAble
+})
 
-export default connect(mapStateToProps)(AllPhotos)
+export default connect(mapStateToProps)(AllPhotos);

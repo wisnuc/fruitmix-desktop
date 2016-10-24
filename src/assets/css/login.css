@@ -1,12 +1,13 @@
+/*old css is not work*/
 .index-frame {
 	display : flex;
 	justify-content : center;
+	align-items : center;
+	text-align:center;
 	min-height : 100vh;
 	min-width : 100vw;
 	background-image : url(../images/index/party_orig.jpg);
 	background-size : cover;
-	align-items : center;
-	text-align:center;
 	font-size: 14px!important;
 }
 .login-container {
@@ -156,4 +157,54 @@
 .fruitmix-detail>div {
 	height:30px;
 	line-height: 30px;
+}
+
+/*new css is working*/
+.login-frame {
+	display : flex;
+	justify-content : center;
+	align-items : center;
+	text-align:center;
+	min-height : 100vh;
+	min-width : 100vw;
+	background-image : url(../images/index/party_orig.jpg);
+	background-size : cover;
+	font-size: 14px!important;
+}
+
+.login-wrap {
+	width:700px;
+	height:450px;
+	display: flex;
+	flex-direction: column;
+	padding-top:15px;
+	background-color: #f2f2f2; 
+}
+
+.login-title {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin-bottom: 20px;
+}
+.login-title>span {
+	flex:0 0 33%;
+}
+
+.login-title>span:nth-child(2) {
+	font-size: 25px;
+}
+
+.login-content>div {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	height:300px;
+}
+.login-content>div>div {
+	flex:0 0 33%;	
+}
+
+.login-invisible {
+	opacity: 0
 }

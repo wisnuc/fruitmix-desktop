@@ -22,6 +22,7 @@ global.fruitmixWindow = null
 global.appifiWindow = null
 //server
 global.server = ''
+global.OSServer - ''
 //user
 global.user = {}
 //files
@@ -143,7 +144,7 @@ app.on('ready', function() {
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	})
-	mainWindow.webContents.openDevTools()
+	//mainWindow.webContents.openDevTools()
 	mainWindow.loadURL('file://' + __dirname + '/build/index.html')
 	//create folder
 	fs.exists(mediaPath,exists=>{
@@ -210,6 +211,7 @@ ipcMain.on('setServeIp',(err,ip, isCustom, isStorage)=>{
 	c('set ip : ')
 	dispatch(action.setDeviceUsedRecently(ip))
 	server = 'http://' + ip + ':3721'
+	OSServer = 'http://' + ip + ':3000'
 	// if (isCustom) {
 	// 	c('??')
 	// 	c(ip)
@@ -366,7 +368,7 @@ ipcMain.on('enterChildren', (event,selectItem) => {
 function enterChildren(selectItem) {
 	dispatch(action.loadingFile())
 	c(' ')
-	c('open the folder : ' + selectItem.name)
+	//c('open the folder : ' + selectItem.name?selectItem.name:'null')
 	let folder = map.get(selectItem.uuid)
 	fileApi.getFile(selectItem.uuid).then(file => {
 		folder.children.length = 0
@@ -642,6 +644,7 @@ ipcMain.on('share',function(err,files,users){
 			console.log('all share success')
 			mainWindow.webContents.send('message',files.length + ' 个文件分享成功')
 			ipcMain.emit('getFilesSharedToOthers')
+			ipcMain.emit('enterChildren',null,currentDirectory)
 			return
 		}else {
 			fileApi.share(files[index],users,doShare)
@@ -810,6 +813,7 @@ function dealShareThumbQueue() {
 }
 function isShareThumbExist(item) {
 	c(item.digest)
+	console.log(item)
 	fs.readFile(path.join(mediaPath,item.digest+'thumb210'),(err,data)=>{
 		if (err) {
 			c('not exist')
@@ -849,9 +853,10 @@ function isShareThumbExist(item) {
 		let index = shareThumbIng.findIndex(i=>i.digest == item.digest)
 		shareThumbIng.splice(index,1)
 		//mainWindow.webContents.send('getShareThumbSuccess',item.digest,path.join(mediaPath,item.digest+'thumb210'))
-		let photo = mediaMap.get(item.parent).doc.contents.find(p => p.digest == item.digest)
+		let photo = mediaShareMap.get(item.parent).doc.contents.find(p => p.digest == item.digest)
 		photo.path = path.join(mediaPath,item.digest+'thumb210')
-		dispatch(action.setMedia(media))
+		dispatch(action.setMediaShare(mediaShare))
+		dealShareThumbQueue()
 		// setTimeout(dealShareThumbQueue,200)
 	}
 }
@@ -995,11 +1000,18 @@ ipcMain.on('getMediaShare' , err => {
 	})
 })
 
+// medias   array   photo.digest
+// users    array   user.uuid  ['xxx','xxx,'xxx']
+// album    object  {title:'xxx',text:'xxx'}
+
 ipcMain.on('createMediaShare',(err, medias, users, album) => {
 	c(' ')
 	c('create media share-----------------------------')
 	mediaApi.createMediaShare(medias, users, album).then(data => {
 		c(data)
+		mediaShare.push(data)
+		mediaShareMap.set(data.digest,mediaShare[mediaShare.length-1])
+		dispatch(action.setMediaShare(mediaShare))
 		mainWindow.webContents.send('message','创建相册成功')
 	}).catch(err => {
 		c(err)
