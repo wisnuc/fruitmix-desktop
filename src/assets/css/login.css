@@ -160,7 +160,7 @@
 }
 
 /*new css is working*/
-/*.index-frame {
+.login-frame {
 	display : flex;
 	justify-content : center;
 	align-items : center;
@@ -172,7 +172,7 @@
 	font-size: 14px!important;
 }
 
-.login-container {
+.login-wrap {
 	border: 1px solid red;
 	width:700px;
 	height:450px;
@@ -183,6 +183,15 @@
 }
 
 .login-title {
-	
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin-bottom: 20px;
 }
-*/
+.login-title>span {
+	flex:0 0 33%;
+}
+
+.login-title>span:nth-child(2) {
+	font-size: 25px;
+}

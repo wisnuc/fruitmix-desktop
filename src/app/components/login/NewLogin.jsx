@@ -66,7 +66,7 @@ class Index extends React.Component {
 	render() {
 		let findDevice = this.props.state.view.findDevice
 		return(
-			<div className='index-frame' key='login'>
+			<div className='login-frame' key='login'>
 				{this.getLoginContent()}
 				<Snackbar open={this.props.state.snack.open} message={this.props.state.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
 			</div>
@@ -75,10 +75,18 @@ class Index extends React.Component {
 	}
 	//get jsx content 
 	getLoginContent() {
+		let selectedIndex = this.props.state.login.selectIndex
+		let selectedItem = this.props.state.login.device[selectedIndex]
 		return (
-			<div className='login-container'>
-				<div className='login-title'>123</div>
-				<div className=''>123</div>
+			<div className='login-wrap'>
+				<div className='login-title'>
+					<span>WISNUC</span>
+					<span>欢迎使用WISNUC</span>
+					<span>123</span>
+				</div>
+				<div className='login-content'>
+
+				</div>
 				<div className=''>123</div>
 			</div>
 			)
