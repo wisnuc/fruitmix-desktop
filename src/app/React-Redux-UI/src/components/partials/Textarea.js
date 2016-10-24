@@ -8,6 +8,14 @@ import React, { Component, PropTypes } from 'react';
 import { pick, computedStyle } from '../../utils';
 
 class Textarea extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      rows: props.rows
+    }
+  }
+
   getSingleLineHeight() {
     const cloneNode = this.el.cloneNode();
 
@@ -29,13 +37,21 @@ class Textarea extends Component {
     return this.el.scrollHeight;
   }
 
+  getClientHeight() {
+    return this.el.clientHeight;
+  }
+
   adaptHeight() {
-    const { rows, textareaAdaptRows } = this.props;
+    const { textareaAdaptRows } = this.props;
+    const { rows } = this.state;
     const singleLineHeight = this.getSingleLineHeight();
     const scrollHeight = this.getScrollHeight();
+    const clientHeight = this.getClientHeight();
     const changeRows = Math.floor(scrollHeight / singleLineHeight);
 
-    changeRows > rows && textareaAdaptRows(changeRows);
+    if (scrollHeight > clientHeight) {
+      this.setState({ rows: this.state.rows + 1 });
+    }
   }
 
   handleChange(e) {
@@ -50,7 +66,7 @@ class Textarea extends Component {
     const value = e.target.value;
 
     setTimeout(() => {
-      changeEventHandle.call(this, value);
+      changeEventHandle && changeEventHandle.call(this, value);
     }, 0);
 	}
 
@@ -60,14 +76,14 @@ class Textarea extends Component {
       'style',
       'defaultValue',
       'placeholder',
-      'readOnly',
-      'rows'
+      'readOnly'
     ];
 
 		return (
 			<textarea
         ref={ el => this.el = el }
         { ...pick(this.props, textareaProps) }
+        rows={ this.state.rows }
         onChange={ this.handleChange.bind(this) }>
       </textarea>
 		);

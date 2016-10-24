@@ -397,17 +397,13 @@ class AllPhotos extends Component {
   }
 
   createImageSwipeComponent() {
-    const { largeImages, shareComponentEnterAnimateAble, view, shareRadios } = this.props;
+    const { largeImages } = this.props;
 
     if (largeImages.data && largeImages.data.length) {
       return (
         <ImageSwipe
           width={ 960 }
-          height={ 700 }
-          shareComponentEnterAnimateAble={ shareComponentEnterAnimateAble }
-          largeImages={ largeImages }
-          shareRadios={ shareRadios }
-          view={ view }>
+          height={ 700 }>
         </ImageSwipe>
       );
     }

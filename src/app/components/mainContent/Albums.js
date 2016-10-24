@@ -3,6 +3,7 @@
 **/
 
 import React, { Component, PropTypes } from 'react';
+import { findDOMNode } from 'react-dom';
 import { connect } from 'react-redux'
 
 import NavigationBar from '../main/NavigationBar';
@@ -61,7 +62,7 @@ function getStyles () {
       height: 35,
       lineHeight: '35px',
       marginLeft: 10,
-      width: 60,
+      width: 60
     }
   }
 }
@@ -101,19 +102,42 @@ class Albums extends Component {
     dispatch(Action.getLargeImageList(document.querySelectorAll('[data-date="'+ date +'"]'), currentThumbIndex, date));
   }
 
-  selectAlbumPhotoItemHandle(index, el, date, checked) {
-    const { dispatch } = this.props;
+  setAlbumMediaList(albumMedia) {
+    if (!albumMedia) {
+      this.albumMediaList = [];
+      return;
+    }
 
+    const albumMediaList = Array.isArray(this.albumMediaList) ? this.albumMediaList : (this.albumMediaList = []);
+    albumMediaList.push(albumMedia);
+  }
+
+  getAlbumMediaList() {
+    return this.albumMediaList;
+  }
+
+  selectAlbumPhotoItemHandle(index, el, date, checked) {
     if (checked) {
       Object
         .keys(this.refs)
-        .forEach(key => this.refs[key].setState({ selectStatus: 'over' }));
+        .forEach(key => {
+          if (findDOMNode(this.refs[key]) !== el && this.refs[key].state.selectStatus !== 'active') {
+            this.refs[key].setState({ selectStatus: 'over' });
+          }
+        });
 
-      setTimeout(() => {
-        dispatch(Action.addDragImageItem(el, date, index));
-      }, 0);
+        setTimeout(() =>
+          this.setAlbumMediaList(el.dataset['hash']), 0);
+
     } else {
-      dispatch(Action.removeDragImageItem(date, index));
+      const refKeys = Object.keys(this.refs);
+
+      const hasSelected = refKeys.some(key => this.refs[key].state.selectStatus === 'active');
+
+      if (!hasSelected) {
+        refKeys.forEach(key => this.refs[key].setState({ selectStatus: void 0 }));
+      }
+      //dispatch(Action.removeDragImageItem(date, index));
     }
   }
 
@@ -173,14 +197,17 @@ class Albums extends Component {
     const photoList = this.getPhotoList();
 
     return (
-      <div style={{ position: 'fixed', top: 64, bottom: 55, width: '100%', backgroundColor: '#fff', overflow: 'auto', boxSizing: 'border-box', padding: '10px 0 0 10px', boxSizing: 'border-box' }}>
+      <div className="dialog-content dialog-photolist-content" style={{ position: 'fixed', top: 64, bottom: 55, width: '100%', backgroundColor: '#fff', overflow: 'auto', boxSizing: 'border-box', padding: '10px 37px 0', boxSizing: 'border-box' }}>
         {
           photoList.map((photo, index) =>
             <AlbumPhotoItem
+              ref={ formatDate(photo.exifDateTime) + '_' + index }
               dataIndex={ index }
+              style={{ width: 111, height: 111, padding: '0', border: 'none', margin: '0 3px 6px'}}
               isViewAllPhoto={ true }
               date={ formatDate(photo.exifDateTime) }
               key={ photo.digest }
+              isUnViewLargePhoto={ true }
               digest={ photo.digest }
               path={ photo.path }
               onViewLargeImage={ this.viewLargeImageHandle.bind(this) }
@@ -197,7 +224,7 @@ class Albums extends Component {
     button = Object.assign({}, button, { margin: '10px 10px 10px 0' })
 
     return (
-      <div className="clearfix" style={{ position: 'fixed', bottom: 0, height: 55, left: 0, width: '100%', backgroundColor: '' }}>
+      <div className="clearfix" style={{ position: 'fixed', bottom: 0, height: 55, left: 0, width: '100%', backgroundColor: '#fff' }}>
         <div className="fr">
           <Button
             className="cancel-btn"
@@ -217,7 +244,7 @@ class Albums extends Component {
       <AddAlbumTopicDialog
         caption="新建相册"
         content={ this.createAlbumTopicDialogContent() }
-        style={{ left: dialogRect.left, width: dialogRect.width, WebkitTransform: 'translateY(-50%)' }}
+        style={{ width: 560, zIndex: 1200 }}
         foot={ this.createAlbumTopicDialogFoot() }
         orientation="custom"
         onClose={ this.toggleShowed.bind(this, 'addAlbumTopicDialogShowedStatus') }>
@@ -231,11 +258,13 @@ class Albums extends Component {
 
     return (
       <div style={ dialogContent }>
-        <Input
+        <input
+          ref="title"
+          type="text"
           placeholder="请输入相册名称"
-          style={ input }>
-        </Input>
+          style={ input } />
         <Textarea
+          ref="text"
           placeholder="请输入描述"
           style={ input }>
         </Textarea>
@@ -258,7 +287,7 @@ class Albums extends Component {
           <Button
             className="cancel-btn"
             style={ button }
-            clickEventHandle={ this.toggleShowed.bind(this, 'addAlbumTopicDialogShowedStatus') }
+            clickEventHandle={ this.toggleShowed.bind(this, 'addAlbumTopicDialogShowedStatus', false, 'sendCreateAlbumCommand') }
             text="确定">
           </Button>
         </div>
@@ -270,8 +299,9 @@ class Albums extends Component {
 
   }
 
-  toggleShowed(mark, isSwitch) {
+  toggleShowed(mark, isSwitch, isCommand) {
     const showedDialogState = {};
+    const { createAlbumMedia } = this.props;
 
     if (isSwitch === true) {
       if (mark !== 'addAlbumPhotoListDialogShowedStatus') {
@@ -287,6 +317,18 @@ class Albums extends Component {
     } else if (typeof mark === 'string') {
       showedDialogState['addAlbumIconShowedStatus'] = true;
       showedDialogState[mark] = false;
+
+      if (isCommand === 'sendCreateAlbumCommand') {
+        const albumMediaList = (this.getAlbumMediaList() || []).slice(0);
+        const title = findDOMNode(this.refs.title).value;
+        const text = findDOMNode(this.refs.text).value;
+        this.setAlbumMediaList();
+
+        setTimeout(() => {
+          ipc.send('createMediaShare', albumMediaList, [], { title, text });
+        }, 0);
+        //ipc.send('createMediaShare', albumMediaList, []);
+      }
     } else {
       showedDialogState['addAlbumIconShowedStatus'] = false;
       showedDialogState['addAlbumPhotoListDialogShowedStatus'] = true;
@@ -326,11 +368,16 @@ class Albums extends Component {
   }
 }
 
-var mapStateToProps = (state)=>({
-       //state: state,
-     media: state.media,
-     navigationBarTitleTexts: state.navigationBarTitleTexts,
-     login:state.login
+var mapStateToProps = ({
+  media,
+  navigationBarTitleTexts,
+  login,
+  createAlbumMedia
+}) => ({
+   media,
+   navigationBarTitleTexts,
+   login,
+   createAlbumMedia
 })
 
 export default connect(mapStateToProps)(Albums);

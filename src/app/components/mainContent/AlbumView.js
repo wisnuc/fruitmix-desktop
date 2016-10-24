@@ -18,7 +18,7 @@ function getStyles () {
   return {
     root: {
       marginLeft: -5,
-      paddingTop: 10
+      paddingTop: 52
     },
     operationBarStyle: {
       padding: '0 55px'
