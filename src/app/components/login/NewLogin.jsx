@@ -67,6 +67,14 @@ class Index extends React.Component {
 		ipc.send('setServeIp',ip,false, isStorage)
 	}
 
+	submit() {
+		let username = this.refs.username.input.value
+		let password = this.refs.password.input.value
+		ipc.send('login','Alice','123456')
+		// ipc.send('login','Bob','123456')
+		// ipc.send('login',username,password)
+	}
+
 	render() {
 		let findDevice = this.props.state.view.findDevice
 		return(
@@ -132,7 +140,7 @@ class Index extends React.Component {
 			return <div>the device has no users</div>
 		}else if (selectedItem.fruitmix && selectedItem.users.length != 0) {
 			return <div>
-				<userList device={selectedItem}/>
+				<userList device={selectedItem} submit={this.submit.bind(this)}/>
 			</div>
 		}else {
 			return <div>the device is not map any station</div>

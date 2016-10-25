@@ -13,12 +13,18 @@ import Action from '../../actions/action'
 class UserList extends React.Component {
 	constructor(props) {
 		super(props)
-		this.state = {index:0}
+		this.state = {index:-1}
 	}
 
 	render() {
+		let content
+		if (this.state.index) {
+			
+		}
 		return (
-			<div>{this.state.index}</div>
+			<div>
+				{content}
+			</div>
 			)
 	}
 }

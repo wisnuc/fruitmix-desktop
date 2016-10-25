@@ -299,6 +299,7 @@ ipcMain.on('login',function(err,username,password){
 	c('login : ')
 	dispatch({type: "LOGIN"})
 	var tempArr = []
+	var colorArr = ['#FFC107','#8BC34C','#00bcd4']
 	loginApi.login().then((data)=>{
 		c('get login data : ' + data.length + ' users')
 		user = data.find((item)=>{return item.username == username})
@@ -318,6 +319,14 @@ ipcMain.on('login',function(err,username,password){
 		c('get users : ' + users.length)
 		tempArr.forEach(item => {
 			item.checked = false
+			let randomNumber = Math.random()
+			if (randomNumber< 0.33) {
+				item.color = colorArr[0]
+			}else if (randomNumber < 0.66) {
+				item.color = colorArr[1]
+			}else {
+				item.color = colorArr[2]
+			}
 		})
 		user.users = tempArr
 		user.allUser = users
