@@ -19,6 +19,7 @@ import AlbumView from '../mainContent/AlbumView'
 import Setting from '../mainContent/Setting'
 import DataMove from '../mainContent/DataMove'
 import Media from '../mainContent/Media'
+import AlbumShare from '../mainContent/AlbumOrPhotoShare'
 
 
 
@@ -43,6 +44,7 @@ class MainContent extends Component {
 			'我分享的文件' : <SharedByMe dispatch={this.props.dispatch} state={this.props.state} key={'d'}></SharedByMe>,
 			'所有照片' : <AllPhotos key={'e'}></AllPhotos>,
 			'相册' : <Albums key={'f'}></Albums>,
+			'分享' : <AlbumShare key={'j'}></AlbumShare>,
 			'相册查看' : <AlbumView dispatch={this.props.dispatch} state={this.props.state} key={'g'}></AlbumView>,
 			'设置' : <Setting dispatch={this.props.dispatch} state={this.props.state} key={'h'}></Setting>,
 			'数据迁移' : <DataMove dispatch={this.props.dispatch} state={this.props.state} key={'i'}></DataMove>
