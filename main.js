@@ -81,6 +81,7 @@ const loginApi = require('./lib/login')
 const mediaApi = require('./lib/media')
 const deviceApi = require('./lib/device')
 const fileApi = require('./lib/file')
+const utils = require('./lib/util')
 var findDevice = require('./lib/mdns')
 
 //require store
@@ -986,7 +987,9 @@ ipcMain.on('getMediaShare' , err => {
 	c('获取mediaShare...')
 	mediaApi.getMediaShare().then(data => {
 		c('获取mediaShare成功')
-		mediaShare = data
+
+		mediaShare = utils.quickSort(data)
+		console.log(data)
 		mediaShare.forEach(item => {
 			mediaShareMap.set(item.digest,item)
 		})

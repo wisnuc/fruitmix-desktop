@@ -90,7 +90,7 @@ class Index extends React.Component {
 					<div>
 						<div onClick={this.selectDevice.bind(this,selectedIndex-1,true)} className={selectedIndex==0?'login-invisible':''}>prev</div>
 						<div>{selectedItem.address}</div>
-						<div onClick={this.selectDevice.bind(this,selectedIndex+1,true)} className={selectedIndex==this.props.state.login.device.length-1?'login-invisible':''}>next</div>
+						<div onClick={this.selectDevice.bind(this,selectedIndex+1,true)} className={selectedIndex==(this.props.state.login.device.length-1)?'login-invisible':''}>next</div>
 					</div>
 					)
 		}
@@ -126,13 +126,13 @@ class Index extends React.Component {
 			return <div>please install appifi</div>
 		}else if (!selectedItem.fruitmix) {
 			return <div>please configure your volume</div>
+		}else if (selectedItem.fruitmix && selectedItem.fruitmix == "ERROR") {
+			return <div>fruitmix is error</div>
 		}else if (selectedItem.fruitmix && selectedItem.users.length == 0) {
 			return <div>the device has no users</div>
 		}else if (selectedItem.fruitmix && selectedItem.users.length != 0) {
 			return <div>
-				{selectedItem.users.map(item => {
-					return <div key={item.username}>{item.username}</div>
-				})}
+				<userList device={selectedItem}/>
 			</div>
 		}else {
 			return <div>the device is not map any station</div>
