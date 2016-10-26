@@ -167,44 +167,231 @@
 	text-align:center;
 	min-height : 100vh;
 	min-width : 100vw;
-	background-image : url(../images/index/party_orig.jpg);
+	background-image : url(../images/index/index.jpg);
 	background-size : cover;
 	font-size: 14px!important;
 }
 
 .login-wrap {
-	width:700px;
+	width:800px;
 	height:450px;
 	display: flex;
 	flex-direction: column;
-	padding-top:15px;
+	padding-top:40px;
 	background-color: #f2f2f2; 
+	box-sizing: border-box;
 }
 
 .login-title {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	margin-bottom: 20px;
+	margin-bottom: 15px;
+	height:28px;
 }
 .login-title>span {
-	flex:0 0 33%;
+	flex:0 0 50%;
+	box-sizing: border-box;
 }
-
+.login-title>span:nth-child(1) {
+	padding-left:60px;
+	text-align: left;
+	display: flex;
+	flex-direction: row;
+}
 .login-title>span:nth-child(2) {
-	font-size: 25px;
+	padding-right: 60px;
+	text-align: right;
+}
+.login-title-icon {
+	background-image: url(../images/index/ic_logo.png);
+	background-repeat: no-repeat;
+	width: 114px;
+	height:28px;
+}
+.login-title-name {
+	height:28px;
+	line-height: 38px;
+	padding-left:10px;
 }
 
 .login-content>div {
 	display: flex;
-	flex-direction: row;
-	align-items: center;
-	height:300px;
+	flex-direction: column;
 }
-.login-content>div>div {
-	flex:0 0 33%;	
+#login-wellcome {
+	font-size: 26px;
+	color:#212121;
+	margin-bottom: 32px;
+}
+
+#login-device-select {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	margin-bottom: 30px;
+}
+#login-device-select>*{
+	flex:0 0 33%;
+}
+#login-device-select svg {
+	cursor: pointer;
+	box-sizing: border-box;
+}
+#login-device-select svg:nth-child(1){
+	padding-left:120px!important;
+	box-sizing: border-box;
+}
+#login-device-select svg:nth-child(3){
+	padding-right:120px!important;
+	box-sizing: border-box;
+}
+.login-device-icon {
+	background:url(../images/index/ic_winsnuc.png) no-repeat center;
+	height:74px;
+}
+
+.login-device-name {
+	color:#212121;
+	font-size: 18px;
+	font-weight: 600;
+	margin-bottom: 14px;
 }
 
 .login-invisible {
 	opacity: 0
+}
+
+.login-footer {
+	height:142px;
+	padding-top: 40px;
+	box-sizing: border-box;
+	position: relative;
+}
+
+.login-footer-userList {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	max-width: 404px;
+	overflow: hidden;
+	margin:0 auto;
+}
+
+.login-userIcon{
+	display: flex;
+	flex-direction: column;
+	margin-right: 20px;
+	margin-left: 20px;
+}
+.login-userIcon>span{
+	cursor: pointer;
+}
+.login-userIcon>span:nth-child(1){
+	width:56px;
+	height:56px;
+	line-height: 56px;
+	border-radius: 50%;
+	margin-bottom: 10px;
+	color:white;
+}
+.login-userIcon>span:last-child{
+	color:#212121;
+	font-size: 14px;
+	max-width: 70px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.login-footer-userSelected {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	max-width: 500px;
+	overflow: hidden;
+	margin:0 auto;
+}
+.login-users-more {
+	padding-top:15px;
+	box-sizing: border-box;
+	cursor: pointer; 
+}
+.login-large-userList{
+	position: absolute;
+	width:100%;
+	bottom: 0px;
+	height: 310px;
+	padding:0 55px 0 60px ;
+	overflow: auto;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	background-color: #f2f2f2;
+}
+.login-password {
+	width:212px;
+	height: 36px;
+	margin-top: 10px;
+	border:1px solid #e0e0e0;
+	margin-right: 10px;
+	box-sizing: border-box;
+	padding-left:18px; 
+}
+
+.login-password-container {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+}
+.login-password-container>span:nth-child(1) {
+	color:#212121;
+	padding-left:5px;
+}
+
+.login-custom-container {
+	display: flex;
+	flex-direction: row;
+	max-width: 500px;
+	margin:0 auto;
+	cursor: pointer;
+}
+
+.login-submit-button, .login-cancel-button {
+	width:70px;
+	height:36px;
+	line-height: 36px;
+	position: relative;
+	top:13px;
+	color:#ffffff;
+	cursor: pointer;
+	transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+}
+
+.login-submit-button {
+	background-color: #3f51b5;
+	margin-right: 5px;
+}
+.login-submit-button:hover {
+	background-color: #4169E1;
+}
+.login-cancel-button {
+	background-color: #D87093;
+}
+
+.login-appifi-button {
+	cursor: pointer;
+	background-color: #3f51b5;
+	width:110px;
+	height: 36px;
+	line-height: 36px;
+	margin: 0 auto;
+	color:#fff;
+	transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+}
+.login-appifi-button:hover {
+	cursor: pointer;
+	background-color: #4169E1;
 }

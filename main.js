@@ -291,7 +291,8 @@ ipcMain.on('openAppifi', (err)=>{
 	fruitmixWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	})
-	fruitmixWindow.loadURL(server.substring(0,server.length-4)+3000)
+	c(server)
+	fruitmixWindow.loadURL(server.substring(0,server.length-4)+3001)
 })
 //get all user information --------------------------------------
 ipcMain.on('login',function(err,username,password){

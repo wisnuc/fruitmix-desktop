@@ -13,12 +13,21 @@ import Action from '../../actions/action'
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
 import baseTheme from 'material-ui/styles/baseThemes/lightBaseTheme'
 import { Paper, TextField, FlatButton, CircularProgress, Snackbar, SelectField, MenuItem } from 'material-ui'
+import Dehaze from 'material-ui/svg-icons/image/dehaze'
+import Left from 'material-ui/svg-icons/navigation/chevron-left'
+import Right from 'material-ui/svg-icons/navigation/chevron-right'
+
 //import CSS
 import css  from  '../../../assets/css/login'
 //import component
 import UserList from './userList'
 
 class Index extends React.Component {
+
+	constructor(props) {
+		super(props)
+		this.state = {volume:false}
+	}
 
 	getChildContext() {
 		const muiTheme = getMuiTheme(baseTheme)
@@ -37,19 +46,11 @@ class Index extends React.Component {
 		},1500)
 
 		ipc.on('message',(err,message,code)=>{
-			this.props.dispatch(Login.setSnack(message,true))
+			this.props.dispatch(Action.setSnack(message,true))
 		})
 	}
 
 	componentWillUnmount() {
-	}
-
-	//submit login
-	submit() {
-		let username = this.refs.username.input.value
-		let password = this.refs.password.input.value
-		ipc.send('login','Alice','123456')
-		// ipc.send('login',username,password)
 	}
 
 	//close snackbar
@@ -70,22 +71,33 @@ class Index extends React.Component {
 	submit() {
 		let username = this.refs.username.input.value
 		let password = this.refs.password.input.value
-		ipc.send('login','Alice','123456')
+		// ipc.send('login','Alice','123456')
 		// ipc.send('login','Bob','123456')
-		// ipc.send('login',username,password)
+		ipc.send('login',username,password)
+	}
+
+	kenDown(e) {
+		if (e.nativeEvent.which == 13) {
+			this.submit()
+		}
+	}
+
+	openAppifiInstall() {
+		ipc.send('openAppifi')
 	}
 
 	render() {
 		let findDevice = this.props.state.view.findDevice
 		return(
 			<div className='login-frame' key='login'>
-				{this.getLoginContent()}
+				{this.state.volume && this.getVolumeContent()}
+				{!this.state.volume && this.getLoginContent()}
 				<Snackbar open={this.props.state.snack.open} message={this.props.state.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
 			</div>
 			)
 			
 	}
-	//get jsx content 
+
 	getLoginContent() {
 		let selectedIndex = this.props.state.login.selectIndex
 		let selectedItem = this.props.state.login.device[selectedIndex]
@@ -96,18 +108,27 @@ class Index extends React.Component {
 		}else {
 				content = (
 					<div>
-						<div onClick={this.selectDevice.bind(this,selectedIndex-1,true)} className={selectedIndex==0?'login-invisible':''}>prev</div>
+						<div id='login-wellcome'>欢迎使用WISNUC</div>
+						<div id='login-device-select'>
+							<Left onClick={this.selectDevice.bind(this,selectedIndex-1,true)} className={selectedIndex==0?'login-invisible':''}></Left>
+							<div className='login-device-icon'></div>
+							<Right onClick={this.selectDevice.bind(this,selectedIndex+1,true)} className={selectedIndex==(this.props.state.login.device.length-1)?'login-invisible':''}></Right>
+						</div>
+						<div className='login-device-name'>{selectedItem.name.split('wisnuc-')[1]||selectedItem.name.split('wisnuc-')[0]}</div>
 						<div>{selectedItem.address}</div>
-						<div onClick={this.selectDevice.bind(this,selectedIndex+1,true)} className={selectedIndex==(this.props.state.login.device.length-1)?'login-invisible':''}>next</div>
 					</div>
 					)
 		}
 		return (
 			<div className='login-wrap'>
 				<div className='login-title'>
-					<span>WISNUC</span>
-					<span>欢迎使用WISNUC</span>
-					<span>setting</span>
+					<span>
+						<span className='login-title-icon'></span>
+						<span className='login-title-name'>登录</span>
+					</span>
+					<span>
+						<Dehaze></Dehaze>
+					</span>
 				</div>
 				<div className='login-content'>
 					{content}
@@ -129,9 +150,15 @@ class Index extends React.Component {
 		if (!selectedItem) {
 			return <div>please add new device</div>
 		}else if (selectedItem.isCustom) {
-			return <div>the device is added by users</div>
+			return (
+					<div className='login-custom-container'>
+						<TextField hintStyle={{color:'#999'}} ref='username' hintText="用户名" type="username" />
+						<TextField hintStyle={{color:'#999'}} ref='password' hintText="密码" type="password" onKeyDown={this.kenDown.bind(this)}/>
+						<FlatButton label='登录' onClick={this.submit.bind(this)}/>
+					</div>
+				)
 		}else if (selectedItem.appifi && selectedItem.appifi.code == "ECONNREFUSED") {
-			return <div>please install appifi</div>
+			return <div className='login-appifi-button' onClick={this.openAppifiInstall.bind(this)}>请安装appifi</div>
 		}else if (!selectedItem.fruitmix) {
 			return <div>please configure your volume</div>
 		}else if (selectedItem.fruitmix && selectedItem.fruitmix == "ERROR") {
@@ -139,12 +166,16 @@ class Index extends React.Component {
 		}else if (selectedItem.fruitmix && selectedItem.users.length == 0) {
 			return <div>the device has no users</div>
 		}else if (selectedItem.fruitmix && selectedItem.users.length != 0) {
-			return <div>
-				<userList device={selectedItem} submit={this.submit.bind(this)}/>
-			</div>
+			return <UserList device={selectedItem}></UserList>
 		}else {
 			return <div>the device is not map any station</div>
 		}
+	}
+
+	getVolumeContent() {
+		return (
+			<div>123</div>
+			)
 	}
 
 }
