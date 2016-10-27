@@ -81,6 +81,7 @@ const loginApi = require('./lib/login')
 const mediaApi = require('./lib/media')
 const deviceApi = require('./lib/device')
 const fileApi = require('./lib/file')
+const utils = require('./lib/util')
 var findDevice = require('./lib/mdns')
 
 //require store
@@ -144,7 +145,7 @@ app.on('ready', function() {
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	})
-	//mainWindow.webContents.openDevTools()
+	mainWindow.webContents.openDevTools()
 	mainWindow.loadURL('file://' + __dirname + '/build/index.html')
 	//create folder
 	fs.exists(mediaPath,exists=>{
@@ -300,6 +301,7 @@ ipcMain.on('login',function(err,username,password){
 	c('login : ')
 	dispatch({type: "LOGIN"})
 	var tempArr = []
+	var colorArr = ['#FFC107','#8BC34C','#00bcd4']
 	loginApi.login().then((data)=>{
 		c('get login data : ' + data.length + ' users')
 		user = data.find((item)=>{return item.username == username})
@@ -319,6 +321,14 @@ ipcMain.on('login',function(err,username,password){
 		c('get users : ' + users.length)
 		tempArr.forEach(item => {
 			item.checked = false
+			let randomNumber = Math.random()
+			if (randomNumber< 0.33) {
+				item.color = colorArr[0]
+			}else if (randomNumber < 0.66) {
+				item.color = colorArr[1]
+			}else {
+				item.color = colorArr[2]
+			}
 		})
 		user.users = tempArr
 		user.allUser = users
@@ -988,7 +998,9 @@ ipcMain.on('getMediaShare' , err => {
 	c('获取mediaShare...')
 	mediaApi.getMediaShare().then(data => {
 		c('获取mediaShare成功')
-		mediaShare = data
+
+		mediaShare = utils.quickSort(data)
+		console.log(data)
 		mediaShare.forEach(item => {
 			mediaShareMap.set(item.digest,item)
 		})

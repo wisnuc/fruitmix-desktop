@@ -67,6 +67,14 @@ class Index extends React.Component {
 		ipc.send('setServeIp',ip,false, isStorage)
 	}
 
+	submit() {
+		let username = this.refs.username.input.value
+		let password = this.refs.password.input.value
+		ipc.send('login','Alice','123456')
+		// ipc.send('login','Bob','123456')
+		// ipc.send('login',username,password)
+	}
+
 	render() {
 		let findDevice = this.props.state.view.findDevice
 		return(
@@ -90,7 +98,7 @@ class Index extends React.Component {
 					<div>
 						<div onClick={this.selectDevice.bind(this,selectedIndex-1,true)} className={selectedIndex==0?'login-invisible':''}>prev</div>
 						<div>{selectedItem.address}</div>
-						<div onClick={this.selectDevice.bind(this,selectedIndex+1,true)} className={selectedIndex==this.props.state.login.device.length-1?'login-invisible':''}>next</div>
+						<div onClick={this.selectDevice.bind(this,selectedIndex+1,true)} className={selectedIndex==(this.props.state.login.device.length-1)?'login-invisible':''}>next</div>
 					</div>
 					)
 		}
@@ -126,13 +134,13 @@ class Index extends React.Component {
 			return <div>please install appifi</div>
 		}else if (!selectedItem.fruitmix) {
 			return <div>please configure your volume</div>
+		}else if (selectedItem.fruitmix && selectedItem.fruitmix == "ERROR") {
+			return <div>fruitmix is error</div>
 		}else if (selectedItem.fruitmix && selectedItem.users.length == 0) {
 			return <div>the device has no users</div>
 		}else if (selectedItem.fruitmix && selectedItem.users.length != 0) {
 			return <div>
-				{selectedItem.users.map(item => {
-					return <div key={item.username}>{item.username}</div>
-				})}
+				<UserList device={selectedItem} submit={this.submit.bind(this)}/>
 			</div>
 		}else {
 			return <div>the device is not map any station</div>
