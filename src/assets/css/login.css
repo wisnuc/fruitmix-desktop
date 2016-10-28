@@ -171,7 +171,7 @@
 	background-size : cover;
 	font-size: 14px!important;
 }
-
+/*login content*/
 .login-wrap {
 	width:800px;
 	height:450px;
@@ -181,7 +181,6 @@
 	background-color: #f2f2f2; 
 	box-sizing: border-box;
 }
-
 .login-title {
 	display: flex;
 	flex-direction: row;
@@ -214,7 +213,6 @@
 	line-height: 38px;
 	padding-left:10px;
 }
-
 .login-content>div {
 	display: flex;
 	flex-direction: column;
@@ -224,7 +222,6 @@
 	color:#212121;
 	margin-bottom: 32px;
 }
-
 #login-device-select {
 	display: flex;
 	flex-direction: row;
@@ -251,25 +248,21 @@
 	background:url(../images/index/ic_winsnuc.png) no-repeat center;
 	height:74px;
 }
-
 .login-device-name {
 	color:#212121;
 	font-size: 18px;
 	font-weight: 600;
 	margin-bottom: 14px;
 }
-
 .login-invisible {
 	opacity: 0
 }
-
 .login-footer {
 	height:142px;
 	padding-top: 40px;
 	box-sizing: border-box;
 	position: relative;
 }
-
 .login-footer-userList {
 	display: flex;
 	flex-direction: row;
@@ -278,7 +271,6 @@
 	overflow: hidden;
 	margin:0 auto;
 }
-
 .login-userIcon{
 	display: flex;
 	flex-direction: column;
@@ -303,7 +295,6 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-
 .login-footer-userSelected {
 	display: flex;
 	flex-direction: row;
@@ -340,7 +331,6 @@
 	box-sizing: border-box;
 	padding-left:18px; 
 }
-
 .login-password-container {
 	display: flex;
 	flex-direction: column;
@@ -350,7 +340,6 @@
 	color:#212121;
 	padding-left:5px;
 }
-
 .login-custom-container {
 	display: flex;
 	flex-direction: row;
@@ -358,7 +347,6 @@
 	margin:0 auto;
 	cursor: pointer;
 }
-
 .login-submit-button, .login-cancel-button {
 	width:70px;
 	height:36px;
@@ -369,7 +357,6 @@
 	cursor: pointer;
 	transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
 }
-
 .login-submit-button {
 	background-color: #3f51b5;
 	margin-right: 5px;
@@ -380,7 +367,6 @@
 .login-cancel-button {
 	background-color: #D87093;
 }
-
 .login-appifi-button {
 	cursor: pointer;
 	background-color: #3f51b5;
@@ -394,4 +380,14 @@
 .login-appifi-button:hover {
 	cursor: pointer;
 	background-color: #4169E1;
+}
+/*login volume*/
+.login-volume-wrap {
+	width:800px;
+	height:600px;
+	display: flex;
+	flex-flow: column nowrap;
+	padding-top:40px;
+	background-color: #f2f2f2; 
+	box-sizing: border-box;
 }

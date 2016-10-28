@@ -26,7 +26,7 @@ class Index extends React.Component {
 
 	constructor(props) {
 		super(props)
-		this.state = {volume:false}
+		this.state = {volume:false,step:1,type:1}
 	}
 
 	getChildContext() {
@@ -86,6 +86,12 @@ class Index extends React.Component {
 		ipc.send('openAppifi')
 	}
 
+	openVolume() {
+		this.setState({
+			volume:true
+		})
+	}
+
 	render() {
 		let findDevice = this.props.state.view.findDevice
 		return(
@@ -104,7 +110,7 @@ class Index extends React.Component {
 		let content 
 		//content
 		if (this.props.state.login.device.length == 0) {
-				content = <div>not found</div>
+				content = <div>没有发现相关设备</div>
 		}else {
 				content = (
 					<div>
@@ -148,7 +154,7 @@ class Index extends React.Component {
 			return <div>loading...</div>
 		}
 		if (!selectedItem) {
-			return <div>please add new device</div>
+			return <div>请添加设备</div>
 		}else if (selectedItem.isCustom) {
 			return (
 					<div className='login-custom-container'>
@@ -160,7 +166,7 @@ class Index extends React.Component {
 		}else if (selectedItem.appifi && selectedItem.appifi.code == "ECONNREFUSED") {
 			return <div className='login-appifi-button' onClick={this.openAppifiInstall.bind(this)}>请安装appifi</div>
 		}else if (!selectedItem.fruitmix) {
-			return <div>please configure your volume</div>
+			return <div onClick={this.openVolume.bind(this)}>please configure your volume</div>
 		}else if (selectedItem.fruitmix && selectedItem.fruitmix == "ERROR") {
 			return <div>fruitmix is error</div>
 		}else if (selectedItem.fruitmix && selectedItem.users.length == 0) {
@@ -173,8 +179,25 @@ class Index extends React.Component {
 	}
 
 	getVolumeContent() {
+		let selectedIndex = this.props.state.login.selectIndex
+		let selectedItem = this.props.state.login.device[selectedIndex]
+		let content 
+		if (!selectedItem) {
+			return <div>not found</div>
+		}
 		return (
-			<div>123</div>
+			<div className='login-volume-wrap'>
+				<div className='login-title'>
+					<span>
+						<span className='login-title-icon'></span>
+						<span className='login-title-name'>安装向导</span>
+					</span>
+					<span>
+						<Dehaze></Dehaze>
+					</span>
+				</div>
+				<div></div>
+			</div>
 			)
 	}
 

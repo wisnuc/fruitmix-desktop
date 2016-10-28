@@ -143,7 +143,7 @@ app.on('ready', function() {
 	mainWindow.on('page-title-updated',function(event){
 		event.preventDefault()
 	})
-	mainWindow.webContents.openDevTools()
+	// mainWindow.webContents.openDevTools()
 	mainWindow.loadURL('file://' + __dirname + '/build/index.html')
 	//create folder
 	fs.exists(mediaPath,exists=>{
@@ -210,6 +210,7 @@ ipcMain.on('setServeIp',(err,ip, isCustom, isStorage)=>{
 	c('set ip : ')
 	dispatch(action.setDeviceUsedRecently(ip))
 	server = 'http://' + ip + ':3721'
+	// server = 'http://' + ip
 	OSServer = 'http://' + ip + ':3000'
 	// if (isCustom) {
 	// 	c('??')
@@ -934,8 +935,6 @@ function isThumbExist(item) {
 		thumbIng.splice(index,1)
 		mediaMap.get(item.digest).path = path.join(mediaPath,item.digest+'thumb138')
 		dispatch(action.setMedia(media))
-		//mainWindow.webContents.send('getThumbSuccess',item.digest,path.join(mediaPath,item.digest+'thumb138'))
-		// setTimeout(dealThumbQueue,200)
 		dealThumbQueue()
 	}
 }
@@ -999,7 +998,6 @@ ipcMain.on('getMediaShare' , err => {
 		c('获取mediaShare成功')
 
 		mediaShare = utils.quickSort(data)
-		console.log(data)
 		mediaShare.forEach(item => {
 			mediaShareMap.set(item.digest,item)
 		})
