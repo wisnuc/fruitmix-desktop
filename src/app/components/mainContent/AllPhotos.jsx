@@ -189,7 +189,7 @@ class AllPhotos extends Component {
     if (imageItem && imageItem.length) {
       const { dragStyle, dragButtonStyle, operationBarStyle } = getStyles();
       const dragElementRect = this.getDragElementRect();
-      const newDragStyle = Object.assign({}, dragStyle, dragElementRect);
+      const newDragStyle = Object.assign({}, dragStyle, dragElementRect, { bottom: 0 });
       const clearAllButtonStyle = Object.assign({}, dragButtonStyle, { marginRight: 0 });
 
       return (

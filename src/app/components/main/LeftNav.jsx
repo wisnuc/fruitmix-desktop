@@ -195,7 +195,7 @@ class leftNav extends Component {
 
 		dispatch(Action.changeSelectedNavItem(name));
 
-		if (name === '所有照片' || name === '相册') {
+		if (name === '所有照片' || name === '相册' || name === '分享') {
 			dispatch(Action.toggleNavigator([ name ]));
 		}
 	}
