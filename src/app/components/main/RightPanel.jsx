@@ -29,7 +29,7 @@ function getStyles () {
       backgroundColor: '#f5f5f5'
     },
     itemBody: {
-      overflow: 'hidden',
+      overflow: 'auto',
       transition: 'max-height .5s cubic-bezier(0, 1, .5, 1)',
       backgroundColor: '#fff'
     },

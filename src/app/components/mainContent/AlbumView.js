@@ -3,6 +3,7 @@
 **/
 
 import React, { Component, PropTypes } from 'react';
+import { findDOMNode } from 'react-dom';
 import { connect } from 'react-redux';
 import NavigationBar from '../main/NavigationBar';
 import AlbumPhotoItem from '../common/AlbumPhotoItem';
@@ -117,10 +118,9 @@ class AlbumView extends Component {
 
     return albumPhotoHashList.map((albumPhoto, index) => (
       <AlbumPhotoItem
-        refs={ albumHash + index }
+        ref={ 'date' + index }
         albumDigest={ albumHash }
         dataIndex={ index }
-        dataExifOrientation={ albumPhoto.exifOrientation }
         date={ this.toDate(ctime) }
         key={ albumPhoto.digest }
         digest={ albumPhoto.digest }
@@ -171,12 +171,12 @@ class AlbumView extends Component {
                 </MenuItem>
               </div>
 
-              <div className="action-btn" title="下载">
+              {/*<div className="action-btn" title="下载">
                 <MenuItem
                   desktop={ true }
                   leftIcon={ svg.selectedDownload() }>
                 </MenuItem>
-              </div>
+              </div>*/}
             </div>
             <div className="clear-operation fr" onClick={ this.clearAllSelectedItem.bind(this) } style={{ marginTop: 10 }}>
               <MenuItem
@@ -252,12 +252,33 @@ class AlbumView extends Component {
     if (checked) {
       Object
         .keys(this.refs)
-        .forEach(key => this.refs[key].setState({ selectStatus: 'over' }));
+        .filter(key => key.indexOf('date') >= 0)
+        .forEach(key => {
+          const node = findDOMNode(this.refs[key]);
+
+          if (node === el) {
+            this.refs[key].setState({ selectStatus: 'active' });
+          } else {
+            if (this.refs[key].state.selectStatus !== 'active') {
+              this.refs[key].setState({ selectStatus: 'over' });
+            }
+          }
+        });
 
       setTimeout(() => {
         dispatch(Action.addDragImageItem(el, date, index));
       }, 0);
     } else {
+      const filterKeys = Object.keys(this.refs).filter(key => key.indexOf('date') >= 0);
+      const allUnChecked = filterKeys.every(key => this.refs[key].state.selectStatus !== 'active');
+
+      if (allUnChecked) {
+        filterKeys.forEach(key => {
+          const node = findDOMNode(this.refs[key]);
+          this.refs[key].setState({ selectStatus: el === node ? 'over' : void 0 });
+        })
+      }
+
       dispatch(Action.removeDragImageItem(date, index));
     }
   }

@@ -98,9 +98,9 @@ export default class AlbumPhotoItem extends Component {
     });
   }
 
-  mouseoutHandle() {
+  mouseoutHandle(e) {
     const nodeList = Array.from(document.querySelectorAll('.image-item'));
-    const hasSelected = nodeList.some(node => node.classList.contains('show'))
+    const hasSelected = nodeList.some(node => node.classList.contains('show'));
 
     if (this.state.selectStatus === 'active' || hasSelected) {
       return;
@@ -130,6 +130,7 @@ export default class AlbumPhotoItem extends Component {
       onViewLargeImage, onSelect, dataIndex,
       date, digest, isUnViewLargePhoto
     } = this.props;
+    const nodelist = Array.from(document.querySelectorAll('.image-item'));
 
     if (isUnViewLargePhoto) {
       this.setState({
@@ -141,15 +142,27 @@ export default class AlbumPhotoItem extends Component {
       }, 0);
 
     } else {
-      onViewLargeImage(date, dataIndex);
-      ipc.send('getMediaImage', digest);
+      const unAllChecked = nodelist.every(node => !node.classList.contains('show'));
+
+      if (!unAllChecked) {
+        this.setState({
+          selectStatus: this.state.selectStatus === 'over' ? 'active' : 'over'
+        });
+
+        setTimeout(() => {
+          onSelect(dataIndex, this.el, date, this.state.selectStatus === 'active');
+        }, 0);
+      } else {
+        onViewLargeImage(date, dataIndex);
+        ipc.send('getMediaImage', digest);
+      }
     }
 
     e.stopPropagation();
   }
 
   render() {
-    const { date, digest, style, dataExifOrientation }= this.props;
+    const { date, digest, style, dataExifOrientation } = this.props;
     let { itemStyle } = getStyles();
     const selectStatus = this.state.selectStatus;
     let className = selectStatus
@@ -159,7 +172,7 @@ export default class AlbumPhotoItem extends Component {
       : '';
     className = className.split(' ').concat(['image-item', 'fl']).join(' ').trim();
     itemStyle = Object.assign({}, itemStyle, style);
-    console.log(dataExifOrientation, 'gggggggggggggggggggggggggggg');
+
     return (
       <div
         ref={ el => this.el = el }

@@ -47,6 +47,7 @@ export default class RadioGroup extends Component {
     return radios.map((radioItem, index) => {
       return (
         <Radio
+          className="share-type"
           key={ index }
           style={ radioStyle }
           changeEventHandle={ this.onSelectedItem }

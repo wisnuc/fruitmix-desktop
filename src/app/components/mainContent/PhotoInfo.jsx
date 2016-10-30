@@ -5,6 +5,8 @@
 **/
 
 import React, { Component, PropTypes } from 'react';
+import { connect } from 'react-redux';
+import { formatDate } from '../../utils/datetime';
 
 function getStyles () {
   return {
@@ -33,7 +35,7 @@ function getStyles () {
   };
 }
 
-export default class PhotoInfo extends Component {
+class PhotoInfo extends Component {
   render() {
     const {
       body,
@@ -43,30 +45,38 @@ export default class PhotoInfo extends Component {
       span
     } = getStyles();
     const lastLiStyle = Object.assign({}, li, lastLi);
-
+    const {
+      fileInfo: { type, size, exifDateTime, width, height },
+      username
+    } = this.props;
+    
     return (
       <ul className="photo-info-body" style={ body }>
         <li style={ li }>
           <label style={ label }>所有者:</label>
-          <span style={ span }>111</span>
+          <span style={ span }>{ username }</span>
         </li>
         <li style={ li }>
           <label style={ label }>文件类型:</label>
-          <span style={ span }>exit</span>
+          <span style={ span }>{ type }</span>
         </li>
         <li style={ li }>
           <label style={ label }>文件大小:</label>
-          <span style={ span }>30000</span>
+          <span style={ span }>{ size ? (size / 1024).toFixed(2) + 'KB' : '' }</span>
         </li>
         <li style={ li }>
           <label style={ label }>拍摄日期:</label>
-          <span style={ span }>2016-9-2 16:00:00</span>
+          <span style={ span }>{ exifDateTime ? formatDate(exifDateTime) : '' }</span>
         </li>
         <li style={ lastLiStyle }>
           <label style={ label }>尺寸:</label>
-          <span style={ span }>300 * 300</span>
+          <span style={ span }>{ width } * { height }</span>
         </li>
       </ul>
     );
   }
 }
+
+const mapStateToProps = ({ fileInfo, login: { obj: { username } } }) => ({ fileInfo, username });
+
+export default connect(mapStateToProps)(PhotoInfo);

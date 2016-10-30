@@ -28,10 +28,24 @@ function getStyles() {
 }
 
 class PhotoItem extends Component {
+  constructor() {
+    super();
+
+    this.mapOrientation = {
+      8: -90,
+      3: -180,
+      6: 90
+    };
+  }
+
   render() {
-    const { imgStyle, loadingIconStyle } = getStyles();
-    const { path, isLargeImageVisible, largeImagePath } = this.props;
+    let { imgStyle, loadingIconStyle } = getStyles();
+    const { path, isLargeImageVisible, largeImagePath, exifOrientation } = this.props;
     const isPath = isLargeImageVisible ? !!largeImagePath : !!path;
+
+    if (isLargeImageVisible) {
+      imgStyle = Object.assign({}, imgStyle, { transform: 'rotate('+ this.mapOrientation[exifOrientation] +'deg)' });
+    }
 
     return (
       <img
@@ -42,7 +56,10 @@ class PhotoItem extends Component {
   }
 
   componentDidMount() {
-    const { digest, path, largeImagePath, albumDigest, isLargeImageVisible } = this.props;
+    const {
+      digest, path, largeImagePath,
+      albumDigest, isLargeImageVisible
+    } = this.props;
 
     if (isLargeImageVisible) {
       if (!largeImagePath) {
@@ -67,6 +84,6 @@ PhotoItem.propTypes = {
   isLargeImageVisible: false
 };
 
-const mapStateToProps = ({ view: { currentMediaImage: { path } } }) => ({ largeImagePath: path });
+const mapStateToProps = ({ view: { currentMediaImage: { path, exifOrientation } } }) => ({ largeImagePath: path });
 
 export default connect(mapStateToProps)(PhotoItem);

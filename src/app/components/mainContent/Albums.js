@@ -328,7 +328,6 @@ class Albums extends Component {
         setTimeout(() => {
           ipc.send('createMediaShare', albumMediaList, [], { title, text });
         }, 0);
-        //ipc.send('createMediaShare', albumMediaList, []);
       }
     } else {
       showedDialogState['addAlbumIconShowedStatus'] = false;

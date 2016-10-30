@@ -67,6 +67,19 @@ var actions = {
 		}
 	},
 
+	createFileInfo(fileInfo) {
+		return {
+			type: 'CREATE_FILE_INFO',
+			fileInfo
+		}
+	},
+
+	clearFileInfo() {
+		return {
+			type: 'CLEAR_FILE_INFO'
+		}
+	},
+
 	// no using
 	mouseDown(left,top) {
 		return {
