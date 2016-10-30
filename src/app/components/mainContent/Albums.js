@@ -143,7 +143,7 @@ class Albums extends Component {
 
   getPhotoList() {
     const { media } = this.props;
-    return media.data.slice(0, 100).filter(l => !!l.exifDateTime);
+    return media.data.slice(0, 200).filter(l => !!l.exifDateTime);
   }
 
   getDialogClientRect() {

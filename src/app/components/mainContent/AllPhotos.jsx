@@ -360,7 +360,7 @@ class AllPhotos extends Component {
         key && store.dateStr.push(key);
       });
 
-      store.data = tmp.slice(0, 40);
+      store.data = tmp.slice(0, 200);
 
       this.setState({
         imageGroup: store
