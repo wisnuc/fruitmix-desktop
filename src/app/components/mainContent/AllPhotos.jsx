@@ -361,6 +361,7 @@ class AllPhotos extends Component {
       });
 
       store.data = tmp.slice(0, 200);
+      store.dateStr = store.dateStr.filter(date => !!store.data.find(obj => formatDate(obj.exifDateTime) === date));
 
       this.setState({
         imageGroup: store
