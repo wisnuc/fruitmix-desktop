@@ -81,6 +81,7 @@ class AlbumOrPhotoShare extends Component {
 
     return (
       <PhotoMain
+        dispatch={ this.props.dispatch }
         isSingle={ isAlbum || isSinglePhoto }
         albumDigest={ media.digest }
         photoList={ contents.slice(0, 6) }>
@@ -100,7 +101,13 @@ class AlbumOrPhotoShare extends Component {
     );
   }
 
-  makePhotoEnd(media) {
+  viewMoreHandle(digest) {
+    const { dispatch } = this.props;
+    dispatch(Action.changeSelectedNavItem('分享查看'));
+    dispatch(Action.getAlbumHash(digest));
+  }
+
+  makePhotoEnd(media, digest) {
     const { doc: { album, contents, ctime, author } } = media;
     const {
       shareItemEndSinglePhotoStyle, shareItemEndManyPhotoStyle,
@@ -111,7 +118,7 @@ class AlbumOrPhotoShare extends Component {
 
     if (isManyChildPhoto) {
       return (
-        <div style={ shareItemEndManyPhotoStyle }>更多</div>
+        <div style={ shareItemEndManyPhotoStyle } onClick={ this.viewMoreHandle.bind(this, digest) }>更多</div>
       );
     } else {
       if (isAlbum) {
@@ -173,7 +180,7 @@ class AlbumOrPhotoShare extends Component {
             { this.createPhotoMain(media) }
           </div>
           {/* PhotoEnd */}
-          { this.makePhotoEnd(media) }
+          { this.makePhotoEnd(media, media.digest) }
         </div>
       );
     });

@@ -208,9 +208,21 @@ class Index extends React.Component {
 
 	selectDisk(disk) {
 		c.log(disk.name)
-		this.setState({
-			disks:this.state.disks.concat([disk])
+		let index = this.state.disks.findIndex(item => {
+			return item.devname == disk.devname
 		})
+		c.log(index)
+		if (index != -1) {
+			this.state.disks.splice(index,1)
+			this.setState({
+				disks:this.state.disks
+			})	
+		}else {
+			this.setState({
+				disks:this.state.disks.concat([disk])
+			})	
+		}
+		
 		console.log(this.state)
 	}
 
@@ -335,6 +347,7 @@ class Index extends React.Component {
 		}
 		//appifi 正常运行 但没有用户
 		else if (selectedItem.fruitmix && selectedItem.users.length == 0) {
+			return <div className='login-appifi-button' onClick={this.openGuide.bind(this)}>向导</div>
 			return <div onClick={this.openGuide.bind(this)}>the device has no users</div>
 		}
 		else if (!selectedItem.fruitmix) {
@@ -414,7 +427,7 @@ class Index extends React.Component {
 								return (
 									<div className='login-disk-row' key={item.devname}>
 										<span>{item.devname}</span>
-										<span onClick={this.selectDisk.bind(this,item)}>添加{add?添加:已添加}</span>
+										<span onClick={this.selectDisk.bind(this,item)}>{add?'添加':'已添加'}</span>
 									</div>
 									)
 							})}

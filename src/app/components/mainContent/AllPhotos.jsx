@@ -21,6 +21,7 @@ import Action from '../../actions/action';
 import svg from '../../utils/SVGIcon';
 
 import { formatDate } from '../../utils/datetime';
+import { timeShare } from '../../utils/funcExic';
 
 function getStyles () {
   return {
@@ -109,7 +110,8 @@ class AllPhotos extends Component {
 
   selectedItemHandle(index, el, date, hasChecked) {
     const { dispatch } = this.props;
-    const nodeList = Array.from(document.querySelectorAll('[data-date="'+ date +'"]'));
+    const currentYearNodeList = Array.from(document.querySelectorAll('[data-date="'+ date +'"]'));
+    const allNodeList = Array.from(document.querySelectorAll('.image-item'));
 
     if (hasChecked) {
       dispatch(Action.addDragImageItem(el, date, index));
@@ -118,24 +120,37 @@ class AllPhotos extends Component {
     }
 
     if (hasChecked) {
+      dispatch(Action.createFileInfo({
+        type: el.dataset['type'],
+        size: el.dataset['size'],
+        exifDateTime: el.dataset['exifdatetime'],
+        width: el.dataset['width'],
+        height: el.dataset['height']
+      }));
+
       setTimeout(() => {
-        Object.keys(this.refs).forEach(ref => {
-          if (ref.indexOf(date) >= 0) {
-            findDOMNode(this.refs[ref]).classList.add('active');
-          }
+        allNodeList.forEach(node => {
+          node.classList.add('active');
         });
 
-        const allChecked = nodeList.every(node => node.classList.contains('show'));
+        const allChecked = currentYearNodeList.every(node => node.classList.contains('show'));
 
         if (allChecked) {
           this.refs["select_datetime" + '_' + date].setState({ checked: true });
         }
       }, 0);
     } else {
-      const allUnChecked = nodeList.every(node => !node.classList.contains('show'));
+      const allYearUnChecked = currentYearNodeList.every(node => !node.classList.contains('show'));
+      const allUnChecked = allNodeList.every(node => !node.classList.contains('show'));
+
+      dispatch(Action.clearFileInfo());
+
+      if (allYearUnChecked) {
+        this.refs["select_datetime" + '_' + date].setState({ checked: false });
+      }
 
       if (allUnChecked) {
-        this.refs["select_datetime" + '_' + date].setState({ checked: false });
+        allNodeList.forEach(node => node !== el && node.classList.remove('active')) ;
       }
     }
   }
@@ -143,15 +158,21 @@ class AllPhotos extends Component {
   cancelSelectedItemHandle(index, date) {
     const { dispatch } = this.props;
     const nodeList = Array.from(document.querySelectorAll('[data-date="'+ date +'"]'));
+    const allNodeList = Array.from(document.querySelectorAll('.image-item'));
 
     dispatch(Action.removeDragImageItem(date, index));
-    setTimeout(() => {
-      const allUnChecked = nodeList.every(node => !node.classList.contains('show'));
+    dispatch(Action.clearFileInfo());
 
-      if (allUnChecked) {
-        this.refs["select_datetime" + '_' + date].setState({ checked: false });
-      }
-    })
+    const unChecked = nodeList.every(node => !node.classList.contains('show'));
+    const allUnChecked = allNodeList.every(node => !node.classList.contains('show'));
+
+    if (unChecked) {
+      this.refs["select_datetime" + '_' + date].setState({ checked: false });
+    }
+
+    if (allUnChecked) {
+      allNodeList.forEach(node => node.classList.remove('active'));
+    }
   }
 
   detectImageItemActive(date) {
@@ -183,6 +204,32 @@ class AllPhotos extends Component {
     }
   }
 
+  shareActionHandle() {
+    const { imageItem, login } = this.props;
+    const shareType = Array
+      .from(document.querySelectorAll('.share-type'))
+      .find(node => node.firstElementChild.checked)
+      .firstElementChild
+      .value;
+    const imageDigestList = imageItem.map(imageObj => imageObj.el.dataset['hash']);
+    let peoples;
+
+    if (shareType === 'custom') {
+      peoples = Array
+        .from(document.querySelectorAll('.user-select'))
+        .filter(node => node.checked).map(node => node.value);
+    } else {
+      peoples = login.obj.users.filter(user => user.uuid !== login.obj.uuid).map(user => user.uuid);
+    }
+
+    ipc.send('createMediaShare', imageDigestList, peoples);
+    //
+    // const selectedNodelist = Array.from(document.querySelectorAll('.user-select')).filter(node => node.checked);
+    // const imageDigestList = imageItem.map(imageObj => imageObj.el.dataset['hash']);
+
+    //ipc.send('createMediaShare', )
+  }
+
   createCarouselComponent() {
     const { imageItem, dispatch } = this.props;
 
@@ -196,7 +243,7 @@ class AllPhotos extends Component {
         <div ref={ el => this.dragEl = el } className="image-selected" style={ newDragStyle }>
           <div className="image-operation clearfix" style={ operationBarStyle }>
             <div className="operations fl">
-              <div className="action-btn" title="分享">
+              <div className="action-btn" title="分享" onClick={ this.shareActionHandle.bind(this) }>
                 <MenuItem
                   desktop={ true }
                   leftIcon={ svg.share() }>
@@ -210,12 +257,12 @@ class AllPhotos extends Component {
                 </MenuItem>
               </div>
 
-              <div className="action-btn" title="下载">
+              {/*<div className="action-btn" title="下载">
                 <MenuItem
                   desktop={ true }
                   leftIcon={ svg.selectedDownload() }>
                 </MenuItem>
-              </div>
+              </div>*/}
             </div>
             <div className="clear-operation fr" onClick={ this.clearAllSelectedItem.bind(this) } style={{ marginTop: 10 }}>
               <MenuItem
@@ -278,24 +325,57 @@ class AllPhotos extends Component {
         key && store.dateStr.push(key);
       });
 
-      store.data = tmp;
-      this.setState({ imageGroup: store });
+      store.data = tmp.slice(0, 40);
+
+      this.setState({
+        imageGroup: store
+      });
+      // 每一时段显示多少个数据
+      // timeShare(store.data, (medias) => {
+      //   this.setState({
+      //     imageGroup: {
+      //       dateStr: store.dateStr,
+      //       data: (this.state.imageGroup ? this.state.imageGroup.data : []).concat(medias)
+      //     }
+      //   });
+      // }, () => {
+      // }, 100, 300)();
     }
   }
 
   changedHandle(date, checked) {
     const { dispatch } = this.props;
     const checkedEls = [];
+    const currentYearNodeList = Array.from(document.querySelectorAll('[data-date="'+ date +'"]'));
+    const allNodeList = Array.from(document.querySelectorAll('.image-item'));
+    let checkedNodeList;
 
-    Object.keys(this.refs).forEach((key, index) => {
-      if (key.indexOf(date) == 0) {
+    dispatch(Action.clearFileInfo());
 
-        findDOMNode(this.refs[key]).classList[checked ? 'add' : 'remove']('active');
-        findDOMNode(this.refs[key]).classList[checked ? 'add' : 'remove']('show');
-
-        checkedEls.push(findDOMNode(this.refs[key]));
+    allNodeList.forEach((node, index) => {
+      if (node.dataset.date.indexOf(date) == 0) {
+        if (!checked) {
+          node.classList.remove('show');
+        } else {
+          node.classList.add('active');
+          node.classList.add('show');
+        }
+      } else {
+        if (checked) {
+          node.classList.add('active');
+        }
       }
     });
+
+    if (!checked) {
+      checkedNodeList = allNodeList.filter(node => node.classList.contains('show'));
+
+      allNodeList.forEach((node, index) => {
+        if (!checkedNodeList.length) {
+          node.classList.remove('active');
+        }
+      });
+    }
 
     if (checked) {
       dispatch(Action.addDragImageList(checkedEls, date));
@@ -332,7 +412,6 @@ class AllPhotos extends Component {
               {
                 imageGroup.map((entry, index) => {
                   if (formatDate(entry.exifDateTime) === date) {
-
                     return (
                       <ImageByDate
                         key={ '' + index + index }
@@ -450,7 +529,8 @@ var mapStateToProps = (state)=>({
      largeImages: state.largeImages,
      navigationBarTitleTexts: state.navigationBarTitleTexts,
      shareRadios: state.shareRadio,
-     shareComponentEnterAnimateAble: state.shareComponentEnterAnimateAble
+     shareComponentEnterAnimateAble: state.shareComponentEnterAnimateAble,
+     login: state.login
 })
 
 export default connect(mapStateToProps)(AllPhotos);

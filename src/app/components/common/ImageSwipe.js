@@ -3,6 +3,7 @@
 **/
 
 import React, { Component, PropTypes } from 'react';
+import { findDOMNode } from 'react-dom';
 import { connect } from 'react-redux';
 
 import { MenuItem } from 'material-ui';
@@ -73,6 +74,12 @@ class ImageSwipe extends Component {
       arrowLeftStatus: this.currentImgIndex > 0,
       arrowRightStatus: this.currentImgIndex < this.imgLength - 1,
       shareComponentEnterAnimateAble: false
+    };
+
+    this.mapOrientation = {
+      8: -90,
+      3: -180,
+      6: 90
     };
   }
 
@@ -156,23 +163,24 @@ class ImageSwipe extends Component {
     const { root, rootInner, featurePanel } = getStyles(this.props);
     const { view, height, shareRadio } = this.props;
     const shareComponentClassName = this.state.shareComponentEnterAnimateAble ? 'share-enter-animate' : '';
+    const imageStyle = { objectFit: 'cover', transform: 'rotate('+ this.mapOrientation[view.currentMediaImage.exifOrientation] +'deg)' }
 
     return (
       <div className="image-swipe-container" style={ root }>
         <div style={ rootInner }>
-          <img src={ view.currentMediaImage.path } width="100%" height="100%" style={{ objectFit: 'cover' }} />
+          <img ref="img" src={ view.currentMediaImage.path } width="100%" height="100%" style={ imageStyle } />
 
           {/* 右侧功能面板 */}
-          <div className={ shareComponentClassName } style={ featurePanel }>
+          { /*<div className={ shareComponentClassName } style={ featurePanel }>
             <div className="circle-header" style={{ padding: '40px 0 20px', fontSize: 16, textAlign: 'center', borderBottom: '1px solid rgba(0,0,0,.12)' }}>
               相册分享
             </div>
             <div className="circle-body">
 
-              {/* 分享组件 */}
+
               <Share dispatch={ dispatch } shareRadios={ shareRadio }></Share>
             </div>
-          </div>
+          </div>*/}
         </div>
 
         { this.state.arrowLeftStatus && this.createArrowComponent('left') }

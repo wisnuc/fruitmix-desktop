@@ -20,6 +20,7 @@ import Setting from '../mainContent/Setting'
 import DataMove from '../mainContent/DataMove'
 import Media from '../mainContent/Media'
 import AlbumOrPhotoShare from '../mainContent/AlbumOrPhotoShare';
+import AlbumOrPhotoShareView from '../mainContent/AlbumOrPhotoShareView';
 
 class MainContent extends Component {
 
@@ -40,8 +41,9 @@ class MainContent extends Component {
 			'我分享的文件' : <SharedByMe dispatch={this.props.dispatch} state={this.props.state} key={'d'}></SharedByMe>,
 			'所有照片' : <AllPhotos key={'e'}></AllPhotos>,
 			'相册' : <Albums key={'f'}></Albums>,
-			'分享' : <AlbumOrPhotoShare key={'j'}></AlbumOrPhotoShare>,
+			'分享' : <AlbumOrPhotoShare key={'j'} dispatch={this.props.dispatch}></AlbumOrPhotoShare>,
 			'相册查看' : <AlbumView dispatch={this.props.dispatch} state={this.props.state} key={'g'}></AlbumView>,
+      '分享查看' : <AlbumOrPhotoShareView dispatch={this.props.dispatch} state={this.props.state} key={'g'}></AlbumOrPhotoShareView>,
 			'设置' : <Setting dispatch={this.props.dispatch} state={this.props.state} key={'h'}></Setting>,
 			'数据迁移' : <DataMove dispatch={this.props.dispatch} state={this.props.state} key={'i'}></DataMove>
 		}

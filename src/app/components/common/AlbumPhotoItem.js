@@ -98,9 +98,9 @@ export default class AlbumPhotoItem extends Component {
     });
   }
 
-  mouseoutHandle() {
+  mouseoutHandle(e) {
     const nodeList = Array.from(document.querySelectorAll('.image-item'));
-    const hasSelected = nodeList.some(node => node.classList.contains('show'))
+    const hasSelected = nodeList.some(node => node.classList.contains('show'));
 
     if (this.state.selectStatus === 'active' || hasSelected) {
       return;
@@ -130,6 +130,7 @@ export default class AlbumPhotoItem extends Component {
       onViewLargeImage, onSelect, dataIndex,
       date, digest, isUnViewLargePhoto
     } = this.props;
+    const nodelist = Array.from(document.querySelectorAll('.image-item'));
 
     if (isUnViewLargePhoto) {
       this.setState({
@@ -141,15 +142,27 @@ export default class AlbumPhotoItem extends Component {
       }, 0);
 
     } else {
-      onViewLargeImage(date, dataIndex);
-      ipc.send('getMediaImage', digest);
+      const unAllChecked = nodelist.every(node => !node.classList.contains('show'));
+
+      if (!unAllChecked) {
+        this.setState({
+          selectStatus: this.state.selectStatus === 'over' ? 'active' : 'over'
+        });
+
+        setTimeout(() => {
+          onSelect(dataIndex, this.el, date, this.state.selectStatus === 'active');
+        }, 0);
+      } else {
+        onViewLargeImage(date, dataIndex);
+        ipc.send('getMediaImage', digest);
+      }
     }
 
     e.stopPropagation();
   }
 
   render() {
-    const { date, digest, style }= this.props;
+    const { date, digest, style, dataExifOrientation } = this.props;
     let { itemStyle } = getStyles();
     const selectStatus = this.state.selectStatus;
     let className = selectStatus
@@ -164,6 +177,7 @@ export default class AlbumPhotoItem extends Component {
       <div
         ref={ el => this.el = el }
         data-date={ date }
+        data-exiforientation={ dataExifOrientation }
         data-hash={ digest }
         className={ className }
         style={ itemStyle }
@@ -185,7 +199,7 @@ export default class AlbumPhotoItem extends Component {
   componentDidMount() {
     const { digest, path, isViewAllPhoto, albumDigest } = this.props;
 
-    if (!path || path.charAt(0) !== '/') {
+    if (!path) {
       ipc.send(isViewAllPhoto ? 'getThumb' : 'getAlbumThumb', { digest }, albumDigest);
     }
   }

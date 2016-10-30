@@ -207,6 +207,7 @@ class Albums extends Component {
               isViewAllPhoto={ true }
               date={ formatDate(photo.exifDateTime) }
               key={ photo.digest }
+              exifOrientation={ photo.exifOrientation }
               isUnViewLargePhoto={ true }
               digest={ photo.digest }
               path={ photo.path }
@@ -327,7 +328,6 @@ class Albums extends Component {
         setTimeout(() => {
           ipc.send('createMediaShare', albumMediaList, [], { title, text });
         }, 0);
-        //ipc.send('createMediaShare', albumMediaList, []);
       }
     } else {
       showedDialogState['addAlbumIconShowedStatus'] = false;

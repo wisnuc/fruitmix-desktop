@@ -17,6 +17,7 @@ import largeImages from './largeImage';
 import navigationBarTitleTexts from './navigationBarTitleTexts';
 import albumHash from './albumHash';
 import moveData from './moveData';
+import fileInfo from './fileInfo';
 
 // import atom component reducer
 import { radio, shareRadio } from '../React-Redux-UI/src/reducers/reducer';
@@ -39,7 +40,8 @@ const reducer = combineReducers({
 	radio,
 	albumHash,
 	shareRadio,
-	moveData
+	moveData,
+	fileInfo
 });
 
 export default reducer;

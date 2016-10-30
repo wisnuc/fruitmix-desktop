@@ -73,7 +73,10 @@ export default class ImageByDate extends Component {
   }
 
   outedHandle() {
-    if (this.el.classList.contains('show')) {
+    const nodeList = Array.from(document.querySelectorAll('.image-item'));
+    const hasSelected = nodeList.some(node => node.classList.contains('show'))
+
+    if (this.el.classList.contains('show') || hasSelected) {
       return;
     }
 
@@ -95,13 +98,13 @@ export default class ImageByDate extends Component {
       date, detectImageItemActive, onCancelSelectedItem,
       dataIndex, onViewLargeImage, onSelectedItem
     } = this.props;
-    const nodeList = Array.from(document.querySelectorAll('[data-date="'+ date +'"]'));
+    const nodeList = Array.from(document.querySelectorAll('.image-item'));
     const hasSelected = nodeList.some(node => node.classList.contains('show'));
 
     if (el.classList.contains('active') && !el.classList.contains('show') && hasSelected) {
       el.classList.add('show');
       onSelectedItem(dataIndex, el, date, true);
-    } else if (el.classList.contains('active') && el.classList.contains('show')) {
+    } else if (el.classList.contains('active') && el.classList.contains('show') && hasSelected) {
       el.classList.remove('show');
       onCancelSelectedItem(dataIndex, date);
 
@@ -163,7 +166,7 @@ export default class ImageByDate extends Component {
     let { itemStyle, selectStatusStyle } = getStyles();
 
     return (
-      <div ref={ el => this.el = el } data-hash={ hash } data-date={ date } data-index={ dataIndex } className="image-item" style={ itemStyle }
+      <div ref={ el => this.el = el } data-type={ figureItem.type } data-size={ figureItem.size } data-exifDateTime={ figureItem.exifDateTime } data-width={ figureItem.width } data-height={ figureItem.height } data-hash={ hash } data-date={ date } data-index={ dataIndex } className="image-item" style={ itemStyle }
         onClick={ this.lookLargePhotoHandle } onMouseOver={ this.overedHandle } onMouseOut={ this.outedHandle }>
         <div className="selected-mask"></div>
 

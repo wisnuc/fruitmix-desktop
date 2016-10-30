@@ -4,6 +4,7 @@
 
 import React, { Component, PropTypes } from 'react';
 import Checkbox from '../../React-Redux-UI/src/components/partials/Checkbox';
+import { connect } from 'react-redux';
 
 function getStyles() {
   return {
@@ -33,7 +34,7 @@ function getStyles() {
   };
 }
 
-export default class ViewPermission extends Component {
+class ViewPermission extends Component {
   constructor() {
     super();
     this.onChange = this.onChange.bind(this);
@@ -45,38 +46,35 @@ export default class ViewPermission extends Component {
 
   render() {
     const { root, row, col, verticalCol } = getStyles();
+    const { users, uuid } = this.props;
     const assignedCol = Object.assign({}, col, verticalCol);
+    const components = users.filter(user => user.uuid !== uuid).map(user => {
+      return (
+        <div key={ user.uuid }  className="permission-row" style={ row }>
+          <span style={ col }>{ user.username }</span>
+          <span style={ assignedCol }>
+            <Checkbox value={ user.uuid } className="user-select" checked={ false } onChange={ this.onChange }></Checkbox>
+          </span>
+        </div>
+      )
+    });
 
     return (
       <div className="permission" style={ root }>
         <div className="permission-header">
           <div className="permission-row" style={ row }>
             <span style={ col }>用户</span>
-            <span style={ assignedCol }>编辑</span>
             <span style={ assignedCol }>查看</span>
           </div>
         </div>
         <div className="permission-body">
-          <div className="permission-row" style={ row }>
-            <span style={ col }>RoseRoseRoseRoseRose</span>
-            <span style={ assignedCol }>
-              <Checkbox value="edit" checked={ true } onChange={ this.onChange }></Checkbox>
-            </span>
-            <span style={ assignedCol }>
-              <Checkbox value="view" onChange={ this.onChange }></Checkbox>
-            </span>
-          </div>
-          <div className="permission-row" style={ row }>
-            <span style={ col }>Jack</span>
-            <span style={ assignedCol }>
-              <Checkbox value="edit" onChange={ this.onChange }></Checkbox>
-            </span>
-            <span style={ assignedCol }>
-              <Checkbox value="view" checked={ true } onChange={ this.onChange }></Checkbox>
-            </span>
-          </div>
+          { components }
         </div>
       </div>
     );
   }
 }
+
+const mapStateToProps = ({ login: { obj: { uuid, users } } }) => ({ users, uuid });
+
+export default connect(mapStateToProps)(ViewPermission);
