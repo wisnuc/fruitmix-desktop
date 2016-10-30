@@ -40,7 +40,7 @@ class Index extends React.Component {
 
 	constructor(props) {
 		super(props)
-		this.state = {volume:false,step:1,type:'1'}
+		this.state = {guide:false,maintenance:false,step:1,type:'1',volumes:{},disks:[],username:'',password:'',loading:false}
 	}
 
 	getChildContext() {
@@ -100,10 +100,16 @@ class Index extends React.Component {
 		ipc.send('openAppifi')
 	}
 
-	openVolume() {
+	openGuide() {
 		this.setState({
-			volume:true
+			guide:true
 		})
+	}
+
+	openMaintenance() {
+		this.setState({
+			maintenance:true
+		})	
 	}
 
 	checkType(event,index) {
@@ -112,10 +118,13 @@ class Index extends React.Component {
 		})
 	}
 
-	prev() {
+	guidePrev() {
 		if (this.state.step == 1) {
 			this.setState({
-				volume : false
+				guide : false,
+				maintenance : false,
+				volumes:{},
+				disks:[]
 			})
 		}else {
 			this.setState({
@@ -124,26 +133,112 @@ class Index extends React.Component {
 		}
 	}
 
-	next() {
-		if (this.state.step == 3) {
-			
-		}else if (this.state.step <3) {
-			this.setState({
-				step : (this.state.step + 1)
-			})
+	guideNext() {
+		let selectedIndex = this.props.state.login.selectIndex
+		let selectedItem = this.props.state.login.device[selectedIndex]
+		if (this.state.step == 1) {
+			if (this.isEmptyObject(this.state.volumes) && this.state.disks.length == 0 ) {
+				ipc.emit('message',null,'请选择磁盘新建磁盘卷')
+			}else {
+				this.setState({step:2})
+			}
 		}
+		
+		if (this.state.step == 2) {
+			let username = this.refs.username.input.value
+			let password = this.refs.password.input.value
+			let cpassword = this.refs.confirmPassword.input.value
+			if(username.length == 0){
+				ipc.emit('message',null,'用户名不能为空')
+			}else if (password.length == 0 || cpassword.length == 0) {
+				ipc.emit('message',null,'密码不能为空')
+			}else if (password != cpassword) {
+				ipc.emit('message',null,'请确认密码一致')
+			}else {
+				this.setState({
+					step:3,
+					username:username,
+					password:password
+				})
+			}
+		}
+
+		if (this.state.step == 3) {
+				let t = this.state.type == 1 ?'single':this.state.type == 2?'raid0':'raid1'
+				let target = this.state.disks.map(item=>item.name)
+				let init = {
+					username: this.state.username,
+					password: this.state.password
+				}
+				let mkfs = {
+					type:'btrfs',
+					mode:t
+				}
+				let time = (new Date()).getTime()
+				ipc.once('mirFinish-'+time,(err,data) => {
+					if (data == 'success') {
+						this.setState({
+							step : 4
+						})
+					}else {
+						this.setState({
+							step : 1
+						})
+					}
+						
+				})
+				ipc.send('installVolume',selectedItem.address,target,init,mkfs,time)
+				
+		
+		}
+	}
+
+	closeGuide() {
+		this.setState({
+			maintenance:false,
+			guide:false,
+			step : 1,
+			username:'',
+			password:'',
+			disks:[],
+			volumes:{},
+			type:1
+		})
+	}
+
+	selectDisk(disk) {
+		c.log(disk.name)
+		this.setState({
+			disks:this.state.disks.concat([disk])
+		})
+		console.log(this.state)
+	}
+
+	selectVolume(volume) {
+		c.log(volume)
+		this.setState({
+			disks:[],
+			volumes:volume
+		})
+	}
+
+	isEmptyObject(e) {  
+    	var t
+    	for (t in e)  
+        	return false;  
+    	return true
 	}
 
 	render() {
 		let findDevice = this.props.state.view.findDevice
 		return(
 			<div className='login-frame' key='login'>
-				{this.state.volume && this.getVolume()}
-				{!this.state.volume && this.getLogin()}
+				{this.state.guide && this.getGuide()}
+				{this.state.maintenance && this.getGuide()}
+				{!this.state.guide && !this.state.maintenance && this.getLogin()}
 				<Snackbar open={this.props.state.snack.open} message={this.props.state.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
 			</div>
 			)
-			
 	}
 
 	getLogin() {
@@ -192,12 +287,16 @@ class Index extends React.Component {
 		let selectedIndex = this.props.state.login.selectIndex
 		let selectedItem = this.props.state.login.device[selectedIndex]
 		let busy = (this.props.state.login.state ==='BUSY')
+		//登录中...
 		if (busy) {
 			return <div>loading...</div>
 		}
+		//没有发现设备
 		if (!selectedItem) {
 			return <div>请添加设备</div>
-		}else if (selectedItem.isCustom) {
+		}
+		//自定义地址
+		else if (selectedItem.isCustom) {
 			return (
 					<div className='login-custom-container'>
 						<TextField hintStyle={{color:'#999'}} ref='username' hintText="用户名" type="username" />
@@ -205,22 +304,51 @@ class Index extends React.Component {
 						<FlatButton label='登录' onClick={this.submit.bind(this)}/>
 					</div>
 				)
-		}else if (selectedItem.appifi && selectedItem.appifi.code == "ECONNREFUSED") {
+		}
+		//appifi 没有安装
+		else if (selectedItem.appifi == 'ERROR') {
 			return <div className='login-appifi-button' onClick={this.openAppifiInstall.bind(this)}>请安装appifi</div>
-		}else if (!selectedItem.fruitmix) {
-			return <div onClick={this.openVolume.bind(this)}>please configure your volume</div>
-		}else if (selectedItem.fruitmix && selectedItem.fruitmix == "ERROR") {
-			return <div>fruitmix is error</div>
-		}else if (selectedItem.fruitmix && selectedItem.users.length == 0) {
-			return <div>the device has no users</div>
-		}else if (selectedItem.fruitmix && selectedItem.users.length != 0) {
+		}
+		//appifi 正常运行 但卷没有拉起来
+		else if (selectedItem.fruitmix == 'ERROR' && selectedItem.boot && selectedItem.mir) {
+			let hasWisnuc = false
+			if (selectedItem.mir.volumes.length == 0) {
+				hasWisnuc = false
+			}else {
+				selectedItem.mir.volumes.forEach(item => {
+					if (item.wisnucInstalled) {
+						hasWisnuc = true
+					}
+				})
+			}
+			if (hasWisnuc) {
+				return <div className='login-appifi-button' onClick={this.openMaintenance.bind(this)}>管理</div>
+			}else {
+				return <div className='login-appifi-button' onClick={this.openGuide.bind(this)}>向导</div>
+			}
+
+			
+		}
+		//正常启动
+		else if (selectedItem.fruitmix && selectedItem.users.length != 0) {
 			return <UserList device={selectedItem}></UserList>
-		}else {
+		}
+		//appifi 正常运行 但没有用户
+		else if (selectedItem.fruitmix && selectedItem.users.length == 0) {
+			return <div onClick={this.openGuide.bind(this)}>the device has no users</div>
+		}
+		else if (!selectedItem.fruitmix) {
+			return <div onClick={this.openVolume.bind(this)}>please configure your volume</div>
+		}
+		else if (selectedItem.fruitmix && selectedItem.fruitmix == "ERROR") {
+			return <div>fruitmix is error</div>
+		}
+		else {
 			return <div>the device is not map any station</div>
 		}
 	}
 
-	getVolume() {
+	getGuide() {
 		let selectedIndex = this.props.state.login.selectIndex
 		let selectedItem = this.props.state.login.device[selectedIndex]
 		if (!selectedItem || !selectedItem.mir) {
@@ -238,16 +366,16 @@ class Index extends React.Component {
 					</span>
 				</div>
 				<div className='login-volume-content'>
-					{this.getVolumeContent()}
+					{this.getGuideContent()}
 				</div>
 				<div className='login-volume-footer'>
-					{this.getVolumeFooter()}
+					{this.getGuideFooter()}
 				</div>
 			</div>
 			)
 	}
 
-	getVolumeContent() {
+	getGuideContent() {
 		let selectedIndex = this.props.state.login.selectIndex
 		let selectedItem = this.props.state.login.device[selectedIndex]
 		let content
@@ -263,10 +391,32 @@ class Index extends React.Component {
 								<RadioButton value='3' iconStyle={styles.icon} labelStyle={styles.label} label='安全模式(RAID 1)'/>
 							</RadioButtonGroup>
 						</div>
+						{/*<div>卷信息:</div>
+						<div>
+							{selectedItem.mir.volumes.map(item => {
+								return (
+									<div className='login-volume-row' key={item.uuid}><span>{item.mountpoint}</span>
+										<span onClick={this.selectVolume.bind(this,item)}>start</span>
+									</div>
+									)
+							})}
+						</div>*/}
 						<div>选择磁盘:</div>
 						<div>
 							{selectedItem.mir.blocks.map(item => {
-								return <div key={item.devname}>{item.devname}</div>
+								let add = true
+								let obj = this.state.disks.find(item2 => {
+									return item.devname == item2.devname
+								})
+								if (obj) {
+									add = false
+								}
+								return (
+									<div className='login-disk-row' key={item.devname}>
+										<span>{item.devname}</span>
+										<span onClick={this.selectDisk.bind(this,item)}>添加{add?添加:已添加}</span>
+									</div>
+									)
 							})}
 						</div>
 					</div>
@@ -276,22 +426,39 @@ class Index extends React.Component {
 				content = (
 					<div className='login-volume-case2'>
 						<header>建立您的管理员账户</header>
-						<TextField  hintText="Name" floatingLabelText="用户名"/><br/>
-						<TextField  hintText="Password" floatingLabelText="密码"/><br/>
-						<TextField  hintText="Confirm password" floatingLabelText="确认密码"/><br/>
+						<TextField ref='username'  hintText="Name"  floatingLabelText="用户名"/><br/>
+						<TextField ref='password'  hintText="Password" type='password' floatingLabelText="密码"/><br/>
+						<TextField ref='confirmPassword'  hintText="Confirm password" type='password' floatingLabelText="确认密码"/><br/>
 					</div>
 					)
 				break
 			case 3:
-				content = (
-					<div className='login-volume-case3'>
-						<header>您的磁盘配置信息</header>
-						<div></div>
-					</div>
-					)
+				c.log(this.state.disks)
+					content = (
+						<div className='login-volume-case3'>
+							<header>您的磁盘配置信息</header>
+							<div>
+								<div>存储模式 : {this.state.type==1?'普通模式':this.state.type==2?'速度模式':'安全模式'}</div>
+								<div>磁盘格式 : BtfFS</div>
+								<div>磁盘信息 : </div>
+								<div>
+									{this.state.disks.map((item,index) => {
+										return (
+											<div key={item.devname}>磁盘{index+1} : {item.devname}</div>
+											)
+									})}
+								</div>
+							</div>
+						</div>
+					)	
 				break
 			case 4:
-				content = <div>4</div>
+				content = (
+					<div className='login-volume-case4'>
+						<div>您已完成设备配置</div>
+						<div onClick={this.closeGuide.bind(this)}>返回登录</div>
+					</div>
+				)
 				break
 			default:
 				content = <div>default</div>
@@ -299,19 +466,24 @@ class Index extends React.Component {
 		return content
 	}
 
-	getVolumeFooter() {
+	getGuideFooter() {
 		let selectedIndex = this.props.state.login.selectIndex
 		let selectedItem = this.props.state.login.device[selectedIndex]
+		if (this.state.step == 4) {
+			return (
+				null
+				)
+		}
 		return (
 				<div className='login-volume-footer-container'>
-					<div onClick={this.prev.bind(this)} className='login-volume-prev'>{this.state.step==1?'返回':'上一步'}</div>
+					<div onClick={this.guidePrev.bind(this)} className='login-volume-prev'>{this.state.step==1?'返回':'上一步'}</div>
 					<div className='login-volume-point'>
 						<span></span>
 						<span></span>
 						<span></span>
 						<span></span>
 					</div>
-					<div onClick={this.next.bind(this)} className='login-volume-next'>下一步</div>
+					<div onClick={this.guideNext.bind(this)} className='login-volume-next'>下一步</div>
 				</div>
 			)
 	}
