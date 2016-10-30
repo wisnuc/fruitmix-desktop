@@ -47,7 +47,7 @@ export default class Drag extends Component {
 	}
 
 	onMouseDown(e) {
-		if (this.el === e.target) {
+		if (this.el === e.target.parentNode) {
 			this.cloneNode = this.createDragElement();
 			const clientRect = getClientRect(this.el);
 
@@ -76,9 +76,9 @@ export default class Drag extends Component {
 	}
 
 	componentWillMount() {
-		document.addEventListener('mousedown', this.onMouseDown);
-		document.addEventListener('mousemove', this.onMouseMove);
-		document.addEventListener('mouseup', this.onMouseUp);
+		document.addEventListener('mousedown', this.onMouseDown.bind(this));
+		document.addEventListener('mousemove', this.onMouseMove.bind(this));
+		document.addEventListener('mouseup', this.onMouseUp.bind(this));
 	}
 
 	render() {
@@ -86,7 +86,9 @@ export default class Drag extends Component {
 		const newStyle = Object.assign({}, style, { WebkitUserSelect: 'none', backgroundImage: 'url("'+ src +'")' });
 
 		return (
-			<div ref={ el => this.el = el } className={ className } style={ style }></div>
+			<div ref={ el => this.el = el } className={ className } style={ style }>
+				<img src={ src } draggable="false" ondragstart="return false;" style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
+			</div>
 		);
 	}
 }

@@ -6,6 +6,7 @@ import React, { Component, PropTypes } from 'react';
 import { findDOMNode } from 'react-dom';
 import { connect } from 'react-redux';
 import NavigationBar from '../main/NavigationBar';
+import RightPanel from '../main/RightPanel';
 import AlbumPhotoItem from '../common/AlbumPhotoItem';
 import Carousel from '../../React-Redux-UI/src/components/transitions/Carousel';
 import Mask from '../../React-Redux-UI/src/components/partials/Mask';
@@ -67,6 +68,8 @@ class AlbumView extends Component {
 
   clearAllSelectedItem() {
     const { dispatch } = this.props;
+    const nodelist = Array.from(document.querySelectorAll('.image-item'));
+    Object.keys(this.refs).forEach(key => key.indexOf('date') >= 0 && this.refs[key].setState({ selectStatus: void 0 }));
 
     dispatch(Action.clearDragImageItem());
   }
@@ -118,7 +121,7 @@ class AlbumView extends Component {
 
     return albumPhotoHashList.map((albumPhoto, index) => (
       <AlbumPhotoItem
-        ref={ 'date' + index }
+        ref={ 'date' + this.toDate(ctime) + index }
         albumDigest={ albumHash }
         dataIndex={ index }
         date={ this.toDate(ctime) }
@@ -138,9 +141,59 @@ class AlbumView extends Component {
       <NavigationBar
         dispatch={ dispatch }
         navigationBarTitleTexts={ navigationBarTitleTexts }
-        navigationBarHorizontalPadding={ 18 }>
+        hasIconAble={ true }
+        navigationBarHorizontalPadding={ 18 }
+        onShowedRightPanel={ this.showedRightPanelHandler.bind(this) }>
       </NavigationBar>
     );
+  }
+
+  showedRightPanelHandler() {
+    this.refs.rightPanel && findDOMNode(this.refs.rightPanel).lastElementChild.classList.toggle('active');
+  }
+
+  shareActionHandle() {
+    const { imageItem, login } = this.props;
+    const shareType = Array
+      .from(document.querySelectorAll('.share-type'))
+      .find(node => node.firstElementChild.checked)
+      .firstElementChild
+      .value;
+    const imageDigestList = imageItem.map(imageObj => imageObj.el.dataset['hash']);
+    let peoples;
+
+    if (shareType === 'custom') {
+      peoples = Array
+        .from(document.querySelectorAll('.user-select'))
+        .filter(node => node.checked).map(node => node.value);
+    } else {
+      peoples = login.obj.users.filter(user => user.uuid !== login.obj.uuid).map(user => user.uuid);
+    }
+
+    ipc.send('createMediaShare', imageDigestList, peoples);
+    this.clearAllSelectedItem();
+  }
+
+  albumActionHandle() {
+    const { imageItem, login } = this.props;
+    const shareType = Array
+      .from(document.querySelectorAll('.share-type'))
+      .find(node => node.firstElementChild.checked)
+      .firstElementChild
+      .value;
+    const imageDigestList = imageItem.map(imageObj => imageObj.el.dataset['hash']);
+    let peoples;
+
+    if (shareType === 'custom') {
+      peoples = Array
+        .from(document.querySelectorAll('.user-select'))
+        .filter(node => node.checked).map(node => node.value);
+    } else {
+      peoples = login.obj.users.filter(user => user.uuid !== login.obj.uuid).map(user => user.uuid);
+    }
+
+    ipc.send('createMediaShare', imageDigestList, peoples, {});
+    this.clearAllSelectedItem();
   }
 
   createCarouselComponent() {
@@ -157,14 +210,14 @@ class AlbumView extends Component {
 
           <div className="image-operation clearfix" style={ operationBarStyle }>
             <div className="operations fl">
-              <div className="action-btn" title="分享">
+              <div className="action-btn" title="分享" onClick={ this.shareActionHandle.bind(this) }>
                 <MenuItem
                   desktop={ true }
                   leftIcon={ svg.share() }>
                 </MenuItem>
               </div>
 
-              <div className="action-btn" title="相册">
+              <div className="action-btn" title="相册" onClick={ this.albumActionHandle.bind(this) }>
                 <MenuItem
                   desktop={ true }
                   leftIcon={ svg.album() }>
@@ -227,6 +280,15 @@ class AlbumView extends Component {
 
     if (!detectLeft || !detectRight || !detectTop || !detectBottom) {
       // 拖拽元素全部超出容器
+      this.refs['date' + date + index].setState({ selectStatus: void 0 });
+
+      const currentYearNodeList = Array.from(document.querySelectorAll('[data-date="'+ date +'"]'));
+      const unChecked = currentYearNodeList.every(node => !node.classList.contains('show'));
+
+      // if (unChecked) {
+      //   this.refs['select_datetime' + '_' + date].setState({ checked: false });
+      // }
+
       dispatch(Action.removeDragImageItem(date, index));
     }
   }
@@ -288,6 +350,8 @@ class AlbumView extends Component {
 
     return (
       <div className="album-view clearfix">
+        {/* right panel */}
+        <RightPanel ref="rightPanel" width={ 230 } dispatch={ this.props.dispatch } shareRadios={ this.props.shareRadios }></RightPanel>
         { this.createNavigationBar() }
         <div className="album-view-list clearfix" style={ root }>
           { this.createAlbumPhotoItem() }

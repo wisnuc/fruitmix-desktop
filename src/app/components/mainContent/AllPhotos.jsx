@@ -200,6 +200,14 @@ class AllPhotos extends Component {
       // 拖拽元素全部超出容器
       findDOMNode(this.refs[date + '-' + index]).classList.remove('active');
       findDOMNode(this.refs[date + '-' + index]).classList.remove('show');
+
+      const currentYearNodeList = Array.from(document.querySelectorAll('[data-date="'+ date +'"]'));
+      const unChecked = currentYearNodeList.every(node => !node.classList.contains('show'));
+
+      if (unChecked) {
+        this.refs['select_datetime' + '_' + date].setState({ checked: false });
+      }
+
       dispatch(Action.removeDragImageItem(date, index));
     }
   }
@@ -223,11 +231,29 @@ class AllPhotos extends Component {
     }
 
     ipc.send('createMediaShare', imageDigestList, peoples);
-    //
-    // const selectedNodelist = Array.from(document.querySelectorAll('.user-select')).filter(node => node.checked);
-    // const imageDigestList = imageItem.map(imageObj => imageObj.el.dataset['hash']);
+    this.clearAllSelectedItem();
+  }
 
-    //ipc.send('createMediaShare', )
+  albumActionHandle() {
+    const { imageItem, login } = this.props;
+    const shareType = Array
+      .from(document.querySelectorAll('.share-type'))
+      .find(node => node.firstElementChild.checked)
+      .firstElementChild
+      .value;
+    const imageDigestList = imageItem.map(imageObj => imageObj.el.dataset['hash']);
+    let peoples;
+
+    if (shareType === 'custom') {
+      peoples = Array
+        .from(document.querySelectorAll('.user-select'))
+        .filter(node => node.checked).map(node => node.value);
+    } else {
+      peoples = login.obj.users.filter(user => user.uuid !== login.obj.uuid).map(user => user.uuid);
+    }
+
+    ipc.send('createMediaShare', imageDigestList, peoples, {});
+    this.clearAllSelectedItem();
   }
 
   createCarouselComponent() {
@@ -250,7 +276,7 @@ class AllPhotos extends Component {
                 </MenuItem>
               </div>
 
-              <div className="action-btn" title="相册">
+              <div className="action-btn" title="相册" onClick={ this.albumActionHandle.bind(this) }>
                 <MenuItem
                   desktop={ true }
                   leftIcon={ svg.album() }>
@@ -300,6 +326,15 @@ class AllPhotos extends Component {
 
   clearAllSelectedItem() {
     const { dispatch } = this.props;
+    const nodelist = Array.from(document.querySelectorAll('.image-item'));
+    nodelist.forEach(node => {
+      node.classList.remove('active')
+      node.classList.remove('show');
+    });
+
+    Object.keys(this.refs).forEach(key => {
+      key.indexOf('select_datetime') >= 0 && this.refs[key].setState({ checked: false });
+    });
 
     dispatch(Action.clearDragImageItem());
   }
@@ -357,6 +392,7 @@ class AllPhotos extends Component {
         if (!checked) {
           node.classList.remove('show');
         } else {
+          checkedEls.push(node);
           node.classList.add('active');
           node.classList.add('show');
         }
