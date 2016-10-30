@@ -14,8 +14,8 @@ import { ipcRenderer } from 'electron'
 global.ipc = ipcRenderer
 
 //import component
-import Login from'./components/login/Login'// login
-// import Login from './components/login/NewLogin'//login
+// import Login from'./components/login/Login'// login
+import Login from './components/login/NewLogin'//login
 import Main from './components/main/Main'//main
 
 //import Action

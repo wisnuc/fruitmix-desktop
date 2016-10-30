@@ -40,7 +40,7 @@ class Index extends React.Component {
 
 	constructor(props) {
 		super(props)
-		this.state = {volume:false,step:1,type:1}
+		this.state = {volume:false,step:1,type:'1'}
 	}
 
 	getChildContext() {
@@ -106,10 +106,32 @@ class Index extends React.Component {
 		})
 	}
 
-	checkType(index,event) {
+	checkType(event,index) {
 		this.setState({
 			type:index
 		})
+	}
+
+	prev() {
+		if (this.state.step == 1) {
+			this.setState({
+				volume : false
+			})
+		}else {
+			this.setState({
+				step : (this.state.step - 1)
+			})
+		}
+	}
+
+	next() {
+		if (this.state.step == 3) {
+			
+		}else if (this.state.step <3) {
+			this.setState({
+				step : (this.state.step + 1)
+			})
+		}
 	}
 
 	render() {
@@ -233,22 +255,40 @@ class Index extends React.Component {
 			case 1:
 				content = (
 					<div className='login-volume-case1'>
-						<div>选择磁盘存储模式{this.state.type}</div>
+						<div>选择磁盘存储模式</div>
 						<div>
-							<RadioButtonGroup onChange={this.checkType.bind(this,1)}>
-								<RadioButton iconStyle={styles.icon} labelStyle={styles.label} label='普通模式(single)'/>
-								<RadioButton iconStyle={styles.icon} labelStyle={styles.label} label='速度模式(RAID 0)'/>
-								<RadioButton iconStyle={styles.icon} labelStyle={styles.label} label='安全模式(RAID 1)'/>
+							<RadioButtonGroup valueSelected={this.state.type} name='typeSelect' onChange={this.checkType.bind(this)}>
+								<RadioButton value='1' iconStyle={styles.icon} labelStyle={styles.label} label='普通模式(single)'/>
+								<RadioButton value='2' iconStyle={styles.icon} labelStyle={styles.label} label='速度模式(RAID 0)'/>
+								<RadioButton value='3' iconStyle={styles.icon} labelStyle={styles.label} label='安全模式(RAID 1)'/>
 							</RadioButtonGroup>
+						</div>
+						<div>选择磁盘:</div>
+						<div>
+							{selectedItem.mir.blocks.map(item => {
+								return <div key={item.devname}>{item.devname}</div>
+							})}
 						</div>
 					</div>
 					)
 				break
 			case 2:
-				content = <div>2</div>
+				content = (
+					<div className='login-volume-case2'>
+						<header>建立您的管理员账户</header>
+						<TextField  hintText="Name" floatingLabelText="用户名"/><br/>
+						<TextField  hintText="Password" floatingLabelText="密码"/><br/>
+						<TextField  hintText="Confirm password" floatingLabelText="确认密码"/><br/>
+					</div>
+					)
 				break
 			case 3:
-				content = <div>3</div>
+				content = (
+					<div className='login-volume-case3'>
+						<header>您的磁盘配置信息</header>
+						<div></div>
+					</div>
+					)
 				break
 			case 4:
 				content = <div>4</div>
@@ -262,21 +302,18 @@ class Index extends React.Component {
 	getVolumeFooter() {
 		let selectedIndex = this.props.state.login.selectIndex
 		let selectedItem = this.props.state.login.device[selectedIndex]
-		let content
-		switch(this.state.step) {
-			case 1:
-				content = <div>1</div>
-				break
-			case 2:case 3:
-				content = <div>2</div>
-				break
-			case 4:
-				content = <div>4</div>
-				break
-			default:
-				content = <div>default</div>
-		}
-		return content
+		return (
+				<div className='login-volume-footer-container'>
+					<div onClick={this.prev.bind(this)} className='login-volume-prev'>{this.state.step==1?'返回':'上一步'}</div>
+					<div className='login-volume-point'>
+						<span></span>
+						<span></span>
+						<span></span>
+						<span></span>
+					</div>
+					<div onClick={this.next.bind(this)} className='login-volume-next'>下一步</div>
+				</div>
+			)
 	}
 
 }
