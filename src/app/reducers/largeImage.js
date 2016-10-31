@@ -10,6 +10,7 @@ export default function (state = {}, action) {
       if (action.largeImageEls.length) {
         ret.currentThumbIndex = action.currentThumbIndex;
         ret.date = action.date;
+        ret.hash = action.hash;
         ret.data = [];
       }
 

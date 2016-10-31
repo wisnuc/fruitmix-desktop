@@ -239,13 +239,11 @@ class Albums extends Component {
   }
 
   createAddAlbumTopicDialog() {
-    const dialogRect = this.getDialogClientRect();
-
     return (
       <AddAlbumTopicDialog
         caption="新建相册"
         content={ this.createAlbumTopicDialogContent() }
-        style={{ width: 560, zIndex: 1200 }}
+        style={{ width: 420, zIndex: 1200 }}
         foot={ this.createAlbumTopicDialogFoot() }
         orientation="custom"
         onClose={ this.toggleShowed.bind(this, 'addAlbumTopicDialogShowedStatus') }>

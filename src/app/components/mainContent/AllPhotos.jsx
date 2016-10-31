@@ -12,6 +12,7 @@ import RightPanel from '../main/RightPanel';
 import ImageByDate from '../common/ImageByDate';
 // 图片轮播组件
 import Carousel from '../../React-Redux-UI/src/components/transitions/Carousel';
+import AddShareDialog from '../common/Dialog';
 import Mask from '../../React-Redux-UI/src/components/partials/Mask';
 import ImageSwipe from '../common/ImageSwipe';
 import { MenuItem } from 'material-ui';
@@ -25,6 +26,9 @@ import { timeShare } from '../../utils/funcExic';
 
 function getStyles () {
   return {
+    root: {
+      marginTop: 55,
+    },
     operationBarStyle: {
       padding: '0 55px'
     },
@@ -89,7 +93,8 @@ class AllPhotos extends Component {
 
     this.map = props.media ? props.media.data : [];
     this.state = {
-      imageGroup: void 0
+      imageGroup: void 0,
+      addShareDialogShowedStatus: false
     };
   }
 
@@ -133,20 +138,22 @@ class AllPhotos extends Component {
           node.classList.add('active');
         });
 
-        const allChecked = currentYearNodeList.every(node => node.classList.contains('show'));
+        const allChecked = currentYearNodeList.every(node => node.querySelector('span').classList.contains('selected-status-widget'));
 
         if (allChecked) {
-          this.refs["select_datetime" + '_' + date].setState({ checked: true });
+          findDOMNode(this.refs["select_datetime" + '_' + date]).classList.add('selected-status-widget');
+          findDOMNode(this.refs["select_datetime" + '_' + date]).classList.remove('unselected-status-widget');
         }
       }, 0);
     } else {
-      const allYearUnChecked = currentYearNodeList.every(node => !node.classList.contains('show'));
-      const allUnChecked = allNodeList.every(node => !node.classList.contains('show'));
+      const allYearUnChecked = currentYearNodeList.every(node => !node.querySelector('span').classList.contains('selected-status-widget'));
+      const allUnChecked = allNodeList.every(node => !node.querySelector('span').classList.contains('selected-status-widget'));
 
       dispatch(Action.clearFileInfo());
 
       if (allYearUnChecked) {
-        this.refs["select_datetime" + '_' + date].setState({ checked: false });
+        findDOMNode(this.refs["select_datetime" + '_' + date]).classList.remove('selected-status-widget');
+        findDOMNode(this.refs["select_datetime" + '_' + date]).classList.add('unselected-status-widget');
       }
 
       if (allUnChecked) {
@@ -163,11 +170,12 @@ class AllPhotos extends Component {
     dispatch(Action.removeDragImageItem(date, index));
     dispatch(Action.clearFileInfo());
 
-    const unChecked = nodeList.every(node => !node.classList.contains('show'));
-    const allUnChecked = allNodeList.every(node => !node.classList.contains('show'));
+    const unChecked = nodeList.every(node => !node.querySelector('span').classList.contains('selected-status-widget'));
+    const allUnChecked = allNodeList.every(node => !node.querySelector('span').classList.contains('selected-status-widget'));
 
     if (unChecked) {
-      this.refs["select_datetime" + '_' + date].setState({ checked: false });
+      findDOMNode(this.refs["select_datetime" + '_' + date]).classList.remove('selected-status-widget');
+      findDOMNode(this.refs["select_datetime" + '_' + date]).classList.add('unselected-status-widget');
     }
 
     if (allUnChecked) {
@@ -213,25 +221,26 @@ class AllPhotos extends Component {
   }
 
   shareActionHandle() {
-    const { imageItem, login } = this.props;
-    const shareType = Array
-      .from(document.querySelectorAll('.share-type'))
-      .find(node => node.firstElementChild.checked)
-      .firstElementChild
-      .value;
-    const imageDigestList = imageItem.map(imageObj => imageObj.el.dataset['hash']);
-    let peoples;
-
-    if (shareType === 'custom') {
-      peoples = Array
-        .from(document.querySelectorAll('.user-select'))
-        .filter(node => node.checked).map(node => node.value);
-    } else {
-      peoples = login.obj.users.filter(user => user.uuid !== login.obj.uuid).map(user => user.uuid);
-    }
-
-    ipc.send('createMediaShare', imageDigestList, peoples);
-    this.clearAllSelectedItem();
+    this.setState({ addShareDialogShowedStatus: true });
+    // const { imageItem, login } = this.props;
+    // const shareType = Array
+    //   .from(document.querySelectorAll('.share-type'))
+    //   .find(node => node.firstElementChild.checked)
+    //   .firstElementChild
+    //   .value;
+    // const imageDigestList = imageItem.map(imageObj => imageObj.el.dataset['hash']);
+    // let peoples;
+    //
+    // if (shareType === 'custom') {
+    //   peoples = Array
+    //     .from(document.querySelectorAll('.user-select'))
+    //     .filter(node => node.checked).map(node => node.value);
+    // } else {
+    //   peoples = login.obj.users.filter(user => user.uuid !== login.obj.uuid).map(user => user.uuid);
+    // }
+    //
+    // ipc.send('createMediaShare', imageDigestList, peoples);
+    // this.clearAllSelectedItem();
   }
 
   albumActionHandle() {
@@ -254,6 +263,29 @@ class AllPhotos extends Component {
 
     ipc.send('createMediaShare', imageDigestList, peoples, {});
     this.clearAllSelectedItem();
+  }
+
+  createShareDialog() {
+    if (this.state.addShareDialogShowedStatus) {
+      return (
+        <AddShareDialog
+          caption="分享相片"
+          content={ this.createShareContent() }
+          style={{ width: 420, zIndex: 1200 }}
+          foot={ this.createShareFoot() }
+          orientation="custom"
+          onClose={ function () {} }>
+        </AddShareDialog>
+      );
+    }
+  }
+
+  createShareContent() {
+    return (<div>1</div>);
+  }
+
+  createShareFoot() {
+    return (<div>2</div>);
   }
 
   createCarouselComponent() {
@@ -379,11 +411,20 @@ class AllPhotos extends Component {
     }
   }
 
-  changedHandle(date, checked) {
+  changedHandle(date, e) {
     const { dispatch } = this.props;
     const checkedEls = [];
     const currentYearNodeList = Array.from(document.querySelectorAll('[data-date="'+ date +'"]'));
     const allNodeList = Array.from(document.querySelectorAll('.image-item'));
+    const node = e.currentTarget.querySelectorAll('span')[0];
+    const className = node.classList.contains('selected-status-widget')
+      ? 'unselected-status-widget'
+      : 'selected-status-widget';
+
+    node.classList.add('select-status-widget');
+    node.classList.add(className);
+    node.classList.remove(className === 'selected-status-widget' ? 'unselected-status-widget' : 'selected-status-widget');
+    const checked = node.classList.contains('selected-status-widget');
     let checkedNodeList;
 
     dispatch(Action.clearFileInfo());
@@ -391,11 +432,13 @@ class AllPhotos extends Component {
     allNodeList.forEach((node, index) => {
       if (node.dataset.date.indexOf(date) == 0) {
         if (!checked) {
-          node.classList.remove('show');
+          node.querySelector('span').classList.remove('select-status-widget');
+          node.querySelector('span').classList.remove('selected-status-widget');
         } else {
           checkedEls.push(node);
           node.classList.add('active');
-          node.classList.add('show');
+          node.querySelector('span').classList.add('select-status-widget');
+          node.querySelector('span').classList.add('selected-status-widget');
         }
       } else {
         if (checked) {
@@ -421,10 +464,10 @@ class AllPhotos extends Component {
     }
   }
 
-  viewLargeImageHandle(date, currentThumbIndex) {
+  viewLargeImageHandle(date, currentThumbIndex, hash) {
     const { dispatch } = this.props;
 
-    dispatch(Action.getLargeImageList(document.querySelectorAll('[data-date="'+ date +'"]'), currentThumbIndex, date));
+    dispatch(Action.getLargeImageList(document.querySelectorAll('.image-item'), currentThumbIndex, date, hash));
   }
 
   createImageByDateComponent() {
@@ -438,36 +481,45 @@ class AllPhotos extends Component {
         component = dateStr.map((date, index) => {
           return (
             <div className="clearfix">
-              <div style={{ margin: '0 0 10px', fontFamily: 'helvetica', color: '#6d6d6d', fontSize: 12 }}>
-                <Checkbox ref={ "select_datetime" + '_' + date }
+              <div style={{ margin: '0 0 8px', fontFamily: 'helvetica', color: '#6d6d6d', fontSize: 12, lineHeight: '20px' }}>
+                <div onClick={ this.changedHandle.bind(this, date) }>
+                  <span ref={ "select_datetime" + '_' + date } className="status-widget select-status-widget unselected-status-widget">
+                     <i></i>
+                  </span>
+                  <span style={{ marginLeft: 10 }}>{ date }</span>
+                </div>
+
+                {/*<Checkbox ref={ "select_datetime" + '_' + date }
                  key={ index }
                  value={ date }
                  text={ date }
                  onChange={ this.changedHandle.bind(this) }>
-                </Checkbox>
+                </Checkbox>*/}
               </div>
-              {
-                imageGroup.map((entry, index) => {
-                  if (formatDate(entry.exifDateTime) === date) {
-                    return (
-                      <ImageByDate
-                        key={ '' + index + index }
-                        date={ date }
-                        dataIndex={ index }
-                        ref={ date + '-' + index }
-                        figureItem={ entry }
-                        onSelectedItem={ this.selectedItemHandle.bind(this) }
-                        onCancelSelectedItem={ this.cancelSelectedItemHandle.bind(this) }
-                        onViewLargeImage={ this.viewLargeImageHandle.bind(this) }
-                        detectImageItemActive={ this.detectImageItemActive }
-                        hash={ entry.digest }
-                        dispatch={ this.props.dispatch }
-                        state={this.props.state}>
-                      </ImageByDate>
-                    )
-                  }
-                })
-              }
+              <div style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start', marginBottom: 15 }}>
+                {
+                  imageGroup.map((entry, index) => {
+                    if (formatDate(entry.exifDateTime) === date) {
+                      return (
+                        <ImageByDate
+                          key={ '' + index + index }
+                          date={ date }
+                          dataIndex={ index }
+                          ref={ date + '-' + index }
+                          figureItem={ entry }
+                          onSelectedItem={ this.selectedItemHandle.bind(this) }
+                          onCancelSelectedItem={ this.cancelSelectedItemHandle.bind(this) }
+                          onViewLargeImage={ this.viewLargeImageHandle.bind(this) }
+                          detectImageItemActive={ this.detectImageItemActive }
+                          hash={ entry.digest }
+                          dispatch={ this.props.dispatch }
+                          state={this.props.state}>
+                        </ImageByDate>
+                      )
+                    }
+                  })
+                }
+              </div>
             </div>
           );
         });
@@ -484,11 +536,11 @@ class AllPhotos extends Component {
           hasIconAble={ true }
           onShowedRightPanel={ this.showedRightPanelHandler.bind(this) }>
         </NavigationBar>
-
+        { this.createShareDialog() }
         {/* right panel */}
-        <RightPanel ref="rightPanel" width={ 230 } dispatch={ this.props.dispatch } shareRadios={ this.props.shareRadios }></RightPanel>
+        {/*<RightPanel ref="rightPanel" width={ 230 } dispatch={ this.props.dispatch } shareRadios={ this.props.shareRadios }></RightPanel>*/}
 
-        <div style={{ marginTop: 52 }}>
+        <div style={ getStyles().root }>
           { component }
         </div>
       </div>

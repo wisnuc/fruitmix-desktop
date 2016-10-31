@@ -30,7 +30,10 @@ function getStyles () {
     caption: {
       color: '#212121',
       fontSize: 14,
-      padding: '10px 0'
+      padding: '10px 0',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
     },
     describe: {
       margin: 0,

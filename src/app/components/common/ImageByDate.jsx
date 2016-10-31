@@ -13,24 +13,17 @@ function getStyles () {
     itemStyle: {
       boxSizing: 'border-box',
       border: '1px solid #e5e5e5',
-      float: 'left',
       position: 'relative',
-      width: 140,
-      height: 140,
-      marginRight: 10,
-      marginBottom: 10
+      flexBasis: 150,
+      height: 158,
+      marginRight: 6,
+      marginBottom: 6
     },
     selectStatusStyle: {
-      borderWidth: 1,
-      borderStyle: 'solid',
-      borderColor: '#757575',
-      boxSizing: 'border-box',
       display: 'none',
       position: 'absolute',
       left: 10,
-      top: 10,
-      width: 15,
-      height: 15
+      top: 10
     },
     figureStyle: {
       width: '100%',
@@ -73,10 +66,10 @@ export default class ImageByDate extends Component {
   }
 
   outedHandle() {
-    const nodeList = Array.from(document.querySelectorAll('.image-item'));
-    const hasSelected = nodeList.some(node => node.classList.contains('show'))
+    const nodeList = Array.from(document.querySelectorAll('.image-item')).map(node => node.querySelector('span'));
+    const hasSelected = nodeList.some(node => node.classList.contains('selected-status-widget'))
 
-    if (this.el.classList.contains('show') || hasSelected) {
+    if (this.el.querySelector('span').classList.contains('selected-status-widget') || hasSelected) {
       return;
     }
 
@@ -85,10 +78,20 @@ export default class ImageByDate extends Component {
 
   selectedItemHandle(e) {
     const { onSelectedItem, date, dataIndex } = this.props;
-    const el = e.currentTarget.parentNode;
+    const el = e.currentTarget;
+    const className = el.classList.contains('selected-status-widget')
+      ? 'status-widget'
+      : 'selected-status-widget';
 
-    el.classList.toggle('show');
-    onSelectedItem(dataIndex, el, date, el.classList.contains('show'));
+    if (el.classList.contains('selected-status-widget')) {
+      el.classList.remove('select-status-widget');
+      el.classList.remove('selected-status-widget');
+    } else {
+      el.classList.add('select-status-widget');
+      el.classList.add('selected-status-widget');
+    }
+
+    onSelectedItem(dataIndex, el.parentNode, date, el.classList.contains('selected-status-widget'));
     e.stopPropagation();
   }
 
@@ -96,16 +99,18 @@ export default class ImageByDate extends Component {
     const el = e.currentTarget;
     const {
       date, detectImageItemActive, onCancelSelectedItem,
-      dataIndex, onViewLargeImage, onSelectedItem
+      dataIndex, onViewLargeImage, onSelectedItem, hash
     } = this.props;
-    const nodeList = Array.from(document.querySelectorAll('.image-item'));
-    const hasSelected = nodeList.some(node => node.classList.contains('show'));
+    const nodeList = Array.from(document.querySelectorAll('.image-item')).map(node => node.querySelector('span'));
+    const hasSelected = nodeList.some(node => node.classList.contains('selected-status-widget'))
 
-    if (el.classList.contains('active') && !el.classList.contains('show') && hasSelected) {
-      el.classList.add('show');
+    if (el.classList.contains('active') && !el.querySelector('span').classList.contains('selected-status-widget') && hasSelected) {
+      el.querySelector('span').classList.add('select-status-widget');
+      el.querySelector('span').classList.add('selected-status-widget');
       onSelectedItem(dataIndex, el, date, true);
-    } else if (el.classList.contains('active') && el.classList.contains('show') && hasSelected) {
-      el.classList.remove('show');
+    } else if (el.classList.contains('active') && el.querySelector('span').classList.contains('selected-status-widget') && hasSelected) {
+      el.querySelector('span').classList.remove('select-status-widget');
+      el.querySelector('span').classList.remove('selected-status-widget');
       onCancelSelectedItem(dataIndex, date);
 
       // if (!detectImageItemActive(date)) {
@@ -120,8 +125,8 @@ export default class ImageByDate extends Component {
       // }
     } else {
       //this.props.dispatch(Action.toggleMedia(true))
-      onViewLargeImage(date, dataIndex);
-      ipc.send('getMediaImage',this.props.hash);
+      onViewLargeImage(date, dataIndex, hash);
+      ipc.send('getMediaImage', hash);
     }
   }
 
@@ -152,7 +157,7 @@ export default class ImageByDate extends Component {
       //   }
       // }
       return (
-        <img src={ figureItem.path }/>
+        <img style={{ width: '100%', height: '100%', objectFit: 'cover' }} src={ figureItem.path } />
       );
     } else {
       return (
@@ -173,7 +178,7 @@ export default class ImageByDate extends Component {
         {/* 生成缩略图 */}
         { this.createFigureComponent(figureItem) }
 
-        { figureItem.path && ( <i style={ selectStatusStyle } onClick={ this.selectedItemHandle }></i> ) }
+        { figureItem.path && ( <span className="status-widget" style={ selectStatusStyle } onClick={ this.selectedItemHandle }><i></i></span> ) }
       </div>
     );
   }
