@@ -283,16 +283,6 @@ class AllFiles extends Component {
 		// 	this.props.dispatch(Action.setFilesSize(false));
 		// }
 	}
-
-	componentWillReceiveProps() {
-		c.log('0')
-		c.log((new Date()).getTime())
-	}
-
-	componentDidUpdate() {
-		c.log('1')
-		c.log((new Date()).getTime())	
-	}
 }
 
 export default AllFiles;

@@ -260,16 +260,6 @@ class Main extends Component {
 	cleanSnack() {
 		this.props.dispatch(Action.cleanSnack());
 	}
-
-	componentWillReceiveProps() {
-		c.log('-2')
-		c.log((new Date()).getTime())
-	}
-
-	componentDidUpdate() {
-		c.log('-1')
-		c.log((new Date()).getTime())	
-	}
 }
 
 Main.childContextTypes = {

@@ -319,7 +319,7 @@ ipcMain.on('login',function(err,username,password){
 		user.type = token.type
 		return loginApi.getAllUser()
 	}).then((users)=>{
-
+		console.log(tempArr)
 		c('get users : ' + users.length)
 		tempArr.forEach(item => {
 			item.checked = false
@@ -332,6 +332,7 @@ ipcMain.on('login',function(err,username,password){
 				item.color = colorArr[2]
 			}
 		})
+		console.log(tempArr)
 		user.users = tempArr
 		user.allUser = users
 		isLogin = true
@@ -355,8 +356,10 @@ ipcMain.on('getRootData', ()=> {
 	c('achieve data ===> ')
 	fileApi.getDrive().then((drivesArr) => {
 		drives = drivesArr
+		let uuid = store.getState().login.obj.uuid
+		let driveUUid = store.getState().login.obj.allUser.find(item=>item.uuid == uuid).home
 		let drive = drives.find(item => {
-			if (item.owner[0] == user.uuid && item.label.indexOf('home') != -1) {return true}
+			if (item.uuid == driveUUid) {return true}
 		})
 		if (drive == undefined) {
 			throw new Error('can not find root node')
@@ -374,12 +377,13 @@ ipcMain.on('getRootData', ()=> {
 	})
 })
 //select children
-ipcMain.on('enterChildren', (event,selectItem) => {
+ipcMain.on('enterChildren', (err,selectItem,a) => {
 	enterChildren(selectItem)
 })
 function enterChildren(selectItem) {
 	dispatch(action.loadingFile())
 	c(' ')
+	c('enterChildren : ')
 	//c('open the folder : ' + selectItem.name?selectItem.name:'null')
 	let folder = map.get(selectItem.uuid)
 	fileApi.getFile(selectItem.uuid).then(file => {
@@ -411,7 +415,6 @@ function getPath(obj) {
 		dirPath.unshift({key:item.name,value:Object.assign({},item,{children:null})})
 		getPath(map.get(obj.parent))
 	}
-	
 }
 ipcMain.on('getFile',(e,uuid)=>{
 	getFile(uuid).then((data)=>{
@@ -1029,10 +1032,19 @@ ipcMain.on('createMediaShare',(err, medias, users, album) => {
 		mediaShare.push(data)
 		mediaShareMap.set(data.digest,mediaShare[mediaShare.length-1])
 		dispatch(action.setMediaShare(mediaShare))
-		mainWindow.webContents.send('message','创建相册成功')
+		if (album) {
+			mainWindow.webContents.send('message','创建相册成功')
+		}else {
+			mainWindow.webContents.send('message','创建分享成功')
+		}
 	}).catch(err => {
 		c(err)
-		mainWindow.webContents.send('message','创建相册失败')
+		if (album) {
+			mainWindow.webContents.send('message','创建相册失败')
+		}else {
+			mainWindow.webContents.send('message','创建相册失败')
+		}
+		
 	})
 })
 
@@ -1480,6 +1492,64 @@ function getFolderTree(folderObj,call) {
 			call(null,tree)
 		}
 	})
+}
+
+//system api-----------------------------------------
+ipcMain.on('runVolume',(err,address,target,init,mkfs) => {
+	c(address)
+	c(target)
+	c(init)
+	c(mkfs)
+	mir(address,target).then(data => {
+		
+	}).catch(err => {
+		
+	})
+})
+
+ipcMain.on('installVolume', (err,address,target,init,mkfs,time) => {
+	c(address)
+	c(target)
+	c(init)
+	c(mkfs)
+	c(time)
+	mir(address,target,init,mkfs).then(data => {
+		mainWindow.webContents.send('mirFinish-'+time,'success')
+	}).catch(err => {
+		mainWindow.webContents.send('mirFinish-'+time,'failed')
+		mainWindow.webContents.send('message',err)
+	})
+})
+
+function mir(address,target,init,mkfs) {
+	console.log(target)
+	var promise = new Promise((resolve,reject) => {
+		let options = {
+			method: 'post',
+			url:' http://' + address +':3000/system/mir',
+			headers : {
+					'Content-Type': 'application/json'
+				},
+			body: JSON.stringify({
+				target:target,
+				init,
+				mkfs
+			})
+		}
+		let callback = (err,res,body) => {
+			if (!err && res.statusCode == 200) {
+				c('success : ')
+				c(res.body)
+				resolve(body)
+			}else {
+				c('failed : ')
+				console.log(res.body)
+				reject(res.body)
+			}
+		}
+		request(options,callback)
+	})
+	return promise
 }
 
 ipcMain.on('store',(err,store)=>{

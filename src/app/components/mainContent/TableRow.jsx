@@ -3,7 +3,7 @@ import svg from '../../utils/SVGIcon';
 class Row extends Component {
 
 	shouldComponentUpdate(nextP) {
-		if (this.props.item.checked == nextP.item.checked && this.props.item.name == nextP.item.name) {
+		if (this.props.item.checked == nextP.item.checked && this.props.item.name == nextP.item.name && this.props.index == nextP.index ) {
 			return false
 		}else {
 			return true
