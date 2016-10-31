@@ -974,8 +974,8 @@ body{
 	border: 1px solid rgba(255,255,255,.54);
 	border-radius: 100%;
 	display: inline-block;
-	height: 18px;
-	width: 18px;
+	height: 16px;
+	width: 16px;
 	overflow: hidden;
 	vertical-align: bottom;
 }
@@ -1016,4 +1016,8 @@ body{
 .status-widget.select-status-widget.unselected-status-widget i,
 .status-widget.select-status-widget.unselected-status-widget i:after {
 	background-color: #eee;
+}
+
+.share-user-list > span:last-of-type > div > div > div {
+	left: 3px!important;
 }

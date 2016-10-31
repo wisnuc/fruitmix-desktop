@@ -5,8 +5,6 @@
 import React, { Component, PropTypes } from 'react';
 import { findDOMNode } from 'react-dom';
 import { connect } from 'react-redux';
-
-import Checkbox from '../../React-Redux-UI/src/components/partials/Checkbox';
 import NavigationBar from '../main/NavigationBar';
 import RightPanel from '../main/RightPanel';
 import ImageByDate from '../common/ImageByDate';
@@ -15,7 +13,7 @@ import Carousel from '../../React-Redux-UI/src/components/transitions/Carousel';
 import AddShareDialog from '../common/Dialog';
 import Mask from '../../React-Redux-UI/src/components/partials/Mask';
 import ImageSwipe from '../common/ImageSwipe';
-import { MenuItem } from 'material-ui';
+import { Checkbox, MenuItem, RadioButtonGroup, RadioButton } from 'material-ui';
 
 import Action from '../../actions/action';
 
@@ -48,6 +46,11 @@ function getStyles () {
       textAlign: 'center',
       width: 16,
       height: 16
+    },
+    dialogContentStyle: {
+      backgroundColor: '#fff',
+      fontSize: 12,
+      padding: '25px 50px 0'
     }
   }
 }
@@ -87,6 +90,45 @@ function getMapByDateTimestamp (arr) {
   return result;
 }
 
+/**
+  分享操作
+**/
+const shareAction = (() => {
+  let checkedUserids = [];
+
+  return {
+    choise(id, checked) {
+      if (checked)
+        return checkedUserids.push(id);
+
+      const findIndex = checkedUserids.findIndex(uid => uid === id);
+
+      if (findIndex >= 0)
+        return checkedUserids.splice(findIndex, 1);
+    },
+    send(context) {
+      const shareType = context.state.showedShareList;
+      const users = context.props.login.obj.users;
+      const clearAllSelectedItem = context.clearAllSelectedItem;
+      const imageDigestList = context.props.imageItem.map(imageObj => imageObj.el.dataset['hash']);
+
+      if (shareType) {
+        // 分享给选中的人
+        ipc.send('createMediaShare', imageDigestList, checkedUserids);
+      } else {
+        // 分享给所有人
+        ipc.send('createMediaShare', imageDigestList, users.map(user => user.uuid));
+      }
+
+      clearAllSelectedItem.call(context);
+      context.reset();
+    },
+    clear() {
+      checkedUserids = [];
+    }
+  }
+})();
+
 class AllPhotos extends Component {
   constructor(props) {
     super(props);
@@ -94,7 +136,8 @@ class AllPhotos extends Component {
     this.map = props.media ? props.media.data : [];
     this.state = {
       imageGroup: void 0,
-      addShareDialogShowedStatus: false
+      addShareDialogShowedStatus: false,
+      showedShareList: true
     };
   }
 
@@ -222,25 +265,6 @@ class AllPhotos extends Component {
 
   shareActionHandle() {
     this.setState({ addShareDialogShowedStatus: true });
-    // const { imageItem, login } = this.props;
-    // const shareType = Array
-    //   .from(document.querySelectorAll('.share-type'))
-    //   .find(node => node.firstElementChild.checked)
-    //   .firstElementChild
-    //   .value;
-    // const imageDigestList = imageItem.map(imageObj => imageObj.el.dataset['hash']);
-    // let peoples;
-    //
-    // if (shareType === 'custom') {
-    //   peoples = Array
-    //     .from(document.querySelectorAll('.user-select'))
-    //     .filter(node => node.checked).map(node => node.value);
-    // } else {
-    //   peoples = login.obj.users.filter(user => user.uuid !== login.obj.uuid).map(user => user.uuid);
-    // }
-    //
-    // ipc.send('createMediaShare', imageDigestList, peoples);
-    // this.clearAllSelectedItem();
   }
 
   albumActionHandle() {
@@ -265,6 +289,13 @@ class AllPhotos extends Component {
     this.clearAllSelectedItem();
   }
 
+  reset() {
+    this.setState({
+      addShareDialogShowedStatus: false,
+      showedShareList: true
+    });
+  }
+
   createShareDialog() {
     if (this.state.addShareDialogShowedStatus) {
       return (
@@ -274,18 +305,145 @@ class AllPhotos extends Component {
           style={{ width: 420, zIndex: 1200 }}
           foot={ this.createShareFoot() }
           orientation="custom"
-          onClose={ function () {} }>
+          onClose={ () => { this.reset(); } }>
         </AddShareDialog>
       );
     }
   }
 
   createShareContent() {
-    return (<div>1</div>);
+    const { dialogContentStyle } = getStyles();
+    const { obj: { users, uuid } } = this.props.login;
+
+    // 控件样式
+    const iconStyle = { fill: '#576bc0', height: 16, width: 16 };
+    const labelStyle = { color: '#333', fontSize: 14, marginTop: -4 };
+    const radioStyle = { marginBottom: 5 };
+    const rowStyle = { display: '-webkit-box', color: '#949494', fontSize: 12, marginBottom: 5, textAlign: 'left', WebkitBoxOrient: 'horizontal' };
+    const columnStyle = { display: 'block' };
+    const userColumnStyle = Object.assign({}, columnStyle, { WebkitBoxFlex: 2 });
+    const operationColumnStyle = Object.assign({}, columnStyle, { width: 72 })
+    const columnFontStyle = Object.assign({}, columnStyle, { fontSize: 13 });
+
+    // 分享用户列表头部
+    const shareUserHead = (
+      <div style={ rowStyle }>
+        <span style={ userColumnStyle }>用户</span>
+        <span style={ operationColumnStyle }>查看</span>
+      </div>
+    );
+
+    shareAction.clear();
+
+    // 分享用户列表项组件
+    const shareUserListItems = users.map((user, index) => {
+      const userid = user.uuid;
+      const username = user.username;
+      shareAction.choise(userid, userid === uuid);
+
+      return (
+        <div className="share-user-list" key={ userid } style={ rowStyle }>
+          <span style={ Object.assign({}, userColumnStyle, columnFontStyle) }>{ username }</span>
+          <span style={ operationColumnStyle }>
+            <Checkbox
+              ref={ 'user' + userid }
+              value={ username }
+              defaultChecked={ userid === uuid }
+              iconStyle={ iconStyle }
+              onCheck={ ((userid, event, checked) => { shareAction.choise(userid, checked) }).bind(null, userid) }
+              style={ radioStyle } />
+          </span>
+        </div>
+      );
+    });
+
+    // 分享用户列表项组件
+    let shareUserList;
+
+    if (this.state.showedShareList) {
+      shareUserList = (
+        <div style={{ marginTop: 5, marginLeft: 28 }}>
+          { shareUserHead }
+          <div style={{ marginTop: 10 }}>
+            { shareUserListItems }
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div style={ dialogContentStyle }>
+        {/* two radio button*/}
+        <RadioButtonGroup
+          ref="shareToUser"
+          name="shareToUser"
+          defaultSelected="customUser"
+          value="allUsers"
+          onChange={ (event, value) => this.setState({ showedShareList: value === 'customUser' })  }>
+
+          <RadioButton
+            value="allUsers"
+            iconStyle={ iconStyle }
+            label="给所有人"
+            labelStyle={ labelStyle }
+            style={ radioStyle } />
+
+          <RadioButton
+            value="customUser"
+            iconStyle={ iconStyle }
+            label="自定义"
+            labelStyle={ labelStyle }
+            rippleColor="transparent" />
+        </RadioButtonGroup>
+        { shareUserList }
+      </div>
+    );
+  }
+
+  sendShareRequest() {
+    const {obj: { users }} = this.props.login;
+    const { showedShareList } = this.state;
+    let userids;
+
+    if (!showedShareList) {
+      userids = users.map(user => user.uuid);
+    } else {
+      userids = Object.keys(this.refs)
+        .filter(key => key.indexOf('user') >= 0 && !!this.refs[key].checked)
+        .map(key => key.slice(key.indexOf('user') + 4))
+    }
+
+    Object.keys(this.refs).filter(key => key.indexOf('user') >= 0 && console.log(findDOMNode(this.refs[key]).checked));
+    // const { imageItem, login } = this.props;
+    // const shareType = Array
+    //   .from(document.querySelectorAll('.share-type'))
+    //   .find(node => node.firstElementChild.checked)
+    //   .firstElementChild
+    //   .value;
+    // const imageDigestList = imageItem.map(imageObj => imageObj.el.dataset['hash']);
+    // let peoples;
+    //
+    // if (shareType === 'custom') {
+    //   peoples = Array
+    //     .from(document.querySelectorAll('.user-select'))
+    //     .filter(node => node.checked).map(node => node.value);
+    // } else {
+    //   peoples = login.obj.users.filter(user => user.uuid !== login.obj.uuid).map(user => user.uuid);
+    // }
+    //
+    // ipc.send('createMediaShare', imageDigestList, peoples);
+    // this.clearAllSelectedItem();
   }
 
   createShareFoot() {
-    return (<div>2</div>);
+    const style = { borderTop: '1px solid #e0e0e0', margin: '10px 50px 0' };
+    const btnStyle = { borderRadius: 4, backgroundColor: '#ff9a01', color: '#fff', fontSize: 12, textAlign: 'center', margin: '10px 0 15px', lineHeight: '30px', width: 60 };
+
+    return (
+      <div className="clearfix" style={ style }>
+        <a className="fr" href="javascript:;" onClick={ (() => { shareAction.send(this) }).bind(this) } style={ btnStyle }>分享</a>
+      </div>
+    );
   }
 
   createCarouselComponent() {
@@ -365,7 +523,10 @@ class AllPhotos extends Component {
     });
 
     Object.keys(this.refs).forEach(key => {
-      key.indexOf('select_datetime') >= 0 && this.refs[key].setState({ checked: false });
+      if (key.indexOf('select_datetime')) {
+        findDOMNode(this.refs[key]).classList.remove('selected-status-widget');
+        findDOMNode(this.refs[key]).classList.add('unselected-status-widget');
+      }
     });
 
     dispatch(Action.clearDragImageItem());
@@ -589,6 +750,7 @@ class AllPhotos extends Component {
   componentWillUnmount() {
     this.mounted = false;
     this.clearAllSelectedItem();
+    shareAction.clear();
   }
 
   componentWillReceiveProps(nextProps) {
