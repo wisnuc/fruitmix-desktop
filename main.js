@@ -355,8 +355,10 @@ ipcMain.on('getRootData', ()=> {
 	c('achieve data ===> ')
 	fileApi.getDrive().then((drivesArr) => {
 		drives = drivesArr
+		let uuid = store.getState().login.obj.uuid
+		let driveUUid = store.getState().login.obj.allUser.find(item=>item.uuid == uuid).home
 		let drive = drives.find(item => {
-			if (item.owner[0] == user.uuid && item.label.indexOf('home') != -1) {return true}
+			if (item.uuid == driveUUid) {return true}
 		})
 		if (drive == undefined) {
 			throw new Error('can not find root node')
@@ -374,12 +376,13 @@ ipcMain.on('getRootData', ()=> {
 	})
 })
 //select children
-ipcMain.on('enterChildren', (event,selectItem) => {
+ipcMain.on('enterChildren', (err,selectItem,a) => {
 	enterChildren(selectItem)
 })
 function enterChildren(selectItem) {
 	dispatch(action.loadingFile())
 	c(' ')
+	c('enterChildren : ')
 	//c('open the folder : ' + selectItem.name?selectItem.name:'null')
 	let folder = map.get(selectItem.uuid)
 	fileApi.getFile(selectItem.uuid).then(file => {
@@ -411,7 +414,6 @@ function getPath(obj) {
 		dirPath.unshift({key:item.name,value:Object.assign({},item,{children:null})})
 		getPath(map.get(obj.parent))
 	}
-	
 }
 ipcMain.on('getFile',(e,uuid)=>{
 	getFile(uuid).then((data)=>{
