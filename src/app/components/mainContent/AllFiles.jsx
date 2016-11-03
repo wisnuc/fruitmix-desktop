@@ -63,6 +63,7 @@ class AllFiles extends Component {
 						    <MenuItem innerDivStyle={listStyle} primaryText="新建文件夹" onClick={this.toggleUploadFolder.bind(this,true)}/>
 							<MenuItem innerDivStyle={listStyle} primaryText="上传文件" onClick={this.openInputFile.bind(this)}/>
 							<MenuItem innerDivStyle={listStyle} primaryText="上传文件夹" onClick={this.openInputFolder.bind(this)}/>
+							<MenuItem innerDivStyle={listStyle} primaryText="上传" onClick={this.openUpload.bind(this)}/>
 						</IconMenu>
 					</div>
 					{/*file table body*/}
@@ -173,25 +174,26 @@ class AllFiles extends Component {
 	upLoadFile(e) {
 		let files = [];
 		let map = new Map();
-		var t = new Date();
+		let t = new Date();
+		let dirUUID = this.props.state.file.current.directory.uuid
 		for (let i=0;i<e.nativeEvent.target.files.length;i++) {
 			var f = e.nativeEvent.target.files[i]
 			var file = {
-				uploadTime : Date.parse(t),
-				parent : this.props.state.file.current.directory.uuid,
-				status:0,
-				uuid:null,
-				checked:false,
-				type:'file',
-				owner:[this.props.state.login.obj.uuid],
-				size:f.size,
-				path:f.path,
-				name:f.name,
+				uploadTime : Date.parse(t), // nonsense TODO
+				parent : dirUUID,			// target
+				status:0,					// 0, 100 progress
+				uuid:null,					// return uuid
+				checked:false,				// not used
+				type:'file',				// file type (file or folder)
+				owner:[this.props.state.login.obj.uuid],	// not used
+				size:f.size,				// file size
+				path:f.path,				// file local path (with name)
+				name:f.name,				// file name (basename)
 			}
 			files.push(file);
-			map.set(f.path+Date.parse(t),file);
+			map.set(f.path+Date.parse(t),files[files.length-1]);
 		}
-		let fileObj = {data:files,length:files.length,success:0,failed:0,index:0,status:'ready',parent:this.props.state.file.current.directory.uuid,map:map,key:Date.parse(new Date())};
+		let fileObj = {data:files,map:map,length:files.length,success:0,failed:0,index:0,status:'ready',parent:this.props.state.file.current.directory.uuid,key:Date.parse(new Date())};
 		this.props.dispatch(Action.addUpload(fileObj));
 		ipc.send('uploadFile',fileObj);	
 		this.props.dispatch(Action.setSnack(files.length+' 个文件添加到上传队列',true));
@@ -235,10 +237,14 @@ class AllFiles extends Component {
 	openInputFolder() {
 		ipc.send('openInputOfFolder');
 	}
+	openUpload() {
+		ipc.send('openUpload')	
+	}
 	//toggle dialog of upload files
 	toggleUploadFolder(b) {
 		this.props.dispatch(Action.toggleDialogOfUploadFolder(b));
 	}
+
 	//toggle dialog of share
 	toggleShare(b) {
 		this.props.dispatch(Action.toggleShare(b));
