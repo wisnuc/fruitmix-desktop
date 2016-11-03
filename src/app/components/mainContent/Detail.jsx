@@ -105,7 +105,7 @@ class Detail extends Component {
  	}
  	getOwner(owner) {
  		let o = this.props.login.obj.users.find(item=>{
- 			return item.uuid = owner
+ 			return item.uuid == owner[0]
  		});
  		if (o != undefined) {
  			return o.username
@@ -144,6 +144,7 @@ class Detail extends Component {
 	}
 
 	checkUser(uuid,obj,checked) {
+		c.log(uuid)
 		let index = this.props.view.menu.index
 		let files = [this.props.file.children[index].uuid]
 		let users = this.cloneFun(this.props.file.children[index].readlist)
@@ -151,6 +152,7 @@ class Detail extends Component {
 			users = []
 		}
 		if (checked) {
+			c.log(uuid)
 			users.push(uuid)
 			ipc.send('share',files,users)
 		}else {

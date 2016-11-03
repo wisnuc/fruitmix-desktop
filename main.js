@@ -319,7 +319,7 @@ ipcMain.on('login',function(err,username,password){
 		user.type = token.type
 		return loginApi.getAllUser()
 	}).then((users)=>{
-
+		console.log(tempArr)
 		c('get users : ' + users.length)
 		tempArr.forEach(item => {
 			item.checked = false
@@ -332,6 +332,7 @@ ipcMain.on('login',function(err,username,password){
 				item.color = colorArr[2]
 			}
 		})
+		console.log(tempArr)
 		user.users = tempArr
 		user.allUser = users
 		isLogin = true

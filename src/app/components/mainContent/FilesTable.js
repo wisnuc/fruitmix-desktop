@@ -121,16 +121,6 @@ class AllFilesTable extends Component {
 		$('tbody>tr:eq('+rowNumber+') .bezierFrame').children('.bezierTransition2').remove();
 		$('tbody>tr:eq('+rowNumber+') .bezierFrame').append('<div class="bezierTransition2"></div>');
 	}
-
-	componentWillReceiveProps() {
-		c.log('2')
-		c.log((new Date()).getTime())
-	}
-
-	componentDidUpdate() {
-		c.log('3')
-		c.log((new Date()).getTime())	
-	}
 }
 
 var mapStateToProps = (state)=>({
