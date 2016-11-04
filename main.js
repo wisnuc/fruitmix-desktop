@@ -1144,6 +1144,7 @@ ipcMain.on('upLoadFolder',(e,name,dir)=>{
 ipcMain.on('uploadFile',(e,files)=>{
 	// uploadQueue.push(files)
 	// upload.dealUploadQueue()
+	let target = currentDirectory.uuid
 	dialog.showOpenDialog({properties: [ 'openFile','multiSelections','createDirectory']},function(data){
 		let index = 0
 		readFileInfor(data[index],(err, infor) => {
@@ -1153,7 +1154,9 @@ ipcMain.on('uploadFile',(e,files)=>{
 			}else {
 				c(infor)
 			}
-			if () {}
+			// if () {
+
+			// }
 		})
 	})
 
