@@ -63,7 +63,6 @@ class AllFiles extends Component {
 						    <MenuItem innerDivStyle={listStyle} primaryText="新建文件夹" onClick={this.toggleUploadFolder.bind(this,true)}/>
 							<MenuItem innerDivStyle={listStyle} primaryText="上传文件" onClick={this.openInputFile.bind(this)}/>
 							<MenuItem innerDivStyle={listStyle} primaryText="上传文件夹" onClick={this.openInputFolder.bind(this)}/>
-							<MenuItem innerDivStyle={listStyle} primaryText="上传" onClick={this.openUpload.bind(this)}/>
 						</IconMenu>
 					</div>
 					{/*file table body*/}
@@ -231,14 +230,12 @@ class AllFiles extends Component {
 	}
 	//open input of files
 	openInputFile() {
-		$('.upload-input').trigger('click');
+		// $('.upload-input').trigger('click');
+		ipc.send('uploadFile')
 	}
 	//toggle dialog of upload folder
 	openInputFolder() {
 		ipc.send('openInputOfFolder');
-	}
-	openUpload() {
-		ipc.send('openUpload')	
 	}
 	//toggle dialog of upload files
 	toggleUploadFolder(b) {

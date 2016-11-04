@@ -1,1 +1,8 @@
-{"presets":["es2015","react"]}
+{
+  "presets": ["es2015", "react", "bluebird"],
+  "plugins": [
+    "transform-async-to-bluebird", 
+    "transform-promise-to-bluebird",
+    "transform-runtime"
+  ]
+}

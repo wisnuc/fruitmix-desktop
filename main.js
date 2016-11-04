@@ -22,7 +22,7 @@ global.fruitmixWindow = null
 global.appifiWindow = null
 //server
 global.server = ''
-global.OSServer - ''
+global.OSServer = ''
 //user
 global.user = {}
 //files
@@ -31,9 +31,6 @@ global.rootNode = null
 global.tree = []
 global.map = new Map()
 //share
-// global.shareFiles = []
-// global.shareTree = []
-// global.shareMap = new Map()
 global.shareRoot = []
 global.shareChildren = []
 global.sharePath = []
@@ -44,9 +41,11 @@ global.parent = {}
 global.dirPath = []
 global.tree = []
 //upload 
-global.uploadQueue = []
 global.uploadNow = []
 global.uploadHandleArr = []
+global.uploadQueue = []
+global.httpRequestConcurrency = 4
+global.fileHashConcurrency = 4
 //download
 global.downloadQueue = []
 global.downloadNow = []
@@ -1143,8 +1142,29 @@ ipcMain.on('upLoadFolder',(e,name,dir)=>{
 
 //upload file
 ipcMain.on('uploadFile',(e,files)=>{
-	uploadQueue.push(files)
-	upload.dealUploadQueue()
+	// uploadQueue.push(files)
+	// upload.dealUploadQueue()
+	dialog.showOpenDialog({properties: [ 'openFile','multiSelections','createDirectory']},function(data){
+		let index = 0
+		readFileInfor(data[index],(err, infor) => {
+			index++
+			if(err) {
+				//...
+			}else {
+				c(infor)
+			}
+			if () {}
+		})
+	})
+
+	let readFileInfor = (path) => {
+		fs.lstat(path,(err, infor) => {
+			if (err) {
+				return callback(err)
+			}
+			callback(null,infor)
+		})
+	}
 })
 
 //upload folder
@@ -1403,11 +1423,6 @@ function uploadFileInFolder(node) {
 	})
 	return promise
 }
-ipcMain.on('openUpload', e => {
-	dialog.showOpenDialog({properties: [ 'openFile','openDirectory','multiSelections','createDirectory']},function(data){
-		c(data)
-	})
-})
 //download file
 ipcMain.on('download',(e,files)=>{
 	downloadQueue.push(files)
