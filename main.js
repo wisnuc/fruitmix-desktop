@@ -44,8 +44,13 @@ global.tree = []
 global.uploadNow = []
 global.uploadHandleArr = []
 global.uploadQueue = []
-global.httpRequestConcurrency = 4
-global.fileHashConcurrency = 4
+// global.httpRequestConcurrency = 4
+// global.fileHashConcurrency = 4
+// global.runningQueue = []
+// const readyQueue = []
+// const hashingQueue = []
+// const hashlessQueue = []
+// const userTasks = []
 //download
 global.downloadQueue = []
 global.downloadNow = []
@@ -101,7 +106,8 @@ const adapter = () => {
 		setting : store.getState().setting,
 		file : store.getState().file,
 		media : store.getState().media,
-		share: store.getState().share
+		share: store.getState().share,
+		transimission: store.getState().transimission
 	}
 }
 
@@ -1146,32 +1152,60 @@ ipcMain.on('uploadFile',(e,files)=>{
 	// upload.dealUploadQueue()
 	let target = currentDirectory.uuid
 	dialog.showOpenDialog({properties: [ 'openFile','multiSelections','createDirectory']},function(data){
+		if (!data) {
+			return
+		}
 		let index = 0
-		readFileInfor(data[index],(err, infor) => {
-			index++
-			if(err) {
-				//...
-			}else {
-				c(infor)
-			}
-			// if () {
-
-			// }
-		})
+		let count = data.length
+		let fileArr = []
+		let readFileInfor = (abspath) => {
+			fs.lstat(abspath,(err, infor) => {
+				if (err) {
+					
+				}else {
+					fileArr.push(Object.assign({},infor,{abspath:abspath}))	
+				}
+				index++
+				if(index < count) {
+					readFileInfor(data[index])
+				}else {
+					upload.createUserTask('file',fileArr,target)
+				}
+			})
+		}
+		readFileInfor(data[index])
 	})
-
-	let readFileInfor = (path) => {
-		fs.lstat(path,(err, infor) => {
-			if (err) {
-				return callback(err)
-			}
-			callback(null,infor)
-		})
-	}
 })
 
 //upload folder
-ipcMain.on('openInputOfFolder', e=>{
+ipcMain.on('openInputOfFolder', e => {
+	let target = currentDirectory.uuid
+	dialog.showOpenDialog({properties: [ 'openDirectory','multiSelections','createDirectory']},function(data){
+		if (!data) {
+			return
+		}
+		let index = 0
+		let count = data.length
+		let folderArr = []
+		let readFolderInfor = (abspath) => {
+			fs.stat(abspath,(err, infor) => {
+				if (err) {
+					
+				}else {
+					folderArr.push(Object.assign({},infor,{abspath:abspath}))	
+				}
+				index++
+				if(index < count) {
+					readFolderInfor(data[index])
+				}else {
+					c(folderArr)
+					upload.createUserTask('folder',folderArr,target)
+				}
+			})
+		}
+		readFolderInfor(data[index])
+	})
+	return
 	// initialize object
 	var uploadObj = {
 		status: '准备',

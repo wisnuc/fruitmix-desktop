@@ -103,12 +103,12 @@ var actions = {
 		}
 	},
 
-	addUpload(obj) {
-		return {
-			type: 'ADD_UPLOAD',
-			obj: obj
-		}
-	},
+	// addUpload(obj) {
+	// 	return {
+	// 		type: 'ADD_UPLOAD',
+	// 		obj: obj
+	// 	}
+	// },
 
 	addDownload(obj) {
 		return {
@@ -225,13 +225,13 @@ var actions = {
 		}
 	},
 
-	refreshStatusOfUpload(file,status) {
-		return {
-			type: 'REFRESH_STATUS_UPLOAD',
-			file: file,
-			status: status
-		}
-	},
+	// refreshStatusOfUpload(file,status) {
+	// 	return {
+	// 		type: 'REFRESH_STATUS_UPLOAD',
+	// 		file: file,
+	// 		status: status
+	// 	}
+	// },
 
 	refreshStatusOfDownload(file,status) {
 		return {
@@ -249,13 +249,13 @@ var actions = {
 		}
 	},
 
-	refreshUploadStatusOfFolder(key,status) {
-		return {
-			type: 'UPLOAD_STATUS_OF_FOLDER',
-			key: key,
-			status: status
-		}
-	},
+	// refreshUploadStatusOfFolder(key,status) {
+	// 	return {
+	// 		type: 'UPLOAD_STATUS_OF_FOLDER',
+	// 		key: key,
+	// 		status: status
+	// 	}
+	// },
 
 	checkUser(uuid,b) {
 		return {

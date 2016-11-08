@@ -5,7 +5,7 @@ import login from './login'
 import navigation from './navigation'
 import multiple from './multiple'
 import snack from './snack'
-import transmission from './transmission'
+import transimission from './transimission'
 import tree from './tree'
 import media from './media'
 import setting from './setting'
@@ -27,7 +27,7 @@ const reducer = combineReducers({
 	navigation,
 	multiple,
 	snack,
-	transmission,
+	transimission,
 	tree,
 	media,
 	setting,

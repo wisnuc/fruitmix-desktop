@@ -138,9 +138,9 @@ class PopMenu extends Component {
 }
 
 var mapStateToProps = (state)=>({
-	     file: state.file,
-	     navigation: state.navigation,
-	     view: state.view,
-	})
+	file: state.file,
+	navigation: state.navigation,
+	view: state.view,
+})
 
 export default connect(mapStateToProps)(PopMenu)

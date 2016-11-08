@@ -11,6 +11,7 @@
 // import Component
 import AllFile from '../mainContent/AllFiles'
 import Collection from '../mainContent/Collection'
+import Transimission from '../mainContent/Transimission'
 import SharedFiles from '../mainContent/SharedFiles'
 import SharedByMe from '../mainContent/SharedByMe'
 import AllPhotos from '../mainContent/AllPhotos'
@@ -36,14 +37,15 @@ class MainContent extends Component {
 	render() {
 		let componentMap = {
 			'我的所有文件' : <AllFile dispatch={this.props.dispatch} state={this.props.state} key={'a'}></AllFile>,
-			'上传/下载' : <Collection dispatch={this.props.dispatch} state={this.props.state} key={'b'}></Collection>,
+			'上传/下载' : <Transimission key={'b'}></Transimission>,
+			// '上传/下载' : <Collection dispatch={this.props.dispatch} state={this.props.state} key={'b'}></Collection>,
 			'分享给我的文件' : <SharedFiles dispatch={this.props.dispatch} state={this.props.state} key={'c'}></SharedFiles>,
 			'我分享的文件' : <SharedByMe dispatch={this.props.dispatch} state={this.props.state} key={'d'}></SharedByMe>,
 			'所有照片' : <AllPhotos key={'e'}></AllPhotos>,
 			'相册' : <Albums key={'f'}></Albums>,
 			'分享' : <AlbumOrPhotoShare key={'j'} dispatch={this.props.dispatch}></AlbumOrPhotoShare>,
 			'相册查看' : <AlbumView dispatch={this.props.dispatch} state={this.props.state} key={'g'}></AlbumView>,
-      '分享查看' : <AlbumOrPhotoShareView dispatch={this.props.dispatch} state={this.props.state} key={'g'}></AlbumOrPhotoShareView>,
+      		'分享查看' : <AlbumOrPhotoShareView dispatch={this.props.dispatch} state={this.props.state} key={'g'}></AlbumOrPhotoShareView>,
 			'设置' : <Setting dispatch={this.props.dispatch} state={this.props.state} key={'h'}></Setting>,
 			'数据迁移' : <DataMove dispatch={this.props.dispatch} state={this.props.state} key={'i'}></DataMove>
 		}

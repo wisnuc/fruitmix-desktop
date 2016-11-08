@@ -70,9 +70,9 @@ class Main extends Component {
 		// 	this.props.dispatch(Action.setShareChildren(shareChildren,sharePath));
 		// });
 
-		ipc.on('refreshStatusOfUpload',(err,file,status)=>{
-			this.props.dispatch(Action.refreshStatusOfUpload(file,status));
-		});
+		// ipc.on('refreshStatusOfUpload',(err,file,status)=>{
+		// 	this.props.dispatch(Action.refreshStatusOfUpload(file,status));
+		// });
 
 		ipc.on('refreshStatusOfDownload',(err,file,status)=>{
 			this.props.dispatch(Action.refreshStatusOfDownload(file,status));
@@ -82,9 +82,9 @@ class Main extends Component {
 			this.props.dispatch(Action.refreshDownloadStatusOfFolder(key,status));
 		});
 
-		ipc.on('refreshUploadStatusOfFolder',(err,key,status)=>{
-			this.props.dispatch(Action.refreshUploadStatusOfFolder(key,status));
-		});
+		// ipc.on('refreshUploadStatusOfFolder',(err,key,status)=>{
+		// 	this.props.dispatch(Action.refreshUploadStatusOfFolder(key,status));
+		// });
 
 
 		ipc.on('deleteSuccess',(err,obj,children,dir)=>{
@@ -134,9 +134,9 @@ class Main extends Component {
 			this.props.dispatch(Action.addDownload(obj));
 		});
 
-		ipc.on('transmissionUpload',(err,obj)=>{
-			this.props.dispatch(Action.addUpload(obj));
-		});
+		// ipc.on('transmissionUpload',(err,obj)=>{
+		// 	this.props.dispatch(Action.addUpload(obj));
+		// });
 
 		ipc.on('setUsers',(err,user)=>{
 			this.props.dispatch({type:'SET_USER',user:user});

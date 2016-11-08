@@ -99,6 +99,14 @@ var actions = {
 			files:files
 		}
 	},
+
+	//transimission --------------------------------------------
+	setUpload(data) {
+		return {
+			type : 'SET_UPLOAD',
+			data : data
+		}
+	}
 }
 
 module.exports = actions;
