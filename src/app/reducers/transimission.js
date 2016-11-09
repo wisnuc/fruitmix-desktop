@@ -59,7 +59,9 @@ const transimission = (state=defaultState,action)=>{
 		// 	state.upload[index].status = action.status;
 		// 	return Object.assign({},state);
 		case 'ADAPTER':
-			return Object.assign({},state,action.store.transimission)
+			state = transimission
+			return state
+			// return Object.assign({},state,action.store.transimission)
 		default:
 			return state
 	}

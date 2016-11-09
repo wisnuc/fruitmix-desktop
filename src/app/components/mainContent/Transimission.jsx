@@ -19,11 +19,16 @@ class Collection extends Component {
 			<div className='transimission-container'>
 				<Tabs tabItemContainerStyle={{backgroundColor:'#f3f3f3',color:'#9a9a9a'}} inkBarStyle={{marginLeft:'12.5%',width:'25%',backgroundColor:'red'}}>
 					<Tab label='上传队列' style={{color:'#404040',fontSize:'14px'}}>
+						<div className='transimissionRow'>
+							<span>名称</span>
+							<span>状态</span>
+							<span>进度</span>
+						</div>
 						{this.props.transimission.upload.map(task => {
 							return (
 								<div>
 									{task.roots.map(item => {
-										return <UploadTable key={item.target+item.abspath} item={item}/>
+										return <UploadTable isRoot={true} key={item.target+item.abspath} item={item}/>
 									})}
 								</div>
 								)

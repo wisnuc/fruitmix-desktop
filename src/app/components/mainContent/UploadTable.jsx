@@ -16,10 +16,11 @@ class UploadTable extends Component {
 	}
 	render() {
 		let item = this.props.item
+		let classname = !!this.props.isRoot?'transimissionRoot':''
 		return (
-			<div>
-				<div onClick={this.toggleChildren.bind(this)}>
-					<span>{item.abspath}</span>
+			<div className={classname}>
+				<div className='transimissionRow' onClick={this.toggleChildren.bind(this)}>
+					<span>{item.name}</span>
 					<span>{item.state}</span>
 					<span>{item.success}</span>
 				</div>
@@ -31,22 +32,12 @@ class UploadTable extends Component {
 	}
 
 	toggleChildren() {
-		c.log(this.state)
 		this.setState({
 			open : !this.state.open
 		})
 	}
 
 	getChildren() {
-		// if (this.props.item.children && this.props.item.children.length != 0) {
-		// 	return this.props.item.children.map(item1 => {
-		// 		return <UploadTable item={item1}/>
-		// 	})
-		// }else {
-		// 	return null
-		// }
-		// c.log(this.props.item.abspath)
-		// c.log(this.state.open)
 		let result
 		if (!this.state.open || !this.props.item.children ) {
 			return null
@@ -56,6 +47,18 @@ class UploadTable extends Component {
 			})
 		}
 		return result
+	}
+
+	getState(state) {
+		if (state == 'ready' || state == 'hashless') {
+			return '准备'
+		}else if (state == 'running') {
+			return '上传中'
+		}else if (state == 'hashing') {
+			return '正在校验本地文件'
+		}else {
+			return state
+		}
 	}
 }
 

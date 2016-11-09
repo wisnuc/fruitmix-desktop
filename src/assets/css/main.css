@@ -592,6 +592,14 @@ body{
 	background-color: #fff;
 	overflow: auto;
 }
+.transimissionRow{
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+}
+.transimissionRow>span {
+	flex: 0 0 33%;
+}
 /*setting*/
 .setting-container {
 	width:100%;
