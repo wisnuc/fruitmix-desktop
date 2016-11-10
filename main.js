@@ -1472,28 +1472,29 @@ ipcMain.on('downloadFile',(e,files)=>{
 	download.createUserTask('file',files)
 })
 //download folder
-ipcMain.on('downloadFolder',(err,folder,type)=>{
-	c('')
-	c('开始下载文件夹...')
-	folder.forEach(item=>{
-		getFolderTree(item,(err, tree) => {
-			if (err) {
-				c('get tree failed')
-				return
-			}
-			c('文件树组成')
-			let count = download.getTreeCount(tree)	
-			let time = (new Date()).getTime()
-			let obj = {count:count,failed:[],success:0,data:tree,type:'folder',status:'ready',key:item.uuid+time}
-			downloadFolderQueue.push(obj)
-			mainWindow.webContents.send('transmissionDownload',obj)	
-			if (downloadFolderNow.length == 0) {
-				downloadFolderNow.push(downloadFolderQueue[0])
-				download.downloadFolder(downloadFolderNow[0])
-			}
-		})
+ipcMain.on('downloadFolder',(err,folder)=>{
+	download.createUserTask('folder',folder)
+	// c('')
+	// c('开始下载文件夹...')
+	// folder.forEach(item=>{
+	// 	getFolderTree(item,(err, tree) => {
+	// 		if (err) {
+	// 			c('get tree failed')
+	// 			return
+	// 		}
+	// 		c('文件树组成')
+	// 		let count = download.getTreeCount(tree)	
+	// 		let time = (new Date()).getTime()
+	// 		let obj = {count:count,failed:[],success:0,data:tree,type:'folder',status:'ready',key:item.uuid+time}
+	// 		downloadFolderQueue.push(obj)
+	// 		mainWindow.webContents.send('transmissionDownload',obj)	
+	// 		if (downloadFolderNow.length == 0) {
+	// 			downloadFolderNow.push(downloadFolderQueue[0])
+	// 			download.downloadFolder(downloadFolderNow[0])
+	// 		}
+	// 	})
 		
-	})
+	// })
 	
 })
 
