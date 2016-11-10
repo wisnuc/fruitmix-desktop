@@ -225,13 +225,12 @@ var actions = {
 		}
 	},
 
-	// refreshStatusOfUpload(file,status) {
-	// 	return {
-	// 		type: 'REFRESH_STATUS_UPLOAD',
-	// 		file: file,
-	// 		status: status
-	// 	}
-	// },
+	refreshStatusOfUpload(tasks) {
+		return {
+			type: 'REFRESH_STATUS_UPLOAD',
+			tasks : tasks
+		}
+	},
 
 	refreshStatusOfDownload(file,status) {
 		return {
@@ -241,13 +240,13 @@ var actions = {
 		}
 	},
 
-	refreshDownloadStatusOfFolder(key,status) {
-		return {
-			type: 'DOWNLOAD_STATUS_OF_FOLDER',
-			key: key,
-			status: status
-		}
-	},
+	// refreshDownloadStatusOfFolder(key,status) {
+	// 	return {
+	// 		type: 'DOWNLOAD_STATUS_OF_FOLDER',
+	// 		key: key,
+	// 		status: status
+	// 	}
+	// },
 
 	// refreshUploadStatusOfFolder(key,status) {
 	// 	return {
@@ -390,6 +389,9 @@ var actions = {
 			select: name
 		};
 	}
+
+	// transimission
+
 }
 
 module.exports = actions;

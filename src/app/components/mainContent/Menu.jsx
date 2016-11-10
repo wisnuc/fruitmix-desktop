@@ -112,27 +112,27 @@ class PopMenu extends Component {
 
 	dowload() {
 		let files = [];
-		let folder = [];
-		let map = new Map();
-		let t = new Date();
+		let folders = [];
+		// let map = new Map();
+		// let t = new Date();
 		this.props.file.children.forEach(item=>{
 			if (item.checked && item.type != 'folder') {
-				let file = Object.assign({},item,{status:0,downloadTime:Date.parse(t)});
-				files.push(file);
-				map.set(item.uuid+Date.parse(t),file);	
+				// let file = Object.assign({},item,{status:0,downloadTime:Date.parse(t)});
+				files.push(item);
+				// map.set(item.uuid+Date.parse(t),file);	
 			}
 			if (item.checked && item.type == 'folder') {
-				folder.push(item);
+				folders.push(item);
 			}
 		});
-		let fileObj = {type:'file',data:files,length:files.length,success:0,failed:0,index:0,status:'ready',map:map,key:Date.parse(new Date())};
-		if (folder.length != 0) {
-			ipc.send('downloadFolder',folder);
+		// let fileObj = {type:'file',data:files,length:files.length,success:0,failed:0,index:0,status:'ready',map:map,key:Date.parse(new Date())};
+		if (folders.length != 0) {
+			ipc.send('downloadFolder',folders);
 		}	
-		if (fileObj.length != 0) {
-			this.props.dispatch(Action.addDownload(fileObj));
-			ipc.send('download',fileObj);	
-			this.props.dispatch(Action.setSnack(files.length+' 个文件添加到下载队列',true));
+		if (files.length != 0) {
+			// this.props.dispatch(Action.addDownload(fileObj));
+			ipc.send('downloadFile',files);	
+			// this.props.dispatch(Action.setSnack(files.length+' 个文件添加到下载队列',true));
 		}
 	}
 }

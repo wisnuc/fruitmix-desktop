@@ -56,7 +56,10 @@ class UploadTable extends Component {
 			return '上传中'
 		}else if (state == 'hashing') {
 			return '正在校验本地文件'
-		}else {
+		}else if (false) {
+			return ''
+		}
+		else {
 			return state
 		}
 	}

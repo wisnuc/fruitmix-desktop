@@ -35,17 +35,10 @@ const transimission = (state=defaultState,action)=>{
 				}
 			});
 			return Object.assign({},state) 
-		// case 'REFRESH_STATUS_UPLOAD':
-		// 	state.upload.forEach(item=>{
-		// 		if (item.type == 'folder') {
-		// 			return
-		// 		}
-		// 		var uploadFIle = item.map.get(action.file);
-		// 		if (uploadFIle != undefined) {
-		// 			uploadFIle.status = action.status;
-		// 		}
-		// 	});
-		// 	return Object.assign({},state);
+		case 'REFRESH_STATUS_UPLOAD':
+			// state.upload = action.tasks
+			// return state
+			return Object.assign({},state,{upload:action.tasks});
 		case 'DOWNLOAD_STATUS_OF_FOLDER': 
 			var index = state.download.findIndex(item=>{
 				return item.type=='folder'&&item.key==action.key
@@ -58,9 +51,9 @@ const transimission = (state=defaultState,action)=>{
 		// 	})
 		// 	state.upload[index].status = action.status;
 		// 	return Object.assign({},state);
-		case 'ADAPTER':
-			state = action.store.transimission
-			return state
+		// case 'ADAPTER':
+		// 	state = action.store.transimission
+		// 	return state
 			// return Object.assign({},state,action.store.transimission)
 		default:
 			return state

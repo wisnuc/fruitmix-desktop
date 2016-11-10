@@ -107,7 +107,7 @@ const adapter = () => {
 		file : store.getState().file,
 		media : store.getState().media,
 		share: store.getState().share,
-		transimission: store.getState().transimission
+		// transimission: store.getState().transimission
 	}
 }
 
@@ -832,33 +832,36 @@ function dealShareThumbQueue() {
 }
 function isShareThumbExist(item) {
 	c(item.digest)
-	console.log(item)
 	fs.readFile(path.join(mediaPath,item.digest+'thumb210'),(err,data)=>{
 		if (err) {
 			c('not exist')
 			downloadMedia(item,true,item).then((data)=>{
 				c('download success')
+				// if () {
+
+				// }
 				sendThumb(item)
 				console.log(shareThumbQueue.length+' length')
 			}).catch(err=>{
 				c(item.digest+' failed')
 				item.failed++
-				let index = thumbIng.findIndex(i=>i.digest == item.digest)
-				let t = thumbIng[index]
-				thumbIng.splice(index,1)
-				if (item.failed <5) {
-					fs.readFile(path.join(mediaPath,item.digest+'thumb210'),(err,data)=>{
-						if (err) {
+				let index = shareThumbIng.findIndex(i=>i.digest == item.digest)
+				let t = shareThumbIng[index]
+				shareThumbIng.splice(index,1)
+				shareThumbQueue.push(t)
+				// if (item.failed <5) {
+				// 	fs.readFile(path.join(mediaPath,item.digest+'thumb210'),(err,data)=>{
+				// 		if (err) {
 
-						}else {
-							c('find cache')
-						}
-					})
-					shareThumbQueue.push(t)
-				}else {
-					// item.status='failed'
-					// mainWindow.webContents.send('getThumbFailed',item)
-				}
+				// 		}else {
+				// 			c('find cache')
+				// 		}
+				// 	})
+					
+				// }else {
+				// 	// item.status='failed'
+				// 	// mainWindow.webContents.send('getThumbFailed',item)
+				// }
 				dealShareThumbQueue()
 			})
 		}else {
@@ -874,6 +877,7 @@ function isShareThumbExist(item) {
 		//mainWindow.webContents.send('getShareThumbSuccess',item.digest,path.join(mediaPath,item.digest+'thumb210'))
 		let photo = mediaShareMap.get(item.parent).doc.contents.find(p => p.digest == item.digest)
 		photo.path = path.join(mediaPath,item.digest+'thumb210')
+		c('photo path : ' + photo.path)
 		dispatch(action.setMediaShare(mediaShare))
 		dealShareThumbQueue()
 		// setTimeout(dealShareThumbQueue,200)
@@ -1461,9 +1465,11 @@ function uploadFileInFolder(node) {
 	return promise
 }
 //download file
-ipcMain.on('download',(e,files)=>{
-	downloadQueue.push(files)
-	download.dealDownloadQueue()
+ipcMain.on('downloadFile',(e,files)=>{
+	// downloadQueue.push(files)
+	// download.dealDownloadQueue()
+	c(files)
+	download.createUserTask('file',files)
 })
 //download folder
 ipcMain.on('downloadFolder',(err,folder,type)=>{

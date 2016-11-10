@@ -23,9 +23,6 @@ import Move from './Move';
 class AllFiles extends Component {
 	render() {
 		var _this = this
-		
-
-		
 		return (
 			<div className='all-my-files' style={{height:'100%'}}>
 				{this.getTable()}

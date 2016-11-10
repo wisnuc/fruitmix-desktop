@@ -101,12 +101,12 @@ var actions = {
 	},
 
 	//transimission --------------------------------------------
-	setUpload(data) {
-		return {
-			type : 'SET_UPLOAD',
-			data : data
-		}
-	}
+	// setUpload(data) {
+	// 	return {
+	// 		type : 'SET_UPLOAD',
+	// 		data : data
+	// 	}
+	// }
 }
 
 module.exports = actions;

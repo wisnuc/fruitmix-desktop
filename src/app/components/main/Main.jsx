@@ -70,17 +70,17 @@ class Main extends Component {
 		// 	this.props.dispatch(Action.setShareChildren(shareChildren,sharePath));
 		// });
 
-		// ipc.on('refreshStatusOfUpload',(err,file,status)=>{
-		// 	this.props.dispatch(Action.refreshStatusOfUpload(file,status));
-		// });
+		ipc.on('refreshStatusOfUpload',(err,tasks)=>{
+			this.props.dispatch(Action.refreshStatusOfUpload(tasks));
+		});
 
 		ipc.on('refreshStatusOfDownload',(err,file,status)=>{
 			this.props.dispatch(Action.refreshStatusOfDownload(file,status));
 		})
 
-		ipc.on('refreshDownloadStatusOfFolder',(err,key,status)=>{
-			this.props.dispatch(Action.refreshDownloadStatusOfFolder(key,status));
-		});
+		// ipc.on('refreshDownloadStatusOfFolder',(err,key,status)=>{
+		// 	this.props.dispatch(Action.refreshDownloadStatusOfFolder(key,status));
+		// });
 
 		// ipc.on('refreshUploadStatusOfFolder',(err,key,status)=>{
 		// 	this.props.dispatch(Action.refreshUploadStatusOfFolder(key,status));
@@ -130,9 +130,9 @@ class Main extends Component {
 		// })
 
 		//transmission---------------------------------------------------------------------
-		ipc.on('transmissionDownload',(err,obj)=>{
-			this.props.dispatch(Action.addDownload(obj));
-		});
+		// ipc.on('transmissionDownload',(err,obj)=>{
+		// 	this.props.dispatch(Action.addDownload(obj));
+		// });
 
 		// ipc.on('transmissionUpload',(err,obj)=>{
 		// 	this.props.dispatch(Action.addUpload(obj));
