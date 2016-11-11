@@ -1,61 +1,124 @@
-var Promise = require('bluebird')//corn module
+var path = require('path')
+var fs = require('fs')
+var stream = require('stream')
+var crypto = require('crypto')
+
+const electron = require('electron')
+var request = require('request')
+var Promise = require('bluebird')
+var rimraf = require('rimraf')
+var mkdirp = require('mkdirp')
+var UUID = require('node-uuid')
 var deepEqual = require('deep-equal')
 
 var debug = require('debug')("main")
 
-const electron = require('electron')
-const {app, BrowserWindow, ipcMain, dialog, Menu, Tray } = require('electron')
+var mocha = false
+
+const { app, BrowserWindow, ipcMain, dialog, Menu, Tray } = electron
+const store = require('./serve/store/store')
+const upload = require('./lib/upload')
+const download = require('./lib/download')
+const loginApi = require('./lib/login')
+const mediaApi = require('./lib/media')
+const deviceApi = require('./lib/device')
+const fileApi = require('./lib/file')
+const utils = require('./lib/util')
+
+var findDevice = require('./lib/mdns')
+
+//require store
+global.action = require('./serve/action/action')
+// global.dispatch = store.dispatch
+global.dispatch = (action) => {
+	c(' ')
+	// debug(action.type)
+	store.dispatch(action)
+}
+
+const cwd = process.cwd()
+
+// init, load config
+rimraf.sync(path.join(cwd, 'tmp'))
+mkdirp.sync(path.join(cwd, 'tmp'))
+try {
+  let raw = fs.readFileSync(path.join(cwd, 'server'))
+  let config = JSON.parse(raw) 
+  store.dispatch({
+    type: 'CONFIG_INIT',
+    data: config
+  }) 
+}
+catch (e) { // e.code === 'ENOENT' && e.syscall === 'read'
+}
+
+// observer
+let prevConfig
+const configObserver = () => {
+
+  if (store.getState().config === prevConfig)
+    return
+ 
+  prevConfig = store.getState().config 
+
+  // temp file    
+  // write to temp file
+  // rename
+  let tmpfile = path.join(cwd, 'tmp', UUID.v4())
+  let os = fs.createWriteStream(tmpfile)
+  os.on('close', () => fs.rename(tmpfile, path.join(cwd, 'server')))
+  os.on('err', err => {
+    console.log('[config] failed to save config to disk')
+    console.log(err)
+  })
+  os.write(JSON.stringify(store.getState().config))
+  os.end()
+}
+
 global.ipcMain = ipcMain
 var appIcon = null
-
-global.request = require('request')
-global.fs = require ('fs')
-global.stream = require('stream')
-global.path = require('path')
-global._ = require('lodash')
-global.mdns = require('mdns-js')
-global.crypto = require('crypto')
 
 global.mainWindow = null
 global.testWindow = null
 global.fruitmixWindow = null
 global.appifiWindow = null
+
 //server
 global.server = ''
 global.OSServer = ''
+
 //user
 global.user = {}
+
 //files
 global.drives = []
 global.rootNode = null
 global.tree = []
 global.map = new Map()
+
 //share
 global.shareRoot = []
 global.shareChildren = []
 global.sharePath = []
+
 //directory
 global.currentDirectory = {}
 global.children = []
 global.parent = {}
 global.dirPath = []
 global.tree = []
+
 //upload 
 global.uploadNow = []
 global.uploadHandleArr = []
 global.uploadQueue = []
-// global.httpRequestConcurrency = 4
-// global.fileHashConcurrency = 4
-// global.runningQueue = []
-// const readyQueue = []
-// const hashingQueue = []
-// const hashlessQueue = []
-// const userTasks = []
+
 //download
 global.downloadQueue = []
 global.downloadNow = []
 global.downloadFolderQueue = []
 global.downloadFolderNow = []
+
 //media
 global.media = []
 global.mediaMap = new Map()
@@ -65,40 +128,21 @@ global.thumbQueue = []
 global.thumbIng = []
 global.shareThumbQueue = []
 global.shareThumbIng = []
+
 //path
 global.mediaPath = path.join(__dirname,'media')
 global.downloadPath = path.join(__dirname,'download')
+
 //device
 global.device = []
 global.serverRecord = null
 global.isLogin = false
 global.c = console.log
 
-global.mocha = false
-
 // mdns.excludeInterface('0.0.0.0')
 // var browser = mdns.createBrowser(mdns.tcp('http'))
 
-//require module
-const upload = require('./lib/upload')
-const download = require('./lib/download')
-const loginApi = require('./lib/login')
-const mediaApi = require('./lib/media')
-const deviceApi = require('./lib/device')
-const fileApi = require('./lib/file')
-const utils = require('./lib/util')
-var findDevice = require('./lib/mdns')
-
-//require store
-global.action = require('./serve/action/action')
-global.store = require('./serve/store/store')
-
-// global.dispatch = store.dispatch
-global.dispatch = (action) => {
-	c(' ')
-	// debug(action.type)
-	store.dispatch(action)
-}
+// store adapter from backend to frontend
 const adapter = () => {
 	c('run dapter')
 	return {
@@ -114,8 +158,30 @@ const adapter = () => {
 var storeLock = false
 var waitForRender = null
 
+// updating front end
+// on backend store update
+// with throttling (200ms)
+// without referential equality check
+let prevLogin, prevSetting, prevFile, prevMedia, prevShare
 store.subscribe(() => { 
-	if (storeLock) {
+
+  // do referential equality check, memoization
+  let state = store.getState()
+
+  if (state.login === prevLogin &&
+      state.setting === prevSetting &&
+      state.file === prevFile &&
+      state.media === prevMedia &&
+      state.share === prevShare)
+    return
+
+  prevLogin = state.login
+  prevSetting = state.setting
+  prevFile = state.file
+  prevMedia = state.media
+  prevShare = state.share
+
+	if (storeLock) { // strategy ???
 		clearTimeout(waitForRender)
 		waitForRender = setTimeout(()=>{
 			storeLock = false;
@@ -213,36 +279,21 @@ app.on('window-all-closed', () => {
 ipcMain.on('getDeviceUsedRecently',err=>{
 	deviceApi.getRecord()
 })
+
 //setIp
 ipcMain.on('setServeIp',(err,ip, isCustom, isStorage)=>{
 	c('set ip : ')
 	dispatch(action.setDeviceUsedRecently(ip))
 	server = 'http://' + ip + ':3721'
-	// server = 'http://' + ip
 	OSServer = 'http://' + ip + ':3000'
-	// if (isCustom) {
-	// 	c('??')
-	// 	c(ip)
-	// 	return
-	// }
-	if ( !isStorage) {
-		return
-	}
-	fs.readFile(path.join(process.cwd(),'server'),{encoding: 'utf8'},(err,data)=>{
-		if (err) {
-			return
-		}
-		let d = JSON.parse(data)
-		d.ip = ip
-		if (isCustom) {
-			d.customDevice.push({address:ip,host:ip,appifi:{},name:ip,active:false,checked:true,isCustom:true})
-		}
-		let j = JSON.stringify(d)
-		fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
+  
+  store.dispatch({
+    type: 'CONFIG_SET_IP',
+    data: ip
+  })
 
-		})
-	})
 })
+
 ipcMain.on('delServer',(err,i)=>{
 	// let index = device.findIndex(item=>{
 	// 	return item.addresses[0] == i.addresses[0]
@@ -250,23 +301,13 @@ ipcMain.on('delServer',(err,i)=>{
 	// device.splice(index,1)
 
 	dispatch(action.deleteServer(i))
-	fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
-		let d = JSON.parse(data) 
-		c(d)
-		let ind = d.customDevice.findIndex(item=>{
-			return item.address == i.address
-		})
-		if (ind != -1) {
-			d.customDevice.splice(ind,1)
-		}
-		let j = JSON.stringify(d)
-		fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
 
-		})
-	})
-
-	// dispatch(action.setDevice(device))
+  store.dispatch({
+    type: 'CONFIG_DELETE_CUSTOM_DEVICE',
+    data: i.address
+  })
 })
+
 //create fruitmix
 ipcMain.on('createFruitmix',(err,item)=>{
 	c(item.address[0]+':'+item.port)
@@ -757,24 +798,11 @@ ipcMain.on('changeDownloadPath', e=>{
 		downloadPath = folderPath
 		// mainWindow.webContents.send('setDownloadPath',downloadPath)
 		dispatch(action.setDownloadPath(downloadPath))
-		
-		fs.readFile(path.join(__dirname,'server'),{encoding: 'utf8'},(err,data)=>{
-			if (err) {
-				serverRecord = {ip:'',savePassword:false,autoLogin:false,username:null,password:null,customDevice:[],download: downloadPath}
-				let j = JSON.stringify(serverRecord)
-				fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
 
-				})
-			}else {
-				serverRecord = JSON.parse(data)
-				serverRecord.download = downloadPath
-				let j = JSON.stringify(serverRecord)
-				fs.writeFile(path.join(__dirname,'server'),j,(err,data)=>{
-
-				})
-			}
-			
-		})
+    store.dispatch({
+      type: 'CONFIG_SET_DOWNLOAD_PATH',
+      data: downloadPath
+    })
 	})
 })
 
@@ -1646,6 +1674,7 @@ function testInit() {
 		testWindow.webContents.send('viewtest',entries)
 
 		ipcMain.on('selectTestCase', (err,index) => {
+      // dynamic require
 			currentTestCase = require(path.join(process.cwd(), 'viewtest', entries[index]))()
 			currentTestCase.cases = currentTestCase.cases.map(item => {
 				return Object.assign({}, item, {checked : false})
@@ -1666,7 +1695,6 @@ function selectTestCase() {
 		mainWindow.webContents.send('stateUpdate', JSON.parse(data))
 	})
 }
-
 
 ipcMain.on('dispatch', (err, action) => {
 	if (!mocha) {return}
