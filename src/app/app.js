@@ -124,3 +124,15 @@ ipc.on('stateUpdate',(err,data)=>{
 ipc.on('adapter', (err, data) => {
 	dispatch(Action.adapter(data))
 })
+
+// app / init
+setInverval(() => store.dispatch({ type: 'COMMAND_TICK' }), 1000)
+
+ipc.on('command', (e, {id, err, data}) => {
+  store.dispatch({
+    type: 'COMMAND_RETURN',
+    id, err, data 
+  }) 
+})
+
+

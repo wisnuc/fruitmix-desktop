@@ -3,7 +3,7 @@ var request = require('request')
 var loginApi = {
 
 	//get userList
-	login : function login () {
+	login : function () {
 		let login = new Promise((resolve,reject)=>{
 			request(server+'/login',function(err,res,body){
 				if (!err && res.statusCode == 200) {

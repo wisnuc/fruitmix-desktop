@@ -5,7 +5,7 @@
   "private": true,
   "main": "main.js",
   "scripts": {
-    "start": "electron main.js",
+    "start": "electron .",
     "mocha": "mocha --compilers js:babel-core/register --recursive --sort"
   },
   "devDependencies": {
@@ -21,6 +21,7 @@
     "babel-preset-es2015": "^6.9.0",
     "babel-preset-react": "^6.11.1",
     "babel-preset-stage-2": "^6.18.0",
+    "babel-register": "^6.18.0",
     "babel-runtime": "^6.18.0",
     "bluebird": "^3.4.1",
     "chai": "^3.5.0",
