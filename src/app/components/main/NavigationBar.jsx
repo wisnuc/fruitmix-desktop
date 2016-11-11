@@ -4,7 +4,7 @@
 
 import React, { Component, PropTypes } from 'react';
 
-import RightPanel from './RightPanel';
+//import RightPanel from './RightPanel';
 
 function getStyles (props) {
   return {
@@ -120,7 +120,7 @@ export default class NavigationBar extends Component {
     return (
       <div className="navigation-bar clearfix" style={ root }>
         { this.createTitleTextComponent() }
-        { this.createIconComponent() }
+        { /*this.createIconComponent() */}
       </div>
     );
   }

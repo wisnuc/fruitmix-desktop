@@ -18,26 +18,37 @@ function getStyles(props) {
       WebkitTransform: 'translate(-50%, -50%)'
     },
     head: {
-      backgroundColor: '#ff9800',
-      color: '#fff',
+      backgroundColor: '#f6f7f9',
+      color: '#7f7f7f',
       fontSize: 16,
-      height: 64,
-      lineHeight: '64px',
-      padding: '0 40px',
+      lineHeight: '55px',
+      padding: '0 20px',
+      textAlign: 'center',
       position: 'relative'
     },
     close: {
+      backgroundColor: '#7f7f7f',
       position: 'absolute',
-      top: 0,
-      right: 40,
-      fontSize: 30
+      top: 18,
+      width: 13,
+      height: 2,
+      right: 20,
+      fontSize: 0,
+      transform: 'rotate(45deg) translate(8px, 4px)'
+    },
+    failClose: {
+      display: 'inline-block',
+      width: 13,
+      height: 2,
+      backgroundColor: '#7f7f7f',
+      transform: 'rotate(-85deg) translate(25px,-2px)'
     }
   }
 }
 
 export default class Dialog extends Component {
   render() {
-    let { root, head, close } = getStyles(this.props);
+    let { root, head, close, failClose } = getStyles(this.props);
     const {
        caption,
        onClose,
@@ -55,7 +66,9 @@ export default class Dialog extends Component {
       <div className="dialog" style={ root }>
         <div className="dialog-head" style={ head }>
           { caption }
-          <label style={ close } onClick={ onClose }>x</label>
+          <label style={ close } onClick={ onClose }>
+            <i style={ failClose }></i>
+          </label>
         </div>
         <div className="dialog-body">
           { content }

@@ -155,12 +155,13 @@ var actions = {
 		}
 	},
 
-	getLargeImageList(largeImageEls, currentThumbIndex, date) {
+	getLargeImageList(largeImageEls, currentThumbIndex, date, hash) {
 	  return {
 			type: 'LARGE_IMAGE',
 			date,
 			largeImageEls,
-			currentThumbIndex
+			currentThumbIndex,
+			hash
 		};
 	},
 

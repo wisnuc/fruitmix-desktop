@@ -69,7 +69,6 @@ class ImageSwipe extends Component {
 
     this.imgLength = props.largeImages.data.length;
     this.currentImgIndex = this.findIndex();
-
     this.state = {
       arrowLeftStatus: this.currentImgIndex > 0,
       arrowRightStatus: this.currentImgIndex < this.imgLength - 1,
@@ -82,6 +81,14 @@ class ImageSwipe extends Component {
       6: 90
     };
   }
+
+  // componentWillReceiveProps() {
+  //   this.currentImgIndex = this.findIndex();
+  //   this.setState({
+  //     arrowLeftStatus: this.currentImgIndex > 0,
+  //     arrowRightStatus: this.currentImgIndex < this.imgLength - 1
+  //   });
+  // }
 
   detectIndex(currentImgIndex) {
     const { state } = this.props;
@@ -101,18 +108,16 @@ class ImageSwipe extends Component {
     const { largeImages } = this.props;
     const currentThumbIndex = largeImages.currentThumbIndex;
     const date = largeImages.date;
-    const els = Array.from(document.querySelectorAll('[data-date="'+ date +'"]'));
+    const currentHash = largeImages.hash;
 
-    return els.findIndex(el =>
-      el.dataset.index == currentThumbIndex
-    );
+    return largeImages.data.findIndex(hash => currentHash === hash);
   }
 
   moveTo(nextIndex) {
     const { largeImages } = this.props;
 
     this.currentImgIndex = this.detectIndex(nextIndex);
-
+    console.log(this.currentImgIndex, 'ggggg');
     ipc.send('getMediaImage', largeImages.data[this.currentImgIndex]);
   }
 
@@ -187,7 +192,7 @@ class ImageSwipe extends Component {
 
         { this.state.arrowRightStatus && this.createArrowComponent('right') }
 
-        { this.createShareIcon() }
+        {/* this.createShareIcon() */}
       </div>
     );
   }

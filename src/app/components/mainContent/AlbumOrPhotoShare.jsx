@@ -7,7 +7,7 @@ import Action from '../../actions/action';
 import NavigationBar from '../main/NavigationBar';
 import PhotoSubject from '../common/PhotoSubject';
 import PhotoMain from '../common/PhotoMain';
-//dispatch(Action.toggleNavigator([ '相册', title ]));
+
 function getStyles() {
   return {
     rootStyle: {
@@ -164,9 +164,7 @@ class AlbumOrPhotoShare extends Component {
     const { rootStyle, shareItemStyle, shareItemSubjectStyle, shareItemMainStyle } = getStyles();
     const { mediaShare, uuid, navigationBarTitleTexts } = this.props;
 
-    const photoComponents = mediaShare.filter(
-      media => media.doc.author !== uuid
-    ).map(media => {
+    const photoComponents = mediaShare.map(media => {
       const { doc: { author, ctime } } = media;
 
       return (
