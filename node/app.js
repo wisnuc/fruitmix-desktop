@@ -194,7 +194,6 @@ store.subscribe(() => {
 console.log(configObserver)
 store.subscribe(configObserver)
 
-
 //app ready and open window ------------------------------------
 app.on('ready', function() {
 
@@ -241,6 +240,7 @@ ipcMain.on('getDeviceUsedRecently', err => {
 })
 
 ipcMain.on('command', commandHandler)
+
 
 //setIp
 ipcMain.on('setServeIp',(err, ip, isCustom, isStorage)=>{
@@ -631,8 +631,6 @@ ipcMain.on('share',function(err,files,users){
 		if (index == files.length) {
 			console.log('all share success')
 			mainWindow.webContents.send('message',files.length + ' 个文件分享成功')
-//			ipcMain.emit('getFilesSharedToOthers')
-//			ipcMain.emit('enterChildren',null,currentDirectory)
 			return
 		}else {
 			fileApi.share(files[index],users,doShare)
@@ -1436,6 +1434,7 @@ function uploadFileInFolder(node) {
 	})
 	return promise
 }
+
 //download file
 ipcMain.on('downloadFile',(e,files)=>{
 	// downloadQueue.push(files)
@@ -1443,6 +1442,7 @@ ipcMain.on('downloadFile',(e,files)=>{
 	c(files)
 	download.createUserTask('file',files)
 })
+
 //download folder
 ipcMain.on('downloadFolder',(err,folder)=>{
 	download.createUserTask('folder',folder)
