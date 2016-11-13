@@ -1,13 +1,8 @@
+import Debug from 'debug'
 import { ipcRenderer } from 'electron'
 import UUID from 'node-uuid'
 
-/***
-op:
-{
-  cmd: // string
-  args: // object
-}
-***/
+const debug = Debug('reducer:command')
 
 class Job { 
 
@@ -30,10 +25,10 @@ class Job {
   }
 
   isTimeout() {
-    new Date().getTime() - this.timestamp > this.timeout 
+    return new Date().getTime() - this.timestamp > this.timeout 
   }
 
-  timeout() {
+  fireTimeout() {
     if (this.callback) {
       let err = new Error('timeout')
       err.code = 'ETIMEOUT'
@@ -42,15 +37,18 @@ class Job {
   } 
 }
 
-const commander = (state = [], action) => {
+const command = (state = [], action) => {
 
-  let job, index
+  let job, index, newState
 
   switch (action.type) {
   case 'COMMAND_SEND': 
     job = new Job(action.key, action.op, action.callback)
-    ipcRenderer.send('command', job.id, job.op)
-    return [...state, job] 
+    ipcRenderer.send('command', job.id, action.op)
+    newState = [...state, job] 
+    
+    debug('COMMAND_SEND', newState)
+    return newState
 
   case 'COMMAND_RETURN':
     index = state.findIndex(job => job.id === action.id)
@@ -59,30 +57,45 @@ const commander = (state = [], action) => {
     if (job.callback) 
       job.callback(action.err, action.data)
 
-    return [
+    newState =  [
       ...state.slice(0, index),
       ...state.slice(index + 1)
     ]
+    
+    debug('COMMAND_RETURN', newState)
+    return newState
 
   case 'COMMAND_ABORT':
     index = state.findIndex(job => job.id === action.id)     
     if (index === -1) return state
     job = state[index]
     job.abort()
-    return [
+    newState = [
       ...state.slice(0, index),
       ...state.slice(index + 1)
     ]
+    
+    debug('COMMAND_ABORT', newState)
+    return newState
 
   case 'COMMAND_TICK':
-    let newState = []     
+
+    newState = []     
     state.forEach(job => {
-      if (job.isTimeout()) job.timeout() 
-      else newState.push(job)
+      if (job.isTimeout()) {
+        job.fireTimeout() 
+      }
+      else 
+        newState.push(job)
     })
+
+    debug('COMMAND_TICK')
     return newState
+
+  default:
+    return state
   }
 }
 
-export default Command
+export default command
 

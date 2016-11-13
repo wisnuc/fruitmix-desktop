@@ -101,6 +101,7 @@ Render()
 
 //subscribe store change
 store.subscribe(()=>{
+
 	if (storeLock) {
 		clearTimeout(waitForRender)
 		waitForRender = setTimeout(()=>{storeLock = false;Render()},50)
@@ -122,12 +123,20 @@ ipc.on('stateUpdate',(err,data)=>{
 })
 
 ipc.on('adapter', (err, data) => {
+  dispatch({
+    type: 'SERVER_UPDATE',
+    data: data
+  })
 	dispatch(Action.adapter(data))
 })
 
-// app / init
-setInverval(() => store.dispatch({ type: 'COMMAND_TICK' }), 1000)
+// command tick
+setInterval(() => {
+  if (store.getState().command.length === 0) return
+  store.dispatch({ type: 'COMMAND_TICK' })
+}, 1000)
 
+// 
 ipc.on('command', (e, {id, err, data}) => {
   store.dispatch({
     type: 'COMMAND_RETURN',
@@ -136,3 +145,4 @@ ipc.on('command', (e, {id, err, data}) => {
 })
 
 
+localStorage.debug = 'reducer:command'

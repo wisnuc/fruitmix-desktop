@@ -6,10 +6,12 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "devel": "nodemon --exec electron .",
     "mocha": "mocha --compilers js:babel-core/register --recursive --sort"
   },
   "devDependencies": {
     "babel": "^6.5.2",
+    "babel-cli": "^6.18.0",
     "babel-core": "^6.11.4",
     "babel-loader": "^6.2.4",
     "babel-plugin-transform-async-to-bluebird": "^1.0.0",
@@ -40,6 +42,7 @@
     "mocha": "^3.1.2",
     "moment": "^2.15.2",
     "node-uuid": "^1.4.7",
+    "nodemon": "^1.11.0",
     "react": "^15.2.1",
     "react-addons-css-transition-group": "^15.2.1",
     "react-dom": "^15.2.1",

@@ -11,7 +11,7 @@ const loginState = (state = defaultState, action) => {
 		case 'LOGIN':
 			return Object.assign({}, state, {state: 'BUSY'})
 		case 'LOGGEDIN':
-			return Object.assign({},state, {obj:action.obj,state:'LOGGEDIN'})
+			return Object.assign({}, state, {obj:action.obj, state:'LOGGEDIN'})
 		case 'REJECTED':
 			return Object.assign({}, state, {state: 'REJECTED'})
 		case 'LOGIN_OFF':

@@ -8,15 +8,18 @@ import createLogger from 'redux-logger';
 
 const loggerMiddleware = createLogger();
 
+/**
 const createStoreWithMiddleware = applyMiddleware(
 	thunkMiddleware,
 	loggerMiddleware
 )(createStore);
+**/
 
-const s = createStore(reducer);
+export const store = createStore(reducer);
 
 export default function configureStore(initialState) {
-	return createStoreWithMiddleware(reducer, initialState);
+	// return createStoreWithMiddleware(reducer, initialState);
+  return store
 }
 
 // export default function configureStore() {

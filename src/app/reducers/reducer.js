@@ -19,6 +19,9 @@ import albumHash from './albumHash';
 import moveData from './moveData';
 import fileInfo from './fileInfo';
 
+import command from './command'
+import server from './server'
+
 // import atom component reducer
 import { radio, shareRadio } from '../React-Redux-UI/src/reducers/reducer';
 
@@ -41,7 +44,9 @@ const reducer = combineReducers({
 	albumHash,
 	shareRadio,
 	moveData,
-	fileInfo
+	fileInfo,
+  server,
+  command,
 });
 
 export default reducer;

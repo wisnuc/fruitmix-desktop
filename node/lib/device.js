@@ -1,7 +1,7 @@
-var path = require('path')
-var fs = require('fs')
-var request = require('request')
-var store = require('../serve/store/store')
+import path from 'path'
+import fs from 'fs'
+import request from 'request'
+import store from '../serve/store/store'
 
 // login api
 var findDeviceApi = {

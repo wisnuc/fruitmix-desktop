@@ -91,7 +91,7 @@ class Index extends React.Component {
 						<TextField underlineStyle={{borderColor:'#999'}} underlineFocusStyle={styles.underlineStyle} hintStyle={{color:'#999'}} ref='password' style={{marginBottom: 10}} hintText="密码" type="password" onKeyDown={this.kenDown.bind(this)}/>
 						<div className='login-button'>
 							<div onTouchTap={this.toggleDevice.bind(this)}>设置</div>
-							<div onTouchTap={this.submit.bind(this)}>登录</div>
+							<div onTouchTap={/* this.submit.bind(this)*/ () => console.log('hello')}>登录</div>
 						</div>
 					</div>
 				</div>

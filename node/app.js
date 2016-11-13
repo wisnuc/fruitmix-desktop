@@ -1,31 +1,36 @@
-var path = require('path')
-var fs = require('fs')
-var stream = require('stream')
-var crypto = require('crypto')
+import path from 'path'
+import fs from'fs'
+import stream from 'stream'
+import crypto from 'crypto'
 
-const electron = require('electron')
-var request = require('request')
-var Promise = require('bluebird')
-var rimraf = require('rimraf')
-var mkdirp = require('mkdirp')
-var UUID = require('node-uuid')
-var deepEqual = require('deep-equal')
+import Debug from 'debug'
+import { app, BrowserWindow, ipcMain, dialog, Menu, Tray } from 'electron'
+import request from 'request'
+import rimraf from'rimraf'
+import mkdirp from'mkdirp'
+import UUID from 'node-uuid'
+import deepEqual from 'deep-equal'
 
-var debug = require('debug')("main")
+const debug = Debug('main')
 
 var mocha = false
 
-const { app, BrowserWindow, ipcMain, dialog, Menu, Tray } = electron
-const store = require('./serve/store/store')
+import store from './serve/store/store'
+import configObserver from './lib/config'
+import { commandHandler } from './lib/command'
+
 const upload = require('./lib/upload')
 const download = require('./lib/download')
-const loginApi = require('./lib/login')
+import loginApi from './lib/login'
 const mediaApi = require('./lib/media')
 const deviceApi = require('./lib/device')
 const fileApi = require('./lib/file')
 const utils = require('./lib/util')
+import { loginHandler } from './lib/login'
 
-var findDevice = require('./lib/mdns')
+import { initMainWindow, getMainWindow } from './lib/window'
+
+var mdns = require('./lib/mdns')
 
 //require store
 global.action = require('./serve/action/action')
@@ -41,6 +46,9 @@ const cwd = process.cwd()
 // init, load config
 rimraf.sync(path.join(cwd, 'tmp'))
 mkdirp.sync(path.join(cwd, 'tmp'))
+mkdirp.sync(path.join(cwd, 'media'))
+mkdirp.sync(path.join(cwd, 'download'))
+
 try {
   let raw = fs.readFileSync(path.join(cwd, 'server'))
   let config = JSON.parse(raw) 
@@ -50,29 +58,6 @@ try {
   }) 
 }
 catch (e) { // e.code === 'ENOENT' && e.syscall === 'read'
-}
-
-// observer
-let prevConfig
-const configObserver = () => {
-
-  if (store.getState().config === prevConfig)
-    return
- 
-  prevConfig = store.getState().config 
-
-  // temp file    
-  // write to temp file
-  // rename
-  let tmpfile = path.join(cwd, 'tmp', UUID.v4())
-  let os = fs.createWriteStream(tmpfile)
-  os.on('close', () => fs.rename(tmpfile, path.join(cwd, 'server')))
-  os.on('err', err => {
-    console.log('[config] failed to save config to disk')
-    console.log(err)
-  })
-  os.write(JSON.stringify(store.getState().config))
-  os.end()
 }
 
 global.ipcMain = ipcMain
@@ -139,20 +124,24 @@ global.serverRecord = null
 global.isLogin = false
 global.c = console.log
 
-// mdns.excludeInterface('0.0.0.0')
-// var browser = mdns.createBrowser(mdns.tcp('http'))
 
 // store adapter from backend to frontend
 const adapter = () => {
 	c('run dapter')
-	return {
-		login : store.getState().login,
-		setting : store.getState().setting,
-		file : store.getState().file,
-		media : store.getState().media,
+	let state = {
+    config: store.getState().config,
+    server: store.getState().server,
+		login: store.getState().login,
+		setting: store.getState().setting,
+		file: store.getState().file,
+		media: store.getState().media,
 		share: store.getState().share,
 		// transimission: store.getState().transimission
 	}
+
+  debug('adapter, store state', state)
+
+  return state
 }
 
 var storeLock = false
@@ -163,7 +152,11 @@ var waitForRender = null
 // with throttling (200ms)
 // without referential equality check
 let prevLogin, prevSetting, prevFile, prevMedia, prevShare
+
+let initCount = 3
 store.subscribe(() => { 
+
+  if (initCount--) console.log(store.getState())
 
   // do referential equality check, memoization
   let state = store.getState()
@@ -188,7 +181,7 @@ store.subscribe(() => {
 			debug('subscribe doing .......' + (new Date).getTime())
 			mainWindow.webContents.send('adapter',adapter())
 		},200)
-	}else {
+	} else {
 		debug('subscribe doing .......' + (new Date).getTime())
 		mainWindow.webContents.send('adapter',adapter())
 		storeLock = true
@@ -198,53 +191,20 @@ store.subscribe(() => {
 	}
 })
 
-// browser.on('update', deviceApi.findDevice) 
+console.log(configObserver)
+store.subscribe(configObserver)
 
 
 //app ready and open window ------------------------------------
 app.on('ready', function() {
-	mainWindow = new BrowserWindow({
-		frame: true,
-		height: 768,
-		resizable: true,
-		width: 1366,
-		minWidth:1024,
-		minHeight:768,
-		title:'WISNUC',
-		icon: path.join(__dirname,'180-180.png')
-	})
-	//window title
-	mainWindow.on('page-title-updated',function(event){
-		event.preventDefault()
-	})
-	mainWindow.webContents.openDevTools()
-  // FIXME
-	mainWindow.loadURL('file://' + path.dirname(__dirname) + '/build/index.html')
-	//create folder
-	fs.exists(mediaPath,exists=>{
-		if (!exists) {
-			fs.mkdir(mediaPath,err=>{
-				if(err){
-					console.log(err)
-				}
-			})
-		}
-	})
-	fs.exists(downloadPath,exists=>{
-		if (!exists) {
-			fs.mkdir(downloadPath,err=>{
-				if(err){
-					console.log(err)
-				}
-			})
-		}
-	})
 
-	setTimeout( () => {
-		var x = findDevice().on('stationUpdate', data => {
+  initMainWindow()
+  mainWindow = getMainWindow()
+
+  // initialize mdns
+  mdns().on('stationUpdate', data => {
 			dispatch(action.setDevice(data))
-		})
-	},500)
+	})
 
 	//Tray
 	// appIcon = new Tray(path.join(__dirname,'180-180.png'))
@@ -255,9 +215,9 @@ app.on('ready', function() {
 	//     { label: 'Item4', type: 'radio' }
 	// ])
 	// appIcon.setToolTip('This is my application.')
- //  	appIcon.setContextMenu(contextMenu)
+  //  	appIcon.setContextMenu(contextMenu)
 
-  	if (mocha) {
+  if (mocha) {
 		testWindow = new BrowserWindow({
 			frame: true,
 			height: 768,
@@ -273,16 +233,17 @@ app.on('ready', function() {
 	}
 })
 
-app.on('window-all-closed', () => {
-  app.quit()
-})
+app.on('window-all-closed', () => app.quit())
 
-ipcMain.on('getDeviceUsedRecently',err=>{
+// ??? TODO
+ipcMain.on('getDeviceUsedRecently', err => {
 	deviceApi.getRecord()
 })
 
+ipcMain.on('command', commandHandler)
+
 //setIp
-ipcMain.on('setServeIp',(err,ip, isCustom, isStorage)=>{
+ipcMain.on('setServeIp',(err, ip, isCustom, isStorage)=>{
 	c('set ip : ')
 	dispatch(action.setDeviceUsedRecently(ip))
 	server = 'http://' + ip + ':3721'
@@ -292,10 +253,9 @@ ipcMain.on('setServeIp',(err,ip, isCustom, isStorage)=>{
     type: 'CONFIG_SET_IP',
     data: ip
   })
-
 })
 
-ipcMain.on('delServer',(err,i)=>{
+ipcMain.on('delServer',(err, i)=>{
 	// let index = device.findIndex(item=>{
 	// 	return item.addresses[0] == i.addresses[0]
 	// })
@@ -328,7 +288,8 @@ ipcMain.on('createFruitmix',(err,item)=>{
 	fruitmixWindow.loadURL('http://'+item.address+':3000')
 })
 
-ipcMain.on('openAppifi', (err)=>{
+ipcMain.on('openAppifi', err => {
+
 	fruitmixWindow = new BrowserWindow({
 		frame: true,
 		height: 768,
@@ -345,51 +306,10 @@ ipcMain.on('openAppifi', (err)=>{
 	c(server)
 	fruitmixWindow.loadURL(server.substring(0,server.length-4)+3001)
 })
-//get all user information --------------------------------------
-ipcMain.on('login',function(err,username,password){
-	c(' ')
-	c('login : ')
-	dispatch({type: "LOGIN"})
-	var tempArr = []
-	var colorArr = ['#FFC107','#8BC34C','#00bcd4']
-	loginApi.login().then((data)=>{
-		c('get login data : ' + data.length + ' users')
-		user = data.find((item)=>{return item.username == username})
-		if (user == undefined) {
-			throw new Error('username is not exist in login data')
-		}
-		user = Object.assign({},user)
-		tempArr = data
-		return loginApi.getToken(user.uuid,password)
-	}).then((token)=>{
-		c('get token : '+ token.type +token.token)
-		user.token = token.token
-		user.type = token.type
-		return loginApi.getAllUser()
-	}).then((users)=>{
-		c('get users : ' + users.length)
-		tempArr.forEach(item => {
-			item.checked = false
-			let randomNumber = Math.random()
-			if (randomNumber< 0.33) {
-				item.color = colorArr[0]
-			}else if (randomNumber < 0.66) {
-				item.color = colorArr[1]
-			}else {
-				item.color = colorArr[2]
-			}
-		})
-		user.users = tempArr
-		user.allUser = users
-		isLogin = true
-		dispatch(action.loggedin(user))
 
-	}).catch((err)=>{
-		c('login failed : ' + err)
-		dispatch(action.loginFailed())
-		mainWindow.webContents.send('message','登录失败',0)
-	})
-})
+//get all user information --------------------------------------
+ipcMain.on('login', (err, user, pass) => loginHandler(err, user, pass))
+
 //get all files -------------------------------------------------
 ipcMain.on('getRootData', ()=> {
 	dispatch(action.loadingFile())
@@ -422,10 +342,12 @@ ipcMain.on('getRootData', ()=> {
 		mainWindow.webContents.send('message','get data error',1)	
 	})
 })
+
 //select children
 ipcMain.on('enterChildren', (err,selectItem,a) => {
 	enterChildren(selectItem)
 })
+
 function enterChildren(selectItem) {
 	dispatch(action.loadingFile())
 	c(' ')
@@ -557,14 +479,15 @@ ipcMain.on('rename',(e,uuid,name,oldName)=>{
 ipcMain.on('close-main-window', function () {
     app.quit()
 })
-//create user
-ipcMain.on('create-new-user',function(err, u, p){
+
+// create user
+ipcMain.on('create-new-user', function(err, u, p) {
 	loginApi.createNewUser(u,p).then(()=>{
 		console.log('register success')
 		mainWindow.webContents.send('message','注册新用户成功')
 		loginApi.getAllUser().then(users=>{
 			user.allUser = users
-			dispatch(action.loggedin(user))
+      dispatch(action.loggedin(user)) // TODO ? why
 			//mainWindow.webContents.send('addUser',user)
 		})
 
@@ -573,7 +496,7 @@ ipcMain.on('create-new-user',function(err, u, p){
 				item.checked = false
 			})
 			user.users = data
-			dispatch(action.loggedin(user))
+			dispatch(action.loggedin(user)) // TODO ? why
 		})
 		
 	}).catch((e)=>{
@@ -581,6 +504,7 @@ ipcMain.on('create-new-user',function(err, u, p){
 		mainWindow.webContents.send('message','注册新用户失败')
 	})
 })
+
 ipcMain.on('userInit',(err,s,u,p,i)=>{
 	c(' ')
 	loginApi.userInit(s,u,p).then( () => {
@@ -615,6 +539,7 @@ ipcMain.on('userInit',(err,s,u,p,i)=>{
 	}
 	request.post(s+'/init',options,callback)
 })
+
 //delete user 
 ipcMain.on('deleteUser',(err,uuid)=>{
 	c(uuid)
@@ -624,6 +549,7 @@ ipcMain.on('deleteUser',(err,uuid)=>{
 		mainWindow.webContents.send('message','删除用户失败，接口貌似还不OK')
 	})
 })
+
 //getTreeChildren
 ipcMain.on('getTreeChildren',function(err,uuid) {
 	if (uuid && uuid!='') {
@@ -658,6 +584,7 @@ ipcMain.on('move',function(err,arr,target) {
 		}
 	})
 })
+
 function move(uuid,target,index) {
 	let promise = new Promise((resolve,reject)=>{
 		var options = {
@@ -713,8 +640,6 @@ ipcMain.on('share',function(err,files,users){
 	}
 
 	fileApi.share(files[index],users,doShare)
-
-  
 })
 
 const shareFilesHandler = ({files, users}, callback) => 
@@ -724,26 +649,6 @@ const shareFilesHandler = ({files, users}, callback) =>
     }
     return Promise.promisify(request)(opts).reflect()
   }).asCallback((err, arr) => callback(err))
-
-let commandMap = new Map()
-
-ipcMain.on('command', (e, id, op) => {
-
-  let handler = commandMap.get(op.cmd)
-  if (handler) {
-    handler(op.args, (err, data) => 
-      mainWindow.webContent.send('command', { id, err, data }))
-  }
-  else {
-    mainWindow.webContent.send('command', { 
-      id,
-      err: {
-        code: 'ENOCOMMAND',
-        message: `command ${op.cmd} not found`
-      },
-    })
-  }
-})
 
 //enterShare
 ipcMain.on('enterShare',(err,item)=>{
@@ -778,6 +683,7 @@ ipcMain.on('cancelShare',(err,item)=>{
 		ipcMain.emit('getFilesSharedToOthers')
 	})
 })
+
 //loginOff
 ipcMain.on('loginOff',err=>{
 	user = {}
@@ -889,6 +795,7 @@ function dealShareThumbQueue() {
 
 	}
 }
+
 function isShareThumbExist(item) {
 	c(item.digest)
 	fs.readFile(path.join(mediaPath,item.digest+'thumb210'),(err,data)=>{
@@ -948,6 +855,7 @@ ipcMain.on('getThumb',(err,item)=>{
 	thumbQueue.push(item)
 	dealThumbQueue()
 })
+
 function dealThumbQueue() {
 	if (thumbQueue.length == 0) {
 		return
@@ -966,6 +874,7 @@ function dealThumbQueue() {
 
 	}
 }
+
 function isThumbExist(item) {
 	c(' ')
 	c(item.digest)
@@ -1048,6 +957,7 @@ function downloadMedia(item,large) {
 		})
 	return download
 }
+
 //getMediaImage
 ipcMain.on('getMediaImage',(err,hash)=>{
 	c(hash)
@@ -1462,6 +1372,7 @@ ipcMain.on('openInputOfFolder', e => {
 })
 
 function createFolder(dir,name) {
+
 	let promise = new Promise((resolve,reject)=>{
 		// c('folder name is ' + name + ' parent uuid is : ' + dir.uuid )
 		var _this = this
@@ -1486,6 +1397,7 @@ function createFolder(dir,name) {
 	})
 	return promise
 }
+
 function uploadFileInFolder(node) {
 	var promise = new Promise((resolve,reject)=>{
 		let hash = crypto.createHash('sha256')
@@ -1559,7 +1471,13 @@ ipcMain.on('downloadFolder',(err,folder)=>{
 })
 
 function getFolderTree(folderObj,call) {
-	let tree = {uuid:folderObj.uuid,name:folderObj.name,path:path.join(downloadPath,folderObj.name),children:[]}
+
+	let tree = {
+    uuid: folderObj.uuid,
+    name: folderObj.name,
+    path: path.join(downloadPath,folderObj.name),
+    children:[]
+  }
 
 	function traverse(folder,callback) {
 		fileApi.getFile(folder.uuid).then(result => {
@@ -1686,7 +1604,6 @@ ipcMain.on('store',(err,store)=>{
 		}
 	})
 })
-
 
 var currentTestCase = null
 

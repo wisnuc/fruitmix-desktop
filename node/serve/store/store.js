@@ -1,11 +1,13 @@
-//import core module
-var createStore = require('redux').createStore
-//import reducer
-var reducer = require('../reducers/reducer')
+import { createStore } from 'redux'
+import Debug from 'debug'
 
+import reducer from '../reducers/reducer'
+
+const debug = Debug('store')
 const store = createStore(reducer)
 
+debug('store state', store.getState())
 console.log('store created')
 
-module.exports = store
+export default store
 

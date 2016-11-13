@@ -12,6 +12,8 @@ import { FlatButton } from 'material-ui'
 //import Action
 import Action from '../../actions/action'
 
+import { sendCommand } from '../../lib/command'
+
 class UserList extends React.Component {
 	constructor(props) {
 		super(props)
@@ -36,8 +38,28 @@ class UserList extends React.Component {
 	}
 
 	submit() {
+
+    sendCommand('user-login', {
+      cmd: 'USER_LOGIN',
+      args: {
+        username, password
+      } 
+    }, err => {
+      console.log(err) 
+    })
+
 		let username = this.props.device.users[this.state.index].username
 		let password = this.refs.password.value
+
+    sendCommand('user-login', {
+      cmd: 'USER_LOGIN',
+      args: {
+        username, password
+      } 
+    }, err => {
+      console.log(err) 
+    })
+
 		// ipc.send('login','Alice','123456')
 		// ipc.send('login','Bob','123456')
 		ipc.send('login',username,password)

@@ -341,8 +341,6 @@ var fileApi = {
 		})
 		return rename
 	}
-
-
 }
 
 module.exports = fileApi
