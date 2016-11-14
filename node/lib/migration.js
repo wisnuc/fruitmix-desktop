@@ -1,4 +1,8 @@
 import { ipcMain } from 'electron'
+import Debug from 'debug'
+
+const debug = Debug('lib:migration')
+const c = debug
 
 // data move api -----------------------------------------
 

@@ -292,13 +292,9 @@ export const loginHandler = (err, username, password) =>
   })().asCallback(err => console.log(err))
 
 //setIp
-ipcMain.on('setServeIp',(err, ip, isCustom, isStorage)=>{
-	debug('setServeIp', ip, isCustom, isStorage)
+ipcMain.on('setServerIp',(err, ip, isCustom, isStorage)=>{
 
-	dispatch(action.setDeviceUsedRecently(ip))
-	server = 'http://' + ip + ':3721'
-	OSServer = 'http://' + ip + ':3000'
-  
+	debug('setServerIp', ip)
   store.dispatch({
     type: 'CONFIG_SET_IP',
     data: ip

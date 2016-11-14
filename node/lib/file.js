@@ -2,7 +2,11 @@ import Debug from 'debug'
 import { ipcMain } from 'electron'
 import request from 'request'
 
+// TODO
+import action from '../serve/action/action'
+
 const debug = Debug('lib:file')
+const c = debug
 
 var fileApi = {
 	//get files can be seen

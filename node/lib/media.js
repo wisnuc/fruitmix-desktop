@@ -1,7 +1,11 @@
-var path = require('path')
-var fs = require('fs')
-var request = require('request')
+import path from 'path'
+import fs from 'fs'
+import request from 'request'
 import { ipcMain } from 'electron'
+import Debug from 'debug'
+
+const debug = Debug('lib:media')
+const c = debug
 
 var mediaApi = {
 	//getMediaData

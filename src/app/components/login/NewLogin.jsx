@@ -81,7 +81,7 @@ class Index extends React.Component {
 		}
 		let s = isStorage==false?false:true
 		let ip = this.props.state.login.device[index].address
-		ipc.send('setServeIp',ip,false, isStorage)
+		ipc.send('setServerIp', ip)
 	}
 
 	submit() {

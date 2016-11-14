@@ -43,23 +43,27 @@ export const fileNav = (context, target) => {
     // TODO if error, may snackbar message
     if (err) { // fail 
       let state
-      dispatch({
-        type: 'FILE_NAV_STOP',
-        success: false
-      })
+      setImmediate(() => 
+        dispatch({
+          type: 'FILE_NAV_STOP',
+          success: false
+        }))
     }
     else { // sucess
-      dispatch({
-        type: 'FILE_NAV_STOP',
-        success: true
-      })
+      setImmediate(() => 
+        dispatch({
+          type: 'FILE_NAV_STOP',
+          success: true
+        }))
     }
   })
 
-  dispatch({
-    type: 'FILE_NAV_START',
-    job: key
-  })
+  setImmediate(() => 
+    dispatch({
+      type: 'FILE_NAV_START',
+      job: key
+    }))
+
 }
 
 
