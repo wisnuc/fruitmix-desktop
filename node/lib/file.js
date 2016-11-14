@@ -13,7 +13,6 @@ const debug = Debug('lib:file')
 const c = debug
 
 addListener(login => {
-
   if (login === 'LOGGEDIN')
     debug('loggedin message')    
 })
@@ -362,6 +361,8 @@ var fileApi = {
 }
 
 module.exports = fileApi
+///////////////////////////////////////////////////////////////////////////////
+
 
 //
 let context = null
@@ -499,7 +500,6 @@ const fileCommandMap = new Map([
   ['FILE_NAV', fileNavHandler],
 ])
 
-console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.')
 registerCommandHandlers(fileCommandMap)
 
 //get all files -------------------------------------------------
