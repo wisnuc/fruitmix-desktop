@@ -3,10 +3,20 @@ import { ipcMain } from 'electron'
 import request from 'request'
 
 // TODO
+import store from '../serve/store/store'
+import { addListener } from '../serve/reducers/login'
+import registerCommandHandlers from './command'
 import action from '../serve/action/action'
+import { requestGet, requestGetAsync, serverGetAsync } from './server'
 
 const debug = Debug('lib:file')
 const c = debug
+
+addListener(login => {
+
+  if (login === 'LOGGEDIN')
+    debug('loggedin message')    
+})
 
 var fileApi = {
 	//get files can be seen
@@ -353,17 +363,27 @@ var fileApi = {
 
 module.exports = fileApi
 
-//files
+//
+let context = null
 let drives = []
+let tree = null
 let rootNode = null
 let map = new Map()
 
-//directory
+const resetData = () => {
+  context = null
+  drives = []
+  tree = null
+  rootNode = null
+  map = new Map()
+}
+
+//directory 
 let currentDirectory = {}
 let children = []
 let parent = {}
 let dirPath = []
-let tree = []
+
 
 //share
 global.shareRoot = []
@@ -381,33 +401,151 @@ global.downloadNow = []
 global.downloadFolderQueue = []
 global.downloadFolderNow = []
 
+const getDrivesAsync = async() => await serverGetAsync(`drives`)
+const listFolderAsync = async (uuid) => await serverGetAsync(`files/${uuid}`)
+
+// pure
+const fileNodePath = (node) => {
+
+  let arr = []
+  if (!node.parent || node.parent === '') {
+    arr.unshift({
+      key: '',
+      value: {}
+    }) 
+    return arr
+  }
+
+  for (let n = map.get(node.uuid); 
+    (n !== null && n !== undefined && n !== ''); 
+    n = n.parent) {
+    arr.unshift({
+      key: n.name,
+      value: Object.assign({}, n, { children: undefined })
+    })
+  } 
+  return arr 
+}
+
+const updateLocalTree = (folder, children) => {
+
+  // tree visitor
+  const visit = (node, func) => {
+    if (node.children && node.children.length)
+      node.children.forEach(child => visit(child, func))
+    func(node) 
+  }
+
+  // remove map index for all children subtree
+  folder.children.forEach(child => 
+    visit(child, node => map.delete(node.uuid)))
+
+  // clear children
+  folder.children = []
+
+  // add new children and map index
+  children.forEach((item, index) => {
+    let x = Object.assign({}, item, {
+      parent: folder.uuid,
+      children: []
+    })
+    folder.children.push(x)
+    map.set(item.uuid, x)
+  })
+}
+
+const fileNavAsync = async (context, target) => {
+
+  if (target === null) {
+
+    // get drive list
+    drives = await getDrivesAsync()
+    // user uuid
+		let uuid = store.getState().login.obj.uuid
+    // find home drive uuid
+    let driveUUID = store.getState().server.users.find(item => item.uuid === uuid).home
+    // find home drive 
+		let drive = drives.find(item => item.uuid == driveUUID)
+		if (!drive) 
+			throw new Error('can not find root node')
+ 
+    // set root and map
+		rootNode = Object.assign({}, drive, { children:[] })
+		map.set(rootNode.uuid, rootNode)
+
+    target = rootNode.uuid
+  }
+
+  let folder = map.get(target)    
+  let kids = await listFolderAsync(target)
+
+  updateLocalTree(folder, kids)
+
+  let directory = Object.assign({}, folder, { children: undefined }) 
+  let children = kids.map(kid => Object.assign({}, kid, {
+    children: null, // TODO
+    checked: false, // TODO 
+  }))
+  let path = fileNodePath(folder)
+
+  return { directory, children, path }
+}
+
+const fileNavHandler = ({context, target}, callback) => 
+  fileNavAsync(context, target).asCallback((err, data) => 
+      err ? callback(err) : callback(null, data))
+
+const fileCommandMap = new Map([
+  ['FILE_NAV', fileNavHandler],
+])
+
+console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.')
+registerCommandHandlers(fileCommandMap)
+
 //get all files -------------------------------------------------
 ipcMain.on('getRootData', ()=> {
 
   debug('getRootData') 
+  return
 
-	dispatch(action.loadingFile())
-	drives = []
-	rootNode = null
-	tree = []
-	map = new Map()
+	// dispatch(action.loadingFile())
+
+	// drives = []
+	// rootNode = null
+	// tree = []
+	// map = new Map()
+  resetData()
 
 	c(' ')
 	c('achieve data ===> ')
+
+  // get drive list
 	fileApi.getDrive().then((drivesArr) => {
-		drives = drivesArr
+
+		drives = drivesArr // save drive list
+
+    // user uuid
 		let uuid = store.getState().login.obj.uuid
+
 		// let driveUUid = store.getState().login.obj.allUser.find(item=>item.uuid == uuid).home
+    // find home drive
     let driveUUid = store.getState().node.server.users.find(item => item.uuid === uuid).home
+
 		let drive = drives.find(item => {
 			if (item.uuid == driveUUid) {return true}
 		})
+
 		if (drive == undefined) {
 			throw new Error('can not find root node')
 		}
 
-		tree=Object.assign({},drive,{children:[]})
+    // tree
+		tree = Object.assign({}, drive, { children:[] })
+
+    // index
 		map.set(tree.uuid, tree)
+
+    // 
 		rootNode = tree
 
 		enterChildren(rootNode)
@@ -424,29 +562,55 @@ ipcMain.on('enterChildren', (err,selectItem,a) => {
 })
 
 function enterChildren(selectItem) {
+
 	dispatch(action.loadingFile())
 	c(' ')
 	c('enterChildren : ')
 	//c('open the folder : ' + selectItem.name?selectItem.name:'null')
+
+  // get target node
 	let folder = map.get(selectItem.uuid)
+
+  // list node, http get
 	fileApi.getFile(selectItem.uuid).then(file => {
-		folder.children.length = 0
+    
+		folder.children = []
+
 		file.forEach((item, index) => {
-			folder.children.push(Object.assign({}, item, {parent:selectItem.uuid,children:[]}))
-			map.set(item.uuid, folder.children[folder.children.length-1])
+      let x = Object.assign({}, item, {
+        parent:selectItem.uuid,
+        children:[]
+      })
+      folder.children.push(x)
+			map.set(item.uuid, x)
 		})
 
-		currentDirectory = Object.assign({}, selectItem, {children:null})
-		children = file.map(item=>Object.assign({},item,{children:null,checked:false}))
+    // {currentDirectory, children, path}
+
+    // mapped object
+		currentDirectory = Object.assign({}, selectItem, {
+      children:null
+    })
+
+    // mapped objects
+		children = file.map(item=>
+      Object.assign({}, item, {
+        children:null,
+        checked:false
+      }))
+
 		dirPath.length = 0
 		getPath(folder)
-		dispatch(action.setDir(currentDirectory,children,dirPath))
+
+		dispatch(action.setDir(currentDirectory, children, dirPath))
 
 	}).catch(err => {
 		c(err)
 	})
 }
-//get path
+
+// input file node
+// return array 
 function getPath(obj) {
 	//obj is root?
 	if (obj.parent == undefined || obj.parent == '') {
@@ -1106,7 +1270,7 @@ ipcMain.on('downloadFolder',(err,folder)=>{
 	
 })
 
-
+export { resetData }
 
 
 

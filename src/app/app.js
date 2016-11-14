@@ -139,6 +139,9 @@ setInterval(() => {
 
 // 
 ipc.on('command', (e, {id, err, data}) => {
+
+  console.log(id, err, data)
+
   store.dispatch({
     type: 'COMMAND_RETURN',
     id, err, data 

@@ -1,5 +1,5 @@
 var combineReducers = require('redux').combineReducers
-var login = require('./login')
+import login from './login'
 var setting = require('./setting')
 var file = require('./file')
 var media = require('./media')

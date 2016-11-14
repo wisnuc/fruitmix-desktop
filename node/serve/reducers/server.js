@@ -1,3 +1,5 @@
+import Debug from 'debug'
+const debug = Debug('reducer:server')
 
 const defaultState = {
   users: []
@@ -5,7 +7,6 @@ const defaultState = {
 
 const server2 = (state = defaultState, action) => {
 
-  try {
   switch (action.type) {
   case 'SERVER_UPDATE_USERS':
     return Object.assign({}, state, { 
@@ -16,9 +17,6 @@ const server2 = (state = defaultState, action) => {
     console.log('server action')
     return state
   }
-
-  }
-  catch (e) { console.log(e) }
 }
 
 export default server2

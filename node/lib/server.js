@@ -94,4 +94,12 @@ export const retrieveUsers = async (token) => {
   return requestGetAsync(`http://${ip}:${port}/users`, token)
 }
 
+export const serverGetAsync = async (endpoint) => {
+  let ip = store.getState().config.ip
+  let port = 3721
+  let token = store.getState().login.obj.token
+  return requestGetAsync(`http://${ip}:${port}/${endpoint}`, token)
+}
+
+
 

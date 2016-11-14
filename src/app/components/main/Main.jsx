@@ -54,11 +54,11 @@ class Main extends Component {
     fileNav('HOME_DRIVE', null)
 
 		ipc.send('getRootData')
-		ipc.send('getMediaData')
-		ipc.send('getMoveData')
-		ipc.send('getFilesSharedToMe')
-		ipc.send('getFilesSharedToOthers')
-		ipc.send('getMediaShare')
+		// ipc.send('getMediaData')
+		// ipc.send('getMoveData')
+		// ipc.send('getFilesSharedToMe')
+		// ipc.send('getFilesSharedToOthers')
+		// ipc.send('getMediaShare')
 
 		// this.props.dispatch(Action.filesLoading());
 

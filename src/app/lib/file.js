@@ -63,7 +63,6 @@ export const fileNav = (context, target) => {
       type: 'FILE_NAV_START',
       job: key
     }))
-
 }
 
 

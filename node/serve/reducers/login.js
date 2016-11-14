@@ -6,7 +6,16 @@ const defaultState = {
   	selectIndex : 0
 }
 
+const listeners = []
+
+export const addListener = listener => listeners.push(listener)
+
 const loginState = (state = defaultState, action) => {
+
+  // logged in listener
+  if (action.type === 'LOGGEDIN') 
+    setImmediate(() => listeners.forEach(l => l(action.type)))
+
 	switch (action.type) {
 		case 'LOGIN':
 			return Object.assign({}, state, {state: 'BUSY'})
@@ -19,19 +28,14 @@ const loginState = (state = defaultState, action) => {
 		case 'LOGINOUT':
 			return Object.assign({}, state, {state: 'READY'})
 
+    case 'CONFIG_SET_IP': {
+      let selectIndex = state.device.findIndex(dev => dev.address === action.data)
+      return (selectIndex !== -1) ? Object.assign({}, state, { selectIndex }) : state
+    }
+
 		case 'SET_DEVICE':
 			return Object.assign({},state,{device: action.device});
-		case 'SET_DEVICE_USED_RECENTLY':
-			c('ip is : ' + action.ip)
-			var i = state.device.findIndex(item=>{
-				return item.address == action.ip
-			});
-			if (i != -1) {
-				return Object.assign({},state,{selectIndex:i})
-			}else {
-				return Object.assign({},state,{device:state.device.concat([{address:action.ip,ip:action.ip,host:action.ip,friutmix:"INITIALIZED",isCustom:true}]),selectIndex: state.device.length})
-			}
-			return state
+
 		case 'DELETE_SERVER':
 			var IPIndex = state.device.findIndex(item => {
 				return item.address == action.item.address
@@ -43,6 +47,7 @@ const loginState = (state = defaultState, action) => {
 		default:
 			return state
 	}
-};
+}
 
-module.exports = loginState
+export default loginState
+

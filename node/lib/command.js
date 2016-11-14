@@ -12,7 +12,18 @@ const commandHandler = (evt, id, op) => {
   if (handler) {
     handler(op.args, (err, data) => {
       debug('reply', id, err && err.message, data)
-      evt.sender.send('command', { id, err, data })
+      if (err) {
+        debug('command handler error', err)
+        evt.sender.send('command', { 
+          id, 
+          err: {
+            code: err.code,
+            message: err.message
+          } 
+        })
+      }
+      else 
+        evt.sender.send('command', { id, data })
     })
   }
   else {
@@ -31,8 +42,10 @@ ipcMain.on('command', commandHandler)
 
 // key: command name, cmd
 // val: function (handler)
-const registerCommandHandlers = map => 
+const registerCommandHandlers = map => {
+  debug('register command handlers', map)
   map.forEach((val, key) => commandMap.set(key, val))
+}
 
 export default registerCommandHandlers
 
