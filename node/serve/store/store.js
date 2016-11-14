@@ -9,5 +9,8 @@ const store = createStore(reducer)
 debug('store state', store.getState())
 console.log('store created')
 
+// FIXME
+global.dispatch = action => store.dispatch(action)
+
 export default store
 

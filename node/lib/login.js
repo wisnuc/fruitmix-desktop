@@ -1,3 +1,4 @@
+import { ipcMain } from 'electron'
 import { request, requestAsync, serverAddr } from './async'
 
 import Debug from 'debug'
@@ -6,6 +7,8 @@ import { requestGetAsync,
   tryLoginAsync, retrieveUsers } from './server'
 
 const debug = Debug('lib:login')
+// FIXME
+const c = debug
 
 // login api
 var loginApi = {
@@ -288,14 +291,81 @@ export const loginHandler = (err, username, password) =>
     }
   })().asCallback(err => console.log(err))
 
+//setIp
+ipcMain.on('setServeIp',(err, ip, isCustom, isStorage)=>{
+	debug('setServeIp', ip, isCustom, isStorage)
+
+	dispatch(action.setDeviceUsedRecently(ip))
+	server = 'http://' + ip + ':3721'
+	OSServer = 'http://' + ip + ':3000'
+  
+  store.dispatch({
+    type: 'CONFIG_SET_IP',
+    data: ip
+  })
+})
+
+ipcMain.on('delServer',(err, i)=>{
+	// let index = device.findIndex(item=>{
+	// 	return item.addresses[0] == i.addresses[0]
+	// })
+	// device.splice(index,1)
+
+	dispatch(action.deleteServer(i))
+
+  store.dispatch({
+    type: 'CONFIG_DELETE_CUSTOM_DEVICE',
+    data: i.address
+  })
+})
+
+//loginOff
+ipcMain.on('loginOff',err=>{
+	user = {}
+	//files
+	rootNode= null
+	allFiles = []
+	filesSharedByMe = []
+	tree = {}
+	map = new Map()
+	//share
+	shareFiles = []
+	shareTree = []
+	shareMap = new Map()
+	shareChildren = []
+	sharePath = []
+	//directory
+	currentDirectory = {}
+	children = []
+	parent = {}
+	dirPath = []
+	tree = {}
+	//upload 
+	uploadQueue = []
+	uploadNow = []
+	//download
+	downloadQueue = []
+	downloadNow = []
+	downloadFolderQueue = []
+	downloadFolderNow = []
+	//media
+	media = []
+	mediaMap = new Map()
+	thumbQueue = []
+	thumbIng = []
+	shareThumbQueue = []
+	shareThumbIng = []
+
+	dispatch(action.loginoff())
+	isLogin = false
+})
 
 
 
 
 
 
-
-
+ipcMain.on('login', (err, user, pass) => loginHandler(err, user, pass))
 
 
 

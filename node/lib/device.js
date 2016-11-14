@@ -79,9 +79,6 @@ var findDeviceApi = {
 			
 		});
 	}
-
-
-
 };
 
 module.exports = findDeviceApi
