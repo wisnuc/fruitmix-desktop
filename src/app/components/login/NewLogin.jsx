@@ -16,7 +16,7 @@ import { Paper, TextField, FlatButton, CircularProgress, Snackbar, SelectField, 
 import Dehaze from 'material-ui/svg-icons/image/dehaze'
 import Left from 'material-ui/svg-icons/navigation/chevron-left'
 import Right from 'material-ui/svg-icons/navigation/chevron-right'
-import { sencCommand } from '../../lib/command' 
+import { sendCommand } from '../../lib/command' 
 
 //import CSS
 import css  from  '../../../assets/css/login'

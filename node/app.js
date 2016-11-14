@@ -19,7 +19,7 @@ const upload = require('./lib/upload')
 const download = require('./lib/download')
 import loginApi from './lib/login'
 const mediaApi = require('./lib/media')
-const deviceApi = require('./lib/device')
+// const deviceApi = require('./lib/device')
 const fileApi = require('./lib/file')
 const utils = require('./lib/util')
 
