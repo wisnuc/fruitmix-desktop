@@ -102,6 +102,8 @@ Render()
 //subscribe store change
 store.subscribe(()=>{
 
+  console.log(store.getState())
+
 	if (storeLock) {
 		clearTimeout(waitForRender)
 		waitForRender = setTimeout(()=>{storeLock = false;Render()},50)
@@ -110,7 +112,6 @@ store.subscribe(()=>{
 		storeLock = true
 		waitForRender = setTimeout(()=>{storeLock = false},50)
 	}
-
 })
 
 var clearLock = ()=>{
@@ -124,7 +125,7 @@ ipc.on('stateUpdate',(err,data)=>{
 
 ipc.on('adapter', (err, data) => {
   dispatch({
-    type: 'SERVER_UPDATE',
+    type: 'NODE_UPDATE',
     data: data
   })
 	dispatch(Action.adapter(data))
@@ -146,3 +147,4 @@ ipc.on('command', (e, {id, err, data}) => {
 
 
 localStorage.debug = 'reducer:command'
+

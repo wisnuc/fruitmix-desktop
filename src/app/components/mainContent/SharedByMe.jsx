@@ -51,7 +51,8 @@ class SharedByMe extends Component {
 
 	findUser(file) {
 		let users = '';
-		let allUser = this.props.state.login.obj.users;
+		// let allUser = this.props.state.login.obj.users;
+    let allUser = this.props.state.node.server.users
 		file.writelist.forEach((item,index)=>{
 			let i = allUser.findIndex(i=>i.uuid==item);
 			if (i != -1) {

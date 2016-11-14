@@ -39,15 +39,6 @@ class UserList extends React.Component {
 
 	submit() {
 
-    sendCommand('user-login', {
-      cmd: 'USER_LOGIN',
-      args: {
-        username, password
-      } 
-    }, err => {
-      console.log(err) 
-    })
-
 		let username = this.props.device.users[this.state.index].username
 		let password = this.refs.password.value
 

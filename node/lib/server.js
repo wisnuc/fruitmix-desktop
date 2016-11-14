@@ -48,32 +48,33 @@ export const requestGet = (url, token, callback) => {
 
 export const requestGetAsync = Promise.promisify(requestGet)
 
-export const updateLoginUsersAsync = async () => {
+const updateUsersAsync = async () => {
 
   let ip = store.getState().config.ip
   let port = 3721
 
-  let lusers = await requestGetAsync(`http://${ip}:${port}/login`)
+  let users = await requestGetAsync(`http://${ip}:${port}/login`)
 
-  debug('update login users', lusers)
+  debug('update users', users)
 
   store.dispatch({
-    type: 'SERVER_UPDATE_LOGIN_USERS',
-    data: lusers
+    type: 'SERVER_UPDATE_USERS',
+    data: users
   })
 }
 
+// TODO username should be UUID
 export const tryLoginAsync = async (username, password) => {
 
   debug('tryLoginAsync', username, password)
 
-  await updateLoginUsersAsync()
+  await updateUsersAsync()
 
   // TODO invalid state
   let ip = store.getState().config.ip
   let port = 3721
-  let loginUsers = store.getState().server.loginUsers
-  let userUUID = loginUsers.find(usr => usr.username === username).uuid
+  let users = store.getState().server.users
+  let userUUID = users.find(usr => usr.username === username).uuid
 
   debug('requesting token', userUUID, password)
 

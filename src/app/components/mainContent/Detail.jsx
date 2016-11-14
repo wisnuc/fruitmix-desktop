@@ -77,7 +77,8 @@ class Detail extends Component {
  			return <div>文件暂时无法进行分享</div>
  		}
 
- 		return this.props.login.obj.users.map(item => {
+ 		// return this.props.login.obj.users.map(item => {
+    return this.props.node.server.users.map(item => {
 						    	let checked = false
 						    	if(data.readlist) {
 						    		let index = data.readlist.findIndex(i => {
@@ -104,7 +105,8 @@ class Detail extends Component {
  		this.props.dispatch(Action.cleanDetail());
  	}
  	getOwner(owner) {
- 		let o = this.props.login.obj.users.find(item=>{
+ 		// let o = this.props.login.obj.users.find(item=>{
+    let o = this.props.node.server.users.find(item => {
  			return item.uuid == owner[0]
  		});
  		if (o != undefined) {
@@ -131,7 +133,8 @@ class Detail extends Component {
 			let index = this.props.view.menu.index
 			let files = [this.props.file.children[index].uuid]
 			let users = []
-			this.props.login.obj.users.forEach( item => {
+			// this.props.login.obj.users.forEach( item => {
+      this.props.node.server.users.forEach(item => {
 				if ((item.uuid != this.props.login.obj.uuid) && (typeof item.uuid == 'string') ) {
 					users.push(item.uuid)
 				}

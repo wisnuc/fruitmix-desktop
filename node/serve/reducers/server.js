@@ -1,15 +1,15 @@
 
 const defaultState = {
-  loginUsers: []
+  users: []
 }
 
 const server2 = (state = defaultState, action) => {
 
   try {
   switch (action.type) {
-  case 'SERVER_UPDATE_LOGIN_USERS':
+  case 'SERVER_UPDATE_USERS':
     return Object.assign({}, state, { 
-      loginUsers: action.data 
+      users: action.data 
     })
 
   default:

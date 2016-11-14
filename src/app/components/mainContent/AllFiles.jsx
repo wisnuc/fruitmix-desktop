@@ -125,7 +125,8 @@ class AllFiles extends Component {
 		if (!this.props.state.view.dialogOfShare) {
 			return null
 		}else {
-			let shareUserList = this.props.state.login.obj.users.map((item,index)=>{
+			//let shareUserList = this.props.state.login.obj.users.map((item,index)=>{
+      let shareUserList = this.props.state.node.server.users.map((item, index) => {
 						if (item.username == this.props.state.login.obj.username) {
 							return
 						}
@@ -212,8 +213,10 @@ class AllFiles extends Component {
 	selectBreadCrumb(obj) {
 		$('.bezierFrame').empty().append('<div class="bezierTransition1"></div><div class="bezierTransition2"></div>');
 		if (obj.key == '') {
-			ipc.send('getRootData');
+			// ipc.send('getRootData');
 			// this.props.dispatch(Action.filesLoading());
+      console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<')
+      fileNav('HOME_DRIVE', null) 
 		}else {
 			this.props.dispatch(Action.cleanDetail());
 			ipc.send('enterChildren',obj.value);
@@ -252,7 +255,8 @@ class AllFiles extends Component {
 				files.push(item.uuid)
 			}
 		})
-		this.props.state.login.obj.users.forEach((item,index)=>{
+		//this.props.state.login.obj.users.forEach((item,index)=>{
+    this.props.state.node.server.users.forEach((item, index) => {
 			if (item.checked) {
 				users.push(item.uuid);
 			}

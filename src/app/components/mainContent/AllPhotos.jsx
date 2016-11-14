@@ -244,7 +244,7 @@ class AllPhotos extends Component {
   }
 
   albumActionHandle() {
-    const { imageItem, login } = this.props;
+    const { imageItem, login, node } = this.props;
     const shareType = Array
       .from(document.querySelectorAll('.share-type'))
       .find(node => node.firstElementChild.checked)
@@ -258,7 +258,8 @@ class AllPhotos extends Component {
         .from(document.querySelectorAll('.user-select'))
         .filter(node => node.checked).map(node => node.value);
     } else {
-      peoples = login.obj.users.filter(user => user.uuid !== login.obj.uuid).map(user => user.uuid);
+      // peoples = login.obj.users.filter(user => user.uuid !== login.obj.uuid).map(user => user.uuid);
+      peoples = node.server.users.filter(user => user.uuid !== login.obj.uuid).map(user => user.uuid) 
     }
 
     ipc.send('createMediaShare', imageDigestList, peoples, {});

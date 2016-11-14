@@ -2,7 +2,7 @@
 export default (state = null, action) => {
 
   switch (action.type) {
-  case 'SERVER_UPDATE':
+  case 'NODE_UPDATE':
     return action.data
   default:
     return state

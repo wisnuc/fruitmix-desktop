@@ -20,7 +20,7 @@ import moveData from './moveData';
 import fileInfo from './fileInfo';
 
 import command from './command'
-import server from './server'
+import node from './node'
 
 // import atom component reducer
 import { radio, shareRadio } from '../React-Redux-UI/src/reducers/reducer';
@@ -45,8 +45,8 @@ const reducer = combineReducers({
 	shareRadio,
 	moveData,
 	fileInfo,
-  server,
   command,
+  node,
 });
 
 export default reducer;

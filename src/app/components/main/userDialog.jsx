@@ -32,6 +32,7 @@ class User extends React.Component {
 		  },
 		};
 		let login = this.props.login;
+    let node = this.props.node
 		if (this.state.createUser) {
 			return (
 				<div className='Setting'>
@@ -56,7 +57,8 @@ class User extends React.Component {
 			return (
 				<div>
 					<div className='user-dialog-list-container'>
-					{login.obj.allUser.map(item=>{
+					{ /* login.obj.allUser.map(item=>{ */
+            node.server.users.map(item => { 
 						return (
 							<div key={item.username} className='user-dialog-list'>
 								<span>{item.username}</span>

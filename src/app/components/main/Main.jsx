@@ -34,6 +34,8 @@ import svg from '../../utils/SVGIcon'
 
 //import Mask from './MediaMask'
 
+import { fileNav } from '../../lib/file'
+
 class Main extends Component {
 
 	getChildContext() {
@@ -46,6 +48,11 @@ class Main extends Component {
     }
 	componentDidMount() {
 		var _this = this
+
+    console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<< >>>>>>>>>>>>>>>>>>>>>>>>>>')
+
+    fileNav('HOME_DRIVE', null)
+
 		ipc.send('getRootData')
 		ipc.send('getMediaData')
 		ipc.send('getMoveData')

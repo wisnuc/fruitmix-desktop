@@ -17,7 +17,7 @@ var mocha = false
 
 import store from './serve/store/store'
 import configObserver from './lib/config'
-import { commandHandler } from './lib/command'
+import { registerCommandHandler } from './lib/command'
 
 const upload = require('./lib/upload')
 const download = require('./lib/download')
@@ -81,17 +81,17 @@ global.rootNode = null
 global.tree = []
 global.map = new Map()
 
-//share
-global.shareRoot = []
-global.shareChildren = []
-global.sharePath = []
-
 //directory
 global.currentDirectory = {}
 global.children = []
 global.parent = {}
 global.dirPath = []
 global.tree = []
+
+//share
+global.shareRoot = []
+global.shareChildren = []
+global.sharePath = []
 
 //upload 
 global.uploadNow = []
@@ -239,8 +239,6 @@ ipcMain.on('getDeviceUsedRecently', err => {
 	deviceApi.getRecord()
 })
 
-ipcMain.on('command', commandHandler)
-
 
 //setIp
 ipcMain.on('setServeIp',(err, ip, isCustom, isStorage)=>{
@@ -312,6 +310,9 @@ ipcMain.on('login', (err, user, pass) => loginHandler(err, user, pass))
 
 //get all files -------------------------------------------------
 ipcMain.on('getRootData', ()=> {
+
+  debug('getRootData') 
+
 	dispatch(action.loadingFile())
 	drives = []
 	rootNode = null
@@ -323,7 +324,8 @@ ipcMain.on('getRootData', ()=> {
 	fileApi.getDrive().then((drivesArr) => {
 		drives = drivesArr
 		let uuid = store.getState().login.obj.uuid
-		let driveUUid = store.getState().login.obj.allUser.find(item=>item.uuid == uuid).home
+		// let driveUUid = store.getState().login.obj.allUser.find(item=>item.uuid == uuid).home
+    let driveUUid = store.getState().node.server.users.find(item => item.uuid === uuid).home
 		let drive = drives.find(item => {
 			if (item.uuid == driveUUid) {return true}
 		})
@@ -1197,6 +1199,7 @@ ipcMain.on('openInputOfFolder', e => {
 		type: 'folder',
 		name: ''
 	}
+
 	dialog.showOpenDialog({properties: [ 'openDirectory']},function(folder){
 
 		if (folder == undefined)　{

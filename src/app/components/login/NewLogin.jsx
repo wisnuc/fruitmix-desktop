@@ -85,11 +85,11 @@ class Index extends React.Component {
 	}
 
 	submit() {
+
     console.log('submit, --------------------------------->')
 		let username = this.refs.username.input.value
 		let password = this.refs.password.input.value
-		// ipc.send('login','Alice','123456')
-		// ipc.send('login','Bob','123456')
+
     console.log('sendcommand, ---------------------------->')
     sendCommand('user-login', {
       cmd: 'USER_LOGIN',
@@ -99,6 +99,7 @@ class Index extends React.Component {
     }, err => {
       console.log(err) 
     })
+
 		ipc.send('login',username,password)
 	}
 

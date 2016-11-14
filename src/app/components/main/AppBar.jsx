@@ -49,11 +49,13 @@ class Bar extends Component {
 	getList() {
 		let list = null;
 		var name = this.props.login.obj.username;
-		// let index = this.props.login.obj.allUser.findIndex(item=>(item.username == name));
+		//let index = this.props.login.obj.allUser.findIndex(item=>(item.username == name));
+    let index = this.props.node.server.users.findIndex(item => item.username === name)
     // console.log(this.props)
-    if (!this.props.server || !this.props.server.server) return null // dirty fix FIXME
-    let index = this.props.server.server.loginUsers.findIndex(usr => usr.username === name)
-		if ( this.props.login.obj.allUser[index].isAdmin) {
+    // if (!this.props.server || !this.props.server.server) return null // dirty fix FIXME
+    // let index = this.props.server.server.loginUsers.findIndex(usr => usr.username === name)
+		// if ( this.props.login.obj.allUser[index].isAdmin) {
+    if (this.props.node.server.users[index].isAdmin) {
 			list = (<MenuItem value="1" primaryText="用户管理" onTouchTap={this.toggleUser.bind(this)}/>)
 		}
 
@@ -112,7 +114,8 @@ class Bar extends Component {
 }
 
 var mapStateToProps = (state)=>({
-	     login: state.login
-	})
+    login: state.login,
+    node: state.node   
+  })
 
 export default connect(mapStateToProps)(Bar)

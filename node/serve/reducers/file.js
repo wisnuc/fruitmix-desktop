@@ -12,19 +12,23 @@ const defaultDirectory = {
 }
 
 const directory = (state = defaultDirectory,action)=> {
+
 	switch (action.type) {
-		case 'LOADING':
-			return Object.assign({},state,{view:{state:'BUSY',selectAll:false}})
-		case 'SET_DIR':
-			var newCurrent = {
-				directory : action.directory,
-				children : [],
-				path : action.path
-			}
-			var newView = {state:'READY',selectAll:false}
-			return Object.assign({},state,{current : newCurrent,view:newView,children:action.children})
-		default:
-			return state
+  case 'LOADING':
+    return Object.assign({}, state, {
+      view: { state:'BUSY', selectAll:false }
+    })
+
+  case 'SET_DIR':
+    var newCurrent = {
+      directory : action.directory,
+      children : [],
+      path : action.path
+    }
+    var newView = {state:'READY',selectAll:false}
+    return Object.assign({},state,{current : newCurrent,view:newView,children:action.children})
+  default:
+    return state
 	}
 }
 

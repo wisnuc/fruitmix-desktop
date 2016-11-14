@@ -32,7 +32,7 @@ class Job {
     if (this.callback) {
       let err = new Error('timeout')
       err.code = 'ETIMEOUT'
-      this.callback(err)
+      setImmediate(() => this.callback(err))
     }
   } 
 }

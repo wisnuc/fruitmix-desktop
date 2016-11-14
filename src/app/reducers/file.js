@@ -12,9 +12,30 @@ const defaultDirectory = {
 }
 
 const directory = (state = defaultDirectory,action)=> {
+
 	switch (action.type) {
 		case 'ADAPTER':
 			return Object.assign({},state,action.store.file)
+
+    case 'FILE_NAV_START':
+      return Object.assign({}, {
+        current: state.current,
+        view: {
+          state: 'BUSY',
+          selected: state.view.selected,
+          job: action.job
+        }
+      })
+
+    case 'FILE_NAV_STOP':
+      return Object.assign({}, {
+        current: state.current,
+        view: {
+          state: 'READY',
+          selected: action.success ? [] : state.view.selected
+        }
+      })
+
 		case 'SELECT_CHILDREN':
 			var allSelected = true;
 			//setSelectedChildren

@@ -1,4 +1,4 @@
-var request = require('request')
+import request from 'request'
 
 var fileApi = {
 	//get files can be seen
