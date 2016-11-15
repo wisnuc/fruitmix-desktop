@@ -43,6 +43,11 @@ const command = (state = [], action) => {
 
   switch (action.type) {
   case 'COMMAND_SEND': 
+    if (!action.callback) {
+      ipcRenderer.send('command', null, action.op)
+      return state
+    }
+
     job = new Job(action.key, action.op, action.callback)
     ipcRenderer.send('command', job.id, action.op)
     newState = [...state, job] 

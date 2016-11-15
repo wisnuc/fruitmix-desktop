@@ -149,5 +149,5 @@ ipc.on('command', (e, {id, err, data}) => {
 })
 
 
-localStorage.debug = 'reducer:command'
+localStorage.debug = 'reducer:*,lib:*'
 

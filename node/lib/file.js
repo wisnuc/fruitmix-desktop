@@ -487,7 +487,14 @@ const fileNavAsync = async (context, target) => {
     children: null, // TODO
     checked: false, // TODO 
   }))
+
   let path = fileNodePath(folder)
+
+  let newState = { directory, children, path } 
+  store.dispatch({
+    type: 'SET_DIR2',
+    data: newState
+  })
 
   return { directory, children, path }
 }

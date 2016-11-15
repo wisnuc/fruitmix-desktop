@@ -38,7 +38,7 @@ export const fileNav = (context, target) => {
       context: 'HOME_DRIVE',
       target: target
     }
-  }, err => {
+  }) /** err => {
 
     // TODO if error, may snackbar message
     if (err) { // fail 
@@ -57,6 +57,7 @@ export const fileNav = (context, target) => {
         }))
     }
   })
+  **/
 
   setImmediate(() => 
     dispatch({

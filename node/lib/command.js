@@ -8,6 +8,16 @@ const commandHandler = (evt, id, op) => {
 
   debug('incoming', id, op)
 
+  if (!id) {
+    let handler = commandMap.get(op.cmd)
+    if (handler) {
+      handler(op.args, (err, data) => {
+        debug('command no reply', op, err, data)    
+      })
+    }
+    return    
+  }
+
   let handler = commandMap.get(op.cmd)
   if (handler) {
     handler(op.args, (err, data) => {
@@ -38,6 +48,8 @@ const commandHandler = (evt, id, op) => {
   }
 }
 
+// ipcMain.on('unsolicited', 
+
 ipcMain.on('command', commandHandler)
 
 // key: command name, cmd
@@ -50,3 +62,4 @@ const registerCommandHandlers = map => {
 export default registerCommandHandlers
 
 console.log('commandHandler module loaded')
+

@@ -53,7 +53,7 @@ class Main extends Component {
 
     fileNav('HOME_DRIVE', null)
 
-		ipc.send('getRootData')
+		// ipc.send('getRootData')
 		// ipc.send('getMediaData')
 		// ipc.send('getMoveData')
 		// ipc.send('getFilesSharedToMe')
