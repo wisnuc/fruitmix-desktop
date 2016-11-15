@@ -12,7 +12,7 @@ import { connect } from 'react-redux'
 import Action from '../../actions/action'
 import svg from '../../utils/SVGIcon'
 import Row from './TableRow'
-
+import { fileNav } from '../../lib/file'
 
 class AllFilesTable extends Component {
 	render() {
@@ -98,7 +98,8 @@ class AllFilesTable extends Component {
 
 		var children = this.props.file.children;
 		if (children[rowNumber] && children[rowNumber].type == 'folder') {
-			ipc.send('enterChildren',children[rowNumber]);
+			// ipc.send('enterChildren',children[rowNumber]);
+      fileNav('HOME_DRIVE', children[rowNumber].uuid)
 		}
 	}
 

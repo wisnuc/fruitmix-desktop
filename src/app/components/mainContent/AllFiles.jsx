@@ -20,6 +20,8 @@ import Menu from './Menu';
 import Detail from './Detail';
 import Move from './Move';
 
+import { fileNav } from '../../lib/file'
+
 class AllFiles extends Component {
 	render() {
 		var _this = this
@@ -219,7 +221,8 @@ class AllFiles extends Component {
       fileNav('HOME_DRIVE', null) 
 		}else {
 			this.props.dispatch(Action.cleanDetail());
-			ipc.send('enterChildren',obj.value);
+			// ipc.send('enterChildren',obj.value);
+      fileNav('HOME_DRIVE', obj.value.uuid)
 		}
 	}
 	//create new folder
