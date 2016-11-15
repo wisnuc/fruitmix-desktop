@@ -7,7 +7,8 @@ import store from '../serve/store/store'
 import { addListener } from '../serve/reducers/login'
 import registerCommandHandlers from './command'
 import action from '../serve/action/action'
-import { requestGet, requestGetAsync, serverGetAsync } from './server'
+import { requestGet, requestGetAsync, serverGetAsync, 
+  serverDeleteAsync } from './server'
 
 const debug = Debug('lib:file')
 const c = debug
@@ -421,7 +422,7 @@ const fileNodePath = (node) => {
     (n !== null && n !== undefined && n !== ''); 
     n = n.parent) {
     arr.unshift({
-      key: n.name,
+      key: n.name ? n.name : '',
       value: Object.assign({}, n, { children: undefined })
     })
   } 
@@ -503,70 +504,27 @@ const fileNavHandler = ({context, target}, callback) =>
   fileNavAsync(context, target).asCallback((err, data) => 
       err ? callback(err) : callback(null, data))
 
+const fileDeleteAsync = async (dir, children) => {
+
+  await Promise.map(children, child => 
+    serverDeleteAsync(`files/${dir.uuid}/${child.uuid}`).reflect())
+
+  // TODO
+  await fileNavAsync('HOME_DRIVE', dir.uuid)  
+}
+
+const fileDeleteHandler = ({dir, children}, callback) =>
+  fileDeleteAsync(dir, children).asCallback((err, data) =>
+    err ? callback(err) : callback(null, data))
+
 const fileCommandMap = new Map([
   ['FILE_NAV', fileNavHandler],
+  ['FILE_DELETE', fileDeleteHandler],
 ])
 
 registerCommandHandlers(fileCommandMap)
 
-//get all files -------------------------------------------------
-ipcMain.on('getRootData', ()=> {
-
-  debug('getRootData') 
-  return
-
-	// dispatch(action.loadingFile())
-
-	// drives = []
-	// rootNode = null
-	// tree = []
-	// map = new Map()
-  resetData()
-
-	c(' ')
-	c('achieve data ===> ')
-
-  // get drive list
-	fileApi.getDrive().then((drivesArr) => {
-
-		drives = drivesArr // save drive list
-
-    // user uuid
-		let uuid = store.getState().login.obj.uuid
-
-		// let driveUUid = store.getState().login.obj.allUser.find(item=>item.uuid == uuid).home
-    // find home drive
-    let driveUUid = store.getState().node.server.users.find(item => item.uuid === uuid).home
-
-		let drive = drives.find(item => {
-			if (item.uuid == driveUUid) {return true}
-		})
-
-		if (drive == undefined) {
-			throw new Error('can not find root node')
-		}
-
-    // tree
-		tree = Object.assign({}, drive, { children:[] })
-
-    // index
-		map.set(tree.uuid, tree)
-
-    // 
-		rootNode = tree
-
-		enterChildren(rootNode)
-	})
-	.catch((err) => {
-		c(err)
-		mainWindow.webContents.send('message','get data error',1)	
-	})
-})
-
-//select children
-ipcMain.on('enterChildren', (err,selectItem,a) => {
-	enterChildren(selectItem)
-})
+///////////////////////////////////////////////////////////////////////////////
 
 function enterChildren(selectItem) {
 
@@ -631,30 +589,12 @@ function getPath(obj) {
 	}
 }
 
-ipcMain.on('getFile',(e,uuid)=>{
-	getFile(uuid).then((data)=>{
-		mainWindow.webContents.send('receiveFile',data)
-	})
-})
-
-function getFile(uuid) {
-	var file = new Promise((resolve,reject)=>{
-		request
-			.get(server+'/files/'+uuid)
-			.set('Authorization',user.type+' '+user.token)
-			.end((err,res)=>{
-				if (res.ok) {
-					resolve(eval(res.body))
-				}else {
-					reject(err)
-				}
-			})
-	})
-	return file
-}
-
 //delete
+
+// objArr filenode array
+// 
 ipcMain.on('delete',(e,objArr,dir)=>{
+
 	let count = 0
 	c(' ')
 	c('删除文件 : ')
@@ -680,13 +620,14 @@ ipcMain.on('delete',(e,objArr,dir)=>{
 		count++
 		if (count != objArr.length) {
 			deleteItem()
-		}else {
+		} else {
 			if (dir.uuid == currentDirectory.uuid) {
 				enterChildren(dir)
 			}
 		}
 	}
 })
+
 //rename
 ipcMain.on('rename',(e,uuid,name,oldName)=>{
 	fileApi.rename(uuid,name,oldName).then(()=>{

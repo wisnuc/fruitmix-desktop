@@ -13,6 +13,7 @@ import { connect } from 'react-redux'
 import { Paper, Menu, MenuItem } from 'material-ui';
 //import Action
 import Action from '../../actions/action';
+import { sendCommand } from '../../lib/command'
 
 class PopMenu extends Component {
 	render() {
@@ -32,7 +33,7 @@ class PopMenu extends Component {
 				<Paper zDepth={2}>
 					<Menu className='menu-list' desktop={true} autoWidth={false}>
 						<MenuItem primaryText='详细信息' onTouchTap={this.detail.bind(this)}></MenuItem>
-						<MenuItem primaryText='重命名' onClick={this.rename.bind(this)}></MenuItem>
+						<MenuItem primaryText='重命名' onClick={this.rename2.bind(this)}></MenuItem>
 						{/*<MenuItem primaryText='移至' onTouchTap={this.moveto.bind(this)}></MenuItem>*/}
 						<MenuItem primaryText='分享' onTouchTap={this.share.bind(this)}></MenuItem>
 						<MenuItem primaryText='删除' onTouchTap={this.remove.bind(this)}></MenuItem>
@@ -46,8 +47,52 @@ class PopMenu extends Component {
 	detail() {
 		this.props.dispatch(Action.openDetail());
 	}
+
+	moveto() {
+		if (!!this.props.data.directory.uuid) {
+			ipc.send('getTreeChildren',this.props.data.directory.uuid);
+		}else {
+			ipc.send('getTreeChildren');
+		}
+		
+		this.props.dispatch(Action.toggleMove(true,this.props.data.menu.x,this.props.data.menu.y));
+	}
+	//toggle dialog of share
+	share() {
+		this.props.dispatch(Action.toggleShare(true));
+	}
+
+  // delete
+	remove() {
+		let arr = [];
+		this.props.file.children.forEach(item=>{
+			if (item.checked) {
+				arr.push(item)
+			}
+		});
+		// ipc.send('delete',arr,this.props.file.current.directory);
+    sendCommand(null, {
+      cmd: 'FILE_DELETE',
+      args: {
+        dir: this.props.file.current.directory,
+        children: arr
+      } 
+    }) 
+	}
+
+  rename2() {
+    sendCommand(null, {
+      cmd: 'FILE_RENAME',
+      args: {
+        dir: this.props.file.current.directory,
+        child: this.props.file.children[this.props.view.menu.index] 
+      }
+    })
+  }
+
 	//rename
 	rename() {
+
 		let index = this.props.view.menu.index 
 		let uuid = this.props.file.children[index].uuid
 		let dom = $('div[data-uuid='+uuid+']>span:eq(1)')[0];
@@ -84,30 +129,6 @@ class PopMenu extends Component {
 		setTimeout(function(){
 			dom.focus();
 		},0)
-	}
-
-	moveto() {
-		if (!!this.props.data.directory.uuid) {
-			ipc.send('getTreeChildren',this.props.data.directory.uuid);
-		}else {
-			ipc.send('getTreeChildren');
-		}
-		
-		this.props.dispatch(Action.toggleMove(true,this.props.data.menu.x,this.props.data.menu.y));
-	}
-	//toggle dialog of share
-	share() {
-		this.props.dispatch(Action.toggleShare(true));
-	}
-
-	remove() {
-		let arr = [];
-		this.props.file.children.forEach(item=>{
-			if (item.checked) {
-				arr.push(item)
-			}
-		});
-		ipc.send('delete',arr,this.props.file.current.directory);
 	}
 
 	dowload() {

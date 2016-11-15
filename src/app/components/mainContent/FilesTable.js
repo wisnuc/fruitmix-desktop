@@ -15,8 +15,10 @@ import Row from './TableRow'
 import { fileNav } from '../../lib/file'
 
 class AllFilesTable extends Component {
+
 	render() {
 		var _this = this;
+
 		return (
 			<table className="fileTable hasCheckBox">
 				{/*table header*/}
@@ -39,7 +41,15 @@ class AllFilesTable extends Component {
 					{
 						this.props.file.children.map((item,index)=>{
 							return (
-								<Row index={index} item={item} key={item.uuid} selectChildren={this.selectChildren.bind(this)} enterChildren={this.enterChildren.bind(this)} addBezier={this.addBezier.bind(this)}></Row>
+								<Row 
+                  index={index} 
+                  item={item} 
+                  key={item.uuid} 
+                  selectChildren={this.selectChildren.bind(this)} 
+                  enterChildren={this.enterChildren.bind(this)} 
+                  addBezier={this.addBezier.bind(this)}
+                  editing={index === window.store.getState().view.menu.index }
+                />
 							)
 						}
 					)}

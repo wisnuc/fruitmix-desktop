@@ -5,17 +5,17 @@
  * @author liuhua
  **/
 
- 'use strict';
-// require core module
- import React, { Component, PropTypes } from 'react';
- import { findDOMNode } from 'react-dom';
- import CSS from '../../utils/transition';
+import React, { Component, PropTypes } from 'react';
+import { findDOMNode } from 'react-dom';
+import CSS from '../../utils/transition';
 
 //require material
 import { TextField, Drawer, Paper, Snackbar, FlatButton, IconMenu, MenuItem, IconButton, Dialog } from 'material-ui';
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
+
+import {Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar'
 
 //import Action
 import Action from '../../actions/action';
@@ -24,12 +24,11 @@ import Action from '../../actions/action';
 import css  from  '../../../assets/css/main';
 
 //import component
+import AppBar from './AppBar'
 import LeftNav from './LeftNav';
 import Content from './Content';
 import Multiple from '../mainContent/Multiple';
 //import Users from './userDialog';
-import AppBar from './AppBar'
-
 import svg from '../../utils/SVGIcon'
 
 //import Mask from './MediaMask'
@@ -158,37 +157,49 @@ class Main extends Component {
 		})
 
 		setTimeout(()=>{
-			// ipc.send('createMediaShare',["dce28c18b5c20959a8969f29623a05437598977f2c3b37675dbaf3a488ab8884","eded050006853bb4560f3347d1ba10535c0f98d61bfe888124b3970720672166","1c5ec2f0fffc2202e4020cd47e1b06c5956ef6febfbc56fa731726dd42c3d3ca","2cb17a7e37e48e5a320fe7eff2a8a568d48bf027a1117b553848641f743c1834","3f02a9745ec0119f8b5c9ed8978b6ad86ec362bc6c1f65b3ebc5b3f3fdf4fc93","7ea0425b90f8fe7b47a1e20168848be02dd7e9bf463c4ad2d8acf1c49a00ff4a","c2da92f989b82d0d37233c299dc466bcddb55fc0bcdd255179b41f8f38b55078","0b0cbe6db498178e9a51a0b4682ebad2c0a13956243893b840ff78c64cb349fb","3463344894d0b862ce5a90ac6b9fa30caaeb800eab95c29c737b65dcbd47ffe1"],["5da92303-33a1-4f79-8d8f-a7b6becde6c3"])
 		},2000)
 	}
 
+//				{/*Multiple select frame*/}
+//				{/*<Multiple dispatch={this.props.dispatch} state={this.props.state}/>*/}
+
+
 	render() {
-		// if (this.props.state.view.currentMediaImage.open) {
-		// 	m = <Mask dispatch={this.props.dispatch} state={this.props.state}/>
-		// }
-		return (<CSS opts={['app',true,true,true,500,5000,5000]} style={{height:'100%'}}>
-			<div className="main" key='main' onMouseMove={this.mouseMove.bind(this)} onMouseUp={this.mouseUp.bind(this)} onClick={this.triggerClick.bind(this)}>
+		return (
+      <CSS opts={['app',true,true,true,500,5000,5000]} style={{height:'100%'}}>
+        <div className="main" key='main' 
+          onMouseMove={this.mouseMove.bind(this)} 
+          onMouseUp={this.mouseUp.bind(this)} 
+          onClick={this.triggerClick.bind(this)}
+        >
 
-				{/*Multiple select frame*/}
-				{/*<Multiple dispatch={this.props.dispatch} state={this.props.state}/>*/}
+          {/*Bar*/}
+          <AppBar/>
+          <Toolbar style={{top: 64}}>
+            <ToolbarGroup>
+              <ToolbarTitle text="Options" />
+            </ToolbarGroup>
+          </Toolbar>
 
-				{/*Bar*/}
-				<AppBar/>
+          {/*Left Nav*/}
+          <LeftNav/>
 
-				{/*Left Nav*/}
-				<LeftNav/>
+          {/*Content*/}
+          <Paper className={"content-container " + (this.props.state.navigation.menu?'content-has-left-padding':'no-padding') } zDepth={0}>
+            <Content dispatch={this.props.dispatch} state={this.props.state}/>
+          </Paper>
 
-				{/*Content*/}
-				<Paper className={"content-container "+(this.props.state.navigation.menu?'content-has-left-padding':'no-padding')} zDepth={0}>
-					<Content dispatch={this.props.dispatch} state={this.props.state}/>
-				</Paper>
-
-				<Snackbar style={{textAlign:'center'}} open={this.props.state.snack.open} message={this.props.state.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
-			</div></CSS>
-			);
+          <Snackbar 
+            style={{textAlign:'center'}} 
+            open={this.props.state.snack.open} 
+            message={this.props.state.snack.text} 
+            autoHideDuration={3000} 
+            onRequestClose={this.cleanSnack.bind(this)}
+          />
+        </div>
+      </CSS>
+	  )
 	}
-
-	
 
 	triggerClick(e) {
 		if (this.props.state.view.menu.show) {

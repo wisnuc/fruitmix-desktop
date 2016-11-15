@@ -1,40 +1,58 @@
-import React, { findDOMNode, Component, PropTypes } from 'react';
-import svg from '../../utils/SVGIcon';
+import React, { findDOMNode, Component, PropTypes } from 'react'
+import TextField from 'material-ui/TextField'
+import svg from '../../utils/SVGIcon'
+
 class Row extends Component {
 
+/**
 	shouldComponentUpdate(nextP) {
-		if (this.props.item.checked == nextP.item.checked && this.props.item.name == nextP.item.name && this.props.index == nextP.index ) {
+		if (this.props.item.checked == nextP.item.checked && 
+      this.props.item.name == nextP.item.name && 
+      this.props.index == nextP.index ) {
 			return false
-		}else {
+		} else {
 			return true
 		}
 	}
+**/
 
 	render() {
 		var _this = this
 		return (
-			<tr onTouchTap={_this.props.selectChildren.bind(_this,this.props.index)} onDoubleClick={_this.props.enterChildren.bind(_this,this.props.index)} 
-			className={this.props.item.checked==true?'tr-selected-background':''}>
-				<td onClick={this.props.addBezier.bind(this,this.props.index)} data-selected={this.props.item.checked} className='first-td'>
+			<tr 
+        onTouchTap={_this.props.selectChildren.bind(_this,this.props.index)} 
+        onDoubleClick={_this.props.enterChildren.bind(_this,this.props.index)} 
+			  className={this.props.item.checked==true?'tr-selected-background':''}
+      >
+        {/* checkbox column */}
+				<td onClick={this.props.addBezier.bind(this,this.props.index)} 
+          data-selected={this.props.item.checked} className='first-td'>
 					<div className='selectBox'>
 						<div>{this.props.item.checked==false?svg.blackFrame():svg.select()}</div>
 						<div className='bezierFrame' style={{width:48,height:48}}>
 							<div className="bezierTransition1"></div>
 							<div className="bezierTransition2"></div>
 						</div>
-					<div></div>
+					  <div></div>
 					</div>
 				</td>
+        {/* file name column */}
+
 				<td title={this.props.item.name}>
 					<div data-uuid={this.props.item.uuid}>
 						<span className={'file-type-icon '+this.getTypeOfFile(this.props.item)}></span>
-						<span className='file-name'>{this.props.item.name}</span>
+						{ this.props.editing ? 
+              <span><TextField hintText={this.props.item.name} /></span> : 
+              <span className='file-name'>{this.props.item.name}</span> 
+            }
 					</div>
 				</td>
+        
+
 				<td >{this.getTime(this.props.item.mtime)}</td>
 				<td>{this.getSize(this.props.item.size)}</td>
 			</tr>
-			)
+    )
 	}
 
 	getSize(size) {
@@ -91,8 +109,7 @@ class Row extends Component {
 		}
 		return 'file'
 	}
-
-
-
 }
-export default Row;
+
+export default Row
+

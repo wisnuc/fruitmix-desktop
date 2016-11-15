@@ -6,7 +6,7 @@ const debug = Debug('lib:server')
 import store from '../serve/store/store'
 
 // TODO token can also be auth, or not provided 
-export const requestGet = (url, token, callback) => {
+const requestGet = (url, token, callback) => {
 
   // auth-less
   if (typeof token === 'function') {
@@ -47,6 +47,28 @@ export const requestGet = (url, token, callback) => {
 }
 
 export const requestGetAsync = Promise.promisify(requestGet)
+
+const requestDelete = (url, token, callback) => {
+
+  let opts = { method: 'DELETE', url }
+  opts.headers = { Authorization: 'JWT ' + token }
+
+  debug('requestDelete, opts', opts)
+
+  request(opts, (err, res) => {
+
+    if (err) return callback(err)
+    if (res.statusCode !== 200) {
+      let e = new Error('http status code not 200')
+      e.code = 'EHTTPSTATUS'
+      e.status = res.statusCode
+      return callback(e)
+    }
+    callback(null)    
+  })
+}
+
+const requestDeleteAsync = Promise.promisify(requestDelete)
 
 const updateUsersAsync = async () => {
 
@@ -100,6 +122,16 @@ export const serverGetAsync = async (endpoint) => {
   let token = store.getState().login.obj.token
   return requestGetAsync(`http://${ip}:${port}/${endpoint}`, token)
 }
+
+export const serverDeleteAsync = async (endpoint) => {
+  let ip = store.getState().config.ip
+  let port = 3721
+  let token = store.getState().login.obj.token
+  return requestDeleteAsync(`http://${ip}:${port}/${endpoint}`, token)
+}
+
+
+
 
 
 

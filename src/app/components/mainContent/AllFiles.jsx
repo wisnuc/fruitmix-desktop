@@ -197,20 +197,31 @@ class AllFiles extends Component {
 		ipc.send('uploadFile',fileObj);	
 		this.props.dispatch(Action.setSnack(files.length+' 个文件添加到上传队列',true));
 	}
+
 	//get  bread
 	getBreadCrumb(){
+
+    console.log('=============')
+    console.log(this.props.state.file.current.path)
+    console.log('=============')
+
 		var _this = this;
 		var path = this.props.state.file.current.path;
 		var pathArr = [];
 		pathArr = path.map((item,index)=>{
 			return(
-				<span key={index} style={{display:'flex',alignItems:'center'}} onClick={_this.selectBreadCrumb.bind(_this,item)}>
-					{item.key!=''?<span className='breadcrumb-text'>{item.key}</span>:<span className='breadcrumb-home'></span>}
+				<span key={index} style={{display:'flex',alignItems:'center'}} 
+          onClick={_this.selectBreadCrumb.bind(_this,item)}>
+					{ item.key!='' ? 
+              <span className='breadcrumb-text'>{item.key}</span> :
+              <span className='breadcrumb-home'></span>
+          }
 					<span className={index==path.length-1?'breadcrumb-arrow hidden':'breadcrumb-arrow'}></span>
 				</span>
 			)});
 		return pathArr;
 	}
+
 	//select bread crumb
 	selectBreadCrumb(obj) {
 		$('.bezierFrame').empty().append('<div class="bezierTransition1"></div><div class="bezierTransition2"></div>');
