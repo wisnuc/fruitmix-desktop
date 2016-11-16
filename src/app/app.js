@@ -9,8 +9,10 @@
 import React from 'react'
 import { render } from 'react-dom'
 import injectTapEventPlugin from 'react-tap-event-plugin'
-
 import { ipcRenderer } from 'electron'
+
+const debug = require('debug')('main')
+
 global.ipc = ipcRenderer
 
 //import component
@@ -70,7 +72,7 @@ var App = React.createClass({
 		}
 		return(
 				
-				<div className="app">
+				<div className="app" onClick={ e => console.log(e) } >
 						{/*<button onClick={this.save}>store</button>*/}
 						{isLogin && <Main state={mocha?mochaState:state} dispatch={dispatch}/>}
 						{!isLogin && <Login state={mocha?mochaState:state} dispatch={dispatch}/>}
@@ -148,6 +150,5 @@ ipc.on('command', (e, {id, err, data}) => {
   }) 
 })
 
-
-localStorage.debug = 'reducer:*,lib:*'
+debug('debug module works')
 

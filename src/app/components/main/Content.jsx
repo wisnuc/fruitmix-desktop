@@ -51,11 +51,11 @@ class MainContent extends Component {
 		}
 		return (
 			<div>
-		        <div className="content">
-		          <CSS opts={['content', true, true, false, 800, 800, 500]}>
-		  				  {componentMap[this.getContentSelected()]}
-		  				</CSS>
-		        </div>
+        <div className="content">
+          <CSS opts={['content', true, true, false, 800, 800, 500]}>
+            {componentMap[this.getContentSelected()]}
+          </CSS>
+        </div>
 			</div>
 		)
 	}

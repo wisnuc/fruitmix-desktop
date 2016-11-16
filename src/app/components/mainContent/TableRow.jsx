@@ -1,56 +1,98 @@
 import React, { findDOMNode, Component, PropTypes } from 'react'
 import TextField from 'material-ui/TextField'
+import Checkbox from 'material-ui/Checkbox'
 import svg from '../../utils/SVGIcon'
+
+const isLeftClick = e => e.nativeEvent.button === 0
+const isRightClick = e => e.nativeEvent.button === 2
+
+const stm = () => window.store.getState().file.stm
 
 class Row extends Component {
 
-/**
-	shouldComponentUpdate(nextP) {
-		if (this.props.item.checked == nextP.item.checked && 
-      this.props.item.name == nextP.item.name && 
-      this.props.index == nextP.index ) {
-			return false
-		} else {
-			return true
-		}
-	}
-**/
-
 	render() {
-		var _this = this
-		return (
-			<tr 
-        onTouchTap={_this.props.selectChildren.bind(_this,this.props.index)} 
-        onDoubleClick={_this.props.enterChildren.bind(_this,this.props.index)} 
-			  className={this.props.item.checked==true?'tr-selected-background':''}
+/**
+    return (
+      <tr 
+        style={{backgroundColor: this.props.checked ? '#EEE' : '#FFF' }}
+        onMouseEnter = {() => window.store.dispatch({type: 'FILE_ROW_MOUSE_ENTER', data: this.props.item.uuid})}
+        onMouseLeave = {() => window.store.dispatch({type: 'FILE_ROW_MOUSE_LEAVE', data: this.props.item.uuid})}
       >
-        {/* checkbox column */}
-				<td onClick={this.props.addBezier.bind(this,this.props.index)} 
-          data-selected={this.props.item.checked} className='first-td'>
-					<div className='selectBox'>
-						<div>{this.props.item.checked==false?svg.blackFrame():svg.select()}</div>
-						<div className='bezierFrame' style={{width:48,height:48}}>
-							<div className="bezierTransition1"></div>
-							<div className="bezierTransition2"></div>
-						</div>
-					  <div></div>
-					</div>
-				</td>
-        {/* file name column */}
+**/
+    return (
+      <tr>
+        <td>
+          {/* (this.props.checked || stm().mouseOver === this.props.item.uuid) &&
+            <Checkbox checked={this.props.checked} onCheck={() => window.store.dispatch({
+              type: 'FILE_ROW_CHECKBOX_ONCHECK',
+              data: this.props.item.uuid
+            })}/>
+          */}
+        </td>
 
-				<td title={this.props.item.name}>
+        {/* name colume */}
+				<td title={this.props.item.name} 
+          onClick={
+            e => isLeftClick(e) &&
+              window.store.dispatch({
+                type: 'FILE_ROW_RAWCLICK',
+                childUUID: this.props.item.uuid,
+                colume: 'name'
+              })
+          }
+        >
 					<div data-uuid={this.props.item.uuid}>
 						<span className={'file-type-icon '+this.getTypeOfFile(this.props.item)}></span>
 						{ this.props.editing ? 
-              <span><TextField hintText={this.props.item.name} /></span> : 
-              <span className='file-name'>{this.props.item.name}</span> 
+              <TextField 
+                hintText={this.props.item.name} 
+                fullWidth={true} 
+                ref={ input => { input && input.focus() }}
+                onBlur={() => window.store.dispatch({
+                  type: 'FILE_ROW_NAME_ONBLUR',
+                  data: this.props.item.uuid
+                })}
+              /> : <span className='file-name'>{this.props.item.name}</span> 
             }
 					</div>
 				</td>
-        
 
-				<td >{this.getTime(this.props.item.mtime)}</td>
-				<td>{this.getSize(this.props.item.size)}</td>
+        {/* time colume */}
+				<td
+          onClick={
+            e => isLeftClick(e) &&
+              window.store.dispatch({
+                type: 'FILE_ROW_RAWCLICK',
+                childUUID: this.props.item.uuid,
+                colume: 'nonname'
+              })
+          }
+        >
+          {this.getTime(this.props.item.mtime)}
+        </td>
+
+        {/* size colume */}
+				<td 
+          onClick={
+            e => {
+              console.log('===============')
+              console.log(e.nativeEvent)
+
+              return isLeftClick(e) ?
+              window.store.dispatch({
+                type: 'FILE_ROW_RAWCLICK',
+                childUUID: this.props.item.uuid,
+                colume: 'nonname'
+              }) : isRightClick(e) ?
+              window.store.dispatch({
+                type: 'FILE_ROW_RIGHTCLICK',
+                data: this.props.item.uuid
+              }) : null
+            }
+          }
+        >
+          {this.getSize(this.props.item.size)}
+        </td>
 			</tr>
     )
 	}

@@ -1,7 +1,5 @@
-import Debug from 'debug'
 import { store } from '../stores/store'
-
-const debug = Debug('lib:command')
+const debug = require('debug')('lib:command')
 
 const sendCommand = (key, op, callback) => {
 

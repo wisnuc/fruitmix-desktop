@@ -44,11 +44,12 @@ class AllFilesTable extends Component {
 								<Row 
                   index={index} 
                   item={item} 
+                  checked={window.store.getState().file.stm.selection.has(item.uuid)}
                   key={item.uuid} 
                   selectChildren={this.selectChildren.bind(this)} 
                   enterChildren={this.enterChildren.bind(this)} 
                   addBezier={this.addBezier.bind(this)}
-                  editing={index === window.store.getState().view.menu.index }
+                  editing={item.uuid === window.store.getState().file.stm.editing }
                 />
 							)
 						}
@@ -88,6 +89,8 @@ class AllFilesTable extends Component {
 		}
 		if (e.nativeEvent.button == 2) {
 			//right click
+      console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+
 			let x = e.nativeEvent.pageX;
 			let y = e.nativeEvent.pageY;
 			if (this.props.file.children[rowNumber].checked == false) {	

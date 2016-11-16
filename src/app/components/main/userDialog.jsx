@@ -53,7 +53,7 @@ class User extends React.Component {
 		 			</div>
 	 			</div>
 				);
-		}else {
+		} else {
 			return (
 				<div>
 					<div className='user-dialog-list-container'>

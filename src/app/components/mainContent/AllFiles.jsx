@@ -6,7 +6,7 @@
  **/
   'use strict';
 // require core module
- import React, { findDOMNode, Component, PropTypes } from 'react';
+import React, { findDOMNode, Component, PropTypes } from 'react';
 //require material
 import { Paper, FontIcon, SvgIcon, IconMenu, MenuItem, Dialog, FlatButton, RaisedButton, TextField, Checkbox, CircularProgress } from 'material-ui';
 import { Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn } from 'material-ui/Table';
@@ -23,6 +23,7 @@ import Move from './Move';
 import { fileNav } from '../../lib/file'
 
 class AllFiles extends Component {
+
 	render() {
 		var _this = this
 		return (
@@ -37,6 +38,7 @@ class AllFiles extends Component {
 			</div>
 		)
 	}
+
 	//get table 
 	getTable() {
 		const listStyle = {
@@ -52,7 +54,7 @@ class AllFiles extends Component {
 					{/*upload input*/}
 					<input className='upload-input' type="file" onChange={this.upLoadFile.bind(this)} multiple={true}/>
 					{/*bread crumb*/}
-					<div className='breadcrumb'>
+					<div className='breadcrumb' onClick={e => console.log(e)}>
 						{this.getBreadCrumb()}
 						<IconMenu className='breadcrumb-add'
 						      iconButtonElement={<span style={{cursor:'pointer'}}>{svg.add()}</span>}
@@ -200,10 +202,6 @@ class AllFiles extends Component {
 
 	//get  bread
 	getBreadCrumb(){
-
-    console.log('=============')
-    console.log(this.props.state.file.current.path)
-    console.log('=============')
 
 		var _this = this;
 		var path = this.props.state.file.current.path;
