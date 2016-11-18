@@ -71,13 +71,11 @@ var App = React.createClass({
 			isLogin = state.login.state == 'LOGGEDIN'?true:false
 		}
 		return(
-				
-				<div className="app" onClick={ e => console.log(e) } >
-						{/*<button onClick={this.save}>store</button>*/}
-						{isLogin && <Main state={mocha?mochaState:state} dispatch={dispatch}/>}
-						{!isLogin && <Login state={mocha?mochaState:state} dispatch={dispatch}/>}
-				</div>
-				
+      <div className="app" >
+        {/*<button onClick={this.save}>store</button>*/}
+        {isLogin && <Main state={mocha?mochaState:state} dispatch={dispatch}/>}
+        {!isLogin && <Login state={mocha?mochaState:state} dispatch={dispatch}/>}
+      </div>
 			)
 	},
 

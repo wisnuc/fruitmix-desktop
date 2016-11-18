@@ -41,14 +41,14 @@ class Main extends Component {
 		const muiTheme = getMuiTheme(lightBaseTheme);
 		return {muiTheme};
 	}
+
 	constructor(props) {
-        super(props);
-        this.state = { userDialog: false};
-    }
+    super(props);
+    this.state = { userDialog: false};
+  }
+
 	componentDidMount() {
 		var _this = this
-
-    console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<< >>>>>>>>>>>>>>>>>>>>>>>>>>')
 
     fileNav('HOME_DRIVE', null)
 
@@ -167,11 +167,7 @@ class Main extends Component {
 	render() {
 		return (
       <CSS opts={['app',true,true,true,500,5000,5000]} style={{height:'100%'}}>
-        <div className="main" key='main' 
-          onMouseMove={this.mouseMove.bind(this)} 
-          onMouseUp={this.mouseUp.bind(this)} 
-          onClick={this.triggerClick.bind(this)}
-        >
+        <div className="main" key='main' >
 
           {/*Bar*/}
           <AppBar/>

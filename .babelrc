@@ -1,6 +1,7 @@
 {
   "presets": ["es2015", "react", "bluebird"],
   "plugins": [
+    "transform-decorators-legacy",
     "transform-async-to-bluebird", 
     "transform-promise-to-bluebird",
     "transform-runtime"

@@ -1,4 +1,5 @@
 import React, { findDOMNode, Component, PropTypes } from 'react'
+import Paper from 'material-ui/Paper'
 import TextField from 'material-ui/TextField'
 import Checkbox from 'material-ui/Checkbox'
 import svg from '../../utils/SVGIcon'
@@ -8,36 +9,52 @@ const isRightClick = e => e.nativeEvent.button === 2
 
 const stm = () => window.store.getState().file.stm
 
+const COLOR_WHITE = '#FFF'
+const COLOR_LIGHT_GRAY = '#EEE'
+const COLOR_DARK_GRAY = '#111'
+const COLOR_BLACK = '#000'
+
 class Row extends Component {
 
 	render() {
-/**
+
+    let style = {
+      row: {
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: this.props.checked ? '#777' : '#FFF',
+        color: this.props.checked ? '#FFF' : '#000',
+      },
+
+    }
+
     return (
+      <Paper style={style.row}>      
       <tr 
-        style={{backgroundColor: this.props.checked ? '#EEE' : '#FFF' }}
+        style={{
+        }}
         onMouseEnter = {() => window.store.dispatch({type: 'FILE_ROW_MOUSE_ENTER', data: this.props.item.uuid})}
         onMouseLeave = {() => window.store.dispatch({type: 'FILE_ROW_MOUSE_LEAVE', data: this.props.item.uuid})}
       >
-**/
-    return (
-      <tr>
         <td>
-          {/* (this.props.checked || stm().mouseOver === this.props.item.uuid) &&
+          { (this.props.checked || stm().mouseOver === this.props.item.uuid) &&
             <Checkbox checked={this.props.checked} onCheck={() => window.store.dispatch({
               type: 'FILE_ROW_CHECKBOX_ONCHECK',
               data: this.props.item.uuid
             })}/>
-          */}
+          }
         </td>
 
-        {/* name colume */}
+        {/* name column */}
 				<td title={this.props.item.name} 
-          onClick={
+          onTouchTap={
             e => isLeftClick(e) &&
               window.store.dispatch({
                 type: 'FILE_ROW_RAWCLICK',
                 childUUID: this.props.item.uuid,
-                colume: 'name'
+                column: 'name'
               })
           }
         >
@@ -57,32 +74,29 @@ class Row extends Component {
 					</div>
 				</td>
 
-        {/* time colume */}
-				<td
-          onClick={
+        {/* time column */}
+				<td style={{color: this.props.checked ? '#FFF' : '#000'}}
+          onTouchTap={
             e => isLeftClick(e) &&
               window.store.dispatch({
                 type: 'FILE_ROW_RAWCLICK',
                 childUUID: this.props.item.uuid,
-                colume: 'nonname'
+                column: 'nonname'
               })
           }
         >
           {this.getTime(this.props.item.mtime)}
         </td>
 
-        {/* size colume */}
+        {/* size column */}
 				<td 
-          onClick={
+          onTouchTap={
             e => {
-              console.log('===============')
-              console.log(e.nativeEvent)
-
               return isLeftClick(e) ?
               window.store.dispatch({
                 type: 'FILE_ROW_RAWCLICK',
                 childUUID: this.props.item.uuid,
-                colume: 'nonname'
+                column: 'nonname'
               }) : isRightClick(e) ?
               window.store.dispatch({
                 type: 'FILE_ROW_RIGHTCLICK',
@@ -93,7 +107,7 @@ class Row extends Component {
         >
           {this.getSize(this.props.item.size)}
         </td>
-			</tr>
+			</tr></Paper>
     )
 	}
 

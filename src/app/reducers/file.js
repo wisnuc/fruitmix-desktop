@@ -26,7 +26,7 @@ class StateMachine {
 class Clicked extends StateMachine {
 
   constructor(obj) {
-    super()
+    super(obj)
   }
 
   leftClick(childUUID, column) {
@@ -40,7 +40,7 @@ class Clicked extends StateMachine {
 class Clicking extends StateMachine {
 
   constructor(obj) {
-    super()
+    super(obj)
     this.timer = setTimeout(() => {
       // fire old one
       window.store.dispatch({
@@ -55,7 +55,7 @@ class Clicking extends StateMachine {
           'FILE_ROW_NONNAME_LEFTCLICK',
         data: this.childUUID
       })
-    }, 350)
+    }, 250)
   }
 
   // column: name or nonname
@@ -88,16 +88,12 @@ class Clicking extends StateMachine {
   destructor() {
 
     if (this.timer) {
+      debug('clear Timeout')
       clearTimeout(this.timer)
     }
     delete this.timer
   }
 }
-
-
-
-// stm instanceof PlainView
-// stm.constructor.name
 
 class PlainView extends StateMachine {
 
@@ -153,10 +149,12 @@ class PlainView extends StateMachine {
 
   rowNameLeftClick(childUUID) {
     /// FIXME
+    return this
   }
 
   rowNameDoubleClick(childUUID) {
     /// FIXME
+    return this
   }
 
   rowNonnameLeftClick(childUUID) {
@@ -165,10 +163,16 @@ class PlainView extends StateMachine {
 
   rowNonnameDoubleClick(childUUID) {
     // return this. TODO
+    return this
   }
 
   rowNameOnBlur(childUUID) {
     return this.resetEditing(childUUID)
+  }
+
+  rowRightClick(childUUID) {
+    debug('rowRightClick not implemented yet')
+    return this
   }
 
   rowMouseEnter(childUUID) {
@@ -243,23 +247,22 @@ const directory = (state = defaultDirectory,action)=> {
           state.stm
       })
 
-    /** raw click for click machine **/
+    /** raw click for click machine begin **/
 
     case 'FILE_ROW_RAWCLICK':
-      debug(action.type, action.data)
+      debug(action.type, action.childUUID, action.column)
       return Object.assign({}, state, {
         click: state.click.leftClick(action.childUUID, action.column)
       })
 
     case 'FILE_ROW_RAWCLICK_TIMEOUT':
-      debug(action.type, action.data)
+      debug(action.type, action.childUUID, action.column)
       return Object.assign({}, state, {
         click: state.click.setState(Clicked)
       })
 
-    /** raw click for click machine **/
+    /** raw click for click machine end **/
 
-    // raw (almost) event forwarder begings
     case 'FILE_ROW_CHECKBOX_ONCHECK': // action.data is uuid
       debug(action.type, action.data)
       return Object.assign({}, state, {
@@ -284,15 +287,14 @@ const directory = (state = defaultDirectory,action)=> {
         stm: state.stm.rowMouseLeave(action.data)
       })
 
-    // raw (almost) event forwarder ends
-
-    // buffered clicks
+    // buffered click
     case 'FILE_ROW_NAME_LEFTCLICK':
       debug(action.type, action.data)
       return Object.assign({}, state, {
         stm: state.stm.rowNameLeftClick(action.data)
       })
-
+  
+    // detected double click
     case 'FILE_ROW_NAME_DOUBLECLICK':
       debug(action.type, action.data)
       return Object.assign({}, state, {
