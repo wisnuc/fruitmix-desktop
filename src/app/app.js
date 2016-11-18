@@ -8,7 +8,7 @@
 //import core module
 import React from 'react'
 import { render } from 'react-dom'
-import injectTapEventPlugin from 'react-tap-event-plugin'
+
 
 import { ipcRenderer } from 'electron'
 global.ipc = ipcRenderer
@@ -36,17 +36,13 @@ import configureStore from './stores/store'
 
 const store = configureStore()
 
-injectTapEventPlugin()
+
 
 var storeLock = false
 
 var waitForRender = null
 
 window.c = console
-
-window.onresize = function() {
-	// store.dispatch({type:''})
-}
 
 window.mocha = false
 
@@ -124,3 +120,9 @@ ipc.on('stateUpdate',(err,data)=>{
 ipc.on('adapter', (err, data) => {
 	dispatch(Action.adapter(data))
 })
+
+if (module.hot) {
+	console.log('module>>>>')
+	console.log(module)
+	module.hot.accept()
+}
