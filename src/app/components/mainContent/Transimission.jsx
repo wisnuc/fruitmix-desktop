@@ -21,7 +21,7 @@ class Collection extends Component {
 					<Tab label='上传队列' style={{color:'#404040',fontSize:'14px'}}>
 						<div className='transimissionRow'>
 							<span>名称</span>
-							<span>状态</span>
+							<span>大小</span>
 							<span>进度</span>
 						</div>
 						{this.props.transimission.upload.map(task => {

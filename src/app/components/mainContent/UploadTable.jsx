@@ -21,8 +21,8 @@ class UploadTable extends Component {
 			<div className={classname}>
 				<div className='transimissionRow' onClick={this.toggleChildren.bind(this)}>
 					<span>{item.name}</span>
-					<span>{item.state}</span>
-					<span>{item.success}</span>
+					<span>{this.getSize()}</span>
+					<span>{this.getProgress()}</span>
 				</div>
 				<div style={{paddingLeft:'30px'}}>
 					{this.getChildren()}
@@ -49,6 +49,45 @@ class UploadTable extends Component {
 		return result
 	}
 
+	getSize() {
+		let size = this.props.item.size
+		if (!size) {
+			return ''
+		}
+		size = parseFloat(size);
+		if (size < 1024) {
+			return size.toFixed(2)+' B'
+		}else if (size < 1024*1024) {
+			return (size/1024).toFixed(2)+' KB'
+		}else if(size<1024*1024*1024) {
+			return (size/1024/1024).toFixed(2)+ ' M'
+		}else {
+			return (size/1024/1024/1024).toFixed(2)+ ' G'
+		}
+	}
+
+	getProgress() {
+		let item = this.props.item
+		if (item.type == 'file') {
+			if (item.progress !== 0 && item.progress !== 1) {
+				return (item.progress*100).toFixed(2)
+			}else if (item.progress == 1.01) {
+				return '上传失败'
+			}else {
+				return this.getState(item.state)
+			}
+		}else {
+			if (!item.isRoot) {
+				return
+			}
+			if (item.finishCount == item.children.length) {
+				return '已完成'
+			}else {
+				return '已上传 ' + item.success
+			}
+		}
+	}
+
 	getState(state) {
 		if (state == 'ready' || state == 'hashless') {
 			return '准备'
@@ -56,8 +95,8 @@ class UploadTable extends Component {
 			return '上传中'
 		}else if (state == 'hashing') {
 			return '正在校验本地文件'
-		}else if (false) {
-			return ''
+		}else if (state == 'finished') {
+			return '已完成'
 		}
 		else {
 			return state

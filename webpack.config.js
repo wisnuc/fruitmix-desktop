@@ -34,8 +34,6 @@ module.exports = {
         './src/app/app.js'
     ],
 
-    hot: true
-
     stats: {
         colors : true,
         reasons: true

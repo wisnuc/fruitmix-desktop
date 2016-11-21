@@ -1152,8 +1152,6 @@ ipcMain.on('upLoadFolder',(e,name,dir)=>{
 
 //upload file
 ipcMain.on('uploadFile',(e,files)=>{
-	// uploadQueue.push(files)
-	// upload.dealUploadQueue()
 	let target = currentDirectory.uuid
 	dialog.showOpenDialog({properties: [ 'openFile','multiSelections','createDirectory']},function(data){
 		if (!data) {
@@ -1473,6 +1471,8 @@ ipcMain.on('downloadFile',(e,files)=>{
 })
 //download folder
 ipcMain.on('downloadFolder',(err,folder)=>{
+	c(folder)
+	return
 	download.createUserTask('folder',folder)
 	// c('')
 	// c('开始下载文件夹...')
