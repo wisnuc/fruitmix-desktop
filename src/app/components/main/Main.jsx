@@ -74,8 +74,8 @@ class Main extends Component {
 			this.props.dispatch(Action.refreshStatusOfUpload(tasks));
 		});
 
-		ipc.on('refreshStatusOfDownload',(err,file,status)=>{
-			this.props.dispatch(Action.refreshStatusOfDownload(file,status));
+		ipc.on('refreshStatusOfDownload',(err,tasks)=>{
+			this.props.dispatch(Action.refreshStatusOfDownload(tasks));
 		})
 
 		// ipc.on('refreshDownloadStatusOfFolder',(err,key,status)=>{

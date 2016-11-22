@@ -25,19 +25,8 @@ const transimission = (state=defaultState,action)=>{
 			return Object.assign({},state,{download:down});
 
 		case 'REFRESH_STATUS_DOWNLOAD':
-			state.download.forEach(item=>{
-				if (item.type == 'folder') {
-					return
-				}
-				var downloadFIle = item.map.get(action.file);
-				if (downloadFIle != undefined) {
-					downloadFIle.status = action.status;
-				}
-			});
-			return Object.assign({},state) 
+			return Object.assign({},state,{download:action.tasks});
 		case 'REFRESH_STATUS_UPLOAD':
-			// state.upload = action.tasks
-			// return state
 			return Object.assign({},state,{upload:action.tasks});
 		case 'DOWNLOAD_STATUS_OF_FOLDER': 
 			var index = state.download.findIndex(item=>{

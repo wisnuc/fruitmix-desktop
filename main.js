@@ -1466,13 +1466,10 @@ function uploadFileInFolder(node) {
 ipcMain.on('downloadFile',(e,files)=>{
 	// downloadQueue.push(files)
 	// download.dealDownloadQueue()
-	c(files)
 	download.createUserTask('file',files)
 })
 //download folder
 ipcMain.on('downloadFolder',(err,folder)=>{
-	c(folder)
-	return
 	download.createUserTask('folder',folder)
 	// c('')
 	// c('开始下载文件夹...')
