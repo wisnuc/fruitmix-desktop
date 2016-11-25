@@ -1,31 +1,27 @@
-// reducers
-//import core module
-import { createStore, applyMiddleware } from 'redux';
-import thunkMiddleware from 'redux-thunk';
-//import reducer
-import reducer from '../reducers/reducer';
-import createLogger from 'redux-logger';
+import { createStore, applyMiddleware } from 'redux'
+import reducer from '../reducers/reducer'
 
-const loggerMiddleware = createLogger();
+import { ipcRenderer } from 'electron'
 
-/**
-const createStoreWithMiddleware = applyMiddleware(
-	thunkMiddleware,
-	loggerMiddleware
-)(createStore);
-**/
+// sample dispatcher
+const logger = store => next => action => {
+  console.log('dispatching', action)
+  let result = next(action)
+  console.log('next state', store.getState())
+  return result
+}
 
+const hijack = (state, action) => 
+  action.type === 'HIJACK' ? action.state : reducer(state, action)
 
-export const store = createStore(reducer);
+const store = createStore(hijack, applyMiddleware(logger))
+
+ipcRenderer.on('hijack', state => 
+  store.dispatch({ type: 'HIJACK', state }))
 
 window.store = store
 
-export default function configureStore(initialState) {
-	// return createStoreWithMiddleware(reducer, initialState);
-  return store
-}
+console.log('store module initialized')
 
-// export default function configureStore() {
-// 	return s
-// }
+export default store
 

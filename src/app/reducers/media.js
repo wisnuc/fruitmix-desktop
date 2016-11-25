@@ -1,3 +1,6 @@
+import Debug from 'debug'
+const debug = Debug('reducer:media')
+
 const defaultState = {
 	data: [],
 	status: 'busy',
@@ -39,7 +42,7 @@ const Media = (state=defaultState,action)=>{
 		// 	return Object.assign({},state,{mediaShare:action.data})
 
 		case 'ADAPTER':
-			c.log(action.store.media)
+			debug(action.store.media)
 			return Object.assign({},state,action.store.media)
 		default:
 			return state;

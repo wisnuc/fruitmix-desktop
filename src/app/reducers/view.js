@@ -9,10 +9,24 @@ const defaultState = {
 	menu:{show:false,index:-1,x:0,y:0},
 	mediaSize: 30,
 	currentMediaImage:{status:'notReady',path:null,open: false},
+  toggle: false,
+  showAppBar: true,
+  showLeftNav: true
 }
 
 const loginState = (state = defaultState, action) => {
+
 	switch (action.type) {
+
+    case 'TOGGLE_APPBAR':
+      return Object.assign({}, state, { showAppBar: !state.showAppBar }) 
+
+    case 'TOGGLE_SOMETHING':
+      return Object.assign({}, state, { toggle: !state.toggle })
+
+    case 'TOGGLE_LEFTNAV':
+      return Object.assign({}, state, { showLeftNav: !state.showLeftNav })
+
 		case 'TOGGLE_DEVICE':
 			return Object.assign({},state,{findDevice:!state.findDevice})
 		case 'TOGGLE_ADD_DEVICE':

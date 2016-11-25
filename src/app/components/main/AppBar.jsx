@@ -10,10 +10,9 @@ import React, { findDOMNode, Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import CSS from '../../utils/transition'
 // import Component
-import { AppBar, TextField, Drawer, Paper, Snackbar, FlatButton, IconMenu, MenuItem, IconButton, Dialog } from 'material-ui'
+import { AppBar, Toolbar, TextField, Drawer, Paper, Snackbar, FlatButton, IconMenu, MenuItem, IconButton, Dialog } from 'material-ui'
 import Users from './userDialog';
 import svg from '../../utils/SVGIcon'
-//import Action
 import Action from '../../actions/action'
 
 class Bar extends Component {
@@ -25,24 +24,30 @@ class Bar extends Component {
 
 	render() {
 		return (
-				<AppBar
-					className='app-bar' title='WISNUC' titleStyle={{fontSize:'18px'}}
-					iconElementRight={
-						<IconMenu
-							className='app-bar-right'
-	          				iconButtonElement={<IconButton>{svg.expandMore()}</IconButton>}
-	          				anchorOrigin={{horizontal: 'right', vertical: 'top'}}
-	      					targetOrigin={{horizontal: 'right', vertical: 'top'}}
-	        			>
-				          {this.getList()}
-				          <MenuItem value="2" primaryText="注销" onTouchTap={this.logOff.bind(this)}/>
-	        			</IconMenu>}
-					onLeftIconButtonTouchTap={this.leftNavClick.bind(this)}
-				>
-					<div className='app-bar-username'>{this.props.login.obj.username}</div>
-					<div className='app-bar-appifi' onClick={this.openAppifi.bind(this)}></div>
-					{this.getUserManager()}
-				</AppBar>
+      <div>
+        {/*
+        <AppBar style={{backgroundColor: 'white'}} id = 'global-appbar' title='WISNUC'>
+          <Toolbar />
+        </AppBar> */}
+
+        <Paper style={{width: '100%', height:64}} />
+        <Paper style={{width: '100%', height:56, backgroundColor: '#FAFAFA'}} />
+        {/*
+        iconElementRight={
+          <IconMenu
+            className='app-bar-right'
+                  iconButtonElement={<IconButton>{svg.expandMore()}</IconButton>}
+                  anchorOrigin={{horizontal: 'right', vertical: 'top'}}
+                targetOrigin={{horizontal: 'right', vertical: 'top'}}
+              >
+                {this.getList()}
+                <MenuItem value="2" primaryText="注销" onTouchTap={this.logOff.bind(this)}/>
+              </IconMenu>} */}
+        {/* onLeftIconButtonTouchTap={this.leftNavClick.bind(this)} */}
+        {/* <div className='app-bar-username'>{this.props.login.obj.username}</div> */}
+        {/* <div className='app-bar-appifi' onClick={this.openAppifi.bind(this)}></div> */}
+        {/* this.getUserManager() */}
+      </div>
 		)
 	}
 

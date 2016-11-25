@@ -13,8 +13,8 @@ const initMainWindow = () => {
 		height: 768,
 		resizable: true,
 		width: 1366,
-		minWidth:1024,
-		minHeight:768,
+		minWidth:200,
+		minHeight:200,
 		title:'WISNUC',
 		icon: path.join(__dirname,'180-180.png') // FIXME
 	})

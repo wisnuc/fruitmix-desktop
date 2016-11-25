@@ -4,26 +4,43 @@
  * @time 2016-4-26
  * @author liuhua
  **/
+import { ipcRenderer } from 'electron'
 
 import React, { Component, PropTypes } from 'react';
 import { findDOMNode } from 'react-dom';
-import CSS from '../../utils/transition';
 
 //require material
-import { TextField, Drawer, Paper, Snackbar, FlatButton, IconMenu, MenuItem, IconButton, Dialog } from 'material-ui';
-import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
+import { Avatar, SvgIcon, Subheader, List, ListItem, Popover, Menu, TextField, Drawer, Paper, Snackbar, FlatButton, RaisedButton, IconMenu, MenuItem, IconButton, Dialog, Divider } from 'material-ui';
+
+import SocialNotifications from 'material-ui/svg-icons/social/notifications'
+
+import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert'
+import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
+import NavigationApps from 'material-ui/svg-icons/navigation/apps'
+import NavigationExpandLess from 'material-ui/svg-icons/navigation/expand-less'
+import NavigationExpandMore from 'material-ui/svg-icons/navigation/expand-more'
+import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
+import FileCloudCircle from 'material-ui/svg-icons/file/cloud-circle'
+import FileFolderShared from 'material-ui/svg-icons/file/folder-shared'
+import FileFileUpload from 'material-ui/svg-icons/file/file-upload'
+import FileFileDownload from 'material-ui/svg-icons/file/file-download'
+import SocialShare from 'material-ui/svg-icons/social/share'
+import SocialPeople from 'material-ui/svg-icons/social/people'
+import ActionSettings from 'material-ui/svg-icons/action/settings'
+import ActionInfo from 'material-ui/svg-icons/action/info'
+import ActionAccountCircle from 'material-ui/svg-icons/action/account-circle'
+import DeviceStorage from 'material-ui/svg-icons/device/storage'
+
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 
 import {Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar'
-
+import enhanceWithClickOutside from 'react-click-outside'
 //import Action
-import Action from '../../actions/action';
+import Action from '../../actions/action'
 
-//import CSS
-import css  from  '../../../assets/css/main';
+import FileUploadButton from '../file/FileUploadButton'
 
-//import component
 import AppBar from './AppBar'
 import LeftNav from './LeftNav';
 import Content from './Content';
@@ -31,75 +48,335 @@ import Multiple from '../mainContent/Multiple';
 //import Users from './userDialog';
 import svg from '../../utils/SVGIcon'
 
+import ScrollArea from 'react-scrollbar'
 //import Mask from './MediaMask'
+
+import AllFiles from '../mainContent/AllFiles'
+
+const storeState = () => window.store.getState()
 
 import { fileNav } from '../../lib/file'
 
+const LEFTNAV_WIDTH = 210
+
+
+const toggleAppBar = () => window.store.dispatch({ type: 'TOGGLE_APPBAR' })
+
+
+const renderLeftNav = () => (
+    <Menu style={{fontSize: 14, fontWeight: 700}} width={240}>
+      <MenuItem style={{fontSize: 23, fontWeight: 700}} primaryText='我的文件' leftIcon={<DeviceStorage />} />
+      <MenuItem primaryText='我分享的文件' leftIcon={<SocialShare />} />
+      <Divider />
+      <MenuItem primaryText='分享给我的文件' leftIcon={<SocialPeople />} />
+      <Divider />
+      <MenuItem primaryText='上传任务' leftIcon={<FileFileUpload />} />
+      <MenuItem primaryText='下载任务' leftIcon={<FileFileDownload />} />
+      <Divider />
+      <MenuItem primaryText='test icon' leftIcon={<FileIcon />} />
+    </Menu> 
+  )
+
+const FileToolbar = ({showAppBar, showDetail, toggleLeftNav}) => {
+
+  return (
+    <Paper id='layout-middle-container-upper' 
+      style={{ 
+        position: 'absolute', width: '100%', height: 56,
+        backgroundColor: '#2196F3',
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between' 
+      }} 
+      rounded={false} 
+      zDepth={showAppBar ? 0 : 1}
+    >
+      <IconButton id='file-toolbar-menu-icon' key='toolbar-menu' 
+        style={{marginLeft: 4}}
+        iconStyle={{color: '#000', opacity:0.54}} 
+        onTouchTap={() => toggleLeftNav()}
+      > 
+        <NavigationMenu />
+      </IconButton>
+
+      <div key='toolbar-title' style={{marginLeft: 20, fontSize: 21, whiteSpace: 'nowrap', color: '#FFF' }}>文件</div>
+
+      <div key='toolbar-spacer-middle' style={{width: '100%'}} />
+
+      <IconButton iconStyle={{color: '#000', opacity: 0.54}}>
+        <FileCreateNewFolder />
+      </IconButton>
+
+      <IconButton iconStyle={{color: showDetail ? '#FFF' : '#000', opacity: showDetail ? 1 : 0.54}} 
+        onTouchTap={() => window.store.dispatch({ type: 'TOGGLE_SOMETHING' })}>
+        <ActionInfo />
+      </IconButton> 
+
+      <div style={{width: (showAppBar || showDetail) ? 0 : 48, height:48, transition: 'width 150ms'}} />
+
+    </Paper>
+  )
+}
+
+class FileDetailToolbar extends React.Component {
+
+  constructor(props) {
+    super(props)
+  }
+
+  render() {
+    const { showAppBar, showBanner, nudgeBanner } = this.props
+    return (
+      <Paper id='layout-right-container-upper' 
+        style={{
+          position: 'absolute', 
+          width: '100%', height: 56, 
+
+          backgroundColor:'#1976D2',
+
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+        rounded={false} 
+        zDepth={showAppBar ? 0 : 1}
+      >
+        <div style={{flex: '1'}} />
+        <IconButton style={{opacity: showBanner ? 0.54 : 0}}><ActionInfo /></IconButton>
+        <div style={{width: nudgeBanner ? 48 : 0, height:48, transition: 'width 150ms'}} />
+      </Paper>
+    )
+  }
+}
+
+class FileApp extends React.Component {
+
+  constructor(props) {
+    super(props)
+    this.state = this.propsToState(props)
+    this.toggleLeftNavBound = this.toggleLeftNav.bind(this)
+  }
+
+  // functional
+  propsToState(props) {
+
+   let state = {
+      showAppBar: props.showAppBar,
+      showDetail: props.showDetail,
+      nudgeBanner: !props.showAppBar && !props.showDetail
+    } 
+
+    if (props.showDetail) {
+      state.detailShowBanner = true
+      state.detailNudgeBanner = !props.showAppBar
+    }
+
+    if (!this.state) {
+      state.leftNav = false
+    }
+    else {
+      state.leftNav = this.state.leftNav
+    }
+
+    return state
+  }
+
+  toggleLeftNav() {
+    this.setState(Object.assign({}, this.state, { leftNav: !this.state.leftNav }))
+  }
+
+  // state delay
+  componentWillReceiveProps(nextProps) {
+
+    let nextState = this.propsToState(nextProps)
+
+    if (this.state.showDetail === false && nextProps.showDetail === true) {
+      this.setState(Object.assign({}, nextState, { detailShowBanner: false }))
+      return setTimeout(() => this.setState(nextState), 450)
+    }
+    else if (this.state.showDetail === true && nextProps.showDetail === false) {
+      this.setState(Object.assign({}, this.state, { detailShowBanner: false }))
+      return setTimeout(() => this.setState(nextState), 450)
+    }
+    
+    this.setState(nextState)
+  } 
+
+  render() {
+
+    const detailWidth = 500
+    const { showAppBar, showDetail } = this.props
+
+    return (
+
+      <div id='layout-main-container' 
+        style={{
+          position: 'absolute', 
+          width: '100%', 
+          top: this.state.showAppBar ? 64 : 0, 
+          height: this.state.showAppBar ? 'calc(100% - 64px)' : '100%', 
+          transition: 'top 150ms',
+          backgroundColor:'blue'
+        }}
+      >
+        { false && ( // don't delete me, floating left nav
+        <Paper style={{
+          width: 280, 
+          height: '100%', 
+          position: 'absolute', 
+          left: this.state.leftNav ? 0 : -280, 
+          transition: 'left 100ms', 
+          zIndex: 1000 }} 
+          rounded={false}
+          zDepth={2} 
+        >
+          { renderLeftNav() }
+        </Paper> ) }
+
+        {/* this.state.leftNav && <div style={{position: 'absolute', width: '100%', height: '100%', backgroundColor: 'black', zIndex: 999, opacity:0.05}} onTouchTap={this.toggleLeftNavBound} /> */}
+
+        <div id='layout-middle-container' 
+          style={{
+            position: 'absolute',
+
+            // imporant! using props (next)
+            width: this.props.showDetail ? `calc(100% - ${detailWidth}px)` : '100%', 
+            transition: 'width 300ms',
+            height:'100%'
+          }}
+        >
+          {/* important ! */}
+          <Divider />
+
+          <FileToolbar showAppBar={showAppBar} showDetail={showDetail} toggleLeftNav={this.toggleLeftNavBound} />
+
+          <div id='layout-middle-container-spacer' style={{height: 56}} />
+
+          <div id='layout-middle-container-lower' style={{
+            width: '100%', 
+            height: 'calc(100% - 56px)', 
+            backgroundColor: '#EEEEEE', 
+            display:'flex'
+          }}>
+
+            <div style={{
+              position: 'absolute',
+              width: LEFTNAV_WIDTH,
+              height: '100%',
+              left: this.state.leftNav ? 0 : -LEFTNAV_WIDTH,
+              transition: 'left 300ms'
+            }}>
+              <Menu autoWidth={false} listStyle={{width: LEFTNAV_WIDTH}}>
+                <MenuItem style={{fontSize: 14}} primaryText='我的文件' leftIcon={<DeviceStorage />} animation={null}/>
+                <MenuItem style={{fontSize: 14}} primaryText='我分享的文件' leftIcon={<SocialShare />} />
+                <Divider />
+                <MenuItem style={{fontSize: 14}} primaryText='分享给我文件' leftIcon={<SocialPeople />} />
+                <Divider />
+                <MenuItem style={{fontSize: 14}} primaryText='上传任务' leftIcon={<FileFileUpload />} />
+                <MenuItem style={{fontSize: 14}} primaryText='下载任务' leftIcon={<FileFileDownload />} />
+              </Menu> 
+            </div>
+
+            <div style={{
+              // for suppressed leftNav, TODO
+              marginLeft: this.state.leftNav ? LEFTNAV_WIDTH : 0, 
+              transition: 'margin-left 300ms', 
+
+              width: '100%', 
+              height: '100%', 
+              backgroundColor:'yellow', 
+              // overflow: 'auto'
+            }}>
+              {/* <Content dispatch={window.store.dispatch} state={storeState()}/> */}
+              <AllFiles dispatch={window.store.dispatch} state={window.store.getState()}/>
+            </div>
+          </div>
+
+        </div> 
+        <div id='layout-rightnav-container' 
+          style={{
+            width: detailWidth, 
+            height: '100%', 
+            backgroundColor: '#EBEBEB', 
+            position: 'absolute', 
+            right: showDetail ? 0 : -detailWidth, 
+            transition: 'right 300ms'
+        }}>
+          <Divider />
+
+          { this.state.showDetail && <FileDetailToolbar showAppBar={this.state.showAppBar} showBanner={this.state.detailShowBanner} nudgeBanner={this.state.detailNudgeBanner} /> }
+        </div>
+      </div>
+    )
+  }
+}
+
 class Main extends Component {
+
+	constructor(props) {
+    super(props);
+    this.state = { userDialog: false, popover: false };
+  }
 
 	getChildContext() {
 		const muiTheme = getMuiTheme(lightBaseTheme);
 		return {muiTheme};
 	}
 
-	constructor(props) {
-    super(props);
-    this.state = { userDialog: false};
-  }
-
 	componentDidMount() {
+
 		var _this = this
 
     fileNav('HOME_DRIVE', null)
 
-		// ipc.send('getRootData')
-		// ipc.send('getMediaData')
-		// ipc.send('getMoveData')
-		// ipc.send('getFilesSharedToMe')
-		// ipc.send('getFilesSharedToOthers')
-		// ipc.send('getMediaShare')
+		// ipcRenderer.send('getRootData')
+		// ipcRenderer.send('getMediaData')
+		// ipcRenderer.send('getMoveData')
+		// ipcRenderer.send('getFilesSharedToMe')
+		// ipcRenderer.send('getFilesSharedToOthers')
+		// ipcRenderer.send('getMediaShare')
 
 		// this.props.dispatch(Action.filesLoading());
 
-		// ipc.on('receive',function (err,dir,children,path) {
+		// ipcRenderer.on('receive',function (err,dir,children,path) {
 		// 	_this.props.dispatch(Action.setDirctory(dir,children,path))
 		// });
-		ipc.on('setTree',(err,tree)=>{
+		ipcRenderer.on('setTree',(err,tree)=>{
 			this.props.dispatch(Action.setTree(tree));
 		});
 
-		// ipc.on('uploadSuccess',(err,file,children)=>{
+		// ipcRenderer.on('uploadSuccess',(err,file,children)=>{
 		// 		this.props.dispatch(Action.refreshDir(children));
 		// });
 
-		// ipc.on('setShareChildren',(err,shareChildren,sharePath)=>{
+		// ipcRenderer.on('setShareChildren',(err,shareChildren,sharePath)=>{
 		// 	this.props.dispatch(Action.setShareChildren(shareChildren,sharePath));
 		// });
 
-		ipc.on('refreshStatusOfUpload',(err,tasks)=>{
+		ipcRenderer.on('refreshStatusOfUpload',(err,tasks)=>{
 			this.props.dispatch(Action.refreshStatusOfUpload(tasks));
 		});
 
-		ipc.on('refreshStatusOfDownload',(err,file,status)=>{
+		ipcRenderer.on('refreshStatusOfDownload',(err,file,status)=>{
 			this.props.dispatch(Action.refreshStatusOfDownload(file,status));
 		})
 
-		// ipc.on('refreshDownloadStatusOfFolder',(err,key,status)=>{
+		// ipcRenderer.on('refreshDownloadStatusOfFolder',(err,key,status)=>{
 		// 	this.props.dispatch(Action.refreshDownloadStatusOfFolder(key,status));
 		// });
 
-		// ipc.on('refreshUploadStatusOfFolder',(err,key,status)=>{
+		// ipcRenderer.on('refreshUploadStatusOfFolder',(err,key,status)=>{
 		// 	this.props.dispatch(Action.refreshUploadStatusOfFolder(key,status));
 		// });
 
 
-		ipc.on('deleteSuccess',(err,obj,children,dir)=>{
-			if (dir.uuid == this.props.state.data.directory.uuid) {
+		ipcRenderer.on('deleteSuccess',(err,obj,children,dir)=>{
+			if (dir.uuid == storeState().data.directory.uuid) {
 				this.props.dispatch(Action.refreshDir(children));
 			}
 		});
 
-		ipc.on('message',(err,message,code)=>{
+		ipcRenderer.on('message',(err,message,code)=>{
 			this.props.dispatch(Action.setSnack(message,true));
 			switch(code) {
 				case 1:
@@ -107,52 +384,52 @@ class Main extends Component {
 			}
 		});
 
-		ipc.on('treeChildren',(err,treeChildren)=>{
+		ipcRenderer.on('treeChildren',(err,treeChildren)=>{
 			this.props.dispatch(Action.setTree(treeChildren));
 		});
 		//media--------------------------------------------------------------------------
-		// ipc.on('mediaFinish',(err,media)=>{
+		// ipcRenderer.on('mediaFinish',(err,media)=>{
 		// 	this.props.dispatch(Action.setMedia(media));
 		// });
 
-		// ipc.on('getThumbSuccess',(err,item,path)=>{
+		// ipcRenderer.on('getThumbSuccess',(err,item,path)=>{
 		// 	this.props.dispatch(Action.setThumb(item,path,'ready'));
 		// });
 
-		// ipc.on('getThumbFailed',(err,item)=>{
+		// ipcRenderer.on('getThumbFailed',(err,item)=>{
 		// 	this.props.dispatch(Action.setThumb(item,'failed'));
 		// });
 
-		ipc.on('donwloadMediaSuccess',(err,item)=>{
+		ipcRenderer.on('donwloadMediaSuccess',(err,item)=>{
 			this.props.dispatch(Action.setMediaImage(item));
 		});
 
-		// ipc.on('mediaShare', (err,data) => {
+		// ipcRenderer.on('mediaShare', (err,data) => {
 		// 	this.props.dispatch(Action.setMediaShare(data))
 		// })
 
-		// ipc.on('getShareThumbSuccess', (err, item, path) => {
+		// ipcRenderer.on('getShareThumbSuccess', (err, item, path) => {
 		// 	this.props.dispatch(Action.setShareThumb(item,path))
 		// })
 
 		//transmission---------------------------------------------------------------------
-		// ipc.on('transmissionDownload',(err,obj)=>{
+		// ipcRenderer.on('transmissionDownload',(err,obj)=>{
 		// 	this.props.dispatch(Action.addDownload(obj));
 		// });
 
-		// ipc.on('transmissionUpload',(err,obj)=>{
+		// ipcRenderer.on('transmissionUpload',(err,obj)=>{
 		// 	this.props.dispatch(Action.addUpload(obj));
 		// });
 
-		ipc.on('setUsers',(err,user)=>{
+		ipcRenderer.on('setUsers',(err,user)=>{
 			this.props.dispatch({type:'SET_USER',user:user});
 		});
 
-		ipc.on('setDownloadPath',(err,path)=>{
+		ipcRenderer.on('setDownloadPath',(err,path)=>{
 			this.props.dispatch({type:'SET_DOWNLOAD_PATH',path:path});
 		})
 
-		ipc.on('setMoveData', (err,data) => {
+		ipcRenderer.on('setMoveData', (err,data) => {
 			this.props.dispatch(Action.setMoveData(data))
 		})
 
@@ -160,116 +437,80 @@ class Main extends Component {
 		},2000)
 	}
 
-//				{/*Multiple select frame*/}
-//				{/*<Multiple dispatch={this.props.dispatch} state={this.props.state}/>*/}
-
-
 	render() {
-		return (
-      <CSS opts={['app',true,true,true,500,5000,5000]} style={{height:'100%'}}>
-        <div className="main" key='main' >
 
-          {/*Bar*/}
-          <AppBar/>
-          <Toolbar style={{top: 64}}>
-            <ToolbarGroup>
-              <ToolbarTitle text="Options" />
-            </ToolbarGroup>
-          </Toolbar>
+    const showAppBar = window.store.getState().view.showAppBar
+    const showDetail = window.store.getState().view.toggle
 
-          {/*Left Nav*/}
-          <LeftNav/>
+    return (
 
-          {/*Content*/}
-          <Paper className={"content-container " + (this.props.state.navigation.menu?'content-has-left-padding':'no-padding') } zDepth={0}>
-            <Content dispatch={this.props.dispatch} state={this.props.state}/>
-          </Paper>
+      <div style={{width: '100%', height: '100%'}}>
 
-          <Snackbar 
-            style={{textAlign:'center'}} 
-            open={this.props.state.snack.open} 
-            message={this.props.state.snack.text} 
-            autoHideDuration={3000} 
-            onRequestClose={this.cleanSnack.bind(this)}
-          />
-        </div>
-      </CSS>
+        <Paper id='layout-appbar' style={{
+
+          position: 'absolute', 
+          width: '100%', 
+          height: 64, 
+
+          top: showAppBar ? 0 : -64, 
+          transition: 'top 150ms',
+
+          display: 'flex',
+          alignItems: 'center', 
+          justifyContent: 'space-between', 
+          backgroundColor: '#FFF' 
+
+        }}
+          rounded={false}
+        >
+
+          <div style={{marginLeft: 72, fontSize: 16, opacity:0.54}}>闻上云管家</div>
+          
+          <Avatar style={{marginLeft: 16, flex: '0 0 32px'}} src="../src/assets/custom/images/romantic_dog.jpg" size={32} />
+          <Avatar style={{marginLeft: 16, flex: '0 0 32px'}} src="../src/assets/custom/images/romantic_dog.jpg" size={32} />
+          <Avatar style={{marginLeft: 16, flex: '0 0 32px'}} src="../src/assets/custom/images/romantic_dog.jpg" size={32} />
+          <Avatar style={{marginLeft: 16, flex: '0 0 32px'}} src="../src/assets/custom/images/romantic_dog.jpg" size={32} />
+          <Avatar style={{marginLeft: 16, flex: '0 0 32px'}} src="../src/assets/custom/images/romantic_dog.jpg" size={32} />
+          <Avatar style={{marginLeft: 16, flex: '0 0 32px'}} src="../src/assets/custom/images/romantic_dog.jpg" size={32} />
+          <Avatar style={{marginLeft: 16, flex: '0 0 32px'}} src="../src/assets/custom/images/romantic_dog.jpg" size={32} />
+          <Avatar style={{marginLeft: 16, flex: '0 0 32px'}} src="../src/assets/custom/images/romantic_dog.jpg" size={32} />
+          
+          <div style={{flex:'1 0'}} />
+
+          <IconButton iconStyle={{opacity: 0.54}}><NavigationApps /></IconButton>
+          <IconButton iconStyle={{opacity: 0.54}}><ActionSettings /></IconButton> 
+          <IconButton iconStyle={{opacity: 0.54}}><SocialNotifications /></IconButton>
+          <IconButton iconStyle={{opacity: 0.54}}><ActionAccountCircle /></IconButton>
+          <div style={{width: 64, height: 64}} />
+        </Paper>
+
+        <FileApp showAppBar={showAppBar} showDetail={showDetail} />
+
+        <Snackbar 
+          style={{textAlign:'center'}} 
+          open={storeState().snack.open} 
+          message={storeState().snack.text} 
+          autoHideDuration={3000} 
+          onRequestClose={this.cleanSnack.bind(this)}
+        />
+
+        <IconButton
+          id='floating-home' 
+          style={{ position: 'absolute',
+            top: showAppBar ? 8 : 4,
+            transition: 'top 150ms',
+            right: 0,
+            zIndex: 9999
+          }}
+          iconStyle={{opacity: 0.54}} 
+          onTouchTap={toggleAppBar} 
+        >
+          { showAppBar ? <NavigationExpandLess /> : <NavigationExpandMore /> }
+        </IconButton>
+      </div>
 	  )
 	}
 
-	triggerClick(e) {
-		if (this.props.state.view.menu.show) {
-			this.props.dispatch(Action.toggleMenu(null,0,0,false));
-		}
-	}
-	//draw multiple select frame
-	mouseMove(e) {
-		return 
-		 e.preventDefault(); e.stopPropagation();
-		if (this.props.state.multiple.multiple.isShow == true&&this.props.state.data.state != 'BUSY') {
-			this.props.dispatch(Action.mouseMove(e.nativeEvent.x,e.nativeEvent.y));
-		}
-	}
-	//multiple select and hide frame
-	mouseUp() {
-		return 
-		if (this.props.state.multiple.multiple.isShow == true) {
-		let mul = this.props.state.multiple.multiple;
- 			let height = Math.abs(mul.top-mul.height);;
- 			let part = Math.ceil(height/51);
- 			let top = Math.min(mul.top,mul.height)+document.getElementsByClassName('file-area')[0].scrollTop;
- 			let bottom = Math.max(mul.top,mul.height)+document.getElementsByClassName('file-area')[0].scrollTop;
-
- 			let position = this.props.state.data.position;
- 			for (let i = 0;i < position.length; i++) {
- 				if (position[i].bottom<top) {
- 					if (this.props.state.data.children[i].checked == true) {
- 						this.props.dispatch(Action.selectChildren(i));
- 					}
- 					continue;
- 				}
- 				if (position[i].bottom>top&&position[i].top<top) {
- 					if (this.props.state.data.children[i].checked == false) {
- 						this.props.dispatch(Action.selectChildren(i));
- 						if (this.props.state.data.detail.length!=0) {
- 							this.props.dispatch(Action.setDetail([this.props.state.data.children[i]]));
- 						}
-
- 					}
-
- 					continue;
- 				}
- 				if (position[i].bottom<bottom&&position[i].top>top) {
- 					if (this.props.state.data.children[i].checked == false) {
- 						this.props.dispatch(Action.selectChildren(i));
- 						if (this.props.state.data.detail.length!=0) {
- 							this.props.dispatch(Action.setDetail([this.props.state.data.children[i]]));
- 						}
- 					}
- 					continue;
- 				}
- 				if (position[i].top<bottom&&position[i].bottom>bottom) {
- 					if (this.props.state.data.children[i].checked == false) {
- 						this.props.dispatch(Action.selectChildren(i));
- 						if (this.props.state.data.detail.length!=0) {
- 							this.props.dispatch(Action.setDetail([this.props.state.data.children[i]]));
- 						}
- 					}
- 					continue;
- 				}
- 				if (position[i].top>bottom) {
- 					if (this.props.state.data.children[i].checked == true) {
- 						this.props.dispatch(Action.selectChildren(i));
- 					}
- 					continue;
- 				}
- 			}
-			var num = [];
-			var dis = this.props.state.data.multiple;
-
-			this.props.dispatch(Action.mouseUp());
-		}
-	}
 	//close snackbar
 	cleanSnack() {
 		this.props.dispatch(Action.cleanSnack());
@@ -280,7 +521,6 @@ Main.childContextTypes = {
 	muiTheme: React.PropTypes.object.isRequired
 }
 
+export default Main
 
 
-//export component
-export default Main;

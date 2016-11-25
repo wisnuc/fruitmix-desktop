@@ -35,6 +35,7 @@ class MainContent extends Component {
 	}
 
 	render() {
+/**
 		let componentMap = {
 			'我的所有文件' : <AllFile dispatch={this.props.dispatch} state={this.props.state} key={'a'}></AllFile>,
 			'上传/下载' : <Transimission key={'b'}></Transimission>,
@@ -58,6 +59,8 @@ class MainContent extends Component {
         </div>
 			</div>
 		)
+**/
+  return <AllFile dispatch={window.store.dispatch} state={window.store.getState()} key='my-drive' />
 	}
 }
 

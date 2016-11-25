@@ -4,7 +4,7 @@
  * @time 2016-10-23
  * @author liuhua
 **/
-
+import { ipcRenderer } from 'electron'
 // require core module
 import React, { findDOMNode, Component, PropTypes } from 'react'
 //require material
@@ -51,9 +51,7 @@ class UserList extends React.Component {
       console.log(err) 
     })
 
-		// ipc.send('login','Alice','123456')
-		// ipc.send('login','Bob','123456')
-		ipc.send('login',username,password)
+		ipcRenderer.send('login',username,password)
 	}
 
 	kenDown(e) {
@@ -127,7 +125,6 @@ class UserList extends React.Component {
 	}
 
 	componentWillReceiveProps(nextProps) {
-		c.log(nextProps)
 		if (this.props.device.address != nextProps.device.address) {
 			console.log('not equal')
 			this.setState({

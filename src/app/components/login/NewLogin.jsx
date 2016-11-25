@@ -6,10 +6,9 @@
 **/
 
 // require core module
+import { ipcRenderer } from 'electron'
 import React, { findDOMNode, Component, PropTypes } from 'react'
-//import Action
 import Action from '../../actions/action'
-//require material
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
 import baseTheme from 'material-ui/styles/baseThemes/lightBaseTheme'
 import { Paper, TextField, FlatButton, CircularProgress, Snackbar, SelectField, MenuItem, RadioButton, RadioButtonGroup } from 'material-ui'
@@ -38,6 +37,8 @@ const styles = {
 
 }
 
+const storeState = () => window.store.getState()
+
 class Index extends React.Component {
 
 	constructor(props) {
@@ -52,16 +53,16 @@ class Index extends React.Component {
 
 	componentDidMount() {
 		setTimeout(()=>{
-			ipc.send('getDeviceUsedRecently')
+			ipcRenderer.send('getDeviceUsedRecently')
 		},1000)
 
 		setTimeout(()=>{
-				if (this.props.state.login.selectIndex == 0 && this.props.state.login.device.length != 0) {
+				if (storeState().login.selectIndex == 0 && storeState().login.device.length != 0) {
 					this.selectDevice.apply(this,[0,false, null])
 				}
 		},1500)
 
-		ipc.on('message',(err,message,code)=>{
+		ipcRenderer.on('message',(err,message,code)=>{
 			this.props.dispatch(Action.setSnack(message,true))
 		})
 	}
@@ -75,13 +76,13 @@ class Index extends React.Component {
 	}
 
 	selectDevice(index, isStorage, e) {
-		if (index<0 || index==this.props.state.login.device.length) {
+		if (index<0 || index==storeState().login.device.length) {
 			console.log('index is over range')
 			return
 		}
 		let s = isStorage==false?false:true
-		let ip = this.props.state.login.device[index].address
-		ipc.send('setServerIp', ip)
+		let ip = storeState().login.device[index].address
+		ipcRenderer.send('setServerIp', ip)
 	}
 
 	submit() {
@@ -100,7 +101,7 @@ class Index extends React.Component {
       console.log(err) 
     })
 
-		ipc.send('login',username,password)
+		ipcRenderer.send('login',username,password)
 	}
 
 	kenDown(e) {
@@ -110,7 +111,7 @@ class Index extends React.Component {
 	}
 
 	openAppifiInstall() {
-		ipc.send('openAppifi')
+		ipcRenderer.send('openAppifi')
 	}
 
 	openGuide() {
@@ -147,11 +148,11 @@ class Index extends React.Component {
 	}
 
 	guideNext() {
-		let selectedIndex = this.props.state.login.selectIndex
-		let selectedItem = this.props.state.login.device[selectedIndex]
+		let selectedIndex = storeState().login.selectIndex
+		let selectedItem = storeState().login.device[selectedIndex]
 		if (this.state.step == 1) {
 			if (this.isEmptyObject(this.state.volumes) && this.state.disks.length == 0 ) {
-				ipc.emit('message',null,'请选择磁盘新建磁盘卷')
+				ipcRenderer.emit('message',null,'请选择磁盘新建磁盘卷')
 			}else {
 				this.setState({step:2})
 			}
@@ -162,11 +163,11 @@ class Index extends React.Component {
 			let password = this.refs.password.input.value
 			let cpassword = this.refs.confirmPassword.input.value
 			if(username.length == 0){
-				ipc.emit('message',null,'用户名不能为空')
+				ipcRenderer.emit('message',null,'用户名不能为空')
 			}else if (password.length == 0 || cpassword.length == 0) {
-				ipc.emit('message',null,'密码不能为空')
+				ipcRenderer.emit('message',null,'密码不能为空')
 			}else if (password != cpassword) {
-				ipc.emit('message',null,'请确认密码一致')
+				ipcRenderer.emit('message',null,'请确认密码一致')
 			}else {
 				this.setState({
 					step:3,
@@ -188,7 +189,7 @@ class Index extends React.Component {
 					mode:t
 				}
 				let time = (new Date()).getTime()
-				ipc.once('mirFinish-'+time,(err,data) => {
+				ipcRenderer.once('mirFinish-'+time,(err,data) => {
 					if (data == 'success') {
 						this.setState({
 							step : 4
@@ -200,7 +201,7 @@ class Index extends React.Component {
 					}
 						
 				})
-				ipc.send('installVolume',selectedItem.address,target,init,mkfs,time)
+				ipcRenderer.send('installVolume',selectedItem.address,target,init,mkfs,time)
 				
 		
 		}
@@ -255,23 +256,24 @@ class Index extends React.Component {
 	}
 
 	render() {
-		let findDevice = this.props.state.view.findDevice
+
+		let findDevice = storeState().view.findDevice
 		return(
 			<div className='login-frame' key='login'>
 				{this.state.guide && this.getGuide()}
 				{this.state.maintenance && this.getGuide()}
 				{!this.state.guide && !this.state.maintenance && this.getLogin()}
-				<Snackbar open={this.props.state.snack.open} message={this.props.state.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
+				<Snackbar open={storeState().snack.open} message={storeState().snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
 			</div>
-			)
+	  )
 	}
 
 	getLogin() {
-		let selectedIndex = this.props.state.login.selectIndex
-		let selectedItem = this.props.state.login.device[selectedIndex]
+		let selectedIndex = storeState().login.selectIndex
+		let selectedItem = storeState().login.device[selectedIndex]
 		let content 
 		//content
-		if (this.props.state.login.device.length == 0) {
+		if (storeState().login.device.length == 0) {
 				content = <div>没有发现相关设备</div>
 		}else {
 				content = (
@@ -280,7 +282,7 @@ class Index extends React.Component {
 						<div id='login-device-select'>
 							<Left onClick={this.selectDevice.bind(this,selectedIndex-1,true)} className={selectedIndex==0?'login-invisible':''}></Left>
 							<div className='login-device-icon'></div>
-							<Right onClick={this.selectDevice.bind(this,selectedIndex+1,true)} className={selectedIndex==(this.props.state.login.device.length-1)?'login-invisible':''}></Right>
+							<Right onClick={this.selectDevice.bind(this,selectedIndex+1,true)} className={selectedIndex==(storeState().login.device.length-1)?'login-invisible':''}></Right>
 						</div>
 						<div className='login-device-name'>{selectedItem.name.split('wisnuc-')[1]||selectedItem.name.split('wisnuc-')[0]}</div>
 						<div>{selectedItem.address}</div>
@@ -309,9 +311,9 @@ class Index extends React.Component {
 	}
 
 	getLoginFooter() {
-		let selectedIndex = this.props.state.login.selectIndex
-		let selectedItem = this.props.state.login.device[selectedIndex]
-		let busy = (this.props.state.login.state ==='BUSY')
+		let selectedIndex = storeState().login.selectIndex
+		let selectedItem = storeState().login.device[selectedIndex]
+		let busy = (storeState().login.state ==='BUSY')
 		//登录中...
 		if (busy) {
 			return <div>loading...</div>
@@ -375,8 +377,8 @@ class Index extends React.Component {
 	}
 
 	getGuide() {
-		let selectedIndex = this.props.state.login.selectIndex
-		let selectedItem = this.props.state.login.device[selectedIndex]
+		let selectedIndex = storeState().login.selectIndex
+		let selectedItem = storeState().login.device[selectedIndex]
 		if (!selectedItem || !selectedItem.mir) {
 			return <div>not found</div>
 		}
@@ -402,8 +404,8 @@ class Index extends React.Component {
 	}
 
 	getGuideContent() {
-		let selectedIndex = this.props.state.login.selectIndex
-		let selectedItem = this.props.state.login.device[selectedIndex]
+		let selectedIndex = storeState().login.selectIndex
+		let selectedItem = storeState().login.device[selectedIndex]
 		let content
 		switch(this.state.step) {
 			case 1:
@@ -493,8 +495,8 @@ class Index extends React.Component {
 	}
 
 	getGuideFooter() {
-		let selectedIndex = this.props.state.login.selectIndex
-		let selectedItem = this.props.state.login.device[selectedIndex]
+		let selectedIndex = storeState().login.selectIndex
+		let selectedItem = storeState().login.device[selectedIndex]
 		if (this.state.step == 4) {
 			return (
 				null

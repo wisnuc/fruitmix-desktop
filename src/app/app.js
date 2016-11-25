@@ -1,134 +1,70 @@
-  /**
-   * @module app
-   * @description app main module
-   * @time 2016-04-05 12:00
-   * @author liuhua
-   **/
+/**
+ * @module app
+ * @description app main module
+ * @time 2016-04-05 12:00
+ * @author liuhua
+ **/
 
-//import core module
-import React from 'react'
-import { render } from 'react-dom'
-import injectTapEventPlugin from 'react-tap-event-plugin'
+import Debug from 'debug'
+import store from './stores/store'
 import { ipcRenderer } from 'electron'
 
-const debug = require('debug')('main')
+import React from 'react'
+import ReactDom from 'react-dom'
+import injectTapEventPlugin from 'react-tap-event-plugin'
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
+import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme'
+import getMuiTheme from 'material-ui/styles/getMuiTheme'
 
-global.ipc = ipcRenderer
+//import provider TODO
+import { Provider } from 'react-redux'
+import Login from './components/login/NewLogin'
+import Main from './components/main/Main'
 
-//import component
-// import Login from'./components/login/Login'// login
-import Login from './components/login/NewLogin'//login
-import Main from './components/main/Main'//main
+const debug = Debug('main')
 
-//import Action
-import Action from './actions/action'
+// import css
+require('../assets/css/app.css')
 
-//import provider
-import {Provider} from 'react-redux'
-
-
+// required by Material UI
+injectTapEventPlugin()
 // global import jQuery
 global.$ = global.jQuery = global.jQuery || require('jquery')
 
-//import css
-require('../assets/css/app.css')
+// root component
+const App = () => (
+  <MuiThemeProvider muiTheme={getMuiTheme(lightBaseTheme)}>
+    { window.store.getState().login.state === 'LOGGEDIN' ? (<Main />) : <Login /> }
+  </MuiThemeProvider>
+)
 
-//import store
-import configureStore from './stores/store'
+// render method
+const render = () => ReactDom.render(<App/>, document.getElementById('app'))
 
-const store = configureStore()
-
-injectTapEventPlugin()
-
-var storeLock = false
-
-var waitForRender = null
-
-window.c = console
-
-window.onresize = function() {
-	// store.dispatch({type:''})
-}
-
-window.mocha = false
-
-window.mochaState = store.getState()
-
-if (mocha) {
-	window.dispatch = (action)=>{ipc.send('dispatch',action)}
-}else {
-	window.dispatch = (action)=>{store.dispatch(action)}
-}
-
-//APP component
-var App = React.createClass({
-	render: function(){
-		let state = store.getState()
-		let isLogin
-		if (mocha) {
-			isLogin = mochaState.login.state == 'LOGGEDIN'?true:false
-		}else {
-			isLogin = state.login.state == 'LOGGEDIN'?true:false
-		}
-		return(
-      <div className="app" >
-        {/*<button onClick={this.save}>store</button>*/}
-        {isLogin && <Main state={mocha?mochaState:state} dispatch={dispatch}/>}
-        {!isLogin && <Login state={mocha?mochaState:state} dispatch={dispatch}/>}
-      </div>
-			)
-	},
-
-	save : function () {
-		ipc.send('store', store.getState())
-	}
-})
-
-// define dom node
-var appMountElement = document.getElementById('app')
-
-//define render function
-var Render = () =>{
-	render(
-		<Provider store={store}>
-			<App></App>
-		</Provider>,
-		appMountElement)
-}
-
-//render
-Render()
-
-//subscribe store change
-store.subscribe(()=>{
-
+// subscribe render
+store.subscribe(() => {
   console.log(store.getState())
-
-	if (storeLock) {
-		clearTimeout(waitForRender)
-		waitForRender = setTimeout(()=>{storeLock = false;Render()},50)
-	}else {
-		Render()
-		storeLock = true
-		waitForRender = setTimeout(()=>{storeLock = false},50)
-	}
+  render()
 })
 
-var clearLock = ()=>{
-	return setTimeout(()=>{storeLock = false; Render()},50)
-}
+// first render
+render()
 
-ipc.on('stateUpdate',(err,data)=>{
-	mochaState = data
-	Render()
+
+ipcRenderer.on('stateUpdate',(err,data)=>{
+	// mochaState = data
+	// Render()
 })
 
-ipc.on('adapter', (err, data) => {
-  dispatch({
+ipcRenderer.on('adapter', (err, data) => {
+  store.dispatch({
     type: 'NODE_UPDATE',
     data: data
   })
-	dispatch(Action.adapter(data))
+	store.dispatch({
+    type: 'ADAPTER',
+    store: data
+  })
 })
 
 // command tick
@@ -138,7 +74,7 @@ setInterval(() => {
 }, 1000)
 
 // 
-ipc.on('command', (e, {id, err, data}) => {
+ipcRenderer.on('command', (e, {id, err, data}) => {
 
   console.log(id, err, data)
 
@@ -148,5 +84,5 @@ ipc.on('command', (e, {id, err, data}) => {
   }) 
 })
 
-debug('debug module works')
+console.log('main module works')
 

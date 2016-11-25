@@ -16,15 +16,16 @@ import Action from '../../actions/action';
 import { sendCommand } from '../../lib/command'
 
 class PopMenu extends Component {
+
 	render() {
-		let menu = this.props.view.menu;
+		let menu = window.store.getState().view.menu;
 		let style = {
 			display:'none'
 		}
 		if (menu.show) {
 			style = Object.assign({},style,{
 				display: menu.show?'block':'none',
-				left: this.props.navigation.menu?menu.x-249:menu.x,
+				left: window.store.getState().navigation.menu?menu.x-249:menu.x,
 				top: menu.y-132+document.getElementsByClassName('file-area')[0].scrollTop
 			});
 		}
@@ -65,16 +66,16 @@ class PopMenu extends Component {
   // delete
 	remove() {
 		let arr = [];
-		this.props.file.children.forEach(item=>{
+		window.store.getState().file.children.forEach(item=>{
 			if (item.checked) {
 				arr.push(item)
 			}
 		});
-		// ipc.send('delete',arr,this.props.file.current.directory);
+		// ipc.send('delete',arr,window.store.getState().file.current.directory);
     sendCommand(null, {
       cmd: 'FILE_DELETE',
       args: {
-        dir: this.props.file.current.directory,
+        dir: window.store.getState().file.current.directory,
         children: arr
       } 
     }) 
@@ -84,8 +85,8 @@ class PopMenu extends Component {
     sendCommand(null, {
       cmd: 'FILE_RENAME',
       args: {
-        dir: this.props.file.current.directory,
-        child: this.props.file.children[this.props.view.menu.index] 
+        dir: window.store.getState().file.current.directory,
+        child: window.store.getState().file.children[window.store.getState().view.menu.index] 
       }
     })
   }
@@ -93,8 +94,8 @@ class PopMenu extends Component {
 	//rename
 	rename() {
 
-		let index = this.props.view.menu.index 
-		let uuid = this.props.file.children[index].uuid
+		let index = window.store.getState().view.menu.index 
+		let uuid = window.store.getState().file.children[index].uuid
 		let dom = $('div[data-uuid='+uuid+']>span:eq(1)')[0];
 		let oldName = dom.innerHTML;
 		//edit position point to end
@@ -136,7 +137,7 @@ class PopMenu extends Component {
 		let folders = [];
 		// let map = new Map();
 		// let t = new Date();
-		this.props.file.children.forEach(item=>{
+		window.store.getState().file.children.forEach(item=>{
 			if (item.checked && item.type != 'folder') {
 				// let file = Object.assign({},item,{status:0,downloadTime:Date.parse(t)});
 				files.push(item);
@@ -158,10 +159,12 @@ class PopMenu extends Component {
 	}
 }
 
+/**
 var mapStateToProps = (state)=>({
 	file: state.file,
 	navigation: state.navigation,
 	view: state.view,
 })
+**/
 
-export default connect(mapStateToProps)(PopMenu)
+export default PopMenu

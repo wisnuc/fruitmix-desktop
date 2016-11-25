@@ -1,4 +1,4 @@
-import { store } from '../stores/store'
+import store from '../stores/store'
 const debug = require('debug')('lib:command')
 
 const sendCommand = (key, op, callback) => {

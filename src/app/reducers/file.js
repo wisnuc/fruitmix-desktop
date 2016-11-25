@@ -240,7 +240,10 @@ const defaultDirectory = {
 const directory = (state = defaultDirectory,action)=> {
 
 	switch (action.type) {
+
 		case 'ADAPTER':
+      console.log('|------------------------------->>>>>>>>>>>')
+      console.log(action)
 			return Object.assign({}, state, action.store.file, {
         stm: (state.current.directory.uuid !== action.store.file.current.directory.uuid) ?
           state.stm.setSelection([]) :

@@ -4,6 +4,7 @@
  * @time 2016-5-6
  * @author liuhua
  **/
+
 import React, { findDOMNode, Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 import Action from '../../actions/action'
@@ -36,7 +37,7 @@ const FONT_BRIGHTOP2 = '70%'
 
 const stm = () => window.store.getState().file.stm
 
-class Row extends Component {
+class DataRow extends Component {
 
 	render() {
 
@@ -108,8 +109,7 @@ class Row extends Component {
     }
 
     return (
-      <Paper 
-        style={style.row} zDepth={this.props.checked ? 2 : 0}
+      <div style={style.row} zDepth={this.props.checked ? 2 : 0}
         onMouseEnter = {() => window.store.dispatch({type: 'FILE_ROW_MOUSE_ENTER', data: this.props.item.uuid})}
         onMouseLeave = {() => window.store.dispatch({type: 'FILE_ROW_MOUSE_LEAVE', data: this.props.item.uuid})}
       > 
@@ -181,7 +181,7 @@ class Row extends Component {
         >
           {this.getSize(this.props.item.size)}
         </div>
-			</Paper>
+			</div>
     )
 	}
 
@@ -240,6 +240,8 @@ class Row extends Component {
 	}
 }
 
+const fileState = () => window.store.getState().file
+
 class AllFilesTable extends Component {
 
   constructor(props) {
@@ -254,7 +256,6 @@ class AllFilesTable extends Component {
 
   handleKeyEvent(e) {
 
-    console.log(e)
     let newState
 
     if (e.key === 'Control') {
@@ -304,9 +305,10 @@ class AllFilesTable extends Component {
 	render() {
     console.log('redraw')
 		return (
-      <Paper style={{ width: '100%', height: '100%', backgroundColor:'#EEE', display:'flex', flexDirection:'column', alignItems:'center' }} >
-        { this.props.file.children.map((item,index)=> (
-          <Row 
+      <div style={{ width: '100%', backgroundColor:'#EEE', display:'flex', flexDirection:'column', alignItems:'center' }} >
+        
+        { fileState().children.map((item,index)=> (
+          <DataRow 
             ctrl={this.state.ctrl}
             shift={this.state.shift}
             index={index} 
@@ -318,8 +320,7 @@ class AllFilesTable extends Component {
             editing={item.uuid === window.store.getState().file.stm.editing }
           />))
         }
-        {/* not work <div style={{ width: '100%', flex:1, backgroundColor:'yellow'}} /> */}
-      </Paper>
+      </div>
 	  )
   }
 
@@ -330,9 +331,9 @@ class AllFilesTable extends Component {
 
 	//select files
 	selectChildren (rowNumber,e) {
-		c.log(e)
+
 		//bezier
-		if (this.props.file.children[rowNumber].checked == true) {
+		if (fileState().children[rowNumber].checked == true) {
 			this.bez1(rowNumber);
 		}else {
 			this.bez2(rowNumber);
@@ -341,7 +342,7 @@ class AllFilesTable extends Component {
 
 			let x = e.nativeEvent.pageX;
 			let y = e.nativeEvent.pageY;
-			if (this.props.file.children[rowNumber].checked == false) {	
+			if (fileState().children[rowNumber].checked == false) {	
 				this.props.dispatch(Action.toggleMenu(rowNumber,x,y,true));
 				this.props.dispatch(Action.selectChildren(rowNumber))
 			}else {
@@ -357,7 +358,7 @@ class AllFilesTable extends Component {
 		//bezier 
 		$('.bezierFrame').empty().append('<div class="bezierTransition1"></div><div class="bezierTransition2"></div>');
 
-		var children = this.props.file.children;
+		var children = fileState().children;
 		if (children[rowNumber] && children[rowNumber].type == 'folder') {
 			// ipc.send('enterChildren',children[rowNumber]);
       fileNav('HOME_DRIVE', children[rowNumber].uuid)
@@ -365,8 +366,4 @@ class AllFilesTable extends Component {
 	}
 }
 
-var mapStateToProps = (state)=>({
-  file: state.file,
-})
-
-export default connect(mapStateToProps)(AllFilesTable)
+export default AllFilesTable

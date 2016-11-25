@@ -1,6 +1,4 @@
-//import core module
 import { combineReducers } from 'redux'
-//import all reducers
 import login from './login'
 import navigation from './navigation'
 import multiple from './multiple'
@@ -19,6 +17,7 @@ import albumHash from './albumHash';
 import moveData from './moveData';
 import fileInfo from './fileInfo';
 
+import popmenu from './popmenu'
 import command from './command'
 import node from './node'
 
@@ -47,6 +46,8 @@ const reducer = combineReducers({
 	fileInfo,
   command,
   node,
-});
+  popmenu
+})
 
-export default reducer;
+export default reducer
+

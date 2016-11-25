@@ -4,43 +4,713 @@
  * @time 2016-4-28
  * @author liuhua
  **/
-  'use strict';
-// require core module
-import React, { findDOMNode, Component, PropTypes } from 'react';
-//require material
-import { Paper, FontIcon, SvgIcon, IconMenu, MenuItem, Dialog, FlatButton, RaisedButton, TextField, Checkbox, CircularProgress } from 'material-ui';
+
+import Debug from 'debug'
+
+const debug = Debug('app:file')
+
+import React, { findDOMNode, Component, PropTypes } from 'react'
+import { connect } from 'react-redux'
+import Action from '../../actions/action'
+import { fileNav } from '../../lib/file'
+
+import keypress from 'keypress.js'
+
+import svg from '../../utils/SVGIcon'
+
+import { Popover } from 'material-ui'
+import IconButton from 'material-ui/IconButton'
+import ActionCheckCircle from 'material-ui/svg-icons/action/check-circle'
+import ActionDone from 'material-ui/svg-icons/action/done'
+import NavigationCheck from 'material-ui/svg-icons/navigation/check'
+import FileFolder from 'material-ui/svg-icons/file/folder'
+import FileFileUpload from 'material-ui/svg-icons/file/file-upload'
+import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
+import ToggleCheckBox from 'material-ui/svg-icons/toggle/check-box'
+import ToggleCheckBoxOutlineBlank from 'material-ui/svg-icons/toggle/check-box-outline-blank'
+import ToggleRadioButtonUnchecked from 'material-ui/svg-icons/toggle/radio-button-unchecked'
+
+import { Divider, Avatar, Paper, FontIcon, SvgIcon, IconMenu, Menu, MenuItem, Dialog, FloatingActionButton,
+  FlatButton, RaisedButton, TextField, Checkbox, CircularProgress } from 'material-ui';
 import { Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn } from 'material-ui/Table';
 import {blue500, red500, greenA200} from 'material-ui/styles/colors';
-import svg from '../../utils/SVGIcon';
-//import Action
-import Action from '../../actions/action';
-// import Component 
-import FilesTable from './FilesTable';
-import Menu from './Menu';
+
+// import Menu from './Menu';
 import Detail from './Detail';
 import Move from './Move';
 
-import { fileNav } from '../../lib/file'
+import FileUploadButton from '../file/FileUploadButton'
 
-class AllFiles extends Component {
+const isLeftClick = e => e.nativeEvent.button === 0
+const isRightClick = e => e.nativeEvent.button === 2
+
+const COLOR_WHITE = '#FFF'
+const COLOR_LIGHT_GRAY = '#DFD'
+const COLOR_DARK_GRAY = '#BFB'
+const COLOR_BLACK = '#3F51B5'
+
+const FONT_BLACK = '#000'
+const FONT_WHITE = '#FFF'
+const FONT_DARKOP1 = '84%'
+const FONT_DARKOP2 = '55%'
+const FONT_BRIGHTOP1 = '100%'
+const FONT_BRIGHTOP2 = '70%'
+
+const stm = () => window.store.getState().file.stm
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+class PopMenu extends React.Component {
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      open: false,
+    }
+  
+    this.handleRequestClose = () => {
+      this.setState({
+        open: false,
+      })
+    }
+
+  }
+
+  componentDidMount() {
+    debug('popmenu did mount')
+  }
+
+  componentWillUnmount() {
+    debug('popmenu will unmount')
+  }
+
+  render() {
+
+    debug('popmenu render', this.state, this.fired)
+
+    return (
+      <div>
+        <div style={{width:'100%', height:'100%'}} 
+          ref={element => {
+            if (element) element.click()
+          }} 
+
+          onClick = {e => {
+            console.log(e)
+            this.setState({
+              open: true,
+              anchorEl: e.currentTarget 
+            })
+          }}
+        />
+
+        <Popover
+          open={this.state.open}
+          anchorEl={this.state.anchorEl}
+          anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+          targetOrigin={{horizontal: 'left', vertical: 'top'}}
+          onRequestClose={this.handleRequestClose}
+        >
+          <Menu>
+            <MenuItem primaryText="Refresh" />
+            <MenuItem primaryText="Help &amp; feedback" />
+            <MenuItem primaryText="Settings" />
+            <MenuItem primaryText="Sign out" />
+          </Menu>
+        </Popover>        
+      </div>
+    )
+  }
+}
+
+const formatTime = (mtime) => {
+
+  if (!mtime) {
+    return null
+  }
+
+  let time = new Date()
+  time.setTime(parseInt(mtime))
+  return time.getFullYear() + '/' + (time.getMonth() + 1) + '/' + time.getDay()
+}
+
+const formatSize = (size) => {
+
+  if (!size) return null
+  
+  size = parseFloat(size)
+
+  if (size < 1024) 
+    return size.toFixed(2)+' B'
+  else if (size < 1024*1024)
+    return (size/1024).toFixed(2)+' KB'
+  else if(size<1024*1024*1024)
+    return (size/1024/1024).toFixed(2)+ ' M'
+  else 
+    return (size/1024/1024/1024).toFixed(2)+ ' G'
+}
+
+const DataRow = ({
+  uuid,
+  index,
+  name,
+  type,
+  mtime,
+  size,
+
+  selecting,
+  editing,
+
+  selected,
+  specified,
+  hover,
+
+  leading,
+  check,
+  
+  onMouseEnter,
+  onMouseLeave,
+  onClick,
+  onDoubleClick,
+  onRightClick
+}) => {
+
+  let style = {
+
+    row: {
+      width: '100%',
+      flex: '0 0 40px',
+
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'flex-start',
+
+      backgroundColor: (hover || leading === 'active') ? '#EEEEEE' : selected ? '#F5F5F5' : '#FFF',
+
+      color: '#000',
+      opacity: 0.87
+    },
+   
+    time: {
+      flex: '0 0 160px',
+      fontSize: 13,
+      opacity: 0.54,
+      textAlign: 'right',
+    },
+
+    size: {
+      flex: '0 0 160px',
+      fontSize: 13,
+      opacity: 0.54,
+      textAlign: 'right',
+      marginRight: 24
+    },
+  }
+
+  const secondaryColor = '#FF4081'
+
+  const renderLeading = () => {
+
+    let height = '100%', backgroundColor = '#FFF', opacity = 0
+
+    switch(leading) {
+    case 'inactive':
+      height = 24
+      backgroundColor = '#000'
+      opacity = 0.26
+      break
+    case 'activating':
+      height = 24
+      backgroundColor = '#000'
+      opacity = 0.26
+      break
+    case 'active':
+      backgroundColor = secondaryColor
+      opacity = 1
+      break
+    }
+
+    return <div style={{ flex: '0 0 4px', height, backgroundColor, opacity, zIndex:1000 }} /> 
+  }
+
+  return (
+
+    <div style={style.row}
+      onMouseEnter = {() => onMouseEnter(index)}
+      onMouseLeave = {() => onMouseLeave(index)}
+      onClick = {e => onClick(uuid, e)}
+      onDoubleClick = {e => onDoubleClick(uuid, e)}
+      onTouchTap = {e => e.nativeEvent.button === 2 && onRightClick(uuid, e.nativeEvent)}
+    >
+
+      { 
+        // 4px width
+        renderLeading() 
+      } 
+
+      <div style={{flex: '0 0 12px'}} />
+
+      <div style={{flex: '0 0 48px', display: 'flex', alignItems: 'center'}} >
+        {
+          (check === 'checked' || check === 'unchecking') ? <ActionCheckCircle style={{color: secondaryColor, opacity: 1, zIndex:1000}} /> :
+          check === 'checking' ? <NavigationCheck style={{color: '#000', opacity: 0.26}} /> : null
+        }
+      </div>
+      
+      <div style={{flex: '0 0 8px'}} />
+
+      <div style={{flex: '0 0 48px', display: 'flex', alignItems: 'center'}} >
+        {
+          type === 'folder' ?  
+            <FileFolder style={{color: '#000', opacity: 0.54}} /> : 
+              <EditorInsertDriveFile style={{color: '#000', opacity: 0.54}} />
+        }
+      </div>
+
+      {/* name column */}
+      <div style={{width:'100%'}} >
+        { editing ? 
+          <TextField 
+            hintText={name} 
+            fullWidth={true} 
+            ref={ input => { input && input.focus() }}
+            onBlur={() => window.store.dispatch({
+              type: 'FILE_ROW_NAME_ONBLUR',
+              data: uuid
+            })}
+          /> : <span style={{fontSize: 14, opacity:0.87}}>{name}</span> 
+        }
+      </div>
+
+      {/* time column */}
+      <div style={style.time}>{formatTime(mtime)}</div>
+
+      {/* size column */}
+      <div style={style.size}>{formatSize(size)}</div>
+    </div>
+  )
+}
+
+class AllFiles extends React.Component {
+
+  constructor(props) {
+
+    super(props)
+
+    this.state = { 
+      file: null, 
+      ctrl: false, 
+      shift: false,
+      pageX: 0,
+      pageY: 0,
+      contextMenu: false,
+    }
+
+    this.rowMouseEnterBound = this.rowMouseEnter.bind(this)
+    this.rowMouseLeaveBound = this.rowMouseLeave.bind(this)
+    this.rowClickBound = this.rowClick.bind(this)
+    this.rowDoubleClickBound = this.rowDoubleClick.bind(this)
+    this.rowRightClickBound = this.rowRightClick.bind(this)
+    
+    this.keypress = null
+    this.unsubscribe = null
+
+    debug('constructed')    
+  }
+
+  componentDidMount() {
+
+    // create keypress listener
+    this.keypress = new keypress.Listener()
+
+    // listen window keydown keyup event
+    window.addEventListener('keydown', this.keypress)
+    window.addEventListener('keyup', this.keypress)
+
+    // register ctrl
+    this.keypress.register_combo({
+      "keys"              : "ctrl",
+      "on_keydown"        : this.handleCtrlDown,
+      "on_keyup"          : this.handleCtrlUp,
+      "on_release"        : null,
+      "this"              : this,
+      "prevent_default"   : true,
+      "prevent_repeat"    : true,
+      "is_unordered"      : false,
+      "is_counting"       : false,
+      "is_exclusive"      : false,
+      "is_solitary"       : false,
+      "is_sequence"       : false
+    })
+
+    // register shift
+    this.keypress.register_combo({
+      "keys"              : "shift",
+      "on_keydown"        : this.handleShiftDown,
+      "on_keyup"          : this.handleShiftUp,
+      "on_release"        : null,
+      "this"              : this,
+      "prevent_default"   : true,
+      "prevent_repeat"    : true,
+      "is_unordered"      : false,
+      "is_counting"       : false,
+      "is_exclusive"      : false,
+      "is_solitary"       : false,
+      "is_sequence"       : false
+    })
+
+    // subscribe to redux store
+    this.unsubscribe = window.store.subscribe(() => {
+      let newFile = window.store.getState().node.file
+      if (newFile !== this.state.file) {
+        this.nodeUpdate(newFile)
+      }
+    })
+
+    let file = window.store.getState().node.file
+
+    let state = { file }
+
+    if (this.state.file === null && file) {
+      state.list = file.children.map(item => Object.assign({}, item, { selected: false }))
+      this.setState(state)
+    } 
+  }
+
+  componentWillUnmount() {
+
+    // clean up keypress
+    this.keypress.reset()
+    this.keypress.stop_listening()
+    this.keypress.destroy()
+    this.keypress = null
+
+    // remove listener
+    window.removeEventListener('keydown', this.keypress, false)
+    window.removeEventListener('keyup', this.keypress, false)
+
+    // unsubscribe redux store
+    this.unsubscribe && this.state.unsubscribe()
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return nextState !== this.state
+  }
+
+  nodeUpdate(newFile) {
+
+    debug('nodeUpdate', newFile) 
+
+    if (newFile === this.state.file) return
+
+    let state = {
+      file: newFile,
+      list: newFile.children.map(item => Object.assign({}, item, { 
+          specified: false,
+          selected: false,
+          hover: false,
+        }))
+        .sort((a, b) => {
+          if (a.type !== b.type) {
+            return a.type === 'folder' ? -1 : 1
+          }
+          else
+            return a.name.localeCompare(b.name)
+        }),
+    }
+
+    this.setState(state)
+    debug('nodeUpdate changed state', state)
+  }
+
+  handleCtrlDown() {
+    debug('ctrl down')
+    this.setState(Object.assign({}, this.state, { ctrl: true }))
+  }
+
+  handleCtrlUp() {
+    debug('ctrl up')
+    this.setState(Object.assign({}, this.state, { ctrl: false }))
+  }
+
+  handleShiftDown() {
+    debug('shift down')
+    this.setState(Object.assign({}, this.state, { shift: true }))
+  }
+
+  handleShiftUp() {
+    debug('shift up')
+    this.setState(Object.assign({}, this.state, { shift: false }))
+  }
+
+  rowMouseLeave(index) {
+    
+    this.setState(state => Object.assign({}, state, {
+      list: [
+        ...state.list.slice(0, index),
+        Object.assign({}, state.list[index], { hover: false }),
+        ...state.list.slice(index + 1)
+      ]
+    }))
+  }
+
+  rowMouseEnter(index) {
+
+    this.setState(state => Object.assign({}, state, {
+      list: [
+        ...state.list.slice(0, index),
+        Object.assign({}, state.list[index], { hover: true }),
+        ...state.list.slice(index + 1)
+      ]
+    }))
+  }
+
+  // mutate item, return new list
+  rowClick(uuid, e) {
+
+    debug('row click', e, e.ctrlKey, e.shiftKey)
+
+    let list, nextState
+
+    if (e.shiftKey) {
+      let begin = this.state.list.findIndex(item => item.specified)
+      if (begin !== -1) { // specified
+        let end = this.state.list.findIndex(item => item.uuid === uuid)
+
+        if (begin === end) // user unspecify
+          list = [
+            ...this.state.list.slice(0, begin),
+            Object.assign({}, this.state.list[begin], { specified: false }),
+            ...this.state.list.slice(begin + 1)
+          ]
+        else 
+          list = this.state.list.map((item, index, arr) => {
+            if ((index >= begin && index <= end) || (index <=begin && index >= end)) {
+              if (item.specified)
+                return Object.assign({}, item, { specified: false, selected: true })
+              if (!item.selected) 
+                return Object.assign({}, item, { selected: true })
+            }
+            return item
+          }) 
+      }
+      else { // not specified
+        list = this.state.list.map(item => {
+          if (item.uuid === uuid) 
+            return Object.assign({}, item, { specified: true, selected: true }) 
+          else 
+            return item
+        })
+      }
+      nextState = Object.assign({}, this.state, { list, ctrl: e.ctrlKey, shift: e.shiftKey })
+      return this.setState(nextState)
+
+    }
+    else if (e.ctrlKey === true) {
+
+      list = this.state.list.map(item => {
+        if (item.uuid === uuid) // target, toggle selected, set specified the same with selected !!!
+          return Object.assign({}, item, { specified: !item.selected, selected: !item.selected })
+        else if (item.specified) // non-target
+          return Object.assign({}, item, { specified: false })
+        else  
+          return item 
+      })
+
+      nextState = Object.assign({}, this.state, { list })
+      this.setState(nextState)
+    }
+    else {
+      // normal: set target exclusively specified, set target exclusively selected
+      let list = this.state.list.map(item => {
+        if (item.uuid === uuid) {  // target
+          if (item.selected && item.specified) 
+            return item
+          else
+            return Object.assign({}, item, { specified: true, selected: true })
+        }
+        else { // not target
+          if (item.selected || item.specified)
+            return Object.assign({}, item, { specified: false, selected: false })
+          else 
+            return item
+        }
+      })
+
+      nextState = Object.assign({}, this.state, { list, ctrl: e.ctrlKey, shift: e.shiftKey })
+      this.setState(nextState)
+    }
+  }
+
+  rowDoubleClick(uuid, e) {
+    
+  }
+
+  rowRightClick(index, e) {
+
+    // e is native event
+    debug('row right click', e)
+
+    if (this.state.ctrl || this.state.shift) return
+          
+    this.setState(Object.assign({}, this.state, { 
+      pageX: e.pageX, 
+      pageY: e.pageY,
+      contextMenu: true
+    }))  
+  }
+
+  renderList() {
+
+    let specified, multi, min, max, hover
+    let { ctrl, shift, list } = this.state
+
+    specified = this.state.list.findIndex(item => item.specified)
+    hover = this.state.list.findIndex(item => item.hover)
+
+    if (specified !== -1 && hover !== -1) {
+      min = Math.min(specified, hover)
+      max = Math.max(specified, hover)
+    }
+
+    multi = this.state.list.filter(item => item.selected).length > 1
+    
+    let selecting = ctrl || shift 
+
+    return this.state.list.map((item, index) => (
+      <DataRow 
+
+        key={item.uuid}
+
+        index={index}
+        name={item.name}
+        type={item.type}
+        uuid={item.uuid} 
+        mtime={item.mtime}
+        size={item.size}
+       
+        selected={item.selected}
+        hover={item.hover}
+        
+        leading={(() => { // none, inactive, activating, active
+          if (shift) {
+            if (specified !== -1)
+              return (index <= max && index >= min) ? 'active' : 'none'
+            else  
+              return item.hover ? 'activating' : 'none'
+          }
+          else 
+            return item.specified ? 'inactive' : 'none'
+        })()}
+
+        check={(() => { // none, checking, unchecking, checked
+          if (shift) {
+            if (specified !== -1) {
+              if (index <= max && index >= min) { // in range
+                return item.selected ? 'checked' : 'checking'
+              }
+              else
+                return item.selected ? 'checked' : 'none'
+            }   
+            else {
+              if (item.selected)
+                return 'checked'
+              else if (item.hover)
+                return 'checking'
+              else 
+                return 'none'
+            }
+          } 
+          else if (ctrl) {
+            if (item.selected && item.hover)
+              return 'unchecking'
+            else if (!item.selected && item.hover)
+              return 'checking'
+            else if (item.selected)
+              return 'checked'
+            else
+              return 'none'
+          }
+          else {
+            return (multi && item.selected) ? 'checked' : 'none'
+          }
+        })()}
+
+        modifier={this.state.shift ? 'shift' : this.state.ctrl ? 'ctrl' : 'none'}
+
+        selecting={selecting}
+        specified={item.specified} 
+
+        onMouseEnter={this.rowMouseEnterBound}
+        onMouseLeave={this.rowMouseLeaveBound}
+        onClick={this.rowClickBound}
+        onDoubleClick={this.rowDoubleClickBound}
+        onRightClick={this.rowRightClickBound}
+
+      />))
+  }
 
 	render() {
-		var _this = this
+
+    if (this.state.file === null) return null 
+
 		return (
-			<div className='all-my-files' style={{height:'100%'}}>
-				{this.getTable()}
-				{/*file detail*/}
-				{this.getDetail()}
-				{/*create new folder dialog*/}
-				{this.getCreateFolderDialog()}
-				{/*share dialog*/}
-				{this.getShareDialog()}
-			</div>
+      <div style={{ 
+        width: '100%', 
+        height: '100%',
+        backgroundColor:'#EEE' 
+      }}>
+       
+        <div style={{width: '100%', height:40, backgroundColor:'#FFF', 
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}> 
+          <div style={{flex: '0 0 120px'}} />
+          <div style={{flex: 1, fontSize: 14, fontWeight: 'bold', opacity: 0.54}}>文件名称</div>
+          <div style={{flex: '0 0 160px', fontSize: 14, opacity: 0.54, textAlign: 'right'}}>时间</div>
+          <div style={{flex: '0 0 160px', fontSize: 14, opacity: 0.54, textAlign: 'right', marginRight: 24 + 16 /* 16 supposed to be scrollbar width */ }}>大小</div>
+        </div>
+        <Divider style={{marginLeft: 120}} />
+        <div style={{width: '100%', height: 'calc(100% - 40px)', overflowY: 'scroll', backgroundColor: '#FFF', display: 'flex', flexDirection: 'column'}}>
+          { this.renderList() }
+          <div style={{flex:'1 0 96px', backgroundColor: 'yellow'}} />
+        </div>
+
+        <FileUploadButton style={{position: 'absolute', right:48, bottom:48}} />
+
+        { this.state.contextMenu && (
+          <div style={{position: 'absolute', top: 0, left: 0, width:'100%', height:'100%', zIndex:2000}}
+            onTouchTap={() => this.setState(Object.assign({}, this.state, { contextMenu: false}))} >
+            <Paper style={{
+              position: 'absolute', 
+              top: this.state.pageY - (window.store.getState().view.showAppBar ? 64 : 0), 
+              left: this.state.pageX,
+              backgroundColor: '#F5F5F5'
+            }}>
+              <Menu >
+                <MenuItem primaryText='hello' />
+                <MenuItem primaryText='world' />
+              </Menu>
+            </Paper>
+          </div>
+        )}
+
+
+        {/* this.props.state.file.view.state !== 'BUSY' && <FilesTable />  */}
+        {/*file detail*/}
+        {/*this.getDetail()*/}
+        {/*create new folder dialog*/}
+        {/*this.getCreateFolderDialog()*/}
+        {/*share dialog*/}
+        {/*this.getShareDialog() */}
+      </div>
 		)
 	}
 
+  /////////////////////////////////////////////////////////////////////////////
+
 	//get table 
 	getTable() {
+
 		const listStyle = {
 			height: 48,
 			lineHeight:'48px'
@@ -48,15 +718,14 @@ class AllFiles extends Component {
 
 		if (this.props.state.file.view.state=='BUSY') {
 			return (<div className='data-loading '><CircularProgress/></div>)
-		}else {
+		} else {
+/**
 			return (
-				<Paper className='file-area' onScroll={this.scrollEvent.bind(this)} onMouseDown={this.mouseDown.bind(this)}>
-					{/*upload input*/}
+				<Paper>
 					<input className='upload-input' type="file" onChange={this.upLoadFile.bind(this)} multiple={true}/>
-					{/*bread crumb*/}
-					<div className='breadcrumb' onClick={e => console.log(e)}>
+					<div onClick={e => console.log(e)}>
 						{this.getBreadCrumb()}
-						<IconMenu className='breadcrumb-add'
+						<IconMenu 
 						      iconButtonElement={<span style={{cursor:'pointer'}}>{svg.add()}</span>}
 						      anchorOrigin={{horizontal: 'left', vertical: 'top'}}
 						      targetOrigin={{horizontal: 'left', vertical: 'top'}}
@@ -66,14 +735,14 @@ class AllFiles extends Component {
 							<MenuItem innerDivStyle={listStyle} primaryText="上传文件夹" onClick={this.openInputFolder.bind(this)}/>
 						</IconMenu>
 					</div>
-					{/*file table body*/}
-					<div className="all-files-container">
+					<div >
 						<FilesTable/>
 						<Menu></Menu>
-						{/*<Move dispatch={this.props.dispatch} state={this.props.state}></Move>*/}
 					</div>
 				</Paper>
 				)
+**/
+      return <FilesTable key='file-table-content' />
 		}
 	}
 
@@ -167,10 +836,7 @@ class AllFiles extends Component {
 				)
 		}
 	}
-	//open multiple select
-	mouseDown(e) {
-		// this.props.dispatch(Action.mouseDown(e.nativeEvent.x,e.nativeEvent.y));
-	}
+
 	//upload file
 	upLoadFile(e) {
 		let files = [];
@@ -226,7 +892,6 @@ class AllFiles extends Component {
 		if (obj.key == '') {
 			// ipc.send('getRootData');
 			// this.props.dispatch(Action.filesLoading());
-      console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<')
       fileNav('HOME_DRIVE', null) 
 		}else {
 			this.props.dispatch(Action.cleanDetail());
@@ -286,19 +951,6 @@ class AllFiles extends Component {
 	checkUser(uuid) {
 		this.props.dispatch(Action.checkUser(uuid))
 	}
-	//scrollEvent 
-	scrollEvent() {
-		// let dom = document.getElementsByClassName('file-area')[0]
-		// let sTop = dom.scrollTop;
-		// let sHeight = dom.scrollHeight;
-		// let cHeight = dom.clientHeight;
-		// if (cHeight+sTop == sHeight) {
-		// 	if (this.props.state.data.children.length <= this.props.state.data.showSize) {
-		// 		return
-		// 	}
-		// 	this.props.dispatch(Action.setFilesSize(false));
-		// }
-	}
 }
 
-export default AllFiles;
+export default AllFiles
