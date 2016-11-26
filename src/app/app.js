@@ -28,13 +28,14 @@ require('../assets/css/app.css')
 
 // required by Material UI
 injectTapEventPlugin()
+
 // global import jQuery
 global.$ = global.jQuery = global.jQuery || require('jquery')
 
 // root component
 const App = () => (
   <MuiThemeProvider muiTheme={getMuiTheme(lightBaseTheme)}>
-    { window.store.getState().login.state === 'LOGGEDIN' ? (<Main />) : <Login /> }
+    { window.store.getState().login.state === 'LOGGEDIN' ? (<Main showAppBar={window.store.getState().view.showAppBar}/>) : <Login /> }
   </MuiThemeProvider>
 )
 
