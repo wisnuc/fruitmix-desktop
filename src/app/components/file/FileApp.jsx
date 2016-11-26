@@ -40,9 +40,13 @@ import SocialPeople from 'material-ui/svg-icons/social/people'
 import DeviceStorage from 'material-ui/svg-icons/device/storage'
 import ActionInfo from 'material-ui/svg-icons/action/info'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
+import NavigationClose from 'material-ui/svg-icons/navigation/close'
+import NavigationCancel from 'material-ui/svg-icons/navigation/cancel'
 
 import { Divider, Paper, Menu, MenuItem, Dialog, 
   FlatButton, TextField, Checkbox, CircularProgress } from 'material-ui'
+
+import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
 
 import { blue500, red500, greenA200 } from 'material-ui/styles/colors'
 
@@ -301,6 +305,342 @@ const DataRow = ({
     </div>
   )
 }
+
+  /////////////////////////////////////////////////////////////////////////////
+/**
+	//get table 
+	getTable() {
+
+		const listStyle = {
+			height: 48,
+			lineHeight:'48px'
+		}
+
+		if (this.props.state.file.view.state=='BUSY') {
+			return (<div className='data-loading '><CircularProgress/></div>)
+		} else {
+			return (
+				<Paper>
+					<input className='upload-input' type="file" onChange={this.upLoadFile.bind(this)} multiple={true}/>
+					<div onClick={e => console.log(e)}>
+						{this.getBreadCrumb()}
+						<IconMenu 
+						      iconButtonElement={<span style={{cursor:'pointer'}}>{svg.add()}</span>}
+						      anchorOrigin={{horizontal: 'left', vertical: 'top'}}
+						      targetOrigin={{horizontal: 'left', vertical: 'top'}}
+						    >
+						    <MenuItem innerDivStyle={listStyle} primaryText="新建文件夹" onClick={this.toggleUploadFolder.bind(this,true)}/>
+							<MenuItem innerDivStyle={listStyle} primaryText="上传文件" onClick={this.openInputFile.bind(this)}/>
+							<MenuItem innerDivStyle={listStyle} primaryText="上传文件夹" onClick={this.openInputFolder.bind(this)}/>
+						</IconMenu>
+					</div>
+					<div >
+						<FilesTable/>
+						<Menu></Menu>
+					</div>
+				</Paper>
+				)
+      return <FilesTable key='file-table-content' />
+		}
+	}
+
+	getDetail() {
+		if (!this.props.state.view.detail) {
+			return null
+		}else {
+			return (
+				<Paper className='file-detail' style={{width:this.props.state.view.detail?'220px':'0px'}}>
+					<Detail></Detail>
+				</Paper>
+				)
+		}
+	}
+
+	getCreateFolderDialog() {
+		if (!this.props.state.view.dialogOfFolder) {
+			return null
+		}else {
+			let folderActions = [
+			<FlatButton
+				label="取消"
+				primary={true}
+				onTouchTap={this.toggleUploadFolder.bind(this,false)}
+				labelStyle={{color:'#000',fontSize:'15px'}}
+			/>,
+			<FlatButton
+				label="确认"
+				primary={true}
+				onTouchTap={this.upLoadFolder.bind(this)}
+				backgroundColor='#ef6c00'
+				labelStyle={{color:'#fff',fontSize:'16px'}}
+				hoverColor='#ef6c00'
+			/>,
+			]
+			return (
+				<Dialog
+					title="新建文件夹"
+					titleClassName='create-folder-dialog-title'
+					actions={folderActions}
+					modal={false}
+					open={this.props.state.view.dialogOfFolder}
+					className='create-folder-dialog'
+				       >
+				    <div className='create-folder-dialog-label'>名称</div>
+				    <TextField fullWidth={true} hintText="名称" id='folder-name'/>
+				</Dialog>
+			)
+		}
+	}
+
+	getShareDialog() {
+		if (!this.props.state.view.dialogOfShare) {
+			return null
+		}else {
+			//let shareUserList = this.props.state.login.obj.users.map((item,index)=>{
+      let shareUserList = this.props.state.node.server.users.map((item, index) => {
+						if (item.username == this.props.state.login.obj.username) {
+							return
+						}
+						return <Checkbox key={item.username} label={item.username} style={{marginBottom: 16}} labelPosition="left" onCheck={this.checkUser.bind(this,item.uuid)}/>
+					})
+			let shareActions = [
+				<FlatButton
+					label="取消"
+					primary={true}
+					onTouchTap={this.toggleShare.bind(this,false)}
+					labelStyle={{color:'#000',fontSize:'15px'}}
+				/>,
+				<FlatButton
+					label="确认"
+					primary={true}
+					onTouchTap={this.share.bind(this)}
+					backgroundColor='#ef6c00'
+					labelStyle={{color:'#fff',fontSize:'16px'}}
+					hoverColor='#ef6c00'
+				/>,
+			]
+
+			return (
+				<Dialog 
+					title='分享' 
+					titleClassName='create-folder-dialog-title'
+					actions={shareActions}
+					open={this.props.state.view.dialogOfShare}
+					className='create-folder-dialog'>
+					<div className='share-user-list-container'>
+					{shareUserList}
+					</div>
+				</Dialog>
+				)
+		}
+	}
+
+	//upload file
+	upLoadFile(e) {
+		let files = [];
+		let map = new Map();
+		let t = new Date();
+		let dirUUID = this.props.state.file.current.directory.uuid
+		for (let i=0;i<e.nativeEvent.target.files.length;i++) {
+			var f = e.nativeEvent.target.files[i]
+			var file = {
+				uploadTime : Date.parse(t), // nonsense TODO
+				parent : dirUUID,			// target
+				status:0,					// 0, 100 progress
+				uuid:null,					// return uuid
+				checked:false,				// not used
+				type:'file',				// file type (file or folder)
+				owner:[this.props.state.login.obj.uuid],	// not used
+				size:f.size,				// file size
+				path:f.path,				// file local path (with name)
+				name:f.name,				// file name (basename)
+			}
+			files.push(file);
+			map.set(f.path+Date.parse(t),files[files.length-1]);
+		}
+		let fileObj = {data:files,map:map,length:files.length,success:0,failed:0,index:0,status:'ready',parent:this.props.state.file.current.directory.uuid,key:Date.parse(new Date())};
+		this.props.dispatch(Action.addUpload(fileObj));
+		ipc.send('uploadFile',fileObj);	
+		this.props.dispatch(Action.setSnack(files.length+' 个文件添加到上传队列',true));
+	}
+
+	//get  bread
+	getBreadCrumb(){
+
+		var _this = this;
+		var path = this.props.state.file.current.path;
+		var pathArr = [];
+		pathArr = path.map((item,index)=>{
+			return(
+				<span key={index} style={{display:'flex',alignItems:'center'}} 
+          onClick={_this.selectBreadCrumb.bind(_this,item)}>
+					{ item.key!='' ? 
+              <span className='breadcrumb-text'>{item.key}</span> :
+              <span className='breadcrumb-home'></span>
+          }
+					<span className={index==path.length-1?'breadcrumb-arrow hidden':'breadcrumb-arrow'}></span>
+				</span>
+			)});
+		return pathArr;
+	}
+
+	//select bread crumb
+	selectBreadCrumb(obj) {
+		$('.bezierFrame').empty().append('<div class="bezierTransition1"></div><div class="bezierTransition2"></div>');
+		if (obj.key == '') {
+			// ipc.send('getRootData');
+			// this.props.dispatch(Action.filesLoading());
+      fileNav('HOME_DRIVE', null) 
+		}else {
+			this.props.dispatch(Action.cleanDetail());
+			// ipc.send('enterChildren',obj.value);
+      fileNav('HOME_DRIVE', obj.value.uuid)
+		}
+	}
+	//create new folder
+	upLoadFolder() {
+		let name = $('#folder-name')[0].value;
+		ipc.send('upLoadFolder',name,this.props.state.file.current.directory);
+		this.toggleUploadFolder(false);
+	}
+	//open input of files
+	openInputFile() {
+		// $('.upload-input').trigger('click');
+		ipc.send('uploadFile')
+	}
+	//toggle dialog of upload folder
+	openInputFolder() {
+		ipc.send('openInputOfFolder');
+	}
+	//toggle dialog of upload files
+	toggleUploadFolder(b) {
+		this.props.dispatch(Action.toggleDialogOfUploadFolder(b));
+	}
+
+	//toggle dialog of share
+	toggleShare(b) {
+		this.props.dispatch(Action.toggleShare(b));
+	}
+	//share files or folders
+	share() {
+		let files = []
+		let users = []
+		this.props.state.file.current.children.forEach(item => {
+			if (item.checked) {
+				files.push(item.uuid)
+			}
+		})
+		//this.props.state.login.obj.users.forEach((item,index)=>{
+    this.props.state.node.server.users.forEach((item, index) => {
+			if (item.checked) {
+				users.push(item.uuid);
+			}
+		})
+
+		if (users.length == 0) {
+			return
+		}
+		this.props.dispatch(Action.toggleShare(false));
+		this.props.dispatch(Action.cancelUserCheck());
+		
+		ipc.send('share',files,users);
+	}
+	// select users be shared
+	checkUser(uuid) {
+		this.props.dispatch(Action.checkUser(uuid))
+	}
+}
+**/
+// export default AllFiles
+
+///////////////////////////////////////////////////////////////////////////////
+
+const toolbarStyle = {
+
+  activeIcon: {
+    color: '#000', 
+    opacity: 0.54
+  },
+
+  inactiveIcon: {
+    color: '#000',
+    opacity: 0.26
+  },
+
+  whiteIcon: {
+    color: '#FFF',
+    opacity: 1
+  },
+  
+  hiddenIcon: {
+    color: '#FFF',
+    opacity: 0
+  }
+}
+
+const FileToolbar = ({
+  nudge,
+  title,
+  suppressed,
+  toggleLeftNav, 
+  children
+}) => {
+
+  return (
+    <Paper
+      style={{ 
+        position: 'absolute', width: '100%', height: 56,
+        backgroundColor: '#2196F3',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between' 
+      }} 
+      rounded={false} 
+      zDepth={suppressed ? 0 : 1}
+    >
+      <IconButton style={{marginLeft: 4}}
+        iconStyle={toolbarStyle.activeIcon} 
+        onTouchTap={toggleLeftNav}
+      > 
+        <NavigationMenu />
+      </IconButton>
+
+      <div style={{marginLeft: 20, fontSize: 21, whiteSpace: 'nowrap', color: '#FFF'}}>
+        {title}
+      </div>
+
+      <div style={{width: '100%', display: 'flex', justifyContent: 'flex-end'}}>
+        { children }
+      </div>
+
+      <div style={{width: nudge ? 48 : 0, height:48, transition: sharpCurve('width')}} />
+    </Paper>
+  )
+}
+
+const FileDetailToolbar = ({
+  nudge,
+  suppressed,
+  show,
+  children 
+}) => (
+
+    <Paper
+      style={{
+        position: 'absolute', 
+        width: '100%', height: 56, 
+        backgroundColor: '#1E88E5', // '#1976D2',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}
+      rounded={false} 
+      zDepth={suppressed ? 0 : 1}
+    >
+      <div style={{flex:1, display: 'flex', justifyContent:'flex-end'}}>
+        { show && children }
+      </div>
+      <div style={{width: nudge ? 48 : 0, height:48, transition: sharpCurve('width')}} />
+    </Paper>
+  )
 
 class AllFiles extends React.Component {
 
@@ -720,393 +1060,48 @@ class AllFiles extends React.Component {
       </div>
 		)
 	}
-
-  /////////////////////////////////////////////////////////////////////////////
-
-	//get table 
-	getTable() {
-
-		const listStyle = {
-			height: 48,
-			lineHeight:'48px'
-		}
-
-		if (this.props.state.file.view.state=='BUSY') {
-			return (<div className='data-loading '><CircularProgress/></div>)
-		} else {
-/**
-			return (
-				<Paper>
-					<input className='upload-input' type="file" onChange={this.upLoadFile.bind(this)} multiple={true}/>
-					<div onClick={e => console.log(e)}>
-						{this.getBreadCrumb()}
-						<IconMenu 
-						      iconButtonElement={<span style={{cursor:'pointer'}}>{svg.add()}</span>}
-						      anchorOrigin={{horizontal: 'left', vertical: 'top'}}
-						      targetOrigin={{horizontal: 'left', vertical: 'top'}}
-						    >
-						    <MenuItem innerDivStyle={listStyle} primaryText="新建文件夹" onClick={this.toggleUploadFolder.bind(this,true)}/>
-							<MenuItem innerDivStyle={listStyle} primaryText="上传文件" onClick={this.openInputFile.bind(this)}/>
-							<MenuItem innerDivStyle={listStyle} primaryText="上传文件夹" onClick={this.openInputFolder.bind(this)}/>
-						</IconMenu>
-					</div>
-					<div >
-						<FilesTable/>
-						<Menu></Menu>
-					</div>
-				</Paper>
-				)
-**/
-      return <FilesTable key='file-table-content' />
-		}
-	}
-
-	getDetail() {
-		if (!this.props.state.view.detail) {
-			return null
-		}else {
-			return (
-				<Paper className='file-detail' style={{width:this.props.state.view.detail?'220px':'0px'}}>
-					<Detail></Detail>
-				</Paper>
-				)
-		}
-	}
-
-	getCreateFolderDialog() {
-		if (!this.props.state.view.dialogOfFolder) {
-			return null
-		}else {
-			let folderActions = [
-			<FlatButton
-				label="取消"
-				primary={true}
-				onTouchTap={this.toggleUploadFolder.bind(this,false)}
-				labelStyle={{color:'#000',fontSize:'15px'}}
-			/>,
-			<FlatButton
-				label="确认"
-				primary={true}
-				onTouchTap={this.upLoadFolder.bind(this)}
-				backgroundColor='#ef6c00'
-				labelStyle={{color:'#fff',fontSize:'16px'}}
-				hoverColor='#ef6c00'
-			/>,
-			]
-			return (
-				<Dialog
-					title="新建文件夹"
-					titleClassName='create-folder-dialog-title'
-					actions={folderActions}
-					modal={false}
-					open={this.props.state.view.dialogOfFolder}
-					className='create-folder-dialog'
-				       >
-				    <div className='create-folder-dialog-label'>名称</div>
-				    <TextField fullWidth={true} hintText="名称" id='folder-name'/>
-				</Dialog>
-			)
-		}
-	}
-
-	getShareDialog() {
-		if (!this.props.state.view.dialogOfShare) {
-			return null
-		}else {
-			//let shareUserList = this.props.state.login.obj.users.map((item,index)=>{
-      let shareUserList = this.props.state.node.server.users.map((item, index) => {
-						if (item.username == this.props.state.login.obj.username) {
-							return
-						}
-						return <Checkbox key={item.username} label={item.username} style={{marginBottom: 16}} labelPosition="left" onCheck={this.checkUser.bind(this,item.uuid)}/>
-					})
-			let shareActions = [
-				<FlatButton
-					label="取消"
-					primary={true}
-					onTouchTap={this.toggleShare.bind(this,false)}
-					labelStyle={{color:'#000',fontSize:'15px'}}
-				/>,
-				<FlatButton
-					label="确认"
-					primary={true}
-					onTouchTap={this.share.bind(this)}
-					backgroundColor='#ef6c00'
-					labelStyle={{color:'#fff',fontSize:'16px'}}
-					hoverColor='#ef6c00'
-				/>,
-			]
-
-			return (
-				<Dialog 
-					title='分享' 
-					titleClassName='create-folder-dialog-title'
-					actions={shareActions}
-					open={this.props.state.view.dialogOfShare}
-					className='create-folder-dialog'>
-					<div className='share-user-list-container'>
-					{shareUserList}
-					</div>
-				</Dialog>
-				)
-		}
-	}
-
-	//upload file
-	upLoadFile(e) {
-		let files = [];
-		let map = new Map();
-		let t = new Date();
-		let dirUUID = this.props.state.file.current.directory.uuid
-		for (let i=0;i<e.nativeEvent.target.files.length;i++) {
-			var f = e.nativeEvent.target.files[i]
-			var file = {
-				uploadTime : Date.parse(t), // nonsense TODO
-				parent : dirUUID,			// target
-				status:0,					// 0, 100 progress
-				uuid:null,					// return uuid
-				checked:false,				// not used
-				type:'file',				// file type (file or folder)
-				owner:[this.props.state.login.obj.uuid],	// not used
-				size:f.size,				// file size
-				path:f.path,				// file local path (with name)
-				name:f.name,				// file name (basename)
-			}
-			files.push(file);
-			map.set(f.path+Date.parse(t),files[files.length-1]);
-		}
-		let fileObj = {data:files,map:map,length:files.length,success:0,failed:0,index:0,status:'ready',parent:this.props.state.file.current.directory.uuid,key:Date.parse(new Date())};
-		this.props.dispatch(Action.addUpload(fileObj));
-		ipc.send('uploadFile',fileObj);	
-		this.props.dispatch(Action.setSnack(files.length+' 个文件添加到上传队列',true));
-	}
-
-	//get  bread
-	getBreadCrumb(){
-
-		var _this = this;
-		var path = this.props.state.file.current.path;
-		var pathArr = [];
-		pathArr = path.map((item,index)=>{
-			return(
-				<span key={index} style={{display:'flex',alignItems:'center'}} 
-          onClick={_this.selectBreadCrumb.bind(_this,item)}>
-					{ item.key!='' ? 
-              <span className='breadcrumb-text'>{item.key}</span> :
-              <span className='breadcrumb-home'></span>
-          }
-					<span className={index==path.length-1?'breadcrumb-arrow hidden':'breadcrumb-arrow'}></span>
-				</span>
-			)});
-		return pathArr;
-	}
-
-	//select bread crumb
-	selectBreadCrumb(obj) {
-		$('.bezierFrame').empty().append('<div class="bezierTransition1"></div><div class="bezierTransition2"></div>');
-		if (obj.key == '') {
-			// ipc.send('getRootData');
-			// this.props.dispatch(Action.filesLoading());
-      fileNav('HOME_DRIVE', null) 
-		}else {
-			this.props.dispatch(Action.cleanDetail());
-			// ipc.send('enterChildren',obj.value);
-      fileNav('HOME_DRIVE', obj.value.uuid)
-		}
-	}
-	//create new folder
-	upLoadFolder() {
-		let name = $('#folder-name')[0].value;
-		ipc.send('upLoadFolder',name,this.props.state.file.current.directory);
-		this.toggleUploadFolder(false);
-	}
-	//open input of files
-	openInputFile() {
-		// $('.upload-input').trigger('click');
-		ipc.send('uploadFile')
-	}
-	//toggle dialog of upload folder
-	openInputFolder() {
-		ipc.send('openInputOfFolder');
-	}
-	//toggle dialog of upload files
-	toggleUploadFolder(b) {
-		this.props.dispatch(Action.toggleDialogOfUploadFolder(b));
-	}
-
-	//toggle dialog of share
-	toggleShare(b) {
-		this.props.dispatch(Action.toggleShare(b));
-	}
-	//share files or folders
-	share() {
-		let files = []
-		let users = []
-		this.props.state.file.current.children.forEach(item => {
-			if (item.checked) {
-				files.push(item.uuid)
-			}
-		})
-		//this.props.state.login.obj.users.forEach((item,index)=>{
-    this.props.state.node.server.users.forEach((item, index) => {
-			if (item.checked) {
-				users.push(item.uuid);
-			}
-		})
-
-		if (users.length == 0) {
-			return
-		}
-		this.props.dispatch(Action.toggleShare(false));
-		this.props.dispatch(Action.cancelUserCheck());
-		
-		ipc.send('share',files,users);
-	}
-	// select users be shared
-	checkUser(uuid) {
-		this.props.dispatch(Action.checkUser(uuid))
-	}
-}
-
-// export default AllFiles
-
-///////////////////////////////////////////////////////////////////////////////
-
-const FileToolbar = ({showAppBar, showDetail, toggleLeftNav}) => {
-
-  return (
-    <Paper id='layout-middle-container-upper' 
-      style={{ 
-        position: 'absolute', width: '100%', height: 56,
-        backgroundColor: '#2196F3',
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'space-between' 
-      }} 
-      rounded={false} 
-      zDepth={showAppBar ? 0 : 1}
-    >
-      <IconButton id='file-toolbar-menu-icon' key='toolbar-menu' 
-        style={{marginLeft: 4}}
-        iconStyle={{color: '#000', opacity:0.54}} 
-        onTouchTap={() => toggleLeftNav()}
-      > 
-        <NavigationMenu />
-      </IconButton>
-
-      <div key='toolbar-title' style={{marginLeft: 20, fontSize: 21, whiteSpace: 'nowrap', color: '#FFF' }}>文件</div>
-
-      <div key='toolbar-spacer-middle' style={{width: '100%'}} />
-
-      <IconButton iconStyle={{color: '#000', opacity: 0.54}}>
-        <FileCreateNewFolder />
-      </IconButton>
-
-      <IconButton iconStyle={{color: showDetail ? '#FFF' : '#000', opacity: showDetail ? 1 : 0.54}} 
-        onTouchTap={() => window.store.dispatch({ type: 'TOGGLE_SOMETHING' })}>
-        <ActionInfo />
-      </IconButton> 
-
-      <div style={{width: (showAppBar || showDetail) ? 0 : 48, height:48, transition: 'width 150ms'}} />
-
-    </Paper>
-  )
-}
-
-class FileDetailToolbar extends React.Component {
-
-  constructor(props) {
-    super(props)
-  }
-
-  render() {
-    const { showAppBar, showBanner, nudgeBanner } = this.props
-    return (
-      <Paper id='layout-right-container-upper' 
-        style={{
-          position: 'absolute', 
-          width: '100%', height: 56, 
-
-          backgroundColor:'#1976D2',
-
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-        rounded={false} 
-        zDepth={showAppBar ? 0 : 1}
-      >
-        <div style={{flex: '1'}} />
-        <IconButton style={{opacity: showBanner ? 0.54 : 0}}><ActionInfo /></IconButton>
-        <div style={{width: nudgeBanner ? 48 : 0, height:48, transition: 'width 150ms'}} />
-      </Paper>
-    )
-  }
 }
 
 class FileApp extends React.Component {
 
+  // maximized, resizing, nudge
   constructor(props) {
+
     super(props)
-    this.state = this.propsToState(props)
-    this.toggleLeftNavBound = this.toggleLeftNav.bind(this)
+
+    this.state = {
+      showDetail: false,
+      leftNav: true,
+      detailResizing: false
+    }
+
+    // avoid binding
+    this.toggleDetail = () => {
+      this.setState(Object.assign({}, this.state, { 
+        detailResizing: true, 
+        showDetail: !this.state.showDetail 
+      }))
+      setTimeout(() => this.setState(Object.assign({}, this.state, { 
+        detailResizing: false
+      })), sharpCurveDelay)
+    }
+
+    this.toggleLeftNav = () => {
+      this.setState(Object.assign({}, this.state, { leftNav: !this.state.leftNav }))
+    }
   }
-
-  // functional
-  propsToState(props) {
-
-   let state = {
-      showAppBar: props.showAppBar,
-      showDetail: props.showDetail,
-      nudgeBanner: !props.showAppBar && !props.showDetail
-    } 
-
-    if (props.showDetail) {
-      state.detailShowBanner = true
-      state.detailNudgeBanner = !props.showAppBar
-    }
-
-    if (!this.state) {
-      state.leftNav = false
-    }
-    else {
-      state.leftNav = this.state.leftNav
-    }
-
-    return state
-  }
-
-  toggleLeftNav() {
-    this.setState(Object.assign({}, this.state, { leftNav: !this.state.leftNav }))
-  }
-
-  // state delay
-  componentWillReceiveProps(nextProps) {
-
-    let nextState = this.propsToState(nextProps)
-
-    if (this.state.showDetail === false && nextProps.showDetail === true) {
-      this.setState(Object.assign({}, nextState, { detailShowBanner: false }))
-      return setTimeout(() => this.setState(nextState), 450)
-    }
-    else if (this.state.showDetail === true && nextProps.showDetail === false) {
-      this.setState(Object.assign({}, this.state, { detailShowBanner: false }))
-      return setTimeout(() => this.setState(nextState), 450)
-    }
-    
-    this.setState(nextState)
-  } 
 
   render() {
 
     const detailWidth = 500
-    const { showAppBar, showDetail } = this.props
+    const showDetail = this.state.showDetail
+    const { showAppBar } = this.props
 
     return (
     <div style={this.props.style} >
-      <div id='layout-main-container' 
-        style={{ height: '100%', backgroundColor:'blue' }}
-      >
+      <div style={{ height: '100%', backgroundColor:'blue', 
+        display: 'flex', justifyContent: 'space-between' }}>
+
         { false && ( // don't delete me, floating left nav
         <Paper style={{
           width: 280, 
@@ -1121,24 +1116,35 @@ class FileApp extends React.Component {
           { renderLeftNav() }
         </Paper> ) }
 
-        {/* this.state.leftNav && <div style={{position: 'absolute', width: '100%', height: '100%', backgroundColor: 'black', zIndex: 999, opacity:0.05}} onTouchTap={this.toggleLeftNavBound} /> */}
-
         <div id='layout-middle-container' 
           style={{
             position: 'absolute',
-
             backgroundColor: 'red',
-
-            // imporant! using props (next)
-            width: this.props.showDetail ? `calc(100% - ${detailWidth}px)` : '100%', 
-            transition: 'width 300ms',
+            width: this.state.showDetail ? `calc(100% - ${detailWidth}px)` : '100%', 
+            transition: sharpCurve('width'),
             height:'100%'
           }}
         >
           {/* important ! */}
           <Divider />
 
-          <FileToolbar showAppBar={showAppBar} showDetail={showDetail} toggleLeftNav={this.toggleLeftNavBound} />
+          <FileToolbar 
+            nudge={this.props.nudge && !this.state.showDetail}
+            title='文件'
+            suppressed={!this.props.maximized}
+            toggleLeftNav={this.toggleLeftNav} 
+          >
+            <IconButton iconStyle={toolbarStyle.activeIcon}>
+              <FileCreateNewFolder />
+            </IconButton>
+
+            <IconButton 
+              iconStyle={ this.state.showDetail ? toolbarStyle.whiteIcon : toolbarStyle.activeIcon } 
+              onTouchTap={this.toggleDetail}
+            >
+              <ActionInfo />
+            </IconButton> 
+          </FileToolbar>
 
           <div id='layout-middle-container-spacer' style={{height: 56}} />
 
@@ -1154,7 +1160,7 @@ class FileApp extends React.Component {
               width: LEFTNAV_WIDTH,
               height: '100%',
               left: this.state.leftNav ? 0 : -LEFTNAV_WIDTH,
-              transition: 'left 150ms cubic-bezier(0.4, 0.0, 0.6, 1)'
+              transition: sharpCurve('left')
             }}>
               <Menu autoWidth={false} listStyle={{width: LEFTNAV_WIDTH}}>
                 <MenuItem style={{fontSize: 14}} primaryText='我的文件' leftIcon={<DeviceStorage />} animation={null}/>
@@ -1170,15 +1176,14 @@ class FileApp extends React.Component {
             <div style={{
               // for suppressed leftNav, TODO
               marginLeft: this.state.leftNav ? LEFTNAV_WIDTH : 0, 
-              transition: 'margin-left 150ms cubic-bezier(0.4, 0.0, 0.6, 1)',
+              transition: sharpCurve('margin-left'),
 
               width: '100%', 
               height: '100%', 
               backgroundColor:'yellow', 
-              // overflow: 'auto'
             }}>
               {/* <Content dispatch={window.store.dispatch} state={storeState()}/> */}
-              <AllFiles dispatch={window.store.dispatch} state={window.store.getState()}/>
+              <AllFiles />
             </div>
           </div>
 
@@ -1189,12 +1194,22 @@ class FileApp extends React.Component {
             height: '100%', 
             backgroundColor: '#EBEBEB', 
             position: 'absolute', 
-            right: showDetail ? 0 : -detailWidth, 
-            transition: 'right 150ms cubic-bezier(0.4, 0.0, 0.6, 1)'
+            right: this.state.showDetail ? 0 : -detailWidth, 
+            transition: sharpCurve('right')
         }}>
           <Divider />
-
-          { this.state.showDetail && <FileDetailToolbar showAppBar={this.state.showAppBar} showBanner={this.state.detailShowBanner} nudgeBanner={this.state.detailNudgeBanner} /> }
+          <FileDetailToolbar 
+            nudge={this.props.nudge} 
+            suppressed={!this.props.maximized}
+            show={!this.state.detailResizing}
+          > 
+            <IconButton 
+              iconStyle={toolbarStyle.activeIcon}
+              onTouchTap={this.toggleDetail}
+            >
+              <NavigationClose />
+            </IconButton>
+          </FileDetailToolbar>
         </div>
       </div>
     </div>

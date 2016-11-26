@@ -20,18 +20,19 @@ import NavigationExpandMore from 'material-ui/svg-icons/navigation/expand-more'
 import ActionSettings from 'material-ui/svg-icons/action/settings'
 import ActionAccountCircle from 'material-ui/svg-icons/action/account-circle'
 
+import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
 
 import { fileNav } from '../../lib/file'
+
+
 import FileApp from '../file/FileApp'
 
+//import CSS
+import css  from  '../../../assets/css/main';
 
-import LeftNav from './LeftNav';
 
 
 const storeState = () => window.store.getState()
-
-
-const toggleAppBar = () => window.store.dispatch({ type: 'TOGGLE_APPBAR' })
 
 
 const renderLeftNav = () => (
@@ -48,19 +49,13 @@ const renderLeftNav = () => (
     </Menu> 
   )
 
-const motionSharpCurveDuration = 150
-const motionSharpCurve = (prop) => `${prop} ${motionSharpCurveDuration}ms cubic-bezier(0.4, 0.0, 0.6, 1)`
+const TopBar = (props) => (
 
-const TopBar = ({style, showAppBar}) => (
-
-  <div style={style}>
+  <div style={props.style}>
     <Paper style={{ 
       height: '100%', backgroundColor: '#FFF',
       display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-    }}
-    zDepth={3}
-    >
-
+    }}>
       <div style={{marginLeft: 72, width: (210 - 72), fontSize: 16, opacity:0.54}}>闻上云管家</div>
       
       <Avatar style={{marginRight: 16, flex: '0 0 32px'}} src="../src/assets/custom/images/romantic_dog.jpg" size={32} />
@@ -83,58 +78,74 @@ const TopBar = ({style, showAppBar}) => (
   </div>
 )
 
+const toggleAppBar = () => window.store.dispatch({ type: 'TOGGLE_APPBAR' })
+
+
 class Main extends React.Component {
 
 	constructor(props) {
-    super(props);
-    this.state = { showAppBar: props.showAppBar }
-  }
+    super(props)
 
-  componentWillReceiveProps(nextProps) {
-    
+    this.state = { 
+      showAppBar: true, 
+      resizing: false
+    }
+
+    this.toggleAppBar = () => {
+      this.setState({
+        showAppBar: !this.state.showAppBar,
+        resizing: true
+      })
+      setTimeout(() => this.setState({
+        resizing: false
+      }), sharpCurveDuration * 2)
+    }
   }
 
 	render() {
 
     const topBarHeight = 48
-    const showAppBar = window.store.getState().view.showAppBar
+    const showAppBar = this.state.showAppBar
   
     return (
 
       <div style={{width: '100%', height: '100%'}}>
 
         <div style={{position: 'absolute', top: 0, left: 0, width: '100%', height: '100%'}}>
-          <TopBar 
-            style= {{
+
+          <TopBar style= {{
               position: 'absolute', 
               width: '100%', 
               height: topBarHeight, 
-              top: this.props.showAppBar ? 0 : -topBarHeight,
-              transition: motionSharpCurve('top'),
-            }} 
-            showAppBar={showAppBar} />
+              top: showAppBar ? 0 : -topBarHeight,
+              transition: sharpCurve('top'),
+          }}/>
 
           <FileApp 
             style={{
               position: 'absolute', 
               width: '100%', 
-              top: this.props.showAppBar ? topBarHeight : 0, 
-              height: this.props.showAppBar ? `calc(100% - ${topBarHeight}px)` : '100%', 
-              transition: motionSharpCurve('top'),
+              top: showAppBar ? topBarHeight : 0, 
+              height: showAppBar ? `calc(100% - ${topBarHeight}px)` : '100%', 
+              transition: sharpCurve('all'),
             }}
-            showAppBar={showAppBar} />
+            
+            maximized={!showAppBar}
+            resizing={this.state.resizing}
+            nudge={!showAppBar}
+          />
         </div>
 
         <IconButton 
           style={{position: 'absolute', 
             top: showAppBar ? (topBarHeight - 48) / 2 : (56 - 48 ) / 2,
-            transition: motionSharpCurve('top'),
+            transition: sharpCurve('top'),
             right: 0,
             zIndex: 10000
           }}
 
           iconStyle={{opacity: 0.54}} 
-          onTouchTap={toggleAppBar} 
+          onTouchTap={this.toggleAppBar} 
         >
           { showAppBar ? <NavigationExpandLess /> : <NavigationExpandMore /> }
         </IconButton>
