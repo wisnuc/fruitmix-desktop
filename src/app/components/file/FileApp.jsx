@@ -42,6 +42,7 @@ import ActionInfo from 'material-ui/svg-icons/action/info'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import NavigationClose from 'material-ui/svg-icons/navigation/close'
 import NavigationCancel from 'material-ui/svg-icons/navigation/cancel'
+import NavigationChevronRight from 'material-ui/svg-icons/navigation/chevron-right'
 
 import { Divider, Paper, Menu, MenuItem, Dialog, 
   FlatButton, TextField, Checkbox, CircularProgress } from 'material-ui'
@@ -71,71 +72,7 @@ const FONT_BRIGHTOP2 = '70%'
 
 const stm = () => window.store.getState().file.stm
 
-
 ///////////////////////////////////////////////////////////////////////////////
-
-class PopMenu extends React.Component {
-
-  constructor(props) {
-    super(props)
-    this.state = {
-      open: false,
-    }
-  
-    this.handleRequestClose = () => {
-      this.setState({
-        open: false,
-      })
-    }
-
-  }
-
-  componentDidMount() {
-    debug('popmenu did mount')
-  }
-
-  componentWillUnmount() {
-    debug('popmenu will unmount')
-  }
-
-  render() {
-
-    debug('popmenu render', this.state, this.fired)
-
-    return (
-      <div>
-        <div style={{width:'100%', height:'100%'}} 
-          ref={element => {
-            if (element) element.click()
-          }} 
-
-          onClick = {e => {
-            console.log(e)
-            this.setState({
-              open: true,
-              anchorEl: e.currentTarget 
-            })
-          }}
-        />
-
-        <Popover
-          open={this.state.open}
-          anchorEl={this.state.anchorEl}
-          anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
-          targetOrigin={{horizontal: 'left', vertical: 'top'}}
-          onRequestClose={this.handleRequestClose}
-        >
-          <Menu>
-            <MenuItem primaryText="Refresh" />
-            <MenuItem primaryText="Help &amp; feedback" />
-            <MenuItem primaryText="Settings" />
-            <MenuItem primaryText="Sign out" />
-          </Menu>
-        </Popover>        
-      </div>
-    )
-  }
-}
 
 const formatTime = (mtime) => {
 
@@ -164,8 +101,8 @@ const formatSize = (size) => {
     return (size/1024/1024/1024).toFixed(2)+ ' G'
 }
 
+const FileTableRow = ({
 
-const DataRow = ({
   uuid,
   index,
   name,
@@ -173,11 +110,8 @@ const DataRow = ({
   mtime,
   size,
 
-  selecting,
   editing,
-
   selected,
-  specified,
   hover,
 
   leading,
@@ -188,20 +122,19 @@ const DataRow = ({
   onClick,
   onDoubleClick,
   onRightClick
+
 }) => {
 
   let style = {
-
     row: {
+
       width: '100%',
       flex: '0 0 40px',
 
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'flex-start',
-
       backgroundColor: (hover || leading === 'active') ? '#EEEEEE' : selected ? '#F5F5F5' : '#FFF',
-
       color: '#000',
       opacity: 0.87
     },
@@ -223,21 +156,20 @@ const DataRow = ({
   }
 
   const secondaryColor = '#FF4081'
-
   const renderLeading = () => {
 
     let height = '100%', backgroundColor = '#FFF', opacity = 0
 
     switch(leading) {
     case 'inactive':
-      height = 24
+      height = 20
       backgroundColor = '#000'
       opacity = 0.26
       break
     case 'activating':
-      height = 24
-      backgroundColor = '#000'
-      opacity = 0.26
+      height = 20
+      backgroundColor = secondaryColor
+      opacity = 1
       break
     case 'active':
       backgroundColor = secondaryColor
@@ -248,65 +180,49 @@ const DataRow = ({
     return <div style={{ flex: '0 0 4px', height, backgroundColor, opacity, zIndex:1000 }} /> 
   }
 
-  return (
+  const renderCheckBox = () => 
+    (check === 'checked' || check === 'unchecking') ? 
+      <ActionCheckCircle style={{color: secondaryColor, opacity: 1, zIndex:1000}} /> :
+        check === 'checking' ? <NavigationCheck style={{color: '#000', opacity: 0.26}} /> : null 
 
+  const renderIcon = () => 
+    type === 'folder' ?  
+      <FileFolder style={{color: '#000', opacity: 0.54}} /> : 
+        <EditorInsertDriveFile style={{color: '#000', opacity: 0.54}} />
+
+  return (
     <div style={style.row}
       onMouseEnter = {() => onMouseEnter(index)}
       onMouseLeave = {() => onMouseLeave(index)}
       onClick = {e => onClick(uuid, e)}
-      onDoubleClick = {e => onDoubleClick(uuid, e)}
+      onDoubleClick = {e => { type === 'folder' && fileNav('HOME_DRIVE', uuid) }}
       onTouchTap = {e => e.nativeEvent.button === 2 && onRightClick(uuid, e.nativeEvent)}
     >
-
-      { 
-        // 4px width
-        renderLeading() 
-      } 
-
+        { renderLeading() } 
       <div style={{flex: '0 0 12px'}} />
-
-      <div style={{flex: '0 0 48px', display: 'flex', alignItems: 'center'}} >
-        {
-          (check === 'checked' || check === 'unchecking') ? <ActionCheckCircle style={{color: secondaryColor, opacity: 1, zIndex:1000}} /> :
-          check === 'checking' ? <NavigationCheck style={{color: '#000', opacity: 0.26}} /> : null
-        }
+      <div style={{flex: '0 0 48px', display: 'flex', alignItems: 'center'}}>
+        { renderCheckBox() }
       </div>
-      
       <div style={{flex: '0 0 8px'}} />
-
       <div style={{flex: '0 0 48px', display: 'flex', alignItems: 'center'}} >
-        {
-          type === 'folder' ?  
-            <FileFolder style={{color: '#000', opacity: 0.54}} /> : 
-              <EditorInsertDriveFile style={{color: '#000', opacity: 0.54}} />
-        }
+        { renderIcon() }
       </div>
-
-      {/* name column */}
-      <div style={{width:'100%'}} >
-        { editing ? 
-          <TextField 
-            hintText={name} 
+      <div style={{width:'100%'}}> { 
+        editing ? 
+          <TextField defaultValue={name} 
             fullWidth={true} 
-            ref={ input => { input && input.focus() }}
-            onBlur={() => window.store.dispatch({
-              type: 'FILE_ROW_NAME_ONBLUR',
-              data: uuid
-            })}
-          /> : <span style={{fontSize: 14, opacity:0.87}}>{name}</span> 
-        }
-      </div>
-
-      {/* time column */}
+            ref={ input => { input && input.focus() }} 
+            onBlur={() => window.store.dispatch({ type: 'FILE_ROW_NAME_ONBLUR', data: uuid })} 
+          /> : <div style={{fontSize: 14, opacity:0.87}}>{name}</div> 
+      }</div>
       <div style={style.time}>{formatTime(mtime)}</div>
-
-      {/* size column */}
       <div style={style.size}>{formatSize(size)}</div>
     </div>
   )
 }
 
-  /////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
 /**
 	//get table 
 	getTable() {
@@ -581,6 +497,7 @@ const toolbarStyle = {
 const FileToolbar = ({
   nudge,
   title,
+  breadCrumb,
   suppressed,
   toggleLeftNav, 
   children
@@ -603,8 +520,14 @@ const FileToolbar = ({
         <NavigationMenu />
       </IconButton>
 
-      <div style={{marginLeft: 20, fontSize: 21, whiteSpace: 'nowrap', color: '#FFF'}}>
+      {/**
+      <div style={{marginLeft: 20, flex: '0 0 138px', fontSize: 21, whiteSpace: 'nowrap', color: '#FFF'}}>
         {title}
+      </div>
+      **/}
+
+      <div style={{display: 'flex', alignItems: 'center', fontSize: 21, color: '#FFF'}}>
+        <FlatButton>hello</FlatButton><NavigationChevronRight style={{margin: 8}} color='white' /><div>world</div>
       </div>
 
       <div style={{width: '100%', display: 'flex', justifyContent: 'flex-end'}}>
@@ -642,24 +565,45 @@ const FileDetailToolbar = ({
     </Paper>
   )
 
-class AllFiles extends React.Component {
+class FileApp extends React.Component {
 
   constructor(props) {
 
     super(props)
 
     this.state = { 
+
       file: null, 
+
+      showDetail: false,
+      leftNav: true,
+      detailResizing: false,
 
       ctrl: false, 
       shift: false,
 
       clientX: 0,
       clientY: 0, 
-
       contextMenu: false,
     }
 
+    // avoid binding
+    this.toggleDetail = () => {
+      this.setState(Object.assign({}, this.state, { 
+        detailResizing: true, 
+        showDetail: !this.state.showDetail 
+      }))
+      setTimeout(() => this.setState(Object.assign({}, this.state, { 
+        detailResizing: false
+      })), sharpCurveDelay)
+    }
+
+    this.toggleLeftNav = () => {
+      this.setState(Object.assign({}, this.state, { leftNav: !this.state.leftNav }))
+    }
+
+    // this.selectBread
+     
     this.rowMouseEnterBound = this.rowMouseEnter.bind(this)
     this.rowMouseLeaveBound = this.rowMouseLeave.bind(this)
     this.rowClickBound = this.rowClick.bind(this)
@@ -747,9 +691,11 @@ class AllFiles extends React.Component {
     this.unsubscribe && this.state.unsubscribe()
   }
 
+/**
   shouldComponentUpdate(nextProps, nextState) {
     return nextState !== this.state
   }
+**/
 
   nodeUpdate(newFile) {
 
@@ -817,6 +763,81 @@ class AllFiles extends React.Component {
         ...state.list.slice(index + 1)
       ]
     }))
+  } 
+
+  rowShiftClick(uuid, e) {
+
+    let list, nextState
+    let begin = this.state.list.findIndex(item => item.specified)
+    if (begin !== -1) { // specified
+      let end = this.state.list.findIndex(item => item.uuid === uuid)
+
+      if (begin === end) // user unspecify
+        list = [
+          ...this.state.list.slice(0, begin),
+          Object.assign({}, this.state.list[begin], { specified: false }),
+          ...this.state.list.slice(begin + 1)
+        ]
+      else 
+        list = this.state.list.map((item, index, arr) => {
+          if ((index >= begin && index <= end) || (index <=begin && index >= end)) {
+            if (item.specified)
+              return Object.assign({}, item, { specified: false, selected: true })
+            if (!item.selected) 
+              return Object.assign({}, item, { selected: true })
+          }
+          return item
+        }) 
+    }
+    else { // not specified
+      list = this.state.list.map(item => {
+        if (item.uuid === uuid) 
+          return Object.assign({}, item, { specified: true, selected: true }) 
+        else 
+          return item
+      })
+    }
+    nextState = Object.assign({}, this.state, { list, ctrl: e.ctrlKey, shift: e.shiftKey })
+    return this.setState(nextState)
+  }
+
+  rowCtrlClick(uuid, e) {
+
+    let list, nextState
+    list = this.state.list.map(item => {
+      if (item.uuid === uuid) // target, toggle selected, set specified the same with selected !!!
+        return Object.assign({}, item, { specified: !item.selected, selected: !item.selected })
+      else if (item.specified) // non-target
+        return Object.assign({}, item, { specified: false })
+      else  
+        return item 
+    })
+
+    nextState = Object.assign({}, this.state, { list })
+    this.setState(nextState)
+  }
+
+  rowJustClick(uuid, e) {
+
+    let list, nextState
+    // normal: set target exclusively specified, set target exclusively selected
+    list = this.state.list.map(item => {
+      if (item.uuid === uuid) {  // target
+        if (item.selected && item.specified) 
+          return item
+        else
+          return Object.assign({}, item, { specified: true, selected: true })
+      }
+      else { // not target
+        if (item.selected || item.specified)
+          return Object.assign({}, item, { specified: false, selected: false })
+        else 
+          return item
+      }
+    })
+
+    nextState = Object.assign({}, this.state, { list, ctrl: e.ctrlKey, shift: e.shiftKey })
+    this.setState(nextState)
   }
 
   // mutate item, return new list
@@ -824,95 +845,96 @@ class AllFiles extends React.Component {
 
     debug('row click', e, e.ctrlKey, e.shiftKey)
 
-    let list, nextState
-
-    if (e.shiftKey) {
-      let begin = this.state.list.findIndex(item => item.specified)
-      if (begin !== -1) { // specified
-        let end = this.state.list.findIndex(item => item.uuid === uuid)
-
-        if (begin === end) // user unspecify
-          list = [
-            ...this.state.list.slice(0, begin),
-            Object.assign({}, this.state.list[begin], { specified: false }),
-            ...this.state.list.slice(begin + 1)
-          ]
-        else 
-          list = this.state.list.map((item, index, arr) => {
-            if ((index >= begin && index <= end) || (index <=begin && index >= end)) {
-              if (item.specified)
-                return Object.assign({}, item, { specified: false, selected: true })
-              if (!item.selected) 
-                return Object.assign({}, item, { selected: true })
-            }
-            return item
-          }) 
-      }
-      else { // not specified
-        list = this.state.list.map(item => {
-          if (item.uuid === uuid) 
-            return Object.assign({}, item, { specified: true, selected: true }) 
-          else 
-            return item
-        })
-      }
-      nextState = Object.assign({}, this.state, { list, ctrl: e.ctrlKey, shift: e.shiftKey })
-      return this.setState(nextState)
-
-    }
-    else if (e.ctrlKey === true) {
-
-      list = this.state.list.map(item => {
-        if (item.uuid === uuid) // target, toggle selected, set specified the same with selected !!!
-          return Object.assign({}, item, { specified: !item.selected, selected: !item.selected })
-        else if (item.specified) // non-target
-          return Object.assign({}, item, { specified: false })
-        else  
-          return item 
-      })
-
-      nextState = Object.assign({}, this.state, { list })
-      this.setState(nextState)
-    }
-    else {
-      // normal: set target exclusively specified, set target exclusively selected
-      let list = this.state.list.map(item => {
-        if (item.uuid === uuid) {  // target
-          if (item.selected && item.specified) 
-            return item
-          else
-            return Object.assign({}, item, { specified: true, selected: true })
-        }
-        else { // not target
-          if (item.selected || item.specified)
-            return Object.assign({}, item, { specified: false, selected: false })
-          else 
-            return item
-        }
-      })
-
-      nextState = Object.assign({}, this.state, { list, ctrl: e.ctrlKey, shift: e.shiftKey })
-      this.setState(nextState)
-    }
+    if (e.shiftKey) 
+      return this.rowShiftClick(uuid, e) 
+    else if (e.ctrlKey === true)
+      return this.rowCtrlClick(uuid, e)
+    else 
+      return this.rowJustClick(uuid, e)
   }
 
   rowDoubleClick(uuid, e) {
     
+      
   }
 
-  rowRightClick(index, e) {
+  rowRightClick(uuid, e) {
 
     // e is native event
-    debug('row right click', e.clientX, e.clientY)
+    debug('row right click', uuid, e.ctrlKey, e.shiftKey, e.clientX, e.clientY)
 
-    if (this.state.ctrl || this.state.shift) return
-          
-    this.setState(Object.assign({}, this.state, { 
-      clientX: e.clientX, 
-      clientY: e.clientY,
-      contextMenu: true
-    }))  
+    if (e.shiftKey) {
+      let specified = this.state.list.findIndex(item => item.specified) 
+      if (specified !== -1) {
+        let list = [
+          ...this.state.list.slice(0, specified),
+          Object.assign({}, this.state.list[specified], { specified: false }),
+          ...this.state.list.slice(specified + 1)
+        ]
+      
+        let nextState = Object.assign({}, this.state, { list, ctrl: e.ctrlKey, shift: e.shiftKey })
+        return this.setState(nextState)
+      }
+      else {
+        // similar with rowCtrlClick but not changing specified
+        let list, nextState
+        list = this.state.list.map(item => {
+          if (item.uuid === uuid) // target, toggle selected, set specified the same with selected !!!
+            return Object.assign({}, item, { selected: !item.selected })
+          else  
+            return item 
+        })
+
+        nextState = Object.assign({}, this.state, { list })
+        return this.setState(nextState)
+      }
+    }
+    else if (e.ctrlKey) {
+      this.rowCtrlClick(uuid, e)
+    }
+    else { 
+      // multi-selected, just context menu
+      if (this.state.list.filter(item => item.selected).length > 1) {
+        this.setState(state => 
+          Object.assign({}, state, { 
+            clientX: e.clientX, 
+            clientY: e.clientY,
+            contextMenu: true
+          }))  
+      }
+      else { // only one or none selected, act as left click then context menu
+        this.rowJustClick(uuid, e)       
+        // use function version of setState
+        this.setState(state => 
+          Object.assign({}, state, { 
+            clientX: e.clientX, 
+            clientY: e.clientY,
+            contextMenu: true
+          }))  
+      }
+    }
   }
+
+/**
+	renderBreadCrumb(){
+
+		var _this = this;
+		var path = this.props.state.file.current.path;
+		var pathArr = [];
+		pathArr = path.map((item,index)=>{
+			return(
+				<span key={index} style={{display:'flex',alignItems:'center'}} 
+          onClick={_this.selectBreadCrumb.bind(_this,item)}>
+					{ item.key!='' ? 
+              <span className='breadcrumb-text'>{item.key}</span> :
+              <span className='breadcrumb-home'></span>
+          }
+					<span className={index==path.length-1?'breadcrumb-arrow hidden':'breadcrumb-arrow'}></span>
+				</span>
+			)});
+		return pathArr;
+	}
+**/
 
   renderList() {
 
@@ -932,7 +954,7 @@ class AllFiles extends React.Component {
     let selecting = ctrl || shift 
 
     return this.state.list.map((item, index) => (
-      <DataRow 
+      <FileTableRow 
 
         key={item.uuid}
 
@@ -952,6 +974,9 @@ class AllFiles extends React.Component {
               return (index <= max && index >= min) ? 'active' : 'none'
             else  
               return item.hover ? 'activating' : 'none'
+          }
+          else if (ctrl) {
+            return item.specified ? 'activating' : 'none' 
           }
           else 
             return item.specified ? 'inactive' : 'none'
@@ -1000,21 +1025,15 @@ class AllFiles extends React.Component {
         onClick={this.rowClickBound}
         onDoubleClick={this.rowDoubleClickBound}
         onRightClick={this.rowRightClickBound}
-
       />))
   }
 
-	render() {
+	renderListView() {
 
     if (this.state.file === null) return null 
 
 		return (
-      <div style={{ 
-        width: '100%', 
-        height: '100%',
-        backgroundColor:'#EEE' 
-      }}>
-       
+      <div style={{ width: '100%', height: '100%', backgroundColor:'#EEE' }}>
         <div style={{width: '100%', height:40, backgroundColor:'#FFF', 
           display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}> 
           <div style={{flex: '0 0 120px'}} />
@@ -1025,11 +1044,13 @@ class AllFiles extends React.Component {
         <Divider style={{marginLeft: 120}} />
         <div style={{width: '100%', height: 'calc(100% - 40px)', overflowY: 'scroll', backgroundColor: '#FFF', display: 'flex', flexDirection: 'column'}}>
           { this.renderList() }
-          <div style={{flex:'1 0 96px', backgroundColor: 'yellow'}} />
+          <div style={{flex:'1 0 96px', backgroundColor: 'yellow'}} 
+            onTouchTap={() => {
+              console.log('hello world')
+            }}
+          />
         </div>
-
         <FileUploadButton style={{position: 'absolute', right:48, bottom:48}} />
-
         { this.state.contextMenu && (
           <div 
             style={{position: 'fixed', top: 0, left: 0, width:'100%', height:'100%', zIndex:2000}}
@@ -1050,8 +1071,7 @@ class AllFiles extends React.Component {
         )}
 
 
-        {/* this.props.state.file.view.state !== 'BUSY' && <FilesTable />  */}
-        {/*file detail*/}
+
         {/*this.getDetail()*/}
         {/*create new folder dialog*/}
         {/*this.getCreateFolderDialog()*/}
@@ -1060,42 +1080,11 @@ class AllFiles extends React.Component {
       </div>
 		)
 	}
-}
-
-class FileApp extends React.Component {
-
-  // maximized, resizing, nudge
-  constructor(props) {
-
-    super(props)
-
-    this.state = {
-      showDetail: false,
-      leftNav: true,
-      detailResizing: false
-    }
-
-    // avoid binding
-    this.toggleDetail = () => {
-      this.setState(Object.assign({}, this.state, { 
-        detailResizing: true, 
-        showDetail: !this.state.showDetail 
-      }))
-      setTimeout(() => this.setState(Object.assign({}, this.state, { 
-        detailResizing: false
-      })), sharpCurveDelay)
-    }
-
-    this.toggleLeftNav = () => {
-      this.setState(Object.assign({}, this.state, { leftNav: !this.state.leftNav }))
-    }
-  }
 
   render() {
 
     const detailWidth = 500
-    const showDetail = this.state.showDetail
-    const { showAppBar } = this.props
+    debug('file', this.state.file && this.state.file.current.path)
 
     return (
     <div style={this.props.style} >
@@ -1182,8 +1171,7 @@ class FileApp extends React.Component {
               height: '100%', 
               backgroundColor:'yellow', 
             }}>
-              {/* <Content dispatch={window.store.dispatch} state={storeState()}/> */}
-              <AllFiles />
+              { this.renderListView() }
             </div>
           </div>
 
@@ -1197,7 +1185,7 @@ class FileApp extends React.Component {
             right: this.state.showDetail ? 0 : -detailWidth, 
             transition: sharpCurve('right')
         }}>
-          <Divider />
+          {/* <Divider /> */}
           <FileDetailToolbar 
             nudge={this.props.nudge} 
             suppressed={!this.props.maximized}
