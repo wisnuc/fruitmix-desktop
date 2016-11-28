@@ -44,8 +44,7 @@ import NavigationClose from 'material-ui/svg-icons/navigation/close'
 import NavigationCancel from 'material-ui/svg-icons/navigation/cancel'
 import NavigationChevronRight from 'material-ui/svg-icons/navigation/chevron-right'
 
-import { Divider, Paper, Menu, MenuItem, Dialog, 
-  FlatButton, TextField, Checkbox, CircularProgress } from 'material-ui'
+import { Divider, Paper, Menu, MenuItem, Dialog, FlatButton, TextField, Checkbox, CircularProgress } from 'material-ui'
 
 import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
 
@@ -70,9 +69,9 @@ const FONT_DARKOP2 = '55%'
 const FONT_BRIGHTOP1 = '100%'
 const FONT_BRIGHTOP2 = '70%'
 
-const stm = () => window.store.getState().file.stm
-
 ///////////////////////////////////////////////////////////////////////////////
+
+const secondaryColor = '#FF4081'
 
 const formatTime = (mtime) => {
 
@@ -88,9 +87,8 @@ const formatTime = (mtime) => {
 const formatSize = (size) => {
 
   if (!size) return null
-  
-  size = parseFloat(size)
 
+  size = parseFloat(size)
   if (size < 1024) 
     return size.toFixed(2)+' B'
   else if (size < 1024*1024)
@@ -101,102 +99,180 @@ const formatSize = (size) => {
     return (size/1024/1024/1024).toFixed(2)+ ' G'
 }
 
-const FileTableRow = ({
+const rowColor = (props, state) => {
 
-  uuid,
-  index,
-  name,
-  type,
-  mtime,
-  size,
+  if ((props.shift && props.range) || state.hover) 
+    return '#EEEEEE' 
+  else if (props.selected)
+    return '#F5F5F5' 
+  else
+    return  '#FFFFFF'
+}
 
-  editing,
-  selected,
-  hover,
+const rowLeading = (props, state) => {
 
-  leading,
-  check,
-  
-  onMouseEnter,
-  onMouseLeave,
-  onClick,
-  onDoubleClick,
-  onRightClick
+  if (props.shift) 
+    if (props.range)
+      return 'fullOn'
+    else if (state.hover)
+      return 'activeHint'
+    else
+      return 'none'
+  else if (props.ctrl)
+    if (props.specified)
+      return 'activeHint'
+  //  else if (state.hover)
+  //    return 'inactiveHint'
+    else 
+      return 'none'
+  else
+    return props.specified ? 'inactiveHint' : 'none'
+}
 
-}) => {
+const rowCheck = (props, state) => {
 
-  let style = {
-    row: {
+  if (props.shift) {
 
-      width: '100%',
-      flex: '0 0 40px',
+    if (props.selected)
+      return 'checked'
+    else if (props.range || state.hover)
+      return 'checking'
+    else
+      return 'none'
+  }
+  else if (props.ctrl) {
+    if (props.selected)
+      return 'checked'
+    else if (state.hover)
+      return 'checking' 
+    else
+      return 'none'
+  }
+  else {
+    if (props.multi && props.selected)
+      return 'checked'
+    else
+      return 'none'
+  }
+}
 
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-start',
-      backgroundColor: (hover || leading === 'active') ? '#EEEEEE' : selected ? '#F5F5F5' : '#FFF',
-      color: '#000',
-      opacity: 0.87
-    },
-   
-    time: {
-      flex: '0 0 160px',
-      fontSize: 13,
-      opacity: 0.54,
-      textAlign: 'right',
-    },
+// props must has ctrl & shift
+class FileTableRow extends React.Component {
 
-    size: {
-      flex: '0 0 160px',
-      fontSize: 13,
-      opacity: 0.54,
-      textAlign: 'right',
-      marginRight: 24
-    },
+  constructor(props) {
+    super(props)
+    this.state = { hover: false }
   }
 
-  const secondaryColor = '#FF4081'
-  const renderLeading = () => {
+  componentWillReceiveProps(nextProps) {
 
-    let height = '100%', backgroundColor = '#FFF', opacity = 0
+    this.setState(state => {
 
-    switch(leading) {
-    case 'inactive':
-      height = 20
-      backgroundColor = '#000'
-      opacity = 0.26
-      break
-    case 'activating':
-      height = 20
-      backgroundColor = secondaryColor
-      opacity = 1
-      break
-    case 'active':
-      backgroundColor = secondaryColor
-      opacity = 1
-      break
+      let nextState = {}
+      nextState.hover = state.hover
+      nextState.rowColor = rowColor(nextProps, state)
+      nextState.rowLeading = rowLeading(nextProps, state)
+      nextState.rowCheck = rowCheck(nextProps, state)
+      
+      return nextState
+    })
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+
+    let color = rowColor(nextProps, nextState)
+    let leading = rowLeading(nextProps, nextState)
+    let check = rowCheck(nextProps, nextState)
+  
+    if (color === this.state.rowColor &&
+        leading === this.state.rowLeading &&
+        check === this.state.rowCheck) 
+      return false
+    return true
+  }
+
+  render() {
+
+    let { index, item, onMouseEnter, onMouseLeave, onClick, onDoubleClick, onRightClick } = this.props
+
+    let style = {
+      row: {
+        width: '100%',
+        flex: '0 0 40px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        backgroundColor: this.state.rowColor,
+        color: '#000',
+        opacity: 0.87
+      },
+     
+      time: {
+        flex: '0 0 160px',
+        fontSize: 13,
+        opacity: 0.54,
+        textAlign: 'right',
+      },
+
+      size: {
+        flex: '0 0 160px',
+        fontSize: 13,
+        opacity: 0.54,
+        textAlign: 'right',
+        marginRight: 24
+      },
     }
 
-    return <div style={{ flex: '0 0 4px', height, backgroundColor, opacity, zIndex:1000 }} /> 
-  }
+    const renderLeading = () => {
+
+      let height = '100%', backgroundColor = '#FFF', opacity = 0
+
+      switch(this.state.rowLeading) {
+      case 'inactiveHint':
+        height = 20
+        backgroundColor = '#000'
+        opacity = 0.26
+        break
+      case 'activeHint':
+        height = 20
+        backgroundColor = secondaryColor
+        opacity = 1
+        break
+      case 'fullOn':
+        backgroundColor = secondaryColor
+        opacity = 1
+        break
+      }
+
+      return <div style={{ flex: '0 0 4px', height, backgroundColor, opacity, zIndex:1000 }} /> 
+    }
 
   const renderCheckBox = () => 
-    (check === 'checked' || check === 'unchecking') ? 
+    (this.state.rowCheck === 'checked' || this.state.rowCheck === 'unchecking') ? 
       <ActionCheckCircle style={{color: secondaryColor, opacity: 1, zIndex:1000}} /> :
-        check === 'checking' ? <NavigationCheck style={{color: '#000', opacity: 0.26}} /> : null 
+        this.state.rowCheck === 'checking' ? <NavigationCheck style={{color: '#000', opacity: 0.26}} /> : null 
 
   const renderIcon = () => 
-    type === 'folder' ?  
+    this.props.item.type === 'folder' ?  
       <FileFolder style={{color: '#000', opacity: 0.54}} /> : 
         <EditorInsertDriveFile style={{color: '#000', opacity: 0.54}} />
 
+  let editing = false
   return (
     <div style={style.row}
-      onMouseEnter = {() => onMouseEnter(index)}
-      onMouseLeave = {() => onMouseLeave(index)}
-      onClick = {e => onClick(uuid, e)}
-      onDoubleClick = {e => { type === 'folder' && fileNav('HOME_DRIVE', uuid) }}
-      onTouchTap = {e => e.nativeEvent.button === 2 && onRightClick(uuid, e.nativeEvent)}
+      onMouseEnter = {() => {
+        onMouseEnter(index)
+        this.setState(state => ({ hover: true }))
+      }}
+      onMouseLeave = {() => {
+        this.setState(state => ({ hover: false }))
+        onMouseLeave(index)
+      }}
+
+      onClick = {e => onClick(this.props.item.uuid, e)}
+      onDoubleClick = {e => { this.props.item.type === 'folder' && 
+        fileNav('HOME_DRIVE', this.props.item.uuid) }}
+      onTouchTap = {e => e.nativeEvent.button === 2 && onRightClick(this.props.item.uuid, e.nativeEvent)}
     >
         { renderLeading() } 
       <div style={{flex: '0 0 12px'}} />
@@ -209,18 +285,19 @@ const FileTableRow = ({
       </div>
       <div style={{width:'100%'}}> { 
         editing ? 
-          <TextField defaultValue={name} 
+          <TextField defaultValue={this.props.item.name} 
             fullWidth={true} 
             ref={ input => { input && input.focus() }} 
-            onBlur={() => window.store.dispatch({ type: 'FILE_ROW_NAME_ONBLUR', data: uuid })} 
-          /> : <div style={{fontSize: 14, opacity:0.87}}>{name}</div> 
+            onBlur={() => window.store.dispatch({ type: 'FILE_ROW_NAME_ONBLUR', data: this.props.item.uuid })} 
+          /> : 
+          <div style={{fontSize: 14, opacity:0.87}}>{this.props.item.name}</div> 
       }</div>
-      <div style={style.time}>{formatTime(mtime)}</div>
-      <div style={style.size}>{formatSize(size)}</div>
+      <div style={style.time}>{formatTime(this.props.item.mtime)}</div>
+      <div style={style.size}>{formatSize(this.props.item.size)}</div>
     </div>
   )
+  }
 }
-
 /////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -579,8 +656,8 @@ class FileApp extends React.Component {
       leftNav: true,
       detailResizing: false,
 
-      ctrl: false, 
       shift: false,
+      hover: -1, // index of row currently hovered
 
       clientX: 0,
       clientY: 0, 
@@ -601,11 +678,18 @@ class FileApp extends React.Component {
     this.toggleLeftNav = () => {
       this.setState(Object.assign({}, this.state, { leftNav: !this.state.leftNav }))
     }
+  
+    this.rowMouseLeave = index => {
+      return this.setState(state => 
+        Object.assign({}, state, { hover: -1 })) 
+    }
 
-    // this.selectBread
+    this.rowMouseEnter = index => {
+      return this.setState(state => 
+        Object.assign({}, state, { hover: index })) 
+    }
+
      
-    this.rowMouseEnterBound = this.rowMouseEnter.bind(this)
-    this.rowMouseLeaveBound = this.rowMouseLeave.bind(this)
     this.rowClickBound = this.rowClick.bind(this)
     this.rowDoubleClickBound = this.rowDoubleClick.bind(this)
     this.rowRightClickBound = this.rowRightClick.bind(this)
@@ -705,10 +789,10 @@ class FileApp extends React.Component {
 
     let state = {
       file: newFile,
+      specified: -1,
       list: newFile.children.map(item => Object.assign({}, item, { 
           specified: false,
           selected: false,
-          hover: false,
         }))
         .sort((a, b) => {
           if (a.type !== b.type) {
@@ -742,28 +826,6 @@ class FileApp extends React.Component {
     debug('shift up')
     this.setState(Object.assign({}, this.state, { shift: false }))
   }
-
-  rowMouseLeave(index) {
-    
-    this.setState(state => Object.assign({}, state, {
-      list: [
-        ...state.list.slice(0, index),
-        Object.assign({}, state.list[index], { hover: false }),
-        ...state.list.slice(index + 1)
-      ]
-    }))
-  }
-
-  rowMouseEnter(index) {
-
-    this.setState(state => Object.assign({}, state, {
-      list: [
-        ...state.list.slice(0, index),
-        Object.assign({}, state.list[index], { hover: true }),
-        ...state.list.slice(index + 1)
-      ]
-    }))
-  } 
 
   rowShiftClick(uuid, e) {
 
@@ -843,8 +905,7 @@ class FileApp extends React.Component {
   // mutate item, return new list
   rowClick(uuid, e) {
 
-    debug('row click', e, e.ctrlKey, e.shiftKey)
-
+    debug('row click', uuid, e, e.ctrlKey, e.shiftKey)
     if (e.shiftKey) 
       return this.rowShiftClick(uuid, e) 
     else if (e.ctrlKey === true)
@@ -942,7 +1003,7 @@ class FileApp extends React.Component {
     let { ctrl, shift, list } = this.state
 
     specified = this.state.list.findIndex(item => item.specified)
-    hover = this.state.list.findIndex(item => item.hover)
+    hover = this.state.hover
 
     if (specified !== -1 && hover !== -1) {
       min = Math.min(specified, hover)
@@ -954,74 +1015,19 @@ class FileApp extends React.Component {
     let selecting = ctrl || shift 
 
     return this.state.list.map((item, index) => (
+
       <FileTableRow 
-
         key={item.uuid}
-
+        item={item}
         index={index}
-        name={item.name}
-        type={item.type}
-        uuid={item.uuid} 
-        mtime={item.mtime}
-        size={item.size}
-       
+        ctrl = {this.state.ctrl}
+        shift = {this.state.shift}
+        specified = {item.specified}
         selected={item.selected}
-        hover={item.hover}
-        
-        leading={(() => { // none, inactive, activating, active
-          if (shift) {
-            if (specified !== -1)
-              return (index <= max && index >= min) ? 'active' : 'none'
-            else  
-              return item.hover ? 'activating' : 'none'
-          }
-          else if (ctrl) {
-            return item.specified ? 'activating' : 'none' 
-          }
-          else 
-            return item.specified ? 'inactive' : 'none'
-        })()}
-
-        check={(() => { // none, checking, unchecking, checked
-          if (shift) {
-            if (specified !== -1) {
-              if (index <= max && index >= min) { // in range
-                return item.selected ? 'checked' : 'checking'
-              }
-              else
-                return item.selected ? 'checked' : 'none'
-            }   
-            else {
-              if (item.selected)
-                return 'checked'
-              else if (item.hover)
-                return 'checking'
-              else 
-                return 'none'
-            }
-          } 
-          else if (ctrl) {
-            if (item.selected && item.hover)
-              return 'unchecking'
-            else if (!item.selected && item.hover)
-              return 'checking'
-            else if (item.selected)
-              return 'checked'
-            else
-              return 'none'
-          }
-          else {
-            return (multi && item.selected) ? 'checked' : 'none'
-          }
-        })()}
-
-        modifier={this.state.shift ? 'shift' : this.state.ctrl ? 'ctrl' : 'none'}
-
-        selecting={selecting}
-        specified={item.specified} 
-
-        onMouseEnter={this.rowMouseEnterBound}
-        onMouseLeave={this.rowMouseLeaveBound}
+        multi={multi}
+        range={(specified !== -1 && hover !== -1 && index >= min && index <= max)}
+        onMouseEnter={this.rowMouseEnter}
+        onMouseLeave={this.rowMouseLeave}
         onClick={this.rowClickBound}
         onDoubleClick={this.rowDoubleClickBound}
         onRightClick={this.rowRightClickBound}
@@ -1084,7 +1090,7 @@ class FileApp extends React.Component {
   render() {
 
     const detailWidth = 500
-    debug('file', this.state.file && this.state.file.current.path)
+    debug('fileapp render')
 
     return (
     <div style={this.props.style} >
