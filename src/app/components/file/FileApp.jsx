@@ -161,7 +161,7 @@ class FileTableRow extends React.Component {
 
   constructor(props) {
     super(props)
-    this.state = { hover: false }
+    this.state = { hover: false } // TODO
   }
 
   componentWillReceiveProps(nextProps) {
@@ -180,15 +180,9 @@ class FileTableRow extends React.Component {
 
   shouldComponentUpdate(nextProps, nextState) {
 
-    let color = rowColor(nextProps, nextState)
-    let leading = rowLeading(nextProps, nextState)
-    let check = rowCheck(nextProps, nextState)
-  
-    if (color === this.state.rowColor &&
-        leading === this.state.rowLeading &&
-        check === this.state.rowCheck) 
-      return false
-    return true
+    return !(nextState.color === this.state.rowColor &&
+        nextState.leading === this.state.rowLeading &&
+        nextState.check === this.state.rowCheck) 
   }
 
   render() {
@@ -597,14 +591,12 @@ const FileToolbar = ({
         <NavigationMenu />
       </IconButton>
 
-      {/**
       <div style={{marginLeft: 20, flex: '0 0 138px', fontSize: 21, whiteSpace: 'nowrap', color: '#FFF'}}>
         {title}
       </div>
-      **/}
 
-      <div style={{display: 'flex', alignItems: 'center', fontSize: 21, color: '#FFF'}}>
-        <FlatButton>hello</FlatButton><NavigationChevronRight style={{margin: 8}} color='white' /><div>world</div>
+      <div style={{display: 'flex', alignItems: 'center', fontSize: 16, color: '#FFF'}}>
+        hello<NavigationChevronRight style={{margin: 8}} color='white' /><div>world</div>
       </div>
 
       <div style={{width: '100%', display: 'flex', justifyContent: 'flex-end'}}>
