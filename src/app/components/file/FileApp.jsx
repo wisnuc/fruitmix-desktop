@@ -19,7 +19,7 @@ import keypress from 'keypress.js'
 
 import svg from '../../utils/SVGIcon'
 
-import { Popover } from 'material-ui'
+import { Avatar, Popover } from 'material-ui'
 
 import IconButton from 'material-ui/IconButton'
 import ActionCheckCircle from 'material-ui/svg-icons/action/check-circle'
@@ -44,7 +44,7 @@ import NavigationClose from 'material-ui/svg-icons/navigation/close'
 import NavigationCancel from 'material-ui/svg-icons/navigation/cancel'
 import NavigationChevronRight from 'material-ui/svg-icons/navigation/chevron-right'
 
-import { Divider, Paper, Menu, MenuItem, Dialog, FlatButton, TextField, Checkbox, CircularProgress } from 'material-ui'
+import { Drawer, Divider, Paper, Menu, MenuItem, Dialog, FlatButton, TextField, Checkbox, CircularProgress } from 'material-ui'
 
 import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
 
@@ -180,9 +180,11 @@ class FileTableRow extends React.Component {
 
   shouldComponentUpdate(nextProps, nextState) {
 
-    return !(nextState.color === this.state.rowColor &&
+    if (nextState.color === this.state.rowColor &&
         nextState.leading === this.state.rowLeading &&
         nextState.check === this.state.rowCheck) 
+      return false
+    return true
   }
 
   render() {
@@ -582,6 +584,7 @@ const FileToolbar = ({
         display: 'flex', alignItems: 'center', justifyContent: 'space-between' 
       }} 
       rounded={false} 
+      transitionEnabled={false}
       zDepth={suppressed ? 0 : 1}
     >
       <IconButton style={{marginLeft: 4}}
@@ -599,11 +602,11 @@ const FileToolbar = ({
         hello<NavigationChevronRight style={{margin: 8}} color='white' /><div>world</div>
       </div>
 
-      <div style={{width: '100%', display: 'flex', justifyContent: 'flex-end'}}>
+      <div style={{flex: 1, display: 'flex', justifyContent: 'flex-end'}}>
         { children }
       </div>
 
-      <div style={{width: nudge ? 48 : 0, height:48, transition: sharpCurve('width')}} />
+      <div style={{width: nudge ? 56 : 0, height:48, transition: sharpCurve('width')}} />
     </Paper>
   )
 }
@@ -625,12 +628,13 @@ const FileDetailToolbar = ({
         justifyContent: 'space-between',
       }}
       rounded={false} 
+      transitionEnabled={false}
       zDepth={suppressed ? 0 : 1}
     >
       <div style={{flex:1, display: 'flex', justifyContent:'flex-end'}}>
         { show && children }
       </div>
-      <div style={{width: nudge ? 48 : 0, height:48, transition: sharpCurve('width')}} />
+      <div style={{width: nudge ? 56 : 0, height:48, transition: sharpCurve('width')}} />
     </Paper>
   )
 
@@ -645,7 +649,7 @@ class FileApp extends React.Component {
       file: null, 
 
       showDetail: false,
-      leftNav: true,
+      leftNav: false,
       detailResizing: false,
 
       shift: false,
@@ -666,6 +670,49 @@ class FileApp extends React.Component {
         detailResizing: false
       })), sharpCurveDelay)
     }
+
+    this.renderLeftNav = () => (
+
+      <Paper style={{
+        width: LEFTNAV_WIDTH, 
+        height: '100%', 
+        position: 'absolute', 
+        left: this.state.leftNav ? 0 : -LEFTNAV_WIDTH, 
+        transition: sharpCurve('left'), 
+        zIndex: 1000 }} 
+
+        transitionEnabled={false}
+        rounded={false}
+        zDepth={this.state.leftNav ? 3 : 0} 
+      >
+        <div style={{width: '100%', height: 56, display: 'flex', alignItems: 'center',
+          backgroundColor: blue500 }}>
+          <div style={{marginLeft:4, width:68}}>
+            <IconButton iconStyle={{color: '#FFF'}}
+              onTouchTap={() => this.setState(Object.assign({}, this.state, {
+                leftNav: false
+              }))}>
+              <NavigationMenu />
+            </IconButton>
+          </div>
+          <div style={{fontSize:21, fontWeight: 'medium', color: '#FFF' }}>文件</div>
+        </div>
+        <Menu autoWidth={false} width={LEFTNAV_WIDTH}>
+          <MenuItem primaryText='我的文件' leftIcon={<DeviceStorage />} 
+            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}/>
+          <MenuItem primaryText='我分享的文件' leftIcon={<SocialShare />} 
+            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}/>
+          <Divider />
+          <MenuItem primaryText='分享给我的文件' leftIcon={<SocialPeople />}
+            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}/>
+          <Divider />
+          <MenuItem primaryText='上传任务' leftIcon={<FileFileUpload />}
+            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}/>
+          <MenuItem primaryText='下载任务' leftIcon={<FileFileDownload />}
+            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}/>
+        </Menu> 
+      </Paper>
+    )
 
     this.toggleLeftNav = () => {
       this.setState(Object.assign({}, this.state, { leftNav: !this.state.leftNav }))
@@ -1068,8 +1115,6 @@ class FileApp extends React.Component {
           </div>
         )}
 
-
-
         {/*this.getDetail()*/}
         {/*create new folder dialog*/}
         {/*this.getCreateFolderDialog()*/}
@@ -1089,19 +1134,15 @@ class FileApp extends React.Component {
       <div style={{ height: '100%', backgroundColor:'blue', 
         display: 'flex', justifyContent: 'space-between' }}>
 
-        { false && ( // don't delete me, floating left nav
-        <Paper style={{
-          width: 280, 
-          height: '100%', 
-          position: 'absolute', 
-          left: this.state.leftNav ? 0 : -280, 
-          transition: 'left 100ms', 
-          zIndex: 1000 }} 
-          rounded={false}
-          zDepth={2} 
-        >
-          { renderLeftNav() }
-        </Paper> ) }
+        { this.state.leftNav &&
+          <div id='file-left-nav-mask' 
+            style={{backgroundColor: '#000', opacity: 0.1, 
+            width: '100%', height: '100%', zIndex:999}} 
+            onTouchTap={() => this.setState(Object.assign({}, this.state, { leftNav: false }))}
+          />
+        }
+
+        { this.renderLeftNav() }
 
         <div id='layout-middle-container' 
           style={{
@@ -1118,7 +1159,7 @@ class FileApp extends React.Component {
           <FileToolbar 
             nudge={this.props.nudge && !this.state.showDetail}
             title='文件'
-            suppressed={!this.props.maximized}
+            suppressed={false && !this.props.maximized}
             toggleLeftNav={this.toggleLeftNav} 
           >
             <IconButton iconStyle={toolbarStyle.activeIcon}>
@@ -1142,6 +1183,7 @@ class FileApp extends React.Component {
             display:'flex'
           }}>
 
+            {false &&
             <div style={{
               position: 'absolute',
               width: LEFTNAV_WIDTH,
@@ -1158,12 +1200,12 @@ class FileApp extends React.Component {
                 <MenuItem style={{fontSize: 14}} primaryText='上传任务' leftIcon={<FileFileUpload />} />
                 <MenuItem style={{fontSize: 14}} primaryText='下载任务' leftIcon={<FileFileDownload />} />
               </Menu> 
-            </div>
+            </div>}
 
             <div style={{
               // for suppressed leftNav, TODO
-              marginLeft: this.state.leftNav ? LEFTNAV_WIDTH : 0, 
-              transition: sharpCurve('margin-left'),
+              // marginLeft: this.state.leftNav ? LEFTNAV_WIDTH : 0, 
+              // transition: sharpCurve('margin-left'),
 
               width: '100%', 
               height: '100%', 
@@ -1186,7 +1228,7 @@ class FileApp extends React.Component {
           {/* <Divider /> */}
           <FileDetailToolbar 
             nudge={this.props.nudge} 
-            suppressed={!this.props.maximized}
+            suppressed={false && !this.props.maximized}
             show={!this.state.detailResizing}
           > 
             <IconButton 

@@ -8,17 +8,23 @@ import { ipcRenderer } from 'electron'
 
 import React from 'react';
 
-import {Avatar, Menu, Paper, Snackbar, MenuItem, IconButton, Divider } from 'material-ui';
+import {Avatar, Menu, Paper, Snackbar, MenuItem, IconButton, Divider, 
+  Subheader, List, ListItem } from 'material-ui';
 
 import SocialNotifications from 'material-ui/svg-icons/social/notifications'
-
+import {blue500, pink500, gray500} from 'material-ui/styles/colors'
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import NavigationApps from 'material-ui/svg-icons/navigation/apps'
 import NavigationExpandLess from 'material-ui/svg-icons/navigation/expand-less'
 import NavigationExpandMore from 'material-ui/svg-icons/navigation/expand-more'
+import NavigationChevronRight from 'material-ui/svg-icons/navigation/chevron-right'
 import ActionSettings from 'material-ui/svg-icons/action/settings'
 import ActionAccountCircle from 'material-ui/svg-icons/action/account-circle'
+
+import FileFolder from 'material-ui/svg-icons/file/folder'
+import ImagePhoto from 'material-ui/svg-icons/image/photo'
+
 
 import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
 
@@ -26,28 +32,16 @@ import { fileNav } from '../../lib/file'
 
 
 import FileApp from '../file/FileApp'
+import ControlApp from '../control/ControlApp'
 
 //import CSS
 import css  from  '../../../assets/css/main';
 
-
-
 const storeState = () => window.store.getState()
 
+const appMap = new Map()
+// appMap = 
 
-const renderLeftNav = () => (
-    <Menu style={{fontSize: 14, fontWeight: 700}} width={240}>
-      <MenuItem style={{fontSize: 23, fontWeight: 700}} primaryText='我的文件' leftIcon={<DeviceStorage />} />
-      <MenuItem primaryText='我分享的文件' leftIcon={<SocialShare />} />
-      <Divider />
-      <MenuItem primaryText='分享给我的文件' leftIcon={<SocialPeople />} />
-      <Divider />
-      <MenuItem primaryText='上传任务' leftIcon={<FileFileUpload />} />
-      <MenuItem primaryText='下载任务' leftIcon={<FileFileDownload />} />
-      <Divider />
-      <MenuItem primaryText='test icon' leftIcon={<FileIcon />} />
-    </Menu> 
-  )
 
 const TopBar = (props) => (
 
@@ -78,8 +72,52 @@ const TopBar = (props) => (
   </div>
 )
 
-const toggleAppBar = () => window.store.dispatch({ type: 'TOGGLE_APPBAR' })
+const systemPaneWidth = 320
 
+const SystemDrawer = (props) => {
+
+  return (
+    <div style={props.style}>
+      <Paper 
+        style={{
+          width: '100%',
+          height: '100%',
+          backgroundColor: '#FAFAFA'
+        }}
+        transitionEnabled={false}
+        rounded={false}
+        zDepth={1}
+      >
+        <div style={{height: 56, marginLeft: 72, display: 'flex', alignItems: 'center', 
+          fontSize: 16, fontWeight: 'medium', opacity: props.resizing ? 0 : 0.54}}>
+          闻上云管家
+        </div>
+        <Divider/>
+        <div>
+        <List>
+          <Subheader>应用</Subheader>
+          <ListItem
+            primaryText='文件'
+            leftAvatar={<Avatar icon={<FileFolder />} backgroundColor={blue500} />}
+          />
+          <ListItem
+            primaryText='照片'
+            leftAvatar={<Avatar icon={<ImagePhoto />} backgroundColor={pink500} />}
+          />
+          <ListItem
+            primaryText='系统设置'
+            leftAvatar={<Avatar icon={<ActionSettings />} backgroundColor={gray500} />}
+          />
+          <Divider />
+          <Subheader>通知</Subheader>
+        </List>
+        </div>
+      </Paper>
+    </div>
+  )
+}
+
+const toggleAppBar = () => window.store.dispatch({ type: 'TOGGLE_APPBAR' })
 
 class Main extends React.Component {
 
@@ -102,6 +140,16 @@ class Main extends React.Component {
     }
   }
 
+/**
+          <TopBar style= {{
+              position: 'absolute', 
+              width: '100%', 
+              height: topBarHeight, 
+              top: showAppBar ? 0 : -topBarHeight,
+              transition: sharpCurve('top'),
+          }}/>
+**/
+
 	render() {
 
     const topBarHeight = 48
@@ -110,44 +158,42 @@ class Main extends React.Component {
     return (
 
       <div style={{width: '100%', height: '100%'}}>
-
-        <div style={{position: 'absolute', top: 0, left: 0, width: '100%', height: '100%'}}>
-
-          <TopBar style= {{
-              position: 'absolute', 
-              width: '100%', 
-              height: topBarHeight, 
-              top: showAppBar ? 0 : -topBarHeight,
-              transition: sharpCurve('top'),
-          }}/>
-
-          <FileApp 
-            style={{
-              position: 'absolute', 
-              width: '100%', 
-              top: showAppBar ? topBarHeight : 0, 
-              height: showAppBar ? `calc(100% - ${topBarHeight}px)` : '100%', 
-              transition: sharpCurve('all'),
-            }}
-            
-            maximized={!showAppBar}
-            resizing={this.state.resizing}
-            nudge={!showAppBar}
-          />
+        <div style={{
+            position: 'absolute', 
+            width: showAppBar ? 'calc(100% - 320px)': '100%',
+            height: '100%', 
+            transition: sharpCurve('all'),
+            overflow: 'hidden'
+        }}>
+          <FileApp maximized={!showAppBar} resizing={this.state.resizing} nudge={!showAppBar}/>
         </div>
+
+        <SystemDrawer 
+          style={{
+            position: 'absolute',
+            width: 320,
+            height: '100%',
+            right: showAppBar ? 0 : -320,
+            transition: sharpCurve('right')
+          }}
+          resizing={this.state.resizing}
+        />
 
         <IconButton 
           style={{position: 'absolute', 
-            top: showAppBar ? (topBarHeight - 48) / 2 : (56 - 48 ) / 2,
+            top: (56 - 48 ) / 2,
             transition: sharpCurve('top'),
             right: 0,
             zIndex: 10000
           }}
 
-          iconStyle={{opacity: 0.54}} 
+          iconStyle={showAppBar ?
+            ({color: '#000', opacity: 0.54}) :
+            ({color: '#FFF', opacity: 1})
+          }
           onTouchTap={this.toggleAppBar} 
         >
-          { showAppBar ? <NavigationExpandLess /> : <NavigationExpandMore /> }
+          { showAppBar ? <NavigationChevronRight /> : <NavigationApps /> }
         </IconButton>
 
         <Snackbar 
