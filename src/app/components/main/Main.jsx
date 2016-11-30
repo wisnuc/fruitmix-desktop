@@ -12,7 +12,7 @@ import {Avatar, Menu, Paper, Snackbar, MenuItem, IconButton, Divider,
   Subheader, List, ListItem } from 'material-ui';
 
 import SocialNotifications from 'material-ui/svg-icons/social/notifications'
-import {blue500, pink500, gray500} from 'material-ui/styles/colors'
+import {blue500, pink500, yellow500, green500, gray500} from 'material-ui/styles/colors'
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import NavigationApps from 'material-ui/svg-icons/navigation/apps'
@@ -24,12 +24,12 @@ import ActionAccountCircle from 'material-ui/svg-icons/action/account-circle'
 
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import ImagePhoto from 'material-ui/svg-icons/image/photo'
-
+import ImagePhotoAlbum from 'material-ui/svg-icons/image/photo-album'
+import ImagePortrait from 'material-ui/svg-icons/image/portrait'
 
 import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
 
-import { fileNav } from '../../lib/file'
-
+import { command } from '../../lib/command'
 
 import FileApp from '../file/FileApp'
 import ControlApp from '../control/ControlApp'
@@ -40,8 +40,6 @@ import css  from  '../../../assets/css/main';
 const storeState = () => window.store.getState()
 
 const appMap = new Map()
-// appMap = 
-
 
 const TopBar = (props) => (
 
@@ -75,41 +73,51 @@ const TopBar = (props) => (
 const systemPaneWidth = 320
 
 const SystemDrawer = (props) => {
-
   return (
     <div style={props.style}>
       <Paper 
         style={{
           width: '100%',
           height: '100%',
-          backgroundColor: '#FAFAFA'
+          backgroundColor: '#36474F'
         }}
         transitionEnabled={false}
         rounded={false}
-        zDepth={1}
+        zDepth={3}
       >
-        <div style={{height: 56, marginLeft: 72, display: 'flex', alignItems: 'center', 
-          fontSize: 16, fontWeight: 'medium', opacity: props.resizing ? 0 : 0.54}}>
-          闻上云管家
+        <div style={{height: 56, display: 'flex', alignItems: 'center', 
+          color: '#FFF', backgroundColor: '#36474F', }}>
+          <div style={{marginLeft: 72, fontSize: 21, fontWeight: 'medium', opacity: props.resizing ? 0 : 1}}>闻上云管家</div>
         </div>
-        <Divider/>
+        <Divider style={{backgroundColor: '#353535' }}/>
         <div>
-        <List>
-          <Subheader>应用</Subheader>
-          <ListItem
+        <List style={{color: '#FFF'}}>
+          <Subheader style={{color: '#7EC7C0', fontWeight: 'medium'}}>应用</Subheader>
+          <ListItem style={{color: '#FFF'}}
             primaryText='文件'
             leftAvatar={<Avatar icon={<FileFolder />} backgroundColor={blue500} />}
+            onTouchTap={() => props.onLauncherSelect(FileApp)}
           />
-          <ListItem
+          <ListItem style={{color: '#FFF'}}
             primaryText='照片'
             leftAvatar={<Avatar icon={<ImagePhoto />} backgroundColor={pink500} />}
           />
-          <ListItem
+          <ListItem style={{color: '#FFF'}}
+            primaryText='相册'
+            leftAvatar={<Avatar icon={<ImagePhotoAlbum />} backgroundColor={yellow500} />}
+          />
+          <ListItem style={{color: '#FFF'}}
+            primaryText='分享'
+            leftAvatar={<Avatar icon={<ImagePortrait />} backgroundColor={green500} />}
+          />
+          <ListItem style={{color: '#FFF'}}
             primaryText='系统设置'
             leftAvatar={<Avatar icon={<ActionSettings />} backgroundColor={gray500} />}
+            onTouchTap={() => props.onLauncherSelect(ControlApp)}
           />
-          <Divider />
-          <Subheader>通知</Subheader>
+          <div style={{height: 8}} />
+          <Divider style={{backgroundColor: '#353535'}}/>
+          <Subheader style={{color: '#7EC7C0', fontWeight: 'medium'}}>通知</Subheader>
         </List>
         </div>
       </Paper>
@@ -125,6 +133,7 @@ class Main extends React.Component {
     super(props)
 
     this.state = { 
+      currentApp: FileApp, 
       showAppBar: true, 
       resizing: false
     }
@@ -138,34 +147,36 @@ class Main extends React.Component {
         resizing: false
       }), sharpCurveDuration * 2)
     }
-  }
 
-/**
-          <TopBar style= {{
-              position: 'absolute', 
-              width: '100%', 
-              height: topBarHeight, 
-              top: showAppBar ? 0 : -topBarHeight,
-              transition: sharpCurve('top'),
-          }}/>
-**/
+    this.onLauncherSelect = (app) => {
+      if (app === this.state.currentApp) return
+      this.setState(Object.assign({}, this.state, { currentApp: app }))   
+    }
+  }
 
 	render() {
 
     const topBarHeight = 48
     const showAppBar = this.state.showAppBar
-  
+
+    const appProps = {
+      maximized: !showAppBar,
+      resizing: this.state.resizing,
+      nudge: true
+    }    
+ 
     return (
 
       <div style={{width: '100%', height: '100%'}}>
         <div style={{
             position: 'absolute', 
-            width: showAppBar ? 'calc(100% - 320px)': '100%',
+            // width: showAppBar ? 'calc(100% - 320px)': '100%',
+            width: '100%',
             height: '100%', 
             transition: sharpCurve('all'),
             overflow: 'hidden'
         }}>
-          <FileApp maximized={!showAppBar} resizing={this.state.resizing} nudge={!showAppBar}/>
+          { React.createElement(this.state.currentApp, appProps, null) } 
         </div>
 
         <SystemDrawer 
@@ -177,6 +188,7 @@ class Main extends React.Component {
             transition: sharpCurve('right')
           }}
           resizing={this.state.resizing}
+          onLauncherSelect={this.onLauncherSelect}
         />
 
         <IconButton 
@@ -188,7 +200,7 @@ class Main extends React.Component {
           }}
 
           iconStyle={showAppBar ?
-            ({color: '#000', opacity: 0.54}) :
+            ({color: '#FFF', opacity: 1}) :
             ({color: '#FFF', opacity: 1})
           }
           onTouchTap={this.toggleAppBar} 
@@ -214,9 +226,13 @@ class Main extends React.Component {
 
 	componentDidMount() {
 
+    setTimeout(() => this.setState(Object.assign({}, this.state, {
+      showAppBar: false
+    })), 1500)
+
 		var _this = this
 
-    fileNav('HOME_DRIVE', null)
+    // fileNav('HOME_DRIVE', null)
 
 		// ipcRenderer.send('getRootData')
 		// ipcRenderer.send('getMediaData')

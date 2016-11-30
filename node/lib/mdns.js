@@ -3,6 +3,8 @@ var request = require('request')
 var mdns = require('mdns-js')
 var validator = require('validator')
 var request = require('superagent')
+var UUID = require('node-uuid')
+var debug = require('debug')('mdns')
 
 mdns.excludeInterface('0.0.0.0')
 
@@ -36,15 +38,34 @@ class StationBrowser extends EventEmitter {
   constructor(browser) {
 
     super()
-
     browser.on('update', data => {
+
+      debug('mdns update', data)
 
       if (!Array.isArray(data.addresses) || typeof data.host !== 'string')  
         return
+      debug('mdns addresses', data.addresses)
+
+      if (data.addresses.includes('192.168.5.65')) {
+        // 801L5C00748
+        let mock = { 
+          name: 'wisnuc-ws215i-801L5C00748',
+          domain: 'local',
+          host: 'wisnuc-ws215i-801L5C00748.local',
+          model: 'ws215i',
+          serial: '801L5C00748',
+          address: '192.168.5.65' 
+        }
+
+        return this.updateStation(mock)
+      }
 
       // check if ws host
       var parsed = parseHostname(data.host) 
-      if (!parsed) return
+      if (!parsed) {
+        debug('parse host name failed', data.host)
+        return 
+      }
 
       // set up hostname => ip address map
       data.addresses
@@ -56,6 +77,8 @@ class StationBrowser extends EventEmitter {
         address: data.addresses[0]
       })
 
+
+      debug('new station found', obj)
       this.updateStation(obj)
     }) 
 
@@ -98,6 +121,8 @@ class StationBrowser extends EventEmitter {
         return
 
       var copy = [...this.stations]
+
+      debug('station update', copy)
       Object.freeze(copy)
       this.emit('stationUpdate', copy)
     }

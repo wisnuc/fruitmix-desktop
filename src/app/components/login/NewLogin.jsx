@@ -15,7 +15,7 @@ import { Paper, TextField, FlatButton, CircularProgress, Snackbar, SelectField, 
 import Dehaze from 'material-ui/svg-icons/image/dehaze'
 import Left from 'material-ui/svg-icons/navigation/chevron-left'
 import Right from 'material-ui/svg-icons/navigation/chevron-right'
-import { sendCommand } from '../../lib/command' 
+import { sendCommand, command } from '../../lib/command' 
 
 //import CSS
 import css  from  '../../../assets/css/login'
@@ -87,11 +87,10 @@ class Index extends React.Component {
 
 	submit() {
 
-    console.log('submit, --------------------------------->')
 		let username = this.refs.username.input.value
 		let password = this.refs.password.input.value
 
-    console.log('sendcommand, ---------------------------->')
+/**
     sendCommand('user-login', {
       cmd: 'USER_LOGIN',
       args: {
@@ -100,7 +99,9 @@ class Index extends React.Component {
     }, err => {
       console.log(err) 
     })
+**/
 
+    command('user-login', 'USER_LOGIN', { username, password }, err => console.log(err))
 		ipcRenderer.send('login',username,password)
 	}
 
