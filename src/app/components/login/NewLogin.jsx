@@ -84,11 +84,12 @@ class Index extends React.Component {
 		let ip = storeState().login.device[index].address
 		ipcRenderer.send('setServerIp', ip)
 	}
-
+	/*
 	submit() {
 
 		let username = this.refs.username.input.value
 		let password = this.refs.password.input.value
+		*/
 
 /**
     sendCommand('user-login', {
@@ -100,16 +101,18 @@ class Index extends React.Component {
       console.log(err) 
     })
 **/
-
-    command('user-login', 'USER_LOGIN', { username, password }, err => console.log(err))
+	/*
+    	command('user-login', 'USER_LOGIN', { username, password }, err => console.log(err))
 		ipcRenderer.send('login',username,password)
 	}
+	*/
 
-	kenDown(e) {
-		if (e.nativeEvent.which == 13) {
-			this.submit()
-		}
-	}
+
+	// kenDown(e) {
+	// 	if (e.nativeEvent.which == 13) {
+	// 		this.submit()
+	// 	}
+	// }
 
 	openAppifiInstall() {
 		ipcRenderer.send('openAppifi')

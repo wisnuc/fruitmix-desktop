@@ -41,20 +41,7 @@ class UserList extends React.Component {
 
 		let username = this.props.device.users[this.state.index].username
 		let password = this.refs.password.value
-
-/**
-    sendCommand('user-login', {
-      cmd: 'USER_LOGIN',
-      args: {
-        username, password
-      } 
-    }, err => {
-      console.log(err) 
-    })
-**/
-    command('user-login', 'USER_LOGIN', { username, password }, err => 
-      console.log(err)) 
-
+    	command('user-login', 'USER_LOGIN', { username, password }, err => console.log(err)) 
 		ipcRenderer.send('login',username,password)
 	}
 
