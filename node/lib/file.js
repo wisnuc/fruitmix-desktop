@@ -12,8 +12,10 @@ import { serverGetAsync, serverPostAsync, serverPatchAsync, serverDeleteAsync } 
 const debug = Debug('lib:file')
 const c = debug
 
-const asCallback = (afunc) => (args, callback) => 
-    afunc(args).asCallback((err, data) => err ? callback(err) : callback(null, data))
+const asCallback = (afunc) => 
+  (args, callback) => 
+    afunc(args).asCallback((err, data) => 
+      err ? callback(err) : callback(null, data))
 
 addListener(login => {
   if (login === 'LOGGEDIN')
@@ -505,26 +507,50 @@ const fileNavAsync = async (context, target) => {
 }
 **/
 
+const fileGetSharedWithMe = async () => 
+  await serverGetAsync(`share/sharedWithMe`)
+
+const fileGetSharedWithOthers = async () => 
+  await serverGetAsync(`share/sharedWithOthers`) 
+
 const fileNavAsync = async ({ context, folderUUID, rootUUID }) => {
 
   debug('fileNavAsync', context, folderUUID, rootUUID)
 
   switch (context) {
   case 'HOME_DRIVE':
-    if (!folderUUID) {
+    if (!folderUUID && !rootUUID) {
       folderUUID = rootUUID = store.getState().login.obj.home 
     }
     else if (!rootUUID) {
       rootUUID = store.getState().login.obj.home
     }
+    else {
+      throw(new Error(`error folder/root uuid: ${folderUUID}/${rootUUID}`))
+    }
     break
 
   case 'SHARED_WITH_ME':
-    throw new Error('not supported yet')
+
+    if (!folderUUID && !rootUUID) {
+      return {
+        children: await fileGetSharedWithMe()
+      }
+    }
+    else if (!folderUUID) { // only rootUUID means list this share root
+      folderUUID = rootUUID
+    }
     break
 
   case 'SHARED_WITH_OTHERS':
-    throw new Error('not supported yet')
+    if (!folderUUID && !rootUUID) {
+      return {
+        children: await fileGetSharedWithOthers()
+      }
+    }
+    else if (!folderUUID) {
+      folderUUID = rootUUID
+    }
     break
 
   default:
