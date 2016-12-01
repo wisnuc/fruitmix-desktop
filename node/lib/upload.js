@@ -5,8 +5,21 @@ var stream = require('stream')
 var EventEmitter = require('events')
 var crypto = require('crypto')
 
-var request = require('request')
+import { dialog } from 'electron' 
+import request from 'request'
+
+import registerCommandHandlers from './command'
+import { getMainWindow } from './window'
+import store from '../serve/store/store'
+
 var sendMessage = null
+var c = console.log
+var server
+var user
+var initArgs = () => {
+  server = 'http://' + store.getState().config.ip + ':3721'
+  user = store.getState().login.obj
+}
 // describe
 
 // 1 upload operation  
@@ -103,33 +116,41 @@ class UserTask extends EventEmitter {
     // case 1: multiple folders
     // case 2: multiple files
     this.roots = []
-		if (type === 'file') {
+    if (type === 'file') {
+      this.type = 'file'
       files.forEach(file => {
-        this.roots.push(createFileUploadTask(null, file.abspath, target, null))
+        this.roots.push(createFileUploadTask(null, file, target, null))
       })
     }
     else {
+      this.type = 'folder'
       files.forEach(folder => {
-        this.roots.push(createFolderUploadTask(null, folder.abspath, target, null))
+        this.roots.push(createFolderUploadTask(null, folder, target, null))
       })
     }
-	}
+  }
 }
 
 const createUserTask = (type, files, target) => {
   let userTask = new UserTask(type, files, target)
   userTasks.push(userTask)
+  sendUploadMessage()
 }
 
+var sendMessage = null
+var updateStatusOfupload = () => {
+  let mainWindow = getMainWindow()
+  mainWindow.webContents.send('refreshStatusOfUpload',userTasks)
+}
 const sendUploadMessage = () => {
   let isSend = false
     for (var i = 0; i < userTasks.length; i++) {
-      if (isSend == true) {
-        break
-      }
       for (var j = 0;j < userTasks[i].roots.length;j++) {
-        if (userTasks[i].roots[j].finishCount != userTasks[i].roots[j].children.length ) {
-          c(i + ' .. ' + j)
+        if (userTasks[i].type == 'folder' && userTasks[i].roots[j].finishCount !== userTasks[i].roots[j].children.length ) {
+          isSend = true
+          break
+        }
+        if (userTasks[i].type == 'file' && userTasks[i].roots[j].state !== 'finished') {
           isSend = true
           break
         }
@@ -137,13 +158,15 @@ const sendUploadMessage = () => {
     }
 
   if (isSend && sendMessage==null) {
+    c('begin send message ...')
     sendMessage = setInterval(()=> {
-        c('send message ...')
-        mainWindow.webContents.send('refreshStatusOfUpload',userTasks)
+        updateStatusOfupload()
         // dispatch(action.setUpload(userTasks))
 
       },1000)
-  }else {
+  }else if(!isSend && sendMessage != null) {
+    c('stop send message ...')
+    updateStatusOfupload()
     clearInterval(sendMessage)
     sendMessage = null
   }
@@ -154,22 +177,22 @@ setInterval(() => {
 },5000)
 
 const folderStats = (abspath, callback) => {
-	fs.readdir(abspath, (err, entries) => {
-		if (err) return callback(err)
-		if (entries.length === 0) 
-			return callback(null, [])
-		let count = entries.length
-		let xstats = []
-		entries.forEach(entry => {
-			fs.lstat(path.join(abspath, entry), (err, stats) => {
-				if (!err) {
-					if (stats.isFile() || stats.isDirectory())
-						xstats.push(Object.assign(stats, { abspath: path.join(abspath, entry) }))
-				}
-				if (!--count) callback(null, xstats)
-			})
-		})
-	})
+  fs.readdir(abspath, (err, entries) => {
+    if (err) return callback(err)
+    if (entries.length === 0) 
+      return callback(null, [])
+    let count = entries.length
+    let xstats = []
+    entries.forEach(entry => {
+      fs.lstat(path.join(abspath, entry), (err, stats) => {
+        if (!err) {
+          if (stats.isFile() || stats.isDirectory())
+            xstats.push(Object.assign(stats, { abspath: path.join(abspath, entry) }))
+        }
+        if (!--count) callback(null, xstats)
+      })
+    })
+  })
 }
 
 const hashFile = (abspath, callback) => {
@@ -191,38 +214,37 @@ const hashFile = (abspath, callback) => {
   fileStream.pipe(hash) 
 }
 
-const createFileUploadTask = (parent, abspath, target, root) => {
+const createFileUploadTask = (parent, file, target, root) => {
   c(' ')
-  c('create file : ' + path.basename(abspath))
-  let task = new fileUploadTask(parent, abspath, target, root)
-  // task.enterHashlessState()
+  c('create file : ' + path.basename(file.abspath))
+  let task = new fileUploadTask(parent, file, target, root)
   task.setState('hashless')
   return task
 }
 
 class fileUploadTask extends EventEmitter {
 
-	constructor(parent, abspath, target, root) {
-		super()
-		this.abspath = abspath
-		this.target = target
+  constructor(parent, file, target, root) {
+    super()
+    this.abspath = file.abspath
+    this.size = file.size
+    this.progress = 0
+    this.target = target
     this.parent = parent
     this.type = 'file'
-    this.name = path.basename(abspath)
-		if (this.parent) {
-			this.parent.children.push(this)
+    this.name = path.basename(file.abspath)
+    this.isRoot = true
+    if (this.parent) {
+      this.parent.children.push(this)
       this.root = root
-    }else {
-      this.children = {length:1}
-      this.root = this
+      this.isRoot = false
     }
-    this.finishCount = 0
     this.state = null
-	}
+  }
 
   setState(newState,...args) {
     c(' ')
-    c('setState : ' + newState + '(' + this.state +')' + ' ' + path.basename(this.abspath))
+    // c('setState : ' + newState + '(' + this.state +')' + ' ' + path.basename(this.abspath))
     switch (this.state) {
       case 'hashless':
         this.exitHashlessState()
@@ -304,6 +326,7 @@ class fileUploadTask extends EventEmitter {
     let transform = new stream.Transform({
       transform: function(chunk, encoding, next) {
         body+=chunk.length;
+        _this.progress = body / _this.size
         this.push(chunk)
         next();
       }
@@ -323,16 +346,18 @@ class fileUploadTask extends EventEmitter {
     }
     this.handle = request(options, (err, res, body) => {
       if (!err && res.statusCode == 200) {
-        c('upload file ' + path.basename(this.abspath) + 'success!!!')
+        c('upload file ' + path.basename(_this.abspath) + 'success')
         if (_this.root) {
           _this.root.success++
         }
+        _this.progress = 1
         _this.setState('finished', null, JSON.parse(body).uuid)
       }else {
-        c('upload file ' + path.basename(this.abspath) + 'fail!!!')
+        c('upload file ' + path.basename(_this.abspath) + 'failed')
         if (_this.root) {
           _this.root.failed++
         }
+        _this.progress = 1.01
         _this.setState('finished', err, null)
       }
     })
@@ -347,17 +372,17 @@ class fileUploadTask extends EventEmitter {
     if (this.parent) {
       this.parent.childrenFinish()
     }
-    this.finishCount++
     this.state = 'finished'
     this.message = err ? err.message : null
   }
 }
 
 // factory 
-const createFolderUploadTask = (parent, abspath, target, root) => {
+const createFolderUploadTask = (parent, folder, target, root) => {
   c(' ')
-  c('create folder : ' + path.basename(abspath))
-  let task = new folderUploadTask(parent, abspath, target, root)
+  c('create folder : ' + path.basename(folder.abspath))
+  c(folder)
+  let task = new folderUploadTask(parent, folder, target, root)
   // task.enterReadyState()
   task.setState('ready')
   return task
@@ -367,32 +392,34 @@ const createFolderUploadTask = (parent, abspath, target, root) => {
 // ready -> running -> end
 class folderUploadTask extends EventEmitter {
 
-	constructor(parent, abspath, target, root) {
+  constructor(parent, folder, target, root) {
 
-		super()
-		this.abspath = abspath
-    this.name = path.basename(abspath)
-		this.target = target // uuid
+    super()
+    this.abspath = folder.abspath
+    this.name = path.basename(folder.abspath)
+    this.progress = 0
+    this.target = target // uuid
     this.type = 'folder'
-		// structural
-		this.parent = parent
-		this.children = []
-		if (this.parent) {
-			this.parent.children.push(this)
+    // structural
+    this.parent = parent
+    this.children = []
+    this.isRoot = true
+    if (this.parent) {
+      this.parent.children.push(this)
       this.root = root
+      this.isRoot = false
     }else {
       this.root = this
       this.success = 0
       this.failed = 0
     }
-
     this.state = null
     this.finishCount = 0
-	}
+  }
 
   setState(newState, ...args) {
     c(' ')
-    c('setState : ' + newState + '(' + this.state +')' + ' ' + path.basename(this.abspath))
+    // c('setState : ' + newState + '(' + this.state +')' + ' ' + path.basename(this.abspath))
     switch (this.state) {
       case 'ready':
         this.exitReadyState()
@@ -453,12 +480,16 @@ class folderUploadTask extends EventEmitter {
     this.handle = request(options,function (err,res,body) {
       if (!err && res.statusCode == 200) {
         c('create folder ' + path.basename(_this.abspath) + ' success')
-        _this.root.success++
+        if (_this.root) {
+          _this.root.success++
+        }
         _this.uuid = JSON.parse(body).uuid
-        c('uuid is : ' + _this.uuid)
+        // c('uuid is : ' + _this.uuid)
         _this.setState('probing')
       }else {
-        _this.root.failed++
+        if (_this.root) {
+          _this.root.failed++
+        }
         c('create folder ' + path.basename(_this.abspath) + ' failed')
         c(err)
         _this.setState('finished', err)
@@ -482,13 +513,12 @@ class folderUploadTask extends EventEmitter {
       }
   
       xstats.forEach(xstat => {
+        let r = _this.root?_this.root:_this
         if (xstat.isDirectory()) {
-          // createFolderTaskFromStats()
-          createFolderUploadTask(this, xstat.abspath, _this.uuid, this.root)
+          createFolderUploadTask(_this, xstat, _this.uuid, r)
         }
         else if (xstat.isFile()) {
-          // createFileTaskFromStats()
-          createFileUploadTask(this, xstat.abspath, _this.uuid, this.root)
+          createFileUploadTask(_this, xstat, _this.uuid, r)
         }
       })
 
@@ -500,8 +530,6 @@ class folderUploadTask extends EventEmitter {
     if (!this.children.length && this.parent) {
       this.parent.childrenFinish()
     }
-
-
   }
 
   enterFinishedState(err) {
@@ -510,190 +538,56 @@ class folderUploadTask extends EventEmitter {
   }
 
   childrenFinish() {
-    c(path.basename(this.abspath) + ' run children finish : ' + ' ___________________________________')
+    // c(path.basename(this.abspath) + ' run children finish : ' + ' ___________________________________')
     this.finishCount++
-    c('finish count is ' + this.finishCount)
-    c('children length is ' + this.children.length)
+    // c('finish count is ' + this.finishCount)
+    // c('children length is ' + this.children.length)
     if (this.finishCount == this.children.length && this.parent) {
-      c(path.basename(this.abspath) + ' is over------------------------------------------------')
+      // c(path.basename(this.abspath) + ' is over------------------------------------------------')
       this.parent.childrenFinish()
     }else if (this.finishCount == this.children.length && !this.parent) {
       c(path.basename(this.abspath) + ' is absolute over------------------------------------------------')
+      updateStatusOfupload()
     }
   }
 }
 
+const uploadHandle = (args, callback) => {
+  initArgs()
+  let folderUUID = args.folderUUID
+  let dialogType = args.type=='folder'?'openDirectory':'openFile'
+  dialog.showOpenDialog({properties: [ dialogType,'multiSelections','createDirectory']},function(data){
+    if (!data) {
+      callback('get list err',null)
+      return
+    }
+    let index = 0
+    let count = data.length
+    let uploadArr = []
+    let readUploadInfor = (abspath) => {
+      fs.stat(abspath,(err, infor) => {
+        if (err) {
 
-
-
-
-const scan = () => {
-
+        }else {
+          uploadArr.push(Object.assign({},infor,{abspath:abspath})) 
+        }
+        index++
+        if(index < count) {
+          readUploadInfor(data[index])
+        }else {
+          createUserTask(args.type,uploadArr,folderUUID,callback)
+        }
+      })
+    }
+    readUploadInfor(data[index])
+  })
 }
 
+const uploadCommandMap = new Map([
+  ['UPLOAD_FOLDER', uploadHandle],
+  ['UPLOAD_FILE', uploadHandle]
+])
 
-// transimission api
-var transmission = {
-	//create folder
-	createFolder: function(name,dir) {
-		var _this = this
-		var options = {
-			url:server+'/files/'+dir.uuid,
-			method:'post',
-			headers: {
-				Authorization: user.type+' '+user.token,
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				name:name
-			})
-		}
-		request(options,function (err,res,body) {
-			if (!err && res.statusCode == 200) {
-				c('create folder ' + name + ' success')
-				var folder = JSON.parse(body)
-				_this.modifyFolder(name,dir,folder,true);
-			}else {
-				c('create folder ' + name + ' failed')
-				mainWindow.webContents.send('message','新建文件夹'+name+'失败');
-			}
-		})
-	},
-
-	modifyFolder: function(name,dir,folder,send) {
-		//insert folder obj into map
-		
-		let parentNode = map.get(dir.uuid);
-		parentNode.children.push(Object.assign({},folder,{children:[]}))
-		map.set(folder.uuid,parentNode.children[parentNode.children.length-1]);
-		if (dir.uuid == currentDirectory.uuid) {
-			//get children
-			children = parentNode.children.map(item => Object.assign({},item,{checked:false,children:null}))
-			//ipc
-			if (send) {
-				dispatch(action.setDir(currentDirectory,children,dirPath))
-			}
-			mainWindow.webContents.send('message','新建文件夹成功')
-		}
-	},
-	//upload file
-	dealUploadQueue: function() {
-		if (uploadQueue.length == 0) {
-			return
-		}else {
-			if (uploadQueue[0].index == uploadQueue[0].length && uploadNow.length == 0) {
-				mainWindow.webContents.send('message',uploadQueue[0].success+' 个文件上传成功 '+uploadQueue[0].failed+' 个文件上传失败');
-				this.modifyData(uploadQueue.shift())
-				c('one upload task over');
-				this.dealUploadQueue();
-			}else {
-				if (uploadNow.length == 0) {
-					let gap = 1 - uploadNow.length;
-					for (let i = 0; i < gap; i++) {
-						let index = uploadQueue[0].index;
-						if (index > uploadQueue[0].length-1) {
-							return
-						}
-						uploadNow.push(uploadQueue[0].data[index]);
-						this.uploadFile(uploadQueue[0].data[index]);
-						uploadQueue[0].index++;
-					}
-				}
-			}
-		}
-	},
-
-	uploadFile: function(file) {
-		var _this = this;
-		let body = 0;
-		let countStatus;
-		let hashing = true
-		if (file.size > 10000000) {
-			countStatus = setInterval(()=>{
-				if (hashing) {
-					return
-				}
-				let status = body/file.size;
-				mainWindow.webContents.send('refreshStatusOfUpload',file.path+file.uploadTime,status);
-				c(file.path+ ' ======== ' + status);
-			},1000);
-		}
-		
-		let transform = new stream.Transform({
-			transform: function(chunk, encoding, next) {
-				body+=chunk.length;
-				this.push(chunk)
-				next();
-			}
-		})
-		
-		let hash = crypto.createHash('sha256')
-		hash.setEncoding('hex')
-		mainWindow.webContents.send('refreshStatusOfUpload',file.path+file.uploadTime,'正在校验文件');
-		let fileStream = fs.createReadStream(file.path)
-
-		fileStream.on('end',() => {
-			hash.end()
-			let sha = hash.read()
-			hashing = false
-
-			var tempStream = fs.createReadStream(file.path).pipe(transform);
-			tempStream.path = file.path
-
-			var options = {
-				url:server+'/files/'+file.parent,
-				method:'post',
-				headers: {
-					Authorization: user.type+' '+user.token
-				},
-				formData : {
-					'sha256' : sha,
-					'file' : tempStream
-				}
-
-			}
-			request(options,function (err,res,body) {
-				clearInterval(countStatus)
-				if (!err && res.statusCode == 200) {
-					c('create file success')
-						uploadQueue[0].success += 1;
-						file.status = 1;
-						mainWindow.webContents.send('refreshStatusOfUpload',file.path+file.uploadTime,1);
-						file.uuid = JSON.parse(body).uuid
-				}else {
-					c('create folder failed')
-						uploadQueue[0].failed += 1;
-						file.status = 1.01;
-						mainWindow.webContents.send('refreshStatusOfUpload',file.path+file.uploadTime,1.01);
-						mainWindow.webContents.send('message','upload failed');
-				}
-				let index = uploadNow.findIndex(item=>item.path == file.path);
-				uploadNow.splice(index,1);
-				if (uploadNow.length == 0) {
-					_this.dealUploadQueue();
-				}
-			})
-			
-		})
-
-		fileStream.pipe(hash)	
-	},
-
-	modifyData: function(files,uuid) {
-		if (files.parent == currentDirectory.uuid) {
-			ipcMain.emit('enterChildren',null,{uuid:files.parent})
-		}
-	},
-
-  createUserTask:createUserTask
-
-};
-
-// export {
-//   fileUploadTask,
-//   folderUploadTask
-// }
-
-module.exports = transmission
+registerCommandHandlers(uploadCommandMap)
 
 

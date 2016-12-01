@@ -4,6 +4,7 @@ import { FloatingActionButton, RaisedButton, Popover, Menu, MenuItem } from 'mat
 import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import FileFileUpload from 'material-ui/svg-icons/file/file-upload'
+import { command } from '../../lib/command'
 
 class FileUploadButton extends React.Component {
 
@@ -35,12 +36,31 @@ class FileUploadButton extends React.Component {
           onRequestClose={() => this.setState({ open: false })} 
         >
           <Menu>
-            <MenuItem primaryText='上传文件夹' leftIcon={<FileFolder />}/>
-            <MenuItem primaryText='上传文件' leftIcon={<EditorInsertDriveFile />}/>
+            <MenuItem primaryText='上传文件夹' leftIcon={<FileFolder />} onTouchTap={this.upload.bind(this, 'UPLOAD_FOLDER')}/>
+            <MenuItem primaryText='上传文件' leftIcon={<EditorInsertDriveFile />} onTouchTap={this.upload.bind(this, 'UPLOAD_FILE')}/>
           </Menu>          
         </Popover>
       </div>
     )
+  }
+
+  upload(cm) {
+    if (!this.props.path.length) {
+      return
+    }
+    let path = this.props.path
+    let folderUUID = path[path.length - 1].uuid
+    let type = cm=='UPLOAD_FOLDER'?'folder':'file'
+    command('fileapp', cm, {folderUUID:folderUUID,type:type}, (err) => {
+      if (err) {
+        console.log('upload folder task error')
+      }else {
+        console.log('upload folder task success')
+      }
+    })
+    this.setState({
+      open : false
+    })
   }
 }
 

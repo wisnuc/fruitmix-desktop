@@ -15,18 +15,18 @@ import migration from './lib/migration'
 import userModule from './lib/user'
 import systemModule from './lib/system'
 
-const upload = require('./lib/upload')
-const download = require('./lib/download')
+//init api
 import loginApi from './lib/login'
-const mediaApi = require('./lib/media')
-// const deviceApi = require('./lib/device')
-const fileApi = require('./lib/file')
-const utils = require('./lib/util')
-
+import fileApi from './lib/file'
+import mediaApi from './lib/media'
+import upload from './lib/upload'
+import download from './lib/download'
+//init window
 import { initMainWindow, getMainWindow } from './lib/window'
 import { initTestWindow } from './lib/testHook'
 
 import mdns from './lib/mdns'
+
 const debug = Debug('main')
 
 var mocha = false
@@ -67,26 +67,8 @@ app.on('ready', function() {
 
   initMainWindow()
   if (mocha) initTestWindow()
-
-	//Tray var appIcon = null
-	// appIcon = new Tray(path.join(__dirname,'180-180.png'))
-	// var contextMenu = Menu.buildFromTemplate([
-	//     { label: 'Item1', type: 'radio' },
-	//     { label: 'Item2', type: 'radio' },
-	//     { label: 'Item3', type: 'radio', checked: true },
-	//     { label: 'Item4', type: 'radio' }
-	// ])
-	// appIcon.setToolTip('This is my application.')
-  //  	appIcon.setContextMenu(contextMenu)
 })
 
 app.on('window-all-closed', () => app.quit())
-
-// ipcMain.on('close-main-window', () => app.quit())
-/**
-ipcMain.on('getDeviceUsedRecently', err => {
-	deviceApi.getRecord()
-})
-**/
 
 

@@ -753,6 +753,30 @@ class FileApp extends React.Component {
       })), sharpCurveDelay)
     }
 
+    this.download = () => {
+    	let downloadArr = this.state.list.filter(item => item.selected)
+    	let folders = []
+    	let files = []
+    	this.state.list.forEach(item => {
+    		if (item.selected && item.type == 'folder') {
+    			folders.push(item)
+    		}else if (item.selected && item.type == 'file') {
+    			files.push(item)
+    		}
+    	})
+
+    	command('fileapp', 'DOWNLOAD', {
+    		folders: !!folders.length?folders:undefined,
+    		files: !!files.length?files:undefined
+    	}, (err) => {
+    		if (err) {
+    			console.log('download task error')
+    		}else {
+    			console.log('download task success')
+    		}
+    	})
+    }
+
     this.hideContextMenu = () => {
       if (!this.state.contextMenu) return
 
@@ -1275,7 +1299,7 @@ class FileApp extends React.Component {
             }}
           />
         </div>
-        <FileUploadButton style={{position: 'absolute', right:48, bottom:48}} />
+        <FileUploadButton path={this.state.path} style={{position: 'absolute', right:48, bottom:48}} />
 
         { this.state.contextMenu && (
           <div 
@@ -1300,7 +1324,7 @@ class FileApp extends React.Component {
                 }}/>
                 <MenuItem primaryText='移动' /> 
                 <MenuItem primaryText='分享' /> 
-                <MenuItem primaryText='下载' />
+                <MenuItem primaryText='下载' onTouchTap={this.download}/>
                 <MenuItem primaryText='删除' onTouchTap={this.showDeleteConfirmDialog} /> 
                 <MenuItem primaryText='详情' onTouchTap={this.showDetail} />
               </Menu>
