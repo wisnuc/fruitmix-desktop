@@ -694,6 +694,7 @@ class FileApp extends React.Component {
       deleteConfirm: false,
     }
 
+    // FIXME !!!
     this.refresh = () => {
       command('fileapp', 'FILE_NAV', {
         context: this.state.navContext,
@@ -791,7 +792,7 @@ class FileApp extends React.Component {
 
     this.renderLeftNav = () => (
 
-      <Paper style={{
+      <div style={{
         width: LEFTNAV_WIDTH, 
         height: '100%', 
         position: 'absolute', 
@@ -802,6 +803,8 @@ class FileApp extends React.Component {
         transitionEnabled={false}
         rounded={false}
         zDepth={this.state.leftNav ? 3 : 0} 
+
+        onTouchTap={e => console.log(e)}
       >
         <div style={{width: '100%', height: 56, display: 'flex', alignItems: 'center',
           backgroundColor: blue500 }}>
@@ -815,11 +818,35 @@ class FileApp extends React.Component {
           </div>
           <div style={{fontSize:21, fontWeight: 'medium', color: '#FFF' }}>文件</div>
         </div>
-        <Menu autoWidth={false} width={LEFTNAV_WIDTH}>
+        <Menu autoWidth={false} width={LEFTNAV_WIDTH}
+          onItemTouchTap={() => console.log('-------------- >>>>')}
+        >
           <MenuItem primaryText='我的文件' leftIcon={<DeviceStorage />} 
-            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}/>
-          <MenuItem primaryText='我分享的文件' leftIcon={<SocialShare />} 
-            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}/>
+            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}
+            onTouchTap={() => {
+              debug('left menu my files selected')
+              const context = 'HOME_DRIVE'
+              command('fileapp', 'FILE_NAV', { context }, (err, data) => {
+                if (err) return
+                this.navUpdate(context, data) 
+              })
+            }}
+          />
+          <MenuItem 
+            key='leftnav-shared-with-others'
+            id='leftnav-shared-with-others'
+            primaryText='我分享的文件' leftIcon={<SocialShare />} 
+            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}
+            onTouchTap={() => {
+
+              debug('Left menu sharedWithOthers selected')
+              const context = 'SHARED_WITH_OTHERS'
+              command('fileapp', 'FILE_NAV', { context }, (err, data) => {
+                if (err) return
+                setImmediate(() => this.navUpdate(context, data))
+              })
+            }}
+          />
           <Divider />
           <MenuItem primaryText='分享给我的文件' leftIcon={<SocialPeople />}
             innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}/>
@@ -829,7 +856,7 @@ class FileApp extends React.Component {
           <MenuItem primaryText='下载任务' leftIcon={<FileFileDownload />}
             innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}/>
         </Menu> 
-      </Paper>
+      </div>
     )
 
     this.toggleLeftNav = () => assign({ leftNav: !this.state.leftNav })
@@ -962,11 +989,49 @@ class FileApp extends React.Component {
   }
 **/
 
+  // context
+  // data : {
+  //   children: []
+  //   path: [], 1..n -> path[0] root, path[last] current directory
+  // }
+
+  // context share
+  // 1, same as HOME_DRIVE
+  // 2. 
   navUpdate(context, data) {
 
     debug('navUpdate', context, data) 
 
+    if ((context === 'SHARED_WITH_ME' ||
+        context === 'SHARED_WITH_OTHERS') && !data.path) {
+      // virtual list
+
+      let state = {
+        navContext: context, 
+        navList: null,
+        navRoot: null,
+        
+        directory: null,
+        path: [],
+        
+        specified: -1,
+       
+        list: data.children.map(item => Object.assign({}, item, {
+            specified: false,
+            selected: false,
+          },
+          (item.name ? null : { name: item.uuid })
+          ))
+          .sort((a, b) => a.name.localeCompare(b.name))
+      }
+
+      this.setState(state)
+      debug('navUpdate, shared virtual root directory', state)
+      return  
+    }
+
     let state = {
+
       navContext: context,
       navList: null,
       navRoot: data.path[0],
@@ -1035,6 +1100,9 @@ class FileApp extends React.Component {
         node: uuid,
         name: newName 
       }, (err, data) => this.refresh())
+    }
+    else if (this.state.createNewFolder) {
+      // TODO
     }
   }
 
@@ -1332,7 +1400,6 @@ class FileApp extends React.Component {
           </div>
         )}
 
-        {/*this.getDetail()*/}
         {/*share dialog*/}
         {/*this.getShareDialog() */}
       </div>
@@ -1413,7 +1480,19 @@ class FileApp extends React.Component {
             }}>
               <Menu autoWidth={false} listStyle={{width: LEFTNAV_WIDTH}}>
                 <MenuItem style={{fontSize: 14}} primaryText='我的文件' leftIcon={<DeviceStorage />} animation={null}/>
-                <MenuItem style={{fontSize: 14}} primaryText='我分享的文件' leftIcon={<SocialShare />} />
+                <MenuItem 
+                  style={{fontSize: 14}} 
+                  primaryText='我分享的文件' 
+                  leftIcon={<SocialShare />} 
+                  onTouchTap={() => {
+                    debug('Left menu sharedWithOthers selected')
+                    const context = 'SHARED_WITH_OTHERS'
+                    command('fileapp', 'FILE_NAV', { context }, (err, data) => {
+                      if (err) return
+                      setImmediate(() => this.navUpdate(context, data))
+                    })
+                  }}
+                />
                 <Divider />
                 <MenuItem style={{fontSize: 14}} primaryText='分享给我文件' leftIcon={<SocialPeople />} />
                 <Divider />
