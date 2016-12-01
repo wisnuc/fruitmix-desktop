@@ -13,13 +13,14 @@ import React from 'react'
 
 import { connect } from 'react-redux'
 import Action from '../../actions/action'
-import { fileNav } from '../../lib/file'
+import { command } from '../../lib/command'
+import { fileNav, fileCreateNewFolder } from '../../lib/file'
 
 import keypress from 'keypress.js'
 
 import svg from '../../utils/SVGIcon'
 
-import { Popover } from 'material-ui'
+import { Avatar, Popover } from 'material-ui'
 
 import IconButton from 'material-ui/IconButton'
 import ActionCheckCircle from 'material-ui/svg-icons/action/check-circle'
@@ -44,7 +45,8 @@ import NavigationClose from 'material-ui/svg-icons/navigation/close'
 import NavigationCancel from 'material-ui/svg-icons/navigation/cancel'
 import NavigationChevronRight from 'material-ui/svg-icons/navigation/chevron-right'
 
-import { Divider, Paper, Menu, MenuItem, Dialog, FlatButton, TextField, Checkbox, CircularProgress } from 'material-ui'
+import { Divider, Paper, Menu, MenuItem, Dialog, 
+  FlatButton, TextField, Checkbox, CircularProgress } from 'material-ui'
 
 import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
 
@@ -70,6 +72,8 @@ const FONT_BRIGHTOP1 = '100%'
 const FONT_BRIGHTOP2 = '70%'
 
 ///////////////////////////////////////////////////////////////////////////////
+
+import { DialogInput, DialogConfirm } from '../common/Dialogs'
 
 const secondaryColor = '#FF4081'
 
@@ -156,37 +160,36 @@ const rowCheck = (props, state) => {
   }
 }
 
+const rowEditing = (props, state) => {
+  return props.editing
+}
+
 // props must has ctrl & shift
 class FileTableRow extends React.Component {
 
   constructor(props) {
     super(props)
-    this.state = { hover: false }
+    this.state = { hover: false } // TODO
   }
 
   componentWillReceiveProps(nextProps) {
-
     this.setState(state => {
-
       let nextState = {}
       nextState.hover = state.hover
       nextState.rowColor = rowColor(nextProps, state)
       nextState.rowLeading = rowLeading(nextProps, state)
       nextState.rowCheck = rowCheck(nextProps, state)
-      
+      nextState.rowEditing = rowEditing(nextProps, state)
       return nextState
     })
   }
 
   shouldComponentUpdate(nextProps, nextState) {
 
-    let color = rowColor(nextProps, nextState)
-    let leading = rowLeading(nextProps, nextState)
-    let check = rowCheck(nextProps, nextState)
-  
-    if (color === this.state.rowColor &&
-        leading === this.state.rowLeading &&
-        check === this.state.rowCheck) 
+    if (nextState.color === this.state.rowColor &&
+        nextState.leading === this.state.rowLeading &&
+        nextState.check === this.state.rowCheck &&
+        nextState.editing === this.state.rowEditing) 
       return false
     return true
   }
@@ -257,21 +260,21 @@ class FileTableRow extends React.Component {
       <FileFolder style={{color: '#000', opacity: 0.54}} /> : 
         <EditorInsertDriveFile style={{color: '#000', opacity: 0.54}} />
 
-  let editing = false
   return (
     <div style={style.row}
       onMouseEnter = {() => {
+        if (this.props.noMouseEvent) return
         onMouseEnter(index)
         this.setState(state => ({ hover: true }))
       }}
       onMouseLeave = {() => {
+        if (this.props.noMouseEvent) return
         this.setState(state => ({ hover: false }))
         onMouseLeave(index)
       }}
 
       onClick = {e => onClick(this.props.item.uuid, e)}
-      onDoubleClick = {e => { this.props.item.type === 'folder' && 
-        fileNav('HOME_DRIVE', this.props.item.uuid) }}
+      onDoubleClick = {e => onDoubleClick(this.props.item.uuid, e)}
       onTouchTap = {e => e.nativeEvent.button === 2 && onRightClick(this.props.item.uuid, e.nativeEvent)}
     >
         { renderLeading() } 
@@ -284,11 +287,14 @@ class FileTableRow extends React.Component {
         { renderIcon() }
       </div>
       <div style={{width:'100%'}}> { 
-        editing ? 
-          <TextField defaultValue={this.props.item.name} 
-            fullWidth={true} 
+        this.props.editing ?  
+          <TextField 
+            id={this.props.item.uuid}
+            defaultValue={this.props.item.name} 
+            fullWidth={false} 
             ref={ input => { input && input.focus() }} 
-            onBlur={() => window.store.dispatch({ type: 'FILE_ROW_NAME_ONBLUR', data: this.props.item.uuid })} 
+            onChange={this.props.editingOnChange}
+            onBlur={this.props.editingOnBlur} 
           /> : 
           <div style={{fontSize: 14, opacity:0.87}}>{this.props.item.name}</div> 
       }</div>
@@ -298,6 +304,24 @@ class FileTableRow extends React.Component {
   )
   }
 }
+
+
+class Throttler extends React.Component {
+  
+  constructor(props) {
+    super(props)
+    this.state = {}
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return nextProps.render  
+  }
+
+  render() {
+    return <div>{this.props.children}</div>
+  }
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -588,6 +612,7 @@ const FileToolbar = ({
         display: 'flex', alignItems: 'center', justifyContent: 'space-between' 
       }} 
       rounded={false} 
+      transitionEnabled={false}
       zDepth={suppressed ? 0 : 1}
     >
       <IconButton style={{marginLeft: 4}}
@@ -597,21 +622,15 @@ const FileToolbar = ({
         <NavigationMenu />
       </IconButton>
 
-      {/**
       <div style={{marginLeft: 20, flex: '0 0 138px', fontSize: 21, whiteSpace: 'nowrap', color: '#FFF'}}>
-        {title}
+        { breadCrumb }
       </div>
-      **/}
-
-      <div style={{display: 'flex', alignItems: 'center', fontSize: 21, color: '#FFF'}}>
-        <FlatButton>hello</FlatButton><NavigationChevronRight style={{margin: 8}} color='white' /><div>world</div>
-      </div>
-
-      <div style={{width: '100%', display: 'flex', justifyContent: 'flex-end'}}>
+      
+      <div style={{flex: 1, display: 'flex', justifyContent: 'flex-end'}}>
         { children }
       </div>
 
-      <div style={{width: nudge ? 48 : 0, height:48, transition: sharpCurve('width')}} />
+      <div style={{width: nudge ? 56 : 0, height:48, transition: sharpCurve('width')}} />
     </Paper>
   )
 }
@@ -623,23 +642,21 @@ const FileDetailToolbar = ({
   children 
 }) => (
 
-    <Paper
+    <div
       style={{
         position: 'absolute', 
         width: '100%', height: 56, 
-        backgroundColor: '#1E88E5', // '#1976D2',
+        backgroundColor: '#FAFAFA', //'#1E88E5', // '#1976D2',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
       }}
-      rounded={false} 
-      zDepth={suppressed ? 0 : 1}
     >
       <div style={{flex:1, display: 'flex', justifyContent:'flex-end'}}>
         { show && children }
       </div>
-      <div style={{width: nudge ? 48 : 0, height:48, transition: sharpCurve('width')}} />
-    </Paper>
+      <div style={{width: nudge ? 56 : 0, height:48, transition: sharpCurve('width')}} />
+    </div>
   )
 
 class FileApp extends React.Component {
@@ -648,37 +665,187 @@ class FileApp extends React.Component {
 
     super(props)
 
+    const assign = (props) => this.setState(state => Object.assign({}, state, props)) 
+
+    this.inputValue = null
     this.state = { 
 
       file: null, 
 
-      showDetail: false,
+      // for home_drive, navList is null, navRoot is home root uuid
+      // for shared_xxxx, navList is share list, navRoot is null or current share list item
+      navContext: 'HOME_DRIVE',
+      navTopList: null,
+      navRoot: null,
+
+      detailOn: false,
       leftNav: true,
       detailResizing: false,
 
       shift: false,
-      hover: -1, // index of row currently hovered
+      hover: -1,    // index of row currently hovered
+      editing: null,  // uuid of row currently editing
 
       clientX: 0,
       clientY: 0, 
       contextMenu: false,
+
+      createNewFolder: false,
+      deleteConfirm: false,
+    }
+
+    // FIXME !!!
+    this.refresh = () => {
+      command('fileapp', 'FILE_NAV', {
+        context: this.state.navContext,
+        folderUUID: this.state.directory.uuid,
+        rootUUID: this.state.path[0].uuid
+      }, (err, data) => {
+        if (err) return // TODO
+        this.navUpdate(this.state.navContext, data) // TODO
+      })
+    }
+
+    this.createNewFolder = (name) => {
+
+      if (typeof name !== 'string' || name.length === 0) return
+
+      command('fileapp', 'FILE_CREATE_NEW_FOLDER', { 
+          dir: this.state.directory.uuid,
+          name
+        }, (err, data) => {
+          if (err) return // TODO
+          setImmediate(this.refresh)
+        })
+    }
+
+    this.deleteSelected = () => {
+
+      if (!this.state.list.find(item => item.selected)) return
+      command('fileapp', 'FILE_DELETE', {
+        dir: this.state.directory.uuid,
+        nodes: this.state.list.filter(item => item.selected).map(item => item.uuid),
+      }, (err, data) => {
+        setImmediate(this.refresh)
+      })
     }
 
     // avoid binding
     this.toggleDetail = () => {
       this.setState(Object.assign({}, this.state, { 
         detailResizing: true, 
-        showDetail: !this.state.showDetail 
+        detailOn: !this.state.detailOn 
       }))
       setTimeout(() => this.setState(Object.assign({}, this.state, { 
         detailResizing: false
       })), sharpCurveDelay)
     }
 
-    this.toggleLeftNav = () => {
-      this.setState(Object.assign({}, this.state, { leftNav: !this.state.leftNav }))
+    this.showDetail = () => {
+
+      if (this.state.detailOn) return
+      debug('showDetail()')
+      this.setState(state => Object.assign({}, state, { 
+        detailResizing: true, 
+        detailOn: true
+      }))
+      setTimeout(() => this.setState(Object.assign({}, this.state, { 
+        detailResizing: false
+      })), sharpCurveDelay)
     }
-  
+
+    this.hideContextMenu = () => {
+      if (!this.state.contextMenu) return
+
+      debug('hideContextMenu()')
+      this.setState(state => Object.assign({}, state, {
+        contextMenu: false
+      }))
+    }
+
+    this.showCreateNewFolderDialog = () => assign({ createNewFolder: true })
+    this.showDeleteConfirmDialog = () => assign({ deleteConfirm: true })
+
+    this.renderLeftNav = () => (
+
+      <div style={{
+        width: LEFTNAV_WIDTH, 
+        height: '100%', 
+        position: 'absolute', 
+        left: this.state.leftNav ? 0 : -LEFTNAV_WIDTH, 
+        transition: sharpCurve('left'), 
+        zIndex: 1000 }} 
+
+        transitionEnabled={false}
+        rounded={false}
+        zDepth={this.state.leftNav ? 3 : 0} 
+
+        onTouchTap={e => console.log(e)}
+      >
+        <div style={{width: '100%', height: 56, display: 'flex', alignItems: 'center',
+          backgroundColor: blue500 }}>
+          <div style={{marginLeft:4, width:68}}>
+            <IconButton iconStyle={{color: '#FFF'}}
+              onTouchTap={() => this.setState(Object.assign({}, this.state, {
+                leftNav: false
+              }))}>
+              <NavigationMenu />
+            </IconButton>
+          </div>
+          <div style={{fontSize:21, fontWeight: 'medium', color: '#FFF' }}>文件</div>
+        </div>
+        <Menu autoWidth={false} width={LEFTNAV_WIDTH}
+          onItemTouchTap={() => console.log('-------------- >>>>')}
+        >
+          <MenuItem primaryText='我的文件' leftIcon={<DeviceStorage />} 
+            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}
+            onTouchTap={() => {
+              debug('left menu my files selected')
+              const context = 'HOME_DRIVE'
+              command('fileapp', 'FILE_NAV', { context }, (err, data) => {
+                if (err) return
+                this.navUpdate(context, data) 
+              })
+            }}
+          />
+          <MenuItem 
+            key='leftnav-shared-with-others'
+            id='leftnav-shared-with-others'
+            primaryText='我分享的文件' leftIcon={<SocialShare />} 
+            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}
+            onTouchTap={() => {
+
+              debug('Left menu sharedWithOthers selected')
+              const context = 'SHARED_WITH_OTHERS'
+              command('fileapp', 'FILE_NAV', { context }, (err, data) => {
+                if (err) return
+                setImmediate(() => this.navUpdate(context, data))
+              })
+            }}
+          />
+          <Divider />
+          <MenuItem primaryText='分享给我的文件' leftIcon={<SocialPeople />}
+            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}/>
+          <Divider />
+          <MenuItem primaryText='上传任务' leftIcon={<FileFileUpload />}
+            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}/>
+          <MenuItem primaryText='下载任务' leftIcon={<FileFileDownload />}
+            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}/>
+        </Menu> 
+      </div>
+    )
+
+    this.toggleLeftNav = () => assign({ leftNav: !this.state.leftNav })
+
+    this.rowEditingOnBlur = () => {
+      this.inputValue = null
+      assign({ editing: null })
+    }
+
+    this.rowEditingOnChange = e => {
+      this.inputValue = e.target.value 
+    }
+ 
     this.rowMouseLeave = index => {
       return this.setState(state => 
         Object.assign({}, state, { hover: -1 })) 
@@ -741,6 +908,23 @@ class FileApp extends React.Component {
       "is_sequence"       : false
     })
 
+    this.keypress.register_combo({
+      "keys"              : "enter",
+      "on_keydown"        : this.enterKeyDown,
+      "on_keyup"          : null,
+      "on_release"        : null,
+      "this"              : this,
+      "prevent_default"   : true,
+      "prevent_repeat"    : true,
+      "is_unordered"      : false,
+      "is_counting"       : false,
+      "is_exclusive"      : false,
+      "is_solitary"       : false,
+      "is_sequence"       : false
+   })
+
+/****
+
     // subscribe to redux store
     this.unsubscribe = window.store.subscribe(() => {
       let newFile = window.store.getState().node.file
@@ -749,14 +933,14 @@ class FileApp extends React.Component {
       }
     })
 
-    let file = window.store.getState().node.file
+****/
 
-    let state = { file }
+    setImmediate(() => 
+      command('fileapp', 'FILE_NAV', { context: 'HOME_DRIVE' }, (err, data) => {
+        if (err) return // todo
+        this.navUpdate('HOME_DRIVE', data) 
+      }))
 
-    if (this.state.file === null && file) {
-      state.list = file.children.map(item => Object.assign({}, item, { selected: false }))
-      this.setState(state)
-    } 
   }
 
   componentWillUnmount() {
@@ -772,7 +956,7 @@ class FileApp extends React.Component {
     window.removeEventListener('keyup', this.keypress, false)
 
     // unsubscribe redux store
-    this.unsubscribe && this.state.unsubscribe()
+//    this.unsubscribe && this.unsubscribe()
   }
 
 /**
@@ -781,16 +965,60 @@ class FileApp extends React.Component {
   }
 **/
 
-  nodeUpdate(newFile) {
+  // context
+  // data : {
+  //   children: []
+  //   path: [], 1..n -> path[0] root, path[last] current directory
+  // }
 
-    debug('nodeUpdate', newFile) 
+  // context share
+  // 1, same as HOME_DRIVE
+  // 2. 
+  navUpdate(context, data) {
 
-    if (newFile === this.state.file) return
+    debug('navUpdate', context, data) 
+
+    if ((context === 'SHARED_WITH_ME' ||
+        context === 'SHARED_WITH_OTHERS') && !data.path) {
+      // virtual list
+
+      let state = {
+        navContext: context, 
+        navList: null,
+        navRoot: null,
+        
+        directory: null,
+        path: [],
+        
+        specified: -1,
+       
+        list: data.children.map(item => Object.assign({}, item, {
+            specified: false,
+            selected: false,
+          },
+          (item.name ? null : { name: item.uuid })
+          ))
+          .sort((a, b) => a.name.localeCompare(b.name))
+      }
+
+      this.setState(state)
+      debug('navUpdate, shared virtual root directory', state)
+      return  
+    }
 
     let state = {
-      file: newFile,
+
+      navContext: context,
+      navList: null,
+      navRoot: data.path[0],
+
+      // the last one
+      directory: data.path[data.path.length - 1],
+      path: data.path,
+
       specified: -1,
-      list: newFile.children.map(item => Object.assign({}, item, { 
+
+      list: data.children.map(item => Object.assign({}, item, { 
           specified: false,
           selected: false,
         }))
@@ -804,7 +1032,7 @@ class FileApp extends React.Component {
     }
 
     this.setState(state)
-    debug('nodeUpdate changed state', state)
+    debug('navUpdate changed state', state)
   }
 
   handleCtrlDown() {
@@ -825,6 +1053,33 @@ class FileApp extends React.Component {
   handleShiftUp() {
     debug('shift up')
     this.setState(Object.assign({}, this.state, { shift: false }))
+  }
+
+  enterKeyDown() {
+
+    if (this.state.editing) {
+
+      debug('enter down, editing', this.inputValue)
+
+      let uuid = this.state.editing
+      let item = this.state.list.find(item => item.uuid === uuid)
+      let oldName = item.name
+      let newName = this.inputValue
+
+      this.inputValue = null
+      this.setState(state => Object.assign({}, state, { editing: null }))
+
+      if (oldName === newName) return
+
+      command('fileapp', 'FILE_RENAME', {
+        dir: this.state.directory.uuid,
+        node: uuid,
+        name: newName 
+      }, (err, data) => this.refresh())
+    }
+    else if (this.state.createNewFolder) {
+      // TODO
+    }
   }
 
   rowShiftClick(uuid, e) {
@@ -916,7 +1171,13 @@ class FileApp extends React.Component {
 
   rowDoubleClick(uuid, e) {
     
-      
+    let item = this.state.list.find(i => i.uuid === uuid)
+    if (!item) return
+    if (item.type !== 'folder') return
+    command('fileapp', 'FILE_NAV', { context: 'HOME_DRIVE', folderUUID: uuid }, (err, data) => {
+      if (err) return // todo
+      this.navUpdate('HOME_DRIVE', data) 
+    })
   }
 
   rowRightClick(uuid, e) {
@@ -976,31 +1237,53 @@ class FileApp extends React.Component {
     }
   }
 
-/**
 	renderBreadCrumb(){
 
-		var _this = this;
-		var path = this.props.state.file.current.path;
-		var pathArr = [];
-		pathArr = path.map((item,index)=>{
-			return(
-				<span key={index} style={{display:'flex',alignItems:'center'}} 
-          onClick={_this.selectBreadCrumb.bind(_this,item)}>
-					{ item.key!='' ? 
-              <span className='breadcrumb-text'>{item.key}</span> :
-              <span className='breadcrumb-home'></span>
-          }
-					<span className={index==path.length-1?'breadcrumb-arrow hidden':'breadcrumb-arrow'}></span>
-				</span>
-			)});
-		return pathArr;
+    if (!this.state.path) return null
+
+    let list = []
+    this.state.path.forEach((node, index, arr) => {
+      list.push(
+        <span
+          style={{
+            fontSize: 21,
+            fontWeight: 'medium',
+            color: '#FFF',
+            opacity: index === arr.length - 1 ? 1 : 0.7,
+          }}
+
+          onTouchTap={() => {
+            command('fileapp', 'FILE_NAV', { 
+              context: 'HOME_DRIVE', 
+              folderUUID: node.uuid, 
+              rootUUID: arr[0].uuid  
+            }, (err, data) => {
+              if (err) return // todo
+              this.navUpdate('HOME_DRIVE', data) 
+            })
+          }}
+        >
+          {index === 0 ? '我的文件' :  node.name}
+        </span>
+      ) 
+
+      if (index !== arr.length - 1) 
+        list.push(<NavigationChevronRight />)
+    })
+
+    return list
+    
+    return (
+      <div style={{fontSize: 16, display:'flex', alignItems: 'baseline', color: '#FFF'}}>
+        { list }
+      </div>
+    )
 	}
-**/
 
   renderList() {
 
     let specified, multi, min, max, hover
-    let { ctrl, shift, list } = this.state
+    let { ctrl, shift, list, editing } = this.state
 
     specified = this.state.list.findIndex(item => item.specified)
     hover = this.state.hover
@@ -1024,8 +1307,12 @@ class FileApp extends React.Component {
         shift = {this.state.shift}
         specified = {item.specified}
         selected={item.selected}
+        editing={item.uuid === editing}
         multi={multi}
         range={(specified !== -1 && hover !== -1 && index >= min && index <= max)}
+        noMouseEvent={!!editing}
+        editingOnChange={this.rowEditingOnChange}
+        editingOnBlur={this.rowEditingOnBlur}
         onMouseEnter={this.rowMouseEnter}
         onMouseLeave={this.rowMouseLeave}
         onClick={this.rowClickBound}
@@ -1036,7 +1323,7 @@ class FileApp extends React.Component {
 
 	renderListView() {
 
-    if (this.state.file === null) return null 
+    if (!this.state.list) return null 
 
 		return (
       <div style={{ width: '100%', height: '100%', backgroundColor:'#EEE' }}>
@@ -1050,17 +1337,18 @@ class FileApp extends React.Component {
         <Divider style={{marginLeft: 120}} />
         <div style={{width: '100%', height: 'calc(100% - 40px)', overflowY: 'scroll', backgroundColor: '#FFF', display: 'flex', flexDirection: 'column'}}>
           { this.renderList() }
-          <div style={{flex:'1 0 96px', backgroundColor: 'yellow'}} 
+          <div style={{flex:'1 0 96px', backgroundColor: '#FFF'}} 
             onTouchTap={() => {
               console.log('hello world')
             }}
           />
         </div>
         <FileUploadButton style={{position: 'absolute', right:48, bottom:48}} />
+
         { this.state.contextMenu && (
           <div 
             style={{position: 'fixed', top: 0, left: 0, width:'100%', height:'100%', zIndex:2000}}
-            onTouchTap={() => this.setState(Object.assign({}, this.state, { contextMenu: false}))} 
+            onTouchTap={() => this.hideContextMenu()} 
           >
             <Paper style={{
               position: 'fixed', 
@@ -1068,24 +1356,33 @@ class FileApp extends React.Component {
               left: this.state.clientX,
               backgroundColor: '#F5F5F5'
             }}>
-              <Menu >
-                <MenuItem primaryText='hello' />
-                <MenuItem primaryText='world' />
+              <Menu>
+                <MenuItem primaryText='新建文件夹' onTouchTap={this.showCreateNewFolderDialog}/>
+                <MenuItem primaryText='重命名' onTouchTap={() => {
+                  let select = this.state.list.filter(item => item.selected)  
+                  if (select.length === 1) {
+                    this.inputValue = select[0].name
+                    debug(this.inputValue)
+                    this.setState(state => Object.assign({}, state, { editing: select[0].uuid }))
+                  }
+                }}/>
+                <MenuItem primaryText='移动' /> 
+                <MenuItem primaryText='分享' /> 
+                <MenuItem primaryText='下载' />
+                <MenuItem primaryText='删除' onTouchTap={this.showDeleteConfirmDialog} /> 
+                <MenuItem primaryText='详情' onTouchTap={this.showDetail} />
               </Menu>
             </Paper>
           </div>
         )}
 
-
-
-        {/*this.getDetail()*/}
-        {/*create new folder dialog*/}
-        {/*this.getCreateFolderDialog()*/}
         {/*share dialog*/}
         {/*this.getShareDialog() */}
       </div>
 		)
 	}
+
+  
 
   render() {
 
@@ -1093,29 +1390,24 @@ class FileApp extends React.Component {
     debug('fileapp render')
 
     return (
-    <div style={this.props.style} >
-      <div style={{ height: '100%', backgroundColor:'blue', 
-        display: 'flex', justifyContent: 'space-between' }}>
+    <div style={this.props && this.props.style} >
+      <div style={{ height: '100%', backgroundColor:'blue', display: 'flex', justifyContent: 'space-between' }}>
 
-        { false && ( // don't delete me, floating left nav
-        <Paper style={{
-          width: 280, 
-          height: '100%', 
-          position: 'absolute', 
-          left: this.state.leftNav ? 0 : -280, 
-          transition: 'left 100ms', 
-          zIndex: 1000 }} 
-          rounded={false}
-          zDepth={2} 
-        >
-          { renderLeftNav() }
-        </Paper> ) }
+        { this.state.leftNav &&
+          <div id='file-left-nav-mask' 
+            style={{backgroundColor: '#000', opacity: 0.1, 
+            width: '100%', height: '100%', zIndex:999}} 
+            onTouchTap={() => this.setState(Object.assign({}, this.state, { leftNav: false }))}
+          />
+        }
+
+        { false && this.renderLeftNav() }
 
         <div id='layout-middle-container' 
           style={{
             position: 'absolute',
             backgroundColor: 'red',
-            width: this.state.showDetail ? `calc(100% - ${detailWidth}px)` : '100%', 
+            width: this.state.detailOn ? `calc(100% - ${detailWidth}px)` : '100%', 
             transition: sharpCurve('width'),
             height:'100%'
           }}
@@ -1124,17 +1416,22 @@ class FileApp extends React.Component {
           <Divider />
 
           <FileToolbar 
-            nudge={this.props.nudge && !this.state.showDetail}
+            nudge={this.props.nudge && !this.state.detailOn}
             title='文件'
-            suppressed={!this.props.maximized}
+            breadCrumb={this.renderBreadCrumb()} 
+            suppressed={true || !this.props.maximized}
             toggleLeftNav={this.toggleLeftNav} 
           >
-            <IconButton iconStyle={toolbarStyle.activeIcon}>
+            <IconButton iconStyle={toolbarStyle.activeIcon}
+              onTouchTap={() => this.setState(Object.assign({}, this.state, { 
+                createNewFolder: true
+              }))}
+            >
               <FileCreateNewFolder />
             </IconButton>
 
             <IconButton 
-              iconStyle={ this.state.showDetail ? toolbarStyle.whiteIcon : toolbarStyle.activeIcon } 
+              iconStyle={ this.state.detailOn ? toolbarStyle.whiteIcon : toolbarStyle.activeIcon } 
               onTouchTap={this.toggleDetail}
             >
               <ActionInfo />
@@ -1159,7 +1456,19 @@ class FileApp extends React.Component {
             }}>
               <Menu autoWidth={false} listStyle={{width: LEFTNAV_WIDTH}}>
                 <MenuItem style={{fontSize: 14}} primaryText='我的文件' leftIcon={<DeviceStorage />} animation={null}/>
-                <MenuItem style={{fontSize: 14}} primaryText='我分享的文件' leftIcon={<SocialShare />} />
+                <MenuItem 
+                  style={{fontSize: 14}} 
+                  primaryText='我分享的文件' 
+                  leftIcon={<SocialShare />} 
+                  onTouchTap={() => {
+                    debug('Left menu sharedWithOthers selected')
+                    const context = 'SHARED_WITH_OTHERS'
+                    command('fileapp', 'FILE_NAV', { context }, (err, data) => {
+                      if (err) return
+                      setImmediate(() => this.navUpdate(context, data))
+                    })
+                  }}
+                />
                 <Divider />
                 <MenuItem style={{fontSize: 14}} primaryText='分享给我文件' leftIcon={<SocialPeople />} />
                 <Divider />
@@ -1182,19 +1491,25 @@ class FileApp extends React.Component {
           </div>
 
         </div> 
-        <div id='layout-rightnav-container' 
+
+        <div
           style={{
             width: detailWidth, 
             height: '100%', 
-            backgroundColor: '#EBEBEB', 
+            backgroundColor: '#FAFAFA', 
             position: 'absolute', 
-            right: this.state.showDetail ? 0 : -detailWidth, 
-            transition: sharpCurve('right')
-        }}>
-          {/* <Divider /> */}
+            right: this.state.detailOn ? 0 : -detailWidth, 
+            transition: sharpCurve('right'),
+            borderStyle: 'solid',
+            borderWidth: '0 0 0 1px',
+            borderColor: '#BDBDBD'
+          }} 
+          rounded={false}
+          transitionEnabled={false} 
+        >
           <FileDetailToolbar 
             nudge={this.props.nudge} 
-            suppressed={!this.props.maximized}
+            suppressed={false && !this.props.maximized}
             show={!this.state.detailResizing}
           > 
             <IconButton 
@@ -1205,6 +1520,54 @@ class FileApp extends React.Component {
             </IconButton>
           </FileDetailToolbar>
         </div>
+
+        <DialogInput 
+          title={(() => {
+            if (this.state.createNewFolder)
+              return '新建文件夹'
+            else
+              return ''
+          })()}
+
+          hint={(() => {
+            if (this.state.createNewFolder)
+              return '新建文件夹'
+            else 
+              return ''
+          })()}
+
+          open={this.state.createNewFolder} 
+
+          onCancel={() => {
+            this.setState(Object.assign({}, this.state, { createNewFolder: false }))
+          }}
+
+          onOK={name => {
+            this.setState(Object.assign({}, this.state, { createNewFolder: false }))
+            this.createNewFolder(name)
+          }}
+        />
+
+        <DialogConfirm
+          title={(() => {
+            if (this.state.deleteConfirm)
+              return '确认删除选中内容？'
+            else
+              return ''
+          })()}
+
+          open={this.state.deleteConfirm}
+          
+          onCancel={() => {
+            this.setState(Object.assign({}, this.state, { deleteConfirm: false }))
+          }}
+
+          onOK={() => {
+            this.setState(Object.assign({}, this.state, { deleteConfirm: false})) 
+            this.deleteSelected()
+          }}
+        />
+
       </div>
     </div>
     )

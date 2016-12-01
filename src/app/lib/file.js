@@ -66,4 +66,13 @@ export const fileNav = (context, target) => {
     }))
 }
 
+export const fileCreateNewFolder = (key, target, name, callback) => {
+  sendCommand(key, {
+    cmd: 'FILE_CREATE_NEW_FOLDER',
+    args: { target, name }, 
+  }, callback) 
+}
+
+
+
 

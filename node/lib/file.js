@@ -7,11 +7,15 @@ import store from '../serve/store/store'
 import { addListener } from '../serve/reducers/login'
 import registerCommandHandlers from './command'
 import action from '../serve/action/action'
-import { requestGet, requestGetAsync, serverGetAsync, 
-  serverDeleteAsync } from './server'
+import { serverGetAsync, serverPostAsync, serverPatchAsync, serverDeleteAsync } from './server'
 
 const debug = Debug('lib:file')
 const c = debug
+
+const asCallback = (afunc) => 
+  (args, callback) => 
+    afunc(args).asCallback((err, data) => 
+      err ? callback(err) : callback(null, data))
 
 addListener(login => {
   if (login === 'LOGGEDIN')
@@ -364,7 +368,6 @@ var fileApi = {
 module.exports = fileApi
 ///////////////////////////////////////////////////////////////////////////////
 
-
 //
 let context = null
 let drives = []
@@ -404,7 +407,9 @@ global.downloadFolderQueue = []
 global.downloadFolderNow = []
 
 const getDrivesAsync = async() => await serverGetAsync(`drives`)
-const listFolderAsync = async (uuid) => await serverGetAsync(`files/${uuid}`)
+
+const listFolderAsync = async (folderUUID, rootUUID) => 
+  await serverGetAsync(`files/${folderUUID}`, { rootUUID })
 
 // pure
 const fileNodePath = (node) => {
@@ -456,6 +461,7 @@ const updateLocalTree = (folder, children) => {
   })
 }
 
+/**
 const fileNavAsync = async (context, target) => {
 
   if (target === null) {
@@ -499,27 +505,89 @@ const fileNavAsync = async (context, target) => {
 
   return { directory, children, path }
 }
+**/
 
-const fileNavHandler = ({context, target}, callback) => 
-  fileNavAsync(context, target).asCallback((err, data) => 
-      err ? callback(err) : callback(null, data))
+const fileGetSharedWithMe = async () => 
+  await serverGetAsync(`share/sharedWithMe`)
 
-const fileDeleteAsync = async (dir, children) => {
+const fileGetSharedWithOthers = async () => 
+  await serverGetAsync(`share/sharedWithOthers`) 
 
-  await Promise.map(children, child => 
-    serverDeleteAsync(`files/${dir.uuid}/${child.uuid}`).reflect())
+const fileNavAsync = async ({ context, folderUUID, rootUUID }) => {
 
-  // TODO
-  await fileNavAsync('HOME_DRIVE', dir.uuid)  
+  debug('fileNavAsync', context, folderUUID, rootUUID)
+
+  switch (context) {
+  case 'HOME_DRIVE':
+    if (!folderUUID && !rootUUID) {
+      folderUUID = rootUUID = store.getState().login.obj.home 
+    }
+    else if (!rootUUID) {
+      rootUUID = store.getState().login.obj.home
+    }
+    else {
+      throw(new Error(`error folder/root uuid: ${folderUUID}/${rootUUID}`))
+    }
+    break
+
+  case 'SHARED_WITH_ME':
+
+    if (!folderUUID && !rootUUID) {
+      return {
+        children: await fileGetSharedWithMe()
+      }
+    }
+    else if (!folderUUID) { // only rootUUID means list this share root
+      folderUUID = rootUUID
+    }
+    break
+
+  case 'SHARED_WITH_OTHERS':
+    if (!folderUUID && !rootUUID) {
+      return {
+        children: await fileGetSharedWithOthers()
+      }
+    }
+    else if (!folderUUID) {
+      folderUUID = rootUUID
+    }
+    break
+
+  default:
+    throw new Error('invalid nav context')
+  }
+
+  return await serverGetAsync(`files/${folderUUID}`, { navroot: rootUUID })
 }
 
-const fileDeleteHandler = ({dir, children}, callback) =>
-  fileDeleteAsync(dir, children).asCallback((err, data) =>
-    err ? callback(err) : callback(null, data))
+const fileRenameAsync = async({dir, node, name}) => {
+  
+  debug('fileRenameAsync', dir, node, name)
+
+  return await serverPatchAsync(`files/${dir}/${node}`, { name })
+}
+
+const fileDeleteAsync = async ({dir, nodes}) => {
+
+  debug('fileDeleteAsync', dir, nodes)
+
+  return await Promise.map(nodes, node => 
+    serverDeleteAsync(`files/${dir}/${node}`).reflect())
+}
+
+
+const fileCreateNewFolderAsync = async ({dir, name}) => {
+
+  debug('fileCreateNewFolderAsync', dir, name)
+
+  return await serverPostAsync(`files/${dir}`, { name })
+}
 
 const fileCommandMap = new Map([
-  ['FILE_NAV', fileNavHandler],
-  ['FILE_DELETE', fileDeleteHandler],
+  ['FILE_NAV', asCallback(fileNavAsync)],
+  ['FILE_DELETE', asCallback(fileDeleteAsync)],
+  ['FILE_RENAME', asCallback(fileRenameAsync)],
+  ['FILE_CREATE_NEW_FOLDER', asCallback(fileCreateNewFolderAsync)]
 ])
 
 registerCommandHandlers(fileCommandMap)
@@ -964,7 +1032,6 @@ ipcMain.on('openInputOfFolder', e => {
 		//send transmission task 
 		mainWindow.webContents.send('transmissionUpload',uploadObj)
 
-
 		let showCountOfUpload = setInterval(()=>{
 			c('the number of folder ' + path.basename(folderPath) + ' is ' + uploadObj.count)
 		},3000)
@@ -1219,8 +1286,6 @@ ipcMain.on('downloadFolder',(err,folder)=>{
 })
 
 export { resetData }
-
-
 
 
 
