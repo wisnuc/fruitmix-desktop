@@ -86,4 +86,3 @@ ipcRenderer.on('command', (e, {id, err, data}) => {
 })
 
 console.log('main module works')
-

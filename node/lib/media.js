@@ -4,131 +4,20 @@ import request from 'request'
 import { ipcMain } from 'electron'
 import Debug from 'debug'
 
+import { serverGetAsync, serverPostAsync, serverPatchAsync, serverDeleteAsync, serverDownloadAsync } from './server'
+import action from '../serve/action/action'
+import store from '../serve/store/store'
+import utils from './util'
+import { getMainWindow } from './window'
+
 const debug = Debug('lib:media')
 const c = debug
-
-var mediaApi = {
-	//getMediaData
-	getMediaData : function () {
-		var media = new Promise((resolve,reject)=>{ 
-			var options = {
-				method: 'GET',
-				url: server+'/media',
-				headers: {
-					Authorization: user.type+' '+user.token
-				}
-
-			};
-			function callback (err,res,body) {
-				if (!err && res.statusCode == 200) {
-					resolve(JSON.parse(body));
-				}else {
-					reject(err);
-				}
-			}
-			request(options,callback);
-		});
-		return media;
-	},
-
-	downloadMediaImage : function(hash) {
-		var promise = new Promise((resolve,reject)=>{
-			var options = {
-				method: 'GET',
-				url: server+'/media/'+hash+'/download',
-				headers: {
-					Authorization: user.type+' '+user.token
-				}
-			}
-			function callback (err,res,body) {
-				if (!err && res.statusCode == 200) {
-					resolve()
-				}else {
-					c('err : ')
-					c(res.body)
-					c(err)
-
-					reject()
-				}
-			}
-			var stream = fs.createWriteStream(path.join(mediaPath,hash))
-			request(options,callback).pipe(stream)
-		})
-		return promise
-	},
-
-	getMediaShare : function() {
-		var promise = new Promise((resolve,reject) => {
-			var options = {
-				method : 'GET',
-				url : server + '/mediaShare',
-				headers : {
-					Authorization: user.type+' '+user.token	
-				}
-			}
-
-			function callback(err,res,body) {
-				if (!err && res.statusCode == 200) {
-					resolve(JSON.parse(body))
-				}else {
-					c('has err :')
-					c(res.body)
-					c(err)
-					reject()
-				}
-			}
-
-			request(options,callback)
-		})
-
-		return promise
-	},
-
-	createMediaShare : function(medias, users, album) {
-		var promise = new Promise((resolve, reject) => {
-			var b
-			if (album) {
-				b = JSON.stringify({
-					viewers : users,
-					contents : medias,
-					album : album
-				})
-			}else {
-				b = JSON.stringify({
-					viewers : users,
-					contents : medias
-				})
-			}
-			var options = {
-				method : 'post',
-				url : server + '/mediaShare',
-				headers : {
-					Authorization: user.type+' '+user.token,
-					'Content-Type': 'application/json'
-				},
-				body: b
-			}
-
-			function callback(err,res,body) {
-				if (!err && res.statusCode == 200) {
-					resolve(JSON.parse(body))
-				}else {
-					c('has err :')
-					c(res.body)
-					c(err)
-					reject(err)
-				}
-			}
-
-			request(options,callback)
-		})
-		return promise
-	}
-
-
-};
-
-module.exports = mediaApi;
+var server
+var user
+var initArgs = () => {
+  server = 'http://' + store.getState().config.ip + ':3721'
+  user = store.getState().login.obj
+}
 
 //media
 let media = []
@@ -141,16 +30,15 @@ let shareThumbQueue = []
 let shareThumbIng = []
 
 //path
-let mediaPath = path.join(__dirname,'media')
-let downloadPath = path.join(__dirname,'download')
+let mediaPath = path.join(process.cwd(),'media')
+let downloadPath = path.join(process.cwd(),'download')
 
 // media api --------------------------------------------
 
 //getMediaData
 ipcMain.on('getMediaData',(err)=>{
-	c(' ')
 	c('获取media...')
-	mediaApi.getMediaData().then((data)=>{
+	serverGetAsync('media').then((data)=>{
 		c('media 列表获取成功')
 		media = data
 		media.forEach(item=>{
@@ -159,14 +47,62 @@ ipcMain.on('getMediaData',(err)=>{
 			item.failed = 0
 			mediaMap.set(item.digest,item)
 		})
-		// mainWindow.webContents.send('mediaFinish',media)
 		dispatch(action.setMedia(media))
 	}).catch(err=>{
 		c('media 列表获取失败')
 		console.log(err)
 	})
 })
-//getMediaShareThumb
+//getMediaShare
+ipcMain.on('getMediaShare' , err => {
+	c('获取mediaShare...')
+	serverGetAsync('mediaShare').then(data => {
+		c('获取mediaShare成功')
+		mediaShare = utils.quickSort(data)
+		mediaShare.forEach(item => {
+			mediaShareMap.set(item.digest,item)
+		})
+		dispatch(action.setMediaShare(mediaShare))
+		//mainWindow.webContents.send('mediaShare',data)
+	}).catch(err => {
+		c('获取mediaShare失败')
+		c(err)
+	})
+})
+
+// medias   array   photo.digest
+// users    array   user.uuid  ['xxx','xxx,'xxx']
+// album    object  {title:'xxx',text:'xxx'}
+
+ipcMain.on('createMediaShare',(err, medias, users, album) => {
+	c(' ')
+	c('create media share-----------------------------')
+	let body = {
+		viewers : users,
+		contents : medias,
+		album : album
+	}
+	serverPostAsync('mediaShare',body).then(data => {
+		c(data)
+		mediaShare.push(data)
+		mediaShareMap.set(data.digest,mediaShare[mediaShare.length-1])
+		dispatch(action.setMediaShare(mediaShare))
+		if (album) {
+			getMainWindow().webContents.send('message','创建相册成功')
+		}else {
+			getMainWindow().webContents.send('message','创建分享成功')
+		}
+	}).catch(err => {
+		c(err)
+		if (album) {
+			getMainWindow().webContents.send('message','创建相册失败')
+		}else {
+			getMainWindow().webContents.send('message','创建相册失败')
+		}
+		
+	})
+})
+//--------------------------------------------------------------------
 ipcMain.on('getAlbumThumb', (err, item, digest) => {
 	item.parent = digest
 	shareThumbQueue.push(item)
@@ -174,13 +110,11 @@ ipcMain.on('getAlbumThumb', (err, item, digest) => {
 })
 
 function dealShareThumbQueue() {
-	c(' ')
 	if (shareThumbQueue.length == 0) {
 		return
 	}else {
 			c('shareThumbQueue.length ' + shareThumbQueue.length)
 			if (shareThumbIng.length == 0) {
-				c('not wait')
 				for (var i=0;i<1;i++) {
 					if (shareThumbQueue.length == 0) {
 						break
@@ -189,10 +123,7 @@ function dealShareThumbQueue() {
 					shareThumbIng.push(item)
 					isShareThumbExist(item)
 				}
-			}else {
-				c('wait')
 			}
-
 	}
 }
 
@@ -203,9 +134,6 @@ function isShareThumbExist(item) {
 			c('not exist')
 			downloadMedia(item,true,item).then((data)=>{
 				c('download success')
-				// if () {
-
-				// }
 				sendThumb(item)
 				console.log(shareThumbQueue.length+' length')
 			}).catch(err=>{
@@ -215,19 +143,6 @@ function isShareThumbExist(item) {
 				let t = shareThumbIng[index]
 				shareThumbIng.splice(index,1)
 				shareThumbQueue.push(t)
-				// if (item.failed <5) {
-				// 	fs.readFile(path.join(mediaPath,item.digest+'thumb210'),(err,data)=>{
-				// 		if (err) {
-
-				// 		}else {
-				// 			c('find cache')
-				// 		}
-				// 	})
-					
-				// }else {
-				// 	// item.status='failed'
-				// 	// mainWindow.webContents.send('getThumbFailed',item)
-				// }
 				dealShareThumbQueue()
 			})
 		}else {
@@ -276,7 +191,6 @@ function dealThumbQueue() {
 }
 
 function isThumbExist(item) {
-	c(' ')
 	c(item.digest)
 	fs.readFile(path.join(mediaPath,item.digest+'thumb138'),(err,data)=>{
 		if (err) {
@@ -321,6 +235,7 @@ function isThumbExist(item) {
 }
 
 function downloadMedia(item,large) {
+	initArgs()
 	var size = large?'width=210&height=210':'width=138&height=138'
 	var download = new Promise((resolve,reject)=>{
 		let scale = item.width/item.height
@@ -357,12 +272,10 @@ function downloadMedia(item,large) {
 		})
 	return download
 }
-
 //getMediaImage
 ipcMain.on('getMediaImage',(err,hash)=>{
-	c(hash)
-	mediaApi.downloadMediaImage(hash).then(()=>{
-		c('download media image success')
+	serverDownloadAsync('media/'+hash+'/download',null,path.join(process.cwd(),'media'),hash).then((data) => {
+		c('download media image' + hash + ' success')
 		var imageObj = {}
 		imageObj.path = path.join(mediaPath,hash)
 		let item = mediaMap.get(hash)
@@ -371,59 +284,15 @@ ipcMain.on('getMediaImage',(err,hash)=>{
 		}else {
 			imageObj.exifOrientation = null
 		}
-		// fs.stat(item.path,function(err,data){
-		// 	c(data)
-		// })
 		mainWindow.webContents.send('donwloadMediaSuccess',imageObj)
-	}).catch(err=>{
-		c('download media image failed')
+	}).catch(e => {
+		c('download media image' + failed + ' success')
+		c(e)
 	})
 })
 
-//getMediaShare
-ipcMain.on('getMediaShare' , err => {
-	c('获取mediaShare...')
-	mediaApi.getMediaShare().then(data => {
-		c('获取mediaShare成功')
 
-		mediaShare = utils.quickSort(data)
-		mediaShare.forEach(item => {
-			mediaShareMap.set(item.digest,item)
-		})
-		dispatch(action.setMediaShare(mediaShare))
-		//mainWindow.webContents.send('mediaShare',data)
-	}).catch(err => {
-		c('获取mediaShare失败')
-		c(err)
-	})
-})
 
-// medias   array   photo.digest
-// users    array   user.uuid  ['xxx','xxx,'xxx']
-// album    object  {title:'xxx',text:'xxx'}
 
-ipcMain.on('createMediaShare',(err, medias, users, album) => {
-	c(' ')
-	c('create media share-----------------------------')
-	mediaApi.createMediaShare(medias, users, album).then(data => {
-		c(data)
-		mediaShare.push(data)
-		mediaShareMap.set(data.digest,mediaShare[mediaShare.length-1])
-		dispatch(action.setMediaShare(mediaShare))
-		if (album) {
-			mainWindow.webContents.send('message','创建相册成功')
-		}else {
-			mainWindow.webContents.send('message','创建分享成功')
-		}
-	}).catch(err => {
-		c(err)
-		if (album) {
-			mainWindow.webContents.send('message','创建相册失败')
-		}else {
-			mainWindow.webContents.send('message','创建相册失败')
-		}
-		
-	})
-})
 
 
