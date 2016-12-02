@@ -28,6 +28,7 @@ import ImagePhotoAlbum from 'material-ui/svg-icons/image/photo-album'
 import ImagePortrait from 'material-ui/svg-icons/image/portrait'
 
 import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
+import Action from '../../actions/action'
 
 import { command } from '../../lib/command'
 
@@ -235,11 +236,14 @@ class Main extends React.Component {
     // fileNav('HOME_DRIVE', null)
 
 		// ipcRenderer.send('getRootData')
-		// ipcRenderer.send('getMediaData')
+		ipcRenderer.send('getMediaData')
 		// ipcRenderer.send('getMoveData')
 		// ipcRenderer.send('getFilesSharedToMe')
 		// ipcRenderer.send('getFilesSharedToOthers')
-		// ipcRenderer.send('getMediaShare')
+		ipcRenderer.send('getMediaShare')
+    setTimeout(() => {
+      // ipcRenderer.send('getMediaImage',storeState().media.data[0].digest)
+    },2000)
 
 		// this.props.dispatch(Action.filesLoading());
 
@@ -306,7 +310,7 @@ class Main extends React.Component {
 		// });
 
 		ipcRenderer.on('donwloadMediaSuccess',(err,item)=>{
-			this.props.dispatch(Action.setMediaImage(item));
+			window.store.dispatch(Action.setMediaImage(item));
 		});
 
 		// ipcRenderer.on('mediaShare', (err,data) => {
