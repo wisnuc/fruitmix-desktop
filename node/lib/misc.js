@@ -1,4 +1,7 @@
-import { ipcMain } from 'electron'
+import { ipcMain, BrowserWindow } from 'electron'
+
+import Debug from 'debug'
+const debug = Debug('lib:misc')
 
 ipcMain.on('changeDownloadPath', e=>{
 	dialog.showOpenDialog({properties: [ 'openDirectory']},function(folder) {
@@ -18,23 +21,30 @@ ipcMain.on('changeDownloadPath', e=>{
 	})
 })
 
-ipcMain.on('openAppifi', err => {
+ipcMain.on('launchAppifiBootstrapWindow', (event, address) => {
 
-	fruitmixWindow = new BrowserWindow({
+  debug('launchAppifiBootstrapWindow', address)
+
+  const url = `http://${address}:3001`
+
+	const fruitmixWindow = new BrowserWindow({
 		frame: true,
 		height: 768,
 		resizable: true,
 		width: 1366,
 		minWidth:1024,
 		minHeight:768,
-		title:'WISNUC'
+		title:'WISNUC Appifi Installer'
 	})
+
 	//window title
-	fruitmixWindow.on('page-title-updated',function(event){
+	fruitmixWindow.on('page-title-updated', (event) => {
+
+    // this prevents window title from changed by document title, but why ??? TODO
 		event.preventDefault()
 	})
-	c(server)
-	fruitmixWindow.loadURL(server.substring(0,server.length-4)+3001)
+
+	fruitmixWindow.loadURL(url)
 })
 
 //create fruitmix

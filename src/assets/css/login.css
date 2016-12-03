@@ -244,10 +244,6 @@
 	padding-right:120px!important;
 	box-sizing: border-box;
 }
-.login-device-icon {
-	background:url(../images/index/ic_winsnuc.png) no-repeat center;
-	height:74px;
-}
 .login-device-name {
 	color:#212121;
 	font-size: 18px;

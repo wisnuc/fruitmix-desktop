@@ -7,20 +7,29 @@
 
 // require core module
 import { ipcRenderer } from 'electron'
-import React, { findDOMNode, Component, PropTypes } from 'react'
+import React, { Component, PropTypes } from 'react'
+import ReactDOM from 'react-dom'
+
 import Action from '../../actions/action'
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
 import baseTheme from 'material-ui/styles/baseThemes/lightBaseTheme'
-import { Paper, TextField, FlatButton, CircularProgress, Snackbar, SelectField, MenuItem, RadioButton, RadioButtonGroup } from 'material-ui'
-import Dehaze from 'material-ui/svg-icons/image/dehaze'
-import Left from 'material-ui/svg-icons/navigation/chevron-left'
-import Right from 'material-ui/svg-icons/navigation/chevron-right'
-import { sendCommand, command } from '../../lib/command' 
+import { Avatar, IconButton, Paper, TextField, FlatButton, CircularProgress, Snackbar, SelectField, MenuItem, RadioButton, RadioButtonGroup } from 'material-ui'
+
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group'  
+import TransitionGroup from 'react-addons-transition-group'
+
+import NavigationChevronLeft from 'material-ui/svg-icons/navigation/chevron-left'
+import NavigationChevronRight from 'material-ui/svg-icons/navigation/chevron-right'
+import { command } from '../../lib/command' 
+import { TweenMax } from 'gsap'
 
 //import CSS
 import css  from  '../../../assets/css/login'
 //import component
 import UserList from './userList'
+
+import Debug from 'debug'
+const debug = Debug('view:login')
 
 const styles = {
 	icon : {
@@ -34,7 +43,59 @@ const styles = {
 		color:'#999',
 		marginRight:'30px'
 	}
+}
 
+const Barcelona = ({fill, size}) => (
+  <div style={{width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+    <svg style={{fill, width: Math.floor(size * 128 / 192), height: Math.floor(size * 176 / 192)}}
+      xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 352">
+      <path d="m 218.80203,48.039815 c -14.29555,11.911857 -25.3383,24.549958 -45.64007,35.359768 -7.02132,4.468951 -23.85238,6.000285 -34.76376,2.406502 C 111.22305,78.031495 92.140083,67.296886 70.422926,57.663153 48.215526,46.811935 22.865307,36.618679 5.6439616,24.553833 -1.5344798,20.331611 -0.35135786,13.918033 13.868086,11.892977 43.143517,7.1450877 75.870493,6.5837609 107.132,4.6866422 147.52562,3.0153376 187.86409,-0.22170151 228.69047,0.37596259 242.35579,0.23107113 257.06988,3.8096879 254.79285,9.2910307 251.48569,20.8655 236.4618,31.431442 225.3584,42.204703 c -2.18031,1.945806 -4.36853,3.890424 -6.55637,5.835112 z" />
+      <path d="M 0.71584761,36.189436 C 5.7333591,46.742429 28.494578,54.650053 44.647666,63.186203 c 29.265921,13.132026 55.055587,27.478913 89.289864,39.017527 22.53176,8.66966 45.71976,-2.309934 53.39004,-9.921384 23.06458,-18.643025 45.06127,-37.527084 63.37844,-56.857692 4.39395,-3.966197 5.48956,-13.906509 4.83954,-4.430211 -0.4744,81.122537 0.0256,162.248467 -0.49302,243.368927 -7.81768,16.05486 -29.68046,30.63968 -45.31272,45.8063 -12.79139,10.22313 -21.6348,21.65006 -43.34582,29.94174 -24.20287,5.91627 -44.5008,-6.09059 -59.21752,-11.5605 C 74.058118,323.37123 39.752306,308.43334 10.445173,292.23628 -5.6879281,283.85313 2.7946672,273.33309 0.66866322,263.84413 0.57030725,187.95925 0.87058396,112.0742 0.71584761,36.189436 Z" />
+    </svg>
+  </div>
+)
+
+const NamedAvatar = ({ style, name }) => (
+  <div style={style}>
+    <div style={{width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start'}}>
+      <Avatar>{name.slice(0, 3).toUpperCase()}</Avatar>
+      { false && <div style={{marginTop: 12, fontSize: 12, fontWeight: 'medium', opacity: 0.7}}>{name}</div> }
+    </div> 
+  </div>
+)
+
+class BottomFrame extends React.Component {
+
+  constructor(props) {
+    super(props)
+  }
+
+/**
+  componentWillEnter(callback) {
+    debug('bottom frame will enter', this.props.KEY)    
+    const el = ReactDOM.findDOMNode(this)
+    TweenMax.fromTo(el, 0.33, {opacity: 0}, {opacity: 1, onComplete: () => {
+      debug('bottom framewill enter callback')
+      callback()
+    }})
+  }
+**/
+
+/**
+  componentWillLeave(callback) {
+    debug('bottom frame will leave', this.props.KEY)
+    const el = ReactDOM.findDOMNode(this);
+    TweenMax.fromTo(el, 0.1, {opacity: 1}, {opacity: 0, onComplete: callback})
+  }
+**/
+
+  render() {
+    return (
+      <div>
+        { this.props.children }
+      </div>
+    )
+  }
 }
 
 const storeState = () => window.store.getState()
@@ -43,7 +104,20 @@ class Index extends React.Component {
 
 	constructor(props) {
 		super(props)
-		this.state = {guide:false,maintenance:false,step:1,type:'1',volumes:{},disks:[],username:'',password:'',loading:false}
+		this.state = {
+
+      stations: [],
+
+      guide:false,
+      maintenance:false,
+      step:1,type:'1',
+      volumes:{},
+      disks:[],
+      username:'',
+      password:'',
+      loading:false,
+      expanded: false
+    }
 	}
 
 	getChildContext() {
@@ -52,15 +126,17 @@ class Index extends React.Component {
 	}
 
 	componentDidMount() {
-		setTimeout(()=>{
-			ipcRenderer.send('getDeviceUsedRecently')
-		},1000)
 
-		setTimeout(()=>{
-				if (storeState().login.selectIndex == 0 && storeState().login.device.length != 0) {
-					this.selectDevice.apply(this,[0,false, null])
-				}
-		},1500)
+		setTimeout(()=> {
+			ipcRenderer.send('getDeviceUsedRecently')
+		}, 1000)
+
+		setTimeout(()=> {
+      if (storeState().login.selectIndex == 0 && storeState().login.device.length != 0) {
+        debug('Login didMount, device', window.store.getState().login.device)
+        this.selectDevice.apply(this,[0,false, null])
+      }
+		}, 1500)
 
 		ipcRenderer.on('message',(err,message,code)=>{
 			this.props.dispatch(Action.setSnack(message,true))
@@ -76,6 +152,7 @@ class Index extends React.Component {
 	}
 
 	selectDevice(index, isStorage, e) {
+
 		if (index<0 || index==storeState().login.device.length) {
 			console.log('index is over range')
 			return
@@ -84,6 +161,7 @@ class Index extends React.Component {
 		let ip = storeState().login.device[index].address
 		ipcRenderer.send('setServerIp', ip)
 	}
+
 	/*
 	submit() {
 
@@ -262,122 +340,146 @@ class Index extends React.Component {
 	render() {
 
 		let findDevice = storeState().view.findDevice
-		return(
-			<div className='login-frame' key='login'>
-				{this.state.guide && this.getGuide()}
-				{this.state.maintenance && this.getGuide()}
-				{!this.state.guide && !this.state.maintenance && this.getLogin()}
-				<Snackbar open={storeState().snack.open} message={storeState().snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
-			</div>
-	  )
-	}
-
-	getLogin() {
-		let selectedIndex = storeState().login.selectIndex
-		let selectedItem = storeState().login.device[selectedIndex]
-		let content 
-		//content
-		if (storeState().login.device.length == 0) {
-				content = <div>没有发现相关设备</div>
-		}else {
-				content = (
-					<div>
-						<div id='login-wellcome'>欢迎使用WISNUC</div>
-						<div id='login-device-select'>
-							<Left onClick={this.selectDevice.bind(this,selectedIndex-1,true)} className={selectedIndex==0?'login-invisible':''}></Left>
-							<div className='login-device-icon'></div>
-							<Right onClick={this.selectDevice.bind(this,selectedIndex+1,true)} className={selectedIndex==(storeState().login.device.length-1)?'login-invisible':''}></Right>
-						</div>
-						<div className='login-device-name'>{selectedItem.name.split('wisnuc-')[1]||selectedItem.name.split('wisnuc-')[0]}</div>
-						<div>{selectedItem.address}</div>
-					</div>
-					)
-		}
-		return (
-			<div className='login-wrap'>
-				<div className='login-title'>
-					<span>
-						<span className='login-title-icon'></span>
-						<span className='login-title-name'>登录</span>
-					</span>
-					<span>
-						<Dehaze></Dehaze>
-					</span>
-				</div>
-				<div className='login-content'>
-					{content}
-				</div>
-				<div className='login-footer'>
-					{this.getLoginFooter()}
-				</div>
-			</div>
-			)
-	}
-
-	getLoginFooter() {
 		let selectedIndex = storeState().login.selectIndex
 		let selectedItem = storeState().login.device[selectedIndex]
 		let busy = (storeState().login.state ==='BUSY')
-		//登录中...
-		if (busy) {
-			return <div>loading...</div>
-		}
-		//没有发现设备
-		if (!selectedItem) {
-			return <div>请添加设备</div>
-		}
-		//自定义地址
-		else if (selectedItem.isCustom) {
-			return (
-					<div className='login-custom-container'>
-						<TextField hintStyle={{color:'#999'}} ref='username' hintText="用户名" type="username" />
-						<TextField hintStyle={{color:'#999'}} ref='password' hintText="密码" type="password" onKeyDown={this.kenDown.bind(this)}/>
-						<FlatButton label='登录' onClick={this.submit.bind(this)}/>
-					</div>
-				)
-		}
-		//appifi 没有安装
-		else if (selectedItem.appifi == 'ERROR') {
-			return <div className='login-appifi-button' onClick={this.openAppifiInstall.bind(this)}>请安装appifi</div>
-		}
-		//appifi 正常运行 但卷没有拉起来
-		else if (selectedItem.fruitmix == 'ERROR' && selectedItem.boot && selectedItem.mir) {
-			let hasWisnuc = false
-			if (selectedItem.mir.volumes.length == 0) {
-				hasWisnuc = false
-			}else {
-				selectedItem.mir.volumes.forEach(item => {
-					if (item.wisnucInstalled) {
-						hasWisnuc = true
-					}
-				})
-			}
-			if (hasWisnuc) {
-				return <div className='login-appifi-button' onClick={this.openMaintenance.bind(this)}>管理</div>
-			}else {
-				return <div className='login-appifi-button' onClick={this.openGuide.bind(this)}>向导</div>
-			}
 
-			
-		}
-		//正常启动
-		else if (selectedItem.fruitmix && selectedItem.users.length != 0) {
-			return <UserList device={selectedItem}></UserList>
-		}
-		//appifi 正常运行 但没有用户
-		else if (selectedItem.fruitmix && selectedItem.users.length == 0) {
-			return <div className='login-appifi-button' onClick={this.openGuide.bind(this)}>向导</div>
-			return <div onClick={this.openGuide.bind(this)}>the device has no users</div>
-		}
-		else if (!selectedItem.fruitmix) {
-			return <div onClick={this.openVolume.bind(this)}>please configure your volume</div>
-		}
-		else if (selectedItem.fruitmix && selectedItem.fruitmix == "ERROR") {
-			return <div>fruitmix is error</div>
-		}
-		else {
-			return <div>the device is not map any station</div>
-		}
+    let model = (name) => name.split('-')[1].toUpperCase()
+    let serial = (name) => name.split('-')[2].toUpperCase()
+
+		return(
+      <div 
+        style={{
+          backgroundImage: 'url(../src/assets/images/index/index.jpg)',
+          width:'100%', 
+          height: '100%',
+          display:'flex', 
+          flexDirection:'column', 
+          alignItems:'center', 
+          justifyContent: 'flex-start'
+        }}
+      >
+        <div style={{height: `calc(15% + 40px)`}} />
+
+        <div style={{width: 480}}>
+          <Paper id='top-half-container'
+            style={{
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              backgroundColor: '#455A64'
+            }}
+          >
+
+            { storeState().login.device.length === 0 && <div>没有发现相关设备</div> }
+            { storeState().login.device.length !== 0 && (
+
+            <div style={{width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+              <div style={{width: '100%', marginTop:64, marginBottom:32, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                <IconButton style={{marginLeft: 24}} iconStyle={{color:'#FFF'}}
+                  onTouchTap={this.selectDevice.bind(this,selectedIndex-1,true)}
+                ><NavigationChevronLeft /></IconButton>
+                <Barcelona fill='#FFF' size={80} />
+                <IconButton style={{marginRight: 24}} iconStyle={{color:'#EEE'}}
+                  onTouchTap={this.selectDevice.bind(this,selectedIndex+1,true)}
+                ><NavigationChevronRight /></IconButton>
+              </div>
+              <div style={{fontSize: 24, color: '#FFF', marginBottom: 12}}>{model(selectedItem.name)}</div>
+              <div style={{fontSize: 14, color: '#FFF', marginBottom: 24, opacity: 0.7}}>{selectedItem.address}</div>
+            </div> )
+
+            }
+          </Paper>
+          <Paper style={{width:'100%'}}>
+            {(() => {
+              //登录中...
+              if (busy) {
+                return <div>loading...</div>
+              }
+              //没有发现设备
+              if (!selectedItem) {
+                return <div>请添加设备</div>
+              }
+              //自定义地址
+              else if (selectedItem.isCustom) {
+                return (
+                    <div className='login-custom-container'>
+                      <TextField hintStyle={{color:'#999'}} ref='username' hintText="用户名" type="username" />
+                      <TextField hintStyle={{color:'#999'}} ref='password' hintText="密码" type="password" onKeyDown={this.kenDown.bind(this)}/>
+                      <FlatButton label='登录' onClick={this.submit.bind(this)}/>
+                    </div>
+                  )
+              }
+              //appifi 没有安装
+              else if (selectedItem.appifi == 'ERROR') {
+                return <div className='login-appifi-button' onClick={this.openAppifiInstall.bind(this)}>请安装appifi</div>
+              }
+              //appifi 正常运行 但卷没有拉起来
+              else if (selectedItem.fruitmix == 'ERROR' && selectedItem.boot && selectedItem.mir) {
+                let hasWisnuc = false
+                if (selectedItem.mir.volumes.length == 0) {
+                  hasWisnuc = false
+                }else {
+                  selectedItem.mir.volumes.forEach(item => {
+                    if (item.wisnucInstalled) {
+                      hasWisnuc = true
+                    }
+                  })
+                }
+                if (hasWisnuc) {
+                  return <div className='login-appifi-button' onClick={this.openMaintenance.bind(this)}>管理</div>
+                }else {
+                  return <div className='login-appifi-button' onClick={this.openGuide.bind(this)}>向导</div>
+                }
+              }
+              //正常启动
+              else if (selectedItem.fruitmix && selectedItem.users.length != 0) {
+                debug('selectedItem', selectedItem.users)
+                // return <UserList device={selectedItem}></UserList>
+                return (
+                  <div style={{width: '100%', height: '100%', padding:10, display: 'flex', 
+                    justifyContent: 'center', flexWrap: 'wrap'}}
+                  >
+                    { selectedItem && selectedItem.users.map(user => 
+                      <NamedAvatar key={user.uuid} style={{margin:10}} name={user.username} />) }
+                  </div>
+                )
+              }
+              //appifi 正常运行 但没有用户
+              else if (selectedItem.fruitmix && selectedItem.users.length == 0) {
+                return <div className='login-appifi-button' onClick={this.openGuide.bind(this)}>向导</div>
+                return <div onClick={this.openGuide.bind(this)}>the device has no users</div>
+              }
+              else if (!selectedItem.fruitmix) {
+                return <div onClick={this.openVolume.bind(this)}>please configure your volume</div>
+              }
+              else if (selectedItem.fruitmix && selectedItem.fruitmix == "ERROR") {
+                return <div>fruitmix is error</div>
+              }
+              else {
+                return <div>the device is not map any station</div>
+              }
+            })()}
+          </Paper>
+          <Paper style={{width:'100%', display:'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+            <IconButton style={{marginLeft: 24}} iconStyle={{color:'#FFF'}}
+              onTouchTap={this.selectDevice.bind(this,selectedIndex-1,true)}
+            ><NavigationChevronLeft /></IconButton>
+            <IconButton style={{marginRight: 24}} iconStyle={{color:'#EEE'}}
+              onTouchTap={this.selectDevice.bind(this,selectedIndex+1,true)}
+            ><NavigationChevronRight /></IconButton>
+          </Paper>
+        </div>
+        <Snackbar 
+          open={storeState().snack.open} 
+          message={storeState().snack.text} 
+          autoHideDuration={3000} 
+          onRequestClose={this.cleanSnack.bind(this)}
+        />
+      </div>
+	  )
 	}
 
 	getGuide() {
