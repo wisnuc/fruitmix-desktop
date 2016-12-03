@@ -103,20 +103,6 @@ var actions = {
 		}
 	},
 
-	// addUpload(obj) {
-	// 	return {
-	// 		type: 'ADD_UPLOAD',
-	// 		obj: obj
-	// 	}
-	// },
-
-	addDownload(obj) {
-		return {
-			type: 'ADD_DOWNLOAD',
-			obj: obj
-		}
-	},
-
 	addDragImageItem(el, date, index) {
     return {
 			type: 'ADD_DRAG_IMAGEITEM',
@@ -192,13 +178,6 @@ var actions = {
 		};
 	},
 
-	// refreshDir(obj) {
-	// 	return {
-	// 		type: 'REFRESH_DIR',
-	// 		obj: obj,
-	// 	}
-	// },
-
 	removeFile(obj) {
 		return {
 			type: 'REMOVE',
@@ -240,22 +219,6 @@ var actions = {
 			status: status
 		}
 	},
-
-	// refreshDownloadStatusOfFolder(key,status) {
-	// 	return {
-	// 		type: 'DOWNLOAD_STATUS_OF_FOLDER',
-	// 		key: key,
-	// 		status: status
-	// 	}
-	// },
-
-	// refreshUploadStatusOfFolder(key,status) {
-	// 	return {
-	// 		type: 'UPLOAD_STATUS_OF_FOLDER',
-	// 		key: key,
-	// 		status: status
-	// 	}
-	// },
 
 	checkUser(uuid,b) {
 		return {
@@ -300,29 +263,6 @@ var actions = {
 		}
 	},
 	//media ---------------------------------------------
-	// setMedia(data) {
-	// 	return {
-	// 		type: 'SET_MEDIA',
-	// 		data: data
-	// 	}
-	// },
-
-	// setThumb(item,path,status) {
-	// 	return {
-	// 		type: 'SET_THUMB',
-	// 		data: item,
-	// 		status:status,
-	// 		path:path
-	// 	}
-	// },
-
-	// setShareThumb(item, path, status) {
-	// 	return {
-	// 		type: 'SET_SHARE_THUMB',
-	// 		data: item,
-	// 		path: path
-	// 	}
-	// },
 
 	toggleMedia(open) {
 		return {
@@ -337,28 +277,6 @@ var actions = {
 			item: item
 		}
 	},
-
-	// setShareChildren(shareChildren,sharePath) {
-	// 	return {
-	// 		type: 'SET_SHARE_CHILDREN',
-	// 		shareChildren: shareChildren,
-	// 		sharePath:sharePath
-	// 	}
-	// },
-
-	setMediaSize(reset) {
-		return {
-			type: 'SET_MEDIA_SIZE',
-			reset: reset
-		}
-	},
-
-	// setMediaShare(data) {
-	// 	return {
-	// 		type : 'SET_MEDIA_SHARE',
-	// 		data : data
-	// 	}
-	// },
 
 	logOut() {
 		return {

@@ -326,35 +326,7 @@ const directory = (state = defaultDirectory,action)=> {
       return Object.assign({}, state, {
         stm: state.stm.setEditing(action.data)
       })
-
-		case 'SELECT_CHILDREN':
-			var allSelected = true;
-			var newChildren = state.children.map((item,index)=>{
-				return index == action.rowNumber?Object.assign({},item,{checked:!item.checked}):item
-			});
-			// //is all children selected?
-			for (let item of newChildren) {
-				if (item.checked == false) {
-					allSelected = false;
-					break;
-				}
-			}
-			return Object.assign({},state,{
-				view:Object.assign({},state.view,{selectAll:allSelected}),
-				children: newChildren,
-        stm: state.stm.selectChild(state.children[action.rowNumber].uuid)
-			})
-
-		case 'SELECT_ALL_CHILDREN':
-			var children = state.children.map((item,index)=> {
-				return state.view.selectAll?Object.assign({},item,{checked:false}):Object.assign({},item,{checked:true});
-			});
-			return Object.assign({},state,{
-				view:Object.assign({},state.view,{selectAll:!state.view.selectAll}),
-				current:Object.assign({},state.current,{children:children}),
-				children:children,
-        stm: state.stm.setSelection(state.view.selectAll ? state.children.map(child => child.uuid) : []) 
-			});		
+      
 		default:
 			return state
 	}
