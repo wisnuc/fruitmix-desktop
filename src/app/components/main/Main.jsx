@@ -8,7 +8,7 @@ import { ipcRenderer } from 'electron'
 
 import React from 'react';
 
-import {Avatar, Menu, Paper, Snackbar, MenuItem, IconButton, Divider, 
+import {Avatar, Menu, Paper, Snackbar, MenuItem, IconButton, Divider,
   Subheader, List, ListItem } from 'material-ui';
 
 import SocialNotifications from 'material-ui/svg-icons/social/notifications'
@@ -28,11 +28,13 @@ import ImagePhotoAlbum from 'material-ui/svg-icons/image/photo-album'
 import ImagePortrait from 'material-ui/svg-icons/image/portrait'
 
 import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
+import Action from '../../actions/action'
 
 import { command } from '../../lib/command'
 
 import FileApp from '../file/FileApp'
 import ControlApp from '../control/ControlApp'
+import PhotoApp from '../photo/PhotoApp';
 
 //import CSS
 import css  from  '../../../assets/css/main';
@@ -44,12 +46,12 @@ const appMap = new Map()
 const TopBar = (props) => (
 
   <div style={props.style}>
-    <Paper style={{ 
+    <Paper style={{
       height: '100%', backgroundColor: '#FFF',
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
     }}>
       <div style={{marginLeft: 72, width: (210 - 72), fontSize: 16, opacity:0.54}}>闻上云管家</div>
-      
+
       <Avatar style={{marginRight: 16, flex: '0 0 32px'}} src="../src/assets/custom/images/romantic_dog.jpg" size={32} />
       <Avatar style={{marginRight: 16, flex: '0 0 32px'}} src="../src/assets/custom/images/romantic_dog.jpg" size={32} />
       <Avatar style={{marginRight: 16, flex: '0 0 32px'}} src="../src/assets/custom/images/romantic_dog.jpg" size={32} />
@@ -58,11 +60,11 @@ const TopBar = (props) => (
       <Avatar style={{marginRight: 16, flex: '0 0 32px'}} src="../src/assets/custom/images/romantic_dog.jpg" size={32} />
       <Avatar style={{marginRight: 16, flex: '0 0 32px'}} src="../src/assets/custom/images/romantic_dog.jpg" size={32} />
       <Avatar style={{marginRight: 16, flex: '0 0 32px'}} src="../src/assets/custom/images/romantic_dog.jpg" size={32} />
-      
+
       <div style={{flex:'1 0'}} />
 
       <IconButton iconStyle={{opacity: 0.54}}><NavigationApps /></IconButton>
-      <IconButton iconStyle={{opacity: 0.54}}><ActionSettings /></IconButton> 
+      <IconButton iconStyle={{opacity: 0.54}}><ActionSettings /></IconButton>
       <IconButton iconStyle={{opacity: 0.54}}><SocialNotifications /></IconButton>
       <IconButton iconStyle={{opacity: 0.54}}><ActionAccountCircle /></IconButton>
       <div style={{width: 64}} />
@@ -75,7 +77,7 @@ const systemPaneWidth = 320
 const SystemDrawer = (props) => {
   return (
     <div style={props.style}>
-      <Paper 
+      <Paper
         style={{
           width: '100%',
           height: '100%',
@@ -85,7 +87,7 @@ const SystemDrawer = (props) => {
         rounded={false}
         zDepth={3}
       >
-        <div style={{height: 56, display: 'flex', alignItems: 'center', 
+        <div style={{height: 56, display: 'flex', alignItems: 'center',
           color: '#FFF', backgroundColor: '#36474F', }}>
           <div style={{marginLeft: 72, fontSize: 21, fontWeight: 'medium', opacity: props.resizing ? 0 : 1}}>闻上云管家</div>
         </div>
@@ -101,6 +103,7 @@ const SystemDrawer = (props) => {
           <ListItem style={{color: '#FFF'}}
             primaryText='照片'
             leftAvatar={<Avatar icon={<ImagePhoto />} backgroundColor={pink500} />}
+            onTouchTap={() => props.onLauncherSelect(PhotoApp)}
           />
           <ListItem style={{color: '#FFF'}}
             primaryText='相册'
@@ -132,9 +135,9 @@ class Main extends React.Component {
 	constructor(props) {
     super(props)
 
-    this.state = { 
-      currentApp: FileApp, 
-      showAppBar: true, 
+    this.state = {
+      currentApp: FileApp,
+      showAppBar: true,
       resizing: false
     }
 
@@ -150,7 +153,7 @@ class Main extends React.Component {
 
     this.onLauncherSelect = (app) => {
       if (app === this.state.currentApp) return
-      this.setState(Object.assign({}, this.state, { currentApp: app }))   
+      this.setState(Object.assign({}, this.state, { currentApp: app }))
     }
   }
 
@@ -163,23 +166,23 @@ class Main extends React.Component {
       maximized: !showAppBar,
       resizing: this.state.resizing,
       nudge: true
-    }    
- 
+    }
+
     return (
 
       <div style={{width: '100%', height: '100%'}}>
         <div style={{
-            position: 'absolute', 
+            position: 'absolute',
             // width: showAppBar ? 'calc(100% - 320px)': '100%',
             width: '100%',
-            height: '100%', 
+            height: '100%',
             transition: sharpCurve('all'),
             overflow: 'hidden'
         }}>
-          { React.createElement(this.state.currentApp, appProps, null) } 
+          { React.createElement(this.state.currentApp, appProps, null) }
         </div>
 
-        <SystemDrawer 
+        <SystemDrawer
           style={{
             position: 'absolute',
             width: 320,
@@ -191,8 +194,8 @@ class Main extends React.Component {
           onLauncherSelect={this.onLauncherSelect}
         />
 
-        <IconButton 
-          style={{position: 'absolute', 
+        <IconButton
+          style={{position: 'absolute',
             top: (56 - 48 ) / 2,
             transition: sharpCurve('top'),
             right: 0,
@@ -203,16 +206,16 @@ class Main extends React.Component {
             ({color: '#FFF', opacity: 1}) :
             ({color: '#FFF', opacity: 1})
           }
-          onTouchTap={this.toggleAppBar} 
+          onTouchTap={this.toggleAppBar}
         >
           { showAppBar ? <NavigationChevronRight /> : <NavigationApps /> }
         </IconButton>
 
-        <Snackbar 
-          style={{textAlign:'center'}} 
-          open={storeState().snack.open} 
-          message={storeState().snack.text} 
-          autoHideDuration={3000} 
+        <Snackbar
+          style={{textAlign:'center'}}
+          open={storeState().snack.open}
+          message={storeState().snack.text}
+          autoHideDuration={3000}
           onRequestClose={() => window.store.dispatch() /* TODO */}
         />
       </div>
@@ -235,11 +238,14 @@ class Main extends React.Component {
     // fileNav('HOME_DRIVE', null)
 
 		// ipcRenderer.send('getRootData')
-		// ipcRenderer.send('getMediaData')
+		ipcRenderer.send('getMediaData')
 		// ipcRenderer.send('getMoveData')
 		// ipcRenderer.send('getFilesSharedToMe')
 		// ipcRenderer.send('getFilesSharedToOthers')
-		// ipcRenderer.send('getMediaShare')
+		ipcRenderer.send('getMediaShare')
+    setTimeout(() => {
+      ipcRenderer.send('getThumb',[storeState().media.data[0],storeState().media.data[1],storeState().media.data[2]])
+    },2000)
 
 		// this.props.dispatch(Action.filesLoading());
 
@@ -306,7 +312,7 @@ class Main extends React.Component {
 		// });
 
 		ipcRenderer.on('donwloadMediaSuccess',(err,item)=>{
-			this.props.dispatch(Action.setMediaImage(item));
+			window.store.dispatch(Action.setMediaImage(item));
 		});
 
 		// ipcRenderer.on('mediaShare', (err,data) => {
@@ -345,5 +351,3 @@ class Main extends React.Component {
 }
 
 export default Main
-
-

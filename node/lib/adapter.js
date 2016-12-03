@@ -8,8 +8,8 @@ const debug = Debug('lib:adapter')
 const adapter = () => {
 
 	let state = {
-    config: store.getState().config,
-    server: store.getState().server,
+    	config: store.getState().config,
+    	server: store.getState().server,
 		login: store.getState().login,
 		setting: store.getState().setting,
 		file: store.getState().file,

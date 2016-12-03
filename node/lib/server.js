@@ -1,5 +1,7 @@
 import Debug from 'debug'
 import request from 'request'
+import fs from 'fs'
+import path from 'path'
 
 const debug = Debug('lib:server')
 
@@ -51,6 +53,41 @@ const requestGet = (url, qs, token, callback) => {
 }
 
 export const requestGetAsync = Promise.promisify(requestGet)
+
+const requestDownload = (url, qs, token, downloadPath, name, callback) => {
+  let opts = { method: 'GET', url }
+  if (qs) opts.qs = qs
+  if (typeof token === 'string')
+    opts.headers = { Authorization: 'JWT ' + token }
+  else if (typeof token === 'object' && token !== null) {
+    opts.auth = token
+  }
+
+  let stream = fs.createWriteStream(path.join(downloadPath,name))
+  request(opts, (err, res) => {
+
+    if (err) return callback(err)
+    if (res.statusCode !== 200) {
+      let e = new Error('http status code not 200')
+      e.code = 'EHTTPSTATUS'
+      e.status = res.statusCode
+      return callback(e)
+    }
+
+    try {
+      return callback(null, null)
+    }
+    catch (e) {
+      console.log('req GET json parse err')
+      console.log(e)
+      let e1 = new Error('json parse error')
+      e1.code === 'EJSONPARSE'
+      return callback(e1)
+    }
+  }).pipe(stream)
+}
+
+export const requestDownloadAsync = Promise.promisify(requestDownload)
 
 const requestPost = (url, token, body, callback) => {
 
@@ -195,6 +232,13 @@ export const serverPatchAsync = async (endpoint, body) => {
   let port = 3721
   let token = store.getState().login.obj.token
   return requestPatchAsync(`http://${ip}:${port}/${endpoint}`, token, body)
+}
+
+export const serverDownloadAsync = (endpoint, qs, downloadPath, name) => {
+  let ip = store.getState().config.ip
+  let port = 3721
+  let token = store.getState().login.obj.token
+  return requestDownloadAsync(`http://${ip}:${port}/${endpoint}`, qs, token, downloadPath, name)
 }
 
 
