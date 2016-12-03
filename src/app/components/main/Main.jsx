@@ -242,7 +242,7 @@ class Main extends React.Component {
 		// ipcRenderer.send('getFilesSharedToOthers')
 		ipcRenderer.send('getMediaShare')
     setTimeout(() => {
-      // ipcRenderer.send('getMediaImage',storeState().media.data[0].digest)
+      ipcRenderer.send('getThumb',[storeState().media.data[0],storeState().media.data[1],storeState().media.data[2]])
     },2000)
 
 		// this.props.dispatch(Action.filesLoading());
