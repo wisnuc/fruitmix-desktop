@@ -16,18 +16,15 @@ const debug = Debug('lib:media')
 const c = debug
 
 var mediaPath = path.join(process.cwd(),'media')
-var downloadPath = path.join(process.cwd(),'download')
+var thumbConcurrency = 1
 
 var media = []
 var mediaMap = new Map()
 var mediaShare = []
 var mediaShareMap = new Map()
-
 var taskQueue = []
 var thumbReadyQueue = []
 var thumbRunningQueue = []
-
-var thumbConcurrency = 1
 
 //listener
 ipcMain.on('getMediaData',(event)=>{
