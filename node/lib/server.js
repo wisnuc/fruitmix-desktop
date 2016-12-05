@@ -68,6 +68,7 @@ const requestDownload = (url, qs, token, downloadPath, name, callback) => {
 
     if (err) return callback(err)
     if (res.statusCode !== 200) {
+      console.log(res.body)
       let e = new Error('http status code not 200')
       e.code = 'EHTTPSTATUS'
       e.status = res.statusCode

@@ -1,9 +1,10 @@
+//import core module
 import path from 'path'
 import fs from 'fs'
 import request from 'request'
 import { ipcMain } from 'electron'
 import Debug from 'debug'
-
+//import file module
 import { serverGetAsync, serverPostAsync, serverPatchAsync, serverDeleteAsync, serverDownloadAsync } from './server'
 import action from '../serve/action/action'
 import store from '../serve/store/store'
@@ -13,35 +14,23 @@ import { getMainWindow } from './window'
 //init
 const debug = Debug('lib:media')
 const c = debug
-var server
-var user
-var initArgs = () => {
-  server = 'http://' + store.getState().config.ip + ':3721'
-  user = store.getState().login.obj
-}
 
-//path
-let mediaPath = path.join(process.cwd(),'media')
-let downloadPath = path.join(process.cwd(),'download')
+var mediaPath = path.join(process.cwd(),'media')
+var downloadPath = path.join(process.cwd(),'download')
 
-//media
-let media = []
-let mediaMap = new Map()
+var media = []
+var mediaMap = new Map()
+var mediaShare = []
+var mediaShareMap = new Map()
 
-let mediaShare = []
-let mediaShareMap = new Map()
-
-let thumbReadyQueue = []
-let thumbRunningQueue = []
-let albumReadyQueue = []
-let albumRunningQueue = []
+var taskQueue = []
+var thumbReadyQueue = []
+var thumbRunningQueue = []
 
 var thumbConcurrency = 1
-var taskQueue = []
 
-
-//getMediaData
-ipcMain.on('getMediaData',(err)=>{
+//listener
+ipcMain.on('getMediaData',(event)=>{
 	serverGetAsync('media').then((data)=>{
 		c('media 列表获取成功')
 		media = data
@@ -57,8 +46,8 @@ ipcMain.on('getMediaData',(err)=>{
 		console.log(err)
 	})
 })
-//getMediaShare
-ipcMain.on('getMediaShare' , err => {
+
+ipcMain.on('getMediaShare' , event => {
 	serverGetAsync('mediaShare').then(data => {
 		c('获取mediaShare成功')
 		mediaShare = utils.quickSort(data)
@@ -72,11 +61,7 @@ ipcMain.on('getMediaShare' , err => {
 	})
 })
 
-// medias   array   photo.digest
-// users    array   user.uuid  ['xxx','xxx,'xxx']
-// album    object  {title:'xxx',text:'xxx'}
-
-ipcMain.on('createMediaShare',(err, medias, users, album) => {
+ipcMain.on('createMediaShare',(event, medias, users, album) => {
 	let body = {
 		viewers : users,
 		contents : medias,
@@ -84,6 +69,7 @@ ipcMain.on('createMediaShare',(err, medias, users, album) => {
 	}
 	serverPostAsync('mediaShare',body).then(data => {
 		c('创建相册成功')
+		data = JSON.parse(data)
 		mediaShare.push(data)
 		mediaShareMap.set(data.digest,mediaShare[mediaShare.length-1])
 		dispatch(action.setMediaShare(mediaShare))
@@ -103,23 +89,51 @@ ipcMain.on('createMediaShare',(err, medias, users, album) => {
 		
 	})
 })
-//--------------------------------------------------------------------
-ipcMain.on('getAlbumThumb', (err, item, digest) => {
-	item.parent = digest
-	shareThumbQueue.push(item)
-	dealShareThumbQueue()
+
+ipcMain.on('getMediaImage',(event,hash)=>{
+	serverDownloadAsync('media/'+hash+'/download',null,mediaPath,hash).then((data) => {
+		c('download media image' + hash + ' success')
+		var imageObj = {}
+		imageObj.path = path.join(mediaPath,hash)
+		let item = mediaMap.get(hash)
+		if (item != undefined) {
+			imageObj.exifOrientation = item.exifOrientation
+		}else {
+			imageObj.exifOrientation = null
+		}
+		mainWindow.webContents.send('donwloadMediaSuccess',imageObj)
+	}).catch(e => {
+		c('download media image' + failed + ' success')
+		c(e)
+	})
 })
 
-const createTask = (tasks, parent) => {
-	let task = new createUserTask(tasks, parent)
+ipcMain.on('getThumb',(event,tasks)=>{
+	createTask(tasks, null)
+})
+
+ipcMain.on('getAlbumThumb', (event, tasks, mediaShareDigest) => {
+	createTask(tasks, mediaShareDigest)
+})
+
+//schedule download queue
+const scheduleThumb = () => {
+	while (thumbRunningQueue.length < thumbConcurrency && thumbReadyQueue.length) {
+		thumbReadyQueue[0].setState('running')
+	}
+}	
+
+//create task send by Browser
+const createTask = (tasks, mediaShareDigest) => {
+	let task = new createUserTask(tasks, mediaShareDigest)
 	taskQueue.push(task)
 }
 
 class createUserTask {
-	constructor(tasks, parent) {
+	constructor(tasks, mediaShareDigest) {
 		this.children = []
 		tasks.forEach(item => {
-			this.children.push(createThumbTask(item, parent, this))
+			this.children.push(createThumbTask(item, mediaShareDigest, this))
 		})
 	}
 
@@ -139,178 +153,7 @@ class createUserTask {
 	}
 }
 
-function dealShareThumbQueue() {
-	if (shareThumbQueue.length == 0) {
-		return
-	}else {
-			c('shareThumbQueue.length ' + shareThumbQueue.length)
-			if (shareThumbIng.length == 0) {
-				for (var i=0;i<1;i++) {
-					if (shareThumbQueue.length == 0) {
-						break
-					}
-					let item = shareThumbQueue.shift()
-					shareThumbIng.push(item)
-					isShareThumbExist(item)
-				}
-			}
-	}
-}
-
-function isShareThumbExist(item) {
-	c(item.digest)
-	fs.readFile(path.join(mediaPath,item.digest+'thumb210'),(err,data)=>{
-		if (err) {
-			c('not exist')
-			downloadMedia(item,true,item).then((data)=>{
-				c('download success')
-				sendThumb(item)
-				console.log(shareThumbQueue.length+' length')
-			}).catch(err=>{
-				c(item.digest+' failed')
-				item.failed++
-				let index = shareThumbIng.findIndex(i=>i.digest == item.digest)
-				let t = shareThumbIng[index]
-				shareThumbIng.splice(index,1)
-				shareThumbQueue.push(t)
-				dealShareThumbQueue()
-			})
-		}else {
-			c('exist')
-			sendThumb(item)
-		}
-	})
-
-	function sendThumb(item){
-		c(item.digest+' is over')
-		let index = shareThumbIng.findIndex(i=>i.digest == item.digest)
-		shareThumbIng.splice(index,1)
-		//mainWindow.webContents.send('getShareThumbSuccess',item.digest,path.join(mediaPath,item.digest+'thumb210'))
-		let photo = mediaShareMap.get(item.parent).doc.contents.find(p => p.digest == item.digest)
-		photo.path = path.join(mediaPath,item.digest+'thumb210')
-		c('photo path : ' + photo.path)
-		dispatch(action.setMediaShare(mediaShare))
-		dealShareThumbQueue()
-		// setTimeout(dealShareThumbQueue,200)
-	}
-}
-
-//getMediaThumb
-ipcMain.on('getThumb',(err,tasks)=>{
-	createTask(tasks, null)
-})
-
-function dealThumbQueue() {
-	if (thumbQueue.length == 0) {
-		return
-	}else {
-
-			if (thumbIng.length == 0) {
-				for (var i=0;i<1;i++) {
-					if (thumbQueue.length == 0) {
-						break
-					}
-					let item = thumbQueue.shift()
-					thumbIng.push(item)
-					isThumbExist(item)
-				}
-			}
-
-	}
-}
-
-function isThumbExist(item) {
-	c(item.digest)
-	fs.readFile(path.join(mediaPath,item.digest+'thumb138'),(err,data)=>{
-		if (err) {
-			downloadMedia(item,false,item).then((data)=>{
-				sendThumb(item)
-				console.log(thumbQueue.length+' length')
-			}).catch(err=>{
-				c(item.digest+' failed')
-				item.failed++
-				let index = thumbIng.findIndex(i=>i.digest == item.digest)
-				let t = thumbIng[index]
-				thumbIng.splice(index,1)
-				if (item.failed <5) {
-					fs.readFile(path.join(mediaPath,item.digest+'thumb'),(err,data)=>{
-						if (err) {
-
-						}else {
-							c('find cache')
-						}
-					})
-					thumbQueue.push(t)
-				}else {
-					item.status='failed'
-					mainWindow.webContents.send('getThumbFailed',item)
-				}
-				dealThumbQueue()
-				console.log(thumbQueue.length+' length')
-			})
-		}else {
-			sendThumb(item)
-		}
-	})
-
-	function sendThumb(item){
-		c(item.digest+' is over')
-		let index = thumbIng.findIndex(i=>i.digest == item.digest)
-		thumbIng.splice(index,1)
-		mediaMap.get(item.digest).path = path.join(mediaPath,item.digest+'thumb138')
-		dispatch(action.setMedia(media))
-	}
-}
-
-function downloadMedia(item,large) {
-	initArgs()
-	var size = large?'width=210&height=210':'width=138&height=138'
-	var download = new Promise((resolve,reject)=>{
-		let scale = item.width/item.height
-		let height = 100/scale
-		var options = {
-			method: 'GET',
-			url: server+'/media/'+item.digest+'/thumbnail?'+size+'&autoOrient=true&modifier=caret',
-			headers: {
-				Authorization: user.type+' '+user.token
-			}
-		}
-
-		function callback (err,res,body) {
-			if (!err && res.statusCode == 200) {
-				console.log('res')
-				resolve(body)
-			}else {
-				c('err')
-				c(res.body)
-				c(item.digest)
-				fs.unlink(path.join(mediaPath,item.digest+'thumb'), (err,data)=>{
-					reject(err)	
-				})
-				
-			}
-		}
-			if (large) {
-				var stream = fs.createWriteStream(path.join(mediaPath,item.digest+'thumb210'))
-			}else {
-				var stream = fs.createWriteStream(path.join(mediaPath,item.digest+'thumb138'))
-			}
-
-			request(options,callback).pipe(stream)
-		})
-	return download
-}
-
-
-
-
-
-const scheduleThumb = () => {
-	while (thumbRunningQueue.length < thumbConcurrency && thumbReadyQueue.length) {
-		thumbReadyQueue[0].setState('running')
-	}
-}	
-
+//state change function called when state change
 const addToReadyQueue = (task) => {
 	thumbReadyQueue.push(task)
 	scheduleThumb()
@@ -329,15 +172,16 @@ const removeOutOfRunningQueue = (task) => {
 	scheduleThumb()
 }
 
-const createThumbTask = (item, parent, root) => {
-	let task = new thumbGetTask(item, parent, root)
+//create thumb download object when task create
+const createThumbTask = (item, mediaShareDigest, root) => {
+	let task = new thumbGetTask(item, mediaShareDigest, root)
 	task.setState('ready')
 	return task
 }
 
 class thumbGetTask {
-	constructor(item, parent, root) {
-		this.parent = parent
+	constructor(item, mediaShareDigest, root) {
+		this.mediaShareDigest = mediaShareDigest
 		this.item = item
 		this.root = root
 		this.state = null
@@ -384,28 +228,30 @@ class thumbGetTask {
 
 	enterRunningState() {
 		let _this = this
+		let cacheName = this.mediaShareDigest?'thumb210':'thumb138'
 		this.state = 'running'
 		addToRunningQueue(this)
-		fs.readFile(path.join(mediaPath,this.item.digest+'thumb138'),(err,data)=>{
+		fs.stat(path.join(mediaPath,this.item.digest+cacheName),(err,data)=>{
 			if (err) {
 				c('not find cache')
 				let qs = {
-					width :_this.parent?'138':'210',
-					height : _this.parent?'138':'210',
+					width :_this.mediaShareDigest?'138':'210',
+					height : _this.mediaShareDigest?'138':'210',
 					autoOrient : true,
 					modifier : 'caret'
 				}
 				let digest = _this.item.digest
-				serverDownloadAsync('media/' + digest + '/thumbnail', qs, mediaPath, digest + 'thumb138').then( data => {
-					c('get Thumb 138 success')
+				serverDownloadAsync('media/' + digest + '/thumbnail', qs, mediaPath, digest + cacheName).then( data => {
+					c('get Thumb success')
 					_this.result = 'success'
 					_this.setState('finish')
 				}).catch(err => {
-					c('get Thumb 138 error : ')
+					c('get Thumb error : ')
 					c(err)
-					_this.result = 'failed'
-					_this.setState('finish')
-					
+					if (!_this.result) {
+						_this.result = 'failed'
+						_this.setState('finish')
+					}
 				})
 			}else {
 				c('find cache')
@@ -421,30 +267,24 @@ class thumbGetTask {
 
 	enterFinishState() {
 		this.state = 'finish'
-		c(this.item.digest+' is over')
-		mediaMap.get(this.item.digest).path = path.join(mediaPath,this.item.digest+'thumb138')
+		if (this.result == 'failed') {
+			this.root.taskFinish()
+			return
+		}
+		if (this.mediaShareDigest) {
+			c('thumb exist in mediaShare')
+			let ms = mediaShareMap.get(this.mediaShareDigest)
+			let photo = ms.doc.contents.find(item => item.digest == this.item.digest)
+			photo.path = path.join(mediaPath,this.item.digest+'thumb210')
+		}else {
+			c('thumb exist in mediaList')
+			mediaMap.get(this.item.digest).path = path.join(mediaPath,this.item.digest+'thumb138')
+		}
 		this.root.taskFinish()
 	}
 }
 
 
-//getMediaImage
-ipcMain.on('getMediaImage',(err,hash)=>{
-	serverDownloadAsync('media/'+hash+'/download',null,mediaPath,hash).then((data) => {
-		c('download media image' + hash + ' success')
-		var imageObj = {}
-		imageObj.path = path.join(mediaPath,hash)
-		let item = mediaMap.get(hash)
-		if (item != undefined) {
-			imageObj.exifOrientation = item.exifOrientation
-		}else {
-			imageObj.exifOrientation = null
-		}
-		mainWindow.webContents.send('donwloadMediaSuccess',imageObj)
-	}).catch(e => {
-		c('download media image' + failed + ' success')
-		c(e)
-	})
-})
+
 
 

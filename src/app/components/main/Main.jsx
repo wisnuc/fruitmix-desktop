@@ -235,34 +235,50 @@ class Main extends React.Component {
 
 		var _this = this
 
-    // fileNav('HOME_DRIVE', null)
-
-		// ipcRenderer.send('getRootData')
 		ipcRenderer.send('getMediaData')
-		// ipcRenderer.send('getMoveData')
-		// ipcRenderer.send('getFilesSharedToMe')
-		// ipcRenderer.send('getFilesSharedToOthers')
 		ipcRenderer.send('getMediaShare')
+
     setTimeout(() => {
-      ipcRenderer.send('getThumb',[storeState().media.data[0],storeState().media.data[1],storeState().media.data[2]])
+      //about mediaApi test function should put in here
+
+      // createMediaShareTest()      
+      // mediaListThumbTest()
+      // mediaShareThumbTest()
     },2000)
 
-		// this.props.dispatch(Action.filesLoading());
+    const createMediaShareTest = () => {
+      let media = storeState().media
+      let mediaList = media.data.map(item => {
+        console.log(item)
+        return item.digest
+      })
+      let userList = storeState().node.server.users.forEach(item => {
+        return item.uuid
+      })
+      ipcRenderer.send('createMediaShare',mediaList,userList,null)
+    }
 
-		// ipcRenderer.on('receive',function (err,dir,children,path) {
-		// 	_this.props.dispatch(Action.setDirctory(dir,children,path))
-		// });
+    const mediaListThumbTest = () => {
+      let media = storeState().media
+      let data = media.data
+      ipcRenderer.send('getThumb',data)
+    }
+
+    const mediaShareThumbTest = () => {
+      let media = storeState().media
+      let mediaShare = media.mediaShare[0]
+      let digest = mediaShare.digest
+      let arr = mediaShare.doc.contents
+      ipcRenderer.send('getAlbumThumb',arr,digest)
+    }
+
 		ipcRenderer.on('setTree',(err,tree)=>{
 			this.props.dispatch(Action.setTree(tree));
 		});
 
-		// ipcRenderer.on('uploadSuccess',(err,file,children)=>{
-		// 		this.props.dispatch(Action.refreshDir(children));
-		// });
-
-		// ipcRenderer.on('setShareChildren',(err,shareChildren,sharePath)=>{
-		// 	this.props.dispatch(Action.setShareChildren(shareChildren,sharePath));
-		// });
+    ipcRenderer.on('treeChildren',(err,treeChildren)=>{
+      this.props.dispatch(Action.setTree(treeChildren));
+    });
 
 		ipcRenderer.on('refreshStatusOfUpload',(err,tasks)=>{
 			this.props.dispatch(Action.refreshStatusOfUpload(tasks));
@@ -272,65 +288,18 @@ class Main extends React.Component {
 			this.props.dispatch(Action.refreshStatusOfDownload(file,status));
 		})
 
-		// ipcRenderer.on('refreshDownloadStatusOfFolder',(err,key,status)=>{
-		// 	this.props.dispatch(Action.refreshDownloadStatusOfFolder(key,status));
-		// });
-
-		// ipcRenderer.on('refreshUploadStatusOfFolder',(err,key,status)=>{
-		// 	this.props.dispatch(Action.refreshUploadStatusOfFolder(key,status));
-		// });
-
-
-		ipcRenderer.on('deleteSuccess',(err,obj,children,dir)=>{
-			if (dir.uuid == storeState().data.directory.uuid) {
-				this.props.dispatch(Action.refreshDir(children));
-			}
-		});
-
 		ipcRenderer.on('message',(err,message,code)=>{
-			this.props.dispatch(Action.setSnack(message,true));
-			switch(code) {
-				case 1:
-					this.props.dispatch(Action.getDataFailed());
-			}
+			this.props.dispatch(Action.setSnack(message,true))
 		});
 
-		ipcRenderer.on('treeChildren',(err,treeChildren)=>{
-			this.props.dispatch(Action.setTree(treeChildren));
-		});
+		
 		//media--------------------------------------------------------------------------
-		// ipcRenderer.on('mediaFinish',(err,media)=>{
-		// 	this.props.dispatch(Action.setMedia(media));
-		// });
-
-		// ipcRenderer.on('getThumbSuccess',(err,item,path)=>{
-		// 	this.props.dispatch(Action.setThumb(item,path,'ready'));
-		// });
-
-		// ipcRenderer.on('getThumbFailed',(err,item)=>{
-		// 	this.props.dispatch(Action.setThumb(item,'failed'));
-		// });
 
 		ipcRenderer.on('donwloadMediaSuccess',(err,item)=>{
 			window.store.dispatch(Action.setMediaImage(item));
 		});
 
-		// ipcRenderer.on('mediaShare', (err,data) => {
-		// 	this.props.dispatch(Action.setMediaShare(data))
-		// })
-
-		// ipcRenderer.on('getShareThumbSuccess', (err, item, path) => {
-		// 	this.props.dispatch(Action.setShareThumb(item,path))
-		// })
-
 		//transmission---------------------------------------------------------------------
-		// ipcRenderer.on('transmissionDownload',(err,obj)=>{
-		// 	this.props.dispatch(Action.addDownload(obj));
-		// });
-
-		// ipcRenderer.on('transmissionUpload',(err,obj)=>{
-		// 	this.props.dispatch(Action.addUpload(obj));
-		// });
 
 		ipcRenderer.on('setUsers',(err,user)=>{
 			this.props.dispatch({type:'SET_USER',user:user});
@@ -343,9 +312,6 @@ class Main extends React.Component {
 		ipcRenderer.on('setMoveData', (err,data) => {
 			this.props.dispatch(Action.setMoveData(data))
 		})
-
-		setTimeout(()=>{
-		},2000)
 	}
 
 }
