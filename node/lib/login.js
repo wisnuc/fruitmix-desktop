@@ -295,6 +295,7 @@ export const loginHandler = (err, username, password) =>
 ipcMain.on('setServerIp',(err, ip, isCustom, isStorage)=>{
 
 	debug('setServerIp', ip)
+
   store.dispatch({
     type: 'CONFIG_SET_IP',
     data: ip
@@ -355,11 +356,6 @@ ipcMain.on('loginOff',err=>{
 	dispatch(action.loginoff())
 	isLogin = false
 })
-
-
-
-
-
 
 ipcMain.on('login', (err, user, pass) => loginHandler(err, user, pass))
 
