@@ -73,5 +73,10 @@
   },
   "src": "src",
   "test": "test",
-  "dist": "dist"
+  "dist": "dist",
+  "dependencies": {
+    "json-loader": "^0.5.4",
+    "prettysize": "0.0.3",
+    "superagent": "^2.3.0"
+  }
 }
