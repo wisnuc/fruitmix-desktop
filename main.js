@@ -1,2 +1,1 @@
-require('babel-register')
-require('./node/app')
+require('./build/app')

@@ -3,6 +3,14 @@
 /media
 /download
 /npm-debug.log
-/.swp
+
+*.swp
+
 /server
 /ele
+
+wisnuc-linux-x64.tar.gz
+wisnuc-linux-x64/
+wisnuc-win32-x64.tar.gz
+wisnuc-win32-x64/
+

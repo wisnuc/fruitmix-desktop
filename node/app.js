@@ -26,6 +26,7 @@ import { initMainWindow, getMainWindow } from './lib/window'
 import { initTestWindow } from './lib/testHook'
 
 import mdns from './lib/mdns'
+import misc from './lib/misc'
 
 const debug = Debug('main')
 
