@@ -26,6 +26,9 @@ function getStyles (leftnav) {
       top: 0,
       transition: sharpCurve('left'),
       zIndex: 1000
+    },
+    main: {
+      padding: '66px 15px 0'
     }
   }
 }
@@ -40,8 +43,7 @@ class PhotoApp extends Component {
     };
 
     this.toggleLeftNav = () => this.setState({ leftNav: !this.state.leftNav });
-
-    let { leftNav } = getStyles(this.state.leftNav);
+    this.style = getStyles(this.state.leftNav);
 
     // this.renderLeftNav = () => (
     //   <div
@@ -86,12 +88,11 @@ class PhotoApp extends Component {
 
   render() {
     return (
-      <div className="view-image">
+      <div>
         <PhotoToolBar
           action={ this.toggleLeftNav }
-          state={ ['照片'] }
-        />
-        <PhotoList />
+          state={ ['照片'] }/>
+        <PhotoList style={ this.style.main } />
       </div>
     );
   }

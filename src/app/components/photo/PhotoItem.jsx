@@ -4,19 +4,16 @@
 
 import { ipcRenderer } from 'electron';
 
-import React, { Component } from 'react';
-import loadingIcon from '../../../assets/images/index/loading.gif';
+import React, { Component, PropTypes } from 'react';
+import loading from '../../../assets/images/index/loading.gif';
 
 function getStyles () {
   return {
     root: {
       boxSizing: 'border-box',
       border: '1px solid #e5e5e5',
-      position: 'relative',
-      flexBasis: 150,
-      height: 158,
-      marginRight: 6,
-      marginBottom: 6
+      height: '100%',
+      width: '100%'
     },
     thumb: {
       width: '100%',
@@ -38,42 +35,37 @@ function getStyles () {
 }
 
 export default class PhotoItem extends Component {
-  buildThumb(path, thumbStyle) {
-    return (
-      <img
-        src={ path }
-        style={ thumbStyle }
-      />
-    );
-  }
-
-  buildLoadingIcon(loadingIconStyle) {
-    return (
-      <img
-        src={ loadingIcon }
-        style={ loadingIconStyle }
-      />
-    );
-  }
-
   shouldComponentUpdate(nextProps) {
-    return nextProps.state.path !== this.props.state.path;
+    return nextProps.path !== this.props.path;
   }
 
   render() {
-    let { path } = this.props.state;
+    let { path, style } = this.props;
     let { root, thumb, loadingIcon } = getStyles();
+    let component;
+
+    if (path) {
+      component = (<img src={ path } style={ thumb } />);
+    } else {
+      component = (<img src={ loading } style={ loadingIcon } />);
+    }
 
     return (
-      <div style={ root }>
-        { path ? this.buildThumb(path, thumb) : this.buildLoadingIcon(loadingIcon) }
+      <div style={ style }>
+        <div style={ root }>
+          { component }
+        </div>
       </div>
     );
   }
 
-  // componentDidMount() {
-  //   let { path } = this.props.state;
-  //
-  //   ipcRenderer.send('getThumb', path);
-  // }
+  componentDidMount() {
+    let { digest } = this.props;
+
+    ipcRenderer.send('getThumb', [{ digest }]);
+  }
 }
+
+PhotoItem.propTypes = {
+  digest: PropTypes.string.isRequired
+};
