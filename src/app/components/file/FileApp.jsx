@@ -1416,6 +1416,13 @@ class FileApp extends React.Component {
 		)
 	}
 
+	getSelectedList() {
+		if (!this.state.list) {
+			return []
+		}
+		return this.state.list.filter(item => item.selected)
+	}
+
   render() {
     const detailWidth = 300
     debug('fileapp render')
@@ -1566,7 +1573,7 @@ class FileApp extends React.Component {
               <NavigationClose />
             </IconButton>
           </FileDetailToolbar>
-          <Detail/>
+          <Detail detail={this.getSelectedList()}/>
         </div>
 
         <DialogInput
