@@ -1,35 +1,15 @@
 import { ipcMain } from 'electron'
 
+import Debug from 'debug'
+const debug = Debug('lib:system')
+const c = debug
 
-//system api-----------------------------------------
-ipcMain.on('runVolume',(err,address,target,init,mkfs) => {
-	c(address)
-	c(target)
-	c(init)
-	c(mkfs)
-	mir(address,target).then(data => {
-		
-	}).catch(err => {
-		
-	})
-})
-
-ipcMain.on('installVolume', (err,address,target,init,mkfs,time) => {
-	c(address)
-	c(target)
-	c(init)
-	c(mkfs)
-	c(time)
-	mir(address,target,init,mkfs).then(data => {
-		mainWindow.webContents.send('mirFinish-'+time,'success')
-	}).catch(err => {
-		mainWindow.webContents.send('mirFinish-'+time,'failed')
-		mainWindow.webContents.send('message',err)
-	})
-})
+import { getMainWindow } from './window'
 
 function mir(address,target,init,mkfs) {
+
 	console.log(target)
+
 	var promise = new Promise((resolve,reject) => {
 		let options = {
 			method: 'post',
@@ -56,6 +36,42 @@ function mir(address,target,init,mkfs) {
 		}
 		request(options,callback)
 	})
+
 	return promise
 }
+//system api-----------------------------------------
+ipcMain.on('runVolume',(err, address, target, init, mkfs) => {
+	c(address)
+	c(target)
+	c(init)
+	c(mkfs)
+	mir(address,target).then(data => {
+		
+	}).catch(err => {
+		
+	})
+})
+
+ipcMain.on('installVolume', (err,address,target,init,mkfs,time) => {
+
+	c(address)
+	c(target)
+	c(init)
+	c(mkfs)
+	c(time)
+
+  const mainWindow = getMainWindow()
+
+	mir(address,target,init,mkfs).then(data => {
+
+		mainWindow.webContents.send('mirFinish-'+time,'success')
+
+	}).catch(err => {
+
+		mainWindow.webContents.send('mirFinish-'+time,'failed')
+		mainWindow.webContents.send('message',err)
+
+	})
+})
+
 

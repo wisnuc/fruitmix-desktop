@@ -16,7 +16,11 @@ const initMainWindow = () => {
 		minWidth:200,
 		minHeight:200,
 		title:'WISNUC',
-		icon: path.join(__dirname,'180-180.png') // FIXME
+		icon: path.join(__dirname,'180-180.png'), // FIXME
+  
+    webPreferences: {
+      webSecurity: false
+    }
 	})
 
 	//window title
@@ -25,8 +29,13 @@ const initMainWindow = () => {
 	})
 
   // debug mode
-	_mainWindow.webContents.openDevTools()
-	_mainWindow.loadURL('file://' + process.cwd() + '/build/index.html')
+	// _mainWindow.webContents.openDevTools()
+  _mainWindow.maximize()
+
+  if (global.BABEL_IS_RUNNING) 
+	  _mainWindow.loadURL('file://' + process.cwd() + '/build/index.html')
+  else
+	  _mainWindow.loadURL('file://' + process.cwd() + '/resources/app/build/index.html')
 
   console.log('[window] mainWindow initialized')
 }

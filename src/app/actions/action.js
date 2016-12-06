@@ -212,11 +212,10 @@ var actions = {
 		}
 	},
 
-	refreshStatusOfDownload(file,status) {
+	refreshStatusOfDownload(tasks) {
 		return {
 			type: 'REFRESH_STATUS_DOWNLOAD',
-			file: file,
-			status: status
+			tasks : tasks
 		}
 	},
 

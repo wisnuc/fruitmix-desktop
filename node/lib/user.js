@@ -1,4 +1,6 @@
 import { ipcMain } from 'electron'
+import registerCommandHandlers from './command'
+import { serverGetAsync, serverPostAsync, serverPatchAsync, serverDeleteAsync } from './server'
 // create user
 ipcMain.on('create-new-user', function(err, u, p) {
 	loginApi.createNewUser(u,p).then(()=>{

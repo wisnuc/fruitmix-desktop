@@ -6,7 +6,8 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "devel": "nodemon --exec electron .",
+    "devel": "nodemon --exec electron mainDevel.js",
+    "build": "babel node --out-dir build",
     "mocha": "mocha --compilers js:babel-core/register --recursive --sort"
   },
   "devDependencies": {
@@ -33,29 +34,31 @@
     "css-loader": "^0.23.1",
     "debug": "^2.3.2",
     "deep-equal": "^1.0.1",
+    "electron-packager": "^8.3.0",
     "electron-prebuilt": "^1.4.5",
     "file-loader": "^0.9.0",
+    "gsap": "^1.19.0",
     "html-webpack-plugin": "^2.22.0",
     "jquery": "^3.1.0",
     "keypress.js": "^2.1.0-1",
     "lodash": "^4.13.1",
-    "material-ui": "^0.15.2",
+    "material-ui": "^0.16.0",
     "mdns-js": "^0.5.0",
     "mkdirp": "^0.5.1",
     "mocha": "^3.1.2",
     "moment": "^2.15.2",
     "node-uuid": "^1.4.7",
     "nodemon": "^1.11.0",
-    "react": "^15.2.1",
+    "react": "^15.4.1",
     "react-addons-css-transition-group": "^15.2.1",
     "react-click-outside": "^2.2.0",
-    "react-dom": "^15.2.1",
+    "react-dom": "^15.4.1",
     "react-hot-loader": "^1.3.0",
     "react-keydown": "^1.6.5",
     "react-redux": "^4.4.5",
     "react-router": "^2.6.0",
     "react-scrollbar": "^0.4.2",
-    "react-tap-event-plugin": "^1.0.0",
+    "react-tap-event-plugin": "^2.0.0",
     "redux": "^3.5.2",
     "redux-logger": "^2.6.1",
     "redux-thunk": "^2.1.0",
@@ -70,5 +73,10 @@
   },
   "src": "src",
   "test": "test",
-  "dist": "dist"
+  "dist": "dist",
+  "dependencies": {
+    "json-loader": "^0.5.4",
+    "prettysize": "0.0.3",
+    "superagent": "^2.3.0"
+  }
 }

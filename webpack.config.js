@@ -12,6 +12,7 @@ var CopyWebpackPlugin = require('copy-webpack-plugin');
 var ELE_PATH = path.resolve(__dirname, 'ele');
 var SRC_PATH = path.resolve(__dirname, 'src');
 var HTML_PATH = path.resolve(__dirname, 'src/index.html');
+
 module.exports = {
 
     output: {
@@ -63,13 +64,18 @@ module.exports = {
             {
                 test  : /\.(png|jpg|jpeg|ico|gif|woff|woff2|ttf|eot|svg)$/,
                 loader: 'url-loader?limit=8192'
-            }
+            },
+            {
+                test: /\.json$/,
+                loader: 'json-loader'
+            },
         ]
     },
 
     plugins: [
         new webpack.HotModuleReplacementPlugin(),
         new HtmlWebpackPlugin({template: path.resolve(__dirname, 'src/index.html')}),
+        new webpack.DefinePlugin({ "global.GENTLY": false })
         // new CopyWebpackPlugin([
         //     { from:  path.resolve(SRC_PATH,'electron-index.js'), to: 'electron-index.js' },
         //     { from:  path.resolve(SRC_PATH,'index.html'), to: 'index.html' }

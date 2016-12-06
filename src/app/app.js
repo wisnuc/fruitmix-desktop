@@ -44,7 +44,7 @@ const render = () => ReactDom.render(<App/>, document.getElementById('app'))
 
 // subscribe render
 store.subscribe(() => {
-  console.log(store.getState())
+  // console.log(store.getState())
   render()
 })
 
