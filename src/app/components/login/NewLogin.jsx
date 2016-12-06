@@ -14,12 +14,7 @@ import Action from '../../actions/action'
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
 import baseTheme from 'material-ui/styles/baseThemes/lightBaseTheme'
 import { Checkbox, Divider, RaisedButton, Avatar, IconButton, LinearProgress, Paper, TextField, FlatButton, CircularProgress, Snackbar, SelectField, MenuItem } from 'material-ui'
-import {
-  Step,
-  Stepper,
-  StepLabel,
-  StepContent,
-} from 'material-ui/Stepper'
+import { Step, Stepper, StepLabel, StepContent } from 'material-ui/Stepper'
 
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
 
