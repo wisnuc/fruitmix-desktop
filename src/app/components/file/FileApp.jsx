@@ -16,7 +16,7 @@ import Action from '../../actions/action'
 import { command } from '../../lib/command'
 import { fileNav, fileCreateNewFolder } from '../../lib/file'
 
-import keypress from 'keypress.js'
+import keypress from '../common/keypress.js'
 
 import svg from '../../utils/SVGIcon'
 
@@ -1566,6 +1566,7 @@ class FileApp extends React.Component {
             suppressed={false && !this.props.maximized}
             show={!this.state.detailResizing}
           >
+          	<div></div>
             <IconButton
               iconStyle={toolbarStyle.activeIcon}
               onTouchTap={this.toggleDetail}

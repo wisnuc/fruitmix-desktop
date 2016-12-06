@@ -13,7 +13,10 @@ import ReactDOM from 'react-dom'
 import Action from '../../actions/action'
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
 import baseTheme from 'material-ui/styles/baseThemes/lightBaseTheme'
-import { Avatar, IconButton, LinearProgress, Paper, TextField, FlatButton, CircularProgress, Snackbar, SelectField, MenuItem, RadioButton, RadioButtonGroup } from 'material-ui'
+import { Checkbox, Divider, RaisedButton, Avatar, IconButton, LinearProgress, Paper, TextField, FlatButton, CircularProgress, Snackbar, SelectField, MenuItem } from 'material-ui'
+import { Step, Stepper, StepLabel, StepContent } from 'material-ui/Stepper'
+
+import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
 
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group'  
 import TransitionGroup from 'react-addons-transition-group'
@@ -29,13 +32,18 @@ import UUID from 'node-uuid'
 
 import {indigo900, cyan900, teal900, lightGreen900, lime900, yellow900} from 'material-ui/styles/colors'
 
+import request from 'superagent'
+import prettysize from 'prettysize'
+
 //import CSS
 import css  from  '../../../assets/css/login'
 //import component
 import UserList from './userList'
 
 import Debug from 'debug'
-const debug = Debug('view:login')
+const debug = Debug('main')
+
+console.log(debug)
 
 const styles = {
 	icon : {
@@ -348,7 +356,7 @@ class Index extends React.Component {
 		}
 
 		if (this.state.step == 3) {
-				let t = this.state.type == 1 ?'single':this.state.type == 2?'raid0':'raid1'
+				let t = this.state.type == 1 ? 'single':this.state.type == 2?'raid0':'raid1'
 				let target = this.state.disks.map(item=>item.name)
 				let init = {
 					username: this.state.username,
@@ -785,7 +793,7 @@ class UserBox extends React.Component {
           <FlatButton style={{marginLeft: 16}} label='取消' primary={true} 
             onTouchTap={() => {
               this.setState(Object.assign({}, this.state, { selectedIndex: -1 }))
-              this.props.onResize('SHRINK')
+              this.props.onResize('VSHRINK')
             }} 
           />
         </div>
@@ -795,9 +803,8 @@ class UserBox extends React.Component {
 
   render() {
 
-    debug('userbox render', this.users)
     return (
-      <div key='login-user-box' style={this.props.style}>
+      <Paper key='login-user-box' style={this.props.style}>
         <div style={{boxSizing: 'border-box', width:'100%', paddingLeft:64, paddingRight:64, backgroundColor:'#FFF'}}>
           <div style={{width: '100%', height: '100%', paddingTop: 16, display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap'}}>
             { this.users && 
@@ -810,7 +817,7 @@ class UserBox extends React.Component {
 
                       this.inputValue = ''
                       this.setState(Object.assign({}, this.state, { selectedIndex: index }))
-                      this.props.onResize('EXPAND')
+                      this.props.onResize('VEXPAND')
                     }}
 
                   />)}
@@ -819,8 +826,389 @@ class UserBox extends React.Component {
         <div style={{boxSizing: 'border-box', width: '100%', height: this.state.selectedIndex !== -1 ? 240 : 0, backgroundColor: '#FAFAFA', paddingLeft: 64, paddingRight: 64, overflow: 'hidden', transition: 'all 300ms'}}>
           { this.state.selectedIndex !== -1 && this.renderLoginBox() }
         </div>
+      </Paper>
+    )
+  }
+}
+
+class FirstUserBox extends React.Component {
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      expanded: false
+    }
+  }
+
+  render() {
+    return (
+      <div style={{width: '100%'}}>
+        <div style={{width: '100%', height: '100%'}}>
+          <div style={{width: '100%', height: this.state.expanded ? 320 : 0, transition: 'height 300ms', overflow: 'hidden', backgroundColor: '#FFF',
+            display: 'flex', flexDirection: 'column', alignItems: 'flex-start', boxSizing: 'border-box', paddingLeft: 64}}>
+            
+            <div style={{marginTop: 34, fontSize: 24, color: '#000', opacity: 0.54}}>创建第一个用户</div>
+            <div style={{marginTop: 8, marginBottom: 12, fontSize: 20, color: '#000', opacity: 0.54}}>该用户将成为系统中最高权限的管理员</div>
+            <TextField hintText='用户名'/>
+            <TextField hintText='密码' />
+            <TextField hintText='确认密码' />
+            <div style={{display: 'flex'}}>
+              <FlatButton label='确认' />
+              <FlatButton label='取消' onTouchTap={() => {
+                this.setState(Object.assign({}, this.state, { expanded: false }))
+                this.props.onResize('VSHRINK') 
+              }}/>
+            </div>
+          </div>
+          <div style={{width: '100%', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FAFAFA'}}>
+            <div style={{marginLeft: 16}}>该设备已安装WISNUC OS，但尚未创建用户。</div>
+            <FlatButton style={{marginRight: 16}} label='创建用户' disabled={this.state.expanded} onTouchTap={() => {
+              this.setState(Object.assign({}, this.state, { expanded: true }))
+              this.props.onResize('VEXPAND')
+              // setTimeout(() => this.props.onResize('HEXPAND'), 350)
+            }}/>
+          </div>
+        </div>
       </div>
     )
+  }
+}
+
+
+class GuideBox extends React.Component {
+
+  constructor(props) {
+
+    super(props)
+    this.state = {
+
+      // multi-steps expansion / shrink animation
+      expanded: false,
+      showContent: false,
+
+      // stepper
+      finished: false,
+      stepIndex: 0,
+
+      //
+      selection: [],
+      mode: null, 
+     
+      //
+      username: null,
+      password: null,
+      passwordAgain: null 
+    }
+
+    this.handleNext = () => {
+      const {stepIndex} = this.state
+      this.setState(Object.assign({}, this.state, {
+        stepIndex: stepIndex + 1,
+        finished: stepIndex >= 2,
+      }))
+    }
+
+    this.handlePrev = () => {
+      const {stepIndex} = this.state;
+      if (stepIndex > 0) {
+        this.setState(Object.assign({}, this.state, {stepIndex: stepIndex - 1}))
+      }
+    }
+
+    this.renderStepActions = (step) => {
+
+        const {stepIndex} = this.state;
+
+        return (
+          <div style={{margin: '12px 0'}}>
+            <RaisedButton
+              label={stepIndex === 2 ? '完成' : '下一步'}
+              disableTouchRipple={true}
+              disableFocusRipple={true}
+              primary={true}
+              onTouchTap={this.handleNext}
+              style={{marginRight: 12}}
+            />
+            {step > 0 && (
+              <FlatButton
+                label="上一步"
+                disabled={stepIndex === 0}
+                disableTouchRipple={true}
+                disableFocusRipple={true}
+                onTouchTap={this.handlePrev}
+              />
+            )}
+          </div>
+        );
+      }
+
+    this.radioButtonOnClick = value => {
+      
+    }
+  }
+
+  renderRow (blk) {
+
+    let model = blk.model ? blk.model : '未知型号'
+    let devname = blk.devname
+    let size = prettysize(blk.size * 512)
+    let iface = blk.isATA ? 'ATA' :
+                blk.isSCSI ? 'SCSI' :
+                blk.isUSB ? 'USB' : '未知'
+
+    let usage = blk.isFileSystem ? '文件系统' :
+                blk.isPartitioned ? '有文件分区' : '未知'
+
+    let valid = !blk.isRootFS && !blk.isActiveSwap && !blk.removable
+
+    console.log(blk.isRootFS, blk.isActiveSwap, blk.removable, valid)
+
+    let comment
+    if (blk.isRootFS)
+      comment = '该磁盘含有rootfs，不可用'
+    else if (blk.isActiveSwap)
+      comment = '该磁盘含有在使用的交换分区，不可用'
+    else if (blk.removable)
+      comment = '该磁盘为可移动磁盘，WISNUC OS不支持使用可移动磁盘建立磁盘卷'
+    else
+      comment = '该磁盘可以加入磁盘卷'
+ 
+    return (
+      <div key={devname} style={{width: '100%', height: 48, display: 'flex', alignItems: 'center'}}>
+        <div style={{flex: '0 0 64px'}}>
+          { valid && <Checkbox style={{marginLeft: 16}} checked={this.state.selection.indexOf(devname) !== -1}onCheck={() => {
+
+            let nextState
+
+            let index = this.state.selection.indexOf(devname)
+            if (index === -1) {
+              nextState = Object.assign({}, this.state, {
+                selection: [...this.state.selection, devname]
+              })
+            }
+            else {
+              nextState = Object.assign({}, this.state, {
+                selection: [...this.state.selection.slice(0, index),
+                  ...this.state.selection.slice(index + 1)]
+              })
+            }
+
+            if (nextState.selection.length === 1) {
+              nextState.mode = 'single'
+            }
+            else if (nextState.selection.length === 0) {
+              nextState.mode = null
+            }
+
+            this.setState(nextState)
+
+          }}/>}
+        </div>
+        <div style={{flex: '0 0 160px'}}>{model}</div>
+        <div style={{flex: '0 0 80px'}}>{devname}</div>
+        <div style={{flex: '0 0 80px'}}>{size}</div>
+        <div style={{flex: '0 0 80px'}}>{iface}</div>
+        <div style={{flex: '0 0 80px'}}>{usage}</div>
+        <div style={{flex: '0 0 240px'}}>{comment}</div>
+      </div> 
+    )
+  }
+
+  render() {
+
+    const {finished, stepIndex} = this.state;
+
+    return (
+      <div style={{width: '100%'}}>
+        <div style={{width: '100%', height: '100%'}}>
+          <div style={{width: '100%', height: this.state.expanded ? 640 : 0, transition: 'height 300ms', overflow: 'hidden', backgroundColor: '#FAFAFA', boxSizing: 'border-box', paddingLeft: 64, paddingRight: 64}}>
+            <div style={{marginTop: 34, marginBottom: 12, fontSize: 34, color: '#000', opacity: 0.54}}>初始化向导</div>
+            <div style={{opacity: this.state.showContent ? 1 : 0, transition:'opacity 150ms'}}>
+              <Stepper activeStep={stepIndex} orientation="vertical">
+                <Step>
+                  <StepLabel>创建或选择已有的磁盘卷</StepLabel>
+                  <StepContent style={{opacity: 0.87}}>
+                    <p>WISNUC OS使用Btrfs文件系统，您可以选择一块或多块物理磁盘创建磁盘卷，<span style={{color: 'red'}}>所选磁盘上的数据都会被清除</span>。</p>
+                      <div style={{width: 720, fontSize: 13}}>
+                        <Divider />
+                        <div style={{width: '100%', height: 48, display: 'flex', alignItems: 'center'}}>
+                          <div style={{flex: '0 0 64px'}} />
+                          <div style={{flex: '0 0 160px'}}>型号</div>
+                          <div style={{flex: '0 0 80px'}}>设备名</div>
+                          <div style={{flex: '0 0 80px'}}>容量</div>
+                          <div style={{flex: '0 0 80px'}}>接口</div>
+                          <div style={{flex: '0 0 80px'}}>使用</div>
+                          <div style={{flex: '0 0 240px'}}>说明</div>
+                        </div>
+                        <Divider />
+                        { this.props.storage && this.props.storage.blocks.filter(blk => blk.isDisk).map(blk => this.renderRow(blk)) }
+                        <Divider />
+                      </div>
+                    <div style={{position: 'relative', marginTop: 12, marginBottom:12, display: 'flex'}}>
+                      <div>选择磁盘卷模式：</div>
+                      <div style={{width: 160}}>
+                      <RadioButtonGroup style={{position: 'relative', display: 'flex'}} 
+                        valueSelected={this.state.mode} 
+                        onChange={(e, value) => {
+                          this.setState(Object.assign({}, this.state, { mode: value })) 
+                        }}>
+                        <RadioButton value='single' label='single模式' disabled={this.state.selection.length === 0} />
+                        <RadioButton value='raid0' label='raid0模式' disabled={this.state.selection.length < 2} />
+                        <RadioButton value='raid1' label='raid1模式' disabled={this.state.selection.length < 2} />
+                      </RadioButtonGroup>
+                      </div>
+                    </div>
+                    <div style={{margin: '12px 0'}}>
+                      <RaisedButton
+                        label='下一步'
+                        disabled={this.state.selection.length === 0 || !this.state.mode}
+                        disableTouchRipple={true}
+                        disableFocusRipple={true}
+                        primary={true}
+                        onTouchTap={this.handleNext}
+                        style={{marginRight: 12}}
+                      />
+                    </div>
+                  </StepContent>
+                </Step>
+                <Step>
+                  <StepLabel>创建第一个用户</StepLabel>
+                  <StepContent>
+                    <p>请输入第一个用户的用户名和密码，该用户会成为系统权限最高的管理员。</p>
+                    <div>
+                      <TextField key='guide-box-username' hintText='用户名' 
+                        value={this.state.username}
+                        onChange={e => {
+                        let nextState = Object.assign({}, this.state, { username: e.target.value })
+                        console.log(nextState)
+                        this.setState(nextState)
+                      }}/>
+                    </div>
+                    <div>
+                      <TextField key='guide-box-password' hintText='密码' 
+                        value={this.state.password}
+                        onChange={e => {
+                        let nextState = Object.assign({}, this.state, { password: e.target.value })
+                        console.log(nextState)
+                        this.setState(nextState)
+                      }}/>
+                    </div>
+                    <div>
+                      <TextField key='guide-box-password-again' hintText='再次输入密码' 
+                        value={this.state.passwordAgain}
+                        onChange={e => {
+                        this.setState(Object.assign({}, this.state, { passwordAgain: e.target.value }))
+                      }}/>
+                    </div>
+                    <div style={{margin: '12px 0'}}>
+                      <RaisedButton
+                        label='下一步'
+
+                        disabled={!(this.state.username && 
+                          this.state.username.length > 0 && 
+                          this.state.password &&
+                          this.state.password === this.state.passwordAgain && 
+                          this.state.password.length > 0)}
+
+                        disableTouchRipple={true}
+                        disableFocusRipple={true}
+                        primary={true}
+                        onTouchTap={this.handleNext}
+                        style={{marginRight: 12}}
+                      />
+                      <FlatButton
+                        label="上一步"
+                        disableTouchRipple={true}
+                        disableFocusRipple={true}
+                        onTouchTap={this.handlePrev}
+                      />
+                    </div>
+                  </StepContent>
+                </Step>
+                <Step>
+                  <StepLabel>确认</StepLabel>
+                  <StepContent>
+                    <p>请确认您输入的信息无误，点击完成键应用设置。</p>
+                    <div style={{margin: '12px 0'}}>
+                      <RaisedButton
+                        label='完成'
+                        disableTouchRipple={true}
+                        disableFocusRipple={true}
+                        primary={true}
+                        onTouchTap={this.handleNext}
+                        style={{marginRight: 12}}
+                      />
+                      <FlatButton
+                        label="上一步"
+                        disabled={stepIndex === 0}
+                        disableTouchRipple={true}
+                        disableFocusRipple={true}
+                        onTouchTap={this.handlePrev}
+                      />
+                    </div>
+                  </StepContent>
+                </Step>
+              </Stepper>
+              { finished && (
+                <div style={{width: '100%', height: 100, display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: 64}}>
+                  <CircularProgress />
+                  <div style={{marginTop: 16, fontSize: 24, opacity: 0.54}}>正在应用设置，请管理员同志耐心等待。</div>
+                </div>
+              )}
+            </div>
+
+          </div>
+
+          <div style={{width: '100%', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FAFAFA'}}>
+            <div style={{marginLeft: 16}}>该设备已安装WISNUC OS，但尚未初始化。</div>
+            <FlatButton style={{marginRight: 16}} label={this.state.expanded ? '放弃' : '初始化'} 
+              onTouchTap={() => {
+                if (this.state.expanded) {
+                  this.setState(Object.assign({}, this.state, { 
+                    showContent: false,
+                    finished: false,
+                    stepIndex: 0,
+                    selection: [],
+                    mode: null,
+                    username: null,
+                    password: null,
+                    passwordAgain: null
+                  }))
+                  setTimeout(() => {
+                    this.props.onResize('HSHRINK')
+                    setTimeout(() => {
+                      this.setState(Object.assign({}, this.state, { expanded: false }))
+                      this.props.onResize('VSHRINK')
+                    }, 350)
+                  }, 150)
+                }
+                else {
+                  this.setState(Object.assign({}, this.state, { expanded: true }))
+                  this.props.onResize('VEXPAND')
+                  setTimeout(() => {
+                    this.props.onResize('HEXPAND')
+                    setTimeout(() => {
+                      this.setState(Object.assign({}, this.state, { showContent: true }))
+                    }, 350)
+                  }, 350)
+                }
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+
+class MaintenanceBox extends React.Component {
+
+  constructor(props) {
+    super(props)
+  }
+
+  render() {
+    return <div style={{width: '100%', backgroundColor: 'red', height: 64}}>This is MaintenanceBox</div>
   }
 }
 
@@ -875,7 +1263,8 @@ class DeviceCard extends React.Component {
 
     this.state = {
       selectedUserIndex: -1,
-      toggle: false
+      toggle: false,
+      horizontalExpanded: false
     }
 
     this.model = '个人计算机'
@@ -901,6 +1290,25 @@ class DeviceCard extends React.Component {
     } 
 
     ipcRenderer.send('setServerIp', props.address)
+
+    if (!this.users) {
+      request.get(`http://${props.address}:3000/system/storage`)
+        .set('Accept', 'application/json')
+        .end((err, res) => {
+
+          console.log('device card load storage', err || !res.ok || res.body)
+
+          let storage = (err || !res.ok) ? 'ERROR' : res.body
+          this.setState(Object.assign({}, this.state, { storage }))
+        })
+    }
+
+    this.onBoxResize = resize => {
+      if ((resize === 'VEXPAND' && this.state.toggle === false) || (resize === 'VSHRINK' && this.state.toggle === true))
+        this.setState(Object.assign({}, this.state, { toggle: !this.state.toggle }))
+      else if (resize === 'HEXPAND' || resize === 'HSHRINK')
+        this.props.onResize(resize)
+    }
   }
 
   componentWillEnter(callback) {
@@ -919,23 +1327,21 @@ class DeviceCard extends React.Component {
 
   render() {
 
-    debug('DeviceCard render', this.props)
-    const device = this.props.device
+    let paperStyle = {
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'flex-start',
+      backgroundColor: this.props.backgroundColor || '#3F51B5',
+      transition: 'all 300ms'
+    }
 
     return (
       <div style={this.props.style}>
 
         {/* top container */}
-        <Paper id='top-half-container'
-          style={{
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'flex-start',
-            backgroundColor: this.props.backgroundColor || '#3F51B5'
-          }}
-        >
+        <Paper id='top-half-container' style={paperStyle} >
           <div style={{width: '100%', display: 'flex', alignItems: 'stretch'}}>
             <HoverNav style={{flex: '0 0 64px'}} onTouchTap={this.props.onNavPrev} >
               <NavigationChevronLeft style={{width:32, height:32}} color='#FFF'/>
@@ -982,19 +1388,23 @@ class DeviceCard extends React.Component {
           </div>
         </Paper>
 
-        { true &&
-          <Paper style={{width: '100%', backgroundColor: '#FFF'}}>
-            <UserBox 
-              style={{width: '100%', transition: 'all 300ms'}} 
-              color={this.props.backgroundColor}
-              users={this.users}
-              username={this.selectedUsername()}
-              onResize={resize => {
-                if ((resize === 'EXPAND' && this.state.toggle === false) || (resize === 'SHRINK' && this.state.toggle === true))
-                  this.setState(Object.assign({}, this.state, { toggle: !this.state.toggle }))
-              }}
-            />
-          </Paper>
+        { this.props.boot && this.props.boot.state === 'normal' && this.users && this.users.length !== 0 &&
+          <UserBox 
+            style={{width: '100%', backgroundColor: '#FFF', transition: 'all 300ms'}} 
+            color={this.props.backgroundColor}
+            users={this.users}
+            username={this.selectedUsername()}
+            onResize={this.onBoxResize}
+          />
+        }
+        { this.props.boot && this.props.boot.state === 'normal' && this.users && this.users.length === 0 &&
+          {/* <FruitmixInitBox />*/}
+        }
+        { this.props.boot && this.props.boot.state === 'maintenance' && !this.props.boot.lastFileSystem &&
+          <GuideBox storage={this.state.storage} onResize={this.onBoxResize} />
+        }
+        { this.props.boot && this.props.boot.state === 'maintenance' && this.props.boot.lastFileSystem &&
+          <MaintenanceBox />
         }
       </div>
     )
@@ -1007,14 +1417,14 @@ class Login extends React.Component {
 
   constructor(props) {
 
-    const duration = 0.33
+    const duration = 0.45
 
     super(props)
     this.state = {
-
       devices: [],
       uuid: UUID.v4(),
       selectedDeviceIndex: -1,
+      expanded: false
     }
 
     this.initTimer = setInterval(() => {
@@ -1023,6 +1433,8 @@ class Login extends React.Component {
       
       clearInterval(this.initTimer)       
       delete this.initTimer
+
+      console.log('init devices', window.store.getState().login.device)
 
       let nextState = Object.assign({}, this.state, { devices: window.store.getState().login.device, selectedDeviceIndex: 0 })
       this.setState(nextState)
@@ -1047,7 +1459,7 @@ class Login extends React.Component {
 
       if (index === selectedDeviceIndex) return
 
-      let nextState = Object.assign({}, this.state, { selectedDeviceIndex: index })
+      let nextState = Object.assign({}, this.state, { selectedDeviceIndex: index, expanded: false })
       this.setState(nextState)
 
       debug('select next device', selectedDeviceIndex, index)
@@ -1067,7 +1479,7 @@ class Login extends React.Component {
 
       if (index === selectedDeviceIndex) return
 
-      let nextState = Object.assign({}, this.state, { selectedDeviceIndex: index })
+      let nextState = Object.assign({}, this.state, { selectedDeviceIndex: index, expanded: false })
       this.setState(nextState)
 
       debug('select prev device', selectedDeviceIndex, index)
@@ -1134,7 +1546,7 @@ class Login extends React.Component {
 
     let type, props = {
 
-      style: {position: 'absolute', width:'100%', height: '100%'},
+      style: { position: 'absolute', width:'100%', height: '100%'},
       onWillEnter: this.cardWillEnter,
       onWillLeave: this.cardWillLeave
     }
@@ -1143,18 +1555,22 @@ class Login extends React.Component {
       type = InfoCard
       Object.assign(props, { 
         key: 'init-scanning-device',
-        text: '正在搜索网络内的WISNUC OS设备' 
+        text: '正在搜索网络上的WISNUC OS设备' 
       })
     }
     else {
 
       let device = this.state.devices[this.state.selectedDeviceIndex]
 
+      console.log('device storage', device, device.storage)
+
       type = DeviceCard
       Object.assign(props, {
 
         key: `login-device-card-${this.state.selectedDeviceIndex}`,
 
+        boot: device.boot,
+        storage: device.storage,
         name: device.name,
         address: device.address,
         users: device.users,
@@ -1163,6 +1579,11 @@ class Login extends React.Component {
 
         onNavPrev: this.state.selectedDeviceIndex === 0 ? null : this.navPrev,
         onNavNext: this.state.selectedDeviceIndex === this.state.devices.length - 1 ? null : this.navNext,
+
+        onResize: resize => {
+          if ((resize === 'HEXPAND' && !this.state.expanded) || (resize === 'HSHRINK' && this.state.expanded))
+            this.setState(Object.assign({}, this.state, { expanded: !this.state.expanded }))
+        }
       })
     }
 
@@ -1177,7 +1598,7 @@ class Login extends React.Component {
           alignItems: 'center'
         }}
       >
-        <div style={{marginTop: 160, width: 480, backgroundColor: '#BBB'}}>
+        <div style={{marginTop: 160, width: this.state.expanded ? 1024 : 480, backgroundColor: '#BBB', transition: 'width 300ms'}}>
           <div style={{width: '100%', position: 'relative', perspective: 1000}}>
             <TransitionGroup>
               { React.createElement(type, props) }
