@@ -51,8 +51,11 @@ import { Divider, Paper, Menu, MenuItem, Dialog,
 import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
 
 import { blue500, red500, greenA200 } from 'material-ui/styles/colors'
-
+//import file module
 import FileUploadButton from './FileUploadButton'
+import Upload from './Upload'
+import Download from './Download'
+import Detail from './Detail'
 
 const LEFTNAV_WIDTH = 210
 
@@ -999,7 +1002,7 @@ class FileApp extends React.Component {
   // 1, same as HOME_DRIVE
   // 2.
   navUpdate(context, data) {
-
+  	console.log(context)
     debug('navUpdate', context, data)
 
     if ((context === 'SHARED_WITH_ME' ||
@@ -1054,7 +1057,7 @@ class FileApp extends React.Component {
             return a.name.localeCompare(b.name)
         }),
     }
-
+    console.log('.....')
     this.setState(state)
     debug('navUpdate changed state', state)
   }
@@ -1346,6 +1349,13 @@ class FileApp extends React.Component {
   }
 
 	renderListView() {
+		if (this.state.navContext == 'DOWNLOAD') {
+			return <Download/>
+		}
+
+		if (this.state.navContext == 'UPLOAD') {
+			return <Upload/>
+		}
 
     if (!this.state.list) return null
 
@@ -1406,11 +1416,8 @@ class FileApp extends React.Component {
 		)
 	}
 
-
-
   render() {
-
-    const detailWidth = 500
+    const detailWidth = 300
     debug('fileapp render')
 
     return (
@@ -1479,7 +1486,15 @@ class FileApp extends React.Component {
               transition: sharpCurve('left')
             }}>
               <Menu autoWidth={false} listStyle={{width: LEFTNAV_WIDTH}}>
-                <MenuItem style={{fontSize: 14}} primaryText='我的文件' leftIcon={<DeviceStorage />} animation={null}/>
+                <MenuItem style={{fontSize: 14}} primaryText='我的文件' leftIcon={<DeviceStorage />} animation={null}
+                	onTouchTap = {() => {
+                		setImmediate(() =>
+								      command('fileapp', 'FILE_NAV', { context: 'HOME_DRIVE' }, (err, data) => {
+								        if (err) return // todo
+								        this.navUpdate('HOME_DRIVE', data)
+								      }))
+                	}}
+                />
                 <MenuItem
                   style={{fontSize: 14}}
                   primaryText='我分享的文件'
@@ -1496,8 +1511,16 @@ class FileApp extends React.Component {
                 <Divider />
                 <MenuItem style={{fontSize: 14}} primaryText='分享给我文件' leftIcon={<SocialPeople />} />
                 <Divider />
-                <MenuItem style={{fontSize: 14}} primaryText='上传任务' leftIcon={<FileFileUpload />} />
-                <MenuItem style={{fontSize: 14}} primaryText='下载任务' leftIcon={<FileFileDownload />} />
+                <MenuItem style={{fontSize: 14}} primaryText='上传任务' leftIcon={<FileFileUpload />} 
+                	onTouchTap={() => {
+                		this.navUpdate('UPLOAD',{children:[],path:[]})
+                	}}
+                />
+                <MenuItem style={{fontSize: 14}} primaryText='下载任务' leftIcon={<FileFileDownload />} 
+                	onTouchTap={() => {
+                		this.navUpdate('DOWNLOAD',{children:[],path:[]})
+                	}}
+                />
               </Menu>
             </div>
 
@@ -1543,6 +1566,7 @@ class FileApp extends React.Component {
               <NavigationClose />
             </IconButton>
           </FileDetailToolbar>
+          <Detail/>
         </div>
 
         <DialogInput

@@ -281,11 +281,11 @@ class Main extends React.Component {
     });
 
 		ipcRenderer.on('refreshStatusOfUpload',(err,tasks)=>{
-			this.props.dispatch(Action.refreshStatusOfUpload(tasks));
+			window.store.dispatch(Action.refreshStatusOfUpload(tasks));
 		});
 
-		ipcRenderer.on('refreshStatusOfDownload',(err,file,status)=>{
-			this.props.dispatch(Action.refreshStatusOfDownload(file,status));
+		ipcRenderer.on('refreshStatusOfDownload',(err,tasks)=>{
+			window.store.dispatch(Action.refreshStatusOfDownload(tasks));
 		})
 
 		ipcRenderer.on('message',(err,message,code)=>{

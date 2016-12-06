@@ -527,10 +527,14 @@ body{
 /*detail*/
 .detail-container{
 	box-sizing: border-box;
-	position: relative;
-	font-size:12px;
-	cursor: default;
-	font-family: SimSun
+	/*position: relative;*/
+	font-size:14px;
+	height:100%;
+	padding-top: 56px;
+	color:rgba(0,0,0,.87);
+	text-align: center;
+	/*cursor: default;*/
+	/*font-family: SimSun*/
 }
 .file-infor {
 
@@ -593,9 +597,20 @@ body{
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
+	height: 40px;
+	line-height: 40px;
+	font-size: 14px;
 }
 .transimissionRow>span {
-	flex: 0 0 33%;
+	flex: 0 0 33.33%;
+	box-sizing: border-box;
+	padding-left:16px;
+	color:rgba(0,0,0,.87);
+}
+.transimissionTitle {
+	background-color: #f3f3f3;
+	height:50px;
+	line-height: 50px;
 }
 /*setting*/
 .setting-container {
