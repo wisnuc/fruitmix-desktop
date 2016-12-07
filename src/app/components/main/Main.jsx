@@ -114,7 +114,7 @@ const SystemDrawer = (props) => {
             leftAvatar={<Avatar icon={<ImagePortrait />} backgroundColor={green500} />}
           />
           <ListItem style={{color: '#FFF'}}
-            primaryText='系统设置'
+            primaryText='设置'
             leftAvatar={<Avatar icon={<ActionSettings />} backgroundColor={gray500} />}
             onTouchTap={() => props.onLauncherSelect(ControlApp)}
           />
