@@ -59,7 +59,7 @@ export default class PhotoToolBar extends Component {
 
   render() {
     let { action, state } = this.props;
-
+    
     return (
       <Paper
         style={{
