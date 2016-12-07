@@ -21,6 +21,10 @@ import { FlatButton, Paper } from 'material-ui'
 
 import request from 'superagent'
 
+import TimeDate from './TimeDate'
+
+const C = x => f => f ? C(f(x)) : x
+
 let labeledTextStyle = {
   height: 48,
   display: 'flex',
@@ -37,66 +41,6 @@ const LabeledText = ({label, text, right, styleOverlay}) =>
     </div>
   )
 
-const renderLine = (obj, prop) => <LabeledText label={prop} text={obj[prop] || '(none)'} right={4}/>
-
-class TimeDate extends React.Component {
-
-  constructor(props) {
-    super(props)
-    this.state = {
-      data: null
-    }
-
-    this.properties = [
-      'Local time',
-      'Universal time',
-      'RTC time',
-      'Time zone',
-      'NTP synchronized',
-      'Network time on'
-    ]
-  }
-
-  componentDidMount() {
-    this.timer = setInterval(() => 
-      request
-        .get('http://192.168.5.132:3000/system/timedate')
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          if (err || !res.ok) return
-          this.setState(Object.assign({}, this.state, { data: res.body }))
-        })     
-    , 1000)
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.timer)
-    delete this.timer
-  }
-
-  render() {
-    return (
-      <div style={this.props.style}>
-        <div style={{marginTop: 24, width: 440}}>
-          { this.state.data && 
-            this.properties.map(prop => ({
-              key: prop,
-              value: this.state.data[prop] || '(none)' 
-            }))
-            .reduce((prev, curr) => [...prev, (
-              <div style={{width: '100%', height: 40, display: 'flex', alignItems: 'center',
-                fontSize: 14, color: 'rgba(0, 0, 0, 0.87)'}}>
-                <div style={{flex: '0 0 160px'}}>{curr.key}</div>
-                <div>{curr.value}</div> 
-              </div>
-            )], [])
-          }
-        </div>
-      </div>
-    )
-  }
-}
-
 class Storage extends React.Component {
 
   constructor(props) {
@@ -107,6 +51,84 @@ class Storage extends React.Component {
     return <div />
   }
 }
+
+const renderLine = () => (
+  <div style={{height: 40, color: 'rgba(0, 0, 0, 0.87)', display: 'flex', alignItems: 'center'}}>
+    <div style={{flex: '0 0 160px'}}>{key}</div>
+    <div>{value}</div>
+  </div>
+)
+
+const NetFace = (props) => {
+
+  const renderLine = (key, value) => (
+    <div style={{height: 40, color: 'rgba(0, 0, 0, 0.87)', fontSize: 14, 
+      display: 'flex', alignItems: 'center'}}>
+      <div style={{flex: '0 0 160px'}}>{key}</div>
+      <div>{value}</div>
+    </div>
+  )
+
+  return (
+    <div style={props.style}>
+      <div style={{
+        fontSize: 24,
+        fontWeight: 400,
+        color: blueGrey500,
+        marginTop: 32,
+        marginBottom: 32
+      }}>
+        {props.data.name}
+      </div>
+      { renderLine('地址类型', props.data.family) }
+      { renderLine('网络地址', props.data.address) }
+      { renderLine('子网掩码', props.data.netmask) }
+      { renderLine('MAC地址', props.data.mac.toUpperCase()) }
+    </div>
+  )
+}
+
+class Ethernet extends React.Component {
+
+  constructor(props) {
+    super(props)
+    this.state = {}
+  }
+
+  componentDidMount() {
+
+    if (!this.props.address) return
+
+    request.get(`http://${this.props.address}:3000/system/net`)
+      .set('Accept', 'application/json')
+      .end((err, res) => {
+        if (err || !res.ok) return
+        this.setState(Object.assign({}, this.state, { data: res.body }))
+      })
+  }
+
+  extract(itfs) {
+
+    let arr = []
+    for (let name in itfs) {
+      let ipv4 = itfs[name].find(addr => addr.internal === false && addr.family === 'IPv4')
+      if (ipv4) arr.push(Object.assign(ipv4, { name }))
+    } 
+    return arr
+  }
+
+  render() {
+
+    if (!this.state.data) return <div />
+    return (
+      <div style={this.props.style}>
+        { this.extract(this.state.data.os).map(itf => <NetFace data={itf} />) }
+      </div>
+    )
+  } 
+}
+
+const PlaceHolder = () => <div />
 
 class ControlApp extends React.Component {
 
@@ -123,11 +145,17 @@ class ControlApp extends React.Component {
     this.settings = [
       ['用户', <SocialPeople />, 'USER'],
       ['存储', <DeviceStorage />, 'STORAGE'],
-      ['网络', <ActionSettingsEthernet />, 'ETHERNET'],
-      ['时间', <DeviceAccessTime />, 'TIMEDATE'],
+      ['网络', <ActionSettingsEthernet />, 'ETHERNET', Ethernet],
+      ['时间', <DeviceAccessTime />, 'TIMEDATE', TimeDate],
       ['风扇', <HardwareToys />, 'FAN'],
       ['关机', <ActionPowerSettingsNew />, 'POWEROFF']
     ]
+
+    let { device, selectIndex } = window.store.getState().login
+    if (device && device[selectIndex]) {
+      this.address = device[selectIndex].address
+      console.log(this.address)
+    }
   }
 
   renderMenuItem(text, icon, select) {
@@ -153,8 +181,7 @@ class ControlApp extends React.Component {
 
   render() {
 
-    const detailWidth = 300
-    const contentStyle = { marginLeft: 72 }
+    const contentStyle = { paddingLeft: 72, paddingTop: 24 }
 
     const title = () => {
       let found = this.settings.find(item => item[2] === this.state.select)
@@ -191,25 +218,23 @@ class ControlApp extends React.Component {
             height:'100%'
           }}
         >
-
-          <div style={{ position: 'absolute', width: '100%', height: 56, display: 'flex', alignItems: 'center' }}>
-            <Paper style={{backgroundColor: blueGrey500, width: '100%', height: '100%', display: 'flex',
-              alignItems: 'center'}}>
-              <div style={{fontSize: 21, color: '#FFF', marginLeft: 72}}>{ title() }</div>
-            </Paper>
-          </div>
+          <Paper style={{position:'absolute', width:'100%', height:56, display:'flex', alignItems:'center',
+            backgroundColor: blueGrey500 }}>
+            <div style={{fontSize: 21, color: '#FFF', marginLeft: 72}}>{ title() }</div>
+          </Paper>
 
           <div id='layout-middle-container-spacer' style={{height: 56}} />
-
-          <div id='layout-middle-container-lower' 
-            style={{ width: '100%', height: 'calc(100% - 56px)', backgroundColor: '#EEEEEE', display:'flex' }}>
-
-            <div style={{ width: '100%', height: '100%', backgroundColor:'#FAFAFA' }}>
-              {
-                this.state.select === 'STORAGE' ? <Storage /> :
-                this.state.select === 'TIMEDATE' ? <TimeDate style={contentStyle} /> : null
-              }
-            </div>
+          <div id='layout-middle-container-lower' style={{width:'100%', height:'calc(100% - 56px)', 
+            backgroundColor: '#FAFAFA'}}>
+            { C(this.settings)
+              (settings => settings.find(item => item[2] === this.state.select))
+              (found => found && found[3] ? 
+                React.createElement(found[3], { 
+                  style: contentStyle,
+                  address: this.address
+                }) : <PlaceHolder />)
+              ()
+            }
           </div> 
         </div>
       </div>
