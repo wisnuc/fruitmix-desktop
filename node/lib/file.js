@@ -526,11 +526,19 @@ const fileCreateNewFolderAsync = async ({dir, name}) => {
   return await serverPostAsync(`files/${dir}`, { name })
 }
 
+const fileShareAsync = async ({fileUUID, users, directoryUUID}) => {
+
+	debug('fileShare', fileUUID, users)
+
+	return await serverPatchAsync(`files/${directoryUUID}/${fileUUID}`,{writelist: users, readlist: users})
+}
+
 const fileCommandMap = new Map([
   ['FILE_NAV', asCallback(fileNavAsync)],
   ['FILE_DELETE', asCallback(fileDeleteAsync)],
   ['FILE_RENAME', asCallback(fileRenameAsync)],
-  ['FILE_CREATE_NEW_FOLDER', asCallback(fileCreateNewFolderAsync)]
+  ['FILE_CREATE_NEW_FOLDER', asCallback(fileCreateNewFolderAsync)],
+  ['FILE_SHARE',asCallback(fileShareAsync)]
 ])
 
 registerCommandHandlers(fileCommandMap)

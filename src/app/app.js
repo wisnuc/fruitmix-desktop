@@ -77,7 +77,7 @@ setInterval(() => {
 // 
 ipcRenderer.on('command', (e, {id, err, data}) => {
 
-  console.log(id, err, data)
+  // console.log(id, err, data)
 
   store.dispatch({
     type: 'COMMAND_RETURN',

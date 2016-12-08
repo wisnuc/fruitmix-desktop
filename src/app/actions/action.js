@@ -41,11 +41,11 @@ var actions = {
 		}
 	},
 
-	cleanDetail() {
-		return {
-			type: 'CLEAN_DETAIL'
-		}
-	},
+	// cleanDetail() {
+	// 	return {
+	// 		type: 'CLEAN_DETAIL'
+	// 	}
+	// },
 	//left navigation
 	changeSelectedNavItem(name,index) {
 		return {

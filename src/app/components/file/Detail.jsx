@@ -11,11 +11,11 @@ import { connect } from 'react-redux'
  //require material
 import { Paper, Menu, MenuItem, Checkbox } from 'material-ui'
 import {RadioButton, RadioButtonGroup} from 'material-ui/RadioButton'
-import ActionFavorite from 'material-ui/svg-icons/action/favorite'
-//import Action
-import Action from '../../actions/action'
-
 import {Tabs, Tab} from 'material-ui/Tabs'
+//import file mpdule
+import { command } from '../../lib/command'
+
+
 
 const styles = {
 	radioIconStyle : {fill:'#5766bd',marginBottom:'20px'},
@@ -23,10 +23,40 @@ const styles = {
 	buttonStyle : {position:'absolute',left:'0px'}
 }
 
+class ShareRow extends Component {
+	constructor(props) {
+		super(props)
+		this.state = {shared:false,state:'ready'}
+	}
+
+	render() {
+		return (
+			<div>{this.props.item.name}</div>
+		)
+	}
+} 
+
 class Detail extends Component {
  	constructor(props) {
  		super(props)
  		this.state = {type:'custom'}
+ 	}
+
+ 	componentWillReceiveProps(next) {
+ 		// console.log(next)
+ 	}
+
+ 	shouldComponentUpdate(nextProps) {
+ 		let nowDetail = this.props.detail
+ 		let nextDetail = nextProps.detail
+ 		if (nowDetail.length == 1 && nextDetail.length == 1
+ 			&& nowDetail[0].uuid == nextDetail[0].uuid) {
+ 			return false
+ 		}else if (nowDetail.length !== 1 && nextDetail.length != 1) {
+ 			return false
+ 		}else {
+ 			return true
+ 		}
  	}
 
  	render() {
@@ -37,7 +67,7 @@ class Detail extends Component {
 		 			{this.getDetail()}
 		 			</Tab>
 		 			<Tab label='分享' style={{color:'#000'}}>
-		 			{this.getShare}
+		 			{this.getShare()}
 		 			</Tab>
 		 		</Tabs>
 	 		</div>
@@ -45,9 +75,9 @@ class Detail extends Component {
  	}
 
  	getDetail() {
- 		if (this.props.detail.length != 1) {
+ 		if (this.props.detail.length !== 1) {
  			return (
- 				<div>
+ 				<div className='detail-not-select'>
  					<svg width='107' height='82' viewBox='0 0 107 82' focusable='false' >
  						<path fill='#999' d='M0,4a4,4,0,0,1,4,-4h89a4,4,0,0,1,4,4v18.5l-23.5,40.5h-69.5a4,4,0,0,1,-4,-4ZM74.5,65l23,-39.15l1,0l7,4.1l1,1l-23,39.15ZM74,65.8l9.5,5.5l-9,4ZM97,51v8a4,4,0,0,1,-4,4h-3ZM21,63v19l23,-19Z'></path>
  					</svg>
@@ -73,15 +103,25 @@ class Detail extends Component {
  	}
 
  	getShare() {
+ 		if (this.props.detail.length !== 1) {
+ 			return (
+ 				<div className='detail-not-select'>
+ 					<svg width='107' height='82' viewBox='0 0 107 82' focusable='false' >
+ 						<path fill='#999' d='M0,4a4,4,0,0,1,4,-4h89a4,4,0,0,1,4,4v18.5l-23.5,40.5h-69.5a4,4,0,0,1,-4,-4ZM74.5,65l23,-39.15l1,0l7,4.1l1,1l-23,39.15ZM74,65.8l9.5,5.5l-9,4ZM97,51v8a4,4,0,0,1,-4,4h-3ZM21,63v19l23,-19Z'></path>
+ 					</svg>
+ 					<div className='detail-title'>请选择一个文件或者文件夹</div>
+ 				</div>)
+ 		}
+ 		let data=this.props.detail[0]
  		return (
- 			<div className='share-infor'>
-		 		<div className='detail-title'>分享</div>
+ 			<div className='file-share'>
+ 				<div className='file-detail-line'><div></div></div>
 		 		<RadioButtonGroup name="typeSelect" valueSelected={this.state.type} onChange ={this.changeShareType.bind(this)} className='detail-share-radio-group'>
-		 		<RadioButton value='all' label='所有人' iconStyle={styles.radioIconStyle} labelStyle={styles.radioLabelStyle}/>
-		 		<RadioButton value='custom' label='自定义' iconStyle={styles.radioIconStyle} labelStyle={styles.radioLabelStyle}/>
+			 		<RadioButton value='all' label='所有人' iconStyle={styles.radioIconStyle} labelStyle={styles.radioLabelStyle}/>
+			 		<RadioButton value='custom' label='自定义' iconStyle={styles.radioIconStyle} labelStyle={styles.radioLabelStyle}/>
 		 		</RadioButtonGroup>
+		 		<div className='file-detail-line'><div></div></div>
 		 		<div className='custom-share-container' style={this.state.type=='all'?{display:'none'}:{}}>
-
 		 		{this.getShareList(data)}
 		 		</div>
 		 	</div>
@@ -93,34 +133,33 @@ class Detail extends Component {
  		if (data.type == 'file') {
  			return <div>文件无法进行分享</div>
  		}
-
- 		// return this.props.login.obj.users.map(item => {
-    return this.props.node.server.users.map(item => {
-						    	let checked = false
-						    	if(data.readlist) {
-						    		let index = data.readlist.findIndex(i => {
-							    		return i == item.uuid
-							    	})
-							    	if (index != -1) {
-							    		checked = true
-							    	}
-						    	}
-						    	return (
-						    		<Checkbox
-						    			key={item.uuid}
-						    			defaultChecked={checked}
-								      	label={item.username}
-								      	labelPosition="left"
-								      	iconStyle={{fill:'5766bd'}}
-								      	onCheck={this.checkUser.bind(_this,item.uuid)}
-								    />
-						    	)
-						    })
+ 		let users = window.store.getState().node.server.users
+ 		return users.map(item => {
+ 			let checked = false
+ 			if(data.readlist) {
+ 				let index = data.readlist.findIndex(i => {
+ 					return i == item.uuid
+ 				})
+ 				if (index != -1) {
+ 					checked = true
+ 				}
+ 			}
+ 			// return (
+ 			// 	<ShareRow item={item}/>
+ 			// 	)
+ 			return (
+ 				<Checkbox
+ 				key={item.uuid}
+ 				defaultChecked={checked}
+ 				label={item.username}
+ 				labelPosition="left"
+ 				iconStyle={{fill:'5766bd'}}
+ 				onCheck={this.checkUser.bind(_this,data,item.uuid)}
+ 				/>
+ 				)
+ 		})
  	}
 
- 	closeDetail() {
- 		this.props.dispatch(Action.cleanDetail());
- 	}
  	getOwner(owner) {
  		// let o = this.props.login.obj.users.find(item=>{
     let o = window.store.getState().node.server.users.find(item => {
@@ -151,7 +190,7 @@ class Detail extends Component {
 			let files = [this.props.file.children[index].uuid]
 			let users = []
 			// this.props.login.obj.users.forEach( item => {
-      this.props.node.server.users.forEach(item => {
+      	this.props.node.server.users.forEach(item => {
 				if ((item.uuid != this.props.login.obj.uuid) && (typeof item.uuid == 'string') ) {
 					users.push(item.uuid)
 				}
@@ -163,25 +202,31 @@ class Detail extends Component {
 		})
 	}
 
-	checkUser(uuid,obj,checked) {
-		c.log(uuid)
-		let index = this.props.view.menu.index
-		let files = [this.props.file.children[index].uuid]
-		let users = this.cloneFun(this.props.file.children[index].readlist)
+	checkUser(file,userUUID,event,checked) {
+		var _this = this
+		let users = file.readlist
+		let directoryUUID = this.props.directory.uuid
 		if (users == undefined) {
 			users = []
 		}
 		if (checked) {
-			c.log(uuid)
-			users.push(uuid)
-			ipc.send('share',files,users)
+			users.push(userUUID)
 		}else {
-			let index = users.findIndex(item => item == uuid)
+			let index = users.findIndex(item => item == userUUID)
 			if (index != -1) {
 				users.splice(index,1)
-				ipc.send('share',files,users)
 			}
 		}
+		command('','FILE_SHARE',{fileUUID:file.uuid, users ,directoryUUID},(err,data) => {
+				if (err) {
+					console.log('share failed')
+					console.log(err)
+				}else {
+					console.log('share success')
+					console.log(JSON.parse(data))
+					_this.props.updateFileNode(JSON.parse(data))
+				}
+			})
 	}
 
 	cloneFun(obj){

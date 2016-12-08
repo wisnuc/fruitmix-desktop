@@ -14,7 +14,8 @@ import React from 'react'
 import { connect } from 'react-redux'
 import Action from '../../actions/action'
 import { command } from '../../lib/command'
-import { fileNav, fileCreateNewFolder } from '../../lib/file'
+//seem to be not word
+// import { fileNav, fileCreateNewFolder } from '../../lib/file'
 
 import keypress from '../common/keypress.js'
 
@@ -604,7 +605,8 @@ const FileToolbar = ({
   breadCrumb,
   suppressed,
   toggleLeftNav,
-  children
+  children,
+  leftNav
 }) => {
 
   return (
@@ -625,7 +627,7 @@ const FileToolbar = ({
         <NavigationMenu />
       </IconButton>
 
-      <div style={{marginLeft: 20, flex: '0 0 138px', fontSize: 21, whiteSpace: 'nowrap', color: '#FFF'}}>
+      <div style={{marginLeft: leftNav?228:20, flex: '0 0 138px', fontSize: 21, whiteSpace: 'nowrap', color: '#FFF', transition:sharpCurve('all')}}>
         { breadCrumb }
       </div>
 
@@ -701,9 +703,11 @@ class FileApp extends React.Component {
     this.refresh = () => {
       command('fileapp', 'FILE_NAV', {
         context: this.state.navContext,
-        folderUUID: this.state.directory.uuid,
-        rootUUID: this.state.path[0].uuid
+        folderUUID: this.state.directory.uuid
       }, (err, data) => {
+      	console.log('refresh callback ......................')
+      	console.log(err)
+      	console.log(data)
         if (err) return // TODO
         this.navUpdate(this.state.navContext, data) // TODO
       })
@@ -1282,8 +1286,7 @@ class FileApp extends React.Component {
           onTouchTap={() => {
             command('fileapp', 'FILE_NAV', {
               context: 'HOME_DRIVE',
-              folderUUID: node.uuid,
-              rootUUID: arr[0].uuid
+              folderUUID: node.uuid
             }, (err, data) => {
               if (err) return // todo
               this.navUpdate('HOME_DRIVE', data)
@@ -1301,7 +1304,7 @@ class FileApp extends React.Component {
     return list
 
     return (
-      <div style={{fontSize: 16, display:'flex', alignItems: 'baseline', color: '#FFF'}}>
+      <div  style={{fontSize: 16, display:'flex', alignItems: 'baseline', color: '#FFF'}}>
         { list }
       </div>
     )
@@ -1423,6 +1426,13 @@ class FileApp extends React.Component {
 		return this.state.list.filter(item => item.selected)
 	}
 
+	getDirectory() {
+		if (!this.state.list) {
+			return {}
+		}
+		return this.state.directory
+	}
+
   render() {
     const detailWidth = 300
     debug('fileapp render')
@@ -1459,6 +1469,7 @@ class FileApp extends React.Component {
             breadCrumb={this.renderBreadCrumb()}
             suppressed={true || !this.props.maximized}
             toggleLeftNav={this.toggleLeftNav}
+            leftNav={this.state.leftNav}
           >
             <IconButton iconStyle={toolbarStyle.activeIcon}
               onTouchTap={() => this.setState(Object.assign({}, this.state, {
@@ -1574,7 +1585,7 @@ class FileApp extends React.Component {
               <NavigationClose />
             </IconButton>
           </FileDetailToolbar>
-          <Detail detail={this.getSelectedList()}/>
+          <Detail detail={this.getSelectedList()} directory={this.getDirectory()} updateFileNode={this.updateFileNode.bind(this)}/>
         </div>
 
         <DialogInput
@@ -1627,6 +1638,16 @@ class FileApp extends React.Component {
       </div>
     </div>
     )
+  }
+
+  updateFileNode(node) {
+  	console.log('update node.........')
+  	let index = this.state.list.findIndex(item => item.uuid == node.uuid)
+  	if (index !== -1) {
+  		this.setState({
+  			list : [...this.state.list.slice(0,index),Object.assign(node,{selected:true}),...this.state.list.slice(index+1)]
+  		})
+  	}
   }
 }
 

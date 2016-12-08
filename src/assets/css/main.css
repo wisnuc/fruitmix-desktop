@@ -532,7 +532,7 @@ body{
 	padding-top: 56px;
 	color:rgba(0,0,0,.87);
 }
-.detail-container svg {
+.detail-not-select>svg {
 	display: block;
 	margin:20px auto 10px;
 	opacity: 0.54
@@ -543,7 +543,6 @@ body{
 	padding:20px 12px;
 }
 .file-infor> div:not(.file-detail-line) {
-
 	margin-bottom: 10px;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -565,43 +564,24 @@ body{
 }
 
 .detail-title {
-	/*background-color:#f5f5f5;*/
 	height:38px;
 	line-height: 38px;
 	margin-bottom: 20px;
 	text-align: center;
 }
 
-.detail-close {
-	position: absolute;
-	bottom: 20px;
-	left:20px;
-	line-height: 36px;
+.file-share {
+	box-sizing: border-box;
+	padding:20px 12px;
 }
 .detail-share-radio-group {
-	padding-left:20px;
+	/*padding-left:20px;*/
 }
 .custom-share-container {
-	padding:0 20px 0 50px;
+	padding:0 20px 0;
 	max-height: 200px;
 	overflow: auto;
 }
-/*.detail-share-button {
-	text-align: center;
-	overflow: hidden;
-	width:100%;
-}
-.detail-share-button span{
-	margin-top:5px;
-	float:right;
-	font-size:12px;
-	width: 88px;
-	height: 36px;
-	line-height: 36px;
-}
-.detail-share-button span:hover {
-	background-color: rgba(153,153,153,.2);
-}*/
 /*transmission*/
 .transimission-container {
 	width:100%;
