@@ -950,7 +950,7 @@ class GuideBox extends React.Component {
   renderRow (blk) {
 
     let model = blk.model ? blk.model : '未知型号'
-    let devname = blk.devname
+    let name = blk.name
     let size = prettysize(blk.size * 512)
     let iface = blk.isATA ? 'ATA' :
                 blk.isSCSI ? 'SCSI' :
@@ -974,16 +974,16 @@ class GuideBox extends React.Component {
       comment = '该磁盘可以加入磁盘卷'
  
     return (
-      <div key={devname} style={{width: '100%', height: 48, display: 'flex', alignItems: 'center'}}>
+      <div key={name} style={{width: '100%', height: 48, display: 'flex', alignItems: 'center'}}>
         <div style={{flex: '0 0 64px'}}>
-          { valid && <Checkbox style={{marginLeft: 16}} checked={this.state.selection.indexOf(devname) !== -1}onCheck={() => {
+          { valid && <Checkbox style={{marginLeft: 16}} checked={this.state.selection.indexOf(name) !== -1}onCheck={() => {
 
             let nextState
 
-            let index = this.state.selection.indexOf(devname)
+            let index = this.state.selection.indexOf(name)
             if (index === -1) {
               nextState = Object.assign({}, this.state, {
-                selection: [...this.state.selection, devname]
+                selection: [...this.state.selection, name]
               })
             }
             else {
@@ -1005,7 +1005,7 @@ class GuideBox extends React.Component {
           }}/>}
         </div>
         <div style={{flex: '0 0 160px'}}>{model}</div>
-        <div style={{flex: '0 0 80px'}}>{devname}</div>
+        <div style={{flex: '0 0 80px'}}>{name}</div>
         <div style={{flex: '0 0 80px'}}>{size}</div>
         <div style={{flex: '0 0 80px'}}>{iface}</div>
         <div style={{flex: '0 0 80px'}}>{usage}</div>
@@ -1135,7 +1135,41 @@ class GuideBox extends React.Component {
                         disableTouchRipple={true}
                         disableFocusRipple={true}
                         primary={true}
-                        onTouchTap={this.handleNext}
+                        onTouchTap={() => {
+                          this.handleNext()
+                          console.log('this is finished button')
+                          console.log('address', this.props.address)
+                          console.log('selection', this.state.selection)
+                          console.log('mode', this.state.mode)
+                          console.log('username', this.state.username)
+                          console.log('password', this.state.password)
+
+                          request
+                            .post(`http://${this.props.address}:3000/system/mir`)
+                            .send({
+                              target: this.state.selection,
+                              mkfs: {
+                                type: 'btrfs',
+                                mode: this.state.mode,
+                              },
+                              init: {
+                                username: this.state.username,
+                                password: this.state.password
+                              }
+                            })
+                            .set('Accept', 'application/json')
+                            .end((err, res) => {
+                              // FIXME error
+                              // console.log(err || !res.ok || res.body)
+                              if (err || !res.ok) {
+                                console.log(err || !res.ok)
+                                return
+                              }
+
+                              setTimeout(() => 
+                                ipcRenderer.send('login', this.state.username, this.state.password), 1000)
+                            })
+                        }}
                         style={{marginRight: 12}}
                       />
                       <FlatButton
@@ -1401,7 +1435,7 @@ class DeviceCard extends React.Component {
           {/* <FruitmixInitBox />*/}
         }
         { this.props.boot && this.props.boot.state === 'maintenance' && !this.props.boot.lastFileSystem &&
-          <GuideBox storage={this.state.storage} onResize={this.onBoxResize} />
+          <GuideBox address={this.address} storage={this.state.storage} onResize={this.onBoxResize} />
         }
         { this.props.boot && this.props.boot.state === 'maintenance' && this.props.boot.lastFileSystem &&
           <MaintenanceBox />

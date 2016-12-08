@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Divider, Menu, MenuItem, IconButton } from 'material-ui'
+import { Paper, Divider, Menu, MenuItem, IconButton, FlatButton, RaisedButton } from 'material-ui'
 import { blue500, blueGrey500 } from 'material-ui/styles/colors'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import SocialShare from 'material-ui/svg-icons/social/share'
@@ -12,12 +12,11 @@ import ActionPowerSettingsNew from 'material-ui/svg-icons/action/power-settings-
 import DeviceAccessTime from 'material-ui/svg-icons/device/access-time'
 import DeviceStorage from 'material-ui/svg-icons/device/storage'
 import HardwareToys from 'material-ui/svg-icons/hardware/toys'
+import EditorModeEdit from 'material-ui/svg-icons/editor/mode-edit'
 
 import { sharpCurve } from '../common/motion'
 
 const LEFTNAV_WIDTH=210
-
-import { FlatButton, Paper } from 'material-ui'
 
 import request from 'superagent'
 
@@ -130,6 +129,72 @@ class Ethernet extends React.Component {
 
 const PlaceHolder = () => <div />
 
+class User extends React.Component {
+  constructor(props) {
+    super(props)
+  }
+
+  renderLine(key, value, icon) {
+    return (
+      <div style={{height: 48, fontSize: 14, color: 'rgba(0, 0, 0, 0.87)', display: 'flex', alignItems: 'center'}}>
+        <div style={{flex: '0 0 120px'}}>{key}</div>
+        <div style={{flex: '0 0 160px'}}>{value}</div>
+        { icon && <IconButton>{icon}</IconButton> }
+      </div>
+    )
+  }
+
+  render() {
+
+    let user = window.store.getState().login.obj
+
+    return (
+      <div style={this.props.style}>
+        <div style={{width:'100%'}}>
+          <div style={{
+            fontSize: 24,
+            fontWeight: 400,
+            color: blueGrey500,
+            marginTop: 32,
+            marginBottom: 32
+          }}>
+            { user.username }
+          </div>
+          {
+            (user.isAdmin && user.isFirstUser) ? 
+              <div>您是系统的第一个用户，是最高权限的系统管理员。</div> :
+            (user.isAdmin) ?
+              <div>您是系统管理员。</div> :
+              <div>您是系统普通用户。</div>
+          }
+          <div style={{
+            fontSize: 24,
+            fontWeight: 400,
+            color: blueGrey500,
+            marginTop: 32,
+            marginBottom: 32
+          }}>
+            修改信息
+          </div>
+          <div style={{fontSize: 14, color: 'rgba(0, 0, 0, 0.87)', fontWeight: 'bold'}}>用户名</div>
+          <div style={{fontSize: 14, color: 'rgba(0, 0, 0, 0.87)'}}>
+            <p>WISNUC OS内部使用不可修改的唯一用户ID标识用户身份。用户名仅用于用户登录等信息显示，Windows共享文件访问和其他需要登录的网络文件服务在登录时使用。</p>
+            <p>用户名可以使用中文字符，包括可显示的标点符号。Windows共享文件访问也支持中文字符的用户名，但不是所有客户端软件都支持中文名，所以，如果您使用的网络文件系统服务客户端软件（例如Android或者iOS上的samba客户端）不支持中文用户名，您只能使用英文大小写字母的用户名。</p>
+          </div>
+          <RaisedButton label='修改用户名' />
+
+          <div style={{fontSize: 14, color: 'rgba(0, 0, 0, 0.87)', fontWeight: 'bold', marginTop: 24}}>密码</div>
+          <div style={{fontSize: 14, color: 'rgba(0, 0, 0, 0.87)'}}>
+            <p>WISNUC OS的所有客户端、Web浏览器和网络文件服务使用相同的用户名密码组合。</p>
+            <p>WISNUC OS不会保存任何形式的用户明文密码。</p>
+          </div>
+          <RaisedButton label='修改密码' />
+        </div>
+      </div>
+    )
+  }
+}
+
 class ControlApp extends React.Component {
 
   constructor(props) {
@@ -143,7 +208,7 @@ class ControlApp extends React.Component {
     }
 
     this.settings = [
-      ['用户', <SocialPeople />, 'USER'],
+      ['用户', <SocialPeople />, 'USER', User],
       ['存储', <DeviceStorage />, 'STORAGE'],
       ['网络', <ActionSettingsEthernet />, 'ETHERNET', Ethernet],
       ['时间', <DeviceAccessTime />, 'TIMEDATE', TimeDate],
@@ -181,7 +246,7 @@ class ControlApp extends React.Component {
 
   render() {
 
-    const contentStyle = { paddingLeft: 72, paddingTop: 24 }
+    const contentStyle = { paddingLeft: 72, paddingRight: 72, paddingTop: 24 }
 
     const title = () => {
       let found = this.settings.find(item => item[2] === this.state.select)
