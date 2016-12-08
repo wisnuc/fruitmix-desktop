@@ -13,6 +13,7 @@ import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motio
 import React, { Component } from 'react';
 import PhotoList from './PhotoList';
 import PhotoToolBar from './PhotoToolBar';
+import Carousel from './Carousel';
 
 const LEFTNAV_WIDTH = 210;
 
@@ -27,7 +28,7 @@ function getStyles (leftnav) {
       transition: sharpCurve('left'),
       zIndex: 1000
     },
-    main: {
+    photoList: {
       padding: '66px 15px 0'
     }
   }
@@ -92,7 +93,8 @@ class PhotoApp extends Component {
         <PhotoToolBar
           action={ this.toggleLeftNav }
           state={ ['照片'] }/>
-        <PhotoList style={ this.style.main } />
+
+        <PhotoList style={ this.style.photoList } />
       </div>
     );
   }

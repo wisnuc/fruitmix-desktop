@@ -18,8 +18,15 @@ export default class PhotoListByDate extends Component {
     };
   }
 
+  shouldComponentUpdate() {
+    return false;
+  }
+
   render() {
-    let { style, date, photos } = this.props;
+    let {
+      style, date, photos,
+      addListToSelection, removeListToSelection
+    } = this.props;
     let icon;
 
     return (
@@ -28,8 +35,8 @@ export default class PhotoListByDate extends Component {
         <PhotoSelectDate
           style={{ marginBottom: 15 }}
           primaryText={ date }
-          addListToSelection={ () => this.selectionRefs.forEach(refName => this.refs[refName].onSelected()) }
-          removeListToSelection={ () => this.selectionRefs.forEach(refName => this.refs[refName].offSelected()) } />
+          selectedDateBehavior={ () => this.selectionRefs.forEach(refName => this.refs[refName].onSelected()) }
+          offSelectedDateBehavior={ () => this.selectionRefs.forEach(refName => this.refs[refName].offSelected()) } />
 
          {/* 照片 */}
          <div style={ style }>
@@ -37,9 +44,14 @@ export default class PhotoListByDate extends Component {
                <div style={{ position: 'relative' }}>
                  { this.state.action === 'pending'
                      ? (null)
-                     : (<SelectIconButton ref={ 'selectAction' + index } style={{ position: 'absolute', left: 5, top: 5, width: 18, height: 18 }} />)
+                     : (<SelectIconButton
+                         ref={ 'selectAction' + index }
+                         style={{ position: 'absolute', left: 5, top: 5, width: 18, height: 18 }}
+                         selectBehavior={ (action) => { let photoItem = this.refs['photoItem' + index]; (action === 'on' ? addListToSelection(photoItem.props.path) : removeListToSelection(photoItem.props.path)) } } />
+                        )
                  }
                  <PhotoItem
+                   ref={ 'photoItem' + index }
                    style={{ width: 150, height: 158, marginRight: 6, marginBottom: 6 }}
                    digest={ photo.digest }
                    path={ photo.path }
@@ -62,5 +74,7 @@ export default class PhotoListByDate extends Component {
 PhotoListByDate.propTypes = {
   style: PropTypes.object,
   date: PropTypes.string.isRequired,
-  photos: PropTypes.array.isRequired
+  photos: PropTypes.array.isRequired,
+  addListToSelection: PropTypes.func.isRequired,
+  removeListToSelection: PropTypes.func.isRequired
 };
