@@ -21,7 +21,10 @@ export default class Carousel extends Component {
           <CarouselTopBar
             style={{ marginLeft: __MARGIN_DISTANCE__, marginRight: __MARGIN_DISTANCE__, height: __PART_HEIGHT__, lineHeight: __PART_HEIGHT__ + 'px' }} />
 
-          <SlideToAnimate style={{ marginLeft: __MARGIN_DISTANCE__, marginRight: __MARGIN_DISTANCE__, height: 90 }}>
+          <SlideToAnimate
+            style={{ marginLeft: __MARGIN_DISTANCE__, marginRight: __MARGIN_DISTANCE__, height: 90 }}
+            translateCount={ items.length }
+            translateDistance={ 90 }>
             <CarouselList
               items={ items }
               style={{ display: 'flex', flexFlow: 'row nowrap', justifyContent: 'flex-start' }} />
