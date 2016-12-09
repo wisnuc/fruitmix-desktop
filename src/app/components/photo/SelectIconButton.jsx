@@ -74,12 +74,16 @@ export default class SelectIconButton extends Component {
     this.selectBehavior = props.selectBehavior || (() => {});
   }
 
-  onSelected() {
-    this.setState({ action: 'on' }, () => this.selectBehavior(this.state.action));
+  onSelected(disabled) {
+    this.setState({ action: 'on' }, () => !disabled && this.selectBehavior(this.state.action));
   }
 
-  offSelected() {
-    this.setState({ action: 'off' }, () => this.selectBehavior(this.state.action));
+  offSelected(disabled) {
+    this.setState({ action: 'off' }, () => !disabled && this.selectBehavior(this.state.action));
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return nextState.action !== this.state.action;
   }
 
   render() {

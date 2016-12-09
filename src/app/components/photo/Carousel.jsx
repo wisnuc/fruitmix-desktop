@@ -9,6 +9,7 @@ import CarouselList from './CarouselList';
 import SlideToAnimate from './SlideToAnimate';
 
 const __MARGIN_DISTANCE__ = 60;
+const __PART_HEIGHT__ = 45;
 
 export default class Carousel extends Component {
   render() {
@@ -18,17 +19,17 @@ export default class Carousel extends Component {
       <div style={ style }>
         <div style={{ width: '100%' }}>
           <CarouselTopBar
-            style={{ marginLeft: __MARGIN_DISTANCE__, height: 45 }} />
+            style={{ marginLeft: __MARGIN_DISTANCE__, marginRight: __MARGIN_DISTANCE__, height: __PART_HEIGHT__, lineHeight: __PART_HEIGHT__ + 'px' }} />
 
           <SlideToAnimate style={{ marginLeft: __MARGIN_DISTANCE__, marginRight: __MARGIN_DISTANCE__, height: 90 }}>
             <CarouselList
               items={ items }
-              style={{ display: 'flex', flexFlow: 'row no-wrap', stringifyContent: 'space-between' }} />
+              style={{ display: 'flex', flexFlow: 'row nowrap', justifyContent: 'flex-start' }} />
           </SlideToAnimate>
 
           <CarouselBottomBar
-            style={{ marginLeft: __MARGIN_DISTANCE__, textAlign: 'center' }}
-            count={4} />
+            style={{ marginLeft: __MARGIN_DISTANCE__, marginRight: __MARGIN_DISTANCE__, textAlign: 'center', height: __PART_HEIGHT__, lineHeight: __PART_HEIGHT__ + 'px' }}
+            count={ items.length } />
         </div>
       </div>
     );
