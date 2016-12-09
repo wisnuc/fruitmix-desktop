@@ -1,6 +1,6 @@
 global.BABEL_IS_RUNNING = true
 
-console.log('You are running in develop/babel mode !')
+console.log('Running in developer (babel-node) mode')
 
 require('babel-register')
 require('./node/app')

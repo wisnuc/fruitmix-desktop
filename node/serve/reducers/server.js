@@ -14,7 +14,6 @@ const server2 = (state = defaultState, action) => {
     })
 
   default:
-    console.log('server action')
     return state
   }
 }

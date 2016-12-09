@@ -1,114 +1,72 @@
+import request from 'superagent'
+
 import React from 'react'
 
-import { Paper, Divider, FlatButton } from 'material-ui'
+import { header1Style } from './styles'
 
-import { BouncyCardHeaderLeft, BouncyCardHeaderLeftText } from '../components/bouncy'
-import { dispatch, storageStore, serverOpStore, storageState, networkState } from '../utils/storeState'
-import { LabeledText, Spacer } from './CustomViews'
+const NetFace = (props) => {
 
-const renderIPV4 = (obj) => (
-    <div style={{display:'flex'}}>
-      <div style={{width:56}} /> 
-      <div style={{paddingTop:16, paddingBottom:16, width:200,
-        fontSize:16, fontWeight:'bold', opacity:0.54}}>IPv4</div>
-      <div style={{paddingTop:16, paddingBottom:16, flex:3}}>
-        <LabeledText label='address' text={obj.address} right={4} />
-        <LabeledText label='netmask' text={obj.netmask} right={4} />
-        <LabeledText label='mac'text={obj.mac} right={4} />
-        <LabeledText label='internal' text={obj.internal.toString()} right={4} />
-      </div>
-    </div> 
+  const renderLine = (key, value) => (
+    <div style={{height: 40, color: 'rgba(0, 0, 0, 0.87)', fontSize: 14, 
+      display: 'flex', alignItems: 'center'}}>
+      <div style={{flex: '0 0 160px'}}>{key}</div>
+      <div>{value}</div>
+    </div>
   )
-
-const renderIPV6 = (obj) => (
-    <div style={{display:'flex'}}>
-      <div style={{width:56}} /> 
-      <div style={{paddingTop:16, paddingBottom:16, width:200,
-        fontSize:16, fontWeight:'bold', opacity:0.54}}>IPv6</div>
-      <div style={{paddingTop:16, paddingBottom:16, flex:3}}>
-        <LabeledText label='address' text={obj.address} right={4} />
-        <LabeledText label='netmask' text={obj.netmask} right={4} />
-        <LabeledText label='mac'text={obj.mac} right={4} />
-        <LabeledText label='internal' text={obj.internal.toString()} right={4} />
-        <LabeledText label='scope id' text={obj.scopeid} right={4} />
-      </div>
-    </div> 
-  )
-
-const renderContent = (net, ipv4, ipv6) => {
-
-  let ccdRowStyle = { width: '100%', display: 'flex', flexDirection: 'row', }
-  let ccdLeftColStyle = { flex: 1, fontSize: 15, opacity:0.87 }
-  let ccdRightColStyle = { flex: 3 }
 
   return (
-    <div>
-      <Divider />
-      <div>
-        <div style={{display:'flex'}}>
-          <div style={{width:56}} /> 
-          <div style={{paddingTop:16, paddingBottom:16, width:200,
-            fontSize:16, fontWeight:'bold', opacity:0.54}}>Link Information</div>
-          <div style={{paddingTop:16, paddingBottom:16, flex:3}}>
-            <LabeledText label='address' text={net.address} right={4} />
-            <LabeledText label='broadcast' text={net.broadcast} right={4} />
-            <LabeledText label='duplex' text={net.duplex} right={4} />
-            <LabeledText label='mtu' text={net.mtu} right={4} />
-            <LabeledText label='speed' text={net.speed} right={4} />
-          </div>
-        </div>
+    <div style={props.style}>
+      <div style={Object.assign({}, header1Style, { color: props.themeColor || 'grey'})}>
+        {props.data.name}
       </div>
-      { ipv4 && renderIPV4(ipv4) }
-      { ipv6 && renderIPV6(ipv6) }
+      { renderLine('地址类型', props.data.family) }
+      { renderLine('网络地址', props.data.address) }
+      { renderLine('子网掩码', props.data.netmask) }
+      { renderLine('MAC地址', props.data.mac.toUpperCase()) }
     </div>
   )
 }
 
-const renderHeader = (net) => (
-    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-      <BouncyCardHeaderLeft title={net.name}>
-        <BouncyCardHeaderLeftText text={net.operstate} />
-      </BouncyCardHeaderLeft>
-    </div>
-  ) 
+class Ethernet extends React.Component {
 
-const renderCard = (net) => {
-
-  let selected = { width: '100%', marginTop: 16, marginBottom: 16 }
-
-  return (
-    <div key={'network-interface-' + net.name} style={{transition:'top 300ms'}}>
-      <Paper style={ selected } rounded={true} >
-        { renderHeader(net) }
-        { renderContent(net, net.ipv4, net.ipv6) } 
-      </Paper>
-    </div>
-  )
-}
-
-const render = () => {
-
-  let nets, os
-  
-  if (networkState() === null) nets = [] 
-  else {
-    os = networkState().os
-    nets = networkState().nets.map(net => 
-      Object.assign({}, net, { 
-        ipv4: (os[net.name] || []).find(x => x.family === 'IPv4'),
-        ipv6: (os[net.name] || []).find(x => x.family === 'IPv6')
-      }))
+  constructor(props) {
+    super(props)
+    this.state = {}
   }
 
-  return (
-    <div key='network-content-page'>
-      <div style={{display: 'flex', alignItems: 'center', justifyContent:'space-between'}}>
-        <div style={{fontSize:16, opacity:0.54}}>Network Interfaces</div>
-        <FlatButton label='refresh' onTouchTap={() => dispatch({type: 'SERVEROP_REQUEST', data: { operation: 'networkUpdate' }})} />
+  componentDidMount() {
+
+    if (!this.props.address) return
+
+    request.get(`http://${this.props.address}:3000/system/net`)
+      .set('Accept', 'application/json')
+      .end((err, res) => {
+        if (err || !res.ok) return
+        this.setState(Object.assign({}, this.state, { data: res.body }))
+      })
+  }
+
+  extract(itfs) {
+
+    let arr = []
+    for (let name in itfs) {
+      let ipv4 = itfs[name].find(addr => addr.internal === false && addr.family === 'IPv4')
+      if (ipv4) arr.push(Object.assign(ipv4, { name }))
+    } 
+    return arr
+  }
+
+  render() {
+    if (!this.state.data) return <div />
+    return (
+      <div style={this.props.style}>
+        <div style={{paddingLeft: 72}}>
+        { this.extract(this.state.data.os).map(itf => 
+            <NetFace data={itf} themeColor={this.props.themeColor}/>) }
+        </div>
       </div>
-      { nets.map(renderCard) }
-    </div>
-  )
+    )
+  } 
 }
 
-export default render
+export default Ethernet

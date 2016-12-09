@@ -48,7 +48,7 @@ class TimeDate extends React.Component {
   render() {
     return (
       <div style={this.props.style}>
-        <div style={{paddingTop: 24, width: 440}}>
+        <div style={{paddingTop: 48, paddingLeft: 72, width: 440}}>
           { this.state.data ? 
             this.properties.map(prop => ({
               key: prop,

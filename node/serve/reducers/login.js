@@ -1,9 +1,9 @@
 //define default state
 const defaultState = {
 	state: 'READY', // READY, BUSY, REJECTED, TIMEOUT, ERROR, LOGGEDIN
-  	obj: {},
-  	device: [],
-  	selectIndex : 0
+  obj: {},
+  device: [],
+  selectIndex : 0
 }
 
 const listeners = []
@@ -24,7 +24,7 @@ const loginState = (state = defaultState, action) => {
 		case 'REJECTED':
 			return Object.assign({}, state, {state: 'REJECTED'})
 		case 'LOGIN_OFF':
-			return Object.assign({}, state, {state: 'READY',obj: {}})
+			return Object.assign({}, state, {state: 'READY', obj: {}})
 		case 'LOGINOUT':
 			return Object.assign({}, state, {state: 'READY'})
 
