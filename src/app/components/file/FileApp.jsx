@@ -680,7 +680,7 @@ class FileApp extends React.Component {
       // for home_drive, navList is null, navRoot is home root uuid
       // for shared_xxxx, navList is share list, navRoot is null or current share list item
       navContext: 'HOME_DRIVE',
-      navTopList: null,
+      // navTopList: null,
       navRoot: null,
 
       detailOn: false,
@@ -954,24 +954,11 @@ class FileApp extends React.Component {
       "is_sequence"       : false
    })
 
-/****
-
-    // subscribe to redux store
-    this.unsubscribe = window.store.subscribe(() => {
-      let newFile = window.store.getState().node.file
-      if (newFile !== this.state.file) {
-        this.nodeUpdate(newFile)
-      }
-    })
-
-****/
-
     setImmediate(() =>
-      command('fileapp', 'FILE_NAV', { context: 'HOME_DRIVE' }, (err, data) => {
+    	command('fileapp', 'FILE_NAV', { context: 'HOME_DRIVE' }, (err, data) => {
         if (err) return // todo
-        this.navUpdate('HOME_DRIVE', data)
+        	this.navUpdate('HOME_DRIVE', data)
       }))
-
   }
 
   componentWillUnmount() {
@@ -985,16 +972,7 @@ class FileApp extends React.Component {
     // remove listener
     window.removeEventListener('keydown', this.keypress, false)
     window.removeEventListener('keyup', this.keypress, false)
-
-    // unsubscribe redux store
-//    this.unsubscribe && this.unsubscribe()
   }
-
-/**
-  shouldComponentUpdate(nextProps, nextState) {
-    return nextState !== this.state
-  }
-**/
 
   // context
   // data : {
@@ -1006,20 +984,17 @@ class FileApp extends React.Component {
   // 1, same as HOME_DRIVE
   // 2.
   navUpdate(context, data) {
-  	console.log(context)
     debug('navUpdate', context, data)
 
-    if ((context === 'SHARED_WITH_ME' ||
-        context === 'SHARED_WITH_OTHERS') && !data.path) {
+    if ((context === 'SHARED_WITH_ME' || context === 'SHARED_WITH_OTHERS') ) {
       // virtual list
-
       let state = {
         navContext: context,
-        navList: null,
-        navRoot: null,
+        // navList: null,
+        // navRoot: null,
 
-        directory: null,
-        path: [],
+        directory: data.path.length>1?data.path[data.path.length - 1]:null,
+        path: data.path,
 
         specified: -1,
 
@@ -1040,7 +1015,7 @@ class FileApp extends React.Component {
     let state = {
 
       navContext: context,
-      navList: null,
+      // navList: null,
       navRoot: data.path[0],
 
       // the last one
@@ -1201,13 +1176,29 @@ class FileApp extends React.Component {
   }
 
   rowDoubleClick(uuid, e) {
-
+  	console.log('enter double click enent -----------')
+  	console.log('current path is :' )
+  	console.log( this.state.path)
+  	console.log('current state is : ' )
+  	console.log(this.state.navRoot)
     let item = this.state.list.find(i => i.uuid === uuid)
+    let navContext = this.state.navContext
+    let rUUID
     if (!item) return
     if (item.type !== 'folder') return
-    command('fileapp', 'FILE_NAV', { context: 'HOME_DRIVE', folderUUID: uuid }, (err, data) => {
+    if (navContext == 'HOME_DRIVE') {
+    	rUUID = null
+    }else if (navContext == 'SHARED_WITH_OTHERS' || navContext == 'SHARED_WITH_ME') {
+    	if (this.state.path.length == 0) {
+    		rUUID = item.uuid
+    		this.state.navRoot = item
+    	}else {
+    		rUUID = this.state.navRoot.uuid
+    	}
+    }
+    command('fileapp', 'FILE_NAV', { context: this.state.navContext, folderUUID: uuid, rootUUID:rUUID }, (err, data) => {
       if (err) return // todo
-      this.navUpdate('HOME_DRIVE', data)
+      this.navUpdate(this.state.navContext, data)
     })
   }
 
@@ -1269,10 +1260,25 @@ class FileApp extends React.Component {
   }
 
 	renderBreadCrumb(){
-
+		let list = []
+		let _this = this
     if (!this.state.path) return null
-
-    let list = []
+    if (this.state.navContext=='SHARED_WITH_ME' || this.state.navContext=='SHARED_WITH_OTHERS') {
+    	list.push(
+    		<span onTouchTap={()=> {
+    			_this.state.navRoot = null
+    			command('FileApp','FILE_NAV',{context:_this.state.navContext},(err,data) => {
+    				if (err) {
+    					return
+    				}
+    				this.navUpdate(_this.state.navContext, data)
+    			})
+    		}}>
+    		{this.state.navContext=='SHARED_WITH_ME'?'分享给我的文件':'我分享的文件'}
+    		</span>
+    		)
+    	list.push(<NavigationChevronRight />)
+    }
     this.state.path.forEach((node, index, arr) => {
       list.push(
         <span
@@ -1280,20 +1286,21 @@ class FileApp extends React.Component {
             fontSize: 21,
             fontWeight: 'medium',
             color: '#FFF',
-            opacity: index === arr.length - 1 ? 1 : 0.7,
+            opacity: index === arr.length - 1 ? 1 : 0.7
           }}
 
           onTouchTap={() => {
             command('fileapp', 'FILE_NAV', {
-              context: 'HOME_DRIVE',
-              folderUUID: node.uuid
+              context: this.state.navContext,
+              folderUUID: node.uuid,
+              rootUUID:this.state.navRoot.uuid
             }, (err, data) => {
               if (err) return // todo
-              this.navUpdate('HOME_DRIVE', data)
+              this.navUpdate(_this.state.navContext, data)
             })
           }}
         >
-          {index === 0 ? '我的文件' :  node.name}
+          {index === 0 && this.state.navContext=='HOME_DRIVE'? '我的文件' :  node.name}
         </span>
       )
 
@@ -1434,6 +1441,8 @@ class FileApp extends React.Component {
 	}
 
   render() {
+  	console.log('run render ------------------')
+  	console.log(this.state)
     const detailWidth = 300
     debug('fileapp render')
 
@@ -1441,15 +1450,15 @@ class FileApp extends React.Component {
     <div style={this.props && this.props.style} >
       <div style={{ height: '100%', backgroundColor:'blue', display: 'flex', justifyContent: 'space-between' }}>
 
-        { this.state.leftNav &&
+        {/* this.state.leftNav &&
           <div id='file-left-nav-mask'
             style={{backgroundColor: '#000', opacity: 0.1,
             width: '100%', height: '100%', zIndex:999}}
             onTouchTap={() => this.setState(Object.assign({}, this.state, { leftNav: false }))}
           />
-        }
+        */}
 
-        { false && this.renderLeftNav() }
+        {/* false && this.renderLeftNav() */}
 
         <div id='layout-middle-container'
           style={{
@@ -1471,13 +1480,13 @@ class FileApp extends React.Component {
             toggleLeftNav={this.toggleLeftNav}
             leftNav={this.state.leftNav}
           >
-            <IconButton iconStyle={toolbarStyle.activeIcon}
+            {this.state.navContext=='HOME_DRIVE' && <IconButton iconStyle={toolbarStyle.activeIcon}
               onTouchTap={() => this.setState(Object.assign({}, this.state, {
                 createNewFolder: true
               }))}
             >
               <FileCreateNewFolder />
-            </IconButton>
+            </IconButton>}
 
             <IconButton
               iconStyle={ this.state.detailOn ? toolbarStyle.whiteIcon : toolbarStyle.activeIcon }
@@ -1527,7 +1536,15 @@ class FileApp extends React.Component {
                   }}
                 />
                 <Divider />
-                <MenuItem style={{fontSize: 14}} primaryText='分享给我文件' leftIcon={<SocialPeople />} />
+                <MenuItem style={{fontSize: 14}} primaryText='分享给我文件' leftIcon={<SocialPeople />} 
+                	onTouchTap={()=> {
+                		let context = 'SHARED_WITH_ME'
+                		command('fileapp', 'FILE_NAV', { context }, (err, data) => {
+                      if (err) return
+                      setImmediate(() => this.navUpdate(context, data))
+                    })
+                	}}
+                />
                 <Divider />
                 <MenuItem style={{fontSize: 14}} primaryText='上传任务' leftIcon={<FileFileUpload />} 
                 	onTouchTap={() => {

@@ -469,16 +469,16 @@ const fileNavAsync = async ({ context, folderUUID, rootUUID }) => {
     else if (!rootUUID) {
       rootUUID = store.getState().login.obj.home
     }
-    else {
-      throw(new Error(`error folder/root uuid: ${folderUUID}/${rootUUID}`))
-    }
+    // else {
+    //   throw(new Error(`error folder/root uuid: ${folderUUID}/${rootUUID}`))
+    // }
     break
 
   case 'SHARED_WITH_ME':
-
     if (!folderUUID && !rootUUID) {
       return {
-        children: await fileGetSharedWithMe()
+        children: await fileGetSharedWithMe(),
+        path:[]
       }
     }
     else if (!folderUUID) { // only rootUUID means list this share root
@@ -489,11 +489,14 @@ const fileNavAsync = async ({ context, folderUUID, rootUUID }) => {
   case 'SHARED_WITH_OTHERS':
     if (!folderUUID && !rootUUID) {
       return {
-        children: await fileGetSharedWithOthers()
+        children: await fileGetSharedWithOthers(),
+        path:[]
       }
     }
     else if (!folderUUID) {
       folderUUID = rootUUID
+    }else if (!rootUUID) {
+    	rootUUID = store.getState().login.obj.home
     }
     break
 
