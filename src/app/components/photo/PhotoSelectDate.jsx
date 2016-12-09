@@ -19,8 +19,8 @@ export default class PhotoSelectDate extends Component {
     super(props);
 
     this.style = getStyles();
-    this.addListToSelection = props.addListToSelection;
-    this.removeListToSelection = props.removeListToSelection;
+    this.selectedDateBehavior = props.selectedDateBehavior;
+    this.offSelectedDateBehavior = props.offSelectedDateBehavior;
   }
 
   shouldComponentUpdate() {
@@ -35,7 +35,7 @@ export default class PhotoSelectDate extends Component {
         <label style={ this.style.root }>
           <SelectIconButton
             style={{ display: 'inline-block', width: 18, height: 18, marginRight: 8 }}
-            selectBehavior={ (action) => { action === 'on' ? this.addListToSelection() : this.removeListToSelection() } }/>
+            selectBehavior={ (action) => { action === 'on' ? this.selectedDateBehavior() : this.offSelectedDateBehavior() } }/>
           { primaryText }
         </label>
       </div>
@@ -46,6 +46,6 @@ export default class PhotoSelectDate extends Component {
 PhotoSelectDate.propTypes = {
   style: PropTypes.object,
   primaryText: PropTypes.string.isRequired,
-  addListToSelection: PropTypes.func.isRequired,
-  removeListToSelection: PropTypes.func.isRequired
+  selectedDateBehavior: PropTypes.func.isRequired,
+  offSelectedDateBehavior: PropTypes.func.isRequired
 };

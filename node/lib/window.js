@@ -17,7 +17,7 @@ const initMainWindow = () => {
 		minHeight:200,
 		title:'WISNUC',
 		icon: path.join(__dirname,'180-180.png'), // FIXME
-  
+
     webPreferences: {
       webSecurity: false
     }
@@ -29,10 +29,10 @@ const initMainWindow = () => {
 	})
 
   // debug mode
-	_mainWindow.webContents.openDevTools()
+	// _mainWindow.webContents.openDevTools()
   _mainWindow.maximize()
 
-  if (global.BABEL_IS_RUNNING) 
+  if (global.BABEL_IS_RUNNING)
 	  _mainWindow.loadURL('file://' + process.cwd() + '/build/index.html')
   else
 	  _mainWindow.loadURL('file://' + process.cwd() + '/resources/app/build/index.html')

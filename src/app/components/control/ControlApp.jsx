@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Divider, Menu, MenuItem, IconButton } from 'material-ui'
+import { Paper, Divider, Menu, MenuItem, IconButton, FlatButton, RaisedButton } from 'material-ui'
 import { blue500, blueGrey500 } from 'material-ui/styles/colors'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import SocialShare from 'material-ui/svg-icons/social/share'
@@ -12,90 +12,18 @@ import ActionPowerSettingsNew from 'material-ui/svg-icons/action/power-settings-
 import DeviceAccessTime from 'material-ui/svg-icons/device/access-time'
 import DeviceStorage from 'material-ui/svg-icons/device/storage'
 import HardwareToys from 'material-ui/svg-icons/hardware/toys'
+import EditorModeEdit from 'material-ui/svg-icons/editor/mode-edit'
 
 import { sharpCurve } from '../common/motion'
 
 const LEFTNAV_WIDTH=210
 
-import { FlatButton, Paper } from 'material-ui'
-
 import request from 'superagent'
 
-let labeledTextStyle = {
-  height: 48,
-  display: 'flex',
-  flexDirection: 'row',
-  fontSize: 13,
-  lineHeight: 1.5,
-}
+import TimeDate from './TimeDate'
+import Ethernet from './Ethernet'
 
-const LabeledText = ({label, text, right, styleOverlay}) => 
-  ( 
-    <div style={styleOverlay ? Object.assign({}, labeledTextStyle, styleOverlay) : labeledTextStyle}>
-      <div style={{flex:1, fontWeight:100, fontFamily:'monospace', opacity:'0.54'}}>{label}:</div>
-      <div style={{flex:(right || 4), fontFamily:'monospace', opacity:'0.87'}}>{text}</div>
-    </div>
-  )
-
-const renderLine = (obj, prop) => <LabeledText label={prop} text={obj[prop] || '(none)'} right={4}/>
-
-class TimeDate extends React.Component {
-
-  constructor(props) {
-    super(props)
-    this.state = {
-      data: null
-    }
-
-    this.properties = [
-      'Local time',
-      'Universal time',
-      'RTC time',
-      'Time zone',
-      'NTP synchronized',
-      'Network time on'
-    ]
-  }
-
-  componentDidMount() {
-    this.timer = setInterval(() => 
-      request
-        .get('http://192.168.5.132:3000/system/timedate')
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          if (err || !res.ok) return
-          this.setState(Object.assign({}, this.state, { data: res.body }))
-        })     
-    , 1000)
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.timer)
-    delete this.timer
-  }
-
-  render() {
-    return (
-      <div style={this.props.style}>
-        <div style={{marginTop: 24, width: 440}}>
-          { this.state.data && 
-            this.properties.map(prop => ({
-              key: prop,
-              value: this.state.data[prop] || '(none)' 
-            }))
-            .reduce((prev, curr) => [...prev, (
-              <div style={{width: '100%', height: 40, display: 'flex', alignItems: 'center',
-                fontSize: 14, color: 'rgba(0, 0, 0, 0.87)'}}>
-                <div style={{flex: '0 0 160px'}}>{curr.key}</div>
-                <div>{curr.value}</div> 
-              </div>
-            )], [])
-          }
-        </div>
-      </div>
-    )
-  }
-}
+const C = x => f => f ? C(f(x)) : x
 
 class Storage extends React.Component {
 
@@ -108,6 +36,91 @@ class Storage extends React.Component {
   }
 }
 
+const PlaceHolder = () => <div />
+
+class PowerOff extends React.Component {
+
+  constructor(props) {
+    super(props)
+  }
+
+  render() {
+    return (
+      <div style={this.props.style}>
+        关机
+      </div>
+    )
+  }
+}
+
+class User extends React.Component {
+
+  constructor(props) {
+    super(props)
+  }
+
+  renderLine(key, value, icon) {
+    return (
+      <div style={{height: 48, fontSize: 14, color: 'rgba(0, 0, 0, 0.87)', display: 'flex', alignItems: 'center'}}>
+        <div style={{flex: '0 0 120px'}}>{key}</div>
+        <div style={{flex: '0 0 160px'}}>{value}</div>
+        { icon && <IconButton>{icon}</IconButton> }
+      </div>
+    )
+  }
+
+  render() {
+
+    let user = window.store.getState().login.obj
+
+    return (
+      <div style={this.props.style}>
+        <div style={{width:'100%'}}>
+          <div style={{
+            fontSize: 24,
+            fontWeight: 400,
+            color: blueGrey500,
+            marginTop: 32,
+            marginBottom: 32
+          }}>
+            { user.username }
+          </div>
+          {
+            (user.isAdmin && user.isFirstUser) ? 
+              <div>您是系统的第一个用户，是最高权限的系统管理员。</div> :
+            (user.isAdmin) ?
+              <div>您是系统管理员。</div> :
+              <div>您是系统普通用户。</div>
+          }
+          <div style={{
+            fontSize: 24,
+            fontWeight: 400,
+            color: blueGrey500,
+            marginTop: 32,
+            marginBottom: 32
+          }}>
+            修改信息
+          </div>
+          <div style={{fontSize: 14, color: 'rgba(0, 0, 0, 0.87)', fontWeight: 'bold'}}>用户名</div>
+          <div style={{fontSize: 14, color: 'rgba(0, 0, 0, 0.87)'}}>
+            <p>WISNUC OS内部使用不可修改的唯一用户ID标识用户身份。用户名仅用于用户登录等信息显示，Windows共享文件访问和其他需要登录的网络文件服务在登录时使用。</p>
+            <p>用户名可以使用中文字符，包括可显示的标点符号。Windows共享文件访问也支持中文字符的用户名，但不是所有客户端软件都支持中文名，所以，如果您使用的网络文件系统服务客户端软件（例如Android或者iOS上的samba客户端）不支持中文用户名，您只能使用英文大小写字母的用户名。</p>
+          </div>
+          <RaisedButton label='修改用户名' />
+
+          <div style={{fontSize: 14, color: 'rgba(0, 0, 0, 0.87)', fontWeight: 'bold', marginTop: 24}}>密码</div>
+          <div style={{fontSize: 14, color: 'rgba(0, 0, 0, 0.87)'}}>
+            <p>WISNUC OS的所有客户端、Web浏览器和网络文件服务使用相同的用户名密码组合。</p>
+            <p>WISNUC OS不会保存任何形式的用户明文密码。</p>
+          </div>
+          <RaisedButton label='修改密码' />
+        </div>
+      </div>
+    )
+  }
+}
+
+// this is a container component
 class ControlApp extends React.Component {
 
   constructor(props) {
@@ -121,16 +134,23 @@ class ControlApp extends React.Component {
     }
 
     this.settings = [
-      ['用户', <SocialPeople />, 'USER'],
+      ['用户', <SocialPeople />, 'USER', User],
       ['存储', <DeviceStorage />, 'STORAGE'],
-      ['网络', <ActionSettingsEthernet />, 'ETHERNET'],
-      ['时间', <DeviceAccessTime />, 'TIMEDATE'],
+      ['网络', <ActionSettingsEthernet />, 'ETHERNET', Ethernet],
+      ['时间', <DeviceAccessTime />, 'TIMEDATE', TimeDate],
       ['风扇', <HardwareToys />, 'FAN'],
-      ['关机', <ActionPowerSettingsNew />, 'POWEROFF']
+      ['关机', <ActionPowerSettingsNew />, 'POWEROFF', PowerOff]
     ]
+
+    let { device, selectIndex } = window.store.getState().login
+    if (device && device[selectIndex]) {
+      this.address = device[selectIndex].address
+      console.log(this.address)
+    }
   }
 
   renderMenuItem(text, icon, select) {
+
     return (
       <MenuItem 
         key={`control-panel-${select}`}
@@ -153,8 +173,7 @@ class ControlApp extends React.Component {
 
   render() {
 
-    const detailWidth = 300
-    const contentStyle = { marginLeft: 72 }
+    const contentStyle = { paddingLeft: 72, paddingRight: 72, paddingTop: 24 }
 
     const title = () => {
       let found = this.settings.find(item => item[2] === this.state.select)
@@ -191,25 +210,24 @@ class ControlApp extends React.Component {
             height:'100%'
           }}
         >
-
-          <div style={{ position: 'absolute', width: '100%', height: 56, display: 'flex', alignItems: 'center' }}>
-            <Paper style={{backgroundColor: blueGrey500, width: '100%', height: '100%', display: 'flex',
-              alignItems: 'center'}}>
-              <div style={{fontSize: 21, color: '#FFF', marginLeft: 72}}>{ title() }</div>
-            </Paper>
-          </div>
+          <Paper style={{position:'absolute', width:'100%', height:56, display:'flex', alignItems:'center',
+            backgroundColor: blueGrey500 }}>
+            <div style={{fontSize: 21, color: '#FFF', marginLeft: 72}}>{ title() }</div>
+          </Paper>
 
           <div id='layout-middle-container-spacer' style={{height: 56}} />
-
-          <div id='layout-middle-container-lower' 
-            style={{ width: '100%', height: 'calc(100% - 56px)', backgroundColor: '#EEEEEE', display:'flex' }}>
-
-            <div style={{ width: '100%', height: '100%', backgroundColor:'#FAFAFA' }}>
-              {
-                this.state.select === 'STORAGE' ? <Storage /> :
-                this.state.select === 'TIMEDATE' ? <TimeDate style={contentStyle} /> : null
-              }
-            </div>
+          <div id='layout-middle-container-lower' style={{width:'100%', height:'calc(100% - 56px)', 
+            backgroundColor: '#FAFAFA'}}>
+            { C(this.settings)
+              (settings => settings.find(item => item[2] === this.state.select))
+              (found => found && found[3] ? 
+                React.createElement(found[3], { 
+                  style: contentStyle,
+                  themeColor: blueGrey500,
+                  address: this.address
+                }) : <PlaceHolder />)
+              ()
+            }
           </div> 
         </div>
       </div>
