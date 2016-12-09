@@ -21,24 +21,9 @@ const LEFTNAV_WIDTH=210
 import request from 'superagent'
 
 import TimeDate from './TimeDate'
+import Ethernet from './Ethernet'
 
 const C = x => f => f ? C(f(x)) : x
-
-let labeledTextStyle = {
-  height: 48,
-  display: 'flex',
-  flexDirection: 'row',
-  fontSize: 13,
-  lineHeight: 1.5,
-}
-
-const LabeledText = ({label, text, right, styleOverlay}) => 
-  ( 
-    <div style={styleOverlay ? Object.assign({}, labeledTextStyle, styleOverlay) : labeledTextStyle}>
-      <div style={{flex:1, fontWeight:100, fontFamily:'monospace', opacity:'0.54'}}>{label}:</div>
-      <div style={{flex:(right || 4), fontFamily:'monospace', opacity:'0.87'}}>{text}</div>
-    </div>
-  )
 
 class Storage extends React.Component {
 
@@ -51,85 +36,25 @@ class Storage extends React.Component {
   }
 }
 
-const renderLine = () => (
-  <div style={{height: 40, color: 'rgba(0, 0, 0, 0.87)', display: 'flex', alignItems: 'center'}}>
-    <div style={{flex: '0 0 160px'}}>{key}</div>
-    <div>{value}</div>
-  </div>
-)
+const PlaceHolder = () => <div />
 
-const NetFace = (props) => {
-
-  const renderLine = (key, value) => (
-    <div style={{height: 40, color: 'rgba(0, 0, 0, 0.87)', fontSize: 14, 
-      display: 'flex', alignItems: 'center'}}>
-      <div style={{flex: '0 0 160px'}}>{key}</div>
-      <div>{value}</div>
-    </div>
-  )
-
-  return (
-    <div style={props.style}>
-      <div style={{
-        fontSize: 24,
-        fontWeight: 400,
-        color: blueGrey500,
-        marginTop: 32,
-        marginBottom: 32
-      }}>
-        {props.data.name}
-      </div>
-      { renderLine('地址类型', props.data.family) }
-      { renderLine('网络地址', props.data.address) }
-      { renderLine('子网掩码', props.data.netmask) }
-      { renderLine('MAC地址', props.data.mac.toUpperCase()) }
-    </div>
-  )
-}
-
-class Ethernet extends React.Component {
+class PowerOff extends React.Component {
 
   constructor(props) {
     super(props)
-    this.state = {}
-  }
-
-  componentDidMount() {
-
-    if (!this.props.address) return
-
-    request.get(`http://${this.props.address}:3000/system/net`)
-      .set('Accept', 'application/json')
-      .end((err, res) => {
-        if (err || !res.ok) return
-        this.setState(Object.assign({}, this.state, { data: res.body }))
-      })
-  }
-
-  extract(itfs) {
-
-    let arr = []
-    for (let name in itfs) {
-      let ipv4 = itfs[name].find(addr => addr.internal === false && addr.family === 'IPv4')
-      if (ipv4) arr.push(Object.assign(ipv4, { name }))
-    } 
-    return arr
   }
 
   render() {
-
-    if (!this.state.data) return <div />
     return (
       <div style={this.props.style}>
-        { this.extract(this.state.data.os).map(itf => <NetFace data={itf} />) }
+        关机
       </div>
     )
-  } 
+  }
 }
 
-const PlaceHolder = () => <div />
-
 class User extends React.Component {
+
   constructor(props) {
     super(props)
   }
@@ -195,6 +120,7 @@ class User extends React.Component {
   }
 }
 
+// this is a container component
 class ControlApp extends React.Component {
 
   constructor(props) {
@@ -213,7 +139,7 @@ class ControlApp extends React.Component {
       ['网络', <ActionSettingsEthernet />, 'ETHERNET', Ethernet],
       ['时间', <DeviceAccessTime />, 'TIMEDATE', TimeDate],
       ['风扇', <HardwareToys />, 'FAN'],
-      ['关机', <ActionPowerSettingsNew />, 'POWEROFF']
+      ['关机', <ActionPowerSettingsNew />, 'POWEROFF', PowerOff]
     ]
 
     let { device, selectIndex } = window.store.getState().login
@@ -224,6 +150,7 @@ class ControlApp extends React.Component {
   }
 
   renderMenuItem(text, icon, select) {
+
     return (
       <MenuItem 
         key={`control-panel-${select}`}
@@ -296,6 +223,7 @@ class ControlApp extends React.Component {
               (found => found && found[3] ? 
                 React.createElement(found[3], { 
                   style: contentStyle,
+                  themeColor: blueGrey500,
                   address: this.address
                 }) : <PlaceHolder />)
               ()

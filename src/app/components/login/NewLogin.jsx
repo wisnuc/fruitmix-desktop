@@ -1144,19 +1144,23 @@ class GuideBox extends React.Component {
                           console.log('username', this.state.username)
                           console.log('password', this.state.password)
 
+                          let postdata = {
+                            target: this.state.selection,
+                            mkfs: {
+                              type: 'btrfs',
+                              mode: this.state.mode,
+                            },
+                            init: {
+                              username: this.state.username,
+                              password: this.state.password
+                            }
+                          }
+
+                          console.log('postdata', postdata)
+
                           request
                             .post(`http://${this.props.address}:3000/system/mir`)
-                            .send({
-                              target: this.state.selection,
-                              mkfs: {
-                                type: 'btrfs',
-                                mode: this.state.mode,
-                              },
-                              init: {
-                                username: this.state.username,
-                                password: this.state.password
-                              }
-                            })
+                            .send(postdata)
                             .set('Accept', 'application/json')
                             .end((err, res) => {
                               // FIXME error
