@@ -5,14 +5,7 @@ var file = require('./file')
 var media = require('./media')
 var share = require('./share')
 var config = require('./config')
-// var server = require('./server').default
 import server from './server'
-
-
-console.log('>>>>>>>>')
-console.log(server)
-console.log('<<<<<<<<')
-// var transimission = require('./transimission')
 
 const reducer = combineReducers({
   config,

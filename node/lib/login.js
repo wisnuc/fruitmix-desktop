@@ -3,8 +3,7 @@ import { request, requestAsync, serverAddr } from './async'
 
 import Debug from 'debug'
 import store from '../serve/store/store'
-import { requestGetAsync,
-  tryLoginAsync, retrieveUsers } from './server'
+import { requestGetAsync, tryLoginAsync, retrieveUsers } from './server'
 
 const debug = Debug('lib:login')
 // FIXME
@@ -163,97 +162,6 @@ var loginApi = {
 
 export default loginApi
 
-/**
-{ uuid: 'db0b4645-6339-4f68-810a-2a10ca76867a',
-  username: 'admin',
-  avatar: null,
-  unixUID: 2000,
-  token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZGIwYjQ2NDUtNjMzOS00ZjY4LTgxMGEtMmExMGNhNzY4NjdhIn0.y2nX2rFzdypPX2d3u3fBHtR8TAStvlSj3XPj10s5p4g',
-  type: 'JWT',
-  users: 
-   [ { uuid: 'db0b4645-6339-4f68-810a-2a10ca76867a',
-       username: 'admin',
-       avatar: null,
-       unixUID: 2000,
-       checked: false,
-       color: '#00bcd4' },
-     { uuid: '345c87e1-7b79-40d8-b0a8-83a2f1a07a04',
-       username: '1',
-       avatar: null,
-       unixUID: 2001,
-       checked: false,
-       color: '#00bcd4' },
-     { uuid: '99aeffe6-4fb1-410e-80dd-02b2a97fb9f2',
-       username: '我和你',
-       avatar: null,
-       unixUID: 2002,
-       checked: false,
-       color: '#8BC34C' },
-     { uuid: 'd781c358-cfe7-4423-b687-5c31cae1f4c7',
-       username: '心连心',
-       avatar: null,
-       unixUID: 2003,
-       checked: false,
-       color: '#FFC107' },
-     { uuid: '39a2be62-ea9a-4e16-95af-77c82ec38a66',
-       username: '同住地球村',
-       avatar: null,
-       unixUID: 2004,
-       checked: false,
-       color: '#FFC107' } ],
-  allUser: 
-   [ { type: 'local',
-       uuid: 'db0b4645-6339-4f68-810a-2a10ca76867a',
-       username: 'admin',
-       avatar: null,
-       email: null,
-       isAdmin: true,
-       isFirstUser: true,
-       home: '1dff495e-dd38-4a3b-807b-b3977071c190',
-       library: 'd09457bd-7c5e-442e-b934-1fbaa37ac9e5',
-       unixUID: 2000 },
-     { type: 'local',
-       uuid: '345c87e1-7b79-40d8-b0a8-83a2f1a07a04',
-       username: '1',
-       avatar: null,
-       email: null,
-       isAdmin: false,
-       isFirstUser: false,
-       home: 'f0073ecf-75a2-4ce2-9dfe-d469426e678c',
-       library: '3745fb14-e794-41f8-bcd4-4599ae6e53af',
-       unixUID: 2001 },
-     { type: 'local',
-       uuid: '99aeffe6-4fb1-410e-80dd-02b2a97fb9f2',
-       username: '我和你',
-       avatar: null,
-       email: null,
-       isAdmin: false,
-       isFirstUser: false,
-       home: '5cc42eaa-b6ac-49fb-b449-02f7074132ca',
-       library: 'd0732d8b-5c1a-4816-a9ef-b61555185d2d',
-       unixUID: 2002 },
-     { type: 'local',
-       uuid: 'd781c358-cfe7-4423-b687-5c31cae1f4c7',
-       username: '心连心',
-       avatar: null,
-       email: null,
-       isAdmin: false,
-       isFirstUser: false,
-       home: '6dae565d-0389-429c-92e3-f2e7fce106a6',
-       library: '749fa4e6-c24f-4afc-a03b-4dcfd3fa69d8',
-       unixUID: 2003 },
-     { type: 'local',
-       uuid: '39a2be62-ea9a-4e16-95af-77c82ec38a66',
-       username: '同住地球村',
-       avatar: null,
-       email: null,
-       isAdmin: false,
-       isFirstUser: false,
-       home: '8dce26bf-a37c-498f-a8d9-f566bc477d5e',
-       library: '1aa9a034-e82c-4e98-8814-ee8043905574',
-       unixUID: 2004 } ] }
-**/
-
 // this function handles user login from front end.
 // input: username, password
 // output: 
@@ -316,49 +224,12 @@ ipcMain.on('delServer',(err, i)=>{
   })
 })
 
-//loginOff
-ipcMain.on('loginOff',err=>{
-	user = {}
-	//files
-	rootNode= null
-	allFiles = []
-	filesSharedByMe = []
-	tree = {}
-	map = new Map()
-	//share
-	shareFiles = []
-	shareTree = []
-	shareMap = new Map()
-	shareChildren = []
-	sharePath = []
-	//directory
-	currentDirectory = {}
-	children = []
-	parent = {}
-	dirPath = []
-	tree = {}
-	//upload 
-	uploadQueue = []
-	uploadNow = []
-	//download
-	downloadQueue = []
-	downloadNow = []
-	downloadFolderQueue = []
-	downloadFolderNow = []
-	//media
-	media = []
-	mediaMap = new Map()
-	thumbQueue = []
-	thumbIng = []
-	shareThumbQueue = []
-	shareThumbIng = []
-
-	dispatch(action.loginoff())
-	isLogin = false
-})
-
 ipcMain.on('login', (err, user, pass) => loginHandler(err, user, pass))
 
+ipcMain.on('loginOff', evt => {
+  debug('loginOff')
+  dispatch({type: 'LOGIN_OFF'})
+})
 
 
 

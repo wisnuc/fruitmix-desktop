@@ -12,7 +12,7 @@ import {Avatar, Menu, Paper, Snackbar, MenuItem, IconButton, Divider,
   Subheader, List, ListItem } from 'material-ui';
 
 import SocialNotifications from 'material-ui/svg-icons/social/notifications'
-import {blue500, pink500, yellow500, green500, gray500} from 'material-ui/styles/colors'
+import {blue500, pink500, yellow500, green500, grey500, blueGrey500} from 'material-ui/styles/colors'
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import NavigationApps from 'material-ui/svg-icons/navigation/apps'
@@ -26,6 +26,7 @@ import FileFolder from 'material-ui/svg-icons/file/folder'
 import ImagePhoto from 'material-ui/svg-icons/image/photo'
 import ImagePhotoAlbum from 'material-ui/svg-icons/image/photo-album'
 import ImagePortrait from 'material-ui/svg-icons/image/portrait'
+import ActionExitToApp from 'material-ui/svg-icons/action/exit-to-app'
 
 import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
 import Action from '../../actions/action'
@@ -115,8 +116,13 @@ const SystemDrawer = (props) => {
           />
           <ListItem style={{color: '#FFF'}}
             primaryText='设置'
-            leftAvatar={<Avatar icon={<ActionSettings />} backgroundColor={gray500} />}
+            leftAvatar={<Avatar icon={<ActionSettings />} backgroundColor={grey500} />}
             onTouchTap={() => props.onLauncherSelect(ControlApp)}
+          />
+          <ListItem style={{color: '#FFF'}}
+            primaryText='退出登录'
+            leftAvatar={<Avatar icon={<ActionExitToApp />} backgroundColor={blueGrey500} />}
+            onTouchTap={() => ipcRenderer.send('loginOff')}
           />
           <div style={{height: 8}} />
           <Divider style={{backgroundColor: '#353535'}}/>
