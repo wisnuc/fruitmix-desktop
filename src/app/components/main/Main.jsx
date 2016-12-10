@@ -244,7 +244,7 @@ class Main extends React.Component {
       // createMediaShareTest()      
       // mediaListThumbTest()
       // mediaShareThumbTest()
-    },2000)
+    }, 2000)
 
     const createMediaShareTest = () => {
       let media = storeState().media
@@ -292,14 +292,10 @@ class Main extends React.Component {
 			this.props.dispatch(Action.setSnack(message,true))
 		});
 
-		
-		//media--------------------------------------------------------------------------
 
 		ipcRenderer.on('donwloadMediaSuccess',(err,item)=>{
 			window.store.dispatch(Action.setMediaImage(item));
 		});
-
-		//transmission---------------------------------------------------------------------
 
 		ipcRenderer.on('setUsers',(err,user)=>{
 			this.props.dispatch({type:'SET_USER',user:user});

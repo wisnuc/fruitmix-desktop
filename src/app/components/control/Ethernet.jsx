@@ -2,7 +2,7 @@ import request from 'superagent'
 
 import React from 'react'
 
-
+import { header1Style } from './styles'
 
 const NetFace = (props) => {
 
@@ -16,13 +16,7 @@ const NetFace = (props) => {
 
   return (
     <div style={props.style}>
-      <div style={{
-        fontSize: 24,
-        fontWeight: 400,
-        color: props.themeColor || 'grey',
-        marginTop: 32,
-        marginBottom: 32
-      }}>
+      <div style={Object.assign({}, header1Style, { color: props.themeColor || 'grey'})}>
         {props.data.name}
       </div>
       { renderLine('地址类型', props.data.family) }
@@ -66,8 +60,10 @@ class Ethernet extends React.Component {
     if (!this.state.data) return <div />
     return (
       <div style={this.props.style}>
+        <div style={{paddingLeft: 72}}>
         { this.extract(this.state.data.os).map(itf => 
             <NetFace data={itf} themeColor={this.props.themeColor}/>) }
+        </div>
       </div>
     )
   } 
