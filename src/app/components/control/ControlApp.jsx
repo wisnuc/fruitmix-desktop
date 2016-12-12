@@ -4,7 +4,7 @@ const debug = Debug('view:control:device')
 
 import React from 'react'
 
-import { Paper, Divider, Menu, MenuItem, IconButton, FlatButton, RaisedButton } from 'material-ui'
+import { Paper, Divider, Dialog, Menu, MenuItem, IconButton, FlatButton, RaisedButton, TextField } from 'material-ui'
 import { blue500, blueGrey500 } from 'material-ui/styles/colors'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import SocialShare from 'material-ui/svg-icons/social/share'
@@ -60,30 +60,93 @@ class PowerOff extends React.Component {
 class User extends React.Component {
 
   constructor(props) {
+
     super(props)
     this.state = {
       err: null,
-      data: null
+      data: null,
+      newUserDialog: null
+    }
+
+    this.validateUsername = () => {
+
+      debug('validate username enter', this.state.newUserDialog, this.state.data)
+      let ret = this.state.newUserDialog && this.state.newUserDialog.username && this.state.newUserDialog.username.length &&
+        !this.state.data.find(user => user.username === this.state.newUserDialog.username)
+  
+      debug('validate username', ret, this.state.newUserDialog, this.state.data)
+      return ret
+    }
+
+    this.validatePassword = () => {
+      let ret = this.state.newUserDialog && this.state.newUserDialog.password && this.state.newUserDialog.password.length
+      
+      debug('validate password', ret, this.state.newUserDialog)
+      return ret
+    }
+
+    this.validatePasswordAgain = () => {
+
+      debug('validate password again, entering')
+
+      let ret = this.state.newUserDialog && this.state.newUserDialog.password &&
+        this.state.newUserDialog.password.length &&
+        this.state.newUserDialog.password === this.state.newUserDialog.passwordAgain
+
+      debug('validate password again', ret, this.state.newUserDialog)
+      return ret
+    }
+
+    this.newUserDialogCancel = () => 
+      this.setState(Object.assign({}, this.state, { newUserDialog: null }))
+
+    this.newUserDialogOK = () => {
+      this.setState(Object.assign({}, this.state, { 
+        newUserDialog: Object.assign({}, this.state.newUserDialog, { busy: true })
+      }))
+
+      let { address, user } = this.props
+     
+      request
+        .post(`http://${this.props.address}:${this.props.fruitmixPort}/users`)
+        .set('Accept', 'application/json')
+        .set('Authorization', 'JWT ' + this.props.user.token)
+        .send({username: this.state.newUserDialog.username, password: this.state.newUserDialog.password}) 
+        .end((err, res) => {
+          if (err || !res.ok)
+            return debug(err || !res.ok)
+
+          debug('request create new user', res.body)
+
+          this.refreshUsers()
+          setTimeout(() => this.setState(Object.assign({}, this.state, { newUserDialog: null })), 1000) 
+        })
+    }
+
+    this.refreshUsers = () => {
+
+      request
+        .get(`http://${this.props.address}:3721/users`)
+        .set('Accept', 'application/json')
+        .set('Authorization', 'JWT ' + this.props.user.token)
+        .end((err, res) => {
+
+          debug('component did mount, request users endpoint', err || !res.ok || res.body)
+          if (err) {
+            this.setState(Object.assign({}, this.state, { err, data: null }))
+          }
+          else if (!res.ok) {
+            this.setState(Object.assign({}, this.state, { err: new Error('response not ok'), data: null }))
+          }
+          else { 
+            this.setState(Object.assign({}, this.state, { err: null, data: res.body }))
+          }
+        })
     }
   }
 
   componentDidMount() {
-
-    request
-      .get(`http://${this.props.address}:3721/login`)
-      .set('Accept', 'application/json')
-      .end((err, res) => {
-        console.log(err || !res.ok || res.body)
-        if (err) {
-          this.setState(Object.assign({}, this.state, { err, data: null }))
-        }
-        else if (!res.ok) {
-          this.setState(Object.assign({}, this.state, { err: new Error('response not ok'), data: null }))
-        }
-        else { 
-          this.setState(Object.assign({}, this.state, { err: null, data: res.body }))
-        }
-      })
+    this.refreshUsers()
   }
 
   renderLine(key, value, icon) {
@@ -96,9 +159,33 @@ class User extends React.Component {
     )
   }
 
+  renderUserRow(user) {
+    return (
+      <div style={{height: 48, fontSize: 13, color: 'rgba(0, 0, 0, 0.87)', display: 'flex', alignItems: 'center'}}>
+        <div style={{flex: '0 0 320px', fontFamily:'monospace'}}>{ user ? user.uuid.toUpperCase() : '用户ID' }</div>
+        <div style={{flex: '0 0 140px'}}>{ user ? user.username: '用户名' }</div>
+        <div style={{flex: '0 0 100px'}}>{ user ? (user.type === 'local' ? '本地用户' : '远程用户') : '用户类型' }</div>
+        <div style={{flex: '0 0 100px'}}>{ user ? (user.isAdmin ? '是' : '否') : '是管理员' }</div>
+        <div style={{flex: '0 0 100px'}}>{ user ? (user.isFirstUser ? '是' : '否') : '是第一个用户' }</div>
+      </div>
+    )
+  }
+
+  renderUserList() {
+
+    if (!this.state.data) return null
+
+    return (
+      <div>
+        { this.renderUserRow() }
+        { this.state.data.map(user => this.renderUserRow(user)) }
+      </div> 
+    )
+  }
+
   render() {
 
-    let user = window.store.getState().login.obj
+    let { themeColor, address, fruitmixPort, user } = this.props
 
     return (
       <div style={this.props.style}>
@@ -122,11 +209,56 @@ class User extends React.Component {
           <div style={header2StyleNotFirst}>密码</div>
           <div style={contentStyle}>WISNUC OS的所有客户端、Web浏览器和网络文件服务使用相同的用户名密码组合。</div>
           <div style={contentStyle}>WISNUC OS不会保存任何形式的用户明文密码。</div>
-          <RaisedButton label='修改密码' />
-          <div style={{height: 30}} />
-          <Divider style={{width: 760}}/>
-          <div style={Object.assign({}, header1Style, { color: blueGrey500 })}>所有用户</div>
-          <div style={{height: 48}} />
+          <RaisedButton style={{marginBottom: 30}} label='修改密码' />
+
+          { this.props.user.isAdmin &&
+          <div>
+            <Divider style={{width: 760}}/>
+            <div style={Object.assign({}, header1Style, { color: blueGrey500 })}>用户管理</div>
+            { this.renderUserList() }
+            <div style={{height: 48}} />
+            <RaisedButton style={{marginBottom: 30}} label='新建用户' onTouchTap={() => {
+              this.setState(Object.assign({}, this.state, { newUserDialog: {} })) 
+            }}/>
+            <div>
+              <Dialog contentStyle={{width: 400, padding:0}} 
+                title='新建用户'
+                modal={false} 
+                open={!!this.state.newUserDialog} 
+                onRequestClose={this.newUserDialogCancel} 
+              >
+                <TextField hintText='用户名' floatingLabelText='用户名' fullWidth={true} 
+                  disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
+                  onChange={e => this.setState(Object.assign({}, this.state, {
+                    newUserDialog: Object.assign({}, this.state.newUserDialog, { username: e.target.value })
+                  }))}
+                />
+                <TextField hintText='输入密码' floatingLabelText='输入密码' fullWidth={true} 
+                  disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
+                  onChange={e => this.setState(Object.assign({}, this.state, {
+                    newUserDialog: Object.assign({}, this.state.newUserDialog, { password: e.target.value })
+                  }))}
+                />
+                <TextField hintText='再次输入密码' floatingLabelText='再次输入密码' fullWidth={true} 
+                  disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
+                  onChange={e => this.setState(Object.assign({}, this.state, {
+                    newUserDialog: Object.assign({}, this.state.newUserDialog, { passwordAgain: e.target.value })
+                  }))}
+                />
+                <div style={{height:30}} />
+                <div style={{width: '100%', display: 'flex', justifyContent: 'flex-end'}}>
+                  <FlatButton label='取消' labelStyle={{fontSize: 16, fontSize: 'bold'}} primary={true} 
+                    disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
+                    onTouchTap={() => this.newUserDialogCancel()} />
+                  <FlatButton label='确定' labelStyle={{fontSize: 16, fontSize: 'bold'}} primary={true} 
+                    disabled={this.state.newUserDialog && this.state.newUserDialog.busy || !(this.validateUsername() && this.validatePassword() && this.validatePasswordAgain())}
+                    onTouchTap={() => this.newUserDialogOK()} />
+                </div>
+              </Dialog>
+            </div>
+          </div>
+          }
+
         </div>
       </div>
     )
@@ -446,7 +578,13 @@ class ControlApp extends React.Component {
           <div id='layout-middle-container-lower' style={{width:'100%', height:'calc(100% - 56px)', backgroundColor: '#FAFAFA', overflowY: 'auto'}}>
             { C(this.settings)
               (settings => settings.find(item => item[2] === this.state.select))
-              (found => found && found[3] ? React.createElement(found[3], { themeColor: blueGrey500, address: this.address }) : <PlaceHolder />)
+              (found => found && found[3] ? 
+                React.createElement(found[3], { 
+                  themeColor: blueGrey500, 
+                  address: this.address,
+                  fruitmixPort: 3721,
+                  user: window.store.getState().login.obj 
+                }) : <PlaceHolder />)
               () }
           </div> 
         </div>
