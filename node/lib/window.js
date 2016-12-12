@@ -32,13 +32,14 @@ const initMainWindow = () => {
 	})
 
   // debug mode
-	// _mainWindow.webContents.openDevTools()
+  // _mainWindow.webContents.openDevTools()
   _mainWindow.maximize()
 
   if (global.BABEL_IS_RUNNING)
 	  _mainWindow.loadURL('file://' + process.cwd() + '/build/index.html')
   else
-	  _mainWindow.loadURL('file://' + process.cwd() + '/resources/app/build/index.html')
+    _mainWindow.loadURL('file://' + path.join(global.entryFileDir, 'index.html'))	
+	  // _mainWindow.loadURL('file://' + process.cwd() + '/resources/app/build/index.html')
 
   console.log('[window] mainWindow initialized')
 }

@@ -28,6 +28,8 @@ import { initTestWindow } from './lib/testHook'
 import mdns from './lib/mdns'
 import misc from './lib/misc'
 
+global.entryFileDir = __dirname
+
 const debug = Debug('main')
 
 var mocha = false
