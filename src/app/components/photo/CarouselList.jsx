@@ -6,18 +6,20 @@ import React, { Component, PropTypes } from 'react';
 
 const CarouselItem = ({ style, path }) => (
   <div style={ style }>
-    <img src={ path } style={{ objectFit: 'contain' }} />
+    <div style={{ borderRadius: 4, width: 90, height: 90, overflow: 'hidden' }}>
+      <img src={ path } style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
+    </div>
   </div>
 );
 
 export default class CarouselList extends Component {
   constructor() {
     super();
-    
+
     this.style = {
       carouselItem: {
-        width: 90,
-        height: 90,
+        flexShrink: 0,
+        flexGrow: 0,
         marginRight: 10
       }
     };
