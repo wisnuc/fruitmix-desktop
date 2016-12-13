@@ -39,7 +39,7 @@ function getStyles (props) {
       right: -260,
       height: '100%',
       width: 260,
-      transition: 'right .2s linear'
+      transition: 'right .5s cubic-bezier(0, 1, .5, 1)'
     },
     leftArrow: {
       position: 'absolute',

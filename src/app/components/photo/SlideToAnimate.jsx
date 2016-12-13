@@ -39,7 +39,7 @@ export default class SlideToAnimate extends Component {
         top: 0,
         height: '100%',
         width: '100%',
-        transition: 'transform .35s linear'
+        transition: 'transform .2s cubic-bezier(0, 1, .5, 1)'
       }
     };
 
