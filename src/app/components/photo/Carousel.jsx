@@ -24,6 +24,7 @@ export default class Carousel extends Component {
           <SlideToAnimate
             style={{ marginLeft: __MARGIN_DISTANCE__, marginRight: __MARGIN_DISTANCE__, height: 90 }}
             translateCount={ items.length }
+            translateGrep={ 10 }
             translateDistance={ 90 }>
             <CarouselList
               items={ items }

@@ -19,17 +19,19 @@ export default class SlideToAnimate extends Component {
         overflow: 'hidden'
       },
       dire: {
+        borderRadius: '100%',
         background: '#eee',
-        height: 20,
+        height: 35,
         position: 'absolute',
-        width: 20,
-        top: 35
+        width: 35,
+        top: '50%',
+        transform: 'translateY(-50%)'
       },
       leftDire: {
-        left: -35
+        left: -50
       },
       rightDire: {
-        right: -35
+        right: -50
       },
       translate: {
         position: 'absolute',
@@ -45,31 +47,37 @@ export default class SlideToAnimate extends Component {
     this.rightDireStyle = Object.assign({}, this.style.dire, this.style.rightDire);
 
     this.state = {
-      activeIndex: 0
+      currentIndex: props.activeIndex
     };
 
     this.translateLeft = () => {
-      if (this.state.activeIndex - 1 < 0)
+      if (this.state.currentIndex - 1 < 0)
         return;
 
-      this.setState({ activeIndex: this.state.activeIndex - 1 });
+      const nextIndex = this.state.currentIndex - 1;
+
+      this.props.translateLeftCallback(nextIndex);
+      this.setState({ currentIndex: nextIndex });
     };
 
     this.translateRight = () => {
-      if (this.state.activeIndex + 1 >= this.translateCount)
+      if (this.state.currentIndex + 1 >= this.translateCount)
         return;
 
-      this.setState({ activeIndex: this.state.activeIndex + 1 });
+      const prevIndex = this.state.currentIndex + 1;
+
+      this.props.translateRightCallback(prevIndex);
+      this.setState({ currentIndex: prevIndex });
     };
 
     this.transformTranslateStyle = () => {
-      const { translateDistance } = this.props;
-      let activeIndexDistance = -translateDistance * this.state.activeIndex;
+      const { translateDistance, translateGrep } = this.props;
+      let currentIndexDistance = -translateDistance * this.state.currentIndex;
 
-      this.state.activeIndex && (activeIndexDistance -= 10);
-      
+      this.state.currentIndex && (currentIndexDistance -= translateGrep * this.state.currentIndex);
+
       return {
-        transform: `translate3d(${activeIndexDistance}px, 0, 0)`
+        transform: `translate3d(${currentIndexDistance}px, 0, 0)`
       };
     };
 
@@ -105,8 +113,19 @@ export default class SlideToAnimate extends Component {
 }
 
 SlideToAnimate.propTypes = {
-  style: PropTypes.object,
+  style: PropTypes.object.isRequired,
   translateDistance: PropTypes.number.isRequired,
+  translateGrep: PropTypes.number,
   translateCount: PropTypes.number.isRequired,
-  children: PropTypes.element.isRequired
+  children: PropTypes.element.isRequired,
+  translateLeftCallback: PropTypes.func,
+  translateRightCallback: PropTypes.func,
+  activeIndex: PropTypes.number
+};
+
+SlideToAnimate.defaultProps = {
+  activeIndex: 0,
+  translateGrep: 0,
+  translateLeftCallback: () => {},
+  translateRightCallback: () => {}
 };

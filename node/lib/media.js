@@ -83,7 +83,7 @@ ipcMain.on('createMediaShare',(event, medias, users, album) => {
 		}else {
 			getMainWindow().webContents.send('message','创建相册失败')
 		}
-		
+
 	})
 })
 
@@ -98,10 +98,10 @@ ipcMain.on('getMediaImage',(event,hash)=>{
 		}else {
 			imageObj.exifOrientation = null
 		}
-		mainWindow.webContents.send('donwloadMediaSuccess',imageObj)
+		getMainWindow().webContents.send('donwloadMediaSuccess',imageObj)
 	}).catch(e => {
-		c('download media image' + failed + ' success')
-		c(e)
+		//c('download media image' + failed + ' success')
+		//console.log(e);
 	})
 })
 
@@ -118,7 +118,7 @@ const scheduleThumb = () => {
 	while (thumbRunningQueue.length < thumbConcurrency && thumbReadyQueue.length) {
 		thumbReadyQueue[0].setState('running')
 	}
-}	
+}
 
 //create task send by Browser
 const createTask = (tasks, mediaShareDigest) => {
@@ -280,8 +280,3 @@ class thumbGetTask {
 		this.root.taskFinish()
 	}
 }
-
-
-
-
-

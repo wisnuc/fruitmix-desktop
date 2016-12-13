@@ -33,7 +33,7 @@ export default class PhotoListByDate extends Component {
   }
 
   render() {
-    let { style, date, photos } = this.props;
+    let { style, date, photos, lookPhotoDetail } = this.props;
     let icon;
 
     return (
@@ -65,6 +65,7 @@ export default class PhotoListByDate extends Component {
                  <PhotoItem
                    ref={ 'photoItem' + index }
                    style={{ width: 150, height: 158, marginRight: 6, marginBottom: 6 }}
+                   lookPhotoDetail={ lookPhotoDetail }
                    digest={ photo.digest }
                    path={ photo.path }
                    key={ photo.digest } />
@@ -88,5 +89,6 @@ PhotoListByDate.propTypes = {
   date: PropTypes.string.isRequired,
   photos: PropTypes.array.isRequired,
   addListToSelection: PropTypes.func.isRequired,
-  removeListToSelection: PropTypes.func.isRequired
+  removeListToSelection: PropTypes.func.isRequired,
+  lookPhotoDetail: PropTypes.func.isRequired
 };

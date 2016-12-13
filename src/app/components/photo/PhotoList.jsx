@@ -5,6 +5,7 @@
 import React, { Component, PropTypes } from 'react';
 import PhotoListByDate from './PhotoListByDate';
 import Carousel from './Carousel';
+import PhotoDetail from './PhotoDetail';
 
 import { formatDate } from '../../utils/datetime';
 
@@ -23,11 +24,23 @@ export default class PhotoList extends Component {
         height: 180,
         position: 'fixed',
         width: 'calc(100% - 50px)'
+      },
+      photoDetail: {
+        position: 'fixed',
+        left: 0,
+        top: 0,
+        width: 600,
+        height: 420,
+        left: '50%',
+        top: '50%',
+        zIndex: 9999,
+        transform: 'translate(-50%, -50%)'
       }
     };
 
     this.state = {
-      carouselItems: []
+      carouselItems: [],
+      activeIndex: false
     };
 
     this.addListToSelection = (path) => {
@@ -54,16 +67,22 @@ export default class PhotoList extends Component {
         }
       });
     };
+    this.lookPhotoDetail = (activeIndex) => this.setState({ activeIndex });
 
     this.renderCarousel = () => {
-      if (this.state.carouselItems.length) {
-        return (
-          <Carousel
-            style={ this.style.carousel }
-            items={ this.state.carouselItems } />
-        );
-      }
-    }
+      return this.state.carouselItems.length
+        ? (<Carousel style={ this.style.carousel } items={ this.state.carouselItems } />)
+        : void 0;
+    };
+    this.renderPhotoDetail = (photos) => {
+      return photos.length && this.state.activeIndex !== false
+        ? (<PhotoDetail closeMaskLayer={ () => this.setState({ activeIndex: false }) } style={ this.style.photoDetail } items={ photos } activeIndex={ this.state.activeIndex } />)
+        : void 0;
+    };
+  }
+
+  getChildContext() {
+    return { photos: this.photos };
   }
 
   findDatesByExifDateTime(dataSource) {
@@ -83,7 +102,7 @@ export default class PhotoList extends Component {
   render() {
     let store = window.store;
     let dispatch = store.dispatch;
-    let photos = store.getState().media.data.slice(0, 200);
+    let photos = this.photos = store.getState().media.data.slice(0, 200);
     let photoDates = this.findDatesByExifDateTime(photos);
 
     return (
@@ -92,14 +111,22 @@ export default class PhotoList extends Component {
           <PhotoListByDate
             style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start', marginBottom: 15 }}
             date={ date }
+            allPhotos={ photos }
             photos={ this.findPhotosByDate(photos, date) }
             addListToSelection={ this.addListToSelection }
+            lookPhotoDetail={ this.lookPhotoDetail }
             removeListToSelection={ this.removeListToSelection }
             key={ date }/>
           ))
         }
         { this.renderCarousel() }
+
+        { this.renderPhotoDetail(photos) }
       </div>
     );
   }
 }
+
+PhotoList.childContextTypes = {
+  photos: PropTypes.array.isRequired
+};

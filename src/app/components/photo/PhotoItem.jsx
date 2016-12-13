@@ -35,17 +35,24 @@ function getStyles () {
 }
 
 export default class PhotoItem extends Component {
+  constructor(props, context) {
+    super(props, context);
+
+    this.findPhotoIndexByDigest = () =>
+      this.context.photos.findIndex(photo => photo.digest === props.digest);
+  }
+
   shouldComponentUpdate(nextProps) {
     return nextProps.path !== this.props.path;
   }
 
   render() {
-    let { path, style } = this.props;
+    let { path, style, lookPhotoDetail, index } = this.props;
     let { root, thumb, loadingIcon } = getStyles();
     let component;
 
     if (path) {
-      component = (<img src={ path } style={ thumb } />);
+      component = (<img src={ path } style={ thumb } onClick={ () => lookPhotoDetail(this.findPhotoIndexByDigest()) } />);
     } else {
       component = (<img src={ loading } style={ loadingIcon } />);
     }
@@ -67,5 +74,14 @@ export default class PhotoItem extends Component {
 }
 
 PhotoItem.propTypes = {
-  digest: PropTypes.string.isRequired
+  digest: PropTypes.string.isRequired,
+  lookPhotoDetail: PropTypes.func
+};
+
+PhotoItem.contextTypes = {
+  photos: PropTypes.Array
+};
+
+PhotoItem.defaultProps = {
+  lookPhotoDetail: () => {}
 };

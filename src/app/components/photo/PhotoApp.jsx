@@ -11,9 +11,8 @@ import { blue500, red500, greenA200 } from 'material-ui/styles/colors'
 import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion';
 
 import React, { Component } from 'react';
-import PhotoList from './PhotoList';
 import PhotoToolBar from './PhotoToolBar';
-import Carousel from './Carousel';
+import PhotoList from './PhotoList';
 
 const LEFTNAV_WIDTH = 210;
 
@@ -90,10 +89,12 @@ class PhotoApp extends Component {
   render() {
     return (
       <div>
+        {/* 工具条 */}
         <PhotoToolBar
           action={ this.toggleLeftNav }
           state={ ['照片'] }/>
 
+        {/* 照片列表 */}
         <PhotoList style={ this.style.photoList } />
       </div>
     );
