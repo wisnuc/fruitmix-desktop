@@ -10,33 +10,45 @@ import SelectIconButton from './SelectIconButton';
 import { formatDate } from '../../utils/datetime';
 
 export default class PhotoListByDate extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
     this.state = {
       action: 'on'
     };
-  }
 
-  shouldComponentUpdate() {
-    return false;
+    this.selectSingleItem = (action, itemIndex) => {
+      let photoItem = this.refs['photoItem' + itemIndex];
+      let selectDate = this.refs['selectDate'];
+      let isOn = action === 'on';
+
+      props[(isOn ? 'add' : 'remove') + 'ListToSelection'](photoItem.props.path);
+
+      setTimeout(() =>
+        isOn
+          ? (this.selectionRefs.every(refName => this.refs[refName].state.action === 'on') && selectDate.onSelected(true))
+          : (this.selectionRefs.every(refName => this.refs[refName].state.action === 'off') && selectDate.offSelected(true))
+      , 0);
+    }
   }
 
   render() {
-    let {
-      style, date, photos,
-      addListToSelection, removeListToSelection
-    } = this.props;
+    let { style, date, photos } = this.props;
     let icon;
 
     return (
       <div>
         {/* 日期 */}
-        <PhotoSelectDate
-          style={{ marginBottom: 15 }}
-          primaryText={ date }
-          selectedDateBehavior={ () => this.selectionRefs.forEach(refName => this.refs[refName].onSelected()) }
-          offSelectedDateBehavior={ () => this.selectionRefs.forEach(refName => this.refs[refName].offSelected()) } />
+        <div style={{ marginBottom: 15 }}>
+          <SelectIconButton
+            ref="selectDate"
+            style={{ display: 'inline-block', width: 18, height: 18, marginRight: 8 }}
+            selectBehavior={ action => this.selectionRefs.forEach(refName => this.refs[refName][action + 'Selected']()) } />
+
+          <PhotoSelectDate
+            style={{ display: 'inline-block' }}
+            primaryText={ date } />
+        </div>
 
          {/* 照片 */}
          <div style={ style }>
@@ -45,9 +57,9 @@ export default class PhotoListByDate extends Component {
                  { this.state.action === 'pending'
                      ? (null)
                      : (<SelectIconButton
-                         ref={ 'selectAction' + index }
+                         ref={ 'selectSingleItem' + index }
                          style={{ position: 'absolute', left: 5, top: 5, width: 18, height: 18 }}
-                         selectBehavior={ (action) => { let photoItem = this.refs['photoItem' + index]; (action === 'on' ? addListToSelection(photoItem.props.path) : removeListToSelection(photoItem.props.path)) } } />
+                         selectBehavior={ action => this.selectSingleItem(action, index) } />
                         )
                  }
                  <PhotoItem
@@ -67,7 +79,7 @@ export default class PhotoListByDate extends Component {
   componentDidMount() {
     this.selectionRefs = Object
       .keys(this.refs)
-      .filter(refName => refName.indexOf('selectAction') >= 0);
+      .filter(refName => refName.indexOf('selectSingleItem') >= 0);
   }
 }
 

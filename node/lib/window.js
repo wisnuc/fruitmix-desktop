@@ -1,5 +1,8 @@
+import Debug from 'debug'
 import path from 'path'
-import { BrowserWindow } from 'electron'
+import { ipcMain, BrowserWindow } from 'electron'
+
+const debug = Debug('lib:window')
 
 let _mainWindow = null
 
@@ -13,8 +16,8 @@ const initMainWindow = () => {
 		height: 768,
 		resizable: true,
 		width: 1366,
-		minWidth:200,
-		minHeight:200,
+		minWidth: 640,
+		minHeight: 480,
 		title:'WISNUC',
 		icon: path.join(__dirname,'180-180.png'), // FIXME
 
@@ -29,15 +32,37 @@ const initMainWindow = () => {
 	})
 
   // debug mode
-	// _mainWindow.webContents.openDevTools()
+  // _mainWindow.webContents.openDevTools()
   _mainWindow.maximize()
 
   if (global.BABEL_IS_RUNNING)
 	  _mainWindow.loadURL('file://' + process.cwd() + '/build/index.html')
   else
-	  _mainWindow.loadURL('file://' + process.cwd() + '/resources/app/build/index.html')
+    _mainWindow.loadURL('file://' + path.join(global.entryFileDir, 'index.html'))	
+	  // _mainWindow.loadURL('file://' + process.cwd() + '/resources/app/build/index.html')
 
   console.log('[window] mainWindow initialized')
 }
 
+const openNewWindow = (url) => {
+
+  debug('openNewWindow', url)
+
+  let newWindow = new BrowserWindow({
+    frame: true,
+    height: 768,
+    width: 1366,
+    resizable: true,
+    title: 'Appifi', 
+  })
+
+  newWindow.on('page-title-updated', event => event.preventDefault())
+  newWindow.maximize()
+
+  newWindow.loadURL(url)
+}
+
+ipcMain.on('newWebWindow', (event, url) => openNewWindow(url))
+
 export { initMainWindow, getMainWindow }
+

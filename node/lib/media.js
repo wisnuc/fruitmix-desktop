@@ -15,7 +15,7 @@ import { getMainWindow } from './window'
 const debug = Debug('lib:media')
 const c = debug
 
-var mediaPath = path.join(process.cwd(),'media')
+// var mediaPath = path.join(process.cwd(),'media')
 var thumbConcurrency = 1
 
 var media = []

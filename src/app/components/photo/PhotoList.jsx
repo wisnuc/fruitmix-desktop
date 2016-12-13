@@ -31,21 +31,27 @@ export default class PhotoList extends Component {
     };
 
     this.addListToSelection = (path) => {
-      this.setState({
+      const hasPath = this.state.carouselItems.findIndex(item => item === path) >= 0;
+
+      !hasPath && this.setState(prevState => ({
         carouselItems: [
-          ...this.state.carouselItems,
+          ...prevState.carouselItems,
           path
         ]
-      })
+      }));
     };
     this.removeListToSelection = (path) => {
-      const index = this.findItemByDigest(this.state.carouselItems, path);
+      const hasPath = this.state.carouselItems.findIndex(item => item === path) >= 0;
 
-      this.setState({
-        carouselItems: [
-          ...this.state.carouselItems.slice(0, index),
-          ...this.state.carouselItems.slice(index + 1)
-        ]
+      hasPath && this.setState(prevState => {
+        let index = this.findPath(prevState.carouselItems, path);
+
+        return {
+          carouselItems: [
+            ...prevState.carouselItems.slice(0, index),
+            ...prevState.carouselItems.slice(index + 1)
+          ]
+        }
       });
     };
 
@@ -63,7 +69,7 @@ export default class PhotoList extends Component {
   findDatesByExifDateTime(dataSource) {
     return dataSource
       .map(dataItem => formatDate(dataItem.exifDateTime))
-      .filter((date, index, dates) => !index || dates.indexOf(date) === index && date)
+      .filter((date, index, dates) => !index || dates.indexOf(date) === index)
   }
 
   findPath(items, path) {

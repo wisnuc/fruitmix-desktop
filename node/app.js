@@ -3,8 +3,18 @@ import fs from'fs'
 
 import Debug from 'debug'
 import { app, ipcMain, Menu, Tray } from 'electron'
-import rimraf from'rimraf'
-import mkdirp from'mkdirp'
+// import rimraf from'rimraf'
+// import mkdirp from'mkdirp'
+
+// synchronized init, preparing paths
+// rimraf.sync(path.join(__dirname, 'tmp'))
+// mkdirp.sync(path.join(__dirname, 'tmp'))
+// mkdirp.sync(path.join(__dirname, 'media'))
+// mkdirp.sync(path.join(__dirname, 'download'))
+
+// global.tmpPath = path.join(__dirname, 'tmp')
+// global.mediaPath = path.join(__dirname, 'media')
+// global.downloadPath = path.join(path.join(__dirname, 'download'))
 
 import store from './serve/store/store'
 import configObserver from './lib/config'
@@ -28,6 +38,8 @@ import { initTestWindow } from './lib/testHook'
 import mdns from './lib/mdns'
 import misc from './lib/misc'
 
+global.entryFileDir = __dirname
+
 const debug = Debug('main')
 
 var mocha = false
@@ -42,15 +54,9 @@ mdns().on('stationUpdate', device => {
   })
 })
 
-// synchronized init, preparing paths
-rimraf.sync(path.join(cwd, 'tmp'))
-mkdirp.sync(path.join(cwd, 'tmp'))
-mkdirp.sync(path.join(cwd, 'media'))
-mkdirp.sync(path.join(cwd, 'download'))
-
 // read config file
 try {
-  let raw = fs.readFileSync(path.join(cwd, 'server'))
+  let raw = fs.readFileSync(path.join(__dirname, 'server'))
   let config = JSON.parse(raw) 
   store.dispatch({
     type: 'CONFIG_INIT',
