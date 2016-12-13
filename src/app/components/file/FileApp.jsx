@@ -1264,20 +1264,37 @@ class FileApp extends React.Component {
 		let _this = this
     if (!this.state.path) return null
     if (this.state.navContext=='SHARED_WITH_ME' || this.state.navContext=='SHARED_WITH_OTHERS') {
-    	list.push(
-    		<span onTouchTap={()=> {
-    			_this.state.navRoot = null
-    			command('FileApp','FILE_NAV',{context:_this.state.navContext},(err,data) => {
-    				if (err) {
-    					return
-    				}
-    				this.navUpdate(_this.state.navContext, data)
-    			})
-    		}}>
-    		{this.state.navContext=='SHARED_WITH_ME'?'分享给我的文件':'我分享的文件'}
-    		</span>
-    		)
-    	list.push(<NavigationChevronRight />)
+    	if (this.state.path.length == 0) {
+    		list.push(
+	    		<span onTouchTap={()=> {
+	    			_this.state.navRoot = null
+	    			command('FileApp','FILE_NAV',{context:_this.state.navContext},(err,data) => {
+	    				if (err) {
+	    					return
+	    				}
+	    				this.navUpdate(_this.state.navContext, data)
+	    			})
+	    		}}>
+	    		{this.state.navContext=='SHARED_WITH_ME'?'分享给我的文件':'我分享的文件'}
+	    		</span>
+	    		)
+    	}else {
+    		list.push(
+	    		<span onTouchTap={()=> {
+	    			_this.state.navRoot = null
+	    			command('FileApp','FILE_NAV',{context:_this.state.navContext},(err,data) => {
+	    				if (err) {
+	    					return
+	    				}
+	    				this.navUpdate(_this.state.navContext, data)
+	    			})
+	    		}}>
+	    		{this.state.navContext=='SHARED_WITH_ME'?'分享给我的文件':'我分享的文件'}
+	    		</span>
+	    		)
+	    	list.push(<NavigationChevronRight />)
+    	}
+	    	
     }
     this.state.path.forEach((node, index, arr) => {
       list.push(
