@@ -5,7 +5,7 @@ const debug = Debug('view:control:device')
 import React from 'react'
 
 import { Paper, Divider, Dialog, Menu, MenuItem, IconButton, FlatButton, RaisedButton, TextField } from 'material-ui'
-import { blue500, blueGrey500 } from 'material-ui/styles/colors'
+import { blue500, blueGrey500, deepOrange500 } from 'material-ui/styles/colors'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import SocialShare from 'material-ui/svg-icons/social/share'
 import SocialPeople from 'material-ui/svg-icons/social/people'
@@ -18,9 +18,6 @@ import DeviceAccessTime from 'material-ui/svg-icons/device/access-time'
 import DeviceStorage from 'material-ui/svg-icons/device/storage'
 import HardwareToys from 'material-ui/svg-icons/hardware/toys'
 import EditorModeEdit from 'material-ui/svg-icons/editor/mode-edit'
-import HardwareKeyboardArrowUp from 'material-ui/svg-icons/hardware/keyboard-arrow-up'
-import HardwareKeyboardArrowDown from 'material-ui/svg-icons/hardware/keyboard-arrow-down'
-
 
 const LEFTNAV_WIDTH=210
 
@@ -28,34 +25,17 @@ import request from 'superagent'
 
 import TimeDate from './TimeDate'
 import Ethernet from './Ethernet'
+import Device from './Device'
+import Fan from './Fan'
+import PowerOff from './PowerOff'
+import ChangePasswordButton from './user/ChangePasswordButton'
+
 
 import { header1Style, header2Style, header2StyleNotFirst, contentStyle } from './styles'
 
 const C = x => f => f ? C(f(x)) : x
 
 const PlaceHolder = () => <div />
-
-class PowerOff extends React.Component {
-
-  constructor(props) {
-    super(props)
-  }
-
-  render() {
-    return (
-      <div style={this.props.style}>
-        <div style={{paddingLeft: 72}}>
-          <div style={Object.assign({}, header1Style, { color: this.props.themeColor || 'grey'})}>重启和关机</div>
-          <RaisedButton label='关机'/>
-          <RaisedButton label='重启' style={{marginLeft: 16}} />
-          <div style={Object.assign({}, header1Style, { color: this.props.themeColor || 'grey'})}>进入维护模式</div>
-          <div style={contentStyle}>重启后进入维护模式，可以在维护模式下执行磁盘操作或系统维护任务。</div>
-          <RaisedButton label='重启进入维护模式'/>
-        </div>
-      </div>
-    )
-  }
-}
 
 class User extends React.Component {
 
@@ -65,16 +45,53 @@ class User extends React.Component {
     this.state = {
       err: null,
       data: null,
-      newUserDialog: null
+      usernameDialog: null,
+      passwordDialog: null,
+      newUserDialog: null,
+    }
+
+    this.validateNewUsername = () => {
+
+      let ret = this.state.usernameDialog &&
+        this.state.usernameDialog.username &&
+        this.state.usernameDialog.username.length
+
+      debug('validate new username', ret)
+      return ret
+    }
+
+    this.usernameDialogCancel = () =>
+      this.setState(Object.assign({}, this.state, { usernameDialog: null }))
+
+    this.usernameDialogOK = () => {
+      this.setState(Object.assign({}, this.state, {
+        usernameDialog: Object.assign({}, this.state.usernameDialog, { busy: true })
+      }))
+
+      request
+        .patch(`http://${this.props.address}:${this.props.fruitmixPort}/users/${this.props.user.uuid}`)
+        .set('Accept', 'application/json')
+        .set('Authorization', 'JWT ' + this.props.user.token)
+        .send({ username: this.state.usernameDialog.username })
+        .end((err, res) => {
+
+          debug('request patch username', res.body && res.body)
+
+          if (err || !res.ok) return debug('request patch username', err || !res.ok)
+          debug('request patch username', res.body)
+        })
     }
 
     this.validateUsername = () => {
 
-      debug('validate username enter', this.state.newUserDialog, this.state.data)
-      let ret = this.state.newUserDialog && this.state.newUserDialog.username && this.state.newUserDialog.username.length &&
+      let ret = this.state.newUserDialog && 
+        this.state.newUserDialog.username && 
+        this.state.newUserDialog.username.length &&
         !this.state.data.find(user => user.username === this.state.newUserDialog.username)
   
-      debug('validate username', ret, this.state.newUserDialog, this.state.data)
+      // throw new Error('unexpected execution')
+
+      debug('validate username', ret, this.state.newUserDialog)
       return ret
     }
 
@@ -89,7 +106,8 @@ class User extends React.Component {
 
       debug('validate password again, entering')
 
-      let ret = this.state.newUserDialog && this.state.newUserDialog.password &&
+      let ret = this.state.newUserDialog && 
+        this.state.newUserDialog.password &&
         this.state.newUserDialog.password.length &&
         this.state.newUserDialog.password === this.state.newUserDialog.passwordAgain
 
@@ -204,12 +222,51 @@ class User extends React.Component {
           <div style={contentStyle}>
             用户名可以使用中文字符，包括可显示的标点符号。Windows共享文件访问也支持中文字符的用户名，但不是所有客户端软件都支持中文名，所以，如果您使用的网络文件系统服务客户端软件（例如Android或者iOS上的samba客户端）不支持中文用户名，您只能使用英文大小写字母的用户名。
           </div>
-          <RaisedButton label='修改用户名' />
+          <RaisedButton label='修改用户名' onTouchTap={() => 
+            this.setState(Object.assign({}, this.state, { usernameDialog: {} }))} />
+          <Dialog 
+            titleStyle={{fontSize: 20, color: 'rgba(0,0,0,0.87)'}}
+            contentStyle={{width: 336}}
+            title='修改用户名'
+            modal={false}
+            open={!!this.state.usernameDialog}
+            onRequestClose={this.usernameDialogCancel}
+          >
+            <TextField hintText='新用户名' floatingLabelText='新用户名' fullWidth={true}
+              disabled={this.state.usernameDialog && this.state.usernameDialog.busy}
+              onChange={e => {
+                this.setState(Object.assign({}, this.state, {
+                  usernameDialog: Object.assign({}, this.state.usernameDialog, {
+                    username: e.target.value
+                  })
+                }))
+              }}
+            />
+            <div style={{width: '100%', marginTop: 56, display: 'flex', justifyContent: 'flex-end'}}>
+              <FlatButton label='取消' labelStyle={{fontSize: 16, fontSize: 'bold'}} primary={true} 
+                disabled={this.state.usernameDialog && this.state.usernameDialog.busy}
+                onTouchTap={this.usernameDialogCancel} />
+              <FlatButton label='确定' labelStyle={{fontSize: 16, fontSize: 'bold'}} primary={true} 
+                disabled={this.state.usernameDialog && this.state.usernameDialog.busy || 
+                  !this.validateNewUsername()}
+                onTouchTap={this.usernameDialogOK} />
+            </div>
+          </Dialog>
 
           <div style={header2StyleNotFirst}>密码</div>
           <div style={contentStyle}>WISNUC OS的所有客户端、Web浏览器和网络文件服务使用相同的用户名密码组合。</div>
           <div style={contentStyle}>WISNUC OS不会保存任何形式的用户明文密码。</div>
-          <RaisedButton style={{marginBottom: 30}} label='修改密码' />
+
+          <ChangePasswordButton
+            style={{marginBottom:30}}
+            themeColor={this.props.themeColor}
+            accentColor={deepOrange500}
+            address={this.props.address}
+            fruitmixPort={this.props.fruitmixPort}
+            user={this.props.user}
+            onOK={() => console.log('change password OK')}
+            onCancel={() => console.log('change password Cancel')}
+          />
 
           { this.props.user.isAdmin &&
           <div>
@@ -221,7 +278,9 @@ class User extends React.Component {
               this.setState(Object.assign({}, this.state, { newUserDialog: {} })) 
             }}/>
             <div>
-              <Dialog contentStyle={{width: 400, padding:0}} 
+              <Dialog 
+                titleStyle={{fontSize: 20, color: 'rgba(0,0,0,0.87)'}}
+                contentStyle={{width: 400}} 
                 title='新建用户'
                 modal={false} 
                 open={!!this.state.newUserDialog} 
@@ -246,7 +305,7 @@ class User extends React.Component {
                   }))}
                 />
                 <div style={{height:30}} />
-                <div style={{width: '100%', display: 'flex', justifyContent: 'flex-end'}}>
+                <div style={{width: '100%', marginTop: 56, display: 'flex', justifyContent: 'flex-end'}}>
                   <FlatButton label='取消' labelStyle={{fontSize: 16, fontSize: 'bold'}} primary={true} 
                     disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
                     onTouchTap={() => this.newUserDialogCancel()} />
@@ -262,186 +321,6 @@ class User extends React.Component {
         </div>
       </div>
     )
-  }
-}
-
-class Fan extends React.Component {
-  
-  constructor(props) {
-    super(props)
-  }
-
-  render() {
-
-    const titleStyle = {
-      width:240,
-      height:48,
-      fontWeight: 'bold',
-      fontSize: 16,
-      color: 'red',
-      backgroundColor: '#FFF',
-      opacity:1,
-      display:'flex',
-      alignItems: 'center',
-      paddingLeft: 16,
-    }
-
-    const footerStyle = {
-      width:240,
-      height:96,
-      fontSize: 16,
-      opacity:0.54,
-      display:'flex',
-      flexDirection:'column',
-      alignItems: 'center',
-      justifyContent:'center'
-    }
-
-    return (
-      <div style={this.props.style}>
-
-        {/* left and right */}
-        <div style={{paddingLeft: 72, paddingTop:48, display:'flex'}}>
-
-          <Paper style={{padding:0}}>
-            <div style={titleStyle}>马达动力</div>
-            <div style={{height:48}} />
-            <div style={{width:240, height:144, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
-              <FlatButton icon={<HardwareKeyboardArrowUp />} primary={true} />
-              <div style={{fontSize:34, margin:8, 
-                opacity:0.54, display:'flex', justifyContent:'center'}}>{'50%'}</div>
-              <FlatButton icon={<HardwareKeyboardArrowDown />} primary={true} />
-            </div>
-            <div style={footerStyle}>
-              <div>点击上下箭头</div>
-              <div>调节马达动力</div>
-            </div>
-          </Paper>
-
-          <Paper style={{padding:0, marginLeft:24}}>
-            <div style={titleStyle}>风扇转速</div>
-            <div style={{height:48}} />
-            <div style={{width:240, height:144, fontSize:56, opacity:0.87,
-              display:'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'green' }}>{'1234'}</div>
-            <div style={footerStyle}>unit: RPM</div>
-          </Paper>
-        </div>
-      </div>
-    )
-  }
-}
-
-class Device extends React.Component {
-
-  constructor(props) {
-    super(props)
-    this.state = {
-      err: null,
-      data: null
-    }
-  }
-
-  componentDidMount() {
-
-    request
-      .get(`http://${this.props.address}:3000/system/device`)
-      .set('Accept', 'application/json')
-      .end((err, res) => {
-
-        debug('request', err || !res.ok || res.body)
-
-        if (err) {
-          this.setState(Object.assign({}, this.state, { err, data: null }))
-        }
-        else if (!res.ok) {
-          this.setState(Object.assign({}, this.state, { err: new Error('response not ok'), data: null }))
-        }
-        else 
-          this.setState(Object.assign({}, this.state, { err: null, data: res.body }))
-      })
-  }
-
-  renderWS215i(ws215i) {
-    return [
-      <div style={Object.assign({}, header1Style, { color: this.props.themeColor })}>硬件</div>,
-      <div style={header2Style}>闻上家用私有云</div>,
-      <div style={contentStyle}>型号: WS215i</div>, 
-      <div style={contentStyle}>硬件序列号: {ws215i.serial}</div>,
-      <div style={contentStyle}>MAC地址: {ws215i.mac.toUpperCase()}</div>
-    ]
-  }
-
-  renderDmiDecode(dmidecode) {
-    return []
-  }
-
-  renderCpuInfo(cpuInfo) {
-    return [
-      <div style={header2StyleNotFirst}>CPU</div>,
-      <div style={contentStyle}>CPU核心数: {cpuInfo.length}</div>,
-      <div style={contentStyle}>CPU类型: {cpuInfo[0].modelName}</div>,
-      <div style={contentStyle}>Cache: {cpuInfo[0].cacheSize}</div>
-    ]
-  }
-
-  renderMemInfo(memInfo) {
-    return [
-      <div style={header2StyleNotFirst}>内存</div>,
-      <div style={contentStyle}>总内存: {memInfo.memTotal}</div>,
-      <div style={contentStyle}>未使用内存: {memInfo.memFree}</div>,
-      <div style={contentStyle}>可用内存: {memInfo.memAvailable}</div>
-    ]
-  } 
-
-  renderRelease(release, commit) {
-    let rel = [
-      <div style={Object.assign({}, header1Style, { color: this.props.themeColor })}>软件</div>
-    ]
-    
-    if (!release)
-      rel.push(<div style={contentStyle}>未能获得软件版本信息，您可能在使用开发版本软件。</div>)
-    else {
-      rel.push(<div style={contentStyle}>版本: {release.tag_name + (release.prerelease ? ' beta' : '')}</div>)
-      rel.push(<div style={contentStyle}>版本类型: {release.prerelease ? '测试版' : '正式版'}</div>)
-      rel.push(<div style={contentStyle}>发布时间: {new Date(release.published_at).toLocaleDateString('zh-CN')}</div>)
-      rel.push(<div style={contentStyle}>源码版本: {commit ? commit.slice(0,12) : '未知'}</div>)
-    }
-
-    return rel
-  }
-
-  render() {
-
-    let children = []
-
-    if (this.state.data) {
-
-      let { cpuInfo, memInfo, ws215i, dmidecode, release, commit } = this.state.data
-
-      debug('release commit', release, commit)
-
-      if (ws215i)
-        children = children.concat(this.renderWS215i(ws215i))
-      if (dmidecode)
-        children = children.concat(this.renderDmiDecode(dmidecode))
-
-      children = children.concat(this.renderCpuInfo(cpuInfo))
-      children = children.concat(this.renderMemInfo(memInfo))
-
-      if (release)
-        children = children.concat(this.renderRelease(release, commit))
-      
-      children.push(<div style={{height:30}} />)
-    }
-
-    return (
-      <div style={this.props.style}>
-        <div style={{paddingLeft: 72}}>
-          { children }
-        </div>
-      </div>
-    ) 
   }
 }
 
@@ -475,7 +354,7 @@ class Storage extends React.Component {
   render() {
     return (
       <div style={this.props.style}>
-        { this.state.data && JSON.stringify(this.state.data) }
+        { this.state.data && JSON.stringify(this.state.data, null, '  ') }
       </div>
     ) 
   }
@@ -582,6 +461,7 @@ class ControlApp extends React.Component {
                 React.createElement(found[3], { 
                   themeColor: blueGrey500, 
                   address: this.address,
+                  systemPort: 3000,
                   fruitmixPort: 3721,
                   user: window.store.getState().login.obj 
                 }) : <PlaceHolder />)
