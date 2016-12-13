@@ -44,13 +44,13 @@ var findDeviceApi = {
 	getRecord: function() {
 		c(' ');
 		//have device used recently
-		fs.readFile(path.join(process.cwd(),'server'),{encoding: 'utf8'},(err,data)=>{
+		fs.readFile(path.join(tmpPath,'server'),{encoding: 'utf8'},(err,data)=>{
       console.log('device api, getRecord, load config')
 			if (err) {
 				c('没有找到记录');
 				serverRecord = {ip:'',savePassword:false,autoLogin:false,username:null,password:null,customDevice:[],download: downloadPath};
 				let j = JSON.stringify(serverRecord);
-				fs.writeFile(path.join(process.cwd(),'server'),j,(err,data)=>{
+				fs.writeFile(path.join(tmpPath,'server'),j,(err,data)=>{
 
 				});
 				// dispatch(action.setDevice(device))

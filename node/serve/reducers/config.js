@@ -25,8 +25,7 @@ const defaultState = {
   username: null,
   password: null,
   customDevice: [],
-  download: path.join(process.cwd(), 'download')
-}
+  download: global.downloadPath}
 
 module.exports = (state = defaultState, action) => {
 
