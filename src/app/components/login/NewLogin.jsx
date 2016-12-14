@@ -1050,9 +1050,6 @@ class GuideBox extends React.Component {
             <div style={{opacity: this.state.showContent ? 1 : 0, transition:'opacity 150ms'}}>
               <Stepper activeStep={stepIndex} orientation="vertical">
                 <Step>
-                  
-                </Step>
-                <Step>
                   <StepLabel>创建或选择已有的磁盘卷</StepLabel>
                   <StepContent style={{opacity: 0.87}}>
                     <p>WISNUC OS使用Btrfs文件系统，您可以选择一块或多块物理磁盘创建磁盘卷，<span style={{color: 'red'}}>所选磁盘上的数据都会被清除</span>。</p>
