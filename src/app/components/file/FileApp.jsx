@@ -6,12 +6,15 @@
  **/
 
 import Debug from 'debug'
-
 const debug = Debug('app:file')
 
 import React from 'react'
 
-import { connect } from 'react-redux'
+// import css from '../../../assets/css/react-treeview.css'
+// import TreeView from 'react-treeview'
+
+import TreeTable from '../common/TreeTable'
+
 import Action from '../../actions/action'
 import { command } from '../../lib/command'
 //seem to be not word
@@ -44,6 +47,7 @@ import ActionInfo from 'material-ui/svg-icons/action/info'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import NavigationClose from 'material-ui/svg-icons/navigation/close'
 import NavigationCancel from 'material-ui/svg-icons/navigation/cancel'
+import NavigationArrowForward from 'material-ui/svg-icons/navigation/arrow-forward'
 import NavigationChevronRight from 'material-ui/svg-icons/navigation/chevron-right'
 
 import { Divider, Paper, Menu, MenuItem, Dialog,
@@ -697,7 +701,26 @@ class FileApp extends React.Component {
 
       createNewFolder: false,
       deleteConfirm: false,
+      importDialog: null,
     }
+
+    this.dataSource = [
+      {
+        type: 'Employees',
+        collapsed: false,
+        people: [
+          {name: 'Paul Gordon', age: 25, sex: 'male', role: 'coder', collapsed: false},
+          {name: 'Sarah Lee', age: 23, sex: 'female', role: 'jqueryer', collapsed: false},
+        ],
+      },
+      {
+        type: 'CEO',
+        collapsed: false,
+        people: [
+          {name: 'Drew Anderson', age: 35, sex: 'male', role: 'boss', collapsed: false},
+        ],
+      },
+    ]
 
     // FIXME !!!
     this.refresh = () => {
@@ -856,12 +879,15 @@ class FileApp extends React.Component {
           />
           <Divider />
           <MenuItem primaryText='分享给我的文件' leftIcon={<SocialPeople />}
-            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}/>
+            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}
+          />
           <Divider />
           <MenuItem primaryText='上传任务' leftIcon={<FileFileUpload />}
-            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}/>
+            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}
+          />
           <MenuItem primaryText='下载任务' leftIcon={<FileFileDownload />}
-            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}/>
+            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}
+          />
         </Menu>
       </div>
     )
@@ -1427,7 +1453,7 @@ class FileApp extends React.Component {
                     this.setState(state => Object.assign({}, state, { editing: select[0].uuid }))
                   }
                 }}/>
-                <MenuItem primaryText='移动' />
+                <MenuItem primaryText='移动' disabled={true}/>
                 <MenuItem primaryText='分享' />
                 <MenuItem primaryText='下载' onTouchTap={this.download}/>
                 <MenuItem primaryText='删除' onTouchTap={this.showDeleteConfirmDialog} />
@@ -1573,6 +1599,13 @@ class FileApp extends React.Component {
                 		this.navUpdate('DOWNLOAD',{children:[],path:[]})
                 	}}
                 />
+                <Divider />
+                <MenuItem primaryText='导入旧版本文件' leftIcon={<NavigationArrowForward />}
+                  innerDivStyle={{fontSize: 14, fontWeight: 'medium', color: 'rgba(0,0,0,0.87'}}
+                  onTouchTap={() => {
+                    this.setState(Object.assign({}, this.state, { importDialog: {}}))
+                  }}
+                />
               </Menu>
             </div>
 
@@ -1583,7 +1616,7 @@ class FileApp extends React.Component {
 
               width: '100%',
               height: '100%',
-              backgroundColor:'yellow',
+              backgroundColor: '#FAFAFA', //'yellow',
             }}>
               { this.renderListView() }
             </div>
@@ -1668,6 +1701,71 @@ class FileApp extends React.Component {
             this.deleteSelected()
           }}
         />
+
+        <Dialog
+          titleStyle={{fontSize: 20}}
+          title='导入文件夹'
+          open={this.state.importDialog} 
+          modal={true}
+          onRequestClose={() => this.setState(Object.assign({}, this.state, { importDialog: null }))}
+        >
+          <p>选择需要导入的文件夹，点击确定，该文件夹将被移动到当前用户的当前文件夹。</p>
+          <Divider />
+          <TreeTable
+            style={{width: 720, height: 200, overflowY: 'auto'}}
+            data={[
+              {
+                name: 'hello',
+                children: [
+                  {
+                    name: 'biu~',
+                    children: [
+                      {
+                        name: 'bia~ji!'
+                      }
+                    ]
+                  }, 
+                  {}, {}
+                ]
+              },
+              {
+                name: 'world',
+                children: []
+              }
+            ]} 
+
+            showHeader={false}
+            disabled={false}
+            columns={[
+              {
+                headerStyle: { 
+                  width: 200, 
+                  backgroundColor: 'blue' 
+                },
+                name: 'hello'
+              },
+              {
+                headerStyle: { 
+                  width: 200, 
+                  backgroundColor: 'yellow' 
+                },
+                name: 'bar'
+              }
+            ]}
+          />
+          <div style={{marginTop: 24, display: 'flex', alignItems: 'center', justifyContent: 'flex-end'}}>
+            <FlatButton 
+              label='取消' 
+              primary={true}
+              onTouchTap={() => this.setState(Object.assign({}, this.state, { importDialog: null }))}
+            />
+            <FlatButton 
+              label='确认' 
+              primary={true}
+              
+            />
+          </div>
+        </Dialog>
 
       </div>
     </div>

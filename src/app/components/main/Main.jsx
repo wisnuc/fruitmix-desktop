@@ -12,7 +12,7 @@ import {Avatar, Menu, Paper, Snackbar, MenuItem, IconButton, Divider,
   Subheader, List, ListItem, SvgIcon} from 'material-ui';
 
 import SocialNotifications from 'material-ui/svg-icons/social/notifications'
-import {blue500, pink500, yellow500, green500, grey500, blueGrey500, lightBlue500} from 'material-ui/styles/colors'
+import {blue500, pink500, yellow500, green500, grey500, blueGrey500, brown500, lightBlue500} from 'material-ui/styles/colors'
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import NavigationApps from 'material-ui/svg-icons/navigation/apps'
@@ -106,17 +106,19 @@ const SystemDrawer = (props) => {
             leftAvatar={<Avatar icon={<ImagePhoto />} backgroundColor={pink500} />}
             onTouchTap={() => props.onLauncherSelect(PhotoApp)}
           />
-          <ListItem style={{color: '#FFF'}}
-            primaryText='相册'
-            leftAvatar={<Avatar icon={<ImagePhotoAlbum />} backgroundColor={yellow500} />}
+          <ListItem style={{color: 'rgba(255,255,255,0.7)'}}
+            primaryText='相册（暂不可用）'
+            leftAvatar={<Avatar icon={<ImagePhotoAlbum />} backgroundColor={grey500} />}
+            disabled={true}
           />
-          <ListItem style={{color: '#FFF'}}
-            primaryText='分享'
-            leftAvatar={<Avatar icon={<ImagePortrait />} backgroundColor={green500} />}
+          <ListItem style={{color: 'rgba(255,255,255,0.7)'}}
+            primaryText='分享（暂不可用）'
+            leftAvatar={<Avatar icon={<ImagePortrait />} backgroundColor={grey500} />}
+            disabled={true}
           />
           <ListItem style={{color: '#FFF'}}
             primaryText='设置'
-            leftAvatar={<Avatar icon={<ActionSettings />} backgroundColor={grey500} />}
+            leftAvatar={<Avatar icon={<ActionSettings />} backgroundColor={blueGrey500} />}
             onTouchTap={() => props.onLauncherSelect(ControlApp)}
           />
           <ListItem style={{color: '#FFF'}}
@@ -130,7 +132,7 @@ const SystemDrawer = (props) => {
           />
           <ListItem style={{color: '#FFF'}}
             primaryText='退出登录'
-            leftAvatar={<Avatar icon={<ActionExitToApp />} backgroundColor={blueGrey500} />}
+            leftAvatar={<Avatar icon={<ActionExitToApp />} backgroundColor={brown500} />}
             onTouchTap={() => ipcRenderer.send('loginOff')}
           />
           <div style={{height: 8}} />

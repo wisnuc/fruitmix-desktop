@@ -89,4 +89,48 @@ export class DialogConfirm extends React.Component {
   }
 }
 
+export class DialogImportFile extends React.Component {
+
+  constructor(props) {
+    super(props)
+  }
+
+  render() {
+    return (
+      <Dialog
+        titleStyle={{fontSize: 20}}
+        title='导入文件夹'
+        open={this.props.open}
+        model={true}
+        onRequestClose={this.props.onCancel}
+      >
+        <Divider />
+        <TreeTable 
+          data={this.props.data}
+          columns={this.props.columns}
+          showHeader={this.props.showHeader}
+          disabled={this.props.disabled}
+        />
+      </Dialog>
+    )
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
