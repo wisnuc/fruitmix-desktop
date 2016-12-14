@@ -8,7 +8,8 @@
     "start": "electron .",
     "devel": "nodemon --exec electron devel.js",
     "build": "babel node --out-dir build",
-    "mocha": "mocha --compilers js:babel-core/register --recursive --sort"
+    "mocha": "mocha --compilers js:babel-core/register --recursive --sort",
+    "devel2": "electron devel.js"
   },
   "devDependencies": {
     "babel": "^6.5.2",
