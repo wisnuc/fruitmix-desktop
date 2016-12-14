@@ -13,23 +13,62 @@ export default class PhotoListByDate extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      action: 'on'
+    // this.selectSingleItem1 = (action, itemIndex) => {
+    //   let photoItem = this.refs['photoItem' + itemIndex];
+    //   let selectDate = this.refs['selectDate'];
+    //   let isOn = action === 'on';
+    //
+    //   props[(isOn ? 'add' : 'remove') + 'ListToSelection'](photoItem.props.path);
+    //
+    //   setTimeout(() =>
+    //     isOn
+    //       ? (this.selectionRefs.every(refName => this.refs[refName].state.action === 'on') && selectDate.onSelected(true))
+    //       : (this.selectionRefs.every(refName => this.refs[refName].state.action === 'off') && selectDate.offSelected(true))
+    //   , 0);
+    // };
+
+    this.addHoverToAllItem = () => {
+      this.selectionRefs.forEach(refName =>
+        this.refs[refName].addHoverIconButton()
+      );
     };
 
-    this.selectSingleItem = (action, itemIndex) => {
-      let photoItem = this.refs['photoItem' + itemIndex];
-      let selectDate = this.refs['selectDate'];
-      let isOn = action === 'on';
+    this.removeHoverToAllItem = () => {
+      this.detectIsAllOffChecked() && this.selectionRefs.forEach(refName =>
+        this.refs[refName].removeHoverIconButton()
+      );
+    }
 
-      props[(isOn ? 'add' : 'remove') + 'ListToSelection'](photoItem.props.path);
+    this.addCheckedToItem = (itemIndex) => {
+      const photoItem = this.refs['photoItem' + itemIndex];
+
+      this.props.addListToSelection(photoItem.props.path);
+    };
+
+    this.detectIsAllOffChecked = () => {
+      return this.selectionRefs.every(refName => this.refs[refName].state.action !== 'on');
+    };
+
+    this.addAllChecked = () => {
+      const selectDate = this.refs['selectDate'];
 
       setTimeout(() =>
-        isOn
-          ? (this.selectionRefs.every(refName => this.refs[refName].state.action === 'on') && selectDate.onSelected(true))
-          : (this.selectionRefs.every(refName => this.refs[refName].state.action === 'off') && selectDate.offSelected(true))
+        this.selectionRefs.every(refName => this.refs[refName].state.action === 'on')
+          && selectDate.onSelected(true)
       , 0);
     }
+
+    this.removeCheckedToItem = (itemIndex) => {
+      const photoItem = this.refs['photoItem' + itemIndex];
+
+      this.props.removeListToSelection(photoItem.props.path);
+    };
+
+    this.removeAllChecked = () => {
+      const selectDate = this.refs['selectDate'];
+
+      selectDate.offSelected(true);
+    };
   }
 
   render() {
@@ -43,7 +82,9 @@ export default class PhotoListByDate extends Component {
           <SelectIconButton
             ref="selectDate"
             style={{ display: 'inline-block', width: 18, height: 18, marginRight: 8 }}
-            selectBehavior={ action => this.selectionRefs.forEach(refName => this.refs[refName][action + 'Selected']()) } />
+            selectBehavior={ action => this.selectionRefs.forEach((refName, index) => {
+              this.refs[refName][action + 'SelectIconButton'](true);
+              if (action === 'on') { this.addCheckedToItem(index); this.addAllChecked(); } else { this.removeCheckedToItem(index); this.removeAllChecked(); this.removeHoverToAllItem(); } }) } />
 
           <PhotoSelectDate
             style={{ display: 'inline-block' }}
@@ -54,18 +95,13 @@ export default class PhotoListByDate extends Component {
          <div style={ style }>
            { photos.map((photo, index) => (
                <div style={{ position: 'relative' }}>
-                 { this.state.action === 'pending'
-                     ? (null)
-                     : (<SelectIconButton
-                         ref={ 'selectSingleItem' + index }
-                         style={{ position: 'absolute', left: 5, top: 5, width: 18, height: 18 }}
-                         selectBehavior={ action => this.selectSingleItem(action, index) } />
-                        )
-                 }
                  <PhotoItem
                    ref={ 'photoItem' + index }
                    style={{ width: 150, height: 158, marginRight: 6, marginBottom: 6 }}
                    lookPhotoDetail={ lookPhotoDetail }
+                   detectIsAllOffChecked={ this.detectIsAllOffChecked }
+                   selected={ () => { this.addHoverToAllItem(); this.addCheckedToItem(index); this.addAllChecked(); } }
+                   unselected={ () => { this.removeCheckedToItem(index); this.removeAllChecked(); this.removeHoverToAllItem(); } }
                    digest={ photo.digest }
                    path={ photo.path }
                    key={ photo.digest } />
@@ -80,7 +116,7 @@ export default class PhotoListByDate extends Component {
   componentDidMount() {
     this.selectionRefs = Object
       .keys(this.refs)
-      .filter(refName => refName.indexOf('selectSingleItem') >= 0);
+      .filter(refName => refName.indexOf('photoItem') >= 0);
   }
 }
 

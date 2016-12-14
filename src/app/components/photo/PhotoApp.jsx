@@ -28,7 +28,13 @@ function getStyles (leftnav) {
       zIndex: 1000
     },
     photoList: {
-      padding: '66px 15px 0'
+      padding: '16px 15px 0',
+      overflow: 'auto',
+      position: 'absolute',
+      left: 0,
+      top: 56,
+      width: '100%',
+      height: '100%'
     }
   }
 }
