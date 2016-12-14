@@ -351,12 +351,18 @@ class Storage extends React.Component {
       })
   }
 
+/**
   render() {
     return (
       <div style={this.props.style}>
         { this.state.data && JSON.stringify(this.state.data, null, '  ') }
       </div>
     ) 
+  }
+**/
+
+  render() {
+    return <div />
   }
 }
 
@@ -398,6 +404,7 @@ class ControlApp extends React.Component {
         style={{fontSize:14}} 
         primaryText={text} 
         leftIcon={icon}
+        disabled={text === '存储' ? true : false}
         onTouchTap={() => this.setState(Object.assign({}, this.state, { select }))} 
       />
     )

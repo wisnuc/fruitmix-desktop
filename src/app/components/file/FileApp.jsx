@@ -6,18 +6,23 @@
  **/
 
 import Debug from 'debug'
-
-const debug = Debug('app:file')
+const debug = Debug('view:file:app')
 
 import React from 'react'
 
-import { connect } from 'react-redux'
+// import css from '../../../assets/css/react-treeview.css'
+// import TreeView from 'react-treeview'
+
+import TreeTable from '../common/TreeTable'
+import { DialogImportFile } from '../common/Dialogs'
+
 import Action from '../../actions/action'
 import { command } from '../../lib/command'
 //seem to be not word
 // import { fileNav, fileCreateNewFolder } from '../../lib/file'
 
 import keypress from '../common/keypress.js'
+import request from 'superagent'
 
 import svg from '../../utils/SVGIcon'
 
@@ -44,6 +49,7 @@ import ActionInfo from 'material-ui/svg-icons/action/info'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import NavigationClose from 'material-ui/svg-icons/navigation/close'
 import NavigationCancel from 'material-ui/svg-icons/navigation/cancel'
+import NavigationArrowForward from 'material-ui/svg-icons/navigation/arrow-forward'
 import NavigationChevronRight from 'material-ui/svg-icons/navigation/chevron-right'
 
 import { Divider, Paper, Menu, MenuItem, Dialog,
@@ -627,7 +633,7 @@ const FileToolbar = ({
         <NavigationMenu />
       </IconButton>
 
-      <div style={{marginLeft: leftNav?228:20, flex: '0 0 138px', fontSize: 21, whiteSpace: 'nowrap', color: '#FFF', transition:sharpCurve('all')}}>
+      <div className='breadcrumb' style={{marginLeft: leftNav?228:20, flex: '0 0 138px', fontSize: 18, whiteSpace: 'nowrap', color: '#FFF', transition:sharpCurve('all')}}>
         { breadCrumb }
       </div>
 
@@ -697,6 +703,7 @@ class FileApp extends React.Component {
 
       createNewFolder: false,
       deleteConfirm: false,
+      importDialog: null,
     }
 
     // FIXME !!!
@@ -856,12 +863,15 @@ class FileApp extends React.Component {
           />
           <Divider />
           <MenuItem primaryText='分享给我的文件' leftIcon={<SocialPeople />}
-            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}/>
+            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}
+          />
           <Divider />
           <MenuItem primaryText='上传任务' leftIcon={<FileFileUpload />}
-            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}/>
+            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}
+          />
           <MenuItem primaryText='下载任务' leftIcon={<FileFileDownload />}
-            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}/>
+            innerDivStyle={{fontSize:14, fontWeight:'medium', opacity:0.87}}
+          />
         </Menu>
       </div>
     )
@@ -1166,7 +1176,7 @@ class FileApp extends React.Component {
   // mutate item, return new list
   rowClick(uuid, e) {
 
-    debug('row click', uuid, e, e.ctrlKey, e.shiftKey)
+    // debug('row click', uuid, e, e.ctrlKey, e.shiftKey)
     if (e.shiftKey)
       return this.rowShiftClick(uuid, e)
     else if (e.ctrlKey === true)
@@ -1262,76 +1272,75 @@ class FileApp extends React.Component {
 	renderBreadCrumb(){
 		let list = []
 		let _this = this
-    if (!this.state.path) return null
-    if (this.state.navContext=='SHARED_WITH_ME' || this.state.navContext=='SHARED_WITH_OTHERS') {
-    	if (this.state.path.length == 0) {
-    		list.push(
-	    		<span onTouchTap={()=> {
-	    			_this.state.navRoot = null
-	    			command('FileApp','FILE_NAV',{context:_this.state.navContext},(err,data) => {
-	    				if (err) {
-	    					return
-	    				}
-	    				this.navUpdate(_this.state.navContext, data)
-	    			})
-	    		}}>
-	    		{this.state.navContext=='SHARED_WITH_ME'?'分享给我的文件':'我分享的文件'}
-	    		</span>
-	    		)
-    	}else {
-    		list.push(
-	    		<span onTouchTap={()=> {
-	    			_this.state.navRoot = null
-	    			command('FileApp','FILE_NAV',{context:_this.state.navContext},(err,data) => {
-	    				if (err) {
-	    					return
-	    				}
-	    				this.navUpdate(_this.state.navContext, data)
-	    			})
-	    		}}>
-	    		{this.state.navContext=='SHARED_WITH_ME'?'分享给我的文件':'我分享的文件'}
-	    		</span>
-	    		)
-	    	list.push(<NavigationChevronRight />)
-    	}
-	    	
-    }
-    this.state.path.forEach((node, index, arr) => {
-      list.push(
-        <span
-          style={{
-            fontSize: 21,
-            fontWeight: 'medium',
-            color: '#FFF',
-            opacity: index === arr.length - 1 ? 1 : 0.7
-          }}
+		if (!this.state.path) return null
+		if (this.state.navContext=='SHARED_WITH_ME' || this.state.navContext=='SHARED_WITH_OTHERS') {
+			let name = this.state.navContext=='SHARED_WITH_ME'?'分享给我的文件':'我分享的文件'
+			list.push(
+				<span 
+				onTouchTap={()=> {
+					_this.state.navRoot = null
+					command('FileApp','FILE_NAV',{context:_this.state.navContext},(err,data) => {
+						if (err) {
+							return
+						}
+						this.navUpdate(_this.state.navContext, data)
+					})
+				}}
+				title={name}
+				style={{
+					opacity:this.state.path.length>0?0.7:1
+				}}
+				>
+				{name}
+				</span>
+				)
+			if (this.state.path.length !== 0) {
+				list.push(<NavigationChevronRight />)
+			}
+		}
+		this.state.path.forEach((node, index, arr) => {
+			let name = index === 0 && this.state.navContext=='HOME_DRIVE'? '我的文件' :  node.name
+			if (arr.length>3) {
+				if (index == 1) {
+					list.push(
+						<div>...</div>
+						)
+					list.push(<NavigationChevronRight />)
+					return
+				}else if (index > 1 && index <arr.length -2) {
+					return
+				}
+			}
+			list.push(
+				<span
+					title={name}
+					style={{
+						fontWeight: 'medium',
+						color: '#FFF',
+						opacity: index === arr.length - 1 ? 1 : 0.7
+					}}
 
-          onTouchTap={() => {
-            command('fileapp', 'FILE_NAV', {
-              context: this.state.navContext,
-              folderUUID: node.uuid,
-              rootUUID:this.state.navRoot.uuid
-            }, (err, data) => {
-              if (err) return // todo
-              this.navUpdate(_this.state.navContext, data)
-            })
-          }}
-        >
-          {index === 0 && this.state.navContext=='HOME_DRIVE'? '我的文件' :  node.name}
-        </span>
-      )
+					onTouchTap={() => {
+						command('fileapp', 'FILE_NAV', {
+							context: this.state.navContext,
+							folderUUID: node.uuid,
+							rootUUID:this.state.navRoot.uuid
+						}, (err, data) => {
+	              if (err) return // todo
+	              	this.navUpdate(_this.state.navContext, data)
+	          		}
+	          			)
+					}}
+				>
+				{name}
+				</span>
+				)
 
-      if (index !== arr.length - 1)
-        list.push(<NavigationChevronRight />)
-    })
+			if (index !== arr.length - 1)
+				list.push(<NavigationChevronRight />)
+		})
 
-    return list
-
-    return (
-      <div  style={{fontSize: 16, display:'flex', alignItems: 'baseline', color: '#FFF'}}>
-        { list }
-      </div>
-    )
+		return list
 	}
 
   renderList() {
@@ -1427,7 +1436,7 @@ class FileApp extends React.Component {
                     this.setState(state => Object.assign({}, state, { editing: select[0].uuid }))
                   }
                 }}/>
-                <MenuItem primaryText='移动' />
+                <MenuItem primaryText='移动' disabled={true}/>
                 <MenuItem primaryText='分享' />
                 <MenuItem primaryText='下载' onTouchTap={this.download}/>
                 <MenuItem primaryText='删除' onTouchTap={this.showDeleteConfirmDialog} />
@@ -1458,10 +1467,10 @@ class FileApp extends React.Component {
 	}
 
   render() {
-  	console.log('run render ------------------')
-  	console.log(this.state)
+  	// console.log('run render ------------------')
+  	// console.log(this.state)
     const detailWidth = 300
-    debug('fileapp render')
+    // debug('fileapp render')
 
     return (
     <div style={this.props && this.props.style} >
@@ -1573,6 +1582,32 @@ class FileApp extends React.Component {
                 		this.navUpdate('DOWNLOAD',{children:[],path:[]})
                 	}}
                 />
+                <Divider />
+                <MenuItem primaryText='导入旧版本文件' leftIcon={<NavigationArrowForward />}
+                  innerDivStyle={{fontSize: 14, fontWeight: 'medium', color: 'rgba(0,0,0,0.87'}}
+                  onTouchTap={() => {
+                   
+                    let index = window.store.getState().login.selectIndex
+                    let addr = window.store.getState().login.device[index].address
+                    let url = `http://${addr}:3721/winsun`
+
+                    request
+                      .get(url)
+                      .set('Accept', 'application/json')
+                      .end((err, res) => {
+                
+                        debug('winsun request', url, err || !res.ok || res.body)
+
+                        // FIXME
+                        if (err || !res.ok) return
+                        this.setState(Object.assign({}, this.state, { 
+                          importDialog: {
+                            data: res.body
+                          }
+                        }))
+                      })
+                  }}
+                />
               </Menu>
             </div>
 
@@ -1583,7 +1618,7 @@ class FileApp extends React.Component {
 
               width: '100%',
               height: '100%',
-              backgroundColor:'yellow',
+              backgroundColor: '#FAFAFA', //'yellow',
             }}>
               { this.renderListView() }
             </div>
@@ -1669,13 +1704,81 @@ class FileApp extends React.Component {
           }}
         />
 
+        <DialogImportFile
+
+          open={!!this.state.importDialog}
+          data={this.state.importDialog && this.state.importDialog.data}
+          columns={[
+            {
+              headerStyle: { 
+                width: 200, 
+                backgroundColor: 'blue' 
+              },
+              name: 'hello'
+            },
+            {
+              headerStyle: { 
+                width: 200, 
+                backgroundColor: 'yellow' 
+              },
+              name: 'bar'
+            }
+          ]}
+
+          showHeader={false}
+          status={{ message: 'what' }}       
+
+          onCancel={() => {
+            this.setState(Object.assign({}, this.state, {
+              importDialog: null
+            }))
+          }}
+
+          onOK={select => {
+
+            let index = window.store.getState().login.selectIndex
+            let addr = window.store.getState().login.device[index].address
+            let url = `http://${addr}:3721/winsun`
+            let data = {
+              src: select.path,
+              dst: this.state.directory.uuid
+            }
+
+            request
+              .post(url)
+              .set('Accept', 'application/json')
+              .send(data)
+              .end((err, res) => {
+
+                if (err || !res.ok) {
+                  window.store.dispatch({
+                    type: 'SET_SNACK',
+                    open: true,
+                    text: '错误：' + err ? err.message : 'Bad Response' 
+                  })
+                }
+                else {
+                  window.store.dispatch({
+                    type: 'SET_SNACK',
+                    open: true,
+                    text: '文件导入成功！'
+                  }) 
+                }
+
+                this.refresh()
+                this.setState(Object.assign({}, this.state, {
+                  importDialog: null
+                })) 
+              })
+          }}
+        />
+
       </div>
     </div>
     )
   }
 
   updateFileNode(node) {
-  	console.log('update node.........')
   	let index = this.state.list.findIndex(item => item.uuid == node.uuid)
   	if (index !== -1) {
   		this.setState({
@@ -1685,4 +1788,71 @@ class FileApp extends React.Component {
   }
 }
 
+/**
+        <Dialog
+          titleStyle={{fontSize: 20}}
+          title='导入文件夹'
+          open={this.state.importDialog} 
+          modal={true}
+          onRequestClose={() => this.setState(Object.assign({}, this.state, { importDialog: null }))}
+        >
+          <p>选择需要导入的文件夹，点击确定，该文件夹将被移动到当前用户的当前文件夹。</p>
+          <Divider />
+          <TreeTable
+            style={{width: 720, height: 200, overflowY: 'auto'}}
+            data={[
+              {
+                name: 'hello',
+                children: [
+                  {
+                    name: 'biu~',
+                    children: [
+                      {
+                        name: 'bia~ji!'
+                      }
+                    ]
+                  }, 
+                  {}, {}
+                ]
+              },
+              {
+                name: 'world',
+                children: []
+              }
+            ]} 
+
+            showHeader={false}
+            disabled={false}
+            columns={[
+              {
+                headerStyle: { 
+                  width: 200, 
+                  backgroundColor: 'blue' 
+                },
+                name: 'hello'
+              },
+              {
+                headerStyle: { 
+                  width: 200, 
+                  backgroundColor: 'yellow' 
+                },
+                name: 'bar'
+              }
+            ]}
+          />
+          <div style={{marginTop: 24, display: 'flex', alignItems: 'center', justifyContent: 'flex-end'}}>
+            <FlatButton 
+              label='取消' 
+              primary={true}
+              onTouchTap={() => this.setState(Object.assign({}, this.state, { importDialog: null }))}
+            />
+            <FlatButton 
+              label='确认' 
+              primary={true}
+              
+            />
+          </div>
+        </Dialog>
+
+**/
 export default FileApp

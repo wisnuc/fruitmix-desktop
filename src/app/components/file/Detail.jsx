@@ -15,6 +15,10 @@ import {Tabs, Tab} from 'material-ui/Tabs'
 //import file mpdule
 import { command } from '../../lib/command'
 
+import Debug from 'debug'
+
+const debug = Debug('detail')
+
 
 
 const styles = {
@@ -43,18 +47,25 @@ class Detail extends Component {
  	}
 
  	componentWillReceiveProps(next) {
- 		// console.log(next)
+ 		debug('detail receive props')
+ 		debug(next)
  	}
 
  	shouldComponentUpdate(nextProps) {
  		let nowDetail = this.props.detail
  		let nextDetail = nextProps.detail
+ 		let nowDetailList = nowDetail[0] && (typeof nowDetail[0].readlist) == 'object'?nowDetail[0].readlist:undefined
+ 		let nextDetailList = nextDetail[0] && (typeof nextDetail[0].readlist) == 'object'?nextDetail[0].readlist:undefined
  		if (nowDetail.length == 1 && nextDetail.length == 1
- 			&& nowDetail[0].uuid == nextDetail[0].uuid) {
+ 			&& nowDetail[0].uuid == nextDetail[0].uuid
+ 			&& nowDetailList == nextDetailList) {
+ 			debug('detail not update....')
  			return false
  		}else if (nowDetail.length !== 1 && nextDetail.length != 1) {
+ 			debug('detail not update....')
  			return false
  		}else {
+ 			debug('detail update....')
  			return true
  		}
  	}
@@ -203,27 +214,35 @@ class Detail extends Component {
 	}
 
 	checkUser(file,userUUID,event,checked) {
+		debug('check user ......')
+		debug(file.readlist)
+		debug(checked)
 		var _this = this
 		let users = file.readlist
 		let directoryUUID = this.props.directory.uuid
 		if (users == undefined) {
+			debug('user not exist')
 			users = []
 		}
 		if (checked) {
 			users.push(userUUID)
+			debug('push user')
+			debug(users)
 		}else {
 			let index = users.findIndex(item => item == userUUID)
 			if (index != -1) {
 				users.splice(index,1)
 			}
+			debug('delete user')
+			debug(users)
 		}
 		command('','FILE_SHARE',{fileUUID:file.uuid, users ,directoryUUID},(err,data) => {
 				if (err) {
-					console.log('share failed')
-					console.log(err)
+					debug('share failed')
+					debug(err)
 				}else {
-					console.log('share success')
-					console.log(JSON.parse(data))
+					debug('share success')
+					debug(JSON.parse(data))
 					_this.props.updateFileNode(JSON.parse(data))
 				}
 			})
