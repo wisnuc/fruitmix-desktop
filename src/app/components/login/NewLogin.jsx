@@ -882,6 +882,20 @@ class FirstUserBox extends React.Component {
   }
 }
 
+class InstallBox extends React.Component {
+
+  constructor(props) {
+    super(props)
+  }
+
+  render() {
+    return (
+      <div>
+        
+      </div>
+    )
+  }
+}
 
 class GuideBox extends React.Component {
 
@@ -907,6 +921,8 @@ class GuideBox extends React.Component {
       password: null,
       passwordAgain: null 
     }
+
+    // this.hasVolume = props.storage.volumes.length > 0
 
     this.handleNext = () => {
       const {stepIndex} = this.state
@@ -1033,6 +1049,9 @@ class GuideBox extends React.Component {
             <div style={{marginTop: 34, marginBottom: 12, fontSize: 34, color: '#000', opacity: 0.54}}>初始化向导</div>
             <div style={{opacity: this.state.showContent ? 1 : 0, transition:'opacity 150ms'}}>
               <Stepper activeStep={stepIndex} orientation="vertical">
+                <Step>
+                  
+                </Step>
                 <Step>
                   <StepLabel>创建或选择已有的磁盘卷</StepLabel>
                   <StepContent style={{opacity: 0.87}}>
@@ -1337,6 +1356,8 @@ class DeviceCard extends React.Component {
 
     ipcRenderer.send('setServerIp', props.address)
 
+    console.log('device card, users', this.users)
+
     if (!this.users) {
       request.get(`http://${props.address}:3000/system/storage`)
         .set('Accept', 'application/json')
@@ -1369,6 +1390,30 @@ class DeviceCard extends React.Component {
     if (this.users && this.users.length && this.state.selectedUserIndex >= 0 && this.state.selectedUserIndex < this.users.length) {
       return this.users[this.state.selectedUserIndex].username
     }
+  }
+
+  renderFooter() {
+
+    if (this.props.boot && this.props.boot.state === 'normal' && this.users && this.users.length !== 0) 
+      return (
+        <UserBox 
+          style={{width: '100%', backgroundColor: '#FFF', transition: 'all 300ms'}} 
+          color={this.props.backgroundColor}
+          users={this.users}
+          username={this.selectedUsername()}
+          onResize={this.onBoxResize}
+        />
+      )
+
+    if (!this.state.storage) return <div /> // busybox
+
+    if (this.props.boot && this.props.boot.state === 'maintenance') {
+      if (!this.props.boot.lastFileSystem)
+        return <GuideBox address={this.address} storage={this.state.storage} onResize={this.onBoxResize} />
+      else
+        return <MaintenanceBox />
+    } 
+    return <div />
   }
 
   render() {
@@ -1434,24 +1479,7 @@ class DeviceCard extends React.Component {
           </div>
         </Paper>
 
-        { this.props.boot && this.props.boot.state === 'normal' && this.users && this.users.length !== 0 &&
-          <UserBox 
-            style={{width: '100%', backgroundColor: '#FFF', transition: 'all 300ms'}} 
-            color={this.props.backgroundColor}
-            users={this.users}
-            username={this.selectedUsername()}
-            onResize={this.onBoxResize}
-          />
-        }
-        { this.props.boot && this.props.boot.state === 'normal' && this.users && this.users.length === 0 &&
-          {/* <FruitmixInitBox />*/}
-        }
-        { this.props.boot && this.props.boot.state === 'maintenance' && !this.props.boot.lastFileSystem &&
-          <GuideBox address={this.address} storage={this.state.storage} onResize={this.onBoxResize} />
-        }
-        { this.props.boot && this.props.boot.state === 'maintenance' && this.props.boot.lastFileSystem &&
-          <MaintenanceBox />
-        }
+        { this.renderFooter() }
       </div>
     )
   }
