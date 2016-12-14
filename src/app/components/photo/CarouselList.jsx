@@ -25,16 +25,19 @@ export default class CarouselList extends Component {
     };
   }
 
-  shouldComponentUpdate(nextProps) {
-    return nextProps.items.length !== this.props.items.length;
-  }
-
   render() {
     let { style, items } = this.props;
 
     return (
       <div style={ style }>
-        { items.map((item, index) => ( <CarouselItem key={ item + index } path={ item } style={ this.style.carouselItem } /> )) }
+        { items.map((item, index) => (
+            <CarouselItem
+              key={ item + index }
+              path={ item }
+              style={ this.style.carouselItem } />
+            )
+          )
+        }
       </div>
     );
   }

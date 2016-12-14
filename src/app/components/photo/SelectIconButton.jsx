@@ -54,7 +54,7 @@ export default class SelectIconButton extends Component {
 
     this.style = getStyles();
     this.state = {
-      action: 'off'
+      action: props.checked
     };
 
     this.onActiveByRootStyle = Object.assign({}, this.style.root, this.style.onActive);
@@ -82,8 +82,8 @@ export default class SelectIconButton extends Component {
     this.setState({ action: 'off' }, () => !disabled && this.selectBehavior(this.state.action));
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return nextState.action !== this.state.action;
+  componentWillReceiveProps(nextProps) {
+    this.props.isReceive && this[`${nextProps.checked}Selected`](true);
   }
 
   render() {
@@ -100,5 +100,12 @@ export default class SelectIconButton extends Component {
 
 SelectIconButton.propTypes = {
   style: PropTypes.object,
-  selectBehavior: PropTypes.func
+  selectBehavior: PropTypes.func,
+  checked: PropTypes.string,
+  isReceive: PropTypes.bool
+};
+
+SelectIconButton.defaultProps = {
+  checked: 'off',
+  isReceive: false
 };

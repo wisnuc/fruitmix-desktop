@@ -59,13 +59,13 @@ export default class PhotoToolBar extends Component {
 
   render() {
     let { action, state } = this.props;
-    
+
     return (
       <Paper
         style={{
           position: 'absolute', width: '100%', height: 56,
           backgroundColor: '#2196F3',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+          display: 'flex', alignItems: 'center', justifyContent: 'flex-start'
         }}
         rounded={ false }
         transitionEnabled={ false }>

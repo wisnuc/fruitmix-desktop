@@ -101,7 +101,7 @@ export default class PhotoDetail extends Component {
     };
 
     this.requestNext = (activeIndex) => {
-      ipcRenderer.send('getMediaImage', this.props.items[activeIndex].digest)
+      ipcRenderer.send('getMediaImage', this.props.items[activeIndex].digest);
     };
 
     this.buildPhotoDetailList = () => (
