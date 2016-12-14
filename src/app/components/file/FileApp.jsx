@@ -6,7 +6,7 @@
  **/
 
 import Debug from 'debug'
-const debug = Debug('app:file')
+const debug = Debug('view:file:app')
 
 import React from 'react'
 
@@ -14,6 +14,7 @@ import React from 'react'
 // import TreeView from 'react-treeview'
 
 import TreeTable from '../common/TreeTable'
+import { DialogImportFile } from '../common/Dialogs'
 
 import Action from '../../actions/action'
 import { command } from '../../lib/command'
@@ -21,6 +22,7 @@ import { command } from '../../lib/command'
 // import { fileNav, fileCreateNewFolder } from '../../lib/file'
 
 import keypress from '../common/keypress.js'
+import request from 'superagent'
 
 import svg from '../../utils/SVGIcon'
 
@@ -703,24 +705,6 @@ class FileApp extends React.Component {
       deleteConfirm: false,
       importDialog: null,
     }
-
-    this.dataSource = [
-      {
-        type: 'Employees',
-        collapsed: false,
-        people: [
-          {name: 'Paul Gordon', age: 25, sex: 'male', role: 'coder', collapsed: false},
-          {name: 'Sarah Lee', age: 23, sex: 'female', role: 'jqueryer', collapsed: false},
-        ],
-      },
-      {
-        type: 'CEO',
-        collapsed: false,
-        people: [
-          {name: 'Drew Anderson', age: 35, sex: 'male', role: 'boss', collapsed: false},
-        ],
-      },
-    ]
 
     // FIXME !!!
     this.refresh = () => {
@@ -1602,7 +1586,26 @@ class FileApp extends React.Component {
                 <MenuItem primaryText='导入旧版本文件' leftIcon={<NavigationArrowForward />}
                   innerDivStyle={{fontSize: 14, fontWeight: 'medium', color: 'rgba(0,0,0,0.87'}}
                   onTouchTap={() => {
-                    this.setState(Object.assign({}, this.state, { importDialog: {}}))
+                   
+                    let index = window.store.getState().login.selectIndex
+                    let addr = window.store.getState().login.device[index].address
+                    let url = `http://${addr}:3721/winsun`
+
+                    request
+                      .get(url)
+                      .set('Accept', 'application/json')
+                      .end((err, res) => {
+                
+                        debug('winsun request', url, err || !res.ok || res.body)
+
+                        // FIXME
+                        if (err || !res.ok) return
+                        this.setState(Object.assign({}, this.state, { 
+                          importDialog: {
+                            data: res.body
+                          }
+                        }))
+                      })
                   }}
                 />
               </Menu>
@@ -1701,6 +1704,91 @@ class FileApp extends React.Component {
           }}
         />
 
+        <DialogImportFile
+
+          open={!!this.state.importDialog}
+          data={this.state.importDialog && this.state.importDialog.data}
+          columns={[
+            {
+              headerStyle: { 
+                width: 200, 
+                backgroundColor: 'blue' 
+              },
+              name: 'hello'
+            },
+            {
+              headerStyle: { 
+                width: 200, 
+                backgroundColor: 'yellow' 
+              },
+              name: 'bar'
+            }
+          ]}
+
+          showHeader={false}
+          status={{ message: 'what' }}       
+
+          onCancel={() => {
+            this.setState(Object.assign({}, this.state, {
+              importDialog: null
+            }))
+          }}
+
+          onOK={select => {
+
+            let index = window.store.getState().login.selectIndex
+            let addr = window.store.getState().login.device[index].address
+            let url = `http://${addr}:3721/winsun`
+            let data = {
+              src: select.path,
+              dst: this.state.directory.uuid
+            }
+
+            request
+              .post(url)
+              .set('Accept', 'application/json')
+              .send(data)
+              .end((err, res) => {
+
+                if (err || !res.ok) {
+                  window.store.dispatch({
+                    type: 'SET_SNACK',
+                    open: true,
+                    text: '错误：' + err ? err.message : 'Bad Response' 
+                  })
+                }
+                else {
+                  window.store.dispatch({
+                    type: 'SET_SNACK',
+                    open: true,
+                    text: '文件导入成功！'
+                  }) 
+                }
+
+                this.refresh()
+                this.setState(Object.assign({}, this.state, {
+                  importDialog: null
+                })) 
+              })
+          }}
+        />
+
+      </div>
+    </div>
+    )
+  }
+
+  updateFileNode(node) {
+  	let index = this.state.list.findIndex(item => item.uuid == node.uuid)
+  	if (index !== -1) {
+  		this.setState({
+  			list : [...this.state.list.slice(0,index),Object.assign(node,{selected:true}),...this.state.list.slice(index+1)]
+  		})
+  	}
+  }
+}
+
+/**
         <Dialog
           titleStyle={{fontSize: 20}}
           title='导入文件夹'
@@ -1766,19 +1854,5 @@ class FileApp extends React.Component {
           </div>
         </Dialog>
 
-      </div>
-    </div>
-    )
-  }
-
-  updateFileNode(node) {
-  	let index = this.state.list.findIndex(item => item.uuid == node.uuid)
-  	if (index !== -1) {
-  		this.setState({
-  			list : [...this.state.list.slice(0,index),Object.assign(node,{selected:true}),...this.state.list.slice(index+1)]
-  		})
-  	}
-  }
-}
-
+**/
 export default FileApp

@@ -230,10 +230,10 @@ class Main extends React.Component {
 
         <Snackbar
           style={{textAlign:'center'}}
-          open={storeState().snack.open}
-          message={storeState().snack.text}
+          open={window.store.getState().snack.open}
+          message={window.store.getState().snack.text}
           autoHideDuration={3000}
-          onRequestClose={() => window.store.dispatch() /* TODO */}
+          onRequestClose={() => window.store.dispatch({ type: 'CLEAN_SNACK' })}
         />
       </div>
 	  )

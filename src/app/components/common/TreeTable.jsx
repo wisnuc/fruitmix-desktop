@@ -19,7 +19,6 @@ class TreeTable extends React.Component {
     this.data = props.data
     this.state = {
       expansion: new Set(),
-      select: null
     }
 
     this.toggleExpansion = (item) => {
@@ -31,7 +30,8 @@ class TreeTable extends React.Component {
       else 
         expansion.add(item)
 
-      this.setState(Object.assign({}, this.state, { expansion, select: item }))
+      this.setState(Object.assign({}, this.state, { expansion }))
+      if (this.props.onSelect) this.props.onSelect(item)
     }
     
     this.showHeader = props.showHeader
@@ -56,14 +56,14 @@ class TreeTable extends React.Component {
       const renderItem = (item, level) => {
 
         rows.push(
-          <div 
-            style={{
+          <div style={{
               height: 40, display: 'flex', alignItems: 'center', 
-              backgroundColor: item === this.state.select ? '#F5F5F5' : null,
-              color: item === this.state.select ? pink500 : 'rgba(0,0,0,0.87)', 
+              backgroundColor: item === this.props.select ? '#F5F5F5' : null,
+              color: item === this.props.select ? pink500 : 'rgba(0,0,0,0.87)', 
               fontSize: 14,
             }}
-            onClick={() => this.setState(Object.assign({}, this.state, { select: item }))}
+
+            onClick={() => this.props.onSelect && this.props.onSelect(item)}
           >
 
             <div style={{flex: `0 0 ${level * 24}px`}} />
@@ -105,15 +105,8 @@ class TreeTable extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-
     if (nextProps.data !== this.props.data) {
-
-      let initState = {
-        expansion: [],
-        select: null
-      }
-
-      this.setState(initState)
+      this.setState({ expansion: new Set() })
     }
   } 
 
