@@ -147,10 +147,6 @@ export class DialogImportFile extends React.Component {
           }}
         />
 
-        <p style={{marginTop:24}}>
-          { this.props.status.message }
-        </p>
-
         <div style={{
           marginTop: 24, 
           display: 'flex', 
