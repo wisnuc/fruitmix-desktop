@@ -277,6 +277,9 @@ body{
 	overflow: hidden;
 	text-overflow: ellipsis;
 	cursor: pointer;
+	height:24px;
+	line-height: 24px;
+	display: inline-block;
 }
 .breadcrumb-home {
 	background: url(../images/index/home-page@2x.png) no-repeat;
