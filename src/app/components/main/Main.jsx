@@ -199,13 +199,24 @@ class Main extends React.Component {
           { React.createElement(this.state.currentApp, appProps, null) }
         </div>
 
+        { showAppBar && 
+        <div style={{
+          position: 'fixed', 
+          width: '100%', height: '100%', top: 0, left: 0,
+          zIndex: 999
+          }}
+
+          onTouchTap={this.toggleAppBar}
+        />
+        }
         <SystemDrawer
           style={{
             position: 'absolute',
             width: 320,
             height: '100%',
             right: showAppBar ? 0 : -320,
-            transition: sharpCurve('right')
+            transition: sharpCurve('right'),
+            zIndex: 1000
           }}
           resizing={this.state.resizing}
           onLauncherSelect={this.onLauncherSelect}
