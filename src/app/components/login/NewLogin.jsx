@@ -15,6 +15,7 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme'
 import baseTheme from 'material-ui/styles/baseThemes/lightBaseTheme'
 import { Checkbox, Divider, RaisedButton, Avatar, IconButton, LinearProgress, Paper, TextField, FlatButton, CircularProgress, Snackbar, SelectField, MenuItem } from 'material-ui'
 import { Step, Stepper, StepLabel, StepContent } from 'material-ui/Stepper'
+import { Tabs, Tab } from 'material-ui/Tabs'
 
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
 
@@ -24,13 +25,15 @@ import TransitionGroup from 'react-addons-transition-group'
 import NavigationChevronLeft from 'material-ui/svg-icons/navigation/chevron-left'
 import NavigationChevronRight from 'material-ui/svg-icons/navigation/chevron-right'
 import SocialPerson from 'material-ui/svg-icons/social/person'
+import ToggleRadioButtonChecked from 'material-ui/svg-icons/toggle/radio-button-checked'
+import ToggleRadioButtonUnchecked from 'material-ui/svg-icons/toggle/radio-button-unchecked'
 
 import { command } from '../../lib/command' 
 import { TweenMax } from 'gsap'
 
 import UUID from 'node-uuid'
 
-import {indigo900, cyan900, teal900, lightGreen900, lime900, yellow900} from 'material-ui/styles/colors'
+import {indigo900, cyan500, cyan900, teal900, lightGreen900, lime900, yellow900} from 'material-ui/styles/colors'
 
 import request from 'superagent'
 import prettysize from 'prettysize'
@@ -902,15 +905,22 @@ class GuideBox extends React.Component {
   constructor(props) {
 
     super(props)
+
+    this.hasGoodVolume = !!props.storage.volumes.find(vol => vol.isBtrfs && !vol.isMissing)
+
     this.state = {
 
       // multi-steps expansion / shrink animation
       expanded: false,
       showContent: false,
 
+      decision: null,
+
       // stepper
       finished: false,
       stepIndex: 0,
+
+      volSelection: null,
 
       //
       selection: [],
@@ -971,7 +981,35 @@ class GuideBox extends React.Component {
     }
   }
 
-  renderRow (blk) {
+  renderVolumeRow (vol) {
+
+    let id = vol.uuid
+    let label = vol.label
+    let number = vol.total
+    let missing = vol.isMissing
+
+    let comment = missing ? '该卷有磁盘缺失，无法使用' : '该卷可以使用'
+    
+    return (
+      <div key={name} style={{width: '100%', height: 40, display: 'flex', alignItems: 'center'}}>
+        <div style={{flex: '0 0 64px'}}>
+          <Checkbox style={{marginLeft: 16}} 
+            disabled={this.state.decision !== 'useExisting'}
+            checked={this.state.volSelection === id}
+            onCheck={() => {
+              this.setState(Object.assign({}, this.state, { volSelection: id }))
+            }} 
+          />
+        </div>
+        <div style={{flex: '0 0 320px'}}>{id}</div>
+        <div style={{flex: '0 0 80px'}}>{label}</div>
+        <div style={{flex: '0 0 80px'}}>{number}</div>
+        <div style={{flex: '0 0 160px'}}>{comment}</div>
+      </div> 
+    )
+   }
+
+  renderDiskRow (blk) {
 
     let model = blk.model ? blk.model : '未知型号'
     let name = blk.name
@@ -998,9 +1036,11 @@ class GuideBox extends React.Component {
       comment = '该磁盘可以加入磁盘卷'
  
     return (
-      <div key={name} style={{width: '100%', height: 48, display: 'flex', alignItems: 'center'}}>
+      <div key={name} style={{width: '100%', height: 40, display: 'flex', alignItems: 'center'}}>
         <div style={{flex: '0 0 64px'}}>
-          { valid && <Checkbox style={{marginLeft: 16}} checked={this.state.selection.indexOf(name) !== -1}onCheck={() => {
+          { valid && <Checkbox style={{marginLeft: 16}} 
+            disabled={this.state.decision !== 'createNew'}
+            checked={this.state.selection.indexOf(name) !== -1} onCheck={() => {
 
             let nextState
 
@@ -1051,11 +1091,58 @@ class GuideBox extends React.Component {
               <Stepper activeStep={stepIndex} orientation="vertical">
                 <Step>
                   <StepLabel>创建或选择已有的磁盘卷</StepLabel>
-                  <StepContent style={{opacity: 0.87}}>
-                    <p>WISNUC OS使用Btrfs文件系统，您可以选择一块或多块物理磁盘创建磁盘卷，<span style={{color: 'red'}}>所选磁盘上的数据都会被清除</span>。</p>
-                      <div style={{width: 720, fontSize: 13}}>
+
+                  <StepContent>
+
+                    <div style={{height: 40, display: 'flex', alignItems: 'center'}}>
+                      <Checkbox 
+                        labelStyle={{ color: this.state.decision === 'useExisting' ? cyan500 : 'rgba(0,0,0,0.87)' }}
+                        label='选择现有磁盘卷，磁盘卷上的数据都会保留' 
+                        disableTouchRipple={true}
+                        disableFocusRipple={true}
+                        checked={this.state.decision === 'useExisting'} 
+                        onCheck={() => this.setState(Object.assign({}, this.state, { 
+                          decision: 'useExisting',
+                          selection: [],
+                          mode: null,
+                        }))}
+                      />
+                    </div>
+
+                    <div style={{color: this.state.decision === 'useExisting' ? 'rgba(0,0,0,0.87)' : 'rgba(0,0,0,0.54)'}}>
+                      <div style={{marginLeft: 40, width: 760, fontSize: 13}}>
+                        <Divider /> 
+                        <div style={{width: '100%', height: 32, display: 'flex', alignItems: 'center'}}>
+                          <div style={{flex: '0 0 64px'}} />
+                          <div style={{flex: '0 0 320px'}}>ID</div>
+                          <div style={{flex: '0 0 80px'}}>Label</div>
+                          <div style={{flex: '0 0 80px'}}>磁盘数量</div>
+                          <div style={{flex: '0 0 160px'}}>说明</div>
+                        </div>
                         <Divider />
-                        <div style={{width: '100%', height: 48, display: 'flex', alignItems: 'center'}}>
+                        { this.props.storage && this.props.storage.volumes.map(vol => this.renderVolumeRow(vol)) } 
+                        <Divider />
+                      </div>
+                    </div>
+
+                    <div style={{height: 24}} />
+                    <div style={{height: 40, display: 'flex', alignItems: 'center'}}>
+                      <Checkbox 
+                        labelStyle={{ color: this.state.decision === 'createNew' ? cyan500 : 'rgba(0,0,0,0.87)' }}
+                        label='选择磁盘创建新磁盘卷，所选磁盘上的数据都会被清除' 
+                        disableTouchRipple={true}
+                        disableFocusRipple={true}
+                        checked={this.state.decision === 'createNew'}
+                        onCheck={() => this.setState(Object.assign({}, this.state, { 
+                          decision: 'createNew',
+                          volSelection: null
+                        }))}
+                      />
+                    </div>
+                    <div style={{color: this.state.decision === 'createNew' ? 'rgba(0,0,0,0.87)' : 'rgba(0,0,0,0.54)'}}>
+                      <div style={{marginLeft: 40, width: 760, fontSize: 13}}>
+                        <Divider />
+                        <div style={{width: '100%', height: 32, display: 'flex', alignItems: 'center'}}>
                           <div style={{flex: '0 0 64px'}} />
                           <div style={{flex: '0 0 160px'}}>型号</div>
                           <div style={{flex: '0 0 80px'}}>设备名</div>
@@ -1065,27 +1152,42 @@ class GuideBox extends React.Component {
                           <div style={{flex: '0 0 240px'}}>说明</div>
                         </div>
                         <Divider />
-                        { this.props.storage && this.props.storage.blocks.filter(blk => blk.isDisk).map(blk => this.renderRow(blk)) }
+                        { this.props.storage && this.props.storage.blocks.filter(blk => blk.isDisk).map(blk => this.renderDiskRow(blk)) }
                         <Divider />
                       </div>
-                    <div style={{position: 'relative', marginTop: 12, marginBottom:12, display: 'flex'}}>
-                      <div>选择磁盘卷模式：</div>
-                      <div style={{width: 160}}>
-                      <RadioButtonGroup style={{position: 'relative', display: 'flex'}} 
-                        valueSelected={this.state.mode} 
-                        onChange={(e, value) => {
-                          this.setState(Object.assign({}, this.state, { mode: value })) 
-                        }}>
-                        <RadioButton value='single' label='single模式' disabled={this.state.selection.length === 0} />
-                        <RadioButton value='raid0' label='raid0模式' disabled={this.state.selection.length < 2} />
-                        <RadioButton value='raid1' label='raid1模式' disabled={this.state.selection.length < 2} />
-                      </RadioButtonGroup>
+
+                      <div style={{position: 'relative', marginLeft: 40, marginTop: 12, marginBottom:12, display: 'flex', alignItems: 'center'}}>
+                        <div style={{fontSize:13}}>选择磁盘卷模式：</div>
+                        <div style={{width: 160}}>
+                        <RadioButtonGroup style={{position: 'relative', display: 'flex'}} 
+                          valueSelected={this.state.mode} 
+                          onChange={(e, value) => {
+                            this.setState(Object.assign({}, this.state, { mode: value })) 
+                          }}>
+                          <RadioButton style={{fontSize:13, width:128}} iconStyle={{width:16, height:16, padding: 2}} 
+                            disableTouchRipple={true}
+                            disableFocusRipple={true}
+                            value='single' label='single模式' 
+                            disabled={this.state.decision !== 'createNew' || this.state.selection.length === 0} />
+                          <RadioButton style={{fontSize:13, width:128}} iconStyle={{width:16, height:16, padding: 2}} 
+                            disableTouchRipple={true}
+                            disableFocusRipple={true}
+                            value='raid0' label='raid0模式' 
+                            disabled={this.state.decision !== 'createNew' || this.state.selection.length < 2} />
+                          <RadioButton style={{fontSize:13, width:128}} iconStyle={{width:16, height:16, padding: 2}} 
+                            disableTouchRipple={true}
+                            disableFocusRipple={true}
+                            value='raid1' label='raid1模式' 
+                            disabled={this.state.decision !== 'createNew' || this.state.selection.length < 2} />
+                        </RadioButtonGroup>
+                        </div>
                       </div>
                     </div>
-                    <div style={{margin: '12px 0'}}>
+
+                    <div style={{margin: '24px 0'}}>
                       <RaisedButton
                         label='下一步'
-                        disabled={this.state.selection.length === 0 || !this.state.mode}
+                        disabled={ this.state.decision === 'createNew' ? (this.state.selection.length === 0 || !this.state.mode) : (this.state.volSelection === null)}
                         disableTouchRipple={true}
                         disableFocusRipple={true}
                         primary={true}
@@ -1093,6 +1195,7 @@ class GuideBox extends React.Component {
                         style={{marginRight: 12}}
                       />
                     </div>
+
                   </StepContent>
                 </Step>
                 <Step>
@@ -1163,22 +1266,34 @@ class GuideBox extends React.Component {
                           this.handleNext()
                           console.log('this is finished button')
                           console.log('address', this.props.address)
+                          console.log('decision', this.state.decision)
+                          console.log('volSelection', this.state.volSelection)
                           console.log('selection', this.state.selection)
                           console.log('mode', this.state.mode)
                           console.log('username', this.state.username)
                           console.log('password', this.state.password)
 
-                          let postdata = {
-                            target: this.state.selection,
-                            mkfs: {
-                              type: 'btrfs',
-                              mode: this.state.mode,
-                            },
-                            init: {
-                              username: this.state.username,
-                              password: this.state.password
+                          let postdata 
+                          if (this.state.decision === 'createNew') 
+                            postdata = {
+                              target: this.state.selection,
+                              mkfs: {
+                                type: 'btrfs',
+                                mode: this.state.mode,
+                              },
+                              init: {
+                                username: this.state.username,
+                                password: this.state.password
+                              }
                             }
-                          }
+                          else if (this.state.decision === 'useExisting') 
+                            postdata = {
+                              target: [this.state.volSelection],
+                              init: {
+                                username: this.state.username,
+                                password: this.state.password
+                              }
+                            }
 
                           console.log('postdata', postdata)
 
@@ -1228,8 +1343,10 @@ class GuideBox extends React.Component {
                 if (this.state.expanded) {
                   this.setState(Object.assign({}, this.state, { 
                     showContent: false,
+                    decision: null,
                     finished: false,
                     stepIndex: 0,
+                    volSelection: null,
                     selection: [],
                     mode: null,
                     username: null,
