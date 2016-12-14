@@ -14,7 +14,7 @@ const __PART_HEIGHT__ = 45;
 export default class Carousel extends Component {
   render() {
     const { style, items } = this.props;
-
+    
     return (
       <div style={ style }>
         <div style={{ width: '100%' }}>

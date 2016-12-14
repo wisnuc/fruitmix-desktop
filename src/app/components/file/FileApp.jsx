@@ -631,7 +631,7 @@ const FileToolbar = ({
         <NavigationMenu />
       </IconButton>
 
-      <div style={{marginLeft: leftNav?228:20, flex: '0 0 138px', fontSize: 21, whiteSpace: 'nowrap', color: '#FFF', transition:sharpCurve('all')}}>
+      <div className='breadcrumb' style={{marginLeft: leftNav?228:20, flex: '0 0 138px', fontSize: 18, whiteSpace: 'nowrap', color: '#FFF', transition:sharpCurve('all')}}>
         { breadCrumb }
       </div>
 
@@ -1192,7 +1192,7 @@ class FileApp extends React.Component {
   // mutate item, return new list
   rowClick(uuid, e) {
 
-    debug('row click', uuid, e, e.ctrlKey, e.shiftKey)
+    // debug('row click', uuid, e, e.ctrlKey, e.shiftKey)
     if (e.shiftKey)
       return this.rowShiftClick(uuid, e)
     else if (e.ctrlKey === true)
@@ -1288,76 +1288,75 @@ class FileApp extends React.Component {
 	renderBreadCrumb(){
 		let list = []
 		let _this = this
-    if (!this.state.path) return null
-    if (this.state.navContext=='SHARED_WITH_ME' || this.state.navContext=='SHARED_WITH_OTHERS') {
-    	if (this.state.path.length == 0) {
-    		list.push(
-	    		<span onTouchTap={()=> {
-	    			_this.state.navRoot = null
-	    			command('FileApp','FILE_NAV',{context:_this.state.navContext},(err,data) => {
-	    				if (err) {
-	    					return
-	    				}
-	    				this.navUpdate(_this.state.navContext, data)
-	    			})
-	    		}}>
-	    		{this.state.navContext=='SHARED_WITH_ME'?'分享给我的文件':'我分享的文件'}
-	    		</span>
-	    		)
-    	}else {
-    		list.push(
-	    		<span onTouchTap={()=> {
-	    			_this.state.navRoot = null
-	    			command('FileApp','FILE_NAV',{context:_this.state.navContext},(err,data) => {
-	    				if (err) {
-	    					return
-	    				}
-	    				this.navUpdate(_this.state.navContext, data)
-	    			})
-	    		}}>
-	    		{this.state.navContext=='SHARED_WITH_ME'?'分享给我的文件':'我分享的文件'}
-	    		</span>
-	    		)
-	    	list.push(<NavigationChevronRight />)
-    	}
-	    	
-    }
-    this.state.path.forEach((node, index, arr) => {
-      list.push(
-        <span
-          style={{
-            fontSize: 21,
-            fontWeight: 'medium',
-            color: '#FFF',
-            opacity: index === arr.length - 1 ? 1 : 0.7
-          }}
+		if (!this.state.path) return null
+		if (this.state.navContext=='SHARED_WITH_ME' || this.state.navContext=='SHARED_WITH_OTHERS') {
+			let name = this.state.navContext=='SHARED_WITH_ME'?'分享给我的文件':'我分享的文件'
+			list.push(
+				<span 
+				onTouchTap={()=> {
+					_this.state.navRoot = null
+					command('FileApp','FILE_NAV',{context:_this.state.navContext},(err,data) => {
+						if (err) {
+							return
+						}
+						this.navUpdate(_this.state.navContext, data)
+					})
+				}}
+				title={name}
+				style={{
+					opacity:this.state.path.length>0?0.7:1
+				}}
+				>
+				{name}
+				</span>
+				)
+			if (this.state.path.length !== 0) {
+				list.push(<NavigationChevronRight />)
+			}
+		}
+		this.state.path.forEach((node, index, arr) => {
+			let name = index === 0 && this.state.navContext=='HOME_DRIVE'? '我的文件' :  node.name
+			if (arr.length>3) {
+				if (index == 1) {
+					list.push(
+						<div>...</div>
+						)
+					list.push(<NavigationChevronRight />)
+					return
+				}else if (index > 1 && index <arr.length -2) {
+					return
+				}
+			}
+			list.push(
+				<span
+					title={name}
+					style={{
+						fontWeight: 'medium',
+						color: '#FFF',
+						opacity: index === arr.length - 1 ? 1 : 0.7
+					}}
 
-          onTouchTap={() => {
-            command('fileapp', 'FILE_NAV', {
-              context: this.state.navContext,
-              folderUUID: node.uuid,
-              rootUUID:this.state.navRoot.uuid
-            }, (err, data) => {
-              if (err) return // todo
-              this.navUpdate(_this.state.navContext, data)
-            })
-          }}
-        >
-          {index === 0 && this.state.navContext=='HOME_DRIVE'? '我的文件' :  node.name}
-        </span>
-      )
+					onTouchTap={() => {
+						command('fileapp', 'FILE_NAV', {
+							context: this.state.navContext,
+							folderUUID: node.uuid,
+							rootUUID:this.state.navRoot.uuid
+						}, (err, data) => {
+	              if (err) return // todo
+	              	this.navUpdate(_this.state.navContext, data)
+	          		}
+	          			)
+					}}
+				>
+				{name}
+				</span>
+				)
 
-      if (index !== arr.length - 1)
-        list.push(<NavigationChevronRight />)
-    })
+			if (index !== arr.length - 1)
+				list.push(<NavigationChevronRight />)
+		})
 
-    return list
-
-    return (
-      <div  style={{fontSize: 16, display:'flex', alignItems: 'baseline', color: '#FFF'}}>
-        { list }
-      </div>
-    )
+		return list
 	}
 
   renderList() {
@@ -1484,10 +1483,10 @@ class FileApp extends React.Component {
 	}
 
   render() {
-  	console.log('run render ------------------')
-  	console.log(this.state)
+  	// console.log('run render ------------------')
+  	// console.log(this.state)
     const detailWidth = 300
-    debug('fileapp render')
+    // debug('fileapp render')
 
     return (
     <div style={this.props && this.props.style} >
@@ -1773,7 +1772,6 @@ class FileApp extends React.Component {
   }
 
   updateFileNode(node) {
-  	console.log('update node.........')
   	let index = this.state.list.findIndex(item => item.uuid == node.uuid)
   	if (index !== -1) {
   		this.setState({

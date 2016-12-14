@@ -6,6 +6,7 @@ import React, { Component, PropTypes } from 'react';
 import PhotoListByDate from './PhotoListByDate';
 import Carousel from './Carousel';
 import PhotoDetail from './PhotoDetail';
+import FadingToAnimate from './FadingToAnimate';
 
 import { formatDate } from '../../utils/datetime';
 
@@ -15,13 +16,9 @@ export default class PhotoList extends Component {
 
     this.style = {
       carousel: {
-        backgroundColor: '#fff',
-        borderRadius: 4,
-        boxShadow: '0 0 10px rgba(0,0,0,.3)',
         bottom: 15,
         left: 0,
         margin: '0 25px',
-        height: 180,
         position: 'fixed',
         width: 'calc(100% - 50px)'
       },
@@ -69,14 +66,18 @@ export default class PhotoList extends Component {
     };
     this.lookPhotoDetail = (activeIndex) => this.setState({ activeIndex });
 
-    this.renderCarousel = () => {
-      return this.state.carouselItems.length
-        ? (<Carousel style={ this.style.carousel } items={ this.state.carouselItems } />)
-        : void 0;
-    };
+    this.renderCarousel = () => (
+      <FadingToAnimate style={ this.style.carousel } flag={ this.state.carouselItems.length ? 'in' : 'out' }>
+        <Carousel style={{ backgroundColor: '#fff', height: 180, borderRadius: 4, boxShadow: '0 0 10px rgba(0,0,0,.3)' }} items={ this.state.carouselItems } />
+      </FadingToAnimate>
+    );
     this.renderPhotoDetail = (photos) => {
       return photos.length && this.state.activeIndex !== false
-        ? (<PhotoDetail closeMaskLayer={ () => this.setState({ activeIndex: false }) } style={ this.style.photoDetail } items={ photos } activeIndex={ this.state.activeIndex } />)
+        ? (<PhotoDetail
+            closeMaskLayer={ () => this.setState({ activeIndex: false }) }
+            style={ this.style.photoDetail }
+            items={ photos }
+            activeIndex={ this.state.activeIndex } />)
         : void 0;
     };
   }

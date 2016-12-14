@@ -21,7 +21,7 @@ function getStyles () {
     	height: 2,
     	lineHeight: 0,
     	fontSize: 0,
-    	transform: 'rotate(41deg) translateX(5px)',
+    	transform: 'rotate(35deg) translate(3px, -1px)',
     	width: 7,
     	verticalAlign: 'middle'
     },
@@ -29,7 +29,7 @@ function getStyles () {
       display: 'inline-block',
     	width: 10,
     	height: 2,
-    	transform: 'rotate(-40deg) translate(1px,1px)'
+    	transform: 'rotate(-40deg) translate(1px,-3px)'
     },
     onActive: {
       borderColor: '#576bc0',
