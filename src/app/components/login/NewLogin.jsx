@@ -1508,7 +1508,7 @@ class DeviceCard extends React.Component {
 
   renderFooter() {
 
-    if (this.props.boot && this.props.boot.state === 'normal' && this.users && this.users.length !== 0) 
+    if (this.props.boot && (this.props.boot.state === 'normal' || this.props.boot.state === 'alternative') && this.users && this.users.length !== 0) 
       return (
         <UserBox 
           style={{width: '100%', backgroundColor: '#FFF', transition: 'all 300ms'}} 
