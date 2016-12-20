@@ -22,6 +22,7 @@ import NavigationChevronRight from 'material-ui/svg-icons/navigation/chevron-rig
 import SocialPerson from 'material-ui/svg-icons/social/person'
 import ToggleRadioButtonChecked from 'material-ui/svg-icons/toggle/radio-button-checked'
 import ToggleRadioButtonUnchecked from 'material-ui/svg-icons/toggle/radio-button-unchecked'
+
 import {indigo900, cyan500, cyan900, teal900, lightGreen900, lime900, yellow900} from 'material-ui/styles/colors'
 
 //import react transition module
@@ -41,7 +42,9 @@ import prettysize from 'prettysize'
 import css  from  '../../../assets/css/login'
 
 import Debug from 'debug'
-const debug = Debug('main')
+const debug = Debug('component:login')
+
+import InfoCard from './InfoCard'
 
 const styles = {
 	icon : {
@@ -133,45 +136,6 @@ class HoverNav extends React.Component {
     )
   }
 }
-
-class BottomFrame extends React.Component {
-
-  constructor(props) {
-    super(props)
-  }
-
-/**
-  componentWillEnter(callback) {
-    debug('bottom frame will enter', this.props.KEY)    
-    const el = ReactDOM.findDOMNode(this)
-    TweenMax.fromTo(el, 0.33, {opacity: 0}, {opacity: 1, onComplete: () => {
-      debug('bottom framewill enter callback')
-      callback()
-    }})
-  }
-**/
-
-/**
-  componentWillLeave(callback) {
-    debug('bottom frame will leave', this.props.KEY)
-    const el = ReactDOM.findDOMNode(this);
-    TweenMax.fromTo(el, 0.1, {opacity: 1}, {opacity: 0, onComplete: callback})
-  }
-**/
-
-  render() {
-    return (
-      <div>
-        { this.props.children }
-      </div>
-    )
-  }
-}
-
-const storeState = () => window.store.getState()
-
-
-
 
 class UserBox extends React.Component {
 
@@ -803,49 +767,6 @@ class MaintenanceBox extends React.Component {
   }
 }
 
-class KardContent extends React.Component {
-
-  constructor(props) {
-    super(props)
-  }
-
-  render() {
-    <div style={{width: '100%', height: 240, display: 'flex', justifyContent: 'space-between'}}>
-      <div style={{width: '50%', backgroundColor: 'red'}} onTouchTap={this.props.onLeftTouchTap}/> 
-      <div style={{width: '50%', backgroundColor: 'green'}} onTouchTap={this.props.onRightTouchTap}/>
-    </div>
-  }
-}
-
-
-class InfoCard extends React.Component {
-
-  constructor(props) {
-    super(props)
-  }
-
-  componentWillEnter(callback) {
-    this.props.onWillEnter(ReactDOM.findDOMNode(this), callback) 
-  }
-
-  componentWillLeave(callback) {
-    this.props.onWillLeave(ReactDOM.findDOMNode(this), callback)
-  }
-
-  render() {
-    return (
-      <div style={this.props.style}>
-        <div style={{width: '100%', height: 288, backgroundColor: 'rgba(128, 128, 128, 0.8)',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
-          <div style={{fontSize: 21, color:'#FFF'}}>{this.props.text}</div>
-          <div style={{flex: '0 0 24px'}} />
-          <div style={{width: '70%'}}><LinearProgress /></div>
-        </div>
-      </div>
-    )
-  }
-}
-
 class DeviceCard extends React.Component {
 
   constructor(props) {
@@ -853,10 +774,13 @@ class DeviceCard extends React.Component {
     super(props)
 
     this.state = {
+
       selectedUserIndex: -1,
       toggle: false,
-      horizontalExpanded: false
+      horizontalExpanded: false,
     }
+
+    this.mounted = false
 
     this.model = '个人计算机'
     this.logoType = Computer
@@ -864,7 +788,7 @@ class DeviceCard extends React.Component {
     this.address = props.address
     this.users = props.users
 
-    debug('device card, props.name', props.name)
+    debug('device card, props.device', props.device)
 
     if (props.name) {
 
@@ -882,14 +806,10 @@ class DeviceCard extends React.Component {
 
     ipcRenderer.send('setServerIp', props.address)
 
-    console.log('device card, users', this.users)
-
     if (!this.users) {
       request.get(`http://${props.address}:3000/system/storage`)
         .set('Accept', 'application/json')
         .end((err, res) => {
-
-          console.log('device card load storage', err || !res.ok || res.body)
 
           let storage = (err || !res.ok) ? 'ERROR' : res.body
           this.setState(Object.assign({}, this.state, { storage }))
@@ -902,6 +822,14 @@ class DeviceCard extends React.Component {
       else if (resize === 'HEXPAND' || resize === 'HSHRINK')
         this.props.onResize(resize)
     }
+  }
+
+  componentDidMount() {
+    this.mounted = true
+  }
+
+  componentWillUnmount() {
+    this.mounted = false
   }
 
   componentWillEnter(callback) {
@@ -1017,24 +945,25 @@ class Login extends React.Component {
 
   constructor(props) {
 
-    const duration = 0.45
+    const duration = 0.4
 
     super(props)
+
     this.state = {
       devices: [],
-      uuid: UUID.v4(),
       selectedDeviceIndex: -1,
-      expanded: false
+      expanded: false,
+      deviceName: null 
     }
 
     this.initTimer = setInterval(() => {
 
       if (window.store.getState().login.device.length === 0) return
       
-      // clearInterval(this.initTimer)       
-      // delete this.initTimer
+      clearInterval(this.initTimer)       
+      delete this.initTimer
 
-      console.log('init devices', window.store.getState().login.device)
+      debug('init devices', window.store.getState().login.device)
 
       let nextState = Object.assign({}, this.state, { devices: window.store.getState().login.device})
       if (this.state.selectedDeviceIndex == -1) {
@@ -1145,10 +1074,14 @@ class Login extends React.Component {
     }
   }
 
-  render() {
-  	console.log('login render....')
-    let type, props = {
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.devices !== this.props.devices)
+      debug('devices changed', this.props.devices, nextProps.devices)
+  }
 
+  render() {
+
+    let type, props = {
       style: { position: 'absolute', width:'100%', height: '100%'},
       onWillEnter: this.cardWillEnter,
       onWillLeave: this.cardWillLeave
@@ -1165,12 +1098,12 @@ class Login extends React.Component {
 
       let device = this.state.devices[this.state.selectedDeviceIndex]
 
-      console.log('device storage', device, device.storage)
-
       type = DeviceCard
       Object.assign(props, {
 
         key: `login-device-card-${this.state.selectedDeviceIndex}`,
+
+        device: this.props.devices.find(dev => dev.address === device.address),
 
         boot: device.boot,
         storage: device.storage,

@@ -20,6 +20,7 @@ import fileInfo from './fileInfo';
 import popmenu from './popmenu'
 import command from './command'
 import node from './node'
+import mdns from './mdns'
 
 // import atom component reducer
 import { radio, shareRadio } from '../React-Redux-UI/src/reducers/reducer';
@@ -46,7 +47,8 @@ const reducer = combineReducers({
 	fileInfo,
   command,
   node,
-  popmenu
+  popmenu,
+  mdns
 })
 
 export default reducer
