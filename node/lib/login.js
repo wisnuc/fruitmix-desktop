@@ -211,10 +211,6 @@ ipcMain.on('setServerIp',(err, ip, isCustom, isStorage)=>{
 })
 
 ipcMain.on('delServer',(err, i)=>{
-	// let index = device.findIndex(item=>{
-	// 	return item.addresses[0] == i.addresses[0]
-	// })
-	// device.splice(index,1)
 
 	dispatch(action.deleteServer(i))
 

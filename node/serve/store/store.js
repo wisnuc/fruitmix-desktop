@@ -1,6 +1,5 @@
 import { createStore } from 'redux'
 import Debug from 'debug'
-
 import reducer from '../reducers/reducer'
 
 const debug = Debug('store')

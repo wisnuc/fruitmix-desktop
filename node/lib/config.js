@@ -3,8 +3,6 @@ import fs from 'fs'
 import UUID from 'node-uuid'
 import store from '../serve/store/store'
 
-const cwd = process.cwd()
-
 let prevConfig
 
 const configObserver = () => {

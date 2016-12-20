@@ -1,6 +1,7 @@
 var rimraf = require('rimraf')
 var mkdirp = require('mkdirp')
 var path = require('path')
+
 // synchronized init, preparing paths
 // rimraf.sync(path.join(__dirname, 'tmp'))
 mkdirp.sync(path.join(__dirname, 'tmp'))
