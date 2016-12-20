@@ -81,15 +81,6 @@ const Computer = ({style, fill, size}) => (
   </div>
 )
 
-const Docker = ({style, fill, size}) => (
-  <div style={Object.assign(style, {width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 300ms'})}>
-    <svg style={{fill, width: Math.floor(size * 176 / 192), height: Math.floor(size * 128 / 192), transition: 'all 300ms'}}
-      xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 352">
-      <path d="m 35.342575,103.40594 c -7.386153,0.40907 -12.720571,-9.266577 -7.439462,-14.894382 5.069711,-6.521328 17.337886,-2.768809 17.00382,5.785471 0.03854,5.014639 -4.675211,9.158751 -9.564358,9.108911 z M 152.84753,53.762374 c -0.93488,-8.409321 -7.15165,-14.808034 -13.66337,-19.58416 -7.73073,7.983312 -8.58014,21.433093 -2.27722,30.514852 -10.40378,6.28869 -22.73566,4.173144 -34.26638,4.554456 -33.970613,0 -67.94123,0 -101.91184709,0 -1.84691781,10.773383 -0.15488452,22.43413 5.46534669,31.881188 6.4558514,12.35342 19.2275544,20.86878 32.5949364,24.41393 17.883348,4.46994 36.924859,2.51821 54.467584,-2.56682 25.12815,-7.28259 45.88364,-26.773895 55.49194,-50.995624 10.24032,0.808494 22.00694,-2.96169 26.40672,-13.040897 2.00666,-3.882791 -7.32229,-5.019983 -10.13077,-5.927476 -4.05372,-0.568579 -8.2215,-0.294547 -12.17694,0.750551 z M 94.095053,46.475245 c -5.920792,0 -11.841584,0 -17.762376,0 0,5.920792 0,11.841584 0,17.762376 5.920792,0 11.841584,0 17.762376,0 0,-5.920792 0,-11.841584 0,-17.762376 z m 0,-22.316833 c -5.920792,0 -11.841584,0 -17.762376,0 0,5.920792 0,11.841585 0,17.762377 5.920792,0 11.841584,0 17.762376,0 0,-5.920792 0,-11.841585 0,-17.762377 z m 0,-22.7722782 c -5.920792,0 -11.841584,0 -17.762376,0 0,5.9207924 0,11.8415852 0,17.7623772 5.920792,0 11.841584,0 17.762376,0 0,-5.920792 0,-11.8415848 0,-17.7623772 z M 115.95644,46.475245 c -5.92079,0 -11.84158,0 -17.762377,0 0,5.920792 0,11.841584 0,17.762376 5.920797,0 11.841587,0 17.762377,0 0,-5.920792 0,-11.841584 0,-17.762376 z m -66.039606,0 c -5.920792,0 -11.841585,0 -17.762377,0 0,5.920792 0,11.841584 0,17.762376 5.920792,0 11.841585,0 17.762377,0 0,-5.920792 0,-11.841584 0,-17.762376 z m 22.316832,0 c -5.920792,0 -11.841585,0 -17.762377,0 0,5.920792 0,11.841584 0,17.762376 5.920792,0 11.841585,0 17.762377,0 0,-5.920792 0,-11.841584 0,-17.762376 z m -44.17822,0 c -5.920792,0 -11.841584,0 -17.762376,0 0,5.920792 0,11.841584 0,17.762376 5.920792,0 11.841584,0 17.762376,0 0,-5.920792 0,-11.841584 0,-17.762376 z m 44.17822,-22.316833 c -5.920792,0 -11.841585,0 -17.762377,0 0,5.920792 0,11.841585 0,17.762377 5.920792,0 11.841585,0 17.762377,0 0,-5.920792 0,-11.841585 0,-17.762377 z m -22.316832,0 c -5.920792,0 -11.841585,0 -17.762377,0 0,5.920792 0,11.841585 0,17.762377 5.920792,0 11.841585,0 17.762377,0 0,-5.920792 0,-11.841585 0,-17.762377 z" />
-    </svg>
-  </div>
-)
-
 class HoverNav extends React.Component {
 
   constructor(props) {
@@ -173,21 +164,6 @@ class FirstUserBox extends React.Component {
   }
 }
 
-class InstallBox extends React.Component {
-
-  constructor(props) {
-    super(props)
-  }
-
-  render() {
-    return (
-      <div>
-        
-      </div>
-    )
-  }
-}
-
 class MaintenanceBox extends React.Component {
 
   constructor(props) {
@@ -207,46 +183,65 @@ class DeviceCard extends React.Component {
 
     this.state = {
 
-      selectedUserIndex: -1,
       toggle: false,
       horizontalExpanded: false,
+
+      boot: null,
+      storage: null,
+      users: null,
     }
 
-    this.mounted = false
+    this.unmounted = false
 
     this.model = '个人计算机'
     this.logoType = Computer
     this.serial = '未知序列号'
-    this.address = props.address
-    this.users = props.users
+    this.address = props.device.address
 
-    debug('device card, props.device', props.device)
-
-    if (props.name) {
-
-      let split = props.name.split('-')
+    if (props.device.name) {
+      let split = props.device.name.split('-')
       if (split.length === 3 && split[0] === 'wisnuc') {
-
         if (split[1] === 'ws215i') {
           this.model = 'WS215i'
           this.logoType = Barcelona
         }
-
         this.serial = split[2]
       }
     } 
 
-    ipcRenderer.send('setServerIp', props.address)
+    ipcRenderer.send('setServerIp', props.device.address)
 
-    if (!this.users) {
-      request.get(`http://${props.address}:3000/system/storage`)
+    this.refresh = () => {
+
+      request.get(`http://${props.device.address}:3000/system/storage`)
         .set('Accept', 'application/json')
         .end((err, res) => {
+          if (this.unmounted) return
+          this.setState(state => Object.assign({}, state, { 
+            storage: (err || !res.ok) ? 'ERROR' : res.body
+          }))
+        })
 
-          let storage = (err || !res.ok) ? 'ERROR' : res.body
-          this.setState(Object.assign({}, this.state, { storage }))
+      request.get(`http://${props.device.address}:3721/login`)
+        .set('Accept', 'application/json')
+        .end((err, res) => {
+          if (this.unmounted) return
+          this.setState(state => Object.assign({}, state, { 
+            users: (err || !res.ok) ? 'ERROR' : res.body 
+          }))
+        })
+
+      request.get(`http://${props.device.address}:3000/system/boot`)
+        .set('Accept', 'application/json')
+        .end((err, res) => {
+          if (this.unmounted) return
+          this.setState(state => Object.assign({}, state, {
+            boot: (err || !res.ok) ? 'ERROR' : res.body
+          }))
         })
     }
+
+    this.refresh()
 
     this.onBoxResize = resize => {
       if ((resize === 'VEXPAND' && this.state.toggle === false) || (resize === 'VSHRINK' && this.state.toggle === true))
@@ -256,12 +251,12 @@ class DeviceCard extends React.Component {
     }
   }
 
-  componentDidMount() {
-    this.mounted = true
+  componentWillUpdate(nextProps, nextState) {
+    debug('componentWillUpdate', nextProps, nextState)
   }
 
   componentWillUnmount() {
-    this.mounted = false
+    this.unmounted = true
   }
 
   componentWillEnter(callback) {
@@ -272,30 +267,46 @@ class DeviceCard extends React.Component {
     this.props.onWillLeave(ReactDOM.findDOMNode(this), callback)
   }
 
-  selectedUsername() {
-    if (this.users && this.users.length && this.state.selectedUserIndex >= 0 && this.state.selectedUserIndex < this.users.length) {
-      return this.users[this.state.selectedUserIndex].username
-    }
-  }
-
   renderFooter() {
 
-    if (this.props.boot && (this.props.boot.state === 'normal' || this.props.boot.state === 'alternative') && this.users && this.users.length !== 0) 
+    if (this.state.boot === null || this.state.storage === null || this.state.users === null) {
+      return <div />
+    }
+
+    if (this.state.boot === 'ERROR' || this.state.storage === 'ERROR') {
+      return (
+        <div style={{width: '100%', height: 64, backgroundColor: '#FFF', display: 'flex', alignItems: 'center', boxSizing: 'border-box', paddingLeft: 64}}>
+          无法与该设备通讯，它可能刚刚离线。 
+        </div>
+      )
+    }
+
+    // if we have user
+    if (this.state.users && Array.isArray(this.state.users) && this.state.users.length !== 0) 
       return (
         <UserBox 
           style={{width: '100%', backgroundColor: '#FFF', transition: 'all 300ms'}} 
           color={this.props.backgroundColor}
-          users={this.users}
-          username={this.selectedUsername()}
+          users={this.state.users}
           onResize={this.onBoxResize}
         />
       )
 
-    if (!this.state.storage) return <div /> // busybox
+    // if we have no user
+    if (this.state.users && Array.isArray(this.state.users) && this.state.users.length === 0)
+      return (
+        <div>No User</div>
+      )
 
-    if (this.props.boot && this.props.boot.state === 'maintenance') {
-      if (!this.props.boot.lastFileSystem)
-        return <GuideBox address={this.address} storage={this.state.storage} onResize={this.onBoxResize} />
+    if (this.state.boot && this.state.boot.state === 'maintenance') {
+      if (!this.state.boot.lastFileSystem)
+        return (
+          <GuideBox 
+            address={this.props.device.address} 
+            storage={this.state.storage} 
+            onResize={this.onBoxResize} 
+          />
+        )
       else
         return <MaintenanceBox />
     } 
@@ -354,7 +365,9 @@ class DeviceCard extends React.Component {
                   color: '#FFF', 
                   marginBottom: this.state.toggle ? 0 : 12,
                 }}>{this.model}</div>
-                <div style={{fontSize: 14, color: '#FFF', marginBottom: 12, opacity: 0.7}}>{this.address}</div>
+                <div style={{fontSize: 14, color: '#FFF', marginBottom: 12, opacity: 0.7}}>
+                  {this.props.device.address}
+                </div>
                 { !this.state.toggle && <div style={{fontSize: 14, color: '#FFF', marginBottom: 16, opacity: 0.7}}>{this.serial}</div> }
               </div>
               </div>
@@ -536,12 +549,6 @@ class Login extends React.Component {
         key: `login-device-card-${this.state.selectedDeviceIndex}`,
 
         device: this.props.devices.find(dev => dev.address === device.address),
-
-        boot: device.boot,
-        storage: device.storage,
-        name: device.name,
-        address: device.address,
-        users: device.users,
 
         backgroundColor: colorArray[this.state.selectedDeviceIndex % colorArray.length],
 
