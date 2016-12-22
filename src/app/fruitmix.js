@@ -34,7 +34,11 @@ global.$ = global.jQuery = global.jQuery || require('jquery')
 // root component
 const App = () => (
   <MuiThemeProvider muiTheme={getMuiTheme(lightBaseTheme)}>
-    { window.store.getState().login.state === 'LOGGEDIN' ? (<Main showAppBar={window.store.getState().view.showAppBar}/>) : <Login /> }
+    { 
+      window.store.getState().login.state === 'LOGGEDIN' ? 
+      <Main showAppBar={window.store.getState().view.showAppBar} /> : 
+      <Login devices={window.store.getState().mdns}/> 
+    }
   </MuiThemeProvider>
 )
 

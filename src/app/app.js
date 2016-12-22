@@ -5,7 +5,7 @@
 
 console.log('localStorage.debug, old', localStorage.debug)
 
-localStorage.debug = 'main,lib:*,view:*,app:*,reducer:*'
+localStorage.debug = 'main,lib:*,view:*,app:*,reducer:*,component:*'
 
 console.log('localStorage.debug, new', localStorage.debug)
 
