@@ -157,6 +157,10 @@ class Login extends React.Component {
     }
   }
 
+
+  componentWillUnmount() {
+    clearInterval(this.initTimer)
+  }
   componentWillReceiveProps(nextProps) {
     if (nextProps.devices !== this.props.devices)
       debug('devices changed', this.props.devices, nextProps.devices)

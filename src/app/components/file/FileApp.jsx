@@ -1247,12 +1247,20 @@ class FileApp extends React.Component {
       this.rowCtrlClick(uuid, e)
     }
     else {
+    	let containerDom = document.getElementById('fileListContainer')
+    	let maxLeft = containerDom.offsetLeft +  containerDom.clientWidth - 112
+    	let x = e.clientX>maxLeft?maxLeft:e.clientX
+    	let maxTop = containerDom.offsetTop + containerDom.offsetHeight -352
+    	let y = e.clientY>maxTop?maxTop:e.clientY
+    	console.log(maxTop)
+    	console.log(e.clientY)
       // multi-selected, just context menu
       if (this.state.list.filter(item => item.selected).length > 1) {
+
         this.setState(state =>
           Object.assign({}, state, {
-            clientX: e.clientX,
-            clientY: e.clientY,
+            clientX: x,
+            clientY: y,
             contextMenu: true
           }))
       }
@@ -1261,8 +1269,8 @@ class FileApp extends React.Component {
         // use function version of setState
         this.setState(state =>
           Object.assign({}, state, {
-            clientX: e.clientX,
-            clientY: e.clientY,
+            clientX: x,
+            clientY: y,
             contextMenu: true
           }))
       }
@@ -1397,6 +1405,7 @@ class FileApp extends React.Component {
 
 		return (
       <div style={{ width: '100%', height: '100%', backgroundColor:'#EEE' }}>
+      	{/*file table title*/}
         <div style={{width: '100%', height:40, backgroundColor:'#FFF',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
           <div style={{flex: '0 0 120px'}} />
@@ -1405,6 +1414,7 @@ class FileApp extends React.Component {
           <div style={{flex: '0 0 160px', fontSize: 14, opacity: 0.54, textAlign: 'right', marginRight: 24 + 16 /* 16 supposed to be scrollbar width */ }}>大小</div>
         </div>
         <Divider style={{marginLeft: 120}} />
+      	{/*file table*/}
         <div style={{width: '100%', height: 'calc(100% - 40px)', overflowY: 'scroll', backgroundColor: '#FFF', display: 'flex', flexDirection: 'column'}}>
           { this.renderList() }
           <div style={{flex:'1 0 96px', backgroundColor: '#FFF'}}
@@ -1413,8 +1423,9 @@ class FileApp extends React.Component {
             }}
           />
         </div>
+      	{/*upload button*/}
         <FileUploadButton path={this.state.path} style={{position: 'absolute', right:48, bottom:48}} />
-
+      	{/*right click menu*/}
         { this.state.contextMenu && (
           <div
             style={{position: 'fixed', top: 0, left: 0, width:'100%', height:'100%', zIndex:2000}}
@@ -1486,6 +1497,7 @@ class FileApp extends React.Component {
 
         {/* false && this.renderLeftNav() */}
 
+      	{/*left file app container*/}
         <div id='layout-middle-container'
           style={{
             position: 'absolute',
@@ -1504,8 +1516,7 @@ class FileApp extends React.Component {
             breadCrumb={this.renderBreadCrumb()}
             suppressed={true || !this.props.maximized}
             toggleLeftNav={this.toggleLeftNav}
-            leftNav={this.state.leftNav}
-          >
+            leftNav={this.state.leftNav}>
             {this.state.navContext=='HOME_DRIVE' && <IconButton iconStyle={toolbarStyle.activeIcon}
               onTouchTap={() => this.setState(Object.assign({}, this.state, {
                 createNewFolder: true
@@ -1530,7 +1541,7 @@ class FileApp extends React.Component {
             backgroundColor: '#EEEEEE',
             display:'flex'
           }}>
-
+          	{/*left navigation*/}
             <div style={{
               position: 'absolute',
               width: LEFTNAV_WIDTH,
@@ -1610,7 +1621,7 @@ class FileApp extends React.Component {
                 />
               </Menu>
             </div>
-
+          	{/*file list*/}
             <div style={{
               // for suppressed leftNav, TODO
               marginLeft: this.state.leftNav ? LEFTNAV_WIDTH : 0,
@@ -1619,13 +1630,14 @@ class FileApp extends React.Component {
               width: '100%',
               height: '100%',
               backgroundColor: '#FAFAFA', //'yellow',
-            }}>
+            }}
+            	id='fileListContainer'
+            >
               { this.renderListView() }
             </div>
           </div>
-
         </div>
-
+      	{/*right detail container*/}
         <div
           style={{
             width: detailWidth,
