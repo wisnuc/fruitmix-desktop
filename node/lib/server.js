@@ -28,8 +28,6 @@ const requestGet = (url, qs, token, callback) => {
 
   request.get(opts, (err, res) => {
 
-    debug('requestGet response', err, res.statusCode, res.body)
-
     if (err) return callback(err)
     if (res.statusCode !== 200) {
       let e = new Error('http status code not 200')

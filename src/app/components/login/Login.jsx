@@ -22,49 +22,6 @@ import DeviceCard from './DeviceCard'
 import { command } from '../../lib/command' 
 import css  from  '../../../assets/css/login'
 
-class FirstUserBox extends React.Component {
-
-  constructor(props) {
-    super(props)
-    this.state = {
-      expanded: false
-    }
-  }
-
-  render() {
-    return (
-      <div style={{width: '100%'}}>
-        <div style={{width: '100%', height: '100%'}}>
-          <div style={{width: '100%', height: this.state.expanded ? 320 : 0, transition: 'height 300ms', overflow: 'hidden', backgroundColor: '#FFF',
-            display: 'flex', flexDirection: 'column', alignItems: 'flex-start', boxSizing: 'border-box', paddingLeft: 64}}>
-            
-            <div style={{marginTop: 34, fontSize: 24, color: '#000', opacity: 0.54}}>创建第一个用户</div>
-            <div style={{marginTop: 8, marginBottom: 12, fontSize: 20, color: '#000', opacity: 0.54}}>该用户将成为系统中最高权限的管理员</div>
-            <TextField hintText='用户名'/>
-            <TextField hintText='密码' />
-            <TextField hintText='确认密码' />
-            <div style={{display: 'flex'}}>
-              <FlatButton label='确认' />
-              <FlatButton label='取消' onTouchTap={() => {
-                this.setState(Object.assign({}, this.state, { expanded: false }))
-                this.props.onResize('VSHRINK') 
-              }}/>
-            </div>
-          </div>
-          <div style={{width: '100%', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FAFAFA'}}>
-            <div style={{marginLeft: 16}}>该设备已安装WISNUC OS，但尚未创建用户。</div>
-            <FlatButton style={{marginRight: 16}} label='创建用户' disabled={this.state.expanded} onTouchTap={() => {
-              this.setState(Object.assign({}, this.state, { expanded: true }))
-              this.props.onResize('VEXPAND')
-              // setTimeout(() => this.props.onResize('HEXPAND'), 350)
-            }}/>
-          </div>
-        </div>
-      </div>
-    )
-  }
-}
-
 const colorArray = [ indigo900, cyan900, teal900, lightGreen900, lime900, yellow900 ]
 
 class Login extends React.Component {

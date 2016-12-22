@@ -19,6 +19,7 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme'
 //import provider TODO
 import Login from './components/login/Login'
 import Main from './components/main/Main'
+import Maintenance from './components/maintenance/Maintenance'
 
 const debug = Debug('app')
 
@@ -35,9 +36,11 @@ global.$ = global.jQuery = global.jQuery || require('jquery')
 const App = () => (
   <MuiThemeProvider muiTheme={getMuiTheme(lightBaseTheme)}>
     { 
-      window.store.getState().login.state === 'LOGGEDIN' ? 
-      <Main showAppBar={window.store.getState().view.showAppBar} /> : 
-      <Login devices={window.store.getState().mdns}/> 
+      window.store.getState().maintenance ? 
+        <Maintenance /> :
+        window.store.getState().login.state === 'LOGGEDIN' ? 
+          <Main showAppBar={window.store.getState().view.showAppBar} /> : 
+          <Login devices={window.store.getState().mdns}/> 
     }
   </MuiThemeProvider>
 )

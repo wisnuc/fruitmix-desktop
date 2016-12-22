@@ -1,14 +1,19 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import { ipcRenderer } from 'electron'
+import { ipcRenderer, clipboard } from 'electron'
 import request from 'superagent'
 import Debug from 'debug'
 const debug = Debug('component:DeviceCard')
 
-import { Paper } from 'material-ui'
+import { Paper, FlatButton, RaisedButton, IconButton, Dialog } from 'material-ui'
 import NavigationChevronLeft from 'material-ui/svg-icons/navigation/chevron-left'
 import NavigationChevronRight from 'material-ui/svg-icons/navigation/chevron-right'
+import { grey700 } from 'material-ui/styles/colors'
+
+import keypress from '../common/keypress'
+
+import ErrorBox from './ErrorBox'
 import UserBox from './UserBox'
 import GuideBox from './GuideBox'
 
@@ -71,14 +76,46 @@ class HoverNav extends React.Component {
   }
 }
 
-class MaintenanceBox extends React.Component {
+class FirstUserBox extends React.Component {
 
   constructor(props) {
     super(props)
+    this.state = {
+      expanded: false
+    }
   }
 
   render() {
-    return <div style={{width: '100%', backgroundColor: 'red', height: 64}}>This is MaintenanceBox</div>
+    return (
+      <div style={{width: '100%'}}>
+        <div style={{width: '100%', height: '100%'}}>
+          <div style={{width: '100%', height: this.state.expanded ? 320 : 0, transition: 'height 300ms', overflow: 'hidden', backgroundColor: '#FFF',
+            display: 'flex', flexDirection: 'column', alignItems: 'flex-start', boxSizing: 'border-box', paddingLeft: 64}}>
+            
+            <div style={{marginTop: 34, fontSize: 24, color: '#000', opacity: 0.54}}>创建第一个用户</div>
+            <div style={{marginTop: 8, marginBottom: 12, fontSize: 20, color: '#000', opacity: 0.54}}>该用户将成为系统中最高权限的管理员</div>
+            <TextField hintText='用户名'/>
+            <TextField hintText='密码' />
+            <TextField hintText='确认密码' />
+            <div style={{display: 'flex'}}>
+              <FlatButton label='确认' />
+              <FlatButton label='取消' onTouchTap={() => {
+                this.setState(Object.assign({}, this.state, { expanded: false }))
+                this.props.onResize('VSHRINK') 
+              }}/>
+            </div>
+          </div>
+          <div style={{width: '100%', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FAFAFA'}}>
+            <div style={{marginLeft: 16}}>该设备已安装WISNUC OS，但尚未创建用户。</div>
+            <FlatButton style={{marginRight: 16}} label='创建用户' disabled={this.state.expanded} onTouchTap={() => {
+              this.setState(Object.assign({}, this.state, { expanded: true }))
+              this.props.onResize('VEXPAND')
+              // setTimeout(() => this.props.onResize('HEXPAND'), 350)
+            }}/>
+          </div>
+        </div>
+      </div>
+    )
   }
 }
 
@@ -117,37 +154,29 @@ class DeviceCard extends React.Component {
 
     ipcRenderer.send('setServerIp', props.device.address)
 
+    this.requestGet = (port, ep, propName) =>
+      request.get(`http://${this.props.device.address}:${port}/${ep}`)
+        .set('Accept', 'application/json')
+        .end((err, res) => {
+          if (this.unmounted) return
+          this.setState(state => { 
+            let nextState = Object.assign({}, state) 
+            nextState[propName] = err ? err : !res.ok ? new Error('request bad response') : res.body
+            return nextState
+          })
+        })
+
     this.refresh = () => {
 
-      request.get(`http://${props.device.address}:3000/system/storage`)
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          if (this.unmounted) return
-          this.setState(state => Object.assign({}, state, { 
-            storage: (err || !res.ok) ? 'ERROR' : res.body
-          }))
-        })
+      if (this.unmounted) return
 
-      request.get(`http://${props.device.address}:3721/login`)
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          if (this.unmounted) return
-          this.setState(state => Object.assign({}, state, { 
-            users: (err || !res.ok) ? 'ERROR' : res.body 
-          }))
-        })
+      // clear data
+      this.setState(state => Object.assign({}, state, { boot: null, storage: null, users: null }))
 
-      request.get(`http://${props.device.address}:3000/system/boot`)
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          if (this.unmounted) return
-          this.setState(state => Object.assign({}, state, {
-            boot: (err || !res.ok) ? 'ERROR' : res.body
-          }))
-        })
+      this.requestGet(3000, 'system/boot', 'boot')
+      this.requestGet(3000, 'system/storage', 'storage')
+      this.requestGet(3721, 'login', 'users')
     }
-
-    this.refresh()
 
     this.onBoxResize = resize => {
       if ((resize === 'VEXPAND' && this.state.toggle === false) || (resize === 'VSHRINK' && this.state.toggle === true))
@@ -155,14 +184,54 @@ class DeviceCard extends React.Component {
       else if (resize === 'HEXPAND' || resize === 'HSHRINK')
         this.props.onResize(resize)
     }
+
+    this.refresh()
   }
 
+  /**
   componentWillUpdate(nextProps, nextState) {
     debug('componentWillUpdate', nextProps, nextState)
   }
+  **/
+
+  componentDidMount() {
+
+    // create keypress listener
+    this.keypress = new keypress.Listener()
+
+    // listen window keydown keyup event
+    window.addEventListener('keydown', this.keypress)
+    window.addEventListener('keyup', this.keypress)
+
+    this.keypress.sequence_combo('up up down down left right left right b a enter', () => {
+
+      let text = 'The Contra Code was actually first used in Gradius for NES in 1986 by Konami.'
+      console.log(text)
+
+      window.store.dispatch({
+        type: 'ENTER_MAINTENANCE',
+        data: {
+          device: this.props.device,
+          boot: this.state.boot,
+          storage: this.state.storage,
+        }
+      }) 
+    })
+  }
 
   componentWillUnmount() {
+
     this.unmounted = true
+
+    // clean up keypress
+    this.keypress.reset()
+    this.keypress.stop_listening()
+    this.keypress.destroy()
+    this.keypress = null
+
+    // remove listener
+    window.removeEventListener('keydown', this.keypress, false)
+    window.removeEventListener('keyup', this.keypress, false)
   }
 
   componentWillEnter(callback) {
@@ -173,50 +242,108 @@ class DeviceCard extends React.Component {
     this.props.onWillLeave(ReactDOM.findDOMNode(this), callback)
   }
 
+  // this is the logic branching place
   renderFooter() {
 
     if (this.state.boot === null || this.state.storage === null || this.state.users === null) {
-      return <div />
-    }
-
-    if (this.state.boot === 'ERROR' || this.state.storage === 'ERROR') {
       return (
-        <div style={{width: '100%', height: 64, backgroundColor: '#FFF', display: 'flex', alignItems: 'center', boxSizing: 'border-box', paddingLeft: 64}}>
-          无法与该设备通讯，它可能刚刚离线。 
+        <div style={{width: '100%', height: 64, backgroundColor: '#FFF', 
+          display: 'flex', alignItems: 'center', boxSizing: 'border-box', paddingLeft: 64}}>
+          通讯中....
         </div>
       )
     }
 
-    // if we have user
-    if (this.state.users && Array.isArray(this.state.users) && this.state.users.length !== 0) 
+    if (this.state.boot instanceof Error || this.state.storage instanceof Error) {
       return (
-        <UserBox 
-          style={{width: '100%', backgroundColor: '#FFF', transition: 'all 300ms'}} 
-          color={this.props.backgroundColor}
-          users={this.state.users}
-          onResize={this.onBoxResize}
-        />
+        <div style={{width: '100%', height: 64, backgroundColor: '#FFF', display: 'flex', alignItems: 'center', boxSizing: 'border-box', paddingLeft: 64}}>
+          无法与该设备通讯，它可能刚刚离线或正在启动。 
+        </div>
       )
+    }
+    // not both boot and storage are OK
 
-    // if we have no user
-    if (this.state.users && Array.isArray(this.state.users) && this.state.users.length === 0)
-      return (
-        <div>No User</div>
-      )
-
-    if (this.state.boot && this.state.boot.state === 'maintenance') {
-      if (!this.state.boot.lastFileSystem)
+    // if we have user array (not error)
+    if (this.state.users && Array.isArray(this.state.users)) {
+      if (this.state.users.length !== 0) 
         return (
-          <GuideBox 
-            address={this.props.device.address} 
-            storage={this.state.storage} 
-            onResize={this.onBoxResize} 
+          <UserBox 
+            style={{width: '100%', backgroundColor: '#FFF', transition: 'all 300ms'}} 
+            color={this.props.backgroundColor}
+            users={this.state.users}
+            onResize={this.onBoxResize}
           />
         )
       else
-        return <MaintenanceBox />
-    } 
-    return <div />
+        return <div>No User </div>
+    }
+    // now boot and storage ready, users should be error
+
+
+    // if boot state is normal or alternative and users is ERROR, this is undefined case, should display errorbox
+    if ((this.state.boot.state === 'normal' || this.state.boot.state === 'alternative') && this.state.users instanceof Error) 
+      return (
+        <ErrorBox 
+          text='系统启动但应用服务无法连接，请重启服务器。'  
+          error={JSON.stringify({
+            boot: this.state.boot,
+            storage: this.state.storage,
+            users: this.state.users
+          }, null, '  ')} 
+        />
+      )
+    // now boot state should not be normal or alternative, must be maintenance, assert it!
+    if (this.state.boot.state !== 'maintenance')
+      throw new Error('Undefined State: boot state is not maintenance')
+
+    if (!this.state.boot.lastFileSystem) // this is wrong if lastFileSystem null but there is bootable FIXME
+      return (
+        <GuideBox 
+          address={this.props.device.address} 
+          storage={this.state.storage} 
+          onResize={this.onBoxResize} 
+        />
+      )
+
+    return (
+      <div style={{width: '100%', height: 64, backgroundColor: 'rgba(128,128,128,0.8)',
+        display:'flex', alignItems: 'center', justifyContent: 'space-between', 
+        boxSizing: 'border-box', paddingLeft: 64, paddingRight: 64}}>
+        
+        <div style={{color: '#FFF' }}>该设备未能正常启动应用服务。</div>
+        <RaisedButton 
+          label='进入维护模式' 
+          onTouchTap={() => {
+            window.store.dispatch({
+              type: 'ENTER_MAINTENANCE',
+              data: {
+                device: this.props.device,
+                boot: this.state.boot,
+                storage: this.state.storage,
+              }
+            }) 
+          }}
+        />
+      </div>
+    )
+
+    // there are following possibilities:
+    // 1. user forced boot to maintenance mode.
+    //    actions depends on system state, including:
+    //    a) select one bootable system to boot, if any
+    //    b) select one file system and re-init (delete old one)
+    //    c) rebuild a file system to install new one
+    //
+    // 2. the lfs exists but not bootable, either volume missing, or fruitmix deleted.
+    //    a) fix
+    //    b) reinstall wisnuc
+    //    c) rebuild a file system to install new one
+    //    
+    // 3. no bootable file system
+    //    a) reinstall or rebuild
+    // 4. more than one bootable file system
+    //    a) select one file system and boot
+    //    b) reinstall or rebuild
   }
 
   render() {
