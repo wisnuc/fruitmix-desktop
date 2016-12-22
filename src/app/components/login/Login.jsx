@@ -1145,6 +1145,10 @@ class Login extends React.Component {
     }
   }
 
+  componentWillUnmount() {
+    clearInterval(this.initTimer)
+  }
+
   render() {
   	console.log('login render....')
     let type, props = {
