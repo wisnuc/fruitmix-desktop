@@ -6,6 +6,33 @@ import React from 'react'
 import request from 'superagent'
 import { header1Style, header2Style, header2StyleNotFirst, contentStyle } from './styles'
 
+/** sample dmidecode for vmware guest / window host
+  "dmidecode": {
+    "processorFrequency": "3300 MHz",
+    "processorVersion": "Intel(R) Core(TM) i5-4590 CPU @ 3.30GHz",
+    "processorManufacturer": "GenuineIntel",
+    "processorFamily": "Unknown",
+    "chassisAssetTag": "No Asset Tag",
+    "chassisSerialNumber": "None",
+    "chassisVersion": "N/A",
+    "chassisType": "Other",
+    "chassisManufacturer": "No Enclosure",
+    "baseboardAssetTag": "Not Specified",
+    "baseboardSerialNumber": "None",
+    "baseboardVersion": "None",
+    "baseboardProductName": "440BX Desktop Reference Platform",
+    "baseboardManufacturer": "Intel Corporation",
+    "systemUuid": "564DF053-1B08-DB67-0B1F-C654F24CC61B",
+    "systemSerialNumber": "VMware-56 4d f0 53 1b 08 db 67-0b 1f c6 54 f2 4c c6 1b",
+    "systemVersion": "None",
+    "systemProductName": "VMware Virtual Platform",
+    "systemManufacturer": "VMware, Inc.",
+    "biosReleaseDate": "07/02/2015",
+    "biosVersion": "6.00",
+    "biosVendor": "Phoenix Technologies LTD"
+  },
+**/
+
 class Device extends React.Component {
 
   constructor(props) {

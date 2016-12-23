@@ -10,15 +10,16 @@ import { ipcRenderer } from 'electron'
 
 import React from 'react'
 import ReactDom from 'react-dom'
+
 import injectTapEventPlugin from 'react-tap-event-plugin'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme'
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
 
 //import provider TODO
-import { Provider } from 'react-redux'
-import Login from './components/login/NewLogin'
+import Login from './components/login/Login'
 import Main from './components/main/Main'
+import Maintenance from './components/maintenance/Maintenance'
 
 const debug = Debug('app')
 
@@ -34,7 +35,13 @@ global.$ = global.jQuery = global.jQuery || require('jquery')
 // root component
 const App = () => (
   <MuiThemeProvider muiTheme={getMuiTheme(lightBaseTheme)}>
-    { window.store.getState().login.state === 'LOGGEDIN' ? (<Main showAppBar={window.store.getState().view.showAppBar}/>) : <Login /> }
+    { 
+      window.store.getState().maintenance ? 
+        <Maintenance /> :
+        window.store.getState().login.state === 'LOGGEDIN' ? 
+          <Main showAppBar={window.store.getState().view.showAppBar} /> : 
+          <Login devices={window.store.getState().mdns}/> 
+    }
   </MuiThemeProvider>
 )
 
@@ -43,7 +50,6 @@ const render = () => ReactDom.render(<App/>, document.getElementById('app'))
 
 // subscribe render
 store.subscribe(() => {
-  // console.log(store.getState())
   render()
 })
 
@@ -75,8 +81,6 @@ setInterval(() => {
 
 // 
 ipcRenderer.on('command', (e, {id, err, data}) => {
-
-  // console.log(id, err, data)
 
   store.dispatch({
     type: 'COMMAND_RETURN',

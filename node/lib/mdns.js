@@ -39,6 +39,7 @@ class StationBrowser extends EventEmitter {
 
     super()
     browser.on('update', data => {
+        console.log(data)
 
       debug('mdns update', data)
 

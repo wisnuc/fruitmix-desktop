@@ -2,25 +2,13 @@ import path from 'path'
 import fs from'fs'
 
 import Debug from 'debug'
-import { app, ipcMain, Menu, Tray } from 'electron'
-// import rimraf from'rimraf'
-// import mkdirp from'mkdirp'
-
-// synchronized init, preparing paths
-// rimraf.sync(path.join(__dirname, 'tmp'))
-// mkdirp.sync(path.join(__dirname, 'tmp'))
-// mkdirp.sync(path.join(__dirname, 'media'))
-// mkdirp.sync(path.join(__dirname, 'download'))
-
-// global.tmpPath = path.join(__dirname, 'tmp')
-// global.mediaPath = path.join(__dirname, 'media')
-// global.downloadPath = path.join(path.join(__dirname, 'download'))
+import { app } from 'electron'
 
 import store from './serve/store/store'
 import configObserver from './lib/config'
-import { registerCommandHandler } from './lib/command'
-
 import adapter from './lib/adapter'
+
+import { registerCommandHandler } from './lib/command'
 import migration from './lib/migration'
 import userModule from './lib/user'
 import systemModule from './lib/system'
@@ -44,8 +32,6 @@ const debug = Debug('main')
 
 var mocha = false
 
-const cwd = process.cwd()
-
 // initialize mdns
 mdns().on('stationUpdate', device => {
   store.dispatch({
@@ -56,7 +42,7 @@ mdns().on('stationUpdate', device => {
 
 // read config file
 try {
-  let raw = fs.readFileSync(path.join(__dirname, 'server'))
+  let raw = fs.readFileSync(path.join(tmpPath, 'server'))
   let config = JSON.parse(raw) 
   store.dispatch({
     type: 'CONFIG_INIT',
@@ -64,6 +50,7 @@ try {
   }) 
 }
 catch (e) { // e.code === 'ENOENT' && e.syscall === 'read'
+  console.log(e)
 }
 
 store.subscribe(configObserver)

@@ -1,199 +1,231 @@
- /**
+/**
  * @component Index
  * @description 首页组件
- * @time 2016-4-5
+ * @time 2016-10-23
  * @author liuhua
- **/
- 'use strict'
-// require core module
-import React, { findDOMNode, Component, PropTypes } from 'react'
-import Base from '../../utils/Base'
-// require action
-import Login from'../../actions/action'
-//require material
-import { Paper, TextField, FlatButton, CircularProgress, Snackbar, SelectField, MenuItem } from 'material-ui'
-import getMuiTheme from 'material-ui/styles/getMuiTheme'
-import darkBaseTheme from 'material-ui/styles/baseThemes/darkBaseTheme'
-import baseTheme from 'material-ui/styles/baseThemes/lightBaseTheme'
+**/
 
-//import CSS
+import { ipcRenderer } from 'electron'
+import { TweenMax } from 'gsap'
+import Debug from 'debug'
+const debug = Debug('component:Login')
+
+import React, { Component, PropTypes } from 'react'
+import ReactDOM from 'react-dom'
+import TransitionGroup from 'react-addons-transition-group'
+
+import { TextField, FlatButton } from 'material-ui'
+import { indigo900, cyan500, cyan900, teal900, lightGreen900, lime900, yellow900 } from 'material-ui/styles/colors'
+import InfoCard from './InfoCard'
+import DeviceCard from './DeviceCard'
+
+import { command } from '../../lib/command' 
 import css  from  '../../../assets/css/login'
-//import Action
-import Action from '../../actions/action'
-//import component
-import Device from './Device'
-import {orange500, blue500} from 'material-ui/styles/colors'
 
-// define Index component
-class Index extends React.Component {
+const colorArray = [ indigo900, cyan900, teal900, lightGreen900, lime900, yellow900 ]
 
-	getChildContext() {
-		const muiTheme = getMuiTheme(baseTheme)
-		return {muiTheme}
-	}
+class Login extends React.Component {
 
-	componentDidMount() {
+  constructor(props) {
 
-		setTimeout(()=>{
-			ipc.send('getDeviceUsedRecently')
-		},1000)
+    const duration = 0.4
 
-		setTimeout(()=>{
-				if (this.props.state.login.selectIndex == 0 && this.props.state.login.device.length != 0) {
-					this.selectDevice.apply(this,[null,0,false])
-				}
-		},1500)
+    super(props)
 
-		ipc.on('message',(err,message,code)=>{
-			this.props.dispatch(Login.setSnack(message,true))
-			// if (code == 0 ) {
-			// 	this.props.dispatch(Login.loginFailed())
-			// }
-		})
+    this.state = {
+      devices: [],
+      selectedDeviceIndex: -1,
+      expanded: false,
+      deviceName: null 
+    }
 
-	}
+    this.initTimer = setInterval(() => {
 
-	componentWillUnmount() {
-		clearInterval(this.find)
-	}
+      if (window.store.getState().login.device.length === 0) return
+      
+      clearInterval(this.initTimer)       
+      delete this.initTimer
 
-	submit() {
-		let username = this.refs.username.input.value
-		let password = this.refs.password.input.value
-		ipc.send('login',username,password)
-	}
+      debug('init devices', window.store.getState().login.device)
 
-	render() {
-		var _this = this
-		let findDevice = this.props.state.view.findDevice
-		let loginContent
-		let busy = (this.props.state.login.state ==='BUSY')
-		let device = this.props.state.login.device
-		const styles = {
-		  underlineStyle: {
-		    borderColor: orange500,
-		  },
-		}
-		//login
-		if (!busy) {
-			loginContent = (
-				<div className='login-container'>
-					<div className='login-device-title'>已发现 {device.length} 台 wisnuc</div>
-					<div className='login-device-list'>
+      let nextState = Object.assign({}, this.state, { devices: window.store.getState().login.device})
+      if (this.state.selectedDeviceIndex == -1) {
+      	Object.assign(nextState,{selectedDeviceIndex:0})
+      }
+      this.setState(nextState)
 
-						<SelectField iconStyle={{fill:'#666'}} underlineStyle={{borderColor:'rgba(255,255,255,0)'}}  value={this.getValue()} onChange={this.selectDevice.bind(this)}>
-							{device.map((item,index)=>(
-								<MenuItem innerDivStyle={{overflow:'hidden',textOverflow:'ellipsis',maxWidth:'200px'}} key={index} value={index} primaryText={_this.getTitle(item)}></MenuItem>
-							))}
-						</SelectField>
+      debug('devices initialized', nextState)
 
-						<TextField underlineStyle={{borderColor:'#999'}} underlineFocusStyle={styles.underlineStyle} hintStyle={{color:'#999'}} ref='username' style={{marginBottom: 10}} hintText="用户名" type="username" />
-						<TextField underlineStyle={{borderColor:'#999'}} underlineFocusStyle={styles.underlineStyle} hintStyle={{color:'#999'}} ref='password' style={{marginBottom: 10}} hintText="密码" type="password" onKeyDown={this.kenDown.bind(this)}/>
-						<div className='login-button'>
-							<div onTouchTap={this.toggleDevice.bind(this)}>设置</div>
-							<div onTouchTap={/* this.submit.bind(this)*/ () => console.log('hello')}>登录</div>
-						</div>
-					</div>
-				</div>
-				)
-		}else {
-			loginContent= (
-				<Paper style={{alignItems:'center'}} className='login-container' zDepth={4}>
-					<CircularProgress />
-				</Paper>
-				)
-		}
+    }, 2000)
 
-		//add device
-		let addDevice = (
-			<div className='setting-serverIP-container'>
-				<TextField underlineStyle={{borderColor:'#999'}} underlineFocusStyle={styles.underlineStyle} hintStyle={{color:'#999'}} ref='serverIP' hintText='serverIP' fullWidth={true}/>
-				<div className='login-button'>
+    this.selectNextDevice = () => {
+     
+      let { devices, selectedDeviceIndex } = this.state
+      let index
 
-							<div onTouchTap={this.toggleAddDevice.bind(this)}>取消</div>
-							<div onTouchTap={this.submitServer.bind(this)}>提交</div>
-				</div>
-			</div>
-			)
-		let deviceList = (
-				<div className='add-device-list-container'>
-						{device.map(item=>(
-							<Device key={item.address} item={item}></Device>
-						))}
-						</div>
-			)
+      if (devices.length === 0) 
+        index = -1
+      else if (selectedDeviceIndex === -1)
+        index = 0
+      else if (selectedDeviceIndex >= devices.length - 2)
+        index = devices.length - 1
+      else 
+        index = selectedDeviceIndex + 1
 
-		let findDeviceContent = (
-				<div className='find-device-container' style={{maxHeight:document.body.clientHeight}}>
-					<div className='add-device-title'>已发现 {device.length} 台 wisnuc</div>
-					<div className='add-device-content'>
-						{this.props.state.view.addDevice?addDevice:deviceList}
-					</div>
-					<div className='add-device-button' style={this.props.state.login.addDevice?{display:'none'}:{}}>
-						<span  onClick={this.toggleDevice.bind(this)}>返回</span>
-						<span onClick={this.toggleAddDevice.bind(this)}>添加设备</span>
-					</div>
-				</div>
-			)
+      if (index === selectedDeviceIndex) return
 
-		return (
-			<div className='index-frame' key='login'>
-				{!!findDevice && findDeviceContent}
-				{!findDevice && loginContent}
-				<Snackbar open={this.props.state.snack.open} message={this.props.state.snack.text} autoHideDuration={3000} onRequestClose={this.cleanSnack.bind(this)}/>
-			</div>
-			)
-	}
+      let nextState = Object.assign({}, this.state, { selectedDeviceIndex: index, expanded: false })
+      this.setState(nextState)
 
-	kenDown(e) {
-		if (e.nativeEvent.which == 13) {
-			this.submit()
-		}
-	}
+      debug('select next device', selectedDeviceIndex, index)
+    }
 
-	//close snackbar
-	cleanSnack() {
-		this.props.dispatch(Action.cleanSnack())
-	}
+    this.selectPrevDevice = () => {
+     
+      let { devices, selectedDeviceIndex } = this.state
+      let index
 
-	toggleDevice() {
-		this.props.dispatch(Action.toggleDevice())
-	}
+      if (devices.length === 0) 
+        index = -1
+      else if (selectedDeviceIndex <= 1)
+        index = 0
+      else 
+        index = selectedDeviceIndex - 1
 
-	toggleAddDevice() {
-		this.props.dispatch(Action.toggleAddDevice())
-	}
+      if (index === selectedDeviceIndex) return
 
-	submitServer() {
-		let ip = this.refs.serverIP.input.value
-		ipc.send('setServeIp',ip,true,true)
-		this.props.dispatch(Action.toggleAddDevice())
-	}
+      let nextState = Object.assign({}, this.state, { selectedDeviceIndex: index, expanded: false })
+      this.setState(nextState)
 
-	selectDevice(e,index, isStorage) {
-		let s = isStorage==false?false:true
-		let ip = this.props.state.login.device[index].address
-		ipc.send('setServeIp',ip,false, isStorage)
-	}
+      debug('select prev device', selectedDeviceIndex, index)
+    }
+    
 
-	getValue() {
-			return this.props.state.login.selectIndex
-	}
+    // for leaving children, there is no way to update props, but this state is required for animation
+    // so we put it directly in container object, and pass callbacks which can access this state
+    // to the children
+    this.enter = 'right'
 
-	getTitle(item) {
-		if (item.isCustom) {
-			return item.host
-		}
-		let titleArr = item.host.split('-')
-		let title = titleArr[2]
-		title = title.split('.')[0]
+    this.cardWillEnter = (el, callback) => {
 
-		return item.fruitmix=="INITIALIZED"?title:title+"(未配置)"
-	}
+      if (this.enter === 'right') {
+        TweenMax.from(el, duration, {
+          delay: duration,
+          opacity: 0, 
+          right: -150,
+          onComplete: () => callback()
+        })
+      }
+      else {
+        TweenMax.from(el, duration, {
+          delay: duration,
+          opacity: 0, 
+          transformOrigin: 'left center',
+          transform: 'translateZ(-64px) rotateY(45deg)',
+          onComplete: () => callback()
+        })
+      }
+    }
+
+    this.cardWillLeave = (el, callback) => {
+
+      if (this.enter === 'left') {
+        TweenMax.to(el, duration, {
+          opacity: 0, 
+          right: -150,
+          onComplete: () => callback()
+        })
+      }
+      else {
+        TweenMax.to(el, duration, {
+          opacity: 0, 
+          transformOrigin: 'left center',
+          transform: 'translateZ(-64px) rotateY(45deg)',
+          onComplete: () => callback()
+        })
+      }
+    }
+
+    this.navPrev = () => {
+      this.enter = 'left'
+      this.selectPrevDevice()
+    }
+
+    this.navNext = () => {
+      this.enter = 'right'
+      this.selectNextDevice()
+    }
+  }
+
+
+  componentWillUnmount() {
+    clearInterval(this.initTimer)
+  }
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.devices !== this.props.devices)
+      debug('devices changed', this.props.devices, nextProps.devices)
+  }
+
+  render() {
+
+    let type, props = {
+      style: { position: 'absolute', width:'100%', height: '100%'},
+      onWillEnter: this.cardWillEnter,
+      onWillLeave: this.cardWillLeave
+    }
+    
+    if (this.state.devices.length === 0) {
+      type = InfoCard
+      Object.assign(props, { 
+        key: 'init-scanning-device',
+        text: '正在搜索网络上的WISNUC OS设备' 
+      })
+    }
+    else {
+
+      let device = this.state.devices[this.state.selectedDeviceIndex]
+
+      type = DeviceCard
+      Object.assign(props, {
+
+        key: `login-device-card-${this.state.selectedDeviceIndex}`,
+
+        device: this.props.devices.find(dev => dev.address === device.address),
+
+        backgroundColor: colorArray[this.state.selectedDeviceIndex % colorArray.length],
+
+        onNavPrev: this.state.selectedDeviceIndex === 0 ? null : this.navPrev,
+        onNavNext: this.state.selectedDeviceIndex === this.state.devices.length - 1 ? null : this.navNext,
+
+        onResize: resize => {
+          if ((resize === 'HEXPAND' && !this.state.expanded) || (resize === 'HSHRINK' && this.state.expanded))
+            this.setState(Object.assign({}, this.state, { expanded: !this.state.expanded }))
+        }
+      })
+    }
+
+    return (
+      <div 
+        style={{
+          backgroundImage: 'url(../src/assets/images/index/index.jpg)',
+          width: '100%', 
+          height: '100%', 
+          display:'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center'
+        }}
+      >
+        <div style={{marginTop: 160, width: this.state.expanded ? 1024 : 480, backgroundColor: '#BBB', transition: 'width 300ms'}}>
+          <div style={{width: '100%', position: 'relative', perspective: 1000}}>
+            <TransitionGroup>
+              { React.createElement(type, props) }
+            </TransitionGroup>
+          </div>
+        </div>
+      </div>
+    )
+  }
 }
 
-Index.childContextTypes = {
-  muiTheme: React.PropTypes.object.isRequired,
-}
+export default Login
 
-export default Index

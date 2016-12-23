@@ -1,21 +1,20 @@
-var combineReducers = require('redux').combineReducers
+import { combineReducers } from 'redux'
+import setting from './setting'
+import file from './file'
+import media from './media'
 import login from './login'
-var setting = require('./setting')
-var file = require('./file')
-var media = require('./media')
-var share = require('./share')
-var config = require('./config')
+import share from './share'
+import config from './config'
 import server from './server'
 
 const reducer = combineReducers({
   config,
   server,
 	login,
-	setting,
 	file,
-	media,
 	share,
-	// transimission
+	media,
+	setting
 })
 
-module.exports = reducer
+export default reducer

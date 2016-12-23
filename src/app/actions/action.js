@@ -12,18 +12,6 @@ var actions = {
 			type: 'SELECT_ALL_CHILDREN',
 		}
 	},
-	//view
-	toggleDevice() {
-		return {
-			type: 'TOGGLE_DEVICE'
-		}
-	},
-
-	toggleAddDevice() {
-		return {
-			type: 'TOGGLE_ADD_DEVICE'
-		}
-	},
 
 	toggleMenu(index,x,y,selected) {
 		return {
@@ -192,13 +180,6 @@ var actions = {
 		}
 	},
 
-	toggleShare(open) {
-		return {
-				type: 'TOGGLE_SHARE',
-				isOpen: open
-		}
-	},
-
 	cancelUserCheck() {
 		return {
 			type:'CANCEL_USER_CHECK',
@@ -216,13 +197,6 @@ var actions = {
 		return {
 			type: 'REFRESH_STATUS_DOWNLOAD',
 			tasks : tasks
-		}
-	},
-
-	checkUser(uuid,b) {
-		return {
-			type: 'CHECK_USER',
-			uuid: uuid
 		}
 	},
 
