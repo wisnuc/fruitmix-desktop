@@ -28,7 +28,6 @@ function getStyles (leftnav) {
       zIndex: 1000
     },
     photoList: {
-      padding: '16px 15px 0',
       overflow: 'auto',
       position: 'absolute',
       left: 0,

@@ -7,8 +7,20 @@ import PhotoListByDate from './PhotoListByDate';
 import Carousel from './Carousel';
 import PhotoDetail from './PhotoDetail';
 import FadingToAnimate from './FadingToAnimate';
+import LazyloadBox from '../scrollLazyload/LazyloadBox';
+import ScrollFlush from '../scrollLazyload/ScrollFlush';
 
 import { formatDate } from '../../utils/datetime';
+
+/******* 以下是测试代码 ********/
+const dataArr = [];
+
+for (var i = 0; i < 20; i++) {
+  dataArr.push({
+    width: 200,
+    height: 200
+  });
+}
 
 export default class PhotoList extends Component {
   constructor(props) {
@@ -35,10 +47,18 @@ export default class PhotoList extends Component {
       }
     };
 
+    let photos = store.getState().media.data.filter(item => !!item.exifDateTime);
+
     this.state = {
       carouselItems: [],
       activeIndex: false
     };
+    this.photoDates = Array.from(new Set(photos.map(item => formatDate(item.exifDateTime))));
+    this.photoMapDates = this.photoDates.map(date => ({
+      date,
+      photos: this.findPhotosByDate(photos, date)
+    }));
+
 
     this.addListToSelection = (path) => {
       const hasPath = this.state.carouselItems.findIndex(item => item === path) >= 0;
@@ -86,12 +106,6 @@ export default class PhotoList extends Component {
     return { photos: this.photos };
   }
 
-  findDatesByExifDateTime(dataSource) {
-    return dataSource
-      .map(dataItem => formatDate(dataItem.exifDateTime))
-      .filter((date, index, dates) => !index || dates.indexOf(date) === index)
-  }
-
   findPath(items, path) {
     return items.findIndex(item => item === path);
   }
@@ -101,14 +115,18 @@ export default class PhotoList extends Component {
   }
 
   render() {
-    let store = window.store;
-    let dispatch = store.dispatch;
-    let photos = this.photos = store.getState().media.data.slice(0, 200);
-    let photoDates = this.findDatesByExifDateTime(photos);
+    // let store = window.store;
+    // let dispatch = store.dispatch;
+    // let photos = this.photos = store.getState().media.data;
+    // let photoDates = this.findDatesByExifDateTime(photos);
 
     return (
       <div style={ this.props.style }>
-        { photoDates.map((date, index) => (
+        <ScrollFlush
+          list={ this.photoMapDates }
+          pageSize={ 7 } />
+
+        {/* photoDates.map((date, index) => (
           <PhotoListByDate
             style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start', marginBottom: 15 }}
             date={ date }
@@ -119,10 +137,12 @@ export default class PhotoList extends Component {
             removeListToSelection={ this.removeListToSelection }
             key={ date }/>
           ))
-        }
-        { this.renderCarousel() }
+        */}
+        {/* 轮播 */}
+        {/* this.renderCarousel() */}
 
-        { this.renderPhotoDetail(photos) }
+        {/* 查看大图 */}
+        {/* this.renderPhotoDetail(photos) */}
       </div>
     );
   }
