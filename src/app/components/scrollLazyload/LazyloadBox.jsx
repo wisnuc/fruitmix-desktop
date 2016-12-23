@@ -33,8 +33,7 @@ export default class LazyloadBox extends Component {
       left: 0,
       width: '100%',
       height: `${this.state.height}px`,
-      top: `${this.props.actualTop}px`,
-      backgroundColor: `${this.props.bgColor}`
+      top: `${this.props.actualTop}px`
     });
   }
 
@@ -46,23 +45,27 @@ export default class LazyloadBox extends Component {
 
   render() {
     return this.state.visible
-      ? (<div style={ this.getStyle() }></div>)
+      ? (
+          <div style={ this.getStyle() }>
+            {React.createElement(this.props.children.type, {
+              style: { display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start', marginBottom: 15 },
+              key: this.props.key,
+              date: this.props.date,
+              allPhotos: this.props.allPhotos,
+              photos: this.props.list,
+              addListToSelection: this.props.addListToSelection,
+              lookPhotoDetail: this.props.lookPhotoDetail,
+              removeListToSelection: this.props.removeListToSelection
+            })}
+          </div>
+        )
       : null;
-  }
-
-  componentDidMount() {
-    this.node = findDOMNode(this);
-
-    //add(window, 'resize', this.resizeHandler);
-    //add(window, 'scroll', this.scrollHandler);
-  }
-
-  componentWillUnmount() {
-    //remove(window, 'scroll', this.resizeHandler);
   }
 }
 
 LazyloadBox.propTypes = {
+  date: PropTypes.string.isRequired,
+  list: PropTypes.array.isRequired,
   height: PropTypes.number.isRequired,
   actualTop: PropTypes.number.isRequired
 };

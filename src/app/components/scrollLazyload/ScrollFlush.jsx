@@ -1,10 +1,10 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component, PropTypes, Children } from 'react';
 import { findDOMNode } from 'react-dom';
 import { add, remove } from './utils/eventListeners';
 import throttle from './utils/throttle';
 import LazyloadBox from './LazyloadBox';
+import PhotoListByDate from '../photo/PhotoListByDate';
 
-const __BGCOLORS__ = ['red', 'orange', 'yellow', 'green', 'blue', 'lightgreen'];
 const __DELAY__ = 300;
 const __MUSTEXECTIME__ = 200;
 
@@ -90,17 +90,21 @@ export default class ScrollFlush extends Component {
 			style: this.getStyle(this.state.height)
 		}, (
 			<div ref={innerEl => this.innerEl = innerEl}>
-			  {this.state.lazyloadBoxs.map((lazyloadBox, index) => {
-				  return (
-						<LazyloadBox
-						  ref={`lazyloadBox${index}`}
-						  key={index}
-						  height={this.singleItemHeight}
-						  list={lazyloadBox.photos}
-						  actualTop={index * this.singleItemHeight}
-						  bgColor={__BGCOLORS__[index % __BGCOLORS__.length]}/>
-					);
-				})}
+			  {this.state.lazyloadBoxs.map((lazyloadBox, index) => (
+					<LazyloadBox
+						ref={`lazyloadBox${index}`}
+						key={index}
+						height={this.singleItemHeight}
+						date={lazyloadBox.date}
+						list={lazyloadBox.photos}
+						actualTop={index * this.singleItemHeight}
+						allPhotos={this.props.allPhotos}
+            addListToSelection={ this.props.addListToSelection }
+            lookPhotoDetail={ this.props.lookPhotoDetail }
+            removeListToSelection={ this.props.removeListToSelection }>
+						<PhotoListByDate />
+					</LazyloadBox>
+				))}
 			</div>
 		));
 	}

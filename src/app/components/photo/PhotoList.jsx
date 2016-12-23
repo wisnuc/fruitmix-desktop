@@ -47,16 +47,15 @@ export default class PhotoList extends Component {
       }
     };
 
-    let photos = store.getState().media.data.filter(item => !!item.exifDateTime);
-
     this.state = {
       carouselItems: [],
       activeIndex: false
     };
-    this.photoDates = Array.from(new Set(photos.map(item => formatDate(item.exifDateTime))));
+    this.allPhotos = store.getState().media.data.filter(item => !!item.exifDateTime);
+    this.photoDates = Array.from(new Set(this.allPhotos.map(item => formatDate(item.exifDateTime))));
     this.photoMapDates = this.photoDates.map(date => ({
       date,
-      photos: this.findPhotosByDate(photos, date)
+      photos: this.findPhotosByDate(this.allPhotos, date)
     }));
 
 
@@ -123,8 +122,14 @@ export default class PhotoList extends Component {
     return (
       <div style={ this.props.style }>
         <ScrollFlush
-          list={ this.photoMapDates }
-          pageSize={ 7 } />
+          allPhotos={this.allPhotos}
+          addListToSelection={ this.addListToSelection }
+          lookPhotoDetail={ this.lookPhotoDetail }
+          removeListToSelection={ this.removeListToSelection }
+          list={this.photoMapDates}
+          pageSize={7}>
+          <LazyloadBox />
+        </ScrollFlush>
 
         {/* photoDates.map((date, index) => (
           <PhotoListByDate
