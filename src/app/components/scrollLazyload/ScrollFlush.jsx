@@ -31,16 +31,15 @@ export default class ScrollFlush extends Component {
 			bottom: 0,
 			overflow: 'auto'
 		});
-		this.callerChildScrollHandler = () => {
-		  Object
-			  .keys(this.refs)
-				.filter(ref => ref.indexOf('lazyloadBox') >= 0)
-				.forEach(ref => this.refs[ref].scrollHandler(this.node.getBoundingClientRect().width, this.node.scrollTop))
-		}
+		// this.callerChildScrollHandler = () => {
+		//   Object
+		// 	  .keys(this.refs)
+		// 		.filter(ref => ref.indexOf('lazyloadBox') >= 0)
+		// 		.forEach(ref => this.refs[ref].scrollHandler(this.node.getBoundingClientRect().width, this.node.scrollTop))
+		// };
 	  this.scrollHandler = throttle(() => {
 			// 调用子组件scrollHandler
-			this.callerChildScrollHandler();
-
+			//this.callerChildScrollHandler();
 			if (this.isFirstLoad || (!this.isCallering && this.isToBottom())) {
 				if (this.currentPage >= this.pageCount) {
 					alert('没有更多了');
@@ -57,7 +56,6 @@ export default class ScrollFlush extends Component {
 					]
 				}, () => {
 					this.isCallering = false;
-					this.innerEl.style.height = `${this.state.lazyloadBoxs.length * this.singleItemHeight}px`;
 				});
 			}
 			this.isFirstLoad = false;
@@ -81,32 +79,30 @@ export default class ScrollFlush extends Component {
 		return visualHeight + artualScrollTop >= artualHeight;
 	}
 
-	shouldComponentUpdate(nextProps, nextState) {
-		return nextState.lazyloadBoxs.length !== this.state.lazyloadBoxs.length;
-	}
-
 	render() {
     return React.createElement(this.props.nodeName, {
 			style: this.getStyle(this.state.height)
 		}, (
 			<div ref={innerEl => this.innerEl = innerEl}>
-			  {this.state.lazyloadBoxs.map((lazyloadBox, index) => (
-					<LazyloadBox
+			  {this.state.lazyloadBoxs.map((lazyloadBox, index) => {
+					return <LazyloadBox
 						ref={`lazyloadBox${index}`}
 						key={index}
-						height={this.singleItemHeight}
 						date={lazyloadBox.date}
-						list={lazyloadBox.photos}
-						actualTop={index * this.singleItemHeight}
+						list={this.props.list[index].photos}
 						allPhotos={this.props.allPhotos}
-            addListToSelection={ this.props.addListToSelection }
-            lookPhotoDetail={ this.props.lookPhotoDetail }
-            removeListToSelection={ this.props.removeListToSelection }>
+            addListToSelection={this.props.addListToSelection}
+            lookPhotoDetail={this.props.lookPhotoDetail}
+            removeListToSelection={this.props.removeListToSelection}>
 						<PhotoListByDate />
 					</LazyloadBox>
-				))}
+				})}
 			</div>
 		));
+	}
+
+	componentWillReceiveProps() {
+	  //this.isUpdate = true;
 	}
 
 	componentDidMount() {
@@ -114,6 +110,10 @@ export default class ScrollFlush extends Component {
 		this.scrollHandler();
 
 	  add(this.node, 'scroll', this.scrollHandler);
+	}
+
+	componentDidUpdate() {
+		//this.isUpdate && this.scrollHandler();
 	}
 
 	componentWillUnmount() {

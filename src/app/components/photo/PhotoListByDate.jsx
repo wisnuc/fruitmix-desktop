@@ -2,6 +2,7 @@
   PhotoListByDate.jsx
 **/
 
+import { ipcRenderer } from 'electron';
 import React, { Component, PropTypes } from 'react';
 import PhotoItem from './PhotoItem';
 import PhotoSelectDate from './PhotoSelectDate';
@@ -12,7 +13,6 @@ import { formatDate } from '../../utils/datetime';
 export default class PhotoListByDate extends Component {
   constructor(props) {
     super(props);
-
     // this.selectSingleItem1 = (action, itemIndex) => {
     //   let photoItem = this.refs['photoItem' + itemIndex];
     //   let selectDate = this.refs['selectDate'];
@@ -74,7 +74,7 @@ export default class PhotoListByDate extends Component {
   render() {
     let { style, date, photos, lookPhotoDetail } = this.props;
     let icon;
-
+    
     return (
       <div>
         {/* 日期 */}
@@ -117,6 +117,8 @@ export default class PhotoListByDate extends Component {
     this.selectionRefs = Object
       .keys(this.refs)
       .filter(refName => refName.indexOf('photoItem') >= 0);
+
+    ipcRenderer.send('getThumb', this.props.photos.map(item => ({ digest: item.digest })));
   }
 }
 
