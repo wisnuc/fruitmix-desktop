@@ -1,9 +1,5 @@
-import Debug from 'debug'
-
-const debug = Debug('component:treetable')
-
 import React from 'react'
-
+import muiThemeable from 'material-ui/styles/muiThemeable'
 import { Divider, IconButton, Checkbox } from 'material-ui'
 import { pink500 } from 'material-ui/styles/colors'
 import HardwareKeyboardArrowRight from 'material-ui/svg-icons/hardware/keyboard-arrow-right'
@@ -11,6 +7,9 @@ import HardwareKeyboardArrowUp from 'material-ui/svg-icons/hardware/keyboard-arr
 import HardwareKeyboardArrowDown from 'material-ui/svg-icons/hardware/keyboard-arrow-down'
 import NavigationExpandLess from 'material-ui/svg-icons/navigation/expand-less' 
 import NavigationExpandMore from 'material-ui/svg-icons/navigation/expand-more'
+
+import Debug from 'debug'
+const debug = Debug('component:maintenance:treetable')
 
 import prettysize from 'prettysize'
 
@@ -21,9 +20,7 @@ class TreeTable extends React.Component {
     super(props)
 
     this.data = props.data
-    this.state = {
-      expansion: new Set(),
-    }
+    this.state = { expansion: new Set() }
 
     this.toggleExpansion = (item) => {
 
@@ -41,7 +38,7 @@ class TreeTable extends React.Component {
     this.diskUsage = item => {
       if (item.isPartitioned) 
         return `分区使用，分区表类型：${item.partitionTableType}`
-      else if (item.isUsedAsFileSystem) {
+      else if (item.idFsUsage) {
         if (item.isFileSystem) {
           if (item.fileSystemType === 'btrfs')
             return `btrfs磁盘卷设备，卷ID：${item.btrfsVolume}，设备ID：${item.btrfsDevice}`
@@ -96,7 +93,6 @@ class TreeTable extends React.Component {
     this.renderData = () => {
 
       let rows = []
-
       const renderItem = (item, level) => {
 
         rows.push(
@@ -113,15 +109,12 @@ class TreeTable extends React.Component {
             <div style={{flex: '0 0 18px'}}>
               { level === 0 &&
                 <Checkbox 
-                  checked={!!this.props.selection.find(select => select === item)}
-                  onCheck={() => {
-                    console.log('on check')
-                    this.props.onCheck(item)
-                  }}
+                  checked={!!this.props.selection && !!this.props.selection.find(select => select === item)}
+                  onCheck={() => this.props.onCheck(item)}
                   iconStyle={{width:18, marginRight:0}}
                   disableTouchRipple={true} 
                   disableFocusRipple={true} 
-                  disabled={this.props.context !== 'CREATING_NEW_VOLUME' || item.removable === true}
+                  disabled={!this.props.selection || item.removable === true}
                 /> 
               }
             </div>
@@ -195,4 +188,4 @@ class TreeTable extends React.Component {
   }
 }
 
-export default TreeTable
+export default muiThemeable()(TreeTable)
