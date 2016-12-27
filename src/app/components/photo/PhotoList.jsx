@@ -51,13 +51,6 @@ export default class PhotoList extends Component {
       carouselItems: [],
       activeIndex: false
     };
-    this.allPhotos = store.getState().media.data.filter(item => !!item.exifDateTime);
-    this.photoDates = Array.from(new Set(this.allPhotos.map(item => formatDate(item.exifDateTime))));
-    this.photoMapDates = this.photoDates.map(date => ({
-      date,
-      photos: this.findPhotosByDate(this.allPhotos, date)
-    }));
-
 
     this.addListToSelection = (path) => {
       const hasPath = this.state.carouselItems.findIndex(item => item === path) >= 0;
@@ -114,6 +107,10 @@ export default class PhotoList extends Component {
   }
 
   render() {
+    // this.photoMapDates = this.photoDates.map(date => ({
+    //   date,
+    //   photos: this.findPhotosByDate(this.allPhotos, date)
+    // }));
     // let store = window.store;
     // let dispatch = store.dispatch;
     // let photos = this.photos = store.getState().media.data;
@@ -122,11 +119,11 @@ export default class PhotoList extends Component {
     return (
       <div style={ this.props.style }>
         <ScrollFlush
-          allPhotos={this.allPhotos}
+          allPhotos={this.props.allPhotos}
           addListToSelection={ this.addListToSelection }
           lookPhotoDetail={ this.lookPhotoDetail }
           removeListToSelection={ this.removeListToSelection }
-          list={this.photoMapDates}
+          list={this.props.photoMapDates}
           pageSize={7}>
           <LazyloadBox />
         </ScrollFlush>
