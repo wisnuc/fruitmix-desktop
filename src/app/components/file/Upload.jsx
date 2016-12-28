@@ -19,6 +19,7 @@ class Upload extends Component {
 		return (
 			<div className='transimission-container'>
 				<div className='transimissionRow transimissionTitle'>
+					<span></span>
 					<span>名称</span>
 					<span>大小</span>
 					<span>进度</span>

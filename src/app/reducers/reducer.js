@@ -1,6 +1,5 @@
 import { combineReducers } from 'redux'
 import login from './login'
-import navigation from './navigation'
 import multiple from './multiple'
 import snack from './snack'
 import transimission from './transimission'
@@ -28,7 +27,6 @@ import { radio, shareRadio } from '../React-Redux-UI/src/reducers/reducer';
 
 const reducer = combineReducers({
 	login,
-	navigation,
 	multiple,
 	snack,
 	transimission,

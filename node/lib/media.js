@@ -106,6 +106,7 @@ ipcMain.on('getMediaImage',(event,hash)=>{
 })
 
 ipcMain.on('getThumb',(event,tasks)=>{
+	console.log(tasks)
 	createTask(tasks, null)
 })
 

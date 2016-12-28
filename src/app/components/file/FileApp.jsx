@@ -1487,16 +1487,6 @@ class FileApp extends React.Component {
     <div style={this.props && this.props.style} >
       <div style={{ height: '100%', backgroundColor:'blue', display: 'flex', justifyContent: 'space-between' }}>
 
-        {/* this.state.leftNav &&
-          <div id='file-left-nav-mask'
-            style={{backgroundColor: '#000', opacity: 0.1,
-            width: '100%', height: '100%', zIndex:999}}
-            onTouchTap={() => this.setState(Object.assign({}, this.state, { leftNav: false }))}
-          />
-        */}
-
-        {/* false && this.renderLeftNav() */}
-
       	{/*left file app container*/}
         <div id='layout-middle-container'
           style={{

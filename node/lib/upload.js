@@ -7,13 +7,14 @@ var crypto = require('crypto')
 
 import { dialog } from 'electron' 
 import request from 'request'
+import Debug from 'debug'
 
 import registerCommandHandlers from './command'
 import { getMainWindow } from './window'
 import store from '../serve/store/store'
 
 var sendMessage = null
-var c = console.log
+var c = Debug('lib:upload')
 var server
 var user
 var initArgs = () => {
@@ -37,7 +38,7 @@ var initArgs = () => {
 
 
 let httpRequestConcurrency = 4
-let fileHashConcurrency = 4
+let fileHashConcurrency = 6
 
 const scheduleHttpRequest = () => {
   while (runningQueue.length < httpRequestConcurrency && readyQueue.length)
@@ -48,7 +49,7 @@ const scheduleFileHash = () => {
   while (hashingQueue.length < fileHashConcurrency && hashlessQueue.length) 
     hashlessQueue[0].setState('hashing')
 }
-
+ 
 /*
  * running queue and ready queue contains both file and folder task
  * runningQueue enter: when scheduling request
@@ -575,7 +576,8 @@ const uploadHandle = (args, callback) => {
         if(index < count) {
           readUploadInfor(data[index])
         }else {
-          createUserTask(args.type,uploadArr,folderUUID,callback)
+          createUserTask(args.type,uploadArr,folderUUID)
+          getMainWindow().webContents.send('message',uploadArr.length + '个任务添加至上传队列')
         }
       })
     }
