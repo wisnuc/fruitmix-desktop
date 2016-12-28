@@ -317,7 +317,7 @@ class Main extends React.Component {
 		})
 
 		ipcRenderer.on('message',(err,message,code)=>{
-			this.props.dispatch(Action.setSnack(message,true))
+			window.store.dispatch(Action.setSnack(message,true))
 		});
 
 

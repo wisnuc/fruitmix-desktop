@@ -22,6 +22,7 @@ class UploadTable extends Component {
 		return (
 			<div className={classname}>
 				<div className='transimissionRow' onClick={this.toggleChildren.bind(this)}>
+					<span></span>
 					<span>{item.name}</span>
 					<span>{this.getSize()}</span>
 					<span>{this.getProgress()}</span>

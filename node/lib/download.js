@@ -407,6 +407,8 @@ const downloadHandle = (args, callback) => {
   if (args.folders) {
   	createUserTask('folder',args.folders)
   }
+  let count = args.files?args.files.length:args.folders.length
+  getMainWindow().webContents.send('message', count + '个任务添加至下载队列')
 }
 
 const uploadCommandMap = new Map([

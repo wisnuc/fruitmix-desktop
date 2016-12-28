@@ -49,12 +49,6 @@ var actions = {
 		};
 	},
 
-	navToggle() {
-		return {
-			type: 'NAV_MENU_TOGGLE'
-		}
-	},
-
 	createFileInfo(fileInfo) {
 		return {
 			type: 'CREATE_FILE_INFO',
