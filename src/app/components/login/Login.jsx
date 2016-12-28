@@ -20,7 +20,7 @@ import InfoCard from './InfoCard'
 import DeviceCard from './DeviceCard'
 
 import { command } from '../../lib/command' 
-import css  from  '../../../assets/css/login'
+// import css  from  '../../../assets/css/login'
 
 const colorArray = [ indigo900, cyan900, teal900, lightGreen900, lime900, yellow900 ]
 

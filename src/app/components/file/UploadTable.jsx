@@ -72,7 +72,7 @@ class UploadTable extends Component {
 	getProgress() {
 		let item = this.props.item
 		if (item.type == 'file') {
-			if (item.progress !== 0 && item.progress !== 1) {
+			if (item.progress !== 0 && item.progress !== 1 && item.progress !== 1.01) {
 				return (item.progress*100).toFixed(2)+' %'
 			}else if (item.progress == 1.01) {
 				return '上传失败'
