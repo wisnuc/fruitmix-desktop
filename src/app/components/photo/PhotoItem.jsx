@@ -2,8 +2,6 @@
   PhotoItem
 **/
 
-import { ipcRenderer } from 'electron';
-
 import React, { Component, PropTypes } from 'react';
 import HoverIconButton from './HoverIconButton';
 import SelectIconButton from './SelectIconButton';
@@ -89,9 +87,9 @@ export default class PhotoItem extends Component {
     };
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return nextProps.path !== this.props.path || nextState.action !== this.state.action;
-  }
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   return nextProps.path !== this.props.path || nextState.action !== this.state.action;
+  // }
 
   render() {
     let component, iconComponent;
@@ -140,11 +138,11 @@ export default class PhotoItem extends Component {
     );
   }
 
-  componentDidMount() {
-    let { digest } = this.props;
-
-    ipcRenderer.send('getThumb', [{ digest }]);
-  }
+  // componentDidMount() {
+  //   let { digest } = this.props;
+  //
+  //   ipcRenderer.send('getThumb', [{ digest }]);
+  // }
 }
 
 PhotoItem.propTypes = {

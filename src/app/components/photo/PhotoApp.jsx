@@ -9,8 +9,9 @@ import DeviceStorage from 'material-ui/svg-icons/device/storage';
 import { blue500, red500, greenA200 } from 'material-ui/styles/colors'
 
 import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion';
+import { formatDate } from '../../utils/datetime';
 
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 import PhotoToolBar from './PhotoToolBar';
 import PhotoList from './PhotoList';
 
@@ -91,20 +92,56 @@ class PhotoApp extends Component {
     // );
   }
 
+  setPhotoInfo() {
+    const mediaStore = window.store.getState().media.data;
+    const photoDates = [];
+    const photoMapDates = [];
+    const allPhotos = [];
+    mediaStore.forEach((item, index) => {
+      if (!item.exifDateTime)
+        return;
+
+      allPhotos.push(item);
+
+      const formatExifDateTime = formatDate(item.exifDateTime);
+      const isRepeat = photoDates.findIndex(item => item === formatExifDateTime) >= 0;
+
+      if (!isRepeat) {
+        photoDates.push(formatExifDateTime);
+        photoMapDates.push({
+          date: formatExifDateTime,
+          photos: [item]
+        })
+      } else {
+        photoMapDates
+          .find(item => item.date === formatExifDateTime)
+          .photos
+          .push(item);
+      }
+    });
+
+    return {
+      allPhotos,
+      photoDates,
+      photoMapDates
+    };
+  }
+
   render() {
     return (
       <div>
         {/* 工具条 */}
         <PhotoToolBar
-          action={ this.toggleLeftNav }
-          state={ ['照片'] }/>
+          action={this.toggleLeftNav}
+          state={['照片']}/>
 
         {/* 照片列表 */}
-        <PhotoList style={ this.style.photoList } />
+        <PhotoList
+          style={this.style.photoList}
+          {...this.setPhotoInfo()} />
       </div>
     );
   }
-
 }
 
 export default PhotoApp;
