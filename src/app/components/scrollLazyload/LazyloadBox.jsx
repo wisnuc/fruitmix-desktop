@@ -40,7 +40,7 @@ export default class LazyloadBox extends Component {
           key: this.props.key,
           date: this.props.date,
           allPhotos: this.props.allPhotos,
-          photos: this.props.list,
+          photos: this.props.list.slice(0, 50),
           addListToSelection: this.props.addListToSelection,
           lookPhotoDetail: this.props.lookPhotoDetail,
           removeListToSelection: this.props.removeListToSelection

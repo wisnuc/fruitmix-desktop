@@ -87,9 +87,9 @@ export default class PhotoItem extends Component {
     };
   }
 
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   return nextProps.path !== this.props.path || nextState.action !== this.state.action;
-  // }
+  shouldComponentUpdate(nextProps, nextState) {
+    return nextProps.path !== this.props.path || nextState.action !== this.state.action;
+  }
 
   render() {
     let component, iconComponent;
