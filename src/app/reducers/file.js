@@ -219,17 +219,6 @@ class MoveFilesView extends StateMachine {
 
 const defaultDirectory = {
 
-	current : {
-		directory: {},
-		children:[],
-		path:[],
-	},
-	view : {
-		state: 'READY',
-		selectAll:false, 
-	},
-	children : [],
-
   click: new Clicked({}),
   stm: new PlainView({
     cwd: '',
@@ -241,14 +230,12 @@ const directory = (state = defaultDirectory,action)=> {
 
 	switch (action.type) {
 
-		case 'ADAPTER':
-      console.log('|------------------------------->>>>>>>>>>>')
-      console.log(action)
-			return Object.assign({}, state, action.store.file, {
-        stm: (state.current.directory.uuid !== action.store.file.current.directory.uuid) ?
-          state.stm.setSelection([]) :
-          state.stm
-      })
+		// case 'ADAPTER':
+		// 	return Object.assign({}, state, action.store.file, {
+  //       stm: (state.current.directory.uuid !== action.store.file.current.directory.uuid) ?
+  //         state.stm.setSelection([]) :
+  //         state.stm
+  //     })
 
     /** raw click for click machine begin **/
 
