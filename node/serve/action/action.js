@@ -25,20 +25,6 @@ var actions = {
 		}
 	},
 
-	deleteServer(item) {
-		return {
-			type : 'DELETE_SERVER',
-			item : item
-		}
-	},
-
-	setDeviceUsedRecently(ip) {
-		return {
-			type: 'SET_DEVICE_USED_RECENTLY',
-			ip: ip
-		}
-	},
-
 	setDownloadPath(path) {
 		return {
 			type : 'SET_DOWNLOAD_PATH',
