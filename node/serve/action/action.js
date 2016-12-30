@@ -69,22 +69,6 @@ var actions = {
 			data : data
 		}
 	},
-
-	//share
-	setShareChildren(shareChildren,sharePath) {
-		return {
-			type: 'SET_SHARE_CHILDREN',
-			shareChildren: shareChildren,
-			sharePath:sharePath
-		}
-	},
-
-	setFilesSharedWithMe(files) {
-		return {
-			type: 'FILES_SHARED_BY_ME',
-			files:files
-		}
-	}
 }
 
 module.exports = actions;

@@ -74,7 +74,7 @@ class UploadTable extends Component {
 		if (item.type == 'file') {
 			if (item.progress !== 0 && item.progress !== 1 && item.progress !== 1.01) {
 				return (item.progress*100).toFixed(2)+' %'
-			}else if (item.progress == 1.01) {
+			}else if (item.progress == 1.01 || item.message) {
 				return '上传失败'
 			}else {
 				return this.getState(item.state)
