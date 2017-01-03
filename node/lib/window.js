@@ -22,7 +22,8 @@ const initMainWindow = () => {
 		icon: path.join(__dirname,'180-180.png'), // FIXME
 
     webPreferences: {
-      webSecurity: false
+      webSecurity: false,
+      experimentalFeatures: true
     }
 	})
 
