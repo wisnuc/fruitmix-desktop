@@ -74,7 +74,7 @@ export default class PhotoListByDate extends Component {
   render() {
     let { style, date, photos, lookPhotoDetail } = this.props;
     let icon;
-    
+
     return (
       <div>
         {/* 日期 */}
@@ -98,10 +98,11 @@ export default class PhotoListByDate extends Component {
                  <PhotoItem
                    ref={ 'photoItem' + index }
                    style={{ width: 150, height: 158, marginRight: 6, marginBottom: 6 }}
-                   lookPhotoDetail={ lookPhotoDetail }
+                   lookPhotoDetail={ lookPhotoDetail.bind(null, index) }
                    detectIsAllOffChecked={ this.detectIsAllOffChecked }
                    selected={ () => { this.addHoverToAllItem(); this.addCheckedToItem(index); this.addAllChecked(); } }
                    unselected={ () => { this.removeCheckedToItem(index); this.removeAllChecked(); this.removeHoverToAllItem(); } }
+                   date={ this.props.date }
                    digest={ photo.digest }
                    path={ photo.path }
                    key={ photo.digest } />

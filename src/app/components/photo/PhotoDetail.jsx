@@ -7,6 +7,11 @@ import React, { Component, PropTypes } from 'react';
 import SlideToAnimate from './SlideToAnimate';
 
 const __PERCENT__ = '100%';
+const __MAPORIENTATION__ = {
+  8: -90,
+  3: -180,
+  6: 90
+};
 
 class MaskLayer extends Component {
   constructor() {
@@ -19,7 +24,7 @@ class MaskLayer extends Component {
         top: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: 'rgba(0,0,0,.45)',
+        backgroundColor: 'rgba(0,0,0,.95)',
         zIndex: 999
       }
     }
@@ -42,13 +47,13 @@ class PhotoDetailItem extends Component {
   }
 
   render() {
-    const { style, path } = this.props;
+    const { style, path, exifOrientation } = this.props;
 
     return (
       <div style={ style }>
         <img
           src={ path }
-          style={{ width: __PERCENT__, height: __PERCENT__, objectFit: 'cover' }} />
+          style={{ width: __PERCENT__, height: __PERCENT__, objectFit: 'cover', transform: `rotate(${__MAPORIENTATION__[exifOrientation]})deg` }} />
       </div>
     )
   }
@@ -78,7 +83,8 @@ class PhotoDetailList extends Component {
           <PhotoDetailItem
             key={ item.digest }
             style={ this.style.root }
-            path={ activeIndex == index ? this.store.getState().view.currentMediaImage.path : item.path } />
+            exifOrientation={ this.store.getState().view.currentMediaImage.exifOrientation }
+            path={ this.store.getState().view.currentMediaImage.path } />
         )) }
       </div>
     );
@@ -96,18 +102,21 @@ export default class PhotoDetail extends Component {
       photoDetailList: {
         display: 'flex',
         flexFlow: 'row nowrap',
-        justifyContent: 'flex-start'
+        justifyContent: 'flex-start',
+        height: '100%'
       }
     };
 
-    this.requestNext = (activeIndex) => {
-      ipcRenderer.send('getMediaImage', this.props.items[activeIndex].digest);
+    this.requestNext = (seqIndex) => {
+      ipcRenderer.send('getMediaImage', this.props.items[seqIndex].digest);
     };
 
     this.buildPhotoDetailList = () => (
       <SlideToAnimate
         style={ this.style.slideAnimate }
-        activeIndex={ this.props.activeIndex }
+        direLeft={ -45 }
+        direRight={ -45 }
+        activeIndex={ this.props.seqIndex }
         translateLeftCallback={ this.requestNext }
         translateRightCallback={ this.requestNext }
         translateDistance={ this.props.style.width }
@@ -120,8 +129,12 @@ export default class PhotoDetail extends Component {
     );
   }
 
+  // shouldComponentUpdate(nextProps) {
+  //   return this.props.activeIndex !== nextProps.activeIndex;
+  // }
+
   componentWillMount() {
-    this.requestNext(this.props.activeIndex);
+    this.requestNext(this.props.seqIndex);
   }
 
   render() {
