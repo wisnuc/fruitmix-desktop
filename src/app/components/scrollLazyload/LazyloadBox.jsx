@@ -36,7 +36,7 @@ export default class LazyloadBox extends Component {
     return (
       <div>
         {React.createElement(this.props.children.type, {
-          style: { display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start', marginBottom: 15 },
+          style: { display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start' },
           key: this.props.key,
           date: this.props.date,
           allPhotos: this.props.allPhotos,

@@ -76,7 +76,7 @@ export default class PhotoListByDate extends Component {
     let icon;
 
     return (
-      <div>
+      <div style={{ padding: '0 6px 6px 6px' }}>
         {/* 日期 */}
         <div style={{ marginBottom: 15 }}>
           <SelectIconButton
