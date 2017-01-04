@@ -27,6 +27,15 @@ class FileTable extends Component {
 			this.list = list
 			this.forceUpdate()
 		}
+
+		this.updateFileNode = (node) => {
+			let index = this.list.findIndex(item => item.uuid == node.uuid)
+			if (index !== -1) {
+				this.list[index] = node
+				this.updateDetail()
+			}else {
+			}
+		}
 		this.kd = this.keydown.bind(this)
 		this.ku = this.keyup.bind(this)
 	}
@@ -44,13 +53,13 @@ class FileTable extends Component {
 	}
 
 	componentWillUpdate() {
-		console.log('will update.......................................')
-		console.log((new Date()).getTime())
+		// console.log('will update.......................................')
+		// console.log((new Date()).getTime())
 	}
 
 	componentDidUpdate() {
-		console.log('did update.......................................')
-		console.log((new Date()).getTime())
+		// console.log('did update.......................................')
+		// console.log((new Date()).getTime())
 	}
 
 	shouldComponentUpdate() {
@@ -78,6 +87,7 @@ class FileTable extends Component {
 						rowSelect:this.rowSelect.bind(_this),
 						rowDClick:this.rowDClick.bind(_this),
 						mouseEnter:this.mouseEnter.bind(_this),
+						rightClick:this.rightClick.bind(this),
 						parent:_this
 					})
 				})}
@@ -169,6 +179,20 @@ class FileTable extends Component {
 		}
 		console.log(this.selectedIndexArr)
 		console.log(this.lastSelected)
+		this.updateDetail()
+	}
+
+	rightClick(event) {
+		let containerDom = document.getElementById('fileListContainer')
+    	let maxLeft = containerDom.offsetLeft + containerDom.clientWidth - 112
+    	let x = event.clientX>maxLeft?maxLeft:event.clientX
+    	let maxTop = containerDom.offsetTop + containerDom.offsetHeight -352
+    	let y = event.clientY>maxTop?maxTop:event.clientY
+		this.props.parent.setState({
+			contextMenu:true,
+			clientY:y,
+			clientX:x
+		})
 	}
 
 	keydown(event) {
@@ -234,9 +258,17 @@ class FileTable extends Component {
 	}
 
 	getSelectedItem() {
-		return this.state.selectedIndexArr.map(item => {
+		return this.selectedIndexArr.map(item => {
 			return this.list[item]
 		})
+	}
+
+	updateDetail() {
+		if (this.selectedIndexArr.length == 1) {
+			this.props.parent.refs.detail.setList([this.list[this.selectedIndexArr[0]]])
+		}else {
+			this.props.parent.refs.detail.setList([this.list[this.selectedIndexArr[0]],this.list[this.selectedIndexArr[1]]])
+		}
 	}
 }
 

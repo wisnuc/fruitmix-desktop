@@ -89,7 +89,7 @@ class DownloadTable extends Component {
 			if (item.finishCount == item.children.length) {
 				return '已完成'
 			}else {
-				return '已下载 ' + item.success + (!item.failed?null:'/'+item.failed+' 失败')
+				return '已下载 ' + item.success + (!item.failed?'':'/'+item.failed+' 失败')
 			}
 		}
 	}

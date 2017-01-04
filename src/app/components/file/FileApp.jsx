@@ -454,6 +454,7 @@ class FileApp extends React.Component {
 
       createNewFolder: false,
       deleteConfirm: false,
+      renameConfirm:false,
       importDialog: null,
     }
 
@@ -485,11 +486,11 @@ class FileApp extends React.Component {
     }
 
     this.deleteSelected = () => {
-
-      if (!this.state.list.find(item => item.selected)) return
+      let deleteArr = this.refs.FileTable.getSelectedItem().map(item => item.uuid)
+      if (deleteArr.length == 0) return
       command('fileapp', 'FILE_DELETE', {
         dir: this.state.directory.uuid,
-        nodes: this.state.list.filter(item => item.selected).map(item => item.uuid),
+        nodes: deleteArr
       }, (err, data) => {
         setImmediate(this.refresh)
       })
@@ -520,17 +521,15 @@ class FileApp extends React.Component {
     }
 
     this.download = () => {
-    	let downloadArr = this.state.list.filter(item => item.selected)
     	let folders = []
     	let files = []
-    	this.state.list.forEach(item => {
-    		if (item.selected && item.type == 'folder') {
+    	this.refs.FileTable.getSelectedItem().forEach(item => {
+    		if (item.type == 'folder') {
     			folders.push(item)
-    		}else if (item.selected && item.type == 'file') {
+    		}else if (item.type == 'file') {
     			files.push(item)
     		}
     	})
-
     	command('fileapp', 'DOWNLOAD', {
     		folders: !!folders.length?folders:undefined,
     		files: !!files.length?files:undefined
@@ -553,6 +552,7 @@ class FileApp extends React.Component {
     }
 
     this.showCreateNewFolderDialog = () => assign({ createNewFolder: true })
+    this.showRenameDialog = () => assign({renameConfirm: true})
     this.showDeleteConfirmDialog = () => assign({ deleteConfirm: true })
 
     this.renderLeftNav = () => (
@@ -1172,16 +1172,9 @@ class FileApp extends React.Component {
             }}>
               <Menu>
                 <MenuItem primaryText='新建文件夹' onTouchTap={this.showCreateNewFolderDialog}/>
-                <MenuItem primaryText='重命名' onTouchTap={() => {
-                  let select = this.state.list.filter(item => item.selected)
-                  if (select.length === 1) {
-                    this.inputValue = select[0].name
-                    debug(this.inputValue)
-                    this.setState(state => Object.assign({}, state, { editing: select[0].uuid }))
-                  }
-                }}/>
+                <MenuItem primaryText='重命名' onTouchTap={this.showRenameDialog}/>
                 <MenuItem primaryText='移动' disabled={true}/>
-                <MenuItem primaryText='分享' />
+                <MenuItem primaryText='分享' onTouchTap={this.showDetail}/>
                 <MenuItem primaryText='下载' onTouchTap={this.download}/>
                 <MenuItem primaryText='删除' onTouchTap={this.showDeleteConfirmDialog} />
                 <MenuItem primaryText='详情' onTouchTap={this.showDetail} />
@@ -1253,7 +1246,6 @@ class FileApp extends React.Component {
 		if (!this.state.list) {
 			return []
 		}
-    // return this.refs.FileTable.getSelectedItem()
 		return this.state.list.filter(item => item.selected)
 	}
 
@@ -1282,8 +1274,7 @@ class FileApp extends React.Component {
             width: this.state.detailOn ? `calc(100% - ${detailWidth}px)` : '100%',
             transition: sharpCurve('width'),
             height:'100%'
-          }}
-        >
+          }}>
           {/* important ! */}
           <Divider />
 
@@ -1316,16 +1307,14 @@ class FileApp extends React.Component {
             width: '100%',
             height: 'calc(100% - 56px)',
             backgroundColor: '#EEEEEE',
-            display:'flex'
-          }}>
+            display:'flex'}}>
           	{/*left navigation*/}
             <div style={{
               position: 'absolute',
               width: LEFTNAV_WIDTH,
               height: '100%',
               left: this.state.leftNav ? 0 : -LEFTNAV_WIDTH,
-              transition: sharpCurve('left')
-            }}>
+              transition: sharpCurve('left')}}>
               <Menu autoWidth={false} listStyle={{width: LEFTNAV_WIDTH}}>
                 <MenuItem style={{fontSize: 14}} primaryText='我的文件' leftIcon={<DeviceStorage />} animation={null}
                 	onTouchTap = {() => {
@@ -1408,10 +1397,8 @@ class FileApp extends React.Component {
 
               width: '100%',
               height: '100%',
-              backgroundColor: '#FAFAFA', //'yellow',
-            }}
-            	id='fileListContainer'
-            >
+              backgroundColor: '#FAFAFA'}}
+            	id='fileListContainer'>
               { this.renderListView() }
             </div>
           </div>
@@ -1430,8 +1417,7 @@ class FileApp extends React.Component {
             borderColor: '#BDBDBD'
           }}
           rounded={false}
-          transitionEnabled={false}
-        >
+          transitionEnabled={false}>
           <FileDetailToolbar
             nudge={this.props.nudge}
             suppressed={false && !this.props.maximized}
@@ -1445,9 +1431,9 @@ class FileApp extends React.Component {
               <NavigationClose />
             </IconButton>
           </FileDetailToolbar>
-          <Detail detail={this.getSelectedList()} directory={this.getDirectory()} updateFileNode={this.updateFileNode.bind(this)}/>
+          <Detail ref='detail' parent={this}/>
         </div>
-
+        {/*dialogs*/}
         <DialogInput
           title={(() => {
             if (this.state.createNewFolder)
@@ -1472,6 +1458,32 @@ class FileApp extends React.Component {
           onOK={name => {
             this.setState(Object.assign({}, this.state, { createNewFolder: false }))
             this.createNewFolder(name)
+          }}
+        />
+
+        <DialogInput
+          title={(() => {
+            if (this.state.renameConfirm)
+              return '重命名'
+            else
+              return ''
+          })()}
+
+          hint={(() => {
+            if (this.state.renameConfirm)
+              return '重命名'
+            else
+              return ''
+          })()}
+
+          open={this.state.renameConfirm}
+
+          onCancel={() => {
+            this.setState(Object.assign({}, this.state, { renameConfirm: false }))
+          }}
+
+          onOK={name => {
+            this.setState(Object.assign({}, this.state, { renameConfirm: false }))
           }}
         />
 
@@ -1570,6 +1582,7 @@ class FileApp extends React.Component {
   }
 
   updateFileNode(node) {
+    console.log(node)
   	let index = this.state.list.findIndex(item => item.uuid == node.uuid)
   	if (index !== -1) {
   		this.setState({

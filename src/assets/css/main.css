@@ -309,8 +309,6 @@ body{
 }
 .custom-share-container {
 	padding:0 20px 0;
-	max-height: 200px;
-	overflow: auto;
 }
 /*transmission*/
 .transimission-container {

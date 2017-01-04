@@ -62,7 +62,7 @@ class Row extends Component {
 		if (this.show) {
 			return (
 				<div className='row' style={style} 
-					onClick={this.rowClick.bind(this)}
+					onMouseUp={this.rowClick.bind(this)}
 					onDoubleClick={this.rowDClick.bind(this)}
 					onMouseEnter={this.mouseEnter.bind(this)} 
 					onMouseLeave={this.mouseLeave.bind(this)}
@@ -90,8 +90,22 @@ class Row extends Component {
 		}
 	}
 
-	rowClick() {
-		this.props.rowSelect(!this.isSelected,this.props.index)
+	rowClick(e) {
+		let event = e.nativeEvent
+		if (event.button == 1) {
+			return
+		}else if (event.button == 2) {
+			if (this.isSelected) {
+				
+			}else {
+				this.props.rowSelect(!this.isSelected,this.props.index)	
+			}
+			this.props.rightClick(e.nativeEvent)
+		}else {
+			this.props.rowSelect(!this.isSelected,this.props.index)	
+		}
+		
+		
 	}
 
 	rowDClick() {
