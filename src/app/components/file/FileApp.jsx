@@ -59,6 +59,7 @@ import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motio
 
 import { blue500, red500, greenA200 } from 'material-ui/styles/colors'
 //import file module
+import FileTable from './FileTable'
 import FileUploadButton from './FileUploadButton'
 import Upload from './Upload'
 import Download from './Download'
@@ -660,59 +661,59 @@ class FileApp extends React.Component {
 
   componentDidMount() {
 
-    // create keypress listener
-    this.keypress = new keypress.Listener()
+   //  // create keypress listener
+   //  this.keypress = new keypress.Listener()
 
-    // listen window keydown keyup event
-    window.addEventListener('keydown', this.keypress)
-    window.addEventListener('keyup', this.keypress)
+   //  // listen window keydown keyup event
+   //  window.addEventListener('keydown', this.keypress)
+   //  window.addEventListener('keyup', this.keypress)
 
-    // register ctrl
-    this.keypress.register_combo({
-      "keys"              : "ctrl",
-      "on_keydown"        : this.handleCtrlDown,
-      "on_keyup"          : this.handleCtrlUp,
-      "on_release"        : null,
-      "this"              : this,
-      "prevent_default"   : true,
-      "prevent_repeat"    : true,
-      "is_unordered"      : false,
-      "is_counting"       : false,
-      "is_exclusive"      : false,
-      "is_solitary"       : false,
-      "is_sequence"       : false
-    })
+   //  // register ctrl
+   //  this.keypress.register_combo({
+   //    "keys"              : "ctrl",
+   //    "on_keydown"        : this.handleCtrlDown,
+   //    "on_keyup"          : this.handleCtrlUp,
+   //    "on_release"        : null,
+   //    "this"              : this,
+   //    "prevent_default"   : true,
+   //    "prevent_repeat"    : true,
+   //    "is_unordered"      : false,
+   //    "is_counting"       : false,
+   //    "is_exclusive"      : false,
+   //    "is_solitary"       : false,
+   //    "is_sequence"       : false
+   //  })
 
-    // register shift
-    this.keypress.register_combo({
-      "keys"              : "shift",
-      "on_keydown"        : this.handleShiftDown,
-      "on_keyup"          : this.handleShiftUp,
-      "on_release"        : null,
-      "this"              : this,
-      "prevent_default"   : true,
-      "prevent_repeat"    : true,
-      "is_unordered"      : false,
-      "is_counting"       : false,
-      "is_exclusive"      : false,
-      "is_solitary"       : false,
-      "is_sequence"       : false
-    })
+   //  // register shift
+   //  this.keypress.register_combo({
+   //    "keys"              : "shift",
+   //    "on_keydown"        : this.handleShiftDown,
+   //    "on_keyup"          : this.handleShiftUp,
+   //    "on_release"        : null,
+   //    "this"              : this,
+   //    "prevent_default"   : true,
+   //    "prevent_repeat"    : true,
+   //    "is_unordered"      : false,
+   //    "is_counting"       : false,
+   //    "is_exclusive"      : false,
+   //    "is_solitary"       : false,
+   //    "is_sequence"       : false
+   //  })
 
-    this.keypress.register_combo({
-      "keys"              : "enter",
-      "on_keydown"        : this.enterKeyDown,
-      "on_keyup"          : null,
-      "on_release"        : null,
-      "this"              : this,
-      "prevent_default"   : true,
-      "prevent_repeat"    : true,
-      "is_unordered"      : false,
-      "is_counting"       : false,
-      "is_exclusive"      : false,
-      "is_solitary"       : false,
-      "is_sequence"       : false
-   })
+   //  this.keypress.register_combo({
+   //    "keys"              : "enter",
+   //    "on_keydown"        : this.enterKeyDown,
+   //    "on_keyup"          : null,
+   //    "on_release"        : null,
+   //    "this"              : this,
+   //    "prevent_default"   : true,
+   //    "prevent_repeat"    : true,
+   //    "is_unordered"      : false,
+   //    "is_counting"       : false,
+   //    "is_exclusive"      : false,
+   //    "is_solitary"       : false,
+   //    "is_sequence"       : false
+   // })
 
     setImmediate(() =>
     	command('fileapp', 'FILE_NAV', { context: 'HOME_DRIVE' }, (err, data) => {
@@ -746,6 +747,20 @@ class FileApp extends React.Component {
   navUpdate(context, data) {
     debug('navUpdate', context, data)
 
+    let sortedList = data.children.map(item => Object.assign({}, item, {
+      specified: false,
+      selected: false,
+      mtime:formatTime(item.mtime),
+      size:formatSize(item.size),
+      name:item.name?item.name:item.uuid
+    })).sort((a, b) => {
+      if (a.type !== b.type) {
+        return a.type === 'folder' ? -1 : 1
+      }else {
+        return a.name.localeCompare(b.name) 
+      }
+    })
+
     if ((context === 'SHARED_WITH_ME' || context === 'SHARED_WITH_OTHERS') ) {
       // virtual list
       let state = {
@@ -758,17 +773,12 @@ class FileApp extends React.Component {
 
         specified: -1,
 
-        list: data.children.map(item => Object.assign({}, item, {
-            specified: false,
-            selected: false,
-          },
-          (item.name ? null : { name: item.uuid })
-          ))
-          .sort((a, b) => a.name.localeCompare(b.name))
+        list: sortedList
       }
 
       this.setState(state)
       debug('navUpdate, shared virtual root directory', state)
+      this.refs.FileTable.setList(sortedList)
       return
     }
 
@@ -784,20 +794,10 @@ class FileApp extends React.Component {
 
       specified: -1,
 
-      list: data.children.map(item => Object.assign({}, item, {
-          specified: false,
-          selected: false,
-        }))
-        .sort((a, b) => {
-          if (a.type !== b.type) {
-            return a.type === 'folder' ? -1 : 1
-          }
-          else
-            return a.name.localeCompare(b.name)
-        }),
+      list: sortedList
     }
-    console.log('.....')
     this.setState(state)
+    this.refs.FileTable.setList(sortedList)
     debug('navUpdate changed state', state)
   }
 
@@ -936,11 +936,11 @@ class FileApp extends React.Component {
   }
 
   rowDoubleClick(uuid, e) {
-  	console.log('enter double click enent -----------')
-  	console.log('current path is :' )
-  	console.log( this.state.path)
-  	console.log('current state is : ' )
-  	console.log(this.state.navRoot)
+  	// console.log('enter double click enent -----------')
+  	// console.log('current path is :' )
+  	// console.log( this.state.path)
+  	// console.log('current state is : ' )
+  	// console.log(this.state.navRoot)
     let item = this.state.list.find(i => i.uuid === uuid)
     let navContext = this.state.navContext
     let rUUID
@@ -1153,6 +1153,45 @@ class FileApp extends React.Component {
 
     if (!this.state.list) return null
 
+    return (
+      <div style={{position:'relative',overflow:'auto',height:'100%'}}>
+        <FileTable ref='FileTable' parent={this}/>
+        {/*upload button*/}
+        <FileUploadButton path={this.state.path} style={{position: 'absolute', right:48, bottom:48}} />
+        {/*right click menu*/}
+        { this.state.contextMenu && (
+          <div
+            style={{position: 'fixed', top: 0, left: 0, width:'100%', height:'100%', zIndex:2000}}
+            onTouchTap={() => this.hideContextMenu()}
+          >
+            <Paper style={{
+              position: 'fixed',
+              top: this.state.clientY,
+              left: this.state.clientX,
+              backgroundColor: '#F5F5F5'
+            }}>
+              <Menu>
+                <MenuItem primaryText='新建文件夹' onTouchTap={this.showCreateNewFolderDialog}/>
+                <MenuItem primaryText='重命名' onTouchTap={() => {
+                  let select = this.state.list.filter(item => item.selected)
+                  if (select.length === 1) {
+                    this.inputValue = select[0].name
+                    debug(this.inputValue)
+                    this.setState(state => Object.assign({}, state, { editing: select[0].uuid }))
+                  }
+                }}/>
+                <MenuItem primaryText='移动' disabled={true}/>
+                <MenuItem primaryText='分享' />
+                <MenuItem primaryText='下载' onTouchTap={this.download}/>
+                <MenuItem primaryText='删除' onTouchTap={this.showDeleteConfirmDialog} />
+                <MenuItem primaryText='详情' onTouchTap={this.showDetail} />
+              </Menu>
+            </Paper>
+          </div>
+        )}
+      </div>
+      )
+
 		return (
       <div style={{ width: '100%', height: '100%', backgroundColor:'#EEE' }}>
       	{/*file table title*/}
@@ -1206,9 +1245,6 @@ class FileApp extends React.Component {
             </Paper>
           </div>
         )}
-
-        {/*share dialog*/}
-        {/*this.getShareDialog() */}
       </div>
 		)
 	}
@@ -1217,6 +1253,7 @@ class FileApp extends React.Component {
 		if (!this.state.list) {
 			return []
 		}
+    // return this.refs.FileTable.getSelectedItem()
 		return this.state.list.filter(item => item.selected)
 	}
 
@@ -1541,72 +1578,4 @@ class FileApp extends React.Component {
   	}
   }
 }
-
-/**
-        <Dialog
-          titleStyle={{fontSize: 20}}
-          title='导入文件夹'
-          open={this.state.importDialog} 
-          modal={true}
-          onRequestClose={() => this.setState(Object.assign({}, this.state, { importDialog: null }))}
-        >
-          <p>选择需要导入的文件夹，点击确定，该文件夹将被移动到当前用户的当前文件夹。</p>
-          <Divider />
-          <TreeTable
-            style={{width: 720, height: 200, overflowY: 'auto'}}
-            data={[
-              {
-                name: 'hello',
-                children: [
-                  {
-                    name: 'biu~',
-                    children: [
-                      {
-                        name: 'bia~ji!'
-                      }
-                    ]
-                  }, 
-                  {}, {}
-                ]
-              },
-              {
-                name: 'world',
-                children: []
-              }
-            ]} 
-
-            showHeader={false}
-            disabled={false}
-            columns={[
-              {
-                headerStyle: { 
-                  width: 200, 
-                  backgroundColor: 'blue' 
-                },
-                name: 'hello'
-              },
-              {
-                headerStyle: { 
-                  width: 200, 
-                  backgroundColor: 'yellow' 
-                },
-                name: 'bar'
-              }
-            ]}
-          />
-          <div style={{marginTop: 24, display: 'flex', alignItems: 'center', justifyContent: 'flex-end'}}>
-            <FlatButton 
-              label='取消' 
-              primary={true}
-              onTouchTap={() => this.setState(Object.assign({}, this.state, { importDialog: null }))}
-            />
-            <FlatButton 
-              label='确认' 
-              primary={true}
-              
-            />
-          </div>
-        </Dialog>
-
-**/
 export default FileApp

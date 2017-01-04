@@ -359,3 +359,93 @@ body{
 	font-size: 12px;
 	color:rgba(0,0,0,.54);
 }
+
+/*file table*/
+
+#list-container {
+  height: 100%;
+  overflow: auto;
+  position: relative;
+}
+
+.row-title {
+  height:40px;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  margin-left: 120px;
+  font-size:14px;
+  opacity: 0.54;
+}
+
+.row-title > div:nth-child(1) {
+  font-weight: bold;
+  flex:1; 
+}
+
+.row-title > div:nth-child(2) {
+  flex:0 0 160px;
+  text-align: right;
+}
+
+.row-title > div:nth-child(3) {
+  flex:0 0 160px;
+  text-align: right; 
+  margin-right: 40px;
+}
+
+#rowlist-content {
+  height:calc(100% - 41px);
+  background-color: '#FFF';
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  height:40px;
+  color:#000;
+  opacity: .87
+}
+
+.row:hover {
+  background-color: #EEEEEE!important;
+}
+
+.row > div {
+  box-sizing: border-box;
+  cursor: default;
+  height: 40px;
+  line-height: 40px;
+}
+
+.row-select {
+  flex:0 1 120px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+.row > div:nth-child(2) {
+  flex: 1
+}
+
+.row-time {
+  flex:0 1 160px;
+  font-size:13px;
+  opacity: .54;
+  text-align: right;
+}
+
+.row-size {
+  flex:0 1 160px;
+  font-size: 13px;
+  opacity: .54;
+  text-align: right;
+  margin-right: 40px;
+}
