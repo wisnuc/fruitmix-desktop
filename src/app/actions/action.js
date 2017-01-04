@@ -95,17 +95,19 @@ var actions = {
 		};
 	},
 
-	refreshStatusOfUpload(tasks) {
+	refreshStatusOfUpload(tasks, finish) {
 		return {
 			type: 'REFRESH_STATUS_UPLOAD',
-			tasks : tasks
+			tasks: tasks,
+			uploadFinish: finish
 		}
 	},
 
-	refreshStatusOfDownload(tasks) {
+	refreshStatusOfDownload(tasks, finish) {
 		return {
 			type: 'REFRESH_STATUS_DOWNLOAD',
-			tasks : tasks
+			tasks : tasks,
+			downloadFinish: finish
 		}
 	},
 

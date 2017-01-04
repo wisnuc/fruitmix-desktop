@@ -1,6 +1,6 @@
 //define default state
 const defaultState = {
-	state: 'READY', // READY, BUSY, REJECTED, TIMEOUT, ERROR, LOGGEDIN
+	state: 'READY',
   obj: {},
   device: [],
   selectIndex : 0
@@ -35,15 +35,6 @@ const loginState = (state = defaultState, action) => {
 
 		case 'SET_DEVICE':
 			return Object.assign({},state,{device: action.device});
-
-		case 'DELETE_SERVER':
-			var IPIndex = state.device.findIndex(item => {
-				return item.address == action.item.address
-			})
-			if (IPIndex != -1) {
-				state.device.splice(IPIndex,1)
-			}
-			return state
 		default:
 			return state
 	}

@@ -308,12 +308,12 @@ class Main extends React.Component {
       this.props.dispatch(Action.setTree(treeChildren));
     });
 
-		ipcRenderer.on('refreshStatusOfUpload',(err,tasks)=>{
-			window.store.dispatch(Action.refreshStatusOfUpload(tasks));
+		ipcRenderer.on('refreshStatusOfUpload',(err,tasks, finish)=>{
+			window.store.dispatch(Action.refreshStatusOfUpload(tasks, finish));
 		});
 
-		ipcRenderer.on('refreshStatusOfDownload',(err,tasks)=>{
-			window.store.dispatch(Action.refreshStatusOfDownload(tasks));
+		ipcRenderer.on('refreshStatusOfDownload',(err,tasks, finish)=>{
+			window.store.dispatch(Action.refreshStatusOfDownload(tasks, finish));
 		})
 
 		ipcRenderer.on('message',(err,message,code)=>{
