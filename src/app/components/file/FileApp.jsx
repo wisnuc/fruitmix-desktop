@@ -648,6 +648,16 @@ class FileApp extends React.Component {
         Object.assign({}, state, { hover: index }))
     }
 
+    this.drop = e => {
+      if (window.store.getState().login.state !== "LOGGEDIN") return
+      if (this.state.navContext !== 'HOME_DRIVE') return
+      let files = []
+      for(let item of e.dataTransfer.files) {
+        files.push(item.path)
+      }
+      command('fileapp','DRAG_FILE',{files,dirUUID:this.state.directory.uuid})
+    }
+
 
     this.rowClickBound = this.rowClick.bind(this)
     this.rowDoubleClickBound = this.rowDoubleClick.bind(this)
@@ -660,6 +670,8 @@ class FileApp extends React.Component {
   }
 
   componentDidMount() {
+
+    document.addEventListener('drop', this.drop)
 
    //  // create keypress listener
    //  this.keypress = new keypress.Listener()
@@ -725,14 +737,15 @@ class FileApp extends React.Component {
   componentWillUnmount() {
 
     // clean up keypress
-    this.keypress.reset()
-    this.keypress.stop_listening()
-    this.keypress.destroy()
-    this.keypress = null
+    // this.keypress.reset()
+    // this.keypress.stop_listening()
+    // this.keypress.destroy()
+    // this.keypress = null
 
     // remove listener
-    window.removeEventListener('keydown', this.keypress, false)
-    window.removeEventListener('keyup', this.keypress, false)
+    // window.removeEventListener('keydown', this.keypress, false)
+    // window.removeEventListener('keyup', this.keypress, false)
+    document.removeEventListener('drop', this.drop)
   }
 
   // context
