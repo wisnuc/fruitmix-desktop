@@ -68,10 +68,8 @@ export default class SlideToAnimate extends Component {
 
       const prevIndex = this.state.currentIndex + 1;
 
-      if (this.props.translateRightCallback(prevIndex) === false) {
-        console.log('rt');
+      if (this.props.translateRightCallback(prevIndex) === false)
         return;
-      }
 
       this.setState({ currentIndex: prevIndex });
     };
