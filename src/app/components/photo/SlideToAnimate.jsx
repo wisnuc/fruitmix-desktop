@@ -56,7 +56,9 @@ export default class SlideToAnimate extends Component {
 
       const nextIndex = this.state.currentIndex - 1;
 
-      this.props.translateLeftCallback(nextIndex);
+      if (this.props.translateLeftCallback(nextIndex) === false)
+        return;
+
       this.setState({ currentIndex: nextIndex });
     };
 
@@ -66,7 +68,11 @@ export default class SlideToAnimate extends Component {
 
       const prevIndex = this.state.currentIndex + 1;
 
-      this.props.translateRightCallback(prevIndex);
+      if (this.props.translateRightCallback(prevIndex) === false) {
+        console.log('rt');
+        return;
+      }
+
       this.setState({ currentIndex: prevIndex });
     };
 

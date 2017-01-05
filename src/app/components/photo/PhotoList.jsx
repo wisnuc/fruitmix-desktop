@@ -36,7 +36,7 @@ export default class PhotoList extends Component {
         // top: 60,
         // bottom: 60,
         // height: 'calc(100% - 120px)',
-        zIndex: 9999
+        zIndex: 10002
       }
     };
 

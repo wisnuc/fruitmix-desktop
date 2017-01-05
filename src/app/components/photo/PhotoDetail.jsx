@@ -25,7 +25,7 @@ class MaskLayer extends Component {
         width: '100%',
         height: '100%',
         backgroundColor: 'rgba(0,0,0,.95)',
-        zIndex: 999
+        zIndex: 10001
       }
     }
   }
@@ -75,7 +75,7 @@ class PhotoDetailList extends Component {
   }
 
   render() {
-    const { style, activeIndex, items } = this.props;
+    const { style, items } = this.props;
 
     return (
       <div style={ this.props.style }>
@@ -107,12 +107,19 @@ export default class PhotoDetail extends Component {
       }
     };
 
-    this.requestNext = (seqIndex) => {
-      ipcRenderer.send('getMediaImage', this.props.items[seqIndex].digest);
+    this.requestNext = (currentIndex) => {
+      window.store.dispatch({ type: 'CLEAR_MEDIA_IMAGE' });
+      ipcRenderer.send('getMediaImage', this.props.items[currentIndex].digest);
+      setTimeout(() => {
+        this.refs['slideToAnimate'].setState({ currentIndex });
+      }, 10);
+
+      return false;
     };
 
     this.buildPhotoDetailList = () => (
       <SlideToAnimate
+        ref="slideToAnimate"
         style={ this.style.slideAnimate }
         direLeft={ -45 }
         direRight={ -45 }
@@ -123,15 +130,14 @@ export default class PhotoDetail extends Component {
         translateCount={ this.props.items.length }>
         <PhotoDetailList
           style={ this.style.photoDetailList }
-          activeIndex={ this.props.activeIndex }
           items={ this.props.items }/>
       </SlideToAnimate>
     );
   }
 
-  // shouldComponentUpdate(nextProps) {
-  //   return this.props.activeIndex !== nextProps.activeIndex;
-  // }
+  shouldComponentUpdate(nextProps) {
+    return window.store.getState().view.currentMediaImage.path !== '';
+  }
 
   componentWillMount() {
     this.requestNext(this.props.seqIndex);
