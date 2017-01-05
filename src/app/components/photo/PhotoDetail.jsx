@@ -126,7 +126,7 @@ export default class PhotoDetail extends Component {
         activeIndex={ this.props.seqIndex }
         translateLeftCallback={ this.requestNext }
         translateRightCallback={ this.requestNext }
-        translateDistance={ this.props.style.width }
+        translateDistance={ document.documentElement.clientWidth - 120 }
         translateCount={ this.props.items.length }>
         <PhotoDetailList
           style={ this.style.photoDetailList }

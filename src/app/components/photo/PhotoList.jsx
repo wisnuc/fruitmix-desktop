@@ -25,17 +25,17 @@ export default class PhotoList extends Component {
       },
       photoDetail: {
         position: 'fixed',
-        left: '50%',
-        top: '50%',
-        width: 781,
-        height: 648,
-        transform: 'translate(-50%, -50%)',
-        // left: 60,
-        // right: 60,
-        // width: 'calc(100% - 120px)',
-        // top: 60,
-        // bottom: 60,
-        // height: 'calc(100% - 120px)',
+        // left: '50%',
+        // top: '50%',
+        // width: 781,
+        // height: 648,
+        // transform: 'translate(-50%, -50%)',
+        left: 60,
+        right: 60,
+        width: 'calc(100% - 120px)',
+        top: 60,
+        bottom: 60,
+        height: 'calc(100% - 120px)',
         zIndex: 10002
       }
     };

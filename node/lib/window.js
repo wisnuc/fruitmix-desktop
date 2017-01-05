@@ -32,13 +32,13 @@ const initMainWindow = () => {
 	})
 
   // debug mode
-  // _mainWindow.webContents.openDevTools()
-  _mainWindow.maximize()
+  _mainWindow.webContents.openDevTools()
+  //_mainWindow.maximize()
 
   if (global.BABEL_IS_RUNNING)
 	  _mainWindow.loadURL('file://' + process.cwd() + '/build/index.html')
   else
-    _mainWindow.loadURL('file://' + path.join(global.entryFileDir, 'index.html'))	
+    _mainWindow.loadURL('file://' + path.join(global.entryFileDir, 'index.html'))
 	  // _mainWindow.loadURL('file://' + process.cwd() + '/resources/app/build/index.html')
 
   console.log('[window] mainWindow initialized')
@@ -53,7 +53,7 @@ const openNewWindow = (url) => {
     height: 768,
     width: 1366,
     resizable: true,
-    title: 'Appifi', 
+    title: 'Appifi',
   })
 
   newWindow.on('page-title-updated', event => event.preventDefault())
@@ -65,4 +65,3 @@ const openNewWindow = (url) => {
 ipcMain.on('newWebWindow', (event, url) => openNewWindow(url))
 
 export { initMainWindow, getMainWindow }
-
