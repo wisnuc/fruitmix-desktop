@@ -399,116 +399,28 @@ class Maintenance extends React.Component {
     //
     // operation
     //
-    this.operationActions = () => {
-
-      if (this.state.operation === null) return []
-      switch(this.state.operation.stage) {
-      case 'CONFIRM':
-
-        return [
-          <FlatButton
-            labelStyle={{fontSize: 16}}
-            label='取消'
-            onTouchTap={() => { 
-              this.state.operation.onCancel && this.state.operation.onCancel()
-              this.setState({ operation: null })
-            }}
-          />,
-          <FlatButton 
-            labelStyle={{fontSize: 16}}
-            label='确认'
-            secondary={true}
-            onTouchTap={() => {
-
-              this.setState({
-                operation: {
-                  stage: 'WIP',
-                  title: '执行操作',
-                  text: 'busy' 
-                }
-              })
-
-              const finish = (text, success) => {
-                this.setState({
-                  operation: {
-                    stage: success ? 'SUCCESS' : 'FAILED',
-                    title: success ? '操作成功' : '操作失败',
-                    text
-                  }
-                })
-              }
-
-              let data = null
-              if (this.state.operation.Input) 
-                data = this.state.operation.input
-              else if (this.state.operation.select) 
-                data = this.state.operation.select
-
-              this.state.operation.onOK(data, text => finish(text, true), text => finish(text, false))
-            }}
-
-            disabled={ this.state.operation.Input && !this.state.operation.inputDone }
-          />
-        ]
-
-      case 'WIP':
-        return [ <FlatButton labelStyle={{fontSize: 16}} label=' ' disabled={true} /> ]
-
-      case 'SUCCESS':
-      case 'FAILED':
-        return [
-          <FlatButton
-            labelStyle={{fontSize: 16}}
-            label='晓得了'
-            secondary={true}
-            onTouchTap={() => this.setState({ operation: null }) }
-          />
-        ]
-
-      default:
-        return []
-      }
+    this.operationOnCancel = () => {
+      this.setState({ operation: null }) 
     }
 
-    const DialogTextBox = props => (
+/**
 
-      <div style={props.style}>
-        { props.busy &&
-          <div style={{width: '100%', height: '100%', 
-            display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-            <CircularProgress color={pinkA200} />
-          </div> }
-        
-        { !props.busy &&
-          <div style={{width: '100%'}}>
-            { props.text.map((line, index, array) => {
-              return (
-              <div style={{ 
-                fontSize: 15, lineHeight: '24px', 
-                marginBottom: index === array.length - 1 ? 0 : 20
-              }}>{ line }</div>)
-            })}
-          </div> } 
-      </div>
-    )
+  STAGE: 'SETUSER'
+  title: 
+  username:
+  password:
+  passwordAgain:
+  Content 
 
-    this.UsernamePassword = props => {
+**/
+
+    this.UsernamePasswordContent = props => {
 
       const onChange = (name, value) => {
 
-        let copy = Object.assign({}, this.state.operation.input)
-        copy[name] = value
-
-        let done = copy.username && copy.username.length > 0 && 
-          copy.password && copy.password.length > 0 && 
-          copy.passwordAgain && copy.passwordAgain === copy.password
-
-        let nextOp = Object.assign({}, this.state.operation, { 
-          input: copy,
-          inputDone: done 
-        })
-
-        this.setState({ operation: nextOp })
+        let operation = Object.assign({}, this.state.operation)
+        operation[name] = value
+        this.setState({ operation })
       }
 
       return (
@@ -523,118 +435,103 @@ class Maintenance extends React.Component {
       )
     }
 
+    // Sub Component
+    this.OperationTextContent = props => (
+      <div style={{width: '100%'}}>
+        { this.state.operation.text.map((line, index, array) => {
+          return (
+          <div style={{ 
+            fontSize: 15, lineHeight: '24px', 
+            marginBottom: index === array.length - 1 ? 0 : 20
+          }}>{ line }</div>)
+        })}
+      </div>     
+    )
+
+    // Sub Component
+    this.OperationBusy = props => (
+      <div style={{width: '100%', height: '100%', 
+        display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+        <CircularProgress color={pinkA200} />
+      </div> 
+    )
+
+    // state transition
+    this.setOperationDialogBusy = () => {
+
+      let operation = {
+        stage: 'WIP',
+        title: '执行操作',
+        Content: this.OperationBusy,
+        actions: [
+          {
+            label: ' ',
+            disabled: true
+          }
+        ]
+      }
+
+      this.setState({ operation })
+    }
+
+    this.setOperationDialogSuccess = text => {
+
+      let operation = {
+        stage: 'SUCCESS',
+        title: '操作成功',
+        text,
+        Content: this.OperationTextContent,
+        actions: [ 
+          {
+            label: '晓得了',
+            onTouchTap: this.operationOnCancel
+          }
+        ]
+      }
+
+      this.setState({ operation })
+    }
+
+    this.setOperationDialogFailed = text => {
+
+      let operation = {
+        stage: 'FAILED',
+        title: '操作失败',
+        text,
+        Content: this.OperationTextContent,
+        actions: [ 
+          {
+            label: '晓得了',
+            onTouchTap: this.operationOnCancel
+          }
+        ]
+      }
+
+      this.setState({ operation })
+    }
+
+    // TODO move to main render
     this.OperationDialog = props => {
 
-      debug('Operation Dialog render', this.state.operation)
-
-      let busy = this.state.operation && this.state.operation.text === 'busy' // TODO
-
+      let operation = this.state.operation
       return ( 
         <Dialog
           contentStyle={{ width: 504, zIndex: 2500 }}
-          title={this.state.operation && this.state.operation.title}
-          open={this.state.operation !== null}
+          title={operation && operation.title}
+          open={operation !== null}
           modal={true}
-          actions={this.operationActions()}
+          actions={ operation && operation.actions && 
+            operation.actions.map(action => 
+              <FlatButton 
+                label={action.label}
+                onTouchTap={action.onTouchTap}
+                disabled={typeof action.disabled === 'function' ? action.disabled() : action.disabled}
+              /> ) 
+          }
         >
-          { !!this.state.operation && this.state.operation.Input === undefined &&
-            <div style={{width: '100%', height: 120}}>
-              { busy &&
-                <div style={{width: '100%', height: '100%', 
-                  display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                  <CircularProgress color={pinkA200} />
-                </div> }
-              
-              { !busy &&
-                <div style={{width: '100%'}}>
-                  { this.state.operation.text.map((line, index, array) => {
-                    return (
-                    <div style={{ 
-                      fontSize: 15, lineHeight: '24px', 
-                      marginBottom: index === array.length - 1 ? 0 : 20
-                    }}>{ line }</div>)
-                  })}
-                </div> } 
-
-              { this.state.operation.select &&
-                <div>
-                  { this.state.operation.select.map(item => 
-                      <Checkbox 
-                        label={item[1]} 
-                        checked={ this.state.operation.selected.includes(item[0]) }
-                        onCheck={() => {
-                          let sel, value = item[0]
-                          let index = this.state.operation.selected.indexOf(value)
-                          if (index === -1) 
-                            sel = [...this.state.operation.selected, value]
-                          else
-                            sel = [...this.state.operation.selected.slice(0, index),
-                              ...this.state.operation.selected.slice(index + 1)]
-
-                          let nextOp = Object.assign({}, this.state.operation, { selected: sel })
-                          this.setState({ operation: nextOp })
-                        }}
-                      />
-                    ) }
-                </div> 
-              }
-            </div> }
-            
-            { !!this.state.operation && this.state.operation.Input !== undefined &&
-              <this.state.operation.Input />
-            }
+          { operation && operation.Content && <operation.Content /> }
         </Dialog>
       )
-    }
-
-    this.startOperation = ({
-
-        // input mode
-        input,        // { title, content }
-
-        // simple mode
-        text, 
-        select,       // [[value, text]...]
-        selectSingle, // true for radio button
-
-        onOK,         // (selected: null, if select undefined; or [] containing user selection
-                      // onSuccess(text), onFailed(text))
-        onCancel
-
-      }) => {
-
-      debug('start operation', text, onOK, onCancel)
-
-      if (input) {
-
-        this.setState({
-          operation: {
-            stage: 'CONFIRM',
-            title: input.title || '确认操作',
-            Input: input.Input,
-            onOK,
-            onCancel,
-
-            inputDone: false,
-            input: {}
-          }
-        })
-      }
-      else {
-        this.setState({
-          operation: {
-            stage: 'CONFIRM',
-            title: '确认操作',
-            text,
-            select,
-            selectSingle,
-            onOK,
-            onCancel,
-
-            selected: [],
-          }
-        }) 
-      }
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -661,32 +558,80 @@ class Maintenance extends React.Component {
 
     this.startWisnucOnVolume = volume => {
 
-      this.startOperation({
+      let operation = {
+        stage: 'CONFIRM',
+        title: '确认操作',
         text: ['启动安装于Btrfs磁盘阵列上的WISNUC应用？'],
-        onOK: (selected, onSuccess, onFailed) => {
+        Content: this.OperationTextContent,
+        actions: [{
+          label: '取消',
+          onTouchTap: this.operationOnCancel 
+        },{
+          label: '确认',
+          onTouchTap: () => {
 
-          let device = window.store.getState().maintenance.device
-          let url = `http://${device.address}:3000/system/mir/run`
+            this.setOperationDialogBusy()
 
-          request
-            .post(url)
-            .set('Accept', 'application/json')
-            .send({ target: volume.fileSystemUUID })
-            .end((err, res) => {
+            let device = window.store.getState().maintenance.device
+            let url = `http://${device.address}:3000/system/mir/run`
 
-              if (err) {
-                this.reloadBootStorage((err2, { boot, storage }) => {
-                  onFailed(this.errorText(err, res))
-                })
-              }
-              else {
-                this.reloadBootStorage((err2, { boot, storage }) => {
-                  onSuccess(['启动成功，系统将在3秒钟后跳转到登录页面'])
-                })
-              }
-            })
-        },
-      }) 
+            request
+              .post(url)
+              .set('Accept', 'application/json')
+              .send({ target: volume.fileSystemUUID })
+              .end((err, res) => {
+
+                if (err) {
+                  this.reloadBootStorage((err2, { boot, storage }) => {
+                    this.setOperationDialogFailed(this.errorText(err, res))
+                  })
+                }
+                else {
+                  this.reloadBootStorage((err2, { boot, storage }) => {
+                    // FIXME
+                    this.setOperationDialogSuccess(['启动成功，系统将在3秒钟后跳转到登录页面'])
+                  })
+                }
+              })
+          },         
+        }]
+      }
+
+      this.setState({ operation })
+    }
+
+    this.installWisnucOnVolume = volume => {
+
+      debug('installWisnucOnVolume', volume)
+
+      if (volume.wisnuc.status === 'NOTFOUND') {
+        
+        let operation = {
+          stage: 'SETUSER',
+          title: '输入用户名和密码',
+          username: '',
+          password: '',
+          passwordAgain: '',
+          Content: this.UsernamePasswordContent,
+          actions: [{
+            label: '取消',
+            onTouchTap: this.operationOnCancel
+          }, {
+            label: '确认',
+            disabled: () => {
+
+              let op = this.state.operation
+              return !(op.username && op.username.length > 0 && 
+                        op.password && op.password.length > 0 && 
+                        op.passwordAgain && op.passwordAgain === op.password)
+               
+            },
+            onTouchTap: () => {}
+          }]
+        } 
+
+        this.setState({ operation })
+      }
     }
 
     this.mkfsBtrfsVolume = () => {
@@ -696,43 +641,57 @@ class Maintenance extends React.Component {
       let target = this.state.creatingNewVolume.disks.map(disk => disk.name)
       let type = 'btrfs'
       let mode = this.state.creatingNewVolume.mode
+
       let text = []
 
       text.push(`使用设备${target.join()}和${mode}模式创建新磁盘阵列，` +
         '这些磁盘和包含这些磁盘的磁盘阵列上的数据都会被删除且无法恢复。')
       text.push('确定要执行该操作吗？')
 
-      let obj = {
-
+      let operation = {
+        stage: 'CONFIRM',
+        title: '确认操作',
         text,
-        onOK: (selected, onSuccess, onFailed) => {
-
-            debug('mkfs operation onOk', selected)
-
-            let device = window.store.getState().maintenance.device
-            request
-              .post(`http://${device.address}:3000/system/mir/mkfs`)
-              .set('Accept', 'application/json')
-              .send({ type, target, mode })
-              .end((err, res) => {
-
-                debug('mkfs btrfs request', err || res.body)
-              
-                if (err) {
-                  this.reloadBootStorage((err2, { boot, storage }) => {  
-                    onFailed(this.errorText(err, res))
-                  })
-                }
-                else {
-                  this.reloadBootStorage((err, { boot, storage }) => {
-                    onSuccess(['成功'])
-                  })
-                }
-              })
+        Content: this.OperationTextContent,
+        actions: [
+          {
+            label: '取消',
+            onTouchTap: this.operationOnCancel,
           },
-        }
+          {
+            label: '确认',
+            onTouchTap: () => {
 
-        this.startOperation(obj)
+              // set dialog state to busy
+              this.setOperationDialogBusy()
+
+              let device = window.store.getState().maintenance.device
+              request
+                .post(`http://${device.address}:3000/system/mir/mkfs`)
+                .set('Accept', 'application/json')
+                .send({ type, target, mode })
+                .end((err, res) => {
+
+                  debug('mkfs btrfs request', err || res.body)
+                
+                  // set dialog state to success or failed
+                  if (err) {
+                    this.reloadBootStorage((err2, { boot, storage }) => {  
+                      this.setOperationDialogFailed(this.errorText(err, res))
+                    })
+                  }
+                  else {
+                    this.reloadBootStorage((err2, { boot, storage }) => {
+                      this.setOperationDialogSuccess(['成功'])
+                    })
+                  }
+                })
+            }
+          }
+        ]
+      } 
+
+      this.setState({ operation })
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -1352,7 +1311,7 @@ class Maintenance extends React.Component {
                 <this.VolumeMenu volume={volume}
                   actions={[
                     [ volume.wisnuc.status === 'NOTFOUND' ? '安装' : '重新安装',
-                      () => {}, 
+                      () => this.installWisnucOnVolume(volume), 
                       false 
                     ],
                   ]}
@@ -1983,21 +1942,6 @@ class Maintenance extends React.Component {
 
           </div> 
           {/* gray box end */}
-
-          <FlatButton label='input' 
-            onTouchTap={() => {
-              this.startOperation({
-                input: {
-                  title: '请输入用户名和密码',
-                  Input: this.UsernamePassword
-                },
-                onOK: (input, onSuccess, onFailed) => {
-                  debug('fake input', input)
-                  setTimeout(() => onSuccess(['OKOK']), 3000)
-                }
-              })
-            }}
-          />
 
           <div style={{width: '100%', height: 48}} />
         </div>
