@@ -33,7 +33,8 @@ class FileTable extends Component {
 			if (index !== -1) {
 				this.list[index] = node
 				this.updateDetail()
-			}else {
+				// this.refs.index.forceUpdate()
+				this.refs[index.toString()].forceUpdate()
 			}
 		}
 		this.kd = this.keydown.bind(this)
@@ -52,22 +53,11 @@ class FileTable extends Component {
 		document.removeEventListener('keyup', this.ku)
 	}
 
-	componentWillUpdate() {
-		// console.log('will update.......................................')
-		// console.log((new Date()).getTime())
-	}
-
-	componentDidUpdate() {
-		// console.log('did update.......................................')
-		// console.log((new Date()).getTime())
-	}
-
 	shouldComponentUpdate() {
 		return false
 	}
 
 	render() {
-		console.log('render !! may be wrong!!')
 		let _this = this
 		return (
 			<div id='list-container'>

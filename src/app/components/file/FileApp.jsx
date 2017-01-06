@@ -1504,9 +1504,9 @@ class FileApp extends React.Component {
               node: uuid,
               name: newName
             }, (err, data) => {
-              console.log(data)
-              return
-              this.refresh()
+              let dom = this.refs.FileTable
+              dom.updateFileNode(JSON.parse(data))
+              dom.forceUpdate()
             })
           }}
         />
