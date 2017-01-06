@@ -21,7 +21,7 @@ export default class ScrollFlush extends Component {
 		this.state = {
 			lazyloadBoxs: []
 		};
-
+		this.lazyloadBoxs = [];
 		this.getStyle = () => ({
 			position: 'absolute',
 			left: 0,
@@ -31,12 +31,7 @@ export default class ScrollFlush extends Component {
 			bottom: 0,
 			overflow: 'auto'
 		});
-		// this.callerChildScrollHandler = () => {
-		//   Object
-		// 	  .keys(this.refs)
-		// 		.filter(ref => ref.indexOf('lazyloadBox') >= 0)
-		// 		.forEach(ref => this.refs[ref].scrollHandler(this.node.getBoundingClientRect().width, this.node.scrollTop))
-		// };
+
 	  this.scrollHandler = throttle(() => {
 			// 调用子组件scrollHandler
 			//this.callerChildScrollHandler();
@@ -62,15 +57,6 @@ export default class ScrollFlush extends Component {
 	  }, __DELAY__, __MUSTEXECTIME__);
 	}
 
-	// getLazyloadHeight(itemCount) {
-	// 	return Math
-	// 	  .ceil(
-	// 			itemCount / Math.floor(
-	// 				document.documentElement.clientWidth / this.singleItemWidth
-	// 			)
-	// 		) * this.singleItemHeight;
-	// }
-
 	isToBottom() {
     const visualHeight = this.node.getBoundingClientRect().height;
 		const artualHeight = this.node.scrollHeight;
@@ -85,35 +71,36 @@ export default class ScrollFlush extends Component {
 		}, (
 			<div ref={innerEl => this.innerEl = innerEl}>
 			  {this.state.lazyloadBoxs.map((lazyloadBox, index) => {
-					return <LazyloadBox
-						ref={`lazyloadBox${index}`}
-						key={index}
-						date={lazyloadBox.date}
-						list={this.props.list[index].photos}
-						allPhotos={this.props.allPhotos}
-            addListToSelection={this.props.addListToSelection}
-            lookPhotoDetail={this.props.lookPhotoDetail}
-            removeListToSelection={this.props.removeListToSelection}>
-						<PhotoListByDate />
-					</LazyloadBox>
+					let __LazyloadBox__ = (
+						<LazyloadBox
+							ref={'lazyloadBox' + index}
+							key={index}
+							date={lazyloadBox.date}
+							list={this.props.list[index].photos}
+							allPhotos={this.props.allPhotos}
+							addListToSelection={this.props.addListToSelection}
+							lookPhotoDetail={this.props.lookPhotoDetail}
+							removeListToSelection={this.props.removeListToSelection}
+							onDetectAllOffChecked={() => this.props.onDetectAllOffChecked(Object.keys(this.refs).map(refName => this.refs[refName].refs['photoListByDate']))}
+							onGetPhotoListByDates={() => this.props.onGetPhotoListByDates(Object.keys(this.refs).map(refName => this.refs[refName].refs['photoListByDate']))}
+							onAddHoverToList={() => this.props.onAddHoverToList(Object.keys(this.refs).map(refName => this.refs[refName].refs['photoListByDate']))}
+							onRemoveHoverToList={() => this.props.onRemoveHoverToList(Object.keys(this.refs).map(refName => this.refs[refName].refs['photoListByDate']))}>
+							<PhotoListByDate />
+						</LazyloadBox>
+					);
+					return __LazyloadBox__;
 				})}
 			</div>
 		));
-	}
-
-	componentWillReceiveProps() {
-	  //this.isUpdate = true;
 	}
 
 	componentDidMount() {
 	  this.node = findDOMNode(this);
 		this.scrollHandler();
 
-	  add(this.node, 'scroll', this.scrollHandler);
-	}
+		//console.log(Object.keys(this.refs).filter(refName => refName.indexOf('lazyloadBox') >= 0).forEach(refName => this.lazyloadBoxs.push(this.refs[refName].props.children)), 'm,dddfd');
 
-	componentDidUpdate() {
-		//this.isUpdate && this.scrollHandler();
+	  add(this.node, 'scroll', this.scrollHandler);
 	}
 
 	componentWillUnmount() {

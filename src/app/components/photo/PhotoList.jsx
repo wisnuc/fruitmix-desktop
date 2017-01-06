@@ -21,7 +21,8 @@ export default class PhotoList extends Component {
         left: 0,
         margin: '0 25px',
         position: 'fixed',
-        width: 'calc(100% - 50px)'
+        width: 'calc(100% - 50px)',
+        zIndex: 200
       },
       photoDetail: {
         position: 'fixed',
@@ -30,12 +31,10 @@ export default class PhotoList extends Component {
         // width: 781,
         // height: 648,
         // transform: 'translate(-50%, -50%)',
-        left: 60,
-        right: 60,
-        width: 'calc(100% - 120px)',
-        top: 60,
-        bottom: 60,
-        height: 'calc(100% - 120px)',
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '100%',
         zIndex: 10002
       }
     };
@@ -76,7 +75,10 @@ export default class PhotoList extends Component {
 
     this.renderCarousel = () => (
       <FadingToAnimate style={ this.style.carousel } flag={ this.state.carouselItems.length ? 'in' : 'out' }>
-        <Carousel style={{ backgroundColor: '#fff', height: 180, borderRadius: 4, boxShadow: '0 0 10px rgba(0,0,0,.3)' }} items={ this.state.carouselItems } />
+        <Carousel
+          onClearHoverToList={() => { this.photoListByDates.forEach(p => p.removeCheckToAllItem())}}
+          style={{ backgroundColor: '#fff', height: 180, borderRadius: 4, boxShadow: '0 0 10px rgba(0,0,0,.3)' }}
+          items={ this.state.carouselItems } />
       </FadingToAnimate>
     );
     this.renderPhotoDetail = (photos) => {
@@ -84,6 +86,8 @@ export default class PhotoList extends Component {
         ? (<PhotoDetail
             closeMaskLayer={ () => this.setState({ activeIndex: false }) }
             style={ this.style.photoDetail }
+            deltaWidth={ document.documentElement.clientWidth }
+            deltaHeight={ document.documentElement.clientHeight }
             items={ photos[this.state.activeIndex].photos }
             seqIndex={ this.seqIndex }
             activeIndex={ this.state.activeIndex } />)
@@ -103,41 +107,30 @@ export default class PhotoList extends Component {
     return photos.filter(photo => formatDate(photo.exifDateTime) === date);
   }
 
+  detectAllOffChecked(photoListByDates) {
+    return photoListByDates.every(p => p.detectIsAllOffChecked());
+  }
+
   render() {
-    // this.photoMapDates = this.photoDates.map(date => ({
-    //   date,
-    //   photos: this.findPhotosByDate(this.allPhotos, date)
-    // }));
-    // let store = window.store;
-    // let dispatch = store.dispatch;
-    // let photos = this.photos = store.getState().media.data;
-    // let photoDates = this.findDatesByExifDateTime(photos);
     return (
       <div style={ this.props.style }>
+        {/* 图片列表 */}
         <ScrollFlush
           allPhotos={this.props.allPhotos}
           addListToSelection={ this.addListToSelection }
           lookPhotoDetail={ this.lookPhotoDetail }
           removeListToSelection={ this.removeListToSelection }
           list={this.props.photoMapDates}
+          onDetectAllOffChecked={this.detectAllOffChecked}
+          onGetPhotoListByDates={photoListByDates => this.photoListByDates = photoListByDates}
+          onAddHoverToList={photoListByDates => { this.photoListByDates = photoListByDates; photoListByDates.forEach(p => p.addHoverToAllItem())}}
+          onRemoveHoverToList={photoListByDates => {const isAllOffChecked = photoListByDates.every(p => p.detectIsAllOffChecked()); isAllOffChecked && photoListByDates.forEach(p => p.removeHoverToAllItem()) }}
           pageSize={7}>
           <LazyloadBox />
         </ScrollFlush>
 
-        {/* photoDates.map((date, index) => (
-          <PhotoListByDate
-            style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start', marginBottom: 15 }}
-            date={ date }
-            allPhotos={ photos }
-            photos={ this.findPhotosByDate(photos, date) }
-            addListToSelection={ this.addListToSelection }
-            lookPhotoDetail={ this.lookPhotoDetail }
-            removeListToSelection={ this.removeListToSelection }
-            key={ date }/>
-          ))
-        */}
         {/* 轮播 */}
-        { this.renderCarousel() }
+        {/* this.renderCarousel() */}
 
         {/* 查看大图 */}
         { this.renderPhotoDetail(this.props.photoMapDates) }

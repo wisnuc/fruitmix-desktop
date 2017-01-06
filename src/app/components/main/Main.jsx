@@ -102,8 +102,8 @@ const SystemDrawer = (props) => {
             onTouchTap={() => props.onLauncherSelect(FileApp)}
           />
           <ListItem style={{color: 'rgba(255,255,255,0.7)'}}
-            primaryText='照片（暂不可用）'
-            leftAvatar={<Avatar icon={<ImagePhoto />} backgroundColor={grey500} />}
+            primaryText='照片'
+            leftAvatar={<Avatar icon={<ImagePhoto />} backgroundColor={blue500} />}
             onTouchTap={() => props.onLauncherSelect(PhotoApp)}
           />
           <ListItem style={{color: 'rgba(255,255,255,0.7)'}}

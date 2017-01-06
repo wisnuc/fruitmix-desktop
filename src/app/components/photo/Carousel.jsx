@@ -19,6 +19,7 @@ export default class Carousel extends Component {
       <div style={ style }>
         <div style={{ width: '100%' }}>
           <CarouselTopBar
+            onClearHoverToList={this.props.onClearHoverToList}
             style={{ marginLeft: __MARGIN_DISTANCE__, marginRight: __MARGIN_DISTANCE__, height: __PART_HEIGHT__, lineHeight: __PART_HEIGHT__ + 'px' }} />
 
           <SlideToAnimate

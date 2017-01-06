@@ -25,17 +25,11 @@ export default class LazyloadBox extends Component {
     // };
   }
 
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   return false;
-  //   // return nextProps.actualTop !== this.props.actualTop
-  //   //   || nextState.height !== this.state.height
-  //   //   || nextState.visible !== this.state.visible;
-  // }
-
   render() {
     return (
       <div>
         {React.createElement(this.props.children.type, {
+          ref: 'photoListByDate',
           style: { display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start' },
           key: this.props.key,
           date: this.props.date,
@@ -43,7 +37,11 @@ export default class LazyloadBox extends Component {
           photos: this.props.list.slice(0, 50),
           addListToSelection: this.props.addListToSelection,
           lookPhotoDetail: this.props.lookPhotoDetail,
-          removeListToSelection: this.props.removeListToSelection
+          removeListToSelection: this.props.removeListToSelection,
+          onDetectAllOffChecked:this.props.onDetectAllOffChecked,
+          onGetPhotoListByDates: this.props.onGetPhotoListByDates,
+          onAddHoverToList: this.props.onAddHoverToList,
+          onRemoveHoverToList: this.props.onRemoveHoverToList
         })}
       </div>
     );

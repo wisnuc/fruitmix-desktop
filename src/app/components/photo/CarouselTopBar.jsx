@@ -14,12 +14,12 @@ export default class CarouselTopBar extends Component {
       <div style={ this.props.style }>
         <div style={{ clear: 'both' }}>
           <div style={{ float: 'left' }}>
-            <button style={{ display: 'inline-block', marginRight: 30, padding: '5px 10px', background: '#eee' }}>分享</button>
-            <button style={{ display: 'inline-block', marginRight: 30, padding: '5px 10px', background: '#eee' }}>相册</button>
-            <button style={{ display: 'inline-block', marginRight: 30, padding: '5px 10px', background: '#eee' }}>下载</button>
+            <button disabled style={{ display: 'inline-block', marginRight: 30, padding: '5px 10px', background: '#eee' }}>分享</button>
+            <button disabled style={{ display: 'inline-block', marginRight: 30, padding: '5px 10px', background: '#eee' }}>相册</button>
+            <button disabled style={{ display: 'inline-block', marginRight: 30, padding: '5px 10px', background: '#eee' }}>下载</button>
           </div>
           <div style={{ float: 'right' }}>
-            <button style={{ display: 'inline-block', padding: '5px 10px', background: '#eee' }}>清除全部</button>
+            <button style={{ display: 'inline-block', padding: '5px 10px', background: '#eee' }} onClick={this.props.onClearHoverToList}>清除全部</button>
           </div>
         </div>
       </div>
@@ -28,5 +28,6 @@ export default class CarouselTopBar extends Component {
 }
 
 CarouselTopBar.propTypes = {
-  style: PropTypes.object
+  style: PropTypes.object,
+  onClearHoverToList: PropTypes.func
 };
