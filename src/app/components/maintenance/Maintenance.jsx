@@ -3,12 +3,15 @@ const debug = Debug('component:maintenance')
 
 import React from 'react'
 import muiThemeable from 'material-ui/styles/muiThemeable'
-import { AppBar, Avatar, Checkbox, Chip, Divider, Paper, SvgIcon, Menu, MenuItem,
-  FloatingActionButton,
-  FlatButton, Dialog, RaisedButton, IconButton, TextField, Toggle, CircularProgress } from 'material-ui'
+import { 
+  AppBar, Avatar, Checkbox, Chip, Divider, Paper, SvgIcon, Menu, MenuItem, 
+  FloatingActionButton, Subheader, FlatButton, Dialog, RaisedButton, 
+  IconButton, TextField, Toggle, CircularProgress 
+} from 'material-ui'
 
 import Popover, {PopoverAnimationVertical} from 'material-ui/Popover'
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
+import { List, ListItem } from 'material-ui/List'
 import ActionExitToApp from 'material-ui/svg-icons/action/exit-to-app'
 import ActionDns from 'material-ui/svg-icons/action/dns'
 import ActionDonutSmall from 'material-ui/svg-icons/action/donut-small'
@@ -17,35 +20,22 @@ import ContentContentCopy from 'material-ui/svg-icons/content/content-copy'
 import NavigationExpandMore from 'material-ui/svg-icons/navigation/expand-more'
 import NavigationExpandLess from 'material-ui/svg-icons/navigation/expand-less'
 import NavigationClose from 'material-ui/svg-icons/navigation/close'
+import NavigationMoreVert from 'material-ui/svg-icons/navigation/more-vert'
 import ContentAddCircle from 'material-ui/svg-icons/content/add-circle'
+import { 
+  pinkA200, grey300, grey400, greenA400, green400, amber400, red400, 
+
+  lightGreen100,
+  lightGreen400,
+  lightGreenA100,
+  lightGreenA200,
+  lightGreenA400, 
+  lightGreenA700
+} from 'material-ui/styles/colors'
 
 import UUID from 'node-uuid'
 
-const CatSilhouette = props => (
-  <SvgIcon {...props} viewBox='0 0 400 380'>
-    <path d="M 151.34904,307.20455 L 264.34904,307.20455 C 264.34904,291.14096 263.2021,287.95455 236.59904,287.95455 C 240.84904,275.20455 258.12424,244.35808 267.72404,244.35808 C 276.21707,244.35808 286.34904,244.82592 286.34904,264.20455 C 286.34904,286.20455 323.37171,321.67547 332.34904,307.20455 C 345.72769,285.63897 309.34904,292.21514 309.34904,240.20455 C 309.34904,169.05135 350.87417,179.18071 350.87417,139.20455 C 350.87417,119.20455 345.34904,116.50374 345.34904,102.20455 C 345.34904,83.30695 361.99717,84.403577 358.75805,68.734879 C 356.52061,57.911656 354.76962,49.23199 353.46516,36.143889 C 352.53959,26.857305 352.24452,16.959398 342.59855,17.357382 C 331.26505,17.824992 326.96549,37.77419 309.34904,39.204549 C 291.76851,40.631991 276.77834,24.238028 269.97404,26.579549 C 263.22709,28.901334 265.34904,47.204549 269.34904,60.204549 C 275.63588,80.636771 289.34904,107.20455 264.34904,111.20455 C 239.34904,115.20455 196.34904,119.20455 165.34904,160.20455 C 134.34904,201.20455 135.49342,249.3212 123.34904,264.20455 C 82.590696,314.15529 40.823919,293.64625 40.823919,335.20455 C 40.823919,353.81019 72.349045,367.20455 77.349045,361.20455 C 82.349045,355.20455 34.863764,337.32587 87.995492,316.20455 C 133.38711,298.16014 137.43914,294.47663 151.34904,307.20455 z "/>
-  </SvgIcon>
-)
-
-const BallOfYarn = props => (
-  <SvgIcon {...props} viewBox='0 0 92.4 92.4'>
-    <path d="m 27.407,27.720002 c -2.396667,-0.960667 -4.793333,-1.921333 -7.19,-2.882001 -4.928333,14.365667 -9.856667,28.731333 -14.785,43.097 1.469773,2.162525 3.994465,7.79419 5.685434,7.269322 C 16.547289,59.376215 21.977145,43.548108 27.407,27.720002 Z" />
-    <path d="m 21.581,7.1080015 c 12.538,5.0260005 25.076,10.0519995 37.614,15.0779995 0.840667,-1.795666 1.681333,-3.591333 2.522,-5.387 -11.059667,-4.434 -22.119333,-8.8679995 -33.179,-13.3019995 -2.416771,1.001479 -4.745113,2.21454 -6.957,3.611 z" />
-    <path d="m 39.474,51.683002 c 1.661333,0.659999 3.322667,1.32 4.984,1.979999 2.510667,-5.362667 5.021333,-10.725333 7.532,-16.088 -2.249333,-0.901667 -4.498667,-1.803333 -6.748,-2.705 -1.922667,5.604333 -3.845333,11.208667 -5.768,16.813001 z" />
-    <path d="m 37.63,57.059001 c -0.595333,1.735334 -1.190667,3.470667 -1.786,5.206 14.222333,5.650001 28.444667,11.3 42.667,16.95 1.870616,-1.954048 5.78607,-4.827607 1.249054,-5.419455 C 65.716702,68.216699 51.673351,62.63785 37.63,57.059001 Z" />
-    <path d="m 8.15,19.999001 c -8.0441709,11.490909 -10.2996588,26.733817 -6.024,40.082 4.271667,-12.452667 8.543333,-24.905333 12.815,-37.358 -2.263667,-0.908 -4.527333,-1.816 -6.791,-2.724 z" />
-    <path d="m 54.401,32.426001 c 0.794667,-1.697 1.589333,-3.394 2.384,-5.091 C 43.259333,21.912668 29.733667,16.490334 16.208,11.068002 14.251971,12.911785 9.755677,15.745271 14.478637,16.422749 27.786091,21.757166 41.093546,27.091585 54.401,32.426001 Z" />
-    <path d="M 72.129,7.9480015 C 64.666667,23.886334 57.204333,39.824669 49.742,55.763002 c 2.264667,0.899667 4.529333,1.799332 6.794,2.698999 C 63.683,43.197334 70.83,27.932668 77.977,12.668002 76.157,10.942987 74.203779,9.3570245 72.129,7.9480015 Z" />
-    <path d="m 39.966,32.755001 c -2.428333,-0.973332 -4.856667,-1.946667 -7.285,-2.92 -5.797,16.897667 -11.594,33.795334 -17.391,50.693 2.348333,1.459622 6.992361,7.689814 7.523863,2.229487 C 28.531242,66.089992 34.248621,49.422497 39.966,32.755001 Z" />
-    <path d="m 73.98,65.393001 c 3.928,1.561001 7.856,3.122 11.784,4.683 7.025399,-11.46917 8.57713,-26.067866 4.177,-38.772 -5.320333,11.363 -10.640667,22.726 -15.961,34.089 z" />
-    <path d="m 64.129,11.650001 c 1.029667,-2.1996665 2.059333,-4.3993325 3.089,-6.5989995 -9.146438,-4.7196541 -19.895967,-6.1967691 -29.984,-4.181 8.965,3.5933333 17.93,7.186667 26.895,10.7799995 z" />
-    <path d="m 30.283,78.473001 c -1.111667,3.240334 -2.223333,6.480667 -3.335,9.721 10.266269,4.758338 22.300289,5.506869 33.087,2.099001 -9.917333,-3.94 -19.834667,-7.88 -29.752,-11.82 z" />
-    <path d="m 73.624,83.381001 c -13.208333,-5.247 -26.416667,-10.494 -39.625,-15.741 -0.624333,1.819 -1.248667,3.638001 -1.873,5.457 11.807667,4.691333 23.615333,9.382667 35.423,14.074 2.11805,-1.105235 4.153099,-2.370538 6.075,-3.79 z" />
-    <path d="m 82.139,17.163001 c -6.773333,14.466 -13.546667,28.932 -20.32,43.398001 2.292667,0.911 4.585333,1.822 6.878,2.733 6.076333,-12.979001 12.152667,-25.958 18.229,-38.937001 -1.365073,-2.541276 -2.973262,-4.951124 -4.787,-7.194 z" />  
-  </SvgIcon>
-)
-
-import TreeTable from './TreeTable'
+import { CatSilhouette, BallOfYarn } from './svg'
 
 import request from 'superagent'
 import validator from 'validator'
@@ -60,472 +50,15 @@ const SUBTITLE_MARGINTOP = 24
 
 const alphabet = 'abcdefghijklmnopqrstuvwxyz'
 
-const diskName = name => {
+const diskDisplayName = name => {
   let chr = name.charAt(2)
   let number = alphabet.indexOf(chr) + 1
   return `硬盘 #${number}`
 }
 
-const partName = name => {
+const partitionDisplayName = name => {
   let numstr = name.slice(3)
   return `分区 #${numstr}`
-}
-
-const visibleLaterKey = () => UUID.v4()
-
-class VisibleLater extends React.Component {
-
-  constructor(props) {
-    super(props)
-    this.state = { visibility: 'hidden' }
-  }
-
-  componentDidMount() {
-    setTimeout(() => {
-      if (this.unmounted) return 
-      this.setState({ visibility: 'visible' })}
-    , this.props.delay)
-  }
-
-  componentWillUnmount() {
-    this.unmounted = true
-  }
-
-  render() {
-
-    let style = this.props.style ? 
-      Object.assign({}, this.props.style, this.state) :
-      this.state
-
-    return (
-      <div key={visibleLaterKey()} style={style}>{ this.props.children }</div>
-    )
-  }
-}
-
-class MountLater extends React.Component {
-
-  constructor(props) {
-    super(props)
-    this.state = { mount: false }
-  }
-}
-
-const DialogTextBox = (props) => (
-  <div style={props.style}>
-    { props.busy ? 
-      <div style={{width: '100%', height: '100%', 
-        display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-        <CircularProgress />
-      </div> :
-      <div style={{width: '100%'}}>
-        { props.text.map((line, index, array) => {
-          return (
-          <div style={{ 
-            fontSize: 15, lineHeight: '24px', 
-            marginBottom: index === array.length - 1 ? 0 : 20
-          }}>{ line }</div>)
-        })}
-      </div> } 
-  </div>
-)
-
-class RebootToMaintenance extends React.Component {
-
-  constructor(props) {
-    super(props)
-
-    if (typeof props.address !== 'string' || !validator.isIP(props.address, 4))
-      throw new Error('RebootToMaintenance requires a valid address')
-
-    this.state = { dialog: null }
-
-    this.successText = [
-      '系统重启后不会自动启动WISNUC服务，会停留在维护模式，您可以进行系统维护工作；',
-      '重启需要大约30秒到1分钟左右；程序现在返回搜索设备界面。'
-    ]
-
-    this.errorText = []
-
-    this.rebootSuccess = () => this.setState({ dialog: {
-      success: true,
-      busy: false,
-      title: '操作成功',
-      text: this.successText
-    }})
-
-    this.rebootError = () => this.setState({ dialog: {
-      success: false,
-      title: '操作失败',
-      text: this.errorText
-    }})
-   
-    this.reboot = () => {
-
-      debug('reboot to maintenance')
-
-      if (this.props.address)
-        request
-          .post(`http://${this.props.address}:3000/system/boot`)
-          .set('Accept', 'application/json')
-          .send({ op: 'rebootMaintenance' })
-          .end((err, res) => {
-
-            let hint = '请退出当前界面重新搜索设备，或者重启服务器后重试。错误信息：'
-
-            if (err)
-              this.errorText = [ hint, err.message ]
-            else if (!res.ok) {
-              this.errorText = [ hint, `request got bad response: ${res.status}` ]
-              if (typeof res.body === 'object' && typeof res.body.message === 'string') {
-                this.errorText.push(res.body.message)
-              }
-            }
-            else
-              return this.rebootSuccess()
-
-            this.rebootError()
-          })
-    } 
-  }
-
-  render() {
-    return (
-      <div>
-        <FlatButton 
-          style={{marginLeft: -16}}
-          labelStyle={{fontSize: 14}}
-          label='重启进入维护模式' 
-          primary={true}
-          onTouchTap={this.reboot}           
-        />
-
-        <Dialog
-          contentStyle={{ width: 560 }}
-          title={this.state.dialog && this.state.dialog.title}
-          open={this.state.dialog !== null}
-          modal={this.state.dialog !== null && this.state.dialog.success === true}
-          actions={[
-            <FlatButton 
-              labelStyle={{ fontSize: 16 }}
-              label='晓得了' 
-              primary={true}
-              disabled={this.state.dialog && this.state.dialog.busy}
-              onTouchTap={() => {
-                if (this.state.dialog.success === true) {
-                  this.setState({
-                    dialog: Object.assign({}, this.state.dialog, { busy: true })
-                  })
-                  setTimeout(() => window.store.dispatch({ type: 'EXIT_MAINTENANCE' }), 5000)
-                }
-                else if (this.state.dialog.success === false) {
-                  this.setState({ dialog: null }) 
-                }
-              }}
-            />
-          ]}
-        >
-          <DialogTextBox
-            style={{width: '100%', height: 120}}
-            busy={this.state.dialog && this.state.dialog.busy}
-            text={(this.state.dialog && this.state.dialog.text) || []}
-          />
-        </Dialog>
-      </div>
-    ) 
-  }
-}
-
-const WisnucContentViewState = (props) => (
-  <div>
-    <div style={{
-      fontSize: 14, 
-      lineHeight: '24px',
-      marginBottom: 20, 
-      color: 'rgba(0,0,0,0.87)'
-    }}>
-      WISNUC应用已经启动，磁盘卷和磁盘信息仅供浏览；如需操作，请重启系统进入维护模式。
-    </div>
-    <RebootToMaintenance address={props.address}/>
-  </div>
-)
-
-const extractFruitmixInstance = storage => {
-  
-  let { blocks, volumes } = storage
-  let fruits = []
-  volumes.forEach(vol => {
-
-    if (!vol.wisnuc) return
-    if (vol.wisnuc.users)
-      fruits.push(Object.assign({}, vol, { isVolume: true }))
-    else {
-      if (vol.isRootFS) { 
-        if (vol.error !== 'ENOFRUITMIX') 
-          fruits.push(Object.assign({}, vol, { isVolume: true }))
-      }
-      else {
-        if (vol.error !== 'ENOWISNUC')
-          fruits.push(Object.assign({}, vol, { isVolume: true }))
-      }
-    } 
-  })
-
-  blocks.forEach(blk => {
-
-    if (!blk.wisnuc) return
-    if (blk.wisnuc.users)
-      fruits.push(Object.assign({}, blk))
-    else {
-      if (blk.isRootFS) {
-        if (blk.wisnuc.error !== 'ENOFRUITMIX')
-          fruits.push(Object.assign({}, blk))
-      }
-      else {
-        if (blk.wisnuc.error !== 'ENOWISNUC')
-          fruits.push(Object.assign({}, blk))
-      }
-    }
-  })
-
-  return fruits
-}
-
-const WisnucContentEditState = (props) => {
-
-  console.log('====')
-  console.log(props.state.storage)
-  console.log('====')
-
-  let fruits = extractFruitmixInstance(props.state.storage)
-
-  return (
-    <div>
-      <div>
-        {
-          fruits.map(fr => (
-            <Paper style={{display: 'flex', borderStyle: 'solid', borderColor: 'red'}} zDepth={3}>
-              <div style={{flex:'0 0 266px', display: 'flex', padding:16, boxSizing:'border-box'}}>
-                <Avatar>1</Avatar>
-                <div style={{marginLeft:50}}>
-                  <div style={{fontSize:14, lineHeight:'20px', fontWeight: 700, color:'rgba(0,0,0,0.87)'}}>WISNUC</div>
-                  <div style={{fontSize:14, lingHeight:'20px', color:'rgba(0,0,0,0.54)'}}>Fruitmix</div>
-                </div>
-              </div>
-              <div style={{flex: '0 0 640px'}}>
-                <div style={{width: '100%', height: 16}} />
-                <div style={{fontSize:14, lineHeight: '20px', fontWeight: 700, color: 'rgba(0,0,0,0.87)'}}>
-                  用户 - <span>{fr.wisnuc.users.map(u => u.username).join(', ')}</span>
-                </div>
-                <div style={{fontSize:14}}>{fr.isVolume ? 'Btrfs磁盘卷' : fr.isDisk ? '磁盘文件系统' : '文件分区'}</div>
-                <div>{fr.uuid}</div>
-                <div style={{fontSize: 13}}>{fr.mountpoint}</div>
-                <FlatButton style={{marginLeft: -16}} label='启动该实例' primary={true} />
-              </div>
-            </Paper>
-          ))
-        }
-      </div>
-    </div>
-  )
-}
-
-class WisnucSection extends React.Component {
-
-  constructor(props) {
-    super(props)
-    this.state = {}
-  }
-
-  render() {
-    return (
-      <div style={this.props.style}>
-        <div style={{width:'100%'}}>
-          <div style={{
-            fontSize: 24, 
-            fontWeight: 400,
-            lineHeight: '32px',
-            paddingTop: 48,
-            marginBottom: 30,
-            color: 'rgba(0,0,0,0.87)'
-          }}>
-            WISNUC应用 {this.props.state.value}
-          </div>
-          { this.props.state.value === 'VIEW_STATE' && 
-            <WisnucContentViewState 
-              address={this.props.address} 
-            /> }
-
-          { (this.props.state.value === 'BOOT_STATE' ||
-            this.props.state.value === 'INSTALL_STATE' ||
-            this.props.state.value === 'INSTALLNEW_STATE') &&
-            <WisnucContentEditState 
-              state={this.props.state}
-              address={this.props.address}
-            /> }
-
-        </div>
-      </div>
-    )
-  }
-}
-
-class VolumeTable extends React.Component {
-    
-  constructor(props) {
-    super(props)
-  }
-
-  render() {
-
-    let volumes = this.props.volumes
-
-    if (volumes.length === 0) {
-      return (
-        <div>
-          <div style={{width:'100%', height: 64, display: 'flex', alignItems: 'center'}}>
-            <div style={{fontSize: 20}}>
-              磁盘卷
-            </div>
-          </div>
-          <div style={{
-            marginBottom: 40,
-            fontSize: 14,
-            color: 'rgba(0,0,0,0.87)'
-          }}>
-            未检测到btrfs磁盘卷，需要创建一个磁盘卷才能使用WISNUC系统。
-          </div>
-          <FlatButton 
-            style={{margin: -16}}
-            labelStyle={{fontSize: 14}}
-            label='创建新磁盘卷安装WISNUC系统' 
-            primary={true}
-            disabled={this.state.context === 'CREATING_NEW_VOLUME'}
-            onTouchTap={() => 
-              this.setState(state => Object.assign({}, state, { context: 'CREATING_NEW_VOLUME' }))
-            }
-          />
-        </div>
-      )
-    }
-    else {
-      return (
-        <Paper zDepth={3}>
-          <div style={{width:'100%', height: 64, display: 'flex', alignItems: 'center',
-            justifyContent: 'space-between'}}>
-            <div style={{display: 'flex', alignItems: 'center'}}>
-              <div style={{ marginLeft: 24, fontSize: 20 }}>
-               Btrfs磁盘卷
-              </div>
-            </div>
-            { false &&
-            <div style={{flex: '0 0 160px', marginRight: 24, display: 'flex', alignItems: 'center' }}>
-              <Toggle 
-                labelStyle={{
-                  fontSize:14, 
-                  color: this.volumeToggleToggled() ? 
-                    this.props.muiTheme.palette.textColor : 
-                    'rgba(0,0,0,0.54)' 
-                }}
-                label='安装WISNUC应用' 
-                toggled={this.volumeToggleToggled()} 
-                disabled={this.volumeToggleDisabled()}
-                onTouchTap={() => {
-                  debug('toggle onTouchTap', this.state) 
-                  if (this.state.value === 'INSTALL_STATE' || this.state.value === 'INSTALLNEW_STATE')
-                    this.next('BOOT_STATE')
-                  else if (this.state.value === 'BOOT_STATE')
-                    this.next('INSTALL_STATE')
-                }}
-              />
-            </div> }
-          </div>
-          <div style={{width:'100%', height: SUBTITLE_HEIGHT, display: 'flex', alignItems: 'center',
-            fontSize:12, color: 'rgba(0,0,0,0.54)'
-          }}>
-            <div style={{flex: '0 0 106px'}} />
-            <div style={{flex: '0 0 480px'}}>
-              ID
-            </div>
-            <div style={{flex: '0 0 80px'}}>
-              磁盘数量
-            </div>
-            <div style={{flex: '0 0 80px'}}>
-              WISNUC系统
-            </div>
-          </div>
-          <Divider inset={true} />
-            { volumes
-                .map(vol => (
-                  <div style={{width: '100%', height: 48, 
-                    display: 'flex', alignItems: 'center', fontSize: 13, color: 'rgba(0,0,0,0.87'
-                  }}>
-                    <div style={{flex: '0 0 24px'}} />
-                    <div style={{flex: '0 0 18px'}}>
-                      <Checkbox 
-                        secondary={true}
-                        onCheck={() => {
-                        }}
-                        iconStyle={{width:18, marginRight:0}}
-                        disableTouchRipple={true} 
-                        disableFocusRipple={true} 
-                      /> 
-                    </div>
-                    <div style={{flex: '0 0 24px'}} />
-                    <div style={{flex: '0 0 40px'}} />
-                    <div style={{flex: '0 0 160px'}}>
-                      {vol.label.length === 0 ? '' : vol.label}
-                    </div>
-                    <div style={{flex: '0 0 320px'}}>
-                      {vol.uuid}
-                    </div>
-                    <div style={{flex: '0 0 80px'}}>
-                      {vol.total}
-                    </div>
-                    <div style={{flex: '0 0 80px'}}>
-                      {vol.wisnucInstalled ? '已安装' : '未安装' }
-                    </div>
-                  </div> 
-                ))
-                .reduce((prev, curr) => {
-                  prev.push(curr)
-                  prev.push(<Divider />)
-                  return prev 
-                }, [])}
-          <Divider />
-          <div style={{
-            width: '100%', height: 56, 
-            display: 'flex', alignItems: 'center', justifyContent: 'flex-end'}}>
-            <FlatButton 
-              style={{ marginRight: 8 }}
-              labelStyle={{ fontSize: 14 }}
-              label='在所选磁盘卷上安装'
-              primary={true}
-              onTouchTap={() => {
-                this.setState(state => Object.assign({}, state, {
-                  context: 'CREATING_NEW_VOLUME'
-                }))
-              }}
-            />
-          </div>
-        </Paper>
-      )
-    }
-  }
-}
-
-const If = props => {
-  if (props.condition === true) 
-    return <div>{props.children}</div>
-  else
-    return null
-}
-
-const IfElse = props => {
-  if (props.condition === true)
-    return <div>{props.yes}</div>
-  else
-    return <div>{props.no}</div>
 }
 
 const HDDIcon = props => (
@@ -562,35 +95,6 @@ const HeaderTitle1 = (props) => (
     </div>
   </div>
 )
-
-const WisnucLabel = props => {
-
-/**
-      ENOWISNUC         // wisnuc folder does not exist         // no fruitmix
-      EWISNUCNOTDIR     // wisnuc folder is not a dir           // no fruitmix
-      ENOFRUITMIX       // fruitmix folder does not exist       // no fruitmix
-      EFRUITMIXNOTDIR   // fruitmix folder is not a dir         // no fruitmix
-      ENOMODELS         // models folder does not exist         // ambiguous
-      EMODELSNOTDIR     // models folder is not a dir           // ambiguous
-      ENOUSERS          // users.json file does not exist       // ambiguous
-      EUSERSNOTFILE     // users.json is not a file             // ambiguous
-      EUSERSPARSE       // users.json parse fail                // damaged        RED
-      EUSERSFORMAT      // users.json is not well formatted     // damaged        RED
-**/
-
-  let { wisnuc, style } = props
-
-  if (wisnuc.users) {
-    if (wisnuc.users.length === 0)
-      return <div style={style}>已安装WISNUC应用，但尚未创建用户。</div>
-    else
-      return <div style={style}>
-               已安装WISNUC应用；用户：{ wisnuc.users.map(u => u.username) }
-             </div>             
-  } 
-  else
-    return <div/>
-}
 
 class KeyValueList extends React.Component {
 
@@ -815,177 +319,426 @@ class RaidModePopover extends React.Component {
   }
 }
 
-class CreatingNewVolumeCombo extends React.Component {
-
-  constructor(props) {
-    super(props)
-
-    this.state = {
-      content: null,
-    }
-
-    this.simulateSuccess = () => {
-      this.setState({
-        content: {
-          stage: 'WIP',
-          title: '操作进行中',
-          text: 'busy' 
-        }
-      })
-      setTimeout(() => {
-        this.setState({
-          content: {
-            stage: 'SUCCESS',
-            title: '操作成功',
-            text: [] 
-          }
-        })
-
-        setTimeout(() => {
-          this.setState({content: null})
-        }, 2000)
-
-      }, 2000)
-    }
-
-    this.simulateFailure = () => {
-      this.setState({
-        content: {
-          stage: 'WIP',
-          title: '操作进行中',
-          text: 'busy' 
-        }
-      })
-      setTimeout(() => {
-        this.setState({
-          content: {
-            stage: 'FAILED',
-            title: '操作失败',
-            text: ['reason1', 'reason2'] 
-          }
-        })
-      }, 2000)
-    }
-
-    this.confirmActions = [
-      <FlatButton
-        labelStyle={{fontSize: 16}}
-        label='取消'
-        onTouchTap={() => this.setState({ content: null })}
-        disabled={!!(this.state.content && this.state.content.stage === 'WIP')}
-      />,
-      <FlatButton 
-        labelStyle={{fontSize: 16}}
-        label='确认'
-        secondary={true}
-        onTouchTap={() => { this.simulateSuccess() }}
-        disabled={!!(this.state.content && this.state.content.stage === 'WIP')}
-      />
-     ]
-
-    this.disabledActions = [
-      <FlatButton
-        labelStyle={{fontSize: 16}}
-        label='取消'
-        disabled={true}
-      />,
-      <FlatButton 
-        labelStyle={{fontSize: 16}}
-        label='确认'
-        secondary={true}
-        disabled={true}
-      />
-     ]
-
-    this.blankActions = [
-      <FlatButton disabled={true} />
-    ]
-
-    this.failedActions = [
-      <FlatButton
-        labelStyle={{fontSize: 16}}
-        label='知道了'
-        secondary={true}
-        onTouchTap={() => this.setState({ content: null })}
-      />
-    ]
-
-    this.getActions = () => {
-
-      if (this.state.content === null) return []
-
-      switch(this.state.content.stage) {
-      case 'CONFIRM':
-        return this.confirmActions
-      case 'WIP':
-        return this.disabledActions
-      case 'SUCCESS':
-        return this.blankActions
-      case 'FAILED':
-        return this.failedActions
-      default:
-        return []
-      }
-    }
-  }
-
-  render() {
-
-    return (
-      <div style={this.props.style}>
-
-        <FlatButton 
-          style={{marginLeft: 8, marginRight:8}}
-          labelStyle={{ fontSize: 16 }} 
-          label='创建' 
-          secondary={true} 
-          disabled={this.props.disabled}
-          onTouchTap={() => this.setState({
-            content: {
-              stage: 'CONFIRM',
-              title: '确认操作',
-              text: ['first line', 'second line']
-            }
-          })}
-        />
-
-        <Dialog
-          contentStyle={{ width: 560 }}
-          title={this.state.content && this.state.content.title}
-          open={this.state.content !== null}
-          modal={true}
-          actions={this.getActions()}
-        >
-          { this.state.content &&
-          <DialogTextBox
-            style={{width: '100%', height: 120}}
-            busy={this.state.content.text === 'busy'}
-            text={this.state.content.text}
-          /> }
-        </Dialog>
-      </div>
-    )
-  }
-}
-
 @muiThemeable()
 class Maintenance extends React.Component {
 
   constructor(props) {
 
     super(props)
+    const that = this
+
+    this.unmounted = false
+
+    this.colors = {
+
+      primary: this.props.muiTheme.palette.primary1Color,
+      accent: this.props.muiTheme.palette.accent1Color,
+      
+      fillGrey: grey400,
+      fillGreyFaded: grey300      
+    }
+
+    this.dim = {
+      
+    }
 
     this.state = { 
       creatingNewVolume: null,
-      expanded: []
+      expanded: [],
+      operation: null,
     }
 
-    this.color = {
-      primary: this.props.muiTheme.palette.primary1Color,
-      accent: this.props.muiTheme.palette.accent1Color,
+    this.reloadBootStorage = callback => {
+
+      let done = false
+      let device = window.store.getState().maintenance.device
+      let storage, boot
+
+      const finish = () => {
+        if (storage && boot) {
+          debug('reload boot storage', boot, storage)
+          this.setState({ 
+            storage, boot,  
+            creatingNewVolume: this.state.creatingNewVolume ? { disks: [], mode: 'single' } : null
+          })
+
+          callback && callback(null, { storage, boot })
+          done = true 
+        }
+      }
+
+      request.get(`http://${device.address}:3000/system/storage?wisnuc=true`)
+        .set('Accept', 'application/json')
+        .end((err, res) => {
+          if (this.unmounted) {
+            if (!done) {
+              callback && callback(new Error('unmounted'))
+              done = true
+            }
+            return
+          }
+          storage = err ? err.message : res.body
+          finish()
+        })
+
+      request.get(`http://${device.address}:3000/system/boot`)
+        .set('Accept', 'application/json')
+        .end((err, res) => {
+          if (this.unmounted) {
+            if (!done) {
+              callback && callback(new Error('unmounted'))
+              done = true
+            }
+          }
+          boot = err ? err.message : res.body
+          finish()
+        })
     }
 
-    this.unmounted = false
+    ////////////////////////////////////////////////////////////////////////////
+    //
+    // operation
+    //
+    this.operationActions = () => {
+
+      if (this.state.operation === null) return []
+      switch(this.state.operation.stage) {
+      case 'CONFIRM':
+
+        return [
+          <FlatButton
+            labelStyle={{fontSize: 16}}
+            label='取消'
+            onTouchTap={() => { 
+              this.state.operation.onCancel && this.state.operation.onCancel()
+              this.setState({ operation: null })
+            }}
+          />,
+          <FlatButton 
+            labelStyle={{fontSize: 16}}
+            label='确认'
+            secondary={true}
+            onTouchTap={() => {
+
+              this.setState({
+                operation: {
+                  stage: 'WIP',
+                  title: '执行操作',
+                  text: 'busy' 
+                }
+              })
+
+              const finish = (text, success) => {
+                this.setState({
+                  operation: {
+                    stage: success ? 'SUCCESS' : 'FAILED',
+                    title: success ? '操作成功' : '操作失败',
+                    text
+                  }
+                })
+              }
+
+              let data = null
+              if (this.state.operation.Input) 
+                data = this.state.operation.input
+              else if (this.state.operation.select) 
+                data = this.state.operation.select
+
+              this.state.operation.onOK(data, text => finish(text, true), text => finish(text, false))
+            }}
+
+            disabled={ this.state.operation.Input && !this.state.operation.inputDone }
+          />
+        ]
+
+      case 'WIP':
+        return [ <FlatButton labelStyle={{fontSize: 16}} label=' ' disabled={true} /> ]
+
+      case 'SUCCESS':
+      case 'FAILED':
+        return [
+          <FlatButton
+            labelStyle={{fontSize: 16}}
+            label='晓得了'
+            secondary={true}
+            onTouchTap={() => this.setState({ operation: null }) }
+          />
+        ]
+
+      default:
+        return []
+      }
+    }
+
+    const DialogTextBox = props => (
+
+      <div style={props.style}>
+        { props.busy &&
+          <div style={{width: '100%', height: '100%', 
+            display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+            <CircularProgress color={pinkA200} />
+          </div> }
+        
+        { !props.busy &&
+          <div style={{width: '100%'}}>
+            { props.text.map((line, index, array) => {
+              return (
+              <div style={{ 
+                fontSize: 15, lineHeight: '24px', 
+                marginBottom: index === array.length - 1 ? 0 : 20
+              }}>{ line }</div>)
+            })}
+          </div> } 
+      </div>
+    )
+
+    this.UsernamePassword = props => {
+
+      const onChange = (name, value) => {
+
+        let copy = Object.assign({}, this.state.operation.input)
+        copy[name] = value
+
+        let done = copy.username && copy.username.length > 0 && 
+          copy.password && copy.password.length > 0 && 
+          copy.passwordAgain && copy.passwordAgain === copy.password
+
+        let nextOp = Object.assign({}, this.state.operation, { 
+          input: copy,
+          inputDone: done 
+        })
+
+        this.setState({ operation: nextOp })
+      }
+
+      return (
+        <div>
+          <TextField hintText='用户名' floatingLabelText='用户名' 
+            onChange={e => onChange('username', e.target.value)} />
+          <TextField hintText='输入密码' floatingLabelText='输入密码' type='password'
+            onChange={e => onChange('password', e.target.value)} />
+          <TextField hintText='再次输入密码' floatingLabelText='再次输入密码' type='password'
+            onChange={e => onChange('passwordAgain', e.target.value)} />
+        </div>
+      )
+    }
+
+    this.OperationDialog = props => {
+
+      debug('Operation Dialog render', this.state.operation)
+
+      let busy = this.state.operation && this.state.operation.text === 'busy' // TODO
+
+      return ( 
+        <Dialog
+          contentStyle={{ width: 504, zIndex: 2500 }}
+          title={this.state.operation && this.state.operation.title}
+          open={this.state.operation !== null}
+          modal={true}
+          actions={this.operationActions()}
+        >
+          { !!this.state.operation && this.state.operation.Input === undefined &&
+            <div style={{width: '100%', height: 120}}>
+              { busy &&
+                <div style={{width: '100%', height: '100%', 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                  <CircularProgress color={pinkA200} />
+                </div> }
+              
+              { !busy &&
+                <div style={{width: '100%'}}>
+                  { this.state.operation.text.map((line, index, array) => {
+                    return (
+                    <div style={{ 
+                      fontSize: 15, lineHeight: '24px', 
+                      marginBottom: index === array.length - 1 ? 0 : 20
+                    }}>{ line }</div>)
+                  })}
+                </div> } 
+
+              { this.state.operation.select &&
+                <div>
+                  { this.state.operation.select.map(item => 
+                      <Checkbox 
+                        label={item[1]} 
+                        checked={ this.state.operation.selected.includes(item[0]) }
+                        onCheck={() => {
+                          let sel, value = item[0]
+                          let index = this.state.operation.selected.indexOf(value)
+                          if (index === -1) 
+                            sel = [...this.state.operation.selected, value]
+                          else
+                            sel = [...this.state.operation.selected.slice(0, index),
+                              ...this.state.operation.selected.slice(index + 1)]
+
+                          let nextOp = Object.assign({}, this.state.operation, { selected: sel })
+                          this.setState({ operation: nextOp })
+                        }}
+                      />
+                    ) }
+                </div> 
+              }
+            </div> }
+            
+            { !!this.state.operation && this.state.operation.Input !== undefined &&
+              <this.state.operation.Input />
+            }
+        </Dialog>
+      )
+    }
+
+    this.startOperation = ({
+
+        // input mode
+        input,        // { title, content }
+
+        // simple mode
+        text, 
+        select,       // [[value, text]...]
+        selectSingle, // true for radio button
+
+        onOK,         // (selected: null, if select undefined; or [] containing user selection
+                      // onSuccess(text), onFailed(text))
+        onCancel
+
+      }) => {
+
+      debug('start operation', text, onOK, onCancel)
+
+      if (input) {
+
+        this.setState({
+          operation: {
+            stage: 'CONFIRM',
+            title: input.title || '确认操作',
+            Input: input.Input,
+            onOK,
+            onCancel,
+
+            inputDone: false,
+            input: {}
+          }
+        })
+      }
+      else {
+        this.setState({
+          operation: {
+            stage: 'CONFIRM',
+            title: '确认操作',
+            text,
+            select,
+            selectSingle,
+            onOK,
+            onCancel,
+
+            selected: [],
+          }
+        }) 
+      }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // 
+    // operations
+    //
+    
+    this.errorText = (err, res) => {
+
+      let text = []
+
+      // see superagent documentation on error handling
+      if (err.status) {
+        text.push(`${err.status} ${err.message}`)
+        if (res && res.body && res.body.message)
+          text.push(`message: ${res.body.message}`)
+      } 
+      else {
+        text.push(`错误信息：`, err.message)
+      }
+
+      return text
+    }
+
+    this.startWisnucOnVolume = volume => {
+
+      this.startOperation({
+        text: ['启动安装于Btrfs磁盘阵列上的WISNUC应用？'],
+        onOK: (selected, onSuccess, onFailed) => {
+
+          let device = window.store.getState().maintenance.device
+          let url = `http://${device.address}:3000/system/mir/run`
+
+          request
+            .post(url)
+            .set('Accept', 'application/json')
+            .send({ target: volume.fileSystemUUID })
+            .end((err, res) => {
+
+              if (err) {
+                this.reloadBootStorage((err2, { boot, storage }) => {
+                  onFailed(this.errorText(err, res))
+                })
+              }
+              else {
+                this.reloadBootStorage((err2, { boot, storage }) => {
+                  onSuccess(['启动成功，系统将在3秒钟后跳转到登录页面'])
+                })
+              }
+            })
+        },
+      }) 
+    }
+
+    this.mkfsBtrfsVolume = () => {
+      
+      if (this.state.creatingNewVolume === null) return
+
+      let target = this.state.creatingNewVolume.disks.map(disk => disk.name)
+      let type = 'btrfs'
+      let mode = this.state.creatingNewVolume.mode
+      let text = []
+
+      text.push(`使用设备${target.join()}和${mode}模式创建新磁盘阵列，` +
+        '这些磁盘和包含这些磁盘的磁盘阵列上的数据都会被删除且无法恢复。')
+      text.push('确定要执行该操作吗？')
+
+      let obj = {
+
+        text,
+        onOK: (selected, onSuccess, onFailed) => {
+
+            debug('mkfs operation onOk', selected)
+
+            let device = window.store.getState().maintenance.device
+            request
+              .post(`http://${device.address}:3000/system/mir/mkfs`)
+              .set('Accept', 'application/json')
+              .send({ type, target, mode })
+              .end((err, res) => {
+
+                debug('mkfs btrfs request', err || res.body)
+              
+                if (err) {
+                  this.reloadBootStorage((err2, { boot, storage }) => {  
+                    onFailed(this.errorText(err, res))
+                  })
+                }
+                else {
+                  this.reloadBootStorage((err, { boot, storage }) => {
+                    onSuccess(['成功'])
+                  })
+                }
+              })
+          },
+        }
+
+        this.startOperation(obj)
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // 
+    // actions
+    //
 
     this.onToggleCreatingNewVolume = () => {
       this.setState(state => {
@@ -1087,7 +840,7 @@ class Maintenance extends React.Component {
     )
 
     // frame height should be 36 + marginBottom (12, supposed)
-    this.TextButtonTop = () => (
+    this.TextButtonTop = props => (
       <div style={{width: '100%', height: 36, 
         display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
         <div>{ props.text || '' }</div>
@@ -1098,6 +851,7 @@ class Maintenance extends React.Component {
           disableTouchRipple={true} 
           disableFocusRipple={true}
           onTouchTap={this.onToggleCreatingNewVolume}
+          disabled={props.disabled}
         /> 
       </div>
     )
@@ -1112,6 +866,10 @@ class Maintenance extends React.Component {
 
       let hint = cnv.disks.length > 0 ?
         `已选中${cnv.disks.length}个磁盘` : '请选择磁盘'
+
+      let wrap = {
+        FB: FlatButton
+      }
 
       return (
         <div style={{width: '100%', height: 136 - 48 - 16}}>
@@ -1154,9 +912,12 @@ class Maintenance extends React.Component {
                 disabled={!actionEnabled}
                 onSelect={this.setVolumeMode}
               />
-              <CreatingNewVolumeCombo 
+
+              <FlatButton label='创建' secondary={true}
+                onTouchTap={this.mkfsBtrfsVolume}
                 disabled={this.state.creatingNewVolume.disks.length === 0}
               />
+
               <FlatButton label='取消' secondary={true} 
                 onTouchTap={this.onToggleCreatingNewVolume}
               />
@@ -1166,6 +927,164 @@ class Maintenance extends React.Component {
         </div>
       )
     }
+
+    this.VolumeStatus = volume => {
+      
+    }
+
+    this.VolumeWisnucBadge = class extends React.Component {
+
+    /****
+
+          ENOWISNUC         // wisnuc folder does not exist         // no fruitmix
+          EWISNUCNOTDIR     // wisnuc folder is not a dir           // no fruitmix
+          ENOFRUITMIX       // fruitmix folder does not exist       // no fruitmix
+          EFRUITMIXNOTDIR   // fruitmix folder is not a dir         // no fruitmix
+          ENOMODELS         // models folder does not exist         // ambiguous
+          EMODELSNOTDIR     // models folder is not a dir           // ambiguous
+          ENOUSERS          // users.json file does not exist       // ambiguous
+          EUSERSNOTFILE     // users.json is not a file             // ambiguous
+          EUSERSPARSE       // users.json parse fail                // damaged        RED
+          EUSERSFORMAT      // users.json is not well formatted     // damaged        RED
+
+    ****/
+
+      constructor(props) {
+        super(props)
+        this.state = {
+          open: false,
+          anchorEl: null
+        }
+
+        this.toggleList = target => {
+          if (this.state.open === false) {
+            this.setState({
+              open: true,
+              anchorEl: target
+            })
+          }
+          else {
+            this.setState({
+              open: false,
+              anchorEl: null
+            })
+          }
+        }
+      }
+
+      render() {
+
+        let { status, users, error, message } = this.props.volume.wisnuc
+
+        // return <div style={{background: 'yellow'}}>{this.props.volume.fileSystemUUID}</div>
+
+        if (users) {
+          if (users.length === 0) {
+            return <div>WISNUC已安装但尚未创建用户。</div>
+          } 
+          else {
+            return (
+              <div 
+                style={{
+                  height: 28,
+                  display: 'flex', alignItems: 'center',
+                  boxSizing: 'border-box', padding: 8, borderRadius: 4,
+                  fontSize: 13, 
+                  fontWeight: 'bold', 
+                  color: that.state.creatingNewVolume === null ? 
+                    lightGreen400 : 'rgba(0,0,0,0.38)', 
+                }}
+                onTouchTap={e => {
+                  e.stopPropagation()
+                  this.toggleList(e.currentTarget)
+                }}
+              >
+                <div>WISNUC已安装，有{users.length}位用户</div>
+                <Popover
+                  open={this.state.open}
+                  anchorEl={this.state.anchorEl}
+                  anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+                  targetOrigin={{horizontal: 'left', vertical: 'top'}}
+                  onRequestClose={() => this.setState({ open: false, anchorEl: null })}
+                  animated={false}
+                  animation={PopoverAnimationVertical}
+                >
+                  <List style={{minWidth: 240}}>
+                    <Subheader>用户列表</Subheader>
+                    { users.map(user => 
+                        <ListItem 
+                          leftAvatar={<Avatar>{user.username.slice(0,1).toUpperCase()}</Avatar>}
+                          primaryText={user.username} 
+                          secondaryText={ 
+                            user.isFirstUser ? '第一管理员' : 
+                            user.isAdmin ? '管理员' : '普通用户' 
+                          }
+                          disabled={true}
+                        />
+                      ) }
+                  </List>
+                </Popover>
+              </div>
+            )
+          }
+        }
+        else if (status === 'NOTFOUND') {
+          return <div
+            style={{
+              fontSize: 13,
+              color: that.state.creatingNewVolume === null ?
+                'rgba(0,0,0,0.87)' : 'rgba(0,0,0,0.38)' 
+            }}
+          >(WISNUC未安装)</div>
+        }
+        else if (error) {
+
+          return (
+            <div 
+              style={{
+                height: 28,
+                display: 'flex', alignItems: 'center',
+                boxSizing: 'border-box', padding: 8, borderRadius: 4,
+                fontSize: 13, 
+                fontWeight: 'bold', 
+                color: that.state.creatingNewVolume === null ? '#00C853' : 'rgba(0,0,0,0.38)' , 
+                backgroundColor: that.state.creatingNewVolume === null ? '#B9F6CA' : '#E0E0E0'
+              }}
+              onTouchTap={e => {
+                e.stopPropagation()
+                this.toggleList(e.currentTarget)
+              }}
+            >
+              <div>检测WISNUC时遇到问题</div>
+              <Popover
+                open={this.state.open}
+                anchorEl={this.state.anchorEl}
+                anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+                targetOrigin={{horizontal: 'left', vertical: 'top'}}
+                onRequestClose={() => this.setState({ open: false, anchorEl: null })}
+                animated={false}
+                animation={PopoverAnimationVertical}
+              >
+                <div style={{width: 240}}>
+                  文件系统存在{`wisnuc/fruitmix`}目录，但是
+                  {
+                    error === 'ENOMODELS' ? '没有models目录' :
+                    error === 'EMODELS' ? 'models不是目录' :
+                    error === 'ENOUSERS' ? '没有users.json文件' :
+                    error === 'EUSERSNOTFILE' ? 'users.json不是文件' :
+                    error === 'EUSERSPARSE' ? 'users.json无法解析，不是合法的json格式' :
+                    error === 'EUSERSFORMAT' ? 'users.json文件内部数据格式错误' : '未知的错误'
+                  }
+                </div>
+              </Popover>
+            </div>
+          )       
+        }
+
+        return <div/>
+      }
+    }
+
 
     this.volumeUnformattable = volume => {
       return []
@@ -1191,10 +1110,25 @@ class Maintenance extends React.Component {
         return []
     }
 
-    this.volumeIconColor = volume => 
-      this.state.creatingNewVolume ? '#E0E0E0' :
-        volume.wisnuc.hasOwnProperty('users') ? this.props.muiTheme.palette.primary1Color :
-          '#BDBDBD'
+    this.volumeIconColor = volume => {
+
+      if (this.state.creatingNewVolume)
+        return this.colors.fillGreyFaded
+
+      switch (volume.wisnuc.status) {
+      case 'READY':
+        return lightGreen400
+      case 'NOTFOUND':
+        return this.colors.fillGrey
+      case 'AMBIGUOUS':
+        return amber400
+      case 'DAMAGED':
+        return red400
+      }
+      
+      
+      return '#000'
+    }
 
     this.VolumeTitle = props => {
 
@@ -1227,10 +1161,11 @@ class Maintenance extends React.Component {
       
       return (
         <div style={{
-          fontSize: 14, 
-          fontWeight: 'bold',
+          fontSize: 13, 
           color: this.state.creatingNewVolume ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.87)'
-        }}>{text}</div>
+        }}>
+          {text}
+        </div>
       )
     }
 
@@ -1243,10 +1178,10 @@ class Maintenance extends React.Component {
         text = '分区使用的磁盘'
       }
       else if (disk.idFsUsage === 'filesystem') {
-        text = '包含文件系统（无分区表）'
+        text = '包含文件系统，无分区表'
       }
       else if (disk.idFsUsage === 'other') {
-        text = '包含特殊文件系统（无分区表）'
+        text = '包含特殊文件系统，无分区表'
       }
       else if (disk.idFsUsage === 'raid') {
         text = 'Linux RAID设备'
@@ -1263,10 +1198,11 @@ class Maintenance extends React.Component {
 
       return (
         <div style={{
-          fontSize: 14, 
-          fontWeight: 'bold',
+          fontSize: 13, 
           color: this.state.creatingNewVolume ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.87)'
-        }}>{text}</div>
+        }}>
+          {text}
+        </div>
       )
     }
 
@@ -1296,7 +1232,7 @@ class Maintenance extends React.Component {
               <Avatar 
                 style={{ margin:4 }} 
                 color='white' 
-                backgroundColor={primary1Color}
+                backgroundColor='#BDBDBD'
                 icon={<HDDIcon />} 
               /> }
           </HeaderIcon>
@@ -1307,11 +1243,67 @@ class Maintenance extends React.Component {
               height: cnv ? TABLEDATA_HEIGHT : HEADER_HEIGHT,
               transition: 'height 300ms'
             }}
-            title={diskName(disk.name)} 
+            title={diskDisplayName(disk.name)} 
             onTouchTap={e => cnv && e.stopPropagation()}
           />
         </div>
       )
+    }
+
+    // props: 1) volume; 2) actions [[], []]
+    this.VolumeMenu = class extends React.Component {
+
+      constructor(props) {
+        super(props)
+        this.state = {
+          open: false
+        }
+
+        this.handleRequestClose = () => this.setState({ open: false })
+      }
+
+      render() {
+
+        let volume = this.props.volume
+
+        return (
+          <div>
+            <IconButton
+              onTouchTap={e => {
+                e.stopPropagation()
+                this.setState({ 
+                  open: true,
+                  anchorEl: e.currentTarget
+                })
+              }}
+            >
+              <NavigationMoreVert />
+            </IconButton>
+            <Popover
+              open={this.state.open}
+              anchorEl={this.state.anchorEl}
+              anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+              targetOrigin={{horizontal: 'left', vertical: 'top'}}
+              onRequestClose={this.handleRequestClose}
+              animation={PopoverAnimationVertical}
+            >
+              <Menu>
+                { this.props.actions.map(act => (
+                    <MenuItem
+                      style={{fontSize: 13}}
+                      primaryText={act[0]}
+                      disabled={act[2]}
+                      onTouchTap={() => {
+                        this.handleRequestClose()
+                        act[1] && act[1](volume)
+                      }}
+                    />
+                  )) }
+               </Menu>
+            </Popover>
+          </div>
+        )
+      }
     }
 
     this.BtrfsVolume = props => {
@@ -1324,7 +1316,6 @@ class Maintenance extends React.Component {
       let { volumes, blocks } = this.state.storage
       let cnv = !!this.state.creatingNewVolume
 
-      //let expandableHeight = this.state.expanded ? 17 * 24 + 3 * SUBTITLE_HEIGHT + SUBTITLE_MARGINTOP : 0
       let expandableHeight = this.state.expanded.indexOf(volume) !== -1 ?
         17 * 24 + 3 * SUBTITLE_HEIGHT + SUBTITLE_MARGINTOP : 0
 
@@ -1333,23 +1324,41 @@ class Maintenance extends React.Component {
       return (
         <Paper {...props}>
 
-          <div style={{width: '100%', display: 'flex', alignItems: 'center'}}
-            onTouchTap={() => this.toggleExpanded(volume)}
-          >
-            <div style={{flex: '0 0 256px'}}>
-              <this.VolumeTitle volume={volume} />
-            </div>
+          <div style={{width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}
+            onTouchTap={() => this.toggleExpanded(volume)}>
 
-            {/*
-            <WisnucLabel style={{height: HEADER_HEIGHT, display: 'flex', alignItems: 'center', 
-              fontSize: 14, fontWeight: 'bold'}} wisnuc={volume.wisnuc} />
-            <div style={{flexGrow: 1}} />
-            */}
-
-            <div style={{flex: '0 0 336px'}}>
+            <div style={{flex: '0 0 800px', height: '100%', display: 'flex', alignItems: 'center'}}>
+              <div style={{flex: '0 0 256px'}}>
+                <this.VolumeTitle volume={volume} />
+              </div>
               <this.VolumeHeadline volume={volume} />
+                <div style={{flex: '0 0 16px'}} />
+              <this.VolumeWisnucBadge volume={volume} />
             </div>
 
+            <div style={{display: 'flex', alignItems: 'center'}}>
+
+              { this.state.boot.state === 'maintenance' &&
+                this.state.creatingNewVolume === null &&
+                volume.wisnuc.status === 'READY' &&
+                <FlatButton label='启动' primary={true} 
+                  onTouchTap={e => {
+                    e.stopPropagation()
+                    this.startWisnucOnVolume(volume)
+                  }}/> }
+
+              { this.state.boot.state === 'maintenance' &&
+                this.state.creatingNewVolume === null &&
+                <this.VolumeMenu volume={volume}
+                  actions={[
+                    [ volume.wisnuc.status === 'NOTFOUND' ? '安装' : '重新安装',
+                      () => {}, 
+                      false 
+                    ],
+                  ]}
+                />
+              }
+            </div>
           </div>
 
           <VerticalExpandable height={expandableHeight}>
@@ -1362,7 +1371,7 @@ class Maintenance extends React.Component {
                 disabled={cnv}
                 items={[
                   ['磁盘数量', `${volume.total} (${comment()})`],
-                  ['UUID', volume.uuid.toUpperCase()],
+                  ['文件系统UUID', volume.uuid.toUpperCase()],
                   ['访问路径', volume.mountpoint],
                 ]}
               />
@@ -1443,7 +1452,7 @@ class Maintenance extends React.Component {
                         viewBox='0 0 24 24' 
                       />), 72, true
                     ],
-                    [diskName(blk.name), 184],
+                    [diskDisplayName(blk.name), 184],
                     [blk.idBus, 64],
                     [prettysize(blk.size * 512), 64, true],
                     ['', 56],
@@ -1573,7 +1582,7 @@ class Maintenance extends React.Component {
                   selected={false} 
                   items={[
                     ['', 72],
-                    [blk.name, 184],
+                    [partitionDisplayName(blk.name), 184],
                     [(blk.idFsUsage && blk.fileSystemType) ? blk.fileSystemType : '(未知)', 64],
                     [prettysize(blk.size * 512), 64, true],
                     ['', 56],
@@ -1606,7 +1615,7 @@ class Maintenance extends React.Component {
 
           <DoubleDivider 
             grayLeft={256} 
-            colorLeft={unformattable().length > 0 ? null : cnv ? 256 : '100%'} 
+            colorLeft={this.diskUnformattable(disk).length > 0 ? null : cnv ? 256 : '100%'} 
           />
 
           <TableDataRow
@@ -1690,6 +1699,7 @@ class Maintenance extends React.Component {
           }>
 
             <SubTitleRow text='文件系统信息' disabled={cnv} />
+
             <TableHeaderRow
               disabled={cnv}
               items={[
@@ -1713,6 +1723,7 @@ class Maintenance extends React.Component {
             <div style={{width: '100%', height: SUBTITLE_MARGINTOP }}/>
 
             <SubTitleRow text='磁盘信息' disabled={cnv && this.diskUnformattable(disk).length > 0} />
+
           </VerticalExpandable>
 
           <TableHeaderRow 
@@ -1797,7 +1808,7 @@ class Maintenance extends React.Component {
 
           <VerticalExpandable height={expandableHeight}>
 
-            <div style={{height: 48, lineHeight: '24px', marginLeft: 256, fontSize: 14}}>
+            <div style={{height: 24, lineHeight: '24px', marginLeft: 256, fontSize: 14}}>
               该信息仅供参考；有可能磁盘上的文件系统特殊或者较新，本系统未能正确识别。
             </div>
             <div style={{height: SUBTITLE_MARGINTOP}} />
@@ -1847,35 +1858,7 @@ class Maintenance extends React.Component {
   }
 
   componentDidMount() {
-    
-    let device = window.store.getState().maintenance.device
-
-    request.get(`http://${device.address}:3000/system/storage?wisnuc=true`)
-      .set('Accept', 'application/json')
-      .end((err, res) => {
-        if (this.unmounted) return
-        if (err)
-          this.setState({ storage: err.message })
-        else if (!res.ok)
-          this.setState({ storage: 'bad response' })
-        else {
-          this.setState({ 
-            storage: res.body
-          })
-        }
-      })
-
-    request.get(`http://${device.address}:3000/system/boot`)
-      .set('Accept', 'application/json')
-      .end((err, res) => {
-        if (this.unmounted) return
-        if (err)
-          this.setState({ boot: err.message })
-        else if (!res.ok)
-          this.setState({ boot: 'bad response' })
-        else
-          this.setState({ boot: res.body })
-      })
+    this.reloadBootStorage()    
   }
 
   componentWillUnmount() {
@@ -1920,13 +1903,20 @@ class Maintenance extends React.Component {
           <div style={{width: 72, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
             <BallOfYarn style={{width: 24, height: 24}} color='#FFF' />
           </div>
-          <div>WISNUC - 维护模式</div>
+          <div>
+            WISNUC - {
+              !this.state.boot ? '' :
+              this.state.boot.state === 'maintenance' ? '维护模式' : '已正常启动'
+            }
+          </div>
         </div>
       </div>
     )
   }
 
   render() {
+
+    debug('main render', this.state)
     
     const primary1Color = this.props.muiTheme.palette.primary1Color
     const accent1Color = this.props.muiTheme.palette.accent1Color
@@ -1952,6 +1942,8 @@ class Maintenance extends React.Component {
         { this.renderCat() }
         { this.renderTitle() }
 
+        <this.OperationDialog />
+
         {/* page container */}
         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
@@ -1968,7 +1960,12 @@ class Maintenance extends React.Component {
 
             {/* top panel selector */}
             <div style={{ width: 1200, height: cnv ? 136 - 48 - 16 : 48, transition: 'height 300ms' }}>
-              { cnv ?  <this.NewVolumeTop /> : <this.TextButtonTop /> }
+              { cnv ?  <this.NewVolumeTop /> : 
+                <this.TextButtonTop 
+                  text={this.state.boot.state !== 'maintenance' ? '该设备已正常启动，此界面仅用于浏览。' : '' }
+                  disabled={this.state.boot.state !== 'maintenance'}
+                /> 
+              }
             </div>
 
             { typeof this.state.boot === 'object' && typeof this.state.storage === 'object' &&
@@ -1987,19 +1984,27 @@ class Maintenance extends React.Component {
           </div> 
           {/* gray box end */}
 
+          <FlatButton label='input' 
+            onTouchTap={() => {
+              this.startOperation({
+                input: {
+                  title: '请输入用户名和密码',
+                  Input: this.UsernamePassword
+                },
+                onOK: (input, onSuccess, onFailed) => {
+                  debug('fake input', input)
+                  setTimeout(() => onSuccess(['OKOK']), 3000)
+                }
+              })
+            }}
+          />
+
           <div style={{width: '100%', height: 48}} />
         </div>
       </div>
     )
   }
 }
-
-/**
-                  disk.isPartitioned ? <this.PartitionedDisk style={this.cardStyle(disk)} disk={disk} /> :
-                  !!disk.idFsUsage ? <this.FileSystemUsageDisk style={this.cardStyle(disk)} disk={disk} /> :
-                  <this.NoUsageDisk style={this.cardStyle(disk)} disk={disk} />) } 
-**/
-
 
 export default Maintenance
 

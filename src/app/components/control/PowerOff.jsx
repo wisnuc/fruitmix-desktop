@@ -49,9 +49,11 @@ class PowerOff extends React.Component {
             color: this.props.themeColor || 'grey'
           })}>进入维护模式</div>
           <div style={contentStyle}>
-            重启后进入维护模式，可以在维护模式下执行磁盘操作或系统维护任务。（该功能暂未可用）
+            重启后进入维护模式，可以在维护模式下执行磁盘操作或系统维护任务。
           </div>
-          <RaisedButton label='重启进入维护模式' disabled={true}/>
+          <RaisedButton label='重启进入维护模式'
+            onTouchTap={() => this.bootOp('rebootMaintenance')}
+          />
         </div>
       </div>
     )
