@@ -7,8 +7,8 @@ import React, { PropTypes } from 'react';
 function getStyles(duration, opacity) {
   return {
     width: '100%',
-    height: '100%',
-    transition: `opacity ${duration}s cubic-bezier(0, 1, .5, 1)`,
+    height: opacity === 1 ? '100%' : 0,
+    transition: `opacity ${duration}s cubic-bezier(0, 1, .5, 1), height ${duration}s linear`,
     opacity
   }
 }

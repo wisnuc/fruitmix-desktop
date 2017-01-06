@@ -9,18 +9,7 @@ import PhotoDetail from './PhotoDetail';
 import FadingToAnimate from './FadingToAnimate';
 import LazyloadBox from '../scrollLazyload/LazyloadBox';
 import ScrollFlush from '../scrollLazyload/ScrollFlush';
-
 import { formatDate } from '../../utils/datetime';
-
-/******* 以下是测试代码 ********/
-const dataArr = [];
-
-for (var i = 0; i < 20; i++) {
-  dataArr.push({
-    width: 200,
-    height: 200
-  });
-}
 
 export default class PhotoList extends Component {
   constructor(props) {
@@ -36,14 +25,18 @@ export default class PhotoList extends Component {
       },
       photoDetail: {
         position: 'fixed',
-        left: 0,
-        top: 0,
-        width: 800,
-        height: 620,
         left: '50%',
         top: '50%',
-        zIndex: 9999,
-        transform: 'translate(-50%, -50%)'
+        width: 781,
+        height: 648,
+        transform: 'translate(-50%, -50%)',
+        // left: 60,
+        // right: 60,
+        // width: 'calc(100% - 120px)',
+        // top: 60,
+        // bottom: 60,
+        // height: 'calc(100% - 120px)',
+        zIndex: 9999
       }
     };
 
@@ -76,7 +69,10 @@ export default class PhotoList extends Component {
         }
       });
     };
-    this.lookPhotoDetail = (activeIndex) => this.setState({ activeIndex });
+    this.lookPhotoDetail = (seqIndex, activeIndex) => {
+      this.setState({ activeIndex });
+      this.seqIndex = seqIndex;
+    };
 
     this.renderCarousel = () => (
       <FadingToAnimate style={ this.style.carousel } flag={ this.state.carouselItems.length ? 'in' : 'out' }>
@@ -88,14 +84,15 @@ export default class PhotoList extends Component {
         ? (<PhotoDetail
             closeMaskLayer={ () => this.setState({ activeIndex: false }) }
             style={ this.style.photoDetail }
-            items={ photos }
+            items={ photos[this.state.activeIndex].photos }
+            seqIndex={ this.seqIndex }
             activeIndex={ this.state.activeIndex } />)
         : void 0;
     };
   }
 
   getChildContext() {
-    return { photos: this.photos };
+    return { photos: this.props.photoMapDates };
   }
 
   findPath(items, path) {
@@ -115,7 +112,6 @@ export default class PhotoList extends Component {
     // let dispatch = store.dispatch;
     // let photos = this.photos = store.getState().media.data;
     // let photoDates = this.findDatesByExifDateTime(photos);
-
     return (
       <div style={ this.props.style }>
         <ScrollFlush
@@ -141,10 +137,10 @@ export default class PhotoList extends Component {
           ))
         */}
         {/* 轮播 */}
-        {/* this.renderCarousel() */}
+        { this.renderCarousel() }
 
         {/* 查看大图 */}
-        {/* this.renderPhotoDetail(photos) */}
+        { this.renderPhotoDetail(this.props.photoMapDates) }
       </div>
     );
   }

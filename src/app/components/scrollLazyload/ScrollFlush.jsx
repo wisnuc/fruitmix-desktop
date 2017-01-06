@@ -25,7 +25,7 @@ export default class ScrollFlush extends Component {
 		this.getStyle = () => ({
 			position: 'absolute',
 			left: 0,
-			top: 0,
+			top: 6,
 			width: '100%',
 			height: 'calc(100% - 56px)',
 			bottom: 0,

@@ -43,8 +43,8 @@ export default class SlideToAnimate extends Component {
       }
     };
 
-    this.leftDireStyle = Object.assign({}, this.style.dire, this.style.leftDire);
-    this.rightDireStyle = Object.assign({}, this.style.dire, this.style.rightDire);
+    this.leftDireStyle = Object.assign({}, this.style.dire, this.style.leftDire, { left: this.props.direLeft });
+    this.rightDireStyle = Object.assign({}, this.style.dire, this.style.rightDire, { right: this.props.direRight });
 
     this.state = {
       currentIndex: props.activeIndex
@@ -73,7 +73,6 @@ export default class SlideToAnimate extends Component {
     this.transformTranslateStyle = () => {
       const { translateDistance, translateGrep } = this.props;
       let currentIndexDistance = -translateDistance * this.state.currentIndex;
-
       this.state.currentIndex && (currentIndexDistance -= translateGrep * this.state.currentIndex);
 
       return {

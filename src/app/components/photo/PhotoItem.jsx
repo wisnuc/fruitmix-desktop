@@ -57,8 +57,9 @@ export default class PhotoItem extends Component {
       action: 'pending'
     };
 
-    this.findPhotoIndexByDigest = () =>
-      this.context.photos.findIndex(photo => photo.digest === props.digest);
+    this.findPhotoIndexByDigest = () => {
+      return this.context.photos.findIndex(photo => photo.date === this.props.date)
+    };
 
     this.addHoverIconButton = () => {
       this.state.action === 'pending' && this.setState({ action: 'hover' });
