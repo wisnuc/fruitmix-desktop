@@ -454,7 +454,6 @@ class FileApp extends React.Component {
 
       createNewFolder: false,
       deleteConfirm: false,
-      renameConfirm:false,
       importDialog: null,
     }
 
@@ -464,9 +463,6 @@ class FileApp extends React.Component {
         context: this.state.navContext,
         folderUUID: this.state.directory.uuid
       }, (err, data) => {
-      	console.log('refresh callback ......................')
-      	console.log(err)
-      	console.log(data)
         if (err) return // TODO
         this.navUpdate(this.state.navContext, data) // TODO
       })
@@ -552,7 +548,9 @@ class FileApp extends React.Component {
     }
 
     this.showCreateNewFolderDialog = () => assign({ createNewFolder: true })
-    this.showRenameDialog = () => assign({renameConfirm: true})
+    this.showRenameDialog = () => {
+      let dom = this.refs.FileTable
+      assign({editing: dom.list[dom.selectedIndexArr[0]]})}
     this.showDeleteConfirmDialog = () => assign({ deleteConfirm: true })
 
     this.renderLeftNav = () => (
@@ -1185,7 +1183,7 @@ class FileApp extends React.Component {
             }}>
               <Menu>
                 <MenuItem primaryText='新建文件夹' onTouchTap={this.showCreateNewFolderDialog}/>
-                <MenuItem primaryText='重命名' onTouchTap={this.showRenameDialog}/>
+                <MenuItem primaryText='重命名' disabled={this.refs.FileTable.selectedIndexArr.length!==1} onTouchTap={this.showRenameDialog.bind(this)}/>
                 <MenuItem primaryText='移动' disabled={true}/>
                 <MenuItem primaryText='分享' onTouchTap={this.showDetail}/>
                 <MenuItem primaryText='下载' onTouchTap={this.download}/>
@@ -1476,27 +1474,40 @@ class FileApp extends React.Component {
 
         <DialogInput
           title={(() => {
-            if (this.state.renameConfirm)
+            if (this.state.editing)
               return '重命名'
             else
               return ''
           })()}
 
           hint={(() => {
-            if (this.state.renameConfirm)
+            if (this.state.editing)
               return '重命名'
             else
               return ''
           })()}
 
-          open={this.state.renameConfirm}
+          open={!!this.state.editing}
 
           onCancel={() => {
-            this.setState(Object.assign({}, this.state, { renameConfirm: false }))
+            this.setState(Object.assign({}, this.state, { editing: null }))
           }}
 
           onOK={name => {
-            this.setState(Object.assign({}, this.state, { renameConfirm: false }))
+            this.setState(Object.assign({}, this.state, { editing: null }))
+            let uuid = this.state.editing.uuid
+            let oldName = this.state.editing.name
+            let newName = name
+            if (oldName === newName) return
+            command('fileapp', 'FILE_RENAME', {
+              dir: this.state.directory.uuid,
+              node: uuid,
+              name: newName
+            }, (err, data) => {
+              console.log(data)
+              return
+              this.refresh()
+            })
           }}
         />
 
