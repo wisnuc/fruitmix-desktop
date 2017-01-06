@@ -1170,7 +1170,7 @@ class FileApp extends React.Component {
         {/*upload button*/}
         <FileUploadButton path={this.state.path} style={{position: 'absolute', right:48, bottom:48}} />
         {/*right click menu*/}
-        { this.state.contextMenu && (
+        { this.state.contextMenu && this.state.navContext == 'HOME_DRIVE' && (
           <div
             style={{position: 'fixed', top: 0, left: 0, width:'100%', height:'100%', zIndex:2000}}
             onTouchTap={() => this.hideContextMenu()}
@@ -1467,6 +1467,9 @@ class FileApp extends React.Component {
           }}
 
           onOK={name => {
+            if (name.length == 0 ) return
+            console.log(this.state.list.find(item => item.name == name))
+            if (this.state.list.findIndex(item => item.name == name) != -1) return
             this.setState(Object.assign({}, this.state, { createNewFolder: false }))
             this.createNewFolder(name)
           }}

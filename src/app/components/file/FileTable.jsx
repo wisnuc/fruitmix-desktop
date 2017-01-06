@@ -21,6 +21,7 @@ class FileTable extends Component {
 			this.lastHover = -1
 			this.shift = false
 			this.ctrl = false
+			this.forceUpdate()
 		}
 		this.setList = (list) => {
 			this.refresh()

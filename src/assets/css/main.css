@@ -419,6 +419,8 @@ body{
   cursor: default;
   height: 40px;
   line-height: 40px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .row-select {
