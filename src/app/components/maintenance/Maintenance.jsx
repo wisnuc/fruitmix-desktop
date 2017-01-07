@@ -22,6 +22,9 @@ import NavigationExpandLess from 'material-ui/svg-icons/navigation/expand-less'
 import NavigationClose from 'material-ui/svg-icons/navigation/close'
 import NavigationMoreVert from 'material-ui/svg-icons/navigation/more-vert'
 import ContentAddCircle from 'material-ui/svg-icons/content/add-circle'
+import ToggleRadioButtonChecked from 'material-ui/svg-icons/toggle/radio-button-checked'
+import ToggleRadioButtonUnchecked from 'material-ui/svg-icons/toggle/radio-button-unchecked'
+
 import { 
   pinkA200, grey300, grey400, greenA400, green400, amber400, red400, 
 
@@ -47,6 +50,8 @@ const TABLEDATA_HEIGHT = 48
 const HEADER_HEIGHT = 64
 const FOOTER_HEIGHT = 48
 const SUBTITLE_MARGINTOP = 24
+
+
 
 const alphabet = 'abcdefghijklmnopqrstuvwxyz'
 
@@ -417,7 +422,6 @@ class Maintenance extends React.Component {
     this.UsernamePasswordContent = props => {
 
       const onChange = (name, value) => {
-
         let operation = Object.assign({}, this.state.operation)
         operation[name] = value
         this.setState({ operation })
@@ -516,7 +520,7 @@ class Maintenance extends React.Component {
       let operation = this.state.operation
       return ( 
         <Dialog
-          contentStyle={{ width: 504, zIndex: 2500 }}
+          contentStyle={{ width: (this.state.operation && this.state.operation.width) || 560 }}
           title={operation && operation.title}
           open={operation !== null}
           modal={true}
@@ -600,9 +604,9 @@ class Maintenance extends React.Component {
       this.setState({ operation })
     }
 
-    this.installWisnucOnVolume = volume => {
+    this.initWisnucOnVolume = volume => {
 
-      debug('installWisnucOnVolume', volume)
+      debug('initWisnucOnVolume', volume)
 
       if (volume.wisnuc.status === 'NOTFOUND') {
         
@@ -619,18 +623,138 @@ class Maintenance extends React.Component {
           }, {
             label: '确认',
             disabled: () => {
-
               let op = this.state.operation
               return !(op.username && op.username.length > 0 && 
                         op.password && op.password.length > 0 && 
                         op.passwordAgain && op.passwordAgain === op.password)
                
             },
-            onTouchTap: () => {}
+            onTouchTap: () => {
+
+              this.setOperationDialogBusy()
+
+              let device = window.store.getState().maintenance.device
+              let url = `http://${device.address}:3000/system/mir/init`
+
+              request
+                .post(url)
+                .set('Accept', 'application/json')
+                .send({ 
+                  target: volume.fileSystemUUID,
+                  username: this.state.operation.username,
+                  password: this.state.operation.password,
+                  
+                })
+                .end((err, res) => {
+                  if (err) {
+                    this.reloadBootStorage((err2, { boot, storage }) => {
+                      this.setOperationDialogFailed(this.errorText(err, res))
+                    })              
+                  }
+                  else {
+                    this.reloadBootStorage((err2, { boot, storage }) => {
+                      this.setOperationDialogSuccess(['创建成功'])
+                    })
+                  }
+                })
+            },
           }]
         } 
 
         this.setState({ operation })
+      }
+      else {
+
+/**
+                                                                  remove wisnuc     remove fruitmix
+      USER > 0                                                          
+      USER = 0
+      ENOWISNUC         // wisnuc folder does not exist           x                 x
+      EWISNUCNOTDIR     // wisnuc folder is not a dir                               x
+      ENOFRUITMIX       // fruitmix folder does not exist                           x
+      EFRUITMIXNOTDIR   // fruitmix folder is not a dir
+      ENOMODELS         // models folder does not exist
+      EMODELSNOTDIR     // models folder is not a dir
+      ENOUSERS          // users.json file does not exist
+      EUSERSNOTFILE     // users.json is not a file
+      EUSERSPARSE       // users.json parse fail
+      EUSERSFORMAT      // users.json is not well formatted
+**/
+
+        let wisnuc = volume.wisnuc
+        let warning
+
+        let text = []
+
+        if (wisnuc.status === 'READY' || 'DAMAGED') {
+          warning = '文件系统已经包含wisnuc应用的用户数据，请仔细阅读下述信息，避免数据丢失。'
+        }
+        else if (wisnuc.status === 'AMBIGUOUS') {
+          warning = '文件系统可能包含wisnuc应用的用户数据，请仔细阅读下述信息，避免数据丢失。'
+        }
+        else if (wisnuc.error === 'EWISNUCNOTDIR' || wisnuc.error === 'EFRUITMIXNOTDIR') {
+          warning = '文件系统存在文件与wisnuc应用数据的目录结构冲突，请仔细阅读下述信息，避免数据丢失。'
+        }
+        else if (wisnuc.error === 'EWISNUCNOFRUITMIX' && volume.mountpoint !== '/') { // for rootfs this is normal case
+          warning = '文件系统不包含wisnuc应用的用户数据，但存在wisnuc文件夹，请仔细阅读下述信息，避免数据丢失。'
+        }
+
+        let general = 'wisnuc应用在文件系统根目录上建立名为wisnuc的文件夹存放数据；其中fruitmix子文件夹存放用户的私有云应用数据，包括用户通过手机、客户端以及Windows文件共享(Samba)等方式传输的文件和照片；wisnuc目录下的其他文件夹可能用于存放appifi/docker第三方应用的镜像文件、私有数据（例如Transmission的下载文件，ownCloud的私有云文件）；对于ws215i用户，如果系统从2016年1月的版本升级至最新版本，且没有做过数据迁移，则老版本系统的用户数据也存放在wisnuc目录下的其他目录内。'
+
+        let removeWisnuc = '选择该选项会删除所有上述存放于wisnuc目录下的数据。'
+        let removeFruitmix = '选择该选项会保留原wisnuc目录下的其他目录数据，包括appifi/docker应用镜像，appifi/docker第三方应用数据，老版本软件尚未迁移的用户数据；但删除所有位于fruitmix目录下的wisnuc私有云应用数据，包括所有用户信息、云盘配置信息、用户上传的所有文件和照片。'
+        let keepBoth = '选择该选项不会删除任何数据，但会在该目录下重建新的用户和云盘配置；该操作之后旧的用户上传的文件和照片在新系统中无法直接使用，用户只能手动迁移；旧系统中创建的文件、照片和相册分享无法恢复。'
+
+        let mustDelete
+        if (wisnuc.error === 'EWISNUCNOTDIR')
+          mustDelete = '必须选择删除和重建wisnuc文件夹方可执行操作'
+        else if (wisnuc.error === 'EFRUITMIXNOTDIR')
+          mustDelete = '必须选择删除和重建fruitmix文件夹方可执行操作'
+        
+        let operation = {
+
+          stage: 'INITCONFIRM',
+          title: '确认操作',
+          width: 672,
+
+          username: '',
+          password: '',
+          passwordAgain: '',
+
+          Content: () => (
+            <div>
+              { warning && <div>{warning}</div> }              
+              <div>{general}</div>
+              <Checkbox 
+                checkedIcon={<ToggleRadioButtonChecked />}
+                uncheckedIcon={<ToggleRadioButtonUnchecked />}
+                label='删除并重建wisnuc目录' 
+              />
+              <div>{removeWisnuc}</div>
+              <Checkbox 
+                checkedIcon={<ToggleRadioButtonChecked />}
+                uncheckedIcon={<ToggleRadioButtonUnchecked />}
+                label='保留wisnuc目录，删除和重建fruitmix目录' 
+              />
+              <div>{removeWisnuc}</div>
+              <Checkbox 
+                checkedIcon={<ToggleRadioButtonChecked />}
+                uncheckedIcon={<ToggleRadioButtonUnchecked />}
+                label='保留wisnuc和fruitmix目录，重建用户和云盘信息'
+              />
+              <div>{keepBoth}</div>
+            </div>
+          ),
+          actions: [{
+            label: '取消',
+            onTouchTap: this.operationOnCancel
+          },{
+            label: '下一步',
+            
+          }]  
+        }
+
+        this.setState({operation})
       }
     }
 
@@ -833,22 +957,9 @@ class Maintenance extends React.Component {
       return (
         <div style={{width: '100%', height: 136 - 48 - 16}}>
 
-          {/*          
-          <div style={{width: '100%', height: 48, marginBottom: 16, 
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-            <div style={{fontSize: 20, color: 'rgba(0,0,0,0.54)'}}>创建磁盘阵列</div> 
-            <IconButton 
-              iconStyle={{fill: 'rgba(0,0,0,0.54)'}}
-              onTouchTap={this.onToggleCreatingNewVolume}>
-              <NavigationClose />
-            </IconButton> 
-          </div>
-          */}
-
           <Paper style={{ width: '100%', height: 64, 
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             color: this.props.muiTheme.palette.accent1Color,
-            // backgroundColor: '#FCE4EC' // pink50, not working
           }}>
 
             <div style={{marginLeft: 16, fontSize: 16}}>{ hint }</div> 
@@ -1299,6 +1410,7 @@ class Maintenance extends React.Component {
 
               { this.state.boot.state === 'maintenance' &&
                 this.state.creatingNewVolume === null &&
+                !volume.isMissing &&
                 volume.wisnuc.status === 'READY' &&
                 <FlatButton label='启动' primary={true} 
                   onTouchTap={e => {
@@ -1311,8 +1423,8 @@ class Maintenance extends React.Component {
                 <this.VolumeMenu volume={volume}
                   actions={[
                     [ volume.wisnuc.status === 'NOTFOUND' ? '安装' : '重新安装',
-                      () => this.installWisnucOnVolume(volume), 
-                      false 
+                      () => this.initWisnucOnVolume(volume), 
+                      volume.isMissing
                     ],
                   ]}
                 />
