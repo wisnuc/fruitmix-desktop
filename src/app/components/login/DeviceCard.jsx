@@ -119,16 +119,24 @@ class FirstUserBox extends React.Component {
   }
 }
 
+const MaintBox = props => (
+    <div style={{width: '100%', height: 64, backgroundColor: 'rgba(128,128,128,0.8)',
+      display:'flex', alignItems: 'center', justifyContent: 'space-between', 
+      boxSizing: 'border-box', paddingLeft: 64, paddingRight: 64}}>
+      
+      <div style={{color: '#FFF' }}>{props.text}</div>
+      <FlatButton label='维护模式' onTouchTap={this.maintain} />
+    </div>
+  )
+
 class DeviceCard extends React.Component {
 
   constructor(props) {
 
     super(props)
     this.state = {
-
       toggle: false,
       horizontalExpanded: false,
-
       boot: null,
       storage: null,
       users: null,
@@ -136,21 +144,45 @@ class DeviceCard extends React.Component {
 
     this.unmounted = false
 
-    this.model = '个人计算机'
-    this.logoType = Computer
-    this.serial = '未知序列号'
-    this.address = props.device.address
+    this.serial = () => {
 
-    if (props.device.name) {
-      let split = props.device.name.split('-')
-      if (split.length === 3 && split[0] === 'wisnuc') {
-        if (split[1] === 'ws215i') {
-          this.model = 'WS215i'
-          this.logoType = Barcelona
+      let serial = '未知序列号'
+      if (props.device.name) {
+        let split = props.device.name.split('-')
+        if (split.length === 3 && split[0] === 'wisnuc') {
+          serial = split[2]
         }
-        this.serial = split[2]
-      }
-    } 
+      } 
+
+      return serial
+    }
+
+    this.model = () => {
+
+      let model = '个人计算机'
+      if (this.props.device.name) {
+        let split = this.props.device.name.split('-')
+        if (split.length === 3 && split[0] === 'wisnuc') {
+          if (split[1] === 'ws215i') {
+            model = 'WS215i'
+          }
+        }
+      } 
+      return model 
+    }
+
+    this.logoType = () => {
+      let logoType = Computer
+      if (this.props.device.name) {
+        let split = this.props.device.name.split('-')
+        if (split.length === 3 && split[0] === 'wisnuc') {
+          if (split[1] === 'ws215i') {
+            logoType = Barcelona
+          }
+        }
+      } 
+      return logoType
+    }
 
     ipcRenderer.send('setServerIp', props.device.address)
 
@@ -158,7 +190,9 @@ class DeviceCard extends React.Component {
       request.get(`http://${this.props.device.address}:${port}/${ep}`)
         .set('Accept', 'application/json')
         .end((err, res) => {
+
           if (this.unmounted) return
+
           this.setState(state => { 
             let nextState = Object.assign({}, state) 
             nextState[propName] = err ? err : !res.ok ? new Error('request bad response') : res.body
@@ -176,6 +210,34 @@ class DeviceCard extends React.Component {
       this.requestGet(3000, 'system/boot', 'boot')
       this.requestGet(3000, 'system/storage', 'storage')
       this.requestGet(3721, 'login', 'users')
+    }
+
+    this.reset = () => {
+
+      if (this.unmounted) return
+
+      this.setState(state => ({
+        toggle: false,
+        horizontalExpanded: false,
+        boot: null,
+        storage: null,
+        users: null,
+      }))
+
+      this.requestGet(3000, 'system/boot', 'boot')
+      this.requestGet(3000, 'system/storage', 'storage')
+      this.requestGet(3721, 'login', 'users')
+    }
+
+    this.maintain = () => {
+      window.store.dispatch({
+        type: 'ENTER_MAINTENANCE',
+        data: {
+          device: this.props.device,
+          boot: this.state.boot,
+          storage: this.state.storage,
+        }
+      }) 
     }
 
     this.onBoxResize = resize => {
@@ -208,14 +270,7 @@ class DeviceCard extends React.Component {
       let text = 'The Contra Code was actually first used in Gradius for NES in 1986 by Konami.'
       console.log(text)
 
-      window.store.dispatch({
-        type: 'ENTER_MAINTENANCE',
-        data: {
-          device: this.props.device,
-          boot: this.state.boot,
-          storage: this.state.storage,
-        }
-      }) 
+      this.maintain()
     })
   }
 
@@ -292,39 +347,44 @@ class DeviceCard extends React.Component {
           }, null, '  ')} 
         />
       )
+
     // now boot state should not be normal or alternative, must be maintenance, assert it!
     if (this.state.boot.state !== 'maintenance')
       throw new Error('Undefined State: boot state is not maintenance')
 
-    if (!this.state.boot.lastFileSystem) // this is wrong if lastFileSystem null but there is bootable FIXME
-      return (
-        <GuideBox 
-          address={this.props.device.address} 
-          storage={this.state.storage} 
-          onResize={this.onBoxResize} 
-        />
-      )
+    if (this.state.boot.lastFileSystem) {
+      
+      let text = '系统未能启动上次使用的wisnuc应用'
+
+      if (this.state.boot.bootMode === 'maintenance')
+        text = '用户指定启动至维护模式'
+
+      return <MaintBox text={text} />
+    }
+
+    // now this.state.boot.lastFileSystem is null
+    // 1. if there is suspicious wisnuc, select maintenance
+    let storage = this.state.storage
+    let fileSystems = [...storage.volumes, ...storage.blocks.filter(blk => !blk.isVolumeDevice && blk.isFileSystem)]
+
+    let suspicious = fileSystems
+                      .filter(f => !!f.wisnuc)
+                      .find(f => f.wisnuc === 'ERROR' || !f.wisnuc.intact) 
+
+    if (suspicious)
+      return <MaintBox text='存在可疑文件系统' />
+
+    if (storage.volumes.find(v => v.isMissing))
+      return <MaintBox text='存在不完整磁盘阵列' />
 
     return (
-      <div style={{width: '100%', height: 64, backgroundColor: 'rgba(128,128,128,0.8)',
-        display:'flex', alignItems: 'center', justifyContent: 'space-between', 
-        boxSizing: 'border-box', paddingLeft: 64, paddingRight: 64}}>
-        
-        <div style={{color: '#FFF' }}>该设备未能正常启动应用服务。</div>
-        <RaisedButton 
-          label='进入维护模式' 
-          onTouchTap={() => {
-            window.store.dispatch({
-              type: 'ENTER_MAINTENANCE',
-              data: {
-                device: this.props.device,
-                boot: this.state.boot,
-                storage: this.state.storage,
-              }
-            }) 
-          }}
-        />
-      </div>
+      <GuideBox 
+        address={this.props.device.address} 
+        storage={this.state.storage} 
+        onResize={this.onBoxResize} 
+        onReset={this.reset}
+        onMaintain={this.maintain}
+      />
     )
 
     // there are following possibilities:
@@ -370,7 +430,7 @@ class DeviceCard extends React.Component {
             <div style={{flexGrow: 1, transition: 'height 300ms'}}>
               <div style={{position: 'relative', width:'100%', height: '100%'}}>
               { 
-                React.createElement(this.logoType, { 
+                React.createElement(this.logoType(), { 
 
                   style: this.state.toggle ?  {
                       position: 'absolute',
@@ -397,11 +457,11 @@ class DeviceCard extends React.Component {
                   fontWeight: 'medium',
                   color: '#FFF', 
                   marginBottom: this.state.toggle ? 0 : 12,
-                }}>{this.model}</div>
+                }}>{this.model()}</div>
                 <div style={{fontSize: 14, color: '#FFF', marginBottom: 12, opacity: 0.7}}>
                   {this.props.device.address}
                 </div>
-                { !this.state.toggle && <div style={{fontSize: 14, color: '#FFF', marginBottom: 16, opacity: 0.7}}>{this.serial}</div> }
+                { !this.state.toggle && <div style={{fontSize: 14, color: '#FFF', marginBottom: 16, opacity: 0.7}}>{this.serial()}</div> }
               </div>
               </div>
             </div>

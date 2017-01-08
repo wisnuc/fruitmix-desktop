@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { FlatButton, RaisedButton, Checkbox, Divider, TextField, CircularProgress } from 'material-ui'
+import { FlatButton, RaisedButton, Checkbox, Dialog, Divider, TextField, CircularProgress } from 'material-ui'
 import { Step, Stepper, StepLabel, StepContent } from 'material-ui/Stepper'
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
 import { cyan500 } from 'material-ui/styles/colors'
@@ -39,9 +39,60 @@ class GuideBox extends React.Component {
       username: null,
       password: null,
       passwordAgain: null 
+
+      ///////////////
+
     }
 
-    // this.hasVolume = props.storage.volumes.length > 0
+    this.mir = (type, data, callback) => {
+      request
+        .post(`http://${this.props.address}:3000/system/mir/${type}`)
+        .timeout(30000)
+        .send(data)
+        .set('Accept', 'application/json')
+        .end((err, res) => callback(err, res && res.body))
+    }
+
+    this.creatingNewVolume = () => {
+
+      this.mir('mkfs', {
+        type: 'btrfs', 
+        target: this.state.selection, 
+        mode: this.state.mode
+      }, (err, body) => {
+
+        if (err) {
+          console.log('mkfs failed', err.message, body && body.message)
+          return this.setState({ dialogText: ['创建磁盘阵列失败', err.message, body && body.message] })
+        }
+
+        console.log(body)
+        this.useExisting(body)
+      })
+    }
+
+    this.useExisting = uuid => {
+      this.mir('init', {
+        target: uuid,
+        username: this.state.username,
+        password: this.state.password
+      }, (err, body) => {
+
+        if (err) {
+          console.log('init failed', err.message, body && body.message)
+          return this.setState({ dialogText: ['初始化用户失败', err.message, body && body.message] }) 
+        }
+
+        this.mir('run', { target: uuid }, (err, body) => {
+          
+          if (err) {
+            console.log('run failed', err.message, body && body.message)
+            return this.setState({ dialogText: ['运行新系统失败', err.message, body && body.message] }) 
+          }
+          setTimeout(() => ipcRenderer.send('login', this.state.username, this.state.password), 1000)
+        })
+      })  
+    }
 
     this.handleNext = () => {
       const {stepIndex} = this.state
@@ -193,7 +244,9 @@ class GuideBox extends React.Component {
     return (
       <div style={{width: '100%'}}>
         <div style={{width: '100%', height: '100%'}}>
-          <div style={{width: '100%', height: this.state.expanded ? 640 : 0, transition: 'height 300ms', overflow: 'hidden', backgroundColor: '#FAFAFA', boxSizing: 'border-box', paddingLeft: 64, paddingRight: 64}}>
+          <div style={{width: '100%', height: this.state.expanded ? 640 : 0, transition: 'height 300ms', overflow: 'hidden', backgroundColor: '#FAFAFA', boxSizing: 'border-box', paddingLeft: 64, paddingRight: 64,
+            overflowY: 'auto'
+          }}>
             <div style={{marginTop: 34, marginBottom: 12, fontSize: 34, color: '#000', opacity: 0.54}}>初始化向导</div>
             <div style={{opacity: this.state.showContent ? 1 : 0, transition:'opacity 150ms'}}>
               <Stepper activeStep={stepIndex} orientation="vertical">
@@ -371,55 +424,12 @@ class GuideBox extends React.Component {
                         disableFocusRipple={true}
                         primary={true}
                         onTouchTap={() => {
+
                           this.handleNext()
-                          console.log('this is finished button')
-                          console.log('address', this.props.address)
-                          console.log('decision', this.state.decision)
-                          console.log('volSelection', this.state.volSelection)
-                          console.log('selection', this.state.selection)
-                          console.log('mode', this.state.mode)
-                          console.log('username', this.state.username)
-                          console.log('password', this.state.password)
-
-                          let postdata 
-                          if (this.state.decision === 'createNew') 
-                            postdata = {
-                              target: this.state.selection,
-                              mkfs: {
-                                type: 'btrfs',
-                                mode: this.state.mode,
-                              },
-                              init: {
-                                username: this.state.username,
-                                password: this.state.password
-                              }
-                            }
-                          else if (this.state.decision === 'useExisting') 
-                            postdata = {
-                              target: [this.state.volSelection],
-                              init: {
-                                username: this.state.username,
-                                password: this.state.password
-                              }
-                            }
-
-                          console.log('postdata', postdata)
-
-                          request
-                            .post(`http://${this.props.address}:3000/system/mir`)
-                            .send(postdata)
-                            .set('Accept', 'application/json')
-                            .end((err, res) => {
-                              // FIXME error
-                              // console.log(err || !res.ok || res.body)
-                              if (err || !res.ok) {
-                                console.log(err || !res.ok)
-                                return
-                              }
-
-                              setTimeout(() => 
-                                ipcRenderer.send('login', this.state.username, this.state.password), 1000)
-                            })
+                          if (this.state.decision === 'createNew')
+                            this.creatingNewVolume()
+                          else
+                            this.useExisting(this.state.volSelection)
                         }}
                         style={{marginRight: 12}}
                       />
@@ -436,12 +446,30 @@ class GuideBox extends React.Component {
               </Stepper>
               { finished && (
                 <div style={{width: '100%', height: 100, display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: 64}}>
-                  <CircularProgress />
-                  <div style={{marginTop: 16, fontSize: 24, opacity: 0.54}}>正在应用设置，请管理员同志耐心等待。</div>
+                  { !this.state.dialogText && <CircularProgress /> }
+                  { !this.state.dialogText && <div style={{marginTop: 16, fontSize: 24, opacity: 0.54}}>正在应用设置，请管理员同志耐心等待。</div> }
+                  <Dialog 
+                    contentStyle={{width: 560, height: 480}}
+                    title='遇到错误'
+                    actions={[
+                      <FlatButton 
+                        label='进入维护模式' 
+                        onTouchTap={this.props.onMaintain} 
+                      />,
+                      <FlatButton 
+                        label='重置向导' 
+                        onTouchTap={this.props.onReset} 
+                      />
+                    ]}
+                    modal={true}
+                    open={!!this.state.dialogText}
+                    onRequestClose={() => this.setState({ dialogText: undefined })}
+                  >
+                    { this.state.dialogText && this.state.dialogText.map(line => <div>{line}</div>) } 
+                  </Dialog>
                 </div>
               )}
             </div>
-
           </div>
 
           <div style={{width: '100%', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FAFAFA'}}>
