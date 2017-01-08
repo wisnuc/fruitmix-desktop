@@ -22,12 +22,8 @@ import NavigationExpandLess from 'material-ui/svg-icons/navigation/expand-less'
 import NavigationClose from 'material-ui/svg-icons/navigation/close'
 import NavigationMoreVert from 'material-ui/svg-icons/navigation/more-vert'
 import ContentAddCircle from 'material-ui/svg-icons/content/add-circle'
-import ToggleRadioButtonChecked from 'material-ui/svg-icons/toggle/radio-button-checked'
-import ToggleRadioButtonUnchecked from 'material-ui/svg-icons/toggle/radio-button-unchecked'
-
 import { 
   pinkA200, grey300, grey400, greenA400, green400, amber400, red400, 
-
   lightGreen100,
   lightGreen400,
   lightGreenA100,
@@ -39,6 +35,10 @@ import {
 import UUID from 'node-uuid'
 
 import { CatSilhouette, BallOfYarn } from './svg'
+import { 
+  operationTextConfirm, operationBase, operationReinitConfirmDeletion, operationUsernamePassword,
+  Operation, operationBusy, operationSuccess, operationFailed, createOperation 
+} from '../common/Operation'
 
 import request from 'superagent'
 import validator from 'validator'
@@ -50,8 +50,6 @@ const TABLEDATA_HEIGHT = 48
 const HEADER_HEIGHT = 64
 const FOOTER_HEIGHT = 48
 const SUBTITLE_MARGINTOP = 24
-
-
 
 const alphabet = 'abcdefghijklmnopqrstuvwxyz'
 
@@ -333,6 +331,8 @@ class Maintenance extends React.Component {
     const that = this
 
     this.unmounted = false
+    this.createOperation = (operation, ...args) =>
+      createOperation(this, 'dialog', operation, ...args)
 
     this.colors = {
 
@@ -561,200 +561,107 @@ class Maintenance extends React.Component {
     }
 
     this.startWisnucOnVolume = volume => {
+    
+      let text = ['启动安装于Btrfs磁盘阵列上的WISNUC应用？']
 
-      let operation = {
-        stage: 'CONFIRM',
-        title: '确认操作',
-        text: ['启动安装于Btrfs磁盘阵列上的WISNUC应用？'],
-        Content: this.OperationTextContent,
-        actions: [{
-          label: '取消',
-          onTouchTap: this.operationOnCancel 
-        },{
-          label: '确认',
-          onTouchTap: () => {
+      this.createOperation(operationTextConfirm, text, () => {
 
-            this.setOperationDialogBusy()
+        this.state.dialog.setState(operationBusy)
 
-            let device = window.store.getState().maintenance.device
-            let url = `http://${device.address}:3000/system/mir/run`
+        let device = window.store.getState().maintenance.device
+        let url = `http://${device.address}:3000/system/mir/run`
 
-            request
-              .post(url)
-              .set('Accept', 'application/json')
-              .send({ target: volume.fileSystemUUID })
-              .end((err, res) => {
+        request
+          .post(url)
+          .set('Accept', 'application/json')
+          .send({ target: volume.fileSystemUUID })
+          .end((err, res) => {
 
-                if (err) {
-                  this.reloadBootStorage((err2, { boot, storage }) => {
-                    this.setOperationDialogFailed(this.errorText(err, res))
-                  })
-                }
-                else {
-                  this.reloadBootStorage((err2, { boot, storage }) => {
-                    // FIXME
-                    this.setOperationDialogSuccess(['启动成功，系统将在3秒钟后跳转到登录页面'])
-                  })
-                }
+            if (err) {
+              this.reloadBootStorage((err2, { boot, storage }) => {
+                this.state.dialog.setState(operationFailed, this.errorText(err, res))
               })
-          },         
-        }]
-      }
-
-      this.setState({ operation })
+            }
+            else {
+              this.reloadBootStorage((err2, { boot, storage }) => {
+                // FIXME
+                this.state.dialog.setState(operationSuccess, ['启动成功，系统将在3秒钟后跳转到登录页面'])
+              })
+            }
+          })
+      })  
     }
 
     this.initWisnucOnVolume = volume => {
 
       debug('initWisnucOnVolume', volume)
 
-      if (volume.wisnuc.status === 'NOTFOUND') {
-        
-        let operation = {
-          stage: 'SETUSER',
-          title: '输入用户名和密码',
-          username: '',
-          password: '',
-          passwordAgain: '',
-          Content: this.UsernamePasswordContent,
-          actions: [{
-            label: '取消',
-            onTouchTap: this.operationOnCancel
-          }, {
-            label: '确认',
-            disabled: () => {
-              let op = this.state.operation
-              return !(op.username && op.username.length > 0 && 
-                        op.password && op.password.length > 0 && 
-                        op.passwordAgain && op.passwordAgain === op.password)
-               
-            },
-            onTouchTap: () => {
+      if (volume.wisnuc.error === 'ENOWISNUC' || 
+          (volume.wisnuc.error === 'ENOFRUIMITX' && volume.mountpoint === '/')) {
 
-              this.setOperationDialogBusy()
+          debug('clean install')
+          this.createOperation(operationUsernamePassword, (username, password) => {
 
-              let device = window.store.getState().maintenance.device
-              let url = `http://${device.address}:3000/system/mir/init`
+            debug('username, password', username, password)
 
-              request
-                .post(url)
-                .set('Accept', 'application/json')
-                .send({ 
-                  target: volume.fileSystemUUID,
-                  username: this.state.operation.username,
-                  password: this.state.operation.password,
-                  
-                })
-                .end((err, res) => {
-                  if (err) {
-                    this.reloadBootStorage((err2, { boot, storage }) => {
-                      this.setOperationDialogFailed(this.errorText(err, res))
-                    })              
-                  }
-                  else {
-                    this.reloadBootStorage((err2, { boot, storage }) => {
-                      this.setOperationDialogSuccess(['创建成功'])
-                    })
-                  }
-                })
-            },
-          }]
-        } 
+            this.state.dialog.setState(operationBusy)
 
-        this.setState({ operation })
+            let device = window.store.getState().maintenance.device
+            let url = `http://${device.address}:3000/system/mir/init`
+
+            request
+              .post(url)
+              .set('Accept', 'application/json')
+              .send({ 
+                target: volume.fileSystemUUID,
+                username,
+                password,
+              })
+              .end((err, res) => {
+                if (err) {
+                  this.reloadBootStorage((err2, { boot, storage }) => {
+                    this.state.dialog.setState(operationFailed, this.errorText(err, res))
+                  })              
+                }
+                else {
+                  this.reloadBootStorage((err2, { boot, storage }) => {
+                    this.state.dialog.setState(operationSuccess, ['创建成功'])
+                  })
+                }
+              })
+          })
       }
-      else {
+      else { 
+        this.createOperation(operationReinitConfirmDeletion, volume, remove => {
+          this.state.dialog.setState(operationUsernamePassword, (username, password) => {
+            debug('reinstall', remove, username, password)
 
-/**
-                                                                  remove wisnuc     remove fruitmix
-      USER > 0                                                          
-      USER = 0
-      ENOWISNUC         // wisnuc folder does not exist           x                 x
-      EWISNUCNOTDIR     // wisnuc folder is not a dir                               x
-      ENOFRUITMIX       // fruitmix folder does not exist                           x
-      EFRUITMIXNOTDIR   // fruitmix folder is not a dir
-      ENOMODELS         // models folder does not exist
-      EMODELSNOTDIR     // models folder is not a dir
-      ENOUSERS          // users.json file does not exist
-      EUSERSNOTFILE     // users.json is not a file
-      EUSERSPARSE       // users.json parse fail
-      EUSERSFORMAT      // users.json is not well formatted
-**/
+            let device = window.store.getState().maintenance.device
+            let url = `http://${device.address}:3000/system/mir/init`
 
-        let wisnuc = volume.wisnuc
-        let warning
-
-        let text = []
-
-        if (wisnuc.status === 'READY' || 'DAMAGED') {
-          warning = '文件系统已经包含wisnuc应用的用户数据，请仔细阅读下述信息，避免数据丢失。'
-        }
-        else if (wisnuc.status === 'AMBIGUOUS') {
-          warning = '文件系统可能包含wisnuc应用的用户数据，请仔细阅读下述信息，避免数据丢失。'
-        }
-        else if (wisnuc.error === 'EWISNUCNOTDIR' || wisnuc.error === 'EFRUITMIXNOTDIR') {
-          warning = '文件系统存在文件与wisnuc应用数据的目录结构冲突，请仔细阅读下述信息，避免数据丢失。'
-        }
-        else if (wisnuc.error === 'EWISNUCNOFRUITMIX' && volume.mountpoint !== '/') { // for rootfs this is normal case
-          warning = '文件系统不包含wisnuc应用的用户数据，但存在wisnuc文件夹，请仔细阅读下述信息，避免数据丢失。'
-        }
-
-        let general = 'wisnuc应用在文件系统根目录上建立名为wisnuc的文件夹存放数据；其中fruitmix子文件夹存放用户的私有云应用数据，包括用户通过手机、客户端以及Windows文件共享(Samba)等方式传输的文件和照片；wisnuc目录下的其他文件夹可能用于存放appifi/docker第三方应用的镜像文件、私有数据（例如Transmission的下载文件，ownCloud的私有云文件）；对于ws215i用户，如果系统从2016年1月的版本升级至最新版本，且没有做过数据迁移，则老版本系统的用户数据也存放在wisnuc目录下的其他目录内。'
-
-        let removeWisnuc = '选择该选项会删除所有上述存放于wisnuc目录下的数据。'
-        let removeFruitmix = '选择该选项会保留原wisnuc目录下的其他目录数据，包括appifi/docker应用镜像，appifi/docker第三方应用数据，老版本软件尚未迁移的用户数据；但删除所有位于fruitmix目录下的wisnuc私有云应用数据，包括所有用户信息、云盘配置信息、用户上传的所有文件和照片。'
-        let keepBoth = '选择该选项不会删除任何数据，但会在该目录下重建新的用户和云盘配置；该操作之后旧的用户上传的文件和照片在新系统中无法直接使用，用户只能手动迁移；旧系统中创建的文件、照片和相册分享无法恢复。'
-
-        let mustDelete
-        if (wisnuc.error === 'EWISNUCNOTDIR')
-          mustDelete = '必须选择删除和重建wisnuc文件夹方可执行操作'
-        else if (wisnuc.error === 'EFRUITMIXNOTDIR')
-          mustDelete = '必须选择删除和重建fruitmix文件夹方可执行操作'
-        
-        let operation = {
-
-          stage: 'INITCONFIRM',
-          title: '确认操作',
-          width: 672,
-
-          username: '',
-          password: '',
-          passwordAgain: '',
-
-          Content: () => (
-            <div>
-              { warning && <div>{warning}</div> }              
-              <div>{general}</div>
-              <Checkbox 
-                checkedIcon={<ToggleRadioButtonChecked />}
-                uncheckedIcon={<ToggleRadioButtonUnchecked />}
-                label='删除并重建wisnuc目录' 
-              />
-              <div>{removeWisnuc}</div>
-              <Checkbox 
-                checkedIcon={<ToggleRadioButtonChecked />}
-                uncheckedIcon={<ToggleRadioButtonUnchecked />}
-                label='保留wisnuc目录，删除和重建fruitmix目录' 
-              />
-              <div>{removeWisnuc}</div>
-              <Checkbox 
-                checkedIcon={<ToggleRadioButtonChecked />}
-                uncheckedIcon={<ToggleRadioButtonUnchecked />}
-                label='保留wisnuc和fruitmix目录，重建用户和云盘信息'
-              />
-              <div>{keepBoth}</div>
-            </div>
-          ),
-          actions: [{
-            label: '取消',
-            onTouchTap: this.operationOnCancel
-          },{
-            label: '下一步',
-            
-          }]  
-        }
-
-        this.setState({operation})
+            request
+              .post(url)
+              .set('Accept', 'application/json')
+              .send({ 
+                target: volume.fileSystemUUID,
+                remove,
+                username,
+                password,
+              })
+              .end((err, res) => {
+                if (err) {
+                  this.reloadBootStorage((err2, { boot, storage }) => {
+                    this.state.dialog.setState(operationFailed, this.errorText(err, res))
+                  })              
+                }
+                else {
+                  this.reloadBootStorage((err2, { boot, storage }) => {
+                    this.state.dialog.setState(operationSuccess, ['重建成功'])
+                  })
+                }
+              })
+          })
+        })
       }
     }
 
@@ -772,50 +679,33 @@ class Maintenance extends React.Component {
         '这些磁盘和包含这些磁盘的磁盘阵列上的数据都会被删除且无法恢复。')
       text.push('确定要执行该操作吗？')
 
-      let operation = {
-        stage: 'CONFIRM',
-        title: '确认操作',
-        text,
-        Content: this.OperationTextContent,
-        actions: [
-          {
-            label: '取消',
-            onTouchTap: this.operationOnCancel,
-          },
-          {
-            label: '确认',
-            onTouchTap: () => {
+      this.createOperation(operationTextConfirm, text, () => {
 
-              // set dialog state to busy
-              this.setOperationDialogBusy()
+        // set dialog state to busy
+        this.state.dialog.setState(operationBusy)
 
-              let device = window.store.getState().maintenance.device
-              request
-                .post(`http://${device.address}:3000/system/mir/mkfs`)
-                .set('Accept', 'application/json')
-                .send({ type, target, mode })
-                .end((err, res) => {
+        let device = window.store.getState().maintenance.device
+        request
+          .post(`http://${device.address}:3000/system/mir/mkfs`)
+          .set('Accept', 'application/json')
+          .send({ type, target, mode })
+          .end((err, res) => {
 
-                  debug('mkfs btrfs request', err || res.body)
-                
-                  // set dialog state to success or failed
-                  if (err) {
-                    this.reloadBootStorage((err2, { boot, storage }) => {  
-                      this.setOperationDialogFailed(this.errorText(err, res))
-                    })
-                  }
-                  else {
-                    this.reloadBootStorage((err2, { boot, storage }) => {
-                      this.setOperationDialogSuccess(['成功'])
-                    })
-                  }
-                })
+            debug('mkfs btrfs request', err || res.body)
+          
+            // set dialog state to success or failed
+            if (err) {
+              this.reloadBootStorage((err2, { boot, storage }) => {  
+                this.state.dialog.setState(operationFailed, this.errorText(err, res))
+              })
             }
-          }
-        ]
-      } 
-
-      this.setState({ operation })
+            else {
+              this.reloadBootStorage((err2, { boot, storage }) => {
+                this.state.dialog.setState(operationSuccess, ['成功'])
+              })
+            }
+          })
+      })
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -1045,8 +935,6 @@ class Maintenance extends React.Component {
       render() {
 
         let { status, users, error, message } = this.props.volume.wisnuc
-
-        // return <div style={{background: 'yellow'}}>{this.props.volume.fileSystemUUID}</div>
 
         if (users) {
           if (users.length === 0) {
@@ -2057,6 +1945,15 @@ class Maintenance extends React.Component {
 
           <div style={{width: '100%', height: 48}} />
         </div>
+
+        <Operation substate={this.state.dialog} />
+
+        <FlatButton label='do busy' 
+          onTouchTap={() => {
+            this.createOperation(operationBusy) 
+            setTimeout(() => this.state.dialog.setState(operationFailed, ['hello', 'world']), 2000)
+          }}/>
+
       </div>
     )
   }
