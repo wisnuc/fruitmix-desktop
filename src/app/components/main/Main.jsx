@@ -102,8 +102,8 @@ const SystemDrawer = (props) => {
             onTouchTap={() => props.onLauncherSelect(FileApp)}
           />
           <ListItem style={{color: 'rgba(255,255,255,0.7)'}}
-            primaryText='照片（暂不可用）'
-            leftAvatar={<Avatar icon={<ImagePhoto />} backgroundColor={grey500} />}
+            primaryText='照片'
+            leftAvatar={<Avatar icon={<ImagePhoto />} backgroundColor={blue500} />}
             onTouchTap={() => props.onLauncherSelect(PhotoApp)}
           />
           <ListItem style={{color: 'rgba(255,255,255,0.7)'}}
@@ -308,16 +308,16 @@ class Main extends React.Component {
       this.props.dispatch(Action.setTree(treeChildren));
     });
 
-		ipcRenderer.on('refreshStatusOfUpload',(err,tasks)=>{
-			window.store.dispatch(Action.refreshStatusOfUpload(tasks));
+		ipcRenderer.on('refreshStatusOfUpload',(err,tasks, finish)=>{
+			window.store.dispatch(Action.refreshStatusOfUpload(tasks, finish));
 		});
 
-		ipcRenderer.on('refreshStatusOfDownload',(err,tasks)=>{
-			window.store.dispatch(Action.refreshStatusOfDownload(tasks));
+		ipcRenderer.on('refreshStatusOfDownload',(err,tasks, finish)=>{
+			window.store.dispatch(Action.refreshStatusOfDownload(tasks, finish));
 		})
 
 		ipcRenderer.on('message',(err,message,code)=>{
-			this.props.dispatch(Action.setSnack(message,true))
+			window.store.dispatch(Action.setSnack(message,true))
 		});
 
 

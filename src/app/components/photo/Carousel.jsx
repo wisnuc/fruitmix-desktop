@@ -14,15 +14,18 @@ const __PART_HEIGHT__ = 45;
 export default class Carousel extends Component {
   render() {
     const { style, items } = this.props;
-    
+
     return (
       <div style={ style }>
         <div style={{ width: '100%' }}>
           <CarouselTopBar
+            onClearHoverToList={this.props.onClearHoverToList}
             style={{ marginLeft: __MARGIN_DISTANCE__, marginRight: __MARGIN_DISTANCE__, height: __PART_HEIGHT__, lineHeight: __PART_HEIGHT__ + 'px' }} />
 
           <SlideToAnimate
             style={{ marginLeft: __MARGIN_DISTANCE__, marginRight: __MARGIN_DISTANCE__, height: 90 }}
+            direLeft={ -45 }
+            direRight={ -45 }
             translateCount={ items.length }
             translateGrep={ 10 }
             translateDistance={ 90 }>

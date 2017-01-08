@@ -10,7 +10,6 @@ import adapter from './lib/adapter'
 
 import { registerCommandHandler } from './lib/command'
 import migration from './lib/migration'
-import userModule from './lib/user'
 import systemModule from './lib/system'
 
 //init api
@@ -64,5 +63,3 @@ app.on('ready', function() {
 })
 
 app.on('window-all-closed', () => app.quit())
-
-

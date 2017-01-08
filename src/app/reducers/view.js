@@ -1,82 +1,45 @@
 //define default state
 const defaultState = {
-  	findDevice: false,
-  	addDevice: false,
-  	dialogOfFolder: false,
-	dialogOfShare: false,
-	detail : false,
-	move: {open:false,x:0,y:0,data:[]},
-	menu:{show:false,index:-1,x:0,y:0},
-	mediaSize: 30,
 	currentMediaImage:{status:'notReady',path:null,open: false},
-  toggle: false,
-  showAppBar: true,
-  showLeftNav: true
+	toggle: false,
+	showAppBar: true,
+	showLeftNav: true
 }
 
 const loginState = (state = defaultState, action) => {
 
 	switch (action.type) {
 
-    case 'TOGGLE_APPBAR':
-      return Object.assign({}, state, { showAppBar: !state.showAppBar }) 
+		case 'TOGGLE_APPBAR':
+			return Object.assign({}, state, { showAppBar: !state.showAppBar })
 
-    case 'TOGGLE_SOMETHING':
-      return Object.assign({}, state, { toggle: !state.toggle })
+		case 'TOGGLE_SOMETHING':
+			return Object.assign({}, state, { toggle: !state.toggle })
 
-    case 'TOGGLE_LEFTNAV':
-      return Object.assign({}, state, { showLeftNav: !state.showLeftNav })
-
-		case 'TOGGLE_DEVICE':
-			return Object.assign({},state,{findDevice:!state.findDevice})
-		case 'TOGGLE_ADD_DEVICE':
-			return Object.assign({},state,{addDevice:!state.addDevice})
-		case 'TOGGLE_DIALOG_FOLDER':
-			return Object.assign({},state,{dialogOfFolder:action.isOpen});
-
-		case 'TOGGLE_SHARE':
-			return Object.assign({},state,{dialogOfShare:action.isOpen});
-
-		case 'OPEN_DETAIL':
-			return Object.assign({},state,{detail:true});
-
-		case 'CLEAN_DETAIL':
-			return Object.assign({},state,{detail:false});
-		case 'TOGGLE_MOVE':
-			return Object.assign({},state,{move:{open:action.open,x:action.x,y:action.y}});
-		case 'CLOSE_MOVE': 
-			return Object.assign({},state,{move: {open:false,x:0,y:0,data:[]}})
-		case 'TOGGLE_MENU':
-			if (action.index == null) {
-				var newMenu = Object.assign({}, state.menu, {show:false})
-				return Object.assign({},state,{menu:newMenu});	
-			}
-			return Object.assign({},state,{menu:{show:action.selected,index:action.index,x:action.x,y: action.y}});
-		//media
-		case 'SET_MEDIA_SIZE':
-			var s
-			if (action.reset) {
-				s = 30
-			}else {
-				s = state.mediaSize+30
-			}
-			return Object.assign({},state,{mediaSize:s});
+		case 'TOGGLE_LEFTNAV':
+			return Object.assign({}, state, { showLeftNav: !state.showLeftNav })
 
 		case 'TOGGLE_MEDIA':
 			let imgObj = {}
 			if (action.open == false) {
-				imgObj = {status:'notReady',path:null,open: false};	
+				imgObj = {status:'notReady',path:null,open: false};
 			}else {
 				imgObj = {status:'notReady',path:null,open: true}
 			}
 			return Object.assign({},state,{currentMediaImage:imgObj});
-		case 'SET_MEDIA_IMAGE':
 
+		case 'SET_MEDIA_IMAGE':
 			var newCurrentImage = Object.assign({}, state.currentMediaImage)
 			newCurrentImage.status = 'ready'
 			newCurrentImage.path = action.item.path
 			newCurrentImage.exifOrientation = action.item.exifOrientation
 			return Object.assign({},state,{currentMediaImage:newCurrentImage})
+
+		case 'CLEAR_MEDIA_IMAGE':
+		  const newCurrentImage = Object.assign({}, state.currentMediaImage);
+			newCurrentImage.path = '';
+
+			return Object.assign({}, state, { currentMediaImage: newCurrentImage });
 
 		default:
 			return state

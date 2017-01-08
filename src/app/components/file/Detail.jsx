@@ -127,7 +127,7 @@ class Detail extends Component {
  		return (
  			<div className='file-share'>
  				<div className='file-detail-line'><div></div></div>
-		 		<RadioButtonGroup name="typeSelect" valueSelected={this.state.type} onChange ={this.changeShareType.bind(this)} className='detail-share-radio-group'>
+		 		<RadioButtonGroup name="typeSelect" valueSelected={this.state.type} onChange ={this.changeShareType.bind(this)}>
 			 		<RadioButton value='all' label='所有人' iconStyle={styles.radioIconStyle} labelStyle={styles.radioLabelStyle}/>
 			 		<RadioButton value='custom' label='自定义' iconStyle={styles.radioIconStyle} labelStyle={styles.radioLabelStyle}/>
 		 		</RadioButtonGroup>

@@ -23,9 +23,9 @@ const scheduleHttpRequest = () => {
 		readyQueue[0].setState('running')
 }
 
-const updateStatusOfDownload = () => {
+const updateStatusOfDownload = (finish) => {
 	let mainWindow = getMainWindow()
-	mainWindow.webContents.send('refreshStatusOfDownload',userTasks)
+	mainWindow.webContents.send('refreshStatusOfDownload',userTasks, finish)
 }
 
 const sendDownloadMessage = () => {
@@ -48,13 +48,11 @@ const sendDownloadMessage = () => {
     // console.log(sendMessage?'已经在发送':'没有发送')
   if (isSend && sendMessage==null) {
     sendMessage = setInterval(()=> {
-        c('begin send message ...')
-        updateStatusOfDownload()
+        updateStatusOfDownload(!isSend)
       },1000)
   }else if (!isSend && sendMessage != null) {
-  	c('stop send message ...')
     clearInterval(sendMessage)
-    updateStatusOfDownload()
+    updateStatusOfDownload(!isSend)
     sendMessage = null
   }
 }
@@ -89,6 +87,7 @@ const userTasks = []
 const createUserTask = (type, files) => {
   let userTask = new UserTask(type, files)
   userTasks.push(userTask)
+  sendDownloadMessage()
 }
 
 class UserTask extends EventEmitter {
@@ -140,8 +139,6 @@ class fileDownloadTask extends EventEmitter {
 	}
 
 	setState(newState,...args) {
-		// c(' ')
-		// c('setState : ' + newState + '(' + this.state +')' + ' ' + this.name)
 		switch (this.state) {
 			case 'ready':
 			this.exitReadyState()
@@ -215,9 +212,7 @@ class fileDownloadTask extends EventEmitter {
 			_this.setState('finished',err)
 		})
 		.on('complete', function() {
-		    // c('request complete : ')
 		    if (finish) {
-		    	// c(_this.name + ' 文件下载成功')
 			    if (_this.root) {
 			    	_this.root.success++
 			    }
@@ -407,6 +402,8 @@ const downloadHandle = (args, callback) => {
   if (args.folders) {
   	createUserTask('folder',args.folders)
   }
+  let count = args.files?args.files.length:args.folders.length
+  getMainWindow().webContents.send('message', count + '个任务添加至下载队列')
 }
 
 const uploadCommandMap = new Map([

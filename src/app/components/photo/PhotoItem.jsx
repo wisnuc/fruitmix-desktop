@@ -18,9 +18,11 @@ function getStyles () {
       overflow: 'hidden'
     },
     thumb: {
-      width: '100%',
-      height: '100%',
-      objectFit: 'cover'
+      width: 'auto',
+      height: 'auto',
+      maxWidth: '100%',
+      maxHeight: '100%',
+      verticalAlign: 'middle'
     },
     loadingIcon: {
       position: 'absolute',
@@ -48,6 +50,12 @@ function getStyles () {
   }
 }
 
+const __MAPORIENTATION__ = {
+  8: -90,
+  3: -180,
+  6: 90
+};
+
 export default class PhotoItem extends Component {
   constructor(props, context) {
     super(props, context);
@@ -57,43 +65,64 @@ export default class PhotoItem extends Component {
       action: 'pending'
     };
 
-    this.findPhotoIndexByDigest = () =>
-      this.context.photos.findIndex(photo => photo.digest === props.digest);
+    this.findPhotoIndexByDigest = () => {
+      return this.context.photos.findIndex(photo => photo.date === this.props.date)
+    };
 
     this.addHoverIconButton = () => {
       this.state.action === 'pending' && this.setState({ action: 'hover' });
     };
 
     this.removeHoverIconButton = () => {
-      this.state.action === 'hover' && this.setState({ action: 'pending' });
+      this.state.action === 'hover' && this.props.onDetectAllOffChecked() && this.setState({ action: 'pending' });
     };
 
     this.changeState = () => {
       const action = this.state.action;
-
-      action === 'hover' && props.detectIsAllOffChecked()
-        ? props.lookPhotoDetail(this.findPhotoIndexByDigest())
-        : action === 'on'
-          ? this.offSelectIconButton()
-          : this.onSelectIconButton();
+      props.lookPhotoDetail(this.findPhotoIndexByDigest());
+      // action === 'hover' && props.onDetectAllOffChecked()
+      //   ? props.lookPhotoDetail(this.findPhotoIndexByDigest())
+      //   : action === 'on'
+      //     ? this.offSelectIconButton()
+      //     : this.onSelectIconButton();
     };
 
     this.onSelectIconButton = (disabled) => {
-      this.setState({ action: 'on' }, () => !disabled && props.selected());
+      (this.state.action === 'hover'
+        || this.state.action === 'pending')
+      && this.setState({ action: 'on' }, () => !disabled && props.selected());
     };
 
-    this.offSelectIconButton = (disabled) => {
-      this.setState({ action: 'pending' }, () => !disabled && props.unselected());
+    this.offSelectIconButton = (disabled, state = 'hover') => {
+      if (this.state.action === 'on') {
+        this.setState({
+          action: state
+        }, () => !disabled && props.unselected());
+      }
+      // setTimeout(() => {
+      //   if (this.state.action === 'on') {
+      //     this.setState({
+      //       action: this.props.onDetectAllOffChecked() ? 'pending' : 'hover'
+      //     }, () => !disabled && props.unselected())
+      //   }
+      // }, 0);
+      // if (this.state.action === 'on') {
+      //   this.setState({
+      //     action: isTo || this.props.onDetectAllOffChecked() ? 'pending' : 'hover'
+      //   }, () => !disabled && props.unselected());
+      // }
     };
   }
 
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   return nextProps.path !== this.props.path || nextState.action !== this.state.action;
-  // }
+  shouldComponentUpdate(nextProps, nextState) {
+    return nextProps.path !== this.props.path;
+  }
 
   render() {
     let component, iconComponent;
-    const { path, style, lookPhotoDetail, index } = this.props;
+    const {
+      path, style, lookPhotoDetail,
+      index, exifOrientation, width, height } = this.props;
 
     if (path) {
       iconComponent = this.state.action === 'pending'
@@ -108,16 +137,39 @@ export default class PhotoItem extends Component {
             checked={ this.state.action }
             style={{ position: 'absolute', left: 5, top: 5, width: 18, height: 18 }}
             selectBehavior={ action => this[`${action}SelectIconButton`]() } />)
+            /*
+            onMouseOver={ this.addHoverIconButton }
+            onMouseLeave={ this.removeHoverIconButton }
+            */
+      // let actualWidth, actualHeight;
+      // // let clipTop, clipLeft;
+      //
+      // if (width > height) {
+      //   actualWidth = 280;
+      //   actualHeight = 210;
+      // } else {
+      //   actualWidth = 210;
+      //   actualHeight = 280;
+      // }
+
+      // if (actualWidth === 280) {
+      //   clipLeft = 280 - 150;
+      //   clipTop = 210 - 158;
+      // } else {
+      //   clipLeft = 210 - 150;
+      //   clipTop = 280 - 158;
+      // }
 
       component = (
         <div
-          style={{ position: 'relative', width: '100%', height: '100%' }}
-          onMouseOver={ this.addHoverIconButton }
-          onMouseLeave={ this.removeHoverIconButton }
+          style={{ position: 'relative', cursor: 'pointer', width: '100%', height: '100%', overflow: 'hidden', textAlign: 'center' }}
           onClick={ this.changeState }>
 
-          { iconComponent }
+          {/* iconComponent */}
+          <div style={{ height: '50%', width: 0, display: 'inline-block' }}></div>
 
+          {/*<div style={{ position: 'absolute', backgroundPosition: `-${clipLeft}px, -${clipTop}px`, backgroundSize: 'cover', backgroundImage: `url(${path})`, width: actualWidth, height: actualHe
+          ight }}></div>*/}
           <img
             src={ path }
             style={ this.styles.thumb } />
@@ -137,12 +189,6 @@ export default class PhotoItem extends Component {
       </div>
     );
   }
-
-  // componentDidMount() {
-  //   let { digest } = this.props;
-  //
-  //   ipcRenderer.send('getThumb', [{ digest }]);
-  // }
 }
 
 PhotoItem.propTypes = {

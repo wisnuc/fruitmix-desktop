@@ -51,13 +51,7 @@ class FileUploadButton extends React.Component {
     let path = this.props.path
     let folderUUID = path[path.length - 1].uuid
     let type = cm=='UPLOAD_FOLDER'?'folder':'file'
-    command('fileapp', cm, {folderUUID:folderUUID,type:type}, (err) => {
-      if (err) {
-        console.log('upload folder task error')
-      }else {
-        console.log('upload folder task success')
-      }
-    })
+    command('fileapp', cm, {folderUUID:folderUUID,type:type})
     this.setState({
       open : false
     })

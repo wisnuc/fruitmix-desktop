@@ -7,7 +7,6 @@ import React, { Component, PropTypes } from 'react';
 import PhotoItem from './PhotoItem';
 import PhotoSelectDate from './PhotoSelectDate';
 import SelectIconButton from './SelectIconButton';
-
 import { formatDate } from '../../utils/datetime';
 
 export default class PhotoListByDate extends Component {
@@ -56,7 +55,7 @@ export default class PhotoListByDate extends Component {
         this.selectionRefs.every(refName => this.refs[refName].state.action === 'on')
           && selectDate.onSelected(true)
       , 0);
-    }
+    };
 
     this.removeCheckedToItem = (itemIndex) => {
       const photoItem = this.refs['photoItem' + itemIndex];
@@ -66,25 +65,55 @@ export default class PhotoListByDate extends Component {
 
     this.removeAllChecked = () => {
       const selectDate = this.refs['selectDate'];
-
       selectDate.offSelected(true);
     };
+
+    this.removeCheckToAllItem = () => {
+      this.selectionRefs.forEach(refName =>
+        this.refs[refName].offSelectIconButton(false)
+      );
+    };
+
+    this.selectByDate = (action) => {
+      this.selectionRefs.forEach((refName, index) => {
+        this.refs[refName][`${action}SelectIconButton`](false);
+
+        if (action === 'on') {
+          this.addCheckedToItem(index);
+          this.props.onGetPhotoListByDates();
+        } else {
+          this.removeCheckedToItem(index);
+
+          //this.removeAllChecked();
+          // this.removeHoverToAllItem();
+          // this.props.onRemoveHoverToList();
+          // this.removeCheckedToItem(index);
+          // this.removeHoverToAllItem();
+        }
+      });
+
+      // if (action !== 'on') {
+      //   setTimeout(() => {
+      //     if (this.props.onDetectAllOffChecked()) {
+      //       this.removeCheckToAllItem();
+      //     }
+      //   }, 0);
+      // }
+    }
   }
 
   render() {
     let { style, date, photos, lookPhotoDetail } = this.props;
     let icon;
-    
+
     return (
-      <div>
+      <div style={{ padding: '0 6px 6px 6px' }}>
         {/* 日期 */}
         <div style={{ marginBottom: 15 }}>
-          <SelectIconButton
+          {/*<SelectIconButton
             ref="selectDate"
             style={{ display: 'inline-block', width: 18, height: 18, marginRight: 8 }}
-            selectBehavior={ action => this.selectionRefs.forEach((refName, index) => {
-              this.refs[refName][action + 'SelectIconButton'](true);
-              if (action === 'on') { this.addCheckedToItem(index); this.addAllChecked(); } else { this.removeCheckedToItem(index); this.removeAllChecked(); this.removeHoverToAllItem(); } }) } />
+            selectBehavior={ this.selectByDate } />*/}
 
           <PhotoSelectDate
             style={{ display: 'inline-block' }}
@@ -98,10 +127,15 @@ export default class PhotoListByDate extends Component {
                  <PhotoItem
                    ref={ 'photoItem' + index }
                    style={{ width: 150, height: 158, marginRight: 6, marginBottom: 6 }}
-                   lookPhotoDetail={ lookPhotoDetail }
+                   width={ photo.width }
+                   height={ photo.height }
+                   lookPhotoDetail={ lookPhotoDetail.bind(null, index) }
                    detectIsAllOffChecked={ this.detectIsAllOffChecked }
-                   selected={ () => { this.addHoverToAllItem(); this.addCheckedToItem(index); this.addAllChecked(); } }
-                   unselected={ () => { this.removeCheckedToItem(index); this.removeAllChecked(); this.removeHoverToAllItem(); } }
+                   exifOrientation={ photo.exifOrientation }
+                   onDetectAllOffChecked={ this.props.onDetectAllOffChecked }
+                   selected={ () => { this.addHoverToAllItem(); this.addCheckedToItem(index); this.addAllChecked(); this.props.onAddHoverToList(); } }
+                   unselected={ () => { this.removeCheckedToItem(index); this.removeAllChecked(); this.removeHoverToAllItem(); this.props.onRemoveHoverToList(); } }
+                   date={ this.props.date }
                    digest={ photo.digest }
                    path={ photo.path }
                    key={ photo.digest } />
@@ -116,7 +150,9 @@ export default class PhotoListByDate extends Component {
   componentDidMount() {
     this.selectionRefs = Object
       .keys(this.refs)
-      .filter(refName => refName.indexOf('photoItem') >= 0);
+      .filter(refName =>
+        refName.indexOf('photoItem') >= 0
+      );
 
     ipcRenderer.send('getThumb', this.props.photos.map(item => ({ digest: item.digest })));
   }
@@ -128,5 +164,7 @@ PhotoListByDate.propTypes = {
   photos: PropTypes.array.isRequired,
   addListToSelection: PropTypes.func.isRequired,
   removeListToSelection: PropTypes.func.isRequired,
-  lookPhotoDetail: PropTypes.func.isRequired
+  lookPhotoDetail: PropTypes.func.isRequired,
+  onAddHoverToList: PropTypes.func,
+  onOffSelected: PropTypes.func
 };

@@ -22,6 +22,7 @@ class UploadTable extends Component {
 		return (
 			<div className={classname}>
 				<div className='transimissionRow' onClick={this.toggleChildren.bind(this)}>
+					<span></span>
 					<span>{item.name}</span>
 					<span>{this.getSize()}</span>
 					<span>{this.getProgress()}</span>
@@ -71,9 +72,9 @@ class UploadTable extends Component {
 	getProgress() {
 		let item = this.props.item
 		if (item.type == 'file') {
-			if (item.progress !== 0 && item.progress !== 1) {
+			if (item.progress !== 0 && item.progress !== 1 && item.progress !== 1.01) {
 				return (item.progress*100).toFixed(2)+' %'
-			}else if (item.progress == 1.01) {
+			}else if (item.progress == 1.01 || item.message) {
 				return '上传失败'
 			}else {
 				return this.getState(item.state)

@@ -1,58 +1,10 @@
 var actions = {
-	//files
-	selectChildren(rowNumber) {
-		return {
-			type: 'SELECT_CHILDREN',
-			rowNumber:rowNumber
-		}
-	},
-
-	selectAllChildren() {
-		return {
-			type: 'SELECT_ALL_CHILDREN',
-		}
-	},
-
-	toggleMenu(index,x,y,selected) {
-		return {
-			type: 'TOGGLE_MENU',
-			index : index,
-			x: x,
-			y: y,
-			selected:selected
-		}
-	},
-
-	openDetail() {
-		return {
-			type : 'OPEN_DETAIL'
-		}
-	},
-
-	// cleanDetail() {
-	// 	return {
-	// 		type: 'CLEAN_DETAIL'
-	// 	}
-	// },
-	//left navigation
-	changeSelectedNavItem(name,index) {
-		return {
-			type: 'NAV_SELECT',
-			select: name
-		}
-	},
 
 	selectedNavItem(name) {
     return {
 			type: 'PHOTO_MENU_SELECT',
 			name
 		};
-	},
-
-	navToggle() {
-		return {
-			type: 'NAV_MENU_TOGGLE'
-		}
 	},
 
 	createFileInfo(fileInfo) {
@@ -65,29 +17,6 @@ var actions = {
 	clearFileInfo() {
 		return {
 			type: 'CLEAR_FILE_INFO'
-		}
-	},
-
-	// no using
-	mouseDown(left,top) {
-		return {
-			type: 'MOUSE_DOWN',
-			left: left,
-			top: top
-		}
-	},
-
-	mouseMove(width,height) {
-		return {
-			type: 'MOUSE_MOVE',
-			width: width,
-			height:height
-		}
-	},
-
-	mouseUp() {
-		return {
-			type: 'MOUSE_UP'
 		}
 	},
 
@@ -166,37 +95,19 @@ var actions = {
 		};
 	},
 
-	removeFile(obj) {
-		return {
-			type: 'REMOVE',
-			obj: obj
-		}
-	},
-
-	toggleDialogOfUploadFolder(open) {
-		return {
-			type: 'TOGGLE_DIALOG_FOLDER',
-			isOpen: open
-		}
-	},
-
-	cancelUserCheck() {
-		return {
-			type:'CANCEL_USER_CHECK',
-		}
-	},
-
-	refreshStatusOfUpload(tasks) {
+	refreshStatusOfUpload(tasks, finish) {
 		return {
 			type: 'REFRESH_STATUS_UPLOAD',
-			tasks : tasks
+			tasks: tasks,
+			uploadFinish: finish
 		}
 	},
 
-	refreshStatusOfDownload(tasks) {
+	refreshStatusOfDownload(tasks, finish) {
 		return {
 			type: 'REFRESH_STATUS_DOWNLOAD',
-			tasks : tasks
+			tasks : tasks,
+			downloadFinish: finish
 		}
 	},
 
@@ -211,28 +122,6 @@ var actions = {
 	cleanSnack() {
 		return {
 			type: 'CLEAN_SNACK'
-		}
-	},
-
-	toggleMove(open,x,y) {
-		return {
-			type: 'TOGGLE_MOVE',
-			open: open,
-			x: x,
-			y: y
-		}
-	},
-
-	setTree(tree) {
-		return {
-			type: 'SET_TREE',
-			tree: tree
-		}
-	},
-
-	closeMove() {
-		return {
-			type: 'CLOSE_MOVE'
 		}
 	},
 	//media ---------------------------------------------
@@ -251,24 +140,10 @@ var actions = {
 		}
 	},
 
-	logOut() {
-		return {
-			type: 'LOG_OUT'
-		}
-	},
-
 	adapter(data) {
 		return {
 			type: 'ADAPTER',
 			store: data
-		}
-	},
-
-	//move data
-	setMoveData(data) {
-		return {
-			type : 'SET_MOVE_DATA',
-			data : data
 		}
 	},
 

@@ -97,6 +97,7 @@ class PhotoApp extends Component {
     const photoDates = [];
     const photoMapDates = [];
     const allPhotos = [];
+
     mediaStore.forEach((item, index) => {
       if (!item.exifDateTime)
         return;
@@ -123,7 +124,7 @@ class PhotoApp extends Component {
     return {
       allPhotos,
       photoDates,
-      photoMapDates
+      photoMapDates: photoMapDates.sort((prev, next) => Date.parse(next.date) - Date.parse(prev.date))
     };
   }
 

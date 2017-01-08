@@ -1,6 +1,8 @@
 const defaultState = {
 	upload:[],
-	download: []
+	download: [],
+	uploadFinish: true,
+	downloadFinish: true
 }
 
 const transimission = (state=defaultState,action)=>{
@@ -11,10 +13,15 @@ const transimission = (state=defaultState,action)=>{
 				download: []
 			}
 		case 'REFRESH_STATUS_DOWNLOAD':
-			return Object.assign({},state,{download:action.tasks})
+			return Object.assign({},state,{
+				download:action.tasks,
+				downloadFinish:action.downloadFinish == undefined?state.uploadFinish:action.downloadFinish
+			})
 
 		case 'REFRESH_STATUS_UPLOAD':
-			return Object.assign({},state,{upload:action.tasks})
+			return Object.assign({},state,{
+				upload:action.tasks,
+				uploadFinish:action.uploadFinish == undefined?state.uploadFinish:action.uploadFinish})
 		default:
 			return state
 	}

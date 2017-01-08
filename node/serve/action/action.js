@@ -25,20 +25,6 @@ var actions = {
 		}
 	},
 
-	deleteServer(item) {
-		return {
-			type : 'DELETE_SERVER',
-			item : item
-		}
-	},
-
-	setDeviceUsedRecently(ip) {
-		return {
-			type: 'SET_DEVICE_USED_RECENTLY',
-			ip: ip
-		}
-	},
-
 	setDownloadPath(path) {
 		return {
 			type : 'SET_DOWNLOAD_PATH',
@@ -83,22 +69,6 @@ var actions = {
 			data : data
 		}
 	},
-
-	//share
-	setShareChildren(shareChildren,sharePath) {
-		return {
-			type: 'SET_SHARE_CHILDREN',
-			shareChildren: shareChildren,
-			sharePath:sharePath
-		}
-	},
-
-	setFilesSharedWithMe(files) {
-		return {
-			type: 'FILES_SHARED_BY_ME',
-			files:files
-		}
-	}
 }
 
 module.exports = actions;

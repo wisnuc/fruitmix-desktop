@@ -1,6 +1,6 @@
 //define default state
 const defaultState = {
-	state: 'READY', // READY, BUSY, REJECTED, TIMEOUT, ERROR, LOGGEDIN
+  state: 'READY', // READY, BUSY, REJECTED, TIMEOUT, ERROR, LOGGEDIN
   obj: {},
   device: [],
   selectIndex : 0
