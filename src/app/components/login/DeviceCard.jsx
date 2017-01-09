@@ -248,7 +248,6 @@ class DeviceCard extends React.Component {
         this.props.onResize(resize)
     }
 
-
     // quick fix, refresh cannot be used here, setState() cannot be called inside constructor (not mounted)
     this.requestGet(3000, 'system/boot', 'boot')
     this.requestGet(3000, 'system/storage', 'storage')

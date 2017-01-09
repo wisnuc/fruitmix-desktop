@@ -23,7 +23,9 @@ import NavigationClose from 'material-ui/svg-icons/navigation/close'
 import NavigationMoreVert from 'material-ui/svg-icons/navigation/more-vert'
 import ContentAddCircle from 'material-ui/svg-icons/content/add-circle'
 import { 
-  pinkA200, grey300, grey400, greenA400, green400, amber400, red400, 
+  pinkA200, grey300, grey400, greenA400, green400, amber400, 
+  redA200,
+  red400, 
   lightGreen100,
   lightGreen400,
   lightGreenA100,
@@ -35,6 +37,8 @@ import {
 import UUID from 'node-uuid'
 
 import { CatSilhouette, BallOfYarn } from './svg'
+import { InitVolumeDialogs } from './InitVolumeDialogs'
+
 import { 
   operationTextConfirm, operationBase, operationReinitConfirmDeletion, operationUsernamePassword,
   Operation, operationBusy, operationSuccess, operationFailed, createOperation 
@@ -408,17 +412,6 @@ class Maintenance extends React.Component {
       this.setState({ operation: null }) 
     }
 
-/**
-
-  STAGE: 'SETUSER'
-  title: 
-  username:
-  password:
-  passwordAgain:
-  Content 
-
-**/
-
     this.UsernamePasswordContent = props => {
 
       const onChange = (name, value) => {
@@ -596,73 +589,10 @@ class Maintenance extends React.Component {
 
       debug('initWisnucOnVolume', volume)
 
-      if (volume.wisnuc.error === 'ENOWISNUC' || 
-          (volume.wisnuc.error === 'ENOFRUIMITX' && volume.mountpoint === '/')) {
+      // TODO FIXME
+      if (typeof volume.wisnuc !== 'object') return
 
-          debug('clean install')
-          this.createOperation(operationUsernamePassword, (username, password) => {
-
-            debug('username, password', username, password)
-
-            this.state.dialog.setState(operationBusy)
-
-            let device = window.store.getState().maintenance.device
-            let url = `http://${device.address}:3000/system/mir/init`
-
-            request
-              .post(url)
-              .set('Accept', 'application/json')
-              .send({ 
-                target: volume.fileSystemUUID,
-                username,
-                password,
-              })
-              .end((err, res) => {
-                if (err) {
-                  this.reloadBootStorage((err2, { boot, storage }) => {
-                    this.state.dialog.setState(operationFailed, this.errorText(err, res))
-                  })              
-                }
-                else {
-                  this.reloadBootStorage((err2, { boot, storage }) => {
-                    this.state.dialog.setState(operationSuccess, ['创建成功'])
-                  })
-                }
-              })
-          })
-      }
-      else { 
-        this.createOperation(operationReinitConfirmDeletion, volume, remove => {
-          this.state.dialog.setState(operationUsernamePassword, (username, password) => {
-            debug('reinstall', remove, username, password)
-
-            let device = window.store.getState().maintenance.device
-            let url = `http://${device.address}:3000/system/mir/init`
-
-            request
-              .post(url)
-              .set('Accept', 'application/json')
-              .send({ 
-                target: volume.fileSystemUUID,
-                remove,
-                username,
-                password,
-              })
-              .end((err, res) => {
-                if (err) {
-                  this.reloadBootStorage((err2, { boot, storage }) => {
-                    this.state.dialog.setState(operationFailed, this.errorText(err, res))
-                  })              
-                }
-                else {
-                  this.reloadBootStorage((err2, { boot, storage }) => {
-                    this.state.dialog.setState(operationSuccess, ['重建成功'])
-                  })
-                }
-              })
-          })
-        })
-      }
+      this.setState({ initVolume: volume })
     }
 
     this.mkfsBtrfsVolume = () => {
@@ -934,6 +864,8 @@ class Maintenance extends React.Component {
 
       render() {
 
+        if (typeof this.props.volume.wisnuc !== 'object') return null
+
         let { status, users, error, message } = this.props.volume.wisnuc
 
         if (users) {
@@ -1073,6 +1005,9 @@ class Maintenance extends React.Component {
       if (this.state.creatingNewVolume)
         return this.colors.fillGreyFaded
 
+      if (volume.isMissing) return redA200
+      if (typeof volume.wisnuc !== 'object') return '#000'
+
       switch (volume.wisnuc.status) {
       case 'READY':
         return lightGreen400
@@ -1083,7 +1018,6 @@ class Maintenance extends React.Component {
       case 'DAMAGED':
         return red400
       }
-      
       
       return '#000'
     }
@@ -1298,7 +1232,7 @@ class Maintenance extends React.Component {
 
               { this.state.boot.state === 'maintenance' &&
                 this.state.creatingNewVolume === null &&
-                !volume.isMissing &&
+                !volume.isMissing && typeof volume.wisnuc === 'object' &&
                 volume.wisnuc.status === 'READY' &&
                 <FlatButton label='启动' primary={true} 
                   onTouchTap={e => {
@@ -1309,12 +1243,14 @@ class Maintenance extends React.Component {
               { this.state.boot.state === 'maintenance' &&
                 this.state.creatingNewVolume === null &&
                 <this.VolumeMenu volume={volume}
-                  actions={[
-                    [ volume.wisnuc.status === 'NOTFOUND' ? '安装' : '重新安装',
-                      () => this.initWisnucOnVolume(volume), 
-                      volume.isMissing
-                    ],
-                  ]}
+                  actions={
+                    typeof volume.wisnuc === 'object' ?  [
+                      [ volume.wisnuc.status === 'NOTFOUND' ? '安装' : '重新安装',
+                        () => this.initWisnucOnVolume(volume), 
+                        volume.isMissing
+                      ]
+                    ] : []
+                  }
                 />
               }
             </div>
@@ -1948,11 +1884,11 @@ class Maintenance extends React.Component {
 
         <Operation substate={this.state.dialog} />
 
-        <FlatButton label='do busy' 
-          onTouchTap={() => {
-            this.createOperation(operationBusy) 
-            setTimeout(() => this.state.dialog.setState(operationFailed, ['hello', 'world']), 2000)
-          }}/>
+        <InitVolumeDialogs 
+          volume={this.state.initVolume}
+          onRequestClose={() => this.setState({ initVolume: undefined })}
+          onResponse={() => this.reloadBootStorage()}
+        />
 
       </div>
     )
