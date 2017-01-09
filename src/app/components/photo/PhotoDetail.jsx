@@ -6,8 +6,6 @@ import { ipcRenderer } from 'electron';
 import { findDOMNode } from 'react-dom';
 import React, { Component, PropTypes } from 'react';
 import SlideToAnimate from './SlideToAnimate';
-import megapixImage from './megapixImage';
-//import Exif from 'exif-js';
 import { add, remove } from '../scrollLazyload/utils/eventListeners';
 
 const __PERCENT__ = '100%';
