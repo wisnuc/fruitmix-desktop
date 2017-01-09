@@ -125,7 +125,7 @@ const MaintBox = props => (
       boxSizing: 'border-box', paddingLeft: 64, paddingRight: 64}}>
       
       <div style={{color: '#FFF' }}>{props.text}</div>
-      <FlatButton label='维护模式' onTouchTap={this.maintain} />
+      <FlatButton label='维护模式' onTouchTap={props.onMaintain} />
     </div>
   )
 
@@ -193,9 +193,11 @@ class DeviceCard extends React.Component {
 
           if (this.unmounted) return
 
+          debug('request get', ep, propName, err || res.body)
+
           this.setState(state => { 
-            let nextState = Object.assign({}, state) 
-            nextState[propName] = err ? err : !res.ok ? new Error('request bad response') : res.body
+            let nextState = {}
+            nextState[propName] = err ? err.message : res.body
             return nextState
           })
         })
@@ -204,7 +206,6 @@ class DeviceCard extends React.Component {
 
       if (this.unmounted) return
 
-      // clear data
       this.setState(state => Object.assign({}, state, { boot: null, storage: null, users: null }))
 
       this.requestGet(3000, 'system/boot', 'boot')
@@ -247,7 +248,11 @@ class DeviceCard extends React.Component {
         this.props.onResize(resize)
     }
 
-    this.refresh()
+
+    // quick fix, refresh cannot be used here, setState() cannot be called inside constructor (not mounted)
+    this.requestGet(3000, 'system/boot', 'boot')
+    this.requestGet(3000, 'system/storage', 'storage')
+    this.requestGet(3721, 'login', 'users')
   }
 
   /**
@@ -352,14 +357,14 @@ class DeviceCard extends React.Component {
     if (this.state.boot.state !== 'maintenance')
       throw new Error('Undefined State: boot state is not maintenance')
 
+
+    let text = '系统未能启动上次使用的wisnuc应用'
     if (this.state.boot.lastFileSystem) {
       
-      let text = '系统未能启动上次使用的wisnuc应用'
-
       if (this.state.boot.bootMode === 'maintenance')
         text = '用户指定启动至维护模式'
 
-      return <MaintBox text={text} />
+      return <MaintBox text={text} onMaintain={this.maintain} />
     }
 
     // now this.state.boot.lastFileSystem is null
@@ -372,10 +377,11 @@ class DeviceCard extends React.Component {
                       .find(f => f.wisnuc === 'ERROR' || !f.wisnuc.intact) 
 
     if (suspicious)
-      return <MaintBox text='存在可疑文件系统' />
+      return <MaintBox text={text} onMaintain={this.maintain} />
 
-    if (storage.volumes.find(v => v.isMissing))
-      return <MaintBox text='存在不完整磁盘阵列' />
+    // if (storage.volumes.find(v => v.isMissing))
+    if (storage.volumes.length > 0)
+      return <MaintBox text={text} onMaintain={this.maintain} />
 
     return (
       <GuideBox 
