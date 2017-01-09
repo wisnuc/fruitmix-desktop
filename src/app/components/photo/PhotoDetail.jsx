@@ -105,8 +105,9 @@ class PhotoDetailItem extends Component {
   }
 
   render() {
-    let { style, exifOrientation, width, height, path } = this.props;
-
+    let { style, width, height, path } = this.props;
+    let exifOrientation = window.store.getState().view.currentMediaImage.exifOrientation;
+    console.log(__MAPORIENTATION__[exifOrientation], 'ooxx');
     return (
       <div style={ style } data-orientation={ exifOrientation } data-width={ width } data-height={ height }>
         {/*<div style={this.getStyles()}>
@@ -114,7 +115,7 @@ class PhotoDetailItem extends Component {
               ref={ el => this.el = el }
               src={ path }
               style={{ display: 'inline-block', width: __PERCENT__, height: __PERCENT__ }} />*/}
-          <div style={Object.assign({}, this.getStyles(), { transform: `rotate(${__MAPORIENTATION__[exifOrientation]}deg)` })}>
+          <div style={Object.assign({}, this.getStyles(), { transform: `rotate(${__MAPORIENTATION__[exifOrientation] || 0}deg)` })}>
             <div style={{ width: '0', height: '50%', display: 'inline-block' }}></div>
             <img
               ref={ el => this.el = el }
