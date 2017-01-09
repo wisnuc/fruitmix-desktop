@@ -3,13 +3,18 @@
 **/
 
 import { ipcRenderer } from 'electron';
+import { findDOMNode } from 'react-dom';
 import React, { Component, PropTypes } from 'react';
 import SlideToAnimate from './SlideToAnimate';
+import megapixImage from './megapixImage';
+//import Exif from 'exif-js';
+import { add, remove } from '../scrollLazyload/utils/eventListeners';
 
 const __PERCENT__ = '100%';
 const __MAPORIENTATION__ = {
+  1: 0,
   8: -90,
-  3: -180,
+  3: 180,
   6: 90
 };
 
@@ -45,18 +50,56 @@ class PhotoDetailItem extends Component {
   constructor() {
     super();
 
-    this.getStyles = (clientRect) => ({
+    this.state = {
+      path: ''
+    };
+
+    this.getStyles = (clientRect = { width: 0, height: 0, left: 0, top: 0 }) => ({
       position: 'absolute',
-      width: `${clientRect.width}px`,
-      height: `${clientRect.height}px`,
-      left: `${clientRect.left}px`,
-      top: `${clientRect.top}`
+      left: 40,
+      right: 40,
+      top: 40,
+      bottom: 40,
+      height: 'calc(100% - 80px)',
+      textAlign: 'center',
+      // textAlign: 'center'
+      // width: `${clientRect.width}px`,
+      // height: `${clientRect.height}px`,
+      // left: `${clientRect.left}px`,
+      // top: `${clientRect.top}`,
+      overflow: 'hidden'
       // position: 'absolute',
       // left: `${clientRect.left}`,
       // top: `${clientRect.top}`,
       // width: `${clientRect.width}`,
       // height: `${clientRect.height}`
     });
+    this.getClientRect = (width, height) => {
+      let { deltaWidth, deltaHeight } = this.props;
+      let actualWidth, actualHeight, actualLeft, actualTop;
+      const ratio = width / height;
+
+      if (ratio < 1) {
+        // 如果是高图片
+        actualHeight = deltaHeight;
+        actualWidth = deltaHeight * ratio;
+        actualLeft = (deltaWidth - actualWidth) / 2;
+        actualTop = 0;
+      } else {
+        // 如果是宽图片
+        actualWidth = deltaWidth;
+        actualHeight = deltaWidth / ratio;
+        actualLeft = 0;
+        actualTop = (deltaHeight - actualHeight) / 2;
+      }
+
+      return {
+        width: actualWidth,
+        height: actualHeight,
+        left: actualLeft,
+        top: actualTop
+      };
+    };
   }
 
   shouldComponentUpdate(nextProps) {
@@ -64,55 +107,70 @@ class PhotoDetailItem extends Component {
   }
 
   render() {
-    let {
-      style, path, exifOrientation,
-      width, height, deltaWidth, deltaHeight
-     } = this.props;
+    let { style, exifOrientation, width, height, path } = this.props;
 
-    let temp;
-    const rotate = __MAPORIENTATION__[exifOrientation];
-
-    // if (rotate) {
-    //   temp = height;
-    //   height = width;
-    //   width = temp;
-    // }
-    // if (rotate == 90) {}
-
-    const ratio = width / height;
-    let actualWidth, actualHeight, actualLeft, actualTop;
-
-    if (ratio < 1) {
-      // 如果是高图片
-      actualHeight = deltaHeight;
-      actualWidth = deltaHeight * ratio;
-      actualLeft = (deltaWidth - actualWidth) / 2;
-      actualTop = 0;
-    } else {
-      // 如果是宽图片
-      actualWidth = deltaWidth;
-      actualHeight = deltaWidth / ratio;
-      actualLeft = 0;
-      actualTop = (deltaHeight - actualHeight) / 2;
-    }
-
-    const clientRect = {
-      width: actualWidth,
-      height: actualHeight,
-      left: actualLeft,
-      top: actualTop
-    };
-    //console.log(window.store.getState().view.currentMediaImage.exifOrientation, 'www');
     return (
-      <div style={ style } data-width={ width } data-height={height} data-exifOrientation={exifOrientation}>
-        <div style={ this.getStyles(clientRect) }>
-          <img
-            src={ path }
-            style={{ width: __PERCENT__, height: __PERCENT__, objectFit: 'cover', transform: `rotate(${__MAPORIENTATION__[exifOrientation]}deg)` }} />
+      <div style={ style } data-orientation={ exifOrientation } data-width={ width } data-height={ height }>
+        {/*<div style={this.getStyles()}>
+          <div>transform: 'rotate('+ __MAPORIENTATION__[exifOrientation] +'deg)'
+              ref={ el => this.el = el }
+              src={ path }
+              style={{ display: 'inline-block', width: __PERCENT__, height: __PERCENT__ }} />*/}
+          <div style={Object.assign({}, this.getStyles(), { transform: `rotate(${__MAPORIENTATION__[exifOrientation]}deg)` })}>
+            <div style={{ width: '0', height: '50%', display: 'inline-block' }}></div>
+            <img
+              ref={ el => this.el = el }
+              src={ path }
+              style={{ display: 'inline-block', width: 'auto', height: 'auto', maxWidth: '100%', maxHeight: '100%', verticalAlign: 'middle' }} />
+          </div>
         </div>
-      </div>
     )
   }
+
+  // componentDidMount() {
+  //   const node = findDOMNode(this.el);
+  //   const handler = () => {
+  //     const naturalWidth = node.naturalWidth;
+  //     const naturalHeight = nodeName.naturalHeight;
+  //     const clientRect = this.getClientRect(naturalWidth, naturalHeight);
+  //     console.log(clientRect, 'xxoo')
+  //     node.style.width = `${clientRect['width']}px`
+  //     node.style.height = `${clientRect['height']}px`
+  //     node.style.top = `${clientRect['top']}px`
+  //     node.style.left = `${clientRect['left']}px`
+  //
+  //     //remove(node, 'load', handler);
+  //   };
+  //
+  //   //add(node, 'load', handler);
+  // }
+
+  //componentDidMount() {
+  //   const node = findDOMNode(this.el);
+  //   const eventListener = () => {
+  //     const clientRect = this.getClientRect();
+  //     const naturalWidth = node.naturalWidth;
+  //     const naturalHeight = node.naturalHeight;
+  //     const canvas = document.createElement('canvas');
+  //     const ctx = canvas.getContext('2d');
+  //     canvas.width = naturalWidth;
+  //     canvas.height = naturalHeight;
+  //     ctx.drawImage(node, 0, 0, naturalWidth, naturalHeight);
+  //
+  //     const img = new megapixImage.MegapixImage(node);
+  //     img.render(canvas, {
+  //       maxWidth: clientRect.width,
+  //       maxHeight: clientRect.height,
+  //       quality: .8,
+  //       orientation: this.props.exifOrientation
+  //     });
+  //
+  //     node.setAttribute('src', canvas.toDataURL('image/jpeg', .8));
+  //     remove(node, 'load', eventListener);
+  //   };
+  //
+  //   add(node, 'load', eventListener);
+  // }
 }
 
 class PhotoDetailList extends Component {
@@ -132,7 +190,7 @@ class PhotoDetailList extends Component {
   }
 
   render() {
-    const { style, items } = this.props;
+    const { style, items, seqIndex } = this.props;
 
     return (
       <div style={ this.props.style }>
@@ -154,6 +212,14 @@ class PhotoDetailList extends Component {
       </div>
     );
   }
+
+  componentDidUpdate() {
+    window.store.dispatch({ type: 'CLEAR_MEDIA_IMAGE' });
+  }
+
+  shouldComponentUpdate(nextProps) {
+    return window.store.getState().view.currentMediaImage.path !== '';
+  }
 }
 
 export default class PhotoDetail extends Component {
@@ -173,12 +239,9 @@ export default class PhotoDetail extends Component {
     };
 
     this.requestNext = (currentIndex) => {
-      window.store.dispatch({ type: 'CLEAR_MEDIA_IMAGE' });
       ipcRenderer.send('getMediaImage', this.props.items[currentIndex].digest);
       setTimeout(() => {
-        this.refs['slideToAnimate'].setState(
-          { currentIndex }
-        );
+        this.refs['slideToAnimate'].setState({ currentIndex });
       }, 500);
 
       return false;
@@ -192,12 +255,13 @@ export default class PhotoDetail extends Component {
         activeIndex={ this.props.seqIndex }
         translateLeftCallback={ this.requestNext }
         translateRightCallback={ this.requestNext }
-        translateDistance={ this.props.delta }
+        translateDistance={ 0 }
         translateCount={ this.props.items.length }>
         <PhotoDetailList
           deltaWidth={ this.props.deltaWidth }
           deltaHeight={ this.props.deltaHeight }
           style={ this.style.photoDetailList }
+          seqIndex={ this.props.seqIndex }
           items={ this.props.items }/>
       </SlideToAnimate>
     );
