@@ -538,9 +538,43 @@ const uploadHandle = (args, callback) => {
   })
 }
 
+const dragFileHandle = (args) => {
+  let files = []
+  let folders = []
+  let index = 0
+  let loop = () => {
+    let filePath = path.normalize(args.files[index])
+    fs.stat(filePath, (err,stat) => {
+      if (err) {
+        index++
+        return loop()
+      }
+      if (stat.isDirectory()) {
+        folders.push({size:stat.size,abspath:filePath})
+      }else {
+        files.push({size:stat.size,abspath:filePath})
+      }
+      index++
+      if (index == args.files.length) {
+        console.log(folders)
+        console.log(files)
+        console.log(args.dirUUID)
+        initArgs()
+        if (files.length != 0) createUserTask('file', files, args.dirUUID) 
+        if (folders.length != 0) createUserTask('folders', folders, args.dirUUID) 
+        getMainWindow().webContents.send('message', files.length + folders.length + '个任务添加至上传队列')
+        return
+      }
+      loop()
+    })
+  }
+  loop()
+}
+
 const uploadCommandMap = new Map([
   ['UPLOAD_FOLDER', uploadHandle],
-  ['UPLOAD_FILE', uploadHandle]
+  ['UPLOAD_FILE', uploadHandle],
+  ['DRAG_FILE', dragFileHandle]
 ])
 
 registerCommandHandlers(uploadCommandMap)
