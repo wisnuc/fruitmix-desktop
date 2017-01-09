@@ -9,6 +9,7 @@ const debug = Debug('component:DeviceCard')
 import { Paper, FlatButton, RaisedButton, IconButton, Dialog } from 'material-ui'
 import NavigationChevronLeft from 'material-ui/svg-icons/navigation/chevron-left'
 import NavigationChevronRight from 'material-ui/svg-icons/navigation/chevron-right'
+import ActionOpenInBrowser from 'material-ui/svg-icons/action/open-in-browser'
 import { grey700 } from 'material-ui/styles/colors'
 
 import keypress from '../common/keypress'
@@ -197,7 +198,7 @@ class DeviceCard extends React.Component {
 
           this.setState(state => { 
             let nextState = {}
-            nextState[propName] = err ? err.message : res.body
+            nextState[propName] = err ? err : res.body
             return nextState
           })
         })
@@ -353,8 +354,17 @@ class DeviceCard extends React.Component {
       )
 
     // now boot state should not be normal or alternative, must be maintenance, assert it!
-    if (this.state.boot.state !== 'maintenance')
-      throw new Error('Undefined State: boot state is not maintenance')
+    if (this.state.boot.state !== 'maintenance') {
+
+      console.log('>>>>>><<<<<<')
+      console.log(this.state)
+      console.log('<<<<<<>>>>>>')
+
+      setTimeout(() => {
+        throw new Error('Undefined State: boot state is not maintenance')
+      }, 5000)
+      return
+    }
 
 
     let text = '系统未能启动上次使用的wisnuc应用'
@@ -463,8 +473,12 @@ class DeviceCard extends React.Component {
                   color: '#FFF', 
                   marginBottom: this.state.toggle ? 0 : 12,
                 }}>{this.model()}</div>
-                <div style={{fontSize: 14, color: '#FFF', marginBottom: 12, opacity: 0.7}}>
+                <div 
+                  style={{fontSize: 14, color: 'rgba(255,255,255,0.7)', marginBottom: 12, display: 'flex', alignItems: 'center', cursor: 'pointer'}}
+                  onTouchTap={() => ipcRenderer.send('newWebWindow', '固件版本管理', `http://${this.props.device.address}:3001`)}
+                >
                   {this.props.device.address}
+                  <ActionOpenInBrowser style={{marginLeft: 8}} color='rgba(255,255,255,0.7)' />
                 </div>
                 { !this.state.toggle && <div style={{fontSize: 14, color: '#FFF', marginBottom: 16, opacity: 0.7}}>{this.serial()}</div> }
               </div>

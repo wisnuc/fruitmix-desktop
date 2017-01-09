@@ -264,7 +264,7 @@ class RaidModePopover extends React.Component {
     super(props)
     this.state = { open: false, hover: false } 
     this.label = () => this.props.list.find(item => item[0] === this.props.select)[1]
-    this.handleRequestClose = () => this.setState({ open: false })
+    this.handleRequestClose = () => this.setState({ open: false, anchorEl: null })
   }
 
   componentWillReceiveProps(nextProps) {
@@ -289,8 +289,7 @@ class RaidModePopover extends React.Component {
 
           onMouseEnter={() => !this.props.disabled && this.setState({ hover: true })}
           onMouseLeave={() => !this.props.disabled && this.setState({ hover: false })}
-          onTouchTap={() => !this.props.disabled && this.setState({ open: true })}
-
+          onTouchTap={e => !this.props.disabled && this.setState({ open: true, anchorEl: e.currentTarget })}
         >
           {this.label()} 
           <NavigationExpandMore 

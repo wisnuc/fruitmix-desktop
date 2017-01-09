@@ -45,7 +45,7 @@ const initMainWindow = () => {
   console.log('[window] mainWindow initialized')
 }
 
-const openNewWindow = (url) => {
+const openNewWindow = (title, url) => {
 
   debug('openNewWindow', url)
 
@@ -54,7 +54,7 @@ const openNewWindow = (url) => {
     height: 768,
     width: 1366,
     resizable: true,
-    title: 'Appifi',
+    title,
   })
 
   newWindow.on('page-title-updated', event => event.preventDefault())
@@ -63,6 +63,6 @@ const openNewWindow = (url) => {
   newWindow.loadURL(url)
 }
 
-ipcMain.on('newWebWindow', (event, url) => openNewWindow(url))
+ipcMain.on('newWebWindow', (event, title, url) => openNewWindow(title, url))
 
 export { initMainWindow, getMainWindow }
