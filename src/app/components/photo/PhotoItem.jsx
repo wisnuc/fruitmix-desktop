@@ -12,7 +12,6 @@ function getStyles () {
     root: {
       position: 'relative',
       boxSizing: 'border-box',
-      border: '1px solid #e5e5e5',
       height: '100%',
       width: '100%',
       overflow: 'hidden'
