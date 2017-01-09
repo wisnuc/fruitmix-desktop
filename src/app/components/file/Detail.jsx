@@ -43,32 +43,22 @@ class ShareRow extends Component {
 class Detail extends Component {
  	constructor(props) {
  		super(props)
- 		this.state = {type:'custom'}
- 	}
-
- 	componentWillReceiveProps(next) {
- 		debug('detail receive props')
- 		debug(next)
- 	}
-
- 	shouldComponentUpdate(nextProps) {
- 		let nowDetail = this.props.detail
- 		let nextDetail = nextProps.detail
- 		let nowDetailList = nowDetail[0] && (typeof nowDetail[0].readlist) == 'object'?nowDetail[0].readlist:undefined
- 		let nextDetailList = nextDetail[0] && (typeof nextDetail[0].readlist) == 'object'?nextDetail[0].readlist:undefined
- 		if (nowDetail.length == 1 && nextDetail.length == 1
- 			&& nowDetail[0].uuid == nextDetail[0].uuid
- 			&& nowDetailList == nextDetailList) {
- 			debug('detail not update....')
- 			return false
- 		}else if (nowDetail.length !== 1 && nextDetail.length != 1) {
- 			debug('detail not update....')
- 			return false
- 		}else {
- 			debug('detail update....')
- 			return true
+ 		this.setList = list =>{
+	 		this.setState({
+	 			selectItem:list,
+	 			type: 'custom'
+	 		})
+	 		this.forceUpdate()
+	 	}
+ 		this.state = {
+ 			type:'custom',
+ 			selectItem:[]
  		}
  	}
+
+ 	// shouldComponentUpdate(nextProps) {
+ 	// 	return false
+ 	// }
 
  	render() {
  		return (
@@ -86,7 +76,7 @@ class Detail extends Component {
  	}
 
  	getDetail() {
- 		if (this.props.detail.length !== 1) {
+ 		if (this.state.selectItem.length !== 1) {
  			return (
  				<div className='detail-not-select'>
  					<svg width='107' height='82' viewBox='0 0 107 82' focusable='false' >
@@ -95,7 +85,7 @@ class Detail extends Component {
  					<div className='detail-title'>请选择一个文件或者文件夹</div>
  				</div>)
  		}
- 		let data=this.props.detail[0]
+ 		let data = this.state.selectItem[0]
  		return (
  			<div>
 	 			<div className='file-infor'>
@@ -114,7 +104,10 @@ class Detail extends Component {
  	}
 
  	getShare() {
- 		if (this.props.detail.length !== 1) {
+ 		if (this.props.parent.state.navContext != 'HOME_DRIVE') {
+ 			return null
+ 		}
+ 		if (this.state.selectItem.length !== 1) {
  			return (
  				<div className='detail-not-select'>
  					<svg width='107' height='82' viewBox='0 0 107 82' focusable='false' >
@@ -123,7 +116,7 @@ class Detail extends Component {
  					<div className='detail-title'>请选择一个文件或者文件夹</div>
  				</div>)
  		}
- 		let data=this.props.detail[0]
+ 		let data=this.state.selectItem[0]
  		return (
  			<div className='file-share'>
  				<div className='file-detail-line'><div></div></div>
@@ -155,25 +148,21 @@ class Detail extends Component {
  					checked = true
  				}
  			}
- 			// return (
- 			// 	<ShareRow item={item}/>
- 			// 	)
  			return (
  				<Checkbox
  				key={item.uuid}
  				defaultChecked={checked}
  				label={item.username}
  				labelPosition="left"
- 				iconStyle={{fill:'5766bd'}}
- 				onCheck={this.checkUser.bind(_this,data,item.uuid)}
+ 				iconStyle={{fill:'5766bd'}} 
+ 				onCheck={this.checkUser.bind(_this,data,item.uuid,!checked)}
  				/>
  				)
  		})
  	}
 
  	getOwner(owner) {
- 		// let o = this.props.login.obj.users.find(item=>{
-    let o = window.store.getState().node.server.users.find(item => {
+ 		let o = window.store.getState().node.server.users.find(item => {
  			return item.uuid == owner[0]
  		});
  		if (o != undefined) {
@@ -182,6 +171,7 @@ class Detail extends Component {
  			return false
  		}
  	}
+
  	getSize(size) {
 		size = parseFloat(size);
 		if (size < 1024) {
@@ -196,56 +186,52 @@ class Detail extends Component {
 	}
 
 	changeShareType(o,value) {
+		var _this = this
 		if (value == 'all') {
-			let index = this.props.view.menu.index
-			let files = [this.props.file.children[index].uuid]
-			let users = []
-			// this.props.login.obj.users.forEach( item => {
-      	this.props.node.server.users.forEach(item => {
-				if ((item.uuid != this.props.login.obj.uuid) && (typeof item.uuid == 'string') ) {
-					users.push(item.uuid)
+			let users = window.store.getState().node.server.users.map(item => item.uuid)
+			let directoryUUID = this.props.parent.getDirectory().uuid
+			let fileUUID = this.state.selectItem[0].uuid
+			command('','FILE_SHARE',{fileUUID, users ,directoryUUID},(err,data) => {
+				if (err) {
+					console.log('share failed')
+				}else {
+					console.log('share success')
+					_this.props.parent.refs.FileTable.updateFileNode(JSON.parse(data))
 				}
 			})
-			ipc.send('share',files,users)
 		}
 		this.setState({
 			type:value
 		})
+		this.forceUpdate()
 	}
 
-	checkUser(file,userUUID,event,checked) {
-		debug('check user ......')
-		debug(file.readlist)
-		debug(checked)
+	checkUser(file,userUUID,checked,event) {
 		var _this = this
 		let users = file.readlist
-		let directoryUUID = this.props.directory.uuid
+		let directoryUUID = this.props.parent.getDirectory().uuid
 		if (users == undefined) {
-			debug('user not exist')
 			users = []
 		}
 		if (checked) {
-			users.push(userUUID)
-			debug('push user')
-			debug(users)
+			if (users.findIndex(item => item == userUUID) == -1) {
+				users.push(userUUID)
+			}
 		}else {
 			let index = users.findIndex(item => item == userUUID)
 			if (index != -1) {
 				users.splice(index,1)
 			}
-			debug('delete user')
-			debug(users)
 		}
 		command('','FILE_SHARE',{fileUUID:file.uuid, users ,directoryUUID},(err,data) => {
-				if (err) {
-					debug('share failed')
-					debug(err)
-				}else {
-					debug('share success')
-					debug(JSON.parse(data))
-					_this.props.updateFileNode(JSON.parse(data))
-				}
-			})
+			if (err) {
+				console.log('share failed')
+				this.forceUpdate()
+			}else {
+				console.log('share success')
+				_this.props.parent.refs.FileTable.updateFileNode(JSON.parse(data))
+			}
+		})
 	}
 
 	cloneFun(obj){
@@ -260,4 +246,4 @@ class Detail extends Component {
 	}
 }
 
- export default Detail
+export default Detail

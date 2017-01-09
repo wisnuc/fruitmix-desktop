@@ -14,7 +14,8 @@ const logger = store => next => action => {
 const hijack = (state, action) => 
   action.type === 'HIJACK' ? action.state : reducer(state, action)
 
-const store = createStore(hijack, applyMiddleware(logger))
+// const store = createStore(hijack, applyMiddleware(logger))
+const store = createStore(hijack)
 
 ipcRenderer.on('hijack', state => 
   store.dispatch({ type: 'HIJACK', state }))

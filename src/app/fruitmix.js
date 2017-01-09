@@ -15,11 +15,10 @@ import injectTapEventPlugin from 'react-tap-event-plugin'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme'
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
-
-//import provider TODO
 import Login from './components/login/Login'
 import Main from './components/main/Main'
 import Maintenance from './components/maintenance/Maintenance'
+import { command } from './lib/command'
 
 const debug = Debug('app')
 
@@ -88,6 +87,19 @@ ipcRenderer.on('command', (e, {id, err, data}) => {
     type: 'COMMAND_RETURN',
     id, err, data 
   }) 
+})
+
+// document.addEventListener('dragenter', (e) => {
+//   console.log('....drag.....')
+//   e.preventDefault()
+// })
+
+document.addEventListener('dragover', (e) => {
+  e.preventDefault()
+})
+
+document.addEventListener('drop', (e) => {
+  e.preventDefault()
 })
 
 debug('fruitmix app module loaded')
