@@ -1507,8 +1507,10 @@ class FileApp extends React.Component {
               node: uuid,
               name: newName
             }, (err, data) => {
+              let newData = JSON.parse(data)
+              Object.assign(newData,{size:formatSize(newData.size),mtime:formatTime(newData.mtime)})
               let dom = this.refs.FileTable
-              dom.updateFileNode(JSON.parse(data))
+              dom.updateFileNode(newData)
               dom.forceUpdate()
             })
           }}
