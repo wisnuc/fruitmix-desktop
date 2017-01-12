@@ -1,12 +1,12 @@
 import React from 'react'
 
-import { Checkbox, CircularProgress, Dialog, FlatButton, TextField } from 'material-ui'
+import FlatButton from '../common/FlatButton'
+import { Checkbox, CircularProgress, Dialog, TextField } from 'material-ui'
 import ToggleRadioButtonChecked from 'material-ui/svg-icons/toggle/radio-button-checked'
 import ToggleRadioButtonUnchecked from 'material-ui/svg-icons/toggle/radio-button-unchecked'
 
 import request from 'superagent'
 
-// this is an event emitter, onInput
 class UsernamePassword extends React.Component {
 
   constructor(props) {
@@ -78,7 +78,6 @@ const ReinitVolumeConfirm = props => {
     mustDelete = '必须选择删除和重建wisnuc文件夹方可执行操作'
   else if (wisnuc.error === 'EFRUITMIXNOTDIR')
     mustDelete = '必须选择删除和重建fruitmix文件夹方可执行操作'
-
 
   return (
     <div>

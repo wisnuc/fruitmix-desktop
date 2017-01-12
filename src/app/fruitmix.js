@@ -31,9 +31,13 @@ injectTapEventPlugin()
 // global import jQuery
 global.$ = global.jQuery = global.jQuery || require('jquery')
 
+global.theme = Object.assign({}, getMuiTheme(lightBaseTheme), { fontFamily: 'Noto Sans CJK SC, sans-serif' })
+
+console.log('theme', global.theme)
+
 // root component
 const App = () => (
-  <MuiThemeProvider muiTheme={getMuiTheme(lightBaseTheme)}>
+  <MuiThemeProvider muiTheme={theme}>
     { 
       window.store.getState().maintenance ? 
         <Maintenance /> :

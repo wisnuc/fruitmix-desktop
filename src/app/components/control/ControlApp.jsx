@@ -131,8 +131,11 @@ class User extends React.Component {
         .set('Authorization', 'JWT ' + this.props.user.token)
         .send({username: this.state.newUserDialog.username, password: this.state.newUserDialog.password}) 
         .end((err, res) => {
-          if (err || !res.ok)
-            return debug(err || !res.ok)
+          if (err || !res.ok) {
+            debug(err || !res.ok)
+            if (res && res.body) debug(res.body.message)
+            return
+          }
 
           debug('request create new user', res.body)
 

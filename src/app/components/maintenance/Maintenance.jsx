@@ -5,9 +5,11 @@ import React from 'react'
 import muiThemeable from 'material-ui/styles/muiThemeable'
 import { 
   AppBar, Avatar, Checkbox, Chip, Divider, Paper, SvgIcon, Menu, MenuItem, 
-  FloatingActionButton, Subheader, FlatButton, Dialog, RaisedButton, 
+  FloatingActionButton, Subheader, Dialog, RaisedButton, 
   IconButton, TextField, Toggle, CircularProgress 
 } from 'material-ui'
+
+import FlatButton from '../common/FlatButton'
 
 import Popover, {PopoverAnimationVertical} from 'material-ui/Popover'
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
@@ -22,6 +24,7 @@ import NavigationExpandLess from 'material-ui/svg-icons/navigation/expand-less'
 import NavigationClose from 'material-ui/svg-icons/navigation/close'
 import NavigationMoreVert from 'material-ui/svg-icons/navigation/more-vert'
 import ContentAddCircle from 'material-ui/svg-icons/content/add-circle'
+
 import { 
   pinkA200, grey300, grey400, greenA400, green400, amber400, 
   redA200,
@@ -40,8 +43,7 @@ import { CatSilhouette, BallOfYarn } from './svg'
 import { InitVolumeDialogs } from './InitVolumeDialogs'
 
 import { 
-  operationTextConfirm, operationBase, operationReinitConfirmDeletion, operationUsernamePassword,
-  Operation, operationBusy, operationSuccess, operationFailed, createOperation 
+  operationTextConfirm, operationBase, Operation, operationBusy, operationSuccess, operationFailed, createOperation 
 } from '../common/Operation'
 
 import request from 'superagent'
@@ -1233,7 +1235,9 @@ class Maintenance extends React.Component {
                 this.state.creatingNewVolume === null &&
                 !volume.isMissing && typeof volume.wisnuc === 'object' &&
                 volume.wisnuc.status === 'READY' &&
-                <FlatButton label='启动' primary={true} 
+                <FlatButton 
+                  label='启动' 
+                  primary={true} 
                   onTouchTap={e => {
                     e.stopPropagation()
                     this.startWisnucOnVolume(volume)
