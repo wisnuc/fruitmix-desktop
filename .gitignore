@@ -5,7 +5,8 @@
 /npm-debug.log
 
 *.swp
-
+public/*.js
+public/*.json
 /server
 /ele
 /tmp
