@@ -34,6 +34,8 @@
     "deep-equal": "^1.0.1",
     "electron-packager": "^8.3.0",
     "file-loader": "^0.9.0",
+    "grunt": "^1.0.1",
+    "grunt-contrib-clean": "^1.0.0",
     "gsap": "^1.19.0",
     "html-webpack-plugin": "^2.22.0",
     "jquery": "^3.1.0",
@@ -79,5 +81,6 @@
   },
   "src": "src",
   "test": "test",
-  "dist": "dist"
+  "dist": "dist",
+  "download": "download"
 }
