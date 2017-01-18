@@ -12,12 +12,6 @@ var actions = {
 		}
 	},
 
-	loginoff() {
-		return {
-			type: 'LOGIN_OFF'
-		}
-	},
-
 	setDevice(device) {
 		return {
 			type: 'SET_DEVICE',

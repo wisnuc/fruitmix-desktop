@@ -168,8 +168,9 @@ class FileTable extends Component {
 				this.selectOne(index)
 			}
 		}
-		console.log(this.selectedIndexArr)
-		console.log(this.lastSelected)
+		// console.log(this.selectedIndexArr)
+		// console.log(this.lastSelected)
+		console.log(this.list[this.lastSelected])
 		this.updateDetail()
 	}
 

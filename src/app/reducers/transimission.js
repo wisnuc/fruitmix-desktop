@@ -8,10 +8,12 @@ const defaultState = {
 const transimission = (state=defaultState,action)=>{
 	switch(action.type) {
 		case 'LOGIN_OFF':
-			return {
+			return Object.assign({}, state, {
 				upload:[],
-				download: []
-			}
+				download: [],
+				uploadFinish: true,
+				downloadFinish: true
+			})
 		case 'REFRESH_STATUS_DOWNLOAD':
 			return Object.assign({},state,{
 				download:action.tasks,

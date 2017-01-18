@@ -84,7 +84,7 @@ class Row extends Component {
 					</div>
 					<div>{this.props.infor.name}</div>
 					<div className='row-time'>{this.props.infor.mtime}</div>
-					<div className='row-size'>{this.props.infor.size}</div>
+					<div className='row-size'>{this.props.infor.conversionSize}</div>
 				</div>
 				)
 		}

@@ -92,7 +92,7 @@ class Detail extends Component {
 	 				<div className='file-detail-line'><div></div></div>
 		 			<div>类型&nbsp;&nbsp;:&nbsp;&nbsp;{data.type?data.type=='folder'?'文件夹':'文件':null}</div>
 		 			<div>名称&nbsp;&nbsp;:&nbsp;&nbsp;{data.name||null}</div>
-		 			<div>大小&nbsp;&nbsp;:&nbsp;&nbsp;{data.size}</div>
+		 			<div>大小&nbsp;&nbsp;:&nbsp;&nbsp;{data.conversionSize}</div>
 		 			<div title={data.path||null}>位置&nbsp;&nbsp;:&nbsp;&nbsp;{data.path||null}</div>
 		 			<div>所有者&nbsp;&nbsp;:&nbsp;&nbsp;{this.getOwner(data.owner)||null}</div>
 		 			<div>上传时间&nbsp;&nbsp;:&nbsp;&nbsp;{data.mtime||null}</div>

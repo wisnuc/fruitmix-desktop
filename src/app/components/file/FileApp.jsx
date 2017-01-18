@@ -89,14 +89,13 @@ import { DialogInput, DialogConfirm } from '../common/Dialogs'
 const secondaryColor = '#FF4081'
 
 const formatTime = (mtime) => {
-
   if (!mtime) {
     return null
   }
 
   let time = new Date()
   time.setTime(parseInt(mtime))
-  return time.getFullYear() + '/' + (time.getMonth() + 1) + '/' + time.getDay()
+  return time.getFullYear() + '-' + (time.getMonth() + 1) + '-' + time.getDate()
 }
 
 const formatSize = (size) => {
@@ -762,7 +761,8 @@ class FileApp extends React.Component {
       specified: false,
       selected: false,
       mtime:formatTime(item.mtime),
-      size:formatSize(item.size),
+      size:item.size,
+      conversionSize:formatSize(item.size),
       name:item.name?item.name:item.uuid
     })).sort((a, b) => {
       if (a.type !== b.type) {

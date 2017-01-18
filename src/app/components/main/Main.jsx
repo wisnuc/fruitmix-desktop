@@ -133,7 +133,7 @@ const SystemDrawer = (props) => {
           <ListItem style={{color: '#FFF'}}
             primaryText='退出登录'
             leftAvatar={<Avatar icon={<ActionExitToApp />} backgroundColor={brown500} />}
-            onTouchTap={() => ipcRenderer.send('loginOff')}
+            onTouchTap={() => {window.store.dispatch({type:'LOGIN_OFF'});ipcRenderer.send('loginOff')}}
           />
           <div style={{height: 8}} />
           <Divider style={{backgroundColor: '#353535'}}/>

@@ -11,6 +11,7 @@ import Debug from 'debug'
 import registerCommandHandlers from './command'
 import { getMainWindow } from './window'
 import store from '../serve/store/store'
+import { ipcMain } from 'electron'
 
 var sendMessage = null
 var server
@@ -579,4 +580,10 @@ const uploadCommandMap = new Map([
 
 registerCommandHandlers(uploadCommandMap)
 
-
+ipcMain.on('loginOff', evt => {
+  readyQueue.length = 0 
+  hashlessQueue.length = 0 
+  hashingQueue.length = 0 
+  runningQueue.length = 0 
+  userTasks.length = 0 
+})
