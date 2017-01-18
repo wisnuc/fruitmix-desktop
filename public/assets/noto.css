@@ -1,58 +1,38 @@
 @font-face {
-    font-family: 'Noto Sans CJK SC';
-    src: url('NotoSansCJKsc-Regular.otf');
-    font-weight: normal;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: 'Noto Sans CJK SC';
-    src: url('NotoSansCJKsc-Bold.otf');
-    font-weight: 700;
-    font-style: normal;
-}
-
-@font-face {
   font-family: 'Noto Sans SC';
   font-style: normal;
   font-weight: 100;
-  src:  url('NotoSansSC-Thin.woff') format('woff'),
-        url('NotoSansSC-Thin.woff2') format('woff2')
+  src:  url('NotoSansSC-Thin.woff2') format('woff2')
 }
 @font-face {
   font-family: 'Noto Sans SC';
   font-style: normal;
   font-weight: 300;
-  src:  url('NotoSansSC-Light.woff') format('woff'),
-        url('NotoSansSC-Light.woff2') format('woff2')
+  src:  url('NotoSansSC-Light.woff2') format('woff2')
 }
 @font-face {
    font-family: 'Noto Sans SC';
    font-style: normal;
    font-weight: 400;
-   src: url('NotoSansSC-Regular.woff') format('woff'),
-        url('NotoSansSC-Regular.woff2') format('woff2')
+   src: url('NotoSansSC-Regular.woff2') format('woff2')
  }
 @font-face {
    font-family: 'Noto Sans SC';
    font-style: normal;
    font-weight: 500;
-   src: url('NotoSansSC-Medium.woff') format('woff'),
-        url('NotoSansSC-Medium.woff2') format('woff2')
+   src: url('NotoSansSC-Medium.woff2') format('woff2')
  }
 @font-face {
    font-family: 'Noto Sans SC';
    font-style: normal;
    font-weight: 700;
-   src: url('NotoSansSC-Bold.woff') format('woff'),
-        url('NotoSansSC-Bold.woff2') format('woff2')
+   src: url('NotoSansSC-Bold.woff2') format('woff2')
  }
 @font-face {
    font-family: 'Noto Sans SC';
    font-style: normal;
    font-weight: 900;
-   src: url('NotoSansSC-Black.woff') format('woff'),
-        url('NotoSansSC-Black.woff2') format('woff2')
+   src: url('NotoSansSC-Black.woff2') format('woff2')
  }
 
 
