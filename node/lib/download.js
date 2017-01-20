@@ -354,7 +354,6 @@ class folderDownloadTask {
 		function callback (err,res,body) {
 			if (!err && res.statusCode == 200) {
 				let children = JSON.parse(res.body)
-				c('get ' + _this.name + ' children : ')
 				children.forEach(item => {
 					if (item.type == 'folder') {
 						createFolderDownloadTask(_this,item,path.join(_this.downloadPath,_this.name),_this.root)
