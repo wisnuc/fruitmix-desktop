@@ -24,7 +24,7 @@ const scheduleHttpRequest = () => {
 		readyQueue[0].setState('running')
 }
 
-const updateStatusOfDownload = (finish) => {
+var updateStatusOfDownload = (finish) => {
 	let mainWindow = getMainWindow()
 	mainWindow.webContents.send('refreshStatusOfDownload',userTasks, finish)
 }
@@ -60,7 +60,7 @@ const sendDownloadMessage = () => {
 
 setInterval(() => {
 	sendDownloadMessage()
-},3000)
+},5000)
 
 const runningQueue = []
 const readyQueue = []
@@ -368,7 +368,7 @@ class folderDownloadTask {
 				_this.setState('finished', err)
 			}
 		}
-		this.handle = request(options,callback)
+		request(options,callback)
 	}
 
 	exitProbingState() {
