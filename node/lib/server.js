@@ -145,11 +145,13 @@ const requestDelete = (url, token, callback) => {
 
     if (err) return callback(err)
     if (res.statusCode !== 200) {
+      console.log('a delete error ~~~~~~~~~~~~')
       let e = new Error('http status code not 200')
       e.code = 'EHTTPSTATUS'
       e.status = res.statusCode
       return callback(e)
     }
+    console.log('a delete finish ~~~~~~~~~~~~')
     callback(null)    
   })
 }

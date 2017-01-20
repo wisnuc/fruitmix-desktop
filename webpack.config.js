@@ -50,7 +50,7 @@ module.exports = {
                 loader : 'react-hot!babel-loader'
             },
             {
-                test  : /\.css$/,
+                test  : /\.(css|sass)$/,
                 loader: 'style-loader!css-loader'
             },
             {
