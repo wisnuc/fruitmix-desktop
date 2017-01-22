@@ -36,7 +36,8 @@ class Login extends React.Component {
       devices: [],
       selectedDeviceIndex: -1,
       expanded: false,
-      deviceName: null 
+      deviceName: null,
+      dim: false
     }
 
     this.initTimer = setInterval(() => {
@@ -155,8 +156,9 @@ class Login extends React.Component {
       this.enter = 'right'
       this.selectNextDevice()
     }
-  }
 
+    this.toggleDim = () => this.setState(state => ({ dim: !state.dim }))
+  }
 
   componentWillUnmount() {
     clearInterval(this.initTimer)
@@ -199,23 +201,33 @@ class Login extends React.Component {
 
         onResize: resize => {
           if ((resize === 'HEXPAND' && !this.state.expanded) || (resize === 'HSHRINK' && this.state.expanded))
-            this.setState(Object.assign({}, this.state, { expanded: !this.state.expanded }))
-        }
+            this.setState({ expanded: !this.state.expanded })
+        },
+
+        toggleDim: this.toggleDim
       })
     }
 
     return (
-      <div 
-        style={{
-          backgroundImage: 'url(../src/assets/images/index/index.jpg)',
-          width: '100%', 
-          height: '100%', 
-          display:'flex', 
-          flexDirection: 'column', 
-          alignItems: 'center'
-        }}
-      >
-        <div style={{marginTop: 160, width: this.state.expanded ? 1024 : 480, backgroundColor: '#BBB', transition: 'width 300ms'}}>
+      <div style={{ width: '100%', height: '100%', display:'flex', flexDirection: 'column', alignItems: 'center' }} >
+        <img 
+          style={{
+            width: '110%',
+            top: '-5%',
+            position: 'absolute',
+            zIndex: -1000,
+            filter: 'blur(5px)',
+            transition: 'filter 300ms linear'
+          }}
+          src='../src/assets/images/index/index.jpg' 
+        />
+        <div style={{width: '100%', height: '100%', top: 0, position: 'absolute', backgroundColor: '#000', zIndex: -999, opacity: this.state.dim ? 0.7 : 0, transition: 'opacity 300ms'}} />
+        <div style={{ 
+          marginTop: 160, 
+          width: this.state.expanded ? 1024 : 448, 
+          backgroundColor: '#BBB', 
+          transition: 'width 300ms'
+        }}>
           <div style={{width: '100%', position: 'relative', perspective: 1000}}>
             <TransitionGroup>
               { React.createElement(type, props) }
