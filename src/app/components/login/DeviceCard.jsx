@@ -220,6 +220,17 @@ class DeviceCard extends React.Component {
       this.requestGet(3721, 'login', 'users')
     }
 
+    this.requestToken = (uuid, password, callback) => 
+      this.unmounted
+        ? setImmediate(callback(new Error('device card component unmounted')))
+        : request.get(`http://${this.props.device.address}:3721/token`)
+            .auth(uuid, password)
+            .set('Accept', 'application/json')
+            .end((err, res) => 
+              this.unmounted 
+                ? callback(new Error('device card component unmounted'))
+                : callback(err, res))
+
     this.reset = () => {
 
       if (this.unmounted) return
@@ -336,6 +347,7 @@ class DeviceCard extends React.Component {
             users={this.state.users}
             onResize={this.onBoxResize}
             toggleDim={this.props.toggleDim}
+            requestToken={this.requestToken}
           />
         )
       else

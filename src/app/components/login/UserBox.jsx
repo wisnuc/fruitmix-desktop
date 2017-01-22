@@ -9,6 +9,7 @@ blueGrey400, blueGrey500, cyan500, cyan300 } from 'material-ui/styles/colors'
 
 import { ipcRenderer } from 'electron'
 import { sharpCurve, sharpCurveDuration } from '../common/motion'
+import LoginBox from './LoginBox'
 
 const styles = {
 
@@ -47,83 +48,6 @@ const NamedAvatar = ({ style, name, selected, onTouchTap }) => (
   </div>
 )
 
-class LoginBox extends React.Component {
-
-  constructor(props) {
-    super(props)
-    this.state = {
-      password: ''
-    }
-  }
-
-  render() {
-    return (
-      <div
-        style={{
-          boxSizing: 'border-box', 
-          width: '100%', 
-          height: this.props.open ? 224 : 0, 
-          backgroundColor: '#FFF', 
-          paddingLeft: 24, 
-          paddingRight: 24, 
-          overflow: 'hidden', 
-          transition: sharpCurve('height')
-        }}
-      >
-        { this.state.selectedIndex !== -1 && (
-          <div style={{width: '100%', display: 'flex', flexDirection: 'column' }}>     
-            <div style={{flex: '0 0 24px'}}/>
-            <div style={{
-              fontSize: 13, 
-              color:'rgba(0,0,0,0.38)',
-              height: 24,
-              marginBottom: 8
-            }}>用户登录</div>
-            <div style={{
-              fontSize: 24, 
-              fontWeight: 'medium',
-              color: 'rgba(0,0,0,0.87)', 
-            }}>
-              {this.props.username}
-            </div>
-            <div style={{flex: '0 0 20px'}}/>
-            <TextField 
-              key={this.props.uuid}
-              fullWidth={true} 
-              hintText='请输入密码' 
-              type='password'
-              ref={ input => { input && input.focus() }}
-              onChange={e => this.inputValue = e.target.value}
-              onKeyDown={e => {
-                if (e.which === 13) {
-                  ipcRenderer.send('login', 
-                  this.props.users[this.state.selectedIndex].username, this.inputValue)
-                }
-              }}
-              onBlur={() => {}}
-            />
-            <div style={{flex: '0 0 20px'}}/>
-            <div style={{width: '100%', display: 'flex'}}>
-              <div style={{flexGrow: 1}} />
-              <FlatButton label='取消' primary={true} onTouchTap={this.props.cancel} />
-              <FlatButton style={{marginRight: -16}} label='确认' primary={true} 
-                onTouchTap={() => this.props.login(this.state.password, 
-                  err => {
-                    if (err) {
-                    } 
-                    else {
-                    }
-                  })
-                }
-              />
-            </div>
-          </div>
-        )}
-      </div>
-    )  
-  } 
-}
-
 class UserBox extends React.Component {
 
   constructor(props) {
@@ -132,6 +56,7 @@ class UserBox extends React.Component {
   }
 
   selectUser(index) {
+
     if (index === -1) {
       this.setState({ selectedIndex: -1 })
       setTimeout(() => {
@@ -156,11 +81,17 @@ class UserBox extends React.Component {
     }
   }
 
-  tryLogin(password, callback) {
-    
+  // TODO 
+  success(username, password) {
+    ipcRenderer.send('login', username, password) 
   }
 
   render() {
+
+    let user
+    if (this.state.selectedIndex !== -1) {
+      user = this.props.users[this.state.selectedIndex]
+    }
 
     return (
       <div key='login-user-box' style={this.props.style}>
@@ -190,64 +121,14 @@ class UserBox extends React.Component {
 
         <div style={{width: '100%', boxSizing: 'border-box', paddingLeft: 0, paddingRight: 0}}>
           <div style={{width: '100%', height: Math.ceil(this.props.users.length / 8) * 52 + 16 }}/> 
-          <div
-            style={{
-              boxSizing: 'border-box', 
-              width: '100%', 
-              height: this.state.selectedIndex !== -1 ? 224 : 0, 
-              backgroundColor: '#FFF', 
-              paddingLeft: 24, 
-              paddingRight: 24, 
-              overflow: 'hidden', 
-              transition: sharpCurve('height')
-            }}
-          >
-            { this.state.selectedIndex !== -1 && (
-              <div style={{width: '100%', display: 'flex', flexDirection: 'column' }}>     
-                <div style={{flex: '0 0 24px'}}/>
-                <div style={{
-                  fontSize: 13, 
-                  color:'rgba(0,0,0,0.38)',
-                  height: 24,
-                  marginBottom: 8
-                }}>用户登录</div>
-                <div style={{
-                  fontSize: 24, 
-                  fontWeight: 'medium',
-                  color: 'rgba(0,0,0,0.87)', 
-                }}>
-                  {this.props.users[this.state.selectedIndex].username}
-                </div>
-                <div style={{flex: '0 0 20px'}}/>
-                <TextField 
-                  key={this.props.users[this.state.selectedIndex].uuid}
-                  fullWidth={true} 
-                  hintText='请输入密码' 
-                  type='password'
-                  ref={ input => { input && input.focus() }}
-                  onChange={e => this.inputValue = e.target.value}
-                  onKeyDown={e => {
-                    if (e.which === 13) {
-                      ipcRenderer.send('login', 
-                      this.props.users[this.state.selectedIndex].username, this.inputValue)
-                    }
-                  }}
-                  onBlur={() => {}}
-                />
-                <div style={{flex: '0 0 20px'}}/>
-                <div style={{width: '100%', display: 'flex'}}>
-                  <div style={{flexGrow: 1}} />
-                  <FlatButton label='取消' primary={true} onTouchTap={this.selectUser.bind(this, -1)} />
-                  <FlatButton style={{marginRight: -16}} label='确认' primary={true} 
-                    onTouchTap={() => {
-                      ipcRenderer.send('login', 
-                        this.props.users[this.state.selectedIndex].username, this.inputValue) 
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
+          <LoginBox
+            open={this.state.selectedIndex !== -1}
+            username={user && user.username}
+            uuid={user && user.uuid}
+            cancel={this.selectUser.bind(this, -1)}
+            requestToken={this.props.requestToken}
+            success={this.success.bind(this)}
+          />
         </div>
       </div>
     )
