@@ -156,10 +156,12 @@ const sendUploadMessage = () => {
     }
 
   if (isSend && sendMessage == null) {
+    console.log('begin send message')
     sendMessage = setInterval(()=> {updateStatusOfupload(!isSend)},1000)
   }else if(!isSend && sendMessage != null) {
     updateStatusOfupload(!isSend)
     clearInterval(sendMessage)
+    console.log('stop send message')
     sendMessage = null
   }
 }
@@ -342,14 +344,17 @@ class fileUploadTask extends EventEmitter {
   }
 
   exitRunningState() {
+    console.log('exitRunningState')
     this.handle = null
     removeOutOfRunningQueue(this)
   }
 
   enterFinishedState(err,uuid) {
+    console.log('enterFinishedState0')
     if (this.parent) {
       this.parent.childrenFinish()
     }
+    console.log('enterFinishedState1')
     this.state = 'finished'
     this.message = err ? err.message : null
   }

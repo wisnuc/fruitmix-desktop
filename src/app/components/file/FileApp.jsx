@@ -487,6 +487,7 @@ class FileApp extends React.Component {
         dir: this.state.directory.uuid,
         nodes: deleteArr
       }, (err, data) => {
+        console.log('刪除 返回~~')
         setImmediate(this.refresh)
       })
     }
@@ -1064,7 +1065,7 @@ class FileApp extends React.Component {
 				</span>
 				)
 			if (this.state.path.length !== 0) {
-				list.push(<NavigationChevronRight />)
+				list.push(<NavigationChevronRight style={{fill:'rgba(255,255,255,.7)'}}/>)
 			}
 		}
 		this.state.path.forEach((node, index, arr) => {
@@ -1074,7 +1075,7 @@ class FileApp extends React.Component {
 					list.push(
 						<div>...</div>
 						)
-					list.push(<NavigationChevronRight />)
+					list.push(<NavigationChevronRight style={{fill:'rgba(255,255,255,.7)'}}/>)
 					return
 				}else if (index > 1 && index <arr.length -2) {
 					return
@@ -1106,7 +1107,7 @@ class FileApp extends React.Component {
 				)
 
 			if (index !== arr.length - 1)
-				list.push(<NavigationChevronRight />)
+				list.push(<NavigationChevronRight style={{fill:'rgba(255,255,255,.7)'}}/>)
 		})
 
 		return list

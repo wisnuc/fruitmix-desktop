@@ -27,7 +27,7 @@ class DownloadTable extends Component {
 				<div className='transimissionRow' onClick={this.toggleChildren.bind(this)}>
 					<span></span>
 					<span>{item.name}</span>
-					<span>{item.size}</span>
+					<span>{this.getSize(item.size)}</span>
 					<span>{this.getProgress()}</span>
 				</div>
 				<div style={{paddingLeft:'30px'}}>

@@ -22,7 +22,7 @@ module.exports = function (grunt) {
                 }
             }
         },
-        clean: ["<%= pkg.download %>", "a.txt.txt"]
+        clean: ["<%= pkg.download %>", ]
     });
     // grunt.registerTask('serve', function (target) {
     //     if (target === 'dist') {

@@ -95,7 +95,7 @@ class UploadTable extends Component {
 		if (state == 'ready' || state == 'hashless') {
 			return '准备'
 		}else if (state == 'running') {
-			return '上传中'
+			return '99.9%'
 		}else if (state == 'hashing') {
 			return '正在校验本地文件'
 		}else if (state == 'finished') {

@@ -1,5 +1,6 @@
 import path from 'path'
 import fs from'fs'
+import os from 'os'
 
 import Debug from 'debug'
 import { app } from 'electron'
@@ -57,8 +58,15 @@ store.subscribe(adapter)
 
 //app ready and open window ------------------------------------
 app.on('ready', function() {
-
   initMainWindow()
+  if (os.platform() == 'darwin') {
+    console.log('system is osx')
+    let data = app.getPath('downloads')
+    console.log('download path is : ' + data)
+    store.dispatch({type:'CONFIG_SET_DOWNLOAD_PATH',data})
+  }
+  
+  
   if (mocha) initTestWindow()
 })
 
