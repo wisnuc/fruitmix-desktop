@@ -350,12 +350,10 @@ class fileUploadTask extends EventEmitter {
   }
 
   enterFinishedState(err,uuid) {
-    console.log('enterFinishedState0')
+    this.state = 'finished'
     if (this.parent) {
       this.parent.childrenFinish()
     }
-    console.log('enterFinishedState1')
-    this.state = 'finished'
     this.message = err ? err.message : null
   }
 }
@@ -505,6 +503,9 @@ class folderUploadTask extends EventEmitter {
 
   enterFinishedState(err) {
     this.state = 'finished'
+    if (!this.children.length && !this.parent) {
+      updateStatusOfupload()
+    }
     this.message = err ? err.message : null
   }
 

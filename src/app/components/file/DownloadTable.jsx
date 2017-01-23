@@ -100,7 +100,7 @@ class DownloadTable extends Component {
 		}else if (state == 'running') {
 			return '下载中'
 		}else if (state == 'hashing') {
-			return '正在校验本地文件'
+			return '正在校验'
 		}else if (state == 'finished') {
 			return '已完成'
 		}

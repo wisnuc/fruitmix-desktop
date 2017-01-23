@@ -235,7 +235,7 @@ class User extends React.Component {
             open={!!this.state.usernameDialog}
             onRequestClose={this.usernameDialogCancel}
           >
-            <TextField hintText='新用户名' floatingLabelText='新用户名' fullWidth={true}
+            <TextField hintText='新用户名' floatingLabelText='新用户名' fullWidth={true} 
               disabled={this.state.usernameDialog && this.state.usernameDialog.busy}
               onChange={e => {
                 this.setState(Object.assign({}, this.state, {
