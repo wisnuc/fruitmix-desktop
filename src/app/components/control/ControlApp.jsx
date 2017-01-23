@@ -227,7 +227,7 @@ class User extends React.Component {
           </div>
           <RaisedButton label='修改用户名' onTouchTap={() => 
             this.setState(Object.assign({}, this.state, { usernameDialog: {} }))} />
-          <Dialog 
+          <Dialog key='changeUsername'
             titleStyle={{fontSize: 20, color: 'rgba(0,0,0,0.87)'}}
             contentStyle={{width: 336}}
             title='修改用户名'
@@ -235,7 +235,7 @@ class User extends React.Component {
             open={!!this.state.usernameDialog}
             onRequestClose={this.usernameDialogCancel}
           >
-            <TextField hintText='新用户名' floatingLabelText='新用户名' fullWidth={true} 
+            <TextField hintText='新用户名' floatingLabelText='新用户名' fullWidth={true} key='changeusername'
               disabled={this.state.usernameDialog && this.state.usernameDialog.busy}
               onChange={e => {
                 this.setState(Object.assign({}, this.state, {
@@ -289,19 +289,19 @@ class User extends React.Component {
                 open={!!this.state.newUserDialog} 
                 onRequestClose={this.newUserDialogCancel} 
               >
-                <TextField hintText='用户名' floatingLabelText='用户名' fullWidth={true} 
+                <TextField hintText='用户名' floatingLabelText='用户名' fullWidth={true}  key='createusername'
                   disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
                   onChange={e => this.setState(Object.assign({}, this.state, {
                     newUserDialog: Object.assign({}, this.state.newUserDialog, { username: e.target.value })
                   }))}
                 />
-                <TextField hintText='输入密码' floatingLabelText='输入密码' fullWidth={true} 
+                <TextField hintText='输入密码' floatingLabelText='输入密码' fullWidth={true} key='createpassword'
                   disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
                   onChange={e => this.setState(Object.assign({}, this.state, {
                     newUserDialog: Object.assign({}, this.state.newUserDialog, { password: e.target.value })
                   }))}
                 />
-                <TextField hintText='再次输入密码' floatingLabelText='再次输入密码' fullWidth={true} 
+                <TextField hintText='再次输入密码' floatingLabelText='再次输入密码' fullWidth={true} key='createpasswordagain'
                   disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
                   onChange={e => this.setState(Object.assign({}, this.state, {
                     newUserDialog: Object.assign({}, this.state.newUserDialog, { passwordAgain: e.target.value })
@@ -420,6 +420,14 @@ class ControlApp extends React.Component {
         { this.settings.map(item => this.renderMenuItem(item[0], item[1], item[2])) }        
       </Menu>
     )
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    console.log('should update diff')
+    if (this.state.leftNav != nextState.leftNav) return true
+    if (this.state.detailOn != nextState.detailOn) return true
+    if (this.state.select != nextState.select) return true
+    return false
   }
 
   render() {
