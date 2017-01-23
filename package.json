@@ -79,6 +79,7 @@
     "redux": "^3.5.2",
     "request": "^2.74.0",
     "rimraf": "^2.5.4",
+    "sanitize-filename": "^1.6.1",
     "superagent": "^2.3.0",
     "validator": "^6.0.0"
   },

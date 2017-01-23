@@ -235,7 +235,7 @@ class User extends React.Component {
             open={!!this.state.usernameDialog}
             onRequestClose={this.usernameDialogCancel}
           >
-            <TextField hintText='新用户名' floatingLabelText='新用户名' fullWidth={true} key='changeusername'
+            <TextField hintText='新用户名' floatingLabelText='新用户名' fullWidth={true} key='changeusername' maxLength={20}
               disabled={this.state.usernameDialog && this.state.usernameDialog.busy}
               onChange={e => {
                 this.setState(Object.assign({}, this.state, {
@@ -289,19 +289,19 @@ class User extends React.Component {
                 open={!!this.state.newUserDialog} 
                 onRequestClose={this.newUserDialogCancel} 
               >
-                <TextField hintText='用户名' floatingLabelText='用户名' fullWidth={true}  key='createusername'
+                <TextField hintText='用户名' floatingLabelText='用户名' fullWidth={true}  key='createusername' maxLength={20}
                   disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
                   onChange={e => this.setState(Object.assign({}, this.state, {
                     newUserDialog: Object.assign({}, this.state.newUserDialog, { username: e.target.value })
                   }))}
                 />
-                <TextField hintText='输入密码' floatingLabelText='输入密码' fullWidth={true} key='createpassword'
+                <TextField hintText='输入密码' floatingLabelText='输入密码' fullWidth={true} key='createpassword' maxLength={40}
                   disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
                   onChange={e => this.setState(Object.assign({}, this.state, {
                     newUserDialog: Object.assign({}, this.state.newUserDialog, { password: e.target.value })
                   }))}
                 />
-                <TextField hintText='再次输入密码' floatingLabelText='再次输入密码' fullWidth={true} key='createpasswordagain'
+                <TextField hintText='再次输入密码' floatingLabelText='再次输入密码' fullWidth={true} key='createpasswordagain' maxLength={40}
                   disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
                   onChange={e => this.setState(Object.assign({}, this.state, {
                     newUserDialog: Object.assign({}, this.state.newUserDialog, { passwordAgain: e.target.value })
