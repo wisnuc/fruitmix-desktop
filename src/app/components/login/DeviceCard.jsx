@@ -6,11 +6,12 @@ import request from 'superagent'
 import Debug from 'debug'
 const debug = Debug('component:DeviceCard')
 
+import muiThemeable from 'material-ui/styles/muiThemeable'
 import { Paper, FlatButton, RaisedButton, IconButton, Dialog } from 'material-ui'
 import NavigationChevronLeft from 'material-ui/svg-icons/navigation/chevron-left'
 import NavigationChevronRight from 'material-ui/svg-icons/navigation/chevron-right'
 import ActionOpenInBrowser from 'material-ui/svg-icons/action/open-in-browser'
-import { grey700 } from 'material-ui/styles/colors'
+import { grey700, grey400, grey500, blueGrey400, blueGrey500 } from 'material-ui/styles/colors'
 
 import keypress from '../common/keypress'
 
@@ -130,6 +131,11 @@ const MaintBox = props => (
     </div>
   )
 
+/**
+ * This component provides a card
+ */
+
+// @muiThemeable() cannot use!!!
 class DeviceCard extends React.Component {
 
   constructor(props) {
@@ -214,6 +220,17 @@ class DeviceCard extends React.Component {
       this.requestGet(3721, 'login', 'users')
     }
 
+    this.requestToken = (uuid, password, callback) => 
+      this.unmounted
+        ? setImmediate(callback(new Error('device card component unmounted')))
+        : request.get(`http://${this.props.device.address}:3721/token`)
+            .auth(uuid, password)
+            .set('Accept', 'application/json')
+            .end((err, res) => 
+              this.unmounted 
+                ? callback(new Error('device card component unmounted'))
+                : callback(err, res))
+
     this.reset = () => {
 
       if (this.unmounted) return
@@ -249,17 +266,14 @@ class DeviceCard extends React.Component {
         this.props.onResize(resize)
     }
 
+    this.verticalExpand = () => {}
+    this.verticalShrink = () => {}
+
     // quick fix, refresh cannot be used here, setState() cannot be called inside constructor (not mounted)
     this.requestGet(3000, 'system/boot', 'boot')
     this.requestGet(3000, 'system/storage', 'storage')
     this.requestGet(3721, 'login', 'users')
   }
-
-  /**
-  componentWillUpdate(nextProps, nextState) {
-    debug('componentWillUpdate', nextProps, nextState)
-  }
-  **/
 
   componentDidMount() {
 
@@ -328,10 +342,12 @@ class DeviceCard extends React.Component {
       if (this.state.users.length !== 0) 
         return (
           <UserBox 
-            style={{width: '100%', backgroundColor: '#FFF', transition: 'all 300ms'}} 
+            style={{width: '100%', transition: 'all 300ms', position:'relative'}} 
             color={this.props.backgroundColor}
             users={this.state.users}
             onResize={this.onBoxResize}
+            toggleDim={this.props.toggleDim}
+            requestToken={this.requestToken}
           />
         )
       else
@@ -429,7 +445,10 @@ class DeviceCard extends React.Component {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'flex-start',
-      backgroundColor: this.props.backgroundColor || '#3F51B5',
+      backgroundColor: this.state.toggle 
+        ? grey500 // '#00BCD4' // '#0097A7' // cyan700  '#00BCD4' // cyan500
+        : this.props.backgroundColor || '#3F51B5',
+
       transition: 'all 300ms'
     }
 
@@ -437,10 +456,16 @@ class DeviceCard extends React.Component {
       <div style={this.props.style}>
 
         {/* top container */}
-        <Paper id='top-half-container' style={paperStyle} >
+        <Paper id='top-half-container' style={paperStyle} rounded={false}>
           <div style={{width: '100%', display: 'flex', alignItems: 'stretch'}}>
-            <HoverNav style={{flex: '0 0 64px'}} onTouchTap={this.props.onNavPrev} >
-              <NavigationChevronLeft style={{width:32, height:32}} color='#FFF'/>
+            <HoverNav 
+              style={{
+                flex: this.state.toggle ? '0 0 24px' : '0 0 64px', 
+                transition: 'all 300ms'
+              }} 
+              onTouchTap={this.state.toggle ? undefined : this.props.onNavPrev} 
+            >
+              { !this.state.toggle && <NavigationChevronLeft style={{width:32, height:32}} color='#FFF'/> }
             </HoverNav>
             <div style={{flexGrow: 1, transition: 'height 300ms'}}>
               <div style={{position: 'relative', width:'100%', height: '100%'}}>
@@ -461,8 +486,8 @@ class DeviceCard extends React.Component {
                       transition: 'all 300ms'
                     },
 
-                  fill: '#FFF',
-                  size: this.state.toggle? 40 : 80
+                  fill: this.state.toggle ? 'rgba(255,255,255,0.7)' : '#FFF',
+                  size: this.state.toggle ? 40 : 80
                 }) 
               }
               <div style={{height: this.state.toggle ? 16 : 192, transition: 'height 300ms'}} />
@@ -470,22 +495,42 @@ class DeviceCard extends React.Component {
                 <div style={{
                   fontSize: this.state.toggle ? 14 : 24, 
                   fontWeight: 'medium',
-                  color: '#FFF', 
+                  color: this.state.toggle ? 'rgba(255,255,255,0.7)' : '#FFF', 
                   marginBottom: this.state.toggle ? 0 : 12,
                 }}>{this.model()}</div>
                 <div 
-                  style={{fontSize: 14, color: 'rgba(255,255,255,0.7)', marginBottom: 12, display: 'flex', alignItems: 'center', cursor: 'pointer'}}
-                  onTouchTap={() => ipcRenderer.send('newWebWindow', '固件版本管理', `http://${this.props.device.address}:3001`)}
+                  style={{
+                    fontSize: 14, 
+                    color: 'rgba(255,255,255,0.7)', 
+                    marginBottom: 12, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    cursor: 'pointer'
+                  }}
+                  onTouchTap={() => 
+                    ipcRenderer.send('newWebWindow', '固件版本管理', `http://${this.props.device.address}:3001`)
+                  }
                 >
                   {this.props.device.address}
                   <ActionOpenInBrowser style={{marginLeft: 8}} color='rgba(255,255,255,0.7)' />
                 </div>
-                { !this.state.toggle && <div style={{fontSize: 14, color: '#FFF', marginBottom: 16, opacity: 0.7}}>{this.serial()}</div> }
+                { !this.state.toggle && 
+                  <div style={{
+                    fontSize: 14, 
+                    color: 'rgba(255,255,255,0.7)', 
+                    marginBottom: 16
+                  }}>{this.serial()}</div> }
               </div>
               </div>
             </div>
-            <HoverNav style={{flex: '0 0 64px'}} onTouchTap={this.props.onNavNext} >
-              <NavigationChevronRight style={{width:32, height:32}} color='#FFF'/>
+            <HoverNav 
+              style={{
+                flex: this.state.toggle ? '0 0 24px' : '0 0 64px',
+                transition: 'all 300ms'
+              }} 
+              onTouchTap={this.state.toggle ? undefined : this.props.onNavNext} 
+            >
+              { !this.state.toggle && <NavigationChevronRight style={{width:32, height:32}} color='#FFF'/> }
             </HoverNav>
           </div>
         </Paper>

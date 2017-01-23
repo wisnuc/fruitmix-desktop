@@ -1,98 +1,139 @@
 import React from 'react'
-import { Avatar, TextField, Paper, FlatButton } from 'material-ui'
+
+import muiThemeable from 'material-ui/styles/muiThemeable'
+import { Avatar, TextField, Paper } from 'material-ui'
+import FlatButton from '../common/FlatButton'
+
+import { grey50, grey100, grey200, grey300, grey400, grey500, grey600,
+blueGrey400, blueGrey500, cyan500, cyan300 } from 'material-ui/styles/colors'
 
 import { ipcRenderer } from 'electron'
+import { sharpCurve, sharpCurveDuration } from '../common/motion'
+import LoginBox from './LoginBox'
 
-const NamedAvatar = ({ style, name, onTouchTap }) => (
+const styles = {
+
+  flexCenter: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+
+  flexWrap: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexWrap: 'wrap'
+  },
+}
+
+const NamedAvatar = ({ style, name, selected, onTouchTap }) => (
   <div style={style}>
-    <div style={{width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start'}}>
-      <Avatar onTouchTap={onTouchTap}>{name.slice(0, 2).toUpperCase()}</Avatar>
-      { false && <div style={{marginTop: 12, fontSize: 12, fontWeight: 'medium', opacity: 0.7}}>{name}</div> }
+    <div style={styles.flexCenter}>
+      <Avatar 
+        style={{transition: 'all 150ms'}}
+        color={selected ? '#FFF' : 'rgba(0,0,0,0.54)'}
+        backgroundColor={selected ? cyan300 : grey300}
+        size={36}
+        onTouchTap={onTouchTap}
+      >
+        <div style={{lineHeight: '24px', fontSize: 14}}>
+          {name.slice(0, 2).toUpperCase()}
+        </div>
+      </Avatar>
     </div> 
   </div>
 )
-
 
 class UserBox extends React.Component {
 
   constructor(props) {
     super(props)
+    this.state = { selectedIndex: -1, }
+  }
 
-    this.users = props.users
+  selectUser(index) {
 
-    this.state = {
-      selectedIndex: -1
+    if (index === -1) {
+      this.setState({ selectedIndex: -1 })
+      setTimeout(() => {
+        this.props.onResize('VSHRINK')
+        this.props.toggleDim()
+      }, sharpCurveDuration * 2)
+      return
+    }
+
+    if (this.state.selectedIndex === -1) {
+
+      this.props.onResize('VEXPAND')
+      this.props.toggleDim()
+
+      setTimeout(() => {
+        this.inputValue = ''
+        this.setState({ selectedIndex: index})
+      }, 300)
+    }
+    else {
+      this.setState({ selectedIndex: index })
     }
   }
 
-  renderBlank() {
-    return <div style={{width: '100%', height: '100%'}} />
+  // TODO 
+  success(username, password) {
+    ipcRenderer.send('login', username, password) 
   }
 
-  renderLoginBox() {
+  render() {
+
+    let user
+    if (this.state.selectedIndex !== -1) {
+      user = this.props.users[this.state.selectedIndex]
+    }
+
     return (
-      <div style={{width: '100%', display: 'flex', flexDirection: 'column' }}>     
-        <div style={{flex: '0 0 34px'}}/>
-        <div style={{fontSize: 34, color: '#000', opacity: 0.54}}>{this.users[this.state.selectedIndex].username}</div>
-        <div style={{flex: '0 0 8px'}}/>
-        <TextField fullWidth={true} hintText='请输入密码' type='password'
-          ref={ input => { input && input.focus() }}
-          onChange={e => this.inputValue = e.target.value}
-          onKeyDown={e => {
-            if (e.which === 13) {
-              ipcRenderer.send('login', this.users[this.state.selectedIndex].username, this.inputValue)
-            }
-          }}
-          onBlur={() => {}}
-        />
-        <div style={{flex: '0 0 34px'}}/>
-        <div style={{width: '100%', display: 'flex'}}>
-          <div style={{flexGrow: 1}} />
-          <FlatButton label='确认' primary={true} 
-            onTouchTap={() => {
-              ipcRenderer.send('login', this.users[this.state.selectedIndex].username, this.inputValue) 
-            }}
-          />
-          <FlatButton style={{marginLeft: 16}} label='取消' primary={true} 
-            onTouchTap={() => {
-              this.setState(Object.assign({}, this.state, { selectedIndex: -1 }))
-              this.props.onResize('VSHRINK')
-            }} 
+      <div key='login-user-box' style={this.props.style}>
+        <Paper 
+          style={{
+            position: 'absolute',
+            top: 0,
+            boxSizing: 'border-box', 
+            width:'100%', 
+            paddingLeft:8, 
+            paddingRight:8, 
+            backgroundColor: grey100
+          }} 
+          rounded={false}
+        >
+          <div style={{...styles.flexWrap, padding: 8}}>
+            { this.props.users.map((user, index) => 
+              <NamedAvatar 
+                key={user.uuid} 
+                style={{margin: 8}}
+                name={user.username} 
+                selected={index === this.state.selectedIndex}
+                onTouchTap={this.selectUser.bind(this, index)}
+              />)}
+          </div>
+        </Paper>
+
+        <div style={{width: '100%', boxSizing: 'border-box', paddingLeft: 0, paddingRight: 0}}>
+          <div style={{width: '100%', height: Math.ceil(this.props.users.length / 8) * 52 + 16 }}/> 
+          <LoginBox
+            open={this.state.selectedIndex !== -1}
+            username={user && user.username}
+            uuid={user && user.uuid}
+            cancel={this.selectUser.bind(this, -1)}
+            requestToken={this.props.requestToken}
+            success={this.success.bind(this)}
           />
         </div>
       </div>
     )
   }
-
-  render() {
-
-    return (
-      <Paper key='login-user-box' style={this.props.style}>
-        <div style={{boxSizing: 'border-box', width:'100%', paddingLeft:64, paddingRight:64, backgroundColor:'#FFF'}}>
-          <div style={{width: '100%', height: '100%', paddingTop: 16, display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap'}}>
-            { this.users && 
-                this.users.map((user, index) => 
-                  <NamedAvatar 
-                    key={user.uuid} 
-                    style={{marginRight:16, marginBottom:16}} 
-                    name={user.username} 
-                    onTouchTap={() => {
-
-                      this.inputValue = ''
-                      this.setState(Object.assign({}, this.state, { selectedIndex: index }))
-                      this.props.onResize('VEXPAND')
-                    }}
-
-                  />)}
-          </div>
-        </div>
-        <div style={{boxSizing: 'border-box', width: '100%', height: this.state.selectedIndex !== -1 ? 240 : 0, backgroundColor: '#FAFAFA', paddingLeft: 64, paddingRight: 64, overflow: 'hidden', transition: 'all 300ms'}}>
-          { this.state.selectedIndex !== -1 && this.renderLoginBox() }
-        </div>
-      </Paper>
-    )
-  }
 }
 
-export default UserBox
+export default muiThemeable()(UserBox)
 
