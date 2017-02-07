@@ -17,6 +17,7 @@ import keypress from '../common/keypress'
 
 import ErrorBox from './ErrorBox'
 import UserBox from './UserBox'
+import FirstUserBox from './FirstUserBox'
 import GuideBox from './GuideBox'
 
 const Barcelona = ({style, fill, size}) => (
@@ -78,6 +79,8 @@ class HoverNav extends React.Component {
   }
 }
 
+
+/**
 class FirstUserBox extends React.Component {
 
   constructor(props) {
@@ -120,6 +123,8 @@ class FirstUserBox extends React.Component {
     )
   }
 }
+
+**/
 
 const MaintBox = props => (
     <div style={{width: '100%', height: 64, backgroundColor: 'rgba(128,128,128,0.8)',
@@ -351,7 +356,13 @@ class DeviceCard extends React.Component {
           />
         )
       else
-        return <div>No User </div>
+        return (
+          <FirstUserBox 
+            style={{width: '100%', transition: 'all 300ms', position: 'relative'}}
+            onResize={this.onBoxResize}
+            toggleDim={this.props.toggleDim}
+          />
+        )
     }
     // now boot and storage ready, users should be error
 

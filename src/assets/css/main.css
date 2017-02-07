@@ -1,7 +1,8 @@
 /*main*/
-$primaryColor: #333;
+/* $primaryColor: #333; */
+
 * {
-	font-family: "Noto Sans SC" , sans-serif!important;
+	font-family: "Noto Sans SC", sans-serif;
 }
 
 img {
