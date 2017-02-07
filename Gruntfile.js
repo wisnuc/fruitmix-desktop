@@ -1,39 +1,55 @@
-/**
- * @description grunt 配置
- *
- **/
-'use strict'
-    // webpackDevConfig = require('./webpack.config.js');
-module.exports = function (grunt) {
-    // Let *load-grunt-tasks* require everything
-    grunt.loadNpmTasks('grunt-contrib-clean')
-    // Read configuration from package.json
-    var pkgConfig = grunt.file.readJSON('package.json');
+'use strict';
+
+module.exports = (grunt) => {
+    require('load-grunt-tasks')(grunt)
+    require('time-grunt')(grunt)
+    var config = {
+        app: 'app',
+        dist: 'dist',
+        public: 'public'
+    }
+
     grunt.initConfig({
-        pkg: grunt.file.readJSON('package.json'),
-        htmlmin: {
+        config: config,
+
+        copy: {
             dist: {
-                options: {
-                    removeComments    : true,
-                    collapseWhitespace: true
-                },
-                files  : {
-                    'dist/index.html': 'dist/assets/index.html'
-                }
+                files: [
+                    {
+                        expand: true,
+                        cwd: '<%= config.app %>/',
+                        src: '*.html',
+                        dest: '<%= config.dist %>/',
+                        ext: '.min.html',//替换后缀
+                        extDot: 'first',//从第几个点开始替换
+                    },
+                    {
+                        expand: true,
+                        cwd: '<%= config.app %>/',
+                        src: '**/*.js',
+                        dest: '<%= config.dist %>/',
+                        ext:'.js',
+                        extDot: 'last',
+                        flatten: true,//会将中间目录去除
+                        rename: (dest, src) => {
+                            return dest + 'js/' + src
+                        }
+                    }
+                ]
             }
         },
-        clean: ["<%= pkg.download %>", ]
-    });
-    // grunt.registerTask('serve', function (target) {
-    //     if (target === 'dist') {
-    //         return grunt.task.run(['build', 'open:dist', 'connect:dist']);
-    //     }
-    //     grunt.task.run([
-    //         'open:dev',
-    //         'webpack-dev-server'
-    //     ]);
-    // });
-    // grunt.registerTask('build', ['clean', 'webpack', 'htmlmin']);
-    // grunt.registerTask('default', []);
-    grunt.registerTask('clean', ['clean']);
-};
+
+        clean: {
+            dist: {
+                src: ['<%= config.public%>/**.js'],
+                filter: 'isFile',
+                // filter: (filepath) => {
+                //  return !grunt.file.isDir(filepath)
+                // }
+                dot: true ,//同时命中以点开头的目标
+                matchBase:true, //a?b 会命中 /xyz/123/acb   不会命中//xyz/acb/123
+                expand:true 
+            }
+        }
+    })
+}

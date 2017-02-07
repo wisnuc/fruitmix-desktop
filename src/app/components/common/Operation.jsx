@@ -220,11 +220,11 @@ export class operationUsernamePassword extends operationBase {
 
     return (
       <div>
-        <TextField hintText='用户名' floatingLabelText='用户名' 
+        <TextField hintText='用户名' floatingLabelText='用户名' maxLength={20} 
           onChange={e => onChange('username', e.target.value)} />
-        <TextField hintText='输入密码' floatingLabelText='输入密码' type='password'
+        <TextField hintText='输入密码' floatingLabelText='输入密码' type='password' maxLength={40}
           onChange={e => onChange('password', e.target.value)} />
-        <TextField hintText='再次输入密码' floatingLabelText='再次输入密码' type='password'
+        <TextField hintText='再次输入密码' floatingLabelText='再次输入密码' type='password' maxLength={40}
           onChange={e => onChange('passwordAgain', e.target.value)} />
       </div>
     )

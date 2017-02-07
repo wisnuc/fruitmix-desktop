@@ -40,6 +40,7 @@
     "html-webpack-plugin": "^2.22.0",
     "jquery": "^3.1.0",
     "keypress.js": "^2.1.0-1",
+    "load-grunt-tasks": "^3.5.2",
     "material-ui": "^0.16.0",
     "mocha": "^3.1.2",
     "moment": "^2.15.2",
@@ -60,6 +61,7 @@
     "redux-thunk": "^2.1.0",
     "style-loader": "^0.13.1",
     "superagent": "^2.3.0",
+    "time-grunt": "^1.4.0",
     "url-loader": "^0.5.7",
     "webpack": "^1.13.1"
   },
@@ -77,11 +79,13 @@
     "redux": "^3.5.2",
     "request": "^2.74.0",
     "rimraf": "^2.5.4",
+    "sanitize-filename": "^1.6.1",
     "superagent": "^2.3.0",
     "validator": "^6.0.0"
   },
   "src": "src",
   "test": "test",
   "dist": "dist",
-  "download": "download"
+  "download": "download",
+  "public": "public"
 }

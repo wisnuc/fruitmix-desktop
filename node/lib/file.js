@@ -1,6 +1,7 @@
 import Debug from 'debug'
 import { ipcMain } from 'electron'
 import request from 'request'
+import sanitize from 'sanitize-filename'
 
 // TODO
 import store from '../serve/store/store'
@@ -152,7 +153,7 @@ const fileRenameAsync = async({dir, node, name}) => {
   
   debug('fileRenameAsync', dir, node, name)
 
-  return await serverPatchAsync(`files/${dir}/${node}`, { name })
+  return await serverPatchAsync(`files/${dir}/${node}`, { name : sanitize(name) })
 }
 
 const fileDeleteAsync = async ({dir, nodes}) => {
