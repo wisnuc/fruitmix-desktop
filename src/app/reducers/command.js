@@ -104,3 +104,4 @@ const command = (state = [], action) => {
 
 export default command
 
+export { Job }
