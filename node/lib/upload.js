@@ -35,7 +35,7 @@ const initArgs = () => {
 // folder task : ready -> running -> end (success or fail) (update children state, reschedule)
 // file task: hashless -> hashing -> ready -> running -> end (success or fail (update itself state, reschedule)
 
-
+//schedule
 let httpRequestConcurrency = 4
 let fileHashConcurrency = 6
 
@@ -104,35 +104,41 @@ const addHashlessQueue = (task) => {
 
 const removeOutOfHashlessQueue = (task) => {
   hashlessQueue.splice(hashlessQueue.indexOf(task),1)
-
 }
 
-const userTasks = []
-
-class UserTask extends EventEmitter {
-
-  constructor(type, files, target) {
-    super()
-    this.roots = []
-    if (type === 'file') {
-      this.type = 'file'
-      files.forEach(file => {
-        this.roots.push(createFileUploadTask(null, file, target, null))
+//read directory
+const folderStats = (abspath, callback) => {
+  fs.readdir(abspath, (err, entries) => {
+    if (err) return callback(err)
+    if (entries.length === 0) return callback(null, [])
+    let count = entries.length
+    let xstats = []
+    entries.forEach(entry => {
+      fs.lstat(path.join(abspath, entry), (err, stats) => {
+        if (!err) {
+          if (stats.isFile() || stats.isDirectory())
+            xstats.push(Object.assign(stats, { abspath: path.join(abspath, entry) }))
+        }
+        if (!--count) callback(null, xstats)
       })
-    }
-    else {
-      this.type = 'folder'
-      files.forEach(folder => {
-        this.roots.push(createFolderUploadTask(null, folder, target, null))
-      })
-    }
-  }
+    })
+  })
 }
 
-const createUserTask = (type, files, target) => {
-  let userTask = new UserTask(type, files, target)
-  userTasks.push(userTask)
-  sendUploadMessage()
+//hash
+const hashFile = (abspath) => {
+  let promise = new Promise((resolve,reject) => {
+    let hash = crypto.createHash('sha256')
+    hash.setEncoding('hex')
+    let fileStream = fs.createReadStream(abspath)
+    fileStream.on('end',(err) => {
+      if (err) reject(err)
+      hash.end()
+      resolve(hash.read())
+    })
+    fileStream.pipe(hash)
+  })
+  return promise
 }
 
 var sendMessage = null
@@ -170,45 +176,41 @@ setInterval(() => {
   sendUploadMessage()
 },5000)
 
-const folderStats = (abspath, callback) => {
-  fs.readdir(abspath, (err, entries) => {
-    if (err) return callback(err)
-    if (entries.length === 0) return callback(null, [])
-    let count = entries.length
-    let xstats = []
-    entries.forEach(entry => {
-      fs.lstat(path.join(abspath, entry), (err, stats) => {
-        if (!err) {
-          if (stats.isFile() || stats.isDirectory())
-            xstats.push(Object.assign(stats, { abspath: path.join(abspath, entry) }))
-        }
-        if (!--count) callback(null, xstats)
+const userTasks = []
+
+//create task
+class UserTask extends EventEmitter {
+
+  constructor(type, files, target) {
+    super()
+    this.roots = []
+    if (type === 'file') {
+      this.type = 'file'
+      files.forEach(file => {
+        this.roots.push(createFileUploadTask(null, file, target, null))
       })
-    })
-  })
+    }
+    else {
+      this.type = 'folder'
+      files.forEach(folder => {
+        this.roots.push(createFolderUploadTask(null, folder, target, null))
+      })
+    }
+  }
 }
-
-const hashFile = (abspath) => {
-  let promise = new Promise((resolve,reject) => {
-    let hash = crypto.createHash('sha256')
-    hash.setEncoding('hex')
-    let fileStream = fs.createReadStream(abspath)
-    fileStream.on('end',(err) => {
-      if (err) reject(err)
-      hash.end()
-      resolve(hash.read())
-    })
-    fileStream.pipe(hash)
-  })
-  return promise
+//create task factory
+const createUserTask = (type, files, target) => {
+  let userTask = new UserTask(type, files, target)
+  userTasks.push(userTask)
+  sendUploadMessage()
 }
-
+// file factory
 const createFileUploadTask = (parent, file, target, root) => {
   let task = new fileUploadTask(parent, file, target, root)
   task.setState('hashless')
   return task
 }
-
+// state machine pattern
 class fileUploadTask extends EventEmitter {
 
   constructor(parent, file, target, root) {
@@ -358,7 +360,7 @@ class fileUploadTask extends EventEmitter {
   }
 }
 
-// factory 
+// folder factory 
 const createFolderUploadTask = (parent, folder, target, root) => {
   let task = new folderUploadTask(parent, folder, target, root)
   task.setState('ready')
@@ -366,7 +368,6 @@ const createFolderUploadTask = (parent, folder, target, root) => {
 }
 
 // state machine pattern
-// ready -> running -> end
 class folderUploadTask extends EventEmitter {
 
   constructor(parent, folder, target, root) {
@@ -519,6 +520,7 @@ class folderUploadTask extends EventEmitter {
   }
 }
 
+//handler
 const uploadHandle = (args, callback) => {
   initArgs()
   let folderUUID = args.folderUUID
@@ -577,7 +579,7 @@ const dragFileHandle = (args) => {
   }
   loop()
 }
-
+//bind handler
 const uploadCommandMap = new Map([
   ['UPLOAD_FOLDER', uploadHandle],
   ['UPLOAD_FILE', uploadHandle],

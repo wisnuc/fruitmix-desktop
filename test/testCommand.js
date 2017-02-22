@@ -1,5 +1,4 @@
 import { expect } from 'chai'
-
 import jobFactory from '../src/app/reducers/commandJobCreater'
 import taskFactory from '../node/lib/commandTaskCreater'
 

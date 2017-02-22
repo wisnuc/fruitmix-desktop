@@ -45,10 +45,8 @@ class FileUploadButton extends React.Component {
   }
 
   upload(cm) {
-    if (!this.props.path.length) {
-      return
-    }
     let path = this.props.path
+    if (!path.length) return
     let folderUUID = path[path.length - 1].uuid
     let type = cm=='UPLOAD_FOLDER'?'folder':'file'
     command('fileapp', cm, {folderUUID:folderUUID,type:type})

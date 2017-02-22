@@ -1,3 +1,5 @@
+import path from 'path'
+import mkdirp from 'mkdirp'
 //define default state
 const defaultState = {
 	state: 'READY',
@@ -11,11 +13,13 @@ const listeners = []
 export const addListener = listener => listeners.push(listener)
 
 const loginState = (state = defaultState, action) => {
-
   // logged in listener
-  if (action.type === 'LOGGEDIN') 
+  if (action.type === 'LOGGEDIN') {
+  	let cachePath = path.join(global.cachePath, action.obj.uuid)
+    mkdirp(cachePath)
+    action.obj.cachePath = cachePath
     setImmediate(() => listeners.forEach(l => l(action.type)))
-
+   }
 	switch (action.type) {
 		case 'LOGIN':
 			return Object.assign({}, state, {state: 'BUSY'})
