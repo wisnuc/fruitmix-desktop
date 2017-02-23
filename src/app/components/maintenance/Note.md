@@ -98,3 +98,12 @@
     render()
   }
 }
+
+# api:
+http://${device.address}:3000/system/storage?wisnuc=true
+http://${device.address}:3000/system/boot
+http://${device.address}:3000/system/mir/run
+http://${device.address}:3000/system/mir/mkfs
+http://${device.address}:3000/system/mir/init
+
+
