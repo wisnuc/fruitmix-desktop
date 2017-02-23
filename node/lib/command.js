@@ -1,5 +1,6 @@
 import Debug from 'debug'
 import { ipcMain } from 'electron'
+import taskFactory from './commandTaskCreater'
 const debug = Debug('lib:command')
 
 let commandMap = new Map()
@@ -7,6 +8,12 @@ let commandMap = new Map()
 // evt: electron ipc event, holding sender
 // id: should be uuid, identifying the command instance
 // op: operation, has cmd and args as props
+
+ipcMain.on('command', (evt, id, op) => {
+  let task = taskFactory(evt, id, op, commandMap)
+  task.isIDExist()
+})
+/*
 ipcMain.on('command', (evt, id, op) => {
 
   debug('incoming', id, op)
@@ -53,6 +60,7 @@ ipcMain.on('command', (evt, id, op) => {
     })
   }
 })
+*/
 
 // key: command name, cmd
 // val: function (handler)

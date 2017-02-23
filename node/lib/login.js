@@ -1,8 +1,7 @@
 import { ipcMain } from 'electron'
-import { request, requestAsync, serverAddr } from './async'
-
 import Debug from 'debug'
 import store from '../serve/store/store'
+import { request, requestAsync, serverAddr } from './async'
 import { requestGetAsync, tryLoginAsync, retrieveUsers } from './server'
 
 const debug = Debug('lib:login')
@@ -25,7 +24,7 @@ export const loginHandler = (err, username, password) =>
       let users = await retrieveUsers(token.token)
       debug('loginHandler, users', users)
 
-      let me = users.find(usr => usr.username === username) 
+      let me = users.find(usr => usr.username === username)
       dispatch({
         type: 'LOGGEDIN',
         obj: Object.assign(me, token) 

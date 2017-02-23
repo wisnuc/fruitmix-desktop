@@ -1,0 +1,78 @@
+import path from 'path'
+import fs from 'fs'
+import stream from 'stream'
+import crypto from 'crypto'
+import { dialog, ipcMain } from 'electron'
+
+import request from 'request'
+
+import store from '../serve/store/store'
+import registerCommandHandlers from './command'
+import { getMainWindow } from './window'
+import createUserTask from './uploadTaskCreater'
+
+//handler
+const uploadHandle = (args, callback) => {
+  initArgs()
+  let folderUUID = args.folderUUID
+  let dialogType = args.type=='folder'?'openDirectory':'openFile'
+  dialog.showOpenDialog({properties: [ dialogType,'multiSelections','createDirectory']},function(data){
+    if (!data) return callback('get list err',null)
+    let index = 0
+    let count = data.length
+    let uploadArr = []
+    let readUploadInfor = (abspath) => {
+      fs.stat(abspath,(err, infor) => {
+        if (err) return console.log('读取目录 ' + abspath + ' 错误')
+        uploadArr.push({size:infor.size,abspath:abspath}) 
+        index++
+        if(index < count) {
+          readUploadInfor(data[index])
+        }else {
+          createUserTask(args.type,uploadArr,folderUUID)
+          getMainWindow().webContents.send('message',uploadArr.length + '个任务添加至上传队列')
+        }
+      })
+    }
+    readUploadInfor(data[index])
+  })
+}
+
+const dragFileHandle = (args) => {
+  let files = []
+  let folders = []
+  let index = 0
+  let loop = () => {
+    let filePath = path.normalize(args.files[index])
+    fs.stat(filePath, (err,stat) => {
+      if (err) {
+        index++
+        return loop()
+      }
+      if (stat.isDirectory()) folders.push({size:stat.size,abspath:filePath})
+      else files.push({size:stat.size,abspath:filePath})
+      
+      index++
+      if (index == args.files.length) {
+        console.log(folders)
+        console.log(files)
+        if (files.length != 0) createUserTask('file', files, args.dirUUID) 
+        if (folders.length != 0) createUserTask('folders', folders, args.dirUUID) 
+        getMainWindow().webContents.send('message', files.length + folders.length + '个任务添加至上传队列')
+        return
+      }
+      loop()
+    })
+  }
+  loop()
+}
+
+
+
+const uploadCommandMap = new Map([
+  ['UPLOAD_FOLDER', uploadHandle],
+  ['UPLOAD_FILE', uploadHandle],
+  ['DRAG_FILE', dragFileHandle]
+])
+
+registerCommandHandlers(uploadCommandMap)

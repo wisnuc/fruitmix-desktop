@@ -1,41 +1,8 @@
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
-import UUID from 'node-uuid'
+import jobFactory from './commandJobCreater'
 
 const debug = Debug('reducer:command')
-
-class Job { 
-
-  constructor(key, op, callback) {
-    this.id = UUID.v4()
-    this.key = key
-    this.cmd = op.cmd
-    this.args = op.args
-    this.timeout = op.timeout || 5000 // default timeout 5 seconds
-    this.callback = callback
-    this.timestamp = new Date().getTime()
-  }
-  
-  abort() {
-    if (this.callback) {
-      let err = new Error('aborted')
-      err.code = 'EABORT'
-      this.callback(err)
-    }
-  }
-
-  isTimeout() {
-    return new Date().getTime() - this.timestamp > this.timeout 
-  }
-
-  fireTimeout() {
-    if (this.callback) {
-      let err = new Error('timeout')
-      err.code = 'ETIMEOUT'
-      setImmediate(() => this.callback(err))
-    }
-  } 
-}
 
 const command = (state = [], action) => {
 
@@ -48,7 +15,7 @@ const command = (state = [], action) => {
       return state
     }
 
-    job = new Job(action.key, action.op, action.callback)
+    job = jobFactory(action.key, action.op, action.callback)
     ipcRenderer.send('command', job.id, action.op)
     newState = [...state, job] 
     
@@ -103,4 +70,3 @@ const command = (state = [], action) => {
 }
 
 export default command
-
