@@ -45,6 +45,7 @@ class StationBrowser extends EventEmitter {
 
       if (!Array.isArray(data.addresses) || typeof data.host !== 'string')  
         return
+
       debug('mdns addresses', data.addresses)
 
       if (data.addresses.includes('192.168.5.65')) {

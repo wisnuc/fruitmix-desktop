@@ -4,7 +4,6 @@
  * @time 2016-10-23
  * @author liuhua
 **/
-
 import { ipcRenderer } from 'electron'
 import { TweenMax } from 'gsap'
 import Debug from 'debug'
@@ -57,7 +56,7 @@ class Login extends React.Component {
 
       debug('devices initialized', nextState)
 
-    }, 2000)
+    }, 3000)
 
     this.selectNextDevice = () => {
      
@@ -163,6 +162,7 @@ class Login extends React.Component {
   componentWillUnmount() {
     clearInterval(this.initTimer)
   }
+
   componentWillReceiveProps(nextProps) {
     if (nextProps.devices !== this.props.devices)
       debug('devices changed', this.props.devices, nextProps.devices)

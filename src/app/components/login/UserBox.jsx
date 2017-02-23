@@ -1,4 +1,8 @@
 import React from 'react'
+import ReactDOM from 'react-dom'
+
+import Radium from 'radium'
+import ReactTooltip from 'react-tooltip'
 
 import muiThemeable from 'material-ui/styles/muiThemeable'
 import { Avatar, TextField, Paper } from 'material-ui'
@@ -30,23 +34,41 @@ const styles = {
   },
 }
 
-const NamedAvatar = ({ style, name, selected, onTouchTap }) => (
-  <div style={style}>
-    <div style={styles.flexCenter}>
-      <Avatar 
-        style={{transition: 'all 150ms'}}
-        color={selected ? '#FFF' : 'rgba(0,0,0,0.54)'}
-        backgroundColor={selected ? cyan300 : grey300}
-        size={36}
-        onTouchTap={onTouchTap}
-      >
-        <div style={{lineHeight: '24px', fontSize: 14}}>
-          {name.slice(0, 2).toUpperCase()}
-        </div>
-      </Avatar>
-    </div> 
-  </div>
-)
+const RadiumAvatar = Radium(Avatar)
+
+class NamedAvatar extends React.Component {
+
+  constructor(props) {
+    super(props)
+  }
+
+  render() {
+
+    const { style, name, selected, onTouchTap } = this.props
+    return (
+      <div style={style}>
+        <div style={styles.flexCenter}>
+          <RadiumAvatar
+            style={{
+              transition: 'all 150ms',
+              color: selected ? '#FFF' : 'rgba(0,0,0,0.54)',
+              backgroundColor: selected ? cyan300 : grey300,
+
+              ':hover': {
+                color: '#FFF',
+                backgroundColor: selected ? cyan300 : grey500,
+              }
+            }}
+            size={36}
+            onTouchTap={onTouchTap}
+          >
+            <div style={{lineHeight: '24px', fontSize: 14}}>{name.slice(0, 2).toUpperCase()}</div>
+          </RadiumAvatar>
+        </div> 
+      </div>
+    )
+  }
+}
 
 class UserBox extends React.Component {
 
@@ -81,7 +103,7 @@ class UserBox extends React.Component {
     }
   }
 
-  // TODO 
+  // TODO ???
   success(username, password) {
     ipcRenderer.send('login', username, password) 
   }
@@ -130,6 +152,7 @@ class UserBox extends React.Component {
             success={this.success.bind(this)}
           />
         </div>
+
       </div>
     )
   }

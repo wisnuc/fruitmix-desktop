@@ -38,13 +38,11 @@ console.log('theme', global.theme)
 // root component
 const App = () => (
   <MuiThemeProvider muiTheme={theme}>
-    { 
-      window.store.getState().maintenance ? 
-        <Maintenance /> :
-        window.store.getState().login.state === 'LOGGEDIN' ? 
-          <Main showAppBar={window.store.getState().view.showAppBar} /> : 
-          <Login devices={window.store.getState().mdns}/> 
-    }
+    { window.store.getState().maintenance 
+        ? <Maintenance /> 
+        : window.store.getState().login.state === 'LOGGEDIN' 
+          ? <Main showAppBar={window.store.getState().view.showAppBar} /> 
+          : <Login devices={window.store.getState().mdns}/> }
   </MuiThemeProvider>
 )
 
@@ -58,7 +56,6 @@ store.subscribe(() => {
 
 // first render
 render()
-
 
 ipcRenderer.on('stateUpdate',(err,data)=>{
 	// mochaState = data
