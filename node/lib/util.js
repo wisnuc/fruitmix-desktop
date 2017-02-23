@@ -50,17 +50,25 @@ var utils = {
 		return promise
 	},
 
-	createFileObj: function(abspath, parentUUID, name) {
-		return {
-			type:'',
-			taskUUID: uuid.v4(),
-			name: name,
-			abspath: abspath,
-			parent: parentUUID,
-			isRoot: false,
-			stateName: '',
-			children: []
+	createFileObj: function(abspath, name, root) {
+
+		class CreateObj {
+			constructor(abspath, name, root) {
+				this.type = ''
+				this.name = name
+				this.abspath = abspath
+				this.root = root
+				this.isRoot = false
+				this.stateName = ''
+				this.children = []
+			}
+
+			requestProbe() {
+				this.state.requestProbe()
+			}
 		}
+
+		return new CreateObj(abspath, name, root)
 	},
 
 	visitFolder: function(filePath, position, parent, root, callback) {
@@ -79,7 +87,7 @@ var utils = {
 				let count = entries.length
 				let index = 0
 				let pushObj = () => {
-					let obj = utils.createFileObj(path.join(filePath, entries[index]), parent.taskUUID, entries[index])
+					let obj = utils.createFileObj(path.join(filePath, entries[index]), entries[index], root)
 					position.push(obj)
 					root.list.push(obj)
 					utils.visitFolder(path.join(filePath, entries[index]), position[index].children, obj, root, call)

@@ -39,6 +39,10 @@ const uploadHandle = (args, callback) => {
 }
 
 const dragFileHandle = (args) => {
+	if (!args.files.length) return
+	createUserTask(args.files, args.dirUUID)
+	getMainWindow().webContents.send('message', args.files.length + '个任务添加至上传队列')
+	return
   let files = []
   let folders = []
   let index = 0
