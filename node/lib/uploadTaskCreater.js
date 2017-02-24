@@ -15,7 +15,8 @@ let user
 let httpRequestConcurrency = 4
 let fileHashConcurrency = 6
 let visitConcurrency = 2
-const userTasks = new Map()
+const userTasks = []
+const userTasksMap = new Map()
 const runningQueue = []
 const readyQueue = []
 const hashingQueue = []
@@ -23,11 +24,20 @@ const hashlessQueue = []
 const visitlessQueue = []
 const visitingQueue = []
 
+// send message
+setInterval(() => {
+	for(let item of userTasks) {
+		// console.log(item)
+	}
+},1000)
+
+
 //create task factory
 const createUserTask = (files, target) => {
 	initArgs()
 	let task = new UserTask(files, target)
-  userTasks.set(task.operationUUID, task)
+	userTasks.push(task)
+  userTasksMap.set(task.operationUUID, task)
 }
 /*
 	UserTask is created by operation
@@ -37,12 +47,26 @@ class UserTask {
   constructor(files, target) {
   	this.operationUUID = uuid.v4()
     this.tasks = []
-    files.forEach(abspath => this.tasks.push(createTask(abspath, target, true)))
+    this.send = null
+    files.forEach(abspath => this.tasks.push(createTask(abspath, target, true, this.operationUUID)))
+  }
+
+  beginSendMessage() {
+  	console.log('beginSendMessage')
+  	this.send = setInterval(() => {
+  		console.log('send message .....')
+  	},1000) 
+  }
+
+  stopSendMessage() {
+  	console.log('stopSendMessage')
+  	this.clearInterval(this.send)
+  	this.send = null
   }
 }
 
-const createTask = (abspath, target) => {
-	let task = new TaskManager(abspath, target, true)
+const createTask = (abspath, target, newWork, operationUUID) => {
+	let task = new TaskManager(abspath, target, true, operationUUID)
 	task.readyToVisit()
 	return task
 }
@@ -58,10 +82,11 @@ const createTask = (abspath, target) => {
 	schedule(): schedule work list
 */
 class TaskManager {
-	constructor(abspath, target, newWork) {
+	constructor(abspath, target, newWork, operationUUID) {
 		this.abspath = abspath
 		this.target = target
 		this.newWork = newWork
+		this.operation = operationUUID
 		this.name = path.basename(abspath)
 		this.size = 0
 		this.state = ''
@@ -70,13 +95,13 @@ class TaskManager {
 		this.finishCount = 0
 		this.tree = []
 		this.worklist = []
-		this.folderIndex = 0
 		this.fileIndex = 0
 		this.hashIndex = 0
 		this.lastFolderIndex = -1
 		this.lastFileIndex = -1
 		this.hashing = []
-		this.Uploading = []
+		this.uploading = []
+		this.record = []
 	}
 
 	readyToVisit() {
@@ -84,15 +109,24 @@ class TaskManager {
 		addToVisitlessQueue(this)
 	}
 
+	recordInfor(msg) {
+		this.record.length > 50
+		this.record.splice(0,20)
+		// console.log(msg)
+		this.record.push(msg)
+	}
+
 	visit() {
-		console.log('开始遍历文件树...')
+		let _this = this
+		this.recordInfor('开始遍历文件树...')
 		removeOutOfVisitlessQueue(this)
 		addToVisitingQueue(this)
 		visitFolder(this.abspath, this.tree, this.worklist, this, () => {
+			_this.tree[0].target = _this.target
 			removeOutOfVisitingQueue(this)
-			console.log('遍历文件树结束...')
-			this.state = 'visited'
-			this.diff()
+			_this.recordInfor('遍历文件树结束...')
+			_this.state = 'visited'
+			_this.diff()
 		})
 	}
 
@@ -100,10 +134,8 @@ class TaskManager {
 		if (!this.newWork) {
 
 		}else {
-			console.log('新任务 不需要与服务器进行比较') 
-			
+			this.recordInfor('新任务 不需要与服务器进行比较') 
 		}
-
 		for(let i = this.worklist.length-1 ;i>=0; i--) {
 			if (this.lastFileIndex != -1) break
 			if (this.worklist[i].type === 'file') this.lastFileIndex = i
@@ -113,9 +145,8 @@ class TaskManager {
 			if (this.lastFolderIndex != -1) break
 			if (this.worklist[i].type === 'folder') this.lastFolderIndex = i
 		}
-
-		console.log(this.lastFileIndex)
-		console.log(this.lastFolderIndex)
+		this.recordInfor(this.lastFileIndex)
+		this.recordInfor(this.lastFolderIndex)
 
 		this.schedule()
 	}
@@ -128,11 +159,10 @@ class TaskManager {
 	}
 
 	hashSchedule() {
-		if (this.lastFileIndex === -1) return console.log('任务列表中不包含文件')
-		if (this.hashing.length >= 2) return console.log('任务的HASH队列已满')
-		if (this.hashIndex === this.lastFileIndex) return console.log(this.name + ' 所有文件hash计算完毕')
-		console.log('HASH 序列号为 ：' + this.hashIndex )
-		let _this = this	
+		if (this.lastFileIndex === -1) return this.recordInfor('任务列表中不包含文件')
+		if (this.hashing.length >= 2) return this.recordInfor('任务的HASH队列已满')
+		if (this.hashIndex === this.lastFileIndex + 1) return this.recordInfor(this.name + ' 所有文件hash计算完毕')
+		this.recordInfor('正在HASH第  ：' + this.hashIndex + ' 个文件')
 		let obj = this.worklist[this.hashIndex]
 		if (obj.type === 'folder' || obj.stateName === 'finish') this.hashIndex++
 		else{
@@ -145,7 +175,37 @@ class TaskManager {
 	}
 
 	uploadSchedule() {
-		if (this.UploadingCount >=2 || this.lastFolderIndex === -1) return
+		if (this.lastFolderIndex === -1) return this.recordInfor('任务列表中不包含文件')
+		if (this.uploading.length >=2 ) return this.recordInfor('任务上传队列已满')
+		if (this.fileIndex === this.worklist.length) return this.recordInfor('所有文件上传结束')
+		this.recordInfor('正在调度第 ' + (this.fileIndex + 1) + ' 个文件,总共 ' + this.worklist.length + ' 个')
+
+		let _this = this
+		let obj = this.worklist[this.fileIndex]
+		if (obj.state === 'finish') this.hashIndex++
+		if (obj.target === '') {
+			this.recordInfor('当前文件父文件夹正在创建，缺少目标，等待...')
+			setTimeout(() => {
+				_this.uploadSchedule()
+			},1000)
+			return
+		}
+		
+		else if (obj.type === 'file' && obj.sha === '') {
+			this.recordInfor('当前文件HASH尚未计算，等待...')
+			setTimeout(() => {
+				_this.uploadSchedule()
+			},1000)
+			return
+		}
+		else {
+			let stateMachine = obj.type == 'folder'? createFolderSTM : UploadFileSTM
+			obj.setState(stateMachine)
+			this.uploading.push(obj)
+			this.fileIndex++
+			obj.requestProbe()
+		}
+		this.uploadSchedule()
 	}
 }
 
@@ -154,8 +214,8 @@ const visitFolder = (abspath, position, worklist, manager, callback) => {
 		if (err || ( !stat.isDirectory() && !stat.isFile())) return callback(err)
 		let type = stat.isDirectory()?'folder':'file'
 		let obj = stat.isDirectory()?
-			new folderUploadTask(type, abspath, manager):
-			new fileUploadTask(type, abspath, manager)
+			new FolderUploadTask(type, abspath, manager):
+			new FileUploadTask(type, abspath, manager)
 		manager.count++
 		manager.size += stat.size
 		worklist.push(obj)
@@ -195,9 +255,21 @@ class UploadTask {
 	requestProbe() {
 		this.state.requestProbe()
 	}
+
+	uploadFinish() {
+		this.recordInfor(this.name + ' 上传完毕')
+		this.stateName = 'finish'
+		this.manager.uploading.splice(this.manager.uploading.indexOf(this), 1)
+		this.manager.finishCount++
+		this.manager.uploadSchedule()
+	}
+
+	recordInfor(msg) {
+		this.manager.recordInfor(msg)
+	}
 }
 
-class fileUploadTask extends UploadTask{
+class FileUploadTask extends UploadTask{
 	constructor(type, abspath, manager) {
 		super(type, abspath, manager)
 		this.progress = 0
@@ -206,20 +278,19 @@ class fileUploadTask extends UploadTask{
 	}
 
 	hashFinish() {
-		console.log(this.name + ' HASH计算完毕')
+		this.recordInfor(this.name + ' HASH计算完毕')
 		this.stateName = 'hashed'
 		this.manager.hashing.splice(this.manager.hashing.indexOf(this),1)
-		this.manager.schedule()
+		this.manager.hashSchedule()
 	}
 }
 
-class folderUploadTask extends UploadTask{
+class FolderUploadTask extends UploadTask{
 	constructor(type, abspath, manager) {
 		super(type, abspath, manager)
 		this.children = []
 	}
 }
-
 
 class STM {
 	constructor(wrapper) {
@@ -238,12 +309,12 @@ class HashSTM extends STM {
 	requestProbe() {
 		this.wrapper.stateName = 'hassless'
 		addToHashlessQueue(this)
-		console.log(this.wrapper.name + ' 进入HASH队列')
+		this.wrapper.recordInfor(this.wrapper.name + ' 进入HASH队列')
 	}
 
 	async hashing() {
-		console.log(this.wrapper.name + ' 开始计算HASH')
 		try {
+			this.wrapper.recordInfor(this.wrapper.name + ' 开始计算HASH')
 			this.wrapper.stateName = 'hashing'
 			removeOutOfHashlessQueue(this)
 			addToHashingQueue(this)
@@ -256,6 +327,51 @@ class HashSTM extends STM {
 			//todo
 			console.log(e)
 		}
+	}
+}
+
+class createFolderSTM extends STM {
+	constructor(wrapper) {
+		super(wrapper)
+		this.handle = null
+	}
+
+	requestProbe() {
+		this.wrapper.stateName = 'uploadless'
+		addToReadyQueue(this)
+	}
+
+	uploading() {
+		this.wrapper.stateName = 'uploading'
+		removeOutOfReadyQueue(this)
+		addToRunningQueue(this)
+    let options = {
+      url:server+'/files/'+this.wrapper.target,
+      method:'post',
+      headers: {
+        Authorization: user.type+' '+user.token,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name:path.basename(this.wrapper.abspath)
+      })
+    }
+
+    this.wrapper.recordInfor(this.wrapper.name + ' 开始创建...')
+    this.handle = request(options, (err, res, body) => {
+    	if (err || res.statusCode != 200) {
+    		//todo
+    		this.wrapper.recordInfor(this.wrapper.name + ' 创建失败')
+    		console.log(err)
+    		console.log(res.statusCode)
+    		console.log(res.statusMessage)
+    	}else {
+    		removeOutOfRunningQueue(this)
+    		this.wrapper.uuid = JSON.parse(body).uuid
+    		this.wrapper.children.forEach(item => item.target = this.wrapper.uuid)
+    		this.wrapper.uploadFinish()
+    	}
+    })
 	}
 }
 
@@ -278,7 +394,7 @@ class UploadFileSTM extends STM {
 		this.wrapper.stateName = 'uploading'
 		removeOutOfReadyQueue(this)
 		addToRunningQueue(this)
-		console.log(this.wrapper.name + ' upload running')
+		this.wrapper.recordInfor(this.wrapper.name + ' 开始上传...')
 		let _this = this
 		let body = 0
 
@@ -304,121 +420,12 @@ class UploadFileSTM extends STM {
     	if (!err && res.statusCode == 200) {
     		removeOutOfRunningQueue(_this)
     		this.wrapper.uuid = JSON.parse(body).uuid
-    		this.wrapper.schedule()
+    		this.wrapper.uploadFinish()
     	}else {
-    		console.log('upload failed')
-    		console.log('err is : ')
+    		this.wrapper.recordInfor(this.wrapper.name + ' 上传失败')
     		console.log(err)
     		console.log(res.statusCode)
     		console.log(res.statusMessage)
-    	}
-    })
-	}
-}
-
-class FinishSTM extends STM {
-	constructor(wrapper) {
-		super(wrapper)
-	}
-
-	requestProbe() {
-		this.wrapper.stateName = 'finishing'
-		console.log('')
-		if (this.wrapper.isRoot) {
-			if (this.wrapper.type === 'file') {
-				//nothing todo
-			}else {
-				//running next
-				this.wrapper.lastFinishPath = this.wrapper.abspath
-				this.wrapper.children.forEach( item => item.target = this.wrapper.uuid)
-				// console.log(this.wrapper.list[this.wrapper.index])
-				this.wrapper.list[this.wrapper.index].state = new createFolderSTM(this.wrapper.list[this.wrapper.index])
-				this.wrapper.list[this.wrapper.index].requestProbe()
-			}
-		}else {
-
-			this.wrapper.root.index++
-			this.wrapper.root.lastFinishPath = this.wrapper.abspath
-			this.wrapper.children.forEach( item => item.target = this.wrapper.uuid)
-
-			let rootNode = this.wrapper.root
-			let list = rootNode.list
-			let index = rootNode.index
-			let count = rootNode.count
-
-			if (index == (count - 1)) return
-			if (list[index].type === 'file') list[index].state = new HashSTM(list[index])
-			else list[index].state = new createFolderSTM(list[index])
-			list[index].requestProbe()
-		}
-	}
-}
-
-class VisitorSTM extends STM {
-	constructor(wrapper) {
-		super(wrapper)
-	}
-
-	requestProbe() {
-		this.wrapper.stateName = 'visitless'
-		addToVisitlessQueue(this)
-	}
-
-	visiting() {
-		try {
-			let _this = this
-			this.wrapper.stateName = 'visiting'
-			removeOutOfVisitlessQueue(this)
-			addToVisitingQueue(this)
-			console.log(this.wrapper.name + ' visiting running')
-			utils.visitFolder(this.wrapper.abspath, this.wrapper.children, this.wrapper, this.wrapper, (err) => {
-				// _this.setState(createFolderSTM)
-			})
-		}catch(e) {
-			console.log(e)
-		}
-	}
-}
-
-class createFolderSTM extends STM {
-	constructor(wrapper) {
-		super(wrapper)
-		this.handle = null
-	}
-
-	requestProbe() {
-		this.wrapper.stateName = 'uploadless'
-		addToReadyQueue(this)
-	}
-
-	uploading() {
-		this.wrapper.stateName = 'uploading'
-		removeOutOfReadyQueue(this)
-		addToRunningQueue(this)
-		console.log(this.wrapper.name + ' create running')
-    let options = {
-      url:server+'/files/'+this.wrapper.target,
-      method:'post',
-      headers: {
-        Authorization: user.type+' '+user.token,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name:path.basename(this.wrapper.abspath)
-      })
-    }
-    this.handle = request(options, (err, res, body) => {
-    	if (err || res.statusCode != 200) {
-    		//todo
-    		console.log('create failed')
-    		console.log(err)
-    		console.log(res.statusCode)
-    		console.log(res.statusMessage)
-    	}else {
-    		console.log(body)
-    		removeOutOfRunningQueue(this)
-    		this.wrapper.uuid = JSON.parse(body).uuid
-    		this.setState(FinishSTM)
     	}
     })
 	}

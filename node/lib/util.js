@@ -48,60 +48,6 @@ var utils = {
 			fileStream.pipe(hash)
 		})
 		return promise
-	},
-
-	createFileObj: function(abspath, name, root) {
-
-		class CreateObj {
-			constructor(abspath, name, root) {
-				this.type = ''
-				this.name = name
-				this.abspath = abspath
-				this.root = root
-				this.isRoot = false
-				this.stateName = ''
-				this.children = []
-			}
-
-			requestProbe() {
-				this.state.requestProbe()
-			}
-		}
-
-		return new CreateObj(abspath, name, root)
-	},
-
-	visitFolder: function(filePath, position, parent, root, callback) {
-		console.log(path.basename(filePath))
-		fs.stat(filePath, (err, stat) => {
-			if (err || ( !stat.isDirectory() && !stat.isFile())) return callback(err)
-			root.count++
-			root.size += stat.size
-			if (stat.isFile()) {
-				parent.type = 'file'
-				return callback()
-			}else parent.type = 'folder'
-			fs.readdir(filePath, (err, entries) => {
-				if (err) return callback(err)
-				else if (!entries.length) return callback(null)
-				let count = entries.length
-				let index = 0
-				let pushObj = () => {
-					let obj = utils.createFileObj(path.join(filePath, entries[index]), entries[index], root)
-					position.push(obj)
-					root.list.push(obj)
-					utils.visitFolder(path.join(filePath, entries[index]), position[index].children, obj, root, call)
-				}
-				let call = err => {
-					if (err) return callback(err)
-					if ( ++index == count) return callback()
-					else {
-						pushObj()
-					}
-				}
-				pushObj()
-			})
-		})
 	}
 }
 

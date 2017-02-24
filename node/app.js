@@ -17,8 +17,8 @@ import systemModule from './lib/system'
 import loginApi from './lib/login'
 import fileApi from './lib/file'
 import mediaApi from './lib/media'
-import upload from './lib/upload'
-// import newUpload from './lib/newUpload'
+// import upload from './lib/upload'
+import newUpload from './lib/newUpload'
 import download from './lib/download'
 //init window
 import { initMainWindow, getMainWindow } from './lib/window'
@@ -69,30 +69,30 @@ app.on('ready', function() {
   
   if (mocha) initTestWindow()
 
-  // setTimeout(() => {
-  //   if (true) {
-  //     store.dispatch({
-  //       type: 'CONFIG_SET_IP',
-  //       data: '192.168.5.182'
-  //     })
-  //     dispatch({
-  //       type: 'LOGGEDIN',
-  //       obj: {
-  //         "type": "JWT",
-  //         "uuid": "1100da1a-4b5d-4723-87c8-31ea912eef98",
-  //         "username": "liu",
-  //         "avatar": null,
-  //         "email": null,
-  //         "isAdmin": false,
-  //         "isFirstUser": false,
-  //         "home": "0afdc3a4-2738-4df8-b794-0421d6d7705d",
-  //         "library": "b19561a5-8a14-43bc-85b4-4774a0277850",
-  //         "unixUID": 2004,
-  //         token:'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiMTEwMGRhMWEtNGI1ZC00NzIzLTg3YzgtMzFlYTkxMmVlZjk4In0.0Fs5Lvy3_p5-KkzeKAYB3xyl76qRAP12p5JMRW7k-ro'
-  //       }
-  //     })
-  //   }
-  // },1000)
+  setTimeout(() => {
+    if (true) {
+      store.dispatch({
+        type: 'CONFIG_SET_IP',
+        data: '192.168.5.197'
+      })
+      dispatch({
+        type: 'LOGGEDIN',
+        obj: {
+          "type": "JWT",
+          "uuid": "384ae38b-d840-420b-bc64-763654522b70",
+          "username": "liu",
+          "avatar": null,
+          "email": null,
+          "isAdmin": true,
+          "isFirstUser": true,
+          "home": "3ecb3b93-b3c1-4415-ae02-3af9b8c5fa19",
+          "library": "ef8bae54-b5f6-41a2-bae0-cb164f7e205b",
+          "unixUID": 2000,
+          "token":'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiMzg0YWUzOGItZDg0MC00MjBiLWJjNjQtNzYzNjU0NTIyYjcwIn0.H4szymqLtQ1dNGYNDrCWQ0q-jGvLK094E0-I8LAxASg'
+        }
+      })
+    }
+  },1000)
 })
 
 app.on('window-all-closed', () => app.quit())
