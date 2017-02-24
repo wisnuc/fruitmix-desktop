@@ -31,20 +31,18 @@ injectTapEventPlugin()
 // global import jQuery
 global.$ = global.jQuery = global.jQuery || require('jquery')
 
-global.theme = Object.assign({}, getMuiTheme(lightBaseTheme), { fontFamily: 'Noto Sans CJK SC, sans-serif' })
+global.theme = Object.assign({}, getMuiTheme(lightBaseTheme), { fontFamily: 'Noto Sans SC, sans-serif' })
 
 console.log('theme', global.theme)
 
 // root component
 const App = () => (
   <MuiThemeProvider muiTheme={theme}>
-    { 
-      window.store.getState().maintenance ? 
-        <Maintenance /> :
-        window.store.getState().login.state === 'LOGGEDIN' ? 
-          <Main showAppBar={window.store.getState().view.showAppBar} /> : 
-          <Login devices={window.store.getState().mdns}/> 
-    }
+    { window.store.getState().maintenance 
+        ? <Maintenance /> 
+        : window.store.getState().login.state === 'LOGGEDIN' 
+          ? <Main showAppBar={window.store.getState().view.showAppBar} /> 
+          : <Login devices={window.store.getState().mdns}/> }
   </MuiThemeProvider>
 )
 
@@ -58,7 +56,6 @@ store.subscribe(() => {
 
 // first render
 render()
-
 
 ipcRenderer.on('stateUpdate',(err,data)=>{
 	// mochaState = data

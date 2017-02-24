@@ -14,10 +14,10 @@ const parseHostname = (hostname) => {
 
   if (typeof hostname !== 'string') return null
 
-  var split = hostname.split('.')
+    var split = hostname.split('.')
   if (split.length !== 2) return null
 
-  var name = split[0]
+    var name = split[0]
   var domain = split[1]
 
   split = split[0].split('-')
@@ -39,12 +39,13 @@ class StationBrowser extends EventEmitter {
 
     super()
     browser.on('update', data => {
-        console.log(data)
+      // console.log(data)
 
       debug('mdns update', data)
 
       if (!Array.isArray(data.addresses) || typeof data.host !== 'string')  
         return
+
       debug('mdns addresses', data.addresses)
 
       if (data.addresses.includes('192.168.5.65')) {
@@ -70,8 +71,8 @@ class StationBrowser extends EventEmitter {
 
       // set up hostname => ip address map
       data.addresses
-        .filter(addr => validator.isIP(addr, 4))
-        .forEach(addr => this.map.set(data.host, addr))
+      .filter(addr => validator.isIP(addr, 4))
+      .forEach(addr => this.map.set(data.host, addr))
 
       // 
       let obj = Object.assign(parsed, {
@@ -113,12 +114,12 @@ class StationBrowser extends EventEmitter {
       var prev = this.stations[index]
       var curr = Object.assign({}, prev, obj)
       this.stations = [...this.stations.slice(0, index), curr, 
-        ...this.stations.slice(index + 1)]
+      ...this.stations.slice(index + 1)]
       this.signal(prev, curr)
 
       if (prev.appifi && curr.appifi && 
-          !!prev.appifi.docker === !!curr.appifi.docker &&
-          prev.fruitmix === curr.fruitmix)
+        !!prev.appifi.docker === !!curr.appifi.docker &&
+        prev.fruitmix === curr.fruitmix)
         return
 
       var copy = [...this.stations]
@@ -134,21 +135,21 @@ class StationBrowser extends EventEmitter {
     if (prev === null) {
 
       request
-        .get(`${curr.address}:3000/server`)
-        .set('Accept', 'application/json')
-        .end((err, res) => {
+      .get(`${curr.address}:3000/server`)
+      .set('Accept', 'application/json')
+      .end((err, res) => {
 
-          if (err) 
-            return this.updateStation({ name: curr.name, appifi: 'ERROR' })
+        if (err) 
+          return this.updateStation({ name: curr.name, appifi: 'ERROR' })
 
-          if (!res.ok)
-            return this.updateStation({ name: curr.name, appifi: 'ERROR' }) 
+        if (!res.ok)
+          return this.updateStation({ name: curr.name, appifi: 'ERROR' }) 
 
-          this.getBlockMessage(curr.address,(data) => {
+        this.getBlockMessage(curr.address,(data) => {
             // check appifi.docker object or null
             this.updateStation({ name: curr.name, appifi: res.body, mir:data.mir, boot:data.boot })
           })
-        })
+      })
 
       return
     }  
@@ -160,7 +161,7 @@ class StationBrowser extends EventEmitter {
     // }
     // when station.appifi updated, AND docker started
     if (prev.appifi === undefined &&
-        typeof curr.appifi === 'object') {
+      typeof curr.appifi === 'object') {
 
       request
         .get(`${curr.address}:3721/login`) 
@@ -198,33 +199,33 @@ class StationBrowser extends EventEmitter {
     let mir = null
     let boot = null
     request
-        .get(`${ip}:3000/system/storage`)
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-            if (!err && res.ok) {
-                mir = res.body
-            }else {
-              mir = null
-            }
-            request
-                .get(`${ip}:3000/system/boot`)
-                .set('Accept', 'application/json')
-                .end((err, b) => {
-                    if (!err && res.ok) {
-                        boot = b.body
-                    }else {
-                      boot = null
-                    }
-                    callback({mir,boot})
-                })
-        })
+    .get(`${ip}:3000/system/storage`)
+    .set('Accept', 'application/json')
+    .end((err, res) => {
+      if (!err && res.ok) {
+        mir = res.body
+      }else {
+        mir = null
+      }
+      request
+      .get(`${ip}:3000/system/boot`)
+      .set('Accept', 'application/json')
+      .end((err, b) => {
+        if (!err && res.ok) {
+          boot = b.body
+        }else {
+          boot = null
+        }
+        callback({mir,boot})
+      })
+    })
   }
 
 // EHOSTUNREACH
 // ECONNRESET
 // ECONNREFUSED
 
-  watch () {
+watch () {
     // console.log('watch...')
 
     this.stations.forEach(stn => {
@@ -233,19 +234,19 @@ class StationBrowser extends EventEmitter {
       if (stn.appifi) {
 
         request
-          .get(`${stn.address}:3000/server`)
-          .set('Accept', 'application/json')
-          .end((err, res) => {
+        .get(`${stn.address}:3000/server`)
+        .set('Accept', 'application/json')
+        .end((err, res) => {
 
-            if (err || !res.ok) 
-              return this.updateStation({ name: stn.name, appifi: 'ERROR' })
+          if (err || !res.ok) 
+            return this.updateStation({ name: stn.name, appifi: 'ERROR' })
 
-            appifi = res.body
+          appifi = res.body
             // if (!appifi.docker) {
             //   return this.updateStation({ name: stn.name, appifi, fruitmix: undefined })  
             // }
             this.getBlockMessage(stn.address,(data) => {
-              
+
               mir = data.mir
               boot = data.boot
 

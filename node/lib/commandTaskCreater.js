@@ -19,8 +19,8 @@ class CommandTask {
 	}
 
 	commandWithNoCallback() {
-		if (hander) {
-			hander(this.args, (err, data) => {
+		if (this.hander) {
+			this.hander(this.args, (err, data) => {
 				debug('command no reply', op, err, data)
 			})
 		}

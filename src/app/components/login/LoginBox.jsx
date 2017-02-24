@@ -14,7 +14,7 @@ class LoginBox extends React.Component {
       password: '',
       error: undefined,
       busy: false,
-      success: false,
+      success: 0,
     }
   }
 
@@ -49,8 +49,13 @@ class LoginBox extends React.Component {
       if (err) 
         this.setState({ busy: false, error: err.message })
       else {
-        this.setState({ busy: false, success: true })
-        setTimeout(() => this.props.success(username, password), 1200)
+        setTimeout(() => {
+          this.setState({ busy: false, success: 1 })
+          setTimeout(() => {
+            this.setState({ success: 2 })
+            setTimeout(() => this.props.success(username, password), 900)
+          }, 150)
+        }, 150)
       }
     })
 
@@ -85,17 +90,16 @@ class LoginBox extends React.Component {
               flex: '0 0 36px', 
               fontSize: 24, 
               fontWeight: 'medium',
-              color: 'rgba(0,0,0,0.87)', 
+              color: 'rgba(0,0,0,0.87)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis', 
             }}>
               {this.props.username}
             </div>
             <div style={{flex: '0 0 20px'}}/>
             <div style={{width: '100%', flex: '0 0 48px'}}>
-              { this.state.success 
-                ? <div style={{width: '100%', display:'flex', alignItems:'center', justifyContent: 'center'}}>
-                    <Checkmark color={this.props.muiTheme.palette.primary1Color} delay={300} />
-                  </div>
-                : <TextField 
+              { this.state.success === 0 
+                ? <TextField 
                     key={this.props.uuid}
                     fullWidth={true} 
                     hintText='请输入密码' 
@@ -105,17 +109,22 @@ class LoginBox extends React.Component {
                     ref={input => { input && input.focus() }}
                     onChange={this.onInput.bind(this)}
                     onKeyDown={this.onKeyDown.bind(this)}
-                  /> }
+                  />                 
+                : this.state.success === 1 
+                ? <div />
+                : <div style={{width: '100%', display:'flex', alignItems:'center', justifyContent: 'center'}}>
+                    <Checkmark color={this.props.muiTheme.palette.primary1Color} delay={300} />
+                  </div>
+}
             </div>
-            <div style={{flex: '0 0 20px'}}/>
             <div style={{width: '100%', flex: '0 0 36px', display: 'flex'}}>
               <div style={{flexGrow: 1}} />
-              { !this.state.success &&
+              { this.state.success === 0 &&
               <FlatButton label='取消' primary={true} 
                 disabled={this.state.busy}
                 onTouchTap={this.props.cancel} 
               /> }
-              { !this.state.success &&
+              { this.state.success === 0 &&
               <FlatButton style={{marginRight: -16}} label='确认' primary={true} 
                 disabled={this.state.password.length === 0 || this.state.busy}
                 onTouchTap={this.login.bind(this)}
