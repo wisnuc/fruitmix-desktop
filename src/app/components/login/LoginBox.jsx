@@ -90,7 +90,9 @@ class LoginBox extends React.Component {
               flex: '0 0 36px', 
               fontSize: 24, 
               fontWeight: 'medium',
-              color: 'rgba(0,0,0,0.87)', 
+              color: 'rgba(0,0,0,0.87)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis', 
             }}>
               {this.props.username}
             </div>
@@ -115,7 +117,6 @@ class LoginBox extends React.Component {
                   </div>
 }
             </div>
-            <div style={{flex: '0 0 20px'}}/>
             <div style={{width: '100%', flex: '0 0 36px', display: 'flex'}}>
               <div style={{flexGrow: 1}} />
               { this.state.success === 0 &&
