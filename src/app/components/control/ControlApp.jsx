@@ -296,12 +296,14 @@ class User extends React.Component {
                   }))}
                 />
                 <TextField hintText='输入密码' floatingLabelText='输入密码' fullWidth={true} key='createpassword' maxLength={40}
+                  type="password"
                   disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
                   onChange={e => this.setState(Object.assign({}, this.state, {
                     newUserDialog: Object.assign({}, this.state.newUserDialog, { password: e.target.value })
                   }))}
                 />
                 <TextField hintText='再次输入密码' floatingLabelText='再次输入密码' fullWidth={true} key='createpasswordagain' maxLength={40}
+                  type="password"
                   disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
                   onChange={e => this.setState(Object.assign({}, this.state, {
                     newUserDialog: Object.assign({}, this.state.newUserDialog, { passwordAgain: e.target.value })

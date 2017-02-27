@@ -26,7 +26,7 @@ import HoverNav from './HoverNav'
 const MaintBox = props => (
     <div style={{width: '100%', height: 64, backgroundColor: 'rgba(128,128,128,0.8)',
       display:'flex', alignItems: 'center', justifyContent: 'space-between', 
-      boxSizing: 'border-box', paddingLeft: 64, paddingRight: 64}}>
+      boxSizing: 'border-box', paddingLeft: 24, paddingRight: 24}}>
       
       <div style={{color: '#FFF' }}>{props.text}</div>
       <FlatButton label='维护模式' onTouchTap={props.onMaintain} />
@@ -222,7 +222,7 @@ class DeviceCard extends React.Component {
     if (this.state.boot === null || this.state.storage === null || this.state.users === null) {
       return (
         <div style={{width: '100%', height: 64, backgroundColor: '#FFF', 
-          display: 'flex', alignItems: 'center', boxSizing: 'border-box', paddingLeft: 64}}>
+          display: 'flex', alignItems: 'center', boxSizing: 'border-box', paddingLeft: 24}}>
           通讯中....
         </div>
       )
@@ -230,7 +230,7 @@ class DeviceCard extends React.Component {
 
     if (this.state.boot instanceof Error || this.state.storage instanceof Error) {
       return (
-        <div style={{width: '100%', height: 64, backgroundColor: '#FFF', display: 'flex', alignItems: 'center', boxSizing: 'border-box', paddingLeft: 64}}>
+        <div style={{width: '100%', height: 64, backgroundColor: '#FFF', display: 'flex', alignItems: 'center', boxSizing: 'border-box', paddingLeft: 24}}>
           无法与该设备通讯，它可能刚刚离线或正在启动。 
         </div>
       )

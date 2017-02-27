@@ -366,6 +366,7 @@ class GuideBox extends React.Component {
                     <div>
                       <TextField key='guide-box-username' hintText='用户名' 
                         value={this.state.username}
+                        maxLength={20}
                         onChange={e => {
                         let nextState = Object.assign({}, this.state, { username: e.target.value })
                         console.log(nextState)
@@ -375,6 +376,8 @@ class GuideBox extends React.Component {
                     <div>
                       <TextField key='guide-box-password' hintText='密码' 
                         value={this.state.password}
+                        type= 'password'
+                        maxLength={40}
                         onChange={e => {
                         let nextState = Object.assign({}, this.state, { password: e.target.value })
                         console.log(nextState)
@@ -384,6 +387,8 @@ class GuideBox extends React.Component {
                     <div>
                       <TextField key='guide-box-password-again' hintText='再次输入密码' 
                         value={this.state.passwordAgain}
+                        type='password'
+                        maxLength={40}
                         onChange={e => {
                         this.setState(Object.assign({}, this.state, { passwordAgain: e.target.value }))
                       }}/>
@@ -473,7 +478,7 @@ class GuideBox extends React.Component {
           </div>
 
           <div style={{width: '100%', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FAFAFA'}}>
-            <div style={{marginLeft: 16}}>该设备已安装WISNUC OS，但尚未初始化。</div>
+            <div style={{marginLeft: 24}}>该设备已安装WISNUC OS，但尚未初始化。</div>
             <FlatButton style={{marginRight: 16}} label={this.state.expanded ? '放弃' : '初始化'} 
               onTouchTap={() => {
                 if (this.state.expanded) {
