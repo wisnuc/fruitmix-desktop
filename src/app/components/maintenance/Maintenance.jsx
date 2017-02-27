@@ -579,7 +579,13 @@ class Maintenance extends React.Component {
             else {
               this.reloadBootStorage((err2, { boot, storage }) => {
                 // FIXME
-                this.state.dialog.setState(operationSuccess, ['启动成功，系统将在3秒钟后跳转到登录页面'])
+                for(let i=5;i>=0;i--)
+                {
+                  let time=(5-i)*1000;
+                  let that=this;
+                  setTimeout(function(){that.state.dialog.setState(operationSuccess, ['启动成功，系统将在' + i + '秒钟后跳转到登录页面'])},time)
+                }
+                setTimeout(function(){window.store.dispatch({type: 'EXIT_MAINTENANCE'})},6000)
               })
             }
           })
