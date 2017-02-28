@@ -578,7 +578,7 @@ class Maintenance extends React.Component {
             }
             else {
               this.reloadBootStorage((err2, { boot, storage }) => {
-                // FIXME
+                // FIXMED
                 for(let i=5;i>=0;i--)
                 {
                   let time=(5-i)*1000;
@@ -926,6 +926,7 @@ class Maintenance extends React.Component {
           }
         }
         else if (status === 'NOTFOUND') {
+          console.log(status)
           return <div
             style={{
               fontSize: 13,
