@@ -1,7 +1,9 @@
 import Debug from 'debug'
 const debug = Debug('view:control:poweroff')
 
+import { ipcRenderer } from 'electron'
 import React from 'react'
+
 import FlatButton from '../common/FlatButton'
 import { Dialog } from 'material-ui'
 import request from 'superagent'
@@ -53,7 +55,11 @@ class PowerOff extends React.Component {
         <FlatButton 
           label='确定' 
           primary={true}
-          onTouchTap={() => this.bootOp('poweroff')}
+          onTouchTap={() => {
+            this.bootOp('poweroff')
+            window.store.dispatch({type:'LOGIN_OFF'})//unknown use
+            ipcRenderer.send('loginOff')
+          }}
          />
       ]
     case 'REBOOT':
@@ -62,7 +68,11 @@ class PowerOff extends React.Component {
         <FlatButton 
           label='确定' 
           primary={true}
-          onTouchTap={() => this.bootOp('reboot')}
+          onTouchTap={() => {
+            this.bootOp('reboot')
+            window.store.dispatch({type:'LOGIN_OFF'})
+            ipcRenderer.send('loginOff')
+          }}
          />
       ]
     case 'REBOOTMAINTENANCE':
@@ -71,26 +81,16 @@ class PowerOff extends React.Component {
         <FlatButton 
           label='确定' 
           primary={true}
-          onTouchTap={() => this.bootOp('rebootMaintenance')}
+          onTouchTap={() => {
+            this.bootOp('rebootMaintenance')
+            window.store.dispatch({type:'LOGIN_OFF'})
+            ipcRenderer.send('loginOff')
+          }}
          />
       ]
     }
   }
   render() {
-  ////
-    const actions = [
-      <FlatButton
-        label="取消"
-        primary={true}
-        onTouchTap={this.handleClose}
-      />,
-      <FlatButton
-        label="确定"
-        primary={true}
-        onTouchTap={this.handleClose}
-      />,
-    ];
-  ////
     return (
       <div style={this.props.style}>
         <div style={{paddingLeft: 72}}>

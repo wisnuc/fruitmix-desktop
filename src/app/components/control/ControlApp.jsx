@@ -80,6 +80,8 @@ class User extends React.Component {
 
           if (err || !res.ok) return debug('request patch username', err || !res.ok)
           debug('request patch username', res.body)
+          this.refreshUsers()
+          setTimeout(() => this.setState(Object.assign({}, this.state, { usernameDialog: null })), 1000) 
         })
     }
 
@@ -204,7 +206,15 @@ class User extends React.Component {
       </div> 
     )
   }
-
+  renderUserName() {
+    if (!this.state.data) return null
+    debug('this.state.data.username', this.state.data[0].username)
+    return (
+      <div style={Object.assign({}, header1Style, { color: blueGrey500 })}>
+        { this.state.data[0].username }
+      </div>
+    )
+  }
   render() {
 
     let { themeColor, address, fruitmixPort, user } = this.props
@@ -212,7 +222,7 @@ class User extends React.Component {
     return (
       <div style={this.props.style}>
         <div style={{paddingLeft: 72}}>
-          <div style={Object.assign({}, header1Style, { color: blueGrey500 })}>{ user.username }</div>
+          { this.renderUserName() }
           <div style={contentStyle}>
             { user.isAdmin && user.isFirstUser ? 
               '您是系统的第一个用户，是最高权限的系统管理员。' :
