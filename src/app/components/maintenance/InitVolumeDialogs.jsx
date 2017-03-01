@@ -1,5 +1,6 @@
 import React from 'react'
-
+import Debug from 'debug'
+const debug = Debug('component:maintenance:InitVolumeDialogs')
 import FlatButton from '../common/FlatButton'
 import { Checkbox, CircularProgress, Dialog, TextField } from 'material-ui'
 import ToggleRadioButtonChecked from 'material-ui/svg-icons/toggle/radio-button-checked'
@@ -47,42 +48,42 @@ class UsernamePassword extends React.Component {
 }
 
 const ReinitVolumeConfirm = props => {
-
+  debug("ReinitVolumeConfirm props ",props)
   let volume = props.volume
   let wisnuc = volume.wisnuc 
 
   let warning = ''
   let text = []
-
-  if (wisnuc.status === 'READY' || 'DAMAGED') {
+  debug("wisnuc.status",wisnuc.status)
+  debug("wisnuc.error",wisnuc.error)
+  debug("waring raw: ", warning)
+  if (wisnuc.status === ('READY' || 'DAMAGED')) {
     warning = '文件系统已经包含wisnuc应用的用户数据，请仔细阅读下述信息，避免数据丢失。'
   }
   else if (wisnuc.status === 'AMBIGUOUS') {
     warning = '文件系统可能包含wisnuc应用的用户数据，请仔细阅读下述信息，避免数据丢失。'
   }
-  else if (wisnuc.error === 'EWISNUCNOTDIR' || wisnuc.error === 'EFRUITMIXNOTDIR') {
-    warning = '文件系统存在文件与wisnuc应用数据的目录结构冲突，请仔细阅读下述信息，避免数据丢失。'
+  else if (wisnuc.error === 'EWISNUCNOTDIR') {
+    warning = '文件系统存在文件 wisnuc 与wisnuc应用数据的目录结构冲突，请仔细阅读下述信息，避免数据丢失。'
+  }
+  else if (wisnuc.error === 'EFRUITMIXNOTDIR') {
+    warning = '文件系统存在文件 wisnuc/fruitmix 与wisnuc应用数据的目录结构冲突，请仔细阅读下述信息，避免数据丢失。'
   }
   else if (wisnuc.error === 'EWISNUCNOFRUITMIX' && volume.mountpoint !== '/') { // for rootfs this is normal case
     warning = '文件系统不包含wisnuc应用的用户数据，但存在wisnuc文件夹，请仔细阅读下述信息，避免数据丢失。'
   }
-
+  else{
+    warning = '文件系统不包含wisnuc应用的用户数据，但存在wisnuc文件夹，且挂载点并不是根目录，请仔细阅读下述信息，避免数据丢失。'
+  }
+  debug("waring new: ", warning)
   let general = 'wisnuc应用在文件系统根目录上建立名为wisnuc的文件夹存放数据；其中fruitmix子文件夹存放用户的私有云应用数据，包括用户通过手机、客户端以及Windows文件共享(Samba)等方式传输的文件和照片；wisnuc目录下的其他文件夹可能用于存放appifi/docker第三方应用的镜像文件、私有数据（例如Transmission的下载文件，ownCloud的私有云文件）；对于ws215i用户，如果系统从2016年1月的版本升级至最新版本，且没有做过数据迁移，则老版本系统的用户数据也存放在wisnuc目录下的其他目录内。'
 
   let removeWisnuc = '选择该选项会删除所有上述存放于wisnuc目录下的数据。'
   let removeFruitmix = '选择该选项会保留原wisnuc目录下的其他目录数据，包括appifi/docker应用镜像，appifi/docker第三方应用数据，老版本软件尚未迁移的用户数据；但删除所有位于fruitmix目录下的wisnuc私有云应用数据，包括所有用户信息、云盘配置信息、用户上传的所有文件和照片。'
   let keepBoth = '选择该选项不会删除任何数据，但会在该目录下重建新的用户和云盘配置；该操作之后旧的用户上传的文件和照片在新系统中无法直接使用，用户只能手动迁移；旧系统中创建的文件、照片和相册分享无法恢复。'
 
-  let mustDelete
-  if (wisnuc.error === 'EWISNUCNOTDIR')
-    mustDelete = '必须选择删除和重建wisnuc文件夹方可执行操作'
-  else if (wisnuc.error === 'EFRUITMIXNOTDIR')
-    mustDelete = '必须选择删除和重建fruitmix文件夹方可执行操作'
-
-  return (
+  let removeWisnucCheck = [
     <div>
-      { warning && <div>{warning}</div> }              
-      <div>{general}</div>
       <Checkbox 
         checked={props.remove === 'wisnuc'}
         checkedIcon={<ToggleRadioButtonChecked />}
@@ -93,17 +94,24 @@ const ReinitVolumeConfirm = props => {
         disableFocusRipple={true}
       />
       <div>{removeWisnuc}</div>
+    </div>
+  ]
+  let removeFruitmixCheck = [
+    <div>
       <Checkbox 
         checked={props.remove === 'fruitmix'}
         checkedIcon={<ToggleRadioButtonChecked />}
         uncheckedIcon={<ToggleRadioButtonUnchecked />}
         label='保留wisnuc目录，删除和重建fruitmix目录' 
         onCheck={() => props.onCheck('fruitmix')}
-
         disableTouchRipple={true}
         disableFocusRipple={true}
       />
-      <div>{removeWisnuc}</div>
+      <div>{removeFruitmix}</div>
+    </div>
+  ]
+  let keepBothCheck = [
+    <div>
       <Checkbox 
         checked={props.remove === undefined}
         checkedIcon={<ToggleRadioButtonChecked />}
@@ -114,6 +122,20 @@ const ReinitVolumeConfirm = props => {
         disableFocusRipple={true}
       />
       <div>{keepBoth}</div>
+     </div>
+  ]
+  let mustDelete = ''
+  if (wisnuc.error === 'EWISNUCNOTDIR')
+    mustDelete = 'wisnuc'
+  else if (wisnuc.error === 'EFRUITMIXNOTDIR')
+    mustDelete = 'fruitmix'
+  return (
+    <div>
+      { warning && <div style={{margin: 16}}>警告：{warning}</div> }
+      {/* <div style={{margin: 16}}>{general}</div>*/}
+      { <div style={{margin: 16}}>{removeWisnucCheck}</div>}
+      { !(mustDelete === 'wisnuc') && <div style={{margin: 16}}>{removeFruitmixCheck}</div> }
+      { !mustDelete && <div style={{margin: 16}}>{keepBothCheck}</div>}
     </div>
   )
 }
@@ -131,11 +153,7 @@ export class InitVolumeDialogs extends React.Component {
   constructor(props) {
 
     super(props) 
-
-    let stage = undefined
-    if (props.volume)
-      stage = props.volume.wisnuc.intace ? 'SETUSER' : 'CONFIRM'
-
+    
     this.state = {
       stage:  props.volume ? 'CONFIRM' : undefined,
       remove: undefined,
@@ -153,6 +171,7 @@ export class InitVolumeDialogs extends React.Component {
 
       let wisnuc = nextProps.volume.wisnuc
       this.setState({
+        //wisnuc directory is not exist when intact is true
         stage: wisnuc.intact ? 'SETUSER' : 'CONFIRM',
         remove: undefined,
         user: null,
@@ -230,11 +249,11 @@ export class InitVolumeDialogs extends React.Component {
       return [ <FlatButton label=' ' disabled={true} /> ]
 
     case 'SUCCESS':
-      return [ <FlatButton label='晓得了' 
+      return [ <FlatButton label='success 晓得了' 
         primary={true} onTouchTap={this.props.onRequestClose} /> ]
 
     case 'FAILED':
-      return [ <FlatButton label='晓得了' 
+      return [ <FlatButton label='failed 晓得了' 
         primary={true} onTouchTap={this.props.onRequestClose} /> ]
     }
   }
@@ -276,7 +295,8 @@ export class InitVolumeDialogs extends React.Component {
         model={true}
         actions={this.getActions()}
       >
-        <div style={{width: '100%', minHeight: 280}}> 
+        <div style={{width: '100%', height: '100%'}}> 
+        {/* <div style={{width: '100%', minHeight: 280}}> */}
         { this.state.stage === 'CONFIRM' ? 
             <ReinitVolumeConfirm 
               volume={this.props.volume}
