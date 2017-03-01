@@ -461,3 +461,24 @@ body{
   text-align: right;
   margin-right: 40px;
 }
+
+/*new transmission 2017.2.28*/
+#transmission-wrap {
+	padding:108px 88px 0px;
+}
+
+#trs-uploading-main {
+	margin-bottom: 80px;
+}
+
+.trs-title {
+	font-size :26px;
+	font-weight: 400;
+	color:#b8b8b8;
+}
+
+.trs-hr {
+	height:1px;
+	background-color: #b8b8b8;
+	margin: 8px 0px 12px 0px
+}

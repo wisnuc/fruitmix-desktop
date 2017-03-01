@@ -61,7 +61,8 @@ import { blue500, red500, greenA200 } from 'material-ui/styles/colors'
 //import file module
 import FileTable from './FileTable'
 import FileUploadButton from './FileUploadButton'
-import Upload from './Upload'
+// import Upload from './Upload'
+import Upload from './newUpload'
 import Download from './Download'
 import Detail from './Detail'
 
@@ -1160,7 +1161,7 @@ class FileApp extends React.Component {
 		}
 
 		if (this.state.navContext == 'UPLOAD') {
-			return <Upload/>
+			return <Upload type='upload'/>
 		}
 
     if (!this.state.list) return null
@@ -1362,13 +1363,13 @@ class FileApp extends React.Component {
                 />
                 <Divider />
                 <MenuItem style={{fontSize: 14}} primaryText='上传任务' leftIcon={<FileFileUpload />}
-                  rightIcon={window.store.getState().transimission.uploadFinish?null:svg.transmission()} 
+                  rightIcon={window.store.getState().transmission.uploadFinish?null:svg.transmission()} 
                 	onTouchTap={() => {
                 		this.navUpdate('UPLOAD',{children:[],path:[]})
                 	}}
                 />
                 <MenuItem style={{fontSize: 14}} primaryText='下载任务' leftIcon={<FileFileDownload />}
-                  rightIcon={window.store.getState().transimission.downloadFinish?null:svg.transmission()} 
+                  rightIcon={window.store.getState().transmission.downloadFinish?null:svg.transmission()} 
                 	onTouchTap={() => {
                 		this.navUpdate('DOWNLOAD',{children:[],path:[]})
                 	}}

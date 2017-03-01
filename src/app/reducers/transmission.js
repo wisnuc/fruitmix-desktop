@@ -1,11 +1,13 @@
 const defaultState = {
-	upload:[],
+	upload: [],
 	download: [],
 	uploadFinish: true,
-	downloadFinish: true
+	downloadFinish: true,
+	userTasks: [],
+	finishTasks: []
 }
 
-const transimission = (state=defaultState,action)=>{
+const transmission = (state = defaultState, action)=>{
 	switch(action.type) {
 		case 'LOGIN_OFF':
 			return Object.assign({}, state, {
@@ -24,9 +26,17 @@ const transimission = (state=defaultState,action)=>{
 			return Object.assign({},state,{
 				upload:action.tasks,
 				uploadFinish:action.uploadFinish == undefined?state.uploadFinish:action.uploadFinish})
+
+		case 'UPDATE_UPLOAD':
+
+			return Object.assign({}, state, {
+				userTasks: action.userTasks,
+				finishTasks: action.finishTasks
+			})
+
 		default:
 			return state
 	}
 }
 
-export default transimission;
+export default transmission

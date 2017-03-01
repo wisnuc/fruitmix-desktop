@@ -15,7 +15,9 @@ let user
 let httpRequestConcurrency = 4
 let fileHashConcurrency = 6
 let visitConcurrency = 2
+let sendHandler = null
 const userTasks = []
+const finishTasks = []
 const userTasksMap = new Map()
 const runningQueue = []
 const readyQueue = []
@@ -24,49 +26,47 @@ const hashlessQueue = []
 const visitlessQueue = []
 const visitingQueue = []
 
-// send message
-setInterval(() => {
-	for(let item of userTasks) {
-		// console.log(item)
+//sendMessage
+const sendMessage = () => {
+	let shouldSend = false
+	for(let i = 0; i < userTasks.length; i++) {
+		if (userTasks[i].state !== 'pause') {
+			shouldSend = true
+			break
+		}
 	}
-},1000)
+	if (shouldSend && !sendHandler) {
+		console.log('开始发送传输信息')
+		sendHandler = setInterval(sendMsg, 1000)
+		sendMsg()
+	}else if (!shouldSend && sendHandler) {
+		console.log('停止发送传输信息')
+		clearInterval(sendHandler)
+		sendHandler = null
+		sendMsg()
+	}
+}
 
+const sendMsg = () => {
+	let mainWindow = getMainWindow()
+  mainWindow.webContents.send('UPDATE_UPLOAD', userTasks, finishTasks)
+}
 
 //create task factory
 const createUserTask = (files, target) => {
 	initArgs()
-	let task = new UserTask(files, target)
-	userTasks.push(task)
-  userTasksMap.set(task.operationUUID, task)
-}
-/*
-	UserTask is created by operation
-	UserTask has one or more task
-*/
-class UserTask {
-  constructor(files, target) {
-  	this.operationUUID = uuid.v4()
-    this.tasks = []
-    this.send = null
-    files.forEach(abspath => this.tasks.push(createTask(abspath, target, true, this.operationUUID)))
-  }
-
-  beginSendMessage() {
-  	console.log('beginSendMessage')
-  	this.send = setInterval(() => {
-  		console.log('send message .....')
-  	},1000) 
-  }
-
-  stopSendMessage() {
-  	console.log('stopSendMessage')
-  	this.clearInterval(this.send)
-  	this.send = null
-  }
+	files.forEach(abspath => {
+		let taskUUID = uuid.v4()
+		let obj = createTask(abspath, target, true, taskUUID)
+		userTasks.push(obj)
+		userTasksMap.set(obj.uuid, obj)
+		console.log(userTasks[0] === userTasksMap.get(userTasks[0].uuid))
+	})
+	sendMessage()
 }
 
-const createTask = (abspath, target, newWork, operationUUID) => {
-	let task = new TaskManager(abspath, target, true, operationUUID)
+const createTask = (abspath, target, newWork, uuid) => {
+	let task = new TaskManager(abspath, target, true, uuid)
 	task.readyToVisit()
 	return task
 }
@@ -82,11 +82,11 @@ const createTask = (abspath, target, newWork, operationUUID) => {
 	schedule(): schedule work list
 */
 class TaskManager {
-	constructor(abspath, target, newWork, operationUUID) {
+	constructor(abspath, target, newWork, uuid) {
 		this.abspath = abspath
 		this.target = target
 		this.newWork = newWork
-		this.operation = operationUUID
+		this.uuid = uuid
 		this.name = path.basename(abspath)
 		this.size = 0
 		this.state = ''
@@ -110,13 +110,13 @@ class TaskManager {
 	}
 
 	recordInfor(msg) {
-		this.record.length > 50
-		this.record.splice(0,20)
-		// console.log(msg)
+		if (this.record.length > 50) this.record.splice(0,20)
+		console.log(msg)
 		this.record.push(msg)
 	}
 
 	visit() {
+		this.state = 'visiting'
 		let _this = this
 		this.recordInfor('开始遍历文件树...')
 		removeOutOfVisitlessQueue(this)
@@ -131,6 +131,7 @@ class TaskManager {
 	}
 
 	diff() {
+		this.state = 'diffing'
 		if (!this.newWork) {
 
 		}else {
@@ -145,8 +146,8 @@ class TaskManager {
 			if (this.lastFolderIndex != -1) break
 			if (this.worklist[i].type === 'folder') this.lastFolderIndex = i
 		}
-		this.recordInfor(this.lastFileIndex)
-		this.recordInfor(this.lastFolderIndex)
+		// this.recordInfor(this.lastFileIndex)
+		// this.recordInfor(this.lastFolderIndex)
 
 		this.schedule()
 	}
@@ -159,10 +160,11 @@ class TaskManager {
 	}
 
 	hashSchedule() {
+		console.log('HASH调度...')
 		if (this.lastFileIndex === -1) return this.recordInfor('任务列表中不包含文件')
 		if (this.hashing.length >= 2) return this.recordInfor('任务的HASH队列已满')
-		if (this.hashIndex === this.lastFileIndex + 1) return this.recordInfor(this.name + ' 所有文件hash计算完毕')
-		this.recordInfor('正在HASH第  ：' + this.hashIndex + ' 个文件')
+		if (this.hashIndex === this.lastFileIndex + 1) return this.recordInfor(this.name + ' 所有文件hash调度完成')
+		this.recordInfor('正在HASH第 ' + this.hashIndex + ' 个文件')
 		let obj = this.worklist[this.hashIndex]
 		if (obj.type === 'folder' || obj.stateName === 'finish') this.hashIndex++
 		else{
@@ -175,9 +177,11 @@ class TaskManager {
 	}
 
 	uploadSchedule() {
-		if (this.lastFolderIndex === -1) return this.recordInfor('任务列表中不包含文件')
+		console.log('上传调度...')
+		if (this.finishCount === this.worklist.length) return this.recordInfor('文件全部上传结束') 
+		// if (this.lastFileIndex === -1) return this.recordInfor('任务列表中不包含文件')
 		if (this.uploading.length >=2 ) return this.recordInfor('任务上传队列已满')
-		if (this.fileIndex === this.worklist.length) return this.recordInfor('所有文件上传结束')
+		if (this.fileIndex === this.worklist.length) return this.recordInfor('所有文件上传调度完成')
 		this.recordInfor('正在调度第 ' + (this.fileIndex + 1) + ' 个文件,总共 ' + this.worklist.length + ' 个')
 
 		let _this = this
@@ -185,17 +189,11 @@ class TaskManager {
 		if (obj.state === 'finish') this.hashIndex++
 		if (obj.target === '') {
 			this.recordInfor('当前文件父文件夹正在创建，缺少目标，等待...')
-			setTimeout(() => {
-				_this.uploadSchedule()
-			},1000)
 			return
 		}
 		
 		else if (obj.type === 'file' && obj.sha === '') {
 			this.recordInfor('当前文件HASH尚未计算，等待...')
-			setTimeout(() => {
-				_this.uploadSchedule()
-			},1000)
 			return
 		}
 		else {
@@ -257,11 +255,19 @@ class UploadTask {
 	}
 
 	uploadFinish() {
+		let manager = this.manager
 		this.recordInfor(this.name + ' 上传完毕')
 		this.stateName = 'finish'
-		this.manager.uploading.splice(this.manager.uploading.indexOf(this), 1)
-		this.manager.finishCount++
-		this.manager.uploadSchedule()
+		manager.uploading.splice(manager.uploading.indexOf(this), 1)
+		manager.finishCount++
+		if (manager.finishCount === manager.worklist.length) {
+			manager.state = 'finish'
+			userTasks.splice(userTasks.indexOf(this),1)
+			finishTasks.push(this)
+			sendMessage()
+		}else {
+			manager.uploadSchedule()
+		}
 	}
 
 	recordInfor(msg) {
@@ -281,7 +287,7 @@ class FileUploadTask extends UploadTask{
 		this.recordInfor(this.name + ' HASH计算完毕')
 		this.stateName = 'hashed'
 		this.manager.hashing.splice(this.manager.hashing.indexOf(this),1)
-		this.manager.hashSchedule()
+		this.manager.schedule()
 	}
 }
 
@@ -321,7 +327,6 @@ class HashSTM extends STM {
 			this.wrapper.sha = await utils.hashFile(this.wrapper.abspath)
 			removeOutOfHashingQueue(this)
 			this.wrapper.hashFinish()
-			// this.setState(UploadFileSTM) 
 		}
 		catch(e) {
 			//todo
@@ -419,8 +424,8 @@ class UploadFileSTM extends STM {
     this.handle = request(options, (err, res, body) => {
     	if (!err && res.statusCode == 200) {
     		removeOutOfRunningQueue(_this)
-    		this.wrapper.uuid = JSON.parse(body).uuid
-    		this.wrapper.uploadFinish()
+    		_this.wrapper.uuid = JSON.parse(body).uuid
+    		_this.wrapper.uploadFinish()
     	}else {
     		this.wrapper.recordInfor(this.wrapper.name + ' 上传失败')
     		console.log(err)

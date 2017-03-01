@@ -66,8 +66,6 @@ ipcRenderer.on('stateUpdate',(err,data)=>{
 })
 
 ipcRenderer.on('adapter', (err, data) => {
-  console.log('receive' )
-  console.log(data)
   store.dispatch({
     type: 'NODE_UPDATE',
     data: data
