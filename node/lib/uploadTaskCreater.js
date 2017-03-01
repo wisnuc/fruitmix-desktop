@@ -37,7 +37,7 @@ const sendMessage = () => {
 	}
 	if (shouldSend && !sendHandler) {
 		console.log('开始发送传输信息')
-		sendHandler = setInterval(sendMsg, 1000)
+		sendHandler = setInterval(sendMsg, 2000)
 		sendMsg()
 	}else if (!shouldSend && sendHandler) {
 		console.log('停止发送传输信息')
@@ -49,7 +49,7 @@ const sendMessage = () => {
 
 const sendMsg = () => {
 	let mainWindow = getMainWindow()
-  mainWindow.webContents.send('UPDATE_UPLOAD', userTasks, finishTasks)
+  mainWindow.webContents.send('UPDATE_UPLOAD', userTasks.map(item => item.getSummary()), finishTasks.map(i => i.getSummary()))
 }
 
 //create task factory
@@ -87,6 +87,7 @@ class TaskManager {
 		this.target = target
 		this.newWork = newWork
 		this.uuid = uuid
+		this.type = null
 		this.name = path.basename(abspath)
 		this.size = 0
 		this.state = ''
@@ -102,6 +103,22 @@ class TaskManager {
 		this.hashing = []
 		this.uploading = []
 		this.record = []
+	}
+
+	getSummary() {
+		return {
+			abspath: this.abspath,
+			target: this.target,
+			uuid: this.uuid,
+			type: this.type,
+			name: this.name,
+			size: this.size,
+			state: this.state,
+			pause: this.pause,
+			count: this.count,
+			finishCount: this.finishCount,
+			record: this.record
+		}
 	}
 
 	readyToVisit() {
@@ -123,6 +140,7 @@ class TaskManager {
 		addToVisitingQueue(this)
 		visitFolder(this.abspath, this.tree, this.worklist, this, () => {
 			_this.tree[0].target = _this.target
+			_this.type = _this.tree[0].type
 			removeOutOfVisitingQueue(this)
 			_this.recordInfor('遍历文件树结束...')
 			_this.state = 'visited'
@@ -263,7 +281,7 @@ class UploadTask {
 		if (manager.finishCount === manager.worklist.length) {
 			manager.state = 'finish'
 			userTasks.splice(userTasks.indexOf(this),1)
-			finishTasks.push(this)
+			finishTasks.push(this.manager)
 			sendMessage()
 		}else {
 			manager.uploadSchedule()

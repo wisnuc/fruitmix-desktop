@@ -463,22 +463,65 @@ body{
 }
 
 /*new transmission 2017.2.28*/
-#transmission-wrap {
-	padding:108px 88px 0px;
+#trs-wrap {
+	padding:108px 0px 0px;
+	-webkit-user-select:none;
 }
 
-#trs-uploading-main {
+.trs-list-wrapper {
 	margin-bottom: 80px;
 }
 
 .trs-title {
+	padding:0 88px;
 	font-size :26px;
 	font-weight: 400;
 	color:#b8b8b8;
 }
 
 .trs-hr {
+	box-sizing: border-box;
 	height:1px;
 	background-color: #b8b8b8;
-	margin: 8px 0px 12px 0px
+	margin: 8px 88px 12px 88px
+}
+
+.trs-row {
+	padding:0 88px;
+	height:64px;
+	line-height: 64px;
+	font-size:14px;
+	color:#3f3f3f;
+	display: flex;
+	flex-flow:row nowrap;
+	justify-content: flex-start;
+	align-items: stretch;
+}
+
+.trs-row-name {
+	flex-grow: 2;
+	min-width: 100px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	display: flex;
+	flex: row nowrap
+}
+
+.trs-row-name>span:nth-child(1){
+	display: flex;
+	align-items: center;
+	margin-right: 8px;
+}
+
+.trs-row-rtime {
+	width:234px;
+}
+
+.trs-row-progress {
+	width:284px;
+}
+
+.trs-row-tool {
+	width:100px;
 }
