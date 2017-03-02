@@ -9,7 +9,9 @@ import Debug from 'debug'
 const debug = Debug('component:DeviceCard')
 
 import muiThemeable from 'material-ui/styles/muiThemeable'
-import { Paper, FlatButton, RaisedButton, IconButton, Dialog } from 'material-ui'
+import LinearProgress from 'material-ui/LinearProgress'
+import { Paper, RaisedButton, IconButton, Dialog } from 'material-ui'
+import FlatButton from '../common/FlatButton'
 import ActionOpenInBrowser from 'material-ui/svg-icons/action/open-in-browser'
 import { grey700, grey400, grey500, blueGrey400, blueGrey500 } from 'material-ui/styles/colors'
 
@@ -221,9 +223,12 @@ class DeviceCard extends React.Component {
 
     if (this.state.boot === null || this.state.storage === null || this.state.users === null) {
       return (
-        <div style={{width: '100%', height: 64, backgroundColor: '#FFF', 
-          display: 'flex', alignItems: 'center', boxSizing: 'border-box', paddingLeft: 24}}>
-          通讯中....
+        <div style={{width: '100%',height: 68,display: 'flex', alignItems: 'center', boxSizing: 'border-box',flexWrap: 'wrap'}}>
+          <div style={{height: 4,width: 480}}><LinearProgress mode="indeterminate" /></div>
+          <div style={{width: '100%', height: 64, backgroundColor: '#FFF', 
+            display: 'flex', alignItems: 'center', boxSizing: 'border-box', paddingLeft: 24}}>
+            通讯中....
+          </div>
         </div>
       )
     }

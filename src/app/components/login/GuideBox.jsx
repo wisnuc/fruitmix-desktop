@@ -1,6 +1,7 @@
 import React from 'react'
 
-import { FlatButton, RaisedButton, Checkbox, Dialog, Divider, TextField, CircularProgress } from 'material-ui'
+import { RaisedButton, Checkbox, Dialog, Divider, TextField, CircularProgress } from 'material-ui'
+import FlatButton from '../common/FlatButton'
 import { Step, Stepper, StepLabel, StepContent } from 'material-ui/Stepper'
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
 import { cyan500 } from 'material-ui/styles/colors'
