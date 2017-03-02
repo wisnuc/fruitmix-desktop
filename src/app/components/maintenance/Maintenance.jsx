@@ -423,11 +423,11 @@ class Maintenance extends React.Component {
 
       return (
         <div>
-          <TextField hintText='用户名' floatingLabelText='用户名' 
+          <TextField hintText='' floatingLabelText='用户名' 
             onChange={e => onChange('username', e.target.value)} />
-          <TextField hintText='输入密码' floatingLabelText='输入密码' type='password'
+          <TextField hintText='' floatingLabelText='输入密码' type='password'
             onChange={e => onChange('password', e.target.value)} />
-          <TextField hintText='再次输入密码' floatingLabelText='再次输入密码' type='password'
+          <TextField hintText='' floatingLabelText='再次输入密码' type='password'
             onChange={e => onChange('passwordAgain', e.target.value)} />
         </div>
       )
@@ -862,7 +862,7 @@ class Maintenance extends React.Component {
           open: false,
           anchorEl: null
         }
-
+        debug("VolumeWisnucBadge props",props)
         this.toggleList = target => {
           if (this.state.open === false) {
             this.setState({
@@ -878,10 +878,9 @@ class Maintenance extends React.Component {
           }
         }
       }
-
       render() {
 
-        if (typeof this.props.volume.wisnuc !== 'object') return null
+        if (typeof this.props.volume.wisnuc !== 'object') return null //ENOFRUITMIX can't work
 
         let { status, users, error, message } = this.props.volume.wisnuc
 
@@ -936,19 +935,20 @@ class Maintenance extends React.Component {
           }
         }
         else if (status === 'NOTFOUND') {
-          debug("status",status)
-          debug("error",error)
+          //debug("status",status)
+          //debug("error",error)
           var text='';
           switch (error){
             case "ENOWISNUC" :
-              text = "(WISNUC未安装)";
+              text = "(WISNUC未安装)";break;
             case "EWISNUCNOTDIR":
-              text = "(WISNUC未安装,wisnuc路径存在但不是文件夹)";
+              text = "(WISNUC未安装,wisnuc路径存在但不是文件夹)";break;
             case "ENOFRUITMIX":
-              text = "(WISNUC未正确安装,不存在wisnuc/fruitmix文件夹)";
+              text = "(WISNUC未正确安装,不存在wisnuc/fruitmix文件夹)";break;
             case "EFRUITMIXNOTDIR":
-              text = "(WISNUC未正确安装,wisnuc/fruitmix不是文件夹)";
+              text = "(WISNUC未正确安装,wisnuc/fruitmix不是文件夹)";break;
           }
+          //debug("text",text)
           return <div
             style={{
               fontSize: 13,
@@ -1248,12 +1248,12 @@ class Maintenance extends React.Component {
         <Paper {...props}>
           <div style={{width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}
           onTouchTap={() => this.toggleExpanded(volume)}>
-            <div style={{flex: '0 0 1000px', height: '100%', display: 'flex', alignItems: 'center'}}>
+            <div style={{flex: '0 0 800px', height: '100%', display: 'flex', alignItems: 'center'}}>
               <div style={{flex: '0 0 256px'}}>
                 <this.VolumeTitle volume={volume} />
               </div>
               <this.VolumeHeadline volume={volume} />
-              <div style={{flex: '0 0 216px'}} />
+              <div style={{flex: '0 0 16px'}} />
               <this.VolumeWisnucBadge volume={volume} />
             </div>
 
@@ -1276,7 +1276,7 @@ class Maintenance extends React.Component {
                 <this.VolumeMenu volume={volume}
                   actions={
                     typeof volume.wisnuc === 'object' ?  [
-                      [ volume.wisnuc.status === 'NOTFOUND' ? '安装' : '重新安装',
+                      [ volume.wisnuc.error === 'ENOWISNUC' ? '安装' : '重新安装',
                         () => this.initWisnucOnVolume(volume), 
                         volume.isMissing
                       ]
@@ -1296,7 +1296,7 @@ class Maintenance extends React.Component {
               <KeyValueList 
                 disabled={cnv}
                 items={[
-                  ['磁盘数量', `${volume.total} (${comment()})`],
+                  ['磁盘数量', (volume.total >= 2) ? `${volume.total}（${comment()}）` : `${volume.total}`],
                   ['文件系统UUID', volume.uuid.toUpperCase()],
                   ['访问路径', volume.mountpoint],
                 ]}

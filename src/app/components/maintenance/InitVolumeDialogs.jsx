@@ -36,11 +36,11 @@ class UsernamePassword extends React.Component {
   render() {
     return (
       <div>
-        <div><TextField hintText='用户名' floatingLabelText='用户名' 
+        <div><TextField hintText='' floatingLabelText='用户名' maxLength={20} 
           onChange={e => this.onChange('username', e.target.value)} /></div>
-        <div><TextField hintText='输入密码' floatingLabelText='输入密码' type='password'
+        <div><TextField hintText='' floatingLabelText='输入密码' type='password' maxLength={40}
           onChange={e => this.onChange('password', e.target.value)} /></div>
-        <div><TextField hintText='再次输入密码' floatingLabelText='再次输入密码' type='password'
+        <div><TextField hintText='' floatingLabelText='再次输入密码' type='password' maxLength={40}
           onChange={e => this.onChange('passwordAgain', e.target.value)} /></div>
       </div>
     )

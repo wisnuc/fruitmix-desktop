@@ -54,8 +54,10 @@ class ChangePasswordButton extends React.Component {
           onRequestClose={() => this.setState({open: false})}
         >
           <TextField 
-            hintText='输入新密码' 
+            hintText='' 
             floatingLabelText='输入新密码' 
+            maxLength={40}
+            type='password'
             fullWidth={true}
             disabled={this.state.busy}
             onChange={e => this.setState(Object.assign({}, this.state, {
@@ -64,8 +66,10 @@ class ChangePasswordButton extends React.Component {
           />
 
           <TextField 
-            hintText='再次输入新密码' 
+            hintText='' 
             floatingLabelText='再次输入新密码' 
+            maxLength={40}
+            type='password'
             fullWidth={true}
             disabled={this.state.busy}
             onChange={e => this.setState(Object.assign({}, this.state, {
