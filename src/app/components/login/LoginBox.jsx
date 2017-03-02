@@ -117,7 +117,7 @@ class LoginBox extends React.Component {
                   </div>
 }
             </div>
-            <div style={{width: '100%', flex: '0 0 36px', display: 'flex'}}>
+            <div style={{width: '100%', flex: '0 0 36px', display: 'flex',position: 'absolute',bottom: 16,right: 40}}>
               <div style={{flexGrow: 1}} />
               { this.state.success === 0 &&
               <FlatButton label='取消' primary={true} 
