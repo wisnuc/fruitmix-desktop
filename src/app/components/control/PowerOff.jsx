@@ -1,15 +1,12 @@
 import Debug from 'debug'
 const debug = Debug('view:control:poweroff')
-
 import { ipcRenderer } from 'electron'
 import React from 'react'
-
+import { command } from '../../lib/command'
 import FlatButton from '../common/FlatButton'
 import { Dialog, CircularProgress } from 'material-ui'
 import { pinkA200 } from 'material-ui/styles/colors'
-
 import request from 'superagent'
-
 import { header1Style, header2Style, header2StyleNotFirst, contentStyle } from './styles'
 
 class PowerOff extends React.Component {
@@ -23,6 +20,8 @@ class PowerOff extends React.Component {
       boot: null,
       storage: null,
       users: null,
+      poweroff: null,
+      device: null
     };
     this.url = `http://${this.props.address}:${this.props.systemPort}/system/boot`
     this.cancelButton = <FlatButton label='取消' primary={true} onTouchTap={this.handleClose} />
@@ -35,19 +34,25 @@ class PowerOff extends React.Component {
           if (err || !res.ok) 
             return debug('request boot op failed', err || !res.ok, op)
           debug('request boot op success', op)
-          // Get reboot status
-          debug("this.props of PowerOff",this.props)
-          debug("window.store.getState().mdns", window.store.getState().mdns);
-          let oldip = this.props.address;
-          let serial = null; 
-          for(var mdns of window.store.getState().mdns){
-            if(mdns.adress === oldip){
-              serial = mdns.serial;
-            }
+          if(op === 'poweroff') {
+            this.setState({rebooting: true,poweroff: true});
+            return;
           }
-          this.setState({rebooting: true});
-          //FIXME
-          //this.GetNewDevice(serial);
+          else{
+            this.setState({rebooting: true});
+            // TODO Get reboot status
+            //debug("this.props of PowerOff",this.props)
+            //debug("window.store.getState().mdns", window.store.getState().mdns);
+            //let oldip = this.props.address;
+            //let serial = null; 
+            //let MaintenanceDevice = window.store.getState().Maintenance.device;
+            //for(var mdns of window.store.getState().mdns){
+            //  if(mdns.adress === oldip){
+            //    serial = mdns.serial;
+            //  }
+            //}
+            //this.GetNewDevice(serial);
+          }
         })
     }
     this.requestGet = (ip, port, ep, propName) => {
@@ -67,6 +72,10 @@ class PowerOff extends React.Component {
   }
   //FIXME need to handle situation when ip change
   GetNewDevice = (serial) => {
+    //debug("window.store.getState().mdns", window.store.getState().mdns);
+    //command = (key, cmd, args, callback)=>{}
+    //command('node','mdns refresh') 
+    debug("window.store.getState().mdns", window.store.getState().mdns);
     var newip = null;
     for(var mdns of window.store.getState().mdns){
       if(mdns.serial === serial){
@@ -96,17 +105,37 @@ class PowerOff extends React.Component {
       });
   };
 
-  //FIXME
   renderReBooting() {
     var text;
+    debug("PowerOff props and state ",this.props,this.state)
+    if (this.state.poweroff){
+      return(
+        <div>已关机<br/>5秒后将转到登陆页面</div>
+      )
+    }
+    return(
+        <div>重启中......<br/>5秒后将转到登陆页面</div>
+      ) 
+    //////////////////////////////
+    //TODO the following code is not use, maybe use it later
     if (this.state.boot === null || this.state.storage === null || this.state.users === null) {
       return (
-        <div>重启中... <br/>3秒后将转到登陆页面</div>
+        <div>重启中...</div>
           )
     }
     if (this.state.boot.bootMode){
       if(this.state.boot.bootMode === 'maintenance'){
         text = "已重新启动,将进入维护模式页面"
+        setTimeout(function(){
+          window.store.dispatch({
+            type: 'ENTER_MAINTENANCE',
+            data: {
+              device: this.state.device,//FIXME
+              boot: this.state.boot,
+              storage: this.state.storage,
+            }
+          })
+        },3000)
       }
       else{
         text = "重启成功，将转到登陆页面"
@@ -117,8 +146,8 @@ class PowerOff extends React.Component {
       }
     }
     else {
-      debug("this.state.boot.lastFileSystem",this.state.boot.lastFileSystem)
-      debug("this.state.boot.bootMode",this.state.boot.bootMode)
+      debug("reboot error this.state.boot.lastFileSystem",this.state.boot.lastFileSystem)
+      debug("reboot error this.state.boot.bootMode",this.state.boot.bootMode)
       text = "有点不对劲，将转到登陆页面";
       setTimeout(function(){
         window.store.dispatch({type:'LOGIN_OFF'})
@@ -134,6 +163,7 @@ class PowerOff extends React.Component {
     return (
       <div> {text} </div>
       )
+    ///////////////////////////
   }
   rebootActions(){
     return [
@@ -154,9 +184,9 @@ class PowerOff extends React.Component {
           onTouchTap={() => {
             this.bootOp('poweroff')
             setTimeout(function(){
-              window.store.dispatch({type:'LOGIN_OFF'})
-              ipcRenderer.send('loginOff')
-            },3000)
+               window.store.dispatch({type:'LOGIN_OFF'})
+               ipcRenderer.send('loginOff')
+            },5000)
           }}
          />
       ]
@@ -168,11 +198,10 @@ class PowerOff extends React.Component {
           primary={true}
           onTouchTap={() => {
             this.bootOp('reboot');
-            //FIXME
             setTimeout(function(){
               window.store.dispatch({type:'LOGIN_OFF'})
               ipcRenderer.send('loginOff')
-            },3000)
+            },5000)
           }}
          />
       ]
@@ -184,11 +213,10 @@ class PowerOff extends React.Component {
           primary={true}
           onTouchTap={() => {
             this.bootOp('rebootMaintenance')
-            //FIXME
             setTimeout(function(){
               window.store.dispatch({type:'LOGIN_OFF'})
               ipcRenderer.send('loginOff')
-            },3000)
+            },5000)
           }}
          />
       ]
