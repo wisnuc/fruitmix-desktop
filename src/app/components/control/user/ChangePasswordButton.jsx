@@ -1,6 +1,6 @@
 import React from 'react'
-import { FlatButton, RaisedButton, TextField, Dialog } from 'material-ui'
-
+import { TextField, Dialog } from 'material-ui'
+import FlatButton from '../../common/FlatButton'
 import request from 'superagent'
 
 class ChangePasswordButton extends React.Component {
@@ -44,7 +44,7 @@ class ChangePasswordButton extends React.Component {
   render() {
     return (
       <div style={this.props.style}>
-        <RaisedButton label='修改密码' onTouchTap={() => this.setState({ open: true})} />
+        <FlatButton primary={true} style={{marginLeft: -8}} label='修改密码' onTouchTap={() => this.setState({ open: true})} />
         <Dialog
           titleStyle={{color: 'rgba(0, 0, 0, 0.87)', fontSize: 20}}
           contentStyle={{width:336}}
@@ -54,8 +54,10 @@ class ChangePasswordButton extends React.Component {
           onRequestClose={() => this.setState({open: false})}
         >
           <TextField 
-            hintText='输入新密码' 
+            hintText='' 
             floatingLabelText='输入新密码' 
+            maxLength={40}
+            type='password'
             fullWidth={true}
             disabled={this.state.busy}
             onChange={e => this.setState(Object.assign({}, this.state, {
@@ -64,8 +66,10 @@ class ChangePasswordButton extends React.Component {
           />
 
           <TextField 
-            hintText='再次输入新密码' 
+            hintText='' 
             floatingLabelText='再次输入新密码' 
+            maxLength={40}
+            type='password'
             fullWidth={true}
             disabled={this.state.busy}
             onChange={e => this.setState(Object.assign({}, this.state, {

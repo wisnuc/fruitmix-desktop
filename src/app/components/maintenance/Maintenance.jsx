@@ -423,11 +423,11 @@ class Maintenance extends React.Component {
 
       return (
         <div>
-          <TextField hintText='用户名' floatingLabelText='用户名' 
+          <TextField hintText='' floatingLabelText='用户名' 
             onChange={e => onChange('username', e.target.value)} />
-          <TextField hintText='输入密码' floatingLabelText='输入密码' type='password'
+          <TextField hintText='' floatingLabelText='输入密码' type='password'
             onChange={e => onChange('password', e.target.value)} />
-          <TextField hintText='再次输入密码' floatingLabelText='再次输入密码' type='password'
+          <TextField hintText='' floatingLabelText='再次输入密码' type='password'
             onChange={e => onChange('passwordAgain', e.target.value)} />
         </div>
       )
@@ -578,8 +578,14 @@ class Maintenance extends React.Component {
             }
             else {
               this.reloadBootStorage((err2, { boot, storage }) => {
-                // FIXME
-                this.state.dialog.setState(operationSuccess, ['启动成功，系统将在3秒钟后跳转到登录页面'])
+                // FIXMED
+                for(let i=3;i>=0;i--)
+                {
+                  let time=(3-i)*1000;
+                  let that=this;
+                  setTimeout(function(){that.state.dialog.setState(operationSuccess, ['启动成功，系统将在' + i + '秒钟后跳转到登录页面'])},time)
+                }
+                  setTimeout(function(){window.store.dispatch({type: 'EXIT_MAINTENANCE'})},4000)
               })
             }
           })
@@ -704,10 +710,21 @@ class Maintenance extends React.Component {
     this.cardStyle = item => {
       let expanded = this.state.expanded.indexOf(item) !== -1      
       if (this.state.creatingNewVolume === null) {
-        return {
-          width: 1200, 
-          margin: expanded ? 24 : 8, 
-          transition: 'all 300ms',
+        //if(item.missing){
+        if(0){
+          return {
+            width: 1200, 
+            margin: expanded ? 24 : 8, 
+            transition: 'all 300ms',
+            backgroundColor: red400
+          }
+        }
+        else{
+          return {
+            width: 1200, 
+            margin: expanded ? 24 : 8, 
+            transition: 'all 300ms',
+          }
         }
       }
       else {
@@ -751,7 +768,7 @@ class Maintenance extends React.Component {
         <FlatButton
           label='创建磁盘阵列'
           labelPosition='before'
-          icon={<ContentAddCircle color={this.props.muiTheme.palette.primary1Color} />}
+          icon={<ContentAddCircle color={this.props.muiTheme.palette.primary1Color} style={{verticalAlign : '-18%'}}/>}
           disableTouchRipple={true} 
           disableFocusRipple={true}
           onTouchTap={this.onToggleCreatingNewVolume}
@@ -846,7 +863,6 @@ class Maintenance extends React.Component {
           open: false,
           anchorEl: null
         }
-
         this.toggleList = target => {
           if (this.state.open === false) {
             this.setState({
@@ -862,13 +878,28 @@ class Maintenance extends React.Component {
           }
         }
       }
-
       render() {
-
-        if (typeof this.props.volume.wisnuc !== 'object') return null
-
+        let VolumeisMissing = this.props.volume.isMissing
+        //debug("VolumeWisnucBadge props, VolumeisMissing, UUID",this.props,VolumeisMissing,this.props.volume.fileSystemUUID)
+        if (VolumeisMissing){
+          return (
+            <div 
+              style={{
+                height: 28,
+                display: 'flex', alignItems: 'center',
+                boxSizing: 'border-box', padding: 8, borderRadius: 4,
+                fontSize: 13,
+                fontWeight: 'bold',
+                color: that.state.creatingNewVolume === null ? '#D50000' : 'rgba(0,0,0,0.38)' , 
+                backgroundColor: that.state.creatingNewVolume === null ? '#FF8A80' : '#E0E0E0'
+              }}
+            >
+              发现有磁盘缺失
+            </div>
+          )
+        }
+        if (typeof this.props.volume.wisnuc !== 'object') return null //ENOFRUITMIX can't work
         let { status, users, error, message } = this.props.volume.wisnuc
-
         if (users) {
           if (users.length === 0) {
             return <div>WISNUC已安装但尚未创建用户。</div>
@@ -920,13 +951,27 @@ class Maintenance extends React.Component {
           }
         }
         else if (status === 'NOTFOUND') {
+          //debug("status",status)
+          //debug("error",error)
+          var text='';
+          switch (error){
+            case "ENOWISNUC" :
+              text = "(WISNUC未安装)";break;
+            case "EWISNUCNOTDIR":
+              text = "(WISNUC未安装,wisnuc路径存在但不是文件夹)";break;
+            case "ENOFRUITMIX":
+              text = "(WISNUC未正确安装,不存在wisnuc/fruitmix文件夹)";break;
+            case "EFRUITMIXNOTDIR":
+              text = "(WISNUC未正确安装,wisnuc/fruitmix不是文件夹)";break;
+          }
+          //debug("text",text)
           return <div
             style={{
               fontSize: 13,
               color: that.state.creatingNewVolume === null ?
                 'rgba(0,0,0,0.87)' : 'rgba(0,0,0,0.38)' 
             }}
-          >(WISNUC未安装)</div>
+          >{ text }</div>
         }
         else if (error) {
 
@@ -1008,7 +1053,7 @@ class Maintenance extends React.Component {
 
       if (volume.isMissing) return redA200
       if (typeof volume.wisnuc !== 'object') return '#000'
-
+      //debug("volume.wisnuc.status",volume.wisnuc.status)
       switch (volume.wisnuc.status) {
       case 'READY':
         return lightGreen400
@@ -1153,12 +1198,10 @@ class Maintenance extends React.Component {
         }
 
         this.handleRequestClose = () => this.setState({ open: false })
+        //debug("this.VolumeMenu, this.props",this.props)
       }
-
       render() {
-
         let volume = this.props.volume
-
         return (
           <div>
             <IconButton
@@ -1211,21 +1254,41 @@ class Maintenance extends React.Component {
 
       let expandableHeight = this.state.expanded.indexOf(volume) !== -1 ?
         17 * 24 + 3 * SUBTITLE_HEIGHT + SUBTITLE_MARGINTOP : 0
-
-      const comment = () => volume.missing ? '有磁盘缺失' : '全部在线'
-
+      //debug("BtrfsVolume props",props)
+      //debug("BtrfsVolume volumes",volumes)
+      const comment = () => volume.missing ? '有磁盘缺失' : '全部在线' //TODO if(volume.missing === true)
+      const DivStyle = VolumeIsMissing => {
+      //debug("VolumeIsMissing",VolumeIsMissing)
+        if(VolumeIsMissing){
+          return {
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            backgroundColor: ''
+            //backgroundColor: red400
+          }
+        }
+        else{
+          return {
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            backgroundColor: ''
+          }
+        }
+      }
       return (
         <Paper {...props}>
-
-          <div style={{width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}
-            onTouchTap={() => this.toggleExpanded(volume)}>
-
+          <div style={DivStyle(volume.missing)}
+          onTouchTap={() => this.toggleExpanded(volume)}>
             <div style={{flex: '0 0 800px', height: '100%', display: 'flex', alignItems: 'center'}}>
               <div style={{flex: '0 0 256px'}}>
                 <this.VolumeTitle volume={volume} />
               </div>
               <this.VolumeHeadline volume={volume} />
-                <div style={{flex: '0 0 16px'}} />
+              <div style={{flex: '0 0 16px'}} />
               <this.VolumeWisnucBadge volume={volume} />
             </div>
 
@@ -1248,11 +1311,11 @@ class Maintenance extends React.Component {
                 <this.VolumeMenu volume={volume}
                   actions={
                     typeof volume.wisnuc === 'object' ?  [
-                      [ volume.wisnuc.status === 'NOTFOUND' ? '安装' : '重新安装',
+                      [ volume.wisnuc.error === 'ENOWISNUC' ? '安装' : '重新安装',
                         () => this.initWisnucOnVolume(volume), 
                         volume.isMissing
                       ]
-                    ] : []
+                    ] : [['修复问题',() => alert("功能开发中......")]] //TODO
                   }
                 />
               }
@@ -1268,7 +1331,7 @@ class Maintenance extends React.Component {
               <KeyValueList 
                 disabled={cnv}
                 items={[
-                  ['磁盘数量', `${volume.total} (${comment()})`],
+                  ['磁盘数量', (volume.total >= 2) ? `${volume.total}（${comment()}）` : `${volume.total}`],
                   ['文件系统UUID', volume.uuid.toUpperCase()],
                   ['访问路径', volume.mountpoint],
                 ]}
@@ -1426,7 +1489,7 @@ class Maintenance extends React.Component {
           + 2 * SUBTITLE_HEIGHT
         let outer = HEADER_HEIGHT + TABLEHEADER_HEIGHT
       
-        debug('partitioned disk floatingTitleTop', cnv, inner, outer)
+        //debug('partitioned disk floatingTitleTop', cnv, inner, outer)
 
         return this.state.expanded.indexOf(disk) !== -1 ? inner + outer : outer      
       }
@@ -1784,7 +1847,18 @@ class Maintenance extends React.Component {
       color='#E0E0E0' 
     />
   } 
-
+  
+  renderBootStatus() {
+    var data = window.store.getState().maintenance.device;
+    var TextMaintence = '该设备已正常启动，此界面仅用于浏览；设备的ip为 ' + data.address + '，model为 ' + data.model + '，serial为 '+ data.serial + '。';
+    //debug("data = window.store.getState().maintenance = ", data);
+    return (
+      <this.TextButtonTop 
+        text={this.state.boot.state !== 'maintenance' ? TextMaintence : '' }
+        disabled={this.state.boot.state !== 'maintenance'}
+      /> 
+    )
+  }
   renderTitle() {
     return (
       <div style={{
@@ -1814,7 +1888,7 @@ class Maintenance extends React.Component {
 
   render() {
 
-    debug('main render', this.state)
+    //debug('main render', this.state)
     
     const primary1Color = this.props.muiTheme.palette.primary1Color
     const accent1Color = this.props.muiTheme.palette.accent1Color
@@ -1858,12 +1932,7 @@ class Maintenance extends React.Component {
 
             {/* top panel selector */}
             <div style={{ width: 1200, height: cnv ? 136 - 48 - 16 : 48, transition: 'height 300ms' }}>
-              { cnv ?  <this.NewVolumeTop /> : 
-                <this.TextButtonTop 
-                  text={this.state.boot.state !== 'maintenance' ? '该设备已正常启动，此界面仅用于浏览。' : '' }
-                  disabled={this.state.boot.state !== 'maintenance'}
-                /> 
-              }
+              { cnv ?  <this.NewVolumeTop /> : this.renderBootStatus()}
             </div>
 
             { typeof this.state.boot === 'object' && typeof this.state.storage === 'object' &&

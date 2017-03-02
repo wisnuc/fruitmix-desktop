@@ -1,5 +1,6 @@
 import React from 'react'
-import { Checkbox, CircularProgress, Dialog, FlatButton, TextField } from 'material-ui'
+import { Checkbox, CircularProgress, Dialog, TextField } from 'material-ui'
+import FlatButton from './FlatButton'
 import ToggleRadioButtonChecked from 'material-ui/svg-icons/toggle/radio-button-checked'
 import ToggleRadioButtonUnchecked from 'material-ui/svg-icons/toggle/radio-button-unchecked'
 
