@@ -24,7 +24,7 @@ class GuideBox extends React.Component {
       expanded: false,
       showContent: false,
 
-      decision: null,
+     // decision: null,
 
       // stepper
       finished: false,
@@ -155,7 +155,6 @@ class GuideBox extends React.Component {
       <div key={name} style={{width: '100%', height: 40, display: 'flex', alignItems: 'center'}}>
         <div style={{flex: '0 0 64px'}}>
           <Checkbox style={{marginLeft: 16}} 
-            disabled={this.state.decision !== 'useExisting'}
             checked={this.state.volSelection === id}
             onCheck={() => {
               this.setState(Object.assign({}, this.state, { volSelection: id }))
@@ -199,7 +198,6 @@ class GuideBox extends React.Component {
       <div key={name} style={{width: '100%', height: 40, display: 'flex', alignItems: 'center'}}>
         <div style={{flex: '0 0 64px'}}>
           { valid && <Checkbox style={{marginLeft: 16}} 
-            disabled={this.state.decision !== 'createNew'}
             checked={this.state.selection.indexOf(name) !== -1} onCheck={() => {
 
             let nextState
@@ -237,6 +235,7 @@ class GuideBox extends React.Component {
       </div> 
     )
   }
+  
 
   render() {
 
@@ -252,11 +251,11 @@ class GuideBox extends React.Component {
             <div style={{opacity: this.state.showContent ? 1 : 0, transition:'opacity 150ms'}}>
               <Stepper activeStep={stepIndex} orientation="vertical">
                 <Step>
-                  <StepLabel>创建或选择已有的磁盘卷</StepLabel>
+                  <StepLabel>创建磁盘卷</StepLabel>
 
                   <StepContent>
 
-                    <div style={{height: 40, display: 'flex', alignItems: 'center'}}>
+                    {/*<div style={{height: 40, display: 'flex', alignItems: 'center'}}>
                       <Checkbox 
                         labelStyle={{ color: this.state.decision === 'useExisting' ? cyan500 : 'rgba(0,0,0,0.87)' }}
                         label='选择现有磁盘卷，磁盘卷上的数据都会保留' 
@@ -287,8 +286,8 @@ class GuideBox extends React.Component {
                       </div>
                     </div>
 
-                    <div style={{height: 24}} />
-                    <div style={{height: 40, display: 'flex', alignItems: 'center'}}>
+                    <div style={{height: 24}} />*/}
+                    {/*<div style={{height: 40, display: 'flex', alignItems: 'center'}}>
                       <Checkbox 
                         labelStyle={{ color: this.state.decision === 'createNew' ? cyan500 : 'rgba(0,0,0,0.87)' }}
                         label='选择磁盘创建新磁盘卷，所选磁盘上的数据都会被清除' 
@@ -300,9 +299,10 @@ class GuideBox extends React.Component {
                           volSelection: null
                         }))}
                       />
-                    </div>
-                    <div style={{color: this.state.decision === 'createNew' ? 'rgba(0,0,0,0.87)' : 'rgba(0,0,0,0.54)'}}>
-                      <div style={{marginLeft: 40, width: 760, fontSize: 13}}>
+                    </div>*/}
+                    <div style={{height: 40, display: 'flex', alignItems: 'center', color: cyan500, paddingLeft: 10, paddingBottom: 20}}>选择磁盘创建新的磁盘卷，所选磁盘的数据会被清除</div> 
+                    <div style={{color: 'rgba(0,0,0,0.87)'}}>
+                      <div style={{marginLeft: 10, width: 760, fontSize: 13}}>
                         <Divider />
                         <div style={{width: '100%', height: 32, display: 'flex', alignItems: 'center'}}>
                           <div style={{flex: '0 0 64px'}} />
@@ -318,7 +318,7 @@ class GuideBox extends React.Component {
                         <Divider />
                       </div>
 
-                      <div style={{position: 'relative', marginLeft: 40, marginTop: 12, marginBottom:12, display: 'flex', alignItems: 'center'}}>
+                      <div style={{position: 'relative', marginLeft: 10, marginTop: 12, marginBottom:12, display: 'flex', alignItems: 'center'}}>
                         <div style={{fontSize:13}}>选择磁盘卷模式：</div>
                         <div style={{width: 160}}>
                         <RadioButtonGroup style={{position: 'relative', display: 'flex'}} 
@@ -330,17 +330,17 @@ class GuideBox extends React.Component {
                             disableTouchRipple={true}
                             disableFocusRipple={true}
                             value='single' label='single模式' 
-                            disabled={this.state.decision !== 'createNew' || this.state.selection.length === 0} />
+                            disabled={ this.state.selection.length === 0} />
                           <RadioButton style={{fontSize:13, width:128}} iconStyle={{width:16, height:16, padding: 2}} 
                             disableTouchRipple={true}
                             disableFocusRipple={true}
                             value='raid0' label='raid0模式' 
-                            disabled={this.state.decision !== 'createNew' || this.state.selection.length < 2} />
+                            disabled={ this.state.selection.length < 2} />
                           <RadioButton style={{fontSize:13, width:128}} iconStyle={{width:16, height:16, padding: 2}} 
                             disableTouchRipple={true}
                             disableFocusRipple={true}
                             value='raid1' label='raid1模式' 
-                            disabled={this.state.decision !== 'createNew' || this.state.selection.length < 2} />
+                            disabled={ this.state.selection.length < 2} />
                         </RadioButtonGroup>
                         </div>
                       </div>
@@ -349,7 +349,7 @@ class GuideBox extends React.Component {
                     <div style={{margin: '24px 0'}}>
                       <RaisedButton
                         label='下一步'
-                        disabled={ this.state.decision === 'createNew' ? (this.state.selection.length === 0 || !this.state.mode) : (this.state.volSelection === null)}
+                        disabled={ this.state.selection.length === 0 || !this.state.mode }
                         disableTouchRipple={true}
                         disableFocusRipple={true}
                         primary={true}
@@ -432,10 +432,7 @@ class GuideBox extends React.Component {
                         onTouchTap={() => {
 
                           this.handleNext()
-                          if (this.state.decision === 'createNew')
-                            this.creatingNewVolume()
-                          else
-                            this.useExisting(this.state.volSelection)
+                          this.creatingNewVolume()
                         }}
                         style={{marginRight: 12}}
                       />
@@ -485,7 +482,6 @@ class GuideBox extends React.Component {
                 if (this.state.expanded) {
                   this.setState(Object.assign({}, this.state, { 
                     showContent: false,
-                    decision: null,
                     finished: false,
                     stepIndex: 0,
                     volSelection: null,
