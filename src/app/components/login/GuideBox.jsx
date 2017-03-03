@@ -254,6 +254,8 @@ class GuideBox extends React.Component {
 
                   <StepContent>
 
+                    <div style={{height: 40, display: 'flex', alignItems: 'center', color: cyan500, paddingLeft: 10, paddingBottom: 20}}>选择磁盘创建新的磁盘卷，所选磁盘的数据会被清除</div> 
+                    <div style={{color: 'rgba(0,0,0,0.87)'}}>
                       <div style={{marginLeft: 10, width: 760, fontSize: 13}}>
                         <Divider />
                         <div style={{width: '100%', height: 32, display: 'flex', alignItems: 'center'}}>
