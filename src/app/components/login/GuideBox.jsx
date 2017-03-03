@@ -24,7 +24,6 @@ class GuideBox extends React.Component {
       expanded: false,
       showContent: false,
 
-     // decision: null,
 
       // stepper
       finished: false,
@@ -255,53 +254,6 @@ class GuideBox extends React.Component {
 
                   <StepContent>
 
-                    {/*<div style={{height: 40, display: 'flex', alignItems: 'center'}}>
-                      <Checkbox 
-                        labelStyle={{ color: this.state.decision === 'useExisting' ? cyan500 : 'rgba(0,0,0,0.87)' }}
-                        label='选择现有磁盘卷，磁盘卷上的数据都会保留' 
-                        disableTouchRipple={true}
-                        disableFocusRipple={true}
-                        checked={this.state.decision === 'useExisting'} 
-                        onCheck={() => this.setState(Object.assign({}, this.state, { 
-                          decision: 'useExisting',
-                          selection: [],
-                          mode: null,
-                        }))}
-                      />
-                    </div>
-
-                    <div style={{color: this.state.decision === 'useExisting' ? 'rgba(0,0,0,0.87)' : 'rgba(0,0,0,0.54)'}}>
-                      <div style={{marginLeft: 40, width: 760, fontSize: 13}}>
-                        <Divider /> 
-                        <div style={{width: '100%', height: 32, display: 'flex', alignItems: 'center'}}>
-                          <div style={{flex: '0 0 64px'}} />
-                          <div style={{flex: '0 0 320px'}}>ID</div>
-                          <div style={{flex: '0 0 80px'}}>Label</div>
-                          <div style={{flex: '0 0 80px'}}>磁盘数量</div>
-                          <div style={{flex: '0 0 160px'}}>说明</div>
-                        </div>
-                        <Divider />
-                        { this.props.storage && this.props.storage.volumes.map(vol => this.renderVolumeRow(vol)) } 
-                        <Divider />
-                      </div>
-                    </div>
-
-                    <div style={{height: 24}} />*/}
-                    {/*<div style={{height: 40, display: 'flex', alignItems: 'center'}}>
-                      <Checkbox 
-                        labelStyle={{ color: this.state.decision === 'createNew' ? cyan500 : 'rgba(0,0,0,0.87)' }}
-                        label='选择磁盘创建新磁盘卷，所选磁盘上的数据都会被清除' 
-                        disableTouchRipple={true}
-                        disableFocusRipple={true}
-                        checked={this.state.decision === 'createNew'}
-                        onCheck={() => this.setState(Object.assign({}, this.state, { 
-                          decision: 'createNew',
-                          volSelection: null
-                        }))}
-                      />
-                    </div>*/}
-                    <div style={{height: 40, display: 'flex', alignItems: 'center', color: cyan500, paddingLeft: 10, paddingBottom: 20}}>选择磁盘创建新的磁盘卷，所选磁盘的数据会被清除</div> 
-                    <div style={{color: 'rgba(0,0,0,0.87)'}}>
                       <div style={{marginLeft: 10, width: 760, fontSize: 13}}>
                         <Divider />
                         <div style={{width: '100%', height: 32, display: 'flex', alignItems: 'center'}}>
