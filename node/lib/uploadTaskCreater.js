@@ -2,9 +2,11 @@ import path from 'path'
 import fs from 'fs'
 import stream from 'stream'
 import { dialog, ipcMain } from 'electron'
+import child_process from 'child_process'
 
 import request from 'request'
 import uuid from 'node-uuid'
+import DataStore from 'nedb'
 
 import store from '../serve/store/store'
 import { getMainWindow } from './window'
@@ -25,7 +27,18 @@ const hashingQueue = []
 const hashlessQueue = []
 const visitlessQueue = []
 const visitingQueue = []
+const db = new DataStore({fileName: 'userTasks.db', autoload: true})
+// db.userTasks = new DataStore('userTasks.db')
+// db.finishTasks = new DataStore('finishTasks')
 
+db.insert({name: 'test'}, (err, doc) => {
+	console.log(err)
+	console.log(doc)
+})
+// db.userTasks.find({},(err,data) => {
+// 	console.log(err)
+// 	console.log(data)
+// })
 //sendMessage
 const sendMessage = () => {
 	let shouldSend = false
@@ -90,10 +103,17 @@ class TaskManager {
 		this.type = null
 		this.name = path.basename(abspath)
 		this.size = 0
+
+		this.completeSize = 0
+		this.lastTimeSize = 0
+		this.speed = ''
+		this.restTime = ''
 		this.state = ''
 		this.pause = false
 		this.count = 0
 		this.finishCount = 0
+		this.finishDate = null
+
 		this.tree = []
 		this.worklist = []
 		this.fileIndex = 0
@@ -103,21 +123,29 @@ class TaskManager {
 		this.hashing = []
 		this.uploading = []
 		this.record = []
+
+		this.countSpeed = setInterval(() => {
+			let s = (this.completeSize - this.lastTimeSize) / 1
+			this.speed = utils.formatSize(s) + ' / 秒'
+			this.restTime = utils.formatSeconds((this.size - this.completeSize) / s)
+			this.lastTimeSize = this.completeSize
+		}, 1000)
 	}
 
 	getSummary() {
 		return {
-			abspath: this.abspath,
-			target: this.target,
 			uuid: this.uuid,
 			type: this.type,
 			name: this.name,
 			size: this.size,
-			state: this.state,
-			pause: this.pause,
+			completeSize: this.completeSize,
 			count: this.count,
 			finishCount: this.finishCount,
-			record: this.record
+			restTime: this.restTime,
+			state: this.state,
+			pause: this.pause,
+			record: this.record,
+			speed: this.speed
 		}
 	}
 
@@ -223,6 +251,19 @@ class TaskManager {
 		}
 		this.uploadSchedule()
 	}
+
+	workFinishCall() {
+		if (this.finishCount === this.worklist.length) {
+			this.state = 'finish'
+			this.finishDate = utils.formatDate()
+			userTasks.splice(userTasks.indexOf(this),1)
+			finishTasks.push(this)
+			clearInterval(this.countSpeed)
+			sendMessage()
+		}else {
+			this.uploadSchedule()
+		}
+	}
 }
 
 const visitFolder = (abspath, position, worklist, manager, callback) => {
@@ -278,14 +319,7 @@ class UploadTask {
 		this.stateName = 'finish'
 		manager.uploading.splice(manager.uploading.indexOf(this), 1)
 		manager.finishCount++
-		if (manager.finishCount === manager.worklist.length) {
-			manager.state = 'finish'
-			userTasks.splice(userTasks.indexOf(this),1)
-			finishTasks.push(this.manager)
-			sendMessage()
-		}else {
-			manager.uploadSchedule()
-		}
+		manager.workFinishCall()
 	}
 
 	recordInfor(msg) {
@@ -342,9 +376,26 @@ class HashSTM extends STM {
 			this.wrapper.stateName = 'hashing'
 			removeOutOfHashlessQueue(this)
 			addToHashingQueue(this)
-			this.wrapper.sha = await utils.hashFile(this.wrapper.abspath)
-			removeOutOfHashingQueue(this)
-			this.wrapper.hashFinish()
+			let options = {
+			    env:{absPath:this.wrapper.abspath},
+			    encoding:'utf8',
+			    cwd: process.cwd()
+			}
+			let child = child_process.fork('node/lib/filehash.js', [], options)
+			child.on('message',(hash) => {
+				this.wrapper.sha = hash
+				removeOutOfHashingQueue(this)
+				this.wrapper.hashFinish()
+			})
+
+			child.on('error', (err) => {
+				console.log('hash error!')
+				console.log(err)
+			})
+
+
+			// this.wrapper.sha = await utils.hashFile(this.wrapper.abspath)
+			
 		}
 		catch(e) {
 			//todo
@@ -423,8 +474,9 @@ class UploadFileSTM extends STM {
 
     let transform = new stream.Transform({
       transform: function(chunk, encoding, next) {
-        body+=chunk.length;
+        body += chunk.length;
         _this.wrapper.progress = body / _this.wrapper.size
+        _this.wrapper.manager.completeSize += chunk.length
         this.push(chunk)
         next()
       }

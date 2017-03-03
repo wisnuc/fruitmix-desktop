@@ -10,7 +10,7 @@
     "build": "babel node --out-dir build",
     "mocha": "mocha --compilers js:babel-core/register --recursive --sort",
     "devel2": "electron devel.js",
-    "testCommand" : "mocha ./test/testCommand.js --recursive --compilers js:babel-core/register"
+    "testCommand": "mocha ./test/testCommand.js --recursive --compilers js:babel-core/register"
   },
   "devDependencies": {
     "babel": "^6.5.2",
@@ -75,6 +75,7 @@
     "json-loader": "^0.5.4",
     "mdns-js": "^0.5.0",
     "mkdirp": "^0.5.1",
+    "nedb": "^1.8.0",
     "node-uuid": "^1.4.7",
     "prettysize": "0.0.3",
     "redux": "^3.5.2",
