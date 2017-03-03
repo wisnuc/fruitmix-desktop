@@ -4,7 +4,8 @@ const debug = Debug('view:control:device')
 
 import React from 'react'
 
-import { Paper, Divider, Dialog, Menu, MenuItem, IconButton, FlatButton, RaisedButton, TextField } from 'material-ui'
+import { Paper, Divider, Dialog, Menu, MenuItem, IconButton, TextField } from 'material-ui'
+import FlatButton from '../common/FlatButton'
 import { blue500, blueGrey500, deepOrange500 } from 'material-ui/styles/colors'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import SocialShare from 'material-ui/svg-icons/social/share'
@@ -79,6 +80,8 @@ class User extends React.Component {
 
           if (err || !res.ok) return debug('request patch username', err || !res.ok)
           debug('request patch username', res.body)
+          this.refreshUsers()
+          setTimeout(() => this.setState(Object.assign({}, this.state, { usernameDialog: null })), 1000) 
         })
     }
 
@@ -203,7 +206,15 @@ class User extends React.Component {
       </div> 
     )
   }
-
+  renderUserName() {
+    if (!this.state.data) return null
+    debug('this.state.data.username', this.state.data[0].username)
+    return (
+      <div style={Object.assign({}, header1Style, { color: blueGrey500 })}>
+        { this.state.data[0].username }
+      </div>
+    )
+  }
   render() {
 
     let { themeColor, address, fruitmixPort, user } = this.props
@@ -211,7 +222,7 @@ class User extends React.Component {
     return (
       <div style={this.props.style}>
         <div style={{paddingLeft: 72}}>
-          <div style={Object.assign({}, header1Style, { color: blueGrey500 })}>{ user.username }</div>
+          { this.renderUserName() }
           <div style={contentStyle}>
             { user.isAdmin && user.isFirstUser ? 
               '您是系统的第一个用户，是最高权限的系统管理员。' :
@@ -225,7 +236,7 @@ class User extends React.Component {
           <div style={contentStyle}>
             用户名可以使用中文字符，包括可显示的标点符号。Windows共享文件访问也支持中文字符的用户名，但不是所有客户端软件都支持中文名，所以，如果您使用的网络文件系统服务客户端软件（例如Android或者iOS上的samba客户端）不支持中文用户名，您只能使用英文大小写字母的用户名。
           </div>
-          <RaisedButton label='修改用户名' onTouchTap={() => 
+          <FlatButton label='修改用户名' style={{marginLeft: -8}} primary={true} onTouchTap={() => 
             this.setState(Object.assign({}, this.state, { usernameDialog: {} }))} />
           <Dialog key='changeUsername'
             titleStyle={{fontSize: 20, color: 'rgba(0,0,0,0.87)'}}
@@ -235,7 +246,7 @@ class User extends React.Component {
             open={!!this.state.usernameDialog}
             onRequestClose={this.usernameDialogCancel}
           >
-            <TextField hintText='新用户名' floatingLabelText='新用户名' fullWidth={true} key='changeusername' maxLength={20}
+            <TextField hintText='' floatingLabelText='新用户名' fullWidth={true} key='changeusername' maxLength={20}
               disabled={this.state.usernameDialog && this.state.usernameDialog.busy}
               onChange={e => {
                 this.setState(Object.assign({}, this.state, {
@@ -277,7 +288,7 @@ class User extends React.Component {
             <div style={Object.assign({}, header1Style, { color: blueGrey500 })}>用户管理</div>
             { this.renderUserList() }
             <div style={{height: 48}} />
-            <RaisedButton style={{marginBottom: 30}} label='新建用户' onTouchTap={() => {
+            <FlatButton style={{marginBottom: 30, marginLeft: -8}} label='新建用户' primary={true} onTouchTap={() => {
               this.setState(Object.assign({}, this.state, { newUserDialog: {} })) 
             }}/>
             <div>
@@ -289,21 +300,21 @@ class User extends React.Component {
                 open={!!this.state.newUserDialog} 
                 onRequestClose={this.newUserDialogCancel} 
               >
-                <TextField hintText='用户名' floatingLabelText='用户名' fullWidth={true}  key='createusername' maxLength={20}
+                <TextField hintText='' floatingLabelText='用户名' fullWidth={true}  key='createusername' maxLength={20}
                   disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
                   onChange={e => this.setState(Object.assign({}, this.state, {
                     newUserDialog: Object.assign({}, this.state.newUserDialog, { username: e.target.value })
                   }))}
                 />
-                <TextField hintText='输入密码' floatingLabelText='输入密码' fullWidth={true} key='createpassword' maxLength={40}
-                  type="password"
+                <TextField hintText='' floatingLabelText='输入密码' fullWidth={true} key='createpassword'
+                  maxLength={40} type='password'
                   disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
                   onChange={e => this.setState(Object.assign({}, this.state, {
                     newUserDialog: Object.assign({}, this.state.newUserDialog, { password: e.target.value })
                   }))}
                 />
-                <TextField hintText='再次输入密码' floatingLabelText='再次输入密码' fullWidth={true} key='createpasswordagain' maxLength={40}
-                  type="password"
+                <TextField hintText='' floatingLabelText='再次输入密码' fullWidth={true} key='createpasswordagain'
+                  maxLength={40} type='password'
                   disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
                   onChange={e => this.setState(Object.assign({}, this.state, {
                     newUserDialog: Object.assign({}, this.state.newUserDialog, { passwordAgain: e.target.value })
