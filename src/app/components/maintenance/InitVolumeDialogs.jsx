@@ -131,7 +131,7 @@ const ReinitVolumeConfirm = props => {
     mustDelete = 'fruitmix'
   return (
     <div>
-      { warning && <div style={{margin: 16}}>警告：{warning}</div> }
+      { warning && <div style={{margin: '0 0 16 16'}}>警告：{warning}</div> }
       {/* <div style={{margin: 16}}>{general}</div>*/}
       { <div style={{margin: 16}}>{removeWisnucCheck}</div>}
       { !(mustDelete === 'wisnuc') && <div style={{margin: 16}}>{removeFruitmixCheck}</div> }

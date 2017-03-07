@@ -139,3 +139,21 @@ let mmap = new Map([
     ['EUSERSFORMAT', '/wisnuc/fruitmix/models/users.json文件存在但格式不正确']
 ])  
 ```
+
+<List style={{minWidth: 240}}>
+<Subheader>用户列表</Subheader>
+{ users.map(user => 
+    <ListItem 
+    leftAvatar={<Avatar>{user.username.slice(0,1).toUpperCase()}</Avatar>}
+    primaryText={user.username} 
+    secondaryText={ 
+    user.isFirstUser ? '第一管理员' : 
+    user.isAdmin ? '管理员' : '普通用户' 
+    }
+    disabled={true}
+    />
+    ) }
+</List>
+
+
+
