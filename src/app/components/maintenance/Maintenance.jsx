@@ -1,16 +1,13 @@
 import Debug from 'debug'
 const debug = Debug('component:maintenance')
-
 import React from 'react'
 import muiThemeable from 'material-ui/styles/muiThemeable'
 import { 
-  AppBar, Avatar, Checkbox, Chip, Divider, Paper, SvgIcon, Menu, MenuItem, 
+  AppBar, Avatar, Badge, Checkbox, Chip, Divider, Paper, SvgIcon, Menu, MenuItem, 
   FloatingActionButton, Subheader, Dialog, RaisedButton, 
   IconButton, TextField, Toggle, CircularProgress 
 } from 'material-ui'
-
 import FlatButton from '../common/FlatButton'
-
 import Popover, {PopoverAnimationVertical} from 'material-ui/Popover'
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
 import { List, ListItem } from 'material-ui/List'
@@ -24,36 +21,26 @@ import NavigationExpandLess from 'material-ui/svg-icons/navigation/expand-less'
 import NavigationClose from 'material-ui/svg-icons/navigation/close'
 import NavigationMoreVert from 'material-ui/svg-icons/navigation/more-vert'
 import ContentAddCircle from 'material-ui/svg-icons/content/add-circle'
-
 import { 
   pinkA200, grey300, grey400, greenA400, green400, amber400, 
-  redA200,
-  red400, 
-  lightGreen100,
-  lightGreen400,
-  lightGreenA100,
-  lightGreenA200,
-  lightGreenA400, 
-  lightGreenA700
+  redA200, red400, lightGreen100, lightGreen400, lightGreenA100, 
+  lightGreenA200, lightGreenA400, lightGreenA700
 } from 'material-ui/styles/colors'
-
 import UUID from 'node-uuid'
-
-import { CatSilhouette, BallOfYarn } from './svg'
+import { CatSilhouette, BallOfYarn, Account, ReportProblem, HDDIcon, RAIDIcon, UpIcon, DownIcon
+} from './svg'
 import { InitVolumeDialogs } from './InitVolumeDialogs'
-
 import { 
   operationTextConfirm, operationBase, Operation, operationBusy, operationSuccess, operationFailed, createOperation 
 } from '../common/Operation'
-
 import request from 'superagent'
 import validator from 'validator'
 import prettysize from 'prettysize'
 
 const SUBTITLE_HEIGHT = 32
-const TABLEHEADER_HEIGHT = 32
+const TABLEHEADER_HEIGHT = 48
 const TABLEDATA_HEIGHT = 48
-const HEADER_HEIGHT = 64
+const HEADER_HEIGHT = 104
 const FOOTER_HEIGHT = 48
 const SUBTITLE_MARGINTOP = 24
 
@@ -70,18 +57,6 @@ const partitionDisplayName = name => {
   return `分区 #${numstr}`
 }
 
-const HDDIcon = props => (
-  <SvgIcon {...props}>
-    <path d="M18.035,2.014h-12c-1.1,0-2,0.9-2,2v16c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2v-16C20.035,2.914,19.135,2.014,18.035,2.014z M12.126,5.579c2.686,0,4.862,2.179,4.862,4.862c0,2.688-2.177,4.864-4.862,4.864c-2.687,0-4.862-2.176-4.862-4.864 C7.264,7.757,9.439,5.579,12.126,5.579z M12.126,18.422c-1.841,0-3.576-0.602-5.016-1.738l0.669-0.849 c1.248,0.985,2.751,1.507,4.347,1.507c1.582,0,3.075-0.516,4.319-1.486l0.665,0.851C15.675,17.829,13.952,18.422,12.126,18.422z"/>
-  </SvgIcon>
-)
-
-const RAIDIcon = props => (
-  <SvgIcon {...props}>
-    <path d="M19,5H8C6.9,5,6,5.9,6,7v14c0,1.1,0.9,2,2,2h11c1.1,0,2-0.9,2-2V7C21,5.9,20.1,5,19,5z M13.5,8.308 c2.485,0,4.5,2.016,4.5,4.5c0,2.486-2.015,4.5-4.5,4.5c-2.486,0-4.5-2.014-4.5-4.5C9,10.324,11.014,8.308,13.5,8.308z M13.5,20.192c-1.704,0-3.309-0.557-4.642-1.608l0.619-0.785c1.155,0.912,2.546,1.394,4.023,1.394 c1.464,0,2.846-0.476,3.997-1.374l0.615,0.787C16.784,19.644,15.189,20.192,13.5,20.192z M13.5,13.808c0.553,0,1-0.447,1-1 c0-0.552-0.447-1-1-1s-1,0.448-1,1C12.5,13.36,12.947,13.808,13.5,13.808z"/>
-  </SvgIcon>
-)
-
 const Checkbox40 = props => (
   <div style={{width: 40, height: 40}}>
     <Checkbox {...props} style={{margin: 8}} 
@@ -90,17 +65,65 @@ const Checkbox40 = props => (
   </div>
 )
 
+const ReportProblemIcon = (props) => (
+  <ReportProblem style={{verticalAlign:'-18%', marginRight:8}} color={redA200} {...props}/>
+)
+
 const HeaderIcon = props => (
-  <div style={{width: 72, height: HEADER_HEIGHT, 
-    display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+  <div style={{
+    width: 40,
+    //height: HEADER_HEIGHT,
+    marginLeft: 24,
+    marginTop: 24,
+    marginRight: 16
+  }}>
     { props.children }
   </div>
 )
 
+
+const styles = {
+  chip: {
+    backgroundColor: '#FFFFFF',
+    fontSize: 10, 
+    font: 'roboto',
+    fontWeight: 'medium',
+    height: 26,
+    marginRight: 5,
+    border: '1px solid #e6e6e6',
+  },
+  wrapper: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
+  paperHeader: {
+    position: 'relative', 
+    width:'100%', 
+    height: HEADER_HEIGHT, 
+    border: '1px solid #e6e6e6',
+    display:'flex', 
+    alignItems: 'center',
+  },
+};
+
 const HeaderTitle1 = (props) => (
   <div style={props.style} onTouchTap={props.onTouchTap}>
-    <div style={{width:184, height:'100%', display:'flex', alignItems:'center'}}>
+    <div style={{marginBottom:2}}>
       {props.title}
+    </div>
+    <div style={styles.wrapper}>
+      {props.textFilesystem && 
+        <Chip style={styles.chip} labelStyle={{marginTop:-4}}>
+          <span style={{color: '#9e9e9e'}}>
+            {props.textFilesystem}
+          </span>
+        </Chip> }
+      {props.volumemode && 
+        <Chip style={styles.chip} labelStyle={{marginTop:-4}}>
+          <span style={{color: '#9e9e9e'}}>
+            {props.volumemode}
+          </span>
+        </Chip> }
     </div>
   </div>
 )
@@ -593,12 +616,13 @@ class Maintenance extends React.Component {
     }
 
     this.initWisnucOnVolume = volume => {
-
       debug('initWisnucOnVolume', volume)
-
       // TODO FIXME
-      if (typeof volume.wisnuc !== 'object') return
-
+      if (typeof volume.wisnuc !== 'object')
+      {
+        alert("功能开发中......")
+        return
+      }
       this.setState({ initVolume: volume })
     }
 
@@ -613,8 +637,7 @@ class Maintenance extends React.Component {
       let text = []
 
       text.push(`使用设备${target.join()}和${mode}模式创建新磁盘阵列，` +
-        '这些磁盘和包含这些磁盘的磁盘阵列上的数据都会被删除且无法恢复。')
-      text.push('确定要执行该操作吗？')
+        '这些磁盘和包含这些磁盘的磁盘阵列上的数据都会被删除且无法恢复。确定要执行该操作吗？')
 
       this.createOperation(operationTextConfirm, text, () => {
 
@@ -836,10 +859,6 @@ class Maintenance extends React.Component {
       )
     }
 
-    this.VolumeStatus = volume => {
-      
-    }
-
     this.VolumeWisnucBadge = class extends React.Component {
 
     /****
@@ -878,23 +897,28 @@ class Maintenance extends React.Component {
           }
         }
       }
+
       render() {
+        
         let VolumeisMissing = this.props.volume.isMissing
         //debug("VolumeWisnucBadge props, VolumeisMissing, UUID",this.props,VolumeisMissing,this.props.volume.fileSystemUUID)
         if (VolumeisMissing){
           return (
+            <div style={{display: 'flex'}}>
+            <ReportProblemIcon/>
             <div 
               style={{
-                height: 28,
-                display: 'flex', alignItems: 'center',
-                boxSizing: 'border-box', padding: 8, borderRadius: 4,
+                //height: 28,
+                //display: 'flex', alignItems: 'center',
+                //boxSizing: 'border-box', padding: 8, borderRadius: 4,
                 fontSize: 13,
                 fontWeight: 'bold',
-                color: that.state.creatingNewVolume === null ? '#D50000' : 'rgba(0,0,0,0.38)' , 
-                backgroundColor: that.state.creatingNewVolume === null ? '#FF8A80' : '#E0E0E0'
-              }}
+                color: that.state.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)' , 
+                //backgroundColor: that.state.creatingNewVolume === null ? '#FF8A80' : '#E0E0E0'
+               }}
             >
               发现有磁盘缺失
+            </div>
             </div>
           )
         }
@@ -904,24 +928,57 @@ class Maintenance extends React.Component {
           if (users.length === 0) {
             return <div>WISNUC已安装但尚未创建用户。</div>
           } 
-          else {
-            return (
+          else return (<div/>)
+        }
+        else if (status === 'NOTFOUND') {
+          //debug("status",status)
+          //debug("error",error)
+          var text='';
+          switch (error){
+            case "ENOWISNUC" :
+              text = "WISNUC未安装";break;
+            case "EWISNUCNOTDIR":
+              text = "WISNUC未安装,wisnuc路径存在但不是文件夹";break;
+            case "ENOFRUITMIX":
+              text = "WISNUC未正确安装,不存在wisnuc/fruitmix文件夹";break;
+            case "EFRUITMIXNOTDIR":
+              text = "WISNUC未正确安装,wisnuc/fruitmix不是文件夹";break;
+          }
+          //debug("text",text)
+          return (
+            <div style={{display: 'flex'}}>
+              <ReportProblemIcon/>
+              <div style={{
+                //display: 'flex', alignItems: 'center',
+                fontSize: 13,
+                fontWeight: 'bold', 
+                color: that.state.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)' 
+              }}>{ text }
+              </div>
+            </div>
+            )
+        }
+        else if (error) {
+
+          return (
+            <div style={{display: 'flex'}}>
+              <ReportProblemIcon/>
               <div 
                 style={{
-                  height: 28,
-                  display: 'flex', alignItems: 'center',
-                  boxSizing: 'border-box', padding: 8, borderRadius: 4,
+                  //height: 28,
+                  //display: 'flex', alignItems: 'center',
+                  //boxSizing: 'border-box', padding: 8, borderRadius: 4,
                   fontSize: 13, 
                   fontWeight: 'bold', 
-                  color: that.state.creatingNewVolume === null ? 
-                    lightGreen400 : 'rgba(0,0,0,0.38)', 
+                  color: that.state.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)' , 
+                  //backgroundColor: that.state.creatingNewVolume === null ? '#B9F6CA' : '#E0E0E0'
                 }}
                 onTouchTap={e => {
                   e.stopPropagation()
                   this.toggleList(e.currentTarget)
                 }}
               >
-                <div>WISNUC已安装，有{users.length}位用户</div>
+                <div>检测WISNUC时遇到问题</div>
                 <Popover
                   open={this.state.open}
                   anchorEl={this.state.anchorEl}
@@ -931,92 +988,120 @@ class Maintenance extends React.Component {
                   animated={false}
                   animation={PopoverAnimationVertical}
                 >
-                  <List style={{minWidth: 240}}>
-                    <Subheader>用户列表</Subheader>
-                    { users.map(user => 
-                        <ListItem 
-                          leftAvatar={<Avatar>{user.username.slice(0,1).toUpperCase()}</Avatar>}
-                          primaryText={user.username} 
-                          secondaryText={ 
-                            user.isFirstUser ? '第一管理员' : 
-                            user.isAdmin ? '管理员' : '普通用户' 
-                          }
-                          disabled={true}
-                        />
-                      ) }
-                  </List>
+                  <div style={{width: 240, margin: 8}}>
+                    文件系统存在{`wisnuc/fruitmix`}目录，但是
+                    {
+                      error === 'ENOMODELS' ? '没有models目录' :
+                      error === 'EMODELS' ? 'models不是目录' :
+                      error === 'ENOUSERS' ? '没有users.json文件' :
+                      error === 'EUSERSNOTFILE' ? 'users.json不是文件' :
+                      error === 'EUSERSPARSE' ? 'users.json无法解析，不是合法的json格式' :
+                      error === 'EUSERSFORMAT' ? 'users.json文件内部数据格式错误' : '未知的错误'
+                    }
+                  </div>
                 </Popover>
+              </div>
+            </div>
+          )       
+        }
+        return <div/>
+      }
+    }
+    
+    this.UserBadge = class extends React.Component {
+      constructor(props) {
+        super(props)
+        this.state = {
+          open: false
+        }
+        this.toggleList = target => {
+          if (this.state.open === false) {
+            this.setState({
+              open: true
+            })
+          }
+          else {
+            this.setState({
+              open: false
+            })
+          }
+        }
+      }
+      render() {
+        if (typeof this.props.volume.wisnuc !== 'object') return null //ENOFRUITMIX can't work
+        let { status, users, error, message } = this.props.volume.wisnuc
+        debug('users in UserBadge',users)
+        debug('state.open',this.state.open)
+        if (users) {
+          if (users.length === 0) {
+            return 
+            <div style={{
+              height: 36,
+              display: 'flex', alignItems: 'center',
+              boxSizing: 'border-box', padding: 8, borderRadius: 4,
+              fontSize: 18, 
+              marginLeft: 80,
+              marginBottom: 8,
+              fontWeight: 'bold', 
+              color: that.state.creatingNewVolume === null ? 
+              lightGreen400 : 'rgba(0,0,0,0.38)', 
+              }}>
+                WISNUC<span style={{width:4,display:'inline-block'}}/>
+                已安装<span style={{width:8,display:'inline-block'}}/>
+                但尚未创建用户
+            </div>
+          } 
+          else {
+            return (
+              <div 
+                style={{
+                  height: 24,
+                  display: 'flex', alignItems: 'center',
+                  boxSizing: 'border-box', padding: 8, borderRadius: 4,
+                  fontSize: 18, 
+                  fontFamily:'noto, roboto', 
+                  fontWeight:'regular',
+                  marginLeft: 80,
+                  marginBottom: 8,
+                  color: that.state.creatingNewVolume === null ? '#212121' : 'rgba(0,0,0,0.38)', 
+                }}
+              >
+                  WISNUC<span style={{width:4,display:'inline-block'}}/>已安装
+                  <Badge
+                    style={{verticalAlign : '0%', padding: 0, marginLeft: -4}}
+                    badgeContent={users.length}
+                    secondary={true}
+                    badgeStyle={{font: 'roboto', fontWeight: 'regular', fontSize:12,
+                      height:16, width:16, backgroundColor: 'white', color: '#757575',
+                      top:10, right:4}}
+                      onTouchTap={e => {
+                        e.stopPropagation()
+                        this.toggleList(e.currentTarget)
+                      }}
+                  >
+                    <IconButton>
+                      <Avatar style={{}} 
+                        size={24}
+                        color={'white'}
+                        backgroundColor={that.state.creatingNewVolume === null ? '#8C9EFF' : 'rgba(0,0,0,0.38)'}
+                        icon={<Account/>}
+                      />
+                    </IconButton>
+                  </Badge>
+                  <div style={{
+                    transition: 'all 300ms', overflow:'hidden',display:'flex',
+                    width: this.state.open ? users.length * 32 : 0 }}
+                  >
+                    {users.map((user, index) =>
+                      <Avatar size={24} style={{marginRight: 8}}>
+                        {user.username.slice(0, 2).toUpperCase()} 
+                      </Avatar>
+                    )}
+                  </div>
               </div>
             )
           }
         }
-        else if (status === 'NOTFOUND') {
-          //debug("status",status)
-          //debug("error",error)
-          var text='';
-          switch (error){
-            case "ENOWISNUC" :
-              text = "(WISNUC未安装)";break;
-            case "EWISNUCNOTDIR":
-              text = "(WISNUC未安装,wisnuc路径存在但不是文件夹)";break;
-            case "ENOFRUITMIX":
-              text = "(WISNUC未正确安装,不存在wisnuc/fruitmix文件夹)";break;
-            case "EFRUITMIXNOTDIR":
-              text = "(WISNUC未正确安装,wisnuc/fruitmix不是文件夹)";break;
-          }
-          //debug("text",text)
-          return <div
-            style={{
-              fontSize: 13,
-              color: that.state.creatingNewVolume === null ?
-                'rgba(0,0,0,0.87)' : 'rgba(0,0,0,0.38)' 
-            }}
-          >{ text }</div>
-        }
-        else if (error) {
-
-          return (
-            <div 
-              style={{
-                height: 28,
-                display: 'flex', alignItems: 'center',
-                boxSizing: 'border-box', padding: 8, borderRadius: 4,
-                fontSize: 13, 
-                fontWeight: 'bold', 
-                color: that.state.creatingNewVolume === null ? '#00C853' : 'rgba(0,0,0,0.38)' , 
-                backgroundColor: that.state.creatingNewVolume === null ? '#B9F6CA' : '#E0E0E0'
-              }}
-              onTouchTap={e => {
-                e.stopPropagation()
-                this.toggleList(e.currentTarget)
-              }}
-            >
-              <div>检测WISNUC时遇到问题</div>
-              <Popover
-                open={this.state.open}
-                anchorEl={this.state.anchorEl}
-                anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
-                targetOrigin={{horizontal: 'left', vertical: 'top'}}
-                onRequestClose={() => this.setState({ open: false, anchorEl: null })}
-                animated={false}
-                animation={PopoverAnimationVertical}
-              >
-                <div style={{width: 240}}>
-                  文件系统存在{`wisnuc/fruitmix`}目录，但是
-                  {
-                    error === 'ENOMODELS' ? '没有models目录' :
-                    error === 'EMODELS' ? 'models不是目录' :
-                    error === 'ENOUSERS' ? '没有users.json文件' :
-                    error === 'EUSERSNOTFILE' ? 'users.json不是文件' :
-                    error === 'EUSERSPARSE' ? 'users.json无法解析，不是合法的json格式' :
-                    error === 'EUSERSFORMAT' ? 'users.json文件内部数据格式错误' : '未知的错误'
-                  }
-                </div>
-              </Popover>
-            </div>
-          )       
-        }
-
         return <div/>
       }
     }
@@ -1072,37 +1157,26 @@ class Maintenance extends React.Component {
 
       const volume = props.volume
       return (
-        <div style={{width: '100%', height: '100%', display:'flex'}}>
+        <div style={{width: '100%', height: HEADER_HEIGHT, display:'flex'}}>
           <HeaderIcon>
-            <Avatar style={{ margin:4 }} 
-              color='white' 
+            <Avatar
+              size={40}
+              color={'white'}
               backgroundColor={this.volumeIconColor(volume)}
-              icon={<ContentContentCopy viewBox='0 0 24 24' />} 
+              icon={<RAIDIcon/>}
             />
           </HeaderIcon>
           <HeaderTitle1 
             style={{
-              fontSize: 16, 
-              height: HEADER_HEIGHT,
-              color: !!this.state.creatingNewVolume ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.87)'
+              font: 'noto', fontWeight: 'regular', fontSize: 26,
+              width: 176, 
+              marginTop:18,
+              color: !!this.state.creatingNewVolume ? 'rgba(0,0,0,0.38)' : '#212121'
             }}
-            title='磁盘阵列' 
+            volumemode = {volume.usage.data.mode.toUpperCase()}
+            title='磁盘阵列'
+            textFilesystem = 'Btrfs'
           />
-        </div>
-      )
-    }
-
-    this.VolumeHeadline = props => {
-
-      let vol = props.volume
-      let text = `Btrfs文件系统，${vol.total}个磁盘，${vol.usage.data.mode.toUpperCase()}模式`
-      
-      return (
-        <div style={{
-          fontSize: 13, 
-          color: this.state.creatingNewVolume ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.87)'
-        }}>
-          {text}
         </div>
       )
     }
@@ -1152,33 +1226,40 @@ class Maintenance extends React.Component {
       const uf = this.diskUnformattable(disk).length > 0
 
       return (
-        <div style={{position: 'absolute', width: 256, left: 0, 
+        <div style={{position: 'absolute', width: 256, display: 'flex',
           top: props.top, 
           height: cnv ? TABLEDATA_HEIGHT : HEADER_HEIGHT, 
-          transition: 'all 300ms',
-          display: 'flex', alignItems: 'center'}}>
+          transition: 'all 300ms'}}>
           <HeaderIcon>
-            { cnv &&  
-              <Checkbox40 
-                fill={accent1Color} 
-                disabled={uf}
-                onTouchTap={e=> e.stopPropagation()} 
-                checked={!!this.state.creatingNewVolume.disks.find(d => d === disk)}
-                onCheck={() => this.toggleCandidate(disk)}
-              /> }
-            { !cnv &&
+            { cnv ?  
+              <div style={{marginTop: -16, marginLeft: 56}}>
+                <Checkbox40 
+                  fill={accent1Color} 
+                  disabled={uf}
+                  onTouchTap={e=> e.stopPropagation()} 
+                  checked={!!this.state.creatingNewVolume.disks.find(d => d === disk)}
+                  onCheck={() => this.toggleCandidate(disk)}
+                />
+                </div>
+              :
               <Avatar 
-                style={{ margin:4 }} 
+                size={40}
                 color='white' 
                 backgroundColor='#BDBDBD'
                 icon={<HDDIcon />} 
-              /> }
+              /> 
+             }
           </HeaderIcon>
           <HeaderTitle1 
             style={{ 
-              fontSize: cnv ? 13 : 16, 
-              color: (!cnv || !uf) ? 'rgba(0,0,0,0.87)' : 'rgba(0,0,0,0.38)',
+              font: 'noto',
+              fontWeight: 'regular',
+              fontSize: cnv ? 13 : 26,
               height: cnv ? TABLEDATA_HEIGHT : HEADER_HEIGHT,
+              width: 176, 
+              marginTop: 18,
+              marginLeft: cnv ? 40 : 0,
+              color: (!cnv || !uf) ? '#212121' : 'rgba(0,0,0,0.38)',
               transition: 'height 300ms'
             }}
             title={diskDisplayName(disk.name)} 
@@ -1265,7 +1346,8 @@ class Maintenance extends React.Component {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            backgroundColor: ''
+            backgroundColor: '',
+            border: '1px solid #e6e6e6'
             //backgroundColor: red400
           }
         }
@@ -1275,53 +1357,27 @@ class Maintenance extends React.Component {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            backgroundColor: ''
+            backgroundColor: '',
+            border: '1px solid #e6e6e6'
           }
         }
       }
       return (
         <Paper {...props}>
           <div style={DivStyle(volume.missing)}
-          onTouchTap={() => this.toggleExpanded(volume)}>
-            <div style={{flex: '0 0 800px', height: '100%', display: 'flex', alignItems: 'center'}}>
+            onTouchTap={() => this.toggleExpanded(volume)}
+          >
+            <div style={{flex: '0 0 900px', height: '100%', display: 'flex', alignItems: 'center'}}>
               <div style={{flex: '0 0 256px'}}>
                 <this.VolumeTitle volume={volume} />
               </div>
-              <this.VolumeHeadline volume={volume} />
-              <div style={{flex: '0 0 16px'}} />
               <this.VolumeWisnucBadge volume={volume} />
             </div>
-
-            <div style={{display: 'flex', alignItems: 'center'}}>
-
-              { this.state.boot.state === 'maintenance' &&
-                this.state.creatingNewVolume === null &&
-                !volume.isMissing && typeof volume.wisnuc === 'object' &&
-                volume.wisnuc.status === 'READY' &&
-                <FlatButton 
-                  label='启动' 
-                  primary={true} 
-                  onTouchTap={e => {
-                    e.stopPropagation()
-                    this.startWisnucOnVolume(volume)
-                  }}/> }
-
-              { this.state.boot.state === 'maintenance' &&
-                this.state.creatingNewVolume === null &&
-                <this.VolumeMenu volume={volume}
-                  actions={
-                    typeof volume.wisnuc === 'object' ?  [
-                      [ volume.wisnuc.error === 'ENOWISNUC' ? '安装' : '重新安装',
-                        () => this.initWisnucOnVolume(volume), 
-                        volume.isMissing
-                      ]
-                    ] : [['修复问题',() => alert("功能开发中......")]] //TODO
-                  }
-                />
-              }
+            <div style={{marginRight:24}}>
+              {expandableHeight ? <DownIcon color={'#9e9e9e'}/> : <UpIcon color={'#9e9e9e'}/>}
             </div>
+          
           </div>
-
           <VerticalExpandable height={expandableHeight}>
 
             <SubTitleRow text='磁盘阵列信息' disabled={cnv} />
@@ -1380,10 +1436,10 @@ class Maintenance extends React.Component {
           </VerticalExpandable>
 
           <TableHeaderRow 
-            style={{ color: 'rgba(0,0,0,0.54)' }}
+            style={{ font:'roboto', fontWeight:'regular', fontSize:18, color:'#212121'}}
             items={[ 
-              ['', 256], 
-              ['接口', 64], 
+              ['', 256,], 
+              ['接口', 64,], 
               ['容量', 64, true], 
               ['', 56],
               ['设备名', 96],
@@ -1394,13 +1450,12 @@ class Maintenance extends React.Component {
             ]} 
           />
 
-          <DoubleDivider grayLeft={256} colorLeft={cnv ? 256 : '100%'} />
-
           { blocks.filter(blk => blk.isVolumeDevice && blk.fileSystemUUID === volume.uuid)
               .map(blk => ( 
                 <TableDataRow
                   disabled={this.volumeUnformattable(volume).length > 0}
                   selected={cnv && !!this.state.creatingNewVolume.disks.find(d => d === blk)}
+                  style={{marginLeft: 80,fontFamily:'宋体, roboto', fontWeight:'medium',fontSize:14, color:'#212121'}}
                   items={[
                     [(cnv ? 
                       <Checkbox40 
@@ -1411,9 +1466,9 @@ class Maintenance extends React.Component {
                       <HDDIcon 
                         color='rgba(0,0,0,0.38)' 
                         viewBox='0 0 24 24' 
-                      />), 72, true
+                      />), 36,
                     ],
-                    [diskDisplayName(blk.name), 184],
+                    [diskDisplayName(blk.name), 140],
                     [blk.idBus, 64],
                     [prettysize(blk.size * 512), 64, true],
                     ['', 56],
@@ -1428,8 +1483,8 @@ class Maintenance extends React.Component {
                 p.push(c)
                 p.push(
                   <DoubleDivider 
-                    grayLeft={index === array.length - 1 ? null : 72} 
-                    colorLeft={cnv ? 72 : '100%'} 
+                    grayLeft={index === array.length - 1 ? null : 80} 
+                    colorLeft={cnv ? 80 : '100%'} 
                   />
                 )
                 return p
@@ -1437,9 +1492,49 @@ class Maintenance extends React.Component {
 
           <div style={{width: '100%', height: cnv ? FOOTER_HEIGHT : 0, transition: 'height 300ms',
             display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
-            <div style={{flex: '0 0 72px'}}/>
+            <div style={{flex: '0 0 80px'}}/>
             <div style={{fontSize: 14, color: accent1Color}}>
               { cnv && '选择该磁盘阵列中的磁盘建立新的磁盘阵列，会摧毁当前磁盘阵列存储的所有数据。' }
+            </div>
+          </div>
+          <DoubleDivider grayLeft={80} colorLeft={cnv ? 80 : '100%'} />
+          <div>
+            <div style={{height:24}}/>
+            <this.UserBadge volume={volume} />
+            <div style={{display: 'flex', alignItems: 'center', marginLeft: 80, height: 36, marginBottom: 24,
+              fontSize: 14
+            }}>
+              { this.state.boot.state === 'maintenance' &&
+                this.state.creatingNewVolume === null &&
+                !volume.isMissing && typeof volume.wisnuc === 'object' &&
+                volume.wisnuc.status === 'READY' &&
+                <div>
+                  <FlatButton 
+                    style={{marginLeft: -8}}
+                    label='启动' 
+                    primary={true} 
+                    onTouchTap={e => {
+                      e.stopPropagation()
+                      this.startWisnucOnVolume(volume)
+                    }}
+                  />
+                  <span style={{width:8,display:'inline-block'}}/>
+                 </div>
+              }
+              { this.state.boot.state === 'maintenance' &&
+                this.state.creatingNewVolume === null &&
+                <FlatButton 
+                  style={{marginLeft: -8}}
+                  label={
+                    typeof volume.wisnuc === 'object' 
+                      ? [[ volume.wisnuc.error === 'ENOWISNUC' ? '安装' : '重新安装']]
+                      : [['修复问题']] //TODO
+                  }
+                  primary={true} 
+                  onTouchTap = {() => this.initWisnucOnVolume(volume)}
+                /> 
+              }
+
             </div>
           </div>
         </Paper>
@@ -1489,7 +1584,7 @@ class Maintenance extends React.Component {
           + 2 * SUBTITLE_HEIGHT
         let outer = HEADER_HEIGHT + TABLEHEADER_HEIGHT
       
-        //debug('partitioned disk floatingTitleTop', cnv, inner, outer)
+        debug('partitioned disk floatingTitleTop', cnv, inner, outer)
 
         return this.state.expanded.indexOf(disk) !== -1 ? inner + outer : outer      
       }
@@ -1504,19 +1599,17 @@ class Maintenance extends React.Component {
       return (
 
         <Paper {...props}>
-          <div 
-            style={{position: 'relative', width:'100%', height: HEADER_HEIGHT, 
-              display:'flex', alignItems: 'center'}}
-            onTouchTap={() => this.toggleExpanded(disk)}
-          >
-            <div style={{flex: '0 0 256px'}}>
-              <this.DiskTitle disk={disk} top={floatingTitleTop()} />
-            </div>
-            <div style={{flex: '0 0 336px'}}>
-              <this.DiskHeadline disk={disk} />
-            </div>
+          <div style={styles.paperHeader} onTouchTap={() => this.toggleExpanded(disk)}>
+              <div style={{flex: '0 0 256px'}}>
+                <this.DiskTitle disk={disk} top={floatingTitleTop()} />
+              </div>
+              <div style={{flex: '0 0 336px'}}>
+                <this.DiskHeadline disk={disk} />
+              </div>
+              <div style={{marginLeft:560}}>
+                {this.state.expanded.indexOf(disk) !== -1 ? <DownIcon color={'#9e9e9e'}/> : <UpIcon color={'#9e9e9e'}/>}
+              </div>
           </div>
-
           <VerticalExpandable height={this.state.expanded.indexOf(disk) !== -1 ? 
             SUBTITLE_HEIGHT * 2 + 
             TABLEHEADER_HEIGHT + 
@@ -1535,8 +1628,6 @@ class Maintenance extends React.Component {
                 ['设备名', 96],
                 ['路径（挂载点）', 416],
               ]}/> 
-         
-            <Divider style={{marginLeft: 256}} /> 
             { parts.map(blk => (
                 <TableDataRow 
                   disabled={cnv}
@@ -1574,11 +1665,6 @@ class Maintenance extends React.Component {
             ]} 
           />
 
-          <DoubleDivider 
-            grayLeft={256} 
-            colorLeft={this.diskUnformattable(disk).length > 0 ? null : cnv ? 256 : '100%'} 
-          />
-
           <TableDataRow
             disabled={cnv && this.diskUnformattable(disk).length > 0}
             selected={cnv && !!this.state.creatingNewVolume.disks.find(d => d === disk)}
@@ -1597,13 +1683,13 @@ class Maintenance extends React.Component {
 
           {/* exclusive OR */}
           <DoubleDivider 
-            grayLeft={unformattable().length > 0 ? (cnv ? 72 : '100%') : null} 
-            colorLeft={unformattable().length === 0 ? (cnv ? 72 : '100%') : null} 
+            grayLeft={unformattable().length > 0 ? (cnv ? 80 : '100%') : null} 
+            colorLeft={unformattable().length === 0 ? (cnv ? 80 : '100%') : null} 
           />
 
           <div style={{width: '100%', height: cnv ? FOOTER_HEIGHT : 0, transition: 'height 300ms',
             display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
-            <div style={{flex: '0 0 72px'}}/>
+            <div style={{flex: '0 0 80px'}}/>
             <div style={{
               fontSize: 14, 
               color: unformattable().length > 0 ? 'rgba(0,0,0,0.87)' : 
@@ -1629,7 +1715,6 @@ class Maintenance extends React.Component {
       let cnv = !!this.state.creatingNewVolume
 
       let floatingTitleTop = () => {
-
         if (!cnv) return 0
         let outer = HEADER_HEIGHT + TABLEHEADER_HEIGHT
         let inner = TABLEHEADER_HEIGHT + TABLEDATA_HEIGHT + SUBTITLE_MARGINTOP + 2 * SUBTITLE_HEIGHT
@@ -1638,16 +1723,15 @@ class Maintenance extends React.Component {
       
       return (
         <Paper {...props}>
-          <div 
-            style={{position: 'relative', width:'100%', height: HEADER_HEIGHT, 
-              display:'flex', alignItems: 'center'}}
-            onTouchTap={() => this.toggleExpanded(disk)}
-          >
+          <div style={styles.paperHeader} onTouchTap={() => this.toggleExpanded(disk)}>
             <div style={{flex: '0 0 256px'}}>
               <this.DiskTitle disk={disk} top={floatingTitleTop()} />
             </div>
             <div style={{flex: '0 0 336px'}}>
               <this.DiskHeadline disk={disk} />
+            </div>
+            <div style={{marginLeft:560}}>
+              {this.state.expanded.indexOf(disk) !== -1 ? <DownIcon color={'#9e9e9e'}/> : <UpIcon color={'#9e9e9e'}/>}
             </div>
           </div>
 
@@ -1713,10 +1797,10 @@ class Maintenance extends React.Component {
               [disk.serial || '', 208],
             ]}
           />       
-          <DoubleDivider colorLeft={cnv ? 72 : '100%'} />
+          <DoubleDivider colorLeft={cnv ? 80 : '100%'} />
           <div style={{width: '100%', height: cnv ? FOOTER_HEIGHT : 0, transition: 'height 300ms',
             display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
-            <div style={{flex: '0 0 72px'}}/>
+            <div style={{flex: '0 0 80px'}}/>
             <div style={{
               fontSize: 14, 
               color: (disk.isActiveSwap || disk.isRootFS) ? 'rgba(0,0,0,0.87)' : accent1Color
@@ -1754,16 +1838,15 @@ class Maintenance extends React.Component {
   
       return (
         <Paper {...props}>
-          <div 
-            style={{position: 'relative', width:'100%', height: HEADER_HEIGHT, 
-              display:'flex', alignItems: 'center'}}
-            onTouchTap={() => this.toggleExpanded(disk)}
-          >
+          <div style={styles.paperHeader} onTouchTap={() => this.toggleExpanded(disk)}>
             <div style={{flex: '0 0 256px'}}>
               <this.DiskTitle disk={disk} top={floatingTitleTop()} />
             </div>
             <div style={{flex: '0 0 336px'}}>
               <this.DiskHeadline disk={disk} />
+            </div>
+            <div style={{marginLeft:560}}>
+              {this.state.expanded.indexOf(disk) !== -1 ? <DownIcon color={'#9e9e9e'}/> : <UpIcon color={'#9e9e9e'}/>}
             </div>
           </div>
 
@@ -1802,10 +1885,10 @@ class Maintenance extends React.Component {
               [disk.serial || '', 208],
             ]}
           />       
-          <DoubleDivider colorLeft={cnv ? 72 : '100%'} />
+          <DoubleDivider colorLeft={cnv ? 80 : '100%'} />
           <div style={{width: '100%', height: cnv ? FOOTER_HEIGHT : 0, transition: 'height 300ms',
             display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
-            <div style={{flex: '0 0 72px'}}/>
+            <div style={{flex: '0 0 80px'}}/>
             <div style={{
               fontSize: 14, 
               color: (disk.isActiveSwap || disk.isRootFS) ? 'rgba(0,0,0,0.87)' : accent1Color

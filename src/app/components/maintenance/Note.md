@@ -1,11 +1,16 @@
 # import 
+
+```javascript
 {
   Debug React, many from material-ui, 
   FlatButton, UUID, svg, InitVolumeDialogs,
   Operation, request, validator, prettysize
 }
+```
 
 # function
+
+```javascript
 {
   diskDisplayName() //硬盘#N
   partitionDisplayName() //分区#N
@@ -20,8 +25,11 @@
   TableDataRowDark() //未使用
   VerticalExpandable() //可纵向展开和收回的部分
 }
+```
 
 # class
+
+```javascript
 {
   KeyValueList{} //主要数据列表，每个为占页面一半的一栏
   DoubleDivider{} //分割线
@@ -98,13 +106,17 @@
     render()
   }
 }
+```
 
 # api:
+
+```
 http://${device.address}:3000/system/storage?wisnuc=true
 http://${device.address}:3000/system/boot
 http://${device.address}:3000/system/mir/run
 http://${device.address}:3000/system/mir/mkfs
 http://${device.address}:3000/system/mir/init
+```
 
 ## status and error of volumes
 
@@ -127,3 +139,21 @@ let mmap = new Map([
     ['EUSERSFORMAT', '/wisnuc/fruitmix/models/users.json文件存在但格式不正确']
 ])  
 ```
+
+<List style={{minWidth: 240}}>
+<Subheader>用户列表</Subheader>
+{ users.map(user => 
+    <ListItem 
+    leftAvatar={<Avatar>{user.username.slice(0,1).toUpperCase()}</Avatar>}
+    primaryText={user.username} 
+    secondaryText={ 
+    user.isFirstUser ? '第一管理员' : 
+    user.isAdmin ? '管理员' : '普通用户' 
+    }
+    disabled={true}
+    />
+    ) }
+</List>
+
+
+

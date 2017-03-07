@@ -1,9 +1,6 @@
 import Debug from 'debug'
-
 const debug = Debug('view:control:device')
-
 import React from 'react'
-
 import { Paper, Divider, Dialog, Menu, MenuItem, IconButton, TextField } from 'material-ui'
 import FlatButton from '../common/FlatButton'
 import { blue500, blueGrey500, deepOrange500 } from 'material-ui/styles/colors'
@@ -19,23 +16,18 @@ import DeviceAccessTime from 'material-ui/svg-icons/device/access-time'
 import DeviceStorage from 'material-ui/svg-icons/device/storage'
 import HardwareToys from 'material-ui/svg-icons/hardware/toys'
 import EditorModeEdit from 'material-ui/svg-icons/editor/mode-edit'
-
-const LEFTNAV_WIDTH=210
-
+import Checkmark from '../common/Checkmark'
 import request from 'superagent'
-
 import TimeDate from './TimeDate'
 import Ethernet from './Ethernet'
 import Device from './Device'
 import Fan from './Fan'
 import PowerOff from './PowerOff'
 import ChangePasswordButton from './user/ChangePasswordButton'
-
-
 import { header1Style, header2Style, header2StyleNotFirst, contentStyle } from './styles'
 
+const LEFTNAV_WIDTH=210
 const C = x => f => f ? C(f(x)) : x
-
 const PlaceHolder = () => <div />
 
 class User extends React.Component {
@@ -49,39 +41,47 @@ class User extends React.Component {
       usernameDialog: null,
       passwordDialog: null,
       newUserDialog: null,
+      success: 0,
+      errorText: null
     }
 
     this.validateNewUsername = () => {
 
       let ret = this.state.usernameDialog &&
         this.state.usernameDialog.username &&
-        this.state.usernameDialog.username.length
+        this.state.usernameDialog.username.length &&
+        !this.state.data.find(user => user.username === this.state.usernameDialog.username)
 
-      debug('validate new username', ret)
+      //debug('validate new username', ret)
       return ret
     }
 
     this.usernameDialogCancel = () =>
-      this.setState(Object.assign({}, this.state, { usernameDialog: null }))
+      this.setState(Object.assign({}, this.state, { usernameDialog: null, success: 0, errorText: null}))
 
     this.usernameDialogOK = () => {
       this.setState(Object.assign({}, this.state, {
         usernameDialog: Object.assign({}, this.state.usernameDialog, { busy: true })
       }))
-
       request
         .patch(`http://${this.props.address}:${this.props.fruitmixPort}/users/${this.props.user.uuid}`)
         .set('Accept', 'application/json')
         .set('Authorization', 'JWT ' + this.props.user.token)
         .send({ username: this.state.usernameDialog.username })
         .end((err, res) => {
-
-          debug('request patch username', res.body && res.body)
-
-          if (err || !res.ok) return debug('request patch username', err || !res.ok)
-          debug('request patch username', res.body)
+          debug('request patch username, err, res.body', err, res.body && res.body)
+          let ErrorText="修改失败，请重试！"
+          if (err || !res.ok){
+            if(res.body.message === "invalid username") {
+              ErrorText="不能使用该用户名，可能是重复的用户名，请重试！"
+            }
+            this.setState(Object.assign({}, this.state, { errorText: ErrorText, usernameDialog: {}, success: 0}))
+            return
+          }
+          //debug('request patch username', res.body)
           this.refreshUsers()
-          setTimeout(() => this.setState(Object.assign({}, this.state, { usernameDialog: null })), 1000) 
+          this.setState({ success: 1 })
+          setTimeout(() => this.setState(Object.assign({}, this.state, { usernameDialog: null, success: 0 })), 1000)
         })
     }
 
@@ -101,7 +101,7 @@ class User extends React.Component {
     this.validatePassword = () => {
       let ret = this.state.newUserDialog && this.state.newUserDialog.password && this.state.newUserDialog.password.length
       
-      debug('validate password', ret, this.state.newUserDialog)
+      //debug('validate password', ret, this.state.newUserDialog)
       return ret
     }
 
@@ -135,15 +135,18 @@ class User extends React.Component {
         .send({username: this.state.newUserDialog.username, password: this.state.newUserDialog.password}) 
         .end((err, res) => {
           if (err || !res.ok) {
-            debug(err || !res.ok)
-            if (res && res.body) debug(res.body.message)
+            //debug(err || !res.ok)
+            let ErrorText="修改失败，请重试！"
+            if(res.body.message === "invalid username") {
+              ErrorText="不能使用该用户名，可能是重复的用户名，请重试！"
+            }
+            this.setState(Object.assign({}, this.state, { errorText: ErrorText, usernameDialog: {}, success: 0}))
             return
           }
-
-          debug('request create new user', res.body)
-
+          //debug('request create new user', res.body)
           this.refreshUsers()
-          setTimeout(() => this.setState(Object.assign({}, this.state, { newUserDialog: null })), 1000) 
+          this.setState({ success: 1 })
+          setTimeout(() => this.setState(Object.assign({}, this.state, { newUserDialog: null, success: 0 })), 1000)
         })
     }
 
@@ -208,7 +211,7 @@ class User extends React.Component {
   }
   renderUserName() {
     if (!this.state.data) return null
-    debug('this.state.data.username', this.state.data[0].username)
+    //debug('this.state.data.username', this.state.data[0].username)
     return (
       <div style={Object.assign({}, header1Style, { color: blueGrey500 })}>
         { this.state.data[0].username }
@@ -241,32 +244,41 @@ class User extends React.Component {
           <Dialog key='changeUsername'
             titleStyle={{fontSize: 20, color: 'rgba(0,0,0,0.87)'}}
             contentStyle={{width: 336}}
-            title='修改用户名'
+            title={this.state.success ? '修改成功':'修改用户名'}
             modal={false}
             open={!!this.state.usernameDialog}
             onRequestClose={this.usernameDialogCancel}
           >
-            <TextField hintText='' floatingLabelText='新用户名' fullWidth={true} key='changeusername' maxLength={20}
-              disabled={this.state.usernameDialog && this.state.usernameDialog.busy}
-              onChange={e => {
-                this.setState(Object.assign({}, this.state, {
-                  usernameDialog: Object.assign({}, this.state.usernameDialog, {
-                    username: e.target.value
-                  })
-                }))
-              }}
-            />
-            <div style={{width: '100%', marginTop: 56, display: 'flex', justifyContent: 'flex-end'}}>
-              <FlatButton label='取消' labelStyle={{fontSize: 16, fontSize: 'bold'}} primary={true} 
-                disabled={this.state.usernameDialog && this.state.usernameDialog.busy}
-                onTouchTap={this.usernameDialogCancel} />
-              <FlatButton label='确定' labelStyle={{fontSize: 16, fontSize: 'bold'}} primary={true} 
-                disabled={this.state.usernameDialog && this.state.usernameDialog.busy || 
-                  !this.validateNewUsername()}
-                onTouchTap={this.usernameDialogOK} />
-            </div>
+          {/*add checkmark*/}
+          { this.state.success === 0
+            ? <div>
+                <TextField hintText='' floatingLabelText='新用户名' fullWidth={true} key='changeusername' maxLength={20}
+                  disabled={this.state.usernameDialog && this.state.usernameDialog.busy}
+                  errorText={this.state.errorText}
+                  onChange={e => {
+                    this.setState(Object.assign({}, this.state, {
+                      usernameDialog: Object.assign({}, this.state.usernameDialog, {
+                        username: e.target.value
+                      }),errorText: null
+                    }))
+                  }}
+                />
+                <div style={{width: '100%', marginTop: 56, display: 'flex', justifyContent: 'flex-end'}}>
+                  <FlatButton label='取消' labelStyle={{fontSize: 16, fontSize: 'bold'}} primary={true} 
+                    disabled={this.state.usernameDialog && this.state.usernameDialog.busy}
+                    onTouchTap={this.usernameDialogCancel} />
+                  <FlatButton label='确定' labelStyle={{fontSize: 16, fontSize: 'bold'}} primary={true} 
+                    disabled={this.state.usernameDialog && this.state.usernameDialog.busy || 
+                      !this.validateNewUsername()}
+                    onTouchTap={this.usernameDialogOK} />
+                </div>
+              </div>
+            : <div style={{width: '100%', display:'flex', alignItems:'center', justifyContent: 'center'}}>
+                <Checkmark primary={true} delay={300} />
+              </div>
+           }
           </Dialog>
-
+          
           <div style={header2StyleNotFirst}>密码</div>
           <div style={contentStyle}>WISNUC OS的所有客户端、Web浏览器和网络文件服务使用相同的用户名密码组合。</div>
           <div style={contentStyle}>WISNUC OS不会保存任何形式的用户明文密码。</div>
@@ -295,40 +307,48 @@ class User extends React.Component {
               <Dialog 
                 titleStyle={{fontSize: 20, color: 'rgba(0,0,0,0.87)'}}
                 contentStyle={{width: 400}} 
-                title='新建用户'
+                title={this.state.success ? '新建用户成功':'新建用户'}
                 modal={false} 
                 open={!!this.state.newUserDialog} 
                 onRequestClose={this.newUserDialogCancel} 
               >
-                <TextField hintText='' floatingLabelText='用户名' fullWidth={true}  key='createusername' maxLength={20}
-                  disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
-                  onChange={e => this.setState(Object.assign({}, this.state, {
-                    newUserDialog: Object.assign({}, this.state.newUserDialog, { username: e.target.value })
-                  }))}
-                />
-                <TextField hintText='' floatingLabelText='输入密码' fullWidth={true} key='createpassword'
-                  maxLength={40} type='password'
-                  disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
-                  onChange={e => this.setState(Object.assign({}, this.state, {
-                    newUserDialog: Object.assign({}, this.state.newUserDialog, { password: e.target.value })
-                  }))}
-                />
-                <TextField hintText='' floatingLabelText='再次输入密码' fullWidth={true} key='createpasswordagain'
-                  maxLength={40} type='password'
-                  disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
-                  onChange={e => this.setState(Object.assign({}, this.state, {
-                    newUserDialog: Object.assign({}, this.state.newUserDialog, { passwordAgain: e.target.value })
-                  }))}
-                />
-                <div style={{height:30}} />
-                <div style={{width: '100%', marginTop: 56, display: 'flex', justifyContent: 'flex-end'}}>
-                  <FlatButton label='取消' labelStyle={{fontSize: 16, fontSize: 'bold'}} primary={true} 
-                    disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
-                    onTouchTap={() => this.newUserDialogCancel()} />
-                  <FlatButton label='确定' labelStyle={{fontSize: 16, fontSize: 'bold'}} primary={true} 
-                    disabled={this.state.newUserDialog && this.state.newUserDialog.busy || !(this.validateUsername() && this.validatePassword() && this.validatePasswordAgain())}
-                    onTouchTap={() => this.newUserDialogOK()} />
-                </div>
+                {/*add checkmark*/}
+                {this.state.success === 0
+                  ? <div>
+                      <TextField hintText='' floatingLabelText='用户名' fullWidth={true}  key='createusername' maxLength={20}
+                        disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
+                        onChange={e => this.setState(Object.assign({}, this.state, {
+                          newUserDialog: Object.assign({}, this.state.newUserDialog, { username: e.target.value })
+                        }))}
+                      />
+                      <TextField hintText='' floatingLabelText='输入密码' fullWidth={true} key='createpassword'
+                        maxLength={40} type='password'
+                        disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
+                        onChange={e => this.setState(Object.assign({}, this.state, {
+                          newUserDialog: Object.assign({}, this.state.newUserDialog, { password: e.target.value })
+                        }))}
+                      />
+                      <TextField hintText='' floatingLabelText='再次输入密码' fullWidth={true} key='createpasswordagain'
+                        maxLength={40} type='password'
+                        disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
+                        onChange={e => this.setState(Object.assign({}, this.state, {
+                          newUserDialog: Object.assign({}, this.state.newUserDialog, { passwordAgain: e.target.value })
+                        }))}
+                      />
+                      <div style={{height:30}} />
+                      <div style={{width: '100%', marginTop: 56, display: 'flex', justifyContent: 'flex-end'}}>
+                        <FlatButton label='取消' labelStyle={{fontSize: 16, fontSize: 'bold'}} primary={true} 
+                          disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
+                          onTouchTap={() => this.newUserDialogCancel()} />
+                        <FlatButton label='确定' labelStyle={{fontSize: 16, fontSize: 'bold'}} primary={true} 
+                          disabled={this.state.newUserDialog && this.state.newUserDialog.busy || !(this.validateUsername() && this.validatePassword() && this.validatePasswordAgain())}
+                          onTouchTap={() => this.newUserDialogOK()} />
+                      </div>
+                    </div>
+                  : <div style={{width: '100%', display:'flex', alignItems:'center', justifyContent: 'center'}}>
+                      <Checkmark primary={true} delay={300} />
+                    </div>
+                }
               </Dialog>
             </div>
           </div>

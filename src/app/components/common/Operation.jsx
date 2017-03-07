@@ -22,6 +22,11 @@ export const Operation = props => {
         state.getActions().map(action => 
           <FlatButton 
             label={action.label}
+            labelStyle={{
+              fontSize: 14, lineHeight: '36px', 
+              font: '宋体',
+              color: '#00bcd4',
+            }}
             onTouchTap={action.onTouchTap}
             disabled={typeof action.disabled === 'function' ? action.disabled() : action.disabled}
           /> ) 
@@ -145,8 +150,10 @@ export class operationText extends operationBase {
         { this.text.map((line, index, array) => {
           return (
           <div style={{ 
-            fontSize: 15, lineHeight: '24px', 
-            marginBottom: index === array.length - 1 ? 0 : 20
+            fontSize: 14, lineHeight: '24px', 
+            font: '宋体',
+            color: '#757575',
+            marginBottom: index === array.length - 1 ? 0 : 32
           }}>{ line }</div>)
         })}
       </div>     
