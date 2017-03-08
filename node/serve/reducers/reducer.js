@@ -10,7 +10,6 @@ const reducer = combineReducers({
   config,
   server,
 	login,
-	file,
 	media,
 	setting
 })
