@@ -1,6 +1,5 @@
 import { combineReducers } from 'redux'
 import setting from './setting'
-import file from './file'
 import media from './media'
 import login from './login'
 import config from './config'
