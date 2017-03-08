@@ -24,7 +24,6 @@ export const Operation = props => {
             label={action.label}
             labelStyle={{
               fontSize: 14, lineHeight: '36px', 
-              font: '宋体',
               color: '#00bcd4',
             }}
             onTouchTap={action.onTouchTap}
@@ -151,7 +150,6 @@ export class operationText extends operationBase {
           return (
           <div style={{ 
             fontSize: 14, lineHeight: '24px', 
-            font: '宋体',
             color: '#757575',
             marginBottom: index === array.length - 1 ? 0 : 32
           }}>{ line }</div>)

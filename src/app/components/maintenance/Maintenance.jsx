@@ -66,7 +66,7 @@ const Checkbox40 = props => (
 )
 
 const ReportProblemIcon = (props) => (
-  <ReportProblem style={{verticalAlign:'-18%', marginRight:8}} color={redA200} {...props}/>
+  <ReportProblem style={{verticalAlign:'-18%', marginRight:8}} {...props}/>
 )
 
 const HeaderIcon = props => (
@@ -86,7 +86,6 @@ const styles = {
   chip: {
     backgroundColor: '#FFFFFF',
     fontSize: 10, 
-    font: 'roboto',
     fontWeight: 'medium',
     height: 26,
     marginRight: 5,
@@ -905,7 +904,7 @@ class Maintenance extends React.Component {
         if (VolumeisMissing){
           return (
             <div style={{display: 'flex'}}>
-            <ReportProblemIcon/>
+            <ReportProblemIcon color={that.state.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)'}/>
             <div 
               style={{
                 //height: 28,
@@ -947,7 +946,7 @@ class Maintenance extends React.Component {
           //debug("text",text)
           return (
             <div style={{display: 'flex'}}>
-              <ReportProblemIcon/>
+              <ReportProblemIcon color={that.state.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)'}/>
               <div style={{
                 //display: 'flex', alignItems: 'center',
                 fontSize: 13,
@@ -962,7 +961,7 @@ class Maintenance extends React.Component {
 
           return (
             <div style={{display: 'flex'}}>
-              <ReportProblemIcon/>
+              <ReportProblemIcon color={that.state.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)'}/>
               <div 
                 style={{
                   //height: 28,
@@ -1012,26 +1011,15 @@ class Maintenance extends React.Component {
       constructor(props) {
         super(props)
         this.state = {
-          open: false
+          hover: false
         }
-        this.toggleList = target => {
-          if (this.state.open === false) {
-            this.setState({
-              open: true
-            })
-          }
-          else {
-            this.setState({
-              open: false
-            })
-          }
+        this.toggleHover = () => {
+          this.setState({hover: !this.state.hover})
         }
       }
       render() {
         if (typeof this.props.volume.wisnuc !== 'object') return null //ENOFRUITMIX can't work
         let { status, users, error, message } = this.props.volume.wisnuc
-        debug('users in UserBadge',users)
-        debug('state.open',this.state.open)
         if (users) {
           if (users.length === 0) {
             return 
@@ -1059,7 +1047,6 @@ class Maintenance extends React.Component {
                   display: 'flex', alignItems: 'center',
                   boxSizing: 'border-box', padding: 8, borderRadius: 4,
                   fontSize: 18, 
-                  fontFamily:'noto, roboto', 
                   fontWeight:'regular',
                   marginLeft: 80,
                   marginBottom: 8,
@@ -1071,13 +1058,11 @@ class Maintenance extends React.Component {
                     style={{verticalAlign : '0%', padding: 0, marginLeft: -4}}
                     badgeContent={users.length}
                     secondary={true}
-                    badgeStyle={{font: 'roboto', fontWeight: 'regular', fontSize:12,
+                    badgeStyle={{fontWeight: 'regular', fontSize:12,
                       height:16, width:16, backgroundColor: 'white', color: '#757575',
                       top:10, right:4}}
-                      onTouchTap={e => {
-                        e.stopPropagation()
-                        this.toggleList(e.currentTarget)
-                      }}
+                      onMouseEnter={this.toggleHover}
+                      onMouseLeave={this.toggleHover}
                   >
                     <IconButton>
                       <Avatar style={{}} 
@@ -1089,8 +1074,9 @@ class Maintenance extends React.Component {
                     </IconButton>
                   </Badge>
                   <div style={{
-                    transition: 'all 300ms', overflow:'hidden',display:'flex',
-                    width: this.state.open ? users.length * 32 : 0 }}
+                    transition: 'all 450ms', overflow:'hidden',opacity: this.state.hover ? 1 : 0,
+                    marginTop: this.state.hover ? -4 : 12,
+                    }}
                   >
                     {users.map((user, index) =>
                       <Avatar size={24} style={{marginRight: 8}}>
@@ -1168,7 +1154,7 @@ class Maintenance extends React.Component {
           </HeaderIcon>
           <HeaderTitle1 
             style={{
-              font: 'noto', fontWeight: 'regular', fontSize: 26,
+              fontWeight: 'regular', fontSize: 26,
               width: 176, 
               marginTop:18,
               color: !!this.state.creatingNewVolume ? 'rgba(0,0,0,0.38)' : '#212121'
@@ -1252,7 +1238,6 @@ class Maintenance extends React.Component {
           </HeaderIcon>
           <HeaderTitle1 
             style={{ 
-              font: 'noto',
               fontWeight: 'regular',
               fontSize: cnv ? 13 : 26,
               height: cnv ? TABLEDATA_HEIGHT : HEADER_HEIGHT,
@@ -1374,7 +1359,7 @@ class Maintenance extends React.Component {
               <this.VolumeWisnucBadge volume={volume} />
             </div>
             <div style={{marginRight:24}}>
-              {expandableHeight ? <DownIcon color={'#9e9e9e'}/> : <UpIcon color={'#9e9e9e'}/>}
+              {expandableHeight ? <UpIcon color={'#9e9e9e'}/> : <DownIcon color={'#9e9e9e'}/>}
             </div>
           
           </div>
@@ -1436,7 +1421,7 @@ class Maintenance extends React.Component {
           </VerticalExpandable>
 
           <TableHeaderRow 
-            style={{ font:'roboto', fontWeight:'regular', fontSize:18, color:'#212121'}}
+            style={{ fontWeight:'regular', fontSize:18, color:'#212121'}}
             items={[ 
               ['', 256,], 
               ['接口', 64,], 
@@ -1607,7 +1592,7 @@ class Maintenance extends React.Component {
                 <this.DiskHeadline disk={disk} />
               </div>
               <div style={{marginLeft:560}}>
-                {this.state.expanded.indexOf(disk) !== -1 ? <DownIcon color={'#9e9e9e'}/> : <UpIcon color={'#9e9e9e'}/>}
+                {this.state.expanded.indexOf(disk) !== -1 ? <UpIcon color={'#9e9e9e'}/> : <DownIcon color={'#9e9e9e'}/>}
               </div>
           </div>
           <VerticalExpandable height={this.state.expanded.indexOf(disk) !== -1 ? 
@@ -1731,7 +1716,7 @@ class Maintenance extends React.Component {
               <this.DiskHeadline disk={disk} />
             </div>
             <div style={{marginLeft:560}}>
-              {this.state.expanded.indexOf(disk) !== -1 ? <DownIcon color={'#9e9e9e'}/> : <UpIcon color={'#9e9e9e'}/>}
+              {this.state.expanded.indexOf(disk) !== -1 ? <UpIcon color={'#9e9e9e'}/> : <DownIcon color={'#9e9e9e'}/>}
             </div>
           </div>
 
@@ -1846,7 +1831,7 @@ class Maintenance extends React.Component {
               <this.DiskHeadline disk={disk} />
             </div>
             <div style={{marginLeft:560}}>
-              {this.state.expanded.indexOf(disk) !== -1 ? <DownIcon color={'#9e9e9e'}/> : <UpIcon color={'#9e9e9e'}/>}
+              {this.state.expanded.indexOf(disk) !== -1 ? <UpIcon color={'#9e9e9e'}/> : <DownIcon color={'#9e9e9e'}/>}
             </div>
           </div>
 
