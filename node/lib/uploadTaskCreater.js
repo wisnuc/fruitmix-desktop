@@ -6,11 +6,11 @@ import child_process from 'child_process'
 
 import request from 'request'
 import uuid from 'node-uuid'
-import DataStore from 'nedb'
 
 import store from '../serve/store/store'
 import { getMainWindow } from './window'
 import utils from './util'
+import { userTasks, finishTasks} from './newUpload'
 
 let server
 let user
@@ -18,27 +18,15 @@ let httpRequestConcurrency = 4
 let fileHashConcurrency = 6
 let visitConcurrency = 2
 let sendHandler = null
-const userTasks = []
-const finishTasks = []
-const userTasksMap = new Map()
+
 const runningQueue = []
 const readyQueue = []
 const hashingQueue = []
 const hashlessQueue = []
 const visitlessQueue = []
 const visitingQueue = []
-const db = new DataStore({fileName: 'userTasks.db', autoload: true})
-// db.userTasks = new DataStore('userTasks.db')
-// db.finishTasks = new DataStore('finishTasks')
 
-db.insert({name: 'test'}, (err, doc) => {
-	console.log(err)
-	console.log(doc)
-})
-// db.userTasks.find({},(err,data) => {
-// 	console.log(err)
-// 	console.log(data)
-// })
+// ipcMain.on('getTransmission')
 //sendMessage
 const sendMessage = () => {
 	let shouldSend = false
@@ -62,25 +50,16 @@ const sendMessage = () => {
 
 const sendMsg = () => {
 	let mainWindow = getMainWindow()
-  mainWindow.webContents.send('UPDATE_UPLOAD', userTasks.map(item => item.getSummary()), finishTasks.map(i => i.getSummary()))
+  	mainWindow.webContents.send('UPDATE_UPLOAD', userTasks.map(item => item.getSummary()), finishTasks.map(i => i.getSummary?i.getSummary():i))
 }
 
-//create task factory
-const createUserTask = (files, target) => {
+const createTask = (abspath, target, newWork,type) => {
 	initArgs()
-	files.forEach(abspath => {
-		let taskUUID = uuid.v4()
-		let obj = createTask(abspath, target, true, taskUUID)
-		userTasks.push(obj)
-		userTasksMap.set(obj.uuid, obj)
-		console.log(userTasks[0] === userTasksMap.get(userTasks[0].uuid))
-	})
-	sendMessage()
-}
-
-const createTask = (abspath, target, newWork, uuid) => {
-	let task = new TaskManager(abspath, target, true, uuid)
+	let taskUUID = uuid.v4()
+	let task = new TaskManager(abspath, target, true, taskUUID, type)
+	userTasks.push(task)
 	task.readyToVisit()
+	sendMessage()
 	return task
 }
 /*
@@ -95,15 +74,15 @@ const createTask = (abspath, target, newWork, uuid) => {
 	schedule(): schedule work list
 */
 class TaskManager {
-	constructor(abspath, target, newWork, uuid) {
+	constructor(abspath, target, newWork, uuid, type) {
 		this.abspath = abspath
 		this.target = target
 		this.newWork = newWork
 		this.uuid = uuid
-		this.type = null
+		this.type = type
 		this.name = path.basename(abspath)
-		this.size = 0
 
+		this.size = 0
 		this.completeSize = 0
 		this.lastTimeSize = 0
 		this.speed = ''
@@ -142,6 +121,7 @@ class TaskManager {
 			count: this.count,
 			finishCount: this.finishCount,
 			restTime: this.restTime,
+			finishDate: this.finishDate,
 			state: this.state,
 			pause: this.pause,
 			record: this.record,
@@ -149,15 +129,15 @@ class TaskManager {
 		}
 	}
 
-	readyToVisit() {
-		this.state = 'visitless'
-		addToVisitlessQueue(this)
-	}
-
 	recordInfor(msg) {
 		if (this.record.length > 50) this.record.splice(0,20)
 		console.log(msg)
 		this.record.push(msg)
+	}
+
+	readyToVisit() {
+		this.state = 'visitless'
+		addToVisitlessQueue(this)
 	}
 
 	visit() {
@@ -168,7 +148,6 @@ class TaskManager {
 		addToVisitingQueue(this)
 		visitFolder(this.abspath, this.tree, this.worklist, this, () => {
 			_this.tree[0].target = _this.target
-			_this.type = _this.tree[0].type
 			removeOutOfVisitingQueue(this)
 			_this.recordInfor('遍历文件树结束...')
 			_this.state = 'visited'
@@ -192,8 +171,6 @@ class TaskManager {
 			if (this.lastFolderIndex != -1) break
 			if (this.worklist[i].type === 'folder') this.lastFolderIndex = i
 		}
-		// this.recordInfor(this.lastFileIndex)
-		// this.recordInfor(this.lastFolderIndex)
 
 		this.schedule()
 	}
@@ -260,9 +237,27 @@ class TaskManager {
 			finishTasks.push(this)
 			clearInterval(this.countSpeed)
 			sendMessage()
+			this.finishStore()
 		}else {
 			this.uploadSchedule()
 		}
+	}
+
+	finishStore() {
+		let obj = {
+			_id: this.uuid,
+			abspath: this.abspath,
+			target: this.target,
+			name: this.name,
+			type: this.type,
+			uuid: this.tree[0].uuid,
+			finishDate: this.finishDate
+		}
+
+		db.finish.insert(obj,(err, data) => {
+			if (err) return console.log(err) 
+			console.log(data)
+		})
 	}
 }
 
@@ -302,7 +297,7 @@ class UploadTask {
 		this.manager = manager
 		this.target = ''
 		this.state = null
-    this.stateName = ''
+    	this.stateName = ''
 	}
 
 	setState(NextState) {
@@ -484,7 +479,6 @@ class UploadFileSTM extends STM {
 
     let tempStream = fs.createReadStream(this.wrapper.abspath).pipe(transform)
     tempStream.path = this.wrapper.abspath
-
     let options = {
       url: server + '/files/' + this.wrapper.target,
       method: 'post',
@@ -588,4 +582,6 @@ const removeOutOfRunningQueue = (task) => {
   scheduleHttpRequest()
 }
 
-export default createUserTask
+export default createTask
+
+export { sendMsg }

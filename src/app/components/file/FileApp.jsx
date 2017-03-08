@@ -1407,7 +1407,7 @@ class FileApp extends React.Component {
               // for suppressed leftNav, TODO
               marginLeft: this.state.leftNav ? LEFTNAV_WIDTH : 0,
               transition: sharpCurve('margin-left'),
-
+              overflow: 'auto',
               width: '100%',
               height: '100%',
               backgroundColor: '#FAFAFA'}}

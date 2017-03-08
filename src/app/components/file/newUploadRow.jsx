@@ -13,7 +13,7 @@ const selectStyle = {backgroundColor:'#f4f4f4'}
 class UploadRow extends Component {
 	constructor() {
 		super()
-		this.state = {checked: false}
+		this.state = {checked: false, detail: false}
 	}
 
 	render() {
@@ -43,9 +43,23 @@ class UploadRow extends Component {
 						{this.getUploadedSize(task)}
 					</div>
 				</div>
-				<div className='trs-row-tool'>...</div>
+				<div className='trs-row-tool'>
+					<span>{task.pause?'play':'pause'}</span>
+					<span onClick={this.toggleDetail.bind(this)}>Detail</span>
+					{this.state.detail?
+					(<div className='trs-detail-container'>
+											{task.record.map(item => <div>{item}</div>)}
+										</div>):null
+				}
+				</div>
 			</div>
 		)
+	}
+
+	toggleDetail() {
+		this.setState({
+			detail: !this.state.detail
+		})
 	}
 
 	select() {

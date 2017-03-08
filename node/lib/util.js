@@ -81,7 +81,13 @@ var utils = {
 	formatDate(mtime) {
 		let time = new Date()
 		if (!!mtime) time.setTime(mtime)
-		return time.getFullYear() + '-' + (time.getMonth() + 1) + '-' + time.getDate() + '-' + (time.getHours() + 1) 
+		return [
+			time.getFullYear(),
+			time.getMonth() + 1,
+			time.getDate(),
+			time.getHours(),
+			time.getMinutes()
+		]
 	}
 
 }

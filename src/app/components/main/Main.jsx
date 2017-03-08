@@ -265,6 +265,8 @@ class Main extends React.Component {
 		ipcRenderer.send('getMediaData')
 		ipcRenderer.send('getMediaShare')
 
+    command('', 'GET_TRANSMISSION', {})
+
 		ipcRenderer.on('refreshStatusOfUpload',(err,tasks, finish)=>{
 			window.store.dispatch(Action.refreshStatusOfUpload(tasks, finish));
 		});

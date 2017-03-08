@@ -2,6 +2,7 @@
 /build
 /media
 /download
+/dbCache
 /npm-debug.log
 
 *.swp

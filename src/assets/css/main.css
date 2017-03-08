@@ -35,18 +35,6 @@ body{
 }
 
 /*unknow but maybe is working for some component*/
-.right-panel-inner.active {
-	right: 0!important;
-}
-
-.slide-emit {
-	display: none;
-}
-
-.slide-emit:checked + div {
-	max-height: 0!important;
-}
-
 .large-arrow,
 .large-arrow > div > div {
 	position: static!important;
@@ -310,53 +298,6 @@ body{
 .custom-share-container {
 	padding:0 20px 0;
 }
-/*transmission*/
-.transimission-container {
-	width:100%;
-	height: 100%;
-	background-color: #fff;
-	overflow: auto;
-}
-.transimissionRow{
-	display: flex;
-	flex-direction: row;
-	flex-wrap: nowrap;
-	height: 48px;
-	line-height: 48px;
-	font-size: 14px;
-}
-.transimissionRow>span {
-	box-sizing: border-box;
-	color:rgba(0,0,0,.87);
-	overflow: hidden;
-	text-overflow: ellipsis;
-	font-size: 13px;
-}
-
-.transimissionRow>span:nth-child(1) {
-	flex:0 0 50px;
-}
-.transimissionRow>span:nth-child(2) {
-	flex-grow: 1;
-}
-.transimissionRow>span:nth-child(3) {
-	flex:0 1 75px;
-	margin-right: 56px;
-	text-align: right;
-}
-.transimissionRow>span:nth-child(4) {
-	flex:0 1 75px;
-	margin-right: 24px;
-	text-align: right;
-}
-
-.transimissionRow:not(.transimissionTitle):hover {
-	background-color: #eeeeee;
-}
-.transimissionTitle>span {
-	font-size: 12px;
-	color:rgba(0,0,0,.54);
-}
 
 .lightbox-arrow svg {
 	width: 44px!important;
@@ -556,4 +497,20 @@ body{
 
 .trs-row-tool {
 	width:100px;
+	position: relative;
+}
+
+.trs-row-finishDate {
+	width:385px;
+}
+
+.trs-detail-container {
+	width:250px;
+	height:150px;
+	top:64px;
+	right:0px;
+	position: absolute;
+	border: 1px solid red;
+	overflow: auto;
+	background: white
 }
