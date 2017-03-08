@@ -10,7 +10,36 @@ import { ipcRenderer } from 'electron'
 import prettysize from 'prettysize'
 import request from 'superagent'
 
-class GuideBox extends React.Component {
+import UsernamePassword from './UsernamePassword'
+
+// import CreatingVolumeDiskSelection1
+
+const StateUp = base => class extends base {
+
+  setSubState(name, nextSubState) {
+    let state = this.props.state || this.state
+    let subState = state[name]
+    let nextSubStateMerged = Object.assign(new subState.constructor(), subState, nextSubState)
+    let nextState = { [name]: nextSubStateMerged }
+    this.props.setState
+      ? this.props.setState(nextState)
+      : this.setState(nextState)
+  }
+
+  setSubStateBound(name) {
+    let obj = this.setSubStateBoundObj || (this.setSubStateBoundObj = {})
+    return obj[name] ? obj[name] : (obj[name] = this.setSubState.bind(this, name))
+  }
+
+  bindVState(name) {
+    return {
+      state: this.props.state ? this.props.state[name] : this.state[name],
+      setState: this.setSubStateBound(name)
+    }
+  }
+}
+
+class GuideBox extends StateUp(React.Component) {
 
   constructor(props) {
 
@@ -24,7 +53,6 @@ class GuideBox extends React.Component {
       expanded: false,
       showContent: false,
 
-
       // stepper
       finished: false,
       stepIndex: 0,
@@ -34,14 +62,8 @@ class GuideBox extends React.Component {
       //
       selection: [],
       mode: null, 
-     
-      //
-      username: null,
-      password: null,
-      passwordAgain: null 
 
-      ///////////////
-
+      userpass: new UsernamePassword.State(),
     }
 
     this.mir = (type, data, callback) => {
@@ -74,8 +96,8 @@ class GuideBox extends React.Component {
     this.useExisting = uuid => {
       this.mir('init', {
         target: uuid,
-        username: this.state.username,
-        password: this.state.password
+        username: this.state.userpass.username,
+        password: this.state.userpass.password
       }, (err, body) => {
 
         if (err) {
@@ -89,7 +111,7 @@ class GuideBox extends React.Component {
             console.log('run failed', err.message, body && body.message)
             return this.setState({ dialogText: ['运行新系统失败', err.message, body && body.message] }) 
           }
-          setTimeout(() => ipcRenderer.send('login', this.state.username, this.state.password), 1000)
+          setTimeout(() => ipcRenderer.send('login', this.state.userpass.username, this.state.userpass.password), 1000)
         })
       })  
     }
@@ -318,46 +340,13 @@ class GuideBox extends React.Component {
                   <StepLabel>创建第一个用户</StepLabel>
                   <StepContent>
                     <p>请输入第一个用户的用户名和密码，该用户会成为系统权限最高的管理员。</p>
-                    <div>
-                      <TextField key='guide-box-username' hintText='用户名' 
-                        value={this.state.username}
-                        maxLength={20}
-                        onChange={e => {
-                        let nextState = Object.assign({}, this.state, { username: e.target.value })
-                        console.log(nextState)
-                        this.setState(nextState)
-                      }}/>
-                    </div>
-                    <div>
-                      <TextField key='guide-box-password' hintText='密码' 
-                        value={this.state.password}
-                        type= 'password'
-                        maxLength={40}
-                        onChange={e => {
-                        let nextState = Object.assign({}, this.state, { password: e.target.value })
-                        console.log(nextState)
-                        this.setState(nextState)
-                      }}/>
-                    </div>
-                    <div>
-                      <TextField key='guide-box-password-again' hintText='再次输入密码' 
-                        value={this.state.passwordAgain}
-                        type='password'
-                        maxLength={40}
-                        onChange={e => {
-                        this.setState(Object.assign({}, this.state, { passwordAgain: e.target.value }))
-                      }}/>
-                    </div>
+
+                    <UsernamePassword {...this.bindVState('userpass')} />
+
                     <div style={{margin: '12px 0'}}>
                       <RaisedButton
                         label='下一步'
-
-                        disabled={!(this.state.username && 
-                          this.state.username.length > 0 && 
-                          this.state.password &&
-                          this.state.password === this.state.passwordAgain && 
-                          this.state.password.length > 0)}
-
+                        disabled={ !this.state.userpass.isInputOK() }
                         disableTouchRipple={true}
                         disableFocusRipple={true}
                         primary={true}
@@ -441,9 +430,9 @@ class GuideBox extends React.Component {
                     volSelection: null,
                     selection: [],
                     mode: null,
-                    username: null,
-                    password: null,
-                    passwordAgain: null
+
+                    userpass: new UsernamePassword.State(),
+
                   }))
                   setTimeout(() => {
                     this.props.onResize('HSHRINK')
