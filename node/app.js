@@ -24,7 +24,8 @@ import download from './lib/download'
 import { initMainWindow, getMainWindow } from './lib/window'
 import { initTestWindow } from './lib/testHook'
 
-import mdns from './lib/mdns'
+import mdns2 from './lib/mdns2'
+// import mdns from './lib/mdns'
 import misc from './lib/misc'
 
 global.entryFileDir = __dirname
@@ -34,12 +35,14 @@ const debug = Debug('main')
 var mocha = false
 
 // initialize mdns
+/**
 mdns().on('stationUpdate', device => {
   store.dispatch({
     type: 'SET_DEVICE',
     device
   })
 })
+**/
 
 // read config file
 try {

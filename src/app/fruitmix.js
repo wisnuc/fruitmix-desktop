@@ -18,6 +18,7 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme'
 import Login from './components/login/Login'
 import Main from './components/main/Main'
 import Maintenance from './components/maintenance/Maintenance'
+import mdns from './lib/mdns'
 import { command } from './lib/command'
 
 const debug = Debug('app')
@@ -36,23 +37,27 @@ global.theme = Object.assign({}, getMuiTheme(lightBaseTheme), { fontFamily: 'Not
 console.log('theme', global.theme)
 
 // root component
-const App = () => (
-  <MuiThemeProvider muiTheme={theme}>
-    { window.store.getState().maintenance 
-        ? <Maintenance /> 
-        : window.store.getState().login.state === 'LOGGEDIN' 
-          ? <Main showAppBar={window.store.getState().view.showAppBar} /> 
-          : <Login devices={window.store.getState().mdns}/> }
-  </MuiThemeProvider>
-)
+const App = () => {
+
+  console.log('====', window.mdns.devices)
+
+  return (
+    <MuiThemeProvider muiTheme={theme}>
+      { window.store.getState().maintenance 
+          ? <Maintenance /> 
+          : window.store.getState().login.state === 'LOGGEDIN' 
+            ? <Main showAppBar={window.store.getState().view.showAppBar} /> 
+            : <Login devices={window.mdns.devices}/> }
+    </MuiThemeProvider>
+  )
+}
 
 // render method
 const render = () => ReactDom.render(<App/>, document.getElementById('app'))
+window.fullRender = render
 
 // subscribe render
-store.subscribe(() => {
-  render()
-})
+store.subscribe(() => { render() })
 
 // first render
 render()
@@ -104,4 +109,5 @@ document.addEventListener('drop', (e) => {
 })
 
 debug('fruitmix app module loaded')
+
 
