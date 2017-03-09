@@ -1,21 +1,13 @@
 import Debug from 'debug'
 import React from 'react'
 import {
-  AppBar, Avatar, Badge, Checkbox, Chip, Divider, Paper, Menu, MenuItem, Dialog, IconButton, TextField, Toggle, CircularProgress
+  AppBar, Avatar, Badge, Checkbox, Chip, Divider, Paper, Menu, MenuItem, Dialog, IconButton, TextField, CircularProgress
 } from 'material-ui'
 import muiThemeable from 'material-ui/styles/muiThemeable'
 import Popover, { PopoverAnimationVertical } from 'material-ui/Popover'
-import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
-import { List, ListItem } from 'material-ui/List'
 import ActionExitToApp from 'material-ui/svg-icons/action/exit-to-app'
-import ActionDns from 'material-ui/svg-icons/action/dns'
-import ActionDonutSmall from 'material-ui/svg-icons/action/donut-small'
-import ImageCropPortrait from 'material-ui/svg-icons/image/crop-portrait'
-import ContentContentCopy from 'material-ui/svg-icons/content/content-copy'
 import NavigationExpandMore from 'material-ui/svg-icons/navigation/expand-more'
 import NavigationExpandLess from 'material-ui/svg-icons/navigation/expand-less'
-import NavigationClose from 'material-ui/svg-icons/navigation/close'
-import NavigationMoreVert from 'material-ui/svg-icons/navigation/more-vert'
 import ContentAddCircle from 'material-ui/svg-icons/content/add-circle'
 import {
   pinkA200, grey300, grey400, greenA400, green400, amber400,
@@ -140,8 +132,9 @@ class KeyValueList extends React.PureComponent {
 
     return (
       <div style={this.props.style}>
-        { this.props.items.map((item,index) => (
-          <div key={index}
+        { this.props.items.map(item => (
+          <div
+            key={item.toString()}
             style={{
               height: 24,
               display: 'flex',
@@ -188,10 +181,10 @@ const TableHeaderRow = (props) => {
   return (
     <div style={props.style}>
       <div style={style}>
-        { props.items.map((item, index) => {
+        { props.items.map((item) => {
           const style = { flex: `0 0 ${item[1]}px` }
           if (item[2] === true) { style.textAlign = 'right' }
-          return (<div style={style} key={index}>{item[0]}</div>)
+          return (<div style={style} key={item.toString()}>{item[0]}</div>)
         }) }
       </div>
     </div>
@@ -213,11 +206,11 @@ const TableDataRow = (props) => {
   return (
     <div style={props.style}>
       <div style={containerStyle}>
-        { props.items.map((item,index) => {
+        { props.items.map((item) => {
           if (typeof item[0] === 'string') {
             const style = { flex: `0 0 ${item[1]}px` }
             if (item[2] === true) style.textAlign = 'right'
-            return <div style={style} key={index}>{item[0]}</div>
+            return <div style={style} key={item.toString()}>{item[0]}</div>
           }
           const style = {
             flex: `0 0 ${item[1]}px`,
@@ -226,7 +219,7 @@ const TableDataRow = (props) => {
           }
 
           if (item[2] === true) style.justifyContent = 'center'
-          return <div style={style} key={index}>{item[0]}</div>
+          return <div style={style} key={item.toString()}>{item[0]}</div>
         }) }
       </div>
     </div>
@@ -390,7 +383,7 @@ class Maintenance extends React.Component {
       const device = window.store.getState().maintenance.device
       const finish = () => {
         if (storage && boot) {
-          //debug('reload boot storage', boot, storage)
+          // debug('reload boot storage', boot, storage)
           this.setState({
             storage,
             boot,
@@ -438,7 +431,7 @@ class Maintenance extends React.Component {
       this.setState({ operation: null })
     }
 
-    this.UsernamePasswordContent = (props) => {
+    this.UsernamePasswordContent = () => {
       const onChange = (name, value) => {
         const operation = Object.assign({}, this.state.operation)
         operation[name] = value
@@ -464,7 +457,7 @@ class Maintenance extends React.Component {
     }
 
     // Sub Component
-    this.OperationTextContent = props => (
+    this.OperationTextContent = () => (
       <div style={{ width: '100%' }}>
         { this.state.operation.text.map((line, index, array) => (
           <div
@@ -478,7 +471,7 @@ class Maintenance extends React.Component {
     )
 
     // Sub Component
-    this.OperationBusy = props => (
+    this.OperationBusy = () => (
       <div
         style={{ width: '100%',
           height: '100%',
@@ -542,7 +535,7 @@ class Maintenance extends React.Component {
     }
 
     // TODO move to main render
-    this.OperationDialog = (props) => {
+    this.OperationDialog = () => {
       const operation = this.state.operation
       return (
         <Dialog
@@ -598,12 +591,11 @@ class Maintenance extends React.Component {
           .send({ target: volume.fileSystemUUID })
           .end((err, res) => {
             if (err) {
-              this.reloadBootStorage((err2, { boot, storage }) => {
+              this.reloadBootStorage(() => {
                 this.state.dialog.setState(operationFailed, this.errorText(err, res))
               })
             } else {
-              this.reloadBootStorage((err2, { boot, storage }) => {
-                // FIXMED
+              this.reloadBootStorage(() => {
                 for (let i = 3; i >= 0; i--) {
                   const time = (3 - i) * 1000
                   const that = this
@@ -1087,8 +1079,8 @@ class Maintenance extends React.Component {
                   marginTop: this.state.hover ? -4 : 12
                 }}
               >
-                {users.map((user, index) =>
-                  <Avatar key={index} size={24} style={{ marginRight: 8 }}>
+                {users.map(user =>
+                  <Avatar key={user.username.toString()} size={24} style={{ marginRight: 8 }}>
                     {user.username.slice(0, 2).toUpperCase()}
                   </Avatar>
                     )}
@@ -1254,7 +1246,7 @@ class Maintenance extends React.Component {
       const primary1Color = this.props.muiTheme.palette.primary1Color
       const accent1Color = this.props.muiTheme.palette.accent1Color
 
-      const {volume, ...rest} = props
+      const { volume, ...rest } = props
       const boot = this.state.boot
       const { volumes, blocks } = this.state.storage
       const cnv = !!this.state.creatingNewVolume
@@ -1376,8 +1368,9 @@ class Maintenance extends React.Component {
           />
 
           { blocks.filter(blk => blk.isVolumeDevice && blk.fileSystemUUID === volume.uuid)
-              .map((blk, index)=> (
-                <TableDataRow key={index + blk}
+              .map((blk, index) => (
+                <TableDataRow
+                  key={blk.name}
                   disabled={this.volumeUnformattable(volume).length > 0}
                   selected={cnv && !!this.state.creatingNewVolume.disks.find(d => d === blk)}
                   style={{ marginLeft: 80, fontFamily: '宋体, roboto', fontWeight: 'medium', fontSize: 14, color: '#212121' }}
@@ -1408,7 +1401,8 @@ class Maintenance extends React.Component {
               .reduce((p, c, index, array) => {
                 p.push(c)
                 p.push(
-                  <DoubleDivider key={index}
+                  <DoubleDivider
+                    key={index.toString()}
                     grayLeft={index === array.length - 1 ? null : 80}
                     colorLeft={cnv ? 80 : '100%'}
                   />
@@ -1502,7 +1496,7 @@ class Maintenance extends React.Component {
       // K combinator
       const K = x => y => x
 
-      const { disk, ...rest} = props
+      const { disk, ...rest } = props
       const boot = this.state.boot
       const { blocks } = this.state.storage
       const cnv = !!this.state.creatingNewVolume
@@ -1559,8 +1553,9 @@ class Maintenance extends React.Component {
                 ['路径（挂载点）', 416]
               ]}
             />
-            { parts.map((blk,index) => (
-              <TableDataRow key={blk + index}
+            { parts.map((blk, index) => (
+              <TableDataRow
+                key={blk.name}
                 disabled={cnv}
                 selected={false}
                 items={[
@@ -1576,7 +1571,7 @@ class Maintenance extends React.Component {
                 ))
                 .reduce((p, c, index) => {
                   p.push(c)
-                  p.push(<Divider inset key={index}/>)
+                  p.push(<Divider inset key={index.toString()} />)
                   return p
                 }, []) }
             <div style={{ width: '100%', height: SUBTITLE_MARGINTOP }} />
@@ -1649,7 +1644,7 @@ class Maintenance extends React.Component {
       const boot = this.state.boot
       const storage = this.state.storage
       const cnv = !!this.state.creatingNewVolume
-      const {disk, ...rest} = props
+      const { disk, ...rest } = props
       const floatingTitleTop = () => {
         if (!cnv) return 0
         const outer = HEADER_HEIGHT + TABLEHEADER_HEIGHT
@@ -1771,7 +1766,7 @@ class Maintenance extends React.Component {
 
       const boot = this.state.boot
       const storage = this.state.storage
-      const {disk,...rest} = props
+      const { disk, ...rest } = props
 
       const cnv = !!this.state.creatingNewVolume
 
@@ -1984,16 +1979,16 @@ class Maintenance extends React.Component {
             </div>
 
             { typeof this.state.boot === 'object' && typeof this.state.storage === 'object' &&
-              this.state.storage.volumes.map((vol,index) =>
-                <this.BtrfsVolume key={index} style={this.cardStyle(vol)} volume={vol} zDepth={this.cardDepth(vol)} />) }
+              this.state.storage.volumes.map((vol, index) =>
+                <this.BtrfsVolume key={index.toString()} style={this.cardStyle(vol)} volume={vol} zDepth={this.cardDepth(vol)} />) }
 
             { typeof this.state.boot === 'object' && typeof this.state.storage === 'object' &&
               this.state.storage.blocks
                 .filter(blk => blk.isDisk && !blk.isVolumeDevice)
-                .map(disk => React.createElement(
+                .map((disk, index) => React.createElement(
                   disk.isPartitioned ? this.PartitionedDisk :
                   disk.idFsUsage ? this.FileSystemUsageDisk : this.NoUsageDisk, {
-                    style: this.cardStyle(disk), zDepth: this.cardDepth(disk), disk
+                    style: this.cardStyle(disk), zDepth: this.cardDepth(disk), disk, key: index.toString()
                   }, null)) }
 
           </div>
