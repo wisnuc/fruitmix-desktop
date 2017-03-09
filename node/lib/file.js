@@ -7,7 +7,6 @@ import sanitize from 'sanitize-filename'
 import store from '../serve/store/store'
 import { addListener } from '../serve/reducers/login'
 import registerCommandHandlers from './command'
-import action from '../serve/action/action'
 import { serverGetAsync, serverPostAsync, serverPatchAsync, serverDeleteAsync } from './server'
 
 const debug = Debug('lib:file')
