@@ -15,7 +15,7 @@ import fileInfo from './fileInfo';
 import popmenu from './popmenu'
 import command from './command'
 import node from './node'
-import mdns from './mdns'
+// import mdns from './mdns'
 import maintenance from './maintenance'
 
 // import atom component reducer
@@ -39,7 +39,7 @@ const reducer = combineReducers({
   command,
   node,
   popmenu,
-  mdns,
+//  mdns,
   maintenance,
 })
 

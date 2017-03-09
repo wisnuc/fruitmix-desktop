@@ -1,11 +1,3 @@
-/**
- * @component Index
- * @description 首页组件
- * @time 2016-10-23
- * @author liuhua
-**/
-
-import { ipcRenderer } from 'electron'
 import { TweenMax } from 'gsap'
 import Debug from 'debug'
 const debug = Debug('component:Login')
@@ -43,16 +35,21 @@ class Login extends React.Component {
 
     this.initTimer = setInterval(() => {
 
-      if (window.store.getState().login.device.length === 0) return
+      // if (window.store.getState().login.device.length === 0) return
+      if (window.mdns.devices.length === 0) return
       
       clearInterval(this.initTimer)       
       delete this.initTimer
 
-      debug('init devices', window.store.getState().login.device)
+      debug('init devices', window.mdns.devices)
 
-      let nextState = Object.assign({}, this.state, { devices: window.store.getState().login.device})
+      // TODO
+      let nextState = Object.assign({}, this.state, {
+        devices: window.mdns.devices
+      })
+
       if (this.state.selectedDeviceIndex == -1) {
-      	Object.assign(nextState,{selectedDeviceIndex:0})
+      	Object.assign(nextState, { selectedDeviceIndex:0 })
       }
       this.setState(nextState)
 

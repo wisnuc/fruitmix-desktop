@@ -104,8 +104,9 @@ class UserBox extends React.Component {
   }
 
   // TODO ???
-  success(username, password) {
-    ipcRenderer.send('login', username, password) 
+  success(uuid, token) {
+    // ipcRenderer.send('login', username, password) 
+    ipcRenderer.send('LOGIN', this.props.device, { uuid, token })
   }
 
   render() {

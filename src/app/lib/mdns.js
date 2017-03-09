@@ -22,7 +22,6 @@ window.mdns = {
   }
 }
 
-
 ipcRenderer.on('MDNS_UPDATE', 
   (event, instance, device) => window.mdns.update(instance, device))
 

@@ -93,8 +93,6 @@ class DeviceCard extends React.Component {
       return logoType
     }
 
-    ipcRenderer.send('setServerIp', props.device.address)
-
     this.requestGet = (port, ep, propName) =>
       request.get(`http://${this.props.device.address}:${port}/${ep}`)
         .set('Accept', 'application/json')
@@ -249,6 +247,7 @@ class DeviceCard extends React.Component {
           <UserBox 
             style={{width: '100%', transition: 'all 300ms', position:'relative'}} 
             color={this.props.backgroundColor}
+            device={this.props.device}
             users={this.state.users}
             onResize={this.onBoxResize}
             toggleDim={this.props.toggleDim}

@@ -61,7 +61,30 @@ ipcMain.on('loginOff', evt => {
   dispatch({type: 'LOGIN_OFF'})
 })
 
+ipcMain.on('LOGIN', 
+  (event, device, user) => {
+    dispatch({ 
+      type: 'LOGIN',
+      data: { device, user }
+    })
 
+    process.nextTick(() => {
+      retrieveUsers(user.token).asCallback((err, users) => {
+
+        console.log(err || users)
+        if (err) return
+
+        let me = users.find(u => u.uuid === user.uuid)
+        if (me) 
+          dispatch({
+            type: 'LOGIN_USER',
+            data: me
+          })
+      })
+    })
+  })
+
+ipcMain.on('LOGOUT', e => dispatch({ type: 'LOGOUT' }))
 
 
 

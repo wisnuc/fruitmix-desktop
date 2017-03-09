@@ -45,7 +45,7 @@ const App = () => {
     <MuiThemeProvider muiTheme={theme}>
       { window.store.getState().maintenance 
           ? <Maintenance /> 
-          : window.store.getState().login.state === 'LOGGEDIN' 
+          : window.store.getState().login.state === 'LOGIN' 
             ? <Main showAppBar={window.store.getState().view.showAppBar} /> 
             : <Login devices={window.mdns.devices}/> }
     </MuiThemeProvider>

@@ -53,7 +53,7 @@ class LoginBox extends React.Component {
           this.setState({ busy: false, success: 1 })
           setTimeout(() => {
             this.setState({ success: 2 })
-            setTimeout(() => this.props.success(username, password), 900)
+            setTimeout(() => this.props.success(uuid, res.body.token), 900)
           }, 150)
         }, 150)
       }

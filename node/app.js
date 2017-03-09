@@ -59,6 +59,11 @@ catch (e) { // e.code === 'ENOENT' && e.syscall === 'read'
 
 store.subscribe(configObserver)
 store.subscribe(adapter)
+store.subscribe(() => {
+
+  console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+  console.log('store', store.getState())
+})
 
 //app ready and open window ------------------------------------
 app.on('ready', function() {

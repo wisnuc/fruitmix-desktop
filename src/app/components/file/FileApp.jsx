@@ -1378,8 +1378,7 @@ class FileApp extends React.Component {
                   innerDivStyle={{fontSize: 14, fontWeight: 'medium', color: 'rgba(0,0,0,0.87'}}
                   onTouchTap={() => {
                    
-                    let index = window.store.getState().login.selectIndex
-                    let addr = window.store.getState().login.device[index].address
+                    let addr = window.store.getState().login.device.address
                     let url = `http://${addr}:3721/winsun`
 
                     request
@@ -1569,8 +1568,7 @@ class FileApp extends React.Component {
 
           onOK={select => {
 
-            let index = window.store.getState().login.selectIndex
-            let addr = window.store.getState().login.device[index].address
+            let addr = window.store.getState().login.device.address
             let url = `http://${addr}:3721/winsun`
             let data = {
               src: select.path,
