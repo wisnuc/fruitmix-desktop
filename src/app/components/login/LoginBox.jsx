@@ -2,6 +2,7 @@ import React from 'react'
 
 import muiThemeable from 'material-ui/styles/muiThemeable'
 import { TextField } from 'material-ui'
+
 import FlatButton from '../common/FlatButton'
 import { sharpCurve, sharpCurveDuration } from '../common/motion'
 import Checkmark from '../common/Checkmark'
