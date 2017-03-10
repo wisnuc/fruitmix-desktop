@@ -5,10 +5,11 @@
  * @author liuhua
 **/
 
-import { ipcRenderer } from 'electron'
 import { TweenMax } from 'gsap'
 import Debug from 'debug'
 const debug = Debug('component:Login')
+
+import { ipcRenderer } from 'electron'
 
 import React, { Component, PropTypes } from 'react'
 import ReactDOM from 'react-dom'
@@ -17,6 +18,9 @@ import TransitionGroup from 'react-addons-transition-group'
 import { TextField } from 'material-ui'
 import FlatButton from '../common/FlatButton'
 import { indigo900, cyan500, cyan900, teal900, lightGreen900, lime900, yellow900 } from 'material-ui/styles/colors'
+import FloatingActionButton from 'material-ui/FloatingActionButton'
+import NavigationRefresh from 'material-ui/svg-icons/navigation/refresh'
+
 import InfoCard from './InfoCard'
 import DeviceCard from './DeviceCard'
 
@@ -40,6 +44,8 @@ class Login extends React.Component {
       deviceName: null,
       dim: false
     }
+
+    debug('this.state',this.state)
 
     this.initTimer = setInterval(() => {
 
@@ -211,6 +217,14 @@ class Login extends React.Component {
 
     return (
       <div style={{ width: '100%', height: '100%', display:'flex', flexDirection: 'column', alignItems: 'center' }} >
+{/*
+        <FloatingActionButton 
+          style={{ position: 'absolute', top: 24, right: 24}}
+          onTouchTap={() => this.setState(Object.assign({}, this.state,{devices: [], selectedDeviceIndex: -1, expanded: false, deviceName: null, dim: false}))}
+        >
+          <NavigationRefresh />
+        </FloatingActionButton>
+*/}
         <img 
           style={{
             width: '110%',

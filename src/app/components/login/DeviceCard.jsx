@@ -365,7 +365,7 @@ class DeviceCard extends React.Component {
     return (
       <div style={this.props.style}>
 
-        {/* top container */}
+              {/* top container */}
         <Paper id='top-half-container' style={paperStyle} rounded={false}>
           <div style={{width: '100%', display: 'flex', alignItems: 'stretch'}}>
             <HoverNav 

@@ -33,6 +33,39 @@ const parseHostname = (hostname) => {
   }
 }
 
+{/*class Browser extends EventEmitter {
+  
+  constructor(){
+    super()
+    this.restart()
+  }
+
+  restart(){
+    
+    this.uuid = UUID.v4()
+    this.devices = []
+    this.browser.on('ready', () => this.browser.discover())
+    this.browser.on('update', data => {
+      //....
+      //this.devices.push(xxx) dup!!!
+      this.emit('update', this.uuid, this.devices)
+    })
+  }
+}
+
+let browser = new Browser()
+browser.on('updata', (uuid, devices) => {
+  getMainWindow().webContents.send('MDNS_UPDATE', {uuid, devices})
+}
+
+ipcMian.on('update', (uuid, devices) => browser.restart())
+
+const restart_handler = (args, callback) => {
+  browser.restart()
+}
+
+register('MDNS_RESTART',)*/}
+
 class StationBrowser extends EventEmitter {
 
   constructor(browser) {
@@ -48,7 +81,7 @@ class StationBrowser extends EventEmitter {
 
       debug('mdns addresses', data.addresses)
 
-      if (data.addresses.includes('192.168.5.65')) {
+{/*      if (data.addresses.includes('192.168.5.65')) {
         // 801L5C00748
         let mock = { 
           name: 'wisnuc-ws215i-801L5C00748',
@@ -61,7 +94,7 @@ class StationBrowser extends EventEmitter {
 
         return this.updateStation(mock)
       }
-
+*/}
       // check if ws host
       var parsed = parseHostname(data.host) 
       if (!parsed) {
