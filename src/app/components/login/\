@@ -176,8 +176,8 @@ class GuideBox extends StateUp(React.Component) {
                   <StepLabel>创建磁盘卷</StepLabel>
 
                   <StepContent>
-                    <CreatingVolumeDiskSelection1 storage = {this.props.storage} {...this.bindVState( 'volumeselect')} />
-                   { console.log('<><><><><><><>', this.props)}
+                    <CreatingVolumeDiskSelection1 {...this.bindVState( 'volumeselect', Object.assign({}, this.props.storage ))} />
+                   { console.log('<><><><><><><>', this.props.storage)}
                     <div style={{margin: '24px 0'}}>
                       <RaisedButton
                         label='下一步'
