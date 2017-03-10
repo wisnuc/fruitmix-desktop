@@ -598,8 +598,7 @@ class Maintenance extends React.Component {
               this.reloadBootStorage(() => {
                 for (let i = 3; i >= 0; i--) {
                   const time = (3 - i) * 1000
-                  const that = this
-                  setTimeout(() => { that.state.dialog.setState(operationSuccess, [`启动成功，系统将在${i}秒钟后跳转到登录页面`]) }, time)
+                  setTimeout(() => { this.state.dialog.setState(operationSuccess, [`启动成功，系统将在${i}秒钟后跳转到登录页面`]) }, time)
                 }
                 setTimeout(() => { window.store.dispatch({ type: 'EXIT_MAINTENANCE' }) }, 4000)
               })
