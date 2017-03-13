@@ -176,8 +176,8 @@ class GuideBox extends StateUp(React.Component) {
                   <StepLabel>创建磁盘卷</StepLabel>
 
                   <StepContent>
-                    <CreatingVolumeDiskSelection1 storage = {this.props.storage} {...this.bindVState( 'volumeselect')} />
-                   { console.log('<><><><><><><>', this.props)}
+                    <CreatingVolumeDiskSelection1 {...this.bindVState( 'volumeselect', Object.assign({}, this.props.storage ))} />
+                   { console.log('<><><><><><><>', this.props.storage)}
                     <div style={{margin: '24px 0'}}>
                       <RaisedButton
                         label='下一步'
@@ -260,20 +260,7 @@ class GuideBox extends StateUp(React.Component) {
                       />,
                       <FlatButton 
                         label='重置向导' 
-                        onTouchTap={() => {
-                          this.props.onReset
-                          this.setState(Object.assign({}, this.state, {
-                            showContent: true,
-                            finished: false,
-                            stepIndex: 0,
-                            volumeselect: new CreatingVolumeDiskSelection1.State(),
-                            userpass: new UsernamePassword.State()
-                          }))
-                          setTimeout(() => {
-                            this.setState(Object.assign({}, this.state, { expanded: true}))
-                            this.props.onResize('VEXPAND')
-                          },350)
-                        }} 
+                        onTouchTap={this.props.onReset} 
                       />
                     ]}
                     modal={true}
@@ -289,8 +276,6 @@ class GuideBox extends StateUp(React.Component) {
 
           <div style={{width: '100%', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FAFAFA'}}>
             <div style={{marginLeft: 24}}>该设备已安装WISNUC OS，但尚未初始化。</div>
-            
-              { console.log('<<<<<<<<<<<<<<<>>>>>>>>>>>>>', this.state.expanded)}
             <FlatButton style={{marginRight: 16}} label={this.state.expanded ? '放弃' : '初始化'} 
               onTouchTap={() => {
                 if (this.state.expanded) {

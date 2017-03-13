@@ -138,12 +138,14 @@ class DeviceCard extends React.Component {
       if (this.unmounted) return
 
       this.setState(state => ({
-        toggle: false,
-        horizontalExpanded: false,
+        toggle: true,
+        horizontalExpanded: true,
         boot: null,
         storage: null,
         users: null,
       }))
+
+      
 
       this.requestGet(3000, 'system/boot', 'boot')
       this.requestGet(3000, 'system/storage', 'storage')

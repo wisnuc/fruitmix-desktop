@@ -4,6 +4,7 @@ import { cyan500 } from 'material-ui/styles/colors'
 
 import { Checkbox, Divider } from 'material-ui'
 import { RadioButton, RadioButtonGroup} from 'material-ui/RadioButton' 
+import prettysize from 'prettysize'
 
 
 class CreatingVolumeDiskSelection1 extends React.PureComponent {
@@ -40,6 +41,7 @@ class CreatingVolumeDiskSelection1 extends React.PureComponent {
     else
       comment = '该磁盘可以加入磁盘卷'
  
+console.log('>>>>>>>>>>>>>', this.props)
     return (
       <div key={name} style={{width: '100%', height: 40, display: 'flex', alignItems: 'center'}}>
         <div style={{flex: '0 0 64px'}}>
@@ -97,6 +99,7 @@ class CreatingVolumeDiskSelection1 extends React.PureComponent {
               <div style={{flex: '0 0 80px'}}>使用</div>
               <div style={{flex: '0 0 240px'}}>说明</div>
             </div>
+            {console.log('>>>>>>>>>>', this.props)}
             <Divider />
             
             { this.props.storage && this.props.storage.blocks.filter(blk => blk.isDisk).map(blk => this.renderDiskRow(blk)) }
