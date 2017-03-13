@@ -1,29 +1,14 @@
 import React from 'react'
 import Debug from 'debug'
-import prettysize from 'prettysize'
 import muiThemeable from 'material-ui/styles/muiThemeable'
 import NavigationExpandMore from 'material-ui/svg-icons/navigation/expand-more'
 import Popover, { PopoverAnimationVertical } from 'material-ui/Popover'
-import {
-  AppBar, Avatar, Badge, Checkbox, Chip, Divider, Paper, Menu, MenuItem, Dialog, IconButton, TextField, CircularProgress
-} from 'material-ui'
-import {
-  pinkA200, grey300, grey400, greenA400, green400, amber400,
-  redA200, red400, lightGreen100, lightGreen400, lightGreenA100,
-  lightGreenA200, lightGreenA400, lightGreenA700
-} from 'material-ui/styles/colors'
+import { Paper, Menu, MenuItem } from 'material-ui'
 import request from 'superagent'
-
 import {
   operationTextConfirm, operationBase, Operation, operationBusy, operationSuccess, operationFailed, createOperation
 } from '../common/Operation'
-
-import VolumeWisnucError from './VolumeWisnucError'
-import DoubleDivider from './DoubleDivider'
-import Users from './Users'
 import FlatButton from '../common/FlatButton'
-import { CatSilhouette, BallOfYarn, Account, ReportProblem, HDDIcon, RAIDIcon, UpIcon, DownIcon
-} from './Svg'
 
 const debug = Debug('component:maintenance:BtrfsVolume')
 
@@ -206,11 +191,11 @@ export default class NewVolumeTop extends React.Component {
           .end((err, res) => {
             debug('mkfs btrfs request', err || res.body)
             if (err) {
-              this.reloadBootStorage((err2, { boot, storage }) => {
+              this.reloadBootStorage(() => {
                 this.props.state.dialog.setState(operationFailed, this.errorText(err, res))
               })
             } else {
-              this.reloadBootStorage((err2, { boot, storage }) => {
+              this.reloadBootStorage(() => {
                 this.props.state.dialog.setState(operationSuccess, ['成功'])
               })
             }

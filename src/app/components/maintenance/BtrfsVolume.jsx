@@ -2,26 +2,21 @@ import React from 'react'
 import Debug from 'debug'
 import prettysize from 'prettysize'
 import muiThemeable from 'material-ui/styles/muiThemeable'
+import { Avatar, Checkbox, Chip, Paper } from 'material-ui'
 import {
-      AppBar, Avatar, Badge, Checkbox, Chip, Divider, Paper, Menu, MenuItem, Dialog, IconButton, TextField, CircularProgress
-} from 'material-ui'
-import {
-    pinkA200, grey300, grey400, greenA400, green400, amber400,
-    redA200, red400, lightGreen100, lightGreen400, lightGreenA100,
-    lightGreenA200, lightGreenA400, lightGreenA700
+  pinkA200, grey300, grey400, greenA400, green400, amber400,
+  redA200, red400, lightGreen100, lightGreen400, lightGreenA100,
+  lightGreenA200, lightGreenA400, lightGreenA700
 } from 'material-ui/styles/colors'
 import request from 'superagent'
-
 import {
-    operationTextConfirm, operationBase, Operation, operationBusy, operationSuccess, operationFailed, createOperation
+  operationTextConfirm, operationBase, Operation, operationBusy, operationSuccess, operationFailed, createOperation
 } from '../common/Operation'
-
 import VolumeWisnucError from './VolumeWisnucError'
 import DoubleDivider from './DoubleDivider'
 import Users from './Users'
 import FlatButton from '../common/FlatButton'
-import { CatSilhouette, BallOfYarn, Account, ReportProblem, HDDIcon, RAIDIcon, UpIcon, DownIcon
-} from './Svg'
+import { HDDIcon, RAIDIcon, UpIcon, DownIcon } from './Svg'
 
 const debug = Debug('component:maintenance:BtrfsVolume')
 const SUBTITLE_HEIGHT = 32
@@ -221,16 +216,15 @@ class KeyValueList extends React.PureComponent {
 
 @muiThemeable()
 export default class BtrfsVolume extends React.Component {
-
-  // static State = class State {
-  //  constructor() {
-  //    this.creatingNewVolume = null
-  //    this.expanded = []
-  //    this.operation = null
-  //  }
-  // }
-
-
+  /*
+  static State = class State {
+    constructor() {
+      this.creatingNewVolume = null
+      this.expanded = []
+       this.operation = null
+     }
+  }
+  */
   constructor(props) {
     super(props)
     this.unmounted = false
@@ -422,41 +416,26 @@ export default class BtrfsVolume extends React.Component {
   }
 
   render() {
+    const { volume, muiTheme, state, setState, that, ...rest } = this.props
     const primary1Color = this.props.muiTheme.palette.primary1Color
     const accent1Color = this.props.muiTheme.palette.accent1Color
-
-    const { volume, muiTheme, state, setState, that, ...rest } = this.props
-    const boot = this.props.state.boot
-    const { volumes, blocks } = this.props.state.storage
+    const { blocks } = this.props.state.storage
     const cnv = !!this.props.state.creatingNewVolume
-
     const expandableHeight = this.props.state.expanded.indexOf(volume) !== -1 ?
       17 * 24 + 3 * SUBTITLE_HEIGHT + SUBTITLE_MARGINTOP : 0
     const comment = () => volume.missing ? '有磁盘缺失' : '全部在线' // TODO if(volume.missing === true)
-    const DivStyle = (VolumeIsMissing) => {
-      if (VolumeIsMissing) {
-        return {
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          backgroundColor: '',
-          border: '1px solid #e6e6e6'
-        }
-      }
-      return {
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: '',
-        border: '1px solid #e6e6e6'
-      }
-    }
+    const DivStyle = () => ({
+      width: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: '',
+      border: '1px solid #e6e6e6'
+    })
     return (
       <Paper {...rest}>
         <div
-          style={DivStyle(volume.missing)}
+          style={DivStyle()}
           onTouchTap={() => this.toggleExpanded(volume)}
         >
           <div style={{ flex: '0 0 900px', height: '100%', display: 'flex', alignItems: 'center' }}>

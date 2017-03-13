@@ -28,7 +28,7 @@ import InitVolumeDialogs from './InitVolumeDialogs'
 import {
   operationTextConfirm, operationBase, Operation, operationBusy, operationSuccess, operationFailed, createOperation
 } from '../common/Operation'
-import { CatSilhouette, BallOfYarn, HDDIcon, RAIDIcon, UpIcon, DownIcon
+import { CatSilhouette, BallOfYarn, HDDIcon, UpIcon, DownIcon
 } from './Svg'
 
 const StateUp = base => class extends base {
@@ -223,75 +223,6 @@ const VerticalExpandable = props => (
     { props.children }
   </div>
 )
-
-class RaidModePopover extends React.Component {
-
-  constructor(props) {
-    super(props)
-    this.state = { open: false, hover: false }
-    this.label = () => this.props.list.find(item => item[0] === this.props.select)[1]
-    this.handleRequestClose = () => this.setState({ open: false, anchorEl: null })
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.disabled) this.setState({ open: false, hover: false })
-  }
-
-  render() {
-    return (
-      <div style={this.props.style}>
-        <div
-
-          style={{
-            width: '100%',
-            height: '100%',
-            boxSizing: 'border-box',
-            padding: 8,
-            display: 'flex',
-            alignItems: 'center',
-            fontSize: 13,
-            color: this.props.disabled ? 'rgba(0,0,0,0.38)' : this.props.color,
-            borderRadius: '2px',
-            backgroundColor: this.state.hover || this.state.open ? '#EEEEEE' : undefined
-          }}
-
-          onMouseEnter={() => !this.props.disabled && this.setState({ hover: true })}
-          onMouseLeave={() => !this.props.disabled && this.setState({ hover: false })}
-          onTouchTap={e => !this.props.disabled && this.setState({ open: true, anchorEl: e.currentTarget })}
-        >
-          {this.label()}
-          <NavigationExpandMore
-            style={{ width: 18, height: 18, marginLeft: 8 }}
-            color={this.props.disabled ? 'rgba(0,0,0,0.38)' : this.props.color}
-          />
-        </div>
-
-        <Popover
-          open={this.state.open}
-          anchorEl={this.state.anchorEl}
-          anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
-          targetOrigin={{ horizontal: 'left', vertical: 'top' }}
-          onRequestClose={this.handleRequestClose}
-          animation={PopoverAnimationVertical}
-        >
-          <Menu>
-            { this.props.list.map(item => (
-              <MenuItem
-                style={{ fontSize: 13 }}
-                primaryText={item[1]}
-                disabled={item[2]}
-                onTouchTap={() => {
-                  this.handleRequestClose()
-                  this.props.onSelect(item[0])
-                }}
-              />
-            )) }
-          </Menu>
-        </Popover>
-      </div>
-    )
-  }
-}
 
 @muiThemeable()
 class Maintenance extends React.Component {
@@ -904,8 +835,6 @@ class Maintenance extends React.Component {
     this.FileSystemUsageDisk = (props) => {
       const primary1Color = this.props.muiTheme.palette.primary1Color
       const accent1Color = this.props.muiTheme.palette.accent1Color
-      const boot = this.state.boot
-      const storage = this.state.storage
       const cnv = !!this.state.creatingNewVolume
       const { disk, ...rest } = props
       const floatingTitleTop = () => {
@@ -1193,22 +1122,11 @@ class Maintenance extends React.Component {
   }
 
   render() {
-    const primary1Color = this.props.muiTheme.palette.primary1Color
-    const accent1Color = this.props.muiTheme.palette.accent1Color
     const cnv = !!this.state.creatingNewVolume
-    const raidDisabled = !this.state.creatingNewVolume || this.state.creatingNewVolume.disks.length < 2
-    const bright = 'rgba(255,255,255,0.7)'
-    const dim = 'rgba(0,0,0,0.54)'
-    const cardStyle = {
-      width: 1200,
-      marginBottom: cnv ? 4 : 24,
-      transition: 'margin-bottom 300ms'
-    }
 
     if (typeof this.state.boot !== 'object' || typeof this.state.storage !== 'object') return <div />
 
     return (
-
       <div style={{ width: '100%', height: '100%', backgroundColor: '#F5F5F5', overflowY: 'scroll' }}>
 
         { this.renderAppBar() }
@@ -1237,7 +1155,7 @@ class Maintenance extends React.Component {
 
             {/* top panel selector */}
             <div style={{ width: 1200, height: cnv ? 136 - 48 - 16 : 48, transition: 'height 300ms' }}>
-              { cnv ? <NewVolumeTop state={this.state} setState={this.ssb} that={this}/> : this.renderBootStatus()}
+              { cnv ? <NewVolumeTop state={this.state} setState={this.ssb} that={this} /> : this.renderBootStatus()}
             </div>
 
             { typeof this.state.boot === 'object' && typeof this.state.storage === 'object' &&
