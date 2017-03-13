@@ -19,8 +19,9 @@ import request from 'superagent'
 import validator from 'validator'
 import prettysize from 'prettysize'
 
-import DoubleDivider from './DoubleDivider.jsx'
+import DoubleDivider from './DoubleDivider'
 import BtrfsVolume from './BtrfsVolume'
+import NewVolumeTop from './NewVolumeTop'
 
 import FlatButton from '../common/FlatButton'
 import InitVolumeDialogs from './InitVolumeDialogs'
@@ -505,63 +506,6 @@ class Maintenance extends React.Component {
 
     // //////////////////////////////////////////////////////////////////////////
     //
-    // operations
-    //
-
-    this.errorText = (err, res) => {
-      const text = []
-
-      // see superagent documentation on error handling
-      if (err.status) {
-        text.push(`${err.status} ${err.message}`)
-        if (res && res.body && res.body.message) { text.push(`message: ${res.body.message}`) }
-      } else {
-        text.push('错误信息：', err.message)
-      }
-
-      return text
-    }
-
-    this.mkfsBtrfsVolume = () => {
-      if (this.state.creatingNewVolume === null) return
-
-      const target = this.state.creatingNewVolume.disks.map(disk => disk.name)
-      const type = 'btrfs'
-      const mode = this.state.creatingNewVolume.mode
-
-      const text = []
-
-      text.push(`使用设备${target.join()}和${mode}模式创建新磁盘阵列，` +
-        '这些磁盘和包含这些磁盘的磁盘阵列上的数据都会被删除且无法恢复。确定要执行该操作吗？')
-
-      this.createOperation(operationTextConfirm, text, () => {
-        // set dialog state to busy
-        this.state.dialog.setState(operationBusy)
-
-        const device = window.store.getState().maintenance.device
-        request
-          .post(`http://${device.address}:3000/system/mir/mkfs`)
-          .set('Accept', 'application/json')
-          .send({ type, target, mode })
-          .end((err, res) => {
-            debug('mkfs btrfs request', err || res.body)
-
-            // set dialog state to success or failed
-            if (err) {
-              this.reloadBootStorage((err2, { boot, storage }) => {
-                this.state.dialog.setState(operationFailed, this.errorText(err, res))
-              })
-            } else {
-              this.reloadBootStorage((err2, { boot, storage }) => {
-                this.state.dialog.setState(operationSuccess, ['成功'])
-              })
-            }
-          })
-      })
-    }
-
-    // //////////////////////////////////////////////////////////////////////////
-    //
     // actions
     //
 
@@ -673,71 +617,6 @@ class Maintenance extends React.Component {
     )
 
     // frame height should be 48 + 16 + 64 + 8 = 136
-    this.NewVolumeTop = () => {
-      const cnv = this.state.creatingNewVolume
-
-      const actionEnabled = cnv.disks.length > 0
-      const raidEnabled = cnv.disks.length > 1
-
-      const hint = cnv.disks.length > 0 ?
-        `已选中${cnv.disks.length}个磁盘` : '请选择磁盘'
-
-      const wrap = {
-        FB: FlatButton
-      }
-
-      return (
-        <div style={{ width: '100%', height: 136 - 48 - 16 }}>
-
-          <Paper
-            style={{ width: '100%',
-              height: 64,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              color: this.props.muiTheme.palette.accent1Color
-            }}
-          >
-
-            <div style={{ marginLeft: 16, fontSize: 16 }}>{ hint }</div>
-
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <RaidModePopover
-                list={[
-                ['single', '使用SINGLE模式', false],
-                  ['raid0',
-                    raidEnabled ? '使用RAID0模式' : '使用RAID0模式 (需选择至少两块磁盘)',
-                    !raidEnabled
-                  ],
-                  ['raid1',
-                    raidEnabled ? '使用RAID1模式' : '使用RAID1模式 (需选择至少两块磁盘)',
-                    !raidEnabled
-                  ]
-                ]}
-                color={this.props.muiTheme.palette.accent1Color}
-                select={cnv.mode}
-                disabled={!actionEnabled}
-                onSelect={this.setVolumeMode}
-              />
-
-              <FlatButton
-                label="创建" secondary
-                onTouchTap={this.mkfsBtrfsVolume}
-                disabled={this.state.creatingNewVolume.disks.length === 0}
-              />
-
-              <FlatButton
-                label="取消" secondary
-                onTouchTap={this.onToggleCreatingNewVolume}
-              />
-            </div>
-
-          </Paper>
-        </div>
-      )
-    }
-
-    this.volumeUnformattable = volume => []
 
     this.diskUnformattable = (disk) => {
       const K = x => y => x
@@ -1358,7 +1237,7 @@ class Maintenance extends React.Component {
 
             {/* top panel selector */}
             <div style={{ width: 1200, height: cnv ? 136 - 48 - 16 : 48, transition: 'height 300ms' }}>
-              { cnv ? <this.NewVolumeTop /> : this.renderBootStatus()}
+              { cnv ? <NewVolumeTop state={this.state} setState={this.ssb} that={this}/> : this.renderBootStatus()}
             </div>
 
             { typeof this.state.boot === 'object' && typeof this.state.storage === 'object' &&
