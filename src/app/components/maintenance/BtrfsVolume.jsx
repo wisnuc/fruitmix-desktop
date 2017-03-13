@@ -1,4 +1,5 @@
 import React from 'react'
+import Debug from 'debug'
 import prettysize from 'prettysize'
 import muiThemeable from 'material-ui/styles/muiThemeable'
 import {
@@ -11,7 +12,6 @@ import {
 } from 'material-ui/styles/colors'
 import request from 'superagent'
 
-
 import {
     operationTextConfirm, operationBase, Operation, operationBusy, operationSuccess, operationFailed, createOperation
 } from '../common/Operation'
@@ -23,6 +23,7 @@ import FlatButton from '../common/FlatButton'
 import { CatSilhouette, BallOfYarn, Account, ReportProblem, HDDIcon, RAIDIcon, UpIcon, DownIcon
 } from './Svg'
 
+const debug = Debug('component:maintenance:BtrfsVolume')
 const SUBTITLE_HEIGHT = 32
 const TABLEHEADER_HEIGHT = 48
 const TABLEDATA_HEIGHT = 48
@@ -92,7 +93,6 @@ const HeaderTitle1 = props => (
   </div>
 )
 
-
 const SubTitleRow = props => (
   <div style={{ width: '100%', height: SUBTITLE_HEIGHT, display: 'flex', alignItems: 'center' }}>
     <div style={{ flex: '0 0 256px' }} />
@@ -107,7 +107,6 @@ const SubTitleRow = props => (
     </div>
   </div>
 )
-
 
 const TableHeaderRow = (props) => {
   const style = {
@@ -131,7 +130,6 @@ const TableHeaderRow = (props) => {
     </div>
   )
 }
-
 
 const TableDataRow = (props) => {
   const containerStyle = {
@@ -189,7 +187,6 @@ const HeaderIcon = props => (
   </div>
 )
 
-
 class KeyValueList extends React.PureComponent {
 
   constructor(props) {
@@ -222,9 +219,18 @@ class KeyValueList extends React.PureComponent {
   }
 }
 
-
 @muiThemeable()
 export default class BtrfsVolume extends React.Component {
+
+  // static State = class State {
+  //  constructor() {
+  //    this.creatingNewVolume = null
+  //    this.expanded = []
+  //    this.operation = null
+  //  }
+  // }
+
+
   constructor(props) {
     super(props)
     this.unmounted = false
@@ -310,7 +316,7 @@ export default class BtrfsVolume extends React.Component {
     }
 
     this.createOperation = (operation, ...args) =>
-      createOperation(this, 'dialog', operation, ...args)
+      createOperation(this.props.that, 'dialog', operation, ...args)
 
 
     this.reloadBootStorage = (callback) => {
@@ -414,11 +420,12 @@ export default class BtrfsVolume extends React.Component {
       this.props.setState({ initVolume: volume })
     }
   }
+
   render() {
     const primary1Color = this.props.muiTheme.palette.primary1Color
     const accent1Color = this.props.muiTheme.palette.accent1Color
 
-    const { volume, ...rest } = this.props
+    const { volume, muiTheme, state, setState, that, ...rest } = this.props
     const boot = this.props.state.boot
     const { volumes, blocks } = this.props.state.storage
     const cnv = !!this.props.state.creatingNewVolume
@@ -427,7 +434,6 @@ export default class BtrfsVolume extends React.Component {
       17 * 24 + 3 * SUBTITLE_HEIGHT + SUBTITLE_MARGINTOP : 0
     const comment = () => volume.missing ? '有磁盘缺失' : '全部在线' // TODO if(volume.missing === true)
     const DivStyle = (VolumeIsMissing) => {
-      // debug("VolumeIsMissing",VolumeIsMissing)
       if (VolumeIsMissing) {
         return {
           width: '100%',
