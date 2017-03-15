@@ -169,7 +169,7 @@ class GuideBox extends StateUp(React.Component) {
           <div style={{width: '100%', height: this.state.expanded ? 640 : 0, transition: 'height 300ms', overflow: 'hidden', backgroundColor: '#FAFAFA', boxSizing: 'border-box', paddingLeft: 64, paddingRight: 64,
             overflowY: 'auto'
           }}>
-            <div style={{marginTop: 34, marginBottom: 12, fontSize: 34, color: '#000', opacity: 0.54}}>初始化向导</div>
+            <div style={{marginTop: 34, marginBottom: 12, fontSize: 34, color: '#000', opacity: this.state.showContent ? 0.54 : 0, transition:'opacity 150ms'}}>初始化向导</div>
             <div style={{opacity: this.state.showContent ? 1 : 0, transition:'opacity 150ms'}}>
               <Stepper activeStep={stepIndex} orientation="vertical">
                 <Step>
@@ -177,7 +177,6 @@ class GuideBox extends StateUp(React.Component) {
 
                   <StepContent>
                     <CreatingVolumeDiskSelection1 storage = {this.props.storage} {...this.bindVState( 'volumeselect')} />
-                   { console.log('<><><><><><><>', this.props)}
                     <div style={{margin: '24px 0'}}>
                       <RaisedButton
                         label='下一步'
