@@ -2,9 +2,15 @@
 
 ```javascript
 {
-  Debug React, many from material-ui, 
-  FlatButton, UUID, svg, InitVolumeDialogs,
-  Operation, request, validator, prettysize
+  Debug React, many from material-ui, FlatButton,
+  UUID, Operation, request, validator, prettysize
+  NewVolumeTop //添加新磁盘页面，顶栏部分
+  BtrfsVolume //磁盘阵列信息，数据使用，磁盘信息列表
+  DoubleDivider //分割线
+  Svg //Svg图片
+  InitVolumeDialogs //安装与重新安装Wisnuc
+  Users //用户图标与动画
+  VolumeWisnucError //错误提示
 }
 ```
 
@@ -32,7 +38,6 @@
 ```javascript
 {
   KeyValueList{} //主要数据列表，每个为占页面一半的一栏
-  DoubleDivider{} //分割线
   RaidModePopover{} //创建新磁盘阵列时的可下拉选择的模式选项
   Maintenance
   {
@@ -65,7 +70,6 @@
       cardDepth()
       ExpandToggle()
       TextButtonTop() //创建磁盘阵列按钮
-      NewVolumeTop() //添加新磁盘页面，顶栏部分
       VolumeStatus()
       volumeUnformattable()
       diskUnformattable()
@@ -74,12 +78,10 @@
       VolumeHeadline() //Btrfs文件系统，XX个磁盘，XX模式
       DiskHeadline() //分区使用的磁盘
       DiskTitle() // 左边的硬盘标题
-      BtrfsVolume() //磁盘阵列信息，数据使用，磁盘信息列表
       partitionedDiskNewVolumeWarning()
       PartitionedDisk() // 分区信息，磁盘信息
       FileSystemUsageDisk()
       NoUsageDisk() //硬盘不可用时候显示的内容
-      VolumeWisnucBadge //用户列表
       {
         constructor()
         {
@@ -139,21 +141,3 @@ let mmap = new Map([
     ['EUSERSFORMAT', '/wisnuc/fruitmix/models/users.json文件存在但格式不正确']
 ])  
 ```
-
-<List style={{minWidth: 240}}>
-<Subheader>用户列表</Subheader>
-{ users.map(user => 
-    <ListItem 
-    leftAvatar={<Avatar>{user.username.slice(0,1).toUpperCase()}</Avatar>}
-    primaryText={user.username} 
-    secondaryText={ 
-    user.isFirstUser ? '第一管理员' : 
-    user.isAdmin ? '管理员' : '普通用户' 
-    }
-    disabled={true}
-    />
-    ) }
-</List>
-
-
-

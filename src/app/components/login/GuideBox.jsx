@@ -259,7 +259,20 @@ class GuideBox extends StateUp(React.Component) {
                       />,
                       <FlatButton 
                         label='重置向导' 
-                        onTouchTap={this.props.onReset} 
+                        onTouchTap={() => {
+                          this.props.onReset
+                          this.setState(Object.assign({}, this.state, {
+                            showContent: true,
+                            finished: false,
+                            stepIndex: 0,
+                            volumeselect: new CreatingVolumeDiskSelection1.State(),
+                            userpass: new UsernamePassword.State()
+                          }))
+                          setTimeout(() => {
+                            this.setState(Object.assign({}, this.state, { expanded: true}))
+                            this.props.onResize('VEXPAND')
+                          },350)
+                        }} 
                       />
                     ]}
                     modal={true}
@@ -275,6 +288,8 @@ class GuideBox extends StateUp(React.Component) {
 
           <div style={{width: '100%', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FAFAFA'}}>
             <div style={{marginLeft: 24}}>该设备已安装WISNUC OS，但尚未初始化。</div>
+            
+              { console.log('<<<<<<<<<<<<<<<>>>>>>>>>>>>>', this.state.expanded)}
             <FlatButton style={{marginRight: 16}} label={this.state.expanded ? '放弃' : '初始化'} 
               onTouchTap={() => {
                 if (this.state.expanded) {
