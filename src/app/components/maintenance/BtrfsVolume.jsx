@@ -221,16 +221,14 @@ export default class BtrfsVolume extends React.Component {
     constructor() {
       this.creatingNewVolume = null
       this.expanded = []
-       this.operation = null
-     }
+      this.operation = null
+    }
   }
   */
   constructor(props) {
     super(props)
     this.unmounted = false
     this.colors = {
-      primary: this.props.muiTheme.palette.primary1Color,
-      accent: this.props.muiTheme.palette.accent1Color,
       fillGrey: grey400,
       fillGreyFaded: grey300
     }
@@ -416,6 +414,7 @@ export default class BtrfsVolume extends React.Component {
   }
 
   render() {
+    debug("BtrfsVolume render! ")
     const { volume, muiTheme, state, setState, that, ...rest } = this.props
     const primary1Color = this.props.muiTheme.palette.primary1Color
     const accent1Color = this.props.muiTheme.palette.accent1Color

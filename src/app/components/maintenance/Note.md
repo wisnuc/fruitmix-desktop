@@ -57,10 +57,6 @@
       setOperationDialogSuccess()
       setOperationDialogFailed()
       OperationDialog()
-      errorText()
-      startWisnucOnVolume() //启动wisnuc应用
-      initWisnucOnVolume() //重新安装
-      mkfsBtrfsVolume()
       onToggleCreatingNewVolume()
       toggleExpanded()
       toggleCandidate()
@@ -82,23 +78,6 @@
       PartitionedDisk() // 分区信息，磁盘信息
       FileSystemUsageDisk()
       NoUsageDisk() //硬盘不可用时候显示的内容
-      {
-        constructor()
-        {
-          state
-          toggleList()
-        }
-        render()
-      }
-      VolumeMenu
-      {
-        constructor()
-        {
-          state
-          handleRequestClose()
-        }
-        render()
-      }
     }
     componentDidMount()
     componentWillUnmount()
