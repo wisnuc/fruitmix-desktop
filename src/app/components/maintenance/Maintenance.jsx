@@ -23,6 +23,8 @@ import DoubleDivider from './DoubleDivider'
 import BtrfsVolume from './BtrfsVolume'
 import NewVolumeTop from './NewVolumeTop'
 import PartitionedDisk from './PartitionedDisk'
+import FileSystemUsageDisk from './FileSystemUsageDisk'
+import NoUsageDisk from './NoUsageDisk'
 
 import FlatButton from '../common/FlatButton'
 import InitVolumeDialogs from './InitVolumeDialogs'
@@ -32,174 +34,12 @@ import {
 import { CatSilhouette, BallOfYarn, HDDIcon, UpIcon, DownIcon
 } from './Svg'
 import StateUp from './VPStateUp'
+import {
+  TABLEDATA_HEIGHT, HEADER_HEIGHT, alphabet, diskDisplayName,
+  Checkbox40, HeaderIcon, styles, HeaderTitle1
+} from './ConstElement'
 
 const debug = Debug('component:maintenance')
-const SUBTITLE_HEIGHT = 32
-const TABLEHEADER_HEIGHT = 48
-const TABLEDATA_HEIGHT = 48
-const HEADER_HEIGHT = 104
-const FOOTER_HEIGHT = 48
-const SUBTITLE_MARGINTOP = 24
-
-const alphabet = 'abcdefghijklmnopqrstuvwxyz'
-
-const diskDisplayName = (name) => {
-  const chr = name.charAt(2)
-  const number = alphabet.indexOf(chr) + 1
-  return `硬盘 #${number}`
-}
-
-const partitionDisplayName = (name) => {
-  const numstr = name.slice(3)
-  return `分区 #${numstr}`
-}
-
-const Checkbox40 = props => (
-  <div style={{ width: 40, height: 40 }}>
-    <Checkbox
-      {...props} style={{ margin: 8 }}
-      iconStyle={{ fill: props.fill }}
-    />
-  </div>
-)
-
-const HeaderIcon = props => (
-  <div
-    style={{
-      width: 40,
-      marginLeft: 24,
-      marginTop: 24,
-      marginRight: 16
-    }}
-  >
-    { props.children }
-  </div>
-)
-
-const styles = {
-  chip: {
-    backgroundColor: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: 'medium',
-    height: 26,
-    marginRight: 5,
-    border: '1px solid #e6e6e6'
-  },
-  wrapper: {
-    display: 'flex',
-    flexWrap: 'wrap'
-  },
-  paperHeader: {
-    position: 'relative',
-    width: '100%',
-    height: HEADER_HEIGHT,
-    border: '1px solid #e6e6e6',
-    display: 'flex',
-    alignItems: 'center'
-  }
-}
-
-const HeaderTitle1 = props => (
-  <div style={props.style} onTouchTap={props.onTouchTap}>
-    <div style={{ marginBottom: 2 }}>
-      {props.title}
-    </div>
-    <div style={styles.wrapper}>
-      {props.textFilesystem &&
-        <Chip style={styles.chip} labelStyle={{ marginTop: -4 }}>
-          <span style={{ color: '#9e9e9e' }}>
-            {props.textFilesystem}
-          </span>
-        </Chip> }
-      {props.volumemode &&
-        <Chip style={styles.chip} labelStyle={{ marginTop: -4 }}>
-          <span style={{ color: '#9e9e9e' }}>
-            {props.volumemode}
-          </span>
-        </Chip> }
-    </div>
-  </div>
-)
-
-const SubTitleRow = props => (
-  <div style={{ width: '100%', height: SUBTITLE_HEIGHT, display: 'flex', alignItems: 'center' }}>
-    <div style={{ flex: '0 0 256px' }} />
-    <div
-      style={{ flex: '0 0 184px',
-        fontSize: 13,
-        color: props.disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.87)',
-        fontWeight: 'bold'
-      }}
-    >
-      {props.text}
-    </div>
-  </div>
-)
-
-// disabled
-const TableHeaderRow = (props) => {
-  const style = {
-    height: TABLEHEADER_HEIGHT,
-    display: 'flex',
-    alignItems: 'center',
-    fontSize: 11,
-    color: props.disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.54)',
-    fontWeight: props.disabled ? 'normal' : 'bold'
-  }
-
-  return (
-    <div style={props.style}>
-      <div style={style}>
-        { props.items.map((item) => {
-          const style = { flex: `0 0 ${item[1]}px` }
-          if (item[2] === true) { style.textAlign = 'right' }
-          return (<div style={style} key={item.toString()}>{item[0]}</div>)
-        }) }
-      </div>
-    </div>
-  )
-}
-
-// disabled, selected
-const TableDataRow = (props) => {
-  const containerStyle = {
-    height: TABLEDATA_HEIGHT,
-    display: 'flex',
-    alignItems: 'center',
-    fontSize: 13,
-    color: props.disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.87)'
-  }
-
-  if (!props.disabled && props.selected) { containerStyle.backgroundColor = '#F5F5F5' }
-
-  return (
-    <div style={props.style}>
-      <div style={containerStyle}>
-        { props.items.map((item) => {
-          if (typeof item[0] === 'string') {
-            const style = { flex: `0 0 ${item[1]}px` }
-            if (item[2] === true) style.textAlign = 'right'
-            return <div style={style} key={item.toString()}>{item[0]}</div>
-          }
-          const style = {
-            flex: `0 0 ${item[1]}px`,
-            display: 'flex',
-            alignItems: 'center'
-          }
-
-          if (item[2] === true) style.justifyContent = 'center'
-          return <div style={style} key={item.toString()}>{item[0]}</div>
-        }) }
-      </div>
-    </div>
-  )
-}
-
-const VerticalExpandable = props => (
-  <div style={{ width: '100%', height: props.height, transition: 'height 300ms', overflow: 'hidden' }}>
-    { props.children }
-  </div>
-)
 
 @muiThemeable()
 class Maintenance extends StateUp(React.Component) {
@@ -214,16 +54,11 @@ class Maintenance extends StateUp(React.Component) {
       createOperation(this, 'dialog', operation, ...args)
 
     this.colors = {
-
       primary: this.props.muiTheme.palette.primary1Color,
       accent: this.props.muiTheme.palette.accent1Color,
 
       fillGrey: grey400,
       fillGreyFaded: grey300
-    }
-
-    this.dim = {
-
     }
 
     this.state = {
@@ -625,217 +460,6 @@ class Maintenance extends StateUp(React.Component) {
       )
     }
 
-    // file system disk is determined by idFsUsage
-    this.FileSystemUsageDisk = (props) => {
-      const primary1Color = this.props.muiTheme.palette.primary1Color
-      const accent1Color = this.props.muiTheme.palette.accent1Color
-      const cnv = !!this.state.creatingNewVolume
-      const { disk, ...rest } = props
-      const floatingTitleTop = () => {
-        if (!cnv) return 0
-        const outer = HEADER_HEIGHT + TABLEHEADER_HEIGHT
-        const inner = TABLEHEADER_HEIGHT + TABLEDATA_HEIGHT + SUBTITLE_MARGINTOP + 2 * SUBTITLE_HEIGHT
-        return this.state.expanded.indexOf(disk) !== -1 ? inner + outer : outer
-      }
-
-      return (
-        <Paper {...rest}>
-          <div style={styles.paperHeader} onTouchTap={() => this.toggleExpanded(disk)}>
-            <div style={{ flex: '0 0 256px' }}>
-              <this.DiskTitle disk={disk} top={floatingTitleTop()} />
-            </div>
-            <div style={{ flex: '0 0 336px' }}>
-              <this.DiskHeadline disk={disk} />
-            </div>
-            <div style={{ marginLeft: 560 }}>
-              {this.state.expanded.indexOf(disk) !== -1 ? <UpIcon color={'#9e9e9e'} /> : <DownIcon color={'#9e9e9e'} />}
-            </div>
-          </div>
-
-          <VerticalExpandable
-            height={
-              this.state.expanded.indexOf(disk) !== -1 ?
-                SUBTITLE_HEIGHT * 2 +
-                TABLEHEADER_HEIGHT +
-                TABLEDATA_HEIGHT +
-                SUBTITLE_MARGINTOP : 0
-            }
-          >
-
-            <SubTitleRow text="文件系统信息" disabled={cnv} />
-
-            <TableHeaderRow
-              disabled={cnv}
-              items={[
-              ['', 256],
-              ['文件系统', 184],
-              ['文件系统UUID', 304],
-              ['路径（挂载点）', 416]
-              ]}
-            />
-            <Divider style={{ marginLeft: 256 }} />
-            <TableDataRow
-              disabled={cnv}
-              selected={false}
-              items={[
-              ['', 256],
-              [disk.fileSystemType, 184],
-              [disk.fileSystemUUID, 304],
-              [disk.isMounted ? disk.mountpoint : '(未挂载)']
-              ]}
-            />
-            <Divider style={{ marginLeft: 256 }} />
-            <div style={{ width: '100%', height: SUBTITLE_MARGINTOP }} />
-
-            <SubTitleRow text="磁盘信息" disabled={cnv && this.diskUnformattable(disk).length > 0} />
-
-          </VerticalExpandable>
-
-          <TableHeaderRow
-            disabled={cnv && this.diskUnformattable(disk).length > 0}
-            items={[
-            ['', 256],
-            ['接口', 64],
-            ['容量', 64, true],
-            ['', 56],
-            ['设备名', 96],
-            ['型号', 208],
-            ['序列号', 208]
-            ]}
-          />
-          <DoubleDivider grayLeft={256} colorLeft={cnv ? 256 : '100%'} />
-
-          <TableDataRow
-            disabled={cnv && this.diskUnformattable(disk).length > 0}
-            selected={cnv && !!this.state.creatingNewVolume.disks.find(d => d === disk)}
-            items={[
-            ['', 256],
-            [disk.idBus, 64],
-            [prettysize(disk.size * 512), 64, true],
-            ['', 56],
-            [disk.name, 96],
-            [disk.model || '', 208],
-            [disk.serial || '', 208]
-            ]}
-          />
-          <DoubleDivider colorLeft={cnv ? 80 : '100%'} />
-          <div
-            style={{ width: '100%',
-              height: cnv ? FOOTER_HEIGHT : 0,
-              transition: 'height 300ms',
-              display: 'flex',
-              alignItems: 'center',
-              overflow: 'hidden' }}
-          >
-            <div style={{ flex: '0 0 80px' }} />
-            <div
-              style={{
-                fontSize: 14,
-                color: (disk.isActiveSwap || disk.isRootFS) ? 'rgba(0,0,0,0.87)' : accent1Color
-              }}
-            >
-              { cnv &&
-                  (disk.isActiveSwap ? '该磁盘不能加入磁盘阵列；它是在使用的交换文件系统。' :
-                    disk.isRootFS ? '该磁盘不能加入磁盘阵列；它是在使用的系统文件系统。' :
-                    '选择该磁盘加入新的磁盘阵列，会摧毁该磁盘上的所有数据。'
-                  )
-              }
-            </div>
-          </div>
-        </Paper>
-      )
-    }
-
-    this.NoUsageDisk = (props) => {
-      const primary1Color = this.props.muiTheme.palette.primary1Color
-      const accent1Color = this.props.muiTheme.palette.accent1Color
-
-      const boot = this.state.boot
-      const storage = this.state.storage
-      const { disk, ...rest } = props
-
-      const cnv = !!this.state.creatingNewVolume
-
-      const expandableHeight = this.state.expanded.indexOf(disk) !== -1 ?
-        24 + SUBTITLE_HEIGHT + SUBTITLE_MARGINTOP : 0
-
-      const floatingTitleTop = () => {
-        if (!cnv) return 0
-        return HEADER_HEIGHT + TABLEHEADER_HEIGHT + expandableHeight
-      }
-
-      return (
-        <Paper {...rest}>
-          <div style={styles.paperHeader} onTouchTap={() => this.toggleExpanded(disk)}>
-            <div style={{ flex: '0 0 256px' }}>
-              <this.DiskTitle disk={disk} top={floatingTitleTop()} />
-            </div>
-            <div style={{ flex: '0 0 336px' }}>
-              <this.DiskHeadline disk={disk} />
-            </div>
-            <div style={{ marginLeft: 560 }}>
-              {this.state.expanded.indexOf(disk) !== -1 ? <UpIcon color={'#9e9e9e'} /> : <DownIcon color={'#9e9e9e'} />}
-            </div>
-          </div>
-
-          <VerticalExpandable height={expandableHeight}>
-
-            <div style={{ height: 24, lineHeight: '24px', marginLeft: 256, fontSize: 14 }}>
-              该信息仅供参考；有可能磁盘上的文件系统特殊或者较新，本系统未能正确识别。
-            </div>
-            <div style={{ height: SUBTITLE_MARGINTOP }} />
-            <SubTitleRow text="磁盘信息" />
-
-          </VerticalExpandable>
-
-          <TableHeaderRow
-            disabled={false}
-            items={[
-              ['', 256],
-              ['接口', 64],
-              ['容量', 64, true],
-              ['', 56],
-              ['设备名', 96],
-              ['型号', 208],
-              ['序列号', 208]
-            ]}
-          />
-          <DoubleDivider grayLeft={256} colorLeft={cnv ? 256 : '100%'} />
-          <TableDataRow
-            disabled={false}
-            selected={cnv && this.state.creatingNewVolume.disks.find(d => d === disk)}
-            items={[
-              ['', 256],
-              [disk.idBus, 64],
-              [prettysize(disk.size * 512), 64, true],
-              ['', 56],
-              [disk.name, 96],
-              [disk.model || '', 208],
-              [disk.serial || '', 208]
-            ]}
-          />
-          <DoubleDivider colorLeft={cnv ? 80 : '100%'} />
-          <div
-            style={{ width: '100%',
-              height: cnv ? FOOTER_HEIGHT : 0,
-              transition: 'height 300ms',
-              display: 'flex',
-              alignItems: 'center',
-              overflow: 'hidden' }}
-          >
-            <div style={{ flex: '0 0 80px' }} />
-            <div
-              style={{
-                fontSize: 14,
-                color: (disk.isActiveSwap || disk.isRootFS) ? 'rgba(0,0,0,0.87)' : accent1Color
-              }}
-            >
-              { cnv && '选择该磁盘加入新的磁盘阵列，会摧毁该磁盘上的所有数据。' }
-            </div>
-          </div>
-        </Paper>
-      )
-    }
     this.renderAppBar = () => (<AppBar
       style={{ position: 'absolute', height: 128, width: 'calc(100% - 16px)' }}
       showMenuIconButton={false}
@@ -974,8 +598,8 @@ class Maintenance extends StateUp(React.Component) {
                       disk,
                       key: index.toString() }
                     return disk.isPartitioned ? <PartitionedDisk {...props} />
-                      : disk.idFsUsage ? <this.FileSystemUsageDisk {...props} />
-                      : <this.NoUsageDisk {...props} />
+                      : disk.idFsUsage ? <FileSystemUsageDisk {...props} />
+                      : <NoUsageDisk {...props} />
                   })
             }
           </div>
@@ -992,7 +616,7 @@ class Maintenance extends StateUp(React.Component) {
           onResponse={() => this.reloadBootStorage()}
         />
 
-    </div>
+      </div>
     )
   }
 }

@@ -21,7 +21,7 @@ import {
   SUBTITLE_HEIGHT, TABLEHEADER_HEIGHT, TABLEDATA_HEIGHT, HEADER_HEIGHT, 
   FOOTER_HEIGHT, SUBTITLE_MARGINTOP, alphabet, styles, partitionDisplayName,
   SubTitleRow, VerticalExpandable, TableHeaderRow, TableDataRow
-} from './ConstElement.jsx'
+} from './ConstElement'
 
 const debug = Debug('component:maintenance:BtrfsVolume')
 
@@ -59,7 +59,7 @@ export default class PartitionedDisk extends React.Component {
     // K combinator
     const K = x => y => x
 
-    const { disk, ...rest } = this.props
+    const { disk, muiTheme, state, setState, that, ...rest } = this.props
     const boot = this.props.state.boot
     const { blocks } = this.props.state.storage
     const cnv = !!this.props.state.creatingNewVolume

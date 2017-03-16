@@ -1,186 +1,26 @@
 import React from 'react'
 import Debug from 'debug'
 import prettysize from 'prettysize'
-import muiThemeable from 'material-ui/styles/muiThemeable'
-import { Avatar, Checkbox, Chip, Paper } from 'material-ui'
+import { Avatar, Paper } from 'material-ui'
 import {
-  pinkA200, grey300, grey400, greenA400, green400, amber400,
-  redA200, red400, lightGreen100, lightGreen400, lightGreenA100,
-  lightGreenA200, lightGreenA400, lightGreenA700
+  grey300, grey400, amber400, redA200, red400, lightGreen400
 } from 'material-ui/styles/colors'
 import request from 'superagent'
 import {
-  operationTextConfirm, operationBase, Operation, operationBusy, operationSuccess, operationFailed, createOperation
+  operationTextConfirm, operationBusy, operationSuccess, operationFailed
 } from '../common/Operation'
 import VolumeWisnucError from './VolumeWisnucError'
 import DoubleDivider from './DoubleDivider'
 import Users from './Users'
 import FlatButton from '../common/FlatButton'
 import { HDDIcon, RAIDIcon, UpIcon, DownIcon } from './Svg'
+import {
+  SUBTITLE_HEIGHT, HEADER_HEIGHT, FOOTER_HEIGHT, SUBTITLE_MARGINTOP,
+  SubTitleRow, VerticalExpandable, TableHeaderRow, TableDataRow,
+  diskDisplayName, HeaderTitle1, HeaderIcon, Checkbox40
+} from './ConstElement.jsx'
 
 const debug = Debug('component:maintenance:BtrfsVolume')
-const SUBTITLE_HEIGHT = 32
-const TABLEHEADER_HEIGHT = 48
-const TABLEDATA_HEIGHT = 48
-const HEADER_HEIGHT = 104
-const FOOTER_HEIGHT = 48
-const SUBTITLE_MARGINTOP = 24
-const alphabet = 'abcdefghijklmnopqrstuvwxyz'
-
-const diskDisplayName = (name) => {
-  const chr = name.charAt(2)
-  const number = alphabet.indexOf(chr) + 1
-  return `硬盘 #${number}`
-}
-
-const VerticalExpandable = props => (
-  <div style={{ width: '100%', height: props.height, transition: 'height 300ms', overflow: 'hidden' }}>
-    { props.children }
-  </div>
-)
-
-const styles = {
-  chip: {
-    backgroundColor: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: 'medium',
-    height: 26,
-    marginRight: 5,
-    border: '1px solid #e6e6e6'
-  },
-  wrapper: {
-    display: 'flex',
-    flexWrap: 'wrap'
-  },
-  paperHeader: {
-    position: 'relative',
-    width: '100%',
-    height: HEADER_HEIGHT,
-    border: '1px solid #e6e6e6',
-    display: 'flex',
-    alignItems: 'center'
-  }
-}
-
-const HeaderTitle1 = props => (
-  <div style={props.style} onTouchTap={props.onTouchTap}>
-    <div style={{ marginBottom: 2 }}>
-      {props.title}
-    </div>
-    <div style={styles.wrapper}>
-      {
-        props.textFilesystem &&
-        <Chip style={styles.chip} labelStyle={{ marginTop: -4 }}>
-          <span style={{ color: '#9e9e9e' }}>
-            {props.textFilesystem}
-          </span>
-        </Chip>
-      }
-      {
-        props.volumemode &&
-          <Chip style={styles.chip} labelStyle={{ marginTop: -4 }}>
-            <span style={{ color: '#9e9e9e' }}>
-              {props.volumemode}
-            </span>
-          </Chip>
-        }
-    </div>
-  </div>
-)
-
-const SubTitleRow = props => (
-  <div style={{ width: '100%', height: SUBTITLE_HEIGHT, display: 'flex', alignItems: 'center' }}>
-    <div style={{ flex: '0 0 256px' }} />
-    <div
-      style={{ flex: '0 0 184px',
-        fontSize: 13,
-        color: props.disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.87)',
-        fontWeight: 'bold'
-      }}
-    >
-      {props.text}
-    </div>
-  </div>
-)
-
-const TableHeaderRow = (props) => {
-  const style = {
-    height: TABLEHEADER_HEIGHT,
-    display: 'flex',
-    alignItems: 'center',
-    fontSize: 11,
-    color: props.disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.54)',
-    fontWeight: props.disabled ? 'normal' : 'bold'
-  }
-
-  return (
-    <div style={props.style}>
-      <div style={style}>
-        { props.items.map((item) => {
-          const styles = { flex: `0 0 ${item[1]}px` }
-          if (item[2] === true) { styles.textAlign = 'right' }
-          return (<div style={styles} key={item.toString()}>{item[0]}</div>)
-        }) }
-      </div>
-    </div>
-  )
-}
-
-const TableDataRow = (props) => {
-  const containerStyle = {
-    height: TABLEDATA_HEIGHT,
-    display: 'flex',
-    alignItems: 'center',
-    fontSize: 13,
-    color: props.disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.87)'
-  }
-
-  if (!props.disabled && props.selected) { containerStyle.backgroundColor = '#F5F5F5' }
-
-  return (
-    <div style={props.style}>
-      <div style={containerStyle}>
-        { props.items.map((item) => {
-          if (typeof item[0] === 'string') {
-            const style = { flex: `0 0 ${item[1]}px` }
-            if (item[2] === true) style.textAlign = 'right'
-            return <div style={style} key={item.toString()}>{item[0]}</div>
-          }
-          const style = {
-            flex: `0 0 ${item[1]}px`,
-            display: 'flex',
-            alignItems: 'center'
-          }
-
-          if (item[2] === true) style.justifyContent = 'center'
-          return <div style={style} key={item.toString()}>{item[0]}</div>
-        }) }
-      </div>
-    </div>
-  )
-}
-
-const Checkbox40 = props => (
-  <div style={{ width: 40, height: 40 }}>
-    <Checkbox
-      {...props} style={{ margin: 8 }}
-      iconStyle={{ fill: props.fill }}
-    />
-  </div>
-)
-
-const HeaderIcon = props => (
-  <div
-    style={{
-      width: 40,
-      marginLeft: 24,
-      marginTop: 24,
-      marginRight: 16
-    }}
-  >
-    { props.children }
-  </div>
-)
 
 class KeyValueList extends React.PureComponent {
 
@@ -214,7 +54,6 @@ class KeyValueList extends React.PureComponent {
   }
 }
 
-@muiThemeable()
 export default class BtrfsVolume extends React.Component {
   /*
   static State = class State {
@@ -338,10 +177,9 @@ export default class BtrfsVolume extends React.Component {
   }
 
   render() {
-    debug("BtrfsVolume render! ")
-    const { volume, muiTheme, state, setState, that, ...rest } = this.props
-    const primary1Color = this.props.muiTheme.palette.primary1Color
-    const accent1Color = this.props.muiTheme.palette.accent1Color
+    debug('BtrfsVolume render! ')
+    const { volume, state, setState, that, ...rest } = this.props
+    const accent1Color = this.props.that.colors.accent
     const { blocks } = this.props.state.storage
     const cnv = !!this.props.state.creatingNewVolume
     const expandableHeight = this.props.state.expanded.indexOf(volume) !== -1 ?
@@ -446,7 +284,7 @@ export default class BtrfsVolume extends React.Component {
 
         {
         blocks.filter(blk => blk.isVolumeDevice && blk.fileSystemUUID === volume.uuid)
-          .map((blk, index) => (
+          .map(blk => (
             <TableDataRow
               key={blk.name}
               disabled={this.volumeUnformattable(volume).length > 0}
@@ -457,7 +295,7 @@ export default class BtrfsVolume extends React.Component {
                   <Checkbox40
                     fill={accent1Color}
                     checked={!!this.props.state.creatingNewVolume.disks.find(d => d === blk)}
-                    onCheck={() => this.that.toggleCandidate(blk)}
+                    onCheck={() => this.props.that.toggleCandidate(blk)}
                   /> :
                   <HDDIcon
                     color="rgba(0,0,0,0.38)"

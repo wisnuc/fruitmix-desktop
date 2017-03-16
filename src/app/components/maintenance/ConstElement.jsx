@@ -1,4 +1,5 @@
 import React from 'react'
+import { Checkbox, Chip } from 'material-ui'
 
 export const SUBTITLE_HEIGHT = 32
 export const TABLEHEADER_HEIGHT = 48
@@ -52,7 +53,7 @@ export const SubTitleRow = props => (
 )
 
 export const VerticalExpandable = props => (
-  <div style={{ width: '100%', height: props.height, transition: 'height 300ms', overflow: 'hidden' }}>
+  <div style={{ width: '102%', height: props.height, transition: 'height 300ms', overflow: 'hidden' }}>
     { props.children }
   </div>
 )
@@ -113,4 +114,57 @@ export const TableDataRow = (props) => {
     </div>
   )
 }
-// import { SUBTITLE_HEIGHT, TABLEHEADER_HEIGHT, TABLEDATA_HEIGHT, HEADER_HEIGHT, FOOTER_HEIGHT, SUBTITLE_MARGINTOP, alphabet, styles, partitionDisplayName, SubTitleRow, VerticalExpandable, TableHeaderRow, TableDataRow } from './ConstElement.jsx'
+
+export const diskDisplayName = (name) => {
+  const chr = name.charAt(2)
+  const number = alphabet.indexOf(chr) + 1
+  return `硬盘 #${number}`
+}
+
+export const HeaderTitle1 = props => (
+  <div style={props.style} onTouchTap={props.onTouchTap}>
+    <div style={{ marginBottom: 2 }}>
+      {props.title}
+    </div>
+    <div style={styles.wrapper}>
+      {
+        props.textFilesystem &&
+        <Chip style={styles.chip} labelStyle={{ marginTop: -4 }}>
+          <span style={{ color: '#9e9e9e' }}>
+            {props.textFilesystem}
+          </span>
+        </Chip>
+      }
+      {
+        props.volumemode &&
+          <Chip style={styles.chip} labelStyle={{ marginTop: -4 }}>
+            <span style={{ color: '#9e9e9e' }}>
+              {props.volumemode}
+            </span>
+          </Chip>
+        }
+    </div>
+  </div>
+)
+
+export const Checkbox40 = props => (
+  <div style={{ width: 40, height: 40 }}>
+    <Checkbox
+      {...props} style={{ margin: 8 }}
+      iconStyle={{ fill: props.fill }}
+    />
+  </div>
+)
+
+export const HeaderIcon = props => (
+  <div
+    style={{
+      width: 40,
+      marginLeft: 24,
+      marginTop: 24,
+      marginRight: 16
+    }}
+  >
+    { props.children }
+  </div>
+)
