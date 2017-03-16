@@ -175,7 +175,7 @@ class User extends React.Component {
     return (
       <div style={{height: 48, fontSize: 13, color: 'rgba(0, 0, 0, 0.87)', display: 'flex', alignItems: 'center'}}>
         <div style={{flex: '0 0 320px', fontFamily:'monospace'}}>{ user ? user.uuid.toUpperCase() : '用户ID' }</div>
-        <div style={{flex: '0 0 140px'}}>{ user ? user.username: '用户名' }</div>
+        <div style={{flex: '0 0 140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{ user ? user.username: '用户名' }</div>
         <div style={{flex: '0 0 100px'}}>{ user ? (user.type === 'local' ? '本地用户' : '远程用户') : '用户类型' }</div>
         <div style={{flex: '0 0 100px'}}>{ user ? (user.isAdmin ? '是' : '否') : '是管理员' }</div>
         <div style={{flex: '0 0 100px'}}>{ user ? (user.isFirstUser ? '是' : '否') : '是第一个用户' }</div>
@@ -195,11 +195,13 @@ class User extends React.Component {
     )
   }
   renderUserName() {
-    if (!this.state.data) return null
+    //if (!this.state.data) return null
     //debug('this.state.data.username', this.state.data[0].username)
     return (
       <div style={Object.assign({}, header1Style, { color: blueGrey500 })}>
-        { this.state.data[0].username }
+        { this.state.data ? this.state.data[0].username
+            : ' '
+        }
       </div>
     )
   }
