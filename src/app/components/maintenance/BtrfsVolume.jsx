@@ -235,30 +235,6 @@ export default class BtrfsVolume extends React.Component {
 
     this.volumeUnformattable = volume => []
 
-    this.toggleExpanded = (disvol) => {
-      const index = this.props.state.expanded.indexOf(disvol)
-      if (index === -1) { this.props.setState({ expanded: [...this.props.state.expanded, disvol] }) } else {
-        this.props.setState({
-          expanded: [...this.props.state.expanded.slice(0, index), ...this.props.state.expanded.slice(index + 1)]
-        })
-      }
-    }
-    this.toggleCandidate = (disk) => {
-      if (this.props.state.creatingNewVolume === null) return
-      const arr = this.props.state.creatingNewVolume.disks
-      const index = arr.indexOf(disk)
-      let nextArr
-      //  TODO not necessary as immutable
-      if (index === -1) { nextArr = [...arr, disk] } else { nextArr = [...arr.slice(0, index), ...arr.slice(index + 1)] }
-
-      this.props.setState({
-        creatingNewVolume: {
-          disks: nextArr,
-          mode: nextArr.length > 1 ? this.props.state.creatingNewVolume.mode : 'single'
-        }
-      })
-    }
-
     this.volumeIconColor = (volume) => {
       if (this.props.state.creatingNewVolume) { return this.colors.fillGreyFaded }
 
@@ -277,7 +253,6 @@ export default class BtrfsVolume extends React.Component {
 
       return '#000'
     }
-
 
     this.VolumeTitle = (props) => {
       const volume = props.volume
@@ -307,56 +282,6 @@ export default class BtrfsVolume extends React.Component {
       )
     }
 
-    this.createOperation = (operation, ...args) =>
-      createOperation(this.props.that, 'dialog', operation, ...args)
-
-
-    this.reloadBootStorage = (callback) => {
-      let storage
-      let boot
-      let done = false
-      const device = window.store.getState().maintenance.device
-      const finish = () => {
-        if (storage && boot) {
-          this.props.setState({
-            storage,
-            boot,
-            creatingNewVolume: this.props.state.creatingNewVolume ? { disks: [], mode: 'single' } : null
-          })
-
-          if (callback) callback(null, { storage, boot })
-          done = true
-        }
-      }
-
-      request.get(`http://${device.address}:3000/system/storage?wisnuc=true`)
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          if (this.unmounted) {
-            if (!done) {
-              if (callback) callback(new Error('unmounted'))
-              done = true
-            }
-            return
-          }
-          storage = err ? err.message : res.body
-          finish()
-        })
-
-      request.get(`http://${device.address}:3000/system/boot`)
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          if (this.unmounted) {
-            if (!done) {
-              if (callback) callback(new Error('unmounted'))
-              done = true
-            }
-          }
-          boot = err ? err.message : res.body
-          finish()
-        })
-    }
-
     this.errorText = (err, res) => {
       const text = []
 
@@ -371,11 +296,10 @@ export default class BtrfsVolume extends React.Component {
       return text
     }
 
-
     this.startWisnucOnVolume = (volume) => {
       const text = ['启动安装于Btrfs磁盘阵列上的WISNUC应用？']
 
-      this.createOperation(operationTextConfirm, text, () => {
+      this.props.that.createOperation(operationTextConfirm, text, () => {
         this.props.state.dialog.setState(operationBusy)
 
         const device = window.store.getState().maintenance.device
@@ -387,11 +311,11 @@ export default class BtrfsVolume extends React.Component {
           .send({ target: volume.fileSystemUUID })
           .end((err, res) => {
             if (err) {
-              this.reloadBootStorage(() => {
+              this.props.that.reloadBootStorage(() => {
                 this.props.state.dialog.setState(operationFailed, this.errorText(err, res))
               })
             } else {
-              this.reloadBootStorage(() => {
+              this.props.that.reloadBootStorage(() => {
                 for (let i = 3; i >= 0; i--) {
                   const time = (3 - i) * 1000
                   setTimeout(() => { this.props.state.dialog.setState(operationSuccess, [`启动成功，系统将在${i}秒钟后跳转到登录页面`]) }, time)
@@ -435,7 +359,7 @@ export default class BtrfsVolume extends React.Component {
       <Paper {...rest}>
         <div
           style={DivStyle()}
-          onTouchTap={() => this.toggleExpanded(volume)}
+          onTouchTap={() => this.props.that.toggleExpanded(volume)}
         >
           <div style={{ flex: '0 0 900px', height: '100%', display: 'flex', alignItems: 'center' }}>
             <div style={{ flex: '0 0 256px' }}>
@@ -533,7 +457,7 @@ export default class BtrfsVolume extends React.Component {
                   <Checkbox40
                     fill={accent1Color}
                     checked={!!this.props.state.creatingNewVolume.disks.find(d => d === blk)}
-                    onCheck={() => this.toggleCandidate(blk)}
+                    onCheck={() => this.that.toggleCandidate(blk)}
                   /> :
                   <HDDIcon
                     color="rgba(0,0,0,0.38)"

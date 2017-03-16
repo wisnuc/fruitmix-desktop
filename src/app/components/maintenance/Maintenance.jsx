@@ -22,6 +22,7 @@ import prettysize from 'prettysize'
 import DoubleDivider from './DoubleDivider'
 import BtrfsVolume from './BtrfsVolume'
 import NewVolumeTop from './NewVolumeTop'
+import PartitionedDisk from './PartitionedDisk'
 
 import FlatButton from '../common/FlatButton'
 import InitVolumeDialogs from './InitVolumeDialogs'
@@ -540,25 +541,6 @@ class Maintenance extends StateUp(React.Component) {
       } return []
     }
 
-    this.volumeIconColor = (volume) => {
-      if (this.state.creatingNewVolume) { return this.colors.fillGreyFaded }
-
-      if (volume.isMissing) return redA200
-      if (typeof volume.wisnuc !== 'object') return '#000'
-      switch (volume.wisnuc.status) {
-        case 'READY':
-          return lightGreen400
-        case 'NOTFOUND':
-          return this.colors.fillGrey
-        case 'AMBIGUOUS':
-          return amber400
-        case 'DAMAGED':
-          return red400
-      }
-
-      return '#000'
-    }
-
     this.DiskHeadline = (props) => {
       const disk = props.disk
       let text = ''
@@ -640,170 +622,6 @@ class Maintenance extends StateUp(React.Component) {
             onTouchTap={e => cnv && e.stopPropagation()}
           />
         </div>
-      )
-    }
-
-    this.partitionedDiskNewVolumeWarning = (parts) => {
-      if (parts.length === 0) { return '选择该磁盘建立新的磁盘阵列，会摧毁磁盘上的所有数据。' }
-
-      return parts
-        .reduce((p, c, i, a) => {
-          let s
-          if (c.isActiveSwap) { s = `${p}在使用的交换分区(${c.name})` } else if (c.isRootFS) { s = `${p}在使用的系统分区(${c.name})` }
-
-          if (i === a.length - 2) {
-            s += '和'
-          } else if (i === a.length - 1) {
-            s += '。'
-          } else {
-            s += '，'
-          }
-          return s
-        }, '该磁盘不能加入磁盘阵列；它包含')
-    }
-
-    this.PartitionedDisk = (props) => {
-      // K combinator
-      const K = x => y => x
-
-      const { disk, ...rest } = props
-      const boot = this.state.boot
-      const { blocks } = this.state.storage
-      const cnv = !!this.state.creatingNewVolume
-
-      const parts = blocks.filter(blk => blk.parentName === disk.name && !blk.isExtended)
-
-      const floatingTitleTop = () => {
-        if (!cnv) return 0
-        const inner = TABLEHEADER_HEIGHT + (parts.length * TABLEDATA_HEIGHT) + SUBTITLE_MARGINTOP + (2 * SUBTITLE_HEIGHT)
-        const outer = HEADER_HEIGHT + TABLEHEADER_HEIGHT
-
-        return this.state.expanded.indexOf(disk) !== -1 ? inner + outer : outer
-      }
-
-      // return array of unformattable partitions
-      const unformattable = () =>
-        parts.reduce((p, c) =>
-          (c.isActiveSwap || c.isRootFS) ?
-          K(p)(p.push(c)) :
-          p, [])
-
-      return (
-
-        <Paper {...rest}>
-          <div style={styles.paperHeader} onTouchTap={() => this.toggleExpanded(disk)}>
-            <div style={{ flex: '0 0 256px' }}>
-              <this.DiskTitle disk={disk} top={floatingTitleTop()} />
-            </div>
-            <div style={{ flex: '0 0 336px' }}>
-              <this.DiskHeadline disk={disk} />
-            </div>
-            <div style={{ marginLeft: 560 }}>
-              {this.state.expanded.indexOf(disk) !== -1 ? <UpIcon color={'#9e9e9e'} /> : <DownIcon color={'#9e9e9e'} />}
-            </div>
-          </div>
-          <VerticalExpandable
-            height={this.state.expanded.indexOf(disk) !== -1 ?
-                SUBTITLE_HEIGHT * 2 +
-                TABLEHEADER_HEIGHT +
-                TABLEDATA_HEIGHT * parts.length +
-                SUBTITLE_MARGINTOP : 0
-            }
-          >
-
-            <SubTitleRow text="分区信息" disabled={cnv} />
-            <TableHeaderRow
-              disabled={cnv}
-              items={[
-              ['', 256],
-              ['文件系统', 64],
-              ['容量', 64, true],
-              ['', 56],
-              ['设备名', 96],
-              ['路径（挂载点）', 416]
-              ]}
-            />
-            { parts.map((blk, index) => (
-              <TableDataRow
-                key={blk.name}
-                disabled={cnv}
-                selected={false}
-                items={[
-                ['', 72],
-                [partitionDisplayName(blk.name), 184],
-                [(blk.idFsUsage && blk.fileSystemType) ? blk.fileSystemType : '(未知)', 64],
-                [prettysize(blk.size * 512), 64, true],
-                ['', 56],
-                [blk.name, 96],
-                [blk.isMounted ? blk.mountpoint : '', 416]
-                ]}
-              />
-          ))
-              .reduce((p, c, index) => {
-                p.push(c)
-                p.push(<Divider inset key={index.toString()} />)
-                return p
-              }, []) }
-            <div style={{ width: '100%', height: SUBTITLE_MARGINTOP }} />
-
-            <SubTitleRow text="磁盘信息" disabled={cnv && this.diskUnformattable(disk).length > 0} />
-          </VerticalExpandable>
-          <TableHeaderRow
-            disabled={cnv && this.diskUnformattable(disk).length > 0}
-            items={[
-                ['', 256],
-                ['接口', 64],
-                ['容量', 64, true],
-                ['', 56],
-                ['设备名', 96],
-                ['型号', 208],
-                ['序列号', 208],
-                ['分区表类型', 112]
-            ]}
-          />
-
-          <TableDataRow
-            disabled={cnv && this.diskUnformattable(disk).length > 0}
-            selected={cnv && !!this.state.creatingNewVolume.disks.find(d => d === disk)}
-            items={[
-              ['', 72],
-              ['', 184],
-              [disk.idBus, 64],
-              [prettysize(disk.size * 512), 64, true],
-              ['', 56],
-              [disk.name, 96],
-              [disk.model || '', 208],
-              [disk.serial || '', 208],
-              [disk.partitionTableType, 112]
-            ]}
-          />
-
-          {/* exclusive OR */}
-          <DoubleDivider
-            grayLeft={unformattable().length > 0 ? (cnv ? 80 : '100%') : null}
-            colorLeft={unformattable().length === 0 ? (cnv ? 80 : '100%') : null}
-          />
-
-          <div
-            style={{ width: '100%',
-              height: cnv ? FOOTER_HEIGHT : 0,
-              transition: 'height 300ms',
-              display: 'flex',
-              alignItems: 'center',
-              overflow: 'hidden' }}
-          >
-            <div style={{ flex: '0 0 80px' }} />
-            <div
-              style={{
-                fontSize: 14,
-                color: unformattable().length > 0 ? 'rgba(0,0,0,0.87)' :
-              this.props.muiTheme.palette.accent1Color
-              }}
-            >
-              { cnv && this.partitionedDiskNewVolumeWarning(unformattable()) }
-            </div>
-          </div>
-        </Paper>
       )
     }
 
@@ -1134,19 +952,32 @@ class Maintenance extends StateUp(React.Component) {
               { cnv ? <NewVolumeTop state={this.state} setState={this.ssb} that={this} /> : this.renderBootStatus()}
             </div>
 
-            { typeof this.state.boot === 'object' && typeof this.state.storage === 'object' &&
+            {
+              typeof this.state.boot === 'object' && typeof this.state.storage === 'object' &&
                 this.state.storage.volumes.map((vol, index) =>
-                  <BtrfsVolume state={this.state} setState={this.ssb} that={this} key={index.toString()} style={this.cardStyle(vol)} volume={vol} zDepth={this.cardDepth(vol)} />) }
+                  <BtrfsVolume
+                    state={this.state} setState={this.ssb} that={this} key={index.toString()}
+                    style={this.cardStyle(vol)} volume={vol} zDepth={this.cardDepth(vol)}
+                  />)
+            }
 
-            { typeof this.state.boot === 'object' && typeof this.state.storage === 'object' &&
-                      this.state.storage.blocks
-                      .filter(blk => blk.isDisk && !blk.isVolumeDevice)
-                      .map((disk, index) => React.createElement(
-                        disk.isPartitioned ? this.PartitionedDisk :
-                        disk.idFsUsage ? this.FileSystemUsageDisk : this.NoUsageDisk, {
-                          style: this.cardStyle(disk), zDepth: this.cardDepth(disk), disk, key: index.toString()
-                        }, null)) }
-
+            {
+              typeof this.state.boot === 'object' && typeof this.state.storage === 'object' &&
+                this.state.storage.blocks.filter(blk =>
+                  blk.isDisk && !blk.isVolumeDevice).map((disk, index) => {
+                    const props = {
+                      state: this.state,
+                      setState: this.ssb,
+                      that: this,
+                      style: this.cardStyle(disk),
+                      zDepth: this.cardDepth(disk),
+                      disk,
+                      key: index.toString() }
+                    return disk.isPartitioned ? <PartitionedDisk {...props} />
+                      : disk.idFsUsage ? <this.FileSystemUsageDisk {...props} />
+                      : <this.NoUsageDisk {...props} />
+                  })
+            }
           </div>
           {/* gray box end */}
 
@@ -1161,7 +992,7 @@ class Maintenance extends StateUp(React.Component) {
           onResponse={() => this.reloadBootStorage()}
         />
 
-      </div>
+    </div>
     )
   }
 }
