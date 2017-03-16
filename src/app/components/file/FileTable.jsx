@@ -115,7 +115,7 @@ class FileTable extends Component {
 					console.log(min + ' '  + max)
 					for(let i = min; i <= max; i++) {
 						this.refs[i].shiftHover = false
-						this.selectOne(i)
+						if (!this.refs[i].isSelected) this.selectOne(i)
 					}
 					this.lastSelected = index
 				}
@@ -149,13 +149,13 @@ class FileTable extends Component {
 					this.shiftMoveIndexArr = []
 					this.selectedIndexArr = []
 				}else {
-						this.shift = false
+					this.shift = false
 					let min = this.lastSelected<index?this.lastSelected:index
 					let max = this.lastSelected<index?index:this.lastSelected
 					console.log(min + ' '  + max)
 					for(let i = min; i <= max; i++) {
 						this.refs[i].shiftHover = false
-						this.selectOne(i)
+						if (!this.refs[i].isSelected) this.selectOne(i)
 					}
 					this.lastSelected = index
 				}
@@ -170,7 +170,7 @@ class FileTable extends Component {
 		}
 		// console.log(this.selectedIndexArr)
 		// console.log(this.lastSelected)
-		console.log(this.list[this.lastSelected])
+		// console.log(this.list[this.lastSelected])
 		this.updateDetail()
 	}
 

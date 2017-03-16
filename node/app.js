@@ -19,7 +19,7 @@ import fileApi from './lib/file'
 import mediaApi from './lib/media'
 // import upload from './lib/upload'
 import newUpload from './lib/newUpload'
-import download from './lib/download'
+import download from './lib/newDownload'
 //init window
 import { initMainWindow, getMainWindow } from './lib/window'
 import { initTestWindow } from './lib/testHook'

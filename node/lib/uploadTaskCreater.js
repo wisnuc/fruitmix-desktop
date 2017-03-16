@@ -50,13 +50,14 @@ const sendMessage = () => {
 
 const sendMsg = () => {
 	let mainWindow = getMainWindow()
-  	mainWindow.webContents.send('UPDATE_UPLOAD', userTasks.map(item => item.getSummary()), finishTasks.map(i => i.getSummary?i.getSummary():i))
+  mainWindow.webContents.send('UPDATE_UPLOAD', userTasks.map(item => item.getSummary()), finishTasks.map(i => i.getSummary?i.getSummary():i))
 }
 
 const createTask = (abspath, target, newWork,type) => {
 	initArgs()
 	let taskUUID = uuid.v4()
 	let task = new TaskManager(abspath, target, true, taskUUID, type)
+	task.createStore()
 	userTasks.push(task)
 	task.readyToVisit()
 	sendMessage()
@@ -201,15 +202,19 @@ class TaskManager {
 
 	uploadSchedule() {
 		console.log('上传调度...')
-		if (this.finishCount === this.worklist.length) return this.recordInfor('文件全部上传结束') 
-		// if (this.lastFileIndex === -1) return this.recordInfor('任务列表中不包含文件')
+		if (this.finishCount === this.worklist.length) return this.recordInfor('文件全部上传结束')
 		if (this.uploading.length >=2 ) return this.recordInfor('任务上传队列已满')
 		if (this.fileIndex === this.worklist.length) return this.recordInfor('所有文件上传调度完成')
 		this.recordInfor('正在调度第 ' + (this.fileIndex + 1) + ' 个文件,总共 ' + this.worklist.length + ' 个')
 
 		let _this = this
 		let obj = this.worklist[this.fileIndex]
-		if (obj.state === 'finish') this.hashIndex++
+		if (obj.stateName === 'finish') {
+			this.recordInfor('文件已被上传过，跳过...')
+			this.fileIndex++
+			this.uploadSchedule()
+			return
+		}
 		if (obj.target === '') {
 			this.recordInfor('当前文件父文件夹正在创建，缺少目标，等待...')
 			return
@@ -243,7 +248,25 @@ class TaskManager {
 		}
 	}
 
+	createStore() {
+		let obj = {
+			_id: this.uuid,
+			abspath: this.abspath,
+			target: this.target,
+			name: this.name,
+			type: this.type
+		}
+
+		db.uploading.insert(obj, (err, data) => {
+			if(err) return console.log(err)
+			console.log(data)
+		})
+	}
+
 	finishStore() {
+		db.uploading.remove({_id: this.uuid}, {}, (err,data) => {
+			if (err) return console.log(err)
+		})
 		let obj = {
 			_id: this.uuid,
 			abspath: this.abspath,
@@ -254,7 +277,7 @@ class TaskManager {
 			finishDate: this.finishDate
 		}
 
-		db.finish.insert(obj,(err, data) => {
+		db.uploaded.insert(obj,(err, data) => {
 			if (err) return console.log(err) 
 			console.log(data)
 		})
@@ -297,7 +320,7 @@ class UploadTask {
 		this.manager = manager
 		this.target = ''
 		this.state = null
-    	this.stateName = ''
+    this.stateName = ''
 	}
 
 	setState(NextState) {

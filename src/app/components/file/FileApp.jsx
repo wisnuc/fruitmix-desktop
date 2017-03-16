@@ -63,7 +63,7 @@ import FileTable from './FileTable'
 import FileUploadButton from './FileUploadButton'
 // import Upload from './Upload'
 import Upload from './newUpload'
-import Download from './Download'
+import Download from './newDownload'
 import Detail from './Detail'
 
 const LEFTNAV_WIDTH = 210
@@ -528,14 +528,8 @@ class FileApp extends React.Component {
     		}
     	})
     	command('fileapp', 'DOWNLOAD', {
-    		folders: !!folders.length?folders:undefined,
-    		files: !!files.length?files:undefined
-    	}, (err) => {
-    		if (err) {
-    			console.log('download task error')
-    		}else {
-    			console.log('download task success')
-    		}
+    		folders: !!folders.length?folders:[],
+    		files: !!files.length?files:[]
     	})
     }
 

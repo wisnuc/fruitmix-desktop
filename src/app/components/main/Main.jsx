@@ -264,8 +264,7 @@ class Main extends React.Component {
 
 		ipcRenderer.send('getMediaData')
 		ipcRenderer.send('getMediaShare')
-
-    command('', 'GET_TRANSMISSION', {})
+    ipcRenderer.send('GET_TRANSMISSION')
 
 		ipcRenderer.on('refreshStatusOfUpload',(err,tasks, finish)=>{
 			window.store.dispatch(Action.refreshStatusOfUpload(tasks, finish));
@@ -276,10 +275,16 @@ class Main extends React.Component {
 		})
 
     ipcRenderer.on('UPDATE_UPLOAD', (err, userTasks, finishTasks) => {
-      console.log(userTasks)
-      console.log(finishTasks)
       window.store.dispatch({
         type : 'UPDATE_UPLOAD',
+        userTasks,
+        finishTasks
+      })
+    })
+
+    ipcRenderer.on('UPDATE_DOWNLOAD', (err, userTasks, finishTasks) => {
+      window.store.dispatch({
+        type : 'UPDATE_DOWNLOAD',
         userTasks,
         finishTasks
       })

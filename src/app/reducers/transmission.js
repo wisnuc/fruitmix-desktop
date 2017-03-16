@@ -3,8 +3,10 @@ const defaultState = {
 	download: [],
 	uploadFinish: true,
 	downloadFinish: true,
-	userTasks: [],
-	finishTasks: []
+	uploadingTasks: [],
+	uploadedTasks: [],
+	downloadingTasks: [],
+	downloadedTasks:[]
 }
 
 const transmission = (state = defaultState, action)=>{
@@ -28,10 +30,16 @@ const transmission = (state = defaultState, action)=>{
 				uploadFinish:action.uploadFinish == undefined?state.uploadFinish:action.uploadFinish})
 
 		case 'UPDATE_UPLOAD':
-
 			return Object.assign({}, state, {
-				userTasks: action.userTasks,
-				finishTasks: action.finishTasks
+				uploadingTasks: action.userTasks,
+				uploadedTasks: action.finishTasks
+			})
+
+		case 'UPDATE_DOWNLOAD':
+			console.log(action.userTasks)
+			return Object.assign({}, state, {
+				downloadingTasks: action.userTasks,
+				downloadedTasks: action.finishTasks
 			})
 
 		default:

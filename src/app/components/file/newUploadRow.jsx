@@ -7,13 +7,17 @@
 import React, { Component } from 'react'
 import FileSvg from 'material-ui/svg-icons/editor/insert-drive-file'
 import FolderSvg from 'material-ui/svg-icons/file/folder'
+import PlaySvg from 'material-ui/svg-icons/av/play-arrow'
+import PauseSvg from 'material-ui/svg-icons/av/pause'
+import DetailSvg from 'material-ui/svg-icons/image/details'
 
 const normalStyle = {}
 const selectStyle = {backgroundColor:'#f4f4f4'}
+const svgStyle = {color: '#000', opacity: 0.54}
 class UploadRow extends Component {
 	constructor() {
 		super()
-		this.state = {checked: false, detail: false}
+		this.state = {checked: false}
 	}
 
 	render() {
@@ -27,8 +31,8 @@ class UploadRow extends Component {
 				<div className='trs-row-name'>
 					<span>
 						{
-							task.type=='folder'?<FolderSvg style={{color: '#000', opacity: 0.54}}/>:
-							<FileSvg style={{color: '#000', opacity: 0.54}}/>
+							task.type=='folder'?<FolderSvg style={svgStyle}/>:
+							<FileSvg style={svgStyle}/>
 						}
 					</span>
 					<span>{task.name}</span>
@@ -44,23 +48,15 @@ class UploadRow extends Component {
 					</div>
 				</div>
 				<div className='trs-row-tool'>
-					<span>{task.pause?'play':'pause'}</span>
-					<span onClick={this.toggleDetail.bind(this)}>Detail</span>
-					{this.state.detail?
-					(<div className='trs-detail-container'>
-											{task.record.map(item => <div>{item}</div>)}
-										</div>):null
-				}
+					{task.pause?
+						<PlaySvg style={svgStyle} onClick={this.props.resume.bind(this, task.uuid)}/>:
+						<PauseSvg style={svgStyle} onClick={this.props.pause.bind(this, task.uuid)}/>}
+
 				</div>
 			</div>
 		)
 	}
 
-	toggleDetail() {
-		this.setState({
-			detail: !this.state.detail
-		})
-	}
 
 	select() {
 		this.setState({
@@ -91,7 +87,6 @@ class UploadRow extends Component {
 		else if (size < (1024 * 1024 * 1024)) return (size / 1024 / 1024).toFixed(2) + 'M'
 		else return (size / 1024 / 1024 / 1024).toFixed(2) + 'G'
 	}
-
 }
 
 export default UploadRow

@@ -3,6 +3,7 @@
 /media
 /download
 /dbCache
+/tmpTrans
 /npm-debug.log
 
 *.swp

@@ -20,18 +20,18 @@ class Upload extends Component {
 
 	render() {
 		let transmission = window.store.getState().transmission
-		let userTasks = transmission.uploadingTasks
-		let finishTasks = transmission.uploadedTasks
+		let userTasks = transmission.downloadingTasks
+		let finishTasks = transmission.downloadedTasks
 		return (
 			<div id='trs-wrap'>
 				<div className='trs-title'>
-					<span>上传中</span>
+					<span>下载中</span>
 					<span>({userTasks.length})</span>
 				</div>
 				<div className='trs-hr'></div>
 				<div className='trs-list-wrapper'>
 					{userTasks.map((task) => {
-						return <Row key={task.uuid} task={task} pause={this.pause}/>
+						return <Row key={task.uuid} task={task} pause={this.pause} resume={this.resume}/>
 					})}
 				</div>
 				<div className='trs-title'>
@@ -53,11 +53,15 @@ class Upload extends Component {
 	}
 
 	pause(uuid) {
-		
+		ipcRenderer.send('PAUSE_DOWNLOADING', uuid)
+	}
+
+	resume(uuid) {
+		ipcRenderer.send('RESUME_DOWNLOADING', uuid)
 	}
 
 	cleanRecord() {
-		command('', 'CLEAN_UPLOAD_RECORD',{})
+		command('', 'CLEAN_DOWNLOAD_RECORD',{})
 	}
 }
 
