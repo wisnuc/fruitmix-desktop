@@ -1,32 +1,16 @@
 import React from 'react'
 import Debug from 'debug'
-import prettysize from 'prettysize'
-import muiThemeable from 'material-ui/styles/muiThemeable'
-import { Avatar, Checkbox, Chip, Divider, Paper } from 'material-ui'
+import { Paper } from 'material-ui'
+import { UpIcon, DownIcon } from './Svg'
 import {
-  pinkA200, grey300, grey400, greenA400, green400, amber400,
-  redA200, red400, lightGreen100, lightGreen400, lightGreenA100,
-  lightGreenA200, lightGreenA400, lightGreenA700
-} from 'material-ui/styles/colors'
-import request from 'superagent'
-import {
-  operationTextConfirm, operationBase, Operation, operationBusy, operationSuccess, operationFailed, createOperation
-} from '../common/Operation'
-import VolumeWisnucError from './VolumeWisnucError'
-import DoubleDivider from './DoubleDivider'
-import Users from './Users'
-import FlatButton from '../common/FlatButton'
-import { HDDIcon, RAIDIcon, UpIcon, DownIcon } from './Svg'
-import {
-  SUBTITLE_HEIGHT, TABLEHEADER_HEIGHT, TABLEDATA_HEIGHT, HEADER_HEIGHT,
-  FOOTER_HEIGHT, SUBTITLE_MARGINTOP, alphabet, styles, partitionDisplayName,
-  SubTitleRow, VerticalExpandable, TableHeaderRow, TableDataRow
+  SUBTITLE_HEIGHT, TABLEHEADER_HEIGHT, HEADER_HEIGHT,
+  FOOTER_HEIGHT, SUBTITLE_MARGINTOP, styles, SubTitleRow,
+  VerticalExpandable, DiskHeadline, DiskTitle, DiskInfoTable
 } from './ConstElement'
 
-const debug = Debug('component:maintenance:BtrfsVolume')
+const debug = Debug('component:maintenance:NoUsageDisk')
 
-@muiThemeable()
-export default class PartitionedDisk extends React.Component {
+export default class NoUsageDisk extends React.Component {
   /*
   static State = class State {
     constructor() {
@@ -38,19 +22,23 @@ export default class PartitionedDisk extends React.Component {
   */
   constructor(props) {
     super(props)
+    this.state = {
+      expanded: false
+    }
+    this.toggleExpanded = () => {
+      const newstatus = !this.state.expanded
+      this.setState({ expanded: newstatus })
+    }
   }
   render() {
-    const primary1Color = this.props.muiTheme.palette.primary1Color
-    const accent1Color = this.props.muiTheme.palette.accent1Color
-
-    const boot = this.props.state.boot
-    const storage = this.props.state.storage
-    const { disk, muiTheme, state, setState, that, ...rest } = this.props
-
-    const cnv = !!this.props.state.creatingNewVolume
-
-    const expandableHeight = this.props.state.expanded.indexOf(disk) !== -1 ?
-      24 + SUBTITLE_HEIGHT + SUBTITLE_MARGINTOP : 0
+    debug('NoUsageDisk Render')
+    const primary1Color = this.props.that.colors.primary
+    const accent1Color = this.props.that.colors.accent
+    const { disk, state, setState, that, ...rest } = this.props
+    const cnv = this.props.state.creatingNewVolume
+    const uf = this.props.that.diskUnformattable(disk).length > 0
+    const expandableHeight = this.state.expanded ?
+      36 + SUBTITLE_HEIGHT + SUBTITLE_MARGINTOP : 0
 
     const floatingTitleTop = () => {
       if (!cnv) return 0
@@ -59,55 +47,40 @@ export default class PartitionedDisk extends React.Component {
 
     return (
       <Paper {...rest}>
-        <div style={styles.paperHeader} onTouchTap={() => this.props.that.toggleExpanded(disk)}>
+        <div style={styles.paperHeader} onTouchTap={() => this.toggleExpanded()}>
           <div style={{ flex: '0 0 256px' }}>
-            <this.props.that.DiskTitle disk={disk} top={floatingTitleTop()} />
+            <DiskTitle
+              disk={disk} top={floatingTitleTop()} colors={this.props.that.colors}
+              cnv={cnv} uf={uf} toggleCandidate={this.props.that.toggleCandidate}
+            />
           </div>
           <div style={{ flex: '0 0 336px' }}>
-            <this.props.that.DiskHeadline disk={disk} />
+            <DiskHeadline disk={disk} cnv={cnv} />
           </div>
           <div style={{ marginLeft: 560 }}>
-            {this.props.state.expanded.indexOf(disk) !== -1 ? <UpIcon color={'#9e9e9e'} /> : <DownIcon color={'#9e9e9e'} />}
+            {this.state.expanded ? <UpIcon color={'#9e9e9e'} /> : <DownIcon color={'#9e9e9e'} />}
           </div>
         </div>
 
         <VerticalExpandable height={expandableHeight}>
-
-          <div style={{ height: 24, lineHeight: '24px', marginLeft: 256, fontSize: 14 }}>
+          <div
+            style={{
+              height: 24,
+              lineHeight: '24px',
+              marginLeft: 256,
+              fontSize: 14,
+              marginTop: '12px',
+              color: cnv ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.87)'
+            }}
+          >
             该信息仅供参考；有可能磁盘上的文件系统特殊或者较新，本系统未能正确识别。
           </div>
           <div style={{ height: SUBTITLE_MARGINTOP }} />
-          <SubTitleRow text="磁盘信息" />
-
+          <SubTitleRow text="磁盘信息" disabled={cnv} />
         </VerticalExpandable>
 
-        <TableHeaderRow
-          disabled={false}
-          items={[
-            ['', 256],
-            ['接口', 64],
-            ['容量', 64, true],
-            ['', 56],
-            ['设备名', 96],
-            ['型号', 208],
-            ['序列号', 208]
-          ]}
-        />
-        <DoubleDivider grayLeft={256} colorLeft={cnv ? 256 : '100%'} />
-        <TableDataRow
-          disabled={false}
-          selected={cnv && this.props.state.creatingNewVolume.disks.find(d => d === disk)}
-          items={[
-            ['', 256],
-            [disk.idBus, 64],
-            [prettysize(disk.size * 512), 64, true],
-            ['', 56],
-            [disk.name, 96],
-            [disk.model || '', 208],
-            [disk.serial || '', 208]
-          ]}
-        />
-        <DoubleDivider colorLeft={cnv ? 80 : '100%'} />
+        <DiskInfoTable cnv={cnv} disk={disk} type="NoUsageDisk" />
+
         <div
           style={{ width: '100%',
             height: cnv ? FOOTER_HEIGHT : 0,

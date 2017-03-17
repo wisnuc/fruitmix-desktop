@@ -1,12 +1,7 @@
 import React from 'react'
 import Popover, { PopoverAnimationVertical } from 'material-ui/Popover'
-import {
-  pinkA200, grey300, grey400, greenA400, green400, amber400,
-  redA200, red400, lightGreen100, lightGreen400, lightGreenA100,
-  lightGreenA200, lightGreenA400, lightGreenA700
-} from 'material-ui/styles/colors'
-import { CatSilhouette, BallOfYarn, Account, ReportProblem, HDDIcon, RAIDIcon, UpIcon, DownIcon
-    } from './Svg'
+import { redA200 } from 'material-ui/styles/colors'
+import { ReportProblem } from './Svg'
 
 /** **
 
@@ -23,11 +18,8 @@ import { CatSilhouette, BallOfYarn, Account, ReportProblem, HDDIcon, RAIDIcon, U
 
  ** **/
 
-const ReportProblemIcon = props => (
-  <ReportProblem style={{ verticalAlign: '-18%', marginRight: 8 }} {...props} />
-)
+const ReportProblemIcon = props => <ReportProblem style={{ verticalAlign: '-18%', marginRight: 8 }} {...props} />
 
-// export default class VolumeWisnucBadge extends React.Component {
 export default class VolumeWisnucError extends React.Component {
 
   constructor(props) {

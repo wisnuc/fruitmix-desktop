@@ -7,18 +7,19 @@ import {
 } from 'material-ui/styles/colors'
 import request from 'superagent'
 import {
-  operationTextConfirm, operationBusy, operationSuccess, operationFailed
+  Operation, createOperation, operationTextConfirm, operationBusy, operationSuccess, operationFailed
 } from '../common/Operation'
 import VolumeWisnucError from './VolumeWisnucError'
 import DoubleDivider from './DoubleDivider'
 import Users from './Users'
+import InitVolumeDialogs from './InitVolumeDialogs'
 import FlatButton from '../common/FlatButton'
 import { HDDIcon, RAIDIcon, UpIcon, DownIcon } from './Svg'
 import {
   SUBTITLE_HEIGHT, HEADER_HEIGHT, FOOTER_HEIGHT, SUBTITLE_MARGINTOP,
   SubTitleRow, VerticalExpandable, TableHeaderRow, TableDataRow,
   diskDisplayName, HeaderTitle1, HeaderIcon, Checkbox40
-} from './ConstElement.jsx'
+} from './ConstElement'
 
 const debug = Debug('component:maintenance:BtrfsVolume')
 
@@ -59,20 +60,27 @@ export default class BtrfsVolume extends React.Component {
   static State = class State {
     constructor() {
       this.creatingNewVolume = null
-      this.expanded = []
-      this.operation = null
     }
   }
   */
   constructor(props) {
     super(props)
-    this.unmounted = false
+
+    this.state = {
+      expanded: false,
+      initVolume: undefined,
+      dialog: undefined
+    }
+
+    this.toggleExpanded = () => {
+      const newstatus = !this.state.expanded
+      this.setState({ expanded: newstatus })
+    }
+
     this.colors = {
       fillGrey: grey400,
       fillGreyFaded: grey300
     }
-
-    this.volumeUnformattable = volume => []
 
     this.volumeIconColor = (volume) => {
       if (this.props.state.creatingNewVolume) { return this.colors.fillGreyFaded }
@@ -121,6 +129,10 @@ export default class BtrfsVolume extends React.Component {
       )
     }
 
+    this.createOperation = (operation, ...args) =>
+      createOperation(this, 'dialog', operation, ...args)
+
+
     this.errorText = (err, res) => {
       const text = []
 
@@ -138,8 +150,8 @@ export default class BtrfsVolume extends React.Component {
     this.startWisnucOnVolume = (volume) => {
       const text = ['启动安装于Btrfs磁盘阵列上的WISNUC应用？']
 
-      this.props.that.createOperation(operationTextConfirm, text, () => {
-        this.props.state.dialog.setState(operationBusy)
+      this.createOperation(operationTextConfirm, text, () => {
+        this.state.dialog.setState(operationBusy)
 
         const device = window.store.getState().maintenance.device
         const url = `http://${device.address}:3000/system/mir/run`
@@ -151,13 +163,13 @@ export default class BtrfsVolume extends React.Component {
           .end((err, res) => {
             if (err) {
               this.props.that.reloadBootStorage(() => {
-                this.props.state.dialog.setState(operationFailed, this.errorText(err, res))
+                this.state.dialog.setState(operationFailed, this.errorText(err, res))
               })
             } else {
               this.props.that.reloadBootStorage(() => {
                 for (let i = 3; i >= 0; i--) {
                   const time = (3 - i) * 1000
-                  setTimeout(() => { this.props.state.dialog.setState(operationSuccess, [`启动成功，系统将在${i}秒钟后跳转到登录页面`]) }, time)
+                  setTimeout(() => { this.state.dialog.setState(operationSuccess, [`启动成功，系统将在${i}秒钟后跳转到登录页面`]) }, time)
                 }
                 setTimeout(() => { window.store.dispatch({ type: 'EXIT_MAINTENANCE' }) }, 4000)
               })
@@ -172,7 +184,7 @@ export default class BtrfsVolume extends React.Component {
         alert('功能开发中......')
         return
       }
-      this.props.setState({ initVolume: volume })
+      this.setState({ initVolume: volume })
     }
   }
 
@@ -182,7 +194,7 @@ export default class BtrfsVolume extends React.Component {
     const accent1Color = this.props.that.colors.accent
     const { blocks } = this.props.state.storage
     const cnv = !!this.props.state.creatingNewVolume
-    const expandableHeight = this.props.state.expanded.indexOf(volume) !== -1 ?
+    const expandableHeight = this.state.expanded ?
       17 * 24 + 3 * SUBTITLE_HEIGHT + SUBTITLE_MARGINTOP : 0
     const comment = () => volume.missing ? '有磁盘缺失' : '全部在线' // TODO if(volume.missing === true)
     const DivStyle = () => ({
@@ -197,7 +209,7 @@ export default class BtrfsVolume extends React.Component {
       <Paper {...rest}>
         <div
           style={DivStyle()}
-          onTouchTap={() => this.props.that.toggleExpanded(volume)}
+          onTouchTap={() => this.toggleExpanded()}
         >
           <div style={{ flex: '0 0 900px', height: '100%', display: 'flex', alignItems: 'center' }}>
             <div style={{ flex: '0 0 256px' }}>
@@ -206,7 +218,7 @@ export default class BtrfsVolume extends React.Component {
             <VolumeWisnucError creatingNewVolume={this.props.state.creatingNewVolume} volume={volume} />
           </div>
           <div style={{ marginRight: 24 }}>
-            {expandableHeight ? <UpIcon color={'#9e9e9e'} /> : <DownIcon color={'#9e9e9e'} />}
+            {this.state.expanded ? <UpIcon color={'#9e9e9e'} /> : <DownIcon color={'#9e9e9e'} />}
           </div>
 
         </div>
@@ -264,10 +276,11 @@ export default class BtrfsVolume extends React.Component {
             />
           </div>
           <div style={{ width: '100%', height: SUBTITLE_MARGINTOP }} />
-          <SubTitleRow text="磁盘信息" disabled={cnv && this.volumeUnformattable(volume).length > 0} />
+          <SubTitleRow text="磁盘信息" disabled={cnv} />
         </VerticalExpandable>
 
         <TableHeaderRow
+          disabled={cnv}
           style={{ fontWeight: 'regular', fontSize: 18, color: '#212121' }}
           items={[
             ['', 256],
@@ -287,7 +300,7 @@ export default class BtrfsVolume extends React.Component {
           .map(blk => (
             <TableDataRow
               key={blk.name}
-              disabled={this.volumeUnformattable(volume).length > 0}
+              disabled={cnv}
               selected={cnv && !!this.props.state.creatingNewVolume.disks.find(d => d === blk)}
               style={{ marginLeft: 80, fontWeight: 'medium', fontSize: 14, color: '#212121' }}
               items={[
@@ -339,7 +352,6 @@ export default class BtrfsVolume extends React.Component {
             { cnv && '选择该磁盘阵列中的磁盘建立新的磁盘阵列，会摧毁当前磁盘阵列存储的所有数据。' }
           </div>
         </div>
-        <DoubleDivider grayLeft={80} colorLeft={cnv ? 80 : '100%'} />
         <div>
           <div style={{ height: 24 }} />
           <Users creatingNewVolume={this.props.state.creatingNewVolume} volume={volume} />
@@ -382,9 +394,14 @@ export default class BtrfsVolume extends React.Component {
                   onTouchTap={() => this.initWisnucOnVolume(volume)}
                 />
             }
-
           </div>
         </div>
+        <InitVolumeDialogs
+          volume={this.state.initVolume}
+          onRequestClose={() => this.setState({ initVolume: undefined })}
+          onResponse={() => this.props.that.reloadBootStorage()}
+        />
+        <Operation substate={this.state.dialog} />
       </Paper>
     )
   }

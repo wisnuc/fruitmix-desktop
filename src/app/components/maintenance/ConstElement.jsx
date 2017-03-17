@@ -1,5 +1,7 @@
 import React from 'react'
-import { Checkbox, Chip } from 'material-ui'
+import prettysize from 'prettysize'
+import { Checkbox, Chip, Avatar } from 'material-ui'
+import { HDDIcon } from './Svg'
 
 export const SUBTITLE_HEIGHT = 32
 export const TABLEHEADER_HEIGHT = 48
@@ -142,7 +144,7 @@ export const HeaderTitle1 = props => (
               {props.volumemode}
             </span>
           </Chip>
-        }
+      }
     </div>
   </div>
 )
@@ -168,3 +170,122 @@ export const HeaderIcon = props => (
     { props.children }
   </div>
 )
+
+export const DiskHeadline = (props) => {
+  const disk = props.disk
+  const cnv = props.cnv
+  let text = ''
+  if (disk.isPartitioned) {
+    text = '分区使用的磁盘'
+  } else if (disk.idFsUsage === 'filesystem') {
+    text = '包含文件系统，无分区表'
+  } else if (disk.idFsUsage === 'other') {
+    text = '包含特殊文件系统，无分区表'
+  } else if (disk.idFsUsage === 'raid') {
+    text = 'Linux RAID设备'
+  } else if (disk.idFsUsage === 'crypto') {
+    text = '加密文件系统'
+  } else if (disk.idFsUsage) {
+    text = `未知的使用方式 (ID_FS_USAGE=${disk.idFsUsage})`
+  } else {
+    text = '未发现文件系统或分区表'
+  }
+
+  return (
+    <div
+      style={{
+        fontSize: 13,
+        color: cnv ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.87)'
+      }}
+    >
+      {text}
+    </div>
+  )
+}
+
+export const DiskTitle = (props) => {
+  const { disk, cnv, uf, toggleCandidate } = props
+  const { primary, accent } = props.colors
+
+  return (
+    <div
+      style={{ position: 'absolute',
+        width: 256,
+        display: 'flex',
+        top: props.top,
+        height: cnv ? TABLEDATA_HEIGHT : HEADER_HEIGHT,
+        transition: 'all 300ms' }}
+    >
+      <HeaderIcon>
+        { cnv ?
+          <div style={{ marginTop: -16, marginLeft: 56 }}>
+            <Checkbox40
+              fill={accent}
+              disabled={uf}
+              onTouchTap={e => e.stopPropagation()}
+              checked={!!cnv.disks.find(d => d === disk)}
+              onCheck={() => toggleCandidate(disk)}
+            />
+          </div>
+              :
+          <Avatar
+            size={40}
+            color="white"
+            backgroundColor="#BDBDBD"
+            icon={<HDDIcon />}
+          />
+          }
+      </HeaderIcon>
+      <HeaderTitle1
+        style={{
+          fontWeight: 'regular',
+          fontSize: cnv ? 13 : 26,
+          height: cnv ? TABLEDATA_HEIGHT : HEADER_HEIGHT,
+          width: 176,
+          marginTop: 18,
+          marginLeft: cnv ? 40 : 0,
+          color: (!cnv) ? '#212121' : 'rgba(0,0,0,0.38)',
+          transition: 'height 300ms'
+        }}
+        title={diskDisplayName(disk.name)}
+        onTouchTap={e => cnv && e.stopPropagation()}
+      />
+    </div>
+  )
+}
+
+export const DiskInfoTable = (props) => {
+  const { cnv, disk, type } = props
+  return (
+    <div>
+      <TableHeaderRow
+        disabled={cnv}
+        items={[
+          ['', 256],
+          ['接口', 64],
+          ['容量', 64, true],
+          ['', 56],
+          ['设备名', 96],
+          ['型号', 208],
+          ['序列号', 208],
+          type === 'PartitionedDisk' ? ['分区表类型', 112] : []
+        ]}
+      />
+      <TableDataRow
+        disabled={cnv}
+        selected={cnv && !!cnv.disks.find(d => d === disk)}
+        items={[
+          ['', 72],
+          ['', 184],
+          [disk.idBus, 64],
+          [prettysize(disk.size * 512), 64, true],
+          ['', 56],
+          [disk.name, 96],
+          [disk.model || '', 208],
+          [disk.serial || '', 208],
+          type === 'PartitionedDisk' ? [disk.partitionTableType, 112] : []
+        ]}
+      />
+    </div>
+  )
+}
