@@ -10,8 +10,8 @@ const downloadHandle = (args, callback) => {
 	console.log(args)
 	let files = args.files
 	let folders = args.folders
-	files.forEach(item => createTask(item.uuid, item.name, item.size, item.type))
-	folders.forEach(item => createTask(item.uuid, item.name, 0, item.type))
+	files.forEach(item => createTask(item.uuid, item.name, item.size, item.type, true))
+	folders.forEach(item => createTask(item.uuid, item.name, 0, item.type, true))
 	let count = files.length + folders.length
   getMainWindow().webContents.send('message', count + '个任务添加至下载队列')
 }
@@ -37,6 +37,8 @@ const getTransmissionHandle = (args, callback) => {
 	db.downloading.find({}, (err, tasks) => {
 		if(err) return 
 		console.log(tasks)
+		tasks.forEach(item => 
+			createTask(item.target, item.name, item.size, item.type, false, item.downloadPath, item._id))
 	})
 	db.downloaded.find({}, (err, tasks) => {
 		if (err) return console.log(err)

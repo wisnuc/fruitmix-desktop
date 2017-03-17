@@ -298,7 +298,7 @@ const visitFolder = (abspath, position, worklist, manager, callback) => {
 		if (stat.isFile()) return callback(null)
 		fs.readdir(abspath, (err, entries) => {
 			if (err) return callback(err)
-			else if (!entries.length) return callback(null)
+			if (!entries.length) return callback(null)
 			let count = entries.length
 			let index = 0
 			let next = () => {visitFolder(path.join(abspath, entries[index]), obj.children, worklist, manager, call)}

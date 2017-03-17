@@ -51,11 +51,11 @@ const sendMsg = () => {
   mainWindow.webContents.send('UPDATE_DOWNLOAD', userTasks.map(item => item.getSummary()), finishTasks.map(i => i.getSummary?i.getSummary():i))
 }
 
-const createTask = (target, name, size, type) => {
+const createTask = (target, name, size, type, newWork, p, u) => {
 	initArgs()
-	let taskUUID = uuid.v4()
-	let abspath = store.getState().config.download
-	let task = new TaskManager(taskUUID, abspath, target, name, size, type, true)
+	let taskUUID = u?u:uuid.v4()
+	let abspath = p?p:store.getState().config.download
+	let task = new TaskManager(taskUUID, abspath, target, name, size, type, newWork)
 	task.createStore()
 	userTasks.push(task)
 	task.readyToVisit()
@@ -133,19 +133,44 @@ class TaskManager {
 		removeOutOfVisitlessQueue(this)
 		addToVisitingQueue(this)
 		visitTask(this.target, this.name, this.type, this.rootSize, this.tree, this.worklist, this, (err, data) => {
-			if (err) return console.log(err)
-				_this.tree[0].downloadPath = _this.downloadPath
-				removeOutOfVisitingQueue(this)
-				_this.recordInfor('遍历文件树结束...')
-				_this.state = 'visited'
-				_this.diff()
+			if (err) return _this.recordInfor('遍历服务器数据出错')
+			_this.tree[0].downloadPath = _this.downloadPath
+			removeOutOfVisitingQueue(this)
+			_this.recordInfor('遍历文件树结束...')
+			_this.state = 'visited'
+			_this.diff()
 		})
 	}
 
 	diff() {
 		this.state = 'diffing'
 		if (!this.newWork) {
-
+			fs.stat(path.join(this.downloadPath, this.name), (err, stat) => {
+				if (err) {
+					this.recordInfor('已下载的文件查找错误')
+					this.schedule()
+				}else {
+					if (stat.isFile()) {
+						this.recordInfor('文件下载任务 重新下载文件')
+						this.schedule()
+					}else {
+						this.recordInfor('文件夹下载任务 查找本地已下载文件信息')
+						let localObj = []
+						visitLocalFiles(path.join(this.downloadPath, this.name), localObj, (err) => {
+							if (err) {
+								this.recordInfor('校验本地文件出错')
+							}else {
+								this.recordInfor('校验本地文件结束')
+								diffTree(this.tree[0], localObj[0], this, err => {
+									if (err) console.log(err)
+										this.schedule()
+									// console.log(this.tree[0])
+								})
+							}
+						})
+					}
+				}
+			})
 		}else {
 			this.recordInfor('新任务 不需要与服务器进行比较')
 			this.schedule()
@@ -212,11 +237,13 @@ class TaskManager {
 	}
 
 	createStore() {
+		if (!this.newWork) return
 		let obj = {
 			_id: this.uuid,
 			downloadPath: this.downloadPath,
 			target: this.target,
 			name: this.name,
+			size: this.rootSize,
 			type: this.type
 		}
 		db.downloading.insert(obj, (err, data) => {})
@@ -248,8 +275,8 @@ const visitTask = (target, name, type, size, position, worklist, manager, callba
 	manager.count++
 	manager.size += size
 	let obj = type === 'file'?
-  	new FileDownloadTask(type, target, name, manager):
-  	new FolderDownloadTask(type, target, name, manager)
+  	new FileDownloadTask(type, target, name, size, manager):
+  	new FolderDownloadTask(type, target, name, size, manager)
   worklist.push(obj)
 	position.push(obj)
 
@@ -281,12 +308,63 @@ const visitTask = (target, name, type, size, position, worklist, manager, callba
 	})
 }
 
+const visitLocalFiles = (abspath, position, callback) => {
+	fs.stat(abspath, (err, stat) => {
+		if (err || ( !stat.isDirectory() && !stat.isFile())) return callback(err)
+		let type = stat.isDirectory()?'folder':'file'
+		let obj = {name: path.basename(abspath), type, children: []}
+		position.push(obj)
+		if (stat.isFile()) return callback(null)
+		fs.readdir(abspath, (err, entries) => {
+			if (err) return callback(err)
+			if (!entries.length) return callback(null)
+			let count = entries.length
+			let index = 0
+			let next = () => {visitLocalFiles(path.join(abspath, entries[index]), obj.children, call)}
+			let call = err => {
+				if (err) return callback(err)
+				if (++index == count) return callback()
+				else next()
+			}
+			next()
+		})
+	})
+}
+
+const diffTree = (taskPosition, localPosition, manager ,callback) => {
+	if (taskPosition.name !== localPosition.name) return callback()
+	taskPosition.stateName = 'finish'
+	manager.finishCount++
+	manager.completeSize += taskPosition.size?taskPosition.size:0
+	if(taskPosition.type === 'file') return callback()
+	let children = taskPosition.children
+	if(!children.length) return callback()
+	children.forEach(item => item.downloadPath = path.join(taskPosition.downloadPath, taskPosition.name))
+	let count = children.length
+	let index = 0
+	let next = () => {
+		let currentObj = taskPosition.children[index]
+		let i = localPosition.children.findIndex(item => item.name == currentObj.name)
+		if (i !== -1) {
+			diffTree(currentObj, localPosition.children[i], manager, call)
+		}else {
+			call()
+		}
+	}
+	let call = (err) => {
+		if (++index == count) return callback()
+		else next()
+	}
+	next()
+}
+
 class DownloadTask {
-	constructor(type, target, name, manager) {
+	constructor(type, target, name, size, manager) {
 		this.type = type
 		this.name = name
 		this.target = target
 		this.manager = manager
+		this.size = size
 		this.downloadPath = ''
 		this.state = null
     this.stateName = ''
@@ -324,8 +402,8 @@ class DownloadTask {
 }
 
 class FileDownloadTask extends DownloadTask{
-	constructor(type, target, name, manager) {
-		super(type, target, name, manager)
+	constructor(type, target, name, size, manager) {
+		super(type, target, name, size, manager)
 		this.progress = 0
 		this.seek = 0
 		this.timeStamp = (new Date()).getTime()
@@ -333,8 +411,8 @@ class FileDownloadTask extends DownloadTask{
 }
 
 class FolderDownloadTask extends DownloadTask{
-	constructor(type, target, name, manager) {
-		super(type, target, name, manager)
+	constructor(type, target, name, size, manager) {
+		super(type, target, name, size, manager)
 		this.children = []
 	}
 }
@@ -433,7 +511,7 @@ class DownloadFileSTM extends STM {
 		})
 
 		stream.on('pipe', (src) => {
-			console.log('stream pipe trigger')
+			// console.log('stream pipe trigger')
 			// console.log(src)
 		})
 
@@ -443,12 +521,12 @@ class DownloadFileSTM extends STM {
 		})
 
 		stream.on('finish', () => {
-			console.log('stream finish trigger')
+			// console.log('stream finish trigger')
 			this.rename(tmpDownloadPath)
 		})
 
 		stream.on('close', () => {
-			console.log('stream close trigger')
+			// console.log('stream close trigger')
 		})
 
 		this.handle = request(options)
@@ -457,7 +535,7 @@ class DownloadFileSTM extends STM {
 				console.log(err)
 			})
 			.on('complete',(err) => {
-				console.log('readstream complete...')
+				// console.log('readstream complete...')
 				// console.log(err)
 				// console.log(data)
 			})
@@ -466,10 +544,10 @@ class DownloadFileSTM extends STM {
 				// console.log(data.length)
 			})
 			.on('close',() => {
-				console.log('readstream close...')
+				// console.log('readstream close...')
 			})
 			.on('end',() => {
-				console.log('readstream end...')
+				// console.log('readstream end...')
 			})
 		
 		_this.handle.pipe(stream)
