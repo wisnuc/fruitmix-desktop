@@ -4,7 +4,7 @@ import { RaisedButton, Checkbox, Dialog, Divider, TextField, CircularProgress } 
 import FlatButton from '../common/FlatButton'
 import { Step, Stepper, StepLabel, StepContent } from 'material-ui/Stepper'
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
-import { cyan500 } from 'material-ui/styles/colors'
+import { cyan500, red400, redA200 } from 'material-ui/styles/colors'
 
 import { ipcRenderer } from 'electron'
 import prettysize from 'prettysize'
@@ -158,7 +158,47 @@ class GuideBox extends StateUp(React.Component) {
     }
   }
 
-  
+  renderDiskRow (blk) {
+
+    let model = blk.model ? blk.model : '未知型号'
+    let name = blk.name
+    let size = prettysize(blk.size * 512)
+    let iface = blk.isATA ? 'ATA' :
+                blk.isSCSI ? 'SCSI' :
+                blk.isUSB ? 'USB' : '未知'
+
+    let usage = blk.isFileSystem ? '文件系统' :
+                blk.isPartitioned ? '有文件分区' : '未知'
+
+    let valid = !blk.isRootFS && !blk.isActiveSwap && !blk.removable
+
+
+    let comment
+    if (blk.isRootFS)
+      comment = '该磁盘含有rootfs，不可用'
+    else if (blk.isActiveSwap)
+      comment = '该磁盘含有在使用的交换分区，不可用'
+    else if (blk.removable)
+      comment = '该磁盘为可移动磁盘，WISNUC OS不支持使用可移动磁盘建立磁盘卷'
+    else
+      comment = '该磁盘可以加入磁盘卷'
+ 
+    return (
+      <div key={name} style={{width: '100%', height: this.state.volumeselect.selection.indexOf(name) !== -1 ? 40 : 0, display: 'flex', alignItems: 'center', color: !blk.isPartitioned ? 'rgba(0,0,0,0.87)' : 'rgba(0,0,0,0.38)', overflow: 'hidden'}}>
+        
+        <div style={{flex: '0 0 160px'}}>{model}</div>
+        <div style={{flex: '0 0 80px'}}>{name}</div>
+        <div style={{flex: '0 0 80px'}}>{size}</div>
+        <div style={{flex: '0 0 80px'}}>{iface}</div>
+        <div style={{flex: '0 0 80px'}}>{usage}</div>
+        <div style={{flex: '0 0 240px'}}>{comment}</div>
+      </div> 
+    )
+  }
+
+
+    
+
   render() {
 
     const {finished, stepIndex} = this.state;
@@ -220,7 +260,29 @@ class GuideBox extends StateUp(React.Component) {
                 <Step>
                   <StepLabel>确认</StepLabel>
                   <StepContent>
-                    <p>请确认您输入的信息无误，点击完成键应用设置。</p>
+                    <p style={{color: red400}}>请确认您输入的信息无误，点击完成键应用设置。</p>
+                    <div style={{marginBottom: 12}}>磁盘信息</div>
+                    <div style={{color: 'rgba(0,0,0,0.87)', marginBottom: 12}}>
+                      <div style={{marginLeft: 10, width: 760, fontSize: 13}}>
+                        <Divider />
+                        <div style={{width: '100%', height: 32, display: 'flex', alignItems: 'center'}}>
+                          <div style={{flex: '0 0 64px'}} />
+                          <div style={{flex: '0 0 160px'}}>型号</div>
+                          <div style={{flex: '0 0 80px'}}>设备名</div>
+                          <div style={{flex: '0 0 80px'}}>容量</div>
+                          <div style={{flex: '0 0 80px'}}>接口</div>
+                          <div style={{flex: '0 0 80px'}}>使用</div>
+                          <div style={{flex: '0 0 240px'}}>说明</div>
+                        </div>
+                        <Divider />
+                          { this.props.storage && this.props.storage.blocks.filter(blk => blk.isDisk).map(blk => this.renderDiskRow(blk)) }
+
+                        <Divider />
+                      </div>
+                    </div>
+                    {console.log('------====-------', this.state.volumeselect.selection)}
+                    <div style={{marginBottom: 12}}>模式：{this.state.volumeselect.mode}</div>
+                    <div style={{marginBottom: 12}}>用户名：{this.state.userpass.username}</div>
                     <div style={{margin: '12px 0'}}>
                       <RaisedButton
                         label='完成'

@@ -257,14 +257,20 @@ class DeviceCard extends React.Component {
             requestToken={this.requestToken}
           />
         )
-      else
-        return (
+      else{
+        //return (
+        text = '系统不存在用户，请进入维护模式'
+
+        return <MaintBox text={text} onMaintain={this.maintain} />
+      }
+      /**
           <FirstUserBox 
             style={{width: '100%', transition: 'all 300ms', position: 'relative'}}
             onResize={this.onBoxResize}
             toggleDim={this.props.toggleDim}
           />
         )
+      **/
     }
     // now boot and storage ready, users should be error
 
