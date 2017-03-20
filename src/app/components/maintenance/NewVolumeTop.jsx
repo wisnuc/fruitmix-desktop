@@ -28,7 +28,6 @@ class RaidModePopover extends React.Component {
     return (
       <div style={this.props.style}>
         <div
-
           style={{
             width: '100%',
             height: '100%',
@@ -41,7 +40,6 @@ class RaidModePopover extends React.Component {
             borderRadius: '2px',
             backgroundColor: this.state.hover || this.state.open ? '#EEEEEE' : undefined
           }}
-
           onMouseEnter={() => !this.props.disabled && this.setState({ hover: true })}
           onMouseLeave={() => !this.props.disabled && this.setState({ hover: false })}
           onTouchTap={e => !this.props.disabled && this.setState({ open: true, anchorEl: e.currentTarget })}
@@ -64,6 +62,7 @@ class RaidModePopover extends React.Component {
           <Menu>
             { this.props.list.map(item => (
               <MenuItem
+                key={item[1].toString()}
                 style={{ fontSize: 13 }}
                 primaryText={item[1]}
                 disabled={item[2]}

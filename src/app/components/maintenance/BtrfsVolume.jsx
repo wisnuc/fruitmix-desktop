@@ -205,6 +205,8 @@ export default class BtrfsVolume extends React.Component {
       backgroundColor: '',
       border: '1px solid #e6e6e6'
     })
+    // debug('volume.usage', volume.usage, '!volume.usage', !volume.usage)
+    if (!volume.usage) return <div />
     return (
       <Paper {...rest}>
         <div

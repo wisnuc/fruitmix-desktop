@@ -100,7 +100,6 @@ export default class PartitionedDisk extends React.Component {
               SUBTITLE_MARGINTOP : 0
           }
         >
-
           <SubTitleRow text="分区信息" disabled={cnv} />
           <TableHeaderRow
             disabled={cnv}
@@ -120,8 +119,8 @@ export default class PartitionedDisk extends React.Component {
               disabled={cnv}
               selected={false}
               items={[
-                ['', 72],
-                [partitionDisplayName(blk.name), 184],
+                ['', 116],
+                [partitionDisplayName(blk.name), 140],
                 [(blk.idFsUsage && blk.fileSystemType) ? blk.fileSystemType : '(未知)', 64],
                 [prettysize(blk.size * 512), 64, true],
                 ['', 56],
@@ -131,7 +130,7 @@ export default class PartitionedDisk extends React.Component {
             />
           )).reduce((p, c, index) => {
             p.push(c)
-            p.push(<Divider inset key={index.toString()} />)
+            p.push(<Divider style={{ marginLeft: 116 }} key={index.toString()} />)
             return p
           }, [])
         }

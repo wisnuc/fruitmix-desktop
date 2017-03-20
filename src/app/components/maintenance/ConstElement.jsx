@@ -55,7 +55,7 @@ export const SubTitleRow = props => (
 )
 
 export const VerticalExpandable = props => (
-  <div style={{ width: '102%', height: props.height, transition: 'height 300ms', overflow: 'hidden' }}>
+  <div style={{ width: '100%', height: props.height, transition: 'height 300ms', overflow: 'hidden' }}>
     { props.children }
   </div>
 )
