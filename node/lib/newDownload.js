@@ -6,16 +6,20 @@ import { dialog, ipcMain } from 'electron'
 const userTasks = []
 const finishTasks = []
 
+//args have imformation about file/folder get from server
+//name,uuid,size,type were used to create manager
 const downloadHandle = (args, callback) => {
-	console.log(args)
 	let files = args.files
 	let folders = args.folders
+
 	files.forEach(item => createTask(item.uuid, item.name, item.size, item.type, true))
 	folders.forEach(item => createTask(item.uuid, item.name, 0, item.type, true))
+
 	let count = files.length + folders.length
   getMainWindow().webContents.send('message', count + '个任务添加至下载队列')
 }
 
+//handle will open dialog from electron to clean record of the task have been downloaded
 const cleanRecordHandle = () => {
 	dialog.showMessageBox({
 		type:'question',
@@ -33,13 +37,13 @@ const cleanRecordHandle = () => {
 }
 
 const getTransmissionHandle = (args, callback) => {
-	// db.uploading   to fixed
+
 	db.downloading.find({}, (err, tasks) => {
-		if(err) return 
-		console.log(tasks)
+		if(err) return
 		tasks.forEach(item => 
-			createTask(item.target, item.name, item.size, item.type, false, item.downloadPath, item._id))
+			createTask(item.target, item.name, item.size, item.type, false, item.downloadPath, item._id, item.downloading))
 	})
+
 	db.downloaded.find({}, (err, tasks) => {
 		if (err) return console.log(err)
 		finishTasks.splice(0, 0, ...tasks)

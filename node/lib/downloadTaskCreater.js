@@ -51,11 +51,15 @@ const sendMsg = () => {
   mainWindow.webContents.send('UPDATE_DOWNLOAD', userTasks.map(item => item.getSummary()), finishTasks.map(i => i.getSummary?i.getSummary():i))
 }
 
-const createTask = (target, name, size, type, newWork, p, u) => {
+//TaskManager creater
+//new job :init manager with default parameter
+//old job :init manager with defined parameter(uuid, dwonloadpath, downloading information)
+const createTask = (target, name, size, type, newWork, p, u, d) => {
 	initArgs()
 	let taskUUID = u?u:uuid.v4()
 	let abspath = p?p:store.getState().config.download
-	let task = new TaskManager(taskUUID, abspath, target, name, size, type, newWork)
+	let downloadingList = d?d:[]
+	let task = new TaskManager(taskUUID, abspath, target, name, size, type, newWork, downloadingList)
 	task.createStore()
 	userTasks.push(task)
 	task.readyToVisit()
@@ -63,7 +67,7 @@ const createTask = (target, name, size, type, newWork, p, u) => {
 }
 
 class TaskManager {
-	constructor(taskUUID, downloadPath, target, name, size, type, newWork) {
+	constructor(taskUUID, downloadPath, target, name, size, type, newWork, downloadingList) {
 		this.uuid = taskUUID
 		this.downloadPath = downloadPath
 		this.target = target
@@ -87,6 +91,7 @@ class TaskManager {
 		this.tree = []
 		this.worklist = []
 		this.downloading = []
+		this.downloadingList = downloadingList
 		this.record = []
 
 		this.countSpeed = setInterval(() => {
@@ -132,7 +137,7 @@ class TaskManager {
 		this.recordInfor('开始遍历文件树...')
 		removeOutOfVisitlessQueue(this)
 		addToVisitingQueue(this)
-		visitTask(this.target, this.name, this.type, this.rootSize, this.tree, this.worklist, this, (err, data) => {
+		visitTask(this.target, this.name, this.type, this.rootSize, this.tree, this, (err, data) => {
 			if (err) return _this.recordInfor('遍历服务器数据出错')
 			_this.tree[0].downloadPath = _this.downloadPath
 			removeOutOfVisitingQueue(this)
@@ -236,48 +241,68 @@ class TaskManager {
 		}
 	}
 
-	createStore() {
-		if (!this.newWork) return
-		let obj = {
+	getStoreObj() {
+		let downloadingArr = []
+		this.downloading.forEach(item => {
+			if (item.type === 'file') {
+				downloadingArr.push(item.getSummary())
+			}
+		})
+		return {
 			_id: this.uuid,
 			downloadPath: this.downloadPath,
 			target: this.target,
 			name: this.name,
-			size: this.rootSize,
-			type: this.type
+			size: this.size,
+			type: this.type,
+			downloading: downloadingArr,
+			finishDate: this.finishDate
 		}
-		db.downloading.insert(obj, (err, data) => {})
+	}
+
+	createStore() {
+		if (!this.newWork) return
+		db.downloading.insert(this.getStoreObj(), (err, data) => {})
+	}
+
+	updateStore() {
+		let downloadingArr = []
+		this.downloading.forEach(item => {
+			if (item.type === 'file') {
+				downloadingArr.push(item.getSummary())
+			}
+		})
+		db.downloading.update({_id: this.uuid}, {$set: {downloading:downloadingArr}}, (err, data) => {
+			// console.log(data)
+		})
 	}
 
 	finishStore() {
 		db.downloading.remove({_id: this.uuid}, {}, (err,data) => {
 			if (err) return console.log(err)
 		})
-		let obj = {
-			_id: this.uuid,
-			downloadPath: this.downloadPath,
-			target: this.target,
-			name: this.name,
-			type: this.type,
-			uuid: this.tree[0].uuid,
-			finishDate: this.finishDate
-		}
 
-		db.downloaded.insert(obj,(err, data) => {
+		db.downloaded.insert(this.getStoreObj(), (err, data) => {
 			if (err) return console.log(err) 
 			console.log(data)
 		})
 	}
 }
 
-//receive folder node
-const visitTask = (target, name, type, size, position, worklist, manager, callback) => {
+const visitTask = (target, name, type, size, position, manager, callback) => {
 	manager.count++
 	manager.size += size
 	let obj = type === 'file'?
   	new FileDownloadTask(type, target, name, size, manager):
   	new FolderDownloadTask(type, target, name, size, manager)
-  worklist.push(obj)
+  let index = manager.downloadingList.findIndex(item => item.target === target)
+  if (index !== -1) {
+  	// may be local file has been removed
+  	obj.seek = manager.downloadingList[index].seek
+  	obj.timeStamp = manager.downloadingList[index].timeStamp
+  	manager.completeSize += manager.downloadingList[index].seek
+  }
+  manager.worklist.push(obj)
 	position.push(obj)
 
 	if (type === 'file') return callback(null)
@@ -297,7 +322,7 @@ const visitTask = (target, name, type, size, position, worklist, manager, callba
 		let count = tasks.length
 		let index = 0
 		let task = tasks[index]
-		let next = () => {visitTask(task.uuid, task.name, task.type, task.size?task.size:0, obj.children, worklist, manager, call)}
+		let next = () => {visitTask(task.uuid, task.name, task.type, task.size?task.size:0, obj.children, manager, call)}
 		let call = (err) => {
 			if (err) return callback(err)
 			if (++index === count) return callback(null)
@@ -408,6 +433,16 @@ class FileDownloadTask extends DownloadTask{
 		this.seek = 0
 		this.timeStamp = (new Date()).getTime()
 	}
+
+	getSummary() {
+		return {
+			name: this.name,
+			target: this.target,
+			downloadPath: this.downloadPath,
+			seek: this.seek,
+			timeStamp: this.timeStamp
+		}
+	}
 }
 
 class FolderDownloadTask extends DownloadTask{
@@ -449,25 +484,8 @@ class createFolderSTM extends STM {
     		removeOutOfRunningQueue(_this)
     		wrapper.children.forEach(item => item.downloadPath = path.join(wrapper.downloadPath, wrapper.name))
     		wrapper.downloadFinish()
-    		// console.log(wrapper.children)
     	}else {
 
-    	}
-    })
-    return
-
-    this.handle = request(options, (err, res, body) => {
-    	if (err || res.statusCode != 200) {
-    		//todo
-    		this.wrapper.recordInfor(this.wrapper.name + ' 创建失败')
-    		console.log(err)
-    		console.log(res.statusCode)
-    		console.log(res.statusMessage)
-    	}else {
-    		removeOutOfRunningQueue(this)
-    		this.wrapper.uuid = JSON.parse(body).uuid
-    		this.wrapper.children.forEach(item => item.target = this.wrapper.uuid)
-    		this.wrapper.uploadFinish()
     	}
     })
 	}
@@ -485,6 +503,7 @@ class DownloadFileSTM extends STM {
 		wrapper.stateName = 'running'
 		removeOutOfReadyQueue(this)
 		addToRunningQueue(this)
+		wrapper.manager.updateStore()
     wrapper.recordInfor(wrapper.name + ' 开始创建...')
 
     let options = {
@@ -517,6 +536,7 @@ class DownloadFileSTM extends STM {
 
 		stream.on('drain', () => {
 			// console.log('stream drain trigger')
+			wrapper.manager.updateStore()
 			_this.wrapper.seek = stream.bytesWritten
 		})
 
