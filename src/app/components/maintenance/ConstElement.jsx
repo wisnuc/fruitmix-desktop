@@ -6,7 +6,7 @@ import { HDDIcon } from './Svg'
 export const SUBTITLE_HEIGHT = 32
 export const TABLEHEADER_HEIGHT = 48
 export const TABLEDATA_HEIGHT = 48
-export const HEADER_HEIGHT = 104
+export const HEADER_HEIGHT = 80
 export const FOOTER_HEIGHT = 48
 export const SUBTITLE_MARGINTOP = 24
 export const alphabet = 'abcdefghijklmnopqrstuvwxyz'
@@ -62,23 +62,21 @@ export const VerticalExpandable = props => (
 
 export const TableHeaderRow = (props) => {
   const style = {
+    fontWeight: 'regular',
+    fontSize: 12,
     height: TABLEHEADER_HEIGHT,
     display: 'flex',
     alignItems: 'center',
-    fontSize: 11,
-    color: props.disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.54)',
-    fontWeight: props.disabled ? 'normal' : 'bold'
+    color: '#9e9e9e'
   }
 
   return (
-    <div style={props.style}>
-      <div style={style}>
-        { props.items.map((item) => {
-          const style = { flex: `0 0 ${item[1]}px` }
-          if (item[2] === true) { style.textAlign = 'right' }
-          return (<div style={style} key={item.toString()}>{item[0]}</div>)
-        }) }
-      </div>
+    <div style={style}>
+      { props.items.map((item) => {
+        const styleTmp = { flex: `0 0 ${item[1]}px` }
+        if (item[2] === true) { styleTmp.textAlign = 'right' }
+        return (<div style={styleTmp} key={item.toString()}>{item[0]}</div>)
+      }) }
     </div>
   )
 }
@@ -86,10 +84,11 @@ export const TableHeaderRow = (props) => {
 export const TableDataRow = (props) => {
   const containerStyle = {
     height: TABLEDATA_HEIGHT,
+    fontSize: 14,
+    fontWeight: 'medium',
     display: 'flex',
     alignItems: 'center',
-    fontSize: 13,
-    color: props.disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.87)'
+    color: props.disabled ? 'rgba(0,0,0,0.38)' : '#212121'
   }
 
   if (!props.disabled && props.selected) { containerStyle.backgroundColor = '#F5F5F5' }
@@ -125,9 +124,12 @@ export const diskDisplayName = (name) => {
 
 export const HeaderTitle1 = props => (
   <div style={props.style} onTouchTap={props.onTouchTap}>
-    <div style={{ marginBottom: 2 }}>
-      {props.title}
-    </div>
+    {props.title}
+  </div>
+)
+
+export const FsAndVolumemode = props => (
+  <div style={props.style} onTouchTap={props.onTouchTap}>
     <div style={styles.wrapper}>
       {
         props.textFilesystem &&
@@ -148,7 +150,6 @@ export const HeaderTitle1 = props => (
     </div>
   </div>
 )
-
 export const Checkbox40 = props => (
   <div style={{ width: 40, height: 40 }}>
     <Checkbox
@@ -205,7 +206,7 @@ export const DiskHeadline = (props) => {
 
 export const DiskTitle = (props) => {
   const { disk, cnv, uf, toggleCandidate } = props
-  const { primary, accent } = props.colors
+  const { accent } = props.colors
 
   return (
     <div
@@ -242,7 +243,7 @@ export const DiskTitle = (props) => {
           fontSize: cnv ? 13 : 26,
           height: cnv ? TABLEDATA_HEIGHT : HEADER_HEIGHT,
           width: 176,
-          marginTop: 18,
+          marginTop: cnv ? 18 : 22,
           marginLeft: cnv ? 40 : 0,
           color: (!cnv) ? '#212121' : 'rgba(0,0,0,0.38)',
           transition: 'height 300ms'
@@ -263,11 +264,11 @@ export const DiskInfoTable = (props) => {
         items={[
           ['', 256],
           ['接口', 64],
-          ['容量', 64, true],
-          ['', 56],
+          ['容量', 80, true],
+          ['', 64],
           ['设备名', 96],
-          ['型号', 208],
-          ['序列号', 208],
+          ['型号', 200],
+          ['序列号', 200],
           type === 'PartitionedDisk' ? ['分区表类型', 112] : []
         ]}
       />
@@ -278,11 +279,11 @@ export const DiskInfoTable = (props) => {
           ['', 72],
           ['', 184],
           [disk.idBus, 64],
-          [prettysize(disk.size * 512), 64, true],
-          ['', 56],
+          [prettysize(disk.size * 512), 80, true],
+          ['', 64],
           [disk.name, 96],
-          [disk.model || '', 208],
-          [disk.serial || '', 208],
+          [disk.model || '', 200],
+          [disk.serial || '', 200],
           type === 'PartitionedDisk' ? [disk.partitionTableType, 112] : []
         ]}
       />

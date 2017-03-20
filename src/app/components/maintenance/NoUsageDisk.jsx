@@ -1,6 +1,6 @@
 import React from 'react'
 import Debug from 'debug'
-import { Paper } from 'material-ui'
+import { Divider, Paper } from 'material-ui'
 import { UpIcon, DownIcon } from './Svg'
 import {
   SUBTITLE_HEIGHT, TABLEHEADER_HEIGHT, HEADER_HEIGHT,
@@ -80,7 +80,12 @@ export default class NoUsageDisk extends React.Component {
         </VerticalExpandable>
 
         <DiskInfoTable cnv={cnv} disk={disk} type="NoUsageDisk" />
-
+        <Divider
+          style={{
+            marginLeft: 80,
+            width: 1040,
+            backgroundColor: cnv ? accent1Color : '' }}
+        />
         <div
           style={{ width: '100%',
             height: cnv ? FOOTER_HEIGHT : 0,

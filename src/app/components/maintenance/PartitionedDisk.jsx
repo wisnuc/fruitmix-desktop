@@ -59,6 +59,7 @@ export default class PartitionedDisk extends React.Component {
     const { blocks } = this.props.state.storage
     const cnv = this.props.state.creatingNewVolume
     const uf = this.props.that.diskUnformattable(disk).length > 0
+    const accent = this.props.that.colors.accent
     const parts = blocks.filter(blk => blk.parentName === disk.name && !blk.isExtended)
 
     const floatingTitleTop = () => {
@@ -106,10 +107,10 @@ export default class PartitionedDisk extends React.Component {
             items={[
             ['', 256],
             ['文件系统', 64],
-            ['容量', 64, true],
-            ['', 56],
+            ['容量', 80, true],
+            ['', 64],
             ['设备名', 96],
-            ['路径（挂载点）', 416]
+            ['路径（挂载点）', 524]
             ]}
           />
           {
@@ -122,15 +123,15 @@ export default class PartitionedDisk extends React.Component {
                 ['', 116],
                 [partitionDisplayName(blk.name), 140],
                 [(blk.idFsUsage && blk.fileSystemType) ? blk.fileSystemType : '(未知)', 64],
-                [prettysize(blk.size * 512), 64, true],
-                ['', 56],
+                [prettysize(blk.size * 512), 80, true],
+                ['', 64],
                 [blk.name, 96],
-                [blk.isMounted ? blk.mountpoint : '', 416]
+                [blk.isMounted ? blk.mountpoint : '', 524]
               ]}
             />
           )).reduce((p, c, index) => {
             p.push(c)
-            p.push(<Divider style={{ marginLeft: 116 }} key={index.toString()} />)
+            p.push(<Divider style={{ marginLeft: 116, width: 968 }} key={index.toString()} />)
             return p
           }, [])
         }
@@ -141,9 +142,11 @@ export default class PartitionedDisk extends React.Component {
         <DiskInfoTable cnv={cnv} disk={disk} type="PartitionedDisk" />
 
         {/* exclusive OR */}
-        <DoubleDivider
-          grayLeft={unformattable().length > 0 ? (cnv ? 80 : '100%') : null}
-          colorLeft={unformattable().length === 0 ? (cnv ? 80 : '100%') : null}
+        <Divider
+          style={{
+            marginLeft: 80,
+            width: 1040,
+            backgroundColor: cnv ? (unformattable().length === 0 ? accent : '#E0E0E0') : '' }}
         />
 
         <div
@@ -158,8 +161,7 @@ export default class PartitionedDisk extends React.Component {
           <div
             style={{
               fontSize: 14,
-              color: unformattable().length > 0 ? 'rgba(0,0,0,0.87)' :
-              this.props.that.colors.accent
+              color: unformattable().length > 0 ? 'rgba(0,0,0,0.87)' : accent
             }}
           >
             { cnv && this.partitionedDiskNewVolumeWarning(unformattable()) }

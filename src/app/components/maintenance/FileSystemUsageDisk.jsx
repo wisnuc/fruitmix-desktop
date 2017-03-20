@@ -2,6 +2,7 @@ import React from 'react'
 import Debug from 'debug'
 import { Divider, Paper } from 'material-ui'
 import { UpIcon, DownIcon } from './Svg'
+import DoubleDivider from './DoubleDivider'
 import {
   SUBTITLE_HEIGHT, TABLEHEADER_HEIGHT, TABLEDATA_HEIGHT, HEADER_HEIGHT,
   FOOTER_HEIGHT, SUBTITLE_MARGINTOP, styles, SubTitleRow, VerticalExpandable,
@@ -78,29 +79,34 @@ export default class FileSystemUsageDisk extends React.Component {
             disabled={cnv}
             items={[
             ['', 256],
-            ['文件系统', 184],
+            ['文件系统', 120],
             ['文件系统UUID', 304],
-            ['路径（挂载点）', 416]
+            ['路径（挂载点）', 264]
             ]}
           />
-          <Divider style={{ marginLeft: 256 }} />
+          <Divider style={{ marginLeft: 256, width: 688 }} />
           <TableDataRow
             disabled={cnv}
             selected={false}
             items={[
             ['', 256],
-            [disk.fileSystemType, 184],
+            [disk.fileSystemType, 120],
             [disk.fileSystemUUID, 304],
-            [disk.isMounted ? disk.mountpoint : '(未挂载)']
+            [disk.isMounted ? disk.mountpoint : '(未挂载)', 264]
             ]}
           />
-          <Divider style={{ marginLeft: 256 }} />
+          <Divider style={{ marginLeft: 256, width: 688 }} />
           <div style={{ width: '100%', height: SUBTITLE_MARGINTOP }} />
           <SubTitleRow text="磁盘信息" disabled={cnv} />
         </VerticalExpandable>
 
         <DiskInfoTable cnv={cnv} disk={disk} type="FileSystemUsageDisk" />
-
+        <Divider
+          style={{
+            marginLeft: 80,
+            width: 1040,
+            backgroundColor: cnv ? accent1Color : '' }}
+        />
         <div
           style={{ width: '100%',
             height: cnv ? FOOTER_HEIGHT : 0,

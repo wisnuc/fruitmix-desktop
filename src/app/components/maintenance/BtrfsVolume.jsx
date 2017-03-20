@@ -18,7 +18,7 @@ import { HDDIcon, RAIDIcon, UpIcon, DownIcon } from './Svg'
 import {
   SUBTITLE_HEIGHT, HEADER_HEIGHT, FOOTER_HEIGHT, SUBTITLE_MARGINTOP,
   SubTitleRow, VerticalExpandable, TableHeaderRow, TableDataRow,
-  diskDisplayName, HeaderTitle1, HeaderIcon, Checkbox40
+  diskDisplayName, HeaderTitle1, HeaderIcon, Checkbox40, FsAndVolumemode
 } from './ConstElement'
 
 const debug = Debug('component:maintenance:BtrfsVolume')
@@ -118,12 +118,10 @@ export default class BtrfsVolume extends React.Component {
               fontWeight: 'regular',
               fontSize: 26,
               width: 176,
-              marginTop: 18,
+              marginTop: 22,
               color: this.props.state.creatingNewVolume ? 'rgba(0,0,0,0.38)' : '#212121'
             }}
-            volumemode={volume.usage.data.mode.toUpperCase()}
             title="磁盘阵列"
-            textFilesystem="Btrfs"
           />
         </div>
       )
@@ -217,6 +215,12 @@ export default class BtrfsVolume extends React.Component {
             <div style={{ flex: '0 0 256px' }}>
               <this.VolumeTitle volume={volume} />
             </div>
+            <div style={{ flex: '0 0 160px', marginLeft: -12 }}>
+              <FsAndVolumemode
+                volumemode={volume.usage.data.mode.toUpperCase()}
+                textFilesystem="Btrfs"
+              />
+            </div>
             <VolumeWisnucError creatingNewVolume={this.props.state.creatingNewVolume} volume={volume} />
           </div>
           <div style={{ marginRight: 24 }}>
@@ -283,64 +287,66 @@ export default class BtrfsVolume extends React.Component {
 
         <TableHeaderRow
           disabled={cnv}
-          style={{ fontWeight: 'regular', fontSize: 18, color: '#212121' }}
           items={[
             ['', 256],
             ['接口', 64],
-            ['容量', 64, true],
-            ['', 56],
+            ['容量', 80, true],
+            ['', 64],
             ['设备名', 96],
             ['型号', 208],
             ['序列号', 208],
-            ['DEV ID', 96],
-            ['已使用', 64, true]
+            ['DEV ID', 64],
+            ['已使用', 80, true]
           ]}
         />
 
-        {
-        blocks.filter(blk => blk.isVolumeDevice && blk.fileSystemUUID === volume.uuid)
-          .map(blk => (
-            <TableDataRow
-              key={blk.name}
-              disabled={cnv}
-              selected={cnv && !!this.props.state.creatingNewVolume.disks.find(d => d === blk)}
-              style={{ marginLeft: 80, fontWeight: 'medium', fontSize: 14, color: '#212121' }}
-              items={[
-                [(cnv ?
-                  <Checkbox40
-                    fill={accent1Color}
-                    checked={!!this.props.state.creatingNewVolume.disks.find(d => d === blk)}
-                    onCheck={() => this.props.that.toggleCandidate(blk)}
-                  /> :
-                  <HDDIcon
-                    color="rgba(0,0,0,0.38)"
-                    viewBox="0 0 24 24"
-                  />), 36
-                ],
-                [diskDisplayName(blk.name), 140],
-                [blk.idBus, 64],
-                [prettysize(blk.size * 512), 64, true],
-                ['', 56],
-                [blk.name, 96],
-                [blk.model || '', 208],
-                [blk.serial || '', 208],
-                [volume.devices.find(d => d.name === blk.name).id.toString(), 96],
-                [volume.devices.find(d => d.name === blk.name).used, 64, true]
-              ]}
-            />
-          ))
-          .reduce((p, c, index, array) => {
-            p.push(c)
-            p.push(
-              <DoubleDivider
-                key={index.toString()}
-                grayLeft={index === array.length - 1 ? null : 80}
-                colorLeft={cnv ? 80 : '100%'}
+        <div style={{ overflow: 'hidden' }}>
+          {
+          blocks.filter(blk => blk.isVolumeDevice && blk.fileSystemUUID === volume.uuid)
+            .map(blk => (
+              <TableDataRow
+                key={blk.name}
+                disabled={cnv}
+                selected={cnv && !!this.props.state.creatingNewVolume.disks.find(d => d === blk)}
+                style={{ marginLeft: 80 }}
+                items={[
+                  [(cnv ?
+                    <Checkbox40
+                      fill={accent1Color}
+                      checked={!!this.props.state.creatingNewVolume.disks.find(d => d === blk)}
+                      onCheck={() => this.props.that.toggleCandidate(blk)}
+                    /> :
+                    <HDDIcon
+                      color="rgba(0,0,0,0.38)"
+                      viewBox="0 0 24 24"
+                    />), 40
+                  ],
+                  [diskDisplayName(blk.name), 136],
+                  [blk.idBus, 64],
+                  [prettysize(blk.size * 512), 80, true],
+                  ['', 64],
+                  [blk.name, 96],
+                  [blk.model || '', 208],
+                  [blk.serial || '', 208],
+                  [volume.devices.find(d => d.name === blk.name).id.toString(), 64],
+                  [volume.devices.find(d => d.name === blk.name).used, 80, true]
+                ]}
               />
-            )
-            return p
-          }, [])
-      }
+            ))
+            .reduce((p, c, index, array) => {
+              p.push(c)
+              p.push(
+                <DoubleDivider
+                  key={index.toString()}
+                  grayLeft={index === array.length - 1 ? null : 80}
+                  colorLeft={cnv ? 80 : '100%'}
+                  width={1040}
+                />
+              )
+              return p
+            }, [])
+        }
+        </div>
         <div
           style={{ width: '100%',
             height: cnv ? FOOTER_HEIGHT : 0,
