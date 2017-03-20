@@ -184,14 +184,14 @@ class GuideBox extends StateUp(React.Component) {
       comment = '该磁盘可以加入磁盘卷'
  
     return (
-      <div key={name} style={{width: '100%', height: this.state.volumeselect.selection.indexOf(name) !== -1 ? 40 : 0, display: 'flex', alignItems: 'center', color: !blk.isPartitioned ? 'rgba(0,0,0,0.87)' : 'rgba(0,0,0,0.38)', overflow: 'hidden'}}>
+      <div key={name} style={{width: '100%', height: this.state.volumeselect.selection.indexOf(name) !== -1 ? 48 : 0, display: 'flex', alignItems: 'center', color: !blk.isPartitioned ? 'rgba(0,0,0,0.87)' : 'rgba(0,0,0,0.38)', overflow: 'hidden', fontSize: 14}}>
         
-        <div style={{flex: '0 0 160px'}}>{model}</div>
-        <div style={{flex: '0 0 80px'}}>{name}</div>
+        <div style={{flex: '0 0 200px'}}>{model}</div>
+        <div style={{flex: '0 0 100px'}}>{name}</div>
         <div style={{flex: '0 0 80px'}}>{size}</div>
         <div style={{flex: '0 0 80px'}}>{iface}</div>
         <div style={{flex: '0 0 80px'}}>{usage}</div>
-        <div style={{flex: '0 0 240px'}}>{comment}</div>
+        <div style={{flex: '0 0 220px'}}>{comment}</div>
       </div> 
     )
   }
@@ -260,19 +260,16 @@ class GuideBox extends StateUp(React.Component) {
                 <Step>
                   <StepLabel>确认</StepLabel>
                   <StepContent>
-                    <p style={{color: red400}}>请确认您输入的信息无误，点击完成键应用设置。</p>
-                    <div style={{marginBottom: 12}}>磁盘信息</div>
+                    <div style={{margin: '20px 0', color: 'rgba(0, 0, 0, 0.87)'}}>磁盘信息</div>
                     <div style={{color: 'rgba(0,0,0,0.87)', marginBottom: 12}}>
-                      <div style={{marginLeft: 10, width: 760, fontSize: 13}}>
-                        <Divider />
-                        <div style={{width: '100%', height: 32, display: 'flex', alignItems: 'center'}}>
-                          <div style={{flex: '0 0 64px'}} />
-                          <div style={{flex: '0 0 160px'}}>型号</div>
-                          <div style={{flex: '0 0 80px'}}>设备名</div>
+                      <div style={{width: 760, fontSize: 16, marginLeft: 36}}>
+                        <div style={{width: '100%', height: 32, display: 'flex', alignItems: 'left', color: 'rgba(0, 0, 0, 0.54)'}}>
+                          <div style={{flex: '0 0 200px'}}>型号</div>
+                          <div style={{flex: '0 0 100px'}}>设备名</div>
                           <div style={{flex: '0 0 80px'}}>容量</div>
                           <div style={{flex: '0 0 80px'}}>接口</div>
                           <div style={{flex: '0 0 80px'}}>使用</div>
-                          <div style={{flex: '0 0 240px'}}>说明</div>
+                          <div style={{flex: '0 0 220px'}}>说明</div>
                         </div>
                         <Divider />
                           { this.props.storage && this.props.storage.blocks.filter(blk => blk.isDisk).map(blk => this.renderDiskRow(blk)) }
@@ -280,9 +277,8 @@ class GuideBox extends StateUp(React.Component) {
                         <Divider />
                       </div>
                     </div>
-                    {console.log('------====-------', this.state.volumeselect.selection)}
-                    <div style={{marginBottom: 12}}>模式：{this.state.volumeselect.mode}</div>
-                    <div style={{marginBottom: 12}}>用户名：{this.state.userpass.username}</div>
+                    <div style={{margin: '20px 0', color: 'rgba(0, 0, 0, 0.87)', fontSize: 16}}>模式：<span style={{fontWeight: 'bold', color: 'rgba(0, 0, 0, 0.87)'}}>{this.state.volumeselect.mode}</span></div>
+                    <div style={{margin: '20px 0', color: 'rgba(0, 0, 0, 0.87)', fontSize: 16}}>用户名：<span style={{fontWeight: 'bold', color: 'rgba(0, 0, 0, 0.87)'}}>{this.state.userpass.username}</span></div>
                     <div style={{margin: '12px 0'}}>
                       <RaisedButton
                         label='完成'
@@ -350,8 +346,6 @@ class GuideBox extends StateUp(React.Component) {
 
           <div style={{width: '100%', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FAFAFA'}}>
             <div style={{marginLeft: 24}}>该设备已安装WISNUC OS，但尚未初始化。</div>
-            
-              { console.log('<<<<<<<<<<<<<<<>>>>>>>>>>>>>', this.state.expanded)}
             <FlatButton style={{marginRight: 16}} label={this.state.expanded ? '放弃' : '初始化'} 
               onTouchTap={() => {
                 if (this.state.expanded) {
