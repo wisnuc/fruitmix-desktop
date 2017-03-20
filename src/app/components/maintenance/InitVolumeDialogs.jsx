@@ -55,7 +55,6 @@ const ReinitVolumeConfirm = (props) => {
   const wisnuc = volume.wisnuc
 
   let warning = ''
-  const text = []
   if (wisnuc.status === ('READY' || 'DAMAGED')) {
     warning = '文件系统已经包含wisnuc应用的用户数据，请仔细阅读下述信息，避免数据丢失。'
   } else if (wisnuc.status === 'AMBIGUOUS') {
@@ -75,7 +74,7 @@ const ReinitVolumeConfirm = (props) => {
   const removeFruitmix = '选择该选项会保留原wisnuc目录下的其他目录数据，包括appifi/docker应用镜像，appifi/docker第三方应用数据，老版本软件尚未迁移的用户数据；但删除所有位于fruitmix目录下的wisnuc私有云应用数据，包括所有用户信息、云盘配置信息、用户上传的所有文件和照片。'
   const keepBoth = '选择该选项不会删除任何数据，但会在该目录下重建新的用户和云盘配置；该操作之后旧的用户上传的文件和照片在新系统中无法直接使用，用户只能手动迁移；旧系统中创建的文件、照片和相册分享无法恢复。'
 
-  const removeWisnucCheck = [
+  const removeWisnucCheck = (
     <div>
       <Checkbox
         checked={props.remove === 'wisnuc'}
@@ -88,8 +87,8 @@ const ReinitVolumeConfirm = (props) => {
       />
       <div>{removeWisnuc}</div>
     </div>
-  ]
-  const removeFruitmixCheck = [
+  )
+  const removeFruitmixCheck = (
     <div>
       <Checkbox
         checked={props.remove === 'fruitmix'}
@@ -102,8 +101,8 @@ const ReinitVolumeConfirm = (props) => {
       />
       <div>{removeFruitmix}</div>
     </div>
-  ]
-  const keepBothCheck = [
+  )
+  const keepBothCheck = (
     <div>
       <Checkbox
         checked={props.remove === undefined}
@@ -116,7 +115,7 @@ const ReinitVolumeConfirm = (props) => {
       />
       <div>{keepBoth}</div>
     </div>
-  ]
+  )
   let mustDelete = ''
   if (wisnuc.error === 'EWISNUCNOTDIR') { mustDelete = 'wisnuc' } else if (wisnuc.error === 'EFRUITMIXNOTDIR') { mustDelete = 'fruitmix' }
   return (
@@ -131,7 +130,7 @@ const ReinitVolumeConfirm = (props) => {
 
 const TextBox = props => (
   <div>
-    { props.text.map(line => <div>{line}</div>) }
+    { props.text.map(line => <div key={line.toString()}>{line}</div>) }
   </div>
 )
 
@@ -280,7 +279,6 @@ export default class InitVolumeDialogs extends React.Component {
         actions={this.getActions()}
       >
         <div style={{ width: '100%', height: '100%' }}>
-          {/* <div style={{width: '100%', minHeight: 280}}> */}
           { this.state.stage === 'CONFIRM' ?
             <ReinitVolumeConfirm
               volume={this.props.volume}

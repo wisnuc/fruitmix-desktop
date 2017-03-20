@@ -1,16 +1,15 @@
 import React from 'react'
 import Debug from 'debug'
-import muiThemeable from 'material-ui/styles/muiThemeable'
 import NavigationExpandMore from 'material-ui/svg-icons/navigation/expand-more'
 import Popover, { PopoverAnimationVertical } from 'material-ui/Popover'
 import { Paper, Menu, MenuItem } from 'material-ui'
 import request from 'superagent'
 import {
-  operationTextConfirm, operationBase, Operation, operationBusy, operationSuccess, operationFailed, createOperation
+  operationTextConfirm, Operation, operationBusy, operationSuccess, operationFailed, createOperation
 } from '../common/Operation'
 import FlatButton from '../common/FlatButton'
 
-const debug = Debug('component:maintenance:BtrfsVolume')
+const debug = Debug('component:maintenance:NewVolumeTop')
 
 class RaidModePopover extends React.Component {
 
@@ -29,7 +28,6 @@ class RaidModePopover extends React.Component {
     return (
       <div style={this.props.style}>
         <div
-
           style={{
             width: '100%',
             height: '100%',
@@ -42,7 +40,6 @@ class RaidModePopover extends React.Component {
             borderRadius: '2px',
             backgroundColor: this.state.hover || this.state.open ? '#EEEEEE' : undefined
           }}
-
           onMouseEnter={() => !this.props.disabled && this.setState({ hover: true })}
           onMouseLeave={() => !this.props.disabled && this.setState({ hover: false })}
           onTouchTap={e => !this.props.disabled && this.setState({ open: true, anchorEl: e.currentTarget })}
@@ -65,6 +62,7 @@ class RaidModePopover extends React.Component {
           <Menu>
             { this.props.list.map(item => (
               <MenuItem
+                key={item[1].toString()}
                 style={{ fontSize: 13 }}
                 primaryText={item[1]}
                 disabled={item[2]}
@@ -81,11 +79,13 @@ class RaidModePopover extends React.Component {
   }
 }
 
-@muiThemeable()
 export default class NewVolumeTop extends React.Component {
 
   constructor(props) {
     super(props)
+    this.state = {
+      dialog: undefined
+    }
 
     this.setVolumeMode = (mode) => {
       if (this.props.state.creatingNewVolume === null) return
@@ -99,7 +99,6 @@ export default class NewVolumeTop extends React.Component {
         if (state.creatingNewVolume === null) {
           return {
             creatingNewVolume: { disks: [], mode: 'single' },
-            expanded: []
           }
         }
         return { creatingNewVolume: null }
@@ -107,53 +106,7 @@ export default class NewVolumeTop extends React.Component {
     }
 
     this.createOperation = (operation, ...args) =>
-      createOperation(this.props.that, 'dialog', operation, ...args)
-
-    this.reloadBootStorage = (callback) => {
-      let storage
-      let boot
-      let done = false
-      const device = window.store.getState().maintenance.device
-      const finish = () => {
-        if (storage && boot) {
-          this.props.setState({
-            storage,
-            boot,
-            creatingNewVolume: this.props.state.creatingNewVolume ? { disks: [], mode: 'single' } : null
-          })
-
-          if (callback) callback(null, { storage, boot })
-          done = true
-        }
-      }
-
-      request.get(`http://${device.address}:3000/system/storage?wisnuc=true`)
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          if (this.unmounted) {
-            if (!done) {
-              if (callback) callback(new Error('unmounted'))
-              done = true
-            }
-            return
-          }
-          storage = err ? err.message : res.body
-          finish()
-        })
-
-      request.get(`http://${device.address}:3000/system/boot`)
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          if (this.unmounted) {
-            if (!done) {
-              if (callback) callback(new Error('unmounted'))
-              done = true
-            }
-          }
-          boot = err ? err.message : res.body
-          finish()
-        })
-    }
+      createOperation(this, 'dialog', operation, ...args)
 
     this.errorText = (err, res) => {
       const text = []
@@ -180,23 +133,21 @@ export default class NewVolumeTop extends React.Component {
       text.push(`使用设备${target.join()}和${mode}模式创建新磁盘阵列，` +
         '这些磁盘和包含这些磁盘的磁盘阵列上的数据都会被删除且无法恢复。确定要执行该操作吗？')
 
-      debug('this.props.state.creatingNewVolume', this.props.state.creatingNewVolume)
       this.createOperation(operationTextConfirm, text, () => {
-        this.props.state.dialog.setState(operationBusy)
+        this.state.dialog.setState(operationBusy)
         const device = window.store.getState().maintenance.device
         request
           .post(`http://${device.address}:3000/system/mir/mkfs`)
           .set('Accept', 'application/json')
           .send({ type, target, mode })
           .end((err, res) => {
-            debug('mkfs btrfs request', err || res.body)
             if (err) {
-              this.reloadBootStorage(() => {
-                this.props.state.dialog.setState(operationFailed, this.errorText(err, res))
+              this.props.that.reloadBootStorage(() => {
+                this.state.dialog.setState(operationFailed, this.errorText(err, res))
               })
             } else {
-              this.reloadBootStorage(() => {
-                this.props.state.dialog.setState(operationSuccess, ['成功'])
+              this.props.that.reloadBootStorage(() => {
+                this.state.dialog.setState(operationSuccess, ['成功'])
               })
             }
           })
@@ -205,6 +156,7 @@ export default class NewVolumeTop extends React.Component {
   }
   render() {
     const cnv = this.props.state.creatingNewVolume
+    const accent1Color = this.props.that.colors.accent
     const actionEnabled = cnv.disks.length > 0
     const raidEnabled = cnv.disks.length > 1
     const hint = cnv.disks.length > 0 ? `已选中${cnv.disks.length}个磁盘` : '请选择磁盘'
@@ -218,7 +170,7 @@ export default class NewVolumeTop extends React.Component {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            color: this.props.muiTheme.palette.accent1Color
+            color: accent1Color
           }}
         >
           <div style={{ marginLeft: 16, fontSize: 16 }}>{ hint }</div>
@@ -235,7 +187,7 @@ export default class NewVolumeTop extends React.Component {
                   !raidEnabled
                 ]
               ]}
-              color={this.props.muiTheme.palette.accent1Color}
+              color={accent1Color}
               select={cnv.mode}
               disabled={!actionEnabled}
               onSelect={this.setVolumeMode}
@@ -250,6 +202,7 @@ export default class NewVolumeTop extends React.Component {
               onTouchTap={this.onToggleCreatingNewVolume}
             />
           </div>
+          <Operation substate={this.state.dialog} />
         </Paper>
       </div>
     )

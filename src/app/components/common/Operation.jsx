@@ -8,27 +8,28 @@ import Debug from 'debug'
 
 const debug = Debug('component:operation')
 
-export const Operation = props => {
-
-  let state = props.substate
+export const Operation = (props) => {
+  const state = props.substate
 
   return (
     <Dialog
       contentStyle={{ width: (state && state.getWidth) || 800 }}
       title={state && state.getTitle()}
       open={state !== undefined}
-      modal={true}
-      actions={ state && 
-        state.getActions().map(action => 
-          <FlatButton 
+      modal
+      actions={state &&
+        state.getActions().map(action =>
+          <FlatButton
+            key={action.label}
             label={action.label}
             labelStyle={{
-              fontSize: 14, lineHeight: '36px', 
-              color: '#00bcd4',
+              fontSize: 14,
+              lineHeight: '36px',
+              color: '#00bcd4'
             }}
             onTouchTap={action.onTouchTap}
             disabled={typeof action.disabled === 'function' ? action.disabled() : action.disabled}
-          /> ) 
+          />)
       }
     >
       { state && state.render() }
@@ -39,22 +40,20 @@ export const Operation = props => {
 export class operationBase {
 
   constructor(obj) {
-
     debug('base constructor', obj)
 
     this._context = obj._context
-    this._propName = obj._propName 
+    this._propName = obj._propName
 
     this.close = () => this.setState()
 
-    if (obj.width) this.width = width
+    if (obj.width) this.width = obj.width
   }
 
   setState(Next, ...args) {
-
     this.exit()
 
-    let obj = {}
+    const obj = {}
     obj[this._propName] = Next ? new Next(this, ...args) : undefined
 
     debug('set context state', this._context, obj)
@@ -63,11 +62,10 @@ export class operationBase {
 
   // short circuit exit/entry
   update(props) {
-
-    let clone = new this.constructor(this)
+    const clone = new this.constructor(this)
     Object.assign(clone, props)
 
-    let obj = {}
+    const obj = {}
     obj[this._propName] = clone
 
     this._context.setState(state => obj)
@@ -94,7 +92,7 @@ export class operationBase {
 
   render() {
     debug('base render')
-    return <div style={{backgroundColor: 'yellow'}}>This is base render</div>
+    return <div style={{ backgroundColor: 'yellow' }}>This is base render</div>
   }
 }
 
@@ -110,15 +108,17 @@ export class operationBusy extends operationBase {
 
   render() {
     return (
-      <div style={{
-        width: '100%', 
-        height: '100%', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center'
-      }}>
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
         <CircularProgress />
-      </div> 
+      </div>
     )
   }
 }
@@ -133,29 +133,30 @@ export class operationText extends operationBase {
 
   getTitle() {
     return this.title
-  } 
+  }
 
   getActions() {
     return this.actions || []
   }
 
   render() {
-
-    let style= { width: '100%' }
-    if (this.height) style.height = height
+    const style = { width: '100%' }
+    if (this.height) style.height = this.height
 
     return (
       <div style={style}>
-        { this.text.map((line, index, array) => {
-          return (
-          <div style={{ 
-            fontSize: 14, lineHeight: '24px', 
-            color: '#757575',
-            marginBottom: index === array.length - 1 ? 0 : 32
-          }}>{ line }</div>)
-        })}
-      </div>     
-    ) 
+        { this.text.map((line, index, array) => (
+          <div
+            key={line.toString()}
+            style={{
+              fontSize: 14,
+              lineHeight: '24px',
+              color: '#757575',
+              marginBottom: index === array.length - 1 ? 0 : 32
+            }}
+          >{ line }</div>))}
+      </div>
+    )
   }
 }
 
@@ -170,14 +171,14 @@ export class operationFinish extends operationText {
 export class operationSuccess extends operationFinish {
 
   constructor(obj, text) {
-    super(obj, '操作成功', text) 
+    super(obj, '操作成功', text)
   }
 }
 
 export class operationFailed extends operationFinish {
 
   constructor(obj, text) {
-    super(obj, '操作失败', text) 
+    super(obj, '操作失败', text)
   }
 }
 
@@ -195,7 +196,7 @@ export class operationUsernamePassword extends operationBase {
     super(obj)
 
     if (obj instanceof operationUsernamePassword) {
-      Object.assign(this, obj)  
+      Object.assign(this, obj)
       return
     }
 
@@ -212,13 +213,12 @@ export class operationUsernamePassword extends operationBase {
 
   getActions() {
     return [
-      { label: '取消', onTouchTap: this.close}, 
-      { label: '确认', onTouchTap: () => this.next(this.username, this.password), }
+      { label: '取消', onTouchTap: this.close },
+      { label: '确认', onTouchTap: () => this.next(this.username, this.password) }
     ]
   }
 
   render() {
-
     const onChange = (name, value) => {
       this[name] = value
       this.setState(operationUsernamePassword)
@@ -226,12 +226,18 @@ export class operationUsernamePassword extends operationBase {
 
     return (
       <div>
-        <TextField hintText='用户名' floatingLabelText='用户名' maxLength={20} 
-          onChange={e => onChange('username', e.target.value)} />
-        <TextField hintText='输入密码' floatingLabelText='输入密码' type='password' maxLength={40}
-          onChange={e => onChange('password', e.target.value)} />
-        <TextField hintText='再次输入密码' floatingLabelText='再次输入密码' type='password' maxLength={40}
-          onChange={e => onChange('passwordAgain', e.target.value)} />
+        <TextField
+          hintText="用户名" floatingLabelText="用户名" maxLength={20}
+          onChange={e => onChange('username', e.target.value)}
+        />
+        <TextField
+          hintText="输入密码" floatingLabelText="输入密码" type="password" maxLength={40}
+          onChange={e => onChange('password', e.target.value)}
+        />
+        <TextField
+          hintText="再次输入密码" floatingLabelText="再次输入密码" type="password" maxLength={40}
+          onChange={e => onChange('passwordAgain', e.target.value)}
+        />
       </div>
     )
   }
@@ -239,7 +245,7 @@ export class operationUsernamePassword extends operationBase {
 
 /**
                                                                   remove wisnuc     remove fruitmix
-      USER > 0                                                          
+      USER > 0
       USER = 0
       ENOWISNUC             // wisnuc folder does not exist       x                 x
       EWISNUCNOTDIR         // wisnuc folder is not a dir                           x
@@ -255,35 +261,31 @@ export class operationUsernamePassword extends operationBase {
 
 // this dialog content has copy constructor
 export class operationReinitConfirmDeletion extends operationBase {
-  
-  constructor(obj, volume, next) {
 
+  constructor(obj, volume, next) {
     super(obj)
     if (obj instanceof operationReinitConfirmDeletion) {
       Object.assign(this, obj)
       return
-    } 
+    }
 
     this.volume = volume
     this.next = next
 
     this.remove = undefined
 
-    let wisnuc = volume.wisnuc
+    const wisnuc = volume.wisnuc
 
     this.warning
     this.text = []
 
     if (wisnuc.status === 'READY' || 'DAMAGED') {
       this.warning = '文件系统已经包含wisnuc应用的用户数据，请仔细阅读下述信息，避免数据丢失。'
-    }
-    else if (wisnuc.status === 'AMBIGUOUS') {
+    } else if (wisnuc.status === 'AMBIGUOUS') {
       this.warning = '文件系统可能包含wisnuc应用的用户数据，请仔细阅读下述信息，避免数据丢失。'
-    }
-    else if (wisnuc.error === 'EWISNUCNOTDIR' || wisnuc.error === 'EFRUITMIXNOTDIR') {
+    } else if (wisnuc.error === 'EWISNUCNOTDIR' || wisnuc.error === 'EFRUITMIXNOTDIR') {
       this.warning = '文件系统存在文件与wisnuc应用数据的目录结构冲突，请仔细阅读下述信息，避免数据丢失。'
-    }
-    else if (wisnuc.error === 'EWISNUCNOFRUITMIX' && volume.mountpoint !== '/') { // for rootfs this is normal case
+    } else if (wisnuc.error === 'EWISNUCNOFRUITMIX' && volume.mountpoint !== '/') { // for rootfs this is normal case
       this.warning = '文件系统不包含wisnuc应用的用户数据，但存在wisnuc文件夹，请仔细阅读下述信息，避免数据丢失。'
     }
 
@@ -293,77 +295,73 @@ export class operationReinitConfirmDeletion extends operationBase {
     this.removeFruitmix = '选择该选项会保留原wisnuc目录下的其他目录数据，包括appifi/docker应用镜像，appifi/docker第三方应用数据，老版本软件尚未迁移的用户数据；但删除所有位于fruitmix目录下的wisnuc私有云应用数据，包括所有用户信息、云盘配置信息、用户上传的所有文件和照片。'
     this.keepBoth = '选择该选项不会删除任何数据，但会在该目录下重建新的用户和云盘配置；该操作之后旧的用户上传的文件和照片在新系统中无法直接使用，用户只能手动迁移；旧系统中创建的文件、照片和相册分享无法恢复。'
 
-    if (wisnuc.error === 'EWISNUCNOTDIR')
-      this.mustDelete = '必须选择删除和重建wisnuc文件夹方可执行操作'
-    else if (wisnuc.error === 'EFRUITMIXNOTDIR')
-      this.mustDelete = '必须选择删除和重建fruitmix文件夹方可执行操作'
-
-  } 
+    if (wisnuc.error === 'EWISNUCNOTDIR') { this.mustDelete = '必须选择删除和重建wisnuc文件夹方可执行操作' } else if (wisnuc.error === 'EFRUITMIXNOTDIR') { this.mustDelete = '必须选择删除和重建fruitmix文件夹方可执行操作' }
+  }
 
   onCheck(option) {
     if (this.remove !== option) {
-      this.update({ remove: option }) 
+      this.update({ remove: option })
     }
   }
 
   getTitle() {
     return '确认操作'
-  } 
+  }
 
   getActions() {
     return [
       { label: '取消', onTouchTap: this.close },
-      { label: '下一步', onTouchTap: () => {
-        console.log('====')
-        console.log(this)
-        console.log('====')
-        this.next(this.remove) 
-      }},
+      { label: '下一步',
+        onTouchTap: () => {
+          console.log('====')
+          console.log(this)
+          console.log('====')
+          this.next(this.remove)
+        } }
     ]
   }
 
   render() {
-
     return (<div>
-      { this.warning && <div>{this.warning}</div> }              
+      { this.warning && <div>{this.warning}</div> }
       <div>{this.general}</div>
-      <Checkbox 
+      <Checkbox
         checked={this.remove === 'wisnuc'}
         checkedIcon={<ToggleRadioButtonChecked />}
         uncheckedIcon={<ToggleRadioButtonUnchecked />}
-        label='删除并重建wisnuc目录' 
+        label="删除并重建wisnuc目录"
         onCheck={this.onCheck.bind(this, 'wisnuc')}
 
-        disableTouchRipple={true}
-        disableFocusRipple={true}
+        disableTouchRipple
+        disableFocusRipple
       />
       <div>{this.removeWisnuc}</div>
-      <Checkbox 
+      <Checkbox
         checked={this.remove === 'fruitmix'}
         checkedIcon={<ToggleRadioButtonChecked />}
         uncheckedIcon={<ToggleRadioButtonUnchecked />}
-        label='保留wisnuc目录，删除和重建fruitmix目录' 
+        label="保留wisnuc目录，删除和重建fruitmix目录"
         onCheck={this.onCheck.bind(this, 'fruitmix')}
 
-        disableTouchRipple={true}
-        disableFocusRipple={true}
+        disableTouchRipple
+        disableFocusRipple
       />
       <div>{this.removeWisnuc}</div>
-      <Checkbox 
+      <Checkbox
         checked={this.remove === undefined}
         checkedIcon={<ToggleRadioButtonChecked />}
         uncheckedIcon={<ToggleRadioButtonUnchecked />}
-        label='保留wisnuc和fruitmix目录，重建用户和云盘信息'
-        onCheck={this.onCheck.bind(this, undefined)} 
+        label="保留wisnuc和fruitmix目录，重建用户和云盘信息"
+        onCheck={this.onCheck.bind(this, undefined)}
 
-        disableTouchRipple={true}
-        disableFocusRipple={true}
+        disableTouchRipple
+        disableFocusRipple
       />
       <div>{this.keepBoth}</div>
     </div>)
   }
 }
 
-export const createOperation = (context, name, operation, ...args) => 
+export const createOperation = (context, name, operation, ...args) =>
   new operationBase({ _context: context, _propName: name }).setState(operation, ...args)
- 
+

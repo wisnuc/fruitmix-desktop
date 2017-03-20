@@ -17,7 +17,8 @@ export default class DoubleDivider extends React.PureComponent {
           <Divider
             style={{
               marginLeft: this.props.grayLeft,
-              transition: 'margin 300ms'
+              transition: 'margin 300ms',
+              width: this.props.width
             }}
           /> }
 
@@ -26,7 +27,8 @@ export default class DoubleDivider extends React.PureComponent {
             style={{
               marginLeft: this.props.colorLeft,
               backgroundColor: accent1Color,
-              transition: 'margin 300ms'
+              transition: 'margin 300ms',
+              width: this.props.width
             }}
           /> }
       </div>

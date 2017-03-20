@@ -1,186 +1,27 @@
 import React from 'react'
 import Debug from 'debug'
 import prettysize from 'prettysize'
-import muiThemeable from 'material-ui/styles/muiThemeable'
-import { Avatar, Checkbox, Chip, Paper } from 'material-ui'
+import { Avatar, Paper } from 'material-ui'
 import {
-  pinkA200, grey300, grey400, greenA400, green400, amber400,
-  redA200, red400, lightGreen100, lightGreen400, lightGreenA100,
-  lightGreenA200, lightGreenA400, lightGreenA700
+  grey300, grey400, amber400, redA200, red400, lightGreen400
 } from 'material-ui/styles/colors'
 import request from 'superagent'
 import {
-  operationTextConfirm, operationBase, Operation, operationBusy, operationSuccess, operationFailed, createOperation
+  Operation, createOperation, operationTextConfirm, operationBusy, operationSuccess, operationFailed
 } from '../common/Operation'
 import VolumeWisnucError from './VolumeWisnucError'
 import DoubleDivider from './DoubleDivider'
 import Users from './Users'
+import InitVolumeDialogs from './InitVolumeDialogs'
 import FlatButton from '../common/FlatButton'
 import { HDDIcon, RAIDIcon, UpIcon, DownIcon } from './Svg'
+import {
+  SUBTITLE_HEIGHT, HEADER_HEIGHT, FOOTER_HEIGHT, SUBTITLE_MARGINTOP,
+  SubTitleRow, VerticalExpandable, TableHeaderRow, TableDataRow,
+  diskDisplayName, HeaderTitle1, HeaderIcon, Checkbox40, FsAndVolumemode
+} from './ConstElement'
 
 const debug = Debug('component:maintenance:BtrfsVolume')
-const SUBTITLE_HEIGHT = 32
-const TABLEHEADER_HEIGHT = 48
-const TABLEDATA_HEIGHT = 48
-const HEADER_HEIGHT = 104
-const FOOTER_HEIGHT = 48
-const SUBTITLE_MARGINTOP = 24
-const alphabet = 'abcdefghijklmnopqrstuvwxyz'
-
-const diskDisplayName = (name) => {
-  const chr = name.charAt(2)
-  const number = alphabet.indexOf(chr) + 1
-  return `硬盘 #${number}`
-}
-
-const VerticalExpandable = props => (
-  <div style={{ width: '100%', height: props.height, transition: 'height 300ms', overflow: 'hidden' }}>
-    { props.children }
-  </div>
-)
-
-const styles = {
-  chip: {
-    backgroundColor: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: 'medium',
-    height: 26,
-    marginRight: 5,
-    border: '1px solid #e6e6e6'
-  },
-  wrapper: {
-    display: 'flex',
-    flexWrap: 'wrap'
-  },
-  paperHeader: {
-    position: 'relative',
-    width: '100%',
-    height: HEADER_HEIGHT,
-    border: '1px solid #e6e6e6',
-    display: 'flex',
-    alignItems: 'center'
-  }
-}
-
-const HeaderTitle1 = props => (
-  <div style={props.style} onTouchTap={props.onTouchTap}>
-    <div style={{ marginBottom: 2 }}>
-      {props.title}
-    </div>
-    <div style={styles.wrapper}>
-      {
-        props.textFilesystem &&
-        <Chip style={styles.chip} labelStyle={{ marginTop: -4 }}>
-          <span style={{ color: '#9e9e9e' }}>
-            {props.textFilesystem}
-          </span>
-        </Chip>
-      }
-      {
-        props.volumemode &&
-          <Chip style={styles.chip} labelStyle={{ marginTop: -4 }}>
-            <span style={{ color: '#9e9e9e' }}>
-              {props.volumemode}
-            </span>
-          </Chip>
-        }
-    </div>
-  </div>
-)
-
-const SubTitleRow = props => (
-  <div style={{ width: '100%', height: SUBTITLE_HEIGHT, display: 'flex', alignItems: 'center' }}>
-    <div style={{ flex: '0 0 256px' }} />
-    <div
-      style={{ flex: '0 0 184px',
-        fontSize: 13,
-        color: props.disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.87)',
-        fontWeight: 'bold'
-      }}
-    >
-      {props.text}
-    </div>
-  </div>
-)
-
-const TableHeaderRow = (props) => {
-  const style = {
-    height: TABLEHEADER_HEIGHT,
-    display: 'flex',
-    alignItems: 'center',
-    fontSize: 11,
-    color: props.disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.54)',
-    fontWeight: props.disabled ? 'normal' : 'bold'
-  }
-
-  return (
-    <div style={props.style}>
-      <div style={style}>
-        { props.items.map((item) => {
-          const styles = { flex: `0 0 ${item[1]}px` }
-          if (item[2] === true) { styles.textAlign = 'right' }
-          return (<div style={styles} key={item.toString()}>{item[0]}</div>)
-        }) }
-      </div>
-    </div>
-  )
-}
-
-const TableDataRow = (props) => {
-  const containerStyle = {
-    height: TABLEDATA_HEIGHT,
-    display: 'flex',
-    alignItems: 'center',
-    fontSize: 13,
-    color: props.disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.87)'
-  }
-
-  if (!props.disabled && props.selected) { containerStyle.backgroundColor = '#F5F5F5' }
-
-  return (
-    <div style={props.style}>
-      <div style={containerStyle}>
-        { props.items.map((item) => {
-          if (typeof item[0] === 'string') {
-            const style = { flex: `0 0 ${item[1]}px` }
-            if (item[2] === true) style.textAlign = 'right'
-            return <div style={style} key={item.toString()}>{item[0]}</div>
-          }
-          const style = {
-            flex: `0 0 ${item[1]}px`,
-            display: 'flex',
-            alignItems: 'center'
-          }
-
-          if (item[2] === true) style.justifyContent = 'center'
-          return <div style={style} key={item.toString()}>{item[0]}</div>
-        }) }
-      </div>
-    </div>
-  )
-}
-
-const Checkbox40 = props => (
-  <div style={{ width: 40, height: 40 }}>
-    <Checkbox
-      {...props} style={{ margin: 8 }}
-      iconStyle={{ fill: props.fill }}
-    />
-  </div>
-)
-
-const HeaderIcon = props => (
-  <div
-    style={{
-      width: 40,
-      marginLeft: 24,
-      marginTop: 24,
-      marginRight: 16
-    }}
-  >
-    { props.children }
-  </div>
-)
 
 class KeyValueList extends React.PureComponent {
 
@@ -214,51 +55,31 @@ class KeyValueList extends React.PureComponent {
   }
 }
 
-@muiThemeable()
 export default class BtrfsVolume extends React.Component {
   /*
   static State = class State {
     constructor() {
       this.creatingNewVolume = null
-      this.expanded = []
-       this.operation = null
-     }
+    }
   }
   */
   constructor(props) {
     super(props)
-    this.unmounted = false
+
+    this.state = {
+      expanded: false,
+      initVolume: undefined,
+      dialog: undefined
+    }
+
+    this.toggleExpanded = () => {
+      const newstatus = !this.state.expanded
+      this.setState({ expanded: newstatus })
+    }
+
     this.colors = {
-      primary: this.props.muiTheme.palette.primary1Color,
-      accent: this.props.muiTheme.palette.accent1Color,
       fillGrey: grey400,
       fillGreyFaded: grey300
-    }
-
-    this.volumeUnformattable = volume => []
-
-    this.toggleExpanded = (disvol) => {
-      const index = this.props.state.expanded.indexOf(disvol)
-      if (index === -1) { this.props.setState({ expanded: [...this.props.state.expanded, disvol] }) } else {
-        this.props.setState({
-          expanded: [...this.props.state.expanded.slice(0, index), ...this.props.state.expanded.slice(index + 1)]
-        })
-      }
-    }
-    this.toggleCandidate = (disk) => {
-      if (this.props.state.creatingNewVolume === null) return
-      const arr = this.props.state.creatingNewVolume.disks
-      const index = arr.indexOf(disk)
-      let nextArr
-      //  TODO not necessary as immutable
-      if (index === -1) { nextArr = [...arr, disk] } else { nextArr = [...arr.slice(0, index), ...arr.slice(index + 1)] }
-
-      this.props.setState({
-        creatingNewVolume: {
-          disks: nextArr,
-          mode: nextArr.length > 1 ? this.props.state.creatingNewVolume.mode : 'single'
-        }
-      })
     }
 
     this.volumeIconColor = (volume) => {
@@ -280,7 +101,6 @@ export default class BtrfsVolume extends React.Component {
       return '#000'
     }
 
-
     this.VolumeTitle = (props) => {
       const volume = props.volume
       return (
@@ -298,66 +118,18 @@ export default class BtrfsVolume extends React.Component {
               fontWeight: 'regular',
               fontSize: 26,
               width: 176,
-              marginTop: 18,
+              marginTop: 22,
               color: this.props.state.creatingNewVolume ? 'rgba(0,0,0,0.38)' : '#212121'
             }}
-            volumemode={volume.usage.data.mode.toUpperCase()}
             title="磁盘阵列"
-            textFilesystem="Btrfs"
           />
         </div>
       )
     }
 
     this.createOperation = (operation, ...args) =>
-      createOperation(this.props.that, 'dialog', operation, ...args)
+      createOperation(this, 'dialog', operation, ...args)
 
-
-    this.reloadBootStorage = (callback) => {
-      let storage
-      let boot
-      let done = false
-      const device = window.store.getState().maintenance.device
-      const finish = () => {
-        if (storage && boot) {
-          this.props.setState({
-            storage,
-            boot,
-            creatingNewVolume: this.props.state.creatingNewVolume ? { disks: [], mode: 'single' } : null
-          })
-
-          if (callback) callback(null, { storage, boot })
-          done = true
-        }
-      }
-
-      request.get(`http://${device.address}:3000/system/storage?wisnuc=true`)
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          if (this.unmounted) {
-            if (!done) {
-              if (callback) callback(new Error('unmounted'))
-              done = true
-            }
-            return
-          }
-          storage = err ? err.message : res.body
-          finish()
-        })
-
-      request.get(`http://${device.address}:3000/system/boot`)
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          if (this.unmounted) {
-            if (!done) {
-              if (callback) callback(new Error('unmounted'))
-              done = true
-            }
-          }
-          boot = err ? err.message : res.body
-          finish()
-        })
-    }
 
     this.errorText = (err, res) => {
       const text = []
@@ -373,12 +145,11 @@ export default class BtrfsVolume extends React.Component {
       return text
     }
 
-
     this.startWisnucOnVolume = (volume) => {
       const text = ['启动安装于Btrfs磁盘阵列上的WISNUC应用？']
 
       this.createOperation(operationTextConfirm, text, () => {
-        this.props.state.dialog.setState(operationBusy)
+        this.state.dialog.setState(operationBusy)
 
         const device = window.store.getState().maintenance.device
         const url = `http://${device.address}:3000/system/mir/run`
@@ -389,14 +160,14 @@ export default class BtrfsVolume extends React.Component {
           .send({ target: volume.fileSystemUUID })
           .end((err, res) => {
             if (err) {
-              this.reloadBootStorage(() => {
-                this.props.state.dialog.setState(operationFailed, this.errorText(err, res))
+              this.props.that.reloadBootStorage(() => {
+                this.state.dialog.setState(operationFailed, this.errorText(err, res))
               })
             } else {
-              this.reloadBootStorage(() => {
+              this.props.that.reloadBootStorage(() => {
                 for (let i = 3; i >= 0; i--) {
                   const time = (3 - i) * 1000
-                  setTimeout(() => { this.props.state.dialog.setState(operationSuccess, [`启动成功，系统将在${i}秒钟后跳转到登录页面`]) }, time)
+                  setTimeout(() => { this.state.dialog.setState(operationSuccess, [`启动成功，系统将在${i}秒钟后跳转到登录页面`]) }, time)
                 }
                 setTimeout(() => { window.store.dispatch({ type: 'EXIT_MAINTENANCE' }) }, 4000)
               })
@@ -411,17 +182,17 @@ export default class BtrfsVolume extends React.Component {
         alert('功能开发中......')
         return
       }
-      this.props.setState({ initVolume: volume })
+      this.setState({ initVolume: volume })
     }
   }
 
   render() {
-    const { volume, muiTheme, state, setState, that, ...rest } = this.props
-    const primary1Color = this.props.muiTheme.palette.primary1Color
-    const accent1Color = this.props.muiTheme.palette.accent1Color
+    debug('BtrfsVolume render! ')
+    const { volume, state, setState, that, ...rest } = this.props
+    const accent1Color = this.props.that.colors.accent
     const { blocks } = this.props.state.storage
     const cnv = !!this.props.state.creatingNewVolume
-    const expandableHeight = this.props.state.expanded.indexOf(volume) !== -1 ?
+    const expandableHeight = this.state.expanded ?
       17 * 24 + 3 * SUBTITLE_HEIGHT + SUBTITLE_MARGINTOP : 0
     const comment = () => volume.missing ? '有磁盘缺失' : '全部在线' // TODO if(volume.missing === true)
     const DivStyle = () => ({
@@ -432,20 +203,28 @@ export default class BtrfsVolume extends React.Component {
       backgroundColor: '',
       border: '1px solid #e6e6e6'
     })
+    // debug('volume.usage', volume.usage, '!volume.usage', !volume.usage)
+    if (!volume.usage) return <div />
     return (
       <Paper {...rest}>
         <div
           style={DivStyle()}
-          onTouchTap={() => this.toggleExpanded(volume)}
+          onTouchTap={() => this.toggleExpanded()}
         >
           <div style={{ flex: '0 0 900px', height: '100%', display: 'flex', alignItems: 'center' }}>
             <div style={{ flex: '0 0 256px' }}>
               <this.VolumeTitle volume={volume} />
             </div>
+            <div style={{ flex: '0 0 160px', marginLeft: -12 }}>
+              <FsAndVolumemode
+                volumemode={volume.usage.data.mode.toUpperCase()}
+                textFilesystem="Btrfs"
+              />
+            </div>
             <VolumeWisnucError creatingNewVolume={this.props.state.creatingNewVolume} volume={volume} />
           </div>
           <div style={{ marginRight: 24 }}>
-            {expandableHeight ? <UpIcon color={'#9e9e9e'} /> : <DownIcon color={'#9e9e9e'} />}
+            {this.state.expanded ? <UpIcon color={'#9e9e9e'} /> : <DownIcon color={'#9e9e9e'} />}
           </div>
 
         </div>
@@ -503,68 +282,71 @@ export default class BtrfsVolume extends React.Component {
             />
           </div>
           <div style={{ width: '100%', height: SUBTITLE_MARGINTOP }} />
-          <SubTitleRow text="磁盘信息" disabled={cnv && this.volumeUnformattable(volume).length > 0} />
+          <SubTitleRow text="磁盘信息" disabled={cnv} />
         </VerticalExpandable>
 
         <TableHeaderRow
-          style={{ fontWeight: 'regular', fontSize: 18, color: '#212121' }}
+          disabled={cnv}
           items={[
             ['', 256],
             ['接口', 64],
-            ['容量', 64, true],
-            ['', 56],
+            ['容量', 80, true],
+            ['', 64],
             ['设备名', 96],
             ['型号', 208],
             ['序列号', 208],
-            ['DEV ID', 96],
-            ['已使用', 64, true]
+            ['DEV ID', 64],
+            ['已使用', 80, true]
           ]}
         />
 
-        {
-        blocks.filter(blk => blk.isVolumeDevice && blk.fileSystemUUID === volume.uuid)
-          .map((blk, index) => (
-            <TableDataRow
-              key={blk.name}
-              disabled={this.volumeUnformattable(volume).length > 0}
-              selected={cnv && !!this.props.state.creatingNewVolume.disks.find(d => d === blk)}
-              style={{ marginLeft: 80, fontWeight: 'medium', fontSize: 14, color: '#212121' }}
-              items={[
-                [(cnv ?
-                  <Checkbox40
-                    fill={accent1Color}
-                    checked={!!this.props.state.creatingNewVolume.disks.find(d => d === blk)}
-                    onCheck={() => this.toggleCandidate(blk)}
-                  /> :
-                  <HDDIcon
-                    color="rgba(0,0,0,0.38)"
-                    viewBox="0 0 24 24"
-                  />), 36
-                ],
-                [diskDisplayName(blk.name), 140],
-                [blk.idBus, 64],
-                [prettysize(blk.size * 512), 64, true],
-                ['', 56],
-                [blk.name, 96],
-                [blk.model || '', 208],
-                [blk.serial || '', 208],
-                [volume.devices.find(d => d.name === blk.name).id.toString(), 96],
-                [volume.devices.find(d => d.name === blk.name).used, 64, true]
-              ]}
-            />
-          ))
-          .reduce((p, c, index, array) => {
-            p.push(c)
-            p.push(
-              <DoubleDivider
-                key={index.toString()}
-                grayLeft={index === array.length - 1 ? null : 80}
-                colorLeft={cnv ? 80 : '100%'}
+        <div style={{ overflow: 'hidden' }}>
+          {
+          blocks.filter(blk => blk.isVolumeDevice && blk.fileSystemUUID === volume.uuid)
+            .map(blk => (
+              <TableDataRow
+                key={blk.name}
+                disabled={cnv}
+                selected={cnv && !!this.props.state.creatingNewVolume.disks.find(d => d === blk)}
+                style={{ marginLeft: 80 }}
+                items={[
+                  [(cnv ?
+                    <Checkbox40
+                      fill={accent1Color}
+                      checked={!!this.props.state.creatingNewVolume.disks.find(d => d === blk)}
+                      onCheck={() => this.props.that.toggleCandidate(blk)}
+                    /> :
+                    <HDDIcon
+                      color="rgba(0,0,0,0.38)"
+                      viewBox="0 0 24 24"
+                    />), 40
+                  ],
+                  [diskDisplayName(blk.name), 136],
+                  [blk.idBus, 64],
+                  [prettysize(blk.size * 512), 80, true],
+                  ['', 64],
+                  [blk.name, 96],
+                  [blk.model || '', 208],
+                  [blk.serial || '', 208],
+                  [volume.devices.find(d => d.name === blk.name).id.toString(), 64],
+                  [volume.devices.find(d => d.name === blk.name).used, 80, true]
+                ]}
               />
-            )
-            return p
-          }, [])
-      }
+            ))
+            .reduce((p, c, index, array) => {
+              p.push(c)
+              p.push(
+                <DoubleDivider
+                  key={index.toString()}
+                  grayLeft={index === array.length - 1 ? null : 80}
+                  colorLeft={cnv ? 80 : '100%'}
+                  width={1040}
+                />
+              )
+              return p
+            }, [])
+        }
+        </div>
         <div
           style={{ width: '100%',
             height: cnv ? FOOTER_HEIGHT : 0,
@@ -578,7 +360,6 @@ export default class BtrfsVolume extends React.Component {
             { cnv && '选择该磁盘阵列中的磁盘建立新的磁盘阵列，会摧毁当前磁盘阵列存储的所有数据。' }
           </div>
         </div>
-        <DoubleDivider grayLeft={80} colorLeft={cnv ? 80 : '100%'} />
         <div>
           <div style={{ height: 24 }} />
           <Users creatingNewVolume={this.props.state.creatingNewVolume} volume={volume} />
@@ -621,9 +402,14 @@ export default class BtrfsVolume extends React.Component {
                   onTouchTap={() => this.initWisnucOnVolume(volume)}
                 />
             }
-
           </div>
         </div>
+        <InitVolumeDialogs
+          volume={this.state.initVolume}
+          onRequestClose={() => this.setState({ initVolume: undefined })}
+          onResponse={() => this.props.that.reloadBootStorage()}
+        />
+        <Operation substate={this.state.dialog} />
       </Paper>
     )
   }

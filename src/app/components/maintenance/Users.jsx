@@ -1,17 +1,8 @@
 import React from 'react'
-import {
-    AppBar, Avatar, Badge, Checkbox, Chip, Divider, Paper, Menu, MenuItem, Dialog, IconButton, TextField, CircularProgress
-} from 'material-ui'
-import {
-  pinkA200, grey300, grey400, greenA400, green400, amber400,
-  redA200, red400, lightGreen100, lightGreen400, lightGreenA100,
-  lightGreenA200, lightGreenA400, lightGreenA700
-} from 'material-ui/styles/colors'
-import { CatSilhouette, BallOfYarn, Account, ReportProblem, HDDIcon, RAIDIcon, UpIcon, DownIcon
-} from './Svg'
+import { Avatar, Badge, IconButton } from 'material-ui'
+import { Account } from './Svg'
 
-
-export default class UserBadge extends React.Component {
+export default class Users extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
