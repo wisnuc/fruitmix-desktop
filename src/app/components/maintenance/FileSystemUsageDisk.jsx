@@ -2,7 +2,6 @@ import React from 'react'
 import Debug from 'debug'
 import { Divider, Paper } from 'material-ui'
 import { UpIcon, DownIcon } from './Svg'
-import DoubleDivider from './DoubleDivider'
 import {
   SUBTITLE_HEIGHT, TABLEHEADER_HEIGHT, TABLEDATA_HEIGHT, HEADER_HEIGHT,
   FOOTER_HEIGHT, SUBTITLE_MARGINTOP, styles, SubTitleRow, VerticalExpandable,
@@ -33,10 +32,10 @@ export default class FileSystemUsageDisk extends React.Component {
   }
   render() {
     debug('FileSystemUsageDisk render! ')
-    const { disk, state, setState, that, ...rest } = this.props
-    const primary1Color = this.props.that.colors.primary
+    const { disk, state, setState, zDepth, that, ...rest } = this.props
     const accent1Color = this.props.that.colors.accent
     const cnv = this.props.state.creatingNewVolume
+    const ExpandedzDepth = this.state.expanded ? 2 : zDepth
     const uf = this.props.that.diskUnformattable(disk).length > 0
 
     const floatingTitleTop = () => {
@@ -47,7 +46,7 @@ export default class FileSystemUsageDisk extends React.Component {
     }
 
     return (
-      <Paper {...rest}>
+      <Paper zDepth={ExpandedzDepth} {...rest}>
         <div style={styles.paperHeader} onTouchTap={() => this.toggleExpanded()}>
           <div style={{ flex: '0 0 256px' }}>
             <DiskTitle

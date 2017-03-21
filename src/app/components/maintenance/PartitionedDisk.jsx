@@ -2,7 +2,6 @@ import React from 'react'
 import Debug from 'debug'
 import prettysize from 'prettysize'
 import { Divider, Paper } from 'material-ui'
-import DoubleDivider from './DoubleDivider'
 import { UpIcon, DownIcon } from './Svg'
 import {
   SUBTITLE_HEIGHT, TABLEHEADER_HEIGHT, TABLEDATA_HEIGHT, HEADER_HEIGHT,
@@ -54,10 +53,10 @@ export default class PartitionedDisk extends React.Component {
     debug('PartitionedDisk Render')
     // K combinator
     const K = x => y => x
-
-    const { disk, state, setState, that, ...rest } = this.props
+    const { disk, state, setState, that, zDepth, ...rest } = this.props
     const { blocks } = this.props.state.storage
     const cnv = this.props.state.creatingNewVolume
+    const ExpandedzDepth = this.state.expanded ? 2 : zDepth
     const uf = this.props.that.diskUnformattable(disk).length > 0
     const accent = this.props.that.colors.accent
     const parts = blocks.filter(blk => blk.parentName === disk.name && !blk.isExtended)
@@ -78,7 +77,7 @@ export default class PartitionedDisk extends React.Component {
         p, [])
 
     return (
-      <Paper {...rest}>
+      <Paper zDepth={ExpandedzDepth} {...rest}>
         <div style={styles.paperHeader} onTouchTap={() => this.toggleExpanded()}>
           <div style={{ flex: '0 0 256px' }}>
             <DiskTitle

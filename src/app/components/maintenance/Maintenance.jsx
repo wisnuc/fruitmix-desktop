@@ -180,7 +180,8 @@ class Maintenance extends StateUp(React.Component) {
 
   renderBootStatus() {
     const data = window.store.getState().maintenance.device
-    const TextMaintence = `该设备已正常启动，此界面仅用于浏览；设备的ip为 ${data.address}，model为 ${data.model}，serial为 ${data.serial}。`
+    const TextMaintence = `该设备已正常启动，此界面仅用于浏览。
+      设备的ip为 ${data.address}，model为 ${data.model}，serial为 ${data.serial}`
     // debug("data = window.store.getState().maintenance = ", data);
     return (
       <this.TextButtonTop

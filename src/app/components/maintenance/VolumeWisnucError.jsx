@@ -62,7 +62,7 @@ export default class VolumeWisnucError extends React.Component {
       )
     }
     if (typeof this.props.volume.wisnuc !== 'object') return null // ENOFRUITMIX can't work
-    const { status, users, error, message } = this.props.volume.wisnuc
+    const { status, users, error } = this.props.volume.wisnuc
     if (users) {
       if (users.length === 0) {
         return <div>WISNUC已安装但尚未创建用户。</div>

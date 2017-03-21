@@ -98,7 +98,7 @@ export default class NewVolumeTop extends React.Component {
       this.props.setState((state) => {
         if (state.creatingNewVolume === null) {
           return {
-            creatingNewVolume: { disks: [], mode: 'single' },
+            creatingNewVolume: { disks: [], mode: 'single' }
           }
         }
         return { creatingNewVolume: null }

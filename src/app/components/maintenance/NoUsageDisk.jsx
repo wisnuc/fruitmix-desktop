@@ -32,21 +32,20 @@ export default class NoUsageDisk extends React.Component {
   }
   render() {
     debug('NoUsageDisk Render')
-    const primary1Color = this.props.that.colors.primary
     const accent1Color = this.props.that.colors.accent
-    const { disk, state, setState, that, ...rest } = this.props
+    const { disk, state, setState, that, zDepth, ...rest } = this.props
     const cnv = this.props.state.creatingNewVolume
     const uf = this.props.that.diskUnformattable(disk).length > 0
     const expandableHeight = this.state.expanded ?
       36 + SUBTITLE_HEIGHT + SUBTITLE_MARGINTOP : 0
-
+    const ExpandedzDepth = this.state.expanded ? 2 : zDepth
     const floatingTitleTop = () => {
       if (!cnv) return 0
       return HEADER_HEIGHT + TABLEHEADER_HEIGHT + expandableHeight
     }
 
     return (
-      <Paper {...rest}>
+      <Paper zDepth={ExpandedzDepth} {...rest}>
         <div style={styles.paperHeader} onTouchTap={() => this.toggleExpanded()}>
           <div style={{ flex: '0 0 256px' }}>
             <DiskTitle

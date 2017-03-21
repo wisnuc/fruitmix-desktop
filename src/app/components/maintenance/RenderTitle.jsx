@@ -6,7 +6,7 @@ import { CatSilhouette, BallOfYarn } from './Svg'
 const RenderTitle = props => (
   <div style={{ position: 'absolute', width: '100%' }} >
     <AppBar
-      style={{ position: 'absolute', height: 128, width: 'calc(100% - 16px)', marginLeft: -8, marginTop: -8 }}
+      style={{ position: 'absolute', height: 136, width: 'calc(100% - 6px)', marginLeft: -8, marginTop: -8 }}
       showMenuIconButton={false}
       zDepth={2}
       iconElementRight={

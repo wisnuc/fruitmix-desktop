@@ -10,50 +10,17 @@ import {
   Operation, createOperation, operationTextConfirm, operationBusy, operationSuccess, operationFailed
 } from '../common/Operation'
 import VolumeWisnucError from './VolumeWisnucError'
-import DoubleDivider from './DoubleDivider'
 import Users from './Users'
 import InitVolumeDialogs from './InitVolumeDialogs'
 import FlatButton from '../common/FlatButton'
 import { HDDIcon, RAIDIcon, UpIcon, DownIcon } from './Svg'
 import {
-  SUBTITLE_HEIGHT, HEADER_HEIGHT, FOOTER_HEIGHT, SUBTITLE_MARGINTOP,
-  SubTitleRow, VerticalExpandable, TableHeaderRow, TableDataRow,
-  diskDisplayName, HeaderTitle1, HeaderIcon, Checkbox40, FsAndVolumemode
+  SUBTITLE_HEIGHT, HEADER_HEIGHT, FOOTER_HEIGHT, SUBTITLE_MARGINTOP, SubTitleRow,
+  VerticalExpandable, TableHeaderRow, TableDataRow, diskDisplayName, HeaderTitle1,
+  HeaderIcon, Checkbox40, FsAndVolumemode, KeyValueList, DoubleDivider
 } from './ConstElement'
 
 const debug = Debug('component:maintenance:BtrfsVolume')
-
-class KeyValueList extends React.PureComponent {
-
-  constructor(props) {
-    super(props)
-  }
-
-  render() {
-    const style = { flexGrow: 1 }
-    if (this.props.right === true) { style.textAlign = 'right' }
-
-    return (
-      <div style={this.props.style}>
-        { this.props.items.map(item => (
-          <div
-            key={item.toString()}
-            style={{
-              height: 24,
-              display: 'flex',
-              alignItems: 'center',
-              fontSize: 13,
-              color: this.props.disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.87'
-            }}
-          >
-            <div style={{ width: 184 }}>{item[0]}</div>
-            <div style={style}>{item[1]}</div>
-          </div>
-        ))}
-      </div>
-    )
-  }
-}
 
 export default class BtrfsVolume extends React.Component {
   /*
@@ -188,12 +155,13 @@ export default class BtrfsVolume extends React.Component {
 
   render() {
     debug('BtrfsVolume render! ')
-    const { volume, state, setState, that, ...rest } = this.props
+    const { volume, state, setState, zDepth, that, ...rest } = this.props
     const accent1Color = this.props.that.colors.accent
     const { blocks } = this.props.state.storage
     const cnv = !!this.props.state.creatingNewVolume
     const expandableHeight = this.state.expanded ?
       17 * 24 + 3 * SUBTITLE_HEIGHT + SUBTITLE_MARGINTOP : 0
+    const ExpandedzDepth = this.state.expanded ? 2 : zDepth
     const comment = () => volume.missing ? '有磁盘缺失' : '全部在线' // TODO if(volume.missing === true)
     const DivStyle = () => ({
       width: '100%',
@@ -206,7 +174,7 @@ export default class BtrfsVolume extends React.Component {
     // debug('volume.usage', volume.usage, '!volume.usage', !volume.usage)
     if (!volume.usage) return <div />
     return (
-      <Paper {...rest}>
+      <Paper zDepth={ExpandedzDepth} {...rest}>
         <div
           style={DivStyle()}
           onTouchTap={() => this.toggleExpanded()}
@@ -340,6 +308,7 @@ export default class BtrfsVolume extends React.Component {
                   key={index.toString()}
                   grayLeft={index === array.length - 1 ? null : 80}
                   colorLeft={cnv ? 80 : '100%'}
+                  accent1Color={accent1Color}
                   width={1040}
                 />
               )

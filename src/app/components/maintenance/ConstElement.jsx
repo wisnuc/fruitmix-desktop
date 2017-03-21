@@ -1,6 +1,6 @@
 import React from 'react'
 import prettysize from 'prettysize'
-import { Checkbox, Chip, Avatar } from 'material-ui'
+import { Checkbox, Chip, Avatar, Divider } from 'material-ui'
 import { HDDIcon } from './Svg'
 
 export const SUBTITLE_HEIGHT = 32
@@ -290,3 +290,50 @@ export const DiskInfoTable = (props) => {
     </div>
   )
 }
+
+export const KeyValueList = (props) => {
+  const style = { flexGrow: 1 }
+  if (props.right === true) { style.textAlign = 'right' }
+  return (
+    <div style={props.style}>
+      { props.items.map(item => (
+        <div
+          key={item.toString()}
+          style={{
+            height: 24,
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: 13,
+            color: props.disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.87'
+          }}
+        >
+          <div style={{ width: 184 }}>{item[0]}</div>
+          <div style={style}>{item[1]}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+export const DoubleDivider = props => (
+  <div>
+    { props.grayLeft &&
+      <Divider
+        style={{
+          marginLeft: props.grayLeft,
+          transition: 'margin 300ms',
+          width: props.width
+        }}
+      /> }
+
+    { props.colorLeft &&
+    <Divider
+      style={{
+        marginLeft: props.colorLeft,
+        backgroundColor: props.accent1Color,
+        transition: 'margin 300ms',
+        width: props.width
+      }}
+    /> }
+  </div>
+)
