@@ -41,13 +41,13 @@ class CreatingVolumeDiskSelection1 extends React.PureComponent {
     else
       comment = '该磁盘可以加入磁盘卷'
  
-console.log('>>>>>>>>>>>>>', this.props)
     return (
-      <div key={name} style={{width: '100%', height: 40, display: 'flex', alignItems: 'center'}}>
+      <div key={name} style={{width: '100%', height: 40, display: 'flex', alignItems: 'center', color: !blk.isPartitioned ? 'rgba(0,0,0,0.87)' : 'rgba(0,0,0,0.38)'}}>
         <div style={{flex: '0 0 64px'}}>
           { valid && <Checkbox style={{marginLeft: 16}} 
+            disabled={usage !== '未知'}
             checked={this.props.state.selection.indexOf(name) !== -1} onCheck={() => {
-
+            console.log('......=============.......', this.props.state.selection)
             let nextState
 
             let index = this.props.state.selection.indexOf(name)
