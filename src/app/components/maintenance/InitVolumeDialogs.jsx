@@ -130,7 +130,7 @@ const ReinitVolumeConfirm = (props) => {
 
 const TextBox = props => (
   <div>
-    { props.text.map(line => <div key={line.toString()}>{line}</div>) }
+    { props.text.map((line, index) => <div key={index.toString()}>{line}</div>) }
   </div>
 )
 
@@ -210,12 +210,12 @@ export default class InitVolumeDialogs extends React.Component {
               .set('Accept', 'application/json')
               .send(opts)
               .end((err, res) => {
-                this.setState({
-                  stage: err ? 'FAILED' : 'SUCCESS',
-                  err,
-                  body: res && res.body
-                })
-
+                setTimeout(
+                  () => this.setState({
+                    stage: err ? 'FAILED' : 'SUCCESS',
+                    err,
+                    body: res && res.body
+                  }), 2000)
                 this.props.onResponse(err, res)
               })
             }}
@@ -262,7 +262,7 @@ export default class InitVolumeDialogs extends React.Component {
   render() {
     const busyContentStyle = {
       width: '100%',
-      height: 280,
+      height: 24,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'
