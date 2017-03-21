@@ -130,7 +130,7 @@ export default class NewVolumeTop extends React.Component {
       const mode = this.props.state.creatingNewVolume.mode
       const text = []
 
-      text.push(`使用设备${target.join()}和${mode}模式创建新磁盘阵列，` +
+      text.push(`使用硬盘 ${target.join('、')} ，以${mode}模式创建新磁盘阵列，` +
         '这些磁盘和包含这些磁盘的磁盘阵列上的数据都会被删除且无法恢复。确定要执行该操作吗？')
 
       this.createOperation(operationTextConfirm, text, () => {

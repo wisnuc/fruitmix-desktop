@@ -1,7 +1,7 @@
 /**
  PhotoApp.jsx
 **/
-
+import Debug from 'debug';
 import { Menu, MenuItem, Divider } from 'material-ui';
 import IconButton from 'material-ui/IconButton';
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu';
@@ -15,6 +15,7 @@ import React, { Component, PropTypes } from 'react';
 import PhotoToolBar from './PhotoToolBar';
 import PhotoList from './PhotoList';
 
+const debug = Debug('component:photoApp:')
 const LEFTNAV_WIDTH = 210;
 
 function getStyles (leftnav) {
@@ -129,6 +130,7 @@ class PhotoApp extends Component {
   }
 
   render() {
+    debug('render photoapp')
     return (
       <div>
         {/* 工具条 */}

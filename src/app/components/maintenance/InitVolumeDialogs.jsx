@@ -229,13 +229,13 @@ export default class InitVolumeDialogs extends React.Component {
 
       case 'SUCCESS':
         return [<FlatButton
-          label="success 晓得了"
+          label="确定"
           primary onTouchTap={this.props.onRequestClose}
         />]
 
       case 'FAILED':
         return [<FlatButton
-          label="failed 晓得了"
+          label="确定"
           primary onTouchTap={this.props.onRequestClose}
         />]
     }
