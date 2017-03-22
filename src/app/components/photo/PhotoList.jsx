@@ -1,11 +1,17 @@
 import React, { Component, PropTypes } from 'react'
-// import PhotoListByDate from './PhotoListByDate'
+import Debug from 'debug'
+import PhotoListByDate from './PhotoListByDate'
 import Carousel from './Carousel'
 import PhotoDetail from './PhotoDetail'
 import FadingToAnimate from './FadingToAnimate'
 import LazyloadBox from '../scrollLazyload/LazyloadBox'
 import ScrollFlush from '../scrollLazyload/ScrollFlush'
 import { formatDate } from '../../utils/datetime'
+
+const debug = Debug('component:photoApp:PhotoList')
+const findPath = (items, path) => items.findIndex(item => item === path)
+const findPhotosByDate = (photos, date) => photos.filter(photo => formatDate(photo.exifDateTime) === date)
+const detectAllOffChecked = photoListByDates => photoListByDates.every(p => p.detectIsAllOffChecked())
 
 export default class PhotoList extends Component {
   constructor(props) {
@@ -54,7 +60,7 @@ export default class PhotoList extends Component {
       const hasPath = this.state.carouselItems.findIndex(item => item === path) >= 0
 
       hasPath && this.setState((prevState) => {
-        const index = this.findPath(prevState.carouselItems, path)
+        const index = findPath(prevState.carouselItems, path)
 
         return {
           carouselItems: [
@@ -69,15 +75,18 @@ export default class PhotoList extends Component {
       this.seqIndex = seqIndex
     }
 
-    this.renderCarousel = () => (
-      <FadingToAnimate style={this.style.carousel} flag={this.state.carouselItems.length ? 'in' : 'out'}>
-        <Carousel
-          onClearHoverToList={() => { this.photoListByDates.forEach(p => p.removeCheckToAllItem()) }}
-          style={{ backgroundColor: '#fff', height: 180, borderRadius: 4, boxShadow: '0 0 10px rgba(0,0,0,.3)' }}
-          items={this.state.carouselItems}
-        />
-      </FadingToAnimate>
-    )
+    this.renderCarousel = () => {
+      debug('this.renderCarousel')
+      return (
+        <FadingToAnimate style={this.style.carousel} flag={this.state.carouselItems.length ? 'in' : 'out'}>
+          <Carousel
+            onClearHoverToList={() => { this.photoListByDates.forEach(p => p.removeCheckToAllItem()) }}
+            style={{ backgroundColor: '#fff', height: 180, borderRadius: 4, boxShadow: '0 0 10px rgba(0,0,0,.3)' }}
+            items={this.state.carouselItems}
+          />
+        </FadingToAnimate>
+      )
+    }
     this.renderPhotoDetail = photos => photos.length && this.state.activeIndex !== false
         ? (<PhotoDetail
           closeMaskLayer={() => this.setState({ activeIndex: false })}
@@ -95,18 +104,6 @@ export default class PhotoList extends Component {
     return { photos: this.props.photoMapDates }
   }
 
-  findPath(items, path) {
-    return items.findIndex(item => item === path)
-  }
-
-  findPhotosByDate(photos, date) {
-    return photos.filter(photo => formatDate(photo.exifDateTime) === date)
-  }
-
-  detectAllOffChecked(photoListByDates) {
-    return photoListByDates.every(p => p.detectIsAllOffChecked())
-  }
-
   render() {
     return (
       <div style={this.props.style}>
@@ -117,7 +114,7 @@ export default class PhotoList extends Component {
           lookPhotoDetail={this.lookPhotoDetail}
           removeListToSelection={this.removeListToSelection}
           list={this.props.photoMapDates}
-          onDetectAllOffChecked={this.detectAllOffChecked}
+          onDetectAllOffChecked={detectAllOffChecked}
           onGetPhotoListByDates={photoListByDates => this.photoListByDates = photoListByDates}
           onAddHoverToList={(photoListByDates) => { this.photoListByDates = photoListByDates; photoListByDates.forEach(p => p.addHoverToAllItem()) }}
           onRemoveHoverToList={(photoListByDates) => { const isAllOffChecked = photoListByDates.every(p => p.detectIsAllOffChecked()); isAllOffChecked && photoListByDates.forEach(p => p.removeHoverToAllItem()) }}
@@ -127,7 +124,7 @@ export default class PhotoList extends Component {
         </ScrollFlush>
 
         {/* 轮播 */}
-        {this.renderCarousel()}
+        {/* this.renderCarousel() */}
 
         {/* 查看大图 */}
         { this.renderPhotoDetail(this.props.photoMapDates) }
