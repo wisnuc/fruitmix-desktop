@@ -2,12 +2,12 @@
   PhotoItem
 **/
 
-import React, { Component, PropTypes } from 'react';
-import HoverIconButton from './HoverIconButton';
-import SelectIconButton from './SelectIconButton';
-import loading from '../../../assets/images/index/loading.gif';
+import React, { Component, PropTypes } from 'react'
+import HoverIconButton from './HoverIconButton'
+import SelectIconButton from './SelectIconButton'
+import loading from '../../../assets/images/index/loading.gif'
 
-function getStyles () {
+function getStyles() {
   return {
     root: {
       position: 'relative',
@@ -41,7 +41,7 @@ function getStyles () {
     	background: 'linear-gradient(to bottom, rgba(0, 0, 0, .12) 0%, rgba(255, 255, 255, 0) 100%)',
     	left: 0,
     	top: -50,
-    	transition: 'top .2s linear',
+    	transition: 'top .2s linear'
     },
     activeOvlay: {
       top: 0
@@ -53,50 +53,48 @@ const __MAPORIENTATION__ = {
   8: -90,
   3: -180,
   6: 90
-};
+}
 
 export default class PhotoItem extends Component {
   constructor(props, context) {
-    super(props, context);
+    super(props, context)
 
-    this.styles = getStyles();
+    this.styles = getStyles()
     this.state = {
       action: 'pending'
-    };
+    }
 
-    this.findPhotoIndexByDigest = () => {
-      return this.context.photos.findIndex(photo => photo.date === this.props.date)
-    };
+    this.findPhotoIndexByDigest = () => this.context.photos.findIndex(photo => photo.date === this.props.date)
 
     this.addHoverIconButton = () => {
-      this.state.action === 'pending' && this.setState({ action: 'hover' });
-    };
+      this.state.action === 'pending' && this.setState({ action: 'hover' })
+    }
 
     this.removeHoverIconButton = () => {
-      this.state.action === 'hover' && this.props.onDetectAllOffChecked() && this.setState({ action: 'pending' });
-    };
+      this.state.action === 'hover' && this.props.onDetectAllOffChecked() && this.setState({ action: 'pending' })
+    }
 
     this.changeState = () => {
-      const action = this.state.action;
-      props.lookPhotoDetail(this.findPhotoIndexByDigest());
+      const action = this.state.action
+      props.lookPhotoDetail(this.findPhotoIndexByDigest())
       // action === 'hover' && props.onDetectAllOffChecked()
       //   ? props.lookPhotoDetail(this.findPhotoIndexByDigest())
       //   : action === 'on'
       //     ? this.offSelectIconButton()
       //     : this.onSelectIconButton();
-    };
+    }
 
     this.onSelectIconButton = (disabled) => {
       (this.state.action === 'hover'
         || this.state.action === 'pending')
-      && this.setState({ action: 'on' }, () => !disabled && props.selected());
-    };
+      && this.setState({ action: 'on' }, () => !disabled && props.selected())
+    }
 
     this.offSelectIconButton = (disabled, state = 'hover') => {
       if (this.state.action === 'on') {
         this.setState({
           action: state
-        }, () => !disabled && props.unselected());
+        }, () => !disabled && props.unselected())
       }
       // setTimeout(() => {
       //   if (this.state.action === 'on') {
@@ -110,18 +108,19 @@ export default class PhotoItem extends Component {
       //     action: isTo || this.props.onDetectAllOffChecked() ? 'pending' : 'hover'
       //   }, () => !disabled && props.unselected());
       // }
-    };
+    }
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    return nextProps.path !== this.props.path;
+    return nextProps.path !== this.props.path
   }
 
   render() {
-    let component, iconComponent;
+    let component,
+      iconComponent
     const {
       path, style, lookPhotoDetail,
-      index, exifOrientation, width, height } = this.props;
+      index, exifOrientation, width, height } = this.props
 
     if (path) {
       iconComponent = this.state.action === 'pending'
@@ -129,13 +128,15 @@ export default class PhotoItem extends Component {
         : this.state.action === 'hover'
           ? (<HoverIconButton
             style={{ position: 'absolute', zIndex: 100, left: 5, top: 5, width: 18, height: 18, borderRadius: '100%', backgroundColor: 'transparent', border: '1px solid rgba(255,255,255,.54)' }}
-            selectBehavior={ e => { this.onSelectIconButton(); e.stopPropagation(); } } />)
+            selectBehavior={(e) => { this.onSelectIconButton(); e.stopPropagation() }}
+          />)
           : (<SelectIconButton
-            isReceive={ true }
-            ref={ 'selectSingleItem' + index }
-            checked={ this.state.action }
+            isReceive
+            ref={`selectSingleItem${index}`}
+            checked={this.state.action}
             style={{ position: 'absolute', left: 5, top: 5, width: 18, height: 18 }}
-            selectBehavior={ action => this[`${action}SelectIconButton`]() } />)
+            selectBehavior={action => this[`${action}SelectIconButton`]()}
+          />)
             /*
             onMouseOver={ this.addHoverIconButton }
             onMouseLeave={ this.removeHoverIconButton }
@@ -162,31 +163,33 @@ export default class PhotoItem extends Component {
       component = (
         <div
           style={{ position: 'relative', cursor: 'pointer', width: '100%', height: '100%', overflow: 'hidden', textAlign: 'center' }}
-          onClick={ this.changeState }>
+          onClick={this.changeState}
+        >
 
           {/* iconComponent */}
-          <div style={{ height: '50%', width: 0, display: 'inline-block' }}></div>
+          <div style={{ height: '50%', width: 0, display: 'inline-block' }} />
 
-          {/*<div style={{ position: 'absolute', backgroundPosition: `-${clipLeft}px, -${clipTop}px`, backgroundSize: 'cover', backgroundImage: `url(${path})`, width: actualWidth, height: actualHe
+          {/* <div style={{ position: 'absolute', backgroundPosition: `-${clipLeft}px, -${clipTop}px`, backgroundSize: 'cover', backgroundImage: `url(${path})`, width: actualWidth, height: actualHe
           ight }}></div>*/}
           <img
-            src={ path }
-            style={ this.styles.thumb } />
+            src={path}
+            style={this.styles.thumb}
+          />
 
-          <span style={ Object.assign({}, this.styles.ovlay, this.state.action === 'hover' && this.styles.activeOvlay) }></span>
+          <span style={Object.assign({}, this.styles.ovlay, this.state.action === 'hover' && this.styles.activeOvlay)} />
         </div>
-      );
+      )
     } else {
-      component = (<img src={ loading } style={ this.styles.loadingIcon } />);
+      component = (<img src={loading} style={this.styles.loadingIcon} />)
     }
 
     return (
-      <div style={ style }>
-        <div style={ this.styles.root }>
+      <div style={style}>
+        <div style={this.styles.root}>
           { component }
         </div>
       </div>
-    );
+    )
   }
 }
 
@@ -194,12 +197,12 @@ PhotoItem.propTypes = {
   digest: PropTypes.string.isRequired,
   lookPhotoDetail: PropTypes.func,
   showSelectIconButton: PropTypes.func
-};
+}
 
 PhotoItem.contextTypes = {
   photos: PropTypes.Array
-};
+}
 
 PhotoItem.defaultProps = {
   lookPhotoDetail: () => {}
-};
+}

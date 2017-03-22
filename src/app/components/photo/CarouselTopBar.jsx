@@ -2,16 +2,16 @@
   CarouselTopBar.jsx
 **/
 
-import React, { Component, PropTypes } from 'react';
+import React, { Component, PropTypes } from 'react'
 
 export default class CarouselTopBar extends Component {
   shouldComponentUpdate() {
-    return false;
+    return false
   }
 
   render() {
     return (
-      <div style={ this.props.style }>
+      <div style={this.props.style}>
         <div style={{ clear: 'both' }}>
           <div style={{ float: 'left' }}>
             <button disabled style={{ display: 'inline-block', marginRight: 30, padding: '5px 10px', background: '#eee' }}>分享</button>
@@ -23,11 +23,11 @@ export default class CarouselTopBar extends Component {
           </div>
         </div>
       </div>
-    );
+    )
   }
 }
 
 CarouselTopBar.propTypes = {
   style: PropTypes.object,
   onClearHoverToList: PropTypes.func
-};
+}

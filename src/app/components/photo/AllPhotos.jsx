@@ -2,32 +2,32 @@
   所有照片
 **/
 
-import React, { Component, PropTypes } from 'react';
-import { findDOMNode } from 'react-dom';
-import { connect } from 'react-redux';
+import React, { Component, PropTypes } from 'react'
+import { findDOMNode } from 'react-dom'
+import { connect } from 'react-redux'
 
-import Checkbox from '../../React-Redux-UI/src/components/partials/Checkbox';
-import NavigationBar from '../main/NavigationBar';
-import RightPanel from '../main/RightPanel';
-import ImageByDate from '../common/ImageByDate';
+import Checkbox from '../../React-Redux-UI/src/components/partials/Checkbox'
+import NavigationBar from '../main/NavigationBar'
+import RightPanel from '../main/RightPanel'
+import ImageByDate from '../common/ImageByDate'
 // 图片轮播组件
-import Carousel from '../../React-Redux-UI/src/components/transitions/Carousel';
-import AddShareDialog from '../common/Dialog';
-import Mask from '../../React-Redux-UI/src/components/partials/Mask';
-import ImageSwipe from '../common/ImageSwipe';
-import { MenuItem } from 'material-ui';
+import Carousel from '../../React-Redux-UI/src/components/transitions/Carousel'
+import AddShareDialog from '../common/Dialog'
+import Mask from '../../React-Redux-UI/src/components/partials/Mask'
+import ImageSwipe from '../common/ImageSwipe'
+import { MenuItem } from 'material-ui'
 
-import Action from '../../actions/action';
+import Action from '../../actions/action'
 
-import svg from '../../utils/SVGIcon';
+import svg from '../../utils/SVGIcon'
 
-import { formatDate } from '../../utils/datetime';
-import { timeShare } from '../../utils/funcExic';
+import { formatDate } from '../../utils/datetime'
+import { timeShare } from '../../utils/funcExic'
 
-function getStyles () {
+function getStyles() {
   return {
     root: {
-      marginTop: 55,
+      marginTop: 55
     },
     operationBarStyle: {
       padding: '0 55px'
@@ -37,7 +37,7 @@ function getStyles () {
       backgroundColor: '#fff',
     	boxSizing: 'border-box',
     	border: '1px solid #d3d3d3',
-      boxShadow: "0 0 5px rgba(0,0,0,.25)",
+      boxShadow: '0 0 5px rgba(0,0,0,.25)',
     	height: 155
     },
     dragButtonStyle: {
@@ -55,173 +55,173 @@ function getStyles () {
 /**
   生成根据日期时间戳降序，日期字符串作为key的map
 **/
-function getMapByDateTimestamp (arr) {
-  const map = new Map;
-  const result = [];
+function getMapByDateTimestamp(arr) {
+  const map = new Map()
+  const result = []
 
-  for (let item of arr) {
+  for (const item of arr) {
     if (item.datetime != null) {
-      const dateStr = formatDate(item.datetime);
+      const dateStr = formatDate(item.datetime)
 
       if (!map.has(dateStr)) {
-        map.set(dateStr, [ item ]);
+        map.set(dateStr, [item])
       } else {
-        const data = map.get(dateStr);
-        data.push(item);
+        const data = map.get(dateStr)
+        data.push(item)
       }
     }
   }
 
-  let mapKeys = [];
+  let mapKeys = []
 
-  for (let key of map.keys()) {
-    mapKeys.push(key);
+  for (const key of map.keys()) {
+    mapKeys.push(key)
   }
 
-  mapKeys = mapKeys.sort().reverse();
+  mapKeys = mapKeys.sort().reverse()
 
-  for (let key of mapKeys) {
-    result.push( { key: key, data: map.get(key) } );
+  for (const key of mapKeys) {
+    result.push({ key, data: map.get(key) })
   }
 
-  return result;
+  return result
 }
 
 class AllPhotos extends Component {
   constructor(props) {
-    super(props);
+    super(props)
 
-    this.map = props.media ? props.media.data : [];
+    this.map = props.media ? props.media.data : []
     this.state = {
       imageGroup: void 0,
       addShareDialogShowedStatus: false
-    };
+    }
   }
 
   getDragElementRect() {
-    const leftSideBarWidth = 220;
-    const totalGap = 36;
-    const bottom = 10;
-    const rightPanelWidth = window.innerWidth - leftSideBarWidth;
-    const width = rightPanelWidth - totalGap;
-    const originPosLeft = parseInt((rightPanelWidth - width) / 2);
+    const leftSideBarWidth = 220
+    const totalGap = 36
+    const bottom = 10
+    const rightPanelWidth = window.innerWidth - leftSideBarWidth
+    const width = rightPanelWidth - totalGap
+    const originPosLeft = parseInt((rightPanelWidth - width) / 2)
 
     return {
-      width: width,
+      width,
       left: originPosLeft + leftSideBarWidth,
-      bottom: bottom
+      bottom
     }
   }
 
   selectedItemHandle(index, el, date, hasChecked) {
-    const { dispatch } = this.props;
-    const currentYearNodeList = Array.from(document.querySelectorAll('[data-date="'+ date +'"]'));
-    const allNodeList = Array.from(document.querySelectorAll('.image-item'));
+    const { dispatch } = this.props
+    const currentYearNodeList = Array.from(document.querySelectorAll(`[data-date="${date}"]`))
+    const allNodeList = Array.from(document.querySelectorAll('.image-item'))
 
     if (hasChecked) {
-      dispatch(Action.addDragImageItem(el, date, index));
+      dispatch(Action.addDragImageItem(el, date, index))
     } else {
-      dispatch(Action.removeDragImageItem(date, index));
+      dispatch(Action.removeDragImageItem(date, index))
     }
 
     if (hasChecked) {
       dispatch(Action.createFileInfo({
-        type: el.dataset['type'],
-        size: el.dataset['size'],
-        exifDateTime: el.dataset['exifdatetime'],
-        width: el.dataset['width'],
-        height: el.dataset['height']
-      }));
+        type: el.dataset.type,
+        size: el.dataset.size,
+        exifDateTime: el.dataset.exifdatetime,
+        width: el.dataset.width,
+        height: el.dataset.height
+      }))
 
       setTimeout(() => {
-        allNodeList.forEach(node => {
-          node.classList.add('active');
-        });
+        allNodeList.forEach((node) => {
+          node.classList.add('active')
+        })
 
-        const allChecked = currentYearNodeList.every(node => node.querySelector('span').classList.contains('selected-status-widget'));
+        const allChecked = currentYearNodeList.every(node => node.querySelector('span').classList.contains('selected-status-widget'))
 
         if (allChecked) {
-          findDOMNode(this.refs["select_datetime" + '_' + date]).classList.add('selected-status-widget');
-          findDOMNode(this.refs["select_datetime" + '_' + date]).classList.remove('unselected-status-widget');
+          findDOMNode(this.refs[`${'select_datetime' + '_'}${date}`]).classList.add('selected-status-widget')
+          findDOMNode(this.refs[`${'select_datetime' + '_'}${date}`]).classList.remove('unselected-status-widget')
         }
-      }, 0);
+      }, 0)
     } else {
-      const allYearUnChecked = currentYearNodeList.every(node => !node.querySelector('span').classList.contains('selected-status-widget'));
-      const allUnChecked = allNodeList.every(node => !node.querySelector('span').classList.contains('selected-status-widget'));
+      const allYearUnChecked = currentYearNodeList.every(node => !node.querySelector('span').classList.contains('selected-status-widget'))
+      const allUnChecked = allNodeList.every(node => !node.querySelector('span').classList.contains('selected-status-widget'))
 
-      dispatch(Action.clearFileInfo());
+      dispatch(Action.clearFileInfo())
 
       if (allYearUnChecked) {
-        findDOMNode(this.refs["select_datetime" + '_' + date]).classList.remove('selected-status-widget');
-        findDOMNode(this.refs["select_datetime" + '_' + date]).classList.add('unselected-status-widget');
+        findDOMNode(this.refs[`${'select_datetime' + '_'}${date}`]).classList.remove('selected-status-widget')
+        findDOMNode(this.refs[`${'select_datetime' + '_'}${date}`]).classList.add('unselected-status-widget')
       }
 
       if (allUnChecked) {
-        allNodeList.forEach(node => node !== el && node.classList.remove('active')) ;
+        allNodeList.forEach(node => node !== el && node.classList.remove('active'))
       }
     }
   }
 
   cancelSelectedItemHandle(index, date) {
-    const { dispatch } = this.props;
-    const nodeList = Array.from(document.querySelectorAll('[data-date="'+ date +'"]'));
-    const allNodeList = Array.from(document.querySelectorAll('.image-item'));
+    const { dispatch } = this.props
+    const nodeList = Array.from(document.querySelectorAll(`[data-date="${date}"]`))
+    const allNodeList = Array.from(document.querySelectorAll('.image-item'))
 
-    dispatch(Action.removeDragImageItem(date, index));
-    dispatch(Action.clearFileInfo());
+    dispatch(Action.removeDragImageItem(date, index))
+    dispatch(Action.clearFileInfo())
 
-    const unChecked = nodeList.every(node => !node.querySelector('span').classList.contains('selected-status-widget'));
-    const allUnChecked = allNodeList.every(node => !node.querySelector('span').classList.contains('selected-status-widget'));
+    const unChecked = nodeList.every(node => !node.querySelector('span').classList.contains('selected-status-widget'))
+    const allUnChecked = allNodeList.every(node => !node.querySelector('span').classList.contains('selected-status-widget'))
 
     if (unChecked) {
-      findDOMNode(this.refs["select_datetime" + '_' + date]).classList.remove('selected-status-widget');
-      findDOMNode(this.refs["select_datetime" + '_' + date]).classList.add('unselected-status-widget');
+      findDOMNode(this.refs[`${'select_datetime' + '_'}${date}`]).classList.remove('selected-status-widget')
+      findDOMNode(this.refs[`${'select_datetime' + '_'}${date}`]).classList.add('unselected-status-widget')
     }
 
     if (allUnChecked) {
-      allNodeList.forEach(node => node.classList.remove('active'));
+      allNodeList.forEach(node => node.classList.remove('active'))
     }
   }
 
   detectImageItemActive(date) {
-    const imageItemEls = Array.prototype.slice.call(document.querySelectorAll('[data-date="'+ date +'"]'));
-    const hasSelectedLength = imageItemEls.filter(el => el.classList.contains('active')).length;
+    const imageItemEls = Array.prototype.slice.call(document.querySelectorAll(`[data-date="${date}"]`))
+    const hasSelectedLength = imageItemEls.filter(el => el.classList.contains('active')).length
 
-    return !!hasSelectedLength;
+    return !!hasSelectedLength
   }
 
   dragEndHandle(date, index, left, top, dragedEl) {
-    const width = parseInt(dragedEl.offsetWidth);
-    const height = parseInt(dragedEl.offsetHeight);
+    const width = parseInt(dragedEl.offsetWidth)
+    const height = parseInt(dragedEl.offsetHeight)
 
     // 检测是否超出了容器
-    const container = this.getDragElementRect();
-    const containerTop = this.dragEl.getBoundingClientRect().top + window.pageYOffset;
-    const containerHeight = this.dragEl.getBoundingClientRect().height;
+    const container = this.getDragElementRect()
+    const containerTop = this.dragEl.getBoundingClientRect().top + window.pageYOffset
+    const containerHeight = this.dragEl.getBoundingClientRect().height
 
-    const detectLeft = (width + left) >= container.left;
-    const detectRight = left <= container.left + container.width;
-    const detectTop = (width + top) >= containerTop;
-    const detectBottom = top <= containerTop + containerHeight;
+    const detectLeft = (width + left) >= container.left
+    const detectRight = left <= container.left + container.width
+    const detectTop = (width + top) >= containerTop
+    const detectBottom = top <= containerTop + containerHeight
 
     if (!detectLeft || !detectRight || !detectTop || !detectBottom) {
       // 拖拽元素全部超出容器
-      findDOMNode(this.refs[date + '-' + index]).classList.remove('active');
-      findDOMNode(this.refs[date + '-' + index]).classList.remove('show');
+      findDOMNode(this.refs[`${date}-${index}`]).classList.remove('active')
+      findDOMNode(this.refs[`${date}-${index}`]).classList.remove('show')
 
-      const currentYearNodeList = Array.from(document.querySelectorAll('[data-date="'+ date +'"]'));
-      const unChecked = currentYearNodeList.every(node => !node.classList.contains('show'));
+      const currentYearNodeList = Array.from(document.querySelectorAll(`[data-date="${date}"]`))
+      const unChecked = currentYearNodeList.every(node => !node.classList.contains('show'))
 
       if (unChecked) {
-        this.refs['select_datetime' + '_' + date].setState({ checked: false });
+        this.refs[`${'select_datetime' + '_'}${date}`].setState({ checked: false })
       }
 
-      dispatch(Action.removeDragImageItem(date, index));
+      dispatch(Action.removeDragImageItem(date, index))
     }
   }
 
   shareActionHandle() {
-    this.setState({ addShareDialogShowedStatus: true });
+    this.setState({ addShareDialogShowedStatus: true })
     // const { imageItem, login } = this.props;
     // const shareType = Array
     //   .from(document.querySelectorAll('.share-type'))
@@ -244,26 +244,26 @@ class AllPhotos extends Component {
   }
 
   albumActionHandle() {
-    const { imageItem, login, node } = this.props;
+    const { imageItem, login, node } = this.props
     const shareType = Array
       .from(document.querySelectorAll('.share-type'))
       .find(node => node.firstElementChild.checked)
       .firstElementChild
-      .value;
-    const imageDigestList = imageItem.map(imageObj => imageObj.el.dataset['hash']);
-    let peoples;
+      .value
+    const imageDigestList = imageItem.map(imageObj => imageObj.el.dataset.hash)
+    let peoples
 
     if (shareType === 'custom') {
       peoples = Array
         .from(document.querySelectorAll('.user-select'))
-        .filter(node => node.checked).map(node => node.value);
+        .filter(node => node.checked).map(node => node.value)
     } else {
       // peoples = login.obj.users.filter(user => user.uuid !== login.obj.uuid).map(user => user.uuid);
       peoples = node.server.users.filter(user => user.uuid !== login.obj.uuid).map(user => user.uuid)
     }
 
-    ipc.send('createMediaShare', imageDigestList, peoples, {});
-    this.clearAllSelectedItem();
+    ipc.send('createMediaShare', imageDigestList, peoples, {})
+    this.clearAllSelectedItem()
   }
 
   createShareDialog() {
@@ -271,64 +271,64 @@ class AllPhotos extends Component {
       return (
         <AddShareDialog
           caption="分享相片"
-          content={ this.createShareContent() }
+          content={this.createShareContent()}
           style={{ width: 420, zIndex: 1200 }}
-          foot={ this.createShareFoot() }
+          foot={this.createShareFoot()}
           orientation="custom"
-          onClose={ function () {} }>
-        </AddShareDialog>
-      );
+          onClose={function () {}}
+        />
+      )
     }
   }
 
   createShareContent() {
-    return (<div>1</div>);
+    return (<div>1</div>)
   }
 
   createShareFoot() {
-    return (<div>2</div>);
+    return (<div>2</div>)
   }
 
   createCarouselComponent() {
-    const { imageItem, dispatch } = this.props;
+    const { imageItem, dispatch } = this.props
 
     if (imageItem && imageItem.length) {
-      const { dragStyle, dragButtonStyle, operationBarStyle } = getStyles();
-      const dragElementRect = this.getDragElementRect();
-      const newDragStyle = Object.assign({}, dragStyle, dragElementRect, { bottom: 0 });
-      const clearAllButtonStyle = Object.assign({}, dragButtonStyle, { marginRight: 0 });
+      const { dragStyle, dragButtonStyle, operationBarStyle } = getStyles()
+      const dragElementRect = this.getDragElementRect()
+      const newDragStyle = Object.assign({}, dragStyle, dragElementRect, { bottom: 0 })
+      const clearAllButtonStyle = Object.assign({}, dragButtonStyle, { marginRight: 0 })
 
       return (
-        <div ref={ el => this.dragEl = el } className="image-selected" style={ newDragStyle }>
-          <div className="image-operation clearfix" style={ operationBarStyle }>
+        <div ref={el => this.dragEl = el} className="image-selected" style={newDragStyle}>
+          <div className="image-operation clearfix" style={operationBarStyle}>
             <div className="operations fl">
-              <div className="action-btn" title="分享" onClick={ this.shareActionHandle.bind(this) }>
+              <div className="action-btn" title="分享" onClick={this.shareActionHandle.bind(this)}>
                 <MenuItem
-                  desktop={ true }
-                  leftIcon={ svg.share() }>
-                </MenuItem>
+                  desktop
+                  leftIcon={svg.share()}
+                />
               </div>
 
-              <div className="action-btn" title="相册" onClick={ this.albumActionHandle.bind(this) }>
+              <div className="action-btn" title="相册" onClick={this.albumActionHandle.bind(this)}>
                 <MenuItem
-                  desktop={ true }
-                  leftIcon={ svg.album() }>
-                </MenuItem>
+                  desktop
+                  leftIcon={svg.album()}
+                />
               </div>
 
-              {/*<div className="action-btn" title="下载">
+              {/* <div className="action-btn" title="下载">
                 <MenuItem
                   desktop={ true }
                   leftIcon={ svg.selectedDownload() }>
                 </MenuItem>
               </div>*/}
             </div>
-            <div className="clear-operation fr" onClick={ this.clearAllSelectedItem.bind(this) } style={{ marginTop: 10 }}>
+            <div className="clear-operation fr" onClick={this.clearAllSelectedItem.bind(this)} style={{ marginTop: 10 }}>
               <MenuItem
                 className="action-btn"
-                desktop={ true }
-                leftIcon={ svg.deleteAll() }>
-              </MenuItem>
+                desktop
+                leftIcon={svg.deleteAll()}
+              />
               <label>清除全部</label>
             </div>
           </div>
@@ -336,16 +336,17 @@ class AllPhotos extends Component {
             {/* 图片轮播 */}
             <Carousel
               className="carousel"
-              data={ imageItem }
-              dispatch={ dispatch }
-              height={ 75 }
-              onDragEnd={ this.dragEndHandle.bind(this) }
-              width={ dragElementRect.width - 2 }>
-            </Carousel>
+              data={imageItem}
+              dispatch={dispatch}
+              height={75}
+              onDragEnd={this.dragEndHandle.bind(this)}
+              width={dragElementRect.width - 2}
+            />
           </div>
           <div
             className="text-bar"
-            style={{ textAlign: 'center', fontSize: 12, marginTop: 10, color: '#757575'  }}>
+            style={{ textAlign: 'center', fontSize: 12, marginTop: 10, color: '#757575' }}
+          >
               选中
               <label style={{ fontSize: 14 }}>
                 { imageItem.length }
@@ -353,52 +354,52 @@ class AllPhotos extends Component {
               张图片
           </div>
         </div>
-      );
+      )
     }
   }
 
   clearAllSelectedItem() {
-    const { dispatch } = this.props;
-    const nodelist = Array.from(document.querySelectorAll('.image-item'));
-    nodelist.forEach(node => {
+    const { dispatch } = this.props
+    const nodelist = Array.from(document.querySelectorAll('.image-item'))
+    nodelist.forEach((node) => {
       node.classList.remove('active')
-      node.classList.remove('show');
-    });
+      node.classList.remove('show')
+    })
 
-    Object.keys(this.refs).forEach(key => {
-      key.indexOf('select_datetime') >= 0 && this.refs[key].setState({ checked: false });
-    });
+    Object.keys(this.refs).forEach((key) => {
+      key.indexOf('select_datetime') >= 0 && this.refs[key].setState({ checked: false })
+    })
 
-    dispatch(Action.clearDragImageItem());
+    dispatch(Action.clearDragImageItem())
   }
 
   scrollTo() {
     if (this.mounted || this.mounted === void 0) {
-      let store = {
+      const store = {
         dateStr: [],
         data: []
-      };
+      }
 
-      let tmp = this.map;
+      const tmp = this.map
 
-      let tmpKeys = tmp.map(t =>
+      const tmpKeys = tmp.map(t =>
         formatDate(t.exifDateTime)
-      );
+      )
 
-      let uniqueKeys = tmpKeys.filter((key, index) =>
+      const uniqueKeys = tmpKeys.filter((key, index) =>
         !index || tmpKeys.indexOf(key) === index
-      );
+      )
 
-      uniqueKeys.forEach(key => {
-        key && store.dateStr.push(key);
-      });
+      uniqueKeys.forEach((key) => {
+        key && store.dateStr.push(key)
+      })
 
-      store.data = tmp.slice(0, 200);
-      store.dateStr = store.dateStr.filter(date => !!store.data.find(obj => formatDate(obj.exifDateTime) === date));
+      store.data = tmp.slice(0, 200)
+      store.dateStr = store.dateStr.filter(date => !!store.data.find(obj => formatDate(obj.exifDateTime) === date))
 
       this.setState({
         imageGroup: store
-      });
+      })
       // 每一时段显示多少个数据
       // timeShare(store.data, (medias) => {
       //   this.setState({
@@ -413,117 +414,113 @@ class AllPhotos extends Component {
   }
 
   changedHandle(date, e) {
-    const { dispatch } = this.props;
-    const checkedEls = [];
-    const currentYearNodeList = Array.from(document.querySelectorAll('[data-date="'+ date +'"]'));
-    const allNodeList = Array.from(document.querySelectorAll('.image-item'));
-    const node = e.currentTarget.querySelectorAll('span')[0];
+    const { dispatch } = this.props
+    const checkedEls = []
+    const currentYearNodeList = Array.from(document.querySelectorAll(`[data-date="${date}"]`))
+    const allNodeList = Array.from(document.querySelectorAll('.image-item'))
+    const node = e.currentTarget.querySelectorAll('span')[0]
     const className = node.classList.contains('selected-status-widget')
       ? 'unselected-status-widget'
-      : 'selected-status-widget';
+      : 'selected-status-widget'
 
-    node.classList.add('select-status-widget');
-    node.classList.add(className);
-    node.classList.remove(className === 'selected-status-widget' ? 'unselected-status-widget' : 'selected-status-widget');
-    const checked = node.classList.contains('selected-status-widget');
-    let checkedNodeList;
+    node.classList.add('select-status-widget')
+    node.classList.add(className)
+    node.classList.remove(className === 'selected-status-widget' ? 'unselected-status-widget' : 'selected-status-widget')
+    const checked = node.classList.contains('selected-status-widget')
+    let checkedNodeList
 
-    dispatch(Action.clearFileInfo());
+    dispatch(Action.clearFileInfo())
 
     allNodeList.forEach((node, index) => {
       if (node.dataset.date.indexOf(date) == 0) {
         if (!checked) {
-          node.querySelector('span').classList.remove('select-status-widget');
-          node.querySelector('span').classList.remove('selected-status-widget');
+          node.querySelector('span').classList.remove('select-status-widget')
+          node.querySelector('span').classList.remove('selected-status-widget')
         } else {
-          checkedEls.push(node);
-          node.classList.add('active');
-          node.querySelector('span').classList.add('select-status-widget');
-          node.querySelector('span').classList.add('selected-status-widget');
+          checkedEls.push(node)
+          node.classList.add('active')
+          node.querySelector('span').classList.add('select-status-widget')
+          node.querySelector('span').classList.add('selected-status-widget')
         }
-      } else {
-        if (checked) {
-          node.classList.add('active');
-        }
+      } else if (checked) {
+        node.classList.add('active')
       }
-    });
+    })
 
     if (!checked) {
-      checkedNodeList = allNodeList.filter(node => node.classList.contains('show'));
+      checkedNodeList = allNodeList.filter(node => node.classList.contains('show'))
 
       allNodeList.forEach((node, index) => {
         if (!checkedNodeList.length) {
-          node.classList.remove('active');
+          node.classList.remove('active')
         }
-      });
+      })
     }
 
     if (checked) {
-      dispatch(Action.addDragImageList(checkedEls, date));
+      dispatch(Action.addDragImageList(checkedEls, date))
     } else {
-      dispatch(Action.removeDragImageList(date));
+      dispatch(Action.removeDragImageList(date))
     }
   }
 
   viewLargeImageHandle(date, currentThumbIndex, hash) {
-    const { dispatch } = this.props;
+    const { dispatch } = this.props
 
-    dispatch(Action.getLargeImageList(document.querySelectorAll('.image-item'), currentThumbIndex, date, hash));
+    dispatch(Action.getLargeImageList(document.querySelectorAll('.image-item'), currentThumbIndex, date, hash))
   }
 
   createImageByDateComponent() {
-    let component;
+    let component
 
     if (this.state.imageGroup) {
-      const dateStr = this.state.imageGroup.dateStr;
-      const imageGroup = this.state.imageGroup.data;
+      const dateStr = this.state.imageGroup.dateStr
+      const imageGroup = this.state.imageGroup.data
 
       if (dateStr.length) {
-        component = dateStr.map((date, index) => {
-          return (
-            <div className="clearfix">
-              <div style={{ margin: '0 0 8px', fontFamily: 'helvetica', color: '#6d6d6d', fontSize: 12, lineHeight: '20px' }}>
-                <div onClick={ this.changedHandle.bind(this, date) }>
-                  <span ref={ "select_datetime" + '_' + date } className="status-widget select-status-widget unselected-status-widget">
-                     <i></i>
-                  </span>
-                  <span style={{ marginLeft: 10 }}>{ date }</span>
-                </div>
+        component = dateStr.map((date, index) => (
+          <div className="clearfix">
+            <div style={{ margin: '0 0 8px', fontFamily: 'helvetica', color: '#6d6d6d', fontSize: 12, lineHeight: '20px' }}>
+              <div onClick={this.changedHandle.bind(this, date)}>
+                <span ref={`${'select_datetime' + '_'}${date}`} className="status-widget select-status-widget unselected-status-widget">
+                  <i />
+                </span>
+                <span style={{ marginLeft: 10 }}>{ date }</span>
+              </div>
 
-                {/*<Checkbox ref={ "select_datetime" + '_' + date }
+              {/* <Checkbox ref={ "select_datetime" + '_' + date }
                  key={ index }
                  value={ date }
                  text={ date }
                  onChange={ this.changedHandle.bind(this) }>
                 </Checkbox>*/}
-              </div>
-              <div style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start', marginBottom: 15 }}>
-                {
+            </div>
+            <div style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start', marginBottom: 15 }}>
+              {
                   imageGroup.map((entry, index) => {
                     if (formatDate(entry.exifDateTime) === date) {
                       return (
                         <ImageByDate
-                          key={ '' + index + index }
-                          date={ date }
-                          dataIndex={ index }
-                          ref={ date + '-' + index }
-                          figureItem={ entry }
-                          onSelectedItem={ this.selectedItemHandle.bind(this) }
-                          onCancelSelectedItem={ this.cancelSelectedItemHandle.bind(this) }
-                          onViewLargeImage={ this.viewLargeImageHandle.bind(this) }
-                          detectImageItemActive={ this.detectImageItemActive }
-                          hash={ entry.digest }
-                          dispatch={ this.props.dispatch }
-                          state={this.props.state}>
-                        </ImageByDate>
+                          key={`${index}${index}`}
+                          date={date}
+                          dataIndex={index}
+                          ref={`${date}-${index}`}
+                          figureItem={entry}
+                          onSelectedItem={this.selectedItemHandle.bind(this)}
+                          onCancelSelectedItem={this.cancelSelectedItemHandle.bind(this)}
+                          onViewLargeImage={this.viewLargeImageHandle.bind(this)}
+                          detectImageItemActive={this.detectImageItemActive}
+                          hash={entry.digest}
+                          dispatch={this.props.dispatch}
+                          state={this.props.state}
+                        />
                       )
                     }
                   })
                 }
-              </div>
             </div>
-          );
-        });
+          </div>
+          ))
       }
     }
 
@@ -531,71 +528,71 @@ class AllPhotos extends Component {
       <div className="image-group">
         {/* navigation bar */}
         <NavigationBar
-          dispatch={ this.props.dispatch }
-          navigationBarTitleTexts={ this.props.navigationBarTitleTexts }
-          navigationBarHorizontalPadding={ 18 }
-          hasIconAble={ true }
-          onShowedRightPanel={ this.showedRightPanelHandler.bind(this) }>
-        </NavigationBar>
+          dispatch={this.props.dispatch}
+          navigationBarTitleTexts={this.props.navigationBarTitleTexts}
+          navigationBarHorizontalPadding={18}
+          hasIconAble
+          onShowedRightPanel={this.showedRightPanelHandler.bind(this)}
+        />
         { this.createShareDialog() }
         {/* right panel */}
-        {/*<RightPanel ref="rightPanel" width={ 230 } dispatch={ this.props.dispatch } shareRadios={ this.props.shareRadios }></RightPanel>*/}
+        {/* <RightPanel ref="rightPanel" width={ 230 } dispatch={ this.props.dispatch } shareRadios={ this.props.shareRadios }></RightPanel>*/}
 
-        <div style={ getStyles().root }>
+        <div style={getStyles().root}>
           { component }
         </div>
       </div>
-    );
+    )
   }
 
   shutdownMaskHandle() {
-    const { dispatch } = this.props;
+    const { dispatch } = this.props
 
-    dispatch(Action.toggleMedia(false));
-    dispatch(Action.removeLargeImageList());
+    dispatch(Action.toggleMedia(false))
+    dispatch(Action.removeLargeImageList())
   }
 
   createMaskComponent() {
-    const { largeImages } = this.props;
+    const { largeImages } = this.props
 
     if (largeImages.data && largeImages.data.length) {
       return (
-        <Mask className="large-image-mask" onShutdown={ this.shutdownMaskHandle.bind(this) }></Mask>
-      );
+        <Mask className="large-image-mask" onShutdown={this.shutdownMaskHandle.bind(this)} />
+      )
     }
   }
 
   createImageSwipeComponent() {
-    const { largeImages } = this.props;
+    const { largeImages } = this.props
 
     if (largeImages.data && largeImages.data.length) {
       return (
         <ImageSwipe
-          width={ 960 }
-          height={ 700 }>
-        </ImageSwipe>
-      );
+          width={960}
+          height={700}
+        />
+      )
     }
   }
 
   showedRightPanelHandler() {
-    this.refs.rightPanel && findDOMNode(this.refs.rightPanel).lastElementChild.classList.toggle('active');
+    this.refs.rightPanel && findDOMNode(this.refs.rightPanel).lastElementChild.classList.toggle('active')
   }
 
   componentDidMount() {
-    this.mounted = true;
-    this.scrollTo();
+    this.mounted = true
+    this.scrollTo()
   }
 
   componentWillUnmount() {
-    this.mounted = false;
-    this.clearAllSelectedItem();
+    this.mounted = false
+    this.clearAllSelectedItem()
   }
 
   componentWillReceiveProps(nextProps) {
-    this.map = nextProps.media ? nextProps.media.data : [];
+    this.map = nextProps.media ? nextProps.media.data : []
 
-    this.scrollTo();
+    this.scrollTo()
   }
 
   render() {
@@ -606,21 +603,21 @@ class AllPhotos extends Component {
         { this.createMaskComponent() }
         { this.createImageSwipeComponent() }
       </div>
-    );
+    )
   }
 }
 
-var mapStateToProps = (state)=>({
-       //state: state,
-     media: state.media,
-     navigation: state.navigation,
-     view: state.view,
-     imageItem: state.imageItem,
-     largeImages: state.largeImages,
-     navigationBarTitleTexts: state.navigationBarTitleTexts,
-     shareRadios: state.shareRadio,
-     shareComponentEnterAnimateAble: state.shareComponentEnterAnimateAble,
-     login: state.login
+const mapStateToProps = state => ({
+       // state: state,
+  media: state.media,
+  navigation: state.navigation,
+  view: state.view,
+  imageItem: state.imageItem,
+  largeImages: state.largeImages,
+  navigationBarTitleTexts: state.navigationBarTitleTexts,
+  shareRadios: state.shareRadio,
+  shareComponentEnterAnimateAble: state.shareComponentEnterAnimateAble,
+  login: state.login
 })
 
-export default connect(mapStateToProps)(AllPhotos);
+export default connect(mapStateToProps)(AllPhotos)
