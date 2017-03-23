@@ -53,10 +53,11 @@ const sendMsg = () => {
   mainWindow.webContents.send('UPDATE_UPLOAD', userTasks.map(item => item.getSummary()), finishTasks.map(i => i.getSummary?i.getSummary():i))
 }
 
-const createTask = (abspath, target, newWork,type) => {
+const createTask = (abspath, target, newWork, type, u, r) => {
 	initArgs()
-	let taskUUID = uuid.v4()
-	let task = new TaskManager(abspath, target, true, taskUUID, type)
+	let taskUUID = u?u:uuid.v4()
+	let uploadRecord = r?r:[]
+	let task = new TaskManager(taskUUID, abspath, target, type, true, uploadRecord)
 	task.createStore()
 	userTasks.push(task)
 	task.readyToVisit()
@@ -75,14 +76,14 @@ const createTask = (abspath, target, newWork,type) => {
 	schedule(): schedule work list
 */
 class TaskManager {
-	constructor(abspath, target, newWork, uuid, type) {
+	constructor(uuid, abspath, target, type, newWork, uploadRecord) {
+		this.uuid = uuid
 		this.abspath = abspath
 		this.target = target
-		this.newWork = newWork
-		this.uuid = uuid
 		this.type = type
 		this.name = path.basename(abspath)
-
+		this.newWork = newWork
+		
 		this.size = 0
 		this.completeSize = 0
 		this.lastTimeSize = 0
@@ -94,15 +95,16 @@ class TaskManager {
 		this.finishCount = 0
 		this.finishDate = null
 
-		this.tree = []
-		this.worklist = []
 		this.fileIndex = 0
 		this.hashIndex = 0
 		this.lastFolderIndex = -1
 		this.lastFileIndex = -1
+		this.tree = []
+		this.worklist = []
 		this.hashing = []
 		this.uploading = []
 		this.record = []
+		this.uploadRecord = uploadRecord
 
 		this.countSpeed = setInterval(() => {
 			let s = (this.completeSize - this.lastTimeSize) / 1
@@ -147,7 +149,7 @@ class TaskManager {
 		this.recordInfor('开始遍历文件树...')
 		removeOutOfVisitlessQueue(this)
 		addToVisitingQueue(this)
-		visitFolder(this.abspath, this.tree, this.worklist, this, () => {
+		visitFolder(this.abspath, this.tree, this.worklist, this, (err, data) => {
 			_this.tree[0].target = _this.target
 			removeOutOfVisitingQueue(this)
 			_this.recordInfor('遍历文件树结束...')

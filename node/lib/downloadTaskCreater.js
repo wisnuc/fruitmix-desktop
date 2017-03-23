@@ -55,6 +55,7 @@ const sendMsg = () => {
 //new job :init manager with default parameter
 //old job :init manager with defined parameter(uuid, dwonloadpath, downloading information)
 const createTask = (target, name, size, type, newWork, p, u, d) => {
+	console.log(size)
 	initArgs()
 	let taskUUID = u?u:uuid.v4()
 	let abspath = p?p:store.getState().config.download
@@ -67,18 +68,18 @@ const createTask = (target, name, size, type, newWork, p, u, d) => {
 }
 
 class TaskManager {
-	constructor(taskUUID, downloadPath, target, name, size, type, newWork, downloadingList) {
+	constructor(taskUUID, downloadPath, target, name, rootSize, type, newWork, downloadingList) {
 		this.uuid = taskUUID
 		this.downloadPath = downloadPath
 		this.target = target
 		this.name = name
-		this.size = 0
-		this.rootSize = size
+		this.rootSize = rootSize //for visit
 		this.type = type
 		this.newWork = newWork
 
+		this.size = 0
 		this.completeSize = 0
-		this.lastTimeSize = 0
+		this.lastTimeSize = 0 // for count speed
 		this.speed = ''
 		this.restTime = ''
 		this.state = ''
@@ -91,7 +92,7 @@ class TaskManager {
 		this.tree = []
 		this.worklist = []
 		this.downloading = []
-		this.downloadingList = downloadingList
+		this.downloadingList = downloadingList //for continue downloading
 		this.record = []
 
 		this.countSpeed = setInterval(() => {
@@ -99,10 +100,10 @@ class TaskManager {
 			this.speed = utils.formatSize(s) + ' / 秒'
 			this.restTime = utils.formatSeconds((this.size - this.completeSize) / s)
 			this.lastTimeSize = this.completeSize
-			// console.log(this.speed)
 		}, 1000)
 	}
 
+	// summary send to browser
 	getSummary() {
 		return {
 			uuid: this.uuid,
@@ -120,17 +121,20 @@ class TaskManager {
 		}
 	}
 
+	//record log information
 	recordInfor(msg) {
 		if (this.record.length > 50) this.record.splice(0,20)
 		console.log(msg)
 		this.record.push(msg)
 	}
 
+	//add to visit queue
 	readyToVisit() {
 		this.state = 'visitless'
 		addToVisitlessQueue(this)
 	}
 
+	//consist tree from server
 	visit() {
 		this.state = 'visiting'
 		let _this = this
@@ -142,8 +146,13 @@ class TaskManager {
 			_this.tree[0].downloadPath = _this.downloadPath
 			removeOutOfVisitingQueue(this)
 			_this.recordInfor('遍历文件树结束...')
-			_this.state = 'visited'
-			_this.diff()
+			fs.readdir(this.downloadPath, (err, files) => {
+				if (err) return this.recordInfor('下载目录未找到')
+				console.log(files)
+				isFileNameExist(this.tree[0].name, files)
+				_this.diff()	
+			})
+			
 		})
 	}
 
@@ -156,7 +165,7 @@ class TaskManager {
 					this.schedule()
 				}else {
 					if (stat.isFile()) {
-						this.recordInfor('文件下载任务 重新下载文件')
+						this.recordInfor('文件下载任务 继续下载文件')
 						this.schedule()
 					}else {
 						this.recordInfor('文件夹下载任务 查找本地已下载文件信息')
@@ -164,12 +173,12 @@ class TaskManager {
 						visitLocalFiles(path.join(this.downloadPath, this.name), localObj, (err) => {
 							if (err) {
 								this.recordInfor('校验本地文件出错')
+								this.schedule()
 							}else {
 								this.recordInfor('校验本地文件结束')
 								diffTree(this.tree[0], localObj[0], this, err => {
 									if (err) console.log(err)
-										this.schedule()
-									// console.log(this.tree[0])
+									this.schedule()
 								})
 							}
 						})
@@ -253,7 +262,7 @@ class TaskManager {
 			downloadPath: this.downloadPath,
 			target: this.target,
 			name: this.name,
-			size: this.size,
+			rootSize: this.rootSize,
 			type: this.type,
 			downloading: downloadingArr,
 			finishDate: this.finishDate
@@ -293,8 +302,9 @@ const visitTask = (target, name, type, size, position, manager, callback) => {
 	manager.count++
 	manager.size += size
 	let obj = type === 'file'?
-  	new FileDownloadTask(type, target, name, size, manager):
-  	new FolderDownloadTask(type, target, name, size, manager)
+  	new FileDownloadTask(target, name, type, size, manager):
+  	new FolderDownloadTask(target, name, type, size, manager)
+
   let index = manager.downloadingList.findIndex(item => item.target === target)
   if (index !== -1) {
   	// may be local file has been removed
@@ -384,12 +394,13 @@ const diffTree = (taskPosition, localPosition, manager ,callback) => {
 }
 
 class DownloadTask {
-	constructor(type, target, name, size, manager) {
-		this.type = type
-		this.name = name
+	constructor(target, name, type, size, manager) {
 		this.target = target
-		this.manager = manager
+		this.name = name
+		this.type = type
 		this.size = size
+		this.manager = manager
+		
 		this.downloadPath = ''
 		this.state = null
     this.stateName = ''

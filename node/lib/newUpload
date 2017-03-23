@@ -42,7 +42,6 @@ const uploadHandle = (args, callback) => {
 
 const dragFileHandle = (args) => {
 	if (!args.files.length) return
-	// return
   let index = 0
   let loop = () => {
     let filePath = path.normalize(args.files[index])
@@ -54,7 +53,7 @@ const dragFileHandle = (args) => {
       }
       if (stat.isDirectory()) type='folder'
       else type = 'file'
-      createTask(filePath,args.dirUUID, true, type)
+      createTask(filePath,args.dirUUID, type, true)
       index++
       if (index == args.files.length) return getMainWindow().webContents.send('message', args.files.length + '个任务添加至上传队列')
       loop()

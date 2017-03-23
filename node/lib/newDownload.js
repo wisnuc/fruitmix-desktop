@@ -41,7 +41,7 @@ const getTransmissionHandle = (args, callback) => {
 	db.downloading.find({}, (err, tasks) => {
 		if(err) return
 		tasks.forEach(item => 
-			createTask(item.target, item.name, item.size, item.type, false, item.downloadPath, item._id, item.downloading))
+			createTask(item.target, item.name, item.rootSize, item.type, false, item.downloadPath, item._id, item.downloading))
 	})
 
 	db.downloaded.find({}, (err, tasks) => {
