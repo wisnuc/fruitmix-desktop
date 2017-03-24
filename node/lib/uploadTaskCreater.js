@@ -53,7 +53,7 @@ const sendMsg = () => {
   mainWindow.webContents.send('UPDATE_UPLOAD', userTasks.map(item => item.getSummary()), finishTasks.map(i => i.getSummary?i.getSummary():i))
 }
 
-const createTask = (abspath, target, newWork, type, u, r) => {
+const createTask = (abspath, target, type, newWork, u, r) => {
 	initArgs()
 	let taskUUID = u?u:uuid.v4()
 	let uploadRecord = r?r:[]
@@ -84,7 +84,7 @@ class TaskManager {
 		this.name = path.basename(abspath)
 		this.newWork = newWork
 		
-		this.size = 0
+		this.size = 0//not need rootsize for visit 
 		this.completeSize = 0
 		this.lastTimeSize = 0
 		this.speed = ''
@@ -175,6 +175,21 @@ class TaskManager {
 			if (this.worklist[i].type === 'folder') this.lastFolderIndex = i
 		}
 
+		this.schedule()
+	}
+
+	pauseTask() {
+		this.pause = true
+		this.downloading.forEach(work => {
+			if (work.type === 'file') work.pause()
+		})
+	}
+
+	resumeTask() {
+		this.pause = false
+		this.downloading.forEach(work => {
+			if (work.type === 'file') work.resume() 
+		})
 		this.schedule()
 	}
 
@@ -353,6 +368,7 @@ class FileUploadTask extends UploadTask{
 		this.progress = 0
 		this.seek = 0
 		this.sha = ''
+		this.parts = []
 	}
 
 	hashFinish() {
@@ -412,9 +428,6 @@ class HashSTM extends STM {
 				console.log('hash error!')
 				console.log(err)
 			})
-
-
-			// this.wrapper.sha = await utils.hashFile(this.wrapper.abspath)
 			
 		}
 		catch(e) {
@@ -537,7 +550,7 @@ const scheduleHttpRequest = () => {
 
 const scheduleFileHash = () => {
   while (hashingQueue.length < fileHashConcurrency && hashlessQueue.length) {
-    hashlessQueue[0].hashing()
+    console.log(hashlessQueue[0].hashing())
    }
 }
 

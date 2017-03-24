@@ -30,6 +30,7 @@ const transmission = (state = defaultState, action)=>{
 				uploadFinish:action.uploadFinish == undefined?state.uploadFinish:action.uploadFinish})
 
 		case 'UPDATE_UPLOAD':
+			console.log(action.userTasks)
 			return Object.assign({}, state, {
 				uploadingTasks: action.userTasks,
 				uploadedTasks: action.finishTasks

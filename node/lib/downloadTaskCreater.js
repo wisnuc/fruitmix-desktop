@@ -146,13 +146,7 @@ class TaskManager {
 			_this.tree[0].downloadPath = _this.downloadPath
 			removeOutOfVisitingQueue(this)
 			_this.recordInfor('遍历文件树结束...')
-			fs.readdir(this.downloadPath, (err, files) => {
-				if (err) return this.recordInfor('下载目录未找到')
-				console.log(files)
-				isFileNameExist(this.tree[0].name, files)
-				_this.diff()	
-			})
-			
+			this.diff()
 		})
 	}
 
@@ -162,7 +156,7 @@ class TaskManager {
 			fs.stat(path.join(this.downloadPath, this.name), (err, stat) => {
 				if (err) {
 					this.recordInfor('已下载的文件查找错误')
-					this.schedule()
+					this.checkNameExist()
 				}else {
 					if (stat.isFile()) {
 						this.recordInfor('文件下载任务 继续下载文件')
@@ -186,9 +180,20 @@ class TaskManager {
 				}
 			})
 		}else {
-			this.recordInfor('新任务 不需要与服务器进行比较')
-			this.schedule()
+			this.recordInfor('新任务 不需要与服务器进行比较, 检查文件名是否重复')
+			this.checkNameExist()	
 		}
+	}
+
+	checkNameExist() {
+		fs.readdir(this.downloadPath, (err, files) => {
+			if (err) return this.recordInfor('下载目录未找到')
+			let name = isFileNameExist(this.tree[0], 0, files)
+			this.tree[0].name = name
+			this.name = name
+			this.updateStore()
+			this.schedule()
+		})
 	}
 
 	pauseTask() {
@@ -203,6 +208,7 @@ class TaskManager {
 		this.downloading.forEach(work => {
 			if (work.type === 'file') work.resume() 
 		})
+		this.schedule()
 	}
 
 	schedule() {
@@ -246,6 +252,7 @@ class TaskManager {
 			this.recordInfor(this.name + ' 下载完成')
 			this.finishStore()
 		}else {
+			this.updateStore()
 			this.downloadSchedule()
 		}
 	}
@@ -281,7 +288,7 @@ class TaskManager {
 				downloadingArr.push(item.getSummary())
 			}
 		})
-		db.downloading.update({_id: this.uuid}, {$set: {downloading:downloadingArr}}, (err, data) => {
+		db.downloading.update({_id: this.uuid}, {$set: {name:this.name, downloading:downloadingArr}}, (err, data) => {
 			// console.log(data)
 		})
 	}
@@ -393,6 +400,27 @@ const diffTree = (taskPosition, localPosition, manager ,callback) => {
 	next()
 }
 
+const isFileNameExist = (position, times, list) => {
+	let name = ''
+	if(times === 0) {
+		name = position.name
+	}else {
+		let arr = position.name.split('.')
+		if(arr.length === 1) name = arr[0] + '(' + times + ')'
+		else {
+			arr[arr.length-2] += '(' + times + ')'
+			name = arr.join('.')
+		}
+	}
+	let index = list.findIndex(item => item === name)
+	if (index === -1) {
+		console.log('文件名是 : ' + name)
+		return name
+	}else {
+		return isFileNameExist(position, ++times, list)	
+	}
+}
+
 class DownloadTask {
 	constructor(target, name, type, size, manager) {
 		this.target = target
@@ -442,6 +470,7 @@ class FileDownloadTask extends DownloadTask{
 		super(type, target, name, size, manager)
 		this.progress = 0
 		this.seek = 0
+		this.lastTimeSize = 0
 		this.timeStamp = (new Date()).getTime()
 	}
 
@@ -483,7 +512,7 @@ class createFolderSTM extends STM {
 		this.handle = null
 	}
 
-	downloading() {
+	beginDownload() {
 		let _this = this
 		let wrapper = this.wrapper
 		wrapper.stateName = 'running'
@@ -508,15 +537,20 @@ class DownloadFileSTM extends STM {
 		this.handle = null
 	}
 
+	beginDownload() {
+		removeOutOfReadyQueue(this)
+		addToRunningQueue(this)
+		this.wrapper.manager.updateStore()
+    this.wrapper.recordInfor(this.wrapper.name + ' 开始创建...')
+    this.downloading()
+	}
+
 	downloading() {
 		let _this = this
 		let wrapper = this.wrapper
+		if (wrapper.size === wrapper.seek) return wrapper.manager.downloadSchedule()
 		wrapper.stateName = 'running'
-		removeOutOfReadyQueue(this)
-		addToRunningQueue(this)
-		wrapper.manager.updateStore()
-    wrapper.recordInfor(wrapper.name + ' 开始创建...')
-
+		
     let options = {
 			method: 'GET',
 			url: server + '/files/' + wrapper.target,
@@ -540,45 +574,30 @@ class DownloadFileSTM extends STM {
 			console.log(err)
 		})
 
-		stream.on('pipe', (src) => {
-			// console.log('stream pipe trigger')
-			// console.log(src)
-		})
-
 		stream.on('drain', () => {
-			// console.log('stream drain trigger')
+			let gap = stream.bytesWritten - this.wrapper.lastTimeSize
+			_this.wrapper.seek += gap
+			this.wrapper.manager.completeSize += gap
+			this.wrapper.lastTimeSize = stream.bytesWritten
+			// console.log('一段文件写入完成 当前seek位置为 ：' + _this.wrapper.seek/_this.wrapper.size + '% 增加了 ：' + gap/this.wrapper.size )
 			wrapper.manager.updateStore()
-			_this.wrapper.seek = stream.bytesWritten
 		})
 
 		stream.on('finish', () => {
 			// console.log('stream finish trigger')
-			this.rename(tmpDownloadPath)
-		})
-
-		stream.on('close', () => {
-			// console.log('stream close trigger')
+			let gap = stream.bytesWritten - this.wrapper.lastTimeSize
+			_this.wrapper.seek += gap
+			this.wrapper.manager.completeSize += gap
+			this.wrapper.lastTimeSize = stream.bytesWritten
+			// console.log('一段文件写入结束 当前seek位置为 ：' + _this.wrapper.seek/_this.wrapper.size + '% 增加了 ：' + gap/this.wrapper.size )
+			this.wrapper.lastTimeSize = 0
+			if(this.wrapper.seek == this.wrapper.size) this.rename(tmpDownloadPath)
 		})
 
 		this.handle = request(options)
 			.on('error',(err)=>{
 				console.log('readstream error...')
 				console.log(err)
-			})
-			.on('complete',(err) => {
-				// console.log('readstream complete...')
-				// console.log(err)
-				// console.log(data)
-			})
-			.on('data',(data) =>{
-				this.wrapper.manager.completeSize += data.length
-				// console.log(data.length)
-			})
-			.on('close',() => {
-				// console.log('readstream close...')
-			})
-			.on('end',() => {
-				// console.log('readstream end...')
 			})
 		
 		_this.handle.pipe(stream)
@@ -596,14 +615,16 @@ class DownloadFileSTM extends STM {
 	pause() {		
 		if (this.wrapper.stateName !== 'running') return
 		this.wrapper.stateName = 'pause'
-		this.handle.pause()
+		sendMsg()
+		this.handle.abort()
 		this.wrapper.recordInfor(this.wrapper.name + '暂停了')
 	}
 
 	resume() {
 		if (this.wrapper.stateName !== 'pause') return
 		this.wrapper.stateName = 'running'
-		this.handle.resume()
+		sendMsg()
+		this.downloading()
 		this.wrapper.recordInfor(this.wrapper.name + '继续下载')
 	}
 }
@@ -615,7 +636,7 @@ const scheduleVisit = () => {
 
 const scheduleHttpRequest = () => {
   while (runningQueue.length < httpRequestConcurrency && readyQueue.length)
-    readyQueue[0].downloading()
+    readyQueue[0].beginDownload()
 }
 
 //visitless
@@ -661,7 +682,7 @@ const removeOutOfRunningQueue = (task) => {
 ipcMain.on('PAUSE_DOWNLOADING', (e, uuid) => {
 	if (!uuid) return
 	let task = userTasks.find(item => item.uuid === uuid)
-	task.pauseTask()
+	if (task) {task.pauseTask()}
 })
 
 ipcMain.on('RESUME_DOWNLOADING', (e, uuid) => {
