@@ -3,8 +3,8 @@ import EventListener from 'react-event-listener'
 import keycode from 'keycode'
 import { Paper } from 'material-ui'
 
-const getstyle = props => ({
-  dialogWindow: {
+const getStyles = props => ({
+  dialogRoot: {
     position: 'fixed',
     width: '100%',
     height: '100%',
@@ -15,21 +15,26 @@ const getstyle = props => ({
     backgroundColor: 'none',
     transition: `left 0ms cubic-bezier(0.23, 1, 0.32, 1) ${props ? '0ms' : '450ms'}`
   },
-  translateDiv: {
+  dialogWindow: {
     position: 'relative',
     zIndex: 1500,
     width: '75%',
+    height: 100,
     maxWidth: '768px',
     margin: '0 auto',
     transition: 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms',
     opacity: props ? 1 : 0,
     transform: props ? 'translate(0px, 64px)' : 'translate(0px, 0px)'
   },
+  container: {
+
+  },
+
   dialogContent: {
-    position: 'fixed',
     zIndex: 1500,
     width: '100%',
     maxWidth: '768px',
+    height: '100%',
     color: 'rgba(0, 0, 0, 0.870588)',
     backgroundColor: 'rgb(255, 255, 255)',
     boxSizing: 'border-box',
@@ -57,6 +62,10 @@ export default class CDialog extends React.Component {
     modal: PropTypes.bool,
     onRequestClose: PropTypes.func,
     open: PropTypes.bool.isRequired,
+    containerClassName: PropTypes.string,
+    containerStyle: PropTypes.object,
+    overlayClassName: PropTypes.string,
+    overlayStyle: PropTypes.object
   }
   constructor(props) {
     super(props)
@@ -64,21 +73,21 @@ export default class CDialog extends React.Component {
       if (!this.props.open) return
 
       const clientHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+      const dialogRoot = this.nodeRoot
       const dialogWindow = this.nodeDialogWindow
       const dialogContent = this.nodeDialogContent
       const minPaddingTop = 16
-      const dialogContentHeight = dialogContent.offsetHeight
 
       dialogContent.style.height = ''
       dialogWindow.style.height = ''
 
-      let paddingTop = ((clientHeight - dialogContentHeight) / 2) - 64
+      let paddingTop = ((clientHeight - dialogWindow.offsetHeight) / 2) - 64
       if (paddingTop < minPaddingTop) paddingTop = minPaddingTop
-      dialogWindow.style.paddingTop = `${paddingTop}px`
+      dialogRoot.style.paddingTop = `${paddingTop}px`
     }
 
     this.requestClose = (buttonClicked) => {
-      if (buttonClicked && !this.props.modal) return
+      if (!buttonClicked && this.props.modal) return
       if (this.props.onRequestClose) {
         this.props.onRequestClose(!!buttonClicked)
       }
@@ -106,29 +115,50 @@ export default class CDialog extends React.Component {
   }
 
   render() {
+    const {
+      open,
+      containerClassName,
+      containerStyle,
+      overlayClassName,
+      overlayStyle
+    } = this.props
+    const styles = getStyles(open)
+    styles.container = Object.assign(styles.container, containerStyle)
+    styles.overlay = Object.assign(styles.overlay, overlayStyle)
     return (
       <div
-        ref={node => (this.nodeDialogWindow = node)}
-        style={getstyle(this.props.open).dialogWindow}
+        style={styles.dialogRoot}
+        ref={node => (this.nodeRoot = node)}
       >
-        <div style={getstyle(this.props.open).translateDiv} >
-          { this.props.open &&
+        <div
+          ref={node => (this.nodeDialogWindow = node)}
+          style={styles.dialogWindow}
+        >
           <div
-            ref={node => (this.nodeDialogContent = node)}
-            style={getstyle(this.props.open).dialogContent}
+            className={containerClassName}
+            style={styles.container}
           >
-            <EventListener
-              target="window"
-              onKeyUp={this.handleKeyUp}
-              onResize={this.handleResize}
-            />
-            <Paper zDepth={4}>
-              {this.props.children}
-            </Paper>
-          </div> }
+            {
+              open &&
+                <div
+                  ref={node => (this.nodeDialogContent = node)}
+                  style={styles.dialogContent}
+                >
+                  <EventListener
+                    target="window"
+                    onKeyUp={this.handleKeyUp}
+                    onResize={this.handleResize}
+                  />
+                  <Paper zDepth={4}>
+                    {this.props.children}
+                  </Paper>
+                </div>
+            }
+          </div>
         </div>
         <div
-          style={getstyle(this.props.open).overlay}
+          className={overlayClassName}
+          style={styles.overlay}
           onTouchTap={this.handleTouchTapOverlay}
         />
       </div>

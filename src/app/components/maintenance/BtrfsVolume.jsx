@@ -20,6 +20,8 @@ import {
   HeaderIcon, Checkbox40, FsAndVolumemode, KeyValueList, DoubleDivider
 } from './ConstElement'
 
+import PureDialog from '../common/PureDialog.jsx'
+
 const debug = Debug('component:maintenance:BtrfsVolume')
 
 export default class BtrfsVolume extends React.Component {
@@ -36,7 +38,8 @@ export default class BtrfsVolume extends React.Component {
     this.state = {
       expanded: false,
       initVolume: undefined,
-      dialog: undefined
+      dialog: undefined,
+      pureDialog: undefined
     }
 
     this.toggleExpanded = () => {
@@ -146,7 +149,7 @@ export default class BtrfsVolume extends React.Component {
     this.initWisnucOnVolume = (volume) => {
       // TODO FIXME
       if (typeof volume.wisnuc !== 'object') {
-        alert('功能开发中......')
+        this.setState({ pureDialog: true })
         return
       }
       this.setState({ initVolume: volume })
@@ -379,6 +382,14 @@ export default class BtrfsVolume extends React.Component {
           onResponse={() => this.props.that.reloadBootStorage()}
         />
         <Operation substate={this.state.dialog} />
+        <PureDialog
+          open={this.state.pureDialog}
+          onRequestClose={() => this.setState({ pureDialog: false })}
+        >
+          <div style={{ padding: 24 }}>
+          功能开发中
+          </div>
+        </PureDialog>
       </Paper>
     )
   }
