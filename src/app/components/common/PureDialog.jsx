@@ -1,90 +1,24 @@
 import React, { PropTypes } from 'react'
 import EventListener from 'react-event-listener'
 import keycode from 'keycode'
+import { TweenMax } from 'gsap'
 import { Paper } from 'material-ui'
+import ReactTransitionGroup from 'react-addons-transition-group'
 
-const getStyles = props => ({
-  dialogRoot: {
-    position: 'fixed',
-    width: '100%',
-    height: '100%',
-    boxSizing: 'border-box',
-    top: 0,
-    left: props ? 0 : '-100%',
-    zIndex: 1500,
-    backgroundColor: 'none',
-    transition: `left 0ms cubic-bezier(0.23, 1, 0.32, 1) ${props ? '0ms' : '450ms'}`
-  },
-  dialogWindow: {
-    position: 'relative',
-    zIndex: 1500,
-    width: '75%',
-    height: 100,
-    maxWidth: '768px',
-    margin: '0 auto',
-    transition: 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms',
-    opacity: props ? 1 : 0,
-    transform: props ? 'translate(0px, 64px)' : 'translate(0px, 0px)'
-  },
-  container: {
+class TransitionItem extends React.Component {
 
-  },
-
-  dialogContent: {
-    zIndex: 1500,
-    width: '100%',
-    maxWidth: '768px',
-    height: '100%',
-    color: 'rgba(0, 0, 0, 0.870588)',
-    backgroundColor: 'rgb(255, 255, 255)',
-    boxSizing: 'border-box',
-    boxShadow: 'rgba(0, 0, 0, 0.247059) 0px 14px 45px, rgba(0, 0, 0, 0.219608) 0px 10px 18px',
-    borderRadius: '2px'
-  },
-  overlay: {
-    position: 'fixed',
-    height: '100%',
-    width: '100%',
-    top: 0,
-    left: props ? 0 : '-100%',
-    opacity: props ? 1 : 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.541176)',
-    willChange: 'opacity',
-    transform: 'translateZ(0px)',
-    transition: `left 0ms cubic-bezier(0.23, 1, 0.32, 1) ${props ? '0ms' : '400ms'},
-      opacity 400ms cubic-bezier(0.23, 1, 0.32, 1) 0ms`,
-    zIndex: 1400
-  }
-})
-
-export default class CDialog extends React.Component {
   static propTypes = {
     modal: PropTypes.bool,
-    onRequestClose: PropTypes.func,
-    open: PropTypes.bool.isRequired,
-    containerClassName: PropTypes.string,
-    containerStyle: PropTypes.object,
-    overlayClassName: PropTypes.string,
-    overlayStyle: PropTypes.object
+    onRequestClose: PropTypes.func
   }
+
+  static defaultProps = {
+    modal: false,
+    onRequestClose: null
+  }
+
   constructor(props) {
     super(props)
-    this.positionDialog = () => {
-      if (!this.props.open) return
-
-      const clientHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
-      const dialogRoot = this.nodeRoot
-      const dialogWindow = this.nodeDialogWindow
-      const dialogContent = this.nodeDialogContent
-      const minPaddingTop = 16
-
-      dialogContent.style.height = ''
-      dialogWindow.style.height = ''
-
-      let paddingTop = ((clientHeight - dialogWindow.offsetHeight) / 2) - 64
-      if (paddingTop < minPaddingTop) paddingTop = minPaddingTop
-      dialogRoot.style.paddingTop = `${paddingTop}px`
-    }
 
     this.requestClose = (buttonClicked) => {
       if (!buttonClicked && this.props.modal) return
@@ -97,71 +31,108 @@ export default class CDialog extends React.Component {
     }
 
     this.handleKeyUp = (event) => {
-      if (keycode(event) === 'esc') {
-        this.requestClose(false)
+      switch (keycode(event)) {
+        case 'esc': return this.requestClose(false)
+        default: return 0
       }
     }
-    this.handleResize = () => {
-      this.positionDialog()
+    this.animation = (status) => {
+      const transformItem = document.getElementById('transformItem')
+      const overlay = document.getElementById('overlay')
+      const time = 0.45
+      const ease = Power4.easeOut
+
+      if (status === 'In') {
+        TweenMax.from(overlay, time, { opacity: 0, ease })
+        TweenMax.from(transformItem, time, { top: '-64', opacity: 0, ease })
+      }
+
+      if (status === 'Out') {
+        TweenMax.to(transformItem, time, { top: '-64', opacity: 0, ease })
+        TweenMax.to(overlay, time, { opacity: 0, ease })
+      }
     }
   }
 
-  componentDidMount() {
-    this.positionDialog()
+  componentWillUnmount() {
+    clearTimeout(this.enterTimeout)
+    clearTimeout(this.leaveTimeout)
   }
 
-  componentDidUpdate() {
-    this.positionDialog()
+  componentWillEnter(callback) {
+    this.componentWillAppear(callback)
+  }
+
+  componentWillAppear(callback) {
+    this.animation('In')
+    this.enterTimeout = setTimeout(callback, 450) // matches transition duration
+  }
+
+  componentWillLeave(callback) {
+    this.animation('Out')
+    this.leaveTimeout = setTimeout(callback, 450) // matches transition duration
   }
 
   render() {
-    const {
-      open,
-      containerClassName,
-      containerStyle,
-      overlayClassName,
-      overlayStyle
-    } = this.props
-    const styles = getStyles(open)
-    styles.container = Object.assign(styles.container, containerStyle)
-    styles.overlay = Object.assign(styles.overlay, overlayStyle)
     return (
       <div
-        style={styles.dialogRoot}
-        ref={node => (this.nodeRoot = node)}
+        style={{
+          position: 'fixed',
+          width: '100%',
+          height: '100%',
+          top: 0,
+          left: 0,
+          zIndex: 1500,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'all 0ms cubic-bezier(0.23, 1, 0.32, 1)'
+        }}
       >
         <div
-          ref={node => (this.nodeDialogWindow = node)}
-          style={styles.dialogWindow}
+          id="transformItem"
+          style={{
+            position: 'relative',
+            zIndex: 1500,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
         >
-          <div
-            className={containerClassName}
-            style={styles.container}
-          >
-            {
-              open &&
-                <div
-                  ref={node => (this.nodeDialogContent = node)}
-                  style={styles.dialogContent}
-                >
-                  <EventListener
-                    target="window"
-                    onKeyUp={this.handleKeyUp}
-                    onResize={this.handleResize}
-                  />
-                  <Paper zDepth={4}>
-                    {this.props.children}
-                  </Paper>
-                </div>
-            }
-          </div>
+          <EventListener target="window" onKeyUp={this.handleKeyUp} />
+          <Paper zDepth={4}>
+            {this.props.children}
+          </Paper>
         </div>
         <div
-          className={overlayClassName}
-          style={styles.overlay}
+          id="overlay"
+          style={{
+            position: 'fixed',
+            height: '100%',
+            width: '100%',
+            top: 0,
+            left: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.541176)',
+            zIndex: 1400
+          }}
           onTouchTap={this.handleTouchTapOverlay}
         />
       </div>
+    )
+  }
+}
+
+export default class CDialog extends React.Component {
+
+  static propTypes = {
+    open: PropTypes.bool.isRequired
+  }
+
+  render() {
+    return (
+      <ReactTransitionGroup>
+        {this.props.open && <TransitionItem {...this.props} />}
+      </ReactTransitionGroup>
     )
   }
 }

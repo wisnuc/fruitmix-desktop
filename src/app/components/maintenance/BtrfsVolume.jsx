@@ -386,7 +386,7 @@ export default class BtrfsVolume extends React.Component {
           open={this.state.pureDialog}
           onRequestClose={() => this.setState({ pureDialog: false })}
         >
-          <div style={{ padding: 24 }}>
+          <div style={{ padding: 24, width: 80 }}>
           功能开发中
           </div>
         </PureDialog>
