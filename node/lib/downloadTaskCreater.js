@@ -26,6 +26,7 @@ const initArgs = () => {
   user = store.getState().login.obj
 }
 
+//determine whether need to start/close sending msg
 const sendMessage = () => {
 	let shouldSend = false
 	for(let i = 0; i < userTasks.length; i++) {
@@ -46,6 +47,7 @@ const sendMessage = () => {
 	}
 }
 
+//send summary information to browser
 const sendMsg = () => {
 	let mainWindow = getMainWindow()
   mainWindow.webContents.send('UPDATE_DOWNLOAD', userTasks.map(item => item.getSummary()), finishTasks.map(i => i.getSummary?i.getSummary():i))
@@ -53,9 +55,8 @@ const sendMsg = () => {
 
 //TaskManager creater
 //new job :init manager with default parameter
-//old job :init manager with defined parameter(uuid, dwonloadpath, downloading information)
+//old job :init manager with defined parameter(uuid, downloadpath, downloading information)
 const createTask = (target, name, size, type, newWork, p, u, d) => {
-	console.log(size)
 	initArgs()
 	let taskUUID = u?u:uuid.v4()
 	let abspath = p?p:store.getState().config.download
@@ -67,6 +68,8 @@ const createTask = (target, name, size, type, newWork, p, u, d) => {
 	sendMessage()
 }
 
+
+//a download task manager for init/record/visit/schedule
 class TaskManager {
 	constructor(taskUUID, downloadPath, target, name, rootSize, type, newWork, downloadingList) {
 		this.uuid = taskUUID
@@ -96,11 +99,11 @@ class TaskManager {
 		this.record = []
 
 		this.countSpeed = setInterval(() => {
-			let s = (this.completeSize - this.lastTimeSize) / 1
+			let s = (this.completeSize - this.lastTimeSize) / 2
 			this.speed = utils.formatSize(s) + ' / 秒'
 			this.restTime = utils.formatSeconds((this.size - this.completeSize) / s)
 			this.lastTimeSize = this.completeSize
-		}, 1000)
+		}, 2000)
 	}
 
 	// summary send to browser
@@ -128,7 +131,7 @@ class TaskManager {
 		this.record.push(msg)
 	}
 
-	//add to visit queue
+	//add to visit queue && wait schedule
 	readyToVisit() {
 		this.state = 'visitless'
 		addToVisitlessQueue(this)
@@ -150,6 +153,8 @@ class TaskManager {
 		})
 	}
 
+	//if task is new , check rootName isRepeat
+	//if task is old , visit local file tree && diff the trees
 	diff() {
 		this.state = 'diffing'
 		if (!this.newWork) {
@@ -172,6 +177,7 @@ class TaskManager {
 								this.recordInfor('校验本地文件结束')
 								diffTree(this.tree[0], localObj[0], this, err => {
 									if (err) console.log(err)
+									this.pause = true
 									this.schedule()
 								})
 							}
@@ -185,6 +191,7 @@ class TaskManager {
 		}
 	}
 
+	//check whether the root is same to someone in download path
 	checkNameExist() {
 		fs.readdir(this.downloadPath, (err, files) => {
 			if (err) return this.recordInfor('下载目录未找到')
@@ -196,6 +203,7 @@ class TaskManager {
 		})
 	}
 
+	//pause all the task in downloading queue
 	pauseTask() {
 		this.pause = true
 		this.downloading.forEach(work => {
@@ -203,6 +211,7 @@ class TaskManager {
 		})
 	}
 
+	//resume all the task in downloading queue
 	resumeTask() {
 		this.pause = false
 		this.downloading.forEach(work => {
@@ -211,12 +220,14 @@ class TaskManager {
 		this.schedule()
 	}
 
+	//download schedule only need to schedule download queue(upload include hash task)
 	schedule() {
 		this.state = 'schedule'
 		if (this.pause || !this.count) return
 		this.downloadSchedule()
 	}
 
+	//the file for condition begin downloading
 	downloadSchedule() {
 		console.log('进行下载调度...')
 		if (this.pause) return this.recordInfor('下载任务已暂停')
@@ -229,8 +240,7 @@ class TaskManager {
 		if (obj.stateName === 'finish') {
 			this.recordInfor('文件已被下载，跳过...')
 			this.downloadIndex++
-			this.downloadSchedule()
-			return
+			return this.downloadSchedule()
 		}
 		if (obj.downloadPath === '') return this.recordInfor('文件的父文件夹尚未创建，缺少目标，等待..')
 		let stateMachine = obj.type == 'folder'? createFolderSTM : DownloadFileSTM
@@ -241,7 +251,9 @@ class TaskManager {
 		this.downloadSchedule()
 	}
 
+	//will be call when a node was downloaded
 	workFinishCall() {
+		//all nodes have been downloaded
 		if (this.finishCount === this.worklist.length) {
 			this.state = 'finish'
 			this.finishDate = utils.formatDate()
@@ -252,6 +264,7 @@ class TaskManager {
 			this.recordInfor(this.name + ' 下载完成')
 			this.finishStore()
 		}else {
+			//running next
 			this.updateStore()
 			this.downloadSchedule()
 		}
@@ -305,6 +318,7 @@ class TaskManager {
 	}
 }
 
+//visit tree from serve && check the seek of downloading files
 const visitTask = (target, name, type, size, position, manager, callback) => {
 	manager.count++
 	manager.size += size
@@ -350,6 +364,7 @@ const visitTask = (target, name, type, size, position, manager, callback) => {
 	})
 }
 
+//visit local files 
 const visitLocalFiles = (abspath, position, callback) => {
 	fs.stat(abspath, (err, stat) => {
 		if (err || ( !stat.isDirectory() && !stat.isFile())) return callback(err)
@@ -373,6 +388,8 @@ const visitLocalFiles = (abspath, position, callback) => {
 	})
 }
 
+//diff server file tree && local file tree
+//mark the node has been finished
 const diffTree = (taskPosition, localPosition, manager ,callback) => {
 	if (taskPosition.name !== localPosition.name) return callback()
 	taskPosition.stateName = 'finish'
@@ -400,6 +417,8 @@ const diffTree = (taskPosition, localPosition, manager ,callback) => {
 	next()
 }
 
+//check the name isExist in download folder
+//if name exist, rename the root file
 const isFileNameExist = (position, times, list) => {
 	let name = ''
 	if(times === 0) {
@@ -421,6 +440,7 @@ const isFileNameExist = (position, times, list) => {
 	}
 }
 
+//Each instance is a fileNode of tree
 class DownloadTask {
 	constructor(target, name, type, size, manager) {
 		this.target = target
