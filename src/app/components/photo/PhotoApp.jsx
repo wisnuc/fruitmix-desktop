@@ -67,42 +67,44 @@ class PhotoApp extends React.Component {
         </Menu>
       </div>
     )
-  }
 
-  setPhotoInfo() {
-    const mediaStore = window.store.getState().media.data
-    const photoDates = []
-    const photoMapDates = []
-    const allPhotos = []
+    this.setPhotoInfo = () => {
+      const mediaStore = window.store.getState().media.data
+      const photoDates = []
+      const photoMapDates = []
+      const allPhotos = []
+      debug('render photoapp mediaStore', mediaStore)
 
-    mediaStore.forEach((item, index) => {
-      if (!item.exifDateTime) { return }
+      mediaStore.forEach((item, index) => {
+        if (!item.exifDateTime) { return }
 
-      allPhotos.push(item)
+        allPhotos.push(item)
 
-      const formatExifDateTime = formatDate(item.exifDateTime)
-      const isRepeat = photoDates.findIndex(item => item === formatExifDateTime) >= 0
+        const formatExifDateTime = formatDate(item.exifDateTime)
+        const isRepeat = photoDates.findIndex(Item => Item === formatExifDateTime) >= 0
 
-      if (!isRepeat) {
-        photoDates.push(formatExifDateTime)
-        photoMapDates.push({
-          date: formatExifDateTime,
-          photos: [item]
-        })
-      } else {
-        photoMapDates
-          .find(item => item.date === formatExifDateTime)
+        if (!isRepeat) {
+          photoDates.push(formatExifDateTime)
+          photoMapDates.push({
+            date: formatExifDateTime,
+            photos: [item]
+          })
+        } else {
+          photoMapDates
+          .find(Item => Item.date === formatExifDateTime)
           .photos
           .push(item)
-      }
-    })
+        }
+      })
 
-    return {
-      allPhotos,
-      photoDates,
-      photoMapDates: photoMapDates.sort((prev, next) => Date.parse(next.date) - Date.parse(prev.date))
+      return {
+        allPhotos,
+        photoDates,
+        photoMapDates: photoMapDates.sort((prev, next) => Date.parse(next.date) - Date.parse(prev.date))
+      }
     }
   }
+
 
   render() {
     debug('render photoapp state', this.state)
