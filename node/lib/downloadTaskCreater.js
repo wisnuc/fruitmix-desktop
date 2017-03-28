@@ -289,11 +289,13 @@ class TaskManager {
 		}
 	}
 
+	//will be call when a task is new
 	createStore() {
 		if (!this.newWork) return
 		db.downloading.insert(this.getStoreObj(), (err, data) => {})
 	}
 
+	//will be call when a task node drain trigger
 	updateStore() {
 		let downloadingArr = []
 		this.downloading.forEach(item => {
@@ -306,6 +308,7 @@ class TaskManager {
 		})
 	}
 
+	//move task from downloading store to downloaded store
 	finishStore() {
 		db.downloading.remove({_id: this.uuid}, {}, (err,data) => {
 			if (err) return console.log(err)
@@ -486,8 +489,8 @@ class DownloadTask {
 }
 
 class FileDownloadTask extends DownloadTask{
-	constructor(type, target, name, size, manager) {
-		super(type, target, name, size, manager)
+	constructor(target, name, type, size, manager) {
+		super(target, name, type, size, manager)
 		this.progress = 0
 		this.seek = 0
 		this.lastTimeSize = 0
@@ -506,8 +509,8 @@ class FileDownloadTask extends DownloadTask{
 }
 
 class FolderDownloadTask extends DownloadTask{
-	constructor(type, target, name, size, manager) {
-		super(type, target, name, size, manager)
+	constructor(target, name, type, size, manager) {
+		super(target, name, type, size, manager)
 		this.children = []
 	}
 }

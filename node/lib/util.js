@@ -88,6 +88,21 @@ var utils = {
 			time.getHours(),
 			time.getMinutes().toString().length == 1? '0' + time.getMinutes():time.getMinutes()
 		]
+	},
+
+	splicePart(size, partSize) {
+		let part = []
+		let position = 0
+		while(position < size) {
+			if (position + partSize >= size -1) {
+				part.push({start: position, end: size-1})
+				break
+			}else {
+				part.push({start: position, end: position + partSize})
+				position = position + partSize + 1
+			}
+		}
+		return part
 	}
 
 }

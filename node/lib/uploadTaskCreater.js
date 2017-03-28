@@ -17,6 +17,7 @@ let user
 let httpRequestConcurrency = 4
 let fileHashConcurrency = 6
 let visitConcurrency = 2
+let partSize = 19999999
 let sendHandler = null
 
 const runningQueue = []
@@ -276,7 +277,6 @@ class TaskManager {
 
 		db.uploading.insert(obj, (err, data) => {
 			if(err) return console.log(err)
-			console.log(data)
 		})
 	}
 
@@ -307,7 +307,7 @@ const visitFolder = (abspath, position, worklist, manager, callback) => {
 		let type = stat.isDirectory()?'folder':'file'
 		let obj = stat.isDirectory()?
 			new FolderUploadTask(type, abspath, manager):
-			new FileUploadTask(type, abspath, manager)
+			new FileUploadTask(type, abspath, stat.size, manager)
 		manager.count++
 		manager.size += stat.size
 		worklist.push(obj)
@@ -363,8 +363,9 @@ class UploadTask {
 }
 
 class FileUploadTask extends UploadTask{
-	constructor(type, abspath, manager) {
+	constructor(type, abspath, size, manager) {
 		super(type, abspath, manager)
+		this.size = size
 		this.progress = 0
 		this.seek = 0
 		this.sha = ''
@@ -375,6 +376,7 @@ class FileUploadTask extends UploadTask{
 		this.recordInfor(this.name + ' HASH计算完毕')
 		this.stateName = 'hashed'
 		this.manager.hashing.splice(this.manager.hashing.indexOf(this),1)
+		console.log(this.parts)
 		this.manager.schedule()
 	}
 }
@@ -406,22 +408,25 @@ class HashSTM extends STM {
 		this.wrapper.recordInfor(this.wrapper.name + ' 进入HASH队列')
 	}
 
-	async hashing() {
+	hashing() {
+		let wrapper = this.wrapper
+		wrapper.recordInfor(this.wrapper.name + ' 开始计算HASH')
+		wrapper.stateName = 'hashing'
+		removeOutOfHashlessQueue(this)
+		addToHashingQueue(this)
+
 		try {
-			this.wrapper.recordInfor(this.wrapper.name + ' 开始计算HASH')
-			this.wrapper.stateName = 'hashing'
-			removeOutOfHashlessQueue(this)
-			addToHashingQueue(this)
 			let options = {
-			    env:{absPath:this.wrapper.abspath},
+			    env:{absPath: wrapper.abspath, size: wrapper.size, partSize},
 			    encoding:'utf8',
 			    cwd: process.cwd()
 			}
 			let child = child_process.fork('node/lib/filehash.js', [], options)
-			child.on('message',(hash) => {
-				this.wrapper.sha = hash
+			child.on('message',(obj) => {
+				wrapper.sha = obj.hash
+				wrapper.parts = obj.parts
 				removeOutOfHashingQueue(this)
-				this.wrapper.hashFinish()
+				wrapper.hashFinish()
 			})
 
 			child.on('error', (err) => {
