@@ -76,12 +76,12 @@ export default class PhotoItem extends Component {
 
     this.changeState = () => {
       const action = this.state.action
-      props.lookPhotoDetail(this.findPhotoIndexByDigest())
-      // action === 'hover' && props.onDetectAllOffChecked()
-      //   ? props.lookPhotoDetail(this.findPhotoIndexByDigest())
-      //   : action === 'on'
-      //     ? this.offSelectIconButton()
-      //     : this.onSelectIconButton();
+      // props.lookPhotoDetail(this.findPhotoIndexByDigest())
+      action === 'hover' && props.onDetectAllOffChecked()
+         ? props.lookPhotoDetail(this.findPhotoIndexByDigest())
+         : action === 'on'
+           ? this.offSelectIconButton()
+           : this.onSelectIconButton();
     }
 
     this.onSelectIconButton = (disabled) => {

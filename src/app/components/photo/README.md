@@ -5,6 +5,17 @@ PhotoApp {
   this.renderLeftNav()
   PhotoToolBar
   PhotoList{
+    ScrollFlush{
+      LazyloadBox{
+        PhotoListByDate.jsx{
+          PhotoItem{
+            HoverIconButton  
+          }
+          PhotoSelectDate
+            SelectIconButton  
+        }
+      }
+    },
     this.renderPhotoDetail(
       PhotoDetail{
         SlideToAnimate  
@@ -21,15 +32,6 @@ PhotoApp {
       }
     )
   }
-}
-
-
-PhotoListByDate.jsx{
-  PhotoItem{
-    HoverIconButton  
-  }
-  PhotoSelectDate
-  SelectIconButton  
 }
 
 ```

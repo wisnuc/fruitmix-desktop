@@ -2,7 +2,7 @@ import { ipcRenderer } from 'electron'
 import { findDOMNode } from 'react-dom'
 import React, { Component, PropTypes } from 'react'
 import SlideToAnimate from './SlideToAnimate'
-import { add, remove } from '../scrollLazyload/utils/eventListeners'
+import { add, remove } from './scrollLazyload/utils/eventListeners'
 
 const __PERCENT__ = '100%'
 const __MAPORIENTATION__ = {

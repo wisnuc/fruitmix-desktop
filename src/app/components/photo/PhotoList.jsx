@@ -1,11 +1,10 @@
 import React, { Component, PropTypes } from 'react'
 import Debug from 'debug'
-import PhotoListByDate from './PhotoListByDate'
 import Carousel from './Carousel'
 import PhotoDetail from './PhotoDetail'
 import FadingToAnimate from './FadingToAnimate'
-import LazyloadBox from '../scrollLazyload/LazyloadBox'
-import ScrollFlush from '../scrollLazyload/ScrollFlush'
+import LazyloadBox from './scrollLazyload/LazyloadBox'
+import ScrollFlush from './scrollLazyload/ScrollFlush'
 import { formatDate } from '../../utils/datetime'
 
 const debug = Debug('component:photoApp:PhotoList')
@@ -116,8 +115,17 @@ export default class PhotoList extends Component {
           list={this.props.photoMapDates}
           onDetectAllOffChecked={detectAllOffChecked}
           onGetPhotoListByDates={photoListByDates => this.photoListByDates = photoListByDates}
-          onAddHoverToList={(photoListByDates) => { this.photoListByDates = photoListByDates; photoListByDates.forEach(p => p.addHoverToAllItem()) }}
-          onRemoveHoverToList={(photoListByDates) => { const isAllOffChecked = photoListByDates.every(p => p.detectIsAllOffChecked()); isAllOffChecked && photoListByDates.forEach(p => p.removeHoverToAllItem()) }}
+          onAddHoverToList={
+            (photoListByDates) => {
+              this.photoListByDates = photoListByDates; photoListByDates.forEach(p => p.addHoverToAllItem())
+            }
+          }
+          onRemoveHoverToList={
+            (photoListByDates) => {
+              const isAllOffChecked = photoListByDates.every(p => p.detectIsAllOffChecked())
+              isAllOffChecked && photoListByDates.forEach(p => p.removeHoverToAllItem())
+            }
+          }
           pageSize={7}
         >
           <LazyloadBox />
@@ -125,6 +133,7 @@ export default class PhotoList extends Component {
 
         {/* 轮播 */}
         {/* this.renderCarousel() */}
+        { this.renderCarousel() }
 
         {/* 查看大图 */}
         { this.renderPhotoDetail(this.props.photoMapDates) }

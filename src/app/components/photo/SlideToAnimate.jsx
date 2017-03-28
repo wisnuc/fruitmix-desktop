@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { findDOMNode } from 'react-dom'
 import { SvgIcon } from 'material-ui'
-import throttle from '../scrollLazyload/utils/throttle'
+import throttle from './scrollLazyload/utils/throttle'
 
 export default class SlideToAnimate extends Component {
   constructor(props) {
