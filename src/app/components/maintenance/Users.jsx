@@ -16,16 +16,15 @@ export default class Users extends React.Component {
     if (typeof this.props.volume.wisnuc !== 'object') return null // ENOFRUITMIX can't work
     const users = this.props.volume.wisnuc.users
     const divStyle = {
-      height: 24,
+      height: 48,
       display: 'flex',
       alignItems: 'center',
       boxSizing: 'border-box',
       padding: 8,
       borderRadius: 4,
-      fontSize: 18,
+      fontSize: 17,
       fontWeight: 'regular',
       marginLeft: 80,
-      marginBottom: 8,
       color: this.props.creatingNewVolume === null ? '#212121' : 'rgba(0,0,0,0.38)'
     }
     if (users) {

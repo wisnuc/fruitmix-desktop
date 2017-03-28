@@ -15,12 +15,12 @@ const RenderTitle = props => (
         </IconButton>}
     />
     <CatSilhouette
-      style={{ position: 'absolute', top: 34, left: 48, width: 120, height: 114, zIndex: 10000 }}
+      style={{ position: 'absolute', top: 34, left: 48, width: 120, height: 114, zIndex: 1200 }}
       color="#E0E0E0"
     />
     <div style={{ margin: 'auto', marginTop: 72, width: 1200, display: 'flex', alignItems: 'center' }} >
-      <BallOfYarn style={{ width: 24, height: 24, marginLeft: 24, zIndex: 2000 }} color="#FFF" />
-      <div style={{ fontSize: 24, color: '#FFF', marginLeft: 36, zIndex: 2000 }} >
+      <BallOfYarn style={{ width: 24, height: 24, marginLeft: 24, zIndex: 1100 }} color="#FFF" />
+      <div style={{ fontSize: 24, color: '#FFF', marginLeft: 36, zIndex: 1100 }} >
           WISNUC - { !props.state.boot ? '' :
               props.state.boot.state === 'maintenance' ? '维护模式' : '已正常启动'
           }

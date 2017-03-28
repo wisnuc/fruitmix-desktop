@@ -18,7 +18,7 @@ import { ReportProblem } from './Svg'
 
  ** **/
 
-const ReportProblemIcon = props => <ReportProblem style={{ verticalAlign: '-18%', marginRight: 8 }} {...props} />
+const ReportProblemIcon = props => <ReportProblem style={{ marginRight: 8 }} {...props} />
 
 export default class VolumeWisnucError extends React.Component {
 
@@ -47,7 +47,7 @@ export default class VolumeWisnucError extends React.Component {
     const VolumeisMissing = this.props.volume.isMissing
     if (VolumeisMissing) {
       return (
-        <div style={{ display: 'flex' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
           <ReportProblemIcon color={this.props.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)'} />
           <div
             style={{
@@ -88,7 +88,8 @@ export default class VolumeWisnucError extends React.Component {
           <ReportProblemIcon color={this.props.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)'} />
           <div
             style={{
-              // display: 'flex', alignItems: 'center',
+              display: 'flex',
+              alignItems: 'center',
               fontSize: 13,
               fontWeight: 'bold',
               color: this.props.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)'
@@ -103,13 +104,11 @@ export default class VolumeWisnucError extends React.Component {
           <ReportProblemIcon color={this.props.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)'} />
           <div
             style={{
-              // height: 28,
-              // display: 'flex', alignItems: 'center',
-              // boxSizing: 'border-box', padding: 8, borderRadius: 4,
+              display: 'flex',
+              alignItems: 'center',
               fontSize: 13,
               fontWeight: 'bold',
               color: this.props.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)'
-              // backgroundColor: this.props.creatingNewVolume === null ? '#B9F6CA' : '#E0E0E0'
             }}
             onTouchTap={(e) => {
               e.stopPropagation()
