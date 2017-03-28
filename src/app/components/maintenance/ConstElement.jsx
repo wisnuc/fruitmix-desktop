@@ -6,7 +6,7 @@ import { HDDIcon } from './Svg'
 export const SUBTITLE_HEIGHT = 32
 export const TABLEHEADER_HEIGHT = 48
 export const TABLEDATA_HEIGHT = 48
-export const HEADER_HEIGHT = 80
+export const HEADER_HEIGHT = 72
 export const FOOTER_HEIGHT = 48
 export const SUBTITLE_MARGINTOP = 24
 export const alphabet = 'abcdefghijklmnopqrstuvwxyz'
@@ -14,14 +14,15 @@ export const alphabet = 'abcdefghijklmnopqrstuvwxyz'
 export const styles = {
   chip: {
     backgroundColor: '#FFFFFF',
-    fontSize: 10,
+    fontSize: 14,
     fontWeight: 'medium',
-    height: 26,
+    height: 24,
     marginRight: 5,
     border: '1px solid #e6e6e6'
   },
   wrapper: {
     display: 'flex',
+    alignItems: 'center',
     flexWrap: 'wrap'
   },
   paperHeader: {
@@ -133,7 +134,7 @@ export const FsAndVolumemode = props => (
     <div style={styles.wrapper}>
       {
         props.textFilesystem &&
-        <Chip style={styles.chip} labelStyle={{ marginTop: -4 }}>
+        <Chip style={styles.chip} labelStyle={{ marginTop: -6 }}>
           <span style={{ color: '#9e9e9e' }}>
             {props.textFilesystem}
           </span>
@@ -141,7 +142,7 @@ export const FsAndVolumemode = props => (
       }
       {
         props.volumemode &&
-          <Chip style={styles.chip} labelStyle={{ marginTop: -4 }}>
+          <Chip style={styles.chip} labelStyle={{ marginTop: -6 }}>
             <span style={{ color: '#9e9e9e' }}>
               {props.volumemode}
             </span>
@@ -163,8 +164,8 @@ export const HeaderIcon = props => (
   <div
     style={{
       width: 40,
-      marginLeft: 24,
-      marginTop: 24,
+      marginLeft: 16,
+      marginTop: 16,
       marginRight: 16
     }}
   >
@@ -219,7 +220,7 @@ export const DiskTitle = (props) => {
     >
       <HeaderIcon>
         { cnv ?
-          <div style={{ marginTop: -16, marginLeft: 56 }}>
+          <div style={{ marginTop: -8, marginLeft: 56 }}>
             <Checkbox40
               fill={accent}
               disabled={uf}
@@ -240,10 +241,10 @@ export const DiskTitle = (props) => {
       <HeaderTitle1
         style={{
           fontWeight: 'regular',
-          fontSize: cnv ? 13 : 26,
+          fontSize: cnv ? 13 : 21,
           height: cnv ? TABLEDATA_HEIGHT : HEADER_HEIGHT,
           width: 176,
-          marginTop: cnv ? 18 : 22,
+          marginTop: cnv ? 18 : 20,
           marginLeft: cnv ? 40 : 0,
           color: (!cnv) ? '#212121' : 'rgba(0,0,0,0.38)',
           transition: 'height 300ms'

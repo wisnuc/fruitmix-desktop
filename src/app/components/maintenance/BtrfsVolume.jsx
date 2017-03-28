@@ -61,9 +61,9 @@ export default class BtrfsVolume extends React.Component {
         case 'READY':
           return lightGreen400
         case 'NOTFOUND':
-          return this.colors.fillGrey
+          return red400
         case 'AMBIGUOUS':
-          return amber400
+          return red400
         case 'DAMAGED':
           return red400
       }
@@ -83,16 +83,24 @@ export default class BtrfsVolume extends React.Component {
               icon={<RAIDIcon />}
             />
           </HeaderIcon>
-          <HeaderTitle1
-            style={{
-              fontWeight: 'regular',
-              fontSize: 26,
-              width: 176,
-              marginTop: 22,
-              color: this.props.state.creatingNewVolume ? 'rgba(0,0,0,0.38)' : '#212121'
-            }}
-            title="磁盘阵列"
-          />
+          <div style={{ width: 168, paddingLeft: 8 }}>
+            <HeaderTitle1
+              style={{
+                fontWeight: 'regular',
+                fontSize: 21,
+                width: 176,
+                marginTop: 6,
+                marginBottom: 4,
+                color: this.props.state.creatingNewVolume ? 'rgba(0,0,0,0.38)' : '#212121'
+              }}
+              title="磁盘阵列"
+            />
+            <FsAndVolumemode
+              style={{ marginLeft: -12, textTransform: 'capitalize' }}
+              volumemode={volume.usage.data.mode.toLowerCase()}
+              textFilesystem="Btrfs"
+            />
+          </div>
         </div>
       )
     }
@@ -185,12 +193,6 @@ export default class BtrfsVolume extends React.Component {
           <div style={{ flex: '0 0 900px', height: '100%', display: 'flex', alignItems: 'center' }}>
             <div style={{ flex: '0 0 256px' }}>
               <this.VolumeTitle volume={volume} />
-            </div>
-            <div style={{ flex: '0 0 160px', marginLeft: -12 }}>
-              <FsAndVolumemode
-                volumemode={volume.usage.data.mode.toUpperCase()}
-                textFilesystem="Btrfs"
-              />
             </div>
             <VolumeWisnucError creatingNewVolume={this.props.state.creatingNewVolume} volume={volume} />
           </div>
@@ -332,15 +334,13 @@ export default class BtrfsVolume extends React.Component {
             { cnv && '选择该磁盘阵列中的磁盘建立新的磁盘阵列，会摧毁当前磁盘阵列存储的所有数据。' }
           </div>
         </div>
-        <div>
-          <div style={{ height: 24 }} />
+        { !cnv && <div>
           <Users creatingNewVolume={this.props.state.creatingNewVolume} volume={volume} />
           <div
             style={{ display: 'flex',
               alignItems: 'center',
               marginLeft: 80,
-              height: 36,
-              marginBottom: 24,
+              height: 56,
               fontSize: 14
             }}
           >
@@ -375,7 +375,7 @@ export default class BtrfsVolume extends React.Component {
                 />
             }
           </div>
-        </div>
+        </div> }
         <InitVolumeDialogs
           volume={this.state.initVolume}
           onRequestClose={() => this.setState({ initVolume: undefined })}
