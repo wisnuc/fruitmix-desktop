@@ -158,22 +158,18 @@ class InitStep extends StateUp(React.Component) {
 
 			let newExpanded = !this.props.expanded
 
-			this.setState({
-				expanded: newExpanded
-			})
+			return newExpanded
 
-			this.props.callbackExpanded(changeExpanded)
+			this.props.callbackExpanded(this.changeExpanded)
 		}
 
 		this.changeShowContent = () => {
 
 			let newShowContent = !this.props.showContent
 
-			this.setState({
-				showContent: newShowContent
-			})
+			return newShowContent
 
-			this.props.callbackShowContent(changeShowContent)
+			this.props.callbackShowContent(this.changeShowContent)
 		}
   }
 
@@ -215,19 +211,16 @@ class InitStep extends StateUp(React.Component) {
     )
   }
 
-
-
-
   render() {
 
     const {finished, stepIndex} = this.state;
 		console.log('this.props.expanded',this.props.expanded)
+		console.log('this.props.showContent',this.props.showContent)
 
     return (
       <div style={{width: '100%'}}>
         <div style={{width: '100%', height: '100%'}}>
-          <div style={{width: '100%', height: this.props.expanded ? 640 : 0, transition: 'height 300ms', overflow: 'hidden', backgroundColor: '#FAFAFA', boxSizing: 'border-box', paddingLeft: 64, paddingRight: 64,
-            overflowY: 'auto'
+          <div style={{width: '100%', height: this.props.expanded ? 640 : 0, transition: 'height 300ms', overflow: 'hidden', backgroundColor: '#FAFAFA', boxSizing: 'border-box', paddingLeft: 64, paddingRight: 64, overflowY: 'auto', paddingBottom: this.props.showContent ? 64 : 0
           }}>
             <div style={{marginTop: 34, marginBottom: 12, fontSize: 34, color: '#000', opacity: this.props.showContent ? 0.54 : 0, transition:'opacity 150ms'}}>初始化向导</div>
             <div style={{opacity: this.props.showContent ? 1 : 0, transition:'opacity 150ms'}}>
@@ -280,29 +273,26 @@ class InitStep extends StateUp(React.Component) {
                 <Step>
                   <StepLabel>确认</StepLabel>
                   <StepContent>
-                    <p style={{color: red400}}>请确认您输入的信息无误，点击完成键应用设置。</p>
-                    <div style={{marginBottom: 12}}>磁盘信息</div>
+                    <div style={{margin: '20px 0', color: 'rgba(0, 0, 0, 0.87)'}}>磁盘信息</div>
                     <div style={{color: 'rgba(0,0,0,0.87)', marginBottom: 12}}>
-                      <div style={{marginLeft: 10, width: 760, fontSize: 13}}>
-                        <Divider />
-                        <div style={{width: '100%', height: 32, display: 'flex', alignItems: 'center'}}>
-                          <div style={{flex: '0 0 64px'}} />
-                          <div style={{flex: '0 0 160px'}}>型号</div>
-                          <div style={{flex: '0 0 80px'}}>设备名</div>
+                      <div style={{width: 760, fontSize: 16, marginLeft: 36}}>
+                        <div style={{width: '100%', height: 32, display: 'flex', alignItems: 'left', color: 'rgba(0, 0, 0, 0.54)'}}>
+                          <div style={{flex: '0 0 200px'}}>型号</div>
+                          <div style={{flex: '0 0 100px'}}>设备名</div>
                           <div style={{flex: '0 0 80px'}}>容量</div>
                           <div style={{flex: '0 0 80px'}}>接口</div>
                           <div style={{flex: '0 0 80px'}}>使用</div>
-                          <div style={{flex: '0 0 240px'}}>说明</div>
+                          <div style={{flex: '0 0 220px'}}>说明</div>
                         </div>
-                        <Divider />
+                        <Divider style={{width: 740}}/>
                           { this.props.storage && this.props.storage.blocks.filter(blk => blk.isDisk).map(blk => this.renderDiskRow(blk)) }
-
-                        <Divider />
+                        <Divider style={{width: 740}}/>
                       </div>
                     </div>
-                    <div style={{marginBottom: 12}}>模式：{this.state.volumeselect.mode}</div>
-                    <div style={{marginBottom: 12}}>用户名：{this.state.userpass.username}</div>
-                    <div style={{margin: '12px 0'}}>
+                    <div style={{margin: '20px 0', color: 'rgba(0, 0, 0, 0.87)', fontSize: 16}}>模式：<span style={{fontWeight: 'bold', color: 'rgba(0, 0, 0, 0.87)'}}>{this.state.volumeselect.mode}</span></div>
+                    <div style={{margin: '20px 0', color: 'rgba(0, 0, 0, 0.87)', fontSize: 16}}>用户名：<span style={{fontWeight: 'bold', color: 'rgba(0, 0, 0, 0.87)'}}>{this.state.userpass.username}</span></div>
+
+                   <div style={{margin: '12px 0'}}>
                       <RaisedButton
                         label='完成'
                         disableTouchRipple={true}
@@ -323,30 +313,31 @@ class InitStep extends StateUp(React.Component) {
                         onTouchTap={this.handlePrev}
                       />
                     </div>
-										<FlatButton
-											label="返回"
-											onTouchTap={() => {
-												this.setState(Object.assign({}, this.state, {
-													finished: false,
-													stepIndex: 0,
 
-													volumeselect: new CreatingVolumeDiskSelection1.State(),
-													userpass: new UsernamePassword.State(),
-
-												}))
-												this.changeShowContent()
-												setTimeout(() => {
-													this.props.onResize('HSHRINK')
-													setTimeout(() => {
-														this.changeExpanded()
-														this.props.onResize('VSHRINK')
-													}, 350)
-												}, 150)
-											}}
-										/>
                   </StepContent>
                 </Step>
               </Stepper>
+							<FlatButton
+								label="返回"
+								onTouchTap={() => {
+									this.setState(Object.assign({}, this.state, {
+										finished: false,
+										stepIndex: 0,
+
+										volumeselect: new CreatingVolumeDiskSelection1.State(),
+										userpass: new UsernamePassword.State(),
+
+									}))
+									this.changeShowContent()
+									setTimeout(() => {
+										this.props.onResize('HSHRINK')
+										setTimeout(() => {
+											this.changeExpanded()
+											this.props.onResize('VSHRINK')
+										}, 350)
+									}, 150)
+								}}
+							/>
               { finished && (
                 <div style={{width: '100%', height: 100, display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: 64}}>
                   { !this.state.dialogText && <CircularProgress /> }

@@ -15,13 +15,13 @@ class GuideBox extends React.Component {
 		}
 	}
 
-	childExpanded (newExpanded) {
+	childExpanded = (newExpanded) => {
 		this.setState({
 			expanded: newExpanded
 		})
 	}
 
-	childShowContent (newShwoContent) {
+	childShowContent = (newShowContent) => {
 		this.setState({
 		  showContent: newShowContent
 		})
@@ -42,7 +42,7 @@ class GuideBox extends React.Component {
 						callbackExpanded={this.childExpanded}
 						callbackShowContent={this.childShowContent}
 					/>
-          <div style={{width: '100%', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FAFAFA'}}>
+          <div style={{width: '100%', height: this.state.expanded ? 0 : 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FAFAFA'}}>
             <div style={{marginLeft: 24, display: this.state.expanded ? 'none' : 'block'}}>该设备已安装WISNUC OS，但尚未初始化。</div>
 
             <FlatButton style={{marginRight: 16, display:this.state.expanded ? 'none' : 'block'}} label={'初始化'}
