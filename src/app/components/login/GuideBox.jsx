@@ -27,6 +27,7 @@ class GuideBox extends React.Component {
 		})
 	}
 
+
   render() {
 
 		console.log('this.props.volumes',this.props)

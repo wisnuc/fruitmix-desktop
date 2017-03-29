@@ -1,12 +1,7 @@
 import React from 'react'
 import Popover, { PopoverAnimationVertical } from 'material-ui/Popover'
-import {
-  pinkA200, grey300, grey400, greenA400, green400, amber400,
-  redA200, red400, lightGreen100, lightGreen400, lightGreenA100,
-  lightGreenA200, lightGreenA400, lightGreenA700
-} from 'material-ui/styles/colors'
-import { CatSilhouette, BallOfYarn, Account, ReportProblem, HDDIcon, RAIDIcon, UpIcon, DownIcon
-    } from './Svg'
+import { redA200 } from 'material-ui/styles/colors'
+import { ReportProblem } from './Svg'
 
 /** **
 
@@ -23,11 +18,8 @@ import { CatSilhouette, BallOfYarn, Account, ReportProblem, HDDIcon, RAIDIcon, U
 
  ** **/
 
-const ReportProblemIcon = props => (
-  <ReportProblem style={{ verticalAlign: '-18%', marginRight: 8 }} {...props} />
-)
+const ReportProblemIcon = props => <ReportProblem style={{ marginRight: 8 }} {...props} />
 
-// export default class VolumeWisnucBadge extends React.Component {
 export default class VolumeWisnucError extends React.Component {
 
   constructor(props) {
@@ -55,7 +47,7 @@ export default class VolumeWisnucError extends React.Component {
     const VolumeisMissing = this.props.volume.isMissing
     if (VolumeisMissing) {
       return (
-        <div style={{ display: 'flex' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
           <ReportProblemIcon color={this.props.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)'} />
           <div
             style={{
@@ -70,7 +62,7 @@ export default class VolumeWisnucError extends React.Component {
       )
     }
     if (typeof this.props.volume.wisnuc !== 'object') return null // ENOFRUITMIX can't work
-    const { status, users, error, message } = this.props.volume.wisnuc
+    const { status, users, error } = this.props.volume.wisnuc
     if (users) {
       if (users.length === 0) {
         return <div>WISNUC已安装但尚未创建用户。</div>
@@ -96,7 +88,8 @@ export default class VolumeWisnucError extends React.Component {
           <ReportProblemIcon color={this.props.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)'} />
           <div
             style={{
-              // display: 'flex', alignItems: 'center',
+              display: 'flex',
+              alignItems: 'center',
               fontSize: 13,
               fontWeight: 'bold',
               color: this.props.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)'
@@ -111,13 +104,11 @@ export default class VolumeWisnucError extends React.Component {
           <ReportProblemIcon color={this.props.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)'} />
           <div
             style={{
-              // height: 28,
-              // display: 'flex', alignItems: 'center',
-              // boxSizing: 'border-box', padding: 8, borderRadius: 4,
+              display: 'flex',
+              alignItems: 'center',
               fontSize: 13,
               fontWeight: 'bold',
               color: this.props.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)'
-              // backgroundColor: this.props.creatingNewVolume === null ? '#B9F6CA' : '#E0E0E0'
             }}
             onTouchTap={(e) => {
               e.stopPropagation()

@@ -1,17 +1,8 @@
 import React from 'react'
-import {
-    AppBar, Avatar, Badge, Checkbox, Chip, Divider, Paper, Menu, MenuItem, Dialog, IconButton, TextField, CircularProgress
-} from 'material-ui'
-import {
-  pinkA200, grey300, grey400, greenA400, green400, amber400,
-  redA200, red400, lightGreen100, lightGreen400, lightGreenA100,
-  lightGreenA200, lightGreenA400, lightGreenA700
-} from 'material-ui/styles/colors'
-import { CatSilhouette, BallOfYarn, Account, ReportProblem, HDDIcon, RAIDIcon, UpIcon, DownIcon
-} from './Svg'
+import { Avatar, Badge, IconButton } from 'material-ui'
+import { Account } from './Svg'
 
-
-export default class UserBadge extends React.Component {
+export default class Users extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -25,16 +16,15 @@ export default class UserBadge extends React.Component {
     if (typeof this.props.volume.wisnuc !== 'object') return null // ENOFRUITMIX can't work
     const users = this.props.volume.wisnuc.users
     const divStyle = {
-      height: 24,
+      height: 48,
       display: 'flex',
       alignItems: 'center',
       boxSizing: 'border-box',
       padding: 8,
       borderRadius: 4,
-      fontSize: 18,
+      fontSize: 17,
       fontWeight: 'regular',
       marginLeft: 80,
-      marginBottom: 8,
       color: this.props.creatingNewVolume === null ? '#212121' : 'rgba(0,0,0,0.38)'
     }
     if (users) {
