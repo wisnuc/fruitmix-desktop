@@ -52,12 +52,12 @@ function splice(size, partSize) {
 	let part = []
 	let position = 0
 	while(position < size) {
-		if (position + partSize >= size -1) {
+		if (position + partSize >= size) {
 			part.push({start: position, end: size-1})
 			break
 		}else {
-			part.push({start: position, end: position + partSize})
-			position = position + partSize + 1
+			part.push({start: position, end: position + partSize -1})
+			position = position + partSize
 		}
 	}
 	return part

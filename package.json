@@ -82,7 +82,7 @@
     "request": "^2.74.0",
     "rimraf": "^2.5.4",
     "sanitize-filename": "^1.6.1",
-    "superagent": "^2.3.0",
+    "superagent": "^3.5.2",
     "validator": "^6.0.0"
   },
   "src": "src",

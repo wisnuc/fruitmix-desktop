@@ -1,6 +1,7 @@
 import path from 'path'
 import fs from 'fs'
 import stream from 'stream'
+import http from 'http'
 import { dialog, ipcMain } from 'electron'
 import child_process from 'child_process'
 
@@ -17,7 +18,7 @@ let user
 let httpRequestConcurrency = 4
 let fileHashConcurrency = 6
 let visitConcurrency = 2
-let partSize = 19999999
+let partSize = 20000000
 let sendHandler = null
 
 const runningQueue = []
@@ -266,17 +267,40 @@ class TaskManager {
 		}
 	}
 
-	createStore() {
-		let obj = {
+	getStoreObj() {
+		let uploadArr = []
+		this.uploading.forEach(item => {
+			if (item.type === 'file') {
+				uploadArr.push(item.getSummary())
+			}
+		})
+		return {
 			_id: this.uuid,
 			abspath: this.abspath,
 			target: this.target,
 			name: this.name,
-			type: this.type
+			rootSize: this.rootSize,
+			type: this.type,
+			uploading: uploadArr,
+			finishDate: this.finishDate
 		}
+	}
 
-		db.uploading.insert(obj, (err, data) => {
+	createStore() {
+
+		db.uploading.insert(this.getStoreObj(), (err, data) => {
 			if(err) return console.log(err)
+		})
+	}
+
+	updateStore() {
+		let uploadArr = []
+		this.uploading.forEach(item => {
+			uploadArr.push(item.getSummary())
+		})
+
+		db.uploading.update({_id: this.uuid}, {$set: {name:this.name, uploading:uploadArr}}, (err, data) => {
+			// console.log(data)
 		})
 	}
 
@@ -284,17 +308,8 @@ class TaskManager {
 		db.uploading.remove({_id: this.uuid}, {}, (err,data) => {
 			if (err) return console.log(err)
 		})
-		let obj = {
-			_id: this.uuid,
-			abspath: this.abspath,
-			target: this.target,
-			name: this.name,
-			type: this.type,
-			uuid: this.tree[0].uuid,
-			finishDate: this.finishDate
-		}
 
-		db.uploaded.insert(obj,(err, data) => {
+		db.uploaded.insert(this.getStoreObj(), (err, data) => {
 			if (err) return console.log(err) 
 			console.log(data)
 		})
@@ -366,16 +381,27 @@ class FileUploadTask extends UploadTask{
 	constructor(type, abspath, size, manager) {
 		super(type, abspath, manager)
 		this.size = size
-		this.progress = 0
 		this.seek = 0
 		this.sha = ''
 		this.parts = []
+		this.taskid = ''
+		this.segmentsize = size > 1000000000 ? size/50 : partSize
+	}
+
+	getSummary() {
+		return {
+			name: this.name,
+			target: this.target,
+			abspath: this.abspath,
+			seek: this.seek
+		}
 	}
 
 	hashFinish() {
 		this.recordInfor(this.name + ' HASH计算完毕')
 		this.stateName = 'hashed'
 		this.manager.hashing.splice(this.manager.hashing.indexOf(this),1)
+		console.log('..................')
 		console.log(this.parts)
 		this.manager.schedule()
 	}
@@ -404,8 +430,8 @@ class HashSTM extends STM {
 
 	requestProbe() {
 		this.wrapper.stateName = 'hassless'
-		addToHashlessQueue(this)
 		this.wrapper.recordInfor(this.wrapper.name + ' 进入HASH队列')
+		addToHashlessQueue(this)
 	}
 
 	hashing() {
@@ -414,7 +440,6 @@ class HashSTM extends STM {
 		wrapper.stateName = 'hashing'
 		removeOutOfHashlessQueue(this)
 		addToHashingQueue(this)
-
 		try {
 			let options = {
 			    env:{absPath: wrapper.abspath, size: wrapper.size, partSize},
@@ -434,9 +459,9 @@ class HashSTM extends STM {
 				console.log(err)
 			})
 			
-		}
-		catch(e) {
+		}catch(e) {
 			//todo
+			console.log('hash error')
 			console.log(e)
 		}
 	}
@@ -502,18 +527,19 @@ class UploadFileSTM extends STM {
 		addToReadyQueue(this)
 	}
 
-	uploading() {
+	beginUpload() {
 		this.wrapper.stateName = 'uploading'
 		removeOutOfReadyQueue(this)
 		addToRunningQueue(this)
+		this.wrapper.manager.updateStore()
 		this.wrapper.recordInfor(this.wrapper.name + ' 开始上传...')
-		let _this = this
-		let body = 0
+		this.createUploadTask()
+	}
 
+	uploadWholeFile() {
+		let _this = this
     let transform = new stream.Transform({
       transform: function(chunk, encoding, next) {
-        body += chunk.length;
-        _this.wrapper.progress = body / _this.wrapper.size
         _this.wrapper.manager.completeSize += chunk.length
         this.push(chunk)
         next()
@@ -541,6 +567,106 @@ class UploadFileSTM extends STM {
     	}
     })
 	}
+
+	createUploadTask() {
+		let options = {
+      url: server+'/filemap/' + this.wrapper.target,
+      method:'post',
+      headers: {
+       	Authorization: user.type + ' ' + user.token,
+       	'Content-Type': 'application/json'
+     	},
+     	body: JSON.stringify({
+       	filename :this.wrapper.name,
+       	size: this.wrapper.size,
+       	segmentsize: this.segmentsize,
+       	sha256: this.wrapper.sha
+      })
+    }
+
+    request(options, (err,res, body) => {
+    	if (err || res.statusCode !== 200) {
+    		this.wrapper.recordInfor('创建上传任务失败，缺少对应API，上传整个文件')
+    		this.uploadWholeFile()
+    		return
+    	}
+    	let b = JSON.parse(body)
+    	obj.taskid = b.taskid
+    	this.uploadSegment()
+    })
+	}
+
+	uploadSegment() {
+		let wrapper = this.wrapper
+		console.log('开始上传第' + wrapper.seek + '块')
+		console.log('----------------------------------------------')
+		var url = server + 
+				'/filemap/?' + wrapper.target + 
+				'/segmenthash=' + wrapper.parts[s].sha + 
+				'&start=' + s + 
+				'&taskid=' + obj.taskid
+				
+		var stream = fs.createReadStream(obj.absPath, {start:wrapper.parts[s].start, end: wrapper.parts[s].end,autoClose:true})
+		stream.on('error', err => {
+			console.log('第' + s +'块 ' + 'stream: '+ err)
+		})
+		stream.on('open',() => {
+			console.log('第' + s +'块 ' + 'stream: open')
+		})
+		stream.on('close',() => {
+			console.log('第' + s +'块 ' + 'stream: close')
+		})
+
+		stream.on('end',() => {
+			console.log('第' + s +'块 ' + 'stream: end')
+		})
+
+		var options = {
+			host: server.split(':')[0],
+			port: server.split(':')[1],
+			headers: {
+				Authorization: user.type + ' ' + user.token,
+			},
+			method: 'PUT',
+			path: encodeURI('/filemap/' + wrapper.target +'?filename=' + wrapper.name + 
+				'&segmenthash=' + wrapper.parts[s].sha + 
+				'&start=' + s + 
+				'&taskid=' + wrapper.taskid 
+			)
+		}
+
+		this.handle = http.request(options).on('error',(err) => {
+			console.log('第' + s +'块 ' + 'req : err')
+			console.log(err)
+		}).on('response',(res) => {
+			console.log('第' + s +'块 ' + 'req : response')
+			console.log(res.statusCode)
+			if(res.statusCode == 200) {
+				return this.partUploadFinish()
+			}
+		}).on('abort', () => {
+			console.log('第' + s +'块 ' + 'req : abort')
+		}).on('aborted', () => {
+			console.log('第' + s +'块 ' + 'req : aborted')
+		}).on('connect', () => {
+			console.log('第' + s +'块 ' + 'req : connect')
+		}).on('socket', () => {
+			console.log('第' + s +'块 ' + 'req : socket')
+		}).on('upgrade', () => {
+			console.log('第' + s +'块 ' + 'req : upgrade')
+		}).on('pipe', () => {
+			console.log('第' + s +'块 ' + 'req : pipe')
+		})
+
+		stream.pipe(req)
+	}
+
+	partUploadFinish() {
+		wrapper.seek++
+		if (wrapper.seek == wrapper.parts.length) {
+			console.log('所有块已经上传完成')
+		}
+	}
 }
 
 const initArgs = () => {
@@ -550,7 +676,7 @@ const initArgs = () => {
 
 const scheduleHttpRequest = () => {
   while (runningQueue.length < httpRequestConcurrency && readyQueue.length)
-    readyQueue[0].uploading()
+    readyQueue[0].beginUpload()
 }
 
 const scheduleFileHash = () => {
