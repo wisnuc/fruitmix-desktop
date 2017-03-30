@@ -251,10 +251,10 @@ class User extends React.Component {
                   }}
                 />
                 <div style={{width: '100%', marginTop: 56, display: 'flex', justifyContent: 'flex-end'}}>
-                  <FlatButton label='取消' labelStyle={{fontSize: 16, fontSize: 'bold'}} primary={true} 
+                  <FlatButton label='取消' primary={true} 
                     disabled={this.state.usernameDialog && this.state.usernameDialog.busy}
                     onTouchTap={this.usernameDialogCancel} />
-                  <FlatButton label='确定' labelStyle={{fontSize: 16, fontSize: 'bold'}} primary={true} 
+                  <FlatButton label='确定' primary={true} 
                     disabled={this.state.usernameDialog && this.state.usernameDialog.busy || 
                       !this.validateNewUsername()}
                     onTouchTap={this.usernameDialogOK} />
@@ -324,10 +324,10 @@ class User extends React.Component {
                       />
                       <div style={{height:30}} />
                       <div style={{width: '100%', marginTop: 56, display: 'flex', justifyContent: 'flex-end'}}>
-                        <FlatButton label='取消' labelStyle={{fontSize: 16, fontSize: 'bold'}} primary={true} 
+                        <FlatButton label='取消' primary={true} 
                           disabled={this.state.newUserDialog && this.state.newUserDialog.busy}
                           onTouchTap={() => this.newUserDialogCancel()} />
-                        <FlatButton label='确定' labelStyle={{fontSize: 16, fontSize: 'bold'}} primary={true} 
+                        <FlatButton label='确定' primary={true} 
                           disabled={this.state.newUserDialog && this.state.newUserDialog.busy || !(this.validateUsername() && this.validatePassword() && this.validatePasswordAgain())}
                           onTouchTap={() => this.newUserDialogOK()} />
                       </div>

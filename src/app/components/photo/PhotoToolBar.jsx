@@ -37,7 +37,7 @@ export default class PhotoToolBar extends React.Component {
         <span
           style={{
             fontSize: 21,
-            fontWeight: 'medium',
+            fontWeight: 500,
             color: '#FFF',
             opacity: index === arr.length - 1 ? 1 : 0.7
           }}

@@ -24,9 +24,6 @@ PhotoApp {
     this.renderCarousel(
       FadingToAnimate{
         Carousel{
-          CarouselTopBar  
-          CarouselBottomBar
-          CarouselList
           SlideToAnimate
         }
       }

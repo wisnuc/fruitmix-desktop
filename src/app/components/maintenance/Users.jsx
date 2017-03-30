@@ -16,14 +16,13 @@ export default class Users extends React.Component {
     if (typeof this.props.volume.wisnuc !== 'object') return null // ENOFRUITMIX can't work
     const users = this.props.volume.wisnuc.users
     const divStyle = {
-      height: 48,
+      height: 56,
       display: 'flex',
       alignItems: 'center',
       boxSizing: 'border-box',
-      padding: 8,
       borderRadius: 4,
-      fontSize: 17,
-      fontWeight: 'regular',
+      fontSize: 14,
+      fontWeight: 500,
       marginLeft: 80,
       color: this.props.creatingNewVolume === null ? '#212121' : 'rgba(0,0,0,0.38)'
     }
@@ -44,25 +43,19 @@ export default class Users extends React.Component {
             style={{ verticalAlign: '0%', padding: 0, marginLeft: -4 }}
             badgeContent={users.length}
             secondary
-            badgeStyle={{ fontWeight: 'regular',
-              fontSize: 12,
+            badgeStyle={{
+              fontSize: 13,
               height: 16,
               width: 16,
-              backgroundColor: 'white',
-              color: '#757575',
+              backgroundColor: '#BDBDBD',
+              color: 'white',
               top: 10,
               right: 4 }}
             onMouseEnter={this.toggleHover}
             onMouseLeave={this.toggleHover}
           >
-            <IconButton>
-              <Avatar
-                style={{}}
-                size={24}
-                color={'white'}
-                backgroundColor={this.props.creatingNewVolume === null ? '#8C9EFF' : 'rgba(0,0,0,0.38)'}
-                icon={<Account />}
-              />
+            <IconButton iconStyle={{ width: 20, height: 20 }}>
+              <Account color={'#757575'} />
             </IconButton>
           </Badge>
           <div

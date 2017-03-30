@@ -68,10 +68,10 @@ export default class FileSystemUsageDisk extends React.Component {
               SUBTITLE_HEIGHT * 2 +
               TABLEHEADER_HEIGHT +
               TABLEDATA_HEIGHT +
-              SUBTITLE_MARGINTOP : 0
+              SUBTITLE_MARGINTOP*2 : 0
           }
         >
-
+          <div style={{ width: '100%', height: SUBTITLE_MARGINTOP }} />
           <SubTitleRow text="文件系统信息" disabled={cnv} />
 
           <TableHeaderRow

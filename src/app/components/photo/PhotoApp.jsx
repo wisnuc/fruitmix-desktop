@@ -1,7 +1,6 @@
 import Debug from 'debug'
 import React from 'react'
-import { Menu, MenuItem, Divider } from 'material-ui'
-import IconButton from 'material-ui/IconButton'
+import { Menu, MenuItem, Divider, IconButton } from 'material-ui'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import DeviceStorage from 'material-ui/svg-icons/device/storage'
 import { blue500, red500, greenA200 } from 'material-ui/styles/colors'
@@ -35,14 +34,13 @@ class PhotoApp extends React.Component {
           position: 'absolute',
           left: this.state.leftNav ? 0 : -1 * LEFTNAV_WIDTH,
           top: 56,
-          transition: sharpCurve('left'),
-          zIndex: 1000
+          transition: sharpCurve('left')
         }}
         transitionEnabled={false}
         rounded={false}
-        zDepth={this.state.leftNav ? 3 : 0}
+        zDepth={this.state.leftNav ? 1 : 0}
       >
-        {debug('this.renderLeftNav', 'this.state.leftNav', this.state.leftNav)}
+        {/*debug('this.renderLeftNav', 'this.state.leftNav', this.state.leftNav)*/}
         {/* 导航条 */}
 
         {/* 左侧菜单 */}
@@ -52,17 +50,17 @@ class PhotoApp extends React.Component {
         >
           <MenuItem
             primaryText="照片" leftIcon={<DeviceStorage />}
-            innerDivStyle={{ fontSize: 14, fontWeight: 'medium', opacity: 0.87 }}
+            innerDivStyle={{ fontSize: 14, fontWeight: 500, opacity: 0.87 }}
           />
           <Divider />
           <MenuItem
             primaryText="相册" leftIcon={<DeviceStorage />}
-            innerDivStyle={{ fontSize: 14, fontWeight: 'medium', opacity: 0.87 }}
+            innerDivStyle={{ fontSize: 14, fontWeight: 500, opacity: 0.87 }}
           />
           <Divider />
           <MenuItem
             primaryText="分享" leftIcon={<DeviceStorage />}
-            innerDivStyle={{ fontSize: 14, fontWeight: 'medium', opacity: 0.87 }}
+            innerDivStyle={{ fontSize: 14, fontWeight: 500, opacity: 0.87 }}
           />
         </Menu>
       </div>
@@ -73,16 +71,12 @@ class PhotoApp extends React.Component {
       const photoDates = []
       const photoMapDates = []
       const allPhotos = []
-      debug('render photoapp mediaStore', mediaStore)
-
+      // debug('render photoapp mediaStore', mediaStore)
       mediaStore.forEach((item, index) => {
         if (!item.exifDateTime) { return }
-
         allPhotos.push(item)
-
         const formatExifDateTime = formatDate(item.exifDateTime)
         const isRepeat = photoDates.findIndex(Item => Item === formatExifDateTime) >= 0
-
         if (!isRepeat) {
           photoDates.push(formatExifDateTime)
           photoMapDates.push({
@@ -96,7 +90,6 @@ class PhotoApp extends React.Component {
           .push(item)
         }
       })
-
       return {
         allPhotos,
         photoDates,
@@ -105,9 +98,8 @@ class PhotoApp extends React.Component {
     }
   }
 
-
   render() {
-    debug('render photoapp state', this.state)
+    // debug('render photoapp state', this.state)
     return (
       <div>
         {/* 工具条 */}
@@ -115,22 +107,23 @@ class PhotoApp extends React.Component {
           action={this.toggleLeftNav}
           state={['照片']}
         />
-
+        <this.renderLeftNav />
         {/* 照片列表 */}
         <PhotoList
           style={{
-            overflow: 'auto',
-            position: 'absolute',
+            position: 'fixed',
             top: 56,
             width: this.state.leftNav ? 'calc(100% - 210px)' : '100%',
             height: '100%',
             left: this.state.leftNav ? LEFTNAV_WIDTH : 0,
             backgroundColor: '#FFFFFF',
-            transition: sharpCurve('left')
+            transition: sharpCurve('left'),
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
           {...this.setPhotoInfo()}
         />
-        <this.renderLeftNav />
       </div>
     )
   }
