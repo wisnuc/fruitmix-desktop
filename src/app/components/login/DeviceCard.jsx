@@ -115,6 +115,38 @@ class DeviceCard extends React.Component {
       })
     }
 
+		this.states = () => {
+
+			if(this.state.toggle === true){
+				return states = open
+			}
+			else {
+				return states = close
+			}
+
+			return states
+		}
+
+		this.onOpen = () => {
+
+			setTimeout (() => {
+			  this.onBoxResize('VEXPAND')
+				setTimeout (() => {
+					this.props.onResize('HEXPAND')
+				},350)
+			},350)
+		}
+
+		this.onClose = () => {
+
+			setTimeout (() => {
+			  this.onBoxResize('VSHRINK')
+				setTimeout (() => {
+					this.props.onResize('HSHRINK')
+				},350)
+			},350)
+		}
+
     this.onBoxResize = resize => {
       if ((resize === 'VEXPAND' && this.state.toggle === false) || (resize === 'VSHRINK' && this.state.toggle === true))
         this.setState(Object.assign({}, this.state, { toggle: !this.state.toggle }))
@@ -213,12 +245,10 @@ class DeviceCard extends React.Component {
       else{
 
         text = '系统不存在用户，请进入维护模式'
-
         return <MaintBox text={text} onMaintain={this.maintain} />
       }
     }
     // now boot and storage ready, users should be error
-
 
     // if boot state is normal or alternative and users is ERROR, this is undefined case, should display errorbox
     if ((this.state.boot.state === 'normal' || this.state.boot.state === 'alternative') && this.state.users instanceof Error)
@@ -271,8 +301,10 @@ class DeviceCard extends React.Component {
       <GuideBox
         address={this.props.device.address}
         storage={this.state.storage}
-        onResize={this.onBoxResize}
-        onReset={this.reset}
+				toggle={this.state.toggle}
+				states={this.states}
+				onOpen={this.onOpen}
+				onClose={this.onClose}
         onMaintain={this.maintain}
       />
     )
