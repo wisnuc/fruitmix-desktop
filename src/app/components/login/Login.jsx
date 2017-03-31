@@ -24,7 +24,7 @@ import NavigationRefresh from 'material-ui/svg-icons/navigation/refresh'
 import InfoCard from './InfoCard'
 import DeviceCard from './DeviceCard'
 
-import { command } from '../../lib/command' 
+import { command } from '../../lib/command'
 // import css  from  '../../../assets/css/login'
 
 const colorArray = [ indigo900, cyan900, teal900, lightGreen900, lime900, yellow900 ]
@@ -50,8 +50,8 @@ class Login extends React.Component {
     this.initTimer = setInterval(() => {
 
       if (window.store.getState().login.device.length === 0) return
-      
-      clearInterval(this.initTimer)       
+
+      clearInterval(this.initTimer)
       delete this.initTimer
 
       debug('init devices', window.store.getState().login.device)
@@ -67,17 +67,17 @@ class Login extends React.Component {
     }, 2000)
 
     this.selectNextDevice = () => {
-     
+
       let { devices, selectedDeviceIndex } = this.state
       let index
 
-      if (devices.length === 0) 
+      if (devices.length === 0)
         index = -1
       else if (selectedDeviceIndex === -1)
         index = 0
       else if (selectedDeviceIndex >= devices.length - 2)
         index = devices.length - 1
-      else 
+      else
         index = selectedDeviceIndex + 1
 
       if (index === selectedDeviceIndex) return
@@ -89,15 +89,15 @@ class Login extends React.Component {
     }
 
     this.selectPrevDevice = () => {
-     
+
       let { devices, selectedDeviceIndex } = this.state
       let index
 
-      if (devices.length === 0) 
+      if (devices.length === 0)
         index = -1
       else if (selectedDeviceIndex <= 1)
         index = 0
-      else 
+      else
         index = selectedDeviceIndex - 1
 
       if (index === selectedDeviceIndex) return
@@ -107,7 +107,7 @@ class Login extends React.Component {
 
       debug('select prev device', selectedDeviceIndex, index)
     }
-    
+
 
     // for leaving children, there is no way to update props, but this state is required for animation
     // so we put it directly in container object, and pass callbacks which can access this state
@@ -119,7 +119,7 @@ class Login extends React.Component {
       if (this.enter === 'right') {
         TweenMax.from(el, duration, {
           delay: duration,
-          opacity: 0, 
+          opacity: 0,
           right: -150,
           onComplete: () => callback()
         })
@@ -127,7 +127,7 @@ class Login extends React.Component {
       else {
         TweenMax.from(el, duration, {
           delay: duration,
-          opacity: 0, 
+          opacity: 0,
           transformOrigin: 'left center',
           transform: 'translateZ(-64px) rotateY(45deg)',
           onComplete: () => callback()
@@ -139,14 +139,14 @@ class Login extends React.Component {
 
       if (this.enter === 'left') {
         TweenMax.to(el, duration, {
-          opacity: 0, 
+          opacity: 0,
           right: -150,
           onComplete: () => callback()
         })
       }
       else {
         TweenMax.to(el, duration, {
-          opacity: 0, 
+          opacity: 0,
           transformOrigin: 'left center',
           transform: 'translateZ(-64px) rotateY(45deg)',
           onComplete: () => callback()
@@ -182,12 +182,12 @@ class Login extends React.Component {
       onWillEnter: this.cardWillEnter,
       onWillLeave: this.cardWillLeave
     }
-    
+
     if (this.state.devices.length === 0) {
       type = InfoCard
-      Object.assign(props, { 
+      Object.assign(props, {
         key: 'init-scanning-device',
-        text: '正在搜索网络上的WISNUC OS设备' 
+        text: '正在搜索网络上的WISNUC OS设备'
       })
     }
     else {
@@ -218,29 +218,27 @@ class Login extends React.Component {
     return (
       <div style={{ width: '100%', height: '100%', display:'flex', flexDirection: 'column', alignItems: 'center' }} >
 {/*
-        <FloatingActionButton 
+        <FloatingActionButton
           style={{ position: 'absolute', top: 24, right: 24}}
           onTouchTap={() => this.setState(Object.assign({}, this.state,{devices: [], selectedDeviceIndex: -1, expanded: false, deviceName: null, dim: false}))}
         >
           <NavigationRefresh />
         </FloatingActionButton>
 */}
-        <img 
+        <img
           style={{
             width: '110%',
             top: '-5%',
             position: 'absolute',
             zIndex: -1000,
-            filter: 'blur(5px)',
-            transition: 'filter 300ms linear'
           }}
-          src='../src/assets/images/index/index.jpg' 
+          src='../src/assets/images/index/index.jpg'
         />
         <div style={{width: '100%', height: '100%', top: 0, position: 'absolute', backgroundColor: '#000', zIndex: -999, opacity: this.state.dim ? 0.7 : 0, transition: 'opacity 300ms'}} />
-        <div style={{ 
-          marginTop: 160, 
-          width: this.state.expanded ? 1024 : 448, 
-          backgroundColor: '#BBB', 
+        <div style={{
+          marginTop: 160,
+          width: this.state.expanded ? 1024 : 448,
+          backgroundColor: '#BBB',
           transition: 'width 300ms'
         }}>
           <div style={{width: '100%', position: 'relative', perspective: 1000}}>
