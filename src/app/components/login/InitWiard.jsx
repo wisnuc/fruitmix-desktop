@@ -39,13 +39,15 @@ const StateUp = base => class extends base {
 }
 
 const PrevStepButton = (props) => {
-	<FlatButton
-		label="上一步"
-		disableTouchRipple={true}
-		disableFocusRipple={true}
-		disabled={props.disabled}
-		onTouchTap={props.handlePrev}
-	/>
+	return (
+		<FlatButton
+			label="上一步"
+			disableTouchRipple={true}
+			disableFocusRipple={true}
+			disabled={props.disabled}
+			onTouchTap={props.handlePrev}
+		/>
+	)
 }
 
 const NextStepButton = (props) => {
@@ -187,13 +189,12 @@ class InitWiard extends StateUp(React.Component) {
   render() {
 
     const {finished, stepIndex} = this.state;
-		console.log('this.props.expanded',this.props.expanded)
-		console.log('this.props.showContent',this.props.showContent)
+		console.log('*&*&*&', this.props.onClose)
 
     return (
 			<div style={{
 				width: '100%',
-				height: this.props.expanded ? 640 : 0,
+				height: 640,
 				transition: 'height 300ms',
 				overflow: 'hidden',
 				backgroundColor: '#FAFAFA',
@@ -201,10 +202,10 @@ class InitWiard extends StateUp(React.Component) {
 				paddingLeft: 64,
 				paddingRight: 64,
 				overflowY: 'auto',
-				paddingBottom: this.props.showContent ? 64 : 0
+				paddingBottom: 64
 			}}>
-				<div style={{marginTop: 34, marginBottom: 12, fontSize: 34, color: '#000', opacity: this.props.showContent ? 0.54 : 0, transition:'opacity 150ms'}}>初始化向导</div>
-				<div style={{opacity: this.props.showContent ? 1 : 0, transition:'opacity 150ms'}}>
+				<div style={{marginTop: 34, marginBottom: 12, fontSize: 34, color: '#000', opacity: 0.54}}>初始化向导</div>
+				<div>
 					<Stepper activeStep={stepIndex} orientation="vertical">
 						<Step>
 							<StepLabel>创建磁盘卷</StepLabel>
@@ -270,13 +271,14 @@ class InitWiard extends StateUp(React.Component) {
 					</Stepper>
 					<FlatButton
 						label="返回"
-						onTouchTap={() => {
+						onTouchTap={(props) => {
 							this.setState(Object.assign({}, this.state, {
 								finished: false,
 								stepIndex: 0,
 								volumeselect: new CreatingVolumeDiskSelection1.State(),
 								userpass: new UsernamePassword.State(),
 							}))
+							this.props.onClose()
 						}}
 					/>
 					{ finished && (

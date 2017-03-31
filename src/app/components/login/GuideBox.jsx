@@ -15,13 +15,14 @@ const GuideFooter = (props) => {
 
 const GuideBox = (props) => {
 
+	console.log('^_^_^_^_^_', props.toggle)
     return (
 			<div style={{width: '100%', height: '100%'}}>
 				<div >
 					{
 						props.toggle ?
-							<GuideFooter onOpen={props.onOpen}/> :
-							<InitWiard storage={props.storage} />
+							<InitWiard storage={props.storage} onClose={props.onClose}/> :
+							<GuideFooter onOpen={props.onOpen}/>
 					}
 				</div>
 			</div>

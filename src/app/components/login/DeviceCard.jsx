@@ -140,9 +140,9 @@ class DeviceCard extends React.Component {
 		this.onClose = () => {
 
 			setTimeout (() => {
-			  this.onBoxResize('VSHRINK')
+				this.props.onResize('HSHRINK')
 				setTimeout (() => {
-					this.props.onResize('HSHRINK')
+					this.onBoxResize('VSHRINK')
 				},350)
 			},350)
 		}
