@@ -3,10 +3,10 @@ import Debug from 'debug'
 import { Paper, Card, IconButton, CircularProgress } from 'material-ui'
 import Carousel from './Carousel'
 import PhotoDetail from './PhotoDetail'
-import FadingToAnimate from './FadingToAnimate'
 import LazyloadBox from './scrollLazyload/LazyloadBox'
 import ScrollFlush from './scrollLazyload/ScrollFlush'
 import { formatDate } from '../../utils/datetime'
+import PhotoListByDate from './PhotoListByDate'
 
 const debug = Debug('component:photoApp:PhotoList')
 const findPath = (items, path) => items.findIndex(item => item === path)
@@ -52,15 +52,15 @@ export default class PhotoList extends Component {
     }
 
     this.renderCarousel = () => {
+      if (!this.state.carouselItems.length) return <div />
       debug('this.renderCarousel')
       return (
-        <FadingToAnimate
+        <Paper
           style={{
             position: 'fixed',
             bottom: 15,
             width: '75%'
           }}
-          flag={this.state.carouselItems.length ? 'in' : 'out'}
         >
           <Carousel
             ClearAll={() => this.setState({ carouselItems: [] })}
@@ -68,7 +68,7 @@ export default class PhotoList extends Component {
             style={{ backgroundColor: '#fff', height: 180, borderRadius: 4, boxShadow: '0 0 10px rgba(0,0,0,.3)' }}
             items={this.state.carouselItems}
           />
-        </FadingToAnimate>
+        </Paper>
       )
     }
     this.renderPhotoDetail = photos => photos.length && this.state.activeIndex !== false
@@ -96,33 +96,40 @@ export default class PhotoList extends Component {
 
   render() {
     debug('this.props', this.props)
+    let date=''
+    if(this.props.photoMapDates[0]) date=this.props.photoMapDates[0].date
     return (
       <Paper style={this.props.style}>
         {/* 图片列表 */}
-        <ScrollFlush
-          allPhotos={this.props.allPhotos}
+        <PhotoListByDate
           addListToSelection={this.addListToSelection}
+          allPhotos={this.props.allPhotos}
           lookPhotoDetail={this.lookPhotoDetail}
-          removeListToSelection={this.removeListToSelection}
-          list={this.props.photoMapDates}
-          onDetectAllOffChecked={detectAllOffChecked}
-          onGetPhotoListByDates={photoListByDates => this.photoListByDates = photoListByDates}
           onAddHoverToList={
             (photoListByDates) => {
               this.photoListByDates = photoListByDates; photoListByDates.forEach(p => p.addHoverToAllItem())
             }
           }
+          onDetectAllOffChecked={detectAllOffChecked}
+          onGetPhotoListByDates={photoListByDates => this.photoListByDates = photoListByDates}
           onRemoveHoverToList={
             (photoListByDates) => {
               const isAllOffChecked = photoListByDates.every(p => p.detectIsAllOffChecked())
               isAllOffChecked && photoListByDates.forEach(p => p.removeHoverToAllItem())
             }
           }
+          removeListToSelection={this.removeListToSelection}
+          style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start' }}
+          ref={'photoListByDate'}
+          photos={this.props.photoMapDates}
+          date={date}
+        />
+        {/*
+          list={this.props.photoMapDates}
           selectedList={this.state.carouselItems}
           pageSize={7}
-        >
-          <LazyloadBox />
-        </ScrollFlush>
+        
+        */}
 
         {/* 轮播 */}
         {/* this.renderCarousel() */}

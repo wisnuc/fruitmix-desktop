@@ -88,7 +88,7 @@ export default class PhotoListByDate extends Component {
 
   render() {
     const { style, date, photos, lookPhotoDetail } = this.props
-
+    console.log('PhotoListByDate.jsx', this.props)
     return (
       <div style={{ padding: '0 6px 6px 6px' }}>
         {/* 日期 */}

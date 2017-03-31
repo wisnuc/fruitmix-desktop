@@ -98,8 +98,12 @@ class PhotoApp extends React.Component {
     }
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    return 1
+  }
+
   render() {
-    // debug('render photoapp state', this.state)
+    // debug('render photoapp state, props', this.state, this.props)
     return (
       <div>
         {/* 工具条 */}
