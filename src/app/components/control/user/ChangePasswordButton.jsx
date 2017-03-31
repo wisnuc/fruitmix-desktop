@@ -86,7 +86,7 @@ class ChangePasswordButton extends React.Component {
                   <FlatButton label='取消' 
                     labelStyle={{
                       fontSize: 16, 
-                      fontWeight: 'medium',
+                      fontWeight: 500,
                     }}
                     primary={true}
                     disabled={this.state.busy}
@@ -97,7 +97,7 @@ class ChangePasswordButton extends React.Component {
                   <FlatButton label='确定' 
                     labelStyle={{
                       fontSize: 16, 
-                      fontWeight: 'medium',
+                      fontWeight: 500,
                     }}
                     primary={true}
                     disabled={this.state.busy || !this.validatePasswords()}

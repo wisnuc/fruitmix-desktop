@@ -17,7 +17,7 @@ import { HDDIcon, RAIDIcon, UpIcon, DownIcon } from './Svg'
 import {
   SUBTITLE_HEIGHT, HEADER_HEIGHT, FOOTER_HEIGHT, SUBTITLE_MARGINTOP, SubTitleRow,
   VerticalExpandable, TableHeaderRow, TableDataRow, diskDisplayName, HeaderTitle1,
-  HeaderIcon, Checkbox40, FsAndVolumemode, KeyValueList, DoubleDivider
+  HeaderIcon, Checkbox40, KeyValueList, DoubleDivider
 } from './ConstElement'
 
 import PureDialog from '../common/PureDialog.jsx'
@@ -53,8 +53,9 @@ export default class BtrfsVolume extends React.Component {
     }
 
     this.volumeIconColor = (volume) => {
-      if (this.props.state.creatingNewVolume) { return this.colors.fillGreyFaded }
-
+      if (this.props.state.creatingNewVolume) return this.colors.fillGreyFaded
+      return this.colors.fillGrey
+      // TODO
       if (volume.isMissing) return redA200
       if (typeof volume.wisnuc !== 'object') return '#000'
       switch (volume.wisnuc.status) {
@@ -67,14 +68,13 @@ export default class BtrfsVolume extends React.Component {
         case 'DAMAGED':
           return red400
       }
-
       return '#000'
     }
 
     this.VolumeTitle = (props) => {
       const volume = props.volume
       return (
-        <div style={{ width: '100%', height: HEADER_HEIGHT, display: 'flex' }}>
+        <div style={{ width: '100%', height: HEADER_HEIGHT, display: 'flex', alignItems: 'center' }}>
           <HeaderIcon>
             <Avatar
               size={40}
@@ -83,23 +83,23 @@ export default class BtrfsVolume extends React.Component {
               icon={<RAIDIcon />}
             />
           </HeaderIcon>
-          <div style={{ width: 168, paddingLeft: 8 }}>
+          <div style={{ width: 176 }}>
             <HeaderTitle1
               style={{
-                fontWeight: 'regular',
+                fontWeight: 500,
                 fontSize: 21,
                 width: 176,
-                marginTop: 6,
-                marginBottom: 4,
                 color: this.props.state.creatingNewVolume ? 'rgba(0,0,0,0.38)' : '#212121'
               }}
               title="磁盘阵列"
             />
-            <FsAndVolumemode
-              style={{ marginLeft: -12, textTransform: 'capitalize' }}
-              volumemode={volume.usage.data.mode.toLowerCase()}
-              textFilesystem="Btrfs"
-            />
+            <div
+              style={{ textTransform: 'capitalize', fontSize: 14, fontWeight: 500, color: '#9e9e9e', marginTop: 2 }}
+              onTouchTap={props.onTouchTap}
+            >
+              <span style={{ marginRight: 5 }}>Btrfs</span>
+              { volume.usage.data.mode && <span style={{ marginRight: 5 }}> {volume.usage.data.mode.toLowerCase()} </span> }
+            </div>
           </div>
         </div>
       )
@@ -171,7 +171,7 @@ export default class BtrfsVolume extends React.Component {
     const { blocks } = this.props.state.storage
     const cnv = !!this.props.state.creatingNewVolume
     const expandableHeight = this.state.expanded ?
-      17 * 24 + 3 * SUBTITLE_HEIGHT + SUBTITLE_MARGINTOP : 0
+      17 * 23 + 3 * SUBTITLE_HEIGHT + SUBTITLE_MARGINTOP * 2 + 0.5 : 0
     const ExpandedzDepth = this.state.expanded ? 2 : zDepth
     const comment = () => volume.missing ? '有磁盘缺失' : '全部在线' // TODO if(volume.missing === true)
     const DivStyle = () => ({
@@ -180,7 +180,10 @@ export default class BtrfsVolume extends React.Component {
       alignItems: 'center',
       justifyContent: 'space-between',
       backgroundColor: '',
-      border: '1px solid #e6e6e6'
+      boxSizing: 'border-box',
+      borderStyle: 'none none solid none',
+      borderWidth: '1px',
+      borderColor: '#e6e6e6'
     })
     // debug('volume.usage', volume.usage, '!volume.usage', !volume.usage)
     if (!volume.usage) return <div />
@@ -203,6 +206,7 @@ export default class BtrfsVolume extends React.Component {
         </div>
         <VerticalExpandable height={expandableHeight}>
 
+          <div style={{ width: '100%', height: 0.5 }} />
           <SubTitleRow text="磁盘阵列信息" disabled={cnv} />
 
           <div style={{ width: '100%', display: 'flex' }}>
@@ -216,7 +220,7 @@ export default class BtrfsVolume extends React.Component {
               ]}
             />
           </div>
-
+          <div style={{ width: '100%', height: SUBTITLE_MARGINTOP }} />
           <SubTitleRow text="数据使用" disabled={cnv} />
 
           <div style={{ width: '100%', display: 'flex' }}>
@@ -262,14 +266,14 @@ export default class BtrfsVolume extends React.Component {
           disabled={cnv}
           items={[
             ['', 256],
-            ['接口', 64],
-            ['容量', 80, true],
-            ['', 64],
-            ['设备名', 96],
-            ['型号', 208],
-            ['序列号', 208],
+            ['接口', 40],
+            ['容量', 72, true],
+            ['', 56],
+            ['设备名', 98],
+            ['型号', 216],
+            ['序列号', 236],
             ['DEV ID', 64],
-            ['已使用', 80, true]
+            ['已使用', 82, true]
           ]}
         />
 
@@ -295,14 +299,14 @@ export default class BtrfsVolume extends React.Component {
                     />), 40
                   ],
                   [diskDisplayName(blk.name), 136],
-                  [blk.idBus, 64],
-                  [prettysize(blk.size * 512), 80, true],
-                  ['', 64],
-                  [blk.name, 96],
-                  [blk.model || '', 208],
-                  [blk.serial || '', 208],
+                  [blk.idBus, 40],
+                  [prettysize(blk.size * 512), 72, true],
+                  ['', 56],
+                  [blk.name, 98],
+                  [blk.model || '', 216],
+                  [blk.serial || '', 236],
                   [volume.devices.find(d => d.name === blk.name).id.toString(), 64],
-                  [volume.devices.find(d => d.name === blk.name).used, 80, true]
+                  [volume.devices.find(d => d.name === blk.name).used, 82, true]
                 ]}
               />
             ))
@@ -334,14 +338,28 @@ export default class BtrfsVolume extends React.Component {
             { cnv && '选择该磁盘阵列中的磁盘建立新的磁盘阵列，会摧毁当前磁盘阵列存储的所有数据。' }
           </div>
         </div>
-        { !cnv && <div>
-          <Users creatingNewVolume={this.props.state.creatingNewVolume} volume={volume} />
+        { !cnv && <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            boxSizing: 'border-box',
+            borderStyle: 'solid none none none',
+            borderWidth: '1px',
+            borderColor: '#e6e6e6'
+          }}
+        >
+          <div style={{ width: 1000 }}>
+            <Users creatingNewVolume={this.props.state.creatingNewVolume} volume={volume} />
+          </div>
           <div
-            style={{ display: 'flex',
+            style={{
+              height: 40,
+              display: 'flex',
               alignItems: 'center',
-              marginLeft: 80,
-              height: 56,
-              fontSize: 14
+              justifyContent: 'flex-end',
+              padding: 8,
+              fontSize: 14,
+              width: 200
             }}
           >
             { this.props.state.boot.state === 'maintenance' &&
@@ -350,7 +368,6 @@ export default class BtrfsVolume extends React.Component {
                 volume.wisnuc.status === 'READY' &&
                 <div>
                   <FlatButton
-                    style={{ marginLeft: -8 }}
                     label="启动"
                     primary
                     onTouchTap={(e) => {
@@ -358,13 +375,11 @@ export default class BtrfsVolume extends React.Component {
                       this.startWisnucOnVolume(volume)
                     }}
                   />
-                  <span style={{ width: 8, display: 'inline-block' }} />
                 </div>
             }
             { this.props.state.boot.state === 'maintenance' &&
                 this.props.state.creatingNewVolume === null &&
                 <FlatButton
-                  style={{ marginLeft: -8 }}
                   label={
                     typeof volume.wisnuc === 'object'
                       ? [[volume.wisnuc.error === 'ENOWISNUC' ? '安装' : '重新安装']]

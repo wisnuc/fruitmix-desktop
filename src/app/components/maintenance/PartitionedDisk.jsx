@@ -97,19 +97,20 @@ export default class PartitionedDisk extends React.Component {
               SUBTITLE_HEIGHT * 2 +
               TABLEHEADER_HEIGHT +
               TABLEDATA_HEIGHT * parts.length +
-              SUBTITLE_MARGINTOP : 0
+              SUBTITLE_MARGINTOP * 2 : 0
           }
         >
+          <div style={{ width: '100%', height: SUBTITLE_MARGINTOP }} />
           <SubTitleRow text="分区信息" disabled={cnv} />
           <TableHeaderRow
             disabled={cnv}
             items={[
             ['', 256],
-            ['文件系统', 64],
-            ['容量', 80, true],
-            ['', 64],
-            ['设备名', 96],
-            ['路径（挂载点）', 524]
+            ['文件系统', 56],
+            ['容量', 56, true],
+            ['', 56],
+            ['设备名', 98],
+            ['路径（挂载点）', 568]
             ]}
           />
           {
@@ -121,11 +122,11 @@ export default class PartitionedDisk extends React.Component {
               items={[
                 ['', 116],
                 [partitionDisplayName(blk.name), 140],
-                [(blk.idFsUsage && blk.fileSystemType) ? blk.fileSystemType : '(未知)', 64],
-                [prettysize(blk.size * 512), 80, true],
-                ['', 64],
-                [blk.name, 96],
-                [blk.isMounted ? blk.mountpoint : '', 524]
+                [(blk.idFsUsage && blk.fileSystemType) ? blk.fileSystemType : '(未知)', 56],
+                [prettysize(blk.size * 512), 56, true],
+                ['', 56],
+                [blk.name, 98],
+                [blk.isMounted ? blk.mountpoint : '', 568]
               ]}
             />
           )).reduce((p, c, index) => {

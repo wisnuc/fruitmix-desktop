@@ -20,13 +20,13 @@ export class DialogInput extends React.Component {
       <FlatButton
         label="取消"
         onTouchTap={() => this.props.onCancel()}
-        labelStyle={{fontSize:'15px', fontWeight: 'medium'}}
+        labelStyle={{fontSize:'15px', fontWeight: 500}}
       />,
       <FlatButton
         label="确认"
         primary={true}
         onTouchTap={() => this.props.onOK(this.inputValue)}
-        labelStyle={{fontSize:'15px', fontWeight: 'medium'}}
+        labelStyle={{fontSize:'15px', fontWeight: 500}}
       />,
     ]    
 
@@ -71,13 +71,13 @@ export class DialogConfirm extends React.Component {
       <FlatButton
         label="取消"
         onTouchTap={() => this.props.onCancel()}
-        labelStyle={{fontSize:'15px', fontWeight: 'medium'}}
+        labelStyle={{fontSize:'15px', fontWeight: 500}}
       />,
       <FlatButton
         label="确认"
         primary={true}
         onTouchTap={() => this.props.onOK(this.inputValue)}
-        labelStyle={{fontSize:'15px', fontWeight: 'medium'}}
+        labelStyle={{fontSize:'15px', fontWeight: 500}}
       />,
     ]    
 

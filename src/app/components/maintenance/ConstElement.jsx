@@ -3,28 +3,15 @@ import prettysize from 'prettysize'
 import { Checkbox, Chip, Avatar, Divider } from 'material-ui'
 import { HDDIcon } from './Svg'
 
-export const SUBTITLE_HEIGHT = 32
+export const SUBTITLE_HEIGHT = 29
 export const TABLEHEADER_HEIGHT = 48
 export const TABLEDATA_HEIGHT = 48
-export const HEADER_HEIGHT = 72
+export const HEADER_HEIGHT = 64
 export const FOOTER_HEIGHT = 48
-export const SUBTITLE_MARGINTOP = 24
+export const SUBTITLE_MARGINTOP = 4
 export const alphabet = 'abcdefghijklmnopqrstuvwxyz'
 
 export const styles = {
-  chip: {
-    backgroundColor: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: 'medium',
-    height: 24,
-    marginRight: 5,
-    border: '1px solid #e6e6e6'
-  },
-  wrapper: {
-    display: 'flex',
-    alignItems: 'center',
-    flexWrap: 'wrap'
-  },
   paperHeader: {
     position: 'relative',
     width: '100%',
@@ -34,7 +21,6 @@ export const styles = {
     alignItems: 'center'
   }
 }
-
 export const partitionDisplayName = (name) => {
   const numstr = name.slice(3)
   return `分区 #${numstr}`
@@ -45,9 +31,9 @@ export const SubTitleRow = props => (
     <div style={{ flex: '0 0 256px' }} />
     <div
       style={{ flex: '0 0 184px',
-        fontSize: 13,
+        fontSize: 14,
         color: props.disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.87)',
-        fontWeight: 'bold'
+        fontWeight: 500
       }}
     >
       {props.text}
@@ -63,12 +49,12 @@ export const VerticalExpandable = props => (
 
 export const TableHeaderRow = (props) => {
   const style = {
-    fontWeight: 'regular',
-    fontSize: 12,
+    fontWeight: 500,
+    fontSize: 14,
     height: TABLEHEADER_HEIGHT,
     display: 'flex',
     alignItems: 'center',
-    color: '#9e9e9e'
+    color: '#757575'
   }
 
   return (
@@ -86,7 +72,7 @@ export const TableDataRow = (props) => {
   const containerStyle = {
     height: TABLEDATA_HEIGHT,
     fontSize: 14,
-    fontWeight: 'medium',
+    fontWeight: 500,
     display: 'flex',
     alignItems: 'center',
     color: props.disabled ? 'rgba(0,0,0,0.38)' : '#212121'
@@ -129,28 +115,6 @@ export const HeaderTitle1 = props => (
   </div>
 )
 
-export const FsAndVolumemode = props => (
-  <div style={props.style} onTouchTap={props.onTouchTap}>
-    <div style={styles.wrapper}>
-      {
-        props.textFilesystem &&
-        <Chip style={styles.chip} labelStyle={{ marginTop: -6 }}>
-          <span style={{ color: '#9e9e9e' }}>
-            {props.textFilesystem}
-          </span>
-        </Chip>
-      }
-      {
-        props.volumemode &&
-          <Chip style={styles.chip} labelStyle={{ marginTop: -6 }}>
-            <span style={{ color: '#9e9e9e' }}>
-              {props.volumemode}
-            </span>
-          </Chip>
-      }
-    </div>
-  </div>
-)
 export const Checkbox40 = props => (
   <div style={{ width: 40, height: 40 }}>
     <Checkbox
@@ -164,8 +128,7 @@ export const HeaderIcon = props => (
   <div
     style={{
       width: 40,
-      marginLeft: 16,
-      marginTop: 16,
+      marginLeft: 24,
       marginRight: 16
     }}
   >
@@ -214,13 +177,21 @@ export const DiskTitle = (props) => {
       style={{ position: 'absolute',
         width: 256,
         display: 'flex',
+        alignItems: 'center',
         top: props.top,
         height: cnv ? TABLEDATA_HEIGHT : HEADER_HEIGHT,
-        transition: 'all 300ms' }}
+        transition: 'all 300ms'
+      }}
     >
       <HeaderIcon>
         { cnv ?
-          <div style={{ marginTop: -8, marginLeft: 56 }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              marginLeft: 56
+            }}
+          >
             <Checkbox40
               fill={accent}
               disabled={uf}
@@ -228,26 +199,25 @@ export const DiskTitle = (props) => {
               checked={!!cnv.disks.find(d => d === disk)}
               onCheck={() => toggleCandidate(disk)}
             />
-          </div>
-              :
+          </div> :
           <Avatar
             size={40}
             color="white"
             backgroundColor="#BDBDBD"
             icon={<HDDIcon />}
           />
-          }
+        }
       </HeaderIcon>
       <HeaderTitle1
         style={{
-          fontWeight: 'regular',
           fontSize: cnv ? 13 : 21,
           height: cnv ? TABLEDATA_HEIGHT : HEADER_HEIGHT,
           width: 176,
-          marginTop: cnv ? 18 : 20,
           marginLeft: cnv ? 40 : 0,
           color: (!cnv) ? '#212121' : 'rgba(0,0,0,0.38)',
-          transition: 'height 300ms'
+          transition: 'height 300ms',
+          display: 'flex',
+          alignItems: 'center'
         }}
         title={diskDisplayName(disk.name)}
         onTouchTap={e => cnv && e.stopPropagation()}
@@ -264,12 +234,12 @@ export const DiskInfoTable = (props) => {
         disabled={cnv}
         items={[
           ['', 256],
-          ['接口', 64],
-          ['容量', 80, true],
-          ['', 64],
-          ['设备名', 96],
-          ['型号', 200],
-          ['序列号', 200],
+          ['接口', 40],
+          ['容量', 72, true],
+          ['', 56],
+          ['设备名', 98],
+          ['型号', 216],
+          ['序列号', 236],
           type === 'PartitionedDisk' ? ['分区表类型', 112] : []
         ]}
       />
@@ -279,12 +249,12 @@ export const DiskInfoTable = (props) => {
         items={[
           ['', 72],
           ['', 184],
-          [disk.idBus, 64],
-          [prettysize(disk.size * 512), 80, true],
-          ['', 64],
-          [disk.name, 96],
-          [disk.model || '', 200],
-          [disk.serial || '', 200],
+          [disk.idBus, 40],
+          [prettysize(disk.size * 512), 72, true],
+          ['', 56],
+          [disk.name, 98],
+          [disk.model || '', 216],
+          [disk.serial || '', 236],
           type === 'PartitionedDisk' ? [disk.partitionTableType, 112] : []
         ]}
       />
@@ -301,11 +271,11 @@ export const KeyValueList = (props) => {
         <div
           key={item.toString()}
           style={{
-            height: 24,
+            height: 23,
             display: 'flex',
             alignItems: 'center',
-            fontSize: 13,
-            color: props.disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.87'
+            fontSize: 14,
+            color: props.disabled ? 'rgba(0,0,0,0.38)' : '#757575'
           }}
         >
           <div style={{ width: 184 }}>{item[0]}</div>

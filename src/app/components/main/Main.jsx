@@ -227,7 +227,7 @@ class Main extends React.Component {
             top: (56 - 48 ) / 2,
             transition: sharpCurve('top'),
             right: 0,
-            zIndex: 10000
+            zIndex: 1000
           }}
 
           iconStyle={showAppBar ?

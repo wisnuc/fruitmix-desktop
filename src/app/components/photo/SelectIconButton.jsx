@@ -2,9 +2,9 @@
   SelectIconButton.jsx
 **/
 
-import React, { Component, PropTypes } from 'react';
+import React, { Component, PropTypes } from 'react'
 
-function getStyles () {
+function getStyles() {
   return {
     root: {
       display: 'block',
@@ -50,51 +50,51 @@ function getStyles () {
 
 export default class SelectIconButton extends Component {
   constructor(props) {
-    super(props);
+    super(props)
 
-    this.style = getStyles();
+    this.style = getStyles()
     this.state = {
       action: props.checked
-    };
+    }
 
-    this.onActiveByRootStyle = Object.assign({}, this.style.root, this.style.onActive);
-    this.offActiveByRootStyle = Object.assign({}, this.style.root, this.style.offActive);
-    this.onActiveByFirstLineStyle = Object.assign({}, this.style.firstLine, this.style.onActiveByLine);
-    this.offActiveByFirstLineStyle = Object.assign({}, this.style.firstLine, this.style.offActiveByLine);
-    this.onActiveByLastLineStyle = Object.assign({}, this.style.lastLine, this.style.onActiveByLine);
-    this.offActiveByLastLineStyle = Object.assign({}, this.style.lastLine, this.style.offActiveByLine);
+    this.onActiveByRootStyle = Object.assign({}, this.style.root, this.style.onActive)
+    this.offActiveByRootStyle = Object.assign({}, this.style.root, this.style.offActive)
+    this.onActiveByFirstLineStyle = Object.assign({}, this.style.firstLine, this.style.onActiveByLine)
+    this.offActiveByFirstLineStyle = Object.assign({}, this.style.firstLine, this.style.offActiveByLine)
+    this.onActiveByLastLineStyle = Object.assign({}, this.style.lastLine, this.style.onActiveByLine)
+    this.offActiveByLastLineStyle = Object.assign({}, this.style.lastLine, this.style.offActiveByLine)
 
     this.handleClick = (e) => {
-      let actionName = this.state.action === 'off'
+      const actionName = this.state.action === 'off'
         ? 'on'
-        : 'off';
-      this[actionName + 'Selected']();
-      e.stopPropagation();
-    };
-    this.selectBehavior = props.selectBehavior || (() => {});
+        : 'off'
+      this[`${actionName}Selected`]()
+      e.stopPropagation()
+    }
+    this.selectBehavior = props.selectBehavior || (() => {})
   }
 
   onSelected(disabled) {
-    this.setState({ action: 'on' }, () => !disabled && this.selectBehavior(this.state.action));
+    this.setState({ action: 'on' }, () => !disabled && this.selectBehavior(this.state.action))
   }
 
   offSelected(disabled) {
-    this.setState({ action: 'off' }, () => !disabled && this.selectBehavior(this.state.action));
+    this.setState({ action: 'off' }, () => !disabled && this.selectBehavior(this.state.action))
   }
 
   componentWillReceiveProps(nextProps) {
-    this.props.isReceive && this[`${nextProps.checked}Selected`](true);
+    this.props.isReceive && this[`${nextProps.checked}Selected`](true)
   }
 
   render() {
     return (
-      <div style={ this.props.style } onClick={ this.handleClick }>
-        <span style={ this[this.state.action + 'ActiveByRootStyle'] }>
-          <i style={ this[this.state.action + 'ActiveByFirstLineStyle'] }></i>
-          <i style={ this[this.state.action + 'ActiveByLastLineStyle'] }></i>
+      <div style={this.props.style} onClick={this.handleClick}>
+        <span style={this[`${this.state.action}ActiveByRootStyle`]}>
+          <i style={this[`${this.state.action}ActiveByFirstLineStyle`]} />
+          <i style={this[`${this.state.action}ActiveByLastLineStyle`]} />
         </span>
       </div>
-    );
+    )
   }
 }
 
@@ -103,9 +103,9 @@ SelectIconButton.propTypes = {
   selectBehavior: PropTypes.func,
   checked: PropTypes.string,
   isReceive: PropTypes.bool
-};
+}
 
 SelectIconButton.defaultProps = {
   checked: 'off',
   isReceive: false
-};
+}

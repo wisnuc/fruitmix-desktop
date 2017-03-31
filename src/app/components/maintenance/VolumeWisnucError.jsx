@@ -1,6 +1,6 @@
 import React from 'react'
 import Popover, { PopoverAnimationVertical } from 'material-ui/Popover'
-import { redA200 } from 'material-ui/styles/colors'
+import { pinkA200 } from 'material-ui/styles/colors'
 import { ReportProblem } from './Svg'
 
 /** **
@@ -48,12 +48,12 @@ export default class VolumeWisnucError extends React.Component {
     if (VolumeisMissing) {
       return (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <ReportProblemIcon color={this.props.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)'} />
+          <ReportProblemIcon color={this.props.creatingNewVolume === null ? pinkA200 : 'rgba(0,0,0,0.38)'} />
           <div
             style={{
-              fontSize: 13,
-              fontWeight: 'bold',
-              color: this.props.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)'
+              fontSize: 14,
+              fontWeight: 500,
+              color: this.props.creatingNewVolume === null ? pinkA200 : 'rgba(0,0,0,0.38)'
             }}
           >
             发现有磁盘缺失
@@ -85,14 +85,14 @@ export default class VolumeWisnucError extends React.Component {
       // debug("text",text)
       return (
         <div style={{ display: 'flex' }}>
-          <ReportProblemIcon color={this.props.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)'} />
+          <ReportProblemIcon color={this.props.creatingNewVolume === null ? pinkA200 : 'rgba(0,0,0,0.38)'} />
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              fontSize: 13,
-              fontWeight: 'bold',
-              color: this.props.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)'
+              fontSize: 14,
+              fontWeight: 500,
+              color: this.props.creatingNewVolume === null ? pinkA200 : 'rgba(0,0,0,0.38)'
             }}
           >{ text }
           </div>
@@ -101,14 +101,14 @@ export default class VolumeWisnucError extends React.Component {
     } else if (error) {
       return (
         <div style={{ display: 'flex' }}>
-          <ReportProblemIcon color={this.props.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)'} />
+          <ReportProblemIcon color={this.props.creatingNewVolume === null ? pinkA200 : 'rgba(0,0,0,0.38)'} />
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              fontSize: 13,
-              fontWeight: 'bold',
-              color: this.props.creatingNewVolume === null ? redA200 : 'rgba(0,0,0,0.38)'
+              fontSize: 14,
+              fontWeight: 500,
+              color: this.props.creatingNewVolume === null ? pinkA200 : 'rgba(0,0,0,0.38)'
             }}
             onTouchTap={(e) => {
               e.stopPropagation()
