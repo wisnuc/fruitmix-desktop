@@ -1,25 +1,24 @@
 import { ipcRenderer } from 'electron'
 import Debug from 'debug'
-import React, { Component, PropTypes } from 'react'
+import React, { PropTypes } from 'react'
 import { CircularProgress } from 'material-ui'
 import SlideToAnimate from './SlideToAnimate'
 
 const debug = Debug('component:photoApp:PhotoDetail')
-const __MAPORIENTATION__ = {
-  1: 0,
-  8: -90,
-  3: 180,
-  6: 90
-}
 
-class PhotoDetailList extends Component {
+class PhotoDetailList extends React.Component {
   constructor() {
     super()
   }
 
-  componentDidUpdate() {
-    window.store.dispatch({ type: 'CLEAR_MEDIA_IMAGE' })
+  componentWillReceiveProps(nextProps) {
   }
+  shouldComponentUpdate(nextProps, nextState) {
+    return 1
+  }
+  // componentDidUpdate() {
+  //  window.store.dispatch({ type: 'CLEAR_MEDIA_IMAGE' })
+  // }
 
   render() {
     const { style, items, seqIndex } = this.props
@@ -29,6 +28,7 @@ class PhotoDetailList extends Component {
       degRotate = `rotate(${(exifOrientation - 1) * 90}deg)`
     }
 
+    debug('window.store.getState().view.currentMediaImage.path', window.store.getState().view.currentMediaImage.path)
     return (
       <div
         style={{
@@ -69,7 +69,7 @@ class PhotoDetailList extends Component {
   }
 }
 
-export default class PhotoDetail extends Component {
+export default class PhotoDetail extends React.Component {
   constructor() {
     super()
 
@@ -130,9 +130,9 @@ export default class PhotoDetail extends Component {
             style={{
               width: '100%',
               height: '100%',
-              zIndex: 10004
+              zIndex: 1500
             }}
-            onClose={this.props.closeMaskLayer}
+            onClose={this.props.closePhotoDetail}
             activeIndex={this.props.seqIndex}
             translateLeftCallback={this.requestNext}
             translateRightCallback={this.requestNext}
@@ -147,7 +147,7 @@ export default class PhotoDetail extends Component {
                 width: '75%',
                 height: '100%',
                 margin: '0 auto',
-                zIndex: 10004
+                zIndex: 1500
               }}
               seqIndex={this.props.seqIndex}
               items={this.props.items}
@@ -164,7 +164,7 @@ export default class PhotoDetail extends Component {
             backgroundColor: 'rgba(0, 0, 0, 0.9)',
             zIndex: 1400
           }}
-          onTouchTap={this.props.closeMaskLayer}
+          onTouchTap={this.props.closePhotoDetail}
         />
       </div>
     )
@@ -175,5 +175,5 @@ PhotoDetail.propTypes = {
   style: PropTypes.object.isRequired,
   items: PropTypes.array.isRequired,
   activeIndex: PropTypes.number.isRequired,
-  closeMaskLayer: PropTypes.func.isRequired
+  closePhotoDetail: PropTypes.func.isRequired
 }

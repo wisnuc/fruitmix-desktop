@@ -6,25 +6,11 @@ import { ipcRenderer } from 'electron'
 import React, { Component, PropTypes } from 'react'
 import PhotoItem from './PhotoItem'
 import PhotoSelectDate from './PhotoSelectDate'
-import SelectIconButton from './SelectIconButton'
 import { formatDate } from '../../utils/datetime'
 
 export default class PhotoListByDate extends Component {
   constructor(props) {
     super(props)
-    // this.selectSingleItem1 = (action, itemIndex) => {
-    //   let photoItem = this.refs['photoItem' + itemIndex];
-    //   let selectDate = this.refs['selectDate'];
-    //   let isOn = action === 'on';
-    //
-    //   props[(isOn ? 'add' : 'remove') + 'ListToSelection'](photoItem.props.path);
-    //
-    //   setTimeout(() =>
-    //     isOn
-    //       ? (this.selectionRefs.every(refName => this.refs[refName].state.action === 'on') && selectDate.onSelected(true))
-    //       : (this.selectionRefs.every(refName => this.refs[refName].state.action === 'off') && selectDate.offSelected(true))
-    //   , 0);
-    // };
 
     this.addHoverToAllItem = () => {
       this.selectionRefs.forEach(refName =>
@@ -102,7 +88,6 @@ export default class PhotoListByDate extends Component {
 
   render() {
     const { style, date, photos, lookPhotoDetail } = this.props
-    let icon
 
     return (
       <div style={{ padding: '0 6px 6px 6px' }}>
@@ -132,8 +117,8 @@ export default class PhotoListByDate extends Component {
                 detectIsAllOffChecked={this.detectIsAllOffChecked}
                 exifOrientation={photo.exifOrientation}
                 onDetectAllOffChecked={this.props.onDetectAllOffChecked}
-                selected={() => { this.addHoverToAllItem(); this.addCheckedToItem(index); this.addAllChecked(); this.props.onAddHoverToList() }}
-                unselected={() => { this.removeCheckedToItem(index); this.removeAllChecked(); this.removeHoverToAllItem(); this.props.onRemoveHoverToList() }}
+                selected={() => { this.addCheckedToItem(index) }}
+                unselected={() => { this.removeCheckedToItem(index) }}
                 date={this.props.date}
                 digest={photo.digest}
                 path={photo.path}

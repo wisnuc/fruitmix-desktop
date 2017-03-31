@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import Debug from 'debug'
+import { Paper, Card, IconButton, CircularProgress } from 'material-ui'
 import Carousel from './Carousel'
 import PhotoDetail from './PhotoDetail'
 import FadingToAnimate from './FadingToAnimate'
@@ -57,13 +58,13 @@ export default class PhotoList extends Component {
           style={{
             position: 'fixed',
             bottom: 15,
-            width: '75%',
-            zIndex: 10001
+            width: '75%'
           }}
           flag={this.state.carouselItems.length ? 'in' : 'out'}
         >
           <Carousel
-            onClearHoverToList={() => { this.photoListByDates.forEach(p => p.removeCheckToAllItem()) }}
+            ClearAll={() => this.setState({ carouselItems: [] })}
+            removeListToSelection={this.removeListToSelection}
             style={{ backgroundColor: '#fff', height: 180, borderRadius: 4, boxShadow: '0 0 10px rgba(0,0,0,.3)' }}
             items={this.state.carouselItems}
           />
@@ -72,14 +73,13 @@ export default class PhotoList extends Component {
     }
     this.renderPhotoDetail = photos => photos.length && this.state.activeIndex !== false
         ? (<PhotoDetail
-          closeMaskLayer={() => this.setState({ activeIndex: false })}
+          closePhotoDetail={() => this.setState({ activeIndex: false })}
           style={{
             position: 'fixed',
             left: 0,
             top: 0,
             width: '100%',
-            height: '100%',
-            zIndex: 10004
+            height: '100%'
           }}
           deltaWidth={document.documentElement.clientWidth}
           deltaHeight={document.documentElement.clientHeight}
@@ -97,7 +97,7 @@ export default class PhotoList extends Component {
   render() {
     debug('this.props', this.props)
     return (
-      <div style={this.props.style}>
+      <Paper style={this.props.style}>
         {/* 图片列表 */}
         <ScrollFlush
           allPhotos={this.props.allPhotos}
@@ -118,6 +118,7 @@ export default class PhotoList extends Component {
               isAllOffChecked && photoListByDates.forEach(p => p.removeHoverToAllItem())
             }
           }
+          selectedList={this.state.carouselItems}
           pageSize={7}
         >
           <LazyloadBox />
@@ -129,7 +130,7 @@ export default class PhotoList extends Component {
 
         {/* 查看大图 */}
         { this.renderPhotoDetail(this.props.photoMapDates) }
-      </div>
+      </Paper>
     )
   }
 }

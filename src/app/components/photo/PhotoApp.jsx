@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import React from 'react'
-import { Menu, MenuItem, Divider, IconButton } from 'material-ui'
+import { Paper, Menu, MenuItem, Divider, IconButton } from 'material-ui'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import DeviceStorage from 'material-ui/svg-icons/device/storage'
 import { blue500, red500, greenA200 } from 'material-ui/styles/colors'
@@ -26,7 +26,7 @@ class PhotoApp extends React.Component {
     this.toggleLeftNav = () => this.setState({ leftNav: !this.state.leftNav })
 
     this.renderLeftNav = () => (
-      <div
+      <Paper
         style={{
           width: LEFTNAV_WIDTH,
           height: 'calc(100% - 56px)',
@@ -40,7 +40,7 @@ class PhotoApp extends React.Component {
         rounded={false}
         zDepth={this.state.leftNav ? 1 : 0}
       >
-        {/*debug('this.renderLeftNav', 'this.state.leftNav', this.state.leftNav)*/}
+        {/* debug('this.renderLeftNav', 'this.state.leftNav', this.state.leftNav)*/}
         {/* 导航条 */}
 
         {/* 左侧菜单 */}
@@ -63,7 +63,7 @@ class PhotoApp extends React.Component {
             innerDivStyle={{ fontSize: 14, fontWeight: 500, opacity: 0.87 }}
           />
         </Menu>
-      </div>
+      </Paper>
     )
 
     this.setPhotoInfo = () => {

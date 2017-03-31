@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react'
-import SlideToAnimate from './SlideToAnimate'
 import { Paper } from 'material-ui'
+import SlideToAnimate from './SlideToAnimate'
 import FlatButton from '../common/FlatButton'
 
 const MARGIN_DISTANCE = 60
@@ -28,7 +28,7 @@ export default class Carousel extends Component {
         <div style={{ float: 'right' }}>
           <FlatButton
             label="清除全部"
-            onTouchTap={this.props.onClearHoverToList}
+            onTouchTap={this.props.ClearAll}
           />
         </div>
       </div>
@@ -57,6 +57,10 @@ export default class Carousel extends Component {
         <span style={{ fontSize: 14, opacity: 0.87 }}>选中<b>{ count }</b>张照片</span>
       </div>
     )
+  }
+
+  shouldComponentUpdate(nextProps) {
+    return this.props !== nextProps
   }
   render() {
     const { style, items } = this.props

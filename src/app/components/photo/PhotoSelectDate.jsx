@@ -3,7 +3,6 @@
 **/
 
 import React, { Component, PropTypes } from 'react'
-import SelectIconButton from './SelectIconButton'
 
 export default class PhotoSelectDate extends Component {
   shouldComponentUpdate() {
