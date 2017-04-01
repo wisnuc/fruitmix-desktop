@@ -90,6 +90,13 @@ class PhotoApp extends React.Component {
           .push(item)
         }
       })
+      photoMapDates.pop()
+      photoMapDates.pop()
+      photoMapDates.pop()
+      photoMapDates.pop()
+      photoMapDates.pop()
+      photoMapDates.pop()
+      photoMapDates.pop()
       return {
         allPhotos,
         photoDates,

@@ -11,7 +11,7 @@
     "build": "babel node --out-dir build",
     "mocha": "mocha --compilers js:babel-core/register --recursive --sort",
     "devel2": "electron devel.js",
-    "testCommand" : "mocha ./test/testCommand.js --recursive --compilers js:babel-core/register"
+    "testCommand": "mocha ./test/testCommand.js --recursive --compilers js:babel-core/register"
   },
   "devDependencies": {
     "babel": "^6.5.2",
@@ -79,6 +79,7 @@
     "mkdirp": "^0.5.1",
     "node-uuid": "^1.4.7",
     "prettysize": "0.0.3",
+    "react-infinite": "^0.10.0",
     "redux": "^3.5.2",
     "request": "^2.74.0",
     "rimraf": "^2.5.4",

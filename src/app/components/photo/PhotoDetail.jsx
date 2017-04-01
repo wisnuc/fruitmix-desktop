@@ -11,14 +11,13 @@ class PhotoDetailList extends React.Component {
     super()
   }
 
-  componentWillReceiveProps(nextProps) {
-  }
   shouldComponentUpdate(nextProps, nextState) {
-    return 1
+    return window.store.getState().view.currentMediaImage.path !== ''
   }
-  // componentDidUpdate() {
-  //  window.store.dispatch({ type: 'CLEAR_MEDIA_IMAGE' })
-  // }
+
+  componentDidUpdate() {
+    window.store.dispatch({ type: 'CLEAR_MEDIA_IMAGE' })
+  }
 
   render() {
     const { style, items, seqIndex } = this.props
@@ -27,8 +26,6 @@ class PhotoDetailList extends React.Component {
     if (exifOrientation) {
       degRotate = `rotate(${(exifOrientation - 1) * 90}deg)`
     }
-
-    debug('window.store.getState().view.currentMediaImage.path', window.store.getState().view.currentMediaImage.path)
     return (
       <div
         style={{
@@ -81,11 +78,11 @@ export default class PhotoDetail extends React.Component {
     }
 
     this.requestNext = (currentIndex) => {
+      debug('requestNext', this.props, currentIndex)
       ipcRenderer.send('getMediaImage', this.props.items[currentIndex].digest)
       setTimeout(() => {
         this.refs.slideToAnimate.setState({ currentIndex })
       }, 500)
-
       return false
     }
   }

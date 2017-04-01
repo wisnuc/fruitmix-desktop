@@ -83,9 +83,9 @@ export default class PhotoItem extends Component {
     )
   }
 
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   return nextProps.path !== this.props.path
-  // }
+  shouldComponentUpdate(nextProps, nextState) {
+    return ( this.state !== nextState || nextProps.path !== this.props.path )
+  }
 
   render() {
     const { path, style } = this.props

@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import Debug from 'debug'
+import { ipcRenderer } from 'electron'
 import { Paper, Card, IconButton, CircularProgress } from 'material-ui'
 import Carousel from './Carousel'
 import PhotoDetail from './PhotoDetail'
@@ -94,43 +95,54 @@ export default class PhotoList extends Component {
     return { photos: this.props.photoMapDates }
   }
 
+  componentDidMount() {
+    // ipcRenderer.send('getThumb', this.props.allPhotos.map(item => ({ digest: item.digest })))
+  }
+
   render() {
     debug('this.props', this.props)
-    let date=''
-    if(this.props.photoMapDates[0]) date=this.props.photoMapDates[0].date
+    let date = ''
+    if (this.props.photoMapDates[0]) date = this.props.photoMapDates[0].date
     return (
       <Paper style={this.props.style}>
         {/* 图片列表 */}
-        <PhotoListByDate
-          addListToSelection={this.addListToSelection}
-          allPhotos={this.props.allPhotos}
-          lookPhotoDetail={this.lookPhotoDetail}
-          onAddHoverToList={
+        <div
+          style={{
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+            overflow: 'auto'
+          }}
+        >
+          {this.props.photoMapDates.map((list, index) => (
+            <PhotoListByDate
+              addListToSelection={this.addListToSelection}
+              allPhotos={this.props.allPhotos}
+              lookPhotoDetail={this.lookPhotoDetail}
+              onAddHoverToList={
             (photoListByDates) => {
               this.photoListByDates = photoListByDates; photoListByDates.forEach(p => p.addHoverToAllItem())
             }
           }
-          onDetectAllOffChecked={detectAllOffChecked}
-          onGetPhotoListByDates={photoListByDates => this.photoListByDates = photoListByDates}
-          onRemoveHoverToList={
+              onDetectAllOffChecked={detectAllOffChecked}
+              onGetPhotoListByDates={photoListByDates => this.photoListByDates = photoListByDates}
+              onRemoveHoverToList={
             (photoListByDates) => {
               const isAllOffChecked = photoListByDates.every(p => p.detectIsAllOffChecked())
               isAllOffChecked && photoListByDates.forEach(p => p.removeHoverToAllItem())
             }
           }
-          removeListToSelection={this.removeListToSelection}
-          style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start' }}
-          ref={'photoListByDate'}
-          photos={this.props.allPhotos}
-          date={date}
-        />
-        {/*
-          list={this.props.photoMapDates}
-          selectedList={this.state.carouselItems}
-          pageSize={7}
-        
-        */}
-
+              removeListToSelection={this.removeListToSelection}
+              style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start' }}
+              ref={'photoListByDate'}
+              photos={list.photos}
+              date={list.date}
+            />
+        ))}
+          <hr style={{ width: '60%', margin: '0 auto' }} />
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>到底部啦！</div>
+          <div style={{ height: 56 }} />
+        </div>
         {/* 轮播 */}
         {/* this.renderCarousel() */}
         { this.renderCarousel() }
