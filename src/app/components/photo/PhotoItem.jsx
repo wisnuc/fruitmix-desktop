@@ -89,7 +89,7 @@ export default class PhotoItem extends Component {
 
   render() {
     const { path, style } = this.props
-    debug('this.props', this.props)
+    // debug('this.props', this.props)
     return (
       <Paper style={style}>
         <div

@@ -2,7 +2,6 @@ import React, { Component, PropTypes } from 'react'
 import Debug from 'debug'
 import { findDOMNode } from 'react-dom'
 import { SvgIcon } from 'material-ui'
-import throttle from './scrollLazyload/utils/throttle'
 
 const debug = Debug('component:photo:SliderToAnimeta:')
 

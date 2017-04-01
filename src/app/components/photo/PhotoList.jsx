@@ -1,11 +1,10 @@
 import React, { Component, PropTypes } from 'react'
+import ReactDOM from 'react-dom'
 import Debug from 'debug'
-import { List } from 'react-virtualized/dist/commonjs/List'
+import { AutoSizer, List } from 'react-virtualized/dist/commonjs/List'
 import { Paper, Card, IconButton, CircularProgress } from 'material-ui'
 import Carousel from './Carousel'
 import PhotoDetail from './PhotoDetail'
-import LazyloadBox from './scrollLazyload/LazyloadBox'
-import ScrollFlush from './scrollLazyload/ScrollFlush'
 import { formatDate } from '../../utils/datetime'
 import PhotoListByDate from './PhotoListByDate'
 
@@ -93,15 +92,72 @@ export default class PhotoList extends Component {
     return { photos: this.props.photoMapDates }
   }
 
-  render() {
-    debug('render PhotoList, this.props', this.props)
-    const AllHeight = []
-    this.props.photoMapDates.map((list, index) => AllHeight.push(Math.floor(list.photos.length / 7 + 1) * 204))
-    AllHeight.push(56)
+  renderList = () => {
+    // const AllHeight = []
+    // this.props.photoMapDates.map((list, index) => AllHeight.push(Math.floor(list.photos.length / 7 + 1) * 204))
+    // AllHeight.push(56)
     // debug('AllHeight', AllHeight)
+
+    const list = (
+      this.props.photoMapDates.map((list, index) => (
+        <PhotoListByDate
+          key={index.toString()}
+          addListToSelection={this.addListToSelection}
+          allPhotos={this.props.allPhotos}
+          lookPhotoDetail={this.lookPhotoDetail}
+          onAddHoverToList={(photoListByDates) => {
+            this.photoListByDates = photoListByDates
+            photoListByDates.forEach(p => p.addHoverToAllItem())
+          }}
+          onDetectAllOffChecked={detectAllOffChecked}
+          onRemoveHoverToList={(photoListByDates) => {
+            const isAllOffChecked = photoListByDates.every(p => p.detectIsAllOffChecked())
+            isAllOffChecked && photoListByDates.forEach(p => p.removeHoverToAllItem())
+          }}
+          removeListToSelection={this.removeListToSelection}
+          style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start' }}
+          photos={list.photos}
+          date={list.date}
+        />
+      ))
+    )
+    debug('list', this.props)
+
+    if (list.length === 0) return <div />
+
+    const clientHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+    const clientWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
+
+    const height = clientHeight - 56
+    const width = this.props.leftNav ? clientWidth - 210 : clientWidth
+    debug('width, height', width, height)
+
+    const rowRenderer = ({ key, index, style }) => (
+      <div
+        key={key}
+        style={style}
+      >
+        {list[index]}
+      </div>
+      )
+    return (
+      <List
+        height={height}
+        rowCount={list.length}
+        rowHeight={204}
+        rowRenderer={rowRenderer}
+        width={width}
+      />
+    )
+  }
+
+  render() {
+    // debug('render PhotoList, this.props', this.props)
     return (
       <Paper style={this.props.style}>
         {/* 图片列表 */}
+        <this.renderList />
+        {/*
           <div
             style={{
               position: 'relative',
@@ -139,9 +195,10 @@ export default class PhotoList extends Component {
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 16, height: 204}}>
                   ————————到底部啦！————————
                 </div> : <div />
-            } 
+            }
           </div>
 
+*/}
         {/* 轮播 */}
         {/* this.renderCarousel() */}
         { this.renderCarousel() }

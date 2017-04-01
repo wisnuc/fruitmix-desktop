@@ -67,6 +67,7 @@ class PhotoApp extends React.Component {
     )
 
     this.setPhotoInfo = () => {
+      const leftNav = this.state.leftNav ? true : false
       const mediaStore = window.store.getState().media.data
       const photoDates = []
       const photoMapDates = []
@@ -90,12 +91,14 @@ class PhotoApp extends React.Component {
           .push(item)
         }
       })
-      for (let i = 1; i <= 4; i++) {
+      for (let i = 1; i <= 1; i++) {
         photoMapDates.push(...photoMapDates)
       }
       return {
+        leftNav,
         allPhotos,
         photoDates,
+        // photoMapDates
         photoMapDates: photoMapDates.sort((prev, next) => Date.parse(next.date) - Date.parse(prev.date))
       }
     }
@@ -105,9 +108,7 @@ class PhotoApp extends React.Component {
     // debug('render photoapp state, props', this.state, this.props)
     return (
       <Paper>
-        {/* 左边菜单 */}
         <this.renderLeftNav />
-        {/* 照片列表 */}
         <PhotoList
           style={{
             position: 'fixed',
@@ -120,7 +121,6 @@ class PhotoApp extends React.Component {
           }}
           {...this.setPhotoInfo()}
         />
-        {/* 工具条 */}
         <PhotoToolBar
           action={this.toggleLeftNav}
           state={['照片']}
