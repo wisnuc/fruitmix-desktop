@@ -121,7 +121,7 @@ export default class PhotoList extends Component {
           removeListToSelection={this.removeListToSelection}
           style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start' }}
           ref={'photoListByDate'}
-          photos={this.props.photoMapDates}
+          photos={this.props.allPhotos}
           date={date}
         />
         {/*

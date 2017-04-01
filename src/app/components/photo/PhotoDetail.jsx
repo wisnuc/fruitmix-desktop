@@ -54,7 +54,7 @@ class PhotoDetailList extends React.Component {
             deltaWidth={this.props.deltaWidth}
             deltaHeight={this.props.deltaHeight}
           >
-            { window.store.getState().view.currentMediaImage.path ?
+            { window.store.getState().view.currentMediaImage.path ? // FIXME
               <img
                 style={{ transform: degRotate }}
                 height={'100%'}
