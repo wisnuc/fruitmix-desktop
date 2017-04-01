@@ -3,6 +3,7 @@ import React from 'react'
 import FlatButton from '../common/FlatButton'
 
 import InitWiard from './InitWiard'
+import { Paper, RaisedButton, IconButton, Dialog } from 'material-ui'
 
 const GuideFooter = (props) => {
 	return (
@@ -13,19 +14,26 @@ const GuideFooter = (props) => {
 	)
 }
 
+const TransitionCard = (props) => {
+	return (
+		<div style={{ height: props.initWiard === opening || props.initWiard === open ? 680 : 64, transsition: 'height 350ms' }}>
+			<Paper style={{height: '100%', width: '100%'}} />
+		</div>
+	)
+}
+
 const GuideBox = (props) => {
 
-	console.log('^_^_^_^_^_', props.toggle)
+		console.log('&*&*&*&*',props.initWiard)
     return (
 			<div style={{width: '100%', height: '100%'}}>
-				<div >
 					{
-						props.toggle ?
-							<InitWiard storage={props.storage} onClose={props.onClose}/> :
-							<GuideFooter onOpen={props.onOpen}/>
+						props.initWiard === 'close' ? <GuideFooter onOpen={props.onOpen}/> :
+							props.initWiard === 'opening' || props.init === 'closeing' ?
+							<TransitionCard initWiard={props.initWiard} /> :
+							<InitWiard storage={props.storage} onClose={props.onClose}/>
 					}
 				</div>
-			</div>
     )
 }
 

@@ -201,6 +201,8 @@ class DeviceCard extends React.Component {
     window.removeEventListener('keyup', this.keypress, false)
   }
 
+	shouldComponentUpdate(){
+	}
   componentWillEnter(callback) {
     this.props.onWillEnter(ReactDOM.findDOMNode(this), callback)
   }
