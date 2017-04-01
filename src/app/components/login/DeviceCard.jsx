@@ -129,9 +129,9 @@ class DeviceCard extends React.Component {
 		}
 
 		this.onOpen = () => {
-
-			this.setState(Object.assign({}, this.state, {initWiard: 'opening'}))
+console.log('#$#$', this)
 			setTimeout (() => {
+				this.setState(Object.assign({}, this.state, {initWiard: 'opening'}))
 			  this.onBoxResize('VEXPAND')
 				setTimeout (() => {
 					this.props.onResize('HEXPAND')
@@ -142,8 +142,8 @@ class DeviceCard extends React.Component {
 
 		this.onClose = () => {
 
-			this.setState(Object.assign({}, this.state, {initWiard: 'closeing'}))
 			setTimeout (() => {
+				this.setState(Object.assign({}, this.state, {initWiard: 'closeing'}))
 				this.props.onResize('HSHRINK')
 				setTimeout (() => {
 					this.onBoxResize('VSHRINK')
@@ -301,7 +301,7 @@ class DeviceCard extends React.Component {
     // if (storage.volumes.find(v => v.isMissing))
     if (storage.volumes.length > 0)
       return <MaintBox text={text} onMaintain={this.maintain} />
-
+console.log('!@#',this.maintain)
     return (
       <GuideBox
         address={this.props.device.address}

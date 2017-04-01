@@ -16,7 +16,7 @@ const GuideFooter = (props) => {
 
 const TransitionCard = (props) => {
 	return (
-		<div style={{ height: props.initWiard === opening || props.initWiard === open ? 680 : 64, transsition: 'height 350ms' }}>
+		<div style={{ height: props.initWiard === 'opening' || props.initWiard === 'closeing' ? 680 : 64, transition: 'height 350ms' }}>
 			<Paper style={{height: '100%', width: '100%'}} />
 		</div>
 	)
@@ -25,13 +25,18 @@ const TransitionCard = (props) => {
 const GuideBox = (props) => {
 
 		console.log('&*&*&*&*',props.initWiard)
+		console.log('!!!!!!!!!!!)))',props.onMaintain)
     return (
 			<div style={{width: '100%', height: '100%'}}>
 					{
 						props.initWiard === 'close' ? <GuideFooter onOpen={props.onOpen}/> :
-							props.initWiard === 'opening' || props.init === 'closeing' ?
+							props.initWiard === 'opening' || props.initWiard === 'closeing' ?
 							<TransitionCard initWiard={props.initWiard} /> :
-							<InitWiard storage={props.storage} onClose={props.onClose}/>
+							<InitWiard
+								storage={props.storage}
+								onClose={props.onClose}
+								onMaintain={props.onMaintain}
+							/>
 					}
 				</div>
     )

@@ -291,7 +291,7 @@ class InitWiard extends StateUp(React.Component) {
 								actions={[
 									<FlatButton
 										label='进入维护模式'
-										onTouchTap={this.props.onMaintain}
+										onTouchTap={(props) => {this.props.onMaintain()}}
 									/>,
 									<FlatButton
 										label='重置向导'
