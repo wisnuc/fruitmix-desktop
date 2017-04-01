@@ -90,13 +90,9 @@ class PhotoApp extends React.Component {
           .push(item)
         }
       })
-      photoMapDates.pop()
-      photoMapDates.pop()
-      photoMapDates.pop()
-      photoMapDates.pop()
-      photoMapDates.pop()
-      photoMapDates.pop()
-      photoMapDates.pop()
+      for (let i = 1; i <= 4; i++) {
+        photoMapDates.push(...photoMapDates)
+      }
       return {
         allPhotos,
         photoDates,
@@ -105,37 +101,31 @@ class PhotoApp extends React.Component {
     }
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return 1
-  }
-
   render() {
     // debug('render photoapp state, props', this.state, this.props)
     return (
-      <div>
-        {/* 工具条 */}
-        <PhotoToolBar
-          action={this.toggleLeftNav}
-          state={['照片']}
-        />
+      <Paper>
+        {/* 左边菜单 */}
         <this.renderLeftNav />
         {/* 照片列表 */}
         <PhotoList
           style={{
             position: 'fixed',
-            top: 56,
+            paddingTop: 56,
             width: this.state.leftNav ? 'calc(100% - 210px)' : '100%',
             height: '100%',
             left: this.state.leftNav ? LEFTNAV_WIDTH : 0,
             backgroundColor: '#FFFFFF',
-            transition: sharpCurve('left'),
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
+            transition: sharpCurve('left')
           }}
           {...this.setPhotoInfo()}
         />
-      </div>
+        {/* 工具条 */}
+        <PhotoToolBar
+          action={this.toggleLeftNav}
+          state={['照片']}
+        />
+      </Paper>
     )
   }
 }

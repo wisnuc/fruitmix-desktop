@@ -1,7 +1,3 @@
-/**
-  PhotoListByDate.jsx
-**/
-
 import { ipcRenderer } from 'electron'
 import React, { Component, PropTypes } from 'react'
 import PhotoItem from './PhotoItem'
@@ -86,6 +82,9 @@ export default class PhotoListByDate extends Component {
     }
   }
 
+  shouldComponentUpdate(nextProps, nextState){
+    return nextProps.photos[0].path !== this.props.photos[0].path
+  }
   render() {
     const { style, date, photos, lookPhotoDetail } = this.props
     console.log('PhotoListByDate.jsx', this.props)
@@ -93,11 +92,6 @@ export default class PhotoListByDate extends Component {
       <div style={{ padding: '0 6px 6px 6px' }}>
         {/* 日期 */}
         <div style={{ marginBottom: 15 }}>
-          {/* <SelectIconButton
-            ref="selectDate"
-            style={{ display: 'inline-block', width: 18, height: 18, marginRight: 8 }}
-            selectBehavior={ this.selectByDate } />*/}
-
           <PhotoSelectDate
             style={{ display: 'inline-block' }}
             primaryText={date}
@@ -107,7 +101,6 @@ export default class PhotoListByDate extends Component {
         {/* 照片 */}
         <div style={style}>
           { photos.map((photo, index) => (
-            <div style={{ position: 'relative' }}>
               <PhotoItem
                 ref={`photoItem${index}`}
                 style={{ width: 150, height: 158, marginRight: 6, marginBottom: 6 }}
@@ -124,7 +117,6 @@ export default class PhotoListByDate extends Component {
                 path={photo.path}
                 key={photo.digest}
               />
-            </div>
              ))
            }
         </div>
@@ -138,7 +130,6 @@ export default class PhotoListByDate extends Component {
       .filter(refName =>
         refName.indexOf('photoItem') >= 0
       )
-
     ipcRenderer.send('getThumb', this.props.photos.map(item => ({ digest: item.digest })))
   }
 }

@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import Debug from 'debug'
-import { ipcRenderer } from 'electron'
+import { List } from 'react-virtualized/dist/commonjs/List'
 import { Paper, Card, IconButton, CircularProgress } from 'material-ui'
 import Carousel from './Carousel'
 import PhotoDetail from './PhotoDetail'
@@ -82,8 +82,6 @@ export default class PhotoList extends Component {
             width: '100%',
             height: '100%'
           }}
-          deltaWidth={document.documentElement.clientWidth}
-          deltaHeight={document.documentElement.clientHeight}
           items={photos[this.state.activeIndex].photos}
           seqIndex={this.seqIndex}
           activeIndex={this.state.activeIndex}
@@ -95,54 +93,55 @@ export default class PhotoList extends Component {
     return { photos: this.props.photoMapDates }
   }
 
-  componentDidMount() {
-    // ipcRenderer.send('getThumb', this.props.allPhotos.map(item => ({ digest: item.digest })))
-  }
-
   render() {
-    debug('this.props', this.props)
-    let date = ''
-    if (this.props.photoMapDates[0]) date = this.props.photoMapDates[0].date
+    debug('render PhotoList, this.props', this.props)
+    const AllHeight = []
+    this.props.photoMapDates.map((list, index) => AllHeight.push(Math.floor(list.photos.length / 7 + 1) * 204))
+    AllHeight.push(56)
+    // debug('AllHeight', AllHeight)
     return (
       <Paper style={this.props.style}>
         {/* 图片列表 */}
-        <div
-          style={{
-            position: 'relative',
-            width: '100%',
-            height: '100%',
-            overflow: 'auto'
-          }}
-        >
-          {this.props.photoMapDates.map((list, index) => (
-            <PhotoListByDate
-              addListToSelection={this.addListToSelection}
-              allPhotos={this.props.allPhotos}
-              lookPhotoDetail={this.lookPhotoDetail}
-              onAddHoverToList={
-            (photoListByDates) => {
-              this.photoListByDates = photoListByDates; photoListByDates.forEach(p => p.addHoverToAllItem())
+          <div
+            style={{
+              position: 'relative',
+              width: '100%',
+              height: '100%',
+              overflow: 'auto'
+            }}
+          >
+            {
+              this.props.photoMapDates.map((list, index) => (
+                <PhotoListByDate
+                  key={index.toString()}
+                  addListToSelection={this.addListToSelection}
+                  allPhotos={this.props.allPhotos}
+                  lookPhotoDetail={this.lookPhotoDetail}
+                  onAddHoverToList={(photoListByDates) => {
+                    this.photoListByDates = photoListByDates
+                    photoListByDates.forEach(p => p.addHoverToAllItem())
+                  }}
+                  onDetectAllOffChecked={detectAllOffChecked}
+                  onRemoveHoverToList={(photoListByDates) => {
+                    const isAllOffChecked = photoListByDates.every(p => p.detectIsAllOffChecked())
+                    isAllOffChecked && photoListByDates.forEach(p => p.removeHoverToAllItem())
+                  }}
+                  removeListToSelection={this.removeListToSelection}
+                  style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start' }}
+                  ref={'photoListByDate'}
+                  photos={list.photos}
+                  date={list.date}
+                />
+              ))
             }
-          }
-              onDetectAllOffChecked={detectAllOffChecked}
-              onGetPhotoListByDates={photoListByDates => this.photoListByDates = photoListByDates}
-              onRemoveHoverToList={
-            (photoListByDates) => {
-              const isAllOffChecked = photoListByDates.every(p => p.detectIsAllOffChecked())
-              isAllOffChecked && photoListByDates.forEach(p => p.removeHoverToAllItem())
-            }
-          }
-              removeListToSelection={this.removeListToSelection}
-              style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start' }}
-              ref={'photoListByDate'}
-              photos={list.photos}
-              date={list.date}
-            />
-        ))}
-          <hr style={{ width: '60%', margin: '0 auto' }} />
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>到底部啦！</div>
-          <div style={{ height: 56 }} />
-        </div>
+            {
+              this.props.photoMapDates[0] && this.props.photoMapDates[0].photos[0].path ?
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 16, height: 204}}>
+                  ————————到底部啦！————————
+                </div> : <div />
+            } 
+          </div>
+
         {/* 轮播 */}
         {/* this.renderCarousel() */}
         { this.renderCarousel() }

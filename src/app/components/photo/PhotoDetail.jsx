@@ -1,7 +1,8 @@
 import { ipcRenderer } from 'electron'
 import Debug from 'debug'
 import React, { PropTypes } from 'react'
-import { CircularProgress } from 'material-ui'
+import { Paper, CircularProgress } from 'material-ui'
+import RenderToLayer from 'material-ui/internal/RenderToLayer'
 import SlideToAnimate from './SlideToAnimate'
 
 const debug = Debug('component:photoApp:PhotoDetail')
@@ -48,8 +49,6 @@ class PhotoDetailList extends React.Component {
               justifyContent: 'center'
             }}
             key={item.digest}
-            deltaWidth={this.props.deltaWidth}
-            deltaHeight={this.props.deltaHeight}
           >
             { window.store.getState().view.currentMediaImage.path ? // FIXME
               <img
@@ -66,7 +65,7 @@ class PhotoDetailList extends React.Component {
   }
 }
 
-export default class PhotoDetail extends React.Component {
+class PhotoDetailInline extends React.Component {
   constructor() {
     super()
 
@@ -97,7 +96,7 @@ export default class PhotoDetail extends React.Component {
 
   render() {
     return (
-      <div
+      <Paper
         style={{
           position: 'fixed',
           width: '100%',
@@ -163,7 +162,23 @@ export default class PhotoDetail extends React.Component {
           }}
           onTouchTap={this.props.closePhotoDetail}
         />
-      </div>
+      </Paper>
+    )
+  }
+}
+
+/*
+ * Use RenderToLayer method to move the componet to root node
+*/
+
+export default class PhotoDetail extends React.Component {
+  renderLayer = () => (
+    <PhotoDetailInline {...this.props} />
+          );
+
+  render() {
+    return (
+      <RenderToLayer render={this.renderLayer} open useLayerForClickAway={false} />
     )
   }
 }
