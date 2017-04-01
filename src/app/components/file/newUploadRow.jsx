@@ -15,19 +15,19 @@ const normalStyle = {}
 const selectStyle = {backgroundColor:'#f4f4f4'}
 const svgStyle = {color: '#000', opacity: 0.54}
 class UploadRow extends Component {
-	constructor() {
-		super()
-		this.state = {checked: false}
+	constructor(props) {
+		super(props)
+		this.selected = false
 	}
 
 	render() {
 		let task = this.props.task
-		let s = this.state.checked? selectStyle: normalStyle
+		let s = this.selected? selectStyle: normalStyle
 		let pColor = task.pause?'#d4d4d4':'#89c2f2'
 		let pWidth = task.completeSize / task.size * 100
 		if (pWidth === Infinity || !pWidth) pWidth = 0
 		return (
-			<div className='trs-row' style={s} onClick={this.select.bind(this)}>
+			<div className='trs-row' style={s} onClick={this.selectItem.bind(this)}>
 				<div className='trs-row-name'>
 					<span>
 						{
@@ -40,7 +40,9 @@ class UploadRow extends Component {
 				<div className='trs-row-rtime'>{task.restTime}</div>
 				<div className='trs-row-progress'>
 					<div>
-						<div className='trs-row-progress-bar'><span style={{backgroundColor:pColor,width:pWidth + '%'}}></span></div>
+						<div className='trs-row-progress-bar'>
+							<span style={{backgroundColor:pColor,width:pWidth + '%'}}></span>
+						</div>
 						<div>{this.getStatus(task)}</div>
 					</div>
 					<div className='trs-row-finishProcess'>
@@ -51,22 +53,20 @@ class UploadRow extends Component {
 					{task.pause?
 						<PlaySvg style={svgStyle} onClick={this.props.resume.bind(this, task.uuid)}/>:
 						<PauseSvg style={svgStyle} onClick={this.props.pause.bind(this, task.uuid)}/>}
-
 				</div>
 			</div>
 		)
 	}
 
 
-	select() {
-		this.setState({
-			checked: !this.state.checked
-		})
+	selectItem() {
+		this.props.selectItem(this.props.task.uuid)
+
 	}
 
 	getStatus(task) {
 		if (task.pause) return '暂停'
-		if (task.state === 'visitless') return '等待'
+		if (task.state === 'visitless') return '等待中'
 		if (task.state === 'visiting') return '正在校验本地文件' 
 		if (task.state === 'diffing') return '正在校验本地文件' 
 		if (task.state === 'finish') return '已完成'

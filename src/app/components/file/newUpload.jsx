@@ -7,6 +7,7 @@
 import React, { Component } from 'react'
 import { ipcRenderer } from 'electron'
 import Row from './newUploadRow'
+import FinishTaskRow from './FinishRow'
 import FileSvg from 'material-ui/svg-icons/editor/insert-drive-file'
 import FolderSvg from 'material-ui/svg-icons/file/folder'
 import DeleteSvg from 'material-ui/svg-icons/action/delete'
@@ -16,6 +17,7 @@ const svgStyle = {color: '#000', opacity: 0.54}
 class Upload extends Component {
 	constructor() {
 		super()
+		this.selectList = []
 	}
 
 	render() {
@@ -45,7 +47,7 @@ class Upload extends Component {
 				<div className='trs-hr'></div>
 				<div className='trs-list-wrapper'>
 					{finishTasks.map((task) => {
-						return <UploadFinishRow key={task.uuid} task={task}/>
+						return <FinishTaskRow key={task.uuid} task={task}/>
 					})}
 				</div>
 			</div>
@@ -56,47 +58,12 @@ class Upload extends Component {
 		
 	}
 
+	resume() {
+		
+	}
+
 	cleanRecord() {
 		command('', 'CLEAN_UPLOAD_RECORD',{})
-	}
-}
-
-class UploadFinishRow extends Component {
-	constructor() {
-		super()
-		this.createDate = new Date()
-	}
-
-	render() {
-		let task = this.props.task
-		return (
-			<div className='trs-row'>
-				<div className='trs-row-name'>
-					<span>
-						{
-							task.type=='folder'?<FolderSvg style={svgStyle}/>:
-							<FileSvg style={svgStyle}/>
-						}
-					</span>
-					<span>{task.name}</span>
-				</div>
-				<div className='trs-row-finishDate'>
-					<span>{this.getFinishDate(task.finishDate)}</span>
-				</div>
-			</div>
-			)
-	}
-
-	getFinishDate(date) {
-		let d = this.createDate
-		let year = d.getFullYear()
-		let mouth = d.getMonth() + 1
-		let day = d.getDate()
-		let hour = d.getHours()
-		let minute = d.getMinutes()
-		if (year === date[0] && mouth === date[1] && day === date[2]) return date[3] + ':' + date[4]
-		if (year === date[0] && mouth === date[1] && day === date[2] + 1) return '昨天'
-		return date[0] + '-' + date[1] + '-' + date[2]
 	}
 }
 
