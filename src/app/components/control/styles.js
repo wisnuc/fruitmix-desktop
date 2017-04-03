@@ -8,6 +8,7 @@ export const titleStyle = {
 export const header1Style = {
   fontSize: 24,
   fontWeight: 400,
+  height: '32px',
   lineHeight: '32px',
   paddingTop: 48, // or 80 with 1px solid border rgba 0.12
   marginBottom: 30,

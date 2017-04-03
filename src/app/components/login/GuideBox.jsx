@@ -4,7 +4,7 @@ import { RaisedButton, Checkbox, Dialog, Divider, TextField, CircularProgress } 
 import FlatButton from '../common/FlatButton'
 import { Step, Stepper, StepLabel, StepContent } from 'material-ui/Stepper'
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
-import { cyan500 } from 'material-ui/styles/colors'
+import { cyan500, red400, redA200 } from 'material-ui/styles/colors'
 
 import { ipcRenderer } from 'electron'
 import prettysize from 'prettysize'
@@ -12,10 +12,9 @@ import request from 'superagent'
 
 import UsernamePassword from './UsernamePassword'
 
-// import CreatingVolumeDiskSelection1
+import CreatingVolumeDiskSelection1 from './CreatingVolumeDiskSelection1'
 
 const StateUp = base => class extends base {
-
   setSubState(name, nextSubState) {
     let state = this.props.state || this.state
     let subState = state[name]
@@ -57,12 +56,8 @@ class GuideBox extends StateUp(React.Component) {
       finished: false,
       stepIndex: 0,
 
-      volSelection: null,
 
-      //
-      selection: [],
-      mode: null, 
-
+      volumeselect: new CreatingVolumeDiskSelection1.State(),
       userpass: new UsernamePassword.State(),
     }
 
@@ -79,8 +74,8 @@ class GuideBox extends StateUp(React.Component) {
 
       this.mir('mkfs', {
         type: 'btrfs', 
-        target: this.state.selection, 
-        mode: this.state.mode
+        target: this.state.volumeselect.selection, 
+        mode: this.state.volumeselect.mode
       }, (err, body) => {
 
         if (err) {
@@ -163,33 +158,6 @@ class GuideBox extends StateUp(React.Component) {
     }
   }
 
-  renderVolumeRow (vol) {
-
-    let id = vol.uuid
-    let label = vol.label
-    let number = vol.total
-    let missing = vol.isMissing
-
-    let comment = missing ? '该卷有磁盘缺失，无法使用' : '该卷可以使用'
-    
-    return (
-      <div key={name} style={{width: '100%', height: 40, display: 'flex', alignItems: 'center'}}>
-        <div style={{flex: '0 0 64px'}}>
-          <Checkbox style={{marginLeft: 16}} 
-            checked={this.state.volSelection === id}
-            onCheck={() => {
-              this.setState(Object.assign({}, this.state, { volSelection: id }))
-            }} 
-          />
-        </div>
-        <div style={{flex: '0 0 320px'}}>{id}</div>
-        <div style={{flex: '0 0 80px'}}>{label}</div>
-        <div style={{flex: '0 0 80px'}}>{number}</div>
-        <div style={{flex: '0 0 160px'}}>{comment}</div>
-      </div> 
-    )
-   }
-
   renderDiskRow (blk) {
 
     let model = blk.model ? blk.model : '未知型号'
@@ -216,47 +184,20 @@ class GuideBox extends StateUp(React.Component) {
       comment = '该磁盘可以加入磁盘卷'
  
     return (
-      <div key={name} style={{width: '100%', height: 40, display: 'flex', alignItems: 'center'}}>
-        <div style={{flex: '0 0 64px'}}>
-          { valid && <Checkbox style={{marginLeft: 16}} 
-            checked={this.state.selection.indexOf(name) !== -1} onCheck={() => {
-
-            let nextState
-
-            let index = this.state.selection.indexOf(name)
-            if (index === -1) {
-              nextState = Object.assign({}, this.state, {
-                selection: [...this.state.selection, name]
-              })
-            }
-            else {
-              nextState = Object.assign({}, this.state, {
-                selection: [...this.state.selection.slice(0, index),
-                  ...this.state.selection.slice(index + 1)]
-              })
-            }
-
-            if (nextState.selection.length === 1) {
-              nextState.mode = 'single'
-            }
-            else if (nextState.selection.length === 0) {
-              nextState.mode = null
-            }
-
-            this.setState(nextState)
-
-          }}/>}
-        </div>
-        <div style={{flex: '0 0 160px'}}>{model}</div>
-        <div style={{flex: '0 0 80px'}}>{name}</div>
+      <div key={name} style={{width: '100%', height: this.state.volumeselect.selection.indexOf(name) !== -1 ? 48 : 0, display: 'flex', alignItems: 'center', color: !blk.isPartitioned ? 'rgba(0,0,0,0.87)' : 'rgba(0,0,0,0.38)', overflow: 'hidden', fontSize: 14}}>
+        
+        <div style={{flex: '0 0 200px'}}>{model}</div>
+        <div style={{flex: '0 0 100px'}}>{name}</div>
         <div style={{flex: '0 0 80px'}}>{size}</div>
         <div style={{flex: '0 0 80px'}}>{iface}</div>
         <div style={{flex: '0 0 80px'}}>{usage}</div>
-        <div style={{flex: '0 0 240px'}}>{comment}</div>
+        <div style={{flex: '0 0 220px'}}>{comment}</div>
       </div> 
     )
   }
-  
+
+
+    
 
   render() {
 
@@ -275,57 +216,11 @@ class GuideBox extends StateUp(React.Component) {
                   <StepLabel>创建磁盘卷</StepLabel>
 
                   <StepContent>
-
-                    <div style={{height: 40, display: 'flex', alignItems: 'center', color: cyan500, paddingLeft: 10, paddingBottom: 20}}>选择磁盘创建新的磁盘卷，所选磁盘的数据会被清除</div> 
-                    <div style={{color: 'rgba(0,0,0,0.87)'}}>
-                      <div style={{marginLeft: 10, width: 760, fontSize: 13}}>
-                        <Divider />
-                        <div style={{width: '100%', height: 32, display: 'flex', alignItems: 'center'}}>
-                          <div style={{flex: '0 0 64px'}} />
-                          <div style={{flex: '0 0 160px'}}>型号</div>
-                          <div style={{flex: '0 0 80px'}}>设备名</div>
-                          <div style={{flex: '0 0 80px'}}>容量</div>
-                          <div style={{flex: '0 0 80px'}}>接口</div>
-                          <div style={{flex: '0 0 80px'}}>使用</div>
-                          <div style={{flex: '0 0 240px'}}>说明</div>
-                        </div>
-                        <Divider />
-                        { this.props.storage && this.props.storage.blocks.filter(blk => blk.isDisk).map(blk => this.renderDiskRow(blk)) }
-                        <Divider />
-                      </div>
-
-                      <div style={{position: 'relative', marginLeft: 10, marginTop: 12, marginBottom:12, display: 'flex', alignItems: 'center'}}>
-                        <div style={{fontSize:13}}>选择磁盘卷模式：</div>
-                        <div style={{width: 160}}>
-                        <RadioButtonGroup style={{position: 'relative', display: 'flex'}} 
-                          valueSelected={this.state.mode} 
-                          onChange={(e, value) => {
-                            this.setState(Object.assign({}, this.state, { mode: value })) 
-                          }}>
-                          <RadioButton style={{fontSize:13, width:128}} iconStyle={{width:16, height:16, padding: 2}} 
-                            disableTouchRipple={true}
-                            disableFocusRipple={true}
-                            value='single' label='single模式' 
-                            disabled={ this.state.selection.length === 0} />
-                          <RadioButton style={{fontSize:13, width:128}} iconStyle={{width:16, height:16, padding: 2}} 
-                            disableTouchRipple={true}
-                            disableFocusRipple={true}
-                            value='raid0' label='raid0模式' 
-                            disabled={ this.state.selection.length < 2} />
-                          <RadioButton style={{fontSize:13, width:128}} iconStyle={{width:16, height:16, padding: 2}} 
-                            disableTouchRipple={true}
-                            disableFocusRipple={true}
-                            value='raid1' label='raid1模式' 
-                            disabled={ this.state.selection.length < 2} />
-                        </RadioButtonGroup>
-                        </div>
-                      </div>
-                    </div>
-
+                    <CreatingVolumeDiskSelection1 storage = {this.props.storage} {...this.bindVState( 'volumeselect')} />
                     <div style={{margin: '24px 0'}}>
                       <RaisedButton
                         label='下一步'
-                        disabled={ this.state.selection.length === 0 || !this.state.mode }
+                        disabled={ this.state.volumeselect.selection.length === 0 || !this.state.volumeselect.mode }
                         disableTouchRipple={true}
                         disableFocusRipple={true}
                         primary={true}
@@ -365,7 +260,25 @@ class GuideBox extends StateUp(React.Component) {
                 <Step>
                   <StepLabel>确认</StepLabel>
                   <StepContent>
-                    <p>请确认您输入的信息无误，点击完成键应用设置。</p>
+                    <div style={{margin: '20px 0', color: 'rgba(0, 0, 0, 0.87)'}}>磁盘信息</div>
+                    <div style={{color: 'rgba(0,0,0,0.87)', marginBottom: 12}}>
+                      <div style={{width: 760, fontSize: 16, marginLeft: 36}}>
+                        <div style={{width: '100%', height: 32, display: 'flex', alignItems: 'left', color: 'rgba(0, 0, 0, 0.54)'}}>
+                          <div style={{flex: '0 0 200px'}}>型号</div>
+                          <div style={{flex: '0 0 100px'}}>设备名</div>
+                          <div style={{flex: '0 0 80px'}}>容量</div>
+                          <div style={{flex: '0 0 80px'}}>接口</div>
+                          <div style={{flex: '0 0 80px'}}>使用</div>
+                          <div style={{flex: '0 0 220px'}}>说明</div>
+                        </div>
+                        <Divider />
+                          { this.props.storage && this.props.storage.blocks.filter(blk => blk.isDisk).map(blk => this.renderDiskRow(blk)) }
+
+                        <Divider />
+                      </div>
+                    </div>
+                    <div style={{margin: '20px 0', color: 'rgba(0, 0, 0, 0.87)', fontSize: 16}}>模式：<span style={{fontWeight: 'bold', color: 'rgba(0, 0, 0, 0.87)'}}>{this.state.volumeselect.mode}</span></div>
+                    <div style={{margin: '20px 0', color: 'rgba(0, 0, 0, 0.87)', fontSize: 16}}>用户名：<span style={{fontWeight: 'bold', color: 'rgba(0, 0, 0, 0.87)'}}>{this.state.userpass.username}</span></div>
                     <div style={{margin: '12px 0'}}>
                       <RaisedButton
                         label='完成'
@@ -404,7 +317,20 @@ class GuideBox extends StateUp(React.Component) {
                       />,
                       <FlatButton 
                         label='重置向导' 
-                        onTouchTap={this.props.onReset} 
+                        onTouchTap={() => {
+                          this.props.onReset
+                          this.setState(Object.assign({}, this.state, {
+                            showContent: true,
+                            finished: false,
+                            stepIndex: 0,
+                            volumeselect: new CreatingVolumeDiskSelection1.State(),
+                            userpass: new UsernamePassword.State()
+                          }))
+                          setTimeout(() => {
+                            this.setState(Object.assign({}, this.state, { expanded: true}))
+                            this.props.onResize('VEXPAND')
+                          },350)
+                        }} 
                       />
                     ]}
                     modal={true}
@@ -427,10 +353,8 @@ class GuideBox extends StateUp(React.Component) {
                     showContent: false,
                     finished: false,
                     stepIndex: 0,
-                    volSelection: null,
-                    selection: [],
-                    mode: null,
 
+                    volumeselect: new CreatingVolumeDiskSelection1.State(),
                     userpass: new UsernamePassword.State(),
 
                   }))
