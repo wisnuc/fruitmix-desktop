@@ -18,7 +18,7 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme'
 import Login from './components/login/Login'
 import Main from './components/main/Main'
 import Maintenance from './components/maintenance/Maintenance'
-import mdns from './lib/mdns'
+import MDNS from './lib/mdns'
 import { command } from './lib/command'
 
 const debug = Debug('app')
@@ -38,23 +38,19 @@ console.log('theme', global.theme)
 
 // root component
 const App = () => {
-
-  console.log('====', window.mdns.devices)
-
   return (
     <MuiThemeProvider muiTheme={theme}>
       { window.store.getState().maintenance 
           ? <Maintenance /> 
           : window.store.getState().login.state === 'LOGIN' 
             ? <Main showAppBar={window.store.getState().view.showAppBar} /> 
-            : <Login devices={window.mdns.devices}/> }
+            : <Login devices={window.store.getState().mdns}/> }
     </MuiThemeProvider>
   )
 }
 
 // render method
 const render = () => ReactDom.render(<App/>, document.getElementById('app'))
-window.fullRender = render
 
 // subscribe render
 store.subscribe(() => { render() })
@@ -66,6 +62,10 @@ ipcRenderer.on('stateUpdate',(err,data)=>{
 	// mochaState = data
 	// Render()
 })
+
+// start mdns scan
+const mdns = MDNS(ipcRenderer, store)
+mdns.scan()
 
 ipcRenderer.on('adapter', (err, data) => {
   console.log('receive' )

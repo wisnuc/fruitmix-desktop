@@ -38,8 +38,7 @@ class Login extends React.Component {
     super(props)
 
     this.state = {
-      devices: [],
-      selectedDeviceIndex: -1,
+      selectIndex: -1,
       expanded: false,
       deviceName: null,
       dim: false
@@ -47,69 +46,48 @@ class Login extends React.Component {
 
     debug('this.state',this.state)
 
-    this.initTimer = setInterval(() => {
-
-      if (window.store.getState().login.device.length === 0) return
-
-      clearInterval(this.initTimer)
-      delete this.initTimer
-
-      debug('init devices', window.mdns.devices)
-
-      // TODO
-      let nextState = Object.assign({}, this.state, {
-        devices: window.mdns.devices
-      })
-
-      if (this.state.selectedDeviceIndex == -1) {
-      	Object.assign(nextState, { selectedDeviceIndex:0 })
-      }
-      this.setState(nextState)
-
-      debug('devices initialized', nextState)
-
-    }, 2000)
-
     this.selectNextDevice = () => {
 
-      let { devices, selectedDeviceIndex } = this.state
+      let { devices } = this.props
+      let { selectIndex } = this.state
       let index
 
       if (devices.length === 0)
         index = -1
-      else if (selectedDeviceIndex === -1)
+      else if (selectIndex === -1)
         index = 0
-      else if (selectedDeviceIndex >= devices.length - 2)
+      else if (selectIndex >= devices.length - 2)
         index = devices.length - 1
       else
-        index = selectedDeviceIndex + 1
+        index = selectIndex + 1
 
-      if (index === selectedDeviceIndex) return
+      if (index === selectIndex) return
 
-      let nextState = Object.assign({}, this.state, { selectedDeviceIndex: index, expanded: false })
+      let nextState = Object.assign({}, this.state, { selectIndex: index, expanded: false })
       this.setState(nextState)
 
-      debug('select next device', selectedDeviceIndex, index)
+      debug('select next device', selectIndex, index)
     }
 
     this.selectPrevDevice = () => {
 
-      let { devices, selectedDeviceIndex } = this.state
+      let { devices } = this.props
+      let { selectIndex } = this.state
       let index
 
       if (devices.length === 0)
         index = -1
-      else if (selectedDeviceIndex <= 1)
+      else if (selectIndex <= 1)
         index = 0
       else
-        index = selectedDeviceIndex - 1
+        index = selectIndex - 1
 
-      if (index === selectedDeviceIndex) return
+      if (index === selectIndex) return
 
-      let nextState = Object.assign({}, this.state, { selectedDeviceIndex: index, expanded: false })
+      let nextState = Object.assign({}, this.state, { selectIndex: index, expanded: false })
       this.setState(nextState)
 
-      debug('select prev device', selectedDeviceIndex, index)
+      debug('select prev device', selectIndex, index)
     }
 
 
@@ -171,12 +149,17 @@ class Login extends React.Component {
     this.toggleDim = () => this.setState(state => ({ dim: !state.dim }))
   }
 
-  componentWillUnmount() {
-    clearInterval(this.initTimer)
-  }
   componentWillReceiveProps(nextProps) {
-    if (nextProps.devices !== this.props.devices)
-      debug('devices changed', this.props.devices, nextProps.devices)
+
+    let curr = this.props.devices
+    let next = nextProps.devices
+
+    if (curr.length === 0 && next.length > 0) {
+      this.setState({ selectIndex: 0 })
+    }
+    else if (curr.length > 0 && next.length === 0) {
+      this.setState({ selectIndex: -1 })
+    }
   }
 
   render() {
@@ -187,7 +170,7 @@ class Login extends React.Component {
       onWillLeave: this.cardWillLeave
     }
 
-    if (this.state.devices.length === 0) {
+    if (this.props.devices.length === 0) {
       type = InfoCard
       Object.assign(props, {
         key: 'init-scanning-device',
@@ -196,19 +179,19 @@ class Login extends React.Component {
     }
     else {
 
-      let device = this.state.devices[this.state.selectedDeviceIndex]
+      let device = this.props.devices[this.state.selectIndex]
 
       type = DeviceCard
       Object.assign(props, {
 
-        key: `login-device-card-${this.state.selectedDeviceIndex}`,
+        key: `login-device-card-${this.state.selectIndex}`,
 
         device: this.props.devices.find(dev => dev.address === device.address),
 
-        backgroundColor: colorArray[this.state.selectedDeviceIndex % colorArray.length],
+        backgroundColor: colorArray[this.state.selectIndex % colorArray.length],
 
-        onNavPrev: this.state.selectedDeviceIndex === 0 ? null : this.navPrev,
-        onNavNext: this.state.selectedDeviceIndex === this.state.devices.length - 1 ? null : this.navNext,
+        onNavPrev: this.state.selectIndex === 0 ? null : this.navPrev,
+        onNavNext: this.state.selectIndex === this.props.devices.length - 1 ? null : this.navNext,
 
         onResize: resize => {
           if ((resize === 'HEXPAND' && !this.state.expanded) || (resize === 'HSHRINK' && this.state.expanded))
@@ -221,14 +204,6 @@ class Login extends React.Component {
 
     return (
       <div style={{ width: '100%', height: '100%', display:'flex', flexDirection: 'column', alignItems: 'center' }} >
-{/*
-        <FloatingActionButton
-          style={{ position: 'absolute', top: 24, right: 24}}
-          onTouchTap={() => this.setState(Object.assign({}, this.state,{devices: [], selectedDeviceIndex: -1, expanded: false, deviceName: null, dim: false}))}
-        >
-          <NavigationRefresh />
-        </FloatingActionButton>
-*/}
         <img
           style={{
             width: '110%',

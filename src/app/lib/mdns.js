@@ -1,30 +1,45 @@
 import UUID from 'node-uuid'
-import { ipcRenderer } from 'electron'
 
-window.mdns = {
+class MDNS {
 
-  instance: null,
-  devices: [],
+  constructor(ipc, store) {
 
-  update(instance, device) {
-    if (this.instance !== instance) return
+    console.log('constructing mdns', ipc, store)
+
+    this.ipc = ipc
+    this.store = store
+    this.devices = undefined
+    this.session = undefined
+
+    this.ipc.on('MDNS_UPDATE', this.handleUpdate.bind(this))
+  }
+
+  handleUpdate(event, session, device) {
+
+    console.log('MDNS_UPDATE', session, device)
+
+    // discard out-dated session data
+    if (this.session !== session) return
+
+    // discard existing result
     if (this.devices.find(dev => dev.host === device.host)) return
+
     this.devices = [...this.devices, device]
-    console.log('mdns udpated', this.devices)
+    this.store.dispatch({ type: 'MDNS_UPDATE', data: this.devices })
+  }
 
-    window.fullRender()
-  },
+  scan() {
 
-  restart() {
-    this.instance = UUID.v4()
-    this.devices = []
-    ipcRenderer.send('MDNS_RESTART', this.instance)
+    this.session = UUID.v4()
+    this.devices = [] 
+    this.store.dispatch({ type: 'MDNS_UPDATE', data: [] })
+
+    this.ipc.send('MDNS_SCAN', this.session)
+
+    console.log('start new mdns scan session ', this.session)
   }
 }
 
-ipcRenderer.on('MDNS_UPDATE', 
-  (event, instance, device) => window.mdns.update(instance, device))
 
-window.mdns.restart()
-
+export default (ipc, store) => new MDNS(ipc, store) 
 

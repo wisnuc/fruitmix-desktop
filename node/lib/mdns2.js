@@ -52,9 +52,9 @@ const parseHostname = hostname => {
 
 let browser = null
 
-ipcMain.on('MDNS_RESTART', (event, instance) => {
+ipcMain.on('MDNS_SCAN', (event, session) => {
 
-  console.log('mdns2 restart, ' + instance)
+  console.log('mdns2 restart, ' + session)
 
   if (browser) browser.stop()
 
@@ -69,9 +69,11 @@ ipcMain.on('MDNS_RESTART', (event, instance) => {
 
     var parsed = parseHostname(data.host) 
     if (parsed) {
-      event.sender.send('MDNS_UPDATE', instance, Object.assign(parsed, {
-        address: data.addresses[0]
-      }))
+      let message = Object.assign(parsed, { address: data.addresses[0] })
+
+      console.log('mdns send message', message)
+
+      event.sender.send('MDNS_UPDATE', session, message)
     }
   })
 
