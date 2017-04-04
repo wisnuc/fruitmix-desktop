@@ -116,41 +116,30 @@ class DeviceCard extends React.Component {
       })
     }
 
-		this.states = () => {
+    this.onOpen = () => {
+      setTimeout (() => {
+        this.setState(Object.assign({}, this.state, {initWiard: 'opening'}))
+	this.onBoxResize('VEXPAND')
+	setTimeout (() => {
+	  this.props.onResize('HEXPAND')
+	  setTimeout (() => {
+	    this.setState(Object.assign({}, this.state, {initWiard: 'open'}))
+	  },350)
+	},350)
+      },350)
+    }
 
-			if(this.state.toggle === true){
-				return states = open
-			}
-			else {
-				return states = close
-			}
+    this.onClose = () => {
 
-			return states
-		}
-
-		this.onOpen = () => {
-console.log('#$#$', this)
-			setTimeout (() => {
-				this.setState(Object.assign({}, this.state, {initWiard: 'opening'}))
-			  this.onBoxResize('VEXPAND')
-				setTimeout (() => {
-					this.props.onResize('HEXPAND')
-					this.setState(Object.assign({}, this.state, {initWiard: 'open'}))
-				},350)
-			},350)
-		}
-
-		this.onClose = () => {
-
-			setTimeout (() => {
-				this.setState(Object.assign({}, this.state, {initWiard: 'closeing'}))
-				this.props.onResize('HSHRINK')
-				setTimeout (() => {
-					this.onBoxResize('VSHRINK')
-					this.setState(Object.assign({}, this.state, {initWiard: 'close'}))
-				},350)
-			},350)
-		}
+      setTimeout (() => {
+        this.setState(Object.assign({}, this.state, {initWiard: 'closeing'}))
+	this.props.onResize('HSHRINK')
+	setTimeout (() => {
+	  this.onBoxResize('VSHRINK')
+	  this.setState(Object.assign({}, this.state, {initWiard: 'close'}))
+	},350)
+      },350)
+    }
 
     this.onBoxResize = resize => {
       if ((resize === 'VEXPAND' && this.state.toggle === false) || (resize === 'VSHRINK' && this.state.toggle === true))
@@ -301,15 +290,14 @@ console.log('#$#$', this)
     // if (storage.volumes.find(v => v.isMissing))
     if (storage.volumes.length > 0)
       return <MaintBox text={text} onMaintain={this.maintain} />
-console.log('!@#',this.maintain)
     return (
       <GuideBox
         address={this.props.device.address}
         storage={this.state.storage}
-				initWiard={this.state.initWiard}
-				onOpen={this.onOpen}
-				onClose={this.onClose}
-        onMaintain={this.maintain}
+	initWiard={this.state.initWiard}
+	onOpen={this.onOpen}
+	onClose={this.onClose}
+	onMaintain={this.maintain}
       />
     )
 
@@ -349,14 +337,14 @@ console.log('!@#',this.maintain)
     return (
       <div style={this.props.style}>
 
-				<ModelNameCard
-					toggle={this.state.toggle}
-					device={this.props.device}
-					backgroundColor={this.props.backgroundColor}
-					onNavPrev={this.props.onNavPrev}
-					onNavNext={this.props.onNavNext}
-				/>
-        { this.renderFooter() }
+        <ModelNameCard
+        toggle={this.state.toggle}
+        device={this.props.device}
+        backgroundColor={this.props.backgroundColor}
+        onNavPrev={this.props.onNavPrev}
+        onNavNext={this.props.onNavNext}
+      />
+      { this.renderFooter() }
       </div>
     )
   }
