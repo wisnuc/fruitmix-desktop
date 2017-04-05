@@ -86,17 +86,19 @@ export default class PhotoListByDate extends Component {
     return nextProps.photos[0].path !== this.props.photos[0].path
   }
   render() {
-    const { style, date, photos, lookPhotoDetail } = this.props
+    const { style, date, photos, lookPhotoDetail, first } = this.props
     // console.log('PhotoListByDate.jsx', this.props)
     return (
       <div style={{ padding: '0 6px 6px 6px' }}>
         {/* 日期 */}
+        { first &&
         <div style={{ marginBottom: 15 }}>
           <PhotoSelectDate
             style={{ display: 'inline-block' }}
             primaryText={date}
           />
         </div>
+        }
 
         {/* 照片 */}
         <div style={style}>

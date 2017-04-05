@@ -2,7 +2,8 @@ import React, { Component, PropTypes } from 'react'
 import ReactDOM from 'react-dom'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
-import { AutoSizer, List } from 'react-virtualized/dist/commonjs/List'
+import EventListener from 'react-event-listener'
+import { List } from 'react-virtualized/dist/commonjs/List'
 import { Paper, Card, IconButton, CircularProgress } from 'material-ui'
 import Carousel from './Carousel'
 import PhotoDetail from './PhotoDetail'
@@ -87,6 +88,9 @@ export default class PhotoList extends Component {
           activeIndex={this.state.activeIndex}
         />)
       : <div />
+    this.handleResize = () => {
+      debug('Resized')
+    }
   }
 
   getChildContext() {
@@ -99,7 +103,6 @@ export default class PhotoList extends Component {
     const clientWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
     const height = clientHeight - 56
     const width = this.props.leftNav ? clientWidth - 210 : clientWidth
-    // debug('width, height', width, height)
     const rowRenderer = ({ key, index, style }) => {
       const list = this.props.photoMapDates[index]
       return (
@@ -124,17 +127,13 @@ export default class PhotoList extends Component {
             style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start' }}
             photos={list.photos}
             date={list.date}
+            first={list.first}
           />
         </div>
       )
     }
     const AllHeight = []
-    debug('items', Math.ceil(width / 156))
-    this.props.photoMapDates.map((list, index) => AllHeight.push(
-      Math.floor(list.photos.length / Math.ceil(width / 156) + 1) * 164 + 40
-    ))
-    debug('AllHeight', AllHeight)
-    debug('list', this.props.photoMapDates)
+    this.props.photoMapDates.map(list => (AllHeight.push(164 + !!list.first * 40)))
     const rowHeight = ({ index }) => AllHeight[index]
     return (
       <List
@@ -143,15 +142,20 @@ export default class PhotoList extends Component {
         rowHeight={rowHeight}
         rowRenderer={rowRenderer}
         width={width}
+        style={{position: 'fixed'}}
       />
     )
   }
 
   render() {
-    // debug('render PhotoList, this.props', this.props)
+    debug('render PhotoList, this.props', this.props)
     if (this.props.photoMapDates.length === 0) return <div />
     return (
       <Paper style={this.props.style}>
+        <EventListener
+          target="window"
+          onResize={this.handleResize}
+        />
         {/* 图片列表 */}
         <this.renderList />
         {/* 轮播 */}

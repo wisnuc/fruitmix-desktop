@@ -30,6 +30,7 @@ export default class PhotoItem extends Component {
           () => !disabled && props.unselected())
       }
     }
+    this.placeHolder = ( <CircularProgress size={40} thickness={5} /> )
   }
 
   renderHover = () => (
@@ -54,7 +55,7 @@ export default class PhotoItem extends Component {
     )
 
   renderImage = (props) => {
-    const path = props.path
+    const  path = props.path
     return (
       <Paper
         style={{
@@ -73,7 +74,7 @@ export default class PhotoItem extends Component {
         onMouseLeave={() => this.setState({ hover: false })}
       >
         { !path ?
-          <CircularProgress size={40} thickness={5} /> :
+          this.placeHolder :
           <div>
             <div style={{ height: '50%', width: 0, display: 'inline-block' }} />
             <img src={path} alt="img" style={{ objectFit: 'cover' }} />

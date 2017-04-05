@@ -79,6 +79,7 @@ class PhotoApp extends React.Component {
     }
 
     this.setPhotoInfo = () => {
+      debug('start this.setPhotoInfo')
       const leftNav = !!this.state.leftNav
       const mediaStore = window.store.getState().media.data
       const photoDates = []
@@ -86,7 +87,7 @@ class PhotoApp extends React.Component {
       const allPhotos = []
       const clientWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
       const width = leftNav ? clientWidth - 210 : clientWidth
-      mediaStore.sort((prev, next) => Date.parse(next.date) - Date.parse(prev.date))
+      mediaStore.sort((prev, next) => Date.parse(formatDate(next.exifDateTime)) - Date.parse(formatDate(prev.exifDateTime)))
       let MaxItem = Math.floor(width / 156) - 1
       let lineIndex = 0
       mediaStore.forEach((item, index) => {
@@ -98,6 +99,7 @@ class PhotoApp extends React.Component {
           MaxItem = Math.floor(width / 156) - 1
           photoDates.push(formatExifDateTime)
           photoMapDates.push({
+            first: !isRepeat,
             index: lineIndex,
             date: formatExifDateTime,
             photos: [item]
@@ -111,45 +113,21 @@ class PhotoApp extends React.Component {
           .push(item)
         }
       })
-        /*
-      mediaStore.forEach((item, index) => {
-        if (!item.exifDateTime) { return }
-        allPhotos.push(item)
-        const formatExifDateTime = formatDate(item.exifDateTime)
-        const isRepeat = photoDates.findIndex(Item => Item === formatExifDateTime) >= 0
-        if (!isRepeat || MaxItem === 0) {
-          MaxItem = Math.floor(width / 156)
-          photoDates.push(formatExifDateTime)
-          photoMapDates.push({
-            date: formatExifDateTime,
-            photos: [item]
-          })
-        } else {
-          MaxItem -= 1
-          debug('MaxItem', MaxItem)
-          photoMapDates
-          .find(Item => Item.date === formatExifDateTime)
-          .photos
-          .push(item)
-        }
-      })
-        */
       for (let i = 1; i <= 0; i++) {
         photoMapDates.push(...photoMapDates)
       }
-      debug('render photoapp mediaStore, allPhotos, photoMapDates', mediaStore, allPhotos, photoMapDates, MaxItem)
+      debug('finished this.setPhotoInfo')
       return {
         leftNav,
         allPhotos,
         photoDates,
-        // photoMapDates
-        photoMapDates: photoMapDates.sort((prev, next) => Date.parse(next.date) - Date.parse(prev.date))
+        photoMapDates
       }
     }
   }
 
   render() {
-    // debug('render photoapp state, props', this.state, this.props)
+    debug('render photoapp state, props', this.state, this.props)
     return (
       <Paper>
         <this.renderLeftNav />
@@ -161,7 +139,10 @@ class PhotoApp extends React.Component {
             height: '100%',
             left: this.state.leftNav ? LEFTNAV_WIDTH : 0,
             backgroundColor: '#FFFFFF',
-            transition: sharpCurve('left')
+            transition: sharpCurve('left'),
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
           {...this.setPhotoInfo()}
         />
