@@ -74,7 +74,7 @@ app.on('ready', function() {
     if (true) {
       store.dispatch({
         type: 'CONFIG_SET_IP',
-        data: '192.168.5.197'
+        data: '192.168.5.182'
       })
     }
   },1000)

@@ -54,9 +54,7 @@ import { blue500, red500, greenA200 } from 'material-ui/styles/colors'
 //import file module
 import FileTable from './FileTable'
 import FileUploadButton from './FileUploadButton'
-// import Upload from './Upload'
-import Upload from './newUpload'
-import Download from './newDownload'
+import TransmissionContainer from './TransmissionContainer'
 import Detail from './Detail'
 
 const COLOR_WHITE = '#FFF'
@@ -232,10 +230,6 @@ class FileApp extends React.Component {
       leftNav: true,
       detailResizing: false,
 
-      shift: false,
-      hover: -1,    // index of row currently hovered
-      editing: null,  // uuid of row currently editing
-
       clientX: 0,
       clientY: 0,
       contextMenu: false,
@@ -354,7 +348,6 @@ class FileApp extends React.Component {
   }
 
   componentDidMount() {
-
     document.addEventListener('drop', this.drop)
 
     setImmediate(() =>
@@ -376,6 +369,7 @@ class FileApp extends React.Component {
       let name = this.state.navContext=='SHARED_WITH_ME'?'分享给我的文件':'我分享的文件'
       list.push(
         <span 
+        key={name}
         onTouchTap={()=> {
           _this.state.navRoot = null
           command('FileApp','FILE_NAV',{context:_this.state.navContext},(err,data) => {
@@ -386,15 +380,12 @@ class FileApp extends React.Component {
           })
         }}
         title={name}
-        style={{
-          opacity:this.state.path.length>0?0.7:1
-        }}
-        >
-        {name}
+        style={{opacity:this.state.path.length>0?0.7:1}}>
+          {name}
         </span>
         )
       if (this.state.path.length !== 0) {
-        list.push(<NavigationChevronRight style={{fill:'rgba(255,255,255,.7)'}}/>)
+        list.push(<NavigationChevronRight key='chevron-share' style={{fill:'rgba(255,255,255,.7)'}}/>)
       }
     }
     this.state.path.forEach((node, index, arr) => {
@@ -402,9 +393,9 @@ class FileApp extends React.Component {
       if (arr.length>3) {
         if (index == 1) {
           list.push(
-            <div>...</div>
+            <div key={'ellipsis' + node.uuid}>...</div>
             )
-          list.push(<NavigationChevronRight style={{fill:'rgba(255,255,255,.7)'}}/>)
+          list.push(<NavigationChevronRight key={'chevron-ellipsis' + node.uuid} style={{fill:'rgba(255,255,255,.7)'}}/>)
           return
         }else if (index > 1 && index <arr.length -2) {
           return
@@ -412,6 +403,7 @@ class FileApp extends React.Component {
       }
       list.push(
         <span
+          key={node.uuid}
           title={name}
           style={{
             fontWeight: 'medium',
@@ -436,7 +428,7 @@ class FileApp extends React.Component {
         )
 
       if (index !== arr.length - 1)
-        list.push(<NavigationChevronRight style={{fill:'rgba(255,255,255,.7)'}}/>)
+        list.push(<NavigationChevronRight key={'chevron' + node.uuid} style={{fill:'rgba(255,255,255,.7)'}}/>)
     })
 
     return list
@@ -444,11 +436,11 @@ class FileApp extends React.Component {
 
   renderListView() {
     if (this.state.navContext == 'DOWNLOAD') {
-      return <Download/>
+      return <TransmissionContainer key='download' type='download'/>
     }
 
     if (this.state.navContext == 'UPLOAD') {
-      return <Upload type='upload'/>
+      return <TransmissionContainer key='upload' type='upload'/>
     }
 
     if (!this.state.list) return null
@@ -494,11 +486,10 @@ class FileApp extends React.Component {
   // }
 
   // context will be (HOME_DRIVE/SHARED_WITH_OTHERS/SHARED_WITH_ME/UPLOAD/DOWNLOAD)
+  // update state 
   navUpdate(context, data) {
     //sort list (transmission data will be null)
     let sortedList = data.children.map(item => Object.assign({}, item, {
-      specified: false,
-      selected: false,
       mtime:formatTime(item.mtime),
       size:item.size,
       conversionSize:formatSize(item.size),
@@ -511,41 +502,50 @@ class FileApp extends React.Component {
       }
     })
 
-    if ((context === 'SHARED_WITH_ME' || context === 'SHARED_WITH_OTHERS') ) {
-      // virtual list
-      let state = {
-        navContext: context,
-        directory: data.path.length>1?data.path[data.path.length - 1]:null,
-        path: data.path,
-        specified: -1,
-
-        list: sortedList
-      }
-
-      this.setState(state)
-      debug('navUpdate, shared virtual root directory', state)
-      this.refs.FileTable.setList(sortedList)
-      return
-    }
-
     let state = {
       navContext: context,
-      // navList: null,
-      navRoot: data.path[0],
-      // the last one
-      directory: data.path[data.path.length - 1],
+      directory: data.path.length>1?data.path[data.path.length - 1]:data.path[data.path.length - 1],
       path: data.path,
-      specified: -1,
       list: sortedList
     }
-    this.setState(state)
-    this.refs.FileTable.setList(sortedList)
+    if ((context === 'SHARED_WITH_ME' || context === 'SHARED_WITH_OTHERS') ) {
+      this.setState(state)
+      this.refs.FileTable.setList(sortedList)
+    }else if (context === 'HOME_DRIVE') {
+      Object.assign(state, {navRoot: data.path[0]})  
+      this.setState(state)
+      this.refs.FileTable.setList(sortedList)
+    }else {
+      this.setState(state)
+    }
   }
   //will command request to server && update when callback trigger
   leftNavSelect(context) {
     command('fileapp', 'FILE_NAV', { context }, (err, data) => {
       if (err) return
       this.navUpdate(context, data)
+    })
+  }
+
+  rowDoubleClick(uuid, e) {
+    let item = this.state.list.find(i => i.uuid === uuid)
+    let navContext = this.state.navContext
+    let rUUID
+    if (!item) return
+    if (item.type !== 'folder') return
+    if (navContext == 'HOME_DRIVE') {
+      rUUID = null
+    }else if (navContext == 'SHARED_WITH_OTHERS' || navContext == 'SHARED_WITH_ME') {
+      if (this.state.path.length == 0) {
+        rUUID = item.uuid
+        this.state.navRoot = item
+      }else {
+        rUUID = this.state.navRoot.uuid
+      }
+    }
+    command('fileapp', 'FILE_NAV', { context: this.state.navContext, folderUUID: uuid, rootUUID:rUUID }, (err, data) => {
+      if (err) return // todo
+      this.navUpdate(this.state.navContext, data)
     })
   }
 
@@ -665,6 +665,7 @@ class FileApp extends React.Component {
             </div>
           </div>
         </div>
+        
       	{/*right detail container*/}
         <div
           style={{
@@ -677,9 +678,7 @@ class FileApp extends React.Component {
             borderStyle: 'solid',
             borderWidth: '0 0 0 1px',
             borderColor: '#BDBDBD'
-          }}
-          rounded={false}
-          transitionEnabled={false}>
+          }}>
           <FileDetailToolbar
             nudge={this.props.nudge}
             suppressed={false && !this.props.maximized}

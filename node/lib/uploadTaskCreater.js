@@ -399,10 +399,7 @@ class FileUploadTask extends UploadTask{
 
 	hashFinish() {
 		this.recordInfor(this.name + ' HASH计算完毕')
-		this.stateName = 'hashed'
 		this.manager.hashing.splice(this.manager.hashing.indexOf(this),1)
-		console.log('..................')
-		console.log(this.parts)
 		this.manager.schedule()
 	}
 }
@@ -478,7 +475,8 @@ class createFolderSTM extends STM {
 		addToReadyQueue(this)
 	}
 
-	uploading() {
+	beginUpload() {
+		console.log('begin upload')
 		this.wrapper.stateName = 'uploading'
 		removeOutOfReadyQueue(this)
 		addToRunningQueue(this)
@@ -676,19 +674,17 @@ const initArgs = () => {
 
 const scheduleHttpRequest = () => {
   while (runningQueue.length < httpRequestConcurrency && readyQueue.length)
-    readyQueue[0].beginUpload()
+   	readyQueue[0].beginUpload()
 }
 
 const scheduleFileHash = () => {
-  while (hashingQueue.length < fileHashConcurrency && hashlessQueue.length) {
-    console.log(hashlessQueue[0].hashing())
-   }
+  while (hashingQueue.length < fileHashConcurrency && hashlessQueue.length) 
+    hashlessQueue[0].hashing()
 }
 
 const scheduleVisit = () => {
-	while (visitlessQueue.length < visitConcurrency && visitlessQueue.length) {
+	while (visitlessQueue.length < visitConcurrency && visitlessQueue.length) 
 		visitlessQueue[0].visit()
-	}
 }
 
 //visitless
@@ -738,6 +734,7 @@ const addToReadyQueue = (task) => {
 }
 
 const removeOutOfReadyQueue = (task) => {
+	console.log('removeOutOfReadyQueue')
   readyQueue.splice(readyQueue.indexOf(task), 1)
 }
 

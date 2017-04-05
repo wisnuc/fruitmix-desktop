@@ -15,6 +15,7 @@ const normalStyle = {}
 const selectStyle = {backgroundColor:'#f4f4f4'}
 const svgStyle = {color: '#000', opacity: 0.54}
 class UploadRow extends Component {
+	
 	constructor(props) {
 		super(props)
 		this.selected = false
@@ -27,7 +28,7 @@ class UploadRow extends Component {
 		let pWidth = task.completeSize / task.size * 100
 		if (pWidth === Infinity || !pWidth) pWidth = 0
 		return (
-			<div className='trs-row' style={s} onClick={this.selectItem.bind(this)}>
+			<div className='trs-row' style={s} onClick={this.selectTaskItem.bind(this)}>
 				<div className='trs-row-name'>
 					<span>
 						{
@@ -59,8 +60,8 @@ class UploadRow extends Component {
 	}
 
 
-	selectItem() {
-		this.props.selectItem(this.props.task.uuid)
+	selectTaskItem() {
+		this.props.selectTaskItem(this.props.task.uuid)
 
 	}
 

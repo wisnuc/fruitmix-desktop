@@ -639,7 +639,7 @@ class DownloadFileSTM extends STM {
 		if (this.wrapper.stateName !== 'running') return
 		this.wrapper.stateName = 'pause'
 		sendMsg()
-		this.handle.abort()
+		if (this.handle) this.handle.abort()
 		this.wrapper.recordInfor(this.wrapper.name + '暂停了')
 	}
 
@@ -703,6 +703,7 @@ const removeOutOfRunningQueue = (task) => {
 }
 
 ipcMain.on('PAUSE_DOWNLOADING', (e, uuid) => {
+	console.log('PAUSE_DOWNLOADING...', uuid)
 	if (!uuid) return
 	let task = userTasks.find(item => item.uuid === uuid)
 	if (task) {task.pauseTask()}

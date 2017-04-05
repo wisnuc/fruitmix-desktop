@@ -3,21 +3,25 @@ import FolderSvg from 'material-ui/svg-icons/file/folder'
 import FileSvg from 'material-ui/svg-icons/editor/insert-drive-file'
 
 const svgStyle = {color: '#000', opacity: 0.54}
+const normalStyle = {}
+const selectStyle = {backgroundColor:'#f4f4f4'}
 
 class FinishTaskRow extends Component {
 	constructor(props) {
 		super(props)
 		this.createDate = new Date()
 		this.isSelected = false
-		this.state = {
-			isSelected: false
+		this.updateDom = (isSelected) => {
+			this.isSelected = isSelected
+			this.forceUpdate()
 		}
 	}
 
 	render() {
+		let s = this.isSelected? selectStyle: normalStyle
 		let task = this.props.task
 		return (
-			<div className='trs-row'>
+			<div className='trs-row' style={s} onClick={this.selectFinishItem.bind(this)}>
 				<div className='trs-row-name'>
 					<span>
 						{
@@ -48,6 +52,10 @@ class FinishTaskRow extends Component {
 
 	shouldComponentUpdate() {
 		return false
+	}
+
+	selectFinishItem() {
+		this.props.selectFinishItem(this.props.task._id)
 	}
 }
 

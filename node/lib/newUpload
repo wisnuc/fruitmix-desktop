@@ -63,12 +63,12 @@ const dragFileHandle = (args) => {
 }
 
 const getTransmissionHandle = (args, callback) => {
+  db.uploaded.find({}).sort({finishDate: -1}).exec((err, docs) => {
+    if (err) return console.log(err)
+      finishTasks.splice(0, 0, ...docs)
+      sendMsg()
+  })
 	// db.uploading   to fixed
-	db.uploaded.find({}, (err, tasks) => {
-		if (err) return console.log(err)
-		finishTasks.splice(0, 0, ...tasks)
-		sendMsg()
-	})
 }
 
 const cleanRecordHandle = () => {
