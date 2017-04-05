@@ -66,34 +66,78 @@ class PhotoApp extends React.Component {
       </Paper>
     )
 
+    this.reduce = (target_array, num) => {
+      const temp = []
+      return target_array.reduce((pre, cur, index) => {
+        const ar = Math.floor(index / num)
+        if (!temp[ar]) {
+          temp[ar] = []
+        }
+        temp[ar].push(cur)
+        return temp
+      }, 0)
+    }
+
     this.setPhotoInfo = () => {
-      const leftNav = this.state.leftNav ? true : false
+      const leftNav = !!this.state.leftNav
       const mediaStore = window.store.getState().media.data
       const photoDates = []
       const photoMapDates = []
       const allPhotos = []
-      // debug('render photoapp mediaStore', mediaStore)
+      const clientWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
+      const width = leftNav ? clientWidth - 210 : clientWidth
+      mediaStore.sort((prev, next) => Date.parse(next.date) - Date.parse(prev.date))
+      let MaxItem = Math.floor(width / 156) - 1
+      let lineIndex = 0
+      mediaStore.forEach((item, index) => {
+        if (!item.exifDateTime) return null
+        allPhotos.push(item)
+        const formatExifDateTime = formatDate(item.exifDateTime)
+        const isRepeat = photoDates.findIndex(Item => Item === formatExifDateTime) >= 0
+        if (!isRepeat || MaxItem === 0) {
+          MaxItem = Math.floor(width / 156) - 1
+          photoDates.push(formatExifDateTime)
+          photoMapDates.push({
+            index: lineIndex,
+            date: formatExifDateTime,
+            photos: [item]
+          })
+          lineIndex += 1
+        } else {
+          MaxItem -= 1
+          photoMapDates
+          .find(Item => Item.index === (lineIndex - 1))
+          .photos
+          .push(item)
+        }
+      })
+        /*
       mediaStore.forEach((item, index) => {
         if (!item.exifDateTime) { return }
         allPhotos.push(item)
         const formatExifDateTime = formatDate(item.exifDateTime)
         const isRepeat = photoDates.findIndex(Item => Item === formatExifDateTime) >= 0
-        if (!isRepeat) {
+        if (!isRepeat || MaxItem === 0) {
+          MaxItem = Math.floor(width / 156)
           photoDates.push(formatExifDateTime)
           photoMapDates.push({
             date: formatExifDateTime,
             photos: [item]
           })
         } else {
+          MaxItem -= 1
+          debug('MaxItem', MaxItem)
           photoMapDates
           .find(Item => Item.date === formatExifDateTime)
           .photos
           .push(item)
         }
       })
-      for (let i = 1; i <= 1; i++) {
+        */
+      for (let i = 1; i <= 0; i++) {
         photoMapDates.push(...photoMapDates)
       }
+      debug('render photoapp mediaStore, allPhotos, photoMapDates', mediaStore, allPhotos, photoMapDates, MaxItem)
       return {
         leftNav,
         allPhotos,

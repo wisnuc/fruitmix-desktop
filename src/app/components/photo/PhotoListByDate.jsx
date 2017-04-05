@@ -82,7 +82,7 @@ export default class PhotoListByDate extends Component {
     }
   }
 
-  shouldComponentUpdate(nextProps, nextState){
+  shouldComponentUpdate(nextProps, nextState) {
     return nextProps.photos[0].path !== this.props.photos[0].path
   }
   render() {
@@ -101,22 +101,22 @@ export default class PhotoListByDate extends Component {
         {/* 照片 */}
         <div style={style}>
           { photos.map((photo, index) => (
-              <PhotoItem
-                ref={`photoItem${index}`}
-                style={{ width: 150, height: 158, marginRight: 6, marginBottom: 6 }}
-                width={photo.width}
-                height={photo.height}
-                lookPhotoDetail={lookPhotoDetail.bind(null, index)}
-                detectIsAllOffChecked={this.detectIsAllOffChecked}
-                exifOrientation={photo.exifOrientation}
-                onDetectAllOffChecked={this.props.onDetectAllOffChecked}
-                selected={() => { this.addCheckedToItem(index) }}
-                unselected={() => { this.removeCheckedToItem(index) }}
-                date={this.props.date}
-                digest={photo.digest}
-                path={photo.path}
-                key={photo.digest}
-              />
+            <PhotoItem
+              ref={`photoItem${index}`}
+              style={{ width: 150, height: 158, marginRight: 6, marginBottom: 6 }}
+              width={photo.width}
+              height={photo.height}
+              lookPhotoDetail={lookPhotoDetail.bind(null, index)}
+              detectIsAllOffChecked={this.detectIsAllOffChecked}
+              exifOrientation={photo.exifOrientation}
+              onDetectAllOffChecked={this.props.onDetectAllOffChecked}
+              selected={() => { this.addCheckedToItem(index) }}
+              unselected={() => { this.removeCheckedToItem(index) }}
+              date={this.props.date}
+              digest={photo.digest}
+              path={photo.path}
+              key={photo.digest}
+            />
              ))
            }
         </div>

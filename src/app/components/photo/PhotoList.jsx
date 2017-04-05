@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import ReactDOM from 'react-dom'
 import Debug from 'debug'
+import { ipcRenderer } from 'electron'
 import { AutoSizer, List } from 'react-virtualized/dist/commonjs/List'
 import { Paper, Card, IconButton, CircularProgress } from 'material-ui'
 import Carousel from './Carousel'
@@ -93,58 +94,53 @@ export default class PhotoList extends Component {
   }
 
   renderList = () => {
-    // const AllHeight = []
-    // this.props.photoMapDates.map((list, index) => AllHeight.push(Math.floor(list.photos.length / 7 + 1) * 204))
-    // AllHeight.push(56)
-    // debug('AllHeight', AllHeight)
-
-    const list = (
-      this.props.photoMapDates.map((list, index) => (
-        <PhotoListByDate
-          key={index.toString()}
-          addListToSelection={this.addListToSelection}
-          allPhotos={this.props.allPhotos}
-          lookPhotoDetail={this.lookPhotoDetail}
-          onAddHoverToList={(photoListByDates) => {
-            this.photoListByDates = photoListByDates
-            photoListByDates.forEach(p => p.addHoverToAllItem())
-          }}
-          onDetectAllOffChecked={detectAllOffChecked}
-          onRemoveHoverToList={(photoListByDates) => {
-            const isAllOffChecked = photoListByDates.every(p => p.detectIsAllOffChecked())
-            isAllOffChecked && photoListByDates.forEach(p => p.removeHoverToAllItem())
-          }}
-          removeListToSelection={this.removeListToSelection}
-          style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start' }}
-          photos={list.photos}
-          date={list.date}
-        />
-      ))
-    )
-    debug('list', this.props)
-
-    if (list.length === 0) return <div />
-
+    if (this.props.photoMapDates.length === 0) return <div />
     const clientHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
     const clientWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
-
     const height = clientHeight - 56
     const width = this.props.leftNav ? clientWidth - 210 : clientWidth
-    debug('width, height', width, height)
-
-    const rowRenderer = ({ key, index, style }) => (
-      <div
-        key={key}
-        style={style}
-      >
-        {list[index]}
-      </div>
+    // debug('width, height', width, height)
+    const rowRenderer = ({ key, index, style }) => {
+      const list = this.props.photoMapDates[index]
+      return (
+        <div
+          key={key}
+          style={style}
+        >
+          <PhotoListByDate
+            addListToSelection={this.addListToSelection}
+            allPhotos={this.props.allPhotos}
+            lookPhotoDetail={this.lookPhotoDetail}
+            onAddHoverToList={(photoListByDates) => {
+              this.photoListByDates = photoListByDates
+              photoListByDates.forEach(p => p.addHoverToAllItem())
+            }}
+            onDetectAllOffChecked={detectAllOffChecked}
+            onRemoveHoverToList={(photoListByDates) => {
+              const isAllOffChecked = photoListByDates.every(p => p.detectIsAllOffChecked())
+              isAllOffChecked && photoListByDates.forEach(p => p.removeHoverToAllItem())
+            }}
+            removeListToSelection={this.removeListToSelection}
+            style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start' }}
+            photos={list.photos}
+            date={list.date}
+          />
+        </div>
       )
+    }
+    const AllHeight = []
+    debug('items', Math.ceil(width / 156))
+    this.props.photoMapDates.map((list, index) => AllHeight.push(
+      Math.floor(list.photos.length / Math.ceil(width / 156) + 1) * 164 + 40
+    ))
+    debug('AllHeight', AllHeight)
+    debug('list', this.props.photoMapDates)
+    const rowHeight = ({ index }) => AllHeight[index]
     return (
       <List
         height={height}
-        rowCount={list.length}
-        rowHeight={204}
+        rowCount={this.props.photoMapDates.length}
+        rowHeight={rowHeight}
         rowRenderer={rowRenderer}
         width={width}
       />
@@ -153,52 +149,11 @@ export default class PhotoList extends Component {
 
   render() {
     // debug('render PhotoList, this.props', this.props)
+    if (this.props.photoMapDates.length === 0) return <div />
     return (
       <Paper style={this.props.style}>
         {/* 图片列表 */}
         <this.renderList />
-        {/*
-          <div
-            style={{
-              position: 'relative',
-              width: '100%',
-              height: '100%',
-              overflow: 'auto'
-            }}
-          >
-            {
-              this.props.photoMapDates.map((list, index) => (
-                <PhotoListByDate
-                  key={index.toString()}
-                  addListToSelection={this.addListToSelection}
-                  allPhotos={this.props.allPhotos}
-                  lookPhotoDetail={this.lookPhotoDetail}
-                  onAddHoverToList={(photoListByDates) => {
-                    this.photoListByDates = photoListByDates
-                    photoListByDates.forEach(p => p.addHoverToAllItem())
-                  }}
-                  onDetectAllOffChecked={detectAllOffChecked}
-                  onRemoveHoverToList={(photoListByDates) => {
-                    const isAllOffChecked = photoListByDates.every(p => p.detectIsAllOffChecked())
-                    isAllOffChecked && photoListByDates.forEach(p => p.removeHoverToAllItem())
-                  }}
-                  removeListToSelection={this.removeListToSelection}
-                  style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start' }}
-                  ref={'photoListByDate'}
-                  photos={list.photos}
-                  date={list.date}
-                />
-              ))
-            }
-            {
-              this.props.photoMapDates[0] && this.props.photoMapDates[0].photos[0].path ?
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 16, height: 204}}>
-                  ————————到底部啦！————————
-                </div> : <div />
-            }
-          </div>
-
-*/}
         {/* 轮播 */}
         {/* this.renderCarousel() */}
         { this.renderCarousel() }

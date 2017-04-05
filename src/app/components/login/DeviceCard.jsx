@@ -369,17 +369,17 @@ class DeviceCard extends React.Component {
       backgroundColor: bcolor,
       transition: 'all 300ms'
     }
-    /*
-    const ip = '192.168.5.199'
+    
+    const ip = '192.168.5.95'
     const uuid = '' 
-    const username = 'L1'
+    const username = '1'
     const password = '1'
     ipcRenderer.send('setServerIp', ip)
     request.get(`http://${ip}:3721/token`)
       .auth(uuid, password)
       .set('Accept', 'application/json')
       .end(() => ipcRenderer.send('login', username, password))
-    */
+
     return (
       <div style={this.props.style}>
 
