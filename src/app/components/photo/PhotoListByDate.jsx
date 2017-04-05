@@ -1,8 +1,11 @@
 import { ipcRenderer } from 'electron'
 import React, { Component, PropTypes } from 'react'
+import Debug from 'debug'
 import PhotoItem from './PhotoItem'
 import PhotoSelectDate from './PhotoSelectDate'
 import { formatDate } from '../../utils/datetime'
+
+const debug = Debug('component:photoApp:PhotoItems')
 
 export default class PhotoListByDate extends Component {
   constructor(props) {
@@ -83,10 +86,10 @@ export default class PhotoListByDate extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    return nextProps.photos[0].path !== this.props.photos[0].path
+    return nextProps.photos !== this.props.photos
   }
   render() {
-    const { style, date, photos, lookPhotoDetail, first } = this.props
+    const { style, date, photos, lookPhotoDetail, first, isScrolling } = this.props
     // console.log('PhotoListByDate.jsx', this.props)
     return (
       <div style={{ padding: '0 6px 6px 6px' }}>
@@ -118,6 +121,7 @@ export default class PhotoListByDate extends Component {
               digest={photo.digest}
               path={photo.path}
               key={photo.digest}
+              isScrolling={isScrolling}
             />
              ))
            }

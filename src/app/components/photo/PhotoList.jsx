@@ -9,6 +9,7 @@ import Carousel from './Carousel'
 import PhotoDetail from './PhotoDetail'
 import { formatDate } from '../../utils/datetime'
 import PhotoListByDate from './PhotoListByDate'
+import loading from '../../../assets/images/index/loading.gif'
 
 const debug = Debug('component:photoApp:PhotoList')
 const findPath = (items, path) => items.findIndex(item => item === path)
@@ -88,11 +89,11 @@ export default class PhotoList extends Component {
           activeIndex={this.state.activeIndex}
         />)
       : <div />
-    this.handleResize = () => {
-      debug('Resized')
-    }
   }
-
+  handleResize = () => {
+    debug('Resized')
+    this.forceUpdate()
+  }
   getChildContext() {
     return { photos: this.props.photoMapDates }
   }
@@ -103,8 +104,44 @@ export default class PhotoList extends Component {
     const clientWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
     const height = clientHeight - 56
     const width = this.props.leftNav ? clientWidth - 210 : clientWidth
-    const rowRenderer = ({ key, index, style }) => {
+    const rowRenderer = ({ key, index, style, isScrolling }) => {
       const list = this.props.photoMapDates[index]
+      if (isScrolling) return <div />
+        /*
+      if (isScrolling) {
+        return (
+          <div key={key} style={style}>
+            <div style={{ padding: '0 6px 6px 6px' }}>
+              {
+                <div style={{ marginBottom: 15 }}>
+                  <div
+                    style={{ display: 'inline-block' }}
+                    primaryText={list.date}
+                  />
+                </div>
+            }
+              <div style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start' }}>
+                { list.photos.map(() => (
+                  <div
+                    style={{
+                      width: 150,
+                      height: 158,
+                      marginRight: 6,
+                      marginBottom: 6,
+                      display: 'flex',
+                      flexFlow: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <img src={loading} width={20} height={20} />
+                  </div>
+              ))
+              }
+              </div>
+            </div>
+          </div>)
+      }
+      */
       return (
         <div
           key={key}
@@ -128,6 +165,7 @@ export default class PhotoList extends Component {
             photos={list.photos}
             date={list.date}
             first={list.first}
+            isScrolling={isScrolling}
           />
         </div>
       )
@@ -142,7 +180,6 @@ export default class PhotoList extends Component {
         rowHeight={rowHeight}
         rowRenderer={rowRenderer}
         width={width}
-        style={{position: 'fixed'}}
       />
     )
   }

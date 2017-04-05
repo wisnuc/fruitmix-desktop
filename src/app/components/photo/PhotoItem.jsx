@@ -30,7 +30,12 @@ export default class PhotoItem extends Component {
           () => !disabled && props.unselected())
       }
     }
-    this.placeHolder = ( <CircularProgress size={40} thickness={5} /> )
+    this.placeHolder = <div />
+    // this.placeHolder = ( <CircularProgress size={40} thickness={5} /> )
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return (this.state !== nextState || nextProps.path !== this.props.path)
   }
 
   renderHover = () => (
@@ -55,7 +60,7 @@ export default class PhotoItem extends Component {
     )
 
   renderImage = (props) => {
-    const  path = props.path
+    const path = props.path
     return (
       <Paper
         style={{
@@ -82,10 +87,6 @@ export default class PhotoItem extends Component {
         }
       </Paper>
     )
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return (this.state !== nextState || nextProps.path !== this.props.path)
   }
 
   render() {
