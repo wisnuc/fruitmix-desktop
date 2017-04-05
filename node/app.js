@@ -63,6 +63,7 @@ store.subscribe(() => {
 
   console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
   console.log('store', store.getState())
+  console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
 })
 
 //app ready and open window ------------------------------------

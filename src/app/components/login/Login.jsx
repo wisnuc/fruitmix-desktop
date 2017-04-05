@@ -12,18 +12,43 @@ import { command } from '../../lib/command'
 
 const colorArray = [ indigo900, cyan900, teal900, lightGreen900, lime900, yellow900 ]
 
+// props.overly: dim, white, or whatever
+class Background extends React.PureComponent {
+
+  render() {
+    return (
+      <div style={{position: 'absolute', width: '100%', height: '100%'}}> 
+        <img style={{ position: 'absolute', width: '100%', height: '100%', 
+          zIndex: -1000 }} src='../src/assets/images/index/index.jpg' />
+        <div style={{ position: 'absolute', width: '100%', height: '100%', 
+
+          backgroundColor: this.props.overlay === 'white'
+            ? 'rgba(255,255,255,1)' 
+            : this.props.overlay === 'dim'
+              ? 'rgba(0,0,0,0.7)'
+              : 'rgba(0,0,0,0)',
+
+          zIndex: -999, transition: 'backgroundColor 300ms'
+        }}/>
+      </div>
+    )
+   }
+}
+
+// autoLogin, autoLoginTimeout, preferredLanding
+// 
 class Login extends React.Component {
 
   constructor(props) {
 
-    const duration = 0.4
-
     super(props)
 
+    this.duration = 0.4
+
     this.state = {
+
+      stage: 'entering', // 'entered', 'leaving'
       selectIndex: -1,
-      expanded: false,
-      deviceName: null,
       dim: false
     }
 
@@ -44,7 +69,7 @@ class Login extends React.Component {
 
       if (index === selectIndex) return
 
-      let nextState = Object.assign({}, this.state, { selectIndex: index, expanded: false })
+      let nextState = Object.assign({}, this.state, { selectIndex: index })
       this.setState(nextState)
 
       debug('select next device', selectIndex, index)
@@ -65,7 +90,7 @@ class Login extends React.Component {
 
       if (index === selectIndex) return
 
-      let nextState = Object.assign({}, this.state, { selectIndex: index, expanded: false })
+      let nextState = Object.assign({}, this.state, { selectIndex: index })
       this.setState(nextState)
 
       debug('select prev device', selectIndex, index)
@@ -75,47 +100,7 @@ class Login extends React.Component {
     // for leaving children, there is no way to update props, but this state is required for animation
     // so we put it directly in container object, and pass callbacks which can access this state
     // to the children
-    this.enter = 'right'
-
-    this.cardWillEnter = (el, callback) => {
-
-      if (this.enter === 'right') {
-        TweenMax.from(el, duration, {
-          delay: duration,
-          opacity: 0,
-          right: -150,
-          onComplete: () => callback()
-        })
-      }
-      else {
-        TweenMax.from(el, duration, {
-          delay: duration,
-          opacity: 0,
-          transformOrigin: 'left center',
-          transform: 'translateZ(-64px) rotateY(45deg)',
-          onComplete: () => callback()
-        })
-      }
-    }
-
-    this.cardWillLeave = (el, callback) => {
-
-      if (this.enter === 'left') {
-        TweenMax.to(el, duration, {
-          opacity: 0,
-          right: -150,
-          onComplete: () => callback()
-        })
-      }
-      else {
-        TweenMax.to(el, duration, {
-          opacity: 0,
-          transformOrigin: 'left center',
-          transform: 'translateZ(-64px) rotateY(45deg)',
-          onComplete: () => callback()
-        })
-      }
-    }
+    this.enter = 'bottom'
 
     this.navPrev = () => {
       this.enter = 'left'
@@ -127,13 +112,85 @@ class Login extends React.Component {
       this.selectNextDevice()
     }
 
-    this.onResize = resize => {
-      if ((resize === 'HEXPAND' && !this.state.expanded) 
-          || (resize === 'HSHRINK' && this.state.expanded))
-        this.setState({ expanded: !this.state.expanded })
+    this.navUp = () => {
+      this.enter = 'bottom'
+    }
+
+    this.navDown = () => {
+      this.enter = 'top'
     }
 
     this.toggleDim = () => this.setState(state => ({ dim: !state.dim }))
+  }
+
+  cardWillEnter(el, callback) {
+
+    if (this.enter === 'right') {
+      TweenMax.from(el, this.duration, {
+        delay: this.duration,
+        opacity: 0,
+        right: -374,
+        onComplete: () => callback()
+      })
+    }
+    else if (this.enter === 'left') {
+      TweenMax.from(el, this.duration, {
+        delay: this.duration,
+        opacity: 0,
+        transformOrigin: 'left center',
+        transform: 'translateZ(-64px) rotateY(45deg)',
+        onComplete: () => callback()
+      })
+    }
+    else if (this.enter === 'bottom') {
+      TweenMax.from(el, this.duration, {
+        delay: this.duration,
+        opacity: 0,
+        top: 50,
+        onComplete: () => callback()
+      })
+    }
+    else if (this.enter === 'top') {
+      TweenMax.from(el, this.duration, {
+        delay: this.duration,
+        opacity: 0,
+        top: -50,
+        onComplete: () => callback()
+      })
+    }
+  }
+
+  cardWillLeave(el, callback) {
+
+    if (this.enter === 'left') {
+      TweenMax.to(el, this.duration, {
+        opacity: 0,
+        right: -374,
+        onComplete: () => callback()
+      })
+    }
+    else if (this.enter === 'right') {
+      TweenMax.to(el, this.duration, {
+        opacity: 0,
+        transformOrigin: 'left center',
+        transform: 'translateZ(-64px) rotateY(45deg)',
+        onComplete: () => callback()
+      })
+    }
+    else if (this.enter === 'bottom') {
+      TweenMax.to(el, this.duration, {
+        opacity: 0,
+        top: -50,
+        onComplete: () => callback() 
+      })
+    }
+    else if (this.enter === 'top') {
+      TweenMax.to(el, this.duration, {
+        opacity: 0,
+        top: 50,
+        onComplete: () => callback()
+      })
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -152,42 +209,37 @@ class Login extends React.Component {
   render() {
 
     let cardProps = {
-			style: { position: 'absolute', width: '100%', height:'100%'},
-			onWillEnter: this.cardWillEnter,
-			onWillLeave: this.cardWillLeave
+			style: { position: 'absolute', width: 448, right: -224, display: 'flex', flexDirection: 'column', alignItems: 'center' },
+			onWillEnter: this.cardWillEnter.bind(this),
+			onWillLeave: this.cardWillLeave.bind(this)
     }
 
     return (
-      <div style={{ width: '100%', height: '100%', display:'flex', flexDirection: 'column', alignItems: 'center' }} >
-        
-        {/* bg image */}
-        <img style={{ position: 'absolute', width: '100%', height: '100%', 
-          zIndex: -1000 }} src='../src/assets/images/index/index.jpg' />
-        
-        {/* dim */}
-        <div style={{ width: '100%', height: '100%', top: 0, position: 'absolute', 
-          backgroundColor: '#000', zIndex: -999, opacity: this.state.dim ? 0.7 : 0, transition: 'opacity 300ms'}} />
-        
-        <div style={{ marginTop: 160, width: this.state.expanded ? 1024 : 448, backgroundColor: '#BBB', transition: 'width 300ms' }}>
-          <div style={{width: '100%', position: 'relative', perspective: 1000}}>
-            <TransitionGroup>
+      <div style={{width: '100%', height: '100%'}}>
+
+        <Background overlay={this.state.dim ? 'dim' : 'none'} />
+
+        <div style={{width: '100%', height: '100%', display:'flex', flexDirection: 'column', alignItems: 'center'}}>
+          <div style={{flexBasis: '160px'}} />
+          <div style={{perspective: 1000}}>
+            <TransitionGroup component='div'>
               { this.props.devices.length === 0 
-                  ? <InfoCard {...cardProps} 
-                      key='login-no-device' 
-                      text='正在搜索网络上的WISNUC OS设备' 
-                    /> 
-                  : <DeviceCard {...cardProps}
-                      key={`login-device-card-${this.state.selectIndex}`}
-                      device={this.props.devices[this.state.selectIndex]}
-                      backgroundColor={colorArray[this.state.selectIndex]}
-                      onNavPrev={this.state.selectIndex === 0 ? null : this.navPrev}
-                      onNavNext={this.state.selectIndex === this.props.devices.length - 1 ? null : this.navNext}
-                      onResize={this.onResize}
-                      toggleDim={this.toggleDim}
-                    /> }
+                ? <InfoCard {...cardProps}
+                    key='login-no-device' 
+                    text='正在搜索网络上的WISNUC OS设备' 
+                  /> 
+                : <DeviceCard {...cardProps}
+                    key={`login-device-card-${this.state.selectIndex}`}
+                    device={this.props.devices[this.state.selectIndex]}
+                    backgroundColor={colorArray[this.state.selectIndex]}
+                    onNavPrev={this.state.selectIndex === 0 ? null : this.navPrev}
+                    onNavNext={this.state.selectIndex === this.props.devices.length - 1 ? null : this.navNext}
+                    toggleDim={this.toggleDim}
+                  /> }
             </TransitionGroup>
           </div>
         </div>
+
       </div>
     )
   }

@@ -23,6 +23,10 @@ import { command } from './lib/command'
 
 const debug = Debug('app')
 
+// start mdns scan
+const mdns = MDNS(ipcRenderer, store)
+mdns.scan()
+
 // import css
 require('../assets/css/app.css')
 
@@ -30,11 +34,14 @@ require('../assets/css/app.css')
 injectTapEventPlugin()
 
 // global import jQuery
-global.$ = global.jQuery = global.jQuery || require('jquery')
-
 global.theme = Object.assign({}, getMuiTheme(lightBaseTheme), { fontFamily: 'Roboto, Noto Sans SC, sans-serif' })
 
-console.log('theme', global.theme)
+// Login
+// 1. scanning
+// 2. if autoLogin, login success, failed, fallback - TBD
+// 3. if not autoLogin, existing users (with token) user list
+// 4. goto manual 
+
 
 // root component
 const App = () => {
@@ -55,17 +62,10 @@ const render = () => ReactDom.render(<App/>, document.getElementById('app'))
 // subscribe render
 store.subscribe(() => { render() })
 
-// first render
-render()
-
 ipcRenderer.on('stateUpdate',(err,data)=>{
 	// mochaState = data
 	// Render()
 })
-
-// start mdns scan
-const mdns = MDNS(ipcRenderer, store)
-mdns.scan()
 
 ipcRenderer.on('adapter', (err, data) => {
   console.log('receive' )
@@ -109,5 +109,11 @@ document.addEventListener('drop', (e) => {
 })
 
 debug('fruitmix app module loaded')
+
+global.$ = global.jQuery = global.jQuery || require('jquery')
+
+// first render
+render()
+
 
 

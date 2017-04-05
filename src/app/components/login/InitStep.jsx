@@ -15,6 +15,7 @@ import UsernamePassword from './UsernamePassword'
 import CreatingVolumeDiskSelection1 from './CreatingVolumeDiskSelection1'
 
 const StateUp = base => class extends base {
+
   setSubState(name, nextSubState) {
     let state = this.props.state || this.state
     let subState = state[name]
@@ -45,14 +46,12 @@ class InitStep extends StateUp(React.Component) {
     super(props)
 
     this.hasGoodVolume = !!props.storage.volumes.find(vol => vol.isBtrfs && !vol.isMissing)
-		console.log('this.hasGoodVolume',this.hasGoodVolume)
 
     this.state = {
 
       // stepper
       finished: false,
       stepIndex: 0,
-
 
       volumeselect: new CreatingVolumeDiskSelection1.State(),
       userpass: new UsernamePassword.State(),
@@ -214,20 +213,23 @@ class InitStep extends StateUp(React.Component) {
   render() {
 
     const {finished, stepIndex} = this.state;
-		console.log('this.props.expanded',this.props.expanded)
-		console.log('this.props.showContent',this.props.showContent)
 
     return (
-      <div style={{width: '100%'}}>
-        <div style={{width: '100%', height: '100%'}}>
-          <div style={{width: '100%', height: this.props.expanded ? 640 : 0, transition: 'height 300ms', overflow: 'hidden', backgroundColor: '#FAFAFA', boxSizing: 'border-box', paddingLeft: 64, paddingRight: 64, overflowY: 'auto', paddingBottom: this.props.showContent ? 64 : 0
+      <div style={this.props.style}>
+          <div style={{
+            width: '100%', 
+            height: '100%',
+            backgroundColor: '#FAFAFA', 
+            boxSizing: 'border-box', 
+            paddingLeft: 64, 
+            paddingRight: 64, 
+            overflowY: 'auto', 
           }}>
             <div style={{marginTop: 34, marginBottom: 12, fontSize: 34, color: '#000', opacity: this.props.showContent ? 0.54 : 0, transition:'opacity 150ms'}}>初始化向导</div>
             <div style={{opacity: this.props.showContent ? 1 : 0, transition:'opacity 150ms'}}>
               <Stepper activeStep={stepIndex} orientation="vertical">
                 <Step>
                   <StepLabel>创建磁盘卷</StepLabel>
-
                   <StepContent>
                     <CreatingVolumeDiskSelection1 storage = {this.props.storage} {...this.bindVState( 'volumeselect')} />
                     <div style={{margin: '24px 0'}}>
@@ -241,7 +243,6 @@ class InitStep extends StateUp(React.Component) {
                         style={{marginRight: 12}}
                       />
                     </div>
-
                   </StepContent>
                 </Step>
                 <Step>
@@ -378,7 +379,6 @@ class InitStep extends StateUp(React.Component) {
               )}
             </div>
           </div>
-        </div>
       </div>
     )
   }

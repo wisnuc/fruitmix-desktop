@@ -32,12 +32,23 @@ const MaintBox = props => (
     </div>
   )
 
+
+
 class DeviceCard extends React.Component {
 
   constructor(props) {
 
     super(props)
     this.state = {
+
+      // 'normal', 'expanding', 'expanded', 'collapsing'
+      // expand, collapse, fold, unfold
+      // 'folding', 'folded', 'unfolding'
+
+      ready: false,
+
+      transform: 'normal',
+      
       toggle: false,
       horizontalExpanded: false,
       boot: null,
@@ -45,7 +56,18 @@ class DeviceCard extends React.Component {
       users: null,
     }
 
-    ipcRenderer.send('setServerIp', props.device.address)
+    this.requestExpand = () => {
+
+      console.log('this.requestExpand')
+      if (this.state.transform !== 'normal') return
+
+      this.setState({ transform: 'expanding' })
+      
+    }
+
+    this.requestCollapse = () => {}
+    this.requestFold = () => {}
+    this.requestUnfold = () => {}
 
     this.requestGet = (port, ep, propName) =>
       request.get(`http://${this.props.device.address}:${port}/${ep}`)
@@ -147,6 +169,10 @@ class DeviceCard extends React.Component {
 
       this.maintain()
     })
+
+    setTimeout(() => {
+      this.setState({ ready: true })
+    }, 1200)
   }
 
   componentWillUnmount() {
@@ -275,6 +301,8 @@ class DeviceCard extends React.Component {
         onResize={this.onBoxResize}
         onReset={this.reset}
         onMaintain={this.maintain}
+
+        {...this.transformProps()}
       />
     )
 
@@ -297,6 +325,16 @@ class DeviceCard extends React.Component {
     //    b) reinstall or rebuild
   }
 
+  transformProps() {
+    return {
+      transform: this.state.transform,
+      requestExpand: this.requestExpand,
+      requestCollapse: this.requestCollapse,
+      requestFold: this.requestFold,
+      requestUnfold: this.requestUnfold 
+    }
+  }
+
   render() {
 
     let bcolor = this.state.toggle ? grey500 : this.props.backgroundColor || '#3f51B5'
@@ -311,17 +349,21 @@ class DeviceCard extends React.Component {
       transition: 'all 300ms'
     }
 
+    const initStyle = { position: 'absolute', width: 448, right: -224, transition: 'all 300ms' }
+    const expandedStyle = { position: 'absolute', width: 1024, right: -512, transition: 'all 300ms' }
+
     return (
       <div style={this.props.style}>
-
-				<ModelNameCard
-					toggle={this.state.toggle}
-					device={this.props.device}
-					backgroundColor={this.props.backgroundColor}
-					onNavPrev={this.props.onNavPrev}
-					onNavNext={this.props.onNavNext}
-				/>
-        { this.renderFooter() }
+        <div style={{width: this.state.ready ? 1024 : '100%', transition: 'width 300ms'}}>
+          <ModelNameCard
+            toggle={this.state.toggle}
+            device={this.props.device}
+            backgroundColor={this.props.backgroundColor}
+            onNavPrev={this.props.onNavPrev}
+            onNavNext={this.props.onNavNext}
+          />
+          { this.renderFooter() }
+        </div>
       </div>
     )
   }

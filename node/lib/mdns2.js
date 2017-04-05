@@ -54,7 +54,7 @@ let browser = null
 
 ipcMain.on('MDNS_SCAN', (event, session) => {
 
-  console.log('mdns2 restart, ' + session)
+  console.log('new mdns scan session, ' + session)
 
   if (browser) browser.stop()
 
