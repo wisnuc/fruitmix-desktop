@@ -32,7 +32,19 @@ const MaintBox = props => (
     </div>
   )
 
+class FixedHeightFooter extends React.PureComponent {
 
+  constructor(props) {
+    super(props)
+  }
+
+  render() {
+    return (
+      <div style={{width: '100%', height: 64}}>
+      </div>
+    )
+  }
+}
 
 class DeviceCard extends React.Component {
 
@@ -166,13 +178,9 @@ class DeviceCard extends React.Component {
 
       let text = 'The Contra Code was actually first used in Gradius for NES in 1986 by Konami.'
       console.log(text)
-
       this.maintain()
     })
 
-    setTimeout(() => {
-      this.setState({ ready: true })
-    }, 1200)
   }
 
   componentWillUnmount() {
@@ -202,6 +210,9 @@ class DeviceCard extends React.Component {
 
   renderFooter() {
 
+    const device = this.props.selectedDevice
+
+    // communicating
     if (this.state.boot === null || this.state.storage === null || this.state.users === null) {
       return (
         <div style={{width: '100%',height: 68,display: 'flex', alignItems: 'center', boxSizing: 'border-box',flexWrap: 'wrap'}}>
@@ -214,6 +225,7 @@ class DeviceCard extends React.Component {
       )
     }
 
+    // boot or storage failed
     if (this.state.boot instanceof Error || this.state.storage instanceof Error) {
       return (
         <div style={{width: '100%', height: 64, backgroundColor: '#FFF', display: 'flex', alignItems: 'center', boxSizing: 'border-box', paddingLeft: 24}}>
@@ -221,9 +233,9 @@ class DeviceCard extends React.Component {
         </div>
       )
     }
-    // not both boot and storage are OK
+    // now both boot and storage are OK
 
-    // if we have user array (not error)
+    // if we have user array (not error) existing user
     if (this.state.users && Array.isArray(this.state.users)) {
       if (this.state.users.length !== 0)
         return (
@@ -237,7 +249,7 @@ class DeviceCard extends React.Component {
             requestToken={this.requestToken}
           />
         )
-      else{
+      else{ // no user
 
         text = '系统不存在用户，请进入维护模式'
 
@@ -247,6 +259,7 @@ class DeviceCard extends React.Component {
     // now boot and storage ready, users should be error
 
 
+    // boot state OK but user error, fruitmix server error.
     // if boot state is normal or alternative and users is ERROR, this is undefined case, should display errorbox
     if ((this.state.boot.state === 'normal' || this.state.boot.state === 'alternative') && this.state.users instanceof Error)
       return (
@@ -260,6 +273,7 @@ class DeviceCard extends React.Component {
         />
       )
 
+    // boot maint
     // now boot state should not be normal or alternative, must be maintenance, assert it!
     if (this.state.boot.state !== 'maintenance') {
 
@@ -337,32 +351,21 @@ class DeviceCard extends React.Component {
 
   render() {
 
-    let bcolor = this.state.toggle ? grey500 : this.props.backgroundColor || '#3f51B5'
+    const device = this.props.selectedDevice
 
-    let paperStyle = {
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'flex-start',
-      backgroundColor: bcolor,
-      transition: 'all 300ms'
-    }
-
-    const initStyle = { position: 'absolute', width: 448, right: -224, transition: 'all 300ms' }
-    const expandedStyle = { position: 'absolute', width: 1024, right: -512, transition: 'all 300ms' }
+    console.log('device card render, selectedDevice', this.props.selectedDevice)
 
     return (
       <div style={this.props.style}>
-        <div style={{width: this.state.ready ? 1024 : '100%', transition: 'width 300ms'}}>
+        <div style={{width: this.state.ready ? 1154 : '100%', transition: 'width 300ms'}}>
           <ModelNameCard
             toggle={this.state.toggle}
-            device={this.props.device}
+            device={this.props.selectedDevice.mdev}
             backgroundColor={this.props.backgroundColor}
             onNavPrev={this.props.onNavPrev}
             onNavNext={this.props.onNavNext}
           />
-          { this.renderFooter() }
+          { this.props.children } 
         </div>
       </div>
     )

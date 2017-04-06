@@ -28,7 +28,7 @@ class GuideBox extends React.Component {
     return (
       <div style={this.props.style}>
         { this.props.transform !== 'normal' && 
-          <InitStep style={style} {...this.props} /> }
+          <InitStep {...this.props} /> }
         { this.props.transform === 'normal' && <InfoBar {...this.props} /> }
       </div>
     )

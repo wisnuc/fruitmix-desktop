@@ -15,11 +15,10 @@ import injectTapEventPlugin from 'react-tap-event-plugin'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme'
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
-import Login from './components/login/Login'
-import Main from './components/main/Main'
-import Maintenance from './components/maintenance/Maintenance'
 import MDNS from './lib/mdns'
 import { command } from './lib/command'
+
+import Main from './main'
 
 const debug = Debug('app')
 
@@ -36,25 +35,8 @@ injectTapEventPlugin()
 // global import jQuery
 global.theme = Object.assign({}, getMuiTheme(lightBaseTheme), { fontFamily: 'Roboto, Noto Sans SC, sans-serif' })
 
-// Login
-// 1. scanning
-// 2. if autoLogin, login success, failed, fallback - TBD
-// 3. if not autoLogin, existing users (with token) user list
-// 4. goto manual 
-
-
 // root component
-const App = () => {
-  return (
-    <MuiThemeProvider muiTheme={theme}>
-      { window.store.getState().maintenance 
-          ? <Maintenance /> 
-          : window.store.getState().login.state === 'LOGIN' 
-            ? <Main showAppBar={window.store.getState().view.showAppBar} /> 
-            : <Login devices={window.store.getState().mdns}/> }
-    </MuiThemeProvider>
-  )
-}
+const App = () => <MuiThemeProvider muiTheme={theme}><Main /></MuiThemeProvider>
 
 // render method
 const render = () => ReactDom.render(<App/>, document.getElementById('app'))
