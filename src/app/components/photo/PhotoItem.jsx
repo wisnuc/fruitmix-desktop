@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react'
+import { ipcRenderer } from 'electron'
 import Debug from 'debug'
 import { Paper, Card, IconButton, CircularProgress } from 'material-ui'
 import { CheckIcon } from './Svgs'
@@ -10,6 +11,7 @@ export default class PhotoItem extends Component {
     super(props, context)
 
     this.state = {
+      pending: true,
       action: false,
       hover: false
     }
@@ -30,8 +32,8 @@ export default class PhotoItem extends Component {
           () => !disabled && props.unselected())
       }
     }
-    this.placeHolder = <div />
-    // this.placeHolder = ( <CircularProgress size={40} thickness={5} /> )
+    // this.placeHolder = <div>Loading...</div>
+    this.placeHolder = (<CircularProgress size={40} thickness={5} />)
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -91,7 +93,8 @@ export default class PhotoItem extends Component {
 
   render() {
     const { path, style } = this.props
-    // debug('this.props', this.props)
+    debug('Render PhotoItem this.props', this.props)
+    // if(!this.state.pending || !path) setTimeout(()=>this.setState({pending: false}), 100)
     return (
       <Paper style={style}>
         <div

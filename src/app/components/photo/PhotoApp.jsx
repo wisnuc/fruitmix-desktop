@@ -20,7 +20,8 @@ class PhotoApp extends React.Component {
 
     this.state = {
       login: null,
-      leftNav: true
+      leftNav: true,
+      media: window.store.getState().media.data
     }
 
     this.toggleLeftNav = () => this.setState({ leftNav: !this.state.leftNav })
@@ -66,33 +67,25 @@ class PhotoApp extends React.Component {
       </Paper>
     )
 
-    this.reduce = (target_array, num) => {
-      const temp = []
-      return target_array.reduce((pre, cur, index) => {
-        const ar = Math.floor(index / num)
-        if (!temp[ar]) {
-          temp[ar] = []
-        }
-        temp[ar].push(cur)
-        return temp
-      }, 0)
-    }
-
     this.setPhotoInfo = () => {
-      debug('start this.setPhotoInfo')
+      this.mediaStore = window.store.getState().media.data
       const leftNav = !!this.state.leftNav
-      const mediaStore = window.store.getState().media.data
       const photoDates = []
       const photoMapDates = []
       const allPhotos = []
       const clientWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
       const width = leftNav ? clientWidth - 210 : clientWidth
-      mediaStore.sort((prev, next) => Date.parse(formatDate(next.exifDateTime)) - Date.parse(formatDate(prev.exifDateTime)))
+      // debug('start this.setPhotoInfo', this.mediaStore, this.mediaStore.length)
+      this.mediaStore.sort((prev, next) => Date.parse(formatDate(next.exifDateTime)) - Date.parse(formatDate(prev.exifDateTime)))
       let MaxItem = Math.floor(width / 156) - 1
       let lineIndex = 0
-      mediaStore.forEach((item, index) => {
-        if (!item.exifDateTime) return null
+      const dateUnknown = []
+      this.mediaStore.forEach((item) => {
         allPhotos.push(item)
+        if (!item.exifDateTime) {
+          dateUnknown.push(item)
+          return
+        }
         const formatExifDateTime = formatDate(item.exifDateTime)
         const isRepeat = photoDates.findIndex(Item => Item === formatExifDateTime) >= 0
         if (!isRepeat || MaxItem === 0) {
@@ -113,10 +106,33 @@ class PhotoApp extends React.Component {
           .push(item)
         }
       })
+      if (dateUnknown.length > 0) {
+        MaxItem = 0
+        lineIndex += 1
+        let isRepeat = false
+        dateUnknown.forEach((item) => {
+          if (MaxItem === 0) {
+            MaxItem = Math.floor(width / 156) - 1
+            photoMapDates.push({
+              first: !isRepeat,
+              index: lineIndex,
+              date: '神秘时间',
+              photos: [item]
+            })
+            lineIndex += 1
+            isRepeat = true
+          } else {
+            MaxItem -= 1
+            photoMapDates
+              .find(Item => Item.index === (lineIndex - 1))
+              .photos
+              .push(item)
+          }
+        })
+      }
       for (let i = 1; i <= 0; i++) {
         photoMapDates.push(...photoMapDates)
       }
-      debug('finished this.setPhotoInfo')
       return {
         leftNav,
         allPhotos,
@@ -124,6 +140,11 @@ class PhotoApp extends React.Component {
         photoMapDates
       }
     }
+  }
+  shouldComponentUpdate(nextProps, nextState) {
+    debug('In shouldComponentUpdate', window.store.getState().media.data !== this.mediaStore, this.state !== nextState, this.mediaStore)
+    if (window.store.getState().media.data !== this.mediaStore) return true
+    return (this.state !== nextState)
   }
 
   render() {

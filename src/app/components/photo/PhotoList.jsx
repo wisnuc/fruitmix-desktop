@@ -8,7 +8,7 @@ import { Paper, Card, IconButton, CircularProgress } from 'material-ui'
 import Carousel from './Carousel'
 import PhotoDetail from './PhotoDetail'
 import { formatDate } from '../../utils/datetime'
-import PhotoListByDate from './PhotoListByDate'
+import RenderListByRow from './RenderListByRow'
 import loading from '../../../assets/images/index/loading.gif'
 
 const debug = Debug('component:photoApp:PhotoList')
@@ -53,60 +53,26 @@ export default class PhotoList extends Component {
       this.setState({ activeIndex })
       this.seqIndex = seqIndex
     }
-
-    this.renderCarousel = () => {
-      if (!this.state.carouselItems.length) return <div />
-      debug('this.renderCarousel')
-      return (
-        <Paper
-          style={{
-            position: 'fixed',
-            bottom: 15,
-            width: '75%'
-          }}
-        >
-          <Carousel
-            ClearAll={() => this.setState({ carouselItems: [] })}
-            removeListToSelection={this.removeListToSelection}
-            style={{ backgroundColor: '#fff', height: 180, borderRadius: 4, boxShadow: '0 0 10px rgba(0,0,0,.3)' }}
-            items={this.state.carouselItems}
-          />
-        </Paper>
-      )
-    }
-    this.renderPhotoDetail = photos => photos.length && this.state.activeIndex !== false
-        ? (<PhotoDetail
-          closePhotoDetail={() => this.setState({ activeIndex: false })}
-          style={{
-            position: 'fixed',
-            left: 0,
-            top: 0,
-            width: '100%',
-            height: '100%'
-          }}
-          items={photos[this.state.activeIndex].photos}
-          seqIndex={this.seqIndex}
-          activeIndex={this.state.activeIndex}
-        />)
-      : <div />
-  }
-  handleResize = () => {
-    debug('Resized')
-    this.forceUpdate()
   }
   getChildContext() {
     return { photos: this.props.photoMapDates }
   }
 
+  handleResize = () => {
+    this.forceUpdate()
+  }
+
   renderList = () => {
-    if (this.props.photoMapDates.length === 0) return <div />
+    const photoSum = this.props.photoMapDates.length
+    if (photoSum === 0) return <div />
     const clientHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
     const clientWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
     const height = clientHeight - 56
     const width = this.props.leftNav ? clientWidth - 210 : clientWidth
+    debug('this.props.photoMapDates', this.props.photoMapDates)
     const rowRenderer = ({ key, index, style, isScrolling }) => {
       const list = this.props.photoMapDates[index]
-      if (isScrolling) return <div />
+      // if (isScrolling) return <div />
         /*
       if (isScrolling) {
         return (
@@ -133,7 +99,7 @@ export default class PhotoList extends Component {
                       justifyContent: 'center'
                     }}
                   >
-                    <img src={loading} width={20} height={20} />
+                    Loading
                   </div>
               ))
               }
@@ -147,7 +113,7 @@ export default class PhotoList extends Component {
           key={key}
           style={style}
         >
-          <PhotoListByDate
+          <RenderListByRow
             addListToSelection={this.addListToSelection}
             allPhotos={this.props.allPhotos}
             lookPhotoDetail={this.lookPhotoDetail}
@@ -166,27 +132,31 @@ export default class PhotoList extends Component {
             date={list.date}
             first={list.first}
             isScrolling={isScrolling}
+            photoSum={photoSum}
           />
         </div>
       )
     }
     const AllHeight = []
-    this.props.photoMapDates.map(list => (AllHeight.push(164 + !!list.first * 40)))
+    this.props.photoMapDates.map(list => (AllHeight.push(
+      164 * Math.ceil(list.photos.length / Math.floor(width / 156)) + !!list.first * 40
+    )))
     const rowHeight = ({ index }) => AllHeight[index]
     return (
       <List
         height={height}
+        width={width}
         rowCount={this.props.photoMapDates.length}
         rowHeight={rowHeight}
         rowRenderer={rowRenderer}
-        width={width}
       />
     )
   }
 
   render() {
     debug('render PhotoList, this.props', this.props)
-    if (this.props.photoMapDates.length === 0) return <div />
+    const photos = this.props.photoMapDates
+    if (photos.length === 0) return <div />
     return (
       <Paper style={this.props.style}>
         <EventListener
@@ -195,12 +165,33 @@ export default class PhotoList extends Component {
         />
         {/* 图片列表 */}
         <this.renderList />
-        {/* 轮播 */}
-        {/* this.renderCarousel() */}
-        { this.renderCarousel() }
-
-        {/* 查看大图 */}
-        { this.renderPhotoDetail(this.props.photoMapDates) }
+        {/* 轮播 */
+          this.state.carouselItems.length ?
+            <Paper style={{ position: 'fixed', bottom: 15, width: '75%' }} >
+              <Carousel
+                ClearAll={() => this.setState({ carouselItems: [] })}
+                removeListToSelection={this.removeListToSelection}
+                style={{ backgroundColor: '#fff', height: 180, borderRadius: 4, boxShadow: '0 0 10px rgba(0,0,0,.3)' }}
+                items={this.state.carouselItems}
+              />
+            </Paper> : <div />
+        }
+        {/* 查看大图 */
+          photos.length && this.state.activeIndex !== false ?
+            <PhotoDetail
+              closePhotoDetail={() => this.setState({ activeIndex: false })}
+              style={{
+                position: 'fixed',
+                left: 0,
+                top: 0,
+                width: '100%',
+                height: '100%'
+              }}
+              items={photos[this.state.activeIndex].photos}
+              seqIndex={this.seqIndex}
+              activeIndex={this.state.activeIndex}
+            /> : <div />
+        }
       </Paper>
     )
   }

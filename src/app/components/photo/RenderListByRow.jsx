@@ -1,13 +1,13 @@
 import { ipcRenderer } from 'electron'
 import React, { Component, PropTypes } from 'react'
 import Debug from 'debug'
+import { Paper } from 'material-ui'
 import PhotoItem from './PhotoItem'
-import PhotoSelectDate from './PhotoSelectDate'
 import { formatDate } from '../../utils/datetime'
 
-const debug = Debug('component:photoApp:PhotoItems')
+const debug = Debug('component:photoApp:RenderListByRow.jsx')
 
-export default class PhotoListByDate extends Component {
+export default class RenderListByRow extends Component {
   constructor(props) {
     super(props)
 
@@ -85,27 +85,40 @@ export default class PhotoListByDate extends Component {
     }
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return nextProps.photos !== this.props.photos
+  componentDidMount() {
+    this.selectionRefs = Object
+      .keys(this.refs)
+      .filter(refName =>
+        refName.indexOf('photoItem') >= 0
+      )
+    ipcRenderer.send('getThumb', this.props.photos.map(item => ({ digest: item.digest })))
   }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return (nextProps.photos !== this.props.photos && !nextProps.isScrolling)
+    debug('RenderListByRow update!')
+  }
+
   render() {
     const { style, date, photos, lookPhotoDetail, first, isScrolling } = this.props
     // console.log('PhotoListByDate.jsx', this.props)
     return (
       <div style={{ padding: '0 6px 6px 6px' }}>
+
         {/* 日期 */}
         { first &&
         <div style={{ marginBottom: 15 }}>
-          <PhotoSelectDate
-            style={{ display: 'inline-block' }}
-            primaryText={date}
-          />
+          <div style={{display: 'inline-block'}}>
+            <label style={{ fontSize: 12, opacity: 0.87 }}> 
+              { date }
+            </label>
+          </div>
         </div>
         }
-
         {/* 照片 */}
         <div style={style}>
-          { photos.map((photo, index) => (
+          { !isScrolling || this.props.photoSum < 100 ?
+            photos.map((photo, index) => (
             <PhotoItem
               ref={`photoItem${index}`}
               style={{ width: 150, height: 158, marginRight: 6, marginBottom: 6 }}
@@ -123,24 +136,28 @@ export default class PhotoListByDate extends Component {
               key={photo.digest}
               isScrolling={isScrolling}
             />
-             ))
+             )) :
+            photos.map((photo, index) => (
+              <Paper
+                style={{
+                  width: 150,
+                  height: 158,
+                  marginRight: 6,
+                  marginBottom: 6,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >Loading...</Paper>
+            ))
            }
         </div>
       </div>
     )
   }
-
-  componentDidMount() {
-    this.selectionRefs = Object
-      .keys(this.refs)
-      .filter(refName =>
-        refName.indexOf('photoItem') >= 0
-      )
-    ipcRenderer.send('getThumb', this.props.photos.map(item => ({ digest: item.digest })))
-  }
 }
 
-PhotoListByDate.propTypes = {
+RenderListByRow.propTypes = {
   style: PropTypes.object,
   date: PropTypes.string.isRequired,
   photos: PropTypes.array.isRequired,
