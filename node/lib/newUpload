@@ -6,10 +6,12 @@ import { dialog, ipcMain } from 'electron'
 
 import request from 'request'
 
-import store from '../serve/store/store'
 import registerCommandHandlers from './command'
 import { getMainWindow } from './window'
-import createUserTask from './uploadTaskCreater'
+import createTask, { sendMsg } from './uploadTaskCreater'
+
+const userTasks = []
+const finishTasks = []
 
 //handler
 const uploadHandle = (args, callback) => {
@@ -39,40 +41,65 @@ const uploadHandle = (args, callback) => {
 }
 
 const dragFileHandle = (args) => {
-  let files = []
-  let folders = []
+	if (!args.files.length) return
   let index = 0
   let loop = () => {
     let filePath = path.normalize(args.files[index])
+    let type = ''
     fs.stat(filePath, (err,stat) => {
       if (err) {
         index++
         return loop()
       }
-      if (stat.isDirectory()) folders.push({size:stat.size,abspath:filePath})
-      else files.push({size:stat.size,abspath:filePath})
-      
+      if (stat.isDirectory()) type='folder'
+      else type = 'file'
+      createTask(filePath,args.dirUUID, type, true)
       index++
-      if (index == args.files.length) {
-        console.log(folders)
-        console.log(files)
-        if (files.length != 0) createUserTask('file', files, args.dirUUID) 
-        if (folders.length != 0) createUserTask('folders', folders, args.dirUUID) 
-        getMainWindow().webContents.send('message', files.length + folders.length + '个任务添加至上传队列')
-        return
-      }
+      if (index == args.files.length) return getMainWindow().webContents.send('message', args.files.length + '个任务添加至上传队列')
       loop()
     })
   }
   loop()
 }
 
+const getTransmissionHandle = (args, callback) => {
+  db.uploaded.find({}).sort({finishDate: -1}).exec((err, docs) => {
+    if (err) return console.log(err)
+      finishTasks.splice(0, 0, ...docs)
+      sendMsg()
+  })
+	// db.uploading   to fixed
+}
 
+const cleanRecordHandle = () => {
+	dialog.showMessageBox({
+		type:'question',
+		buttons:['取消','确定'],
+		title:'删除确认',
+		icon:null,
+		message:'你确定要清除所有上传记录吗？'},response => {
+			if (!response) return
+			db.uploaded.remove({},{multi: true},(err,re) => {
+				if (err) return console.log(err);
+				finishTasks.length = 0
+				getTransmissionHandle()
+			})
+	})
+}
 
 const uploadCommandMap = new Map([
   ['UPLOAD_FOLDER', uploadHandle],
   ['UPLOAD_FILE', uploadHandle],
-  ['DRAG_FILE', dragFileHandle]
+  ['DRAG_FILE', dragFileHandle],
+  ['CLEAN_UPLOAD_RECORD', cleanRecordHandle]
 ])
 
 registerCommandHandlers(uploadCommandMap)
+
+ipcMain.on('loginOff', evt => {
+  //todo
+})
+
+ipcMain.on('GET_TRANSMISSION', getTransmissionHandle)
+
+export { userTasks, finishTasks }

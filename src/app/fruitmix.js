@@ -63,8 +63,6 @@ ipcRenderer.on('stateUpdate',(err,data)=>{
 })
 
 ipcRenderer.on('adapter', (err, data) => {
-  console.log('receive' )
-  console.log(data)
   store.dispatch({
     type: 'NODE_UPDATE',
     data: data
@@ -104,4 +102,8 @@ document.addEventListener('drop', (e) => {
 })
 
 debug('fruitmix app module loaded')
+
+// setTimeout(() => {
+//   ipcRenderer.send('login','liu','1024')
+// },1000)
 

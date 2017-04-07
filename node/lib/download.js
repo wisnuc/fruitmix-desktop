@@ -349,7 +349,6 @@ class folderDownloadTask {
 			headers: {
 				Authorization: user.type+' '+user.token
 			}
-
 		}
 		function callback (err,res,body) {
 			if (!err && res.statusCode == 200) {

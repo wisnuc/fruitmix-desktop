@@ -42,7 +42,7 @@ var utils = {
 			let fileStream = fs.createReadStream(abspath)
 			fileStream.on('end',(err) => {
 				if (err) reject(err)
-					hash.end()
+				hash.end()
 				resolve(hash.read())
 			})
 			fileStream.pipe(hash)
@@ -50,51 +50,61 @@ var utils = {
 		return promise
 	},
 
-	createFileObj: function(abspath, parentUUID, name) {
-		return {
-			type:'',
-			taskUUID: uuid.v4(),
-			name: name,
-			abspath: abspath,
-			parent: parentUUID,
-			isRoot: false,
-			stateName: '',
-			children: []
+	formatSize: function(size) {
+		if (!size) return 0 + 'KB'
+		size = parseFloat(size)
+		if (size < 1024) return size.toFixed(2) + 'B' 
+		else if (size < (1024 * 1024)) return (size / 1024).toFixed(2) + 'KB'
+		else if (size < (1024 * 1024 * 1024)) return (size / 1024 / 1024).toFixed(2) + 'M'
+		else return (size / 1024 / 1024 / 1024).toFixed(2) + 'G'
+	},
+	
+	formatSeconds(seconds) {
+		if (!seconds || seconds === Infinity) return '--'
+		let s = parseInt(seconds) //s
+		let m = 0
+		let h = 0
+		if (s > 60) {
+			m = parseInt(s / 60)
+			s = parseInt(s % 60)
+			if (m > 60) {
+				h = parseInt(m / 60)
+				m = parseInt(m % 60)
+			}
 		}
+		if (s.toString().length === 1) s = '0' + s
+		if (h.toString().length === 1) h = '0' + h
+		if (m.toString().length === 1) m = '0' + m
+		return h + ':' + m + ':' + s 
 	},
 
-	visitFolder: function(filePath, position, parent, root, callback) {
-		console.log(path.basename(filePath))
-		fs.stat(filePath, (err, stat) => {
-			if (err || ( !stat.isDirectory() && !stat.isFile())) return callback(err)
-			root.count++
-			root.size += stat.size
-			if (stat.isFile()) {
-				parent.type = 'file'
-				return callback()
-			}else parent.type = 'folder'
-			fs.readdir(filePath, (err, entries) => {
-				if (err) return callback(err)
-				else if (!entries.length) return callback(null)
-				let count = entries.length
-				let index = 0
-				let pushObj = () => {
-					let obj = utils.createFileObj(path.join(filePath, entries[index]), parent.taskUUID, entries[index])
-					position.push(obj)
-					root.list.push(obj)
-					utils.visitFolder(path.join(filePath, entries[index]), position[index].children, obj, root, call)
-				}
-				let call = err => {
-					if (err) return callback(err)
-					if ( ++index == count) return callback()
-					else {
-						pushObj()
-					}
-				}
-				pushObj()
-			})
-		})
+	formatDate(mtime) {
+		let time = new Date()
+		if (!!mtime) time.setTime(mtime)
+		return [
+			time.getFullYear(),
+			time.getMonth() + 1,
+			time.getDate(),
+			time.getHours(),
+			time.getMinutes().toString().length == 1? '0' + time.getMinutes():time.getMinutes()
+		]
+	},
+
+	splicePart(size, partSize) {
+		let part = []
+		let position = 0
+		while(position < size) {
+			if (position + partSize >= size -1) {
+				part.push({start: position, end: size-1})
+				break
+			}else {
+				part.push({start: position, end: position + partSize})
+				position = position + partSize + 1
+			}
+		}
+		return part
 	}
+
 }
 
 export default utils

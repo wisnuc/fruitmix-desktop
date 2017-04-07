@@ -256,57 +256,16 @@ class Main extends React.Component {
 	}
 
 	componentDidMount() {
-
     setTimeout(() => this.setState(Object.assign({}, this.state, {
       showAppBar: false
     })), 1500)
 
 		var _this = this
-
+    console.log('............................')
+    console.log(ipcRenderer)
 		ipcRenderer.send('getMediaData')
 		ipcRenderer.send('getMediaShare')
-
-    setTimeout(() => {
-      //about mediaApi test function should put in here
-
-      // createMediaShareTest()
-      // mediaListThumbTest()
-      // mediaShareThumbTest()
-    }, 2000)
-
-    const createMediaShareTest = () => {
-      let media = storeState().media
-      let mediaList = media.data.map(item => {
-        console.log(item)
-        return item.digest
-      })
-      let userList = storeState().node.server.users.forEach(item => {
-        return item.uuid
-      })
-      ipcRenderer.send('createMediaShare',mediaList,userList,null)
-    }
-
-    const mediaListThumbTest = () => {
-      let media = storeState().media
-      let data = media.data
-      ipcRenderer.send('getThumb',data)
-    }
-
-    const mediaShareThumbTest = () => {
-      let media = storeState().media
-      let mediaShare = media.mediaShare[0]
-      let digest = mediaShare.digest
-      let arr = mediaShare.doc.contents
-      ipcRenderer.send('getAlbumThumb',arr,digest)
-    }
-
-		ipcRenderer.on('setTree',(err,tree)=>{
-			this.props.dispatch(Action.setTree(tree));
-		});
-
-    ipcRenderer.on('treeChildren',(err,treeChildren)=>{
-      this.props.dispatch(Action.setTree(treeChildren));
-    });
+    ipcRenderer.send('GET_TRANSMISSION')
 
 		ipcRenderer.on('refreshStatusOfUpload',(err,tasks, finish)=>{
 			window.store.dispatch(Action.refreshStatusOfUpload(tasks, finish));
@@ -316,10 +275,25 @@ class Main extends React.Component {
 			window.store.dispatch(Action.refreshStatusOfDownload(tasks, finish));
 		})
 
+    ipcRenderer.on('UPDATE_UPLOAD', (err, userTasks, finishTasks) => {
+      window.store.dispatch({
+        type : 'UPDATE_UPLOAD',
+        userTasks,
+        finishTasks
+      })
+    })
+
+    ipcRenderer.on('UPDATE_DOWNLOAD', (err, userTasks, finishTasks) => {
+      window.store.dispatch({
+        type : 'UPDATE_DOWNLOAD',
+        userTasks,
+        finishTasks
+      })
+    })
+
 		ipcRenderer.on('message',(err,message,code)=>{
 			window.store.dispatch(Action.setSnack(message,true))
 		});
-
 
 		ipcRenderer.on('donwloadMediaSuccess',(err,item)=>{
 			window.store.dispatch(Action.setMediaImage(item));

@@ -41,7 +41,7 @@ module.exports = (grunt) => {
 
         clean: {
             dist: {
-                src: ['<%= config.public%>/**.js'],
+                src: ['<%= config.public%>/**.js', '<%= config.public%>/**.json'],
                 filter: 'isFile',
                 // filter: (filepath) => {
                 //  return !grunt.file.isDir(filepath)

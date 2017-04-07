@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux'
 import login from './login'
 import snack from './snack'
-import transimission from './transimission'
+import transmission from './transmission'
 import media from './media'
 import setting from './setting'
 import view from './view'
@@ -24,7 +24,7 @@ import { radio, shareRadio } from '../React-Redux-UI/src/reducers/reducer';
 const reducer = combineReducers({
 	login,
 	snack,
-	transimission,
+	transmission,
 	media,
 	setting,
 	view,
