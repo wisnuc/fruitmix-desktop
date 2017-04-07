@@ -5,11 +5,7 @@
  * @author liuhua
 **/
 import React, { Component } from 'react'
-import { ipcRenderer } from 'electron'
-import Row from './TransmissionRow'
-import FinishTaskRow from './TransmissionFinishRow'
-import FileSvg from 'material-ui/svg-icons/editor/insert-drive-file'
-import FolderSvg from 'material-ui/svg-icons/file/folder'
+import RowList from './TransmissionRowList'
 import DeleteSvg from 'material-ui/svg-icons/action/delete'
 import { command } from '../../lib/command'
 
@@ -17,14 +13,44 @@ const svgStyle = {color: '#000', opacity: 0.54}
 class Upload extends Component {
 	constructor(props) {
 		super(props)
-		this.ctrl = false
 		this.taskSelected = []
 		this.finishSelected = []
+		this.special = null
 		this.state = {
 			x: 0,
 			y: 0,
+			ctrl: false,
+			shift: false,
 			menuShow: false
 		}
+		this.kd = this.keydown.bind(this)
+		this.ku = this.keyup.bind(this)
+	}
+
+	componentDidMount() {
+		document.addEventListener('keydown', this.kd)
+		document.addEventListener('keyup', this.ku)
+	}
+
+	componentWillUnmount() {
+		document.removeEventListener('keydown', this.kd)
+		document.removeEventListener('keyup', this.ku)
+	}
+
+	keydown(event) {
+		if (event.ctrlKey == this.ctrl && event.shiftKey == this.shift) return
+		this.setState({
+			ctrl: event.ctrlKey,
+			shift: event.shiftKey
+		})
+	}
+
+	keyup(event) {
+		if (event.ctrlKey == this.ctrl && event.shiftKey == this.shift) return
+		this.setState({
+			ctrl: event.ctrlKey,
+			shift: event.shiftKey
+		})
 	}
 
 	render() {
@@ -45,18 +71,18 @@ class Upload extends Component {
 					<span>({userTasks.length})</span>
 				</div>
 				<div className='trs-hr'></div>
-				<div className='trs-list-wrapper'>
-					{userTasks.map((task) => {
-						return <Row 
-							selectTaskItem={this.selectTaskItem.bind(this)} 
-							ref={task.uuid} 
-							key={task.uuid} 
-							task={task} 
-							pause={this.pause.bind(this)} 
-							resume={this.resume.bind(this)}
-						/>
-					})}
-				</div>
+				<RowList
+					type = {this.props.type}
+					ref='running'
+					listType = 'running'
+					tasks = {userTasks}
+					taskSelected = {this.taskSelected}
+					finishSelected = {this.finishSelected}
+					ctrl = {this.state.ctrl}
+					shift = {this.state.shift}
+					cleanFinishSelect = {this.cleanFinishSelect.bind(this)}
+					cleanTaskSelect = {this.cleanTaskSelect.bind(this)}
+				/>
 				<div className='trs-title'>
 					<span>已完成</span>
 					<span>({finishTasks.length})</span>
@@ -66,27 +92,20 @@ class Upload extends Component {
 					</span>
 				</div>
 				<div className='trs-hr'></div>
-				<div className='trs-list-wrapper'>
-					{finishTasks.map((task) => {
-						return <FinishTaskRow 
-							ref={task._id}
-							key={task._id}
-							task={task} 
-							selectFinishItem={this.selectFinishItem.bind(this)}/>
-					})}
-				</div>
+				<RowList
+					type={this.props.type}
+					listType='finish'
+					ref='finish'
+					tasks={finishTasks}
+					taskSelected = {this.taskSelected}
+					finishSelected = {this.finishSelected}
+					ctrl = {this.state.ctrl}
+					shift = {this.state.shift}
+					cleanFinishSelect = {this.cleanFinishSelect.bind(this)}
+					cleanTaskSelect = {this.cleanTaskSelect.bind(this)}
+				/>
 			</div>
 		)
-	}
-
-	pause(uuid) {
-		if (this.props.type === 'download') ipcRenderer.send('PAUSE_DOWNLOADING', uuid)
-
-	}
-
-	resume(uuid) {
-		if (this.props.type === 'download') ipcRenderer.send('RESUME_DOWNLOADING', uuid)
-
 	}
 
 	cleanRecord() {
@@ -94,23 +113,19 @@ class Upload extends Component {
 		else command('', 'CLEAN_UPLOAD_RECORD',{})
 	}
 
-	selectTaskItem(id, checked) {
-		console.log(id + ' ' + checked)
+	cleanTaskSelect() {
+		this.taskSelected.forEach(item => {
+				this.refs['running'].refs[item].updateDom(false)
+		})
+		this.taskSelected.length = 0
 	}
 
-	selectFinishItem(id, isSelected) {
-		console.log(this.refs[id])
-		//clear task select
-		if (this.ctrl) {
-			this.refs[id].updateDom(!isSelected)
-		}else {
-			if (isSelected) {
-				
-			}else {
-				
-			}
-		}
-	}	
+	cleanFinishSelect() {
+		this.finishSelected.forEach(item => {
+				this.refs['finish'].refs[item].updateDom(false)
+		})
+		this.finishSelected.length = 0
+	}
 }
 
 export default Upload

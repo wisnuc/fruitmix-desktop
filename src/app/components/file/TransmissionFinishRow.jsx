@@ -21,7 +21,7 @@ class FinishTaskRow extends Component {
 		let s = this.isSelected? selectStyle: normalStyle
 		let task = this.props.task
 		return (
-			<div className='trs-row' style={s} onClick={this.selectFinishItem.bind(this)}>
+			<div className='trs-row' style={s} onMouseUp={this.selectFinishItem.bind(this)}>
 				<div className='trs-row-name'>
 					<span>
 						{
@@ -54,8 +54,12 @@ class FinishTaskRow extends Component {
 		return false
 	}
 
-	selectFinishItem() {
-		this.props.selectFinishItem(this.props.task._id)
+	selectFinishItem(e) {
+		let event = e.nativeEvent
+		this.props.selectFinishItem(this.props.task._id, this.isSelected)
+		if (e.button == 2) {
+			this.props.openMenu(event)
+		}
 	}
 }
 

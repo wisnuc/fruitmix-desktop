@@ -465,6 +465,10 @@ body{
 	align-items: stretch;
 }
 
+.trs-row:hover {
+	background: #eeeeee
+}
+
 .trs-row-name {
 	flex-grow: 2;
 	min-width: 100px;

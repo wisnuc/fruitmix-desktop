@@ -44,7 +44,7 @@ const getTransmissionHandle = (args, callback) => {
 			createTask(item.target, item.name, item.rootSize, item.type, false, item.downloadPath, item._id, item.downloading))
 	})
 
-	db.downloaded.find({}, (err, tasks) => {
+	db.downloaded.find({}).sort({finishDate: -1}).exec((err, tasks) => {
 		if (err) return console.log(err)
 		finishTasks.splice(0, 0, ...tasks)
 		sendMsg()
