@@ -153,7 +153,7 @@ class Main extends React.Component {
     super(props)
 
     this.state = {
-      currentApp: FileApp,
+      currentApp: PhotoApp,
       showAppBar: true,
       resizing: false
     }
