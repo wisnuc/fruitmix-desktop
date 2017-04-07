@@ -71,7 +71,7 @@ app.on('ready', function() {
   if (mocha) initTestWindow()
 
   setTimeout(() => {
-    if (true) {
+    if (false) {
       store.dispatch({
         type: 'CONFIG_SET_IP',
         data: '192.168.5.182'
