@@ -22,7 +22,7 @@ export default class PhotoList extends Component {
 
     this.state = {
       carouselItems: [],
-      activeIndex: false
+      openDetail: false
     }
 
     this.addListToSelection = (path) => {
@@ -49,9 +49,10 @@ export default class PhotoList extends Component {
         }
       })
     }
-    this.lookPhotoDetail = (seqIndex, activeIndex) => {
-      this.setState({ activeIndex })
-      this.seqIndex = seqIndex
+    this.lookPhotoDetail = (digest) => {
+      this.seqIndex = this.props.allPhotos.findIndex(item => item.digest === digest)
+      debug('111111111this.state.activeIndex, seqIndex, digest', this.state.activeIndex, this.seqIndex, digest)
+      this.setState({ openDetail: true })
     }
   }
   getChildContext() {
@@ -177,9 +178,9 @@ export default class PhotoList extends Component {
             </Paper> : <div />
         }
         {/* 查看大图 */
-          photos.length && this.state.activeIndex !== false ?
+          this.state.openDetail ?
             <PhotoDetail
-              closePhotoDetail={() => this.setState({ activeIndex: false })}
+              closePhotoDetail={() => this.setState({ openDetail: false })}
               style={{
                 position: 'fixed',
                 left: 0,
@@ -187,9 +188,8 @@ export default class PhotoList extends Component {
                 width: '100%',
                 height: '100%'
               }}
-              items={photos[this.state.activeIndex].photos}
+              items={this.props.allPhotos}
               seqIndex={this.seqIndex}
-              activeIndex={this.state.activeIndex}
             /> : <div />
         }
       </Paper>

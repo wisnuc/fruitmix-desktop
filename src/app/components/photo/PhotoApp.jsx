@@ -81,11 +81,11 @@ class PhotoApp extends React.Component {
       let lineIndex = 0
       const dateUnknown = []
       this.mediaStore.forEach((item) => {
-        allPhotos.push(item)
         if (!item.exifDateTime) {
           dateUnknown.push(item)
           return
         }
+        allPhotos.push(item)
         const formatExifDateTime = formatDate(item.exifDateTime)
         const isRepeat = photoDates.findIndex(Item => Item === formatExifDateTime) >= 0
         if (!isRepeat || MaxItem === 0) {
@@ -111,6 +111,7 @@ class PhotoApp extends React.Component {
         lineIndex += 1
         let isRepeat = false
         dateUnknown.forEach((item) => {
+          allPhotos.push(item)
           if (MaxItem === 0) {
             MaxItem = Math.floor(width / 156) - 1
             photoMapDates.push({

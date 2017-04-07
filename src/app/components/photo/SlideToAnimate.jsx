@@ -65,7 +65,7 @@ export default class SlideToAnimate extends Component {
     this.leftDireStyle = Object.assign({}, this.style.dire, this.style.leftDire)
     this.rightDireStyle = Object.assign({}, this.style.dire, this.style.rightDire)
     this.state = {
-      currentIndex: props.activeIndex,
+      currentIndex: this.props.activeIndex,
       movement: 0
     }
 

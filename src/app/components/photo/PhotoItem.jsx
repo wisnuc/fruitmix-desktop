@@ -76,7 +76,7 @@ export default class PhotoItem extends Component {
           justifyContent: 'center'
         }}
         zDepth={this.state.action || this.state.hover ? 2 : 0}
-        onTouchTap={() => this.props.lookPhotoDetail(this.findPhotoIndexByDigest())}
+        onTouchTap={() => this.props.lookPhotoDetail(this.props.digest)}
         onMouseEnter={() => this.setState({ hover: true })}
         onMouseLeave={() => this.setState({ hover: false })}
       >
@@ -94,7 +94,7 @@ export default class PhotoItem extends Component {
   render() {
     const { path, style } = this.props
     debug('Render PhotoItem this.props', this.props)
-    // if(!this.state.pending || !path) setTimeout(()=>this.setState({pending: false}), 100)
+    // if(!this.state.pending || !path) setTimeout(()=>this.setState({pending: false}), 1000)
     return (
       <Paper style={style}>
         <div

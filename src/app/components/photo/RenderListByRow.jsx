@@ -108,8 +108,8 @@ export default class RenderListByRow extends Component {
         {/* 日期 */}
         { first &&
         <div style={{ marginBottom: 15 }}>
-          <div style={{display: 'inline-block'}}>
-            <label style={{ fontSize: 12, opacity: 0.87 }}> 
+          <div style={{ display: 'inline-block' }}>
+            <label style={{ fontSize: 12, opacity: 0.87 }}>
               { date }
             </label>
           </div>
@@ -119,23 +119,23 @@ export default class RenderListByRow extends Component {
         <div style={style}>
           { !isScrolling || this.props.photoSum < 100 ?
             photos.map((photo, index) => (
-            <PhotoItem
-              ref={`photoItem${index}`}
-              style={{ width: 150, height: 158, marginRight: 6, marginBottom: 6 }}
-              width={photo.width}
-              height={photo.height}
-              lookPhotoDetail={lookPhotoDetail.bind(null, index)}
-              detectIsAllOffChecked={this.detectIsAllOffChecked}
-              exifOrientation={photo.exifOrientation}
-              onDetectAllOffChecked={this.props.onDetectAllOffChecked}
-              selected={() => { this.addCheckedToItem(index) }}
-              unselected={() => { this.removeCheckedToItem(index) }}
-              date={this.props.date}
-              digest={photo.digest}
-              path={photo.path}
-              key={photo.digest}
-              isScrolling={isScrolling}
-            />
+              <PhotoItem
+                ref={`photoItem${index}`}
+                style={{ width: 150, height: 158, marginRight: 6, marginBottom: 6 }}
+                width={photo.width}
+                height={photo.height}
+                lookPhotoDetail={lookPhotoDetail}
+                detectIsAllOffChecked={this.detectIsAllOffChecked}
+                exifOrientation={photo.exifOrientation}
+                onDetectAllOffChecked={this.props.onDetectAllOffChecked}
+                selected={() => { this.addCheckedToItem(index) }}
+                unselected={() => { this.removeCheckedToItem(index) }}
+                date={this.props.date}
+                digest={photo.digest}
+                path={photo.path}
+                key={photo.digest}
+                isScrolling={isScrolling}
+              />
              )) :
             photos.map((photo, index) => (
               <Paper
