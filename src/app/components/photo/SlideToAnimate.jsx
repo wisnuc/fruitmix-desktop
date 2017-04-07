@@ -1,7 +1,9 @@
 import React, { Component, PropTypes } from 'react'
+import Debug from 'debug'
 import { findDOMNode } from 'react-dom'
 import { SvgIcon } from 'material-ui'
-import throttle from './scrollLazyload/utils/throttle'
+
+const debug = Debug('component:photo:SliderToAnimeta:')
 
 export default class SlideToAnimate extends Component {
   constructor(props) {
@@ -14,8 +16,20 @@ export default class SlideToAnimate extends Component {
       },
       slidection: {
         position: 'relative',
+        margin: '0 auto',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         height: '100%',
+        width: '75%',
         overflow: 'hidden'
+      },
+      translate: {
+        display: 'flex',
+        alignItems: 'center',
+        height: '100%',
+        width: '100%',
+        transition: 'transform .2s cubic-bezier(0, 1, .5, 1)'
       },
       dire: {
         borderRadius: '15%',
@@ -34,14 +48,6 @@ export default class SlideToAnimate extends Component {
       rightDire: {
         right: '2%'
       },
-      translate: {
-        position: 'absolute',
-        left: 0,
-        top: 0,
-        height: '100%',
-        width: '100%',
-        transition: 'transform .2s cubic-bezier(0, 1, .5, 1)'
-      },
       closeBtn: {
         position: 'absolute',
         top: 12,
@@ -59,45 +65,43 @@ export default class SlideToAnimate extends Component {
     this.leftDireStyle = Object.assign({}, this.style.dire, this.style.leftDire)
     this.rightDireStyle = Object.assign({}, this.style.dire, this.style.rightDire)
     this.state = {
-      currentIndex: props.activeIndex
+      currentIndex: this.props.activeIndex,
+      movement: 0
     }
 
-    this.translateLeft = throttle(() => {
-      if (this.state.currentIndex - 1 < 0) { return }
-
+    this.translateLeft = () => {
       const nextIndex = this.state.currentIndex - 1
 
       if (this.props.translateLeftCallback(nextIndex) === false) { return }
 
       this.setState({ currentIndex: nextIndex })
-    }, 50, 500)
+      this.setState({ movement: this.state.movement + 1 })
+    }
 
-    this.translateRight = throttle(() => {
-      if (this.state.currentIndex + 1 >= this.translateCount) { return }
-
+    this.translateRight = () => {
       const prevIndex = this.state.currentIndex + 1
 
       if (this.props.translateRightCallback(prevIndex) === false) { return }
 
       this.setState({ currentIndex: prevIndex })
-    }, 50, 500)
+      this.setState({ movement: this.state.movement - 1 })
+    }
 
-    this.addHoverBgColor = ref => () =>
-      findDOMNode(this.refs[ref]).style.backgroundColor = 'rgba(50, 50, 50, .9)'
-      // findDOMNode(this.refs['next']).style.backgroundColor = 'rgba(50, 50, 50, .9)';
-    this.resetHoverBgColor = ref => () =>
-      findDOMNode(this.refs[ref]).style.backgroundColor = 'rgba(50, 50, 50, .5)'
-
-      // findDOMNode(this.refs['next']).style.backgroundColor = 'rgba(50, 50, 50, .5)';
+    this.addHoverBgColor = ref => () => findDOMNode(this.refs[ref]).style.backgroundColor = 'rgba(50, 50, 50, .9)'
+    this.resetHoverBgColor = ref => () => findDOMNode(this.refs[ref]).style.backgroundColor = 'rgba(50, 50, 50, .5)'
 
     this.transformTranslateStyle = () => {
       const { translateDistance, translateGrep } = this.props
-      let currentIndexDistance = -translateDistance * this.state.currentIndex
-      this.state.currentIndex && (currentIndexDistance -= translateGrep * this.state.currentIndex)
-
+      if (translateDistance === 0) return
+      const currentIndexDistance = this.state.movement * translateDistance
+      // debug('translateDistance, translateGrep', translateDistance, translateGrep)
       return {
         transform: `translate3d(${currentIndexDistance}px, 0, 0)`
       }
+    }
+    this.onClose = () => {
+      this.setState({ movement: 0 })
+      this.props.onClose()
     }
 
     this.reset = ({ translateCount }) => {
@@ -118,14 +122,23 @@ export default class SlideToAnimate extends Component {
     return (
       <div style={style}>
         <div style={this.style.root}>
-          <button className="lightbox-close" ref="close" style={this.style.closeBtn} onMouseOver={this.addHoverBgColor('close')} onMouseOut={this.resetHoverBgColor('close')} onClick={() => this.props.onClose && this.props.onClose()}>
-            <SvgIcon fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24">
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-              <path d="M0 0h24v24H0z" fill="none" />
-            </SvgIcon>
-          </button>
+          { this.props.onClose ?
+            <button
+              className="lightbox-close"
+              ref="close"
+              style={this.style.closeBtn}
+              onMouseOver={this.addHoverBgColor('close')}
+              onMouseOut={this.resetHoverBgColor('close')}
+              onClick={() => this.onClose()}
+            >
+              <SvgIcon fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                <path d="M0 0h24v24H0z" fill="none" />
+              </SvgIcon>
+            </button> :
+            <div /> }
 
-          { this.state.currentIndex > 0
+          { this.translateCount > 1
             && (<a
               href="javascript:;"
               className="lightbox-arrow"
@@ -141,7 +154,7 @@ export default class SlideToAnimate extends Component {
               </SvgIcon>
             </a>) }
 
-          { this.state.currentIndex < this.translateCount - 1
+          { this.translateCount > 1
               && (<a
                 href="javascript:;"
                 className="lightbox-arrow"

@@ -1,15 +1,21 @@
-import React, { Component, PropTypes } from 'react'
-import SlideToAnimate from './SlideToAnimate'
+import React from 'react'
 import { Paper } from 'material-ui'
+import SlideToAnimate from './SlideToAnimate'
 import FlatButton from '../common/FlatButton'
 
 const MARGIN_DISTANCE = 60
 const PART_HEIGHT = 45
 
-export default class Carousel extends Component {
+export default class Carousel extends React.Component {
+
   constructor(props) {
     super(props)
   }
+
+  shouldComponentUpdate(nextProps) {
+    return this.props !== nextProps
+  }
+
   CarouselTopBar = () => (
     <div
       style={{
@@ -28,7 +34,7 @@ export default class Carousel extends Component {
         <div style={{ float: 'right' }}>
           <FlatButton
             label="清除全部"
-            onTouchTap={this.props.onClearHoverToList}
+            onTouchTap={this.props.ClearAll}
           />
         </div>
       </div>
@@ -58,6 +64,7 @@ export default class Carousel extends Component {
       </div>
     )
   }
+
   render() {
     const { style, items } = this.props
     return (
@@ -93,9 +100,4 @@ export default class Carousel extends Component {
       </div>
     )
   }
-}
-
-Carousel.propTypes = {
-  style: PropTypes.objectOf(React.PropTypes.string).isRequired,
-  items: React.PropTypes.arrayOf(React.PropTypes.string).isRequired
 }

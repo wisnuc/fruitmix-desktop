@@ -1,30 +1,15 @@
-/**
-  PhotoListByDate.jsx
-**/
-
 import { ipcRenderer } from 'electron'
 import React, { Component, PropTypes } from 'react'
+import Debug from 'debug'
+import { Paper } from 'material-ui'
 import PhotoItem from './PhotoItem'
-import PhotoSelectDate from './PhotoSelectDate'
-import SelectIconButton from './SelectIconButton'
 import { formatDate } from '../../utils/datetime'
 
-export default class PhotoListByDate extends Component {
+const debug = Debug('component:photoApp:RenderListByRow.jsx')
+
+export default class RenderListByRow extends Component {
   constructor(props) {
     super(props)
-    // this.selectSingleItem1 = (action, itemIndex) => {
-    //   let photoItem = this.refs['photoItem' + itemIndex];
-    //   let selectDate = this.refs['selectDate'];
-    //   let isOn = action === 'on';
-    //
-    //   props[(isOn ? 'add' : 'remove') + 'ListToSelection'](photoItem.props.path);
-    //
-    //   setTimeout(() =>
-    //     isOn
-    //       ? (this.selectionRefs.every(refName => this.refs[refName].state.action === 'on') && selectDate.onSelected(true))
-    //       : (this.selectionRefs.every(refName => this.refs[refName].state.action === 'off') && selectDate.offSelected(true))
-    //   , 0);
-    // };
 
     this.addHoverToAllItem = () => {
       this.selectionRefs.forEach(refName =>
@@ -100,65 +85,79 @@ export default class PhotoListByDate extends Component {
     }
   }
 
-  render() {
-    const { style, date, photos, lookPhotoDetail } = this.props
-    let icon
-
-    return (
-      <div style={{ padding: '0 6px 6px 6px' }}>
-        {/* 日期 */}
-        <div style={{ marginBottom: 15 }}>
-          {/* <SelectIconButton
-            ref="selectDate"
-            style={{ display: 'inline-block', width: 18, height: 18, marginRight: 8 }}
-            selectBehavior={ this.selectByDate } />*/}
-
-          <PhotoSelectDate
-            style={{ display: 'inline-block' }}
-            primaryText={date}
-          />
-        </div>
-
-        {/* 照片 */}
-        <div style={style}>
-          { photos.map((photo, index) => (
-            <div style={{ position: 'relative' }}>
-              <PhotoItem
-                ref={`photoItem${index}`}
-                style={{ width: 150, height: 158, marginRight: 6, marginBottom: 6 }}
-                width={photo.width}
-                height={photo.height}
-                lookPhotoDetail={lookPhotoDetail.bind(null, index)}
-                detectIsAllOffChecked={this.detectIsAllOffChecked}
-                exifOrientation={photo.exifOrientation}
-                onDetectAllOffChecked={this.props.onDetectAllOffChecked}
-                selected={() => { this.addHoverToAllItem(); this.addCheckedToItem(index); this.addAllChecked(); this.props.onAddHoverToList() }}
-                unselected={() => { this.removeCheckedToItem(index); this.removeAllChecked(); this.removeHoverToAllItem(); this.props.onRemoveHoverToList() }}
-                date={this.props.date}
-                digest={photo.digest}
-                path={photo.path}
-                key={photo.digest}
-              />
-            </div>
-             ))
-           }
-        </div>
-      </div>
-    )
-  }
-
   componentDidMount() {
     this.selectionRefs = Object
       .keys(this.refs)
       .filter(refName =>
         refName.indexOf('photoItem') >= 0
       )
-
     ipcRenderer.send('getThumb', this.props.photos.map(item => ({ digest: item.digest })))
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return (nextProps.photos !== this.props.photos && !nextProps.isScrolling)
+    debug('RenderListByRow update!')
+  }
+
+  render() {
+    const { style, date, photos, lookPhotoDetail, first, isScrolling } = this.props
+    // console.log('PhotoListByDate.jsx', this.props)
+    return (
+      <div style={{ padding: '0 6px 6px 6px' }}>
+
+        {/* 日期 */}
+        { first &&
+        <div style={{ marginBottom: 15 }}>
+          <div style={{ display: 'inline-block' }}>
+            <label style={{ fontSize: 12, opacity: 0.87 }}>
+              { date }
+            </label>
+          </div>
+        </div>
+        }
+        {/* 照片 */}
+        <div style={style}>
+          { !isScrolling || this.props.photoSum < 100 ?
+            photos.map((photo, index) => (
+              <PhotoItem
+                ref={`photoItem${index}`}
+                style={{ width: 150, height: 158, marginRight: 6, marginBottom: 6 }}
+                width={photo.width}
+                height={photo.height}
+                lookPhotoDetail={lookPhotoDetail}
+                detectIsAllOffChecked={this.detectIsAllOffChecked}
+                exifOrientation={photo.exifOrientation}
+                onDetectAllOffChecked={this.props.onDetectAllOffChecked}
+                selected={() => { this.addCheckedToItem(index) }}
+                unselected={() => { this.removeCheckedToItem(index) }}
+                date={this.props.date}
+                digest={photo.digest}
+                path={photo.path}
+                key={photo.digest}
+                isScrolling={isScrolling}
+              />
+             )) :
+            photos.map((photo, index) => (
+              <Paper
+                style={{
+                  width: 150,
+                  height: 158,
+                  marginRight: 6,
+                  marginBottom: 6,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >Loading...</Paper>
+            ))
+           }
+        </div>
+      </div>
+    )
   }
 }
 
-PhotoListByDate.propTypes = {
+RenderListByRow.propTypes = {
   style: PropTypes.object,
   date: PropTypes.string.isRequired,
   photos: PropTypes.array.isRequired,

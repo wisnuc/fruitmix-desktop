@@ -2,32 +2,18 @@
 
 ```
 PhotoApp {
-  this.renderLeftNav()
+  this.renderLeftNav
   PhotoToolBar
   PhotoList{
-    ScrollFlush{
-      LazyloadBox{
-        PhotoListByDate.jsx{
-          PhotoItem{
-            HoverIconButton  
-          }
-          PhotoSelectDate
-            SelectIconButton  
-        }
-      }
-    },
-    this.renderPhotoDetail(
-      PhotoDetail{
-        SlideToAnimate  
-      }
-    ),
-    this.renderCarousel(
-      FadingToAnimate{
-        Carousel{
-          SlideToAnimate
-        }
-      }
-    )
+    RenderListByRow{
+      PhotoItem
+    }
+    PhotoDetail{
+      SlideToAnimate 
+    }
+    Carousel{
+      SlideToAnimate
+    }
   }
 }
 
