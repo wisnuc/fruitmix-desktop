@@ -4,7 +4,7 @@ import Debug from 'debug'
 import { Paper, Card, IconButton, CircularProgress } from 'material-ui'
 import { CheckIcon } from './Svgs'
 
-const debug = Debug('component:photoItem:')
+const debug = Debug('component:photoApp:photoItem:')
 
 export default class PhotoItem extends Component {
   constructor(props, context) {
@@ -15,8 +15,6 @@ export default class PhotoItem extends Component {
       action: false,
       hover: false
     }
-
-    this.findPhotoIndexByDigest = () => this.context.photos.findIndex(photo => photo.date === this.props.date)
 
     this.onSelectIconButton = () => {
       if (!this.state.action) {
@@ -32,8 +30,9 @@ export default class PhotoItem extends Component {
           () => !disabled && props.unselected())
       }
     }
-    // this.placeHolder = <div>Loading...</div>
-    this.placeHolder = (<CircularProgress size={40} thickness={5} />)
+
+    this.placeHolder = <div style={{ backgroundColor: '#eeeeee', height: '100%', width: '100%' }} />
+    // this.placeHolder = (<CircularProgress size={40} thickness={5} />)
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -61,13 +60,12 @@ export default class PhotoItem extends Component {
     </div>
     )
 
-  renderImage = (props) => {
-    const path = props.path
+  renderImage = () => {
+    const { path } = this.props
     return (
       <Paper
         style={{
           position: 'relative',
-          cursor: 'pointer',
           width: '100%',
           height: '100%',
           overflow: 'hidden',
@@ -75,17 +73,14 @@ export default class PhotoItem extends Component {
           alignItems: 'center',
           justifyContent: 'center'
         }}
-        zDepth={this.state.action || this.state.hover ? 2 : 0}
+        zDepth={this.state.action || this.state.hover ? 4 : 0}
         onTouchTap={() => this.props.lookPhotoDetail(this.props.digest)}
         onMouseEnter={() => this.setState({ hover: true })}
         onMouseLeave={() => this.setState({ hover: false })}
       >
-        { !path ?
-          this.placeHolder :
-          <div>
-            <div style={{ height: '50%', width: 0, display: 'inline-block' }} />
-            <img src={path} alt="img" style={{ objectFit: 'cover' }} />
-          </div>
+        {
+          !path ? this.placeHolder :
+          <img src={path} alt="img" style={{ objectFit: 'cover' }} />
         }
       </Paper>
     )
@@ -93,8 +88,8 @@ export default class PhotoItem extends Component {
 
   render() {
     const { path, style } = this.props
-    debug('Render PhotoItem this.props', this.props)
-    // if(!this.state.pending || !path) setTimeout(()=>this.setState({pending: false}), 1000)
+    // debug('Render PhotoItem this.props', this.props)
+    // return <div>Loading</div>
     return (
       <Paper style={style}>
         <div
@@ -104,8 +99,9 @@ export default class PhotoItem extends Component {
             width: '100%'
           }}
         >
+          {/* (this.state.action || this.state.hover) && <this.renderHover /> */}
           { (this.state.action || this.state.hover) && <this.renderHover /> }
-          { <this.renderImage path={path} /> }
+          { <this.renderImage /> }
         </div>
       </Paper>
     )
@@ -114,12 +110,7 @@ export default class PhotoItem extends Component {
 
 PhotoItem.propTypes = {
   digest: PropTypes.string.isRequired,
-  lookPhotoDetail: PropTypes.func,
-  showSelectIconButton: PropTypes.func
-}
-
-PhotoItem.contextTypes = {
-  photos: PropTypes.Array
+  lookPhotoDetail: PropTypes.func
 }
 
 PhotoItem.defaultProps = {

@@ -11,100 +11,73 @@ export default class RenderListByRow extends Component {
   constructor(props) {
     super(props)
 
-    this.addHoverToAllItem = () => {
-      this.selectionRefs.forEach(refName =>
-        this.refs[refName].addHoverIconButton()
-      )
-    }
+     /*
+      this.addHoverToAllItem = () => {
+        this.selectionRefs.forEach(refName =>
+          this.refs[refName].addHoverIconButton()
+        )
+      }
 
-    this.removeHoverToAllItem = () => {
-      this.detectIsAllOffChecked() && this.selectionRefs.forEach(refName =>
-        this.refs[refName].removeHoverIconButton()
-      )
-    }
+      this.removeHoverToAllItem = () => {
+        this.detectIsAllOffChecked() && this.selectionRefs.forEach(refName =>
+          this.refs[refName].removeHoverIconButton()
+        )
+      }
 
-    this.addCheckedToItem = (itemIndex) => {
-      const photoItem = this.refs[`photoItem${itemIndex}`]
+      this.addCheckedToItem = (itemIndex) => {
+        const photoItem = this.refs[`photoItem${itemIndex}`]
 
-      this.props.addListToSelection(photoItem.props.path)
-    }
+        this.props.addListToSelection(photoItem.props.path)
+      }
 
-    this.detectIsAllOffChecked = () => this.selectionRefs.every(refName => this.refs[refName].state.action !== 'on')
+      this.detectIsAllOffChecked = () => this.selectionRefs.every(refName => this.refs[refName].state.action !== 'on')
 
-    this.addAllChecked = () => {
-      const selectDate = this.refs.selectDate
+      this.addAllChecked = () => {
+        const selectDate = this.refs.selectDate
 
-      setTimeout(() =>
-        this.selectionRefs.every(refName => this.refs[refName].state.action === 'on')
-          && selectDate.onSelected(true)
-      , 0)
-    }
+        setTimeout(() =>
+          this.selectionRefs.every(refName => this.refs[refName].state.action === 'on')
+            && selectDate.onSelected(true)
+        , 0)
+      }
 
-    this.removeCheckedToItem = (itemIndex) => {
-      const photoItem = this.refs[`photoItem${itemIndex}`]
+      this.removeCheckedToItem = (itemIndex) => {
+        const photoItem = this.refs[`photoItem${itemIndex}`]
 
-      this.props.removeListToSelection(photoItem.props.path)
-    }
+        this.props.removeListToSelection(photoItem.props.path)
+      }
 
-    this.removeAllChecked = () => {
-      const selectDate = this.refs.selectDate
-      selectDate.offSelected(true)
-    }
+      this.removeAllChecked = () => {
+        const selectDate = this.refs.selectDate
+        selectDate.offSelected(true)
+      }
 
-    this.removeCheckToAllItem = () => {
-      this.selectionRefs.forEach(refName =>
-        this.refs[refName].offSelectIconButton(false)
-      )
-    }
-
-    this.selectByDate = (action) => {
-      this.selectionRefs.forEach((refName, index) => {
-        this.refs[refName][`${action}SelectIconButton`](false)
-
-        if (action === 'on') {
-          this.addCheckedToItem(index)
-          this.props.onGetPhotoListByDates()
-        } else {
-          this.removeCheckedToItem(index)
-
-          // this.removeAllChecked();
-          // this.removeHoverToAllItem();
-          // this.props.onRemoveHoverToList();
-          // this.removeCheckedToItem(index);
-          // this.removeHoverToAllItem();
-        }
-      })
-
-      // if (action !== 'on') {
-      //   setTimeout(() => {
-      //     if (this.props.onDetectAllOffChecked()) {
-      //       this.removeCheckToAllItem();
-      //     }
-      //   }, 0);
-      // }
-    }
+      this.removeCheckToAllItem = () => {
+        this.selectionRefs.forEach(refName =>
+          this.refs[refName].offSelectIconButton(false)
+        )
+      }
+    */
   }
 
   componentDidMount() {
-    this.selectionRefs = Object
-      .keys(this.refs)
-      .filter(refName =>
-        refName.indexOf('photoItem') >= 0
-      )
     ipcRenderer.send('getThumb', this.props.photos.map(item => ({ digest: item.digest })))
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    return (nextProps.photos !== this.props.photos && !nextProps.isScrolling)
+    let check = false
+    this.props.photos.forEach((item) => { if (!item.path) check = true })
+    if (check) return check
+    return (!nextProps.isScrolling)
+    // return (nextProps.photos !== this.props.photos && !nextProps.isScrolling)
     debug('RenderListByRow update!')
   }
 
   render() {
     const { style, date, photos, lookPhotoDetail, first, isScrolling } = this.props
-    // console.log('PhotoListByDate.jsx', this.props)
+    // debug('PhotoListByDate.jsx', this.props)
     return (
       <div style={{ padding: '0 6px 6px 6px' }}>
-
         {/* 日期 */}
         { first &&
         <div style={{ marginBottom: 15 }}>
@@ -116,12 +89,13 @@ export default class RenderListByRow extends Component {
         </div>
         }
         {/* 照片 */}
+        {/* !isScrolling || this.props.photoSum < 100 ? */}
         <div style={style}>
-          { !isScrolling || this.props.photoSum < 100 ?
+          { !isScrolling ?
             photos.map((photo, index) => (
               <PhotoItem
                 ref={`photoItem${index}`}
-                style={{ width: 150, height: 158, marginRight: 6, marginBottom: 6 }}
+                style={{ width: 210, height: 210, marginRight: 6, marginBottom: 6 }}
                 width={photo.width}
                 height={photo.height}
                 lookPhotoDetail={lookPhotoDetail}
@@ -138,17 +112,20 @@ export default class RenderListByRow extends Component {
               />
              )) :
             photos.map((photo, index) => (
-              <Paper
+              <div
                 style={{
-                  width: 150,
-                  height: 158,
+                  width: 210,
+                  height: 210,
                   marginRight: 6,
                   marginBottom: 6,
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  backgroundColor: '#eeeeee',
+                  borderRadius: 2,
+                  boxShadow: 'rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px'
                 }}
-              >Loading...</Paper>
+              />
             ))
            }
         </div>
