@@ -143,13 +143,12 @@ class PhotoApp extends React.Component {
     }
   }
   shouldComponentUpdate(nextProps, nextState) {
-    debug('In shouldComponentUpdate', window.store.getState().media.data !== this.mediaStore, this.state !== nextState, this.mediaStore)
     if (window.store.getState().media.data !== this.mediaStore) return true
     return (this.state !== nextState)
   }
 
   render() {
-    debug('render photoapp state, props', this.state, this.props)
+    // debug('render photoapp state, props', this.state, this.props)
     return (
       <Paper>
         <this.renderLeftNav />

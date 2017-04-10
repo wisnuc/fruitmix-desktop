@@ -4,7 +4,7 @@ import Debug from 'debug'
 import { Paper, Card, IconButton, CircularProgress } from 'material-ui'
 import { CheckIcon } from './Svgs'
 
-const debug = Debug('component:photoItem:')
+const debug = Debug('component:photoApp:photoItem:')
 
 export default class PhotoItem extends Component {
   constructor(props, context) {
@@ -15,8 +15,6 @@ export default class PhotoItem extends Component {
       action: false,
       hover: false
     }
-
-    this.findPhotoIndexByDigest = () => this.context.photos.findIndex(photo => photo.date === this.props.date)
 
     this.onSelectIconButton = () => {
       if (!this.state.action) {
@@ -32,8 +30,9 @@ export default class PhotoItem extends Component {
           () => !disabled && props.unselected())
       }
     }
-    // this.placeHolder = <div>Loading...</div>
-    this.placeHolder = (<CircularProgress size={40} thickness={5} />)
+
+    this.placeHolder = <div style={{ backgroundColor: '#eeeeee', height: '100%', width: '100%' }} />
+    // this.placeHolder = (<CircularProgress size={40} thickness={5} />)
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -93,8 +92,7 @@ export default class PhotoItem extends Component {
 
   render() {
     const { path, style } = this.props
-    debug('Render PhotoItem this.props', this.props)
-    // if(!this.state.pending || !path) setTimeout(()=>this.setState({pending: false}), 1000)
+    // debug('Render PhotoItem this.props', this.props)
     return (
       <Paper style={style}>
         <div
@@ -114,12 +112,7 @@ export default class PhotoItem extends Component {
 
 PhotoItem.propTypes = {
   digest: PropTypes.string.isRequired,
-  lookPhotoDetail: PropTypes.func,
-  showSelectIconButton: PropTypes.func
-}
-
-PhotoItem.contextTypes = {
-  photos: PropTypes.Array
+  lookPhotoDetail: PropTypes.func
 }
 
 PhotoItem.defaultProps = {

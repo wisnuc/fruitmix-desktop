@@ -95,6 +95,18 @@ class DeviceCard extends React.Component {
 
     ipcRenderer.send('setServerIp', props.device.address)
 
+    /*
+    this.ip = '192.168.5.132'
+    this.uuid = ''  
+    this.username = 'L1'
+    this.password = '1' 
+    ipcRenderer.send('setServerIp', this.ip)
+    request.get(`http://${this.ip}:3721/token`)
+      .auth(this.uuid, this.password)
+      .set('Accept', 'application/json')
+      .end(() => ipcRenderer.send('login', this.username, this.password))
+    */
+
     this.requestGet = (port, ep, propName) =>
       request.get(`http://${this.props.device.address}:${port}/${ep}`)
         .set('Accept', 'application/json')
@@ -370,18 +382,9 @@ class DeviceCard extends React.Component {
       transition: 'all 300ms'
     }
 
-    const ip = '192.168.5.95'
-    const uuid = '' 
-    const username = '伊朗'
-    const password = '1'
-    ipcRenderer.send('setServerIp', ip)
-    request.get(`http://${ip}:3721/token`)
-      .auth(uuid, password)
-      .set('Accept', 'application/json')
-      .end(() => ipcRenderer.send('login', username, password))
-
     return (
       <div style={this.props.style}>
+
               {/* top container */}
         <Paper id='top-half-container' style={paperStyle} rounded={false}>
           <div style={{width: '100%', display: 'flex', alignItems: 'stretch'}}>

@@ -39,9 +39,7 @@ class PhotoDetailInline extends React.Component {
     }
 
     this.requestNext = (currentIndex) => {
-      debug('requestNext', this.props, currentIndex)
       ipcRenderer.send('getMediaImage', this.props.items[currentIndex].digest)
-      debug('requestNext', currentIndex)
     }
     this.changeIndex = (direction) => {
       if (direction === 'right') {
@@ -50,7 +48,6 @@ class PhotoDetailInline extends React.Component {
         this.currentIndex -= 1
       }
       ipcRenderer.once('donwloadMediaSuccess', (err, item) => {
-        debug('donwloadMediaSuccess componentDidUpdate', err, item)
         this.currentImage = item
         this.forceUpdate()
       })
@@ -66,7 +63,6 @@ class PhotoDetailInline extends React.Component {
 
   componentDidMount() {
     ipcRenderer.once('donwloadMediaSuccess', (err, item) => {
-      debug('donwloadMediaSuccess componentDidMount', err, item)
       this.currentImage = item
       this.forceUpdate()
     })
@@ -75,16 +71,8 @@ class PhotoDetailInline extends React.Component {
   shouldComponentUpdate(nextProps, nextState) {
     return this.state !== nextState
   }
-  componentWillUpdate(nextProps, nextState) {
 
-  }
-  componentDidUpdate() {
-  }
-
-  componentWillUnmount() {
-  }
-
-  renderDetail (currentImage) {
+  renderDetail(currentImage, photo) {
     let exifOrientation = ''
     if (currentImage) {
       exifOrientation = currentImage.exifOrientation || ''
@@ -109,14 +97,20 @@ class PhotoDetailInline extends React.Component {
               height={'100%'}
               src={window.store.getState().view.currentMediaImage.path}
               alt="DetailImage"
-            /> :
-            <CircularProgress /> }
+            /> : photo.path ?
+              <img
+                height={'100%'}
+                src={photo.path}
+                alt="DetailImage"
+              /> : <div /> }
         </div>
       </div>
     )
   }
 
   render() {
+    const photo = this.props.items[this.currentIndex]
+    debug('PhotoDetail', this.props)
     return (
       <Paper
         style={{
@@ -153,7 +147,7 @@ class PhotoDetailInline extends React.Component {
               justifyContent: 'center'
             }}
           >
-            { this.renderDetail(this.currentImage) }
+            { this.renderDetail(this.currentImage, photo) }
             <IconButton
               onTouchTap={this.props.closePhotoDetail}
               style={this.style.closeBtn}
@@ -220,6 +214,6 @@ export default class PhotoDetail extends React.Component {
 PhotoDetail.propTypes = {
   style: PropTypes.object.isRequired,
   items: PropTypes.array.isRequired,
-  activeIndex: PropTypes.number.isRequired,
-  closePhotoDetail: PropTypes.func.isRequired
+  closePhotoDetail: PropTypes.func.isRequired,
+  seqIndex: PropTypes.number.isRequired
 }

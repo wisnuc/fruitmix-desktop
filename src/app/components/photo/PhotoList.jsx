@@ -51,7 +51,6 @@ export default class PhotoList extends Component {
     }
     this.lookPhotoDetail = (digest) => {
       this.seqIndex = this.props.allPhotos.findIndex(item => item.digest === digest)
-      debug('111111111this.state.activeIndex, seqIndex, digest', this.state.activeIndex, this.seqIndex, digest)
       this.setState({ openDetail: true })
     }
   }
@@ -70,10 +69,10 @@ export default class PhotoList extends Component {
     const clientWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
     const height = clientHeight - 56
     const width = this.props.leftNav ? clientWidth - 210 : clientWidth
-    debug('this.props.photoMapDates', this.props.photoMapDates)
+    // debug('this.props.photoMapDates', this.props.photoMapDates)
     const rowRenderer = ({ key, index, style, isScrolling }) => {
       const list = this.props.photoMapDates[index]
-      // if (isScrolling) return <div />
+      if (isScrolling) return <div />
         /*
       if (isScrolling) {
         return (
@@ -155,7 +154,7 @@ export default class PhotoList extends Component {
   }
 
   render() {
-    debug('render PhotoList, this.props', this.props)
+    // debug('render PhotoList, this.props', this.props)
     const photos = this.props.photoMapDates
     if (photos.length === 0) return <div />
     return (
