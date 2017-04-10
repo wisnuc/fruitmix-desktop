@@ -2,21 +2,25 @@ import Debug from 'debug'
 const debug = Debug('component:Login')
 
 import React, { Component, PureComponent, PropTypes } from 'react'
-import { indigo900, cyan500, cyan900, teal900, lightGreen900, lime900, yellow900 
+import ReactDOM from 'react-dom'
+import { 
+  indigo900, cyan500, cyan900, teal900, lightGreen900, lime900, yellow900 
 } from 'material-ui/styles/colors'
+
 import { FlatButton, CircularProgress } from 'material-ui'
 
 import CrossNav from './CrossNav'
 import InfoCard from './InfoCard'
-import DeviceCard from './DeviceCard'
+import UserBox from './UserBox'
 import ErrorBox from './ErrorBox' 
 import GuideBox from './GuideBox'
+import CardDisplay from './ModelNameCard'
+import InitWizard from './InitStep'
 
 import { command } from '../../lib/command'
 
 const colorArray = [indigo900, cyan900, teal900, lightGreen900, lime900, yellow900]
 
-// props.overly: dim, white, or whatever
 class Background extends PureComponent {
 
   render() {
@@ -36,7 +40,27 @@ class Background extends PureComponent {
         }}/>
       </div>
     )
-   }
+  }
+}
+
+// pure animation frame !
+class DeviceCard extends PureComponent {
+
+  componentWillEnter(callback) {
+    this.props.onWillEnter(ReactDOM.findDOMNode(this), callback)
+  }
+
+  componentWillLeave(callback) {
+    this.props.onWillLeave(ReactDOM.findDOMNode(this), callback)
+  }
+
+  render() {
+    return (
+      <div style={this.props.style}>
+        { this.props.children }
+      </div>
+    )
+  }
 }
 
 // This component is responsible for
@@ -47,16 +71,55 @@ class Background extends PureComponent {
 class Login extends React.Component {
 
   constructor(props) {
+
     super(props)
-    this.state = { enter: 'bottom', dim: false }
+
+    this.state = { 
+      enter: 'bottom', 
+      expanded: false,
+      vexpand: false,
+      hexpand: false,
+      compact: false,
+      dim: false,
+
+      pin: null, // pin child UI view, prevent auto dispatch, see footer
+    }
 
     this.navPrevBound = this.navPrev.bind(this)
     this.navNextBound = this.navNext.bind(this)
-    this.dimBound = this.toggleDim.bind(this)
+
+    this.toggleDisplayBound = this.toggleDisplay.bind(this)
+    this.toggleExpandedBound = this.toggleExpanded.bind(this)
   }
 
-  toggleDim() {
-    this.setState({ dim: !this.state.dim })
+  toggleDisplay(done) {
+    this.setState({ compact: !this.state.compact, dim: !this.state.dim }) 
+    if (done) setTimeout(() => done(), 300) 
+  }
+
+  async toggleExpandedAsync() {
+
+    let { vexpand, hexpand, expanded } = this.state
+    if (vexpand !== hexpand || hexpand !== expanded) return
+
+    if (!expanded) {
+      this.setState({ vexpand: true, compact: true, dim: true })  
+      await Promise.delay(300)
+      this.setState({ hexpand: true }) 
+      await Promise.delay(300)
+      this.setState({ expanded: true, pin: 'initWizard' })
+    } 
+    else {
+      this.setState({ hexpand: false })
+      await Promise.delay(300)
+      this.setState({ vexpand: false })
+      await Promise.delay(300)
+      this.setState({ expanded: false, pin: undefined })
+    }
+  }
+
+  toggleExpanded() {
+    this.toggleExpandedAsync().asCallback()
   }
 
   navPrev() {
@@ -114,13 +177,9 @@ class Login extends React.Component {
     }
   }
 
-  deviceFooter() {
+  footer() {
 
-    let status = this.props.selectedDevice.status()
-
-    console.log('Login, deviceFooter, status', status)
-
-    let pullError = () => {
+    const pullError = () => {
       let { boot, storage, users } = this.props.selectedDevice
       let obj = {
         boot: boot.isFulfilled() ? boot.value() : boot.reason(),
@@ -130,27 +189,65 @@ class Login extends React.Component {
       return JSON.stringify(obj, null, '  ')
     }
 
-    if (Array.isArray(status)) {
-      if (status.length > 0)
+    const boxStyle = {
+      width: '100%', height: 64, backgroundColor: '#FAFAFA',
+      display:'flex', alignItems: 'center', justifyContent: 'space-between',
+      boxSizing: 'border-box', paddingLeft: 24, paddingRight: 24
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+
+    let status = this.props.selectedDevice.status()
+
+    if (this.state.pin === 'initWizard' || status === 'uninitialized') {
+      
+      let { hexpand, vexpand, expanded } = this.state
+
+      if (hexpand === vexpand && vexpand === expanded) {
+        if (expanded) {
+          return (
+            <InitWizard 
+              device={this.props.selectedDevice}
+              showContent={true}
+              requestClose={this.toggleExpandedBound}
+            />
+          )
+        }
+        else {
+          return (
+            <div style={boxStyle}>
+              <div>该设备尚未初始化</div>
+              <FlatButton label='初始化' onTouchTap={this.toggleExpandedBound} />
+            </div>
+          )
+        }
+      }
+      else 
+        return null
+    }
+
+    if (status === 'users') {
+
+      let users = this.props.selectedDevice.users.value()
+
+      if (users.length > 0)
         return (
           <UserBox
             style={{width: '100%', transition: 'all 300ms', position:'relative'}}
             color={this.props.backgroundColor}
             device={this.props.device}
-            users={this.state.users}
+            users={status}
             onResize={this.onBoxResize}
             toggleDim={this.props.toggleDim}
             requestToken={this.requestToken}
+            toggleDisplay={this.toggleDisplayBound}
           />
         )
       else 
         return null // TODO FirstUserBox
     }
 
-    if (status === 'unintialized')
-      return <GuideBox />
-
-    let text, busy, maint, error
+    let text, busy, maint, error, uninit
     switch (status) {
     case 'probing':
       text = '通讯中....' 
@@ -187,17 +284,9 @@ class Login extends React.Component {
       break
     }
 
-    const boxStyle = {
-      width: '100%', height: 64, backgroundColor: '#FAFAFA',
-      display:'flex', alignItems: 'center', justifyContent: 'space-between',
-      boxSizing: 'border-box', paddingLeft: 24, paddingRight: 24
-    }
-
     if (busy) 
       return (
-        <div style={Object.assign({}, boxStyle, { 
-          paddingLeft: 16, justifyContent: 'start' 
-        })}>
+        <div style={Object.assign({}, boxStyle, { paddingLeft: 16, justifyContent: 'start' })}>
           <CircularProgress style={{ flexBasis: 32 }} size={28} />
           <div style={{ flexBasis: 16 }} />
           <div>{text}</div>
@@ -220,15 +309,7 @@ class Login extends React.Component {
 
     let { mdns, selectedDevice } = this.props
 
-    if (selectedDevice) {
-      console.log('====')
-      console.log(selectedDevice.boot)
-      console.log(selectedDevice.storage)
-      console.log(selectedDevice.users)
-      console.log('====')
-    }
-
-    let cardProps
+    let cardProps, displayProps, cardInnerStyle
     if (selectedDevice === null) {
       cardProps = {
         key: 'info-card',
@@ -236,15 +317,27 @@ class Login extends React.Component {
       }
     }
     else {
-      cardProps = {
-        key: `device-card-${selectedDevice.mdev.name}`,
+
+      cardProps = { key: `device-card-${selectedDevice.mdev.name}` }
+
+      displayProps = {
+
+        toggle: this.state.compact,
+
         device: selectedDevice.mdev,
-        selectedDevice,
         backgroundColor: colorArray[1],
+
         onNavPrev: (!selectedDevice || this.isFirst()) ? null : this.navPrevBound,
         onNavNext: (!selectedDevice || this.isLast()) ? null : this.navNextBound,
-        toggleDim: this.dimBound,
       }
+
+      cardInnerStyle = {
+        backgroundColor: '#FAFAFA',
+        width: this.state.hexpand ? 1152 : '100%', 
+        transition: 'width 300ms',
+      }
+    
+      // if (this.state.vexpand) cardInnerStyle.height = 680
     }
 
     return (
@@ -252,12 +345,20 @@ class Login extends React.Component {
         <Background overlay={this.state.dim ? 'dim' : 'none'} />
         <div style={{width: '100%', height: '100%', 
           display:'flex', flexDirection: 'column', alignItems: 'center'}}>
+
           <div style={{flexBasis: '160px'}} />
+
           <CrossNav duration={0.35} enter={this.state.enter}>
             { selectedDevice === null
               ? <InfoCard {...cardProps} />
-              : <DeviceCard {...cardProps}>{this.deviceFooter()}</DeviceCard> }
+              : <DeviceCard {...cardProps}>
+                  <div style={cardInnerStyle}>
+                    <CardDisplay {...displayProps} />
+                    {this.footer()}
+                  </div>
+                </DeviceCard> }
           </CrossNav>
+
         </div>
       </div>
     )

@@ -36,10 +36,8 @@ class Main extends React.Component {
     }
 
     this.selectedDevice = new Device(mdev)
-    this.selectedDevice.on('updated', (name, prev, curr) => 
-      this.setState({ selectedDevice: this.selectedDevice.immutable }))
-
-    this.setState({ selectedDevice: this.selectedDevice.immutable })
+    this.selectedDevice.on('updated', (prev, next) => this.setState({ selectedDevice: next }))
+    this.selectedDevice.start()
   }
 
   render() {

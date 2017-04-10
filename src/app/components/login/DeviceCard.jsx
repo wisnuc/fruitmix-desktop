@@ -67,7 +67,7 @@ class DeviceCard extends React.Component {
       storage: null,
       users: null,
     }
-
+/**
     this.requestExpand = () => {
 
       console.log('this.requestExpand')
@@ -163,6 +163,7 @@ class DeviceCard extends React.Component {
     this.requestGet(3000, 'system/boot', 'boot')
     this.requestGet(3000, 'system/storage', 'storage')
     this.requestGet(3721, 'login', 'users')
+  **/
   }
 
   componentDidMount() {
@@ -354,17 +355,11 @@ class DeviceCard extends React.Component {
     const device = this.props.selectedDevice
 
     console.log('device card render, selectedDevice', this.props.selectedDevice)
+    console.log('device card render, style', this.props.style)
 
     return (
       <div style={this.props.style}>
         <div style={{width: this.state.ready ? 1154 : '100%', transition: 'width 300ms'}}>
-          <ModelNameCard
-            toggle={this.state.toggle}
-            device={this.props.selectedDevice.mdev}
-            backgroundColor={this.props.backgroundColor}
-            onNavPrev={this.props.onNavPrev}
-            onNavNext={this.props.onNavNext}
-          />
           { this.props.children } 
         </div>
       </div>

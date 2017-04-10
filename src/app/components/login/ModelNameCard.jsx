@@ -14,8 +14,7 @@ import HoverNav from './HoverNav'
 
 class ModelNameCard extends React.Component{
 
-
-	serial = (props) => {
+	serial = props => {
 
 		let serial = '未知序列号'
 		if (this.props.device.name) {
@@ -28,7 +27,7 @@ class ModelNameCard extends React.Component{
 		return serial
 	}
 
-	model = (props) => {
+	model = props => {
 
 		let model = '个人计算机'
 		if (this.props.device.name) {
@@ -43,9 +42,10 @@ class ModelNameCard extends React.Component{
 		return model
 	}
 
-	logoType = (props) => {
+	logoType = props => {
 
 		let logoType = Computer
+
 		if (this.props.device.name) {
 			let split = this.props.device.name.split('-')
 			if (split.length === 3 && split[0] === 'wisnuc') {
@@ -76,7 +76,6 @@ class ModelNameCard extends React.Component{
 			<div>
 				<Paper id='top-half-container' style={paperStyle} rounded={false}>
           <div style={{width: '100%', display: 'flex', alignItems: 'stretch'}}>
-						{console.log('toggle',this.props.toggle)}
             <HoverNav
               style={{ flex: this.props.toggle ? '0 0 24px' : '0 0 64px', transition: 'all 300ms' }}
               direction='left'

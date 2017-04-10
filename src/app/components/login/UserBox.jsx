@@ -79,27 +79,15 @@ class UserBox extends React.Component {
 
   selectUser(index) {
 
-    if (index === -1) {
-      this.setState({ selectedIndex: -1 })
-      setTimeout(() => {
-        this.props.onResize('VSHRINK')
-        this.props.toggleDim()
-      }, sharpCurveDuration * 2)
-      return
-    }
-
     if (this.state.selectedIndex === -1) {
-
-      this.props.onResize('VEXPAND')
-      this.props.toggleDim()
-
-      setTimeout(() => {
-        this.inputValue = ''
-        this.setState({ selectedIndex: index})
-      }, 300)
+      this.props.toggleDisplay(() => {
+        this.setState({ selectedIndex: index })
+      })
     }
     else {
       this.setState({ selectedIndex: index })
+      if (index === -1) 
+        setTimeout(() => this.props.toggleDisplay(), 300)
     }
   }
 
