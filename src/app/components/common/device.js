@@ -44,9 +44,9 @@ class Device extends EventEmitter {
       mdev: this.mdev,
 
       // methods
-      status: this.status.bind(this),
       request: this.request.bind(this),
       initWizard: this.initWizard.bind(this),
+      systemStatus: this.systemStatus.bind(this),
     }
   }
 
@@ -254,7 +254,7 @@ class Device extends EventEmitter {
   // probing, systemError, fruitmixError, 
   // userMaint, failLast, faltMulti, failNoAlt, unknownMaint, unintialized (a special case for failNoAlt)
   // [] (users)
-  status() {
+  systemStatus() {
 
     if (!this.device || !this.boot || !this.storage || !this.users 
         || this.device.isPending() || this.boot.isPending() 
@@ -270,7 +270,7 @@ class Device extends EventEmitter {
         if (this.users.isRejected())
           return 'fruitmixError'
         else
-          return this.users.value()
+          return 'ready'
       }
       else { // maintenance mode
 

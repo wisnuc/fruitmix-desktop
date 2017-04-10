@@ -197,7 +197,7 @@ class Login extends React.Component {
 
     ////////////////////////////////////////////////////////////////////////////
 
-    let status = this.props.selectedDevice.status()
+    let status = this.props.selectedDevice.systemStatus()
 
     if (this.state.pin === 'initWizard' || status === 'uninitialized') {
       
@@ -226,17 +226,15 @@ class Login extends React.Component {
         return null
     }
 
-    if (status === 'users') {
-
+    if (status === 'ready') {
       let users = this.props.selectedDevice.users.value()
-
       if (users.length > 0)
         return (
           <UserBox
             style={{width: '100%', transition: 'all 300ms', position:'relative'}}
             color={this.props.backgroundColor}
             device={this.props.device}
-            users={status}
+            users={users}
             onResize={this.onBoxResize}
             toggleDim={this.props.toggleDim}
             requestToken={this.requestToken}
