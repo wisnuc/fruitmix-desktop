@@ -54,55 +54,6 @@ class InitWizard extends StateUp(React.Component) {
       userpass: new UsernamePassword.State(),
     }
 
-    this.mir = (type, data, callback) => {
-      request
-        .post(`http://${this.props.address}:3000/system/mir/${type}`)
-        .timeout(30000)
-        .send(data)
-        .set('Accept', 'application/json')
-        .end((err, res) => callback(err, res && res.body))
-    }
-
-    this.creatingNewVolume = () => {
-
-      this.mir('mkfs', {
-        type: 'btrfs',
-        target: this.state.volumeselect.selection,
-        mode: this.state.volumeselect.mode
-      }, (err, body) => {
-
-        if (err) {
-          console.log('mkfs failed', err.message, body && body.message)
-          return this.setState({ dialogText: ['创建磁盘阵列失败', err.message, body && body.message] })
-        }
-
-        console.log(body)
-        this.useExisting(body)
-      })
-    }
-
-    this.useExisting = uuid => {
-      this.mir('init', {
-        target: uuid,
-        username: this.state.userpass.username,
-        password: this.state.userpass.password
-      }, (err, body) => {
-
-        if (err) {
-          console.log('init failed', err.message, body && body.message)
-          return this.setState({ dialogText: ['初始化用户失败', err.message, body && body.message] })
-        }
-
-        this.mir('run', { target: uuid }, (err, body) => {
-
-          if (err) {
-            console.log('run failed', err.message, body && body.message)
-            return this.setState({ dialogText: ['运行新系统失败', err.message, body && body.message] })
-          }
-          setTimeout(() => ipcRenderer.send('login', this.state.userpass.username, this.state.userpass.password), 1000)
-        })
-      })
-    }
   }
 
   handleNext() {
@@ -193,27 +144,66 @@ class InitWizard extends StateUp(React.Component) {
     )
   }
 
-  renderFinishedString() {
-    if (this.props.device.mkfs.isPending())
-      return '正在创建文件系统'
-    else if (this.props.device.mkfs.isRejected())
-      return this.props.device.mkfs.reason().message
-    else if (this.props.device.mkfs.isFinished())
-      return this.props.device.mkfs.value()
-    else
-      return 'unexpected'
+  finishedInfo() {
+
+    let { mkfs, storage, install, boot, users, firstUser, token } = this.props.device
+
+    if (!mkfs || mkfs.isPending())
+      return ['busy', '创建文件系统']
+    else if (mkfs.isRejected())
+      return ['error', '创建文件系统失败']
+    else if (!storage || storage.isPending())
+      return ['busy', '更新文件系统信息']
+    else if (storage.isRejected())
+      return ['error', '更新文件系统信息失败']
+    else if (!install || install.isPending())
+      return ['busy', '安装应用']
+    else if (install.isRejected())
+      return ['error', '安装应用失败']
+    else if (!boot || boot.isPending() 
+      || (boot.isFulfilled() && boot.value().fruitmix === null)
+      || (boot.isFulfilled() && boot.value().fruitmix 
+        && boot.value().fruitmix.state === 'starting'))
+      return ['busy', '启动应用']
+    else if (boot.isRejected() 
+      || (boot.isFulfilled() && boot.value().fruitmix 
+        && boot.value().fruitmix.state === 'exited'))
+      return ['error', '启动应用失败']
+    else if (!firstUser || firstUser.isPending())
+      return ['busy', '创建用户']
+    else if (firstUser.isRejected()) 
+      return ['error', '创建用户失败']
+    else if (!users || users.isPending())
+      return ['busy', '获取最新用户列表']
+    else if (users.isRejected())
+      return ['error', '获取最新用户列表失败']
+    else if (!token || token.isPending())
+      return ['busy', '登录']
+    else if (token.isRejected())
+      return ['error', '登录失败']
+    else 
+      return ['success', '成功']
   }
 
   renderFinished() {
 
     if (!this.state.finished) return null
-    if (this.state.dialogText) return null
+
+    let info = this.finishedInfo()
+
     return (
-      <div style={{width: '100%', height: 100, 
-        display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: 64}}>
-        <CircularProgress />
-        <div style={{marginTop: 16, fontSize: 24, opacity: 0.54}}>
-          { this.renderFinishedString() }
+      <div style={{width: '100%', 
+        display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+        <div style={{flex: '0 0 48px'}}>
+          { info[0] === 'busy' && <CircularProgress /> }
+        </div>
+        <div style={{flex: '0 0 64px', 
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 24, color: 'rgba(0,0,0,0.54)'}}>
+          { info[1] }
+        </div>
+        <div style={{flex: '0 0 48px'}}>
+          
         </div>
       </div>
     )

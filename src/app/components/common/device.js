@@ -35,7 +35,7 @@ class Device extends EventEmitter {
     this.mkfs = null
     this.install = null
     this.firstUser = null
-    this.login = null
+    this.token = null
    
     // immutable 
     this.state = {
@@ -138,10 +138,9 @@ class Device extends EventEmitter {
         .set('Accept', 'application/json')
       break
 
-    // FIXME not tested
     case 'firstUser':
       r = request
-        .post(`http://${this.mdev/address}:3721/init`)
+        .post(`http://${this.mdev.address}:3721/init`)
         .send(args)
         .set('Accept', 'application/json')
       break
@@ -154,9 +153,9 @@ class Device extends EventEmitter {
         .set('Accept', 'application/json')
       break
 
-    case 'login':
+    case 'token':
       r = request
-        .get(`http://${this.address}:3721/token`)
+        .get(`http://${this.mdev.address}:3721/token`)
         .auth(args.uuid, args.password)
         .set('Accept', 'application/json')
       break 
@@ -195,6 +194,20 @@ class Device extends EventEmitter {
     return Promise.promisify(this.refreshSystemState).bind(this)()
   }
 
+  // *  1. mkfs
+  //    2. mkfs failed
+  // *  3. update storage
+  //    4. update storage failed
+  // *  5. install
+  //    6. install failed
+  // *  7. refreshing boot or boot.fruitmix.state === 'starting'
+  //    8. refreshing boot failed or boot.fruitmix.state === 'exited'
+  // *  9. refreshing users 
+  //    10. refreshing users failed
+  // *  11. creating first user
+  //    12. creating first user failed
+  // *  13. retrieving token
+  //    14. retrieving token failed
   async initWizardAsync(args) {
 
     let { type, target, mode, username, password } = args
@@ -216,6 +229,10 @@ class Device extends EventEmitter {
       let fruitmix = this.boot.value().fruitmix
       if (fruitmix) {
         if (fruitmix.state === 'started') {
+
+          // this may be due to worker not started yet
+          await Promise.delay(2000)
+
           console.log('device initWizard: fruitmix started')
           break
         }
@@ -225,18 +242,19 @@ class Device extends EventEmitter {
         console.log('device initWizard: fruitmix starting, waiting...')
       }
       else 
-        console.log('device initWizard: fruitmix is null, legal ???')
+        console.log('device initWizard: fruitmix is null, legal ???') // NO!!!
     }
+
+    await this.requestAsync('firstUser', { username, password })
+
+    let user = this.firstUser.value()
+    console.log('device initWizard: first user created')
 
     await this.requestAsync('users', null) 
     console.log('device initWizard: users refreshed')
 
-    await this.requestAsync('firstUser', { username, password })
-    console.log('device initWizard: first user created')
-
-    let user = this.firstUser.value()
-    await this.requestAsync('login', { uuid: user.uuid, password })
-    console.log('device initWizard: login success')
+    await this.requestAsync('token', { uuid: user.uuid, password })
+    console.log('device initWizard: token retrieved')
   }
 
   initWizard(args) {
