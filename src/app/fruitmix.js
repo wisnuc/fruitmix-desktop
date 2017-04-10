@@ -38,10 +38,10 @@ console.log('theme', global.theme)
 // root component
 const App = () => (
   <MuiThemeProvider muiTheme={theme}>
-    { window.store.getState().maintenance 
-        ? <Maintenance /> 
-        : window.store.getState().login.state === 'LOGGEDIN' 
-          ? <Main showAppBar={window.store.getState().view.showAppBar} /> 
+    { window.store.getState().maintenance
+        ? <Maintenance />
+        : window.store.getState().login.state === 'LOGGEDIN'
+          ? <Main showAppBar={window.store.getState().view.showAppBar} />
           : <Login devices={window.store.getState().mdns}/> }
   </MuiThemeProvider>
 )
@@ -81,13 +81,13 @@ setInterval(() => {
   store.dispatch({ type: 'COMMAND_TICK' })
 }, 1000)
 
-// 
+//
 ipcRenderer.on('command', (e, {id, err, data}) => {
 
   store.dispatch({
     type: 'COMMAND_RETURN',
-    id, err, data 
-  }) 
+    id, err, data
+  })
 })
 
 // document.addEventListener('dragenter', (e) => {

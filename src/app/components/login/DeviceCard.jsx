@@ -119,25 +119,25 @@ class DeviceCard extends React.Component {
     this.onOpen = () => {
       setTimeout (() => {
         this.setState(Object.assign({}, this.state, {initWiard: 'opening'}))
-	this.onBoxResize('VEXPAND')
-	setTimeout (() => {
-	  this.props.onResize('HEXPAND')
-	  setTimeout (() => {
-	    this.setState(Object.assign({}, this.state, {initWiard: 'open'}))
-	  },350)
-	},350)
-      },350)
+				this.onBoxResize('VEXPAND')
+					setTimeout (() => {
+					this.props.onResize('HEXPAND')
+						setTimeout (() => {
+							this.setState(Object.assign({}, this.state, {initWiard: 'open'}))
+						},350)
+					},350)
+				},350)
     }
 
     this.onClose = () => {
 
       setTimeout (() => {
         this.setState(Object.assign({}, this.state, {initWiard: 'closeing'}))
-	this.props.onResize('HSHRINK')
-	setTimeout (() => {
-	  this.onBoxResize('VSHRINK')
-	  this.setState(Object.assign({}, this.state, {initWiard: 'close'}))
-	},350)
+				this.props.onResize('HSHRINK')
+				setTimeout (() => {
+					this.onBoxResize('VSHRINK')
+					this.setState(Object.assign({}, this.state, {initWiard: 'close'}))
+				},350)
       },350)
     }
 
@@ -294,10 +294,10 @@ class DeviceCard extends React.Component {
       <GuideBox
         address={this.props.device.address}
         storage={this.state.storage}
-	initWiard={this.state.initWiard}
-	onOpen={this.onOpen}
-	onClose={this.onClose}
-	onMaintain={this.maintain}
+				initWiard={this.state.initWiard}
+				onOpen={this.onOpen}
+				onClose={this.onClose}
+				onMaintain={this.maintain}
       />
     )
 
@@ -338,13 +338,13 @@ class DeviceCard extends React.Component {
       <div style={this.props.style}>
 
         <ModelNameCard
-        toggle={this.state.toggle}
-        device={this.props.device}
-        backgroundColor={this.props.backgroundColor}
-        onNavPrev={this.props.onNavPrev}
-        onNavNext={this.props.onNavNext}
-      />
-      { this.renderFooter() }
+					toggle={this.state.toggle}
+					device={this.props.device}
+					backgroundColor={this.props.backgroundColor}
+					onNavPrev={this.props.onNavPrev}
+					onNavNext={this.props.onNavNext}
+				/>
+				{ this.renderFooter() }
       </div>
     )
   }
