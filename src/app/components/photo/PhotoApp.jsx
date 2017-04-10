@@ -1,5 +1,6 @@
 import Debug from 'debug'
 import React from 'react'
+import EventListener from 'react-event-listener'
 import { Paper, Menu, MenuItem, Divider, IconButton } from 'material-ui'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import DeviceStorage from 'material-ui/svg-icons/device/storage'
@@ -20,7 +21,7 @@ class PhotoApp extends React.Component {
 
     this.state = {
       login: null,
-      leftNav: true,
+      leftNav: false,
       media: window.store.getState().media.data
     }
 
@@ -68,7 +69,9 @@ class PhotoApp extends React.Component {
     )
 
     this.setPhotoInfo = () => {
+      // debug('start this.setPhotoInfo')
       this.mediaStore = window.store.getState().media.data
+      // debug('start this.setPhotoInfo', this.mediaStore, this.mediaStore.length)
       const leftNav = !!this.state.leftNav
       const photoDates = []
       const photoMapDates = []
@@ -77,7 +80,8 @@ class PhotoApp extends React.Component {
       const width = leftNav ? clientWidth - 210 : clientWidth
       // debug('start this.setPhotoInfo', this.mediaStore, this.mediaStore.length)
       this.mediaStore.sort((prev, next) => Date.parse(formatDate(next.exifDateTime)) - Date.parse(formatDate(prev.exifDateTime)))
-      let MaxItem = Math.floor(width / 156) - 1
+      let MaxItem = Math.floor(width / 216) - 1
+      // debug('MaxItem', MaxItem)
       let lineIndex = 0
       const dateUnknown = []
       this.mediaStore.forEach((item) => {
@@ -89,7 +93,7 @@ class PhotoApp extends React.Component {
         const formatExifDateTime = formatDate(item.exifDateTime)
         const isRepeat = photoDates.findIndex(Item => Item === formatExifDateTime) >= 0
         if (!isRepeat || MaxItem === 0) {
-          MaxItem = Math.floor(width / 156) - 1
+          MaxItem = Math.floor(width / 216) - 1
           photoDates.push(formatExifDateTime)
           photoMapDates.push({
             first: !isRepeat,
@@ -113,7 +117,7 @@ class PhotoApp extends React.Component {
         dateUnknown.forEach((item) => {
           allPhotos.push(item)
           if (MaxItem === 0) {
-            MaxItem = Math.floor(width / 156) - 1
+            MaxItem = Math.floor(width / 216) - 1
             photoMapDates.push({
               first: !isRepeat,
               index: lineIndex,
@@ -134,6 +138,7 @@ class PhotoApp extends React.Component {
       for (let i = 1; i <= 0; i++) {
         photoMapDates.push(...photoMapDates)
       }
+      debug('finish this.setPhotoInfo', allPhotos.length, photoMapDates.length)
       return {
         leftNav,
         allPhotos,
@@ -142,6 +147,11 @@ class PhotoApp extends React.Component {
       }
     }
   }
+
+  handleResize = () => {
+    this.forceUpdate()
+  }
+
   shouldComponentUpdate(nextProps, nextState) {
     if (window.store.getState().media.data !== this.mediaStore) return true
     return (this.state !== nextState)
@@ -151,6 +161,10 @@ class PhotoApp extends React.Component {
     // debug('render photoapp state, props', this.state, this.props)
     return (
       <Paper>
+        <EventListener
+          target="window"
+          onResize={this.handleResize}
+        />
         <this.renderLeftNav />
         <PhotoList
           style={{

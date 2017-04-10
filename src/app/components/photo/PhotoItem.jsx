@@ -60,13 +60,12 @@ export default class PhotoItem extends Component {
     </div>
     )
 
-  renderImage = (props) => {
-    const path = props.path
+  renderImage = () => {
+    const { path } = this.props
     return (
       <Paper
         style={{
           position: 'relative',
-          cursor: 'pointer',
           width: '100%',
           height: '100%',
           overflow: 'hidden',
@@ -74,17 +73,14 @@ export default class PhotoItem extends Component {
           alignItems: 'center',
           justifyContent: 'center'
         }}
-        zDepth={this.state.action || this.state.hover ? 2 : 0}
+        zDepth={this.state.action || this.state.hover ? 4 : 0}
         onTouchTap={() => this.props.lookPhotoDetail(this.props.digest)}
         onMouseEnter={() => this.setState({ hover: true })}
         onMouseLeave={() => this.setState({ hover: false })}
       >
-        { !path ?
-          this.placeHolder :
-          <div>
-            <div style={{ height: '50%', width: 0, display: 'inline-block' }} />
-            <img src={path} alt="img" style={{ objectFit: 'cover' }} />
-          </div>
+        {
+          !path ? this.placeHolder :
+          <img src={path} alt="img" style={{ objectFit: 'cover' }} />
         }
       </Paper>
     )
@@ -93,6 +89,7 @@ export default class PhotoItem extends Component {
   render() {
     const { path, style } = this.props
     // debug('Render PhotoItem this.props', this.props)
+    // return <div>Loading</div>
     return (
       <Paper style={style}>
         <div
@@ -102,8 +99,9 @@ export default class PhotoItem extends Component {
             width: '100%'
           }}
         >
+          {/* (this.state.action || this.state.hover) && <this.renderHover /> */}
           { (this.state.action || this.state.hover) && <this.renderHover /> }
-          { <this.renderImage path={path} /> }
+          { <this.renderImage /> }
         </div>
       </Paper>
     )

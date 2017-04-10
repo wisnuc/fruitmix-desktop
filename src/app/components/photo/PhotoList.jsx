@@ -2,8 +2,8 @@ import React, { Component, PropTypes } from 'react'
 import ReactDOM from 'react-dom'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
-import EventListener from 'react-event-listener'
-import { List } from 'react-virtualized/dist/commonjs/List'
+import { List, WindowScroller } from 'react-virtualized'
+// import List from './List'
 import { Paper, Card, IconButton, CircularProgress } from 'material-ui'
 import Carousel from './Carousel'
 import PhotoDetail from './PhotoDetail'
@@ -58,10 +58,6 @@ export default class PhotoList extends Component {
     return { photos: this.props.photoMapDates }
   }
 
-  handleResize = () => {
-    this.forceUpdate()
-  }
-
   renderList = () => {
     const photoSum = this.props.photoMapDates.length
     if (photoSum === 0) return <div />
@@ -72,9 +68,10 @@ export default class PhotoList extends Component {
     // debug('this.props.photoMapDates', this.props.photoMapDates)
     const rowRenderer = ({ key, index, style, isScrolling }) => {
       const list = this.props.photoMapDates[index]
-      if (isScrolling) return <div />
+      // if (isScrolling) return <div />
         /*
       if (isScrolling) {
+      }
         return (
           <div key={key} style={style}>
             <div style={{ padding: '0 6px 6px 6px' }}>
@@ -90,8 +87,8 @@ export default class PhotoList extends Component {
                 { list.photos.map(() => (
                   <div
                     style={{
-                      width: 150,
-                      height: 158,
+                      width: 210,
+                      height: 210,
                       marginRight: 6,
                       marginBottom: 6,
                       display: 'flex',
@@ -106,7 +103,6 @@ export default class PhotoList extends Component {
               </div>
             </div>
           </div>)
-      }
       */
       return (
         <div
@@ -139,9 +135,14 @@ export default class PhotoList extends Component {
     }
     const AllHeight = []
     this.props.photoMapDates.map(list => (AllHeight.push(
-      164 * Math.ceil(list.photos.length / Math.floor(width / 156)) + !!list.first * 40
+      216 * Math.ceil(list.photos.length / Math.floor(width / 216)) + !!list.first * 40
     )))
     const rowHeight = ({ index }) => AllHeight[index]
+    let rowHeightSum = 0
+    for (let i = 0; i < this.props.photoMapDates.length; i++) {
+      rowHeightSum += rowHeight({ index: i })
+    }
+    // debug('rowHeightSum', rowHeightSum)
     return (
       <List
         height={height}
@@ -159,10 +160,6 @@ export default class PhotoList extends Component {
     if (photos.length === 0) return <div />
     return (
       <Paper style={this.props.style}>
-        <EventListener
-          target="window"
-          onResize={this.handleResize}
-        />
         {/* 图片列表 */}
         <this.renderList />
         {/* 轮播 */
