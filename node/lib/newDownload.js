@@ -46,6 +46,7 @@ const getTransmissionHandle = (args, callback) => {
 
 	db.downloaded.find({}).sort({finishDate: -1}).exec((err, tasks) => {
 		if (err) return console.log(err)
+		tasks.forEach(item => item.uuid = item._id)
 		finishTasks.splice(0, 0, ...tasks)
 		sendMsg()
 	})
