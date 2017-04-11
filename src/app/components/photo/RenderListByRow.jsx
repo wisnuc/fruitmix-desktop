@@ -70,7 +70,6 @@ export default class RenderListByRow extends Component {
     if (check) return check
     return (!nextProps.isScrolling)
     // return (nextProps.photos !== this.props.photos && !nextProps.isScrolling)
-    debug('RenderListByRow update!')
   }
 
   render() {
@@ -91,7 +90,7 @@ export default class RenderListByRow extends Component {
         {/* 照片 */}
         {/* !isScrolling || this.props.photoSum < 100 ? */}
         <div style={style}>
-          { !isScrolling ?
+          { !isScrolling || this.props.photoSum < 100 ?
             photos.map((photo, index) => (
               <PhotoItem
                 ref={`photoItem${index}`}
@@ -111,19 +110,14 @@ export default class RenderListByRow extends Component {
                 isScrolling={isScrolling}
               />
              )) :
-            photos.map((photo, index) => (
+            photos.map(() => (
               <div
                 style={{
                   width: 210,
                   height: 210,
                   marginRight: 6,
                   marginBottom: 6,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: '#eeeeee',
-                  borderRadius: 2,
-                  boxShadow: 'rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px'
+                  backgroundColor: '#eeeeee'
                 }}
               />
             ))

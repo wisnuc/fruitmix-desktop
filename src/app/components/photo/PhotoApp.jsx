@@ -1,6 +1,5 @@
 import Debug from 'debug'
 import React from 'react'
-import EventListener from 'react-event-listener'
 import { Paper, Menu, MenuItem, Divider, IconButton } from 'material-ui'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import DeviceStorage from 'material-ui/svg-icons/device/storage'
@@ -77,7 +76,7 @@ class PhotoApp extends React.Component {
       const photoMapDates = []
       const allPhotos = []
       const clientWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
-      const width = leftNav ? clientWidth - 210 : clientWidth
+      const width = leftNav ? clientWidth - 210 - 60 : clientWidth - 60
       // debug('start this.setPhotoInfo', this.mediaStore, this.mediaStore.length)
       this.mediaStore.sort((prev, next) => Date.parse(formatDate(next.exifDateTime)) - Date.parse(formatDate(prev.exifDateTime)))
       let MaxItem = Math.floor(width / 216) - 1
@@ -138,7 +137,7 @@ class PhotoApp extends React.Component {
       for (let i = 1; i <= 0; i++) {
         photoMapDates.push(...photoMapDates)
       }
-      debug('finish this.setPhotoInfo', allPhotos.length, photoMapDates.length)
+      debug('finish this.setPhotoInfo', allPhotos, photoMapDates)
       return {
         leftNav,
         allPhotos,
@@ -146,10 +145,6 @@ class PhotoApp extends React.Component {
         photoMapDates
       }
     }
-  }
-
-  handleResize = () => {
-    this.forceUpdate()
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -161,10 +156,6 @@ class PhotoApp extends React.Component {
     // debug('render photoapp state, props', this.state, this.props)
     return (
       <Paper>
-        <EventListener
-          target="window"
-          onResize={this.handleResize}
-        />
         <this.renderLeftNav />
         <PhotoList
           style={{

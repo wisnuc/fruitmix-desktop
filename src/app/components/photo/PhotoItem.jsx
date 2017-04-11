@@ -57,6 +57,7 @@ export default class PhotoItem extends Component {
         hoverColor={this.state.action ? '#1E88E5' : '#42A5F5'}
         color={this.state.action ? '#1E88E5' : '#90CAF9'}
       />
+      {debug('hover', this.props)}
     </div>
     )
 
