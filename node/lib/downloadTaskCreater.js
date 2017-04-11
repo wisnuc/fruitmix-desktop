@@ -165,6 +165,7 @@ class TaskManager {
 				}else {
 					if (stat.isFile()) {
 						this.recordInfor('文件下载任务 继续下载文件')
+						this.pause = true
 						this.schedule()
 					}else {
 						this.recordInfor('文件夹下载任务 查找本地已下载文件信息')
@@ -205,6 +206,7 @@ class TaskManager {
 
 	//pause all the task in downloading queue
 	pauseTask() {
+		if (this.pause) return
 		this.pause = true
 		this.downloading.forEach(work => {
 			if (work.type === 'file') work.pause()
@@ -213,6 +215,7 @@ class TaskManager {
 
 	//resume all the task in downloading queue
 	resumeTask() {
+		if (!this.pause) return
 		this.pause = false
 		this.downloading.forEach(work => {
 			if (work.type === 'file') work.resume() 
@@ -258,7 +261,7 @@ class TaskManager {
 			this.state = 'finish'
 			this.finishDate = utils.formatDate()
 			userTasks.splice(userTasks.indexOf(this),1)
-			finishTasks.push(this)
+			finishTasks.unshift(this)
 			clearInterval(this.countSpeed)
 			sendMessage()
 			this.recordInfor(this.name + ' 下载完成')
@@ -711,6 +714,7 @@ ipcMain.on('PAUSE_DOWNLOADING', (e, uuid) => {
 
 ipcMain.on('RESUME_DOWNLOADING', (e, uuid) => {
 	if (!uuid) return
+	console.log('receive')
 	let task = userTasks.find(item => item.uuid === uuid)
 	task.resumeTask()
 })

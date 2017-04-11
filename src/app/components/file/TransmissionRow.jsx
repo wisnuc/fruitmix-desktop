@@ -58,8 +58,9 @@ class UploadRow extends Component {
 	}
 
 
-	selectTaskItem() {
-		this.props.selectTaskItem(this.props.task.uuid, this.isSelected)
+	selectTaskItem(e) {
+		let event = e.nativeEvent
+		this.props.select('running', this.props.task.uuid, this.isSelected, null, event)
 	}
 
 	getStatus(task) {

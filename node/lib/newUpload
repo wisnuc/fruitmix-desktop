@@ -65,6 +65,7 @@ const dragFileHandle = (args) => {
 const getTransmissionHandle = (args, callback) => {
   db.uploaded.find({}).sort({finishDate: -1}).exec((err, docs) => {
     if (err) return console.log(err)
+      docs.forEach(item => item.uuid = item._id)
       finishTasks.splice(0, 0, ...docs)
       sendMsg()
   })

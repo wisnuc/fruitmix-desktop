@@ -56,10 +56,7 @@ class FinishTaskRow extends Component {
 
 	selectFinishItem(e) {
 		let event = e.nativeEvent
-		this.props.selectFinishItem(this.props.task._id, this.isSelected)
-		if (e.button == 2) {
-			this.props.openMenu(event)
-		}
+		this.props.select('finish', this.props.task.uuid, this.isSelected, null, event)
 	}
 }
 

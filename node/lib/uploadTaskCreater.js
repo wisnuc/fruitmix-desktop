@@ -258,7 +258,7 @@ class TaskManager {
 			this.state = 'finish'
 			this.finishDate = utils.formatDate()
 			userTasks.splice(userTasks.indexOf(this),1)
-			finishTasks.push(this)
+			finishTasks.unshift(this)
 			clearInterval(this.countSpeed)
 			sendMessage()
 			this.finishStore()
