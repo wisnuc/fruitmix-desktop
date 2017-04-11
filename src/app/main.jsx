@@ -21,9 +21,16 @@ class Main extends React.Component {
       }
     }, 2000)
 
-    this.state = { selectedDevice: null }
+    this.state = { 
 
-    this.selectDeviceBound = this.selectDevice.bind(this)
+      view: 'login',
+
+      selectedDevice: null,
+
+      nav: this.nav.bind(this),
+      login: this.login.bind(this),
+      selectDevice: this.selectDevice.bind(this)
+    }
   }
 
   selectDevice(mdev) { 
@@ -40,23 +47,29 @@ class Main extends React.Component {
     this.selectedDevice.start()
   }
 
+  nav(view) {
+    this.setState({ view })
+  }
+
+  login() {
+     
+  }
+
   render() {
 
-    if (window.store.getState().maintenance) 
-      return <Maintenance />
+    switch (this.state.view) {
+    case 'login':
+      return <Login mdns={window.store.getState().mdns} {...this.state} />
 
-    else if (window.store.getState().login.state === 'LOGIN')
-      return <LoggedIn showAppBar={window.store.getState().view.showAppBar} /> 
+    case 'maintenance':
+      return <Maintenance {...this.state } />
 
-    else {
-      return (
-        <Login 
-          mdns={window.store.getState().mdns} 
-          {...this.state} 
-          selectDevice={this.selectDeviceBound}
-        />
-      )
-    }
+    case 'user':
+      return <LoggedIn showAppBar={window.store.getState().view.showAppBar} />
+
+    default:
+      return <div>hello world!</div>
+    } 
   }
 }
 

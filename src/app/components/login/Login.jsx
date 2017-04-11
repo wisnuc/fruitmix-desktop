@@ -3,8 +3,7 @@ const debug = Debug('component:Login')
 
 import React, { Component, PureComponent, PropTypes } from 'react'
 import ReactDOM from 'react-dom'
-import { 
-  indigo900, cyan500, cyan900, teal900, lightGreen900, lime900, yellow900 
+import { indigo900, cyan500, cyan900, teal900, lightGreen900, lime900, yellow900 
 } from 'material-ui/styles/colors'
 
 import { FlatButton, CircularProgress } from 'material-ui'
@@ -20,30 +19,32 @@ import InitWizard from './InitStep'
 import { command } from '../../lib/command'
 
 const colorArray = [indigo900, cyan900, teal900, lightGreen900, lime900, yellow900]
+const duration = 300
 
 class Background extends PureComponent {
 
   render() {
     return (
       <div style={{position: 'absolute', width: '100%', height: '100%'}}> 
+
         <img style={{ position: 'absolute', width: '100%', height: '100%', 
-          zIndex: -1000 }} src='../src/assets/images/index/index.jpg' />
+          zIndex: -1000 }} src='../src/assets/images/index/index.jpg' 
+        />
+
         <div style={{ position: 'absolute', width: '100%', height: '100%', 
-
-          backgroundColor: this.props.overlay === 'white'
-            ? 'rgba(255,255,255,1)' 
-            : this.props.overlay === 'dim'
-              ? 'rgba(0,0,0,0.7)'
-              : 'rgba(0,0,0,0)',
-
-          zIndex: -999, transition: 'backgroundColor 300ms'
+          backgroundColor: '#000', opacity: this.props.overlay === 'dim' ? 0.54 : 0,
+          zIndex: -999, transition: `opacity ${duration}ms`
         }}/>
+
+        <div style={{ position: 'absolute', width: '100%', height: '100%', 
+          backgroundColor: '#FFF', opacity: this.props.overlay === 'white' ? 1 : 0, 
+          zIndex: -998, transition: `opacity ${duration}ms`
+        }}/>
+
       </div>
     )
   }
 }
-
-const duration = 300
 
 // pure animation frame !
 class DeviceCard extends PureComponent {
@@ -86,6 +87,9 @@ class Login extends React.Component {
       dim: false,
 
       pin: null, // pin child UI view, prevent auto dispatch, see footer
+      
+      bye: false,
+      byebye: false
     }
 
     this.navPrevBound = this.navPrev.bind(this)
@@ -93,6 +97,11 @@ class Login extends React.Component {
 
     this.toggleDisplayBound = this.toggleDisplay.bind(this)
     this.toggleExpandedBound = this.toggleExpanded.bind(this)
+
+    this.initWizardOnCancelBound = this.initWizardOnCancel.bind(this)
+    this.initWizardOnFailBound = this.initWizardOnFail.bind(this)
+    this.initWizardOnOKBound = this.initWizardOnOK.bind(this)
+
   }
 
   toggleDisplay(done) {
@@ -113,11 +122,12 @@ class Login extends React.Component {
       this.setState({ expanded: true, pin: 'initWizard' })
     } 
     else {
-      this.setState({ hexpand: false })
-      await Promise.delay(duration)
       this.setState({ vexpand: false })
       await Promise.delay(duration)
-      this.setState({ expanded: false, pin: undefined })
+      this.setState({ hexpand: false })
+      await Promise.delay(duration)
+      this.setState({ expanded: false, compact: false, dim: false, pin: undefined })
+      await Promise.delay(duration)
     }
   }
 
@@ -180,6 +190,33 @@ class Login extends React.Component {
     }
   }
 
+  initWizardOnCancel() {
+    this.toggleExpandedAsync().asCallback()
+  }
+
+  initWizardOnFail() {
+    // FIXME
+  }
+
+  async doneAsync(view) {
+
+    this.setState({ bye: true, dim: false, enter: 'bottom' })
+    await Promise.delay(300)
+
+    this.setState({ byebye: true })
+    await Promise.delay(300)
+
+    this.props.nav(view || 'user')
+  }
+
+  done(view) {
+    this.doneAsync(view).asCallback()
+  }
+
+  initWizardOnOK() {
+    this.done()
+  } 
+
   footer() {
 
     const pullError = () => {
@@ -212,7 +249,9 @@ class Login extends React.Component {
             <InitWizard 
               device={this.props.selectedDevice}
               showContent={true}
-              requestClose={this.toggleExpandedBound}
+              onCancel={this.initWizardOnCancelBound}
+              onFail={this.initWizardOnFailBound}
+              onOK={this.initWizardOnOKBound}
             />
           )
         }
@@ -230,22 +269,14 @@ class Login extends React.Component {
     }
 
     if (status === 'ready') {
+
       let users = this.props.selectedDevice.users.value()
-      if (users.length > 0)
-        return (
-          <UserBox
-            style={{width: '100%', transition: 'all 300ms', position:'relative'}}
-            color={this.props.backgroundColor}
-            device={this.props.device}
-            users={users}
-            onResize={this.onBoxResize}
-            toggleDim={this.props.toggleDim}
-            requestToken={this.requestToken}
-            toggleDisplay={this.toggleDisplayBound}
-          />
-        )
-      else 
-        return null // TODO FirstUserBox
+      let style = {width: '100%', transition: 'all 300ms', position:'relative' } 
+
+      return users.length > 0
+        ? <UserBox style={style} device={this.props.selectedDevice} 
+            toggleDisplay={this.toggleDisplayBound} done={this.done.bind(this)} />
+        : null // TODO FirstUserBox
     }
 
     let text, busy, maint, error, uninit
@@ -297,7 +328,7 @@ class Login extends React.Component {
       return (
         <div style={boxStyle}>
           <div>{text}</div>
-          <FlatButton label='维护模式' onTouchTap={this.props.onMaintain} />
+          <FlatButton label='维护模式' onTouchTap={ () => this.done('maintenance') } />
         </div>
       )
     else if (error) 
@@ -335,29 +366,32 @@ class Login extends React.Component {
       cardInnerStyle = {
         backgroundColor: '#FAFAFA',
         width: this.state.hexpand ? 1152 : '100%', 
-        transition: `width ${duration}ms`,
+        transition: `all ${duration}ms`,
       }
-    
-      // if (this.state.vexpand) cardInnerStyle.height = 680
     }
 
     return (
+
       <div style={{width: '100%', height: '100%'}}>
-        <Background overlay={this.state.dim ? 'dim' : 'none'} />
+
+        <Background overlay={this.state.byebye ? 'white' : this.state.dim ? 'dim' : 'none'} />
+
         <div style={{width: '100%', height: '100%', 
           display:'flex', flexDirection: 'column', alignItems: 'center'}}>
 
           <div style={{flexBasis: '160px'}} />
 
           <CrossNav duration={0.35} enter={this.state.enter}>
-            { selectedDevice === null
-              ? <InfoCard {...cardProps} />
-              : <DeviceCard {...cardProps}>
-                  <div style={cardInnerStyle}>
-                    <CardDisplay {...displayProps} />
-                    {this.footer()}
-                  </div>
-                </DeviceCard> }
+            { this.state.bye
+                ? <DeviceCard key='animation-card-dummy' />
+                : selectedDevice === null
+                  ? <InfoCard {...cardProps} />
+                  : <DeviceCard {...cardProps}>
+                      <div id='card inner style' style={cardInnerStyle}>
+                        <CardDisplay {...displayProps} />
+                        {this.footer()}
+                      </div>
+                    </DeviceCard> }
           </CrossNav>
 
         </div>

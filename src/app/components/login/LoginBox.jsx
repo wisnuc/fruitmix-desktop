@@ -13,57 +13,41 @@ class LoginBox extends React.Component {
     super(props)
     this.state = {
       password: '',
-      error: undefined,
-      busy: false,
       success: 0,
     }
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.uuid !== this.props.uuid) {
-      this.setState({
-        password: '',
-        error: undefined
-      })
+    if (nextProps.user !== this.props.user) {
+      this.setState({ password: '' })
+      this.props.device.clearRequest('token')
     }
   }
 
-  onInput (e) {
+  onInput(e) {
     let value = e.target.value
-    this.setState({ password: value, error: undefined })
+    this.setState({ password: value })
+    this.props.device.clearRequest('token')
   }
 
   onKeyDown (e) {
-    if (e.which === 13 && this.state.password.length) {
-      this.login()
-    }
+    if (e.which === 13 && this.state.password.length) this.login()
   }
 
   login() {
 
-    let uuid = this.props.uuid
-    let username = this.props.username
+    let { uuid, username } = this.props.user
     let password = this.state.password
-
-    this.props.requestToken(uuid, password, (err, res) => {
-
-      if (err)
-        this.setState({ busy: false, error: err.message })
-      else {
-        setTimeout(() => {
-          this.setState({ busy: false, success: 1 })
-          setTimeout(() => {
-            this.setState({ success: 2 })
-            setTimeout(() => this.props.success(uuid, res.body.token), 900)
-          }, 150)
-        }, 150)
-      }
-    })
-
-    this.setState({ busy: true })
+    this.props.device.request('token', { uuid, password }, err => err || this.props.done())
   }
 
   render() {
+
+    let { token } = this.props.device
+    let busy = token && token.isPending()
+    let error= (token && token.isRejected()) ? token.reason().message : null
+    let success = token && token.isFulfilled()
+
     // 24 + 24 + 36 + 20 + 48 + 20 + 36 = ???
     return (
       <div
@@ -95,43 +79,39 @@ class LoginBox extends React.Component {
               overflow: 'hidden',
               textOverflow: 'ellipsis',
             }}>
-              {this.props.username}
+              {this.props.user.username}
             </div>
             <div style={{flex: '0 0 20px'}}/>
             <div style={{width: '100%', flex: '0 0 48px'}}>
-              { this.state.success === 0
-                ? <TextField
-                    key={this.props.uuid}
-                    fullWidth={true}
-                    hintText='请输入密码'
-                    errorText={this.state.error}
-                    type='password'
-                    disabled={this.state.busy}
-                    ref={input => { input && input.focus() }}
-                    onChange={this.onInput.bind(this)}
-                    onKeyDown={this.onKeyDown.bind(this)}
-                  />
-                : this.state.success === 1
-                ? <div />
-                : <div style={{width: '100%', display:'flex', alignItems:'center', justifyContent: 'center'}}>
-                    <Checkmark color={this.props.muiTheme.palette.primary1Color} delay={300} />
-                  </div>
-              }
+              { !success &&
+                <TextField
+                  key={this.props.user.uuid}
+                  fullWidth={true}
+                  hintText='请输入密码'
+                  errorText={error}
+                  type='password'
+                  disabled={busy}
+                  ref={input => { input && input.focus() }}
+                  onChange={this.onInput.bind(this)}
+                  onKeyDown={this.onKeyDown.bind(this)}
+                /> }
             </div>
 
-						{console.log('@@@@@@@@@@@@@@@', this.props.cancel)}
-            <div style={{width: '100%', flex: '0 0 36px', display: 'flex',position: 'absolute',bottom: 16,right: 40}}>
+            <div style={{width: '100%', flex: '0 0 36px', 
+              display: 'flex', position: 'absolute', bottom: 16, right: 40}}>
+
               <div style={{flexGrow: 1}} />
-              { this.state.success === 0 &&
+              { !success &&
               <FlatButton label='取消' primary={true}
-                disabled={this.state.busy}
+                disabled={busy}
                 onTouchTap={this.props.cancel}
               /> }
-              { this.state.success === 0 &&
+              { !success &&
               <FlatButton style={{marginRight: -16}} label='确认' primary={true}
-                disabled={this.state.password.length === 0 || this.state.busy}
+                disabled={this.state.password.length === 0 || busy}
                 onTouchTap={this.login.bind(this)}
               /> }
+
             </div>
           </div>
         )}

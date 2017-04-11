@@ -45,6 +45,7 @@ class Device extends EventEmitter {
 
       // methods
       request: this.request.bind(this),
+      clearRequest: this.clearRequest.bind(this),
       initWizard: this.initWizard.bind(this),
       systemStatus: this.systemStatus.bind(this),
     }

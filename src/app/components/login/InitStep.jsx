@@ -188,7 +188,7 @@ class InitWizard extends StateUp(React.Component) {
 
     if (!this.state.finished) return null
 
-    let info = this.finishedInfo()
+    let info = this.finishedInfo() 
 
     return (
       <div style={{width: '100%', 
@@ -203,24 +203,42 @@ class InitWizard extends StateUp(React.Component) {
         </div>
         <div style={{flex: '0 0 48px'}}>
           { info[0] === 'success' 
-              ? <FlatButton label='进入系统' onTouchTap={this.props.requestClose} />          
+              ? <FlatButton label='进入系统' onTouchTap={this.props.onOK} />          
               : <FlatButton label='退出' /> }
         </div>
       </div>
     )
   }
 
+  renderBottomButton() {
+    
+    let label, action
+
+    if (this.state.finished && this.finishedInfo()[0] === 'error') {
+      label = '退出'
+      action = this.props.onFail
+    }
+    else if (!this.state.finished) {
+      label = '放弃'
+      action = this.props.onCancel
+    }
+
+    return (
+      <div style={{width: '100%', height: 64, position: 'absolute', bottom: 0, 
+        display: 'flex', alignItems: 'center', justifyContent: 'flex-end'}}>
+        { label && <FlatButton label={label} primary={true} onTouchTap={action}/> }
+      </div>
+    )
+  }
+
   render() {
 
-    const {finished, stepIndex} = this.state;
+    const {finished, stepIndex} = this.state
 
     const titleStyle = {
-      marginTop: 34, 
-      marginBottom: 12, 
+      margin: '34px 64px 12px 64px',
       fontSize: 34, 
-      color: '#000', 
-      opacity: this.props.showContent ? 0.54 : 0, 
-      transition:'opacity 150ms'
+      color: 'rgba(0,0,0,0.54)', 
     }
 
     const storage = 
@@ -229,17 +247,10 @@ class InitWizard extends StateUp(React.Component) {
         : null
 
     return (
-      <div style={{
-        width: '100%', 
-        height: 640,
-        backgroundColor: '#FAFAFA', 
-        boxSizing: 'border-box', 
-        paddingLeft: 64, 
-        paddingRight: 64, 
-        overflowY: 'auto', 
-      }}>
+      <div style={{ width: '100%', height: 640, backgroundColor: '#FAFAFA', position: 'relative', overflowY: 'auto' }}>
+
         <div style={titleStyle}>初始化向导</div>
-        <div style={{opacity: this.props.showContent ? 1 : 0, transition:'opacity 150ms'}}>
+        <div style={{marginLeft: 64, marginRight: 64}}>
           <Stepper activeStep={stepIndex} orientation="vertical">
             <Step>
               <StepLabel>创建磁盘卷</StepLabel>
@@ -266,6 +277,7 @@ class InitWizard extends StateUp(React.Component) {
           </Stepper>
           { this.renderFinished() }
         </div>
+        { this.renderBottomButton() }
       </div>
     )
   }
