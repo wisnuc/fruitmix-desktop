@@ -53,7 +53,6 @@ class InitWizard extends StateUp(React.Component) {
       volumeselect: new CreatingVolumeDiskSelection1.State(),
       userpass: new UsernamePassword.State(),
     }
-
   }
 
   handleNext() {
@@ -203,7 +202,9 @@ class InitWizard extends StateUp(React.Component) {
           { info[1] }
         </div>
         <div style={{flex: '0 0 48px'}}>
-          
+          { info[0] === 'success' 
+              ? <FlatButton label='进入系统' onTouchTap={this.props.requestClose} />          
+              : <FlatButton label='退出' /> }
         </div>
       </div>
     )
@@ -230,7 +231,7 @@ class InitWizard extends StateUp(React.Component) {
     return (
       <div style={{
         width: '100%', 
-        height: '100%',
+        height: 640,
         backgroundColor: '#FAFAFA', 
         boxSizing: 'border-box', 
         paddingLeft: 64, 
@@ -265,29 +266,6 @@ class InitWizard extends StateUp(React.Component) {
           </Stepper>
           { this.renderFinished() }
         </div>
-        <Dialog
-          contentStyle={{width: 560, height: 480}}
-          title='遇到错误'
-          actions={[
-            <FlatButton label='进入维护模式' onTouchTap={this.props.onMaintain} />,
-            <FlatButton
-              label='重置向导'
-              onTouchTap={() => {
-                this.setState({
-                  finished: false,
-                  stepIndex: 0,
-                  volumeselect: new CreatingVolumeDiskSelection1.State(),
-                  userpass: new UsernamePassword.State(),
-                  dialogText: undefined
-                })
-              }}
-            />
-          ]}
-          modal={true}
-          open={!!this.state.dialogText}
-        >
-          { this.state.dialogText && this.state.dialogText.map(line => <div>{line}</div>) }
-        </Dialog>
       </div>
     )
   }

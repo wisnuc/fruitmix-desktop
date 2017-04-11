@@ -43,6 +43,8 @@ class Background extends PureComponent {
   }
 }
 
+const duration = 300
+
 // pure animation frame !
 class DeviceCard extends PureComponent {
 
@@ -75,6 +77,7 @@ class Login extends React.Component {
     super(props)
 
     this.state = { 
+
       enter: 'bottom', 
       expanded: false,
       vexpand: false,
@@ -94,7 +97,7 @@ class Login extends React.Component {
 
   toggleDisplay(done) {
     this.setState({ compact: !this.state.compact, dim: !this.state.dim }) 
-    if (done) setTimeout(() => done(), 300) 
+    if (done) setTimeout(() => done(), duration) 
   }
 
   async toggleExpandedAsync() {
@@ -104,16 +107,16 @@ class Login extends React.Component {
 
     if (!expanded) {
       this.setState({ vexpand: true, compact: true, dim: true })  
-      await Promise.delay(300)
+      await Promise.delay(duration)
       this.setState({ hexpand: true }) 
-      await Promise.delay(300)
+      await Promise.delay(duration)
       this.setState({ expanded: true, pin: 'initWizard' })
     } 
     else {
       this.setState({ hexpand: false })
-      await Promise.delay(300)
+      await Promise.delay(duration)
       this.setState({ vexpand: false })
-      await Promise.delay(300)
+      await Promise.delay(duration)
       this.setState({ expanded: false, pin: undefined })
     }
   }
@@ -332,7 +335,7 @@ class Login extends React.Component {
       cardInnerStyle = {
         backgroundColor: '#FAFAFA',
         width: this.state.hexpand ? 1152 : '100%', 
-        transition: 'width 300ms',
+        transition: `width ${duration}ms`,
       }
     
       // if (this.state.vexpand) cardInnerStyle.height = 680

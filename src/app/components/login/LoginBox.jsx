@@ -116,7 +116,7 @@ class LoginBox extends React.Component {
                 : <div style={{width: '100%', display:'flex', alignItems:'center', justifyContent: 'center'}}>
                     <Checkmark color={this.props.muiTheme.palette.primary1Color} delay={300} />
                   </div>
-}
+              }
             </div>
 
 						{console.log('@@@@@@@@@@@@@@@', this.props.cancel)}
