@@ -2,9 +2,10 @@ import React, { Component, PropTypes } from 'react'
 import ReactDOM from 'react-dom'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
+import EventListener from 'react-event-listener'
 import { List, WindowScroller } from 'react-virtualized'
 // import List from './List'
-import { Paper, Card, IconButton, CircularProgress } from 'material-ui'
+import { Paper, Card, IconButton, CircularProgress, FlatButton } from 'material-ui'
 import Carousel from './Carousel'
 import PhotoDetail from './PhotoDetail'
 import { formatDate } from '../../utils/datetime'
@@ -22,7 +23,9 @@ export default class PhotoList extends Component {
 
     this.state = {
       carouselItems: [],
-      openDetail: false
+      openDetail: false,
+      hover: false,
+      scrollToIndex: 0
     }
 
     this.addListToSelection = (path) => {
@@ -53,6 +56,7 @@ export default class PhotoList extends Component {
       this.seqIndex = this.props.allPhotos.findIndex(item => item.digest === digest)
       this.setState({ openDetail: true })
     }
+    this.setScrollTop
   }
   getChildContext() {
     return { photos: this.props.photoMapDates }
@@ -150,28 +154,76 @@ export default class PhotoList extends Component {
         rowCount={this.props.photoMapDates.length}
         rowHeight={rowHeight}
         rowRenderer={rowRenderer}
+        scrollToIndex={this.state.scrollToIndex}
+        onScroll={() => this.setState({ hover: true })}
+        overscanRowCount={2}
       />
     )
   }
 
+  componentDidUpdate() {
+  }
+
+  handleResize = () => {
+    this.forceUpdate()
+  }
+
+  renderPicker = () => (
+    <div
+      style={{
+        position: 'fixed',
+        width: 80,
+        height: '100%',
+        backgroundColor: this.state.hover ? 'white' : 'white',
+        right: 26
+      }}
+      onMouseEnter={() => this.setState({ hover: true })}
+      onMouseLeave={() => this.setState({ hover: false })}
+    >
+      <FlatButton
+        label="Top"
+        style={{
+          display: this.state.hover ? '' : 'none',
+          position: 'absolute',
+          width: 80,
+          top: 76
+        }}
+        onTouchTap={() => this.setState({ scrollToIndex: 0 })}
+      />
+      <FlatButton
+        label="Bottom"
+        style={{
+          display: this.state.hover ? '' : 'none',
+          position: 'absolute',
+          width: 80,
+          bottom: 86
+        }}
+        onTouchTap={() => this.setState({ scrollToIndex: (this.props.photoMapDates.length - 1) })}
+      />
+    </div>
+    )
   render() {
     // debug('render PhotoList, this.props', this.props)
     const photos = this.props.photoMapDates
     if (photos.length === 0) return <div />
     return (
       <Paper style={this.props.style}>
+        <EventListener
+          target="window"
+          onResize={this.handleResize}
+        />
         {/* 图片列表 */}
         <this.renderList />
         {/* 轮播 */
-          this.state.carouselItems.length ?
-            <Paper style={{ position: 'fixed', bottom: 15, width: '75%' }} >
-              <Carousel
-                ClearAll={() => this.setState({ carouselItems: [] })}
-                removeListToSelection={this.removeListToSelection}
-                style={{ backgroundColor: '#fff', height: 180, borderRadius: 4, boxShadow: '0 0 10px rgba(0,0,0,.3)' }}
-                items={this.state.carouselItems}
-              />
-            </Paper> : <div />
+            this.state.carouselItems.length ?
+              <Paper style={{ position: 'fixed', bottom: 15, width: '75%' }} >
+                <Carousel
+                  ClearAll={() => this.setState({ carouselItems: [] })}
+                  removeListToSelection={this.removeListToSelection}
+                  style={{ backgroundColor: '#fff', height: 180, borderRadius: 4, boxShadow: '0 0 10px rgba(0,0,0,.3)' }}
+                  items={this.state.carouselItems}
+                />
+              </Paper> : <div />
         }
         {/* 查看大图 */
           this.state.openDetail ?
@@ -188,6 +240,7 @@ export default class PhotoList extends Component {
               seqIndex={this.seqIndex}
             /> : <div />
         }
+        { this.renderPicker() }
       </Paper>
     )
   }
