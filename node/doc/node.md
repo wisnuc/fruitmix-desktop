@@ -1,4 +1,61 @@
-# node功能文档
+# node
+
+Files under  `node` directory run in the main process of Electron.
+
+`doc` directory hosts document files.
+
+`lib` directory hosts all function modules.
+
+There are redux reducers inside `reducers` directory. Most of them are used for historical reason. They are going to be removed or minimized.
+
+主要逻辑
+
+1. 启动mdns，初始化所有的config，从前端控制更新
+2. login从前端发起，node暂不关心auto login逻辑
+3. 有files和upload/download模块为前端提供弹药
+4. 暂时只有imagecache和thumbnail为前端提供弹药，但未来可能需要把metadata逻辑一起放在node一侧，因为可以屏蔽远程逻辑
+5. 考虑登出该如何处理
+
+## Modules
+
+`adapter` automatically pass a subset of node-side redux store to browser window. This is going to be examined and all unnecessary logic should be removed. **需检查决定如何处理**
+
+`command` implements command pattern for browser / main rpc (remote procedure call) based on Electron / node IPC. **遥远的未来重构**
+
+Currently, `config` deals with some path related issue. This should be changed by a strict definition of global config, user config, as well as a uniform interface for retrieving file paths. **需要写**
+
+`files` implements server-side file API encapsulation. It is necessary mainly for two reasons:
+
+1. providing a unified interface to browser for both local access and remote access.
+2. performance optimization.
+
+This module is going to be heavily rewritten and refactoring. **需要仔细设计**
+
+`mdns` is refactored and greatly simplified comparing to previous version. However, whether an ip address scanning is required or not is undetermined. **基本上OK**
+
+`server` module encapsulates all (fruitmix) server apis. **修复broken**
+
+`system` module encapsulates certain system api for mkfs, installing, initialization etc. No it is deprecated. Those functionality is implemented in browser. **计划删除**
+
+`misc` implements a few ipc without using any command. It is going to be changed. **考虑ipc模块**
+
+`util` has some utility and algorithm functions. **暂时不管了**
+
+`window` is responsible for creating browser windows. **Bug Fix**
+
+`reducers` and `store` **和adapter一样处理**
+
+
+
+## redux store##
+
+
+
+
+
+
+
+
 
 * ## app.js
 
@@ -9,7 +66,7 @@
 
 
 * ## lib
- ### 1. window.js 可以通过调用 *electron* 的方法创建新的窗口，并向外部提供 *initMainWindow* 和 *getMainWindow* 两个组件。
+### 1. window.js 可以通过调用 *electron* 的方法创建新的窗口，并向外部提供 *initMainWindow* 和 *getMainWindow* 两个组件。
  ### 2. command.js 通过 *electron* 中的 *ipcMain.on()* 的方法来接收处理前端传来的参数 *(evd , ip ,op)* ，并向外提供一个 *registerCommandHandlers* 组件。
  ### 3. adapter.js 在 *store* 更新后被触发，将更新后的新的store抛到前端。
  ### 4. download.js 提供下载功能。
@@ -62,7 +119,7 @@
  ### 20. async.js (已不用)
 
 
- * ## server
+*  ## server
 
   1) action 提供数据结构
   2）reducers 用来处理action改变state

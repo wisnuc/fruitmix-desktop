@@ -24,8 +24,7 @@ import download from './lib/newDownload'
 import { initMainWindow, getMainWindow } from './lib/window'
 import { initTestWindow } from './lib/testHook'
 
-import mdns2 from './lib/mdns2'
-// import mdns from './lib/mdns'
+import mdns from './lib/mdns'
 import misc from './lib/misc'
 
 global.entryFileDir = __dirname

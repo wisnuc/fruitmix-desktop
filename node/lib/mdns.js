@@ -1,23 +1,40 @@
-var EventEmitter = require('events')
-var request = require('request')
-var mdns = require('mdns-js')
-var validator = require('validator')
-var request = require('superagent')
-var UUID = require('node-uuid')
-var debug = require('debug')('mdns')
+import mdns from 'mdns-js'
+import Debug from 'debug'
+import { ipcMain } from 'electron'
 
+const debug = Debug('lib:mdns2')
 mdns.excludeInterface('0.0.0.0')
+
+/** mdns data example
+{ addresses: [ '192.168.5.60' ],
+  query: [ '_http._tcp.local' ],
+  type: 
+   [ { name: 'http',
+       protocol: 'tcp',
+       subtypes: [],
+       description: 'Web Site' },
+     { name: 'http',
+       protocol: 'tcp',
+       subtypes: [],
+       description: 'Web Site' } ],
+  txt: [ '', '' ],
+  port: 3000,
+  fullname: 'WISNUC AppStation #2._http._tcp.local',
+  host: 'wisnuc-generic-04AF2BFC.local',
+  interfaceIndex: 0,
+  networkInterface: 'enp14s0' }
+**/
 
 // return null if not wisnuc device
 // otherwise return { model, serial }
-const parseHostname = (hostname) => {
+const parseHostname = hostname => {
 
   if (typeof hostname !== 'string') return null
 
-    var split = hostname.split('.')
+  var split = hostname.split('.')
   if (split.length !== 2) return null
 
-    var name = split[0]
+  var name = split[0]
   var domain = split[1]
 
   split = split[0].split('-')
@@ -33,307 +50,39 @@ const parseHostname = (hostname) => {
   }
 }
 
-{/*class Browser extends EventEmitter {
-  
-  constructor(){
-    super()
-    this.restart()
-  }
+let browser = null
 
-  restart(){
-    
-    this.uuid = UUID.v4()
-    this.devices = []
-    this.browser.on('ready', () => this.browser.discover())
-    this.browser.on('update', data => {
-      //....
-      //this.devices.push(xxx) dup!!!
-      this.emit('update', this.uuid, this.devices)
-    })
-  }
-}
+ipcMain.on('MDNS_SCAN', (event, session) => {
 
-let browser = new Browser()
-browser.on('updata', (uuid, devices) => {
-  getMainWindow().webContents.send('MDNS_UPDATE', {uuid, devices})
-}
+  console.log('new mdns scan session, ' + session)
 
-ipcMian.on('update', (uuid, devices) => browser.restart())
+  if (browser) browser.stop()
 
-const restart_handler = (args, callback) => {
-  browser.restart()
-}
+  let b = mdns.createBrowser(mdns.tcp('http'))
+  b.on('ready', () => b.discover())
+  b.on('update', data => {
 
-register('MDNS_RESTART',)*/}
-
-class StationBrowser extends EventEmitter {
-
-  constructor(browser) {
-
-    super()
-    browser.on('update', data => {
-      // console.log(data)
-
-      debug('mdns update', data)
-
-      if (!Array.isArray(data.addresses) || typeof data.host !== 'string')  
-        return
-
-      debug('mdns addresses', data.addresses)
-
-{/*      if (data.addresses.includes('192.168.5.65')) {
-        // 801L5C00748
-        let mock = { 
-          name: 'wisnuc-ws215i-801L5C00748',
-          domain: 'local',
-          host: 'wisnuc-ws215i-801L5C00748.local',
-          model: 'ws215i',
-          serial: '801L5C00748',
-          address: '192.168.5.65' 
-        }
-
-        return this.updateStation(mock)
-      }
-*/}
-      // check if ws host
-      var parsed = parseHostname(data.host) 
-      if (!parsed) {
-        debug('parse host name failed', data.host)
-        return 
-      }
-
-      // set up hostname => ip address map
-      data.addresses
-      .filter(addr => validator.isIP(addr, 4))
-      .forEach(addr => this.map.set(data.host, addr))
-
-      // 
-      let obj = Object.assign(parsed, {
-        address: data.addresses[0]
-      })
-
-
-      debug('new station found', obj)
-      this.updateStation(obj)
-    }) 
-
-    browser.on('ready', function () {
-      console.log('mdns browser start discovering')
-      browser.discover() 
-    })
-
-    this.browser = browser
-    this.map = new Map()    
-    this.stations = []
-
-    this.interval = -1
-  }  
-
-  updateStation (obj) {
-
-    var index = this.stations.findIndex(stn => stn.name === obj.name)   
-    if (index === -1) {
-      this.stations = [...this.stations, obj]
-      this.signal(null, obj)
-
-      // TODO
-      if (this.interval === -1) {
-        this.interval = setInterval(() => {
-          this.watch()
-        }, 3000)
-      }
-    }
-    else {
-      var prev = this.stations[index]
-      var curr = Object.assign({}, prev, obj)
-      this.stations = [...this.stations.slice(0, index), curr, 
-      ...this.stations.slice(index + 1)]
-      this.signal(prev, curr)
-
-      if (prev.appifi && curr.appifi && 
-        !!prev.appifi.docker === !!curr.appifi.docker &&
-        prev.fruitmix === curr.fruitmix)
-        return
-
-      var copy = [...this.stations]
-
-      debug('station update', copy)
-      Object.freeze(copy)
-      this.emit('stationUpdate', copy)
-    }
-  }
-
-  signal (prev, curr) {
-    // when new station created
-    if (prev === null) {
-
-      request
-      .get(`${curr.address}:3000/server`)
-      .set('Accept', 'application/json')
-      .end((err, res) => {
-
-        if (err) 
-          return this.updateStation({ name: curr.name, appifi: 'ERROR' })
-
-        if (!res.ok)
-          return this.updateStation({ name: curr.name, appifi: 'ERROR' }) 
-
-        this.getBlockMessage(curr.address,(data) => {
-            // check appifi.docker object or null
-            this.updateStation({ name: curr.name, appifi: res.body, mir:data.mir, boot:data.boot })
-          })
-      })
-
+    if (!Array.isArray(data.addresses) 
+      || data.addresses.length === 0
+      || typeof data.host !== 'string')  
       return
-    }  
-    if (curr.appifi == 'ERROR') {
-      return
+
+    var parsed = parseHostname(data.host) 
+    if (parsed) {
+      let message = Object.assign(parsed, { address: data.addresses[0] })
+
+      console.log('mdns send message', message)
+
+      event.sender.send('MDNS_UPDATE', session, message)
     }
-    // if (curr.boot == undefined) {
-    //   return
-    // }
-    // when station.appifi updated, AND docker started
-    if (prev.appifi === undefined &&
-      typeof curr.appifi === 'object') {
+  })
 
-      request
-        .get(`${curr.address}:3721/login`) 
-        .set('Accept', 'application/json')
-        .end((err, res) => {
+  browser = b
+})
 
-          if (err || !res.ok)
-            return this.updateStation({name: curr.name, fruitmix: 'ERROR'})
+console.log('node/lib/mdns2 loaded')
 
-          let list = res.body
-          var colorArr = ['#FFC107','#8BC34C','#00bcd4']
-          list.forEach(item => {
-            item.checked = false
-            let randomNumber = Math.random()
-            if (randomNumber< 0.33) {
-              item.color = colorArr[0]
-            }else if (randomNumber < 0.66) {
-              item.color = colorArr[1]
-            }else {
-              item.color = colorArr[2]
-            }
-          })
-          this.updateStation({
-            name: curr.name, 
-            fruitmix: list.length ? 'INITIALIZED' : 'INITIAL',
-            users:list.length?list:[]
-          })
-        })
+export default browser
 
-      return
-    }
-  }
 
-  getBlockMessage(ip,callback) {
-    let mir = null
-    let boot = null
-    request
-    .get(`${ip}:3000/system/storage`)
-    .set('Accept', 'application/json')
-    .end((err, res) => {
-      if (!err && res.ok) {
-        mir = res.body
-      }else {
-        mir = null
-      }
-      request
-      .get(`${ip}:3000/system/boot`)
-      .set('Accept', 'application/json')
-      .end((err, b) => {
-        if (!err && res.ok) {
-          boot = b.body
-        }else {
-          boot = null
-        }
-        callback({mir,boot})
-      })
-    })
-  }
 
-// EHOSTUNREACH
-// ECONNRESET
-// ECONNREFUSED
-
-watch () {
-    // console.log('watch...')
-
-    this.stations.forEach(stn => {
-
-      let appifi, fruitmix, mir, boot, list
-      if (stn.appifi) {
-
-        request
-        .get(`${stn.address}:3000/server`)
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-
-          if (err || !res.ok) 
-            return this.updateStation({ name: stn.name, appifi: 'ERROR' })
-
-          appifi = res.body
-            // if (!appifi.docker) {
-            //   return this.updateStation({ name: stn.name, appifi, fruitmix: undefined })  
-            // }
-            this.getBlockMessage(stn.address,(data) => {
-
-              mir = data.mir
-              boot = data.boot
-
-              request
-              .get(`${stn.address}:3721/login`) 
-              .set('Accept', 'application/json')
-              .end((err, res) => {
-
-                if (err || !res.ok)
-                  return this.updateStation({name: stn.name, appifi, fruitmix: 'ERROR', mir, boot})
-
-                list = res.body
-                if (!stn.users) {
-                  var colorArr = ['#FFC107','#8BC34C','#00bcd4']
-                  list.forEach(item => {
-                    item.checked = false
-                    let randomNumber = Math.random()
-                    if (randomNumber< 0.33) {
-                      item.color = colorArr[0]
-                    }else if (randomNumber < 0.66) {
-                      item.color = colorArr[1]
-                    }else {
-                      item.color = colorArr[2]
-                    }
-                  })
-                }else {
-                  list = stn.users
-                }
-                this.updateStation({
-                  name: stn.name, 
-                  appifi,
-                  fruitmix: list.length ? 'INITIALIZED' : 'INITIAL',
-                  users:list,
-                  mir:mir,
-                  boot:boot
-                })
-              })
-            })
-          })
-      } 
-    })
-  }
-
-} // END OF CLASS
-
-const createStationBrowser = () => {
-
-  var browser = mdns.createBrowser(mdns.tcp('http'))
-  return new StationBrowser(browser)
-}
-
-module.exports = createStationBrowser
-
-// var x = createStationBrowser().on('stationUpdate', data => {
-//   console.log(new Date())
-//   console.log(data)
-// })
