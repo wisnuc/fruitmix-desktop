@@ -322,6 +322,22 @@ class TaskManager {
 			console.log(data)
 		})
 	}
+
+	//remove task from taskList && nedb 
+	delete(callback) {
+		if (this.state === 'finish') {
+			this.recordInfor('开始删除已完成传输任务...')
+			callback('running', this.uuid)
+		}else {
+			this.recordInfor('开始删除正在下载任务...')
+			console.log(this.downloading)
+			this.pauseTask()
+			//clear cache to fixed!!
+			callback('running', this.uuid)
+		}
+	}
+
+	
 }
 
 //visit tree from serve && check the seek of downloading files
@@ -644,13 +660,14 @@ class DownloadFileSTM extends STM {
 		sendMsg()
 		if (this.handle) this.handle.abort()
 		this.wrapper.recordInfor(this.wrapper.name + '暂停了')
+		removeOutOfRunningQueue(this)
 	}
 
 	resume() {
 		if (this.wrapper.stateName !== 'pause') return
 		this.wrapper.stateName = 'running'
 		sendMsg()
-		this.downloading()
+		this.beginDownload()
 		this.wrapper.recordInfor(this.wrapper.name + '继续下载')
 	}
 }
@@ -706,7 +723,6 @@ const removeOutOfRunningQueue = (task) => {
 }
 
 ipcMain.on('PAUSE_DOWNLOADING', (e, uuid) => {
-	console.log('PAUSE_DOWNLOADING...', uuid)
 	if (!uuid) return
 	let task = userTasks.find(item => item.uuid === uuid)
 	if (task) {task.pauseTask()}

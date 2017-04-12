@@ -52,6 +52,37 @@ const getTransmissionHandle = (args, callback) => {
 	})
 }
 
+const deleteDownloadingHandle = (e, tasks) => {
+	tasks.forEach(item => {
+		let obj = userTasks.find(task => task.uuid === item.uuid)
+		if (obj) obj.delete(cleanRecord)
+	})
+}
+
+const deleteDownloadedHandle = (e, tasks) => {
+	tasks.forEach(item => {
+		let obj = finishTasks.find(task => task.uuid === item.uuid)
+		if (obj) cleanRecord('finish', item.uuid)
+	})
+}
+
+const cleanRecord = (type, uuid) => {
+	let list = type === 'finish'? finishTasks: userTasks
+	let d = type === 'finish'?db.downloaded:db.downloading
+	let index = list.findIndex(item => item.uuid === uuid)
+	if (index === -1) return console.log('任务没有在任务列表中')
+	else {
+		console.log('删除列表中任务... 第' + index + '个 共' + list.length + '个'  )
+		list.splice(index, 1)
+		console.log('列表中任务删除完成 剩余' + list.length + '个' )
+		d.remove({_id: uuid}, {}, (err, doc) => {
+			if(err) return console.log('删除数据库记录出错')
+			console.log('删除数据库记录成功')
+			sendMsg()
+		})
+	}	
+}
+
 const uploadCommandMap = new Map([
   ['DOWNLOAD', downloadHandle],
   ['CLEAN_DOWNLOAD_RECORD', cleanRecordHandle]
@@ -60,5 +91,8 @@ const uploadCommandMap = new Map([
 registerCommandHandlers(uploadCommandMap)
 
 ipcMain.on('GET_TRANSMISSION', getTransmissionHandle)
+ipcMain.on('DELATE_DOWNLOADING', deleteDownloadingHandle)
+ipcMain.on('DELETE_DOWNLOADED', deleteDownloadedHandle)
+
 
 export { userTasks, finishTasks }
