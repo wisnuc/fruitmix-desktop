@@ -14,7 +14,7 @@ class Config {
   }
 
   getConfig() {
-    return config
+    return this.config
   } 
 
   setConfig(props) {
@@ -28,6 +28,10 @@ class UserConfig extends Config {
   constructor(config, persistence, userUUID) {
     super(config, persistence)
     this.userUUID = userUUID
+  }
+
+  getConfig() {
+    return Object.assign({}, this.config, { userUUID: this.userUUID })
   }
 }
 
@@ -187,7 +191,7 @@ class Configuration {
 
   getConfiguration() {
     return {
-      global: this.globalConfig,
+      global: this.globalConfig.getConfig(),
       users: this.userConfigs.map(uc => uc.getConfig())
     }
   }
