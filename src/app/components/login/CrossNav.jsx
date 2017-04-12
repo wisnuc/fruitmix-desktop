@@ -33,7 +33,7 @@ class CrossNav extends React.Component {
       TweenMax.from(el, duration, {
         delay: duration,
         opacity: 0,
-        top: 100,
+        top: 60,
         onComplete: () => callback()
       })
     }
@@ -41,7 +41,7 @@ class CrossNav extends React.Component {
       TweenMax.from(el, duration, {
         delay: duration,
         opacity: 0,
-        top: -100,
+        top: -60,
         onComplete: () => callback()
       })
     }
@@ -69,14 +69,14 @@ class CrossNav extends React.Component {
     else if (enter === 'bottom') {
       TweenMax.to(el, duration, {
         opacity: 0,
-        top: -100,
+        top: -60,
         onComplete: () => callback() 
       })
     }
     else if (enter === 'top') {
       TweenMax.to(el, duration, {
         opacity: 0,
-        top: 100,
+        top: 60,
         onComplete: () => callback()
       })
     }

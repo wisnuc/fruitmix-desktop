@@ -37,7 +37,7 @@ class Background extends PureComponent {
         }}/>
 
         <div style={{ position: 'absolute', width: '100%', height: '100%', 
-          backgroundColor: '#FFF', opacity: this.props.overlay === 'white' ? 1 : 0, 
+          backgroundColor: '#EEEEEE', opacity: this.props.overlay === 'white' ? 1 : 0, 
           zIndex: -998, transition: `opacity ${duration}ms`
         }}/>
 
@@ -78,6 +78,8 @@ class Login extends React.Component {
     super(props)
 
     this.state = { 
+
+      hello: true,
 
       enter: 'bottom', 
       expanded: false,
@@ -188,6 +190,10 @@ class Login extends React.Component {
     else {
       this.setState({ enter: 'bottom' })
     }
+  }
+
+  componentDidMount() {
+    setTimeout(() => this.setState({ hello: false }), 300)
   }
 
   initWizardOnCancel() {
@@ -374,7 +380,7 @@ class Login extends React.Component {
 
       <div style={{width: '100%', height: '100%'}}>
 
-        <Background overlay={this.state.byebye ? 'white' : this.state.dim ? 'dim' : 'none'} />
+        <Background overlay={(this.state.byebye || this.state.hello) ? 'white' : this.state.dim ? 'dim' : 'none'} />
 
         <div style={{width: '100%', height: '100%', 
           display:'flex', flexDirection: 'column', alignItems: 'center'}}>
@@ -382,7 +388,7 @@ class Login extends React.Component {
           <div style={{flexBasis: '160px'}} />
 
           <CrossNav duration={0.35} enter={this.state.enter}>
-            { this.state.bye
+            { (this.state.bye || this.state.hello)
                 ? <DeviceCard key='animation-card-dummy' />
                 : selectedDevice === null
                   ? <InfoCard {...cardProps} />

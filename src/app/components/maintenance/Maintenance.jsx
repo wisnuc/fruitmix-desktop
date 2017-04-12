@@ -22,6 +22,8 @@ class Maintenance extends StateUp(React.Component) {
     super(props)
 
     this.state = {
+      boot: props.selectedDevice.boot.value(),
+      storage: props.selectedDevice.storage.value(),
       creatingNewVolume: null
     }
 
@@ -171,7 +173,7 @@ class Maintenance extends StateUp(React.Component) {
   }
 
   componentDidMount() {
-    this.reloadBootStorage()
+    // this.reloadBootStorage()
   }
 
   componentWillUnmount() {
@@ -179,7 +181,10 @@ class Maintenance extends StateUp(React.Component) {
   }
 
   renderBootStatus() {
-    const data = window.store.getState().maintenance.device
+
+    // let data = window.store.getState().maintenance.device
+    let data = this.props.selectedDevice.mdev
+
     const TextMaintence = `该设备已正常启动，此界面仅用于浏览。
       设备的ip为 ${data.address}，model为 ${data.model}，serial为 ${data.serial}`
     // debug("data = window.store.getState().maintenance = ", data);
@@ -198,7 +203,7 @@ class Maintenance extends StateUp(React.Component) {
     if (typeof this.state.boot !== 'object' || typeof this.state.storage !== 'object') return <div />
     return (
       <div style={{ width: '100%', height: '100%', backgroundColor: '#F5F5F5', overflowY: 'scroll' }}>
-        <RenderTitle state={this.state} />
+        <RenderTitle state={this.state} {...this.props} />
         {/* page container */}
         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 

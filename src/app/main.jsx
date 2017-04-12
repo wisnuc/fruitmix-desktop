@@ -19,7 +19,7 @@ class Main extends React.Component {
       if (mdns.length > 0) {
         this.selectDevice(mdns[0])
       }
-    }, 2000)
+    }, 3000)
 
     this.state = { 
 
