@@ -24,6 +24,11 @@ class PhotoApp extends React.Component {
       media: window.store.getState().media.data
     }
 
+    this.mediaStore = []
+    this.photoDates = []
+    this.photoMapDates = []
+    this.allPhotos = []
+
     this.toggleLeftNav = () => this.setState({ leftNav: !this.state.leftNav })
 
     this.renderLeftNav = () => (
@@ -69,80 +74,79 @@ class PhotoApp extends React.Component {
 
     this.setPhotoInfo = () => {
       // debug('start this.setPhotoInfo')
-      this.mediaStore = window.store.getState().media.data
       // debug('start this.setPhotoInfo', this.mediaStore, this.mediaStore.length)
       const leftNav = !!this.state.leftNav
-      const photoDates = []
-      const photoMapDates = []
-      const allPhotos = []
-      const clientWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
-      const width = leftNav ? clientWidth - 210 - 60 : clientWidth - 60
-      // debug('start this.setPhotoInfo', this.mediaStore, this.mediaStore.length)
-      this.mediaStore.sort((prev, next) => Date.parse(formatDate(next.exifDateTime)) - Date.parse(formatDate(prev.exifDateTime)))
-      let MaxItem = Math.floor(width / 216) - 1
-      // debug('MaxItem', MaxItem)
-      let lineIndex = 0
-      const dateUnknown = []
-      this.mediaStore.forEach((item) => {
-        if (!item.exifDateTime) {
-          dateUnknown.push(item)
-          return
-        }
-        allPhotos.push(item)
-        const formatExifDateTime = formatDate(item.exifDateTime)
-        const isRepeat = photoDates.findIndex(Item => Item === formatExifDateTime) >= 0
-        if (!isRepeat || MaxItem === 0) {
-          MaxItem = Math.floor(width / 216) - 1
-          photoDates.push(formatExifDateTime)
-          photoMapDates.push({
-            first: !isRepeat,
-            index: lineIndex,
-            date: formatExifDateTime,
-            photos: [item]
-          })
-          lineIndex += 1
-        } else {
-          MaxItem -= 1
-          photoMapDates
-          .find(Item => Item.index === (lineIndex - 1))
-          .photos
-          .push(item)
-        }
-      })
-      if (dateUnknown.length > 0) {
-        MaxItem = 0
-        lineIndex += 1
-        let isRepeat = false
-        dateUnknown.forEach((item) => {
-          allPhotos.push(item)
-          if (MaxItem === 0) {
+      if (!this.mediaStore.length) {
+        this.mediaStore = window.store.getState().media.data
+        const clientWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
+        const width = leftNav ? clientWidth - 210 - 60 : clientWidth - 60
+        // debug('start this.setPhotoInfo', this.mediaStore, this.mediaStore.length)
+        this.mediaStore.sort((prev, next) => Date.parse(formatDate(next.exifDateTime)) - Date.parse(formatDate(prev.exifDateTime)))
+        let MaxItem = Math.floor(width / 216) - 1
+        // debug('MaxItem', MaxItem)
+        let lineIndex = 0
+        const dateUnknown = []
+        this.mediaStore.forEach((item) => {
+          if (!item.exifDateTime) {
+            dateUnknown.push(item)
+            return
+          }
+          this.allPhotos.push(item)
+          const formatExifDateTime = formatDate(item.exifDateTime)
+          const isRepeat = this.photoDates.findIndex(Item => Item === formatExifDateTime) >= 0
+          if (!isRepeat || MaxItem === 0) {
             MaxItem = Math.floor(width / 216) - 1
-            photoMapDates.push({
+            this.photoDates.push(formatExifDateTime)
+            this.photoMapDates.push({
               first: !isRepeat,
               index: lineIndex,
-              date: '神秘时间',
+              date: formatExifDateTime,
               photos: [item]
             })
             lineIndex += 1
-            isRepeat = true
           } else {
             MaxItem -= 1
-            photoMapDates
+            this.photoMapDates
               .find(Item => Item.index === (lineIndex - 1))
               .photos
               .push(item)
           }
         })
+        if (dateUnknown.length > 0) {
+          MaxItem = 0
+          lineIndex += 1
+          let isRepeat = false
+          dateUnknown.forEach((item) => {
+            this.allPhotos.push(item)
+            if (MaxItem === 0) {
+              MaxItem = Math.floor(width / 216) - 1
+              this.photoMapDates.push({
+                first: !isRepeat,
+                index: lineIndex,
+                date: '神秘时间',
+                photos: [item]
+              })
+              lineIndex += 1
+              isRepeat = true
+            } else {
+              MaxItem -= 1
+              this.photoMapDates
+                .find(Item => Item.index === (lineIndex - 1))
+                .photos
+                .push(item)
+            }
+          })
+        }
+        for (let i = 1; i <= 0; i++) {
+          this.photoMapDates.push(...this.photoMapDates)
+        }
+        debug('finish this.setPhotoInfo', this.allPhotos, this.photoMapDates, this.mediaStore)
       }
-      for (let i = 1; i <= 0; i++) {
-        photoMapDates.push(...photoMapDates)
-      }
-      debug('finish this.setPhotoInfo', allPhotos, photoMapDates)
       return {
         leftNav,
-        allPhotos,
-        photoDates,
-        photoMapDates
+        allPhotos: this.allPhotos,
+        photoDates: this.photoDates,
+        photoMapDates: this.photoMapDates
       }
     }
   }

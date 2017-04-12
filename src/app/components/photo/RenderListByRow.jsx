@@ -74,7 +74,7 @@ export default class RenderListByRow extends Component {
 
   render() {
     const { style, date, photos, lookPhotoDetail, first, isScrolling } = this.props
-    // debug('PhotoListByDate.jsx', this.props)
+    debug('PhotoListByDate.jsx', this.props)
     return (
       <div style={{ padding: '0 6px 6px 6px' }}>
         {/* 日期 */}
@@ -90,7 +90,7 @@ export default class RenderListByRow extends Component {
         {/* 照片 */}
         {/* !isScrolling || this.props.photoSum < 100 ? */}
         <div style={style}>
-          { !isScrolling || this.props.photoSum < 100 ?
+          { 0 ?
             photos.map((photo, index) => (
               <PhotoItem
                 ref={`photoItem${index}`}
