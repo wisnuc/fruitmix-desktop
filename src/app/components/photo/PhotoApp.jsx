@@ -154,6 +154,7 @@ class PhotoApp extends React.Component {
 
   render() {
     // debug('render photoapp state, props', this.state, this.props)
+    debug('store', window.store.getState())
     return (
       <Paper>
         <this.renderLeftNav />
