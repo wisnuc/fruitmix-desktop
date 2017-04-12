@@ -1,7 +1,10 @@
 const path = require('path')
-const fs = Promisy.promisifyAll(require('fs'))
+const fs = Promise.promisifyAll(require('fs'))
+const app = require('electron').app
 const mkdirpAsync = Promise.promisify(require('mkdirp'))
 const validator = require('validator')
+
+const createPersistenceAsync = require('./persistence')
 
 class Config {
 
@@ -90,18 +93,34 @@ class Configuration {
     return path.join(this.root, 'users', uuid, 'database')
   }
 
+  // currently only two USER directories supported
+  // public
+  getWisnucDownloadsDir() {
+    return path.join(app.getPath('downloads'), 'wisnuc')
+  }
+
+  // public
+  getWisnucPicturesDir() {
+    return path.join(app.getPath('pictures'), 'wisnuc')
+  }
+
   /*
     prepare directories for user or global 
   */
 
-  makeUserDirsAsync(uuid) {
+  async makeWisnucDirsAsync() {
+    await mkdirpAsync(this.getWisnucDownloadsDir())
+    await mkdirpAsync(this.getWisnucPicturesDir())
+  }
+
+  async makeUserDirsAsync(uuid) {
     await mkdirpAsync(this.getUserDir())
     await mkdirpAsync(this.getUserDownloadDir(uuid))
     await mkdirpAsync(this.getUserDatabaseDir(uuid))
   }
 
   // init global dirs during startup
-  makeGlobalDirsAsync() {
+  async makeGlobalDirsAsync() {
     await mkdirpAsync(this.getUsersDir())
     await mkdirpAsync(this.getTmpDir())
     await mkdirpAsync(this.getThumbnailDir())
@@ -109,7 +128,7 @@ class Configuration {
   }
 
   // load a js object from given path, return null if any error
-  loadObjectAsync(fpath) {
+  async loadObjectAsync(fpath) {
 
     let obj = null
     try { obj = JSON.parse(await fs.readFileAsync(fpath)) }
@@ -118,7 +137,7 @@ class Configuration {
   }
 
   // load or create config for single user
-  initUserConfigAsync(userUUID) {
+  async initUserConfigAsync(userUUID) {
 
     await this.makeUserDirsAsync(userUUID)
 
@@ -131,7 +150,7 @@ class Configuration {
   }
 
   // load or create global config
-  initGlobalConfigAsync() {
+  async initGlobalConfigAsync() {
 
     let configPath = this.getGlobalConfigPath()
     let config = await this.loadObjectAsync(configPath) || {} 
@@ -142,10 +161,11 @@ class Configuration {
   }
 
   // init
-  initAsync() {
+  async initAsync() {
 
     // prepare directories
-    await this.makeGobalDirsAsync()
+    await this.makeWisnucDirsAsync()
+    await this.makeGlobalDirsAsync()
 
     // load global config
     let globalConfig = await this.initGlobalConfigAsync()

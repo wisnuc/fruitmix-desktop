@@ -34,12 +34,16 @@ const initMainWindow = () => {
 
   // debug mode
   _mainWindow.webContents.openDevTools()
+
   // _mainWindow.maximize()
   if (global.BABEL_IS_RUNNING)
 	  _mainWindow.loadURL('file://' + process.cwd() + '/public/index.html')
   else
     _mainWindow.loadURL('file://' + path.join(global.entryFileDir, '../public' ,'index.html'))
-	  // _mainWindow.loadURL('file://' + process.cwd() + '/resources/app/build/index.html')
+
+  // ipc message will lost if sent too early FIXME
+  let contents = _mainWindow.webContents
+  setTimeout(() => contents.send('CONFIG_LOADED', global.configuration.getConfiguration()), 300)
 
   console.log('[window] mainWindow initialized')
 }

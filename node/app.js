@@ -27,6 +27,8 @@ import { initTestWindow } from './lib/testHook'
 import mdns from './lib/mdns'
 import misc from './lib/misc'
 
+const Configuration = require('./lib/configuration')
+
 global.entryFileDir = __dirname
 global.db = {}
 
@@ -68,16 +70,31 @@ store.subscribe(() => {
 
 //app ready and open window ------------------------------------
 app.on('ready', function() {
-  initMainWindow()
+
+  let appDataPath = app.getPath('appData')
+  console.log(`appDataPath is ${appDataPath}`)
+
   if (os.platform() == 'darwin') {
     console.log('system is osx')
     let data = app.getPath('downloads')
     console.log('download path is : ' + data)
     store.dispatch({type:'CONFIG_SET_DOWNLOAD_PATH',data})
   }
-  
-  if (mocha) initTestWindow()
 
+  let configuration = new Configuration(appDataPath)
+  configuration.initAsync().asCallback(err => {
+    if (err) {
+      console.log('failed to load configuration, die', err)
+      process.exit(1)
+    }
+    else {
+      initMainWindow()
+    }
+  })
+
+  global.configuration = configuration
+
+/**  
   setTimeout(() => {
     if (true) {
       store.dispatch({
@@ -86,6 +103,7 @@ app.on('ready', function() {
       })
     }
   },1000)
+**/
 })
 
 app.on('window-all-closed', () => app.quit())
