@@ -10,7 +10,7 @@ const RenderTitle = props => (
       showMenuIconButton={false}
       zDepth={2}
       iconElementRight={
-        <IconButton onTouchTap={() => window.store.dispatch({ type: 'EXIT_MAINTENANCE' })}>
+        <IconButton onTouchTap={() => props.nav('login')}>
           <ActionExitToApp />
         </IconButton>}
     />

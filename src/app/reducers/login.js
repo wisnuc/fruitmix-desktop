@@ -1,20 +1,16 @@
-//define default state
-const defaultState = {
-  state: 'READY', // READY, BUSY, REJECTED, TIMEOUT, ERROR, LOGGEDIN
-  obj: {},
-  device: [],
-  selectIndex : 0
-}
 
-const loginState = (state = defaultState, action) => {
+// this is a passive store, synced from node
+const login = (state = { state: 'LOGOUT' }, action) => {
 
 	switch (action.type) {
 		case 'ADAPTER':
-			return Object.assign({},state,action.store.login)
+      return action.store.login2
+        ? action.store.login2
+        : state
 			
 		default:
 			return state
 	}
 }
 
-export default loginState;
+export default login

@@ -35,7 +35,6 @@ const initMainWindow = () => {
   // debug mode
   _mainWindow.webContents.openDevTools()
   // _mainWindow.maximize()
-
   if (global.BABEL_IS_RUNNING)
 	  _mainWindow.loadURL('file://' + process.cwd() + '/public/index.html')
   else

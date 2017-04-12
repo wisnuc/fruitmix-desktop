@@ -2,7 +2,8 @@ var path = require('path')
 
 const defaultState = {
   ip: '',
-  download: global.downloadPath}
+  download: global.downloadPath
+}
 
 module.exports = (state = defaultState, action) => {
 

@@ -8,11 +8,11 @@ const debug = Debug('lib:adapter')
 const adapter = () => {
 
 	let state = {
-    	config: store.getState().config,
-    	server: store.getState().server,
+    config: store.getState().config,
+    server: store.getState().server,
 		login: store.getState().login,
+    login2: store.getState().login2,
 		setting: store.getState().setting,
-		file: store.getState().file,
 		media: store.getState().media,
 		share: store.getState().share,
 	}
@@ -28,7 +28,7 @@ var waitForRender = null
 // on backend store update
 // with throttling (200ms)
 // without referential equality check
-let prevLogin, prevSetting, prevFile, prevMedia, prevShare
+let prevLogin, prevLogin2, prevSetting, prevMedia, prevShare
 
 let initCount = 3
 
@@ -38,16 +38,16 @@ export default () => {
   let state = store.getState()
   let mainWindow = getMainWindow()
 
-  if (state.login === prevLogin &&
-      state.setting === prevSetting &&
-      state.file === prevFile &&
-      state.media === prevMedia &&
-      state.share === prevShare)
+  if (state.login === prevLogin 
+    && state.login2 === prevLogin2
+    && state.setting === prevSetting
+    && state.media === prevMedia
+    && state.share === prevShare)
     return
 
   prevLogin = state.login
+  prevLogin2 = state.login2
   prevSetting = state.setting
-  prevFile = state.file
   prevMedia = state.media
   prevShare = state.share
 

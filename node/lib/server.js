@@ -7,6 +7,8 @@ const debug = Debug('lib:server')
 
 import store from '../serve/store/store'
 
+const getIpAddr = () => store.getState().login2.device.address
+
 // TODO token can also be auth, or not provided 
 const requestGet = (url, qs, token, callback) => {
 
@@ -160,7 +162,7 @@ const requestDeleteAsync = Promise.promisify(requestDelete)
 
 const updateUsersAsync = async () => {
 
-  let ip = store.getState().config.ip
+  let ip = getIpAddr()
   let port = 3721
 
   let users = await requestGetAsync(`http://${ip}:${port}/login`, null)
@@ -181,7 +183,7 @@ export const tryLoginAsync = async (username, password) => {
   await updateUsersAsync()
 
   // TODO invalid state
-  let ip = store.getState().config.ip
+  let ip = getIpAddr()
   let port = 3721
   let users = store.getState().server.users
   let userUUID = users.find(usr => usr.username === username).uuid
@@ -198,7 +200,7 @@ export const tryLoginAsync = async (username, password) => {
 
 export const retrieveUsers = async (token) => {
   
-  let ip = store.getState().config.ip
+  let ip = getIpAddr()
   let port = 3721
 
   return requestGetAsync(`http://${ip}:${port}/users`, null, token)
@@ -208,35 +210,35 @@ export const serverGetAsync = async (endpoint, qs) => {
 
   debug('serverGetAsync', endpoint, qs) 
 
-  let ip = store.getState().config.ip
+  let ip = getIpAddr()
   let port = 3721
   let token = store.getState().login.obj.token
   return requestGetAsync(`http://${ip}:${port}/${endpoint}`, qs, token)
 }
 
 export const serverDeleteAsync = async (endpoint) => {
-  let ip = store.getState().config.ip
+  let ip = getIpAddr()
   let port = 3721
   let token = store.getState().login.obj.token
   return requestDeleteAsync(`http://${ip}:${port}/${endpoint}`, token)
 }
 
 export const serverPostAsync = async (endpoint, body) => {
-  let ip = store.getState().config.ip
+  let ip = getIpAddr()
   let port = 3721
   let token = store.getState().login.obj.token
   return requestPostAsync(`http://${ip}:${port}/${endpoint}`, token, body)
 }
 
 export const serverPatchAsync = async (endpoint, body) => {
-  let ip = store.getState().config.ip
+  let ip = getIpAddr()
   let port = 3721
   let token = store.getState().login.obj.token
   return requestPatchAsync(`http://${ip}:${port}/${endpoint}`, token, body)
 }
 
 export const serverDownloadAsync = (endpoint, qs, downloadPath, name) => {
-  let ip = store.getState().config.ip
+  let ip = getIpAddr()
   let port = 3721
   let token = store.getState().login.obj.token
   return requestDownloadAsync(`http://${ip}:${port}/${endpoint}`, qs, token, downloadPath, name)

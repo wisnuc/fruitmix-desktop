@@ -5,8 +5,7 @@ import { IconButton, Dialog, RaisedButton } from 'material-ui'
 import AlertError from 'material-ui/svg-icons/alert/error'
 import ActionSettingsPower from 'material-ui/svg-icons/action/settings-power'
 
-
-class ErrorBox extends React.Component {
+class ErrorBox extends React.PureComponent {
 
   propTypes: {
     text: React.PropTypes.string.isRequired,
@@ -15,20 +14,12 @@ class ErrorBox extends React.Component {
 
   constructor(props) {
     super(props)
-    this.state = {
-      open: false,
-    }
+    this.state = { open: false }
   }
 
   render() {
     return (
-      <div 
-        style={{
-          width: '100%', height: 64, backgroundColor: '#FFF',
-          boxSizing: 'border-box', paddingLeft: 16,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between'
-        }}
-      >
+      <div style={this.props.style}> 
         <div>{this.props.text}</div>
         <div style={{ display: 'flex', alignItems: 'center'}}>
           <IconButton onTouchTap={() => this.setState(state => Object.assign({}, state, { open: true }))}>

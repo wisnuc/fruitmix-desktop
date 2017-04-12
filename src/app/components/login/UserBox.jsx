@@ -8,7 +8,7 @@ import muiThemeable from 'material-ui/styles/muiThemeable'
 import { Avatar, TextField, Paper } from 'material-ui'
 import FlatButton from '../common/FlatButton'
 
-import { grey50, grey100, grey200, grey300, grey400, grey500, grey600,
+import { grey100, grey200, grey300, grey400, grey500, grey600,
 blueGrey400, blueGrey500, cyan500, cyan300 } from 'material-ui/styles/colors'
 
 import { ipcRenderer } from 'electron'
@@ -45,6 +45,7 @@ class NamedAvatar extends React.Component {
   render() {
 
     const { style, name, selected, onTouchTap } = this.props
+
     return (
       <div style={style}>
         <div style={styles.flexCenter}>
@@ -62,7 +63,9 @@ class NamedAvatar extends React.Component {
             size={36}
             onTouchTap={onTouchTap}
           >
-            <div style={{lineHeight: '24px', fontSize: 14}}>{name.slice(0, 2).toUpperCase()}</div>
+            <div style={{lineHeight: '24px', fontSize: 14}}>
+              {name.slice(0, 2).toUpperCase()}
+            </div>
           </RadiumAvatar>
         </div> 
       </div>
@@ -79,41 +82,25 @@ class UserBox extends React.Component {
 
   selectUser(index) {
 
-    if (index === -1) {
-      this.setState({ selectedIndex: -1 })
-      setTimeout(() => {
-        this.props.onResize('VSHRINK')
-        this.props.toggleDim()
-      }, sharpCurveDuration * 2)
-      return
-    }
-
     if (this.state.selectedIndex === -1) {
-
-      this.props.onResize('VEXPAND')
-      this.props.toggleDim()
-
-      setTimeout(() => {
-        this.inputValue = ''
-        this.setState({ selectedIndex: index})
-      }, 300)
+      this.props.toggleDisplay(() => {
+        this.setState({ selectedIndex: index })
+      })
     }
     else {
       this.setState({ selectedIndex: index })
+      if (index === -1) 
+        setTimeout(() => this.props.toggleDisplay(), 300)
     }
-  }
-
-  // TODO ???
-  success(username, password) {
-    ipcRenderer.send('login', username, password) 
   }
 
   render() {
+    
+    let users = this.props.device.users.value()
 
     let user
-    if (this.state.selectedIndex !== -1) {
-      user = this.props.users[this.state.selectedIndex]
-    }
+    if (this.state.selectedIndex !== -1) 
+      user = users[this.state.selectedIndex]
 
     return (
       <div key='login-user-box' style={this.props.style}>
@@ -130,7 +117,7 @@ class UserBox extends React.Component {
           rounded={false}
         >
           <div style={{...styles.flexWrap, padding: 8}}>
-            { this.props.users.map((user, index) => 
+            { users.map((user, index) => 
               <NamedAvatar 
                 key={user.uuid} 
                 style={{margin: 8}}
@@ -142,14 +129,13 @@ class UserBox extends React.Component {
         </Paper>
 
         <div style={{width: '100%', boxSizing: 'border-box', paddingLeft: 0, paddingRight: 0}}>
-          <div style={{width: '100%', height: Math.ceil(this.props.users.length / 8) * 52 + 16 }}/> 
+          <div style={{width: '100%', height: Math.ceil(users.length / 8) * 52 + 16 }}/> 
           <LoginBox
             open={this.state.selectedIndex !== -1}
-            username={user && user.username}
-            uuid={user && user.uuid}
+            device={this.props.device}
+            user={user}
             cancel={this.selectUser.bind(this, -1)}
-            requestToken={this.props.requestToken}
-            success={this.success.bind(this)}
+            done={this.props.done}
           />
         </div>
 

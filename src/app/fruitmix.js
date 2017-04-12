@@ -15,12 +15,16 @@ import injectTapEventPlugin from 'react-tap-event-plugin'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme'
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
-import Login from './components/login/Login'
-import Main from './components/main/Main'
-import Maintenance from './components/maintenance/Maintenance'
+import MDNS from './lib/mdns'
 import { command } from './lib/command'
 
+import Main from './main'
+
 const debug = Debug('app')
+
+// start mdns scan
+const mdns = MDNS(ipcRenderer, store)
+mdns.scan()
 
 // import css
 require('../assets/css/app.css')
@@ -29,33 +33,16 @@ require('../assets/css/app.css')
 injectTapEventPlugin()
 
 // global import jQuery
-global.$ = global.jQuery = global.jQuery || require('jquery')
-
 global.theme = Object.assign({}, getMuiTheme(lightBaseTheme), { fontFamily: 'Roboto, Noto Sans SC, sans-serif' })
 
-console.log('theme', global.theme)
-
 // root component
-const App = () => (
-  <MuiThemeProvider muiTheme={theme}>
-    { window.store.getState().maintenance 
-        ? <Maintenance /> 
-        : window.store.getState().login.state === 'LOGGEDIN' 
-          ? <Main showAppBar={window.store.getState().view.showAppBar} /> 
-          : <Login devices={window.store.getState().mdns}/> }
-  </MuiThemeProvider>
-)
+const App = () => <MuiThemeProvider muiTheme={theme}><Main /></MuiThemeProvider>
 
 // render method
 const render = () => ReactDom.render(<App/>, document.getElementById('app'))
 
 // subscribe render
-store.subscribe(() => {
-  render()
-})
-
-// first render
-render()
+store.subscribe(() => { render() })
 
 ipcRenderer.on('stateUpdate',(err,data)=>{
 	// mochaState = data
@@ -103,7 +90,8 @@ document.addEventListener('drop', (e) => {
 
 debug('fruitmix app module loaded')
 
-// setTimeout(() => {
-//   ipcRenderer.send('login','liu','1024')
-// },1000)
+global.$ = global.jQuery = global.jQuery || require('jquery')
+
+// first render
+render()
 

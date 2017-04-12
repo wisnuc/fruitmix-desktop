@@ -39,8 +39,10 @@ const reducer = combineReducers({
   command,
   node,
   popmenu,
-  mdns,
   maintenance,
+
+//////////////////////////////////////
+  mdns,
 })
 
 export default reducer
