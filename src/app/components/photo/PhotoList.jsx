@@ -11,10 +11,10 @@ import PhotoDetail from './PhotoDetail'
 import { formatDate } from '../../utils/datetime'
 import RenderListByRow from './RenderListByRow'
 import loading from '../../../assets/images/index/loading.gif'
+import PhotoItem from './PhotoItem'
 
 const debug = Debug('component:photoApp:PhotoList')
 const findPath = (items, path) => items.findIndex(item => item === path)
-const findPhotosByDate = (photos, date) => photos.filter(photo => formatDate(photo.exifDateTime) === date)
 const detectAllOffChecked = photoListByDates => photoListByDates.every(p => p.detectIsAllOffChecked())
 
 export default class PhotoList extends Component {
@@ -56,10 +56,6 @@ export default class PhotoList extends Component {
       this.seqIndex = this.props.allPhotos.findIndex(item => item.digest === digest)
       this.setState({ openDetail: true })
     }
-    this.setScrollTop
-  }
-  getChildContext() {
-    return { photos: this.props.photoMapDates }
   }
 
   renderList = () => {
@@ -76,37 +72,39 @@ export default class PhotoList extends Component {
         /*
       if (isScrolling) {
       }
-        return (
-          <div key={key} style={style}>
-            <div style={{ padding: '0 6px 6px 6px' }}>
-              {
-                <div style={{ marginBottom: 15 }}>
-                  <div
-                    style={{ display: 'inline-block' }}
-                    primaryText={list.date}
-                  />
-                </div>
-            }
-              <div style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start' }}>
-                { list.photos.map(() => (
-                  <div
-                    style={{
-                      width: 210,
-                      height: 210,
-                      marginRight: 6,
-                      marginBottom: 6,
-                      display: 'flex',
-                      flexFlow: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    Loading
-                  </div>
-              ))
-              }
+      return (
+        <div key={key} style={style}>
+          <div style={{ padding: '0 6px 6px 6px' }}>
+            { list.first &&
+              <div style={{ marginBottom: 15 }}>
+                <div style={{ display: 'inline-block' }}>{ list.date }</div>
               </div>
+            }
+            <div style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start' }}>
+              { isScrolling ? list.photos.map(() => (
+                <div
+                  style={{
+                    width: 210,
+                    height: 210,
+                    marginRight: 6,
+                    marginBottom: 6,
+                    backgroundColor: '#eeeeee'
+                  }}
+                />)) :
+                list.photos.map(photo => (
+                  <PhotoItem
+                    style={{ width: 210, height: 210, marginRight: 6, marginBottom: 6 }}
+                    lookPhotoDetail={this.lookPhotoDetail}
+                    digest={photo.digest}
+                    path={photo.path}
+                    key={photo.digest}
+                  />
+                )
+                )
+              }
             </div>
-          </div>)
+          </div>
+        </div>)
       */
       return (
         <div
@@ -114,25 +112,9 @@ export default class PhotoList extends Component {
           style={style}
         >
           <RenderListByRow
-            addListToSelection={this.addListToSelection}
-            allPhotos={this.props.allPhotos}
             lookPhotoDetail={this.lookPhotoDetail}
-            onAddHoverToList={(photoListByDates) => {
-              this.photoListByDates = photoListByDates
-              photoListByDates.forEach(p => p.addHoverToAllItem())
-            }}
-            onDetectAllOffChecked={detectAllOffChecked}
-            onRemoveHoverToList={(photoListByDates) => {
-              const isAllOffChecked = photoListByDates.every(p => p.detectIsAllOffChecked())
-              isAllOffChecked && photoListByDates.forEach(p => p.removeHoverToAllItem())
-            }}
-            removeListToSelection={this.removeListToSelection}
-            style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start' }}
-            photos={list.photos}
-            date={list.date}
-            first={list.first}
             isScrolling={isScrolling}
-            photoSum={photoSum}
+            list={list}
           />
         </div>
       )
@@ -156,7 +138,7 @@ export default class PhotoList extends Component {
         rowRenderer={rowRenderer}
         scrollToIndex={this.state.scrollToIndex}
         onScroll={() => this.setState({ hover: true })}
-        overscanRowCount={2}
+        overscanRowCount={6}
       />
     )
   }

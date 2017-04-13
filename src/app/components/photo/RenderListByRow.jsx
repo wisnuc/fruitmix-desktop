@@ -1,16 +1,12 @@
-import { ipcRenderer } from 'electron'
 import React, { Component, PropTypes } from 'react'
 import Debug from 'debug'
-import { Paper } from 'material-ui'
 import PhotoItem from './PhotoItem'
-import { formatDate } from '../../utils/datetime'
 
 const debug = Debug('component:photoApp:RenderListByRow.jsx')
 
 export default class RenderListByRow extends Component {
   constructor(props) {
     super(props)
-
      /*
       this.addHoverToAllItem = () => {
         this.selectionRefs.forEach(refName =>
@@ -61,56 +57,31 @@ export default class RenderListByRow extends Component {
   }
 
   componentDidMount() {
-    ipcRenderer.send('getThumb', this.props.photos.map(item => ({ digest: item.digest })))
+    // ipcRenderer.send('getThumb', this.props.photos.map(item => ({ digest: item.digest })))
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    let check = false
-    this.props.photos.forEach((item) => { if (!item.path) check = true })
-    if (check) return check
+    // let check = false
+    // this.props.photos.forEach((item) => { if (!item.path) check = true })
+    // if (check) return check
+    // return false
     return (!nextProps.isScrolling)
     // return (nextProps.photos !== this.props.photos && !nextProps.isScrolling)
   }
 
   render() {
-    const { style, date, photos, lookPhotoDetail, first, isScrolling } = this.props
-    debug('PhotoListByDate.jsx', this.props)
+    const { list, lookPhotoDetail, isScrolling } = this.props
+    const { photos, first, date } = list
     return (
       <div style={{ padding: '0 6px 6px 6px' }}>
-        {/* 日期 */}
         { first &&
-        <div style={{ marginBottom: 15 }}>
-          <div style={{ display: 'inline-block' }}>
-            <label style={{ fontSize: 12, opacity: 0.87 }}>
-              { date }
-            </label>
+          <div style={{ marginBottom: 15 }}>
+            <div style={{ display: 'inline-block' }}>{ date }</div>
           </div>
-        </div>
         }
-        {/* 照片 */}
-        {/* !isScrolling || this.props.photoSum < 100 ? */}
-        <div style={style}>
-          { 0 ?
-            photos.map((photo, index) => (
-              <PhotoItem
-                ref={`photoItem${index}`}
-                style={{ width: 210, height: 210, marginRight: 6, marginBottom: 6 }}
-                width={photo.width}
-                height={photo.height}
-                lookPhotoDetail={lookPhotoDetail}
-                detectIsAllOffChecked={this.detectIsAllOffChecked}
-                exifOrientation={photo.exifOrientation}
-                onDetectAllOffChecked={this.props.onDetectAllOffChecked}
-                selected={() => { this.addCheckedToItem(index) }}
-                unselected={() => { this.removeCheckedToItem(index) }}
-                date={this.props.date}
-                digest={photo.digest}
-                path={photo.path}
-                key={photo.digest}
-                isScrolling={isScrolling}
-              />
-             )) :
-            photos.map(() => (
+        <div style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start' }}>
+          { isScrolling ?
+            photos.map(photo => (
               <div
                 style={{
                   width: 210,
@@ -119,22 +90,21 @@ export default class RenderListByRow extends Component {
                   marginBottom: 6,
                   backgroundColor: '#eeeeee'
                 }}
+                key={photo.digest}
+              />)) :
+            photos.map(photo => (
+              <PhotoItem
+                style={{ width: 210, height: 210, marginRight: 6, marginBottom: 6 }}
+                lookPhotoDetail={lookPhotoDetail}
+                digest={photo.digest}
+                path={photo.path}
+                key={photo.digest}
               />
-            ))
-           }
+            )
+            )
+          }
         </div>
       </div>
     )
   }
-}
-
-RenderListByRow.propTypes = {
-  style: PropTypes.object,
-  date: PropTypes.string.isRequired,
-  photos: PropTypes.array.isRequired,
-  addListToSelection: PropTypes.func.isRequired,
-  removeListToSelection: PropTypes.func.isRequired,
-  lookPhotoDetail: PropTypes.func.isRequired,
-  onAddHoverToList: PropTypes.func,
-  onOffSelected: PropTypes.func
 }

@@ -1,6 +1,7 @@
-import { ipcRenderer } from 'electron'
-import Debug from 'debug'
 import React, { PropTypes } from 'react'
+import Debug from 'debug'
+import { ipcRenderer } from 'electron'
+import UUID from 'node-uuid'
 import { Paper, CircularProgress, IconButton, SvgIcon } from 'material-ui'
 import RenderToLayer from 'material-ui/internal/RenderToLayer'
 import SlideToAnimate from './SlideToAnimate'
@@ -11,35 +12,16 @@ class PhotoDetailInline extends React.Component {
   constructor(props) {
     super(props)
 
-    this.state = {
-      currentImage: null
-    }
-
-    this.currentImage = ''
-
     this.currentIndex = this.props.seqIndex
 
-    this.style = {
-      leftDire: {
-        backgroundColor: 'rgba(50, 50, 50, .5)',
-        position: 'fixed',
-        left: '2%'
-      },
-      rightDire: {
-        backgroundColor: 'rgba(50, 50, 50, .5)',
-        position: 'fixed',
-        right: '2%'
-      },
-      closeBtn: {
-        backgroundColor: 'rgba(50, 50, 50, .5)',
-        position: 'fixed',
-        top: 12,
-        right: 'calc(2% + 6px)'
-      }
-    }
-
     this.requestNext = (currentIndex) => {
-      ipcRenderer.send('getMediaImage', this.props.items[currentIndex].digest)
+      this.path = ''
+      this.thumbPath = ''
+      this.session = UUID.v4()
+      this.digest = this.props.items[currentIndex].digest
+      ipcRenderer.send('getMediaImage', this.session, this.digest)
+      ipcRenderer.send('getThumb', this.session, this.digest)
+      this.forceUpdate()
     }
     this.changeIndex = (direction) => {
       if (direction === 'right') {
@@ -47,12 +29,6 @@ class PhotoDetailInline extends React.Component {
       } else if (direction === 'left') {
         this.currentIndex -= 1
       }
-      ipcRenderer.once('donwloadMediaSuccess', (err, item) => {
-        this.currentImage = item
-        this.forceUpdate()
-      })
-      this.forceUpdate()
-      this.currentImage = ''
       this.requestNext(this.currentIndex)
     }
   }
@@ -62,8 +38,14 @@ class PhotoDetailInline extends React.Component {
   }
 
   componentDidMount() {
-    ipcRenderer.once('donwloadMediaSuccess', (err, item) => {
-      this.currentImage = item
+    ipcRenderer.on('donwloadMediaSuccess', (err, session, path) => {
+      if (session !== this.session) return
+      this.path = path
+      this.forceUpdate()
+    })
+    ipcRenderer.on('getThumbSuccess', (event, session, path) => {
+      if (session !== this.session) return
+      this.thumbPath = path
       this.forceUpdate()
     })
   }
@@ -72,12 +54,17 @@ class PhotoDetailInline extends React.Component {
     return this.state !== nextState
   }
 
-  renderDetail(currentImage, photo) {
+  renderDetail() {
+    /*
     let exifOrientation = ''
     if (currentImage) {
       exifOrientation = currentImage.exifOrientation || ''
     }
     const degRotate = exifOrientation ? `rotate(${(exifOrientation - 1) * 90}deg)` : ''
+              style={{ transform: degRotate, transitionDuration: '0' }}
+    const thumbPath = `${mediaPath}${digest}thumb210`
+    */
+
     return (
       <div
         style={{
@@ -91,26 +78,24 @@ class PhotoDetailInline extends React.Component {
         }}
       >
         <div style={{ position: 'fixed', height: '90%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
-          { currentImage ? // FIXME
+          { this.path ? // FIXME
             <img
-              style={{ transform: degRotate, transitionDuration: '0' }}
               height={'100%'}
-              src={window.store.getState().view.currentMediaImage.path}
+              src={this.path}
               alt="DetailImage"
-            /> : photo.path ?
+            /> : this.thumbPath ?
               <img
                 height={'100%'}
-                src={photo.path}
+                src={this.thumbPath}
                 alt="DetailImage"
-              /> : <div /> }
+              /> : <div />
+          }
         </div>
       </div>
     )
   }
 
   render() {
-    const photo = this.props.items[this.currentIndex]
-    debug('PhotoDetail', this.props)
     return (
       <Paper
         style={{
@@ -123,7 +108,6 @@ class PhotoDetailInline extends React.Component {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          transition: 'all 0ms cubic-bezier(0.23, 1, 0.32, 1)'
         }}
       >
         <div
@@ -137,46 +121,57 @@ class PhotoDetailInline extends React.Component {
             justifyContent: 'center'
           }}
         >
-          <div
+          { this.renderDetail() }
+          <IconButton
+            onTouchTap={this.props.closePhotoDetail}
             style={{
-              width: '100%',
-              height: '100%',
-              zIndex: 1500,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+              position: 'fixed',
+              top: 12,
+              left: 12
             }}
           >
-            { this.renderDetail(this.currentImage, photo) }
-            <IconButton
-              onTouchTap={this.props.closePhotoDetail}
-              style={this.style.closeBtn}
-            >
-              <SvgIcon fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24">
-                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-                <path d="M0 0h24v24H0z" fill="none" />
-              </SvgIcon>
-            </IconButton>
-            { this.currentIndex > 0 && <IconButton
-              style={this.style.leftDire}
-              onTouchTap={() => this.changeIndex('left')}
-            >
-              <SvgIcon fill="#000000" height="36" viewBox="0 0 24 24" width="36">
-                <path d="M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z" />
-                <path d="M0-.5h24v24H0z" fill="none" />
-              </SvgIcon>
-            </IconButton> }
+            <svg width={24} height={24} viewBox="0 0 24 24" fill="white">
+              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+            </svg>
+          </IconButton>
 
-            { this.currentIndex < this.props.items.length - 1 && <IconButton
-              style={this.style.rightDire}
-              onTouchTap={() => this.changeIndex('right')}
-            >
-              <SvgIcon fill="#000000" height="36" viewBox="0 0 24 24" width="36" >
-                <path d="M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z" />
-                <path d="M0-.25h24v24H0z" fill="none" />
-              </SvgIcon>
-            </IconButton> }
-          </div>
+          { this.currentIndex > 0 && <IconButton
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'rgba(66, 66, 66, 0.541176)',
+              position: 'fixed',
+              borderRadius: 28,
+              width: 56,
+              height: 56,
+              left: '2%'
+            }}
+            onTouchTap={() => this.changeIndex('left')}
+          >
+            <svg width={36} height={36} viewBox="0 0 24 24" fill="white">
+              <path d="M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z" />
+            </svg>
+          </IconButton> }
+
+          { this.currentIndex < this.props.items.length - 1 && <IconButton
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'rgba(66, 66, 66, 0.541176)',
+              borderRadius: 28,
+              position: 'fixed',
+              width: 56,
+              height: 56,
+              right: '2%'
+            }}
+            onTouchTap={() => this.changeIndex('right')}
+          >
+            <svg width={36} height={36} viewBox="0 0 24 24" fill="white">
+              <path d="M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z" />
+            </svg>
+          </IconButton> }
         </div>
         <div
           style={{
@@ -185,7 +180,7 @@ class PhotoDetailInline extends React.Component {
             width: '100%',
             top: 0,
             left: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+            backgroundColor: 'rgb(0, 0, 0)',
             zIndex: 1400
           }}
           onTouchTap={this.props.closePhotoDetail}
