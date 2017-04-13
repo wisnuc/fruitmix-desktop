@@ -1,10 +1,10 @@
 import Debug from 'debug'
 import React from 'react'
+import EventListener from 'react-event-listener'
 import { Paper, Menu, MenuItem, Divider, IconButton } from 'material-ui'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import DeviceStorage from 'material-ui/svg-icons/device/storage'
 import { blue500, red500, greenA200 } from 'material-ui/styles/colors'
-
 import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
 import { formatDate } from '../../utils/datetime'
 
@@ -156,10 +156,18 @@ class PhotoApp extends React.Component {
     return (this.state !== nextState)
   }
 
+  handleResize = () => {
+    this.forceUpdate()
+  }
+
   render() {
     debug('store', window.store.getState())
     return (
       <Paper>
+        <EventListener
+          target="window"
+          onResize={this.handleResize}
+        />
         <this.renderLeftNav />
         <PhotoList
           style={{

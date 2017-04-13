@@ -2,7 +2,6 @@ import React, { Component, PropTypes } from 'react'
 import ReactDOM from 'react-dom'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
-import EventListener from 'react-event-listener'
 import { List, WindowScroller } from 'react-virtualized'
 // import List from './List'
 import { Paper, Card, IconButton, CircularProgress, FlatButton } from 'material-ui'
@@ -20,13 +19,14 @@ const detectAllOffChecked = photoListByDates => photoListByDates.every(p => p.de
 export default class PhotoList extends Component {
   constructor(props) {
     super(props)
-
     this.state = {
       carouselItems: [],
       openDetail: false,
       hover: false,
-      scrollToIndex: 0
     }
+    this.clientWidth = ''
+    this.clientHeight = ''
+    this.maxScrollTop = ''
 
     this.addListToSelection = (path) => {
       const hasPath = this.state.carouselItems.findIndex(item => item === path) >= 0
@@ -56,56 +56,37 @@ export default class PhotoList extends Component {
       this.seqIndex = this.props.allPhotos.findIndex(item => item.digest === digest)
       this.setState({ openDetail: true })
     }
+    this.showPicker = (hover) => {
+      debug('this.showPicker')
+      const tmp = document.getElementsByClassName('ReactVirtualized__Grid')[0]
+      debug(tmp, tmp.scrollTop)
+      if (!this.state.hover) {
+        clearTimeout(this.time)
+        this.setState({ hover: true })
+        this.time = setTimeout(() => this.setState({ hover: false }), hover ? 100000 : 2000)
+      }
+    }
+    this.scrollToPosition = (top) => {
+      const list = document.getElementsByClassName('ReactVirtualized__List')[0]
+      list.scrollTop = top
+      // const container = document.getElementsByClassName('ReactVirtualized__Grid__innerScrollContainer')[0]
+      // debug('container', container, container.style)
+      // container.style.maxHeight = `${this.rowHeightSum}px`
+      // container.style.height = `${this.rowHeightSum}px`
+    }
   }
 
   renderList = () => {
     const photoSum = this.props.photoMapDates.length
     if (photoSum === 0) return <div />
-    const clientHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
-    const clientWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
-    const height = clientHeight - 56
-    const width = this.props.leftNav ? clientWidth - 210 : clientWidth
+    this.clientHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+    this.clientWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
+    debug('clientHeight', this.clientHeight)
+    const height = this.clientHeight - 56
+    const width = this.props.leftNav ? this.clientWidth - 210 : this.clientWidth
     // debug('this.props.photoMapDates', this.props.photoMapDates)
     const rowRenderer = ({ key, index, style, isScrolling }) => {
       const list = this.props.photoMapDates[index]
-      // if (isScrolling) return <div />
-        /*
-      if (isScrolling) {
-      }
-      return (
-        <div key={key} style={style}>
-          <div style={{ padding: '0 6px 6px 6px' }}>
-            { list.first &&
-              <div style={{ marginBottom: 15 }}>
-                <div style={{ display: 'inline-block' }}>{ list.date }</div>
-              </div>
-            }
-            <div style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start' }}>
-              { isScrolling ? list.photos.map(() => (
-                <div
-                  style={{
-                    width: 210,
-                    height: 210,
-                    marginRight: 6,
-                    marginBottom: 6,
-                    backgroundColor: '#eeeeee'
-                  }}
-                />)) :
-                list.photos.map(photo => (
-                  <PhotoItem
-                    style={{ width: 210, height: 210, marginRight: 6, marginBottom: 6 }}
-                    lookPhotoDetail={this.lookPhotoDetail}
-                    digest={photo.digest}
-                    path={photo.path}
-                    key={photo.digest}
-                  />
-                )
-                )
-              }
-            </div>
-          </div>
-        </div>)
-      */
       return (
         <div
           key={key}
@@ -124,11 +105,12 @@ export default class PhotoList extends Component {
       216 * Math.ceil(list.photos.length / Math.floor(width / 216)) + !!list.first * 40
     )))
     const rowHeight = ({ index }) => AllHeight[index]
-    let rowHeightSum = 0
+    this.rowHeightSum = 0
     for (let i = 0; i < this.props.photoMapDates.length; i++) {
-      rowHeightSum += rowHeight({ index: i })
+      this.rowHeightSum += rowHeight({ index: i })
     }
-    // debug('rowHeightSum', rowHeightSum)
+    debug('rowHeightSum', this.rowHeightSum)
+    this.maxScrollTop = this.rowHeightSum - this.clientHeight + 56 + 16 * 2
     return (
       <List
         height={height}
@@ -136,51 +118,45 @@ export default class PhotoList extends Component {
         rowCount={this.props.photoMapDates.length}
         rowHeight={rowHeight}
         rowRenderer={rowRenderer}
-        scrollToIndex={this.state.scrollToIndex}
-        onScroll={() => this.setState({ hover: true })}
+        onScroll={() => this.showPicker(false)}
         overscanRowCount={6}
+        style={{ padding: 16 }}
       />
     )
-  }
-
-  componentDidUpdate() {
-  }
-
-  handleResize = () => {
-    this.forceUpdate()
   }
 
   renderPicker = () => (
     <div
       style={{
         position: 'fixed',
-        width: 80,
         height: '100%',
-        backgroundColor: this.state.hover ? 'white' : 'white',
-        right: 26
+        width: 80,
+        right: 16
       }}
-      onMouseEnter={() => this.setState({ hover: true })}
+      onMouseEnter={() => this.showPicker(true)}
       onMouseLeave={() => this.setState({ hover: false })}
     >
       <FlatButton
         label="Top"
         style={{
           display: this.state.hover ? '' : 'none',
-          position: 'absolute',
+          position: 'fixed',
           width: 80,
-          top: 76
+          right: 26,
+          top: 72
         }}
-        onTouchTap={() => this.setState({ scrollToIndex: 0 })}
+        onTouchTap={() => this.scrollToPosition(0)}
       />
       <FlatButton
         label="Bottom"
         style={{
           display: this.state.hover ? '' : 'none',
-          position: 'absolute',
+          position: 'fixed',
           width: 80,
-          bottom: 86
+          right: 26,
+          bottom: 16
         }}
-        onTouchTap={() => this.setState({ scrollToIndex: (this.props.photoMapDates.length - 1) })}
+        onTouchTap={() => this.scrollToPosition(this.maxScrollTop)}
       />
     </div>
     )
@@ -189,11 +165,9 @@ export default class PhotoList extends Component {
     const photos = this.props.photoMapDates
     if (photos.length === 0) return <div />
     return (
-      <Paper style={this.props.style}>
-        <EventListener
-          target="window"
-          onResize={this.handleResize}
-        />
+      <Paper
+        style={this.props.style}
+      >
         {/* 图片列表 */}
         <this.renderList />
         {/* 轮播 */
@@ -226,6 +200,7 @@ export default class PhotoList extends Component {
       </Paper>
     )
   }
+
 }
 
 PhotoList.childContextTypes = {
