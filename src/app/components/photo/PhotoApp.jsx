@@ -13,6 +13,12 @@ import PhotoList from './PhotoList'
 
 const debug = Debug('component:photoApp:')
 const LEFTNAV_WIDTH = 210
+const parseDate = (date) => {
+  if (!date) return 0
+  const b = date.split(/\D/)
+  const c = (`${b[0]}${b[1]}${b[2]}${b[3]}${b[4]}${b[5]}`)
+  return parseInt(c, 10)
+}
 
 class PhotoApp extends React.Component {
   constructor(props) {
@@ -28,6 +34,7 @@ class PhotoApp extends React.Component {
     this.photoDates = []
     this.photoMapDates = []
     this.allPhotos = []
+    this.force = false
 
     this.toggleLeftNav = () => this.setState({ leftNav: !this.state.leftNav })
 
@@ -73,15 +80,19 @@ class PhotoApp extends React.Component {
     )
 
     this.setPhotoInfo = () => {
-      // debug('start this.setPhotoInfo')
-      // debug('start this.setPhotoInfo', this.mediaStore, this.mediaStore.length)
       const leftNav = !!this.state.leftNav
-      if (!this.mediaStore.length) {
+      if (!this.mediaStore.length || this.force) {
         this.mediaStore = window.store.getState().media.data
+        this.photoDates = []
+        this.photoMapDates = []
+        this.allPhotos = []
+        this.force = false
         const clientWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
         const width = leftNav ? clientWidth - 210 - 60 : clientWidth - 60
-        // debug('start this.setPhotoInfo', this.mediaStore, this.mediaStore.length)
-        this.mediaStore.sort((prev, next) => Date.parse(formatDate(next.exifDateTime)) - Date.parse(formatDate(prev.exifDateTime)))
+        debug('start sort', this.mediaStore)
+        this.mediaStore.sort((prev, next) => (parseDate(next.exifDateTime) - parseDate(prev.exifDateTime)) || (
+          parseInt(`0x${next.digest}`, 16) - parseInt(`0x${prev.digest}`, 16)))
+        debug('finish sort', this.mediaStore)
         let MaxItem = Math.floor(width / 216) - 1
         // debug('MaxItem', MaxItem)
         let lineIndex = 0
@@ -137,10 +148,10 @@ class PhotoApp extends React.Component {
             }
           })
         }
+        /* simulate large list */
         for (let i = 1; i <= 0; i++) {
           this.photoMapDates.push(...this.photoMapDates)
         }
-        debug('finish this.setPhotoInfo', this.allPhotos, this.photoMapDates, this.mediaStore)
       }
       return {
         leftNav,
@@ -157,11 +168,12 @@ class PhotoApp extends React.Component {
   }
 
   handleResize = () => {
+    this.force = true // force update setPhotoInfo
     this.forceUpdate()
   }
 
   render() {
-    debug('store', window.store.getState())
+    debug('PhotoApp, this.photoMapDates', this.photoMapDates)
     return (
       <Paper>
         <EventListener

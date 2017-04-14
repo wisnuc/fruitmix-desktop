@@ -76,7 +76,7 @@ export default class PhotoItem extends Component {
       />
       {debug('hover', this.props)}
     </div>
-    )
+  )
 
   renderImage = () => (
     <div
@@ -89,7 +89,6 @@ export default class PhotoItem extends Component {
         alignItems: 'center',
         justifyContent: 'center'
       }}
-      zDepth={this.state.action || this.state.hover ? 4 : 0}
       onTouchTap={() => this.props.lookPhotoDetail(this.props.digest)}
       onMouseEnter={() => this.setState({ hover: true })}
       onMouseLeave={() => this.setState({ hover: false })}
@@ -104,7 +103,6 @@ export default class PhotoItem extends Component {
   render() {
     const { style } = this.props
     // debug('Render PhotoItem this.props', this.props)
-    // return <div>Loading</div>
     return (
       <div style={style}>
         <div
@@ -114,7 +112,6 @@ export default class PhotoItem extends Component {
             width: '100%'
           }}
         >
-          {/* (this.state.action || this.state.hover) && <this.renderHover /> */}
           { (this.state.action || this.state.hover) && <this.renderHover /> }
           { <this.renderImage /> }
         </div>

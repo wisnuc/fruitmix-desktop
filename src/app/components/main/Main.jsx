@@ -295,10 +295,6 @@ class Main extends React.Component {
 			window.store.dispatch(Action.setSnack(message,true))
 		});
 
-		ipcRenderer.on('donwloadMediaSuccess',(err,item)=>{
-			window.store.dispatch(Action.setMediaImage(item));
-		});
-
 		ipcRenderer.on('setUsers',(err,user)=>{
 			this.props.dispatch({type:'SET_USER',user:user});
 		});

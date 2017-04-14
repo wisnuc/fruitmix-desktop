@@ -117,6 +117,8 @@ ipcMain.on('getThumb', (event, session, digest) => {
       }
       serverDownloadAsync(`media/${digest}/thumbnail`, qs, mediaPath, digest + cacheName).then((data) => {
         getMainWindow().webContents.send('getThumbSuccess', session, path.join(mediaPath, `${digest}thumb210`))
+      }).catch((err) => {
+        console.log(err) 
       })
     } else {
       getMainWindow().webContents.send('getThumbSuccess', session, path.join(mediaPath, `${digest}thumb210`))

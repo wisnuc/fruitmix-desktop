@@ -93,9 +93,8 @@ class DeviceCard extends React.Component {
       return logoType
     }
 
-    /*
     ipcRenderer.send('setServerIp', props.device.address)
-    */
+    /*
 
     this.ip = '192.168.5.95'
     this.uuid = ''  
@@ -106,6 +105,7 @@ class DeviceCard extends React.Component {
       .auth(this.uuid, this.password)
       .set('Accept', 'application/json')
       .end(() => ipcRenderer.send('login', this.username, this.password))
+    */
 
     this.requestGet = (port, ep, propName) =>
       request.get(`http://${this.props.device.address}:${port}/${ep}`)

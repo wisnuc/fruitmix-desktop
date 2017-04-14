@@ -5,6 +5,7 @@ import UUID from 'node-uuid'
 import { Paper, CircularProgress, IconButton, SvgIcon } from 'material-ui'
 import RenderToLayer from 'material-ui/internal/RenderToLayer'
 import SlideToAnimate from './SlideToAnimate'
+import { formatDate } from '../../utils/datetime'
 
 const debug = Debug('component:photoApp:PhotoDetail')
 
@@ -19,6 +20,8 @@ class PhotoDetailInline extends React.Component {
       this.thumbPath = ''
       this.session = UUID.v4()
       this.digest = this.props.items[currentIndex].digest
+      this.photo = this.props.items[currentIndex]
+      debug('currentImage', this.photo, Date.parse(formatDate(this.photo.exifDateTime)))
       ipcRenderer.send('getMediaImage', this.session, this.digest)
       ipcRenderer.send('getThumb', this.session, this.digest)
       this.forceUpdate()
@@ -66,9 +69,10 @@ class PhotoDetailInline extends React.Component {
     */
 
     return (
-      <div
+      <Paper
         style={{
           position: 'relative',
+          backgroundColor: 'rgb(0, 0, 0)',
           width: '100%',
           height: '100%',
           margin: '0 auto',
@@ -80,18 +84,20 @@ class PhotoDetailInline extends React.Component {
         <div style={{ position: 'fixed', height: '90%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
           { this.path ? // FIXME
             <img
+              key="DetailImage"
               height={'100%'}
               src={this.path}
               alt="DetailImage"
             /> : this.thumbPath ?
               <img
+                key="DetailImage"
                 height={'100%'}
                 src={this.thumbPath}
                 alt="DetailImage"
               /> : <div />
           }
         </div>
-      </div>
+      </Paper>
     )
   }
 
@@ -107,7 +113,7 @@ class PhotoDetailInline extends React.Component {
           zIndex: 1500,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
+          justifyContent: 'center'
         }}
       >
         <div

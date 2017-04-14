@@ -22,11 +22,14 @@ export default class PhotoList extends Component {
     this.state = {
       carouselItems: [],
       openDetail: false,
-      hover: false,
+      hover: false
     }
-    this.clientWidth = ''
-    this.clientHeight = ''
-    this.maxScrollTop = ''
+    this.clientWidth = 0
+    this.clientHeight = 0
+    this.maxScrollTop = 0
+    this.scrollToIndex = undefined
+    this.indexHeightSum = []
+    this.percentage = 0
 
     this.addListToSelection = (path) => {
       const hasPath = this.state.carouselItems.findIndex(item => item === path) >= 0
@@ -57,16 +60,33 @@ export default class PhotoList extends Component {
       this.setState({ openDetail: true })
     }
     this.showPicker = (hover) => {
-      debug('this.showPicker')
-      const tmp = document.getElementsByClassName('ReactVirtualized__Grid')[0]
-      debug(tmp, tmp.scrollTop)
       if (!this.state.hover) {
         clearTimeout(this.time)
         this.setState({ hover: true })
         this.time = setTimeout(() => this.setState({ hover: false }), hover ? 100000 : 2000)
       }
     }
+    this.onScroll = () => {
+      if (!this.props.photoMapDates.length) return
+      this.scrollToIndex = undefined
+      const list = document.getElementsByClassName('ReactVirtualized__List')[0]
+      const currentIndex = this.indexHeightSum.findIndex(element => element > list.scrollTop)
+      this.date = this.props.photoMapDates[currentIndex].date
+      this.percentage = currentIndex / this.props.photoMapDates.length
+      if (this.dateRef) {
+        debug('this.percentage * (this.clientHeight - 56)', this.percentage * (this.clientHeight - 56))
+        this.dateRef.style.top = `${parseInt(this.percentage * (this.clientHeight - 192) + 108, 10)}px`
+        this.dateRef.innerHTML = this.date
+        debug('onScroll', currentIndex, this.percentage, this.dateRef.style, this.dateRef.style.top)
+        this.showPicker(false)
+      }
+    }
     this.scrollToPosition = (top) => {
+      if (top === this.maxScrollTop) {
+        this.scrollToIndex = this.props.photoMapDates.length - 1
+        this.forceUpdate()
+        return
+      }
       const list = document.getElementsByClassName('ReactVirtualized__List')[0]
       list.scrollTop = top
       // const container = document.getElementsByClassName('ReactVirtualized__Grid__innerScrollContainer')[0]
@@ -76,15 +96,36 @@ export default class PhotoList extends Component {
     }
   }
 
+  componentDidMount() {
+    this.onScroll()
+  }
+
   renderList = () => {
-    const photoSum = this.props.photoMapDates.length
-    if (photoSum === 0) return <div />
+
+    /* calculate size of list */
     this.clientHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
     this.clientWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
-    debug('clientHeight', this.clientHeight)
     const height = this.clientHeight - 56
     const width = this.props.leftNav ? this.clientWidth - 210 : this.clientWidth
-    // debug('this.props.photoMapDates', this.props.photoMapDates)
+
+    /* calculate each row's heigth and their sum */
+    const AllHeight = []
+    this.rowHeightSum = 0
+    this.indexHeightSum = []
+    this.props.photoMapDates.forEach((list) => {
+      const tmp = 216 * Math.ceil(list.photos.length / Math.floor(width / 216)) + !!list.first * 40
+      AllHeight.push(tmp)
+      this.rowHeightSum += tmp
+      this.indexHeightSum.push(this.rowHeightSum)
+    })
+
+    // debug('rowHeightSum', this.rowHeightSum, this.indexHeightSum, AllHeight)
+    const rowHeight = ({ index }) => AllHeight[index]
+    const estimatedRowSize = this.rowHeightSum / AllHeight.length
+    debug('estimatedRowSize', estimatedRowSize)
+    this.maxScrollTop = this.rowHeightSum - this.clientHeight + 56 + 16 * 2
+
+    /* function to render each row */
     const rowRenderer = ({ key, index, style, isScrolling }) => {
       const list = this.props.photoMapDates[index]
       return (
@@ -100,17 +141,6 @@ export default class PhotoList extends Component {
         </div>
       )
     }
-    const AllHeight = []
-    this.props.photoMapDates.map(list => (AllHeight.push(
-      216 * Math.ceil(list.photos.length / Math.floor(width / 216)) + !!list.first * 40
-    )))
-    const rowHeight = ({ index }) => AllHeight[index]
-    this.rowHeightSum = 0
-    for (let i = 0; i < this.props.photoMapDates.length; i++) {
-      this.rowHeightSum += rowHeight({ index: i })
-    }
-    debug('rowHeightSum', this.rowHeightSum)
-    this.maxScrollTop = this.rowHeightSum - this.clientHeight + 56 + 16 * 2
     return (
       <List
         height={height}
@@ -118,9 +148,11 @@ export default class PhotoList extends Component {
         rowCount={this.props.photoMapDates.length}
         rowHeight={rowHeight}
         rowRenderer={rowRenderer}
-        onScroll={() => this.showPicker(false)}
+        onScroll={this.onScroll}
+        scrollToIndex={this.scrollToIndex}
         overscanRowCount={6}
         style={{ padding: 16 }}
+        estimatedRowSize={210}
       />
     )
   }
@@ -130,6 +162,7 @@ export default class PhotoList extends Component {
       style={{
         position: 'fixed',
         height: '100%',
+        paddingTop: 56,
         width: 80,
         right: 16
       }}
@@ -140,10 +173,8 @@ export default class PhotoList extends Component {
         label="Top"
         style={{
           display: this.state.hover ? '' : 'none',
-          position: 'fixed',
-          width: 80,
-          right: 26,
-          top: 72
+          position: 'relative',
+          top: 16
         }}
         onTouchTap={() => this.scrollToPosition(0)}
       />
@@ -152,36 +183,52 @@ export default class PhotoList extends Component {
         style={{
           display: this.state.hover ? '' : 'none',
           position: 'fixed',
-          width: 80,
-          right: 26,
           bottom: 16
         }}
         onTouchTap={() => this.scrollToPosition(this.maxScrollTop)}
       />
+      <div
+        ref={ref => (this.dateRef = ref)}
+        style={{
+          display: this.state.hover ? '' : 'none',
+          position: 'absolute',
+          width: 90,
+          right: 26,
+          backgroundColor: 'black',
+          color: 'white',
+          padding: 8
+        }}
+      />
     </div>
-    )
+  )
+
   render() {
-    // debug('render PhotoList, this.props', this.props)
+    debug('render PhotoList, this.props', this.props, this.state)
     const photos = this.props.photoMapDates
     if (photos.length === 0) return <div />
     return (
-      <Paper
-        style={this.props.style}
-      >
+      <Paper style={this.props.style} >
+
         {/* 图片列表 */}
-        <this.renderList />
-        {/* 轮播 */
-            this.state.carouselItems.length ?
-              <Paper style={{ position: 'fixed', bottom: 15, width: '75%' }} >
-                <Carousel
-                  ClearAll={() => this.setState({ carouselItems: [] })}
-                  removeListToSelection={this.removeListToSelection}
-                  style={{ backgroundColor: '#fff', height: 180, borderRadius: 4, boxShadow: '0 0 10px rgba(0,0,0,.3)' }}
-                  items={this.state.carouselItems}
-                />
-              </Paper> : <div />
+        {
+          this.props.photoMapDates.length ? <this.renderList /> : <div />
         }
-        {/* 查看大图 */
+
+        {/* 轮播 */}
+        {
+          this.state.carouselItems.length ?
+            <Paper style={{ position: 'fixed', bottom: 15, width: '75%' }} >
+              <Carousel
+                ClearAll={() => this.setState({ carouselItems: [] })}
+                removeListToSelection={this.removeListToSelection}
+                style={{ backgroundColor: '#fff', height: 180, borderRadius: 4, boxShadow: '0 0 10px rgba(0,0,0,.3)' }}
+                items={this.state.carouselItems}
+              />
+            </Paper> : <div />
+        }
+
+        {/* 查看大图 */}
+        {
           this.state.openDetail ?
             <PhotoDetail
               closePhotoDetail={() => this.setState({ openDetail: false })}
@@ -196,13 +243,10 @@ export default class PhotoList extends Component {
               seqIndex={this.seqIndex}
             /> : <div />
         }
+
+        {/* 时间轴和跳转按钮 */}
         { this.renderPicker() }
       </Paper>
     )
   }
-
-}
-
-PhotoList.childContextTypes = {
-  photos: PropTypes.array.isRequired
 }
