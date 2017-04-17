@@ -24,21 +24,26 @@ const mediaShareMap = new Map()
 const taskQueue = []
 const thumbReadyQueue = []
 const thumbRunningQueue = []
+const parseDate = (date) => {
+  if (!date) return 0
+  const b = date.split(/\D/)
+  const c = (`${b[0]}${b[1]}${b[2]}${b[3]}${b[4]}${b[5]}`)
+  return parseInt(c, 10)
+}
 
 // listener
 ipcMain.on('getMediaData', (event) => {
   serverGetAsync('media').then((data) => {
-    c('media 列表获取成功')
     media = data
+    media.sort((prev, next) => (parseDate(next.exifDateTime) - parseDate(prev.exifDateTime)) || (
+      parseInt(`0x${next.digest}`, 16) - parseInt(`0x${prev.digest}`, 16)))
     media.forEach((item) => {
       if (item == null) { return }
-      const obj = Object.assign({}, item, { failed: 0 })
       item.failed = 0
       mediaMap.set(item.digest, item)
     })
     dispatch(action.setMedia(media))
   }).catch((err) => {
-    c('media 列表获取失败')
     console.log(err)
   })
 })

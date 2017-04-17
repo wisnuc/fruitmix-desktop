@@ -118,10 +118,8 @@ export default class PhotoList extends Component {
       this.indexHeightSum.push(this.rowHeightSum)
     })
 
-    // debug('rowHeightSum', this.rowHeightSum, this.indexHeightSum, AllHeight)
     const rowHeight = ({ index }) => AllHeight[index]
     const estimatedRowSize = this.rowHeightSum / AllHeight.length
-    debug('estimatedRowSize', estimatedRowSize)
     this.maxScrollTop = this.rowHeightSum - this.clientHeight + 56 + 16 * 2
 
     /* function to render each row */
