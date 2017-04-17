@@ -59,14 +59,14 @@ export default class PhotoList extends Component {
       this.seqIndex = this.props.allPhotos.findIndex(item => item.digest === digest)
       this.setState({ openDetail: true })
     }
-    this.showPicker = (hover) => {
+    this.showDateBar = (hover) => {
       if (!this.state.hover) {
         clearTimeout(this.time)
         this.setState({ hover: true })
         this.time = setTimeout(() => this.setState({ hover: false }), hover ? 100000 : 2000)
       }
     }
-    this.onScroll = () => {
+    this.onScroll = (showDateBar) => {
       if (!this.props.photoMapDates.length) return
       this.scrollToIndex = undefined
       const list = document.getElementsByClassName('ReactVirtualized__List')[0]
@@ -74,11 +74,10 @@ export default class PhotoList extends Component {
       this.date = this.props.photoMapDates[currentIndex].date
       this.percentage = currentIndex / this.props.photoMapDates.length
       if (this.dateRef) {
-        debug('this.percentage * (this.clientHeight - 56)', this.percentage * (this.clientHeight - 56))
         this.dateRef.style.top = `${parseInt(this.percentage * (this.clientHeight - 192) + 108, 10)}px`
         this.dateRef.innerHTML = this.date
-        debug('onScroll', currentIndex, this.percentage, this.dateRef.style, this.dateRef.style.top)
-        this.showPicker(false)
+        // debug('onScroll', currentIndex, this.percentage, this.dateRef.style, this.dateRef.style.top)
+        if (showDateBar) this.showDateBar(false)
       }
     }
     this.scrollToPosition = (top) => {
@@ -96,8 +95,8 @@ export default class PhotoList extends Component {
     }
   }
 
-  componentDidMount() {
-    this.onScroll()
+  componentDidUpdate() {
+    this.onScroll(false)
   }
 
   renderList = () => {
@@ -141,6 +140,7 @@ export default class PhotoList extends Component {
         </div>
       )
     }
+
     return (
       <List
         height={height}
@@ -148,7 +148,7 @@ export default class PhotoList extends Component {
         rowCount={this.props.photoMapDates.length}
         rowHeight={rowHeight}
         rowRenderer={rowRenderer}
-        onScroll={this.onScroll}
+        onScroll={() => this.onScroll(true)}
         scrollToIndex={this.scrollToIndex}
         overscanRowCount={6}
         style={{ padding: 16 }}
@@ -166,7 +166,7 @@ export default class PhotoList extends Component {
         width: 80,
         right: 16
       }}
-      onMouseEnter={() => this.showPicker(true)}
+      onMouseEnter={() => this.showDateBar(true)}
       onMouseLeave={() => this.setState({ hover: false })}
     >
       <FlatButton
