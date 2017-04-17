@@ -150,7 +150,7 @@ export default class PhotoList extends Component {
         scrollToIndex={this.scrollToIndex}
         overscanRowCount={6}
         style={{ padding: 16 }}
-        estimatedRowSize={210}
+        estimatedRowSize={estimatedRowSize}
       />
     )
   }
