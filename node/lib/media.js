@@ -104,22 +104,28 @@ ipcMain.on('getThumb',(event,tasks)=>{
 	createTask(tasks, null)
 })
 */
+const getThumb = (digest, cacheName, mediaPath, session) => {
+  const qs = {
+    width: 210,
+    height: 210,
+    autoOrient: true,
+    modifier: 'caret'
+  }
+  serverDownloadAsync(`media/${digest}/thumbnail`, qs, mediaPath, digest + cacheName).then((data) => {
+    getMainWindow().webContents.send('getThumbSuccess', session, path.join(mediaPath, `${digest}thumb210`))
+  }).catch((err) => {
+    // console.log(err)
+    console.log(`fail download of digest:${digest} of session: ${session} err: ${err}`)
+    // setTimeout(() => getThumb(digest, cacheName, mediaPath, session), 2000)
+  })
+}
+
 
 ipcMain.on('getThumb', (event, session, digest) => {
   const cacheName = 'thumb210'
   fs.stat(path.join(mediaPath, digest + cacheName), (err, data) => {
     if (err) {
-      const qs = {
-        width: 210,
-        height: 210,
-        autoOrient: true,
-        modifier: 'caret'
-      }
-      serverDownloadAsync(`media/${digest}/thumbnail`, qs, mediaPath, digest + cacheName).then((data) => {
-        getMainWindow().webContents.send('getThumbSuccess', session, path.join(mediaPath, `${digest}thumb210`))
-      }).catch((err) => {
-        console.log(err) 
-      })
+      getThumb(digest, cacheName, mediaPath, session)
     } else {
       getMainWindow().webContents.send('getThumbSuccess', session, path.join(mediaPath, `${digest}thumb210`))
     }

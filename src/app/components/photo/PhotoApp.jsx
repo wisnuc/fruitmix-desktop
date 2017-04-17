@@ -153,6 +153,7 @@ class PhotoApp extends React.Component {
           this.photoMapDates.push(...this.photoMapDates)
         }
       }
+      debug('Finishi setPhotoInfo sort', this.allPhotos.length)
       return {
         leftNav,
         allPhotos: this.allPhotos,
