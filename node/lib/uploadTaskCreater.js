@@ -8,6 +8,7 @@ import child_process from 'child_process'
 import request from 'request'
 import uuid from 'node-uuid'
 
+import { serverGetAsync } from './server'
 import store from '../serve/store/store'
 import { getMainWindow } from './window'
 import utils from './util'
@@ -55,11 +56,11 @@ const sendMsg = () => {
   mainWindow.webContents.send('UPDATE_UPLOAD', userTasks.map(item => item.getSummary()), finishTasks.map(i => i.getSummary?i.getSummary():i))
 }
 
-const createTask = (abspath, target, type, newWork, u, r) => {
+const createTask = (abspath, target, type, newWork, u, r, rootUUID) => {
 	initArgs()
 	let taskUUID = u?u:uuid.v4()
 	let uploadRecord = r?r:[]
-	let task = new TaskManager(taskUUID, abspath, target, type, true, uploadRecord)
+	let task = new TaskManager(taskUUID, abspath, target, type, newWork, uploadRecord, rootUUID)
 	task.createStore()
 	userTasks.push(task)
 	task.readyToVisit()
@@ -78,13 +79,14 @@ const createTask = (abspath, target, type, newWork, u, r) => {
 	schedule(): schedule work list
 */
 class TaskManager {
-	constructor(uuid, abspath, target, type, newWork, uploadRecord) {
+	constructor(uuid, abspath, target, type, newWork, uploadRecord, rootUUID) {
 		this.uuid = uuid
 		this.abspath = abspath
 		this.target = target
 		this.type = type
 		this.name = path.basename(abspath)
 		this.newWork = newWork
+		this.rootUUID = rootUUID? rootUUID: ''
 		
 		this.size = 0//not need rootsize for visit 
 		this.completeSize = 0
@@ -162,11 +164,7 @@ class TaskManager {
 
 	diff() {
 		this.state = 'diffing'
-		if (!this.newWork) {
 
-		}else {
-			this.recordInfor('新任务 不需要与服务器进行比较') 
-		}
 		for(let i = this.worklist.length-1 ;i>=0; i--) {
 			if (this.lastFileIndex != -1) break
 			if (this.worklist[i].type === 'file') this.lastFileIndex = i
@@ -177,19 +175,54 @@ class TaskManager {
 			if (this.worklist[i].type === 'folder') this.lastFolderIndex = i
 		}
 
-		this.schedule()
+		if (!this.newWork) {
+			this.pause = true
+			// console.log(this)
+			//....
+
+
+
+		}else {
+			this.recordInfor('新任务 不需要与服务器进行比较') 
+			this.checkNameExist()
+		}
+	}
+
+	async checkNameExist() {
+		let _this = this
+		try{
+			let list = await serverGetAsync('files/' + this.target)
+			let name = _this.tree[0].name
+			let times = 1
+					
+			while(list.findIndex(item => item.name === name) !== -1) {
+				times++
+				let arr = _this.tree[0].name.split('.')
+				if (arr.length  == 1 ) name = arr[0] + '(' + times + ')'
+				else {
+					arr[arr.length-2] += '(' + times + ')'
+					name = arr.join('.')
+				}
+			}
+			_this.tree[0].name = name
+			_this.name = name
+			_this.schedule()
+		}catch(e) {
+			return console.log('上传目标没找到....',e)
+		}
+
 	}
 
 	pauseTask() {
 		this.pause = true
-		this.downloading.forEach(work => {
+		this.uploading.forEach(work => {
 			if (work.type === 'file') work.pause()
 		})
 	}
 
 	resumeTask() {
 		this.pause = false
-		this.downloading.forEach(work => {
+		this.uploading.forEach(work => {
 			if (work.type === 'file') work.resume() 
 		})
 		this.schedule()
@@ -282,12 +315,13 @@ class TaskManager {
 			rootSize: this.rootSize,
 			type: this.type,
 			uploading: uploadArr,
-			finishDate: this.finishDate
+			finishDate: this.finishDate,
+			rootUUID: this.rootUUID
 		}
 	}
 
 	createStore() {
-
+		if (!this.newWork) return
 		db.uploading.insert(this.getStoreObj(), (err, data) => {
 			if(err) return console.log(err)
 		})
@@ -296,10 +330,12 @@ class TaskManager {
 	updateStore() {
 		let uploadArr = []
 		this.uploading.forEach(item => {
-			uploadArr.push(item.getSummary())
+			if (item.type == 'file') {
+				uploadArr.push(item.getSummary())
+			}
 		})
 
-		db.uploading.update({_id: this.uuid}, {$set: {name:this.name, uploading:uploadArr}}, (err, data) => {
+		db.uploading.update({_id: this.uuid}, {$set: {name:this.name, uploading:uploadArr, rootUUID:this.rootUUID}}, (err, data) => {
 			// console.log(data)
 		})
 	}
@@ -367,6 +403,10 @@ class UploadTask {
 		let manager = this.manager
 		this.recordInfor(this.name + ' 上传完毕')
 		this.stateName = 'finish'
+		if (this === this.manager.tree[0]) {
+			console.log('根节点上传完成')
+			this.manager.rootUUID = this.uuid
+		}
 		manager.uploading.splice(manager.uploading.indexOf(this), 1)
 		manager.finishCount++
 		manager.workFinishCall()
@@ -488,7 +528,7 @@ class createFolderSTM extends STM {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        name:path.basename(this.wrapper.abspath)
+        name: this.wrapper.name
       })
     }
 

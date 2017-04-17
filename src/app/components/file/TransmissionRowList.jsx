@@ -39,10 +39,12 @@ class RowList extends Component {
 
 	pause(uuid) {
 		if (this.props.type === 'download') ipcRenderer.send('PAUSE_DOWNLOADING', uuid)
+		else ipcRenderer.send('PAUSE_UPLOADING', uuid)
 	}
 
 	resume(uuid) {
 		if (this.props.type === 'download') ipcRenderer.send('RESUME_DOWNLOADING', uuid)
+		else ipcRenderer.send('RESUME_UPLOADING', uuid)
 	}
 
 	select(type, id, isSelected, index, e) {

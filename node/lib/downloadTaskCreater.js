@@ -1,5 +1,7 @@
 import path from 'path'
 import fs from 'fs'
+import os from 'os'
+import child_process from 'child_process'
 
 import request from 'request'
 import uuid from 'node-uuid'
@@ -98,7 +100,7 @@ class TaskManager {
 		this.downloadingList = downloadingList //for continue downloading
 		this.record = []
 
-		this.countSpeed = setInterval(() => {
+		this.countSpe0ed = setInterval(() => {
 			let s = (this.completeSize - this.lastTimeSize) / 2
 			this.speed = utils.formatSize(s) + ' / 秒'
 			this.restTime = utils.formatSeconds((this.size - this.completeSize) / s)
@@ -330,14 +332,55 @@ class TaskManager {
 			callback('running', this.uuid)
 		}else {
 			this.recordInfor('开始删除正在下载任务...')
-			console.log(this.downloading)
 			this.pauseTask()
-			//clear cache to fixed!!
-			callback('running', this.uuid)
+			this.recordInfor('暂停了下载任务')
+			this.removeCache(callback.bind(this, 'running', this.uuid))
 		}
 	}
 
-	
+	async removeCache(callback) {
+		let del = (p) => {
+			return new Promise((resolve, reject) => {
+					fs.unlink(p, (err, data) => {
+						if (err) {
+							reject(err)
+						}
+						else {
+							resolve(data)
+						}
+					})
+			})
+		}
+
+		while(this.downloading.length) {
+			console.log('开始删除缓存...')
+			if (this.downloading[0].type === 'folder') {
+				this.downloading.shift()
+			}else {
+				let tmpPath = path.join(tmpTransPath, this.uuid + 
+					this.downloading[0].timeStamp + 
+					this.downloading[0].name)
+				try{await del(tmpPath)}
+				catch(e) {console.log('删除缓存' + tmpPath + '失败')}
+				finally{this.downloading.shift()}
+			}
+		}
+		let osType = os.platform()
+
+		switch (osType) {
+			case 'win32':
+				var order = 'rd/s/q '+ path.join(this.downloadPath, this.name)
+				child_process.exec(order)
+				break
+			default:
+				var order = 'rm -rf '+ path.join(this.downloadPath, this.name)
+				child_process.exec(order)
+				break
+		}
+
+		callback()
+	}
+
 }
 
 //visit tree from serve && check the seek of downloading files
@@ -577,6 +620,7 @@ class DownloadFileSTM extends STM {
 	constructor(wrapper) {
 		super(wrapper)
 		this.handle = null
+		this.tmpDownloadPath = path.join(tmpTransPath, wrapper.manager.uuid + wrapper.timeStamp + wrapper.name)
 	}
 
 	beginDownload() {
@@ -584,7 +628,17 @@ class DownloadFileSTM extends STM {
 		addToRunningQueue(this)
 		this.wrapper.manager.updateStore()
     this.wrapper.recordInfor(this.wrapper.name + ' 开始创建...')
-    this.downloading()
+    //check fileCache have been removed
+    fs.exists(this.tmpDownloadPath,(exist) => {
+    	if (exist) {console.log('找到文件缓存')}
+    	else {
+    		console.log('没有找到文件缓存 重新下载该文件')
+    		this.wrapper.manager.completeSize -= this.wrapper.seek
+    		this.wrapper.seek = 0
+    	}
+    	this.downloading()
+    })
+    
 	}
 
 	downloading() {
@@ -609,8 +663,7 @@ class DownloadFileSTM extends STM {
 		  mode: 0o666,
 		  autoClose: true
 		}
-		let tmpDownloadPath = path.join(tmpTransPath, wrapper.manager.uuid + wrapper.timeStamp + wrapper.name)
-		let stream = fs.createWriteStream(tmpDownloadPath, streamOptions)
+		let stream = fs.createWriteStream(this.tmpDownloadPath, streamOptions)
 		stream.on('error', (err) => {
 			console.log('stream error trigger')
 			console.log(err)
@@ -633,7 +686,7 @@ class DownloadFileSTM extends STM {
 			this.wrapper.lastTimeSize = stream.bytesWritten
 			// console.log('一段文件写入结束 当前seek位置为 ：' + _this.wrapper.seek/_this.wrapper.size + '% 增加了 ：' + gap/this.wrapper.size )
 			this.wrapper.lastTimeSize = 0
-			if(this.wrapper.seek == this.wrapper.size) this.rename(tmpDownloadPath)
+			if(this.wrapper.seek == this.wrapper.size) this.rename(this.tmpDownloadPath)
 		})
 
 		this.handle = request(options)
@@ -730,9 +783,8 @@ ipcMain.on('PAUSE_DOWNLOADING', (e, uuid) => {
 
 ipcMain.on('RESUME_DOWNLOADING', (e, uuid) => {
 	if (!uuid) return
-	console.log('receive')
 	let task = userTasks.find(item => item.uuid === uuid)
-	task.resumeTask()
+	if (task) task.resumeTask()
 })
 
 export default createTask

@@ -20,7 +20,6 @@ import request from 'superagent'
 import svg from '../../utils/SVGIcon'
 
 import { Avatar, Popover } from 'material-ui'
-
 import IconButton from 'material-ui/IconButton'
 import ActionCheckCircle from 'material-ui/svg-icons/action/check-circle'
 import ActionDone from 'material-ui/svg-icons/action/done'
@@ -50,7 +49,6 @@ import { Divider, Paper, Menu, MenuItem, Dialog,
 
 import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
 
-import { blue500, red500, greenA200 } from 'material-ui/styles/colors'
 //import file module
 import FileTable from './FileTable'
 import FileUploadButton from './FileUploadButton'

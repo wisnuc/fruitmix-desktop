@@ -33,6 +33,7 @@ class Upload extends Component {
 		this.play = this.play.bind(this)
 		this.pause = this.pause.bind(this)
 		this.delete = this.delete.bind(this)
+		this.open = this.open.bind(this)
 	}
 
 	componentDidMount() {
@@ -124,7 +125,7 @@ class Upload extends Component {
 							<Menu>
 								<MenuItem primaryText='开始下载' disabled={this.state.play} onTouchTap={this.play}/>
 								<MenuItem primaryText='暂停' disabled={this.state.pause} onTouchTap={this.pause}/>
-								<MenuItem primaryText='打开所在文件夹'/>
+								<MenuItem primaryText='打开所在文件夹' onTouchTap={this.open}/>
 								<MenuItem primaryText='删除' onTouchTap={this.delete}/>
 							</Menu>
 						</Paper>
@@ -195,6 +196,12 @@ class Upload extends Component {
 		else this.state.tasks.forEach(item => 
 			ipcRenderer.send(this.taskSelected.length?'DELETE_UPLOADING':'DELETE_UPLOADED', this.state.tasks)
 			)
+	}
+
+	open() {
+		if (this.props.type === 'download') {
+			ipcRenderer.send('OPEN_DOWNLOAD', this.state.tasks, this.taskSelected.length?'running':'finish')
+		}
 	}
 }
 
