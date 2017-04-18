@@ -1,7 +1,6 @@
 const request = require('superagent')
-const EventEmitter =require('eventemitter3')
 
-import Request from './Request'
+import RequestManager from './reqman'
 
 /**
 
@@ -15,7 +14,7 @@ import Request from './Request'
   NOT think some reqs is always there. It may be null.
 
 **/
-class Device extends EventEmitter {
+class Device extends RequestManager {
 
   // constructor won't emit anything since there is no listeners yet
   // the common way to solve this problem is to use a separate method 
@@ -48,53 +47,6 @@ class Device extends EventEmitter {
       clearRequest: this.clearRequest.bind(this),
       initWizard: this.initWizard.bind(this),
       systemStatus: this.systemStatus.bind(this),
-    }
-  }
-
-  abort() {
-    // TODO
-  }
-
-  setState(name, nextState) {
-
-    let state = this.state
-    this.state = Object.assign({}, state, { [name]: nextState })
-    this.emit('updated', state, this.state)
-  }
-
-  setRequest(name, props, f, next) {
-
-    if (this[name]) {
-      this[name].abort()
-      this[name].removeAllListeners()
-    }
-
-    this[name] = new Request(props, f)
-    this[name].on('updated', (prev, curr) => {
-
-      this.setState(name, curr)
-
-      console.log(`${name} updated`, prev, curr, 
-        this[name].isFinished(), typeof next === 'function')
-
-      if (this[name].isFinished() && next) {
-        this[name].isRejected() 
-          ? next(this[name].reason())  
-          : next(null, this[name].value())
-      }
-    })
-
-    // emit 
-    this.setState(name, this[name].state)
-  }
-
-  clearRequest(name) {
-
-    if (this[name]) {
-      this[name].abort()
-      this[name].removeAllListeners()
-      this[name] = null
-      this.setState(name, null)
     }
   }
 

@@ -3,19 +3,38 @@ const EventEmitter = require('eventemitter3')
 
 import Request from './Request'
 
+// logged-in user is constructed from 
+// 1. device 
+// 2. useruuid and token
 class LoggedInUser extends EventEmitter {
 
-  constructor(mdev) {
+  constructor(address, userUUID, token) {
     super()  
 
-    this.mdev = mdev
-  
-    this.home = null
+    this.address = address
+    this.userUUID = userUUID
+    this.token = token
+
+    // requests
+    this.login = null       // from login api
+    this.users = null       // from users api
+
+    this.homeNav = null         // for home nav
+
+    this.publicDrives = null    // for public drives
+
+    this.fshares = null         // for file shares
+    this.mshares = null         // for media shares
+    this.media = null           // for media
 
     this.state = {
+
+      userUUID,
     
-      request: this.request.bind(this)
+      request: this.request.bind(this),
     }
+
+    this.renameBound = this.rename.bind(this)
   }
 
   setState(name, nextState) {
@@ -66,63 +85,16 @@ class LoggedInUser extends EventEmitter {
     let r
 
     switch(name) {
-    case 'device':
+    case 'login':
       r = request
-        .get(`http://${this.mdev.address}:3000/system/device`)
-      break
-
-    case 'boot':
-      r = request
-        .get(`http://${this.mdev.address}:3000/system/boot`)
-      break
-
-    case 'storage':
-      r = request
-        .get(`http://${this.mdev.address}:3000/system/storage?wisnuc=true`)
+        .get(`http://${this.address}:3721/login`)
       break
 
     case 'users':
       r = request
-        .get(`http://${this.mdev.address}:3721/login`)
+        .set('Authorization', 'JWT ' + this.token)
+        .get(`http://${this.address}:3721/users`)
       break
-
-    case 'mkfs':
-      r = request
-        .post(`http://${this.mdev.address}:3000/system/mkfs`)
-        .timeout(30000)
-        .send(args)
-        .set('Accept', 'application/json')
-      break
-
-    case 'install':
-      r = request
-        .post(`http://${this.mdev.address}:3000/system/install`)
-        .timeout(30000)
-        .send(args)
-        .set('Accept', 'application/json')
-      break
-
-    case 'firstUser':
-      r = request
-        .post(`http://${this.mdev.address}:3721/init`)
-        .send(args)
-        .set('Accept', 'application/json')
-      break
-
-    case 'run':
-      r = request
-        .post(`http://${this.mdev.address}:3000/system/mir/run`)
-        .timeout(30000)
-        .send(args)
-        .set('Accept', 'application/json')
-      break
-
-    case 'token':
-      r = request
-        .get(`http://${this.mdev.address}:3721/token`)
-        .auth(args.uuid, args.password)
-        .set('Accept', 'application/json')
-      break 
 
     default:
       break
@@ -132,5 +104,16 @@ class LoggedInUser extends EventEmitter {
 
     this.setRequest(name, args, cb => r.end(cb), next) 
   }
+
+  start() {
+    this.request('login')
+    this.request('users')
+  }
+
+  async rename() {
+    this.request('rename')
+    this.request('
+  }
 }
 
+export default LoggedInUser
