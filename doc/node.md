@@ -22,7 +22,7 @@ There are redux reducers inside `reducers` directory. Most of them are used for 
 
 `command` implements command pattern for browser / main rpc (remote procedure call) based on Electron / node IPC. **遥远的未来重构**
 
-Currently, `config` deals with some path related issue. This should be changed by a strict definition of global config, user config, as well as a uniform interface for retrieving file paths. **需要写**
+Currently, `config` deals with some path related issue. This should be changed by a strict definition of global config, user config, as well as a uniform interface for retrieving file paths. **需要写->需要测试和集成**
 
 `files` implements server-side file API encapsulation. It is necessary mainly for two reasons:
 

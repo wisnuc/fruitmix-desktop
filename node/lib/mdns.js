@@ -80,7 +80,7 @@ ipcMain.on('MDNS_SCAN', (event, session) => {
   browser = b
 })
 
-console.log('node/lib/mdns2 loaded')
+console.log('node/lib/mdns loaded')
 
 export default browser
 

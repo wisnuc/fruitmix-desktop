@@ -41,9 +41,10 @@ const initMainWindow = () => {
   else
     _mainWindow.loadURL('file://' + path.join(global.entryFileDir, '../public' ,'index.html'))
 
-  // ipc message will lost if sent too early FIXME
+  // ipc message will be lost if sent early than 'did-finish-load'
   let contents = _mainWindow.webContents
-  setTimeout(() => contents.send('CONFIG_LOADED', global.configuration.getConfiguration()), 300)
+  contents.on('did-finish-load', () => 
+    contents.send('CONFIG_LOADED', global.configuration.getConfiguration()))
 
   console.log('[window] mainWindow initialized')
 }

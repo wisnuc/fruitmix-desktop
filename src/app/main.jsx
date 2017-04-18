@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDom from 'react-dom'
 
 import Login from './components/login/Login'
-import LoggedIn from './components/main/Main'
+import LoggedIn from './components/main/Navigation'
 import Maintenance from './components/maintenance/Maintenance'
 
 import Device from './components/common/device'
@@ -51,9 +51,7 @@ class Main extends React.Component {
     this.setState({ view })
   }
 
-  login() {
-     
-  }
+  login() {}
 
   render() {
 
