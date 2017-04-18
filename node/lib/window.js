@@ -10,6 +10,9 @@ const getMainWindow = () => _mainWindow
 
 const initMainWindow = () => {
 
+  // add react-devtools as extension of chrome
+  BrowserWindow.addDevToolsExtension(`${process.cwd()}/public/assets/react-devtools/2.0.12_0`)
+
   // create window
 	_mainWindow = new BrowserWindow({
 		frame: true,

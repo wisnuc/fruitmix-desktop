@@ -18,9 +18,6 @@ import node from './node'
 import mdns from './mdns'
 import maintenance from './maintenance'
 
-// import atom component reducer
-import { radio, shareRadio } from '../React-Redux-UI/src/reducers/reducer';
-
 const reducer = combineReducers({
 	login,
 	snack,
@@ -32,9 +29,7 @@ const reducer = combineReducers({
 	imageItem,
 	largeImages,
 	navigationBarTitleTexts,
-	radio,
 	albumHash,
-	shareRadio,
 	fileInfo,
   command,
   node,
