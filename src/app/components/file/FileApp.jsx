@@ -74,6 +74,9 @@ const LEFTNAV_WIDTH = 210
 
 import { DialogInput, DialogConfirm } from '../common/Dialogs'
 
+//import model
+import FileModel from './FileModel'
+
 const secondaryColor = '#FF4081'
 
 const formatTime = (mtime) => {
@@ -214,6 +217,7 @@ class FileApp extends React.Component {
     const assign = (props) => this.setState(state => Object.assign({}, state, props))
 
     this.inputValue = null
+    this.fileModel = null
     this.state = {
 
       file: null,
@@ -235,6 +239,8 @@ class FileApp extends React.Component {
       createNewFolder: false,
       deleteConfirm: false,
       importDialog: null,
+
+      fileModel: null
     }
 
     // FIXME !!!
@@ -353,6 +359,8 @@ class FileApp extends React.Component {
         if (err) return // todo
         	this.navUpdate('HOME_DRIVE', data)
       }))
+
+    this.fileModel = new FileModel('HOME_DRIVE')
   }
 
   componentWillUnmount() {
