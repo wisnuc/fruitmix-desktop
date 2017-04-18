@@ -9,32 +9,17 @@ import Request from './Request'
 class LoggedInUser extends EventEmitter {
 
   constructor(address, userUUID, token) {
+
     super()  
 
     this.address = address
     this.userUUID = userUUID
     this.token = token
 
-    // requests
-    this.login = null       // from login api
-    this.users = null       // from users api
-
-    this.homeNav = null         // for home nav
-
-    this.publicDrives = null    // for public drives
-
-    this.fshares = null         // for file shares
-    this.mshares = null         // for media shares
-    this.media = null           // for media
-
     this.state = {
-
       userUUID,
-    
       request: this.request.bind(this),
     }
-
-    this.renameBound = this.rename.bind(this)
   }
 
   setState(name, nextState) {
@@ -80,20 +65,131 @@ class LoggedInUser extends EventEmitter {
     }
   }
 
+  aget(ep) {
+    return request
+      .get(`http://${this.address}:3721/${ep}`)
+      .set('Authorization', 'JWT ' + this.token)
+  }
+
+  apost(ep, data) {
+
+    let r = request.post(`http://${this.address}:3721/${ep}`)
+    if (data) r = r.send(data)
+    return r.set('Authorization', 'JWT ' + this.token)
+  }
+
+  apatch(ep, data) {
+
+    let r = request.patch(`http://${this.address}:3721/${ep}`)
+    if (data) r = r.send(data)
+    return r.set('Authorization', 'JWT ' + this.token)
+  }
+
+  adel(ep) {
+    return request
+      .del(`http://${this.address}:3721/${ep}`)
+      .set('Authorization', 'JWT ' + this.token)
+  }
+
   request(name, args, next) {
 
     let r
 
     switch(name) {
     case 'login':
-      r = request
-        .get(`http://${this.address}:3721/login`)
+      r = request.get(`http://${this.address}:3721/login`)
+      break
+
+    case 'account':
+      r = this.aget('account')
+      break
+
+    case 'updateAccount':
+      r = this.apost('account', args)
       break
 
     case 'users':
-      r = request
-        .set('Authorization', 'JWT ' + this.token)
-        .get(`http://${this.address}:3721/users`)
+      r = this.aget('users')
+      break
+
+    case 'drives':
+      r = this.aget('drives')
+      break
+
+    case 'adminUsers':
+      r = this.aget('admin/users')
+      break
+
+    case 'adminDrives':
+      r = this.aget('admin/drives')
+      break
+
+    /** File APIs **/
+    case 'listDir':
+      r = this.aget(`fruitmix/list/${args.dirUUID}`)
+      break
+
+    case 'listNavDir':
+      r = this.aget(`fruitmix/list-nav/${args.dirUUID}/${args.rootUUID}`)
+      break
+
+    case 'downloadFile':
+      r = this.aget(`fruitmix/download/${args.dirUUID}/${args.fileUUID}`)
+      break
+
+    case 'mkdir':
+      r = this.apost(`fruitmix/mkdir/${args.dirUUID}/${args.dirname}`)
+      break
+
+    case 'uploadFile':
+      r = null // TODO
+      break
+
+    case 'overwriteFile':
+      r = null // TODO
+      break
+
+    case 'renameDirOrFile':
+      r = this.apost(`fruitmix/rename/${args.dirUUID}/${args.nodeUUID}/${args.filename}`)
+      break
+
+    case 'deleteDirOrFile':
+      r = this.adel(`fruitmix/${args.dirUUID}/${args.nodeUUID}`)
+      break
+
+    /** Ext APIs **/
+    case 'extDrives':
+      // r = this.aget TODO
+      break
+
+    case 'extListDir':
+      break
+
+    case 'extMkdir':
+      break
+    
+    case 'extRenameDirOrFile':
+      break
+
+    case 'extDeleteDirOrFile':
+      break
+
+    /** File Transfer API **/
+    // ????
+
+    /** File Share API **/
+    case 'fileShare':
+      r = this.aget(`fileshare`)
+      break
+
+    /** Media Share API **/
+    case 'mediaShare':
+      r = this.aget(`mediashare`)
+      break
+
+    /** Media API **/
+    case 'media':
+      r = this.aget(`media`)
       break
 
     default:
@@ -101,18 +197,24 @@ class LoggedInUser extends EventEmitter {
     }
 
     if (!r) return console.log(`no request handler found for ${name}`)
-
     this.setRequest(name, args, cb => r.end(cb), next) 
   }
 
-  start() {
-    this.request('login')
-    this.request('users')
+  async requestAsync(name, args) {
+    return Promise.promisify(this.request).bind(this)(name, args)
   }
 
-  async rename() {
-    this.request('rename')
-    this.request('
+  start() {
+
+    this.requestAsync('account', null).asCallback((err, data) => {
+      console.log('initial request for account: ', err || data) 
+    })
+
+    this.request('users')
+    this.request('drives')
+    this.request('fileShare')
+    this.request('mediaShare')
+    this.request('media')
   }
 }
 

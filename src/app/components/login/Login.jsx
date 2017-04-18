@@ -212,7 +212,10 @@ class Login extends React.Component {
     this.setState({ byebye: true })
     await Promise.delay(300)
 
-    this.props.nav(view || 'user')
+    if (view === 'maintenance') 
+      this.props.maintain()
+    else 
+      this.props.login()
   }
 
   done(view) {

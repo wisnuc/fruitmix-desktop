@@ -6,6 +6,7 @@ import LoggedIn from './components/main/Navigation'
 import Maintenance from './components/maintenance/Maintenance'
 
 import Device from './components/common/device'
+import LoggedInUser from './components/common/loggedInUser'
 
 class Main extends React.Component {
 
@@ -13,6 +14,7 @@ class Main extends React.Component {
     super()
 
     this.selectedDevice = null
+    this.user = null
 
     setTimeout(() => {
       let mdns = window.store.getState().mdns
@@ -51,7 +53,22 @@ class Main extends React.Component {
     this.setState({ view })
   }
 
-  login() {}
+  login() {
+
+    let token = this.state.selectedDevice.token
+    if (!token.isFulfilled()) throw new Error('token not found')
+
+    let address = this.state.selectedDevice.mdev.address
+    let userUUID = token.ctx.uuid
+    let jwt = token.value().token
+
+    console.log('user logged-in', address, userUUID, jwt)
+
+    this.user = new LoggedInUser(address, userUUID, jwt)
+    this.user.on('updated', (prev, next) => this.setState({ user: next }))
+    this.user.start()
+    this.setState({ view: 'user' })
+  }
 
   render() {
 
