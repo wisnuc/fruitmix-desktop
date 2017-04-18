@@ -20,7 +20,6 @@ import request from 'superagent'
 import svg from '../../utils/SVGIcon'
 
 import { Avatar, Popover } from 'material-ui'
-
 import IconButton from 'material-ui/IconButton'
 import ActionCheckCircle from 'material-ui/svg-icons/action/check-circle'
 import ActionDone from 'material-ui/svg-icons/action/done'
@@ -50,7 +49,6 @@ import { Divider, Paper, Menu, MenuItem, Dialog,
 
 import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
 
-import { blue500, red500, greenA200 } from 'material-ui/styles/colors'
 //import file module
 import FileTable from './FileTable'
 import FileUploadButton from './FileUploadButton'
@@ -75,6 +73,9 @@ const LEFTNAV_WIDTH = 210
 ///////////////////////////////////////////////////////////////////////////////
 
 import { DialogInput, DialogConfirm } from '../common/Dialogs'
+
+//import model
+import FileModel from './FileModel'
 
 const secondaryColor = '#FF4081'
 
@@ -216,6 +217,7 @@ class FileApp extends React.Component {
     const assign = (props) => this.setState(state => Object.assign({}, state, props))
 
     this.inputValue = null
+    this.fileModel = null
     this.state = {
 
       file: null,
@@ -237,6 +239,8 @@ class FileApp extends React.Component {
       createNewFolder: false,
       deleteConfirm: false,
       importDialog: null,
+
+      fileModel: null
     }
 
     // FIXME !!!
@@ -355,6 +359,8 @@ class FileApp extends React.Component {
         if (err) return // todo
         	this.navUpdate('HOME_DRIVE', data)
       }))
+
+    this.fileModel = new FileModel('HOME_DRIVE')
   }
 
   componentWillUnmount() {

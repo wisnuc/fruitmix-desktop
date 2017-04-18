@@ -6,13 +6,6 @@ import media from './media'
 import setting from './setting'
 import view from './view'
 import file from './file'
-import imageItem from './imageitem';
-import largeImages from './largeImage';
-import navigationBarTitleTexts from './navigationBarTitleTexts';
-import albumHash from './albumHash';
-import fileInfo from './fileInfo';
-
-import popmenu from './popmenu'
 import command from './command'
 import node from './node'
 import mdns from './mdns'
@@ -26,14 +19,8 @@ const reducer = combineReducers({
 	setting,
 	view,
 	file,
-	imageItem,
-	largeImages,
-	navigationBarTitleTexts,
-	albumHash,
-	fileInfo,
   command,
   node,
-  popmenu,
   mdns,
   maintenance,
 })

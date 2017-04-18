@@ -111,7 +111,8 @@ class CreatingVolumeDiskSelection1 extends React.PureComponent {
             <div style={{width: 160}}>
             <RadioButtonGroup style={{position: 'relative', display: 'flex'}} 
               valueSelected={this.props.state.mode} 
-              onChange={(e, value) => this.props.setState({ mode: value }) }>
+              onChange={(e, value) => this.props.setState({ mode: value }) }
+              name={'volume-name'}>
               <RadioButton style={{fontSize:13, width:128}} iconStyle={{width:16, height:16, padding: 2}} 
                 disableTouchRipple={true}
                 disableFocusRipple={true}

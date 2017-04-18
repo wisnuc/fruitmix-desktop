@@ -13,41 +13,31 @@ export default class RenderListByRow extends Component {
           this.refs[refName].addHoverIconButton()
         )
       }
-
       this.removeHoverToAllItem = () => {
         this.detectIsAllOffChecked() && this.selectionRefs.forEach(refName =>
           this.refs[refName].removeHoverIconButton()
         )
       }
-
       this.addCheckedToItem = (itemIndex) => {
         const photoItem = this.refs[`photoItem${itemIndex}`]
-
         this.props.addListToSelection(photoItem.props.path)
       }
-
       this.detectIsAllOffChecked = () => this.selectionRefs.every(refName => this.refs[refName].state.action !== 'on')
-
       this.addAllChecked = () => {
         const selectDate = this.refs.selectDate
-
         setTimeout(() =>
           this.selectionRefs.every(refName => this.refs[refName].state.action === 'on')
             && selectDate.onSelected(true)
         , 0)
       }
-
       this.removeCheckedToItem = (itemIndex) => {
         const photoItem = this.refs[`photoItem${itemIndex}`]
-
         this.props.removeListToSelection(photoItem.props.path)
       }
-
       this.removeAllChecked = () => {
         const selectDate = this.refs.selectDate
         selectDate.offSelected(true)
       }
-
       this.removeCheckToAllItem = () => {
         this.selectionRefs.forEach(refName =>
           this.refs[refName].offSelectIconButton(false)
