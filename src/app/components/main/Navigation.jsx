@@ -55,10 +55,12 @@ class FileContent extends React.Component {
 
   render() {
 
+    /**
     let home = this.props.home
     if (home.isPending()) {
       return <div>loading...</div>
     }
+    **/
 
     return (
       <div>loaded</div>
