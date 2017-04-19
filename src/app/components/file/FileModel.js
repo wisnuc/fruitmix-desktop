@@ -41,6 +41,8 @@ class FileModel extends EventEmitter {
 	}
 
 	request(name, args, next) {
+		let ip = window.store.getState().node.config.ip
+		let port = 3721
 		switch(name) {
 			case 'file_nav':
 				r = request(``)
