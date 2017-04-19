@@ -127,6 +127,7 @@ class PhotoApp extends React.Component {
             this.allPhotos.push(item)
             if (MaxItem === 0) {
               MaxItem = Math.floor(width / 216) - 1
+              this.photoDates.push(0)
               this.photoMapDates.push({
                 first: !isRepeat,
                 index: lineIndex,
@@ -168,7 +169,7 @@ class PhotoApp extends React.Component {
   }
 
   render() {
-    // debug('PhotoApp, store.media.data', window.store.getState().media.data)
+    debug('PhotoApp, store.media.data', window.store.getState().media.data)
     return (
       <Paper>
         <EventListener
