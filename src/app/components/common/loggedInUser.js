@@ -207,7 +207,7 @@ class LoggedInUser extends EventEmitter {
   start() {
 
     this.requestAsync('account', null).asCallback((err, data) => {
-      console.log('initial request for account: ', err || data) 
+     
     })
 
     this.request('users')
@@ -219,3 +219,4 @@ class LoggedInUser extends EventEmitter {
 }
 
 export default LoggedInUser
+

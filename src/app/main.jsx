@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDom from 'react-dom'
 
 import Login from './components/login/Login'
-import LoggedIn from './components/main/Navigation'
+import LoggedIn from './components/nav/Navigation'
 import Maintenance from './components/maintenance/Maintenance'
 
 import Device from './components/common/device'

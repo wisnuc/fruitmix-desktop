@@ -23,92 +23,171 @@ import NavigationExpandMore from 'material-ui/svg-icons/navigation/expand-more'
 import NavigationExpandLess from 'material-ui/svg-icons/navigation/expand-less'
 
 import { indigo500 } from 'material-ui/styles/colors'
-
-
 import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
 
-const fileAppBar = () => {
+import FileTitle from '../file/FileTitle'
+import FileToolBar from '../file/FileToolBar'
+import FileContent from '../file/FileContent'
+import FileDetail from '../file/FileDetail'
 
-  return {
-    prominent: true,
-    title: '文件',
-    color: indigo500
-  }
-}
+const navMap = new Map([
+  ['HOME_DRIVE', {
+    text: '我的文件',
+    icon: FileFolder,
+    prominent: () => true,
+    toolbar: FileToolBar,
+    content: FileContent,
+    detail: FileDetail
+  }],
+  ['PUBLIC_DRIVES', {
+    text: '公共文件',
+    icon: FileFolderShared,
+    prominent: () => true,
+    toolbar: FileToolBar,
+    content: FileContent,
+    detail: FileDetail,
+  }],
+  ['FSHARED_WITH_ME', {
+    text: '分享给我',
+    icon: SocialPeople
+  }],
+  ['FSHARED_WITH_OTHERS', {
+    text: '我的分享',
+    icon: SocialShare,
+  }],
+  ['EXT_DRIVES', {
+    text: '全部磁盘',
+    icon: DeviceStorage,
+  }],
+  ['UPLOADING', {
+    text: '正在上传',
+    icon: FileCloudUpload,
+  }],
+  ['DOWNLOADING', {
+    text: '正在下载',
+    icon: FileCloudDownload,
+  }],
+  ['COPY_MOVE', {
+    text: '复制移动',
+    icon: ActionSwapHoriz,
+  }],
+  ['MEDIA', {
+    text: '照片',
+    icon: FileFolder,
+  }],
+  ['MEDIA_ALBUM', {
+    text: '相册',
+    icon: FileFolderShared,
+  }],
+  ['MEDIA_SHARE', {
+    text: '分享',
+    icon: SocialShare,
+  }],
+  ['APP_MARKET', {
+    text: '应用市场',
+    icon: ActionDashboard
+  }],
+  ['INSTALLED_APPS', {
+    text: '我的应用',
+    icon: ActionExtension
+  }],
+  ['SETTINGS_APPS', {
+    text: '设置',
+    icon: ActionSettings
+  }],
+  ['LOGOUT', {
+    text: '退出',
+    icon: ActionExitToApp,
+  }]
+])
 
-class FileToolBar extends React.Component {
+const fileNavGroup = ['HOME_DRIVE', 'PUBLIC_DRIVES', 'FSHARED_WITH_ME', 
+  'FSHARED_WITH_OTHERS', 'EXT_DRIVES', 'UPLOADING', 'DOWNLOADING', 'COPY_MOVE' ]
 
-  constructor(props) {
-    super(props)
-  }  
-
-  render() {
-    return <div />
-  }
-}
-
-class FileContent extends React.Component {
- 
-  constructor(props) {
-    super(props)
-  } 
-
-  render() {
-
-    /**
-    let home = this.props.home
-    if (home.isPending()) {
-      return <div>loading...</div>
-    }
-    **/
-
-    return (
-      <div>loaded</div>
-    )
-  }
-}
-
-class FileDetail extends React.Component {
-
-  constructor(props) {
-    super(props)
-  }
-
-  render() {
-    return <div />
-  }
-}
+const mediaNavGroup = ['MEDIA', 'MEDIA_ALBUM', 'MEDIA_SHARE']
+const appifiNavGroup = ['APP_MARKET', 'INSTALLED_APPS']
 
 class AppBar extends React.Component {
 
   constructor(props) {
     super(props)
 
-    this.state = {
-      prominent: false
-    }
+    this.state = {}
   }
 
   render() {
+
+    let color = '#FFF' // TODO
+
+    let { prominent, Title, Toolbar } = this.props
+
+    console.log('AppBar render, Title, Toolbar', Title, Toolbar)
+
+    let topbarStyle = {
+      width: '100%', 
+      height: 48, 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'space-between'
+    }
+
+    let toolbarStyle = {
+      flexGrow: 1, 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'flex-end'
+    }
+
+    let titleRegionStyle = {
+      height: prominent ? 48 : 0,
+      width: '100%',
+      marginLeft: 72,
+      transition: 'height 300ms'
+    }
+
     return (
       <Paper style={this.props.style} rounded={false}>
-        <div style={{width: '100%', height: 48, display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+
+        <div style={topbarStyle}>
+
           <div style={{flex: '0 0 12px'}} />
+
+          {/** menu button **/}
           <IconButton onTouchTap={() => this.props.openDrawer(true)}>
             <NavigationMenu color='#FFF' />
           </IconButton>
+
+          {/** spacer **/}
           <div style={{flex: '0 0 20px'}} />
-          {/* <div style={{fontSize: 20, fontWeight: 'medium'}}>文件</div> */}
-          <div style={{flexGrow: 1}} />
-          <IconButton><SocialNotifications color='#FFF' /></IconButton>
-          <IconButton onTouchTap={this.props.toggleDetail}>
-            <ActionInfo color='#FFF' />
+         
+          {/** non-prominent title **/} 
+          { (!prominent && typeof Title === 'string') && 
+            <div>{Title}</div> }
+
+          {/** context-sensitive toolbar **/}
+          <div style={toolbarStyle}>
+            { Toolbar && <Toolbar /> }
+          </div>
+
+          {/** global notification button **/}
+          <IconButton>
+            <SocialNotifications color={color} />
           </IconButton>
+
+          {/** optional toggle detail button **/}
+          <IconButton onTouchTap={this.props.toggleDetail}>
+            <ActionInfo color={color} />
+          </IconButton>
+
+          {/** right padding **/} 
           <div style={{flex: '0 0 12px'}} />
+
         </div>
-        <div style={{marginLeft: 80, width: '100%', height: 48, display: 'flex', alignItems: 'center', fontSize: 20, fontWeight: 'medium', color: '#FFF' }}>
-          {'我的文件 > Hello > World > 一个人的探戈'}
-        </div>
+
+        { (prominent && Title && typeof Title === 'string') &&
+          <div style={{fontSize: 20, fontWeight: 500, color: '#FFF'}}>{Title}</div> }
+        { (prominent && Title && typeof Title !== 'string') && <Title /> }
+
       </Paper>
     )
   } 
@@ -191,95 +270,6 @@ class QuickNav extends React.PureComponent {
     )
   }
 }
-
-class Something extends React.PureComponent {
-
-  render() {
-    return <div />
-   
-  }
-}
-
-const navMap = new Map([
-  ['HOME_DRIVE', {
-    text: '我的文件',
-    icon: FileFolder,
-    appbar: {
-      prominent: true,
-      title: null,
-      color: '#123456' 
-    },
-    toolbar: FileToolBar,
-    content: FileContent,
-    detail: FileDetail
-  }],
-  ['PUBLIC_DRIVES', {
-    text: '公共文件',
-    icon: FileFolderShared,
-    appbar: {
-    }
-  }],
-  ['FSHARED_WITH_ME', {
-    text: '分享给我',
-    icon: SocialPeople
-  }],
-  ['FSHARED_WITH_OTHERS', {
-    text: '我的分享',
-    icon: SocialShare,
-  }],
-  ['EXT_DRIVES', {
-    text: '全部磁盘',
-    icon: DeviceStorage,
-  }],
-  ['UPLOADING', {
-    text: '正在上传',
-    icon: FileCloudUpload,
-  }],
-  ['DOWNLOADING', {
-    text: '正在下载',
-    icon: FileCloudDownload,
-  }],
-  ['COPY_MOVE', {
-    text: '复制移动',
-    icon: ActionSwapHoriz,
-  }],
-  ['MEDIA', {
-    text: '照片',
-    icon: FileFolder,
-  }],
-  ['MEDIA_ALBUM', {
-    text: '相册',
-    icon: FileFolderShared,
-  }],
-  ['MEDIA_SHARE', {
-    text: '分享',
-    icon: SocialShare,
-  }],
-  ['APP_MARKET', {
-    text: '应用市场',
-    icon: ActionDashboard
-  }],
-  ['INSTALLED_APPS', {
-    text: '我的应用',
-    icon: ActionExtension
-  }],
-  ['SETTINGS_APPS', {
-    text: '设置',
-    icon: ActionSettings
-  }],
-  ['LOGOUT', {
-    text: '退出',
-    icon: ActionExitToApp,
-  }]
-])
-
-const fileNavGroup = [
-  'HOME_DRIVE', 'PUBLIC_DRIVES', 'FSHARED_WITH_ME', 'FSHARED_WITH_OTHERS', 'EXT_DRIVES', 
-  'UPLOADING', 'DOWNLOADING', 'COPY_MOVE'
-]
-
-const mediaNavGroup = ['MEDIA', 'MEDIA_ALBUM', 'MEDIA_SHARE']
-const appifiNavGroup = ['APP_MARKET', 'INSTALLED_APPS']
 
 class Navigation extends React.Component {
 
@@ -386,10 +376,17 @@ class Navigation extends React.Component {
         <div style={{height: '100%', position: 'relative', flexGrow: 1}}>
           
           {/* appbar */}
-          <AppBar style={{position: 'absolute', width: '100%', height: appbarHeight, backgroundColor}} 
+          <AppBar 
+
+            style={{position: 'absolute', width: '100%', height: appbarHeight, backgroundColor}} 
+
             toggleDetail={this.toggleDetailBound}
             toggleMenu={this.toggleMenuBound} 
             openDrawer={this.openDrawerBound}
+            
+            prominent={fileNavGroup.slice(0, 5).includes(this.state.nav) ? true : false}
+            Toolbar={fileNavGroup.slice(0, 5).includes(this.state.nav) && FileToolBar}
+            Title={fileNavGroup.slice(0,5).includes(this.state.nav) && FileTitle}
           />
         
           {/* appbar shadow region, for display shadow */}
