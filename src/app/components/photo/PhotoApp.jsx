@@ -80,7 +80,7 @@ class PhotoApp extends React.Component {
     )
 
     this.setPhotoInfo = () => {
-      // debug('start this.setPhotoInfo')
+      // debug('start this.setPhotoInfo', (!this.mediaStore.length || this.force))
       const leftNav = !!this.state.leftNav
       if (!this.mediaStore.length || this.force) {
         /* mediaStore were sorted by date in Node */
@@ -158,7 +158,7 @@ class PhotoApp extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    if (!window.store.getState().media.data.length) return true
+    if (!this.mediaStore.length) return true
     return (this.state !== nextState)
   }
 
@@ -168,7 +168,7 @@ class PhotoApp extends React.Component {
   }
 
   render() {
-    debug('PhotoApp, this.photoMapDates', this.photoMapDates)
+    // debug('PhotoApp, store.media.data', window.store.getState().media.data)
     return (
       <Paper>
         <EventListener

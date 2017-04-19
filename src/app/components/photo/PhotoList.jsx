@@ -63,7 +63,7 @@ export default class PhotoList extends Component {
       if (!this.state.hover) {
         clearTimeout(this.time)
         this.setState({ hover: true })
-        this.time = setTimeout(() => this.setState({ hover: false }), hover ? 100000 : 2000)
+        this.time = setTimeout(() => this.setState({ hover: false }), hover ? 100000 : 3000)
       }
     }
     this.onScroll = (showDateBar) => {
@@ -100,7 +100,6 @@ export default class PhotoList extends Component {
   }
 
   renderList = () => {
-
     /* calculate size of list */
     this.clientHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
     this.clientWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
@@ -201,7 +200,7 @@ export default class PhotoList extends Component {
   )
 
   render() {
-    debug('render PhotoList, this.props', this.props, this.state)
+    // debug('render PhotoList, this.props', this.props, this.state)
     const photos = this.props.photoMapDates
     if (photos.length === 0) return <div />
     return (

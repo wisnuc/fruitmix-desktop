@@ -60,6 +60,7 @@ export default class RenderListByRow extends Component {
   }
 
   render() {
+    // debug('render row')
     const { list, lookPhotoDetail, isScrolling } = this.props
     const { photos, first, date } = list
     return (

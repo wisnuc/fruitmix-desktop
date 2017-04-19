@@ -33,7 +33,7 @@ global.$ = global.jQuery = global.jQuery || require('jquery')
 
 global.theme = Object.assign({}, getMuiTheme(lightBaseTheme), { fontFamily: 'Roboto, Noto Sans SC, sans-serif' })
 
-console.log('theme', global.theme)
+// console.log('theme', global.theme)
 
 // root component
 const App = () => (

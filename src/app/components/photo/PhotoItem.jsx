@@ -7,6 +7,9 @@ import { CheckIcon } from './Svgs'
 
 const debug = Debug('component:photoApp:photoItem:')
 
+/* increase limit of listeners of EventEmitter */
+ipcRenderer.setMaxListeners(100)
+
 export default class PhotoItem extends Component {
   constructor(props, context) {
     super(props, context)

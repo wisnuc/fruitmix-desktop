@@ -86,12 +86,17 @@ class List extends React.Component {
   }
 }
 export default List
-  /*
+/*
   <List
-    height={height}
-    width={width}
-    rowCount={this.props.photoMapDates.length}
-    rowHeight={rowHeight}
-    rowRenderer={rowRenderer}
+  height={height}
+  width={width}
+  rowCount={this.props.photoMapDates.length}
+  rowHeight={rowHeight}
+  rowRenderer={rowRenderer}
+  onScroll={() => this.onScroll(true)}
+  scrollToIndex={this.scrollToIndex}
+  overscanRowCount={6}
+  style={{ padding: 16 }}
+  estimatedRowSize={estimatedRowSize}
   />
-  */
+*/

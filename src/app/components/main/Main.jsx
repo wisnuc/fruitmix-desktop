@@ -261,8 +261,8 @@ class Main extends React.Component {
     })), 1500)
 
 		var _this = this
-    console.log('............................')
-    console.log(ipcRenderer)
+    // console.log('............................')
+    // console.log(ipcRenderer)
 		ipcRenderer.send('getMediaData')
 		ipcRenderer.send('getMediaShare')
     ipcRenderer.send('GET_TRANSMISSION')

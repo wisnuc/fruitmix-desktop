@@ -93,19 +93,19 @@ class DeviceCard extends React.Component {
       return logoType
     }
 
-    ipcRenderer.send('setServerIp', props.device.address)
     /*
+    ipcRenderer.send('setServerIp', props.device.address)
+    */
 
-    this.ip = '192.168.5.95'
+    this.ip = '192.168.5.132'
     this.uuid = ''  
-    this.username = '伊朗'
+    this.username = 'L1'
     this.password = '1' 
     ipcRenderer.send('setServerIp', this.ip)
     request.get(`http://${this.ip}:3721/token`)
       .auth(this.uuid, this.password)
       .set('Accept', 'application/json')
       .end(() => ipcRenderer.send('login', this.username, this.password))
-    */
 
     this.requestGet = (port, ep, propName) =>
       request.get(`http://${this.props.device.address}:${port}/${ep}`)
