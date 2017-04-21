@@ -248,18 +248,48 @@ export default class PhotoList extends Component {
     this.years = years
 
     /* contanerHeight = clientHeight - headerHeight - marginTopBottom */
-    const contanerHeight = this.clientHeight - headerHeight
+    const contanerHeight = this.clientHeight - headerHeight + 24
     let perHeight = contanerHeight / Dates.length
-    let firstHeight = [...years][0][1] * perHeight
 
-    /* use Newton's method to calc perHeight */
+    /*
+    use Newton's method to calc perHeight 
     for (let i = 0; i < 5; i++) {
       if (firstHeight < 28) {
         perHeight = (contanerHeight - 28 + firstHeight) / Dates.length
         firstHeight = [...years][0][1] * perHeight
       }
     }
+    */
 
+    /* convert currentScrollTop to currentIndex */
+
+      /* 
+    this.percentage = Math.round((y - headerHeight) / (this.clientHeight - headerHeight) * 1000)
+    const currentScrollTop = Math.round((this.maxScrollTop * this.percentage / 1000))
+    const currentIndex = this.indexHeightSum.findIndex(data => data > currentScrollTop + 200)
+    this.date = this.props.photoMapDates[currentIndex].date
+    */
+
+
+
+    let sumCount = 0
+    const timeline = [...years].map((data, index) => {
+      let lineHeight = parseInt(data[1] * perHeight, 10)
+
+      /* top = percentage * (clientHeight - headerHeight) - headerHeight */
+      let top = sumCount / Dates.length * (this.clientHeight - headerHeight)
+      debug(sumCount,data[1],sumCount / Dates.length,Dates.length,this.clientHeight,headerHeight)
+
+      sumCount += data[1]
+
+      if (!index) top += 8
+      let date = null
+      date = parseInt(data[0], 10)
+      if (date === 0) date = 'other'
+      return [date, lineHeight, top]
+    })
+
+    debug('timeline', timeline)
     return (
       <div
         ref={ref => (this.refBackground = ref)}
@@ -285,27 +315,30 @@ export default class PhotoList extends Component {
             top: headerHeight,
             boxSizing: 'border-box',
             height: 'calc(100% - 56px)',
-            paddingTop: 8,
             right: 20
           }}
         >
           {/* date list */}
           {
-            [...years].map((data, index) => {
-              let lineHeight = parseInt(data[1] * perHeight, 10)
-              if (lineHeight < 28 && (index === 0 || index === [...years].length - 1)) lineHeight = 28
+            timeline.map((data, index) => {
+              const date = data[0]
+              const lineHeight = data[1]
+              const top = data[2]
               return (
                 <div
-                  key={data[0]}
+                  key={date}
                   style={{
+                    position: 'absolute',
                     boxSizing: 'border-box',
+                    top: top,
                     height: lineHeight,
                     color: 'rgba(0,0,0,0.54)',
                     paddingRight: 8,
+                    right: 16,
                     textAlign: 'center'
                   }}
                 >
-                  {lineHeight >= 28 ? (parseInt(data[0], 10) || '神秘时间') : null}
+                  { date || null }
                 </div>
               )
             })
