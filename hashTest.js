@@ -78,7 +78,7 @@ function createTask() {
 	console.log('创建任务')
 	console.log('----------------------------------------------')
 	let options = {
-      	url:'http://192.168.5.187:3721'+'/filemap/123',
+      	url:'http://192.168.5.93:3721'+'/filemap/123',
       	method:'post',
       	headers: {
         	Authorization: 'JWT ' + token,
@@ -114,7 +114,7 @@ function upload(obj, callback) {
 	console.log('----------------------------------------------')
 	if (obj.seek == obj.parts.length) return callback(null)
 	let s = obj.seek
-	var url = 'http://192.168.5.187:3721' + 
+	var url = 'http://192.168.5.93:3721' + 
 			'/filemap/123?' + 
 			'segmenthash=' + obj.parts[s].sha + 
 			'&start=' + s + 
@@ -136,7 +136,7 @@ function upload(obj, callback) {
 	})
 
 	var options = {
-		host: '192.168.5.187',
+		host: '192.168.5.93',
 		port: 3721,
 		headers: {
 			Authorization: 'JWT ' + token

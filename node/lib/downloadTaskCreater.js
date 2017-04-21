@@ -147,7 +147,7 @@ class TaskManager {
 		removeOutOfVisitlessQueue(this)
 		addToVisitingQueue(this)
 		visitTask(this.target, this.name, this.type, this.rootSize, this.tree, this, (err, data) => {
-			if (err) return _this.recordInfor('遍历服务器数据出错')
+			if (err) return _this.error(err, '遍历服务器数据出错')
 			_this.tree[0].downloadPath = _this.downloadPath
 			removeOutOfVisitingQueue(this)
 			_this.recordInfor('遍历文件树结束...')
@@ -164,6 +164,7 @@ class TaskManager {
 				if (err) {
 					this.recordInfor('已下载的文件查找错误')
 					this.checkNameExist()
+					this.pause = true
 				}else {
 					if (stat.isFile()) {
 						this.recordInfor('文件下载任务 继续下载文件')
@@ -381,6 +382,11 @@ class TaskManager {
 		callback()
 	}
 
+	error(e, message) {
+		this.state = 'failed'
+		this.Error = e
+		this.recordInfor(message)
+	}
 }
 
 //visit tree from serve && check the seek of downloading files

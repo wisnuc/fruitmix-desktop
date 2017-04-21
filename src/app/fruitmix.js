@@ -103,7 +103,7 @@ document.addEventListener('drop', (e) => {
 
 debug('fruitmix app module loaded')
 
-setTimeout(() => {
-  ipcRenderer.send('login','liu','1024')
-},1000)
+// setTimeout(() => {
+//   ipcRenderer.send('login','liu','1024')
+// },1000)
 

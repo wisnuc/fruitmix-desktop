@@ -64,6 +64,7 @@ class UploadRow extends Component {
 	}
 
 	getStatus(task) {
+		if (task.state === 'failed') return '失败'
 		if (task.pause) return '暂停'
 		if (task.state === 'visitless') return '等待中'
 		if (task.state === 'visiting') return '正在校验本地文件' 
