@@ -107,7 +107,7 @@ export default class PhotoList extends Component {
       }
     }
 
-    this.onPick = (event) => {
+    this.onMouseMove = (event) => {
       if (!this.props.photoMapDates.length) return null
 
       /* get mouse position*/
@@ -165,8 +165,8 @@ export default class PhotoList extends Component {
 
   renderList = () => {
     /* calculate size of list */
-    this.clientHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
-    this.clientWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
+    this.clientHeight = window.innerHeight
+    this.clientWidth = window.innerWidth
     const height = this.clientHeight - headerHeight
     const width = this.props.leftNav ? this.clientWidth - 210 : this.clientWidth
 
@@ -211,7 +211,7 @@ export default class PhotoList extends Component {
         rowRenderer={rowRenderer}
         onScroll={this.onScroll}
         scrollTop={this.scrollTop}
-        overscanRowCount={6}
+        overscanRowCount={10}
         style={{ padding: 16 }}
         estimatedRowSize={estimatedRowSize}
       />
@@ -269,7 +269,7 @@ export default class PhotoList extends Component {
           paddingTop: headerHeight,
           right: 0
         }}
-        onMouseEnter={() => this.showDateBar()}
+        onMouseMove={() => this.showDateBar()}
         onMouseLeave={() => {
           if (!this.onMouseDown) this.setState({ hover: false })
           this.scrollTop = null
@@ -359,19 +359,23 @@ export default class PhotoList extends Component {
 
   render() {
     // debug('render PhotoList, this.props', this.props, this.state)
-    document.body.onmousemove = this.onPick
+    document.body.onmousemove = this.onMouseMove
     document.body.onmouseup = () => (this.onMouseDown = false)
     const photos = this.props.photoMapDates
-    if (photos.length === 0) return <div />
+    if (photos.length === 0) {
+      return (
+        <div style={this.props.style}>
+          <CircularProgress />
+        </div>
+      )
+    }
     return (
       <Paper
         style={this.props.style}
       >
 
         {/* 图片列表 */}
-        {
-          this.props.photoMapDates.length ? <this.renderList /> : <div />
-        }
+        <this.renderList />
 
         {/* 轮播 */}
         {

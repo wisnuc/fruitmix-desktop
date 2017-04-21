@@ -4,8 +4,8 @@ import { ipcRenderer } from 'electron'
 import UUID from 'node-uuid'
 import { Paper, CircularProgress, IconButton, SvgIcon } from 'material-ui'
 import RenderToLayer from 'material-ui/internal/RenderToLayer'
-import SlideToAnimate from './SlideToAnimate'
-import { formatDate } from '../../utils/datetime'
+import keycode from 'keycode'
+import { TweenMax } from 'gsap'
 
 const debug = Debug('component:photoApp:PhotoDetail')
 
@@ -31,17 +31,24 @@ class PhotoDetailInline extends React.Component {
     }
 
     this.requestNext = (currentIndex) => {
+      /* hide image and resieze container */
+      if (this.refImage) {
+        this.refImage.style.display = 'none'
+        this.refContainer.style.height = `${this.photoHeight}px`
+        this.refContainer.style.width = `${this.photoWidth}px`
+      }
+      /* initialize path of image */
       this.path = ''
       this.thumbPath = ''
+
+      /* get current image */
       this.session = UUID.v4()
       this.digest = this.props.items[currentIndex].digest
       this.photo = this.props.items[currentIndex]
-      debug('currentImage', this.photo, Date.parse(formatDate(this.photo.exifDateTime)))
-      ipcRenderer.send('getMediaImage', this.session, this.digest)
       ipcRenderer.send('getThumb', this.session, this.digest)
-      // this.setState({ direction: null })
       this.forceUpdate()
     }
+
     this.changeIndex = (direction) => {
       if (direction === 'right' && this.currentIndex < this.props.items.length - 1) {
         this.currentIndex += 1
@@ -53,15 +60,22 @@ class PhotoDetailInline extends React.Component {
 
     this.updatePath = (event, session, path) => {
       if (this.session === session) {
-        this.path = path
-        this.forceUpdate()
+        clearTimeout(this.time)
+        this.time = setTimeout(() => (this.refImage.src = path), 100)
       }
     }
 
     this.updateThumbPath = (event, session, path) => {
       if (this.session === session) {
+        /* update thumbPath and resize container */
         this.thumbPath = path
-        this.forceUpdate()
+        this.refImage.style.display = 'flex'
+        this.refImage.src = this.thumbPath
+        this.refContainer.style.height = `${this.photoHeight}px`
+        this.refContainer.style.width = `${this.photoWidth}px`
+
+        /* get detail image */
+        ipcRenderer.send('getMediaImage', this.session, this.digest)
       }
     }
     this.calcPositon = (ev) => {
@@ -77,6 +91,25 @@ class PhotoDetailInline extends React.Component {
       } else {
         this.refBackground.style.cursor = 'default'
         if (this.state.direction !== null) this.setState({ direction: null })
+      }
+    }
+
+    this.calcSize = () => {
+      this.clientHeight = window.innerHeight
+      this.clientWidth = window.innerWidth
+      this.photoHeight = this.photo.height
+      this.photoWidth = this.photo.width
+      const HWRatio = this.photoHeight / this.photoWidth
+      if (this.photoHeight > this.clientHeight) {
+        this.photoHeight = this.clientHeight
+        this.photoWidth = this.photoHeight / HWRatio
+        if (this.photoWidth > this.clientWidth) {
+          this.photoWidth = this.clientWidth
+          this.photoHeight = this.photoWidth * HWRatio
+        }
+      } else if (this.photoWidth > this.clientWidth) {
+        this.photoWidth = this.clientWidth
+        this.photoHeight = this.photoWidth * HWRatio
       }
     }
   }
@@ -100,49 +133,50 @@ class PhotoDetailInline extends React.Component {
   }
 
   renderDetail() {
-    /*
-    let exifOrientation = ''
-    if (currentImage) {
-      exifOrientation = currentImage.exifOrientation || ''
-    }
-    const degRotate = exifOrientation ? `rotate(${(exifOrientation - 1) * 90}deg)` : ''
-              style={{ transform: degRotate, transitionDuration: '0' }}
-    const thumbPath = `${mediaPath}${digest}thumb210`
-    */
+    /* calculate photoHeight and photoWidth */
+    this.calcSize()
 
     return (
-      <Paper
+      <div
         style={{
-          position: 'relative',
-          backgroundColor: 'rgb(0, 0, 0)',
-          width: '100%',
+          position: 'fixed',
           height: '100%',
-          margin: '0 auto',
+          width: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
         }}
       >
-        <div style={{ position: 'fixed', height: '90%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
-          { this.path ? // FIXME
+        <div
+          ref={ref => (this.refContainer = ref)}
+          style={{
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: 0,
+            width: 0,
+            backgroundColor: 'black',
+            overflow: 'hidden',
+            transition: 'all 350ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
+          }}
+        >
+          <div ref={ref => (this.refTransition = ref)}>
             <img
-              height={'100%'}
-              src={this.path}
+              style={{ display: 'none' }}
+              ref={ref => (this.refImage = ref)}
+              height={this.photoHeight}
+              width={this.photoWidth}
               alt="DetailImage"
-            /> : this.thumbPath ?
-              <img
-                height={'100%'}
-                src={this.thumbPath}
-                alt="DetailImage"
-              /> : <div />
-          }
+            />
+          </div>
         </div>
-      </Paper>
+      </div>
     )
   }
 
   render() {
-    // debug('render detail')
+    // debug('currentImage', this.photo)
     return (
       <Paper
         style={{

@@ -92,7 +92,7 @@ export default class PhotoItem extends Component {
         justifyContent: 'center'
       }}
       onTouchTap={() => this.props.lookPhotoDetail(this.props.digest)}
-      onMouseEnter={() => this.setState({ hover: true })}
+      onMouseMove={() => this.setState({ hover: true })}
       onMouseLeave={() => this.setState({ hover: false })}
     >
       {
