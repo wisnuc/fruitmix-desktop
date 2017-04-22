@@ -16,52 +16,17 @@ import AppBar from './AppBar'
 import NavDrawer from './NavDrawer'
 import QuickNav from './QuickNav'
 
-const StateUp = base => class extends base {
-
-  setSubState(name, nextSubState) {
-    let state = this.props.state || this.state
-    let subState = state[name]
-    let nextSubStateMerged = Object.assign(new subState.constructor(), subState, nextSubState)
-    let nextState = { [name]: nextSubStateMerged }
-    this.props.setState
-      ? this.props.setState(nextState)
-      : this.setState(nextState)
-  }
-
-  setSubStateBound(name) {
-    let obj = this.setSubStateBoundObj || (this.setSubStateBoundObj = {})
-    return obj[name] 
-      ? obj[name] 
-      : (obj[name] = this.setSubState.bind(this, name))
-  }
-
-  stateBinding(name) {
-    return {
-      state: this.props.state ? this.props.state[name] : this.state[name],
-      setState: this.setSubStateBound(name)
-    }
-  }
-}
-
-class Navigation extends StateUp(React.Component) {
+class Navigation extends React.Component {
 
   constructor(props) {
 
     super(props)
     this.navBoundObj = {}
-
     this.state = {
-
       nav: 'HOME_DRIVE',
       showDetail: false,
       detailWidth: 400,
       openDrawer: false,
-
-      home: new HomeState(),
-      public: new PublicState(),
-      sharedWithMe: new SharedWithMeState(),
-      sharedWithOthers: new SharedWithOthersState(),
-      external: new ExternalState(),
     }
 
     let token = props.selectedDevice.token
@@ -196,21 +161,6 @@ class Navigation extends StateUp(React.Component) {
         <div 
           style={{height: '100%', width: this.state.showDetail ? this.state.detailWidth : 0, 
             backgroundColor: '#F5F5F5', transition: sharpCurve('width')
-          }}
-          onTouchTap={ e => {
-            console.log(e.type)
-            console.log(e.nativeEvent.which)
-            console.log(e.nativeEvent.button)
-          }}
-          onClick={ e => {
-            console.log(e.type)
-            console.log(e.nativeEvent.which)
-            console.log(e.nativeEvent.button)
-          }}
-          onMouseUp={ e => {
-            console.log(e.type)
-            console.log(e.nativeEvent.which)
-            console.log(e.nativeEvent.button)
           }}
         >
           world

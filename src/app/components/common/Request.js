@@ -25,6 +25,7 @@ class ReqState {
   isRejected() { return false }
 
   isFinished() { return !this.isPending() }
+
 }
 
 class ReqPending extends ReqState {
@@ -42,6 +43,7 @@ class ReqPending extends ReqState {
   }
 
   isPending() { return true }
+  value() { return this.ctx.previousValue }
 }
 
 class ReqFulfilled extends ReqState {

@@ -2,11 +2,10 @@ import React from 'react'
 import ReactDom from 'react-dom'
 
 import Login from './components/login/Login'
-import LoggedIn from './components/nav/Navigation'
+import Navigation from './components/nav/NavTest'
 import Maintenance from './components/maintenance/Maintenance'
 
 import Device from './components/common/device'
-import LoggedInUser from './components/common/loggedInUser'
 
 class Main extends React.Component {
 
@@ -54,19 +53,6 @@ class Main extends React.Component {
   }
 
   login() {
-
-    let token = this.state.selectedDevice.token
-    if (!token.isFulfilled()) throw new Error('token not found')
-
-    let address = this.state.selectedDevice.mdev.address
-    let userUUID = token.ctx.uuid
-    let jwt = token.value().token
-
-    console.log('user logged-in', address, userUUID, jwt)
-
-    this.user = new LoggedInUser(address, userUUID, jwt)
-    this.user.on('updated', (prev, next) => this.setState({ user: next }))
-    this.user.start()
     this.setState({ view: 'user' })
   }
 
@@ -80,7 +66,7 @@ class Main extends React.Component {
       return <Maintenance {...this.state } />
 
     case 'user':
-      return <LoggedIn showAppBar={window.store.getState().view.showAppBar} />
+      return <Navigation {...this.state} />
 
     default:
       return <div>hello world!</div>

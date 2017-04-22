@@ -18,6 +18,8 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme'
 import MDNS from './lib/mdns'
 import { command } from './lib/command'
 
+import { teal500 } from 'material-ui/styles/colors'
+
 import Main from './main'
 
 const debug = Debug('app')
@@ -33,7 +35,12 @@ require('../assets/css/app.css')
 injectTapEventPlugin()
 
 // global import jQuery
-global.theme = Object.assign({}, getMuiTheme(lightBaseTheme), { fontFamily: 'Roboto, Noto Sans SC, sans-serif' })
+global.theme = getMuiTheme({ 
+  fontFamily: 'Noto Sans SC, sans-serif',
+  palette: {
+    primary1Color: teal500
+  }
+})
 
 // root component
 const App = () => <MuiThemeProvider muiTheme={theme}><Main /></MuiThemeProvider>

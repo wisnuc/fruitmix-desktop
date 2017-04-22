@@ -3,10 +3,8 @@ const EventEmitter = require('eventemitter3')
 
 import Request from './Request'
 
-// logged-in user is constructed from 
-// 1. device 
-// 2. useruuid and token
-class LoggedInUser extends EventEmitter {
+// this module encapsulate most fruitmix apis
+class Fruitmix extends EventEmitter {
 
   constructor(address, userUUID, token) {
 
@@ -41,8 +39,7 @@ class LoggedInUser extends EventEmitter {
 
       this.setState(name, curr)
 
-      console.log(`${name} updated`, prev, curr, 
-        this[name].isFinished(), typeof next === 'function')
+      console.log(`${name} updated`, prev, curr, this[name].isFinished(), typeof next === 'function')
 
       if (this[name].isFinished() && next) {
         this[name].isRejected() 
@@ -126,19 +123,19 @@ class LoggedInUser extends EventEmitter {
 
     /** File APIs **/
     case 'listDir':
-      r = this.aget(`fruitmix/list/${args.dirUUID}`)
+      r = this.aget(`files/fruitmix/list/${args.dirUUID}`)
       break
 
     case 'listNavDir':
-      r = this.aget(`fruitmix/list-nav/${args.dirUUID}/${args.rootUUID}`)
+      r = this.aget(`files/fruitmix/list-nav/${args.dirUUID}/${args.rootUUID}`)
       break
 
     case 'downloadFile':
-      r = this.aget(`fruitmix/download/${args.dirUUID}/${args.fileUUID}`)
+      r = this.aget(`files/fruitmix/download/${args.dirUUID}/${args.fileUUID}`)
       break
 
     case 'mkdir':
-      r = this.apost(`fruitmix/mkdir/${args.dirUUID}/${args.dirname}`)
+      r = this.apost(`files/fruitmix/mkdir/${args.dirUUID}/${args.dirname}`)
       break
 
     case 'uploadFile':
@@ -150,11 +147,11 @@ class LoggedInUser extends EventEmitter {
       break
 
     case 'renameDirOrFile':
-      r = this.apost(`fruitmix/rename/${args.dirUUID}/${args.nodeUUID}/${args.filename}`)
+      r = this.apost(`files/fruitmix/rename/${args.dirUUID}/${args.nodeUUID}/${args.filename}`)
       break
 
     case 'deleteDirOrFile':
-      r = this.adel(`fruitmix/${args.dirUUID}/${args.nodeUUID}`)
+      r = this.adel(`files/fruitmix/${args.dirUUID}/${args.nodeUUID}`)
       break
 
     /** Ext APIs **/
@@ -207,7 +204,9 @@ class LoggedInUser extends EventEmitter {
   start() {
 
     this.requestAsync('account', null).asCallback((err, data) => {
-     
+      if (data) {
+        this.request('listNavDir', { dirUUID: data.home, rootUUID: data.home })
+      }
     })
 
     this.request('users')
@@ -218,5 +217,5 @@ class LoggedInUser extends EventEmitter {
   }
 }
 
-export default LoggedInUser
+export default Fruitmix
 
