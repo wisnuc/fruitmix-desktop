@@ -56,9 +56,10 @@ class Row extends PureComponent {
                    // This must be passed through to the rendered row element.
     } = this.props 
 
-    let leading = this.props.select.rowLeading(index)
-    let check = this.props.select.rowCheck(index)
-    let color = this.props.select.rowColor(index)
+    let select = this.props.home.select
+    let leading = select.rowLeading(index)
+    let check = select.rowCheck(index)
+    let color = select.rowColor(index)
 
     let innerStyle = {
       width: '100%',
@@ -85,7 +86,8 @@ class Row extends PureComponent {
           </div>
           <div style={{flex: '0 0 8px'}} />
           <div>
-            {`Hello World ${index} ${leading} ${check}`}
+            {`Hello World ${index} ${leading} ${check} ${color} ${select.ctrl} ${select.shift} ` +
+              `${select.hover} ${select.specified}` }
           </div>
         </div>
       </div>
@@ -131,21 +133,25 @@ class FileContent extends Component {
   constructor(props) {
 
     super(props)
-    this.rowRenderer = props => 
-      <Row {...props}  
-        select={this.state.select}
-        onRowTouchTap={this.rowTouchTapBound}
-        onRowMouseEnter={this.rowMouseEnterBound}
-        onRowMouseLeave={this.rowMouseLeaveBound} 
-      />
 
-    this.state = { select: null }
+    this.state = { contextMenu: false }
 
     this.keyDownBound = this.keyDown.bind(this)
     this.keyUpBound = this.keyUp.bind(this)
-    this.rowTouchTapBound = this.rowTouchTap.bind(this)
-    this.rowMouseEnterBound = this.rowMouseEnter.bind(this)
-    this.rowMouseLeaveBound = this.rowMouseLeave.bind(this)
+
+    this.onRowTouchTap = this.rowTouchTap.bind(this)
+    this.onRowMouseEnter = this.rowMouseEnter.bind(this)
+    this.onRowMouseLeave = this.rowMouseLeave.bind(this)
+ 
+    this.rowRenderer = props => (
+      <Row 
+        {...props} 
+        {...this.props} 
+        onRowTouchTap={this.onRowTouchTap}  
+        onRowMouseEnter={this.onRowMouseEnter}
+        onRowMouseLeave={this.onRowMouseLeave}
+      />
+    )
   } 
 
   componentDidMount() {
@@ -160,31 +166,16 @@ class FileContent extends Component {
 		document.removeEventListener('keyup', this.keyUpBound)
 	}
 
-  componentWillReceiveProps(nextProps) {
-
-    if (!nextProps.apis || !nextProps.apis.listNavDir) return
-
-    let listNavDir = nextProps.apis.listNavDir
-    if (listNavDir.isFulfilled() && listNavDir.value() !== this.state.value) {
-      this.setState({
-        value: listNavDir.value(),
-        select: new ListSelect(value.entries.length)
-      })
-    }
-  }
-
-  setSelect(select) {
-    if (select) this.setState({ select })
-  }
-
   keyDown(e) {
     console.log('keydown', e.ctrlKey, e.shiftKey)
-    this.setSelect(this.state.select.keyEvent(e.ctrlKey, e.shiftKey)) 
+    if (this.props.home.select)
+      this.props.home.select.keyEvent(e.ctrlKey, e.shiftKey)
   }
 
   keyUp(e) {
     console.log('keyup', e.ctrlKey, e.shiftKey)
-    this.setSelect(this.state.select.keyEvent(e.ctrlKey, e.shiftKey))
+    if (this.props.home.select)
+      this.props.home.select.keyEvent(e.ctrlKey, e.shiftKey)
   }
 
   rowTouchTap(e, index) {
@@ -204,31 +195,25 @@ class FileContent extends Component {
 
     if (type !== 'mouseup' || !(button === 0 || button === 2)) return
 
-    let select = this.state.select.touchTap(button, index)
-
-    if (button === 0) return this.setSelect(select)
+    this.props.home.select.touchTap(button, index)
 
     if (button === 2) { // right click
 
-      if (this.state.select.shift || this.state.select.ctrl) return
-      let next = {
+      if (this.props.home.select.shift || this.props.home.select.ctrl) return
+      this.setState({
         contextMenu: true,
         clientX: e.nativeEvent.clientX,
         clientY: e.nativeEvent.clientY,
-      }
-
-      if (select) next.select = select
-      this.setState(next)
+      })
     }
   }
 
   rowMouseEnter(e, index) {
-    this.setSelect(this.state.select.mouseEnter(index))
+    this.props.home.select.mouseEnter(index)
   }
 
   rowMouseLeave(e, index) {
-    this.deferredLeave = setTimeout(() => 
-      this.setSelect(this.state.select.mouseLeave(index)), 1)
+    this.deferredLeave = setTimeout(() => this.props.home.select.mouseLeave(index), 1)
   }
 
   render() {
@@ -238,15 +223,15 @@ class FileContent extends Component {
     return (
       <div style={{width: '100%', height: '100%', backgroundColor: '#FAFAFA'}}>
 
-        { this.state.value && 
+        { this.props.home.listNavDir && 
           <AutoSizer>
             {({ height, width }) => (
-              <div onTouchTap={e => this.rowTouchTapBound(e, -1)}>
+              <div onTouchTap={e => this.onRowTouchTap(e, -1)}>
                 <List
                   style={{ outline: 'none' }}
                   height={height}
                   width={width}
-                  rowCount={this.state.select.size}
+                  rowCount={this.props.home.select.size}
                   rowHeight={40}
                   rowRenderer={this.rowRenderer}
                 />

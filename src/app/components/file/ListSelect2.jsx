@@ -4,18 +4,29 @@ class ListSelect extends EventEmitter {
 
   constructor() {
     super()
-    this.state = null
+    this.state = {
+
+      // put functions here is better to put 
+      // functions on parent component
+      keyEvent: this.keyEvent.bind(this),
+      mouseEnter: this.mouseEnter.bind(this),
+      mouseLeave: this.mouseLeave.bind(this),
+      touchTap: this.touchTap.bind(this),  
+      rowColor: this.rowColor.bind(this),
+      rowLeading: this.rowLeading.bind(this),
+      rowCheck: this.rowCheck.bind(this) 
+    }
   }
 
   setState(props) {
     let prev = this.state
     this.state = Object.assign({}, this.state, props)
+
+    console.log('ListSelect setState', this.state)
     this.emit('updated', this.state)
   }
 
   reset(size) {
-
-    console.log('select reset to size', size)
 
     this.setState({
       size,
@@ -202,7 +213,7 @@ class ListSelect extends EventEmitter {
       else
         return 'none'
     }
-    else if (this.ctrl) {
+    else if (this.state.ctrl) {
       if (this.state.selected.includes(index))
         return 'checked'
         // return 'none'

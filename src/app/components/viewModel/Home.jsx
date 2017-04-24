@@ -74,6 +74,9 @@ class Home extends Base {
     // now it's fulfilled
     let value = listNavDir.value()
     if (value !== this.state.listNavDir) {
+
+      console.log('home nextProps, updating listNavDir value', this.state.listNavDir, value)
+
       this.setState({ listNavDir: value })
       this.select.reset(value.entries.length)
     }
@@ -128,7 +131,7 @@ class Home extends Base {
   }
 
   detailEnabled() {
-    return true
+    return false 
   }
 
   detailWidth() {
