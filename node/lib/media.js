@@ -16,9 +16,8 @@ let media=[]
 /* functions */
 const parseDate = (date) => {
   if (!date) return 0
-  const b = date.split(/\D/)
-  const c = (`${b[0]}${b[1]}${b[2]}${b[3]}${b[4]}${b[5]}`)
-  return parseInt(c, 10)
+  const a = date.replace(/:|\s/g, '')
+  return parseInt(a, 10)
 }
 
 const getThumb = (digest, cacheName, mediaPath, session) => {
@@ -39,10 +38,14 @@ const getThumb = (digest, cacheName, mediaPath, session) => {
 
 /* getMediaData */
 ipcMain.on('getMediaData', (event) => {
+  let tmpTime = Date.now()
+  console.log(`before getMedia ${Date.now() - tmpTime}`)
   serverGetAsync('media').then((data) => {
     media = data
+    console.log(`start sort${Date.now() - tmpTime}`)
     media.sort((prev, next) => (parseDate(next.exifDateTime) - parseDate(prev.exifDateTime)) || (
       parseInt(`0x${next.digest}`, 16) - parseInt(`0x${prev.digest}`, 16)))
+    console.log(`finish sort${Date.now() - tmpTime}`)
     dispatch(action.setMedia(media))
   }).catch((err) => {
     console.log(err)

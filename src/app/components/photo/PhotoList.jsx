@@ -91,22 +91,22 @@ export default class PhotoList extends Component {
         this.refDateBar.style.top = `${top + 56}px`
 
         /* update datebox */
-        this.refDateBox.style.display = 'flex'
+        this.refDateBox.style.opacity = 1
         this.refDateBox.style.top = `${top + 40}px`
         this.refDateBox.innerHTML = this.date
 
         /* show timeline */
-        this.refTimeline.style.display = 'inline'
+        this.refTimeline.style.opacity = 1
 
         /* hide dateBarFollowMouse */
-        this.refBarFollowMouse.style.display = 'none'
+        this.refBarFollowMouse.style.opacity = 0
 
         /* hide DateBox and Timeline 2000ms later */
         clearTimeout(this.time)
         if (!this.state.hover) {
           this.time = setTimeout(() => {
-            this.refDateBox.style.display = 'none'
-            this.refTimeline.style.display = 'none'
+            this.refDateBox.style.opacity = 0
+            this.refTimeline.style.opacity = 0
           }, 2000)
         }
       }
@@ -120,7 +120,7 @@ export default class PhotoList extends Component {
       if (top < 66) top = 66
       if (top > this.clientHeight - headerHeight) top = this.clientHeight - headerHeight
 
-      if (this.onMouseDown || (x > this.clientWidth - 84 && x < this.clientWidth - 16 && y > headerHeight)) {
+      if (this.onMouseDown || (x > this.clientWidth - 84 && y > headerHeight)) {
         /* showTimeline and clear setTimeout */
         this.showDateBar()
         clearTimeout(this.time)
@@ -141,11 +141,11 @@ export default class PhotoList extends Component {
 
         /* change position of date box */
         if (this.refDateBox) {
-          this.refDateBox.style.display = 'flex'
+          this.refDateBox.style.opacity = 1
           this.refDateBox.style.top = `${top}px`
           this.refDateBox.innerHTML = this.date
 
-          this.refBarFollowMouse.style.display = 'flex'
+          this.refBarFollowMouse.style.opacity = 1
           this.refBarFollowMouse.style.top = `${top + 16}px`
 
           this.scrollTop = currentScrollTop
@@ -154,7 +154,7 @@ export default class PhotoList extends Component {
           }
         }
       } else if (this.refDateBox) {
-        this.refBarFollowMouse.style.display = 'none'
+        this.refBarFollowMouse.style.opacity = 0
       }
       return null
     }
@@ -303,7 +303,10 @@ export default class PhotoList extends Component {
         {/* timeline */}
         <div
           ref={ref => (this.refTimeline = ref)}
-          style={{ display: this.state.hover ? 'inline' : 'none' }}
+          style={{
+            opacity: this.state.hover ? 1 : 0,
+            transition: 'opacity 350ms'
+          }}
         >
           {/* date list */}
           {
@@ -350,7 +353,8 @@ export default class PhotoList extends Component {
         <div
           ref={ref => (this.refBarFollowMouse = ref)}
           style={{
-            display: this.state.hover ? 'flex' : 'none',
+            opacity: this.state.hover ? 1 : 0,
+            transition: 'opacity 350ms',
             position: 'absolute',
             top: -1000,
             height: 2,
@@ -365,7 +369,8 @@ export default class PhotoList extends Component {
         <div
           ref={ref => (this.refDateBox = ref)}
           style={{
-            display: this.state.hover ? 'flex' : 'none',
+            opacity: this.state.hover ? 1 : 0,
+            transition: 'opacity 350ms',
             position: 'absolute',
             top: -1000,
             width: 84,
