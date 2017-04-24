@@ -22,7 +22,7 @@ class AppBar extends React.PureComponent {
 
     let color = '#FFF' // TODO
 
-    let { prominent, Title, Toolbar } = this.props
+    let { prominent, title, toolbar } = this.props
 
     let topbarStyle = {
       width: '100%', 
@@ -61,12 +61,11 @@ class AppBar extends React.PureComponent {
           <div style={{flex: '0 0 20px'}} />
          
           {/** non-prominent title **/} 
-          { (!prominent && typeof Title === 'string') && 
-            <div>{Title}</div> }
+          { (!prominent && typeof title === 'string') && title }
 
           {/** context-sensitive toolbar **/}
           <div style={toolbarStyle}>
-            { Toolbar && <Toolbar /> }
+            { toolbar }
           </div>
 
           {/** global notification button **/}
@@ -84,11 +83,11 @@ class AppBar extends React.PureComponent {
 
         </div>
 
-        { (prominent && Title && typeof Title === 'string') &&
-          <div style={{fontSize: 20, fontWeight: 500, color: '#FFF'}}>{Title}</div> }
+        { (prominent && title && typeof title === 'string') &&
+          <div style={{fontSize: 20, fontWeight: 500, color: '#FFF'}}>{title}</div> }
 
-        { (prominent && Title && typeof Title !== 'string') && 
-          <div style={titleRegionStyle}><Title /></div> }
+        { (prominent && title && typeof title !== 'string') && 
+          <div style={titleRegionStyle}>{title}</div> }
 
       </Paper>
     )

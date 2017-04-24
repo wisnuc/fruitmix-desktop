@@ -1,88 +1,70 @@
-import React from 'react'
+import React, { Component, PureComponent } from 'react'
 
 import Radium from 'radium'
 import { Paper, IconButton, Menu, Drawer, Divider } from 'material-ui'
 
+import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
+import SocialNotifications from 'material-ui/svg-icons/social/notifications'
+import ActionInfo from 'material-ui/svg-icons/action/info'
 import NavigationExpandMore from 'material-ui/svg-icons/navigation/expand-more'
 import NavigationExpandLess from 'material-ui/svg-icons/navigation/expand-less'
 
-import { cyan700 } from 'material-ui/styles/colors'
 import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
 import Fruitmix from '../common/fruitmix'
 
 import { navMap, fileNavGroup, mediaNavGroup, appifiNavGroup } from './nav'
 
-import AppBar from './AppBar'
 import NavDrawer from './NavDrawer'
 import QuickNav from './QuickNav'
 
-const StateUp = base => class extends base {
+import Home from '../viewModel/Home'
 
-  setSubState(name, nextSubState) {
-    let state = this.props.state || this.state
-    let subState = state[name]
-    let nextSubStateMerged = Object.assign(new subState.constructor(), subState, nextSubState)
-    let nextState = { [name]: nextSubStateMerged }
-    this.props.setState
-      ? this.props.setState(nextState)
-      : this.setState(nextState)
-  }
-
-  setSubStateBound(name) {
-    let obj = this.setSubStateBoundObj || (this.setSubStateBoundObj = {})
-    return obj[name] 
-      ? obj[name] 
-      : (obj[name] = this.setSubState.bind(this, name))
-  }
-
-  stateBinding(name) {
-    return {
-      state: this.props.state ? this.props.state[name] : this.state[name],
-      setState: this.setSubStateBound(name)
-    }
-  }
-}
-
-class Navigation extends StateUp(React.Component) {
+class NavViews extends Component {
 
   constructor(props) {
 
     super(props)
+
     this.navBoundObj = {}
 
-    this.state = {
+    /** init views **/
+    let views = {}
+    let state = {} 
 
-      nav: 'HOME_DRIVE',
+    views.home = new Home(this)
+    views.home.on('updated', next => {
+      this.setState({ home: next })
+      console.log('NavViews updating home', next)
+    })
+    state.home = views.home.state
+
+    Object.assign(state, {
+      nav: null,
       showDetail: false,
-      detailWidth: 400,
       openDrawer: false,
+    })
 
-      home: new HomeState(),
-      public: new PublicState(),
-      sharedWithMe: new SharedWithMeState(),
-      sharedWithOthers: new SharedWithOthersState(),
-      external: new ExternalState(),
-    }
-
-    let token = props.selectedDevice.token
-    if (!token.isFulfilled()) throw new Error('token not fulfilled')
-
-    let address = props.selectedDevice.mdev.address
-    let userUUID = token.ctx.uuid
-
-    this.fruitmix = new Fruitmix(address, userUUID, token.value().token)
-    this.fruitmix.on('updated', (prev, next) => this.setState({ apis: next }))
+    this.state = state
+    this.views = views
 
     this.toggleDetailBound = this.toggleDetail.bind(this)
     this.openDrawerBound = this.openDrawer.bind(this)
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (!this.state.nav) return
+    this.currentView().willReceiveProps(nextProps)
+  }
+
   componentDidMount() {
-    this.fruitmix.start()
+    this.navTo('home')
   }
 
   navTo(nav) {
+    if (nav === this.state.nav) return
+    if (this.state.nav) this.views[this.state.nav].navLeave()
     this.setState({ nav, openDrawer: false })
+    this.views[nav].navEnter()
   }
 
   // not used, decorate onto navmap ? TODO
@@ -99,47 +81,197 @@ class Navigation extends StateUp(React.Component) {
     this.setState({showDetail: !this.state.showDetail})
   }
 
+  currentView() {
+    if (!this.state.nav) throw new Error('no nav')
+    return this.views[this.state.nav]
+  }
+
   renderQuickNavs() {
 
-    let group = fileNavGroup.includes(this.state.nav) 
-      ? fileNavGroup
-      : mediaNavGroup.includes(this.state.nav)
-        ? mediaNavGroup
-        : appifiNavGroup.includes(this.state.nav)
-          ? appifiNavGroup
-          : settingsNavGroup.includes(this.state.nav)
-            ? settingsNavGroup
-            : null
+    if (!this.state.nav) return null
 
+    let color = this.currentView().primaryColor()
+    let group = this.views[this.state.nav].navGroup()
     return (
-      <div style={{width: 72, height: '100%', 
-        transition: sharpCurve('width'), backgroundColor: '#FFF', overflow: 'hidden'}}>
-        { group && group.map(navname => 
-          <QuickNav
-            key={`quicknav-${navname}`}
-            icon={navMap.get(navname).icon} 
-            text={navMap.get(navname).text}
-            selected={this.state.nav === navname}
-            onTouchTap={this.navBound(navname)}
-          />) }
+      <div style={{
+        width: 72, height: '100%', 
+        paddingTop: 8,
+        transition: sharpCurve('width'), 
+        backgroundColor: '#FFF', 
+        overflow: 'hidden'
+      }}>
+        { Object.keys(this.views)
+            .filter(key => 
+              this.views[key].navGroup() === this.views[this.state.nav].navGroup())
+            .map(key =>
+              <QuickNav
+                key={`quicknav-${key}`}
+                icon={this.views[key].quickIcon()} 
+                text={this.views[key].quickName()}
+                color={color}
+                selected={key === this.state.nav}
+                onTouchTap={this.navBound(key)}
+              />) }
       </div>
     )
   }
 
-  prominent(module) {
+  appBarHeight() {
+    return this.currentView().prominent() ? 128 : 64
+  }
 
-    let prominent = module.prominent
+  renderDetailButton() {
 
-    if (!prominent) return false
-    if (typeof prominent === 'boolean') 
-      return prominent
-    if (typeof prominent === 'function') 
-      return prominent() // TODO, if function, args required
+    const view = this.currentView()
+    if (!view.hasDetail()) return null
 
-    return false
+    const onTouchTap = view.detailEnabled()
+      ? this.toggleDetail.bind(this)
+      : undefined
+    
+    const color = view.detailEnabled()
+      ? 'rgba(255,255,255,1)'
+      : 'rgba(255,255,255,0.3)'
+
+    return (  
+      <div style={{width: 48, height: 48, position: 'relative'}} >
+
+        <div style={{
+          position: 'absolute',
+          top: 4, left: 4,
+          width: 40, height: 40,
+          backgroundColor: '#FFF',
+          borderRadius: 20,
+          opacity: this.state.showDetail ? 0.3 : 0, // TODO
+          transition: 'opacity 300ms'
+        }}/> 
+
+        <IconButton style={{position: 'absolute'}} onTouchTap={onTouchTap} >
+          <ActionInfo color={color} />
+        </IconButton> 
+      </div>
+    )
+  }
+
+  renderAppBar() {
+
+    let view = this.currentView()
+    let backgroundColor
+    switch(view.appBarStyle()) {
+    case 'light':
+      backgroundColor = '#FFF'
+      break
+    case 'colored':
+    case 'dark':
+      backgroundColor = view.appBarColor()
+      break
+    case 'transparent':
+    default:
+      break
+    }
+
+    let appBarStyle = {
+      position: 'absolute', 
+      width: '100%', 
+      height: this.appBarHeight(), 
+      backgroundColor,
+      overflow: 'hidden'
+    }
+
+    let topBarStyle = {
+      width: '100%', 
+      height: 64, 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'space-between'
+    }
+
+    let titleStyle = {
+      color: '#FFF',
+      fontSize: 20,
+      fontWeight: 500
+    }
+
+    let toolBarStyle = {
+      flexGrow: 1, 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'flex-end'
+    }
+
+    let titleRegionStyle = {
+      width: 'calc(100% - 72)',
+      height: 64,
+      marginLeft: 72,
+      display: 'flex',
+      alignItems: 'center',
+      color: '#FFF',
+      fontSize: 20,
+      fontWeight: 500,
+      flexWrap: 'wrap'
+    }
+
+    return (
+      <Paper style={appBarStyle} rounded={false}>
+
+        <div style={topBarStyle}>
+          
+          <div style={{flex: '0 0 12px'}} />
+
+          <IconButton onTouchTap={() => this.openDrawer(true)}>
+            <NavigationMenu color='#FFF' />
+          </IconButton>
+
+          <div style={{flex: '0 0 20px'}} />
+         
+          {/** non-prominent title **/} 
+          { !view.prominent() && view.renderTitle() }
+
+          {/** context-sensitive toolbar, passing style for component list **/}
+          { view.renderToolBar({ style: toolBarStyle }) }
+
+          {/** global notification button **/}
+          <IconButton>
+            <SocialNotifications color='rgba(255,255,255,0.5)' />
+          </IconButton>
+
+          {/** optional toggle detail button **/}
+          { this.renderDetailButton() }
+
+          <div style={{flex: '0 0 12px'}} />
+        </div>
+
+        { view.prominent() && view.renderTitle({ style: titleRegionStyle }) }
+      </Paper>
+    )
+  } 
+
+  renderAppBarShadow() {
+    return <div style={{ width: '100%', height: this.appBarHeight(), transition: 'height 300ms'}} />
+  }
+
+  renderDetail() {
+
+    const view = this.currentView()
+
+    if (!view.hasDetail() || !view.detailEnabled()) return null
+
+    const style = {
+      height: '100%', 
+      width: this.state.showDetail ? view.detailWidth() : 0, 
+      transition: sharpCurve('width')
+    }
+
+    return (
+      <div style={style}>
+        world2
+      </div>
+    )
   }
 
   render () {
+
+    if (!this.state.nav) return null
 
     const style = {
       width: '100%',  
@@ -149,11 +281,17 @@ class Navigation extends StateUp(React.Component) {
       overflow: 'hidden'
     }
 
-    let dense = true
-    let module = navMap.get(this.state.nav)
-    let prominent = this.prominent(module)
-
-    let appbarHeight = prominent ? 96 : 48
+    let view = this.views[this.state.nav]
+    let prominent = view.prominent()
+    let cardTitleStyle = {
+      height: 64,
+      display: 'flex',
+      alignItems: 'center',
+      color: 'rgba(0,0,0,0.54)',
+      fontSize: 20,
+      fontWeight: 500,
+      flexWrap: 'wrap'
+    }
 
     return (
       <div style={style}>
@@ -161,69 +299,66 @@ class Navigation extends StateUp(React.Component) {
         {/* left frame */} 
         <div style={{height: '100%', position: 'relative', flexGrow: 1}}>
           
-          {/* appbar */}
-          <AppBar 
-            style={{position: 'absolute', width: '100%', height: appbarHeight, 
-            backgroundColor: cyan700, overflow: 'hidden'}} 
-
-            toggleDetail={this.toggleDetailBound}
-            toggleMenu={this.toggleMenuBound} 
-            openDrawer={this.openDrawerBound}
-            
-            prominent={prominent}
-            Toolbar={module.toolbar}
-            Title={module.title}
-          />
+          { this.renderAppBar() }
+          { this.renderAppBarShadow() }
         
-          {/* appbar shadow region, for display shadow */}
-          <div style={{width: '100%', height: appbarHeight, transition: 'height 300ms'}} />
-
           {/* content + shortcut container*/}
-          <div style={{width: '100%', height: `calc(100% - ${appbarHeight}px)`,
+          <div style={{width: '100%', height: `calc(100% - ${this.appBarHeight()}px)`,
             display: 'flex', justifyContent: 'space-between'}}>
 
             { this.renderQuickNavs() } 
 
             {/* content */}
             <div style={{flexGrow: 1, height: '100%', backgroundColor: '#FAFAFA'}}>
-              <module.content {...this.state} />
+              { view.renderContent() }
             </div>
-            
           </div>
         </div>
 
         {/* right frame */}
-        <div 
-          style={{height: '100%', width: this.state.showDetail ? this.state.detailWidth : 0, 
-            backgroundColor: '#F5F5F5', transition: sharpCurve('width')
-          }}
-          onTouchTap={ e => {
-            console.log(e.type)
-            console.log(e.nativeEvent.which)
-            console.log(e.nativeEvent.button)
-          }}
-          onClick={ e => {
-            console.log(e.type)
-            console.log(e.nativeEvent.which)
-            console.log(e.nativeEvent.button)
-          }}
-          onMouseUp={ e => {
-            console.log(e.type)
-            console.log(e.nativeEvent.which)
-            console.log(e.nativeEvent.button)
-          }}
-        >
-          world
-        </div>
-
+        { this.renderDetail() }       
+ 
         <NavDrawer 
           open={this.state.openDrawer} 
           onRequestChange={this.openDrawerBound}
+          views={this.views}
           nav={this.state.nav}
           navTo={this.navTo.bind(this)}
         />
       </div>
     )
+  }
+}
+
+/**
+  this wrapper is necessary because apis update should be routed to each individual view
+  if both apis and views are put into the same component, it is hard to inform view model
+  to process states like componentWillReceiveProps does. React props is essentially an
+  event routing.
+**/
+class Navigation extends Component {
+
+  constructor(props) {
+    super(props)
+
+    /** init apis **/
+    let token = props.selectedDevice.token
+    if (!token.isFulfilled()) throw new Error('token not fulfilled')
+
+    let address = props.selectedDevice.mdev.address
+    let userUUID = token.ctx.uuid
+    this.fruitmix = new Fruitmix(address, userUUID, token.value().token)
+    this.fruitmix.on('updated', (prev, next) => this.setState({ apis: next }))   
+
+    this.state = { apis: null }
+  }
+
+  componentDidMount() {
+    this.fruitmix.start()
+  }
+
+  render() {
+    return <NavViews apis={this.state.apis} />
   }
 }
 

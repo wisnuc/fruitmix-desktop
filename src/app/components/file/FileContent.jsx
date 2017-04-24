@@ -235,8 +235,6 @@ class FileContent extends Component {
 
     let { apis } = this.props
 
-    console.log('file content render', this.props)
-
     return (
       <div style={{width: '100%', height: '100%', backgroundColor: '#FAFAFA'}}>
 

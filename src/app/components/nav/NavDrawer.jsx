@@ -33,7 +33,7 @@ class MenuSpacer extends PureComponent {
 
 @muiThemeable()
 @Radium
-class MenuItem extends PureComponent {
+class MenuItem extends Component {
 
   render() {
 
@@ -70,23 +70,26 @@ class MenuItem extends PureComponent {
 
 class NavDrawer extends React.Component {
 
-  renderMenuItem(name) {
+  renderGroup(group) {
 
-    const { nav, navTo } = this.props
-    return (
-      <MenuItem
-        icon={navMap.get(name).icon} 
-        text={navMap.get(name).text}
-        dense={true}
-        selected={nav === name}
-        onTouchTap={() => navTo(name)}
-      />     
-    )
+    let { views, nav, navTo } = this.props
+
+    return Object.keys(views)
+      .filter(key => views[key].navGroup() === group)
+      .map(key => (
+        <MenuItem
+          icon={views[key].menuIcon()}
+          text={views[key].menuName()}
+          dense={true}
+          selected={key === nav}
+          onTouchTap={() => navTo(key)}
+        />
+      )) 
   }
 
   render() {
 
-    const { open, onRequestChange, nav, navTo } = this.props
+    const { open, onRequestChange, views, nav, navTo } = this.props
     const dense = true
 
     return (
@@ -98,19 +101,13 @@ class NavDrawer extends React.Component {
 
         <div style={{height: 4}}/>
 
-        { fileNavGroup.map(name => this.renderMenuItem(name)) }
+        { this.renderGroup('file') }
 
         <div style={{height: 4}} />
         <Divider />
         <div style={{height: 4}} />
 
-        { mediaNavGroup.map(name => this.renderMenuItem(name)) }
-
-        <div style={{height: 4}} />
-        <Divider />
-        <div style={{height: 4}} />
-
-        { appifiNavGroup.map(name => this.renderMenuItem(name)) }
+        { this.renderGroup('media') }
 
         <div style={{height: 4}} />
         <Divider />

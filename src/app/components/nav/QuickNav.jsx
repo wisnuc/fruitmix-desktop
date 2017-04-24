@@ -1,7 +1,6 @@
 import React, { Component, PureComponent } from 'react'
 
 import Radium from 'radium'
-import muiThemeable from 'material-ui/styles/muiThemeable'
 
 /**
 
@@ -14,17 +13,15 @@ import muiThemeable from 'material-ui/styles/muiThemeable'
   onTouchTap
 
 **/
-@muiThemeable()
 @Radium
 class QuickNav extends PureComponent {
 
   render() {
 
-    let { icon, text, selected, disabled } = this.props
+    let { icon, text, color, selected, disabled } = this.props
     let Icon = icon
-    let color = selected 
-      ? this.props.muiTheme.palette.primary1Color
-      : (disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.54)')
+    if (!selected)
+      color = disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.54)' // TODO
 
     return (
       <div 
