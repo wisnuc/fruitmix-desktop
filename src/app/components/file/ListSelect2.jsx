@@ -106,7 +106,7 @@ class ListSelect extends EventEmitter {
       }
       else {
 
-        let arr
+        let arr = []
         for (let i = Math.min(specified, index); i <= Math.max(specified, index); i++) 
           arr.push(i)
 
