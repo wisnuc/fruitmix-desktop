@@ -85,6 +85,7 @@ ipcMain.on('getThumb', (event, session, digest) => {
 
 class Worker extends EventEmitter {
   constructor(id) {
+    super()
     this.finished = false
     this.id = id
     this.state = 'PADDING'
@@ -175,8 +176,8 @@ class Worker extends EventEmitter {
 }
 
 class GetThumbTask extends Worker{
-  constructor(id, session, digest, dirpath, height, width) {
-    super(id)
+  constructor(session, digest, dirpath, height, width) {
+    super(session)
     this.session = session
     this.digest = digest
     this.dirpath = dirpath
@@ -212,8 +213,8 @@ class GetThumbTask extends Worker{
 }
 
 class GetImageTask extends Worker {
-  constructor(id, session, digest, dirpath){
-    super(id)
+  constructor(session, digest, dirpath){
+    super(session)
     this.session = session
     this.digest = digest
     this.dirpath = dirpath
@@ -247,8 +248,8 @@ class MediaFileManager {
     this.imageTaskLimit = 10
   }
 
-  createThumbTask(id, session, digest, dirpath, height, width) {
-    let task = new GetThumbTask(id, session, digest, dirpath, height, width)
+  createThumbTask(session, digest, dirpath, height, width) {
+    let task = new GetThumbTask(session, digest, dirpath, height, width)
     task.on('finish', data => {
       getMainWindow().webContents.send('getThumbSuccess', session, data)
       this.schedule()
@@ -261,8 +262,8 @@ class MediaFileManager {
     this.schedule()
   }
 
-  createImageTask(id, session, digest, dirpath) {
-    let task = new GetImageTask(id, session, digest, dirpath)
+  createImageTask(session, digest, dirpath) {
+    let task = new GetImageTask(session, digest, dirpath)
     task.on('finish', data => {
       getMainWindow().webContents.send('donwloadMediaSuccess', session, data)
       this.schedule()
@@ -308,18 +309,18 @@ class MediaFileManager {
 
 let mediaFileManager = new MediaFileManager()
 let dirpath = ''
-ipcMain.on('mediaShowThumb', (event, session, digest, id, height, width) => {
-  mediaFileManager.createThumbTask(id, session, digest, dirpath, height, width)
+ipcMain.on('mediaShowThumb', (event, session, digest, height, width) => {
+  mediaFileManager.createThumbTask(session, digest, dirpath, height, width)
 })
 
-ipcMain.on('mediaHideThumb', (event, id) => {
-  mediaFileManager.abort(id, 'thumb', () => {})
+ipcMain.on('mediaHideThumb', (event, session) => {
+  mediaFileManager.abort(session, 'thumb', () => {})
 })
 
-ipcMain.on('mediaShowImage', (event, session, digest, id) => {
-  mediaFileManager.createImageTask(id, session, digest, dirpath)
+ipcMain.on('mediaShowImage', (event, session, digest) => {
+  mediaFileManager.createImageTask(session, digest, dirpath)
 })
 
-ipcMain.on('mediaHideImage', (event, id) => {
-  mediaFileManager.abort(id, 'image', () => {})
+ipcMain.on('mediaHideImage', (event, session) => {
+  mediaFileManager.abort(session, 'image', () => {})
 })
