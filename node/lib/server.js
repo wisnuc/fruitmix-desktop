@@ -2,8 +2,10 @@ import Debug from 'debug'
 import request from 'request'
 import fs from 'fs'
 import path from 'path'
+import util from 'util'
 
 const debug = Debug('lib:server')
+import UUID from 'node-uuid'
 
 import store from '../serve/store/store'
 
@@ -62,8 +64,11 @@ const requestDownload = (url, qs, token, downloadPath, name, callback) => {
   else if (typeof token === 'object' && token !== null) {
     opts.auth = token
   }
+  
+  let tmpPath = path.join(global.tmpPath, UUID.v4())
+  let dst = path.join(downloadPath, name)
 
-  let stream = fs.createWriteStream(path.join(downloadPath,name))
+  let stream = fs.createWriteStream(tmpPath)
   request(opts, (err, res) => {
 
     if (err) return callback(err)
@@ -76,6 +81,7 @@ const requestDownload = (url, qs, token, downloadPath, name, callback) => {
     }
 
     try {
+      fs.renameSync(tmpPath, dst)
       return callback(null, null)
     }
     catch (e) {
