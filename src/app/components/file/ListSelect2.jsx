@@ -19,16 +19,14 @@ class ListSelect extends EventEmitter {
   }
 
   setState(props) {
-    let prev = this.state
     this.state = Object.assign({}, this.state, props)
-
-    console.log('ListSelect setState', this.state)
     this.emit('updated', this.state)
   }
 
+  // this function does NOT emit !!!
   reset(size) {
 
-    this.setState({
+    this.state = Object.assign({}, this.state, {
       size,
       ctrl: false,
       shift: false,
@@ -36,6 +34,8 @@ class ListSelect extends EventEmitter {
       specified: -1,
       selected: []
     })
+
+    return this.state 
   }
 
   keyEvent(ctrl, shift) {

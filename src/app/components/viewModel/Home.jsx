@@ -29,7 +29,7 @@ class BreadCrumbItem extends React.PureComponent {
     }
 
     return (
-      <div style={style}>
+      <div style={style} onTouchTap={this.props.onTouchTap}>
         { this.props.text }   
       </div>
     )
@@ -54,7 +54,29 @@ class Home extends Base {
     super(ctx)
     this.select = new ListSelect(this)
     this.select.on('updated', next => this.setState({ select: next }))
-    this.state = { select: this.select.state } 
+    this.state = { 
+
+      select: this.select.state,
+      listNavDir: null, // save a reference
+      path: [],         // 
+      entries: [],      // sorted
+    } 
+
+    this.onListNavBySelect = this.listNavBySelect.bind(this)
+  }
+
+  listNavBySelect() {
+
+    let selected = this.select.state.selected
+    if (selected.length !== 1) return
+
+    let entry = this.state.entries[selected[0]]
+    if (entry.type !== 'folder') return
+
+    this.ctx.props.apis.request('listNavDir', {
+      dirUUID: entry.uuid,
+      rootUUID: this.state.path[0].uuid
+    })
   }
 
   setState(props) {
@@ -62,33 +84,39 @@ class Home extends Base {
     this.emit('updated', this.state)
   }
 
+  updateState(listNavDir) {
+
+    if (listNavDir === this.state.listNavDir) return
+
+    let { path, entries } = listNavDir
+
+    entries = [...entries].sort((a, b) => {
+      if (a.type === 'folder' && b.type === 'file') return -1
+      if (a.type === 'file' && b.type === 'folder') return 1
+      return a.name.localeCompare(b.name)
+    })
+ 
+    let select = this.select.reset(entries.length) 
+    let state = { select, listNavDir, path, entries }
+    
+    console.log('home updating state', state)
+    this.setState(state)
+  }
+
   willReceiveProps(nextProps) { 
 
     if (!nextProps.apis || !nextProps.apis.listNavDir) return
-
     let listNavDir = nextProps.apis.listNavDir
     if (listNavDir.isPending() || listNavDir.isRejected()) return
-
-    // now it's fulfilled
-    let value = listNavDir.value()
-
-    console.log('willReceiveProps value', value)
-
-    if (value !== this.state.listNavDir) {
-      this.setState({ 
-        listNavDir: value,
-        entries: [...value.entries].sort((a, b) => {
-          if (a.type === 'folder' && b.type === 'file') return -1
-          if (a.type === 'file' && b.type === 'folder') return 1
-          return a.name.localeCompare(b.name)
-        })
-      })
-      this.select.reset(value.entries.length)
-    }
+    this.updateState(listNavDir.value())
   }
 
   navEnter() {
-    console.log('home enter')
+
+    if (!this.ctx.props.apis || !this.ctx.props.apis.listNavDir) return
+    let listNavDir = this.ctx.props.apis.listNavDir
+    if (listNavDir.isPending() || listNavDir.isRejected()) return
+    this.updateState(listNavDir.value())
   }
 
   navLeave() {
@@ -148,13 +176,10 @@ class Home extends Base {
 
     if (!this.state.listNavDir) return
 
-    const path = this.state.listNavDir.path
+    const path = this.state.path
 
     // each one is preceded with a separator, except for the first one
     // each one is assigned an action, except for the last one
-
-    console.log(path) 
-
     return (
       <div id='file-breadcrumbs' style={style}>
         { this.state.listNavDir.path.reduce((acc, node, index, arr) => {
@@ -162,7 +187,14 @@ class Home extends Base {
           if (index !== 0) acc.push(<BreadCrumbSeparator />)
 
           if (index === 0) { // the first one is always special
-            acc.push(<BreadCrumbItem text='我的文件' />)
+            acc.push(
+              <BreadCrumbItem text='我的文件' 
+                onTouchTap={() => this.ctx.props.apis.request('listNavDir', {
+                  dirUUID: path[0].uuid,
+                  rootUUID: path[0].uuid,
+                })}
+              />
+            )
           }
           else if (index === arr.length - 1) {
             acc.push(<BreadCrumbItem text={node.name} />)
@@ -189,7 +221,16 @@ class Home extends Base {
   }
 
   renderContent() {
-    return <FileContent home={this.state} select={this.state.select} entries={this.state.entries} />
+    return (
+      <FileContent 
+
+        home={this.state} 
+        select={this.state.select} 
+        entries={this.state.entries} 
+
+        listNavBySelect={this.onListNavBySelect}
+      />
+    )
   }
 }
 
