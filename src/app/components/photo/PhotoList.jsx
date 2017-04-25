@@ -13,7 +13,8 @@ import loading from '../../../assets/images/index/loading.gif'
 import PhotoItem from './PhotoItem'
 
 const debug = Debug('component:photoApp:PhotoList')
-const headerHeight = 56
+const headerHeight = 64
+const leftnavWidth = 72
 
 const findPath = (items, path) => items.findIndex(item => item === path)
 
@@ -85,14 +86,14 @@ export default class PhotoList extends Component {
         /* convert percentage to styleTop */
         let top = percentage * (this.clientHeight - headerHeight)
         if (top < 26) top = 26
-        if (top > this.clientHeight - 96) top = this.clientHeight - 96
+        if (top > this.clientHeight - 104) top = this.clientHeight - 104
 
         /* update datebar */
-        this.refDateBar.style.top = `${top + 56}px`
+        this.refDateBar.style.top = `${top + 64}px`
 
         /* update datebox */
         this.refDateBox.style.opacity = 1
-        this.refDateBox.style.top = `${top + 40}px`
+        this.refDateBox.style.top = `${top + 48}px`
         this.refDateBox.innerHTML = this.date
 
         /* show timeline */
@@ -117,8 +118,8 @@ export default class PhotoList extends Component {
       /* get mouse position*/
       let { x, y } = mousePosition(event)
       let top = y - 16
-      if (top < 66) top = 66
-      if (top > this.clientHeight - headerHeight) top = this.clientHeight - headerHeight
+      if (top < (headerHeight + 10)) top = headerHeight + 10
+      if (top > this.clientHeight - 56) top = this.clientHeight - 56
 
       if (this.onMouseDown || (x > this.clientWidth - 84 && y > headerHeight)) {
         /* showTimeline and clear setTimeout */
@@ -170,7 +171,7 @@ export default class PhotoList extends Component {
     this.clientHeight = window.innerHeight
     this.clientWidth = window.innerWidth
     const height = this.clientHeight - headerHeight
-    const width = this.props.leftNav ? this.clientWidth - 210 : this.clientWidth
+    const width = this.clientWidth - leftnavWidth
 
     /* calculate each row's heigth and their sum */
     const AllHeight = []
@@ -245,8 +246,8 @@ export default class PhotoList extends Component {
     let currentYear = null
     const timeline = [...month].map((data, index) => {
       const percentage = (this.indexHeightSum[sumCount] - 200) / this.maxScrollTop
-      /* top = percentage * (clientHeight - headerHeight) - headerHeight */
-      let top = percentage * (this.clientHeight - headerHeight) + 38
+      /* top = percentage * (clientHeight - headerHeight) + headerHeight - adjust */
+      let top = percentage * (this.clientHeight - headerHeight) + headerHeight - 18
 
       const spacingPercentage = (this.indexHeightSum[spacingCount] - 200) / this.maxScrollTop
       /* top = percentage * (clientHeight - headerHeight) - headerHeight */
@@ -263,7 +264,7 @@ export default class PhotoList extends Component {
       }
       currentYear = parseInt(data[0], 10)
       if (!index) { // first date
-        top = 64
+        top = headerHeight + 8
         spacingCount = 0
       } else if (index === month.size - 1) { // last date
         top += 20
@@ -277,7 +278,7 @@ export default class PhotoList extends Component {
       }
 
       /* set range of displaying date*/
-      if (top < 84 && index) date = null
+      if (top < (headerHeight + 16) && index) date = null
       if (top > this.clientHeight - 64 && index !== month.size - 1) date = null
       return [date, top, zIndex]
     })
@@ -389,13 +390,6 @@ export default class PhotoList extends Component {
     document.body.onmousemove = this.onMouseMove
     document.body.onmouseup = () => (this.onMouseDown = false)
     const photos = this.props.photoMapDates
-    if (photos.length === 0) {
-      return (
-        <div style={this.props.style}>
-          <CircularProgress />
-        </div>
-      )
-    }
     return (
       <Paper
         style={this.props.style}

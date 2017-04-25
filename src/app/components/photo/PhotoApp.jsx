@@ -1,7 +1,7 @@
 import Debug from 'debug'
 import React from 'react'
 import EventListener from 'react-event-listener'
-import { Paper, Menu, MenuItem, Divider, IconButton } from 'material-ui'
+import { Paper, Menu, MenuItem, Divider, IconButton, CircularProgress } from 'material-ui'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import DeviceStorage from 'material-ui/svg-icons/device/storage'
 import { blue500, red500, greenA200 } from 'material-ui/styles/colors'
@@ -12,7 +12,7 @@ import PhotoToolBar from './PhotoToolBar'
 import PhotoList from './PhotoList'
 
 const debug = Debug('component:photoApp:')
-const LEFTNAV_WIDTH = 210
+const LEFTNAV_WIDTH = 72
 const parseDate = (date) => {
   if (!date) return 0
   const b = date.split(/\D/)
@@ -26,8 +26,8 @@ class PhotoApp extends React.Component {
 
     this.state = {
       login: null,
-      leftNav: false,
-      media: window.store.getState().media.data
+      leftNav: true,
+      media: this.props.media
     }
 
     this.mediaStore = []
@@ -36,55 +36,12 @@ class PhotoApp extends React.Component {
     this.allPhotos = []
     this.force = false
 
-    this.toggleLeftNav = () => this.setState({ leftNav: !this.state.leftNav })
-
-    this.renderLeftNav = () => (
-      <Paper
-        style={{
-          width: LEFTNAV_WIDTH,
-          height: 'calc(100% - 56px)',
-          backgroundColor: '#EEEEEE',
-          position: 'absolute',
-          left: this.state.leftNav ? 0 : -1 * LEFTNAV_WIDTH,
-          top: 56,
-          transition: sharpCurve('left')
-        }}
-        transitionEnabled={false}
-        rounded={false}
-        zDepth={this.state.leftNav ? 1 : 0}
-      >
-        {/* debug('this.renderLeftNav', 'this.state.leftNav', this.state.leftNav)*/}
-        {/* 导航条 */}
-
-        {/* 左侧菜单 */}
-        <Menu
-          autoWidth={false}
-          width={LEFTNAV_WIDTH}
-        >
-          <MenuItem
-            primaryText="照片" leftIcon={<DeviceStorage />}
-            innerDivStyle={{ fontSize: 14, fontWeight: 500, opacity: 0.87 }}
-          />
-          <Divider />
-          <MenuItem
-            primaryText="相册" leftIcon={<DeviceStorage />}
-            innerDivStyle={{ fontSize: 14, fontWeight: 500, opacity: 0.87 }}
-          />
-          <Divider />
-          <MenuItem
-            primaryText="分享" leftIcon={<DeviceStorage />}
-            innerDivStyle={{ fontSize: 14, fontWeight: 500, opacity: 0.87 }}
-          />
-        </Menu>
-      </Paper>
-    )
-
     this.setPhotoInfo = () => {
       // debug('start this.setPhotoInfo', (!this.mediaStore.length || this.force))
       const leftNav = !!this.state.leftNav
       if (!this.mediaStore.length || this.force) {
         /* mediaStore were sorted by date in Node */
-        this.mediaStore = window.store.getState().media.data
+        this.mediaStore = this.props.media
         this.photoDates = []
         this.photoMapDates = []
         this.allPhotos = []
@@ -169,33 +126,41 @@ class PhotoApp extends React.Component {
   }
 
   render() {
-    debug('PhotoApp, store.media.data', window.store.getState().media.data)
+    debug('PhotoApp, store.media.data', this.props)
     return (
       <Paper>
         <EventListener
           target="window"
           onResize={this.handleResize}
         />
-        <this.renderLeftNav />
-        <PhotoList
-          style={{
-            position: 'fixed',
-            paddingTop: 56,
-            width: this.state.leftNav ? 'calc(100% - 210px)' : '100%',
-            height: '100%',
-            left: this.state.leftNav ? LEFTNAV_WIDTH : 0,
-            backgroundColor: '#FFFFFF',
-            transition: sharpCurve('left'),
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-          {...this.setPhotoInfo()}
-        />
-        <PhotoToolBar
-          action={this.toggleLeftNav}
-          state={['照片']}
-        />
+        {
+          this.props.media ?
+            <PhotoList
+              style={{
+                position: 'fixed',
+                width: 'calc(100% - 72px)',
+                height: 'calc(100% - 64px)',
+                left: LEFTNAV_WIDTH,
+                backgroundColor: '#FFFFFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              {...this.setPhotoInfo()}
+            /> :
+            <div
+              style={{
+                position: 'fixed',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 'calc(100% - 72px)',
+                height: 'calc(100% - 64px)'
+              }}
+            >
+              <CircularProgress />
+            </div>
+        }
       </Paper>
     )
   }

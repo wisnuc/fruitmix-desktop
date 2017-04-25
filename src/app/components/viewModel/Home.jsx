@@ -64,7 +64,7 @@ class Home extends Base {
   }
 
   willReceiveProps(nextProps) { 
-    console.log('home nextProps', nextProps) 
+    console.log('true home nextProps', nextProps) 
 
     if (!nextProps.apis || !nextProps.apis.listNavDir) return
 
