@@ -14,7 +14,6 @@ import FileFolder from 'material-ui/svg-icons/file/folder'
 import { List, AutoSizer } from 'react-virtualized'
 import ListSelect from './ListSelect'
 
-
 const formatTime = mtime => {
 
   if (!mtime) {
@@ -99,6 +98,7 @@ class Row extends PureComponent {
           onTouchTap={e => this.props.onRowTouchTap(e, index)}
           onMouseEnter={e => this.props.onRowMouseEnter(e, index)}
           onMouseLeave={e => this.props.onRowMouseLeave(e, index)}
+          onDoubleClick={e => this.props.onRowDoubleClick(e, index)}
         >
           { renderLeading(leading) }
           <div style={{flex: '0 0 12px'}} />
@@ -182,6 +182,7 @@ class FileContent extends Component {
     this.onRowTouchTap = this.rowTouchTap.bind(this)
     this.onRowMouseEnter = this.rowMouseEnter.bind(this)
     this.onRowMouseLeave = this.rowMouseLeave.bind(this)
+    this.onRowDoubleClick = this.rowDoubleClick.bind(this)
  
     this.rowRenderer = props => (
       <Row 
@@ -190,6 +191,7 @@ class FileContent extends Component {
         onRowTouchTap={this.onRowTouchTap}  
         onRowMouseEnter={this.onRowMouseEnter}
         onRowMouseLeave={this.onRowMouseLeave}
+        onRowDoubleClick={this.onRowDoubleClick}
       />
     )
   } 
@@ -254,6 +256,11 @@ class FileContent extends Component {
 
   rowMouseLeave(e, index) {
     this.deferredLeave = setTimeout(() => this.props.select.mouseLeave(index), 1)
+  }
+
+  rowDoubleClick(e, index) {
+    if (index === -1) return
+    this.props.listNavBySelect()
   }
 
   render() {
