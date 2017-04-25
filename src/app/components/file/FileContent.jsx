@@ -1,3 +1,5 @@
+import prettysize from 'prettysize'
+
 import React, { Component, PureComponent } from 'react'
 
 import Radium from 'radium'
@@ -6,9 +8,23 @@ import ActionCheckCircle from 'material-ui/svg-icons/action/check-circle'
 import NavigationCheck from 'material-ui/svg-icons/navigation/check'
 import ToggleCheckBox from 'material-ui/svg-icons/toggle/check-box'
 import ToggleCheckBoxOutlineBlank from 'material-ui/svg-icons/toggle/check-box-outline-blank'
+import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
+import FileFolder from 'material-ui/svg-icons/file/folder'
 
 import { List, AutoSizer } from 'react-virtualized'
 import ListSelect from './ListSelect'
+
+
+const formatTime = mtime => {
+
+  if (!mtime) {
+    return null
+  }
+
+  let time = new Date()
+  time.setTime(parseInt(mtime))
+  return time.getFullYear() + '-' + (time.getMonth() + 1) + '-' + time.getDay()
+}
 
 const renderLeading = leading => {
 
@@ -47,16 +63,21 @@ class Row extends PureComponent {
 
     const {
 
+      /* these are react-virtualized List props */
       index,       // Index of row
       isScrolling, // The List is currently being scrolled
       isVisible,   // This row is visible within the List (eg it is not an overscanned row)
       key,         // Unique key within array of rendered rows
       parent,      // Reference to the parent List (instance)
-      style        // Style object to be applied to row (to position it);
+      style,       // Style object to be applied to row (to position it);
                    // This must be passed through to the rendered row element.
+
+      /* these are view-model state */
+      entries,
+      select,
     } = this.props 
 
-    let select = this.props.home.select
+    let entry = entries[index]
     let leading = select.rowLeading(index)
     let check = select.rowCheck(index)
     let color = select.rowColor(index)
@@ -85,9 +106,28 @@ class Row extends PureComponent {
             { renderCheck(check) }
           </div>
           <div style={{flex: '0 0 8px'}} />
+          {/*
           <div>
             {`Hello World ${index} ${leading} ${check} ${color} ${select.ctrl} ${select.shift} ` +
               `${select.hover} ${select.specified}` }
+          </div>
+          */}
+          <div style={{flex: '0 0 48px', display: 'flex', alignItems: 'center'}}>
+            { entry.type === 'folder' 
+                ? <FileFolder style={{color: 'rgba(0,0,0,0.54)'}} />
+                : entry.type === 'file'
+                  ? <EditorInsertDriveFile style={{color: 'rgba(0,0,0,0.54'}} />
+                  : null } 
+          </div>
+          <div style={{flexGrow: 1}}>
+            { entry.name }
+          </div>
+          <div style={{flex: '0 1 160px', fontSize: 13, color: 'rgba(0,0,0,0.54)', textAlign: 'right'}}>
+            { formatTime(entry.mtime) }
+          </div>
+          <div style={{flex: '0 1 160px', fontSize: 13, color: 'rgba(0,0,0,0.54)', textAlign: 'right', 
+            marginRight: 72}}>
+            { entry.type === 'file' && prettysize(entry.size) }
           </div>
         </div>
       </div>
@@ -168,14 +208,14 @@ class FileContent extends Component {
 
   keyDown(e) {
     console.log('keydown', e.ctrlKey, e.shiftKey)
-    if (this.props.home.select)
-      this.props.home.select.keyEvent(e.ctrlKey, e.shiftKey)
+    if (this.props.select)
+      this.props.select.keyEvent(e.ctrlKey, e.shiftKey)
   }
 
   keyUp(e) {
     console.log('keyup', e.ctrlKey, e.shiftKey)
-    if (this.props.home.select)
-      this.props.home.select.keyEvent(e.ctrlKey, e.shiftKey)
+    if (this.props.select)
+      this.props.select.keyEvent(e.ctrlKey, e.shiftKey)
   }
 
   rowTouchTap(e, index) {
@@ -195,11 +235,11 @@ class FileContent extends Component {
 
     if (type !== 'mouseup' || !(button === 0 || button === 2)) return
 
-    this.props.home.select.touchTap(button, index)
+    this.props.select.touchTap(button, index)
 
     if (button === 2) { // right click
 
-      if (this.props.home.select.shift || this.props.home.select.ctrl) return
+      if (this.props.select.shift || this.props.select.ctrl) return
       this.setState({
         contextMenu: true,
         clientX: e.nativeEvent.clientX,
@@ -209,11 +249,11 @@ class FileContent extends Component {
   }
 
   rowMouseEnter(e, index) {
-    this.props.home.select.mouseEnter(index)
+    this.props.select.mouseEnter(index)
   }
 
   rowMouseLeave(e, index) {
-    this.deferredLeave = setTimeout(() => this.props.home.select.mouseLeave(index), 1)
+    this.deferredLeave = setTimeout(() => this.props.select.mouseLeave(index), 1)
   }
 
   render() {
@@ -223,6 +263,9 @@ class FileContent extends Component {
     return (
       <div style={{width: '100%', height: '100%', backgroundColor: '#FAFAFA'}}>
 
+        <div style={{width: '100%', height: 8}} />
+        <div style={{width: '100%', height: 40}}>This is header</div>
+
         { this.props.home.listNavDir && 
           <AutoSizer>
             {({ height, width }) => (
@@ -231,7 +274,7 @@ class FileContent extends Component {
                   style={{ outline: 'none' }}
                   height={height}
                   width={width}
-                  rowCount={this.props.home.select.size}
+                  rowCount={this.props.select.size}
                   rowHeight={40}
                   rowRenderer={this.rowRenderer}
                 />

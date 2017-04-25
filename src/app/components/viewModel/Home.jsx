@@ -2,7 +2,7 @@ import React from 'react'
 import Radium from 'radium'
 
 import { IconButton } from 'material-ui'
-import { blue800, indigo700, indigo500, teal500 } from 'material-ui/styles/colors'
+import { orange700, blue700, indigo700, indigo500, teal500 } from 'material-ui/styles/colors'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
 
@@ -52,7 +52,6 @@ class Home extends Base {
   constructor(ctx) {
 
     super(ctx)
-
     this.select = new ListSelect(this)
     this.select.on('updated', next => this.setState({ select: next }))
     this.state = { select: this.select.state } 
@@ -64,7 +63,6 @@ class Home extends Base {
   }
 
   willReceiveProps(nextProps) { 
-    console.log('home nextProps', nextProps) 
 
     if (!nextProps.apis || !nextProps.apis.listNavDir) return
 
@@ -73,11 +71,18 @@ class Home extends Base {
 
     // now it's fulfilled
     let value = listNavDir.value()
+
+    console.log('willReceiveProps value', value)
+
     if (value !== this.state.listNavDir) {
-
-      console.log('home nextProps, updating listNavDir value', this.state.listNavDir, value)
-
-      this.setState({ listNavDir: value })
+      this.setState({ 
+        listNavDir: value,
+        entries: [...value.entries].sort((a, b) => {
+          if (a.type === 'folder' && b.type === 'file') return -1
+          if (a.type === 'file' && b.type === 'folder') return 1
+          return a.name.localeCompare(b.name)
+        })
+      })
       this.select.reset(value.entries.length)
     }
   }
@@ -131,7 +136,7 @@ class Home extends Base {
   }
 
   detailEnabled() {
-    return false 
+    return true
   }
 
   detailWidth() {
@@ -141,30 +146,38 @@ class Home extends Base {
   // breadcrumb
   renderTitle({style}) {
 
+    if (!this.state.listNavDir) return
+
+    const path = this.state.listNavDir.path
+
+    // each one is preceded with a separator, except for the first one
+    // each one is assigned an action, except for the last one
+
+    console.log(path) 
+
     return (
       <div id='file-breadcrumbs' style={style}>
-        <BreadCrumbItem text="我的文件" />
-        <BreadCrumbSeparator />
-        <BreadCrumbItem text="马大哈" />
-        <BreadCrumbSeparator />
-        <BreadCrumbItem text="5f9a02c4-50e7-440d-af25-6a71b1594447" />
-        <BreadCrumbSeparator />
-        <BreadCrumbItem text="Hello" />
-        <BreadCrumbSeparator />
-        <BreadCrumbItem text="Hello" />
-        <BreadCrumbSeparator />
-        <BreadCrumbItem text="Hello" />
-        <BreadCrumbSeparator />
-        <BreadCrumbItem text="Hello" />
-        <BreadCrumbSeparator />
-        <BreadCrumbItem text="Hello" />
-        <BreadCrumbSeparator />
-        <BreadCrumbItem text="Hello" selected={true} />
+        { this.state.listNavDir.path.reduce((acc, node, index, arr) => {
+
+          if (index !== 0) acc.push(<BreadCrumbSeparator />)
+
+          if (index === 0) { // the first one is always special
+            acc.push(<BreadCrumbItem text='我的文件' />)
+          }
+          else if (index === arr.length - 1) {
+            acc.push(<BreadCrumbItem text={node.name} />)
+          } 
+          else {
+            acc.push(<BreadCrumbItem text={node.name} />)
+          }
+          return acc
+        }, [])}
       </div>
     )
   }
 
   renderToolBar({style}) {
+
     return (
       <div style={style}>
         <IconButton><FileCreateNewFolder color='#FFF' /></IconButton>
@@ -176,7 +189,7 @@ class Home extends Base {
   }
 
   renderContent() {
-    return <FileContent home={this.state} />
+    return <FileContent home={this.state} select={this.state.select} entries={this.state.entries} />
   }
 }
 
