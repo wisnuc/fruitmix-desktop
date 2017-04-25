@@ -54,7 +54,13 @@ class Home extends Base {
     super(ctx)
     this.select = new ListSelect(this)
     this.select.on('updated', next => this.setState({ select: next }))
-    this.state = { select: this.select.state } 
+    this.state = { 
+
+      select: this.select.state,
+      listNavDir: null, // save a reference
+      path: [],         // 
+      entries: [],      // sorted
+    } 
   }
 
   setState(props) {
@@ -62,33 +68,39 @@ class Home extends Base {
     this.emit('updated', this.state)
   }
 
+  updateState(listNavDir) {
+
+    if (listNavDir === this.state.listNavDir) return
+
+    let { path, entries } = listNavDir
+
+    entries = [...entries].sort((a, b) => {
+      if (a.type === 'folder' && b.type === 'file') return -1
+      if (a.type === 'file' && b.type === 'folder') return 1
+      return a.name.localeCompare(b.name)
+    })
+ 
+    let select = this.select.reset(entries.length) 
+    let state = { select, listNavDir, path, entries }
+    
+    console.log('home updating state', state)
+    this.setState(state)
+  }
+
   willReceiveProps(nextProps) { 
 
     if (!nextProps.apis || !nextProps.apis.listNavDir) return
-
     let listNavDir = nextProps.apis.listNavDir
     if (listNavDir.isPending() || listNavDir.isRejected()) return
-
-    // now it's fulfilled
-    let value = listNavDir.value()
-
-    console.log('willReceiveProps value', value)
-
-    if (value !== this.state.listNavDir) {
-      this.setState({ 
-        listNavDir: value,
-        entries: [...value.entries].sort((a, b) => {
-          if (a.type === 'folder' && b.type === 'file') return -1
-          if (a.type === 'file' && b.type === 'folder') return 1
-          return a.name.localeCompare(b.name)
-        })
-      })
-      this.select.reset(value.entries.length)
-    }
+    this.updateState(listNavDir.value())
   }
 
   navEnter() {
-    console.log('home enter')
+
+    if (!this.ctx.props.apis || !this.ctx.props.apis.listNavDir) return
+    let listNavDir = this.ctx.props.apis.listNavDir
+    if (listNavDir.isPending() || listNavDir.isRejected()) return
+    this.updateState(listNavDir.value())
   }
 
   navLeave() {
