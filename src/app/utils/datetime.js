@@ -11,7 +11,7 @@
 export function toDateString (datetime) {
   const dateStr = datetime.trim().split(/\s+/)[0];
 
-  return dateStr.replace(/:/g, '/').replace(/\/0/g, '/');
+  return dateStr.replace(/:/g, '/').replace(/\//g, '/');
 }
 
 /**

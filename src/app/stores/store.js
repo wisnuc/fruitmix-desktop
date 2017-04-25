@@ -22,7 +22,7 @@ ipcRenderer.on('hijack', state =>
 
 window.store = store
 
-console.log('store module initialized')
+// console.log('store module initialized')
 
 export default store
 

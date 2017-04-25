@@ -18,6 +18,11 @@ import NavDrawer from './NavDrawer'
 import QuickNav from './QuickNav'
 
 import Home from '../viewModel/Home'
+import Media from '../viewModel/Media'
+
+import Debug from 'debug'
+
+const debug = Debug('component:nav:Navigation')
 
 class NavViews extends Component {
 
@@ -38,6 +43,13 @@ class NavViews extends Component {
     })
     state.home = views.home.state
 
+    views.media = new Media(this)
+    views.media.on('updated', next => {
+      this.setState({ media: next })
+      console.log('NavViews updating media', next)
+    })
+    state.media = views.media.state
+
     Object.assign(state, {
       nav: null,
       showDetail: false,
@@ -57,7 +69,7 @@ class NavViews extends Component {
   }
 
   componentDidMount() {
-    this.navTo('home')
+    this.navTo('media')
   }
 
   navTo(nav) {
@@ -225,7 +237,7 @@ class NavViews extends Component {
           <div style={{flex: '0 0 20px'}} />
          
           {/** non-prominent title **/} 
-          { !view.prominent() && view.renderTitle() }
+          { !view.prominent() && view.renderTitle({ style: titleStyle }) }
 
           {/** context-sensitive toolbar, passing style for component list **/}
           { view.renderToolBar({ style: toolBarStyle }) }
