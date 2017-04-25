@@ -1,4 +1,3 @@
-var path = require('path')
 
 const defaultState = {
   ip: '',

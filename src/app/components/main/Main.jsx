@@ -125,7 +125,7 @@ class Main extends React.Component {
     super(props)
 
     this.state = {
-      currentApp: FileApp,
+      currentApp: PhotoApp,
       showAppBar: true,
       resizing: false
     }
@@ -266,10 +266,6 @@ class Main extends React.Component {
 
 		ipcRenderer.on('message',(err,message,code)=>{
 			window.store.dispatch(Action.setSnack(message,true))
-		});
-
-		ipcRenderer.on('donwloadMediaSuccess',(err,item)=>{
-			window.store.dispatch(Action.setMediaImage(item));
 		});
 
 		ipcRenderer.on('setUsers',(err,user)=>{

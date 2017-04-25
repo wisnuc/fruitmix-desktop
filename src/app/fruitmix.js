@@ -35,8 +35,10 @@ require('../assets/css/app.css')
 injectTapEventPlugin()
 
 // global import jQuery
+global.$ = global.jQuery = global.jQuery || require('jquery')
+
 global.theme = getMuiTheme({ 
-  fontFamily: 'Noto Sans SC, sans-serif',
+  fontFamily: 'Roboto, Noto Sans SC, sans-serif',
   palette: {
     primary1Color: teal500
   }

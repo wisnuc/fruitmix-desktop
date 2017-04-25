@@ -1,10 +1,10 @@
 import Debug from 'debug'
 import React from 'react'
+import EventListener from 'react-event-listener'
 import { Paper, Menu, MenuItem, Divider, IconButton } from 'material-ui'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import DeviceStorage from 'material-ui/svg-icons/device/storage'
 import { blue500, red500, greenA200 } from 'material-ui/styles/colors'
-
 import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
 import { formatDate } from '../../utils/datetime'
 
@@ -13,6 +13,12 @@ import PhotoList from './PhotoList'
 
 const debug = Debug('component:photoApp:')
 const LEFTNAV_WIDTH = 210
+const parseDate = (date) => {
+  if (!date) return 0
+  const b = date.split(/\D/)
+  const c = (`${b[0]}${b[1]}${b[2]}${b[3]}${b[4]}${b[5]}`)
+  return parseInt(c, 10)
+}
 
 class PhotoApp extends React.Component {
   constructor(props) {
@@ -23,6 +29,12 @@ class PhotoApp extends React.Component {
       leftNav: false,
       media: window.store.getState().media.data
     }
+
+    this.mediaStore = []
+    this.photoDates = []
+    this.photoMapDates = []
+    this.allPhotos = []
+    this.force = false
 
     this.toggleLeftNav = () => this.setState({ leftNav: !this.state.leftNav })
 
@@ -68,94 +80,102 @@ class PhotoApp extends React.Component {
     )
 
     this.setPhotoInfo = () => {
-      // debug('start this.setPhotoInfo')
-      this.mediaStore = window.store.getState().media.data
-      // debug('start this.setPhotoInfo', this.mediaStore, this.mediaStore.length)
+      // debug('start this.setPhotoInfo', (!this.mediaStore.length || this.force))
       const leftNav = !!this.state.leftNav
-      const photoDates = []
-      const photoMapDates = []
-      const allPhotos = []
-      const clientWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
-      const width = leftNav ? clientWidth - 210 - 60 : clientWidth - 60
-      // debug('start this.setPhotoInfo', this.mediaStore, this.mediaStore.length)
-      this.mediaStore.sort((prev, next) => Date.parse(formatDate(next.exifDateTime)) - Date.parse(formatDate(prev.exifDateTime)))
-      let MaxItem = Math.floor(width / 216) - 1
-      // debug('MaxItem', MaxItem)
-      let lineIndex = 0
-      const dateUnknown = []
-      this.mediaStore.forEach((item) => {
-        if (!item.exifDateTime) {
-          dateUnknown.push(item)
-          return
-        }
-        allPhotos.push(item)
-        const formatExifDateTime = formatDate(item.exifDateTime)
-        const isRepeat = photoDates.findIndex(Item => Item === formatExifDateTime) >= 0
-        if (!isRepeat || MaxItem === 0) {
-          MaxItem = Math.floor(width / 216) - 1
-          photoDates.push(formatExifDateTime)
-          photoMapDates.push({
-            first: !isRepeat,
-            index: lineIndex,
-            date: formatExifDateTime,
-            photos: [item]
-          })
-          lineIndex += 1
-        } else {
-          MaxItem -= 1
-          photoMapDates
-          .find(Item => Item.index === (lineIndex - 1))
-          .photos
-          .push(item)
-        }
-      })
-      if (dateUnknown.length > 0) {
-        MaxItem = 0
-        lineIndex += 1
-        let isRepeat = false
-        dateUnknown.forEach((item) => {
-          allPhotos.push(item)
-          if (MaxItem === 0) {
+      if (!this.mediaStore.length || this.force) {
+        /* mediaStore were sorted by date in Node */
+        this.mediaStore = window.store.getState().media.data
+        this.photoDates = []
+        this.photoMapDates = []
+        this.allPhotos = []
+        this.force = false
+        const clientWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
+        const width = leftNav ? clientWidth - 210 - 60 : clientWidth - 60
+        let MaxItem = Math.floor(width / 216) - 1
+        let lineIndex = 0
+        const dateUnknown = []
+        this.mediaStore.forEach((item) => {
+          if (!item.exifDateTime) {
+            dateUnknown.push(item)
+            return
+          }
+          this.allPhotos.push(item)
+          const formatExifDateTime = formatDate(item.exifDateTime)
+          const isRepeat = this.photoDates[this.photoDates.length - 1] === formatExifDateTime
+          if (!isRepeat || MaxItem === 0) {
             MaxItem = Math.floor(width / 216) - 1
-            photoMapDates.push({
+            this.photoDates.push(formatExifDateTime)
+            this.photoMapDates.push({
               first: !isRepeat,
               index: lineIndex,
-              date: '神秘时间',
+              date: formatExifDateTime,
               photos: [item]
             })
             lineIndex += 1
-            isRepeat = true
           } else {
             MaxItem -= 1
-            photoMapDates
-              .find(Item => Item.index === (lineIndex - 1))
+            this.photoMapDates[this.photoMapDates.length - 1]
               .photos
               .push(item)
           }
         })
+        if (dateUnknown.length > 0) {
+          MaxItem = 0
+          lineIndex += 1
+          let isRepeat = false
+          dateUnknown.forEach((item) => {
+            this.allPhotos.push(item)
+            if (MaxItem === 0) {
+              MaxItem = Math.floor(width / 216) - 1
+              this.photoDates.push(0)
+              this.photoMapDates.push({
+                first: !isRepeat,
+                index: lineIndex,
+                date: '神秘时间',
+                photos: [item]
+              })
+              lineIndex += 1
+              isRepeat = true
+            } else {
+              MaxItem -= 1
+              this.photoMapDates[this.photoMapDates.length - 1]
+                .photos
+                .push(item)
+            }
+          })
+        }
+        /* simulate large list */
+        for (let i = 1; i <= 0; i++) {
+          this.photoMapDates.push(...this.photoMapDates)
+        }
       }
-      for (let i = 1; i <= 0; i++) {
-        photoMapDates.push(...photoMapDates)
-      }
-      debug('finish this.setPhotoInfo', allPhotos, photoMapDates)
       return {
         leftNav,
-        allPhotos,
-        photoDates,
-        photoMapDates
+        allPhotos: this.allPhotos,
+        photoDates: this.photoDates,
+        photoMapDates: this.photoMapDates
       }
     }
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    if (window.store.getState().media.data !== this.mediaStore) return true
+    if (!this.mediaStore.length) return true
     return (this.state !== nextState)
   }
 
+  handleResize = () => {
+    this.force = true // force update setPhotoInfo
+    this.forceUpdate()
+  }
+
   render() {
-    // debug('render photoapp state, props', this.state, this.props)
+    debug('PhotoApp, store.media.data', window.store.getState().media.data)
     return (
       <Paper>
+        <EventListener
+          target="window"
+          onResize={this.handleResize}
+        />
         <this.renderLeftNav />
         <PhotoList
           style={{

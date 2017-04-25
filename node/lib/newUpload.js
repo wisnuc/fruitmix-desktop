@@ -53,7 +53,7 @@ const dragFileHandle = (args) => {
       }
       if (stat.isDirectory()) type='folder'
       else type = 'file'
-      createTask(filePath,args.dirUUID, type, true)
+      createTask(filePath, args.dirUUID, type, true)
       index++
       if (index == args.files.length) return getMainWindow().webContents.send('message', args.files.length + '个任务添加至上传队列')
       loop()
@@ -62,12 +62,20 @@ const dragFileHandle = (args) => {
   loop()
 }
 
-const getTransmissionHandle = (args, callback) => {
+const getTransmissionHandle = () => {
   db.uploaded.find({}).sort({finishDate: -1}).exec((err, docs) => {
     if (err) return console.log(err)
       docs.forEach(item => item.uuid = item._id)
       finishTasks.splice(0, 0, ...docs)
       sendMsg()
+  })
+
+  db.uploading.find({}, (err, tasks) => {
+    if (err) return
+    tasks.forEach(item => {
+      createTask(item.abspath, item.target, item.type, false, item._id, item.uploading, item.rootUUID)
+      }
+      )
   })
 	// db.uploading   to fixed
 }
@@ -102,5 +110,18 @@ ipcMain.on('loginOff', evt => {
 })
 
 ipcMain.on('GET_TRANSMISSION', getTransmissionHandle)
+
+// ipcMain.on('PAUSE_UPLOADING')
+ipcMain.on('PAUSE_UPLOADING', (e, uuid) => {
+  if (!uuid) return
+  let task = userTasks.find(item => item.uuid === uuid)
+  if (task) {task.pauseTask()}
+})
+
+ipcMain.on('RESUME_UPLOADING', (e, uuid) => {
+  if (!uuid) return
+  let task = userTasks.find(item => item.uuid === uuid)
+  if (task) task.resumeTask()
+})
 
 export { userTasks, finishTasks }
