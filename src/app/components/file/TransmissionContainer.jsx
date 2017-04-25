@@ -17,7 +17,6 @@ class Upload extends Component {
 		super(props)
 		this.taskSelected = []
 		this.finishSelected = []
-		this.special = null
 		this.state = {
 			x: 0,
 			y: 0,
@@ -34,6 +33,7 @@ class Upload extends Component {
 		this.play = this.play.bind(this)
 		this.pause = this.pause.bind(this)
 		this.delete = this.delete.bind(this)
+		this.open = this.open.bind(this)
 	}
 
 	componentDidMount() {
@@ -125,8 +125,8 @@ class Upload extends Component {
 							<Menu>
 								<MenuItem primaryText='开始下载' disabled={this.state.play} onTouchTap={this.play}/>
 								<MenuItem primaryText='暂停' disabled={this.state.pause} onTouchTap={this.pause}/>
-								<MenuItem primaryText='打开所在文件夹'/>
-								<MenuItem primaryText='删除'/>
+								<MenuItem primaryText='打开所在文件夹' onTouchTap={this.open}/>
+								<MenuItem primaryText='删除' onTouchTap={this.delete}/>
 							</Menu>
 						</Paper>
 					</div>
@@ -137,7 +137,9 @@ class Upload extends Component {
 
 	cleanRecord() {
 		if (this.props.type === 'download') command('', 'CLEAN_DOWNLOAD_RECORD',{})
-		else command('', 'CLEAN_UPLOAD_RECORD',{})
+		else command('', 'CLEAN_UPLOAD_RECORD',{}, (err, data) => {
+			console.log(err, data)
+		})
 	}
 
 	cleanTaskSelect() {
@@ -145,7 +147,6 @@ class Upload extends Component {
 			if (this.refs['running'].refs[item]) {
 				this.refs['running'].refs[item].updateDom(false)	
 			}
-			
 		})
 		this.taskSelected.length = 0
 	}
@@ -182,13 +183,25 @@ class Upload extends Component {
 
 	pause() {
 		if (this.props.type === 'download') {
-			console.log('send///')
 			this.state.tasks.forEach(item => ipcRenderer.send('PAUSE_DOWNLOADING', item.uuid))
 		}
 	}
 
 	delete() {
+		console.log(this.state.tasks)
+		if (this.props.type === 'download') 
+			this.state.tasks.forEach(item => 
+				ipcRenderer.send(this.taskSelected.length?'DELATE_DOWNLOADING':'DELETE_DOWNLOADED', this.state.tasks)
+			)
+		else this.state.tasks.forEach(item => 
+			ipcRenderer.send(this.taskSelected.length?'DELETE_UPLOADING':'DELETE_UPLOADED', this.state.tasks)
+			)
+	}
 
+	open() {
+		if (this.props.type === 'download') {
+			ipcRenderer.send('OPEN_DOWNLOAD', this.state.tasks, this.taskSelected.length?'running':'finish')
+		}
 	}
 }
 

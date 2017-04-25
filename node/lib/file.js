@@ -105,7 +105,7 @@ const fileNavAsync = async ({ context, folderUUID, rootUUID }) => {
   switch (context) {
   case 'HOME_DRIVE':
     if (!folderUUID && !rootUUID) {
-      folderUUID = rootUUID = store.getState().login.obj.home 
+      folderUUID = rootUUID = store.getState().login.obj.home
     }
     else if (!rootUUID) {
       rootUUID = store.getState().login.obj.home
@@ -145,7 +145,9 @@ const fileNavAsync = async ({ context, folderUUID, rootUUID }) => {
     throw new Error('invalid nav context')
   }
 
-  return await serverGetAsync(`files/${folderUUID}`, { navroot: rootUUID })
+  let result = await serverGetAsync(`files/${folderUUID}`, { navroot: rootUUID })
+  console.log(result)
+  return result
 }
 
 const fileRenameAsync = async({dir, node, name}) => {

@@ -9,7 +9,6 @@ PhotoApp {
       PhotoItem
     }
     PhotoDetail{
-      SlideToAnimate 
     }
     Carousel{
       SlideToAnimate

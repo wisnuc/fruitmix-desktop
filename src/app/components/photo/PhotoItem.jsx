@@ -1,10 +1,14 @@
 import React, { Component, PropTypes } from 'react'
+import UUID from 'node-uuid'
 import { ipcRenderer } from 'electron'
 import Debug from 'debug'
 import { Paper, Card, IconButton, CircularProgress } from 'material-ui'
 import { CheckIcon } from './Svgs'
 
 const debug = Debug('component:photoApp:photoItem:')
+
+/* increase limit of listeners of EventEmitter */
+ipcRenderer.setMaxListeners(100)
 
 export default class PhotoItem extends Component {
   constructor(props, context) {
@@ -15,6 +19,7 @@ export default class PhotoItem extends Component {
       action: false,
       hover: false
     }
+    this.path = ''
 
     this.onSelectIconButton = () => {
       if (!this.state.action) {
@@ -33,10 +38,25 @@ export default class PhotoItem extends Component {
 
     this.placeHolder = <div style={{ backgroundColor: '#eeeeee', height: '100%', width: '100%' }} />
     // this.placeHolder = (<CircularProgress size={40} thickness={5} />)
+
+    this.updatePath = (event, session, path) => {
+      if (this.session === session) {
+        this.path = path
+        this.forceUpdate()
+      }
+    }
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    return (this.state !== nextState || nextProps.path !== this.props.path)
+    return (this.state !== nextState)
+  }
+  componentDidMount() {
+    this.session = UUID.v4()
+    ipcRenderer.send('getThumb', this.session, this.props.digest)
+    ipcRenderer.on('getThumbSuccess', this.updatePath)
+  }
+  componentWillUnmount() {
+    ipcRenderer.removeListener('getThumbSuccess', this.updatePath)
   }
 
   renderHover = () => (
@@ -57,42 +77,36 @@ export default class PhotoItem extends Component {
         hoverColor={this.state.action ? '#1E88E5' : '#42A5F5'}
         color={this.state.action ? '#1E88E5' : '#90CAF9'}
       />
-      {debug('hover', this.props)}
+    </div>
+  )
+
+  renderImage = () => (
+    <div
+      style={{
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
+      onTouchTap={() => this.props.lookPhotoDetail(this.props.digest)}
+      onMouseMove={() => this.setState({ hover: true })}
+      onMouseLeave={() => this.setState({ hover: false })}
+    >
+      {
+          !this.path ? this.placeHolder :
+          <img src={this.path} alt="img" style={{ objectFit: 'cover' }} />
+        }
     </div>
     )
 
-  renderImage = () => {
-    const { path } = this.props
-    return (
-      <Paper
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: '100%',
-          overflow: 'hidden',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-        zDepth={this.state.action || this.state.hover ? 4 : 0}
-        onTouchTap={() => this.props.lookPhotoDetail(this.props.digest)}
-        onMouseEnter={() => this.setState({ hover: true })}
-        onMouseLeave={() => this.setState({ hover: false })}
-      >
-        {
-          !path ? this.placeHolder :
-          <img src={path} alt="img" style={{ objectFit: 'cover' }} />
-        }
-      </Paper>
-    )
-  }
-
   render() {
-    const { path, style } = this.props
+    const { style } = this.props
     // debug('Render PhotoItem this.props', this.props)
-    // return <div>Loading</div>
     return (
-      <Paper style={style}>
+      <div style={style}>
         <div
           style={{
             position: 'relative',
@@ -100,11 +114,10 @@ export default class PhotoItem extends Component {
             width: '100%'
           }}
         >
-          {/* (this.state.action || this.state.hover) && <this.renderHover /> */}
           { (this.state.action || this.state.hover) && <this.renderHover /> }
           { <this.renderImage /> }
         </div>
-      </Paper>
+      </div>
     )
   }
 }
