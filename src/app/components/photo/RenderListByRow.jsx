@@ -4,7 +4,7 @@ import PhotoItem from './PhotoItem'
 
 const debug = Debug('component:photoApp:RenderListByRow.jsx')
 
-export default class RenderListByRow extends Component {
+class RenderListByRow extends Component {
   constructor(props) {
     super(props)
      /*
@@ -98,3 +98,5 @@ export default class RenderListByRow extends Component {
     )
   }
 }
+
+export default RenderListByRow

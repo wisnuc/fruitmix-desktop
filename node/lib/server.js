@@ -38,6 +38,7 @@ const requestGet = (url, qs, token, callback) => {
       let e = new Error('http status code not 200')
       e.code = 'EHTTPSTATUS'
       e.status = res.statusCode
+      e.url = url
       return callback(e)
     }
 

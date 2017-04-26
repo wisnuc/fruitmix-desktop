@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react'
 import ReactDOM from 'react-dom'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
-import { List, WindowScroller } from 'react-virtualized'
+import { List, AutoSizer } from 'react-virtualized'
 // import List from './List'
 import { Paper, Card, IconButton, CircularProgress, FlatButton } from 'material-ui'
 import Carousel from './Carousel'
@@ -28,12 +28,10 @@ const mousePosition = (ev) => {
   }
 }
 
-export default class PhotoList extends Component {
+class PhotoList extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      carouselItems: [],
-      openDetail: false,
       hover: false
     }
     this.clientWidth = 0
@@ -43,39 +41,11 @@ export default class PhotoList extends Component {
     this.time = null
 
     this.onRowTouchTap = (e, index) => {
-      debug(e.preventDefault,'e.preventDefault')
+      debug(e.preventDefault, 'e.preventDefault')
       e.preventDefault()  // important!
       e.stopPropagation()
     }
 
-    this.addListToSelection = (path) => {
-      const hasPath = this.state.carouselItems.findIndex(item => item === path) >= 0
-
-      !hasPath && this.setState(prevState => ({
-        carouselItems: [
-          ...prevState.carouselItems,
-          path
-        ]
-      }))
-    }
-    this.removeListToSelection = (path) => {
-      const hasPath = this.state.carouselItems.findIndex(item => item === path) >= 0
-
-      hasPath && this.setState((prevState) => {
-        const index = findPath(prevState.carouselItems, path)
-
-        return {
-          carouselItems: [
-            ...prevState.carouselItems.slice(0, index),
-            ...prevState.carouselItems.slice(index + 1)
-          ]
-        }
-      })
-    }
-    this.lookPhotoDetail = (digest) => {
-      this.seqIndex = this.props.allPhotos.findIndex(item => item[0] === digest)
-      this.setState({ openDetail: true })
-    }
     this.showDateBar = () => {
       if (!this.state.hover) {
         this.setState({ hover: true })
@@ -121,6 +91,7 @@ export default class PhotoList extends Component {
 
     this.onMouseMove = (event) => {
       if (!this.props.photoMapDates.length) return null
+
       /* get mouse position*/
       let { x, y } = mousePosition(event)
       let top = y - 16
@@ -203,7 +174,7 @@ export default class PhotoList extends Component {
           style={style}
         >
           <RenderListByRow
-            lookPhotoDetail={this.lookPhotoDetail}
+            lookPhotoDetail={this.props.lookPhotoDetail}
             isScrolling={isScrolling}
             list={list}
           />
@@ -212,19 +183,31 @@ export default class PhotoList extends Component {
     }
 
     return (
-      <div onTouchTap={e => this.onRowTouchTap(e, -1)}>
-        <List
-          height={height}
-          width={width}
-          rowCount={this.props.photoMapDates.length}
-          rowHeight={rowHeight}
-          rowRenderer={rowRenderer}
-          onScroll={this.onScroll}
-          scrollTop={this.scrollTop}
-          overscanRowCount={10}
-          style={{ padding: 16 }}
-          estimatedRowSize={estimatedRowSize}
-        />
+      <div
+        style={{
+          display: 'flex',
+          width: '100%',
+          height: '100%'
+        }}
+      >
+        <AutoSizer>
+          {({ height, width }) => (
+            <div onTouchTap={e => this.onRowTouchTap(e, -1)}>
+              <List
+                height={height}
+                width={width}
+                rowCount={this.props.photoMapDates.length}
+                rowHeight={rowHeight}
+                rowRenderer={rowRenderer}
+                onScroll={this.onScroll}
+                scrollTop={this.scrollTop}
+                overscanRowCount={10}
+                style={{ padding: 16, outline: 'none' }}
+                estimatedRowSize={estimatedRowSize}
+              />
+            </div>
+        )}
+        </AutoSizer>
       </div>
     )
   }
@@ -344,6 +327,7 @@ export default class PhotoList extends Component {
                )
              })
           }
+
           {/* position bar */}
           <div
             ref={ref => (this.refDateBar = ref)}
@@ -358,6 +342,7 @@ export default class PhotoList extends Component {
             }}
           />
         </div>
+
         {/* BarFollowMouse */}
         <div
           ref={ref => (this.refBarFollowMouse = ref)}
@@ -406,40 +391,12 @@ export default class PhotoList extends Component {
         {/* 图片列表 */}
         <this.renderList />
 
-        {/* 轮播 */}
-        {
-          this.state.carouselItems.length ?
-            <Paper style={{ position: 'fixed', bottom: 15, width: '75%' }} >
-              <Carousel
-                ClearAll={() => this.setState({ carouselItems: [] })}
-                removeListToSelection={this.removeListToSelection}
-                style={{ backgroundColor: '#fff', height: 180, borderRadius: 4, boxShadow: '0 0 10px rgba(0,0,0,.3)' }}
-                items={this.state.carouselItems}
-              />
-            </Paper> : <div />
-        }
-
-        {/* 查看大图 */}
-        {
-          this.state.openDetail ?
-            <PhotoDetail
-              closePhotoDetail={() => this.setState({ openDetail: false })}
-              style={{
-                position: 'fixed',
-                left: 0,
-                top: 0,
-                width: '100%',
-                height: '100%'
-              }}
-              items={this.props.allPhotos}
-              seqIndex={this.seqIndex}
-            /> : <div />
-        }
-
         {/* 时间轴 */}
-        { <this.renderTimeline /> }
+        <this.renderTimeline />
 
       </Paper>
     )
   }
 }
+
+export default PhotoList

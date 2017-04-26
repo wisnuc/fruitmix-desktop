@@ -10,7 +10,7 @@ const debug = Debug('component:photoApp:photoItem:')
 /* increase limit of listeners of EventEmitter */
 ipcRenderer.setMaxListeners(100)
 
-export default class PhotoItem extends Component {
+class PhotoItem extends Component {
   constructor(props, context) {
     super(props, context)
 
@@ -52,7 +52,7 @@ export default class PhotoItem extends Component {
   }
   componentDidMount() {
     this.session = UUID.v4()
-    ipcRenderer.send('getThumb', this.session, this.props.digest)
+    // ipcRenderer.send('getThumb', this.session, this.props.digest)
     // ipcRenderer.send('mediaShowThumb', this.session, this.props.digest, 210, 210)
     ipcRenderer.on('getThumbSuccess', this.updatePath)
   }
@@ -131,3 +131,5 @@ PhotoItem.propTypes = {
 PhotoItem.defaultProps = {
   lookPhotoDetail: () => {}
 }
+
+export default PhotoItem

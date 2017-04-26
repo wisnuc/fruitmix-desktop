@@ -69,12 +69,11 @@ ipcMain.on('LOGIN',
     })
 
     process.nextTick(() => {
-      retrieveUsers(user.token).asCallback((err, users) => {
+      retrieveUsers(device.token.data.token).asCallback((err, users) => {
 
-        console.log(err || users)
         if (err) return
-
-        let me = users.find(u => u.uuid === user.uuid)
+      
+        let me = users.friends.find(u => u.uuid === user.uuid)
         if (me) 
           dispatch({
             type: 'LOGIN_USER',
