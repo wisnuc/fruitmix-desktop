@@ -38,7 +38,14 @@ class LoginBox extends React.Component {
 
     let { uuid, username } = this.props.user
     let password = this.state.password
-    this.props.device.request('token', { uuid, password }, err => err || this.props.done())
+    this.props.device.request('token', { uuid, password }, err => {
+      if(err) {
+        console.log(`err:${err}`)
+      } else {
+        this.props.ipcRenderer.send('LOGIN', this.props.device, this.props.user)
+        this.props.done()
+      }
+    })
   }
 
   render() {

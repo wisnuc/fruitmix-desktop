@@ -43,7 +43,7 @@ class PhotoDetailInline extends React.Component {
 
       /* get current image */
       this.session = UUID.v4()
-      this.digest = this.props.items[currentIndex].digest
+      this.digest = this.props.items[currentIndex][0]
       this.photo = this.props.items[currentIndex]
       debug('this.photo', this.photo)
       ipcRenderer.send('getThumb', this.session, this.digest)

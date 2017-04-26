@@ -1,5 +1,6 @@
 import React from 'react'
 import ReactDom from 'react-dom'
+import { ipcRenderer } from 'electron'
 
 import Login from './components/login/Login'
 import Navigation from './components/nav/Navigation'
@@ -30,7 +31,8 @@ class Main extends React.Component {
 
       nav: this.nav.bind(this),
       login: this.login.bind(this),
-      selectDevice: this.selectDevice.bind(this)
+      selectDevice: this.selectDevice.bind(this),
+      ipcRenderer: ipcRenderer
     }
   }
 

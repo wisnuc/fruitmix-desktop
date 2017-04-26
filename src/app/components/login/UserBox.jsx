@@ -136,6 +136,7 @@ class UserBox extends React.Component {
             user={user}
             cancel={this.selectUser.bind(this, -1)}
             done={this.props.done}
+            ipcRenderer={this.props.ipcRenderer}
           />
         </div>
 

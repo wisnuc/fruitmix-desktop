@@ -42,6 +42,12 @@ export default class PhotoList extends Component {
     this.indexHeightSum = []
     this.time = null
 
+    this.onRowTouchTap = (e, index) => {
+      debug(e.preventDefault,'e.preventDefault')
+      e.preventDefault()  // important!
+      e.stopPropagation()
+    }
+
     this.addListToSelection = (path) => {
       const hasPath = this.state.carouselItems.findIndex(item => item === path) >= 0
 
@@ -67,7 +73,7 @@ export default class PhotoList extends Component {
       })
     }
     this.lookPhotoDetail = (digest) => {
-      this.seqIndex = this.props.allPhotos.findIndex(item => item.digest === digest)
+      this.seqIndex = this.props.allPhotos.findIndex(item => item[0] === digest)
       this.setState({ openDetail: true })
     }
     this.showDateBar = () => {
@@ -206,18 +212,20 @@ export default class PhotoList extends Component {
     }
 
     return (
-      <List
-        height={height}
-        width={width}
-        rowCount={this.props.photoMapDates.length}
-        rowHeight={rowHeight}
-        rowRenderer={rowRenderer}
-        onScroll={this.onScroll}
-        scrollTop={this.scrollTop}
-        overscanRowCount={10}
-        style={{ padding: 16 }}
-        estimatedRowSize={estimatedRowSize}
-      />
+      <div onTouchTap={e => this.onRowTouchTap(e, -1)}>
+        <List
+          height={height}
+          width={width}
+          rowCount={this.props.photoMapDates.length}
+          rowHeight={rowHeight}
+          rowRenderer={rowRenderer}
+          onScroll={this.onScroll}
+          scrollTop={this.scrollTop}
+          overscanRowCount={10}
+          style={{ padding: 16 }}
+          estimatedRowSize={estimatedRowSize}
+        />
+      </div>
     )
   }
 
@@ -386,7 +394,7 @@ export default class PhotoList extends Component {
   }
 
   render() {
-    // debug('render PhotoList, this.props', this.props, this.state)
+    debug('render PhotoList, this.props', this.props, this.state)
     document.body.onmousemove = this.onMouseMove
     document.body.onmouseup = () => (this.onMouseDown = false)
     const photos = this.props.photoMapDates

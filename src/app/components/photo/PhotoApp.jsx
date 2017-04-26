@@ -52,12 +52,12 @@ class PhotoApp extends React.Component {
         let lineIndex = 0
         const dateUnknown = []
         this.mediaStore.forEach((item) => {
-          if (!item.exifDateTime) {
+          if (!item[1].metadata.exifDateTime) {
             dateUnknown.push(item)
             return
           }
           this.allPhotos.push(item)
-          const formatExifDateTime = formatDate(item.exifDateTime)
+          const formatExifDateTime = formatDate(item[1].metadata.exifDateTime)
           const isRepeat = this.photoDates[this.photoDates.length - 1] === formatExifDateTime
           if (!isRepeat || MaxItem === 0) {
             MaxItem = Math.floor(width / 216) - 1

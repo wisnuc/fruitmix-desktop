@@ -81,15 +81,14 @@ export default class RenderListByRow extends Component {
                   marginBottom: 6,
                   backgroundColor: '#eeeeee'
                 }}
-                key={photo.digest}
+                key={photo[0]}
               />)) :
             photos.map(photo => (
               <PhotoItem
                 style={{ width: 210, height: 210, marginRight: 6, marginBottom: 6 }}
                 lookPhotoDetail={lookPhotoDetail}
-                digest={photo.digest}
-                path={photo.path}
-                key={photo.digest}
+                digest={photo[0]}
+                key={photo[0]}
               />
             )
             )
