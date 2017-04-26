@@ -52,9 +52,9 @@ class NavViews extends Component {
 
     this.install('home', Home)
     this.install('public', Public)
-    this.install('transmission', Transmission)
     this.install('fileSharedWithMe', FileSharedWithMe)
     this.install('fileSharedWithOthers', FileSharedWithOthers)
+    this.install('transmission', Transmission)
 
     this.install('media', Media)
     this.install('mediaShare', MediaShare)
@@ -90,7 +90,7 @@ class NavViews extends Component {
   }
 
   componentDidMount() {
-    this.navTo('media')
+    this.navTo('home')
   }
 
   navTo(nav) {
