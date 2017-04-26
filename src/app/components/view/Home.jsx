@@ -281,13 +281,9 @@ class Home extends Base {
 
   renderContent() {
 
-    console.log('Home renderContent', this.ctx.props)
-
     return (
-      <div style={{width: '100%', height: '100%'}}>
-
+      <div style={{position: 'relative', width: '100%', height: '100%'}}>
         <FileContent 
-          style={{width: '100%', height: '100%', backgroundColor: '#FFF'}}
           home={this.state} 
           select={this.state.select} 
           entries={this.state.entries} 
