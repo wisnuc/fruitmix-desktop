@@ -74,20 +74,8 @@ class Media extends Base {
     return '照片'
   }
 
-  quickIcon() {
-    return PhotoIcon
-  }
-
   appBarStyle() {
     return 'colored'
-  }
-
-  appBarColor() {
-    return teal500
-  }
-
-  primaryColor() {
-    return teal500
   }
 
   prominent() {
