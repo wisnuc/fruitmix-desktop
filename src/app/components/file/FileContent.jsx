@@ -135,39 +135,6 @@ class Row extends PureComponent {
   } 
 }
 
-class ContextMenu extends PureComponent {
-
-  // top, left, onRequestClose
-  render() {
-
-    const overlayStyle = {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      zIndex: 2000
-    }
-
-    const innerStyle = {
-      position: 'fixed',
-      top: this.props.top,
-      left: this.props.left,
-      zIndex: 2001
-    }
-
-    return (
-      <div style={overlayStyle} onTouchTap={this.props.onRequestClose}>
-        <Paper style={innerStyle}>
-          <Menu>
-            { this.props.children }
-          </Menu>
-        </Paper>
-      </div>
-    )
-  }
-}
-
 class FileContent extends Component {
  
   constructor(props) {
@@ -225,6 +192,8 @@ class FileContent extends Component {
     e.preventDefault()  // important!
     e.stopPropagation()
 
+    console.log('rowTouchTap', index)
+
     // using e.nativeEvent.button instead of e.nativeEvent.which
     // 0 - left
     // 1 - middle 
@@ -239,15 +208,19 @@ class FileContent extends Component {
 
     this.props.select.touchTap(button, index)
 
-    if (button === 2) { // right click
+    if (button === 2) {
+      console.log('rowTouchTap, right click')
+      this.props.showContextMenu(e.nativeEvent.clientX, e.nativeEvent.clientY)
+    }
 
+/**
       if (this.props.select.shift || this.props.select.ctrl) return
       this.setState({
         contextMenu: true,
         clientX: e.nativeEvent.clientX,
         clientY: e.nativeEvent.clientY,
       })
-    }
+**/
   }
 
   rowMouseEnter(e, index) {
@@ -268,7 +241,7 @@ class FileContent extends Component {
     let { apis } = this.props
 
     return (
-      <div style={{width: '100%', height: '100%', backgroundColor: '#FAFAFA'}}>
+      <div style={this.props.style}>
 
         <div style={{width: '100%', height: 8}} />
         <div style={{width: '100%', height: 40}}>This is header</div>
@@ -288,21 +261,6 @@ class FileContent extends Component {
               </div>
             )}
           </AutoSizer> }
-  
-
-        { this.state.contextMenu &&
-          <ContextMenu 
-            top={this.state.clientY} 
-            left={this.state.clientX}
-            onRequestClose={() => this.setState({ 
-              contextMenu: false,
-              clientY: -1,
-              clientX: -1
-            })}
-          >
-            <MenuItem primaryText='新建文件夹' /> 
-          </ContextMenu>
-        }
       </div>
     )
   }

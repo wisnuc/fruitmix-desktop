@@ -1,10 +1,17 @@
-import React from 'react'
+import React, { Component, PureComponent } from 'react'
 import Radium from 'radium'
 
-import { IconButton } from 'material-ui'
+import { Paper, Divider, IconButton, Menu, MenuItem } from 'material-ui'
 import { orange700, blue700, indigo700, indigo500, teal500 } from 'material-ui/styles/colors'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
+
+import ContextMenu from '../common/ContextMenu'
+import DialogOverlay from '../common/DialogOverlay'
+
+import NewFolderDialog from '../file/NewFolderDialog'
+// import RenameDialog from '../file/RenameDialog'
+// import DeleteDialog from '../file/DeleteDialog'
 
 import ListSelect from '../file/ListSelect2'
 import Base from './Base'
@@ -47,6 +54,20 @@ class BreadCrumbSeparator extends React.PureComponent {
   }
 }
 
+class TestDialog extends PureComponent {
+
+  render() {
+    return (
+      <div
+        style={{width: 400, height: 300}}
+        onTouchTap={() => this.props.onRequestClose(false)}
+      >
+        hello
+      </div>
+    )
+  }
+}
+
 class Home extends Base {
 
   constructor(ctx) {
@@ -60,23 +81,22 @@ class Home extends Base {
       listNavDir: null, // save a reference
       path: [],         // 
       entries: [],      // sorted
+
+      contextMenuOpen: false,
+      contextMenuY: -1,
+      contextMenuX: -1,
+
+      createNewFolder: null,
     } 
 
     this.onListNavBySelect = this.listNavBySelect.bind(this)
-  }
+    this.onShowContextMenu = this.showContextMenu.bind(this)
 
-  listNavBySelect() {
+    this.onRequestClose = dirty => {
 
-    let selected = this.select.state.selected
-    if (selected.length !== 1) return
-
-    let entry = this.state.entries[selected[0]]
-    if (entry.type !== 'folder') return
-
-    this.ctx.props.apis.request('listNavDir', {
-      dirUUID: entry.uuid,
-      rootUUID: this.state.path[0].uuid
-    })
+      console.log('home onRequestClose', dirty)
+      this.setState({ createNewFolder: null })
+    }
   }
 
   setState(props) {
@@ -171,6 +191,45 @@ class Home extends Base {
     return 400
   }
 
+  /** operations **/
+
+  listNavBySelect() {
+
+    let selected = this.select.state.selected
+    if (selected.length !== 1) return
+
+    let entry = this.state.entries[selected[0]]
+    if (entry.type !== 'folder') return
+
+    this.ctx.props.apis.request('listNavDir', {
+      dirUUID: entry.uuid,
+      rootUUID: this.state.path[0].uuid
+    })
+  }
+
+  createNewFolder() {
+    this.setState({ createNewFolder: true }) 
+  }
+
+  showContextMenu(clientX, clientY) {
+    if (this.select.state.ctrl || this.select.state.shift) return
+    this.setState({ 
+      contextMenuOpen: true,
+      contextMenuX: clientX,
+      contextMenuY: clientY
+    }) 
+  }
+
+  hideContextMenu() {
+    this.setState({ 
+      contextMenuOpen: false,
+      contextMenuX: -1,
+      contextMenuY: -1,
+    })
+  }
+
+  /** renderers **/
+
   // breadcrumb
   renderTitle({style}) {
 
@@ -221,18 +280,67 @@ class Home extends Base {
   }
 
   renderContent() {
+
+    console.log('Home renderContent', this.ctx.props)
+
     return (
-      <FileContent 
+      <div style={{width: '100%', height: '100%'}}>
 
-        home={this.state} 
-        select={this.state.select} 
-        entries={this.state.entries} 
+        <FileContent 
+          style={{width: '100%', height: '100%', backgroundColor: '#FFF'}}
+          home={this.state} 
+          select={this.state.select} 
+          entries={this.state.entries} 
+          listNavBySelect={this.onListNavBySelect}
+          showContextMenu={this.onShowContextMenu}
+        />
+        
+        <ContextMenu 
+          open={this.state.contextMenuOpen}
+          top={this.state.contextMenuY}
+          left={this.state.contextMenuX}
+          onRequestClose={() => this.hideContextMenu()}
+        >
+          <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
+          <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
+          <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
+          <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
+          <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
+          <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
+          <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
+          <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
+        </ContextMenu> 
 
-        listNavBySelect={this.onListNavBySelect}
-      />
+        <DialogOverlay open={!!this.state.createNewFolder} onRequestClose={this.onRequestClose}>
+          { this.state.createNewFolder && 
+            <NewFolderDialog 
+              apis={this.ctx.props.apis} 
+              path={this.state.path} 
+              entries={this.state.entries}
+            /> }
+        </DialogOverlay>
+      </div>
     )
   }
 }
 
 export default Home
+
+/**
+          { this.state.rename && 
+            <RenameDialog
+              apis={this.ctx.props.apis}
+              path={this.state.path}
+              entries={this.state.entries}
+              target={...}
+            /> } 
+          { this.state.delete &&
+            <DeleteDialog
+              apis={this.ctx.props.apis}
+              path={this.state.path}
+              entries={this.state.entries}
+              select={...}
+            /> }
+**/
+
 
