@@ -5,6 +5,7 @@ import FlatButton from '../common/FlatButton'
 class NewFolderDialog extends React.PureComponent {
 
   constructor(props) {
+
     super(props)
     this.state = {
       value: '',
@@ -12,17 +13,22 @@ class NewFolderDialog extends React.PureComponent {
     }
 
     this.handleChange = e => {
-      this.setState({ value: e.target.value }) 
+      this.setState({ value: e.target.value, errorText: undefined }) 
     }
 
     this.fire = () => {
+
       let { apis, path, entries } = this.props
       let curr = path[path.length - 1]
       let args = {
         dirUUID: curr.uuid,
         dirname: this.state.value
       }
-      apis.request('mkdir', args)
+
+      apis.request('mkdir', args, (err, data) => {
+        if (err) this.setState({ errorText: err.message })
+        else this.props.onRequestClose(true)
+      })
     }
   }
 
@@ -38,6 +44,7 @@ class NewFolderDialog extends React.PureComponent {
             hintText="输入文件夹名称" 
             errorText={this.state.errorText}
             onChange={this.handleChange} 
+            ref={input => input && input.focus()}
           />
         </div>
         <div style={{height: 24}} />
