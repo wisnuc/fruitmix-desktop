@@ -16,7 +16,8 @@ import { getMainWindow } from './window'
 /* init */
 const debug = Debug('lib:media')
 let media=[]
-const getIpAddr = () => store.getState().login2.device.address
+// const getIpAddr = '192.168.5.65'
+const getIpAddr = () => store.getState().login2.device.mdev.address
 
 /* functions */
 const parseDate = (date) => {
@@ -141,7 +142,9 @@ class Worker extends EventEmitter {
 
     //TODO TMP file and rename JACK
 
-    let stream = fs.createWriteStream(path.join(downloadPath,name))
+    let tmpPath = path.join(global.tmpPath, UUID.v4())
+    let dst = path.join(downloadPath, name)
+    let stream = fs.createWriteStream(path.join(tmpPath,name))
     this.request = request(opts, (err, res) => {
       if (err) return callback(err)
       if (res.statusCode !== 200) {
@@ -153,6 +156,7 @@ class Worker extends EventEmitter {
       }
 
       try {
+        fs.renameSync(tmpPath, dst)
         return callback(null, null)
       }
       catch (e) {
@@ -169,7 +173,9 @@ class Worker extends EventEmitter {
     let requestDownloadAsync = Promise.promisify(this.requestDownload.bind(this))
     let ip = getIpAddr()
     let port = 3721
-    let token = store.getState().login.obj.token
+    let token = store.getState().login2.device.token.data.token
+    console.log('!!!!!')
+    console.log(store.getState())
     return requestDownloadAsync(`http://${ip}:${port}/${endpoint}`, qs, token, downloadPath, name)
   }
 
@@ -205,7 +211,7 @@ class GetThumbTask extends Worker{
     this.serverDownloadAsync(`media/${this.digest}/thumbnail`, qs, this.dirpath, this.cacheName).then((data) => {
       this.finish(path.join(this.dirpath, this.cacheName))
     }).catch((err) => {
-      console.log(`fail download of digest:${digest} of session: ${session} err: ${err}`)
+      console.log(`fail download of digest:${this.digest} of session: ${this.session} err: ${err}`)
       // setTimeout(() => getThumb(digest, cacheName, mediaPath, session), 2000)
       this.error(err)
     })
@@ -308,7 +314,7 @@ class MediaFileManager {
 }
 
 let mediaFileManager = new MediaFileManager()
-let dirpath = ''
+let dirpath = mediaPath
 ipcMain.on('mediaShowThumb', (event, session, digest, height, width) => {
   mediaFileManager.createThumbTask(session, digest, dirpath, height, width)
 })

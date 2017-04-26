@@ -284,7 +284,7 @@ class Login extends React.Component {
 
       return users.length > 0
         ? <UserBox style={style} device={this.props.selectedDevice} 
-            toggleDisplay={this.toggleDisplayBound} done={this.done.bind(this)} />
+            toggleDisplay={this.toggleDisplayBound} done={this.done.bind(this)} ipcRenderer={this.props.ipcRenderer}/>
         : null // TODO FirstUserBox
     }
 
