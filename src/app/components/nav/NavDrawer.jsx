@@ -113,7 +113,7 @@ class NavDrawer extends React.Component {
         <Divider />
         <div style={{height: 4}} />
 
-        <MenuItem icon={ActionSettings} text="设置" dense={true} />
+        { this.renderGroup('settings') }
 
         <div style={{height: 4}} />
         <Divider />

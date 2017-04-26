@@ -19,6 +19,13 @@ import QuickNav from './QuickNav'
 
 import Home from '../viewModel/Home'
 import Media from '../viewModel/Media'
+import User from '../viewModel/User'
+import Device from '../viewModel/Device'
+import Storage from '../viewModel/Storage'
+import Networking from '../viewModel/Networking'
+import TimeDate from '../viewModel/TimeDate'
+import FanControl from '../viewModel/FanControl'
+import Power from '../viewModel/Power'
 
 import Debug from 'debug'
 
@@ -32,35 +39,34 @@ class NavViews extends Component {
 
     this.navBoundObj = {}
 
-    /** init views **/
-    let views = {}
-    let state = {} 
+    this.state = {}
+    this.views = {}
 
-    views.home = new Home(this)
-    views.home.on('updated', next => {
-      this.setState({ home: next })
-      console.log('NavViews updating home', next)
-    })
-    state.home = views.home.state
+    this.install('home', Home)
+    this.install('media', Media)
 
-    views.media = new Media(this)
-    views.media.on('updated', next => {
-      this.setState({ media: next })
-      console.log('NavViews updating media', next)
-    })
-    state.media = views.media.state
+    this.install('user', User) 
+    this.install('device', Device)
+    this.install('storage', Storage)
+    this.install('networking', Networking)
+    this.install('timeDate', TimeDate)
+    this.install('fanControl', FanControl)
+    this.install('power', Power)
 
-    Object.assign(state, {
+    Object.assign(this.state, {
       nav: null,
       showDetail: false,
       openDrawer: false,
     })
 
-    this.state = state
-    this.views = views
-
     this.toggleDetailBound = this.toggleDetail.bind(this)
     this.openDrawerBound = this.openDrawer.bind(this)
+  }
+
+  install(name, View) {
+    this.views[name] = new View(this) 
+    this.views[name].on('updated', next => this.setState({ [name]: next }))
+    this.state.home = this.views[name].state
   }
 
   componentWillReceiveProps(nextProps) {
