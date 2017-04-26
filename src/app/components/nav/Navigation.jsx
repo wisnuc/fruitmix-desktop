@@ -18,7 +18,15 @@ import NavDrawer from './NavDrawer'
 import QuickNav from './QuickNav'
 
 import Home from '../view/Home'
+import Public from '../view/Public'
+import FileSharedWithMe from '../view/FileSharedWithMe'
+import FileSharedWithOthers from '../view/FileSharedWithOthers'
+import Transmission from '../view/Transmission'
+
 import Media from '../view/Media'
+import MediaShare from '../view/MediaShare'
+import MediaAlbum from '../view/MediaAlbum'
+
 import User from '../view/User'
 import Device from '../view/Device'
 import Storage from '../view/Storage'
@@ -43,7 +51,14 @@ class NavViews extends Component {
     this.views = {}
 
     this.install('home', Home)
+    this.install('public', Public)
+    this.install('transmission', Transmission)
+    this.install('fileSharedWithMe', FileSharedWithMe)
+    this.install('fileSharedWithOthers', FileSharedWithOthers)
+
     this.install('media', Media)
+    this.install('mediaShare', MediaShare)
+    this.install('mediaAlbum', MediaAlbum)
 
     this.install('user', User) 
     this.install('device', Device)
