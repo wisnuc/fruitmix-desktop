@@ -4,124 +4,65 @@ import EventListener from 'react-event-listener'
 import { Paper, Menu, MenuItem, Divider, IconButton, CircularProgress } from 'material-ui'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import DeviceStorage from 'material-ui/svg-icons/device/storage'
-import { blue500, red500, greenA200 } from 'material-ui/styles/colors'
-import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
 import { formatDate } from '../../utils/datetime'
 
-import PhotoToolBar from './PhotoToolBar'
+import Carousel from './Carousel'
+import PhotoDetail from './PhotoDetail'
+
 import PhotoList from './PhotoList'
 
 const debug = Debug('component:photoApp:')
 const LEFTNAV_WIDTH = 72
-const parseDate = (date) => {
-  if (!date) return 0
-  const b = date.split(/\D/)
-  const c = (`${b[0]}${b[1]}${b[2]}${b[3]}${b[4]}${b[5]}`)
-  return parseInt(c, 10)
-}
 
 class PhotoApp extends React.Component {
   constructor(props) {
     super(props)
 
     this.state = {
-      login: null,
-      leftNav: true,
-      media: this.props.media
+      openDetail: false,
+      carouselItems: []
     }
 
-    this.mediaStore = []
-    this.photoDates = []
-    this.photoMapDates = []
-    this.allPhotos = []
-    this.force = false
+    this.seqIndex = ''
 
-    this.setPhotoInfo = () => {
-      // debug('start this.setPhotoInfo', (!this.mediaStore.length || this.force))
-      const leftNav = !!this.state.leftNav
-      if (!this.mediaStore.length || this.force) {
-        /* mediaStore were sorted by date in Node */
-        this.mediaStore = this.props.media
-        this.photoDates = []
-        this.photoMapDates = []
-        this.allPhotos = []
-        this.force = false
-        const clientWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
-        const width = leftNav ? clientWidth - 210 - 60 : clientWidth - 60
-        let MaxItem = Math.floor(width / 216) - 1
-        let lineIndex = 0
-        const dateUnknown = []
-        this.mediaStore.forEach((item) => {
-          if (!item[1].metadata.exifDateTime) {
-            dateUnknown.push(item)
-            return
-          }
-          this.allPhotos.push(item)
-          const formatExifDateTime = formatDate(item[1].metadata.exifDateTime)
-          const isRepeat = this.photoDates[this.photoDates.length - 1] === formatExifDateTime
-          if (!isRepeat || MaxItem === 0) {
-            MaxItem = Math.floor(width / 216) - 1
-            this.photoDates.push(formatExifDateTime)
-            this.photoMapDates.push({
-              first: !isRepeat,
-              index: lineIndex,
-              date: formatExifDateTime,
-              photos: [item]
-            })
-            lineIndex += 1
-          } else {
-            MaxItem -= 1
-            this.photoMapDates[this.photoMapDates.length - 1]
-              .photos
-              .push(item)
-          }
-        })
-        if (dateUnknown.length > 0) {
-          MaxItem = 0
-          lineIndex += 1
-          let isRepeat = false
-          dateUnknown.forEach((item) => {
-            this.allPhotos.push(item)
-            if (MaxItem === 0) {
-              MaxItem = Math.floor(width / 216) - 1
-              this.photoDates.push(0)
-              this.photoMapDates.push({
-                first: !isRepeat,
-                index: lineIndex,
-                date: '神秘时间',
-                photos: [item]
-              })
-              lineIndex += 1
-              isRepeat = true
-            } else {
-              MaxItem -= 1
-              this.photoMapDates[this.photoMapDates.length - 1]
-                .photos
-                .push(item)
-            }
-          })
+    this.addListToSelection = (path) => {
+      const hasPath = this.state.carouselItems.findIndex(item => item === path) >= 0
+
+      !hasPath && this.setState(prevState => ({
+        carouselItems: [
+          ...prevState.carouselItems,
+          path
+        ]
+      }))
+    }
+    this.removeListToSelection = (path) => {
+      const hasPath = this.state.carouselItems.findIndex(item => item === path) >= 0
+
+      hasPath && this.setState((prevState) => {
+        const index = findPath(prevState.carouselItems, path)
+
+        return {
+          carouselItems: [
+            ...prevState.carouselItems.slice(0, index),
+            ...prevState.carouselItems.slice(index + 1)
+          ]
         }
-        /* simulate large list */
-        for (let i = 1; i <= 0; i++) {
-          this.photoMapDates.push(...this.photoMapDates)
-        }
-      }
-      return {
-        leftNav,
-        allPhotos: this.allPhotos,
-        photoDates: this.photoDates,
-        photoMapDates: this.photoMapDates
-      }
+      })
+    }
+
+    this.lookPhotoDetail = (digest) => {
+      this.seqIndex = this.props.media.findIndex(item => item[0] === digest)
+      this.setState({ openDetail: true })
     }
   }
 
+  /*
   shouldComponentUpdate(nextProps, nextState) {
-    if (!this.mediaStore.length) return true
     return (this.state !== nextState)
   }
+  */
 
   handleResize = () => {
-    this.force = true // force update setPhotoInfo
     this.forceUpdate()
   }
 
@@ -146,7 +87,9 @@ class PhotoApp extends React.Component {
                 alignItems: 'center',
                 justifyContent: 'center'
               }}
-              {...this.setPhotoInfo()}
+              {...this.props.setPhotoInfo(800, 1000, this.props.media)}
+              media={this.props.media}
+              lookPhotoDetail={this.lookPhotoDetail}
             /> :
             <div
               style={{
@@ -161,6 +104,39 @@ class PhotoApp extends React.Component {
               <CircularProgress />
             </div>
         }
+
+        {/* 轮播 */}
+        {
+          this.state.carouselItems.length ?
+            <Paper style={{ position: 'fixed', bottom: 15, width: '75%' }} >
+              <Carousel
+                ClearAll={() => this.setState({ carouselItems: [] })}
+                removeListToSelection={this.removeListToSelection}
+                style={{ backgroundColor: '#fff', height: 180, borderRadius: 4, boxShadow: '0 0 10px rgba(0,0,0,.3)' }}
+                items={this.state.carouselItems}
+              />
+            </Paper> : <div />
+        }
+
+        {/* 查看大图 */}
+        {
+          this.state.openDetail ?
+            <PhotoDetail
+              closePhotoDetail={() => this.setState({ openDetail: false })}
+              style={{
+                position: 'fixed',
+                left: 0,
+                top: 0,
+                width: '100%',
+                height: '100%'
+              }}
+              items={this.props.media}
+              seqIndex={this.seqIndex}
+            /> : <div />
+        }
+
+
+
       </Paper>
     )
   }
