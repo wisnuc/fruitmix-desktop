@@ -27,13 +27,15 @@ class Media extends Base {
     this.allPhotos = []
     this.photoDates = []
     this.photoMapDates = []
+    this.height = 0
+    this.width = 0
     this.setPhotoInfo = this.photoInfo.bind(this)
   }
 
   photoInfo(height, width, media) {
-    debug('height, width, media', height, width, media, this)
+    // debug('height, width, media', height, width, media, this)
     /* mediaStore were sorted by date in Node */
-    if (this.allPhotos !== media) {
+    if (this.allPhotos !== media || this.width !== width) {
       this.allPhotos = media
       this.photoDates = []
       this.photoMapDates = []
@@ -93,10 +95,28 @@ class Media extends Base {
         this.photoMapDates.push(...this.photoMapDates)
       }
     }
+
+    /* calculate each row's heigth and their sum */
+    this.allHeight = []
+    this.rowHeightSum = 0
+    this.indexHeightSum = []
+    this.photoMapDates.forEach((list) => {
+      const tmp = 216 * Math.ceil(list.photos.length / Math.floor(width / 216)) + !!list.first * 40
+      this.allHeight.push(tmp)
+      this.rowHeightSum += tmp
+      this.indexHeightSum.push(this.rowHeightSum)
+    })
+
+    this.maxScrollTop = this.rowHeightSum - height + 16 * 2
+
     return {
       allPhotos: this.allPhotos,
       photoDates: this.photoDates,
-      photoMapDates: this.photoMapDates
+      photoMapDates: this.photoMapDates,
+      indexHeightSum: this.indexHeightSum,
+      allHeight: this.allHeight,
+      maxScrollTop: this.maxScrollTop,
+      rowHeightSum: this.rowHeightSum
     }
   }
 
