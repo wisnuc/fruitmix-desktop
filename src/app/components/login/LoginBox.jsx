@@ -47,6 +47,20 @@ class LoginBox extends React.Component {
       }
     })
   }
+  /* auto login */
+  /*
+  login() {
+    let { uuid, username } = this.props.device.users.value()[0]
+    let password = this.state.password
+    this.props.device.request('token', { uuid, password: 'w' }, err => {
+      if(err) { console.log(`err:${err}`) } else {
+        this.props.ipcRenderer.send('LOGIN', this.props.device, this.props.user)
+        this.props.done()
+      }
+    })
+  }
+  componentDidMount() { this.login() }
+  */
 
   render() {
 

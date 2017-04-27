@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
 import { List, AutoSizer } from 'react-virtualized'
-// import List from './List'
 import { Paper, Card, IconButton, CircularProgress, FlatButton } from 'material-ui'
 import Carousel from './Carousel'
 import PhotoDetail from './PhotoDetail'
@@ -14,9 +13,8 @@ import PhotoItem from './PhotoItem'
 
 const debug = Debug('component:photoApp:PhotoList')
 const headerHeight = 64
-const leftnavWidth = 72
+const timelineMargin = 26
 
-const findPath = (items, path) => items.findIndex(item => item === path)
 
 const mousePosition = (ev) => {
   if (ev.pageX || ev.pageY) {
@@ -34,9 +32,6 @@ class PhotoList extends Component {
     this.state = {
       hover: false
     }
-    this.maxScrollTop = 0
-    this.indexHeightSum = []
-    this.time = null
 
     this.onRowTouchTap = (e, index) => {
       e.preventDefault()  // important!
@@ -48,6 +43,7 @@ class PhotoList extends Component {
         this.setState({ hover: true })
       }
     }
+
     this.onScroll = () => {
       if (!this.photoMapDates.length) return
       const list = document.getElementsByClassName('ReactVirtualized__List')[0]
@@ -58,15 +54,15 @@ class PhotoList extends Component {
       if (this.refDateBar) {
         /* convert percentage to styleTop */
         let top = percentage * this.height
-        if (top < 26) top = 26
-        if (top > this.height + 40) top = this.height + 40
+        if (top < timelineMargin) top = timelineMargin
+        if (top > this.height - timelineMargin) top = this.height - timelineMargin
 
         /* update datebar */
-        this.refDateBar.style.top = `${top + 64}px`
+        this.refDateBar.style.top = `${top}px`
 
         /* update datebox */
         this.refDateBox.style.opacity = 1
-        this.refDateBox.style.top = `${top + 48}px`
+        this.refDateBox.style.top = `${top - 16}px`
         this.refDateBox.innerHTML = this.date
 
         /* show timeline */
@@ -90,19 +86,20 @@ class PhotoList extends Component {
       if (!this.photoMapDates.length) return null
 
       /* get mouse position*/
-      let { x, y } = mousePosition(event)
-      let top = y - 16
-      if (top < (headerHeight + 10)) top = headerHeight + 10
-      if (top > this.height + 8) top = this.height + 8
+      const { x, y } = mousePosition(event)
+      let top = y - headerHeight
+      if (top < timelineMargin) top = timelineMargin
+      if (top > this.height - timelineMargin) top = this.height - timelineMargin
 
-      if (this.onMouseDown || (x > this.width - 12 && y > headerHeight)) {
+      if (this.onMouseDown || (x > this.width - 24 && y > headerHeight)) {
         /* showTimeline and clear setTimeout */
         this.showDateBar()
         clearTimeout(this.time)
 
-        /* calculate position */
-        if (y < headerHeight) y = headerHeight
-        const percentage = Math.round((y - headerHeight) / this.height * 1000)
+        /* calculate position and percentage */
+        let position = y - headerHeight
+        if (position < 0) position = 0
+        const percentage = Math.round(position / this.height * 1000)
 
         /* convert currentScrollTop to currentIndex */
         const currentScrollTop = Math.round((this.maxScrollTop * percentage / 1000))
@@ -117,11 +114,11 @@ class PhotoList extends Component {
         /* change position of date box */
         if (this.refDateBox) {
           this.refDateBox.style.opacity = 1
-          this.refDateBox.style.top = `${top}px`
+          this.refDateBox.style.top = `${top - 16}px`
           this.refDateBox.innerHTML = this.date
 
           this.refBarFollowMouse.style.opacity = 1
-          this.refBarFollowMouse.style.top = `${top + 16}px`
+          this.refBarFollowMouse.style.top = `${top}px`
 
           this.scrollTop = currentScrollTop
           if (this.onMouseDown) {
@@ -161,6 +158,7 @@ class PhotoList extends Component {
 
           const estimatedRowSize = PhotoInfo.rowHeightSum / PhotoInfo.allHeight.length
           const rowHeight = ({ index }) => PhotoInfo.allHeight[index]
+
           /* function to render each row */
           const rowRenderer = ({ key, index, style, isScrolling }) => (
             <div key={key} style={style} >
@@ -171,6 +169,7 @@ class PhotoList extends Component {
               />
             </div>
           )
+
           return (
             <div onTouchTap={e => this.onRowTouchTap(e, -1)}>
               <List
@@ -219,7 +218,7 @@ class PhotoList extends Component {
     const timeline = [...month].map((data, index) => {
       const percentage = (this.indexHeightSum[sumCount] - 200) / this.maxScrollTop
       /* top = percentage * height + headerHeight - adjust */
-      let top = percentage * this.height + headerHeight - 18
+      let top = percentage * this.height - 12
 
       const spacingPercentage = (this.indexHeightSum[spacingCount] - 200) / this.maxScrollTop
       /* top = percentage * height - headerHeight */
@@ -236,11 +235,11 @@ class PhotoList extends Component {
       }
       currentYear = parseInt(data[0], 10)
       if (!index) { // first date
-        top = headerHeight + 8
+        top = 8
         spacingCount = 0
       } else if (index === month.size - 1) { // last date
         top += 20
-        if (top > this.height + 16) top = this.height + 16
+        if (top > this.height - 26) top = this.height - 26
       } else if (spacingTop > 32 && date === parseInt(data[0], 10)) { // show years with enough spacing
         spacingCount = 0
       } else if (date === parseInt(data[0], 10)) { // hide years without enough spacing
@@ -250,8 +249,8 @@ class PhotoList extends Component {
       }
 
       /* set range of displaying date*/
-      if (top < (headerHeight + 16) && index) date = null
-      if (top > this.height && index !== month.size - 1) date = null
+      if (top < 16 && index) date = null
+      if (top > (this.height - 46) && index !== month.size - 1) date = null
       return [date, top, zIndex]
     })
 
@@ -259,10 +258,9 @@ class PhotoList extends Component {
       <div
         ref={ref => (this.refBackground = ref)}
         style={{
-          position: 'fixed',
+          position: 'absolute',
           height: '100%',
           width: 80,
-          paddingTop: headerHeight,
           right: 16
         }}
         onMouseLeave={() => {
@@ -270,7 +268,6 @@ class PhotoList extends Component {
           this.scrollTop = null
         }}
         onMouseDown={() => (this.onMouseDown = true)}
-        onMouseUp={() => (this.onMouseDown = false)}
         onTouchTap={this.scrollToPosition}
       >
         {/* timeline */}
@@ -292,13 +289,13 @@ class PhotoList extends Component {
                  <div
                    key={index.toString()}
                    style={{
-                     position: 'fixed',
+                     position: 'absolute',
                      boxSizing: 'border-box',
                      top,
                      color: 'rgba(0,0,0,0.54)',
                      backgroundColor: 'white',
                      paddingRight: 8,
-                     right: (data[0] === 0) ? 24 : 36,
+                     right: (data[0] === 0) ? 8 : 20,
                      zIndex,
                      textAlign: 'center'
                    }}
@@ -313,11 +310,11 @@ class PhotoList extends Component {
           <div
             ref={ref => (this.refDateBar = ref)}
             style={{
-              position: 'fixed',
+              position: 'absolute',
               top: -1000,
               height: 2,
               width: 48,
-              right: 38,
+              right: 22,
               zIndex: 3,
               backgroundColor: '#4285f4'
             }}
@@ -328,14 +325,14 @@ class PhotoList extends Component {
         <div
           ref={ref => (this.refBarFollowMouse = ref)}
           style={{
-            opacity: this.state.hover ? 1 : 0,
-            transition: 'opacity 350ms',
             position: 'absolute',
-            top: -1000,
             height: 2,
             width: 48,
+            top: -1000,
             right: 22,
             zIndex: 4,
+            transition: 'opacity 350ms',
+            opacity: this.state.hover ? 1 : 0,
             backgroundColor: 'rgba(0,0,0,0.54)'
           }}
         />
@@ -364,9 +361,7 @@ class PhotoList extends Component {
     document.body.onmousemove = this.onMouseMove
     document.body.onmouseup = () => (this.onMouseDown = false)
     return (
-      <Paper
-        style={this.props.style}
-      >
+      <Paper style={this.props.style}>
 
         {/* 图片列表 */}
         <this.renderList />

@@ -9,11 +9,10 @@ import { formatDate } from '../../utils/datetime'
 
 import Carousel from './Carousel'
 import PhotoDetail from './PhotoDetail'
-
 import PhotoList from './PhotoList'
 
 const debug = Debug('component:photoApp:')
-const LEFTNAV_WIDTH = 72
+const findPath = (items, path) => items.findIndex(item => item === path)
 
 class PhotoApp extends React.Component {
   constructor(props) {
@@ -84,7 +83,6 @@ class PhotoApp extends React.Component {
                 position: 'fixed',
                 width: 'calc(100% - 72px)',
                 height: 'calc(100% - 64px)',
-                left: LEFTNAV_WIDTH,
                 backgroundColor: '#FFFFFF',
                 display: 'flex',
                 alignItems: 'center',
@@ -139,17 +137,18 @@ class PhotoApp extends React.Component {
         }
 
         {/* 上传图片 */}
-
-        <div style={{ position: 'absolute', right: 96, bottom: 48 }}>
-          <FloatingActionButton
-            backgroundColor="#2196F3"
-            zDepth={3}
-            onTouchTap={() => {}}
-          >
-            <FileFileUpload />
-          </FloatingActionButton>
-
-        </div>
+        {
+          this.props.media ?
+            <div style={{ position: 'absolute', right: 96, bottom: 48 }}>
+              <FloatingActionButton
+                backgroundColor="#2196F3"
+                zDepth={3}
+                onTouchTap={() => {}}
+              >
+                <FileFileUpload />
+              </FloatingActionButton>
+            </div> : <div />
+        }
       </Paper>
     )
   }
