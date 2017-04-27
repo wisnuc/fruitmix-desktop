@@ -90,7 +90,7 @@ class NavViews extends Component {
   }
 
   componentDidMount() {
-    this.navTo('media')
+    this.navTo('home')
   }
 
   navTo(nav) {

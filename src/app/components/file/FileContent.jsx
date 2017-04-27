@@ -241,11 +241,10 @@ class FileContent extends Component {
     let { apis } = this.props
 
     return (
-      <div style={this.props.style}>
-
+      <div id='file-content' style={{width: '100%', height: '100%'}}>
         <div style={{width: '100%', height: 8}} />
         <div style={{width: '100%', height: 40}}>This is header</div>
-
+        <div style={{width: '100%', height: 'calc(100% - 48px)'}}>
         { this.props.home.listNavDir && 
           <AutoSizer>
             {({ height, width }) => (
@@ -261,6 +260,7 @@ class FileContent extends Component {
               </div>
             )}
           </AutoSizer> }
+        </div>
       </div>
     )
   }

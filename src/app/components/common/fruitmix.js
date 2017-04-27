@@ -135,7 +135,7 @@ class Fruitmix extends EventEmitter {
       break
 
     case 'mkdir':
-      r = this.apost(`files/fruitmix/mkdir/${args.dirUUID}/${args.dirname}`)
+      r = this.apost(`files/fruitmix/mkdir/${args.dirUUID}`, { dirname: args.dirname})
       break
 
     case 'uploadFile':

@@ -41,7 +41,7 @@ class QuickNav extends PureComponent {
       >
         <div style={{height: 16}} />
         <div style={{height: 24}}><Icon style={{color}}/></div>
-        <div style={{marginTop: 6, fontSize:10, lineHeight:'10px', color}}>{text}</div>
+        <div style={{marginTop: 6, fontSize:11, fontWeight: 700, lineHeight:'12px', color}}>{text}</div>
       </div>
     )
   }

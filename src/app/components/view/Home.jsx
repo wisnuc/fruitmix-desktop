@@ -54,20 +54,6 @@ class BreadCrumbSeparator extends React.PureComponent {
   }
 }
 
-class TestDialog extends PureComponent {
-
-  render() {
-    return (
-      <div
-        style={{width: 400, height: 300}}
-        onTouchTap={() => this.props.onRequestClose(false)}
-      >
-        hello
-      </div>
-    )
-  }
-}
-
 class Home extends Base {
 
   constructor(ctx) {
@@ -93,9 +79,12 @@ class Home extends Base {
     this.onShowContextMenu = this.showContextMenu.bind(this)
 
     this.onRequestClose = dirty => {
-
-      console.log('home onRequestClose', dirty)
       this.setState({ createNewFolder: null })
+      if (dirty) 
+        this.ctx.props.apis.request('listNavDir', {
+          dirUUID: this.state.path[this.state.path.length - 1].uuid,
+          rootUUID: this.state.path[0].uuid,
+        })
     }
   }
 
@@ -119,7 +108,6 @@ class Home extends Base {
     let select = this.select.reset(entries.length) 
     let state = { select, listNavDir, path, entries }
     
-    console.log('home updating state', state)
     this.setState(state)
   }
 
@@ -281,13 +269,9 @@ class Home extends Base {
 
   renderContent() {
 
-    console.log('Home renderContent', this.ctx.props)
-
     return (
-      <div style={{width: '100%', height: '100%'}}>
-
+      <div style={{position: 'relative', width: '100%', height: '100%'}}>
         <FileContent 
-          style={{width: '100%', height: '100%', backgroundColor: '#FFF'}}
           home={this.state} 
           select={this.state.select} 
           entries={this.state.entries} 
