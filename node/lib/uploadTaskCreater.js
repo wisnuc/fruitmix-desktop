@@ -177,7 +177,46 @@ class TaskManager {
 
 		if (!this.newWork) {
 			this.pause = true
-			// console.log(this)
+			if (this.type === 'file') {
+				this.recordInfor('文件上传任务，继续上传文件')
+				this.schedule()
+			}else if (this.rootUUID) {
+				this.recordInfor('文件夹上传任务，查找已上传文件信息')
+				let serverFileTree = []
+				let options = {
+					method: 'GET',
+					url: server + '/files/' + this.target,
+					headers: {
+						Authorization: user.type + ' ' + user.token
+					}
+				}
+				request(options, (err, data) => {
+					if (err) return this.recordInfor('上传目标目录不存在',err)
+					data = JSON.parse(data.body)
+					let index = data.findIndex(item => item.uuid === this.rootUUID)
+					if (index === -1) {
+						this.recordInfor('已上传根目录被移除 重新上传')
+						this.schedule()
+					}else {
+						this.recordInfor('已上传根目录存在')
+						visitServerFiles(this.rootUUID, this.name, this.type, serverFileTree, (err, data) => {
+							if (err) return this.recordInfor('校验已上传文件出错')
+							else {
+								this.recordInfor('校验已上传文件完成')
+								diffTree(this.tree[0], serverFileTree[0], this, (err) => {
+									if (err) console.log(err)
+									console.log('比较文件树完成')
+									this.schedule()
+								})
+							}
+						})		
+					}
+				})
+				
+			}else {
+				this.recordInfor('文件夹上传，根目录没有创建，几率很低')
+				this.schedule()
+			}
 			//....
 
 
@@ -210,7 +249,6 @@ class TaskManager {
 		}catch(e) {
 			return console.log('上传目标没找到....',e)
 		}
-
 	}
 
 	pauseTask() {
@@ -380,6 +418,66 @@ const visitFolder = (abspath, position, worklist, manager, callback) => {
 	})
 }
 
+const visitServerFiles = (uuid, name, type, position, callback) => {
+	console.log(name + '...' + type)
+	let obj = {name,type,children:[],uuid}
+	position.push(obj)
+	if (type === 'file') return callback(null)
+	let options = {
+		method: 'GET',
+		url: server + '/files/' + uuid,
+		headers: {
+			Authorization: user.type + ' ' + user.token
+		}
+	}
+
+	request(options, (err, res, body) => {
+		if (err) return callback(err)
+		let entries = JSON.parse(body)
+		if (!entries.length) return callback(null)
+		let count = entries.length
+		let index = 0
+		let next = () => {
+			visitServerFiles(entries[index].uuid, entries[index].name, entries[index].type, obj.children, call)
+		}
+		let call = (err) => {
+			if (err) return callback(err)
+			if (++index == count) return callback()
+			else next()
+		}
+
+		next()
+	})
+}
+
+const diffTree = (taskPosition, localPosition, manager ,callback) => {
+	if (taskPosition.name !== localPosition.name) return callback()
+	taskPosition.stateName = 'finish'
+	taskPosition.uuid = localPosition.uuid
+	manager.finishCount++
+	manager.completeSize += taskPosition.size?taskPosition.size:0
+	if(taskPosition.type === 'file') return callback()
+	let children = taskPosition.children
+	if(!children.length) return callback()
+	children.forEach(item => item.target = taskPosition.uuid)
+	let count = children.length
+	let index = 0
+	let next = () => {
+		let currentObj = taskPosition.children[index]
+		let i = localPosition.children.findIndex(item => item.name == currentObj.name)
+		if (i !== -1) {
+			diffTree(currentObj, localPosition.children[i], manager, call)
+		}else {
+			call()
+		}
+	}
+	let call = (err) => {
+		if (++index == count) return callback()
+		else next()
+	}
+	next()
+}
+
 class UploadTask {
 	constructor(type, abspath, manager) {
 		this.type = type
@@ -414,6 +512,14 @@ class UploadTask {
 
 	recordInfor(msg) {
 		this.manager.recordInfor(msg)
+	}
+
+	pause() {
+		this.state.pause()
+	}
+
+	resume() {
+		this.state.resume()
 	}
 }
 
@@ -566,18 +672,23 @@ class UploadFileSTM extends STM {
 	}
 
 	beginUpload() {
-		this.wrapper.stateName = 'uploading'
+		this.wrapper.stateName = 'running'
 		removeOutOfReadyQueue(this)
 		addToRunningQueue(this)
 		this.wrapper.manager.updateStore()
 		this.wrapper.recordInfor(this.wrapper.name + ' 开始上传...')
-		this.createUploadTask()
+		if (this.wrapper.taskid) {
+			this.uploadSegment()
+		}else {
+			this.createUploadTask()
+		}
 	}
 
 	uploadWholeFile() {
 		let _this = this
     let transform = new stream.Transform({
       transform: function(chunk, encoding, next) {
+      	_this.wrapper.seek += chunk.length
         _this.wrapper.manager.completeSize += chunk.length
         this.push(chunk)
         next()
@@ -704,6 +815,28 @@ class UploadFileSTM extends STM {
 		if (wrapper.seek == wrapper.parts.length) {
 			console.log('所有块已经上传完成')
 		}
+	}
+
+	pause() {		
+		if (this.wrapper.stateName !== 'running') return
+		this.wrapper.stateName = 'pause'
+		sendMsg()
+		if (this.handle) this.handle.abort()
+		if (!this.wrapper.taskid) {
+			console.log('该文件传输没有使用新接口，取消上传，数据清空')
+			this.wrapper.manager.completeSize -= this.wrapper.seek
+			this.wrapper.seek = 0
+		}
+		this.wrapper.recordInfor(this.wrapper.name + '暂停了')
+		removeOutOfRunningQueue(this)
+	}
+
+	resume() {
+		if (this.wrapper.stateName !== 'pause') return
+		this.wrapper.stateName = 'running'
+		sendMsg()
+		this.beginUpload()
+		this.wrapper.recordInfor(this.wrapper.name + '继续上传')
 	}
 }
 

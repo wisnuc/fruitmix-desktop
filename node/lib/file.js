@@ -146,7 +146,7 @@ const fileNavAsync = async ({ context, folderUUID, rootUUID }) => {
   }
 
   let result = await serverGetAsync(`files/${folderUUID}`, { navroot: rootUUID })
-  console.log(result)
+  // console.log(result)
   return result
 }
 
