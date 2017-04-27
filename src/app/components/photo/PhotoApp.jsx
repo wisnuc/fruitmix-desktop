@@ -77,21 +77,7 @@ class PhotoApp extends React.Component {
 
         {/* 图片列表 */}
         {
-          this.props.media ?
-            <PhotoList
-              style={{
-                position: 'fixed',
-                width: 'calc(100% - 72px)',
-                height: 'calc(100% - 64px)',
-                backgroundColor: '#FFFFFF',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-              setPhotoInfo={this.props.setPhotoInfo}
-              media={this.props.media}
-              lookPhotoDetail={this.lookPhotoDetail}
-            /> :
+          !this.props.media ?
             <div
               style={{
                 position: 'fixed',
@@ -103,7 +89,32 @@ class PhotoApp extends React.Component {
               }}
             >
               <CircularProgress />
-            </div>
+            </div> :
+            this.props.media.length ?
+              <PhotoList
+                style={{
+                  position: 'fixed',
+                  width: 'calc(100% - 72px)',
+                  height: 'calc(100% - 64px)',
+                  backgroundColor: '#FFFFFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                setPhotoInfo={this.props.setPhotoInfo}
+                media={this.props.media}
+                lookPhotoDetail={this.lookPhotoDetail}
+              /> :
+              <div
+                style={{
+                  position: 'fixed',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 'calc(100% - 72px)',
+                  height: 'calc(100% - 64px)'
+                }}
+              >啥都没有啊！</div>
         }
 
         {/* 轮播 */}
