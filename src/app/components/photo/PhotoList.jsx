@@ -46,6 +46,7 @@ class PhotoList extends Component {
 
     this.onScroll = () => {
       if (!this.photoMapDates.length) return
+      // debug('this.onScroll')
       const list = document.getElementsByClassName('ReactVirtualized__List')[0]
       const currentIndex = this.indexHeightSum.findIndex(data => data > list.scrollTop + 200)
       const percentage = list.scrollTop / this.maxScrollTop
@@ -92,6 +93,7 @@ class PhotoList extends Component {
       if (top > this.height - timelineMargin) top = this.height - timelineMargin
 
       if (this.onMouseDown || (x > this.width - 24 && y > headerHeight)) {
+        // debug('this.onMouseMove')
         /* showTimeline and clear setTimeout */
         this.showDateBar()
         clearTimeout(this.time)
@@ -143,7 +145,7 @@ class PhotoList extends Component {
         {({ height, width }) => {
           /* get PhotoInfo */
           const PhotoInfo = this.props.setPhotoInfo(height, width, this.props.media)
-          // debug('PhotoInfo', PhotoInfo)
+          debug('PhotoInfo', PhotoInfo)
 
           /* set global variant */
           this.height = height
@@ -192,7 +194,7 @@ class PhotoList extends Component {
   )
 
   renderTimeline = () => {
-    // debug('renderTimeline, this.photoDates', this.photoDates, this.indexHeightSum, this.maxScrollTop)
+    if (!this.photoDates.length) return <div />
     const Dates = this.photoDates
     const month = new Map()
     let mix = null
@@ -292,11 +294,11 @@ class PhotoList extends Component {
                      position: 'absolute',
                      boxSizing: 'border-box',
                      top,
+                     zIndex,
                      color: 'rgba(0,0,0,0.54)',
                      backgroundColor: 'white',
                      paddingRight: 8,
                      right: (data[0] === 0) ? 8 : 20,
-                     zIndex,
                      textAlign: 'center'
                    }}
                  >
