@@ -26,7 +26,7 @@ class Physical extends Base {
   }
 
   menuName() {
-    return '硬盘'
+    return '物理磁盘'
   }
 
   menuIcon() {
@@ -34,7 +34,7 @@ class Physical extends Base {
   }
 
   quickName() {
-    return '硬盘'
+    return '物理磁盘'
   }
 
   appBarStyle() {

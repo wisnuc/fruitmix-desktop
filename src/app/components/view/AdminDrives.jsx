@@ -26,7 +26,7 @@ class AdminDrives extends Base {
   }
 
   menuName() {
-    return '共享盘管理'
+    return '共享文件夹'
   }
 
   menuIcon() {

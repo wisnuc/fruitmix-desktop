@@ -20,7 +20,7 @@ class SubHeader extends Component {
       <div style={{height: 48, fontSize: 14, fontWeight: 500, 
         display: 'flex', alignItems: 'center', color: 'rgba(0,0,0,0.54)'}}>
         <div style={{flex: '0 0 16px'}} />
-        {this.props.text}
+        {this.props.children}
       </div>
     )
   }
@@ -33,7 +33,6 @@ class MenuSpacer extends PureComponent {
   }
 }
 
-@muiThemeable()
 @Radium
 class MenuItem extends Component {
 
@@ -139,6 +138,13 @@ class NavDrawer extends React.Component {
         <Divider />
         <div style={{height: 4}} />
 
+        { this.renderGroup('other') }
+
+        <div style={{height: 4}} />
+        <Divider />
+        <div style={{height: 4}} />
+
+        <SubHeader>管理</SubHeader>
         { this.renderGroup('settings') }
 
         <div style={{height: 4}} />

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { teal500, blue500, blueGrey700 } from 'material-ui/styles/colors'
+import { teal500, blue500, brown500, blueGrey700 } from 'material-ui/styles/colors'
 import EventEmitter from 'eventemitter3'
 
 
@@ -31,6 +31,8 @@ class Base extends EventEmitter {
       return teal500
     case 'media':
       return blue500
+    case 'other':
+      return brown500
     case 'settings':
       return blueGrey700
     default:

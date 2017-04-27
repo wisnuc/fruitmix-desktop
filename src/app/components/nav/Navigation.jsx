@@ -19,9 +19,9 @@ import QuickNav from './QuickNav'
 
 import Home from '../view/Home'
 import Public from '../view/Public'
+import Physical from '../view/Physical'
 import FileSharedWithMe from '../view/FileSharedWithMe'
 import FileSharedWithOthers from '../view/FileSharedWithOthers'
-import Physical from '../view/Physical'
 import Transmission from '../view/Transmission'
 
 import Media from '../view/Media'
@@ -56,9 +56,9 @@ class NavViews extends Component {
 
     this.install('home', Home)
     this.install('public', Public)
+    this.install('physical', Physical)
     this.install('fileSharedWithMe', FileSharedWithMe)
     this.install('fileSharedWithOthers', FileSharedWithOthers)
-    this.install('physical', Physical)
     this.install('transmission', Transmission)
 
     this.install('media', Media)

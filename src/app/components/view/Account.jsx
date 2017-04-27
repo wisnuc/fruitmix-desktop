@@ -22,19 +22,15 @@ class Acount extends Base {
   }
 
   navGroup() {
-    return 'settings'
+    return 'other'
   }
 
   menuName() {
-    return '帐号'
+    return '我'
   }
 
   menuIcon() {
     return ActionAccountBox
-  }
-
-  quickName() {
-    return '帐号'
   }
 
   appBarStyle() {

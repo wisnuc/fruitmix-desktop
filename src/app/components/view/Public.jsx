@@ -5,7 +5,7 @@ import FileFolderShared from 'material-ui/svg-icons/file/folder-shared'
 
 import Base from './Base'
 
-class TimeDate extends Base {
+class Public extends Base {
 
   constructor(ctx) {
     super(ctx)
@@ -26,7 +26,7 @@ class TimeDate extends Base {
   }
 
   menuName() {
-    return '共享盘'
+    return '共享文件夹'
   }
 
   menuIcon() {
@@ -61,5 +61,5 @@ class TimeDate extends Base {
   }
 }
 
-export default TimeDate
+export default Public
 

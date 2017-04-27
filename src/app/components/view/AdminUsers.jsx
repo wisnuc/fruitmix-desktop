@@ -26,7 +26,7 @@ class AdminUsers extends Base {
   }
 
   menuName() {
-    return '用户管理'
+    return '用户'
   }
 
   menuIcon() {
