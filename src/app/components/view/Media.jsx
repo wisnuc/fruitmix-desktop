@@ -33,9 +33,10 @@ class Media extends Base {
   }
 
   photoInfo(height, width, media) {
-    // debug('height, width, media', height, width, media, this)
     /* mediaStore were sorted by date in Node */
-    if (this.allPhotos !== media || this.width !== width) {
+    if ((this.allPhotos !== media || this.width !== width) && width) {
+      debug('photoInfo, height, width, media', height, width, media)
+      this.width = width
       this.allPhotos = media
       this.photoDates = []
       this.photoMapDates = []

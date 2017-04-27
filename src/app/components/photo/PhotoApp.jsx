@@ -68,7 +68,7 @@ class PhotoApp extends React.Component {
   }
 
   render() {
-    // debug('PhotoApp, store.media.data', this.props)
+    // debug('PhotoApp, store.media.data', this.props.media)
     return (
       <Paper>
         <EventListener

@@ -59,7 +59,7 @@ class PhotoList extends Component {
         /* convert percentage to styleTop */
         let top = percentage * this.height
         if (top < 26) top = 26
-        if (top > this.height + 40) top = this.height+ 40
+        if (top > this.height + 40) top = this.height + 40
 
         /* update datebar */
         this.refDateBar.style.top = `${top + 64}px`
@@ -146,6 +146,11 @@ class PhotoList extends Component {
         {({ height, width }) => {
           /* get PhotoInfo */
           const PhotoInfo = this.props.setPhotoInfo(height, width, this.props.media)
+          // debug('PhotoInfo', PhotoInfo)
+
+          /* set global variant */
+          this.height = height
+          this.width = width
           this.allPhotos = PhotoInfo.allPhotos
           this.photoDates = PhotoInfo.photoDates
           this.photoMapDates = PhotoInfo.photoMapDates
@@ -153,10 +158,6 @@ class PhotoList extends Component {
           this.allHeight = PhotoInfo.allHeight
           this.maxScrollTop = PhotoInfo.maxScrollTop
           this.rowHeightSum = PhotoInfo.rowHeightSum
-
-          /* set global variant */
-          this.height = height
-          this.width = width
 
           const estimatedRowSize = PhotoInfo.rowHeightSum / PhotoInfo.allHeight.length
           const rowHeight = ({ index }) => PhotoInfo.allHeight[index]
@@ -178,7 +179,7 @@ class PhotoList extends Component {
                 estimatedRowSize={estimatedRowSize}
                 rowHeight={rowHeight}
                 rowRenderer={rowRenderer}
-                rowCount={this.photoMapDates.length}
+                rowCount={PhotoInfo.photoDates.length}
                 onScroll={this.onScroll}
                 scrollTop={this.scrollTop}
                 overscanRowCount={10}
@@ -192,6 +193,7 @@ class PhotoList extends Component {
   )
 
   renderTimeline = () => {
+    // debug('renderTimeline, this.photoDates', this.photoDates, this.indexHeightSum, this.maxScrollTop)
     const Dates = this.photoDates
     const month = new Map()
     let mix = null
@@ -358,7 +360,7 @@ class PhotoList extends Component {
   }
 
   render() {
-    debug('render PhotoList, this.props', this.props, this.state)
+    // debug('render PhotoList, this.props', this.props, this.state)
     document.body.onmousemove = this.onMouseMove
     document.body.onmouseup = () => (this.onMouseDown = false)
     return (

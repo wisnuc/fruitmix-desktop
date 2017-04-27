@@ -85,12 +85,15 @@ class NavViews extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (!this.state.nav) return
-    this.currentView().willReceiveProps(nextProps)
+    /* Calling this.setState generally doesn't trigger componentWillReceiveProps. */
   }
 
   componentDidMount() {
     this.navTo('home')
+  }
+
+  componentDidUpdate() {
+    this.currentView().willReceiveProps(this.props)
   }
 
   navTo(nav) {
