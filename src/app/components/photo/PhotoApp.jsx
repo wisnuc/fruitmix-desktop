@@ -1,18 +1,18 @@
 import Debug from 'debug'
 import React from 'react'
 import EventListener from 'react-event-listener'
-import { Paper, Menu, MenuItem, Divider, IconButton, CircularProgress } from 'material-ui'
+import { FloatingActionButton, Paper, Menu, MenuItem, Divider, IconButton, CircularProgress } from 'material-ui'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
+import FileFileUpload from 'material-ui/svg-icons/file/file-upload'
 import DeviceStorage from 'material-ui/svg-icons/device/storage'
 import { formatDate } from '../../utils/datetime'
 
 import Carousel from './Carousel'
 import PhotoDetail from './PhotoDetail'
-
 import PhotoList from './PhotoList'
 
 const debug = Debug('component:photoApp:')
-const LEFTNAV_WIDTH = 72
+const findPath = (items, path) => items.findIndex(item => item === path)
 
 class PhotoApp extends React.Component {
   constructor(props) {
@@ -67,13 +67,15 @@ class PhotoApp extends React.Component {
   }
 
   render() {
-    debug('PhotoApp, store.media.data', this.props)
+    // debug('PhotoApp, store.media.data', this.props.media)
     return (
       <Paper>
         <EventListener
           target="window"
           onResize={this.handleResize}
         />
+
+        {/* 图片列表 */}
         {
           this.props.media ?
             <PhotoList
@@ -81,13 +83,12 @@ class PhotoApp extends React.Component {
                 position: 'fixed',
                 width: 'calc(100% - 72px)',
                 height: 'calc(100% - 64px)',
-                left: LEFTNAV_WIDTH,
                 backgroundColor: '#FFFFFF',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}
-              {...this.props.setPhotoInfo(800, 1000, this.props.media)}
+              setPhotoInfo={this.props.setPhotoInfo}
               media={this.props.media}
               lookPhotoDetail={this.lookPhotoDetail}
             /> :
@@ -135,8 +136,19 @@ class PhotoApp extends React.Component {
             /> : <div />
         }
 
-
-
+        {/* 上传图片 */}
+        {
+          this.props.media ?
+            <div style={{ position: 'absolute', right: 96, bottom: 48 }}>
+              <FloatingActionButton
+                backgroundColor="#2196F3"
+                zDepth={3}
+                onTouchTap={() => {}}
+              >
+                <FileFileUpload />
+              </FloatingActionButton>
+            </div> : <div />
+        }
       </Paper>
     )
   }
