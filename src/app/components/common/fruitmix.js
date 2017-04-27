@@ -189,6 +189,14 @@ class Fruitmix extends EventEmitter {
       r = this.aget(`media`)
       break
 
+    case 'adminUsers':
+      r = this.aget(`admin/users`)
+      break
+
+    case 'adminDrives':
+      r = this.aget(`admin/drives`)
+      break
+
     default:
       break
     }
@@ -203,9 +211,13 @@ class Fruitmix extends EventEmitter {
 
   start() {
 
-    this.requestAsync('account', null).asCallback((err, data) => {
-      if (data) {
-        this.request('listNavDir', { dirUUID: data.home, rootUUID: data.home })
+    this.requestAsync('account', null).asCallback((err, account) => {
+      if (account) {
+        this.request('listNavDir', { dirUUID: account.home, rootUUID: account.home })
+        if (account.isAdmin) {
+          this.request('adminUsers')
+          this.request('adminDrives')
+        }
       }
     })
 

@@ -21,13 +21,17 @@ import Home from '../view/Home'
 import Public from '../view/Public'
 import FileSharedWithMe from '../view/FileSharedWithMe'
 import FileSharedWithOthers from '../view/FileSharedWithOthers'
+import Physical from '../view/Physical'
 import Transmission from '../view/Transmission'
 
 import Media from '../view/Media'
 import MediaShare from '../view/MediaShare'
 import MediaAlbum from '../view/MediaAlbum'
 
-import User from '../view/User'
+import Account from '../view/Account'
+
+import AdminUsers from '../view/AdminUsers'
+import AdminDrives from '../view/AdminDrives'
 import Device from '../view/Device'
 import Storage from '../view/Storage'
 import Networking from '../view/Networking'
@@ -54,13 +58,16 @@ class NavViews extends Component {
     this.install('public', Public)
     this.install('fileSharedWithMe', FileSharedWithMe)
     this.install('fileSharedWithOthers', FileSharedWithOthers)
+    this.install('physical', Physical)
     this.install('transmission', Transmission)
 
     this.install('media', Media)
     this.install('mediaShare', MediaShare)
     this.install('mediaAlbum', MediaAlbum)
 
-    this.install('user', User) 
+    this.install('account', Account) 
+    this.install('adminUsers', AdminUsers)
+    this.install('adminDrives', AdminDrives)
     this.install('device', Device)
     this.install('storage', Storage)
     this.install('networking', Networking)

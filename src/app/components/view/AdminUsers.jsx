@@ -1,11 +1,11 @@
 import React, { Component, PureComponent } from 'react'
 import Radium from 'radium'
 
-import ActionSwapVerticalCircle from 'material-ui/svg-icons/action/swap-vertical-circle'
+import ActionSupervisorAccount from 'material-ui/svg-icons/action/supervisor-account'
 
 import Base from './Base'
 
-class Transmission extends Base {
+class AdminUsers extends Base {
 
   constructor(ctx) {
     super(ctx)
@@ -22,33 +22,20 @@ class Transmission extends Base {
   }
 
   navGroup() {
-    return 'file'
+    return 'settings'
   }
 
   menuName() {
-    return '文件传输'
+    return '用户管理'
   }
 
   menuIcon() {
-    return ActionSwapVerticalCircle
+    return ActionSupervisorAccount
   }
 
   appBarStyle() {
     return 'colored'
   }
-
-  prominent() {
-    return true
-  }
-
-  hasDetail() {
-    return true
-  }
-
-  detailEnabled() {
-    return true
-  }
-
 
   /** renderers **/
   renderContent() {
@@ -61,5 +48,5 @@ class Transmission extends Base {
   }
 }
 
-export default Transmission
+export default AdminUsers
 

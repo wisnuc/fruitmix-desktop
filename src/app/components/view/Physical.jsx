@@ -1,11 +1,11 @@
 import React, { Component, PureComponent } from 'react'
 import Radium from 'radium'
 
-import SocialPeople from 'material-ui/svg-icons/social/people'
+import HardwareDeveloperBoard from 'material-ui/svg-icons/hardware/developer-board'
 
 import Base from './Base'
 
-class User extends Base {
+class Physical extends Base {
 
   constructor(ctx) {
     super(ctx)
@@ -22,23 +22,35 @@ class User extends Base {
   }
 
   navGroup() {
-    return 'settings'
+    return 'file'
   }
 
   menuName() {
-    return '用户管理'
+    return '硬盘'
   }
 
   menuIcon() {
-    return SocialPeople
+    return HardwareDeveloperBoard
   }
 
   quickName() {
-    return '用户'
+    return '硬盘'
   }
 
   appBarStyle() {
     return 'colored'
+  }
+
+  prominent() {
+    return true
+  }
+
+  hasDetail() {
+    return true
+  }
+
+  detailEnabled() {
+    return true
   }
 
   /** renderers **/
@@ -52,5 +64,5 @@ class User extends Base {
   }
 }
 
-export default User
+export default Physical
 
