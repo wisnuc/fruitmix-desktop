@@ -1,6 +1,11 @@
+import { ipcRenderer } from 'electron'
+
 import React from 'react'
 import ReactDom from 'react-dom'
-import { ipcRenderer } from 'electron'
+
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
+import getMuiTheme from 'material-ui/styles/getMuiTheme'
+import { teal500, pinkA200 } from 'material-ui/styles/colors'
 
 import Login from './components/login/Login'
 import Navigation from './components/nav/Navigation'
@@ -11,6 +16,7 @@ import Device from './components/common/device'
 class Main extends React.Component {
 
   constructor() {
+
     super()
 
     this.selectedDevice = null
@@ -29,11 +35,33 @@ class Main extends React.Component {
 
       selectedDevice: null,
 
+      theme: getMuiTheme({
+        fontFamily: 'Noto Sans SC, sans-serif',
+        palette: { primary1Color: teal500, accent1Color: pinkA200 }
+      }),
+
       nav: this.nav.bind(this),
       login: this.login.bind(this),
       selectDevice: this.selectDevice.bind(this),
+      setPalette: this.setPalette.bind(this),
+
       ipcRenderer: ipcRenderer
     }
+  }
+
+  setPalette(primary1Color, accent1Color) {
+
+    console.log('main setPalette, primary, accent', primary1Color, accent1Color)
+    
+    this.setState({
+      theme: getMuiTheme({
+        fontFamily: 'Noto Sans SC, sans-serif',
+        palette: { 
+          primary1Color, 
+          accent1Color 
+        }
+      })
+    })
   }
 
   selectDevice(mdev) { 
@@ -60,19 +88,30 @@ class Main extends React.Component {
 
   render() {
 
+    let view = null
+
     switch (this.state.view) {
     case 'login':
-      return <Login mdns={window.store.getState().mdns} {...this.state} />
+      view = <Login mdns={window.store.getState().mdns} {...this.state} />
+      break
 
     case 'maintenance':
-      return <Maintenance {...this.state } />
+      view = <Maintenance {...this.state } />
+      break
 
     case 'user':
-      return <Navigation {...this.state} />
+      view =  <Navigation {...this.state} />
+      break
 
     default:
-      return <div>hello world!</div>
+      break
     } 
+
+    return (
+      <MuiThemeProvider muiTheme={this.state.theme}>
+        { view }
+      </MuiThemeProvider>
+    )
   }
 }
 

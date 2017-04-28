@@ -88,11 +88,6 @@ class Home extends Base {
     }
   }
 
-  setState(props) {
-    this.state = Object.assign({}, this.state, props)
-    this.emit('updated', this.state)
-  }
-
   updateState(listNavDir) {
 
     if (listNavDir === this.state.listNavDir) return

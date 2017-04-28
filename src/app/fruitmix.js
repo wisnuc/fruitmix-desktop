@@ -1,9 +1,3 @@
-/**
- * @module app
- * @description app main module
- * @time 2016-04-05 12:00
- * @author liuhua
- **/
 import Debug from 'debug'
 import store from './stores/store'
 import { ipcRenderer } from 'electron'
@@ -12,9 +6,6 @@ import React from 'react'
 import ReactDom from 'react-dom'
 
 import injectTapEventPlugin from 'react-tap-event-plugin'
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
-import lightBaseTheme from 'material-ui/styles/baseThemes/lightBaseTheme'
-import getMuiTheme from 'material-ui/styles/getMuiTheme'
 import MDNS from './lib/mdns'
 import { command } from './lib/command'
 
@@ -37,18 +28,8 @@ injectTapEventPlugin()
 // global import jQuery
 global.$ = global.jQuery = global.jQuery || require('jquery')
 
-global.theme = getMuiTheme({ 
-  fontFamily: 'Roboto, Noto Sans SC, sans-serif',
-  palette: {
-    primary1Color: teal500
-  }
-})
-
-// root component
-const App = () => <MuiThemeProvider muiTheme={theme}><Main /></MuiThemeProvider>
-
 // render method
-const render = () => ReactDom.render(<App/>, document.getElementById('app'))
+const render = () => ReactDom.render(<Main />, document.getElementById('app'))
 
 // subscribe render
 store.subscribe(() => { render() })

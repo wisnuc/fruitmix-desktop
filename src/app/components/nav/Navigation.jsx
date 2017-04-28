@@ -107,6 +107,7 @@ class NavViews extends Component {
     if (nav === this.state.nav) return
     if (this.state.nav) this.views[this.state.nav].navLeave()
     this.setState({ nav, openDrawer: false })
+    this.props.setPalette(this.views[nav].primaryColor(), this.views[nav].accentColor())
     this.views[nav].navEnter()
   }
 
@@ -135,6 +136,7 @@ class NavViews extends Component {
 
     let color = this.currentView().primaryColor()
     let group = this.views[this.state.nav].navGroup()
+
     return (
       <div style={{
         width: 72, height: '100%', 
@@ -401,7 +403,7 @@ class Navigation extends Component {
   }
 
   render() {
-    return <NavViews apis={this.state.apis} />
+    return <NavViews apis={this.state.apis} {...this.props} />
   }
 }
 

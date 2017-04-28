@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { teal500, green600, lightGreen700, lime800, blue500, brown500, purple300, deepPurple400, indigo300, red400, orange800 } from 'material-ui/styles/colors'
+import { pinkA200 } from 'material-ui/styles/colors'
 import EventEmitter from 'eventemitter3'
 
 
@@ -9,6 +10,12 @@ class Base extends EventEmitter {
   constructor(ctx) {
     super()
     this.ctx = ctx
+    this.state = {}
+  }
+
+  setState(props) {
+    this.state = Object.assign({}, this.state, props)
+    this.emit('updated', this.state)
   }
 
   willReceiveProps(nextProps) {
@@ -24,7 +31,7 @@ class Base extends EventEmitter {
     return 'unfiled'
   }
 
-  groupColor() {
+  groupPrimaryColor() {
     let group = this.navGroup()
     switch(group) {
     case 'file':
@@ -38,6 +45,10 @@ class Base extends EventEmitter {
     default:
       return 'white'
     }
+  }
+
+  groupAccentColor() {
+    return pinkA200
   }
 
   menuName() {
@@ -61,11 +72,15 @@ class Base extends EventEmitter {
   }
 
   appBarColor() {
-    return this.groupColor()
+    return this.groupPrimaryColor()
   } 
 
   primaryColor() {
-    return this.groupColor()
+    return this.groupPrimaryColor()
+  }
+
+  accentColor() {
+    return this.groupAccentColor()
   }
 
   prominent() {
