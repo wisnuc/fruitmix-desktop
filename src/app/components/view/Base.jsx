@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { teal500, blue500, brown500, blueGrey700 } from 'material-ui/styles/colors'
+import { teal500, green600, lightGreen700, lime800, blue500, brown500, purple300, deepPurple400, indigo300, red400, orange800 } from 'material-ui/styles/colors'
 import EventEmitter from 'eventemitter3'
 
 
@@ -32,9 +32,9 @@ class Base extends EventEmitter {
     case 'media':
       return blue500
     case 'other':
-      return brown500
+      return deepPurple400
     case 'settings':
-      return blueGrey700
+      return lime800
     default:
       return 'white'
     }
@@ -70,6 +70,10 @@ class Base extends EventEmitter {
 
   prominent() {
     return false
+  }
+
+  showQuickNav() {
+    return true
   }
 
   hasDetail() {

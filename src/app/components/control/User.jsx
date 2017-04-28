@@ -184,9 +184,7 @@ class User extends React.Component {
   }
 
   renderUserList() {
-    console.log('>>>>>>>>>>>>>>=====================', this.state.data)
     if (!this.state.data) return null
-
     return (
       <div>
         { this.renderUserRow() }

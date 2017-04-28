@@ -243,9 +243,9 @@ class NavViews extends Component {
     }
 
     let titleRegionStyle = {
-      width: 'calc(100% - 72)',
+      width: view.showQuickNav() ? 'calc(100% - 72)' : '100%',
       height: 64,
-      marginLeft: 72,
+      marginLeft: view.showQuickNav() ? 72 : 0,
       display: 'flex',
       alignItems: 'center',
       color: '#FFF',
@@ -349,10 +349,10 @@ class NavViews extends Component {
           <div style={{width: '100%', height: `calc(100% - ${this.appBarHeight()}px)`,
             display: 'flex', justifyContent: 'space-between'}}>
 
-            { this.renderQuickNavs() } 
+            { view.showQuickNav() && this.renderQuickNavs() } 
 
             {/* content */}
-            <div style={{flexGrow: 1, height: '100%', backgroundColor: '#FAFAFA'}}>
+            <div style={{flexGrow: 1, height: '100%'}}>
               { view.renderContent() }
             </div>
           </div>
