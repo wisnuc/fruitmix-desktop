@@ -15,7 +15,7 @@ import { getMainWindow } from './window'
 
 /* init */
 const debug = Debug('lib:media')
-let media=[]
+const media = []
 // const getIpAddr = '192.168.5.65'
 const getIpAddr = () => store.getState().login2.device.mdev.address
 
@@ -74,24 +74,24 @@ class Worker extends EventEmitter {
     this.state = 'PADDING'
   }
 
-  abort(){
-    if(this.finished) return 
+  abort() {
+    if (this.finished) return
     this.finished = true
-    if(this.request) request.abort()
-    let e = new Error('request aborted')
+    if (this.request) this.request.abort()
+    const e = new Error('request aborted')
     e.code = 'EABORT'
     this.emit('error', e)
   }
 
   finish(data) {
-    if(this.finished) return
+    if (this.finished) return
     this.finished = true
     this.state = 'FINISHED'
     this.emit('finish', data)
   }
 
   error(err) {
-    if(this.finished) return 
+    if (this.finished) return
     this.finished = true
     this.state = 'FINISHED'
     this.emit('error', err)
@@ -114,24 +114,22 @@ class Worker extends EventEmitter {
   cleanup() {}
 
   requestDownload(url, qs, token, downloadPath, name, callback) {
-    let opts = { method: 'GET', url }
+    const opts = { method: 'GET', url }
     if (qs) opts.qs = qs
-    if (typeof token === 'string')
-      opts.headers = { Authorization: 'JWT ' + token }
-    else if (typeof token === 'object' && token !== null) {
+    if (typeof token === 'string') { opts.headers = { Authorization: `JWT ${token}` } } else if (typeof token === 'object' && token !== null) {
       opts.auth = token
     }
 
-    //TODO TMP file and rename JACK
+    // TODO TMP file and rename JACK
 
-    let tmpPath = path.join(global.tmpPath, UUID.v4())
-    let dst = path.join(downloadPath, name)
-    let stream = fs.createWriteStream(path.join(tmpPath,name))
+    const tmpPath = path.join(global.tmpPath, UUID.v4())
+    const dst = path.join(downloadPath, name)
+    const stream = fs.createWriteStream(path.join(tmpPath))
     this.request = request(opts, (err, res) => {
       if (err) return callback(err)
       if (res.statusCode !== 200) {
         console.log(res.body)
-        let e = new Error('http status code not 200')
+        const e = new Error('http status code not 200')
         e.code = 'EHTTPSTATUS'
         e.status = res.statusCode
         return callback(e)
@@ -140,11 +138,10 @@ class Worker extends EventEmitter {
       try {
         fs.renameSync(tmpPath, dst)
         return callback(null, null)
-      }
-      catch (e) {
+      } catch (e) {
         console.log('req GET json parse err')
         console.log(e)
-        let e1 = new Error('json parse error')
+        const e1 = new Error('json parse error')
         e1.code === 'EJSONPARSE'
         return callback(e1)
       }
@@ -152,18 +149,16 @@ class Worker extends EventEmitter {
   }
 
   serverDownloadAsync(endpoint, qs, downloadPath, name) {
-    let requestDownloadAsync = Promise.promisify(this.requestDownload.bind(this))
-    let ip = getIpAddr()
-    let port = 3721
-    let token = store.getState().login2.device.token.data.token
-    console.log('!!!!!')
-    console.log(store.getState())
+    const requestDownloadAsync = Promise.promisify(this.requestDownload.bind(this))
+    const ip = getIpAddr()
+    const port = 3721
+    const token = store.getState().login2.device.token.data.token
     return requestDownloadAsync(`http://${ip}:${port}/${endpoint}`, qs, token, downloadPath, name)
   }
 
 }
 
-class GetThumbTask extends Worker{
+class GetThumbTask extends Worker {
   constructor(session, digest, dirpath, height, width) {
     super(session)
     this.session = session
@@ -171,14 +166,14 @@ class GetThumbTask extends Worker{
     this.dirpath = dirpath
     this.height = height
     this.width = width
-    this.cacheName = this.digest + '&height=' + this.height + '&width=' + this.width
+    this.cacheName = `${this.digest}&height=${this.height}&width=${this.width}`
   }
 
   run() {
     this.state = 'RUNNING'
-    let fpath = path.join(this.dirpath, this.cacheName)
+    const fpath = path.join(this.dirpath, this.cacheName)
     fs.lstat(fpath, (err, stat) => {
-      if(err) return this.request()
+      if (err) return this.request()
       return this.finish(fpath)
     })
   }
@@ -201,18 +196,18 @@ class GetThumbTask extends Worker{
 }
 
 class GetImageTask extends Worker {
-  constructor(session, digest, dirpath){
+  constructor(session, digest, dirpath) {
     super(session)
     this.session = session
     this.digest = digest
     this.dirpath = dirpath
   }
-  
+
   run() {
     this.state = 'RUNNING'
-    let fpath = path.join(this.dirpath, this.digest)
+    const fpath = path.join(this.dirpath, this.digest)
     fs.lstat(fpath, (err, stat) => {
-      if(err) return this.request()
+      if (err) return this.request()
       return this.finish(fpath)
     })
   }
@@ -222,14 +217,14 @@ class GetImageTask extends Worker {
     .then((data) => {
       this.finish(path.join(this.dirpath, this.digest))
     })
-    .catch(e => {
+    .catch((e) => {
       this.error(e)
     })
   }
 }
 
 class MediaFileManager {
-  constructor(){
+  constructor() {
     this.thumbTaskQueue = []
     this.imageTaskQueue = []
     this.thumbTaskLimit = 20
@@ -237,12 +232,12 @@ class MediaFileManager {
   }
 
   createThumbTask(session, digest, dirpath, height, width) {
-    let task = new GetThumbTask(session, digest, dirpath, height, width)
-    task.on('finish', data => {
+    const task = new GetThumbTask(session, digest, dirpath, height, width)
+    task.on('finish', (data) => {
       getMainWindow().webContents.send('getThumbSuccess', session, data)
       this.schedule()
     })
-    task.on('error', err => {
+    task.on('error', (err) => {
       // undefined
       this.schedule()
     })
@@ -251,12 +246,12 @@ class MediaFileManager {
   }
 
   createImageTask(session, digest, dirpath) {
-    let task = new GetImageTask(session, digest, dirpath)
-    task.on('finish', data => {
+    const task = new GetImageTask(session, digest, dirpath)
+    task.on('finish', (data) => {
       getMainWindow().webContents.send('donwloadMediaSuccess', session, data)
       this.schedule()
     })
-    task.on('error', err => {
+    task.on('error', (err) => {
       // undefined
       this.schedule()
     })
@@ -265,38 +260,37 @@ class MediaFileManager {
   }
 
   schedule() {
-    let thumbDiff = this.thumbTaskLimit - this.thumbTaskQueue.filter(worker => worker.isRunning()).length
-    if (thumbDiff > 0) 
+    const thumbDiff = this.thumbTaskLimit - this.thumbTaskQueue.filter(worker => worker.isRunning()).length
+    if (thumbDiff > 0) {
       this.thumbTaskQueue.filter(worker => worker.isPadding())
         .slice(0, thumbDiff)
         .forEach(worker => worker.run())
-    
-    let imageDiff = this.imageTaskLimit - this.imageTaskQueue.filter(worker => worker.isRunning()).length
-    if (imageDiff > 0) 
+    }
+
+    const imageDiff = this.imageTaskLimit - this.imageTaskQueue.filter(worker => worker.isRunning()).length
+    if (imageDiff > 0) {
       this.imageTaskQueue.filter(worker => worker.isPadding())
         .slice(0, imageDiff)
         .forEach(worker => worker.run())
+    }
   }
 
-  abort(id, type, callback){
+  abort(id, type, callback) {
     let worker
-    if(type === 'thumb')
-      worker = this.thumbTaskQueue.find((worker => worker.id === workerId))
-    else
-      worker = this.imageTaskQueue.find((worker => worker.id === workerId))
-    if(worker && !worker.isFinished()){
+    if (type === 'thumb') { worker = this.thumbTaskQueue.find((worker => worker.id === id)) } else { worker = this.imageTaskQueue.find((worker => worker.id === id)) }
+    if (worker && !worker.isFinished()) {
       worker.abort()
       process.nextTick(() => callback(null, true))
-    }else{
-      let e = new Error('worker aborted')
+    } else {
+      const e = new Error('worker aborted')
       e.code = 'EABORT'
       process.nextTick(() => callback(e))
     }
   }
 }
 
-let mediaFileManager = new MediaFileManager()
-let dirpath = mediaPath
+const mediaFileManager = new MediaFileManager()
+const dirpath = mediaPath
 ipcMain.on('mediaShowThumb', (event, session, digest, height, width) => {
   mediaFileManager.createThumbTask(session, digest, dirpath, height, width)
 })
