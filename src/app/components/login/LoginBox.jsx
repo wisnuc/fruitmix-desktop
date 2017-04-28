@@ -58,7 +58,7 @@ class LoginBox extends React.Component {
       }
     })
   }
-  // componentDidMount() { this.autologin() }
+  componentDidMount() { this.autologin() }
 
   render() {
 

@@ -44,7 +44,7 @@ class PhotoDetailInline extends React.Component {
       /* get current image */
       this.session = UUID.v4()
       this.digest = this.props.items[currentIndex][0]
-      this.photo = this.props.items[currentIndex]
+      this.photo = this.props.items[currentIndex][1]
       debug('this.photo', this.photo)
       ipcRenderer.send('getThumb', this.session, this.digest)
       this.forceUpdate()
@@ -61,6 +61,7 @@ class PhotoDetailInline extends React.Component {
 
     this.updatePath = (event, session, path) => {
       if (this.session === session) {
+        debug('got media!')
         clearTimeout(this.time)
         this.time = setTimeout(() => (this.refImage.src = path), 100)
       }
@@ -76,6 +77,7 @@ class PhotoDetailInline extends React.Component {
         this.refContainer.style.width = `${this.photoWidth}px`
 
         /* get detail image */
+        debug('got thumb!')
         ipcRenderer.send('getMediaImage', this.session, this.digest)
       }
     }
@@ -98,8 +100,8 @@ class PhotoDetailInline extends React.Component {
     this.calcSize = () => {
       this.clientHeight = window.innerHeight
       this.clientWidth = window.innerWidth
-      this.photoHeight = this.photo.height
-      this.photoWidth = this.photo.width
+      this.photoHeight = this.photo.metadata.height
+      this.photoWidth = this.photo.metadata.width
       const HWRatio = this.photoHeight / this.photoWidth
       if (this.photoHeight > this.clientHeight) {
         this.photoHeight = this.clientHeight
@@ -289,7 +291,7 @@ class PhotoDetailInline extends React.Component {
 export default class PhotoDetail extends React.Component {
   renderLayer = () => (
     <PhotoDetailInline {...this.props} />
-          );
+  )
 
   render() {
     return (
