@@ -149,7 +149,7 @@ class PhotoApp extends React.Component {
         }
 
         {/* 上传图片 */}
-        {
+        {/*
           this.props.media ?
             <div style={{ position: 'absolute', right: 96, bottom: 48 }}>
               <FloatingActionButton
@@ -160,7 +160,7 @@ class PhotoApp extends React.Component {
                 <FileFileUpload />
               </FloatingActionButton>
             </div> : <div />
-        }
+        */}
       </Paper>
     )
   }

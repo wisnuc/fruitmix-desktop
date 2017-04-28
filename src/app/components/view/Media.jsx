@@ -5,6 +5,7 @@ import { IconButton } from 'material-ui'
 import { blue800, indigo700, indigo500, teal500 } from 'material-ui/styles/colors'
 import PhotoIcon from 'material-ui/svg-icons/image/photo'
 import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
+import AddAPhoto from 'material-ui/svg-icons/image/add-to-photos'
 
 import Base from './Base'
 import PhotoApp from '../photo/PhotoApp'
@@ -262,7 +263,7 @@ class Media extends Base {
   renderToolBar({ style }) {
     return (
       <div style={style}>
-        <IconButton />
+        <IconButton><AddAPhoto color="#FFF" /></IconButton>
       </div>
     )
   }
