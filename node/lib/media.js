@@ -77,7 +77,7 @@ class Worker extends EventEmitter {
   abort() {
     if (this.finished) return
     this.finished = true
-    if (this.request) this.request.abort()
+    if (this.requestHandler) this.requestHandler.abort()
     const e = new Error('request aborted')
     e.code = 'EABORT'
     this.emit('error', e)
@@ -125,27 +125,51 @@ class Worker extends EventEmitter {
     const tmpPath = path.join(global.tmpPath, UUID.v4())
     const dst = path.join(downloadPath, name)
     const stream = fs.createWriteStream(path.join(tmpPath))
-    this.request = request(opts, (err, res) => {
-      if (err) return callback(err)
-      if (res.statusCode !== 200) {
-        console.log(res.body)
-        const e = new Error('http status code not 200')
-        e.code = 'EHTTPSTATUS'
-        e.status = res.statusCode
-        return callback(e)
-      }
+    this.requestHandler = request(opts)
+      .on('error', err => {
+        return callback(err)
+      })
+      .on('response', res => {
+        if (res.statusCode !== 200) {
+          console.log(res.body)
+          const e = new Error('http status code not 200')
+          e.code = 'EHTTPSTATUS'
+          e.status = res.statusCode
+          return callback(e)
+        }
 
-      try {
-        fs.renameSync(tmpPath, dst)
-        return callback(null, null)
-      } catch (e) {
-        console.log('req GET json parse err')
-        console.log(e)
-        const e1 = new Error('json parse error')
-        e1.code === 'EJSONPARSE'
-        return callback(e1)
-      }
-    }).pipe(stream)
+        try {
+          fs.renameSync(tmpPath, dst)
+          return callback(null, null)
+        } catch (e) {
+          console.log('req GET json parse err')
+          console.log(e)
+          const e1 = new Error('json parse error')
+          e1.code === 'EJSONPARSE'
+          return callback(e1)
+        }
+      })
+    // (err, res) => {
+    //   if (err) return callback(err)
+    //   if (res.statusCode !== 200) {
+    //     console.log(res.body)
+    //     const e = new Error('http status code not 200')
+    //     e.code = 'EHTTPSTATUS'
+    //     e.status = res.statusCode
+    //     return callback(e)
+    //   }
+
+    //   try {
+    //     fs.renameSync(tmpPath, dst)
+    //     return callback(null, null)
+    //   } catch (e) {
+    //     console.log('req GET json parse err')
+    //     console.log(e)
+    //     const e1 = new Error('json parse error')
+    //     e1.code === 'EJSONPARSE'
+    //     return callback(e1)
+    //   }
+    this.requestHandler.pipe(stream)
   }
 
   serverDownloadAsync(endpoint, qs, downloadPath, name) {
