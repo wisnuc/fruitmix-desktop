@@ -139,123 +139,9 @@ class PhotoList extends Component {
     }
   }
 
-  renderList = () => (
-    <div style={{ display: 'flex', width: '100%', height: '100%' }} >
-      <AutoSizer>
-        {({ height, width }) => {
-          /* get PhotoInfo */
-          const PhotoInfo = this.props.setPhotoInfo(height, width, this.props.media)
-          debug('PhotoInfo', PhotoInfo)
-
-          /* set global variant */
-          this.height = height
-          this.width = width
-          this.allPhotos = PhotoInfo.allPhotos
-          this.photoDates = PhotoInfo.photoDates
-          this.photoMapDates = PhotoInfo.photoMapDates
-          this.indexHeightSum = PhotoInfo.indexHeightSum
-          this.allHeight = PhotoInfo.allHeight
-          this.maxScrollTop = PhotoInfo.maxScrollTop
-          this.rowHeightSum = PhotoInfo.rowHeightSum
-
-          const estimatedRowSize = PhotoInfo.rowHeightSum / PhotoInfo.allHeight.length
-          const rowHeight = ({ index }) => PhotoInfo.allHeight[index]
-
-          /* function to render each row */
-          const rowRenderer = ({ key, index, style, isScrolling }) => (
-            <div key={key} style={style} >
-              <RenderListByRow
-                lookPhotoDetail={this.props.lookPhotoDetail}
-                isScrolling={isScrolling}
-                list={this.photoMapDates[index]}
-              />
-            </div>
-          )
-
-          return (
-            <div onTouchTap={e => this.onRowTouchTap(e, -1)}>
-              <List
-                height={height}
-                width={width}
-                estimatedRowSize={estimatedRowSize}
-                rowHeight={rowHeight}
-                rowRenderer={rowRenderer}
-                rowCount={PhotoInfo.photoDates.length}
-                onScroll={this.onScroll}
-                scrollTop={this.scrollTop}
-                overscanRowCount={10}
-                style={{ padding: 16, outline: 'none' }}
-              />
-            </div>
-          )
-        }}
-      </AutoSizer>
-    </div>
-  )
-
   renderTimeline = () => {
     if (!this.photoDates.length) return <div />
-    const Dates = this.photoDates
-    const month = new Map()
-    let mix = null
-    let dateUnknown = 0
-
-    /* parse data to list of month */
-    Dates.forEach((date) => {
-      if (!date) return (dateUnknown += 1)
-      const b = date.split(/-/)
-      mix = `${b[0]}-${b[1]}`
-      if (month.has(mix)) {
-        month.set(mix, month.get(mix) + 1)
-      } else {
-        month.set(mix, 1)
-      }
-      return null
-    })
-    month.set('0', dateUnknown)
-
-    let sumCount = 0
-    let spacingCount = 0
-    let currentYear = null
-    const timeline = [...month].map((data, index) => {
-      const percentage = (this.indexHeightSum[sumCount] - 200) / this.maxScrollTop
-      /* top = percentage * height + headerHeight - adjust */
-      let top = percentage * this.height - 12
-
-      const spacingPercentage = (this.indexHeightSum[spacingCount] - 200) / this.maxScrollTop
-      /* top = percentage * height - headerHeight */
-      const spacingTop = spacingPercentage * this.height
-
-      sumCount += data[1]
-      spacingCount += data[1]
-      let date
-      let zIndex = 2
-      if (currentYear !== parseInt(data[0], 10)) {
-        date = parseInt(data[0], 10)
-      } else {
-        date = <hr style={{ width: 8 }} />
-      }
-      currentYear = parseInt(data[0], 10)
-      if (!index) { // first date
-        top = 8
-        spacingCount = 0
-      } else if (index === month.size - 1) { // last date
-        top += 20
-        if (top > this.height - 26) top = this.height - 26
-      } else if (spacingTop > 32 && date === parseInt(data[0], 10)) { // show years with enough spacing
-        spacingCount = 0
-      } else if (date === parseInt(data[0], 10)) { // hide years without enough spacing
-        date = null
-      } else { // show bar
-        zIndex = 1
-      }
-
-      /* set range of displaying date*/
-      if (top < 16 && index) date = null
-      if (top > (this.height - 46) && index !== month.size - 1) date = null
-      return [date, top, zIndex]
-    })
-
+    const timeline = this.props.getTimeline(this.photoDates, this.indexHeightSum, this.maxScrollTop, this.height)
     return (
       <div
         ref={ref => (this.refBackground = ref)}
@@ -366,7 +252,57 @@ class PhotoList extends Component {
       <Paper style={this.props.style}>
 
         {/* 图片列表 */}
-        <this.renderList />
+        <div style={{ display: 'flex', width: '100%', height: '100%' }} >
+          <AutoSizer>
+            {({ height, width }) => {
+              /* get PhotoInfo */
+              const PhotoInfo = this.props.setPhotoInfo(height, width, this.props.media)
+              // debug('PhotoInfo', PhotoInfo)
+
+              /* set global variant */
+              this.height = height
+              this.width = width
+              this.allPhotos = PhotoInfo.allPhotos
+              this.photoDates = PhotoInfo.photoDates
+              this.photoMapDates = PhotoInfo.photoMapDates
+              this.indexHeightSum = PhotoInfo.indexHeightSum
+              this.allHeight = PhotoInfo.allHeight
+              this.maxScrollTop = PhotoInfo.maxScrollTop
+              this.rowHeightSum = PhotoInfo.rowHeightSum
+
+              const estimatedRowSize = PhotoInfo.rowHeightSum / PhotoInfo.allHeight.length
+              const rowHeight = ({ index }) => PhotoInfo.allHeight[index]
+
+              /* function to render each row */
+              const rowRenderer = ({ key, index, style, isScrolling }) => (
+                <div key={key} style={style} >
+                  <RenderListByRow
+                    lookPhotoDetail={this.props.lookPhotoDetail}
+                    isScrolling={isScrolling}
+                    list={this.photoMapDates[index]}
+                  />
+                </div>
+              )
+
+              return (
+                <div onTouchTap={e => this.onRowTouchTap(e, -1)}>
+                  <List
+                    height={height}
+                    width={width}
+                    estimatedRowSize={estimatedRowSize}
+                    rowHeight={rowHeight}
+                    rowRenderer={rowRenderer}
+                    rowCount={PhotoInfo.photoDates.length}
+                    onScroll={this.onScroll}
+                    scrollTop={this.scrollTop}
+                    overscanRowCount={10}
+                    style={{ padding: 16, outline: 'none' }}
+                  />
+                </div>
+              )
+            }}
+          </AutoSizer>
+        </div>
 
         {/* 时间轴 */}
         <this.renderTimeline />

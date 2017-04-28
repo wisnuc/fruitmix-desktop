@@ -104,6 +104,7 @@ class PhotoApp extends React.Component {
                 setPhotoInfo={this.props.setPhotoInfo}
                 media={this.props.media}
                 lookPhotoDetail={this.lookPhotoDetail}
+                getTimeline={this.props.getTimeline}
               /> :
               <div
                 style={{

@@ -96,7 +96,7 @@ class NavViews extends Component {
   }
 
   componentDidMount() {
-    this.navTo('home')
+    this.navTo('media')
   }
 
   componentDidUpdate() {
