@@ -1,11 +1,11 @@
 import React, { Component, PureComponent } from 'react'
 import Radium from 'radium'
 
-import FileFolderShared from 'material-ui/svg-icons/file/folder-shared'
+import ActionAccountBox from 'material-ui/svg-icons/action/account-box'
 
 import Base from './Base'
 
-class Public extends Base {
+class Acount extends Base {
 
   constructor(ctx) {
     super(ctx)
@@ -22,33 +22,20 @@ class Public extends Base {
   }
 
   navGroup() {
-    return 'file'
+    return 'other'
   }
 
   menuName() {
-    return '共享文件夹'
+    return '我'
   }
 
   menuIcon() {
-    return FileFolderShared
+    return ActionAccountBox
   }
 
   appBarStyle() {
     return 'colored'
   }
-
-  prominent() {
-    return true
-  }
-
-  hasDetail() {
-    return true
-  }
-
-  detailEnabled() {
-    return true
-  }
-
 
   /** renderers **/
   renderContent() {
@@ -61,5 +48,5 @@ class Public extends Base {
   }
 }
 
-export default Public
+export default Acount
 

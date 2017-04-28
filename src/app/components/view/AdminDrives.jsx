@@ -5,7 +5,7 @@ import FileFolderShared from 'material-ui/svg-icons/file/folder-shared'
 
 import Base from './Base'
 
-class Public extends Base {
+class AdminDrives extends Base {
 
   constructor(ctx) {
     super(ctx)
@@ -22,7 +22,7 @@ class Public extends Base {
   }
 
   navGroup() {
-    return 'file'
+    return 'settings'
   }
 
   menuName() {
@@ -37,19 +37,6 @@ class Public extends Base {
     return 'colored'
   }
 
-  prominent() {
-    return true
-  }
-
-  hasDetail() {
-    return true
-  }
-
-  detailEnabled() {
-    return true
-  }
-
-
   /** renderers **/
   renderContent() {
 
@@ -61,5 +48,5 @@ class Public extends Base {
   }
 }
 
-export default Public
+export default AdminDrives
 

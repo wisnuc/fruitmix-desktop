@@ -3,13 +3,15 @@ import muiThemeable from 'material-ui/styles/muiThemeable'
 
 import Radium from 'radium'
 
-import { Drawer, Divider } from 'material-ui'
+import { Avatar, IconButton, Drawer, Divider } from 'material-ui'
+import FlatButton from '../common/FlatButton'
 import ActionSettings from 'material-ui/svg-icons/action/settings'
 import ActionExitToApp from 'material-ui/svg-icons/action/exit-to-app'
+import ActionAccountCircle from 'material-ui/svg-icons/action/account-circle'
+import SocialPerson from 'material-ui/svg-icons/social/person'
 import { indigo500 } from 'material-ui/styles/colors'
 
 import { navMap, fileNavGroup, mediaNavGroup, appifiNavGroup } from './nav'
-
 
 class SubHeader extends Component {
 
@@ -18,7 +20,7 @@ class SubHeader extends Component {
       <div style={{height: 48, fontSize: 14, fontWeight: 500, 
         display: 'flex', alignItems: 'center', color: 'rgba(0,0,0,0.54)'}}>
         <div style={{flex: '0 0 16px'}} />
-        {this.props.text}
+        {this.props.children}
       </div>
     )
   }
@@ -31,20 +33,19 @@ class MenuSpacer extends PureComponent {
   }
 }
 
-@muiThemeable()
 @Radium
 class MenuItem extends Component {
 
   render() {
 
-    let {icon, text, dense, selected, disabled} = this.props
+    let {icon, text, dense, primaryColor, selected, disabled} = this.props
 
     let iconColor = selected 
-      ? this.props.muiTheme.palette.primary1Color
+      ? this.props.primaryColor
       : (disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.54)')
 
     let fontColor = selected 
-      ? this.props.muiTheme.palette.primary1Color
+      ? this.props.primaryColor
       : (disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.87)')
 
     return (
@@ -74,6 +75,8 @@ class NavDrawer extends React.Component {
 
     let { views, nav, navTo } = this.props
 
+    let primaryColor = views[nav].primaryColor()
+
     return Object.keys(views)
       .filter(key => views[key].navGroup() === group)
       .map(key => (
@@ -81,6 +84,7 @@ class NavDrawer extends React.Component {
           icon={views[key].menuIcon()}
           text={views[key].menuName()}
           dense={true}
+          primaryColor={primaryColor}
           selected={key === nav}
           onTouchTap={() => navTo(key)}
         />
@@ -92,12 +96,33 @@ class NavDrawer extends React.Component {
     const { open, onRequestChange, views, nav, navTo } = this.props
     const dense = true
 
+    let primaryColor = views[nav].primaryColor()
+
     return (
+
       <Drawer docked={false} width={240} open={open} onRequestChange={onRequestChange}>
 
-        <div style={{width: '100%', height: 135, backgroundColor: '#DDDDDD', margin: 'auto'}}>
-          something here
+        <div style={{
+          position: 'relative',
+          width: '100%',
+          backgroundColor: primaryColor
+        }}>
+          <div style={{width: 'calc(100% - 8px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+            <IconButton 
+              iconStyle={{width:48, height: 48, color: 'white'}}
+              style={{width:80, height: 80, padding: 16}}
+              onTouchTap={() => navTo('account')}
+            >
+              <ActionAccountCircle/>
+            </IconButton>
+          </div>
+          <div style={{height: 56, marginLeft: 16, marginTop: -8}}>
+            <div style={{fontSize: 16, fontWeight: 500, color: 'rgba(255, 255, 255, 1)'}}>Username</div>
+            <div style={{fontSize: 16, fontWeight: 400, color: 'rgba(255, 255, 255, 0.7)'}}>@Serial</div>
+          </div> 
         </div>
+
+        <Divider />
 
         <div style={{height: 4}}/>
 
@@ -113,6 +138,13 @@ class NavDrawer extends React.Component {
         <Divider />
         <div style={{height: 4}} />
 
+        { this.renderGroup('other') }
+
+        <div style={{height: 4}} />
+        <Divider />
+        <div style={{height: 4}} />
+
+        <SubHeader>管理</SubHeader>
         { this.renderGroup('settings') }
 
         <div style={{height: 4}} />

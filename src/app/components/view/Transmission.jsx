@@ -1,7 +1,7 @@
 import React, { Component, PureComponent } from 'react'
 import Radium from 'radium'
 
-import ActionSwapVert from 'material-ui/svg-icons/action/swap-vert'
+import ActionSwapVerticalCircle from 'material-ui/svg-icons/action/swap-vertical-circle'
 
 import Base from './Base'
 
@@ -30,7 +30,7 @@ class Transmission extends Base {
   }
 
   menuIcon() {
-    return ActionSwapVert
+    return ActionSwapVerticalCircle
   }
 
   appBarStyle() {

@@ -20,21 +20,20 @@ class QuickNav extends PureComponent {
 
     let { icon, text, color, selected, disabled } = this.props
     let Icon = icon
-    if (!selected)
-      color = disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.54)' // TODO
+    if (!selected) color = disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.54)' // TODO
 
     return (
       <div 
         style={{
-          width: '100%', 
+          position: 'relative', 
+          width: 72, 
           height: 72, 
           display: 'flex', 
           flexDirection: 'column', 
           alignItems: 'center',
           ':hover': { 
-            backgroundColor: '#EEEEEE' 
+            backgroundColor: '#EEEEEE'
           },
-          backgroundColor: selected ? '#F5F5F5' : '#FFF'
         }}
 
         onTouchTap={this.props.onTouchTap}

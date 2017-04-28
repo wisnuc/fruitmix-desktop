@@ -53,11 +53,12 @@ class PhotoItem extends Component {
   componentDidMount() {
     this.session = UUID.v4()
     // ipcRenderer.send('getThumb', this.session, this.props.digest)
-    // ipcRenderer.send('mediaShowThumb', this.session, this.props.digest, 210, 210)
+    ipcRenderer.send('mediaShowThumb', this.session, this.props.digest, 210, 210)
     ipcRenderer.on('getThumbSuccess', this.updatePath)
   }
   componentWillUnmount() {
     ipcRenderer.removeListener('getThumbSuccess', this.updatePath)
+    ipcRenderer.send('mediaHideThumb', this.session)
   }
 
   renderHover = () => (

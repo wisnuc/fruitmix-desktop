@@ -19,6 +19,7 @@ import QuickNav from './QuickNav'
 
 import Home from '../view/Home'
 import Public from '../view/Public'
+import Physical from '../view/Physical'
 import FileSharedWithMe from '../view/FileSharedWithMe'
 import FileSharedWithOthers from '../view/FileSharedWithOthers'
 import Transmission from '../view/Transmission'
@@ -27,7 +28,10 @@ import Media from '../view/Media'
 import MediaShare from '../view/MediaShare'
 import MediaAlbum from '../view/MediaAlbum'
 
-import User from '../view/User'
+import Account from '../view/Account'
+
+import AdminUsers from '../view/AdminUsers'
+import AdminDrives from '../view/AdminDrives'
 import Device from '../view/Device'
 import Storage from '../view/Storage'
 import Networking from '../view/Networking'
@@ -52,6 +56,7 @@ class NavViews extends Component {
 
     this.install('home', Home)
     this.install('public', Public)
+    this.install('physical', Physical)
     this.install('fileSharedWithMe', FileSharedWithMe)
     this.install('fileSharedWithOthers', FileSharedWithOthers)
     this.install('transmission', Transmission)
@@ -60,7 +65,9 @@ class NavViews extends Component {
     this.install('mediaShare', MediaShare)
     this.install('mediaAlbum', MediaAlbum)
 
-    this.install('user', User) 
+    this.install('account', Account) 
+    this.install('adminUsers', AdminUsers)
+    this.install('adminDrives', AdminDrives)
     this.install('device', Device)
     this.install('storage', Storage)
     this.install('networking', Networking)
@@ -85,12 +92,15 @@ class NavViews extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (!this.state.nav) return
-    this.currentView().willReceiveProps(nextProps)
+    /* Calling this.setState generally doesn't trigger componentWillReceiveProps. */
   }
 
   componentDidMount() {
     this.navTo('home')
+  }
+
+  componentDidUpdate() {
+    this.currentView().willReceiveProps(this.props)
   }
 
   navTo(nav) {
@@ -233,9 +243,9 @@ class NavViews extends Component {
     }
 
     let titleRegionStyle = {
-      width: 'calc(100% - 72)',
+      width: view.showQuickNav() ? 'calc(100% - 72)' : '100%',
       height: 64,
-      marginLeft: 72,
+      marginLeft: view.showQuickNav() ? 72 : 0,
       display: 'flex',
       alignItems: 'center',
       color: '#FFF',
@@ -339,10 +349,10 @@ class NavViews extends Component {
           <div style={{width: '100%', height: `calc(100% - ${this.appBarHeight()}px)`,
             display: 'flex', justifyContent: 'space-between'}}>
 
-            { this.renderQuickNavs() } 
+            { view.showQuickNav() && this.renderQuickNavs() } 
 
             {/* content */}
-            <div style={{flexGrow: 1, height: '100%', backgroundColor: '#FAFAFA'}}>
+            <div style={{flexGrow: 1, height: '100%'}}>
               { view.renderContent() }
             </div>
           </div>
