@@ -36,27 +36,9 @@ const getThumb = (digest, cacheName, mediaPath, session) => {
   serverDownloadAsync(`media/${digest}/thumbnail`, qs, mediaPath, digest + cacheName).then((data) => {
     getMainWindow().webContents.send('getThumbSuccess', session, path.join(mediaPath, `${digest}thumb210`))
   }).catch((err) => {
-    // console.log(err)
     console.log(`fail download of digest:${digest} of session: ${session} err: ${err}`)
-    // setTimeout(() => getThumb(digest, cacheName, mediaPath, session), 2000)
   })
 }
-
-/* getMediaData */
-ipcMain.on('getMediaData', (event) => {
-  let tmpTime = Date.now()
-  console.log(`before getMedia ${Date.now() - tmpTime}`)
-  serverGetAsync('media').then((data) => {
-    media = data
-    console.log(`start sort${Date.now() - tmpTime}`)
-    media.sort((prev, next) => (parseDate(next.exifDateTime) - parseDate(prev.exifDateTime)) || (
-      parseInt(`0x${next.digest}`, 16) - parseInt(`0x${prev.digest}`, 16)))
-    console.log(`finish sort${Date.now() - tmpTime}`)
-    dispatch(action.setMedia(media))
-  }).catch((err) => {
-    console.log(err)
-  })
-})
 
 /* getMediaImage */
 ipcMain.on('getMediaImage', (event, session, hash) => {
