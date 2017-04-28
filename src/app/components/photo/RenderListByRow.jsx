@@ -89,6 +89,7 @@ class RenderListByRow extends Component {
                 lookPhotoDetail={lookPhotoDetail}
                 digest={photo[0]}
                 key={photo[0]}
+                ipcRenderer={this.props.ipcRenderer}
               />
             )
             )

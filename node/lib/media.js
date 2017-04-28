@@ -1,7 +1,6 @@
 /* import core module */
 import path from 'path'
 import fs from 'fs'
-import Debug from 'debug'
 import { ipcMain } from 'electron'
 import { EventEmitter } from 'events'
 import UUID from 'node-uuid'
@@ -14,57 +13,7 @@ import store from '../serve/store/store'
 import { getMainWindow } from './window'
 
 /* init */
-const debug = Debug('lib:media')
-const media = []
-// const getIpAddr = '192.168.5.65'
 const getIpAddr = () => store.getState().login2.device.mdev.address
-
-/* functions */
-const parseDate = (date) => {
-  if (!date) return 0
-  const a = date.replace(/:|\s/g, '')
-  return parseInt(a, 10)
-}
-
-const getThumb = (digest, cacheName, mediaPath, session) => {
-  const qs = {
-    width: 210,
-    height: 210,
-    autoOrient: true,
-    modifier: 'caret'
-  }
-  serverDownloadAsync(`media/${digest}/thumbnail`, qs, mediaPath, digest + cacheName).then((data) => {
-    getMainWindow().webContents.send('getThumbSuccess', session, path.join(mediaPath, `${digest}thumb210`))
-  }).catch((err) => {
-    console.log(`fail download of digest:${digest} of session: ${session} err: ${err}`)
-  })
-}
-
-/* getMediaImage */
-ipcMain.on('getMediaImage', (event, session, hash) => {
-  fs.stat(path.join(mediaPath, hash), (err, data) => {
-    if (err) {
-      serverDownloadAsync(`media/${hash}/download`, null, mediaPath, hash).then((data) => {
-        getMainWindow().webContents.send('donwloadMediaSuccess', session, path.join(mediaPath, hash))
-      })
-    } else {
-      getMainWindow().webContents.send('donwloadMediaSuccess', session, path.join(mediaPath, hash))
-    }
-  })
-})
-
-/* getThumbnail */
-ipcMain.on('getThumb', (event, session, digest) => {
-  const cacheName = 'thumb210'
-  fs.stat(path.join(mediaPath, digest + cacheName), (err, data) => {
-    if (err) {
-      getThumb(digest, cacheName, mediaPath, session)
-    } else {
-      getMainWindow().webContents.send('getThumbSuccess', session, path.join(mediaPath, `${digest}thumb210`))
-    }
-  })
-})
-
 
 class Worker extends EventEmitter {
   constructor(id) {
@@ -128,10 +77,8 @@ class Worker extends EventEmitter {
     const dst = path.join(downloadPath, name)
     const stream = fs.createWriteStream(path.join(tmpPath))
     this.requestHandler = request(opts)
-      .on('error', err => {
-        return callback(err)
-      })
-      .on('response', res => {
+      .on('error', err => callback(err))
+      .on('response', (res) => {
         if (res.statusCode !== 200) {
           console.log(res.body)
           const e = new Error('http status code not 200')
@@ -151,26 +98,6 @@ class Worker extends EventEmitter {
           return callback(e1)
         }
       })
-    // (err, res) => {
-    //   if (err) return callback(err)
-    //   if (res.statusCode !== 200) {
-    //     console.log(res.body)
-    //     const e = new Error('http status code not 200')
-    //     e.code = 'EHTTPSTATUS'
-    //     e.status = res.statusCode
-    //     return callback(e)
-    //   }
-
-    //   try {
-    //     fs.renameSync(tmpPath, dst)
-    //     return callback(null, null)
-    //   } catch (e) {
-    //     console.log('req GET json parse err')
-    //     console.log(e)
-    //     const e1 = new Error('json parse error')
-    //     e1.code === 'EJSONPARSE'
-    //     return callback(e1)
-    //   }
     this.requestHandler.pipe(stream)
   }
 
@@ -181,7 +108,6 @@ class Worker extends EventEmitter {
     const token = store.getState().login2.device.token.data.token
     return requestDownloadAsync(`http://${ip}:${port}/${endpoint}`, qs, token, downloadPath, name)
   }
-
 }
 
 class GetThumbTask extends Worker {
@@ -239,7 +165,7 @@ class GetImageTask extends Worker {
   }
 
   request() {
-    serverDownloadAsync(`media/${hash}/download`, null, this.dirpath, this.digest)
+    serverDownloadAsync(`media/${this.digest}/download`, null, this.dirpath, this.digest)
     .then((data) => {
       this.finish(path.join(this.dirpath, this.digest))
     })
@@ -288,7 +214,6 @@ class MediaFileManager {
   schedule() {
     const thumbDiff = this.thumbTaskLimit - this.thumbTaskQueue.filter(worker => worker.isRunning()).length
     if (thumbDiff > 0) {
-
       this.thumbTaskQueue.filter(worker => worker.isPadding())
         .slice(0, thumbDiff)
         .forEach(worker => worker.run())
