@@ -76,8 +76,10 @@ class Worker extends EventEmitter {
 
   abort() {
     if (this.finished) return
+    this.state = 'FINISHED'
     this.finished = true
     if (this.requestHandler) this.requestHandler.abort()
+
     const e = new Error('request aborted')
     e.code = 'EABORT'
     this.emit('error', e)
@@ -286,6 +288,7 @@ class MediaFileManager {
   schedule() {
     const thumbDiff = this.thumbTaskLimit - this.thumbTaskQueue.filter(worker => worker.isRunning()).length
     if (thumbDiff > 0) {
+
       this.thumbTaskQueue.filter(worker => worker.isPadding())
         .slice(0, thumbDiff)
         .forEach(worker => worker.run())
