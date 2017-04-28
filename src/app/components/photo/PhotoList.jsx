@@ -145,12 +145,7 @@ class PhotoList extends Component {
     return (
       <div
         ref={ref => (this.refBackground = ref)}
-        style={{
-          position: 'absolute',
-          height: '100%',
-          width: 80,
-          right: 16
-        }}
+        style={{ position: 'absolute', height: '100%', width: 80, right: 16 }}
         onMouseLeave={() => {
           if (!this.onMouseDown) this.setState({ hover: false })
           this.scrollTop = null
@@ -161,10 +156,7 @@ class PhotoList extends Component {
         {/* timeline */}
         <div
           ref={ref => (this.refTimeline = ref)}
-          style={{
-            opacity: this.state.hover ? 1 : 0,
-            transition: 'opacity 350ms'
-          }}
+          style={{ opacity: this.state.hover ? 1 : 0, transition: 'opacity 350ms' }}
         >
           {/* date list */}
           {
