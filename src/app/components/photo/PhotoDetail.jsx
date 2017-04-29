@@ -1,6 +1,5 @@
 import React, { PropTypes } from 'react'
 import Debug from 'debug'
-import { ipcRenderer } from 'electron'
 import UUID from 'node-uuid'
 import { Paper, CircularProgress, IconButton, SvgIcon } from 'material-ui'
 import RenderToLayer from 'material-ui/internal/RenderToLayer'
@@ -45,8 +44,8 @@ class PhotoDetailInline extends React.Component {
       this.session = UUID.v4()
       this.digest = this.props.items[currentIndex][0]
       this.photo = this.props.items[currentIndex][1]
-      debug('this.photo', this.photo)
-      ipcRenderer.send('getThumb', this.session, this.digest)
+      // debug('this.photo', this.photo)
+      this.props.ipcRenderer.send('mediaShowThumb', this.session, this.digest, 210, 210)
       this.forceUpdate()
     }
 
@@ -78,7 +77,7 @@ class PhotoDetailInline extends React.Component {
 
         /* get detail image */
         debug('got thumb!')
-        ipcRenderer.send('getMediaImage', this.session, this.digest)
+        this.props.ipcRenderer.send('mediaShowImage', this.session, this.digest)
       }
     }
     this.calcPositon = (ev) => {
@@ -122,8 +121,8 @@ class PhotoDetailInline extends React.Component {
   }
 
   componentDidMount() {
-    ipcRenderer.on('donwloadMediaSuccess', this.updatePath)
-    ipcRenderer.on('getThumbSuccess', this.updateThumbPath)
+    this.props.ipcRenderer.on('donwloadMediaSuccess', this.updatePath)
+    this.props.ipcRenderer.on('getThumbSuccess', this.updateThumbPath)
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -131,8 +130,10 @@ class PhotoDetailInline extends React.Component {
   }
 
   componentWillUnmount() {
-    ipcRenderer.removeListener('getThumbSuccess', this.updateThumbPath)
-    ipcRenderer.removeListener('donwloadMediaSuccess', this.updatePath)
+    this.props.ipcRenderer.removeListener('getThumbSuccess', this.updateThumbPath)
+    this.props.ipcRenderer.removeListener('donwloadMediaSuccess', this.updatePath)
+    this.props.ipcRenderer.send('mediaHideThumb', this.session)
+    this.props.ipcRenderer.send('mediaHideImage', this.session)
   }
 
   renderDetail() {

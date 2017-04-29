@@ -1,6 +1,7 @@
 import React from 'react'
 import Radium from 'radium'
 import Debug from 'debug'
+import { ipcRenderer } from 'electron'
 import { IconButton } from 'material-ui'
 import { blue800, indigo700, indigo500, teal500 } from 'material-ui/styles/colors'
 import PhotoIcon from 'material-ui/svg-icons/image/photo'
@@ -17,6 +18,9 @@ const parseDate = (date) => {
   const a = date.replace(/:|\s/g, '')
   return parseInt(a, 10)
 }
+
+/* increase limit of listeners of EventEmitter */
+ipcRenderer.setMaxListeners(100)
 
 class Media extends Base {
 
@@ -37,7 +41,7 @@ class Media extends Base {
   photoInfo(height, width, media) {
     /* mediaStore were sorted by date in Node */
     if ((this.allPhotos !== media || this.width !== width) && width) {
-      debug('photoInfo, height, width, media', height, width, media)
+      // debug('photoInfo, height, width, media', height, width, media)
       this.width = width
       this.allPhotos = media
       this.photoDates = []
@@ -197,13 +201,14 @@ class Media extends Base {
 
     /* now it's fulfilled */
     const value = media.value()
+    // debug('media before sort', media.value())
 
     /* sort photos by date */
     value.sort((prev, next) => (parseDate(next[1].metadata.exifDateTime) - parseDate(prev[1].metadata.exifDateTime)) || (
       parseInt(`0x${next[0]}`, 16) - parseInt(`0x${prev[0]}`, 16)))
 
     if (value !== this.state.media) {
-      debug('media.value()', value)
+      // debug('media.value()', value)
       this.setState({ media: value })
     }
   }
@@ -272,10 +277,12 @@ class Media extends Base {
   }
 
   renderContent() {
+    // debug('renderContent')
     return (<PhotoApp
       media={this.state.media}
       setPhotoInfo={this.setPhotoInfo}
       getTimeline={this.getTimeline}
+      ipcRenderer={ipcRenderer}
     />)
   }
 }
