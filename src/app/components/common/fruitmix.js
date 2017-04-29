@@ -70,16 +70,24 @@ class Fruitmix extends EventEmitter {
 
   apost(ep, data) {
 
-    let r = request.post(`http://${this.address}:3721/${ep}`)
-    if (data) r = r.send(data)
-    return r.set('Authorization', 'JWT ' + this.token)
+    let r = request
+      .post(`http://${this.address}:3721/${ep}`)
+      .set('Authorization', 'JWT ' + this.token)
+
+    return typeof data === 'object'
+      ? r.send(data)
+      : r
   }
 
   apatch(ep, data) {
 
-    let r = request.patch(`http://${this.address}:3721/${ep}`)
-    if (data) r = r.send(data)
-    return r.set('Authorization', 'JWT ' + this.token)
+    let r = request
+      .patch(`http://${this.address}:3721/${ep}`)
+      .set('Authorization', 'JWT ' + this.token)
+
+    return typeof data === 'object'
+      ? r.send(data)
+      : r
   }
 
   adel(ep) {
@@ -119,6 +127,7 @@ class Fruitmix extends EventEmitter {
 
     case 'adminCreateUser':
       r = this.apost('admin/users', {
+        type: 'local',
         username: args.username,
         password: args.password
       })
