@@ -150,14 +150,6 @@ class Home extends Base {
     return 'colored'
   }
 
-  appBarColor() {
-    return teal500
-  }
-
-  primaryColor() {
-    return teal500
-  }
-
   prominent() {
     return true
   }

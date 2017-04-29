@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { teal500, green600, lightGreen700, lime800, blue500, brown500, purple300, deepPurple400, indigo300, red400, orange800 } from 'material-ui/styles/colors'
+import { teal600, indigo600, lightBlue600, cyan500, green600, lightGreen700, lime800, blue500, brown500, purple300, deepPurple500, indigo300, red400, orange600 } from 'material-ui/styles/colors'
 import { pinkA200 } from 'material-ui/styles/colors'
 import EventEmitter from 'eventemitter3'
 
@@ -35,13 +35,13 @@ class Base extends EventEmitter {
     let group = this.navGroup()
     switch(group) {
     case 'file':
-      return teal500
+      return teal600
     case 'media':
-      return blue500
+      return lightBlue600
     case 'other':
-      return deepPurple400
+      return indigo600
     case 'settings':
-      return lime800
+      return deepPurple500
     default:
       return 'white'
     }

@@ -117,6 +117,13 @@ class Fruitmix extends EventEmitter {
       r = this.aget('admin/users')
       break
 
+    case 'adminCreateUser':
+      r = this.apost('admin/users', {
+        username: args.username,
+        password: args.password
+      })
+      break
+
     case 'adminDrives':
       r = this.aget('admin/drives')
       break
@@ -187,14 +194,6 @@ class Fruitmix extends EventEmitter {
     /** Media API **/
     case 'media':
       r = this.aget(`media`)
-      break
-
-    case 'adminUsers':
-      r = this.aget(`admin/users`)
-      break
-
-    case 'adminDrives':
-      r = this.aget(`admin/drives`)
       break
 
     default:

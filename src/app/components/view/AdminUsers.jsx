@@ -21,6 +21,14 @@ class NewUserDialog extends PureComponent {
     this.state = {  
       value:  ''
     }
+
+    this.fire = () => {
+      let apis = this.props.apis
+      apis.request('adminCreateUser', {
+        username: 'hello',
+        password: 'world'
+      })
+    }
   }
 
   render() {
@@ -107,16 +115,12 @@ class AdminUsers extends Base {
     return 'colored'
   }
 
-  showQuickNav() {
-    return true
-  }
-
   prominent() {
     return true
   }
 
   renderTitle({style}) {
-    return <div style={Object.assign({}, style, { marginLeft: 176 })}>用户列表</div>
+    return <div style={Object.assign({}, style, { marginLeft: 176 })}>用户</div>
   }
 
   renderUserRow(user) {
@@ -175,7 +179,8 @@ class AdminUsers extends Base {
             []) }
 
         <DialogOverlay open={!!this.state.createNewUser} onRequestClose={this.onCloseDialog}>
-          { this.state.createNewUser && <NewUserDialog primary={true} /> }
+          { this.state.createNewUser && 
+            <NewUserDialog primary={true} apis={this.ctx.props.apis} /> }
         </DialogOverlay>
       </div>
     )
