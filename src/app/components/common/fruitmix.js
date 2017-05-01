@@ -137,6 +137,15 @@ class Fruitmix extends EventEmitter {
       r = this.aget('admin/drives')
       break
 
+    case 'adminCreateDrive':
+      r = this.apost('admin/drives', {
+        label: args.label,
+        writelist: args.writelist,
+        readlist: [],
+        shareAllowed: true
+      })
+      break
+
     /** File APIs **/
     case 'listDir':
       r = this.aget(`files/fruitmix/list/${args.dirUUID}`)
@@ -172,7 +181,7 @@ class Fruitmix extends EventEmitter {
 
     /** Ext APIs **/
     case 'extDrives':
-      // r = this.aget TODO
+      r = this.aget(`files/external/fs`)
       break
 
     case 'extListDir':

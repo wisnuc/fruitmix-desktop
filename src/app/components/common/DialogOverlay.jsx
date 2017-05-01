@@ -43,7 +43,7 @@ class DialogOverlay extends PureComponent {
         flexDirection: 'column',
         alignItems: 'center', 
         justifyContent: 'center',
-        backgroundColor: 'rgba(0,0,0,0.2)',
+        backgroundColor: 'rgba(0,0,0,0.4)',
         opacity: (status === 'opening' || status === 'closing') ? 0 : 1,
         transition: status === 'opening' 
           ? `all 225ms cubic-bezier(0.0, 0.0, 0.2, 1)`

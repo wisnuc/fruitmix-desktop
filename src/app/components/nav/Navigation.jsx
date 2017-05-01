@@ -302,6 +302,7 @@ class NavViews extends Component {
     if (!view.hasDetail() || !view.detailEnabled()) return null
 
     const style = {
+      flexShrink: 0,
       height: '100%', 
       width: this.state.showDetail ? view.detailWidth() : 0, 
       transition: sharpCurve('width')
