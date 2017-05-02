@@ -258,3 +258,37 @@ ipcMain.on('mediaShowImage', (event, session, digest) => {
 ipcMain.on('mediaHideImage', (event, session) => {
   mediaFileManager.abort(session, 'image', () => {})
 })
+
+/* Media Share */
+
+ipcMain.on('createMediaShare', (event, maintainers, viewers, medias, album) => {
+  const body = {
+    maintainers: maintainers,
+    viewers: viewers,
+    contents: medias,
+    album
+  }
+    console.log('body:')
+    console.log(body)
+  serverPostAsync('mediaShare', body).then((data) => {
+    console.log('创建相册成功')
+    data = JSON.parse(data)
+    mediaShare.push(data)
+    mediaShareMap.set(data.digest, mediaShare[mediaShare.length - 1])
+    dispatch(action.setMediaShare(mediaShare))
+    if (album) {
+      getMainWindow().webContents.send('message', '创建相册成功')
+    } else {
+      getMainWindow().webContents.send('message', '创建分享成功')
+    }
+  }).catch((err) => {
+    console.log('创建相册失败')
+    console.log(err)
+    if (album) {
+      getMainWindow().webContents.send('message', '创建相册失败')
+    } else {
+      getMainWindow().webContents.send('message', '创建相册失败')
+    }
+  })
+})
+
