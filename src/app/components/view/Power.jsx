@@ -4,6 +4,7 @@ import Radium from 'radium'
 import ActionPowerSettingsNew from 'material-ui/svg-icons/action/power-settings-new'
 
 import Base from './Base'
+import FlatButton from '../mdc/FlatButton'
 
 class Power extends Base {
 
@@ -45,8 +46,8 @@ class Power extends Base {
   renderContent() {
 
     return (
-      <div style={{width: '100%', height: '100%'}}>
-        hello
+      <div className='mdc-theme-teal' style={{width: '100%', height: '100%'}}>
+        <FlatButton />
       </div>
     )
   }

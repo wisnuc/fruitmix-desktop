@@ -3,71 +3,69 @@
  *
  **/
 
-'use strict';
+// 'use strict';
 
 var path = require('path');
 var webpack = require('webpack');
 var HtmlWebpackPlugin=require("html-webpack-plugin");
+// const ExtractTextPlugin = require('extract-text-webpack-plugin');
+var MDC_DIR = path.resolve(__dirname, 'node_modules', '@material');
 
 module.exports = {
 
-    output: {
-        path: 'public',
-        filename  : 'bundle.js',
-        hash: true
-    },
+  output: {
+    path: path.join(__dirname, 'public'),
+    filename: 'bundle.js',
+  },
+  cache: true,
+  target: 'electron',
+  watchOptions: {
+    poll: true
+  },
+  devtool: 'eval-source-map',
+  entry: [
+//     'webpack/hot/poll?1000',
+    './src/app/app.js'
+  ],
 
-    cache  : true,
-    debug  : true,
-    target: 'electron',
-    watchOptions: {
-        poll: true
-    },
-    debug: true,
-    devtool: 'eval-source-map',
-    entry: [
-        'webpack/hot/poll?1000',
-        // 'webpack/hot/only-dev-server',
-        './src/app/app.js'
-    ],
+  stats: { colors : true, reasons: true },
+  resolve: { extensions: ['.js', '.jsx', '.css'] },
+  module: {
 
-    stats: {
-        colors : true,
-        reasons: true
-    },
-
-    resolve: {
-        extensions: ['', '.js', '.json', '.jsx', '.css']
-    },
-
-    module: {
-
-        loaders: [
-
-            {
-                test   : /\.(js|jsx)$/,
-                exclude: /node_modules/,
-                loader : 'react-hot!babel-loader'
-            },
-            {
-                test  : /\.(css|sass)$/,
-                loader: 'style-loader!css-loader'
-            },
-            {
-                test  : /\.(png|jpg|jpeg|ico|gif|woff|woff2|ttf|eot|svg)$/,
-                loader: 'url-loader?limit=8192'
-            },
-            {
-                test: /\.json$/,
-                loader: 'json-loader'
-            },
+    rules: [
+      {
+        test: /\.(js|jsx)$/,
+        exclude: /node_modules/,
+        loader: 'react-hot-loader!babel-loader'
+      },
+      {
+        test: /\.css$/,
+        // include: [MDC_DIR],
+        // loader: 'style-loader!css-loader'
+        use: [
+          {
+            loader: 'style-loader',
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              importLoaders: 1,
+            }
+          },
+//          {
+//            loader: 'postcss-loader'
+//          }
         ]
-    },
-
-    plugins: [
-        new webpack.HotModuleReplacementPlugin(),
-        // new HtmlWebpackPlugin({template: path.resolve(__dirname, 'src/index.html')}),
-        new webpack.DefinePlugin({ "global.GENTLY": false })
+      },
+      {
+        test  : /\.(png|jpg|jpeg|ico|gif|woff|woff2|ttf|eot|svg)$/,
+        loader: 'url-loader?limit=8192'
+      },
     ]
+  },
 
-};
+  plugins: [
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.DefinePlugin({ "global.GENTLY": false })
+  ]
+}
