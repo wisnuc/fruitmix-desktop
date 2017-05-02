@@ -90,6 +90,8 @@ class RenderListByRow extends Component {
                 digest={photo[0]}
                 key={photo[0]}
                 ipcRenderer={this.props.ipcRenderer}
+                addListToSelection={this.props.addListToSelection}
+                removeListToSelection={this.props.removeListToSelection}
               />
             )
             )

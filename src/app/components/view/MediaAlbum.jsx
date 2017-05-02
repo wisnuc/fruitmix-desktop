@@ -1,9 +1,11 @@
 import React, { Component, PureComponent } from 'react'
 import Radium from 'radium'
+import { ipcRenderer } from 'electron'
 
 import ImagePhotoAlbum from 'material-ui/svg-icons/image/photo-album'
 
 import Base from './Base'
+import AlbumApp from '../album/AlbumApp'
 
 class MediaAlbum extends Base {
 
@@ -13,6 +15,20 @@ class MediaAlbum extends Base {
   }
 
   willReceiveProps(nextProps) { 
+    // console.log('media nextProps', nextProps)
+    if (!nextProps.apis || !nextProps.apis.media) return
+    const media = nextProps.apis.media
+    if (media.isPending() || media.isRejected()) return
+
+    /* now it's fulfilled */
+    const value = media.value()
+    this.apis = nextProps.apis
+    // debug('media before sort', media.value())
+
+    if (value !== this.state.media) {
+      // debug('media.value()', value)
+      this.setState({ media: value })
+    }
   }
 
   navEnter() {
@@ -51,12 +67,12 @@ class MediaAlbum extends Base {
 
   /** renderers **/
   renderContent() {
-
-    return (
-      <div style={{width: '100%', height: '100%'}}>
-        hello
-      </div>
-    )
+    return (<AlbumApp
+      media={this.state.media}
+      ipcRenderer={ipcRenderer}
+      apis={this.apis}
+      {...this.props}
+    />)
   }
 }
 

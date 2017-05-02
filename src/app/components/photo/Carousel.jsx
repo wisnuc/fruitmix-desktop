@@ -1,8 +1,10 @@
 import React from 'react'
 import { Paper } from 'material-ui'
+import Debug from 'debug'
 import SlideToAnimate from './SlideToAnimate'
 import FlatButton from '../common/FlatButton'
 
+const debug = Debug('component:photoApp:Carousel:')
 const MARGIN_DISTANCE = 60
 const PART_HEIGHT = 45
 
@@ -27,9 +29,12 @@ export default class Carousel extends React.Component {
     >
       <div style={{ clear: 'both' }}>
         <div style={{ float: 'left' }}>
-          <FlatButton label="分享" />
-          <FlatButton label="相册" />
-          <FlatButton label="下载" />
+          <FlatButton label="分享" disabled />
+          <FlatButton
+            label="相册"
+            onTouchTap={() => this.props.creatAlbum(this.props.items)}
+          />
+          <FlatButton label="下载" disabled />
         </div>
         <div style={{ float: 'right' }}>
           <FlatButton
@@ -42,12 +47,18 @@ export default class Carousel extends React.Component {
   )
   CarouselList = (props) => {
     const { style, items } = props
+    const mediaPath = '../media/'
+    debug('items', items)
     return (
       <div style={style}>
         { items.map(item => (
           <div style={{ flexShrink: 0, flexGrow: 0, marginRight: 10 }} key={item.toString()} >
             <div style={{ borderRadius: 4, width: 90, height: 90, overflow: 'hidden' }}>
-              <img src={item} alt="img" style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
+              <img
+                alt="img"
+                src={`${mediaPath}${item}&height=210&width=210`}
+                style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+              />
             </div>
           </div>
         ))
