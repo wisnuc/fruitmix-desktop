@@ -38,6 +38,10 @@ class Media extends Base {
     this.getTimeline = this.timeline.bind(this)
   }
 
+  requestData(eq) {
+    this.apis.request(eq)
+  }
+
   photoInfo(height, width, media) {
     /* mediaStore were sorted by date in Node */
     if ((this.allPhotos !== media || this.width !== width) && width) {
@@ -285,6 +289,7 @@ class Media extends Base {
       getTimeline={this.getTimeline}
       ipcRenderer={ipcRenderer}
       apis={this.apis}
+      requestData={this.requestData}
     />)
   }
 }

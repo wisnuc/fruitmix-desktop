@@ -104,7 +104,7 @@ class PhotoItem extends Component {
             width: '100%'
           }}
         >
-          { (this.state.action || this.state.hover) && <this.renderHover /> }
+          {/* (this.state.action || this.state.hover) && <this.renderHover /> */}
           { <this.renderImage /> }
         </div>
       </div>

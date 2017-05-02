@@ -5,7 +5,7 @@ import { ipcRenderer } from 'electron'
 import ImagePhotoAlbum from 'material-ui/svg-icons/image/photo-album'
 
 import Base from './Base'
-import AlbumApp from '../album/AlbumApp'
+import AlbumApp from '../photo/AlbumApp'
 
 class MediaAlbum extends Base {
 
@@ -16,18 +16,18 @@ class MediaAlbum extends Base {
 
   willReceiveProps(nextProps) { 
     // console.log('media nextProps', nextProps)
-    if (!nextProps.apis || !nextProps.apis.media) return
-    const media = nextProps.apis.media
-    if (media.isPending() || media.isRejected()) return
+    if (!nextProps.apis || !nextProps.apis.mediaShare) return
+    const mediaShare = nextProps.apis.mediaShare
+    if (mediaShare.isPending() || mediaShare.isRejected()) return
 
     /* now it's fulfilled */
-    const value = media.value()
+    const value = mediaShare.value()
     this.apis = nextProps.apis
     // debug('media before sort', media.value())
 
-    if (value !== this.state.media) {
+    if (value !== this.state.mediaShare) {
       // debug('media.value()', value)
-      this.setState({ media: value })
+      this.setState({ mediaShare: value })
     }
   }
 
@@ -68,10 +68,9 @@ class MediaAlbum extends Base {
   /** renderers **/
   renderContent() {
     return (<AlbumApp
-      media={this.state.media}
+      mediaShare={this.state.mediaShare}
       ipcRenderer={ipcRenderer}
       apis={this.apis}
-      {...this.props}
     />)
   }
 }

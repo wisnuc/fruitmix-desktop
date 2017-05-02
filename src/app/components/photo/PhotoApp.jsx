@@ -64,6 +64,7 @@ class PhotoApp extends React.Component {
         ctime: Date.now()
       }))
       this.props.ipcRenderer.send('createMediaShare', users, users, items, { title, text })
+      setTimeout(() => this.props.requestData('mediaShare'), 1000)
     }
   }
 
