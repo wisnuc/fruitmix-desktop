@@ -271,11 +271,9 @@ ipcMain.on('createMediaShare', (event, maintainers, viewers, medias, album) => {
     console.log('body:')
     console.log(body)
   serverPostAsync('mediaShare', body).then((data) => {
-    console.log('创建相册成功')
     data = JSON.parse(data)
-    mediaShare.push(data)
-    mediaShareMap.set(data.digest, mediaShare[mediaShare.length - 1])
-    dispatch(action.setMediaShare(mediaShare))
+    console.log('data:')
+    console.log(data)
     if (album) {
       getMainWindow().webContents.send('message', '创建相册成功')
     } else {
