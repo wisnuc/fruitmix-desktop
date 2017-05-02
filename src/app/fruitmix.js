@@ -15,13 +15,15 @@ import Main from './main'
 
 const debug = Debug('app')
 
+import '../assets/css/mdc.theme.css'
+import '../assets/css/mdc.button.css'
+
 // start mdns scan
 const mdns = MDNS(ipcRenderer, store)
 mdns.scan()
 
 // import css
-require('../assets/css/app.css')
-
+import '../assets/css/app.css'
 // required by Material UI
 injectTapEventPlugin()
 
