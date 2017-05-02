@@ -54,16 +54,16 @@ class PhotoApp extends React.Component {
       this.setState({ openDetail: true })
     }
 
-    this.creatAlbum = (items) => {
+    this.creatAlbum = (items, title, text) => {
       /* maintainers, viewers, medias, album */
-      debug('this.creatAlbum', this.props, items)
+      debug('this.creatAlbum', this.props, items, title, text)
       const users = [this.props.apis.account.data.uuid]
       const contents = items.map(item => ({
         digest: item,
         creator: this.props.apis.account.data.uuid,
         ctime: Date.now()
       }))
-      this.props.ipcRenderer.send('createMediaShare', users, users, items, { title: 'test' })
+      this.props.ipcRenderer.send('createMediaShare', users, users, items, { title, text })
     }
   }
 
