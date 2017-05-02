@@ -20,39 +20,50 @@ class PhotoApp extends React.Component {
 
     this.state = {
       openDetail: false,
-      carouselItems: []
+      selectedItems: []
     }
 
     this.seqIndex = ''
 
-    this.addListToSelection = (path) => {
-      const hasPath = this.state.carouselItems.findIndex(item => item === path) >= 0
-
-      !hasPath && this.setState(prevState => ({
-        carouselItems: [
-          ...prevState.carouselItems,
-          path
-        ]
-      }))
+    this.addListToSelection = (digest) => {
+      debug('this.addListToSelection this.state.selectedItems', this.state.selectedItems)
+      const hadDigest = this.state.selectedItems.findIndex(item => item === digest) >= 0
+      if (!hadDigest) {
+        this.setState(prevState => ({ selectedItems: [...prevState.selectedItems, digest]
+        }))
+      }
     }
-    this.removeListToSelection = (path) => {
-      const hasPath = this.state.carouselItems.findIndex(item => item === path) >= 0
-
-      hasPath && this.setState((prevState) => {
-        const index = findPath(prevState.carouselItems, path)
-
-        return {
-          carouselItems: [
-            ...prevState.carouselItems.slice(0, index),
-            ...prevState.carouselItems.slice(index + 1)
-          ]
-        }
-      })
+    this.removeListToSelection = (digest) => {
+      debug('this.removeListToSelection this.state.selectedItems', this.state.selectedItems)
+      const hadDigest = this.state.selectedItems.findIndex(item => item === digest) >= 0
+      if (hadDigest) {
+        this.setState((prevState) => {
+          const index = prevState.selectedItems.findIndex(item => item === digest)
+          return {
+            selectedItems: [
+              ...prevState.selectedItems.slice(0, index),
+              ...prevState.selectedItems.slice(index + 1)
+            ]
+          }
+        })
+      }
     }
 
     this.lookPhotoDetail = (digest) => {
       this.seqIndex = this.props.media.findIndex(item => item[0] === digest)
       this.setState({ openDetail: true })
+    }
+
+    this.creatAlbum = (items, title, text) => {
+      /* maintainers, viewers, medias, album */
+      debug('this.creatAlbum', this.props, items, title, text)
+      const users = [this.props.apis.account.data.uuid]
+      const contents = items.map(item => ({
+        digest: item,
+        creator: this.props.apis.account.data.uuid,
+        ctime: Date.now()
+      }))
+      this.props.ipcRenderer.send('createMediaShare', users, users, items, { title, text })
     }
   }
 
@@ -67,7 +78,7 @@ class PhotoApp extends React.Component {
   }
 
   render() {
-    // debug('PhotoApp, store.media.data', this.props.media)
+    debug('PhotoApp, this.props', this.props)
     return (
       <Paper>
         <EventListener
@@ -106,6 +117,8 @@ class PhotoApp extends React.Component {
                 lookPhotoDetail={this.lookPhotoDetail}
                 getTimeline={this.props.getTimeline}
                 ipcRenderer={this.props.ipcRenderer}
+                addListToSelection={this.addListToSelection}
+                removeListToSelection={this.removeListToSelection}
               /> :
               <div
                 style={{
@@ -121,13 +134,14 @@ class PhotoApp extends React.Component {
 
         {/* 轮播 */}
         {
-          this.state.carouselItems.length ?
+          this.state.selectedItems.length ?
             <Paper style={{ position: 'fixed', bottom: 15, width: '75%' }} >
               <Carousel
-                ClearAll={() => this.setState({ carouselItems: [] })}
+                ClearAll={() => this.setState({ selectedItems: [] })}
                 removeListToSelection={this.removeListToSelection}
                 style={{ backgroundColor: '#fff', height: 180, borderRadius: 4, boxShadow: '0 0 10px rgba(0,0,0,.3)' }}
-                items={this.state.carouselItems}
+                items={this.state.selectedItems}
+                creatAlbum={this.creatAlbum}
               />
             </Paper> : <div />
         }

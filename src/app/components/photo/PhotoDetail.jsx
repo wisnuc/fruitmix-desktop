@@ -60,7 +60,7 @@ class PhotoDetailInline extends React.Component {
 
     this.updatePath = (event, session, path) => {
       if (this.session === session) {
-        debug('got media!')
+        // debug('got media!')
         clearTimeout(this.time)
         this.time = setTimeout(() => (this.refImage.src = path), 100)
       }
@@ -76,7 +76,7 @@ class PhotoDetailInline extends React.Component {
         this.refContainer.style.width = `${this.photoWidth}px`
 
         /* get detail image */
-        debug('got thumb!')
+        // debug('got thumb!')
         this.props.ipcRenderer.send('mediaShowImage', this.session, this.digest)
       }
     }

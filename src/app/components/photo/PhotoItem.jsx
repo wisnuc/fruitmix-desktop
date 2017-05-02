@@ -19,16 +19,9 @@ class PhotoItem extends Component {
 
     this.onSelectIconButton = () => {
       if (!this.state.action) {
-        this.setState({ action: true }, () => this.props.selected())
+        this.setState({ action: true }, () => this.props.addListToSelection(this.props.digest))
       } else {
-        this.setState({ action: false }, () => this.props.unselected())
-      }
-    }
-
-    this.offSelectIconButton = (disabled, state = false) => {
-      if (this.state.action) {
-        this.setState({ action: state },
-          () => !disabled && props.unselected())
+        this.setState({ action: false }, () => this.props.removeListToSelection(this.props.digest))
       }
     }
 
