@@ -1,20 +1,12 @@
 import React, { Component, PropTypes } from 'react'
-import ReactDOM from 'react-dom'
 import Debug from 'debug'
-import { ipcRenderer } from 'electron'
 import { List, AutoSizer } from 'react-virtualized'
 import { Paper, Card, IconButton, CircularProgress, FlatButton } from 'material-ui'
-import Carousel from './Carousel'
-import PhotoDetail from './PhotoDetail'
-import { formatDate } from '../../utils/datetime'
 import RenderListByRow from './RenderListByRow'
-import loading from '../../../assets/images/index/loading.gif'
-import PhotoItem from './PhotoItem'
 
 const debug = Debug('component:photoApp:PhotoList')
 const headerHeight = 64
 const timelineMargin = 26
-
 
 const mousePosition = (ev) => {
   if (ev.pageX || ev.pageY) {
@@ -139,117 +131,18 @@ class PhotoList extends Component {
     }
   }
 
-  renderTimeline = () => {
-    if (!this.photoDates.length) return <div />
-    const timeline = this.props.getTimeline(this.photoDates, this.indexHeightSum, this.maxScrollTop, this.height)
-    return (
-      <div
-        ref={ref => (this.refBackground = ref)}
-        style={{ position: 'absolute', height: '100%', width: 80, right: 16 }}
-        onMouseLeave={() => {
-          if (!this.onMouseDown) this.setState({ hover: false })
-          this.scrollTop = null
-        }}
-        onMouseDown={() => (this.onMouseDown = true)}
-        onTouchTap={this.scrollToPosition}
-      >
-        {/* timeline */}
-        <div
-          ref={ref => (this.refTimeline = ref)}
-          style={{ opacity: this.state.hover ? 1 : 0, transition: 'opacity 350ms' }}
-        >
-          {/* date list */}
-          {
-             timeline.map((data, index) => {
-               let date = data[0]
-               const top = data[1]
-               const zIndex = data[2]
-               if (date === 0) date = '神秘时间'
-               return (
-                 <div
-                   key={index.toString()}
-                   style={{
-                     position: 'absolute',
-                     boxSizing: 'border-box',
-                     top,
-                     zIndex,
-                     color: 'rgba(0,0,0,0.54)',
-                     backgroundColor: 'white',
-                     paddingRight: 8,
-                     right: (data[0] === 0) ? 8 : 20,
-                     textAlign: 'center'
-                   }}
-                 >
-                   { date }
-                 </div>
-               )
-             })
-          }
-
-          {/* position bar */}
-          <div
-            ref={ref => (this.refDateBar = ref)}
-            style={{
-              position: 'absolute',
-              top: -1000,
-              height: 2,
-              width: 48,
-              right: 22,
-              zIndex: 3,
-              backgroundColor: '#4285f4'
-            }}
-          />
-        </div>
-
-        {/* BarFollowMouse */}
-        <div
-          ref={ref => (this.refBarFollowMouse = ref)}
-          style={{
-            position: 'absolute',
-            height: 2,
-            width: 48,
-            top: -1000,
-            right: 22,
-            zIndex: 4,
-            transition: 'opacity 350ms',
-            opacity: this.state.hover ? 1 : 0,
-            backgroundColor: 'rgba(0,0,0,0.54)'
-          }}
-        />
-
-        {/* DateBox */}
-        <div
-          ref={ref => (this.refDateBox = ref)}
-          style={{
-            opacity: this.state.hover ? 1 : 0,
-            transition: 'opacity 350ms',
-            position: 'absolute',
-            top: -1000,
-            width: 84,
-            right: 96,
-            backgroundColor: 'black',
-            color: 'white',
-            padding: 8
-          }}
-        />
-      </div>
-    )
-  }
-
   render() {
     // debug('render PhotoList, this.props', this.props, this.state)
     document.body.onmousemove = this.onMouseMove
     document.body.onmouseup = () => (this.onMouseDown = false)
     return (
       <Paper style={this.props.style}>
-
         {/* 图片列表 */}
         <div style={{ display: 'flex', width: '100%', height: '100%' }} >
           <AutoSizer>
             {({ height, width }) => {
               /* get PhotoInfo */
               const PhotoInfo = this.props.setPhotoInfo(height, width, this.props.media)
-              // debug('PhotoInfo', PhotoInfo)
 
               /* set global variant */
               this.height = height
@@ -262,6 +155,9 @@ class PhotoList extends Component {
               this.maxScrollTop = PhotoInfo.maxScrollTop
               this.rowHeightSum = PhotoInfo.rowHeightSum
 
+              /* get timeline */
+              this.timeline = this.props.getTimeline(this.photoDates, this.indexHeightSum, this.maxScrollTop, this.height)
+
               const estimatedRowSize = PhotoInfo.rowHeightSum / PhotoInfo.allHeight.length
               const rowHeight = ({ index }) => PhotoInfo.allHeight[index]
 
@@ -272,10 +168,10 @@ class PhotoList extends Component {
                     lookPhotoDetail={this.props.lookPhotoDetail}
                     isScrolling={isScrolling}
                     list={this.photoMapDates[index]}
+                    ipcRenderer={this.props.ipcRenderer}
                   />
                 </div>
               )
-
               return (
                 <div onTouchTap={e => this.onRowTouchTap(e, -1)}>
                   <List
@@ -297,7 +193,96 @@ class PhotoList extends Component {
         </div>
 
         {/* 时间轴 */}
-        <this.renderTimeline />
+        <div
+          ref={ref => (this.refBackground = ref)}
+          style={{ position: 'absolute', height: '100%', width: 80, right: 16 }}
+          onMouseLeave={() => {
+            if (!this.onMouseDown) this.setState({ hover: false })
+            this.scrollTop = null
+          }}
+          onMouseDown={() => (this.onMouseDown = true)}
+          onTouchTap={this.scrollToPosition}
+        >
+          {/* timeline */}
+          <div
+            ref={ref => (this.refTimeline = ref)}
+            style={{ opacity: this.state.hover ? 1 : 0, transition: 'opacity 350ms' }}
+          >
+            {/* date list */}
+            {
+              this.timeline && this.timeline.map((data, index) => {
+                let date = data[0]
+                const top = data[1]
+                const zIndex = data[2]
+                if (date === 0) date = '神秘时间'
+                return (
+                  <div
+                    key={index.toString()}
+                    style={{
+                      position: 'absolute',
+                      boxSizing: 'border-box',
+                      top,
+                      zIndex,
+                      color: 'rgba(0,0,0,0.54)',
+                      backgroundColor: 'white',
+                      paddingRight: 8,
+                      right: (data[0] === 0) ? 8 : 20,
+                      textAlign: 'center'
+                    }}
+                  >
+                    { date }
+                  </div>
+                )
+              })
+            }
+
+            {/* position bar */}
+            <div
+              ref={ref => (this.refDateBar = ref)}
+              style={{
+                position: 'absolute',
+                top: -1000,
+                height: 2,
+                width: 48,
+                right: 22,
+                zIndex: 3,
+                backgroundColor: '#4285f4'
+              }}
+            />
+          </div>
+
+          {/* BarFollowMouse */}
+          <div
+            ref={ref => (this.refBarFollowMouse = ref)}
+            style={{
+              position: 'absolute',
+              top: -1000,
+              right: 22,
+              height: 2,
+              width: 48,
+              zIndex: 4,
+              transition: 'opacity 350ms',
+              opacity: this.state.hover ? 1 : 0,
+              backgroundColor: 'rgba(0,0,0,0.54)'
+            }}
+          />
+
+          {/* DateBox */}
+          <div
+            ref={ref => (this.refDateBox = ref)}
+            style={{
+              position: 'absolute',
+              top: -1000,
+              right: 96,
+              padding: 8,
+              width: 84,
+              color: 'white',
+              backgroundColor: 'black',
+              transition: 'opacity 350ms',
+              opacity: this.state.hover ? 1 : 0
+            }}
+          />
+        </div>
 
       </Paper>
     )

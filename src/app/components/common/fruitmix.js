@@ -70,16 +70,24 @@ class Fruitmix extends EventEmitter {
 
   apost(ep, data) {
 
-    let r = request.post(`http://${this.address}:3721/${ep}`)
-    if (data) r = r.send(data)
-    return r.set('Authorization', 'JWT ' + this.token)
+    let r = request
+      .post(`http://${this.address}:3721/${ep}`)
+      .set('Authorization', 'JWT ' + this.token)
+
+    return typeof data === 'object'
+      ? r.send(data)
+      : r
   }
 
   apatch(ep, data) {
 
-    let r = request.patch(`http://${this.address}:3721/${ep}`)
-    if (data) r = r.send(data)
-    return r.set('Authorization', 'JWT ' + this.token)
+    let r = request
+      .patch(`http://${this.address}:3721/${ep}`)
+      .set('Authorization', 'JWT ' + this.token)
+
+    return typeof data === 'object'
+      ? r.send(data)
+      : r
   }
 
   adel(ep) {
@@ -117,8 +125,25 @@ class Fruitmix extends EventEmitter {
       r = this.aget('admin/users')
       break
 
+    case 'adminCreateUser':
+      r = this.apost('admin/users', {
+        type: 'local',
+        username: args.username,
+        password: args.password
+      })
+      break
+
     case 'adminDrives':
       r = this.aget('admin/drives')
+      break
+
+    case 'adminCreateDrive':
+      r = this.apost('admin/drives', {
+        label: args.label,
+        writelist: args.writelist,
+        readlist: [],
+        shareAllowed: true
+      })
       break
 
     /** File APIs **/
@@ -156,7 +181,7 @@ class Fruitmix extends EventEmitter {
 
     /** Ext APIs **/
     case 'extDrives':
-      // r = this.aget TODO
+      r = this.aget(`files/external/fs`)
       break
 
     case 'extListDir':
@@ -187,14 +212,6 @@ class Fruitmix extends EventEmitter {
     /** Media API **/
     case 'media':
       r = this.aget(`media`)
-      break
-
-    case 'adminUsers':
-      r = this.aget(`admin/users`)
-      break
-
-    case 'adminDrives':
-      r = this.aget(`admin/drives`)
       break
 
     default:

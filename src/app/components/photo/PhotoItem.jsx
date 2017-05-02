@@ -1,14 +1,10 @@
 import React, { Component, PropTypes } from 'react'
 import UUID from 'node-uuid'
-import { ipcRenderer } from 'electron'
 import Debug from 'debug'
 import { Paper, Card, IconButton, CircularProgress } from 'material-ui'
 import { CheckIcon } from './Svgs'
 
 const debug = Debug('component:photoApp:photoItem:')
-
-/* increase limit of listeners of EventEmitter */
-ipcRenderer.setMaxListeners(100)
 
 class PhotoItem extends Component {
   constructor(props, context) {
@@ -52,13 +48,12 @@ class PhotoItem extends Component {
   }
   componentDidMount() {
     this.session = UUID.v4()
-    // ipcRenderer.send('getThumb', this.session, this.props.digest)
-    ipcRenderer.send('mediaShowThumb', this.session, this.props.digest, 210, 210)
-    ipcRenderer.on('getThumbSuccess', this.updatePath)
+    this.props.ipcRenderer.send('mediaShowThumb', this.session, this.props.digest, 210, 210)
+    this.props.ipcRenderer.on('getThumbSuccess', this.updatePath)
   }
   componentWillUnmount() {
-    ipcRenderer.removeListener('getThumbSuccess', this.updatePath)
-    ipcRenderer.send('mediaHideThumb', this.session)
+    this.props.ipcRenderer.removeListener('getThumbSuccess', this.updatePath)
+    this.props.ipcRenderer.send('mediaHideThumb', this.session)
   }
 
   renderHover = () => (

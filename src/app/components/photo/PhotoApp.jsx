@@ -105,6 +105,7 @@ class PhotoApp extends React.Component {
                 media={this.props.media}
                 lookPhotoDetail={this.lookPhotoDetail}
                 getTimeline={this.props.getTimeline}
+                ipcRenderer={this.props.ipcRenderer}
               /> :
               <div
                 style={{
@@ -145,6 +146,7 @@ class PhotoApp extends React.Component {
               }}
               items={this.props.media}
               seqIndex={this.seqIndex}
+              ipcRenderer={this.props.ipcRenderer}
             /> : <div />
         }
 
