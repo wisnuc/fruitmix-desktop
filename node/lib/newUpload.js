@@ -74,8 +74,7 @@ const getTransmissionHandle = () => {
     if (err) return
     tasks.forEach(item => {
       createTask(item.abspath, item.target, item.type, false, item._id, item.uploading, item.rootUUID)
-      }
-      )
+    })
   })
 	// db.uploading   to fixed
 }

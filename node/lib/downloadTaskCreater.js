@@ -51,8 +51,11 @@ const sendMessage = () => {
 
 //send summary information to browser
 const sendMsg = () => {
-	let mainWindow = getMainWindow()
-  mainWindow.webContents.send('UPDATE_DOWNLOAD', userTasks.map(item => item.getSummary()), finishTasks.map(i => i.getSummary?i.getSummary():i))
+  getMainWindow().webContents.send(
+  	'UPDATE_TRANSMISSION', 
+  	'UPDATE_DOWNLOAD', 
+  	userTasks.map(item => item.getSummary()), 
+  	finishTasks.map(i => i.getSummary?i.getSummary():i))
 }
 
 //TaskManager creater

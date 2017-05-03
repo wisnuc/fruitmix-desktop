@@ -52,8 +52,11 @@ const sendMessage = () => {
 }
 
 const sendMsg = () => {
-	let mainWindow = getMainWindow()
-  mainWindow.webContents.send('UPDATE_UPLOAD', userTasks.map(item => item.getSummary()), finishTasks.map(i => i.getSummary?i.getSummary():i))
+  getMainWindow().webContents.send(
+  	'UPDATE_TRANSMISSION', 
+  	'UPDATE_UPLOAD', 
+  	userTasks.map(item => item.getSummary()), 
+  	finishTasks.map(i => i.getSummary?i.getSummary():i))
 }
 
 const createTask = (abspath, target, type, newWork, u, r, rootUUID) => {

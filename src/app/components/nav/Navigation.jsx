@@ -1,4 +1,5 @@
 import React, { Component, PureComponent } from 'react'
+import { ipcRenderer } from 'electron'
 
 import Radium from 'radium'
 import { Paper, IconButton, Menu, Drawer, Divider } from 'material-ui'
@@ -83,6 +84,7 @@ class NavViews extends Component {
 
     this.toggleDetailBound = this.toggleDetail.bind(this)
     this.openDrawerBound = this.openDrawer.bind(this)
+    this.updateTransmissionBound = this.updateTransmission.bind(this)
   }
 
   install(name, View) {
@@ -97,6 +99,12 @@ class NavViews extends Component {
 
   componentDidMount() {
     this.navTo('home')
+    ipcRenderer.send('GET_TRANSMISSION')
+    ipcRenderer.on('UPDATE_TRANSMISSION', this.updateTransmissionBound)
+  }
+
+  componentWillUnmount() {
+    ipcRenderer.removeEventListener('UPDATE_TRANSMISSION', this.updateTransmissionBound)
   }
 
   componentDidUpdate() {
@@ -123,6 +131,11 @@ class NavViews extends Component {
 
   toggleDetail() {
     this.setState({showDetail: !this.state.showDetail})
+  }
+
+  updateTransmission(e, type, userTasks, finishTasks) {
+    console.log(e, userTasks, finishTasks)
+    window.store.dispatch({ type, userTasks, finishTasks })
   }
 
   currentView() {

@@ -6,8 +6,8 @@ var superagent = require('superagent')
 var request = require('request')
 var http = require('http')
 
-let absPath = path.normalize('E:\\下载\\好先生第1集[高清].qsv')
-let token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiNWRhOTIzMDMtMzNhMS00Zjc5LThkOGYtYTdiNmJlY2RlNmMzIn0.79bUgRf9-m0KYP42_BV06yjtxaxgqYIiNdiIJIXfRMM'
+let absPath = path.normalize('E:\\下载\\typora-setup-x64.exe')
+let token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiY2Y5MGQxZWYtNzVhYi00MDZlLWFlNzItYWM3ZDJjYWI3MWVmIn0.eyAC-wyvoapY_GphRqSb3E8U2ZM2soRxCqZgAfU3aTQ"
 let segmentsize = 10000000
 let allHash = crypto.createHash('sha256')
 let obj = {
@@ -78,7 +78,7 @@ function createTask() {
 	console.log('创建任务')
 	console.log('----------------------------------------------')
 	let options = {
-      	url:'http://192.168.5.93:3721'+'/filemap/123',
+      	url:'http://192.168.5.180:3721'+'/filemap/21f696c2-3d40-44a3-b224-28204ef88675',
       	method:'post',
       	headers: {
         	Authorization: 'JWT ' + token,
@@ -114,7 +114,7 @@ function upload(obj, callback) {
 	console.log('----------------------------------------------')
 	if (obj.seek == obj.parts.length) return callback(null)
 	let s = obj.seek
-	var url = 'http://192.168.5.93:3721' + 
+	var url = 'http://192.168.5.180:3721' + 
 			'/filemap/123?' + 
 			'segmenthash=' + obj.parts[s].sha + 
 			'&start=' + s + 
@@ -136,13 +136,13 @@ function upload(obj, callback) {
 	})
 
 	var options = {
-		host: '192.168.5.93',
+		host: '192.168.5.180',
 		port: 3721,
 		headers: {
 			Authorization: 'JWT ' + token
 		},
 		method: 'PUT',
-		path: encodeURI('/filemap/123?filename=' + obj.name + 
+		path: encodeURI('/filemap/21f696c2-3d40-44a3-b224-28204ef88675?filename=' + obj.name + 
 			'&segmenthash=' + obj.parts[s].sha + 
 			'&start=' + s + 
 			'&taskid=' + obj.taskid)

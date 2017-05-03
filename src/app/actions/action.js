@@ -95,22 +95,6 @@ var actions = {
 		};
 	},
 
-	refreshStatusOfUpload(tasks, finish) {
-		return {
-			type: 'REFRESH_STATUS_UPLOAD',
-			tasks: tasks,
-			uploadFinish: finish
-		}
-	},
-
-	refreshStatusOfDownload(tasks, finish) {
-		return {
-			type: 'REFRESH_STATUS_DOWNLOAD',
-			tasks : tasks,
-			downloadFinish: finish
-		}
-	},
-
 	setSnack(message,open) {
 		return {
 			type: 'SET_SNACK',
