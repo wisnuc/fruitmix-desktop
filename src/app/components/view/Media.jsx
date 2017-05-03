@@ -20,7 +20,7 @@ const parseDate = (date) => {
 }
 
 /* increase limit of listeners of EventEmitter */
-ipcRenderer.setMaxListeners(100)
+ipcRenderer.setMaxListeners(1000)
 
 class Media extends Base {
 
@@ -36,6 +36,10 @@ class Media extends Base {
     this.width = 0
     this.setPhotoInfo = this.photoInfo.bind(this)
     this.getTimeline = this.timeline.bind(this)
+  }
+
+  requestData(eq) {
+    this.apis.request(eq)
   }
 
   photoInfo(height, width, media) {
@@ -142,7 +146,7 @@ class Media extends Base {
       }
       return null
     })
-    month.set('0', dateUnknown)
+    if (dateUnknown) month.set('0', dateUnknown)
 
     let sumCount = 0
     let spacingCount = 0
@@ -203,6 +207,7 @@ class Media extends Base {
     const value = media.value()
     // debug('media before sort', media.value())
 
+    this.apis = nextProps.apis
     /* sort photos by date */
     value.sort((prev, next) => (parseDate(next[1].metadata.exifDateTime) - parseDate(prev[1].metadata.exifDateTime)) || (
       parseInt(`0x${next[0]}`, 16) - parseInt(`0x${prev[0]}`, 16)))
@@ -283,6 +288,8 @@ class Media extends Base {
       setPhotoInfo={this.setPhotoInfo}
       getTimeline={this.getTimeline}
       ipcRenderer={ipcRenderer}
+      apis={this.apis}
+      requestData={this.requestData}
     />)
   }
 }

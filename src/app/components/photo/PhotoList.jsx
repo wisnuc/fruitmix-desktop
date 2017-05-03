@@ -66,6 +66,7 @@ class PhotoList extends Component {
 
         /* hide DateBox and Timeline 2000ms later */
         clearTimeout(this.time)
+        clearTimeout(this.time2)
         if (!this.state.hover) {
           this.time = setTimeout(() => {
             this.refDateBox.style.opacity = 0
@@ -84,7 +85,7 @@ class PhotoList extends Component {
       if (top < timelineMargin) top = timelineMargin
       if (top > this.height - timelineMargin) top = this.height - timelineMargin
 
-      if (this.onMouseDown || (x > this.width - 24 && y > headerHeight)) {
+      if (this.onMouseDown || ((x > this.width - 24 && y > headerHeight) && this.state.hover)) {
         // debug('this.onMouseMove')
         /* showTimeline and clear setTimeout */
         this.showDateBar()
@@ -169,6 +170,8 @@ class PhotoList extends Component {
                     isScrolling={isScrolling}
                     list={this.photoMapDates[index]}
                     ipcRenderer={this.props.ipcRenderer}
+                    addListToSelection={this.props.addListToSelection}
+                    removeListToSelection={this.props.removeListToSelection}
                   />
                 </div>
               )
@@ -200,10 +203,10 @@ class PhotoList extends Component {
             if (!this.onMouseDown) this.setState({ hover: false })
             this.scrollTop = null
           }}
+          onMouseEnter={() => this.setState({ hover: true })}
           onMouseDown={() => (this.onMouseDown = true)}
           onTouchTap={this.scrollToPosition}
         >
-          {/* timeline */}
           <div
             ref={ref => (this.refTimeline = ref)}
             style={{ opacity: this.state.hover ? 1 : 0, transition: 'opacity 350ms' }}

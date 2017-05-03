@@ -63,8 +63,8 @@ class NavViews extends Component {
     this.install('transmission', Transmission)
 
     this.install('media', Media)
-    this.install('mediaShare', MediaShare)
-    this.install('mediaAlbum', MediaAlbum)
+    // this.install('mediaShare', MediaShare)
+    // this.install('mediaAlbum', MediaAlbum)
 
     this.install('account', Account) 
     this.install('adminUsers', AdminUsers)
