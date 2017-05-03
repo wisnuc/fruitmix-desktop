@@ -45,12 +45,12 @@ class Media extends Base {
   photoInfo(height, width, media) {
     /* mediaStore were sorted by date in Node */
     if ((this.allPhotos !== media || this.width !== width) && width) {
-      // debug('photoInfo, height, width, media', height, width, media)
       this.width = width
       this.allPhotos = media
       this.photoDates = []
       this.photoMapDates = []
-      let MaxItem = Math.floor(width / 216) - 1
+      const MAX = Math.floor((width - 60) / 216) - 1
+      let MaxItem = MAX
       let lineIndex = 0
       const dateUnknown = []
       this.allPhotos.forEach((item) => {
@@ -61,7 +61,7 @@ class Media extends Base {
         const formatExifDateTime = formatDate(item[1].metadata.exifDateTime)
         const isRepeat = this.photoDates[this.photoDates.length - 1] === formatExifDateTime
         if (!isRepeat || MaxItem === 0) {
-          MaxItem = Math.floor(width / 216) - 1
+          MaxItem = MAX
           this.photoDates.push(formatExifDateTime)
           this.photoMapDates.push({
             first: !isRepeat,
@@ -83,7 +83,7 @@ class Media extends Base {
         let isRepeat = false
         dateUnknown.forEach((item) => {
           if (MaxItem === 0) {
-            MaxItem = Math.floor(width / 216) - 1
+            MaxItem = MAX
             this.photoDates.push(0)
             this.photoMapDates.push({
               first: !isRepeat,
@@ -112,7 +112,7 @@ class Media extends Base {
     this.rowHeightSum = 0
     this.indexHeightSum = []
     this.photoMapDates.forEach((list) => {
-      const tmp = 216 * Math.ceil(list.photos.length / Math.floor(width / 216)) + !!list.first * 40
+      const tmp = 216 * Math.ceil(list.photos.length / Math.floor((width - 60) / 216)) + !!list.first * 40
       this.allHeight.push(tmp)
       this.rowHeightSum += tmp
       this.indexHeightSum.push(this.rowHeightSum)

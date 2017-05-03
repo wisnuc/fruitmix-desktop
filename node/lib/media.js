@@ -87,17 +87,27 @@ class Worker extends EventEmitter {
           return callback(e)
         }
       })
-    this.requestHandler.pipe(stream).on('finish', () => {
-      fs.rename(tmpPath, dst, (err) => {
-        if (err) {
-          console.log(err)
-          const e1 = new Error('write image error')
-          e1.text = err
-          return callback(e1)
-        }
-        return callback(null, null)
+    this.requestHandler.pipe(stream)
+      .on('error', (error) => {
+        console.log(error)
+        const e1 = new Error('write image error')
+        e1.text = err
+        this.finished = true
+        this.state = 'FINISHED'
+        return callback(e1)
       })
-    }
+      .on('finish', () => {
+        if (this.finished) return null
+        fs.rename(tmpPath, dst, (err) => {
+          if (err) {
+            console.log(err)
+            const e1 = new Error('move image error')
+            e1.text = err
+            return callback(e1)
+          }
+          return callback(null, null)
+        })
+      }
     )
   }
 
@@ -263,13 +273,13 @@ ipcMain.on('mediaHideImage', (event, session) => {
 
 ipcMain.on('createMediaShare', (event, maintainers, viewers, medias, album) => {
   const body = {
-    maintainers: maintainers,
-    viewers: viewers,
+    maintainers,
+    viewers,
     contents: medias,
     album
   }
-    console.log('body:')
-    console.log(body)
+  console.log('body:')
+  console.log(body)
   serverPostAsync('mediaShare', body).then((data) => {
     data = JSON.parse(data)
     console.log('data:')
