@@ -86,19 +86,19 @@ class Worker extends EventEmitter {
           e.status = res.statusCode
           return callback(e)
         }
-
-        try {
-          fs.renameSync(tmpPath, dst)
-          return callback(null, null)
-        } catch (e) {
-          console.log('req GET json parse err')
-          console.log(e)
-          const e1 = new Error('json parse error')
-          e1.code === 'EJSONPARSE'
+      })
+    this.requestHandler.pipe(stream).on('finish', () => {
+      fs.rename(tmpPath, dst, (err) => {
+        if (err) {
+          console.log(err)
+          const e1 = new Error('write image error')
+          e1.text = err
           return callback(e1)
         }
+        return callback(null, null)
       })
-    this.requestHandler.pipe(stream)
+    }
+    )
   }
 
   serverDownloadAsync(endpoint, qs, downloadPath, name) {

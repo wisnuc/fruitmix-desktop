@@ -95,8 +95,19 @@ class NavDrawer extends React.Component {
 
     const { open, onRequestChange, views, nav, navTo } = this.props
     const dense = true
-
+    const account = views.account.ctx.props.apis.account.value()
+    const serial = views.account.ctx.props.selectedDevice.mdev.serial
+    let username
+    if (account) username = account.username
     let primaryColor = views[nav].primaryColor()
+
+    /*
+    console.log('>>>>>>>>>>>>>>>>>>>')
+    console.log(this.props)
+    console.log(views.account.ctx.props.apis.account.value())
+    console.log(views.account.ctx.props.selectedDevice.mdev.serial)
+    console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<')
+    */
 
     return (
 
@@ -117,8 +128,8 @@ class NavDrawer extends React.Component {
             </IconButton>
           </div>
           <div style={{height: 56, marginLeft: 16, marginTop: -8}}>
-            <div style={{fontSize: 16, fontWeight: 500, color: 'rgba(255, 255, 255, 1)'}}>Username</div>
-            <div style={{fontSize: 16, fontWeight: 400, color: 'rgba(255, 255, 255, 0.7)'}}>@Serial</div>
+            <div style={{fontSize: 16, fontWeight: 500, color: 'rgba(255, 255, 255, 1)'}}>{username}</div>
+            <div style={{fontSize: 16, fontWeight: 400, color: 'rgba(255, 255, 255, 0.7)'}}>{serial}</div>
           </div> 
         </div>
 
@@ -151,7 +162,12 @@ class NavDrawer extends React.Component {
         <Divider />
         <div style={{height: 4}} />
 
-        <MenuItem icon={ActionExitToApp} text="退出" dense={true} />
+        <MenuItem
+          icon={ActionExitToApp}
+          text="退出"
+          dense={true}
+          onTouchTap={() => this.props.navToMain('login')}
+        />
 
       </Drawer>
     )
