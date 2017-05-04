@@ -74,13 +74,6 @@ app.on('ready', function() {
   let appDataPath = app.getPath('appData')
   console.log(`appDataPath is ${appDataPath}`)
 
-  if (os.platform() == 'darwin') {
-    console.log('system is osx')
-    let data = app.getPath('downloads')
-    console.log('download path is : ' + data)
-    store.dispatch({type:'CONFIG_SET_DOWNLOAD_PATH',data})
-  }
-
   let configuration = new Configuration(appDataPath)
   configuration.initAsync().asCallback(err => {
     if (err) {
@@ -89,6 +82,13 @@ app.on('ready', function() {
     }
     else {
       initMainWindow()
+      //to fixed
+      if (os.platform() == 'darwin') {
+        console.log('system is osx')
+        let data = app.getPath('downloads')
+        console.log('download path is : ' + data)
+        store.dispatch({type:'CONFIG_SET_DOWNLOAD_PATH',data})
+      }
     }
   })
 

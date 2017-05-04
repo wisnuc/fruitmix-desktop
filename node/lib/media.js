@@ -86,19 +86,29 @@ class Worker extends EventEmitter {
           e.status = res.statusCode
           return callback(e)
         }
-
-        try {
-          fs.renameSync(tmpPath, dst)
-          return callback(null, null)
-        } catch (e) {
-          console.log('req GET json parse err')
-          console.log(e)
-          const e1 = new Error('json parse error')
-          e1.code === 'EJSONPARSE'
-          return callback(e1)
-        }
       })
     this.requestHandler.pipe(stream)
+      .on('error', (error) => {
+        console.log(error)
+        const e1 = new Error('write image error')
+        e1.text = err
+        this.finished = true
+        this.state = 'FINISHED'
+        return callback(e1)
+      })
+      .on('finish', () => {
+        if (this.finished) return null
+        fs.rename(tmpPath, dst, (err) => {
+          if (err) {
+            console.log(err)
+            const e1 = new Error('move image error')
+            e1.text = err
+            return callback(e1)
+          }
+          return callback(null, null)
+        })
+      }
+    )
   }
 
   serverDownloadAsync(endpoint, qs, downloadPath, name) {
@@ -263,13 +273,13 @@ ipcMain.on('mediaHideImage', (event, session) => {
 
 ipcMain.on('createMediaShare', (event, maintainers, viewers, medias, album) => {
   const body = {
-    maintainers: maintainers,
-    viewers: viewers,
+    maintainers,
+    viewers,
     contents: medias,
     album
   }
-    console.log('body:')
-    console.log(body)
+  console.log('body:')
+  console.log(body)
   serverPostAsync('mediaShare', body).then((data) => {
     data = JSON.parse(data)
     console.log('data:')

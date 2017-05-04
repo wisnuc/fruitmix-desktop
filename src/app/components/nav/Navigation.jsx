@@ -383,6 +383,7 @@ class NavViews extends Component {
           views={this.views}
           nav={this.state.nav}
           navTo={this.navTo.bind(this)}
+          navToMain={this.props.nav}
         />
       </div>
     )

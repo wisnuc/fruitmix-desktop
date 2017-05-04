@@ -10,6 +10,7 @@
 
 **version**
 * 2017-04-12
+* 2017-05-03
 
 
 ## Table of Content
@@ -19,28 +20,34 @@
 
 List of apis for Node-Browser communication in fruitmix-desktop
 
-## Main
+## Login
 
-### adapter
+### LOGIN
 
-transmit node state to browser state, including following state:
+When Browser sending this message, Node could get information of current acoount, such as ip address of server, token and so on.
 
-+ config
-+ server
-+ login
-+ login2
-+ setting
-+ media
-+ share
+Parameters:
 
-if the last five state(login, login2, setting, media, share) changed, Node would send a new adapter message.
+device: device info // OBJECT
+  { 
+    boot: [Object],
+    device: [Object],
+    mdev: [Object],
+    storage: [Object],
+    token: [Object],
+    users: [Object]
+   }
+
+user: user info //OBJECT
+  {
+    avatar
+    unixUID
+    username
+    uuid
+  }
 
 ```
-// send message in node/lib/adapter.js
-mainWindow.webContents.send('adapter',adapter())
-
-// receive message in src/app/fruitmix.js
-ipcRenderer.on('adapter', (err, data) => {...}
+ipcRenderer.send('LOGIN', this.props.device, this.props.user)
 ```
 
 ## Window
@@ -81,14 +88,49 @@ ipcRenderer.on('MDNS_UPDATE',(event, session, device)=>{...})
 
 ## Media
 
-### getThumb
+### mediaShowThumb
 
-Get a list of thumbnails. When download successfully, path of thumbnails would be updated to store (window.store.getState().media.date[N].path)
+Get a thumbnail. When download successfully,  message of 'getThumbSuccess' would be return
 
-Parameters: a list of digest (hash) of image
+Parameters: 
+session: uuid of session 
+digest: hash of image
+height: height of thumb
+width: width of thumb
 
 ```
-ipcRenderer.send('getThumb', this.photos.map(item => ({ digest: item.digest })))
+ipcRenderer.send('mediaShowThumb', session, digest, 210, 210)
+```
+
+### mediaSHideThumb
+abort the request of thumbnail.
+
+Parameters: 
+session: uuid of session 
+
+```
+ipcRenderer.send('mediaHideThumb', session)
+```
+### mediaShowImage
+
+Get the detail image. When download successfully,  message of 'donwloadMediaSuccess' would be return
+
+Parameters: 
+session: uuid of session 
+digest: hash of image
+
+```
+ipcRenderer.send('mediaShowImage', session, digest)
+```
+
+### mediaSHideImage
+abort the request of detail image
+
+Parameters: 
+session: uuid of session 
+
+```
+ipcRenderer.send('mediaSHideImage', session)
 ```
 
 ## File
