@@ -27,9 +27,6 @@ import '../assets/css/app.css'
 // required by Material UI
 injectTapEventPlugin()
 
-// global import jQuery
-global.$ = global.jQuery = global.jQuery || require('jquery')
-
 // render method
 const render = () => ReactDom.render(<Main />, document.getElementById('app'))
 
@@ -87,8 +84,12 @@ document.addEventListener('drop', (e) => {
 
 debug('fruitmix app module loaded')
 
-global.$ = global.jQuery = global.jQuery || require('jquery')
 
 // first render
 render()
+
+if (module.hot) {
+  console.log('hot...................')
+  module.hot.accept()
+}
 

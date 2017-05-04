@@ -236,12 +236,24 @@ class FileContent extends Component {
     this.props.listNavBySelect()
   }
 
+  drop(e) {
+    console.log(e.nativeEvent.dataTransfer.files)
+    let files = []
+    for(let item of e.dataTransfer.files) {
+      files.push(item.path)
+    }
+
+    console.log(files)
+
+  }
+
   render() {
 
     let { apis } = this.props
 
     return (
-      <div id='file-content' style={{width: '100%', height: '100%'}}>
+      <div id='file-content' style={{width: '100%', height: '100%'}} onDrop={this.drop.bind(this)}>
+      1
         <div style={{width: '100%', height: 8}} />
         <div style={{width: '100%', height: 40}}>This is header</div>
         <div style={{width: '100%', height: 'calc(100% - 48px)'}}>

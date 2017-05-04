@@ -47,7 +47,6 @@
     "gsap": "^1.19.0",
     "html-webpack-plugin": "^2.22.0",
     "immutable": "^3.8.1",
-    "jquery": "^3.1.0",
     "keypress.js": "^2.1.0-1",
     "load-grunt-tasks": "^3.5.2",
     "material-ui": "^0.16.0",

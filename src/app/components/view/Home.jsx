@@ -255,7 +255,7 @@ class Home extends Base {
   }
 
   renderContent() {
-
+    console.log(this)
     return (
       <div style={{position: 'relative', width: '100%', height: '100%'}}>
         <FileContent 
