@@ -31,11 +31,12 @@ export default class NoUsageDisk extends React.Component {
     }
   }
   render() {
-    debug('NoUsageDisk Render')
+    // debug('NoUsageDisk Render', this.props)
     const accent1Color = this.props.that.colors.accent
     const { disk, state, setState, that, zDepth, ...rest } = this.props
+    const isUSB = (disk.idBus === 'usb')
     const cnv = this.props.state.creatingNewVolume
-    const uf = this.props.that.diskUnformattable(disk).length > 0
+    const uf = this.props.that.diskUnformattable(disk).length > 0 || isUSB
     const expandableHeight = this.state.expanded ?
       36 + SUBTITLE_HEIGHT + SUBTITLE_MARGINTOP : 0
     const ExpandedzDepth = this.state.expanded ? 2 : zDepth
@@ -83,7 +84,7 @@ export default class NoUsageDisk extends React.Component {
           style={{
             marginLeft: 80,
             width: 1040,
-            backgroundColor: cnv ? accent1Color : '' }}
+            backgroundColor: cnv ? isUSB ? 'rgb(224, 224, 224)' : accent1Color : '' }}
         />
         <div
           style={{ width: '100%',
@@ -97,10 +98,10 @@ export default class NoUsageDisk extends React.Component {
           <div
             style={{
               fontSize: 14,
-              color: (disk.isActiveSwap || disk.isRootFS) ? 'rgba(0,0,0,0.87)' : accent1Color
+              color: (disk.isActiveSwap || disk.isRootFS || isUSB) ? 'rgba(0,0,0,0.87)' : accent1Color
             }}
           >
-            { cnv && '选择该磁盘加入新的磁盘阵列，会摧毁该磁盘上的所有数据。' }
+            { cnv ? isUSB ? '目前不支持USB设备加入磁盘阵列。' : '选择该磁盘加入新的磁盘阵列，会摧毁该磁盘上的所有数据。' : ''}
           </div>
         </div>
       </Paper>

@@ -40,6 +40,20 @@ class Maintenance extends StateUp(React.Component) {
     this.unmounted = false
 
     this.reloadBootStorage = (callback) => {
+      let done = false
+      this.props.selectedDevice.refreshSystemState(() => {
+        debug('this, in', this, this.props.selectedDevice)
+        this.setState({
+          storage: this.props.selectedDevice.storage.value(),
+          boot: this.props.selectedDevice.boot.value(),
+          creatingNewVolume: this.state.creatingNewVolume ? { disks: [], mode: 'single' } : null
+        })
+        if (callback) callback(null, { storage, boot })
+        done = true
+      })
+      debug('this, out', this)
+      return null
+        /*
       let storage
       let boot
       let done = false
@@ -83,6 +97,7 @@ class Maintenance extends StateUp(React.Component) {
           boot = err ? err.message : res.body
           finish()
         })
+        */
     }
 
     // //////////////////////////////////////////////////////////////////////////
@@ -173,7 +188,7 @@ class Maintenance extends StateUp(React.Component) {
   }
 
   componentDidMount() {
-    // this.reloadBootStorage()
+    this.reloadBootStorage()
   }
 
   componentWillUnmount() {
@@ -181,13 +196,10 @@ class Maintenance extends StateUp(React.Component) {
   }
 
   renderBootStatus() {
-
-    // let data = window.store.getState().maintenance.device
     let data = this.props.selectedDevice.mdev
 
     const TextMaintence = `该设备已正常启动，此界面仅用于浏览。
       设备的ip为 ${data.address}，model为 ${data.model}，serial为 ${data.serial}`
-    // debug("data = window.store.getState().maintenance = ", data);
     return (
       <this.TextButtonTop
         text={this.state.boot.state !== 'maintenance' ? TextMaintence : ''}
@@ -197,7 +209,8 @@ class Maintenance extends StateUp(React.Component) {
   }
 
   render() {
-    debug('render Maintenance', this.state)
+    debug('render Maintenance', this.state, this.props)
+
     const cnv = !!this.state.creatingNewVolume
 
     if (typeof this.state.boot !== 'object' || typeof this.state.storage !== 'object') return <div />
@@ -224,15 +237,22 @@ class Maintenance extends StateUp(React.Component) {
 
             {/* top panel selector */}
             <div style={{ width: 1200, height: cnv ? 136 - 48 - 16 : 48, transition: 'height 300ms' }}>
-              { cnv ? <NewVolumeTop state={this.state} setState={this.ssb} that={this} /> : this.renderBootStatus()}
+              { cnv ? <NewVolumeTop state={this.state} setState={this.ssb} that={this} device={this.props.selectedDevice} nav={this.props.nav} /> : this.renderBootStatus()}
             </div>
 
             {
               typeof this.state.boot === 'object' && typeof this.state.storage === 'object' &&
                 this.state.storage.volumes.map((vol, index) =>
                   <BtrfsVolume
-                    state={this.state} setState={this.ssb} that={this} key={index.toString()}
-                    style={this.cardStyle(vol)} volume={vol} zDepth={this.cardDepth(vol)}
+                    state={this.state}
+                    setState={this.ssb}
+                    that={this}
+                    key={index.toString()}
+                    style={this.cardStyle(vol)}
+                    volume={vol}
+                    zDepth={this.cardDepth(vol)}
+                    device={this.props.selectedDevice}
+                    nav={this.props.nav}
                   />)
             }
 

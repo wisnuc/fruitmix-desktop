@@ -39,7 +39,7 @@ export default class BtrfsVolume extends React.Component {
       expanded: false,
       initVolume: undefined,
       dialog: undefined,
-      pureDialog: undefined
+      pureDialog: false
     }
 
     this.toggleExpanded = () => {
@@ -165,8 +165,8 @@ export default class BtrfsVolume extends React.Component {
   }
 
   render() {
-    debug('BtrfsVolume render! ')
-    const { volume, state, setState, zDepth, that, ...rest } = this.props
+    // debug('BtrfsVolume render! ')
+    const { volume, state, setState, zDepth, that, nav, device, ...rest } = this.props
     const accent1Color = this.props.that.colors.accent
     const { blocks } = this.props.state.storage
     const cnv = !!this.props.state.creatingNewVolume
@@ -382,19 +382,22 @@ export default class BtrfsVolume extends React.Component {
                 <FlatButton
                   label={
                     typeof volume.wisnuc === 'object'
-                      ? [[volume.wisnuc.error === 'ENOWISNUC' ? '安装' : '重新安装']]
+                      ? [[volume.wisnuc.status === 'ENOENT' ? '安装' : '重新安装']]
                       : [['修复问题']] // TODO
                   }
                   primary
                   onTouchTap={() => this.initWisnucOnVolume(volume)}
                 />
             }
+            { /* debug('volume, 安装', volume) */ }
           </div>
         </div> }
         <InitVolumeDialogs
           volume={this.state.initVolume}
           onRequestClose={() => this.setState({ initVolume: undefined })}
           onResponse={() => this.props.that.reloadBootStorage()}
+          device={this.props.device}
+          nav={this.props.nav}
         />
         <Operation substate={this.state.dialog} />
         <PureDialog

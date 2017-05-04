@@ -47,6 +47,9 @@ class Device extends RequestManager {
       clearRequest: this.clearRequest.bind(this),
       initWizard: this.initWizard.bind(this),
       systemStatus: this.systemStatus.bind(this),
+      mkFileSystem: this.mkFileSystem.bind(this),
+      reInstall: this.reInstall.bind(this),
+      refreshSystemState: this.refreshSystemState.bind(this)
     }
   }
 
@@ -207,12 +210,77 @@ class Device extends RequestManager {
     console.log('device initWizard: users refreshed')
 
     await this.requestAsync('token', { uuid: user.uuid, password })
-    console.log('device initWizard: token retrieved')
+     console.log('device initWizard: token retrieved')
+  }
+
+  async mkfsAsync(args) {
+    let { type, target, mode } = args
+
+    let uuid = await this.requestAsync('mkfs', { type, target, mode })
+    console.log('device initWizard:  mkfs returns uuid', uuid)
+
+    await this.requestAsync('storage', null)
+    console.log('device initWizard: storage refreshed')
+  }
+
+  async reInstallAsync(args) {
+    console.log('start reInstall')
+    console.log(args)
+
+    let { target, username, password, remove } = args
+
+    console.log('target, username, password, remove')
+    console.log(target, username, password, remove)
+    let install = true
+    let reinstall = false
+    if (remove === 'wisnuc') reinstall = true // FIXME
+    await this.requestAsync('install', { target, username, password, install })
+    console.log('device initWizard: install fruitmix success')
+
+    while (true) {
+      await Promise.delay(1000)
+      await this.requestAsync('boot', null)
+
+      let fruitmix = this.boot.value().fruitmix
+      if (fruitmix) {
+        if (fruitmix.state === 'started') {
+
+          // this may be due to worker not started yet
+          await Promise.delay(2000)
+
+          console.log('device initWizard: fruitmix started')
+          break
+        }
+        if (fruitmix.state === 'exited') {
+          return console.log('device initWizard: fruitmix exited (unexpected), stop')
+        }
+        console.log('device initWizard: fruitmix starting, waiting...')
+      }
+      else 
+        console.log('device initWizard: fruitmix is null, legal ???') // NO!!!
+    }
+
+    await this.requestAsync('firstUser', { username, password })
+
+    let user = this.firstUser.value()
+    console.log('device initWizard: first user created')
+
+    await this.requestAsync('users', null) 
+    console.log('device initWizard: users refreshed')
+
   }
 
   initWizard(args) {
     this.initWizardAsync(args).asCallback(() => {})
-  } 
+  }
+
+  mkFileSystem(args) {
+    this.mkfsAsync(args).asCallback(() => {})
+  }
+
+  reInstall(args) {
+    this.reInstallAsync(args).asCallback(() => {})
+  }
 
   // probing -> message + progress
   // systemError -> message
@@ -257,7 +325,7 @@ class Device extends RequestManager {
           
           let { blocks, volumes } = this.storage.value()
 
-          // TODO new boot not compatible with old one
+           // TODO new boot not compatible with old one
 /**
           if (volumes.length === 0) { // no existing btrfs volume
 
@@ -265,7 +333,7 @@ class Device extends RequestManager {
             let noFruitmix = 
               blocks
                 .filter(blk => blk.isFileSystem && blk.isMounted)
-                .every(blk => typeof blk.wisnuc === 'object' && blk.wisnuc !== null && blk.wisnuc.status === 'ENOENT')
+                 .every(blk => typeof blk.wisnuc === 'object' && blk.wisnuc !== null && blk.wisnuc.status === 'ENOENT')
 
             if (noFruitmix && this.boot.lastFileSystem === null)
               return 'uninitialized'

@@ -1,7 +1,10 @@
 import React from 'react'
+import Debug from 'debug'
 import Popover, { PopoverAnimationVertical } from 'material-ui/Popover'
 import { pinkA200 } from 'material-ui/styles/colors'
 import { ReportProblem } from './Svg'
+
+const debug = Debug('component:maintenance:VolumeWisnucError')
 
 /** **
 
@@ -44,6 +47,7 @@ export default class VolumeWisnucError extends React.Component {
   }
 
   render() {
+    debug('VolumeWisnucError', this.props)
     const VolumeisMissing = this.props.volume.isMissing
     if (VolumeisMissing) {
       return (
@@ -68,12 +72,13 @@ export default class VolumeWisnucError extends React.Component {
         return <div>WISNUC已安装但尚未创建用户。</div>
       }
       return (<div />)
-    } else if (status === 'NOTFOUND') {
+    } else if (status === 'ENOENT') {
       // debug("status",status)
       // debug("error",error)
-      let text = ''
+      let text = 'WISNUC未安装'
+        /*
       switch (error) {
-        case 'ENOWISNUC' :
+        case 'ENOENT' :
           text = 'WISNUC未安装'; break
         case 'EWISNUCNOTDIR':
           text = 'WISNUC未安装,wisnuc路径存在但不是文件夹'; break
@@ -82,7 +87,7 @@ export default class VolumeWisnucError extends React.Component {
         case 'EFRUITMIXNOTDIR':
           text = 'WISNUC未正确安装,wisnuc/fruitmix不是文件夹'; break
       }
-      // debug("text",text)
+      */
       return (
         <div style={{ display: 'flex' }}>
           <ReportProblemIcon color={this.props.creatingNewVolume === null ? pinkA200 : 'rgba(0,0,0,0.38)'} />

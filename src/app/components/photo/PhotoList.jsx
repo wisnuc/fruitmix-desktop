@@ -25,6 +25,8 @@ class PhotoList extends Component {
       hover: false
     }
 
+    this.firstScroll = true
+
     this.onRowTouchTap = (e, index) => {
       e.preventDefault()  // important!
       e.stopPropagation()
@@ -43,6 +45,11 @@ class PhotoList extends Component {
       const currentIndex = this.indexHeightSum.findIndex(data => data > list.scrollTop + 200)
       const percentage = list.scrollTop / this.maxScrollTop
       this.date = this.photoMapDates[currentIndex].date
+      debug('this.timeline', this.timeline)
+      if (this.firstScroll) {
+        this.firstScroll = false
+        this.forceUpdate()
+      }
 
       if (this.refDateBar) {
         /* convert percentage to styleTop */
@@ -133,7 +140,7 @@ class PhotoList extends Component {
   }
 
   render() {
-    // debug('render PhotoList, this.props', this.props, this.state)
+    debug('render PhotoList, this.props', this.props, this.state)
     document.body.onmousemove = this.onMouseMove
     document.body.onmouseup = () => (this.onMouseDown = false)
     return (
