@@ -252,7 +252,7 @@ class Device extends RequestManager {
   }
 
   manualBoot(args) {
-    this.manualBoot(args).asCallback(() => {})
+    this.manualBootAsync(args).asCallback(() => {})
   }
 
   // probing -> message + progress
