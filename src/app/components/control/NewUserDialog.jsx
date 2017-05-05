@@ -83,6 +83,7 @@ class NewUserDialog extends PureComponent {
             style={{flexGrow: 1}}
             fullWidth={true} 
             hintText="输入密码" 
+            type="password"
             onChange={e => this.updatePassword(e.target.value)} 
           />
         </div>
@@ -92,6 +93,7 @@ class NewUserDialog extends PureComponent {
           <TextField 
             fullWidth={true} 
             hintText="再次输入密码" 
+            type="password"
             onChange={e => this.updatePasswordAgain(e.target.value)} 
           />
         </div>
