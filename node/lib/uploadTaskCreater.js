@@ -14,8 +14,9 @@ import { getMainWindow } from './window'
 import utils from './util'
 import { userTasks, finishTasks} from './newUpload'
 
+let ip
 let server
-let user
+let tokenObj
 let httpRequestConcurrency = 4
 let fileHashConcurrency = 6
 let visitConcurrency = 2
@@ -29,7 +30,6 @@ const hashlessQueue = []
 const visitlessQueue = []
 const visitingQueue = []
 
-// ipcMain.on('getTransmission')
 //sendMessage
 const sendMessage = () => {
 	let shouldSend = false
@@ -59,11 +59,11 @@ const sendMsg = () => {
   	finishTasks.map(i => i.getSummary?i.getSummary():i))
 }
 
-const createTask = (abspath, target, type, newWork, u, r, rootUUID) => {
+const createTask = (abspath, target, type, newWork, u, r, rootNodeUUID, rUUID) => {
 	initArgs()
 	let taskUUID = u?u:uuid.v4()
 	let uploadRecord = r?r:[]
-	let task = new TaskManager(taskUUID, abspath, target, type, newWork, uploadRecord, rootUUID)
+	let task = new TaskManager(taskUUID, abspath, target, type, newWork, uploadRecord, rootNodeUUID, rUUID)
 	task.createStore()
 	userTasks.push(task)
 	task.readyToVisit()
@@ -82,14 +82,15 @@ const createTask = (abspath, target, type, newWork, u, r, rootUUID) => {
 	schedule(): schedule work list
 */
 class TaskManager {
-	constructor(uuid, abspath, target, type, newWork, uploadRecord, rootUUID) {
+	constructor(uuid, abspath, target, type, newWork, uploadRecord, rootNodeUUID, rUUID) {
 		this.uuid = uuid
 		this.abspath = abspath
 		this.target = target
 		this.type = type
 		this.name = path.basename(abspath)
 		this.newWork = newWork
-		this.rootUUID = rootUUID? rootUUID: ''
+		this.rootNodeUUID = rootNodeUUID? rootNodeUUID: ''
+		this.rUUID = rUUID
 		
 		this.size = 0//not need rootsize for visit 
 		this.completeSize = 0
@@ -183,26 +184,26 @@ class TaskManager {
 			if (this.type === 'file') {
 				this.recordInfor('文件上传任务，继续上传文件')
 				this.schedule()
-			}else if (this.rootUUID) {
+			}else if (this.rootNodeUUID) {
 				this.recordInfor('文件夹上传任务，查找已上传文件信息')
 				let serverFileTree = []
 				let options = {
 					method: 'GET',
 					url: server + '/files/' + this.target,
 					headers: {
-						Authorization: user.type + ' ' + user.token
+						Authorization: tokenObj.type + ' ' + tokenObj.token
 					}
 				}
 				request(options, (err, data) => {
 					if (err) return this.recordInfor('上传目标目录不存在',err)
 					data = JSON.parse(data.body)
-					let index = data.findIndex(item => item.uuid === this.rootUUID)
+					let index = data.findIndex(item => item.uuid === this.rootNodeUUID)
 					if (index === -1) {
 						this.recordInfor('已上传根目录被移除 重新上传')
 						this.schedule()
 					}else {
 						this.recordInfor('已上传根目录存在')
-						visitServerFiles(this.rootUUID, this.name, this.type, serverFileTree, (err, data) => {
+						visitServerFiles(this.rootNodeUUID, this.name, this.type, serverFileTree, (err, data) => {
 							if (err) return this.recordInfor('校验已上传文件出错')
 							else {
 								this.recordInfor('校验已上传文件完成')
@@ -233,16 +234,16 @@ class TaskManager {
 	async checkNameExist() {
 		let _this = this
 		try{
-			let list = await serverGetAsync('files/' + this.target)
+			let list = await serverGetAsync('files/fruitmix/list/' + this.target + '/' + this.rUUID)
 			let name = _this.tree[0].name
 			let times = 1
 					
 			while(list.findIndex(item => item.name === name) !== -1) {
 				times++
 				let arr = _this.tree[0].name.split('.')
-				if (arr.length  == 1 ) name = arr[0] + '(' + times + ')'
+				if (arr.length  == 1 ) name = arr[0] + '[' + times + ']'
 				else {
-					arr[arr.length-2] += '(' + times + ')'
+					arr[arr.length-2] += '[' + times + ']'
 					name = arr.join('.')
 				}
 			}
@@ -357,7 +358,8 @@ class TaskManager {
 			type: this.type,
 			uploading: uploadArr,
 			finishDate: this.finishDate,
-			rootUUID: this.rootUUID
+			rootNodeUUID: this.rootNodeUUID,
+			rUUID: this.rUUID
 		}
 	}
 
@@ -371,14 +373,15 @@ class TaskManager {
 	updateStore() {
 		let uploadArr = []
 		this.uploading.forEach(item => {
-			if (item.type == 'file') {
-				uploadArr.push(item.getSummary())
-			}
+			if (item.type == 'file') uploadArr.push(item.getSummary())	
 		})
 
-		db.uploading.update({_id: this.uuid}, {$set: {name:this.name, uploading:uploadArr, rootUUID:this.rootUUID}}, (err, data) => {
-			// console.log(data)
-		})
+		db.uploading.update({_id: this.uuid}, 
+			{$set: {
+				name:this.name, 
+				uploading:uploadArr,
+				rootNodeUUID:this.rootNodeUUID
+			}}, (err, data) => {})
 	}
 
 	finishStore() {
@@ -388,7 +391,6 @@ class TaskManager {
 
 		db.uploaded.insert(this.getStoreObj(), (err, data) => {
 			if (err) return console.log(err) 
-			console.log(data)
 		})
 	}
 }
@@ -430,7 +432,7 @@ const visitServerFiles = (uuid, name, type, position, callback) => {
 		method: 'GET',
 		url: server + '/files/' + uuid,
 		headers: {
-			Authorization: user.type + ' ' + user.token
+			Authorization: tokenObj.type + ' ' + tokenObj.token
 		}
 	}
 
@@ -506,7 +508,7 @@ class UploadTask {
 		this.stateName = 'finish'
 		if (this === this.manager.tree[0]) {
 			console.log('根节点上传完成')
-			this.manager.rootUUID = this.uuid
+			this.manager.rootNodeUUID = this.uuid
 		}
 		manager.uploading.splice(manager.uploading.indexOf(this), 1)
 		manager.finishCount++
@@ -542,7 +544,9 @@ class FileUploadTask extends UploadTask{
 			name: this.name,
 			target: this.target,
 			abspath: this.abspath,
-			seek: this.seek
+			taskid: this.taskid,
+			seek: this.seek,
+			parts: this.parts
 		}
 	}
 
@@ -633,7 +637,7 @@ class createFolderSTM extends STM {
       url:server+'/files/'+this.wrapper.target,
       method:'post',
       headers: {
-        Authorization: user.type+' '+user.token,
+        Authorization: tokenObj.type + ' ' + tokenObj.token,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -703,7 +707,7 @@ class UploadFileSTM extends STM {
     let options = {
       url: server + '/files/' + this.wrapper.target,
       method: 'post',
-      headers: { Authorization: user.type + ' ' + user.token },
+      headers: { Authorization: tokenObj.type + ' ' + tokenObj.token },
       formData: { 'sha256' : this.wrapper.sha,'file' : tempStream }
     }
     this.handle = request(options, (err, res, body) => {
@@ -721,17 +725,18 @@ class UploadFileSTM extends STM {
 	}
 
 	createUploadTask() {
+		let _this = this
 		let options = {
       url: server+'/filemap/' + this.wrapper.target,
       method:'post',
       headers: {
-       	Authorization: user.type + ' ' + user.token,
+       	Authorization: tokenObj.type + ' ' + tokenObj.token,
        	'Content-Type': 'application/json'
      	},
      	body: JSON.stringify({
        	filename :this.wrapper.name,
        	size: this.wrapper.size,
-       	segmentsize: this.segmentsize,
+       	segmentsize: this.wrapper.segmentsize,
        	sha256: this.wrapper.sha
       })
     }
@@ -739,84 +744,93 @@ class UploadFileSTM extends STM {
     request(options, (err,res, body) => {
     	if (err || res.statusCode !== 200) {
     		this.wrapper.recordInfor('创建上传任务失败，缺少对应API，上传整个文件')
-    		this.uploadWholeFile()
+    		console.log(err, res)
     		return
+    		this.uploadWholeFile()
+    	}else {
+    		let b = JSON.parse(body)
+    		console.log('上传任务创建成功', b)
+	    	_this.wrapper.taskid = b.taskid
+	    	this.uploadSegment()	
     	}
-    	let b = JSON.parse(body)
-    	obj.taskid = b.taskid
-    	this.uploadSegment()
+    	
     })
 	}
 
 	uploadSegment() {
 		let wrapper = this.wrapper
+		let seek = wrapper.seek
 		console.log('开始上传第' + wrapper.seek + '块')
 		console.log('----------------------------------------------')
 		var url = server + 
 				'/filemap/?' + wrapper.target + 
-				'/segmenthash=' + wrapper.parts[s].sha + 
-				'&start=' + s + 
-				'&taskid=' + obj.taskid
-				
-		var stream = fs.createReadStream(obj.absPath, {start:wrapper.parts[s].start, end: wrapper.parts[s].end,autoClose:true})
+				'/segmenthash=' + wrapper.parts[seek].sha + 
+				'&start=' + seek + 
+				'&taskid=' + this.wrapper.taskid
+		var stream = fs.createReadStream(wrapper.abspath, {start:wrapper.parts[seek].start, end: wrapper.parts[seek].end,autoClose:true})
 		stream.on('error', err => {
-			console.log('第' + s +'块 ' + 'stream: '+ err)
+			console.log('第' + seek +'块 ' + 'stream: '+ err)
 		})
 		stream.on('open',() => {
-			console.log('第' + s +'块 ' + 'stream: open')
+			console.log('第' + seek +'块 ' + 'stream: open')
 		})
 		stream.on('close',() => {
-			console.log('第' + s +'块 ' + 'stream: close')
+			console.log('第' + seek +'块 ' + 'stream: close')
 		})
 
 		stream.on('end',() => {
-			console.log('第' + s +'块 ' + 'stream: end')
+			console.log('第' + seek +'块 ' + 'stream: end')
 		})
 
 		var options = {
-			host: server.split(':')[0],
-			port: server.split(':')[1],
+			host: ip,
+			port: 3721,
 			headers: {
-				Authorization: user.type + ' ' + user.token,
+				Authorization: tokenObj.type + ' ' + tokenObj.token,
 			},
 			method: 'PUT',
 			path: encodeURI('/filemap/' + wrapper.target +'?filename=' + wrapper.name + 
-				'&segmenthash=' + wrapper.parts[s].sha + 
-				'&start=' + s + 
+				'&segmenthash=' + wrapper.parts[seek].sha + 
+				'&start=' + seek + 
 				'&taskid=' + wrapper.taskid 
 			)
 		}
 
 		this.handle = http.request(options).on('error',(err) => {
-			console.log('第' + s +'块 ' + 'req : err')
+			console.log('第' + seek +'块 ' + 'req : err')
 			console.log(err)
 		}).on('response',(res) => {
-			console.log('第' + s +'块 ' + 'req : response')
+			console.log('第' + seek +'块 ' + 'req : response')
 			console.log(res.statusCode)
 			if(res.statusCode == 200) {
+				if (this.wrapper.seek + 1 == this.wrapper.parts.length) console.log(res)
 				return this.partUploadFinish()
 			}
 		}).on('abort', () => {
-			console.log('第' + s +'块 ' + 'req : abort')
+			console.log('第' + seek +'块 ' + 'req : abort')
 		}).on('aborted', () => {
-			console.log('第' + s +'块 ' + 'req : aborted')
+			console.log('第' + seek +'块 ' + 'req : aborted')
 		}).on('connect', () => {
-			console.log('第' + s +'块 ' + 'req : connect')
+			console.log('第' + seek +'块 ' + 'req : connect')
 		}).on('socket', () => {
-			console.log('第' + s +'块 ' + 'req : socket')
+			console.log('第' + seek +'块 ' + 'req : socket')
 		}).on('upgrade', () => {
-			console.log('第' + s +'块 ' + 'req : upgrade')
+			console.log('第' + seek +'块 ' + 'req : upgrade')
 		}).on('pipe', () => {
-			console.log('第' + s +'块 ' + 'req : pipe')
+			console.log('第' + seek +'块 ' + 'req : pipe')
 		})
 
-		stream.pipe(req)
+		stream.pipe(this.handle)
 	}
 
 	partUploadFinish() {
-		wrapper.seek++
-		if (wrapper.seek == wrapper.parts.length) {
+		this.wrapper.seek++
+		if (this.wrapper.seek == this.wrapper.parts.length) {
 			console.log('所有块已经上传完成')
+			removeOutOfRunningQueue(this)
+			return this.wrapper.uploadFinish()
+		}else {
+			this.uploadSegment()
 		}
 	}
 
@@ -844,8 +858,10 @@ class UploadFileSTM extends STM {
 }
 
 const initArgs = () => {
-  server = 'http://' + store.getState().config.ip + ':3721'
-  user = store.getState().login.obj
+	ip = store.getState().login2.device.mdev.address
+  server = 'http://' + store.getState().login2.device.mdev.address + ':3721'
+  tokenObj = store.getState().login2.device.token.data
+  // user = store.getState().login2.user.obj
 }
 
 const scheduleHttpRequest = () => {

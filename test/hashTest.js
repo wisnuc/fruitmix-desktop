@@ -78,7 +78,7 @@ function createTask() {
 	console.log('创建任务')
 	console.log('----------------------------------------------')
 	let options = {
-      	url:'http://192.168.5.180:3721'+'/filemap/21f696c2-3d40-44a3-b224-28204ef88675',
+      	url:'http://192.168.5.107:3721'+'/filemap/21f696c2-3d40-44a3-b224-28204ef88675',
       	method:'post',
       	headers: {
         	Authorization: 'JWT ' + token,
@@ -114,11 +114,6 @@ function upload(obj, callback) {
 	console.log('----------------------------------------------')
 	if (obj.seek == obj.parts.length) return callback(null)
 	let s = obj.seek
-	var url = 'http://192.168.5.180:3721' + 
-			'/filemap/123?' + 
-			'segmenthash=' + obj.parts[s].sha + 
-			'&start=' + s + 
-			'&taskid=' + obj.taskid
 			
 	var stream = fs.createReadStream(obj.absPath, {start:obj.parts[s].start, end: obj.parts[s].end,autoClose:true})
 	stream.on('error', err => {
@@ -136,7 +131,7 @@ function upload(obj, callback) {
 	})
 
 	var options = {
-		host: '192.168.5.180',
+		host: '192.168.5.107',
 		port: 3721,
 		headers: {
 			Authorization: 'JWT ' + token

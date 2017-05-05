@@ -134,6 +134,7 @@ class NavViews extends Component {
   }
 
   updateTransmission(e, type, userTasks, finishTasks) {
+    return
     console.log(e, userTasks, finishTasks)
     window.store.dispatch({ type, userTasks, finishTasks })
   }

@@ -88,8 +88,3 @@ debug('fruitmix app module loaded')
 // first render
 render()
 
-if (module.hot) {
-  console.log('hot...................')
-  module.hot.accept()
-}
-

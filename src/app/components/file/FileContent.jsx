@@ -13,6 +13,7 @@ import FileFolder from 'material-ui/svg-icons/file/folder'
 
 import { List, AutoSizer } from 'react-virtualized'
 import ListSelect from './ListSelect'
+import { command } from '../../lib/command'
 
 const formatTime = mtime => {
 
@@ -237,14 +238,11 @@ class FileContent extends Component {
   }
 
   drop(e) {
-    console.log(e.nativeEvent.dataTransfer.files)
     let files = []
-    for(let item of e.dataTransfer.files) {
-      files.push(item.path)
-    }
-
-    console.log(files)
-
+    for(let item of e.dataTransfer.files) files.push(item.path)
+    let dir = this.props.home.path
+    let rUUID = this.props.home.path[0].uuid
+    command('fileapp','DRAG_FILE',{files,dirUUID:dir[dir.length - 1].uuid, rUUID})
   }
 
   render() {
@@ -253,7 +251,6 @@ class FileContent extends Component {
 
     return (
       <div id='file-content' style={{width: '100%', height: '100%'}} onDrop={this.drop.bind(this)}>
-      1
         <div style={{width: '100%', height: 8}} />
         <div style={{width: '100%', height: 40}}>This is header</div>
         <div style={{width: '100%', height: 'calc(100% - 48px)'}}>

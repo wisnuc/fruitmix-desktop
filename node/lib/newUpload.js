@@ -41,6 +41,7 @@ const uploadHandle = (args, callback) => {
 }
 
 const dragFileHandle = (args) => {
+  // console.log(args)
 	if (!args.files.length) return
   let index = 0
   let loop = () => {
@@ -53,7 +54,7 @@ const dragFileHandle = (args) => {
       }
       if (stat.isDirectory()) type='folder'
       else type = 'file'
-      createTask(filePath, args.dirUUID, type, true)
+      createTask(filePath, args.dirUUID, type, true, null, null, null, args.rUUID)
       index++
       if (index == args.files.length) return getMainWindow().webContents.send('message', args.files.length + '个任务添加至上传队列')
       loop()
@@ -73,7 +74,7 @@ const getTransmissionHandle = () => {
   db.uploading.find({}, (err, tasks) => {
     if (err) return
     tasks.forEach(item => {
-      createTask(item.abspath, item.target, item.type, false, item._id, item.uploading, item.rootUUID)
+      createTask(item.abspath, item.target, item.type, false, item._id, item.uploading, item.rootUUID, item.rUUID)
     })
   })
 	// db.uploading   to fixed

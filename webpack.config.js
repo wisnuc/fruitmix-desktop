@@ -24,7 +24,7 @@ module.exports = {
   },
   devtool: 'eval-source-map',
   entry: [
-//     'webpack/hot/poll?1000',
+    'webpack/hot/poll?1000',
     './src/app/app.js'
   ],
 
