@@ -39,7 +39,8 @@ export default class BtrfsVolume extends React.Component {
       expanded: false,
       initVolume: undefined,
       dialog: undefined,
-      pureDialog: false
+      pureDialog: false,
+      boot: false
     }
 
     this.toggleExpanded = () => {
@@ -54,18 +55,18 @@ export default class BtrfsVolume extends React.Component {
 
     this.volumeIconColor = (volume) => {
       if (this.props.state.creatingNewVolume) return this.colors.fillGreyFaded
-      return this.colors.fillGrey
+      // return this.colors.fillGrey
       // TODO
       if (volume.isMissing) return redA200
       if (typeof volume.wisnuc !== 'object') return '#000'
       switch (volume.wisnuc.status) {
         case 'READY':
           return lightGreen400
-        case 'NOTFOUND':
+        case 'ENOENT':
           return red400
-        case 'AMBIGUOUS':
+        case 'EDATA':
           return red400
-        case 'DAMAGED':
+        case 'EFAIL':
           return red400
       }
       return '#000'
@@ -128,39 +129,7 @@ export default class BtrfsVolume extends React.Component {
       this.createOperation(operationTextConfirm, text, () => {
         this.state.dialog.setState(operationBusy)
         this.props.device.manualBoot({ target: volume.fileSystemUUID }) // FIXME
-        this.props.that.reloadBootStorage(() => {
-          for (let i = 3; i >= 0; i--) {
-            const time = (3 - i) * 1000
-            setTimeout(() => { this.state.dialog.setState(operationSuccess, [`启动成功，系统将在${i}秒钟后跳转到登录页面`]) }, time)
-          }
-          setTimeout(() => { this.props.nav('login') }, 4000)
-        })
       })
-
-      /*
-      this.createOperation(operationTextConfirm, text, () => {
-        this.state.dialog.setState(operationBusy)
-        request
-          .post(url)
-          .set('Accept', 'application/json')
-          .send({ target: volume.fileSystemUUID })
-          .end((err, res) => {
-            if (err) {
-              this.props.that.reloadBootStorage(() => {
-                this.state.dialog.setState(operationFailed, this.errorText(err, res))
-              })
-            } else {
-              this.props.that.reloadBootStorage(() => {
-                for (let i = 3; i >= 0; i--) {
-                  const time = (3 - i) * 1000
-                  setTimeout(() => { this.state.dialog.setState(operationSuccess, [`启动成功，系统将在${i}秒钟后跳转到登录页面`]) }, time)
-                }
-                setTimeout(() => { window.store.dispatch({ type: 'EXIT_MAINTENANCE' }) }, 4000)
-              })
-            }
-          })
-      })
-      */
     }
 
     this.initWisnucOnVolume = (volume) => {
@@ -171,6 +140,59 @@ export default class BtrfsVolume extends React.Component {
       }
       this.setState({ initVolume: volume })
     }
+    this.end = () => {
+      this.setState({ boot: false, pureDialog: false })
+      const bootState = this.props.device.boot.value().fruitmix.state
+      if (bootState === 'started') {
+        this.props.that.reloadBootStorage(() => {
+          this.props.nav('login')
+        })
+      }
+    }
+  }
+
+  finishedInfo() {
+    const { boot } = this.props.device
+    if (!boot || boot.isPending()
+      || (boot.isFulfilled() && boot.value().fruitmix === null)
+      || (boot.isFulfilled() && boot.value().fruitmix
+        && boot.value().fruitmix.state === 'starting')) {
+      return ['busy', '启动应用']
+    } else if (boot.isRejected()
+      || (boot.isFulfilled() && boot.value().fruitmix
+        && boot.value().fruitmix.state === 'exited')) {
+      return ['error', '启动应用失败']
+    }
+    return ['success', '成功']
+  }
+
+  renderFinished() {
+    if (!this.state.boot) return null
+
+    const info = this.finishedInfo()
+
+    return (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }} >
+        <div style={{ flex: '0 0 48px' }}>
+          { info[0] === 'busy' && <CircularProgress /> }
+        </div>
+        <div
+          style={{ flex: '0 0 64px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 24,
+            color: 'rgba(0,0,0,0.54)' }}
+        >
+          { info[1] }
+        </div>
+        <div style={{ flex: '0 0 48px' }}>
+          { info[0] === 'success'
+            ? <FlatButton label="进入系统" onTouchTap={this.end} />
+            : <FlatButton label="退出" onTouchTap={this.end} /> }
+        </div>
+      </div>
+    )
   }
 
   render() {
@@ -413,9 +435,10 @@ export default class BtrfsVolume extends React.Component {
           open={this.state.pureDialog}
           onRequestClose={() => this.setState({ pureDialog: false })}
         >
-          <div style={{ padding: 24, width: 80 }}>
-          功能开发中
-          </div>
+          {
+            this.state.boot ? this.renderFinished() :
+            <div style={{ padding: 24, width: 80 }}> 请重新建立磁盘阵列 </div>
+          }
         </PureDialog>
       </Paper>
     )

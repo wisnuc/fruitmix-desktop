@@ -167,8 +167,8 @@ const ReinitVolumeConfirm = (props) => {
       <div style={tipStyle}>{keepBoth}</div>
     </div>
   )
-  let mustDelete = ''
-  if (wisnuc.status === 'EDATA') { mustDelete = 'wisnuc' } else if (wisnuc.status === 'EFRUITMIXNOTDIR') { mustDelete = 'fruitmix' }
+  let mustDelete = '' // FIXME
+  if (wisnuc.status !== 'ENOENT') { mustDelete = 'wisnuc' } else if (wisnuc.status === 'EFRUITMIXNOTDIR') { mustDelete = 'fruitmix' }
   return (
     <div>
       { warning && tips }
@@ -223,7 +223,7 @@ class InitVolumeDialogs extends React.Component {
         // wisnuc directory is not exist when intact is true
         // stage: wisnuc.intact ? 'SETUSER' : 'CONFIRM',
         stage: wisnuc.status === 'ENOENT' ? 'SETUSER' : 'CONFIRM',
-        remove: wisnuc.status === 'EDATA' ? 'wisnuc' : undefined,
+        remove: wisnuc.status === 'ENOENT' ? undefined : 'wisnuc',
         user: null,
         err: null,
         body: null
