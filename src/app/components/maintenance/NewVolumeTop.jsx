@@ -2,11 +2,7 @@ import React from 'react'
 import Debug from 'debug'
 import NavigationExpandMore from 'material-ui/svg-icons/navigation/expand-more'
 import Popover, { PopoverAnimationVertical } from 'material-ui/Popover'
-import { Paper, Menu, MenuItem } from 'material-ui'
-import request from 'superagent'
-import {
-  operationTextConfirm, Operation, operationBusy, operationSuccess, operationFailed, createOperation
-} from '../common/Operation'
+import { Paper, Menu, MenuItem, CircularProgress, Dialog } from 'material-ui'
 import FlatButton from '../common/FlatButton'
 
 const debug = Debug('component:maintenance:NewVolumeTop')
@@ -84,7 +80,7 @@ export default class NewVolumeTop extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      dialog: undefined
+      finished: false
     }
 
     this.setVolumeMode = (mode) => {
@@ -104,9 +100,6 @@ export default class NewVolumeTop extends React.Component {
         return { creatingNewVolume: null }
       })
     }
-
-    this.createOperation = (operation, ...args) =>
-      createOperation(this, 'dialog', operation, ...args)
 
     this.errorText = (err, res) => {
       const text = []
@@ -132,28 +125,60 @@ export default class NewVolumeTop extends React.Component {
 
       text.push(`使用硬盘 ${target.join('、')} ，以${mode}模式创建新磁盘阵列，` +
         '这些磁盘和包含这些磁盘的磁盘阵列上的数据都会被删除且无法恢复。确定要执行该操作吗？')
-
-      this.createOperation(operationTextConfirm, text, () => {
-        this.state.dialog.setState(operationBusy)
-        const device = window.store.getState().maintenance.device
-        request
-          .post(`http://${device.address}:3000/system/mir/mkfs`)
-          .set('Accept', 'application/json')
-          .send({ type, target, mode })
-          .end((err, res) => {
-            if (err) {
-              this.props.that.reloadBootStorage(() => {
-                this.state.dialog.setState(operationFailed, this.errorText(err, res))
-              })
-            } else {
-              this.props.that.reloadBootStorage(() => {
-                this.state.dialog.setState(operationSuccess, ['成功'])
-              })
-            }
-          })
-      })
+      const device = this.props.device
+      device.mkFileSystem({ type, target, mode })
+      this.setState({ finished: true })
+    }
+    this.done = () => {
+      this.setState({ finished: false })
+      this.props.reloadBootStorage()
     }
   }
+
+  finishedInfo() {
+    const { mkfs, storage } = this.props.device
+
+    if (!mkfs || mkfs.isPending()) return ['busy', '创建文件系统']
+    else if (mkfs.isRejected()) return ['error', '创建文件系统失败']
+    else if (!storage || storage.isPending()) return ['busy', '更新文件系统信息']
+    else if (storage.isRejected()) return ['error', '更新文件系统信息失败']
+    return ['success', '成功']
+  }
+
+
+  renderFinished() {
+    const info = this.finishedInfo()
+    return (
+      <Dialog open={this.state.finished}>
+        <div
+          style={{ width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center' }}
+        >
+          <div style={{ flex: '0 0 48px' }}>
+            { info[0] === 'busy' && <CircularProgress /> }
+          </div>
+          <div
+            style={{ flex: '0 0 64px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 24,
+              color: 'rgba(0,0,0,0.54)' }}
+          >
+            { info[1] }
+          </div>
+          <div style={{ flex: '0 0 48px' }}>
+            { info[0] === 'success'
+              ? <FlatButton label="确定" onTouchTap={this.done} />
+              : <FlatButton label="退出" onTouchTap={this.done} /> }
+          </div>
+        </div>
+      </Dialog>
+    )
+  }
+
   render() {
     const cnv = this.props.state.creatingNewVolume
     const accent1Color = this.props.that.colors.accent
@@ -163,7 +188,6 @@ export default class NewVolumeTop extends React.Component {
 
     return (
       <div style={{ width: '100%', height: 136 - 48 - 16 }}>
-
         <Paper
           style={{ width: '100%',
             height: 64,
@@ -202,8 +226,8 @@ export default class NewVolumeTop extends React.Component {
               onTouchTap={this.onToggleCreatingNewVolume}
             />
           </div>
-          <Operation substate={this.state.dialog} />
         </Paper>
+        { this.renderFinished() }
       </div>
     )
   }

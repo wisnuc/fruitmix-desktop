@@ -3,10 +3,10 @@ import Debug from 'debug'
 import { Checkbox, CircularProgress, Dialog, TextField } from 'material-ui'
 import ToggleRadioButtonChecked from 'material-ui/svg-icons/toggle/radio-button-checked'
 import ToggleRadioButtonUnchecked from 'material-ui/svg-icons/toggle/radio-button-unchecked'
-import request from 'superagent'
 import FlatButton from '../common/FlatButton'
+import Checkmark from '../common/Checkmark'
 import { VerticalExpandable } from './ConstElement'
-import { UpIcon, DownIcon } from './Svg'
+import { UpIcon, DownIcon, FailedIcon } from './Svg'
 
 const debug = Debug('component:maintenance:InitVolumeDialogs')
 
@@ -56,10 +56,13 @@ const ReinitVolumeConfirm = (props) => {
   const volume = props.volume
   const wisnuc = volume.wisnuc
   const expandableHeight = props.expanded ? 120 : 0
+  debug('ReinitVolumeConfirm', volume, wisnuc)
 
   let warning = ''
-  if (wisnuc.status === ('READY' || 'DAMAGED')) {
+  if (wisnuc.status === 'READY') {
     warning = '文件系统已经包含wisnuc应用的用户数据，请仔细阅读下述信息，避免数据丢失！'
+  } else if (wisnuc.status === 'EDATA') {
+    warning = '文件系统可能包含wisnuc应用的用户数据，请仔细阅读下述信息，避免数据丢失！'
   } else if (wisnuc.status === 'AMBIGUOUS') {
     warning = '文件系统可能包含wisnuc应用的用户数据，请仔细阅读下述信息，避免数据丢失！'
   } else if (wisnuc.error === 'EWISNUCNOTDIR') {
@@ -88,7 +91,7 @@ const ReinitVolumeConfirm = (props) => {
     <div style={{ marginBottom: 32 }}>
       <div
         style={{
-          marginLeft: '48',
+          marginLeft: 48,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -164,8 +167,8 @@ const ReinitVolumeConfirm = (props) => {
       <div style={tipStyle}>{keepBoth}</div>
     </div>
   )
-  let mustDelete = ''
-  if (wisnuc.error === 'EWISNUCNOTDIR') { mustDelete = 'wisnuc' } else if (wisnuc.error === 'EFRUITMIXNOTDIR') { mustDelete = 'fruitmix' }
+  let mustDelete = '' // FIXME
+  if (wisnuc.status !== 'ENOENT') { mustDelete = 'wisnuc' } else if (wisnuc.status === 'EFRUITMIXNOTDIR') { mustDelete = 'fruitmix' }
   return (
     <div>
       { warning && tips }
@@ -184,13 +187,15 @@ const TextBox = props => (
 
 // onRequestClose
 // onStart
-export default class InitVolumeDialogs extends React.Component {
+
+class InitVolumeDialogs extends React.Component {
   constructor(props) {
     super(props)
 
     this.state = {
+      finished: false,
       stage: props.volume ? 'CONFIRM' : undefined,
-      remove: undefined,
+      remove: 'wisnuc',
       user: null,
       err: null,
       res: null,
@@ -203,6 +208,12 @@ export default class InitVolumeDialogs extends React.Component {
       const newstatus = !this.state.expanded
       this.setState({ expanded: newstatus })
     }
+
+    this.end = () => {
+      this.props.onRequestClose()
+      this.props.onResponse()
+      this.setState({ finished: false })
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -210,8 +221,9 @@ export default class InitVolumeDialogs extends React.Component {
       const wisnuc = nextProps.volume.wisnuc
       this.setState({
         // wisnuc directory is not exist when intact is true
-        stage: wisnuc.intact ? 'SETUSER' : 'CONFIRM',
-        remove: undefined,
+        // stage: wisnuc.intact ? 'SETUSER' : 'CONFIRM',
+        stage: wisnuc.status === 'ENOENT' ? 'SETUSER' : 'CONFIRM',
+        remove: wisnuc.status === 'ENOENT' ? undefined : 'wisnuc',
         user: null,
         err: null,
         body: null
@@ -226,6 +238,7 @@ export default class InitVolumeDialogs extends React.Component {
       })
     }
   }
+
 
   getActions() {
     switch (this.state.stage) {
@@ -248,35 +261,27 @@ export default class InitVolumeDialogs extends React.Component {
             onTouchTap={() => {
               this.setState({ stage: 'WIP' })
 
-              const opts = {
-                target: this.props.volume.fileSystemUUID,
-                remove: this.state.remove,
-                username: this.state.user.username,
-                password: this.state.user.password
-              }
-
-              const device = window.store.getState().maintenance.device
-              const url = `http://${device.address}:3000/system/mir/init`
-
-              request
-              .post(url)
-              .set('Accept', 'application/json')
-              .send(opts)
-              .end((err, res) => {
-                setTimeout(
-                  () => this.setState({
-                    stage: err ? 'FAILED' : 'SUCCESS',
-                    err,
-                    body: res && res.body
-                  }), 2000)
-                this.props.onResponse(err, res)
-              })
+              const target = this.props.volume.fileSystemUUID
+              const username = this.state.user.username
+              const password = this.state.user.password
+              const remove = this.state.remove
+              const device = this.props.device
+              /* remove: wisnuc, fruitmix, undefined */
+              // debug('device', device, target, username, password, remove)
+              device.reInstall({ target, username, password, remove })
+              setTimeout(() => this.setState({
+                finished: true,
+                stage: 'SUCCESS',
+                err: { message: 'error occured!' },
+                body: { message: '成功' }
+              }), 2000)
             }}
 
             disabled={!this.state.user}
           />
         ]
 
+       /*
       case 'WIP':
         return [<FlatButton label=" " disabled />]
 
@@ -291,6 +296,7 @@ export default class InitVolumeDialogs extends React.Component {
           label="确定"
           primary onTouchTap={this.props.onRequestClose}
         />]
+        */
     }
     return <div />
   }
@@ -301,21 +307,88 @@ export default class InitVolumeDialogs extends React.Component {
         return '确认操作'
       case 'SETUSER':
         return '设置用户名密码'
+        /*
       case 'WIP':
         return '执行操作'
       case 'SUCCESS':
         return '操作成功'
       case 'FAILED':
         return '操作失败'
+        */
       default:
         return ''
     }
   }
 
+  finishedInfo() {
+    const { install, boot, users, firstUser } = this.props.device
+
+    if (!install || install.isPending()) {
+      return ['busy', '安装应用']
+    } else if (install.isRejected()) {
+      return ['error', '安装应用失败']
+    } else if (!boot || boot.isPending()
+      || (boot.isFulfilled() && boot.value().fruitmix === null)
+      || (boot.isFulfilled() && boot.value().fruitmix
+        && boot.value().fruitmix.state === 'starting')) {
+      return ['busy', '启动应用']
+    } else if (boot.isRejected()
+      || (boot.isFulfilled() && boot.value().fruitmix
+        && boot.value().fruitmix.state === 'exited')) {
+      return ['error', '启动应用失败']
+    } else if (!firstUser || firstUser.isPending()) {
+      return ['busy', '创建用户']
+    } else if (firstUser.isRejected()) {
+      return ['error', '创建用户失败']
+    } else if (!users || users.isPending()) {
+      return ['busy', '获取最新用户列表']
+    } else if (users.isRejected()) {
+      return ['error', '获取最新用户列表失败']
+    }
+    return ['success', '成功']
+  }
+
+  renderFinished() {
+    if (!this.state.finished) return null
+
+    const info = this.finishedInfo()
+
+    return (
+      <div
+        style={{ width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center' }}
+      >
+        <div style={{ flex: '0 0 48px' }}>
+          { info[0] === 'busy' ? <CircularProgress /> :
+            info[0] === 'success' ? <Checkmark primary delay={300} /> :
+            <FailedIcon color={'red'} />
+          }
+        </div>
+        <div
+          style={{ flex: '0 0 64px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 24,
+            color: 'rgba(0,0,0,0.54)' }}
+        >
+          { info[1] }
+        </div>
+        <div style={{ flex: '0 0 48px' }}>
+          { info[0] === 'success'
+            ? <FlatButton label="确定" onTouchTap={this.end} />
+            : <FlatButton label="退出" onTouchTap={this.end} /> }
+        </div>
+      </div>
+    )
+  }
+
   render() {
     const busyContentStyle = {
       width: '100%',
-      height: 24,
+      height: 160,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'
@@ -333,21 +406,23 @@ export default class InitVolumeDialogs extends React.Component {
         actions={this.getActions()}
       >
         <div style={{ width: '100%', height: '100%' }}>
-          { this.state.stage === 'CONFIRM' ?
-            <ReinitVolumeConfirm
-              volume={this.props.volume}
-              remove={this.state.remove}
-              onCheck={remove => this.setState({ remove })}
-              onTouchTap={() => this.setState({ expanded: !this.state.expanded })}
-              expanded={this.state.expanded}
-            /> :
-          this.state.stage === 'SETUSER' ? <UsernamePassword onChange={user => this.setState({ user })} /> :
-          this.state.stage === 'WIP' ? <div style={busyContentStyle}><CircularProgress /></div> :
-          this.state.stage === 'SUCCESS' ? <TextBox text={[this.state.body.message]} /> :
-          this.state.stage === 'FAILED' ? <TextBox text={[this.state.err.message]} /> : null }
+          {
+            this.state.stage === 'CONFIRM' ?
+              <ReinitVolumeConfirm
+                volume={this.props.volume}
+                remove={this.state.remove}
+                onCheck={remove => this.setState({ remove })}
+                onTouchTap={() => this.setState({ expanded: !this.state.expanded })}
+                expanded={this.state.expanded}
+              /> :
+            this.state.stage === 'SETUSER' ? <UsernamePassword onChange={user => this.setState({ user })} /> :
+            this.state.stage === 'WIP' ? <div style={busyContentStyle}><CircularProgress /></div> : null
+          }
+          { this.renderFinished() }
         </div>
       </Dialog>
     )
   }
 }
 
+export default InitVolumeDialogs

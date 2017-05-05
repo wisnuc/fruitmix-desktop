@@ -102,24 +102,25 @@ class AdminUsers extends Base {
         >
           <SocialPersonAdd />
         </FloatingActionButton>
-        <div style={{height: 8}} />
-        <div style={{height: 48, display: 'flex', alignItems: 'center'}}>
-          <div style={{flex: '0 0 104px'}} />
-          <div style={{flex: '0 0 240px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)'}}>
-            用户名
+        <div style={{'overflow-y': 'auto', height: '100%'}}>
+          <div style={{height: 8}} />
+          <div style={{height: 48, display: 'flex', alignItems: 'center'}}>
+            <div style={{flex: '0 0 104px'}} />
+            <div style={{flex: '0 0 240px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)'}}>
+              用户名
+            </div>
+            <div style={{flex: '0 0 400px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)'}}>
+              UUID
+            </div>
           </div>
-          <div style={{flex: '0 0 400px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)'}}>
-            UUID
-          </div>
+          <div style={{height: 8}} />
+          <Divider style={{marginLeft: 104}} />
+          { users.reduce((acc, user) => 
+              [...acc, this.renderUserRow(user), <Divider style={{marginLeft: 104}} />], 
+              []) }
         </div>
-        <div style={{height: 8}} />
-        <Divider style={{marginLeft: 104}} />
-        { users.reduce((acc, user) => 
-            [...acc, this.renderUserRow(user), <Divider style={{marginLeft: 104}} />], 
-            []) }
-
         <DialogOverlay open={!!this.state.createNewUser} onRequestClose={this.onCloseDialog}>
-          { this.state.createNewUser && <NewUserDialog primary={true} apis={this.ctx.props.apis} /> }
+          { this.state.createNewUser && <NewUserDialog refreshUsers={this.ctx.props.apis.request} primary={true} apis={this.ctx.props.apis} /> }
         </DialogOverlay>
       </div>
     )

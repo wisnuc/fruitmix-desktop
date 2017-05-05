@@ -42,9 +42,9 @@ class Main extends React.Component {
 
       nav: this.nav.bind(this),
       login: this.login.bind(this),
+      maintain: this.maintain.bind(this),
       selectDevice: this.selectDevice.bind(this),
       setPalette: this.setPalette.bind(this),
-
       ipcRenderer: ipcRenderer
     }
   }
@@ -80,6 +80,9 @@ class Main extends React.Component {
 
   nav(view) {
     this.setState({ view })
+  }
+  maintain() {
+    this.setState({ view: 'maintenance' })
   }
 
   login() {
