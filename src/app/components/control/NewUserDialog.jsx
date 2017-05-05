@@ -26,8 +26,10 @@ class NewUserDialog extends PureComponent {
         username: this.state.username,
         password: this.state.password
       }, err => {
-        if (!err) return this.props.onRequestClose(true)
-        this.props.refreshUsers('adminUsers')
+        if (!err) {
+          this.props.onRequestClose(true)
+          this.props.refreshUsers('adminUsers')
+        }
       })
     }
   }
