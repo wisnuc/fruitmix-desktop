@@ -119,7 +119,7 @@ class AdminUsers extends Base {
             []) }
 
         <DialogOverlay open={!!this.state.createNewUser} onRequestClose={this.onCloseDialog}>
-          { this.state.createNewUser && <NewUserDialog primary={true} apis={this.ctx.props.apis} /> }
+          { this.state.createNewUser && <NewUserDialog refreshUsers={this.ctx.props.apis.request.bind(this)} primary={true} apis={this.ctx.props.apis} /> }
         </DialogOverlay>
       </div>
     )
