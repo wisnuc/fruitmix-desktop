@@ -90,6 +90,7 @@ class AdminDrives extends Base {
   }
 
   navEnter() {
+    console.log('admin drives nav enter.........')
     this.ctx.props.apis.request('adminUsers')
     this.ctx.props.apis.request('adminDrives')
   }
@@ -157,20 +158,23 @@ class AdminDrives extends Base {
           <ContentAdd />
         </FloatingActionButton>
 
-        <div style={{height: 8}} />
+        <div style={{'overflow-y':'auto', height: '100%'}}>
 
-        <DriveHeader />
-        
-        <div style={{height: 8}} />
+          <div style={{height: 8}} />
 
-        <Divider style={{marginLeft: 104}} />
+          <DriveHeader />
+          
+          <div style={{height: 8}} />
 
-        { drives && users && drives.reduce((acc, drive) => 
-            [...acc, <DriveRow drive={drive} users={users} />, <Divider style={{marginLeft: 104}} />], 
-            []) }
+          <Divider style={{marginLeft: 104}} />
+
+          { drives && users && drives.reduce((acc, drive) => 
+              [...acc, <DriveRow drive={drive} users={users} />, <Divider style={{marginLeft: 104}} />], 
+              []) }
+        </div>
 
         <DialogOverlay open={!!this.state.newDrive} onRequestClose={this.onCloseDialog}>
-          { this.state.newDrive && <NewDriveDialog primary={true} apis={this.ctx.props.apis} /> }
+          { this.state.newDrive && <NewDriveDialog refreshDrives={this.navEnter.bind(this)} primary={true} apis={this.ctx.props.apis} /> }
         </DialogOverlay>
       </div>
     )

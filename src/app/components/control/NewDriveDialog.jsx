@@ -46,7 +46,10 @@ class NewDriveDialog extends PureComponent {
       writelist: this.state.writelist
     }
     apis.request('adminCreateDrive', args, err => {
-      if (!err) this.props.onRequestClose()
+      if (!err) {
+        this.props.onRequestClose()
+        this.props.refreshDrives()
+      }
     })
   }
 
