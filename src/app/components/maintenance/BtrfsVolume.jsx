@@ -125,13 +125,21 @@ export default class BtrfsVolume extends React.Component {
 
     this.startWisnucOnVolume = (volume) => {
       const text = ['启动安装于Btrfs磁盘阵列上的WISNUC应用？']
-
       this.createOperation(operationTextConfirm, text, () => {
         this.state.dialog.setState(operationBusy)
+        this.props.device.manualBoot({ target: volume.fileSystemUUID }) // FIXME
+        this.props.that.reloadBootStorage(() => {
+          for (let i = 3; i >= 0; i--) {
+            const time = (3 - i) * 1000
+            setTimeout(() => { this.state.dialog.setState(operationSuccess, [`启动成功，系统将在${i}秒钟后跳转到登录页面`]) }, time)
+          }
+          setTimeout(() => { this.props.nav('login') }, 4000)
+        })
+      })
 
-        const device = window.store.getState().maintenance.device
-        const url = `http://${device.address}:3000/system/mir/run`
-
+      /*
+      this.createOperation(operationTextConfirm, text, () => {
+        this.state.dialog.setState(operationBusy)
         request
           .post(url)
           .set('Accept', 'application/json')
@@ -152,6 +160,7 @@ export default class BtrfsVolume extends React.Component {
             }
           })
       })
+      */
     }
 
     this.initWisnucOnVolume = (volume) => {

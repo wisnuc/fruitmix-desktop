@@ -42,7 +42,7 @@ class Maintenance extends StateUp(React.Component) {
     this.reloadBootStorage = (callback) => {
       let done = false
       this.props.selectedDevice.refreshSystemState(() => {
-        debug('this, in', this, this.props.selectedDevice)
+        // debug('this, in', this, this.props.selectedDevice)
         this.setState({
           storage: this.props.selectedDevice.storage.value(),
           boot: this.props.selectedDevice.boot.value(),
@@ -51,53 +51,8 @@ class Maintenance extends StateUp(React.Component) {
         if (callback) callback(null, { storage, boot })
         done = true
       })
-      debug('this, out', this)
+      // debug('this, out', this)
       return null
-        /*
-      let storage
-      let boot
-      let done = false
-      const device = window.store.getState().maintenance.device
-      const finish = () => {
-        if (storage && boot) {
-          this.setState({
-            storage,
-            boot,
-            creatingNewVolume: this.state.creatingNewVolume ? { disks: [], mode: 'single' } : null
-          })
-
-          if (callback) callback(null, { storage, boot })
-          done = true
-        }
-      }
-
-      request.get(`http://${device.address}:3000/system/storage?wisnuc=true`)
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          if (this.unmounted) {
-            if (!done) {
-              if (callback) callback(new Error('unmounted'))
-              done = true
-            }
-            return
-          }
-          storage = err ? err.message : res.body
-          finish()
-        })
-
-      request.get(`http://${device.address}:3000/system/boot`)
-        .set('Accept', 'application/json')
-        .end((err, res) => {
-          if (this.unmounted) {
-            if (!done) {
-              if (callback) callback(new Error('unmounted'))
-              done = true
-            }
-          }
-          boot = err ? err.message : res.body
-          finish()
-        })
-        */
     }
 
     // //////////////////////////////////////////////////////////////////////////
@@ -196,7 +151,7 @@ class Maintenance extends StateUp(React.Component) {
   }
 
   renderBootStatus() {
-    let data = this.props.selectedDevice.mdev
+    const data = this.props.selectedDevice.mdev
 
     const TextMaintence = `该设备已正常启动，此界面仅用于浏览。
       设备的ip为 ${data.address}，model为 ${data.model}，serial为 ${data.serial}`
@@ -209,7 +164,7 @@ class Maintenance extends StateUp(React.Component) {
   }
 
   render() {
-    debug('render Maintenance', this.state, this.props)
+    // debug('render Maintenance', this.state, this.props)
 
     const cnv = !!this.state.creatingNewVolume
 
@@ -237,7 +192,15 @@ class Maintenance extends StateUp(React.Component) {
 
             {/* top panel selector */}
             <div style={{ width: 1200, height: cnv ? 136 - 48 - 16 : 48, transition: 'height 300ms' }}>
-              { cnv ? <NewVolumeTop state={this.state} setState={this.ssb} that={this} device={this.props.selectedDevice} nav={this.props.nav} /> : this.renderBootStatus()}
+              { cnv ?
+                <NewVolumeTop
+                  state={this.state}
+                  setState={this.ssb}
+                  that={this}
+                  device={this.props.selectedDevice}
+                  nav={this.props.nav}
+                  reloadBootStorage={this.reloadBootStorage.bind(this)}
+                /> : this.renderBootStatus()}
             </div>
 
             {

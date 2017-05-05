@@ -50,7 +50,7 @@ export default class PartitionedDisk extends React.Component {
     }
   }
   render() {
-    debug('PartitionedDisk Render')
+    // debug('PartitionedDisk Render')
     // K combinator
     const K = x => y => x
     const { disk, state, setState, that, zDepth, ...rest } = this.props

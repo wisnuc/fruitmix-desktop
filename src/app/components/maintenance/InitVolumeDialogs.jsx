@@ -3,7 +3,6 @@ import Debug from 'debug'
 import { Checkbox, CircularProgress, Dialog, TextField } from 'material-ui'
 import ToggleRadioButtonChecked from 'material-ui/svg-icons/toggle/radio-button-checked'
 import ToggleRadioButtonUnchecked from 'material-ui/svg-icons/toggle/radio-button-unchecked'
-import request from 'superagent'
 import FlatButton from '../common/FlatButton'
 import Checkmark from '../common/Checkmark'
 import { VerticalExpandable } from './ConstElement'
@@ -265,7 +264,7 @@ class InitVolumeDialogs extends React.Component {
               const remove = this.state.remove
               const device = this.props.device
               /* remove: wisnuc, fruitmix, undefined */
-              debug('device', device, target, username, password, remove)
+              // debug('device', device, target, username, password, remove)
               device.reInstall({ target, username, password, remove })
               setTimeout(() => this.setState({
                 finished: true,
@@ -386,7 +385,7 @@ class InitVolumeDialogs extends React.Component {
   render() {
     const busyContentStyle = {
       width: '100%',
-      height: 24,
+      height: 160,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'

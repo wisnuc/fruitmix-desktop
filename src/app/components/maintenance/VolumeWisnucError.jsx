@@ -47,7 +47,7 @@ export default class VolumeWisnucError extends React.Component {
   }
 
   render() {
-    debug('VolumeWisnucError', this.props)
+    // debug('VolumeWisnucError', this.props)
     const VolumeisMissing = this.props.volume.isMissing
     if (VolumeisMissing) {
       return (
@@ -72,22 +72,19 @@ export default class VolumeWisnucError extends React.Component {
         return <div>WISNUC已安装但尚未创建用户。</div>
       }
       return (<div />)
-    } else if (status === 'ENOENT') {
+    } else if (status !== 'READY') {
       // debug("status",status)
       // debug("error",error)
-      let text = 'WISNUC未安装'
         /*
-      switch (error) {
+      let text = 'WISNUC未安装'
+      */
+      let text
+      switch (status) {
         case 'ENOENT' :
           text = 'WISNUC未安装'; break
-        case 'EWISNUCNOTDIR':
-          text = 'WISNUC未安装,wisnuc路径存在但不是文件夹'; break
-        case 'ENOFRUITMIX':
-          text = 'WISNUC未正确安装,不存在wisnuc/fruitmix文件夹'; break
-        case 'EFRUITMIXNOTDIR':
-          text = 'WISNUC未正确安装,wisnuc/fruitmix不是文件夹'; break
+        case 'EDATA':
+          text = 'WISNUC未正确安装，用户信息未找到或不能正确解析'; break
       }
-      */
       return (
         <div style={{ display: 'flex' }}>
           <ReportProblemIcon color={this.props.creatingNewVolume === null ? pinkA200 : 'rgba(0,0,0,0.38)'} />

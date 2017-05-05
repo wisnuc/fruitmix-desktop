@@ -129,14 +129,9 @@ export default class NewVolumeTop extends React.Component {
       device.mkFileSystem({ type, target, mode })
       this.setState({ finished: true })
     }
-    this.done = (success) => {
+    this.done = () => {
       this.setState({ finished: false })
-      this.props.setState(() => {
-        if (success) {
-          return { creatingNewVolume: null }
-        }
-        return { creatingNewVolume: { disks: [], mode: 'single' } }
-      })
+      this.props.reloadBootStorage()
     }
   }
 
@@ -176,8 +171,8 @@ export default class NewVolumeTop extends React.Component {
           </div>
           <div style={{ flex: '0 0 48px' }}>
             { info[0] === 'success'
-              ? <FlatButton label="确定" onTouchTap={() => this.done(true)} />
-              : <FlatButton label="退出" onTouchTap={() => this.done(false)} /> }
+              ? <FlatButton label="确定" onTouchTap={this.done} />
+              : <FlatButton label="退出" onTouchTap={this.done} /> }
           </div>
         </div>
       </Dialog>
