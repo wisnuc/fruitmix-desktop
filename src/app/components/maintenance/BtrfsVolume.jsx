@@ -153,6 +153,7 @@ export default class BtrfsVolume extends React.Component {
 
   finishedInfo() {
     const { boot } = this.props.device
+    dbeug('finishedInfo!')
     if (!boot || boot.isPending()
       || (boot.isFulfilled() && boot.value().fruitmix === null)
       || (boot.isFulfilled() && boot.value().fruitmix

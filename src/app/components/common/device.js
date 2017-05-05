@@ -102,7 +102,7 @@ class Device extends RequestManager {
 
       case 'run':
         r = request
-        .post(`http://${this.mdev.address}:3000/system/mir/run`)
+        .post(`http://${this.mdev.address}:3000/system/run`)
         .timeout(30000)
         .send(args)
         .set('Accept', 'application/json')
