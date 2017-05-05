@@ -84,6 +84,8 @@ export default class VolumeWisnucError extends React.Component {
           text = 'WISNUC未安装'; break
         case 'EDATA':
           text = 'WISNUC未正确安装，用户信息未找到或不能正确解析'; break
+        case 'EFAIL':
+          text = 'WISNUC未正确安装，无法正常启动'; break
       }
       return (
         <div style={{ display: 'flex' }}>

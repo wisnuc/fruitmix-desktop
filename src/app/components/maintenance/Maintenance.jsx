@@ -164,7 +164,7 @@ class Maintenance extends StateUp(React.Component) {
   }
 
   render() {
-    // debug('render Maintenance', this.state, this.props)
+    debug('render Maintenance', this.state, this.props)
 
     const cnv = !!this.state.creatingNewVolume
 
