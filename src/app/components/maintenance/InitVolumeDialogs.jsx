@@ -56,10 +56,13 @@ const ReinitVolumeConfirm = (props) => {
   const volume = props.volume
   const wisnuc = volume.wisnuc
   const expandableHeight = props.expanded ? 120 : 0
+  debug('ReinitVolumeConfirm', volume, wisnuc)
 
   let warning = ''
-  if (wisnuc.status === ('READY' || 'DAMAGED')) {
+  if (wisnuc.status === 'READY') {
     warning = '文件系统已经包含wisnuc应用的用户数据，请仔细阅读下述信息，避免数据丢失！'
+  } else if (wisnuc.status === 'EDATA') {
+    warning = '文件系统可能包含wisnuc应用的用户数据，请仔细阅读下述信息，避免数据丢失！'
   } else if (wisnuc.status === 'AMBIGUOUS') {
     warning = '文件系统可能包含wisnuc应用的用户数据，请仔细阅读下述信息，避免数据丢失！'
   } else if (wisnuc.error === 'EWISNUCNOTDIR') {
@@ -165,7 +168,7 @@ const ReinitVolumeConfirm = (props) => {
     </div>
   )
   let mustDelete = ''
-  if (wisnuc.error === 'EWISNUCNOTDIR') { mustDelete = 'wisnuc' } else if (wisnuc.error === 'EFRUITMIXNOTDIR') { mustDelete = 'fruitmix' }
+  if (wisnuc.status === 'EDATA') { mustDelete = 'wisnuc' } else if (wisnuc.status === 'EFRUITMIXNOTDIR') { mustDelete = 'fruitmix' }
   return (
     <div>
       { warning && tips }
@@ -192,7 +195,7 @@ class InitVolumeDialogs extends React.Component {
     this.state = {
       finished: false,
       stage: props.volume ? 'CONFIRM' : undefined,
-      remove: undefined,
+      remove: 'wisnuc',
       user: null,
       err: null,
       res: null,
@@ -220,7 +223,7 @@ class InitVolumeDialogs extends React.Component {
         // wisnuc directory is not exist when intact is true
         // stage: wisnuc.intact ? 'SETUSER' : 'CONFIRM',
         stage: wisnuc.status === 'ENOENT' ? 'SETUSER' : 'CONFIRM',
-        remove: undefined,
+        remove: wisnuc.status === 'EDATA' ? 'wisnuc' : undefined,
         user: null,
         err: null,
         body: null

@@ -214,7 +214,7 @@ class Device extends RequestManager {
     const install = true
     let reinstall = false
     if (remove === 'wisnuc') reinstall = true // FIXME
-    await this.requestAsync('install', { target, username, password, install })
+    await this.requestAsync('install', { target, username, password, install, reinstall })
     while (true) {
       await Promise.delay(1000)
       await this.requestAsync('boot', null)
