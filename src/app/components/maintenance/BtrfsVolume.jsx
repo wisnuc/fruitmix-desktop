@@ -134,7 +134,7 @@ export default class BtrfsVolume extends React.Component {
 
     this.initWisnucOnVolume = (volume) => {
       // TODO FIXME
-      if (typeof volume.wisnuc !== 'object') {
+      if (typeof volume.wisnuc !== 'object' || volume.wisnuc.status !== 'ENOENT') {
         this.setState({ pureDialog: true })
         return
       }
@@ -414,7 +414,7 @@ export default class BtrfsVolume extends React.Component {
                 <FlatButton
                   label={
                     typeof volume.wisnuc === 'object'
-                      ? [[volume.wisnuc.status === 'ENOENT' ? '安装' : '重新安装']]
+                      ? [[volume.wisnuc.status === 'ENOENT' ? '安装' : '修复问题']]
                       : [['修复问题']] // TODO
                   }
                   primary
@@ -438,7 +438,7 @@ export default class BtrfsVolume extends React.Component {
         >
           {
             this.state.boot ? this.renderFinished() :
-            <div style={{ padding: 24, width: 80 }}> 请重新建立磁盘阵列 </div>
+              <div style={{ padding: 24, width: 300 }}> 系统出现严重问题！<br/ >请联系闻上科技，寻求人工技术支持！</div>
           }
         </PureDialog>
       </Paper>
