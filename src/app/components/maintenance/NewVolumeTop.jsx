@@ -127,7 +127,6 @@ export default class NewVolumeTop extends React.Component {
         '这些磁盘和包含这些磁盘的磁盘阵列上的数据都会被删除且无法恢复。确定要执行该操作吗？')
       const device = this.props.device
       device.mkFileSystem({ type, target, mode })
-      debug(type, target, mode, 'type, target, mode')
       this.setState({ finished: true })
     }
     this.done = () => {

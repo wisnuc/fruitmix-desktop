@@ -362,7 +362,7 @@ class InitVolumeDialogs extends React.Component {
       >
         <div style={{ flex: '0 0 48px' }}>
           { info[0] === 'busy' ? <CircularProgress /> :
-            info[0] === 'success' ? <Checkmark primary delay={300} /> :
+            info[0] === 'success' ? <Checkmark delay={300} /> :
             <FailedIcon color={'red'} />
           }
         </div>

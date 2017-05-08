@@ -11,7 +11,6 @@ import FlatButton from '../common/FlatButton'
 import { grey100, grey200, grey300, grey400, grey500, grey600,
 blueGrey400, blueGrey500, cyan500, cyan300 } from 'material-ui/styles/colors'
 
-import { ipcRenderer } from 'electron'
 import { sharpCurve, sharpCurveDuration } from '../common/motion'
 import LoginBox from './LoginBox'
 
@@ -136,7 +135,6 @@ class UserBox extends React.Component {
             user={user}
             cancel={this.selectUser.bind(this, -1)}
             done={this.props.done}
-            ipcRenderer={this.props.ipcRenderer}
           />
         </div>
 
