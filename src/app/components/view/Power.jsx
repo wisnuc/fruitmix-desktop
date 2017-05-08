@@ -1,19 +1,18 @@
 import React, { Component, PureComponent } from 'react'
 import Radium from 'radium'
-import { ipcRenderer } from 'electron'
 import request from 'superagent'
-
+import Paper from 'material-ui/Paper'
 import { Dialog, CircularProgress } from 'material-ui'
 import ActionPowerSettingsNew from 'material-ui/svg-icons/action/power-settings-new'
 import { pinkA200 } from 'material-ui/styles/colors'
 import { header1Style, header2Style, header2StyleNotFirst, contentStyle } from '../control/styles'
 import FlatButton from '../common/FlatButton'
+import Base from './Base'
+import Checkmark from '../common/Checkmark'
 
 import Debug from 'debug'
 const debug = Debug('view:admin:power')
 
-import Base from './Base'
-// import FlatButton from '../mdc/FlatButton'
 
 class Power extends Base {
 
@@ -30,8 +29,11 @@ class Power extends Base {
       storage: null,
       users: null,
       poweroff: null,
-      device: null
+      device: null,
+      progressDisplay:'none',
+      operationDone:false
     }
+
     this.cancelButton = <FlatButton label='取消' primary={true} onTouchTap={this.handleClose} />
 
     this.bootOp = (op) => {
@@ -51,157 +53,6 @@ class Power extends Base {
         })
     }
 
-    this.requestGet = (ip, port, ep, propName) => {
-      request.get(`http://${ip}:${port}/${ep}`)
-      .set('Accept', 'application/json')
-      .timeout(120000)
-      .end((err, res) => {
-        if (this.unmounted) return
-        debug('request get', ep, propName, err || res.body)
-        this.setState(state => { 
-          let nextState = {}
-          nextState[propName] = err ? err : res.body
-          return nextState
-          })  
-        })
-    }
-  }
-
-  GetNewDevice(serial){
-    debug("window.store.getState().mdns", window.store.getState().mdns);
-    var newip = null;
-    for(var mdns of window.store.getState().mdns){
-      if(mdns.serial === serial){
-        newip = mdns.ip;
-      }
-    }
-    debug("ip and serial are: ",newip,serial)
-    setTimeout(() => {
-      this.requestGet(newip, 3000, 'system/boot', 'boot');
-      this.requestGet(newip ,3000, 'system/storage', 'storage');
-      this.requestGet(newip, 3721, 'login', 'users');
-    }, 3000);
-  }
-
-  handleOpen(CHOICE){
-    this.setState({
-      choice: CHOICE,   
-      open: true,
-    })
-  }
-
-  handleClose(){
-    this.setState({
-      open:false,
-      rebooting: false
-    })
-  }
-
-  renderReBooting() {
-    var text;
-    debug("PowerOff props and state ",this.props,this.state)
-    if (this.state.poweroff){
-      return( <div>已关机<br/>5秒后将转到登陆页面</div> )
-    }
-    return( <div>重启中......<br/>5秒后将转到登陆页面</div> ) 
-
-    //TODO the following code is not use, maybe use it later
-    if (this.state.boot === null || this.state.storage === null || this.state.users === null) {
-      return ( <div>重启中...</div> )
-    }
-    if (this.state.boot.bootMode){
-      if(this.state.boot.bootMode === 'maintenance'){
-        text = "已重新启动,将进入维护模式页面"
-        setTimeout(function(){
-          window.store.dispatch({
-            type: 'ENTER_MAINTENANCE',
-            data: {
-              device: this.state.device,//FIXME
-              boot: this.state.boot,
-              storage: this.state.storage,
-            }
-          })
-        },3000)
-      }
-      else{
-        text = "重启成功，将转到登陆页面"
-        setTimeout(function(){
-          window.store.dispatch({type:'LOGIN_OFF'})
-          ipcRenderer.send('loginOff')
-        },3000)
-      }
-    }
-    else {
-      debug("reboot error this.state.boot.lastFileSystem",this.state.boot.lastFileSystem)
-      debug("reboot error this.state.boot.bootMode",this.state.boot.bootMode)
-      text = "有点不对劲，将转到登陆页面";
-      setTimeout(function(){
-        window.store.dispatch({type:'LOGIN_OFF'})
-        ipcRenderer.send('loginOff')
-      },3000)
-
-    }
-
-    return ( <div> {text} </div> )
-  }
-
-  rebootActions(){
-    return [
-      <div style={{width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-        <CircularProgress color={pinkA200} />
-      </div>,
-      <FlatButton label='晓得了' primary={true} onTouchTap={this.handleClose} />
-    ]
-  }
-
-  getActions() {
-    switch (this.state.choice) {
-    case 'POWEROFF':
-      return [ 
-        this.cancelButton, 
-        <FlatButton 
-          label='确定' 
-          primary={true}
-          onTouchTap={() => {
-            this.bootOp('poweroff')
-            setTimeout(function(){
-               window.store.dispatch({type:'LOGIN_OFF'})
-               ipcRenderer.send('loginOff')
-            },5000)
-          }}
-         />
-      ]
-    case 'REBOOT':
-      return [ 
-        this.cancelButton, 
-        <FlatButton 
-          label='确定' 
-          primary={true}
-          onTouchTap={() => {
-            this.bootOp('reboot');
-            setTimeout(function(){
-              window.store.dispatch({type:'LOGIN_OFF'})
-              ipcRenderer.send('loginOff')
-            },5000)
-          }}
-         />
-      ]
-    case 'REBOOTMAINTENANCE':
-      return [ 
-        this.cancelButton, 
-        <FlatButton 
-          label='确定' 
-          primary={true}
-          onTouchTap={() => {
-            this.bootOp('rebootMaintenance')
-            setTimeout(function(){
-              window.store.dispatch({type:'LOGIN_OFF'})
-              ipcRenderer.send('loginOff')
-            },5000)
-          }}
-         />
-      ]
-    }
   }
 
   willReceiveProps(nextProps) { 
@@ -233,22 +84,177 @@ class Power extends Base {
     return 'colored'
   }
 
+  handleOpen(CHOICE){
+    this.setState({
+      choice: CHOICE,   
+      open: true,
+    })
+  }
+
+  handleClose = () => {
+    this.setState({
+      open:false,
+      rebooting: false
+    })
+  }
+
+  getActions() {
+    switch (this.state.choice) {
+    case 'POWEROFF':
+      return [ 
+        this.cancelButton, 
+        <FlatButton 
+          label='确定' 
+          primary={true}
+          onTouchTap={() => {
+            // TODO FIX
+            this.setState({
+              progressDisplay: 'block',
+              open: false
+            })
+            setTimeout(() => {
+              this.setState({
+                operationDone: true
+              })
+            }, 5000)
+            // this.bootOp('poweroff')
+            // setTimeout(function(){
+            //    window.store.dispatch({type:'LOGIN_OFF'})
+            // },5000)
+          }}
+         />
+      ]
+    case 'REBOOT':
+      return [ 
+        this.cancelButton, 
+        <FlatButton 
+          label='确定' 
+          primary={true}
+          onTouchTap={() => {
+            this.setState({
+              progressDisplay: 'block',
+              open: false
+            })
+            setTimeout(() => {
+              this.setState({
+                operationDone: true
+              })
+            }, 5000)
+            // this.bootOp('reboot');
+            // setTimeout(function(){
+            //   window.store.dispatch({type:'LOGIN_OFF'})
+            // },5000)
+          }}
+         />
+      ]
+    case 'REBOOTMAINTENANCE':
+      return [ 
+        this.cancelButton, 
+        <FlatButton 
+          label='确定' 
+          primary={true}
+          onTouchTap={() => {
+            this.setState({
+              progressDisplay: 'block',
+              open: false
+            })
+            setTimeout(() => {
+              this.setState({
+                operationDone: true
+              })
+            }, 5000)
+            // this.bootOp('rebootMaintenance')
+            // setTimeout(function(){
+            //   window.store.dispatch({type:'LOGIN_OFF'})
+            // },5000)
+          }}
+         />
+      ]
+    }
+  }
+
+  renderDiaContent(){
+    if (this.state.operationDone){
+      let hintText = '';
+      let linkText = '';
+      switch(this.state.choice){
+      case 'POWEROFF':
+        hintText = '设备已关机，去'
+        linkText = '登陆'
+        break;
+      case 'REBOOT':
+        hintText = '设备已重启完毕，去'
+        linkText = '登陆'
+        break;
+      case 'REBOOTMAINTENANCE':
+        hintText = '设备已重启至维护模式，去'
+        linkText = '维护'
+        break;
+      }
+      // <span style={{color:'#1d72f0',textDecoration: 'underline', cursor:'pointer' }}>{linkText}</span>
+      return [
+        <div style={{marginTop:80, marginLeft:194}}>
+          <Checkmark delay={300}/>
+        </div>,
+        <div style={{ textAlign:'center', marginTop: 30}}>{hintText}
+          <FlatButton label={linkText} primary={true} onTouchTap={() => {}}/>
+        </div>
+      ]
+    } else {
+      let hintText = ''
+      switch(this.state.choice){
+      case 'POWEROFF':
+        hintText = '设备正在关机...'
+        break;
+      case 'REBOOT':
+        hintText = '设备正在重启...'
+        break;
+      case 'REBOOTMAINTENANCE':
+        hintText = '设备正在重启至维护模式 ...'
+        break;
+      }
+      return (
+        <div>
+          <CircularProgress style={{ marginTop: 48, marginLeft: 200 }} size={100} />
+          <div style={{ textAlign:'center', marginTop:45}}>{hintText}</div>
+        </div>
+      )
+    }    
+  }
+
   /** renderers **/
   renderContent() {
+
+    let progressDiaStyle = {
+      position: 'fixed',
+      width: '100%',
+      height: '100%',
+      left: 0,
+      top: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.541176)',
+      opacity: 1,
+      display: this.state.progressDisplay
+    }
+
+    let paperStyle = {
+      position:'absolute',
+      width:500,
+      height: 300,
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      backgroundColor: 'white'
+    }
 
     return (
       <div style={{width: '100%', height: '100%'}}>
         <div style={{paddingLeft: 72}}>
-          <div style={Object.assign({}, header1Style, { 
-            color: 'grey'
-          })}>重启和关机</div>
+          <div style={Object.assign({}, header1Style, { color: 'grey' })}>重启和关机</div>
 
           <FlatButton label='关机' primary={true} style={{marginLeft: -16}}
-            //onTouchTap={() => this.bootOp('poweroff')}
             onTouchTap={() => this.handleOpen('POWEROFF')}
           />
-          <FlatButton label='重启' primary={true} style={{marginLeft: 0}} 
-            //onTouchTap={() => this.bootOp('reboot')}
+          <FlatButton label='重启' primary={true} style={{marginLeft: 0}}
             onTouchTap={() => this.handleOpen('REBOOT')}
           />
 
@@ -259,7 +265,6 @@ class Power extends Base {
             重启后进入维护模式，可以在维护模式下执行磁盘操作或系统维护任务。
           </div>
           <FlatButton label='重启进入维护模式' primary={true} style={{marginLeft: -8}}
-            //onTouchTap={() => this.bootOp('rebootMaintenance')}
             onTouchTap={() => this.handleOpen('REBOOTMAINTENANCE')}
           />
 
@@ -271,14 +276,13 @@ class Power extends Base {
           >
             {this.state.choice==='POWEROFF'?'确定关机？':this.state.choice==='REBOOT'?'确定重启？':'确定重启并进入维护模式？'}
           </Dialog>
-          <Dialog
-            actions={this.rebootActions()}
-            modal={true}
-            open={this.state.rebooting}
-            onRequestClose={this.handleClose}
-          >
-          {this.renderReBooting()}
-          </Dialog>
+
+          <div style={progressDiaStyle}>
+            <Paper style={paperStyle} zDepth={2} thickness={7}>
+            { this.renderDiaContent()}
+            </Paper>
+          </div>
+
         </div>
       </div>
     )
