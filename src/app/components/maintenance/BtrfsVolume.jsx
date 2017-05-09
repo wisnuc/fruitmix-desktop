@@ -1,7 +1,7 @@
 import React from 'react'
 import Debug from 'debug'
 import prettysize from 'prettysize'
-import { Avatar, Paper } from 'material-ui'
+import { Avatar, Paper, CircularProgress } from 'material-ui'
 import {
   grey300, grey400, amber400, redA200, red400, lightGreen400
 } from 'material-ui/styles/colors'
@@ -39,8 +39,7 @@ export default class BtrfsVolume extends React.Component {
       expanded: false,
       initVolume: undefined,
       dialog: undefined,
-      pureDialog: false,
-      boot: false
+      pureDialog: false
     }
 
     this.toggleExpanded = () => {
@@ -127,51 +126,41 @@ export default class BtrfsVolume extends React.Component {
     this.startWisnucOnVolume = (volume) => {
       const text = ['启动安装于Btrfs磁盘阵列上的WISNUC应用？']
       this.createOperation(operationTextConfirm, text, () => {
-        this.state.dialog.setState(operationBusy)
+        this.state.dialog.setState()
         this.props.device.manualBoot({ target: volume.fileSystemUUID }) // FIXME
+        this.setState({ pureDialog: 'start' })
       })
     }
 
     this.initWisnucOnVolume = (volume) => {
-      // TODO FIXME
       if (typeof volume.wisnuc !== 'object' || volume.wisnuc.status !== 'ENOENT') {
-        this.setState({ pureDialog: true })
+        this.setState({ pureDialog: 'init' })
         return
       }
       this.setState({ initVolume: volume })
     }
     this.end = () => {
-      this.setState({ boot: false, pureDialog: false })
-      const bootState = this.props.device.boot.value().fruitmix.state
-      if (bootState === 'started') {
-        this.props.that.reloadBootStorage(() => {
-          this.props.nav('login')
-        })
-      }
+      // TODO
+      this.setState({ pureDialog: false })
+      this.props.that.reloadBootStorage(() => {
+        this.props.nav('login')
+      })
     }
   }
 
   finishedInfo() {
-    const { boot } = this.props.device
-    dbeug('finishedInfo!')
-    if (!boot || boot.isPending()
-      || (boot.isFulfilled() && boot.value().fruitmix === null)
-      || (boot.isFulfilled() && boot.value().fruitmix
-        && boot.value().fruitmix.state === 'starting')) {
+    const { run } = this.props.device
+    debug('this.props.device', this.props.device)
+    if (!run || run.isPending()) {
       return ['busy', '启动应用']
-    } else if (boot.isRejected()
-      || (boot.isFulfilled() && boot.value().fruitmix
-        && boot.value().fruitmix.state === 'exited')) {
+    } else if (run.isRejected()) {
       return ['error', '启动应用失败']
     }
     return ['success', '成功']
   }
 
   renderFinished() {
-    if (!this.state.boot) return null
-
     const info = this.finishedInfo()
-
     return (
       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }} >
         <div style={{ flex: '0 0 48px' }}>
@@ -189,7 +178,7 @@ export default class BtrfsVolume extends React.Component {
         </div>
         <div style={{ flex: '0 0 48px' }}>
           { info[0] === 'success'
-            ? <FlatButton label="进入系统" onTouchTap={this.end} />
+            ? <FlatButton label="进入登陆页面" onTouchTap={this.end} />
             : <FlatButton label="退出" onTouchTap={this.end} /> }
         </div>
       </div>
@@ -411,6 +400,7 @@ export default class BtrfsVolume extends React.Component {
             }
             { this.props.state.boot.state === 'maintenance' &&
                 this.props.state.creatingNewVolume === null &&
+                volume.wisnuc.status !== 'READY' &&
                 <FlatButton
                   label={
                     typeof volume.wisnuc === 'object'
@@ -433,12 +423,18 @@ export default class BtrfsVolume extends React.Component {
         />
         <Operation substate={this.state.dialog} />
         <PureDialog
-          open={this.state.pureDialog}
+          open={!!this.state.pureDialog}
           onRequestClose={() => this.setState({ pureDialog: false })}
         >
+          <div
+            style={{ height: 300, width: 250, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            { this.state.pureDialog === 'start' && this.renderFinished() }
+          </div>
           {
-            this.state.boot ? this.renderFinished() :
-              <div style={{ padding: 24, width: 300 }}> 系统出现严重问题！<br/ >请联系闻上科技，寻求人工技术支持！</div>
+            this.state.pureDialog === 'init' && <div style={{ padding: 24, width: 300 }}>
+              系统出现严重问题！<br />请联系闻上科技，寻求人工技术支持！
+              </div>
           }
         </PureDialog>
       </Paper>

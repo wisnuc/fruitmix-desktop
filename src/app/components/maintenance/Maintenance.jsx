@@ -55,7 +55,7 @@ class Maintenance extends StateUp(React.Component) {
             creatingNewVolume: this.state.creatingNewVolume ? { disks: [], mode: 'single' } : null
           })
         }
-        if (callback) callback(null, { storage, boot })
+        if (callback) callback(null)
         done = true
       })
       // debug('this, out', this)
