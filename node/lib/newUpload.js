@@ -77,7 +77,6 @@ const getTransmissionHandle = () => {
       createTask(item.abspath, item.target, item.type, false, item._id, item.uploading, item.rootUUID, item.rUUID)
     })
   })
-	// db.uploading   to fixed
 }
 
 const cleanRecordHandle = () => {
