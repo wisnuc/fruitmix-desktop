@@ -134,7 +134,6 @@ class NavViews extends Component {
   }
 
   updateTransmission(e, type, userTasks, finishTasks) {
-    return
     console.log(e, userTasks, finishTasks)
     window.store.dispatch({ type, userTasks, finishTasks })
   }
@@ -330,7 +329,6 @@ class NavViews extends Component {
   }
 
   render () {
-
     if (!this.state.nav) return null
 
     const style = {
