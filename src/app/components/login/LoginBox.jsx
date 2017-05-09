@@ -42,8 +42,7 @@ class LoginBox extends React.Component {
       if(err) {
         console.log(`err:${err}`)
       } else {
-        this.props.ipcRenderer.send('LOGIN', this.props.device, this.props.user)
-        this.props.done()
+        this.props.done('LOGIN', this.props.device, this.props.user)
       }
     })
   }
@@ -53,8 +52,7 @@ class LoginBox extends React.Component {
     let password = this.state.password
     this.props.device.request('token', { uuid, password: 'w' }, err => {
       if(err) { console.log(`err:${err}`) } else {
-        this.props.ipcRenderer.send('LOGIN', this.props.device, this.props.user)
-        this.props.done()
+        this.props.done('LOGIN', this.props.device, this.props.user)
       }
     })
   }

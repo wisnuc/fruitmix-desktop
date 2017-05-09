@@ -6,7 +6,6 @@ import { Step, Stepper, StepLabel, StepContent } from 'material-ui/Stepper'
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
 import { cyan500, red400, redA200 } from 'material-ui/styles/colors'
 
-import { ipcRenderer } from 'electron'
 import prettysize from 'prettysize'
 import request from 'superagent'
 

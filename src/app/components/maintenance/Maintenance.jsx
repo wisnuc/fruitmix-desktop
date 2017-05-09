@@ -42,12 +42,19 @@ class Maintenance extends StateUp(React.Component) {
     this.reloadBootStorage = (callback) => {
       let done = false
       this.props.selectedDevice.refreshSystemState(() => {
-        // debug('this, in', this, this.props.selectedDevice)
-        this.setState({
-          storage: this.props.selectedDevice.storage.value(),
-          boot: this.props.selectedDevice.boot.value(),
-          creatingNewVolume: this.state.creatingNewVolume ? { disks: [], mode: 'single' } : null
-        })
+        debug('this, in', this, this.props.selectedDevice)
+        if (this.props.selectedDevice.storage.value) {
+          this.setState({
+            storage: this.props.selectedDevice.storage.value(),
+            boot: this.props.selectedDevice.boot.value(),
+            creatingNewVolume: this.state.creatingNewVolume ? { disks: [], mode: 'single' } : null
+          })
+        } else {
+          this.setState({
+            boot: this.props.selectedDevice.boot.value(),
+            creatingNewVolume: this.state.creatingNewVolume ? { disks: [], mode: 'single' } : null
+          })
+        }
         if (callback) callback(null, { storage, boot })
         done = true
       })

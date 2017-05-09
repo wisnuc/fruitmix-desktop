@@ -204,7 +204,7 @@ class Login extends React.Component {
     // FIXME
   }
 
-  async doneAsync(view) {
+  async doneAsync(view, device, user) {
 
     this.setState({ bye: true, dim: false, enter: 'bottom' })
     await Promise.delay(300)
@@ -214,16 +214,22 @@ class Login extends React.Component {
 
     if (view === 'maintenance') 
       this.props.maintain()
-    else 
+    else { 
+      this.props.ipcRenderer.send('LOGIN', device, user)
       this.props.login()
+    }
   }
 
-  done(view) {
-    this.doneAsync(view).asCallback()
+  done(view, device, user) {
+    this.doneAsync(view, device, user).asCallback()
   }
 
   initWizardOnOK() {
-    this.done()
+    const view = 'LOGIN'
+    debug('this.props.selectedDevice', this.props.selectedDevice)
+    const device = this.props.selectedDevice 
+    const user = device.users.value()[0]
+    this.done(view, device, user)
   } 
 
   footer() {
@@ -284,7 +290,7 @@ class Login extends React.Component {
 
       return users.length > 0
         ? <UserBox style={style} device={this.props.selectedDevice} 
-            toggleDisplay={this.toggleDisplayBound} done={this.done.bind(this)} ipcRenderer={this.props.ipcRenderer}/>
+            toggleDisplay={this.toggleDisplayBound} done={this.done.bind(this)} />
         : null // TODO FirstUserBox
     }
 
