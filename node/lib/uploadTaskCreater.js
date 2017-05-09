@@ -59,11 +59,11 @@ const sendMsg = () => {
   	finishTasks.map(i => i.getSummary?i.getSummary():i))
 }
 
-const createTask = (abspath, target, type, newWork, u, r, rootNodeUUID, rUUID) => {
+const createTask = (abspath, target, type, newWork, u, r, rootNodeUUID) => {
 	initArgs()
 	let taskUUID = u?u:uuid.v4()
-	let uploadRecord = r?r:[]
-	let task = new TaskManager(taskUUID, abspath, target, type, newWork, uploadRecord, rootNodeUUID, rUUID)
+	let uploadingList = r?r:[]
+	let task = new TaskManager(taskUUID, abspath, target, type, newWork, uploadingList, rootNodeUUID)
 	task.createStore()
 	userTasks.push(task)
 	task.readyToVisit()
@@ -82,15 +82,14 @@ const createTask = (abspath, target, type, newWork, u, r, rootNodeUUID, rUUID) =
 	schedule(): schedule work list
 */
 class TaskManager {
-	constructor(uuid, abspath, target, type, newWork, uploadRecord, rootNodeUUID, rUUID) {
+	constructor(uuid, abspath, target, type, newWork, uploadingList, rootNodeUUID) {
 		this.uuid = uuid 
 		this.abspath = abspath
 		this.target = target
 		this.type = type
 		this.name = path.basename(abspath)
 		this.newWork = newWork
-		this.rootNodeUUID = rootNodeUUID? rootNodeUUID: ''
-		this.rUUID = rUUID //target directory rootUUID
+		this.rootNodeUUID = rootNodeUUID? rootNodeUUID: null
 		
 		this.size = 0//not need rootsize for visit 
 		this.completeSize = 0
@@ -111,8 +110,9 @@ class TaskManager {
 		this.worklist = []
 		this.hashing = []
 		this.uploading = []
+		this.uploadingList = uploadingList
 		this.record = []
-		this.uploadRecord = uploadRecord
+		
 
 		this.countSpeed = setInterval(() => {
 			let s = (this.completeSize - this.lastTimeSize) / 1
@@ -158,15 +158,15 @@ class TaskManager {
 		removeOutOfVisitlessQueue(this)
 		addToVisitingQueue(this)
 		visitFolder(this.abspath, this.tree, this.worklist, this, (err, data) => {
+			if (err) return _this.error(err, '遍历本地文件出错')
 			_this.tree[0].target = _this.target
 			removeOutOfVisitingQueue(this)
 			_this.recordInfor('遍历文件树结束...')
-			_this.state = 'visited'
 			_this.diff()
 		})
 	}
 
-	diff() {
+	async diff() {
 		this.state = 'diffing'
 
 		for(let i = this.worklist.length-1 ;i>=0; i--) {
@@ -187,17 +187,9 @@ class TaskManager {
 			}else if (this.rootNodeUUID) {
 				this.recordInfor('文件夹上传任务，查找已上传文件信息')
 				let serverFileTree = []
-				let options = {
-					method: 'GET',
-					url: server + '/files/' + this.target,
-					headers: {
-						Authorization: tokenObj.type + ' ' + tokenObj.token
-					}
-				}
-				request(options, (err, data) => {
-					if (err) return this.recordInfor('上传目标目录不存在',err)
-					data = JSON.parse(data.body)
-					let index = data.findIndex(item => item.uuid === this.rootNodeUUID)
+				try {
+					let list = await serverGetAsync('files/fruitmix/list/' + this.target + '/' + this.target)
+					let index = list.findIndex(item => item.uuid === this.rootNodeUUID)
 					if (index === -1) {
 						this.recordInfor('已上传根目录被移除 重新上传')
 						this.schedule()
@@ -215,15 +207,15 @@ class TaskManager {
 							}
 						})		
 					}
-				})
+				}catch(e) {
+					_this.error(e, '上传目标目录不存在')
+				}
 				
 			}else {
 				this.recordInfor('文件夹上传，根目录没有创建，几率很低')
 				this.schedule()
 			}
 			//....
-
-
 
 		}else {
 			this.recordInfor('新任务 不需要与服务器进行比较') 
@@ -234,7 +226,7 @@ class TaskManager {
 	async checkNameExist() {
 		let _this = this
 		try{
-			let list = await serverGetAsync('files/fruitmix/list/' + this.target + '/' + this.rUUID)
+			let list = await serverGetAsync('files/fruitmix/list/' + this.target + '/' + this.target)
 			let name = _this.tree[0].name
 			let times = 1
 					
@@ -249,6 +241,7 @@ class TaskManager {
 			}
 			_this.tree[0].name = name
 			_this.name = name
+			_this.updateStore()
 			_this.schedule()
 		}catch(e) {
 			return console.log('上传目标没找到....',e)
@@ -344,21 +337,17 @@ class TaskManager {
 	getStoreObj() {
 		let uploadArr = []
 		this.uploading.forEach(item => {
-			if (item.type === 'file') {
-				uploadArr.push(item.getSummary())
-			}
+			if (item.type === 'file') uploadArr.push(item.getSummary())	
 		})
 		return {
 			_id: this.uuid,
 			abspath: this.abspath,
-			target: this.target,
 			name: this.name,
-			rootSize: this.rootSize,
+			target: this.target,
 			type: this.type,
 			uploading: uploadArr,
 			finishDate: this.finishDate,
-			rootNodeUUID: this.rootNodeUUID,
-			rUUID: this.rUUID
+			rootNodeUUID: this.rootNodeUUID
 		}
 	}
 
@@ -367,7 +356,7 @@ class TaskManager {
 		db.uploading.insert(this.getStoreObj(), (err, data) => {
 			if(err) return console.log(err)
 		})
-	}
+	} 
 
 	updateStore() {
 		let uploadArr = []
@@ -392,6 +381,12 @@ class TaskManager {
 			if (err) return console.log(err) 
 		})
 	}
+
+	error() {
+		this.state = 'failed'
+		this.Error = e
+		this.recordInfor(message)
+	}
 }
 
 const visitFolder = (abspath, position, worklist, manager, callback) => {
@@ -401,6 +396,15 @@ const visitFolder = (abspath, position, worklist, manager, callback) => {
 		let obj = stat.isDirectory()?
 			new FolderUploadTask(type, abspath, manager):
 			new FileUploadTask(type, abspath, stat.size, manager)
+
+		let index = manager.uploadingList.findIndex(item => item.abspath === abspath)
+		let item = manager.uploadingList[index]
+	  if (index !== -1) {
+	  	obj.seek = item.seek
+	  	obj.taskid = item.taskid
+	  	manager.completeSize += item.seek * item.segmentsize
+	  }
+
 		manager.count++
 		manager.size += stat.size
 		worklist.push(obj)
@@ -422,22 +426,14 @@ const visitFolder = (abspath, position, worklist, manager, callback) => {
 	})
 }
 
-const visitServerFiles = (uuid, name, type, position, callback) => {
+const visitServerFiles = async (uuid, name, type, position, callback) => {
 	console.log(name + '...' + type)
 	let obj = {name,type,children:[],uuid}
 	position.push(obj)
 	if (type === 'file') return callback(null)
-	let options = {
-		method: 'GET',
-		url: server + '/files/' + uuid,
-		headers: {
-			Authorization: tokenObj.type + ' ' + tokenObj.token
-		}
-	}
 
-	request(options, (err, res, body) => {
-		if (err) return callback(err)
-		let entries = JSON.parse(body)
+	try {
+		let entries = await serverGetAsync('files/fruitmix/list/' + uuid + '/' + uuid)	
 		if (!entries.length) return callback(null)
 		let count = entries.length
 		let index = 0
@@ -450,8 +446,12 @@ const visitServerFiles = (uuid, name, type, position, callback) => {
 			else next()
 		}
 
-		next()
-	})
+		return next()
+
+	}catch(e) {
+		return callback(err)
+	}
+	
 }
 
 const diffTree = (taskPosition, localPosition, manager ,callback) => {
@@ -545,7 +545,7 @@ class FileUploadTask extends UploadTask{
 			abspath: this.abspath,
 			taskid: this.taskid,
 			seek: this.seek,
-			parts: this.parts
+			segmentsize: this.segmentsize
 		}
 	}
 
@@ -746,7 +746,7 @@ class UploadFileSTM extends STM {
     		return this.uploadWholeFile()
     	}else {
     		let b = JSON.parse(body)
-    		// console.log('上传任务创建成功', b)
+    		console.log('上传任务创建成功', b)
 	    	_this.wrapper.taskid = b.taskid
 	    	this.uploadSegment()	
     	}
@@ -810,8 +810,8 @@ class UploadFileSTM extends STM {
 	partUploadFinish() {
 		this.wrapper.seek++
 		this.partFinishSize = 0
+		this.wrapper.manager.updateStore()
 		if (this.wrapper.seek == this.wrapper.parts.length) {
-			// console.log('所有块已经上传完成')
 			removeOutOfRunningQueue(this)
 			return this.wrapper.uploadFinish()
 		}else this.uploadSegment()
