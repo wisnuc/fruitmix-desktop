@@ -33,6 +33,10 @@ class PhotoDetailInline extends React.Component {
       /* hide image and resieze container */
       if (this.refImage) {
         this.refImage.style.display = 'none'
+        this.refImageDetial.style.display = 'none'
+        this.refImage.style.transform = ''
+        this.refImage.height = this.photoHeight
+        this.refImage.width = this.photoWidth
         this.refContainer.style.height = `${this.photoHeight}px`
         this.refContainer.style.width = `${this.photoWidth}px`
       }
@@ -62,7 +66,20 @@ class PhotoDetailInline extends React.Component {
       if (this.session === session) {
         // debug('got media!')
         clearTimeout(this.time)
-        this.time = setTimeout(() => (this.refImage.src = path), 100)
+        this.time = setTimeout(() => {
+          // this.refImage.style.visibility = 'hidden'
+          // this.refImage.style.opacity = 0
+          // this.refImage.style.visibility = 'visible'
+          // this.refImage.style.opacity = 1
+          if (this.exifOrientation % 2 === 0) {
+            this.refImageDetial.height = this.photoWidth
+            this.refImageDetial.width = this.photoHeight
+          }
+          this.refImageDetial.src = path
+          this.refTransition.style.transform = this.degRotate
+          this.refImageDetial.style.display = ''
+          debug('this.refImage.style.visibility 3', this.refImage)
+        }, 300)
       }
     }
 
@@ -99,8 +116,22 @@ class PhotoDetailInline extends React.Component {
     this.calcSize = () => {
       this.clientHeight = window.innerHeight
       this.clientWidth = window.innerWidth
-      this.photoHeight = this.photo.metadata.height
-      this.photoWidth = this.photo.metadata.width
+
+      /* handle the exifOrientation */
+      this.exifOrientation = this.photo.metadata.exifOrientation
+      this.degRotate = ''
+      if (this.exifOrientation) {
+        this.degRotate = `rotate(${(this.exifOrientation - 1) * 90}deg)`
+      }
+
+      if (this.exifOrientation % 2) {
+        this.photoHeight = this.photo.metadata.height
+        this.photoWidth = this.photo.metadata.width
+      } else {
+        this.photoHeight = this.photo.metadata.width
+        this.photoWidth = this.photo.metadata.height
+      }
+
       const HWRatio = this.photoHeight / this.photoWidth
       if (this.photoHeight > this.clientHeight) {
         this.photoHeight = this.clientHeight
@@ -154,10 +185,10 @@ class PhotoDetailInline extends React.Component {
         <div
           ref={ref => (this.refContainer = ref)}
           style={{
-            position: 'relative',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            position: 'relative',
             height: 0,
             width: 0,
             backgroundColor: 'black',
@@ -165,10 +196,22 @@ class PhotoDetailInline extends React.Component {
             transition: 'all 350ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
           }}
         >
-          <div ref={ref => (this.refTransition = ref)}>
+          <div style={{ position: 'absolute' }} >
             <img
               style={{ display: 'none' }}
               ref={ref => (this.refImage = ref)}
+              height={this.photoHeight}
+              width={this.photoWidth}
+              alt="DetailImage"
+            />
+          </div>
+          <div
+            style={{ position: 'absolute', willChange: 'transform' }}
+            ref={ref => (this.refTransition = ref)}
+          >
+            <img
+              style={{ display: 'none' }}
+              ref={ref => (this.refImageDetial = ref)}
               height={this.photoHeight}
               width={this.photoWidth}
               alt="DetailImage"
