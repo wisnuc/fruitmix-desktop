@@ -19,8 +19,8 @@ import '../assets/css/mdc.theme.css'
 import '../assets/css/mdc.button.css'
 
 // start mdns scan
-const mdns = MDNS(ipcRenderer, store)
-mdns.scan()
+global.mdns = MDNS(ipcRenderer, store)
+global.mdns.scan()
 
 // import css
 import '../assets/css/app.css'

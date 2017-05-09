@@ -5,6 +5,7 @@ import Paper from 'material-ui/Paper'
 import { Dialog, CircularProgress } from 'material-ui'
 import ActionPowerSettingsNew from 'material-ui/svg-icons/action/power-settings-new'
 import { pinkA200 } from 'material-ui/styles/colors'
+import { ipcRenderer } from 'electron'
 import { header1Style, header2Style, header2StyleNotFirst, contentStyle } from '../control/styles'
 import FlatButton from '../common/FlatButton'
 import Base from './Base'
@@ -19,8 +20,9 @@ class Power extends Base {
   constructor(ctx) {
 
     super(ctx)
-    let address = ctx.props.selectedDevice.mdev.address
-    this.url = `http://${address}:3000/system/boot`
+    this.address = ctx.props.selectedDevice.mdev.address
+    this.url = `http://${this.address}:3000/system/boot`
+    this.serial = ctx.props.selectedDevice.mdev.serial
     this.state = {
       open: false,
       rebooting: false,
@@ -98,79 +100,91 @@ class Power extends Base {
     })
   }
 
-  getActions() {
-    switch (this.state.choice) {
+  handleOpenPage = () => {
+    this.setState({
+      progressDisplay:'none',
+      operationDone:false
+    })
+    switch(this.state.choice){
     case 'POWEROFF':
-      return [ 
-        this.cancelButton, 
-        <FlatButton 
-          label='确定' 
-          primary={true}
-          onTouchTap={() => {
-            // TODO FIX
-            this.setState({
-              progressDisplay: 'block',
-              open: false
-            })
-            setTimeout(() => {
-              this.setState({
-                operationDone: true
-              })
-            }, 5000)
-            // this.bootOp('poweroff')
-            // setTimeout(function(){
-            //    window.store.dispatch({type:'LOGIN_OFF'})
-            // },5000)
-          }}
-         />
-      ]
+      // go to login page
+      this.ctx.props.nav('login')
+      break;
     case 'REBOOT':
-      return [ 
-        this.cancelButton, 
-        <FlatButton 
-          label='确定' 
-          primary={true}
-          onTouchTap={() => {
-            this.setState({
-              progressDisplay: 'block',
-              open: false
-            })
-            setTimeout(() => {
-              this.setState({
-                operationDone: true
-              })
-            }, 5000)
-            // this.bootOp('reboot');
-            // setTimeout(function(){
-            //   window.store.dispatch({type:'LOGIN_OFF'})
-            // },5000)
-          }}
-         />
-      ]
+      // go to login page & select target device
+      this.ctx.props.nav('login')
+      break;
     case 'REBOOTMAINTENANCE':
-      return [ 
-        this.cancelButton, 
-        <FlatButton 
-          label='确定' 
-          primary={true}
-          onTouchTap={() => {
-            this.setState({
-              progressDisplay: 'block',
-              open: false
-            })
-            setTimeout(() => {
-              this.setState({
-                operationDone: true
-              })
-            }, 5000)
-            // this.bootOp('rebootMaintenance')
-            // setTimeout(function(){
-            //   window.store.dispatch({type:'LOGIN_OFF'})
-            // },5000)
-          }}
-         />
-      ]
+      // go to login page & select target device
+      this.ctx.props.nav('login')
+      break;
     }
+  }
+
+  scanMdns(){
+    let hasBeenShutDown = false
+    let t = setInterval(() => {
+      global.mdns.scan()
+      setTimeout(() => {
+        switch (this.state.choice) {
+        case 'POWEROFF':
+          if (global.mdns.devices.every(d => d.serial !== this.serial)){
+            clearInterval(t)
+            this.setState({ operationDone: true })
+          }
+          break
+        case 'REBOOT':
+        case 'REBOOTMAINTENANCE':
+          if (hasBeenShutDown){
+            if (global.mdns.devices.find(d => d.serial === this.serial)
+                || global.mdns.devices.find(d => d.address === this.address)){
+              clearInterval(t)
+              this.setState({ operationDone: true })
+            }
+          } else {
+            if (global.mdns.devices.every(d => d.serial !== this.serial)){
+              hasBeenShutDown = true
+            }
+          }
+          break
+        }
+      },500)
+    },1000)
+  }
+
+  getActions() {
+
+    let operation = ''
+    switch(this.state.choice){
+    case 'POWEROFF':
+      operation = 'poweroff'
+      break
+    case 'REBOOT':
+      operation = 'reboot'
+      break
+    case 'REBOOTMAINTENANCE':
+      operation = 'rebootMaintenance'
+      break
+    }
+
+    return [
+      this.cancelButton,
+      <FlatButton
+        label='确定' 
+        primary={true}
+        onTouchTap={() => {
+          this.setState({
+            progressDisplay: 'block',
+            open: false
+          })
+          ipcRenderer.send('LOGIN_OFF')
+          setTimeout(() => {
+            this.bootOp(operation)
+            this.scanMdns()
+          }, 2000)
+        }}
+      />
+    ]
   }
 
   renderDiaContent(){
@@ -191,13 +205,13 @@ class Power extends Base {
         linkText = '维护'
         break;
       }
-      // <span style={{color:'#1d72f0',textDecoration: 'underline', cursor:'pointer' }}>{linkText}</span>
+
       return [
         <div style={{marginTop:80, marginLeft:194}}>
           <Checkmark delay={300}/>
         </div>,
         <div style={{ textAlign:'center', marginTop: 30}}>{hintText}
-          <FlatButton label={linkText} primary={true} onTouchTap={() => {}}/>
+          <FlatButton label={linkText} primary={true} onTouchTap={this.handleOpenPage}/>
         </div>
       ]
     } else {
