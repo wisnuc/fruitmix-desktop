@@ -116,7 +116,7 @@ class Power extends Base {
       break;
     case 'REBOOTMAINTENANCE':
       // go to login page & select target device
-      this.ctx.props.nav('login')
+      this.ctx.props.nav('maintenance')
       break;
     }
   }

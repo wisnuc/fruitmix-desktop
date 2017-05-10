@@ -15,9 +15,7 @@ class FanControl extends Base {
 
     super(ctx)
     let address = ctx.props.selectedDevice.mdev.address
-    // this.url = `http://${address}:3000/system/fan`
-    // TODO  url for test
-    this.url = '192.168.5.182:3000/system/fan'
+    this.url = `http://${address}:3000/system/fan`
     this.timer = null
     this.state = {
       fanScale: null,
