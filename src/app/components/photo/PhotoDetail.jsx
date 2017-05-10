@@ -38,6 +38,7 @@ class PhotoDetailInline extends React.Component {
       if (this.refImage) {
         this.refImage.style.display = 'none'
         this.refImageDetial.style.display = 'none'
+        this.refImageDetial.src = ''
         this.refImage.style.transform = ''
         this.refImage.height = this.photoHeight
         this.refImage.width = this.photoWidth
@@ -69,14 +70,20 @@ class PhotoDetailInline extends React.Component {
       if (this.session === session) {
         clearTimeout(this.time)
         this.time = setTimeout(() => {
+          debug('this.updateThumbPath 2', this.refImage.height, this.refImage.width)
+          debug('this.updatePath 1', this.refImageDetial.height, this.refImageDetial.width)
           if (this.exifOrientation % 2 === 0) {
             this.refImageDetial.height = this.photoWidth
             this.refImageDetial.width = this.photoHeight
+          } else {
+            this.refImageDetial.height = this.photoHeight
+            this.refImageDetial.width = this.photoWidth
           }
           this.refImageDetial.src = path
           this.refTransition.style.transform = this.degRotate
           this.refImageDetial.style.display = ''
-        }, 200)
+          debug('this.updatePath 2', this.refImageDetial.height, this.refImageDetial.width)
+        }, 150)
       }
     }
 
@@ -88,6 +95,8 @@ class PhotoDetailInline extends React.Component {
         this.refImage.src = this.thumbPath
         this.refContainer.style.height = `${this.photoHeight}px`
         this.refContainer.style.width = `${this.photoWidth}px`
+
+        debug('this.updateThumbPath 1', this.refImage.height, this.refImage.width)
 
         /* get detail image */
         this.props.ipcRenderer.send('mediaShowImage', this.session, this.digest)
@@ -146,17 +155,20 @@ class PhotoDetailInline extends React.Component {
     this.animation = (status) => {
       const transformItem = this.refReturn
       const root = this.refRoot
-      const time = 0.25
+      const overlay = this.refOverlay
+      const time = 0.2
       const ease = global.Power4.easeOut
       debug('transformItem, overlay', transformItem, root, ease)
 
       if (status === 'In') {
+        TweenMax.from(overlay, time, { opacity: 0, ease })
+        TweenMax.from(transformItem, time, { rotation: 180, opacity: 0, ease })
         TweenMax.from(root, time, { opacity: 0, ease })
-        TweenMax.from(transformItem, time, { rotation: 90, opacity: 0, ease })
       }
 
       if (status === 'Out') {
-        TweenMax.to(transformItem, time, { rotation: 90, opacity: 0, ease })
+        TweenMax.to(overlay, time, { opacity: 0, ease })
+        TweenMax.to(transformItem, time, { rotation: 180, opacity: 0, ease })
         TweenMax.to(root, time, { opacity: 0, ease })
       }
     }
@@ -191,19 +203,20 @@ class PhotoDetailInline extends React.Component {
   }
 
   componentWillAppear(callback) {
+    this.props.setAnimation('NavigationMenu', 'Out')
     this.animation('In')
-    this.enterTimeout = setTimeout(callback, 250) // matches transition duration
+    this.enterTimeout = setTimeout(callback, 200) // matches transition duration
   }
 
   componentWillLeave(callback) {
+    this.props.setAnimation('NavigationMenu', 'In')
     this.animation('Out')
-    this.leaveTimeout = setTimeout(callback, 250) // matches transition duration
+    this.leaveTimeout = setTimeout(callback, 200) // matches transition duration
   }
 
   renderDetail() {
     /* calculate photoHeight and photoWidth */
     this.calcSize()
-
     return (
       <div
         style={{
@@ -226,7 +239,7 @@ class PhotoDetailInline extends React.Component {
             width: 0,
             backgroundColor: 'black',
             overflow: 'hidden',
-            transition: 'all 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
+            transition: 'all 200ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
           }}
         >
           <div style={{ position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
@@ -245,8 +258,8 @@ class PhotoDetailInline extends React.Component {
             <img
               style={{ display: 'none' }}
               ref={ref => (this.refImageDetial = ref)}
-              height={this.photoHeight}
-              width={this.photoWidth}
+              height={this.exifOrientation % 2 === 0 ? this.photoWidth : this.photoHeight}
+              width={this.exifOrientation % 2 === 0 ? this.photoHeight : this.photoWidth}
               alt="DetailImage"
             />
           </div>
@@ -258,7 +271,7 @@ class PhotoDetailInline extends React.Component {
   render() {
     // debug('currentImage', this.photo)
     return (
-      <Paper
+      <div
         ref={ref => (this.refRoot = ref)}
         style={{
           position: 'fixed',
@@ -360,7 +373,7 @@ class PhotoDetailInline extends React.Component {
           }}
           onTouchTap={this.close}
         />
-      </Paper>
+      </div>
     )
   }
 }

@@ -2,11 +2,13 @@ import React from 'react'
 import Radium from 'radium'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
+import { TweenMax } from 'gsap'
 import { IconButton } from 'material-ui'
 import { blue800, indigo700, indigo500, teal500 } from 'material-ui/styles/colors'
 import PhotoIcon from 'material-ui/svg-icons/image/photo'
 import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
 import AddAPhoto from 'material-ui/svg-icons/image/add-to-photos'
+import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 
 import Base from './Base'
 import PhotoApp from '../photo/PhotoApp'
@@ -40,6 +42,7 @@ class Media extends Base {
     this.maxScrollTop = 0
     this.setPhotoInfo = this.photoInfo.bind(this)
     this.getTimeline = this.timeline.bind(this)
+    this.setAnimation = this.animation.bind(this)
   }
 
   requestData(eq) {
@@ -196,7 +199,7 @@ class Media extends Base {
       if (top > (height - 46) && index !== month.size - 1) date = null
       return [date, top, zIndex]
     })
-    debug('photoDates', photoDates, timeline)
+    // debug('photoDates', photoDates, timeline)
     return timeline
   }
 
@@ -227,11 +230,11 @@ class Media extends Base {
   }
 
   navEnter() {
-    console.log('home enter')
+    console.log('media enter')
   }
 
   navLeave() {
-    console.log('home leave')
+    console.log('media leave')
   }
 
   navGroup() {
@@ -270,6 +273,34 @@ class Media extends Base {
     return 400
   }
 
+  animation(component, status) {
+    if (component === 'NavigationMenu') {
+      /* add animation to NavigationMenu */
+      const transformItem = this.refNavigationMenu
+      const time = 0.4
+      const ease = global.Power4.easeOut
+      if (status === 'In') {
+        debug('animation, IN')
+        TweenMax.to(transformItem, time, { rotation: 180, opacity: 1, ease })
+      }
+      if (status === 'Out') {
+        debug('animation, OUT')
+        TweenMax.to(transformItem, time, { rotation: -180, opacity: 0, ease })
+      }
+    }
+  }
+
+  renderNavigationMenu({ style, onTouchTap }) {
+    const CustomStyle = Object.assign(style, { opacity: 1 })
+    return (
+      <div style={CustomStyle} ref={ref => (this.refNavigationMenu = ref)}>
+        <IconButton onTouchTap={onTouchTap}>
+          <NavigationMenu color="#FFF" />
+        </IconButton>
+      </div>
+    )
+  }
+
   renderTitle({ style }) {
     return (
       <div style={style}>
@@ -286,9 +317,6 @@ class Media extends Base {
     )
   }
 
-  renderDetail({ style }) {
-  }
-
   renderContent() {
     // debug('renderContent')
     return (<PhotoApp
@@ -298,6 +326,7 @@ class Media extends Base {
       ipcRenderer={ipcRenderer}
       apis={this.apis}
       requestData={this.requestData}
+      setAnimation={this.setAnimation}
     />)
   }
 }

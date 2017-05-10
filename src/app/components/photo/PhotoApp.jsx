@@ -161,6 +161,7 @@ class PhotoApp extends React.Component {
           items={this.props.media}
           seqIndex={this.seqIndex}
           ipcRenderer={this.props.ipcRenderer}
+          setAnimation={this.props.setAnimation}
         />
 
         {/* 上传图片 */}

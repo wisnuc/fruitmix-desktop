@@ -4,13 +4,10 @@ import { ipcRenderer } from 'electron'
 import Radium from 'radium'
 import { Paper, IconButton, Menu, Drawer, Divider } from 'material-ui'
 
-import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import SocialNotifications from 'material-ui/svg-icons/social/notifications'
 import ActionInfo from 'material-ui/svg-icons/action/info'
 import NavigationExpandMore from 'material-ui/svg-icons/navigation/expand-more'
 import NavigationExpandLess from 'material-ui/svg-icons/navigation/expand-less'
-
-import { TweenMax } from 'gsap'
 
 import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
 import Fruitmix from '../common/fruitmix'
@@ -143,20 +140,6 @@ class NavViews extends Component {
   currentView() {
     if (!this.state.nav) throw new Error('no nav')
     return this.views[this.state.nav]
-  }
-
-  animation(component, status) {
-    const transformItem = this.refNavigationMenu
-    const time = 0.25
-    const ease = global.Power4.easeOut
-    if (component === 'NavigationMenu') {
-      if (status === 'IN') {
-        TweenMax.from(transformItem, time, { rotation: -180, opacity: 0, ease })
-      }
-      if (status === 'OUT') {
-        TweenMax.to(transformItem, time, { rotation: -180, opacity: 0, ease })
-      }
-    }
   }
 
   renderQuickNavs() {
@@ -292,11 +275,8 @@ class NavViews extends Component {
           
           <div style={{flex: '0 0 12px'}} />
 
-          <IconButton onTouchTap={() => this.openDrawer(true)}>
-            <div ref={ref => (this.refNavigationMenu = ref)}>
-              <NavigationMenu color='#FFF' />
-            </div>
-          </IconButton>
+          {/** NavigationMenu ({ style, onTouchTap })**/}
+          { view.renderNavigationMenu({ style: {}, onTouchTap: () => this.openDrawer(true) }) }
 
           <div style={{flex: '0 0 20px'}} />
          
