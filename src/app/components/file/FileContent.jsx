@@ -252,7 +252,15 @@ class FileContent extends Component {
     return (
       <div id='file-content' style={{width: '100%', height: '100%'}} onDrop={this.drop.bind(this)}>
         <div style={{width: '100%', height: 8}} />
-        <div style={{width: '100%', height: 40}}>This is header</div>
+        {/*header*/}
+        <div style={{width: '100%', height: 40}}>
+          <div style={{width: '100%',height: '100%',display: 'flex',alignItems: 'center'}}>
+          <div style={{flex: '0 0 116px'}} />
+          <div style={{flexGrow: 1}}>文件名</div>
+          <div style={{flex: '0 1 160px', fontSize: 13, color: 'rgba(0,0,0,0.54)', textAlign: 'right'}}>修改时间</div>
+          <div style={{flex: '0 1 160px', fontSize: 13, color: 'rgba(0,0,0,0.54)', textAlign: 'right', marginRight: 72}}>文件大小</div>
+        </div>
+        </div>
         <div style={{width: '100%', height: 'calc(100% - 48px)'}}>
         { this.props.home.listNavDir && 
           <AutoSizer>

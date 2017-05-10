@@ -17,6 +17,7 @@ import ListSelect from '../file/ListSelect2'
 import Base from './Base'
 
 import FileContent from '../file/FileContent'
+import { command } from '../../lib/command'
 
 @Radium
 class BreadCrumbItem extends React.PureComponent {
@@ -187,6 +188,19 @@ class Home extends Base {
   }
 
   download() {
+    let entries = this.state.entries
+    let selected = this.state.select.selected
+    let p = this.state.path
+    let folders = []
+    let files = []
+
+    selected.forEach(item => {
+      let obj = entries[item]
+      if (obj.type == 'folder') folders.push(obj)
+      else if (obj.type == 'file') files.push(obj)
+    })
+
+    command('fileapp', 'DOWNLOAD', { folders, files, dirUUID: p[p.length - 1].uuid})
     
   }
 
@@ -222,11 +236,11 @@ class Home extends Base {
       <div id='file-breadcrumbs' style={style}>
         { this.state.listNavDir.path.reduce((acc, node, index, arr) => {
 
-          if (index !== 0) acc.push(<BreadCrumbSeparator />)
+          if (index !== 0) acc.push(<BreadCrumbSeparator key={node.uuid + index}/>)
 
           if (index === 0) { // the first one is always special
             acc.push(
-              <BreadCrumbItem text='我的文件' 
+              <BreadCrumbItem text='我的文件' key={node.uuid}
                 onTouchTap={() => this.ctx.props.apis.request('listNavDir', {
                   dirUUID: path[0].uuid,
                   rootUUID: path[0].uuid,
@@ -234,11 +248,16 @@ class Home extends Base {
               />
             )
           }
-          else if (index === arr.length - 1) {
-            acc.push(<BreadCrumbItem text={node.name} />)
-          } 
+          // else if (index === arr.length - 1) {
+          //   acc.push(<BreadCrumbItem text={node.name} />)
+          // } 
           else {
-            acc.push(<BreadCrumbItem text={node.name} />)
+            acc.push(<BreadCrumbItem text={node.name} key={node.uuid}
+              onTouchTap={() => this.ctx.props.apis.request('listNavDir', {
+                dirUUID: node.uuid,
+                rootUUID:path[0].uuid
+              })}
+            />)
           }
           return acc
         }, [])}

@@ -11,6 +11,7 @@ import store from '../serve/store/store'
 import { userTasks, finishTasks} from './newDownload'
 import utils from './util'
 import { getMainWindow } from './window'
+import { serverGetAsync } from './server'
 
 let server
 let user
@@ -61,12 +62,12 @@ const sendMsg = () => {
 //TaskManager creater
 //new job :init manager with default parameter
 //old job :init manager with defined parameter(uuid, downloadpath, downloading information)
-const createTask = (target, name, size, type, newWork, p, u, d) => {
+const createTask = (target, name, size, type, dirUUID ,newWork, p, u, d) => {
 	initArgs()
 	let taskUUID = u?u:uuid.v4()
 	let abspath = p?p:store.getState().config.download
 	let downloadingList = d?d:[]
-	let task = new TaskManager(taskUUID, abspath, target, name, size, type, newWork, downloadingList)
+	let task = new TaskManager(taskUUID, abspath, target, name, size, type, dirUUID, newWork, downloadingList)
 	task.createStore()
 	userTasks.push(task)
 	task.readyToVisit()
@@ -76,13 +77,14 @@ const createTask = (target, name, size, type, newWork, p, u, d) => {
 
 //a download task manager for init/record/visit/schedule
 class TaskManager {
-	constructor(taskUUID, downloadPath, target, name, rootSize, type, newWork, downloadingList) {
+	constructor(taskUUID, downloadPath, target, name, rootSize, type, dirUUID, newWork, downloadingList) {
 		this.uuid = taskUUID
 		this.downloadPath = downloadPath
 		this.target = target
 		this.name = name
 		this.rootSize = rootSize //for visit
 		this.type = type
+		this.dirUUID = dirUUID
 		this.newWork = newWork
 
 		this.size = 0
@@ -149,7 +151,7 @@ class TaskManager {
 		this.recordInfor('开始遍历文件树...')
 		removeOutOfVisitlessQueue(this)
 		addToVisitingQueue(this)
-		visitTask(this.target, this.name, this.type, this.rootSize, this.tree, this, (err, data) => {
+		visitTask(this.target, this.name, this.type, this.rootSize, this.dirUUID, this.tree, this, (err, data) => {
 			if (err) return _this.error(err, '遍历服务器数据出错')
 			_this.tree[0].downloadPath = _this.downloadPath
 			removeOutOfVisitingQueue(this)
@@ -206,6 +208,7 @@ class TaskManager {
 			this.tree[0].name = name
 			this.name = name
 			this.updateStore()
+			return 
 			this.schedule()
 		})
 	}
@@ -388,17 +391,18 @@ class TaskManager {
 	error(e, message) {
 		this.state = 'failed'
 		this.Error = e
+		console.log(e)
 		this.recordInfor(message)
 	}
 }
 
 //visit tree from serve && check the seek of downloading files
-const visitTask = (target, name, type, size, position, manager, callback) => {
+const visitTask = async (target, name, type, size, dirUUID, position, manager, callback) => {
 	manager.count++
 	manager.size += size
 	let obj = type === 'file'?
-  	new FileDownloadTask(target, name, type, size, manager):
-  	new FolderDownloadTask(target, name, type, size, manager)
+  	new FileDownloadTask(target, name, type, size, dirUUID, manager):
+  	new FolderDownloadTask(target, name, type, size, dirUUID, manager)
 
   let index = manager.downloadingList.findIndex(item => item.target === target)
   if (index !== -1) {
@@ -412,22 +416,13 @@ const visitTask = (target, name, type, size, position, manager, callback) => {
 
 	if (type === 'file') return callback(null)
 
-	let options = {
-		method: 'GET',
-		url: server + '/files/' + target,
-		headers: {
-			Authorization: user.type + ' ' + user.token
-		}
-	}
-
-	request(options, (err, data) => {
-		let tasks = JSON.parse(data.body)
-		if (err) return callback(err)
+	try {
+		let tasks = await serverGetAsync('files/fruitmix/list/' + target + '/' + target)	
 		if (!tasks.length) return callback(null)
 		let count = tasks.length
 		let index = 0
 		let task = tasks[index]
-		let next = () => {visitTask(task.uuid, task.name, task.type, task.size?task.size:0, obj.children, manager, call)}
+		let next = () => {visitTask(task.uuid, task.name, task.type, task.size?task.size:0, target, obj.children, manager, call)}
 		let call = (err) => {
 			if (err) return callback(err)
 			if (++index === count) return callback(null)
@@ -435,7 +430,7 @@ const visitTask = (target, name, type, size, position, manager, callback) => {
 			next()
 		}
 		next()
-	})
+	}catch(err) {return callback(err)}
 }
 
 //visit local files 
@@ -516,11 +511,12 @@ const isFileNameExist = (position, times, list) => {
 
 //Each instance is a fileNode of tree
 class DownloadTask {
-	constructor(target, name, type, size, manager) {
+	constructor(target, name, type, size, dirUUID, manager) {
 		this.target = target
 		this.name = name
 		this.type = type
 		this.size = size
+		this.dirUUID = dirUUID
 		this.manager = manager
 		
 		this.downloadPath = ''
@@ -560,8 +556,8 @@ class DownloadTask {
 }
 
 class FileDownloadTask extends DownloadTask{
-	constructor(target, name, type, size, manager) {
-		super(target, name, type, size, manager)
+	constructor(target, name, type, size, dirUUID, manager) {
+		super(target, name, type, size, dirUUID, manager)
 		this.progress = 0
 		this.seek = 0
 		this.lastTimeSize = 0
@@ -580,8 +576,8 @@ class FileDownloadTask extends DownloadTask{
 }
 
 class FolderDownloadTask extends DownloadTask{
-	constructor(target, name, type, size, manager) {
-		super(target, name, type, size, manager)
+	constructor(target, name, type, size, dirUUID, manager) {
+		super(target, name, type, size, dirUUID, manager)
 		this.children = []
 	}
 }
@@ -658,7 +654,7 @@ class DownloadFileSTM extends STM {
 		
     let options = {
 			method: 'GET',
-			url: server + '/files/' + wrapper.target,
+			url: server + '/files//fruitmix/download/' + wrapper.target,
 			headers: {
 				Authorization: user.type + ' ' + user.token,
 				Range: 'bytes=' + this.wrapper.seek + '-'

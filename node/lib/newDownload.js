@@ -13,9 +13,8 @@ const finishTasks = []
 const downloadHandle = (args, callback) => {
 	let files = args.files
 	let folders = args.folders
-
-	files.forEach(item => createTask(item.uuid, item.name, item.size, item.type, true))
-	folders.forEach(item => createTask(item.uuid, item.name, 0, item.type, true))
+	files.forEach(item => createTask(item.uuid, item.name, item.size, item.type, args.dirUUID, true))
+	folders.forEach(item => createTask(item.uuid, item.name, 0, item.type, args.dirUUID, true))
 
 	let count = files.length + folders.length
   getMainWindow().webContents.send('message', count + '个任务添加至下载队列')
