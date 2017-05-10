@@ -104,7 +104,7 @@ class NavViews extends Component {
   }
 
   componentWillUnmount() {
-    ipcRenderer.removeEventListener('UPDATE_TRANSMISSION', this.updateTransmissionBound)
+    ipcRenderer.removeListener('UPDATE_TRANSMISSION', this.updateTransmissionBound)
   }
 
   componentDidUpdate() {
