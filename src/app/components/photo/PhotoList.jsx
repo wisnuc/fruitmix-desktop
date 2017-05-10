@@ -45,7 +45,7 @@ class PhotoList extends Component {
       const currentIndex = this.indexHeightSum.findIndex(data => data > list.scrollTop + 200)
       const percentage = list.scrollTop / this.maxScrollTop
       this.date = this.photoMapDates[currentIndex].date
-      debug('this.timeline', this.timeline)
+      // debug('this.timeline', this.timeline)
       if (this.firstScroll) {
         this.firstScroll = false
         this.forceUpdate()
@@ -140,7 +140,7 @@ class PhotoList extends Component {
   }
 
   render() {
-    debug('render PhotoList, this.props', this.props, this.state)
+    // debug('render PhotoList, this.props', this.props, this.state)
     document.body.onmousemove = this.onMouseMove
     document.body.onmouseup = () => (this.onMouseDown = false)
     return (
@@ -151,6 +151,7 @@ class PhotoList extends Component {
             {({ height, width }) => {
               /* get PhotoInfo */
               const PhotoInfo = this.props.setPhotoInfo(height, width, this.props.media)
+              debug('PhotoInfo', PhotoInfo)
 
               /* set global variant */
               this.height = height

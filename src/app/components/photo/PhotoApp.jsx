@@ -148,22 +148,20 @@ class PhotoApp extends React.Component {
         }
 
         {/* 查看大图 */}
-        {
-          this.state.openDetail ?
-            <PhotoDetail
-              closePhotoDetail={() => this.setState({ openDetail: false })}
-              style={{
-                position: 'fixed',
-                left: 0,
-                top: 0,
-                width: '100%',
-                height: '100%'
-              }}
-              items={this.props.media}
-              seqIndex={this.seqIndex}
-              ipcRenderer={this.props.ipcRenderer}
-            /> : <div />
-        }
+        <PhotoDetail
+          onRequestClose={() => this.setState({ openDetail: false })}
+          open={this.state.openDetail}
+          style={{
+            position: 'fixed',
+            left: 0,
+            top: 0,
+            width: '100%',
+            height: '100%'
+          }}
+          items={this.props.media}
+          seqIndex={this.seqIndex}
+          ipcRenderer={this.props.ipcRenderer}
+        />
 
         {/* 上传图片 */}
         {/*

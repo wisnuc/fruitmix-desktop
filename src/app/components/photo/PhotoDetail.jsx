@@ -5,6 +5,7 @@ import { Paper, CircularProgress, IconButton, SvgIcon } from 'material-ui'
 import RenderToLayer from 'material-ui/internal/RenderToLayer'
 import keycode from 'keycode'
 import { TweenMax } from 'gsap'
+import ReactTransitionGroup from 'react-addons-transition-group'
 
 const debug = Debug('component:photoApp:PhotoDetail')
 
@@ -28,6 +29,9 @@ class PhotoDetailInline extends React.Component {
     this.state = {
       direction: null
     }
+    this.close = () => {
+      this.props.onRequestClose()
+    }
 
     this.requestNext = (currentIndex) => {
       /* hide image and resieze container */
@@ -48,7 +52,6 @@ class PhotoDetailInline extends React.Component {
       this.session = UUID.v4()
       this.digest = this.props.items[currentIndex][0]
       this.photo = this.props.items[currentIndex][1]
-      // debug('this.photo', this.photo)
       this.props.ipcRenderer.send('mediaShowThumb', this.session, this.digest, 210, 210)
       this.forceUpdate()
     }
@@ -64,13 +67,8 @@ class PhotoDetailInline extends React.Component {
 
     this.updatePath = (event, session, path) => {
       if (this.session === session) {
-        // debug('got media!')
         clearTimeout(this.time)
         this.time = setTimeout(() => {
-          // this.refImage.style.visibility = 'hidden'
-          // this.refImage.style.opacity = 0
-          // this.refImage.style.visibility = 'visible'
-          // this.refImage.style.opacity = 1
           if (this.exifOrientation % 2 === 0) {
             this.refImageDetial.height = this.photoWidth
             this.refImageDetial.width = this.photoHeight
@@ -78,8 +76,7 @@ class PhotoDetailInline extends React.Component {
           this.refImageDetial.src = path
           this.refTransition.style.transform = this.degRotate
           this.refImageDetial.style.display = ''
-          debug('this.refImage.style.visibility 3', this.refImage)
-        }, 300)
+        }, 200)
       }
     }
 
@@ -93,7 +90,6 @@ class PhotoDetailInline extends React.Component {
         this.refContainer.style.width = `${this.photoWidth}px`
 
         /* get detail image */
-        // debug('got thumb!')
         this.props.ipcRenderer.send('mediaShowImage', this.session, this.digest)
       }
     }
@@ -145,6 +141,25 @@ class PhotoDetailInline extends React.Component {
         this.photoHeight = this.photoWidth * HWRatio
       }
     }
+
+    /* animation */
+    this.animation = (status) => {
+      const transformItem = this.refReturn
+      const root = this.refRoot
+      const time = 0.25
+      const ease = global.Power4.easeOut
+      debug('transformItem, overlay', transformItem, root, ease)
+
+      if (status === 'In') {
+        TweenMax.from(root, time, { opacity: 0, ease })
+        TweenMax.from(transformItem, time, { rotation: 90, opacity: 0, ease })
+      }
+
+      if (status === 'Out') {
+        TweenMax.to(transformItem, time, { rotation: 90, opacity: 0, ease })
+        TweenMax.to(root, time, { opacity: 0, ease })
+      }
+    }
   }
 
   componentWillMount() {
@@ -161,10 +176,28 @@ class PhotoDetailInline extends React.Component {
   }
 
   componentWillUnmount() {
+    clearTimeout(this.enterTimeout)
+    clearTimeout(this.leaveTimeout)
     this.props.ipcRenderer.removeListener('getThumbSuccess', this.updateThumbPath)
     this.props.ipcRenderer.removeListener('donwloadMediaSuccess', this.updatePath)
     this.props.ipcRenderer.send('mediaHideThumb', this.session)
     this.props.ipcRenderer.send('mediaHideImage', this.session)
+  }
+
+  /* ReactTransitionGroup */
+
+  componentWillEnter(callback) {
+    this.componentWillAppear(callback)
+  }
+
+  componentWillAppear(callback) {
+    this.animation('In')
+    this.enterTimeout = setTimeout(callback, 250) // matches transition duration
+  }
+
+  componentWillLeave(callback) {
+    this.animation('Out')
+    this.leaveTimeout = setTimeout(callback, 250) // matches transition duration
   }
 
   renderDetail() {
@@ -193,20 +226,20 @@ class PhotoDetailInline extends React.Component {
             width: 0,
             backgroundColor: 'black',
             overflow: 'hidden',
-            transition: 'all 350ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
+            transition: 'all 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
           }}
         >
-          <div style={{ position: 'absolute' }} >
+          <div style={{ position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
             <img
               style={{ display: 'none' }}
               ref={ref => (this.refImage = ref)}
               height={this.photoHeight}
               width={this.photoWidth}
-              alt="DetailImage"
+              alt="ThumbImage"
             />
           </div>
           <div
-            style={{ position: 'absolute', willChange: 'transform' }}
+            style={{ position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             ref={ref => (this.refTransition = ref)}
           >
             <img
@@ -226,6 +259,7 @@ class PhotoDetailInline extends React.Component {
     // debug('currentImage', this.photo)
     return (
       <Paper
+        ref={ref => (this.refRoot = ref)}
         style={{
           position: 'fixed',
           width: '100%',
@@ -257,18 +291,20 @@ class PhotoDetailInline extends React.Component {
           {/* main image */}
           { this.renderDetail() }
 
-          {/* close Button */}
+          {/* return Button */}
           <IconButton
-            onTouchTap={this.props.closePhotoDetail}
+            onTouchTap={this.close}
             style={{
               position: 'fixed',
               top: 12,
               left: 12
             }}
           >
-            <svg width={24} height={24} viewBox="0 0 24 24" fill="white">
-              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
-            </svg>
+            <div ref={ref => (this.refReturn = ref)} >
+              <svg width={24} height={24} viewBox="0 0 24 24" fill="white">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+              </svg>
+            </div>
           </IconButton>
 
           {/* left Button */}
@@ -310,8 +346,9 @@ class PhotoDetailInline extends React.Component {
           </IconButton>
         </div>
 
-        {/* overLay */}
+        {/* overlay */}
         <div
+          ref={ref => (this.refOverlay = ref)}
           style={{
             position: 'fixed',
             height: '100%',
@@ -321,7 +358,7 @@ class PhotoDetailInline extends React.Component {
             backgroundColor: 'rgb(0, 0, 0)',
             zIndex: 1400
           }}
-          onTouchTap={this.props.closePhotoDetail}
+          onTouchTap={this.close}
         />
       </Paper>
     )
@@ -334,7 +371,9 @@ class PhotoDetailInline extends React.Component {
 
 export default class PhotoDetail extends React.Component {
   renderLayer = () => (
-    <PhotoDetailInline {...this.props} />
+    <ReactTransitionGroup>
+      { this.props.open && <PhotoDetailInline {...this.props} /> }
+    </ReactTransitionGroup>
   )
 
   render() {
@@ -347,6 +386,6 @@ export default class PhotoDetail extends React.Component {
 PhotoDetail.propTypes = {
   style: PropTypes.object.isRequired,
   items: PropTypes.array.isRequired,
-  closePhotoDetail: PropTypes.func.isRequired,
+  onRequestClose: PropTypes.func.isRequired,
   seqIndex: PropTypes.number.isRequired
 }

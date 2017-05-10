@@ -29,11 +29,15 @@ class Media extends Base {
     this.state = {
       media: null
     }
+    this.height = 0
+    this.width = 0
     this.allPhotos = []
     this.photoDates = []
     this.photoMapDates = []
-    this.height = 0
-    this.width = 0
+    this.allHeight = []
+    this.rowHeightSum = 0
+    this.indexHeightSum = []
+    this.maxScrollTop = 0
     this.setPhotoInfo = this.photoInfo.bind(this)
     this.getTimeline = this.timeline.bind(this)
   }
@@ -45,10 +49,17 @@ class Media extends Base {
   photoInfo(height, width, media) {
     /* mediaStore were sorted by date in Node */
     if ((this.allPhotos !== media || this.width !== width) && width) {
+      /* init */
       this.width = width
       this.allPhotos = media
       this.photoDates = []
       this.photoMapDates = []
+      this.allHeight = []
+      this.rowHeightSum = 0
+      this.indexHeightSum = []
+      this.maxScrollTop = 0
+
+      /* calculate photoMapDates and photoDates */
       const MAX = Math.floor((width - 60) / 216) - 1
       let MaxItem = MAX
       let lineIndex = 0
@@ -101,25 +112,21 @@ class Media extends Base {
           }
         })
       }
+
       /* simulate large list */
       for (let i = 1; i <= 0; i++) {
         this.photoMapDates.push(...this.photoMapDates)
       }
+
+      /* calculate each row's heigth and their sum */
+      this.photoMapDates.forEach((list) => {
+        const tmp = 216 * Math.ceil(list.photos.length / Math.floor((width - 60) / 216)) + !!list.first * 40
+        this.allHeight.push(tmp)
+        this.rowHeightSum += tmp
+        this.indexHeightSum.push(this.rowHeightSum)
+      })
+      this.maxScrollTop = this.rowHeightSum - height + 16 * 2
     }
-
-    /* calculate each row's heigth and their sum */
-    this.allHeight = []
-    this.rowHeightSum = 0
-    this.indexHeightSum = []
-    this.photoMapDates.forEach((list) => {
-      const tmp = 216 * Math.ceil(list.photos.length / Math.floor((width - 60) / 216)) + !!list.first * 40
-      this.allHeight.push(tmp)
-      this.rowHeightSum += tmp
-      this.indexHeightSum.push(this.rowHeightSum)
-    })
-
-    this.maxScrollTop = this.rowHeightSum - height + 16 * 2
-
     return {
       allPhotos: this.allPhotos,
       photoDates: this.photoDates,
@@ -189,6 +196,7 @@ class Media extends Base {
       if (top > (height - 46) && index !== month.size - 1) date = null
       return [date, top, zIndex]
     })
+    debug('photoDates', photoDates, timeline)
     return timeline
   }
 
