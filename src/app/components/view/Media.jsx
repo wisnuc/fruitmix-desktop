@@ -2,11 +2,13 @@ import React from 'react'
 import Radium from 'radium'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
+import { TweenMax } from 'gsap'
 import { IconButton } from 'material-ui'
 import { blue800, indigo700, indigo500, teal500 } from 'material-ui/styles/colors'
 import PhotoIcon from 'material-ui/svg-icons/image/photo'
 import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
 import AddAPhoto from 'material-ui/svg-icons/image/add-to-photos'
+import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 
 import Base from './Base'
 import PhotoApp from '../photo/PhotoApp'
@@ -29,13 +31,18 @@ class Media extends Base {
     this.state = {
       media: null
     }
+    this.height = 0
+    this.width = 0
     this.allPhotos = []
     this.photoDates = []
     this.photoMapDates = []
-    this.height = 0
-    this.width = 0
+    this.allHeight = []
+    this.rowHeightSum = 0
+    this.indexHeightSum = []
+    this.maxScrollTop = 0
     this.setPhotoInfo = this.photoInfo.bind(this)
     this.getTimeline = this.timeline.bind(this)
+    this.setAnimation = this.animation.bind(this)
   }
 
   requestData(eq) {
@@ -45,10 +52,17 @@ class Media extends Base {
   photoInfo(height, width, media) {
     /* mediaStore were sorted by date in Node */
     if ((this.allPhotos !== media || this.width !== width) && width) {
+      /* init */
       this.width = width
       this.allPhotos = media
       this.photoDates = []
       this.photoMapDates = []
+      this.allHeight = []
+      this.rowHeightSum = 0
+      this.indexHeightSum = []
+      this.maxScrollTop = 0
+
+      /* calculate photoMapDates and photoDates */
       const MAX = Math.floor((width - 60) / 216) - 1
       let MaxItem = MAX
       let lineIndex = 0
@@ -101,25 +115,21 @@ class Media extends Base {
           }
         })
       }
+
       /* simulate large list */
       for (let i = 1; i <= 0; i++) {
         this.photoMapDates.push(...this.photoMapDates)
       }
+
+      /* calculate each row's heigth and their sum */
+      this.photoMapDates.forEach((list) => {
+        const tmp = 216 * Math.ceil(list.photos.length / Math.floor((width - 60) / 216)) + !!list.first * 40
+        this.allHeight.push(tmp)
+        this.rowHeightSum += tmp
+        this.indexHeightSum.push(this.rowHeightSum)
+      })
+      this.maxScrollTop = this.rowHeightSum - height + 16 * 2
     }
-
-    /* calculate each row's heigth and their sum */
-    this.allHeight = []
-    this.rowHeightSum = 0
-    this.indexHeightSum = []
-    this.photoMapDates.forEach((list) => {
-      const tmp = 216 * Math.ceil(list.photos.length / Math.floor((width - 60) / 216)) + !!list.first * 40
-      this.allHeight.push(tmp)
-      this.rowHeightSum += tmp
-      this.indexHeightSum.push(this.rowHeightSum)
-    })
-
-    this.maxScrollTop = this.rowHeightSum - height + 16 * 2
-
     return {
       allPhotos: this.allPhotos,
       photoDates: this.photoDates,
@@ -189,6 +199,7 @@ class Media extends Base {
       if (top > (height - 46) && index !== month.size - 1) date = null
       return [date, top, zIndex]
     })
+    // debug('photoDates', photoDates, timeline)
     return timeline
   }
 
@@ -219,11 +230,11 @@ class Media extends Base {
   }
 
   navEnter() {
-    console.log('home enter')
+    console.log('media enter')
   }
 
   navLeave() {
-    console.log('home leave')
+    console.log('media leave')
   }
 
   navGroup() {
@@ -262,6 +273,34 @@ class Media extends Base {
     return 400
   }
 
+  animation(component, status) {
+    if (component === 'NavigationMenu') {
+      /* add animation to NavigationMenu */
+      const transformItem = this.refNavigationMenu
+      const time = 0.4
+      const ease = global.Power4.easeOut
+      if (status === 'In') {
+        debug('animation, IN')
+        TweenMax.to(transformItem, time, { rotation: 180, opacity: 1, ease })
+      }
+      if (status === 'Out') {
+        debug('animation, OUT')
+        TweenMax.to(transformItem, time, { rotation: -180, opacity: 0, ease })
+      }
+    }
+  }
+
+  renderNavigationMenu({ style, onTouchTap }) {
+    const CustomStyle = Object.assign(style, { opacity: 1 })
+    return (
+      <div style={CustomStyle} ref={ref => (this.refNavigationMenu = ref)}>
+        <IconButton onTouchTap={onTouchTap}>
+          <NavigationMenu color="#FFF" />
+        </IconButton>
+      </div>
+    )
+  }
+
   renderTitle({ style }) {
     return (
       <div style={style}>
@@ -278,9 +317,6 @@ class Media extends Base {
     )
   }
 
-  renderDetail({ style }) {
-  }
-
   renderContent() {
     // debug('renderContent')
     return (<PhotoApp
@@ -290,6 +326,7 @@ class Media extends Base {
       ipcRenderer={ipcRenderer}
       apis={this.apis}
       requestData={this.requestData}
+      setAnimation={this.setAnimation}
     />)
   }
 }

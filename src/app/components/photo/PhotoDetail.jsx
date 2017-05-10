@@ -5,6 +5,7 @@ import { Paper, CircularProgress, IconButton, SvgIcon } from 'material-ui'
 import RenderToLayer from 'material-ui/internal/RenderToLayer'
 import keycode from 'keycode'
 import { TweenMax } from 'gsap'
+import ReactTransitionGroup from 'react-addons-transition-group'
 
 const debug = Debug('component:photoApp:PhotoDetail')
 
@@ -28,11 +29,19 @@ class PhotoDetailInline extends React.Component {
     this.state = {
       direction: null
     }
+    this.close = () => {
+      this.props.onRequestClose()
+    }
 
     this.requestNext = (currentIndex) => {
       /* hide image and resieze container */
       if (this.refImage) {
         this.refImage.style.display = 'none'
+        this.refImageDetial.style.display = 'none'
+        this.refImageDetial.src = ''
+        this.refImage.style.transform = ''
+        this.refImage.height = this.photoHeight
+        this.refImage.width = this.photoWidth
         this.refContainer.style.height = `${this.photoHeight}px`
         this.refContainer.style.width = `${this.photoWidth}px`
       }
@@ -44,7 +53,6 @@ class PhotoDetailInline extends React.Component {
       this.session = UUID.v4()
       this.digest = this.props.items[currentIndex][0]
       this.photo = this.props.items[currentIndex][1]
-      // debug('this.photo', this.photo)
       this.props.ipcRenderer.send('mediaShowThumb', this.session, this.digest, 210, 210)
       this.forceUpdate()
     }
@@ -60,9 +68,22 @@ class PhotoDetailInline extends React.Component {
 
     this.updatePath = (event, session, path) => {
       if (this.session === session) {
-        // debug('got media!')
         clearTimeout(this.time)
-        this.time = setTimeout(() => (this.refImage.src = path), 100)
+        this.time = setTimeout(() => {
+          debug('this.updateThumbPath 2', this.refImage.height, this.refImage.width)
+          debug('this.updatePath 1', this.refImageDetial.height, this.refImageDetial.width)
+          if (this.exifOrientation % 2 === 0) {
+            this.refImageDetial.height = this.photoWidth
+            this.refImageDetial.width = this.photoHeight
+          } else {
+            this.refImageDetial.height = this.photoHeight
+            this.refImageDetial.width = this.photoWidth
+          }
+          this.refImageDetial.src = path
+          this.refTransition.style.transform = this.degRotate
+          this.refImageDetial.style.display = ''
+          debug('this.updatePath 2', this.refImageDetial.height, this.refImageDetial.width)
+        }, 150)
       }
     }
 
@@ -75,8 +96,9 @@ class PhotoDetailInline extends React.Component {
         this.refContainer.style.height = `${this.photoHeight}px`
         this.refContainer.style.width = `${this.photoWidth}px`
 
+        debug('this.updateThumbPath 1', this.refImage.height, this.refImage.width)
+
         /* get detail image */
-        // debug('got thumb!')
         this.props.ipcRenderer.send('mediaShowImage', this.session, this.digest)
       }
     }
@@ -99,8 +121,22 @@ class PhotoDetailInline extends React.Component {
     this.calcSize = () => {
       this.clientHeight = window.innerHeight
       this.clientWidth = window.innerWidth
-      this.photoHeight = this.photo.metadata.height
-      this.photoWidth = this.photo.metadata.width
+
+      /* handle the exifOrientation */
+      this.exifOrientation = this.photo.metadata.exifOrientation
+      this.degRotate = ''
+      if (this.exifOrientation) {
+        this.degRotate = `rotate(${(this.exifOrientation - 1) * 90}deg)`
+      }
+
+      if (this.exifOrientation % 2) {
+        this.photoHeight = this.photo.metadata.height
+        this.photoWidth = this.photo.metadata.width
+      } else {
+        this.photoHeight = this.photo.metadata.width
+        this.photoWidth = this.photo.metadata.height
+      }
+
       const HWRatio = this.photoHeight / this.photoWidth
       if (this.photoHeight > this.clientHeight) {
         this.photoHeight = this.clientHeight
@@ -112,6 +148,28 @@ class PhotoDetailInline extends React.Component {
       } else if (this.photoWidth > this.clientWidth) {
         this.photoWidth = this.clientWidth
         this.photoHeight = this.photoWidth * HWRatio
+      }
+    }
+
+    /* animation */
+    this.animation = (status) => {
+      const transformItem = this.refReturn
+      const root = this.refRoot
+      const overlay = this.refOverlay
+      const time = 0.2
+      const ease = global.Power4.easeOut
+      debug('transformItem, overlay', transformItem, root, ease)
+
+      if (status === 'In') {
+        TweenMax.from(overlay, time, { opacity: 0, ease })
+        TweenMax.from(transformItem, time, { rotation: 180, opacity: 0, ease })
+        TweenMax.from(root, time, { opacity: 0, ease })
+      }
+
+      if (status === 'Out') {
+        TweenMax.to(overlay, time, { opacity: 0, ease })
+        TweenMax.to(transformItem, time, { rotation: 180, opacity: 0, ease })
+        TweenMax.to(root, time, { opacity: 0, ease })
       }
     }
   }
@@ -130,16 +188,35 @@ class PhotoDetailInline extends React.Component {
   }
 
   componentWillUnmount() {
+    clearTimeout(this.enterTimeout)
+    clearTimeout(this.leaveTimeout)
     this.props.ipcRenderer.removeListener('getThumbSuccess', this.updateThumbPath)
     this.props.ipcRenderer.removeListener('donwloadMediaSuccess', this.updatePath)
     this.props.ipcRenderer.send('mediaHideThumb', this.session)
     this.props.ipcRenderer.send('mediaHideImage', this.session)
   }
 
+  /* ReactTransitionGroup */
+
+  componentWillEnter(callback) {
+    this.componentWillAppear(callback)
+  }
+
+  componentWillAppear(callback) {
+    this.props.setAnimation('NavigationMenu', 'Out')
+    this.animation('In')
+    this.enterTimeout = setTimeout(callback, 200) // matches transition duration
+  }
+
+  componentWillLeave(callback) {
+    this.props.setAnimation('NavigationMenu', 'In')
+    this.animation('Out')
+    this.leaveTimeout = setTimeout(callback, 200) // matches transition duration
+  }
+
   renderDetail() {
     /* calculate photoHeight and photoWidth */
     this.calcSize()
-
     return (
       <div
         style={{
@@ -154,23 +231,35 @@ class PhotoDetailInline extends React.Component {
         <div
           ref={ref => (this.refContainer = ref)}
           style={{
-            position: 'relative',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            position: 'relative',
             height: 0,
             width: 0,
             backgroundColor: 'black',
             overflow: 'hidden',
-            transition: 'all 350ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
+            transition: 'all 200ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
           }}
         >
-          <div ref={ref => (this.refTransition = ref)}>
+          <div style={{ position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
             <img
               style={{ display: 'none' }}
               ref={ref => (this.refImage = ref)}
               height={this.photoHeight}
               width={this.photoWidth}
+              alt="ThumbImage"
+            />
+          </div>
+          <div
+            style={{ position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            ref={ref => (this.refTransition = ref)}
+          >
+            <img
+              style={{ display: 'none' }}
+              ref={ref => (this.refImageDetial = ref)}
+              height={this.exifOrientation % 2 === 0 ? this.photoWidth : this.photoHeight}
+              width={this.exifOrientation % 2 === 0 ? this.photoHeight : this.photoWidth}
               alt="DetailImage"
             />
           </div>
@@ -182,7 +271,8 @@ class PhotoDetailInline extends React.Component {
   render() {
     // debug('currentImage', this.photo)
     return (
-      <Paper
+      <div
+        ref={ref => (this.refRoot = ref)}
         style={{
           position: 'fixed',
           width: '100%',
@@ -214,18 +304,20 @@ class PhotoDetailInline extends React.Component {
           {/* main image */}
           { this.renderDetail() }
 
-          {/* close Button */}
+          {/* return Button */}
           <IconButton
-            onTouchTap={this.props.closePhotoDetail}
+            onTouchTap={this.close}
             style={{
               position: 'fixed',
               top: 12,
               left: 12
             }}
           >
-            <svg width={24} height={24} viewBox="0 0 24 24" fill="white">
-              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
-            </svg>
+            <div ref={ref => (this.refReturn = ref)} >
+              <svg width={24} height={24} viewBox="0 0 24 24" fill="white">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+              </svg>
+            </div>
           </IconButton>
 
           {/* left Button */}
@@ -267,8 +359,9 @@ class PhotoDetailInline extends React.Component {
           </IconButton>
         </div>
 
-        {/* overLay */}
+        {/* overlay */}
         <div
+          ref={ref => (this.refOverlay = ref)}
           style={{
             position: 'fixed',
             height: '100%',
@@ -278,9 +371,9 @@ class PhotoDetailInline extends React.Component {
             backgroundColor: 'rgb(0, 0, 0)',
             zIndex: 1400
           }}
-          onTouchTap={this.props.closePhotoDetail}
+          onTouchTap={this.close}
         />
-      </Paper>
+      </div>
     )
   }
 }
@@ -291,7 +384,9 @@ class PhotoDetailInline extends React.Component {
 
 export default class PhotoDetail extends React.Component {
   renderLayer = () => (
-    <PhotoDetailInline {...this.props} />
+    <ReactTransitionGroup>
+      { this.props.open && <PhotoDetailInline {...this.props} /> }
+    </ReactTransitionGroup>
   )
 
   render() {
@@ -304,6 +399,6 @@ export default class PhotoDetail extends React.Component {
 PhotoDetail.propTypes = {
   style: PropTypes.object.isRequired,
   items: PropTypes.array.isRequired,
-  closePhotoDetail: PropTypes.func.isRequired,
+  onRequestClose: PropTypes.func.isRequired,
   seqIndex: PropTypes.number.isRequired
 }

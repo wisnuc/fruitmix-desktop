@@ -2,6 +2,8 @@ import React from 'react'
 
 import { teal600, indigo600, lightBlue600, cyan500, green600, lightGreen700, lime800, blue500, brown500, purple300, deepPurple500, indigo300, red400, orange600 } from 'material-ui/styles/colors'
 import { pinkA200 } from 'material-ui/styles/colors'
+import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
+import { IconButton } from 'material-ui'
 import EventEmitter from 'eventemitter3'
 
 
@@ -105,6 +107,16 @@ class Base extends EventEmitter {
 
   renderTitle({style}) {
     return <div style={style}>{this.menuName()}</div>
+  }
+
+  renderNavigationMenu({style, onTouchTap}) {
+    return (
+      <div style={style}>
+        <IconButton onTouchTap={onTouchTap}>
+          <NavigationMenu color='#FFF' />
+        </IconButton>
+      </div>
+    )
   }
 
   renderToolBar({style}) {

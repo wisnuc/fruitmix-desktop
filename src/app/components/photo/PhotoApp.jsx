@@ -96,7 +96,7 @@ class PhotoApp extends React.Component {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: 'calc(100% - 72px)',
+                width: 'calc(100% - 80px)',
                 height: 'calc(100% - 64px)'
               }}
             >
@@ -106,7 +106,7 @@ class PhotoApp extends React.Component {
               <PhotoList
                 style={{
                   position: 'fixed',
-                  width: 'calc(100% - 72px)',
+                  width: 'calc(100% - 80px)',
                   height: 'calc(100% - 64px)',
                   backgroundColor: '#FFFFFF',
                   display: 'flex',
@@ -148,22 +148,21 @@ class PhotoApp extends React.Component {
         }
 
         {/* 查看大图 */}
-        {
-          this.state.openDetail ?
-            <PhotoDetail
-              closePhotoDetail={() => this.setState({ openDetail: false })}
-              style={{
-                position: 'fixed',
-                left: 0,
-                top: 0,
-                width: '100%',
-                height: '100%'
-              }}
-              items={this.props.media}
-              seqIndex={this.seqIndex}
-              ipcRenderer={this.props.ipcRenderer}
-            /> : <div />
-        }
+        <PhotoDetail
+          onRequestClose={() => this.setState({ openDetail: false })}
+          open={this.state.openDetail}
+          style={{
+            position: 'fixed',
+            left: 0,
+            top: 0,
+            width: '100%',
+            height: '100%'
+          }}
+          items={this.props.media}
+          seqIndex={this.seqIndex}
+          ipcRenderer={this.props.ipcRenderer}
+          setAnimation={this.props.setAnimation}
+        />
 
         {/* 上传图片 */}
         {/*

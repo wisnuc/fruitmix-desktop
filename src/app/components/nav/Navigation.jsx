@@ -4,7 +4,6 @@ import { ipcRenderer } from 'electron'
 import Radium from 'radium'
 import { Paper, IconButton, Menu, Drawer, Divider } from 'material-ui'
 
-import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import SocialNotifications from 'material-ui/svg-icons/social/notifications'
 import ActionInfo from 'material-ui/svg-icons/action/info'
 import NavigationExpandMore from 'material-ui/svg-icons/navigation/expand-more'
@@ -104,7 +103,7 @@ class NavViews extends Component {
   }
 
   componentWillUnmount() {
-    ipcRenderer.removeEventListener('UPDATE_TRANSMISSION', this.updateTransmissionBound)
+    ipcRenderer.removeListener('UPDATE_TRANSMISSION', this.updateTransmissionBound)
   }
 
   componentDidUpdate() {
@@ -112,9 +111,9 @@ class NavViews extends Component {
   }
 
   navTo(nav) {
+    this.setState({ nav, openDrawer: false })
     if (nav === this.state.nav) return
     if (this.state.nav) this.views[this.state.nav].navLeave()
-    this.setState({ nav, openDrawer: false })
     this.props.setPalette(this.views[nav].primaryColor(), this.views[nav].accentColor())
     this.views[nav].navEnter()
   }
@@ -276,9 +275,8 @@ class NavViews extends Component {
           
           <div style={{flex: '0 0 12px'}} />
 
-          <IconButton onTouchTap={() => this.openDrawer(true)}>
-            <NavigationMenu color='#FFF' />
-          </IconButton>
+          {/** NavigationMenu ({ style, onTouchTap })**/}
+          { view.renderNavigationMenu({ style: {}, onTouchTap: () => this.openDrawer(true) }) }
 
           <div style={{flex: '0 0 20px'}} />
          
@@ -368,7 +366,7 @@ class NavViews extends Component {
             { view.showQuickNav() && this.renderQuickNavs() } 
 
             {/* content */}
-            <div style={{flexGrow: 1, height: '100%'}}>
+            <div style={{flexGrow: 1, height: '100%', marginLeft: 8, marginTop: 8}}>
               { view.renderContent() }
             </div>
           </div>

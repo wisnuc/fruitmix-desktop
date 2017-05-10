@@ -150,7 +150,7 @@ class AdminDrives extends Base {
       <div style={{position: 'relative', width: '100%', height: '100%'}}>
 
         <FloatingActionButton 
-          style={{position: 'absolute', top: -28, left: 24}}
+          style={{position: 'absolute', top: -36, left: 24}}
           secondary={true}
           disabled={!users || !drives}
           onTouchTap={() => this.setState({newDrive: true})}

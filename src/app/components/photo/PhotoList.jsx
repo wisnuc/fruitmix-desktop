@@ -45,7 +45,7 @@ class PhotoList extends Component {
       const currentIndex = this.indexHeightSum.findIndex(data => data > list.scrollTop + 200)
       const percentage = list.scrollTop / this.maxScrollTop
       this.date = this.photoMapDates[currentIndex].date
-      debug('this.timeline', this.timeline)
+      // debug('this.timeline', this.timeline)
       if (this.firstScroll) {
         this.firstScroll = false
         this.forceUpdate()
@@ -140,17 +140,18 @@ class PhotoList extends Component {
   }
 
   render() {
-    debug('render PhotoList, this.props', this.props, this.state)
+    // debug('render PhotoList, this.props', this.props, this.state)
     document.body.onmousemove = this.onMouseMove
     document.body.onmouseup = () => (this.onMouseDown = false)
     return (
-      <Paper style={this.props.style}>
+      <div style={this.props.style}>
         {/* 图片列表 */}
         <div style={{ display: 'flex', width: '100%', height: '100%' }} >
           <AutoSizer>
             {({ height, width }) => {
               /* get PhotoInfo */
               const PhotoInfo = this.props.setPhotoInfo(height, width, this.props.media)
+              debug('PhotoInfo', PhotoInfo)
 
               /* set global variant */
               this.height = height
@@ -194,7 +195,7 @@ class PhotoList extends Component {
                     onScroll={this.onScroll}
                     scrollTop={this.scrollTop}
                     overscanRowCount={10}
-                    style={{ padding: 16, outline: 'none' }}
+                    style={{ outline: 'none' }}
                   />
                 </div>
               )
@@ -294,7 +295,7 @@ class PhotoList extends Component {
           />
         </div>
 
-      </Paper>
+      </div>
     )
   }
 }
