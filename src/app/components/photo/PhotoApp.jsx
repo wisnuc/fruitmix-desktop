@@ -96,7 +96,7 @@ class PhotoApp extends React.Component {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: 'calc(100% - 72px)',
+                width: 'calc(100% - 80px)',
                 height: 'calc(100% - 64px)'
               }}
             >
@@ -106,7 +106,7 @@ class PhotoApp extends React.Component {
               <PhotoList
                 style={{
                   position: 'fixed',
-                  width: 'calc(100% - 72px)',
+                  width: 'calc(100% - 80px)',
                   height: 'calc(100% - 64px)',
                   backgroundColor: '#FFFFFF',
                   display: 'flex',

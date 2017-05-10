@@ -144,7 +144,7 @@ class PhotoList extends Component {
     document.body.onmousemove = this.onMouseMove
     document.body.onmouseup = () => (this.onMouseDown = false)
     return (
-      <Paper style={this.props.style}>
+      <div style={this.props.style}>
         {/* 图片列表 */}
         <div style={{ display: 'flex', width: '100%', height: '100%' }} >
           <AutoSizer>
@@ -195,7 +195,7 @@ class PhotoList extends Component {
                     onScroll={this.onScroll}
                     scrollTop={this.scrollTop}
                     overscanRowCount={10}
-                    style={{ padding: 16, outline: 'none' }}
+                    style={{ outline: 'none' }}
                   />
                 </div>
               )
@@ -295,7 +295,7 @@ class PhotoList extends Component {
           />
         </div>
 
-      </Paper>
+      </div>
     )
   }
 }

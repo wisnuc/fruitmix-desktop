@@ -385,7 +385,7 @@ class NavViews extends Component {
             { view.showQuickNav() && this.renderQuickNavs() } 
 
             {/* content */}
-            <div style={{flexGrow: 1, height: '100%'}}>
+            <div style={{flexGrow: 1, height: '100%', marginLeft: 8, marginTop: 8}}>
               { view.renderContent() }
             </div>
           </div>
