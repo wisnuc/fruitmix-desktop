@@ -115,6 +115,11 @@ class TaskManager {
 		
 
 		this.countSpeed = setInterval(() => {
+			if (this.pause) {
+				this.speed = '0k/秒'
+				this.restTime = '--'
+				return 
+			}
 			let s = (this.completeSize - this.lastTimeSize) / 1
 			this.speed = utils.formatSize(s) + ' / 秒'
 			this.restTime = utils.formatSeconds((this.size - this.completeSize) / s)
@@ -271,11 +276,12 @@ class TaskManager {
 	}
 
 	hashSchedule() {
-		// console.log('HASH调度...')
+		console.log('')
+		console.log('HASH调度...')
 		if (this.lastFileIndex === -1) return this.recordInfor('任务列表中不包含文件')
 		if (this.hashing.length >= 2) return this.recordInfor('任务的HASH队列已满')
 		if (this.hashIndex === this.lastFileIndex + 1) return this.recordInfor(this.name + ' 所有文件hash调度完成')
-		// this.recordInfor('正在HASH第 ' + this.hashIndex + ' 个文件')
+		this.recordInfor('正在HASH第 ' + this.hashIndex + ' 个文件 : ' + this.worklist[this.hashIndex].name)
 		let obj = this.worklist[this.hashIndex]
 		if (obj.type === 'folder' || obj.stateName === 'finish') this.hashIndex++
 		else{
@@ -293,7 +299,7 @@ class TaskManager {
 		if (this.finishCount === this.worklist.length) return this.recordInfor('文件全部上传结束')
 		if (this.uploading.length >=2 ) return this.recordInfor('任务上传队列已满')
 		if (this.fileIndex === this.worklist.length) return this.recordInfor('所有文件上传调度完成')
-		this.recordInfor('正在调度第 ' + (this.fileIndex + 1) + ' 个文件,总共 ' + this.worklist.length + ' 个')
+		this.recordInfor('正在调度第 ' + (this.fileIndex + 1) + ' 个文件,总共 ' + this.worklist.length + ' 个 : ' + this.worklist[this.fileIndex].name )
 
 		let _this = this
 		let obj = this.worklist[this.fileIndex]
@@ -688,6 +694,7 @@ class UploadFileSTM extends STM {
 		let _this = this
     let transform = new stream.Transform({
       transform: function(chunk, encoding, next) {
+      	_this.partFinishSize += chunk.length
         _this.wrapper.manager.completeSize += chunk.length
         this.push(chunk)
         next()
@@ -710,7 +717,7 @@ class UploadFileSTM extends STM {
 		}
 
 		this.handle = http.request(options).on('error',(err) => {
-			console.log(err, res.statusCode)
+			console.log(err)
 		}).on('response', (res) => {
 			if(res.statusCode == 200) {
 				removeOutOfRunningQueue(this)
@@ -793,15 +800,19 @@ class UploadFileSTM extends STM {
 		this.handle = http.request(options).on('error',(err) => {
 			this.wrapper.manager.completeSize -= this.partFinishSize
 			this.partFinishSize = 0
-			console.log('第' + seek +'块 ' + 'req : err')
-			console.log(err)
+			console.log('第' + seek +'块 ' + 'req : err', err)
 		}).on('response',(res) => {
 			console.log('第' + seek +'块 ' + 'req : response')
 			if(res.statusCode == 200) return this.partUploadFinish()
+			else {
+				console.log(res.statusCode + ' !!!!!!!!!!!!!!!!!!!')
+				wrapper.manager.completeSize -= (this.partFinishSize + wrapper.segmentsize * wrapper.seek)
+				this.partFinishSize = 0
+				seek = 0
+				return this.createUploadTask()
+			}
 		}).on('abort', () => {
 			console.log('第' + seek +'块 ' + 'req : abort')
-		}).on('aborted', () => {
-			console.log('第' + seek +'块 ' + 'req : aborted')
 		})
 
 		tempStream.pipe(this.handle)
@@ -821,14 +832,9 @@ class UploadFileSTM extends STM {
 		if (this.wrapper.stateName !== 'running') return
 		this.wrapper.stateName = 'pause'
 		sendMsg()
-		if (this.handle && this.wrapper.taskid) this.handle.abort()
-		if (!this.wrapper.taskid) {
-			console.log('该文件传输没有使用新接口，取消上传，数据清空')
-			// this.wrapper.manager.completeSize -= this.wrapper.seek
-		}else {
-			this.wrapper.manager.completeSize -= this.partFinishSize
-			this.partFinishSize = 0
-		}
+		if (this.handle) this.handle.abort()
+		this.wrapper.manager.completeSize -= this.partFinishSize
+		this.partFinishSize = 0
 		this.wrapper.recordInfor(this.wrapper.name + '暂停了')
 		removeOutOfRunningQueue(this)
 	}

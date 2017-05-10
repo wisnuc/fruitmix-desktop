@@ -329,6 +329,7 @@ class NavViews extends Component {
   }
 
   render () {
+
     if (!this.state.nav) return null
 
     const style = {

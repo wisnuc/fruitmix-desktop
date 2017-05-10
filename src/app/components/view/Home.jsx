@@ -186,6 +186,10 @@ class Home extends Base {
     this.setState({ createNewFolder: true }) 
   }
 
+  download() {
+    
+  }
+
   showContextMenu(clientX, clientY) {
     if (this.select.state.ctrl || this.select.state.shift) return
     this.setState({ 
@@ -272,7 +276,7 @@ class Home extends Base {
           onRequestClose={() => this.hideContextMenu()}
         >
           <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
-          <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
+          <MenuItem primaryText='下载' onTouchTap={this.download.bind(this)} /> 
           <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
           <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
           <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
