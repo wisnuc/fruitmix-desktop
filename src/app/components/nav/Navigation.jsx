@@ -99,7 +99,8 @@ class NavViews extends Component {
   componentDidMount() {
     this.navTo('home')
     ipcRenderer.send('GET_TRANSMISSION')
-    ipcRenderer.on('UPDATE_TRANSMISSION', this.updateTransmissionBound)
+    // ipcRenderer.on('UPDATE_TRANSMISSION', this.updateTransmissionBound)
+    ipcRenderer.on('UPDATE_TRANSMISSION', (e, type, userTasks, finishTasks) => console.log(userTasks, finishTasks))
   }
 
   componentWillUnmount() {
