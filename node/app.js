@@ -4,6 +4,8 @@ import os from 'os'
 
 import Debug from 'debug'
 import { app } from 'electron'
+import { autoUpdater } from 'electron-updater'
+import log from 'electron-log'
 
 import store from './serve/store/store'
 import configObserver from './lib/config'
@@ -89,6 +91,8 @@ app.on('ready', function() {
         console.log('download path is : ' + data)
         store.dispatch({type:'CONFIG_SET_DOWNLOAD_PATH',data})
       }
+
+      autoUpdater.checkForUpdates()
     }
   })
 
@@ -108,3 +112,36 @@ app.on('ready', function() {
 
 app.on('window-all-closed', () => app.quit())
 
+autoUpdater.logger = log;
+autoUpdater.logger.transports.file.level = 'info';
+log.info('App starting...');
+
+var sendStatusToWindow = text => {
+  log.info(text)
+  getMainWindow().webContents.send('message', text)
+}
+
+autoUpdater.on('checking-for-update', () => {
+  sendStatusToWindow('Checking for update...')
+})
+
+autoUpdater.on('update-available', (ev, info) => {
+  sendStatusToWindow('Update available.')
+})
+
+autoUpdater.on('update-not-available', (ev, info) => {
+  sendStatusToWindow('Update not available.')
+})
+
+autoUpdater.on('error', (ev, err) => {
+  sendStatusToWindow(err)
+  sendStatusToWindow('Error in auto-updater.')
+})
+
+autoUpdater.on('download-progress', (ev, progressObj) => {
+  sendStatusToWindow('Download progress...')
+})
+
+autoUpdater.on('update-downloaded', (ev, info) => {
+  sendStatusToWindow('Update downloaded; will install in 5 seconds')
+})

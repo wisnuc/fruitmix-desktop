@@ -2,6 +2,8 @@
   "name": "wisnuc",
   "version": "1.0.0",
   "description": "wisnuc",
+  "author": "wisnuc <support@winsuntech.cn>",
+  "repository": "https://github.com/wisnuc/fruitmix-desktop",
   "private": true,
   "main": "main.js",
   "scripts": {
