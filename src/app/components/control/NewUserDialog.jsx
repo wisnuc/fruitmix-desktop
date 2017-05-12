@@ -17,7 +17,13 @@ class NewUserDialog extends PureComponent {
       username: '',
       password: '',
       passwordAgain: '',
-      message: ''
+      message: '',
+      maxLength: 16,
+      usernameLengthHint:'0/16',
+      usernameErrorText:'',
+      passwordErrorText:'',
+      fullLength: false,
+      passwordAgainErrorText:''
     }
 
     this.fire = () => {
@@ -35,21 +41,48 @@ class NewUserDialog extends PureComponent {
   }
 
   updateUsername(text) {
-    this.setState({ username: text })
+    this.setState({ username: text }, () => {
+      if (this.state.username.length === 0)
+        this.setState({ usernameErrorText: '用户名不能为空' })
+      else if (this.props.apis.adminUsers.data.users.every(u => u.username !== this.state.username))
+        this.setState({ usernameErrorText: '' })
+      else 
+        this.setState({ usernameErrorText: '用户名已存在' })
+      this.setState({ usernameLengthHint: this.state.username.length + '/16' })
+      if (this.state.username.length === this.state.maxLength)
+        this.setState({ fullLength: true })
+      else 
+        this.setState({ fullLength: false })
+    })
   }
 
   updatePassword(text) {
-    this.setState({ password: text })
+    this.setState({ password: text }, () => {
+      if (this.state.password.length === 0)
+        this.setState({ passwordErrorText: '密码不能为空' })
+      else 
+        this.setState({ passwordErrorText: '' })
+      if (this.state.password !== this.state.passwordAgain)
+        this.setState({ passwordAgainErrorText: '两次密码不一致' })
+      else
+        this.setState({ passwordAgainErrorText: '' })
+    })
   }
 
   updatePasswordAgain(text) {
-    this.setState({ passwordAgain: text })
+    this.setState({ passwordAgain: text }, () => {
+      if (this.state.passwordAgain !== this.state.password)
+        this.setState({ passwordAgainErrorText: '两次密码不一致' })
+      else
+        this.setState({ passwordAgainErrorText: '' })
+    })
   }
 
   inputOK() {
     return this.state.username.length > 0
       && this.state.password.length > 0
-      && this.state.password === this.state.passwordAgain 
+      && this.state.password === this.state.passwordAgain
+      && !this.state.usernameErrorText
   }
 
   render() {
@@ -62,11 +95,20 @@ class NewUserDialog extends PureComponent {
           { this.state.message }
         </div>
 
-        <div style={{height: 56, display: 'flex'}}>
+        <div style={{height: 56, display: 'flex', marginBottom:10, position:'relative' }}>
+          <span style={{
+            position:'absolute',
+            bottom:-3,
+            right: 3,
+            fontSize:12,
+            color: this.state.fullLength ? 'rgb(244, 67, 54)' : 'rgb(103, 58, 183)' 
+          }}>{this.state.usernameLengthHint}</span>
           <IconBox style={{marginLeft: -12}} size={48} icon={SocialPerson} />
           <TextField 
             fullWidth={true} 
             hintText="用户名" 
+            maxLength={this.state.maxLength}
+            errorText={this.state.usernameErrorText}
             onChange={e => this.updateUsername(e.target.value)} 
             ref={input => {
               if (input && this.state.focusFirst) {
@@ -77,13 +119,15 @@ class NewUserDialog extends PureComponent {
           />
         </div>
 
-        <div style={{height: 56, display: 'flex'}}>
+        <div style={{height: 56, display: 'flex', marginBottom:10}}>
           <IconBox style={{marginLeft: -12}} size={48} icon={CommunicationVpnKey} />
           <TextField 
             style={{flexGrow: 1}}
             fullWidth={true} 
             hintText="输入密码" 
+            maxLength={this.state.maxLength}
             type="password"
+            errorText={this.state.passwordErrorText}
             onChange={e => this.updatePassword(e.target.value)} 
           />
         </div>
@@ -93,7 +137,9 @@ class NewUserDialog extends PureComponent {
           <TextField 
             fullWidth={true} 
             hintText="再次输入密码" 
+            maxLength={this.state.maxLength}
             type="password"
+            errorText={this.state.passwordAgainErrorText}
             onChange={e => this.updatePasswordAgain(e.target.value)} 
           />
         </div>
