@@ -26,6 +26,7 @@ class PhotoList extends Component {
     }
 
     this.firstScroll = true
+    this.currentDigest = ''
 
     this.onRowTouchTap = (e, index) => {
       e.preventDefault()  // important!
@@ -44,6 +45,8 @@ class PhotoList extends Component {
       const currentIndex = this.indexHeightSum.findIndex(data => data > list.scrollTop + 200)
       const percentage = list.scrollTop / this.maxScrollTop
       this.date = this.photoMapDates[currentIndex].date
+      this.currentDigest = this.photoMapDates[currentIndex].photos[0][0]
+      if (!this.firstScroll) this.props.memoize({ currentDigest: this.currentDigest })
 
       /* forceUpdate when first scroll, this is necessary to show timeline*/
       if (this.firstScroll) {
@@ -151,7 +154,6 @@ class PhotoList extends Component {
             {({ height, width }) => {
               /* get PhotoInfo */
               const PhotoInfo = this.props.setPhotoInfo(height, width, this.props.media)
-              // debug('PhotoInfo', PhotoInfo)
 
               /* set global variant */
               this.height = height
@@ -170,6 +172,17 @@ class PhotoList extends Component {
               const estimatedRowSize = PhotoInfo.rowHeightSum / PhotoInfo.allHeight.length
               const rowHeight = ({ index }) => PhotoInfo.allHeight[index]
 
+              /* get previousIndex */
+              let previousIndex = 0
+              if (this.props.memoize().currentDigest) {
+                this.photoMapDates.forEach((list, index) => {
+                  const Got = list.photos.findIndex(photo => photo[0] === this.props.memoize().currentDigest)
+                  if (Got >= 0) {
+                    previousIndex = this.height > 712 ? this.height > 964 ? index + 3 : index + 2 : index + 1 // why ?
+                  }
+                })
+              }
+              debug('PhotoInfo, previousIndex', PhotoInfo, previousIndex, this.props.memoize(), this.height)
               /* function to render each row */
               const rowRenderer = ({ key, index, style, isScrolling }) => (
                 <div key={key} style={style} >
@@ -193,7 +206,7 @@ class PhotoList extends Component {
                     rowRenderer={rowRenderer}
                     rowCount={PhotoInfo.photoDates.length}
                     onScroll={this.onScroll}
-                    scrollTop={this.scrollTop}
+                    scrollToIndex={previousIndex}
                     overscanRowCount={10}
                     style={{ outline: 'none' }}
                   />

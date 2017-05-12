@@ -31,6 +31,9 @@ class Media extends Base {
     this.state = {
       media: null
     }
+
+    this.memoizeValue = { currentDigest: '' }
+
     this.height = 0
     this.width = 0
     this.allPhotos = []
@@ -40,13 +43,20 @@ class Media extends Base {
     this.rowHeightSum = 0
     this.indexHeightSum = []
     this.maxScrollTop = 0
+    this.previousIndex = 1
     this.setPhotoInfo = this.photoInfo.bind(this)
     this.getTimeline = this.timeline.bind(this)
     this.setAnimation = this.animation.bind(this)
+    this.setMemoize = this.memoize.bind(this)
   }
 
   requestData(eq) {
     this.apis.request(eq)
+  }
+
+  memoize(newValue) {
+    this.memoizeValue = Object.assign(this.memoizeValue, newValue)
+    return this.memoizeValue
   }
 
   photoInfo(height, width, media) {
@@ -61,6 +71,7 @@ class Media extends Base {
       this.rowHeightSum = 0
       this.indexHeightSum = []
       this.maxScrollTop = 0
+      this.previousIndex = 1
 
       /* calculate photoMapDates and photoDates */
       const MAX = Math.floor((width - 60) / 216) - 1
@@ -128,6 +139,7 @@ class Media extends Base {
         this.rowHeightSum += tmp
         this.indexHeightSum.push(this.rowHeightSum)
       })
+
       this.maxScrollTop = this.rowHeightSum - height + 16 * 2
     }
     return {
@@ -137,7 +149,8 @@ class Media extends Base {
       indexHeightSum: this.indexHeightSum,
       allHeight: this.allHeight,
       maxScrollTop: this.maxScrollTop,
-      rowHeightSum: this.rowHeightSum
+      rowHeightSum: this.rowHeightSum,
+      currentDigest: this.memoizeValue.currentDigest
     }
   }
 
@@ -325,6 +338,7 @@ class Media extends Base {
       apis={this.apis}
       requestData={this.requestData}
       setAnimation={this.setAnimation}
+      memoize={this.setMemoize}
     />)
   }
 }

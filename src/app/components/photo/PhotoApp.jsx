@@ -114,6 +114,7 @@ class PhotoApp extends React.Component {
                 ipcRenderer={this.props.ipcRenderer}
                 addListToSelection={this.addListToSelection}
                 removeListToSelection={this.removeListToSelection}
+                memoize={this.props.memoize}
               /> :
               <div
                 style={{
