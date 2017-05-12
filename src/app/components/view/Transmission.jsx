@@ -43,7 +43,7 @@ class Transmission extends Base {
   }
 
   hasDetail() {
-    return true
+    return false
   }
 
   detailEnabled() {
@@ -56,7 +56,7 @@ class Transmission extends Base {
 
     return (
       <div style={{width: '100%', height: '100%'}}>
-        <TransmissionContent/>
+        <TransmissionContent type='download'/>
       </div>
     )
   }

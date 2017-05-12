@@ -20,6 +20,22 @@ const downloadHandle = (args, callback) => {
   getMainWindow().webContents.send('message', count + '个任务添加至下载队列')
 }
 
+const getTransmissionHandle = (args, callback) => {
+
+	db.downloading.find({}, (err, tasks) => {
+		if(err) return
+		tasks.forEach(item => createTask(item.target, item.name, item.rootSize, item.type, item.dirUUID, 
+				false, item.downloadPath, item._id, item.downloading, item.createTime))
+	})
+
+	db.downloaded.find({}).sort({finishDate: -1}).exec((err, tasks) => {
+		if (err) return console.log(err)
+		tasks.forEach(item => item.uuid = item._id)
+		finishTasks.splice(0, 0, ...tasks)
+		sendMsg()
+	})
+}
+
 //handle will open dialog from electron to clean record of the task have been downloaded
 const cleanRecordHandle = () => {
 	dialog.showMessageBox({
@@ -34,22 +50,6 @@ const cleanRecordHandle = () => {
 				finishTasks.length = 0
 				getTransmissionHandle()
 			})
-	})
-}
-
-const getTransmissionHandle = (args, callback) => {
-
-	db.downloading.find({}, (err, tasks) => {
-		if(err) return
-		tasks.forEach(item => 
-			createTask(item.target, item.name, item.rootSize, item.type, false, item.downloadPath, item._id, item.downloading))
-	})
-
-	db.downloaded.find({}).sort({finishDate: -1}).exec((err, tasks) => {
-		if (err) return console.log(err)
-		tasks.forEach(item => item.uuid = item._id)
-		finishTasks.splice(0, 0, ...tasks)
-		sendMsg()
 	})
 }
 
@@ -118,13 +118,11 @@ ipcMain.on('GET_TRANSMISSION', getTransmissionHandle)
 ipcMain.on('DELATE_DOWNLOADING', deleteDownloadingHandle)
 ipcMain.on('DELETE_DOWNLOADED', deleteDownloadedHandle)
 ipcMain.on('OPEN_DOWNLOAD', openDownloadHandle)
-
 ipcMain.on('PAUSE_DOWNLOADING', (e, uuid) => {
 	if (!uuid) return
 	let task = userTasks.find(item => item.uuid === uuid)
 	if (task) {task.pauseTask()}
 })
-
 ipcMain.on('RESUME_DOWNLOADING', (e, uuid) => {
 	if (!uuid) return
 	let task = userTasks.find(item => item.uuid === uuid)

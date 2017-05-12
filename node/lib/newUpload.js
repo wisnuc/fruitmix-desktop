@@ -73,7 +73,7 @@ const getTransmissionHandle = () => {
   db.uploading.find({}, (err, tasks) => {
     if (err) return
     tasks.forEach(item => {
-      createTask(item.abspath, item.target, item.type, false, item._id, item.uploading, item.rootNodeUUID)
+      createTask(item.abspath, item.target, item.type, false, item._id, item.uploading, item.rootNodeUUID, item.createTime)
     })
   })
 }

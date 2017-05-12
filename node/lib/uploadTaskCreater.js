@@ -13,6 +13,7 @@ import store from '../serve/store/store'
 import { getMainWindow } from './window'
 import utils from './util'
 import { userTasks, finishTasks} from './newUpload'
+import sendInfor from './transmissionUpdate'
 
 let ip
 let server
@@ -32,6 +33,7 @@ const visitingQueue = []
 
 //sendMessage
 const sendMessage = () => {
+	sendInfor()
 	let shouldSend = false
 	for(let i = 0; i < userTasks.length; i++) {
 		if (userTasks[i].state !== 'pause') {
@@ -52,18 +54,21 @@ const sendMessage = () => {
 }
 
 const sendMsg = () => {
+	return
   getMainWindow().webContents.send(
   	'UPDATE_TRANSMISSION', 
   	'UPDATE_UPLOAD', 
   	userTasks.map(item => item.getSummary()), 
-  	finishTasks.map(i => i.getSummary?i.getSummary():i))
+  	finishTasks.map(i => i.getSummary?i.getSummary():i)
+  )
 }
 
-const createTask = (abspath, target, type, newWork, u, r, rootNodeUUID) => {
+const createTask = (abspath, target, type, newWork, u, r, rootNodeUUID, ct) => {
 	initArgs()
 	let taskUUID = u?u:uuid.v4()
 	let uploadingList = r?r:[]
-	let task = new TaskManager(taskUUID, abspath, target, type, newWork, uploadingList, rootNodeUUID)
+	let createTime = ct?ct:(new Date()).getTime()
+	let task = new TaskManager(taskUUID, abspath, target, type, createTime, newWork, uploadingList, rootNodeUUID)
 	task.createStore()
 	userTasks.push(task)
 	task.readyToVisit()
@@ -82,11 +87,12 @@ const createTask = (abspath, target, type, newWork, u, r, rootNodeUUID) => {
 	schedule(): schedule work list
 */
 class TaskManager {
-	constructor(uuid, abspath, target, type, newWork, uploadingList, rootNodeUUID) {
+	constructor(uuid, abspath, target, type, createTime, newWork, uploadingList, rootNodeUUID) {
 		this.uuid = uuid 
 		this.abspath = abspath
 		this.target = target
 		this.type = type
+		this.createTime = createTime
 		this.name = path.basename(abspath)
 		this.newWork = newWork
 		this.rootNodeUUID = rootNodeUUID? rootNodeUUID: null
@@ -353,7 +359,8 @@ class TaskManager {
 			type: this.type,
 			uploading: uploadArr,
 			finishDate: this.finishDate,
-			rootNodeUUID: this.rootNodeUUID
+			rootNodeUUID: this.rootNodeUUID,
+			createTime: this.createTime
 		}
 	}
 
@@ -541,7 +548,8 @@ class FileUploadTask extends UploadTask{
 		this.sha = ''
 		this.parts = []
 		this.taskid = ''
-		this.segmentsize = size > 1000000000 ? size/50 : partSize
+		this.segmentsize = size > 1024000000 ? Math.ceil(size/50) : partSize
+		this.failedTimes = 0
 	}
 
 	getSummary() {
@@ -597,7 +605,7 @@ class HashSTM extends STM {
 		addToHashingQueue(this)
 		try {
 			let options = {
-			    env:{absPath: wrapper.abspath, size: wrapper.size, partSize},
+			    env:{absPath: wrapper.abspath, size: wrapper.size, partSize: wrapper.segmentsize},
 			    encoding:'utf8',
 			    cwd: process.cwd()
 			}
@@ -748,7 +756,7 @@ class UploadFileSTM extends STM {
     request(options, (err,res, body) => {
     	if (err || res.statusCode !== 200) {
     		this.wrapper.recordInfor('创建上传任务失败，缺少对应API，上传整个文件')
-    		console.log(err, res.statusCode)
+    		console.log(err)
     		console.log('任务创建的目标是：' + this.wrapper.target)
     		return this.uploadWholeFile()
     	}else {
@@ -806,10 +814,13 @@ class UploadFileSTM extends STM {
 			if(res.statusCode == 200) return this.partUploadFinish()
 			else {
 				console.log(res.statusCode + ' !!!!!!!!!!!!!!!!!!!')
+				wrapper.failedTimes ++ 
 				wrapper.manager.completeSize -= (this.partFinishSize + wrapper.segmentsize * wrapper.seek)
 				this.partFinishSize = 0
 				seek = 0
-				return this.createUploadTask()
+				if (failedTimes < 5) return this.uploadSegment()
+				else if (failedTimes < 6) return this.createUploadTask()
+				else return console.log('failed!!!')
 			}
 		}).on('abort', () => {
 			console.log('第' + seek +'块 ' + 'req : abort')

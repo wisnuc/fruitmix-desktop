@@ -9,12 +9,14 @@ import { ipcMain } from 'electron'
 
 import store from '../serve/store/store'
 import { userTasks, finishTasks} from './newDownload'
+import sendInfor from './transmissionUpdate'
 import utils from './util'
 import { getMainWindow } from './window'
 import { serverGetAsync } from './server'
 
 let server
 let user
+let tokenObj
 let httpRequestConcurrency = 4
 let visitConcurrency = 2
 let sendHandler = null
@@ -25,12 +27,14 @@ const visitlessQueue = []
 const visitingQueue = []
 
 const initArgs = () => {
-  server = 'http://' + store.getState().config.ip + ':3721'
+  server = 'http://' + store.getState().login2.device.mdev.address + ':3721'
   user = store.getState().login.obj
+  tokenObj = store.getState().login2.device.token.data
 }
 
 //determine whether need to start/close sending msg
 const sendMessage = () => {
+	sendInfor()
 	let shouldSend = false
 	for(let i = 0; i < userTasks.length; i++) {
 		if (userTasks[i].state !== 'pause') {
@@ -52,22 +56,25 @@ const sendMessage = () => {
 
 //send summary information to browser
 const sendMsg = () => {
+	return
   getMainWindow().webContents.send(
   	'UPDATE_TRANSMISSION', 
   	'UPDATE_DOWNLOAD', 
   	userTasks.map(item => item.getSummary()), 
-  	finishTasks.map(i => i.getSummary?i.getSummary():i))
+  	finishTasks.map(i => i.getSummary?i.getSummary():i)
+  )
 }
 
 //TaskManager creater
 //new job :init manager with default parameter
 //old job :init manager with defined parameter(uuid, downloadpath, downloading information)
-const createTask = (target, name, size, type, dirUUID ,newWork, p, u, d) => {
+const createTask = (target, name, size, type, dirUUID ,newWork, p, u, d, ct) => {
 	initArgs()
 	let taskUUID = u?u:uuid.v4()
 	let abspath = p?p:store.getState().config.download
 	let downloadingList = d?d:[]
-	let task = new TaskManager(taskUUID, abspath, target, name, size, type, dirUUID, newWork, downloadingList)
+	let createTime = ct?ct:(new Date()).getTime()
+	let task = new TaskManager(taskUUID, abspath, target, name, size, type, dirUUID, newWork, downloadingList, createTime)
 	task.createStore()
 	userTasks.push(task)
 	task.readyToVisit()
@@ -77,13 +84,14 @@ const createTask = (target, name, size, type, dirUUID ,newWork, p, u, d) => {
 
 //a download task manager for init/record/visit/schedule
 class TaskManager {
-	constructor(taskUUID, downloadPath, target, name, rootSize, type, dirUUID, newWork, downloadingList) {
+	constructor(taskUUID, downloadPath, target, name, rootSize, type, dirUUID, newWork, downloadingList, createTime) {
 		this.uuid = taskUUID
 		this.downloadPath = downloadPath
 		this.target = target
 		this.name = name
 		this.rootSize = rootSize //for visit
 		this.type = type
+		this.createTime = createTime
 		this.dirUUID = dirUUID
 		this.newWork = newWork
 
@@ -167,7 +175,7 @@ class TaskManager {
 		if (!this.newWork) {
 			fs.stat(path.join(this.downloadPath, this.name), (err, stat) => {
 				if (err) {
-					this.recordInfor('已下载的文件查找错误')
+					this.recordInfor('没有找到已下载的文件, 从头开始下载')
 					this.checkNameExist()
 					this.pause = true
 				}else {
@@ -208,7 +216,6 @@ class TaskManager {
 			this.tree[0].name = name
 			this.name = name
 			this.updateStore()
-			return 
 			this.schedule()
 		})
 	}
@@ -241,6 +248,7 @@ class TaskManager {
 
 	//the file for condition begin downloading
 	downloadSchedule() {
+		console.log('')
 		console.log('进行下载调度...')
 		if (this.pause) return this.recordInfor('下载任务已暂停')
 		if (this.finishCount === this.worklist.length) return this.recordInfor('文件全部下载结束')
@@ -255,8 +263,7 @@ class TaskManager {
 			return this.downloadSchedule()
 		}
 		if (obj.downloadPath === '') return this.recordInfor('文件的父文件夹尚未创建，缺少目标，等待..')
-		let stateMachine = obj.type == 'folder'? createFolderSTM : DownloadFileSTM
-		obj.setState(stateMachine)
+		obj.setState(obj.type == 'folder'? createFolderSTM : DownloadFileSTM)
 		this.downloading.push(obj)
 		this.downloadIndex++
 		obj.requestProbe()
@@ -296,8 +303,10 @@ class TaskManager {
 			name: this.name,
 			rootSize: this.rootSize,
 			type: this.type,
+			dirUUID: this.dirUUID,
 			downloading: downloadingArr,
-			finishDate: this.finishDate
+			finishDate: this.finishDate,
+			createTime: this.createTime
 		}
 	}
 
@@ -633,9 +642,9 @@ class DownloadFileSTM extends STM {
 		addToRunningQueue(this)
 		this.wrapper.manager.updateStore()
     this.wrapper.recordInfor(this.wrapper.name + ' 开始创建...')
-    //check fileCache have been removed
-    fs.exists(this.tmpDownloadPath,(exist) => {
-    	if (exist) {console.log('找到文件缓存')}
+    //check is fileCache have been removed
+    fs.exists(this.tmpDownloadPath, exist => {
+    	if (exist) console.log('找到文件缓存')
     	else {
     		console.log('没有找到文件缓存 重新下载该文件')
     		this.wrapper.manager.completeSize -= this.wrapper.seek
@@ -654,9 +663,9 @@ class DownloadFileSTM extends STM {
 		
     let options = {
 			method: 'GET',
-			url: server + '/files//fruitmix/download/' + wrapper.target,
+			url: server + '/files/fruitmix/download/' + wrapper.dirUUID + '/' + wrapper.target,
 			headers: {
-				Authorization: user.type + ' ' + user.token,
+				Authorization: tokenObj.type + ' ' + tokenObj.token,
 				Range: 'bytes=' + this.wrapper.seek + '-'
 			}
 		}
@@ -669,36 +678,34 @@ class DownloadFileSTM extends STM {
 		  autoClose: true
 		}
 		let stream = fs.createWriteStream(this.tmpDownloadPath, streamOptions)
-		stream.on('error', (err) => {
-			console.log('stream error trigger')
-			console.log(err)
-		})
+
+		stream.on('error', err => console.log('stream error trigger', err))
 
 		stream.on('drain', () => {
 			let gap = stream.bytesWritten - this.wrapper.lastTimeSize
 			_this.wrapper.seek += gap
 			this.wrapper.manager.completeSize += gap
 			this.wrapper.lastTimeSize = stream.bytesWritten
-			// console.log('一段文件写入完成 当前seek位置为 ：' + _this.wrapper.seek/_this.wrapper.size + '% 增加了 ：' + gap/this.wrapper.size )
+			// console.log('一段文件写入完成 当前seek位置为 ：' + (_this.wrapper.seek/_this.wrapper.size * 100).toFixed(2) + '% 增加了 ：' + gap/this.wrapper.size *100 )
 			wrapper.manager.updateStore()
 		})
 
 		stream.on('finish', () => {
-			// console.log('stream finish trigger')
 			let gap = stream.bytesWritten - this.wrapper.lastTimeSize
 			_this.wrapper.seek += gap
 			this.wrapper.manager.completeSize += gap
 			this.wrapper.lastTimeSize = stream.bytesWritten
-			// console.log('一段文件写入结束 当前seek位置为 ：' + _this.wrapper.seek/_this.wrapper.size + '% 增加了 ：' + gap/this.wrapper.size )
+
+			console.log('一段文件写入结束 当前seek位置为 ：' 
+				+ (_this.wrapper.seek/_this.wrapper.size  * 100).toFixed(2) 
+				+ '% 增加了 ：' + (gap/this.wrapper.size * 100).toFixed(2) )
+
 			this.wrapper.lastTimeSize = 0
-			if(this.wrapper.seek == this.wrapper.size) this.rename(this.tmpDownloadPath)
+			if (this.wrapper.seek == this.wrapper.size) this.rename(this.tmpDownloadPath)
 		})
 
 		this.handle = request(options)
-			.on('error',(err)=>{
-				console.log('readstream error...')
-				console.log(err)
-			})
+			.on('error', err => console.log('req : error', err))
 		
 		_this.handle.pipe(stream)
 	}
