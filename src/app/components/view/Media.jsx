@@ -280,11 +280,9 @@ class Media extends Base {
       const time = 0.4
       const ease = global.Power4.easeOut
       if (status === 'In') {
-        debug('animation, IN')
         TweenMax.to(transformItem, time, { rotation: 180, opacity: 1, ease })
       }
       if (status === 'Out') {
-        debug('animation, OUT')
         TweenMax.to(transformItem, time, { rotation: -180, opacity: 0, ease })
       }
     }

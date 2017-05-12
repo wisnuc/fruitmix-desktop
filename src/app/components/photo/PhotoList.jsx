@@ -40,12 +40,12 @@ class PhotoList extends Component {
 
     this.onScroll = () => {
       if (!this.photoMapDates.length) return
-      // debug('this.onScroll')
       const list = document.getElementsByClassName('ReactVirtualized__List')[0]
       const currentIndex = this.indexHeightSum.findIndex(data => data > list.scrollTop + 200)
       const percentage = list.scrollTop / this.maxScrollTop
       this.date = this.photoMapDates[currentIndex].date
-      // debug('this.timeline', this.timeline)
+
+      /* forceUpdate when first scroll, this is necessary to show timeline*/
       if (this.firstScroll) {
         this.firstScroll = false
         this.forceUpdate()
@@ -73,7 +73,6 @@ class PhotoList extends Component {
 
         /* hide DateBox and Timeline 2000ms later */
         clearTimeout(this.time)
-        clearTimeout(this.time2)
         if (!this.state.hover) {
           this.time = setTimeout(() => {
             this.refDateBox.style.opacity = 0
@@ -142,6 +141,7 @@ class PhotoList extends Component {
   render() {
     // debug('render PhotoList, this.props', this.props, this.state)
     document.body.onmousemove = this.onMouseMove
+    document.body.onmouseleave = () => (this.onMouseDown = false)
     document.body.onmouseup = () => (this.onMouseDown = false)
     return (
       <div style={this.props.style}>
@@ -151,7 +151,7 @@ class PhotoList extends Component {
             {({ height, width }) => {
               /* get PhotoInfo */
               const PhotoInfo = this.props.setPhotoInfo(height, width, this.props.media)
-              debug('PhotoInfo', PhotoInfo)
+              // debug('PhotoInfo', PhotoInfo)
 
               /* set global variant */
               this.height = height
@@ -294,7 +294,6 @@ class PhotoList extends Component {
             }}
           />
         </div>
-
       </div>
     )
   }

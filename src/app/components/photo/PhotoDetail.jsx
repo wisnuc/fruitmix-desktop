@@ -24,15 +24,17 @@ class PhotoDetailInline extends React.Component {
   constructor(props) {
     super(props)
 
-    this.currentIndex = this.props.seqIndex
-
     this.state = {
       direction: null
     }
+
+    this.currentIndex = this.props.seqIndex
+
     this.close = () => {
       this.props.onRequestClose()
     }
 
+    /* change image */
     this.requestNext = (currentIndex) => {
       /* hide image and resieze container */
       if (this.refImage) {
@@ -66,12 +68,11 @@ class PhotoDetailInline extends React.Component {
       this.requestNext(this.currentIndex)
     }
 
+    /* update detail image */
     this.updatePath = (event, session, path) => {
       if (this.session === session) {
         clearTimeout(this.time)
         this.time = setTimeout(() => {
-          debug('this.updateThumbPath 2', this.refImage.height, this.refImage.width)
-          debug('this.updatePath 1', this.refImageDetial.height, this.refImageDetial.width)
           if (this.exifOrientation % 2 === 0) {
             this.refImageDetial.height = this.photoWidth
             this.refImageDetial.width = this.photoHeight
@@ -82,11 +83,11 @@ class PhotoDetailInline extends React.Component {
           this.refImageDetial.src = path
           this.refTransition.style.transform = this.degRotate
           this.refImageDetial.style.display = ''
-          debug('this.updatePath 2', this.refImageDetial.height, this.refImageDetial.width)
         }, 150)
       }
     }
 
+    /* update thumbnail */
     this.updateThumbPath = (event, session, path) => {
       if (this.session === session) {
         /* update thumbPath and resize container */
@@ -96,12 +97,12 @@ class PhotoDetailInline extends React.Component {
         this.refContainer.style.height = `${this.photoHeight}px`
         this.refContainer.style.width = `${this.photoWidth}px`
 
-        debug('this.updateThumbPath 1', this.refImage.height, this.refImage.width)
-
         /* get detail image */
         this.props.ipcRenderer.send('mediaShowImage', this.session, this.digest)
       }
     }
+
+    /* calculate positon of mouse */
     this.calcPositon = (ev) => {
       const { x, y } = mousePosition(ev)
       const clientWidth = window.innerWidth
@@ -118,6 +119,7 @@ class PhotoDetailInline extends React.Component {
       }
     }
 
+    /* calculate size of image */
     this.calcSize = () => {
       this.clientHeight = window.innerHeight
       this.clientWidth = window.innerWidth
@@ -158,7 +160,6 @@ class PhotoDetailInline extends React.Component {
       const overlay = this.refOverlay
       const time = 0.2
       const ease = global.Power4.easeOut
-      debug('transformItem, overlay', transformItem, root, ease)
 
       if (status === 'In') {
         TweenMax.from(overlay, time, { opacity: 0, ease })
@@ -181,10 +182,6 @@ class PhotoDetailInline extends React.Component {
   componentDidMount() {
     this.props.ipcRenderer.on('donwloadMediaSuccess', this.updatePath)
     this.props.ipcRenderer.on('getThumbSuccess', this.updateThumbPath)
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return this.state !== nextState
   }
 
   componentWillUnmount() {
@@ -242,6 +239,7 @@ class PhotoDetailInline extends React.Component {
             transition: 'all 200ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
           }}
         >
+          {/* ThumbImage */}
           <div style={{ position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
             <img
               style={{ display: 'none' }}
@@ -251,6 +249,8 @@ class PhotoDetailInline extends React.Component {
               alt="ThumbImage"
             />
           </div>
+
+          {/* DetailImage */}
           <div
             style={{ position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             ref={ref => (this.refTransition = ref)}
@@ -382,7 +382,7 @@ class PhotoDetailInline extends React.Component {
  * Use RenderToLayer method to move the componet to root node
 */
 
-export default class PhotoDetail extends React.Component {
+class PhotoDetail extends React.Component {
   renderLayer = () => (
     <ReactTransitionGroup>
       { this.props.open && <PhotoDetailInline {...this.props} /> }
@@ -396,9 +396,4 @@ export default class PhotoDetail extends React.Component {
   }
 }
 
-PhotoDetail.propTypes = {
-  style: PropTypes.object.isRequired,
-  items: PropTypes.array.isRequired,
-  onRequestClose: PropTypes.func.isRequired,
-  seqIndex: PropTypes.number.isRequired
-}
+export default PhotoDetail

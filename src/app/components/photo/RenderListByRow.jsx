@@ -1,66 +1,13 @@
-import React, { Component, PropTypes } from 'react'
-import Debug from 'debug'
+import React from 'react'
 import PhotoItem from './PhotoItem'
 
-const debug = Debug('component:photoApp:RenderListByRow.jsx')
+class RenderListByRow extends React.Component {
 
-class RenderListByRow extends Component {
-  constructor(props) {
-    super(props)
-     /*
-      this.addHoverToAllItem = () => {
-        this.selectionRefs.forEach(refName =>
-          this.refs[refName].addHoverIconButton()
-        )
-      }
-      this.removeHoverToAllItem = () => {
-        this.detectIsAllOffChecked() && this.selectionRefs.forEach(refName =>
-          this.refs[refName].removeHoverIconButton()
-        )
-      }
-      this.addCheckedToItem = (itemIndex) => {
-        const photoItem = this.refs[`photoItem${itemIndex}`]
-        this.props.addListToSelection(photoItem.props.path)
-      }
-      this.detectIsAllOffChecked = () => this.selectionRefs.every(refName => this.refs[refName].state.action !== 'on')
-      this.addAllChecked = () => {
-        const selectDate = this.refs.selectDate
-        setTimeout(() =>
-          this.selectionRefs.every(refName => this.refs[refName].state.action === 'on')
-            && selectDate.onSelected(true)
-        , 0)
-      }
-      this.removeCheckedToItem = (itemIndex) => {
-        const photoItem = this.refs[`photoItem${itemIndex}`]
-        this.props.removeListToSelection(photoItem.props.path)
-      }
-      this.removeAllChecked = () => {
-        const selectDate = this.refs.selectDate
-        selectDate.offSelected(true)
-      }
-      this.removeCheckToAllItem = () => {
-        this.selectionRefs.forEach(refName =>
-          this.refs[refName].offSelectIconButton(false)
-        )
-      }
-    */
-  }
-
-  componentDidMount() {
-    // ipcRenderer.send('getThumb', this.props.photos.map(item => ({ digest: item.digest })))
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    // let check = false
-    // this.props.photos.forEach((item) => { if (!item.path) check = true })
-    // if (check) return check
-    // return false
+  shouldComponentUpdate(nextProps) {
     return (!nextProps.isScrolling)
-    // return (nextProps.photos !== this.props.photos && !nextProps.isScrolling)
   }
 
   render() {
-    // debug('render row')
     const { list, lookPhotoDetail, isScrolling } = this.props
     const { photos, first, date } = list
     return (
@@ -74,13 +21,7 @@ class RenderListByRow extends Component {
           { isScrolling ?
             photos.map(photo => (
               <div
-                style={{
-                  width: 210,
-                  height: 210,
-                  marginRight: 6,
-                  marginBottom: 6,
-                  backgroundColor: '#eeeeee'
-                }}
+                style={{ width: 210, height: 210, marginRight: 6, marginBottom: 6, backgroundColor: '#eeeeee' }}
                 key={photo[0]}
               />)) :
             photos.map(photo => (
@@ -93,8 +34,7 @@ class RenderListByRow extends Component {
                 addListToSelection={this.props.addListToSelection}
                 removeListToSelection={this.props.removeListToSelection}
               />
-            )
-            )
+            ))
           }
         </div>
       </div>
