@@ -26,7 +26,7 @@ class PhotoApp extends React.Component {
     this.seqIndex = ''
 
     this.addListToSelection = (digest) => {
-      debug('this.addListToSelection this.state.selectedItems', this.state.selectedItems)
+      // debug('this.addListToSelection this.state.selectedItems', this.state.selectedItems)
       const hadDigest = this.state.selectedItems.findIndex(item => item === digest) >= 0
       if (!hadDigest) {
         this.setState(prevState => ({ selectedItems: [...prevState.selectedItems, digest]
@@ -34,7 +34,7 @@ class PhotoApp extends React.Component {
       }
     }
     this.removeListToSelection = (digest) => {
-      debug('this.removeListToSelection this.state.selectedItems', this.state.selectedItems)
+      // debug('this.removeListToSelection this.state.selectedItems', this.state.selectedItems)
       const hadDigest = this.state.selectedItems.findIndex(item => item === digest) >= 0
       if (hadDigest) {
         this.setState((prevState) => {
@@ -56,7 +56,7 @@ class PhotoApp extends React.Component {
 
     this.creatAlbum = (items, title, text) => {
       /* maintainers, viewers, medias, album */
-      debug('this.creatAlbum', this.props, items, title, text)
+      // debug('this.creatAlbum', this.props, items, title, text)
       const users = [this.props.apis.account.data.uuid]
       const contents = items.map(item => ({
         digest: item,
@@ -68,18 +68,12 @@ class PhotoApp extends React.Component {
     }
   }
 
-  /*
-  shouldComponentUpdate(nextProps, nextState) {
-    return (this.state !== nextState)
-  }
-  */
-
   handleResize = () => {
     this.forceUpdate()
   }
 
   render() {
-    debug('PhotoApp, this.props', this.props)
+    // debug('PhotoApp, this.props', this.props)
     return (
       <Paper>
         <EventListener
@@ -107,7 +101,7 @@ class PhotoApp extends React.Component {
                 style={{
                   position: 'fixed',
                   width: 'calc(100% - 80px)',
-                  height: 'calc(100% - 64px)',
+                  height: 'calc(100% - 72px)',
                   backgroundColor: '#FFFFFF',
                   display: 'flex',
                   alignItems: 'center',
@@ -120,6 +114,7 @@ class PhotoApp extends React.Component {
                 ipcRenderer={this.props.ipcRenderer}
                 addListToSelection={this.addListToSelection}
                 removeListToSelection={this.removeListToSelection}
+                memoize={this.props.memoize}
               /> :
               <div
                 style={{
@@ -151,17 +146,12 @@ class PhotoApp extends React.Component {
         <PhotoDetail
           onRequestClose={() => this.setState({ openDetail: false })}
           open={this.state.openDetail}
-          style={{
-            position: 'fixed',
-            left: 0,
-            top: 0,
-            width: '100%',
-            height: '100%'
-          }}
+          style={{ position: 'fixed', left: 0, top: 0, width: '100%', height: '100%' }}
           items={this.props.media}
           seqIndex={this.seqIndex}
           ipcRenderer={this.props.ipcRenderer}
           setAnimation={this.props.setAnimation}
+          memoize={this.props.memoize}
         />
 
         {/* 上传图片 */}

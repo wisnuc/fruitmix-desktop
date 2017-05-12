@@ -28,9 +28,10 @@ class Media extends Base {
 
   constructor(ctx) {
     super(ctx)
-    this.state = {
-      media: null
-    }
+    this.state = { media: null }
+
+    this.memoizeValue = { currentDigest: '', currentScrollTop: 0 }
+
     this.height = 0
     this.width = 0
     this.allPhotos = []
@@ -40,13 +41,20 @@ class Media extends Base {
     this.rowHeightSum = 0
     this.indexHeightSum = []
     this.maxScrollTop = 0
+    this.previousIndex = 1
     this.setPhotoInfo = this.photoInfo.bind(this)
     this.getTimeline = this.timeline.bind(this)
     this.setAnimation = this.animation.bind(this)
+    this.setMemoize = this.memoize.bind(this)
   }
 
   requestData(eq) {
     this.apis.request(eq)
+  }
+
+  memoize(newValue) {
+    this.memoizeValue = Object.assign(this.memoizeValue, newValue)
+    return this.memoizeValue
   }
 
   photoInfo(height, width, media) {
@@ -61,6 +69,7 @@ class Media extends Base {
       this.rowHeightSum = 0
       this.indexHeightSum = []
       this.maxScrollTop = 0
+      this.previousIndex = 1
 
       /* calculate photoMapDates and photoDates */
       const MAX = Math.floor((width - 60) / 216) - 1
@@ -128,6 +137,7 @@ class Media extends Base {
         this.rowHeightSum += tmp
         this.indexHeightSum.push(this.rowHeightSum)
       })
+
       this.maxScrollTop = this.rowHeightSum - height + 16 * 2
     }
     return {
@@ -137,7 +147,8 @@ class Media extends Base {
       indexHeightSum: this.indexHeightSum,
       allHeight: this.allHeight,
       maxScrollTop: this.maxScrollTop,
-      rowHeightSum: this.rowHeightSum
+      rowHeightSum: this.rowHeightSum,
+      currentDigest: this.memoizeValue.currentDigest
     }
   }
 
@@ -164,10 +175,9 @@ class Media extends Base {
     const timeline = [...month].map((data, index) => {
       const percentage = (indexHeightSum[sumCount] - 200) / maxScrollTop
       /* top = percentage * height + headerHeight - adjust */
-      let top = percentage * height - 12
+      let top = percentage * height - 24
 
       const spacingPercentage = (indexHeightSum[spacingCount] - 200) / maxScrollTop
-      /* top = percentage * height - headerHeight */
       const spacingTop = spacingPercentage * height
 
       sumCount += data[1]
@@ -199,7 +209,7 @@ class Media extends Base {
       if (top > (height - 46) && index !== month.size - 1) date = null
       return [date, top, zIndex]
     })
-    // debug('photoDates', photoDates, timeline)
+    debug('photoDates', photoDates, timeline, height, indexHeightSum)
     return timeline
   }
 
@@ -280,11 +290,9 @@ class Media extends Base {
       const time = 0.4
       const ease = global.Power4.easeOut
       if (status === 'In') {
-        debug('animation, IN')
         TweenMax.to(transformItem, time, { rotation: 180, opacity: 1, ease })
       }
       if (status === 'Out') {
-        debug('animation, OUT')
         TweenMax.to(transformItem, time, { rotation: -180, opacity: 0, ease })
       }
     }
@@ -327,6 +335,7 @@ class Media extends Base {
       apis={this.apis}
       requestData={this.requestData}
       setAnimation={this.setAnimation}
+      memoize={this.setMemoize}
     />)
   }
 }
