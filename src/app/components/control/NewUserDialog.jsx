@@ -81,7 +81,8 @@ class NewUserDialog extends PureComponent {
   inputOK() {
     return this.state.username.length > 0
       && this.state.password.length > 0
-      && this.state.password === this.state.passwordAgain 
+      && this.state.password === this.state.passwordAgain
+      && !this.state.usernameErrorText
   }
 
   render() {
