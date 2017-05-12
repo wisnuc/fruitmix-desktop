@@ -28,11 +28,9 @@ class Media extends Base {
 
   constructor(ctx) {
     super(ctx)
-    this.state = {
-      media: null
-    }
+    this.state = { media: null }
 
-    this.memoizeValue = { currentDigest: '' }
+    this.memoizeValue = { currentDigest: '', currentScrollTop: 0 }
 
     this.height = 0
     this.width = 0
@@ -177,10 +175,9 @@ class Media extends Base {
     const timeline = [...month].map((data, index) => {
       const percentage = (indexHeightSum[sumCount] - 200) / maxScrollTop
       /* top = percentage * height + headerHeight - adjust */
-      let top = percentage * height - 12
+      let top = percentage * height - 24
 
       const spacingPercentage = (indexHeightSum[spacingCount] - 200) / maxScrollTop
-      /* top = percentage * height - headerHeight */
       const spacingTop = spacingPercentage * height
 
       sumCount += data[1]
@@ -212,7 +209,7 @@ class Media extends Base {
       if (top > (height - 46) && index !== month.size - 1) date = null
       return [date, top, zIndex]
     })
-    // debug('photoDates', photoDates, timeline)
+    debug('photoDates', photoDates, timeline, height, indexHeightSum)
     return timeline
   }
 

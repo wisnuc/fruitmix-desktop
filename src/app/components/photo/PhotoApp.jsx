@@ -101,7 +101,7 @@ class PhotoApp extends React.Component {
                 style={{
                   position: 'fixed',
                   width: 'calc(100% - 80px)',
-                  height: 'calc(100% - 64px)',
+                  height: 'calc(100% - 72px)',
                   backgroundColor: '#FFFFFF',
                   display: 'flex',
                   alignItems: 'center',
@@ -151,6 +151,7 @@ class PhotoApp extends React.Component {
           seqIndex={this.seqIndex}
           ipcRenderer={this.props.ipcRenderer}
           setAnimation={this.props.setAnimation}
+          memoize={this.props.memoize}
         />
 
         {/* 上传图片 */}

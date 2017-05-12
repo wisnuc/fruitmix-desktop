@@ -57,6 +57,10 @@ class PhotoDetailInline extends React.Component {
       this.photo = this.props.items[currentIndex][1]
       this.props.ipcRenderer.send('mediaShowThumb', this.session, this.digest, 210, 210)
       this.forceUpdate()
+
+      /* memoize digest */
+      this.props.memoize({ currentDigest: this.digest, currentScrollTop: 0 })
+      // debug('this.props.memoize', this.props.memoize())
     }
 
     this.changeIndex = (direction) => {

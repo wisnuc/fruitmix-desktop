@@ -21,22 +21,20 @@ const mousePosition = (ev) => {
 class PhotoList extends Component {
   constructor(props) {
     super(props)
-    this.state = {
-      hover: false
-    }
 
-    this.firstScroll = true
-    this.currentDigest = ''
+    this.hover = false
+    this.firstScroll = 2
 
     this.onRowTouchTap = (e, index) => {
       e.preventDefault()  // important!
       e.stopPropagation()
     }
 
-    this.showDateBar = () => {
-      if (!this.state.hover) {
-        this.setState({ hover: true })
-      }
+    this.showDateBar = (op) => {
+      // debug('this.showDateBar', op)
+      this.hover = op
+      this.refDateBox.style.opacity = op ? 1 : 0
+      this.refTimeline.style.opacity = op ? 1 : 0
     }
 
     this.onScroll = () => {
@@ -46,11 +44,12 @@ class PhotoList extends Component {
       const percentage = list.scrollTop / this.maxScrollTop
       this.date = this.photoMapDates[currentIndex].date
       this.currentDigest = this.photoMapDates[currentIndex].photos[0][0]
-      if (!this.firstScroll) this.props.memoize({ currentDigest: this.currentDigest })
+      if (!this.firstScroll) this.props.memoize({ currentDigest: '', currentScrollTop: list.scrollTop })
+      // debug('this.props.memoize()', this.props.memoize())
 
-      /* forceUpdate when first scroll, this is necessary to show timeline*/
+      /* forceUpdate when first two scroll, this is necessary to show timeline*/
       if (this.firstScroll) {
-        this.firstScroll = false
+        this.firstScroll -= 1
         this.forceUpdate()
       }
 
@@ -69,6 +68,7 @@ class PhotoList extends Component {
         this.refDateBox.innerHTML = this.date
 
         /* show timeline */
+        // debug('show timeline', this.timeline)
         this.refTimeline.style.opacity = 1
 
         /* hide dateBarFollowMouse */
@@ -76,7 +76,7 @@ class PhotoList extends Component {
 
         /* hide DateBox and Timeline 2000ms later */
         clearTimeout(this.time)
-        if (!this.state.hover) {
+        if (!this.hover) {
           this.time = setTimeout(() => {
             this.refDateBox.style.opacity = 0
             this.refTimeline.style.opacity = 0
@@ -94,10 +94,10 @@ class PhotoList extends Component {
       if (top < timelineMargin) top = timelineMargin
       if (top > this.height - timelineMargin) top = this.height - timelineMargin
 
-      if (this.onMouseDown || ((x > this.width - 24 && y > headerHeight) && this.state.hover)) {
+      if (this.onMouseDown || ((x > this.width - 24 && y > headerHeight) && this.hover)) {
         // debug('this.onMouseMove')
         /* showTimeline and clear setTimeout */
-        this.showDateBar()
+        this.showDateBar(true)
         clearTimeout(this.time)
 
         /* calculate position and percentage */
@@ -141,8 +141,12 @@ class PhotoList extends Component {
     }
   }
 
+  componentWillUnmount() {
+    clearTimeout(this.time)
+  }
+
   render() {
-    // debug('render PhotoList, this.props', this.props, this.state)
+    // debug('render PhotoList, this.props', this.props)
     document.body.onmousemove = this.onMouseMove
     document.body.onmouseleave = () => (this.onMouseDown = false)
     document.body.onmouseup = () => (this.onMouseDown = false)
@@ -173,16 +177,32 @@ class PhotoList extends Component {
               const rowHeight = ({ index }) => PhotoInfo.allHeight[index]
 
               /* get previousIndex */
-              let previousIndex = 0
-              if (this.props.memoize().currentDigest) {
+                /*
+                  currentIndex = this.indexHeightSum.findIndex(data => data > list.scrollTop + 200)
+                    previousIndex = this.height > 712 ? this.height > 964 ? index + 3 : index + 2 : index + 1 // why ?
+
                 this.photoMapDates.forEach((list, index) => {
                   const Got = list.photos.findIndex(photo => photo[0] === this.props.memoize().currentDigest)
                   if (Got >= 0) {
                     previousIndex = this.height > 712 ? this.height > 964 ? index + 3 : index + 2 : index + 1 // why ?
                   }
                 })
+                */
+              let previousScrollTop = 0
+              // debug('this.props.memoize2', this.props.memoize())
+              if (this.props.memoize().currentScrollTop) {
+                previousScrollTop = this.props.memoize().currentScrollTop
+              } else if (this.props.memoize().currentDigest) {
+                this.photoMapDates.forEach((list, index) => {
+                  const Got = list.photos.findIndex(photo => photo[0] === this.props.memoize().currentDigest)
+                  if (Got >= 0) {
+                    previousScrollTop = this.indexHeightSum[index - 1]
+                  }
+                })
               }
-              debug('PhotoInfo, previousIndex', PhotoInfo, previousIndex, this.props.memoize(), this.height)
+
+              // debug('PhotoInfo, previousIndex', PhotoInfo, this.props.memoize(), this.height, previousScrollTop)
+
               /* function to render each row */
               const rowRenderer = ({ key, index, style, isScrolling }) => (
                 <div key={key} style={style} >
@@ -206,7 +226,7 @@ class PhotoList extends Component {
                     rowRenderer={rowRenderer}
                     rowCount={PhotoInfo.photoDates.length}
                     onScroll={this.onScroll}
-                    scrollToIndex={previousIndex}
+                    scrollTop={previousScrollTop}
                     overscanRowCount={10}
                     style={{ outline: 'none' }}
                   />
@@ -221,16 +241,16 @@ class PhotoList extends Component {
           ref={ref => (this.refBackground = ref)}
           style={{ position: 'absolute', height: '100%', width: 80, right: 16 }}
           onMouseLeave={() => {
-            if (!this.onMouseDown) this.setState({ hover: false })
+            if (!this.onMouseDown) this.showDateBar(false)
             this.scrollTop = null
           }}
-          onMouseEnter={() => this.setState({ hover: true })}
+          onMouseEnter={() => this.showDateBar(true)}
           onMouseDown={() => (this.onMouseDown = true)}
           onTouchTap={this.scrollToPosition}
         >
           <div
             ref={ref => (this.refTimeline = ref)}
-            style={{ opacity: this.state.hover ? 1 : 0, transition: 'opacity 350ms' }}
+            style={{ opacity: this.hover ? 1 : 0, transition: 'opacity 350ms' }}
           >
             {/* date list */}
             {
@@ -286,7 +306,7 @@ class PhotoList extends Component {
               width: 48,
               zIndex: 4,
               transition: 'opacity 350ms',
-              opacity: this.state.hover ? 1 : 0,
+              opacity: this.hover ? 1 : 0,
               backgroundColor: 'rgba(0,0,0,0.54)'
             }}
           />
@@ -303,7 +323,7 @@ class PhotoList extends Component {
               color: 'white',
               backgroundColor: 'black',
               transition: 'opacity 350ms',
-              opacity: this.state.hover ? 1 : 0
+              opacity: this.hover ? 1 : 0
             }}
           />
         </div>
