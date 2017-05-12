@@ -38,29 +38,32 @@ class NewUserDialog extends PureComponent {
   }
 
   updateUsername(text) {
-    this.setState({ username: text })
-    if (text.length === 0)
-      this.setState({ usernameErrorText: '用户名不能为空' })
-    else if (this.props.apis.adminUsers.data.users.every(u => u.username !== text))
-      this.setState({ usernameErrorText: '' })
-    else 
-      this.setState({ usernameErrorText: '用户名已存在' })
+    this.setState({ username: text }, () => {
+      if (this.state.username.length === 0)
+        this.setState({ usernameErrorText: '用户名不能为空' })
+      else if (this.props.apis.adminUsers.data.users.every(u => u.username !== this.state.username))
+        this.setState({ usernameErrorText: '' })
+      else 
+        this.setState({ usernameErrorText: '用户名已存在' })
+    })
   }
 
   updatePassword(text) {
-    this.setState({ password: text })
-    if (text.length === 0)
-      this.setState({ passwordErrorText: '密码不能为空' })
-    else 
-      this.setState({ passwordErrorText: '' })
+    this.setState({ password: text }, () => {
+      if (this.state.password.length === 0)
+        this.setState({ passwordErrorText: '密码不能为空' })
+      else 
+        this.setState({ passwordErrorText: '' })
+    })
   }
 
   updatePasswordAgain(text) {
-    this.setState({ passwordAgain: text })
-    if (text !== this.state.password)
-      this.setState({ passwordAgainErrorText: '两次密码不一致' })
-    else
-      this.setState({ passwordAgainErrorText: '' })
+    this.setState({ passwordAgain: text }, () => {
+      if (this.state.passwordAgain !== this.state.password)
+        this.setState({ passwordAgainErrorText: '两次密码不一致' })
+      else
+        this.setState({ passwordAgainErrorText: '' })
+    })
   }
 
   inputOK() {
@@ -102,6 +105,7 @@ class NewUserDialog extends PureComponent {
             style={{flexGrow: 1}}
             fullWidth={true} 
             hintText="输入密码" 
+            maxLength={16}
             type="password"
             errorText={this.state.passwordErrorText}
             onChange={e => this.updatePassword(e.target.value)} 
@@ -113,6 +117,7 @@ class NewUserDialog extends PureComponent {
           <TextField 
             fullWidth={true} 
             hintText="再次输入密码" 
+            maxLength={16}
             type="password"
             errorText={this.state.passwordAgainErrorText}
             onChange={e => this.updatePasswordAgain(e.target.value)} 
