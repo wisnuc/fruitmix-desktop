@@ -1,34 +1,36 @@
 const defaultState = {
-	upload: [],
-	download: [],
-	uploadFinish: true,
-	downloadFinish: true,
-	uploadingTasks: [],
-	uploadedTasks: [],
-	downloadingTasks: [],
-	downloadedTasks:[]
+	// uploadingTasks: [],
+	// uploadedTasks: [],
+	// downloadingTasks: [],
+	// downloadedTasks:[],
+	userTasks: [],
+	finishTasks: []
 }
 
 const transmission = (state = defaultState, action)=>{
 	switch(action.type) {
 		case 'LOGIN_OFF':
 			return Object.assign({}, state, {
-				upload:[],
-				download: [],
-				uploadFinish: true,
-				downloadFinish: true
+				userTasks:[],
+				finishTasks: []
 			})
 
-		case 'UPDATE_UPLOAD':
-			return Object.assign({}, state, {
-				uploadingTasks: action.userTasks,
-				uploadedTasks: action.finishTasks
-			})
+		// case 'UPDATE_UPLOAD':
+		// 	return Object.assign({}, state, {
+		// 		uploadingTasks: action.userTasks,
+		// 		uploadedTasks: action.finishTasks
+		// 	})
 
-		case 'UPDATE_DOWNLOAD':
+		// case 'UPDATE_DOWNLOAD':
+		// 	return Object.assign({}, state, {
+		// 		downloadingTasks: action.userTasks,
+		// 		downloadedTasks: action.finishTasks
+		// 	})
+
+		case 'UPDATE_TRANSMISSION':
 			return Object.assign({}, state, {
-				downloadingTasks: action.userTasks,
-				downloadedTasks: action.finishTasks
+				userTasks: action.userTasks,
+				finishTasks: action.finishTasks
 			})
 
 		default:

@@ -19,6 +19,7 @@ class RowList extends Component {
 						select={this.select}
 						ref={task.uuid}
 						key={task.uuid}
+						trsType={task.trsType}
 						index={index}
 						task={task}
 						pause={this.pause.bind(this)}

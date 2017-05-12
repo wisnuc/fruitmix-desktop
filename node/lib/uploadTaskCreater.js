@@ -33,7 +33,6 @@ const visitingQueue = []
 
 //sendMessage
 const sendMessage = () => {
-	sendInfor()
 	let shouldSend = false
 	for(let i = 0; i < userTasks.length; i++) {
 		if (userTasks[i].state !== 'pause') {
@@ -54,13 +53,14 @@ const sendMessage = () => {
 }
 
 const sendMsg = () => {
+	sendInfor()
 	return
-  getMainWindow().webContents.send(
-  	'UPDATE_TRANSMISSION', 
-  	'UPDATE_UPLOAD', 
-  	userTasks.map(item => item.getSummary()), 
-  	finishTasks.map(i => i.getSummary?i.getSummary():i)
-  )
+  // getMainWindow().webContents.send(
+  // 	'UPDATE_TRANSMISSION', 
+  // 	'UPDATE_UPLOAD', 
+  // 	userTasks.map(item => item.getSummary()), 
+  // 	finishTasks.map(i => i.getSummary?i.getSummary():i)
+  // )
 }
 
 const createTask = (abspath, target, type, newWork, u, r, rootNodeUUID, ct) => {
@@ -96,6 +96,7 @@ class TaskManager {
 		this.name = path.basename(abspath)
 		this.newWork = newWork
 		this.rootNodeUUID = rootNodeUUID? rootNodeUUID: null
+		this.trsType = 'upload'
 		
 		this.size = 0//not need rootsize for visit 
 		this.completeSize = 0
@@ -144,6 +145,7 @@ class TaskManager {
 			finishCount: this.finishCount,
 			restTime: this.restTime,
 			finishDate: this.finishDate,
+			trsType: this.trsType,
 			state: this.state,
 			pause: this.pause,
 			record: this.record,

@@ -2,7 +2,7 @@ import React, { Component, PureComponent } from 'react'
 import Radium from 'radium'
 
 import ActionSwapVerticalCircle from 'material-ui/svg-icons/action/swap-vertical-circle'
-import TransmissionContent from '../file/TransmissionContainer'
+import TrsContainer from '../file/TransmissionContainer2'
 import Base from './Base'
 require('../../../assets/css/main.css')
 
@@ -56,7 +56,7 @@ class Transmission extends Base {
 
     return (
       <div style={{width: '100%', height: '100%'}}>
-        <TransmissionContent type='download'/>
+        <TrsContainer/>
       </div>
     )
   }

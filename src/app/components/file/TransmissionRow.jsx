@@ -34,7 +34,7 @@ class UploadRow extends Component {
 							<FileSvg style={svgStyle}/>
 						}
 					</span>
-					<span>{task.name}</span>
+					<span>{task.name + ' -- ' + task.trsType}</span>
 				</div>
 				<div className='trs-row-rtime'>{task.restTime}</div>
 				<div className='trs-row-progress'>

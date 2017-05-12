@@ -11,7 +11,9 @@ let commandMap = new Map()
 
 ipcMain.on('command', (evt, id, op) => {
   let task = taskFactory(evt, id, op, commandMap)
-  task.isIDExist()
+  if (task) task.isIDExist()
+  else console.log("command don't have handle")
+  
 })
 /*
 ipcMain.on('command', (evt, id, op) => {

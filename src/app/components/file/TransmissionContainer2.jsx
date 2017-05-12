@@ -12,7 +12,8 @@ import RowList from './TransmissionRowList'
 import { command } from '../../lib/command'
 
 const svgStyle = {color: '#000', opacity: 0.54}
-class Upload extends Component {
+
+class TrsContainer extends Component {
 	constructor(props) {
 		super(props)
 		this.taskSelected = []
@@ -65,19 +66,14 @@ class Upload extends Component {
 	render() {
 		let transmission,userTasks,finishTasks
 		transmission = window.store.getState().transmission
-		if (this.props.type == 'download') {
-			userTasks = transmission.userTasks
-			finishTasks = transmission.finishTasks
-		}else {
-			userTasks = transmission.userTasks
-			finishTasks = transmission.finishTasks
-		}
+		userTasks = transmission.userTasks
+		finishTasks = transmission.finishTasks
 		
 		return (
 			<div id='trs-wrap'>
 				{/*title*/}
 				<div className='trs-title'>
-					<span>{this.props.type=='download'?'下载中':'上传中'}</span>
+					<span>传输中</span>
 					<span>({userTasks.length})</span>
 				</div>
 				<div className='trs-hr'></div>
@@ -136,11 +132,8 @@ class Upload extends Component {
 	}
 
 	cleanRecord() {
-		console.log('1')
-		if (this.props.type === 'download') command('', 'CLEAN_DOWNLOAD_RECORD',{})
-		else command('', 'CLEAN_UPLOAD_RECORD',{}, (err, data) => {
-			console.log(err, data)
-		})
+		console.log('')
+		command('', 'CLEAN_RECORD',{})
 	}
 
 	cleanTaskSelect() {
@@ -162,7 +155,12 @@ class Upload extends Component {
 	}
 
 	openMenu(event, obj) {
-		let containerDom = document.getElementById('fileListContainer')
+		let containerDom = document.getElementById('content-container')
+		console.log(containerDom.offsetLeft)
+		console.log(containerDom.clientWidth)
+		console.log(containerDom.offsetTop)
+		console.log(containerDom.offsetHeight)
+		return
 		let maxLeft = containerDom.offsetLeft + containerDom.clientWidth - 112
 		let x = event.clientX>maxLeft?maxLeft:event.clientX
 		let maxTop = containerDom.offsetTop + containerDom.offsetHeight -208
@@ -206,4 +204,4 @@ class Upload extends Component {
 	}
 }
 
-export default Upload
+export default TrsContainer

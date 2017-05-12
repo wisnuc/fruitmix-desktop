@@ -55,7 +55,7 @@ class CommandTask {
 
 export default (evt, id, op, commandMap) => {
 	let hander = commandMap.get(op.cmd)
-	if (!hander && !id) return undefined
+	if (!hander) return undefined
 	let task = new CommandTask(evt, id, op, hander)
 	return task
 }

@@ -29,7 +29,7 @@ class FinishTaskRow extends Component {
 							<FileSvg style={svgStyle}/>
 						}
 					</span>
-					<span>{task.name}</span>
+					<span>{task.name + ' -- ' + task.trsType}</span>
 				</div>
 				<div className='trs-row-finishDate'>
 					<span>{this.getFinishDate(task.finishDate)}</span>

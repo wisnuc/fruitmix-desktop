@@ -78,27 +78,12 @@ const getTransmissionHandle = () => {
   })
 }
 
-const cleanRecordHandle = () => {
-	dialog.showMessageBox({
-		type:'question',
-		buttons:['取消','确定'],
-		title:'删除确认',
-		icon:null,
-		message:'你确定要清除所有上传记录吗？'},response => {
-			if (!response) return
-			db.uploaded.remove({},{multi: true},(err,re) => {
-				if (err) return console.log(err);
-				finishTasks.length = 0
-				getTransmissionHandle()
-			})
-	})
-}
+
 
 const uploadCommandMap = new Map([
   ['UPLOAD_FOLDER', uploadHandle],
   ['UPLOAD_FILE', uploadHandle],
-  ['DRAG_FILE', dragFileHandle],
-  ['CLEAN_UPLOAD_RECORD', cleanRecordHandle]
+  ['DRAG_FILE', dragFileHandle]
 ])
 
 registerCommandHandlers(uploadCommandMap)

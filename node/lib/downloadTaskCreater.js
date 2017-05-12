@@ -34,7 +34,6 @@ const initArgs = () => {
 
 //determine whether need to start/close sending msg
 const sendMessage = () => {
-	sendInfor()
 	let shouldSend = false
 	for(let i = 0; i < userTasks.length; i++) {
 		if (userTasks[i].state !== 'pause') {
@@ -56,13 +55,14 @@ const sendMessage = () => {
 
 //send summary information to browser
 const sendMsg = () => {
+	sendInfor()
 	return
-  getMainWindow().webContents.send(
-  	'UPDATE_TRANSMISSION', 
-  	'UPDATE_DOWNLOAD', 
-  	userTasks.map(item => item.getSummary()), 
-  	finishTasks.map(i => i.getSummary?i.getSummary():i)
-  )
+  // getMainWindow().webContents.send(
+  // 	'UPDATE_TRANSMISSION', 
+  // 	'UPDATE_DOWNLOAD', 
+  // 	userTasks.map(item => item.getSummary()), 
+  // 	finishTasks.map(i => i.getSummary?i.getSummary():i)
+  // )
 }
 
 //TaskManager creater
@@ -94,6 +94,7 @@ class TaskManager {
 		this.createTime = createTime
 		this.dirUUID = dirUUID
 		this.newWork = newWork
+		this.trsType = 'download'
 
 		this.size = 0
 		this.completeSize = 0
@@ -105,6 +106,7 @@ class TaskManager {
 		this.count = 0
 		this.finishCount = 0
 		this.finishDate = null
+		this.finishTime = 0
 
 		this.downloadIndex = 0
 		this.tree = []
@@ -133,6 +135,7 @@ class TaskManager {
 			finishCount: this.finishCount,
 			restTime: this.restTime,
 			finishDate: this.finishDate,
+			trsType: this.trsType,
 			state: this.state,
 			pause: this.pause,
 			speed: this.speed

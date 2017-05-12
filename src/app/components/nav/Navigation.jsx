@@ -99,8 +99,7 @@ class NavViews extends Component {
   componentDidMount() {
     this.navTo('home')
     ipcRenderer.send('GET_TRANSMISSION')
-    // ipcRenderer.on('UPDATE_TRANSMISSION', this.updateTransmissionBound)
-    ipcRenderer.on('UPDATE_TRANSMISSION', (e, type, userTasks, finishTasks) => console.log(userTasks, finishTasks))
+    ipcRenderer.on('UPDATE_TRANSMISSION', this.updateTransmissionBound)
   }
 
   componentWillUnmount() {
@@ -367,7 +366,7 @@ class NavViews extends Component {
             { view.showQuickNav() && this.renderQuickNavs() } 
 
             {/* content */}
-            <div style={{flexGrow: 1, height: '100%', marginLeft: 8, marginTop: 8}}>
+            <div style={{flexGrow: 1, height: '100%', marginLeft: 8, marginTop: 8}} id='content-container'>
               { view.renderContent() }
             </div>
           </div>

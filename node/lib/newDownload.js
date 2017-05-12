@@ -36,22 +36,8 @@ const getTransmissionHandle = (args, callback) => {
 	})
 }
 
-//handle will open dialog from electron to clean record of the task have been downloaded
-const cleanRecordHandle = () => {
-	dialog.showMessageBox({
-		type:'question',
-		buttons:['取消','确定'],
-		title:'删除确认',
-		icon:null,
-		message:'你确定要清除所有下载记录吗？'},response => {
-			if (!response) return
-			db.downloaded.remove({},{multi: true},(err,re) => {
-				if (err) return console.log(err);
-				finishTasks.length = 0
-				getTransmissionHandle()
-			})
-	})
-}
+
+
 
 const deleteDownloadingHandle = (e, tasks) => {
 	tasks.forEach(item => {
@@ -108,8 +94,7 @@ const openDownloadHandle = (e, tasks, type) => {
 }
 
 const uploadCommandMap = new Map([
-  ['DOWNLOAD', downloadHandle],
-  ['CLEAN_DOWNLOAD_RECORD', cleanRecordHandle]
+  ['DOWNLOAD', downloadHandle]
 ])
 
 registerCommandHandlers(uploadCommandMap)
