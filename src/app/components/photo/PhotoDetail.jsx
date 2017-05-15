@@ -4,6 +4,7 @@ import UUID from 'node-uuid'
 import { Paper, CircularProgress, IconButton, SvgIcon } from 'material-ui'
 import RenderToLayer from 'material-ui/internal/RenderToLayer'
 import keycode from 'keycode'
+import EventListener from 'react-event-listener'
 import { TweenMax } from 'gsap'
 import ReactTransitionGroup from 'react-addons-transition-group'
 
@@ -177,6 +178,16 @@ class PhotoDetailInline extends React.Component {
         TweenMax.to(root, time, { opacity: 0, ease })
       }
     }
+
+    this.handleKeyUp = (event) => {
+      // debug('this.handleKeyUp', keycode(event))
+      switch (keycode(event)) {
+        case 'esc': return this.close()
+        case 'left': return this.changeIndex('left')
+        case 'right': return this.changeIndex('right')
+        default: return null
+      }
+    }
   }
 
   componentWillMount() {
@@ -229,6 +240,8 @@ class PhotoDetailInline extends React.Component {
           justifyContent: 'center'
         }}
       >
+        {/* add EventListener to listen keyup */}
+        <EventListener target="window" onKeyUp={this.handleKeyUp} />
         <div
           ref={ref => (this.refContainer = ref)}
           style={{
