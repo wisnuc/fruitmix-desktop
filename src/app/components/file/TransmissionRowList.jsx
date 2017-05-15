@@ -38,13 +38,13 @@ class RowList extends Component {
 		)
 	}
 
-	pause(uuid) {
-		if (this.props.type === 'download') ipcRenderer.send('PAUSE_DOWNLOADING', uuid)
+	pause(uuid, type) {
+		if (type === 'download') ipcRenderer.send('PAUSE_DOWNLOADING', uuid)
 		else ipcRenderer.send('PAUSE_UPLOADING', uuid)
 	}
 
-	resume(uuid) {
-		if (this.props.type === 'download') ipcRenderer.send('RESUME_DOWNLOADING', uuid)
+	resume(uuid, type) {
+		if (type === 'download') ipcRenderer.send('RESUME_DOWNLOADING', uuid)
 		else ipcRenderer.send('RESUME_UPLOADING', uuid)
 	}
 
@@ -78,17 +78,12 @@ class RowList extends Component {
 				this.refs[id].updateDom(true)
 			}
 		}
-		console.log('当前选中任务数量 : ' + arr.length)
-		
-
 		
 		if (e.button == 2) {
 			let tasks = []
 			let play,pause
 			arr.forEach(item => {
-				if (this.refs[item]) {
-					tasks.push(this.refs[item].props.task)
-				}
+				if (this.refs[item]) tasks.push(this.refs[item].props.task)
 			})
 			if (this.props.listType !== 'finish') {
 				for(let i = 0; i < tasks.length; i++) {

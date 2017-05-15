@@ -1,3 +1,5 @@
+import os from 'os'
+import child_process from 'child_process'
 import { dialog, ipcMain } from 'electron'
 import { getMainWindow } from './window'
 import { userTasks as uploadingTasks, finishTasks as uploadedTasks} from './newUpload'
@@ -34,7 +36,7 @@ const quickSort = (arr, type) => {
 }
 
 //handle will open dialog from electron to clean record of the task have been downloaded
-var cleanRecordHandle = () => {
+const cleanRecordHandle = () => {
 	dialog.showMessageBox({
 		type:'question',
 		buttons:['取消','确定'],
@@ -55,14 +57,44 @@ var cleanRecordHandle = () => {
 	})
 }
 
+const openHandle = (e, tasks) => {
+	let osType = os.platform()
+	tasks.forEach(task => {
+		let pathProperty = task.trsType === 'download'? 'downloadPath': 'abspath'
+		// let taskPath
+		// if (task.trsType === 'download') {
+		// 	taskPath = task[pathProperty]
+		// }else {
+		// 	console.log(task[pathProperty])
+		// 	let index = task[pathProperty].lastIndexOf('\\')
+		// 	console.log(index)
+		// 	taskPath = task[pathProperty].substring(0, index)
+		// }
+		let taskPath = task.trsType === 'download' ? task[pathProperty]: task[pathProperty].substring(0, task[pathProperty].lastIndexOf('\\'))
+		console.log('打开目录的文件资源管理器', taskPath)
+		switch (osType) {
+			case 'win32':
+				child_process.exec('explorer ' + taskPath, {})
+				break
+			case 'linux':
+				child_process.exec('nautilus ' + taskPath, {})
+				break
+			case 'darwin':
+				child_process.exec('open ' + taskPath, {})
+				break
+			default : 
+		}
+	})
+}
+
 var commandMap = new Map([
   ['CLEAN_RECORD', cleanRecordHandle]
 ])
 
-console.log(commandMap)
 
 registerCommandHandlers(commandMap)
 
+ipcMain.on('OPEN_TRANSMISSION', openHandle)
 
 
 

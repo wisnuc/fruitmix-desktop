@@ -78,6 +78,36 @@ const getTransmissionHandle = () => {
   })
 }
 
+const deleteUploadingHandle = (e, tasks) => {
+  tasks.forEach(item => {
+    let obj = userTasks.find(task => task.uuid === item.uuid)
+    if (obj) obj.delete(cleanRecord)
+  })
+}
+
+const deleteUploadedHandle = (e, tasks) => {
+  tasks.forEach(item => {
+    let obj = finishTasks.find(task => task.uuid === item.uuid)
+    if (obj) cleanRecord('finish', item.uuid)
+  })
+}
+
+const cleanRecord = (type, uuid) => {
+  let list = type === 'finish'? finishTasks: userTasks
+  let d = type === 'finish'?db.uploaded:db.uploading
+  let index = list.findIndex(item => item.uuid === uuid)
+  if (index === -1) return console.log('任务没有在任务列表中')
+  else {
+    console.log('删除列表中任务... 第' + (index + 1) + '个 共' + list.length + '个'  )
+    list.splice(index, 1)
+    console.log('列表中任务删除完成 剩余' + list.length + '个' )
+    d.remove({_id: uuid}, {}, (err, doc) => {
+      if(err) return console.log('删除数据库记录出错')
+      console.log('删除数据库记录成功')
+      sendMsg()
+    })
+  } 
+}
 
 
 const uploadCommandMap = new Map([
@@ -93,6 +123,8 @@ ipcMain.on('loginOff', evt => {
 })
 
 ipcMain.on('GET_TRANSMISSION', getTransmissionHandle)
+ipcMain.on('DELETE_UPLOADING', deleteUploadingHandle)
+ipcMain.on('DELETE_UPLOADED', deleteUploadedHandle)
 
 // ipcMain.on('PAUSE_UPLOADING')
 ipcMain.on('PAUSE_UPLOADING', (e, uuid) => {
