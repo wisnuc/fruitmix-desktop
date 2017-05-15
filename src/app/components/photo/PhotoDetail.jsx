@@ -130,7 +130,7 @@ class PhotoDetailInline extends React.Component {
       this.clientWidth = window.innerWidth
 
       /* handle the exifOrientation */
-      this.exifOrientation = this.photo.metadata.exifOrientation
+      this.exifOrientation = this.photo.metadata.exifOrientation || 1
       this.degRotate = ''
       if (this.exifOrientation) {
         this.degRotate = `rotate(${(this.exifOrientation - 1) * 90}deg)`
