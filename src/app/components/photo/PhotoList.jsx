@@ -1,11 +1,12 @@
-import React, { Component, PropTypes } from 'react'
+import React from 'react'
+import ReactDom from 'react-dom'
 import Debug from 'debug'
 import { List, AutoSizer } from 'react-virtualized'
 import { Paper, Card, IconButton, CircularProgress, FlatButton } from 'material-ui'
 import RenderListByRow from './RenderListByRow'
 
 const debug = Debug('component:photoApp:PhotoList')
-const headerHeight = 64
+const headerHeight = 72
 const timelineMargin = 26
 
 const mousePosition = (ev) => {
@@ -18,7 +19,7 @@ const mousePosition = (ev) => {
   }
 }
 
-class PhotoList extends Component {
+class PhotoList extends React.Component {
   constructor(props) {
     super(props)
 
@@ -139,10 +140,48 @@ class PhotoList extends Component {
       const list = document.getElementsByClassName('ReactVirtualized__List')[0]
       list.scrollTop = this.scrollTop
     }
+
+    this.renderTimeline = () => {
+      // debug('this.renderTimeline')
+      if (!this.timeline) { return <div /> }
+      return this.timeline.map((data, index) => {
+        let date = data[0]
+        const top = data[1]
+        const zIndex = data[2]
+        if (date === 0) date = '神秘时间'
+        return (
+          <div
+            onMouseEnter={() => this.showDateBar(true)}
+            key={index.toString()}
+            style={{
+              position: 'absolute',
+              boxSizing: 'border-box',
+              top,
+              zIndex,
+              color: 'rgba(0,0,0,0.54)',
+              backgroundColor: 'white',
+              paddingRight: 8,
+              right: (data[0] === 0) ? 8 : 20,
+              textAlign: 'center'
+            }}
+          >
+            { date }
+          </div>
+        )
+      })
+    }
   }
 
   componentWillUnmount() {
     clearTimeout(this.time)
+  }
+
+
+  renderLater() {
+    clearTimeout(this.timeRenderLater)
+    this.timeRenderLater = setTimeout(() => ReactDom.render(
+      <div>{ this.renderTimeline() }</div>, document.getElementById('timeline')
+    ), 100)
   }
 
   render() {
@@ -172,24 +211,13 @@ class PhotoList extends Component {
 
               /* get timeline */
               this.timeline = this.props.getTimeline(this.photoDates, this.indexHeightSum, this.maxScrollTop, this.height)
+              // debug('Get this.timeline', this.timeline, this.height, this.width)
 
               const estimatedRowSize = PhotoInfo.rowHeightSum / PhotoInfo.allHeight.length
               const rowHeight = ({ index }) => PhotoInfo.allHeight[index]
 
               /* get previousIndex */
-                /*
-                  currentIndex = this.indexHeightSum.findIndex(data => data > list.scrollTop + 200)
-                    previousIndex = this.height > 712 ? this.height > 964 ? index + 3 : index + 2 : index + 1 // why ?
-
-                this.photoMapDates.forEach((list, index) => {
-                  const Got = list.photos.findIndex(photo => photo[0] === this.props.memoize().currentDigest)
-                  if (Got >= 0) {
-                    previousIndex = this.height > 712 ? this.height > 964 ? index + 3 : index + 2 : index + 1 // why ?
-                  }
-                })
-                */
               let previousScrollTop = 0
-              // debug('this.props.memoize2', this.props.memoize())
               if (this.props.memoize().currentScrollTop) {
                 previousScrollTop = this.props.memoize().currentScrollTop
               } else if (this.props.memoize().currentDigest) {
@@ -200,8 +228,6 @@ class PhotoList extends Component {
                   }
                 })
               }
-
-              // debug('PhotoInfo, previousIndex', PhotoInfo, this.props.memoize(), this.height, previousScrollTop)
 
               /* function to render each row */
               const rowRenderer = ({ key, index, style, isScrolling }) => (
@@ -216,6 +242,7 @@ class PhotoList extends Component {
                   />
                 </div>
               )
+
               return (
                 <div onTouchTap={e => this.onRowTouchTap(e, -1)}>
                   <List
@@ -250,35 +277,12 @@ class PhotoList extends Component {
         >
           <div
             ref={ref => (this.refTimeline = ref)}
-            style={{ opacity: this.hover ? 1 : 0, transition: 'opacity 350ms' }}
+            style={{ opacity: this.hover ? 1 : 0, transition: 'opacity 200ms' }}
           >
             {/* date list */}
-            {
-              this.timeline && this.timeline.map((data, index) => {
-                let date = data[0]
-                const top = data[1]
-                const zIndex = data[2]
-                if (date === 0) date = '神秘时间'
-                return (
-                  <div
-                    key={index.toString()}
-                    style={{
-                      position: 'absolute',
-                      boxSizing: 'border-box',
-                      top,
-                      zIndex,
-                      color: 'rgba(0,0,0,0.54)',
-                      backgroundColor: 'white',
-                      paddingRight: 8,
-                      right: (data[0] === 0) ? 8 : 20,
-                      textAlign: 'center'
-                    }}
-                  >
-                    { date }
-                  </div>
-                )
-              })
-            }
+            <div id="timeline" />
+            {/* RenderLater is necessary to get this latest value of 'this.timeline' */}
+            { this.renderLater() }
 
             {/* position bar */}
             <div
@@ -305,7 +309,7 @@ class PhotoList extends Component {
               height: 2,
               width: 48,
               zIndex: 4,
-              transition: 'opacity 350ms',
+              transition: 'opacity 200ms',
               opacity: this.hover ? 1 : 0,
               backgroundColor: 'rgba(0,0,0,0.54)'
             }}
@@ -322,7 +326,7 @@ class PhotoList extends Component {
               width: 84,
               color: 'white',
               backgroundColor: 'black',
-              transition: 'opacity 350ms',
+              transition: 'opacity 200ms',
               opacity: this.hover ? 1 : 0
             }}
           />

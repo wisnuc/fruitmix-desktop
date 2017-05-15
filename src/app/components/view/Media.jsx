@@ -173,9 +173,12 @@ class Media extends Base {
     let spacingCount = 0
     let currentYear = null
     const timeline = [...month].map((data, index) => {
-      const percentage = (indexHeightSum[sumCount] - 200) / maxScrollTop
+      let percentage = 0
+      if (sumCount) {
+        percentage = (indexHeightSum[sumCount - 1] - 200) / maxScrollTop
+      }
       /* top = percentage * height + headerHeight - adjust */
-      let top = percentage * height - 24
+      let top = percentage * height - 8
 
       const spacingPercentage = (indexHeightSum[spacingCount] - 200) / maxScrollTop
       const spacingTop = spacingPercentage * height
@@ -199,7 +202,7 @@ class Media extends Base {
       } else if (spacingTop > 32 && date === parseInt(data[0], 10)) { // show years with enough spacing
         spacingCount = 0
       } else if (date === parseInt(data[0], 10)) { // hide years without enough spacing
-        date = null
+        // date = null
       } else { // show bar
         zIndex = 1
       }
@@ -207,9 +210,8 @@ class Media extends Base {
       /* set range of displaying date*/
       if (top < 16 && index) date = null
       if (top > (height - 46) && index !== month.size - 1) date = null
-      return [date, top, zIndex]
+      return [date, top, zIndex, percentage]
     })
-    debug('photoDates', photoDates, timeline, height, indexHeightSum)
     return timeline
   }
 
@@ -226,7 +228,6 @@ class Media extends Base {
 
     /* now it's fulfilled */
     const value = media.value()
-    // debug('media before sort', media.value())
 
     this.apis = nextProps.apis
     /* sort photos by date */
@@ -234,7 +235,6 @@ class Media extends Base {
       parseInt(`0x${next[0]}`, 16) - parseInt(`0x${prev[0]}`, 16)))
 
     if (value !== this.state.media) {
-      // debug('media.value()', value)
       this.setState({ media: value })
     }
   }
@@ -326,7 +326,6 @@ class Media extends Base {
   }
 
   renderContent() {
-    // debug('renderContent')
     return (<PhotoApp
       media={this.state.media}
       setPhotoInfo={this.setPhotoInfo}
