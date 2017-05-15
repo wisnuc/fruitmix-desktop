@@ -148,6 +148,10 @@ class NavViews extends Component {
 
     let color = this.currentView().primaryColor()
     let group = this.views[this.state.nav].navGroup()
+    let navGroupList = Object.keys(this.views).filter(key => this.views[key].navGroup() === this.views[this.state.nav].navGroup())
+
+    /* hide QuickNav if there is only one nav */
+    if (navGroupList.length === 1) { return <div /> }
 
     return (
       <div style={{
@@ -157,10 +161,7 @@ class NavViews extends Component {
         backgroundColor: '#FFF', 
         overflow: 'hidden'
       }}>
-        { Object.keys(this.views)
-            .filter(key => 
-              this.views[key].navGroup() === this.views[this.state.nav].navGroup())
-            .map(key =>
+        { navGroupList.map(key =>
               <QuickNav
                 key={`quicknav-${key}`}
                 icon={this.views[key].quickIcon()} 
@@ -366,7 +367,7 @@ class NavViews extends Component {
             { view.showQuickNav() && this.renderQuickNavs() } 
 
             {/* content */}
-            <div style={{flexGrow: 1, height: '100%', marginLeft: 8, marginTop: 8}} id='content-container'>
+            <div style={{flexGrow: 1, height: '100%', paddingLeft: 8, paddingTop: 8, boxSizing: 'border-box' }} id='content-container'>
               { view.renderContent() }
             </div>
           </div>
