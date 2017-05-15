@@ -242,7 +242,7 @@ class FileContent extends Component {
     for(let item of e.dataTransfer.files) files.push(item.path)
     let dir = this.props.home.path
     let rUUID = this.props.home.path[0].uuid
-    command('fileapp','DRAG_FILE',{files,dirUUID:dir[dir.length - 1].uuid, rUUID})
+    command('fileapp','DRAG_FILE',{files,dirUUID:dir[dir.length - 1].uuid})
   }
 
   render() {

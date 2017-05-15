@@ -14,10 +14,9 @@ const userTasks = []
 const finishTasks = []
 
 //handler
-const uploadHandle = (args, callback) => {
-  initArgs()
-  let folderUUID = args.folderUUID
-  let dialogType = args.type=='folder'?'openDirectory':'openFile'
+const uploadHandle = args => {
+  let { dirUUID, type } = args
+  let dialogType = type == 'folder'? 'openDirectory': 'openFile'
   dialog.showOpenDialog({properties: [ dialogType,'multiSelections','createDirectory']},function(data){
     if (!data) return callback('get list err',null)
     let index = 0
@@ -31,7 +30,7 @@ const uploadHandle = (args, callback) => {
         if(index < count) {
           readUploadInfor(data[index])
         }else {
-          createUserTask(args.type,uploadArr,folderUUID)
+          createTask(abspath, dirUUID, type, true, null, null, null)
           getMainWindow().webContents.send('message',uploadArr.length + '个任务添加至上传队列')
         }
       })
@@ -111,8 +110,7 @@ const cleanRecord = (type, uuid) => {
 
 
 const uploadCommandMap = new Map([
-  ['UPLOAD_FOLDER', uploadHandle],
-  ['UPLOAD_FILE', uploadHandle],
+  ['UPLOAD', uploadHandle],
   ['DRAG_FILE', dragFileHandle]
 ])
 
