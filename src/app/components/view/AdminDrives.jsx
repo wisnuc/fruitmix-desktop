@@ -184,6 +184,7 @@ class AdminDrives extends Base {
                   primary
                   apis={this.ctx.props.apis}
                   users={users}
+                  drives={drives}
                 />
               }
             </DialogOverlay>

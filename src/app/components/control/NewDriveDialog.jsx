@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
 import Debug from 'debug'
 import { TextField, Checkbox, Divider } from 'material-ui'
+import {RadioButton, RadioButtonGroup} from 'material-ui/RadioButton';
 import FlatButton from '../common/FlatButton'
 
 const debug = Debug('component:control:NewDriveDialog')
@@ -13,11 +14,12 @@ class NewDriveDialog extends PureComponent {
     this.state = {
       focusOnce: false,
       label: '',
-      writelist: []
+      writelist: '',
+      errorText: '',
+      mode: ''
     }
 
     this.fire = () => {
-      debug('this.props', this.props)
       const apis = this.props.apis
       const args = {
         label: this.state.label,
@@ -33,10 +35,16 @@ class NewDriveDialog extends PureComponent {
   }
 
   updateLabel(value) {
-    this.setState({ label: value })
+    const drives = this.props.drives
+    if (drives.findIndex(drive => drive.label === value) > -1) {
+      this.setState({ label: value, errorText: '文件名已存在' })
+    } else {
+      this.setState({ label: value, errorText: '' })
+    }
   }
 
   handleCheck(userUUID) {
+    debug('handleCheck', this.state)
     const index = this.state.writelist.indexOf(userUUID)
     if (index === -1) { this.setState({ writelist: [...this.state.writelist, userUUID] }) } else {
       this.setState({
@@ -64,27 +72,55 @@ class NewDriveDialog extends PureComponent {
             alignItems: 'center' }}
         >名称</div>
 
-        <TextField
-          name="shareDiskName"
-          fullWidth
-          onChange={e => this.updateLabel(e.target.value)}
-          value={this.state.label}
-        />
+        <div style={{ height: 60 }}>
+          <TextField
+            name="shareDiskName"
+            fullWidth
+            onChange={e => this.updateLabel(e.target.value)}
+            value={this.state.label}
+            errorText={this.state.errorText}
+          />
+        </div>
 
-        <div style={{ height: 8 }} />
         <div
-          style={{ height: 32,
+          style={{
+            height: 32,
             fontSize: 14,
             fontWeight: 500,
             color: 'rgba(0,0,0,0.54)',
             display: 'flex',
-            alignItems: 'center' }}
-        >选择用户</div>
-        <div style={{ maxHeight: 40 * 8, overflow: 'auto' }}>
+            alignItems: 'center'
+          }}
+        >
+          选择用户
+        </div>
+        <RadioButtonGroup
+          name="usersToshare"
+          onChange={(e, value) => {
+            if (value === 'all') {
+              this.setState({ mode: value, writelist: this.props.users.map(user => user.uuid) })
+            } else {
+              this.setState({ mode: value, writelist: '' })
+            }
+          }}
+        >
+          <RadioButton
+            value="all"
+            label="所有人"
+            style={{ marginBottom: 16 }}
+          />
+          <RadioButton
+            value="custom"
+            label="自定义"
+            style={{ marginBottom: 8 }}
+          />
+        </RadioButtonGroup>
+        <div style={{ maxHeight: 40 * 8, overflow: 'auto', marginLeft: 42 }}>
           {
             users.map(user =>
               <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.username} >
                 <Checkbox
+                  disabled={this.state.mode !== 'custom'}
                   label={user.username}
                   checked={this.state.writelist.includes(user.uuid)}
                   onCheck={() => this.handleCheck(user.uuid)}
@@ -104,7 +140,7 @@ class NewDriveDialog extends PureComponent {
           />
           <FlatButton
             label="创建" primary={this.props.primary} secondary={this.props.accent}
-            disabled={this.state.label.length === 0}
+            disabled={this.state.label.length === 0 || this.state.errorText}
             onTouchTap={this.fire}
           />
         </div>

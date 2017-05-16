@@ -31,7 +31,6 @@ class ChangeAccount extends React.PureComponent {
     this.fire = () => {
       const { apis, op } = this.props
       const args = {
-        user: apis.account.data,
         uuid: apis.account.data.uuid,
         username: op === 'username' ? this.state.username : undefined,
         password: op === 'password' ? this.state.password : undefined
