@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import FolderSvg from 'material-ui/svg-icons/file/folder'
 import FileSvg from 'material-ui/svg-icons/editor/insert-drive-file'
+import DownloadSvg from 'material-ui/svg-icons/file/file-download'
+import UploadSvg from 'material-ui/svg-icons/file/file-upload'
 
 const svgStyle = {color: '#000', opacity: 0.54}
 const normalStyle = {}
@@ -21,15 +23,16 @@ class FinishTaskRow extends Component {
 		let s = this.isSelected? selectStyle: normalStyle
 		let task = this.props.task
 		return (
-			<div className='trs-row' style={s} onMouseUp={this.selectFinishItem.bind(this)}>
+			<div className='trs-row trs-finish-row' style={s} onMouseUp={this.selectFinishItem.bind(this)}>
 				<div className='trs-row-name'>
+					<span>{task.trsType=='download'?<DownloadSvg style={svgStyle}/>:<UploadSvg style={svgStyle}/>}</span>
 					<span>
 						{
 							task.type=='folder'?<FolderSvg style={svgStyle}/>:
 							<FileSvg style={svgStyle}/>
 						}
 					</span>
-					<span>{task.name + ' -- ' + task.trsType}</span>
+					<span>{task.name}</span>
 				</div>
 				<div className='trs-row-finishDate'>
 					<span>{this.getFinishDate(task.finishDate)}</span>

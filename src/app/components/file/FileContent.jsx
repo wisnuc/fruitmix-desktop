@@ -120,7 +120,7 @@ class Row extends PureComponent {
                   ? <EditorInsertDriveFile style={{color: 'rgba(0,0,0,0.54'}} />
                   : null } 
           </div>
-          <div style={{flexGrow: 1}}>
+          <div style={{flexGrow: 1, overflow:'hidden', whiteSpace:'nowrap', textOverflow: 'ellipsis'}}>
             { entry.name }
           </div>
           <div style={{flex: '0 1 160px', fontSize: 13, color: 'rgba(0,0,0,0.54)', textAlign: 'right'}}>
@@ -242,7 +242,7 @@ class FileContent extends Component {
     for(let item of e.dataTransfer.files) files.push(item.path)
     let dir = this.props.home.path
     let rUUID = this.props.home.path[0].uuid
-    command('fileapp','DRAG_FILE',{files,dirUUID:dir[dir.length - 1].uuid, rUUID})
+    command('fileapp','DRAG_FILE',{files,dirUUID:dir[dir.length - 1].uuid})
   }
 
   render() {

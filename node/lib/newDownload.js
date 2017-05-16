@@ -36,9 +36,6 @@ const getTransmissionHandle = (args, callback) => {
 	})
 }
 
-
-
-
 const deleteDownloadingHandle = (e, tasks) => {
 	tasks.forEach(item => {
 		let obj = userTasks.find(task => task.uuid === item.uuid)
@@ -47,6 +44,7 @@ const deleteDownloadingHandle = (e, tasks) => {
 }
 
 const deleteDownloadedHandle = (e, tasks) => {
+	console.log(tasks)
 	tasks.forEach(item => {
 		let obj = finishTasks.find(task => task.uuid === item.uuid)
 		if (obj) cleanRecord('finish', item.uuid)
@@ -70,29 +68,6 @@ const cleanRecord = (type, uuid) => {
 	}	
 }
 
-const openDownloadHandle = (e, tasks, type) => {
-	let osType = os.platform()
-	let list = type === 'finish'? finishTasks: userTasks
-	tasks.forEach(task => {
-		let item = list.find(item => item.uuid === task.uuid)
-		if (item) {
-			console.log('打开下载目录的文件资源管理器', item.downloadPath)
-			switch (osType) {
-				case 'win32':
-					child_process.exec('explorer ' + item.downloadPath, {})
-					break
-				case 'linux':
-					child_process.exec('nautilus ' + item.downloadPath, {})
-					break
-				case 'darwin':
-					child_process.exec('open ' + item.downloadPath, {})
-					break
-				default : 
-			}
-		}
-	})
-}
-
 const uploadCommandMap = new Map([
   ['DOWNLOAD', downloadHandle]
 ])
@@ -100,9 +75,9 @@ const uploadCommandMap = new Map([
 registerCommandHandlers(uploadCommandMap)
 
 ipcMain.on('GET_TRANSMISSION', getTransmissionHandle)
-ipcMain.on('DELATE_DOWNLOADING', deleteDownloadingHandle)
+ipcMain.on('DELETE_DOWNLOADING', deleteDownloadingHandle)
 ipcMain.on('DELETE_DOWNLOADED', deleteDownloadedHandle)
-ipcMain.on('OPEN_DOWNLOAD', openDownloadHandle)
+
 ipcMain.on('PAUSE_DOWNLOADING', (e, uuid) => {
 	if (!uuid) return
 	let task = userTasks.find(item => item.uuid === uuid)

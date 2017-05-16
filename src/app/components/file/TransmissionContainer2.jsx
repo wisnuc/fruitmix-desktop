@@ -79,7 +79,6 @@ class TrsContainer extends Component {
 				<div className='trs-hr'></div>
 				{/*list*/}
 				<RowList
-					type = {this.props.type}
 					ref = 'running'
 					listType = 'running'
 					tasks = {userTasks}
@@ -103,7 +102,6 @@ class TrsContainer extends Component {
 				<div className='trs-hr'></div>
 				{/*list*/}
 				<RowList
-					type = {this.props.type}
 					listType = 'finish'
 					ref = 'finish'
 					tasks = {finishTasks}
@@ -119,7 +117,7 @@ class TrsContainer extends Component {
 					<div className='trs-menu-container' onTouchTap={this.hideMenu}>
 						<Paper style={{position:'absolute',top:this.state.y,left:this.state.x}}>
 							<Menu>
-								<MenuItem primaryText='开始下载' disabled={this.state.play} onTouchTap={this.play}/>
+								<MenuItem primaryText='继续' disabled={this.state.play} onTouchTap={this.play}/>
 								<MenuItem primaryText='暂停' disabled={this.state.pause} onTouchTap={this.pause}/>
 								<MenuItem primaryText='打开所在文件夹' onTouchTap={this.open}/>
 								<MenuItem primaryText='删除' onTouchTap={this.delete}/>
@@ -156,11 +154,6 @@ class TrsContainer extends Component {
 
 	openMenu(event, obj) {
 		let containerDom = document.getElementById('content-container')
-		console.log(containerDom.offsetLeft)
-		console.log(containerDom.clientWidth)
-		console.log(containerDom.offsetTop)
-		console.log(containerDom.offsetHeight)
-		return
 		let maxLeft = containerDom.offsetLeft + containerDom.clientWidth - 112
 		let x = event.clientX>maxLeft?maxLeft:event.clientX
 		let maxTop = containerDom.offsetTop + containerDom.offsetHeight -208
@@ -175,32 +168,37 @@ class TrsContainer extends Component {
 	}
 
 	play() {
-		if (this.props.type === 'download') {
-			this.state.tasks.forEach(item => ipcRenderer.send('RESUME_DOWNLOADING', item.uuid))
-		}
+
+		this.state.tasks.forEach(item => {
+			if (item.trsType === 'download') ipcRenderer.send('RESUME_DOWNLOADING', item.uuid)
+			else ipcRenderer.send('RESUME_UPLOADING', item.uuid)
+		})
 	}
 
 	pause() {
-		if (this.props.type === 'download') {
-			this.state.tasks.forEach(item => ipcRenderer.send('PAUSE_DOWNLOADING', item.uuid))
-		}
+
+		this.state.tasks.forEach(item => {
+			if (item.trsType === 'download') ipcRenderer.send('PAUSE_DOWNLOADING', item.uuid)
+			else ipcRenderer.send('PAUSE_UPLOADING', item.uuid)
+		})
 	}
 
 	delete() {
-		console.log(this.state.tasks)
-		if (this.props.type === 'download') 
-			this.state.tasks.forEach(item => 
-				ipcRenderer.send(this.taskSelected.length?'DELATE_DOWNLOADING':'DELETE_DOWNLOADED', this.state.tasks)
-			)
-		else this.state.tasks.forEach(item => 
-			ipcRenderer.send(this.taskSelected.length?'DELETE_UPLOADING':'DELETE_UPLOADED', this.state.tasks)
-			)
+		let downloadArr = []
+		let uploadArr = []
+		this.state.tasks.forEach(item => {
+			if (item.trsType === 'download') downloadArr.push(item)
+			else uploadArr.push(item)
+		})
+
+		ipcRenderer.send(this.taskSelected.length?'DELETE_DOWNLOADING':'DELETE_DOWNLOADED', downloadArr)
+		ipcRenderer.send(this.taskSelected.length?'DELETE_UPLOADING':'DELETE_UPLOADED', uploadArr)
+
 	}
 
 	open() {
-		if (this.props.type === 'download') {
-			ipcRenderer.send('OPEN_DOWNLOAD', this.state.tasks, this.taskSelected.length?'running':'finish')
-		}
+		console.log(this.state.tasks)
+		ipcRenderer.send('OPEN_TRANSMISSION', this.state.tasks)
 	}
 }
 

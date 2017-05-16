@@ -4,6 +4,9 @@ import FolderSvg from 'material-ui/svg-icons/file/folder'
 import PlaySvg from 'material-ui/svg-icons/av/play-arrow'
 import PauseSvg from 'material-ui/svg-icons/av/pause'
 import DetailSvg from 'material-ui/svg-icons/image/details'
+import DownloadSvg from 'material-ui/svg-icons/file/file-download'
+import UploadSvg from 'material-ui/svg-icons/file/file-upload'
+
 
 const normalStyle = {}
 const selectStyle = {backgroundColor:'#f4f4f4'}
@@ -21,20 +24,21 @@ class UploadRow extends Component {
 
 	render() {
 		let task = this.props.task
-		let s = this.isSelected? selectStyle: normalStyle
+		let style = this.isSelected? selectStyle: normalStyle
 		let pColor = task.pause?'#d4d4d4':'#89c2f2'
 		let pWidth = task.completeSize / task.size * 100
 		if (pWidth === Infinity || !pWidth) pWidth = 0
 		return (
-			<div className='trs-row' style={s} onMouseUp={this.selectTaskItem.bind(this)}>
+			<div className='trs-row' style={style} onMouseUp={this.selectTaskItem.bind(this)}>
 				<div className='trs-row-name'>
+					<span>{task.trsType=='download'?<DownloadSvg style={svgStyle}/>:<UploadSvg style={svgStyle}/>}</span>
 					<span>
 						{
 							task.type=='folder'?<FolderSvg style={svgStyle}/>:
 							<FileSvg style={svgStyle}/>
 						}
 					</span>
-					<span>{task.name + ' -- ' + task.trsType}</span>
+					<span>{task.name}</span>
 				</div>
 				<div className='trs-row-rtime'>{task.restTime}</div>
 				<div className='trs-row-progress'>
@@ -50,8 +54,8 @@ class UploadRow extends Component {
 				</div>
 				<div className='trs-row-tool'>
 					{task.pause?
-						<PlaySvg style={svgStyle} onClick={this.props.resume.bind(this, task.uuid)}/>:
-						<PauseSvg style={svgStyle} onClick={this.props.pause.bind(this, task.uuid)}/>}
+						<PlaySvg style={svgStyle} onClick={this.props.resume.bind(this, task.uuid, task.trsType)}/>:
+						<PauseSvg style={svgStyle} onClick={this.props.pause.bind(this, task.uuid, task.trsType)}/>}
 				</div>
 			</div>
 		)

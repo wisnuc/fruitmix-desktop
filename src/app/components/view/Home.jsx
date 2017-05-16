@@ -1,15 +1,17 @@
 import React, { Component, PureComponent } from 'react'
 import Radium from 'radium'
 
-import { Paper, Divider, IconButton, Menu, MenuItem } from 'material-ui'
+import { Paper, Divider, IconButton, Menu, MenuItem, FloatingActionButton } from 'material-ui'
 import { orange700, blue700, indigo700, indigo500, teal500 } from 'material-ui/styles/colors'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
+import CloudUpload from 'material-ui/svg-icons/file/cloud-upload'
 
 import ContextMenu from '../common/ContextMenu'
 import DialogOverlay from '../common/DialogOverlay'
 
 import NewFolderDialog from '../file/NewFolderDialog'
+import FileUploadButton from '../file/FileUploadButton'
 // import RenameDialog from '../file/RenameDialog'
 // import DeleteDialog from '../file/DeleteDialog'
 
@@ -204,6 +206,48 @@ class Home extends Base {
     
   }
 
+  delete() {
+    console.log(this)
+    let entries = this.state.entries
+    let selected = this.state.select.selected
+    let count = selected.length
+    let finishCount = 0
+
+    let p = this.state.path
+    let dirUUID = p[p.length - 1].uuid
+
+    let loop = () => {
+      let nodeUUID = entries[selected[finishCount]].uuid
+      this.ctx.props.apis.request('deleteDirOrFile', {dirUUID, nodeUUID}, (err, data) => {
+        console.log(entries[selected[finishCount]].name + ' finish')
+        if (err) console.log(err)
+        finishCount++
+        console.log(finishCount, ' vs ', count, this.state.path[this.state.path.length - 1].uuid === dirUUID)
+        if (finishCount === count) {
+          if (this.state.path[this.state.path.length - 1].uuid === dirUUID) {
+            this.ctx.props.apis.request('listNavDir', {rootUUID: this.state.path[0].uuid, dirUUID})  
+          }else return
+          
+        }else loop()
+      })
+    }
+
+    loop()
+  }
+
+  upload(type) {
+    let dirPath = this.state.path
+    let dirUUID = dirPath[dirPath.length - 1].uuid
+    console.log(dirUUID, type)
+    command('fileapp', 'UPLOAD', {dirUUID, type})
+  }
+
+  openUploadDialog() {
+    let dirPath = this.state.path
+    let dirUUID = dirPath[dirPath.length - 1].uuid
+    command('fileapp', 'UPLOAD', { dirUUID })
+  }
+
   showContextMenu(clientX, clientY) {
     if (this.select.state.ctrl || this.select.state.shift) return
     this.setState({ 
@@ -233,7 +277,7 @@ class Home extends Base {
     // each one is preceded with a separator, except for the first one
     // each one is assigned an action, except for the last one
     return (
-      <div id='file-breadcrumbs' style={style}>
+      <div id='file-breadcrumbs' style={Object.assign({}, style, {marginLeft:'176px'})}>
         { this.state.listNavDir.path.reduce((acc, node, index, arr) => {
 
           if (index !== 0) acc.push(<BreadCrumbSeparator key={node.uuid + index}/>)
@@ -269,7 +313,9 @@ class Home extends Base {
 
     return (
       <div style={style}>
-        <IconButton><FileCreateNewFolder color='#FFF' /></IconButton>
+        <IconButton onTouchTap={this.createNewFolder.bind(this)}>
+          <FileCreateNewFolder color='#FFF' />
+        </IconButton>
       </div>
     )
   }
@@ -280,6 +326,9 @@ class Home extends Base {
   renderContent() {
     return (
       <div style={{position: 'relative', width: '100%', height: '100%'}}>
+
+        <FileUploadButton upload={this.upload.bind(this)}/>
+
         <FileContent 
           home={this.state} 
           select={this.state.select} 
@@ -296,7 +345,7 @@ class Home extends Base {
         >
           <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
           <MenuItem primaryText='下载' onTouchTap={this.download.bind(this)} /> 
-          <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
+          <MenuItem primaryText='刪除' onTouchTap={this.delete.bind(this)} /> 
           <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
           <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
           <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 

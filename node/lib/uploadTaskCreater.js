@@ -137,6 +137,7 @@ class TaskManager {
 	getSummary() {
 		return {
 			uuid: this.uuid,
+			abspath:this.abspath,
 			type: this.type,
 			name: this.name,
 			size: this.size,
@@ -362,7 +363,8 @@ class TaskManager {
 			uploading: uploadArr,
 			finishDate: this.finishDate,
 			rootNodeUUID: this.rootNodeUUID,
-			createTime: this.createTime
+			createTime: this.createTime,
+			trsType: this.trsType
 		}
 	}
 
@@ -395,6 +397,22 @@ class TaskManager {
 		db.uploaded.insert(this.getStoreObj(), (err, data) => {
 			if (err) return console.log(err) 
 		})
+	}
+
+	delete(callback) {
+		if (this.state === 'finish') {
+			this.recordInfor('开始删除已完成传输任务...')
+			callback('finish', this.uuid)
+		}else {
+			this.recordInfor('开始删除正在下载任务...')
+			this.pauseTask()
+			this.recordInfor('暂停了下载任务')
+			this.removeCache(callback.bind(this, 'running', this.uuid))
+		}
+	}
+
+	async removeCache(callback) {
+		callback()
 	}
 
 	error() {
@@ -820,8 +838,8 @@ class UploadFileSTM extends STM {
 				wrapper.manager.completeSize -= (this.partFinishSize + wrapper.segmentsize * wrapper.seek)
 				this.partFinishSize = 0
 				seek = 0
-				if (failedTimes < 5) return this.uploadSegment()
-				else if (failedTimes < 6) return this.createUploadTask()
+				if (wrapper.failedTimes < 5) return this.uploadSegment()
+				else if (wrapper.failedTimes < 6) return this.createUploadTask()
 				else return console.log('failed!!!')
 			}
 		}).on('abort', () => {

@@ -244,6 +244,11 @@
 	align-items: stretch;
 }
 
+.trs-finish-row {
+	height:40px;
+	line-height: 40px;
+}
+
 .trs-row:hover {
 	background: #eeeeee
 }
@@ -258,7 +263,7 @@
 	flex: row nowrap
 }
 
-.trs-row-name>span:nth-child(1){
+.trs-row-name>span:nth-child(1), .trs-row-name>span:nth-child(2){
 	display: flex;
 	align-items: center;
 	margin-right: 8px;
@@ -267,6 +272,8 @@
 .trs-row-rtime {
 	width:234px;
 	padding-left:50px;
+	color:rgba(0, 0, 0, 0.541176);
+	font-size:13px;
 }
 
 .trs-row-progress {
@@ -315,6 +322,8 @@
 
 .trs-row-finishDate {
 	width:385px;
+	color:rgba(0, 0, 0, 0.541176);
+	font-size:13px;
 }
 
 .trs-detail-container {

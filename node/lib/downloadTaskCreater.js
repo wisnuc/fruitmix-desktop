@@ -127,6 +127,7 @@ class TaskManager {
 	getSummary() {
 		return {
 			uuid: this.uuid,
+			downloadPath: this.downloadPath,
 			type: this.type,
 			name: this.name,
 			size: this.size,
@@ -309,7 +310,8 @@ class TaskManager {
 			dirUUID: this.dirUUID,
 			downloading: downloadingArr,
 			finishDate: this.finishDate,
-			createTime: this.createTime
+			createTime: this.createTime,
+			trsType: this.trsType
 		}
 	}
 
@@ -348,7 +350,7 @@ class TaskManager {
 	delete(callback) {
 		if (this.state === 'finish') {
 			this.recordInfor('开始删除已完成传输任务...')
-			callback('running', this.uuid)
+			callback('finish', this.uuid)
 		}else {
 			this.recordInfor('开始删除正在下载任务...')
 			this.pauseTask()

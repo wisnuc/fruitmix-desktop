@@ -16,7 +16,7 @@ class FileUploadButton extends React.Component {
   render() {
 
     return (
-      <div style={{position: 'absolute', right:48, bottom:48}}>
+      <div style={{position: 'absolute', top: -36, left: 24}}>
         <FloatingActionButton 
           backgroundColor='#2196F3'
           zDepth={3}
@@ -31,28 +31,22 @@ class FileUploadButton extends React.Component {
           open={this.state.open}
           animated={true}
           anchorEl={this.state.anchorEl}
-          anchorOrigin={{ horizontal: 'left', vertical: 'top' }}
-          targetOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+          targetOrigin={{ horizontal: 'left', vertical: 'top' }}
           onRequestClose={() => this.setState({ open: false })} 
         >
           <Menu>
-            <MenuItem primaryText='上传文件夹' leftIcon={<FileFolder />} onTouchTap={this.upload.bind(this, 'UPLOAD_FOLDER')}/>
-            <MenuItem primaryText='上传文件' leftIcon={<EditorInsertDriveFile />} onTouchTap={this.upload.bind(this, 'UPLOAD_FILE')}/>
+            <MenuItem primaryText='上传文件夹' leftIcon={<FileFolder />} onTouchTap={this.upload.bind(this, 'folder')}/>
+            <MenuItem primaryText='上传文件' leftIcon={<EditorInsertDriveFile />} onTouchTap={this.upload.bind(this, 'file')}/>
           </Menu>          
         </Popover>
       </div>
     )
   }
 
-  upload(cm) {
-    let path = this.props.path
-    if (!path.length) return
-    let folderUUID = path[path.length - 1].uuid
-    let type = cm=='UPLOAD_FOLDER'?'folder':'file'
-    command('fileapp', cm, {folderUUID:folderUUID,type:type})
-    this.setState({
-      open : false
-    })
+  upload(type) {
+    this.props.upload(type)
+    this.setState({open: false})
   }
 }
 
