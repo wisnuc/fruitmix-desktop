@@ -23,14 +23,14 @@ class Account extends Base {
     /* now it's fulfilled */
     const value = account.value()
 
-    this.apis = nextProps.apis
-
     if (value !== this.state.account) {
       this.setState({ account: value })
     }
   }
 
   navEnter() {
+    /* get user list */
+    this.ctx.props.apis.request('login')
   }
 
   navLeave() {
@@ -58,7 +58,7 @@ class Account extends Base {
     return (
       <AccountApp
         account={this.state.account}
-        apis={this.apis}
+        apis={this.ctx.props.apis}
         primaryColor={this.groupPrimaryColor()}
       />
     )

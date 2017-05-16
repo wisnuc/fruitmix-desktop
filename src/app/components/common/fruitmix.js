@@ -110,7 +110,7 @@ class Fruitmix extends EventEmitter {
       break
 
     case 'updateAccount':
-      r = this.apost('account', args)
+        r = this.apatch(`users/${args.uuid}`, args)
       break
 
     case 'users':
