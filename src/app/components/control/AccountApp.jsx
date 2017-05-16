@@ -26,7 +26,7 @@ class AccountApp extends React.Component {
   }
 
   render() {
-    debug('this.props Account', this.props)
+    // debug('this.props Account', this.props)
     const { account, primaryColor, apis } = this.props
     if (!account) return <div />
     return (
@@ -84,7 +84,7 @@ class AccountApp extends React.Component {
         </div>
         <div style={{ height: 18 }} />
         <DialogOverlay open={!!this.state.openDialog} onRequestClose={this.onCloseDialog}>
-            { this.state.openDialog && <ChangeAccount apis={apis} op={this.state.openDialog}/> }
+          { this.state.openDialog && <ChangeAccount apis={apis} op={this.state.openDialog} /> }
         </DialogOverlay>
         <FlatButton
           label="修改密码"
