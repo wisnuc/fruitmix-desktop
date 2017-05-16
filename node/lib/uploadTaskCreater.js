@@ -838,8 +838,8 @@ class UploadFileSTM extends STM {
 				wrapper.manager.completeSize -= (this.partFinishSize + wrapper.segmentsize * wrapper.seek)
 				this.partFinishSize = 0
 				seek = 0
-				if (failedTimes < 5) return this.uploadSegment()
-				else if (failedTimes < 6) return this.createUploadTask()
+				if (wrapper.failedTimes < 5) return this.uploadSegment()
+				else if (wrapper.failedTimes < 6) return this.createUploadTask()
 				else return console.log('failed!!!')
 			}
 		}).on('abort', () => {

@@ -210,6 +210,29 @@ class Home extends Base {
     console.log(this)
     let entries = this.state.entries
     let selected = this.state.select.selected
+    let count = selected.length
+    let finishCount = 0
+
+    let p = this.state.path
+    let dirUUID = p[p.length - 1].uuid
+
+    let loop = () => {
+      let nodeUUID = entries[selected[finishCount]].uuid
+      this.ctx.props.apis.request('deleteDirOrFile', {dirUUID, nodeUUID}, (err, data) => {
+        console.log(entries[selected[finishCount]].name + ' finish')
+        if (err) console.log(err)
+        finishCount++
+        console.log(finishCount, ' vs ', count, this.state.path[this.state.path.length - 1].uuid === dirUUID)
+        if (finishCount === count) {
+          if (this.state.path[this.state.path.length - 1].uuid === dirUUID) {
+            this.ctx.props.apis.request('listNavDir', {rootUUID: this.state.path[0].uuid, dirUUID})  
+          }else return
+          
+        }else loop()
+      })
+    }
+
+    loop()
   }
 
   upload(type) {
@@ -290,7 +313,9 @@ class Home extends Base {
 
     return (
       <div style={style}>
-        <IconButton><FileCreateNewFolder color='#FFF' /></IconButton>
+        <IconButton onTouchTap={this.createNewFolder.bind(this)}>
+          <FileCreateNewFolder color='#FFF' />
+        </IconButton>
       </div>
     )
   }

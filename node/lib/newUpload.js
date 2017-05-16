@@ -17,21 +17,19 @@ const finishTasks = []
 const uploadHandle = args => {
   let { dirUUID, type } = args
   let dialogType = type == 'folder'? 'openDirectory': 'openFile'
-  dialog.showOpenDialog({properties: [ dialogType,'multiSelections','createDirectory']},function(data){
-    if (!data) return callback('get list err',null)
+  dialog.showOpenDialog({properties: [ dialogType,'multiSelections']},function(data){
+    if (!data) return console.log('get list err',null)
     let index = 0
     let count = data.length
-    let uploadArr = []
     let readUploadInfor = (abspath) => {
       fs.stat(abspath,(err, infor) => {
         if (err) return console.log('读取目录 ' + abspath + ' 错误')
-        uploadArr.push({size:infor.size,abspath:abspath}) 
+        createTask(abspath, dirUUID, type, true, null, null, null)
         index++
         if(index < count) {
           readUploadInfor(data[index])
         }else {
-          createTask(abspath, dirUUID, type, true, null, null, null)
-          getMainWindow().webContents.send('message',uploadArr.length + '个任务添加至上传队列')
+          getMainWindow().webContents.send('message', data.length + '个任务添加至上传队列')
         }
       })
     }
