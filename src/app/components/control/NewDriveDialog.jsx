@@ -44,7 +44,7 @@ class NewDriveDialog extends PureComponent {
   }
 
   handleCheck(userUUID) {
-    debug('handleCheck', this.state)
+    // debug('handleCheck', this.state)
     const index = this.state.writelist.indexOf(userUUID)
     if (index === -1) { this.setState({ writelist: [...this.state.writelist, userUUID] }) } else {
       this.setState({

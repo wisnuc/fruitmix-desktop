@@ -8,6 +8,7 @@ import FileFolder from 'material-ui/svg-icons/file/folder'
 import ContentAdd from 'material-ui/svg-icons/content/add'
 
 import IconBox from '../common/IconBox'
+import FlatButton from '../common/FlatButton'
 import DialogOverlay from '../common/DialogOverlay'
 import NewDriveDialog from '../control/NewDriveDialog'
 import Base from './Base'
@@ -44,6 +45,13 @@ class DriveHeader extends React.PureComponent {
 
 @Radium
 class DriveRow extends React.PureComponent {
+  constructor(props) {
+    super(props)
+
+    this.onHover = (op) => {
+      if (this.refFlatButton) this.refFlatButton.style.opacity = op ? 1 : 0
+    }
+  }
 
   render() {
     const drive = this.props.drive
@@ -51,14 +59,19 @@ class DriveRow extends React.PureComponent {
 
     return (
       <div
-        style={{ height: 64,
+        style={{
+          height: 64,
           display: 'flex',
           alignItems: 'center',
           ':hover': { backgroundColor: '#F5F5F5' }
         }}
+        onMouseOver={() => this.onHover(true)}
+        onMouseOut={() => this.onHover(false)}
       >
         <div style={{ flex: '0 0 32px' }} />
-        <Avatar><FileFolder color="white" /></Avatar>
+        <div style={{ flex: '0 0 40px' }}>
+          <Avatar><FileFolder color="white" /></Avatar>
+        </div>
         <div style={{ flex: '0 0 32px' }} />
         <div style={{ flex: '0 0 240px', fontSize: 16, color: 'rgba(0,0,0,0.87)' }}>{drive.label}</div>
         <div style={{ flexGrow: 1, fontSize: 16, color: 'rgba(0,0,0,0.87)' }}>
@@ -72,7 +85,18 @@ class DriveRow extends React.PureComponent {
         <div style={{ flex: '0 0 320px', fontSize: 16, color: 'rgba(0,0,0,0.87)' }}>
           {drive.uuid}
         </div>
-        <div style={{ flex: '0 0 144px' }} />
+        <div style={{ flex: '0 0 72px' }} />
+        <div
+          style={{ flex: '0 0 72px', opacity: 0 }}
+          ref={ref => (this.refFlatButton = ref)}
+        >
+          <FlatButton
+            label="修改"
+            style={{ marginLeft: -8 }}
+            primary
+            onTouchTap={() => this.props.setState({ modifyDrives: true })}
+          />
+        </div>
       </div>
     )
   }
@@ -83,7 +107,8 @@ class AdminDrives extends Base {
   constructor(ctx) {
     super(ctx)
     this.state = {
-      newDrive: false
+      newDrive: false,
+      modifyDrive: false
     }
 
     this.onCloseDialog = () => {
