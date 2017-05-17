@@ -57,22 +57,22 @@ class NavViews extends Component {
     this.install('home', Home)
     this.install('public', Public)
     this.install('physical', Physical)
-    this.install('fileSharedWithMe', FileSharedWithMe)
-    this.install('fileSharedWithOthers', FileSharedWithOthers)
+    // this.install('fileSharedWithMe', FileSharedWithMe)
+    // this.install('fileSharedWithOthers', FileSharedWithOthers)
     this.install('transmission', Transmission)
 
     this.install('media', Media)
     // this.install('mediaShare', MediaShare)
     // this.install('mediaAlbum', MediaAlbum)
 
-    this.install('account', Account) 
+    this.install('account', Account)
     this.install('adminUsers', AdminUsers)
     this.install('adminDrives', AdminDrives)
     this.install('device', Device)
-    this.install('storage', Storage)
+    // this.install('storage', Storage)
     this.install('networking', Networking)
     this.install('timeDate', TimeDate)
-    this.install('fanControl', FanControl)
+    // this.install('fanControl', FanControl)
     this.install('power', Power)
 
     Object.assign(this.state, {

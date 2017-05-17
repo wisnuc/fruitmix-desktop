@@ -42,6 +42,7 @@ class DriveRow extends React.PureComponent {
   render() {
     const drive = this.props.drive
     const users = this.props.users
+    debug('drive,users', drive, users)
 
     return (
       <div
@@ -58,15 +59,10 @@ class DriveRow extends React.PureComponent {
         </div>
         <div style={{ flex: '0 0 32px' }} />
         <div style={{ flex: '0 0 240px', fontSize: 16, color: 'rgba(0,0,0,0.87)' }}>{drive.label}</div>
-        <div style={{ flexGrow: 1, fontSize: 16, color: 'rgba(0,0,0,0.87)' }}>
-          { drive.writelist.reduce((acc, uuid) => {
-            const user = users.find(u => u.uuid === uuid)
-            return user
-              ? [...acc, user.username]
-              : acc
-          }, []).join() }
+        <div style={{ flex: '0 0 320px', fontSize: 16, color: 'rgba(0,0,0,0.54)' }} >
+          { drive.writelist.map(uuid => users.find(u => u.uuid === uuid).username).join(', ') }
         </div>
-        <div style={{ flex: '0 0 320px', fontSize: 16, color: 'rgba(0,0,0,0.87)' }} />
+        <div style={{ flexGrow: 1 }} />
         <div style={{ flex: '0 0 72px' }} />
         <div style={{ flex: '0 0 144px' }} />
       </div>
@@ -118,8 +114,8 @@ class AdminDrives extends React.Component {
           <div style={{ height: 8 }} />
           <Divider style={{ marginLeft: 104 }} />
           {
-            drives && users && drives.reduce((acc, drive) =>
-              [...acc, <DriveRow drive={drive} users={users} setState={this.ssb} />, <Divider style={{ marginLeft: 104 }} />], []
+            drives && users && drives.map(drive =>
+              [<DriveRow drive={drive} users={users} setState={this.ssb} />, <Divider style={{ marginLeft: 104 }} />]
             )
           }
         </div>

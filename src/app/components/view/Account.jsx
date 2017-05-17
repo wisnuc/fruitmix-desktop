@@ -11,7 +11,7 @@ class Account extends Base {
 
   constructor(ctx) {
     super(ctx)
-    this.state = {}
+    this.refreshData = this.refresh.bind(this)
   }
 
   willReceiveProps(nextProps) {
@@ -28,6 +28,10 @@ class Account extends Base {
     }
   }
 
+  refresh () {
+    this.ctx.props.apis.request('account')
+    this.ctx.props.apis.request('login')
+  }
   navEnter() {
     /* get user list */
     this.ctx.props.apis.request('login')
@@ -60,6 +64,7 @@ class Account extends Base {
         account={this.state.account}
         apis={this.ctx.props.apis}
         primaryColor={this.groupPrimaryColor()}
+        refresh={this.refreshData}
       />
     )
   }

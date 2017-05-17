@@ -105,7 +105,7 @@ class DeviceInfo extends React.PureComponent {
     const { cpuInfo, memInfo, ws215i, dmidecode, release, commit } = this.props.device
 
     const cpuTitles = [
-      <Avatar><ActionDns color={this.props.primaryColor} /></Avatar>,
+      <Avatar><ActionDns color="white" /></Avatar>,
       'CPU核心数:',
       'CPU类型:',
       'Cache:'
@@ -119,7 +119,7 @@ class DeviceInfo extends React.PureComponent {
     ]
 
     const memTitles = [
-      <Avatar><ActionDns color={this.props.primaryColor} /></Avatar>,
+      <Avatar><ActionDns color="white" /></Avatar>,
       '总内存:',
       '未使用内存:',
       '可用内存:'
@@ -139,7 +139,7 @@ class DeviceInfo extends React.PureComponent {
 
     if (release) {
       relTitles = [
-        <Avatar><ActionDns color={this.props.primaryColor} /></Avatar>,
+        <Avatar><ActionDns color="white" /></Avatar>,
         '版本:',
         '版本类型:',
         '发布时间:',
@@ -157,7 +157,7 @@ class DeviceInfo extends React.PureComponent {
 
     if (ws215i) {
       ws215iTitles = [
-        <Avatar><ActionDns color={this.props.primaryColor} /></Avatar>,
+        <Avatar><ActionDns color="white" /></Avatar>,
         '型号:',
         '硬件序列号:',
         'MAC地址:'

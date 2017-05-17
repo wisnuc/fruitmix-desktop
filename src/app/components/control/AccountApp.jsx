@@ -25,7 +25,7 @@ class AccountApp extends React.Component {
 
   render() {
     // debug('this.props Account', this.props)
-    const { account, primaryColor, apis } = this.props
+    const { account, primaryColor, apis, refresh } = this.props
     if (!account) return <div />
     return (
       <div style={{ paddingLeft: 72 }}>
@@ -44,9 +44,8 @@ class AccountApp extends React.Component {
           <div style={{ fontSize: 24, color: primaryColor }} > {`${account.username}`} </div>
         </div>
 
-
         {/* user type */}
-        <div style={ contentStyle } >
+        <div style={contentStyle} >
           {
             account.isAdmin && account.isFirstUser ?
               '您是系统的第一个用户，是最高权限的系统管理员。' :
@@ -56,14 +55,17 @@ class AccountApp extends React.Component {
         <div style={{ height: 20 }} />
 
         {/* username */}
-        <div style={ header1Style } > 用户名 </div>
-        <div style={ contentStyle } >
-          WISNUC OS内部使用不可修改的唯一用户ID标识用户身份。用户名仅用于用户登录等信息显示，
+        <div style={header1Style} > 用户名 </div>
+        <div style={contentStyle} >
+          WISNUC OS内部使用不可修改的唯一用户ID标识用户身份。
+        {/*
+          用户名仅用于用户登录等信息显示，
           Windows共享文件访问和其他需要登录的网络文件服务在登录时使用。
           <br />
           用户名可以使用中文字符，包括可显示的标点符号。Windows共享文件访问也支持中文字符的用户名，
           但不是所有客户端软件都支持中文名，所以，如果您使用的网络文件系统服务客户端软件（例如Android或者iOS上的samba客户端）
           不支持中文用户名，您只能使用英文大小写字母的用户名。
+        */}
         </div>
         <div style={{ height: 18 }} />
         <FlatButton
@@ -75,15 +77,17 @@ class AccountApp extends React.Component {
         <div style={{ height: 20 }} />
 
         {/* password */}
-        <div style={ header1Style } > 密码 </div>
-        <div style={ contentStyle } >
+        <div style={header1Style} > 密码 </div>
+        <div style={contentStyle} >
           WISNUC OS的所有客户端、Web浏览器和网络文件服务使用相同的用户名密码组合。
+          {/*
           <br />
           WISNUC OS不会保存任何形式的用户明文密码。
+          */}
         </div>
         <div style={{ height: 18 }} />
         <DialogOverlay open={!!this.state.openDialog} onRequestClose={this.onCloseDialog}>
-          { this.state.openDialog && <ChangeAccount apis={apis} op={this.state.openDialog} /> }
+          { this.state.openDialog && <ChangeAccount refresh={refresh} apis={apis} op={this.state.openDialog} /> }
         </DialogOverlay>
         <FlatButton
           label="修改密码"

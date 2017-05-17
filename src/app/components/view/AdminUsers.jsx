@@ -7,6 +7,7 @@ class AdminUsers extends Base {
 
   constructor(ctx) {
     super(ctx)
+    this.refreshUsers = this.refresh.bind(this)
   }
 
   willReceiveProps(nextProps) {
@@ -22,8 +23,12 @@ class AdminUsers extends Base {
       this.setState({ users: value })
     }
   }
+  refresh () {
+    this.ctx.props.apis.request('adminUsers')
+  }
 
   navEnter() {
+    this.ctx.props.apis.request('login')
   }
 
   navLeave() {
@@ -58,6 +63,8 @@ class AdminUsers extends Base {
     return (
       <AdminUsersApp
         users={this.state.users}
+        apis={this.ctx.props.apis}
+        refreshUsers={this.refreshUsers}
       />
     )
   }

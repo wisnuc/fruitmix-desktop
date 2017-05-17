@@ -5,7 +5,7 @@ import ContentAdd from 'material-ui/svg-icons/content/add'
 import SocialPersonAdd from 'material-ui/svg-icons/social/person-add'
 import ContextMenu from '../common/ContextMenu'
 import DialogOverlay from '../common/DialogOverlay'
-import NewUserDialog from './NewUserDialog'
+import ChangeAccount from './ChangeAccount'
 
 class AdminUsersApp extends React.Component {
 
@@ -35,7 +35,7 @@ class AdminUsersApp extends React.Component {
   }
 
   render() {
-    const users = this.props.users
+    const { users, apis, refreshUsers } = this.props
     if (!users) return <div />
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -63,7 +63,7 @@ class AdminUsersApp extends React.Component {
               []) }
         </div>
         <DialogOverlay open={!!this.state.createNewUser} onRequestClose={this.onCloseDialog}>
-          { this.state.createNewUser && <NewUserDialog refreshUsers={this.ctx.props.apis.request} primary apis={this.ctx.props.apis} /> }
+          { this.state.createNewUser && <ChangeAccount refreshUsers={refreshUsers} apis={apis} op="createUser" /> }
         </DialogOverlay>
       </div>
     )

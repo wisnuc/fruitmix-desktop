@@ -6,7 +6,7 @@ import SocialPerson from 'material-ui/svg-icons/social/person'
 import FlatButton from '../common/FlatButton'
 import IconBox from '../common/IconBox'
 
-const debug = Debug('component:control:ChangePassword')
+const debug = Debug('component:control:Account')
 
 class ChangeAccount extends React.PureComponent {
 
@@ -30,19 +30,32 @@ class ChangeAccount extends React.PureComponent {
 
     this.fire = () => {
       const { apis, op } = this.props
-      const args = {
-        uuid: apis.account.data.uuid,
-        username: op === 'username' ? this.state.username : undefined,
-        password: op === 'password' ? this.state.password : undefined
-      }
-      apis.request('updateAccount', args, (err) => {
-        if (err) {
-          debug('err', args, err, err.message)
-          this.setState({ message: `修改失败：${err.message}` })
-        } else {
-          this.props.onRequestClose(true)
+      if (op === 'createUser') {
+        apis.request('adminCreateUser', {
+          username: this.state.username,
+          password: this.state.password
+        }, (err) => {
+          if (!err) {
+            this.props.onRequestClose(true)
+            this.props.refreshUsers()
+          }
+        })
+      } else {
+        const args = {
+          uuid: apis.account.data.uuid,
+          username: op === 'username' ? this.state.username : undefined,
+          password: op === 'password' ? this.state.password : undefined
         }
-      })
+        apis.request('updateAccount', args, (err) => {
+          if (err) {
+            debug('err', args, err, err.message)
+            this.setState({ message: `修改失败：${err.message}` })
+          } else {
+            this.props.onRequestClose(true)
+            this.props.refresh()
+          }
+        })
+      }
     }
   }
 
@@ -96,6 +109,13 @@ class ChangeAccount extends React.PureComponent {
     if (this.props.op === 'password') {
       return this.state.password.length > 0 && this.state.password === this.state.passwordAgain && !this.state.message
     }
+    if (this.props.op === 'createUser') {
+      return this.state.username.length > 0 &&
+        !this.state.usernameErrorText &&
+        this.state.password.length > 0 &&
+        this.state.password === this.state.passwordAgain &&
+        !this.state.message
+    }
     return false
   }
 
@@ -123,7 +143,7 @@ class ChangeAccount extends React.PureComponent {
 
         {/* username */}
         {
-          op === 'username' &&
+          (op === 'username' || op === 'createUser') &&
             <div style={{ height: 56, display: 'flex', marginBottom: 10, position: 'relative' }}>
               <span
                 style={{
@@ -155,7 +175,7 @@ class ChangeAccount extends React.PureComponent {
 
         {/* password */}
         {
-          op === 'password' &&
+          (op === 'password' || op === 'createUser') &&
             <div>
               <div style={{ height: 56, display: 'flex', marginBottom: 10 }}>
                 <IconBox style={{ marginLeft: -12 }} size={48} icon={CommunicationVpnKey} />
@@ -168,7 +188,7 @@ class ChangeAccount extends React.PureComponent {
                   errorText={this.state.passwordErrorText}
                   onChange={e => this.updatePassword(e.target.value)}
                   ref={(input) => {
-                    if (input && this.state.focusFirst) {
+                    if (input && this.state.focusFirst && (op !== 'createUser')) {
                       input.focus()
                       this.setState({ focusFirst: false })
                     }
