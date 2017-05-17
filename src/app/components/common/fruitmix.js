@@ -137,6 +137,10 @@ class Fruitmix extends EventEmitter {
       r = this.aget('admin/drives')
       break
 
+    case 'driveListNavDir':
+      r = this.aget(`files/fruitmix/list-nav/${args.dirUUID}/${args.rootUUID}`)
+      break
+
     case 'adminCreateDrive':
       r = this.apost('admin/drives', {
         label: args.label,

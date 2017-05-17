@@ -164,6 +164,10 @@ class FileContent extends Component {
     )
   } 
 
+  willReceiveProps(nextProps){
+    console.log(nextProps, '.......')
+  }
+
   componentDidMount() {
 		//bind keydown event
 		document.addEventListener('keydown', this.keyDownBound)
@@ -262,7 +266,7 @@ class FileContent extends Component {
         </div>
         </div>
         <div style={{width: '100%', height: 'calc(100% - 48px)'}}>
-        { this.props.home.listNavDir && 
+        { this.props.entries.length !== 0 && 
           <AutoSizer>
             {({ height, width }) => (
               <div onTouchTap={e => this.onRowTouchTap(e, -1)}>
