@@ -162,7 +162,6 @@ class ChangeAccount extends React.PureComponent {
                 <TextField
                   style={{ flexGrow: 1 }}
                   fullWidth
-                  primary
                   hintText="输入新密码"
                   maxLength={this.state.maxLength}
                   type="password"
@@ -180,7 +179,6 @@ class ChangeAccount extends React.PureComponent {
                 <IconBox style={{ marginLeft: -12 }} size={48} icon={null} />
                 <TextField
                   fullWidth
-                  primary
                   hintText="再次输入密码"
                   maxLength={this.state.maxLength}
                   type="password"

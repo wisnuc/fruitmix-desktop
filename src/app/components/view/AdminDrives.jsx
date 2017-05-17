@@ -1,132 +1,41 @@
 import React from 'react'
-import Radium from 'radium'
 import Debug from 'debug'
-
-import { Avatar, Divider, FloatingActionButton, TextField, IconButton } from 'material-ui'
 import FileFolderShared from 'material-ui/svg-icons/file/folder-shared'
-import FileFolder from 'material-ui/svg-icons/file/folder'
-import ContentAdd from 'material-ui/svg-icons/content/add'
-
-import IconBox from '../common/IconBox'
-import FlatButton from '../common/FlatButton'
-import DialogOverlay from '../common/DialogOverlay'
-import NewDriveDialog from '../control/NewDriveDialog'
+import AdminDriversApp from '../control/AdminDriversApp'
 import Base from './Base'
 
 const debug = Debug('component:viewModel:Media: ')
-
-class DriveHeader extends React.PureComponent {
-
-  // 104, leading
-  // 240, label
-  // grow, user
-  // 320, uuid
-  // 56, spacer
-  // 64, view
-  // 24, padding
-  render() {
-    return (
-      <div style={{ height: 48, display: 'flex', alignItems: 'center' }}>
-        <div style={{ flex: '0 0 104px' }} />
-        <div style={{ flex: '0 0 240px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
-          名称
-        </div>
-        <div style={{ flexGrow: 1 }}>
-          用户
-        </div>
-        <div style={{ flex: '0 0 320px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
-          UUID
-        </div>
-        <div style={{ flex: '0 0 144px' }} />
-      </div>
-    )
-  }
-}
-
-@Radium
-class DriveRow extends React.PureComponent {
-  constructor(props) {
-    super(props)
-
-    this.onHover = (op) => {
-      if (this.refFlatButton) this.refFlatButton.style.opacity = op ? 1 : 0
-    }
-  }
-
-  render() {
-    const drive = this.props.drive
-    const users = this.props.users
-
-    return (
-      <div
-        style={{
-          height: 64,
-          display: 'flex',
-          alignItems: 'center',
-          ':hover': { backgroundColor: '#F5F5F5' }
-        }}
-        onMouseOver={() => this.onHover(true)}
-        onMouseOut={() => this.onHover(false)}
-      >
-        <div style={{ flex: '0 0 32px' }} />
-        <div style={{ flex: '0 0 40px' }}>
-          <Avatar><FileFolder color="white" /></Avatar>
-        </div>
-        <div style={{ flex: '0 0 32px' }} />
-        <div style={{ flex: '0 0 240px', fontSize: 16, color: 'rgba(0,0,0,0.87)' }}>{drive.label}</div>
-        <div style={{ flexGrow: 1, fontSize: 16, color: 'rgba(0,0,0,0.87)' }}>
-          { drive.writelist.reduce((acc, uuid) => {
-            const user = users.find(u => u.uuid === uuid)
-            return user
-              ? [...acc, user.username]
-              : acc
-          }, []).join() }
-        </div>
-        <div style={{ flex: '0 0 320px', fontSize: 16, color: 'rgba(0,0,0,0.87)' }}>
-          {drive.uuid}
-        </div>
-        <div style={{ flex: '0 0 72px' }} />
-        <div
-          style={{ flex: '0 0 72px', opacity: 0 }}
-          ref={ref => (this.refFlatButton = ref)}
-        >
-          <FlatButton
-            label="修改"
-            style={{ marginLeft: -8 }}
-            primary
-            onTouchTap={() => this.props.setState({ modifyDrives: true })}
-          />
-        </div>
-      </div>
-    )
-  }
-}
 
 class AdminDrives extends Base {
 
   constructor(ctx) {
     super(ctx)
-    this.state = {
-      newDrive: false,
-      modifyDrive: false
-    }
-
-    this.onCloseDialog = () => {
-      debug('this.onCloseDialog')
-      this.setState({ newDrive: false })
-    }
-
-    this.refreshDrives = this.navEnter.bind(this)
+    this.refreshDrives = this.refresh.bind(this)
   }
 
   willReceiveProps(nextProps) {
+    // console.log('adminusers nextProps', nextProps)
+    if (!nextProps.apis || !nextProps.apis.adminUsers) return
+    const adminUsers = nextProps.apis.adminUsers
+    if (adminUsers.isPending() || adminUsers.isRejected()) return
+    const adminDrives = nextProps.apis.adminDrives
+    if (adminDrives.isPending() || adminDrives.isRejected()) return
 
+    /* now it's fulfilled */
+    const users = adminUsers.value().users
+    const drives = adminDrives.value().drives
+
+    if (users !== this.state.users || drives !== this.state.drives) {
+      this.setState({ users, drives })
+    }
+  }
+
+  refresh() {
+    this.ctx.props.apis.request('adminUsers')
+    this.ctx.props.apis.request('adminDrives')
   }
 
   navEnter() {
-    console.log('admin drives nav enter.........')
-    this.ctx.props.apis.request('adminUsers')
-    this.ctx.props.apis.request('adminDrives')
   }
 
   navLeave() {
@@ -152,69 +61,35 @@ class AdminDrives extends Base {
     return true
   }
 
+  hasDetail() {
+    return true
+  }
+
+  detailEnabled() {
+    return true
+  }
+
   renderTitle({ style }) {
     return <div style={Object.assign({}, style, { marginLeft: 176 })}>共享文件夹</div>
   }
 
+  renderDetail({ style }) {
+    return (
+      <div style={style}>
+        hello world
+      </div>
+    )
+  }
+
   /** renderers **/
   renderContent() {
-    let users
-    let drives
-
-    if (this.ctx.props.apis.adminDrives.isFulfilled()) { drives = this.ctx.props.apis.adminDrives.value().drives }
-    if (this.ctx.props.apis.adminUsers.isFulfilled()) { users = this.ctx.props.apis.adminUsers.value().users }
-
-/** TODO
-    if (this.ctx.props.apis.adminDrives.isRejected())
-      return (
-        <div style={{width: '100%', height: '100%',
-          display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-          <div>Sorry, 服务器错误；
-            <FlatButton label='重试' primary={true}
-              onTouchTap={() => this.ctx.props.apis.request('adminDrives')} />
-          </div>
-        </div>
-      )
-**/
-    debug('users,drives', drives, users)
-
     return (
-      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-        <FloatingActionButton
-          style={{ position: 'absolute', top: -36, left: 24 }}
-          secondary
-          disabled={!users || !drives}
-          onTouchTap={() => this.setState({ newDrive: true })}
-        >
-          <ContentAdd />
-        </FloatingActionButton>
-
-        <div style={{ overflow: 'auto', height: '100%' }}>
-          <div style={{ height: 8 }} />
-          <DriveHeader />
-          <div style={{ height: 8 }} />
-          <Divider style={{ marginLeft: 104 }} />
-          {
-            drives && users && drives.reduce((acc, drive) =>
-              [...acc, <DriveRow drive={drive} users={users} />, <Divider style={{ marginLeft: 104 }} />], []
-            )
-          }
-        </div>
-        {
-          drives && users &&
-            <DialogOverlay open={!!this.state.newDrive} onRequestClose={this.onCloseDialog}>
-              {
-                this.state.newDrive && <NewDriveDialog
-                  refreshDrives={this.refreshDrives}
-                  primary
-                  apis={this.ctx.props.apis}
-                  users={users}
-                  drives={drives}
-                />
-              }
-            </DialogOverlay>
-        }
-      </div>
+      <AdminDriversApp
+        users={this.state.users}
+        drives={this.state.drives}
+        apis={this.ctx.props.apis}
+        refreshDrives={this.refreshDrives}
+      />
     )
   }
 }

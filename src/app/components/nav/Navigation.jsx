@@ -228,6 +228,7 @@ class NavViews extends Component {
       break
     }
 
+
     let appBarStyle = {
       position: 'absolute', 
       width: '100%', 
@@ -320,11 +321,7 @@ class NavViews extends Component {
       transition: sharpCurve('width')
     }
 
-    return (
-      <div style={style}>
-        world2
-      </div>
-    )
+    return view.renderDetail({style})
   }
 
   render () {
