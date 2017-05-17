@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import Debug from 'debug'
 import { TextField, Checkbox, Divider } from 'material-ui'
-import {RadioButton, RadioButtonGroup} from 'material-ui/RadioButton';
+import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
 import FlatButton from '../common/FlatButton'
 
 const debug = Debug('component:control:NewDriveDialog')

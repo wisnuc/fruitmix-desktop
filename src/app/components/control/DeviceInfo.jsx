@@ -33,53 +33,26 @@ const debug = Debug('component:control:deviceinfo')
   },
 **/
 
-class DriveHeader extends React.PureComponent {
-
-  // 104, leading
-  // 240, label
-  // grow, user
-  // 320, uuid
-  // 56, spacer
-  // 64, view
-  // 24, padding
-
-  render() {
-    return (
-      <div style={{ height: 48, display: 'flex', alignItems: 'center' }}>
-        <div style={{ flex: '0 0 104px' }} />
-        <div style={{ flex: '0 0 240px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
-          名称
-        </div>
-        <div style={{ flexGrow: 1, fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
-          用户
-        </div>
-        <div style={{ flex: '0 0 320px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
-          UUID
-        </div>
-        <div style={{ flex: '0 0 144px' }} />
-      </div>
-    )
-  }
-}
-
 class DeviceInfo extends React.PureComponent {
 
   constructor(props) {
     super(props)
   }
 
-
-  renderList(titles, values) {
-    const titleStyle = { fontSize: 16, flex: '0 0 104px', textAlign: 'right' }
-    const valueStyle = Object.assign(contentStyle, { flex: '0 0 480px' })
+  renderList(Icon, titles, values) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
         {
           titles.map((title, index) => (
-            <div style={{ height: 48, display: 'flex', alignItems: 'center', width: '100%' }} >
-              <div style={titleStyle}> { title } </div>
-              <div style={{ flex: '0 0 80px' }} />
-              <div style={valueStyle}> { values[index] }</div>
+            <div style={{ height: 72, display: 'flex', alignItems: 'center', width: '100%' }} >
+              <div style={{ flex: '0 0 24px' }} />
+              <div style={{ flex: '0 0 56px' }} >
+                { !index && <Icon color={this.props.primaryColor} /> }
+              </div>
+              <div>
+                <div style={{ fontSize: 16, flex: '0 0 240px', color: 'rgba(0, 0, 0, 0.87)' }}> { values[index] }</div>
+                <div style={{ fontSize: 14, flex: '0 0 240px', color: 'rgba(0, 0, 0, 0.54)' }}> { title } </div>
+              </div>
               <div style={{ flexGrow: 1 }} />
             </div>
           ))
@@ -90,40 +63,41 @@ class DeviceInfo extends React.PureComponent {
 
   renderDivider() {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
-        <div style={{ height: 24 }} />
-        <hr style={{ width: 720, marginLeft: 16 }} />
-        <div style={{ height: 24 }} />
+      <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', marginLeft: 80 }}>
+        <div style={{ height: 8 }} />
+        <hr style={{ marginRight: 80, backgroundColor: 'rgb(224, 224, 224)', border: 0, height: 1, width: 'calc(100% - 72px)' }} />
+        <div style={{ height: 8 }} />
       </div>
     )
   }
 
   render() {
-    debug('this.props.device', this.props.device)
+    // debug('this.props.device', this.props.device)
     if (!this.props.device) return <div />
 
     const { cpuInfo, memInfo, ws215i, dmidecode, release, commit } = this.props.device
 
+    const cpuIcon = ActionDns
+
     const cpuTitles = [
-      <Avatar><ActionDns color="white" /></Avatar>,
-      'CPU核心数:',
-      'CPU类型:',
-      'Cache:'
+      'CPU核心数',
+      'CPU类型',
+      'Cache'
     ]
 
     const cpuValues = [
-      'CPU',
       cpuInfo.length,
       cpuInfo[0].modelName,
       cpuInfo[0].cacheSize
     ]
 
     const memTitles = [
-      <Avatar><ActionDns color="white" /></Avatar>,
-      '总内存:',
-      '未使用内存:',
-      '可用内存:'
+      '总内存',
+      '未使用内存',
+      '可用内存'
     ]
+
+    const menIcon = ActionDns
 
     const memValues = [
       '内存',
@@ -134,20 +108,22 @@ class DeviceInfo extends React.PureComponent {
 
     let relTitles
     let relValues
+    let relIcon
     let ws215iTitles
     let ws215iValues
+    let ws215iIcon
 
     if (release) {
+      relIcon = ActionDns
+
       relTitles = [
-        <Avatar><ActionDns color="white" /></Avatar>,
-        '版本:',
-        '版本类型:',
-        '发布时间:',
-        '源码版本:'
+        '版本',
+        '版本类型',
+        '发布时间',
+        '源码版本'
       ]
 
       relValues = [
-        '软件',
         release.tag_name + (release.prerelease ? ' beta' : ''),
         release.prerelease ? '测试版' : '正式版',
         new Date(release.published_at).toLocaleDateString('zh-CN'),
@@ -156,11 +132,12 @@ class DeviceInfo extends React.PureComponent {
     }
 
     if (ws215i) {
+      ws215iIcon = ActionDns
+
       ws215iTitles = [
-        <Avatar><ActionDns color="white" /></Avatar>,
-        '型号:',
-        '硬件序列号:',
-        'MAC地址:'
+        '型号',
+        '硬件序列号',
+        'MAC地址'
       ]
 
       ws215iValues = [
@@ -173,14 +150,14 @@ class DeviceInfo extends React.PureComponent {
 
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-        <div style={{ height: 24 }} />
-        { ws215i && this.renderList(ws215iTitles, ws215iValues) }
+        <div style={{ height: 16 }} />
+        { ws215i && this.renderList(ws215iIcon, ws215iTitles, ws215iValues) }
         { ws215i && <this.renderDivider /> }
-        { release && this.renderList(relTitles, relValues) }
+        { release && this.renderList(relIcon, relTitles, relValues) }
         { release && <this.renderDivider /> }
-        { this.renderList(cpuTitles, cpuValues) }
+        { this.renderList(cpuIcon, cpuTitles, cpuValues) }
         <this.renderDivider />
-        { this.renderList(memTitles, memValues) }
+        { this.renderList(menIcon, memTitles, memValues) }
       </div>
     )
   }
