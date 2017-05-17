@@ -5,7 +5,7 @@ import ActionAccountCircle from 'material-ui/svg-icons/action/account-circle'
 import FlatButton from '../common/FlatButton'
 import Checkmark from '../common/Checkmark'
 import DialogOverlay from '../common/DialogOverlay'
-import ChangeAccount from './ChangeAccount'
+import ChangeAccountDialog from './ChangeAccountDialog'
 import { header1Style, header2Style, header2StyleNotFirst, contentStyle } from '../control/styles'
 
 const debug = Debug('component:control:device')
@@ -87,7 +87,7 @@ class AccountApp extends React.Component {
         </div>
         <div style={{ height: 18 }} />
         <DialogOverlay open={!!this.state.openDialog} onRequestClose={this.onCloseDialog}>
-          { this.state.openDialog && <ChangeAccount refresh={refresh} apis={apis} op={this.state.openDialog} /> }
+          { this.state.openDialog && <ChangeAccountDialog refresh={refresh} apis={apis} op={this.state.openDialog} /> }
         </DialogOverlay>
         <FlatButton
           label="修改密码"

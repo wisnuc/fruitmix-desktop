@@ -8,7 +8,7 @@ import IconBox from '../common/IconBox'
 
 const debug = Debug('component:control:Account')
 
-class ChangeAccount extends React.PureComponent {
+class ChangeAccountDialog extends React.PureComponent {
 
   constructor(props) {
     super(props)
@@ -220,4 +220,4 @@ class ChangeAccount extends React.PureComponent {
   }
 }
 
-export default ChangeAccount
+export default ChangeAccountDialog

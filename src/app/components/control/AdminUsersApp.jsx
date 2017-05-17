@@ -5,7 +5,7 @@ import ContentAdd from 'material-ui/svg-icons/content/add'
 import SocialPersonAdd from 'material-ui/svg-icons/social/person-add'
 import ContextMenu from '../common/ContextMenu'
 import DialogOverlay from '../common/DialogOverlay'
-import ChangeAccount from './ChangeAccount'
+import ChangeAccountDialog from './ChangeAccountDialog'
 
 class AdminUsersApp extends React.Component {
 
@@ -63,7 +63,7 @@ class AdminUsersApp extends React.Component {
               []) }
         </div>
         <DialogOverlay open={!!this.state.createNewUser} onRequestClose={this.onCloseDialog}>
-          { this.state.createNewUser && <ChangeAccount refreshUsers={refreshUsers} apis={apis} op="createUser" /> }
+          { this.state.createNewUser && <ChangeAccountDialog refreshUsers={refreshUsers} apis={apis} op="createUser" /> }
         </DialogOverlay>
       </div>
     )
