@@ -21,6 +21,8 @@ class DrivesDetail extends PureComponent {
       changed: false
     }
 
+    this.currentLabel = this.props.detailDrive.label
+
     this.fire = () => {
       const apis = this.props.apis
       const args = {
@@ -30,6 +32,7 @@ class DrivesDetail extends PureComponent {
       }
       apis.request('adminUpdateDrive', args, (err) => {
         if (!err) {
+          this.currentLabel = this.state.label
           this.setState({ changed: false })
           this.props.refreshDrives()
           this.setState({ message: '修改成功' })
@@ -43,6 +46,7 @@ class DrivesDetail extends PureComponent {
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.detailDrive.uuid !== this.props.detailDrive.uuid) {
+      this.currentLabel = nextProps.detailDrive.label
       this.setState({
         label: '',
         modify: false,
@@ -55,11 +59,15 @@ class DrivesDetail extends PureComponent {
   updateLabel(value) {
     const { drives, detailDrive } = this.props
     if ((drives.findIndex(drive => (drive.label === value)) > -1) && (value !== detailDrive.label)) {
-      debug('updateLabel', this.props)
+      // debug('updateLabel', this.props)
       this.setState({ label: value, errorText: '文件名已存在' })
     } else {
       this.setState({ label: value, errorText: '' })
     }
+  }
+
+  togglecheckAll() {
+  
   }
 
   handleCheck(userUUID) {
@@ -82,86 +90,108 @@ class DrivesDetail extends PureComponent {
     const { users, detailDrive, primaryColor, toggleDetail, primary } = this.props
     if (!users || !detailDrive) return <div />
     return (
-      <div style={{ width: 352, padding: '24px 24px 0px 24px' }}>
-        <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-          修改共享文件夹属性
-          <span style={{ fontSize: 14, fontWeight: 400, color: primaryColor, marginLeft: 8 }}> {this.state.message} </span>
-        </div>
-        <div style={{ height: 20 }} />
-        <div
-          style={{
-            height: 32,
-            fontSize: 14,
-            fontWeight: 500,
-            color: 'rgba(0,0,0,0.54)',
-            display: 'flex',
-            alignItems: 'center'
-          }}
-        >名称</div>
+      <div>
+        <div style={{ height: 128, backgroundColor: '#5E35B1' }}>
+          <div style={{ height: 64 }} />
 
-        <div
-          style={{ height: 60 }}
-        >
-          {
-            this.state.modify ?
-              <TextField
-                name="shareDiskName"
-                fullWidth
-                onChange={e => this.updateLabel(e.target.value)}
-                value={(this.state.label || this.state.modify) ? this.state.label : detailDrive.label}
-                errorText={this.state.errorText}
-                onBlur={() => this.setState({ modify: false, changed: true })}
-                ref={(input) => { if (input && this.state.modify) { input.focus() } }}
-              /> :
-              <div
-                style={{ display: 'flex', alignItems: 'center', height: 48 }}
-                onTouchTap={() => this.setState({ modify: true, message: '' })}
-              >
-                { this.state.label ? this.state.label : detailDrive.label }
-                <ModeEdit color={primaryColor} style={{ marginLeft: 8 }} />
-              </div>
-          }
+          {/* header */}
+          <div
+            style={{
+              height: 64,
+              display: 'flex',
+              alignItems: 'center',
+              fontSize: 20,
+              fontWeight: 500,
+              marginLeft: 24,
+              color: '#FAFAFA'
+            }}
+          >
+            { this.currentLabel }
+          </div>
         </div>
 
-        <div
-          style={{
-            height: 32,
-            fontSize: 14,
-            fontWeight: 500,
-            color: 'rgba(0,0,0,0.54)',
-            display: 'flex',
-            alignItems: 'center'
-          }}
-        >
-          共享用户
-        </div>
-        <div style={{ maxHeight: 40 * 8, overflow: 'auto' }}>
-          {
-            users.map(user =>
-              <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.username} >
-                <Checkbox
-                  label={user.username}
-                  checked={this.state.writelist.includes(user.uuid)}
-                  onCheck={() => this.handleCheck(user.uuid)}
-                />
-              </div>
-            )
-          }
-          <div style={{ height: 8 }} />
-        </div>
+        {/* error message this.state.message */}
 
-        <div style={{ height: 16 }} />
+        {/* content */}
+        <div style={{ width: 352, padding: '24px 24px 0px 24px' }}>
+          {/* label */}
+          <div
+            style={{
+              height: 32,
+              fontSize: 14,
+              fontWeight: 500,
+              color: 'rgba(0,0,0,0.54)',
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >名称</div>
+          <div style={{ height: 60 }} >
+            {
+              this.state.modify ?
+                <TextField
+                  name="shareDiskName"
+                  fullWidth
+                  onChange={e => this.updateLabel(e.target.value)}
+                  value={(this.state.label || this.state.modify) ? this.state.label : detailDrive.label}
+                  errorText={this.state.errorText}
+                  onBlur={() => this.setState({ modify: false, changed: true })}
+                  ref={(input) => { if (input && this.state.modify) { input.focus() } }}
+                /> :
+                <div
+                  style={{ display: 'flex', alignItems: 'center', height: 48 }}
+                  onTouchTap={() => this.setState({ modify: true, message: '' })}
+                >
+                  { this.state.label ? this.state.label : this.currentLabel }
+                  <ModeEdit color={primaryColor} style={{ marginLeft: 8 }} />
+                </div>
+            }
+          </div>
 
-        <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-          <FlatButton
-            label="返回" primary={primary}
-            onTouchTap={toggleDetail}
-          />
-          <FlatButton
-            label="应用" primary={primary}
-            disabled={(!this.state.changed && this.state.label.length === 0) || this.state.errorText || this.state.modify}
-            onTouchTap={this.fire}
-          />
+          {/* users */}
+          <div
+            style={{
+              height: 32,
+              fontSize: 14,
+              fontWeight: 500,
+              color: 'rgba(0,0,0,0.54)',
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          > 共享用户 </div>
+          <div style={{ maxHeight: 40 * 8, overflow: 'auto' }}>
+            <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key="all" >
+              <Checkbox
+                label="所有人"
+                checked={this.state.checkAll}
+                onCheck={this.togglecheckAll}
+              />
+            </div>
+            {
+              users.map(user =>
+                <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.username} >
+                  <Checkbox
+                    label={user.username}
+                    checked={this.state.writelist.includes(user.uuid)}
+                    onCheck={() => this.handleCheck(user.uuid)}
+                  />
+                </div>
+              )
+            }
+            <div style={{ height: 8 }} />
+          </div>
+
+          {/* button */}
+          <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+            <FlatButton
+              label="返回" primary={primary}
+              onTouchTap={toggleDetail}
+            />
+            <FlatButton
+              label="应用" primary={primary}
+              disabled={(!this.state.changed && this.state.label.length === 0) || this.state.errorText || this.state.modify}
+              onTouchTap={this.fire}
+            />
+          </div>
         </div>
       </div>
     )

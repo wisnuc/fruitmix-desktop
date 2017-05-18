@@ -31,9 +31,28 @@ class DriveHeader extends React.PureComponent {
 
 @Radium
 class DriveRow extends React.PureComponent {
+  constructor(props) {
+    super(props)
+
+    this.rowTouchTap = (e) => {
+      e.preventDefault()  // important!
+      e.stopPropagation()
+
+      const type = e.type
+      const button = e.nativeEvent.button
+      if (type !== 'mouseup' || !(button === 0 || button === 2)) return
+
+      this.props.updateDetail(this.props.drive, this.props.users)
+
+      if (button === 2) {
+        this.props.showContextMenu(e.nativeEvent.clientX, e.nativeEvent.clientY)
+      }
+    }
+  }
+
 
   render() {
-    const { drive, users, updateDetail } = this.props
+    const { drive, users, navTo } = this.props
     return (
       <div
         style={{
@@ -42,7 +61,8 @@ class DriveRow extends React.PureComponent {
           alignItems: 'center',
           ':hover': { backgroundColor: '#F5F5F5' }
         }}
-        onTouchTap={() => updateDetail(drive, users)}
+        onTouchTap={this.rowTouchTap}
+        onDoubleClick={() => { navTo('public') }}
       >
         <div style={{ flex: '0 0 32px' }} />
         <div style={{ flex: '0 0 40px' }}>
@@ -73,8 +93,8 @@ class AdminDrives extends React.Component {
   }
 
   render() {
-    const { users, drives, apis, refreshDrives, updateDetail } = this.props
-    // debug('users,drives', drives, users)
+    const { users, drives, apis, refreshDrives, updateDetail, navTo, showContextMenu } = this.props
+    debug('AdminDrivesAdminDrivesAdminDrives', this.props)
     if (!users || !drives) return <div />
 
     return (
@@ -94,7 +114,14 @@ class AdminDrives extends React.Component {
           <Divider style={{ marginLeft: 104 }} />
           {
             drives && users && drives.map(drive =>
-              [<DriveRow drive={drive} users={users} updateDetail={updateDetail} />, <Divider style={{ marginLeft: 104 }} />]
+              [<DriveRow
+                drive={drive}
+                users={users}
+                updateDetail={updateDetail}
+                navTo={navTo}
+                showContextMenu={showContextMenu}
+              />,
+                <Divider style={{ marginLeft: 104 }} />]
             )
           }
         </div>

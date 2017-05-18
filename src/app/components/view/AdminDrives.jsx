@@ -1,8 +1,10 @@
 import React from 'react'
 import Debug from 'debug'
 import FileFolderShared from 'material-ui/svg-icons/file/folder-shared'
+import { MenuItem } from 'material-ui'
 import AdminDriversApp from '../control/AdminDriversApp'
 import DriversDetail from '../control/DriversDetail'
+import ContextMenu from '../common/ContextMenu'
 import Base from './Base'
 
 const debug = Debug('component:viewModel:Media: ')
@@ -13,6 +15,11 @@ class AdminDrives extends Base {
     super(ctx)
     this.refreshDrives = this.refresh.bind(this)
     this.updateDetail = this.update.bind(this)
+    this.state = {
+      contextMenuOpen: false,
+      contextMenuY: -1,
+      contextMenuX: -1
+    }
   }
 
   willReceiveProps(nextProps) {
@@ -32,13 +39,29 @@ class AdminDrives extends Base {
     }
   }
 
+  showContextMenu(clientX, clientY) {
+    this.setState({
+      contextMenuOpen: true,
+      contextMenuX: clientX,
+      contextMenuY: clientY
+    })
+  }
+
+  hideContextMenu() {
+    this.setState({
+      contextMenuOpen: false,
+      contextMenuX: -1,
+      contextMenuY: -1
+    })
+  }
+
   refresh() {
     this.ctx.props.apis.request('adminUsers')
     this.ctx.props.apis.request('adminDrives')
   }
 
   update(detailDrive, detailUsers) {
-    debug('detailDrive, detailUsers', detailDrive, detailUsers)
+    // debug('detailDrive, detailUsers', detailDrive, detailUsers)
     this.setState({ detailDrive, detailUsers })
   }
 
@@ -84,36 +107,46 @@ class AdminDrives extends Base {
     return (
       <div style={style}>
         {
-          this.state.detailDrive ?
-          <DriversDetail
-            primary
-            toggleDetail={toggleDetail}
-            primaryColor={this.groupPrimaryColor()}
-            users={this.state.users}
-            drives={this.state.drives}
-            detailUsers={this.state.detailUsers}
-            detailDrive={this.state.detailDrive}
-            apis={this.ctx.props.apis}
-            refreshDrives={this.refreshDrives}
-          /> :
-          <div style={{ width: 352, padding: '24px 24px 0px 24px' }}>
-            <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>修改共享文件夹属性</div>
-          </div>
+          this.state.detailDrive &&
+            <DriversDetail
+              primary
+              toggleDetail={toggleDetail}
+              primaryColor={this.groupPrimaryColor()}
+              users={this.state.users}
+              drives={this.state.drives}
+              detailUsers={this.state.detailUsers}
+              detailDrive={this.state.detailDrive}
+              apis={this.ctx.props.apis}
+              refreshDrives={this.refreshDrives}
+            />
         }
       </div>
     )
   }
 
   /** renderers **/
-  renderContent() {
+  renderContent({ navTo, toggleDetail }) {
     return (
-      <AdminDriversApp
-        users={this.state.users}
-        drives={this.state.drives}
-        apis={this.ctx.props.apis}
-        refreshDrives={this.refreshDrives}
-        updateDetail={this.updateDetail}
-      />
+      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+        <AdminDriversApp
+          users={this.state.users}
+          drives={this.state.drives}
+          apis={this.ctx.props.apis}
+          refreshDrives={this.refreshDrives}
+          updateDetail={this.updateDetail}
+          navTo={navTo}
+          showContextMenu={this.showContextMenu.bind(this)}
+        />
+        <ContextMenu
+          open={this.state.contextMenuOpen}
+          top={this.state.contextMenuY}
+          left={this.state.contextMenuX}
+          onRequestClose={() => this.hideContextMenu()}
+        >
+          <MenuItem primaryText="打开" onTouchTap={() => navTo('public')} />
+          <MenuItem primaryText="修改" onTouchTap={toggleDetail} />
+        </ContextMenu>
+      </div>
     )
   }
 }

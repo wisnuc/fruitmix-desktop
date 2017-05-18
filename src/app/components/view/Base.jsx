@@ -123,8 +123,8 @@ class Base extends EventEmitter {
     return <div style={style} />
   }
 
-  renderDetail() {
-    return <div />
+  renderDetail({ style }) {
+    return <div style={style} />
   }
 
   renderContent() {

@@ -316,8 +316,9 @@ class NavViews extends Component {
 
     const style = {
       flexShrink: 0,
-      height: '100%', 
-      width: this.state.showDetail ? view.detailWidth() : 0, 
+      height: '100%',
+      backgroundColor: '#FAFAFA',
+      width: this.state.showDetail ? view.detailWidth() : 0,
       transition: sharpCurve('width')
     }
     /* {style}, function to close Detail page */
@@ -365,7 +366,7 @@ class NavViews extends Component {
 
             {/* content */}
             <div style={{flexGrow: 1, height: '100%', paddingLeft: 8, paddingTop: 8, boxSizing: 'border-box' }} id='content-container'>
-              { view.renderContent() }
+              { view.renderContent({ navTo: this.navTo.bind(this), toggleDetail: this.toggleDetailBound }) }
             </div>
           </div>
         </div>
