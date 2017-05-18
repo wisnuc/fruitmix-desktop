@@ -1,6 +1,4 @@
-import React, { Component, PureComponent } from 'react'
-import Radium from 'radium'
-import request from 'superagent'
+import React from 'react'
 import Paper from 'material-ui/Paper'
 import { Dialog, CircularProgress } from 'material-ui'
 import ActionPowerSettingsNew from 'material-ui/svg-icons/action/power-settings-new'
@@ -14,8 +12,7 @@ import Checkmark from '../common/Checkmark'
 import Debug from 'debug'
 const debug = Debug('view:admin:power')
 
-
-class Power extends Base {
+class Power extends React.Component {
 
   constructor(ctx) {
 

@@ -12,13 +12,7 @@ import NewDriveDialog from './NewDriveDialog'
 const debug = Debug('component:control:drive:')
 
 class DriveHeader extends React.PureComponent {
-  // 104, leading
-  // 240, label
-  // grow, user
-  // 320, uuid
-  // 56, spacer
-  // 64, view
-  // 24, padding
+
   render() {
     return (
       <div style={{ height: 48, display: 'flex', alignItems: 'center' }}>
@@ -26,11 +20,10 @@ class DriveHeader extends React.PureComponent {
         <div style={{ flex: '0 0 240px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
           名称
         </div>
-        <div style={{ flexGrow: 1, fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
+        <div style={{ flex: '0 0 320px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
           用户
         </div>
-        <div style={{ flex: '0 0 320px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }} />
-        <div style={{ flex: '0 0 144px' }} />
+        <div style={{ flexGrow: 1 }} />
       </div>
     )
   }
@@ -40,10 +33,7 @@ class DriveHeader extends React.PureComponent {
 class DriveRow extends React.PureComponent {
 
   render() {
-    const drive = this.props.drive
-    const users = this.props.users
-    debug('drive,users', drive, users)
-
+    const { drive, users, updateDetail } = this.props
     return (
       <div
         style={{
@@ -52,6 +42,7 @@ class DriveRow extends React.PureComponent {
           alignItems: 'center',
           ':hover': { backgroundColor: '#F5F5F5' }
         }}
+        onTouchTap={() => updateDetail(drive, users)}
       >
         <div style={{ flex: '0 0 32px' }} />
         <div style={{ flex: '0 0 40px' }}>
@@ -63,8 +54,6 @@ class DriveRow extends React.PureComponent {
           { drive.writelist.map(uuid => users.find(u => u.uuid === uuid).username).join(', ') }
         </div>
         <div style={{ flexGrow: 1 }} />
-        <div style={{ flex: '0 0 72px' }} />
-        <div style={{ flex: '0 0 144px' }} />
       </div>
     )
   }
@@ -78,23 +67,13 @@ class AdminDrives extends React.Component {
       modifyDrive: false
     }
 
-    this.ssb = this.setState.bind(this)
-
     this.onCloseDialog = () => {
-      debug('this.onCloseDialog')
       this.setState({ newDrive: false })
     }
-
-    this.refreshDrives = this.navEnter.bind(this)
-  }
-
-  navEnter() {
-    this.ctx.props.apis.request('adminUsers')
-    this.ctx.props.apis.request('adminDrives')
   }
 
   render() {
-    const { users, drives, apis, refreshDrives } = this.props
+    const { users, drives, apis, refreshDrives, updateDetail } = this.props
     // debug('users,drives', drives, users)
     if (!users || !drives) return <div />
 
@@ -115,7 +94,7 @@ class AdminDrives extends React.Component {
           <Divider style={{ marginLeft: 104 }} />
           {
             drives && users && drives.map(drive =>
-              [<DriveRow drive={drive} users={users} setState={this.ssb} />, <Divider style={{ marginLeft: 104 }} />]
+              [<DriveRow drive={drive} users={users} updateDetail={updateDetail} />, <Divider style={{ marginLeft: 104 }} />]
             )
           }
         </div>

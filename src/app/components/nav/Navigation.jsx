@@ -320,8 +320,8 @@ class NavViews extends Component {
       width: this.state.showDetail ? view.detailWidth() : 0, 
       transition: sharpCurve('width')
     }
-
-    return view.renderDetail({style})
+    /* {style}, function to close Detail page */
+    return view.renderDetail({ style }, this.toggleDetailBound)
   }
 
   render () {
