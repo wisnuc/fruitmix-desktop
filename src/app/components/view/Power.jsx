@@ -263,6 +263,7 @@ class Power extends Base {
     return (
       <div style={{width: '100%', height: '100%'}}>
         <div style={{paddingLeft: 72}}>
+          <div style={{ height: 24 }} />
           <div style={Object.assign({}, header1Style, { color: 'grey' })}>重启和关机</div>
 
           <FlatButton label='关机' primary={true} style={{marginLeft: -16}}
@@ -271,6 +272,7 @@ class Power extends Base {
           <FlatButton label='重启' primary={true} style={{marginLeft: 0}}
             onTouchTap={() => this.handleOpen('REBOOT')}
           />
+          <div style={{ height: 24 }} />
 
           <div style={Object.assign({}, header1Style, { 
             color: 'grey'
@@ -278,6 +280,7 @@ class Power extends Base {
           <div style={contentStyle}>
             重启后进入维护模式，可以在维护模式下执行磁盘操作或系统维护任务。
           </div>
+          <div style={{ height: 24 }} />
           <FlatButton label='重启进入维护模式' primary={true} style={{marginLeft: -8}}
             onTouchTap={() => this.handleOpen('REBOOTMAINTENANCE')}
           />

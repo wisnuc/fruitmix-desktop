@@ -57,22 +57,22 @@ class NavViews extends Component {
     this.install('home', Home)
     this.install('public', Public)
     this.install('physical', Physical)
-    this.install('fileSharedWithMe', FileSharedWithMe)
-    this.install('fileSharedWithOthers', FileSharedWithOthers)
+    // this.install('fileSharedWithMe', FileSharedWithMe)
+    // this.install('fileSharedWithOthers', FileSharedWithOthers)
     this.install('transmission', Transmission)
 
     this.install('media', Media)
     // this.install('mediaShare', MediaShare)
     // this.install('mediaAlbum', MediaAlbum)
 
-    this.install('account', Account) 
+    this.install('account', Account)
     this.install('adminUsers', AdminUsers)
     this.install('adminDrives', AdminDrives)
     this.install('device', Device)
-    this.install('storage', Storage)
+    // this.install('storage', Storage)
     this.install('networking', Networking)
     this.install('timeDate', TimeDate)
-    this.install('fanControl', FanControl)
+    // this.install('fanControl', FanControl)
     this.install('power', Power)
 
     Object.assign(this.state, {
@@ -148,6 +148,10 @@ class NavViews extends Component {
 
     let color = this.currentView().primaryColor()
     let group = this.views[this.state.nav].navGroup()
+    let navGroupList = Object.keys(this.views).filter(key => this.views[key].navGroup() === this.views[this.state.nav].navGroup())
+
+    /* hide QuickNav if there is only one nav */
+    if (navGroupList.length === 1) { return <div /> }
 
     return (
       <div style={{
@@ -157,10 +161,7 @@ class NavViews extends Component {
         backgroundColor: '#FFF', 
         overflow: 'hidden'
       }}>
-        { Object.keys(this.views)
-            .filter(key => 
-              this.views[key].navGroup() === this.views[this.state.nav].navGroup())
-            .map(key =>
+        { navGroupList.map(key =>
               <QuickNav
                 key={`quicknav-${key}`}
                 icon={this.views[key].quickIcon()} 
@@ -226,6 +227,7 @@ class NavViews extends Component {
     default:
       break
     }
+
 
     let appBarStyle = {
       position: 'absolute', 
@@ -319,11 +321,7 @@ class NavViews extends Component {
       transition: sharpCurve('width')
     }
 
-    return (
-      <div style={style}>
-        world2
-      </div>
-    )
+    return view.renderDetail({style})
   }
 
   render () {
@@ -366,7 +364,7 @@ class NavViews extends Component {
             { view.showQuickNav() && this.renderQuickNavs() } 
 
             {/* content */}
-            <div style={{flexGrow: 1, height: '100%', marginLeft: 8, marginTop: 8}} id='content-container'>
+            <div style={{flexGrow: 1, height: '100%', paddingLeft: 8, paddingTop: 8, boxSizing: 'border-box' }} id='content-container'>
               { view.renderContent() }
             </div>
           </div>

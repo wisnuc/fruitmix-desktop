@@ -75,23 +75,20 @@ class PhotoApp extends React.Component {
   render() {
     // debug('PhotoApp, this.props', this.props)
     return (
-      <Paper>
-        <EventListener
-          target="window"
-          onResize={this.handleResize}
-        />
+      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+        <EventListener target="window" onResize={this.handleResize} />
 
-        {/* 图片列表 */}
+        {/* PhotoList */}
         {
           !this.props.media ?
             <div
               style={{
-                position: 'fixed',
+                position: 'relative',
+                width: '100%',
+                height: '100%',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                width: 'calc(100% - 80px)',
-                height: 'calc(100% - 64px)'
+                justifyContent: 'center'
               }}
             >
               <CircularProgress />
@@ -99,9 +96,9 @@ class PhotoApp extends React.Component {
             this.props.media.length ?
               <PhotoList
                 style={{
-                  position: 'fixed',
-                  width: 'calc(100% - 80px)',
-                  height: 'calc(100% - 72px)',
+                  position: 'relative',
+                  width: '100%',
+                  height: '100%',
                   backgroundColor: '#FFFFFF',
                   display: 'flex',
                   alignItems: 'center',
@@ -118,17 +115,17 @@ class PhotoApp extends React.Component {
               /> :
               <div
                 style={{
-                  position: 'fixed',
+                  position: 'relative',
+                  width: '100%',
+                  height: '100%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  width: 'calc(100% - 72px)',
-                  height: 'calc(100% - 64px)'
                 }}
               >啥都没有啊！</div>
         }
 
-        {/* 轮播 */}
+        {/* Carousel */}
         {
           this.state.selectedItems.length ?
             <Paper style={{ position: 'fixed', bottom: 15, width: '75%' }} >
@@ -142,7 +139,7 @@ class PhotoApp extends React.Component {
             </Paper> : <div />
         }
 
-        {/* 查看大图 */}
+        {/* PhotoDetail */}
         <PhotoDetail
           onRequestClose={() => this.setState({ openDetail: false })}
           open={this.state.openDetail}
@@ -154,7 +151,7 @@ class PhotoApp extends React.Component {
           memoize={this.props.memoize}
         />
 
-        {/* 上传图片 */}
+        {/* Media Upload */}
         {/*
           this.props.media ?
             <div style={{ position: 'absolute', right: 96, bottom: 48 }}>
@@ -167,7 +164,7 @@ class PhotoApp extends React.Component {
               </FloatingActionButton>
             </div> : <div />
         */}
-      </Paper>
+      </div>
     )
   }
 }

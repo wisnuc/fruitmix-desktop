@@ -110,7 +110,7 @@ class Fruitmix extends EventEmitter {
       break
 
     case 'updateAccount':
-      r = this.apost('account', args)
+        r = this.apatch(`users/${args.uuid}`, args)
       break
 
     case 'users':
@@ -148,6 +148,10 @@ class Fruitmix extends EventEmitter {
         readlist: [],
         shareAllowed: true
       })
+      break
+
+    case 'adminUpdateDrive':
+      r = this.apost(`admin/drives/${args.driveUUID}`, args)
       break
 
     /** File APIs **/

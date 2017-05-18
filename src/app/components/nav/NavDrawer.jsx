@@ -160,11 +160,13 @@ class NavDrawer extends React.Component {
         <Divider />
         <div style={{ height: 4 }} />
 
+        {/*
         { this.renderGroup('other') }
 
         <div style={{ height: 4 }} />
         <Divider />
         <div style={{ height: 4 }} />
+        */}
 
         { isAdmin && <SubHeader>管理</SubHeader> }
         { isAdmin && this.renderGroup('settings') }

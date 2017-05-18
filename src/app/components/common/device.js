@@ -72,6 +72,16 @@ class Device extends RequestManager {
         .get(`http://${this.mdev.address}:3000/system/storage?wisnuc=true`)
         break
 
+      case 'timedate':
+        r = request
+        .get(`http://${this.mdev.address}:3000/system/timedate`)
+        break
+
+      case 'net':
+        r = request
+        .get(`http://${this.mdev.address}:3000/system/net`)
+        break
+
       case 'users':
         r = request
         .get(`http://${this.mdev.address}:3721/login`)
