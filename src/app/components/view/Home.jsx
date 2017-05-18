@@ -12,7 +12,7 @@ import DialogOverlay from '../common/DialogOverlay'
 
 import NewFolderDialog from '../file/NewFolderDialog'
 import FileUploadButton from '../file/FileUploadButton'
-// import RenameDialog from '../file/RenameDialog'
+import RenameDialog from '../file/RenameDialog'
 // import DeleteDialog from '../file/DeleteDialog'
 
 import ListSelect from '../file/ListSelect2'
@@ -35,7 +35,11 @@ class BreadCrumbItem extends React.PureComponent {
       backgroundColor: 'rgba(255,255,255,0)',
       ':hover': {
         backgroundColor: 'rgba(255,255,255,0.14)' // value from material-component card example
-      }
+      },
+      maxWidth: '100px',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+      textOverflow: 'ellipsis'
     }
 
     return (
@@ -76,6 +80,7 @@ class Home extends Base {
       contextMenuX: -1,
 
       createNewFolder: null,
+      rename: null
     } 
 
     this.onListNavBySelect = this.listNavBySelect.bind(this)
@@ -265,6 +270,14 @@ class Home extends Base {
     })
   }
 
+  renameFolder() {
+    this.setState({rename: true})
+  }
+
+  closeRename() {
+    this.setState({rename: false})
+  }
+
   /** renderers **/
 
   // breadcrumb
@@ -279,6 +292,14 @@ class Home extends Base {
     return (
       <div id='file-breadcrumbs' style={Object.assign({}, style, {marginLeft:'176px'})}>
         { this.state.listNavDir.path.reduce((acc, node, index, arr) => {
+
+          if (path.length > 4 && index > 0 && index < path.length - 3) {
+            if (index === 1) {
+              acc.push(<BreadCrumbSeparator key={node.uuid + index}/>)
+              acc.push(<BreadCrumbItem text='...' key='...'/>)
+            }
+            return acc
+          }
 
           if (index !== 0) acc.push(<BreadCrumbSeparator key={node.uuid + index}/>)
 
@@ -346,11 +367,7 @@ class Home extends Base {
           <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
           <MenuItem primaryText='下载' onTouchTap={this.download.bind(this)} /> 
           <MenuItem primaryText='刪除' onTouchTap={this.delete.bind(this)} /> 
-          <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
-          <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
-          <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
-          <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
-          <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
+          <MenuItem primaryText='重命名'onTouchTap={this.renameFolder.bind(this)} />
         </ContextMenu> 
 
         <DialogOverlay open={!!this.state.createNewFolder} onRequestClose={this.onRequestClose}>
@@ -361,6 +378,17 @@ class Home extends Base {
               entries={this.state.entries}
             /> }
         </DialogOverlay>
+
+        <DialogOverlay open={!!this.state.rename} onRequestClose={this.closeRename.bind(this)}>
+          { this.state.rename && 
+            <RenameDialog 
+              apis={this.ctx.props.apis} 
+              path={this.state.path} 
+              entries={this.state.entries}
+              select={this.state.select}
+            /> }
+        </DialogOverlay>
+
       </div>
     )
   }
