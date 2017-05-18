@@ -57,8 +57,8 @@ class NavViews extends Component {
     this.install('home', Home)
     this.install('public', Public)
     this.install('physical', Physical)
-    this.install('fileSharedWithMe', FileSharedWithMe)
-    this.install('fileSharedWithOthers', FileSharedWithOthers)
+    // this.install('fileSharedWithMe', FileSharedWithMe)
+    // this.install('fileSharedWithOthers', FileSharedWithOthers)
     this.install('transmission', Transmission)
 
     this.install('media', Media)
@@ -133,7 +133,7 @@ class NavViews extends Component {
   }
 
   updateTransmission(e, type, userTasks, finishTasks) {
-    // console.log(e, userTasks, finishTasks)
+    console.log(e, userTasks, finishTasks)
     window.store.dispatch({ type, userTasks, finishTasks })
   }
 

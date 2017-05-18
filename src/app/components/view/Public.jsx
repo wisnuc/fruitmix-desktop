@@ -1,38 +1,19 @@
 import React, { Component, PureComponent } from 'react'
-import { MenuItem, FloatingActionButton } from 'material-ui'
+import { MenuItem, FloatingActionButton, IconButton } from 'material-ui'
+import FileFolderShared from 'material-ui/svg-icons/file/folder-shared'
+import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
 import Radium from 'radium'
 
+import DialogOverlay from '../common/DialogOverlay'
 import ListSelect from '../file/ListSelect2'
-import FileFolderShared from 'material-ui/svg-icons/file/folder-shared'
 import FileContent from '../file/FileContent'
+import NewFolderDialog from '../file/NewFolderDialog'
+import RenameDialog from '../file/RenameDialog'
 import Base from './Base'
+import { command } from '../../lib/command'
 import ContextMenu from '../common/ContextMenu'
 import FileUploadButton from '../file/FileUploadButton'
 
-@Radium
-class BreadCrumbItem extends React.PureComponent {
-
-  render() {
-
-    let style = {
-      cursor: 'pointer',
-      borderRadius: 2, // mimic a flat button
-      height: 32,
-      paddingLeft: 8, 
-      paddingRight: 8, 
-      backgroundColor: 'rgba(255,255,255,0)',
-      ':hover': {
-        backgroundColor: 'rgba(255,255,255,0.14)' // value from material-component card example
-      }
-    }
-
-    return (
-      <div style={style} onTouchTap={this.props.onTouchTap}>
-        { this.props.text }   
-      </div>
-    )
-  }
-}
 
 class Public extends Base {
 
@@ -53,6 +34,7 @@ class Public extends Base {
       contextMenuX: -1,
 
       createNewFolder: null,
+      rename: null,
       inRoot: true
     } 
   }
@@ -144,8 +126,64 @@ class Public extends Base {
     return true
   }
 
-  renderTitle() {
+  renderToolBar({style}) {
+    if (this.state.path.length > 1) return (
+      <div style={style}>
+        <IconButton onTouchTap={this.createNewFolder.bind(this)}>
+          <FileCreateNewFolder color='#FFF' />
+        </IconButton>
+      </div>
+    )
+    else return (<div style={style}/>)
+  }
 
+  renderTitle({style}) {
+    if (!this.state.listNavDir && !this.state.adminDrives) return
+
+    const path = this.state.path
+
+    const listByBread = (node) => {
+      this.ctx.props.apis.request('driveListNavDir', {
+        dirUUID: node.uuid,
+        rootUUID: this.state.path.length>1? this.state.path[1].uuid: node.uuid
+      })
+    }
+
+    // each one is preceded with a separator, except for the first one
+    // each one is assigned an action, except for the last one
+    return (
+      <div id='file-breadcrumbs' style={Object.assign({}, style, {marginLeft:'176px'})}>
+        { path.reduce((acc, node, index, arr) => {
+          if (path.length > 4 && index > 0 && index < path.length - 3) {
+            if (index === 1) {
+              acc.push(<BreadCrumbSeparator key={node.uuid + index}/>)
+              acc.push(<BreadCrumbItem text='...' key='...'/>)
+            }
+            return acc
+          }
+
+          if (index !== 0) acc.push(<BreadCrumbSeparator key={node.uuid + index}/>)
+
+          if (index === 0) { // the first one is always special
+            acc.push(<BreadCrumbItem text='共享文件夹' key={node.uuid} onTouchTap={() => {
+              this.setState({inRoot: true})
+              this.ctx.props.apis.request('adminDrives')
+            }}/>)
+          }
+
+          else {
+            if (index === 1) acc.push(
+              <BreadCrumbItem 
+                text={this.state.adminDrives.drives.find(item => item.uuid === node.name).label}
+                key={node.uuid} onTouchTap={listByBread.bind(this, node)}/>)
+
+            else acc.push(<BreadCrumbItem text={node.name} key={node.uuid} onTouchTap = {listByBread.bind(this, node)}/>)
+            
+          }
+          return acc
+        }, [])}
+      </div>
+    )
   }
 
   listNavBySelect() {
@@ -178,20 +216,69 @@ class Public extends Base {
     })
   }
 
-  createNewFolder() {
+  renameFolder() {
+    this.setState({rename: true})
+  }
 
+  closeRename() {
+    this.setState({rename: false})
+  }
+
+  createNewFolder() {
+    this.setState({ createNewFolder: true }) 
+  } 
+
+  onRequestClose() {
+    let request = this.ctx.props.apis.request
+    let path = this.state.path
+    this.setState({ createNewFolder: false }) 
+    if (this.state.inRoot) request('adminDrives')
+    else request('driveListNavDir', {
+      dirUUID: path[path.length - 1].uuid,
+      rootUUID: path[1].uuid
+    })
   }
 
   download() {
+    let entries = this.state.entries
+    let selected = this.state.select.selected
+    let p = this.state.path
+    let folders = []
+    let files = []
 
+    selected.forEach(item => {
+      let obj = entries[item]
+      if (obj.type == 'folder') folders.push(obj)
+      else if (obj.type == 'file') files.push(obj)
+    })
+
+    command('fileapp', 'DOWNLOAD', { folders, files, dirUUID: p[p.length - 1].uuid})
   }
 
   delete() {
 
   }
 
-  upload() {
+  upload(type) {
+    let dirPath = this.state.path
+    let dirUUID = dirPath[dirPath.length - 1].uuid
+    console.log(dirUUID, type)
+    command('fileapp', 'UPLOAD', {dirUUID, type})
+  }
 
+  createFolder(value) {
+    this.setState({createNewFolder:false})
+    let path = this.state.path
+    let curr = path[path.length - 1]
+    let args = {
+      dirUUID: curr.uuid,
+      dirname: value
+    }
+    console.log(args)
+    this.ctx.props.apis.request('mkdir', args, (err, data) => {
+        if (err) this.setState({ errorText: err.message })
+        else this.props.onRequestClose(true)
+      })
   }
 
 
@@ -214,13 +301,75 @@ class Public extends Base {
           left={this.state.contextMenuX}
           onRequestClose={() => this.hideContextMenu()}
         >
-          <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
+          <MenuItem primaryText='新建文件夹' disabled={this.state.path.length>1?false:true} onTouchTap={this.createNewFolder.bind(this)} /> 
           <MenuItem primaryText='下载' onTouchTap={this.download.bind(this)} /> 
-          <MenuItem primaryText='刪除' onTouchTap={this.delete.bind(this)} /> 
+          <MenuItem primaryText='刪除' disabled={this.state.path.length>1?false:true} onTouchTap={this.delete.bind(this)} /> 
+          <MenuItem primaryText='重命名'onTouchTap={this.renameFolder.bind(this)} />
         </ContextMenu> 
+
+        <DialogOverlay open={!!this.state.createNewFolder} onRequestClose={this.onRequestClose.bind(this)}>
+          { this.state.createNewFolder && 
+            <NewFolderDialog 
+              apis={this.ctx.props.apis} 
+              path={this.state.path} 
+              entries={this.state.entries}
+              
+            /> }
+        </DialogOverlay>
+
+        <DialogOverlay open={!!this.state.rename} onRequestClose={this.closeRename.bind(this)}>
+          { this.state.rename && 
+            <RenameDialog 
+              apis={this.ctx.props.apis} 
+              path={this.state.path} 
+              entries={this.state.entries}
+              select={this.state.select}
+            /> }
+        </DialogOverlay>
       </div>
 
 
+    )
+  }
+}
+
+class BreadCrumbSeparator extends React.PureComponent {
+
+  render() {
+    return (
+      <div style={{height:32, width:8, display:'flex', flexDirection:'column', alignItems:'center'}}>
+        &rsaquo;
+      </div>
+    )
+  }
+}
+
+@Radium
+class BreadCrumbItem extends React.PureComponent {
+
+  render() {
+
+    let style = {
+      cursor: 'pointer',
+      borderRadius: 2, // mimic a flat button
+      height: 32,
+      paddingLeft: 8, 
+      paddingRight: 8, 
+      backgroundColor: 'rgba(255,255,255,0)',
+      ':hover': {
+        backgroundColor: 'rgba(255,255,255,0.14)' // value from material-component card example
+      },
+      maxWidth: '100px',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+      textOverflow: 'ellipsis'
+
+    }
+
+    return (
+      <div style={style} onTouchTap={this.props.onTouchTap}>
+        { this.props.text }   
+      </div>
     )
   }
 }

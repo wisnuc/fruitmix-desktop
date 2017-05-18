@@ -147,7 +147,7 @@ class TaskManager {
 			restTime: this.restTime,
 			finishDate: this.finishDate,
 			trsType: this.trsType,
-			state: this.state,
+			state: this.type=='file'&& !!this.worklist[0]?this.worklist[0].stateName ==='hashing'?'visiting':this.state:this.state,
 			pause: this.pause,
 			record: this.record,
 			speed: this.speed
@@ -415,9 +415,10 @@ class TaskManager {
 		callback()
 	}
 
-	error() {
+	error(e, message) {
 		this.state = 'failed'
 		this.Error = e
+		console.log(e)
 		this.recordInfor(message)
 	}
 }
@@ -482,7 +483,7 @@ const visitServerFiles = async (uuid, name, type, position, callback) => {
 		return next()
 
 	}catch(e) {
-		return callback(err)
+		return callback(e)
 	}
 	
 }
@@ -629,8 +630,9 @@ class HashSTM extends STM {
 			    encoding:'utf8',
 			    cwd: process.cwd()
 			}
-			let child = child_process.fork('node/lib/filehash.js', [], options)
+			let child = child_process.fork(path.join(__dirname ,'filehash'), [], options)
 			child.on('message',(obj) => {
+				console.log('hash message' , obj)
 				wrapper.sha = obj.hash
 				wrapper.parts = obj.parts
 				removeOutOfHashingQueue(this)

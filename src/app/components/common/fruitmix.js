@@ -176,7 +176,7 @@ class Fruitmix extends EventEmitter {
       break
 
     case 'renameDirOrFile':
-      r = this.apost(`files/fruitmix/rename/${args.dirUUID}/${args.nodeUUID}/${args.filename}`)
+      r = this.apatch(`files/fruitmix/rename/${args.dirUUID}/${args.nodeUUID}`, {filename: args.filename})
       break
 
     case 'deleteDirOrFile':
