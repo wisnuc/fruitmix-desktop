@@ -367,6 +367,7 @@
 	flex-flow:row nowrap;
 	justify-content: flex-start;
 	align-items: center;
+	/*border-bottom: solid 1px rgba(0,0,0,.1);*/
 }
 
 .move-title-icon {
@@ -387,7 +388,7 @@
 	background: rgba(0,0,0,.12)
 }
 
-.move-dialog-back>svg {
+.move-title-icon>svg {
 	width:16px!important;
 	height: 16px!important;
 	color:#777!important;
@@ -403,4 +404,19 @@
 	font-family: 'Roboto','Arial','sans-serif';
 	color:#777;
 	width:165px;
+}
+
+.move-dialog-list {
+	width:246px;
+	height:198px;
+	border-top:1px solid #e5e5e5;
+	border-bottom: 1px solid #e5e5e5;
+	display:flex;
+	flex-flow: column nowrap; 
+	justify-content: center;
+	cursor: default;
+}
+
+.move-operation {
+	height:61px;
 }

@@ -421,7 +421,12 @@ class Home extends Base {
         </DialogOverlay>
 
         <DialogOverlay open={this.state.move} onRequestClose={this.closeMove.bind(this)}>
-          { this.state.move && <MoveDialog/>}
+          { this.state.move && <MoveDialog
+              apis={this.ctx.props.apis} 
+              path={this.state.path} 
+              entries={this.state.entries}
+              select={this.state.select}
+            />}
         </DialogOverlay>
 
       </div>
