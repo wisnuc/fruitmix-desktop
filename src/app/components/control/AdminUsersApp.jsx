@@ -35,7 +35,7 @@ class AdminUsersApp extends React.Component {
   }
 
   render() {
-    const { users, apis, refreshUsers } = this.props
+    const { users, apis, refreshUsers, openSnackBar } = this.props
     if (!users) return <div />
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -63,7 +63,15 @@ class AdminUsersApp extends React.Component {
               []) }
         </div>
         <DialogOverlay open={!!this.state.createNewUser} onRequestClose={this.onCloseDialog}>
-          { this.state.createNewUser && <ChangeAccountDialog refreshUsers={refreshUsers} apis={apis} op="createUser" /> }
+          {
+            this.state.createNewUser &&
+            <ChangeAccountDialog
+              refreshUsers={refreshUsers}
+              apis={apis}
+              op="createUser"
+              openSnackBar={openSnackBar}
+            />
+          }
         </DialogOverlay>
       </div>
     )

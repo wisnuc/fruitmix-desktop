@@ -103,29 +103,30 @@ class AdminDrives extends Base {
     return <div style={Object.assign({}, style, { marginLeft: 176 })}>共享文件夹</div>
   }
 
-  renderDetail({ style }, toggleDetail) {
+  renderDetail({ style }, openSnackBar) {
     return (
       <div style={style}>
         {
-          this.state.detailDrive &&
+          this.state.detailDrive ?
             <DriversDetail
               primary
-              toggleDetail={toggleDetail}
-              primaryColor={this.groupPrimaryColor()}
+              openSnackBar={openSnackBar}
               users={this.state.users}
               drives={this.state.drives}
               detailUsers={this.state.detailUsers}
               detailDrive={this.state.detailDrive}
               apis={this.ctx.props.apis}
               refreshDrives={this.refreshDrives}
-            />
+            /> :
+            <div style={{ height: 128, backgroundColor: '#5E35B1' }} />
         }
       </div>
     )
   }
 
   /** renderers **/
-  renderContent({ navTo, toggleDetail }) {
+  renderContent({ navTo, toggleDetail, openSnackBar }) {
+    debug('renderContent openSnackBar', openSnackBar)
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <AdminDriversApp
@@ -136,6 +137,7 @@ class AdminDrives extends Base {
           updateDetail={this.updateDetail}
           navTo={navTo}
           showContextMenu={this.showContextMenu.bind(this)}
+          openSnackBar={openSnackBar}
         />
         <ContextMenu
           open={this.state.contextMenuOpen}

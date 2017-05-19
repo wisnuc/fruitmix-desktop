@@ -93,7 +93,7 @@ class AdminDrives extends React.Component {
   }
 
   render() {
-    const { users, drives, apis, refreshDrives, updateDetail, navTo, showContextMenu } = this.props
+    const { users, drives, apis, refreshDrives, updateDetail, navTo, showContextMenu, openSnackBar } = this.props
     debug('AdminDrivesAdminDrivesAdminDrives', this.props)
     if (!users || !drives) return <div />
 
@@ -135,6 +135,7 @@ class AdminDrives extends React.Component {
                   users={users}
                   drives={drives}
                   refreshDrives={refreshDrives}
+                  openSnackBar={openSnackBar}
                 />
               }
             </DialogOverlay>

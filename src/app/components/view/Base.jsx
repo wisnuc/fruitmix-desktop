@@ -102,7 +102,7 @@ class Base extends EventEmitter {
   }
 
   detailWidth() {
-    return 400
+    return 360
   }
 
   renderTitle({style}) {
@@ -120,6 +120,10 @@ class Base extends EventEmitter {
   }
 
   renderToolBar({style}) {
+    return <div style={style} />
+  }
+
+  renderSnackBar({style}) {
     return <div style={style} />
   }
 
