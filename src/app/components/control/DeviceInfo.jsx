@@ -151,7 +151,7 @@ class DeviceInfo extends React.PureComponent {
     }
 
     return (
-      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'auto' }}>
         <div style={{ height: 16 }} />
         { ws215i && this.renderList(ws215iIcon, ws215iTitles, ws215iValues) }
         { ws215i && <this.renderDivider /> }
