@@ -72,6 +72,14 @@ class Device extends RequestManager {
         .get(`http://${this.mdev.address}:3000/system/storage?wisnuc=true`)
         break
 
+      case 'power':
+        r = request
+        .post(`http://${this.mdev.address}:3000/system/boot`)
+        .timeout(30000)
+        .send(args)
+        .set('Accept', 'application/json')
+        break
+
       case 'timedate':
         r = request
         .get(`http://${this.mdev.address}:3000/system/timedate`)

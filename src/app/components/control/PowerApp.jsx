@@ -1,10 +1,14 @@
 import React from 'react'
 import Debug from 'debug'
 import Paper from 'material-ui/Paper'
-import { Dialog, CircularProgress } from 'material-ui'
+import { Dialog, CircularProgress, Divider } from 'material-ui'
 import ActionPowerSettingsNew from 'material-ui/svg-icons/action/power-settings-new'
 import { pinkA200 } from 'material-ui/styles/colors'
 import { ipcRenderer } from 'electron'
+import Username from 'material-ui/svg-icons/action/perm-identity'
+import PowerSetting from 'material-ui/svg-icons/action/power-settings-new'
+import Build from 'material-ui/svg-icons/action/build'
+
 import { header1Style, header2Style, header2StyleNotFirst, contentStyle } from '../control/styles'
 import FlatButton from '../common/FlatButton'
 import Checkmark from '../common/Checkmark'
@@ -34,9 +38,8 @@ class Power extends React.Component {
     this.cancelButton = <FlatButton label="取消" primary onTouchTap={this.handleClose} />
 
     this.bootOp = (op) => {
-      return null
-      if (err || !res.ok) { return debug('request boot op failed', err || !res.ok, op) }
-      debug('request boot op success', op)
+      // debug('request boot op success', op)
+      this.props.selectedDevice.request('power', { op })
       if (op === 'poweroff') {
         this.setState({ rebooting: true, poweroff: true })
       } else {
@@ -213,52 +216,77 @@ class Power extends React.Component {
       backgroundColor: 'white'
     }
 
+    debug('power', this.props)
     return (
-      <div style={{ width: '100%', height: '100%' }}>
-        <div style={{ paddingLeft: 72 }}>
-          <div style={{ height: 24 }} />
-          <div style={Object.assign({}, header1Style, { color: 'grey' })}>重启和关机</div>
+      <div style={{ paddingLeft: 24, paddingTop: 24 }}>
 
-          <FlatButton
-            label="关机" primary style={{ marginLeft: -16 }}
-            onTouchTap={() => this.handleOpen('POWEROFF')}
-          />
-          <FlatButton
-            label="重启" primary style={{ marginLeft: 0 }}
-            onTouchTap={() => this.handleOpen('REBOOT')}
-          />
-          <div style={{ height: 24 }} />
-
-          <div
-            style={Object.assign({}, header1Style, {
-              color: 'grey'
-            })}
-          >进入维护模式</div>
-          <div style={contentStyle}>
-            重启后进入维护模式，可以在维护模式下执行磁盘操作或系统维护任务。
+        <div style={{ display: 'flex', alignItems: 'center' }} >
+          <div style={{ flex: '0 0 56px', height: 36 }} >
+            <div style={{ height: 8 }} />
+            <PowerSetting color={this.props.primaryColor} />
           </div>
-          <div style={{ height: 24 }} />
-          <FlatButton
-            label="重启进入维护模式" primary style={{ marginLeft: -8 }}
-            onTouchTap={() => this.handleOpen('REBOOTMAINTENANCE')}
-          />
-
-          <Dialog
-            actions={this.getActions()}
-            modal
-            open={this.state.open}
-            onRequestClose={this.handleClose}
-          >
-            {this.state.choice === 'POWEROFF' ? '确定关机？' : this.state.choice === 'REBOOT' ? '确定重启？' : '确定重启并进入维护模式？'}
-          </Dialog>
-
-          <div style={progressDiaStyle}>
-            <Paper style={paperStyle} zDepth={2} thickness={7}>
-              { this.renderDiaContent()}
-            </Paper>
-          </div>
-
+          <div style={{ flex: '0 0 560px', fontSize: 20, color: 'rgba(0, 0, 0, 0.87)' }}>
+              重启和关机
+            </div>
         </div>
+
+        <div style={{ height: 8 }} />
+        <div style={{ display: 'flex', alignItems: 'center' }} >
+          <div style={{ flex: '0 0 56px' }} />
+          <div style={{ flex: '0 0 560px' }}>
+            <FlatButton
+              label="关机" primary style={{ marginLeft: -16 }}
+              onTouchTap={() => this.handleOpen('POWEROFF')}
+            />
+            <FlatButton
+              label="重启" primary style={{ marginLeft: 0 }}
+              onTouchTap={() => this.handleOpen('REBOOT')}
+            />
+          </div>
+        </div>
+
+        <div style={{ height: 16 }} />
+        <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
+        <div style={{ height: 16 }} />
+
+        <div style={{ display: 'flex', alignItems: 'center' }} >
+          <div style={{ flex: '0 0 56px', height: 36 }} >
+            <div style={{ height: 8 }} />
+            <Build color={this.props.primaryColor} />
+          </div>
+          <div style={{ flex: '0 0 560px', fontSize: 20, color: 'rgba(0, 0, 0, 0.87)' }}>
+              进入维护模式
+            </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center' }} >
+          <div style={{ flex: '0 0 56px' }} />
+          <div style={{ flex: '0 0 560px' }}>
+            <div style={contentStyle}>
+                重启后进入维护模式，可以在维护模式下执行磁盘操作或系统维护任务。
+              </div>
+            <div style={{ height: 16 }} />
+            <FlatButton
+              label="重启进入维护模式" primary style={{ marginLeft: -8 }}
+              onTouchTap={() => this.handleOpen('REBOOTMAINTENANCE')}
+            />
+          </div>
+        </div>
+
+        <Dialog
+          actions={this.getActions()}
+          modal
+          open={this.state.open}
+          onRequestClose={this.handleClose}
+        >
+          {this.state.choice === 'POWEROFF' ? '确定关机？' : this.state.choice === 'REBOOT' ? '确定重启？' : '确定重启并进入维护模式？'}
+        </Dialog>
+
+        <div style={progressDiaStyle}>
+          <Paper style={paperStyle} zDepth={2} thickness={7}>
+            { this.renderDiaContent()}
+          </Paper>
+        </div>
+
       </div>
     )
   }

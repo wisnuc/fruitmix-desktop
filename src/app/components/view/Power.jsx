@@ -12,7 +12,7 @@ class Power extends Base {
     super(ctx)
   }
 
-  willReceiveProps(nextProps) { 
+  willReceiveProps(nextProps) {
   }
 
   navEnter() {
@@ -48,6 +48,7 @@ class Power extends Base {
         apis={this.ctx.props.apis}
         nav={this.ctx.props.nav}
         selectedDevice={this.ctx.props.selectedDevice}
+        primaryColor={this.groupPrimaryColor()}
       />
     )
   }
