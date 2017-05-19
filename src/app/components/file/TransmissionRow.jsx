@@ -25,7 +25,7 @@ class UploadRow extends Component {
 	render() {
 		let task = this.props.task
 		let style = this.isSelected? selectStyle: normalStyle
-		let pColor = task.pause?'#d4d4d4':'#89c2f2'
+		let pColor = task.pause?'rgba(0,0,0,.12)':'#89c2f2'
 		let pWidth = task.completeSize / task.size * 100
 		if (pWidth === Infinity || !pWidth) pWidth = 0
 		return (
