@@ -13,7 +13,7 @@ class DrivesDetail extends PureComponent {
     super(props)
 
     this.state = {
-      label: '',
+      label: this.props.detailDrive.label,
       writelist: this.props.detailDrive.writelist,
       errorText: '',
       modify: false,
@@ -47,7 +47,7 @@ class DrivesDetail extends PureComponent {
     if (nextProps.detailDrive.uuid !== this.props.detailDrive.uuid) {
       this.currentLabel = nextProps.detailDrive.label
       this.setState({
-        label: '',
+        label: nextProps.detailDrive.label,
         modify: false,
         changed: false,
         writelist: nextProps.detailDrive.writelist
@@ -112,12 +112,14 @@ class DrivesDetail extends PureComponent {
                   name="shareDiskName"
                   fullWidth
                   onChange={e => this.updateLabel(e.target.value)}
-                  value={(this.state.label || this.state.modify) ? this.state.label : detailDrive.label}
+                  value={this.state.modify ? this.state.label : detailDrive.label}
                   errorText={this.state.errorText}
                   onBlur={() => this.setState({ modify: false, changed: true })}
                   ref={(input) => { if (input && this.state.modify) { input.focus() } }}
-                  hintStyle={{ color: '#FAFAFA' }}
                   inputStyle={{ fontSize: 20, fontWeight: 500, color: '#FAFAFA' }}
+                  underlineFocusStyle={{ borderColor: '#FAFAFA' }}
+                  underlineStyle={{ borderColor: '#5E35B1' }}
+                  errorStyle={{ marginTop: 16 }}
                 /> :
                 <div
                   style={{
@@ -185,7 +187,7 @@ class DrivesDetail extends PureComponent {
             */}
             <FlatButton
               label="应用" primary={primary}
-              disabled={!this.state.changed || this.state.errorText || this.state.modify}
+              disabled={!this.state.changed || !!this.state.errorText || this.state.modify}
               onTouchTap={this.fire}
             />
           </div>
