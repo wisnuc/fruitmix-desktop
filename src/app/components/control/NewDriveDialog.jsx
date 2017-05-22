@@ -140,7 +140,7 @@ class NewDriveDialog extends PureComponent {
 
         {/* button */}
         <div style={{ height: 16 }} />
-        <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: '-24' }}>
+        <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
           <FlatButton
             label="取消" primary={this.props.primary} secondary={this.props.accent}
             onTouchTap={this.props.onRequestClose}

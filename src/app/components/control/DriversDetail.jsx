@@ -91,7 +91,7 @@ class DrivesDetail extends PureComponent {
   }
 
   render() {
-    const { users, detailDrive, openSnackBar, primary } = this.props
+    const { users, detailDrive, primary } = this.props
     if (!users || !detailDrive) return <div />
     return (
       <div>
@@ -101,31 +101,34 @@ class DrivesDetail extends PureComponent {
           <div
             style={{
               height: 64,
-              display: 'flex',
-              alignItems: 'center',
               marginLeft: 24
             }}
+            onMouseOver={() => this.setState({ titleHover: true })}
+            onMouseOut={() => this.setState({ titleHover: false })}
           >
+            <div style={{ height: 16 }} />
             {
               this.state.modify ?
-                <TextField
-                  name="shareDiskName"
-                  fullWidth
-                  onChange={e => this.updateLabel(e.target.value)}
-                  value={this.state.modify ? this.state.label : detailDrive.label}
-                  errorText={this.state.errorText}
-                  onBlur={() => this.setState({ modify: false, changed: true })}
-                  ref={(input) => { if (input && this.state.modify) { input.focus() } }}
-                  inputStyle={{ fontSize: 20, fontWeight: 500, color: '#FAFAFA' }}
-                  underlineFocusStyle={{ borderColor: '#FAFAFA' }}
-                  underlineStyle={{ borderColor: '#5E35B1' }}
-                  errorStyle={{ marginTop: 16 }}
-                /> :
+                <div style={{ marginTop: -8 }}>
+                  <TextField
+                    name="shareDiskName"
+                    fullWidth
+                    onChange={e => this.updateLabel(e.target.value)}
+                    value={this.state.modify ? this.state.label : detailDrive.label}
+                    errorText={this.state.errorText}
+                    onBlur={() => this.setState({ modify: false, changed: true })}
+                    ref={(input) => { if (input && this.state.modify) { input.focus() } }}
+                    inputStyle={{ fontSize: 20, fontWeight: 500, color: '#FAFAFA' }}
+                    underlineFocusStyle={{ borderColor: '#FAFAFA' }}
+                    underlineStyle={{ borderColor: '#5E35B1' }}
+                    errorStyle={{ marginTop: 16 }}
+                  />
+                </div> :
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    height: 48,
+                    height: 32,
                     fontSize: 20,
                     fontWeight: 500,
                     color: '#FAFAFA'
@@ -135,6 +138,12 @@ class DrivesDetail extends PureComponent {
                   { this.state.label ? this.state.label : this.currentLabel }
                   {/* <ModeEdit color="FAFAFA" style={{ marginLeft: 24 }} /> */}
                 </div>
+            }
+            {
+              <Divider
+                color="rgba(0, 0, 0, 0.87)"
+                style={{ opacity: !this.state.modify && this.state.titleHover ? 1 : 0 }}
+              />
             }
           </div>
         </div>
@@ -178,7 +187,7 @@ class DrivesDetail extends PureComponent {
           </div>
 
           {/* button */}
-          <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+          <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
             {/*
             <FlatButton
               label="返回" primary={primary}

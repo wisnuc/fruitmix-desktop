@@ -203,7 +203,7 @@ class ChangeAccountDialog extends React.PureComponent {
         }
         <div style={{ height: 24 }} />
         {/* button */}
-        <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: '-24' }}>
+        <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
           <FlatButton label="取消" onTouchTap={this.props.onRequestClose} primary />
           <FlatButton label="确认" disabled={!this.inputOK()} onTouchTap={this.fire} primary />
         </div>

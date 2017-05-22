@@ -28,10 +28,11 @@ class Power extends React.Component {
     }
 
     this.handleOpen = (CHOICE) => {
-      this.setState({
-        choice: CHOICE,
-        open: true
-      })
+      setTimeout(() =>
+        this.setState({
+          choice: CHOICE,
+          open: true
+        }), 10)
     }
 
     this.handleClose = () => {
@@ -262,7 +263,7 @@ class Power extends React.Component {
               </div>
               <div style={{ height: 24 }} />
               {/* button */}
-              <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: '-24' }}>
+              <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                 { this.renderActions() }
               </div>
             </div>
