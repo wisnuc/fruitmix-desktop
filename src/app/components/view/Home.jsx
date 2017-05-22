@@ -13,6 +13,7 @@ import DialogOverlay from '../common/DialogOverlay'
 import NewFolderDialog from '../file/NewFolderDialog'
 import FileUploadButton from '../file/FileUploadButton'
 import RenameDialog from '../file/RenameDialog'
+import MoveDialog from '../file/MoveDialog'
 // import DeleteDialog from '../file/DeleteDialog'
 
 import ListSelect from '../file/ListSelect2'
@@ -80,7 +81,9 @@ class Home extends Base {
       contextMenuX: -1,
 
       createNewFolder: null,
-      rename: null
+      rename: null,
+      move:false
+
     } 
 
     this.onListNavBySelect = this.listNavBySelect.bind(this)
@@ -190,8 +193,62 @@ class Home extends Base {
     })
   }
 
-  createNewFolder() {
+  showContextMenu(clientX, clientY) {
+    if (this.select.state.ctrl || this.select.state.shift) return
+    let containerDom = document.getElementById('content-container')
+    let maxLeft = containerDom.offsetLeft + containerDom.clientWidth - 240
+    let x = clientX > maxLeft? maxLeft: clientX
+    let maxTop = containerDom.offsetTop + containerDom.offsetHeight -192
+    let y = clientY > maxTop? maxTop: clientY
+    this.setState({ 
+      contextMenuOpen: true,
+      contextMenuX: x,
+      contextMenuY: y
+    }) 
+  }
+
+  hideContextMenu() {
+    this.setState({ 
+      contextMenuOpen: false,
+      // contextMenuX: -1,
+      // contextMenuY: -1,
+    })
+  }
+
+  openCreateNewFolder() {
     this.setState({ createNewFolder: true }) 
+  }
+
+  closeCreateNewFolder(dirty) {
+    this.setState({ createNewFolder: null })
+    if (dirty) 
+      this.ctx.props.apis.request('listNavDir', {
+        dirUUID: this.state.path[this.state.path.length - 1].uuid,
+        rootUUID: this.state.path[0].uuid,
+      })
+  }
+  
+  openRenameFolder() {
+    this.setState({rename: true})
+  }
+
+  closeRename() {
+    this.setState({rename: false})
+    this.refresh()
+  }
+
+  openMove() {
+    this.setState({move: true})
+  }
+
+  closeMove() {
+    this.setState({move:false})
+  }
+
+  openUploadDialog() {
+    let dirPath = this.state.path
+    let dirUUID = dirPath[dirPath.length - 1].uuid
+    command('fileapp', 'UPLOAD', { dirUUID })
   }
 
   download() {
@@ -208,7 +265,6 @@ class Home extends Base {
     })
 
     command('fileapp', 'DOWNLOAD', { folders, files, dirUUID: p[p.length - 1].uuid})
-    
   }
 
   delete() {
@@ -247,35 +303,9 @@ class Home extends Base {
     command('fileapp', 'UPLOAD', {dirUUID, type})
   }
 
-  openUploadDialog() {
-    let dirPath = this.state.path
-    let dirUUID = dirPath[dirPath.length - 1].uuid
-    command('fileapp', 'UPLOAD', { dirUUID })
-  }
-
-  showContextMenu(clientX, clientY) {
-    if (this.select.state.ctrl || this.select.state.shift) return
-    this.setState({ 
-      contextMenuOpen: true,
-      contextMenuX: clientX,
-      contextMenuY: clientY
-    }) 
-  }
-
-  hideContextMenu() {
-    this.setState({ 
-      contextMenuOpen: false,
-      contextMenuX: -1,
-      contextMenuY: -1,
-    })
-  }
-
-  renameFolder() {
-    this.setState({rename: true})
-  }
-
-  closeRename() {
-    this.setState({rename: false})
+  refresh() {
+    let rUUID = this.state.path[0].uuid
+    this.ctx.props.apis.request('listNavDir', {rootUUID: rUUID, dirUUID:rUUID})
   }
 
   /** renderers **/
@@ -334,7 +364,7 @@ class Home extends Base {
 
     return (
       <div style={style}>
-        <IconButton onTouchTap={this.createNewFolder.bind(this)}>
+        <IconButton onTouchTap={this.openCreateNewFolder.bind(this)}>
           <FileCreateNewFolder color='#FFF' />
         </IconButton>
       </div>
@@ -364,13 +394,14 @@ class Home extends Base {
           left={this.state.contextMenuX}
           onRequestClose={() => this.hideContextMenu()}
         >
-          <MenuItem primaryText='新建文件夹' onTouchTap={this.createNewFolder.bind(this)} /> 
+          <MenuItem primaryText='新建文件夹' onTouchTap={this.openCreateNewFolder.bind(this)} /> 
           <MenuItem primaryText='下载' onTouchTap={this.download.bind(this)} /> 
           <MenuItem primaryText='刪除' onTouchTap={this.delete.bind(this)} /> 
-          <MenuItem primaryText='重命名'onTouchTap={this.renameFolder.bind(this)} />
+          <MenuItem primaryText='重命名'onTouchTap={this.openRenameFolder.bind(this)} />
+          <MenuItem primaryText='移动'onTouchTap={this.openMove.bind(this)} />
         </ContextMenu> 
 
-        <DialogOverlay open={!!this.state.createNewFolder} onRequestClose={this.onRequestClose}>
+        <DialogOverlay open={this.state.createNewFolder} onRequestClose={this.closeCreateNewFolder.bind(this)}>
           { this.state.createNewFolder && 
             <NewFolderDialog 
               apis={this.ctx.props.apis} 
@@ -379,7 +410,7 @@ class Home extends Base {
             /> }
         </DialogOverlay>
 
-        <DialogOverlay open={!!this.state.rename} onRequestClose={this.closeRename.bind(this)}>
+        <DialogOverlay open={this.state.rename} onRequestClose={this.closeRename.bind(this)}>
           { this.state.rename && 
             <RenameDialog 
               apis={this.ctx.props.apis} 
@@ -389,28 +420,18 @@ class Home extends Base {
             /> }
         </DialogOverlay>
 
+        <DialogOverlay open={this.state.move} onRequestClose={this.closeMove.bind(this)}>
+          { this.state.move && <MoveDialog
+              apis={this.ctx.props.apis} 
+              path={this.state.path} 
+              entries={this.state.entries}
+              select={this.state.select}
+            />}
+        </DialogOverlay>
+
       </div>
     )
   }
 }
 
 export default Home
-
-/**
-          { this.state.rename && 
-            <RenameDialog
-              apis={this.ctx.props.apis}
-              path={this.state.path}
-              entries={this.state.entries}
-              target={...}
-            /> } 
-          { this.state.delete &&
-            <DeleteDialog
-              apis={this.ctx.props.apis}
-              path={this.state.path}
-              entries={this.state.entries}
-              select={...}
-            /> }
-**/
-
-
