@@ -116,6 +116,7 @@ class NewDriveDialog extends PureComponent {
         <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key="all" >
           <Checkbox
             label="所有人"
+            labelStyle={{ fontSize: 14 }}
             iconStyle={{ fill: this.state.writelist.length === users.length ? '#5E35B1' : 'rgba(0, 0, 0, 0.54)' }}
             checked={this.state.writelist.length === users.length}
             onCheck={() => this.togglecheckAll()}
@@ -129,6 +130,7 @@ class NewDriveDialog extends PureComponent {
                 <Checkbox
                   label={user.username}
                   iconStyle={{ fill: this.state.writelist.includes(user.uuid) ? '#5E35B1' : 'rgba(0, 0, 0, 0.54)' }}
+                  labelStyle={{ fontSize: 14 }}
                   checked={this.state.writelist.includes(user.uuid)}
                   onCheck={() => this.handleCheck(user.uuid)}
                 />

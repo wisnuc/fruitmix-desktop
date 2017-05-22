@@ -94,7 +94,7 @@ class DrivesDetail extends PureComponent {
     const { users, detailDrive, primary } = this.props
     if (!users || !detailDrive) return <div />
     return (
-      <div>
+      <div style={{ height: '100%' }}>
         <div style={{ height: 128, backgroundColor: '#5E35B1' }}>
           <div style={{ height: 64 }} />
           {/* header */}
@@ -149,33 +149,33 @@ class DrivesDetail extends PureComponent {
         </div>
 
         {/* content */}
-        <div style={{ width: 312, padding: '24px 24px 0px 24px' }}>
+        <div style={{ width: 312, height: 'calc(100% - 152px)', padding: 24, display: 'flex', flexDirection: 'column' }}>
           {/* users */}
           <div
             style={{
-              height: 32,
               fontSize: 14,
               fontWeight: 500,
               color: 'rgba(0,0,0,0.54)',
-              display: 'flex',
-              alignItems: 'center'
+              marginTop: -2
             }}
           > 共享用户 </div>
           <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key="all" >
             <Checkbox
               label="所有人"
+              labelStyle={{ fontSize: 14 }}
               iconStyle={{ fill: this.state.writelist.length === users.length ? '#5E35B1' : 'rgba(0, 0, 0, 0.54)' }}
               checked={this.state.writelist.length === users.length}
               onCheck={() => this.togglecheckAll()}
             />
           </div>
-          <div style={{ maxHeight: 40 * 8, overflow: 'auto' }}>
-            <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
+          <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
+          <div style={{ overflow: 'auto', flexGrow: 1 }}>
             {
               users.map(user =>
                 <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.username} >
                   <Checkbox
                     label={user.username}
+                    labelStyle={{ fontSize: 14 }}
                     iconStyle={{ fill: this.state.writelist.includes(user.uuid) ? '#5E35B1' : 'rgba(0, 0, 0, 0.54)' }}
                     checked={this.state.writelist.includes(user.uuid)}
                     onCheck={() => this.handleCheck(user.uuid)}
@@ -186,7 +186,9 @@ class DrivesDetail extends PureComponent {
             <div style={{ height: 8 }} />
           </div>
 
+          <div style={{ height: 16 }} />
           {/* button */}
+          <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
           <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
             {/*
             <FlatButton
