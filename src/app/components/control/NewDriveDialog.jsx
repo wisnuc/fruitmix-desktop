@@ -11,7 +11,7 @@ class NewDriveDialog extends PureComponent {
     super(props)
 
     this.state = {
-      focusOnce: false,
+      focusOnce: true,
       label: '',
       writelist: '',
       errorText: ''
@@ -91,6 +91,12 @@ class NewDriveDialog extends PureComponent {
             onChange={e => this.updateLabel(e.target.value)}
             value={this.state.label}
             errorText={this.state.errorText}
+            ref={(input) => {
+              if (input && this.state.focusOnce) {
+                input.focus()
+                this.setState({ focusOnce: false })
+              }
+            }}
           />
         </div>
 

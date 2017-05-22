@@ -120,7 +120,7 @@ class AccountApp extends React.Component {
 
         <div style={{ height: 16 }} />
         <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
-        <div style={{ height: 16 }} />
+        <div style={{ height: 32 }} />
 
         {/* change password */}
         <div style={{ display: 'flex', alignItems: 'center' }} >
