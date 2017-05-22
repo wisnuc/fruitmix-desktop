@@ -46,7 +46,7 @@ class AdminUsersApp extends React.Component {
         >
           <SocialPersonAdd />
         </FloatingActionButton>
-        <div style={{ 'overflow-y': 'auto', height: '100%' }}>
+        <div style={{ overflow: 'auto', height: '100%' }}>
           <div style={{ height: 48, display: 'flex', alignItems: 'center' }}>
             <div style={{ flex: '0 0 104px' }} />
             <div style={{ flex: '0 0 240px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
