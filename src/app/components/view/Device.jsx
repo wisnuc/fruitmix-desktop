@@ -70,7 +70,6 @@ class Device extends Base {
       />
     )
   }
-
 }
 
 export default Device

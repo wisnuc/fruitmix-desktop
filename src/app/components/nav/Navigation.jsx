@@ -2,7 +2,7 @@ import React, { Component, PureComponent } from 'react'
 import { ipcRenderer } from 'electron'
 
 import Radium from 'radium'
-import { Paper, IconButton, Menu, Drawer, Divider } from 'material-ui'
+import { Paper, IconButton, Menu, Drawer, Divider, Snackbar } from 'material-ui'
 
 import SocialNotifications from 'material-ui/svg-icons/social/notifications'
 import ActionInfo from 'material-ui/svg-icons/action/info'
@@ -79,10 +79,12 @@ class NavViews extends Component {
       nav: null,
       showDetail: false,
       openDrawer: false,
+      snackBar: ''
     })
 
     this.toggleDetailBound = this.toggleDetail.bind(this)
     this.openDrawerBound = this.openDrawer.bind(this)
+    this.openSnackBarBound = this.openSnackBar.bind(this)
     this.updateTransmissionBound = this.updateTransmission.bind(this)
   }
 
@@ -130,6 +132,10 @@ class NavViews extends Component {
 
   toggleDetail() {
     this.setState({showDetail: !this.state.showDetail})
+  }
+
+  openSnackBar(message) {
+    this.setState({ snackBar: message })
   }
 
   updateTransmission(e, type, userTasks, finishTasks) {
@@ -316,12 +322,25 @@ class NavViews extends Component {
 
     const style = {
       flexShrink: 0,
-      height: '100%', 
-      width: this.state.showDetail ? view.detailWidth() : 0, 
+      height: '100%',
+      backgroundColor: '#FAFAFA',
+      width: this.state.showDetail ? view.detailWidth() : 0,
       transition: sharpCurve('width')
     }
+    /* {style}, function to close Detail page */
+    return view.renderDetail({ style }, this.openSnackBarBound)
+  }
 
-    return view.renderDetail({style})
+  renderSnackBar() {
+    debug('renderSnackBar', this.state.snackBar)
+    return (
+      <Snackbar
+        open={!!this.state.snackBar}
+        message={this.state.snackBar}
+        autoHideDuration={4000}
+        onRequestClose={() => this.setState({ snackBar: '' })}
+      />
+    )
   }
 
   render () {
@@ -365,7 +384,13 @@ class NavViews extends Component {
 
             {/* content */}
             <div style={{flexGrow: 1, height: '100%', paddingLeft: 8, paddingTop: 8, boxSizing: 'border-box' }} id='content-container'>
-              { view.renderContent() }
+              {
+                view.renderContent({
+                  navTo: this.navTo.bind(this),
+                  toggleDetail: this.toggleDetailBound,
+                  openSnackBar: this.openSnackBarBound
+                })
+              }
             </div>
           </div>
         </div>
@@ -381,6 +406,9 @@ class NavViews extends Component {
           navTo={this.navTo.bind(this)}
           navToMain={this.props.nav}
         />
+
+        {/* snackBar */}
+        { this.renderSnackBar() }
       </div>
     )
   }

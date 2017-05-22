@@ -28,6 +28,7 @@ class AdminUsers extends Base {
   }
 
   navEnter() {
+    this.ctx.props.apis.request('adminUsers')
     this.ctx.props.apis.request('login')
   }
 
@@ -59,12 +60,13 @@ class AdminUsers extends Base {
   }
 
   /** renderers **/
-  renderContent() {
+  renderContent({ openSnackBar }) {
     return (
       <AdminUsersApp
         users={this.state.users}
         apis={this.ctx.props.apis}
         refreshUsers={this.refreshUsers}
+        openSnackBar={openSnackBar}
       />
     )
   }

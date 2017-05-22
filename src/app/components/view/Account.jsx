@@ -57,10 +57,11 @@ class Account extends Base {
   }
 
   /** renderers **/
-  renderContent() {
-    debug('renderContent', this.state.account)
+  renderContent({ openSnackBar }) {
+    // debug('renderContent', this.state.account)
     return (
       <AccountApp
+        openSnackBar={openSnackBar}
         account={this.state.account}
         apis={this.ctx.props.apis}
         primaryColor={this.groupPrimaryColor()}
