@@ -12,13 +12,7 @@ import NewDriveDialog from './NewDriveDialog'
 const debug = Debug('component:control:drive:')
 
 class DriveHeader extends React.PureComponent {
-  // 104, leading
-  // 240, label
-  // grow, user
-  // 320, uuid
-  // 56, spacer
-  // 64, view
-  // 24, padding
+
   render() {
     return (
       <div style={{ height: 48, display: 'flex', alignItems: 'center' }}>
@@ -26,11 +20,10 @@ class DriveHeader extends React.PureComponent {
         <div style={{ flex: '0 0 240px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
           名称
         </div>
-        <div style={{ flexGrow: 1, fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
+        <div style={{ flex: '0 0 320px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
           用户
         </div>
-        <div style={{ flex: '0 0 320px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }} />
-        <div style={{ flex: '0 0 144px' }} />
+        <div style={{ flexGrow: 1 }} />
       </div>
     )
   }
@@ -38,12 +31,28 @@ class DriveHeader extends React.PureComponent {
 
 @Radium
 class DriveRow extends React.PureComponent {
+  constructor(props) {
+    super(props)
+
+    this.rowTouchTap = (e) => {
+      e.preventDefault()  // important!
+      e.stopPropagation()
+
+      const type = e.type
+      const button = e.nativeEvent.button
+      if (type !== 'mouseup' || !(button === 0 || button === 2)) return
+
+      this.props.updateDetail(this.props.drive, this.props.users)
+
+      if (button === 2) {
+        this.props.showContextMenu(e.nativeEvent.clientX, e.nativeEvent.clientY)
+      }
+    }
+  }
+
 
   render() {
-    const drive = this.props.drive
-    const users = this.props.users
-    debug('drive,users', drive, users)
-
+    const { drive, users, navTo } = this.props
     return (
       <div
         style={{
@@ -52,6 +61,8 @@ class DriveRow extends React.PureComponent {
           alignItems: 'center',
           ':hover': { backgroundColor: '#F5F5F5' }
         }}
+        onTouchTap={this.rowTouchTap}
+        onDoubleClick={() => { navTo('public') }}
       >
         <div style={{ flex: '0 0 32px' }} />
         <div style={{ flex: '0 0 40px' }}>
@@ -63,8 +74,6 @@ class DriveRow extends React.PureComponent {
           { drive.writelist.map(uuid => users.find(u => u.uuid === uuid).username).join(', ') }
         </div>
         <div style={{ flexGrow: 1 }} />
-        <div style={{ flex: '0 0 72px' }} />
-        <div style={{ flex: '0 0 144px' }} />
       </div>
     )
   }
@@ -78,24 +87,14 @@ class AdminDrives extends React.Component {
       modifyDrive: false
     }
 
-    this.ssb = this.setState.bind(this)
-
     this.onCloseDialog = () => {
-      debug('this.onCloseDialog')
       this.setState({ newDrive: false })
     }
-
-    this.refreshDrives = this.navEnter.bind(this)
-  }
-
-  navEnter() {
-    this.ctx.props.apis.request('adminUsers')
-    this.ctx.props.apis.request('adminDrives')
   }
 
   render() {
-    const { users, drives, apis, refreshDrives } = this.props
-    // debug('users,drives', drives, users)
+    const { users, drives, apis, refreshDrives, updateDetail, navTo, showContextMenu, openSnackBar } = this.props
+    debug('AdminDrivesAdminDrivesAdminDrives', this.props)
     if (!users || !drives) return <div />
 
     return (
@@ -115,7 +114,14 @@ class AdminDrives extends React.Component {
           <Divider style={{ marginLeft: 104 }} />
           {
             drives && users && drives.map(drive =>
-              [<DriveRow drive={drive} users={users} setState={this.ssb} />, <Divider style={{ marginLeft: 104 }} />]
+              [<DriveRow
+                drive={drive}
+                users={users}
+                updateDetail={updateDetail}
+                navTo={navTo}
+                showContextMenu={showContextMenu}
+              />,
+                <Divider style={{ marginLeft: 104 }} />]
             )
           }
         </div>
@@ -129,6 +135,7 @@ class AdminDrives extends React.Component {
                   users={users}
                   drives={drives}
                   refreshDrives={refreshDrives}
+                  openSnackBar={openSnackBar}
                 />
               }
             </DialogOverlay>

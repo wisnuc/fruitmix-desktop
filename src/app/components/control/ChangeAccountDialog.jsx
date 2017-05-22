@@ -25,7 +25,6 @@ class ChangeAccountDialog extends React.PureComponent {
       passwordErrorText: '',
       passwordAgainErrorText: '',
 
-      message: ''
     }
 
     this.fire = () => {
@@ -38,6 +37,10 @@ class ChangeAccountDialog extends React.PureComponent {
           if (!err) {
             this.props.onRequestClose(true)
             this.props.refreshUsers()
+            debug('adminCreateUser', this.props)
+            this.props.openSnackBar('创建成功')
+          } else {
+            this.props.openSnackBar(`创建失败：${err.message}`)
           }
         })
       } else {
@@ -49,10 +52,11 @@ class ChangeAccountDialog extends React.PureComponent {
         apis.request('updateAccount', args, (err) => {
           if (err) {
             debug('err', args, err, err.message)
-            this.setState({ message: `修改失败：${err.message}` })
+            this.props.openSnackBar(`修改失败：${err.message}`)
           } else {
             this.props.onRequestClose(true)
             this.props.refresh()
+            this.props.openSnackBar('修改成功')
           }
         })
       }
@@ -64,7 +68,8 @@ class ChangeAccountDialog extends React.PureComponent {
       if (this.state.username.length === 0) {
         this.setState({ usernameErrorText: '用户名不能为空' })
       } else if (!this.props.apis.login || !this.props.apis.login.data) {
-        this.setState({ message: '服务器连接错误', usernameErrorText: '' })
+        this.setState({ usernameErrorText: '' })
+        this.props.openSnackBar('服务器连接错误')
       } else if (this.props.apis.login.data.every(u => u.username !== this.state.username)) {
         this.setState({ usernameErrorText: '' })
       } else {
@@ -104,17 +109,16 @@ class ChangeAccountDialog extends React.PureComponent {
 
   inputOK() {
     if (this.props.op === 'username') {
-      return this.state.username.length > 0 && !this.state.usernameErrorText && !this.state.message
+      return this.state.username.length > 0 && !this.state.usernameErrorText
     }
     if (this.props.op === 'password') {
-      return this.state.password.length > 0 && this.state.password === this.state.passwordAgain && !this.state.message
+      return this.state.password.length > 0 && this.state.password === this.state.passwordAgain
     }
     if (this.props.op === 'createUser') {
       return this.state.username.length > 0 &&
         !this.state.usernameErrorText &&
         this.state.password.length > 0 &&
-        this.state.password === this.state.passwordAgain &&
-        !this.state.message
+        this.state.password === this.state.passwordAgain
     }
     return false
   }
@@ -125,21 +129,9 @@ class ChangeAccountDialog extends React.PureComponent {
       <div style={{ width: 336, padding: '24px 24px 0px 24px' }}>
         {/* title */}
         <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-          { op === 'username' ? '修改用户名' : '修改密码' }
+          { op === 'username' ? '修改用户名' : op === 'createUser' ? '创建新用户' : '修改密码' }
         </div>
-
-        {/* error message */}
-        <div
-          style={{
-            height: 56,
-            display: 'flex',
-            alignItems: 'center',
-            fontSize: 16,
-            color: 'rgb(244, 67, 54)'
-          }}
-        >
-          { this.state.message }
-        </div>
+        <div style={{ height: 56 }} />
 
         {/* username */}
         {

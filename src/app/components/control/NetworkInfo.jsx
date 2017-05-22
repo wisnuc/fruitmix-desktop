@@ -28,16 +28,6 @@ class Ethernet extends React.Component {
     )
   }
 
-  renderDivider() {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', marginLeft: 80 }}>
-        <div style={{ height: 8 }} />
-        <hr style={{ marginRight: 80, backgroundColor: 'rgb(224, 224, 224)', border: 0, height: 1, width: 'calc(100% - 72px)' }} />
-        <div style={{ height: 8 }} />
-      </div>
-    )
-  }
-
   render() {
     const net = this.props.net
     if (!net) return <div />

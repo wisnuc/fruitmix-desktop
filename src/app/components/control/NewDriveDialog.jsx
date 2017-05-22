@@ -1,7 +1,6 @@
 import React, { PureComponent } from 'react'
 import Debug from 'debug'
 import { TextField, Checkbox, Divider } from 'material-ui'
-import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
 import FlatButton from '../common/FlatButton'
 
 const debug = Debug('component:control:NewDriveDialog')
@@ -15,8 +14,7 @@ class NewDriveDialog extends PureComponent {
       focusOnce: false,
       label: '',
       writelist: '',
-      errorText: '',
-      mode: ''
+      errorText: ''
     }
 
     this.fire = () => {
@@ -29,6 +27,10 @@ class NewDriveDialog extends PureComponent {
         if (!err) {
           this.props.onRequestClose()
           this.props.refreshDrives()
+          this.props.openSnackBar('创建成功')
+        } else {
+          debug('adminCreateDrive failed', err)
+          this.props.openSnackBar(`创建失败: ${err.message}`)
         }
       })
     }
@@ -40,6 +42,16 @@ class NewDriveDialog extends PureComponent {
       this.setState({ label: value, errorText: '文件名已存在' })
     } else {
       this.setState({ label: value, errorText: '' })
+    }
+  }
+
+  togglecheckAll() {
+    const users = this.props.users
+    if (this.state.writelist.length === users.length) {
+      this.setState({ writelist: [] })
+    } else {
+      const allUsers = users.map(user => user.uuid)
+      this.setState({ writelist: allUsers })
     }
   }
 
@@ -59,7 +71,7 @@ class NewDriveDialog extends PureComponent {
   render() {
     const users = this.props.users
     return (
-      <div style={{ width: 336, padding: '24px 24px 0px 24px' }}>
+      <div style={{ width: 336, padding: '24px 24px 0px 24px', zIndex: 2000 }}>
 
         <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>新建共享文件夹</div>
         <div style={{ height: 20 }} />
@@ -94,34 +106,23 @@ class NewDriveDialog extends PureComponent {
         >
           选择用户
         </div>
-        <RadioButtonGroup
-          name="usersToshare"
-          onChange={(e, value) => {
-            if (value === 'all') {
-              this.setState({ mode: value, writelist: this.props.users.map(user => user.uuid) })
-            } else {
-              this.setState({ mode: value, writelist: '' })
-            }
-          }}
-        >
-          <RadioButton
-            value="all"
+
+        <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key="all" >
+          <Checkbox
             label="所有人"
-            style={{ marginBottom: 16 }}
+            iconStyle={{ fill: this.state.writelist.length === users.length ? '#5E35B1' : 'rgba(0, 0, 0, 0.54)' }}
+            checked={this.state.writelist.length === users.length}
+            onCheck={() => this.togglecheckAll()}
           />
-          <RadioButton
-            value="custom"
-            label="自定义"
-            style={{ marginBottom: 8 }}
-          />
-        </RadioButtonGroup>
-        <div style={{ maxHeight: 40 * 8, overflow: 'auto', marginLeft: 42 }}>
+        </div>
+        <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
+        <div style={{ maxHeight: 40 * 8, overflow: 'auto' }}>
           {
             users.map(user =>
               <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.username} >
                 <Checkbox
-                  disabled={this.state.mode !== 'custom'}
                   label={user.username}
+                  iconStyle={{ fill: this.state.writelist.includes(user.uuid) ? '#5E35B1' : 'rgba(0, 0, 0, 0.54)' }}
                   checked={this.state.writelist.includes(user.uuid)}
                   onCheck={() => this.handleCheck(user.uuid)}
                 />
@@ -131,8 +132,8 @@ class NewDriveDialog extends PureComponent {
           <div style={{ height: 8 }} />
         </div>
 
+        {/* button */}
         <div style={{ height: 16 }} />
-
         <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
           <FlatButton
             label="取消" primary={this.props.primary} secondary={this.props.accent}
@@ -140,7 +141,7 @@ class NewDriveDialog extends PureComponent {
           />
           <FlatButton
             label="创建" primary={this.props.primary} secondary={this.props.accent}
-            disabled={this.state.label.length === 0 || this.state.errorText}
+            disabled={this.state.label.length === 0 || !!this.state.errorText}
             onTouchTap={this.fire}
           />
         </div>

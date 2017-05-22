@@ -2,6 +2,8 @@ import React from 'react'
 import Debug from 'debug'
 import { Avatar, Divider } from 'material-ui'
 import ActionDns from 'material-ui/svg-icons/action/dns'
+import CPU from 'material-ui/svg-icons/hardware/memory'
+import Memory from 'material-ui/svg-icons/device/sd-storage'
 import { header1Style, header2Style, header2StyleNotFirst, contentStyle } from './styles'
 
 const debug = Debug('component:control:deviceinfo')
@@ -77,7 +79,7 @@ class DeviceInfo extends React.PureComponent {
 
     const { cpuInfo, memInfo, ws215i, dmidecode, release, commit } = this.props.device
 
-    const cpuIcon = ActionDns
+    const cpuIcon = CPU
 
     const cpuTitles = [
       'CPU核心数',
@@ -97,7 +99,7 @@ class DeviceInfo extends React.PureComponent {
       '可用内存'
     ]
 
-    const menIcon = ActionDns
+    const menIcon = Memory
 
     const memValues = [
       '内存',
@@ -149,7 +151,7 @@ class DeviceInfo extends React.PureComponent {
     }
 
     return (
-      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'auto' }}>
         <div style={{ height: 16 }} />
         { ws215i && this.renderList(ws215iIcon, ws215iTitles, ws215iValues) }
         { ws215i && <this.renderDivider /> }
