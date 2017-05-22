@@ -33,6 +33,10 @@ class Public extends Base {
       contextMenuY: -1,
       contextMenuX: -1,
 
+      moveMenuOpen: false,
+      moveMenuX: -1,
+      moveMenuY: -1,
+
       createNewFolder: null,
       rename: null,
       inRoot: true
@@ -201,10 +205,15 @@ class Public extends Base {
 
   showContextMenu(clientX, clientY) {
     if (this.select.state.ctrl || this.select.state.shift) return
+    let containerDom = document.getElementById('content-container')
+    let maxLeft = containerDom.offsetLeft + containerDom.clientWidth - 240
+    let x = clientX > maxLeft? maxLeft: clientX
+    let maxTop = containerDom.offsetTop + containerDom.offsetHeight -192
+    let y = clientY > maxTop? maxTop: clientY
     this.setState({ 
       contextMenuOpen: true,
-      contextMenuX: clientX,
-      contextMenuY: clientY
+      contextMenuX: x,
+      contextMenuY: y
     }) 
   }
 
@@ -228,7 +237,7 @@ class Public extends Base {
     this.setState({ createNewFolder: true }) 
   } 
 
-  onRequestClose() {
+  closeCreateFolder() {
     let request = this.ctx.props.apis.request
     let path = this.state.path
     this.setState({ createNewFolder: false }) 
@@ -248,11 +257,14 @@ class Public extends Base {
 
     selected.forEach(item => {
       let obj = entries[item]
+      if(obj.type == 'public') obj.type = 'folder'
       if (obj.type == 'folder') folders.push(obj)
       else if (obj.type == 'file') files.push(obj)
     })
 
-    command('fileapp', 'DOWNLOAD', { folders, files, dirUUID: p[p.length - 1].uuid})
+    let args = { folders, files, dirUUID: p[p.length - 1].uuid}
+    console.log(args)
+    command('fileapp', 'DOWNLOAD', args)
   }
 
   delete() {
@@ -304,10 +316,10 @@ class Public extends Base {
           <MenuItem primaryText='新建文件夹' disabled={this.state.path.length>1?false:true} onTouchTap={this.createNewFolder.bind(this)} /> 
           <MenuItem primaryText='下载' onTouchTap={this.download.bind(this)} /> 
           <MenuItem primaryText='刪除' disabled={this.state.path.length>1?false:true} onTouchTap={this.delete.bind(this)} /> 
-          <MenuItem primaryText='重命名'onTouchTap={this.renameFolder.bind(this)} />
+          <MenuItem primaryText='重命名' disabled={this.state.path.length>1?false:true} onTouchTap={this.renameFolder.bind(this)} />
         </ContextMenu> 
 
-        <DialogOverlay open={!!this.state.createNewFolder} onRequestClose={this.onRequestClose.bind(this)}>
+        <DialogOverlay open={!!this.state.createNewFolder} onRequestClose={this.closeCreateFolder.bind(this)}>
           { this.state.createNewFolder && 
             <NewFolderDialog 
               apis={this.ctx.props.apis} 
