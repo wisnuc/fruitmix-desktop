@@ -80,8 +80,8 @@ class Home extends Base {
       contextMenuY: -1,
       contextMenuX: -1,
 
-      createNewFolder: null,
-      rename: null,
+      createNewFolder: false,
+      rename: false,
       move:false
 
     } 
@@ -426,6 +426,7 @@ class Home extends Base {
               path={this.state.path} 
               entries={this.state.entries}
               select={this.state.select}
+              type='home'
             />}
         </DialogOverlay>
 

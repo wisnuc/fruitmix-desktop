@@ -359,6 +359,12 @@
 	border: solid 1px rgba(0,0,0,.2);
 }
 
+.move-dialog-container svg {
+	width:16px!important;
+	height: 16px!important;
+	color:#777!important;
+}
+
 .move-dialog-header {
 	height: 48px;
 	background-color: #f1f1f1;
@@ -388,11 +394,6 @@
 	background: rgba(0,0,0,.12)
 }
 
-.move-title-icon>svg {
-	width:16px!important;
-	height: 16px!important;
-	color:#777!important;
-}
 
 .move-dialog-title {
 	margin-left:5px;
@@ -411,12 +412,112 @@
 	height:198px;
 	border-top:1px solid #e5e5e5;
 	border-bottom: 1px solid #e5e5e5;
-	display:flex;
-	flex-flow: column nowrap; 
-	justify-content: center;
 	cursor: default;
+	overflow-y: scroll;
+}
+
+.move-dialog-list::-webkit-scrollbar {
+	width: 14px;
+}
+
+.move-dialog-list::-webkit-scrollbar-track {
+	border:solid transparent;
+	border-width: 0 0 0 4px;
+	background-clip:padding-box;
+}
+
+.move-dialog-list::-webkit-scrollbar-thumb{
+	background-color: rgba(0,0,0,.2);
+	background-clip: padding-box;
+	border:solid transparent;
+	border-width: 1px 1px 1px 6px;
 }
 
 .move-operation {
 	height:61px;
 }
+
+.move-dialog-row {
+	height:36px;
+	line-height: 36px;
+	width:100%;
+	overflow: hidden;
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: center;
+}
+
+.move-dialog-row:hover {
+	background: rgb(241,241,241);
+}
+
+.move-dialog-row.row-selected {
+	background: #4d90fe
+}
+
+.move-dialog-row.disable {
+	opacity: .5
+}
+
+.move-dialog-row svg {
+	width:19px!important;
+	height:19px!important;
+}
+
+.move-dialog-row.row-selected svg {
+	color:white!important;
+	width:21px!important;
+	height:21px!important;	
+}
+
+.move-dialog-row>span {
+	height: 36px;
+	line-height: 36px;
+	font-size:13px;
+	align-items: center;
+}
+
+.move-dialog-row-type {
+	margin:0 18px 0 13px;
+	display: flex;
+}
+
+
+.move-dialog-row-text {
+	width: 150px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	margin-right:5px;
+}
+
+.move-dialog-row.row-selected .move-dialog-row-text {
+	color: white
+}
+
+
+.move-dialog-row-enter {
+	display: none;
+	width:23px;
+	height:25px!important;
+	line-height: 25px!important;
+	cursor: pointer;
+	justify-content: center;
+}
+
+.move-dialog-row-enter:hover {
+	background-color:rgba(0, 0, 0, .11);
+}
+
+.move-dialog-row:hover .move-dialog-row-enter {
+	display: flex;
+}
+
+.move-dialog-row.row-selected .move-dialog-row-enter {
+	display: flex;
+}
+
+.move-dialog-row.disable .move-dialog-row-enter {
+	display: none
+}
+
