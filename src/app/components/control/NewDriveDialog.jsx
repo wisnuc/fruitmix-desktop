@@ -11,7 +11,7 @@ class NewDriveDialog extends PureComponent {
     super(props)
 
     this.state = {
-      focusOnce: false,
+      focusOnce: true,
       label: '',
       writelist: '',
       errorText: ''
@@ -91,6 +91,12 @@ class NewDriveDialog extends PureComponent {
             onChange={e => this.updateLabel(e.target.value)}
             value={this.state.label}
             errorText={this.state.errorText}
+            ref={(input) => {
+              if (input && this.state.focusOnce) {
+                input.focus()
+                this.setState({ focusOnce: false })
+              }
+            }}
           />
         </div>
 
@@ -110,6 +116,7 @@ class NewDriveDialog extends PureComponent {
         <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key="all" >
           <Checkbox
             label="所有人"
+            labelStyle={{ fontSize: 14 }}
             iconStyle={{ fill: this.state.writelist.length === users.length ? '#5E35B1' : 'rgba(0, 0, 0, 0.54)' }}
             checked={this.state.writelist.length === users.length}
             onCheck={() => this.togglecheckAll()}
@@ -123,6 +130,7 @@ class NewDriveDialog extends PureComponent {
                 <Checkbox
                   label={user.username}
                   iconStyle={{ fill: this.state.writelist.includes(user.uuid) ? '#5E35B1' : 'rgba(0, 0, 0, 0.54)' }}
+                  labelStyle={{ fontSize: 14 }}
                   checked={this.state.writelist.includes(user.uuid)}
                   onCheck={() => this.handleCheck(user.uuid)}
                 />
@@ -134,7 +142,7 @@ class NewDriveDialog extends PureComponent {
 
         {/* button */}
         <div style={{ height: 16 }} />
-        <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+        <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
           <FlatButton
             label="取消" primary={this.props.primary} secondary={this.props.accent}
             onTouchTap={this.props.onRequestClose}

@@ -61,11 +61,12 @@ class AdminDrives extends Base {
   }
 
   update(detailDrive, detailUsers) {
-    // debug('detailDrive, detailUsers', detailDrive, detailUsers)
     this.setState({ detailDrive, detailUsers })
   }
 
   navEnter() {
+    this.ctx.props.apis.request('adminUsers')
+    this.ctx.props.apis.request('adminDrives')
   }
 
   navLeave() {
@@ -126,7 +127,7 @@ class AdminDrives extends Base {
 
   /** renderers **/
   renderContent({ navTo, toggleDetail, openSnackBar }) {
-    debug('renderContent openSnackBar', openSnackBar)
+    // debug('renderContent openSnackBar', openSnackBar)
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <AdminDriversApp

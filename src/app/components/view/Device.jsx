@@ -19,7 +19,7 @@ class Device extends Base {
   }
 
   willReceiveProps(nextProps) {
-    console.log('device nextProps', nextProps)
+    // console.log('device nextProps', nextProps)
     if (!nextProps.selectedDevice || !nextProps.selectedDevice.device) return
     const device = nextProps.selectedDevice.device
     if (device.isPending() || device.isRejected()) return
@@ -33,6 +33,7 @@ class Device extends Base {
   }
 
   navEnter() {
+    this.ctx.props.selectedDevice.request('device')
   }
 
   navLeave() {

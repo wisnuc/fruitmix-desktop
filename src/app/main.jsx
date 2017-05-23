@@ -16,27 +16,26 @@ import Device from './components/common/device'
 class Main extends React.Component {
 
   constructor() {
-
     super()
 
     this.selectedDevice = null
     this.user = null
 
     setTimeout(() => {
-      let mdns = window.store.getState().mdns
+      const mdns = window.store.getState().mdns
       if (mdns.length > 0) {
         this.selectDevice(mdns[0])
       }
     }, 3000)
 
-    this.state = { 
+    this.state = {
 
       view: 'login',
 
       selectedDevice: null,
 
       theme: getMuiTheme({
-        fontFamily: 'Noto Sans SC, sans-serif',
+        fontFamily: 'Roboto, Noto Sans SC, sans-serif',
         palette: { primary1Color: teal500, accent1Color: pinkA200 }
       }),
 
@@ -45,31 +44,29 @@ class Main extends React.Component {
       maintain: this.maintain.bind(this),
       selectDevice: this.selectDevice.bind(this),
       setPalette: this.setPalette.bind(this),
-      ipcRenderer: ipcRenderer
+      ipcRenderer
     }
   }
 
   setPalette(primary1Color, accent1Color) {
-
     console.log('main setPalette, primary, accent', primary1Color, accent1Color)
-    
+
     this.setState({
       theme: getMuiTheme({
-        fontFamily: 'Noto Sans SC, sans-serif',
-        palette: { 
-          primary1Color, 
-          accent1Color 
+        fontFamily: 'Roboto, Noto Sans SC, sans-serif',
+        palette: {
+          primary1Color,
+          accent1Color
         }
       })
     })
   }
 
-  selectDevice(mdev) { 
-
+  selectDevice(mdev) {
     // assert mdev must be in mdns list TODO
 
     if (this.selectedDevice) {
-      this.selectedDevice.abort() 
+      this.selectedDevice.abort()
       this.selectedDevice.removeAllListeners()
     }
 
@@ -79,8 +76,15 @@ class Main extends React.Component {
   }
 
   nav(view) {
-    this.setState({ view })
+    setTimeout(() => {
+      const mdns = window.store.getState().mdns
+      if (mdns.length > 0) {
+        this.selectDevice(mdns[0])
+      }
+    }, 3000)
+    this.setState({ view, selectedDevice: null })
   }
+
   maintain() {
     this.setState({ view: 'maintenance' })
   }
@@ -90,25 +94,24 @@ class Main extends React.Component {
   }
 
   render() {
-
     let view = null
 
     switch (this.state.view) {
-    case 'login':
-      view = <Login mdns={window.store.getState().mdns} {...this.state} />
-      break
+      case 'login':
+        view = <Login mdns={window.store.getState().mdns} {...this.state} />
+        break
 
-    case 'maintenance':
-      view = <Maintenance {...this.state } />
-      break
+      case 'maintenance':
+        view = <Maintenance {...this.state} />
+        break
 
-    case 'user':
-      view =  <Navigation {...this.state} />
-      break
+      case 'user':
+        view = <Navigation {...this.state} />
+        break
 
-    default:
-      break
-    } 
+      default:
+        break
+    }
 
     return (
       <MuiThemeProvider muiTheme={this.state.theme}>

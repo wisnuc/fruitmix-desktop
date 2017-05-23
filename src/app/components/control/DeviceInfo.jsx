@@ -1,10 +1,8 @@
 import React from 'react'
 import Debug from 'debug'
-import { Avatar, Divider } from 'material-ui'
 import ActionDns from 'material-ui/svg-icons/action/dns'
 import CPU from 'material-ui/svg-icons/hardware/memory'
 import Memory from 'material-ui/svg-icons/device/sd-storage'
-import { header1Style, header2Style, header2StyleNotFirst, contentStyle } from './styles'
 
 const debug = Debug('component:control:deviceinfo')
 
@@ -46,7 +44,7 @@ class DeviceInfo extends React.PureComponent {
       <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
         {
           titles.map((title, index) => (
-            <div style={{ height: 72, display: 'flex', alignItems: 'center', width: '100%' }} >
+            <div style={{ height: 72, display: 'flex', alignItems: 'center', width: '100%' }} key={title}>
               <div style={{ flex: '0 0 24px' }} />
               <div style={{ flex: '0 0 56px' }} >
                 { !index && <Icon color={this.props.primaryColor} /> }
