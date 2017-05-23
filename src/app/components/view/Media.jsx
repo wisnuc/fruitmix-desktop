@@ -319,7 +319,9 @@ class Media extends Base {
   renderToolBar({ style }) {
     return (
       <div style={style}>
-        <IconButton><AddAPhoto color="#FFF" /></IconButton>
+        {/*
+          <IconButton><AddAPhoto color="#FFF" /></IconButton>
+        */}
       </div>
     )
   }

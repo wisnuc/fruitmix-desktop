@@ -42,7 +42,7 @@ class Ethernet extends React.Component {
       <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
         {
           titles.map((title, index) => (
-            <div style={{ height: 72, display: 'flex', alignItems: 'center', width: '100%' }} >
+            <div style={{ height: 72, display: 'flex', alignItems: 'center', width: '100%' }} key={title}>
               <div style={{ flex: '0 0 24px' }} />
               <div style={{ flex: '0 0 56px' }} >
                 { !index && <Icon color={this.props.primaryColor} /> }
@@ -69,14 +69,12 @@ class Ethernet extends React.Component {
     }
     const data = net.os[NIC].find(item => item.family === 'IPv4')
 
-    const getAddress = () => {
-      return (
-        <div onTouchTap={this.setIp}>
-          {data.address}
-          <ModeEdit color={this.props.primaryColor} style={{ marginLeft: 8 }} viewBox="0 0 36 12" />
-        </div>
+    const getAddress = () => (
+      <div onTouchTap={this.setIp}>
+        {data.address}
+        <ModeEdit color={this.props.primaryColor} style={{ marginLeft: 8 }} viewBox="0 0 36 12" />
+      </div>
       )
-    }
 
     const Icon = ActionSettingsEthernet
 

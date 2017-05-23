@@ -332,7 +332,7 @@ class NavViews extends Component {
   }
 
   renderSnackBar() {
-    debug('renderSnackBar', this.state.snackBar)
+    // debug('renderSnackBar', this.state.snackBar)
     return (
       <Snackbar
         open={!!this.state.snackBar}

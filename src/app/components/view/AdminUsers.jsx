@@ -24,7 +24,7 @@ class AdminUsers extends Base {
     }
   }
 
-  refresh () {
+  refresh() {
     this.ctx.props.apis.request('adminUsers')
     this.ctx.props.apis.request('login')
   }

@@ -15,7 +15,7 @@ class Account extends Base {
   }
 
   willReceiveProps(nextProps) {
-    debug('account nextProps', nextProps)
+    // debug('account nextProps', nextProps)
     if (!nextProps.apis || !nextProps.apis.account) return
     const account = nextProps.apis.account
     if (account.isPending() || account.isRejected()) return
@@ -28,7 +28,7 @@ class Account extends Base {
     }
   }
 
-  refresh () {
+  refresh() {
     this.ctx.props.apis.request('account')
     this.ctx.props.apis.request('login')
   }

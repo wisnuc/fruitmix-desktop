@@ -55,6 +55,7 @@ class DriveRow extends React.PureComponent {
     const { drive, users, navTo } = this.props
     return (
       <div
+        key={drive.label}
         style={{
           height: 64,
           display: 'flex',
@@ -94,7 +95,7 @@ class AdminDrives extends React.Component {
 
   render() {
     const { users, drives, apis, refreshDrives, updateDetail, navTo, showContextMenu, openSnackBar } = this.props
-    debug('AdminDrivesAdminDrivesAdminDrives', this.props)
+    // debug('AdminDrivesAdminDrivesAdminDrives', this.props)
     if (!users || !drives) return <div />
 
     return (

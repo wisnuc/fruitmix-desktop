@@ -22,7 +22,7 @@ class AdminUsersApp extends React.Component {
 
   renderUserRow(user) {
     return (
-      <div style={{ height: 64, display: 'flex', alignItems: 'center' }}>
+      <div style={{ height: 64, display: 'flex', alignItems: 'center' }} key={user.uuid}>
         <div style={{ flex: '0 0 32px' }} />
         <div style={{ flex: '0 0 40px' }}>
           <Avatar>{user.username.slice(0, 1).toUpperCase()}</Avatar>
@@ -59,7 +59,7 @@ class AdminUsersApp extends React.Component {
           <div style={{ height: 8 }} />
           <Divider style={{ marginLeft: 104 }} />
           { users.reduce((acc, user) =>
-              [...acc, this.renderUserRow(user), <Divider style={{ marginLeft: 104 }} />],
+              [...acc, this.renderUserRow(user), <Divider style={{ marginLeft: 104 }} key={user.username} />],
               []) }
         </div>
         <DialogOverlay open={!!this.state.createNewUser} onRequestClose={this.onCloseDialog}>

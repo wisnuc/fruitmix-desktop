@@ -19,12 +19,10 @@ class ChangeAccountDialog extends React.PureComponent {
       username: '',
       usernameErrorText: '',
       usernameLengthHint: '0/16',
-
       password: '',
       passwordAgain: '',
       passwordErrorText: '',
-      passwordAgainErrorText: '',
-
+      passwordAgainErrorText: ''
     }
 
     this.fire = () => {

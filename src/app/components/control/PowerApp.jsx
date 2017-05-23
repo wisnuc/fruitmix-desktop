@@ -41,6 +41,18 @@ class Power extends React.Component {
       })
     }
 
+    this.handleStartProgress = (operation) => {
+      ipcRenderer.send('LOGIN_OFF')
+      setTimeout(() => {
+        this.boot(operation)
+        this.scanMdns()
+      }, 2000)
+      this.setState({
+        progressDialog: true,
+        open: false
+      })
+    }
+
     this.handleEndProgress = () => {
       this.setState({
         progressDialog: false,
@@ -112,24 +124,16 @@ class Power extends React.Component {
         break
     }
 
-    return [
-      <FlatButton label="取消" primary onTouchTap={this.handleClose} />,
-      <FlatButton
-        label="确定"
-        primary
-        onTouchTap={() => {
-          this.setState({
-            progressDialog: true,
-            open: false
-          })
-          ipcRenderer.send('LOGIN_OFF')
-          setTimeout(() => {
-            this.boot(operation)
-            this.scanMdns()
-          }, 2000)
-        }}
-      />
-    ]
+    return (
+      <div>
+        <FlatButton label="取消" primary onTouchTap={this.handleClose} />
+        <FlatButton
+          label="确定"
+          primary
+          onTouchTap={() => this.handleStartProgress(operation)}
+        />
+      </div>
+    )
   }
 
   renderDiaContent() {
@@ -191,7 +195,7 @@ class Power extends React.Component {
   render() {
     // debug('power', this.props)
     return (
-      <div style={{ paddingLeft: 24, paddingTop: 24 }}>
+      <div style={{ paddingLeft: 24, paddingTop: 32 }}>
         {/* poweroff and reboot */}
         <div style={{ display: 'flex', alignItems: 'center' }} >
           <div style={{ flex: '0 0 56px', height: 36 }} >
@@ -249,7 +253,7 @@ class Power extends React.Component {
         </div>
 
         {/* confirm dialog */}
-        <DialogOverlay open={this.state.open} onRequestClose={this.handleClose} >
+        <DialogOverlay open={this.state.open}>
           {
             this.state.open &&
             <div style={{ width: 336, padding: '24px 24px 0px 24px' }}>
