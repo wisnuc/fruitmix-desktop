@@ -9,6 +9,7 @@ import ListSelect from '../file/ListSelect2'
 import FileContent from '../file/FileContent'
 import NewFolderDialog from '../file/NewFolderDialog'
 import RenameDialog from '../file/RenameDialog'
+import MoveDialog from '../file/MoveDialog'
 import Base from './Base'
 import { command } from '../../lib/command'
 import ContextMenu from '../common/ContextMenu'
@@ -33,13 +34,10 @@ class Public extends Base {
       contextMenuY: -1,
       contextMenuX: -1,
 
-      moveMenuOpen: false,
-      moveMenuX: -1,
-      moveMenuY: -1,
-
-      createNewFolder: null,
-      rename: null,
-      inRoot: true
+      createNewFolder: false,
+      rename: false,
+      move:false,
+      inRoot: false
     } 
   }
 
@@ -51,7 +49,7 @@ class Public extends Base {
 
     if (this.state.inRoot) {
       console.log('在根目录')
-      let path = [{name:'共享文件夹', uuid:null}]
+      let path = [{name:'共享文件夹', uuid:null, type:'publicRoot'}]
       let entries = listNavDir.adminDrives.drives
 
       entries.forEach(item => item.name = item.label)
@@ -65,7 +63,7 @@ class Public extends Base {
 
     }else {
       console.log('不在根目录', listNavDir)
-      let path = [{name:'共享文件夹', uuid:null}].concat(listNavDir.driveListNavDir.path)
+      let path = [{type:'public',name:'共享文件夹', uuid:null}].concat(listNavDir.driveListNavDir.path)
       let entries = listNavDir.driveListNavDir.entries
       entries = [...entries].sort((a, b) => {
         if (a.type === 'folder' && b.type === 'file') return -1
@@ -233,6 +231,14 @@ class Public extends Base {
     this.setState({rename: false})
   }
 
+  openMove() {
+    this.setState({move: true})
+  }
+
+  closeMove() {
+    this.setState({move:false})
+  }
+
   createNewFolder() {
     this.setState({ createNewFolder: true }) 
   } 
@@ -317,6 +323,7 @@ class Public extends Base {
           <MenuItem primaryText='下载' onTouchTap={this.download.bind(this)} /> 
           <MenuItem primaryText='刪除' disabled={this.state.path.length>1?false:true} onTouchTap={this.delete.bind(this)} /> 
           <MenuItem primaryText='重命名' disabled={this.state.path.length>1?false:true} onTouchTap={this.renameFolder.bind(this)} />
+          <MenuItem primaryText='移动' disabled={this.state.path.length>1?false:true} onTouchTap={this.openMove.bind(this)} />
         </ContextMenu> 
 
         <DialogOverlay open={!!this.state.createNewFolder} onRequestClose={this.closeCreateFolder.bind(this)}>
@@ -329,7 +336,7 @@ class Public extends Base {
             /> }
         </DialogOverlay>
 
-        <DialogOverlay open={!!this.state.rename} onRequestClose={this.closeRename.bind(this)}>
+        <DialogOverlay open={this.state.rename} onRequestClose={this.closeRename.bind(this)}>
           { this.state.rename && 
             <RenameDialog 
               apis={this.ctx.props.apis} 
@@ -337,6 +344,16 @@ class Public extends Base {
               entries={this.state.entries}
               select={this.state.select}
             /> }
+        </DialogOverlay>
+
+        <DialogOverlay open={this.state.move} onRequestClose={this.closeMove.bind(this)}>
+          { this.state.move && <MoveDialog
+              apis={this.ctx.props.apis} 
+              path={this.state.path} 
+              entries={this.state.entries}
+              select={this.state.select}
+              type='public'
+            />}
         </DialogOverlay>
       </div>
 

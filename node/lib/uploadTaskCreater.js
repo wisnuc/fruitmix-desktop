@@ -461,7 +461,7 @@ const visitFolder = (abspath, position, worklist, manager, callback) => {
 }
 
 const visitServerFiles = async (uuid, name, type, position, callback) => {
-	console.log(name + '...' + type)
+	// console.log(name + '...' + type)
 	let obj = {name,type,children:[],uuid}
 	position.push(obj)
 	if (type === 'file') return callback(null)
@@ -488,10 +488,10 @@ const visitServerFiles = async (uuid, name, type, position, callback) => {
 	
 }
 
-const diffTree = (taskPosition, localPosition, manager ,callback) => {
-	if (taskPosition.name !== localPosition.name) return callback()
+const diffTree = (taskPosition, serverPosition, manager ,callback) => {
+	if (taskPosition.name !== serverPosition.name) return callback()
 	taskPosition.stateName = 'finish'
-	taskPosition.uuid = localPosition.uuid
+	taskPosition.uuid = serverPosition.uuid
 	manager.finishCount++
 	manager.completeSize += taskPosition.size?taskPosition.size:0
 	if(taskPosition.type === 'file') return callback()
@@ -502,9 +502,9 @@ const diffTree = (taskPosition, localPosition, manager ,callback) => {
 	let index = 0
 	let next = () => {
 		let currentObj = taskPosition.children[index]
-		let i = localPosition.children.findIndex(item => item.name == currentObj.name)
+		let i = serverPosition.children.findIndex(item => item.name == currentObj.name)
 		if (i !== -1) {
-			diffTree(currentObj, localPosition.children[i], manager, call)
+			diffTree(currentObj, serverPosition.children[i], manager, call)
 		}else {
 			call()
 		}
@@ -569,7 +569,7 @@ class FileUploadTask extends UploadTask{
 		this.sha = ''
 		this.parts = []
 		this.taskid = ''
-		this.segmentsize = size > 1024000000 ? Math.ceil(size/50) : partSize
+		this.segmentsize = size > 1024000000 ? Math.ceil(size/50) : this.size<partSize?this.size:partSize
 		this.failedTimes = 0
 	}
 
