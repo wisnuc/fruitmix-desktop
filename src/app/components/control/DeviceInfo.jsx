@@ -1,10 +1,8 @@
 import React from 'react'
 import Debug from 'debug'
-import { Avatar, Divider } from 'material-ui'
 import ActionDns from 'material-ui/svg-icons/action/dns'
 import CPU from 'material-ui/svg-icons/hardware/memory'
 import Memory from 'material-ui/svg-icons/device/sd-storage'
-import { header1Style, header2Style, header2StyleNotFirst, contentStyle } from './styles'
 
 const debug = Debug('component:control:deviceinfo')
 

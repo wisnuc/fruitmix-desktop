@@ -24,7 +24,20 @@ class Power extends React.Component {
     }
 
     this.boot = (op) => {
-      this.props.selectedDevice.request('power', { op })
+      this.props.selectedDevice.request('power', { op }, (err) => {
+        if (!err) {
+          this.scanMdns()
+          this.setState({
+            progressDialog: true,
+            open: false
+          })
+        } else {
+          this.props.openSnackBar(`操作失败：${err.message}`)
+          this.setState({
+            open: false
+          })
+        }
+      })
     }
 
     this.handleOpen = (CHOICE) => {
@@ -43,14 +56,7 @@ class Power extends React.Component {
 
     this.handleStartProgress = (operation) => {
       ipcRenderer.send('LOGIN_OFF')
-      setTimeout(() => {
-        this.boot(operation)
-        this.scanMdns()
-      }, 2000)
-      this.setState({
-        progressDialog: true,
-        open: false
-      })
+      setTimeout(() => this.boot(operation), 100)
     }
 
     this.handleEndProgress = () => {
