@@ -28,7 +28,10 @@ class Media extends Base {
 
   constructor(ctx) {
     super(ctx)
-    this.state = { media: null }
+    this.state = {
+      media: [],
+      preValue: []
+    }
 
     this.memoizeValue = { currentDigest: '', currentScrollTop: 0 }
 
@@ -230,12 +233,16 @@ class Media extends Base {
     const value = media.value()
 
     this.apis = nextProps.apis
-    /* sort photos by date */
-    value.sort((prev, next) => (parseDate(next[1].metadata.exifDateTime) - parseDate(prev[1].metadata.exifDateTime)) || (
-      parseInt(`0x${next[0]}`, 16) - parseInt(`0x${prev[0]}`, 16)))
 
-    if (value !== this.state.media) {
-      this.setState({ media: value })
+    if (value !== this.state.preValue) {
+      /* remove photos without metadata */
+      const filter = value.filter(item => !!item[1].metadata)
+
+      /* sort photos by date */
+      filter.sort((prev, next) => (parseDate(next[1].metadata.exifDateTime) - parseDate(prev[1].metadata.exifDateTime)) || (
+        parseInt(`0x${next[0]}`, 16) - parseInt(`0x${prev[0]}`, 16)))
+
+      this.setState({ preValue: value, media: filter })
     }
   }
 
