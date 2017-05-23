@@ -10,7 +10,6 @@ import FlatButton from '../common/FlatButton'
 const debug = Debug('component:control:ethernet')
 
 class Ethernet extends React.Component {
-
   constructor(props) {
     super(props)
     this.state = {
@@ -33,7 +32,7 @@ class Ethernet extends React.Component {
     }
 
     this.aliasRequest = () => {
-      debug('this.aliasRequest', this.state)
+      debug('this.aliasRequest', this.state, this.props)
       this.setState({ open: false })
     }
   }

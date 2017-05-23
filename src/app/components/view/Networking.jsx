@@ -52,11 +52,13 @@ class Ethernet extends Base {
   }
 
   /** renderers **/
-  renderContent() {
+  renderContent({ openSnackBar }) {
     return (
       <NetworkInfo
         net={this.state.net}
         primaryColor={this.groupPrimaryColor()}
+        apis={this.ctx.props.apis}
+        openSnackBar={openSnackBar}
       />
     )
   }

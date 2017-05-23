@@ -240,11 +240,10 @@ class Media extends Base {
   }
 
   navEnter() {
-    console.log('media enter')
+    this.ctx.props.apis.request('media')
   }
 
   navLeave() {
-    console.log('media leave')
   }
 
   navGroup() {

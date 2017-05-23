@@ -90,6 +90,26 @@ class Device extends RequestManager {
         .get(`http://${this.mdev.address}:3000/system/net`)
         break
 
+      case 'getIpaliasing':
+        r = request
+        .get(`http://${this.mdev.address}:3000/system/ipaliasing`)
+        break
+
+      case 'setIpaliasing':
+        r = request
+        .post(`http://${this.mdev.address}:3000/system/ipaliasing`)
+        .timeout(30000)
+        .send(args)
+        .set('Accept', 'application/json')
+        break
+
+      case 'delIpaliasing':
+        r = request
+        .del(`http://${this.mdev.address}:3000/system/ipaliasing`)
+        .send(args)
+        .set('Accept', 'application/json')
+        break
+
       case 'users':
         r = request
         .get(`http://${this.mdev.address}:3721/login`)
