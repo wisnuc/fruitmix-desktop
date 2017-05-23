@@ -49,7 +49,7 @@ class Public extends Base {
 
     if (this.state.inRoot) {
       console.log('在根目录')
-      let path = [{name:'共享文件夹', uuid:null}]
+      let path = [{name:'共享文件夹', uuid:null, type:'publicRoot'}]
       let entries = listNavDir.adminDrives.drives
 
       entries.forEach(item => item.name = item.label)

@@ -220,7 +220,7 @@ class Home extends Base {
   }
 
   closeCreateNewFolder(dirty) {
-    this.setState({ createNewFolder: null })
+    this.setState({ createNewFolder: false })
     if (dirty) 
       this.ctx.props.apis.request('listNavDir', {
         dirUUID: this.state.path[this.state.path.length - 1].uuid,

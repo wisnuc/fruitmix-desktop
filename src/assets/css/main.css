@@ -360,8 +360,8 @@
 }
 
 .move-dialog-container svg {
-	width:16px!important;
-	height: 16px!important;
+/*	width:16px!important;
+	height: 16px!important;*/
 	color:#777!important;
 }
 
@@ -392,6 +392,15 @@
 
 .move-title-icon:hover {
 	background: rgba(0,0,0,.12)
+}
+
+.move-title-icon.invisible:hover {
+	background: rgba(255,255,255,0);
+	cursor:default;
+}
+
+.move-title-icon.invisible svg {
+	display: none!important
 }
 
 
@@ -433,9 +442,54 @@
 	border-width: 1px 1px 1px 6px;
 }
 
+.move-dialog-loading {
+	margin: -20px auto 0;
+	position: relative;
+	top:50%;
+}
+
 .move-operation {
 	height:61px;
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: center;
 }
+
+.move-button {
+	height:32px;
+	line-height: 32px;
+	margin-left:17px;
+	text-align: center;
+	border-radius: 2px;
+	background: #4d90fe;
+	color:white;
+	font-size: 13px;
+	width:70px;
+	cursor: pointer;
+	border: 1px dotted transparent;
+	transition: all ease 0.218s
+}
+
+.move-button:hover {
+	box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2)
+}
+
+.move-button.long {
+	width:105px;
+}
+
+.move-button.disable {
+	background: white;
+	border: none;
+	cursor: default;
+	color:rgba(0,0,0,.26);
+}
+
+.move-button.disable:hover {
+	box-shadow: none
+}
+
+
 
 .move-dialog-row {
 	height:36px;
