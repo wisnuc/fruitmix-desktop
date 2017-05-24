@@ -1,28 +1,30 @@
 import React from 'react'
+import Debug from 'debug'
 import { Paper, FlatButton } from 'material-ui'
 import HardwareKeyboardArrowUp from 'material-ui/svg-icons/hardware/keyboard-arrow-up'
 import HardwareKeyboardArrowDown from 'material-ui/svg-icons/hardware/keyboard-arrow-down'
 
-import request from 'superagent'
+const debug = Debug('component:control:Fan')
 
 class Fan extends React.Component {
 
   constructor(props) {
     super(props)
+
     this.state = {
-      fanScale: null,
-      fanSpeed: null
+      fanScale: '',
+      fanSpeed: ''
     }
 
-    this.url = `http://${this.props.address}:${this.props.systemPort}/system/fan`
-    this.timer = null
-
     this.setFanScale = (fanScale) => {
-      request
-        .post(this.url)
-        .set('Accept', 'application/json')
-        .send({ fanScale })
-        .end((err, res) => console.log(err || !res.ok || res.body))
+      this.props.request('setFanScale', { fanScale }, (err) => {
+        if (!err) {
+          this.props.openSnackBar('调节成功')
+          this.setState({ fanScale })
+        } else {
+          this.props.openSnackBar(`调节失败: ${err.message}`)
+        }
+      })
     }
 
     this.increment = () => {
@@ -46,22 +48,19 @@ class Fan extends React.Component {
     }
   }
 
-  componentDidMount() {
-    this.timer = setInterval(() => request
-      .get(this.url)
-      .set('Accept', 'application/json')
-      .end((err, res) => {
-        if (err || !res.ok) return
-        if (this.timer) this.setState(res.body)
-      }), 1000)
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.timer)
-    this.timer = null
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.fan && (nextProps.fan !== this.props.fan)) {
+      this.setState({
+        fanScale: nextProps.fan.fanScale,
+        fanSpeed: nextProps.fan.fanSpeed
+      })
+    }
   }
 
   render() {
+    // debug('fan, this.props', this.props, this.state)
+    if (!this.props.fan) return <div />
+    const { fanScale, fanSpeed } = this.props.fan
     const titleStyle = {
       width: 240,
       height: 48,
@@ -86,23 +85,32 @@ class Fan extends React.Component {
     }
 
     return (
-      <div style={this.props.style}>
-
-        {/* left and right */}
+      <div style={{ width: '100%', height: '100%' }}>
         <div style={{ paddingLeft: 72, paddingTop: 48, display: 'flex' }}>
-
           <Paper style={{ padding: 0 }}>
             <div style={titleStyle}>马达动力</div>
             <div style={{ height: 48 }} />
             <div style={{ width: 240, height: 144, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
               <FlatButton
-                icon={<HardwareKeyboardArrowUp />} primary
+                primary
                 onTouchTap={this.increment}
+                icon={<HardwareKeyboardArrowUp />}
               />
-              <div style={{ fontSize: 34, margin: 8, color: 'rgba(0,0,0,0.54)', display: 'flex', justifyContent: 'center' }}>{this.state.fanScale}</div>
+              <div
+                style={{
+                  fontSize: 34,
+                  margin: 8,
+                  color: 'rgba(0,0,0,0.54)',
+                  display: 'flex',
+                  justifyContent: 'center'
+                }}
+              >
+                { this.state.fanScale ? this.state.fanScale : fanScale }
+              </div>
               <FlatButton
-                icon={<HardwareKeyboardArrowDown />} primary
+                primary
                 onTouchTap={this.decrement}
+                icon={<HardwareKeyboardArrowDown />}
               />
             </div>
             <div style={footerStyle}>
@@ -118,12 +126,13 @@ class Fan extends React.Component {
               style={{ width: 240,
                 height: 144,
                 fontSize: 45,
-                color: this.props.themeColor,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}
-            >{this.state.fanSpeed}</div>
+            >
+              { this.state.fanSpeed ? this.state.fanSpeed : fanSpeed }
+            </div>
             <div style={footerStyle}>单位: RPM</div>
           </Paper>
         </div>

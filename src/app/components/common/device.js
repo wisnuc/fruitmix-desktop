@@ -90,7 +90,20 @@ class Device extends RequestManager {
         .get(`http://${this.mdev.address}:3000/system/net`)
         break
 
-      case 'getIpaliasing':
+      case 'fan':
+        r = request
+        .get(`http://${this.mdev.address}:3000/system/fan`)
+        break
+
+      case 'setFanScale':
+        r = request
+        .post(`http://${this.mdev.address}:3000/system/fan`)
+        .timeout(30000)
+        .send(args)
+        .set('Accept', 'application/json')
+        break
+
+      case 'ipaliasing':
         r = request
         .get(`http://${this.mdev.address}:3000/system/ipaliasing`)
         break
