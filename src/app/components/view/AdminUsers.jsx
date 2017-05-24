@@ -23,8 +23,10 @@ class AdminUsers extends Base {
       this.setState({ users: value })
     }
   }
-  refresh () {
+
+  refresh() {
     this.ctx.props.apis.request('adminUsers')
+    this.ctx.props.apis.request('login')
   }
 
   navEnter() {

@@ -15,7 +15,7 @@ class TimeDate extends React.Component {
       <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
         {
           titles.map((title, index) => (
-            <div style={{ height: 72, display: 'flex', alignItems: 'center', width: '100%' }} >
+            <div style={{ height: 72, display: 'flex', alignItems: 'center', width: '100%' }} key={title}>
               <div style={{ flex: '0 0 24px' }} />
               <div style={{ flex: '0 0 56px' }} >
                 { !index && <Icon color={this.props.primaryColor} /> }
@@ -34,7 +34,7 @@ class TimeDate extends React.Component {
 
   render() {
     const timedate = this.props.timedate
-    if (!timedate) return <CircularProgress />
+    if (!timedate) return <div />
 
     const Icon = DeviceAccessTime
 

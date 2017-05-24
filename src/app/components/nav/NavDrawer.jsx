@@ -79,23 +79,26 @@ class MenuItem extends Component {
 
 class NavDrawer extends React.Component {
 
-  renderGroup(group) {
+  renderGroup(group, ws215i) {
     const { views, nav, navTo } = this.props
 
     const primaryColor = views[nav].primaryColor()
 
     return Object.keys(views)
       .filter(key => views[key].navGroup() === group)
-      .map(key => (
-        <MenuItem
-          icon={views[key].menuIcon()}
-          text={views[key].menuName()}
-          dense
-          primaryColor={primaryColor}
-          selected={key === nav}
-          onTouchTap={() => navTo(key)}
-        />
-      ))
+      .map((key) => {
+        if (!ws215i && key === 'fanControl') return <div />
+        return (
+          <MenuItem
+            icon={views[key].menuIcon()}
+            text={views[key].menuName()}
+            dense
+            primaryColor={primaryColor}
+            selected={key === nav}
+            onTouchTap={() => navTo(key)}
+          />
+        )
+      })
   }
 
   render() {
@@ -110,11 +113,15 @@ class NavDrawer extends React.Component {
     let isAdmin = false
     if (account && account.isAdmin) isAdmin = true
 
+    let ws215i = false
+    const device = views.account.ctx.props.selectedDevice.device
+    if (device && device.data && device.data.ws215i) {
+      ws215i = true
+    }
+
     /*
     console.log('>>>>>>>>>>>>>>>>>>>')
     console.log(this.props)
-    console.log(views.account.ctx.props.apis.account.value())
-    console.log(views.account.ctx.props.selectedDevice.mdev.serial)
     console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<')
     */
 
@@ -169,7 +176,7 @@ class NavDrawer extends React.Component {
         */}
 
         { isAdmin && <SubHeader>管理</SubHeader> }
-        { isAdmin && this.renderGroup('settings') }
+        { isAdmin && this.renderGroup('settings', ws215i) }
 
         { isAdmin && <div style={{ height: 4 }} /> }
         { isAdmin && <Divider /> }

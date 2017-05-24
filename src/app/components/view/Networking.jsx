@@ -10,7 +10,7 @@ class Ethernet extends Base {
   }
 
   willReceiveProps(nextProps) {
-    console.log('Ethernet nextProps', nextProps)
+    // console.log('Ethernet nextProps', nextProps)
     if (!nextProps.selectedDevice || !nextProps.selectedDevice.net) return
 
     const net = nextProps.selectedDevice.net
@@ -52,11 +52,13 @@ class Ethernet extends Base {
   }
 
   /** renderers **/
-  renderContent() {
+  renderContent({ openSnackBar }) {
     return (
       <NetworkInfo
         net={this.state.net}
         primaryColor={this.groupPrimaryColor()}
+        apis={this.ctx.props.apis}
+        openSnackBar={openSnackBar}
       />
     )
   }
