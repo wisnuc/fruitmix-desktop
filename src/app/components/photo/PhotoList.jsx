@@ -95,7 +95,7 @@ class PhotoList extends React.Component {
       if (top < timelineMargin) top = timelineMargin
       if (top > this.height - timelineMargin) top = this.height - timelineMargin
 
-      if (this.onMouseDown || ((x > this.width - 24 && y > headerHeight) && this.hover)) {
+      if (this.onMouseDown || ((x > this.width - 96 && y > headerHeight) && this.hover)) {
         // debug('this.onMouseMove')
         /* showTimeline and clear setTimeout */
         this.showDateBar(true)

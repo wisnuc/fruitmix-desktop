@@ -20,7 +20,7 @@ class DriveHeader extends React.PureComponent {
         <div style={{ flex: '0 0 240px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
           名称
         </div>
-        <div style={{ flex: '0 0 320px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
+        <div style={{ flex: '0 0 540px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
           用户
         </div>
         <div style={{ flexGrow: 1 }} />
@@ -55,6 +55,7 @@ class DriveRow extends React.PureComponent {
     const { drive, users, navTo } = this.props
     return (
       <div
+        key={drive.label}
         style={{
           height: 64,
           display: 'flex',
@@ -70,7 +71,7 @@ class DriveRow extends React.PureComponent {
         </div>
         <div style={{ flex: '0 0 32px' }} />
         <div style={{ flex: '0 0 240px', fontSize: 16, color: 'rgba(0,0,0,0.87)' }}>{drive.label}</div>
-        <div style={{ flex: '0 0 320px', fontSize: 16, color: 'rgba(0,0,0,0.54)' }} >
+        <div style={{ flex: '0 0 540px', fontSize: 16, color: 'rgba(0,0,0,0.54)' }} >
           { drive.writelist.map(uuid => users.find(u => u.uuid === uuid).username).join(', ') }
         </div>
         <div style={{ flexGrow: 1 }} />
@@ -94,7 +95,7 @@ class AdminDrives extends React.Component {
 
   render() {
     const { users, drives, apis, refreshDrives, updateDetail, navTo, showContextMenu, openSnackBar } = this.props
-    debug('AdminDrivesAdminDrivesAdminDrives', this.props)
+    // debug('AdminDrivesAdminDrivesAdminDrives', this.props)
     if (!users || !drives) return <div />
 
     return (

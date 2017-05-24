@@ -5,6 +5,7 @@ import CommunicationVpnKey from 'material-ui/svg-icons/communication/vpn-key'
 import SocialPerson from 'material-ui/svg-icons/social/person'
 import FlatButton from '../common/FlatButton'
 import IconBox from '../common/IconBox'
+import { validateUsername, validatePassword } from '../common/validate'
 
 const debug = Debug('component:control:Account')
 
@@ -14,17 +15,16 @@ class ChangeAccountDialog extends React.PureComponent {
     super(props)
     this.state = {
       maxLength: 16,
+      maxLengthPassword: 30,
       focusFirst: true,
       fullLength: false,
       username: '',
       usernameErrorText: '',
       usernameLengthHint: '0/16',
-
       password: '',
       passwordAgain: '',
       passwordErrorText: '',
-      passwordAgainErrorText: '',
-
+      passwordAgainErrorText: ''
     }
 
     this.fire = () => {
@@ -67,6 +67,8 @@ class ChangeAccountDialog extends React.PureComponent {
     this.setState({ username: text }, () => {
       if (this.state.username.length === 0) {
         this.setState({ usernameErrorText: '用户名不能为空' })
+      } else if (!validateUsername(text)) {
+        this.setState({ usernameErrorText: '用户名不合法' })
       } else if (!this.props.apis.login || !this.props.apis.login.data) {
         this.setState({ usernameErrorText: '' })
         this.props.openSnackBar('服务器连接错误')
@@ -86,8 +88,19 @@ class ChangeAccountDialog extends React.PureComponent {
 
   updatePassword(text) {
     this.setState({ password: text }, () => {
-      if (this.state.password.length === 0) {
+      if (this.state.password.length === 0 && this.state.passwordAgain.length === 0) {
+        this.setState({ passwordErrorText: '密码不能为空', passwordAgainErrorText: '' })
+      } else if (this.state.password.length === 0) {
         this.setState({ passwordErrorText: '密码不能为空' })
+      } else if (!validatePassword(text)) {
+        this.setState({ passwordErrorText: '密码不合法' })
+      } else if (this.state.password.length > 30) {
+        this.setState({ passwordErrorText: '密码不能超过30位' })
+      } else if (this.state.passwordAgain.length >= this.state.password.length &&
+        this.state.passwordAgain !== this.state.password) {
+        this.setState({ passwordAgainErrorText: '两次密码不一致', passwordErrorText: '' })
+      } else if (this.state.passwordAgain === this.state.password) {
+        this.setState({ passwordAgainErrorText: '' })
       } else {
         this.setState({ passwordErrorText: '' })
       }
@@ -108,6 +121,9 @@ class ChangeAccountDialog extends React.PureComponent {
   }
 
   inputOK() {
+    if (this.state.usernameErrorText || this.state.passwordAgainErrorText || this.state.passwordErrorText) {
+      return false
+    }
     if (this.props.op === 'username') {
       return this.state.username.length > 0 && !this.state.usernameErrorText
     }
@@ -116,7 +132,6 @@ class ChangeAccountDialog extends React.PureComponent {
     }
     if (this.props.op === 'createUser') {
       return this.state.username.length > 0 &&
-        !this.state.usernameErrorText &&
         this.state.password.length > 0 &&
         this.state.password === this.state.passwordAgain
     }
@@ -155,6 +170,7 @@ class ChangeAccountDialog extends React.PureComponent {
                 maxLength={this.state.maxLength}
                 errorText={this.state.usernameErrorText}
                 onChange={e => this.updateUsername(e.target.value)}
+                onBlur={e => this.updateUsername(e.target.value)}
                 ref={(input) => {
                   if (input && this.state.focusFirst) {
                     input.focus()
@@ -175,7 +191,6 @@ class ChangeAccountDialog extends React.PureComponent {
                   style={{ flexGrow: 1 }}
                   fullWidth
                   hintText="输入新密码"
-                  maxLength={this.state.maxLength}
                   type="password"
                   errorText={this.state.passwordErrorText}
                   onChange={e => this.updatePassword(e.target.value)}
@@ -192,7 +207,6 @@ class ChangeAccountDialog extends React.PureComponent {
                 <TextField
                   fullWidth
                   hintText="再次输入密码"
-                  maxLength={this.state.maxLength}
                   type="password"
                   errorText={this.state.passwordAgainErrorText}
                   onChange={e => this.updatePasswordAgain(e.target.value, 'onChange')}
@@ -203,7 +217,7 @@ class ChangeAccountDialog extends React.PureComponent {
         }
         <div style={{ height: 24 }} />
         {/* button */}
-        <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+        <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
           <FlatButton label="取消" onTouchTap={this.props.onRequestClose} primary />
           <FlatButton label="确认" disabled={!this.inputOK()} onTouchTap={this.fire} primary />
         </div>

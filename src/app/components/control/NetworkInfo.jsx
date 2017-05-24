@@ -1,17 +1,48 @@
 import React from 'react'
 import Debug from 'debug'
+import validator from 'validator'
+import { TextField } from 'material-ui'
 import ActionSettingsEthernet from 'material-ui/svg-icons/action/settings-ethernet'
+import ModeEdit from 'material-ui/svg-icons/editor/mode-edit'
+import DialogOverlay from '../common/DialogOverlay'
+import FlatButton from '../common/FlatButton'
 
 const debug = Debug('component:control:ethernet')
 
 class Ethernet extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      open: false,
+      alias: '',
+      focusFirst: true
+    }
+    this.setIp = () => {
+      this.setState({ open: true })
+    }
+    this.onCloseDialog = () => {
+      this.setState({ open: false })
+    }
+
+    this.validateAlias = () => {
+      if (this.state && this.state.alias && typeof this.state.alias === 'string' && validator.isIP(this.state.alias, 4)) {
+        return true
+      }
+      return false
+    }
+
+    this.aliasRequest = () => {
+      debug('this.aliasRequest', this.state, this.props)
+      this.setState({ open: false })
+    }
+  }
 
   renderList(Icon, titles, values) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
         {
           titles.map((title, index) => (
-            <div style={{ height: 72, display: 'flex', alignItems: 'center', width: '100%' }} >
+            <div style={{ height: 72, display: 'flex', alignItems: 'center', width: '100%' }} key={title}>
               <div style={{ flex: '0 0 24px' }} />
               <div style={{ flex: '0 0 56px' }} >
                 { !index && <Icon color={this.props.primaryColor} /> }
@@ -38,6 +69,13 @@ class Ethernet extends React.Component {
     }
     const data = net.os[NIC].find(item => item.family === 'IPv4')
 
+    const getAddress = () => (
+      <div onTouchTap={this.setIp}>
+        {data.address}
+        <ModeEdit color={this.props.primaryColor} style={{ marginLeft: 8 }} viewBox="0 0 36 12" />
+      </div>
+      )
+
     const Icon = ActionSettingsEthernet
 
     const Titles = [
@@ -51,7 +89,7 @@ class Ethernet extends React.Component {
     const Values = [
       NIC,
       data.family,
-      data.address,
+      getAddress(),
       data.netmask,
       data.mac.toUpperCase()
     ]
@@ -61,6 +99,40 @@ class Ethernet extends React.Component {
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <div style={{ height: 16 }} />
         { this.renderList(Icon, Titles, Values) }
+
+        {/* dialog */}
+        <DialogOverlay open={this.state.open}>
+          {
+            this.state.open &&
+            <div style={{ width: 336, padding: '24px 24px 0px 24px' }}>
+              {/* title */}
+              <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
+                { '设置固定IP' }
+              </div>
+              <div style={{ height: 56 }} />
+              <div style={{ height: 56, display: 'flex', marginBottom: 10, position: 'relative' }}>
+                <TextField
+                  fullWidth
+                  hintText={data.address}
+                  onChange={e => this.setState({ alias: e.target.value })}
+                  ref={(input) => {
+                    if (input && this.state.focusFirst) {
+                      input.focus()
+                      this.setState({ focusFirst: false })
+                    }
+                  }}
+                />
+              </div>
+
+              {/* button */}
+              <div style={{ height: 24 }} />
+              <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                <FlatButton label="取消" onTouchTap={this.onCloseDialog} primary />
+                <FlatButton label="确认" disabled={!this.validateAlias()} onTouchTap={this.aliasRequest} primary />
+              </div>
+            </div>
+          }
+        </DialogOverlay>
       </div>
     )
   }

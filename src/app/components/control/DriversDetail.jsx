@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react'
 import Debug from 'debug'
+import sanitize from 'sanitize-filename'
 import { TextField, Checkbox, Divider } from 'material-ui'
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
 import ModeEdit from 'material-ui/svg-icons/editor/mode-edit'
@@ -13,7 +14,7 @@ class DrivesDetail extends PureComponent {
     super(props)
 
     this.state = {
-      label: '',
+      label: this.props.detailDrive.label,
       writelist: this.props.detailDrive.writelist,
       errorText: '',
       modify: false,
@@ -47,7 +48,7 @@ class DrivesDetail extends PureComponent {
     if (nextProps.detailDrive.uuid !== this.props.detailDrive.uuid) {
       this.currentLabel = nextProps.detailDrive.label
       this.setState({
-        label: '',
+        label: nextProps.detailDrive.label,
         modify: false,
         changed: false,
         writelist: nextProps.detailDrive.writelist
@@ -57,9 +58,12 @@ class DrivesDetail extends PureComponent {
 
   updateLabel(value) {
     const { drives, detailDrive } = this.props
+    const newValue = sanitize(value)
     if ((drives.findIndex(drive => (drive.label === value)) > -1) && (value !== detailDrive.label)) {
       // debug('updateLabel', this.props)
       this.setState({ label: value, errorText: '文件名已存在' })
+    } else if (value !== newValue) {
+      this.setState({ label: value, errorText: '文件名不合法' })
     } else {
       this.setState({ label: value, errorText: '' })
     }
@@ -91,39 +95,44 @@ class DrivesDetail extends PureComponent {
   }
 
   render() {
-    const { users, detailDrive, openSnackBar, primary } = this.props
+    const { users, detailDrive, primary } = this.props
     if (!users || !detailDrive) return <div />
     return (
-      <div>
+      <div style={{ height: '100%' }}>
         <div style={{ height: 128, backgroundColor: '#5E35B1' }}>
           <div style={{ height: 64 }} />
           {/* header */}
           <div
             style={{
               height: 64,
-              display: 'flex',
-              alignItems: 'center',
               marginLeft: 24
             }}
+            onMouseOver={() => this.setState({ titleHover: true })}
+            onMouseOut={() => this.setState({ titleHover: false })}
           >
+            <div style={{ height: 16 }} />
             {
               this.state.modify ?
-                <TextField
-                  name="shareDiskName"
-                  fullWidth
-                  onChange={e => this.updateLabel(e.target.value)}
-                  value={(this.state.label || this.state.modify) ? this.state.label : detailDrive.label}
-                  errorText={this.state.errorText}
-                  onBlur={() => this.setState({ modify: false, changed: true })}
-                  ref={(input) => { if (input && this.state.modify) { input.focus() } }}
-                  hintStyle={{ color: '#FAFAFA' }}
-                  inputStyle={{ fontSize: 20, fontWeight: 500, color: '#FAFAFA' }}
-                /> :
+                <div style={{ marginTop: -8 }}>
+                  <TextField
+                    name="shareDiskName"
+                    fullWidth
+                    onChange={e => this.updateLabel(e.target.value)}
+                    value={this.state.modify ? this.state.label : detailDrive.label}
+                    errorText={this.state.errorText}
+                    onBlur={() => this.setState({ modify: false, changed: true })}
+                    ref={(input) => { if (input && this.state.modify) { input.focus() } }}
+                    inputStyle={{ fontSize: 20, fontWeight: 500, color: '#FAFAFA' }}
+                    underlineFocusStyle={{ borderColor: '#FAFAFA' }}
+                    underlineStyle={{ borderColor: '#5E35B1' }}
+                    errorStyle={{ marginTop: 16 }}
+                  />
+                </div> :
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    height: 48,
+                    height: 32,
                     fontSize: 20,
                     fontWeight: 500,
                     color: '#FAFAFA'
@@ -134,37 +143,43 @@ class DrivesDetail extends PureComponent {
                   {/* <ModeEdit color="FAFAFA" style={{ marginLeft: 24 }} /> */}
                 </div>
             }
+            {
+              <Divider
+                color="rgba(0, 0, 0, 0.87)"
+                style={{ opacity: !this.state.modify && this.state.titleHover ? 1 : 0 }}
+              />
+            }
           </div>
         </div>
 
         {/* content */}
-        <div style={{ width: 312, padding: '24px 24px 0px 24px' }}>
+        <div style={{ width: 312, height: 'calc(100% - 152px)', padding: 24, display: 'flex', flexDirection: 'column' }}>
           {/* users */}
           <div
             style={{
-              height: 32,
               fontSize: 14,
               fontWeight: 500,
               color: 'rgba(0,0,0,0.54)',
-              display: 'flex',
-              alignItems: 'center'
+              marginTop: -2
             }}
           > 共享用户 </div>
           <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key="all" >
             <Checkbox
               label="所有人"
+              labelStyle={{ fontSize: 14 }}
               iconStyle={{ fill: this.state.writelist.length === users.length ? '#5E35B1' : 'rgba(0, 0, 0, 0.54)' }}
               checked={this.state.writelist.length === users.length}
               onCheck={() => this.togglecheckAll()}
             />
           </div>
-          <div style={{ maxHeight: 40 * 8, overflow: 'auto' }}>
-            <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
+          <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
+          <div style={{ overflow: 'auto', flexGrow: 1 }}>
             {
               users.map(user =>
                 <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.username} >
                   <Checkbox
                     label={user.username}
+                    labelStyle={{ fontSize: 14 }}
                     iconStyle={{ fill: this.state.writelist.includes(user.uuid) ? '#5E35B1' : 'rgba(0, 0, 0, 0.54)' }}
                     checked={this.state.writelist.includes(user.uuid)}
                     onCheck={() => this.handleCheck(user.uuid)}
@@ -175,8 +190,10 @@ class DrivesDetail extends PureComponent {
             <div style={{ height: 8 }} />
           </div>
 
+          <div style={{ height: 16 }} />
           {/* button */}
-          <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+          <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
+          <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
             {/*
             <FlatButton
               label="返回" primary={primary}
@@ -185,7 +202,7 @@ class DrivesDetail extends PureComponent {
             */}
             <FlatButton
               label="应用" primary={primary}
-              disabled={!this.state.changed || this.state.errorText || this.state.modify}
+              disabled={!this.state.changed || !!this.state.errorText || this.state.modify}
               onTouchTap={this.fire}
             />
           </div>

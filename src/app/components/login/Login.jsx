@@ -372,6 +372,9 @@ class Login extends React.Component {
         toggle: this.state.compact,
 
         device: selectedDevice.mdev,
+
+        ws215i: selectedDevice.device && selectedDevice.device.data && !!selectedDevice.device.data.ws215i,
+
         backgroundColor: colorArray[1],
 
         onNavPrev: (!selectedDevice || this.isFirst()) ? null : this.navPrevBound,

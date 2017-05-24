@@ -42,13 +42,14 @@ class Power extends Base {
   }
 
   /** renderers **/
-  renderContent() {
+  renderContent({ openSnackBar }) {
     return (
       <PowerApp
         apis={this.ctx.props.apis}
         nav={this.ctx.props.nav}
         selectedDevice={this.ctx.props.selectedDevice}
         primaryColor={this.groupPrimaryColor()}
+        openSnackBar={openSnackBar}
       />
     )
   }
