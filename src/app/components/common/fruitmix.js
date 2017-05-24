@@ -15,7 +15,9 @@ class Fruitmix extends EventEmitter {
     this.token = token
 
     this.state = {
+      address,
       userUUID,
+      token,
       request: this.request.bind(this),
     }
   }
