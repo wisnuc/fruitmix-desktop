@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react'
 import Debug from 'debug'
+import sanitize from 'sanitize-filename'
 import { TextField, Checkbox, Divider } from 'material-ui'
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
 import ModeEdit from 'material-ui/svg-icons/editor/mode-edit'
@@ -57,9 +58,12 @@ class DrivesDetail extends PureComponent {
 
   updateLabel(value) {
     const { drives, detailDrive } = this.props
+    const newValue = sanitize(value)
     if ((drives.findIndex(drive => (drive.label === value)) > -1) && (value !== detailDrive.label)) {
       // debug('updateLabel', this.props)
       this.setState({ label: value, errorText: '文件名已存在' })
+    } else if (value !== newValue) {
+      this.setState({ label: value, errorText: '文件名不合法' })
     } else {
       this.setState({ label: value, errorText: '' })
     }

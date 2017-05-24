@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
 import Debug from 'debug'
 import { TextField, Checkbox, Divider } from 'material-ui'
+import sanitize from 'sanitize-filename'
 import FlatButton from '../common/FlatButton'
 
 const debug = Debug('component:control:NewDriveDialog')
@@ -38,8 +39,11 @@ class NewDriveDialog extends PureComponent {
 
   updateLabel(value) {
     const drives = this.props.drives
+    const newValue = sanitize(value)
     if (drives.findIndex(drive => drive.label === value) > -1) {
       this.setState({ label: value, errorText: '文件名已存在' })
+    } else if (value !== newValue) {
+      this.setState({ label: value, errorText: '文件名不合法' })
     } else {
       this.setState({ label: value, errorText: '' })
     }
