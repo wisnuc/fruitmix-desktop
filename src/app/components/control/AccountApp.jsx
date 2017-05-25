@@ -1,15 +1,12 @@
 import React from 'react'
 import Debug from 'debug'
-import { Paper, Divider, Dialog, Menu, MenuItem, IconButton, TextField, Avatar } from 'material-ui'
+import { Divider, IconButton } from 'material-ui'
 import ActionAccountCircle from 'material-ui/svg-icons/action/account-circle'
-import Public from 'material-ui/svg-icons/social/public'
 import Username from 'material-ui/svg-icons/action/perm-identity'
 import Password from 'material-ui/svg-icons/action/lock-outline'
 import FlatButton from '../common/FlatButton'
-import Checkmark from '../common/Checkmark'
 import DialogOverlay from '../common/DialogOverlay'
 import ChangeAccountDialog from './ChangeAccountDialog'
-import { header1Style, header2Style, header2StyleNotFirst, contentStyle } from '../control/styles'
 
 const debug = Debug('component:control:device')
 
@@ -25,30 +22,6 @@ class AccountApp extends React.Component {
       this.setState({ openDialog: '' })
     }
   }
-
-  /*
-        <div style={{ display: 'flex', alignItems: 'center' }} >
-          <div style={{ flex: '0 0 80px' }} >
-
-          </div>
-          <div style={{ flex: '0 0 600px' }}>
-
-          </div>
-        </div>
-
-        avatar
-          <div style={{ flex: '0 0 80px' }} >
-            {
-                account.avatar ? <div /> :
-                <IconButton
-                  iconStyle={{ width: 48, height: 48, color: primaryColor }}
-                  style={{ width: 80, height: 80, padding: 16, marginLeft: -16 }}
-                >
-                  <ActionAccountCircle />
-                </IconButton>
-              }
-          </div>
-  */
 
   render() {
     // debug('this.props Account', this.props)
@@ -77,7 +50,7 @@ class AccountApp extends React.Component {
 
         {/* usertype */}
         <div style={{ flex: '0 0 560px' }}>
-          <div style={contentStyle} >
+          <div style={{ fontSize: 14, lineHeight: '26px', color: 'rgba(0, 0, 0, 0.87)' }} >
             {
               account.isAdmin && account.isFirstUser ?
                 '您是系统的第一个用户，是最高权限的系统管理员。' :
@@ -120,7 +93,7 @@ class AccountApp extends React.Component {
 
         <div style={{ height: 16 }} />
         <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
-        <div style={{ height: 16 }} />
+        <div style={{ height: 32 }} />
 
         {/* change password */}
         <div style={{ display: 'flex', alignItems: 'center' }} >

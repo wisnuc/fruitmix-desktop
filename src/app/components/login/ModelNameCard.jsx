@@ -30,13 +30,8 @@ class ModelNameCard extends React.Component{
 	model = props => {
 
 		let model = '个人计算机'
-		if (this.props.device.name) {
-			let split = this.props.device.name.split('-')
-			if (split.length === 3 && split[0] === 'wisnuc') {
-				if (split[1] === 'ws215i') {
-					model = 'WS215i'
-				}
-			}
+		if (this.props.ws215i) {
+      model = 'WS215i'
 		}
 
 		return model
@@ -46,13 +41,8 @@ class ModelNameCard extends React.Component{
 
 		let logoType = Computer
 
-		if (this.props.device.name) {
-			let split = this.props.device.name.split('-')
-			if (split.length === 3 && split[0] === 'wisnuc') {
-				if (split[1] === 'ws215i') {
-					logoType = Barcelona
-				}
-			}
+		if (this.props.ws215i) {
+      logoType = Barcelona
 		}
 
 		return logoType

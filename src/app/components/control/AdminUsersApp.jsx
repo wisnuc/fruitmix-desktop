@@ -22,7 +22,7 @@ class AdminUsersApp extends React.Component {
 
   renderUserRow(user) {
     return (
-      <div style={{ height: 64, display: 'flex', alignItems: 'center' }}>
+      <div style={{ height: 64, display: 'flex', alignItems: 'center' }} key={user.uuid}>
         <div style={{ flex: '0 0 32px' }} />
         <div style={{ flex: '0 0 40px' }}>
           <Avatar>{user.username.slice(0, 1).toUpperCase()}</Avatar>
@@ -46,7 +46,7 @@ class AdminUsersApp extends React.Component {
         >
           <SocialPersonAdd />
         </FloatingActionButton>
-        <div style={{ 'overflow-y': 'auto', height: '100%' }}>
+        <div style={{ overflow: 'auto', height: '100%' }}>
           <div style={{ height: 48, display: 'flex', alignItems: 'center' }}>
             <div style={{ flex: '0 0 104px' }} />
             <div style={{ flex: '0 0 240px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
@@ -59,7 +59,7 @@ class AdminUsersApp extends React.Component {
           <div style={{ height: 8 }} />
           <Divider style={{ marginLeft: 104 }} />
           { users.reduce((acc, user) =>
-              [...acc, this.renderUserRow(user), <Divider style={{ marginLeft: 104 }} />],
+              [...acc, this.renderUserRow(user), <Divider style={{ marginLeft: 104 }} key={user.username} />],
               []) }
         </div>
         <DialogOverlay open={!!this.state.createNewUser} onRequestClose={this.onCloseDialog}>

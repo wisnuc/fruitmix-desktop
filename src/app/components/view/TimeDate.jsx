@@ -9,8 +9,8 @@ class TimeDate extends Base {
     super(ctx)
   }
 
-  willReceiveProps(nextProps) { 
-    console.log('timedate nextProps', nextProps)
+  willReceiveProps(nextProps) {
+    // console.log('timedate nextProps', nextProps)
     if (!nextProps.selectedDevice || !nextProps.selectedDevice.timedate) return
 
     const timedate = nextProps.selectedDevice.timedate

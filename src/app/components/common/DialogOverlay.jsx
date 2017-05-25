@@ -50,7 +50,11 @@ class DialogOverlay extends PureComponent {
           : `all 195ms cubic-bezier(0.4, 0.0, 1, 1)`
       }}>
         <div style={{backgroundColor: 'white', boxShadow: dialogBoxShadow}}>
-          { !!this.props.children && React.cloneElement(this.props.children, {onRequestClose: this.onRequestClose}) }
+          { 
+            !!this.props.children && this.props.onRequestClose ?
+            React.cloneElement(this.props.children, { onRequestClose: this.onRequestClose }) :
+            React.cloneElement(this.props.children)
+          }
         </div>
         <div style={{height: '10%'}} />
       </div>
