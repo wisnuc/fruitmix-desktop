@@ -22,17 +22,18 @@ import Base from './Base'
 import FileContent from '../file/FileContent'
 import { command } from '../../lib/command'
 
+import FileDetail from '../file/FileDetail'
+
 @Radium
 class BreadCrumbItem extends React.PureComponent {
 
   render() {
-
-    let style = {
+    const style = {
       cursor: 'pointer',
       borderRadius: 2, // mimic a flat button
       height: 32,
-      paddingLeft: 8, 
-      paddingRight: 8, 
+      paddingLeft: 8,
+      paddingRight: 8,
       backgroundColor: 'rgba(255,255,255,0)',
       ':hover': {
         backgroundColor: 'rgba(255,255,255,0.14)' // value from material-component card example
@@ -45,7 +46,7 @@ class BreadCrumbItem extends React.PureComponent {
 
     return (
       <div style={style} onTouchTap={this.props.onTouchTap}>
-        { this.props.text }   
+        { this.props.text }
       </div>
     )
   }
@@ -55,7 +56,7 @@ class BreadCrumbSeparator extends React.PureComponent {
 
   render() {
     return (
-      <div style={{height:32, width:8, display:'flex', flexDirection:'column', alignItems:'center'}}>
+      <div style={{ height: 32, width: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         &rsaquo;
       </div>
     )
@@ -65,15 +66,14 @@ class BreadCrumbSeparator extends React.PureComponent {
 class Home extends Base {
 
   constructor(ctx) {
-
     super(ctx)
     this.select = new ListSelect(this)
     this.select.on('updated', next => this.setState({ select: next }))
-    this.state = { 
+    this.state = {
 
       select: this.select.state,
       listNavDir: null, // save a reference
-      path: [],         // 
+      path: [],         //
       entries: [],      // sorted
 
       contextMenuOpen: false,
@@ -82,25 +82,33 @@ class Home extends Base {
 
       createNewFolder: false,
       rename: false,
-      move:false
+      move: false,
 
-    } 
+      detailIndex: -1
+
+    }
 
     this.onListNavBySelect = this.listNavBySelect.bind(this)
     this.onShowContextMenu = this.showContextMenu.bind(this)
 
-    this.onRequestClose = dirty => {
+    this.onRequestClose = (dirty) => {
       this.setState({ createNewFolder: null })
-      if (dirty) 
+      if (dirty) {
         this.ctx.props.apis.request('listNavDir', {
           dirUUID: this.state.path[this.state.path.length - 1].uuid,
-          rootUUID: this.state.path[0].uuid,
+          rootUUID: this.state.path[0].uuid
         })
+      }
     }
+
+    this.updateDetailBound = this.updateDetail.bind(this)
+  }
+
+  updateDetail(index) {
+    this.setState({ detailIndex: index })
   }
 
   updateState(listNavDir) {
-
     if (listNavDir === this.state.listNavDir) return
 
     let { path, entries } = listNavDir
@@ -110,31 +118,28 @@ class Home extends Base {
       if (a.type === 'file' && b.type === 'folder') return 1
       return a.name.localeCompare(b.name)
     })
- 
-    let select = this.select.reset(entries.length) 
-    let state = { select, listNavDir, path, entries }
-    
+
+    const select = this.select.reset(entries.length)
+    const state = { select, listNavDir, path, entries }
+
     this.setState(state)
   }
 
-  willReceiveProps(nextProps) { 
-
+  willReceiveProps(nextProps) {
     if (!nextProps.apis || !nextProps.apis.listNavDir) return
-    let listNavDir = nextProps.apis.listNavDir
+    const listNavDir = nextProps.apis.listNavDir
     if (listNavDir.isPending() || listNavDir.isRejected()) return
     this.updateState(listNavDir.value())
   }
 
   navEnter() {
-
     if (!this.ctx.props.apis || !this.ctx.props.apis.listNavDir) return
-    let listNavDir = this.ctx.props.apis.listNavDir
+    const listNavDir = this.ctx.props.apis.listNavDir
     if (listNavDir.isPending() || listNavDir.isRejected()) return
     this.updateState(listNavDir.value())
   }
 
   navLeave() {
-    console.log('home leave')
   }
 
   navGroup() {
@@ -154,7 +159,7 @@ class Home extends Base {
   }
 
   quickIcon() {
-    return FileFolder 
+    return FileFolder
   }
 
   appBarStyle() {
@@ -173,18 +178,13 @@ class Home extends Base {
     return true
   }
 
-  detailWidth() {
-    return 400
-  }
-
   /** operations **/
 
   listNavBySelect() {
-
-    let selected = this.select.state.selected
+    const selected = this.select.state.selected
     if (selected.length !== 1) return
 
-    let entry = this.state.entries[selected[0]]
+    const entry = this.state.entries[selected[0]]
     if (entry.type !== 'folder') return
 
     this.ctx.props.apis.request('listNavDir', {
@@ -195,101 +195,101 @@ class Home extends Base {
 
   showContextMenu(clientX, clientY) {
     if (this.select.state.ctrl || this.select.state.shift) return
-    let containerDom = document.getElementById('content-container')
-    let maxLeft = containerDom.offsetLeft + containerDom.clientWidth - 240
-    let x = clientX > maxLeft? maxLeft: clientX
-    let maxTop = containerDom.offsetTop + containerDom.offsetHeight -192
-    let y = clientY > maxTop? maxTop: clientY
-    this.setState({ 
+    const containerDom = document.getElementById('content-container')
+    const maxLeft = containerDom.offsetLeft + containerDom.clientWidth - 240
+    const x = clientX > maxLeft ? maxLeft : clientX
+    const maxTop = containerDom.offsetTop + containerDom.offsetHeight - 192
+    const y = clientY > maxTop ? maxTop : clientY
+    this.setState({
       contextMenuOpen: true,
       contextMenuX: x,
       contextMenuY: y
-    }) 
+    })
   }
 
   hideContextMenu() {
-    this.setState({ 
-      contextMenuOpen: false,
+    this.setState({
+      contextMenuOpen: false
       // contextMenuX: -1,
       // contextMenuY: -1,
     })
   }
 
   openCreateNewFolder() {
-    this.setState({ createNewFolder: true }) 
+    this.setState({ createNewFolder: true })
   }
 
   closeCreateNewFolder(dirty) {
     this.setState({ createNewFolder: false })
-    if (dirty) 
+    if (dirty) {
       this.ctx.props.apis.request('listNavDir', {
         dirUUID: this.state.path[this.state.path.length - 1].uuid,
-        rootUUID: this.state.path[0].uuid,
+        rootUUID: this.state.path[0].uuid
       })
+    }
   }
-  
+
   openRenameFolder() {
-    this.setState({rename: true})
+    this.setState({ rename: true })
   }
 
   closeRename() {
-    this.setState({rename: false})
+    this.setState({ rename: false })
     this.refresh()
   }
 
   openMove() {
-    this.setState({move: true})
+    this.setState({ move: true })
   }
 
   closeMove() {
-    this.setState({move:false})
+    this.setState({ move: false })
   }
 
   openUploadDialog() {
-    let dirPath = this.state.path
-    let dirUUID = dirPath[dirPath.length - 1].uuid
+    const dirPath = this.state.path
+    const dirUUID = dirPath[dirPath.length - 1].uuid
     command('fileapp', 'UPLOAD', { dirUUID })
   }
 
   download() {
-    let entries = this.state.entries
-    let selected = this.state.select.selected
-    let p = this.state.path
-    let folders = []
-    let files = []
+    const entries = this.state.entries
+    const selected = this.state.select.selected
+    const p = this.state.path
+    const folders = []
+    const files = []
 
-    selected.forEach(item => {
-      let obj = entries[item]
-      if (obj.type == 'folder') folders.push(obj)
-      else if (obj.type == 'file') files.push(obj)
+    selected.forEach((item) => {
+      const obj = entries[item]
+      if (obj.type === 'folder') folders.push(obj)
+      else if (obj.type === 'file') files.push(obj)
     })
 
-    command('fileapp', 'DOWNLOAD', { folders, files, dirUUID: p[p.length - 1].uuid})
+    command('fileapp', 'DOWNLOAD', { folders, files, dirUUID: p[p.length - 1].uuid })
   }
 
   delete() {
-    console.log(this)
-    let entries = this.state.entries
-    let selected = this.state.select.selected
-    let count = selected.length
+    // console.log(this)
+    const entries = this.state.entries
+    const selected = this.state.select.selected
+    const count = selected.length
     let finishCount = 0
 
-    let p = this.state.path
-    let dirUUID = p[p.length - 1].uuid
+    const p = this.state.path
+    const dirUUID = p[p.length - 1].uuid
 
-    let loop = () => {
-      let nodeUUID = entries[selected[finishCount]].uuid
-      this.ctx.props.apis.request('deleteDirOrFile', {dirUUID, nodeUUID}, (err, data) => {
-        console.log(entries[selected[finishCount]].name + ' finish')
+    const loop = () => {
+      const nodeUUID = entries[selected[finishCount]].uuid
+      this.ctx.props.apis.request('deleteDirOrFile', { dirUUID, nodeUUID }, (err, data) => {
+        // console.log(`${entries[selected[finishCount]].name} finish`)
         if (err) console.log(err)
         finishCount++
-        console.log(finishCount, ' vs ', count, this.state.path[this.state.path.length - 1].uuid === dirUUID)
+        // console.log(finishCount, ' vs ', count, this.state.path[this.state.path.length - 1].uuid === dirUUID)
         if (finishCount === count) {
           if (this.state.path[this.state.path.length - 1].uuid === dirUUID) {
-            this.ctx.props.apis.request('listNavDir', {rootUUID: this.state.path[0].uuid, dirUUID})  
-          }else return
-          
-        }else loop()
+            this.ctx.props.apis.request('listNavDir', { rootUUID: this.state.path[0].uuid, dirUUID })
+          } else return
+        } else loop()
       })
     }
 
@@ -297,22 +297,21 @@ class Home extends Base {
   }
 
   upload(type) {
-    let dirPath = this.state.path
-    let dirUUID = dirPath[dirPath.length - 1].uuid
-    console.log(dirUUID, type)
-    command('fileapp', 'UPLOAD', {dirUUID, type})
+    const dirPath = this.state.path
+    const dirUUID = dirPath[dirPath.length - 1].uuid
+    // console.log(dirUUID, type)
+    command('fileapp', 'UPLOAD', { dirUUID, type })
   }
 
   refresh() {
-    let rUUID = this.state.path[0].uuid
-    this.ctx.props.apis.request('listNavDir', {rootUUID: rUUID, dirUUID:rUUID})
+    const rUUID = this.state.path[0].uuid
+    this.ctx.props.apis.request('listNavDir', { rootUUID: rUUID, dirUUID: rUUID })
   }
 
   /** renderers **/
 
   // breadcrumb
-  renderTitle({style}) {
-
+  renderTitle({ style }) {
     if (!this.state.listNavDir) return
 
     const path = this.state.path
@@ -320,37 +319,38 @@ class Home extends Base {
     // each one is preceded with a separator, except for the first one
     // each one is assigned an action, except for the last one
     return (
-      <div id='file-breadcrumbs' style={Object.assign({}, style, {marginLeft:'176px'})}>
+      <div id="file-breadcrumbs" style={Object.assign({}, style, { marginLeft: '176px' })}>
         { this.state.listNavDir.path.reduce((acc, node, index, arr) => {
-
           if (path.length > 4 && index > 0 && index < path.length - 3) {
             if (index === 1) {
-              acc.push(<BreadCrumbSeparator key={node.uuid + index}/>)
-              acc.push(<BreadCrumbItem text='...' key='...'/>)
+              acc.push(<BreadCrumbSeparator key={node.uuid + index} />)
+              acc.push(<BreadCrumbItem text="..." key="..." />)
             }
             return acc
           }
 
-          if (index !== 0) acc.push(<BreadCrumbSeparator key={node.uuid + index}/>)
+          if (index !== 0) acc.push(<BreadCrumbSeparator key={node.uuid + index} />)
 
           if (index === 0) { // the first one is always special
             acc.push(
-              <BreadCrumbItem text='我的文件' key={node.uuid}
+              <BreadCrumbItem
+                text="我的文件" key={node.uuid}
                 onTouchTap={() => this.ctx.props.apis.request('listNavDir', {
                   dirUUID: path[0].uuid,
-                  rootUUID: path[0].uuid,
+                  rootUUID: path[0].uuid
                 })}
               />
             )
           }
           // else if (index === arr.length - 1) {
           //   acc.push(<BreadCrumbItem text={node.name} />)
-          // } 
+          // }
           else {
-            acc.push(<BreadCrumbItem text={node.name} key={node.uuid}
+            acc.push(<BreadCrumbItem
+              text={node.name} key={node.uuid}
               onTouchTap={() => this.ctx.props.apis.request('listNavDir', {
                 dirUUID: node.uuid,
-                rootUUID:path[0].uuid
+                rootUUID: path[0].uuid
               })}
             />)
           }
@@ -360,61 +360,73 @@ class Home extends Base {
     )
   }
 
-  renderToolBar({style}) {
-
+  renderToolBar({ style }) {
     return (
       <div style={style}>
         <IconButton onTouchTap={this.openCreateNewFolder.bind(this)}>
-          <FileCreateNewFolder color='#FFF' />
+          <FileCreateNewFolder color="#FFF" />
         </IconButton>
       </div>
     )
   }
 
-  renderDetail({style}) {
+  renderDetail({ style }) {
+    return (
+      <div style={style}>
+        {
+          this.state.entries.length ?
+            <FileDetail
+              detailFile={this.state.entries[this.state.detailIndex]}
+              path={this.state.path}
+            /> :
+            <div style={{ height: 128, backgroundColor: '#00796B' }} />
+        }
+      </div>
+    )
   }
 
   renderContent() {
     return (
-      <div style={{position: 'relative', width: '100%', height: '100%'}}>
+      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
 
-        <FileUploadButton upload={this.upload.bind(this)}/>
+        <FileUploadButton upload={this.upload.bind(this)} />
 
-        <FileContent 
-          home={this.state} 
-          select={this.state.select} 
-          entries={this.state.entries} 
+        <FileContent
+          home={this.state}
+          select={this.state.select}
+          entries={this.state.entries}
           listNavBySelect={this.onListNavBySelect}
           showContextMenu={this.onShowContextMenu}
+          updateDetail={this.updateDetailBound}
         />
-        
-        <ContextMenu 
+
+        <ContextMenu
           open={this.state.contextMenuOpen}
           top={this.state.contextMenuY}
           left={this.state.contextMenuX}
           onRequestClose={() => this.hideContextMenu()}
         >
-          <MenuItem primaryText='新建文件夹' onTouchTap={this.openCreateNewFolder.bind(this)} /> 
-          <MenuItem primaryText='下载' onTouchTap={this.download.bind(this)} /> 
-          <MenuItem primaryText='刪除' onTouchTap={this.delete.bind(this)} /> 
-          <MenuItem primaryText='重命名'onTouchTap={this.openRenameFolder.bind(this)} />
-          <MenuItem primaryText='移动'onTouchTap={this.openMove.bind(this)} />
-        </ContextMenu> 
+          <MenuItem primaryText="新建文件夹" onTouchTap={this.openCreateNewFolder.bind(this)} />
+          <MenuItem primaryText="下载" onTouchTap={this.download.bind(this)} />
+          <MenuItem primaryText="刪除" onTouchTap={this.delete.bind(this)} />
+          <MenuItem primaryText="重命名" onTouchTap={this.openRenameFolder.bind(this)} />
+          <MenuItem primaryText="移动" onTouchTap={this.openMove.bind(this)} />
+        </ContextMenu>
 
         <DialogOverlay open={this.state.createNewFolder} onRequestClose={this.closeCreateNewFolder.bind(this)}>
-          { this.state.createNewFolder && 
-            <NewFolderDialog 
-              apis={this.ctx.props.apis} 
-              path={this.state.path} 
+          { this.state.createNewFolder &&
+            <NewFolderDialog
+              apis={this.ctx.props.apis}
+              path={this.state.path}
               entries={this.state.entries}
             /> }
         </DialogOverlay>
 
         <DialogOverlay open={this.state.rename} onRequestClose={this.closeRename.bind(this)}>
-          { this.state.rename && 
-            <RenameDialog 
-              apis={this.ctx.props.apis} 
-              path={this.state.path} 
+          { this.state.rename &&
+            <RenameDialog
+              apis={this.ctx.props.apis}
+              path={this.state.path}
               entries={this.state.entries}
               select={this.state.select}
             /> }
@@ -422,12 +434,12 @@ class Home extends Base {
 
         <DialogOverlay open={this.state.move} onRequestClose={this.closeMove.bind(this)}>
           { this.state.move && <MoveDialog
-              apis={this.ctx.props.apis} 
-              path={this.state.path} 
-              entries={this.state.entries}
-              select={this.state.select}
-              type='home'
-            />}
+            apis={this.ctx.props.apis}
+            path={this.state.path}
+            entries={this.state.entries}
+            select={this.state.select}
+            type="home"
+          />}
         </DialogOverlay>
 
       </div>

@@ -14,7 +14,7 @@ import Base from './Base'
 import { command } from '../../lib/command'
 import ContextMenu from '../common/ContextMenu'
 import FileUploadButton from '../file/FileUploadButton'
-
+import FileDetail from '../file/FileDetail'
 
 class Public extends Base {
 
@@ -37,8 +37,16 @@ class Public extends Base {
       createNewFolder: false,
       rename: false,
       move:false,
-      inRoot: false
+      inRoot: false,
+
+      detailIndex: -1
     } 
+
+    this.updateDetailBound = this.updateDetail.bind(this)
+  }
+
+  updateDetail(index) {
+    this.setState({ detailIndex: index })
   }
 
   updateState(listNavDir) {
@@ -327,6 +335,21 @@ class Public extends Base {
 
 
   /** renderers **/
+
+  renderDetail({ style }) {
+    return (
+      <div style={style}>
+        {
+          this.state.entries.length ?
+            <FileDetail
+              detailFile={this.state.entries[this.state.detailIndex]}
+              path={this.state.path}
+            /> :
+            <div style={{ height: 128, backgroundColor: '#00796B' }} />
+        }
+      </div>
+    )
+  }
   renderContent() {
     return (
       <div style={{position: 'relative', width: '100%', height: '100%'}}>
@@ -337,6 +360,7 @@ class Public extends Base {
           entries={this.state.entries}
           listNavBySelect={this.listNavBySelect.bind(this)}
           showContextMenu={this.showContextMenu.bind(this)}
+          updateDetail={this.updateDetailBound}
         />
 
         <ContextMenu 

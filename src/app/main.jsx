@@ -49,7 +49,7 @@ class Main extends React.Component {
   }
 
   setPalette(primary1Color, accent1Color) {
-    console.log('main setPalette, primary, accent', primary1Color, accent1Color)
+    // console.log('main setPalette, primary, accent', primary1Color, accent1Color)
 
     this.setState({
       theme: getMuiTheme({

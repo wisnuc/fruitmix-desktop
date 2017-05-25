@@ -104,7 +104,7 @@ class AdminDrives extends Base {
     return <div style={Object.assign({}, style, { marginLeft: 176 })}>共享文件夹</div>
   }
 
-  renderDetail({ style }, openSnackBar) {
+  renderDetail({ style, openSnackBar }) {
     return (
       <div style={style}>
         {

@@ -207,10 +207,10 @@ class Login extends React.Component {
   async doneAsync(view, device, user) {
 
     this.setState({ bye: true, dim: false, enter: 'bottom' })
-    await Promise.delay(300)
+    await Promise.delay(350)
 
     this.setState({ byebye: true })
-    await Promise.delay(300)
+    await Promise.delay(350)
 
     if (view === 'maintenance') 
       this.props.maintain()
