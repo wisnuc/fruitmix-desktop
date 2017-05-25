@@ -48,7 +48,6 @@ class Public extends Base {
      listNavDir.adminDrives === this.state.adminDrives) return
 
     if (this.state.inRoot) {
-      console.log('在根目录')
       let path = [{name:'共享文件夹', uuid:null, type:'publicRoot'}]
       let entries = listNavDir.adminDrives.drives
 
@@ -62,7 +61,6 @@ class Public extends Base {
       this.setState(state)
 
     }else {
-      console.log('不在根目录', listNavDir)
       let path = [{type:'public',name:'共享文件夹', uuid:null}].concat(listNavDir.driveListNavDir.path)
       let entries = listNavDir.driveListNavDir.entries
       entries = [...entries].sort((a, b) => {
