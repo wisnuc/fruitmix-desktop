@@ -274,7 +274,33 @@ class Public extends Base {
   }
 
   delete() {
+    console.log(this)
+    let entries = this.state.entries
+    let selected = this.state.select.selected
+    let count = selected.length
+    let finishCount = 0
 
+    let p = this.state.path
+    let dirUUID = p[p.length - 1].uuid
+
+    let loop = () => {
+      let nodeUUID = entries[selected[finishCount]].uuid
+      this.ctx.props.apis.request('deleteDirOrFile', {dirUUID, nodeUUID}, (err, data) => {
+        console.log(entries[selected[finishCount]].name + ' finish')
+        if (err) console.log(err)
+        finishCount++
+        console.log(finishCount, ' vs ', count, this.state.path[this.state.path.length - 1].uuid === dirUUID)
+        if (finishCount === count) {
+          if (this.state.path[this.state.path.length - 1].uuid === dirUUID) {
+            if (this.state.path.length == 1) {this.ctx.props.apis.request('adminDrives')}
+            this.ctx.props.apis.request('driveListNavDir', {rootUUID: this.state.path[1].uuid, dirUUID})
+          }else return
+          
+        }else loop()
+      })
+    }
+
+    loop()
   }
 
   upload(type) {

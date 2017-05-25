@@ -7,6 +7,8 @@ import FileFolder from 'material-ui/svg-icons/file/folder'
 
 import Base from './Base'
 
+import ListSelect from '../file/ListSelect2'
+
 class DriveHeader extends PureComponent {
 
   // 104, leading
@@ -68,6 +70,8 @@ class Physical extends Base {
 
   constructor(ctx) {
     super(ctx)
+    this.select = new ListSelect(this)
+    this.select.on('updated', next => this.setState({ select: next }))
     this.state = {}
   }
 
