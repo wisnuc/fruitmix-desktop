@@ -66,7 +66,7 @@ ipcRenderer.on('command', (e, {id, err, data}) => {
 
 ipcRenderer.on('CONFIG_LOADED', (event, config) => {
 
-  console.log('CONFIG_LOADED', config)
+  // console.log('CONFIG_LOADED', config)
 })
 
 // document.addEventListener('dragenter', (e) => {

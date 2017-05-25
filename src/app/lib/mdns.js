@@ -4,7 +4,7 @@ class MDNS {
 
   constructor(ipc, store) {
 
-    console.log('constructing mdns', ipc, store)
+    // console.log('constructing mdns', ipc, store)
 
     this.ipc = ipc
     this.store = store
@@ -16,7 +16,7 @@ class MDNS {
 
   handleUpdate(event, session, device) {
 
-    console.log('MDNS_UPDATE', session, device)
+    // console.log('MDNS_UPDATE', session, device)
 
     // discard out-dated session data
     if (this.session !== session) return
@@ -36,7 +36,7 @@ class MDNS {
 
     this.ipc.send('MDNS_SCAN', this.session)
 
-    console.log('start new mdns scan session ', this.session)
+    // console.log('start new mdns scan session ', this.session)
   }
 }
 

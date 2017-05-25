@@ -138,7 +138,7 @@ class NavViews extends Component {
   }
 
   updateTransmission(e, type, userTasks, finishTasks) {
-    console.log(e, userTasks, finishTasks)
+    // console.log(e, userTasks, finishTasks)
     window.store.dispatch({ type, userTasks, finishTasks })
   }
 
@@ -340,7 +340,7 @@ class NavViews extends Component {
       transition: sharpCurve('width')
     }
     /* {style}, function to close Detail page */
-    return view.renderDetail({ style }, this.openSnackBarBound)
+    return view.renderDetail({ style, openSnackBar: this.openSnackBarBound })
   }
 
   renderSnackBar() {
