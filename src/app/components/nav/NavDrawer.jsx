@@ -87,9 +87,10 @@ class NavDrawer extends React.Component {
     return Object.keys(views)
       .filter(key => views[key].navGroup() === group)
       .map((key) => {
-        if (!ws215i && key === 'fanControl') return <div />
+        if (!ws215i && key === 'fanControl') return <div key={key} />
         return (
           <MenuItem
+            key={key}
             icon={views[key].menuIcon()}
             text={views[key].menuName()}
             dense

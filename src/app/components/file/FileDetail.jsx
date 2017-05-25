@@ -112,7 +112,7 @@ class FileDetail extends PureComponent {
 
   render() {
     const { detailFile, path } = this.props
-    debug('detailFile', detailFile, path)
+    // debug('detailFile', detailFile, path)
     if (!detailFile) return <div style={{ height: 128, backgroundColor: '#00796B' }} />
     const Titles = [
       '类型',

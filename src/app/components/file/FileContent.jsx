@@ -67,7 +67,6 @@ class Row extends PureComponent {
       index,       // Index of row
       isScrolling, // The List is currently being scrolled
       isVisible,   // This row is visible within the List (eg it is not an overscanned row)
-      key,         // Unique key within array of rendered rows
       parent,      // Reference to the parent List (instance)
       style,       // Style object to be applied to row (to position it);
                    // This must be passed through to the rendered row element.
@@ -93,7 +92,7 @@ class Row extends PureComponent {
     let outerStyle = style
 
     return (
-      <div key={key} style={outerStyle}>
+      <div key={`${entry.name}+${index.toString()}`} style={outerStyle}>
         <div 
           style={innerStyle}
           onTouchTap={e => this.props.onRowTouchTap(e, index)}
