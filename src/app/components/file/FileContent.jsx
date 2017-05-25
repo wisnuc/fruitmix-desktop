@@ -113,7 +113,7 @@ class Row extends PureComponent {
           </div>
           */}
           <div style={{flex: '0 0 48px', display: 'flex', alignItems: 'center'}}>
-            { entry.type === 'folder' || entry.type === 'public'
+            { entry.type === 'folder' || entry.type === 'public' || entry.type === 'directory'
                 ? <FileFolder style={{color: 'rgba(0,0,0,0.54)'}} />
                 : entry.type === 'file'
                   ? <EditorInsertDriveFile style={{color: 'rgba(0,0,0,0.54'}} />

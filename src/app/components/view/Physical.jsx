@@ -6,7 +6,7 @@ import HardwareDeveloperBoard from 'material-ui/svg-icons/hardware/developer-boa
 import FileFolder from 'material-ui/svg-icons/file/folder'
 
 import Base from './Base'
-
+import FileContent from '../file/FileContent'
 import ListSelect from '../file/ListSelect2'
 
 class DriveHeader extends PureComponent {
@@ -41,13 +41,13 @@ class DriveHeader extends PureComponent {
 class FileSystemRow extends PureComponent {
 
   render() {
-
+    if (this.props.fileSystem.uuid) return null
     let fileSystem = this.props.fileSystem
 
     return (
       <div style={{height: 64, display: 'flex', alignItems: 'center',
         ':hover': { backgroundColor: '#F5F5F5' }
-      }}>
+      }} onDoubleClick={this.props.enter}>
         <div style={{flex: '0 0 32px'}} />
           <Avatar><FileFolder color='white' /></Avatar>
         <div style={{flex: '0 0 32px'}} />
@@ -70,16 +70,59 @@ class Physical extends Base {
 
   constructor(ctx) {
     super(ctx)
+    this.path = [{name:'物理磁盘', type: 'physical', uuid:'物理磁盘'}]
     this.select = new ListSelect(this)
     this.select.on('updated', next => this.setState({ select: next }))
-    this.state = {}
+    this.state = {
+      extDrives:null,
+      extListDir: null,
+      path: [],
+      entries:[],
+      inRoot: true,
+      contextMenuOpen: false,
+      contextMenuY: -1,
+      contextMenuX: -1,
+    }
   }
 
-  willReceiveProps(nextProps) { 
+  updateState(data) {
+    console.log('.........',data)
+    let {extDrives, extListDir} = data
+    if (extDrives === this.state.extDrives && data.extListDir === this.state.extListDir) return console.log('same props in Physical')
+    if (this.state.inRoot) {
+      console.log('在根目录')
+      let path = this.path
+      let entries = extDrives
+      let select = this.select.reset(entries.length)
+      this.setState({select, path, entries, extDrives, extListDir})
+    }else {
+      console.log('不在根目录')
+      let entries = extListDir
+      let select = this.select.reset(entries.length)
+      let path = this.path
+      this.setState({select, entries, extDrives, extListDir, path})
+    }
+  }
+
+  willReceiveProps(nextProps) {
+    console.log('receive props in Physical')
+    let apis = nextProps.apis
+    if (!apis || !apis.extDrives) return
+    if (apis.extDrives.isPending()) return
+    if (apis.extListDir && apis.extListDir.isPending()) return
+    let extListDir = nextProps.apis.extListDir && !apis.extListDir.isRejected()? nextProps.apis.extListDir.value():null
+    let extDrives = apis.extDrives.value()
+    extDrives.forEach(item => item.type = 'folder')
+    this.updateState({
+      extListDir: extListDir,
+      extDrives: extDrives
+    })
   }
 
   navEnter() {
     let apis = this.ctx.props.apis
+    this.path = [{name:'物理磁盘', type: 'physical', uuid:'物理磁盘'}]
+    this.setState({inRoot :true, entries :[]})
     apis.request('extDrives')
   }
 
@@ -124,7 +167,6 @@ class Physical extends Base {
 
   /** renderers **/
   renderContent() {
-
     let extDrives, apis = this.ctx.props.apis
     if (apis.extDrives.isFulfilled) extDrives = apis.extDrives.value()
 
@@ -133,15 +175,54 @@ class Physical extends Base {
 
         <div style={{height: 8}} />
 
-        <DriveHeader />
+        {this.state.path.length == 1 && <DriveHeader />}
         
         <div style={{height: 8}} />
 
-        <Divider style={{marginLeft: 104}} />
+         {this.state.path.length == 1 &&<Divider style={{marginLeft: 104}} />}
 
-        { extDrives && extDrives.map(fsys => <FileSystemRow fileSystem={fsys} />) }
+        { this.state.path.length == 1 && this.state.entries.map(fsys => <FileSystemRow fileSystem={fsys} enter={this.enter.bind(this, fsys)} />) }
+        { this.state.path.length > 1 && <FileContent 
+          home={this.state} 
+          select={this.state.select} 
+          entries={this.state.entries}
+          listNavBySelect={this.enter.bind(this)}
+        />
+        }
+
       </div>
     )
+  }
+
+  enter(fsy) {
+    if (!fsy) {
+      if (this.state.select.selected.length > 1) return
+      fsy = this.state.entries[this.state.select.selected[0]]
+    }
+    console.log(fsy, this.state)
+    if (fsy.type == 'file') return
+    let string = ''
+    let fileSystemIndex = this.state.path.findIndex(item => item.fileSystemUUID)
+    if (fileSystemIndex == -1) {
+      console.log('fileSystemIndex 没有找到 在根目录')
+      string += (fsy.fileSystemUUID + '/')
+    }else {
+      console.log('fileSystemIndex 找到 不在根目录', fileSystemIndex)
+      this.state.path.forEach((item, index) => {
+        console.log(item)
+        if (index < fileSystemIndex) {}
+        if (index == fileSystemIndex) string += (item.fileSystemUUID + '/')
+        if (index > fileSystemIndex) string += (item.name + '/')
+      })
+      string += (fsy.name + '/')
+    }
+      console.log(string)
+    let path = [...this.state.path, fsy]
+    console.log(string)
+
+    this.ctx.props.apis.request('extListDir', {path: encodeURI(string)})
+    this.path = path
+    this.setState({inRoot: false})
   }
 }
 

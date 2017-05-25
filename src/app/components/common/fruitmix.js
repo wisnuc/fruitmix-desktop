@@ -195,6 +195,7 @@ class Fruitmix extends EventEmitter {
       break
 
     case 'extListDir':
+      r = this.aget(`files/external/fs/${args.path}`)
       break
 
     case 'extMkdir':
