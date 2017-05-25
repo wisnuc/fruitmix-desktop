@@ -35,6 +35,10 @@ const quickSort = (arr, type) => {
 	return quickSort(left).concat([pivot], quickSort(right))
 }
 
+const compare = (A, B) => {
+
+}
+
 //handle will open dialog from electron to clean record of the task have been downloaded
 const cleanRecordHandle = () => {
 	dialog.showMessageBox({
