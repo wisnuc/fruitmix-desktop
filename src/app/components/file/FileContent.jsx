@@ -23,7 +23,7 @@ const formatTime = mtime => {
 
   let time = new Date()
   time.setTime(parseInt(mtime))
-  return time.getFullYear() + '-' + (time.getMonth() + 1) + '-' + time.getDay()
+  return time.getFullYear() + '-' + (time.getMonth() + 1) + '-' + time.getDate()
 }
 
 const renderLeading = leading => {
@@ -165,7 +165,7 @@ class FileContent extends Component {
   } 
 
   willReceiveProps(nextProps){
-    console.log(nextProps, '.......')
+    // console.log(nextProps, '.......')
   }
 
   componentDidMount() {
@@ -181,13 +181,13 @@ class FileContent extends Component {
 	}
 
   keyDown(e) {
-    console.log('keydown', e.ctrlKey, e.shiftKey)
+    // console.log('keydown', e.ctrlKey, e.shiftKey)
     if (this.props.select)
       this.props.select.keyEvent(e.ctrlKey, e.shiftKey)
   }
 
   keyUp(e) {
-    console.log('keyup', e.ctrlKey, e.shiftKey)
+    // console.log('keyup', e.ctrlKey, e.shiftKey)
     if (this.props.select)
       this.props.select.keyEvent(e.ctrlKey, e.shiftKey)
   }
@@ -197,7 +197,7 @@ class FileContent extends Component {
     e.preventDefault()  // important!
     e.stopPropagation()
 
-    console.log('rowTouchTap', index)
+    // console.log('rowTouchTap', index)
 
     // using e.nativeEvent.button instead of e.nativeEvent.which
     // 0 - left
@@ -211,10 +211,12 @@ class FileContent extends Component {
 
     if (type !== 'mouseup' || !(button === 0 || button === 2)) return
 
+
     this.props.select.touchTap(button, index)
+    this.props.updateDetail(index)
 
     if (button === 2) {
-      console.log('rowTouchTap, right click')
+      // console.log('rowTouchTap, right click')
       this.props.showContextMenu(e.nativeEvent.clientX, e.nativeEvent.clientY)
     }
 

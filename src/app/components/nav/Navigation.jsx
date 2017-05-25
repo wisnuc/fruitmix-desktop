@@ -340,7 +340,7 @@ class NavViews extends Component {
       transition: sharpCurve('width')
     }
     /* {style}, function to close Detail page */
-    return view.renderDetail({ style }, this.openSnackBarBound)
+    return view.renderDetail({ style, openSnackBar: this.openSnackBarBound })
   }
 
   renderSnackBar() {
