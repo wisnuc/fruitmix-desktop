@@ -72,10 +72,33 @@ class Physical extends Base {
     super(ctx)
     this.select = new ListSelect(this)
     this.select.on('updated', next => this.setState({ select: next }))
-    this.state = {}
+    this.state = {
+      extDrives:null,
+      extListDir: null,
+      contextMenuOpen: false,
+      contextMenuY: -1,
+      contextMenuX: -1,
+    }
   }
 
-  willReceiveProps(nextProps) { 
+  updateState(data) {
+    console.log('.........',data)
+    let {extDrives, extListDir} = data
+    if (data.extDrives === this.state.extDrives && data.extListDir === this.state.extListDir) return
+  }
+
+  willReceiveProps(nextProps) {
+    let apis = nextProps.apis
+    if (!nextProps.apis || !nextProps.apis.extDrives) return
+    if (nextProps.apis.extDrives.isPending()) return
+    if (nextProps.apis.extListDir && nextProps.apis.extListDir.isPending()) return
+    let extListDir = nextProps.apis.extListDir?nextProps.apis.extListDir.value():null
+    let extDrives = apis.extDrives.value()
+    extDrives.forEach(item => item.type = 'folder')
+    this.updateState({
+      extListDir: extListDir,
+      extDrives: extDrives
+    })
   }
 
   navEnter() {

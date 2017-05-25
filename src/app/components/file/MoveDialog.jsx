@@ -5,7 +5,6 @@ import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import ArrowRight from 'material-ui/svg-icons/hardware/keyboard-arrow-right'
-
 import request from 'superagent'
 
 class Row extends React.PureComponent {
@@ -49,10 +48,6 @@ class MoveDialog extends React.PureComponent {
       path:this.paths,
       loading: false,
       currentSelectedIndex: -1 
-    }
-
-    this.fire = () => {
-
     }
   }
 
@@ -131,6 +126,16 @@ class MoveDialog extends React.PureComponent {
     this.props.onRequestClose()
   }
 
+  updateState(path, currentDir, list) {
+    this.setState({
+      path: path?path:this.state.path,
+      list: list?list:this.state.list,
+      currentDir: currentDir?currentDir:this.state.currentDir,
+      loading: false,
+      currentSelectedIndex: -1
+    })
+  }
+
   enter(node) {
     if (node.type == 'file') return
     if (this.selectedArr.findIndex(item => item.uuid === node.uuid) !== -1) return
@@ -140,7 +145,7 @@ class MoveDialog extends React.PureComponent {
 
       this.list(node.uuid).then( data => {
         let list = data
-        this.setState({path, currentDir, list, loading: false, currentSelectedIndex: -1})
+        this.updateState(path, currentDir, list)
       }).catch(err => console.log(err))
     }else if (node.type == 'public') {
 
@@ -148,13 +153,13 @@ class MoveDialog extends React.PureComponent {
       list.forEach(item => item.type = 'folder')
       this.setState({loading:true})
       setTimeout(() => {
-        this.setState({path, currentDir, list, loading: false, currentSelectedIndex: -1})
+        this.updateState(path, currentDir, list)
       },0)
     }else if (node.type == 'physical'){
 
       this.extDrives().then(list => {
         list.forEach(item => item.type = 'folder')
-        this.setState({path, currentDir, list, loading: false, currentSelectedIndex: -1})
+        this.updateState(path, currentDir, list)
       })
 
     }else if (node.fileSystemUUID) {
@@ -163,7 +168,7 @@ class MoveDialog extends React.PureComponent {
         else {
           let list = JSON.parse(res.text)
           // list.forEach(item => item.type = )
-          this.setState({path, currentDir, list, loading: false, currentSelectedIndex: -1})
+          this.updateState(path, currentDir, list)
         }
       })
     }else if (node.type == 'directory') {
@@ -179,7 +184,7 @@ class MoveDialog extends React.PureComponent {
         if (err) console.log(err)
         else {
           let list = JSON.parse(res.text)
-          this.setState({path, currentDir, list, loading: false, currentSelectedIndex: -1}) 
+          this.updateState(path, currentDir, list)
         }
       })
     }
@@ -197,13 +202,13 @@ class MoveDialog extends React.PureComponent {
 
     if (currentDir.type === 'folder' && !currentDir.fileSystemUUID) {
 
-      this.list(currentDir.uuid).then(list => this.setState({list, currentDir, path: copyPath, loading: false, currentSelectedIndex: -1}))
+      this.list(currentDir.uuid).then(list => this.updateState(copyPath, currentDir, list))
 
     }else if (currentDir.type === 'public'){
 
       let list = apis.adminDrives.data.drives
       list.forEach(item => item.type = 'folder')
-      this.setState({list, currentDir, path: copyPath, loading: false, currentSelectedIndex: -1})
+      this.updateState(copyPath, currentDir, list)
 
     }else if(currentDir.type === 'false'){
       
@@ -211,12 +216,12 @@ class MoveDialog extends React.PureComponent {
                   {name:'共享文件夹',type: 'public', uuid: '共享文件夹'},
                   {name:'物理磁盘', type: 'physical', uuid:'物理磁盘'}]
       
-      this.setState({list, currentDir, path:copyPath, loading:false, currentSelectedIndex: -1})
+      this.updateState(copyPath, currentDir, list)
 
     }else if (currentDir.type === 'physical') {
       this.extDrives().then(list => {
         list.forEach(item => item.type = 'folder')
-        this.setState({list, currentDir, path: copyPath, loading: false, currentSelectedIndex: -1})
+        this.updateState(copyPath, currentDir, list)
       })
     }else if (currentDir.fileSystemUUID) {
       let string = 'files/external/fs/' + currentDir.fileSystemUUID + '/'
@@ -225,7 +230,7 @@ class MoveDialog extends React.PureComponent {
         if (err) console.log(err)
         else {
           let list = JSON.parse(res.text)
-          this.setState({list, currentDir, path:copyPath, loading:false, currentSelectedIndex: -1})
+          this.updateState(copyPath, currentDir, list)
         }
       })
     }else if (currentDir.type == 'directory'){
@@ -241,7 +246,7 @@ class MoveDialog extends React.PureComponent {
         if (err) console.log(err)
         else {
           let list = JSON.parse(res.text)
-          this.setState({list, currentDir, path:copyPath, loading:false, currentSelectedIndex: -1})
+          this.updateState(copyPath, currentDir, list)
         }
       })
     }
@@ -266,7 +271,11 @@ class MoveDialog extends React.PureComponent {
   }
 
   move() {
-    console.log(this.selectedArr, this.state.currentSelectedIndex, this)
+    if (this.directory.uuid === this.state.currentDir.uuid) return
+    if (this.state.currentDir.type == 'false') return
+    if (this.state.currentDir.type == 'public') return
+    if (this.state.currentDir.type == 'physical') return
+
     let dstobj
     if (this.state.currentSelectedIndex != -1) {
       dstobj = this.state.list[this.state.currentSelectedIndex]
@@ -282,7 +291,6 @@ class MoveDialog extends React.PureComponent {
       dst.type = 'ext'
       dst.path = '/'
       this.state.path.forEach(item => {
-        console.log(item)
         if (item.type == 'physical')  return
         if (item.type == 'false') return
         if (item.fileSystemUUID) dst.rootPath = item.fileSystemUUID
@@ -290,17 +298,13 @@ class MoveDialog extends React.PureComponent {
       })
     }
 
-
-    console.log(dst)
     this.selectedArr.forEach(item => {
 
-      
       let obj = {src:{type:item.uuid?'fruitmix':'ext', path:item.uuid?item.uuid:null,rootPath:null},dst}
 
       this.apost('files/transfer/move',obj).end((err, res) => {
         if (err) console.log(err)
         else {
-          console.log(JSON.parse(res.text))
           this.props.onRequestClose()
         }
       })
@@ -309,13 +313,11 @@ class MoveDialog extends React.PureComponent {
 
   extDrives() {
     return new Promise((resolve, reject) => {
-      this.setState({loading:true})
       this.aget('files/external/fs').end((err, res) => {
         if (err) return reject(err)
         else {
           let arr = JSON.parse(res.text)
           let list = []
-          console.log(arr)
           arr.forEach(item => {
             if (item.fileSystemType == 'ntfs') list.push(item)
           })
@@ -328,7 +330,6 @@ class MoveDialog extends React.PureComponent {
 
   adminDrives() {
     return new Promise((resolve, reject) => {
-      this.setState({loading:true})
       let string = 'admin/drives'
       this.aget(string).end((err, res) => {
         if (err) return reject(err)
@@ -340,7 +341,7 @@ class MoveDialog extends React.PureComponent {
   aget(ep) {
     let { address, token} = this.props.apis
     let string = 'http://'+address+':3721/'+ep
-    console.log(string)
+    this.setState({loading:true})
     return request
       .get(encodeURI(string))
       .set('Authorization', 'JWT ' + token)

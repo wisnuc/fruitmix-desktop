@@ -36,7 +36,7 @@ const quickSort = (arr, type) => {
 }
 
 const compare = (A, B) => {
-
+	
 }
 
 //handle will open dialog from electron to clean record of the task have been downloaded
