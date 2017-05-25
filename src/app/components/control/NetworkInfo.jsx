@@ -70,11 +70,16 @@ class Ethernet extends React.Component {
     const data = net.os[NIC].find(item => item.family === 'IPv4')
 
     const getAddress = () => (
-      <div onTouchTap={this.setIp}>
+      <div>
         {data.address}
-        <ModeEdit color={this.props.primaryColor} style={{ marginLeft: 8 }} viewBox="0 0 36 12" />
+        {/*
+        <div onTouchTap={this.setIp}>
+          {data.address}
+          <ModeEdit color={this.props.primaryColor} style={{ marginLeft: 8 }} viewBox="0 0 36 12" />
+        </div>
+        */}
       </div>
-      )
+    )
 
     const Icon = ActionSettingsEthernet
 
