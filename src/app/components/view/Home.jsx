@@ -1,5 +1,6 @@
 import React, { Component, PureComponent } from 'react'
 import Radium from 'radium'
+import { ipcRenderer } from 'electron'
 
 import { Paper, Divider, IconButton, Menu, MenuItem, FloatingActionButton } from 'material-ui'
 import { orange700, blue700, indigo700, indigo500, teal500 } from 'material-ui/styles/colors'
@@ -378,6 +379,7 @@ class Home extends Base {
             <FileDetail
               detailFile={this.state.entries[this.state.detailIndex]}
               path={this.state.path}
+              ipcRenderer={ipcRenderer}
             /> :
             <div style={{ height: 128, backgroundColor: '#00796B' }} />
         }

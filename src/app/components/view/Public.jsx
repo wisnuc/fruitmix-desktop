@@ -3,6 +3,7 @@ import { MenuItem, FloatingActionButton, IconButton } from 'material-ui'
 import FileFolderShared from 'material-ui/svg-icons/file/folder-shared'
 import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
 import Radium from 'radium'
+import { ipcRenderer } from 'electron'
 
 import DialogOverlay from '../common/DialogOverlay'
 import ListSelect from '../file/ListSelect2'
@@ -342,6 +343,7 @@ class Public extends Base {
             <FileDetail
               detailFile={this.state.entries[this.state.detailIndex]}
               path={this.state.path}
+              ipcRenderer={ipcRenderer}
             /> :
             <div style={{ height: 128, backgroundColor: '#00796B' }} />
         }

@@ -26,7 +26,9 @@ class PhotoDetailInline extends React.Component {
     super(props)
 
     this.state = {
-      direction: null
+      direction: null,
+      thumbPath: '',
+      detailPath: ''
     }
 
     this.currentIndex = this.props.seqIndex
@@ -37,27 +39,11 @@ class PhotoDetailInline extends React.Component {
 
     /* change image */
     this.requestNext = (currentIndex) => {
-      /* hide image and resieze container */
-      if (this.refImage) {
-        this.refImage.style.display = 'none'
-        this.refImageDetial.style.display = 'none'
-        this.refImageDetial.src = ''
-        this.refImage.style.transform = ''
-        this.refImage.height = this.photoHeight
-        this.refImage.width = this.photoWidth
-        this.refContainer.style.height = `${this.photoHeight}px`
-        this.refContainer.style.width = `${this.photoWidth}px`
-      }
-      /* initialize path of image */
-      this.path = ''
-      this.thumbPath = ''
-
       /* get current image */
       this.session = UUID.v4()
       this.digest = this.props.items[currentIndex][0]
       this.photo = this.props.items[currentIndex][1]
       this.props.ipcRenderer.send('mediaShowThumb', this.session, this.digest, 210, 210)
-      this.forceUpdate()
 
       /* memoize digest */
       this.props.memoize({ currentDigest: this.digest, currentScrollTop: 0 })
@@ -78,16 +64,8 @@ class PhotoDetailInline extends React.Component {
       if (this.session === session) {
         clearTimeout(this.time)
         this.time = setTimeout(() => {
-          if (this.exifOrientation % 2 === 0) {
-            this.refImageDetial.height = this.photoWidth
-            this.refImageDetial.width = this.photoHeight
-          } else {
-            this.refImageDetial.height = this.photoHeight
-            this.refImageDetial.width = this.photoWidth
-          }
-          this.refImageDetial.src = path
           this.refTransition.style.transform = this.degRotate
-          this.refImageDetial.style.display = ''
+          this.setState({ detailPath: path })
         }, 150)
       }
     }
@@ -95,15 +73,11 @@ class PhotoDetailInline extends React.Component {
     /* update thumbnail */
     this.updateThumbPath = (event, session, path) => {
       if (this.session === session) {
-        /* update thumbPath and resize container */
-        this.thumbPath = path
-        this.refImage.style.display = 'flex'
-        this.refImage.src = this.thumbPath
-        this.refContainer.style.height = `${this.photoHeight}px`
-        this.refContainer.style.width = `${this.photoWidth}px`
-
         /* get detail image */
         this.props.ipcRenderer.send('mediaShowImage', this.session, this.digest)
+
+        /* update thumbPath */
+        this.setState({ thumbPath: path, detailPath: '' })
       }
     }
 
@@ -155,6 +129,10 @@ class PhotoDetailInline extends React.Component {
       } else if (this.photoWidth > this.clientWidth) {
         this.photoWidth = this.clientWidth
         this.photoHeight = this.photoWidth * HWRatio
+      }
+      if (this.refContainer) {
+        this.refContainer.style.height = `${this.photoHeight}px`
+        this.refContainer.style.width = `${this.photoWidth}px`
       }
     }
 
@@ -258,13 +236,15 @@ class PhotoDetailInline extends React.Component {
         >
           {/* ThumbImage */}
           <div style={{ position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
-            <img
-              style={{ display: 'none' }}
-              ref={ref => (this.refImage = ref)}
-              height={this.photoHeight}
-              width={this.photoWidth}
-              alt="ThumbImage"
-            />
+            {
+              this.state.thumbPath &&
+                <img
+                  height={this.photoHeight}
+                  width={this.photoWidth}
+                  alt="ThumbImage"
+                  src={this.state.thumbPath}
+                />
+            }
           </div>
 
           {/* DetailImage */}
@@ -272,13 +252,15 @@ class PhotoDetailInline extends React.Component {
             style={{ position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             ref={ref => (this.refTransition = ref)}
           >
-            <img
-              style={{ display: 'none' }}
-              ref={ref => (this.refImageDetial = ref)}
-              height={this.exifOrientation % 2 === 0 ? this.photoWidth : this.photoHeight}
-              width={this.exifOrientation % 2 === 0 ? this.photoHeight : this.photoWidth}
-              alt="DetailImage"
-            />
+            {
+              this.state.detailPath &&
+                <img
+                  height={this.exifOrientation % 2 === 0 ? this.photoWidth : this.photoHeight}
+                  width={this.exifOrientation % 2 === 0 ? this.photoHeight : this.photoWidth}
+                  alt="DetailImage"
+                  src={this.state.detailPath}
+                />
+            }
           </div>
         </div>
       </div>
@@ -286,7 +268,6 @@ class PhotoDetailInline extends React.Component {
   }
 
   render() {
-    // debug('currentImage', this.photo)
     return (
       <div
         ref={ref => (this.refRoot = ref)}
