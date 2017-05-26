@@ -1,13 +1,16 @@
 import React, { Component, PureComponent } from 'react'
 import Radium from 'radium'
 
-import { Avatar, Divider } from 'material-ui'
+import { Avatar, Divider, MenuItem } from 'material-ui'
 import HardwareDeveloperBoard from 'material-ui/svg-icons/hardware/developer-board'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 
 import Base from './Base'
 import FileContent from '../file/FileContent'
 import ListSelect from '../file/ListSelect2'
+import MoveDialog from '../file/MoveDialog'
+import ContextMenu from '../common/ContextMenu'
+import DialogOverlay from '../common/DialogOverlay'
 
 class DriveHeader extends PureComponent {
 
@@ -82,21 +85,19 @@ class Physical extends Base {
       contextMenuOpen: false,
       contextMenuY: -1,
       contextMenuX: -1,
+      move: false
     }
   }
 
   updateState(data) {
-    console.log('.........',data)
     let {extDrives, extListDir} = data
-    if (extDrives === this.state.extDrives && data.extListDir === this.state.extListDir) return console.log('same props in Physical')
+    if (extDrives === this.state.extDrives && data.extListDir === this.state.extListDir) return
     if (this.state.inRoot) {
-      console.log('在根目录')
       let path = this.path
       let entries = extDrives
       let select = this.select.reset(entries.length)
       this.setState({select, path, entries, extDrives, extListDir})
     }else {
-      console.log('不在根目录')
       let entries = extListDir
       let select = this.select.reset(entries.length)
       let path = this.path
@@ -105,7 +106,6 @@ class Physical extends Base {
   }
 
   willReceiveProps(nextProps) {
-    console.log('receive props in Physical')
     let apis = nextProps.apis
     if (!apis || !apis.extDrives) return
     if (apis.extDrives.isPending()) return
@@ -120,6 +120,7 @@ class Physical extends Base {
   }
 
   navEnter() {
+    console.log('nav enter tirgger')
     let apis = this.ctx.props.apis
     this.path = [{name:'物理磁盘', type: 'physical', uuid:'物理磁盘'}]
     this.setState({inRoot :true, entries :[]})
@@ -166,6 +167,43 @@ class Physical extends Base {
   }
 
   /** renderers **/
+
+  renderTitle({style}) {
+    if (!this.state.extDrives && !this.state.extListDir) return
+    const path = this.state.path
+    return (
+      <div id='file-breadcrumbs' style={Object.assign({}, style, {marginLeft:'176px'})}>
+        {path.reduce((acc, node, index, arr) => {
+          if (path.length > 4 && index > 0 && index < path.length - 3) {
+            if (index === 1) {
+              acc.push(<BreadCrumbSeparator key={'Separator' + index}/>)
+              acc.push(<BreadCrumbItem text='...' key='...'/>)
+            }
+            return acc
+          }
+
+          if (index !== 0) acc.push(<BreadCrumbSeparator key={'Separator' + index}/>)
+
+          if (index === 0) { // the first one is always special
+            acc.push(<BreadCrumbItem text='物理磁盘' key='物理磁盘' onTouchTap={this.navEnter.bind(this)}/>)
+          }
+
+          else {
+            if (index === 1) acc.push(
+              <BreadCrumbItem 
+                text={node.name}
+                key={node.name + 'index'} onTouchTap={this.listByBread.bind(this, index)}/>)
+
+            else acc.push(<BreadCrumbItem text={node.name} key={node.name + 'index'} onTouchTap={this.listByBread.bind(this, index)}/>)
+            
+          }
+          return acc
+        }, [])}
+      </div>
+    )
+  }
+
+  
   renderContent() {
     let extDrives, apis = this.ctx.props.apis
     if (apis.extDrives.isFulfilled) extDrives = apis.extDrives.value()
@@ -187,12 +225,50 @@ class Physical extends Base {
           select={this.state.select} 
           entries={this.state.entries}
           listNavBySelect={this.enter.bind(this)}
+          updateDetail={() => {}}
+          showContextMenu={this.showContextMenu.bind(this)}
         />
         }
+
+        <ContextMenu 
+          open={this.state.contextMenuOpen}
+          top={this.state.contextMenuY}
+          left={this.state.contextMenuX}
+          onRequestClose={() => this.hideContextMenu()}
+        >
+          <MenuItem primaryText='移动' disabled={this.state.path.length>1?false:true} onTouchTap={this.openMove.bind(this)} />
+        </ContextMenu> 
+
+        <DialogOverlay open={this.state.move} onRequestClose={this.closeMove.bind(this)}>
+          { this.state.move && <MoveDialog
+              apis={this.ctx.props.apis} 
+              path={this.state.path} 
+              entries={this.state.entries}
+              select={this.state.select}
+              type='physical'
+            />}
+        </DialogOverlay>
 
       </div>
     )
   }
+
+  listByBread(pathIndex) {
+    let path = this.state.path
+    let newPath = [...this.state.path]
+    let string = ''
+    if (pathIndex > path.length || pathIndex < 1) throw Error('bread index error')
+    path.forEach((item, index) => {
+      if (index > pathIndex || index == 0) return
+      if (index == 1) string += path[index].fileSystemUUID + '/'
+      else string += path[index].name + '/'
+    })
+    newPath.splice(pathIndex + 1)
+    console.log(string, newPath)
+    this.ctx.props.apis.request('extListDir', {path: encodeURI(string)})
+    this.path = newPath
+    this.setState({inRoot: false})
+  } 
 
   enter(fsy) {
     if (!fsy) {
@@ -209,20 +285,90 @@ class Physical extends Base {
     }else {
       console.log('fileSystemIndex 找到 不在根目录', fileSystemIndex)
       this.state.path.forEach((item, index) => {
-        console.log(item)
         if (index < fileSystemIndex) {}
         if (index == fileSystemIndex) string += (item.fileSystemUUID + '/')
         if (index > fileSystemIndex) string += (item.name + '/')
       })
       string += (fsy.name + '/')
     }
-      console.log(string)
+
     let path = [...this.state.path, fsy]
     console.log(string)
 
     this.ctx.props.apis.request('extListDir', {path: encodeURI(string)})
     this.path = path
     this.setState({inRoot: false})
+  }
+
+  showContextMenu(clientX, clientY) {
+    if (this.select.state.ctrl || this.select.state.shift) return
+    let containerDom = document.getElementById('content-container')
+    let maxLeft = containerDom.offsetLeft + containerDom.clientWidth - 240
+    let x = clientX > maxLeft? maxLeft: clientX
+    let maxTop = containerDom.offsetTop + containerDom.offsetHeight -192
+    let y = clientY > maxTop? maxTop: clientY
+    this.setState({ 
+      contextMenuOpen: true,
+      contextMenuX: x,
+      contextMenuY: y
+    }) 
+  }
+
+  hideContextMenu() {
+    this.setState({ 
+      contextMenuOpen: false,
+      contextMenuX: -1,
+      contextMenuY: -1,
+    })
+  }
+
+  openMove() {
+    this.setState({move: true})
+  }
+
+  closeMove() {
+    this.setState({move:false})
+  }
+}
+
+class BreadCrumbSeparator extends React.PureComponent {
+
+  render() {
+    return (
+      <div style={{height:32, width:8, display:'flex', flexDirection:'column', alignItems:'center'}}>
+        &rsaquo;
+      </div>
+    )
+  }
+}
+
+@Radium
+class BreadCrumbItem extends React.PureComponent {
+
+  render() {
+
+    let style = {
+      cursor: 'pointer',
+      borderRadius: 2, // mimic a flat button
+      height: 32,
+      paddingLeft: 8, 
+      paddingRight: 8, 
+      backgroundColor: 'rgba(255,255,255,0)',
+      ':hover': {
+        backgroundColor: 'rgba(255,255,255,0.14)' // value from material-component card example
+      },
+      maxWidth: '100px',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+      textOverflow: 'ellipsis'
+
+    }
+
+    return (
+      <div style={style} onTouchTap={this.props.onTouchTap}>
+        { this.props.text }   
+      </div>
+    )
   }
 }
 

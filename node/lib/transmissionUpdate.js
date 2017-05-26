@@ -11,6 +11,7 @@ let lock = false
 const sendInfor = urgent => {
 	let concatUserTasks = [].concat(uploadingTasks, downloadingTasks)
 	let concatFinishTasks = [].concat(uploadedTasks, downloadedTasks)
+	console.log(concatFinishTasks.length)
 	let userTasks = quickSort(concatUserTasks, 'createTime')
 	let finishTasks = quickSort(concatFinishTasks, 'finishDate')
 	getMainWindow().webContents.send(
