@@ -21,9 +21,9 @@ const phaseDate = (time) => {
 const getType = (type, name) => {
   if (type === 'folder') return '文件夹'
   if (type === 'public') return '共享文件夹'
-  let extension = name.replace(/^.*\./, '').toUpperCase()
+  let extension = name.replace(/^.*\./, '')
   if (!extension || extension === name) extension = '未知文件'
-  return extension
+  return extension.toUpperCase()
 }
 
 const getPath = (path) => {
