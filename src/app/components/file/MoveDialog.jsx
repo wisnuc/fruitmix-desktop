@@ -38,6 +38,7 @@ class MoveDialog extends React.PureComponent {
     let selected = this.props.select.selected
     let path = this.props.path
 
+    this.path = path
     this.paths = this.consistPath(this.props.path)
     this.selectedArr = selected.map(item => entries[item])
     this.directory = path[path.length - 1]
@@ -52,6 +53,7 @@ class MoveDialog extends React.PureComponent {
   }
 
   consistPath(path) {
+    console.log(path)
     let newPath = []
     if (path[0].type == 'public') {
       //entry is public
@@ -63,16 +65,36 @@ class MoveDialog extends React.PureComponent {
       newPath = [{name:'我的所有文件', uuid: null, type:'false'}, ...path]
     }else {
       //entry is physical
+      newPath = [{name:'我的所有文件', uuid: null, type:'false'}, ...path]
     }
 
     return newPath
   }
-
+  //行是否能被选中
   isRowDisable(node) {
-    if (node.type === 'file') return true
-    if (this.state.currentDir.uuid !== this.directory.uuid) return false
-    else if (this.selectedArr.findIndex(item => item.uuid === node.uuid) === -1) return false
-    else return true
+    let type = node.type
+    //文件不能被选中
+    if (type == 'file') return true
+    //磁盘路径下: 节点不在被选中数组内
+    else if (node.type === 'directory') {
+      if (this.inSameDirectory()) {
+        //在同一级文件夹
+        if (this.selectedArr.findIndex(item => item.name == node.name) === -1 ) return false
+        else return true  
+      }
+      //不在同一级文件夹 可以被选中
+      else return false
+    }
+    //drive路径下：节点不在被选中数组内
+    else if (node.type == 'folder') {
+      if (this.inSameDirectory()) {
+        if (this.selectedArr.findIndex(item => item.uuid === node.uuid) === -1) return false
+        else return true
+      }
+      //不在同一级文件夹 可以被选中
+      else return false
+    }
+    else return false
   }
 
   getList() {
@@ -87,11 +109,51 @@ class MoveDialog extends React.PureComponent {
     )
   }
 
+  //移动按钮是否工作
   getButtonStyle() {
-    if (this.state.currentSelectedIndex != -1 && this.state.currentDir.type=='folder') return 'move-button' 
-    else if (this.state.currentDir.type !== 'folder' && this.state.currentDir.type !== "directory") return 'disable move-button'
-    else if (this.directory.uuid === this.state.currentDir.uuid) return 'disable move-button'
-    else return 'move-button long'
+    let state = this.state
+    let currentDir = this.state.currentDir
+    let type = this.state.currentDir.type
+    let currentSelectedIndex = this.state.currentSelectedIndex
+    let selectedObj = this.state.currentSelectedIndex!==-1?this.state.list[this.state.currentSelectedIndex]:null
+    let result = '' 
+    //列表中有元素被选中
+    if (state.currentSelectedIndex != -1) {
+      console.log('//列表中有元素被选中')
+      //当前所在文件夹为 false, physical, public
+      if (type !== 'folder' && type !== 'directory') result = 'disable move-button' 
+      //当前所在文件夹为 folder
+      else if (type == 'folder' && !currentDir.fileSystemUUID) {
+        console.log('//当前所在文件夹为 folder')
+        //选中的文件夹 不是要进行移动的文件
+        if (this.selectedArr.findIndex(item => item.uuid == selectedObj.uuid) == -1) result = 'move-button' 
+        else result = 'disable move-button' 
+      }
+      //当前所在文件夹为 directory
+      else if (type == 'directory' || currentDir.fileSystemUUID) {
+        console.log('//当前所在文件夹为 directory')
+        if (!this.inSameDirectory()) result = 'move-button' 
+        else if (this.selectedArr.findIndex(item => item.name == selectedObj.name) == -1) result = 'move-button'
+        else result = 'disable move-button' 
+      }
+    }
+    //列表中没有元素被选中
+    else {
+      //flase, public, physical 不能被指定为目标
+      if (type !== 'folder' && type !== "directory") result = 'disable move-button'
+      
+      else if (type == 'folder' && !currentDir.fileSystemUUID) {
+        //drive 当前文件夹不能与被选中元素所在文件夹相同
+        if (this.inSameDirectory()) result = 'disable move-button'
+        else result = 'move-button long'
+      }else if (type == 'directory' || currentDir.fileSystemUUID) {
+        if (this.inSameDirectory()) result = 'disable move-button'
+        else result = 'move-button long'
+      }
+      else result = 'disable move-button'
+    }
+    this.buttonState = result
+    return result
   }
 
   getButtonText() {
@@ -137,8 +199,19 @@ class MoveDialog extends React.PureComponent {
   }
 
   enter(node) {
+    console.log(node)
+    //condition can not be enter
     if (node.type == 'file') return
-    if (this.selectedArr.findIndex(item => item.uuid === node.uuid) !== -1) return
+    if (this.props.type !== 'physical' && this.selectedArr.findIndex(item => item.uuid === node.uuid) !== -1) return
+    if (node.type == 'directory') {
+      let oldPathString = ''
+      let newPathString = ''
+      this.paths.forEach(item => oldPathString += item.name)
+      this.state.path.forEach(item => newPathString += item.name)
+      console.log(oldPathString, newPathString)
+      if (oldPathString == newPathString && this.selectedArr.findIndex(item => item.name === node.name) !== -1) return
+    }
+
     let path = [...this.state.path, node]
     let currentDir = node
     if (node.type == 'folder' && !node.fileSystemUUID) {
@@ -201,17 +274,17 @@ class MoveDialog extends React.PureComponent {
     let newPath = copyPath.pop()
 
     if (currentDir.type === 'folder' && !currentDir.fileSystemUUID) {
-
+      //nav-dir
       this.list(currentDir.uuid).then(list => this.updateState(copyPath, currentDir, list))
 
     }else if (currentDir.type === 'public'){
-
+      //get adminDrives
       let list = apis.adminDrives.data.drives
       list.forEach(item => item.type = 'folder')
       this.updateState(copyPath, currentDir, list)
 
     }else if(currentDir.type === 'false'){
-      
+      //get virtual root
       let list = [{name:'我的文件', type:'folder', uuid:apis.account.data.home}, 
                   {name:'共享文件夹',type: 'public', uuid: '共享文件夹'},
                   {name:'物理磁盘', type: 'physical', uuid:'物理磁盘'}]
@@ -219,25 +292,18 @@ class MoveDialog extends React.PureComponent {
       this.updateState(copyPath, currentDir, list)
 
     }else if (currentDir.type === 'physical') {
+      //get extDrives 
       this.extDrives().then(list => {
         list.forEach(item => item.type = 'folder')
         this.updateState(copyPath, currentDir, list)
       })
-    }else if (currentDir.fileSystemUUID) {
-      let string = 'files/external/fs/' + currentDir.fileSystemUUID + '/'
-      this.setState({loading:true})
-      this.aget(string).end((err, res) => {
-        if (err) console.log(err)
-        else {
-          let list = JSON.parse(res.text)
-          this.updateState(copyPath, currentDir, list)
-        }
-      })
-    }else if (currentDir.type == 'directory'){
+    }else if (currentDir.fileSystemUUID || currentDir.type == 'directory'){
+       // //get physical path
       let string = 'files/external/fs/'
       let fileSystemUUIDIndex = copyPath.findIndex(item => item.fileSystemUUID)
-      string += copyPath[fileSystemUUIDIndex].fileSystemUUID + '/'
+      if (fileSystemUUIDIndex == -1) return
       copyPath.forEach((item, index) => {
+        if (index == fileSystemUUIDIndex ) string += copyPath[index].fileSystemUUID + '/'
         if (index > fileSystemUUIDIndex) string += (copyPath[index].name + '/')
       })
 
@@ -271,11 +337,10 @@ class MoveDialog extends React.PureComponent {
   }
 
   move() {
-    if (this.directory.uuid === this.state.currentDir.uuid) return
-    if (this.state.currentDir.type == 'false') return
-    if (this.state.currentDir.type == 'public') return
-    if (this.state.currentDir.type == 'physical') return
+    // if (this.directory.uuid === this.state.currentDir.uuid && this.props.type !== 'physical') return
+    if (this.buttonState !== 'move-button' && this.buttonState !== 'move-button long') return
 
+    //dst
     let dstobj
     if (this.state.currentSelectedIndex != -1) {
       dstobj = this.state.list[this.state.currentSelectedIndex]
@@ -291,17 +356,31 @@ class MoveDialog extends React.PureComponent {
       dst.type = 'ext'
       dst.path = '/'
       this.state.path.forEach(item => {
-        if (item.type == 'physical')  return
-        if (item.type == 'false') return
+        if (item.type == 'physical' || item.type == 'false')  return
         if (item.fileSystemUUID) dst.rootPath = item.fileSystemUUID
         else dst.path += (item.name + '/')
+      })
+      if (this.state.currentSelectedIndex != -1) dst.path += this.state.list[this.state.currentSelectedIndex].name
+    }
+
+    //src
+    let string = '/'
+    if (this.props.type == 'physical') {
+      console.log(this.path)
+      this.path.forEach((item, index) => {
+        if (index > 1) string += (item.name + '/')  
       })
     }
 
     this.selectedArr.forEach(item => {
+      
+      let obj = {src: {
+        type:item.uuid?'fruitmix':'ext', 
+        path:item.uuid?item.uuid:string + item.name,
+        rootPath:item.uuid?null:this.path[1].fileSystemUUID}, 
+      dst}
 
-      let obj = {src:{type:item.uuid?'fruitmix':'ext', path:item.uuid?item.uuid:null,rootPath:null},dst}
-
+      console.log(obj)
       this.apost('files/transfer/move',obj).end((err, res) => {
         if (err) console.log(err)
         else {
@@ -309,6 +388,17 @@ class MoveDialog extends React.PureComponent {
         }
       })
     })
+  }
+
+  inSameDirectory() {
+    if (this.props.type == 'physical') {
+      let oldPathString = ''
+      let newPathString = ''
+      this.paths.forEach(item => oldPathString += item.name)
+      this.state.path.forEach(item => newPathString += item.name)
+      if (oldPathString == newPathString) return true
+      else return false
+    }else return this.state.currentDir.uuid == this.directory.uuid
   }
 
   extDrives() {
