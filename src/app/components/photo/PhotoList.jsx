@@ -156,11 +156,16 @@ class PhotoList extends React.Component {
             style={{
               position: 'absolute',
               boxSizing: 'border-box',
+              borderRadius: 11,
+              fontSize: 14,
               top,
               zIndex,
-              color: 'rgba(0,0,0,0.54)',
+              opacity: 0.54,
+              color: 'rgba(0, 0, 0, 1)',
               backgroundColor: 'white',
-              paddingRight: 8,
+              paddingTop: 4,
+              paddingBottom: 4,
+              paddingLeft: 8,
               right: (data[0] === 0) ? 8 : 20,
               textAlign: 'center'
             }}
