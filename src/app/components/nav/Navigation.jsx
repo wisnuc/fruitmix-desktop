@@ -309,7 +309,7 @@ class NavViews extends Component {
 
           {/** global notification button **/}
           <IconButton>
-            <SocialNotifications color="rgba(255,255,255,0.5)" />
+            <SocialNotifications color={view.appBarStyle() === 'light' ? 'rgba(0,0,0,0.54)' : 'rgba(255,255,255,0.5)'} />
           </IconButton>
 
           {/** optional toggle detail button **/}
