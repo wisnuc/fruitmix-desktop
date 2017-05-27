@@ -6,7 +6,7 @@ import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-fil
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import ArrowRight from 'material-ui/svg-icons/hardware/keyboard-arrow-right'
 import request from 'superagent'
-
+import { command } from '../../lib/command'
 class Row extends React.PureComponent {
   constructor(props) {
     super(props)
@@ -119,19 +119,16 @@ class MoveDialog extends React.PureComponent {
     let result = '' 
     //列表中有元素被选中
     if (state.currentSelectedIndex != -1) {
-      console.log('//列表中有元素被选中')
       //当前所在文件夹为 false, physical, public
       if (type !== 'folder' && type !== 'directory') result = 'disable move-button' 
       //当前所在文件夹为 folder
       else if (type == 'folder' && !currentDir.fileSystemUUID) {
-        console.log('//当前所在文件夹为 folder')
         //选中的文件夹 不是要进行移动的文件
         if (this.selectedArr.findIndex(item => item.uuid == selectedObj.uuid) == -1) result = 'move-button' 
         else result = 'disable move-button' 
       }
       //当前所在文件夹为 directory
       else if (type == 'directory' || currentDir.fileSystemUUID) {
-        console.log('//当前所在文件夹为 directory')
         if (!this.inSameDirectory()) result = 'move-button' 
         else if (this.selectedArr.findIndex(item => item.name == selectedObj.name) == -1) result = 'move-button'
         else result = 'disable move-button' 
@@ -240,7 +237,6 @@ class MoveDialog extends React.PureComponent {
         if (err) console.log('err')
         else {
           let list = JSON.parse(res.text)
-          // list.forEach(item => item.type = )
           this.updateState(path, currentDir, list)
         }
       })
@@ -377,13 +373,15 @@ class MoveDialog extends React.PureComponent {
       let obj = {src: {
         type:item.uuid?'fruitmix':'ext', 
         path:item.uuid?item.uuid:string + item.name,
-        rootPath:item.uuid?null:this.path[1].fileSystemUUID}, 
-      dst}
-
+        rootPath:item.uuid?null:this.path[1].fileSystemUUID}, dst}
       console.log(obj)
+
       this.apost('files/transfer/move',obj).end((err, res) => {
         if (err) console.log(err)
         else {
+          Object.assign(obj, JSON.parse(res.text), {name:item.name, createDate: (new Date()).getTime()})
+          console.log(obj)
+          command('fileapp', 'TRANSFER', {obj})
           this.props.onRequestClose()
         }
       })

@@ -285,12 +285,12 @@ class TaskManager {
 	}
 
 	hashSchedule() {
-		console.log('')
-		console.log('HASH调度...')
+		// console.log('')
+		// console.log('HASH调度...')
 		if (this.lastFileIndex === -1) return this.recordInfor('任务列表中不包含文件')
 		if (this.hashing.length >= 2) return this.recordInfor('任务的HASH队列已满')
 		if (this.hashIndex === this.lastFileIndex + 1) return this.recordInfor(this.name + ' 所有文件hash调度完成')
-		this.recordInfor('正在HASH第 ' + this.hashIndex + ' 个文件 : ' + this.worklist[this.hashIndex].name)
+		// this.recordInfor('正在HASH第 ' + this.hashIndex + ' 个文件 : ' + this.worklist[this.hashIndex].name)
 		let obj = this.worklist[this.hashIndex]
 		if (obj.type === 'folder' || obj.stateName === 'finish') this.hashIndex++
 		else{
@@ -632,7 +632,7 @@ class HashSTM extends STM {
 			}
 			let child = child_process.fork(path.join(__dirname ,'filehash'), [], options)
 			child.on('message',(obj) => {
-				console.log('hash message' , obj)
+				// console.log('hash message' , obj)
 				wrapper.sha = obj.hash
 				wrapper.parts = obj.parts
 				removeOutOfHashingQueue(this)
@@ -715,7 +715,7 @@ class UploadFileSTM extends STM {
 		removeOutOfReadyQueue(this)
 		addToRunningQueue(this)
 		this.wrapper.manager.updateStore()
-		this.wrapper.recordInfor(this.wrapper.name + ' 开始上传...')
+		// this.wrapper.recordInfor(this.wrapper.name + ' 开始上传...')
 		if (this.wrapper.taskid) return this.uploadSegment()
 		else return this.createUploadTask()
 	}
@@ -783,7 +783,7 @@ class UploadFileSTM extends STM {
     		return this.uploadWholeFile()
     	}else {
     		let b = JSON.parse(body)
-    		console.log('上传任务创建成功', b)
+    		console.log('上传任务创建成功')
 	    	_this.wrapper.taskid = b.taskid
 	    	this.uploadSegment()	
     	}
@@ -832,7 +832,7 @@ class UploadFileSTM extends STM {
 			this.partFinishSize = 0
 			console.log('第' + seek +'块 ' + 'req : err', err)
 		}).on('response',(res) => {
-			console.log('第' + seek +'块 ' + 'req : response')
+			// console.log('第' + seek +'块 ' + 'req : response')
 			if(res.statusCode == 200) return this.partUploadFinish()
 			else {
 				console.log(res.statusCode + ' !!!!!!!!!!!!!!!!!!!')
