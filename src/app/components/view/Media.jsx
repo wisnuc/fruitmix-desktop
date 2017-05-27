@@ -75,7 +75,7 @@ class Media extends Base {
       this.previousIndex = 1
 
       /* calculate photoMapDates and photoDates */
-      const MAX = Math.floor((width - 60) / 216) - 1
+      const MAX = Math.floor((width - 60) / 218) - 1
       let MaxItem = MAX
       let lineIndex = 0
       const dateUnknown = []
@@ -135,7 +135,7 @@ class Media extends Base {
 
       /* calculate each row's heigth and their sum */
       this.photoMapDates.forEach((list) => {
-        const tmp = 216 * Math.ceil(list.photos.length / Math.floor((width - 60) / 216)) + !!list.first * 40
+        const tmp = 218 * Math.ceil(list.photos.length / Math.floor((width - 60) / 218)) + !!list.first * 27
         this.allHeight.push(tmp)
         this.rowHeightSum += tmp
         this.indexHeightSum.push(this.rowHeightSum)
@@ -205,7 +205,7 @@ class Media extends Base {
       } else if (spacingTop > 32 && date === parseInt(data[0], 10)) { // show years with enough spacing
         spacingCount = 0
       } else if (date === parseInt(data[0], 10)) { // hide years without enough spacing
-        // date = null
+        date = null
       } else { // show bar
         zIndex = 1
       }
@@ -270,7 +270,7 @@ class Media extends Base {
   }
 
   appBarStyle() {
-    return 'colored'
+    return 'light'
   }
 
   prominent() {
@@ -309,15 +309,16 @@ class Media extends Base {
     return (
       <div style={CustomStyle} ref={ref => (this.refNavigationMenu = ref)}>
         <IconButton onTouchTap={onTouchTap}>
-          <NavigationMenu color="#FFF" />
+          <NavigationMenu color="rgba(0,0,0,0.54)" />
         </IconButton>
       </div>
     )
   }
 
   renderTitle({ style }) {
+    const newStyle = Object.assign(style, { color: 'rgba(0,0,0,0.54)' })
     return (
-      <div style={style}>
+      <div style={newStyle}>
         我的照片
       </div>
     )

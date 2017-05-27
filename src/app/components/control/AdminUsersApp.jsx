@@ -28,7 +28,7 @@ class AdminUsersApp extends React.Component {
           <Avatar>{user.username.slice(0, 1).toUpperCase()}</Avatar>
         </div>
         <div style={{ flex: '0 0 32px' }} />
-        <div style={{ flex: '0 0 240px', fontSize: 16, color: 'rgba(0,0,0,0.87)' }}>{user.username}</div>
+        <div style={{ flex: '0 0 300px', fontSize: 16, color: 'rgba(0,0,0,0.87)' }}>{user.username}</div>
         <div style={{ flex: '0 0 400px', fontSize: 16, color: 'rgba(0,0,0,0.54)' }}>{user.uuid}</div>
       </div>
     )
@@ -49,7 +49,7 @@ class AdminUsersApp extends React.Component {
         <div style={{ overflow: 'auto', height: '100%' }}>
           <div style={{ height: 48, display: 'flex', alignItems: 'center' }}>
             <div style={{ flex: '0 0 104px' }} />
-            <div style={{ flex: '0 0 240px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
+            <div style={{ flex: '0 0 300px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
               用户名
             </div>
             <div style={{ flex: '0 0 400px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>

@@ -34,7 +34,7 @@ class PhotoList extends React.Component {
     this.showDateBar = (op) => {
       // debug('this.showDateBar', op)
       this.hover = op
-      this.refDateBox.style.opacity = op ? 1 : 0
+      this.refDateBox.style.opacity = op ? 0.87 : 0
       this.refTimeline.style.opacity = op ? 1 : 0
     }
 
@@ -64,7 +64,7 @@ class PhotoList extends React.Component {
         this.refDateBar.style.top = `${top}px`
 
         /* update datebox */
-        this.refDateBox.style.opacity = 1
+        this.refDateBox.style.opacity = 0.87
         this.refDateBox.style.top = `${top - 16}px`
         this.refDateBox.innerHTML = this.date
 
@@ -118,7 +118,7 @@ class PhotoList extends React.Component {
 
         /* change position of date box */
         if (this.refDateBox) {
-          this.refDateBox.style.opacity = 1
+          this.refDateBox.style.opacity = 0.87
           this.refDateBox.style.top = `${top - 16}px`
           this.refDateBox.innerHTML = this.date
 
@@ -156,11 +156,16 @@ class PhotoList extends React.Component {
             style={{
               position: 'absolute',
               boxSizing: 'border-box',
+              borderRadius: 11,
+              fontSize: 13,
               top,
               zIndex,
-              color: 'rgba(0,0,0,0.54)',
+              opacity: 0.54,
+              color: 'rgba(0, 0, 0, 1)',
               backgroundColor: 'white',
-              paddingRight: 8,
+              paddingTop: 4,
+              paddingBottom: 4,
+              paddingLeft: 8,
               right: (data[0] === 0) ? 8 : 20,
               textAlign: 'center'
             }}
@@ -291,8 +296,8 @@ class PhotoList extends React.Component {
                 position: 'absolute',
                 top: -1000,
                 height: 2,
-                width: 48,
-                right: 22,
+                width: 32,
+                right: 20,
                 zIndex: 3,
                 backgroundColor: '#4285f4'
               }}
@@ -305,9 +310,9 @@ class PhotoList extends React.Component {
             style={{
               position: 'absolute',
               top: -1000,
-              right: 22,
+              right: 20,
               height: 2,
-              width: 48,
+              width: 32,
               zIndex: 4,
               transition: 'opacity 200ms',
               opacity: this.hover ? 1 : 0,
@@ -320,14 +325,19 @@ class PhotoList extends React.Component {
             ref={ref => (this.refDateBox = ref)}
             style={{
               position: 'absolute',
+              fontSize: 14,
               top: -1000,
               right: 96,
-              padding: 8,
+              padding: 12,
               width: 84,
               color: 'white',
               backgroundColor: 'black',
               transition: 'opacity 200ms',
-              opacity: this.hover ? 1 : 0
+              opacity: this.hover ? 0.87 : 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 2
             }}
           />
         </div>

@@ -1,5 +1,6 @@
 import React, { Component, PureComponent } from 'react'
 import Radium from 'radium'
+import { ipcRenderer } from 'electron'
 
 import { Paper, Divider, IconButton, Menu, MenuItem, FloatingActionButton } from 'material-ui'
 import { orange700, blue700, indigo700, indigo500, teal500 } from 'material-ui/styles/colors'
@@ -379,6 +380,7 @@ class Home extends Base {
             <FileDetail
               detailFile={this.state.entries[this.state.detailIndex]}
               path={this.state.path}
+              ipcRenderer={ipcRenderer}
             /> :
             <div style={{ height: 128, backgroundColor: '#00796B' }} />
         }
@@ -386,7 +388,7 @@ class Home extends Base {
     )
   }
 
-  renderContent() {
+  renderContent({ toggleDetail, openSnackBar }) {
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
 
@@ -409,6 +411,7 @@ class Home extends Base {
         >
           <MenuItem primaryText="新建文件夹" onTouchTap={this.openCreateNewFolder.bind(this)} />
           <MenuItem primaryText="下载" onTouchTap={this.download.bind(this)} />
+          <MenuItem primaryText="详细信息" onTouchTap={toggleDetail} />
           <MenuItem primaryText="刪除" onTouchTap={this.delete.bind(this)} />
           <MenuItem primaryText="重命名" onTouchTap={this.openRenameFolder.bind(this)} />
           <MenuItem primaryText="移动" onTouchTap={this.openMove.bind(this)} />
