@@ -15,9 +15,9 @@ class DriveHeader extends React.PureComponent {
 
   render() {
     return (
-      <div style={{ height: 48, display: 'flex', alignItems: 'center' }}>
+      <div style={{ height: 48, display: 'flex', alignItems: 'center', width: '100%' }}>
         <div style={{ flex: '0 0 104px' }} />
-        <div style={{ flex: '0 0 240px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
+        <div style={{ flex: '0 0 300px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
           名称
         </div>
         <div style={{ flex: '0 0 540px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
@@ -70,8 +70,28 @@ class DriveRow extends React.PureComponent {
           <Avatar><FileFolder color="white" /></Avatar>
         </div>
         <div style={{ flex: '0 0 32px' }} />
-        <div style={{ flex: '0 0 240px', fontSize: 16, color: 'rgba(0,0,0,0.87)' }}>{drive.label}</div>
-        <div style={{ flex: '0 0 540px', fontSize: 16, color: 'rgba(0,0,0,0.54)' }} >
+        <div
+          style={{
+            flex: '0 0 300px',
+            fontSize: 16,
+            color: 'rgba(0,0,0,0.87)',
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis'
+          }}
+        >
+          {drive.label}
+        </div>
+        <div
+          style={{
+            flex: '0 0 540px',
+            fontSize: 16,
+            color: 'rgba(0,0,0,0.54)',
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis'
+          }}
+        >
           { drive.writelist.map(uuid => users.find(u => u.uuid === uuid).username).join(', ') }
         </div>
         <div style={{ flexGrow: 1 }} />
@@ -109,7 +129,7 @@ class AdminDrives extends React.Component {
           <ContentAdd />
         </FloatingActionButton>
 
-        <div style={{ overflow: 'auto', height: '100%' }}>
+        <div style={{ overflow: 'auto', height: '100%', maxWidth: '100%' }}>
           <DriveHeader />
           <div style={{ height: 8 }} />
           <Divider style={{ marginLeft: 104 }} />

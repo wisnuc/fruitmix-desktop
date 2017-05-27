@@ -119,7 +119,7 @@ class Row extends PureComponent {
                   ? <EditorInsertDriveFile style={{color: 'rgba(0,0,0,0.54'}} />
                   : null } 
           </div>
-          <div style={{flexGrow: 1, overflow:'hidden', whiteSpace:'nowrap', textOverflow: 'ellipsis'}}>
+          <div style={{flex: '0 0 390px', overflow:'hidden', whiteSpace:'nowrap', textOverflow: 'ellipsis'}}>
             { entry.name }
           </div>
           <div style={{flex: '0 1 160px', fontSize: 13, color: 'rgba(0,0,0,0.54)', textAlign: 'right'}}>
@@ -129,6 +129,7 @@ class Row extends PureComponent {
             marginRight: 72}}>
             { entry.type === 'file' && prettysize(entry.size) }
           </div>
+          <div style={{flexGrow: 1}} />
         </div>
       </div>
     )
@@ -261,9 +262,12 @@ class FileContent extends Component {
         <div style={{width: '100%', height: 40}}>
           <div style={{width: '100%',height: '100%',display: 'flex',alignItems: 'center'}}>
           <div style={{flex: '0 0 116px'}} />
-          <div style={{flexGrow: 1}}>文件名</div>
+          <div style={{flex: '0 0 390px', overflow:'hidden', whiteSpace:'nowrap', textOverflow: 'ellipsis'}}>
+            文件名
+          </div>
           <div style={{flex: '0 1 160px', fontSize: 13, color: 'rgba(0,0,0,0.54)', textAlign: 'right'}}>修改时间</div>
           <div style={{flex: '0 1 160px', fontSize: 13, color: 'rgba(0,0,0,0.54)', textAlign: 'right', marginRight: 72}}>文件大小</div>
+          <div style={{flexGrow: 1}} />
         </div>
         </div>
         <div style={{width: '100%', height: 'calc(100% - 48px)'}}>

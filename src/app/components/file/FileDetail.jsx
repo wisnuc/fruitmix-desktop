@@ -37,8 +37,21 @@ const getPath = (path) => {
     } else {
       newPath.push(item.name)
     }
+    return null
   })
   return newPath.join('/')
+}
+
+const getResolution = (height, width) => {
+  let res = height * width
+  if (res > 100000000) {
+    res = Math.ceil(res / 100000000)
+    return `${res} 亿像素 ${height} x ${width}`
+  } else if (res > 10000) {
+    res = Math.ceil(res / 10000)
+    return `${res} 万像素 ${height} x ${width}`
+  }
+  return `${res} 像素 ${height} x ${width}`
 }
 
 class FileDetail extends React.Component {
@@ -60,7 +73,7 @@ class FileDetail extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (nextProps && nextProps.detailFile && nextProps.detailFile.digest &&
-      (nextProps.detailFile.digest !== this.props.detailFile.digest)) {
+      (!this.props.detailFile || nextProps.detailFile.digest !== this.props.detailFile.digest)) {
       this.session = UUID.v4()
       this.props.ipcRenderer.send('mediaShowThumb', this.session, nextProps.detailFile.digest, 210, 210)
       this.props.ipcRenderer.on('getThumbSuccess', this.updateThumbPath)
@@ -142,15 +155,24 @@ class FileDetail extends React.Component {
 
   render() {
     const { detailFile, path } = this.props
-    // debug('detailFile', detailFile, path)
+    // debug('detailFile', detailFile)
     if (!detailFile) return <div style={{ height: 128, backgroundColor: '#00796B' }} />
 
     const { metadata, digest } = detailFile
     let exifDateTime = ''
     let exifModel = ''
+    let height = ''
+    let width = ''
     if (metadata) {
       exifDateTime = metadata.exifDateTime
       exifModel = metadata.exifModel
+      height = metadata.height
+      width = metadata.width
+    }
+
+    let longPic = false
+    if (height && width && (height / width > 2 || width / height > 2)) {
+      longPic = true
     }
 
     const Titles = [
@@ -159,7 +181,8 @@ class FileDetail extends React.Component {
       detailFile.type !== 'public' ? '位置' : '',
       detailFile.type !== 'public' ? '修改时间' : '',
       exifDateTime ? '拍摄时间' : '',
-      exifModel ? '拍摄设备' : ''
+      exifModel ? '拍摄设备' : '',
+      height && width ? '分辨率' : ''
     ]
 
     const Values = [
@@ -168,7 +191,8 @@ class FileDetail extends React.Component {
       getPath(path),
       phaseDate(detailFile.mtime),
       phaseiExifTime(exifDateTime),
-      exifModel
+      exifModel,
+      getResolution(height, width)
     ]
     return (
       <div style={{ height: '100%' }}>
@@ -186,8 +210,6 @@ class FileDetail extends React.Component {
           digest &&
             <div
               style={{
-                width: 312,
-                height: 234,
                 margin: 24,
                 overflow: 'hidden',
                 display: 'flex',
@@ -197,7 +219,13 @@ class FileDetail extends React.Component {
             >
               {
                 this.state.thumbPath &&
-                  <img style={{ objectFit: 'cover' }} alt="ThumbImage" src={this.state.thumbPath} />
+                  <img
+                    width={312}
+                    height={234}
+                    style={{ objectFit: longPic ? 'contain' : 'cover' }}
+                    alt="ThumbImage"
+                    src={this.state.thumbPath}
+                  />
               }
             </div>
         }
