@@ -86,7 +86,7 @@ var utils = {
 			time.getMonth() + 1,
 			time.getDate(),
 			time.getHours(),
-			time.getMinutes().toString().length == 1? '0' + time.getMinutes():time.getMinutes()
+			time.getMinutes().toString().length == 1? Number(('0' + time.getMinutes())):time.getMinutes()
 		]
 	},
 

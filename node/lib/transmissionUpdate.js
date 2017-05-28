@@ -11,7 +11,7 @@ let lock = false
 const sendInfor = urgent => {
 	let concatUserTasks = [].concat(uploadingTasks, downloadingTasks)
 	let concatFinishTasks = [].concat(uploadedTasks, downloadedTasks)
-	console.log(concatFinishTasks.length)
+	// console.log(concatFinishTasks.length)
 	let userTasks = quickSort(concatUserTasks, 'createTime')
 	let finishTasks = quickSort(concatFinishTasks, 'finishDate')
 	getMainWindow().webContents.send(
@@ -29,15 +29,11 @@ const quickSort = (arr, type) => {
 	let left = []
 	let right = []
 	for (let i = 0; i < arr.length; i++) {
-		if (arr[i][type] < pivot[type]) left.push(arr[i])
-		else right.push(arr[i])
+		if (arr[i][type] < pivot[type]) right.push(arr[i])
+		else left.push(arr[i])
 	}
 	
-	return quickSort(left).concat([pivot], quickSort(right))
-}
-
-const compare = (A, B) => {
-	
+	return quickSort(left, type).concat([pivot], quickSort(right, type))
 }
 
 //handle will open dialog from electron to clean record of the task have been downloaded
@@ -66,15 +62,6 @@ const openHandle = (e, tasks) => {
 	let osType = os.platform()
 	tasks.forEach(task => {
 		let pathProperty = task.trsType === 'download'? 'downloadPath': 'abspath'
-		// let taskPath
-		// if (task.trsType === 'download') {
-		// 	taskPath = task[pathProperty]
-		// }else {
-		// 	console.log(task[pathProperty])
-		// 	let index = task[pathProperty].lastIndexOf('\\')
-		// 	console.log(index)
-		// 	taskPath = task[pathProperty].substring(0, index)
-		// }
 		let taskPath = task.trsType === 'download' ? task[pathProperty]: task[pathProperty].substring(0, task[pathProperty].lastIndexOf('\\'))
 		console.log('打开目录的文件资源管理器', taskPath)
 		switch (osType) {
@@ -92,8 +79,13 @@ const openHandle = (e, tasks) => {
 	})
 }
 
+const transferHandle = args => {
+	console.log(args.obj)
+}
+
 var commandMap = new Map([
-  ['CLEAN_RECORD', cleanRecordHandle]
+  ['CLEAN_RECORD', cleanRecordHandle],
+  ['TRANSFER', transferHandle]
 ])
 
 

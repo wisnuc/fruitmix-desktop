@@ -305,8 +305,9 @@ class Home extends Base {
   }
 
   refresh() {
-    const rUUID = this.state.path[0].uuid
-    this.ctx.props.apis.request('listNavDir', { rootUUID: rUUID, dirUUID: rUUID })
+    let rUUID = this.state.path[0].uuid
+    let dUUID = this.state.path[this.state.path.length - 1].uuid
+    this.ctx.props.apis.request('listNavDir', { rootUUID: rUUID, dirUUID: dUUID })
   }
 
   /** renderers **/
