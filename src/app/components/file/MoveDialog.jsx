@@ -53,7 +53,7 @@ class MoveDialog extends React.PureComponent {
   }
 
   consistPath(path) {
-    console.log(path)
+    // console.log(path)
     let newPath = []
     if (path[0].type == 'public') {
       //entry is public
@@ -205,7 +205,7 @@ class MoveDialog extends React.PureComponent {
       let newPathString = ''
       this.paths.forEach(item => oldPathString += item.name)
       this.state.path.forEach(item => newPathString += item.name)
-      console.log(oldPathString, newPathString)
+      // console.log(oldPathString, newPathString)
       if (oldPathString == newPathString && this.selectedArr.findIndex(item => item.name === node.name) !== -1) return
     }
 
@@ -374,13 +374,12 @@ class MoveDialog extends React.PureComponent {
         type:item.uuid?'fruitmix':'ext', 
         path:item.uuid?item.uuid:string + item.name,
         rootPath:item.uuid?null:this.path[1].fileSystemUUID}, dst}
-      console.log(obj)
-
+      // return console.log(obj, this.directory)
       this.apost('files/transfer/move',obj).end((err, res) => {
         if (err) console.log(err)
         else {
-          Object.assign(obj, JSON.parse(res.text), {name:item.name, createDate: (new Date()).getTime()})
-          console.log(obj)
+          Object.assign(obj, JSON.parse(res.text), {name:item.name, createDate: (new Date()).getTime(), type:'move', directory:this.directory})
+          // console.log(obj)
           command('fileapp', 'TRANSFER', {obj})
           this.props.onRequestClose()
         }

@@ -344,6 +344,7 @@ class TaskManager {
 			this.finishDate = utils.formatDate()
 			userTasks.splice(userTasks.indexOf(this),1)
 			finishTasks.unshift(this)
+			getMainWindow().webContents.send('driveListUpdate', Object.assign({},{uuid:this.target,message:'上传成功'}))
 			sendMessage()
 			return this.finishStore()
 		}else return this.uploadSchedule()

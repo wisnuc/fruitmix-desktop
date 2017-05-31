@@ -1,6 +1,6 @@
 import React, { Component, PureComponent } from 'react'
 import Radium from 'radium'
-
+import { ipcRenderer } from 'electron'
 import { Avatar, Divider, MenuItem } from 'material-ui'
 import HardwareDeveloperBoard from 'material-ui/svg-icons/hardware/developer-board'
 import FileFolder from 'material-ui/svg-icons/file/folder'
@@ -87,6 +87,22 @@ class Physical extends Base {
       contextMenuX: -1,
       move: false
     }
+
+    ipcRenderer.on('physicalListUpdate', (e, obj) => {
+      if (this.state.path.length < 2) return
+      if (obj.rootPath !== this.state.path[1].fileSystemUUID) return
+      let string = ''
+      this.state.path.forEach((item, index) => {
+        if (index > 1) string += ('/' + item.name) 
+      })
+      let position = obj.path.lastIndexOf('/')
+      let dirPath = obj.path.substring(0, position)
+      if (string == dirPath) {
+        this.ctx.openSnackBar(obj.message)
+        this.refresh() 
+      }
+      
+    })
   }
 
   updateState(data) {
@@ -120,7 +136,6 @@ class Physical extends Base {
   }
 
   navEnter() {
-    console.log('nav enter tirgger')
     let apis = this.ctx.props.apis
     this.path = [{name:'物理磁盘', type: 'physical', uuid:'物理磁盘'}]
     this.setState({inRoot :true, entries :[]})
@@ -246,11 +261,22 @@ class Physical extends Base {
               entries={this.state.entries}
               select={this.state.select}
               type='physical'
+              operation='move'
             />}
         </DialogOverlay>
 
       </div>
     )
+  }
+
+  refresh() {
+    let path = this.state.path
+    let string = ''
+    string += path[1].fileSystemUUID + '/'
+    path.forEach((item, index) => {
+      if (index > 1) string += (item.name + '/')
+    })
+    this.ctx.props.apis.request('extListDir', {path: encodeURI(string)})
   }
 
   listByBread(pathIndex) {
@@ -264,7 +290,7 @@ class Physical extends Base {
       else string += path[index].name + '/'
     })
     newPath.splice(pathIndex + 1)
-    console.log(string, newPath)
+    // console.log(string, newPath)
     this.ctx.props.apis.request('extListDir', {path: encodeURI(string)})
     this.path = newPath
     this.setState({inRoot: false})
@@ -275,15 +301,15 @@ class Physical extends Base {
       if (this.state.select.selected.length > 1) return
       fsy = this.state.entries[this.state.select.selected[0]]
     }
-    console.log(fsy, this.state)
+    // console.log(fsy, this.state)
     if (fsy.type == 'file') return
     let string = ''
     let fileSystemIndex = this.state.path.findIndex(item => item.fileSystemUUID)
     if (fileSystemIndex == -1) {
-      console.log('fileSystemIndex 没有找到 在根目录')
+      // console.log('fileSystemIndex 没有找到 在根目录')
       string += (fsy.fileSystemUUID + '/')
     }else {
-      console.log('fileSystemIndex 找到 不在根目录', fileSystemIndex)
+      // console.log('fileSystemIndex 找到 不在根目录', fileSystemIndex)
       this.state.path.forEach((item, index) => {
         if (index < fileSystemIndex) {}
         if (index == fileSystemIndex) string += (item.fileSystemUUID + '/')
@@ -293,7 +319,7 @@ class Physical extends Base {
     }
 
     let path = [...this.state.path, fsy]
-    console.log(string)
+    // console.log(string)
 
     this.ctx.props.apis.request('extListDir', {path: encodeURI(string)})
     this.path = path

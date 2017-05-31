@@ -102,6 +102,13 @@ class Home extends Base {
       }
     }
 
+    ipcRenderer.on('driveListUpdate', (e, obj) => {
+      if (obj.uuid == this.state.path[this.state.path.length - 1].uuid) {
+        this.ctx.openSnackBar(obj.message)
+        this.refresh()
+      }
+    })
+
     this.updateDetailBound = this.updateDetail.bind(this)
   }
 
@@ -443,6 +450,7 @@ class Home extends Base {
             entries={this.state.entries}
             select={this.state.select}
             type="home"
+            operation='move'
           />}
         </DialogOverlay>
 
