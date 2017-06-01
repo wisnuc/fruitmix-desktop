@@ -39,11 +39,19 @@ class Public extends Base {
       rename: false,
       move:false,
       inRoot: false,
-
+      copy: false,
       detailIndex: -1
     } 
 
     this.updateDetailBound = this.updateDetail.bind(this)
+
+    ipcRenderer.on('driveListUpdate', (e, obj) => {
+      if (this.state.path.length == 0) return
+      if (obj.uuid == this.state.path[this.state.path.length - 1].uuid) {
+        this.ctx.openSnackBar(obj.message)
+        this.refresh()
+      }
+    })
   }
 
   updateDetail(index) {
@@ -230,12 +238,13 @@ class Public extends Base {
     })
   }
 
-  renameFolder() {
+  openRename() {
     this.setState({rename: true})
   }
 
   closeRename() {
     this.setState({rename: false})
+    this.refresh()
   }
 
   openMove() {
@@ -246,14 +255,26 @@ class Public extends Base {
     this.setState({move:false})
   }
 
+  openCopy() {
+    this.setState({ copy: true})
+  }
+
+  closeCopy() {
+    this.setState({ copy: false})
+  }
+
   createNewFolder() {
     this.setState({ createNewFolder: true }) 
   } 
 
   closeCreateFolder() {
+    this.setState({ createNewFolder: false }) 
+    this.refresh()
+  }
+
+  refresh() {
     let request = this.ctx.props.apis.request
     let path = this.state.path
-    this.setState({ createNewFolder: false }) 
     if (this.state.inRoot) request('adminDrives')
     else request('driveListNavDir', {
       dirUUID: path[path.length - 1].uuid,
@@ -276,12 +297,12 @@ class Public extends Base {
     })
 
     let args = { folders, files, dirUUID: p[p.length - 1].uuid}
-    console.log(args)
+    // console.log(args)
     command('fileapp', 'DOWNLOAD', args)
   }
 
   delete() {
-    console.log(this)
+    // console.log(this)
     let entries = this.state.entries
     let selected = this.state.select.selected
     let count = selected.length
@@ -372,8 +393,9 @@ class Public extends Base {
           <MenuItem primaryText='新建文件夹' disabled={this.state.path.length>1?false:true} onTouchTap={this.createNewFolder.bind(this)} /> 
           <MenuItem primaryText='下载' onTouchTap={this.download.bind(this)} /> 
           <MenuItem primaryText='刪除' disabled={this.state.path.length>1?false:true} onTouchTap={this.delete.bind(this)} /> 
-          <MenuItem primaryText='重命名' disabled={this.state.path.length>1?false:true} onTouchTap={this.renameFolder.bind(this)} />
+          <MenuItem primaryText='重命名' disabled={this.state.path.length>1?false:true} onTouchTap={this.openRename.bind(this)} />
           <MenuItem primaryText='移动' disabled={this.state.path.length>1?false:true} onTouchTap={this.openMove.bind(this)} />
+          <MenuItem primaryText='拷贝' disabled={this.state.path.length>1?false:true} onTouchTap={this.openCopy.bind(this)} />
         </ContextMenu> 
 
         <DialogOverlay open={!!this.state.createNewFolder} onRequestClose={this.closeCreateFolder.bind(this)}>
@@ -403,6 +425,18 @@ class Public extends Base {
               entries={this.state.entries}
               select={this.state.select}
               type='public'
+              operation='move'
+            />}
+        </DialogOverlay>
+
+        <DialogOverlay open={this.state.copy} onRequestClose={this.closeCopy.bind(this)}>
+          { this.state.copy && <MoveDialog
+              apis={this.ctx.props.apis} 
+              path={this.state.path} 
+              entries={this.state.entries}
+              select={this.state.select}
+              type='public'
+              operation='copy'
             />}
         </DialogOverlay>
       </div>

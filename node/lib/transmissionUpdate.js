@@ -4,6 +4,7 @@ import { dialog, ipcMain } from 'electron'
 import { getMainWindow } from './window'
 import { userTasks as uploadingTasks, finishTasks as uploadedTasks} from './newUpload'
 import { userTasks as downloadingTasks, finishTasks as downloadedTasks} from './newDownload'
+import TransferManager from './transferManager'
 import registerCommandHandlers from './command'
 
 let lock = false
@@ -11,7 +12,6 @@ let lock = false
 const sendInfor = urgent => {
 	let concatUserTasks = [].concat(uploadingTasks, downloadingTasks)
 	let concatFinishTasks = [].concat(uploadedTasks, downloadedTasks)
-	// console.log(concatFinishTasks.length)
 	let userTasks = quickSort(concatUserTasks, 'createTime')
 	let finishTasks = quickSort(concatFinishTasks, 'finishDate')
 	getMainWindow().webContents.send(
@@ -80,7 +80,7 @@ const openHandle = (e, tasks) => {
 }
 
 const transferHandle = args => {
-	console.log(args.obj)
+	TransferManager.addTask(args.obj)
 }
 
 var commandMap = new Map([
