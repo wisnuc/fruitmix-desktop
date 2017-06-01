@@ -34,51 +34,81 @@ ___
 
 ## 项目结构
 
-**dbCache : 数据库文件存放目录**
+* dbCache : 数据库文件存放目录
 
-**doc : 项目文档目录**
+* doc : 项目文档目录
 
-**media : 缩略图 原图存放目录**
+* media : 缩略图 原图存放目录
 
-**node : 后端源代码目录**
+* node : 后端源代码目录
 
-* lib : electron 相关模块
-* serve : electron redux存放目录（store, action, reducers）
+	* lib : electron 相关模块
+	* serve : electron redux存放目录（store, action, reducers）
 
-**node_modules : 存放项目依赖包（工具相关）**
+* node_modules : 存放项目依赖包（工具相关）
 
-**public :  前端资源文件目录,**
+* public :  前端资源文件目录
 
-* assets : 存放资源文件（css, images, font)
-* bundle.js : 前端打包输出
+	* assets : 存放资源文件（css, images, font)
+	* bundle.js : 前端打包输出
 
-**src : 前端源代码目录**
+* src : 前端源代码目录
 
-* app
-	* action : redux相关action
-	* components : react组件
-	* lib : 组件相关依赖
-	* reducers : redux 相关 reducer
-	* stores : 创建redux store
-	* utils : 各类封装的function
-	* app.js : js入口, 定义debug关键字 , 调用fruitmix.js
-	* fruitmix.js : 挂载组件, 事件监听
-* assets : 组件相关样式、图片 
-* index.html : 前端页面入口
+	* app
+		* action : redux相关action
+		* components : react组件
+		* lib : 组件相关依赖
+		* reducers : redux 相关 reducer
+		* stores : 创建redux store
+		* utils : 各类封装的function
+		* app.js : js入口, 定义debug关键字 , 调用fruitmix.js
+		* fruitmix.js : 挂载组件, 事件监听
+	* assets : 组件相关样式、图片 
+	* index.html : 前端页面入口
 
-**test: 模块单元测试目录**
+* test: 模块单元测试目录
 
-**.babelrc : babel工具配置文件**
+* .babelrc : babel工具配置文件
 
-**devel.js :  开发环境使用的入口文件**
+* devel.js :  开发环境使用的入口文件
 
-**Gruntfile.js :  grunt 配置文件** [详细说明](https://gruntjs.com/sample-gruntfile)
+* Gruntfile.js :  grunt 配置文件 [详细说明](https://gruntjs.com/sample-gruntfile)
 
-**package.json : 配置项目依赖及命令** [详细说明](https://docs.npmjs.com/files/package.json)
+* package.json : 配置项目依赖及命令 [详细说明](https://docs.npmjs.com/files/package.json)
 
-**webpack.config.js : webpack配置文件** [详细说明](https://webpack.js.org/concepts/)
+* webpack.config.js : webpack配置文件 [详细说明](https://webpack.js.org/concepts/)
 
-## 前端设计逻辑
+## 前端架构设计
+
+* UML 
+
+![UML](UML.png)
+
+* components
+
+	* Login: 用户登录界面
+	
+	* Maintenance: 维护模式页面
+	
+	* User: 用户登录成功后的使用界面。该部分采用MVVM的架构，即Model-View-ViewModel，View绑定到ViewModel，通过ViewModel来控制View。ViewModel跟Model通讯，告诉它更新来响应UI。
+
+		* Model: 管理api，分发数据
+
+		* ViewModel: 处理单个View所需要的数据与操作
+
+		* View: 呈现具体的用户界面
+
+* interface
+
+	* mdns: 搜索局域网内的设备信息，如ip，用户列表等
+
+	* device api: 包括3000端口system部分api，及3721端口与登录或应用初始化相关的api
+
+	* fruitmix api: 3721端口的api，如File APIs、Media APIs等
+
+	* node: 通过ipcRenderer与node通讯，获取本地文件，如file、media等
+
+## 前端业务逻辑
 
 主要包括三部分的页面，即Login、Maintenance、User页面。
 
@@ -110,35 +140,29 @@ ___
 
 ### User
 
-该部分采用MVVM的架构，即Model-View-ViewModel，View绑定到ViewModel，通过ViewModel来控制View。ViewModel跟Model通讯，告诉它更新来响应UI。
+用户使用界面组成包括AppBar、QuickNav、content、Detail、NavDrawer、snackBar等
 
-* Model: 管理api，分发数据
-* ViewModel: 处理单个View所需要的数据与操作
-* View: 呈现用户界面
-
-用户界面组成包括AppBar、QuickNav、content、Detail、NavDrawer、snackBar等
-
-#### AppBar
+**AppBar**
 
 顶部菜单栏和工具栏
 
-#### NavDrawer
+**NavDrawer**
 
 左侧导航菜单栏，包括顶部的avatar、用户名、设备序列号、各个导航菜单及退出按钮。
 
-#### QuickNav
+**QuickNav**
 
-快速导航栏，包括当前group的所有页面导航
+快速导航栏，包括当前group的所有页面导航，但group内仅一个页面时不显示
 
-#### Detail
+**Detail**
 
 右侧可弹出的detail页面
 
-#### snackBar
+**snackBar**
 	
 全局消息显示，主要是与服务器通讯后的成功或失败信息
 
-#### content
+**content**
 
 主要内容页面，可以是以下页面之一，默认为`我的文件`页面
 
@@ -155,12 +179,16 @@ ___
 	
 * settings: admin用户的管理页面，普通用户该部分不展示
 
-	* 用户
-	* 共享文件夹
+	* 用户管理
+	* 共享文件夹管理
 	* 设备信息
 	* 网络设置
 	* 时间与日期
 	* 重启和关机
+	
+* others: 其他页面，包括
+	
+	* 我的账户
 
 ## 前端源码详解（src/app/）
 
@@ -269,7 +297,7 @@ ViewModel 部分
 	* control/AdminDriversApp: 显示共享盘列表
 	* control/DriversDetail: 显示共享文件盘详细内容，并提供修改功能
 
-* Device.jsx: 设备信息，传递与更新device信息，调用control/DeviceInfo。
+* Device.jsx: 设备信息，传递与更新device信息，调用control/DeviceInfo
 
 * Networking.jsx: 网络管理，传递与更新net信息，调用control/NetworkInfo
 
