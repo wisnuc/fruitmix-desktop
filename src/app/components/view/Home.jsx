@@ -84,9 +84,8 @@ class Home extends Base {
       createNewFolder: false,
       rename: false,
       move: false,
-
+      copy: false,
       detailIndex: -1
-
     }
 
     this.onListNavBySelect = this.listNavBySelect.bind(this)
@@ -101,6 +100,14 @@ class Home extends Base {
         })
       }
     }
+
+    ipcRenderer.on('driveListUpdate', (e, obj) => {
+      console.log('in home')
+      if (obj.uuid == this.state.path[this.state.path.length - 1].uuid) {
+        this.ctx.openSnackBar(obj.message)
+        this.refresh()
+      }
+    })
 
     this.updateDetailBound = this.updateDetail.bind(this)
   }
@@ -245,6 +252,14 @@ class Home extends Base {
 
   closeMove() {
     this.setState({ move: false })
+  }
+
+  openCopy() {
+    this.setState({ copy: true})
+  }
+
+  closeCopy() {
+    this.setState({ copy: false})
   }
 
   openUploadDialog() {
@@ -415,6 +430,7 @@ class Home extends Base {
           <MenuItem primaryText="刪除" onTouchTap={this.delete.bind(this)} />
           <MenuItem primaryText="重命名" onTouchTap={this.openRenameFolder.bind(this)} />
           <MenuItem primaryText="移动" onTouchTap={this.openMove.bind(this)} />
+          <MenuItem primaryText="拷贝" onTouchTap={this.openCopy.bind(this)} />
         </ContextMenu>
 
         <DialogOverlay open={this.state.createNewFolder} onRequestClose={this.closeCreateNewFolder.bind(this)}>
@@ -443,6 +459,18 @@ class Home extends Base {
             entries={this.state.entries}
             select={this.state.select}
             type="home"
+            operation='move'
+          />}
+        </DialogOverlay>
+
+        <DialogOverlay open={this.state.copy} onRequestClose={this.closeCopy.bind(this)}>
+          { this.state.copy && <MoveDialog
+            apis={this.ctx.props.apis}
+            path={this.state.path}
+            entries={this.state.entries}
+            select={this.state.select}
+            type="home"
+            operation='copy'
           />}
         </DialogOverlay>
 
