@@ -135,4 +135,13 @@ ipcMain.on('RESUME_UPLOADING', (e, uuid) => {
   if (task) task.resumeTask()
 })
 
+ipcMain.on('LOGIN_OUT', e => {
+  console.log('LOGIN_OUT in upload')
+  userTasks.forEach(item => item.pauseTask())
+  userTasks.length = 0
+  finishTasks.length = 0
+  sendMsg()
+})
+
+
 export { userTasks, finishTasks }

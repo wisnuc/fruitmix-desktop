@@ -1,6 +1,6 @@
 import React, { Component, PureComponent } from 'react'
 import muiThemeable from 'material-ui/styles/muiThemeable'
-
+import { ipcRenderer } from 'electron'
 import Radium from 'radium'
 
 import { Avatar, IconButton, Drawer, Divider } from 'material-ui'
@@ -188,7 +188,10 @@ class NavDrawer extends React.Component {
           icon={ActionExitToApp}
           text="退出"
           dense
-          onTouchTap={() => this.props.navToMain('login')}
+          onTouchTap={() => {
+            ipcRenderer.send('LOGIN_OUT')
+            this.props.navToMain('login')
+          }}
         />
 
       </Drawer>

@@ -102,6 +102,9 @@ class NavViews extends Component {
     this.navTo('home')
     ipcRenderer.send('GET_TRANSMISSION')
     ipcRenderer.on('UPDATE_TRANSMISSION', this.updateTransmissionBound)
+    ipcRenderer.on('snackbarMessage', (e, message) => {
+      this.openSnackBar(message.message)
+    })
   }
 
   componentWillUnmount() {
