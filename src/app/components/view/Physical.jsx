@@ -85,7 +85,8 @@ class Physical extends Base {
       contextMenuOpen: false,
       contextMenuY: -1,
       contextMenuX: -1,
-      move: false
+      move: false,
+      copy: false
     }
 
     ipcRenderer.on('physicalListUpdate', (e, obj) => {
@@ -252,6 +253,7 @@ class Physical extends Base {
           onRequestClose={() => this.hideContextMenu()}
         >
           <MenuItem primaryText='移动' disabled={this.state.path.length>1?false:true} onTouchTap={this.openMove.bind(this)} />
+          <MenuItem primaryText='拷贝' disabled={this.state.path.length>1?false:true} onTouchTap={this.openCopy.bind(this)} />
         </ContextMenu> 
 
         <DialogOverlay open={this.state.move} onRequestClose={this.closeMove.bind(this)}>
@@ -262,6 +264,17 @@ class Physical extends Base {
               select={this.state.select}
               type='physical'
               operation='move'
+            />}
+        </DialogOverlay>
+
+        <DialogOverlay open={this.state.copy} onRequestClose={this.closeCopy.bind(this)}>
+          { this.state.copy && <MoveDialog
+              apis={this.ctx.props.apis} 
+              path={this.state.path} 
+              entries={this.state.entries}
+              select={this.state.select}
+              type='public'
+              operation='copy'
             />}
         </DialogOverlay>
 
@@ -354,6 +367,14 @@ class Physical extends Base {
 
   closeMove() {
     this.setState({move:false})
+  }
+
+  openCopy() {
+    this.setState({ copy: true})
+  }
+
+  closeCopy() {
+    this.setState({ copy: false})
   }
 }
 

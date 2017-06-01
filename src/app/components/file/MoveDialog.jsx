@@ -154,9 +154,10 @@ class MoveDialog extends React.PureComponent {
   }
 
   getButtonText() {
-    if (this.state.currentSelectedIndex != -1) return '移动' 
-    else if (this.directory.uuid === this.state.currentDir.uuid) return '移动'
-    else return '移动到这里'
+    let text = this.props.operation == 'move'?'移动':'拷贝'
+    if (this.state.currentSelectedIndex != -1) return text
+    else if (this.directory.uuid === this.state.currentDir.uuid) return text
+    else return text + '到这里'
   }
 
   render() {
@@ -375,10 +376,10 @@ class MoveDialog extends React.PureComponent {
         path:item.uuid?item.uuid:string + item.name,
         rootPath:item.uuid?null:this.path[1].fileSystemUUID}, dst}
       // return console.log(obj, this.directory)
-      this.apost('files/transfer/move',obj).end((err, res) => {
+      this.apost('files/transfer/' + this.props.operation, obj).end((err, res) => {
         if (err) console.log(err)
         else {
-          Object.assign(obj, JSON.parse(res.text), {name:item.name, createDate: (new Date()).getTime(), type:'move', directory:this.directory})
+          Object.assign(obj, JSON.parse(res.text), {name:item.name, createDate: (new Date()).getTime(), type:this.props.operation, directory:this.directory})
           // console.log(obj)
           command('fileapp', 'TRANSFER', {obj})
           this.props.onRequestClose()

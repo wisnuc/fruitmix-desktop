@@ -39,7 +39,7 @@ class Public extends Base {
       rename: false,
       move:false,
       inRoot: false,
-
+      copy: false,
       detailIndex: -1
     } 
 
@@ -255,6 +255,14 @@ class Public extends Base {
     this.setState({move:false})
   }
 
+  openCopy() {
+    this.setState({ copy: true})
+  }
+
+  closeCopy() {
+    this.setState({ copy: false})
+  }
+
   createNewFolder() {
     this.setState({ createNewFolder: true }) 
   } 
@@ -387,6 +395,7 @@ class Public extends Base {
           <MenuItem primaryText='刪除' disabled={this.state.path.length>1?false:true} onTouchTap={this.delete.bind(this)} /> 
           <MenuItem primaryText='重命名' disabled={this.state.path.length>1?false:true} onTouchTap={this.openRename.bind(this)} />
           <MenuItem primaryText='移动' disabled={this.state.path.length>1?false:true} onTouchTap={this.openMove.bind(this)} />
+          <MenuItem primaryText='拷贝' disabled={this.state.path.length>1?false:true} onTouchTap={this.openCopy.bind(this)} />
         </ContextMenu> 
 
         <DialogOverlay open={!!this.state.createNewFolder} onRequestClose={this.closeCreateFolder.bind(this)}>
@@ -417,6 +426,17 @@ class Public extends Base {
               select={this.state.select}
               type='public'
               operation='move'
+            />}
+        </DialogOverlay>
+
+        <DialogOverlay open={this.state.copy} onRequestClose={this.closeCopy.bind(this)}>
+          { this.state.copy && <MoveDialog
+              apis={this.ctx.props.apis} 
+              path={this.state.path} 
+              entries={this.state.entries}
+              select={this.state.select}
+              type='public'
+              operation='copy'
             />}
         </DialogOverlay>
       </div>
