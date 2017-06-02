@@ -72,7 +72,7 @@ class NavViews extends Component {
     // this.install('storage', Storage)
     this.install('networking', Networking)
     this.install('timeDate', TimeDate)
-    // this.install('fanControl', FanControl)
+    this.install('fanControl', FanControl)
     this.install('power', Power)
 
     Object.assign(this.state, {
@@ -159,23 +159,36 @@ class NavViews extends Component {
     /* hide QuickNav if there is only one nav */
     if (navGroupList.length === 1) { return <div /> }
 
+    let ws215i = false
+    const device = this.props.selectedDevice.device
+    if (device && device.data && device.data.ws215i) {
+      ws215i = true
+    }
     return (
-      <div style={{
-        width: 72, height: '100%', 
-        paddingTop: 8,
-        transition: sharpCurve('width'), 
-        backgroundColor: '#FFF', 
-        overflow: 'hidden'
-      }}>
-        { navGroupList.map(key =>
+      <div
+        style={{
+          width: 72,
+          height: '100%',
+          paddingTop: 8,
+          transition: sharpCurve('width'),
+          backgroundColor: '#FFF',
+          overflow: 'hidden'
+        }}
+      >
+        {
+          navGroupList.map((key) => {
+            if (!ws215i && key === 'fanControl') return <div key={`quicknav-${key}`} />
+            return (
               <QuickNav
                 key={`quicknav-${key}`}
-                icon={this.views[key].quickIcon()} 
+                icon={this.views[key].quickIcon()}
                 text={this.views[key].quickName()}
                 color={color}
                 selected={key === this.state.nav}
                 onTouchTap={this.navBound(key)}
-              />) }
+              />)
+          })
+        }
       </div>
     )
   }
@@ -328,7 +341,7 @@ class NavViews extends Component {
       transition: sharpCurve('width')
     }
     /* {style}, function to close Detail page */
-    return view.renderDetail({ style }, this.openSnackBarBound)
+    return view.renderDetail({ style, openSnackBar: this.openSnackBarBound })
   }
 
   renderSnackBar() {
@@ -447,5 +460,3 @@ class Navigation extends Component {
 }
 
 export default Navigation
-
-

@@ -6,7 +6,7 @@ import { Paper, Card, IconButton, CircularProgress, FlatButton } from 'material-
 import RenderListByRow from './RenderListByRow'
 
 const debug = Debug('component:photoApp:PhotoList')
-const headerHeight = 72
+const headerHeight = 66
 const timelineMargin = 26
 
 const mousePosition = (ev) => {
