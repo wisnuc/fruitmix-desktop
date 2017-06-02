@@ -217,8 +217,30 @@ fruitmix负责初始化页面、引入样式、挂载react根组件以及一些�
 登陆页面
 
 * Login.jsx: 登陆页面的入口，搭建整体页面
-* InitStep.jsx: 初始化页面
-* ...
+
+* CrossNavcd.jsx: 处理切换设备时的动画
+
+* InfoCard.jsx: 渲染尚未发现设备时的等待页面
+
+* ErrorBox.jsx: 渲染系统错误信息
+
+* ModelNameCard.jsx: 设备信息界面，包括设备图标、名称、序列号等
+
+* Barcelona.jsx: ws215i的logo
+
+* Computer.jsx: 计算机logo
+
+* HoverNav.jsx: 左右切换的按钮
+
+* UserBox.jsx: 渲染罗列用户的Box
+
+* LoginBox.jsx: 渲染登录框，包括输入密码等操作
+
+* InitStep.jsx: 初始化页面，调用UsernamePassword和CreatingVolumeDiskSelection
+
+* UsernamePassword.jsx: 输入用户名、密码的对话框
+
+* CreatingVolumeDiskSelection.jsx: 创建磁盘阵列的信息框
 
 #### nav
 
@@ -228,7 +250,7 @@ fruitmix负责初始化页面、引入样式、挂载react根组件以及一些�
 
 	* AppBar: 渲染顶部菜单栏和工具栏
 	* QuickNav: 渲染左侧快速导航栏，调用QuickNav.jsx
-	* content: 渲染主要内容的部分，调用view/下的各model
+	* content: 渲染主要内容的部分，调用view.renderContent
 	* Detail: 右侧可弹出的detail页面，由view.renderDetail渲染
 	* NavDrawer: 左侧导航菜单栏，调用NavDrawer.jsx
 	* snackBar: 全局消息显示，主要是与服务器通讯后的成功或失败信息
@@ -473,6 +495,8 @@ NoUsageDisk、RenderTitle等组件。主要的函数包括：
 * Checkmark.jsx: 打勾动画
 
 * ContextMenu.jsx: 右键菜单
+
+* BreadCrumb.jsx: 面包渣，渲染文件目录
 
 * validate.jsx: 判断用户名及密码的合法性
 

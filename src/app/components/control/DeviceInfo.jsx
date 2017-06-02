@@ -100,7 +100,6 @@ class DeviceInfo extends React.PureComponent {
     const menIcon = Memory
 
     const memValues = [
-      '内存',
       memInfo.memTotal,
       memInfo.memFree,
       memInfo.memAvailable

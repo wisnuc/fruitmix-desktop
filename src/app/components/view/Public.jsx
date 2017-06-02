@@ -6,6 +6,8 @@ import Radium from 'radium'
 import { ipcRenderer } from 'electron'
 
 import DialogOverlay from '../common/DialogOverlay'
+import { BreadCrumbItem, BreadCrumbSeparator } from '../common/BreadCrumb'
+
 import ListSelect from '../file/ListSelect2'
 import FileContent from '../file/FileContent'
 import NewFolderDialog from '../file/NewFolderDialog'
@@ -446,46 +448,4 @@ class Public extends Base {
   }
 }
 
-class BreadCrumbSeparator extends React.PureComponent {
-
-  render() {
-    return (
-      <div style={{height:32, width:8, display:'flex', flexDirection:'column', alignItems:'center'}}>
-        &rsaquo;
-      </div>
-    )
-  }
-}
-
-@Radium
-class BreadCrumbItem extends React.PureComponent {
-
-  render() {
-
-    let style = {
-      cursor: 'pointer',
-      borderRadius: 2, // mimic a flat button
-      height: 32,
-      paddingLeft: 8, 
-      paddingRight: 8, 
-      backgroundColor: 'rgba(255,255,255,0)',
-      ':hover': {
-        backgroundColor: 'rgba(255,255,255,0.14)' // value from material-component card example
-      },
-      maxWidth: '100px',
-      overflow: 'hidden',
-      whiteSpace: 'nowrap',
-      textOverflow: 'ellipsis'
-
-    }
-
-    return (
-      <div style={style} onTouchTap={this.props.onTouchTap}>
-        { this.props.text }   
-      </div>
-    )
-  }
-}
-
 export default Public
-
