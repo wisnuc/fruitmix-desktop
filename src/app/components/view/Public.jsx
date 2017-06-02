@@ -373,7 +373,7 @@ class Public extends Base {
       </div>
     )
   }
-  renderContent() {
+  renderContent({ openSnackBar }) {
     return (
       <div style={{position: 'relative', width: '100%', height: '100%'}}>
         {this.state.path.length>1 && <FileUploadButton upload={this.upload.bind(this)}/>}
@@ -406,7 +406,7 @@ class Public extends Base {
               apis={this.ctx.props.apis} 
               path={this.state.path} 
               entries={this.state.entries}
-              
+              openSnackBar={openSnackBar}
             /> }
         </DialogOverlay>
 

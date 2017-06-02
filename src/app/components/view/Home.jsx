@@ -401,6 +401,7 @@ class Home extends Base {
               apis={this.ctx.props.apis}
               path={this.state.path}
               entries={this.state.entries}
+              openSnackBar={openSnackBar}
             /> }
         </DialogOverlay>
 

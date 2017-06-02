@@ -4,6 +4,8 @@ import Radium from 'radium'
 @Radium
 export class BreadCrumbItem extends React.PureComponent {
   render() {
+    /* adjust the different lineHeight of Noto and Roboto */
+    const pureRoboto = !this.props.text.replace(/[a-zA-Z0-9`~!@#$%^&()-_=+{}[\];',]/g, '').length
     return (
       <div
         style={{
@@ -12,6 +14,7 @@ export class BreadCrumbItem extends React.PureComponent {
           height: 32,
           paddingLeft: 8,
           paddingRight: 8,
+          paddingTop: pureRoboto ? 4 : 0,
           display: 'flex',
           alignItems: 'center',
           backgroundColor: 'rgba(255,255,255,0)',

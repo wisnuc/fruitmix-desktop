@@ -140,7 +140,6 @@ class DeviceInfo extends React.PureComponent {
       ]
 
       ws215iValues = [
-        '闻上家用私有云',
         'WS215i',
         ws215i.serial,
         ws215i.mac.toUpperCase()
