@@ -21,9 +21,10 @@ const phaseiExifTime = (time) => {
   return `${a[0]}年${a[1]}月${a[2]}日 ${a[3]} : ${a[4]}`
 }
 
-const getType = (type, name) => {
+const getType = (type, name, metadata) => {
   if (type === 'folder') return '文件夹'
   if (type === 'public') return '共享文件夹'
+  if (metadata && metadata.format) return metadata.format
   let extension = name.replace(/^.*\./, '')
   if (!extension || extension === name) extension = '未知文件'
   return extension.toUpperCase()
@@ -186,11 +187,11 @@ class FileDetail extends React.Component {
     ]
 
     const Values = [
-      getType(detailFile.type, detailFile.name),
+      getType(detailFile.type, detailFile.name, metadata),
       prettysize(detailFile.size),
       getPath(path),
       phaseDate(detailFile.mtime),
-      phaseiExifTime(exifDateTime),
+      exifDateTime ? phaseiExifTime(exifDateTime) : '',
       exifModel,
       getResolution(height, width)
     ]

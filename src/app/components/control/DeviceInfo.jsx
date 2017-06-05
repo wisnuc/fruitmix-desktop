@@ -100,7 +100,6 @@ class DeviceInfo extends React.PureComponent {
     const menIcon = Memory
 
     const memValues = [
-      '内存',
       memInfo.memTotal,
       memInfo.memFree,
       memInfo.memAvailable
@@ -141,7 +140,6 @@ class DeviceInfo extends React.PureComponent {
       ]
 
       ws215iValues = [
-        '闻上家用私有云',
         'WS215i',
         ws215i.serial,
         ws215i.mac.toUpperCase()

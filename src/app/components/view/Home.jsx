@@ -10,6 +10,7 @@ import CloudUpload from 'material-ui/svg-icons/file/cloud-upload'
 
 import ContextMenu from '../common/ContextMenu'
 import DialogOverlay from '../common/DialogOverlay'
+import { BreadCrumbItem, BreadCrumbSeparator } from '../common/BreadCrumb'
 
 import NewFolderDialog from '../file/NewFolderDialog'
 import FileUploadButton from '../file/FileUploadButton'
@@ -24,45 +25,6 @@ import FileContent from '../file/FileContent'
 import { command } from '../../lib/command'
 
 import FileDetail from '../file/FileDetail'
-
-@Radium
-class BreadCrumbItem extends React.PureComponent {
-
-  render() {
-    const style = {
-      cursor: 'pointer',
-      borderRadius: 2, // mimic a flat button
-      height: 32,
-      paddingLeft: 8,
-      paddingRight: 8,
-      backgroundColor: 'rgba(255,255,255,0)',
-      ':hover': {
-        backgroundColor: 'rgba(255,255,255,0.14)' // value from material-component card example
-      },
-      maxWidth: '100px',
-      overflow: 'hidden',
-      whiteSpace: 'nowrap',
-      textOverflow: 'ellipsis'
-    }
-
-    return (
-      <div style={style} onTouchTap={this.props.onTouchTap}>
-        { this.props.text }
-      </div>
-    )
-  }
-}
-
-class BreadCrumbSeparator extends React.PureComponent {
-
-  render() {
-    return (
-      <div style={{ height: 32, width: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        &rsaquo;
-      </div>
-    )
-  }
-}
 
 class Home extends Base {
 
@@ -439,6 +401,7 @@ class Home extends Base {
               apis={this.ctx.props.apis}
               path={this.state.path}
               entries={this.state.entries}
+              openSnackBar={openSnackBar}
             /> }
         </DialogOverlay>
 
