@@ -17,7 +17,7 @@ const downloadHandle = (args, callback) => {
 	folders.forEach(item => createTask(item.uuid, item.name, 0, item.type, args.dirUUID?args.dirUUID:item.uuid, true))
 
 	let count = files.length + folders.length
-  getMainWindow().webContents.send('message', count + '个任务添加至下载队列')
+  getMainWindow().webContents.send('snackbarMessage', {message: count + '个任务添加至下载队列'})
 }
 
 const getTransmissionHandle = (args, callback) => {
@@ -83,10 +83,18 @@ ipcMain.on('PAUSE_DOWNLOADING', (e, uuid) => {
 	let task = userTasks.find(item => item.uuid === uuid)
 	if (task) {task.pauseTask()}
 })
+
 ipcMain.on('RESUME_DOWNLOADING', (e, uuid) => {
 	if (!uuid) return
 	let task = userTasks.find(item => item.uuid === uuid)
 	if (task) task.resumeTask()
+})
+
+ipcMain.on('LOGIN_OUT', e => {
+  console.log('LOGIN_OUT in download')
+  userTasks.forEach(item => item.pauseTask())
+  userTasks.length = 0
+  sendMsg()
 })
 
 

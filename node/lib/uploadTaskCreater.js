@@ -843,7 +843,7 @@ class UploadFileSTM extends STM {
 				seek = 0
 				if (wrapper.failedTimes < 5) return this.uploadSegment()
 				else if (wrapper.failedTimes < 6) return this.createUploadTask()
-				else return console.log('failed!!!')
+				else return console.log('failed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 			}
 		}).on('abort', () => {
 			console.log('第' + seek +'块 ' + 'req : abort')

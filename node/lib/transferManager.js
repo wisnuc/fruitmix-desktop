@@ -50,17 +50,18 @@ class Transfer {
 	refresh(obj) {
 		console.log(obj)
 		let text = obj.type == 'move'? '移动': '拷贝'
+		getMainWindow().webContents.send('snackbarMessage', {message: text + '成功'})
 		if (obj.dst.type == 'fruitmix') {
-			getMainWindow().webContents.send('driveListUpdate', Object.assign({},obj.directory,{message: text + '成功'}))
+			getMainWindow().webContents.send('driveListUpdate', Object.assign({},obj.directory))
 		}else {
-			getMainWindow().webContents.send('physicalListUpdate', Object.assign({}, obj.dst, {message: text + '成功'}))
+			getMainWindow().webContents.send('physicalListUpdate', Object.assign({}, obj.dst))
 		}	
 
 		if (obj.type == 'move') {
 			if (obj.src.type == 'fruitmix') {
-				getMainWindow().webContents.send('driveListUpdate', Object.assign({},obj.directory,{message: text + '成功'}))
+				getMainWindow().webContents.send('driveListUpdate', Object.assign({},obj.directory))
 			}else {
-				getMainWindow().webContents.send('physicalListUpdate', Object.assign({}, obj.src, {message: text + '成功'}))
+				getMainWindow().webContents.send('physicalListUpdate', Object.assign({}, obj.src))
 			}
 		}
 	}

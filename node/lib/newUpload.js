@@ -29,7 +29,7 @@ const uploadHandle = args => {
         if(index < count) {
           readUploadInfor(data[index])
         }else {
-          getMainWindow().webContents.send('message', data.length + '个任务添加至上传队列')
+          getMainWindow().webContents.send('snackbarMessage', {message: data.length + '个任务添加至上传队列'})
         }
       })
     }
@@ -52,7 +52,7 @@ const dragFileHandle = (args) => {
       else type = 'file'
       createTask(filePath, args.dirUUID, type, true, null, null, null)
       index++
-      if (index == args.files.length) return getMainWindow().webContents.send('message', args.files.length + '个任务添加至上传队列')
+      if (index == args.files.length) return getMainWindow().webContents.send('snackbarMessage', {message: args.files.length + '个任务添加至上传队列'})
       loop()
     })
   }
@@ -134,5 +134,14 @@ ipcMain.on('RESUME_UPLOADING', (e, uuid) => {
   let task = userTasks.find(item => item.uuid === uuid)
   if (task) task.resumeTask()
 })
+
+ipcMain.on('LOGIN_OUT', e => {
+  console.log('LOGIN_OUT in upload')
+  userTasks.forEach(item => item.pauseTask())
+  userTasks.length = 0
+  finishTasks.length = 0
+  sendMsg()
+})
+
 
 export { userTasks, finishTasks }
