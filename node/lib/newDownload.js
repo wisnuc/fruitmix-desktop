@@ -17,7 +17,7 @@ const downloadHandle = (args, callback) => {
 	folders.forEach(item => createTask(item.uuid, item.name, 0, item.type, args.dirUUID?args.dirUUID:item.uuid, true))
 
 	let count = files.length + folders.length
-  getMainWindow().webContents.send('message', count + '个任务添加至下载队列')
+  getMainWindow().webContents.send('snackbarMessage', {message: count + '个任务添加至下载队列'})
 }
 
 const getTransmissionHandle = (args, callback) => {
