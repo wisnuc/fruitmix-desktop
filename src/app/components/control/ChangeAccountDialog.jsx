@@ -100,7 +100,7 @@ class ChangeAccountDialog extends React.PureComponent {
         this.state.passwordAgain !== this.state.password) {
         this.setState({ passwordAgainErrorText: '两次密码不一致', passwordErrorText: '' })
       } else if (this.state.passwordAgain === this.state.password) {
-        this.setState({ passwordAgainErrorText: '' })
+        this.setState({ passwordAgainErrorText: '', passwordErrorText: '' })
       } else {
         this.setState({ passwordErrorText: '' })
       }

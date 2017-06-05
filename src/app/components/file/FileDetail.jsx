@@ -70,6 +70,13 @@ class FileDetail extends React.Component {
         this.setState({ thumbPath: path })
       }
     }
+
+    /* handle detailFile in first render */
+    if (this.props.detailFile && this.props.detailFile.digest) {
+      this.session = UUID.v4()
+      this.props.ipcRenderer.send('mediaShowThumb', this.session, this.props.detailFile.digest, 210, 210)
+      this.props.ipcRenderer.on('getThumbSuccess', this.updateThumbPath)
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -156,7 +163,7 @@ class FileDetail extends React.Component {
 
   render() {
     const { detailFile, path } = this.props
-    // debug('detailFile', detailFile)
+    // debug('detailFile', detailFile, this.state)
     if (!detailFile) return <div style={{ height: 128, backgroundColor: '#00796B' }} />
 
     const { metadata, digest } = detailFile
