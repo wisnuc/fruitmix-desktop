@@ -38,6 +38,7 @@ const quickSort = (arr, type) => {
 
 //handle will open dialog from electron to clean record of the task have been downloaded
 const cleanRecordHandle = () => {
+	if (uploadedTasks.length == 0 && downloadedTasks.length == 0) return
 	dialog.showMessageBox({
 		type:'question',
 		buttons:['取消','确定'],

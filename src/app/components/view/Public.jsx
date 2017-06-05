@@ -50,7 +50,7 @@ class Public extends Base {
     ipcRenderer.on('driveListUpdate', (e, obj) => {
       if (this.state.path.length == 0) return
       if (obj.uuid == this.state.path[this.state.path.length - 1].uuid) {
-        this.ctx.openSnackBar(obj.message)
+        // this.ctx.openSnackBar(obj.message)
         this.refresh()
       }
     })

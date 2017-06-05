@@ -100,7 +100,7 @@ class Physical extends Base {
       let position = obj.path.lastIndexOf('/')
       let dirPath = obj.path.substring(0, position)
       if (string == dirPath) {
-        this.ctx.openSnackBar(obj.message)
+        // this.ctx.openSnackBar(obj.message)
         this.refresh() 
       }
       

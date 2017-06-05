@@ -49,7 +49,7 @@ class UserConfig extends Config {
 class Configuration {
 
   constructor(root) {
-    this.root = root
+    this.root = path.join(root, 'wisnuc')
   }
 
   /*

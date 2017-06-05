@@ -91,7 +91,7 @@ app.on('ready', function() {
         console.log('download path is : ' + data)
         store.dispatch({type:'CONFIG_SET_DOWNLOAD_PATH',data})
       }
-
+      if (global.BABEL_IS_RUNNING) return
       autoUpdater.checkForUpdates()
     }
   })
