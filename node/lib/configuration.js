@@ -15,7 +15,7 @@ class Config {
 
   getConfig() {
     return this.config
-  } 
+  }
 
   setConfig(props) {
     this.config = Object.assign({}, props)
@@ -36,7 +36,7 @@ class UserConfig extends Config {
 }
 
 
-// 
+//
 // rootpath: app.getPath('appData')
 // /wisnuc/users/<uuid>/config.json   user config
 //                     /download/     user download folder // be careful of disk space
@@ -90,7 +90,7 @@ class Configuration {
   // public
   getUserDownloadDir(uuid) {
     return path.join(this.root, 'users', uuid, 'download')
-  } 
+  }
 
   // public
   getUserDatabaseDir(uuid) {
@@ -109,7 +109,7 @@ class Configuration {
   }
 
   /*
-    prepare directories for user or global 
+    prepare directories for user or global
   */
 
   async makeWisnucDirsAsync() {
@@ -133,56 +133,50 @@ class Configuration {
 
   // load a js object from given path, return null if any error
   async loadObjectAsync(fpath) {
-
     let obj = null
-    try { obj = JSON.parse(await fs.readFileAsync(fpath)) }
-    catch (e) { return null } 
+    try { obj = JSON.parse(await fs.readFileAsync(fpath)) } catch (e) { return null }
     return typeof obj === 'object' ? obj : null
   }
 
   // load or create config for single user
   async initUserConfigAsync(userUUID) {
-
     await this.makeUserDirsAsync(userUUID)
 
-    let configPath = this.getUserConfigFilePath(userUUID)
-    let config = await this.loadObjectAsync(configpath) || {}
-    let tmpdir = this.getTmpDir()
-    let persistence = createPersistenceAsync(configPath, tmpdir)
-    
+    const configPath = this.getUserConfigFilePath(userUUID)
+    const config = await this.loadObjectAsync(configpath) || {}
+    const tmpdir = this.getTmpDir()
+    const persistence = createPersistenceAsync(configPath, tmpdir)
+
     return new UserConfig(config, persistence, userUUID)
   }
 
   // load or create global config
   async initGlobalConfigAsync() {
-
-    let configPath = this.getGlobalConfigPath()
-    let config = await this.loadObjectAsync(configPath) || {} 
-    let tmpdir = this.getTmpDir()
-    let persistence = createPersistenceAsync(configPath, tmpdir)
+    const configPath = this.getGlobalConfigPath()
+    const config = await this.loadObjectAsync(configPath) || {}
+    const tmpdir = this.getTmpDir()
+    const persistence = createPersistenceAsync(configPath, tmpdir)
 
     return new Config(config, persistence)
   }
 
   // init
   async initAsync() {
-
     // prepare directories
     await this.makeWisnucDirsAsync()
     await this.makeGlobalDirsAsync()
 
     // load global config
-    let globalConfig = await this.initGlobalConfigAsync()
+    const globalConfig = await this.initGlobalConfigAsync()
 
     // filter out all UUID entries inside users dir
-    let UUIDs = (await fs.readdirAsync(this.getUsersDir()))
+    const UUIDs = (await fs.readdirAsync(this.getUsersDir()))
       .filter(entry => validator.isUUID(entry))
 
-    // 
-    let userConfigs = []
+    //
+    const userConfigs = []
     for (let i = 0; i < UUIDs.length; i++) {
-      try { userConfigs.push(await this.initUserConfigAsync(UUIDs[i])) }
-      catch (e) {}
+      try { userConfigs.push(await this.initUserConfigAsync(UUIDs[i])) } catch (e) {}
     }
 
     this.globalConfig = globalConfig
