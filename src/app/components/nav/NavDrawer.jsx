@@ -11,8 +11,6 @@ import ActionAccountCircle from 'material-ui/svg-icons/action/account-circle'
 import SocialPerson from 'material-ui/svg-icons/social/person'
 import { indigo500 } from 'material-ui/styles/colors'
 
-import { navMap, fileNavGroup, mediaNavGroup, appifiNavGroup } from './nav'
-
 class SubHeader extends Component {
 
   render() {

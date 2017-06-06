@@ -2,7 +2,7 @@ import React, { Component, PureComponent } from 'react'
 import Radium from 'radium'
 
 import ActionSwapVerticalCircle from 'material-ui/svg-icons/action/swap-vertical-circle'
-import TrsContainer from '../file/TransmissionContainer2'
+import TrsContainer from '../file/TransmissionContainer'
 import Base from './Base'
 require('../../../assets/css/main.css')
 
@@ -13,7 +13,7 @@ class Transmission extends Base {
     this.state = {}
   }
 
-  willReceiveProps(nextProps) { 
+  willReceiveProps(nextProps) {
   }
 
   navEnter() {
@@ -53,10 +53,9 @@ class Transmission extends Base {
 
   /** renderers **/
   renderContent() {
-
     return (
-      <div style={{width: '100%', height: '100%', overflow:'auto'}}>
-        <TrsContainer/>
+      <div style={{ width: '100%', height: '100%', overflow: 'auto' }}>
+        <TrsContainer />
       </div>
     )
   }

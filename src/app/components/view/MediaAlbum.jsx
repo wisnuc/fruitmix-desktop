@@ -14,7 +14,7 @@ class MediaAlbum extends Base {
     this.state = {}
   }
 
-  willReceiveProps(nextProps) { 
+  willReceiveProps(nextProps) {
     // console.log('media nextProps', nextProps)
     if (!nextProps.apis || !nextProps.apis.mediaShare) return
     const mediaShare = nextProps.apis.mediaShare

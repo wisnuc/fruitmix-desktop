@@ -18,7 +18,7 @@ import RenameDialog from '../file/RenameDialog'
 import MoveDialog from '../file/MoveDialog'
 // import DeleteDialog from '../file/DeleteDialog'
 
-import ListSelect from '../file/ListSelect2'
+import ListSelect from '../file/ListSelect'
 import Base from './Base'
 
 import FileContent from '../file/FileContent'
@@ -218,11 +218,11 @@ class Home extends Base {
   }
 
   openCopy() {
-    this.setState({ copy: true})
+    this.setState({ copy: true })
   }
 
   closeCopy() {
-    this.setState({ copy: false})
+    this.setState({ copy: false })
   }
 
   openUploadDialog() {
@@ -283,8 +283,8 @@ class Home extends Base {
   }
 
   refresh() {
-    let rUUID = this.state.path[0].uuid
-    let dUUID = this.state.path[this.state.path.length - 1].uuid
+    const rUUID = this.state.path[0].uuid
+    const dUUID = this.state.path[this.state.path.length - 1].uuid
     this.ctx.props.apis.request('listNavDir', { rootUUID: rUUID, dirUUID: dUUID })
   }
 
@@ -423,7 +423,7 @@ class Home extends Base {
             entries={this.state.entries}
             select={this.state.select}
             type="home"
-            operation='move'
+            operation="move"
           />}
         </DialogOverlay>
 
@@ -434,7 +434,7 @@ class Home extends Base {
             entries={this.state.entries}
             select={this.state.select}
             type="home"
-            operation='copy'
+            operation="copy"
           />}
         </DialogOverlay>
 

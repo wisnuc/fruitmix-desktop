@@ -14,31 +14,30 @@ class FileUploadButton extends React.Component {
   }
 
   render() {
-
     return (
-      <div style={{position: 'absolute', top: -36, left: 24}}>
-        <FloatingActionButton 
-          backgroundColor='#2196F3'
+      <div style={{ position: 'absolute', top: -36, left: 24 }}>
+        <FloatingActionButton
+          backgroundColor="#2196F3"
           zDepth={3}
-          onTouchTap={e => {
+          onTouchTap={(e) => {
             e.preventDefault()
             this.setState({ open: true, anchorEl: e.currentTarget })
           }}
         >
           <FileFileUpload />
         </FloatingActionButton>
-        <Popover 
+        <Popover
           open={this.state.open}
-          animated={true}
+          animated
           anchorEl={this.state.anchorEl}
           anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
           targetOrigin={{ horizontal: 'left', vertical: 'top' }}
-          onRequestClose={() => this.setState({ open: false })} 
+          onRequestClose={() => this.setState({ open: false })}
         >
           <Menu>
-            <MenuItem primaryText='上传文件夹' leftIcon={<FileFolder />} onTouchTap={this.upload.bind(this, 'folder')}/>
-            <MenuItem primaryText='上传文件' leftIcon={<EditorInsertDriveFile />} onTouchTap={this.upload.bind(this, 'file')}/>
-          </Menu>          
+            <MenuItem primaryText="上传文件夹" leftIcon={<FileFolder />} onTouchTap={this.upload.bind(this, 'folder')} />
+            <MenuItem primaryText="上传文件" leftIcon={<EditorInsertDriveFile />} onTouchTap={this.upload.bind(this, 'file')} />
+          </Menu>
         </Popover>
       </div>
     )
@@ -46,7 +45,7 @@ class FileUploadButton extends React.Component {
 
   upload(type) {
     this.props.upload(type)
-    this.setState({open: false})
+    this.setState({ open: false })
   }
 }
 

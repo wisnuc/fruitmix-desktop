@@ -34,18 +34,18 @@ class Base extends EventEmitter {
   }
 
   groupPrimaryColor() {
-    let group = this.navGroup()
-    switch(group) {
-    case 'file':
-      return teal600
-    case 'media':
-      return lightBlue600
-    case 'other':
-      return indigo600
-    case 'settings':
-      return deepPurple500
-    default:
-      return 'white'
+    const group = this.navGroup()
+    switch (group) {
+      case 'file':
+        return teal600
+      case 'media':
+        return lightBlue600
+      case 'other':
+        return indigo600
+      case 'settings':
+        return deepPurple500
+      default:
+        return 'white'
     }
   }
 
@@ -75,7 +75,7 @@ class Base extends EventEmitter {
 
   appBarColor() {
     return this.groupPrimaryColor()
-  } 
+  }
 
   primaryColor() {
     return this.groupPrimaryColor()
@@ -105,25 +105,25 @@ class Base extends EventEmitter {
     return 360
   }
 
-  renderTitle({style}) {
+  renderTitle({ style }) {
     return <div style={style}>{this.menuName()}</div>
   }
 
-  renderNavigationMenu({style, onTouchTap}) {
+  renderNavigationMenu({ style, onTouchTap }) {
     return (
       <div style={style}>
         <IconButton onTouchTap={onTouchTap}>
-          <NavigationMenu color='#FFF' />
+          <NavigationMenu color="#FFF" />
         </IconButton>
       </div>
     )
   }
 
-  renderToolBar({style}) {
+  renderToolBar({ style }) {
     return <div style={style} />
   }
 
-  renderSnackBar({style}) {
+  renderSnackBar({ style }) {
     return <div style={style} />
   }
 
