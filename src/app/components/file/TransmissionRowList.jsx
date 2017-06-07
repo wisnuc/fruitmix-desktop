@@ -1,39 +1,14 @@
 import React, { Component } from 'react'
 import { ipcRenderer } from 'electron'
-import Row from './TransmissionRow'
-import FinishTaskRow from './TransmissionFinishRow'
+import RunningTask from './RunningTask'
+import FinishedTask from './FinishedTask'
 
 class RowList extends Component {
   constructor(props) {
     super(props)
     this.taskSelected = this.props.taskSelected
     this.finishSelected = this.props.finishSelected
-    this.select = this.select.bind(this)
-  }
-
-  render() {
-    return (
-      <div className="trs-list-wrapper" ref="trs-list-wrapper">
-        {this.props.listType == 'running' && this.props.tasks.map((task, index) => <Row
-          select={this.select}
-          ref={task.uuid}
-          key={task.uuid}
-          trsType={task.trsType}
-          index={index}
-          task={task}
-          pause={this.pause.bind(this)}
-          resume={this.resume.bind(this)}
-        />)}
-
-        {this.props.listType == 'finish' && this.props.tasks.map((task, index) => <FinishTaskRow
-          ref={task.uuid}
-          key={task.uuid}
-          index={index}
-          task={task}
-          select={this.select}
-        />)}
-      </div>
-    )
+    this.selectBound = this.select.bind(this)
   }
 
   pause(uuid, type) {
@@ -104,6 +79,41 @@ class RowList extends Component {
       }
       this.props.openMenu(e, obj)
     }
+  }
+
+  render() {
+    return (
+      <div style={{ marginBottom: 80 }} ref="trs-list-wrapper" >
+        {/* running tasks */}
+        {
+          this.props.listType === 'running' && this.props.tasks.map((task, index) => (
+            <RunningTask
+              select={this.selectBound}
+              ref={task.uuid}
+              key={task.uuid}
+              trsType={task.trsType}
+              index={index}
+              task={task}
+              pause={this.pause.bind(this)}
+              resume={this.resume.bind(this)}
+            />
+          ))
+        }
+
+        {/* finished tasks */}
+        {
+          this.props.listType === 'finish' && this.props.tasks.map((task, index) => (
+            <FinishedTask
+              ref={task.uuid}
+              key={task.uuid}
+              index={index}
+              task={task}
+              select={this.selectBound}
+            />
+          ))
+        }
+      </div>
+    )
   }
 }
 

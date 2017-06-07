@@ -1,19 +1,12 @@
-/**
- * @component transmissionFrame
- * @description upload
- * @time 2017-2-28
- * @author liuhua
-**/
-import React, { Component } from 'react'
+import React from 'react'
 import { ipcRenderer } from 'electron'
 import DeleteSvg from 'material-ui/svg-icons/action/delete'
 import { Paper, Menu, MenuItem } from 'material-ui'
 import RowList from './TransmissionRowList'
+import FlatButton from '../common/FlatButton'
 import { command } from '../../lib/command'
 
-const svgStyle = { color: '#000', opacity: 0.54 }
-
-class TrsContainer extends Component {
+class TrsContainer extends React.Component {
   constructor(props) {
     super(props)
     this.taskSelected = []
@@ -61,74 +54,6 @@ class TrsContainer extends Component {
       ctrl: event.ctrlKey,
       shift: event.shiftKey
     })
-  }
-
-  render() {
-    let transmission,
-      userTasks,
-      finishTasks
-    transmission = window.store.getState().transmission
-    userTasks = transmission.userTasks
-    finishTasks = transmission.finishTasks
-
-    return (
-      <div id="trs-wrap">
-        {/* title*/}
-        <div className="trs-title">
-          <span>传输中</span>
-          <span>({userTasks.length})</span>
-        </div>
-        <div className="trs-hr" />
-        {/* list*/}
-        <RowList
-          ref="running"
-          listType="running"
-          tasks={userTasks}
-          taskSelected={this.taskSelected}
-          finishSelected={this.finishSelected}
-          ctrl={this.state.ctrl}
-          shift={this.state.shift}
-          cleanFinishSelect={this.cleanFinishSelect.bind(this)}
-          cleanTaskSelect={this.cleanTaskSelect.bind(this)}
-          openMenu={this.openMenu.bind(this)}
-        />
-        {/* title*/}
-        <div className="trs-title">
-          <span>已完成</span>
-          <span>({finishTasks.length})</span>
-          <span onClick={this.cleanRecord.bind(this)}>
-            <DeleteSvg style={svgStyle} />
-            <span>清除记录</span>
-          </span>
-        </div>
-        <div className="trs-hr" />
-        {/* list*/}
-        <RowList
-          listType="finish"
-          ref="finish"
-          tasks={finishTasks}
-          taskSelected={this.taskSelected}
-          finishSelected={this.finishSelected}
-          ctrl={this.state.ctrl}
-          shift={this.state.shift}
-          cleanFinishSelect={this.cleanFinishSelect.bind(this)}
-          cleanTaskSelect={this.cleanTaskSelect.bind(this)}
-          openMenu={this.openMenu.bind(this)}
-        />
-        {this.state.menuShow && (
-        <div className="trs-menu-container" onTouchTap={this.hideMenu}>
-          <Paper style={{ position: 'absolute', top: this.state.y, left: this.state.x }}>
-            <Menu>
-              <MenuItem primaryText="继续" disabled={this.state.play} onTouchTap={this.play} />
-              <MenuItem primaryText="暂停" disabled={this.state.pause} onTouchTap={this.pause} />
-              <MenuItem primaryText="打开所在文件夹" onTouchTap={this.open} />
-              <MenuItem primaryText="删除" onTouchTap={this.delete} />
-            </Menu>
-          </Paper>
-        </div>
-				)}
-      </div>
-    )
   }
 
   cleanRecord() {
@@ -198,6 +123,106 @@ class TrsContainer extends Component {
   open() {
     console.log(this.state.tasks)
     ipcRenderer.send('OPEN_TRANSMISSION', this.state.tasks)
+  }
+
+  render() {
+    const transmission = window.store.getState().transmission
+    const userTasks = transmission.userTasks
+    const finishTasks = transmission.finishTasks
+
+    const titileStyle = {
+      display: 'flex',
+      alignItems: 'center',
+      padding: '0 88px',
+      fontWeight: 500,
+      color: 'rgba(0,0,0,0.87)'
+    }
+
+    const hrStyle = {
+      boxSizing: 'border-box',
+      height: '1px',
+      backgroundColor: '#b8b8b8',
+      margin: '8px 88px 12px 88px'
+    }
+
+    return (
+      <div style={{ padding: 16 }}>
+        <div style={{ height: 24 }} />
+        {/* running task title */}
+        <div style={titileStyle} >
+          { `传输中（${userTasks.length}）` }
+        </div>
+        <div style={hrStyle} />
+
+        {/* running task list */}
+        <RowList
+          ref="running"
+          listType="running"
+          tasks={userTasks}
+          taskSelected={this.taskSelected}
+          finishSelected={this.finishSelected}
+          ctrl={this.state.ctrl}
+          shift={this.state.shift}
+          cleanFinishSelect={this.cleanFinishSelect.bind(this)}
+          cleanTaskSelect={this.cleanTaskSelect.bind(this)}
+          openMenu={this.openMenu.bind(this)}
+        />
+
+        {/* finished task title */}
+        <div style={titileStyle}>
+          <div style={{ flexGrow: 1 }}>
+            { `已完成（${finishTasks.length}）` }
+          </div>
+          <div style={{ flex: '0 0 180px', display: 'flex', alignItems: 'center' }}>
+            <FlatButton
+              label="清除记录"
+              icon={<DeleteSvg style={{ color: '#000', opacity: 0.54 }} />}
+              onTouchTap={this.cleanRecord.bind(this)}
+            />
+          </div>
+        </div>
+        <div style={hrStyle} />
+
+        {/* finished task list*/}
+        <RowList
+          listType="finish"
+          ref="finish"
+          tasks={finishTasks}
+          taskSelected={this.taskSelected}
+          finishSelected={this.finishSelected}
+          ctrl={this.state.ctrl}
+          shift={this.state.shift}
+          cleanFinishSelect={this.cleanFinishSelect.bind(this)}
+          cleanTaskSelect={this.cleanTaskSelect.bind(this)}
+          openMenu={this.openMenu.bind(this)}
+        />
+
+        {/* menu */}
+        {
+          this.state.menuShow && (
+            <div
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%'
+              }}
+              onTouchTap={this.hideMenu}
+            >
+              <Paper style={{ position: 'absolute', top: this.state.y, left: this.state.x }}>
+                <Menu>
+                  <MenuItem primaryText="继续" disabled={this.state.play} onTouchTap={this.play} />
+                  <MenuItem primaryText="暂停" disabled={this.state.pause} onTouchTap={this.pause} />
+                  <MenuItem primaryText="打开所在文件夹" onTouchTap={this.open} />
+                  <MenuItem primaryText="删除" onTouchTap={this.delete} />
+                </Menu>
+              </Paper>
+            </div>
+          )
+        }
+      </div>
+    )
   }
 }
 

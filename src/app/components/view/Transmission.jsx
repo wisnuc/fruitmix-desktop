@@ -4,7 +4,6 @@ import Radium from 'radium'
 import ActionSwapVerticalCircle from 'material-ui/svg-icons/action/swap-vertical-circle'
 import TrsContainer from '../file/TransmissionContainer'
 import Base from './Base'
-require('../../../assets/css/main.css')
 
 class Transmission extends Base {
 
@@ -50,6 +49,9 @@ class Transmission extends Base {
     return false
   }
 
+  renderTitle({ style }) {
+    return <div style={Object.assign({}, style, { marginLeft: 184 })}>文件传输</div>
+  }
 
   /** renderers **/
   renderContent() {
@@ -62,4 +64,3 @@ class Transmission extends Base {
 }
 
 export default Transmission
-
