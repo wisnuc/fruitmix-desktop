@@ -242,7 +242,7 @@ class Physical extends Base {
 
   renderContent() {
     const apis = this.ctx.props.apis
-    debug('renderContent', this.state)
+    // debug('renderContent', this.state)
     if (!this.state.entries) return <div />
     return (
       <div style={{ width: '100%', height: '100%' }}>

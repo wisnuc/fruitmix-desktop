@@ -163,7 +163,7 @@ class FileDetail extends React.PureComponent {
 
   render() {
     const { detailFile, path } = this.props
-    debug('detailFile', detailFile, this.state)
+    // debug('detailFile', detailFile, this.state)
     if (!detailFile) return <div style={{ height: 128, backgroundColor: '#00796B' }} />
 
     const { metadata, digest } = detailFile
@@ -202,6 +202,7 @@ class FileDetail extends React.PureComponent {
       exifModel,
       getResolution(height, width)
     ]
+
     return (
       <div style={{ height: '100%' }}>
         <div style={{ height: 128, backgroundColor: '#00796B' }}>

@@ -42,8 +42,11 @@ class RunningTask extends React.Component {
   }
 
   getUploadedSize(task) {
-    if (task.type === 'folder') return `${task.finishCount}/${task.count}  ${task.speed}`
-    else if (task.type === 'file') return `${this.formatSize(task.completeSize)}  ${task.speed}`
+    if (task.type === 'folder') {
+      return `${task.finishCount}/${task.count}  ${this.props.task.pause ? '' : task.speed}`
+    } else if (task.type === 'file') {
+      return `${this.formatSize(task.completeSize)}  ${this.props.task.pause ? '' : task.speed}`
+    }
     return ''
   }
 

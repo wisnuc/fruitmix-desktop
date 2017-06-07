@@ -10,10 +10,12 @@ class FinishedTask extends Component {
   constructor(props) {
     super(props)
     this.createDate = new Date()
-    this.isSelected = false
+    this.state = {
+      isSelected: false
+    }
+
     this.updateDom = (isSelected) => {
-      this.isSelected = isSelected
-      this.forceUpdate()
+      this.setState({ isSelected })
     }
   }
 
@@ -31,7 +33,8 @@ class FinishedTask extends Component {
 
   selectFinishItem(e) {
     const event = e.nativeEvent
-    this.props.select('finish', this.props.task.uuid, this.isSelected, null, event)
+    this.props.select('finish', this.props.task.uuid, this.state.isSelected, null, event)
+    this.setState({ isSelected: !this.state.isSelected })
   }
 
   render() {
@@ -46,7 +49,7 @@ class FinishedTask extends Component {
           lindeHeight: 40,
           fontSize: 14,
           color: 'rgba(0,0,0,0.87)',
-          backgroundColor: this.isSelected ? '#f4f4f4' : ''
+          backgroundColor: this.state.isSelected ? '#f4f4f4' : ''
         }}
         onMouseUp={this.selectFinishItem.bind(this)}
       >

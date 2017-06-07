@@ -1,16 +1,19 @@
 import React from 'react'
+import Debug from 'debug'
 import { ipcRenderer } from 'electron'
 import DeleteSvg from 'material-ui/svg-icons/action/delete'
 import { Paper, Menu, MenuItem } from 'material-ui'
-import RowList from './TransmissionRowList'
+import RunningTask from './RunningTask'
+import FinishedTask from './FinishedTask'
 import FlatButton from '../common/FlatButton'
 import { command } from '../../lib/command'
+
+const debug = Debug('component:file:TrsContainer:')
 
 class TrsContainer extends React.Component {
   constructor(props) {
     super(props)
-    this.taskSelected = []
-    this.finishSelected = []
+
     this.state = {
       x: 0,
       y: 0,
@@ -21,108 +24,171 @@ class TrsContainer extends React.Component {
       menuShow: false,
       tasks: []
     }
-    this.kd = this.keydown.bind(this)
-    this.ku = this.keyup.bind(this)
-    this.hideMenu = this.hideMenu.bind(this)
-    this.play = this.play.bind(this)
-    this.pause = this.pause.bind(this)
-    this.delete = this.delete.bind(this)
-    this.open = this.open.bind(this)
+
+    this.taskSelected = []
+    this.finishSelected = []
+
+    this.keydown = (event) => {
+      if (event.ctrlKey === this.state.ctrl && event.shiftKey == this.state.shift) return
+      this.setState({
+        ctrl: event.ctrlKey,
+        shift: event.shiftKey
+      })
+    }
+
+    this.keyup = (event) => {
+      if (event.ctrlKey == this.state.ctrl && event.shiftKey == this.state.shift) return
+      this.setState({
+        ctrl: event.ctrlKey,
+        shift: event.shiftKey
+      })
+    }
+
+    this.hideMenu = () => {
+      this.setState({
+        menuShow: false
+      })
+    }
+
+    this.delete = () => {
+      const downloadArr = []
+      const uploadArr = []
+      this.state.tasks.forEach((item) => {
+        if (item.trsType === 'download') downloadArr.push(item)
+        else uploadArr.push(item)
+      })
+
+      ipcRenderer.send(this.taskSelected.length ? 'DELETE_DOWNLOADING' : 'DELETE_DOWNLOADED', downloadArr)
+      ipcRenderer.send(this.taskSelected.length ? 'DELETE_UPLOADING' : 'DELETE_UPLOADED', uploadArr)
+    }
+
+    this.open = () => {
+      console.log(this.state.tasks)
+      ipcRenderer.send('OPEN_TRANSMISSION', this.state.tasks)
+    }
+
+    this.pause = (uuid, type) => {
+      if (type === 'download') ipcRenderer.send('PAUSE_DOWNLOADING', uuid)
+      else ipcRenderer.send('PAUSE_UPLOADING', uuid)
+    }
+
+    this.resume = (uuid, type) => {
+      if (type === 'download') ipcRenderer.send('RESUME_DOWNLOADING', uuid)
+      else ipcRenderer.send('RESUME_UPLOADING', uuid)
+    }
+
+    this.cleanRecord = () => {
+      console.log('cleanRecord')
+      command('', 'CLEAN_RECORD', {})
+    }
+
+    this.cleanTaskSelect = () => {
+      this.taskSelected.forEach((item) => {
+      })
+      this.taskSelected.length = 0
+    }
+
+    this.cleanFinishSelect = () => {
+      this.finishSelected.forEach((item) => {
+      })
+      this.finishSelected.length = 0
+    }
+
+    this.openMenu = (event, obj) => {
+      const containerDom = document.getElementById('content-container')
+      const maxLeft = containerDom.offsetLeft + containerDom.clientWidth - 112
+      const x = event.clientX > maxLeft ? maxLeft : event.clientX
+      const maxTop = containerDom.offsetTop + containerDom.offsetHeight - 208
+      const y = event.clientY > maxTop ? maxTop : event.clientY
+      this.setState({ menuShow: true, x, y, play: obj.play, pause: obj.pause, tasks: obj.tasks })
+    }
+
+    this.playAll = () => {
+      this.state.tasks.forEach((item) => {
+        if (item.trsType === 'download') ipcRenderer.send('RESUME_DOWNLOADING', item.uuid)
+        else ipcRenderer.send('RESUME_UPLOADING', item.uuid)
+      })
+    }
+
+    this.pauseAll = () => {
+      this.state.tasks.forEach((item) => {
+        if (item.trsType === 'download') ipcRenderer.send('PAUSE_DOWNLOADING', item.uuid)
+        else ipcRenderer.send('PAUSE_UPLOADING', item.uuid)
+      })
+    }
+
+    this.select = (type, id, isSelected, index, e) => {
+      debug('onselect', this.state, type, id, isSelected, this.taskSelected, this.finishSelected)
+      let arr
+      if (type === 'running') {
+        arr = this.taskSelected
+        this.cleanFinishSelect()
+      } else {
+        arr = this.finishSelected
+        this.cleanTaskSelect()
+      }
+      if (this.state.ctrl) {
+        // 'ctrl 按下'
+        if (isSelected) {
+          // '取消选中'
+          if (e.button !== 2) {
+            const index = arr.indexOf(id)
+            arr.splice(index, 1)
+          }
+        } else {
+          // '选中'
+          arr.push(id)
+        }
+
+        // shift enter
+      } else if (this.state.shift) {
+
+      } else {
+        // 右键选中文件 不进行操作 只打开菜单
+        if (!(e.button == 2 && isSelected)) {
+          // '单选一个任务'
+          type === 'running' ? this.cleanTaskSelect() : this.cleanFinishSelect()
+          arr.push(id)
+        }
+      }
+
+      if (e.button === 2) {
+        const tasks = []
+        let play
+        let pause
+        arr.forEach((item) => {
+        })
+        if (type !== 'finish') {
+          for (let i = 0; i < tasks.length; i++) {
+            if (play !== undefined && pause !== undefined) break
+            if (tasks[i].pause) play = false
+            else pause = false
+          }
+          if (play === undefined) play = true
+          if (pause === undefined) pause = true
+        } else {
+          play = true
+          pause = true
+        }
+        const obj = {
+          type,
+          pause,
+          play,
+          tasks
+        }
+        this.openMenu(e, obj)
+      }
+    }
   }
 
   componentDidMount() {
-    document.addEventListener('keydown', this.kd)
-    document.addEventListener('keyup', this.ku)
+    document.addEventListener('keydown', this.keydown)
+    document.addEventListener('keyup', this.keyup)
   }
 
   componentWillUnmount() {
-    document.removeEventListener('keydown', this.kd)
-    document.removeEventListener('keyup', this.ku)
-  }
-
-  keydown(event) {
-    if (event.ctrlKey == this.ctrl && event.shiftKey == this.shift) return
-    this.setState({
-      ctrl: event.ctrlKey,
-      shift: event.shiftKey
-    })
-  }
-
-  keyup(event) {
-    if (event.ctrlKey == this.ctrl && event.shiftKey == this.shift) return
-    this.setState({
-      ctrl: event.ctrlKey,
-      shift: event.shiftKey
-    })
-  }
-
-  cleanRecord() {
-    console.log('')
-    command('', 'CLEAN_RECORD', {})
-  }
-
-  cleanTaskSelect() {
-    this.taskSelected.forEach((item) => {
-      if (this.refs.running.refs[item]) {
-        this.refs.running.refs[item].updateDom(false)
-      }
-    })
-    this.taskSelected.length = 0
-  }
-
-  cleanFinishSelect() {
-    this.finishSelected.forEach((item) => {
-      if (this.refs.finish.refs[item]) {
-        this.refs.finish.refs[item].updateDom(false)
-      }
-    })
-    this.finishSelected.length = 0
-  }
-
-  openMenu(event, obj) {
-    const containerDom = document.getElementById('content-container')
-    const maxLeft = containerDom.offsetLeft + containerDom.clientWidth - 112
-    const x = event.clientX > maxLeft ? maxLeft : event.clientX
-    const maxTop = containerDom.offsetTop + containerDom.offsetHeight - 208
-    const y = event.clientY > maxTop ? maxTop : event.clientY
-    this.setState({ menuShow: true, x, y, play: obj.play, pause: obj.pause, tasks: obj.tasks })
-  }
-
-  hideMenu() {
-    this.setState({
-      menuShow: false
-    })
-  }
-
-  play() {
-    this.state.tasks.forEach((item) => {
-      if (item.trsType === 'download') ipcRenderer.send('RESUME_DOWNLOADING', item.uuid)
-      else ipcRenderer.send('RESUME_UPLOADING', item.uuid)
-    })
-  }
-
-  pause() {
-    this.state.tasks.forEach((item) => {
-      if (item.trsType === 'download') ipcRenderer.send('PAUSE_DOWNLOADING', item.uuid)
-      else ipcRenderer.send('PAUSE_UPLOADING', item.uuid)
-    })
-  }
-
-  delete() {
-    const downloadArr = []
-    const uploadArr = []
-    this.state.tasks.forEach((item) => {
-      if (item.trsType === 'download') downloadArr.push(item)
-      else uploadArr.push(item)
-    })
-
-    ipcRenderer.send(this.taskSelected.length ? 'DELETE_DOWNLOADING' : 'DELETE_DOWNLOADED', downloadArr)
-    ipcRenderer.send(this.taskSelected.length ? 'DELETE_UPLOADING' : 'DELETE_UPLOADED', uploadArr)
-  }
-
-  open() {
-    console.log(this.state.tasks)
-    ipcRenderer.send('OPEN_TRANSMISSION', this.state.tasks)
+    document.removeEventListener('keydown', this.keydown)
+    document.removeEventListener('keyup', this.keyup)
   }
 
   render() {
@@ -155,18 +221,21 @@ class TrsContainer extends React.Component {
         <div style={hrStyle} />
 
         {/* running task list */}
-        <RowList
-          ref="running"
-          listType="running"
-          tasks={userTasks}
-          taskSelected={this.taskSelected}
-          finishSelected={this.finishSelected}
-          ctrl={this.state.ctrl}
-          shift={this.state.shift}
-          cleanFinishSelect={this.cleanFinishSelect.bind(this)}
-          cleanTaskSelect={this.cleanTaskSelect.bind(this)}
-          openMenu={this.openMenu.bind(this)}
-        />
+        {
+          userTasks.map((task, index) => (
+            <RunningTask
+              ref={task.uuid}
+              key={task.uuid}
+              trsType={task.trsType}
+              index={index}
+              task={task}
+              pause={this.pause}
+              resume={this.resume}
+              select={this.select}
+            />
+          ))
+        }
+        <div style={{ height: 48 }} />
 
         {/* finished task title */}
         <div style={titileStyle}>
@@ -177,25 +246,24 @@ class TrsContainer extends React.Component {
             <FlatButton
               label="清除记录"
               icon={<DeleteSvg style={{ color: '#000', opacity: 0.54 }} />}
-              onTouchTap={this.cleanRecord.bind(this)}
+              onTouchTap={this.cleanRecord}
             />
           </div>
         </div>
         <div style={hrStyle} />
 
         {/* finished task list*/}
-        <RowList
-          listType="finish"
-          ref="finish"
-          tasks={finishTasks}
-          taskSelected={this.taskSelected}
-          finishSelected={this.finishSelected}
-          ctrl={this.state.ctrl}
-          shift={this.state.shift}
-          cleanFinishSelect={this.cleanFinishSelect.bind(this)}
-          cleanTaskSelect={this.cleanTaskSelect.bind(this)}
-          openMenu={this.openMenu.bind(this)}
-        />
+        {
+          finishTasks.map((task, index) => (
+            <FinishedTask
+              ref={task.uuid}
+              key={task.uuid}
+              index={index}
+              task={task}
+              select={this.select}
+            />
+          ))
+        }
 
         {/* menu */}
         {
