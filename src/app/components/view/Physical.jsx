@@ -1,5 +1,6 @@
-import React, { Component, PureComponent } from 'react'
+import React from 'react'
 import Radium from 'radium'
+import Debug from 'debug'
 import { ipcRenderer } from 'electron'
 import { Avatar, Divider, MenuItem } from 'material-ui'
 import HardwareDeveloperBoard from 'material-ui/svg-icons/hardware/developer-board'
@@ -9,73 +10,73 @@ import Base from './Base'
 import FileContent from '../file/FileContent'
 import ListSelect from '../file/ListSelect'
 import MoveDialog from '../file/MoveDialog'
+import FileDetail from '../file/FileDetail'
 import { BreadCrumbItem, BreadCrumbSeparator } from '../common/BreadCrumb'
 import ContextMenu from '../common/ContextMenu'
 import DialogOverlay from '../common/DialogOverlay'
+import { HDDIcon } from '../maintenance/Svg'
 
-class DriveHeader extends PureComponent {
+const debug = Debug('component:view:Physical:')
 
-  // 104, leading
-  // 240, label
-  // grow, user
-  // 320, uuid
-  // 56, spacer
-  // 64, view
-  // 24, padding
+class DriveHeader extends React.PureComponent {
   render() {
     return (
-      <div style={{ height: 48, display: 'flex', alignItems: 'center' }}>
+      <div style={{ height: 40, display: 'flex', alignItems: 'center' }}>
         <div style={{ flex: '0 0 104px' }} />
         <div style={{ flex: '0 0 240px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
           类型
         </div>
-        <div style={{ flexGrow: 1 }}>
+        <div style={{ flex: '0 0 240px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
           位置
         </div>
         <div style={{ flex: '0 0 320px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
           UUID
         </div>
-        <div style={{ flex: '0 0 144px' }} />
+        <div style={{ flexGrow: 1 }} />
       </div>
     )
   }
 }
 
 @Radium
-class FileSystemRow extends PureComponent {
-
+class FileSystemRow extends React.PureComponent {
   render() {
-    if (this.props.fileSystem.uuid) return null
-    const fileSystem = this.props.fileSystem
+    /* ignore btrfs disk */
+    if (this.props.fileSystem.uuid) return <div />
 
+    const fileSystem = this.props.fileSystem
     return (
       <div
-        style={{ height: 64,
+        style={{
+          height: 48,
           display: 'flex',
           alignItems: 'center',
           ':hover': { backgroundColor: '#F5F5F5' }
-        }} onDoubleClick={this.props.enter}
+        }}
+        onDoubleClick={this.props.enter}
       >
-        <div style={{ flex: '0 0 32px' }} />
-        <Avatar><FileFolder color="white" /></Avatar>
-        <div style={{ flex: '0 0 32px' }} />
+        <div style={{ flex: '0 0 56px' }} />
+        <div style={{ flex: '0 0 48px', display: 'flex', alignItems: 'center' }}>
+          <Avatar style={{ backgroundColor: 'white' }}>
+            <HDDIcon color="rgba(0,0,0,0.54)" />
+          </Avatar>
+        </div>
         <div style={{ flex: '0 0 240px', fontSize: 16, color: 'rgba(0,0,0,0.87)' }}>
           { fileSystem.fileSystemType }
         </div>
-        <div style={{ flexGrow: 1, fontSize: 16, color: 'rgba(0,0,0,0.87)' }}>
+        <div style={{ flex: '0 0 240px', fontSize: 16, color: 'rgba(0,0,0,0.87)' }}>
           { fileSystem.mountpoint }
         </div>
         <div style={{ flex: '0 0 320px', fontSize: 16, color: 'rgba(0,0,0,0.87)' }}>
           { fileSystem.fileSystemUUID}
         </div>
-        <div style={{ flex: '0 0 144px' }} />
+        <div style={{ flexGrow: 1 }} />
       </div>
     )
   }
 }
 
 class Physical extends Base {
-
   constructor(ctx) {
     super(ctx)
     this.path = [{ name: '物理磁盘', type: 'physical', uuid: '物理磁盘' }]
@@ -91,8 +92,11 @@ class Physical extends Base {
       contextMenuY: -1,
       contextMenuX: -1,
       move: false,
-      copy: false
+      copy: false,
+      detailIndex: -1
     }
+
+    this.updateDetailBound = this.updateDetail.bind(this)
 
     ipcRenderer.on('physicalListUpdate', (e, obj) => {
       if (this.state.path.length < 2) return
@@ -103,7 +107,7 @@ class Physical extends Base {
       })
       const position = obj.path.lastIndexOf('/')
       const dirPath = obj.path.substring(0, position)
-      if (string == dirPath) {
+      if (string === dirPath) {
         // this.ctx.openSnackBar(obj.message)
         this.refresh()
       }
@@ -126,6 +130,10 @@ class Physical extends Base {
     }
   }
 
+  updateDetail(index) {
+    this.setState({ detailIndex: index })
+  }
+
   willReceiveProps(nextProps) {
     const apis = nextProps.apis
     if (!apis || !apis.extDrives) return
@@ -143,7 +151,7 @@ class Physical extends Base {
   navEnter() {
     const apis = this.ctx.props.apis
     this.path = [{ name: '物理磁盘', type: 'physical', uuid: '物理磁盘' }]
-    this.setState({ inRoot: true, entries: [] })
+    this.setState({ inRoot: true, entries: [], detailIndex: -1 })
     apis.request('extDrives')
   }
 
@@ -182,27 +190,23 @@ class Physical extends Base {
     return true
   }
 
-  detailWidth() {
-    return 400
-  }
-
   /** renderers **/
 
   renderTitle({ style }) {
-    if (!this.state.extDrives && !this.state.extListDir) return
+    if (!this.state.extDrives && !this.state.extListDir) return null
     const path = this.state.path
     return (
       <div id="file-breadcrumbs" style={Object.assign({}, style, { marginLeft: '176px' })}>
-        {path.reduce((acc, node, index, arr) => {
+        {path.reduce((acc, node, index) => {
           if (path.length > 4 && index > 0 && index < path.length - 3) {
             if (index === 1) {
-              acc.push(<BreadCrumbSeparator key={`Separator${index}`} />)
+              acc.push(<BreadCrumbSeparator key={`Separator${index.toString()}`} />)
               acc.push(<BreadCrumbItem text="..." key="..." />)
             }
             return acc
           }
 
-          if (index !== 0) acc.push(<BreadCrumbSeparator key={`Separator${index}`} />)
+          if (index !== 0) acc.push(<BreadCrumbSeparator key={`Separator${index.toString()}`} />)
 
           if (index === 0) { // the first one is always special
             acc.push(<BreadCrumbItem text="物理磁盘" key="物理磁盘" onTouchTap={this.navEnter.bind(this)} />)
@@ -220,31 +224,55 @@ class Physical extends Base {
   }
 
 
-  renderContent() {
-    let extDrives,
-      apis = this.ctx.props.apis
-    if (apis.extDrives.isFulfilled) extDrives = apis.extDrives.value()
+  renderDetail({ style }) {
+    return (
+      <div style={style}>
+        {
+          this.state.entries.length ?
+            <FileDetail
+              detailFile={this.state.entries[this.state.detailIndex]}
+              path={this.state.path}
+              ipcRenderer={ipcRenderer}
+            /> :
+            <div style={{ height: 128, backgroundColor: '#00796B' }} />
+        }
+      </div>
+    )
+  }
 
+  renderContent() {
+    const apis = this.ctx.props.apis
+    debug('renderContent', this.state)
+    if (!this.state.entries) return <div />
     return (
       <div style={{ width: '100%', height: '100%' }}>
+        {/* root directory */}
+        {
+          this.state.path.length === 1 &&
+          <div>
+            <DriveHeader />
+            <div style={{ height: 8 }} />
+            {
+              this.state.entries.map(fsys => (
+                <div key={fsys.mountpoint}>
+                  <FileSystemRow fileSystem={fsys} enter={this.enter.bind(this, fsys)} />
+                </div>
+              ))
+            }
+          </div>
+        }
 
-        <div style={{ height: 8 }} />
-
-        {this.state.path.length == 1 && <DriveHeader />}
-
-        <div style={{ height: 8 }} />
-
-        {this.state.path.length == 1 && <Divider style={{ marginLeft: 104 }} />}
-
-        { this.state.path.length == 1 && this.state.entries.map(fsys => <FileSystemRow fileSystem={fsys} enter={this.enter.bind(this, fsys)} />) }
-        { this.state.path.length > 1 && <FileContent
-          home={this.state}
-          select={this.state.select}
-          entries={this.state.entries}
-          listNavBySelect={this.enter.bind(this)}
-          updateDetail={() => {}}
-          showContextMenu={this.showContextMenu.bind(this)}
-        />
+        {/* second or deeper directory */}
+        {
+          this.state.path.length > 1 &&
+            <FileContent
+              home={this.state}
+              select={this.state.select}
+              entries={this.state.entries}
+              listNavBySelect={this.enter.bind(this)}
+              updateDetail={this.updateDetailBound}
+              showContextMenu={this.showContextMenu.bind(this)}
+            />
         }
 
         <ContextMenu
@@ -259,7 +287,7 @@ class Physical extends Base {
 
         <DialogOverlay open={this.state.move} onRequestClose={this.closeMove.bind(this)}>
           { this.state.move && <MoveDialog
-            apis={this.ctx.props.apis}
+            apis={apis}
             path={this.state.path}
             entries={this.state.entries}
             select={this.state.select}
@@ -270,7 +298,7 @@ class Physical extends Base {
 
         <DialogOverlay open={this.state.copy} onRequestClose={this.closeCopy.bind(this)}>
           { this.state.copy && <MoveDialog
-            apis={this.ctx.props.apis}
+            apis={apis}
             path={this.state.path}
             entries={this.state.entries}
             select={this.state.select}
@@ -299,8 +327,8 @@ class Physical extends Base {
     let string = ''
     if (pathIndex > path.length || pathIndex < 1) throw Error('bread index error')
     path.forEach((item, index) => {
-      if (index > pathIndex || index == 0) return
-      if (index == 1) string += `${path[index].fileSystemUUID}/`
+      if (index > pathIndex || index === 0) return
+      if (index === 1) string += `${path[index].fileSystemUUID}/`
       else string += `${path[index].name}/`
     })
     newPath.splice(pathIndex + 1)
@@ -316,17 +344,17 @@ class Physical extends Base {
       fsy = this.state.entries[this.state.select.selected[0]]
     }
     // console.log(fsy, this.state)
-    if (fsy.type == 'file') return
+    if (fsy.type === 'file') return
     let string = ''
     const fileSystemIndex = this.state.path.findIndex(item => item.fileSystemUUID)
-    if (fileSystemIndex == -1) {
+    if (fileSystemIndex === -1) {
       // console.log('fileSystemIndex 没有找到 在根目录')
       string += (`${fsy.fileSystemUUID}/`)
     } else {
       // console.log('fileSystemIndex 找到 不在根目录', fileSystemIndex)
       this.state.path.forEach((item, index) => {
         if (index < fileSystemIndex) {}
-        if (index == fileSystemIndex) string += (`${item.fileSystemUUID}/`)
+        if (index === fileSystemIndex) string += (`${item.fileSystemUUID}/`)
         if (index > fileSystemIndex) string += (`${item.name}/`)
       })
       string += (`${fsy.name}/`)
@@ -380,4 +408,3 @@ class Physical extends Base {
 }
 
 export default Physical
-
