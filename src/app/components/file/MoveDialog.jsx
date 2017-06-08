@@ -7,6 +7,9 @@ import FileFolder from 'material-ui/svg-icons/file/folder'
 import ArrowRight from 'material-ui/svg-icons/hardware/keyboard-arrow-right'
 import request from 'superagent'
 import { command } from '../../lib/command'
+
+require('../../../assets/css/main.css')
+
 class Row extends React.PureComponent {
   constructor(props) {
     super(props)
@@ -18,13 +21,48 @@ class Row extends React.PureComponent {
     const isSelected = this.props.isSelected
     return (
       <div
-        className={isSelected ? 'move-dialog-row row-selected' : disable ? 'move-dialog-row disable' : 'move-dialog-row'}
+        style={{
+          height: 36,
+          lineHeight: 36,
+          width: '100%',
+          overflow: 'hidden',
+          display: 'flex',
+          flexFlow: 'row nowrap',
+          alignItems: 'center',
+          background: isSelected ? '#4d90fe' : '',
+          opacity: disable ? 0.5 : 1
+        }}
         onTouchTap={disable ? null : this.props.selectNode}
         onDoubleClick={this.props.enter}
       >
-        <span className="move-dialog-row-type">{node.type == 'file' ? <EditorInsertDriveFile /> : <FileFolder />}</span>
-        <span className="move-dialog-row-text">{node.name || node.label || node.mountpoint}</span>
-        <span className="move-dialog-row-enter" onTouchTap={this.props.enter}><ArrowRight /></span>
+        <span
+          style={{
+            margin: '0 18px 0 13px',
+            display: 'flex'
+          }}
+        >{node.type == 'file' ? <EditorInsertDriveFile /> : <FileFolder />}</span>
+        <span
+          style={{
+            width: 150,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            marginRight: 5
+          }}
+        >{node.name || node.label || node.mountpoint}</span>
+        <span
+          style={{
+            display: 'none',
+            width: 23,
+            height: '25px!important',
+            lineHeight: '25px!important',
+            cursor: 'pointer',
+            justifyContent: 'center'
+          }}
+          onTouchTap={this.props.enter}
+        >
+          <ArrowRight />
+        </span>
       </div>
     )
   }
