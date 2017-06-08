@@ -16,6 +16,7 @@ import MoveDialog from '../file/MoveDialog'
 import Base from './Base'
 import { command } from '../../lib/command'
 import ContextMenu from '../common/ContextMenu'
+import FlatButton from '../common/FlatButton'
 import FileUploadButton from '../file/FileUploadButton'
 import FileDetail from '../file/FileDetail'
 
@@ -42,10 +43,50 @@ class Public extends Base {
       move: false,
       inRoot: false,
       copy: false,
+      delete: false,
       detailIndex: -1
     }
 
-    this.updateDetailBound = this.updateDetail.bind(this)
+    this.updateDetail = (index) => {
+      this.setState({ detailIndex: index })
+    }
+
+    this.toggleDialog = (type) => {
+      this.setState({ [type]: !this.state[type] })
+    }
+
+    this.delete = () => {
+      const entries = this.state.entries
+      const selected = this.state.select.selected
+      const count = selected.length
+      let finishCount = 0
+      const path = this.state.path
+      const dirUUID = path[path.length - 1].uuid
+
+      const loop = () => {
+        const nodeUUID = entries[selected[finishCount]].uuid
+        this.ctx.props.apis.request('deleteDirOrFile', { dirUUID, nodeUUID }, (err, data) => {
+          // need to handle this err ? TODO
+          if (err) console.log(err)
+          finishCount += 1
+          if (finishCount === count) {
+            if (this.state.path[this.state.path.length - 1].uuid === dirUUID) {
+              if (this.state.path.length == 1) { this.ctx.props.apis.request('adminDrives') }
+              this.ctx.props.apis.request('driveListNavDir', { rootUUID: this.state.path[1].uuid, dirUUID }, (err, data) => {
+                if (!err) {
+                  this.ctx.openSnackBar('删除成功')
+                } else {
+                  this.ctx.openSnackBar(`删除失败: ${err.message}`)
+                }
+              })
+            } else return
+          } else loop()
+        })
+      }
+      loop()
+      this.toggleDialog('delete')
+    }
+
 
     ipcRenderer.on('driveListUpdate', (e, obj) => {
       if (this.state.path.length == 0) return
@@ -54,10 +95,6 @@ class Public extends Base {
         this.refresh()
       }
     })
-  }
-
-  updateDetail(index) {
-    this.setState({ detailIndex: index })
   }
 
   updateState(listNavDir) {
@@ -291,7 +328,7 @@ class Public extends Base {
   download() {
     const entries = this.state.entries
     const selected = this.state.select.selected
-    const p = this.state.path
+    const path = this.state.path
     const folders = []
     const files = []
 
@@ -302,38 +339,9 @@ class Public extends Base {
       else if (obj.type == 'file') files.push(obj)
     })
 
-    const args = { folders, files, dirUUID: p[p.length - 1].uuid }
+    const args = { folders, files, dirUUID: path[path.length - 1].uuid }
     // console.log(args)
     command('fileapp', 'DOWNLOAD', args)
-  }
-
-  delete() {
-    // console.log(this)
-    const entries = this.state.entries
-    const selected = this.state.select.selected
-    const count = selected.length
-    let finishCount = 0
-
-    const p = this.state.path
-    const dirUUID = p[p.length - 1].uuid
-
-    const loop = () => {
-      const nodeUUID = entries[selected[finishCount]].uuid
-      this.ctx.props.apis.request('deleteDirOrFile', { dirUUID, nodeUUID }, (err, data) => {
-        console.log(`${entries[selected[finishCount]].name} finish`)
-        if (err) console.log(err)
-        finishCount++
-        console.log(finishCount, ' vs ', count, this.state.path[this.state.path.length - 1].uuid === dirUUID)
-        if (finishCount === count) {
-          if (this.state.path[this.state.path.length - 1].uuid === dirUUID) {
-            if (this.state.path.length == 1) { this.ctx.props.apis.request('adminDrives') }
-            this.ctx.props.apis.request('driveListNavDir', { rootUUID: this.state.path[1].uuid, dirUUID })
-          } else return
-        } else loop()
-      })
-    }
-
-    loop()
   }
 
   upload(type) {
@@ -386,7 +394,7 @@ class Public extends Base {
           entries={this.state.entries}
           listNavBySelect={this.listNavBySelect.bind(this)}
           showContextMenu={this.showContextMenu.bind(this)}
-          updateDetail={this.updateDetailBound}
+          updateDetail={this.updateDetail}
         />
 
         <ContextMenu
@@ -397,7 +405,7 @@ class Public extends Base {
         >
           <MenuItem primaryText="新建文件夹" disabled={!(this.state.path.length > 1)} onTouchTap={this.createNewFolder.bind(this)} />
           <MenuItem primaryText="下载" onTouchTap={this.download.bind(this)} />
-          <MenuItem primaryText="刪除" disabled={!(this.state.path.length > 1)} onTouchTap={this.delete.bind(this)} />
+          <MenuItem primaryText="刪除" disabled={!(this.state.path.length > 1)} onTouchTap={() => this.toggleDialog('delete')} />
           <MenuItem primaryText="重命名" disabled={!(this.state.path.length > 1)} onTouchTap={this.openRename.bind(this)} />
           <MenuItem primaryText="移动" disabled={!(this.state.path.length > 1)} onTouchTap={this.openMove.bind(this)} />
           <MenuItem primaryText="拷贝" disabled={!(this.state.path.length > 1)} onTouchTap={this.openCopy.bind(this)} />
@@ -443,6 +451,25 @@ class Public extends Base {
             type="public"
             operation="copy"
           />}
+        </DialogOverlay>
+
+        <DialogOverlay open={this.state.delete}>
+          {
+            this.state.delete &&
+            <div style={{ width: 280, padding: '24px 24px 0px 24px' }}>
+              <div style={{ color: 'rgba(0,0,0,0.54)' }}>{'确定删除？'}</div>
+              <div style={{ height: 24 }} />
+              <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('delete')} />
+                <FlatButton
+                  label="确认"
+                  primary
+                  onTouchTap={this.delete}
+                />
+              </div>
+            </div>
+
+          }
         </DialogOverlay>
       </div>
 
