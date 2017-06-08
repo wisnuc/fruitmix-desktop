@@ -107,7 +107,7 @@ class ListSelect extends EventEmitter {
   // if there is single selection and index !== -1, update select and context menu
   // if there is multiple selection, context menu
   rightClick(index) {
-    if (this.state.selected.length > 2) return
+    if (this.state.selected.length > 1) return
     return this.leftClick(index)
   }
 

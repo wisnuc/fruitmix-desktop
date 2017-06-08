@@ -169,7 +169,7 @@ class Home extends Base {
     const containerDom = document.getElementById('content-container')
     const maxLeft = containerDom.offsetLeft + containerDom.clientWidth - 240
     const x = clientX > maxLeft ? maxLeft : clientX
-    const maxTop = containerDom.offsetTop + containerDom.offsetHeight - 192
+    const maxTop = containerDom.offsetTop + containerDom.offsetHeight - 336
     const y = clientY > maxTop ? maxTop : clientY
     this.setState({
       contextMenuOpen: true,

@@ -1,8 +1,11 @@
 import React from 'react'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
-import DeleteSvg from 'material-ui/svg-icons/action/delete'
 import { Paper, Menu, MenuItem } from 'material-ui'
+import DeleteSvg from 'material-ui/svg-icons/action/delete'
+import PlaySvg from 'material-ui/svg-icons/av/play-arrow'
+import PauseSvg from 'material-ui/svg-icons/av/pause'
+
 import RunningTask from './RunningTask'
 import FinishedTask from './FinishedTask'
 import FlatButton from '../common/FlatButton'
@@ -63,7 +66,6 @@ class TrsContainer extends React.Component {
     }
 
     this.open = () => {
-      console.log(this.state.tasks)
       ipcRenderer.send('OPEN_TRANSMISSION', this.state.tasks)
     }
 
@@ -78,105 +80,110 @@ class TrsContainer extends React.Component {
     }
 
     this.cleanRecord = () => {
-      console.log('cleanRecord')
       command('', 'CLEAN_RECORD', {})
     }
 
     this.cleanTaskSelect = () => {
       this.taskSelected.forEach((item) => {
+        if (this.refs[item]) {
+          this.refs[item].updateDom(false)
+        }
       })
       this.taskSelected.length = 0
     }
 
     this.cleanFinishSelect = () => {
       this.finishSelected.forEach((item) => {
+        if (this.refs[item]) {
+          this.refs[item].updateDom(false)
+        }
       })
       this.finishSelected.length = 0
     }
 
     this.openMenu = (event, obj) => {
       const containerDom = document.getElementById('content-container')
-      const maxLeft = containerDom.offsetLeft + containerDom.clientWidth - 112
+      const maxLeft = containerDom.offsetLeft + containerDom.clientWidth - 168
       const x = event.clientX > maxLeft ? maxLeft : event.clientX
-      const maxTop = containerDom.offsetTop + containerDom.offsetHeight - 208
+      const maxTop = containerDom.offsetTop + containerDom.offsetHeight - (16 + 96 + (obj.play + obj.pause) * 48)
       const y = event.clientY > maxTop ? maxTop : event.clientY
       this.setState({ menuShow: true, x, y, play: obj.play, pause: obj.pause, tasks: obj.tasks })
     }
 
-    this.playAll = () => {
-      this.state.tasks.forEach((item) => {
+    this.playAll = (tasks) => {
+      debug('this.play', tasks)
+      tasks.forEach((item) => {
         if (item.trsType === 'download') ipcRenderer.send('RESUME_DOWNLOADING', item.uuid)
         else ipcRenderer.send('RESUME_UPLOADING', item.uuid)
       })
     }
 
-    this.pauseAll = () => {
-      this.state.tasks.forEach((item) => {
+    this.pauseAll = (tasks) => {
+      debug('this.pause', tasks)
+      tasks.forEach((item) => {
         if (item.trsType === 'download') ipcRenderer.send('PAUSE_DOWNLOADING', item.uuid)
         else ipcRenderer.send('PAUSE_UPLOADING', item.uuid)
       })
     }
 
     this.select = (type, id, isSelected, index, e) => {
-      debug('onselect', this.state, type, id, isSelected, this.taskSelected, this.finishSelected)
-      let arr
+      let selectedArray
       if (type === 'running') {
-        arr = this.taskSelected
+        selectedArray = this.taskSelected
         this.cleanFinishSelect()
       } else {
-        arr = this.finishSelected
+        selectedArray = this.finishSelected
         this.cleanTaskSelect()
       }
+
+      /* ctrl */
       if (this.state.ctrl) {
-        // 'ctrl 按下'
-        if (isSelected) {
-          // '取消选中'
-          if (e.button !== 2) {
-            const index = arr.indexOf(id)
-            arr.splice(index, 1)
+
+        /* only left click */
+        if (e.button === 0) {
+          if (isSelected) {
+
+            /* cancel select */
+            const index = selectedArray.indexOf(id)
+            selectedArray.splice(index, 1)
+            this.refs[id].updateDom(!isSelected)
+          } else {
+
+            /* add select */
+            selectedArray.push(id)
+            this.refs[id].updateDom(!isSelected)
           }
-        } else {
-          // '选中'
-          arr.push(id)
         }
-
-        // shift enter
       } else if (this.state.shift) {
+        /* shift TODO */
+      } else if (!(e.button === 2 && isSelected)) {
 
-      } else {
-        // 右键选中文件 不进行操作 只打开菜单
-        if (!(e.button == 2 && isSelected)) {
-          // '单选一个任务'
-          type === 'running' ? this.cleanTaskSelect() : this.cleanFinishSelect()
-          arr.push(id)
-        }
+        /* select an item: no shift or ctrl, not right click a selected item */
+        type === 'running' ? this.cleanTaskSelect() : this.cleanFinishSelect()
+        selectedArray.push(id)
+        this.refs[id].updateDom(true)
       }
 
+      /* right click: open menu */
       if (e.button === 2) {
         const tasks = []
-        let play
-        let pause
-        arr.forEach((item) => {
+        let play = false
+        let pause = false
+
+        /* get selected tasks */
+        selectedArray.forEach((item) => {
+          if (this.refs[item]) tasks.push(this.refs[item].props.task)
         })
-        if (type !== 'finish') {
+        
+        /* add play or pause option to running task */
+        if (type === 'running') {
           for (let i = 0; i < tasks.length; i++) {
-            if (play !== undefined && pause !== undefined) break
-            if (tasks[i].pause) play = false
-            else pause = false
+            if (tasks[i].pause) play = true
+            else pause = true
           }
-          if (play === undefined) play = true
-          if (pause === undefined) pause = true
-        } else {
-          play = true
-          pause = true
         }
-        const obj = {
-          type,
-          pause,
-          play,
-          tasks
-        }
-        this.openMenu(e, obj)
+
+        this.openMenu(e, { type, pause, play, tasks })
       }
     }
   }
@@ -195,6 +202,7 @@ class TrsContainer extends React.Component {
     const transmission = window.store.getState().transmission
     const userTasks = transmission.userTasks
     const finishTasks = transmission.finishTasks
+    // debug('render', userTasks)
 
     const titileStyle = {
       display: 'flex',
@@ -214,9 +222,24 @@ class TrsContainer extends React.Component {
     return (
       <div style={{ padding: 16 }}>
         <div style={{ height: 24 }} />
+
         {/* running task title */}
         <div style={titileStyle} >
-          { `传输中（${userTasks.length}）` }
+          <div style={{ flexGrow: 1 }}>
+            { `传输中（${userTasks.length}）` }
+          </div>
+          <div style={{ flex: '0 0 240px', display: 'flex', alignItems: 'center' }}>
+            <FlatButton
+              label="全部开始"
+              icon={<PlaySvg style={{ color: '#000', opacity: 0.54 }} />}
+              onTouchTap={() => this.playAll(userTasks)}
+            />
+            <FlatButton
+              label="全部暂停"
+              icon={<PauseSvg style={{ color: '#000', opacity: 0.54 }} />}
+              onTouchTap={() => this.pauseAll(userTasks)}
+            />
+          </div>
         </div>
         <div style={hrStyle} />
 
@@ -242,7 +265,7 @@ class TrsContainer extends React.Component {
           <div style={{ flexGrow: 1 }}>
             { `已完成（${finishTasks.length}）` }
           </div>
-          <div style={{ flex: '0 0 180px', display: 'flex', alignItems: 'center' }}>
+          <div style={{ flex: '0 0 120px', display: 'flex', alignItems: 'center' }}>
             <FlatButton
               label="清除记录"
               icon={<DeleteSvg style={{ color: '#000', opacity: 0.54 }} />}
@@ -280,8 +303,8 @@ class TrsContainer extends React.Component {
             >
               <Paper style={{ position: 'absolute', top: this.state.y, left: this.state.x }}>
                 <Menu>
-                  <MenuItem primaryText="继续" disabled={this.state.play} onTouchTap={this.play} />
-                  <MenuItem primaryText="暂停" disabled={this.state.pause} onTouchTap={this.pause} />
+                  { this.state.play && <MenuItem primaryText="继续" onTouchTap={() => this.playAll(this.state.tasks)} /> }
+                  { this.state.pause && <MenuItem primaryText="暂停" onTouchTap={() => this.pauseAll(this.state.tasks)} /> }
                   <MenuItem primaryText="打开所在文件夹" onTouchTap={this.open} />
                   <MenuItem primaryText="删除" onTouchTap={this.delete} />
                 </Menu>

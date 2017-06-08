@@ -1,4 +1,5 @@
 import React, { Component, PureComponent } from 'react'
+import Debug from 'debug'
 import prettysize from 'prettysize'
 import { Avatar } from 'material-ui'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
@@ -9,6 +10,8 @@ import FileFolder from 'material-ui/svg-icons/file/folder'
 
 import { List, AutoSizer } from 'react-virtualized'
 import { command } from '../../lib/command'
+
+const debug = Debug('component:file:FileContent:')
 
 const formatTime = (mtime) => {
   if (!mtime) {
@@ -84,6 +87,7 @@ class Row extends PureComponent {
     }
 
     const outerStyle = style
+    // debug('select', select)
 
     return (
       <div key={`${entry.name}+${index.toString()}`} style={outerStyle}>
@@ -171,62 +175,50 @@ class FileContent extends Component {
   }
 
   componentDidMount() {
-		// bind keydown event
+    // bind keydown event
     document.addEventListener('keydown', this.keyDownBound)
     document.addEventListener('keyup', this.keyUpBound)
   }
 
   componentWillUnmount() {
-		// remove keydown event
+    // remove keydown event
     document.removeEventListener('keydown', this.keyDownBound)
     document.removeEventListener('keyup', this.keyUpBound)
   }
 
   keyDown(e) {
-    // console.log('keydown', e.ctrlKey, e.shiftKey)
     if (this.props.select) { this.props.select.keyEvent(e.ctrlKey, e.shiftKey) }
   }
 
   keyUp(e) {
-    // console.log('keyup', e.ctrlKey, e.shiftKey)
     if (this.props.select) { this.props.select.keyEvent(e.ctrlKey, e.shiftKey) }
   }
 
   rowTouchTap(e, index) {
+    /*
+     * using e.nativeEvent.button instead of e.nativeEvent.which
+     * 0 - left
+     * 1 - middle
+     * 2 - right
+     * e.type must be mouseup
+     * must be button 1 or button 2 of mouse
+     */
+
     e.preventDefault()  // important!
     e.stopPropagation()
 
-    // console.log('rowTouchTap', index)
-
-    // using e.nativeEvent.button instead of e.nativeEvent.which
-    // 0 - left
-    // 1 - middle
-    // 2 - right
-
-    // e.type must be mouseup
-
     const type = e.type
     const button = e.nativeEvent.button
-
     if (type !== 'mouseup' || !(button === 0 || button === 2)) return
 
-
+    /* just touch */
     this.props.select.touchTap(button, index)
     this.props.updateDetail(index)
 
+    /* right click */
     if (button === 2) {
-      // console.log('rowTouchTap, right click')
       this.props.showContextMenu(e.nativeEvent.clientX, e.nativeEvent.clientY)
     }
-
-/**
-      if (this.props.select.shift || this.props.select.ctrl) return
-      this.setState({
-        contextMenu: true,
-        clientX: e.nativeEvent.clientX,
-        clientY: e.nativeEvent.clientY,
-      })
-**/
   }
 
   rowMouseEnter(e, index) {

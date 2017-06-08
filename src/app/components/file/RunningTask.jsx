@@ -10,10 +10,13 @@ const svgStyle = { color: '#000', opacity: 0.54 }
 class RunningTask extends React.Component {
   constructor(props) {
     super(props)
-    this.selected = false
+
+    this.state = {
+      isSelected: false
+    }
+
     this.updateDom = (isSelected) => {
-      this.isSelected = isSelected
-      this.forceUpdate()
+      this.setState({ isSelected })
     }
 
     this.selectTaskItem = (e) => {
@@ -64,6 +67,7 @@ class RunningTask extends React.Component {
     const pColor = task.pause ? 'rgba(0,0,0,.12)' : '#89c2f2'
     let pWidth = task.completeSize / task.size * 100
     if (pWidth === Infinity || !pWidth) pWidth = 0
+
     return (
       <div
         style={{
@@ -128,7 +132,7 @@ class RunningTask extends React.Component {
         <div style={{ flex: '0 0 160px' }}>{ this.getStatus(task) }</div>
 
         {/* Pause and resume */}
-        <div style={{ flex: '0 0 170px', display: 'flex', alignItems: 'center' }}>
+        <div style={{ flex: '0 0 108px', display: 'flex', alignItems: 'center' }}>
           {
             task.pause ?
               <PlaySvg style={svgStyle} onTouchTap={this.toggleTask} /> :

@@ -9,14 +9,25 @@ const svgStyle = { color: '#000', opacity: 0.54 }
 class FinishedTask extends Component {
   constructor(props) {
     super(props)
-    this.createDate = new Date()
+
     this.state = {
       isSelected: false
     }
 
+    this.createDate = new Date()
+
     this.updateDom = (isSelected) => {
       this.setState({ isSelected })
     }
+    
+    this.selectFinishItem = (e) => {
+      const event = e.nativeEvent
+      this.props.select('finish', this.props.task.uuid, this.state.isSelected, null, event)
+    }
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return (this.state !== nextState)
   }
 
   getFinishDate(date) {
@@ -29,12 +40,6 @@ class FinishedTask extends Component {
     if (year === date[0] && mouth === date[1] && day === date[2]) return `${date[3]}:${date[4]}`
     if (year === date[0] && mouth === date[1] && day === date[2] + 1) return '昨天'
     return `${date[0]}-${date[1]}-${date[2]}`
-  }
-
-  selectFinishItem(e) {
-    const event = e.nativeEvent
-    this.props.select('finish', this.props.task.uuid, this.state.isSelected, null, event)
-    this.setState({ isSelected: !this.state.isSelected })
   }
 
   render() {
@@ -51,7 +56,7 @@ class FinishedTask extends Component {
           color: 'rgba(0,0,0,0.87)',
           backgroundColor: this.state.isSelected ? '#f4f4f4' : ''
         }}
-        onMouseUp={this.selectFinishItem.bind(this)}
+        onMouseUp={this.selectFinishItem}
       >
         {/* task type */}
         <div style={{ flex: '0 0 48px' }}>
