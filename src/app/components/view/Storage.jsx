@@ -8,9 +8,8 @@ import Base from './Base'
 class Storage extends Base {
 
   constructor(ctx) {
-
     super(ctx)
-    let address = ctx.props.selectedDevice.mdev.address
+    const address = ctx.props.selectedDevice.mdev.address
     this.url = `http://${address}:3000/system/storage`
     this.state = {
       err: null,
@@ -18,7 +17,7 @@ class Storage extends Base {
     }
   }
 
-  willReceiveProps(nextProps) { 
+  willReceiveProps(nextProps) {
   }
 
   navEnter() {
@@ -28,12 +27,9 @@ class Storage extends Base {
       .end((err, res) => {
         if (err) {
           this.setState(Object.assign({}, this.state, { err, data: null }))
-        }
-        else if (!res.ok) {
+        } else if (!res.ok) {
           this.setState(Object.assign({}, this.state, { err: new Error('response not ok'), data: null }))
-        }
-        else 
-          this.setState(Object.assign({}, this.state, { err: null, data: res.body }))
+        } else { this.setState(Object.assign({}, this.state, { err: null, data: res.body })) }
       })
   }
 
@@ -62,9 +58,8 @@ class Storage extends Base {
 
   /** renderers **/
   renderContent() {
-
     return (
-      <div style={{width: '100%', height: '100%', overflow: 'scroll'}}>
+      <div style={{ width: '100%', height: '100%', overflow: 'scroll' }}>
         hello
       </div>
     )

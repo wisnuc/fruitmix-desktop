@@ -7,13 +7,12 @@ import UUID from 'node-uuid'
 import request from 'request'
 
 /* import file module */
-import { serverGetAsync, serverPostAsync, serverPatchAsync, serverDeleteAsync, serverDownloadAsync } from './server'
-import action from '../serve/action/action'
-import store from '../serve/store/store'
+import { serverDownloadAsync } from './server'
 import { getMainWindow } from './window'
+import store from '../serve/store/store'
 
 /* init */
-const getIpAddr = () => store.getState().login2.device.mdev.address
+const getIpAddr = () => store.getState().login.device.mdev.address
 
 class Worker extends EventEmitter {
   constructor(id) {
@@ -115,7 +114,7 @@ class Worker extends EventEmitter {
     const requestDownloadAsync = Promise.promisify(this.requestDownload.bind(this))
     const ip = getIpAddr()
     const port = 3721
-    const token = store.getState().login2.device.token.data.token
+    const token = store.getState().login.device.token.data.token
     return requestDownloadAsync(`http://${ip}:${port}/${endpoint}`, qs, token, downloadPath, name)
   }
 }

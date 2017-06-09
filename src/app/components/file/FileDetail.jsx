@@ -55,7 +55,7 @@ const getResolution = (height, width) => {
   return `${res} 像素 ${height} x ${width}`
 }
 
-class FileDetail extends React.Component {
+class FileDetail extends React.PureComponent {
 
   constructor(props) {
     super(props)
@@ -69,6 +69,13 @@ class FileDetail extends React.Component {
         // debug('thumbPath got')
         this.setState({ thumbPath: path })
       }
+    }
+
+    /* handle detailFile in first render */
+    if (this.props.detailFile && this.props.detailFile.digest) {
+      this.session = UUID.v4()
+      this.props.ipcRenderer.send('mediaShowThumb', this.session, this.props.detailFile.digest, 210, 210)
+      this.props.ipcRenderer.on('getThumbSuccess', this.updateThumbPath)
     }
   }
 
@@ -137,7 +144,7 @@ class FileDetail extends React.Component {
       >
         <div style={{ flex: '0 0 24px', display: 'flex', alignItems: 'center' }}>
           {
-            type === 'folder' || type === 'public'
+            type === 'folder' || type === 'public' || type === 'directory'
             ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)' }} />
             : type === 'file'
             ? <EditorInsertDriveFile style={{ color: 'rgba(0,0,0,0.54' }} />
@@ -156,7 +163,7 @@ class FileDetail extends React.Component {
 
   render() {
     const { detailFile, path } = this.props
-    // debug('detailFile', detailFile)
+    // debug('detailFile', detailFile, this.state)
     if (!detailFile) return <div style={{ height: 128, backgroundColor: '#00796B' }} />
 
     const { metadata, digest } = detailFile
@@ -180,7 +187,7 @@ class FileDetail extends React.Component {
       '类型',
       detailFile.type === 'file' ? '大小' : '',
       detailFile.type !== 'public' ? '位置' : '',
-      detailFile.type !== 'public' ? '修改时间' : '',
+      (detailFile.type !== 'public' && detailFile.type !== 'unsupported') ? '修改时间' : '',
       exifDateTime ? '拍摄时间' : '',
       exifModel ? '拍摄设备' : '',
       height && width ? '分辨率' : ''
@@ -195,6 +202,7 @@ class FileDetail extends React.Component {
       exifModel,
       getResolution(height, width)
     ]
+
     return (
       <div style={{ height: '100%' }}>
         <div style={{ height: 128, backgroundColor: '#00796B' }}>
