@@ -41,6 +41,7 @@ class RunningTask extends React.Component {
     if (task.state === 'visiting') return '正在校验本地文件'
     if (task.state === 'diffing') return '正在校验本地文件'
     if (task.state === 'finish') return '已完成'
+    if (task.size === 0) return '0%'
     return `${((task.completeSize / task.size) * 100).toFixed(2)}%`
   }
 

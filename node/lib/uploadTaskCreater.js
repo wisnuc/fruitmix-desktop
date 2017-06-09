@@ -115,7 +115,7 @@ class TaskManager {
 
     this.countSpeed = setInterval(() => {
       if (this.pause) {
-        this.speed = '0k/秒'
+        this.speed = ''
         this.restTime = '--'
         return
       }
