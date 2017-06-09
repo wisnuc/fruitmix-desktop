@@ -104,6 +104,10 @@ class MoveDialog extends React.PureComponent {
           return true
         }
       }
+
+      /* 被选文件夹不能是待移动文件的父文件夹 */
+      if (selectedObj.uuid === this.directory.uuid) return true
+
       /* 列表中没有元素被选中时，当前文件夹不能与被选中元素所在文件夹相同 */
     } else if (type === 'folder' && !this.state.currentDir.fileSystemUUID && this.inSameDirectory()) {
       return true
@@ -162,7 +166,7 @@ class MoveDialog extends React.PureComponent {
   }
 
   enter(node) {
-    // console.log(node)
+    // console.log('node', node)
     // condition can not be enter
     if (node.type === 'file') return
     if (this.props.type !== 'physical' && this.selectedArr.findIndex(item => item.uuid === node.uuid) !== -1) return
@@ -224,7 +228,7 @@ class MoveDialog extends React.PureComponent {
   back() {
     const apis = this.props.apis
     const path = this.state.path
-    if (path.length == 1) return
+    if (path.length === 1) return
     if (this.state.loading) return
     const currentDir = path[path.length - 2]
 
@@ -345,8 +349,8 @@ class MoveDialog extends React.PureComponent {
     if (this.props.type === 'physical') {
       let oldPathString = ''
       let newPathString = ''
-      this.paths.forEach(item => oldPathString += item.name)
-      this.state.path.forEach(item => newPathString += item.name)
+      this.paths.forEach(item => (oldPathString += item.name))
+      this.state.path.forEach(item => (newPathString += item.name))
       if (oldPathString === newPathString) return true
       return false
     }
@@ -407,6 +411,15 @@ class MoveDialog extends React.PureComponent {
     })
   }
 
+  renderCurrentDir() {
+    console.log('current directory', this.state.currentDir, this.path)
+    if (this.state.currentDir.uuid === this.path[0].uuid) {
+      const type = this.state.currentDir.type
+      return type === 'folder' ? '我的文件' : type === 'public' ? '共享文件夹' : '物理磁盘'
+    }
+    return this.state.currentDir.name || this.state.currentDir.label
+  }
+
   render() {
     return (
       <div style={{ width: 336 }}>
@@ -442,7 +455,7 @@ class MoveDialog extends React.PureComponent {
               overflow: 'hidden'
             }}
           >
-            { this.state.currentDir.name || this.state.currentDir.label }
+            { this.renderCurrentDir() }
           </div>
 
           {/* close button */}

@@ -46,10 +46,11 @@ class RunningTask extends React.Component {
   }
 
   getUploadedSize(task) {
-    if (task.type === 'folder') {
+    console.log(task)
+    if (task.type === 'folder' && task.count) {
       return `${task.finishCount}/${task.count}  ${this.props.task.pause ? '' : task.speed}`
     } else if (task.type === 'file') {
-      return `${Math.abs(this.formatSize(task.completeSize))}  ${this.props.task.pause ? '' : Math.abs(task.speed)}`
+      return `${this.formatSize(Math.abs(task.completeSize))}  ${this.props.task.pause ? '' : task.speed}`
     }
     return ''
   }
@@ -120,11 +121,11 @@ class RunningTask extends React.Component {
               backgroundColor: 'rgba(0,0,0,.12)'
             }}
           >
-            <span style={{ backgroundColor: pColor, width: `${pWidth}%` }} />
+            <div style={{ backgroundColor: pColor, width: `${pWidth}%` }} />
           </div>
 
           {/* UploadedSize */}
-          <div>
+          <div style={{ height: 20, display: 'flex', alignItems: 'center' }}>
             { this.getUploadedSize(task) }
           </div>
         </div>

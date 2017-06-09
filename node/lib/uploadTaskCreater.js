@@ -68,15 +68,15 @@ const createTask = (abspath, target, type, newWork, u, r, rootNodeUUID, ct) => {
   return task
 }
 /*
-	TaskManager inclue a tree (if task is a file ,the tree has onle on node)
-	TaskManager schedule worker list
-	abspath : abspath of file or root folder
-	target : the target of the root node
-	size: the while size of file/folder
-	pause : could stop upload task
-	state : stop/visit/diff/schedule/finish
-	visit(): consist tree && work list
-	schedule(): schedule work list
+  TaskManager inclue a tree (if task is a file ,the tree has onle on node)
+  TaskManager schedule worker list
+  abspath : abspath of file or root folder
+  target : the target of the root node
+  size: the while size of file/folder
+  pause : could stop upload task
+  state : stop/visit/diff/schedule/finish
+  visit(): consist tree && work list
+  schedule(): schedule work list
 */
 class TaskManager {
   constructor(uuid, abspath, target, type, createTime, newWork, uploadingList, rootNodeUUID) {
@@ -120,7 +120,7 @@ class TaskManager {
         return
       }
       const s = (this.completeSize - this.lastTimeSize) / 1
-      this.speed = `${utils.formatSize(s)} / 秒`
+      this.speed = `${utils.formatSize(s)}/s`
       this.restTime = utils.formatSeconds((this.size - this.completeSize) / s)
       this.lastTimeSize = this.completeSize
     }, 1000)
@@ -219,7 +219,7 @@ class TaskManager {
         this.recordInfor('文件夹上传，根目录没有创建，几率很低')
         this.schedule()
       }
-			// ....
+      // ....
     } else {
       this.recordInfor('新任务 不需要与服务器进行比较')
       this.checkNameExist()
@@ -234,7 +234,7 @@ class TaskManager {
       let times = 0
 
       while (list.findIndex(item => item.name === name) !== -1) {
-        times++
+        times += 1
         const arr = _this.tree[0].name.split('.')
         if (arr.length == 1) name = `${arr[0]}[${times}]`
         else {
@@ -274,18 +274,18 @@ class TaskManager {
   }
 
   hashSchedule() {
-		// console.log('')
-		// console.log('HASH调度...')
+    // console.log('')
+    // console.log('HASH调度...')
     if (this.lastFileIndex === -1) return this.recordInfor('任务列表中不包含文件')
     if (this.hashing.length >= 2) return this.recordInfor('任务的HASH队列已满')
     if (this.hashIndex === this.lastFileIndex + 1) return this.recordInfor(`${this.name} 所有文件hash调度完成`)
-		// this.recordInfor('正在HASH第 ' + this.hashIndex + ' 个文件 : ' + this.worklist[this.hashIndex].name)
+    // this.recordInfor('正在HASH第 ' + this.hashIndex + ' 个文件 : ' + this.worklist[this.hashIndex].name)
     const obj = this.worklist[this.hashIndex]
-    if (obj.type === 'folder' || obj.stateName === 'finish') this.hashIndex++
+    if (obj.type === 'folder' || obj.stateName === 'finish') this.hashIndex += 1
     else {
       obj.setState(HashSTM)
       this.hashing.push(obj)
-      this.hashIndex++
+      this.hashIndex += 1
       obj.requestProbe()
     }
     this.hashSchedule()
@@ -303,14 +303,14 @@ class TaskManager {
     const obj = this.worklist[this.fileIndex]
     if (obj.stateName === 'finish') {
       this.recordInfor('文件已被上传过，跳过...')
-      this.fileIndex++
+      this.fileIndex += 1
       this.uploadSchedule()
       return
     }
     if (obj.target === '') {
       this.recordInfor('当前文件父文件夹正在创建，缺少目标，等待...')
       return
-    }				else if (obj.type === 'file' && obj.sha === '') {
+    }        else if (obj.type === 'file' && obj.sha === '') {
       this.recordInfor('当前文件HASH尚未计算，等待...')
       return
     }
@@ -318,7 +318,7 @@ class TaskManager {
     const stateMachine = obj.type == 'folder' ? createFolderSTM : UploadFileSTM
     obj.setState(stateMachine)
     this.uploading.push(obj)
-    this.fileIndex++
+    this.fileIndex += 1
     obj.requestProbe()
 
     this.uploadSchedule()
@@ -416,18 +416,18 @@ const visitFolder = (abspath, position, worklist, manager, callback) => {
     if (err || (!stat.isDirectory() && !stat.isFile())) return callback(err)
     const type = stat.isDirectory() ? 'folder' : 'file'
     const obj = stat.isDirectory() ?
-			new FolderUploadTask(type, abspath, manager) :
-			new FileUploadTask(type, abspath, stat.size, manager)
+      new FolderUploadTask(type, abspath, manager) :
+      new FileUploadTask(type, abspath, stat.size, manager)
 
     const index = manager.uploadingList.findIndex(item => item.abspath === abspath)
     const item = manager.uploadingList[index]
-	  if (index !== -1) {
-	  	obj.seek = item.seek
-	  	obj.taskid = item.taskid
-	  	manager.completeSize += item.seek * item.segmentsize
-	  }
+    if (index !== -1) {
+      obj.seek = item.seek
+      obj.taskid = item.taskid
+      manager.completeSize += item.seek * item.segmentsize
+    }
 
-    manager.count++
+    manager.count += 1
     manager.size += stat.size
     worklist.push(obj)
     position.push(obj)
@@ -440,7 +440,8 @@ const visitFolder = (abspath, position, worklist, manager, callback) => {
       const next = () => { visitFolder(path.join(abspath, entries[index]), obj.children, worklist, manager, call) }
       let call = (err) => {
         if (err) return callback(err)
-        if (++index == count) return callback()
+        index += 1
+        if (index >= count) return callback()
         next()
       }
       next()
@@ -449,7 +450,7 @@ const visitFolder = (abspath, position, worklist, manager, callback) => {
 }
 
 const visitServerFiles = async (uuid, name, type, position, callback) => {
-	// console.log(name + '...' + type)
+  // console.log(name + '...' + type)
   const obj = { name, type, children: [], uuid }
   position.push(obj)
   if (type === 'file') return callback(null)
@@ -464,7 +465,8 @@ const visitServerFiles = async (uuid, name, type, position, callback) => {
     }
     let call = (err) => {
       if (err) return callback(err)
-      if (++index == count) return callback()
+      index += 1
+      if (index >= count) return callback()
       next()
     }
 
@@ -478,7 +480,7 @@ const diffTree = (taskPosition, serverPosition, manager, callback) => {
   if (taskPosition.name !== serverPosition.name) return callback()
   taskPosition.stateName = 'finish'
   taskPosition.uuid = serverPosition.uuid
-  manager.finishCount++
+  manager.finishCount += 1
   manager.completeSize += taskPosition.size ? taskPosition.size : 0
   if (taskPosition.type === 'file') return callback()
   const children = taskPosition.children
@@ -488,7 +490,7 @@ const diffTree = (taskPosition, serverPosition, manager, callback) => {
   let index = 0
   const next = () => {
     const currentObj = taskPosition.children[index]
-    const i = serverPosition.children.findIndex(item => item.name == currentObj.name)
+    const i = serverPosition.children.findIndex(item => item.name === currentObj.name)
     if (i !== -1) {
       diffTree(currentObj, serverPosition.children[i], manager, call)
     } else {
@@ -496,7 +498,8 @@ const diffTree = (taskPosition, serverPosition, manager, callback) => {
     }
   }
   let call = (err) => {
-    if (++index == count) return callback()
+    index += 1
+    if (index >= count) return callback()
     next()
   }
   next()
@@ -530,7 +533,7 @@ class UploadTask {
       this.manager.rootNodeUUID = this.uuid
     }
     manager.uploading.splice(manager.uploading.indexOf(this), 1)
-    manager.finishCount++
+    manager.finishCount += 1
     return manager.workFinishCall()
   }
 
@@ -571,7 +574,7 @@ class FileUploadTask extends UploadTask {
   }
 
   hashFinish() {
-		// this.recordInfor(this.name + ' HASH计算完毕')
+    // this.recordInfor(this.name + ' HASH计算完毕')
     this.manager.hashing.splice(this.manager.hashing.indexOf(this), 1)
     this.manager.schedule()
   }
@@ -600,25 +603,25 @@ class HashSTM extends STM {
 
   requestProbe() {
     this.wrapper.stateName = 'hassless'
-		// this.wrapper.recordInfor(this.wrapper.name + ' 进入HASH队列')
+    // this.wrapper.recordInfor(this.wrapper.name + ' 进入HASH队列')
     addToHashlessQueue(this)
   }
 
   hashing() {
     const wrapper = this.wrapper
-		// wrapper.recordInfor(this.wrapper.name + ' 开始计算HASH')
+    // wrapper.recordInfor(this.wrapper.name + ' 开始计算HASH')
     wrapper.stateName = 'hashing'
     removeOutOfHashlessQueue(this)
     addToHashingQueue(this)
     try {
       const options = {
-			    env: { absPath: wrapper.abspath, size: wrapper.size, partSize: wrapper.segmentsize },
-			    encoding: 'utf8',
-			    cwd: process.cwd()
+        env: { absPath: wrapper.abspath, size: wrapper.size, partSize: wrapper.segmentsize },
+        encoding: 'utf8',
+        cwd: process.cwd()
       }
       const child = child_process.fork(path.join(__dirname, 'filehash'), [], options)
       child.on('message', (obj) => {
-				// console.log('hash message' , obj)
+        // console.log('hash message' , obj)
         wrapper.sha = obj.hash
         wrapper.parts = obj.parts
         removeOutOfHashingQueue(this)
@@ -630,7 +633,7 @@ class HashSTM extends STM {
         console.log(err)
       })
     } catch (e) {
-			// todo
+      // todo
       console.log('hash error')
       console.log(e)
     }
@@ -665,16 +668,16 @@ class createFolderSTM extends STM {
 
     this.wrapper.recordInfor(`${this.wrapper.name} 开始创建...`)
     this.handle = request(options, (err, res, body) => {
-    	if (err || res.statusCode != 200) {
-    		// todo
-    		this.wrapper.recordInfor(`${this.wrapper.name} 创建失败`)
-    		console.log(err, res.statusCode)
-    	} else {
-    		removeOutOfRunningQueue(this)
-    		this.wrapper.uuid = JSON.parse(body)
-    		this.wrapper.children.forEach(item => item.target = this.wrapper.uuid)
-    		return this.wrapper.uploadFinish()
-    	}
+      if (err || res.statusCode !== 200) {
+        // todo
+        this.wrapper.recordInfor(`${this.wrapper.name} 创建失败`)
+        console.log(err, res.statusCode)
+      } else {
+        removeOutOfRunningQueue(this)
+        this.wrapper.uuid = JSON.parse(body)
+        this.wrapper.children.forEach(item => item.target = this.wrapper.uuid)
+        return this.wrapper.uploadFinish()
+      }
     })
   }
 }
@@ -700,7 +703,7 @@ class UploadFileSTM extends STM {
     removeOutOfReadyQueue(this)
     addToRunningQueue(this)
     this.wrapper.manager.updateStore()
-		// this.wrapper.recordInfor(this.wrapper.name + ' 开始上传...')
+    // this.wrapper.recordInfor(this.wrapper.name + ' 开始上传...')
     if (this.wrapper.taskid) return this.uploadSegment()
     return this.createUploadTask()
   }
@@ -709,7 +712,7 @@ class UploadFileSTM extends STM {
     const _this = this
     const transform = new stream.Transform({
       transform(chunk, encoding, next) {
-      	_this.partFinishSize += chunk.length
+        _this.partFinishSize += chunk.length
         _this.wrapper.manager.completeSize += chunk.length
         this.push(chunk)
         next()
@@ -725,10 +728,10 @@ class UploadFileSTM extends STM {
       },
       method: 'PUT',
       path: encodeURI(`/files/fruitmix/upload/${
-				this.wrapper.target}/${
-				this.wrapper.sha
-				}?filename=${this.wrapper.name}`
-			)
+        this.wrapper.target}/${
+        this.wrapper.sha
+        }?filename=${this.wrapper.name}`
+      )
     }
 
     this.handle = http.request(options).on('error', (err) => {
@@ -749,28 +752,28 @@ class UploadFileSTM extends STM {
       url: `${server}/filemap/${this.wrapper.target}`,
       method: 'post',
       headers: {
-       	Authorization: `${tokenObj.type} ${tokenObj.token}`,
-       	'Content-Type': 'application/json'
-     	},
-     	body: JSON.stringify({
-       	filename: this.wrapper.name,
-       	size: this.wrapper.size,
-       	segmentsize: this.wrapper.segmentsize,
-       	sha256: this.wrapper.sha
+         Authorization: `${tokenObj.type} ${tokenObj.token}`,
+         'Content-Type': 'application/json'
+       },
+       body: JSON.stringify({
+         filename: this.wrapper.name,
+         size: this.wrapper.size,
+         segmentsize: this.wrapper.segmentsize,
+         sha256: this.wrapper.sha
      })
     }
 
     request(options, (err, res, body) => {
-    	if (err || res.statusCode !== 200) {
-    		this.wrapper.recordInfor('创建上传任务失败，缺少对应API，上传整个文件')
-    		console.log(err)
-    		console.log(`任务创建的目标是：${this.wrapper.target}`)
-    		return this.uploadWholeFile()
-    	}
-    		const b = JSON.parse(body)
-    		console.log('上传任务创建成功')
-	    	_this.wrapper.taskid = b.taskid
-	    	this.uploadSegment()
+      if (err || res.statusCode !== 200) {
+        this.wrapper.recordInfor('创建上传任务失败，缺少对应API，上传整个文件')
+        console.log(err)
+        console.log(`任务创建的目标是：${this.wrapper.target}`)
+        return this.uploadWholeFile()
+      }
+        const b = JSON.parse(body)
+        console.log('上传任务创建成功')
+        _this.wrapper.taskid = b.taskid
+        this.uploadSegment()
     })
   }
 
@@ -781,15 +784,15 @@ class UploadFileSTM extends STM {
 
     const transform = new stream.Transform({
       transform(chunk, encoding, next) {
-      	_this.partFinishSize += chunk.length
+        _this.partFinishSize += chunk.length
         _this.wrapper.manager.completeSize += chunk.length
         this.push(chunk)
         next()
       }
     })
 
-		// console.log('开始上传第' + wrapper.seek + '块')
-		// console.log('----------------------------------------------')
+    // console.log('开始上传第' + wrapper.seek + '块')
+    // console.log('----------------------------------------------')
 
     const tempStream = fs.createReadStream(wrapper.abspath, { start: wrapper.parts[seek].start, end: wrapper.parts[seek].end, autoClose: true }).pipe(transform)
 
@@ -805,10 +808,10 @@ class UploadFileSTM extends STM {
       },
       method: 'PUT',
       path: encodeURI(`/filemap/${wrapper.target}?filename=${wrapper.name
-				}&segmenthash=${wrapper.parts[seek].sha
-				}&start=${seek
-				}&taskid=${wrapper.taskid}`
-			)
+        }&segmenthash=${wrapper.parts[seek].sha
+        }&start=${seek
+        }&taskid=${wrapper.taskid}`
+      )
     }
 
     this.handle = http.request(options).on('error', (err) => {
@@ -816,11 +819,11 @@ class UploadFileSTM extends STM {
       this.partFinishSize = 0
       console.log(`第${seek}块 ` + 'req : err', err)
     }).on('response', (res) => {
-			// console.log('第' + seek +'块 ' + 'req : response')
+      // console.log('第' + seek +'块 ' + 'req : response')
       if (res.statusCode == 200) return this.partUploadFinish()
 
       console.log(`${res.statusCode} !!!!!!!!!!!!!!!!!!!`)
-      wrapper.failedTimes ++
+      wrapper.failedTimes += 1
       wrapper.manager.completeSize -= (this.partFinishSize + wrapper.segmentsize * wrapper.seek)
       this.partFinishSize = 0
       seek = 0
@@ -835,7 +838,7 @@ class UploadFileSTM extends STM {
   }
 
   partUploadFinish() {
-    this.wrapper.seek++
+    this.wrapper.seek += 1
     this.partFinishSize = 0
     this.wrapper.manager.updateStore()
     if (this.wrapper.seek == this.wrapper.parts.length) {
@@ -871,7 +874,7 @@ const initArgs = () => {
 }
 
 const scheduleHttpRequest = () => {
-  while (runningQueue.length < httpRequestConcurrency && readyQueue.length)   	{ readyQueue[0].beginUpload() }
+  while (runningQueue.length < httpRequestConcurrency && readyQueue.length) { readyQueue[0].beginUpload() }
 }
 
 const scheduleFileHash = () => {

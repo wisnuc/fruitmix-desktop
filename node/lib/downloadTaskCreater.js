@@ -106,7 +106,7 @@ class TaskManager {
 
     this.countSpe0ed = setInterval(() => {
       const s = (this.completeSize - this.lastTimeSize) / 2
-      this.speed = `${utils.formatSize(s)} / 秒`
+      this.speed = `${utils.formatSize(s)}/s`
       this.restTime = utils.formatSeconds((this.size - this.completeSize) / s)
       this.lastTimeSize = this.completeSize
     }, 2000)
@@ -250,13 +250,13 @@ class TaskManager {
     const obj = this.worklist[this.downloadIndex]
     if (obj.stateName === 'finish') {
       this.recordInfor('文件已被下载，跳过...')
-      this.downloadIndex++
+      this.downloadIndex += 1
       return this.downloadSchedule()
     }
     if (obj.downloadPath === '') return this.recordInfor('文件的父文件夹尚未创建，缺少目标，等待..')
     obj.setState(obj.type == 'folder' ? createFolderSTM : DownloadFileSTM)
     this.downloading.push(obj)
-    this.downloadIndex++
+    this.downloadIndex += 1
     obj.requestProbe()
     this.downloadSchedule()
   }
@@ -394,7 +394,7 @@ class TaskManager {
 
 // visit tree from serve && check the seek of downloading files
 const visitTask = async (target, name, type, size, dirUUID, position, manager, callback) => {
-  manager.count++
+  manager.count += 1
   manager.size += size
   const obj = type === 'file' ?
   	new FileDownloadTask(target, name, type, size, dirUUID, manager) :
@@ -421,7 +421,8 @@ const visitTask = async (target, name, type, size, dirUUID, position, manager, c
     const next = () => { visitTask(task.uuid, task.name, task.type, task.size ? task.size : 0, target, obj.children, manager, call) }
     let call = (err) => {
       if (err) return callback(err)
-      if (++index === count) return callback(null)
+      index += 1
+      if (index >= count) return callback(null)
       task = tasks[index]
       next()
     }
@@ -445,7 +446,8 @@ const visitLocalFiles = (abspath, position, callback) => {
       const next = () => { visitLocalFiles(path.join(abspath, entries[index]), obj.children, call) }
       let call = (err) => {
         if (err) return callback(err)
-        if (++index == count) return callback()
+        index += 1
+        if (index >= count) return callback()
         next()
       }
       next()
@@ -458,7 +460,7 @@ const visitLocalFiles = (abspath, position, callback) => {
 const diffTree = (taskPosition, localPosition, manager, callback) => {
   if (taskPosition.name !== localPosition.name) return callback()
   taskPosition.stateName = 'finish'
-  manager.finishCount++
+  manager.finishCount += 1
   manager.completeSize += taskPosition.size ? taskPosition.size : 0
   if (taskPosition.type === 'file') return callback()
   const children = taskPosition.children
@@ -476,7 +478,8 @@ const diffTree = (taskPosition, localPosition, manager, callback) => {
     }
   }
   let call = (err) => {
-    if (++index == count) return callback()
+    index += 1
+    if (index >= count) return callback()
     next()
   }
   next()
@@ -501,7 +504,8 @@ const isFileNameExist = (position, times, list) => {
     console.log(`文件名是 : ${name}`)
     return name
   }
-  return isFileNameExist(position, ++times, list)
+  times += 1
+  return isFileNameExist(position, times, list)
 }
 
 // Each instance is a fileNode of tree
@@ -533,7 +537,7 @@ class DownloadTask {
     this.state = null
     this.stateName = 'finish'
     manager.downloading.splice(manager.downloading.indexOf(this), 1)
-    manager.finishCount++
+    manager.finishCount += 1
     manager.workFinishCall()
   }
 
