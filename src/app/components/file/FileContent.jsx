@@ -1,36 +1,34 @@
-import prettysize from 'prettysize'
-
 import React, { Component, PureComponent } from 'react'
-
-import Radium from 'radium'
-import { Divider, Paper, Menu, MenuItem } from 'material-ui'
-import ActionCheckCircle from 'material-ui/svg-icons/action/check-circle'
-import NavigationCheck from 'material-ui/svg-icons/navigation/check'
+import Debug from 'debug'
+import prettysize from 'prettysize'
+import { Avatar } from 'material-ui'
+import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import ToggleCheckBox from 'material-ui/svg-icons/toggle/check-box'
 import ToggleCheckBoxOutlineBlank from 'material-ui/svg-icons/toggle/check-box-outline-blank'
 import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 
 import { List, AutoSizer } from 'react-virtualized'
-import ListSelect from './ListSelect'
 import { command } from '../../lib/command'
 
-const formatTime = mtime => {
+const debug = Debug('component:file:FileContent:')
 
+const formatTime = (mtime) => {
   if (!mtime) {
     return null
   }
 
-  let time = new Date()
-  time.setTime(parseInt(mtime))
-  return time.getFullYear() + '-' + (time.getMonth() + 1) + '-' + time.getDate()
+  const time = new Date()
+  time.setTime(parseInt(mtime, 10))
+  return `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`
 }
 
-const renderLeading = leading => {
+const renderLeading = (leading) => {
+  let height = '100%'
+  let backgroundColor = '#FFF'
+  let opacity = 0
 
-    let height = '100%', backgroundColor = '#FFF', opacity = 0
-
-    switch(leading) {
+  switch (leading) {
     case 'inactiveHint':
       height = 20
       backgroundColor = '#000'
@@ -45,22 +43,21 @@ const renderLeading = leading => {
       backgroundColor = '#FF0000'
       opacity = 1
       break
-    }
+  }
 
-    return <div style={{ flex: '0 0 4px', height, backgroundColor, opacity, zIndex:1000 }} />
+  return <div style={{ flex: '0 0 4px', height, backgroundColor, opacity, zIndex: 1000 }} />
 }
 
 const renderCheck = check =>
-  (check === 'checked' || check === 'unchecking') 
-    ? <ToggleCheckBox style={{color: '#FF0000'}} /> 
-    : check === 'checking' 
-      ? <ToggleCheckBoxOutlineBlank style={{color: 'rgba(0,0,0,0.38)'}} /> 
+  (check === 'checked' || check === 'unchecking')
+    ? <ToggleCheckBox style={{ color: '#FF0000' }} />
+    : check === 'checking'
+      ? <ToggleCheckBoxOutlineBlank style={{ color: 'rgba(0,0,0,0.38)' }} />
       : null
 
 class Row extends PureComponent {
 
   render() {
-
     const {
 
       /* these are react-virtualized List props */
@@ -73,27 +70,28 @@ class Row extends PureComponent {
 
       /* these are view-model state */
       entries,
-      select,
-    } = this.props 
+      select
+    } = this.props
 
-    let entry = entries[index]
-    let leading = select.rowLeading(index)
-    let check = select.rowCheck(index)
-    let color = select.rowColor(index)
+    const entry = entries[index]
+    const leading = select.rowLeading(index)
+    const check = select.rowCheck(index)
+    const color = select.rowColor(index)
 
-    let innerStyle = {
+    const innerStyle = {
       width: '100%',
       height: '100%',
       backgroundColor: color,
       display: 'flex',
-      alignItems: 'center',
+      alignItems: 'center'
     }
 
-    let outerStyle = style
+    const outerStyle = style
+    // debug('select', select)
 
     return (
       <div key={`${entry.name}+${index.toString()}`} style={outerStyle}>
-        <div 
+        <div
           style={innerStyle}
           onTouchTap={e => this.props.onRowTouchTap(e, index)}
           onMouseEnter={e => this.props.onRowMouseEnter(e, index)}
@@ -101,45 +99,53 @@ class Row extends PureComponent {
           onDoubleClick={e => this.props.onRowDoubleClick(e, index)}
         >
           { renderLeading(leading) }
-          <div style={{flex: '0 0 12px'}} />
-          <div style={{flex: '0 0 48px', display: 'flex', alignItems: 'center'}}>
+          <div style={{ flex: '0 0 8px' }} />
+          <div style={{ flex: '0 0 36px', display: 'flex', alignItems: 'center' }}>
             { renderCheck(check) }
           </div>
-          <div style={{flex: '0 0 8px'}} />
-          {/*
-          <div>
-            {`Hello World ${index} ${leading} ${check} ${color} ${select.ctrl} ${select.shift} ` +
-              `${select.hover} ${select.specified}` }
-          </div>
-          */}
-          <div style={{flex: '0 0 48px', display: 'flex', alignItems: 'center'}}>
-            { entry.type === 'folder' || entry.type === 'public' || entry.type === 'directory'
-                ? <FileFolder style={{color: 'rgba(0,0,0,0.54)'}} />
+          <div style={{ flex: '0 0 8px' }} />
+
+          {/* file type may be: folder, public, directory, file, unsupported */}
+          <div style={{ flex: '0 0 48px', display: 'flex', alignItems: 'center' }}>
+            <Avatar style={{ backgroundColor: 'white' }}>
+              {
+                entry.type === 'folder' || entry.type === 'public' || entry.type === 'directory'
+                ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)' }} />
                 : entry.type === 'file'
-                  ? <EditorInsertDriveFile style={{color: 'rgba(0,0,0,0.54'}} />
-                  : null } 
+                ? <EditorInsertDriveFile style={{ color: 'rgba(0,0,0,0.54' }} />
+                : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54' }} />
+              }
+            </Avatar>
           </div>
-          <div style={{flex: '0 0 390px', overflow:'hidden', whiteSpace:'nowrap', textOverflow: 'ellipsis'}}>
+
+          <div style={{ flex: '0 0 390px', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
             { entry.name }
           </div>
-          <div style={{flex: '0 1 160px', fontSize: 13, color: 'rgba(0,0,0,0.54)', textAlign: 'right'}}>
-            { formatTime(entry.mtime) }
+
+          <div style={{ flex: '0 1 160px', fontSize: 13, color: 'rgba(0,0,0,0.54)', textAlign: 'right' }}>
+            { entry.mtime && formatTime(entry.mtime) }
           </div>
-          <div style={{flex: '0 1 160px', fontSize: 13, color: 'rgba(0,0,0,0.54)', textAlign: 'right', 
-            marginRight: 72}}>
+
+          <div
+            style={{ flex: '0 1 160px',
+              fontSize: 13,
+              color: 'rgba(0,0,0,0.54)',
+              textAlign: 'right',
+              marginRight: 72 }}
+          >
             { entry.type === 'file' && prettysize(entry.size) }
           </div>
-          <div style={{flexGrow: 1}} />
+
+          <div style={{ flexGrow: 1 }} />
         </div>
       </div>
     )
-  } 
+  }
 }
 
 class FileContent extends Component {
- 
-  constructor(props) {
 
+  constructor(props) {
     super(props)
 
     this.state = { contextMenu: false }
@@ -151,83 +157,68 @@ class FileContent extends Component {
     this.onRowMouseEnter = this.rowMouseEnter.bind(this)
     this.onRowMouseLeave = this.rowMouseLeave.bind(this)
     this.onRowDoubleClick = this.rowDoubleClick.bind(this)
- 
+
     this.rowRenderer = props => (
-      <Row 
-        {...props} 
-        {...this.props} 
-        onRowTouchTap={this.onRowTouchTap}  
+      <Row
+        {...props}
+        {...this.props}
+        onRowTouchTap={this.onRowTouchTap}
         onRowMouseEnter={this.onRowMouseEnter}
         onRowMouseLeave={this.onRowMouseLeave}
         onRowDoubleClick={this.onRowDoubleClick}
       />
     )
-  } 
+  }
 
-  willReceiveProps(nextProps){
+  willReceiveProps(nextProps) {
     // console.log(nextProps, '.......')
   }
 
   componentDidMount() {
-		//bind keydown event
-		document.addEventListener('keydown', this.keyDownBound)
-		document.addEventListener('keyup', this.keyUpBound)
+    // bind keydown event
+    document.addEventListener('keydown', this.keyDownBound)
+    document.addEventListener('keyup', this.keyUpBound)
   }
 
-	componentWillUnmount() {
-		//remove keydown event
-		document.removeEventListener('keydown', this.keyDownBound)
-		document.removeEventListener('keyup', this.keyUpBound)
-	}
+  componentWillUnmount() {
+    // remove keydown event
+    document.removeEventListener('keydown', this.keyDownBound)
+    document.removeEventListener('keyup', this.keyUpBound)
+  }
 
   keyDown(e) {
-    // console.log('keydown', e.ctrlKey, e.shiftKey)
-    if (this.props.select)
-      this.props.select.keyEvent(e.ctrlKey, e.shiftKey)
+    if (this.props.select) { this.props.select.keyEvent(e.ctrlKey, e.shiftKey) }
   }
 
   keyUp(e) {
-    // console.log('keyup', e.ctrlKey, e.shiftKey)
-    if (this.props.select)
-      this.props.select.keyEvent(e.ctrlKey, e.shiftKey)
+    if (this.props.select) { this.props.select.keyEvent(e.ctrlKey, e.shiftKey) }
   }
 
   rowTouchTap(e, index) {
+    /*
+     * using e.nativeEvent.button instead of e.nativeEvent.which
+     * 0 - left
+     * 1 - middle
+     * 2 - right
+     * e.type must be mouseup
+     * must be button 1 or button 2 of mouse
+     */
 
     e.preventDefault()  // important!
     e.stopPropagation()
 
-    // console.log('rowTouchTap', index)
-
-    // using e.nativeEvent.button instead of e.nativeEvent.which
-    // 0 - left
-    // 1 - middle 
-    // 2 - right
-
-    // e.type must be mouseup
-    
-    let type = e.type
-    let button = e.nativeEvent.button
-
+    const type = e.type
+    const button = e.nativeEvent.button
     if (type !== 'mouseup' || !(button === 0 || button === 2)) return
 
-
+    /* just touch */
     this.props.select.touchTap(button, index)
     this.props.updateDetail(index)
 
+    /* right click */
     if (button === 2) {
-      // console.log('rowTouchTap, right click')
       this.props.showContextMenu(e.nativeEvent.clientX, e.nativeEvent.clientY)
     }
-
-/**
-      if (this.props.select.shift || this.props.select.ctrl) return
-      this.setState({
-        contextMenu: true,
-        clientX: e.nativeEvent.clientX,
-        clientY: e.nativeEvent.clientY,
-      })
-**/
   }
 
   rowMouseEnter(e, index) {
@@ -244,48 +235,74 @@ class FileContent extends Component {
   }
 
   drop(e) {
-    let files = []
-    for(let item of e.dataTransfer.files) files.push(item.path)
-    let dir = this.props.home.path
-    let rUUID = this.props.home.path[0].uuid
-    command('fileapp','DRAG_FILE',{files,dirUUID:dir[dir.length - 1].uuid})
+    const files = []
+    for (const item of e.dataTransfer.files) files.push(item.path)
+    const dir = this.props.home.path
+    const rUUID = this.props.home.path[0].uuid
+    command('fileapp', 'DRAG_FILE', { files, dirUUID: dir[dir.length - 1].uuid })
   }
 
   render() {
-
-    let { apis } = this.props
+    const { apis } = this.props
 
     return (
-      <div id='file-content' style={{width: '100%', height: '100%'}} onDrop={this.drop.bind(this)}>
-        <div style={{width: '100%', height: 8}} />
-        {/*header*/}
-        <div style={{width: '100%', height: 40}}>
-          <div style={{width: '100%',height: '100%',display: 'flex',alignItems: 'center'}}>
-          <div style={{flex: '0 0 116px'}} />
-          <div style={{flex: '0 0 390px', overflow:'hidden', whiteSpace:'nowrap', textOverflow: 'ellipsis'}}>
-            文件名
+      <div id="file-content" style={{ width: '100%', height: '100%' }} onDrop={this.drop.bind(this)}>
+        {/* header*/}
+        <div style={{ width: '100%', height: 40 }}>
+          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center' }}>
+            <div style={{ flex: '0 0 104px' }} />
+            <div
+              style={{
+                flex: '0 0 390px',
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis',
+                fontSize: 14,
+                fontWeight: 500,
+                color: 'rgba(0,0,0,0.54)'
+              }}
+            >
+              类型
+            </div>
+            <div style={{ flex: '0 1 160px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)', textAlign: 'right' }}>
+              修改时间
+            </div>
+            <div
+              style={{
+                flex: '0 1 160px',
+                fontSize: 14,
+                fontWeight: 500,
+                color: 'rgba(0,0,0,0.54)',
+                textAlign: 'right',
+                marginRight: 72
+              }}
+            >
+              文件大小
+            </div>
+            <div style={{ flexGrow: 1 }} />
           </div>
-          <div style={{flex: '0 1 160px', fontSize: 13, color: 'rgba(0,0,0,0.54)', textAlign: 'right'}}>修改时间</div>
-          <div style={{flex: '0 1 160px', fontSize: 13, color: 'rgba(0,0,0,0.54)', textAlign: 'right', marginRight: 72}}>文件大小</div>
-          <div style={{flexGrow: 1}} />
         </div>
-        </div>
-        <div style={{width: '100%', height: 'calc(100% - 48px)'}}>
-        { this.props.entries.length !== 0 && 
-          <AutoSizer>
-            {({ height, width }) => (
-              <div onTouchTap={e => this.onRowTouchTap(e, -1)}>
-                <List
-                  style={{ outline: 'none' }}
-                  height={height}
-                  width={width}
-                  rowCount={this.props.select.size}
-                  rowHeight={40}
-                  rowRenderer={this.rowRenderer}
-                />
-              </div>
-            )}
-          </AutoSizer> }
+        <div style={{ width: '100%', height: 8 }} />
+
+        {/* list content */}
+        <div style={{ width: '100%', height: 'calc(100% - 48px)' }}>
+          {
+            this.props.entries.length !== 0 &&
+            <AutoSizer>
+              {({ height, width }) => (
+                <div onTouchTap={e => this.onRowTouchTap(e, -1)}>
+                  <List
+                    style={{ outline: 'none' }}
+                    height={height}
+                    width={width}
+                    rowCount={this.props.select.size}
+                    rowHeight={48}
+                    rowRenderer={this.rowRenderer}
+                  />
+                </div>
+              )}
+            </AutoSizer>
+          }
         </div>
       </div>
     )

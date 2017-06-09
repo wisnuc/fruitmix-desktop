@@ -8,7 +8,7 @@ mdns.excludeInterface('0.0.0.0')
 /** mdns data example
 { addresses: [ '192.168.5.60' ],
   query: [ '_http._tcp.local' ],
-  type: 
+  type:
    [ { name: 'http',
        protocol: 'tcp',
        subtypes: [],
@@ -27,23 +27,21 @@ mdns.excludeInterface('0.0.0.0')
 
 // return null if not wisnuc device
 // otherwise return { model, serial }
-const parseHostname = hostname => {
-
+const parseHostname = (hostname) => {
   if (typeof hostname !== 'string') return null
 
-  var split = hostname.split('.')
+  let split = hostname.split('.')
   if (split.length !== 2) return null
 
-  var name = split[0]
-  var domain = split[1]
+  const name = split[0]
+  const domain = split[1]
 
   split = split[0].split('-')
-  if (split.length !== 3 || split[0] !== 'wisnuc')
-    return null
+  if (split.length !== 3 || split[0] !== 'wisnuc') { return null }
 
   return {
     name,
-    domain, 
+    domain,
     host: hostname,
     model: split[1],
     serial: split[2]
@@ -53,26 +51,22 @@ const parseHostname = hostname => {
 let browser = null
 
 ipcMain.on('MDNS_SCAN', (event, session) => {
-
-  console.log('new mdns scan session, ' + session)
-
+  // console.log(`new mdns scan session, ${session}`)
   if (browser) browser.stop()
 
-  let b = mdns.createBrowser(mdns.tcp('http'))
+  const b = mdns.createBrowser(mdns.tcp('http'))
   b.on('ready', () => b.discover())
-  b.on('update', data => {
-
-    if (!Array.isArray(data.addresses) 
+  b.on('update', (data) => {
+    if (!Array.isArray(data.addresses)
       || data.addresses.length === 0
-      || typeof data.host !== 'string')  
-      return
+      || typeof data.host !== 'string') { return }
 
-    var parsed = parseHostname(data.host) 
+    const parsed = parseHostname(data.host)
     if (parsed) {
-      let message = Object.assign(parsed, { address: data.addresses[0] })
+      const message = Object.assign(parsed, { address: data.addresses[0] })
 
-      console.log('mdns send message', message)
-
+      // console.log('mdns send message', message)
+      
       event.sender.send('MDNS_UPDATE', session, message)
     }
   })
@@ -80,9 +74,6 @@ ipcMain.on('MDNS_SCAN', (event, session) => {
   browser = b
 })
 
-console.log('node/lib/mdns loaded')
+// console.log('node/lib/mdns loaded')
 
 export default browser
-
-
-

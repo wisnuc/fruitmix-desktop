@@ -14,8 +14,7 @@ export const requestAsync = Promise.promisify(request)
 Promise.promisifyAll(fs)
 
 export const serverAddr = () => {
-
-  let config = store.getState().config
+  const config = store.getState().config
   if (config && config.ip && typeof config.ip === 'string' && validator.isIP(config.ip, 4)) {
     return config.ip
   }

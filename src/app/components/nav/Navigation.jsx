@@ -12,8 +12,6 @@ import NavigationExpandLess from 'material-ui/svg-icons/navigation/expand-less'
 import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
 import Fruitmix from '../common/fruitmix'
 
-import { navMap, fileNavGroup, mediaNavGroup, appifiNavGroup } from './nav'
-
 import NavDrawer from './NavDrawer'
 import QuickNav from './QuickNav'
 

@@ -1,5 +1,6 @@
-import React, { Component, PureComponent } from 'react'
+import React from 'react'
 import Radium from 'radium'
+import Debug from 'debug'
 import { ipcRenderer } from 'electron'
 import { Avatar, Divider, MenuItem } from 'material-ui'
 import HardwareDeveloperBoard from 'material-ui/svg-icons/hardware/developer-board'
@@ -7,140 +8,150 @@ import FileFolder from 'material-ui/svg-icons/file/folder'
 
 import Base from './Base'
 import FileContent from '../file/FileContent'
-import ListSelect from '../file/ListSelect2'
+import ListSelect from '../file/ListSelect'
 import MoveDialog from '../file/MoveDialog'
+import FileDetail from '../file/FileDetail'
 import { BreadCrumbItem, BreadCrumbSeparator } from '../common/BreadCrumb'
 import ContextMenu from '../common/ContextMenu'
 import DialogOverlay from '../common/DialogOverlay'
+import { HDDIcon } from '../maintenance/Svg'
 
-class DriveHeader extends PureComponent {
+const debug = Debug('component:view:Physical:')
 
-  // 104, leading
-  // 240, label
-  // grow, user
-  // 320, uuid
-  // 56, spacer
-  // 64, view
-  // 24, padding
+class DriveHeader extends React.PureComponent {
   render() {
     return (
-      <div style={{height: 48, display: 'flex', alignItems: 'center'}}>
-        <div style={{flex: '0 0 104px'}} />
-        <div style={{flex: '0 0 240px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)'}}>
+      <div style={{ height: 40, display: 'flex', alignItems: 'center' }}>
+        <div style={{ flex: '0 0 104px' }} />
+        <div style={{ flex: '0 0 240px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
           类型
         </div>
-        <div style={{flexGrow: 1}}>
+        <div style={{ flex: '0 0 240px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
           位置
         </div>
-        <div style={{flex: '0 0 320px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)'}}>
+        <div style={{ flex: '0 0 320px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
           UUID
         </div>
-        <div style={{flex: '0 0 144px'}} />
+        <div style={{ flexGrow: 1 }} />
       </div>
     )
   }
 }
 
 @Radium
-class FileSystemRow extends PureComponent {
-
+class FileSystemRow extends React.PureComponent {
   render() {
-    if (this.props.fileSystem.uuid) return null
-    let fileSystem = this.props.fileSystem
+    /* ignore btrfs disk */
+    if (this.props.fileSystem.uuid) return <div />
 
+    const fileSystem = this.props.fileSystem
     return (
-      <div style={{height: 64, display: 'flex', alignItems: 'center',
-        ':hover': { backgroundColor: '#F5F5F5' }
-      }} onDoubleClick={this.props.enter}>
-        <div style={{flex: '0 0 32px'}} />
-          <Avatar><FileFolder color='white' /></Avatar>
-        <div style={{flex: '0 0 32px'}} />
-        <div style={{flex: '0 0 240px', fontSize: 16, color: 'rgba(0,0,0,0.87)'}}>
-          { fileSystem.fileSystemType } 
+      <div
+        style={{
+          height: 48,
+          display: 'flex',
+          alignItems: 'center',
+          ':hover': { backgroundColor: '#F5F5F5' }
+        }}
+        onDoubleClick={this.props.enter}
+      >
+        <div style={{ flex: '0 0 56px' }} />
+        <div style={{ flex: '0 0 48px', display: 'flex', alignItems: 'center' }}>
+          <Avatar style={{ backgroundColor: 'white' }}>
+            <HDDIcon color="rgba(0,0,0,0.54)" />
+          </Avatar>
         </div>
-        <div style={{flexGrow: 1, fontSize: 16, color: 'rgba(0,0,0,0.87)'}}>
+        <div style={{ flex: '0 0 240px', fontSize: 16, color: 'rgba(0,0,0,0.87)' }}>
+          { fileSystem.fileSystemType }
+        </div>
+        <div style={{ flex: '0 0 240px', fontSize: 16, color: 'rgba(0,0,0,0.87)' }}>
           { fileSystem.mountpoint }
         </div>
-        <div style={{flex: '0 0 320px', fontSize: 16, color: 'rgba(0,0,0,0.87)'}}>
+        <div style={{ flex: '0 0 320px', fontSize: 16, color: 'rgba(0,0,0,0.87)' }}>
           { fileSystem.fileSystemUUID}
         </div>
-        <div style={{flex: '0 0 144px'}} />
+        <div style={{ flexGrow: 1 }} />
       </div>
     )
   }
 }
 
 class Physical extends Base {
-
   constructor(ctx) {
     super(ctx)
-    this.path = [{name:'物理磁盘', type: 'physical', uuid:'物理磁盘'}]
+    this.path = [{ name: '物理磁盘', type: 'physical', uuid: '物理磁盘' }]
     this.select = new ListSelect(this)
     this.select.on('updated', next => this.setState({ select: next }))
     this.state = {
-      extDrives:null,
+      extDrives: null,
       extListDir: null,
       path: [],
-      entries:[],
+      entries: [],
       inRoot: true,
       contextMenuOpen: false,
       contextMenuY: -1,
       contextMenuX: -1,
       move: false,
-      copy: false
+      copy: false,
+      detailIndex: -1
     }
+
+    this.updateDetailBound = this.updateDetail.bind(this)
 
     ipcRenderer.on('physicalListUpdate', (e, obj) => {
       if (this.state.path.length < 2) return
       if (obj.rootPath !== this.state.path[1].fileSystemUUID) return
       let string = ''
       this.state.path.forEach((item, index) => {
-        if (index > 1) string += ('/' + item.name) 
+        if (index > 1) string += (`/${item.name}`)
       })
-      let position = obj.path.lastIndexOf('/')
-      let dirPath = obj.path.substring(0, position)
-      if (string == dirPath) {
+      const position = obj.path.lastIndexOf('/')
+      const dirPath = obj.path.substring(0, position)
+      if (string === dirPath) {
         // this.ctx.openSnackBar(obj.message)
-        this.refresh() 
+        this.refresh()
       }
-      
     })
   }
 
   updateState(data) {
-    let {extDrives, extListDir} = data
+    const { extDrives, extListDir } = data
     if (extDrives === this.state.extDrives && data.extListDir === this.state.extListDir) return
     if (this.state.inRoot) {
-      let path = this.path
-      let entries = extDrives
-      let select = this.select.reset(entries.length)
-      this.setState({select, path, entries, extDrives, extListDir})
-    }else {
-      let entries = extListDir
-      let select = this.select.reset(entries.length)
-      let path = this.path
-      this.setState({select, entries, extDrives, extListDir, path})
+      const path = this.path
+      const entries = extDrives
+      const select = this.select.reset(entries.length)
+      this.setState({ select, path, entries, extDrives, extListDir })
+    } else {
+      const entries = extListDir
+      const select = this.select.reset(entries.length)
+      const path = this.path
+      this.setState({ select, entries, extDrives, extListDir, path })
     }
   }
 
+  updateDetail(index) {
+    this.setState({ detailIndex: index })
+  }
+
   willReceiveProps(nextProps) {
-    let apis = nextProps.apis
+    const apis = nextProps.apis
     if (!apis || !apis.extDrives) return
     if (apis.extDrives.isPending()) return
     if (apis.extListDir && apis.extListDir.isPending()) return
-    let extListDir = nextProps.apis.extListDir && !apis.extListDir.isRejected()? nextProps.apis.extListDir.value():null
-    let extDrives = apis.extDrives.value()
+    const extListDir = nextProps.apis.extListDir && !apis.extListDir.isRejected() ? nextProps.apis.extListDir.value() : null
+    const extDrives = apis.extDrives.value()
     extDrives.forEach(item => item.type = 'folder')
     this.updateState({
-      extListDir: extListDir,
-      extDrives: extDrives
+      extListDir,
+      extDrives
     })
   }
 
   navEnter() {
-    let apis = this.ctx.props.apis
-    this.path = [{name:'物理磁盘', type: 'physical', uuid:'物理磁盘'}]
-    this.setState({inRoot :true, entries :[]})
+    const apis = this.ctx.props.apis
+    this.path = [{ name: '物理磁盘', type: 'physical', uuid: '物理磁盘' }]
+    this.setState({ inRoot: true, entries: [], detailIndex: -1 })
     apis.request('extDrives')
   }
 
@@ -179,104 +190,121 @@ class Physical extends Base {
     return true
   }
 
-  detailWidth() {
-    return 400
-  }
-
   /** renderers **/
 
-  renderTitle({style}) {
-    if (!this.state.extDrives && !this.state.extListDir) return
+  renderTitle({ style }) {
+    if (!this.state.extDrives && !this.state.extListDir) return null
     const path = this.state.path
     return (
-      <div id='file-breadcrumbs' style={Object.assign({}, style, {marginLeft:'176px'})}>
-        {path.reduce((acc, node, index, arr) => {
+      <div id="file-breadcrumbs" style={Object.assign({}, style, { marginLeft: '176px' })}>
+        {path.reduce((acc, node, index) => {
           if (path.length > 4 && index > 0 && index < path.length - 3) {
             if (index === 1) {
-              acc.push(<BreadCrumbSeparator key={'Separator' + index}/>)
-              acc.push(<BreadCrumbItem text='...' key='...'/>)
+              acc.push(<BreadCrumbSeparator key={`Separator${index.toString()}`} />)
+              acc.push(<BreadCrumbItem text="..." key="..." />)
             }
             return acc
           }
 
-          if (index !== 0) acc.push(<BreadCrumbSeparator key={'Separator' + index}/>)
+          if (index !== 0) acc.push(<BreadCrumbSeparator key={`Separator${index.toString()}`} />)
 
           if (index === 0) { // the first one is always special
-            acc.push(<BreadCrumbItem text='物理磁盘' key='物理磁盘' onTouchTap={this.navEnter.bind(this)}/>)
-          }
-
-          else {
-            if (index === 1) acc.push(
-              <BreadCrumbItem 
+            acc.push(<BreadCrumbItem text="物理磁盘" key="物理磁盘" onTouchTap={this.navEnter.bind(this)} />)
+          } else if (index === 1) {
+            acc.push(
+              <BreadCrumbItem
                 text={node.name}
-                key={node.name + 'index'} onTouchTap={this.listByBread.bind(this, index)}/>)
-
-            else acc.push(<BreadCrumbItem text={node.name} key={node.name + 'index'} onTouchTap={this.listByBread.bind(this, index)}/>)
-            
-          }
+                key={`${node.name}index`} onTouchTap={this.listByBread.bind(this, index)}
+              />)
+          } else acc.push(<BreadCrumbItem text={node.name} key={`${node.name}index`} onTouchTap={this.listByBread.bind(this, index)} />)
           return acc
         }, [])}
       </div>
     )
   }
 
-  
-  renderContent() {
-    let extDrives, apis = this.ctx.props.apis
-    if (apis.extDrives.isFulfilled) extDrives = apis.extDrives.value()
 
+  renderDetail({ style }) {
     return (
-      <div style={{width: '100%', height: '100%'}}>
+      <div style={style}>
+        {
+          this.state.entries.length ?
+            <FileDetail
+              detailFile={this.state.entries[this.state.detailIndex]}
+              path={this.state.path}
+              ipcRenderer={ipcRenderer}
+            /> :
+            <div style={{ height: 128, backgroundColor: '#00796B' }} />
+        }
+      </div>
+    )
+  }
 
-        <div style={{height: 8}} />
-
-        {this.state.path.length == 1 && <DriveHeader />}
-        
-        <div style={{height: 8}} />
-
-         {this.state.path.length == 1 &&<Divider style={{marginLeft: 104}} />}
-
-        { this.state.path.length == 1 && this.state.entries.map(fsys => <FileSystemRow fileSystem={fsys} enter={this.enter.bind(this, fsys)} />) }
-        { this.state.path.length > 1 && <FileContent 
-          home={this.state} 
-          select={this.state.select} 
-          entries={this.state.entries}
-          listNavBySelect={this.enter.bind(this)}
-          updateDetail={() => {}}
-          showContextMenu={this.showContextMenu.bind(this)}
-        />
+  renderContent() {
+    const apis = this.ctx.props.apis
+    // debug('renderContent', this.state)
+    if (!this.state.entries) return <div />
+    return (
+      <div style={{ width: '100%', height: '100%' }}>
+        {/* root directory */}
+        {
+          this.state.path.length === 1 &&
+          <div>
+            <DriveHeader />
+            <div style={{ height: 8 }} />
+            {
+              this.state.entries.map(fsys => (
+                <div key={fsys.mountpoint}>
+                  <FileSystemRow fileSystem={fsys} enter={this.enter.bind(this, fsys)} />
+                </div>
+              ))
+            }
+          </div>
         }
 
-        <ContextMenu 
+        {/* second or deeper directory */}
+        {
+          this.state.path.length > 1 &&
+            <FileContent
+              home={this.state}
+              select={this.state.select}
+              entries={this.state.entries}
+              listNavBySelect={this.enter.bind(this)}
+              updateDetail={this.updateDetailBound}
+              showContextMenu={this.showContextMenu.bind(this)}
+            />
+        }
+
+        <ContextMenu
           open={this.state.contextMenuOpen}
           top={this.state.contextMenuY}
           left={this.state.contextMenuX}
           onRequestClose={() => this.hideContextMenu()}
         >
-          <MenuItem primaryText='移动' disabled={this.state.path.length>1?false:true} onTouchTap={this.openMove.bind(this)} />
-          <MenuItem primaryText='拷贝' disabled={this.state.path.length>1?false:true} onTouchTap={this.openCopy.bind(this)} />
-        </ContextMenu> 
+          <MenuItem primaryText="移动" disabled={!(this.state.path.length > 1)} onTouchTap={this.openMove.bind(this)} />
+          <MenuItem primaryText="拷贝" disabled={!(this.state.path.length > 1)} onTouchTap={this.openCopy.bind(this)} />
+        </ContextMenu>
 
         <DialogOverlay open={this.state.move} onRequestClose={this.closeMove.bind(this)}>
           { this.state.move && <MoveDialog
-              apis={this.ctx.props.apis} 
-              path={this.state.path} 
-              entries={this.state.entries}
-              select={this.state.select}
-              type='physical'
-              operation='move'
-            />}
+            apis={apis}
+            path={this.state.path}
+            entries={this.state.entries}
+            select={this.state.select}
+            type="physical"
+            operation="move"
+          />}
         </DialogOverlay>
 
         <DialogOverlay open={this.state.copy} onRequestClose={this.closeCopy.bind(this)}>
           { this.state.copy && <MoveDialog
-              apis={this.ctx.props.apis} 
-              path={this.state.path} 
-              entries={this.state.entries}
-              select={this.state.select}
-              type='public'
-              operation='copy'
-            />}
+            apis={apis}
+            path={this.state.path}
+            entries={this.state.entries}
+            select={this.state.select}
+            type="public"
+            operation="copy"
+          />}
         </DialogOverlay>
 
       </div>
@@ -284,31 +312,31 @@ class Physical extends Base {
   }
 
   refresh() {
-    let path = this.state.path
+    const path = this.state.path
     let string = ''
-    string += path[1].fileSystemUUID + '/'
+    string += `${path[1].fileSystemUUID}/`
     path.forEach((item, index) => {
-      if (index > 1) string += (item.name + '/')
+      if (index > 1) string += (`${item.name}/`)
     })
-    this.ctx.props.apis.request('extListDir', {path: encodeURI(string)})
+    this.ctx.props.apis.request('extListDir', { path: encodeURI(string) })
   }
 
   listByBread(pathIndex) {
-    let path = this.state.path
-    let newPath = [...this.state.path]
+    const path = this.state.path
+    const newPath = [...this.state.path]
     let string = ''
     if (pathIndex > path.length || pathIndex < 1) throw Error('bread index error')
     path.forEach((item, index) => {
-      if (index > pathIndex || index == 0) return
-      if (index == 1) string += path[index].fileSystemUUID + '/'
-      else string += path[index].name + '/'
+      if (index > pathIndex || index === 0) return
+      if (index === 1) string += `${path[index].fileSystemUUID}/`
+      else string += `${path[index].name}/`
     })
     newPath.splice(pathIndex + 1)
     // console.log(string, newPath)
-    this.ctx.props.apis.request('extListDir', {path: encodeURI(string)})
+    this.ctx.props.apis.request('extListDir', { path: encodeURI(string) })
     this.path = newPath
-    this.setState({inRoot: false})
-  } 
+    this.setState({ inRoot: false })
+  }
 
   enter(fsy) {
     if (!fsy) {
@@ -316,68 +344,67 @@ class Physical extends Base {
       fsy = this.state.entries[this.state.select.selected[0]]
     }
     // console.log(fsy, this.state)
-    if (fsy.type == 'file') return
+    if (fsy.type === 'file') return
     let string = ''
-    let fileSystemIndex = this.state.path.findIndex(item => item.fileSystemUUID)
-    if (fileSystemIndex == -1) {
+    const fileSystemIndex = this.state.path.findIndex(item => item.fileSystemUUID)
+    if (fileSystemIndex === -1) {
       // console.log('fileSystemIndex 没有找到 在根目录')
-      string += (fsy.fileSystemUUID + '/')
-    }else {
+      string += (`${fsy.fileSystemUUID}/`)
+    } else {
       // console.log('fileSystemIndex 找到 不在根目录', fileSystemIndex)
       this.state.path.forEach((item, index) => {
         if (index < fileSystemIndex) {}
-        if (index == fileSystemIndex) string += (item.fileSystemUUID + '/')
-        if (index > fileSystemIndex) string += (item.name + '/')
+        if (index === fileSystemIndex) string += (`${item.fileSystemUUID}/`)
+        if (index > fileSystemIndex) string += (`${item.name}/`)
       })
-      string += (fsy.name + '/')
+      string += (`${fsy.name}/`)
     }
 
-    let path = [...this.state.path, fsy]
+    const path = [...this.state.path, fsy]
     // console.log(string)
 
-    this.ctx.props.apis.request('extListDir', {path: encodeURI(string)})
+    this.ctx.props.apis.request('extListDir', { path: encodeURI(string) })
     this.path = path
-    this.setState({inRoot: false})
+    this.setState({ inRoot: false })
   }
 
   showContextMenu(clientX, clientY) {
     if (this.select.state.ctrl || this.select.state.shift) return
-    let containerDom = document.getElementById('content-container')
-    let maxLeft = containerDom.offsetLeft + containerDom.clientWidth - 240
-    let x = clientX > maxLeft? maxLeft: clientX
-    let maxTop = containerDom.offsetTop + containerDom.offsetHeight -192
-    let y = clientY > maxTop? maxTop: clientY
-    this.setState({ 
+    const containerDom = document.getElementById('content-container')
+    const maxLeft = containerDom.offsetLeft + containerDom.clientWidth - 240
+    const x = clientX > maxLeft ? maxLeft : clientX
+    const maxTop = containerDom.offsetTop + containerDom.offsetHeight - 192
+    const y = clientY > maxTop ? maxTop : clientY
+    this.setState({
       contextMenuOpen: true,
       contextMenuX: x,
       contextMenuY: y
-    }) 
+    })
   }
 
   hideContextMenu() {
-    this.setState({ 
+    this.setState({
       contextMenuOpen: false,
       contextMenuX: -1,
-      contextMenuY: -1,
+      contextMenuY: -1
     })
   }
 
   openMove() {
-    this.setState({move: true})
+    this.setState({ move: true })
   }
 
   closeMove() {
-    this.setState({move:false})
+    this.setState({ move: false })
   }
 
   openCopy() {
-    this.setState({ copy: true})
+    this.setState({ copy: true })
   }
 
   closeCopy() {
-    this.setState({ copy: false})
+    this.setState({ copy: false })
   }
 }
 
 export default Physical
-

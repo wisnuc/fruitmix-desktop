@@ -1,5 +1,5 @@
 import React from 'react'
-import CircularProgress from 'material-ui/CircularProgress'
+import { IconButton, CircularProgress } from 'material-ui'
 import BackIcon from 'material-ui/svg-icons/navigation/arrow-back'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
@@ -7,179 +7,148 @@ import FileFolder from 'material-ui/svg-icons/file/folder'
 import ArrowRight from 'material-ui/svg-icons/hardware/keyboard-arrow-right'
 import request from 'superagent'
 import { command } from '../../lib/command'
-class Row extends React.PureComponent {
-  constructor(props) {
-    super(props)
-  }
+import FlatButton from '../common/FlatButton'
 
+class Row extends React.PureComponent {
   render() {
-    let node = this.props.node
-    let disable = this.props.disable
-    let isSelected = this.props.isSelected
+    const node = this.props.node
+    const disable = this.props.disable
+    const isSelected = this.props.isSelected
     return (
-      <div className={isSelected?'move-dialog-row row-selected':disable?'move-dialog-row disable':'move-dialog-row'} 
-        onTouchTap={disable?null:this.props.selectNode}
-        onDoubleClick={this.props.enter}>
-        <span className='move-dialog-row-type'>{node.type == 'file'?<EditorInsertDriveFile/>:<FileFolder/>}</span>
-        <span className='move-dialog-row-text'>{node.name || node.label || node.mountpoint}</span>
-        <span className='move-dialog-row-enter' onTouchTap={this.props.enter}><ArrowRight/></span>
+      <div
+        style={{
+          height: 36,
+          lineHeight: 36,
+          width: '100%',
+          overflow: 'hidden',
+          display: 'flex',
+          flexFlow: 'row nowrap',
+          alignItems: 'center',
+          background: isSelected ? '#4d90fe' : '',
+          opacity: disable ? 0.5 : 1
+        }}
+        onTouchTap={disable ? null : this.props.selectNode}
+        onDoubleClick={this.props.enter}
+      >
+        <div style={{ margin: '0 18px 0 13px', display: 'flex' }}>
+          {
+            node.type === 'file' ?
+              <EditorInsertDriveFile style={{ color: 'rgba(0,0,0,0.54)' }} /> :
+              <FileFolder style={{ color: 'rgba(0,0,0,0.54)' }} />
+          }
+        </div>
+        <span
+          style={{
+            width: 150,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            marginRight: 5
+          }}
+        >{node.name || node.label || node.mountpoint}</span>
+        <span
+          style={{
+            display: 'none',
+            width: 23,
+            height: '25px!important',
+            lineHeight: '25px!important',
+            cursor: 'pointer',
+            justifyContent: 'center'
+          }}
+          onTouchTap={this.props.enter}
+        >
+          <ArrowRight />
+        </span>
       </div>
     )
   }
 }
 
 class MoveDialog extends React.PureComponent {
-
   constructor(props) {
-
     super(props)
 
-    let entries = this.props.entries
-    let selected = this.props.select.selected
-    let path = this.props.path
+    const entries = this.props.entries
+    const selected = this.props.select.selected
 
-    this.path = path
-    this.paths = this.consistPath(this.props.path)
+    this.path = this.props.path
+    this.paths = [{ name: '我的所有文件', uuid: null, type: 'false' }, ...this.path]
     this.selectedArr = selected.map(item => entries[item])
-    this.directory = path[path.length - 1]
+    this.directory = this.path[this.path.length - 1]
 
     this.state = {
-      list:this.props.entries,
-      currentDir: path[path.length - 1],
-      path:this.paths,
+      list: this.props.entries,
+      currentDir: this.path[this.path.length - 1],
+      path: this.paths,
       loading: false,
-      currentSelectedIndex: -1 
+      currentSelectedIndex: -1
     }
   }
 
-  consistPath(path) {
-    // console.log(path)
-    let newPath = []
-    if (path[0].type == 'public') {
-      //entry is public
-      newPath = [{name:'我的所有文件', uuid: null, type:'false'}, ...path]
-      // path.unshift()
+  /* 移动按钮是否工作 */
+  getButtonStatus() {
+    const type = this.state.currentDir.type
+    const selectedObj = this.state.currentSelectedIndex !== -1 ? this.state.list[this.state.currentSelectedIndex] : null
 
-    }else if (path[0].type == 'folder') {
-      //entry is drive
-      newPath = [{name:'我的所有文件', uuid: null, type:'false'}, ...path]
-    }else {
-      //entry is physical
-      newPath = [{name:'我的所有文件', uuid: null, type:'false'}, ...path]
-    }
+    /* false, public, physical 不能被指定为目标) */
+    if (type !== 'folder' && type !== 'directory') return true
 
-    return newPath
-  }
-  //行是否能被选中
-  isRowDisable(node) {
-    let type = node.type
-    //文件不能被选中
-    if (type == 'file') return true
-    //磁盘路径下: 节点不在被选中数组内
-    else if (node.type === 'directory') {
-      if (this.inSameDirectory()) {
-        //在同一级文件夹
-        if (this.selectedArr.findIndex(item => item.name == node.name) === -1 ) return false
-        else return true  
+    /* 列表中有元素被选中时，不能为待移动的文件夹 */
+    if (this.state.currentSelectedIndex !== -1) {
+      if (type === 'folder' && !this.state.currentDir.fileSystemUUID) {
+        if (!this.selectedArr.findIndex(item => item.uuid === selectedObj.uuid) === -1) {
+          return true
+        }
+      } else if (type === 'directory' || this.state.currentDir.fileSystemUUID) {
+        if (this.inSameDirectory() && !this.selectedArr.findIndex(item => item.name === selectedObj.name) === -1) {
+          return true
+        }
       }
-      //不在同一级文件夹 可以被选中
-      else return false
-    }
-    //drive路径下：节点不在被选中数组内
-    else if (node.type == 'folder') {
-      if (this.inSameDirectory()) {
-        if (this.selectedArr.findIndex(item => item.uuid === node.uuid) === -1) return false
-        else return true
-      }
-      //不在同一级文件夹 可以被选中
-      else return false
-    }
-    else return false
-  }
 
-  getList() {
-    return (
-      this.state.list.map((item, index) => <Row
-        key={item.uuid || item.path || item.name}
-        node={item} 
-        selectNode={this.selectNode.bind(this, index)}
-        enter={this.enter.bind(this, item)}
-        disable={this.isRowDisable(item)}
-        isSelected={index === this.state.currentSelectedIndex} />)
-    )
-  }
+      /* 被选文件夹不能是待移动文件的父文件夹 */
+      if (selectedObj.uuid === this.directory.uuid) return true
 
-  //移动按钮是否工作
-  getButtonStyle() {
-    let state = this.state
-    let currentDir = this.state.currentDir
-    let type = this.state.currentDir.type
-    let currentSelectedIndex = this.state.currentSelectedIndex
-    let selectedObj = this.state.currentSelectedIndex!==-1?this.state.list[this.state.currentSelectedIndex]:null
-    let result = '' 
-    //列表中有元素被选中
-    if (state.currentSelectedIndex != -1) {
-      //当前所在文件夹为 false, physical, public
-      if (type !== 'folder' && type !== 'directory') result = 'disable move-button' 
-      //当前所在文件夹为 folder
-      else if (type == 'folder' && !currentDir.fileSystemUUID) {
-        //选中的文件夹 不是要进行移动的文件
-        if (this.selectedArr.findIndex(item => item.uuid == selectedObj.uuid) == -1) result = 'move-button' 
-        else result = 'disable move-button' 
-      }
-      //当前所在文件夹为 directory
-      else if (type == 'directory' || currentDir.fileSystemUUID) {
-        if (!this.inSameDirectory()) result = 'move-button' 
-        else if (this.selectedArr.findIndex(item => item.name == selectedObj.name) == -1) result = 'move-button'
-        else result = 'disable move-button' 
-      }
+      /* 列表中没有元素被选中时，当前文件夹不能与被选中元素所在文件夹相同 */
+    } else if (type === 'folder' && !this.state.currentDir.fileSystemUUID && this.inSameDirectory()) {
+      return true
+    } else if (type === 'directory' || this.state.currentDir.fileSystemUUID && this.inSameDirectory()) {
+      return true
     }
-    //列表中没有元素被选中
-    else {
-      //flase, public, physical 不能被指定为目标
-      if (type !== 'folder' && type !== "directory") result = 'disable move-button'
-      
-      else if (type == 'folder' && !currentDir.fileSystemUUID) {
-        //drive 当前文件夹不能与被选中元素所在文件夹相同
-        if (this.inSameDirectory()) result = 'disable move-button'
-        else result = 'move-button long'
-      }else if (type == 'directory' || currentDir.fileSystemUUID) {
-        if (this.inSameDirectory()) result = 'disable move-button'
-        else result = 'move-button long'
-      }
-      else result = 'disable move-button'
-    }
-    this.buttonState = result
-    return result
+    return false
   }
 
   getButtonText() {
-    let text = this.props.operation == 'move'?'移动':'拷贝'
-    if (this.state.currentSelectedIndex != -1) return text
+    const text = this.props.operation === 'move' ? '移动' : '拷贝'
+    if (this.state.currentSelectedIndex !== -1) return text
     else if (this.directory.uuid === this.state.currentDir.uuid) return text
-    else return text + '到这里'
+    return `${text}到这里`
   }
 
-  render() {
-    return (
-      <div className='move-dialog-container'>
-        <div style={{height:'0px'}}></div>
-        <div className='move-dialog-header'>
-          <span className={this.state.path.length>1?'move-title-icon':'move-title-icon invisible' } onTouchTap={this.back.bind(this)}>
-            <BackIcon/>
-          </span>
-          <span className='move-dialog-title'>{this.state.currentDir.name || this.state.currentDir.label}</span>
-          <span className='move-title-icon' onTouchTap={this.closeDialog.bind(this)}><CloseIcon/></span>
-        </div>
-        <div className='move-dialog-list'>
-          {this.state.loading && <CircularProgress style={{display:'block'}} className='move-dialog-loading'/>}
-          {!this.state.loading && this.getList()}
-        </div>
-        <div className='move-operation'>
-          <span className={this.getButtonStyle()} onTouchTap={this.move.bind(this)}>{this.getButtonText()}</span>
-        </div>
-      </div>
-    )
+  /* 行是否能被选中 */
+  isRowDisable(node) {
+    const type = node.type
+    // 文件不能被选中
+    if (type == 'file') return true
+    // 磁盘路径下: 节点不在被选中数组内
+    else if (node.type === 'directory') {
+      if (this.inSameDirectory()) {
+        // 在同一级文件夹
+        if (this.selectedArr.findIndex(item => item.name == node.name) === -1) return false
+        return true
+      }
+      // 不在同一级文件夹 可以被选中
+      return false
+    }
+    // drive路径下：节点不在被选中数组内
+    else if (node.type == 'folder') {
+      if (this.inSameDirectory()) {
+        if (this.selectedArr.findIndex(item => item.uuid === node.uuid) === -1) return false
+        return true
+      }
+      // 不在同一级文件夹 可以被选中
+      return false
+    }
+    return false
   }
 
   closeDialog() {
@@ -188,72 +157,68 @@ class MoveDialog extends React.PureComponent {
 
   updateState(path, currentDir, list) {
     this.setState({
-      path: path?path:this.state.path,
-      list: list?list:this.state.list,
-      currentDir: currentDir?currentDir:this.state.currentDir,
+      path: path || this.state.path,
+      list: list || this.state.list,
+      currentDir: currentDir || this.state.currentDir,
       loading: false,
       currentSelectedIndex: -1
     })
   }
 
   enter(node) {
-    console.log(node)
-    //condition can not be enter
-    if (node.type == 'file') return
+    // console.log('node', node)
+    // condition can not be enter
+    if (node.type === 'file') return
     if (this.props.type !== 'physical' && this.selectedArr.findIndex(item => item.uuid === node.uuid) !== -1) return
-    if (node.type == 'directory') {
+    if (node.type === 'directory') {
       let oldPathString = ''
       let newPathString = ''
-      this.paths.forEach(item => oldPathString += item.name)
-      this.state.path.forEach(item => newPathString += item.name)
+      this.paths.forEach(item => (oldPathString += item.name))
+      this.state.path.forEach(item => (newPathString += item.name))
       // console.log(oldPathString, newPathString)
-      if (oldPathString == newPathString && this.selectedArr.findIndex(item => item.name === node.name) !== -1) return
+      if (oldPathString === newPathString && this.selectedArr.findIndex(item => item.name === node.name) !== -1) return
     }
 
-    let path = [...this.state.path, node]
-    let currentDir = node
-    if (node.type == 'folder' && !node.fileSystemUUID) {
-
-      this.list(node.uuid).then( data => {
-        let list = data
+    const path = [...this.state.path, node]
+    const currentDir = node
+    if (node.type === 'folder' && !node.fileSystemUUID) {
+      this.list(node.uuid).then((data) => {
+        const list = data
         this.updateState(path, currentDir, list)
       }).catch(err => console.log(err))
-    }else if (node.type == 'public') {
-
-      let list = this.props.apis.adminDrives.data.drives
-      list.forEach(item => item.type = 'folder')
-      this.setState({loading:true})
+    } else if (node.type === 'public') {
+      const list = this.props.apis.adminDrives.data.drives
+      list.forEach(item => (item.type = 'folder'))
+      this.setState({ loading: true })
       setTimeout(() => {
         this.updateState(path, currentDir, list)
-      },0)
-    }else if (node.type == 'physical'){
-
-      this.extDrives().then(list => {
-        list.forEach(item => item.type = 'folder')
+      }, 0)
+    } else if (node.type === 'physical') {
+      this.extDrives().then((list) => {
+        list.forEach(item => (item.type = 'folder'))
         this.updateState(path, currentDir, list)
       })
-
-    }else if (node.fileSystemUUID) {
-      this.aget('files/external/fs/' + node.fileSystemUUID + '/').end((err, res) => {
+    } else if (node.fileSystemUUID) {
+      this.aget(`files/external/fs/${node.fileSystemUUID}/`).end((err, res) => {
         if (err) console.log('err')
         else {
-          let list = JSON.parse(res.text)
+          const list = JSON.parse(res.text)
           this.updateState(path, currentDir, list)
         }
       })
-    }else if (node.type == 'directory') {
+    } else if (node.type == 'directory') {
       let string = 'files/external/fs/'
-      let fileSystemUUIDIndex = this.state.path.findIndex(item => item.fileSystemUUID)
-      string += this.state.path[fileSystemUUIDIndex].fileSystemUUID + '/'
+      const fileSystemUUIDIndex = this.state.path.findIndex(item => item.fileSystemUUID)
+      string += `${this.state.path[fileSystemUUIDIndex].fileSystemUUID}/`
       this.state.path.forEach((item, index) => {
-        if (index > fileSystemUUIDIndex) string += (this.state.path[index].name + '/')
+        if (index > fileSystemUUIDIndex) string += (`${this.state.path[index].name}/`)
         else return
       })
       string += node.name
       this.aget(string).end((err, res) => {
         if (err) console.log(err)
         else {
-          let list = JSON.parse(res.text)
+          const list = JSON.parse(res.text)
           this.updateState(path, currentDir, list)
         }
       })
@@ -261,54 +226,51 @@ class MoveDialog extends React.PureComponent {
   }
 
   back() {
-    let apis = this.props.apis
-    let path = this.state.path
-    if (path.length == 1) return
+    const apis = this.props.apis
+    const path = this.state.path
+    if (path.length === 1) return
     if (this.state.loading) return
-    let currentDir = path[path.length - 2]
+    const currentDir = path[path.length - 2]
 
-    let copyPath = [...path]
-    let newPath = copyPath.pop()
+    const copyPath = [...path]
+    const newPath = copyPath.pop()
 
     if (currentDir.type === 'folder' && !currentDir.fileSystemUUID) {
-      //nav-dir
+      // nav-dir
       this.list(currentDir.uuid).then(list => this.updateState(copyPath, currentDir, list))
-
-    }else if (currentDir.type === 'public'){
-      //get adminDrives
-      let list = apis.adminDrives.data.drives
+    } else if (currentDir.type === 'public') {
+      // get adminDrives
+      const list = apis.adminDrives.data.drives
       list.forEach(item => item.type = 'folder')
       this.updateState(copyPath, currentDir, list)
+    } else if (currentDir.type === 'false') {
+      // get virtual root
+      const list = [{ name: '我的文件', type: 'folder', uuid: apis.account.data.home },
+                  { name: '共享文件夹', type: 'public', uuid: '共享文件夹' },
+                  { name: '物理磁盘', type: 'physical', uuid: '物理磁盘' }]
 
-    }else if(currentDir.type === 'false'){
-      //get virtual root
-      let list = [{name:'我的文件', type:'folder', uuid:apis.account.data.home}, 
-                  {name:'共享文件夹',type: 'public', uuid: '共享文件夹'},
-                  {name:'物理磁盘', type: 'physical', uuid:'物理磁盘'}]
-      
       this.updateState(copyPath, currentDir, list)
-
-    }else if (currentDir.type === 'physical') {
-      //get extDrives 
-      this.extDrives().then(list => {
+    } else if (currentDir.type === 'physical') {
+      // get extDrives
+      this.extDrives().then((list) => {
         list.forEach(item => item.type = 'folder')
         this.updateState(copyPath, currentDir, list)
       })
-    }else if (currentDir.fileSystemUUID || currentDir.type == 'directory'){
+    } else if (currentDir.fileSystemUUID || currentDir.type == 'directory') {
        // //get physical path
       let string = 'files/external/fs/'
-      let fileSystemUUIDIndex = copyPath.findIndex(item => item.fileSystemUUID)
+      const fileSystemUUIDIndex = copyPath.findIndex(item => item.fileSystemUUID)
       if (fileSystemUUIDIndex == -1) return
       copyPath.forEach((item, index) => {
-        if (index == fileSystemUUIDIndex ) string += copyPath[index].fileSystemUUID + '/'
-        if (index > fileSystemUUIDIndex) string += (copyPath[index].name + '/')
+        if (index == fileSystemUUIDIndex) string += `${copyPath[index].fileSystemUUID}/`
+        if (index > fileSystemUUIDIndex) string += (`${copyPath[index].name}/`)
       })
 
-      this.setState({loading:true})
+      this.setState({ loading: true })
       this.aget(string).end((err, res) => {
         if (err) console.log(err)
         else {
-          let list = JSON.parse(res.text)
+          const list = JSON.parse(res.text)
           this.updateState(copyPath, currentDir, list)
         }
       })
@@ -316,72 +278,67 @@ class MoveDialog extends React.PureComponent {
   }
 
   selectNode(index) {
-    if (this.state.currentSelectedIndex == index) this.setState({currentSelectedIndex: -1})
-    else this.setState({currentSelectedIndex: index})
+    if (this.state.currentSelectedIndex == index) this.setState({ currentSelectedIndex: -1 })
+    else this.setState({ currentSelectedIndex: index })
   }
 
-  //apis
-
+  // apis
   list(uuid) {
     return new Promise((resolve, reject) => {
-      this.setState({loading:true})
-      let string = 'files/fruitmix/list/' + uuid + '/' + uuid
+      this.setState({ loading: true })
+      const string = `files/fruitmix/list/${uuid}/${uuid}`
       this.aget(string).end((err, res) => {
         if (err) return reject(err)
-        else resolve(this.sort(JSON.parse(res.text)))
+        resolve(this.sort(JSON.parse(res.text)))
       })
     })
   }
 
   move() {
-    // if (this.directory.uuid === this.state.currentDir.uuid && this.props.type !== 'physical') return
-    if (this.buttonState !== 'move-button' && this.buttonState !== 'move-button long') return
-
-    //dst
+    // dst
     let dstobj
-    if (this.state.currentSelectedIndex != -1) {
+    if (this.state.currentSelectedIndex !== -1) {
       dstobj = this.state.list[this.state.currentSelectedIndex]
-    }else {
+    } else {
       dstobj = this.state.currentDir
     }
-    let dst = {type:'', path:''}
+    const dst = { type: '', path: '' }
     if (dstobj.uuid) {
       dst.type = 'fruitmix'
       dst.path = dstobj.uuid
-    }
-    else {
+    } else {
       dst.type = 'ext'
       dst.path = '/'
-      this.state.path.forEach(item => {
-        if (item.type == 'physical' || item.type == 'false')  return
+      this.state.path.forEach((item) => {
+        if (item.type === 'physical' || item.type === 'false') return
         if (item.fileSystemUUID) dst.rootPath = item.fileSystemUUID
-        else dst.path += (item.name + '/')
+        else dst.path += (`${item.name}/`)
       })
-      if (this.state.currentSelectedIndex != -1) dst.path += this.state.list[this.state.currentSelectedIndex].name
+      if (this.state.currentSelectedIndex !== -1) dst.path += this.state.list[this.state.currentSelectedIndex].name
     }
 
-    //src
+    // src
     let string = '/'
-    if (this.props.type == 'physical') {
-      console.log(this.path)
+    if (this.props.type === 'physical') {
+      // console.log(this.path)
       this.path.forEach((item, index) => {
-        if (index > 1) string += (item.name + '/')  
+        if (index > 1) string += (`${item.name}/`)
       })
     }
 
-    this.selectedArr.forEach(item => {
-      
-      let obj = {src: {
-        type:item.uuid?'fruitmix':'ext', 
-        path:item.uuid?item.uuid:string + item.name,
-        rootPath:item.uuid?null:this.path[1].fileSystemUUID}, dst}
+    this.selectedArr.forEach((item) => {
+      const obj = { src: {
+        type: item.uuid ? 'fruitmix' : 'ext',
+        path: item.uuid ? item.uuid : string + item.name,
+        rootPath: item.uuid ? null : this.path[1].fileSystemUUID },
+        dst }
       // return console.log(obj, this.directory)
-      this.apost('files/transfer/' + this.props.operation, obj).end((err, res) => {
+      this.apost(`files/transfer/${this.props.operation}`, obj).end((err, res) => {
         if (err) console.log(err)
         else {
-          Object.assign(obj, JSON.parse(res.text), {name:item.name, createDate: (new Date()).getTime(), type:this.props.operation, directory:this.directory})
+          Object.assign(obj, JSON.parse(res.text), { name: item.name, createDate: (new Date()).getTime(), type: this.props.operation, directory: this.directory })
           // console.log(obj)
-          command('fileapp', 'TRANSFER', {obj})
+          command('fileapp', 'TRANSFER', { obj })
           this.props.onRequestClose()
         }
       })
@@ -389,58 +346,57 @@ class MoveDialog extends React.PureComponent {
   }
 
   inSameDirectory() {
-    if (this.props.type == 'physical') {
+    if (this.props.type === 'physical') {
       let oldPathString = ''
       let newPathString = ''
-      this.paths.forEach(item => oldPathString += item.name)
-      this.state.path.forEach(item => newPathString += item.name)
-      if (oldPathString == newPathString) return true
-      else return false
-    }else return this.state.currentDir.uuid == this.directory.uuid
+      this.paths.forEach(item => (oldPathString += item.name))
+      this.state.path.forEach(item => (newPathString += item.name))
+      if (oldPathString === newPathString) return true
+      return false
+    }
+    return this.state.currentDir.uuid === this.directory.uuid
   }
 
   extDrives() {
     return new Promise((resolve, reject) => {
       this.aget('files/external/fs').end((err, res) => {
         if (err) return reject(err)
-        else {
-          let arr = JSON.parse(res.text)
-          let list = []
-          arr.forEach(item => {
-            if (item.fileSystemType == 'ntfs') list.push(item)
-          })
-          resolve(list)
-        }
-      })
 
+        const arr = JSON.parse(res.text)
+        const list = []
+        arr.forEach((item) => {
+          if (item.fileSystemType == 'ntfs') list.push(item)
+        })
+        resolve(list)
+      })
     })
   }
 
   adminDrives() {
     return new Promise((resolve, reject) => {
-      let string = 'admin/drives'
+      const string = 'admin/drives'
       this.aget(string).end((err, res) => {
         if (err) return reject(err)
-        else resolve(JSON.parse(res.text))
+        resolve(JSON.parse(res.text))
       })
     })
   }
 
   aget(ep) {
-    let { address, token} = this.props.apis
-    let string = 'http://'+address+':3721/'+ep
-    this.setState({loading:true})
+    const { address, token } = this.props.apis
+    const string = `http://${address}:3721/${ep}`
+    this.setState({ loading: true })
     return request
       .get(encodeURI(string))
-      .set('Authorization', 'JWT ' + token)
+      .set('Authorization', `JWT ${token}`)
   }
 
   apost(ep, data) {
-    let { address, token} = this.props.apis
-    let string = 'http://'+address+':3721/'+ep
-    let r = request
+    const { address, token } = this.props.apis
+    const string = `http://${address}:3721/${ep}`
+    const r = request
       .post(string)
-      .set('Authorization', 'JWT ' + token)
+      .set('Authorization', `JWT ${token}`)
 
     return typeof data === 'object'
       ? r.send(data)
@@ -453,6 +409,109 @@ class MoveDialog extends React.PureComponent {
       if (a.type === 'file' && b.type === 'folder') return 1
       return a.name.localeCompare(b.name)
     })
+  }
+
+  renderCurrentDir() {
+    console.log('current directory', this.state.currentDir, this.path)
+    if (this.state.currentDir.uuid === this.path[0].uuid) {
+      const type = this.state.currentDir.type
+      return type === 'folder' ? '我的文件' : type === 'public' ? '共享文件夹' : '物理磁盘'
+    }
+    return this.state.currentDir.name || this.state.currentDir.label
+  }
+
+  render() {
+    return (
+      <div style={{ width: 336 }}>
+        {/* header */}
+        <div
+          style={{
+            height: 56,
+            backgroundColor: '#f1f1f1',
+            position: 'relative',
+            display: 'flex',
+            flexFlow: 'row nowrap',
+            justifyContent: 'flex-start',
+            alignItems: 'center'
+          }}
+        >
+          {/* back button */}
+          <div
+            style={{ flex: '0 0 48px', display: 'flex', justifyContent: 'center' }}
+            onTouchTap={this.back.bind(this)}
+          >
+            <IconButton style={{ display: this.state.path.length > 1 ? '' : 'none' }}>
+              <BackIcon />
+            </IconButton>
+          </div>
+
+          {/* current directory */}
+          <div
+            style={{
+              flex: '0 0 240px',
+              color: 'rgba(0,0,0,0.87)',
+              whiteSpace: 'nowrap',
+              textOverflow: 'ellipsis',
+              overflow: 'hidden'
+            }}
+          >
+            { this.renderCurrentDir() }
+          </div>
+
+          {/* close button */}
+          <div
+            style={{ flex: '0 0 48px', display: 'flex', justifyContent: 'center' }}
+            onTouchTap={this.closeDialog.bind(this)}
+          >
+            <IconButton>
+              <CloseIcon />
+            </IconButton>
+          </div>
+        </div>
+
+        {/* list of directory */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 288,
+            height: 200,
+            overflowY: 'auto',
+            padding: '8px 24px 0px 24px',
+            color: 'rgba(0,0,0,0.87)'
+          }}
+        >
+          {
+            this.state.loading ? <CircularProgress /> :
+            <div style={{ height: '100%', width: '100%' }}>
+              {
+                  this.state.list.map((item, index) => (
+                    <Row
+                      key={item.uuid || item.path || item.name}
+                      node={item}
+                      selectNode={this.selectNode.bind(this, index)}
+                      enter={this.enter.bind(this, item)}
+                      disable={this.isRowDisable(item)}
+                      isSelected={index === this.state.currentSelectedIndex}
+                    />
+                  ))
+                }
+            </div>
+          }
+        </div>
+
+        {/* confirm button */}
+        <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+          <FlatButton
+            label={this.getButtonText()}
+            primary
+            disabled={this.getButtonStatus()}
+            onTouchTap={this.move.bind(this)}
+          />
+        </div>
+      </div>
+    )
   }
 }
 

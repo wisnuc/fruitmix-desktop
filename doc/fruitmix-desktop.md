@@ -2,7 +2,7 @@
 
 ___
 
-# Fruitmix-Desktop 软件说明
+# Fruitmix-Desktop 软件设计
 
 **作者**
 
@@ -16,21 +16,6 @@ ___
 **目录**
 
 [TOC]
-
-## 使用说明
-
-### 安装依赖
-
-* 安装nodejs ，webpack
-* 安装 项目依赖包 ，运行npm install
-
-### 常用操作及命令
-
-* 打包前端代码 : webpack
-* 打包前端代码 (开发环境) : webpack --watch
-* 打包后端代码 : npm run build
-* 运行项目(开发环境) : npm run devel
-* 清除热替换产生的缓存 : grunt clean
 
 ## 项目结构
 

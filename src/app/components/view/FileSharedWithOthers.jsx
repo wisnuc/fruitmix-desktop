@@ -12,7 +12,7 @@ class FileSharedWithOthers extends Base {
     this.state = {}
   }
 
-  willReceiveProps(nextProps) { 
+  willReceiveProps(nextProps) {
   }
 
   navEnter() {
@@ -56,9 +56,8 @@ class FileSharedWithOthers extends Base {
 
   /** renderers **/
   renderContent() {
-
     return (
-      <div style={{width: '100%', height: '100%'}}>
+      <div style={{ width: '100%', height: '100%' }}>
         hello
       </div>
     )

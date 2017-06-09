@@ -5,6 +5,7 @@
 /dbCache
 /tmpTrans
 /npm-debug.log
+/out
 
 *.swp
 public/*.js

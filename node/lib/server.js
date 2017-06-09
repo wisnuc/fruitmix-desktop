@@ -9,33 +9,29 @@ import UUID from 'node-uuid'
 
 import store from '../serve/store/store'
 
-const getIpAddr = () => store.getState().login2.device.mdev.address
-const getToken = () => store.getState().login2.device.token.data.token
+const getIpAddr = () => store.getState().login.device.mdev.address
+const getToken = () => store.getState().login.device.token.data.token
 
-// TODO token can also be auth, or not provided 
+// TODO token can also be auth, or not provided
 const requestGet = (url, qs, token, callback) => {
-
   // auth-less
   if (typeof token === 'function') {
     callback = token
     token = null
   }
 
-  let opts = { method: 'GET', url }
+  const opts = { method: 'GET', url }
   if (qs) opts.qs = qs
-  if (typeof token === 'string')
-    opts.headers = { Authorization: 'JWT ' + token }
-  else if (typeof token === 'object' && token !== null) {
+  if (typeof token === 'string') { opts.headers = { Authorization: `JWT ${token}` } } else if (typeof token === 'object' && token !== null) {
     opts.auth = token
   }
 
   debug('requestGet, opts', opts)
 
   request.get(opts, (err, res) => {
-
     if (err) return callback(err)
     if (res.statusCode !== 200) {
-      let e = new Error('http status code not 200')
+      const e = new Error('http status code not 200')
       e.code = 'EHTTPSTATUS'
       e.status = res.statusCode
       e.url = url
@@ -43,13 +39,12 @@ const requestGet = (url, qs, token, callback) => {
     }
 
     try {
-      let obj = JSON.parse(res.body)
+      const obj = JSON.parse(res.body)
       return callback(null, obj)
-    }
-    catch (e) {
+    } catch (e) {
       console.log('req GET json parse err')
       console.log(e)
-      let e1 = new Error('json parse error')
+      const e1 = new Error('json parse error')
       e1.code === 'EJSONPARSE'
       return callback(e1)
     }
@@ -59,24 +54,21 @@ const requestGet = (url, qs, token, callback) => {
 export const requestGetAsync = Promise.promisify(requestGet)
 
 const requestDownload = (url, qs, token, downloadPath, name, callback) => {
-  let opts = { method: 'GET', url }
+  const opts = { method: 'GET', url }
   if (qs) opts.qs = qs
-  if (typeof token === 'string')
-    opts.headers = { Authorization: 'JWT ' + token }
-  else if (typeof token === 'object' && token !== null) {
+  if (typeof token === 'string') { opts.headers = { Authorization: `JWT ${token}` } } else if (typeof token === 'object' && token !== null) {
     opts.auth = token
   }
-  
-  let tmpPath = path.join(global.tmpPath, UUID.v4())
-  let dst = path.join(downloadPath, name)
 
-  let stream = fs.createWriteStream(tmpPath)
+  const tmpPath = path.join(global.tmpPath, UUID.v4())
+  const dst = path.join(downloadPath, name)
+
+  const stream = fs.createWriteStream(tmpPath)
   request(opts, (err, res) => {
-
     if (err) return callback(err)
     if (res.statusCode !== 200) {
       console.log(res.body)
-      let e = new Error('http status code not 200')
+      const e = new Error('http status code not 200')
       e.code = 'EHTTPSTATUS'
       e.status = res.statusCode
       return callback(e)
@@ -85,11 +77,10 @@ const requestDownload = (url, qs, token, downloadPath, name, callback) => {
     try {
       fs.renameSync(tmpPath, dst)
       return callback(null, null)
-    }
-    catch (e) {
+    } catch (e) {
       console.log('req GET json parse err')
       console.log(e)
-      let e1 = new Error('json parse error')
+      const e1 = new Error('json parse error')
       e1.code === 'EJSONPARSE'
       return callback(e1)
     }
@@ -99,18 +90,17 @@ const requestDownload = (url, qs, token, downloadPath, name, callback) => {
 export const requestDownloadAsync = Promise.promisify(requestDownload)
 
 const requestPost = (url, token, body, callback) => {
-
-  let opts = { method: 'POST', url, body: JSON.stringify(body) } 
-  opts.headers = { 
-    Authorization: 'JWT ' + token,
+  const opts = { method: 'POST', url, body: JSON.stringify(body) }
+  opts.headers = {
+    Authorization: `JWT ${token}`,
     'Content-Type': 'application/json'
   }
 
-  debug('requestPost', opts) 
+  debug('requestPost', opts)
   request(opts, (err, res) => {
     if (err) return callback(err)
     if (res.statusCode !== 200) {
-      let e = new Error('http status code not 200')
+      const e = new Error('http status code not 200')
       e.code = 'EHTTPSTATUS'
       e.status = res.statusCode
       return callback(e)
@@ -122,9 +112,9 @@ const requestPost = (url, token, body, callback) => {
 const requestPostAsync = Promise.promisify(requestPost)
 
 const requestPatch = (url, token, body, callback) => {
-  let opts = { method: 'PATCH', url, body: JSON.stringify(body) }
+  const opts = { method: 'PATCH', url, body: JSON.stringify(body) }
   opts.headers = {
-    Authorization: 'JWT ' + token,
+    Authorization: `JWT ${token}`,
     'Content-Type': 'application/json'
   }
 
@@ -133,7 +123,7 @@ const requestPatch = (url, token, body, callback) => {
   request(opts, (err, res) => {
     if (err) return callback(err)
     if (res.statusCode !== 200) {
-      let e = new Error('http status code node 200')
+      const e = new Error('http status code node 200')
       e.code = 'EHTTPSTATUS'
       e.status = res.statusCode
       return callback(e)
@@ -145,35 +135,32 @@ const requestPatch = (url, token, body, callback) => {
 const requestPatchAsync = Promise.promisify(requestPatch)
 
 const requestDelete = (url, token, callback) => {
-
-  let opts = { method: 'DELETE', url }
-  opts.headers = { Authorization: 'JWT ' + token }
+  const opts = { method: 'DELETE', url }
+  opts.headers = { Authorization: `JWT ${token}` }
 
   debug('requestDelete, opts', opts)
 
   request(opts, (err, res) => {
-
     if (err) return callback(err)
     if (res.statusCode !== 200) {
       console.log('a delete error ~~~~~~~~~~~~')
-      let e = new Error('http status code not 200')
+      const e = new Error('http status code not 200')
       e.code = 'EHTTPSTATUS'
       e.status = res.statusCode
       return callback(e)
     }
     console.log('a delete finish ~~~~~~~~~~~~')
-    callback(null)    
+    callback(null)
   })
 }
 
 const requestDeleteAsync = Promise.promisify(requestDelete)
 
 const updateUsersAsync = async () => {
+  const ip = getIpAddr()
+  const port = 3721
 
-  let ip = getIpAddr()
-  let port = 3721
-
-  let users = await requestGetAsync(`http://${ip}:${port}/login`, null)
+  const users = await requestGetAsync(`http://${ip}:${port}/login`, null)
 
   debug('update users', users)
 
@@ -185,20 +172,19 @@ const updateUsersAsync = async () => {
 
 // TODO username should be UUID
 export const tryLoginAsync = async (username, password) => {
-
   debug('tryLoginAsync', username, password)
 
   await updateUsersAsync()
 
   // TODO invalid state
-  let ip = getIpAddr()
-  let port = 3721
-  let users = store.getState().server.users
-  let userUUID = users.find(usr => usr.username === username).uuid
+  const ip = getIpAddr()
+  const port = 3721
+  const users = store.getState().server.users
+  const userUUID = users.find(usr => usr.username === username).uuid
 
   debug('requesting token', userUUID, password)
 
-  let tok = await requestGetAsync(`http://${ip}:${port}/token`, null, {
+  const tok = await requestGetAsync(`http://${ip}:${port}/token`, null, {
     username: userUUID, password
   })
 
@@ -207,46 +193,45 @@ export const tryLoginAsync = async (username, password) => {
 }
 
 export const retrieveUsers = async (token) => {
-  
-  let ip = getIpAddr()
-  let port = 3721
+  const ip = getIpAddr()
+  const port = 3721
 
   return requestGetAsync(`http://${ip}:${port}/users`, null, token)
 }
 
 export const serverGetAsync = async (endpoint, qs) => {
-  debug('serverGetAsync', endpoint, qs) 
+  debug('serverGetAsync', endpoint, qs)
 
-  let ip = getIpAddr()
-  let port = 3721
-  let token = getToken()
+  const ip = getIpAddr()
+  const port = 3721
+  const token = getToken()
   return requestGetAsync(`http://${ip}:${port}/${endpoint}`, qs, token)
 }
 
 export const serverDeleteAsync = async (endpoint) => {
-  let ip = getIpAddr()
-  let port = 3721
-  let token = getToken()
+  const ip = getIpAddr()
+  const port = 3721
+  const token = getToken()
   return requestDeleteAsync(`http://${ip}:${port}/${endpoint}`, token)
 }
 
 export const serverPostAsync = async (endpoint, body) => {
-  let ip = getIpAddr()
-  let port = 3721
-  let token = getToken()
+  const ip = getIpAddr()
+  const port = 3721
+  const token = getToken()
   return requestPostAsync(`http://${ip}:${port}/${endpoint}`, token, body)
 }
 
 export const serverPatchAsync = async (endpoint, body) => {
-  let ip = getIpAddr()
-  let port = 3721
-  let token = getToken()
+  const ip = getIpAddr()
+  const port = 3721
+  const token = getToken()
   return requestPatchAsync(`http://${ip}:${port}/${endpoint}`, token, body)
 }
 
 export const serverDownloadAsync = (endpoint, qs, downloadPath, name) => {
-  let ip = getIpAddr()
-  let port = 3721
-  let token = getToken()
+  const ip = getIpAddr()
+  const port = 3721
+  const token = getToken()
   return requestDownloadAsync(`http://${ip}:${port}/${endpoint}`, qs, token, downloadPath, name)
 }
