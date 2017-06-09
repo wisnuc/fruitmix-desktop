@@ -21,7 +21,7 @@ class RunningTask extends React.Component {
 
     this.selectTaskItem = (e) => {
       const event = e.nativeEvent
-      this.props.select('running', this.props.task.uuid, this.isSelected, null, event)
+      this.props.select('running', this.props.task.uuid, this.state.isSelected, null, event)
     }
 
     this.toggleTask = () => {
@@ -42,14 +42,14 @@ class RunningTask extends React.Component {
     if (task.state === 'diffing') return '正在校验本地文件'
     if (task.state === 'finish') return '已完成'
     if (task.size === 0) return '0%'
-    return `${((task.completeSize / task.size) * 100).toFixed(2)}%`
+    return `${(Math.abs(task.completeSize / task.size) * 100).toFixed(2)}%`
   }
 
   getUploadedSize(task) {
     if (task.type === 'folder') {
       return `${task.finishCount}/${task.count}  ${this.props.task.pause ? '' : task.speed}`
     } else if (task.type === 'file') {
-      return `${this.formatSize(task.completeSize)}  ${this.props.task.pause ? '' : task.speed}`
+      return `${Math.abs(this.formatSize(task.completeSize))}  ${this.props.task.pause ? '' : Math.abs(task.speed)}`
     }
     return ''
   }
@@ -79,7 +79,7 @@ class RunningTask extends React.Component {
           lindeHeight: 40,
           fontSize: 14,
           color: 'rgba(0,0,0,0.87)',
-          backgroundColor: this.isSelected ? '#f4f4f4' : ''
+          backgroundColor: this.state.isSelected ? '#f4f4f4' : ''
         }}
         onTouchTap={this.selectTaskItem}
       >

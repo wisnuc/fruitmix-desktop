@@ -231,7 +231,7 @@ class TaskManager {
     try {
       const list = await serverGetAsync(`files/fruitmix/list/${this.target}/${this.target}`)
       let name = _this.tree[0].name
-      let times = 1
+      let times = 0
 
       while (list.findIndex(item => item.name === name) !== -1) {
         times++
