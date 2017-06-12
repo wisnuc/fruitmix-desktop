@@ -29,10 +29,7 @@ export default class Users extends React.Component {
     if (users) {
       if (users.length === 0) {
         return (
-          <div style={divStyle} >已安装
-            <span style={{ width: 8, display: 'inline-block' }} />WISNUC
-            <span style={{ width: 4, display: 'inline-block' }} />但尚未创建用户
-          </div>
+          <div style={divStyle} > 未创建用户 </div>
         )
       }
 

@@ -65,7 +65,7 @@ ___
 
 ## 前端架构设计
 
-* UML 
+### UML 
 
 ![UML](UML.png)
 
@@ -92,6 +92,414 @@ ___
 	* fruitmix api: 3721端口的api，如File APIs、Media APIs等
 
 	* node: 通过ipcRenderer与node通讯，获取本地文件，如file、media等
+
+### api与状态机模型
+
+#### login
+
+* mdns api: 获取局域网内的设备列表，其数据结构为
+
+```js
+[
+	{
+		name,
+  		domain,
+  		host,
+  		model,
+  		serial,
+  		address
+  	},
+  	...
+]
+```
+	
+* device api
+
+	* systemStatus: 获取设备的状态信息
+	
+	* start: 获取设备和系统状态，包括：
+	
+		* device: 获取目前系统状态
+		* boot: 获取wisnuc fruitmix的启动状态信息
+		* storage: 获取设备的存储信息
+		* users: 获取当前设备的用户列表
+		
+	* token: 根据用户名和密码获取用户token，登陆账户
+	
+	* initWizard: 发送初始化设备的请求，并不断请求目前系统状态包括：
+	
+		* mkfs: 获取创建brtfs文件系统的状态
+		* storage: 获取设备的存储信息
+		* install: 获取安装wisnuc fruitmix的状态
+		* boot: 获取wisnuc fruitmix的启动状态信息
+		* users: 获取当前设备的用户列表
+		* firstUser: 获取第一用户的信息
+		* token: 根据用户名和密码获取用户token，登陆账户
+		
+* device、boot、storage、users的数据结构
+
+```js
+device:{
+	boot: [Object],
+  	device: [Object],
+ 	mdev: [Object],
+  	storage: [Object],
+  	token: [Object],
+  	users: [Object]
+}
+
+boot: {
+	bootMode,
+	currentFileSystem: [Object],
+	fruitmix: [Object],
+	lastFileSystem: [Object],
+	state
+}
+
+storage: {
+	blocks: [Array],
+	ports: [Array],
+	volumes: [Array]
+}
+
+users: [
+	{
+		avatar,
+		unixUID,
+		username,
+		uuid
+	},
+	...
+]
+```
+
+* ipc通讯
+
+	* newWebWindow: 新开窗口，目前是新开固件管理页面
+	* LOGIN: 发送给node端登录信息，包括当前设备和用户信息（device、user）
+
+* state
+
+	* selectedDevice: null, 显示InfoCard，表示正在通过mdns搜索设备
+
+	* selectedDevice: new Device(mdev), 获取到了设备信息及状态（ systemStatus），显示DeviceCard
+	
+		* status: 'busy', 连接未建立，通讯中
+		
+			* systemStatus: 'probing'
+			
+		* status: 'initWizard', 初次启动的状态，将进入初始化页面 -> InitWizard
+		
+			* systemStatus: 'uninitialized'
+
+		* status: 'ready', deviece api、fruitmix api均获取正常，正常的登陆模式 -> view: user
+
+			* systemStatus: 'ready'
+		
+		* status: 'maintenance', 系统出错，或用户指定进入维护模式的状态 -> view: maintenance
+
+			* systemStatus: 'userMaint', 用户指定进入维护模式
+			* systemStatus: 'failLast', 未能启动上次使用的系统
+			* systemStatus: 'failMulti', 存在多个可用系统
+			* systemStatus: 'failNoAlt', 未能发现可用系统
+			* systemStatus: 'unknownMaint', 未知错误
+		
+		* status: 'connnect error', 连接出错
+
+			* systemStatus: 'systemError', 无法与该设备通讯, 3000端口连接异常
+			* systemStatus: 'fruitmixError', 系统启动但应用服务无法连接，3721端口连接异常
+
+#### maintenance
+
+#### user
+
+##### Media
+
+* fruitmix api
+	
+	* media: 获取照片metadata
+
+* metadata的数据结构
+
+```js
+[
+  [
+    digest,
+    {
+      metadata: {
+          exifDateTime,
+          exifMake,
+          exifModel,
+          exifOrientation,
+          format,
+          height,
+          size,
+          width
+      },
+      permittedToShare
+    }
+  ],
+  ...
+]
+```
+
+* ipc通讯: 与node通讯，获取照片的缩略图和原图
+
+	* mediaShowThumb: 发出缩略图的请求
+	* mediaHideThumb: 取消缩略图的请求
+	* getThumbSuccess: 接收缩略图所在路径
+	* mediaShowImage: 发出原图的请求
+	* mediaHideImage:取消原图的请求
+	* donwloadMediaSuccess: 接收原图所在路径
+
+* state 
+
+	* openDetail: false, 仅显示图片列表
+			
+		* showTimeline, 显示时间轴
+			
+	* openDetail: true, 切换查看大图
+			
+		* direction, 左右切换图片
+		* thumbPath, 缩略图的路径，不为空时，显示缩略图
+		* detailPath, 原图的路径，不为空时，显示原图
+
+* persistence
+
+	* currentDigest: 保存当前选中照片的digest
+	* currentScrollTop: 保存当前滚动条的位置
+
+##### Account
+
+* fruitmix api
+	
+	* account: 获取用户信息
+	* login: 获取所有用户列表，用于修改用户名时防重复
+	* updateAccount: 更新用户的用户名或密码
+		
+* account的数据结构
+	
+```js
+{
+	avatar
+	email
+	friends: [],
+	home
+	isAdmin
+	isFirstUser
+	lastChangeTime
+	library
+	nologin
+	password
+	service
+	smbPassword
+	type
+	unixPassword
+	unixuid
+	username
+	uuid
+}
+```
+
+* state
+		
+	* openDialog: '', 仅显示用户信息
+	* openDialog: 'username', 显示更改用户名对话框
+	* openDialog: 'password', 显示更改密码的对话框 
+
+
+##### AdminUsers
+
+* fruitmix api
+		
+	* adminUsers: 获取仅admin用户可见的完整的用户信息列表
+	* login: 获取所有用户列表，用于创建新用户时防重复
+	
+* adminUsers的数据结构
+
+```js
+[
+  {
+    avatar
+    email
+    friends: [],
+    home
+    isAdmin
+    isFirstUser
+    lastChangeTime
+    library
+    nologin
+    password
+    service
+    smbPassword
+    type
+    unixPassword
+    unixuid
+    username
+    uuid
+  },
+  ...
+]
+```
+
+* state
+		
+	* createNewUser: false, 仅显示现有用户列表
+	* createNewUser: true, 显示创建新用户的对话框 
+
+##### AdminDrives
+	
+* fruitmix api
+	
+	* adminUsers: 获取仅admin用户可见的完整的用户信息列表
+	* adminDrives: 获取共享盘信息
+
+* adminDrives的数据结构
+	
+```js
+[
+	{
+		label,
+		readlist: [],
+		shareAllowed,
+		type,
+		uuid,
+		writelist: [],
+	},
+	...
+]
+```
+
+* state
+		
+	* contextMenuOpen: true, 显示右键菜单
+	* newDrive: true, 打开新建共享盘的对话框
+
+##### Device
+
+* device api
+		
+	* device: 获取设备信息
+
+* device的数据结构
+
+```js
+{
+	commit: {}
+	cpuInfo: [
+		{
+			length,
+			modelName,
+			cacheSize,
+			...
+		},
+		...
+	],
+	dmidecode: {},
+	memInfo: {
+		memTotal,
+		memFree,
+		memAvailable,
+		...
+	},
+	release: {}
+}
+```
+
+* state: null
+
+##### Networking
+
+* device api
+	
+	* net: 获取网络信息
+		
+* net的数据结构
+
+```js
+{
+	os: {
+		[network interface card name]: [
+			{
+				address,
+				family: 'IPv4',
+				internal,
+				mac,
+				netmask
+			},
+			...
+		],
+		lo: {}
+	},
+	sysfs: []
+}
+```
+
+* state: null
+
+##### TimeDate
+
+* device api
+		
+	*  timedate: 获取日期与时间信息
+		
+* timedate的数据结构
+
+```js
+{
+	ObjectLocal time,
+	NTP synchronized,
+	Network time on,
+	RTC in local TZ,
+	RTC time,
+	Time zone,
+	Universal time
+}
+```
+
+* state: null
+
+##### FanControl
+
+* device api
+
+	* fan: 获取风扇信息
+	* setFanScale: 调节风扇转速
+		
+* fan的数据结构
+	
+```js
+{
+	fanScale,
+	fanSpeed
+}
+```	
+
+* state
+	
+	* fanScale: 由api获取的风扇速度等级的值，可手动调节
+	* fanSpeed: 由api获取的风扇速度的值
+
+##### Power
+
+* device api
+
+	* power: 对设备进行电源相关的管理
+		
+* ipc 通讯
+	
+	* LOGIN_OFF: 向node端发出登出的信息，主要是处理transmission相关任务
+		
+* state
+		
+	* operation: '', 默认状态，不显示对话框
+	* operation: 'confirm', 打开确认操作的对话框
+	* operation: 'progress', 打开表示重启中的对话框
+	* operation: 'done', 打开表示操作完成的对话框
+	* choice: '', 默认状态，用于表示操作的类型，operation变为'confirm'的同时会对choice赋值
+	* choice: 'POWEROFF', 关机
+	* choice: 'REBOOT', 重启设备
+	* choice: 'REBOOTMAINTENANCE', 重启设备并进入维护模式
 
 ## 前端业务逻辑
 
