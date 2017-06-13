@@ -32,7 +32,7 @@ class TrsContainer extends React.Component {
     this.finishSelected = []
 
     this.keydown = (event) => {
-      if (event.ctrlKey === this.state.ctrl && event.shiftKey == this.state.shift) return
+      if (event.ctrlKey === this.state.ctrl && event.shiftKey === this.state.shift) return
       this.setState({
         ctrl: event.ctrlKey,
         shift: event.shiftKey
@@ -40,7 +40,7 @@ class TrsContainer extends React.Component {
     }
 
     this.keyup = (event) => {
-      if (event.ctrlKey == this.state.ctrl && event.shiftKey == this.state.shift) return
+      if (event.ctrlKey === this.state.ctrl && event.shiftKey === this.state.shift) return
       this.setState({
         ctrl: event.ctrlKey,
         shift: event.shiftKey
@@ -89,7 +89,7 @@ class TrsContainer extends React.Component {
           this.refs[item].updateDom(false)
         }
       })
-      this.taskSelected.length = 0
+      this.taskSelected.length = 0 // need to keep the same reference
     }
 
     this.cleanFinishSelect = () => {
@@ -98,7 +98,7 @@ class TrsContainer extends React.Component {
           this.refs[item].updateDom(false)
         }
       })
-      this.finishSelected.length = 0
+      this.finishSelected.length = 0 // need to keep the same reference
     }
 
     this.openMenu = (event, obj) => {
@@ -111,7 +111,7 @@ class TrsContainer extends React.Component {
     }
 
     this.playAll = (tasks) => {
-      debug('this.play', tasks)
+      // debug('this.play', tasks)
       tasks.forEach((item) => {
         if (item.trsType === 'download') ipcRenderer.send('RESUME_DOWNLOADING', item.uuid)
         else ipcRenderer.send('RESUME_UPLOADING', item.uuid)
@@ -119,15 +119,31 @@ class TrsContainer extends React.Component {
     }
 
     this.pauseAll = (tasks) => {
-      debug('this.pause', tasks)
+      // debug('this.pause', tasks)
       tasks.forEach((item) => {
         if (item.trsType === 'download') ipcRenderer.send('PAUSE_DOWNLOADING', item.uuid)
         else ipcRenderer.send('PAUSE_UPLOADING', item.uuid)
       })
     }
 
+    this.deleteAll = (tasks) => {
+      const downloadArr = []
+      const uploadArr = []
+      tasks.forEach((item) => {
+        if (item.trsType === 'download') downloadArr.push(item)
+        else uploadArr.push(item)
+      })
+
+      ipcRenderer.send('DELETE_DOWNLOADING', downloadArr)
+      ipcRenderer.send('DELETE_UPLOADING', uploadArr)
+    }
+
     this.select = (type, id, isSelected, index, e) => {
       let selectedArray
+      /*
+        selectedArray is a reference of this.taskSelected or this.finishSelected
+        posh/pop selectedArray would alse change vlaue of this.taskSelected or this.finishSelected
+      */
       if (type === 'running') {
         selectedArray = this.taskSelected
         this.cleanFinishSelect()
@@ -138,26 +154,57 @@ class TrsContainer extends React.Component {
 
       /* ctrl */
       if (this.state.ctrl) {
-
         /* only left click */
         if (e.button === 0) {
           if (isSelected) {
-
             /* cancel select */
             const index = selectedArray.indexOf(id)
             selectedArray.splice(index, 1)
             this.refs[id].updateDom(!isSelected)
           } else {
-
             /* add select */
             selectedArray.push(id)
             this.refs[id].updateDom(!isSelected)
           }
         }
-      } else if (this.state.shift) {
+      } else if (this.state.shift && e.button === 0) {
         /* shift TODO */
+        if (selectedArray.length === 0) {
+          selectedArray.push(id)
+          this.refs[id].updateDom(true)
+        } else {
+          const transmission = window.store.getState().transmission
+          const userTasks = transmission.userTasks
+          const finishTasks = transmission.finishTasks
+          const lastSelect = selectedArray[selectedArray.length - 1]
+          let lastIndex
+          let currentIndex
+          if (type === 'running') {
+            lastIndex = userTasks.findIndex(task => task.uuid === lastSelect)
+            currentIndex = userTasks.findIndex(task => task.uuid === id)
+          } else {
+            lastIndex = finishTasks.findIndex(task => task.uuid === lastSelect)
+            currentIndex = finishTasks.findIndex(task => task.uuid === id)
+          }
+          let minor = lastIndex
+          let major = currentIndex
+          if (lastIndex > currentIndex) {
+            minor = currentIndex
+            major = lastIndex
+          }
+          for (let i = minor; i <= major; i++) {
+            let uuid
+            if (type === 'running') {
+              uuid = userTasks[i].uuid
+            } else {
+              uuid = finishTasks[i].uuid
+            }
+            selectedArray.push(uuid)
+            this.refs[uuid].updateDom(true)
+          }
+          // debug('shift', lastSelect, lastIndex, id, currentIndex)
+        }
       } else if (!(e.button === 2 && isSelected)) {
-
         /* select an item: no shift or ctrl, not right click a selected item */
         type === 'running' ? this.cleanTaskSelect() : this.cleanFinishSelect()
         selectedArray.push(id)
@@ -174,7 +221,7 @@ class TrsContainer extends React.Component {
         selectedArray.forEach((item) => {
           if (this.refs[item]) tasks.push(this.refs[item].props.task)
         })
-        
+
         /* add play or pause option to running task */
         if (type === 'running') {
           for (let i = 0; i < tasks.length; i++) {
@@ -219,6 +266,14 @@ class TrsContainer extends React.Component {
       margin: '8px 88px 12px 88px'
     }
 
+    /* show playAll button when allPaused = true */
+    let allPaused = true
+    userTasks.forEach((task) => {
+      if (!task.pause) {
+        allPaused = false
+      }
+    })
+
     return (
       <div style={{ padding: 16 }}>
         <div style={{ height: 24 }} />
@@ -229,15 +284,23 @@ class TrsContainer extends React.Component {
             { `传输中（${userTasks.length}）` }
           </div>
           <div style={{ flex: '0 0 240px', display: 'flex', alignItems: 'center' }}>
+            {
+              allPaused ?
+                <FlatButton
+                  label="全部开始"
+                  icon={<PlaySvg style={{ color: '#000', opacity: 0.54 }} />}
+                  onTouchTap={() => this.playAll(userTasks)}
+                /> :
+                <FlatButton
+                  label="全部暂停"
+                  icon={<PauseSvg style={{ color: '#000', opacity: 0.54 }} />}
+                  onTouchTap={() => this.pauseAll(userTasks)}
+                />
+            }
             <FlatButton
-              label="全部开始"
-              icon={<PlaySvg style={{ color: '#000', opacity: 0.54 }} />}
-              onTouchTap={() => this.playAll(userTasks)}
-            />
-            <FlatButton
-              label="全部暂停"
-              icon={<PauseSvg style={{ color: '#000', opacity: 0.54 }} />}
-              onTouchTap={() => this.pauseAll(userTasks)}
+              label="全部取消"
+              icon={<DeleteSvg style={{ color: '#000', opacity: 0.54 }} />}
+              onTouchTap={() => this.deleteAll(userTasks)}
             />
           </div>
         </div>
