@@ -201,9 +201,10 @@ class InitWizard extends StateUp(React.Component) {
           { info[1] }
         </div>
         <div style={{flex: '0 0 48px'}}>
-          { info[0] === 'success' 
-              ? <FlatButton label='进入系统' onTouchTap={this.props.onOK} />          
-              : <FlatButton label='退出' /> }
+          {
+            info[0] === 'success'
+            ? <FlatButton label='进入系统' onTouchTap={this.props.onOK} />
+            : <FlatButton label='退出' onTouchTap={this.props.onCancel} /> }
         </div>
       </div>
     )

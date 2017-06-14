@@ -42,7 +42,9 @@ class RunningTask extends React.Component {
     if (task.state === 'diffing') return '正在校验本地文件'
     if (task.state === 'finish') return '已完成'
     if (task.size === 0) return '0%'
-    return `${(Math.abs(task.completeSize / task.size) * 100).toFixed(2)}%`
+    let percent = (Math.abs(task.completeSize / task.size) * 100).toFixed(2)
+    if (percent > 100) return '下载出错'
+    return `${percent}%`
   }
 
   getUploadedSize(task) {

@@ -88,7 +88,7 @@ class Login extends React.Component {
       compact: false,
       dim: false,
 
-      pin: null, // pin child UI view, prevent auto dispatch, see footer
+      pin: '', // initWizard, pin child UI view, prevent auto dispatch, see footer
       
       bye: false,
       byebye: false
@@ -201,7 +201,8 @@ class Login extends React.Component {
   }
 
   initWizardOnFail() {
-    // FIXME
+    //FIXME
+    this.toggleExpandedAsync().asCallback()
   }
 
   async doneAsync(view, device, user) {

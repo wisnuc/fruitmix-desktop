@@ -168,7 +168,7 @@ class TrsContainer extends React.Component {
           }
         }
       } else if (this.state.shift && e.button === 0) {
-        /* shift TODO */
+        /* shift */
         if (selectedArray.length === 0) {
           selectedArray.push(id)
           this.refs[id].updateDom(true)

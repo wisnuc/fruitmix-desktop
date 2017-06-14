@@ -82,7 +82,7 @@ class FinishedTask extends Component {
 
         <div style={{ flex: '0 0 32px' }} />
         {/* task finishDate */}
-        <div style={{ flex: '0 0 160px', color: 'rgba(0, 0, 0, 0.54)' }} >
+        <div style={{ flex: '0 0 224px', color: 'rgba(0, 0, 0, 0.54)' }} >
           { this.getFinishDate(task.finishDate) }
         </div>
       </div>

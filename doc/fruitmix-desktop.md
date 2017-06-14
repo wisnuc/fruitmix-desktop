@@ -127,16 +127,6 @@ ___
 
     * token: 根据用户名和密码获取用户token，登陆账户
 
-    * initWizard: 发送初始化设备的请求，并不断请求目前系统状态包括：
-
-        * mkfs: 获取创建brtfs文件系统的状态
-        * storage: 获取设备的存储信息
-        * install: 获取安装wisnuc fruitmix的状态
-        * boot: 获取wisnuc fruitmix的启动状态信息
-        * users: 获取当前设备的用户列表
-        * firstUser: 获取第一用户的信息
-        * token: 根据用户名和密码获取用户token，登陆账户
-
 * device、boot、storage、users的数据结构
 
 ```js
@@ -189,15 +179,17 @@ users: [
 
             * systemStatus: 'probing'
 
-        * status: 'initWizard', 初次启动的状态，将进入初始化页面 -> InitWizard
+        * status: 'initWizard', 初次启动的状态，将进入初始化页面 -> `InitWizard`
 
             * systemStatus: 'uninitialized'
 
-        * status: 'ready', deviece api、fruitmix api均获取正常，正常的登陆模式 -> user
+        * status: 'ready', deviece api、fruitmix api均获取正常，正常的登录模式
 
             * systemStatus: 'ready'
 
-        * status: 'maintenance', 系统出错，或用户指定进入维护模式的状态 -> maintenance
+                * token: 需要uuid和password来获取token，成功登录后 -> `user`
+
+        * status: 'maintenance', 系统出错，或用户指定进入维护模式的状态 -> `maintenance`
 
             * systemStatus: 'userMaint', 用户指定进入维护模式
             * systemStatus: 'failLast', 未能启动上次使用的系统
@@ -209,6 +201,37 @@ users: [
 
             * systemStatus: 'systemError', 无法与该设备通讯, 3000端口连接异常
             * systemStatus: 'fruitmixError', 系统启动但应用服务无法连接，3721端口连接异常
+
+#### InitWizard
+
+* device api
+
+    * initWizard: 发送初始化设备的请求，并不断请求目前系统状态包括：
+
+        * mkfs: 获取创建brtfs文件系统的状态
+        * storage: 获取设备的存储信息
+        * install: 获取安装wisnuc fruitmix的状态
+        * boot: 获取wisnuc fruitmix的启动状态信息
+        * users: 获取当前设备的用户列表
+        * firstUser: 获取第一用户的信息
+        * token: 根据用户名和密码获取用户token，登陆账户
+
+* state
+
+    * step: 'CreatingVolume', 创建磁盘卷
+
+        * volumeselect: 将要被格式化为btrfs文件系统并作为wisnuc系统盘的磁盘
+
+    * step: 'UsernamePassword', 输入初始用户名和密码
+
+        * userpass: 初始用户的用户名和密码
+
+    * step: 'Confirmation', 确认内容，将调用initWizard api
+
+    * step: 'installing', 安装中，不断请求目前系统状态
+
+    * step: 'finished', 完成 -> `user`
+
 
 #### maintenance
 
@@ -287,6 +310,20 @@ storage
 
 #### user
 
+* fruitmix api
+
+    * start: 登录成功后初始请求数据，包括：
+
+        * account: 获取用户信息
+        * listNavDir: 获取根目录文件列表信息
+        * adminUsers: 对于admin用户，获取所有用户的详细信息
+        * adminDrives: 对于admin用户，获取共享盘信息
+        * users: 普通用户获取所有用户信息
+        * drives: 普通用户获取共享盘信息
+        * fileShare: 获取文件分享信息
+        * mediaShare: 获取照片分享信息
+        * media: 获取照片的metadata
+
 * state:
 
     * views: 各个模块的视图，包括：
@@ -315,6 +352,8 @@ storage
 * fruitmix api
 
     * listNavDir: 获取当前页面的项目列表及上级目录
+    * mkdir: 新建文件夹
+    * renameDirOrFile: 重命名文件或文件夹
 
 * listNavDir的数据格式：
 
@@ -342,7 +381,6 @@ storage
         ...
     ]
 }
-
 ```
 
 * ipc通讯
@@ -350,6 +388,9 @@ storage
     * mediaShowThumb: 发出缩略图的请求
     * mediaHideThumb: 取消缩略图的请求
     * getThumbSuccess: 接收缩略图所在路径
+    * command: fileapp: UPLOAD, 上传文件或文件夹
+    * command: fileapp: DOWNLOAD, 下载选中的文件或文件夹
+    * command: fileapp: TRANSFER, 记录传输文件拷贝或移动
 
 * state
 
@@ -362,6 +403,12 @@ storage
         * rename: 重命名项目
         * move: 移动项目
         * copy: 拷贝项目
+
+* persistence
+
+    * path: 保存当前页面的路径
+    * entries: 保存当前文件列表
+    * detailFile: 保存显示详细信息的文件的位置
 
 ##### public
 
@@ -477,7 +524,7 @@ extListDir
 
 ```
 
-* ipc通讯：同Home
+* ipc通讯：无上传，其他同Home
 
 * state
 
@@ -1076,13 +1123,39 @@ ViewModel 部分
 
 文件相关页面
 
+* FileContent.jsx: 文件列表，使用react-virtualized来渲染，需要捕捉鼠标点击及键盘ctrl、shift事件
+
+* FileUploadButton.jsx: 上传文件或文件夹的FAB按钮
+
+* ListSelect.jsx: 处理各种文件被选中的状态
+
 * FileDetai.jsx: 文件详细信息，包括三部分:
 
     * header: 标题，目前是icon+文件名
     * picture: 缩略图，仅含有metadata的图片文件会展示缩略图
     * data: 信息列表，由renderList渲染，包括类型、大小、位置、修改时间，图片则会加上拍摄时间、拍摄设备、分辨率等信息
 
-* ...
+* MoveDialog.jsx: 文件移动的对话框
+
+* NewFolderDialog.jsx: 新建文件夹的对话框
+
+* RenameDialog.jsx: 重命名的对话框
+
+* TransmissionContainer.jsx: 渲染文件传输页面，页面主要包括：
+
+    * running task title: 传输中任务部分的标题，包括全部开始、全部暂停、全部取消的操作按钮
+
+    * running task list: 传输中任务列表，调用RunningTask.jsx
+
+    * finished task title: 已完成任务部分的标题，包括全部删除的操作按钮
+
+    * finished task list: 已完成任务列表，调用FinishedTask.jsx，
+
+    * menu: 渲染右键菜单
+
+* RunningTask.jsx: 渲染正在运行中的任务列表
+
+* FinishedTask.jsx: 渲染已完成的任务列表
 
 #### photo
 

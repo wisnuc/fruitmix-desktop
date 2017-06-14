@@ -220,7 +220,7 @@ class NavViews extends Component {
           width: 40, height: 40,
           backgroundColor: '#FFF',
           borderRadius: 20,
-          opacity: this.state.showDetail ? 0.3 : 0, // TODO
+          opacity: this.state.showDetail ? 0.3 : 0,
           transition: 'opacity 300ms'
         }}/> 
 
