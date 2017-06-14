@@ -69,7 +69,7 @@ export default class VolumeWisnucError extends React.Component {
     const { status, users, error } = this.props.volume.wisnuc
     if (users) {
       if (users.length === 0) {
-        return <div>WISNUC已安装但尚未创建用户。</div>
+        return <div>WISNUC已安装但尚未创建用户</div>
       }
       return (<div />)
     } else if (status !== 'READY') {

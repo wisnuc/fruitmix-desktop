@@ -16,11 +16,14 @@ class Power extends React.Component {
     super(props)
     this.address = this.props.selectedDevice.mdev.address
     this.serial = this.props.selectedDevice.mdev.serial
+
+    /*
+     * operation: '', 'confirm', 'progress', done'
+     * choice: '', 'POWEROFF', 'REBOOT', 'REBOOTMAINTENANCE'
+     */
     this.state = {
-      open: false,
+      operation: '',
       choice: '',
-      progressDialog: false,
-      operationDone: false
     }
 
     this.boot = (op) => {
@@ -28,13 +31,12 @@ class Power extends React.Component {
         if (!err) {
           this.scanMdns()
           this.setState({
-            progressDialog: true,
-            open: false
+            operation: 'progress'
           })
         } else {
           this.props.openSnackBar(`操作失败：${err.message}`)
           this.setState({
-            open: false
+            operation: ''
           })
         }
       })
@@ -44,13 +46,13 @@ class Power extends React.Component {
       setTimeout(() =>
         this.setState({
           choice: CHOICE,
-          open: true
+          operation: 'confirm'
         }), 10)
     }
 
     this.handleClose = () => {
       this.setState({
-        open: false
+        operation: ''
       })
     }
 
@@ -61,8 +63,7 @@ class Power extends React.Component {
 
     this.handleEndProgress = () => {
       this.setState({
-        progressDialog: false,
-        operationDone: false
+        operation: ''
       })
       switch (this.state.choice) {
         case 'POWEROFF':
@@ -82,7 +83,7 @@ class Power extends React.Component {
 
     this.handleExit = () => {
       clearInterval(this.interval)
-      this.setState({ progressDialog: false, operationDone: false })
+      this.setState({ operation: '' })
       this.props.nav('login')
     }
 
@@ -95,7 +96,7 @@ class Power extends React.Component {
             case 'POWEROFF':
               if (global.mdns.devices.every(d => d.serial !== this.serial)) {
                 clearInterval(this.interval)
-                this.setState({ operationDone: true })
+                this.setState({ operation: 'done' })
               }
               break
             case 'REBOOT':
@@ -104,7 +105,7 @@ class Power extends React.Component {
                 if (global.mdns.devices.find(d => d.serial === this.serial)
                 || global.mdns.devices.find(d => d.address === this.address)) {
                   clearInterval(this.interval)
-                  this.setState({ operationDone: true })
+                  this.setState({ operation: 'done' })
                 }
               } else if (global.mdns.devices.every(d => d.serial !== this.serial)) {
                 hasBeenShutDown = true
@@ -143,7 +144,7 @@ class Power extends React.Component {
   }
 
   renderDiaContent() {
-    if (this.state.operationDone) {
+    if (this.state.operation === 'done') {
       let hintText = ''
       let linkText = ''
       switch (this.state.choice) {
@@ -259,9 +260,9 @@ class Power extends React.Component {
         </div>
 
         {/* confirm dialog */}
-        <DialogOverlay open={this.state.open}>
+        <DialogOverlay open={this.state.operation === 'confirm'}>
           {
-            this.state.open &&
+            this.state.operation === 'confirm' &&
             <div style={{ width: 336, padding: '24px 24px 0px 24px' }}>
               {/* title */}
               <div style={{ fontSize: 16, color: 'rgba(0,0,0,0.54)' }}>
@@ -281,9 +282,9 @@ class Power extends React.Component {
         </DialogOverlay>
 
         {/* progress dialog */}
-        <DialogOverlay open={this.state.progressDialog} >
+        <DialogOverlay open={this.state.operation === 'progress'} >
           {
-            this.state.progressDialog &&
+            this.state.operation === 'progress' &&
               <div
                 style={{
                   position: 'absolute',

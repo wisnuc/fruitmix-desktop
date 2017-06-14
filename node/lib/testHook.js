@@ -55,7 +55,7 @@ export const initTestWindow = () => {
     minWidth: 1024,
     minHeight: 768,
     title: 'WISNUC',
-    icon: path.join(__dirname, '180-180.png')
+    icon: path.join(global.rootPath, 'icon.png')
   })
   // testWindow.webContents.openDevTools()
   testWindow.loadURL(`file://${__dirname}/test/storeTest.html`)

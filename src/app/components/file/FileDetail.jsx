@@ -24,6 +24,7 @@ const phaseiExifTime = (time) => {
 const getType = (type, name, metadata) => {
   if (type === 'folder') return '文件夹'
   if (type === 'public') return '共享文件夹'
+  if (type === 'directory') return '文件夹'
   if (metadata && metadata.format) return metadata.format
   let extension = name.replace(/^.*\./, '')
   if (!extension || extension === name) extension = '未知文件'

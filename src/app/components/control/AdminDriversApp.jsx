@@ -105,7 +105,6 @@ class AdminDrives extends React.Component {
     super(props)
     this.state = {
       newDrive: false,
-      modifyDrive: false
     }
 
     this.onCloseDialog = () => {

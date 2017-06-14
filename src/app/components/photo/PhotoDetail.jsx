@@ -48,6 +48,7 @@ class PhotoDetailInline extends React.Component {
       /* memoize digest */
       this.props.memoize({ currentDigest: this.digest, currentScrollTop: 0 })
       // debug('this.props.memoize', this.props.memoize())
+      debug('render photoDetail', this.props.items.length, this.props.items[this.props.seqIndex])
     }
 
     this.changeIndex = (direction) => {

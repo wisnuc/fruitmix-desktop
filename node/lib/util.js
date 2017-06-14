@@ -58,7 +58,7 @@ const utils = {
   },
 
   formatSeconds(seconds) {
-    if (!seconds || seconds === Infinity) return '--'
+    if (!seconds || seconds === Infinity || seconds === -Infinity) return '--'
     let s = parseInt(seconds) // s
     let m = 0
     let h = 0

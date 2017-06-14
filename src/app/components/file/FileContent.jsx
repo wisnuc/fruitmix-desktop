@@ -244,6 +244,7 @@ class FileContent extends Component {
 
   render() {
     const { apis } = this.props
+    // debug('render FileContent', this.props, this.state)
 
     return (
       <div id="file-content" style={{ width: '100%', height: '100%' }} onDrop={this.drop.bind(this)}>

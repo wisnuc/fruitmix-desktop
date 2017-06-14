@@ -88,7 +88,7 @@ class Login extends React.Component {
       compact: false,
       dim: false,
 
-      pin: null, // pin child UI view, prevent auto dispatch, see footer
+      pin: '', // initWizard, pin child UI view, prevent auto dispatch, see footer
       
       bye: false,
       byebye: false
@@ -201,7 +201,8 @@ class Login extends React.Component {
   }
 
   initWizardOnFail() {
-    // FIXME
+    //FIXME
+    this.toggleExpandedAsync().asCallback()
   }
 
   async doneAsync(view, device, user) {
@@ -287,15 +288,24 @@ class Login extends React.Component {
 
       let users = this.props.selectedDevice.users.value()
       let style = {width: '100%', transition: 'all 300ms', position:'relative' } 
-
-      return users.length > 0
-        ? <UserBox style={style} device={this.props.selectedDevice} 
-            toggleDisplay={this.toggleDisplayBound} done={this.done.bind(this)} />
-        : null // TODO FirstUserBox
+      if (users.length > 0) {
+        return (
+          <UserBox
+            style={style}
+            device={this.props.selectedDevice}
+            toggleDisplay={this.toggleDisplayBound}
+            done={this.done.bind(this)}
+          />
+        )
+      }
     }
 
     let text, busy, maint, error, uninit
     switch (status) {
+    case 'ready': // users.length === 0 need to add FirstUser Box TODO 
+      text = '系统错误：未发现用户'
+      error = pullError()
+      break
     case 'probing':
       text = '通讯中....' 
       busy = true
