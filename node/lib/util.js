@@ -60,10 +60,6 @@ const utils = {
   formatSeconds(seconds) {
     if (!seconds || seconds === Infinity || seconds === -Infinity) return '--'
     let s = parseInt(seconds) // s
-    console.log('>>>>>>>>>>>>>>>')
-    console.log(seconds)
-    console.log(s)
-    console.log('<<<<<<<<<<<<<<<')
     let m = 0
     let h = 0
     if (s > 60) {

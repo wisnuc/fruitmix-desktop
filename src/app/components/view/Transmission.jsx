@@ -1,5 +1,6 @@
 import React, { Component, PureComponent } from 'react'
 import Radium from 'radium'
+import { ipcRenderer } from 'electron'
 
 import ActionSwapVerticalCircle from 'material-ui/svg-icons/action/swap-vertical-circle'
 import TrsContainer from '../file/TransmissionContainer'
@@ -16,6 +17,7 @@ class Transmission extends Base {
   }
 
   navEnter() {
+    ipcRenderer.send('GET_TRANSMISSION')
   }
 
   navLeave() {

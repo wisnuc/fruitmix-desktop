@@ -29,12 +29,19 @@ const sendInfor = () => {
   const concatFinishTasks = [].concat(uploadedTasks, downloadedTasks)
   const userTasks = quickSort(concatUserTasks, 'createTime')
   const finishTasks = quickSort(concatFinishTasks, 'finishDate')
-  getMainWindow().webContents.send(
-    'UPDATE_TRANSMISSION',
-    'UPDATE_TRANSMISSION',
-    userTasks.map(item => item.getSummary()),
-    finishTasks.map(i => (i.getSummary ? i.getSummary() : i))
-  )
+  try {
+    getMainWindow().webContents.send(
+      'UPDATE_TRANSMISSION',
+      'UPDATE_TRANSMISSION',
+      userTasks.map(item => item.getSummary()),
+      finishTasks.map(i => (i.getSummary ? i.getSummary() : i))
+    )
+  } catch (error) {
+    /* Error: Object has been destroyed */
+    if (error) {
+      console.error(error)
+    }
+  }
 }
 
 // handle will open dialog from electron to clean record of the task have been downloaded

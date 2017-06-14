@@ -39,7 +39,7 @@ const sendMessage = () => {
   }
   if (shouldSend && !sendHandler) {
     console.log('开始发送传输信息')
-    sendHandler = setInterval(sendMsg, 2000)
+    sendHandler = setInterval(sendMsg, 200)
     sendMsg()
   } else if (!shouldSend && sendHandler) {
     console.log('停止发送传输信息')

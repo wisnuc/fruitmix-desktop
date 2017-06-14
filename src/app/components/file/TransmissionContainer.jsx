@@ -25,7 +25,9 @@ class TrsContainer extends React.Component {
       play: true,
       pause: true,
       menuShow: false,
-      tasks: []
+      tasks: [],
+      userTasks: [],
+      finishTasks: []
     }
 
     this.taskSelected = []
@@ -173,9 +175,8 @@ class TrsContainer extends React.Component {
           selectedArray.push(id)
           this.refs[id].updateDom(true)
         } else {
-          const transmission = window.store.getState().transmission
-          const userTasks = transmission.userTasks
-          const finishTasks = transmission.finishTasks
+          const userTasks = this.state.userTasks
+          const finishTasks = this.state.finishTasks
           const lastSelect = selectedArray[selectedArray.length - 1]
           let lastIndex
           let currentIndex
@@ -233,22 +234,27 @@ class TrsContainer extends React.Component {
         this.openMenu(e, { type, pause, play, tasks })
       }
     }
+
+    this.updateTransmission = (e, type, userTasks, finishTasks) => {
+      this.setState({ userTasks, finishTasks })
+    }
   }
 
   componentDidMount() {
     document.addEventListener('keydown', this.keydown)
     document.addEventListener('keyup', this.keyup)
+    ipcRenderer.on('UPDATE_TRANSMISSION', this.updateTransmission)
   }
 
   componentWillUnmount() {
     document.removeEventListener('keydown', this.keydown)
     document.removeEventListener('keyup', this.keyup)
+    ipcRenderer.removeListener('UPDATE_TRANSMISSION', this.updateTransmission)
   }
 
   render() {
-    const transmission = window.store.getState().transmission
-    const userTasks = transmission.userTasks
-    const finishTasks = transmission.finishTasks
+    const userTasks = this.state.userTasks
+    const finishTasks = this.state.finishTasks
     // debug('render', userTasks)
 
     const titileStyle = {

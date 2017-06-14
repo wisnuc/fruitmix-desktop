@@ -83,7 +83,6 @@ class NavViews extends Component {
     this.toggleDetailBound = this.toggleDetail.bind(this)
     this.openDrawerBound = this.openDrawer.bind(this)
     this.openSnackBarBound = this.openSnackBar.bind(this)
-    this.updateTransmissionBound = this.updateTransmission.bind(this)
   }
 
   install(name, View) {
@@ -98,15 +97,12 @@ class NavViews extends Component {
 
   componentDidMount() {
     this.navTo('home')
-    ipcRenderer.send('GET_TRANSMISSION')
-    ipcRenderer.on('UPDATE_TRANSMISSION', this.updateTransmissionBound)
     ipcRenderer.on('snackbarMessage', (e, message) => {
       this.openSnackBar(message.message)
     })
   }
 
   componentWillUnmount() {
-    ipcRenderer.removeListener('UPDATE_TRANSMISSION', this.updateTransmissionBound)
   }
 
   componentDidUpdate() {
@@ -137,11 +133,6 @@ class NavViews extends Component {
 
   openSnackBar(message) {
     this.setState({ snackBar: message })
-  }
-
-  updateTransmission(e, type, userTasks, finishTasks) {
-    // console.log(e, userTasks, finishTasks)
-    window.store.dispatch({ type, userTasks, finishTasks })
   }
 
   currentView() {
