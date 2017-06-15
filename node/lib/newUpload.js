@@ -59,7 +59,7 @@ const dragFileHandle = (args) => {
   loop()
 }
 
-const getTransmissionHandle = () => {
+const startTransmissionHandle = () => {
   db.uploaded.find({}).sort({ finishDate: -1 }).exec((err, docs) => {
     if (err) return console.log(err)
     docs.forEach(item => item.uuid = item._id)
@@ -117,7 +117,8 @@ ipcMain.on('loginOff', (evt) => {
   // todo
 })
 
-ipcMain.on('GET_TRANSMISSION', getTransmissionHandle)
+ipcMain.on('START_TRANSMISSION', startTransmissionHandle)
+ipcMain.on('GET_TRANSMISSION', sendMsg)
 ipcMain.on('DELETE_UPLOADING', deleteUploadingHandle)
 ipcMain.on('DELETE_UPLOADED', deleteUploadedHandle)
 

@@ -20,7 +20,7 @@ const downloadHandle = (args, callback) => {
   getMainWindow().webContents.send('snackbarMessage', { message: `${count}个任务添加至下载队列` })
 }
 
-const getTransmissionHandle = (args, callback) => {
+const startTransmissionHandle = (args, callback) => {
   db.downloading.find({}, (err, tasks) => {
     if (err) return
     tasks.forEach(item => createTask(item.target, item.name, item.rootSize, item.type, item.dirUUID,
@@ -72,7 +72,8 @@ const uploadCommandMap = new Map([
 
 registerCommandHandlers(uploadCommandMap)
 
-ipcMain.on('GET_TRANSMISSION', getTransmissionHandle)
+ipcMain.on('START_TRANSMISSION', startTransmissionHandle)
+ipcMain.on('GET_TRANSMISSION', sendMsg)
 ipcMain.on('DELETE_DOWNLOADING', deleteDownloadingHandle)
 ipcMain.on('DELETE_DOWNLOADED', deleteDownloadedHandle)
 

@@ -97,6 +97,7 @@ class NavViews extends Component {
 
   componentDidMount() {
     this.navTo('home')
+    ipcRenderer.send('START_TRANSMISSION')
     ipcRenderer.on('snackbarMessage', (e, message) => {
       this.openSnackBar(message.message)
     })
