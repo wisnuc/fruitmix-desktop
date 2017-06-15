@@ -30,7 +30,7 @@ class Public extends Base {
 
       select: this.select.state,
       driveListNavDir: null, // save a reference
-      adminDrives: null,
+      drives: null,
       path: [],         //
       entries: [],      // sorted
 
@@ -44,6 +44,7 @@ class Public extends Base {
       inRoot: false,
       copy: false,
       delete: false,
+      noAccess: false,
       detailIndex: -1
     }
 
@@ -71,7 +72,7 @@ class Public extends Base {
           finishCount += 1
           if (finishCount === count) {
             if (this.state.path[this.state.path.length - 1].uuid === dirUUID) {
-              if (this.state.path.length == 1) { this.ctx.props.apis.request('adminDrives') }
+              if (this.state.path.length == 1) { this.ctx.props.apis.request('drives') }
               this.ctx.props.apis.request('driveListNavDir', { rootUUID: this.state.path[1].uuid, dirUUID }, (err, data) => {
                 if (!err) {
                   this.ctx.openSnackBar('删除成功')
@@ -100,57 +101,50 @@ class Public extends Base {
   updateState(listNavDir) {
     // console.log(listNavDir)
     if (listNavDir.driveListNavDir === this.state.driveListNavDir &&
-     listNavDir.adminDrives === this.state.adminDrives) return
+     listNavDir.drives === this.state.drives) return
 
+    let path
+    let entries
     if (this.state.inRoot) {
-      const path = [{ name: '共享文件夹', uuid: null, type: 'publicRoot' }]
-      const entries = listNavDir.adminDrives.drives
-
-      entries.forEach(item => item.name = item.label)
-      const select = this.select.reset(entries.length)
-      const state = { select,
-        path,
-        entries,
-        driveListNavDir: listNavDir.driveListNavDir,
-        adminDrives: listNavDir.adminDrives
-      }
-
-      this.setState(state)
+      path = [{ name: '共享文件夹', uuid: null, type: 'publicRoot' }]
+      entries = listNavDir.drives.drives.filter(drive => drive.type === 'public')
+      entries.forEach(item => Object.assign(item, { name: item.label }))
     } else {
-      const path = [{ type: 'public', name: '共享文件夹', uuid: null }].concat(listNavDir.driveListNavDir.path)
-      let entries = listNavDir.driveListNavDir.entries
+      path = [{ type: 'public', name: '共享文件夹', uuid: null }].concat(listNavDir.driveListNavDir.path)
+      entries = listNavDir.driveListNavDir.entries
       entries = [...entries].sort((a, b) => {
         if (a.type === 'folder' && b.type === 'file') return -1
         if (a.type === 'file' && b.type === 'folder') return 1
         if (a.name) return a.name.localeCompare(b.name)
         return a.label.localeCompare(b.label)
       })
-
-      const select = this.select.reset(entries.length)
-      const state = { select,
-        path,
-        entries,
-        driveListNavDir: listNavDir.driveListNavDir,
-        adminDrives: listNavDir.adminDrives
-      }
-      this.setState(state)
     }
+    const select = this.select.reset(entries.length)
+    const state = { select,
+      path,
+      entries,
+      driveListNavDir: listNavDir.driveListNavDir,
+      drives: listNavDir.drives
+    }
+    this.setState(state)
   }
 
   willReceiveProps(nextProps) {
-    if (!nextProps.apis || !nextProps.apis.adminDrives) return
-    if (nextProps.apis.adminDrives.isPending()) return
+    // console.log(nextProps)
+    if (!nextProps.apis || !nextProps.apis.drives) return
+    if (nextProps.apis.drives.isPending()) return
     if (nextProps.apis.driveListNavDir && nextProps.apis.driveListNavDir.isPending()) return
     const driveListNavDir = nextProps.apis.driveListNavDir ? nextProps.apis.driveListNavDir.value() : null
+    const drives = nextProps.apis.drives.value()
     this.updateState({
       driveListNavDir,
-      adminDrives: nextProps.apis.adminDrives.value()
+      drives
     })
   }
 
   navEnter() {
     this.setState({ inRoot: true })
-    this.ctx.props.apis.request('adminDrives')
+    this.ctx.props.apis.request('drives')
   }
 
   navLeave() {
@@ -198,7 +192,7 @@ class Public extends Base {
   }
 
   renderTitle({ style }) {
-    if (!this.state.listNavDir && !this.state.adminDrives) return
+    if (!this.state.listNavDir && !this.state.drives) return
 
     const path = this.state.path
 
@@ -228,13 +222,13 @@ class Public extends Base {
             acc.push(<BreadCrumbItem
               text="共享文件夹" key={node.uuid} onTouchTap={() => {
                 this.setState({ inRoot: true })
-                this.ctx.props.apis.request('adminDrives')
+                this.ctx.props.apis.request('drives')
               }}
             />)
           } else if (index === 1) {
             acc.push(
               <BreadCrumbItem
-                text={this.state.adminDrives.drives.find(item => item.uuid === node.name).label}
+                text={this.state.drives.drives.find(item => item.uuid === node.name).label}
                 key={node.uuid} onTouchTap={listByBread.bind(this, node)}
               />)
           } else acc.push(<BreadCrumbItem text={node.name} key={node.uuid} onTouchTap={listByBread.bind(this, node)} />)
@@ -250,6 +244,12 @@ class Public extends Base {
 
     const entry = this.state.entries[selected[0]]
     if (entry.type !== 'folder' && entry.type !== 'public') return
+    const myUUID = this.ctx.props.apis.account.data.uuid
+    const writable = entry.writelist.findIndex(uuid => uuid === myUUID) > -1
+    if (!writable) {
+      this.toggleDialog('noAccess')
+      return
+    }
     this.setState({ inRoot: false })
     this.ctx.props.apis.request('driveListNavDir', {
       dirUUID: entry.uuid,
@@ -316,7 +316,7 @@ class Public extends Base {
   refresh() {
     const request = this.ctx.props.apis.request
     const path = this.state.path
-    if (this.state.inRoot) request('adminDrives')
+    if (this.state.inRoot) request('drives')
     else {
       request('driveListNavDir', {
         dirUUID: path[path.length - 1].uuid,
@@ -466,6 +466,20 @@ class Public extends Base {
                   primary
                   onTouchTap={this.delete}
                 />
+              </div>
+            </div>
+
+          }
+        </DialogOverlay>
+
+        <DialogOverlay open={this.state.noAccess}>
+          { 
+            this.state.noAccess &&
+            <div style={{ width: 280, padding: '24px 24px 0px 24px' }}>
+              <div style={{ color: 'rgba(0,0,0,0.54)' }}>{'对不起，您没有访问权限！'}</div>
+              <div style={{ height: 24 }} />
+              <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                <FlatButton label="确定" primary onTouchTap={() => this.toggleDialog('noAccess')} />
               </div>
             </div>
 
