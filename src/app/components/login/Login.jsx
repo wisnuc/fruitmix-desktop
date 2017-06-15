@@ -1,45 +1,54 @@
 import Debug from 'debug'
-const debug = Debug('component:Login')
-
-import React, { Component, PureComponent, PropTypes } from 'react'
+import React, { Component, PureComponent } from 'react'
 import ReactDOM from 'react-dom'
-import { indigo900, cyan500, cyan900, teal900, lightGreen900, lime900, yellow900 
-} from 'material-ui/styles/colors'
-
 import { FlatButton, CircularProgress } from 'material-ui'
+import { indigo900, cyan500, cyan900, teal900, lightGreen900, lime900, yellow900
+} from 'material-ui/styles/colors'
 
 import CrossNav from './CrossNav'
 import InfoCard from './InfoCard'
 import UserBox from './UserBox'
-import ErrorBox from './ErrorBox' 
-import GuideBox from './GuideBox'
+import ErrorBox from './ErrorBox'
 import CardDisplay from './ModelNameCard'
 import InitWizard from './InitStep'
 
-import { command } from '../../lib/command'
-
+const debug = Debug('component:Login')
 const colorArray = [indigo900, cyan900, teal900, lightGreen900, lime900, yellow900]
 const duration = 300
 
 class Background extends PureComponent {
-
   render() {
     return (
-      <div style={{position: 'absolute', width: '100%', height: '100%'}}> 
+      <div style={{ position: 'absolute', width: '100%', height: '100%' }}>
 
-        <img style={{ position: 'absolute', width: '100%', height: '100%', 
-          zIndex: -1000 }} src='../src/assets/images/index/index.jpg' 
+        <img
+          style={{ position: 'absolute',
+            width: '100%',
+            height: '100%',
+            zIndex: -1000 }} src="../src/assets/images/index/index.jpg"
         />
 
-        <div style={{ position: 'absolute', width: '100%', height: '100%', 
-          backgroundColor: '#000', opacity: this.props.overlay === 'dim' ? 0.54 : 0,
-          zIndex: -999, transition: `opacity ${duration}ms`
-        }}/>
+        <div
+          style={{ position: 'absolute',
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#000',
+            opacity: this.props.overlay === 'dim' ? 0.54 : 0,
+            zIndex: -999,
+            transition: `opacity ${duration}ms`
+          }}
+        />
 
-        <div style={{ position: 'absolute', width: '100%', height: '100%', 
-          backgroundColor: '#EEEEEE', opacity: this.props.overlay === 'white' ? 1 : 0, 
-          zIndex: -998, transition: `opacity ${duration}ms`
-        }}/>
+        <div
+          style={{ position: 'absolute',
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#EEEEEE',
+            opacity: this.props.overlay === 'white' ? 1 : 0,
+            zIndex: -998,
+            transition: `opacity ${duration}ms`
+          }}
+        />
 
       </div>
     )
@@ -74,14 +83,13 @@ class DeviceCard extends PureComponent {
 class Login extends React.Component {
 
   constructor(props) {
-
     super(props)
 
-    this.state = { 
+    this.state = {
 
       hello: true,
 
-      enter: 'bottom', 
+      enter: 'bottom',
       expanded: false,
       vexpand: false,
       hexpand: false,
@@ -89,7 +97,7 @@ class Login extends React.Component {
       dim: false,
 
       pin: '', // initWizard, pin child UI view, prevent auto dispatch, see footer
-      
+
       bye: false,
       byebye: false
     }
@@ -103,27 +111,24 @@ class Login extends React.Component {
     this.initWizardOnCancelBound = this.initWizardOnCancel.bind(this)
     this.initWizardOnFailBound = this.initWizardOnFail.bind(this)
     this.initWizardOnOKBound = this.initWizardOnOK.bind(this)
-
   }
 
   toggleDisplay(done) {
-    this.setState({ compact: !this.state.compact, dim: !this.state.dim }) 
-    if (done) setTimeout(() => done(), duration) 
+    this.setState({ compact: !this.state.compact, dim: !this.state.dim })
+    if (done) setTimeout(() => done(), duration)
   }
 
   async toggleExpandedAsync() {
-
-    let { vexpand, hexpand, expanded } = this.state
+    const { vexpand, hexpand, expanded } = this.state
     if (vexpand !== hexpand || hexpand !== expanded) return
 
     if (!expanded) {
-      this.setState({ vexpand: true, compact: true, dim: true })  
+      this.setState({ vexpand: true, compact: true, dim: true })
       await Promise.delay(duration)
-      this.setState({ hexpand: true }) 
+      this.setState({ hexpand: true })
       await Promise.delay(duration)
       this.setState({ expanded: true, pin: 'initWizard' })
-    } 
-    else {
+    } else {
       this.setState({ vexpand: false })
       await Promise.delay(duration)
       this.setState({ hexpand: false })
@@ -138,50 +143,46 @@ class Login extends React.Component {
   }
 
   navPrev() {
-    let { mdns, selectedDevice, selectDevice } = this.props
-    let index = mdns.findIndex(mdev => mdev === selectedDevice.mdev)
+    const { mdns, selectedDevice, selectDevice } = this.props
+    const index = mdns.findIndex(mdev => mdev === selectedDevice.mdev)
     if (index <= 0) return
     this.props.selectDevice(mdns[index - 1])
   }
 
   navNext() {
-    let { mdns, selectedDevice, selectDevice } = this.props
-    let index = mdns.findIndex(mdev => mdev === selectedDevice.mdev)
+    const { mdns, selectedDevice, selectDevice } = this.props
+    const index = mdns.findIndex(mdev => mdev === selectedDevice.mdev)
     if (index >= mdns.length - 1) return
     selectDevice(mdns[index + 1])
   }
 
   isFirst() {
-    let { mdns, selectedDevice } = this.props
+    const { mdns, selectedDevice } = this.props
     return mdns[0] === selectedDevice.mdev
   }
 
   isLast() {
-    let { mdns, selectedDevice } = this.props
+    const { mdns, selectedDevice } = this.props
     return mdns[mdns.length - 1] === selectedDevice.mdev
   }
 
-  // card change detection is implemented here to conform to 
+  // card change detection is implemented here to conform to
   // `stateless` and `unidirection dataflow`
   componentWillReceiveProps(nextProps) {
-      
-    let currProps = this.props
+    const currProps = this.props
 
     // device card enter from bottom
-    if (!currProps.selectedDevice && nextProps.selectedDevice)
-      this.setState({ enter: 'bottom' })
+    if (!currProps.selectedDevice && nextProps.selectedDevice) { this.setState({ enter: 'bottom' }) }
 
     // device card leave from top
-    else if (currProps.selectedDevice && !nextProps.selectedDevice)
-      this.setState({ enter: 'top' })
+    else if (currProps.selectedDevice && !nextProps.selectedDevice) { this.setState({ enter: 'top' }) }
 
     // device card change
     else if (currProps.selectedDevice && nextProps.selectedDevice) {
-
       if (currProps.selectedDevice.mdev === nextProps.selectedDevice.mdev) return
 
-      let currIndex = this.props.mdns.findIndex(mdev => mdev === this.props.selectedDevice.mdev)
-      let nextIndex = nextProps.mdns.findIndex(mdev => mdev === nextProps.selectedDevice.mdev)
+      const currIndex = this.props.mdns.findIndex(mdev => mdev === this.props.selectedDevice.mdev)
+      const nextIndex = nextProps.mdns.findIndex(mdev => mdev === nextProps.selectedDevice.mdev)
 
       this.setState({ enter: nextIndex >= currIndex ? 'right' : 'left' })
     }
@@ -201,21 +202,18 @@ class Login extends React.Component {
   }
 
   initWizardOnFail() {
-    //FIXME
+    // FIXME
     this.toggleExpandedAsync().asCallback()
   }
 
   async doneAsync(view, device, user) {
-
     this.setState({ bye: true, dim: false, enter: 'bottom' })
     await Promise.delay(360)
 
     this.setState({ byebye: true })
     await Promise.delay(360)
 
-    if (view === 'maintenance') 
-      this.props.maintain()
-    else { 
+    if (view === 'maintenance') { this.props.maintain() } else {
       this.props.ipcRenderer.send('LOGIN', device, user)
       this.props.login()
     }
@@ -228,16 +226,15 @@ class Login extends React.Component {
   initWizardOnOK() {
     const view = 'LOGIN'
     debug('this.props.selectedDevice', this.props.selectedDevice)
-    const device = this.props.selectedDevice 
+    const device = this.props.selectedDevice
     const user = device.users.value()[0]
     this.done(view, device, user)
-  } 
+  }
 
   footer() {
-
     const pullError = () => {
-      let { boot, storage, users } = this.props.selectedDevice
-      let obj = {
+      const { boot, storage, users } = this.props.selectedDevice
+      const obj = {
         boot: boot.isFulfilled() ? boot.value() : boot.reason(),
         storage: storage.isFulfilled() ? storage.value() : storage.reason(),
         users: users.isFulfilled() ? users.value() : users.reason()
@@ -246,48 +243,51 @@ class Login extends React.Component {
     }
 
     const boxStyle = {
-      width: '100%', height: 64, backgroundColor: '#FAFAFA',
-      display:'flex', alignItems: 'center', justifyContent: 'space-between',
-      boxSizing: 'border-box', paddingLeft: 24, paddingRight: 24
+      width: '100%',
+      height: 64,
+      backgroundColor: '#FAFAFA',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      boxSizing: 'border-box',
+      paddingLeft: 24,
+      paddingRight: 24
     }
 
-    ////////////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////////////
 
-    let status = this.props.selectedDevice.systemStatus()
+    const status = this.props.selectedDevice.systemStatus()
 
     if (this.state.pin === 'initWizard' || status === 'uninitialized') {
-      
-      let { hexpand, vexpand, expanded } = this.state
+      const { hexpand, vexpand, expanded } = this.state
 
       if (hexpand === vexpand && vexpand === expanded) {
         if (expanded) {
           return (
-            <InitWizard 
+            <InitWizard
               device={this.props.selectedDevice}
-              showContent={true}
+              showContent
               onCancel={this.initWizardOnCancelBound}
               onFail={this.initWizardOnFailBound}
               onOK={this.initWizardOnOKBound}
             />
           )
         }
-        else {
-          return (
-            <div style={boxStyle}>
-              <div>该设备尚未初始化</div>
-              <FlatButton label='初始化' onTouchTap={this.toggleExpandedBound} />
-            </div>
-          )
-        }
+
+        return (
+          <div style={boxStyle}>
+            <div>该设备尚未初始化</div>
+            <FlatButton label="初始化" onTouchTap={this.toggleExpandedBound} />
+          </div>
+        )
       }
-      else 
-        return null
+      return null
     }
 
     if (status === 'ready') {
+      const users = this.props.selectedDevice.users.value()
+      const style = { width: '100%', transition: 'all 300ms', position: 'relative' }
 
-      let users = this.props.selectedDevice.users.value()
-      let style = {width: '100%', transition: 'all 300ms', position:'relative' } 
       if (users.length > 0) {
         return (
           <UserBox
@@ -300,48 +300,52 @@ class Login extends React.Component {
       }
     }
 
-    let text, busy, maint, error, uninit
+    let text,
+      busy,
+      maint,
+      error,
+      uninit
     switch (status) {
-    case 'ready': // users.length === 0 need to add FirstUser Box TODO 
-      text = '系统错误：未发现用户'
-      error = pullError()
-      break
-    case 'probing':
-      text = '通讯中....' 
-      busy = true
-      break
-    case 'systemError':
-      text = '系统错误：无法与该设备通讯，它可能刚刚离线或正在启动'
-      error = pullError()
-      break
-    case 'fruitmixError':
-      text = '应用错误：系统启动但应用服务无法连接'
-      error = pullError() 
-      break
-    case 'userMaint':
-      text = '用户指定进入维护模式'
-      maint = true
-      break
-    case 'failLast':
-      text = '启动错误：未能启动上次使用的系统'
-      maint = true
-      break
-    case 'failMulti':
-      text = '启动错误：存在多个可用系统'
-      maint = true
-      break
-    case 'failNoAlt':
-      text = '启动错误：未能发现可用系统'
-      maint = true
-      break
-    case 'unknownMaint':
-    default:
-      text = '未知错误'
-      maint = true
-      break
+      case 'ready': // users.length === 0 need to add FirstUser Box TODO
+        text = '系统错误：未发现用户'
+        error = pullError()
+        break
+      case 'probing':
+        text = '通讯中....'
+        busy = true
+        break
+      case 'systemError':
+        text = '系统错误：无法与该设备通讯，它可能刚刚离线或正在启动'
+        error = pullError()
+        break
+      case 'fruitmixError':
+        text = '应用错误：系统启动但应用服务无法连接'
+        error = pullError()
+        break
+      case 'userMaint':
+        text = '用户指定进入维护模式'
+        maint = true
+        break
+      case 'failLast':
+        text = '启动错误：未能启动上次使用的系统'
+        maint = true
+        break
+      case 'failMulti':
+        text = '启动错误：存在多个可用系统'
+        maint = true
+        break
+      case 'failNoAlt':
+        text = '启动错误：未能发现可用系统'
+        maint = true
+        break
+      case 'unknownMaint':
+      default:
+        text = '未知错误'
+        maint = true
+        break
     }
 
-    if (busy) 
+    if (busy) {
       return (
         <div style={Object.assign({}, boxStyle, { paddingLeft: 16, justifyContent: 'start' })}>
           <CircularProgress style={{ flexBasis: 32 }} size={28} />
@@ -349,32 +353,29 @@ class Login extends React.Component {
           <div>{text}</div>
         </div>
       )
-    else if (maint) 
+    } else if (maint) {
       return (
         <div style={boxStyle}>
           <div>{text}</div>
-          <FlatButton label='维护模式' onTouchTap={ () => this.done('maintenance') } />
+          <FlatButton label="维护模式" onTouchTap={() => this.done('maintenance')} />
         </div>
       )
-    else if (error) 
-      return <ErrorBox style={boxStyle} text={text} error={error} /> 
-    else // idle
-      return <div style={boxStyle} /> 
+    } else if (error) { return <ErrorBox style={boxStyle} text={text} error={error} /> }
+    return <div style={boxStyle} />
   }
 
   render() {
+    const { mdns, selectedDevice } = this.props
 
-    let { mdns, selectedDevice } = this.props
-
-    let cardProps, displayProps, cardInnerStyle
+    let cardProps,
+      displayProps,
+      cardInnerStyle
     if (selectedDevice === null) {
       cardProps = {
         key: 'info-card',
-        text: '正在搜索网络上的WISNUC OS设备' 
+        text: '正在搜索网络上的WISNUC OS设备'
       }
-    }
-    else {
-
+    } else {
       cardProps = { key: `device-card-${selectedDevice.mdev.name}` }
 
       displayProps = {
@@ -388,38 +389,43 @@ class Login extends React.Component {
         backgroundColor: colorArray[1],
 
         onNavPrev: (!selectedDevice || this.isFirst()) ? null : this.navPrevBound,
-        onNavNext: (!selectedDevice || this.isLast()) ? null : this.navNextBound,
+        onNavNext: (!selectedDevice || this.isLast()) ? null : this.navNextBound
       }
 
       cardInnerStyle = {
         backgroundColor: '#FAFAFA',
-        width: this.state.hexpand ? 1152 : '100%', 
-        transition: `all ${duration}ms`,
+        width: this.state.hexpand ? 1152 : '100%',
+        transition: `all ${duration}ms`
       }
     }
 
     return (
 
-      <div style={{width: '100%', height: '100%'}}>
+      <div style={{ width: '100%', height: '100%' }}>
 
         <Background overlay={(this.state.byebye || this.state.hello) ? 'white' : this.state.dim ? 'dim' : 'none'} />
 
-        <div style={{width: '100%', height: '100%', 
-          display:'flex', flexDirection: 'column', alignItems: 'center'}}>
+        <div
+          style={{ width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center' }}
+        >
 
-          <div style={{flexBasis: '160px'}} />
+          <div style={{ flexBasis: '160px' }} />
 
           <CrossNav duration={0.35} enter={this.state.enter}>
             { (this.state.bye || this.state.hello)
-                ? <DeviceCard key='animation-card-dummy' />
+                ? <DeviceCard key="animation-card-dummy" />
                 : selectedDevice === null
                   ? <InfoCard {...cardProps} />
                   : <DeviceCard {...cardProps}>
-                      <div id='card inner style' style={cardInnerStyle}>
-                        <CardDisplay {...displayProps} />
-                        {this.footer()}
-                      </div>
-                    </DeviceCard> }
+                    <div id="card inner style" style={cardInnerStyle}>
+                      <CardDisplay {...displayProps} />
+                      {this.footer()}
+                    </div>
+                  </DeviceCard> }
           </CrossNav>
 
         </div>
@@ -429,4 +435,3 @@ class Login extends React.Component {
 }
 
 export default Login
-

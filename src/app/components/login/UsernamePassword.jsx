@@ -22,26 +22,29 @@ class UsernamePassword extends React.PureComponent {
     return (
       <div>
         <div>
-          <TextField key='guide-box-username' hintText='用户名' 
+          <TextField
+            key="guide-box-username" hintText="用户名"
             value={this.props.state.username}
             maxLength={20}
-            onChange={e => this.props.setState({username: e.target.value })}
+            onChange={e => this.props.setState({ username: e.target.value })}
           />
         </div>
         <div>
-          <TextField key='guide-box-password' hintText='密码' 
+          <TextField
+            key="guide-box-password" hintText="密码"
             value={this.props.state.password}
-            type= 'password'
+            type="password"
             maxLength={40}
-            onChange={e => this.props.setState({password: e.target.value })}
+            onChange={e => this.props.setState({ password: e.target.value })}
           />
         </div>
         <div>
-          <TextField key='guide-box-password-again' hintText='再次输入密码' 
+          <TextField
+            key="guide-box-password-again" hintText="再次输入密码"
             value={this.props.state.passwordAgain}
-            type='password'
+            type="password"
             maxLength={40}
-            onChange={e => this.props.setState({passwordAgain: e.target.value })}
+            onChange={e => this.props.setState({ passwordAgain: e.target.value })}
           />
         </div>
       </div>

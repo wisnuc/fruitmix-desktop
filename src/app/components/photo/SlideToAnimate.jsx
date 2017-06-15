@@ -1,11 +1,11 @@
-import React, { Component, PropTypes } from 'react'
+import React from 'react'
 import Debug from 'debug'
 import { findDOMNode } from 'react-dom'
 import { SvgIcon } from 'material-ui'
 
 const debug = Debug('component:photo:SliderToAnimeta:')
 
-export default class SlideToAnimate extends Component {
+export default class SlideToAnimate extends React.Component {
   constructor(props) {
     super(props)
 
@@ -179,22 +179,4 @@ export default class SlideToAnimate extends Component {
       </div>
     )
   }
-}
-
-SlideToAnimate.propTypes = {
-  style: PropTypes.object.isRequired,
-  translateDistance: PropTypes.number.isRequired,
-  translateGrep: PropTypes.number,
-  translateCount: PropTypes.number.isRequired,
-  children: PropTypes.element.isRequired,
-  translateLeftCallback: PropTypes.func,
-  translateRightCallback: PropTypes.func,
-  activeIndex: PropTypes.number
-}
-
-SlideToAnimate.defaultProps = {
-  activeIndex: 0,
-  translateGrep: 0,
-  translateLeftCallback: () => {},
-  translateRightCallback: () => {}
 }

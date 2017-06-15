@@ -25,7 +25,7 @@ class HoverNav extends React.Component {
 
       opacity: 0.5,
 
-      ':hover': { 
+      ':hover': {
         background: '#212121', // gray900
         opacity: 0.7
       }
@@ -37,10 +37,10 @@ class HoverNav extends React.Component {
       <div style={this.props.style}>
         { enabled &&
           <div style={style} onTouchTap={this.props.onTouchTap}>
-            { this.props.direction === 'left' && 
-              <NavigationChevronLeft style={{ width: 32, height: 32}} color='#FFF' /> }
+            { this.props.direction === 'left' &&
+              <NavigationChevronLeft style={{ width: 32, height: 32 }} color="#FFF" /> }
             { this.props.direction === 'right' &&
-              <NavigationChevronRight style={{width: 32, height: 32}} color='#FFF' /> }
+              <NavigationChevronRight style={{ width: 32, height: 32 }} color="#FFF" /> }
           </div> }
       </div>
     )

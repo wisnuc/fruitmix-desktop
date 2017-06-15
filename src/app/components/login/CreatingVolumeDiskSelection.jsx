@@ -4,7 +4,7 @@ import { cyan500 } from 'material-ui/styles/colors'
 import { Checkbox, Divider } from 'material-ui'
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
 
-class CreatingVolumeDiskSelection1 extends React.PureComponent {
+class CreatingVolumeDiskSelection extends React.PureComponent {
 
   static State = class State {
     constructor() {
@@ -137,4 +137,4 @@ class CreatingVolumeDiskSelection1 extends React.PureComponent {
   }
 }
 
-export default CreatingVolumeDiskSelection1
+export default CreatingVolumeDiskSelection

@@ -1,4 +1,4 @@
-import React, { PropTypes } from 'react'
+import React from 'react'
 import Debug from 'debug'
 import UUID from 'node-uuid'
 import { Paper, CircularProgress, IconButton, SvgIcon } from 'material-ui'

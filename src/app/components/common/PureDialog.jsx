@@ -1,4 +1,4 @@
-import React, { PropTypes } from 'react'
+import React from 'react'
 import EventListener from 'react-event-listener'
 import keycode from 'keycode'
 import { TweenMax } from 'gsap'
@@ -7,6 +7,7 @@ import ReactTransitionGroup from 'react-addons-transition-group'
 
 class TransitionItem extends React.Component {
 
+  /*
   static propTypes = {
     modal: PropTypes.bool,
     onRequestClose: PropTypes.func
@@ -16,6 +17,7 @@ class TransitionItem extends React.Component {
     modal: false,
     onRequestClose: null
   }
+  */
 
   constructor(props) {
     super(props)
@@ -124,9 +126,11 @@ class TransitionItem extends React.Component {
 
 export default class CDialog extends React.Component {
 
+  /*
   static propTypes = {
     open: PropTypes.bool.isRequired
   }
+  */
 
   render() {
     return (

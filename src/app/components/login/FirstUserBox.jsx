@@ -8,14 +8,13 @@ import FlatButton from '../common/FlatButton'
 
 class FirstUser extends React.Component {
 
-  constructor (props) {
+  constructor(props) {
     super(props)
   }
 
-  render () {
+  render() {
     return (
-      <div>
-      </div>
+      <div />
     )
   }
 }
@@ -31,29 +30,29 @@ class FirstUserBox extends React.Component {
 
   render() {
     return (
-      <div key='first-user-box' style={this.props.style}>
-        <Paper 
+      <div key="first-user-box" style={this.props.style}>
+        <Paper
           style={{
             position: 'absolute',
             top: 0,
-            boxSizing: 'border-box', 
-            width:'100%', 
+            boxSizing: 'border-box',
+            width: '100%',
             height: 52,
-            paddingLeft:24, 
-            paddingRight:8, 
+            paddingLeft: 24,
+            paddingRight: 8,
             backgroundColor: grey100,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between'
-          }} 
+          }}
           rounded={false}
         >
-          <div>该设备正常运行，但尚未创建用户</div> 
-          <FlatButton label='创建用户' marginRight={-16} />
+          <div>该设备正常运行，但尚未创建用户</div>
+          <FlatButton label="创建用户" marginRight={-16} />
         </Paper>
 
-        <div style={{width: '100%', boxSizing: 'border-box', paddingLeft: 0, paddingRight: 0}}>
-          <div style={{width: '100%', height: 52 }}/> 
+        <div style={{ width: '100%', boxSizing: 'border-box', paddingLeft: 0, paddingRight: 0 }}>
+          <div style={{ width: '100%', height: 52 }} />
         </div>
       </div>
     )
