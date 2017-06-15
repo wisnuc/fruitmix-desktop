@@ -9,16 +9,13 @@ import log from 'electron-log'
 
 import store from './serve/store/store'
 import configObserver from './lib/configObserver'
-import adapter from './lib/adapter'
 
-import { registerCommandHandler } from './lib/command'
 import migration from './lib/migration'
 import systemModule from './lib/system'
 import Configuration from './lib/configuration'
 
 // init api
 import loginApi from './lib/login'
-import fileApi from './lib/file'
 import mediaApi from './lib/media'
 
 // import upload from './lib/upload'
@@ -30,8 +27,6 @@ import { initMainWindow, getMainWindow } from './lib/window'
 import { initTestWindow } from './lib/testHook'
 
 import mdns from './lib/mdns'
-import misc from './lib/misc'
-
 
 global.entryFileDir = __dirname
 global.db = {}
@@ -52,15 +47,12 @@ try {
 }
 
 store.subscribe(configObserver)
-store.subscribe(adapter)
 
-/*
 store.subscribe(() => {
   console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
   console.log('store', store.getState())
   console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
 })
-*/
 
 // app ready and open window
 app.on('ready', () => {

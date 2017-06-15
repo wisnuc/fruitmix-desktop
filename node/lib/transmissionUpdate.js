@@ -31,7 +31,6 @@ const sendInfor = () => {
   try {
     getMainWindow().webContents.send(
       'UPDATE_TRANSMISSION',
-      'UPDATE_TRANSMISSION',
       userTasks.map(item => item.getSummary()),
       finishTasks.map(i => (i.getSummary ? i.getSummary() : i))
     )

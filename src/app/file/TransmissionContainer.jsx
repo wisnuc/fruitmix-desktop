@@ -234,7 +234,7 @@ class TrsContainer extends React.Component {
       }
     }
 
-    this.updateTransmission = (e, type, userTasks, finishTasks) => {
+    this.updateTransmission = (e, userTasks, finishTasks) => {
       this.setState({ userTasks, finishTasks })
     }
   }

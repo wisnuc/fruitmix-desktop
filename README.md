@@ -25,37 +25,40 @@
 
 * node : 后端源代码目录
 
-	* lib : electron 相关模块
-	* serve : electron redux存放目录（store, action, reducers）
+    * lib : electron 相关模块
+    * serve : electron redux存放目录（store, action, reducers）
 
-* node\_modules : 存放项目依赖包（工具相关）
+* node_modules : 存放项目依赖包（工具相关）
 
-* public :  前端资源文件目录
+* public : 前端资源文件目录
 
-	* assets : 存放资源文件（css, images, font)
-	* bundle.js : 前端打包输出
+    * assets : 存放资源文件（css, images, font)
+    * bundle.js : 前端打包输出
 
 * src : 前端源代码目录
 
-	* app
-		* action : redux相关action
-		* components : react组件
-		* lib : 组件相关依赖
-		* reducers : redux 相关 reducer
-		* stores : 创建redux store
-		* utils : 各类封装的function
-		* app.js : js入口, 定义debug关键字 , 调用fruitmix.js
-		* fruitmix.js : 挂载组件, 事件监听
-	* assets : 组件相关样式、图片 
-	* index.html : 前端页面入口
+    * app
+        * app.js: js入口, 定义debug关键字 , 挂载组件, 事件监听
+        * Fruitmix.jsx: 顶层React页面
+        * common: 通用组件
+        * control: admin用户管理相关页面
+        * file: 文件页面
+        * login: 登录页面
+        * maintenance: 维护模式
+        * mdc: 测试文件
+        * nav: model
+        * photo: 照片
+        * view: viewmodel
+    * assets : 组件相关样式、图片
+    * index.html : 前端页面入口
 
 * test: 模块单元测试目录
 
 * .babelrc : babel工具配置文件
 
-* devel.js :  开发环境使用的入口文件
+* devel.js : 开发环境使用的入口文件
 
-* Gruntfile.js :  grunt 配置文件 [详细说明](https://gruntjs.com/sample-gruntfile)
+* Gruntfile.js : grunt 配置文件 [详细说明](https://gruntjs.com/sample-gruntfile)
 
 * package.json : 配置项目依赖及命令 [详细说明](https://docs.npmjs.com/files/package.json)
 

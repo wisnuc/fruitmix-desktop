@@ -156,42 +156,6 @@ const requestDelete = (url, token, callback) => {
 
 const requestDeleteAsync = Promise.promisify(requestDelete)
 
-const updateUsersAsync = async () => {
-  const ip = getIpAddr()
-  const port = 3721
-
-  const users = await requestGetAsync(`http://${ip}:${port}/login`, null)
-
-  debug('update users', users)
-
-  store.dispatch({
-    type: 'SERVER_UPDATE_USERS',
-    data: users
-  })
-}
-
-// TODO username should be UUID
-export const tryLoginAsync = async (username, password) => {
-  debug('tryLoginAsync', username, password)
-
-  await updateUsersAsync()
-
-  // TODO invalid state
-  const ip = getIpAddr()
-  const port = 3721
-  const users = store.getState().server.users
-  const userUUID = users.find(usr => usr.username === username).uuid
-
-  debug('requesting token', userUUID, password)
-
-  const tok = await requestGetAsync(`http://${ip}:${port}/token`, null, {
-    username: userUUID, password
-  })
-
-  debug('tryLoginAsync, token', tok)
-  return tok
-}
-
 export const retrieveUsers = async (token) => {
   const ip = getIpAddr()
   const port = 3721
