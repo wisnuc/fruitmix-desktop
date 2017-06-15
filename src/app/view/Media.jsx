@@ -12,7 +12,7 @@ import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 
 import Base from './Base'
 import PhotoApp from '../photo/PhotoApp'
-import { formatDate } from '../../utils/datetime'
+import { formatDate } from '../common/datetime'
 
 const debug = Debug('component:viewModel:Media: ')
 const parseDate = (date) => {

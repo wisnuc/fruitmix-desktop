@@ -5,7 +5,7 @@ import { FloatingActionButton, Paper, Menu, MenuItem, Divider, IconButton, Circu
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import FileFileUpload from 'material-ui/svg-icons/file/file-upload'
 import DeviceStorage from 'material-ui/svg-icons/device/storage'
-import { formatDate } from '../../utils/datetime'
+import { formatDate } from '../common/datetime'
 
 import Carousel from './Carousel'
 import PhotoDetail from './PhotoDetail'

@@ -1,20 +1,16 @@
-import { ipcRenderer } from 'electron'
-
 import React from 'react'
 import ReactDom from 'react-dom'
-
+import { ipcRenderer } from 'electron'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
 import { teal500, pinkA200 } from 'material-ui/styles/colors'
 
-import Login from './components/login/Login'
-import Navigation from './components/nav/Navigation'
-import Maintenance from './components/maintenance/Maintenance'
+import Login from './login/Login'
+import Navigation from './nav/Navigation'
+import Maintenance from './maintenance/Maintenance'
+import Device from './common/device'
 
-import Device from './components/common/device'
-
-class Main extends React.Component {
-
+class Fruitmix extends React.Component {
   constructor() {
     super()
 
@@ -22,7 +18,7 @@ class Main extends React.Component {
     this.user = null
 
     setTimeout(() => {
-      const mdns = window.store.getState().mdns
+      const mdns = global.mdnsStore
       if (mdns.length > 0) {
         this.selectDevice(mdns[0])
       }
@@ -77,7 +73,7 @@ class Main extends React.Component {
 
   nav(view) {
     setTimeout(() => {
-      const mdns = window.store.getState().mdns
+      const mdns = global.mdnsStore
       if (mdns.length > 0) {
         this.selectDevice(mdns[0])
       }
@@ -98,7 +94,7 @@ class Main extends React.Component {
 
     switch (this.state.view) {
       case 'login':
-        view = <Login mdns={window.store.getState().mdns} {...this.state} />
+        view = <Login mdns={global.mdnsStore} {...this.state} />
         break
 
       case 'maintenance':
@@ -121,4 +117,4 @@ class Main extends React.Component {
   }
 }
 
-export default Main
+export default Fruitmix
