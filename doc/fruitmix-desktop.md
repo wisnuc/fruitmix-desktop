@@ -96,6 +96,32 @@ ___
 
 ### api与状态机模型
 
+* Device APIs
+
+|Device APIs|systemStatus|start|token|initWizard|refreshSystemState|manualBoot|reInstall|device|net|timedate|fan|setFanScale|power|
+| --------- |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+login       | √ | √ | √ |   |   |   |   |   |   |   |   |   |   |
+InitWizard  |   |   |   | √ |   |   |   |   |   |   |   |   |   |
+maintenance |   |   |   |   | √ | √ | √ |   |   |   |   |   |   |
+Device      |   |   |   |   |   |   |   | √ |   |   |   |   |   |
+Networking  |   |   |   |   |   |   |   |   | √ |   |   |   |   |
+TimeDate    |   |   |   |   |   |   |   |   |   | √ |   |   |   |
+FanControl  |   |   |   |   |   |   |   |   |   |   | √ | √ |   |
+Power       |   |   |   |   |   |   |   |   |   |   |   |   | √ |
+
+* Fruitmix APIs
+
+|Fruitmix APIs|account|adminDrives|adminUsers|driveListNavDir|listNavDir|login|media|mkdir|renameDirOrFile|updateAccount|extDrives|extListDir|
+| --------- |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|home       |   |   |   |   | √ |   |   | √ | √ |   |   |   |
+|public     |   | √ |   | √ |   |   |   |   |   |   |   |   |
+|physical   |   |   |   |   |   |   |   |   |   |   | √ | √ |
+|media      |   |   |   |   |   |   | √ |   |   |   |   |   |
+|adminUsers |   |   | √ |   |   | √ |   |   |   |   |   |   |
+|adminDrives|   | √ | √ |   |   |   |   |   |   |   |   |   |
+|account    | √ |   |   |   |   | √ |   |   |   | √ |   |   |
+
+
 #### login
 
 * mdns api: 获取局域网内的设备列表，其数据结构为
@@ -536,11 +562,28 @@ extListDir
 
 ##### transmission
 
-* api: window.store.getState().transmission
+* ipc通讯
 
-    * userTasks: 进行中的任务
+    * PAUSE_DOWNLOADING: 暂停下载项目
 
-    * finishTasks: 已完成的任务
+    * RESUME_DOWNLOADING: 重新启动暂定的下载项目
+
+    * PAUSE_UPLOADING: 暂停上传项目
+
+    * RESUME_UPLOADING: 重新启动暂定的上传项目
+
+    * DELETE_UPLOADING: 取消上传项目
+
+    * DELETE_DOWNLOADING: 取消下载项目
+
+    * OPEN_TRANSMISSION: 打开项目所在文件夹
+
+    * GET_TRANSMISSION: 发送获取transmission列表的请求
+
+    * UPDATE_TRANSMISSION: 获取transmission列表
+
+        * userTasks: 进行中的任务
+        * finishTasks: 已完成的任务
 
 * userTasks和finishTasks的数据结构
 
@@ -583,16 +626,6 @@ finishTasks
     ...
 ]
 ```
-
-* ipc通讯
-
-    * PAUSE_DOWNLOADING: 暂停下载项目
-    * RESUME_DOWNLOADING: 重新启动暂定的下载项目
-    * PAUSE_UPLOADING: 暂停上传项目
-    * RESUME_UPLOADING: 重新启动暂定的上传项目
-    * DELETE_UPLOADING: 取消上传项目
-    * DELETE_DOWNLOADING: 取消下载项目
-    * OPEN_TRANSMISSION: 打开项目所在文件夹
 
 * state
 
