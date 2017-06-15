@@ -1,4 +1,5 @@
 import React from 'react'
+import { ipcRenderer } from 'electron'
 import { IconButton, CircularProgress } from 'material-ui'
 import BackIcon from 'material-ui/svg-icons/navigation/arrow-back'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
@@ -6,7 +7,6 @@ import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-fil
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import ArrowRight from 'material-ui/svg-icons/hardware/keyboard-arrow-right'
 import request from 'superagent'
-import { command } from '../../lib/command'
 import FlatButton from '../common/FlatButton'
 
 class Row extends React.PureComponent {
@@ -338,7 +338,7 @@ class MoveDialog extends React.PureComponent {
         else {
           Object.assign(obj, JSON.parse(res.text), { name: item.name, createDate: (new Date()).getTime(), type: this.props.operation, directory: this.directory })
           // console.log(obj)
-          command('fileapp', 'TRANSFER', { obj })
+          ipcRenderer.send('TRANSFER', obj)
           this.props.onRequestClose()
         }
       })

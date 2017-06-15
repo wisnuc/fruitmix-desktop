@@ -6,7 +6,6 @@ import { dialog, ipcMain } from 'electron'
 
 import request from 'request'
 
-import registerCommandHandlers from './command'
 import { getMainWindow } from './window'
 import createTask, { sendMsg } from './uploadTaskCreater'
 
@@ -14,7 +13,7 @@ const userTasks = []
 const finishTasks = []
 
 // handler
-const uploadHandle = (args) => {
+const uploadHandle = (event, args) => {
   const { dirUUID, type } = args
   const dialogType = type == 'folder' ? 'openDirectory' : 'openFile'
   dialog.showOpenDialog({ properties: [dialogType, 'multiSelections'] }, (data) => {
@@ -37,7 +36,7 @@ const uploadHandle = (args) => {
   })
 }
 
-const dragFileHandle = (args) => {
+const dragFileHandle = (event, args) => {
   if (!args.files.length) return
   let index = 0
   const loop = () => {
@@ -106,13 +105,6 @@ const cleanRecord = (type, uuid) => {
 }
 
 
-const uploadCommandMap = new Map([
-  ['UPLOAD', uploadHandle],
-  ['DRAG_FILE', dragFileHandle]
-])
-
-registerCommandHandlers(uploadCommandMap)
-
 ipcMain.on('loginOff', (evt) => {
   // todo
 })
@@ -121,6 +113,8 @@ ipcMain.on('START_TRANSMISSION', startTransmissionHandle)
 ipcMain.on('GET_TRANSMISSION', sendMsg)
 ipcMain.on('DELETE_UPLOADING', deleteUploadingHandle)
 ipcMain.on('DELETE_UPLOADED', deleteUploadedHandle)
+ipcMain.on('DRAG_FILE', dragFileHandle)
+ipcMain.on('UPLOAD', uploadHandle)
 
 // ipcMain.on('PAUSE_UPLOADING')
 ipcMain.on('PAUSE_UPLOADING', (e, uuid) => {

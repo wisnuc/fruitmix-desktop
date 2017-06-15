@@ -6,7 +6,6 @@ import { getMainWindow } from './window'
 import { userTasks as uploadingTasks, finishTasks as uploadedTasks } from './newUpload'
 import { userTasks as downloadingTasks, finishTasks as downloadedTasks } from './newDownload'
 import TransferManager from './transferManager'
-import registerCommandHandlers from './command'
 
 const lock = false
 
@@ -89,19 +88,12 @@ const openHandle = (e, tasks) => {
   })
 }
 
-const transferHandle = (args) => {
-  TransferManager.addTask(args.obj)
+const transferHandle = (event, args) => {
+  TransferManager.addTask(args)
 }
 
-const commandMap = new Map([
-  ['CLEAN_RECORD', cleanRecordHandle],
-  ['TRANSFER', transferHandle]
-])
-
-
-registerCommandHandlers(commandMap)
-
 ipcMain.on('OPEN_TRANSMISSION', openHandle)
-
+ipcMain.on('CLEAN_RECORD', cleanRecordHandle)
+ipcMain.on('TRANSFER', transferHandle)
 
 export default sendInfor

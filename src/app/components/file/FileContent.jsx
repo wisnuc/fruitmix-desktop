@@ -1,5 +1,6 @@
 import React, { Component, PureComponent } from 'react'
 import Debug from 'debug'
+import { ipcRenderer } from 'electron'
 import prettysize from 'prettysize'
 import { Avatar } from 'material-ui'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
@@ -7,9 +8,7 @@ import ToggleCheckBox from 'material-ui/svg-icons/toggle/check-box'
 import ToggleCheckBoxOutlineBlank from 'material-ui/svg-icons/toggle/check-box-outline-blank'
 import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
 import FileFolder from 'material-ui/svg-icons/file/folder'
-
 import { List, AutoSizer } from 'react-virtualized'
-import { command } from '../../lib/command'
 
 const debug = Debug('component:file:FileContent:')
 
@@ -239,13 +238,12 @@ class FileContent extends Component {
     for (const item of e.dataTransfer.files) files.push(item.path)
     const dir = this.props.home.path
     const rUUID = this.props.home.path[0].uuid
-    command('fileapp', 'DRAG_FILE', { files, dirUUID: dir[dir.length - 1].uuid })
+    ipcRenderer.send('DRAG_FILE', { files, dirUUID: dir[dir.length - 1].uuid })
   }
 
   render() {
     const { apis } = this.props
     // debug('render FileContent', this.props, this.state)
-
     return (
       <div id="file-content" style={{ width: '100%', height: '100%' }} onDrop={this.drop.bind(this)}>
         {/* header*/}

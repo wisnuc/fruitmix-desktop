@@ -7,7 +7,6 @@ import ReactDom from 'react-dom'
 
 import injectTapEventPlugin from 'react-tap-event-plugin'
 import MDNS from './lib/mdns'
-import { command } from './lib/command'
 
 import { teal500 } from 'material-ui/styles/colors'
 
@@ -47,21 +46,6 @@ ipcRenderer.on('adapter', (err, data) => {
     type: 'ADAPTER',
     store: data
   })
-})
-
-// command tick
-setInterval(() => {
-  if (store.getState().command.length === 0) return
-  store.dispatch({ type: 'COMMAND_TICK' })
-}, 1000)
-
-// 
-ipcRenderer.on('command', (e, {id, err, data}) => {
-
-  store.dispatch({
-    type: 'COMMAND_RETURN',
-    id, err, data 
-  }) 
 })
 
 ipcRenderer.on('CONFIG_LOADED', (event, config) => {

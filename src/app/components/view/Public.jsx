@@ -14,7 +14,6 @@ import NewFolderDialog from '../file/NewFolderDialog'
 import RenameDialog from '../file/RenameDialog'
 import MoveDialog from '../file/MoveDialog'
 import Base from './Base'
-import { command } from '../../lib/command'
 import ContextMenu from '../common/ContextMenu'
 import FlatButton from '../common/FlatButton'
 import FileUploadButton from '../file/FileUploadButton'
@@ -341,14 +340,14 @@ class Public extends Base {
 
     const args = { folders, files, dirUUID: path[path.length - 1].uuid }
     // console.log(args)
-    command('fileapp', 'DOWNLOAD', args)
+    ipcRenderer.send('DOWNLOAD', args)
   }
 
   upload(type) {
     const dirPath = this.state.path
     const dirUUID = dirPath[dirPath.length - 1].uuid
     console.log(dirUUID, type)
-    command('fileapp', 'UPLOAD', { dirUUID, type })
+    ipcRenderer.send('UPLOAD', { dirUUID, type })
   }
 
   createFolder(value) {

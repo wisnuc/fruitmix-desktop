@@ -17,7 +17,6 @@ import ContextMenu from '../common/ContextMenu'
 import DialogOverlay from '../common/DialogOverlay'
 import FlatButton from '../common/FlatButton'
 import { BreadCrumbItem, BreadCrumbSeparator } from '../common/BreadCrumb'
-import { command } from '../../lib/command'
 
 const debug = Debug('component:viewModel:Home: ')
 
@@ -253,12 +252,6 @@ class Home extends Base {
     this.setState({ copy: false })
   }
 
-  openUploadDialog() {
-    const dirPath = this.state.path
-    const dirUUID = dirPath[dirPath.length - 1].uuid
-    command('fileapp', 'UPLOAD', { dirUUID })
-  }
-
   download() {
     const entries = this.state.entries
     const selected = this.state.select.selected
@@ -272,14 +265,14 @@ class Home extends Base {
       else if (obj.type === 'file') files.push(obj)
     })
 
-    command('fileapp', 'DOWNLOAD', { folders, files, dirUUID: path[path.length - 1].uuid })
+    ipcRenderer.send('DOWNLOAD', { folders, files, dirUUID: path[path.length - 1].uuid })
   }
 
   upload(type) {
     const dirPath = this.state.path
     const dirUUID = dirPath[dirPath.length - 1].uuid
     // console.log(dirUUID, type)
-    command('fileapp', 'UPLOAD', { dirUUID, type })
+    ipcRenderer.send('UPLOAD', { dirUUID, type })
   }
 
   refresh() {

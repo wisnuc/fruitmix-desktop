@@ -1,6 +1,5 @@
 import os from 'os'
 import child_process from 'child_process'
-import registerCommandHandlers from './command'
 import createTask, { sendMsg } from './downloadTaskCreater'
 import { getMainWindow } from './window'
 import { dialog, ipcMain } from 'electron'
@@ -10,7 +9,7 @@ const finishTasks = []
 
 // args have imformation about file/folder get from server
 // name,uuid,size,type were used to create manager
-const downloadHandle = (args, callback) => {
+const downloadHandle = (event, args, callback) => {
   const files = args.files
   const folders = args.folders
   files.forEach(item => createTask(item.uuid, item.name, item.size, item.type, args.dirUUID, true))
@@ -20,7 +19,7 @@ const downloadHandle = (args, callback) => {
   getMainWindow().webContents.send('snackbarMessage', { message: `${count}个任务添加至下载队列` })
 }
 
-const startTransmissionHandle = (args, callback) => {
+const startTransmissionHandle = () => {
   db.downloading.find({}, (err, tasks) => {
     if (err) return
     tasks.forEach(item => createTask(item.target, item.name, item.rootSize, item.type, item.dirUUID,
@@ -66,16 +65,11 @@ const cleanRecord = (type, uuid) => {
   })
 }
 
-const uploadCommandMap = new Map([
-  ['DOWNLOAD', downloadHandle]
-])
-
-registerCommandHandlers(uploadCommandMap)
-
 ipcMain.on('START_TRANSMISSION', startTransmissionHandle)
 ipcMain.on('GET_TRANSMISSION', sendMsg)
 ipcMain.on('DELETE_DOWNLOADING', deleteDownloadingHandle)
 ipcMain.on('DELETE_DOWNLOADED', deleteDownloadedHandle)
+ipcMain.on('DOWNLOAD', downloadHandle)
 
 ipcMain.on('PAUSE_DOWNLOADING', (e, uuid) => {
   if (!uuid) return

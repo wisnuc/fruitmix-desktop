@@ -4,7 +4,6 @@ import { FloatingActionButton, RaisedButton, Popover, Menu, MenuItem } from 'mat
 import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import FileFileUpload from 'material-ui/svg-icons/file/file-upload'
-import { command } from '../../lib/command'
 
 class FileUploadButton extends React.Component {
 

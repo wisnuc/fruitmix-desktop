@@ -9,7 +9,6 @@ import PauseSvg from 'material-ui/svg-icons/av/pause'
 import RunningTask from './RunningTask'
 import FinishedTask from './FinishedTask'
 import FlatButton from '../common/FlatButton'
-import { command } from '../../lib/command'
 
 const debug = Debug('component:file:TrsContainer:')
 
@@ -82,7 +81,7 @@ class TrsContainer extends React.Component {
     }
 
     this.cleanRecord = () => {
-      command('', 'CLEAN_RECORD', {})
+      ipcRenderer.send('CLEAN_RECORD')
     }
 
     this.cleanTaskSelect = () => {
