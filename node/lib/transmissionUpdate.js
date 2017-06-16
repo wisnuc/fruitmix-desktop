@@ -71,7 +71,7 @@ const openHandle = (e, tasks) => {
     const pathProperty = task.trsType === 'download' ? 'downloadPath' : 'abspath'
     const taskPath = task.trsType === 'download' ?
       task[pathProperty] : task[pathProperty].substring(0, task[pathProperty].lastIndexOf('\\'))
-    console.log('打开目录的文件资源管理器', taskPath)
+    console.log('打开目录的文件资源管理器', taskPath) //FIXME
     switch (osType) {
       case 'win32':
         child_process.exec(`explorer ${taskPath}`, {})

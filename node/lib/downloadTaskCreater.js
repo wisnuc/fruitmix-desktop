@@ -28,6 +28,10 @@ const initArgs = () => {
   tokenObj = store.getState().login.device.token.data
 }
 
+const getDownloadPath = () => store.getState().config.downloadPath
+
+const getTransTmpPath = () => store.getState().config.tmpTransPath
+
 // determine whether need to start/close sending msg
 const sendMessage = () => {
   let shouldSend = false
@@ -60,7 +64,7 @@ const sendMsg = () => {
 const createTask = (target, name, size, type, dirUUID, newWork, p, u, d, ct) => {
   initArgs()
   const taskUUID = u || uuid.v4()
-  const abspath = p || store.getState().config.download
+  const abspath = p || getDownloadPath()
   const downloadingList = d || []
   const createTime = ct || (new Date()).getTime()
   const task = new TaskManager(taskUUID, abspath, target, name, size, type, dirUUID, newWork, downloadingList, createTime)
@@ -362,7 +366,7 @@ class TaskManager {
       if (this.downloading[0].type === 'folder') {
         this.downloading.shift()
       } else {
-        const tmpPath = path.join(tmpTransPath, this.uuid +
+        const tmpPath = path.join(getTransTmpPath(), this.uuid +
 					this.downloading[0].timeStamp +
 					this.downloading[0].name)
         try { await del(tmpPath) }				catch (e) { console.log(`删除缓存${tmpPath}失败`) }				finally { this.downloading.shift() }
@@ -624,7 +628,7 @@ class DownloadFileSTM extends STM {
   constructor(wrapper) {
     super(wrapper)
     this.handle = null
-    this.tmpDownloadPath = path.join(tmpTransPath, wrapper.manager.uuid + wrapper.timeStamp + wrapper.name)
+    this.tmpDownloadPath = path.join(getTransTmpPath(), wrapper.manager.uuid + wrapper.timeStamp + wrapper.name)
   }
 
   beginDownload() {

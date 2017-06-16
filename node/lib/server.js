@@ -11,6 +11,7 @@ import store from '../serve/store/store'
 
 const getIpAddr = () => store.getState().login.device.mdev.address
 const getToken = () => store.getState().login.device.token.data.token
+const getTmpPath = () => store.getState().config.tmpPath
 
 // TODO token can also be auth, or not provided
 const requestGet = (url, qs, token, callback) => {
@@ -60,7 +61,7 @@ const requestDownload = (url, qs, token, downloadPath, name, callback) => {
     opts.auth = token
   }
 
-  const tmpPath = path.join(global.tmpPath, UUID.v4())
+  const tmpPath = path.join(getTmpPath(), UUID.v4())
   const dst = path.join(downloadPath, name)
 
   const stream = fs.createWriteStream(tmpPath)

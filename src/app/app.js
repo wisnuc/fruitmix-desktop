@@ -2,7 +2,6 @@ import React from 'react'
 import ReactDom from 'react-dom'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
-import { teal500 } from 'material-ui/styles/colors'
 
 import injectTapEventPlugin from 'react-tap-event-plugin'
 import MDNS from './common/mdns'
@@ -14,7 +13,7 @@ import '../assets/css/app.css'
 
 /* modify debug filter before application starts' */
 const debug = Debug('app')
-localStorage.debug = 'component:*' 
+localStorage.debug = 'component*'
 
 /* required by Material UI */
 injectTapEventPlugin()
@@ -29,7 +28,7 @@ global.mdns.scan()
 
 /* load config TODO */
 ipcRenderer.on('CONFIG_LOADED', (event, config) => {
-  // debug('CONFIG_LOADED', config)
+  console.log('CONFIG_LOADED', config)
 })
 
 document.addEventListener('dragover', (e) => {

@@ -34,63 +34,34 @@ global.db = {}
 const debug = Debug('main')
 const mocha = false
 
-// read config file
-try {
-  const raw = fs.readFileSync(path.join(tmpPath, 'server'))
-  const config = JSON.parse(raw)
-  store.dispatch({
-    type: 'CONFIG_INIT',
-    data: config
-  })
-} catch (e) { // e.code === 'ENOENT' && e.syscall === 'read'
-  console.log(e)
-}
-
 store.subscribe(configObserver)
 
 store.subscribe(() => {
+/*
   console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
   console.log('store', store.getState())
   console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
+*/
 })
 
-// app ready and open window
+/* app ready and open window */
 app.on('ready', () => {
   const appDataPath = app.getPath('appData')
-  console.log(`appDataPath is ${appDataPath}`)
-
+  // console.log(`appDataPath is ${appDataPath}`)
   const configuration = new Configuration(appDataPath)
+
   configuration.initAsync().asCallback((err) => {
     if (err) {
       console.log('failed to load configuration, die', err)
       process.exit(1)
     } else {
       initMainWindow()
-      // to fixed
-      if (os.platform() == 'darwin') {
-        console.log('system is osx')
-        const data = app.getPath('downloads')
-        console.log(`download path is : ${data}`)
-        store.dispatch({ type: 'CONFIG_SET_DOWNLOAD_PATH', data })
-      }
       if (global.BABEL_IS_RUNNING) return
       autoUpdater.checkForUpdates()
     }
   })
 
   global.configuration = configuration
-
-/**
-  setTimeout(() => {
-    if (true) {
-      store.dispatch({
-        type: 'CONFIG_SET_IP',
-        data: '192.168.5.182'
-      })
-    }
-  },1000)
-**/
-
 })
 
 app.on('window-all-closed', () => app.quit())
