@@ -15,7 +15,12 @@ class AccountApp extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      openDialog: ''
+      openDialog: '',
+      editAvatar: false
+    }
+
+    this.toggleDialog = (type) => {
+      this.setState({ [type]: !this.state[type] })
     }
 
     this.onCloseDialog = () => {
@@ -24,9 +29,30 @@ class AccountApp extends React.Component {
   }
 
   render() {
-    // debug('this.props Account', this.props)
+    debug('this.props Account', this.props)
     const { account, primaryColor, apis, refresh, openSnackBar } = this.props
     if (!account) return <div />
+    const tooltipWeChat = (
+      <div style={{ width: 300, textAlign: 'left', whiteSpace: 'normal' }}>
+        <div style={{ fontWeight: 500 }}>
+          请您下载手机APP“私有群”进行微信绑定
+        </div>
+        <div style={{ fontSize: 13, lineHeight: '24px' }}>
+          闻上私有群是一款将您通过微信小程序或私有群APP分享的所有内容均保存到当前设备的独立应用。
+        </div>
+      </div>
+    )
+
+    const tooltipUserName = (
+      <div style={{ width: 300, textAlign: 'left', whiteSpace: 'normal' }}>
+        <div style={{ fontWeight: 500 }}>
+          { `您当前的用户名为：${account.username}`}
+        </div>
+        <div style={{ fontSize: 13, lineHeight: '24px' }}>
+          设备登录用户名是系统用户名，也是您登录Samba的用户名。
+        </div>
+      </div>
+    )
     return (
       <div style={{ paddingLeft: 68, paddingTop: 16 }}>
 
@@ -37,6 +63,7 @@ class AccountApp extends React.Component {
             <IconButton
               iconStyle={{ width: 64, height: 64, color: primaryColor }}
               style={{ width: 96, height: 96, padding: 16 }}
+              onTouchTap={() => this.toggleDialog('editAvatar')}
             >
               <ActionAccountCircle />
             </IconButton>
@@ -45,7 +72,7 @@ class AccountApp extends React.Component {
 
         {/* username */}
         <div style={{ flex: '0 0 560px', fontSize: 24, color: 'rgba(0, 0, 0, 0.87)', height: 36 }}>
-          {`${account.username}`}
+          { account.username }
         </div>
 
         {/* usertype */}
@@ -56,11 +83,23 @@ class AccountApp extends React.Component {
                 '您是系统的第一个用户，是最高权限的系统管理员。' :
                 account.isAdmin ? '您是系统管理员。' : '您是系统普通用户。'
             }
+            {
+              '您尚未绑定您的微信帐号'
+            }
+            <IconButton
+              iconStyle={{ width: 18, height: 18, color: primaryColor }}
+              style={{ width: 36, height: 36, padding: 8 }}
+              tooltip={tooltipWeChat}
+              touch
+              tooltipPosition="bottom-right"
+            >
+              <ActionAccountCircle />
+            </IconButton>
           </div>
         </div>
 
         <div style={{ height: 16 }} />
-        <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
+        <Divider style={{ color: 'rgba(0, 0, 0, 0.54)', maxWidth: 760 }} />
         <div style={{ height: 32 }} />
 
         {/* change username */}
@@ -71,7 +110,16 @@ class AccountApp extends React.Component {
               <Username color={this.props.primaryColor} />
             </div>
             <div style={{ flex: '0 0 560px', fontSize: 20, color: 'rgba(0, 0, 0, 0.87)' }}>
-              用户名
+              { '设备登录用户名' }
+              <IconButton
+                iconStyle={{ width: 18, height: 18, color: primaryColor }}
+                style={{ width: 36, height: 36, padding: 8 }}
+                tooltip={tooltipUserName}
+                touch
+                tooltipPosition="bottom-right"
+              >
+                <ActionAccountCircle />
+              </IconButton>
             </div>
           </div>
         </div>
@@ -91,8 +139,6 @@ class AccountApp extends React.Component {
           </div>
         </div>
 
-        <div style={{ height: 16 }} />
-        <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
         <div style={{ height: 32 }} />
 
         {/* change password */}
@@ -123,7 +169,7 @@ class AccountApp extends React.Component {
           </div>
         </div>
 
-        {/* dialog */}
+        {/* change account dialog */}
         <DialogOverlay open={!!this.state.openDialog} onRequestClose={this.onCloseDialog}>
           {
             this.state.openDialog &&
@@ -133,6 +179,20 @@ class AccountApp extends React.Component {
                 apis={apis}
                 op={this.state.openDialog}
               />
+          }
+        </DialogOverlay>
+
+        {/* edit avatar dialog */}
+        <DialogOverlay open={!!this.state.editAvatar}>
+          {
+            this.state.editAvatar &&
+            <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
+              <div style={{ color: 'rgba(0,0,0,0.54)' }}>{'请绑定微信，将会自动获取您的微信头像。'}</div>
+              <div style={{ height: 24 }} />
+              <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                <FlatButton label="确定" primary onTouchTap={() => this.toggleDialog('editAvatar')} />
+              </div>
+            </div>
           }
         </DialogOverlay>
       </div>
