@@ -72,6 +72,7 @@ class Fruitmix extends React.Component {
   }
 
   nav(view) {
+    global.mdns.scan()
     setTimeout(() => {
       const mdns = global.mdnsStore
       if (mdns.length > 0) {

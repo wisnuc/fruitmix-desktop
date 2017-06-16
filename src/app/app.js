@@ -16,17 +16,16 @@ import '../assets/css/app.css'
 const debug = Debug('app')
 localStorage.debug = 'component:*' 
 
-/* start mdns scan */
-global.mdnsStore = []
-global.mdns = MDNS(ipcRenderer, global.mdnsStore)
-global.mdns.scan()
-
 /* required by Material UI */
 injectTapEventPlugin()
 
 /* render method */
 const render = () => ReactDom.render(<Fruitmix />, document.getElementById('app'))
 
+/* start mdns scan */
+global.mdnsStore = []
+global.mdns = MDNS(ipcRenderer, global.mdnsStore, render)
+global.mdns.scan()
 
 /* load config TODO */
 ipcRenderer.on('CONFIG_LOADED', (event, config) => {
