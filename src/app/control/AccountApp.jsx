@@ -4,6 +4,7 @@ import { Divider, IconButton } from 'material-ui'
 import ActionAccountCircle from 'material-ui/svg-icons/action/account-circle'
 import Username from 'material-ui/svg-icons/action/perm-identity'
 import Password from 'material-ui/svg-icons/action/lock-outline'
+import HelpIcon from 'material-ui/svg-icons/action/help-outline'
 import FlatButton from '../common/FlatButton'
 import DialogOverlay from '../common/DialogOverlay'
 import ChangeAccountDialog from './ChangeAccountDialog'
@@ -77,7 +78,7 @@ class AccountApp extends React.Component {
 
         {/* usertype */}
         <div style={{ flex: '0 0 560px' }}>
-          <div style={{ fontSize: 14, lineHeight: '26px', color: 'rgba(0, 0, 0, 0.87)' }} >
+          <div style={{ fontSize: 14, lineHeight: '26px', color: 'rgba(0, 0, 0, 0.87)' }}>
             {
               account.isAdmin && account.isFirstUser ?
                 '您是系统的第一个用户，是最高权限的系统管理员。' :
@@ -88,12 +89,12 @@ class AccountApp extends React.Component {
             }
             <IconButton
               iconStyle={{ width: 18, height: 18, color: primaryColor }}
-              style={{ width: 36, height: 36, padding: 8 }}
+              style={{ width: 36, height: 36, padding: 8, verticalAlign: 'sub' }}
               tooltip={tooltipWeChat}
               touch
               tooltipPosition="bottom-right"
             >
-              <ActionAccountCircle />
+              <HelpIcon />
             </IconButton>
           </div>
         </div>
@@ -118,7 +119,7 @@ class AccountApp extends React.Component {
                 touch
                 tooltipPosition="bottom-right"
               >
-                <ActionAccountCircle />
+                <HelpIcon />
               </IconButton>
             </div>
           </div>

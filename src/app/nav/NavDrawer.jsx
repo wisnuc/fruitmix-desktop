@@ -147,7 +147,7 @@ class NavDrawer extends React.Component {
           <div style={{ height: 56, marginLeft: 16, marginTop: -8 }}>
             <div style={{ fontSize: 16, fontWeight: 500, color: 'rgba(255, 255, 255, 1)' }}>{username}</div>
             <div style={{ height: 4 }} />
-            <div style={{ fontSize: 16, fontWeight: 400, color: 'rgba(255, 255, 255, 0.7)' }}>{`@${serial}`}</div>
+            <div style={{ fontSize: 16, fontWeight: 400, color: 'rgba(255, 255, 255, 0.7)' }}>{'设备名称：闻上盒子'}</div>
           </div>
         </div>
 

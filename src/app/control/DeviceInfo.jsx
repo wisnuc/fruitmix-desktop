@@ -1,42 +1,29 @@
 import React from 'react'
 import Debug from 'debug'
+import prettysize from 'prettysize'
+import { TextField, Divider } from 'material-ui'
 import ActionDns from 'material-ui/svg-icons/action/dns'
 import CPU from 'material-ui/svg-icons/hardware/memory'
+import TV from 'material-ui/svg-icons/hardware/tv'
 import Memory from 'material-ui/svg-icons/device/sd-storage'
+import ModeEdit from 'material-ui/svg-icons/editor/mode-edit'
 
 const debug = Debug('component:control:deviceinfo')
 
-/** sample dmidecode for vmware guest / window host
-  "dmidecode": {
-    "processorFrequency": "3300 MHz",
-    "processorVersion": "Intel(R) Core(TM) i5-4590 CPU @ 3.30GHz",
-    "processorManufacturer": "GenuineIntel",
-    "processorFamily": "Unknown",
-    "chassisAssetTag": "No Asset Tag",
-    "chassisSerialNumber": "None",
-    "chassisVersion": "N/A",
-    "chassisType": "Other",
-    "chassisManufacturer": "No Enclosure",
-    "baseboardAssetTag": "Not Specified",
-    "baseboardSerialNumber": "None",
-    "baseboardVersion": "None",
-    "baseboardProductName": "440BX Desktop Reference Platform",
-    "baseboardManufacturer": "Intel Corporation",
-    "systemUuid": "564DF053-1B08-DB67-0B1F-C654F24CC61B",
-    "systemSerialNumber": "VMware-56 4d f0 53 1b 08 db 67-0b 1f c6 54 f2 4c c6 1b",
-    "systemVersion": "None",
-    "systemProductName": "VMware Virtual Platform",
-    "systemManufacturer": "VMware, Inc.",
-    "biosReleaseDate": "07/02/2015",
-    "biosVersion": "6.00",
-    "biosVendor": "Phoenix Technologies LTD"
-  },
-**/
+const phaseData = value => prettysize(parseInt(value, 10) * 1024)
 
 class DeviceInfo extends React.PureComponent {
 
   constructor(props) {
     super(props)
+    this.state = {
+      titleHover: false
+    }
+
+    this.currentLabel = '我的盒子'
+    this.updateLabel = (value) => {
+      this.setState({ label: value, errorText: '' })
+    }
   }
 
   renderList(Icon, titles, values) {
@@ -63,7 +50,7 @@ class DeviceInfo extends React.PureComponent {
 
   renderDivider() {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', marginLeft: 80 }}>
+      <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', marginLeft: 80, width: 760 }}>
         <div style={{ height: 8 }} />
         <hr style={{ marginRight: 80, backgroundColor: 'rgb(224, 224, 224)', border: 0, height: 1, width: 'calc(100% - 72px)' }} />
         <div style={{ height: 8 }} />
@@ -72,10 +59,10 @@ class DeviceInfo extends React.PureComponent {
   }
 
   render() {
-    // debug('this.props.device', this.props.device)
+    debug('this.props.device', this.props.device)
     if (!this.props.device) return <div />
 
-    const { cpuInfo, memInfo, ws215i, dmidecode, release, commit } = this.props.device
+    const { cpuInfo, memInfo, ws215i, release, commit } = this.props.device
 
     const cpuIcon = CPU
 
@@ -88,7 +75,7 @@ class DeviceInfo extends React.PureComponent {
     const cpuValues = [
       cpuInfo.length,
       cpuInfo[0].modelName,
-      cpuInfo[0].cacheSize
+      phaseData(cpuInfo[0].cacheSize)
     ]
 
     const memTitles = [
@@ -100,9 +87,9 @@ class DeviceInfo extends React.PureComponent {
     const menIcon = Memory
 
     const memValues = [
-      memInfo.memTotal,
-      memInfo.memFree,
-      memInfo.memAvailable
+      phaseData(memInfo.memTotal),
+      phaseData(memInfo.memFree),
+      phaseData(memInfo.memAvailable)
     ]
 
     let relTitles
@@ -149,6 +136,61 @@ class DeviceInfo extends React.PureComponent {
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'auto' }}>
         <div style={{ height: 16 }} />
+        <div style={{ height: 72, display: 'flex', alignItems: 'center', width: '100%' }}>
+          <div style={{ flex: '0 0 24px' }} />
+          <div style={{ flex: '0 0 56px' }} >
+            <TV color={this.props.primaryColor} />
+          </div>
+
+          {/* device name */}
+          <div>
+            <div
+              style={{ height: 48, fontSize: 16, color: 'rgba(0, 0, 0, 0.87)' }}
+              onMouseOver={() => this.setState({ titleHover: true })}
+              onMouseOut={() => this.setState({ titleHover: false })}
+            >
+              <div style={{ height: 16 }} />
+              {
+                this.state.modify ?
+                  <div style={{ marginTop: -8 }}>
+                    {/* FIXME */}
+                    <TextField
+                      name="deviceName"
+                      onChange={e => this.updateLabel(e.target.value)}
+                      maxLength={7}
+                      value={this.state.modify ? this.state.label : this.currentLabel}
+                      errorText={this.state.errorText}
+                      onBlur={() => this.setState({ modify: false, changed: true })}
+                      ref={(input) => { if (input && this.state.modify) { input.focus() } }}
+                      inputStyle={{ fontSize: 16, fontWeight: 500 }}
+                    />
+                  </div> :
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      height: 32,
+                      fontSize: 16,
+                      fontWeight: 500
+                    }}
+                    onTouchTap={() => this.setState({ modify: true })}
+                  >
+                    { this.state.label ? this.state.label : this.currentLabel }
+                    { <ModeEdit color={this.props.primaryColor} style={{ marginLeft: 24 }} /> }
+                  </div>
+              }
+              {
+                <Divider
+                  color="rgba(0, 0, 0, 0.87)"
+                  style={{ opacity: !this.state.modify && this.state.titleHover ? 1 : 0 }}
+                />
+              }
+            </div>
+            <div style={{ fontSize: 14, flex: '0 0 240px', color: 'rgba(0, 0, 0, 0.54)' }}> { '设备名称' } </div>
+          </div>
+        </div>
+
+        <this.renderDivider />
         { ws215i && this.renderList(ws215iIcon, ws215iTitles, ws215iValues) }
         { ws215i && <this.renderDivider /> }
         { release && this.renderList(relIcon, relTitles, relValues) }

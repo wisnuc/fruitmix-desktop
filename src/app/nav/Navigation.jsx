@@ -23,8 +23,11 @@ import FileSharedWithOthers from '../view/FileSharedWithOthers'
 import Transmission from '../view/Transmission'
 
 import Media from '../view/Media'
+import Assistant from '../view/Assistant'
 import MediaShare from '../view/MediaShare'
 import MediaAlbum from '../view/MediaAlbum'
+
+import Trash from '../view/Trash'
 
 import Account from '../view/Account'
 
@@ -60,8 +63,11 @@ class NavViews extends Component {
     this.install('transmission', Transmission)
 
     this.install('media', Media)
+    this.install('assistant', Assistant)
     // this.install('mediaShare', MediaShare)
     // this.install('mediaAlbum', MediaAlbum)
+
+    this.install('trash', Trash)
 
     this.install('account', Account)
     this.install('adminUsers', AdminUsers)

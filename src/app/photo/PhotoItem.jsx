@@ -7,8 +7,8 @@ import { CheckIcon } from './Svgs'
 const debug = Debug('component:photoApp:photoItem:')
 
 class PhotoItem extends React.Component {
-  constructor(props, context) {
-    super(props, context)
+  constructor(props) {
+    super(props)
 
     this.state = {
       action: false,
@@ -56,7 +56,6 @@ class PhotoItem extends React.Component {
         <div style={{ position: 'relative', height: '100%', width: '100%' }} >
           {/* renderHover */}
           {
-            /*
             (this.state.action || this.state.hover) && <div
               style={{
                 position: 'absolute',
@@ -75,7 +74,6 @@ class PhotoItem extends React.Component {
                 color={this.state.action ? '#1E88E5' : '#90CAF9'}
               />
             </div>
-            */
           }
 
           {/* renderImage */}
