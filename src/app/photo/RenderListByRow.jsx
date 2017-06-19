@@ -33,6 +33,7 @@ class RenderListByRow extends React.Component {
                 ipcRenderer={this.props.ipcRenderer}
                 addListToSelection={this.props.addListToSelection}
                 removeListToSelection={this.props.removeListToSelection}
+                selectedItems={this.props.selectedItems}
               />
             ))
           }

@@ -229,16 +229,15 @@ class Media extends Base {
 
 
     this.addListToSelection = (digest) => {
-      // debug('this.addListToSelection this.state.selectedItems', this.state.selectedItems)
       const hadDigest = this.state.selectedItems.findIndex(item => item === digest) >= 0
+      debug('this.addListToSelection this.state.selectedItems', this.state.selectedItems, digest, hadDigest)
       if (!hadDigest) {
-        this.setState(prevState => ({ selectedItems: [...prevState.selectedItems, digest]
-        }))
+        this.setState({ selectedItems: [...this.state.selectedItems, digest] })
       }
     }
 
     this.removeListToSelection = (digest) => {
-      // debug('this.removeListToSelection this.state.selectedItems', this.state.selectedItems)
+      debug('this.removeListToSelection this.state.selectedItems', this.state.selectedItems)
       const hadDigest = this.state.selectedItems.findIndex(item => item === digest) >= 0
       if (hadDigest) {
         this.setState((prevState) => {
@@ -367,6 +366,7 @@ class Media extends Base {
       memoize={this.memoize}
       removeListToSelection={this.removeListToSelection}
       addListToSelection={this.addListToSelection}
+      selectedItems={this.state.selectedItems}
     />)
   }
 }

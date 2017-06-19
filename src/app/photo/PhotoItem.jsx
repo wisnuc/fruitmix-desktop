@@ -31,6 +31,15 @@ class PhotoItem extends React.Component {
         this.forceUpdate()
       }
     }
+
+    this.touchImage = () => {
+      debug(this.props.selectedItems)
+      if (this.props.selectedItems.length > 0) {
+        this.setState({ action: false }, () => this.props.removeListToSelection(this.props.digest))
+      } else {
+        this.props.lookPhotoDetail(this.props.digest)
+      }
+    }
   }
 
   componentDidMount() {
@@ -40,6 +49,7 @@ class PhotoItem extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
+    return true
     return (this.state !== nextState)
   }
 
@@ -85,15 +95,22 @@ class PhotoItem extends React.Component {
               overflow: 'hidden',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              backgroundColor: '#eeeeee'
             }}
-            onTouchTap={() => this.props.lookPhotoDetail(this.props.digest)}
+            onTouchTap={this.touchImage}
             onMouseMove={() => this.setState({ hover: true })}
             onMouseLeave={() => this.setState({ hover: false })}
           >
             {
-              !this.path ? <div style={{ backgroundColor: '#eeeeee', height: '100%', width: '100%' }} /> :
-              <img src={this.path} alt="img" style={{ objectFit: 'cover' }} />
+              this.path &&
+              <img
+                src={this.path}
+                alt="img"
+                height={this.state.action ? 180 : 210}
+                width={this.state.action ? 180 : 210}
+                style={{ objectFit: 'cover' }}
+              />
             }
           </div>
         </div>

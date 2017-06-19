@@ -75,6 +75,7 @@ class PhotoApp extends React.Component {
                 addListToSelection={this.props.addListToSelection}
                 removeListToSelection={this.props.removeListToSelection}
                 memoize={this.props.memoize}
+                selectedItems={this.props.selectedItems}
               /> :
               <div
                 style={{
