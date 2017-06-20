@@ -11,17 +11,17 @@ class PhotoItem extends React.Component {
     super(props)
 
     this.state = {
-      action: false,
+      selected: this.props.selectedItems.findIndex(item => item === this.props.digest) >= 0,
       hover: false
     }
 
     this.path = ''
 
     this.onSelectIconButton = () => {
-      if (!this.state.action) {
-        this.setState({ action: true }, () => this.props.addListToSelection(this.props.digest))
+      if (!this.state.selected) {
+        this.setState({ selected: true }, () => this.props.addListToSelection(this.props.digest))
       } else {
-        this.setState({ action: false }, () => this.props.removeListToSelection(this.props.digest))
+        this.setState({ selected: false }, () => this.props.removeListToSelection(this.props.digest))
       }
     }
 
@@ -35,7 +35,11 @@ class PhotoItem extends React.Component {
     this.touchImage = () => {
       debug(this.props.selectedItems)
       if (this.props.selectedItems.length > 0) {
-        this.setState({ action: false }, () => this.props.removeListToSelection(this.props.digest))
+        if (this.state.selected) {
+          this.setState({ selected: false }, () => this.props.removeListToSelection(this.props.digest))
+        } else {
+          this.setState({ selected: true }, () => this.props.addListToSelection(this.props.digest))
+        }
       } else {
         this.props.lookPhotoDetail(this.props.digest)
       }
@@ -46,6 +50,13 @@ class PhotoItem extends React.Component {
     this.session = UUID.v4()
     this.props.ipcRenderer.send('mediaShowThumb', this.session, this.props.digest, 210, 210)
     this.props.ipcRenderer.on('getThumbSuccess', this.updatePath)
+  }
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.selectedItems.length !== this.props.selectedItems.length) {
+      this.setState({
+        selected: nextProps.selectedItems.findIndex(item => item === nextProps.digest) >= 0
+      })
+    }
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -66,7 +77,7 @@ class PhotoItem extends React.Component {
         <div style={{ position: 'relative', height: '100%', width: '100%' }} >
           {/* renderHover */}
           {
-            (this.state.action || this.state.hover) && <div
+            (this.state.selected || this.state.hover) && <div
               style={{
                 position: 'absolute',
                 zIndex: 100,
@@ -80,8 +91,8 @@ class PhotoItem extends React.Component {
               onMouseLeave={() => this.setState({ hover: false })}
             >
               <CheckIcon
-                hoverColor={this.state.action ? '#1E88E5' : '#42A5F5'}
-                color={this.state.action ? '#1E88E5' : '#90CAF9'}
+                hoverColor={this.state.selected ? '#1E88E5' : '#42A5F5'}
+                color={this.state.selected ? '#1E88E5' : '#90CAF9'}
               />
             </div>
           }
@@ -107,8 +118,8 @@ class PhotoItem extends React.Component {
               <img
                 src={this.path}
                 alt="img"
-                height={this.state.action ? 180 : 210}
-                width={this.state.action ? 180 : 210}
+                height={this.state.selected ? 180 : 210}
+                width={this.state.selected ? 180 : 210}
                 style={{ objectFit: 'cover' }}
               />
             }

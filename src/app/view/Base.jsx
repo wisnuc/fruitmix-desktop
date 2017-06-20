@@ -67,6 +67,10 @@ class Base extends EventEmitter {
     return this.menuIcon()
   }
 
+  hasQuickNav() {
+    return true
+  }
+
   // 'light' or 'transparent', no appBarColor required
   // 'colored' or 'dark', should further provide appBarColor
   appBarStyle() {

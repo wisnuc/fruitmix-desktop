@@ -230,26 +230,37 @@ class Media extends Base {
 
     this.addListToSelection = (digest) => {
       const hadDigest = this.state.selectedItems.findIndex(item => item === digest) >= 0
-      debug('this.addListToSelection this.state.selectedItems', this.state.selectedItems, digest, hadDigest)
+      // debug('this.addListToSelection this.state.selectedItems', this.state.selectedItems, digest, hadDigest)
       if (!hadDigest) {
         this.setState({ selectedItems: [...this.state.selectedItems, digest] })
       }
     }
 
     this.removeListToSelection = (digest) => {
-      debug('this.removeListToSelection this.state.selectedItems', this.state.selectedItems)
+      // debug('this.removeListToSelection this.state.selectedItems', this.state.selectedItems)
       const hadDigest = this.state.selectedItems.findIndex(item => item === digest) >= 0
       if (hadDigest) {
-        this.setState((prevState) => {
-          const index = prevState.selectedItems.findIndex(item => item === digest)
-          return {
-            selectedItems: [
-              ...prevState.selectedItems.slice(0, index),
-              ...prevState.selectedItems.slice(index + 1)
-            ]
-          }
+        const index = this.state.selectedItems.findIndex(item => item === digest)
+        this.setState({
+          selectedItems: [
+            ...this.state.selectedItems.slice(0, index),
+            ...this.state.selectedItems.slice(index + 1)
+          ]
         })
       }
+    }
+
+    this.clearSelect = () => {
+      this.setState({ selectedItems: [] })
+    }
+
+    this.startDownload = () => {
+      this.ctx.openSnackBar(`开始下载，共${this.state.selectedItems.length}张照片`)
+      this.setState({ selectedItems: [] })
+    }
+    this.removeMedia = () => {
+      this.ctx.openSnackBar(`移除${this.state.selectedItems.length}张照片`)
+      this.setState({ selectedItems: [] })
     }
   }
 
@@ -324,6 +335,10 @@ class Media extends Base {
     return 400
   }
 
+  hasQuickNav() {
+    return !this.state.selectedItems.length
+  }
+
   renderNavigationMenu({ style, onTouchTap }) {
     const CustomStyle = Object.assign(style, { opacity: 1 })
     return (
@@ -367,6 +382,10 @@ class Media extends Base {
       removeListToSelection={this.removeListToSelection}
       addListToSelection={this.addListToSelection}
       selectedItems={this.state.selectedItems}
+      clearSelect={this.clearSelect}
+      primaryColor={this.groupPrimaryColor()}
+      startDownload={this.startDownload}
+      removeMedia={this.removeMedia}
     />)
   }
 }

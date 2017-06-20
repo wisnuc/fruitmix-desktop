@@ -153,6 +153,7 @@ class NavViews extends Component {
 
     let color = this.currentView().primaryColor()
     let group = this.views[this.state.nav].navGroup()
+    let hasQuickNavs = this.currentView().hasQuickNav()
     let navGroupList = Object.keys(this.views).filter(key => this.views[key].navGroup() === this.views[this.state.nav].navGroup())
 
     /* hide QuickNav if there is only one nav */
@@ -175,7 +176,7 @@ class NavViews extends Component {
         }}
       >
         {
-          navGroupList.map((key) => {
+          hasQuickNavs && navGroupList.map((key) => {
             if (!ws215i && key === 'fanControl') return <div key={`quicknav-${key}`} />
             return (
               <QuickNav
