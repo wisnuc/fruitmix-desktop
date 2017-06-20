@@ -49,7 +49,7 @@ class AdminUsersApp extends React.Component {
           height: 64,
           display: 'flex',
           alignItems: 'center',
-          fontSize: 16,
+          fontSize: 14,
           color: user.nologin ? 'rgba(0,0,0,0.54)' : 'rgba(0,0,0,0.87)'
         }}
         key={user.uuid}
@@ -59,12 +59,13 @@ class AdminUsersApp extends React.Component {
           <Avatar>{ user.username.slice(0, 1).toUpperCase() }</Avatar>
         </div>
         <div style={{ flex: '0 0 32px' }} />
-        <div style={{ flex: '0 0 270px' }}>{ user.username }</div>
-        <div style={{ flex: '0 0 125px', textAlign: 'center' }}>{ user.isAdmin ? '管理员' : '普通用户' }</div>
-        <div style={{ flex: '0 0 125px', textAlign: 'center' }}>{ 0 ? '是' : '否' }</div>
-        <div style={{ flex: '0 0 200px', textAlign: 'center' }}>{ 0 ? '' : '-' }</div>
-        <div style={{ flex: '0 0 200px', textAlign: 'center' }}>{ 0 ? '' : '-' }</div>
-        <div style={{ flex: '0 0 150px', textAlign: 'center' }}>
+        <div style={{ flex: '0 0 320px' }}>{ user.username }</div>
+        <div style={{ flex: '0 0 141px' }}>{ user.isAdmin ? '管理员' : '普通用户' }</div>
+        <div style={{ flex: '0 0 96px' }}>{ 0 ? '是' : '否' }</div>
+        <div style={{ flex: '0 0 150px', textAlign: 'right' }}>{ 0 ? '' : '-' }</div>
+        <div style={{ flex: '0 0 178px', textAlign: 'right' }}>{ 0 ? '' : '-' }</div>
+        <div style={{ flex: '0 0 56px' }} />
+        <div style={{ flex: '0 0 116px', textAlign: 'left' }}>
           {
             user.isFirstUser
             ? <div />
@@ -76,7 +77,7 @@ class AdminUsersApp extends React.Component {
             />
           }
         </div>
-        <div style={{ flex: '0 0 50px', textAlign: 'center' }}>
+        <div style={{ flex: '0 0 50px' }}>
           {
             user.isFirstUser
             ? <div />
@@ -106,19 +107,19 @@ class AdminUsersApp extends React.Component {
         <div style={{ overflow: 'auto', height: '100%' }}>
           <div style={{ height: 48, display: 'flex', alignItems: 'center', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
             <div style={{ flex: '0 0 104px' }} />
-            <div style={{ flex: '0 0 270px' }}>
+            <div style={{ flex: '0 0 320px' }}>
               设备登录用户名
             </div>
-            <div style={{ flex: '0 0 125px', textAlign: 'center' }}>
+            <div style={{ flex: '0 0 141px' }}>
               设备使用权限
             </div>
-            <div style={{ flex: '0 0 125px', textAlign: 'center' }}>
+            <div style={{ flex: '0 0 96px' }}>
               绑定微信
             </div>
-            <div style={{ flex: '0 0 200px', textAlign: 'center' }}>
+            <div style={{ flex: '0 0 150px', textAlign: 'right' }}>
               微信ID
             </div>
-            <div style={{ flex: '0 0 200px', textAlign: 'center' }}>
+            <div style={{ flex: '0 0 178px', textAlign: 'right' }}>
               微信昵称
             </div>
           </div>

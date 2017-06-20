@@ -46,7 +46,7 @@ class PhotoDetailInline extends React.Component {
       this.props.ipcRenderer.send('mediaShowThumb', this.session, this.digest, 210, 210)
 
       /* memoize digest */
-      // this.props.memoize({ currentDigest: this.digest, currentScrollTop: 0 })
+      this.props.memoize({ currentDigest: this.digest, currentScrollTop: 0 })
       // debug('this.props.memoize', this.props.memoize())
       debug('render photoDetail', this.props.items.length, this.props.items[this.props.seqIndex])
     }

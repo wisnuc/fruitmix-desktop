@@ -77,6 +77,10 @@ class AdminDrives extends Base {
   }
 
   menuName() {
+    return '共享文件夹管理'
+  }
+
+  quickName() {
     return '共享文件夹'
   }
 
@@ -101,7 +105,7 @@ class AdminDrives extends Base {
   }
 
   renderTitle({ style }) {
-    return <div style={Object.assign({}, style, { marginLeft: 176 })}>共享文件夹</div>
+    return <div style={Object.assign({}, style, { marginLeft: 176 })}>共享文件夹管理</div>
   }
 
   renderDetail({ style, openSnackBar }) {

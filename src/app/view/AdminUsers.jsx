@@ -42,7 +42,7 @@ class AdminUsers extends Base {
   }
 
   menuName() {
-    return '用户'
+    return '用户管理'
   }
 
   menuIcon() {
@@ -58,7 +58,7 @@ class AdminUsers extends Base {
   }
 
   renderTitle({ style }) {
-    return <div style={Object.assign({}, style, { marginLeft: 176 })}>用户</div>
+    return <div style={Object.assign({}, style, { marginLeft: 176 })}>用户管理</div>
   }
 
   /** renderers **/

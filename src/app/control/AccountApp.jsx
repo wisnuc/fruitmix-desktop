@@ -33,25 +33,46 @@ class AccountApp extends React.Component {
     debug('this.props Account', this.props)
     const { account, primaryColor, apis, refresh, openSnackBar } = this.props
     if (!account) return <div />
+    const tooltipStyle = {
+    }
+
     const tooltipWeChat = (
-      <div style={{ width: 300, textAlign: 'left', whiteSpace: 'normal' }}>
-        <div style={{ fontWeight: 500 }}>
-          请您下载手机APP“私有群”进行微信绑定
-        </div>
-        <div style={{ fontSize: 13, lineHeight: '24px' }}>
-          闻上私有群是一款将您通过微信小程序或私有群APP分享的所有内容均保存到当前设备的独立应用。
-        </div>
+      <div
+        style={{
+          width: 350,
+          textAlign: 'left',
+          whiteSpace: 'normal',
+          fontSize: 14,
+          fontWeight: 500,
+          lineHeight: '26px',
+          display: 'flex',
+          alignItems: 'center',
+          height: 96
+        }}
+      >
+        请您下载手机APP“私有群”进行微信绑定
+        <br />
+        闻上私有群是一款将您通过微信小程序或私有群APP分享的所有内容均保存到当前设备的独立应用。
       </div>
     )
 
     const tooltipUserName = (
-      <div style={{ width: 300, textAlign: 'left', whiteSpace: 'normal' }}>
-        <div style={{ fontWeight: 500 }}>
-          { `您当前的用户名为：${account.username}`}
-        </div>
-        <div style={{ fontSize: 13, lineHeight: '24px' }}>
-          设备登录用户名是系统用户名，也是您登录Samba的用户名。
-        </div>
+      <div
+        style={{
+          width: 380,
+          textAlign: 'left',
+          whiteSpace: 'normal',
+          fontSize: 14,
+          fontWeight: 500,
+          lineHeight: '26px',
+          display: 'flex',
+          alignItems: 'center',
+          height: 72
+        }}
+      >
+        { `您当前的用户名为：${account.username}`}
+        <br />
+        设备登录用户名是系统用户名，也是您登录Samba的用户名。
       </div>
     )
     return (
@@ -72,7 +93,7 @@ class AccountApp extends React.Component {
         </div>
 
         {/* username */}
-        <div style={{ flex: '0 0 560px', fontSize: 24, color: 'rgba(0, 0, 0, 0.87)', height: 36 }}>
+        <div style={{ flex: '0 0 560px', fontSize: 24, color: 'rgba(0, 0, 0, 0.87)', height: 24 }}>
           { account.username }
         </div>
 
@@ -99,7 +120,7 @@ class AccountApp extends React.Component {
           </div>
         </div>
 
-        <div style={{ height: 16 }} />
+        <div style={{ height: 8 }} />
         <Divider style={{ color: 'rgba(0, 0, 0, 0.54)', maxWidth: 760 }} />
         <div style={{ height: 32 }} />
 
@@ -110,8 +131,8 @@ class AccountApp extends React.Component {
               <div style={{ height: 8 }} />
               <Username color={this.props.primaryColor} />
             </div>
-            <div style={{ flex: '0 0 560px', fontSize: 20, color: 'rgba(0, 0, 0, 0.87)' }}>
-              { '设备登录用户名' }
+            <div style={{ flex: '0 0 560px', color: 'rgba(0, 0, 0, 0.87)', display: 'flex', alignItems: 'center' }}>
+              <div> { '设备登录用户名' } </div>
               <IconButton
                 iconStyle={{ width: 18, height: 18, color: primaryColor }}
                 style={{ width: 36, height: 36, padding: 8 }}
@@ -149,7 +170,7 @@ class AccountApp extends React.Component {
               <div style={{ height: 8 }} />
               <Password color={this.props.primaryColor} />
             </div>
-            <div style={{ flex: '0 0 560px', fontSize: 20, color: 'rgba(0, 0, 0, 0.87)' }}>
+            <div style={{ flex: '0 0 560px', fontSize: 16, color: 'rgba(0, 0, 0, 0.87)' }}>
               密码
             </div>
           </div>

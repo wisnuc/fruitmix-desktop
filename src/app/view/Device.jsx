@@ -14,26 +14,27 @@ class Device extends Base {
 
     this.address = ctx.props.selectedDevice.mdev.address
     this.state = {
-      device: ''
+      device: null,
+      storage: null
     }
   }
 
   willReceiveProps(nextProps) {
     // console.log('device nextProps', nextProps)
-    if (!nextProps.selectedDevice || !nextProps.selectedDevice.device) return
+    if (!nextProps.selectedDevice || !nextProps.selectedDevice.device || !nextProps.selectedDevice.storage) return
     const device = nextProps.selectedDevice.device
     if (device.isPending() || device.isRejected()) return
+    const storage = nextProps.selectedDevice.storage
+    if (storage.isPending() || storage.isRejected()) return
 
-    /* now it's fulfilled */
-    const value = device.value()
-
-    if (value !== this.state.device) {
-      this.setState({ device: value })
+    if (device.value() !== this.state.device || storage.value() !== this.state.storage) {
+      this.setState({ device: device.value(), storage: storage.value() })
     }
   }
 
   navEnter() {
     this.ctx.props.selectedDevice.request('device')
+    this.ctx.props.selectedDevice.request('storage')
   }
 
   navLeave() {
@@ -60,13 +61,14 @@ class Device extends Base {
   }
 
   renderTitle({ style }) {
-    return <div style={style}>系统</div>
+    return <div style={style}>设备信息</div>
   }
 
   renderContent() {
     return (
       <DeviceInfo
         device={this.state.device}
+        storage={this.state.storage}
         primaryColor={this.groupPrimaryColor()}
       />
     )

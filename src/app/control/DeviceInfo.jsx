@@ -6,7 +6,10 @@ import ActionDns from 'material-ui/svg-icons/action/dns'
 import CPU from 'material-ui/svg-icons/hardware/memory'
 import TV from 'material-ui/svg-icons/hardware/tv'
 import Memory from 'material-ui/svg-icons/device/sd-storage'
+import StorageIcon from 'material-ui/svg-icons/device/storage'
+import { RAIDIcon } from '../maintenance/Svg'
 import ModeEdit from 'material-ui/svg-icons/editor/mode-edit'
+
 
 const debug = Debug('component:control:deviceinfo')
 
@@ -28,19 +31,18 @@ class DeviceInfo extends React.PureComponent {
 
   renderList(Icon, titles, values) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
+      <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: 420 }}>
         {
           titles.map((title, index) => (
             <div style={{ height: 72, display: 'flex', alignItems: 'center', width: '100%' }} key={title}>
               <div style={{ flex: '0 0 24px' }} />
-              <div style={{ flex: '0 0 56px' }} >
+              <div style={{ flex: '0 0 56px', marginTop: -16 }} >
                 { !index && <Icon color={this.props.primaryColor} /> }
               </div>
               <div>
-                <div style={{ fontSize: 16, flex: '0 0 240px', color: 'rgba(0, 0, 0, 0.87)' }}> { values[index] }</div>
-                <div style={{ fontSize: 14, flex: '0 0 240px', color: 'rgba(0, 0, 0, 0.54)' }}> { title } </div>
+                <div style={{ fontSize: 16, color: 'rgba(0, 0, 0, 0.87)' }}> { values[index] }</div>
+                <div style={{ fontSize: 14, color: 'rgba(0, 0, 0, 0.54)' }}> { title } </div>
               </div>
-              <div style={{ flexGrow: 1 }} />
             </div>
           ))
         }
@@ -50,7 +52,7 @@ class DeviceInfo extends React.PureComponent {
 
   renderDivider() {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', marginLeft: 80, width: 760 }}>
+      <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', marginLeft: 80 }}>
         <div style={{ height: 8 }} />
         <hr style={{ marginRight: 80, backgroundColor: 'rgb(224, 224, 224)', border: 0, height: 1, width: 'calc(100% - 72px)' }} />
         <div style={{ height: 8 }} />
@@ -59,11 +61,41 @@ class DeviceInfo extends React.PureComponent {
   }
 
   render() {
-    debug('this.props.device', this.props.device)
-    if (!this.props.device) return <div />
+    debug('this.props.device', this.props)
+    if (!this.props.device || !this.props.storage) return <div />
 
-    const { cpuInfo, memInfo, ws215i, release, commit } = this.props.device
+    const { cpuInfo, memInfo, ws215i } = this.props.device
+    const volume = this.props.storage.volumes[0] //FIXME
 
+    /* File System */
+    const fsIcon = RAIDIcon
+    const fsTitles = [
+      '文件系统类型',
+      '使用磁盘数量',
+      '磁盘阵列模式'
+    ]
+    const fsValues = [
+      'Brtfs',
+      volume.total,
+      volume.usage.data.mode.toUpperCase()
+    ]
+
+    /* storage */
+    const storageIcon = StorageIcon
+    const storageTitles = [
+      '总容量',
+      '用户数据空间',
+      '可用空间'
+    ]
+
+    const storageValues = [
+      prettysize(volume.usage.overall.deviceSize),
+      prettysize(volume.usage.data.size),
+      prettysize(volume.usage.overall.free)
+    ]
+
+
+    /* CPU */
     const cpuIcon = CPU
 
     const cpuTitles = [
@@ -78,6 +110,7 @@ class DeviceInfo extends React.PureComponent {
       phaseData(cpuInfo[0].cacheSize)
     ]
 
+    /* Memory */
     const memTitles = [
       '总内存',
       '未使用内存',
@@ -92,30 +125,10 @@ class DeviceInfo extends React.PureComponent {
       phaseData(memInfo.memAvailable)
     ]
 
-    let relTitles
-    let relValues
-    let relIcon
+    /* WISNUC */
     let ws215iTitles
     let ws215iValues
     let ws215iIcon
-
-    if (release) {
-      relIcon = ActionDns
-
-      relTitles = [
-        '版本',
-        '版本类型',
-        '发布时间',
-        '源码版本'
-      ]
-
-      relValues = [
-        release.tag_name + (release.prerelease ? ' beta' : ''),
-        release.prerelease ? '测试版' : '正式版',
-        new Date(release.published_at).toLocaleDateString('zh-CN'),
-        commit ? commit.slice(0, 12) : '未知'
-      ]
-    }
 
     if (ws215i) {
       ws215iIcon = ActionDns
@@ -162,17 +175,10 @@ class DeviceInfo extends React.PureComponent {
                       errorText={this.state.errorText}
                       onBlur={() => this.setState({ modify: false, changed: true })}
                       ref={(input) => { if (input && this.state.modify) { input.focus() } }}
-                      inputStyle={{ fontSize: 16, fontWeight: 500 }}
                     />
                   </div> :
                   <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      height: 32,
-                      fontSize: 16,
-                      fontWeight: 500
-                    }}
+                    style={{ display: 'flex', alignItems: 'center', height: 32 }}
                     onTouchTap={() => this.setState({ modify: true })}
                   >
                     { this.state.label ? this.state.label : this.currentLabel }
@@ -189,15 +195,18 @@ class DeviceInfo extends React.PureComponent {
             <div style={{ fontSize: 14, flex: '0 0 240px', color: 'rgba(0, 0, 0, 0.54)' }}> { '设备名称' } </div>
           </div>
         </div>
-
+        <div style={{ height: 16 }} />
         <this.renderDivider />
-        { ws215i && this.renderList(ws215iIcon, ws215iTitles, ws215iValues) }
-        { ws215i && <this.renderDivider /> }
-        { release && this.renderList(relIcon, relTitles, relValues) }
-        { release && <this.renderDivider /> }
-        { this.renderList(cpuIcon, cpuTitles, cpuValues) }
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          { ws215i && this.renderList(ws215iIcon, ws215iTitles, ws215iValues) }
+          { this.renderList(menIcon, memTitles, memValues) }
+          { this.renderList(cpuIcon, cpuTitles, cpuValues) }
+        </div>
         <this.renderDivider />
-        { this.renderList(menIcon, memTitles, memValues) }
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          { this.renderList(fsIcon, fsTitles, fsValues) }
+          { this.renderList(storageIcon, storageTitles, storageValues) }
+        </div>
       </div>
     )
   }
