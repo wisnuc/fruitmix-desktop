@@ -9,6 +9,7 @@ import ToggleCheckBoxOutlineBlank from 'material-ui/svg-icons/toggle/check-box-o
 import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import { List, AutoSizer } from 'react-virtualized'
+import { TXTIcon, WORDIcon, EXCELIcon, PPTIcon, PDFIcon } from '../common/Svg'
 
 const debug = Debug('component:file:FileContent:')
 
@@ -53,6 +54,33 @@ const renderCheck = check =>
     : check === 'checking'
       ? <ToggleCheckBoxOutlineBlank style={{ color: 'rgba(0,0,0,0.38)' }} />
       : null
+
+const renderFileIcon = (name) => {
+  let extension = name.replace(/^.*\./, '')
+  if (!extension || extension === name) extension = 'OTHER'
+  switch (extension.toUpperCase()) {
+    case 'PDF':
+      return (<PDFIcon style={{ color: '#db4437' }} />)
+    case 'TXT':
+      return (<TXTIcon style={{ color: 'rgba(0,0,0,0.54)' }} />)
+    case 'DOCX':
+      return (<WORDIcon style={{ color: '#4285f4' }} />)
+    case 'DOC':
+      return (<WORDIcon style={{ color: '#4285f4' }} />)
+    case 'XLS':
+      return (<EXCELIcon style={{ color: '#0f9d58' }} />)
+    case 'XLSX':
+      return (<EXCELIcon style={{ color: '#0f9d58' }} />)
+    case 'PPT':
+      return (<PPTIcon style={{ color: '#db4437' }} />)
+    case 'PPTX':
+      return (<PPTIcon style={{ color: '#db4437' }} />)
+    case 'OTHER':
+      return (<EditorInsertDriveFile style={{ color: 'rgba(0,0,0,0.54)' }} />)
+    default:
+      return (<EditorInsertDriveFile style={{ color: 'rgba(0,0,0,0.54)' }} />)
+  }
+}
 
 class Row extends PureComponent {
 
@@ -111,8 +139,8 @@ class Row extends PureComponent {
                 entry.type === 'folder' || entry.type === 'public' || entry.type === 'directory'
                 ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)' }} />
                 : entry.type === 'file'
-                ? <EditorInsertDriveFile style={{ color: 'rgba(0,0,0,0.54' }} />
-                : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54' }} />
+                ? renderFileIcon(entry.name)
+                : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)' }} />
               }
             </Avatar>
           </div>
