@@ -225,7 +225,9 @@ class PhotoList extends React.Component {
               let previousScrollTop = 0
               if (this.props.memoize().currentScrollTop) {
                 previousScrollTop = this.props.memoize().currentScrollTop
-              } else if (this.props.memoize().currentDigest) {
+              }
+              /*
+              else if (this.props.memoize().currentDigest) {
                 this.photoMapDates.forEach((list, index) => {
                   const Got = list.photos.findIndex(photo => photo[0] === this.props.memoize().currentDigest)
                   if (Got >= 0) {
@@ -233,6 +235,7 @@ class PhotoList extends React.Component {
                   }
                 })
               }
+              */
 
               /* function to render each row */
               const rowRenderer = ({ key, index, style, isScrolling }) => (

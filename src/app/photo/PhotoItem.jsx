@@ -2,7 +2,8 @@ import React from 'react'
 import UUID from 'node-uuid'
 import Debug from 'debug'
 import { Paper, Card, IconButton, CircularProgress } from 'material-ui'
-import { CheckIcon } from './Svgs'
+import ZoomIn from 'material-ui/svg-icons/action/zoom-in'
+import CheckIcon from 'material-ui/svg-icons/action/check-circle'
 
 const debug = Debug('component:photoApp:photoItem:')
 
@@ -75,7 +76,7 @@ class PhotoItem extends React.Component {
     return (
       <div style={style}>
         <div style={{ position: 'relative', height: '100%', width: '100%' }} >
-          {/* renderHover */}
+          {/* renderHoverCheck */}
           {
             (this.state.selected || this.state.hover) && <div
               style={{
@@ -84,15 +85,44 @@ class PhotoItem extends React.Component {
                 left: 5,
                 top: 5,
                 width: 18,
-                height: 18
+                height: 18,
+                backgroundColor: this.state.selected ? '#FFF' : ''
               }}
               onTouchTap={(e) => { this.onSelectIconButton(); e.stopPropagation() }}
               onMouseEnter={() => this.setState({ hover: true })}
               onMouseLeave={() => this.setState({ hover: false })}
             >
               <CheckIcon
-                hoverColor={this.state.selected ? '#1E88E5' : '#42A5F5'}
-                color={this.state.selected ? '#1E88E5' : '#90CAF9'}
+                hoverColor={this.state.selected ? '#1E88E5' : '#FFF'}
+                color={this.state.selected ? '#1E88E5' : 'rgba(255,255,255,0.54)'}
+              />
+            </div>
+          }
+
+          {/* render hover opendetial */}
+          {
+            this.state.hover && this.props.selectedItems.length > 0 && <div
+              style={{
+                position: 'absolute',
+                zIndex: 100,
+                width: this.state.selected ? 180 : 210,
+                height: 36,
+                color: 'blue',
+                left: this.state.selected ? 15 : 0,
+                bottom: this.state.selected ? 15 : 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                background: 'linear-gradient(0deg, rgba(0,0,0,0.54), rgba(0,0,0,0))'
+              }}
+              onTouchTap={(e) => { this.props.lookPhotoDetail(this.props.digest); e.stopPropagation() }}
+              onMouseEnter={() => this.setState({ hover: true })}
+              onMouseLeave={() => this.setState({ hover: false })}
+            >
+              <ZoomIn
+                style={{ margin: 8 }}
+                hoverColor="#FFF"
+                color="rgba(255,255,255,0.54)"
               />
             </div>
           }
@@ -120,7 +150,7 @@ class PhotoItem extends React.Component {
                 alt="img"
                 height={this.state.selected ? 180 : 210}
                 width={this.state.selected ? 180 : 210}
-                style={{ objectFit: 'cover' }}
+                style={{ objectFit: 'cover', transition: 'all 225ms cubic-bezier(0.0, 0.0, 0.2, 1)' }}
               />
             }
           </div>
