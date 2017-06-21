@@ -45,22 +45,15 @@ const sendInfor = () => {
 // handle will open dialog from electron to clean record of the task have been downloaded
 const cleanRecordHandle = () => {
   if (uploadedTasks.length === 0 && downloadedTasks.length === 0) return
-  dialog.showMessageBox({
-    type: 'question',
-    buttons: ['取消', '确定'],
-    title: '删除确认',
-    icon: null,
-    message: '你确定要清除所有传输记录吗？' }, (response) => {
-    if (!response) return
-    global.db.uploaded.remove({}, { multi: true }, (err) => {
-      if (err) return console.log(err)
-      uploadedTasks.length = 0
 
-      global.db.downloaded.remove({}, { multi: true }, (err) => {
-        if (err) return console.log(err)
-        downloadedTasks.length = 0
-        sendInfor()
-      })
+  global.db.uploaded.remove({}, { multi: true }, (err) => {
+    if (err) return console.log(err)
+    uploadedTasks.length = 0
+
+    global.db.downloaded.remove({}, { multi: true }, (err) => {
+      if (err) return console.log(err)
+      downloadedTasks.length = 0
+      sendInfor()
     })
   })
 }

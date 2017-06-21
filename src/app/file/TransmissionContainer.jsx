@@ -9,6 +9,7 @@ import PauseSvg from 'material-ui/svg-icons/av/pause'
 import RunningTask from './RunningTask'
 import FinishedTask from './FinishedTask'
 import FlatButton from '../common/FlatButton'
+import DialogOverlay from '../common/DialogOverlay'
 
 const debug = Debug('component:file:TrsContainer:')
 
@@ -26,11 +27,15 @@ class TrsContainer extends React.Component {
       menuShow: false,
       tasks: [],
       userTasks: [],
-      finishTasks: []
+      finishTasks: [],
+      clearRunningDialog: false,
+      clearFinishedDialog: false
     }
 
     this.taskSelected = []
     this.finishSelected = []
+
+    this.toggleDialog = op => this.setState({ [op]: !this.state[op] })
 
     this.keydown = (event) => {
       if (event.ctrlKey === this.state.ctrl && event.shiftKey === this.state.shift) return
@@ -293,19 +298,22 @@ class TrsContainer extends React.Component {
               allPaused ?
                 <FlatButton
                   label="全部开始"
+                  disabled={!userTasks.length}
                   icon={<PlaySvg style={{ color: '#000', opacity: 0.54 }} />}
                   onTouchTap={() => this.playAll(userTasks)}
                 /> :
                 <FlatButton
                   label="全部暂停"
+                  disabled={!userTasks.length}
                   icon={<PauseSvg style={{ color: '#000', opacity: 0.54 }} />}
                   onTouchTap={() => this.pauseAll(userTasks)}
                 />
             }
             <FlatButton
               label="全部取消"
+              disabled={!userTasks.length}
               icon={<DeleteSvg style={{ color: '#000', opacity: 0.54 }} />}
-              onTouchTap={() => this.deleteAll(userTasks)}
+              onTouchTap={() => this.toggleDialog('clearRunningDialog')}
             />
           </div>
         </div>
@@ -336,8 +344,9 @@ class TrsContainer extends React.Component {
           <div style={{ flex: '0 0 120px', display: 'flex', alignItems: 'center' }}>
             <FlatButton
               label="清除记录"
+              disabled={!finishTasks.length}
               icon={<DeleteSvg style={{ color: '#000', opacity: 0.54 }} />}
-              onTouchTap={this.cleanRecord}
+              onTouchTap={() => this.toggleDialog('clearFinishedDialog')}
             />
           </div>
         </div>
@@ -380,6 +389,66 @@ class TrsContainer extends React.Component {
             </div>
           )
         }
+
+        {/* clear Running Tasks dialog */}
+        <DialogOverlay open={!!this.state.clearRunningDialog}>
+          <div>
+            {
+              this.state.clearRunningDialog &&
+                <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
+                  <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
+                    { '要取消所有任务吗？' }
+                  </div>
+                  <div style={{ height: 20 }} />
+                  <div style={{ color: 'rgba(0,0,0,0.54)' }}>
+                    { '但如果是下载或上传的是文件夹，文件夹内已完成的文件将保留。' }
+                  </div>
+                  <div style={{ height: 24 }} />
+                  <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                    <FlatButton label="放弃" primary onTouchTap={() => this.toggleDialog('clearRunningDialog')} keyboardFocused />
+                    <FlatButton
+                      label="取消任务"
+                      primary
+                      onTouchTap={() => {
+                        this.toggleDialog('clearRunningDialog')
+                        this.deleteAll(userTasks)
+                      }}
+                    />
+                  </div>
+                </div>
+            }
+          </div>
+        </DialogOverlay>
+
+        {/* clear Finished Tasks dialog */}
+        <DialogOverlay open={!!this.state.clearFinishedDialog}>
+          <div>
+            {
+              this.state.clearFinishedDialog &&
+                <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
+                  <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
+                    { '要清除所有上传及下载记录吗？' }
+                  </div>
+                  <div style={{ height: 20 }} />
+                  <div style={{ color: 'rgba(0,0,0,0.54)' }}>
+                    { '该操作无法撤销，所有记录将被彻底清除。' }
+                  </div>
+                  <div style={{ height: 24 }} />
+                  <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                    <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('clearFinishedDialog')} keyboardFocused />
+                    <FlatButton
+                      label="清除"
+                      primary
+                      onTouchTap={() => {
+                        this.toggleDialog('clearFinishedDialog')
+                        this.cleanRecord()
+                      }}
+                    />
+                  </div>
+                </div>
+            }
+          </div>
+        </DialogOverlay>
       </div>
     )
   }
