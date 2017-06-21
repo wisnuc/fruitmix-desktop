@@ -4,6 +4,7 @@ import Debug from 'debug'
 import { Paper, Card, IconButton, CircularProgress } from 'material-ui'
 import ZoomIn from 'material-ui/svg-icons/action/zoom-in'
 import CheckIcon from 'material-ui/svg-icons/action/check-circle'
+import { CircleIcon } from '../common/Svg'
 
 const debug = Debug('component:photoApp:photoItem:')
 
@@ -76,23 +77,59 @@ class PhotoItem extends React.Component {
     return (
       <div style={style}>
         <div style={{ position: 'relative', height: '100%', width: '100%' }} >
+          {/* renderSelectCircle */}
+          {
+            this.props.selectedItems.length > 0 && !this.state.hover && <div
+              style={{
+                position: 'absolute',
+                zIndex: 100,
+                width: 24,
+                height: 20,
+                display: 'flex',
+                margin: 8,
+                alignItems: 'center'
+              }}
+              onTouchTap={(e) => { this.onSelectIconButton(); e.stopPropagation() }}
+              onMouseEnter={() => this.setState({ hover: true })}
+              onMouseLeave={() => this.setState({ hover: false })}
+            >
+              <CircleIcon />
+            </div>
+          }
+
+          {/* renderSelectedBackground */}
+          {
+            this.state.selected && <div
+              style={{
+                position: 'absolute',
+                zIndex: 100,
+                width: 18,
+                height: 18,
+                margin: '9px 0px 0px 11px',
+                borderRadius: '9px',
+                backgroundColor: '#FFF'
+              }}
+            />
+          }
+
           {/* renderHoverCheck */}
           {
             (this.state.selected || this.state.hover) && <div
               style={{
                 position: 'absolute',
                 zIndex: 100,
-                left: 5,
-                top: 5,
-                width: 18,
-                height: 18,
-                backgroundColor: this.state.selected ? '#FFF' : ''
+                width: this.state.selected ? '' : '100%',
+                height: 36,
+                display: 'flex',
+                alignItems: 'center',
+                background: this.props.selectedItems.length > 0 ? '' : 'linear-gradient(0deg, rgba(0,0,0,0), rgba(0,0,0,0.26))'
               }}
               onTouchTap={(e) => { this.onSelectIconButton(); e.stopPropagation() }}
               onMouseEnter={() => this.setState({ hover: true })}
               onMouseLeave={() => this.setState({ hover: false })}
             >
               <CheckIcon
+                style={{ margin: 8 }}
                 hoverColor={this.state.selected ? '#1E88E5' : '#FFF'}
                 color={this.state.selected ? '#1E88E5' : 'rgba(255,255,255,0.54)'}
               />
@@ -107,19 +144,18 @@ class PhotoItem extends React.Component {
                 zIndex: 100,
                 width: this.state.selected ? 180 : 210,
                 height: 36,
-                color: 'blue',
                 left: this.state.selected ? 15 : 0,
                 bottom: this.state.selected ? 15 : 0,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'flex-end',
-                background: 'linear-gradient(0deg, rgba(0,0,0,0.54), rgba(0,0,0,0))'
+                background: 'linear-gradient(0deg, rgba(0,0,0,0.26), rgba(0,0,0,0))'
               }}
-              onTouchTap={(e) => { this.props.lookPhotoDetail(this.props.digest); e.stopPropagation() }}
               onMouseEnter={() => this.setState({ hover: true })}
               onMouseLeave={() => this.setState({ hover: false })}
             >
               <ZoomIn
+                onTouchTap={(e) => { this.props.lookPhotoDetail(this.props.digest); e.stopPropagation() }}
                 style={{ margin: 8 }}
                 hoverColor="#FFF"
                 color="rgba(255,255,255,0.54)"
@@ -145,13 +181,13 @@ class PhotoItem extends React.Component {
           >
             {
               this.path &&
-              <img
-                src={this.path}
-                alt="img"
-                height={this.state.selected ? 180 : 210}
-                width={this.state.selected ? 180 : 210}
-                style={{ objectFit: 'cover', transition: 'all 225ms cubic-bezier(0.0, 0.0, 0.2, 1)' }}
-              />
+                <img
+                  src={this.path}
+                  alt="img"
+                  height={this.state.selected ? 180 : 210}
+                  width={this.state.selected ? 180 : 210}
+                  style={{ objectFit: 'cover', transition: 'all 225ms cubic-bezier(0.0, 0.0, 0.2, 1)' }}
+                />
             }
           </div>
         </div>

@@ -213,6 +213,7 @@ class PhotoList extends React.Component {
               this.allHeight = PhotoInfo.allHeight
               this.maxScrollTop = PhotoInfo.maxScrollTop
               this.rowHeightSum = PhotoInfo.rowHeightSum
+              this.photoListWithSameDate = PhotoInfo.photoListWithSameDate
 
               /* get timeline */
               this.timeline = this.props.getTimeline(this.photoDates, this.indexHeightSum, this.maxScrollTop, this.height)
@@ -241,6 +242,7 @@ class PhotoList extends React.Component {
                     lookPhotoDetail={this.props.lookPhotoDetail}
                     isScrolling={isScrolling}
                     list={this.photoMapDates[index]}
+                    photoListWithSameDate={this.photoListWithSameDate.find(item => item.date === this.photoMapDates[index].date)}
                     ipcRenderer={this.props.ipcRenderer}
                     addListToSelection={this.props.addListToSelection}
                     removeListToSelection={this.props.removeListToSelection}

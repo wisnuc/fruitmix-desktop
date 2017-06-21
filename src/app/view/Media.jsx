@@ -42,6 +42,7 @@ class Media extends Base {
     this.allPhotos = []
     this.photoDates = []
     this.photoMapDates = []
+    this.photoListWithSameDate = []
     this.allHeight = []
     this.rowHeightSum = 0
     this.indexHeightSum = []
@@ -56,6 +57,7 @@ class Media extends Base {
         this.allPhotos = media
         this.photoDates = []
         this.photoMapDates = []
+        this.photoListWithSameDate = []
         this.allHeight = []
         this.rowHeightSum = 0
         this.indexHeightSum = []
@@ -83,19 +85,28 @@ class Media extends Base {
               date: formatExifDateTime,
               photos: [item]
             })
+            if (!isRepeat) {
+              this.photoListWithSameDate.push({
+                date: formatExifDateTime,
+                photos: [item]
+              })
+            } else {
+              this.photoListWithSameDate[this.photoListWithSameDate.length - 1].photos.push(item)
+            }
             lineIndex += 1
           } else {
             MaxItem -= 1
-            this.photoMapDates[this.photoMapDates.length - 1]
-              .photos
-              .push(item)
+            this.photoMapDates[this.photoMapDates.length - 1].photos.push(item)
+            this.photoListWithSameDate[this.photoListWithSameDate.length - 1].photos.push(item)
           }
         })
         if (dateUnknown.length > 0) {
+          this.photoListWithSameDate.push({ date: '神秘时间', photos: [] })
           MaxItem = 0
           lineIndex += 1
           let isRepeat = false
           dateUnknown.forEach((item) => {
+            this.photoListWithSameDate[this.photoListWithSameDate.length - 1].photos.push(item)
             if (MaxItem === 0) {
               MaxItem = MAX
               this.photoDates.push(0)
@@ -123,7 +134,7 @@ class Media extends Base {
 
         /* calculate each row's heigth and their sum */
         this.photoMapDates.forEach((list) => {
-          const tmp = 218 * Math.ceil(list.photos.length / Math.floor((width - 60) / 218)) + !!list.first * 27
+          const tmp = 218 * Math.ceil(list.photos.length / Math.floor((width - 60) / 218)) + !!list.first * 48
           this.allHeight.push(tmp)
           this.rowHeightSum += tmp
           this.indexHeightSum.push(this.rowHeightSum)
@@ -139,7 +150,8 @@ class Media extends Base {
         allHeight: this.allHeight,
         maxScrollTop: this.maxScrollTop,
         rowHeightSum: this.rowHeightSum,
-        currentDigest: this.memoizeValue.currentDigest
+        currentDigest: this.memoizeValue.currentDigest,
+        photoListWithSameDate: this.photoListWithSameDate
       }
     }
 
