@@ -1,6 +1,7 @@
 import Debug from 'debug'
 import React from 'react'
 import EventListener from 'react-event-listener'
+import { TweenMax } from 'gsap'
 import { Paper, Menu, MenuItem, Divider, IconButton, CircularProgress } from 'material-ui'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
@@ -39,6 +40,21 @@ class PhotoApp extends React.Component {
     }
 
     this.toggleDialog = op => this.setState({ [op]: !this.state[op] })
+
+    this.setAnimation2 = (component, status) => {
+      if (component === 'ClearSelected') {
+        /* add animation to ClearSelected */
+        const transformItem = this.refClearSelected
+        const time = 0.4
+        const ease = global.Power4.easeOut
+        if (status === 'In') {
+          TweenMax.to(transformItem, time, { rotation: 180, opacity: 1, ease })
+        }
+        if (status === 'Out') {
+          TweenMax.to(transformItem, time, { rotation: -180, opacity: 0, ease })
+        }
+      }
+    }
   }
 
   render() {
@@ -106,6 +122,7 @@ class PhotoApp extends React.Component {
           seqIndex={this.seqIndex}
           ipcRenderer={this.props.ipcRenderer}
           setAnimation={this.props.setAnimation}
+          setAnimation2={this.setAnimation2}
           memoize={this.props.memoize}
           selectedItems={this.props.selectedItems}
           addListToSelection={this.props.addListToSelection}
@@ -130,9 +147,12 @@ class PhotoApp extends React.Component {
                 alignItems: 'center'
               }}
             >
-              <IconButton onTouchTap={this.props.clearSelect} style={{ marginLeft: 12 }} >
-                <CloseIcon color="#FFF" />
-              </IconButton>
+              <div style={{ width: 12 }} />
+              <div ref={ref => (this.refClearSelected = ref)}>
+                <IconButton onTouchTap={this.props.clearSelect}>
+                  <CloseIcon color="#FFF" />
+                </IconButton>
+              </div>
               <div style={{ width: 12 }} />
               <div style={{ color: '#FFF', fontSize: 20, fontWeight: 500 }} >
                 { `选择了 ${this.props.selectedItems.length} 张照片` }

@@ -248,12 +248,14 @@ class PhotoDetailInline extends React.Component {
 
   componentWillAppear(callback) {
     this.props.setAnimation('NavigationMenu', 'Out')
+    if (this.props.selectedItems.length > 0) this.props.setAnimation2('ClearSelected', 'Out')
     this.animation('In')
     this.enterTimeout = setTimeout(callback, 200) // matches transition duration
   }
 
   componentWillLeave(callback) {
     this.props.setAnimation('NavigationMenu', 'In')
+    if (this.props.selectedItems.length > 0) this.props.setAnimation2('ClearSelected', 'In')
     this.animation('Out')
     this.leaveTimeout = setTimeout(callback, 200) // matches transition duration
   }
@@ -443,7 +445,6 @@ class PhotoDetailInline extends React.Component {
                   </svg>
                 </div>
               </IconButton>
-              <div style={{ width: 12 }} />
               {
               !!this.props.selectedItems.length &&
                 <div style={{ color: '#FFF', fontSize: 20, fontWeight: 500 }} >
