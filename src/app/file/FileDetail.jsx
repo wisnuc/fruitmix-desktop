@@ -16,7 +16,7 @@ const phaseDate = (time) => {
   return `${year}年${month}月${date}日`
 }
 
-const phaseiExifTime = (time) => {
+const phaseExifTime = (time) => {
   const a = time.replace(/\s+/g, ':').split(':')
   return `${a[0]}年${a[1]}月${a[2]}日 ${a[3]} : ${a[4]}`
 }
@@ -199,7 +199,7 @@ class FileDetail extends React.PureComponent {
       prettysize(detailFile.size),
       getPath(path),
       phaseDate(detailFile.mtime),
-      exifDateTime ? phaseiExifTime(exifDateTime) : '',
+      exifDateTime ? phaseExifTime(exifDateTime) : '',
       exifModel,
       getResolution(height, width)
     ]

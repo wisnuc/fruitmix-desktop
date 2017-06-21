@@ -139,12 +139,12 @@ class Configuration {
   // load a js object from given path, return null if any error
   async loadObjectAsync(fpath) {
     let obj = null
-    console.log('Loading config...')
+    // console.log('Loading config...')
     try { obj = JSON.parse(await fs.readFileAsync(fpath)) } catch (e) {
       console.log(e)
       return null
     }
-    console.log('config:', obj)
+    // console.log('config:', obj)
     return typeof obj === 'object' ? obj : null
   }
 

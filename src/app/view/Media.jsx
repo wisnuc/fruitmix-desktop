@@ -13,6 +13,7 @@ import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import Base from './Base'
 import PhotoApp from '../photo/PhotoApp'
 import { formatDate } from '../common/datetime'
+import FlatButton from '../common/FlatButton'
 
 const debug = Debug('component:viewModel:Media: ')
 const parseDate = (date) => {
@@ -25,13 +26,13 @@ const parseDate = (date) => {
 ipcRenderer.setMaxListeners(1000)
 
 class Media extends Base {
-
   constructor(ctx) {
     super(ctx)
     this.state = {
       media: [],
       preValue: [],
-      selectedItems: []
+      selectedItems: [],
+      uploadMedia: false
     }
 
     this.memoizeValue = { currentDigest: '', currentScrollTop: 0 }
@@ -255,12 +256,35 @@ class Media extends Base {
     }
 
     this.startDownload = () => {
-      this.ctx.openSnackBar(`开始下载，共${this.state.selectedItems.length}张照片`)
-      this.setState({ selectedItems: [] })
+      debug('this.startDownload', this.state.selectedItems, this.memoizeValue)
+      if (this.state.selectedItems.length > 0) {
+        this.ctx.openSnackBar(`开始下载，共${this.state.selectedItems.length}张照片`)
+        this.setState({ selectedItems: [] })
+      } else {
+        this.ctx.openSnackBar('下载成功')
+      }
     }
+
     this.removeMedia = () => {
-      this.ctx.openSnackBar(`移除${this.state.selectedItems.length}张照片`)
-      this.setState({ selectedItems: [] })
+      if (this.state.selectedItems.length > 0) {
+        this.ctx.openSnackBar(`移除${this.state.selectedItems.length}张照片`)
+        this.setState({ selectedItems: [] })
+      } else {
+        this.ctx.openSnackBar('移除照片成功')
+      }
+    }
+
+    this.hideMedia = () => {
+      if (this.state.selectedItems.length > 0) {
+        this.ctx.openSnackBar(`隐藏${this.state.selectedItems.length}张照片`)
+        this.setState({ selectedItems: [] })
+      } else {
+        this.ctx.openSnackBar('隐藏照片成功')
+      }
+    }
+
+    this.uploadMedia = () => {
+      debug('this.uploadMedia!!!!')
     }
   }
 
@@ -362,9 +386,7 @@ class Media extends Base {
   renderToolBar({ style }) {
     return (
       <div style={style}>
-        {/*
-          <IconButton><AddAPhoto color="#FFF" /></IconButton>
-        */}
+        <FlatButton label="上传" onTouchTap={this.uploadMedia} primary />
       </div>
     )
   }
@@ -386,6 +408,7 @@ class Media extends Base {
       primaryColor={this.groupPrimaryColor()}
       startDownload={this.startDownload}
       removeMedia={this.removeMedia}
+      hideMedia={this.hideMedia}
     />)
   }
 }

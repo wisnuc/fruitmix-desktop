@@ -49,7 +49,7 @@ class PhotoApp extends React.Component {
 
         {/* PhotoList */}
         {
-          !this.props.media ?
+           !this.props.media ?
             <div
               style={{
                 position: 'relative',
@@ -65,7 +65,7 @@ class PhotoApp extends React.Component {
             </div> :
             this.props.media.length ?
               <PhotoList
-                style={{
+                 style={{
                   position: 'relative',
                   marginTop: -7,
                   width: '100%',
@@ -107,6 +107,12 @@ class PhotoApp extends React.Component {
           ipcRenderer={this.props.ipcRenderer}
           setAnimation={this.props.setAnimation}
           memoize={this.props.memoize}
+          selectedItems={this.props.selectedItems}
+          addListToSelection={this.props.addListToSelection}
+          removeListToSelection={this.props.removeListToSelection}
+          hideMedia={this.props.hideMedia}
+          removeMedia={this.props.removeMedia}
+          startDownload={this.props.startDownload}
         />
 
         {/* Selected Header */}
@@ -141,7 +147,7 @@ class PhotoApp extends React.Component {
                 <DeleteIcon color="#FFF" />
               </IconButton>
 
-              <IconButton onTouchTap={this.props.clearSelect}>
+              <IconButton onTouchTap={() => this.toggleDialog('hideDialog')}>
                 <VisibilityOff color="#FFF" />
               </IconButton>
               <div style={{ width: 24 }} />
@@ -178,7 +184,39 @@ class PhotoApp extends React.Component {
             }
           </div>
         </DialogOverlay>
+
+        {/* dialog */}
+        <DialogOverlay open={!!this.state.hideDialog}>
+          <div>
+            {
+              this.state.hideDialog &&
+                <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
+                  <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
+                    { '要将照片隐藏吗？' }
+                  </div>
+                  <div style={{ height: 20 }} />
+                  <div style={{ color: 'rgba(0,0,0,0.54)' }}>
+                    { '内容被隐藏后，我的照片内将不显示，可在智能助理中恢复。' }
+                  </div>
+                  <div style={{ height: 24 }} />
+                  <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                    <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('hideDialog')} keyboardFocused />
+                    <FlatButton
+                      label="隐藏"
+                      primary
+                      onTouchTap={() => {
+                        this.toggleDialog('hideDialog')
+                        this.props.hideMedia()
+                      }}
+                    />
+                  </div>
+                </div>
+            }
+          </div>
+        </DialogOverlay>
+
         {/* Media Upload */}
+
       </div>
     )
   }

@@ -1,12 +1,24 @@
 import React from 'react'
 import Debug from 'debug'
 import UUID from 'node-uuid'
-import { Paper, CircularProgress, IconButton, SvgIcon } from 'material-ui'
+import prettysize from 'prettysize'
+import { IconButton } from 'material-ui'
+import CheckIcon from 'material-ui/svg-icons/action/check-circle'
+import DeleteIcon from 'material-ui/svg-icons/action/delete'
+import DateIcon from 'material-ui/svg-icons/action/today'
+import ImageIcon from 'material-ui/svg-icons/image/image'
+import CameraIcon from 'material-ui/svg-icons/image/camera'
+import CloseIcon from 'material-ui/svg-icons/navigation/close'
+import VisibilityOff from 'material-ui/svg-icons/action/visibility-off'
+import InfoIcon from 'material-ui/svg-icons/action/info'
+import DownloadIcon from 'material-ui/svg-icons/file/file-download'
 import RenderToLayer from 'material-ui/internal/RenderToLayer'
 import keycode from 'keycode'
 import EventListener from 'react-event-listener'
 import { TweenMax } from 'gsap'
 import ReactTransitionGroup from 'react-addons-transition-group'
+import DialogOverlay from '../common/DialogOverlay'
+import FlatButton from '../common/FlatButton'
 
 const debug = Debug('component:photoApp:PhotoDetail')
 
@@ -20,18 +32,56 @@ const mousePosition = (ev) => {
   }
 }
 
+const phaseExifTime = (time, type) => {
+  const a = time.replace(/\s+/g, ':').split(':')
+  const date = new Date()
+  const week = ['日', '一', '二', '三', '四', '五', '六']
+  date.setFullYear(a[0], a[1] - 1, a[2])
+  if (type === 'date') return `${a[0]}年${a[1]}月${a[2]}日`
+  if (type === 'time') return `${a[3]} : ${a[4]}`
+  if (type === 'week') return `星期${week[date.getDay()]}`
+  return `${a[0]}年${a[1]}月${a[2]}日 星期${week[date.getDay()]} ${a[3]} : ${a[4]}`
+}
+
+const getResolution = (height, width) => {
+  let res = height * width
+  if (res > 100000000) {
+    res = Math.ceil(res / 100000000)
+    return `${res} 亿像素 ${height} x ${width}`
+  } else if (res > 10000) {
+    res = Math.ceil(res / 10000)
+    return `${res} 万像素 ${height} x ${width}`
+  }
+  return `${res} 像素 ${height} x ${width}`
+}
 
 class PhotoDetailInline extends React.Component {
   constructor(props) {
     super(props)
 
+    this.digest = this.props.items[this.props.seqIndex][0]
+
     this.state = {
+      selected: this.props.selectedItems.findIndex(item => item === this.digest) >= 0,
       direction: null,
+      hideDialog: false,
+      deleteDialog: false,
+      detailInfo: false,
       thumbPath: '',
       detailPath: ''
     }
 
+    this.toggleDialog = op => this.setState({ [op]: !this.state[op] })
+
     this.currentIndex = this.props.seqIndex
+
+    this.selectPhoto = () => {
+      if (this.state.selected) {
+        this.setState({ selected: false }, () => this.props.removeListToSelection(this.digest))
+      } else {
+        this.setState({ selected: true }, () => this.props.addListToSelection(this.digest))
+      }
+    }
 
     this.close = () => {
       this.props.onRequestClose()
@@ -48,7 +98,6 @@ class PhotoDetailInline extends React.Component {
       /* memoize digest */
       this.props.memoize({ currentDigest: this.digest, currentScrollTop: 0 })
       // debug('this.props.memoize', this.props.memoize())
-      debug('render photoDetail', this.props.items.length, this.props.items[this.props.seqIndex])
     }
 
     this.changeIndex = (direction) => {
@@ -58,6 +107,10 @@ class PhotoDetailInline extends React.Component {
         this.currentIndex -= 1
       } else return
       this.requestNext(this.currentIndex)
+      this.digest = this.props.items[this.currentIndex][0]
+      this.setState({
+        selected: this.props.selectedItems.findIndex(item => item === this.digest) >= 0
+      })
     }
 
     /* update detail image */
@@ -85,7 +138,7 @@ class PhotoDetailInline extends React.Component {
     /* calculate positon of mouse */
     this.calcPositon = (ev) => {
       const { x, y } = mousePosition(ev)
-      const clientWidth = window.innerWidth
+      const clientWidth = this.state.detailInfo ? window.innerWidth - 360 : window.innerWidth
 
       if (this.currentIndex > 0 && x < clientWidth * 0.3 && y > 96) {
         this.refBackground.style.cursor = 'pointer'
@@ -102,7 +155,7 @@ class PhotoDetailInline extends React.Component {
     /* calculate size of image */
     this.calcSize = () => {
       this.clientHeight = window.innerHeight
-      this.clientWidth = window.innerWidth
+      this.clientWidth = this.state.detailInfo ? window.innerWidth - 360 : window.innerWidth
 
       /* handle the exifOrientation */
       this.exifOrientation = this.photo.metadata.exifOrientation || 1
@@ -268,6 +321,55 @@ class PhotoDetailInline extends React.Component {
     )
   }
 
+  renderInfo() {
+    debug('renderInfo', this.props.items.length, this.photo)
+    const { exifDateTime, exifModel, exifMake, height, width, size } = this.photo.metadata
+    return (
+      <div style={{ padding: '0px 32px 0px 32px', width: 296 }}>
+        <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.54)', height: 48, display: 'flex', alignItems: 'center' }}> 详情 </div>
+        { exifDateTime &&
+        <div style={{ height: 72, display: 'flex', alignItems: 'center' }}>
+          <DateIcon color="rgba(0,0,0,0.54)" />
+          <div style={{ marginLeft: 64 }}>
+            <div style={{ color: 'rgba(0,0,0,0.87)', lineHeight: '24px' }}>
+              { phaseExifTime(exifDateTime, 'date') }
+            </div>
+            <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14, lineHeight: '20px' }}>
+              { `${phaseExifTime(exifDateTime, 'week')}  ${phaseExifTime(exifDateTime, 'time')}` }
+            </div>
+          </div>
+        </div>
+        }
+        { height && width && size &&
+        <div style={{ height: 72, display: 'flex', alignItems: 'center' }}>
+          <ImageIcon color="rgba(0,0,0,0.54)" />
+          <div style={{ marginLeft: 64 }}>
+            <div style={{ color: 'rgba(0,0,0,0.87)', lineHeight: '24px' }}>
+              { this.digest.slice(0, 9) }
+            </div>
+            <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14, lineHeight: '20px' }}>
+              { `${getResolution(height, width)} ${prettysize(size)}` }
+            </div>
+          </div>
+        </div>
+        }
+        { exifMake && exifModel &&
+        <div style={{ height: 72, display: 'flex', alignItems: 'center' }}>
+          <CameraIcon color="rgba(0,0,0,0.54)" />
+          <div style={{ marginLeft: 64 }}>
+            <div style={{ color: 'rgba(0,0,0,0.87)', lineHeight: '24px' }}>
+              { exifModel }
+            </div>
+            <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14, lineHeight: '20px' }}>
+              { exifMake }
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+    )
+  }
+
   render() {
     return (
       <div
@@ -280,44 +382,107 @@ class PhotoDetailInline extends React.Component {
           left: 0,
           zIndex: 1500,
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
+          alignItems: 'center'
         }}
       >
+        {/* overlay */}
+        <div
+          ref={ref => (this.refOverlay = ref)}
+          style={{
+            position: 'fixed',
+            height: '100%',
+            width: '100%',
+            top: 0,
+            left: 0,
+            backgroundColor: 'rgb(0, 0, 0)'
+          }}
+          onTouchTap={this.close}
+        />
+
+        {/* detail image content */}
         <div
           ref={ref => (this.refBackground = ref)}
           style={{
             position: 'relative',
-            width: '100%',
+            width: this.state.detailInfo ? 'calc(100% - 360px)' : '100%',
             height: '100%',
-            zIndex: 1500,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            transition: 'all 225ms cubic-bezier(0.0, 0.0, 0.2, 1)'
           }}
           onMouseMove={this.calcPositon}
           onTouchTap={() => this.changeIndex(this.state.direction)}
         >
-
           {/* main image */}
           { this.renderDetail() }
 
-          {/* return Button */}
-          <IconButton
-            onTouchTap={this.close}
-            style={{
-              position: 'fixed',
-              top: 12,
-              left: 12
-            }}
-          >
-            <div ref={ref => (this.refReturn = ref)} >
-              <svg width={24} height={24} viewBox="0 0 24 24" fill="white">
-                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
-              </svg>
+          {/* Selected Header */}
+          {
+            <div
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: this.state.detailInfo ? 'calc(100% - 360px)' : '100%',
+                height: 64,
+                display: 'flex',
+                alignItems: 'center',
+                background: 'linear-gradient(0deg, rgba(0,0,0,0), rgba(0,0,0,0.54))'
+              }}
+            >
+              {/* return Button */}
+              <IconButton
+                onTouchTap={this.close}
+                style={{ margin: 12 }}
+              >
+                <div ref={ref => (this.refReturn = ref)} >
+                  <svg width={24} height={24} viewBox="0 0 24 24" fill="white">
+                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+                  </svg>
+                </div>
+              </IconButton>
+              <div style={{ width: 12 }} />
+              {
+              !!this.props.selectedItems.length &&
+                <div style={{ color: '#FFF', fontSize: 20, fontWeight: 500 }} >
+                  { `选择了 ${this.props.selectedItems.length} 张照片` }
+                </div>
+              }
+              <div style={{ flexGrow: 1 }} />
+              {/* toolbar */}
+              {
+                this.props.selectedItems.length ?
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={{ color: '#FFF', fontSize: 14, fontWeight: 500 }} >
+                      { this.state.selected ? '已选择' : '选择' }
+                    </div>
+                    <IconButton onTouchTap={this.selectPhoto}>
+                      <CheckIcon color={this.state.selected ? '#1E88E5' : '#FFF'} />
+                    </IconButton>
+                  </div> :
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <IconButton onTouchTap={this.props.startDownload} tooltip="下载">
+                      <DownloadIcon color="#FFF" />
+                    </IconButton>
+
+                    <IconButton onTouchTap={() => this.toggleDialog('deleteDialog')} tooltip="删除">
+                      <DeleteIcon color="#FFF" />
+                    </IconButton>
+
+                    <IconButton onTouchTap={() => this.toggleDialog('hideDialog')} tooltip="隐藏">
+                      <VisibilityOff color="#FFF" />
+                    </IconButton>
+
+                    <IconButton onTouchTap={() => this.toggleDialog('detailInfo')} tooltip="信息">
+                      <InfoIcon color="#FFF" />
+                    </IconButton>
+                  </div>
+              }
+              <div style={{ width: 24 }} />
             </div>
-          </IconButton>
+          }
 
           {/* left Button */}
           <IconButton
@@ -326,7 +491,7 @@ class PhotoDetailInline extends React.Component {
               alignItems: 'center',
               justifyContent: 'center',
               backgroundColor: 'rgba(66, 66, 66, 0.541176)',
-              position: 'fixed',
+              position: 'absolute',
               borderRadius: 28,
               width: 56,
               height: 56,
@@ -346,7 +511,7 @@ class PhotoDetailInline extends React.Component {
               justifyContent: 'center',
               backgroundColor: 'rgba(66, 66, 66, 0.541176)',
               borderRadius: 28,
-              position: 'fixed',
+              position: 'absolute',
               width: 56,
               height: 56,
               right: '2%'
@@ -358,20 +523,89 @@ class PhotoDetailInline extends React.Component {
           </IconButton>
         </div>
 
-        {/* overlay */}
+        {/* detail Info */}
         <div
-          ref={ref => (this.refOverlay = ref)}
           style={{
             position: 'fixed',
+            width: this.state.detailInfo ? 360 : 0,
             height: '100%',
-            width: '100%',
             top: 0,
-            left: 0,
-            backgroundColor: 'rgb(0, 0, 0)',
-            zIndex: 1400
+            right: 0,
+            backgroundColor: '#FFF',
+            overflow: 'hidden',
+            transition: 'all 225ms cubic-bezier(0.0, 0.0, 0.2, 1)'
           }}
-          onTouchTap={this.close}
-        />
+        >
+          <div style={{ height: 48, display: 'flex', alignItems: 'center', padding: '8px 16px 8px 32px' }}>
+            <div style={{ fontSize: 20, width: 360 }}> 信息 </div>
+            <div style={{ flexGrow: 1 }} />
+            <IconButton onTouchTap={() => this.toggleDialog('detailInfo')}>
+              <CloseIcon color="rgba(0,0,0,0.54)" />
+            </IconButton>
+          </div>
+          { this.state.detailInfo && this.renderInfo() }
+        </div>
+
+        {/* delete dialog */}
+
+        <DialogOverlay open={!!this.state.deleteDialog}>
+          <div>
+            {
+              this.state.deleteDialog &&
+                <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
+                  <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
+                    { '要将照片移动到回收站吗？' }
+                  </div>
+                  <div style={{ height: 20 }} />
+                  <div style={{ color: 'rgba(0,0,0,0.54)' }}>
+                    { '内容被移到回收站后，文件中的相应内容也会被移除。' }
+                  </div>
+                  <div style={{ height: 24 }} />
+                  <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                    <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('deleteDialog')} keyboardFocused />
+                    <FlatButton
+                      label="移除"
+                      primary
+                      onTouchTap={() => {
+                        this.toggleDialog('deleteDialog')
+                        this.props.removeMedia()
+                      }}
+                    />
+                  </div>
+                </div>
+            }
+          </div>
+        </DialogOverlay>
+
+        {/* hide dialog */}
+        <DialogOverlay open={!!this.state.hideDialog}>
+          <div>
+            {
+              this.state.hideDialog &&
+                <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
+                  <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
+                    { '要将照片隐藏吗？' }
+                  </div>
+                  <div style={{ height: 20 }} />
+                  <div style={{ color: 'rgba(0,0,0,0.54)' }}>
+                    { '内容被隐藏后，我的照片内将不显示，可在智能助理中恢复。' }
+                  </div>
+                  <div style={{ height: 24 }} />
+                  <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                    <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('hideDialog')} keyboardFocused />
+                    <FlatButton
+                      label="隐藏"
+                      primary
+                      onTouchTap={() => {
+                        this.toggleDialog('hideDialog')
+                        this.props.hideMedia()
+                      }}
+                    />
+                  </div>
+                </div>
+            }
+          </div>
+        </DialogOverlay>
       </div>
     )
   }
