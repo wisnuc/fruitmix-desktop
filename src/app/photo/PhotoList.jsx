@@ -6,7 +6,6 @@ import { Paper, Card, IconButton, CircularProgress, FlatButton } from 'material-
 import RenderListByRow from './RenderListByRow'
 
 const debug = Debug('component:photoApp:PhotoList')
-const headerHeight = 66
 const timelineMargin = 26
 
 const mousePosition = (ev) => {
@@ -23,6 +22,7 @@ class PhotoList extends React.Component {
   constructor(props) {
     super(props)
 
+    this.headerHeight = this.props.headerHeight
     this.hover = false
     this.firstScroll = 2
 
@@ -91,18 +91,18 @@ class PhotoList extends React.Component {
 
       /* get mouse position*/
       const { x, y } = mousePosition(event)
-      let top = y - headerHeight
+      let top = y - this.headerHeight
       if (top < timelineMargin) top = timelineMargin
       if (top > this.height - timelineMargin) top = this.height - timelineMargin
 
-      if (this.onMouseDown || ((x > this.width - 96 && y > headerHeight) && this.hover)) {
+      if (this.onMouseDown || ((x > this.width - 96 && y > this.headerHeight) && this.hover)) {
         // debug('this.onMouseMove')
         /* showTimeline and clear setTimeout */
         this.showDateBar(true)
         clearTimeout(this.time)
 
         /* calculate position and percentage */
-        let position = y - headerHeight
+        let position = y - this.headerHeight
         if (position < 0) position = 0
         const percentage = Math.round(position / this.height * 1000)
 

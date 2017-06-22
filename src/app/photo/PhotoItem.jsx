@@ -141,7 +141,7 @@ class PhotoItem extends React.Component {
                 alignItems: 'center',
                 background: this.props.selectedItems.length > 0 ? '' : 'linear-gradient(0deg, rgba(0,0,0,0), rgba(0,0,0,0.26))'
               }}
-              onTouchTap={(e) => { this.onSelectIconButton(); e.stopPropagation() }}
+              onTouchTap={this.touchImage}
               onMouseEnter={this.mouseEnter}
               onMouseLeave={this.mouseLeave}
             >
@@ -149,6 +149,7 @@ class PhotoItem extends React.Component {
                 style={{ margin: 8 }}
                 hoverColor={this.state.selected ? '#1E88E5' : '#FFF'}
                 color={this.state.selected ? '#1E88E5' : 'rgba(255,255,255,0.54)'}
+                onTouchTap={(e) => { this.onSelectIconButton(); e.stopPropagation() }}
               />
             </div>
           }

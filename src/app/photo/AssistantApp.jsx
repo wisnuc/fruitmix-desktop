@@ -2,11 +2,14 @@ import Debug from 'debug'
 import React from 'react'
 import EventListener from 'react-event-listener'
 import { TweenMax } from 'gsap'
-import { IconButton, CircularProgress } from 'material-ui'
+import { IconButton, CircularProgress, Divider } from 'material-ui'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import DeleteIcon from 'material-ui/svg-icons/action/delete'
+import Visibility from 'material-ui/svg-icons/action/visibility'
 import VisibilityOff from 'material-ui/svg-icons/action/visibility-off'
 import DownloadIcon from 'material-ui/svg-icons/file/file-download'
+import DownIcon from 'material-ui/svg-icons/hardware/keyboard-arrow-down'
+import UpIcon from 'material-ui/svg-icons/hardware/keyboard-arrow-up'
 import DialogOverlay from '../common/DialogOverlay'
 import FlatButton from '../common/FlatButton'
 
@@ -15,7 +18,7 @@ import PhotoList from './PhotoList'
 
 const debug = Debug('component:photoApp:')
 
-class PhotoApp extends React.Component {
+class AssistantApp extends React.Component {
   constructor(props) {
     super(props)
 
@@ -75,58 +78,93 @@ class PhotoApp extends React.Component {
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <EventListener target="window" onResize={this.handleResize} />
 
+        <div style={{ height: 16 }} />
+        <div style={{ width: '100%' }}>
+          <div style={{ height: 72, display: 'flex', alignItems: 'center', width: '100%' }}>
+            <div style={{ flex: '0 0 24px' }} />
+            <div style={{ flex: '0 0 56px' }} >
+              <VisibilityOff color={this.props.primaryColor} />
+            </div>
+            <div style={{ flex: '0 0 540px' }}>
+              <div style={{ color: 'rgba(0,0,0,0.87)' }}> 隐藏的照片 </div>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ fontSize: 14, color: 'rgba(0, 0, 0, 0.54)' }}> { `数量: ${this.props.media.length}` }</div>
+                <div style={{ flex: '0 0 48px' }} />
+                <FlatButton
+                  label="查看"
+                  labelPosition="before"
+                  disabled={!!this.props.selectedItems.length}
+                  primary
+                  icon={
+                    this.state.showPhotos
+                      ? <DownIcon color={!this.props.selectedItems.length ? this.props.primaryColor : 'rgba(0,0,0,0.54)'} />
+                      : <UpIcon color={this.props.primaryColor} />
+                  }
+                  onTouchTap={() => this.toggleDialog('showPhotos')}
+                />
+              </div>
+            </div>
+            <div style={{ flexGrow: 1 }} />
+          </div>
+          <div style={{ height: 16 }} />
+          <Divider style={{ width: 760, marginLeft: 80 }} />
+          <div style={{ height: 16 }} />
+        </div>
+
         {/* PhotoList */}
-        {
-           !this.props.media ?
-             <div
-               style={{
-                 position: 'relative',
-                 marginTop: -7,
-                 width: '100%',
-                 height: '100%',
-                 display: 'flex',
-                 alignItems: 'center',
-                 justifyContent: 'center'
-               }}
-             >
-               <CircularProgress />
-             </div> :
+        <div style={{ height: 600, marginLeft: 80, display: this.state.showPhotos ? '' : 'none' }}>
+          {
+            !this.props.media ?
+            <div
+              style={{
+                position: 'relative',
+                marginTop: -7,
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <CircularProgress />
+            </div> :
             this.props.media.length ?
-              <PhotoList
-                style={{
-                  position: 'relative',
-                  marginTop: -7,
-                  width: '100%',
-                  height: '100%',
-                  backgroundColor: '#FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-                setPhotoInfo={this.props.setPhotoInfo}
-                media={this.props.media}
-                lookPhotoDetail={this.lookPhotoDetail}
-                getTimeline={this.props.getTimeline}
-                ipcRenderer={this.props.ipcRenderer}
-                addListToSelection={this.props.addListToSelection}
-                removeListToSelection={this.props.removeListToSelection}
-                memoize={this.props.memoize}
-                selectedItems={this.props.selectedItems}
-                getHoverPhoto={this.props.getHoverPhoto}
-                shiftStatus={this.props.shiftStatus}
-                headerHeight={66}
-              /> :
-              <div
-                style={{
-                  position: 'relative',
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >没有照片！</div>
-        }
+            <PhotoList
+              style={{
+                position: 'relative',
+                marginTop: -7,
+                width: '100%',
+                height: '100%',
+                backgroundColor: '#FFFFFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              setPhotoInfo={this.props.setPhotoInfo}
+              media={this.props.media}
+              lookPhotoDetail={this.lookPhotoDetail}
+              getTimeline={this.props.getTimeline}
+              ipcRenderer={this.props.ipcRenderer}
+              addListToSelection={this.props.addListToSelection}
+              removeListToSelection={this.props.removeListToSelection}
+              memoize={this.props.memoize}
+              selectedItems={this.props.selectedItems}
+              getHoverPhoto={this.props.getHoverPhoto}
+              shiftStatus={this.props.shiftStatus}
+              headerHeight={186}
+            /> :
+            <div
+              style={{
+                position: 'relative',
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >没有照片！</div>
+          }
+        </div>
 
         {/* PhotoDetail */}
         <PhotoDetail
@@ -183,7 +221,7 @@ class PhotoApp extends React.Component {
               </IconButton>
 
               <IconButton onTouchTap={() => this.toggleDialog('hideDialog')}>
-                <VisibilityOff color="#FFF" />
+                <Visibility color="#FFF" />
               </IconButton>
               <div style={{ width: 24 }} />
 
@@ -227,17 +265,17 @@ class PhotoApp extends React.Component {
               this.state.hideDialog &&
                 <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
                   <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-                    { '要将照片隐藏吗？' }
+                    { '要将照片恢复显示吗？' }
                   </div>
                   <div style={{ height: 20 }} />
                   <div style={{ color: 'rgba(0,0,0,0.54)' }}>
-                    { '内容被隐藏后，我的照片内将不显示，可在智能助理中恢复。' }
+                    { '恢复后，这些照片将在我的照片内显示' }
                   </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                     <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('hideDialog')} keyboardFocused />
                     <FlatButton
-                      label="隐藏"
+                      label="恢复"
                       primary
                       onTouchTap={() => {
                         this.toggleDialog('hideDialog')
@@ -254,4 +292,4 @@ class PhotoApp extends React.Component {
   }
 }
 
-export default PhotoApp
+export default AssistantApp
