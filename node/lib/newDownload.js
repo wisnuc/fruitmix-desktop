@@ -12,6 +12,8 @@ const finishTasks = []
 const downloadHandle = (event, args, callback) => {
   const files = args.files
   const folders = args.folders
+  // console.log('downloadHandle:')
+  // console.log(files)
   files.forEach(item => createTask(item.uuid, item.name, item.size, item.type, args.dirUUID, true))
   folders.forEach(item => createTask(item.uuid, item.name, 0, item.type, args.dirUUID ? args.dirUUID : item.uuid, true))
 
@@ -23,7 +25,7 @@ const startTransmissionHandle = () => {
   db.downloading.find({}, (err, tasks) => {
     if (err) return
     tasks.forEach(item => createTask(item.target, item.name, item.rootSize, item.type, item.dirUUID,
-				false, item.downloadPath, item._id, item.downloading, item.createTime))
+      false, item.downloadPath, item._id, item.downloading, item.createTime))
   })
 
   db.downloaded.find({}).sort({ finishDate: -1 }).exec((err, tasks) => {

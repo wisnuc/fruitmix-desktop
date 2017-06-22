@@ -21,6 +21,12 @@ const parseDate = (date) => {
   const a = date.replace(/:|\s/g, '')
   return parseInt(a, 10)
 }
+const getName = (photo) => {
+  if (!photo[1].metadata.exifDateTime) {
+    return `IMG_UnkownDate_${photo[0].slice(0, 5).toUpperCase()}_PC.${photo[1].metadata.format}`
+  }
+  return `IMG_${photo[1].metadata.exifDateTime.split(/\s+/g)[0].replace(/[:\s]+/g, '')}_${photo[0].slice(0, 5).toUpperCase()}_PC.${photo[1].metadata.format}`
+}
 
 /* increase limit of listeners of EventEmitter */
 ipcRenderer.setMaxListeners(1000)
@@ -243,7 +249,6 @@ class Media extends Base {
 
     this.requestData = eq => this.apis.request(eq)
 
-
     this.addListToSelection = (digest) => {
       if (this.firstSelect) {
         this.ctx.openSnackBar('按住Shifit并点击，即可一次选择多项内容')
@@ -270,9 +275,7 @@ class Media extends Base {
       }
     }
 
-    this.clearSelect = () => {
-      this.setState({ selectedItems: [] })
-    }
+    this.clearSelect = () => { this.setState({ selectedItems: [] }) }
 
     this.getHoverPhoto = (digest) => {
       if (!this.state.selectedItems.length) return
@@ -293,12 +296,29 @@ class Media extends Base {
     }
 
     this.startDownload = () => {
-      debug('this.startDownload', this.state.selectedItems, this.memoizeValue)
+      // debug('this.startDownload', this.state.selectedItems, this.memoizeValue)
       if (this.state.selectedItems.length > 0) {
-        this.ctx.openSnackBar(`开始下载，共${this.state.selectedItems.length}张照片`)
+        const photos = this.state.selectedItems
+          .map(digest => this.state.media.find(photo => photo[0] === digest))
+          .map(photo => ({
+            name: getName(photo),
+            size: photo[1].metadata.size,
+            type: 'file',
+            uuid: photo[0]
+          }))
+        debug('startDownload', photos, this.state.media.find(photo => photo[0] === this.state.selectedItems[0]))
+        ipcRenderer.send('DOWNLOAD', { folders: [], files: photos, dirUUID: 'media' })
         this.setState({ selectedItems: [] })
       } else {
-        this.ctx.openSnackBar('下载成功')
+        const photo = this.state.media.find(item => item[0] === this.memoizeValue.currentDigest)
+        const data = {
+          name: getName(photo),
+          size: photo[1].metadata.size,
+          type: 'file',
+          uuid: photo[0]
+        }
+        debug('startDownload', data, photo)
+        ipcRenderer.send('DOWNLOAD', { folders: [], files: [data], dirUUID: 'media' })
       }
     }
 

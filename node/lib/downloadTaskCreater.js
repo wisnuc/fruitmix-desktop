@@ -116,7 +116,7 @@ class TaskManager {
     }, 2000)
   }
 
-	// summary send to browser
+  // summary send to browser
   getSummary() {
     return {
       uuid: this.uuid,
@@ -136,20 +136,20 @@ class TaskManager {
     }
   }
 
-	// record log information
+  // record log information
   recordInfor(msg) {
     if (this.record.length > 50) this.record.splice(0, 20)
     console.log(msg)
     this.record.push(msg)
   }
 
-	// add to visit queue && wait schedule
+  // add to visit queue && wait schedule
   readyToVisit() {
     this.state = 'visitless'
     addToVisitlessQueue(this)
   }
 
-	// consist tree from server
+  // consist tree from server
   visit() {
     this.state = 'visiting'
     const _this = this
@@ -165,8 +165,8 @@ class TaskManager {
     })
   }
 
-	// if task is new , check rootName isRepeat
-	// if task is old , visit local file tree && diff the trees
+  // if task is new , check rootName isRepeat
+  // if task is old , visit local file tree && diff the trees
   diff() {
     this.state = 'diffing'
     if (!this.newWork) {
@@ -203,7 +203,7 @@ class TaskManager {
     }
   }
 
-	// check whether the root is same to someone in download path
+  // check whether the root is same to someone in download path
   checkNameExist() {
     fs.readdir(this.downloadPath, (err, files) => {
       if (err) return this.recordInfor('下载目录未找到')
@@ -215,7 +215,7 @@ class TaskManager {
     })
   }
 
-	// pause all the task in downloading queue
+  // pause all the task in downloading queue
   pauseTask() {
     if (this.pause) return
     this.pause = true
@@ -224,7 +224,7 @@ class TaskManager {
     })
   }
 
-	// resume all the task in downloading queue
+  // resume all the task in downloading queue
   resumeTask() {
     if (!this.pause) return
     this.pause = false
@@ -234,14 +234,14 @@ class TaskManager {
     this.schedule()
   }
 
-	// download schedule only need to schedule download queue(upload include hash task)
+  // download schedule only need to schedule download queue(upload include hash task)
   schedule() {
     this.state = 'schedule'
     if (this.pause || !this.count) return
     this.downloadSchedule()
   }
 
-	// the file for condition begin downloading
+  // the file for condition begin downloading
   downloadSchedule() {
     console.log('')
     console.log('进行下载调度...')
@@ -265,9 +265,9 @@ class TaskManager {
     this.downloadSchedule()
   }
 
-	// will be call when a node was downloaded
+  // will be call when a node was downloaded
   workFinishCall() {
-		// all nodes have been downloaded
+    // all nodes have been downloaded
     if (this.finishCount === this.worklist.length) {
       this.state = 'finish'
       this.finishDate = utils.formatDate()
@@ -278,7 +278,7 @@ class TaskManager {
       this.recordInfor(`${this.name} 下载完成`)
       this.finishStore()
     } else {
-			// running next
+      // running next
       this.updateStore()
       this.downloadSchedule()
     }
@@ -306,13 +306,13 @@ class TaskManager {
     }
   }
 
-	// will be call when a task is new
+  // will be call when a task is new
   createStore() {
     if (!this.newWork) return
     db.downloading.insert(this.getStoreObj(), (err, data) => {})
   }
 
-	// will be call when a task node drain trigger
+  // will be call when a task node drain trigger
   updateStore() {
     const downloadingArr = []
     this.downloading.forEach((item) => {
@@ -321,11 +321,11 @@ class TaskManager {
       }
     })
     db.downloading.update({ _id: this.uuid }, { $set: { name: this.name, downloading: downloadingArr } }, (err, data) => {
-			// console.log(data)
+      // console.log(data)
     })
   }
 
-	// move task from downloading store to downloaded store
+  // move task from downloading store to downloaded store
   finishStore() {
     db.downloading.remove({ _id: this.uuid }, {}, (err, data) => {
       if (err) return console.log(err)
@@ -337,7 +337,7 @@ class TaskManager {
     })
   }
 
-	// remove task from taskList && nedb
+  // remove task from taskList && nedb
   delete(callback) {
     if (this.state === 'finish') {
       this.recordInfor('开始删除已完成传输任务...')
@@ -355,7 +355,7 @@ class TaskManager {
       fs.unlink(p, (err, data) => {
         if (err) {
           reject(err)
-        }						else {
+        } else {
           resolve(data)
         }
       })
@@ -367,9 +367,9 @@ class TaskManager {
         this.downloading.shift()
       } else {
         const tmpPath = path.join(getTransTmpPath(), this.uuid +
-					this.downloading[0].timeStamp +
-					this.downloading[0].name)
-        try { await del(tmpPath) }				catch (e) { console.log(`删除缓存${tmpPath}失败`) }				finally { this.downloading.shift() }
+          this.downloading[0].timeStamp +
+          this.downloading[0].name)
+        try { await del(tmpPath) } catch (e) { console.log(`删除缓存${tmpPath}失败`) } finally { this.downloading.shift() }
       }
     }
     const osType = os.platform()
@@ -401,15 +401,15 @@ const visitTask = async (target, name, type, size, dirUUID, position, manager, c
   manager.count += 1
   manager.size += size
   const obj = type === 'file' ?
-  	new FileDownloadTask(target, name, type, size, dirUUID, manager) :
-  	new FolderDownloadTask(target, name, type, size, dirUUID, manager)
+    new FileDownloadTask(target, name, type, size, dirUUID, manager) :
+    new FolderDownloadTask(target, name, type, size, dirUUID, manager)
 
   const index = manager.downloadingList.findIndex(item => item.target === target)
   if (index !== -1) {
-  	// may be local file has been removed
-  	obj.seek = manager.downloadingList[index].seek
-  	obj.timeStamp = manager.downloadingList[index].timeStamp
-  	manager.completeSize += manager.downloadingList[index].seek
+    // may be local file has been removed
+    obj.seek = manager.downloadingList[index].seek
+    obj.timeStamp = manager.downloadingList[index].timeStamp
+    manager.completeSize += manager.downloadingList[index].seek
   }
   manager.worklist.push(obj)
   position.push(obj)
@@ -613,13 +613,13 @@ class createFolderSTM extends STM {
     addToRunningQueue(this)
     wrapper.recordInfor(`${wrapper.name} 开始创建...`)
     fs.mkdir(path.join(wrapper.downloadPath, wrapper.name), (err) => {
-    	if (!err) {
-    		removeOutOfRunningQueue(_this)
-    		wrapper.children.forEach(item => item.downloadPath = path.join(wrapper.downloadPath, wrapper.name))
-    		wrapper.downloadFinish()
-    	} else {
+      if (!err) {
+        removeOutOfRunningQueue(_this)
+        wrapper.children.forEach(item => item.downloadPath = path.join(wrapper.downloadPath, wrapper.name))
+        wrapper.downloadFinish()
+      } else {
 
-    	}
+      }
     })
   }
 }
@@ -638,37 +638,43 @@ class DownloadFileSTM extends STM {
     this.wrapper.recordInfor(`${this.wrapper.name} 开始创建...`)
     // check is fileCache have been removed
     fs.exists(this.tmpDownloadPath, (exist) => {
-    	if (exist) console.log('找到文件缓存')
-    	else {
-    		console.log('没有找到文件缓存 重新下载该文件')
-    		this.wrapper.manager.completeSize -= this.wrapper.seek
-    		this.wrapper.seek = 0
-    	}
-    	this.downloading()
+      if (exist) console.log('找到文件缓存')
+      else {
+        console.log('没有找到文件缓存 重新下载该文件')
+        this.wrapper.manager.completeSize -= this.wrapper.seek
+        this.wrapper.seek = 0
+      }
+      this.downloading()
     })
   }
 
   downloading() {
     const _this = this
     const wrapper = this.wrapper
+    // console.log('in downloading...')
+    // console.log(wrapper)
     if (wrapper.size === wrapper.seek) return wrapper.manager.downloadSchedule()
     wrapper.stateName = 'running'
 
     const options = {
       method: 'GET',
-      url: `${server}/files/fruitmix/download/${wrapper.dirUUID}/${wrapper.target}`,
+      url: wrapper.dirUUID === 'media'
+      ? `${server}/media/${wrapper.target}/download`
+      : `${server}/files/fruitmix/download/${wrapper.dirUUID}/${wrapper.target}`,
+
       headers: {
         Authorization: `${tokenObj.type} ${tokenObj.token}`,
         Range: `bytes=${this.wrapper.seek}-`
       }
     }
+
     const streamOptions = {
       flags: this.wrapper.seek == 0 ? 'w' : 'r+',
       start: this.wrapper.seek,
       defaultEncoding: 'utf8',
-		  fd: null,
-		  mode: 0o666,
-		  autoClose: true
+      fd: null,
+      mode: 0o666,
+      autoClose: true
     }
     const stream = fs.createWriteStream(this.tmpDownloadPath, streamOptions)
 
@@ -679,7 +685,7 @@ class DownloadFileSTM extends STM {
       _this.wrapper.seek += gap
       this.wrapper.manager.completeSize += gap
       this.wrapper.lastTimeSize = stream.bytesWritten
-			// console.log('一段文件写入完成 当前seek位置为 ：' + (_this.wrapper.seek/_this.wrapper.size * 100).toFixed(2) + '% 增加了 ：' + gap/this.wrapper.size *100 )
+      // console.log('一段文件写入完成 当前seek位置为 ：' + (_this.wrapper.seek/_this.wrapper.size * 100).toFixed(2) + '% 增加了 ：' + gap/this.wrapper.size *100 )
       wrapper.manager.updateStore()
     })
 
@@ -690,15 +696,15 @@ class DownloadFileSTM extends STM {
       this.wrapper.lastTimeSize = stream.bytesWritten
 
       console.log(`一段文件写入结束 当前seek位置为 ：${
-				 (_this.wrapper.seek / _this.wrapper.size * 100).toFixed(2)
-				 }% 增加了 ：${(gap / this.wrapper.size * 100).toFixed(2)}`)
+         (_this.wrapper.seek / _this.wrapper.size * 100).toFixed(2)
+         }% 增加了 ：${(gap / this.wrapper.size * 100).toFixed(2)}`)
 
       this.wrapper.lastTimeSize = 0
       if (this.wrapper.seek == this.wrapper.size) this.rename(this.tmpDownloadPath)
     })
 
     this.handle = request(options)
-			.on('error', err => console.log('req : error', err))
+      .on('error', err => console.log('req : error', err))
 
     _this.handle.pipe(stream)
   }
