@@ -247,6 +247,8 @@ class PhotoList extends React.Component {
                     addListToSelection={this.props.addListToSelection}
                     removeListToSelection={this.props.removeListToSelection}
                     selectedItems={this.props.selectedItems}
+                    getHoverPhoto={this.props.getHoverPhoto}
+                    shiftStatus={this.props.shiftStatus}
                   />
                 </div>
               )

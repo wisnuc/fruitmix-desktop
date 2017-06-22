@@ -35,9 +35,14 @@ class PhotoItem extends React.Component {
     }
 
     this.touchImage = () => {
-      debug(this.props.selectedItems)
+      // debug(this.props.selectedItems)
       if (this.props.selectedItems.length > 0) {
-        if (this.state.selected) {
+        /* shift is true */
+        if (this.props.shiftStatus.shift) {
+          this.setState({ selected: true })
+          this.props.shiftStatus.items.forEach(item => this.props.addListToSelection(item))
+        /* shift is false */
+        } else if (this.state.selected) {
           this.setState({ selected: false }, () => this.props.removeListToSelection(this.props.digest))
         } else {
           this.setState({ selected: true }, () => this.props.addListToSelection(this.props.digest))
@@ -45,6 +50,17 @@ class PhotoItem extends React.Component {
       } else {
         this.props.lookPhotoDetail(this.props.digest)
       }
+    }
+
+    this.mouseEnter = () => {
+      this.setState({ hover: true })
+      if (!this.state.hover) {
+        // debug('this.mouseEnter', this.props)
+        this.props.getHoverPhoto(this.props.digest)
+      }
+    }
+    this.mouseLeave = () => {
+      this.setState({ hover: false })
     }
   }
 
@@ -72,7 +88,8 @@ class PhotoItem extends React.Component {
   }
 
   render() {
-    const { style } = this.props
+    const { style, shiftStatus } = this.props
+    this.showShiftOverlay = shiftStatus.shift && shiftStatus.items.includes(this.props.digest)
     // debug('Render PhotoItem this.props', this.props)
     return (
       <div style={style}>
@@ -90,8 +107,8 @@ class PhotoItem extends React.Component {
                 alignItems: 'center'
               }}
               onTouchTap={(e) => { this.onSelectIconButton(); e.stopPropagation() }}
-              onMouseEnter={() => this.setState({ hover: true })}
-              onMouseLeave={() => this.setState({ hover: false })}
+              onMouseEnter={this.mouseEnter}
+              onMouseLeave={this.mouseLeave}
             >
               <CircleIcon />
             </div>
@@ -125,8 +142,8 @@ class PhotoItem extends React.Component {
                 background: this.props.selectedItems.length > 0 ? '' : 'linear-gradient(0deg, rgba(0,0,0,0), rgba(0,0,0,0.26))'
               }}
               onTouchTap={(e) => { this.onSelectIconButton(); e.stopPropagation() }}
-              onMouseEnter={() => this.setState({ hover: true })}
-              onMouseLeave={() => this.setState({ hover: false })}
+              onMouseEnter={this.mouseEnter}
+              onMouseLeave={this.mouseLeave}
             >
               <CheckIcon
                 style={{ margin: 8 }}
@@ -151,8 +168,8 @@ class PhotoItem extends React.Component {
                 justifyContent: 'flex-end',
                 background: 'linear-gradient(0deg, rgba(0,0,0,0.26), rgba(0,0,0,0))'
               }}
-              onMouseEnter={() => this.setState({ hover: true })}
-              onMouseLeave={() => this.setState({ hover: false })}
+              onMouseEnter={this.mouseEnter}
+              onMouseLeave={this.mouseLeave}
             >
               <ZoomIn
                 onTouchTap={(e) => { this.props.lookPhotoDetail(this.props.digest); e.stopPropagation() }}
@@ -176,8 +193,8 @@ class PhotoItem extends React.Component {
               backgroundColor: '#eeeeee'
             }}
             onTouchTap={this.touchImage}
-            onMouseMove={() => this.setState({ hover: true })}
-            onMouseLeave={() => this.setState({ hover: false })}
+            onMouseMove={this.mouseEnter}
+            onMouseLeave={this.mouseLeave}
           >
             {
               this.path &&
@@ -190,6 +207,25 @@ class PhotoItem extends React.Component {
                 />
             }
           </div>
+
+          {/* render Shift Blue Hover */}
+          {
+            this.showShiftOverlay &&
+              <div
+                style={{
+                  position: 'absolute',
+                  zIndex: 100,
+                  width: this.state.selected ? 180 : 210,
+                  height: this.state.selected ? 180 : 210,
+                  top: this.state.selected ? 15 : 0,
+                  left: this.state.selected ? 15 : 0,
+                  backgroundColor: 'rgba(30, 136, 229, 0.26)'
+                }}
+                onTouchTap={this.touchImage}
+                onMouseMove={this.mouseEnter}
+                onMouseLeave={this.mouseLeave}
+              />
+          }
         </div>
       </div>
     )

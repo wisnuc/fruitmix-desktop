@@ -32,10 +32,13 @@ class Media extends Base {
       media: [],
       preValue: [],
       selectedItems: [],
-      uploadMedia: false
+      shiftHoverItems: [],
+      uploadMedia: false,
+      shift: false
     }
 
     this.memoizeValue = { currentDigest: '', currentScrollTop: 0 }
+    this.firstSelect = true
 
     this.height = 0
     this.width = 0
@@ -242,6 +245,10 @@ class Media extends Base {
 
 
     this.addListToSelection = (digest) => {
+      if (this.firstSelect) {
+        this.ctx.openSnackBar('按住Shifit并点击，即可一次选择多项内容')
+        this.firstSelect = false
+      }
       const hadDigest = this.state.selectedItems.findIndex(item => item === digest) >= 0
       // debug('this.addListToSelection this.state.selectedItems', this.state.selectedItems, digest, hadDigest)
       if (!hadDigest) {
@@ -265,6 +272,24 @@ class Media extends Base {
 
     this.clearSelect = () => {
       this.setState({ selectedItems: [] })
+    }
+
+    this.getHoverPhoto = (digest) => {
+      if (!this.state.selectedItems.length) return
+      const lastSelect = this.state.selectedItems[this.state.selectedItems.length - 1]
+      const lastSelectIndex = this.state.media.findIndex(photo => photo[0] === lastSelect)
+      const hoverIndex = this.state.media.findIndex(photo => photo[0] === digest)
+      let shiftHoverPhotos = this.state.media.slice(lastSelectIndex, hoverIndex + 1)
+
+      if (hoverIndex < lastSelectIndex) shiftHoverPhotos = this.state.media.slice(hoverIndex, lastSelectIndex + 1)
+      // debug('this.hover', digest, lastSelect, lastSelectIndex, hoverIndex, shiftHoverPhotos, this.state.shiftHoverItems)
+      this.setState({ shiftHoverItems: shiftHoverPhotos.map(photo => photo[0]) })
+    }
+
+    this.getShiftStatus = (event) => {
+      // debug('this.getShiftStatus', event.shiftKey)
+      if (event.shiftKey === this.state.shift) return
+      this.setState({ shift: event.shiftKey })
     }
 
     this.startDownload = () => {
@@ -421,6 +446,9 @@ class Media extends Base {
       startDownload={this.startDownload}
       removeMedia={this.removeMedia}
       hideMedia={this.hideMedia}
+      getHoverPhoto={this.getHoverPhoto}
+      getShiftStatus={this.getShiftStatus}
+      shiftStatus={{ shift: this.state.shift, items: this.state.shiftHoverItems }}
     />)
   }
 }

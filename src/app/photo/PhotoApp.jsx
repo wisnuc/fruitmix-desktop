@@ -25,7 +25,10 @@ class PhotoApp extends React.Component {
     super(props)
 
     this.state = {
-      openDetail: false
+      openDetail: false,
+      shift: '',
+      deleteDialog: false,
+      hideDialog: false
     }
 
     this.seqIndex = ''
@@ -55,6 +58,20 @@ class PhotoApp extends React.Component {
         }
       }
     }
+
+    this.keyChange = (event) => {
+      this.props.getShiftStatus(event)
+    }
+  }
+
+  componentDidMount() {
+    document.addEventListener('keydown', this.keyChange)
+    document.addEventListener('keyup', this.keyChange)
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.keyChange)
+    document.removeEventListener('keyup', this.keyChange)
   }
 
   render() {
@@ -66,22 +83,22 @@ class PhotoApp extends React.Component {
         {/* PhotoList */}
         {
            !this.props.media ?
-            <div
-              style={{
-                position: 'relative',
-                marginTop: -7,
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <CircularProgress />
-            </div> :
+             <div
+               style={{
+                 position: 'relative',
+                 marginTop: -7,
+                 width: '100%',
+                 height: '100%',
+                 display: 'flex',
+                 alignItems: 'center',
+                 justifyContent: 'center'
+               }}
+             >
+               <CircularProgress />
+             </div> :
             this.props.media.length ?
               <PhotoList
-                 style={{
+                style={{
                   position: 'relative',
                   marginTop: -7,
                   width: '100%',
@@ -100,6 +117,8 @@ class PhotoApp extends React.Component {
                 removeListToSelection={this.props.removeListToSelection}
                 memoize={this.props.memoize}
                 selectedItems={this.props.selectedItems}
+                getHoverPhoto={this.props.getHoverPhoto}
+                shiftStatus={this.props.shiftStatus}
               /> :
               <div
                 style={{

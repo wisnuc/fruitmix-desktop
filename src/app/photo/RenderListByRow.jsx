@@ -20,7 +20,7 @@ class RenderListByRow extends React.Component {
     }
 
     this.onSelectIconButton = () => {
-      console.log('this.onSelectIconButton', this.props)
+      // console.log('this.onSelectIconButton', this.props)
       if (!this.state.selected) {
         this.setState({ selected: true }, () => {
           this.props.photoListWithSameDate.photos.forEach(photo => this.props.addListToSelection(photo[0]))
@@ -103,6 +103,8 @@ class RenderListByRow extends React.Component {
                 addListToSelection={this.props.addListToSelection}
                 removeListToSelection={this.props.removeListToSelection}
                 selectedItems={this.props.selectedItems}
+                getHoverPhoto={this.props.getHoverPhoto}
+                shiftStatus={this.props.shiftStatus}
               />
             ))
           }
