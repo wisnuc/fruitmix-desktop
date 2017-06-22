@@ -14,8 +14,10 @@ const finishTasks = []
 
 // handler
 const uploadHandle = (event, args) => {
+  console.log('uploadHandle...')
+  console.log(args)
   const { dirUUID, type } = args
-  const dialogType = type == 'folder' ? 'openDirectory' : 'openFile'
+  const dialogType = type === 'folder' ? 'openDirectory' : 'openFile'
   dialog.showOpenDialog({ properties: [dialogType, 'multiSelections'] }, (data) => {
     if (!data) return console.log('get list err', null)
     let index = 0
@@ -34,6 +36,11 @@ const uploadHandle = (event, args) => {
     }
     readUploadInfor(data[index])
   })
+}
+
+const uploadMediaHandle = (event, rootUUID) => {
+  const dirUUID = rootUUID
+  uploadHandle(event, { dirUUID, type: 'file' })
 }
 
 const dragFileHandle = (event, args) => {
@@ -115,6 +122,7 @@ ipcMain.on('DELETE_UPLOADING', deleteUploadingHandle)
 ipcMain.on('DELETE_UPLOADED', deleteUploadedHandle)
 ipcMain.on('DRAG_FILE', dragFileHandle)
 ipcMain.on('UPLOAD', uploadHandle)
+ipcMain.on('UPLOADMEDIA', uploadMediaHandle)
 
 // ipcMain.on('PAUSE_UPLOADING')
 ipcMain.on('PAUSE_UPLOADING', (e, uuid) => {

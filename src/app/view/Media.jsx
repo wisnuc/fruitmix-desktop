@@ -341,7 +341,27 @@ class Media extends Base {
     }
 
     this.uploadMedia = () => {
-      debug('this.uploadMedia!!!!')
+      if (!this.ctx.props.apis.listNavDir || !this.ctx.props.apis.listNavDir.data) {
+        this.ctx.openSnackBar('上传失败！')
+        return
+      }
+      const data = this.ctx.props.apis.listNavDir.data
+      const rootUUID = data.path[0].uuid
+      const index = data.entries.findIndex(entry => entry.name === '上传的照片')
+      if (index > -1) {
+        // debug('uploadMedia', rootUUID, this.ctx.props.apis.listNavDir.data)
+        ipcRenderer.send('UPLOADMEDIA', data.entries[index].uuid)
+      } else {
+        // debug('mkdir', rootUUID, this.ctx.props.apis.listNavDir.data)
+        this.ctx.props.apis.request('mkdir', { dirUUID: rootUUID, dirname: '上传的照片' }, (err, uuid) => {
+          if (err) {
+            this.ctx.openSnackBar(`上传失败：${err.message}`)
+          } else {
+            ipcRenderer.send('UPLOADMEDIA', uuid)
+          }
+        })
+      }
+      // ipcRenderer.send('UPLOADMEDIA', rootUUID)
     }
   }
 
