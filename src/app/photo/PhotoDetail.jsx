@@ -61,6 +61,8 @@ class PhotoDetailInline extends React.Component {
 
     this.digest = this.props.items[this.props.seqIndex][0]
 
+    this.dragPosition = { x: 0, y: 0, left: 0, top: 0 }
+
     this.state = {
       selected: this.props.selectedItems.findIndex(item => item === this.digest) >= 0,
       direction: null,
@@ -137,6 +139,13 @@ class PhotoDetailInline extends React.Component {
 
     /* calculate positon of mouse */
     this.calcPositon = (ev) => {
+      /* hide change image button when zoom */
+      if (this.refDetailImage && this.refDetailImage.style.zoom > 1) {
+        this.refBackground.style.cursor = 'default'
+        if (this.state.direction !== null) this.setState({ direction: null })
+        return
+      }
+
       const { x, y } = mousePosition(ev)
       const clientWidth = this.state.detailInfo ? window.innerWidth - 360 : window.innerWidth
 
@@ -220,6 +229,44 @@ class PhotoDetailInline extends React.Component {
         default: return null
       }
     }
+
+    /* handle zoom image */
+    this.handleZoom = (event) => {
+      if (this.refDetailImage) {
+        if (this.state.thumbPath) this.setState({ thumbPath: '' })
+        let zoom = this.refDetailImage.style.zoom
+        zoom *= 0.6 + (event.wheelDelta + 240) / 600
+        if (zoom <= 1) {
+          zoom = 1
+          this.refTransition.style.transform = this.degRotate
+          this.dragPosition.left = 0
+          this.dragPosition.top = 0
+        } else if (zoom > 10000) {
+          zoom = 10000
+        } else {
+          this.dragPosition.left *= 0.6 + (event.wheelDelta + 240) / 600
+          this.dragPosition.top *= 0.6 + (event.wheelDelta + 240) / 600
+          this.refTransition.style.transform = `translate(${this.dragPosition.left}px,${this.dragPosition.top}px) ${this.degRotate}`
+        }
+        // debug('onMouseWheel', event.wheelDelta, zoom)
+        this.refContainer.style.overflow = ''
+        this.refDetailImage.style.zoom = zoom
+      }
+    }
+
+    /* handle drag image when zoom */
+    this.dragImage = (event) => {
+      // debug('this.dragImage before', this.degRotate)
+      if (event.target.style.zoom > 1 && this.state.drag) {
+        const style = this.refTransition.style
+        this.dragPosition.left += this.dragPosition.x ? event.clientX - this.dragPosition.x : 0
+        this.dragPosition.top += this.dragPosition.y ? event.clientY - this.dragPosition.y : 0
+        this.dragPosition.x = event.clientX
+        this.dragPosition.y = event.clientY
+        style.transform = `translate(${this.dragPosition.left}px,${this.dragPosition.top}px) ${this.degRotate}`
+        // debug('this.dragImage', event.clientX, event.clientY, this.dragPosition.left, this.dragPosition.top)
+      }
+    }
   }
 
   componentWillMount() {
@@ -229,11 +276,13 @@ class PhotoDetailInline extends React.Component {
   componentDidMount() {
     this.props.ipcRenderer.on('donwloadMediaSuccess', this.updatePath)
     this.props.ipcRenderer.on('getThumbSuccess', this.updateThumbPath)
+    this.refContainer.addEventListener('mousewheel', this.handleZoom)
   }
 
   componentWillUnmount() {
     clearTimeout(this.enterTimeout)
     clearTimeout(this.leaveTimeout)
+    this.refContainer.removeEventListener('mousewheel', this.handleZoom)
     this.props.ipcRenderer.removeListener('getThumbSuccess', this.updateThumbPath)
     this.props.ipcRenderer.removeListener('donwloadMediaSuccess', this.updatePath)
     this.props.ipcRenderer.send('mediaHideThumb', this.session)
@@ -315,6 +364,12 @@ class PhotoDetailInline extends React.Component {
                   width={this.exifOrientation % 2 === 0 ? this.photoHeight : this.photoWidth}
                   alt="DetailImage"
                   src={this.state.detailPath}
+                  ref={ref => (this.refDetailImage = ref)}
+                  style={{ zoom: 1, transition: 'translate .5s cubic-bezier(0.0, 0.0, 0.2, 1)' }}
+                  onMouseDown={() => this.setState({ drag: true })}
+                  onMouseUp={() => { this.setState({ drag: false }); this.dragPosition.x = 0; this.dragPosition.y = 0 }}
+                  onMouseMove={this.dragImage}
+                  draggable={false}
                 />
             }
           </div>
