@@ -99,12 +99,12 @@ class Home extends Base {
     ipcRenderer.on('driveListUpdate', (e, obj) => {
       console.log('in home')
       console.log(obj, this.state.path)
-      if (obj.uuid == this.state.path[this.state.path.length - 1].uuid) {
-        // this.ctx.openSnackBar(obj.message)
+      if (!this.state.path.length) return
+      if (obj.uuid === this.state.path[this.state.path.length - 1].uuid) {
+        this.ctx.openSnackBar(obj.message)
         this.refresh()
       }
     })
-
   }
 
   updateState(listNavDir) {
@@ -132,10 +132,10 @@ class Home extends Base {
   }
 
   navEnter() {
-    if (!this.ctx.props.apis || !this.ctx.props.apis.listNavDir) return
-    const listNavDir = this.ctx.props.apis.listNavDir
-    if (listNavDir.isPending() || listNavDir.isRejected()) return
-    this.updateState(listNavDir.value())
+    if (!this.ctx.props.apis || !this.ctx.props.apis.account) return
+    if (!this.ctx.props.apis.account.data) return
+    const account = this.ctx.props.apis.account.data
+    if (account) this.ctx.props.apis.request('listNavDir', { dirUUID: account.home, rootUUID: account.home })
   }
 
   navLeave() {

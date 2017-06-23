@@ -112,7 +112,7 @@ class AssistantApp extends React.Component {
         </div>
 
         {/* PhotoList */}
-        <div style={{ height: 600, marginLeft: 80, display: this.state.showPhotos ? '' : 'none' }}>
+        <div style={{ height: 580, marginLeft: 80, display: this.state.showPhotos ? '' : 'none' }}>
           {
             !this.props.media ?
             <div

@@ -16,9 +16,9 @@ const finishTasks = []
 const uploadHandle = (event, args) => {
   console.log('uploadHandle...')
   console.log(args)
-  const { dirUUID, type } = args
+  const { dirUUID, type, filters } = args
   const dialogType = type === 'folder' ? 'openDirectory' : 'openFile'
-  dialog.showOpenDialog({ properties: [dialogType, 'multiSelections'] }, (data) => {
+  dialog.showOpenDialog({ properties: [dialogType, 'multiSelections'], filters }, (data) => {
     if (!data) return console.log('get list err', null)
     let index = 0
     const count = data.length
@@ -40,7 +40,13 @@ const uploadHandle = (event, args) => {
 
 const uploadMediaHandle = (event, rootUUID) => {
   const dirUUID = rootUUID
-  uploadHandle(event, { dirUUID, type: 'file' })
+  uploadHandle(event, { dirUUID,
+    type: 'file',
+    filters: [
+    { name: 'Images', extensions: ['jpg', 'png', 'gif'] },
+    { name: 'Movies', extensions: ['mkv', 'avi', 'mp4'] }
+    ]
+  })
 }
 
 const dragFileHandle = (event, args) => {
