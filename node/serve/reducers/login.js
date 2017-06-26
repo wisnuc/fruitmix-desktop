@@ -1,5 +1,6 @@
 import path from 'path'
 import DataStore from 'nedb'
+import { app } from 'electron'
 
 const defaultState = {
   state: 'LOGOUT',
@@ -10,7 +11,7 @@ const defaultState = {
 const login = (state = defaultState, action) => {
   // logged in listener
   if (action.type === 'LOGIN') {
-    const dbPath = path.join(global.rootPath, 'dbCache')
+    const dbPath = path.join(app.getPath('appData'), 'wisnuc', 'dbCache')
     const uuid = action.data.user.uuid
     global.db.uploading = new DataStore({ filename: path.join(dbPath, `${uuid}uploading.db`), autoload: true })
     global.db.uploaded = new DataStore({ filename: path.join(dbPath, `${uuid}uploaded.db`), autoload: true })
