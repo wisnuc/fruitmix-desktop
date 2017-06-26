@@ -21,6 +21,8 @@ class ChangeAccountDialog extends React.PureComponent {
       username: '',
       usernameErrorText: '',
       usernameLengthHint: '0/16',
+      prePassword: '',
+      prePasswordErrorText: '',
       password: '',
       passwordAgain: '',
       passwordErrorText: '',
@@ -61,6 +63,30 @@ class ChangeAccountDialog extends React.PureComponent {
         })
       }
     }
+
+    this.check = () => {
+      const { apis, op } = this.props
+      if (op === 'password') {
+        const args = {
+          uuid: apis.account.data.uuid,
+          password: this.state.prePassword
+        }
+        apis.request('getToken', args, (err) => {
+          if (err) {
+            debug('err', args, err, err.message)
+            if (err.message === 'Unauthorized') {
+              this.props.openSnackBar('修改失败：原密码错误')
+            } else {
+              this.props.openSnackBar(`修改失败：${err.message}`)
+            }
+          } else {
+            this.fire()
+          }
+        })
+      } else {
+        this.fire()
+      }
+    }
   }
 
   updateUsername(text) {
@@ -82,6 +108,16 @@ class ChangeAccountDialog extends React.PureComponent {
         this.setState({ fullLength: true })
       } else {
         this.setState({ fullLength: false })
+      }
+    })
+  }
+
+  updatePrePassword(text) {
+    this.setState({ prePassword: text }, () => {
+      if (this.state.prePassword.length === 0) {
+        this.setState({ prePasswordErrorText: '密码不能为空' })
+      } else {
+        this.setState({ prePasswordErrorText: '' })
       }
     })
   }
@@ -121,7 +157,8 @@ class ChangeAccountDialog extends React.PureComponent {
   }
 
   inputOK() {
-    if (this.state.usernameErrorText || this.state.passwordAgainErrorText || this.state.passwordErrorText) {
+    if (this.state.usernameErrorText || this.state.passwordAgainErrorText
+      || this.state.passwordErrorText || this.state.prePasswordErrorText) {
       return false
     }
     if (this.props.op === 'username') {
@@ -190,10 +227,11 @@ class ChangeAccountDialog extends React.PureComponent {
                 <TextField
                   style={{ flexGrow: 1 }}
                   fullWidth
-                  hintText="输入新密码"
+                  hintText="输入原密码"
                   type="password"
-                  errorText={this.state.passwordErrorText}
-                  onChange={e => this.updatePassword(e.target.value)}
+                  errorText={this.state.prePasswordErrorText}
+                  onChange={e => this.updatePrePassword(e.target.value)}
+                  onBlur={e => this.updatePrePassword(e.target.value)}
                   ref={(input) => {
                     if (input && this.state.focusFirst && (op !== 'createUser')) {
                       input.focus()
@@ -202,11 +240,22 @@ class ChangeAccountDialog extends React.PureComponent {
                   }}
                 />
               </div>
+              <div style={{ height: 56, display: 'flex', marginBottom: 10 }}>
+                <IconBox style={{ marginLeft: -12 }} size={48} icon={null} />
+                <TextField
+                  style={{ flexGrow: 1 }}
+                  fullWidth
+                  hintText="输入新密码"
+                  type="password"
+                  errorText={this.state.passwordErrorText}
+                  onChange={e => this.updatePassword(e.target.value)}
+                />
+              </div>
               <div style={{ height: 56, display: 'flex' }}>
                 <IconBox style={{ marginLeft: -12 }} size={48} icon={null} />
                 <TextField
                   fullWidth
-                  hintText="再次输入密码"
+                  hintText="再次输入新密码"
                   type="password"
                   errorText={this.state.passwordAgainErrorText}
                   onChange={e => this.updatePasswordAgain(e.target.value, 'onChange')}
@@ -219,7 +268,7 @@ class ChangeAccountDialog extends React.PureComponent {
         {/* button */}
         <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
           <FlatButton label="取消" onTouchTap={this.props.onRequestClose} primary />
-          <FlatButton label="确认" disabled={!this.inputOK()} onTouchTap={this.fire} primary />
+          <FlatButton label="确认" disabled={!this.inputOK()} onTouchTap={this.check} primary />
         </div>
       </div>
     )

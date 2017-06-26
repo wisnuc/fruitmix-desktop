@@ -1,14 +1,13 @@
 import React from 'react'
 import { clipboard } from 'electron'
 import Debug from 'debug'
-import { Avatar, Divider, FloatingActionButton, Toggle, RaisedButton } from 'material-ui'
-import ActionSupervisorAccount from 'material-ui/svg-icons/action/supervisor-account'
-import ContentAdd from 'material-ui/svg-icons/content/add'
+import { Avatar, Divider, FloatingActionButton, Toggle, TextField } from 'material-ui'
+import CommunicationVpnKey from 'material-ui/svg-icons/communication/vpn-key'
 import SocialPersonAdd from 'material-ui/svg-icons/social/person-add'
-import ContextMenu from '../common/ContextMenu'
 import DialogOverlay from '../common/DialogOverlay'
 import ChangeAccountDialog from './ChangeAccountDialog'
 import FlatButton from '../common/FlatButton'
+import IconBox from '../common/IconBox'
 
 const debug = Debug('component:control:AdminUsers: ')
 
@@ -18,6 +17,8 @@ class AdminUsersApp extends React.Component {
     super(props)
     this.state = {
       user: null,
+      password: '',
+      confirmPwd: '',
       createNewUser: false,
       resetPwd: false,
       randomPwd: false,
@@ -30,15 +31,42 @@ class AdminUsersApp extends React.Component {
 
     this.resetPwd = () => {
       debug('this.resetPwd', this.state.user)
-      this.setState({ resetPwd: false, randomPwd: 'true' })
+      this.setState({ resetPwd: false, confirmPwd: 'resetPwd' })
     }
+
     this.disableUser = () => {
       debug('this.resetPwd', this.state.user)
-      this.setState({ disableUser: false })
+      this.setState({ disableUser: false, confirmPwd: 'disableUser' })
     }
+
     this.copyText = () => {
       clipboard.writeText('145343')
       this.props.openSnackBar('复制成功')
+    }
+
+    this.updatePassword = (password) => {
+      this.setState({ password })
+    }
+
+    this.getToken = () => {
+      const args = {
+        uuid: this.props.apis.account.data.uuid,
+        password: this.state.password
+      }
+
+      this.props.apis.request('getToken', args, (err) => {
+        if (err) {
+          debug('err', args, err, err.message)
+          if (err.message === 'Unauthorized') {
+            this.props.openSnackBar('密码错误')
+          } else {
+            this.props.openSnackBar(`出现错误：${err.message}`)
+          }
+        } else {
+          this.setState({ confirmPwd: '' })
+          this.props.openSnackBar('密码正确')
+        }
+      })
     }
   }
 
@@ -86,6 +114,31 @@ class AdminUsersApp extends React.Component {
               onToggle={() => this.toggleDialog('disableUser', user)}
             />
           }
+        </div>
+      </div>
+    )
+  }
+
+  renderConfirmPwd() {
+    return (
+      <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
+        <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}> 输入密码 </div>
+        <div style={{ height: 56 }} />
+        <div style={{ height: 56, display: 'flex', marginBottom: 10 }}>
+          <IconBox style={{ marginLeft: -12 }} size={48} icon={CommunicationVpnKey} />
+          <TextField
+            style={{ flexGrow: 1 }}
+            fullWidth
+            hintText="输入密码"
+            type="password"
+            onChange={e => this.updatePassword(e.target.value)}
+            onBlur={e => this.updatePassword(e.target.value)}
+          />
+        </div>
+        <div style={{ height: 24 }} />
+        <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+          <FlatButton label="取消" primary onTouchTap={() => this.setState({ confirmPwd: '', password: '' })} />
+          <FlatButton label="确定" primary onTouchTap={this.getToken} disabled={!this.state.password} />
         </div>
       </div>
     )
@@ -143,7 +196,7 @@ class AdminUsersApp extends React.Component {
         </DialogOverlay>
 
         {/* reset password dialog */}
-        <DialogOverlay open={!!this.state.resetPwd || !!this.state.randomPwd}>
+        <DialogOverlay open={!!this.state.resetPwd || !!this.state.randomPwd || this.state.confirmPwd === 'resetPwd'}>
           <div>
             {
               this.state.resetPwd &&
@@ -161,6 +214,10 @@ class AdminUsersApp extends React.Component {
                   </div>
                 </div>
             }
+
+            {/* render confirm password */}
+            { this.state.confirmPwd && this.renderConfirmPwd() }
+
             {
               this.state.randomPwd &&
                 <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
@@ -181,7 +238,7 @@ class AdminUsersApp extends React.Component {
         </DialogOverlay>
 
         {/* disable user dialog */}
-        <DialogOverlay open={!!this.state.disableUser}>
+        <DialogOverlay open={!!this.state.disableUser || this.state.confirmPwd === 'disableUser'}>
           <div>
             {
               this.state.disableUser &&
@@ -204,6 +261,8 @@ class AdminUsersApp extends React.Component {
                   </div>
                 </div>
             }
+            {/* render confirm password */}
+            { this.state.confirmPwd && this.renderConfirmPwd() }
           </div>
         </DialogOverlay>
       </div>

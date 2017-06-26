@@ -107,6 +107,12 @@ class Fruitmix extends EventEmitter {
       r = request.get(`http://${this.address}:3721/login`)
       break
 
+    case 'getToken':
+      r = request.get(`http://${this.address}:3721/token`)
+          .auth(args.uuid, args.password)
+          .set('Accept', 'application/json')
+      break
+
     case 'account':
       r = this.aget('account')
       break

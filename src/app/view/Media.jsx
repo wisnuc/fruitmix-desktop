@@ -23,9 +23,9 @@ const parseDate = (date) => {
 }
 const getName = (photo) => {
   if (!photo[1].metadata.exifDateTime) {
-    return `IMG_UnkownDate_${photo[0].slice(0, 5).toUpperCase()}_PC.${photo[1].metadata.format}`
+    return `IMG_UnkownDate-${photo[0].slice(0, 5).toUpperCase()}-PC.${photo[1].metadata.format}`
   }
-  return `IMG_${photo[1].metadata.exifDateTime.split(/\s+/g)[0].replace(/[:\s]+/g, '')}_${photo[0].slice(0, 5).toUpperCase()}_PC.${photo[1].metadata.format}`
+  return `IMG-${photo[1].metadata.exifDateTime.split(/\s+/g)[0].replace(/[:\s]+/g, '')}-${photo[0].slice(0, 5).toUpperCase()}-PC.${photo[1].metadata.format}`
 }
 
 /* increase limit of listeners of EventEmitter */

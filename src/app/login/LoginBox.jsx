@@ -35,6 +35,7 @@ class LoginBox extends React.Component {
   login() {
     const { uuid, username } = this.props.user
     const password = this.state.password
+    console.log(uuid, password)
     this.props.device.request('token', { uuid, password }, (err) => {
       if (err) {
         console.log(`err:${err}`)
