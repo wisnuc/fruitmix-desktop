@@ -8,6 +8,7 @@ import ToggleCheckBox from 'material-ui/svg-icons/toggle/check-box'
 import ToggleCheckBoxOutlineBlank from 'material-ui/svg-icons/toggle/check-box-outline-blank'
 import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
 import FileFolder from 'material-ui/svg-icons/file/folder'
+import PhotoIcon from 'material-ui/svg-icons/image/photo'
 import { List, AutoSizer } from 'react-virtualized'
 import { TXTIcon, WORDIcon, EXCELIcon, PPTIcon, PDFIcon } from '../common/Svg'
 
@@ -55,7 +56,11 @@ const renderCheck = check =>
       ? <ToggleCheckBoxOutlineBlank style={{ color: 'rgba(0,0,0,0.38)' }} />
       : null
 
-const renderFileIcon = (name) => {
+const renderFileIcon = (name, metadata) => {
+  /* media */
+  if (metadata) return <PhotoIcon style={{ color: '#ea4335' }} />
+
+  /* PDF, TXT, Word, Excel, PPT */
   let extension = name.replace(/^.*\./, '')
   if (!extension || extension === name) extension = 'OTHER'
   switch (extension.toUpperCase()) {
@@ -139,7 +144,7 @@ class Row extends PureComponent {
                 entry.type === 'folder' || entry.type === 'public' || entry.type === 'directory'
                 ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)' }} />
                 : entry.type === 'file'
-                ? renderFileIcon(entry.name)
+                ? renderFileIcon(entry.name, entry.metadata)
                 : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)' }} />
               }
             </Avatar>
