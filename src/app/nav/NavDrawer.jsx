@@ -120,7 +120,7 @@ class NavDrawer extends React.Component {
 
     /*
     console.log('>>>>>>>>>>>>>>>>>>>')
-    console.log(this.props)
+    console.log(this.props.views[nav])
     console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<')
     */
 
@@ -176,7 +176,18 @@ class NavDrawer extends React.Component {
         */}
 
         { isAdmin && <SubHeader>管理</SubHeader> }
-        { isAdmin && this.renderGroup('settings', ws215i) }
+        {/* isAdmin && this.renderGroup('settings', ws215i) */}
+        {
+          isAdmin &&
+            <MenuItem
+              icon={ActionSettings}
+              text="设置"
+              dense
+              primaryColor={primaryColor}
+              selected={views[nav].navGroup() === 'settings'}
+              onTouchTap={() => navTo('adminUsers')}
+            />
+        }
 
         { isAdmin && <div style={{ height: 4 }} /> }
         { isAdmin && <Divider /> }
