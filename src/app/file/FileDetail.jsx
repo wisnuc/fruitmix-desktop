@@ -5,6 +5,10 @@ import prettysize from 'prettysize'
 import { CircularProgress, Divider } from 'material-ui'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
+import PhotoIcon from 'material-ui/svg-icons/image/photo'
+import ErrorIcon from 'material-ui/svg-icons/alert/error'
+import { TXTIcon, WORDIcon, EXCELIcon, PPTIcon, PDFIcon } from '../common/Svg'
+import Map from '../common/map'
 
 const debug = Debug('component:file:FileDetail:')
 
@@ -54,6 +58,37 @@ const getResolution = (height, width) => {
     return `${res} 万像素 ${height} x ${width}`
   }
   return `${res} 像素 ${height} x ${width}`
+}
+
+const renderFileIcon = (name, metadata) => {
+  /* media */
+  if (metadata) return <PhotoIcon style={{ color: '#FFFFFF' }} />
+
+  /* PDF, TXT, Word, Excel, PPT */
+  let extension = name.replace(/^.*\./, '')
+  if (!extension || extension === name) extension = 'OTHER'
+  switch (extension.toUpperCase()) {
+    case 'PDF':
+      return (<PDFIcon style={{ color: '#FFFFFF' }} />)
+    case 'TXT':
+      return (<TXTIcon style={{ color: '#FFFFFF' }} />)
+    case 'DOCX':
+      return (<WORDIcon style={{ color: '#FFFFFF' }} />)
+    case 'DOC':
+      return (<WORDIcon style={{ color: '#FFFFFF' }} />)
+    case 'XLS':
+      return (<EXCELIcon style={{ color: '#FFFFFF' }} />)
+    case 'XLSX':
+      return (<EXCELIcon style={{ color: '#FFFFFF' }} />)
+    case 'PPT':
+      return (<PPTIcon style={{ color: '#FFFFFF' }} />)
+    case 'PPTX':
+      return (<PPTIcon style={{ color: '#FFFFFF' }} />)
+    case 'OTHER':
+      return (<EditorInsertDriveFile style={{ color: '#FFFFFF' }} />)
+    default:
+      return (<EditorInsertDriveFile style={{ color: '#FFFFFF' }} />)
+  }
 }
 
 class FileDetail extends React.PureComponent {
@@ -131,7 +166,8 @@ class FileDetail extends React.PureComponent {
     )
   }
 
-  renderTitle(title, type) {
+  renderTitle(detailFile) {
+    const { name, type, metadata } = detailFile
     return (
       <div
         style={{
@@ -146,15 +182,15 @@ class FileDetail extends React.PureComponent {
         <div style={{ flex: '0 0 24px', display: 'flex', alignItems: 'center' }}>
           {
             type === 'folder' || type === 'public' || type === 'directory'
-            ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)' }} />
+            ? <FileFolder style={{ color: '#FFFFFF' }} />
             : type === 'file'
-            ? <EditorInsertDriveFile style={{ color: 'rgba(0,0,0,0.54' }} />
-            : null
+            ? renderFileIcon(name, metadata)
+            : <ErrorIcon style={{ color: '#FFFFFF' }} />
           }
         </div>
         <div style={{ flex: '0 0 16px' }} />
         <div style={{ flexGrow: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          { title }
+          { name }
         </div>
         <div style={{ flex: '0 0 24px' }} />
       </div>
@@ -205,13 +241,13 @@ class FileDetail extends React.PureComponent {
     ]
 
     return (
-      <div style={{ height: '100%' }}>
+      <div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
         <div style={{ height: 128, backgroundColor: '#00796B' }}>
           <div style={{ height: 64 }} />
           {/* header */}
           <div style={{ height: 64, marginLeft: 24 }} >
             <div style={{ height: 16 }} />
-            { this.renderTitle(detailFile.name, detailFile.type) }
+            { this.renderTitle(detailFile) }
           </div>
         </div>
 
@@ -242,9 +278,39 @@ class FileDetail extends React.PureComponent {
         { digest && <Divider /> }
 
         {/* data */}
-        <div style={{ width: 312, height: 'calc(100% - 152px)', padding: 24, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ width: 312, padding: 24, display: 'flex', flexDirection: 'column' }}>
           { this.renderList(Titles, Values) }
         </div>
+
+        {/* map */}
+        {
+          metadata && metadata.GPS &&
+            <div style={{ marginTop: -48 }}>
+              <div style={{ width: 312, padding: 24, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ height: 32, color: 'rgba(0, 0, 0, 0.54)', display: 'flex', alignItems: 'center', width: '100%' }} >
+                  <div style={{ flex: '0 0 96px', fontSize: 14 }} > 拍摄地点 </div>
+                  <div
+                    style={{
+                      fontSize: 14,
+                      flex: '0 0 216px',
+                      color: 'rgba(0, 0, 0, 0.54)',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}
+                    id={`map_${digest}`}
+                  />
+                </div>
+              </div>
+              <div style={{ width: 360, height: 360 }}>
+                <Map
+                  longitude="121.6009"
+                  latitude="31.1811"
+                  resultId={`map_${digest}`}
+                />
+              </div>
+            </div>
+        }
       </div>
     )
   }

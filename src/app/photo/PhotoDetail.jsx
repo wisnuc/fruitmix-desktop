@@ -257,14 +257,17 @@ class PhotoDetailInline extends React.Component {
     /* handle drag image when zoom */
     this.dragImage = (event) => {
       // debug('this.dragImage before', this.degRotate)
-      if (event.target.style.zoom > 1 && this.state.drag) {
+      const zoom = event.target.style.zoom
+      if (zoom > 1 && this.state.drag) {
         const style = this.refTransition.style
+        const height = this.photoHeight * zoom
+        const width = this.photoWidth * zoom
         this.dragPosition.left += this.dragPosition.x ? event.clientX - this.dragPosition.x : 0
         this.dragPosition.top += this.dragPosition.y ? event.clientY - this.dragPosition.y : 0
         this.dragPosition.x = event.clientX
         this.dragPosition.y = event.clientY
         style.transform = `translate(${this.dragPosition.left}px,${this.dragPosition.top}px) ${this.degRotate}`
-        // debug('this.dragImage', event.clientX, event.clientY, this.dragPosition.left, this.dragPosition.top)
+        debug('this.dragImage', height, width, this.dragPosition.left, this.dragPosition.top)
       }
     }
   }
