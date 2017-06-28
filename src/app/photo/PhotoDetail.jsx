@@ -246,6 +246,22 @@ class PhotoDetailInline extends React.Component {
         } else {
           this.dragPosition.left *= 0.6 + (event.wheelDelta + 240) / 600
           this.dragPosition.top *= 0.6 + (event.wheelDelta + 240) / 600
+
+          /* calculate the size diff between photo and client */
+          const width = (this.photoWidth * zoom - this.clientWidth) / 2
+          const height = (this.photoHeight * zoom - this.clientHeight) / 2
+
+          /* the photo can't be move to outside of client */
+          if (width > 0 && this.dragPosition.left < -width) this.dragPosition.left = -width
+          if (width > 0 && this.dragPosition.left > width) this.dragPosition.left = width
+
+          if (height > 0 && this.dragPosition.top < -height) this.dragPosition.top = -height
+          if (height > 0 && this.dragPosition.top > height) this.dragPosition.top = height
+
+          /* when the photo is smaller than client, it can't be move */
+          if (width < 0) this.dragPosition.left = 0
+          if (height < 0) this.dragPosition.top = 0
+
           this.refTransition.style.transform = `translate(${this.dragPosition.left}px,${this.dragPosition.top}px) ${this.degRotate}`
         }
         // debug('onMouseWheel', event.wheelDelta, zoom)
@@ -260,14 +276,32 @@ class PhotoDetailInline extends React.Component {
       const zoom = event.target.style.zoom
       if (zoom > 1 && this.state.drag) {
         const style = this.refTransition.style
-        const height = this.photoHeight * zoom
-        const width = this.photoWidth * zoom
+
+        /* calculate the size diff between photo and client */
+        const width = (this.photoWidth * zoom - this.clientWidth) / 2
+        const height = (this.photoHeight * zoom - this.clientHeight) / 2
+
         this.dragPosition.left += this.dragPosition.x ? event.clientX - this.dragPosition.x : 0
         this.dragPosition.top += this.dragPosition.y ? event.clientY - this.dragPosition.y : 0
+
+        /* the photo can't be move to outside of client */
+        if (width > 0 && this.dragPosition.left < -width) this.dragPosition.left = -width
+        if (width > 0 && this.dragPosition.left > width) this.dragPosition.left = width
+
+        if (height > 0 && this.dragPosition.top < -height) this.dragPosition.top = -height
+        if (height > 0 && this.dragPosition.top > height) this.dragPosition.top = height
+
+        /* when the photo is smaller than client, it can't be move */
+        if (width < 0) this.dragPosition.left = 0
+        if (height < 0) this.dragPosition.top = 0
+
+        /* memoize last position */
         this.dragPosition.x = event.clientX
         this.dragPosition.y = event.clientY
+
+        /* move photo */
         style.transform = `translate(${this.dragPosition.left}px,${this.dragPosition.top}px) ${this.degRotate}`
-        debug('this.dragImage', height, width, this.dragPosition.left, this.dragPosition.top)
+        // debug('this.dragImage', width, height, this.dragPosition.left, this.dragPosition.top)
       }
     }
   }
@@ -372,6 +406,7 @@ class PhotoDetailInline extends React.Component {
                   onMouseDown={() => this.setState({ drag: true })}
                   onMouseUp={() => { this.setState({ drag: false }); this.dragPosition.x = 0; this.dragPosition.y = 0 }}
                   onMouseMove={this.dragImage}
+                  onMouseLeave={() => { this.setState({ drag: false }); this.dragPosition.x = 0; this.dragPosition.y = 0 }}
                   draggable={false}
                 />
             }
