@@ -333,7 +333,7 @@ class TaskManager {
 
     db.downloaded.insert(this.getStoreObj(), (err, data) => {
       if (err) return console.log(err)
-      console.log(data)
+      // console.log(data)
     })
   }
 
