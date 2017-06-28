@@ -30,6 +30,8 @@ import MediaAlbum from '../view/MediaAlbum'
 import Trash from '../view/Trash'
 
 import Account from '../view/Account'
+import Docker from '../view/Docker'
+import InstalledApps from '../view/InstalledApps'
 
 import AdminUsers from '../view/AdminUsers'
 import AdminDrives from '../view/AdminDrives'
@@ -69,6 +71,9 @@ class NavViews extends Component {
 
     this.install('trash', Trash)
 
+    this.install('docker', Docker)
+    this.install('installedApps', InstalledApps)
+
     this.install('account', Account)
     this.install('adminUsers', AdminUsers)
     this.install('adminDrives', AdminDrives)
@@ -79,6 +84,7 @@ class NavViews extends Component {
     this.install('fanControl', FanControl)
     this.install('systemUpdate', SystemUpdate)
     this.install('power', Power)
+
 
     Object.assign(this.state, {
       nav: null,

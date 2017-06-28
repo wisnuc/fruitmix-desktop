@@ -11,6 +11,8 @@ import ActionAccountCircle from 'material-ui/svg-icons/action/account-circle'
 import SocialPerson from 'material-ui/svg-icons/social/person'
 import { indigo500 } from 'material-ui/styles/colors'
 
+import { DockerIcon } from '../common/Svg'
+
 class SubHeader extends Component {
 
   render() {
@@ -177,6 +179,18 @@ class NavDrawer extends React.Component {
 
         { isAdmin && <SubHeader>管理</SubHeader> }
         {/* isAdmin && this.renderGroup('settings', ws215i) */}
+
+        { 
+          isAdmin &&
+            <MenuItem
+              icon={DockerIcon}
+              text="应用市场"
+              dense
+              primaryColor={primaryColor}
+              selected={views[nav].navGroup() === 'docker'}
+              onTouchTap={() => navTo('docker')}
+            />
+        }
         {
           isAdmin &&
             <MenuItem

@@ -44,6 +44,8 @@ class Base extends EventEmitter {
         return indigo600
       case 'settings':
         return deepPurple500
+      case 'docker':
+        return orange600
       default:
         return 'white'
     }

@@ -231,6 +231,11 @@ class Fruitmix extends EventEmitter {
       r = this.aget(`media`)
       break
 
+    /** Docker API **/
+    case 'docker':
+      r = request.get(`http://10.10.9.86:3000/server`)
+      break
+
     default:
       break
     }

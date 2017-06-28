@@ -106,3 +106,30 @@ export const CircleIcon = () => (
     />
   </svg>
 )
+
+export const DockerIcon = (props) => {
+  const style = {
+    fill: 'none',
+    stroke: props.style.color,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round'
+  }
+  return (
+    <SvgIcon {...props} >
+      <circle cx="5.04" cy="16" r="0.5" style={style} />
+      <rect height="3" style={style} width="3" x="1.5" y="9.5" />
+      <rect height="3" style={style} width="3" x="4.5" y="9.5" />
+      <rect height="3" style={style} width="3" x="7.5" y="9.5" />
+      <rect height="3" style={style} width="3" x="10.5" y="9.5" />
+      <rect height="3" style={style} width="3" x="4.5" y="6.5" />
+      <rect height="3" style={style} width="3" x="7.5" y="6.5" />
+      <rect height="3" style={style} width="3" x="10.5" y="6.5" />
+      <rect height="3" style={style} width="3" x="10.5" y="3.5" />
+      <rect height="3" style={style} width="3" x="13.5" y="9.5" />
+      <path
+        d="M23.5,11.5s-1.75-1.12-3-.5A3.45,3.45,0,0,0,19,8.5a3.64,3.64,0,0,0-.58,2.88,1,1,0,0,1-1,1.12H.5c0,6.25,3.83,8,7.5,8a13.76,13.76,0,0,0,12.06-7A4.68,4.68,0,0,0,23.5,11.5Z"
+        style={style}
+      />
+    </SvgIcon>
+  )
+}
