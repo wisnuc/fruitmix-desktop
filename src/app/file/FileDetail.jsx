@@ -8,7 +8,6 @@ import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-fil
 import PhotoIcon from 'material-ui/svg-icons/image/photo'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import { TXTIcon, WORDIcon, EXCELIcon, PPTIcon, PDFIcon } from '../common/Svg'
-import Map from '../common/map'
 
 const debug = Debug('component:file:FileDetail:')
 
@@ -281,36 +280,6 @@ class FileDetail extends React.PureComponent {
         <div style={{ width: 312, padding: 24, display: 'flex', flexDirection: 'column' }}>
           { this.renderList(Titles, Values) }
         </div>
-
-        {/* map */}
-        {
-          metadata && metadata.GPS &&
-            <div style={{ marginTop: -48 }}>
-              <div style={{ width: 312, padding: 24, display: 'flex', flexDirection: 'column' }}>
-                <div style={{ height: 32, color: 'rgba(0, 0, 0, 0.54)', display: 'flex', alignItems: 'center', width: '100%' }} >
-                  <div style={{ flex: '0 0 96px', fontSize: 14 }} > 拍摄地点 </div>
-                  <div
-                    style={{
-                      fontSize: 14,
-                      flex: '0 0 216px',
-                      color: 'rgba(0, 0, 0, 0.54)',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
-                    }}
-                    id={`map_${digest}`}
-                  />
-                </div>
-              </div>
-              <div style={{ width: 360, height: 360 }}>
-                <Map
-                  longitude="121.6009"
-                  latitude="31.1811"
-                  resultId={`map_${digest}`}
-                />
-              </div>
-            </div>
-        }
       </div>
     )
   }

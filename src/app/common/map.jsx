@@ -9,47 +9,49 @@ class Map extends React.Component {
     }
 
     this.fire = () => {
-      this.setState({ success: true }, () => {
-        const map = new AMap.Map('mapContainer', {
-          resizeEnable: true,
-          zoom: 18
-        })
+      this.setState({ success: true }, this.getMap)
+    }
 
-        /* 已知点坐标 */
-        const lnglatXY = [this.props.longitude, this.props.latitude]
+    this.getMap = () => {
+      /* 已知点坐标 */
+      const lnglatXY = [this.props.longitude, this.props.latitude]
 
-        const geocoderCallBack = (data) => {
-          console.log('address', data.regeocode)
-          /* 返回地址描述 */
-          const compo = data.regeocode.addressComponent
-          const address = `${compo.province} ${compo.district}`
-          if (this.props.resultId) {
-            document.getElementById(this.props.resultId).innerHTML = address
-          }
-        }
-
-        /* 逆地理编码 */
-        const regeocoder = () => {
-          const geocoder = new AMap.Geocoder({
-            radius: 1000,
-            extensions: 'all'
-          })
-          geocoder.getAddress(lnglatXY, (status, result) => {
-            console.log(status, result)
-            if (status === 'complete' && result.info === 'OK') {
-              geocoderCallBack(result)
-            }
-          })
-          /* 加点 */
-          const marker = new AMap.Marker({
-            map,
-            position: lnglatXY
-          })
-          map.setFitView()
-        }
-
-        regeocoder()
+      const map = new AMap.Map('mapContainer', {
+        resizeEnable: true,
+        zoom: 15,
+        center: lnglatXY
       })
+
+      const geocoderCallBack = (data) => {
+        console.log('address', data.regeocode)
+        /* 返回地址描述 */
+        const compo = data.regeocode.addressComponent
+        const address = `${compo.province} ${compo.district}`
+        if (this.props.resultId) {
+          document.getElementById(this.props.resultId).innerHTML = address
+        }
+      }
+
+      /* 逆地理编码 */
+      const regeocoder = () => {
+        const geocoder = new AMap.Geocoder({
+          radius: 1000,
+          extensions: 'all'
+        })
+        geocoder.getAddress(lnglatXY, (status, result) => {
+          console.log(status, result)
+          if (status === 'complete' && result.info === 'OK') {
+            geocoderCallBack(result)
+          }
+        })
+        /* 加点 */
+        const marker = new AMap.Marker({
+          map,
+          position: lnglatXY
+        })
+        // map.setFitView()
+      }
+      regeocoder()
     }
   }
 
@@ -61,7 +63,16 @@ class Map extends React.Component {
     document.body.appendChild(script)
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    return (this.state !== nextState || nextProps.resultId !== this.props.resultId)
+  }
+
+  componentDidUpdate() {
+    if (this.state.success) this.getMap()
+  }
+
   render() {
+    console.log('map render')
     const height = this.props.height || 360
     const width = this.props.height || 360
     return (

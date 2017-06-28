@@ -8,6 +8,7 @@ import DeleteIcon from 'material-ui/svg-icons/action/delete'
 import DateIcon from 'material-ui/svg-icons/action/today'
 import ImageIcon from 'material-ui/svg-icons/image/image'
 import CameraIcon from 'material-ui/svg-icons/image/camera'
+import LoactionIcon from 'material-ui/svg-icons/communication/location-on'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import VisibilityOff from 'material-ui/svg-icons/action/visibility-off'
 import InfoIcon from 'material-ui/svg-icons/action/info'
@@ -19,6 +20,7 @@ import { TweenMax } from 'gsap'
 import ReactTransitionGroup from 'react-addons-transition-group'
 import DialogOverlay from '../common/DialogOverlay'
 import FlatButton from '../common/FlatButton'
+import Map from '../common/map'
 
 const debug = Debug('component:photoApp:PhotoDetail')
 
@@ -419,6 +421,11 @@ class PhotoDetailInline extends React.Component {
   renderInfo() {
     debug('renderInfo', this.props.items.length, this.photo)
     const { exifDateTime, exifModel, exifMake, height, width, size } = this.photo.metadata
+
+    const seed = (parseInt(this.digest.slice(0, 3), 16) - 4096) / 2048
+    const longitude = Math.round((121 + seed) * 10000) / 10000
+    const latitude = Math.round((31 + seed) * 10000) / 10000
+
     return (
       <div style={{ padding: '0px 32px 0px 32px', width: 296 }}>
         <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.54)', height: 48, display: 'flex', alignItems: 'center' }}> 详情 </div>
@@ -460,6 +467,30 @@ class PhotoDetailInline extends React.Component {
             </div>
           </div>
         </div>
+        }
+
+        {/* location */}
+        { exifDateTime &&
+        <div style={{ height: 72, display: 'flex', alignItems: 'center' }}>
+          <LoactionIcon color="rgba(0,0,0,0.54)" />
+          <div style={{ marginLeft: 64 }}>
+            <div style={{ color: 'rgba(0,0,0,0.87)', lineHeight: '24px' }} id={`map_${this.digest}`} />
+            <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14, lineHeight: '20px' }}>
+              { `${longitude}, ${latitude}` }
+            </div>
+          </div>
+        </div>
+        }
+
+        {/* map */}
+        { exifDateTime &&
+          <div style={{ width: 360, height: 360, marginLeft: -32 }}>
+            <Map
+              longitude={longitude}
+              latitude={latitude}
+              resultId={`map_${this.digest}`}
+            />
+          </div>
         }
       </div>
     )
