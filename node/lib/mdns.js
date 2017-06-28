@@ -66,7 +66,7 @@ ipcMain.on('MDNS_SCAN', (event, session) => {
       const message = Object.assign(parsed, { address: data.addresses[0] })
 
       // console.log('mdns send message', message)
-      
+
       event.sender.send('MDNS_UPDATE', session, message)
     }
   })

@@ -6,7 +6,6 @@ import { dialog, ipcMain } from 'electron'
 
 import request from 'request'
 
-import registerCommandHandlers from './command'
 import { getMainWindow } from './window'
 import createTask, { sendMsg } from './uploadTaskCreater'
 
@@ -14,10 +13,12 @@ const userTasks = []
 const finishTasks = []
 
 // handler
-const uploadHandle = (args) => {
-  const { dirUUID, type } = args
-  const dialogType = type == 'folder' ? 'openDirectory' : 'openFile'
-  dialog.showOpenDialog({ properties: [dialogType, 'multiSelections'] }, (data) => {
+const uploadHandle = (event, args) => {
+  console.log('uploadHandle...')
+  console.log(args)
+  const { dirUUID, type, filters } = args
+  const dialogType = type === 'folder' ? 'openDirectory' : 'openFile'
+  dialog.showOpenDialog({ properties: [dialogType, 'multiSelections'], filters }, (data) => {
     if (!data) return console.log('get list err', null)
     let index = 0
     const count = data.length
@@ -37,7 +38,18 @@ const uploadHandle = (args) => {
   })
 }
 
-const dragFileHandle = (args) => {
+const uploadMediaHandle = (event, rootUUID) => {
+  const dirUUID = rootUUID
+  uploadHandle(event, { dirUUID,
+    type: 'file',
+    filters: [
+    { name: 'Images', extensions: ['jpg', 'png', 'gif'] },
+    { name: 'Movies', extensions: ['mkv', 'avi', 'mp4'] }
+    ]
+  })
+}
+
+const dragFileHandle = (event, args) => {
   if (!args.files.length) return
   let index = 0
   const loop = () => {
@@ -59,7 +71,7 @@ const dragFileHandle = (args) => {
   loop()
 }
 
-const getTransmissionHandle = () => {
+const startTransmissionHandle = () => {
   db.uploaded.find({}).sort({ finishDate: -1 }).exec((err, docs) => {
     if (err) return console.log(err)
     docs.forEach(item => item.uuid = item._id)
@@ -106,20 +118,17 @@ const cleanRecord = (type, uuid) => {
 }
 
 
-const uploadCommandMap = new Map([
-  ['UPLOAD', uploadHandle],
-  ['DRAG_FILE', dragFileHandle]
-])
-
-registerCommandHandlers(uploadCommandMap)
-
 ipcMain.on('loginOff', (evt) => {
   // todo
 })
 
-ipcMain.on('GET_TRANSMISSION', getTransmissionHandle)
+ipcMain.on('START_TRANSMISSION', startTransmissionHandle)
+ipcMain.on('GET_TRANSMISSION', sendMsg)
 ipcMain.on('DELETE_UPLOADING', deleteUploadingHandle)
 ipcMain.on('DELETE_UPLOADED', deleteUploadedHandle)
+ipcMain.on('DRAG_FILE', dragFileHandle)
+ipcMain.on('UPLOAD', uploadHandle)
+ipcMain.on('UPLOADMEDIA', uploadMediaHandle)
 
 // ipcMain.on('PAUSE_UPLOADING')
 ipcMain.on('PAUSE_UPLOADING', (e, uuid) => {

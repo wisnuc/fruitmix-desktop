@@ -13,6 +13,7 @@ import store from '../serve/store/store'
 
 /* init */
 const getIpAddr = () => store.getState().login.device.mdev.address
+const getTmpPath = () => store.getState().config.tmpPath
 
 class Worker extends EventEmitter {
   constructor(id) {
@@ -72,7 +73,7 @@ class Worker extends EventEmitter {
 
     // TODO TMP file and rename JACK
 
-    const tmpPath = path.join(global.tmpPath, UUID.v4())
+    const tmpPath = path.join(getTmpPath(), UUID.v4())
     const dst = path.join(downloadPath, name)
     const stream = fs.createWriteStream(path.join(tmpPath))
     this.requestHandler = request(opts)
@@ -251,9 +252,11 @@ class MediaFileManager {
 }
 
 const mediaFileManager = new MediaFileManager()
-const dirpath = mediaPath
+const getThumbPath = () => store.getState().config.thumbPath
+const getImagePath = () => store.getState().config.imagePath
+
 ipcMain.on('mediaShowThumb', (event, session, digest, height, width) => {
-  mediaFileManager.createThumbTask(session, digest, dirpath, height, width)
+  mediaFileManager.createThumbTask(session, digest, getThumbPath(), height, width)
 })
 
 ipcMain.on('mediaHideThumb', (event, session) => {
@@ -261,7 +264,7 @@ ipcMain.on('mediaHideThumb', (event, session) => {
 })
 
 ipcMain.on('mediaShowImage', (event, session, digest) => {
-  mediaFileManager.createImageTask(session, digest, dirpath)
+  mediaFileManager.createImageTask(session, digest, getImagePath())
 })
 
 ipcMain.on('mediaHideImage', (event, session) => {

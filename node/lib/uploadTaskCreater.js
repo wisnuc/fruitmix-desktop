@@ -310,7 +310,7 @@ class TaskManager {
     if (obj.target === '') {
       this.recordInfor('当前文件父文件夹正在创建，缺少目标，等待...')
       return
-    }        else if (obj.type === 'file' && obj.sha === '') {
+    } else if (obj.type === 'file' && obj.sha === '') {
       this.recordInfor('当前文件HASH尚未计算，等待...')
       return
     }
@@ -752,15 +752,15 @@ class UploadFileSTM extends STM {
       url: `${server}/filemap/${this.wrapper.target}`,
       method: 'post',
       headers: {
-         Authorization: `${tokenObj.type} ${tokenObj.token}`,
-         'Content-Type': 'application/json'
-       },
-       body: JSON.stringify({
-         filename: this.wrapper.name,
-         size: this.wrapper.size,
-         segmentsize: this.wrapper.segmentsize,
-         sha256: this.wrapper.sha
-     })
+        Authorization: `${tokenObj.type} ${tokenObj.token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        filename: this.wrapper.name,
+        size: this.wrapper.size,
+        segmentsize: this.wrapper.segmentsize,
+        sha256: this.wrapper.sha
+      })
     }
 
     request(options, (err, res, body) => {
@@ -770,10 +770,10 @@ class UploadFileSTM extends STM {
         console.log(`任务创建的目标是：${this.wrapper.target}`)
         return this.uploadWholeFile()
       }
-        const b = JSON.parse(body)
-        console.log('上传任务创建成功')
-        _this.wrapper.taskid = b.taskid
-        this.uploadSegment()
+      const b = JSON.parse(body)
+      console.log('上传任务创建成功')
+      _this.wrapper.taskid = b.taskid
+      this.uploadSegment()
     })
   }
 

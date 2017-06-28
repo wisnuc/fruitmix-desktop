@@ -3,7 +3,6 @@ const fs = Promise.promisifyAll(require('fs'))
 const app = require('electron').app
 const mkdirpAsync = Promise.promisify(require('mkdirp'))
 const validator = require('validator')
-
 const createPersistenceAsync = require('./persistence')
 
 class Config {
@@ -58,6 +57,11 @@ class Configuration {
 
   getGlobalConfigPath() {
     return path.join(this.root, 'config.json')
+  }
+
+  // public
+  getTmpTransDir() {
+    return path.join(this.root, 'tmpTrans')
   }
 
   // public
@@ -126,6 +130,7 @@ class Configuration {
   // init global dirs during startup
   async makeGlobalDirsAsync() {
     await mkdirpAsync(this.getUsersDir())
+    await mkdirpAsync(this.getTmpTransDir())
     await mkdirpAsync(this.getTmpDir())
     await mkdirpAsync(this.getThumbnailDir())
     await mkdirpAsync(this.getImageCacheDir())
@@ -134,7 +139,12 @@ class Configuration {
   // load a js object from given path, return null if any error
   async loadObjectAsync(fpath) {
     let obj = null
-    try { obj = JSON.parse(await fs.readFileAsync(fpath)) } catch (e) { return null }
+    // console.log('Loading config...')
+    try { obj = JSON.parse(await fs.readFileAsync(fpath)) } catch (e) {
+      console.log(e)
+      return null
+    }
+    // console.log('config:', obj)
     return typeof obj === 'object' ? obj : null
   }
 
@@ -143,7 +153,7 @@ class Configuration {
     await this.makeUserDirsAsync(userUUID)
 
     const configPath = this.getUserConfigFilePath(userUUID)
-    const config = await this.loadObjectAsync(configpath) || {}
+    const config = await this.loadObjectAsync(configPath) || {}
     const tmpdir = this.getTmpDir()
     const persistence = createPersistenceAsync(configPath, tmpdir)
 
@@ -176,11 +186,23 @@ class Configuration {
     //
     const userConfigs = []
     for (let i = 0; i < UUIDs.length; i++) {
-      try { userConfigs.push(await this.initUserConfigAsync(UUIDs[i])) } catch (e) {}
+      try { userConfigs.push(await this.initUserConfigAsync(UUIDs[i])) } catch (e) { console.log(e) }
     }
 
     this.globalConfig = globalConfig
     this.userConfigs = userConfigs
+
+    global.dispatch({
+      type: 'CONFIG_INIT',
+      data: {
+        tmpTransPath: this.getTmpTransDir(),
+        tmpPath: this.getTmpDir(),
+        thumbPath: this.getThumbnailDir(),
+        imagePath: this.getImageCacheDir(),
+        downloadPath: this.getWisnucDownloadsDir(),
+        users: this.userConfigs.map(uc => uc.getConfig())
+      }
+    })
   }
 
   getConfiguration() {
@@ -192,4 +214,3 @@ class Configuration {
 }
 
 module.exports = Configuration
-

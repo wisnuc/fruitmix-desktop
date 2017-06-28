@@ -41,14 +41,17 @@ ___
 * src : 前端源代码目录
 
     * app
-        * action : redux相关action
-        * components : react组件
-        * lib : 组件相关依赖
-        * reducers : redux 相关 reducer
-        * stores : 创建redux store
-        * utils : 各类封装的function
-        * app.js : js入口, 定义debug关键字 , 调用fruitmix.js
-        * fruitmix.js : 挂载组件, 事件监听
+        * app.js: js入口, 定义debug关键字 , 挂载组件, 事件监听
+        * Fruitmix.jsx: 顶层React页面
+        * common: 通用组件
+        * control: admin用户管理相关页面
+        * file: 文件页面
+        * login: 登录页面
+        * maintenance: 维护模式
+        * mdc: 测试文件
+        * nav: model
+        * photo: 照片
+        * view: viewmodel
     * assets : 组件相关样式、图片
     * index.html : 前端页面入口
 
@@ -95,6 +98,72 @@ ___
     * node: 通过ipcRenderer与node通讯，获取本地文件，如file、media等
 
 ### api与状态机模型
+
+* Device APIs
+
+|Device APIs|systemStatus|start|token|initWizard|refreshSystemState|manualBoot|reInstall|device|net|timedate|fan|setFanScale|power|
+| --------- |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+login       | √ | √ | √ |   |   |   |   |   |   |   |   |   |   |
+InitWizard  |   |   |   | √ |   |   |   |   |   |   |   |   |   |
+maintenance |   |   |   |   | √ | √ | √ |   |   |   |   |   |   |
+Device      |   |   |   |   |   |   |   | √ |   |   |   |   |   |
+Networking  |   |   |   |   |   |   |   |   | √ |   |   |   |   |
+TimeDate    |   |   |   |   |   |   |   |   |   | √ |   |   |   |
+FanControl  |   |   |   |   |   |   |   |   |   |   | √ | √ |   |
+Power       |   |   |   |   |   |   |   |   |   |   |   |   | √ |
+
+* Fruitmix APIs
+
+|Fruitmix APIs|account|adminDrives|adminUsers|driveListNavDir|listNavDir|login|media|mkdir|renameDirOrFile|updateAccount|extDrives|extListDir|
+| --------- |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|home       |   |   |   |   | √ |   |   | √ | √ |   |   |   |
+|public     |   | √ |   | √ |   |   |   |   |   |   |   |   |
+|physical   |   |   |   |   |   |   |   |   |   |   | √ | √ |
+|media      |   |   |   |   |   |   | √ |   |   |   |   |   |
+|adminUsers |   |   | √ |   |   | √ |   |   |   |   |   |   |
+|adminDrives|   | √ | √ |   |   |   |   |   |   |   |   |   |
+|account    | √ |   |   |   |   | √ |   |   |   | √ |   |   |
+
+
+* ipcRenderer.send
+
+LOGIN
+LOGIN_OFF
+LOGIN_OUT
+
+mediaHideImage
+mediaHideThumb
+mediaShowImage
+mediaShowThumb
+
+START_TRANSMISSION
+GET_TRANSMISSION
+OPEN_TRANSMISSION
+
+UPLOAD
+DOWNLOAD
+PAUSE_UPLOADING
+RESUME_UPLOADING
+PAUSE_DOWNLOADING
+RESUME_DOWNLOADING
+DELETE_DOWNLOADING
+DELETE_UPLOADING
+
+TRANSFER
+CLEAN_RECORD
+DRAG_FILE
+newWebWindow
+
+* ipcRenderer.on
+
+CONFIG_LOADED
+MDNS_UPDATE
+UPDATE_TRANSMISSION
+snackbarMessage
+getThumbSuccess
+donwloadMediaSuccess
+driveListUpdate
+physicalListUpdate
 
 #### login
 
@@ -536,11 +605,28 @@ extListDir
 
 ##### transmission
 
-* api: window.store.getState().transmission
+* ipc通讯
 
-    * userTasks: 进行中的任务
+    * PAUSE_DOWNLOADING: 暂停下载项目
 
-    * finishTasks: 已完成的任务
+    * RESUME_DOWNLOADING: 重新启动暂定的下载项目
+
+    * PAUSE_UPLOADING: 暂停上传项目
+
+    * RESUME_UPLOADING: 重新启动暂定的上传项目
+
+    * DELETE_UPLOADING: 取消上传项目
+
+    * DELETE_DOWNLOADING: 取消下载项目
+
+    * OPEN_TRANSMISSION: 打开项目所在文件夹
+
+    * GET_TRANSMISSION: 发送获取transmission列表的请求
+
+    * UPDATE_TRANSMISSION: 获取transmission列表
+
+        * userTasks: 进行中的任务
+        * finishTasks: 已完成的任务
 
 * userTasks和finishTasks的数据结构
 
@@ -583,16 +669,6 @@ finishTasks
     ...
 ]
 ```
-
-* ipc通讯
-
-    * PAUSE_DOWNLOADING: 暂停下载项目
-    * RESUME_DOWNLOADING: 重新启动暂定的下载项目
-    * PAUSE_UPLOADING: 暂停上传项目
-    * RESUME_UPLOADING: 重新启动暂定的上传项目
-    * DELETE_UPLOADING: 取消上传项目
-    * DELETE_DOWNLOADING: 取消下载项目
-    * OPEN_TRANSMISSION: 打开项目所在文件夹
 
 * state
 
@@ -979,25 +1055,19 @@ finishTasks
 
 ### app.js
 
-app.js 引入了真正的入口文件fruitmix.js，定义调试模块（debug）的输出结果
+初始化页面、引入样式、挂载react根组件以及一些初始化工作，调用Fruitmix.jsx
 
-### fruitmix.js
-
-fruitmix负责初始化页面、引入样式、挂载react根组件以及一些初始化工作，调用main.jsx
-
-### main.jsx
+### Fruitmix.jsx
 
 顶层React页面，根据当前状态选择渲染login、Maintenance或Navigation页面。主要函数包括：
 
 * setPalette: 定义字体、primary color、accent color
-* selectDevice: 选择设备并加载设备信息，调用./components/common/device
+* selectDevice: 选择设备并加载设备信息，调用./common/device
 * nav: 跳转页面
 * maintain: 跳转至maintenance页面
 * login: 跳转至Navigation页面，即登陆成功后的页面
 
-### component
-
-#### login
+### login
 
 登陆页面
 
@@ -1027,7 +1097,7 @@ fruitmix负责初始化页面、引入样式、挂载react根组件以及一些�
 
 * CreatingVolumeDiskSelection.jsx: 创建磁盘阵列的信息框
 
-#### nav
+### nav
 
 页面框架及数据分发，亦即model部分
 
@@ -1048,7 +1118,7 @@ fruitmix负责初始化页面、引入样式、挂载react根组件以及一些�
 
 * QuickNav.jsx: 渲染快速导航栏
 
-#### view
+### view
 
 ViewModel 部分
 
@@ -1119,7 +1189,7 @@ ViewModel 部分
 * MediaShare.jsx
 * Storage.jsx
 
-#### file
+### file
 
 文件相关页面
 
@@ -1157,7 +1227,7 @@ ViewModel 部分
 
 * FinishedTask.jsx: 渲染已完成的任务列表
 
-#### photo
+### photo
 
 照片相关页面
 
@@ -1197,7 +1267,7 @@ ViewModel 部分
     * function handleKeyUp: 处理按键，使用方向键控制选择上一张或下一张图片
     * function renderDetail: 渲染大图的组件，引入EventListener监听按键，由this.state.thumbPath或detailPath控制渲染ThumbImage和DetailImage
 
-#### control
+### control
 
 用户及设备设置页面
 
@@ -1253,7 +1323,7 @@ ViewModel 部分
 
 * TimeDateInfo.jsx: 渲染日期和时间信息
 
-#### maintenance
+### maintenance
 
 维护模式
 
@@ -1298,10 +1368,11 @@ NoUsageDisk、RenderTitle等组件。主要的函数包括：
 
 * VolumeWisnucError.jsx: 渲染WISNUC出错信息的组件，因为新的api下错误信息有所改变故可能待更新。
 
-#### common
+### common
 
 一些公用的组件
 
+* mdns.js: 收到ipc的MDNS_UPDATE信息就开始搜索设备，每搜索到一个新设备就更新全局的store
 
 * Checkmark.jsx: 打勾动画
 
@@ -1334,13 +1405,8 @@ NoUsageDisk、RenderTitle等组件。主要的函数包括：
 * PVState.jsx
 * TreeTable.jsx
 
-#### mdc
+### mdc
 
 一些测试文件
 
 * FlatButton.jsx: 测试FlatButton控件
-
-### lib
-
-* mdns.js: 收到ipc的MDNS_UPDATE信息就开始搜索设备，每搜索到一个新设备就更新全局的store
-* ...

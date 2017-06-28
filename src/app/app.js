@@ -1,15 +1,43 @@
+import React from 'react'
+import ReactDom from 'react-dom'
+import Debug from 'debug'
+import { ipcRenderer } from 'electron'
 
-/* 
- * modify debug filter before application starts'
- */
+import injectTapEventPlugin from 'react-tap-event-plugin'
+import MDNS from './common/mdns'
+import Fruitmix from './Fruitmix'
 
-// console.log('localStorage.debug, old', localStorage.debug)
+import '../assets/css/mdc.theme.css'
+import '../assets/css/mdc.button.css'
+import '../assets/css/app.css'
 
-// localStorage.debug = 'main,lib:*,view:*,app:*,reducer:*,component:*'
-// localStorage.debug = 'nothing'
-localStorage.debug = 'component:*' 
+/* modify debug filter before application starts' */
+const debug = Debug('app')
+localStorage.debug = 'component*'
 
-// console.log('localStorage.debug, new', localStorage.debug)
+/* required by Material UI */
+injectTapEventPlugin()
 
-require('./fruitmix')
+/* render method */
+const render = () => ReactDom.render(<Fruitmix />, document.getElementById('app'))
 
+/* start mdns scan */
+global.mdnsStore = []
+global.mdns = MDNS(ipcRenderer, global.mdnsStore, render)
+global.mdns.scan()
+
+/* load config TODO */
+ipcRenderer.on('CONFIG_LOADED', (event, config) => {
+  console.log('CONFIG_LOADED', config)
+})
+
+document.addEventListener('dragover', (e) => {
+  e.preventDefault()
+})
+
+document.addEventListener('drop', (e) => {
+  e.preventDefault()
+})
+
+/* first render */
+render()
