@@ -2,9 +2,12 @@ import React from 'react'
 import Debug from 'debug'
 import { shell, clipboard } from 'electron'
 import { Paper, IconButton, Toggle } from 'material-ui'
-import AddCirle from 'material-ui/svg-icons/content/add-circle'
+import Star from 'material-ui/svg-icons/toggle/star'
+import FileDownload from 'material-ui/svg-icons/file/file-download'
+
+import Detail from './Detail'
 import FlatButton from '../common/FlatButton'
-import DialogOverlay from '../common/DialogOverlay'
+import DialogOverlay from '../common/PureDialog'
 
 const debug = Debug('component:control:deviceinfo')
 
@@ -14,10 +17,12 @@ class Market extends React.PureComponent {
     super(props)
     /* CId, id of container; CState, state of container */
     this.state = {
+      appDetail: '',
       openURL: '',
       CId: '',
       CState: false
     }
+    this.imgURL = 'https://raw.githubusercontent.com/wisnuc/appifi-recipes/release/images/'
 
     this.toggleState = (op) => {
       this.setState({ [op]: !this.state[op] })
@@ -34,35 +39,39 @@ class Market extends React.PureComponent {
     this.copyText = () => {
       clipboard.writeText(this.state.openURL)
       this.props.openSnackBar('复制成功')
-      this.closeDialog('openURL')
+      // this.closeDialog('openURL')
     }
   }
 
   renderCard(app, containers) {
     const container = containers.find(c => c.Id === app.containerIds[0]) // more than one container ? TODO
-    debug('renderCard', app.containerIds[0], containers, this.props)
-    const url = 'https://raw.githubusercontent.com/wisnuc/appifi-recipes/release/images/'
+    // debug('renderCard', container, this.props)
     const CState = container.State === 'running'
     return (
       <Paper
         key={app.uuid}
-        style={{ float: 'left', margin: 16, height: 266, width: 210 }}
+        style={{ float: 'left', margin: 16, height: 232, width: 176 }}
       >
-        <div style={{ height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img
-            height={150}
-            width={150}
-            src={`${url}${app.recipe.components[0].imageLink}`}
-            alt={app.recipe.appname}
-            style={{ filter: CState ? '' : 'grayscale(100%)' }}
-          />
+        <div style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <IconButton
+            iconStyle={{ width: 128, height: 128, filter: CState ? '' : 'grayscale(100%)' }}
+            style={{ width: 160, height: 160, padding: 16 }}
+            onTouchTap={() => { this.setState({ appDetail: app }) }}
+          >
+            <img
+              height={128}
+              width={128}
+              src={`${this.imgURL}${app.recipe.components[0].imageLink}`}
+              alt={app.recipe.appname}
+            />
+          </IconButton>
         </div>
         <div style={{ height: 34, display: 'flex', marginLeft: 16 }}>
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              color: this.state.open ? 'rgba(0,0,0,0.87)' : 'rgba(0,0,0,0.54)',
+              color: CState ? 'rgba(0,0,0,0.87)' : 'rgba(0,0,0,0.54)',
               fontWeight: 500
             }}
           >
@@ -76,10 +85,10 @@ class Market extends React.PureComponent {
             />
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', margin: '8px 0px 8px 0px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', margin: '-4px 0px 8px 8px' }}>
           <FlatButton
             style={{ color: CState ? this.props.primaryColor : 'rgba(0,0,0,0.54)' }}
-            label={CState ? '打开' : '卸载'}
+            label={CState ? '进入应用' : '卸载应用'}
             onTouchTap={() => this.setState({ openURL: `http://10.10.9.86:${container.Ports[0].PublicPort}/` })}
           />
         </div>
@@ -89,7 +98,7 @@ class Market extends React.PureComponent {
 
   render() {
     if (!this.props.docker || !this.props.docker.appstore) return <div>Loading...</div>
-    debug('this.props.docker', this.props.docker)
+    // debug('this.props.docker', this.props.docker)
     const { docker } = this.props
     const { installeds, containers } = docker.docker
 
@@ -97,10 +106,22 @@ class Market extends React.PureComponent {
     // return <div>Loading...</div>
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'auto' }}>
-        <div style={{ height: 16 }} />
         <div style={{ position: 'relative', width: '100%', height: 'calc(100% - 56px)', overflow: 'auto' }}>
           { installeds.map(app => (this.renderCard(app, containers))) }
         </div>
+
+        {/* detail dialog */}
+        <DialogOverlay open={!!this.state.appDetail} onRequestClose={() => this.closeDialog('appDetail')}>
+          {
+            !!this.state.appDetail &&
+            <Detail
+              app={this.state.appDetail}
+              appstore={this.props.docker.appstore}
+              primaryColor={this.props.primaryColor}
+              imgURL={this.imgURL}
+            />
+          }
+        </DialogOverlay>
 
         {/* toggle start/stop dialog */}
         <DialogOverlay open={!!this.state.CId}>
@@ -126,7 +147,7 @@ class Market extends React.PureComponent {
         </DialogOverlay>
 
         {/* URL dialog */}
-        <DialogOverlay open={!!this.state.openURL}>
+        <DialogOverlay open={!!this.state.openURL} onRequestClose={() => this.closeDialog('openURL')}>
           {
             !!this.state.openURL &&
             <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
@@ -153,6 +174,7 @@ class Market extends React.PureComponent {
             </div>
           }
         </DialogOverlay>
+
       </div>
     )
   }
