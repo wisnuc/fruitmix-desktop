@@ -406,7 +406,7 @@ class NavViews extends Component {
             { view.showQuickNav() && this.renderQuickNavs() }
 
             {/* content */}
-            <div style={{ flexGrow: 1, height: '100%', paddingLeft: 8, paddingTop: 8, boxSizing: 'border-box' }} id="content-container">
+            <div style={{ width: '100%', height: '100%', paddingLeft: 8, paddingTop: 8, boxSizing: 'border-box' }} id="content-container">
               {
                 view.renderContent({
                   navTo: this.navTo.bind(this),
