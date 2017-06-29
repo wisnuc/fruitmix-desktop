@@ -2,18 +2,35 @@ import React from 'react'
 import Debug from 'debug'
 import Base from './Base'
 import AppsIcon from 'material-ui/svg-icons/navigation/apps'
-import Market from '../docker/Market'
-import { PPTIcon, DockerIcon } from '../common/Svg'
+import Apps from '../docker/Apps'
 
 const debug = Debug('view:component:Docker:')
 
-class Docker extends Base {
+class InstalledApps extends Base {
 
   constructor(ctx) {
     super(ctx)
+
+    this.state = {
+      docker: null
+    }
   }
 
   willReceiveProps(nextProps) {
+    // console.log('media nextProps', nextProps)
+    if (!nextProps.apis || !nextProps.apis.docker) return
+    const docker = nextProps.apis.docker
+    if (docker.isPending() || docker.isRejected()) return
+
+    const value = docker.value()
+
+    if (value !== this.state.docker) {
+      this.setState({ docker: value })
+    }
+  }
+
+  navEnter() {
+    this.ctx.props.apis.request('docker')
   }
 
   navGroup() {
@@ -39,9 +56,10 @@ class Docker extends Base {
   /** renderers **/
   renderContent({ openSnackBar }) {
     return (
-      <Market
+      <Apps
         apis={this.ctx.props.apis}
         nav={this.ctx.props.nav}
+        docker={this.state.docker}
         selectedDevice={this.ctx.props.selectedDevice}
         primaryColor={this.groupPrimaryColor()}
         openSnackBar={openSnackBar}
@@ -50,4 +68,4 @@ class Docker extends Base {
   }
 }
 
-export default Docker
+export default InstalledApps
