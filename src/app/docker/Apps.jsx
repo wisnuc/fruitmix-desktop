@@ -41,12 +41,26 @@ class Market extends React.PureComponent {
       this.props.openSnackBar('复制成功')
       // this.closeDialog('openURL')
     }
+
+    this.startUnistall = () => {
+      debug('this.startUnistall')
+      this.setState({ uninstall: this.state.appDetail, appDetail: '' })
+    }
   }
 
-  renderCard(app, containers) {
+  renderCard(app, appstore, containers) {
     const container = containers.find(c => c.Id === app.containerIds[0]) // more than one container ? TODO
     // debug('renderCard', container, this.props)
     const CState = container.State === 'running'
+    const repo = appstore.result.find(a => a.appname === app.recipe.appname).components[0].repo
+
+    const detail = {
+      appname: app.recipe.appname,
+      imageLink: `${this.imgURL}${app.recipe.components[0].imageLink}`,
+      repo,
+      installed: app
+    }
+
     return (
       <Paper
         key={app.uuid}
@@ -56,7 +70,7 @@ class Market extends React.PureComponent {
           <IconButton
             iconStyle={{ width: 128, height: 128, filter: CState ? '' : 'grayscale(100%)' }}
             style={{ width: 160, height: 160, padding: 16 }}
-            onTouchTap={() => { this.setState({ appDetail: app }) }}
+            onTouchTap={() => { this.setState({ appDetail: detail }) }}
           >
             <img
               height={128}
@@ -71,8 +85,7 @@ class Market extends React.PureComponent {
             style={{
               display: 'flex',
               alignItems: 'center',
-              color: CState ? 'rgba(0,0,0,0.87)' : 'rgba(0,0,0,0.54)',
-              fontWeight: 500
+              color: CState ? 'rgba(0,0,0,0.87)' : 'rgba(0,0,0,0.54)'
             }}
           >
             { app.recipe.appname }
@@ -99,7 +112,8 @@ class Market extends React.PureComponent {
   render() {
     if (!this.props.docker || !this.props.docker.appstore) return <div>Loading...</div>
     // debug('this.props.docker', this.props.docker)
-    const { docker } = this.props
+    const docker = this.props.docker
+    const appstore = docker.appstore
     const { installeds, containers } = docker.docker
 
     // debug('this.props.docker', installeds)
@@ -107,20 +121,58 @@ class Market extends React.PureComponent {
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'auto' }}>
         <div style={{ position: 'relative', width: '100%', height: 'calc(100% - 56px)', overflow: 'auto' }}>
-          { installeds.map(app => (this.renderCard(app, containers))) }
+          { installeds.map(app => (this.renderCard(app, appstore, containers))) }
         </div>
 
         {/* detail dialog */}
-        <DialogOverlay open={!!this.state.appDetail} onRequestClose={() => this.closeDialog('appDetail')}>
-          {
-            !!this.state.appDetail &&
-            <Detail
-              app={this.state.appDetail}
-              appstore={this.props.docker.appstore}
-              primaryColor={this.props.primaryColor}
-              imgURL={this.imgURL}
-            />
-          }
+        <DialogOverlay
+          open={!!this.state.appDetail || !!this.state.uninstall}
+          onRequestClose={() => { this.closeDialog('appDetail'); this.closeDialog('uninstall') }}
+        >
+          <div
+            style={{
+              height: this.state.appDetail ? 280 : 173,
+              width: this.state.appDetail ? 680 : 368,
+              transition: 'all .2s cubic-bezier(0.4, 0.0, 0.2, 1) 0ms',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            {
+              !!this.state.appDetail &&
+                <Detail
+                  detail={this.state.appDetail}
+                  primaryColor={this.props.primaryColor}
+                  uninstall={this.startUnistall}
+                />
+            }
+            {
+              !!this.state.uninstall &&
+                <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
+                  <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
+                    { this.state.uninstall.installed ? '卸载应用' : '安装应用' }
+                  </div>
+                  <div style={{ height: 20 }} />
+                  <div style={{ color: 'rgba(0,0,0,0.87)' }}>
+                    { this.state.uninstall.installed ? '确定卸载该应用吗？' : '安装卸载该应用吗？' }
+                  </div>
+                  <div style={{ height: 24 }} />
+                  <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                    <FlatButton
+                      label="取消"
+                      primary
+                      onTouchTap={() => { this.setState({ appDetail: this.state.uninstall }); this.closeDialog('uninstall') }}
+                    />
+                    <FlatButton
+                      label={this.state.uninstall.installed ? '卸载' : '安装'}
+                      primary
+                      onTouchTap={() => {}}
+                    />
+                  </div>
+                </div>
+            }
+          </div>
         </DialogOverlay>
 
         {/* toggle start/stop dialog */}
@@ -174,7 +226,6 @@ class Market extends React.PureComponent {
             </div>
           }
         </DialogOverlay>
-
       </div>
     )
   }

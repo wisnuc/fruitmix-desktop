@@ -11,10 +11,12 @@ const formatNumber = num => ((num > 999999)
   : (num > 999)
   ? `${(num / 1000).toFixed(1)}K` : num)
 
-class Detail extends React.PureComponent {
+class Detail extends React.Component {
 
   constructor(props) {
     super(props)
+
+    this.state = { opacity: 0 }
 
     this.toggleState = (op) => {
       this.setState({ [op]: !this.state[op] })
@@ -25,14 +27,30 @@ class Detail extends React.PureComponent {
     }
   }
 
-  render() {
-    const { app, appstore, primaryColor, imgURL } = this.props
-    const repo = appstore.result.find(a => a.appname === app.recipe.appname).components[0].repo
+  componentWillMount() {
+    console.log('componentWillReceiveProps!!!!!!!')
+    // this.setState({ opacity: 0 })
+    clearTimeout(this.time)
+    setTimeout(() => this.setState({ opacity: 1 }), 100)
+  }
 
-    debug('renderDetail', app, repo)
+
+  render() {
+    const { detail, primaryColor, uninstall } = this.props
+    const { appname, imageLink, repo, installed } = detail
+
+    debug('renderDetail', this.props)
 
     return (
-      <div style={{ padding: 8, display: 'flex', alignItems: 'center' }}>
+      <div
+        style={{
+          padding: 8,
+          display: 'flex',
+          alignItems: 'center',
+          opacity: this.state.opacity,
+          transition: 'all .3s cubic-bezier(0.4, 0.0, 0.2, 1) 0ms'
+        }}
+      >
         {/* left panel */}
         <div style={{ height: 264, width: 160 }} >
           {/* image */}
@@ -40,15 +58,15 @@ class Detail extends React.PureComponent {
             <img
               height={128}
               width={128}
-              src={`${imgURL}${app.recipe.components[0].imageLink}`}
-              alt={app.recipe.appname}
+              src={imageLink}
+              alt={appname}
             />
           </div>
 
           {/* name, star, download */}
           <div style={{ marginLeft: 24, color: 'rgba(0,0,0,0.54)', marginTop: -4 }}>
             <div style={{ height: 24, display: 'flex', alignItems: 'center', color: 'rgba(0,0,0,0.87)' }}>
-              { app.recipe.appname }
+              { appname }
             </div>
             <div style={{ height: 20, display: 'flex', alignItems: 'center', fontSize: 14 }}>
               <Star color="rgba(0,0,0,0.54)" style={{ width: 16, marginRight: 8 }} />
@@ -64,8 +82,8 @@ class Detail extends React.PureComponent {
             <div style={{ display: 'flex', alignItems: 'center', marginLeft: -16 }}>
               <FlatButton
                 primary
-                label={'卸载'}
-                onTouchTap={() => {}}
+                label={installed ? '卸载' : '安装'}
+                onTouchTap={uninstall}
               />
             </div>
           </div>
@@ -78,8 +96,8 @@ class Detail extends React.PureComponent {
         <div style={{ width: 8 }} />
 
         {/* right panel */}
-        <div style={{ minWidth: 400, color: 'rgba(0,0,0,0.54)', margin: 24 }}>
-          <div style={{ height: 24, display: 'flex', alignItems: 'center', color: 'rgba(0,0,0,0.87)' }}>
+        <div style={{ color: 'rgba(0,0,0,0.54)', margin: 24 }}>
+          <div style={{ height: 24, width: 421, display: 'flex', alignItems: 'center', color: 'rgba(0,0,0,0.87)' }}>
             { repo.description ? repo.description : repo.name }
           </div>
           <div style={{ height: 20, display: 'flex', alignItems: 'center', fontSize: 14 }}>
