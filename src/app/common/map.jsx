@@ -56,11 +56,13 @@ class Map extends React.Component {
   }
 
   componentWillMount() {
-    const script = document.createElement('script')
-    script.src = 'http://webapi.amap.com/maps?v=1.3&key=db48eaf98740f0ea550863860b3aab81&plugin=AMap.Geocoder'
-    script.async = true
-    script.onload = this.fire
-    document.body.appendChild(script)
+    setTimeout(() => {
+      const script = document.createElement('script')
+      script.src = 'http://webapi.amap.com/maps?v=1.3&key=db48eaf98740f0ea550863860b3aab81&plugin=AMap.Geocoder'
+      script.async = true
+      script.onload = this.fire
+      document.body.appendChild(script)
+    }, 500)
   }
 
   shouldComponentUpdate(nextProps, nextState) {

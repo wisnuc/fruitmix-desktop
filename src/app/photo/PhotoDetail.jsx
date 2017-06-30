@@ -101,6 +101,10 @@ class PhotoDetailInline extends React.Component {
 
       /* memoize digest */
       this.props.memoize({ currentDigest: this.digest, currentScrollTop: 0 })
+
+      /* init image */
+      this.setState({ thumbPath: '', detailPath: '' })
+
       // debug('this.props.memoize', this.props.memoize())
     }
 
@@ -474,7 +478,7 @@ class PhotoDetailInline extends React.Component {
         <div style={{ height: 72, display: 'flex', alignItems: 'center' }}>
           <LoactionIcon color="rgba(0,0,0,0.54)" />
           <div style={{ marginLeft: 64 }}>
-            <div style={{ color: 'rgba(0,0,0,0.87)', lineHeight: '24px' }} id={`map_${this.digest}`} />
+            <div style={{ color: 'rgba(0,0,0,0.87)', lineHeight: '24px', height: 24 }} id={`map_${this.digest}`} />
             <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14, lineHeight: '20px' }}>
               { `${longitude}, ${latitude}` }
             </div>
