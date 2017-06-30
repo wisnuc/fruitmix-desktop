@@ -93,6 +93,8 @@ class AdminUsersApp extends React.Component {
         <div style={{ flex: '0 0 150px', textAlign: 'right' }}>{ 0 ? '' : '-' }</div>
         <div style={{ flex: '0 0 178px', textAlign: 'right' }}>{ 0 ? '' : '-' }</div>
         <div style={{ flex: '0 0 56px' }} />
+        <div style={{ flex: '0 0 56px' }} />
+        {/*
         <div style={{ flex: '0 0 116px', textAlign: 'left' }}>
           {
             user.isFirstUser
@@ -105,6 +107,7 @@ class AdminUsersApp extends React.Component {
             />
           }
         </div>
+        */}
         <div style={{ flex: '0 0 50px' }}>
           {
             user.isFirstUser

@@ -78,6 +78,7 @@ class Market extends React.PureComponent {
               <FlatButton
                 primary
                 label={'下载并安装'}
+                onTouchTap={() => this.setState({ uninstall: detail })}
               />
           }
         </div>
@@ -86,7 +87,13 @@ class Market extends React.PureComponent {
   }
 
   render() {
-    if (!this.props.docker || !this.props.docker.appstore) return <div>Loading...</div>
+    if (!this.props.docker || !this.props.docker.appstore) {
+      return (
+        <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          载入中...
+        </div>
+      )
+    }
     const appstore = this.props.docker.appstore.result
     const { docker } = this.props
     const { installeds, containers } = docker.docker
@@ -94,9 +101,12 @@ class Market extends React.PureComponent {
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'auto' }}>
         <div style={{ position: 'relative', width: '100%', height: 'calc(100% - 56px)', overflow: 'auto' }}>
+          {/* app card */}
           {
             appstore.map(app => this.renderCard(app, installeds, containers))
           }
+
+          {/* add app */}
           <Paper
             style={{ float: 'left', margin: 16, height: 232, width: 176 }}
           >
@@ -126,6 +136,7 @@ class Market extends React.PureComponent {
               alignItems: 'center'
             }}
           >
+            {/* app detail */}
             {
               !!this.state.appDetail &&
                 <Detail
@@ -134,6 +145,8 @@ class Market extends React.PureComponent {
                   uninstall={this.startUnistall}
                 />
             }
+
+            {/* install or uninstall app */}
             {
               !!this.state.uninstall &&
                 <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
@@ -142,14 +155,14 @@ class Market extends React.PureComponent {
                   </div>
                   <div style={{ height: 20 }} />
                   <div style={{ color: 'rgba(0,0,0,0.87)' }}>
-                    { this.state.uninstall.installed ? '确定卸载该应用吗？' : '安装卸载该应用吗？' }
+                    { this.state.uninstall.installed ? '确定卸载该应用吗？' : '确定安装该应用吗？' }
                   </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                     <FlatButton
                       label="取消"
                       primary
-                      onTouchTap={() => { this.setState({ appDetail: this.state.uninstall }); this.closeDialog('uninstall') }}
+                      onTouchTap={() => this.closeDialog('uninstall')}
                     />
                     <FlatButton
                       label={this.state.uninstall.installed ? '卸载' : '安装'}

@@ -110,7 +110,14 @@ class Market extends React.PureComponent {
   }
 
   render() {
-    if (!this.props.docker || !this.props.docker.appstore) return <div>Loading...</div>
+    if (!this.props.docker || !this.props.docker.appstore) {
+      return (
+        <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          载入中...
+        </div>
+      )
+    }
+
     // debug('this.props.docker', this.props.docker)
     const docker = this.props.docker
     const appstore = docker.appstore
@@ -155,7 +162,7 @@ class Market extends React.PureComponent {
                   </div>
                   <div style={{ height: 20 }} />
                   <div style={{ color: 'rgba(0,0,0,0.87)' }}>
-                    { this.state.uninstall.installed ? '确定卸载该应用吗？' : '安装卸载该应用吗？' }
+                    { this.state.uninstall.installed ? '确定卸载该应用吗？' : '确定安装该应用吗？' }
                   </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
