@@ -5,7 +5,7 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
 import { teal500, pinkA200 } from 'material-ui/styles/colors'
 
-import Login from './login/Login'
+import Login from './login/LoginApp'
 import Navigation from './nav/Navigation'
 import Maintenance from './maintenance/Maintenance'
 import Device from './common/device'

@@ -16,61 +16,6 @@ const debug = Debug('component:Login')
 const colorArray = [indigo900, cyan900, teal900, lightGreen900, lime900, yellow900]
 const duration = 300
 
-// background: 'linear-gradient(-45deg, #1565C0, #64B5F6, #9E9D24)'
-class Background extends PureComponent {
-  render() {
-    return (
-      <div style={{ position: 'absolute', width: '100%', height: '100%' }}>
-
-        <div
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            filter: 'blur(2px) brightness(90%)',
-            background: `
-          linear-gradient(120deg, #9E9D24 30%, #263238 0%, #64B5F6 40%, #64B5F6 60%, transparent 60%),
-          linear-gradient(105deg, #64B5F6 70%, #01579B 0%, #1976D2 80%, #1976D2)
-          `
-          }}
-        />
-
-        {/*
-        <img
-          style={{ position: 'absolute',
-            width: '100%',
-            height: '100%',
-            zIndex: -1000 }} src="../src/assets/images/index/index.jpg"
-        />
-        */}
-
-        <div
-          style={{ position: 'absolute',
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#000',
-            opacity: this.props.overlay === 'dim' ? 0.54 : 0,
-            zIndex: -999,
-            transition: `opacity ${duration}ms`
-          }}
-        />
-
-        <div
-          style={{ position: 'absolute',
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#EEEEEE',
-            opacity: this.props.overlay === 'white' ? 1 : 0,
-            zIndex: -998,
-            transition: `opacity ${duration}ms`
-          }}
-        />
-
-      </div>
-    )
-  }
-}
-
 // pure animation frame !
 class DeviceCard extends PureComponent {
 
@@ -210,7 +155,7 @@ class Login extends React.Component {
   }
 
   componentDidMount() {
-    setTimeout(() => this.setState({ hello: false }), 300)
+    setTimeout(() => this.setState({ hello: false }), 0)
   }
 
   initWizardOnCancel() {
@@ -416,35 +361,30 @@ class Login extends React.Component {
     }
 
     return (
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center' }}
+      >
+        <div style={{ flexBasis: '160px' }} />
+        <CrossNav duration={0.35} enter={this.state.enter}>
+          {
+            (this.state.bye || this.state.hello)
+            ? <DeviceCard key="animation-card-dummy" />
+            : selectedDevice === null
+            ? <InfoCard {...cardProps} />
+            : <DeviceCard {...cardProps}>
+              <div id="card inner style" style={cardInnerStyle}>
+                <CardDisplay {...displayProps} />
+                {this.footer()}
+              </div>
+            </DeviceCard>
+          }
+        </CrossNav>
 
-      <div style={{ width: '100%', height: '100%' }}>
-
-        <Background overlay={(this.state.byebye || this.state.hello) ? 'white' : this.state.dim ? 'dim' : 'none'} />
-
-        <div
-          style={{ width: '100%',
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center' }}
-        >
-
-          <div style={{ flexBasis: '160px' }} />
-
-          <CrossNav duration={0.35} enter={this.state.enter}>
-            { (this.state.bye || this.state.hello)
-                ? <DeviceCard key="animation-card-dummy" />
-                : selectedDevice === null
-                  ? <InfoCard {...cardProps} />
-                  : <DeviceCard {...cardProps}>
-                    <div id="card inner style" style={cardInnerStyle}>
-                      <CardDisplay {...displayProps} />
-                      {this.footer()}
-                    </div>
-                  </DeviceCard> }
-          </CrossNav>
-
-        </div>
       </div>
     )
   }
