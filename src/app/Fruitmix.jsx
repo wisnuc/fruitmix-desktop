@@ -95,7 +95,7 @@ class Fruitmix extends React.Component {
 
     switch (this.state.view) {
       case 'login':
-        view = <Login mdns={global.mdnsStore} {...this.state} />
+        view = <Login mdns={global.mdnsStore} primaryColor={teal500} {...this.state} />
         break
 
       case 'maintenance':

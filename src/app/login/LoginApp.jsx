@@ -1,15 +1,56 @@
+import React from 'react'
 import Debug from 'debug'
-import React, { Component, PureComponent } from 'react'
-import ReactDOM from 'react-dom'
-import { CircularProgress } from 'material-ui'
-import { indigo900, cyan500, cyan900, teal900, lightGreen900, lime900, yellow900 } from 'material-ui/styles/colors'
+import Radium from 'radium'
+import { CircularProgress, Divider } from 'material-ui'
 import RightIcon from 'material-ui/svg-icons/hardware/keyboard-arrow-right'
+import CloudDoneIcon from 'material-ui/svg-icons/file/cloud-done'
+import CloudOffIcon from 'material-ui/svg-icons/file/cloud-off'
+import WifiIcon from 'material-ui/svg-icons/notification/wifi'
 import LocalLogin from './LocalLogin'
+import Barcelona from './Barcelona'
 import FlatButton from '../common/FlatButton'
+import Checkmark from '../common/Checkmark'
 
 const debug = Debug('component:Login')
-const colorArray = [indigo900, cyan900, teal900, lightGreen900, lime900, yellow900]
 const duration = 300
+
+@Radium
+class DeviceList extends React.PureComponent {
+  render() {
+    const { list, primaryColor } = this.props
+    return (
+      <div
+        style={{
+          height: 72,
+          width: '100%',
+          paddingLeft: 48,
+          boxSizing: 'border-box',
+          display: 'flex',
+          alignItems: 'center',
+          ':hover': { backgroundColor: '#EEEEEE' }
+        }}
+      >
+        {
+          list.type === 'remote'
+            ? list.accessible
+            ? <CloudDoneIcon color={primaryColor} />
+            : <CloudOffIcon color="rgba(0,0,0,0.54)" />
+            : list.accessible
+            ? <WifiIcon color={primaryColor} />
+            : <WifiIcon color="rgba(0,0,0,0.54)" />
+        }
+        <div style={{ marginLeft: 24 }}>
+          <div style={{ color: 'rgba(0,0,0,0.87)', lineHeight: '24px' }}>
+            { list.name }
+          </div>
+          <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14, lineHeight: '20px' }}>
+            { list.type === 'remote' ? 'remote' : list.ip }
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
 
 class LoginApp extends React.Component {
 
@@ -20,11 +61,58 @@ class LoginApp extends React.Component {
       local: false,
       dim: true,
       hello: true,
-      error: 'wisnuc' // '', 'net', 'wisnuc'
+      error: '', // '', 'net', 'wisnuc'
+      wechatLogin: '', // '', 'progress', 'authorization', 'getingList', 'success', 'lastDevice', 'list', 'fail'
+      lists: [
+        {
+          name: '公司的闻上盒子',
+          ip: '120.160.23.1',
+          type: 'remote',
+          accessible: true,
+          token: 'token123'
+        },
+        {
+          name: '书房的NAS',
+          ip: '192.0.0.103',
+          type: 'local',
+          accessible: true,
+          token: 'token123'
+        },
+        {
+          name: '朋友A',
+          ip: '110.198.54.9',
+          type: 'remote',
+          accessible: false,
+          token: ''
+        },
+        {
+          name: '新盒子',
+          ip: '192.0.0.104',
+          type: 'local',
+          accessible: false,
+          token: ''
+        }
+      ]
     }
 
     this.toggleMode = () => {
-      this.setState({ local: !this.state.local })
+      this.setState({ local: !this.state.local, wechatLogin: '' })
+    }
+
+    this.QRScaned = () => {
+      this.setState({ wechatLogin: 'connecting' })
+      setTimeout(() => this.setState({ wechatLogin: 'authorization' }), 500)
+      setTimeout(() => this.setState({ wechatLogin: 'getingList' }), 1000)
+      setTimeout(() => this.setState({ wechatLogin: 'success' }), 1500)
+      setTimeout(() => this.setState({ wechatLogin: 'lastDevice' }), 3000)
+    }
+
+    this.enterList = () => {
+      this.setState({ wechatLogin: 'list' })
+    }
+
+    this.resetWCL = () => {
+      this.setState({ wechatLogin: '' })
     }
   }
 
@@ -32,25 +120,166 @@ class LoginApp extends React.Component {
     setTimeout(() => this.setState({ hello: false }), 300)
   }
 
+
+  renderWechatLogin() {
+    let text = ''
+    const wcl = this.state.wechatLogin
+    switch (wcl) {
+      case 'connecting' :
+        text = '连接服务器中...'
+        break
+      case 'authorization' :
+        text = '正在进行权限认证...'
+        break
+      case 'getingList' :
+        text = '正在获取设备列表...'
+        break
+      case 'success' :
+        text = '成功获取设备列表'
+        break
+      default:
+        text = ''
+        break
+    }
+
+    if (wcl === 'fail') {
+      return (
+        <div style={{ zIndex: 100 }} >
+          <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>
+            <div style={{ height: 8 }} />
+            <div style={{ marginLeft: 24, width: 332 }} >
+              { '登录失败' }
+              <div style={{ height: 8 }} />
+              <Divider />
+            </div>
+            <div style={{ height: 24 }} />
+            <div style={{ height: 432, marginLeft: 24, width: 332 }}>
+              <div style={{ height: 24 }} />
+              <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
+                请确定您是否拥有WISNUC品牌硬件产品或正在使用安装有WISNUC OS的硬件设备。
+              </div>
+              <div style={{ height: 24 }} />
+              <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
+                1. 您可能尚未初始化设备
+              </div>
+              <div style={{ height: 24 }} />
+              <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
+                2. 您可能尚未绑定微信
+              </div>
+              <div style={{ height: 24 }} />
+              <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
+                3. 您可能尚未加入私有群
+              </div>
+              <div style={{ height: 160 }} />
+              <Divider />
+            </div>
+            <div style={{ display: 'flex' }}>
+              <div style={{ flexGrow: 1 }} />
+              <FlatButton
+                label="返回"
+                labelStyle={{ color: '#424242', fontWeight: 500 }}
+                onTouchTap={this.resetWCL}
+              />
+            </div>
+          </div>
+        </div>
+      )
+    }
+    return (
+      <div style={{ zIndex: 100 }} >
+        {
+          wcl &&
+            <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>
+              <div style={{ height: 8 }} />
+              <div style={{ marginLeft: 24, width: 332 }} >
+                { wcl === 'lastDevice' ? '上次登录的设备' : wcl === 'list' ? '请选择登录设备' : '登录设备' }
+                <div style={{ height: 8 }} />
+                <Divider />
+              </div>
+              <div style={{ height: 24 }} />
+              {
+                wcl === 'lastDevice'
+                  ? <div>
+                    <div style={{ height: 344, marginLeft: 24, width: 332 }}>
+                      <div style={{ height: 48 }} />
+                      <Barcelona
+                        style={{ position: 'relative', margin: 'auto' }}
+                        fill="rgba(0,0,0,0.54)"
+                        size={80}
+                      />
+                      <div style={{ height: 72 }} />
+                      <div>
+                        <div style={{ fontSize: 24, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}> Wisnuc </div>
+                        <div style={{ fontSize: 14, marginBottom: 12, color: 'rgba(0,0,0,0.54)' }}> { this.state.lists[0].ip } </div>
+                        <div style={{ fontSize: 14, marginBottom: 12, color: 'rgba(0,0,0,0.54)' }}> sdsdfwetergegr </div>
+                      </div>
+                      <div style={{ height: 8 }} />
+                      <Divider />
+                    </div>
+                    <div style={{ height: 8 }} />
+                    <div
+                      style={{
+                        height: 80,
+                        fontSize: 34,
+                        fontWeight: 500,
+                        color: 'rgba(0,0,0,0.87)',
+                        textAlign: 'center'
+                      }}
+                    >
+                      3
+                    </div>
+                    <div style={{ display: 'flex' }}>
+                      <div style={{ flexGrow: 1 }} />
+                      <FlatButton
+                        label="可登录设备列表"
+                        labelPosition="before"
+                        labelStyle={{ color: '#424242', fontWeight: 500 }}
+                        onTouchTap={this.enterList}
+                        icon={<RightIcon color="#424242" />}
+                      />
+                    </div>
+                  </div>
+                  :
+                  <div>
+                    <div style={{ height: 270, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {
+                        wcl === 'list'
+                        ? <div style={{ width: '100%' }}>
+                          {
+                            this.state.lists.map(list => (<DeviceList list={list} primaryColor={this.props.primaryColor} key={list.name} />))
+                          }
+                        </div>
+                        : wcl === 'success'
+                        ? <Checkmark delay={300} color={this.props.primaryColor} />
+                        : <CircularProgress size={64} thickness={5} />
+                      }
+                    </div>
+                    <div style={{ height: 36 }} />
+                    <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.87)', fontSize: 20, height: 36 }}>
+                      { text }
+                    </div>
+                  </div>
+              }
+            </div>
+        }
+      </div>
+    )
+  }
+
   renderCard() {
     return (
-      <div
-        style={{
-          zIndex: 100,
-          opacity: this.state.hello ? 0 : 1,
-          transition: `opacity ${duration}ms`
-        }}
-      >
+      <div style={{ zIndex: 100, opacity: this.state.hello ? 0 : 1, transition: `opacity ${duration}ms` }}>
         {
           !this.state.error ?
             <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>
-              <div style={{ width: 270, height: 270, margin: '42px auto 12px', backgroundColor: 'grey' }} />
-              <div style={{ height: 24 }} />
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(0,0,0,0.87)', fontSize: 20 }}>
+              <div style={{ height: 42 }} />
+              <div style={{ width: 270, height: 270, margin: 'auto', backgroundColor: 'grey' }} />
+              <div style={{ height: 36 }} />
+              <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.87)', fontSize: 20 }}>
                 请使用手机微信扫码登陆
               </div>
               <div style={{ height: 24 }} />
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(0,0,0,0.54)', fontSize: 20 }}>
+              <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.54)', fontSize: 20 }}>
                 客户端远程登陆需要配合手机使用
               </div>
             </div>
@@ -75,11 +304,11 @@ class LoginApp extends React.Component {
                 />
               </div>
               <div style={{ height: 24 }} />
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(0,0,0,0.87)', fontSize: 20 }}>
+              <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.87)', fontSize: 20 }}>
                 { this.state.error === 'net' ? '网络连接已断开' : '云服务已断开' }
               </div>
               <div style={{ height: 24 }} />
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(0,0,0,0.54)', fontSize: 20 }}>
+              <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.54)', fontSize: 20 }}>
                 { this.state.error === 'net' ? '请检查您的网络设置' : '请您稍后登录或局域网登录' }
               </div>
             </div>
@@ -101,16 +330,12 @@ class LoginApp extends React.Component {
         }}
       >
         {/* background */}
-        {/*
-          background: ` linear-gradient(120deg, #9E9D24 30%, #263238 0%, #64B5F6 40%, #64B5F6 60%, transparent 60%),
-          linear-gradient(105deg, #64B5F6 70%, #01579B 0%, #1976D2 80%, #1976D2)`
-        */}
         <div
           style={{
             position: 'absolute',
             width: '100%',
             height: '100%',
-            filter: 'blur(2px)',
+            filter: 'blur(4px)',
             opacity: this.state.hello ? 0 : 1,
             transition: `opacity ${duration}ms`
           }}
@@ -118,23 +343,19 @@ class LoginApp extends React.Component {
           <img
             style={{ position: 'absolute', width: '100%', height: '100%', zIndex: -1000 }}
             src="../src/assets/images/index/index.jpg"
+            alt=""
           />
         </div>
 
         {/* Icon */}
-        <div
-          style={{
-            position: 'absolute',
-            top: -16,
-            left: 24
-          }}
-        >
+        <div style={{ position: 'absolute', top: -16, left: 24 }} >
           <img
             width={96}
             height={96}
             alt=""
             src="../src/assets/images/index/wisnuc.png"
             style={{ filter: 'brightness(5000%)' }}
+            onTouchTap={this.QRScaned}
           />
         </div>
 
@@ -161,17 +382,19 @@ class LoginApp extends React.Component {
         <div
           style={{
             position: 'absolute',
-            bottom: 16,
-            right: 16,
+            bottom: 24,
+            right: 24,
+            fontSize: 14,
             color: '#FAFAFA',
             display: 'flex',
             alignItems: 'center'
           }}
         >
-          ©2016-2017 上海闻上信息科技有限公司 版权所有
+          ©2016 - 2017 上海闻上信息科技有限公司 版权所有
         </div>
 
-        { !this.state.local ? this.renderCard() : <LocalLogin {...this.props} />}
+        {/* login card */}
+        { !this.state.local ? this.state.wechatLogin ? this.renderWechatLogin() : this.renderCard() : <LocalLogin {...this.props} />}
       </div>
     )
   }

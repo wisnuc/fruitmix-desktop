@@ -367,7 +367,8 @@ class Login extends React.Component {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center' }}
+          alignItems: 'center'
+        }}
       >
         <div style={{ flexBasis: '160px' }} />
         <CrossNav duration={0.35} enter={this.state.enter}>
