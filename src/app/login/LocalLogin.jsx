@@ -1,9 +1,9 @@
+import React from 'react'
 import Debug from 'debug'
-import React, { Component, PureComponent } from 'react'
+import Radium from 'radium'
 import ReactDOM from 'react-dom'
-import { FlatButton, CircularProgress } from 'material-ui'
-import { indigo900, cyan500, cyan900, teal900, lightGreen900, lime900, yellow900
-} from 'material-ui/styles/colors'
+import { CircularProgress, Divider } from 'material-ui'
+import { cyan900 } from 'material-ui/styles/colors'
 
 import CrossNav from './CrossNav'
 import InfoCard from './InfoCard'
@@ -12,12 +12,52 @@ import ErrorBox from './ErrorBox'
 import CardDisplay from './ModelNameCard'
 import InitWizard from './InitStep'
 
+import FlatButton from '../common/FlatButton'
+import { Computer, Barcelona } from '../common/Svg'
+
 const debug = Debug('component:Login')
-const colorArray = [indigo900, cyan900, teal900, lightGreen900, lime900, yellow900]
 const duration = 300
 
+@Radium
+class DeviceList extends React.PureComponent {
+  render() {
+    const { device, primaryColor } = this.props
+
+    return (
+      <div
+        style={{
+          height: 72,
+          width: '100%',
+          paddingLeft: 24,
+          boxSizing: 'border-box',
+          display: 'flex',
+          alignItems: 'center',
+          ':hover': { backgroundColor: '#EEEEEE' }
+        }}
+        onTouchTap={() => this.props.touchTap(device)}
+      >
+        <div style={{ width: 32 }}>
+          {
+            device.model === 'ws215i'
+            ? <Barcelona color={primaryColor} style={{ width: 32, height: 32 }} />
+            : <Computer color={primaryColor} style={{ width: 32, height: 32 }} />
+          }
+        </div>
+        <div style={{ marginLeft: 24 }}>
+          <div style={{ color: 'rgba(0,0,0,0.87)', lineHeight: '24px' }}>
+            { device.model === 'ws215i' ? 'WISNUC' : '个人计算机' }
+          </div>
+          <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14, lineHeight: '20px' }}>
+            { device.address }
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+
 // pure animation frame !
-class DeviceCard extends PureComponent {
+class DeviceCard extends React.PureComponent {
 
   componentWillEnter(callback) {
     this.props.onWillEnter(ReactDOM.findDOMNode(this), callback)
@@ -48,9 +88,11 @@ class Login extends React.Component {
 
     this.state = {
 
+      index: 0,
       hello: true,
+      selected: false,
 
-      enter: 'bottom',
+      enter: 'none',
       expanded: false,
       vexpand: false,
       hexpand: false,
@@ -72,6 +114,19 @@ class Login extends React.Component {
     this.initWizardOnCancelBound = this.initWizardOnCancel.bind(this)
     this.initWizardOnFailBound = this.initWizardOnFail.bind(this)
     this.initWizardOnOKBound = this.initWizardOnOK.bind(this)
+
+    this.refresh = () => {
+      debug('this.refresh')
+    }
+
+    this.backToList = () => {
+      this.setState({ selected: false })
+    }
+
+    this.touchTapDevice = (device) => {
+      this.setState({ selected: true })
+      this.props.selectDevice(device)
+    }
   }
 
   toggleDisplay(done) {
@@ -133,10 +188,10 @@ class Login extends React.Component {
     const currProps = this.props
 
     // device card enter from bottom
-    if (!currProps.selectedDevice && nextProps.selectedDevice) { this.setState({ enter: 'bottom' }) }
+    if (!currProps.selectedDevice && nextProps.selectedDevice) { this.setState({ enter: 'none' }) }
 
     // device card leave from top
-    else if (currProps.selectedDevice && !nextProps.selectedDevice) { this.setState({ enter: 'top' }) }
+    else if (currProps.selectedDevice && !nextProps.selectedDevice) { this.setState({ enter: 'none' }) }
 
     // device card change
     else if (currProps.selectedDevice && nextProps.selectedDevice) {
@@ -150,7 +205,7 @@ class Login extends React.Component {
 
     // don't know final sequence TODO
     else {
-      this.setState({ enter: 'bottom' })
+      this.setState({ enter: 'none' })
     }
   }
 
@@ -168,7 +223,7 @@ class Login extends React.Component {
   }
 
   async doneAsync(view, device, user) {
-    this.setState({ bye: true, dim: false, enter: 'bottom' })
+    this.setState({ bye: true, dim: false, enter: 'none' })
     await Promise.delay(360)
 
     this.setState({ byebye: true })
@@ -215,8 +270,6 @@ class Login extends React.Component {
       paddingRight: 24
     }
 
-    // //////////////////////////////////////////////////////////////////////////
-
     const status = this.props.selectedDevice.systemStatus()
 
     if (this.state.pin === 'initWizard' || status === 'uninitialized') {
@@ -261,11 +314,12 @@ class Login extends React.Component {
       }
     }
 
-    let text,
-      busy,
-      maint,
-      error,
-      uninit
+    let text
+    let busy
+    let maint
+    let error
+    let uninit
+
     switch (status) {
       case 'ready': // users.length === 0 need to add FirstUser Box TODO
         text = '系统错误：未发现用户'
@@ -325,67 +379,137 @@ class Login extends React.Component {
     return <div style={boxStyle} />
   }
 
-  render() {
-    const { mdns, selectedDevice } = this.props
+  renderNoDevice() {
+    return (
+      <div>
+        <div style={{ height: 16 }} />
+        <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
+          未发现WISNUC OS设备
+        </div>
+        <div style={{ fontSize: 14, marginBottom: 12, color: 'rgba(0,0,0,0.54)' }}>
+          局域网登录仅支持同一网段的WISNUC设备登录
+        </div>
+        <div style={{ height: 24 }} />
+        <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
+          1. 请确保WISNUC设备电源开启并已连接网络
+        </div>
+        <div style={{ height: 24 }} />
+        <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
+          2. 请尝试微信扫码登录
+        </div>
+        <div style={{ height: 24 }} />
+        <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
+          3. 请刷新再次搜索
+        </div>
+      </div>
+    )
+  }
 
-    let cardProps,
-      displayProps,
-      cardInnerStyle
-    if (selectedDevice === null) {
-      cardProps = {
-        key: 'info-card',
-        text: '正在搜索网络上的WISNUC OS设备'
-      }
-    } else {
-      cardProps = { key: `device-card-${selectedDevice.mdev.name}` }
+  renderDevice(selectedDevice) {
+    if (!selectedDevice) return (<div />)
 
-      displayProps = {
+    const cardProps = { key: `device-card-${selectedDevice.mdev.name}` }
 
-        toggle: this.state.compact,
+    const displayProps = {
+      toggle: this.state.compact,
+      device: selectedDevice.mdev,
+      ws215i: selectedDevice.device && selectedDevice.device.data && !!selectedDevice.device.data.ws215i,
+      backgroundColor: '#006064',
+      onNavPrev: (!selectedDevice || this.isFirst()) ? null : this.navPrevBound,
+      onNavNext: (!selectedDevice || this.isLast()) ? null : this.navNextBound
+    }
 
-        device: selectedDevice.mdev,
-
-        ws215i: selectedDevice.device && selectedDevice.device.data && !!selectedDevice.device.data.ws215i,
-
-        backgroundColor: colorArray[1],
-
-        onNavPrev: (!selectedDevice || this.isFirst()) ? null : this.navPrevBound,
-        onNavNext: (!selectedDevice || this.isLast()) ? null : this.navNextBound
-      }
-
-      cardInnerStyle = {
-        backgroundColor: '#FAFAFA',
-        width: this.state.hexpand ? 1152 : '100%',
-        transition: `all ${duration}ms`
-      }
+    const cardInnerStyle = {
+      backgroundColor: '',
+      width: this.state.hexpand ? 1152 : '100%',
+      transition: `all ${duration}ms`
     }
 
     return (
       <div
         style={{
-          width: '100%',
           height: '100%',
+          width: '100%',
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center'
+          alignItems: 'center',
+          flexDirection: 'column'
         }}
       >
-        <div style={{ flexBasis: '160px' }} />
         <CrossNav duration={0.35} enter={this.state.enter}>
-          {
-            (this.state.bye || this.state.hello)
-            ? <DeviceCard key="animation-card-dummy" />
-            : selectedDevice === null
-            ? <InfoCard {...cardProps} />
-            : <DeviceCard {...cardProps}>
-              <div id="card inner style" style={cardInnerStyle}>
-                <CardDisplay {...displayProps} />
-                {this.footer()}
-              </div>
-            </DeviceCard>
-          }
+          <DeviceCard {...cardProps}>
+            <div id="card inner style" style={cardInnerStyle}>
+              <CardDisplay {...displayProps} />
+              {this.footer()}
+            </div>
+          </DeviceCard>
         </CrossNav>
+      </div>
+    )
+  }
 
+  render() {
+    const { mdns, selectedDevice } = this.props
+    debug('mdns, selectedDevice', mdns, selectedDevice)
+
+    return (
+      <div
+        style={{
+          width: this.state.selected ? 448 : 380,
+          height: this.state.selected ? 376 : 540,
+          backgroundColor: this.state.selected ? '' : '#FAFAFA',
+          zIndex: 100,
+          transition: `all ${duration}ms`
+        }}
+      >
+        {
+          mdns.length > 0 && this.state.selected ? this.renderDevice(selectedDevice)
+            : <div>
+              <div style={{ height: 8 }} />
+              <div
+                style={{
+                  marginLeft: 24,
+                  width: this.state.selected ? 400 : 332,
+                  height: this.state.selected ? 316 : 480,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  transition: `all ${duration}ms`
+                }}
+              >
+                <div style={{ fontSize: 16, color: 'rgba(0,0,0,0.87)' }}>
+                  { '局域网登录' }
+                </div>
+                <div style={{ height: 8 }} />
+                <Divider />
+                <div style={{ height: 8 }} />
+
+                {/* content */}
+                {
+                  mdns.length > 0
+                    ? mdns.map(device => (
+                      <DeviceList
+                        device={device}
+                        primaryColor={this.props.primaryColor}
+                        touchTap={this.touchTapDevice}
+                      />))
+                    : this.renderNoDevice()
+                }
+
+                <div style={{ flexGrow: 1 }} />
+                <Divider />
+              </div>
+
+              {/* button */}
+              <div style={{ height: 8 }} />
+              <div style={{ display: 'flex' }}>
+                <div style={{ flexGrow: 1 }} />
+                <FlatButton
+                  label={'刷新'}
+                  labelStyle={{ color: '#424242', fontWeight: 500 }}
+                  onTouchTap={this.refresh}
+                />
+              </div>
+            </div>
+        }
       </div>
     )
   }

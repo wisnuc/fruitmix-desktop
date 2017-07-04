@@ -91,7 +91,7 @@ class UserBox extends React.Component {
 
     return (
       <div key="login-user-box" style={this.props.style}>
-        <Paper
+        <div
           style={{
             position: 'absolute',
             top: 0,
@@ -99,7 +99,7 @@ class UserBox extends React.Component {
             width: '100%',
             paddingLeft: 8,
             paddingRight: 8,
-            backgroundColor: grey100
+            backgroundColor: '#FAFAFA'
           }}
           rounded={false}
         >
@@ -113,7 +113,7 @@ class UserBox extends React.Component {
                 onTouchTap={this.selectUser.bind(this, index)}
               />)}
           </div>
-        </Paper>
+        </div>
 
         <div style={{ width: '100%', boxSizing: 'border-box', paddingLeft: 0, paddingRight: 0 }}>
           <div style={{ width: '100%', height: Math.ceil(users.length / 8) * 52 + 16 }} />

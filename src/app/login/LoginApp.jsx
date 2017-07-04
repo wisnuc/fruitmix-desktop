@@ -190,33 +190,32 @@ class LoginApp extends React.Component {
         {
           wcl &&
             <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>
-              <div style={{ height: 8 }} />
-              <div style={{ marginLeft: 24, width: 332 }} >
-                { wcl === 'lastDevice' ? '上次登录的设备' : wcl === 'list' ? '请选择登录设备' : '登录设备' }
-                <div style={{ height: 8 }} />
-                <Divider />
+              <div style={{ height: 72, backgroundColor: '#FAFAFA', display: 'flex', alignItems: 'center' }} >
+                <div style={{ marginLeft: 24 }} >
+                  { wcl === 'lastDevice' ? '上次登录的设备' : wcl === 'list' ? '请选择登录设备' : '登录设备' }
+                </div>
               </div>
-              <div style={{ height: 24 }} />
+              <Divider />
+              <div style={{ height: 16 }} />
               {
                 wcl === 'lastDevice'
                   ? <div>
-                    <div style={{ height: 344, marginLeft: 24, width: 332 }}>
-                      <div style={{ height: 48 }} />
+                    <div style={{ height: 296, marginLeft: 24, width: 332 }}>
+                      <div style={{ height: 32 }} />
                       <Barcelona
                         style={{ position: 'relative', margin: 'auto' }}
                         fill="rgba(0,0,0,0.54)"
                         size={80}
                       />
-                      <div style={{ height: 72 }} />
+                      <div style={{ height: 32 }} />
                       <div>
                         <div style={{ fontSize: 24, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}> Wisnuc </div>
                         <div style={{ fontSize: 14, marginBottom: 12, color: 'rgba(0,0,0,0.54)' }}> { this.state.lists[0].ip } </div>
                         <div style={{ fontSize: 14, marginBottom: 12, color: 'rgba(0,0,0,0.54)' }}> sdsdfwetergegr </div>
                       </div>
-                      <div style={{ height: 8 }} />
-                      <Divider />
                     </div>
-                    <div style={{ height: 8 }} />
+                    <Divider />
+                    <div style={{ height: 32 }} />
                     <div
                       style={{
                         height: 80,
