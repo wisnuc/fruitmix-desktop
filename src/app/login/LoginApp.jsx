@@ -1,15 +1,15 @@
 import React from 'react'
 import Debug from 'debug'
 import Radium from 'radium'
-import { CircularProgress, Divider } from 'material-ui'
+import { Avatar, CircularProgress, Divider } from 'material-ui'
 import RightIcon from 'material-ui/svg-icons/hardware/keyboard-arrow-right'
 import CloudDoneIcon from 'material-ui/svg-icons/file/cloud-done'
 import CloudOffIcon from 'material-ui/svg-icons/file/cloud-off'
 import WifiIcon from 'material-ui/svg-icons/notification/wifi'
 import LocalLogin from './LocalLogin'
-import Barcelona from './Barcelona'
 import FlatButton from '../common/FlatButton'
 import Checkmark from '../common/Checkmark'
+import { Barcelona } from '../common/Svg'
 
 const debug = Debug('component:Login')
 const duration = 300
@@ -63,6 +63,7 @@ class LoginApp extends React.Component {
       hello: true,
       error: '', // '', 'net', 'wisnuc'
       wechatLogin: '', // '', 'progress', 'authorization', 'getingList', 'success', 'lastDevice', 'list', 'fail'
+      count: 5,
       lists: [
         {
           name: '公司的闻上盒子',
@@ -96,15 +97,22 @@ class LoginApp extends React.Component {
     }
 
     this.toggleMode = () => {
-      this.setState({ local: !this.state.local, wechatLogin: '' })
+      clearInterval(this.interval)
+      this.setState({ local: !this.state.local, wechatLogin: '', count: 5 })
+    }
+
+    this.countDown = () => {
+      clearInterval(this.interval)
+      this.interval = setInterval(() => this.setState({ count: this.state.count -= 1 }), 1000)
     }
 
     this.QRScaned = () => {
-      this.setState({ wechatLogin: 'connecting' })
+      clearInterval(this.interval)
+      this.setState({ wechatLogin: 'connecting', count: 5 })
       setTimeout(() => this.setState({ wechatLogin: 'authorization' }), 500)
       setTimeout(() => this.setState({ wechatLogin: 'getingList' }), 1000)
       setTimeout(() => this.setState({ wechatLogin: 'success' }), 1500)
-      setTimeout(() => this.setState({ wechatLogin: 'lastDevice' }), 3000)
+      setTimeout(() => this.setState({ wechatLogin: 'lastDevice' }, this.countDown), 3000)
     }
 
     this.enterList = () => {
@@ -196,36 +204,56 @@ class LoginApp extends React.Component {
                 </div>
               </div>
               <Divider />
-              <div style={{ height: 16 }} />
               {
                 wcl === 'lastDevice'
                   ? <div>
-                    <div style={{ height: 296, marginLeft: 24, width: 332 }}>
-                      <div style={{ height: 32 }} />
-                      <Barcelona
-                        style={{ position: 'relative', margin: 'auto' }}
-                        fill="rgba(0,0,0,0.54)"
-                        size={80}
-                      />
-                      <div style={{ height: 32 }} />
-                      <div>
-                        <div style={{ fontSize: 24, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}> Wisnuc </div>
-                        <div style={{ fontSize: 14, marginBottom: 12, color: 'rgba(0,0,0,0.54)' }}> { this.state.lists[0].ip } </div>
-                        <div style={{ fontSize: 14, marginBottom: 12, color: 'rgba(0,0,0,0.54)' }}> sdsdfwetergegr </div>
+                    <div style={{ height: 312, marginLeft: 24, width: 332, display: 'flex', flexDirection: 'column' }}>
+                      <div style={{ flexGrow: 1 }} />
+
+                      {/* Icon */}
+                      <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <div style={{ borderRadius: 48, width: 96, height: 96, overflow: 'hidden' }}>
+                          <img
+                            width={96}
+                            height={96}
+                            alt=""
+                            src="../../Desktop/test.jpg"
+                            style={{ filter: 'grayscale(10%)' }}
+                          />
+                        </div>
                       </div>
+
+                      {/* Name */}
+                      <div style={{ height: 24 }} />
+                      <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        { 'Test' }
+                      </div>
+                      <div style={{ flexGrow: 1 }} />
+                      <div style={{ display: 'flex' }}>
+                        <div style={{ height: 80, width: 80, display: 'flex', alignItems: 'center' }}>
+                          <Barcelona color="rgba(0,0,0,0.54)" style={{ width: 56, height: 56 }} />
+                        </div>
+                        <div>
+                          <div style={{ height: 8 }} />
+                          <div style={{ fontSize: 16, lineHeight: '24px', color: 'rgba(0,0,0,0.87)' }}> { '闻上盒子' } </div>
+                          <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}> { 'ws215i' } </div>
+                          <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}> { '10.10.9.103' } </div>
+                        </div>
+                      </div>
+                      <div style={{ height: 8 }} />
                     </div>
                     <Divider />
                     <div style={{ height: 32 }} />
                     <div
                       style={{
                         height: 80,
-                        fontSize: 34,
+                        fontSize: 16,
                         fontWeight: 500,
                         color: 'rgba(0,0,0,0.87)',
                         textAlign: 'center'
                       }}
                     >
-                      3
+                      <span style={{ fontSize: 34 }}> { this.state.count } </span> 秒后将登录
                     </div>
                     <div style={{ display: 'flex' }}>
                       <div style={{ flexGrow: 1 }} />
@@ -240,6 +268,7 @@ class LoginApp extends React.Component {
                   </div>
                   :
                   <div>
+                    <div style={{ height: 16 }} />
                     <div style={{ height: 270, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       {
                         wcl === 'list'
@@ -278,7 +307,7 @@ class LoginApp extends React.Component {
                 请使用手机微信扫码登陆
               </div>
               <div style={{ height: 24 }} />
-              <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.54)', fontSize: 20 }}>
+              <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.54)', fontSize: 16 }}>
                 客户端远程登陆需要配合手机使用
               </div>
             </div>
