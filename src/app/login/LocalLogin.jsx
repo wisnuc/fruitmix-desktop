@@ -57,7 +57,7 @@ class Login extends React.Component {
       compact: false,
       dim: false,
 
-      pin: '', // initWizard, pin child UI view, prevent auto dispatch, see footer
+      pin: 'initWizard', // initWizard, pin child UI view, prevent auto dispatch, see footer
 
       bye: false,
       byebye: false
@@ -98,9 +98,12 @@ class Login extends React.Component {
 
     if (!expanded) {
       this.setState({ vexpand: true, compact: true, dim: true })
+      debug('vexpand')
       await Promise.delay(duration)
       this.setState({ hexpand: true })
+      debug('hexpand')
       await Promise.delay(duration)
+      debug('expand')
       this.setState({ expanded: true, pin: 'initWizard' })
     } else {
       this.setState({ vexpand: false })
@@ -390,6 +393,7 @@ class Login extends React.Component {
       cardInnerStyle = {
         backgroundColor: '#FAFAFA',
         width: this.state.hexpand ? 1152 : '100%',
+        marginTop: this.state.hexpand ? -168 : '',
         transition: `all ${duration}ms`
       }
     }
@@ -402,11 +406,11 @@ class Login extends React.Component {
               <CrossNav duration={0.35} enter={this.state.enter}>
                 {
                   (this.state.bye || this.state.hello)
-                  ? <DeviceCard key="animation-card-dummy" />
+                  ? <DeviceCard />
                   : selectedDevice === null
                   ? <InfoCard {...cardProps} />
                   : <DeviceCard {...cardProps}>
-                    <div id="card inner style" style={cardInnerStyle}>
+                    <div style={cardInnerStyle}>
                       <CardDisplay {...displayProps} />
                       {this.footer()}
                     </div>

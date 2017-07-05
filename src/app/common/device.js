@@ -137,9 +137,9 @@ class Device extends RequestManager {
         .set('Accept', 'application/json')
         break
 
-      case 'firstUser':
+      case 'addUser':
         r = request
-        .post(`http://${this.mdev.address}:3721/init`)
+        .post(`http://${this.mdev.address}:3000/users`)
         .send(args)
         .set('Accept', 'application/json')
         break
@@ -207,13 +207,16 @@ class Device extends RequestManager {
   async initWizardAsync(args) {
     const { type, target, mode, username, password } = args
 
-    const uuid = await this.requestAsync('mkfs', { type, target, mode })
+    const uuid = await this.requestAsync('mkfs', { target, mode })
     console.log('device initWizard:  mkfs returns uuid', uuid)
 
     await this.requestAsync('storage', null)
     console.log('device initWizard: storage refreshed')
 
-    await this.requestAsync('install', { target: uuid, username, password, install: true })
+    await this.requestAsync('install', { target: uuid })
+    console.log('device initWizard: install fruitmix success')
+
+    await this.requestAsync('install', { target: uuid })
     console.log('device initWizard: install fruitmix success')
 
     while (true) {
@@ -236,7 +239,7 @@ class Device extends RequestManager {
       } else { console.log('device initWizard: fruitmix is null, legal ???') } // NO!!!
     }
 
-    await this.requestAsync('firstUser', { username, password })
+    await this.requestAsync('addUser', { username, password })
 
     const user = this.firstUser.value()
     console.log('device initWizard: first user created')
@@ -249,8 +252,8 @@ class Device extends RequestManager {
   }
 
   async mkfsAsync(args) {
-    const { type, target, mode } = args
-    const uuid = await this.requestAsync('mkfs', { type, target, mode })
+    const { target, mode } = args
+    const uuid = await this.requestAsync('mkfs', { target, mode })
     await this.requestAsync('storage', null)
   }
 
@@ -275,7 +278,7 @@ class Device extends RequestManager {
         }
       } else console.log('device reInstall: fruitmix is null, legal ???') // NO!!!
     }
-    await this.requestAsync('firstUser', { username, password })
+    await this.requestAsync('addUser', { username, password })
     const user = this.firstUser.value()
     await this.requestAsync('users', null)
   }

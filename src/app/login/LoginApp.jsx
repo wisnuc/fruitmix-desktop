@@ -58,7 +58,7 @@ class LoginApp extends React.Component {
     super(props)
 
     this.state = {
-      local: false,
+      local: true,
       dim: true,
       hello: true,
       error: '', // '', 'net', 'wisnuc'
