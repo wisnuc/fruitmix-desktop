@@ -63,7 +63,7 @@ class LoginApp extends React.Component {
       hello: true,
       error: '', // '', 'net', 'wisnuc'
       wechatLogin: '', // '', 'progress', 'authorization', 'getingList', 'success', 'lastDevice', 'list', 'fail'
-      count: 5,
+      count: 3,
       lists: [
         {
           name: '公司的闻上盒子',
@@ -98,17 +98,49 @@ class LoginApp extends React.Component {
 
     this.toggleMode = () => {
       clearInterval(this.interval)
-      this.setState({ local: !this.state.local, wechatLogin: '', count: 5 })
+      this.setState({ local: !this.state.local, wechatLogin: '', count: 3 })
+    }
+
+    this.done = (view, device, user) => {
+      this.doneAsync(view, device, user).asCallback()
+    }
+
+    this.autologin = () => {
+      debug(this.props)
+      if (!this.props.selectedDevice) return
+
+      const users = this.props.selectedDevice.users
+      if (users.isPending() || users.isRejected()) return
+
+      const uuid = '511eecb5-0362-41a2-ac79-624ac5e9c03f'
+      const password = 'w'
+      this.props.selectedDevice.request('token', { uuid, password }, (err) => {
+        if (err) {
+          console.log(`err:${err}`)
+          this.setState({ wechatLogin: 'fail' })
+        } else {
+          this.done('LOGIN', this.props.selectedDevice, this.props.selectedDevice.users.data[0])
+        }
+      })
     }
 
     this.countDown = () => {
       clearInterval(this.interval)
-      this.interval = setInterval(() => this.setState({ count: this.state.count -= 1 }), 1000)
+      let count = 3
+      this.interval = setInterval(() => {
+        if (count > 0) {
+          count -= 1
+          this.setState({ count: this.state.count -= 1 })
+        } else {
+          clearInterval(this.interval)
+          this.autologin()
+        }
+      }, 1000)
     }
 
     this.QRScaned = () => {
       clearInterval(this.interval)
-      this.setState({ wechatLogin: 'connecting', count: 5 })
+      this.setState({ wechatLogin: 'connecting', count: 3 })
       setTimeout(() => this.setState({ wechatLogin: 'authorization' }), 500)
       setTimeout(() => this.setState({ wechatLogin: 'getingList' }), 1000)
       setTimeout(() => this.setState({ wechatLogin: 'success' }), 1500)
@@ -128,6 +160,13 @@ class LoginApp extends React.Component {
     setTimeout(() => this.setState({ hello: false }), 300)
   }
 
+  async doneAsync(view, device, user) {
+    await Promise.delay(360)
+    if (view === 'maintenance') { this.props.maintain() } else {
+      this.props.ipcRenderer.send('LOGIN', device, user)
+      this.props.login()
+    }
+  }
 
   renderWechatLogin() {
     let text = ''
