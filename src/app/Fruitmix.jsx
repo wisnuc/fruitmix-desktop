@@ -22,7 +22,7 @@ class Fruitmix extends React.Component {
       if (mdns.length > 0) {
         this.selectDevice(mdns[0])
       }
-    }, 3000)
+    }, 1000)
 
     this.state = {
 
@@ -78,7 +78,7 @@ class Fruitmix extends React.Component {
       if (mdns.length > 0) {
         this.selectDevice(mdns[0])
       }
-    }, 3000)
+    }, 1000)
     this.setState({ view, selectedDevice: null })
   }
 

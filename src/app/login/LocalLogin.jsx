@@ -1,9 +1,9 @@
-import React from 'react'
 import Debug from 'debug'
-import Radium from 'radium'
+import React, { Component, PureComponent } from 'react'
 import ReactDOM from 'react-dom'
-import { CircularProgress, Divider } from 'material-ui'
-import { cyan900 } from 'material-ui/styles/colors'
+import { FlatButton, CircularProgress, Divider } from 'material-ui'
+import { indigo900, cyan500, cyan900, teal900, lightGreen900, lime900, yellow900
+} from 'material-ui/styles/colors'
 
 import CrossNav from './CrossNav'
 import InfoCard from './InfoCard'
@@ -12,52 +12,12 @@ import ErrorBox from './ErrorBox'
 import CardDisplay from './ModelNameCard'
 import InitWizard from './InitStep'
 
-import FlatButton from '../common/FlatButton'
-import { Computer, Barcelona } from '../common/Svg'
-
 const debug = Debug('component:Login')
+const colorArray = [indigo900, cyan900, teal900, lightGreen900, lime900, yellow900]
 const duration = 300
 
-@Radium
-class DeviceList extends React.PureComponent {
-  render() {
-    const { device, primaryColor } = this.props
-
-    return (
-      <div
-        style={{
-          height: 72,
-          width: '100%',
-          paddingLeft: 24,
-          boxSizing: 'border-box',
-          display: 'flex',
-          alignItems: 'center',
-          ':hover': { backgroundColor: '#EEEEEE' }
-        }}
-        onTouchTap={() => this.props.touchTap(device)}
-      >
-        <div style={{ width: 32 }}>
-          {
-            device.model === 'ws215i'
-            ? <Barcelona color={primaryColor} style={{ width: 32, height: 32 }} />
-            : <Computer color={primaryColor} style={{ width: 32, height: 32 }} />
-          }
-        </div>
-        <div style={{ marginLeft: 24 }}>
-          <div style={{ color: 'rgba(0,0,0,0.87)', lineHeight: '24px' }}>
-            { device.model === 'ws215i' ? 'WISNUC' : '个人计算机' }
-          </div>
-          <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14, lineHeight: '20px' }}>
-            { device.address }
-          </div>
-        </div>
-      </div>
-    )
-  }
-}
-
 // pure animation frame !
-class DeviceCard extends React.PureComponent {
+class DeviceCard extends PureComponent {
 
   componentWillEnter(callback) {
     this.props.onWillEnter(ReactDOM.findDOMNode(this), callback)
@@ -88,11 +48,9 @@ class Login extends React.Component {
 
     this.state = {
 
-      index: 0,
       hello: true,
-      selected: false,
 
-      enter: 'none',
+      enter: 'bottom',
       expanded: false,
       vexpand: false,
       hexpand: false,
@@ -116,16 +74,14 @@ class Login extends React.Component {
     this.initWizardOnOKBound = this.initWizardOnOK.bind(this)
 
     this.refresh = () => {
-      debug('this.refresh')
-    }
-
-    this.backToList = () => {
-      this.setState({ selected: false })
-    }
-
-    this.touchTapDevice = (device) => {
-      this.setState({ selected: true })
-      this.props.selectDevice(device)
+      global.mdns.scan()
+      setTimeout(() => {
+        const mdns = global.mdnsStore
+        if (mdns.length > 0) {
+          this.props.selectDevice(mdns[0])
+        }
+      }, 1000)
+      debug('this.refresh...')
     }
   }
 
@@ -188,10 +144,10 @@ class Login extends React.Component {
     const currProps = this.props
 
     // device card enter from bottom
-    if (!currProps.selectedDevice && nextProps.selectedDevice) { this.setState({ enter: 'none' }) }
+    if (!currProps.selectedDevice && nextProps.selectedDevice) { this.setState({ enter: 'bottom' }) }
 
     // device card leave from top
-    else if (currProps.selectedDevice && !nextProps.selectedDevice) { this.setState({ enter: 'none' }) }
+    else if (currProps.selectedDevice && !nextProps.selectedDevice) { this.setState({ enter: 'top' }) }
 
     // device card change
     else if (currProps.selectedDevice && nextProps.selectedDevice) {
@@ -205,12 +161,12 @@ class Login extends React.Component {
 
     // don't know final sequence TODO
     else {
-      this.setState({ enter: 'none' })
+      this.setState({ enter: 'bottom' })
     }
   }
 
   componentDidMount() {
-    setTimeout(() => this.setState({ hello: false }), 0)
+    setTimeout(() => this.setState({ hello: false }), 300)
   }
 
   initWizardOnCancel() {
@@ -223,7 +179,7 @@ class Login extends React.Component {
   }
 
   async doneAsync(view, device, user) {
-    this.setState({ bye: true, dim: false, enter: 'none' })
+    this.setState({ bye: true, dim: false, enter: 'bottom' })
     await Promise.delay(360)
 
     this.setState({ byebye: true })
@@ -270,6 +226,8 @@ class Login extends React.Component {
       paddingRight: 24
     }
 
+    // //////////////////////////////////////////////////////////////////////////
+
     const status = this.props.selectedDevice.systemStatus()
 
     if (this.state.pin === 'initWizard' || status === 'uninitialized') {
@@ -314,12 +272,11 @@ class Login extends React.Component {
       }
     }
 
-    let text
-    let busy
-    let maint
-    let error
-    let uninit
-
+    let text,
+      busy,
+      maint,
+      error,
+      uninit
     switch (status) {
       case 'ready': // users.length === 0 need to add FirstUser Box TODO
         text = '系统错误：未发现用户'
@@ -405,103 +362,72 @@ class Login extends React.Component {
     )
   }
 
-  renderDevice(selectedDevice) {
-    if (!selectedDevice) return (<div />)
-
-    const cardProps = { key: `device-card-${selectedDevice.mdev.name}` }
-
-    const displayProps = {
-      toggle: this.state.compact,
-      device: selectedDevice.mdev,
-      ws215i: selectedDevice.device && selectedDevice.device.data && !!selectedDevice.device.data.ws215i,
-      backgroundColor: '#006064',
-      onNavPrev: (!selectedDevice || this.isFirst()) ? null : this.navPrevBound,
-      onNavNext: (!selectedDevice || this.isLast()) ? null : this.navNextBound
-    }
-
-    const cardInnerStyle = {
-      backgroundColor: '',
-      width: this.state.hexpand ? 1152 : '100%',
-      transition: `all ${duration}ms`
-    }
-
-    return (
-      <div
-        style={{
-          height: '100%',
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          flexDirection: 'column'
-        }}
-      >
-        <CrossNav duration={0.35} enter={this.state.enter}>
-          <DeviceCard {...cardProps}>
-            <div id="card inner style" style={cardInnerStyle}>
-              <CardDisplay {...displayProps} />
-              {this.footer()}
-            </div>
-          </DeviceCard>
-        </CrossNav>
-      </div>
-    )
-  }
-
   render() {
     const { mdns, selectedDevice } = this.props
-    debug('mdns, selectedDevice', mdns, selectedDevice)
+
+    let cardProps,
+      displayProps,
+      cardInnerStyle
+    if (selectedDevice === null) {
+      cardProps = {
+        key: 'info-card',
+        text: '正在搜索网络上的WISNUC OS设备'
+      }
+    } else {
+      cardProps = { key: `device-card-${selectedDevice.mdev.name}` }
+      displayProps = {
+        toggle: this.state.compact,
+        device: selectedDevice.mdev,
+        ws215i: selectedDevice.device && selectedDevice.device.data && !!selectedDevice.device.data.ws215i,
+        backgroundColor: colorArray[1],
+        onNavPrev: (!selectedDevice || this.isFirst()) ? null : this.navPrevBound,
+        onNavNext: (!selectedDevice || this.isLast()) ? null : this.navNextBound
+      }
+
+      cardInnerStyle = {
+        backgroundColor: '#FAFAFA',
+        width: this.state.hexpand ? 1152 : '100%',
+        transition: `all ${duration}ms`
+      }
+    }
 
     return (
-      <div
-        style={{
-          width: this.state.selected ? 448 : 380,
-          height: this.state.selected ? 376 : 540,
-          backgroundColor: this.state.selected ? '' : '#FAFAFA',
-          zIndex: 100,
-          transition: `all ${duration}ms`
-        }}
-      >
+      <div style={{ zIndex: 100 }}>
         {
-          mdns.length > 0 && this.state.selected ? this.renderDevice(selectedDevice)
-            : <div>
-              <div style={{ height: 8 }} />
-              <div
-                style={{
-                  marginLeft: 24,
-                  width: this.state.selected ? 400 : 332,
-                  height: this.state.selected ? 316 : 480,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  transition: `all ${duration}ms`
-                }}
-              >
-                <div style={{ fontSize: 16, color: 'rgba(0,0,0,0.87)' }}>
+          mdns.length > 0
+            ?  <div style={{ width: 540, height: 380, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <CrossNav duration={0.35} enter={this.state.enter}>
+                {
+                  (this.state.bye || this.state.hello)
+                  ? <DeviceCard key="animation-card-dummy" />
+                  : selectedDevice === null
+                  ? <InfoCard {...cardProps} />
+                  : <DeviceCard {...cardProps}>
+                    <div id="card inner style" style={cardInnerStyle}>
+                      <CardDisplay {...displayProps} />
+                      {this.footer()}
+                    </div>
+                  </DeviceCard>
+                }
+              </CrossNav>
+            </div>
+            : <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>
+              <div style={{ height: 72, backgroundColor: '#FAFAFA', display: 'flex', alignItems: 'center' }} >
+                <div style={{ marginLeft: 24 }} >
                   { '局域网登录' }
                 </div>
-                <div style={{ height: 8 }} />
-                <Divider />
-                <div style={{ height: 8 }} />
-
-                {/* content */}
-                {
-                  mdns.length > 0
-                    ? mdns.map(device => (
-                      <DeviceList
-                        device={device}
-                        primaryColor={this.props.primaryColor}
-                        touchTap={this.touchTapDevice}
-                      />))
-                    : this.renderNoDevice()
-                }
-
-                <div style={{ flexGrow: 1 }} />
-                <Divider />
               </div>
+              <Divider />
+
+              <div style={{ height: 8 }} />
+              {/* content */}
+                <div style={{ marginLeft: 24 }} >
+                  { this.renderNoDevice() }
+                </div>
 
               {/* button */}
-              <div style={{ height: 8 }} />
-              <div style={{ display: 'flex' }}>
-                <div style={{ flexGrow: 1 }} />
+              <div style={{ height: 152 }} />
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginRight: 8 }}>
                 <FlatButton
                   label={'刷新'}
                   labelStyle={{ color: '#424242', fontWeight: 500 }}
