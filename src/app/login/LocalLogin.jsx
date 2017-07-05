@@ -231,6 +231,7 @@ class Login extends React.Component {
     // //////////////////////////////////////////////////////////////////////////
 
     const status = this.props.selectedDevice.systemStatus()
+    debug('footer', status, this.props.selectedDevice)
 
     if (this.state.pin === 'initWizard' || status === 'uninitialized') {
       const { hexpand, vexpand, expanded } = this.state

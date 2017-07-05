@@ -25,13 +25,7 @@ import PureDialog from '../common/PureDialog.jsx'
 const debug = Debug('component:maintenance:BtrfsVolume')
 
 export default class BtrfsVolume extends React.Component {
-  /*
-  static State = class State {
-    constructor() {
-      this.creatingNewVolume = null
-    }
-  }
-  */
+
   constructor(props) {
     super(props)
 
@@ -52,14 +46,13 @@ export default class BtrfsVolume extends React.Component {
       fillGreyFaded: grey300
     }
 
-    this.volumeIconColor = (volume) => {
+    this.volumeIconColor = (volume, boot) => {
       if (this.props.state.creatingNewVolume) return this.colors.fillGreyFaded
       // return this.colors.fillGrey
       // TODO
       if (volume.isMissing) return redA200
-      if (typeof volume.wisnuc !== 'object') return '#000'
-      switch (volume.wisnuc.status) {
-        case 'READY':
+      switch (boot.error) {
+        case null:
           return lightGreen400
         case 'ENOENT':
           return red400
@@ -67,19 +60,20 @@ export default class BtrfsVolume extends React.Component {
           return red400
         case 'EFAIL':
           return red400
+        case 'ENOALT':
+          return red400
       }
       return '#000'
     }
 
-    this.VolumeTitle = (props) => {
-      const volume = props.volume
+    this.VolumeTitle = (volume, boot) => {
       return (
         <div style={{ width: '100%', height: HEADER_HEIGHT, display: 'flex', alignItems: 'center' }}>
           <HeaderIcon>
             <Avatar
               size={40}
               color={'white'}
-              backgroundColor={this.volumeIconColor(volume)}
+              backgroundColor={this.volumeIconColor(volume, boot)}
               icon={<RAIDIcon />}
             />
           </HeaderIcon>
@@ -133,12 +127,13 @@ export default class BtrfsVolume extends React.Component {
     }
 
     this.initWisnucOnVolume = (volume) => {
-      if (typeof volume.wisnuc !== 'object' || volume.wisnuc.status !== 'ENOENT') {
+      if (this.props.state.boot.error !== 'ENOALT') {
         this.setState({ pureDialog: 'init' })
         return
       }
       this.setState({ initVolume: volume })
     }
+
     this.end = () => {
       // TODO
       this.setState({ pureDialog: false })
@@ -186,10 +181,11 @@ export default class BtrfsVolume extends React.Component {
   }
 
   render() {
-    // debug('BtrfsVolume render! ')
+    debug('BtrfsVolume render!', this.props)
     const { volume, state, setState, zDepth, that, nav, device, ...rest } = this.props
     const accent1Color = this.props.that.colors.accent
     const { blocks } = this.props.state.storage
+    const boot = this.props.state.boot
     const cnv = !!this.props.state.creatingNewVolume
     const expandableHeight = this.state.expanded ?
       17 * 23 + 3 * SUBTITLE_HEIGHT + SUBTITLE_MARGINTOP * 2 + 0.5 : 0
@@ -216,9 +212,9 @@ export default class BtrfsVolume extends React.Component {
         >
           <div style={{ flex: '0 0 900px', height: '100%', display: 'flex', alignItems: 'center' }}>
             <div style={{ flex: '0 0 256px' }}>
-              <this.VolumeTitle volume={volume} />
+              { this.VolumeTitle(volume, boot) }
             </div>
-            <VolumeWisnucError creatingNewVolume={this.props.state.creatingNewVolume} volume={volume} />
+            <VolumeWisnucError creatingNewVolume={this.props.state.creatingNewVolume} volume={volume} boot={boot} device={device} />
           </div>
           <div style={{ marginRight: 24 }}>
             {this.state.expanded ? <UpIcon color={'#9e9e9e'} /> : <DownIcon color={'#9e9e9e'} />}
@@ -398,15 +394,11 @@ export default class BtrfsVolume extends React.Component {
                   />
                 </div>
             }
-            { this.props.state.boot.state === 'maintenance' &&
+            {
                 this.props.state.creatingNewVolume === null &&
-                volume.wisnuc.status !== 'READY' &&
+                boot.current === null &&
                 <FlatButton
-                  label={
-                    typeof volume.wisnuc === 'object'
-                      ? [[volume.wisnuc.status === 'ENOENT' ? '安装' : '修复问题']]
-                      : [['修复问题']] // TODO
-                  }
+                  label={boot.error === 'ENOALT' ? '安装' : '修复问题' }
                   primary
                   onTouchTap={() => this.initWisnucOnVolume(volume)}
                 />
@@ -416,6 +408,7 @@ export default class BtrfsVolume extends React.Component {
         </div> }
         <InitVolumeDialogs
           volume={this.state.initVolume}
+          boot={boot}
           onRequestClose={() => this.setState({ initVolume: undefined })}
           onResponse={() => this.props.that.reloadBootStorage()}
           device={this.props.device}

@@ -59,22 +59,22 @@ class Device extends RequestManager {
     switch (name) {
       case 'device':
         r = request
-        .get(`http://${this.mdev.address}:3000/system/device`)
+        .get(`http://${this.mdev.address}:3000/control/system`)
         break
 
       case 'boot':
         r = request
-        .get(`http://${this.mdev.address}:3000/system/boot`)
+        .get(`http://${this.mdev.address}:3000/boot`)
         break
 
       case 'storage':
         r = request
-        .get(`http://${this.mdev.address}:3000/system/storage?wisnuc=true`)
+        .get(`http://${this.mdev.address}:3000/storage`)
         break
 
       case 'power':
         r = request
-        .post(`http://${this.mdev.address}:3000/system/boot`)
+        .post(`http://${this.mdev.address}:3000/boot`)
         .timeout(30000)
         .send(args)
         .set('Accept', 'application/json')
@@ -82,22 +82,22 @@ class Device extends RequestManager {
 
       case 'timedate':
         r = request
-        .get(`http://${this.mdev.address}:3000/system/timedate`)
+        .get(`http://${this.mdev.address}:3000/control/timedate`)
         break
 
       case 'net':
         r = request
-        .get(`http://${this.mdev.address}:3000/system/net`)
+        .get(`http://${this.mdev.address}:3000/control/net/interfaces`)
         break
 
       case 'fan':
         r = request
-        .get(`http://${this.mdev.address}:3000/system/fan`)
+        .get(`http://${this.mdev.address}:3000/control/fan`)
         break
 
       case 'setFanScale':
         r = request
-        .post(`http://${this.mdev.address}:3000/system/fan`)
+        .post(`http://${this.mdev.address}:3000/control/fan`)
         .timeout(30000)
         .send(args)
         .set('Accept', 'application/json')
@@ -105,32 +105,25 @@ class Device extends RequestManager {
 
       case 'ipaliasing':
         r = request
-        .get(`http://${this.mdev.address}:3000/system/ipaliasing`)
+        .get(`http://${this.mdev.address}:3000/control/net/ipaliasing`)
         break
 
       case 'setIpaliasing':
         r = request
-        .post(`http://${this.mdev.address}:3000/system/ipaliasing`)
+        .post(`http://${this.mdev.address}:3000/control/net/ipaliasing`)
         .timeout(30000)
-        .send(args)
-        .set('Accept', 'application/json')
-        break
-
-      case 'delIpaliasing':
-        r = request
-        .del(`http://${this.mdev.address}:3000/system/ipaliasing`)
         .send(args)
         .set('Accept', 'application/json')
         break
 
       case 'users':
         r = request
-        .get(`http://${this.mdev.address}:3721/login`)
+        .get(`http://${this.mdev.address}:3000/users`)
         break
 
       case 'mkfs':
         r = request
-        .post(`http://${this.mdev.address}:3000/system/mkfs`)
+        .post(`http://${this.mdev.address}:3000/storage/volumes`)
         .timeout(30000)
         .send(args)
         .set('Accept', 'application/json')
@@ -138,7 +131,7 @@ class Device extends RequestManager {
 
       case 'install':
         r = request
-        .post(`http://${this.mdev.address}:3000/system/install`)
+        .post(`http://${this.mdev.address}:3000/boot`)
         .timeout(30000)
         .send(args)
         .set('Accept', 'application/json')
@@ -210,6 +203,7 @@ class Device extends RequestManager {
   //    12. creating first user failed
   // *  13. retrieving token
   //    14. retrieving token failed
+
   async initWizardAsync(args) {
     const { type, target, mode, username, password } = args
 
@@ -265,7 +259,8 @@ class Device extends RequestManager {
     const install = true
     let reinstall = false
     if (remove === 'wisnuc') reinstall = true // FIXME
-    await this.requestAsync('install', { target, username, password, install, reinstall })
+    await this.requestAsync('install', { current: target })
+    // await this.requestAsync('install', { target, username, password, install, reinstall })
     while (true) {
       await Promise.delay(1000)
       await this.requestAsync('boot', null)
@@ -327,42 +322,24 @@ class Device extends RequestManager {
       return 'systemError'
     }
 
-    const bootState = this.boot.value().state
+    const boot = this.boot.value()
 
-    if (bootState === 'normal') { // fruitmix booted
+    /* normal mode */
+    if (!boot.error && boot.state === 'started') {
       if (this.users.isRejected()) { return 'fruitmixError' }
       return 'ready'
     }
-       // maintenance mode
 
-    const boot = this.boot.value()
-
-    if (boot.bootMode === 'maintenance') {
+    /* maintenance mode */
+    if (boot.mode === 'maintenance') {
       return 'userMaint'
     } else if (boot.error === 'EFAIL') {
       return 'failLast'
     } else if (boot.error === 'EMULTI') {
       return 'failMulti'
     } else if (boot.error === 'ENOALT') {
-      const { blocks, volumes } = this.storage.value()
-
-           // TODO new boot not compatible with old one
-/**
-          if (volumes.length === 0) { // no existing btrfs volume
-
-            // all mounted file systems has no wisnuc
-            let noFruitmix =
-              blocks
-                .filter(blk => blk.isFileSystem && blk.isMounted)
-                 .every(blk => typeof blk.wisnuc === 'object' && blk.wisnuc !== null && blk.wisnuc.status === 'ENOENT')
-
-            if (noFruitmix && this.boot.lastFileSystem === null)
-              return 'uninitialized'
-          }
-**/
-
-      if (volumes.length === 0 && boot.lastFileSystem === null) { return 'uninitialized' }
-
+      const { volumes } = this.storage.value()
+      if (volumes.length === 0 && boot.last === null) { return 'uninitialized' }
       return 'failNoAlt'
     }
 
