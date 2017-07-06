@@ -49,7 +49,8 @@ class Device extends RequestManager {
       mkFileSystem: this.mkFileSystem.bind(this),
       reInstall: this.reInstall.bind(this),
       refreshSystemState: this.refreshSystemState.bind(this),
-      manualBoot: this.manualBoot.bind(this)
+      manualBoot: this.manualBoot.bind(this),
+      addFirstUser: this.addFirstUser.bind(this)
     }
   }
 
@@ -131,13 +132,13 @@ class Device extends RequestManager {
 
       case 'install':
         r = request
-        .post(`http://${this.mdev.address}:3000/boot`)
+        .patch(`http://${this.mdev.address}:3000/boot`)
         .timeout(30000)
         .send(args)
         .set('Accept', 'application/json')
         break
 
-      case 'addUser':
+      case 'firstUser':
         r = request
         .post(`http://${this.mdev.address}:3000/users`)
         .send(args)
@@ -154,7 +155,7 @@ class Device extends RequestManager {
 
       case 'token':
         r = request
-        .get(`http://${this.mdev.address}:3721/token`)
+        .get(`http://${this.mdev.address}:3000/token`)
         .auth(args.uuid, args.password)
         .set('Accept', 'application/json')
         break
@@ -205,7 +206,7 @@ class Device extends RequestManager {
   //    14. retrieving token failed
 
   async initWizardAsync(args) {
-    const { type, target, mode, username, password } = args
+    const { target, mode, username, password } = args
 
     const uuid = await this.requestAsync('mkfs', { target, mode })
     console.log('device initWizard:  mkfs returns uuid', uuid)
@@ -213,33 +214,47 @@ class Device extends RequestManager {
     await this.requestAsync('storage', null)
     console.log('device initWizard: storage refreshed')
 
-    await this.requestAsync('install', { target: uuid })
-    console.log('device initWizard: install fruitmix success')
-
-    await this.requestAsync('install', { target: uuid })
+    await this.requestAsync('install', { current: uuid.uuid })
     console.log('device initWizard: install fruitmix success')
 
     while (true) {
       await Promise.delay(1000)
       await this.requestAsync('boot', null)
 
-      const fruitmix = this.boot.value().fruitmix
-      if (fruitmix) {
-        if (fruitmix.state === 'started') {
+      const current = this.boot.value().current
+      const state = this.boot.value().state
+
+      if (current) {
+        if (state === 'started') {
           // this may be due to worker not started yet
           await Promise.delay(2000)
 
           console.log('device initWizard: fruitmix started')
           break
         }
-        if (fruitmix.state === 'exited') {
-          return console.log('device initWizard: fruitmix exited (unexpected), stop')
+        if (state === 'stopping') {
+          return console.log('device initWizard: fruitmix stopping (unexpected), stop')
         }
         console.log('device initWizard: fruitmix starting, waiting...')
       } else { console.log('device initWizard: fruitmix is null, legal ???') } // NO!!!
     }
 
-    await this.requestAsync('addUser', { username, password })
+    await this.requestAsync('firstUser', { username, password })
+
+    const user = this.firstUser.value()
+    console.log('device initWizard: first user created')
+
+    await this.requestAsync('users', null)
+    console.log('device initWizard: users refreshed')
+
+    await this.requestAsync('token', { uuid: user.uuid, password })
+    console.log('device initWizard: token retrieved')
+  }
+
+  async addFirstUserAsync(args) {
+    const { username, password } = args
+
+    await this.requestAsync('firstUser', { username, password })
 
     const user = this.firstUser.value()
     console.log('device initWizard: first user created')
@@ -278,7 +293,7 @@ class Device extends RequestManager {
         }
       } else console.log('device reInstall: fruitmix is null, legal ???') // NO!!!
     }
-    await this.requestAsync('addUser', { username, password })
+    await this.requestAsync('firstUser', { username, password })
     const user = this.firstUser.value()
     await this.requestAsync('users', null)
   }
@@ -290,6 +305,10 @@ class Device extends RequestManager {
 
   initWizard(args) {
     this.initWizardAsync(args).asCallback(() => {})
+  }
+
+  addFirstUser(args) {
+    this.addFirstUserAsync(args).asCallback(() => {})
   }
 
   mkFileSystem(args) {

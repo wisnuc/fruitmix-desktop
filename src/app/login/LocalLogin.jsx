@@ -12,9 +12,36 @@ import ErrorBox from './ErrorBox'
 import CardDisplay from './ModelNameCard'
 import InitWizard from './InitStep'
 
+import UsernamePassword from './UsernamePassword'
+
 const debug = Debug('component:Login')
 const colorArray = [indigo900, cyan900, teal900, lightGreen900, lime900, yellow900]
 const duration = 300
+
+const StateUp = base => class extends base {
+
+  setSubState(name, nextSubState) {
+    const state = this.props.state || this.state
+    const subState = state[name]
+    const nextSubStateMerged = Object.assign(new subState.constructor(), subState, nextSubState)
+    const nextState = { [name]: nextSubStateMerged }
+    this.props.setState
+      ? this.props.setState(nextState)
+      : this.setState(nextState)
+  }
+
+  setSubStateBound(name) {
+    const obj = this.setSubStateBoundObj || (this.setSubStateBoundObj = {})
+    return obj[name] ? obj[name] : (obj[name] = this.setSubState.bind(this, name))
+  }
+
+  bindVState(name) {
+    return {
+      state: this.props.state ? this.props.state[name] : this.state[name],
+      setState: this.setSubStateBound(name)
+    }
+  }
+}
 
 // pure animation frame !
 class DeviceCard extends PureComponent {
@@ -41,12 +68,14 @@ class DeviceCard extends PureComponent {
 // 2. card animation
 // 3. background dim
 // 4. card color
-class Login extends React.Component {
+class Login extends StateUp(React.Component) {
 
   constructor(props) {
     super(props)
 
     this.state = {
+
+      enterUserpass: false,
 
       hello: true,
 
@@ -60,13 +89,14 @@ class Login extends React.Component {
       pin: 'initWizard', // initWizard, pin child UI view, prevent auto dispatch, see footer
 
       bye: false,
-      byebye: false
+      byebye: false,
+
+      userpass: new UsernamePassword.State()
     }
 
     this.navPrevBound = this.navPrev.bind(this)
     this.navNextBound = this.navNext.bind(this)
 
-    this.toggleDisplayBound = this.toggleDisplay.bind(this)
     this.toggleExpandedBound = this.toggleExpanded.bind(this)
 
     this.initWizardOnCancelBound = this.initWizardOnCancel.bind(this)
@@ -84,13 +114,29 @@ class Login extends React.Component {
       debug('this.refresh...')
     }
 
+    this.toggleFirstUser = () => {
+      clearTimeout(this.timeEnterUserpass)
+      if (this.state.enterUserpass) {
+        this.timeEnterUserpass = setTimeout(this.toggleDisplay, duration)
+        this.setState({ enterUserpass: false })
+      } else {
+        this.timeEnterUserpass = setTimeout(() => this.setState({ enterUserpass: true }), duration)
+        this.toggleDisplay()
+      }
+    }
 
+    this.addFirstUser = () => {
+      debug('this.addFirstUser', this.state.userpass, this.props)
+      const { username, password } = this.state.userpass
+      this.props.selectedDevice.addFirstUser({ username, password })
+    }
+
+    this.toggleDisplay = (done) => {
+      this.setState({ compact: !this.state.compact, dim: !this.state.dim })
+      if (done) setTimeout(() => done(), duration)
+    }
   }
 
-  toggleDisplay(done) {
-    this.setState({ compact: !this.state.compact, dim: !this.state.dim })
-    if (done) setTimeout(() => done(), duration)
-  }
 
   async toggleExpandedAsync() {
     const { vexpand, hexpand, expanded } = this.state
@@ -98,12 +144,9 @@ class Login extends React.Component {
 
     if (!expanded) {
       this.setState({ vexpand: true, compact: true, dim: true })
-      debug('vexpand')
       await Promise.delay(duration)
       this.setState({ hexpand: true })
-      debug('hexpand')
       await Promise.delay(duration)
-      debug('expand')
       this.setState({ expanded: true, pin: 'initWizard' })
     } else {
       this.setState({ vexpand: false })
@@ -234,7 +277,7 @@ class Login extends React.Component {
     // //////////////////////////////////////////////////////////////////////////
 
     const status = this.props.selectedDevice.systemStatus()
-    debug('footer', status, this.props.selectedDevice)
+    // debug('footer', status, this.props.selectedDevice)
 
     if (this.state.pin === 'initWizard' || status === 'uninitialized') {
       const { hexpand, vexpand, expanded } = this.state
@@ -271,22 +314,23 @@ class Login extends React.Component {
           <UserBox
             style={style}
             device={this.props.selectedDevice}
-            toggleDisplay={this.toggleDisplayBound}
+            toggleDisplay={this.toggleDisplay}
             done={this.done.bind(this)}
           />
         )
       }
     }
 
-    let text,
-      busy,
-      maint,
-      error,
-      uninit
+    let text
+    let busy
+    let maint
+    let error
+    let uninit
+    let noUser
     switch (status) {
       case 'ready': // users.length === 0 need to add FirstUser Box TODO
         text = '系统错误：未发现用户'
-        error = pullError()
+        noUser = true
         break
       case 'probing':
         text = '通讯中....'
@@ -338,7 +382,44 @@ class Login extends React.Component {
           <FlatButton label="维护模式" onTouchTap={() => this.done('maintenance')} />
         </div>
       )
-    } else if (error) { return <ErrorBox style={boxStyle} text={text} error={error} /> }
+    } else if (noUser) {
+      if (!this.state.compact) {
+        return (
+          <div style={boxStyle}>
+            <div>{text}</div>
+            <FlatButton label="创建用户" onTouchTap={this.toggleFirstUser} />
+          </div>
+        )
+      } else {
+        return (
+          <div
+            style={{
+              padding: '0px 24px 0px 24px',
+              height: this.state.enterUserpass ? '' : 0,
+              boxSizing: 'border-box',
+              transition: `all ${duration}ms`,
+              overflow: 'hidden'
+            }}
+          >
+            <div style={{ height: 24 }} />
+            <div style={{ fontSize: 16, lineHeight: '24px', color: 'rgba(0,0,0,0.87)' }}>
+              请输入第一个用户的用户名和密码
+            </div>
+            <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}>
+              该用户会成为系统权限最高的管理员
+            </div>
+            <div style={{ height: 16 }} />
+            <UsernamePassword {...this.bindVState('userpass')} />
+            <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -16 }}>
+              <FlatButton label="取消" onTouchTap={this.toggleFirstUser} primary />
+              <FlatButton label="确认" disabled={!this.state.userpass.isInputOK()} onTouchTap={this.addFirstUser} primary />
+            </div>
+          </div>
+        )
+      }
+    } else if (error) {
+      return <ErrorBox style={boxStyle} text={text} error={error} />
+    }
     return <div style={boxStyle} />
   }
 

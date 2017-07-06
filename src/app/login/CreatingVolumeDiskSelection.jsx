@@ -27,9 +27,9 @@ class CreatingVolumeDiskSelection extends React.PureComponent {
     const valid = !blk.unformattable
 
     let comment
-    if (blk.unformattable && blk.unformattable[0].reason === 'isActiveSwap') {
+    if (blk.unformattable === 'isActiveSwap') {
       comment = '该磁盘含有在使用的交换分区，不可用'
-    } else if (blk.unformattable && blk.unformattable[0].reason === 'isRootFS') {
+    } else if (blk.unformattable === 'isRootFS') {
       comment = '该磁盘含有rootfs，不可用'
     } else if (blk.unformattable) {
       comment = '该磁盘无法格式化，不可用'
