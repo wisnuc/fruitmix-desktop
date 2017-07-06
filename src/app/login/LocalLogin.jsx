@@ -492,13 +492,16 @@ class Login extends StateUp(React.Component) {
                   ? <InfoCard {...cardProps} />
                   : <DeviceCard {...cardProps}>
                     <div style={cardInnerStyle}>
+                      { !this.state.compact &&
                       <div style={{ height: 72, backgroundColor: '#FAFAFA', display: 'flex', alignItems: 'center' }} >
                         <div style={{ marginLeft: 24 }} >
                           { '局域网登录' }
                         </div>
                       </div>
+                      }
                       <CardDisplay {...displayProps} />
-                      {this.footer()}
+                      <Divider />
+                      { this.footer() }
                     </div>
                   </DeviceCard>
                 }

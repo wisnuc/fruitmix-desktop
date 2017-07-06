@@ -80,7 +80,7 @@ class CrossNav extends React.Component {
     const cardProps = {
       style: { position: 'absolute',
         width: 380,
-        right: -224,
+        right: -190,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center' },

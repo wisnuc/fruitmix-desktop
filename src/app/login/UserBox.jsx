@@ -99,7 +99,7 @@ class UserBox extends React.Component {
             width: '100%',
             paddingLeft: 8,
             paddingRight: 8,
-            backgroundColor: '#FAFAFA'
+            backgroundColor: this.state.selectedIndex > -1 ? '#FFFFFF' : '#FAFAFA'
           }}
           rounded={false}
         >
