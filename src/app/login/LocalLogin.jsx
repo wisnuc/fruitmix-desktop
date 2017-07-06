@@ -86,7 +86,7 @@ class Login extends StateUp(React.Component) {
       compact: false,
       dim: false,
 
-      pin: 'initWizard', // initWizard, pin child UI view, prevent auto dispatch, see footer
+      pin: '', // initWizard, pin child UI view, prevent auto dispatch, see footer
 
       bye: false,
       byebye: false,
@@ -466,7 +466,7 @@ class Login extends StateUp(React.Component) {
         toggle: this.state.compact,
         device: selectedDevice.mdev,
         ws215i: selectedDevice.device && selectedDevice.device.data && !!selectedDevice.device.data.ws215i,
-        backgroundColor: colorArray[1],
+        backgroundColor: '#FAFAFA',
         onNavPrev: (!selectedDevice || this.isFirst()) ? null : this.navPrevBound,
         onNavNext: (!selectedDevice || this.isLast()) ? null : this.navNextBound
       }
@@ -483,7 +483,7 @@ class Login extends StateUp(React.Component) {
       <div style={{ zIndex: 100 }}>
         {
           mdns.length > 0
-            ?  <div style={{ width: 540, height: 380, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            ?  <div style={{ width: 380, height: 540, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <CrossNav duration={0.35} enter={this.state.enter}>
                 {
                   (this.state.bye || this.state.hello)
@@ -492,6 +492,11 @@ class Login extends StateUp(React.Component) {
                   ? <InfoCard {...cardProps} />
                   : <DeviceCard {...cardProps}>
                     <div style={cardInnerStyle}>
+                      <div style={{ height: 72, backgroundColor: '#FAFAFA', display: 'flex', alignItems: 'center' }} >
+                        <div style={{ marginLeft: 24 }} >
+                          { '局域网登录' }
+                        </div>
+                      </div>
                       <CardDisplay {...displayProps} />
                       {this.footer()}
                     </div>

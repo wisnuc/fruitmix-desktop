@@ -49,6 +49,11 @@ export default class VolumeWisnucError extends React.Component {
   render() {
     debug('VolumeWisnucError', this.props)
     const { boot, creatingNewVolume, volume } = this.props
+
+    /* wisnuc is running */
+    if (boot.current !== null) return (<div />)
+
+    /* volume is Missing */
     if (volume.isMissing) {
       return (
         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -66,27 +71,24 @@ export default class VolumeWisnucError extends React.Component {
       )
     }
 
-    if (boot.current !== null) return <div />
-    const status = this.props.device.systemStatus()
-    const users = this.props.device.users.data
-    const error = this.props.boot.error
-    debug('VolumeWisnucError status', status)
+    let error = ''
+    let users = []
+    if (typeof volume.users === 'string') {
+      error = volume.users
+    } else if (typeof volume.users === 'array') {
+      users = volume.users
+    }
 
-    if (error) return <div>{ `error: ${error}, status: ${status}` }</div>
+    // if (error) return <div>{ `error: ${error}, status: ${status}` }</div>
 
     if (users) {
       if (users.length === 0) {
         return <div>WISNUC已安装但尚未创建用户</div>
       }
       return (<div />)
-    } else if (status !== 'READY') {
-      // debug("status",status)
-      // debug("error",error)
-        /*
-      let text = 'WISNUC未安装'
-      */
+    } else if (error) {
       let text
-      switch (status) {
+      switch (error) {
         case 'ENOALT' :
           text = 'WISNUC未安装'; break
         case 'EDATA':
@@ -109,7 +111,7 @@ export default class VolumeWisnucError extends React.Component {
           </div>
         </div>
       )
-    } else if (error) {
+    } else if (0) {
       return (
         <div style={{ display: 'flex' }}>
           <ReportProblemIcon color={this.props.creatingNewVolume === null ? pinkA200 : 'rgba(0,0,0,0.38)'} />

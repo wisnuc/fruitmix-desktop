@@ -350,15 +350,15 @@ class Device extends RequestManager {
     if (!boot.error && boot.state === 'started') {
       if (this.users.isRejected()) { return 'fruitmixError' }
       return 'ready'
+    } else if (!boot.error && boot.state === 'starting'){
+      this.requestAsync('boot', null)
     }
 
     /* maintenance mode */
     if (boot.mode === 'maintenance') {
       return 'userMaint'
-    } else if (boot.error === 'EFAIL') {
+    } else if (boot.error === 'ELASTNOTMOUNT' || boot.error === 'ELASTMISSING' || boot.error === 'ELASTDAMAGED') {
       return 'failLast'
-    } else if (boot.error === 'EMULTI') {
-      return 'failMulti'
     } else if (boot.error === 'ENOALT') {
       const { volumes } = this.storage.value()
       if (volumes.length === 0 && boot.last === null) { return 'uninitialized' }

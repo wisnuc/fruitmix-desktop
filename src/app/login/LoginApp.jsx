@@ -189,144 +189,143 @@ class LoginApp extends React.Component {
         break
     }
 
+    if (!wcl) return (<div />)
+
     if (wcl === 'fail') {
       return (
-        <div style={{ zIndex: 100 }} >
-          <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>
-            <div style={{ height: 8 }} />
-            <div style={{ marginLeft: 24, width: 332 }} >
+        <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA', zIndex: 100 }}>
+          {/* title */}
+          <div style={{ height: 72, backgroundColor: '#FAFAFA', display: 'flex', alignItems: 'center' }} >
+            <div style={{ marginLeft: 24 }} >
               { '登录失败' }
-              <div style={{ height: 8 }} />
-              <Divider />
+            </div>
+          </div>
+          <Divider />
+          <div style={{ height: 24 }} />
+
+          {/* content */}
+          <div style={{ height: 400, marginLeft: 24, width: 332 }}>
+            <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
+              请确定您是否拥有WISNUC品牌硬件产品或正在使用安装有WISNUC OS的硬件设备。
             </div>
             <div style={{ height: 24 }} />
-            <div style={{ height: 432, marginLeft: 24, width: 332 }}>
-              <div style={{ height: 24 }} />
-              <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
-                请确定您是否拥有WISNUC品牌硬件产品或正在使用安装有WISNUC OS的硬件设备。
-              </div>
-              <div style={{ height: 24 }} />
-              <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
-                1. 您可能尚未初始化设备
-              </div>
-              <div style={{ height: 24 }} />
-              <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
-                2. 您可能尚未绑定微信
-              </div>
-              <div style={{ height: 24 }} />
-              <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
-                3. 您可能尚未加入私有群
-              </div>
-              <div style={{ height: 160 }} />
-              <Divider />
+            <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
+              1. 您可能尚未初始化设备
             </div>
-            <div style={{ display: 'flex' }}>
-              <div style={{ flexGrow: 1 }} />
-              <FlatButton
-                label="返回"
-                labelStyle={{ color: '#424242', fontWeight: 500 }}
-                onTouchTap={this.resetWCL}
-              />
+            <div style={{ height: 24 }} />
+            <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
+              2. 您可能尚未绑定微信
             </div>
+            <div style={{ height: 24 }} />
+            <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
+              3. 您可能尚未加入私有群
+            </div>
+          </div>
+
+          {/* button */}
+          <div style={{ display: 'flex' }}>
+            <div style={{ flexGrow: 1 }} />
+            <FlatButton
+              label="返回"
+              labelStyle={{ color: '#424242', fontWeight: 500 }}
+              onTouchTap={this.resetWCL}
+            />
           </div>
         </div>
       )
     }
+
+
     return (
-      <div style={{ zIndex: 100 }} >
+      <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA', zIndex: 100 }}>
+        <div style={{ height: 72, backgroundColor: '#FAFAFA', display: 'flex', alignItems: 'center' }} >
+          <div style={{ marginLeft: 24 }} >
+            { wcl === 'lastDevice' ? '上次登录的设备' : wcl === 'list' ? '请选择登录设备' : '登录设备' }
+          </div>
+        </div>
+        <Divider />
         {
-          wcl &&
-            <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>
-              <div style={{ height: 72, backgroundColor: '#FAFAFA', display: 'flex', alignItems: 'center' }} >
-                <div style={{ marginLeft: 24 }} >
-                  { wcl === 'lastDevice' ? '上次登录的设备' : wcl === 'list' ? '请选择登录设备' : '登录设备' }
+          wcl === 'lastDevice'
+            ? <div>
+              <div style={{ height: 312, marginLeft: 24, width: 332, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ flexGrow: 1 }} />
+
+                {/* Icon */}
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <div style={{ borderRadius: 48, width: 96, height: 96, overflow: 'hidden' }}>
+                    <img
+                      width={96}
+                      height={96}
+                      alt=""
+                      src="../../Desktop/test.jpg"
+                      style={{ filter: 'grayscale(10%)' }}
+                    />
+                  </div>
                 </div>
+
+                {/* Name */}
+                <div style={{ height: 24 }} />
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  { 'Test' }
+                </div>
+                <div style={{ flexGrow: 1 }} />
+                <div style={{ display: 'flex' }}>
+                  <div style={{ height: 80, width: 80, display: 'flex', alignItems: 'center' }}>
+                    <Barcelona color="rgba(0,0,0,0.54)" style={{ width: 56, height: 56 }} />
+                  </div>
+                  <div>
+                    <div style={{ height: 8 }} />
+                    <div style={{ fontSize: 16, lineHeight: '24px', color: 'rgba(0,0,0,0.87)' }}> { '闻上盒子' } </div>
+                    <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}> { 'ws215i' } </div>
+                    <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}> { '10.10.9.103' } </div>
+                  </div>
+                </div>
+                <div style={{ height: 8 }} />
               </div>
               <Divider />
-              {
-                wcl === 'lastDevice'
-                  ? <div>
-                    <div style={{ height: 312, marginLeft: 24, width: 332, display: 'flex', flexDirection: 'column' }}>
-                      <div style={{ flexGrow: 1 }} />
-
-                      {/* Icon */}
-                      <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <div style={{ borderRadius: 48, width: 96, height: 96, overflow: 'hidden' }}>
-                          <img
-                            width={96}
-                            height={96}
-                            alt=""
-                            src="../../Desktop/test.jpg"
-                            style={{ filter: 'grayscale(10%)' }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Name */}
-                      <div style={{ height: 24 }} />
-                      <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        { 'Test' }
-                      </div>
-                      <div style={{ flexGrow: 1 }} />
-                      <div style={{ display: 'flex' }}>
-                        <div style={{ height: 80, width: 80, display: 'flex', alignItems: 'center' }}>
-                          <Barcelona color="rgba(0,0,0,0.54)" style={{ width: 56, height: 56 }} />
-                        </div>
-                        <div>
-                          <div style={{ height: 8 }} />
-                          <div style={{ fontSize: 16, lineHeight: '24px', color: 'rgba(0,0,0,0.87)' }}> { '闻上盒子' } </div>
-                          <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}> { 'ws215i' } </div>
-                          <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}> { '10.10.9.103' } </div>
-                        </div>
-                      </div>
-                      <div style={{ height: 8 }} />
-                    </div>
-                    <Divider />
-                    <div style={{ height: 32 }} />
-                    <div
-                      style={{
-                        height: 80,
-                        fontSize: 16,
-                        fontWeight: 500,
-                        color: 'rgba(0,0,0,0.87)',
-                        textAlign: 'center'
-                      }}
-                    >
-                      <span style={{ fontSize: 34 }}> { this.state.count } </span> 秒后将登录
-                    </div>
-                    <div style={{ display: 'flex' }}>
-                      <div style={{ flexGrow: 1 }} />
-                      <FlatButton
-                        label="可登录设备列表"
-                        labelPosition="before"
-                        labelStyle={{ color: '#424242', fontWeight: 500 }}
-                        onTouchTap={this.enterList}
-                        icon={<RightIcon color="#424242" />}
-                      />
-                    </div>
+              <div style={{ height: 32 }} />
+              <div
+                style={{
+                  height: 80,
+                  fontSize: 16,
+                  fontWeight: 500,
+                  color: 'rgba(0,0,0,0.87)',
+                  textAlign: 'center'
+                }}
+              >
+                <span style={{ fontSize: 34 }}> { this.state.count } </span> 秒后将登录
+              </div>
+              <div style={{ display: 'flex' }}>
+                <div style={{ flexGrow: 1 }} />
+                <FlatButton
+                  label="可登录设备列表"
+                  labelPosition="before"
+                  labelStyle={{ color: '#424242', fontWeight: 500 }}
+                  onTouchTap={this.enterList}
+                  icon={<RightIcon color="#424242" />}
+                />
+              </div>
+            </div>
+            :
+            <div>
+              <div style={{ height: 16 }} />
+              <div style={{ height: 270, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {
+                  wcl === 'list'
+                  ? <div style={{ width: '100%' }}>
+                    {
+                      this.state.lists.map(list => (<DeviceList list={list} primaryColor={this.props.primaryColor} key={list.name} />))
+                    }
                   </div>
-                  :
-                  <div>
-                    <div style={{ height: 16 }} />
-                    <div style={{ height: 270, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {
-                        wcl === 'list'
-                        ? <div style={{ width: '100%' }}>
-                          {
-                            this.state.lists.map(list => (<DeviceList list={list} primaryColor={this.props.primaryColor} key={list.name} />))
-                          }
-                        </div>
-                        : wcl === 'success'
-                        ? <Checkmark delay={300} color={this.props.primaryColor} />
-                        : <CircularProgress size={64} thickness={5} />
-                      }
-                    </div>
-                    <div style={{ height: 36 }} />
-                    <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.87)', fontSize: 20, height: 36 }}>
-                      { text }
-                    </div>
-                  </div>
-              }
+                  : wcl === 'success'
+                  ? <Checkmark delay={300} color={this.props.primaryColor} />
+                  : <CircularProgress size={64} thickness={5} />
+                }
+              </div>
+              <div style={{ height: 36 }} />
+              <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.87)', fontSize: 20, height: 36 }}>
+                { text }
+              </div>
             </div>
         }
       </div>

@@ -46,6 +46,7 @@ class ModelNameCard extends React.Component {
     const bcolor = this.props.toggle ? grey500 : this.props.backgroundColor || '#3f51B5'
     const paperStyle = {
       width: '100%',
+      height: 404,
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -83,7 +84,7 @@ class ModelNameCard extends React.Component {
                     transition: 'all 300ms'
                   },
 
-                  fill: this.props.toggle ? 'rgba(255,255,255,0.7)' : '#FFF',
+                  fill: this.props.toggle ? 'rgba(0,0,0,0.54)' : 'rgba(0,0,0,0.54)',
                   size: this.props.toggle ? 40 : 80
                 })
               }
@@ -93,14 +94,14 @@ class ModelNameCard extends React.Component {
                     style={{
                       fontSize: this.props.toggle ? 14 : 24,
                       fontWeight: 'medium',
-                      color: this.props.toggle ? 'rgba(255,255,255,0.7)' : '#FFF',
+                      color: this.props.toggle ? 'rgba(0,0,0,0.54)' : '#FFF',
                       marginBottom: this.props.toggle ? 0 : 12
                     }}
                   >{this.model()}</div>
                   <div
                     style={{
                       fontSize: 14,
-                      color: 'rgba(255,255,255,0.7)',
+                      color: 'rgba(0,0,0,0.54)',
                       marginBottom: 12,
                       display: 'flex',
                       alignItems: 'center',
@@ -111,13 +112,13 @@ class ModelNameCard extends React.Component {
                   }
                   >
                     {this.props.device.address}
-                    <ActionOpenInBrowser style={{ marginLeft: 8 }} color="rgba(255,255,255,0.7)" />
+                    <ActionOpenInBrowser style={{ marginLeft: 8 }} color="rgba(0,0,0,0.54)" />
                   </div>
                   { !this.props.toggle &&
                   <div
                     style={{
                       fontSize: 14,
-                      color: 'rgba(255,255,255,0.7)',
+                      color: 'rgba(0,0,0,0.54)',
                       marginBottom: 16
                     }}
                   >{this.serial()}</div> }
