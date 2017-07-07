@@ -16,11 +16,11 @@ class Update extends Base {
   }
 
   navGroup() {
-    return 'settings'
+    return 'update'
   }
 
   menuName() {
-    return '系统与固件升级'
+    return '客户端升级'
   }
 
   menuIcon() {

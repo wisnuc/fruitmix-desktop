@@ -159,7 +159,7 @@ class Physical extends Base {
   }
 
   navGroup() {
-    return 'file'
+    return 'physical'
   }
 
   menuName() {

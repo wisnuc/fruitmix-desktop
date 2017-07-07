@@ -1,15 +1,15 @@
 import Debug from 'debug'
 import React, { Component, PureComponent } from 'react'
 import ReactDOM from 'react-dom'
-import { FlatButton, CircularProgress, Divider } from 'material-ui'
+import { FlatButton, CircularProgress, Divider, IconButton } from 'material-ui'
 import { indigo900, cyan500, cyan900, teal900, lightGreen900, lime900, yellow900
 } from 'material-ui/styles/colors'
+import RefreshIcon from 'material-ui/svg-icons/navigation/refresh'
 
 import CrossNav from './CrossNav'
-import InfoCard from './InfoCard'
 import UserBox from './UserBox'
 import ErrorBox from './ErrorBox'
-import CardDisplay from './ModelNameCard'
+import DeviceInfo from './ModelNameCard'
 import InitWizard from './InitStep'
 
 import UsernamePassword from './UsernamePassword'
@@ -97,23 +97,21 @@ class Login extends StateUp(React.Component) {
     this.navPrevBound = this.navPrev.bind(this)
     this.navNextBound = this.navNext.bind(this)
 
-    this.toggleExpandedBound = this.toggleExpanded.bind(this)
+    this.toggleExpanded = () => {
+      this.toggleExpandedAsync().asCallback()
+    }
 
     this.initWizardOnCancelBound = this.initWizardOnCancel.bind(this)
     this.initWizardOnFailBound = this.initWizardOnFail.bind(this)
     this.initWizardOnOKBound = this.initWizardOnOK.bind(this)
 
+    /* refresh mdns*/
     this.refresh = () => {
-      global.mdns.scan()
-      setTimeout(() => {
-        const mdns = global.mdnsStore
-        if (mdns.length > 0) {
-          this.props.selectDevice(mdns[0])
-        }
-      }, 1000)
+      this.props.nav('login')
       debug('this.refresh...')
     }
 
+    /* toggle dialog of add FirstUser  */
     this.toggleFirstUser = () => {
       clearTimeout(this.timeEnterUserpass)
       if (this.state.enterUserpass) {
@@ -125,12 +123,14 @@ class Login extends StateUp(React.Component) {
       }
     }
 
+    /* add First User */
     this.addFirstUser = () => {
       debug('this.addFirstUser', this.state.userpass, this.props)
       const { username, password } = this.state.userpass
       this.props.selectedDevice.addFirstUser({ username, password })
     }
 
+    /* change style of device info card */
     this.toggleDisplay = (done) => {
       this.setState({ compact: !this.state.compact, dim: !this.state.dim })
       if (done) setTimeout(() => done(), duration)
@@ -147,7 +147,7 @@ class Login extends StateUp(React.Component) {
       await Promise.delay(duration)
       this.setState({ hexpand: true })
       await Promise.delay(duration)
-      this.setState({ expanded: true, pin: 'initWizard' })
+      this.setState({ expanded: true }) // pin: 'initWizard'
     } else {
       this.setState({ vexpand: false })
       await Promise.delay(duration)
@@ -156,10 +156,6 @@ class Login extends StateUp(React.Component) {
       this.setState({ expanded: false, compact: false, dim: false, pin: undefined })
       await Promise.delay(duration)
     }
-  }
-
-  toggleExpanded() {
-    this.toggleExpandedAsync().asCallback()
   }
 
   navPrev() {
@@ -251,7 +247,7 @@ class Login extends StateUp(React.Component) {
     this.done(view, device, user)
   }
 
-  footer() {
+  renderFooter() {
     const pullError = () => {
       const { boot, storage, users } = this.props.selectedDevice
       const obj = {
@@ -273,8 +269,6 @@ class Login extends StateUp(React.Component) {
       paddingLeft: 24,
       paddingRight: 24
     }
-
-    // //////////////////////////////////////////////////////////////////////////
 
     const status = this.props.selectedDevice.systemStatus()
     // debug('footer', status, this.props.selectedDevice)
@@ -298,7 +292,7 @@ class Login extends StateUp(React.Component) {
         return (
           <div style={boxStyle}>
             <div>该设备尚未初始化</div>
-            <FlatButton label="初始化" onTouchTap={this.toggleExpandedBound} />
+            <FlatButton label="初始化" onTouchTap={this.toggleExpanded} />
           </div>
         )
       }
@@ -327,6 +321,7 @@ class Login extends StateUp(React.Component) {
     let error
     let uninit
     let noUser
+
     switch (status) {
       case 'ready': // users.length === 0 need to add FirstUser Box TODO
         text = '系统错误：未发现用户'
@@ -376,12 +371,27 @@ class Login extends StateUp(React.Component) {
         </div>
       )
     } else if (maint) {
-      return (
-        <div style={boxStyle}>
-          <div>{text}</div>
-          <FlatButton label="维护模式" onTouchTap={() => this.done('maintenance')} />
-        </div>
-      )
+      const { hexpand, vexpand, expanded } = this.state
+
+      if (hexpand === vexpand && vexpand === expanded) {
+        if (expanded) {
+          return (
+            <div style={boxStyle}>
+              <div>{text}</div>
+              <FlatButton label="维护模式" onTouchTap={() => this.done('maintenance')} />
+            </div>
+          )
+        }
+
+        return (
+          <div style={boxStyle}>
+            <div>{text}</div>
+            <FlatButton label="维护模式" onTouchTap={this.toggleExpanded} />
+          </div>
+        )
+      }
+
+      return null
     } else if (noUser) {
       if (!this.state.compact) {
         return (
@@ -390,36 +400,36 @@ class Login extends StateUp(React.Component) {
             <FlatButton label="创建用户" onTouchTap={this.toggleFirstUser} />
           </div>
         )
-      } else {
-        return (
-          <div
-            style={{
-              padding: '0px 24px 0px 24px',
-              height: this.state.enterUserpass ? '' : 0,
-              boxSizing: 'border-box',
-              transition: `all ${duration}ms`,
-              overflow: 'hidden'
-            }}
-          >
-            <div style={{ height: 24 }} />
-            <div style={{ fontSize: 16, lineHeight: '24px', color: 'rgba(0,0,0,0.87)' }}>
+      }
+      return (
+        <div
+          style={{
+            padding: '0px 24px 0px 24px',
+            height: this.state.enterUserpass ? '' : 0,
+            boxSizing: 'border-box',
+            transition: `all ${duration}ms`,
+            overflow: 'hidden'
+          }}
+        >
+          <div style={{ height: 24 }} />
+          <div style={{ fontSize: 16, lineHeight: '24px', color: 'rgba(0,0,0,0.87)' }}>
               请输入第一个用户的用户名和密码
             </div>
-            <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}>
+          <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}>
               该用户会成为系统权限最高的管理员
             </div>
-            <div style={{ height: 16 }} />
-            <UsernamePassword {...this.bindVState('userpass')} />
-            <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -16 }}>
-              <FlatButton label="取消" onTouchTap={this.toggleFirstUser} primary />
-              <FlatButton label="确认" disabled={!this.state.userpass.isInputOK()} onTouchTap={this.addFirstUser} primary />
-            </div>
+          <div style={{ height: 16 }} />
+          <UsernamePassword {...this.bindVState('userpass')} />
+          <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -16 }}>
+            <FlatButton label="取消" onTouchTap={this.toggleFirstUser} primary />
+            <FlatButton label="确认" disabled={!this.state.userpass.isInputOK()} onTouchTap={this.addFirstUser} primary />
           </div>
-        )
-      }
+        </div>
+      )
     } else if (error) {
       return <ErrorBox style={boxStyle} text={text} error={error} />
     }
+
     return <div style={boxStyle} />
   }
 
@@ -452,9 +462,10 @@ class Login extends StateUp(React.Component) {
   render() {
     const { mdns, selectedDevice } = this.props
 
-    let cardProps,
-      displayProps,
-      cardInnerStyle
+    let cardProps
+    let displayProps
+    let cardInnerStyle
+
     if (selectedDevice === null) {
       cardProps = {
         key: 'info-card',
@@ -474,7 +485,7 @@ class Login extends StateUp(React.Component) {
       cardInnerStyle = {
         backgroundColor: '#FAFAFA',
         width: this.state.hexpand ? 1152 : '100%',
-        marginTop: this.state.hexpand ? -168 : '',
+        marginTop: this.state.hexpand ? -88 : '',
         transition: `all ${duration}ms`
       }
     }
@@ -482,26 +493,54 @@ class Login extends StateUp(React.Component) {
     return (
       <div style={{ zIndex: 100 }}>
         {
+          this.state.hexpand &&
+          <div style={{ position: 'absolute', width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.27)', top: 0, left: 0 }} />
+        }
+        {
           mdns.length > 0
-            ?  <div style={{ width: 380, height: 540, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            ? <div style={{ width: 380, height: 540, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <CrossNav duration={0.35} enter={this.state.enter}>
                 {
                   (this.state.bye || this.state.hello)
                   ? <DeviceCard />
                   : selectedDevice === null
-                  ? <InfoCard {...cardProps} />
-                  : <DeviceCard {...cardProps}>
-                    <div style={cardInnerStyle}>
-                      { !this.state.compact &&
+                  ? <DeviceCard {...cardProps}>
+                    <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>
                       <div style={{ height: 72, backgroundColor: '#FAFAFA', display: 'flex', alignItems: 'center' }} >
                         <div style={{ marginLeft: 24 }} >
                           { '局域网登录' }
                         </div>
                       </div>
-                      }
-                      <CardDisplay {...displayProps} />
                       <Divider />
-                      { this.footer() }
+
+                      {/* content */}
+                      <div style={{ height: 270, display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
+                        <CircularProgress size={64} thickness={5} />
+                      </div>
+                      <div style={{ height: 36 }} />
+                      <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.87)', fontSize: 20, height: 36 }}>
+                        { '搜索设备中...' }
+                      </div>
+                    </div>
+                  </DeviceCard>
+                  : <DeviceCard {...cardProps}>
+                    <div style={cardInnerStyle}>
+                      { !this.state.compact &&
+                      <div style={{ height: 72, backgroundColor: '#FAFAFA', display: 'flex', alignItems: 'center' }} >
+                        <div style={{ marginLeft: 24 }} onTouchTap={this.refresh} >
+                          { '局域网登录' }
+                        </div>
+                        <div style={{ flexGrow: 1 }} />
+                        <div style={{ width: 48 }}>
+                          <IconButton>
+                            <RefreshIcon />
+                          </IconButton>
+                        </div>
+                      </div>
+                      }
+                      <DeviceInfo {...displayProps} />
+                      <Divider />
+                      { this.renderFooter() }
                     </div>
                   </DeviceCard>
                 }
@@ -517,9 +556,9 @@ class Login extends StateUp(React.Component) {
 
               <div style={{ height: 8 }} />
               {/* content */}
-                <div style={{ marginLeft: 24 }} >
-                  { this.renderNoDevice() }
-                </div>
+              <div style={{ marginLeft: 24 }} >
+                { this.renderNoDevice() }
+              </div>
 
               {/* button */}
               <div style={{ height: 152 }} />

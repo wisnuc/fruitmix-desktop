@@ -36,7 +36,7 @@ import InstalledApps from '../view/InstalledApps'
 import AdminUsers from '../view/AdminUsers'
 import AdminDrives from '../view/AdminDrives'
 import Device from '../view/Device'
-import Storage from '../view/Storage'
+import FirmwareUpdate from '../view/FirmwareUpdate'
 import Networking from '../view/Networking'
 import TimeDate from '../view/TimeDate'
 import FanControl from '../view/FanControl'
@@ -78,11 +78,11 @@ class NavViews extends Component {
     this.install('adminUsers', AdminUsers)
     this.install('adminDrives', AdminDrives)
     this.install('device', Device)
-    // this.install('storage', Storage)
     this.install('networking', Networking)
     this.install('timeDate', TimeDate)
     this.install('fanControl', FanControl)
     this.install('systemUpdate', SystemUpdate)
+    this.install('firmwareUpdate', FirmwareUpdate)
     this.install('power', Power)
 
 
@@ -165,11 +165,18 @@ class NavViews extends Component {
     /* hide QuickNav if there is only one nav */
     if (navGroupList.length === 1) { return <div /> }
 
+    /* is ws215i ? */
     let ws215i = false
     const device = this.props.selectedDevice.device
     if (device && device.data && device.data.ws215i) {
       ws215i = true
     }
+
+    /* is admin ? */
+    let isAdmin = false
+    const account = this.views.account.ctx.props.apis.account.value()
+    if (account && account.isAdmin) isAdmin = true
+
     return (
       <div
         style={{
@@ -183,7 +190,8 @@ class NavViews extends Component {
       >
         {
           hasQuickNavs && navGroupList.map((key) => {
-            if (!ws215i && key === 'fanControl') return <div key={`quicknav-${key}`} />
+            if ((!ws215i || !isAdmin) && key === 'fanControl') return <div key={`quicknav-${key}`} />
+            if (!isAdmin && (key === 'firmwareUpdate' || key === 'power')) return <div key={`quicknav-${key}`} />
             return (
               <QuickNav
                 key={`quicknav-${key}`}

@@ -32,7 +32,7 @@ class Ethernet extends Base {
   }
 
   navGroup() {
-    return 'settings'
+    return 'device'
   }
 
   menuName() {

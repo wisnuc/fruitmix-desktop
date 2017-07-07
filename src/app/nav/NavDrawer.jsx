@@ -122,8 +122,11 @@ class NavDrawer extends React.Component {
 
     /*
     console.log('>>>>>>>>>>>>>>>>>>>')
+    console.log(this.props)
     console.log(this.props.views[nav])
     console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<')
+    backgroundImage: 'url(../src/assets/images/bg.png)',
+    backgroundSize: 'cover'
     */
 
     return (
@@ -134,78 +137,95 @@ class NavDrawer extends React.Component {
           style={{
             position: 'relative',
             width: '100%',
-            backgroundColor: primaryColor
+            backgroundColor: primaryColor,
           }}
         >
-          <div style={{ width: 'calc(100% - 8px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ width: 'calc(100% - 8px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} >
+            {/* set background of icon */}
             <IconButton
-              iconStyle={{ width: 48, height: 48, color: 'white' }}
-              style={{ width: 80, height: 80, padding: 16 }}
+              iconStyle={{ width: 72, height: 72, color: 'white' }}
+              style={{ width: 96, height: 96, padding: 12 }}
               onTouchTap={() => navTo('account')}
             >
               <ActionAccountCircle />
             </IconButton>
           </div>
-          <div style={{ height: 56, marginLeft: 16, marginTop: -8 }}>
-            <div style={{ fontSize: 16, fontWeight: 500, color: 'rgba(255, 255, 255, 1)' }}>{username}</div>
-            <div style={{ height: 4 }} />
-            <div style={{ fontSize: 16, fontWeight: 400, color: 'rgba(255, 255, 255, 0.7)' }}>{'设备名称：闻上盒子'}</div>
+          <div style={{ height: 40, marginLeft: 16, marginTop: -8 }}>
+            <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(255, 255, 255, 1)' }}>{username}</div>
           </div>
         </div>
 
         <Divider />
-
         <div style={{ height: 4 }} />
 
-        { this.renderGroup('file') }
+        <SubHeader>我的盒子</SubHeader>
 
-        <div style={{ height: 4 }} />
-        <Divider />
-        <div style={{ height: 4 }} />
+        <MenuItem
+          icon={views.home.menuIcon()}
+          text={views.home.menuName()}
+          dense
+          primaryColor={primaryColor}
+          selected={views[nav].navGroup() === 'file'}
+          onTouchTap={() => navTo('home')}
+        />
 
-        { this.renderGroup('media') }
+        <MenuItem
+          icon={views.media.menuIcon()}
+          text={views.media.menuName()}
+          dense
+          primaryColor={primaryColor}
+          selected={views[nav].navGroup() === 'media'}
+          onTouchTap={() => navTo('media')}
+        />
 
-        <div style={{ height: 4 }} />
-        <Divider />
-        <div style={{ height: 4 }} />
+        { this.renderGroup('physical') }
 
-        {/*
-        { this.renderGroup('other') }
+        { this.renderGroup('trash') }
 
+        <SubHeader>应用市场</SubHeader>
+
+        <MenuItem
+          icon={views.docker.menuIcon()}
+          text="Docker"
+          dense
+          primaryColor={primaryColor}
+          selected={views[nav].navGroup() === 'docker'}
+          onTouchTap={() => navTo('docker')}
+        />
+
+      {/*
         <div style={{ height: 4 }} />
         <Divider />
         <div style={{ height: 4 }} />
         */}
 
-        { isAdmin && <SubHeader>管理</SubHeader> }
-        {/* isAdmin && this.renderGroup('settings', ws215i) */}
+        <SubHeader>管理</SubHeader>
 
-        { 
-          isAdmin &&
-            <MenuItem
-              icon={DockerIcon}
-              text="应用市场"
-              dense
-              primaryColor={primaryColor}
-              selected={views[nav].navGroup() === 'docker'}
-              onTouchTap={() => navTo('docker')}
-            />
-        }
         {
-          isAdmin &&
-            <MenuItem
-              icon={ActionSettings}
-              text="设置"
-              dense
-              primaryColor={primaryColor}
-              selected={views[nav].navGroup() === 'settings'}
-              onTouchTap={() => navTo('adminUsers')}
-            />
+          isAdmin && <MenuItem
+            icon={ActionSettings}
+            text="系统设置"
+            dense
+            primaryColor={primaryColor}
+            selected={views[nav].navGroup() === 'settings'}
+            onTouchTap={() => navTo('adminUsers')}
+          />
         }
 
-        { isAdmin && <div style={{ height: 4 }} /> }
-        { isAdmin && <Divider /> }
-        { isAdmin && <div style={{ height: 4 }} /> }
+        <MenuItem
+          icon={views.device.menuIcon()}
+          text={views.device.menuName()}
+          dense
+          primaryColor={primaryColor}
+          selected={views[nav].navGroup() === 'device'}
+          onTouchTap={() => navTo('device')}
+        />
+
+        { this.renderGroup('update') }
+
+        <div style={{ height: 4 }} />
+        <Divider />
+        <div style={{ height: 4 }} />
 
         <MenuItem
           icon={ActionExitToApp}

@@ -1,12 +1,12 @@
 import React from 'react'
 import Debug from 'debug'
-import ActionPowerSettingsNew from 'material-ui/svg-icons/action/power-settings-new'
+import UpdateIcon from 'material-ui/svg-icons/action/system-update-alt'
 import Base from './Base'
-import PowerApp from '../control/PowerApp'
+import UpdateApp from '../control/UpdateApp'
 
-const debug = Debug('view:admin:power')
+const debug = Debug('view:component:update')
 
-class Power extends Base {
+class Update extends Base {
 
   constructor(ctx) {
     super(ctx)
@@ -15,26 +15,20 @@ class Power extends Base {
   willReceiveProps(nextProps) {
   }
 
-  navEnter() {
-  }
-
-  navLeave() {
-  }
-
   navGroup() {
     return 'device'
   }
 
   menuName() {
-    return '重启与关机'
+    return '固件升级'
   }
 
   menuIcon() {
-    return ActionPowerSettingsNew
+    return UpdateIcon
   }
 
   quickName() {
-    return '重启关机'
+    return '固件升级'
   }
 
   appBarStyle() {
@@ -44,7 +38,7 @@ class Power extends Base {
   /** renderers **/
   renderContent({ openSnackBar }) {
     return (
-      <PowerApp
+      <UpdateApp
         apis={this.ctx.props.apis}
         nav={this.ctx.props.nav}
         selectedDevice={this.ctx.props.selectedDevice}
@@ -55,4 +49,4 @@ class Power extends Base {
   }
 }
 
-export default Power
+export default Update
