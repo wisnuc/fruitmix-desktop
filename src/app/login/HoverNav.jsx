@@ -27,20 +27,16 @@ class HoverNav extends React.Component {
         {
           enabled &&
           <div
-            style={{
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: 0.5
-            }}
+            style={{ width: '100%', height: '100%' }}
             onTouchTap={this.props.onTouchTap}
             onMouseMove={() => this.setState({ hover: true })}
             onMouseLeave={() => this.setState({ hover: false })}
           >
-            { this.props.direction === 'left' && this.renderIcon(NavigationChevronLeft) }
-            { this.props.direction === 'right' && this.renderIcon(NavigationChevronRight) }
+            <div style={{ height: 76 }} />
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              { this.props.direction === 'left' && this.renderIcon(NavigationChevronLeft) }
+              { this.props.direction === 'right' && this.renderIcon(NavigationChevronRight) }
+            </div>
           </div>
         }
       </div>
