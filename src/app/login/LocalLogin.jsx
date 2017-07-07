@@ -527,12 +527,12 @@ class Login extends StateUp(React.Component) {
                     <div style={cardInnerStyle}>
                       { !this.state.compact &&
                       <div style={{ height: 72, backgroundColor: '#FAFAFA', display: 'flex', alignItems: 'center' }} >
-                        <div style={{ marginLeft: 24 }} onTouchTap={this.refresh} >
+                        <div style={{ marginLeft: 24 }}>
                           { '局域网登录' }
                         </div>
                         <div style={{ flexGrow: 1 }} />
-                        <div style={{ width: 48 }}>
-                          <IconButton>
+                        <div style={{ width: 56 }}>
+                          <IconButton onTouchTap={this.refresh} >
                             <RefreshIcon />
                           </IconButton>
                         </div>

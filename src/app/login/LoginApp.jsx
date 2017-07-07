@@ -14,6 +14,35 @@ import { Barcelona } from '../common/Svg'
 const debug = Debug('component:Login')
 const duration = 300
 
+/* 
+  http://res.wx.qq.com/connect/zh_CN/htmledition/js/wxLogin.js
+*/
+
+let wxiframe
+const wxlogin = function (a, b, c) {
+  function d(a) {
+    let c = 'default'
+    a.self_redirect === !0 ? c = 'true' : a.self_redirect === !1 && (c = 'false')
+    const d = b.createElement('iframe')
+    wxiframe = d
+    let e = `https://open.weixin.qq.com/connect/qrconnect?appid=${a.appid}&scope=${a.scope}&redirect_uri=${a.redirect_uri}&state=${a.state}&login_type=jssdk&self_redirect=${c}`;
+    e += a.style ? `&style=${a.style}` : ''
+    e += a.href ? `&href=${a.href}` : ''
+    d.src = e
+    d.frameBorder = '0'
+    d.allowTransparency = 'true'
+    d.scrolling = 'no'
+    d.width = '300px'
+    d.height = '400px'
+    const f = b.getElementById(a.id);
+    f.innerHTML = ''
+    f.appendChild(d)
+  }
+  a.WxLogin = d
+}
+
+wxlogin(window, document)
+
 @Radium
 class DeviceList extends React.PureComponent {
   render() {
@@ -58,7 +87,7 @@ class LoginApp extends React.Component {
     super(props)
 
     this.state = {
-      local: true,
+      local: false,
       dim: true,
       hello: true,
       error: '', // '', 'net', 'wisnuc'
@@ -154,10 +183,34 @@ class LoginApp extends React.Component {
     this.resetWCL = () => {
       this.setState({ wechatLogin: '' })
     }
+
+    this.login = () => {
+      this.setState({ login: true }, () => {
+        const wxArgs = new WxLogin({
+          id: 'login_container',
+          appid: 'wxd7e08af781bea6a2',
+          scope: 'snsapi_login',
+          redirect_uri: 'http%3A%2F%2Fwxlogin.siyouqun.com',
+          state: 'uuid',
+          style: '',
+          href: ''
+        })
+      })
+    }
   }
 
   componentDidMount() {
-    setTimeout(() => this.setState({ hello: false }), 300)
+    setTimeout(() => {
+      this.setState({ hello: false })
+      this.login()
+    }, 300)
+
+    /* catch CODE of wechat login */
+    window.onbeforeunload = () => {
+      return true
+      console.log(wxiframe.contentWindow.wx_code)
+      return false // This will stop the redirecting.
+    }
   }
 
   async doneAsync(view, device, user) {
@@ -339,8 +392,10 @@ class LoginApp extends React.Component {
           !this.state.error ?
             <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>
               <div style={{ height: 42 }} />
-              <div style={{ width: 270, height: 270, margin: 'auto', backgroundColor: 'grey' }} />
+              {/* <div style={{ width: 270, height: 270, margin: 'auto', backgroundColor: 'grey' }} /> */}
+              <div style={{ height: 406, width: 300, margin: 'auto' }} id="login_container" />
               <div style={{ height: 36 }} />
+              {/*
               <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.87)', fontSize: 20 }}>
                 请使用手机微信扫码登陆
               </div>
@@ -348,6 +403,7 @@ class LoginApp extends React.Component {
               <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.54)', fontSize: 16 }}>
                 客户端远程登陆需要配合手机使用
               </div>
+              */}
             </div>
             :
             <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>
