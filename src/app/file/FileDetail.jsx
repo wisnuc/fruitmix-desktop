@@ -198,9 +198,9 @@ class FileDetail extends React.PureComponent {
 
 
   render() {
-    const { detailFile, path } = this.props
+    const { detailFile, path, primaryColor } = this.props
     // debug('detailFile', detailFile, this.state)
-    if (!detailFile) return <div style={{ height: 128, backgroundColor: '#00796B' }} />
+    if (!detailFile) return <div style={{ height: 128, backgroundColor: primaryColor, filter: 'brightness(0.9)' }} />
 
     const { metadata, digest } = detailFile
     let exifDateTime = ''
@@ -241,7 +241,7 @@ class FileDetail extends React.PureComponent {
 
     return (
       <div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
-        <div style={{ height: 128, backgroundColor: '#00796B' }}>
+        <div style={{ height: 128, backgroundColor: primaryColor, filter: 'brightness(0.9)' }}>
           <div style={{ height: 64 }} />
           {/* header */}
           <div style={{ height: 64, marginLeft: 24 }} >

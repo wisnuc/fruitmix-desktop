@@ -34,9 +34,6 @@ const wxlogin = function (a, b, c) {
     d.scrolling = 'no'
     d.width = '300px'
     d.height = '400px'
-    const f = b.getElementById(a.id)
-    f.innerHTML = ''
-    f.appendChild(d)
   }
   a.WxLogin = d
 }
@@ -129,7 +126,7 @@ class LoginApp extends React.Component {
     this.toggleMode = () => {
       clearInterval(this.interval)
       if (this.state.local) {
-        this.login()
+        this.initWXLogin()
       }
       this.setState({ local: !this.state.local, wechatLogin: '', count: 3 })
     }
@@ -140,10 +137,16 @@ class LoginApp extends React.Component {
 
     this.autologin = () => {
       debug(this.props)
-      if (!this.props.selectedDevice) return
+      if (!this.props.selectedDevice) {
+        this.setState({ wechatLogin: 'fail' })
+        return
+      }
 
       const users = this.props.selectedDevice.users
-      if (users.isPending() || users.isRejected()) return
+      if (users.isPending() || users.isRejected()) {
+        this.setState({ wechatLogin: 'fail' })
+        return
+      }
 
       const uuid = '511eecb5-0362-41a2-ac79-624ac5e9c03f'
       const password = 'w'
@@ -161,7 +164,7 @@ class LoginApp extends React.Component {
       clearInterval(this.interval)
       let count = 3
       this.interval = setInterval(() => {
-        if (count > 0) {
+        if (count > 1) {
           count -= 1
           this.setState({ count: this.state.count -= 1 })
         } else {
@@ -186,10 +189,11 @@ class LoginApp extends React.Component {
     }
 
     this.resetWCL = () => {
+      this.initWXLogin()
       this.setState({ wechatLogin: '' })
     }
 
-    this.login = () => {
+    this.initWXLogin = () => {
       this.setState({ login: true }, () => {
         const wxArgs = new WxLogin({
           id: 'login_container',
@@ -201,19 +205,40 @@ class LoginApp extends React.Component {
           style: '',
           href: ''
         })
+        const f = document.getElementById('login_container')
+        const d = wxiframe
+        debug('login_container', f, d)
+        if (f) f.innerHTML = ''
+        try {
+          d.onload = (e) => {
+            debug('d.contentWindow', e, d.contentWindow)
+            d.contentWindow.onerror = (e) => { debug('wxiframe error', e) }
+          }
+          f.appendChild(d)
+          debug('success appendChild', d.contentWindow)
+        } catch (e) {
+          debug('error', e)
+          this.setState({ error: 'net' })
+        }
       })
     }
 
     this.getWXCode = (code) => {
-      debug('this.getWXCode', code)
-      setTimeout(this.QRScaned, 2000)
+      this.props.selectedDevice.request('wxLogin', { code, platform: 'PC' }, (err) => {
+        if (err) {
+          debug('this.getWXCode', code, err)
+          this.setState({ wechatLogin: 'fail' })
+        } else {
+          setTimeout(this.QRScaned, 2000)
+        }
+      })
     }
   }
 
   componentDidMount() {
     setTimeout(() => {
       this.setState({ hello: false })
-      this.login()
+      this.initWXLogin()
     }, 300)
 
     /* catch CODE of wechat login */

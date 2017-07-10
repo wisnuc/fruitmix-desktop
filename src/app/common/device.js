@@ -166,6 +166,13 @@ class Device extends RequestManager {
         .set('Accept', 'application/json')
         break
 
+      case 'wxLogin':
+        r = request
+        .get('http://10.10.9.59:5757/v1/test/oauth2')
+        .query({ code: args.code })
+        .query({ platform: args.platform })
+        break
+
       default:
         break
     }

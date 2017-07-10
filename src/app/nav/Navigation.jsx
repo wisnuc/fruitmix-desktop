@@ -124,7 +124,7 @@ class NavViews extends Component {
   }
 
   navTo(nav) {
-    this.setState({ nav, openDrawer: false })
+    this.setState({ nav, openDrawer: false, showDetail: false })
     if (nav === this.state.nav) return
     if (this.state.nav) this.views[this.state.nav].navLeave()
     this.props.setPalette(this.views[nav].primaryColor(), this.views[nav].accentColor())
