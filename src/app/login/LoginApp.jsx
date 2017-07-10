@@ -14,7 +14,7 @@ import { Barcelona } from '../common/Svg'
 const debug = Debug('component:Login')
 const duration = 300
 
-/* 
+/*
   http://res.wx.qq.com/connect/zh_CN/htmledition/js/wxLogin.js
 */
 
@@ -25,7 +25,7 @@ const wxlogin = function (a, b, c) {
     a.self_redirect === !0 ? c = 'true' : a.self_redirect === !1 && (c = 'false')
     const d = b.createElement('iframe')
     wxiframe = d
-    let e = `https://open.weixin.qq.com/connect/qrconnect?appid=${a.appid}&scope=${a.scope}&redirect_uri=${a.redirect_uri}&state=${a.state}&login_type=jssdk&self_redirect=${c}`;
+    let e = `https://open.weixin.qq.com/connect/qrconnect?appid=${a.appid}&scope=${a.scope}&redirect_uri=${a.redirect_uri}&state=${a.state}&login_type=jssdk&self_redirect=${c}`
     e += a.style ? `&style=${a.style}` : ''
     e += a.href ? `&href=${a.href}` : ''
     d.src = e
@@ -34,7 +34,7 @@ const wxlogin = function (a, b, c) {
     d.scrolling = 'no'
     d.width = '300px'
     d.height = '400px'
-    const f = b.getElementById(a.id);
+    const f = b.getElementById(a.id)
     f.innerHTML = ''
     f.appendChild(d)
   }
@@ -87,6 +87,7 @@ class LoginApp extends React.Component {
     super(props)
 
     this.state = {
+      wxCode: '',
       local: false,
       dim: true,
       hello: true,
@@ -127,6 +128,9 @@ class LoginApp extends React.Component {
 
     this.toggleMode = () => {
       clearInterval(this.interval)
+      if (this.state.local) {
+        this.login()
+      }
       this.setState({ local: !this.state.local, wechatLogin: '', count: 3 })
     }
 
@@ -177,6 +181,7 @@ class LoginApp extends React.Component {
     }
 
     this.enterList = () => {
+      clearInterval(this.interval)
       this.setState({ wechatLogin: 'list' })
     }
 
@@ -192,10 +197,16 @@ class LoginApp extends React.Component {
           scope: 'snsapi_login',
           redirect_uri: 'http%3A%2F%2Fwxlogin.siyouqun.com',
           state: 'uuid',
+          language: 'zh_CN',
           style: '',
           href: ''
         })
       })
+    }
+
+    this.getWXCode = (code) => {
+      debug('this.getWXCode', code)
+      setTimeout(this.QRScaned, 2000)
     }
   }
 
@@ -207,9 +218,13 @@ class LoginApp extends React.Component {
 
     /* catch CODE of wechat login */
     window.onbeforeunload = () => {
-      return true
-      console.log(wxiframe.contentWindow.wx_code)
-      return false // This will stop the redirecting.
+      if (wxiframe && wxiframe.contentWindow.wx_code) {
+        console.log(wxiframe.contentWindow.wx_code)
+        this.getWXCode(wxiframe.contentWindow.wx_code)
+        wxiframe.contentWindow.wx_code = null
+        return false // This will stop the redirecting.
+      }
+      return null
     }
   }
 
