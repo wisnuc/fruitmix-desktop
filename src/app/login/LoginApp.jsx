@@ -85,7 +85,7 @@ class LoginApp extends React.Component {
 
     this.state = {
       wxCode: '',
-      local: false,
+      local: true,
       dim: true,
       hello: true,
       error: '', // '', 'net', 'wisnuc'
