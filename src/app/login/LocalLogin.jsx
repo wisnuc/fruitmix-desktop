@@ -11,6 +11,7 @@ import UserBox from './UserBox'
 import ErrorBox from './ErrorBox'
 import DeviceInfo from './ModelNameCard'
 import InitWizard from './InitStep'
+import Maintenanc from './Maintenance'
 
 import UsernamePassword from './UsernamePassword'
 
@@ -99,6 +100,17 @@ class Login extends StateUp(React.Component) {
 
     this.toggleExpanded = () => {
       this.toggleExpandedAsync().asCallback()
+    }
+
+    this.enterMaint = () => {
+      clearTimeout(this.timeMaint)
+      if (this.state.maint) {
+        this.timeMaint = setTimeout(this.toggleDisplay, duration)
+        this.setState({ maint: false })
+      } else {
+        this.timeMaint = setTimeout(() => this.setState({ maint: true }), duration)
+        this.toggleDisplay()
+      }
     }
 
     this.initWizardOnCancelBound = this.initWizardOnCancel.bind(this)
@@ -373,12 +385,19 @@ class Login extends StateUp(React.Component) {
     } else if (maint) {
       const { hexpand, vexpand, expanded } = this.state
 
+      if (this.state.maint) {
+        return (<Maintenanc />)
+      }
+
       if (hexpand === vexpand && vexpand === expanded) {
         if (expanded) {
           return (
-            <div style={boxStyle}>
-              <div>{text}</div>
-              <FlatButton label="维护模式" onTouchTap={() => this.done('maintenance')} />
+            <div>
+              <Maintenanc />
+              <div style={boxStyle}>
+                <div>{text}</div>
+                <FlatButton label="维护模式" onTouchTap={() => this.done('maintenance')} />
+              </div>
             </div>
           )
         }
@@ -386,7 +405,7 @@ class Login extends StateUp(React.Component) {
         return (
           <div style={boxStyle}>
             <div>{text}</div>
-            <FlatButton label="维护模式" onTouchTap={this.toggleExpanded} />
+            <FlatButton label="维护模式" onTouchTap={this.enterMaint} />
           </div>
         )
       }

@@ -169,7 +169,7 @@ class LoginApp extends React.Component {
           this.setState({ count: this.state.count -= 1 })
         } else {
           clearInterval(this.interval)
-          this.autologin()
+          // this.autologin()
         }
       }, 1000)
     }
@@ -207,15 +207,13 @@ class LoginApp extends React.Component {
         })
         const f = document.getElementById('login_container')
         const d = wxiframe
-        debug('login_container', f, d)
         if (f) f.innerHTML = ''
         try {
           d.onload = (e) => {
-            debug('d.contentWindow', e, d.contentWindow)
+            // debug('d.contentWindow', e, d.contentWindow)
             d.contentWindow.onerror = (e) => { debug('wxiframe error', e) }
           }
           f.appendChild(d)
-          debug('success appendChild', d.contentWindow)
         } catch (e) {
           debug('error', e)
           this.setState({ error: 'net' })
@@ -224,12 +222,29 @@ class LoginApp extends React.Component {
     }
 
     this.getWXCode = (code) => {
-      this.props.selectedDevice.request('wxLogin', { code, platform: 'PC' }, (err) => {
+      /* init wx_code */
+      wxiframe.contentWindow.wx_code = null
+
+      /* clear countDown time */
+      clearInterval(this.interval)
+
+      this.setState({ wechatLogin: 'connecting', count: 3 })
+      this.props.selectedDevice.request('wxLogin', { code, platform: 'web' }, (err) => {
         if (err) {
           debug('this.getWXCode', code, err)
           this.setState({ wechatLogin: 'fail' })
         } else {
-          setTimeout(this.QRScaned, 2000)
+          debug('this.getWXCode after wxLogin', this.props.selectedDevice, this.props.selectedDevice.wxLogin)
+          const wxLogin = this.props.selectedDevice.wxLogin
+          if (wxLogin.data) {
+            setTimeout(() => this.setState({ wxData: wxLogin.data.data, wechatLogin: 'authorization' }), 500)
+            setTimeout(() => this.setState({ wechatLogin: 'getingList' }), 1000)
+            setTimeout(() => this.setState({ wechatLogin: 'success' }), 1500)
+            setTimeout(() => this.setState({ wechatLogin: 'lastDevice' }, this.countDown), 2000)
+          } else {
+            debug('no wechat Data')
+            this.setState({ wechatLogin: 'fail' })
+          }
         }
       })
     }
@@ -238,6 +253,7 @@ class LoginApp extends React.Component {
   componentDidMount() {
     setTimeout(() => {
       this.setState({ hello: false })
+      if (this.state.local) return
       this.initWXLogin()
     }, 300)
 
@@ -246,7 +262,6 @@ class LoginApp extends React.Component {
       if (wxiframe && wxiframe.contentWindow.wx_code) {
         console.log(wxiframe.contentWindow.wx_code)
         this.getWXCode(wxiframe.contentWindow.wx_code)
-        wxiframe.contentWindow.wx_code = null
         return false // This will stop the redirecting.
       }
       return null
@@ -328,7 +343,6 @@ class LoginApp extends React.Component {
       )
     }
 
-
     return (
       <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA', zIndex: 100 }}>
         <div style={{ height: 72, backgroundColor: '#FAFAFA', display: 'flex', alignItems: 'center' }} >
@@ -338,7 +352,7 @@ class LoginApp extends React.Component {
         </div>
         <Divider />
         {
-          wcl === 'lastDevice'
+          wcl === 'lastDevice' && this.state.wxData
             ? <div>
               <div style={{ height: 312, marginLeft: 24, width: 332, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flexGrow: 1 }} />
@@ -350,8 +364,7 @@ class LoginApp extends React.Component {
                       width={96}
                       height={96}
                       alt=""
-                      src="../../Desktop/test.jpg"
-                      style={{ filter: 'grayscale(10%)' }}
+                      src={this.state.wxData.wechat.avatarUrl || '../../Desktop/test.jpg'}
                     />
                   </div>
                 </div>
@@ -359,7 +372,7 @@ class LoginApp extends React.Component {
                 {/* Name */}
                 <div style={{ height: 24 }} />
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
-                  { 'Test' }
+                  { this.state.wxData.wechat.nickName || 'Just_Test'}
                 </div>
                 <div style={{ flexGrow: 1 }} />
                 <div style={{ display: 'flex' }}>
