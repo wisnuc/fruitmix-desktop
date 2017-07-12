@@ -10,8 +10,8 @@ import CrossNav from './CrossNav'
 import UserBox from './UserBox'
 import ErrorBox from './ErrorBox'
 import DeviceInfo from './ModelNameCard'
-import InitWizard from './InitStep'
-import Maintenance from './Maintenance'
+import InitWizard from './InitWizard'
+import MaintGuide from './MaintGuide'
 
 import UsernamePassword from './UsernamePassword'
 
@@ -98,8 +98,8 @@ class Login extends StateUp(React.Component) {
     this.navPrevBound = this.navPrev.bind(this)
     this.navNextBound = this.navNext.bind(this)
 
-    this.toggleExpanded = () => {
-      this.toggleExpandedAsync().asCallback()
+    this.toggleExpanded = (pure) => {
+      this.toggleExpandedAsync(pure).asCallback()
     }
 
     this.toggleMaint = () => {
@@ -151,12 +151,17 @@ class Login extends StateUp(React.Component) {
   }
 
 
-  async toggleExpandedAsync() {
+  async toggleExpandedAsync(pure) {
     const { vexpand, hexpand, expanded } = this.state
     if (vexpand !== hexpand || hexpand !== expanded) return
 
+    /* if pure === true, just change expand */
     if (!expanded) {
-      this.setState({ vexpand: true, compact: true, dim: true })
+      if (pure) {
+        this.setState({ vexpand: true })
+      } else {
+        this.setState({ vexpand: true, compact: true, dim: true })
+      }
       await Promise.delay(duration)
       this.setState({ hexpand: true })
       await Promise.delay(duration)
@@ -166,7 +171,11 @@ class Login extends StateUp(React.Component) {
       await Promise.delay(duration)
       this.setState({ hexpand: false })
       await Promise.delay(duration)
-      this.setState({ expanded: false, compact: false, dim: false, pin: undefined })
+      if (pure) {
+        this.setState({ expanded: false })
+      } else {
+        this.setState({ expanded: false, compact: false, dim: false, pin: undefined })
+      }
       await Promise.delay(duration)
     }
   }
@@ -235,6 +244,15 @@ class Login extends StateUp(React.Component) {
     this.toggleExpandedAsync().asCallback()
   }
 
+  initWizardOnOK() {
+    const view = 'LOGIN'
+    debug('this.props.selectedDevice', this.props.selectedDevice)
+    const device = this.props.selectedDevice
+    const user = device.users.value()[0]
+    this.done(view, device, user)
+  }
+
+
   async doneAsync(view, device, user) {
     this.setState({ bye: true, dim: false, enter: 'bottom' })
     await Promise.delay(360)
@@ -250,14 +268,6 @@ class Login extends StateUp(React.Component) {
 
   done(view, device, user) {
     this.doneAsync(view, device, user).asCallback()
-  }
-
-  initWizardOnOK() {
-    const view = 'LOGIN'
-    debug('this.props.selectedDevice', this.props.selectedDevice)
-    const device = this.props.selectedDevice
-    const user = device.users.value()[0]
-    this.done(view, device, user)
   }
 
   renderFooter() {
@@ -389,8 +399,9 @@ class Login extends StateUp(React.Component) {
       if (this.state.maint) {
         debug('LocalLogin props', this.props)
         return (
-          <Maintenance
+          <MaintGuide
             toggleMaint={this.toggleMaint}
+            toggleExpanded={this.toggleExpanded}
             device={this.props.selectedDevice}
             enterMaint={() => this.done('maintenance')}
           />
@@ -398,10 +409,11 @@ class Login extends StateUp(React.Component) {
       }
 
       if (hexpand === vexpand && vexpand === expanded) {
+        /*
         if (expanded) {
           return (
             <div>
-              <Maintenance
+              <MaintGuide
                 toggleMaint={this.toggleMaint}
               />
               <div style={boxStyle}>
@@ -411,6 +423,7 @@ class Login extends StateUp(React.Component) {
             </div>
           )
         }
+        */
 
         return (
           <div style={boxStyle}>
