@@ -86,7 +86,16 @@ class MaintGuide extends React.Component {
 
     this.recoverData = () => {}
 
-    this.foreBoot = () => {}
+    this.forceBoot = () => {
+      const current = this.props.device.storage.data.volumes[this.state.index].uuid
+      this.props.device.request('forceBoot', { current }, (error) => {
+        if (error) {
+          debug('forceBoot error', error)
+        } else {
+          debug('forceBoot success !')
+        }
+      })
+    }
   }
 
   componentDidMount() {
@@ -176,7 +185,7 @@ class MaintGuide extends React.Component {
       this.reinstall,
       this.exportData,
       this.recoverData,
-      this.foreBoot
+      this.forceBoot
     ]
 
     const action = (label, func) => (

@@ -138,6 +138,14 @@ class Device extends RequestManager {
         .set('Accept', 'application/json')
         break
 
+      case 'forceBoot':
+        r = request
+        .patch(`http://${this.mdev.address}:3000/boot`)
+        .timeout(30000)
+        .send(args)
+        .set('Accept', 'application/json')
+        break
+
       case 'firstUser':
         r = request
         .post(`http://${this.mdev.address}:3000/users`)
