@@ -66,14 +66,14 @@ class Fruitmix extends EventEmitter {
 
   aget(ep) {
     return request
-      .get(`http://${this.address}:3721/${ep}`)
+      .get(`http://${this.address}:3000/${ep}`)
       .set('Authorization', 'JWT ' + this.token)
   }
 
   apost(ep, data) {
 
     let r = request
-      .post(`http://${this.address}:3721/${ep}`)
+      .post(`http://${this.address}:3000/${ep}`)
       .set('Authorization', 'JWT ' + this.token)
 
     return typeof data === 'object'
@@ -84,7 +84,7 @@ class Fruitmix extends EventEmitter {
   apatch(ep, data) {
 
     let r = request
-      .patch(`http://${this.address}:3721/${ep}`)
+      .patch(`http://${this.address}:3000/${ep}`)
       .set('Authorization', 'JWT ' + this.token)
 
     return typeof data === 'object'
@@ -94,7 +94,7 @@ class Fruitmix extends EventEmitter {
 
   adel(ep) {
     return request
-      .del(`http://${this.address}:3721/${ep}`)
+      .del(`http://${this.address}:3000/${ep}`)
       .set('Authorization', 'JWT ' + this.token)
   }
 
@@ -104,11 +104,11 @@ class Fruitmix extends EventEmitter {
 
     switch(name) {
     case 'login':
-      r = request.get(`http://${this.address}:3721/login`)
+      r = request.get(`http://${this.address}:3000/users`)
       break
 
     case 'getToken':
-      r = request.get(`http://${this.address}:3721/token`)
+      r = request.get(`http://${this.address}:3000/token`)
           .auth(args.uuid, args.password)
           .set('Accept', 'application/json')
       break
@@ -142,7 +142,7 @@ class Fruitmix extends EventEmitter {
       break
 
     case 'adminDrives':
-      r = this.aget('admin/drives')
+      r = this.aget('drives')
       break
 
     case 'driveListNavDir':
