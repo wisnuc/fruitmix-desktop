@@ -92,6 +92,7 @@ class MaintGuide extends React.Component {
         if (error) {
           debug('forceBoot error', error)
         } else {
+          this.props.refresh()
           debug('forceBoot success !')
         }
       })

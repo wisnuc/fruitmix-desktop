@@ -77,9 +77,8 @@ class Login extends StateUp(React.Component) {
     this.state = {
 
       enterUserpass: false,
-
+      maint: false,
       hello: true,
-
       enter: 'bottom',
       expanded: false,
       vexpand: false,
@@ -120,6 +119,16 @@ class Login extends StateUp(React.Component) {
 
     /* refresh mdns*/
     this.refresh = () => {
+      this.setState({
+        enterUserpass: false,
+        expanded: false,
+        vexpand: false,
+        hexpand: false,
+        compact: false,
+        dim: false,
+        maint: false
+      })
+
       this.props.nav('login')
       debug('this.refresh...')
     }
@@ -403,6 +412,7 @@ class Login extends StateUp(React.Component) {
             toggleMaint={this.toggleMaint}
             toggleExpanded={this.toggleExpanded}
             device={this.props.selectedDevice}
+            refresh={this.refresh}
             enterMaint={() => this.done('maintenance')}
           />
         )
