@@ -11,7 +11,7 @@ import UserBox from './UserBox'
 import ErrorBox from './ErrorBox'
 import DeviceInfo from './ModelNameCard'
 import InitWizard from './InitStep'
-import Maintenanc from './Maintenance'
+import Maintenance from './Maintenance'
 
 import UsernamePassword from './UsernamePassword'
 
@@ -102,7 +102,8 @@ class Login extends StateUp(React.Component) {
       this.toggleExpandedAsync().asCallback()
     }
 
-    this.enterMaint = () => {
+    this.toggleMaint = () => {
+      debug('this.toggleMaint！')
       clearTimeout(this.timeMaint)
       if (this.state.maint) {
         this.timeMaint = setTimeout(this.toggleDisplay, duration)
@@ -386,14 +387,23 @@ class Login extends StateUp(React.Component) {
       const { hexpand, vexpand, expanded } = this.state
 
       if (this.state.maint) {
-        return (<Maintenanc />)
+        debug('LocalLogin props', this.props)
+        return (
+          <Maintenance
+            toggleMaint={this.toggleMaint}
+            device={this.props.selectedDevice}
+            enterMaint={() => this.done('maintenance')}
+          />
+        )
       }
 
       if (hexpand === vexpand && vexpand === expanded) {
         if (expanded) {
           return (
             <div>
-              <Maintenanc />
+              <Maintenance
+                toggleMaint={this.toggleMaint}
+              />
               <div style={boxStyle}>
                 <div>{text}</div>
                 <FlatButton label="维护模式" onTouchTap={() => this.done('maintenance')} />
@@ -405,7 +415,7 @@ class Login extends StateUp(React.Component) {
         return (
           <div style={boxStyle}>
             <div>{text}</div>
-            <FlatButton label="维护模式" onTouchTap={this.enterMaint} />
+            <FlatButton label="维护模式" onTouchTap={this.toggleMaint} />
           </div>
         )
       }

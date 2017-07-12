@@ -32,6 +32,7 @@ class Fruitmix extends React.Component {
 
       theme: getMuiTheme({
         fontFamily: 'Roboto, Noto Sans SC, sans-serif',
+        color: 'rgba(0,0,0,0.87)',
         palette: { primary1Color: teal500, accent1Color: pinkA200 }
       }),
 
