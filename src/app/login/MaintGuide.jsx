@@ -214,30 +214,29 @@ class MaintGuide extends React.Component {
     const blocks = this.props.device.storage.data.blocks
     const volume = this.props.device.storage.data.volumes[this.state.index]
     return (
-      <div style={{ minHeight: 512, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ flexGrow: 1 }} />
-
-        <InitWizard
-          device={device}
-          showContent
-          onCancel={this.backToVolumeCard}
-          onFail={this.backToVolumeCard}
-          onOK={this.done}
-        />
-
-        {/* button */}
-        {/*
-        <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-          <FlatButton
-            label="返回"
-            onTouchTap={this.backToVolumeCard}
-            primary
-          />
-        </div>
-        */}
-      </div>
+      <InitWizard
+        device={device}
+        showContent
+        onCancel={this.backToVolumeCard}
+        onFail={this.backToVolumeCard}
+        onOK={this.done}
+        title="重新安装向导"
+      />
     )
   }
+
+    /*
+        <div style={{ minHeight: 512, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ flexGrow: 1 }} />
+          <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+            <FlatButton
+              label="返回"
+              onTouchTap={this.backToVolumeCard}
+              primary
+            />
+          </div>
+        </div>
+    */
 
   render() {
     debug('render!', this.props, this.state)
@@ -261,17 +260,20 @@ class MaintGuide extends React.Component {
         }}
       >
         {/* head */}
-        <div style={{ height: 72, display: 'flex', alignItems: 'center', fontWeight: 500, marginLeft: 24 }}>
-          <RaidIcon style={{ height: 48, width: 48 }} color={primaryColor} />
-          <div style={{ marginLeft: 16, marginTop: -2 }}>
-            <div>
-              {`磁盘阵列 ${this.state.index + 1}`}
+        {
+          !this.state.detail &&
+            <div style={{ height: 72, display: 'flex', alignItems: 'center', fontWeight: 500, marginLeft: 24 }}>
+              <RaidIcon style={{ height: 48, width: 48 }} color={primaryColor} />
+              <div style={{ marginLeft: 16, marginTop: -2 }}>
+                <div>
+                  {`磁盘阵列 ${this.state.index + 1}`}
+                </div>
+                <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.54)' }}>
+                  {`Brtfs | ${volume.usage.data.mode}`}
+                </div>
+              </div>
             </div>
-            <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.54)' }}>
-              {`Brtfs | ${volume.usage.data.mode}`}
-            </div>
-          </div>
-        </div>
+        }
 
         {/* content */}
         {

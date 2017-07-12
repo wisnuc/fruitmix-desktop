@@ -205,8 +205,8 @@ class InitWizard extends StateUp(React.Component) {
   }
 
   renderBottomButton() {
-    let label,
-      action
+    let label
+    let action
 
     if (this.state.finished && this.finishedInfo()[0] === 'error') {
       label = '退出'
@@ -237,7 +237,7 @@ class InitWizard extends StateUp(React.Component) {
     const storage = this.props.device.storage.isFulfilled() ? this.props.device.storage.value() : null
 
     return (
-      <div style={{ width: '100%', height: 640, backgroundColor: '#FAFAFA', position: 'relative', overflowY: 'auto' }}>
+      <div style={{ width: '100%', minHeight: 640, backgroundColor: '#FAFAFA', position: 'relative', overflowY: 'auto' }}>
         <div style={{ margin: '34px 64px 12px 64px', fontSize: 34, color: 'rgba(0,0,0,0.54)' }}>{ title }</div>
         <div style={{ marginLeft: 64, marginRight: 64 }}>
           <Stepper activeStep={stepIndex} orientation="vertical">
