@@ -105,14 +105,25 @@ class NavDrawer extends React.Component {
   render() {
     const { open, onRequestChange, views, nav, navTo } = this.props
     const dense = true
-    const account = views.account.ctx.props.apis.account.value()
+
+    const account = views.account.ctx.props.apis.account
+    let value = null
+    if (!account.isPending() && !account.isRejected() && account.vaule()) {
+      value = account.vaule()
+    }
+
     let serial = views.account.ctx.props.selectedDevice.mdev.serial
     if (serial.length > 11) serial = serial.substring(serial.length - 11)
-    let username
-    if (account) username = account.username
-    const primaryColor = views[nav].primaryColor()
+
+    let username = ''
     let isAdmin = false
-    if (account && account.isAdmin) isAdmin = true
+    if (value) {
+      username = account.username
+      isAdmin = value.isAdmin
+    }
+
+    const primaryColor = views[nav].primaryColor()
+
 
     let ws215i = false
     const device = views.account.ctx.props.selectedDevice.device
@@ -133,13 +144,7 @@ class NavDrawer extends React.Component {
 
       <Drawer docked={false} width={240} open={open} onRequestChange={onRequestChange}>
 
-        <div
-          style={{
-            position: 'relative',
-            width: '100%',
-            backgroundColor: primaryColor,
-          }}
-        >
+        <div style={{ position: 'relative', width: '100%', backgroundColor: primaryColor }} >
           <div style={{ width: 'calc(100% - 8px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} >
             {/* set background of icon */}
             <IconButton
@@ -193,7 +198,7 @@ class NavDrawer extends React.Component {
           onTouchTap={() => navTo('docker')}
         />
 
-      {/*
+        {/*
         <div style={{ height: 4 }} />
         <Divider />
         <div style={{ height: 4 }} />

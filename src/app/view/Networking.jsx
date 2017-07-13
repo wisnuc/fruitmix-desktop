@@ -10,7 +10,7 @@ class Ethernet extends Base {
   }
 
   willReceiveProps(nextProps) {
-    // console.log('Ethernet nextProps', nextProps)
+    console.log('Ethernet nextProps', nextProps)
     if (!nextProps.selectedDevice || !nextProps.selectedDevice.net) return
 
     const net = nextProps.selectedDevice.net

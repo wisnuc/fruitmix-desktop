@@ -101,7 +101,6 @@ class UserBox extends React.Component {
             paddingRight: 8,
             backgroundColor: this.state.selectedIndex > -1 ? '#FFFFFF' : '#FAFAFA'
           }}
-          rounded={false}
         >
           <div style={{ ...styles.flexWrap, padding: 8 }}>
             { users.map((user, index) =>

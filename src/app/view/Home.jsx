@@ -52,8 +52,8 @@ class Home extends Base {
       this.setState({ createNewFolder: null })
       if (dirty) {
         this.ctx.props.apis.request('listNavDir', {
-          dirUUID: this.state.path[this.state.path.length - 1].uuid,
-          rootUUID: this.state.path[0].uuid
+          driveUUID: this.state.path[0].uuid,
+          dirUUID: this.state.path[this.state.path.length - 1].uuid
         })
       }
     }
@@ -77,7 +77,7 @@ class Home extends Base {
           finishCount += 1
           if (finishCount === count) {
             if (this.state.path[this.state.path.length - 1].uuid === dirUUID) {
-              this.ctx.props.apis.request('listNavDir', { rootUUID: this.state.path[0].uuid, dirUUID }, (err, data) => {
+              this.ctx.props.apis.request('listNavDir', { driveUUID: this.state.path[0].uuid, dirUUID }, (err, data) => {
                 if (!err) {
                   this.ctx.openSnackBar('删除成功')
                 } else {
@@ -135,7 +135,7 @@ class Home extends Base {
     if (!this.ctx.props.apis || !this.ctx.props.apis.account) return
     if (!this.ctx.props.apis.account.data) return
     const account = this.ctx.props.apis.account.data
-    if (account) this.ctx.props.apis.request('listNavDir', { dirUUID: account.home, rootUUID: account.home })
+    if (account) this.ctx.props.apis.request('listNavDir', { driveUUID: account.home, dirUUID: account.home })
   }
 
   navLeave() {
@@ -186,8 +186,8 @@ class Home extends Base {
     if (entry.type !== 'folder') return
 
     this.ctx.props.apis.request('listNavDir', {
-      dirUUID: entry.uuid,
-      rootUUID: this.state.path[0].uuid
+      driveUUID: this.state.path[0].uuid,
+      dirUUID: entry.uuid
     })
   }
 
@@ -221,8 +221,8 @@ class Home extends Base {
     this.setState({ createNewFolder: false })
     if (dirty) {
       this.ctx.props.apis.request('listNavDir', {
-        dirUUID: this.state.path[this.state.path.length - 1].uuid,
-        rootUUID: this.state.path[0].uuid
+        driveUUID: this.state.path[0].uuid,
+        dirUUID: this.state.path[this.state.path.length - 1].uuid
       })
     }
   }
@@ -278,7 +278,7 @@ class Home extends Base {
   refresh() {
     const rUUID = this.state.path[0].uuid
     const dUUID = this.state.path[this.state.path.length - 1].uuid
-    this.ctx.props.apis.request('listNavDir', { rootUUID: rUUID, dirUUID: dUUID })
+    this.ctx.props.apis.request('listNavDir', { driveUUID: rUUID, dirUUID: dUUID })
   }
 
   /* renderers */
@@ -311,8 +311,8 @@ class Home extends Base {
                 <BreadCrumbItem
                   text="我的文件" key={node.uuid}
                   onTouchTap={() => this.ctx.props.apis.request('listNavDir', {
-                    dirUUID: path[0].uuid,
-                    rootUUID: path[0].uuid
+                    driveUUID: path[0].uuid,
+                    dirUUID: path[0].uuid
                   })}
                 />
               )
@@ -320,8 +320,8 @@ class Home extends Base {
               acc.push(<BreadCrumbItem
                 text={node.name} key={node.uuid}
                 onTouchTap={() => this.ctx.props.apis.request('listNavDir', {
-                  dirUUID: node.uuid,
-                  rootUUID: path[0].uuid
+                  driveUUID: path[0].uuid,
+                  dirUUID: node.uuid
                 })}
               />)
             }
