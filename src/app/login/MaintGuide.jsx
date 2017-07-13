@@ -112,12 +112,16 @@ class MaintGuide extends React.Component {
       '用户信息是否完整'
     ]
 
+    let allCheck = true
     const check = this.getStatus(volume, this.props.device.boot.data)
+    check.forEach((item) => { if (!item) allCheck = false })
 
     return (
       <div style={{ marginLeft: 24 }}>
         <div style={{ fontSize: 20, fontWeight: 500, height: 56, display: 'flex', alignItems: 'center' }}>
           { '自动检测' }
+          <div style={{ flexGrow: 1 }} />
+          { allCheck && <FlatButton label={'启动'} onTouchTap={this.forceBoot} style={{ marginRight: 24 }} primary /> }
         </div>
         {
           test.map((text, index) => (
@@ -134,12 +138,6 @@ class MaintGuide extends React.Component {
   }
 
   renderButton() {
-    const volume = this.props.device.storage.data.volumes[this.state.index]
-
-    let allCheck = false
-    const check = this.getStatus(volume, this.props.device.boot.data)
-    check.forEach((item) => { if (!item) allCheck = false })
-
     return (
       <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
         <FlatButton
@@ -150,7 +148,7 @@ class MaintGuide extends React.Component {
         {
           !this.state.action &&
           <FlatButton
-            label={allCheck ? '查看' : '修复'}
+            label="进入维护模式"
             onTouchTap={this.toggleAction}
             primary
           />
