@@ -125,6 +125,7 @@ class Home extends Base {
   }
 
   willReceiveProps(nextProps) {
+    console.log('home', nextProps)
     if (!nextProps.apis || !nextProps.apis.listNavDir) return
     const listNavDir = nextProps.apis.listNavDir
     if (listNavDir.isPending() || listNavDir.isRejected()) return

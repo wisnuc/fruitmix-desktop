@@ -95,9 +95,6 @@ class Fruitmix extends EventEmitter {
     let r
 
     switch (name) {
-      case 'login':
-        r = request.get(`http://${this.address}:3000/users`)
-        break
 
       case 'getToken':
         r = request
@@ -240,7 +237,7 @@ class Fruitmix extends EventEmitter {
   start() {
     this.requestAsync('account', { uuid: this.userUUID }).asCallback((err, account) => {
       if (account) {
-        this.request('listNavDir', { dirUUID: account.home, rootUUID: account.home })
+        this.request('listNavDir', { drivesUUID: account.home, dirUUID: account.home })
         if (account.isAdmin) {
           this.request('adminUsers')
           this.request('adminDrives')
@@ -249,7 +246,13 @@ class Fruitmix extends EventEmitter {
     })
 
     this.request('users')
-    this.request('drives')
+    // this.request('drives')
+    this.requestAsync('drives').asCallback((err, drives) => {
+      if (drives) {
+        const drive = drives[0]
+        this.request('listNavDir', { driveUUID: drive.uuid, dirUUID: drive.uuid })
+      }
+    })
     this.request('fileShare')
     this.request('mediaShare')
     this.request('media')
@@ -257,4 +260,3 @@ class Fruitmix extends EventEmitter {
 }
 
 export default Fruitmix
-
