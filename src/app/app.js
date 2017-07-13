@@ -13,7 +13,7 @@ import '../assets/css/app.css'
 
 /* modify debug filter before application starts' */
 const debug = Debug('app')
-localStorage.debug = 'component*'
+localStorage.debug = '*component*'
 
 /* required by Material UI */
 injectTapEventPlugin()

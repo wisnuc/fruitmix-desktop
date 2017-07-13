@@ -18,12 +18,13 @@ class FirmwareUpdate extends Base {
     }
 
     this.selectRel = (rel) => {
+      debug('this.selectRel', rel)
       this.setState({ rel })
     }
   }
 
   willReceiveProps(nextProps) {
-    debug('FirmwareUpdate in view model', nextProps)
+    // debug('FirmwareUpdate in view model', nextProps)
     if (!nextProps.apis || !nextProps.apis.firm) return
     const firm = nextProps.apis.firm
     if (firm.isPending() || firm.isRejected()) return

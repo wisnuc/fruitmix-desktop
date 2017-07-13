@@ -11,7 +11,7 @@ const debug = Debug('component:control:power:')
 @Radium
 class RelList extends React.PureComponent {
   render() {
-    const { rel, current, install } = this.props
+    const { rel, current, onTouchTap, install } = this.props
     const date = rel.published_at.split('T')[0].split('-')
     let label = '一键安装'
     let disabled = false
@@ -30,8 +30,11 @@ class RelList extends React.PureComponent {
           paddingLeft: 24,
           ':hover': { backgroundColor: '#F5F5F5' }
         }}
-        key={rel.tag_name}
+        onTouchTap={() => onTouchTap(rel)}
       >
+        <div style={{ width: 56, display: 'flex', alignItems: 'center' }}>
+          <div style={{ width: 40, height: 40, borderRadius: '20px', backgroundColor: 'rgba(0,0,0,0.54)', overflow: 'hidden' }} />
+        </div>
         <div style={{ width: 160, display: 'flex', alignItems: 'center' }}>
           { rel.prerelease ? '测试版' : '正式版' }
         </div>
@@ -64,8 +67,7 @@ class FirmwareUpdate extends React.Component {
 
 
   render() {
-    debug('FirmwareUpdate', this.props)
-    const { firm } = this.props
+    const { firm, selectRel } = this.props
     if (!firm) return (<div />)
     const rels = firm.remotes
     const current = rels.find(rel => rel.id === firm.current.id)
@@ -84,6 +86,7 @@ class FirmwareUpdate extends React.Component {
         <div style={{ height: 24 }} />
 
         <div style={{ height: 64, display: 'flex', alignItems: 'center', marginLeft: 24 }}>
+          <div style={{ width: 56 }} />
           {'版本类型'}
           <div style={{ width: 96 }} />
           {'版本号'}
@@ -92,7 +95,7 @@ class FirmwareUpdate extends React.Component {
         </div>
 
         <div style={{ height: 'calc(100% - 180px)', overflow: 'auto' }}>
-          { rels.map(rel => <RelList rel={rel} current={current} />) }
+          { rels.map(rel => <RelList rel={rel} current={current} onTouchTap={selectRel} install={() => {}} key={rel.id} />) }
         </div>
 
         {/* dialog */}
