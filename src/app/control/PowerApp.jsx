@@ -163,7 +163,7 @@ class Power extends React.Component {
       }
 
       return (
-        <div style={{ dispaly: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ marginTop: 48, marginLeft: 136 }}>
             <Checkmark delay={300} color={this.props.primaryColor} />
           </div>
@@ -189,7 +189,7 @@ class Power extends React.Component {
         break
     }
     return (
-      <div style={{ dispaly: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
         <CircularProgress style={{ marginTop: 48, marginLeft: 160 }} />
         <div style={{ textAlign: 'center', marginTop: 24 }}>{hintText} </div>
         <div style={{ textAlign: 'center', marginTop: 24 }}>
