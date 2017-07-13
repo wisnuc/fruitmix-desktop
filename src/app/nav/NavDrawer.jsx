@@ -25,7 +25,7 @@ class SubHeader extends Component {
           alignItems: 'center',
           color: 'rgba(0,0,0,0.54)' }}
       >
-        <div style={{ flex: '0 0 16px' }} />
+        <div style={{ flex: '0 0 24px' }} />
         {this.props.children}
       </div>
     )
@@ -65,10 +65,10 @@ class MenuItem extends Component {
         }}
         onTouchTap={this.props.onTouchTap}
       >
-        <div style={{ flex: '0 0 16px' }} />
+        <div style={{ flex: '0 0 24px' }} />
         <this.props.icon style={{ width: dense ? 18 : 24, height: dense ? 18 : 24, color: iconColor }} />
         <div style={{ flex: '0 0 32px' }} />
-        <div style={{ flexGrow: 1, fontSize: dense ? 13 : 16, fontWeight: 500, color: fontColor }}>
+        <div style={{ flexGrow: 1, fontSize: dense ? 13 : 14, color: fontColor, fontWeight: 500 }}>
           {text}
         </div>
         <div style={{ flex: '0 0 16px' }} />
@@ -93,7 +93,6 @@ class NavDrawer extends React.Component {
             key={key}
             icon={views[key].menuIcon()}
             text={views[key].menuName()}
-            dense
             primaryColor={primaryColor}
             selected={key === nav}
             onTouchTap={() => navTo(key)}
@@ -142,33 +141,32 @@ class NavDrawer extends React.Component {
 
     return (
 
-      <Drawer docked={false} width={240} open={open} onRequestChange={onRequestChange}>
+      <Drawer docked={false} width={256} open={open} onRequestChange={onRequestChange}>
 
         <div style={{ position: 'relative', width: '100%', backgroundColor: primaryColor }} >
-          <div style={{ width: 'calc(100% - 8px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} >
+          <div style={{ height: 96, width: '100%', display: 'flex', alignItems: 'center' }} >
             {/* set background of icon */}
             <IconButton
-              iconStyle={{ width: 72, height: 72, color: 'white' }}
-              style={{ width: 96, height: 96, padding: 12 }}
+              iconStyle={{ width: 67, height: 67, color: 'white' }}
+              style={{ width: 105, height: 105, padding: 19 }}
               onTouchTap={() => navTo('account')}
             >
               <ActionAccountCircle />
             </IconButton>
           </div>
+
           <div style={{ height: 40, marginLeft: 16, marginTop: -8 }}>
             <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(255, 255, 255, 1)' }}>{username}</div>
           </div>
         </div>
 
         <Divider />
-        <div style={{ height: 4 }} />
 
         <SubHeader>我的盒子</SubHeader>
 
         <MenuItem
           icon={views.home.menuIcon()}
           text={views.home.menuName()}
-          dense
           primaryColor={primaryColor}
           selected={views[nav].navGroup() === 'file'}
           onTouchTap={() => navTo('home')}
@@ -177,7 +175,6 @@ class NavDrawer extends React.Component {
         <MenuItem
           icon={views.media.menuIcon()}
           text={views.media.menuName()}
-          dense
           primaryColor={primaryColor}
           selected={views[nav].navGroup() === 'media'}
           onTouchTap={() => navTo('media')}
@@ -187,16 +184,6 @@ class NavDrawer extends React.Component {
 
         { this.renderGroup('trash') }
 
-        <SubHeader>应用市场</SubHeader>
-
-        <MenuItem
-          icon={views.docker.menuIcon()}
-          text="Docker"
-          dense
-          primaryColor={primaryColor}
-          selected={views[nav].navGroup() === 'docker'}
-          onTouchTap={() => navTo('docker')}
-        />
 
         {/*
         <div style={{ height: 4 }} />
@@ -206,11 +193,18 @@ class NavDrawer extends React.Component {
 
         <SubHeader>管理</SubHeader>
 
+        <MenuItem
+          icon={views.docker.menuIcon()}
+          text="应用市场"
+          primaryColor={primaryColor}
+          selected={views[nav].navGroup() === 'docker'}
+          onTouchTap={() => navTo('docker')}
+        />
+
         {
           isAdmin && <MenuItem
             icon={ActionSettings}
             text="系统设置"
-            dense
             primaryColor={primaryColor}
             selected={views[nav].navGroup() === 'settings'}
             onTouchTap={() => navTo('adminUsers')}
@@ -220,7 +214,6 @@ class NavDrawer extends React.Component {
         <MenuItem
           icon={views.device.menuIcon()}
           text={views.device.menuName()}
-          dense
           primaryColor={primaryColor}
           selected={views[nav].navGroup() === 'device'}
           onTouchTap={() => navTo('device')}
@@ -235,7 +228,6 @@ class NavDrawer extends React.Component {
         <MenuItem
           icon={ActionExitToApp}
           text="退出"
-          dense
           onTouchTap={() => {
             ipcRenderer.send('LOGIN_OUT')
             this.props.navToMain('login')
