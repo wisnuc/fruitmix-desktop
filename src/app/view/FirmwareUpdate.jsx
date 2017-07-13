@@ -13,13 +13,7 @@ class FirmwareUpdate extends Base {
     super(ctx)
 
     this.state = {
-      firm: null,
-      rel: null
-    }
-
-    this.selectRel = (rel) => {
-      debug('this.selectRel', rel)
-      this.setState({ rel })
+      firm: null
     }
   }
 
@@ -60,25 +54,6 @@ class FirmwareUpdate extends Base {
     return 'colored'
   }
 
-  hasDetail() {
-    return true
-  }
-
-  detailEnabled() {
-    return true
-  }
-
-  renderDetail({ style, openSnackBar }) {
-    return (
-      <div style={style}>
-        <FirmDetail
-          rel={this.state.rel}
-          primaryColor={this.groupPrimaryColor()}
-        />
-      </div>
-    )
-  }
-
   /** renderers **/
   renderContent({ openSnackBar }) {
     return (
@@ -89,7 +64,6 @@ class FirmwareUpdate extends Base {
         selectedDevice={this.ctx.props.selectedDevice}
         primaryColor={this.groupPrimaryColor()}
         openSnackBar={openSnackBar}
-        selectRel={this.selectRel}
       />
     )
   }
