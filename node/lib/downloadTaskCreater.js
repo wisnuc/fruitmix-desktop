@@ -24,7 +24,7 @@ const visitlessQueue = []
 const visitingQueue = []
 
 const initArgs = () => {
-  server = `http://${store.getState().login.device.mdev.address}:3721`
+  server = `http://${store.getState().login.device.mdev.address}:3000`
   tokenObj = store.getState().login.device.token.data
 }
 
@@ -417,7 +417,7 @@ const visitTask = async (target, name, type, size, dirUUID, position, manager, c
   if (type === 'file') return callback(null)
 
   try {
-    const tasks = await serverGetAsync(`files/fruitmix/list/${target}/${target}`)
+    const tasks = await serverGetAsync(`drives/${target}/dirs/${target}/files`)
     if (!tasks.length) return callback(null)
     const count = tasks.length
     let index = 0
@@ -660,7 +660,7 @@ class DownloadFileSTM extends STM {
       method: 'GET',
       url: wrapper.dirUUID === 'media'
       ? `${server}/media/${wrapper.target}/download`
-      : `${server}/files/fruitmix/download/${wrapper.dirUUID}/${wrapper.target}`,
+      : `${server}/drives/${wrapper.dirUUID}/dirs/${wrapper.dirUUID}/files/${wrapper.target}/data`,
 
       headers: {
         Authorization: `${tokenObj.type} ${tokenObj.token}`,

@@ -2,7 +2,7 @@ import os from 'os'
 import child_process from 'child_process'
 import createTask, { sendMsg } from './downloadTaskCreater'
 import { getMainWindow } from './window'
-import { dialog, ipcMain } from 'electron'
+import { dialog, ipcMain, shell } from 'electron'
 
 const userTasks = []
 const finishTasks = []
@@ -19,6 +19,15 @@ const downloadHandle = (event, args, callback) => {
 
   const count = files.length + folders.length
   getMainWindow().webContents.send('snackbarMessage', { message: `${count}个任务添加至下载队列` })
+}
+
+const openHandle = (event, args, callback) => {
+  console.log('openHandle start')
+  console.log(args)
+  console.log('openHandle start download')
+  // downloadHandle(event, args, callback)
+  shell.openItem('/home/lxw/Desktop/PC_Design/PC_Client_Design_Function_Photo.pdf')
+  console.log('openHandle end')
 }
 
 const startTransmissionHandle = () => {
@@ -72,6 +81,7 @@ ipcMain.on('GET_TRANSMISSION', sendMsg)
 ipcMain.on('DELETE_DOWNLOADING', deleteDownloadingHandle)
 ipcMain.on('DELETE_DOWNLOADED', deleteDownloadedHandle)
 ipcMain.on('DOWNLOAD', downloadHandle)
+ipcMain.on('OPEN_FILE', openHandle)
 
 ipcMain.on('PAUSE_DOWNLOADING', (e, uuid) => {
   if (!uuid) return
