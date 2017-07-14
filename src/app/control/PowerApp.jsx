@@ -23,7 +23,7 @@ class Power extends React.Component {
      */
     this.state = {
       operation: '',
-      choice: '',
+      choice: ''
     }
 
     this.boot = (op) => {

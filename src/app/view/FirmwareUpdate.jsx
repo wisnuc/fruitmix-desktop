@@ -13,7 +13,15 @@ class FirmwareUpdate extends Base {
     super(ctx)
 
     this.state = {
-      firm: null
+      firm: null,
+      showRel: null,
+      latest: null,
+      installed: null
+    }
+
+    this.selectRel = (showRel) => {
+      debug('this.selectRel', showRel)
+      this.setState({ showRel })
     }
   }
 
@@ -25,8 +33,18 @@ class FirmwareUpdate extends Base {
 
     const value = firm.value()
 
-    if (value !== this.state.firm) {
-      this.setState({ firm: value })
+    if (value && value !== this.state.firm) {
+      const rels = value.remotes
+      const installed = rels.findIndex(rel => rel.id === value.current.id)
+      // const latest = rels.findIndex(rel => !rel.prerelease)
+      const latest = 0
+      let showRel
+      if (latest < installed) {
+        showRel = rels[latest]
+      } else {
+        showRel = rels[installed]
+      }
+      this.setState({ firm: value, showRel, latest: rels[latest], installed: rels[installed] })
     }
   }
 
@@ -54,11 +72,38 @@ class FirmwareUpdate extends Base {
     return 'colored'
   }
 
+  hasDetail() {
+    return true
+  }
+
+  detailEnabled() {
+    return true
+  }
+
+  renderDetail({ style, openSnackBar }) {
+    return (
+      <div style={style}>
+        <FirmDetail
+          firm={this.state.firm}
+          showRel={this.state.showRel}
+          latest={this.state.latest}
+          installed={this.state.installed}
+          primaryColor={this.groupPrimaryColor()}
+          selectRel={this.selectRel}
+        />
+      </div>
+    )
+  }
+
   /** renderers **/
-  renderContent({ openSnackBar }) {
+  renderContent({ openSnackBar, toggleDetail }) {
     return (
       <FirmwareUpdateApp
         firm={this.state.firm}
+        showRel={this.state.showRel}
+        latest={this.state.latest}
+        installed={this.state.installed}
+        toggleDetail={toggleDetail}
         apis={this.ctx.props.apis}
         nav={this.ctx.props.nav}
         selectedDevice={this.ctx.props.selectedDevice}
