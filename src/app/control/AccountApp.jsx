@@ -84,11 +84,21 @@ class AccountApp extends React.Component {
 
       this.props.apis.request('wxBind', { ticketId: this.ticket, code, platform: 'web' }, (err, data) => {
         if (err) {
-          debug('this.getWXCode', code, err)
+          debug('this.getWXCode error', code, err)
           this.setState({ error: 'wxLogin' })
         } else {
-          debug('this.getWXCode after wxLogin', data)
-          this.setState({ status: 'success' })
+          debug('this.getWXCode success', data)
+          // this.setState({ status: 'success' })
+          this.setState({ status: 'connecting' })
+          this.props.apis.request('getTicket', { ticketId: data.id }, (error, wechatInfo) => {
+            if (error) {
+              debug('getTicket error', code, data, error)
+              this.setState({ error: 'wxLogin' })
+            } else {
+              debug('getTicket success', wechatInfo)
+              this.setState({ status: 'success' })
+            }
+          })
         }
       })
     }

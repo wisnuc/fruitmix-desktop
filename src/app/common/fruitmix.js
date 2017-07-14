@@ -227,6 +227,10 @@ class Fruitmix extends EventEmitter {
         r = this.apost('station/tickets/', { type: 2 })
         break
 
+      case 'getTicket':
+        r = this.aget(`station/tickets/${args.ticketId}`)
+        break
+
       case 'wxBind':
         r = request
           .get('http://10.10.9.59:5757/v1/wx/oauth2')
