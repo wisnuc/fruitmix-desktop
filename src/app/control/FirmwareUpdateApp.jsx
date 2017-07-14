@@ -17,6 +17,7 @@ class FirmwareUpdate extends React.Component {
     }
 
     this.install = () => {
+      this.props.api.request()
       debug('this.install')
     }
 
@@ -35,43 +36,21 @@ class FirmwareUpdate extends React.Component {
     this.rel = showRel
     return (
       <div style={{ height: '100%', margin: 16 }}>
-        <div style={{ width: '100%', height: 72, display: 'flex', alignItems: 'center' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', fontSize: 34, color: cyan600 }}>
-              { current.tag_name.replace(/\./g, ' . ') }
-              <div style={{ width: 8 }} />
-              { current.prerelease && '(beta)' }
-              <div style={{ width: 8 }} />
-              <div style={{ fontSize: 14, height: 40 }}>
-                <div style={{ height: 16 }} />
-                { showRel.id === latest.id && '最新版' }
-              </div>
-            </div>
-            <div style={{ height: 8 }} />
-            <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }}>
-              { `发布日期：${date[0]}年${date[1]}月${date[2]}日` }
+        <div style={{ width: '100%', height: 72 }}>
+          <div style={{ display: 'flex', alignItems: 'center', fontSize: 34, color: cyan600 }}>
+            { current.tag_name.replace(/\./g, ' . ') }
+            <div style={{ width: 8 }} />
+            { current.prerelease && '(beta)' }
+            <div style={{ width: 8 }} />
+            <div style={{ fontSize: 14, height: 40 }}>
+              <div style={{ height: 16 }} />
+              { showRel.id === latest.id && '最新稳定版' }
             </div>
           </div>
-          <div style={{ flexGrow: 1 }} />
-          <div
-            style={{
-              height: 56,
-              width: 96,
-              marginRight: 16,
-              backgroundColor: grey200,
-              borderRadius: '8px',
-              fontSize: 14
-            }}
-            onTouchTap={toggleDetail}
-          >
-            <div style={{ height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              { installed.tag_name.replace(/\./g, ' . ') }
-            </div>
-            <div style={{ height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: -6 }}>
-              { '当前版本' }
-            </div>
+          <div style={{ height: 8 }} />
+          <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }}>
+            { `发布日期：${date[0]}年${date[1]}月${date[2]}日` }
           </div>
-
         </div>
 
         <div style={{ height: 24 }} />
@@ -92,7 +71,7 @@ class FirmwareUpdate extends React.Component {
         </div>
         {
           current.body ? current.body.split(/[1-9]\./).map(list => list && (
-            <div style={{ marginLeft: 24, height: 40, display: 'flex', alignItems: 'center' }}>
+            <div style={{ marginLeft: 24, height: 40, display: 'flex', alignItems: 'center' }} key={list}>
               { '*' }
               <div style={{ width: 16 }} />
               { list }
@@ -112,15 +91,15 @@ class FirmwareUpdate extends React.Component {
           {
             this.state.confirm &&
               <div style={{ width: 560, padding: '24px 24px 0px 24px' }}>
-                <div style={{ fontSize: 20, fontWeight: 500 }}>
+                <div style={{ fontSize: 21, fontWeight: 500 }}>
                   { '固件安装' }
                 </div>
                 <div style={{ height: 20 }} />
-                <div style={{ color: 'rgba(0,0,0,0.54)' }}>
+                <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }}>
                   { `将要为您安装版本号为 ${this.rel.tag_name} 的固件程序。` }
                 </div>
                 <div style={{ height: 8 }} />
-                <div style={{ color: 'rgba(0,0,0,0.54)' }} >
+                <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }} >
                   { '固件安装后需要重启WISNUC系统，客户端将退出至登录界面，需重新登录。' }
                 </div>
                 <div style={{ height: 24 }} />
@@ -133,7 +112,7 @@ class FirmwareUpdate extends React.Component {
                   <FlatButton
                     label={'安装'}
                     primary
-                    onTouchTap={() => {}}
+                    onTouchTap={this.install}
                   />
                 </div>
               </div>

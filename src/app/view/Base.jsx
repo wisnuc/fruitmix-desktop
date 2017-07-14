@@ -118,6 +118,10 @@ class Base extends EventEmitter {
     return 360
   }
 
+  detailIcon() {
+    return null
+  }
+
   renderTitle({ style }) {
     return <div style={style}>{this.menuName()}</div>
   }

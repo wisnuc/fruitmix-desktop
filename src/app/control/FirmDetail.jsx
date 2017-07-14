@@ -3,7 +3,7 @@ import Debug from 'debug'
 import Radium from 'radium'
 import sanitize from 'sanitize-filename'
 import { TextField, Checkbox, Divider } from 'material-ui'
-import { blueGrey50, blueGrey100 } from 'material-ui/styles/colors'
+import { blueGrey50, blueGrey100, orange200 } from 'material-ui/styles/colors'
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
 import ModeEdit from 'material-ui/svg-icons/editor/mode-edit'
 import FlatButton from '../common/FlatButton'
@@ -13,10 +13,12 @@ const debug = Debug('component:control:FirmDetail')
 @Radium
 class RelList extends React.PureComponent {
   render() {
-    const { rel, onTouchTap, install } = this.props
+    const { rel, onTouchTap, installed } = this.props
     const date = rel.published_at.split('T')[0].split('-')
-    const label = '一键安装'
-    const disabled = false
+    let label = ''
+    if (installed.id === rel.id) {
+      label = '当前使用的版本'
+    }
 
     return (
       <div
@@ -30,19 +32,30 @@ class RelList extends React.PureComponent {
         onTouchTap={() => onTouchTap(rel)}
       >
         <div>
+          <div
+            style={{
+              width: 24,
+              height: 24,
+              borderRadius: '12px',
+              backgroundColor: label ? orange200 : ''
+            }}
+          />
+          <div style={{ height: 24 }} />
+        </div>
+        <div style={{ width: 24 }} />
+        <div>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             { rel.tag_name.replace(/\./g, ' . ') }
             <div style={{ width: 8 }} />
             { rel.prerelease && '(beta)' }
+            <div style={{ width: 48 }} />
+            { label }
           </div>
           <div style={{ height: 8 }} />
           <div style={{ display: 'flex', alignItems: 'center', fontSize: 14, color: 'rgba(0,0,0,0.54)' }}>
             { `发布日期：${date[0]}年${date[1]}月${date[2]}日` }
           </div>
         </div>
-        {/*
-          <FlatButton label={label} disabled={disabled} onTouchTap={() => install(rel)} primary />
-          */}
       </div>
     )
   }
@@ -59,38 +72,22 @@ class FirmDetail extends PureComponent {
     if (!firm) return (<div />)
 
     /* filter prerelease */
-    const rels = firm.remotes.filter(rel => !rel.prerelease)
-    const index = rels.findIndex(rel => rel.id === installed.id)
+    const rels = firm.remotes.filter(rel => !rel.prerelease || rel.id === installed.id)
 
-    let otherRels = rels
-    if (index > -1) {
-      otherRels = [...rels.slice(0, index), ...rels.slice(index + 1)]
-    }
     return (
       <div style={{ height: '100%', backgroundColor: blueGrey50 }}>
         <div style={{ height: 64, backgroundColor: primaryColor, filter: 'brightness(0.9)' }} />
 
         {/* current installed version */}
         <div style={{ display: 'flex', alignItems: 'center', margin: 24 }}>
-          { '当前使用版本' }
-        </div>
-        <RelList
-          rel={installed}
-          onTouchTap={selectRel}
-        />
-
-
-        {/* other  versions */}
-        <div style={{ margin: 24 }} >
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            { '其他可用版本' }
-          </div>
+          { '可用版本列表' }
         </div>
 
         <div style={{ height: 'calc(100% - 304px)', overflow: 'auto' }}>
           {
-            otherRels.map(rel => (
+            rels.map(rel => (
               <RelList
+                installed={installed}
                 key={rel.id}
                 rel={rel}
                 onTouchTap={selectRel}

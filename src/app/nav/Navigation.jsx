@@ -216,6 +216,10 @@ class NavViews extends Component {
   renderDetailButton() {
     const view = this.currentView()
     if (!view.hasDetail()) return null
+    let DetailIcon = ActionInfo
+    if (view.detailIcon()) {
+      DetailIcon = view.detailIcon()
+    }
 
     const onTouchTap = view.detailEnabled()
       ? this.toggleDetail.bind(this)
@@ -243,7 +247,7 @@ class NavViews extends Component {
         />
 
         <IconButton style={{ position: 'absolute' }} onTouchTap={onTouchTap} >
-          <ActionInfo color={color} />
+          <DetailIcon color={color} />
         </IconButton>
       </div>
     )

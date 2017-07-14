@@ -1,6 +1,7 @@
 import React from 'react'
 import Debug from 'debug'
 import UpdateIcon from 'material-ui/svg-icons/action/system-update-alt'
+import ListIcon from 'material-ui/svg-icons/action/list'
 import Base from './Base'
 import FirmwareUpdateApp from '../control/FirmwareUpdateApp'
 import FirmDetail from '../control/FirmDetail'
@@ -26,9 +27,10 @@ class FirmwareUpdate extends Base {
   }
 
   willReceiveProps(nextProps) {
-    // debug('FirmwareUpdate in view model', nextProps)
-    if (!nextProps.apis || !nextProps.apis.firm) return
-    const firm = nextProps.apis.firm
+    debug('FirmwareUpdate in view model', nextProps)
+    if (!nextProps.selectedDevice || !nextProps.selectedDevice.firm) return
+
+    const firm = nextProps.selectedDevice.firm
     if (firm.isPending() || firm.isRejected()) return
 
     const value = firm.value()
@@ -37,7 +39,7 @@ class FirmwareUpdate extends Base {
       const rels = value.remotes
       const installed = rels.findIndex(rel => rel.id === value.current.id)
       // const latest = rels.findIndex(rel => !rel.prerelease)
-      const latest = 0
+      const latest = rels.findIndex(rel => !rel.prerelease)
       let showRel
       if (latest < installed) {
         showRel = rels[latest]
@@ -49,7 +51,7 @@ class FirmwareUpdate extends Base {
   }
 
   navEnter() {
-    this.ctx.props.apis.request('firm')
+    this.ctx.props.selectedDevice.request('firm')
   }
 
   navGroup() {
@@ -78,6 +80,10 @@ class FirmwareUpdate extends Base {
 
   detailEnabled() {
     return true
+  }
+
+  detailIcon() {
+    return ListIcon 
   }
 
   renderDetail({ style, openSnackBar }) {

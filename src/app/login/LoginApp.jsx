@@ -448,15 +448,6 @@ class LoginApp extends React.Component {
               {/* <div style={{ width: 270, height: 270, margin: 'auto', backgroundColor: 'grey' }} /> */}
               <div style={{ height: 406, width: 300, margin: 'auto' }} id="login_container" />
               <div style={{ height: 36 }} />
-              {/*
-              <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.87)', fontSize: 20 }}>
-                请使用手机微信扫码登陆
-              </div>
-              <div style={{ height: 24 }} />
-              <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.54)', fontSize: 16 }}>
-                客户端远程登陆需要配合手机使用
-              </div>
-              */}
             </div>
             :
             <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>

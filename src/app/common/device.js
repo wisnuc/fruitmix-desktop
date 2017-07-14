@@ -175,6 +175,12 @@ class Device extends RequestManager {
           .query({ platform: args.platform })
         break
 
+      /** FirmwareUpdate API **/
+      case 'firm':
+        r = request
+          .get('http://10.10.9.86:3001/state')
+        break
+
       default:
         break
     }

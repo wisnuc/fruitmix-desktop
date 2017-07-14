@@ -222,11 +222,6 @@ class Fruitmix extends EventEmitter {
         r = request.get('http://10.10.9.86:3000/server')
         break
 
-    /** FirmwareUpdate API **/
-      case 'firm':
-        r = request.get('http://10.10.9.86:3001/state')
-        break
-
       default:
         break
     }
