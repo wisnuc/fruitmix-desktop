@@ -18,28 +18,6 @@ const duration = 300
   http://res.wx.qq.com/connect/zh_CN/htmledition/js/wxLogin.js
 */
 
-let wxiframe
-const wxlogin = function (a, b, c) {
-  function d(a) {
-    let c = 'default'
-    a.self_redirect === !0 ? c = 'true' : a.self_redirect === !1 && (c = 'false')
-    const d = b.createElement('iframe')
-    wxiframe = d
-    let e = `https://open.weixin.qq.com/connect/qrconnect?appid=${a.appid}&scope=${a.scope}&redirect_uri=${a.redirect_uri}&state=${a.state}&login_type=jssdk&self_redirect=${c}`
-    e += a.style ? `&style=${a.style}` : ''
-    e += a.href ? `&href=${a.href}` : ''
-    d.src = e
-    d.frameBorder = '0'
-    d.allowTransparency = 'true'
-    d.scrolling = 'no'
-    d.width = '300px'
-    d.height = '400px'
-  }
-  a.WxLogin = d
-}
-
-wxlogin(window, document)
-
 @Radium
 class DeviceList extends React.PureComponent {
   render() {
@@ -193,9 +171,30 @@ class LoginApp extends React.Component {
       this.setState({ wechatLogin: '' })
     }
 
+    this.intiWxScript = () => {
+      this.wxiframe = null
+      this.WxLogin = (a) => {
+        let c = 'default'
+        a.self_redirect === !0 ? c = 'true' : a.self_redirect === !1 && (c = 'false')
+        const d = document.createElement('iframe')
+        this.wxiframe = d
+        let e = `https://open.weixin.qq.com/connect/qrconnect?appid=${a.appid}&scope=${a.scope}&redirect_uri=${a.redirect_uri}&state=${a.state}&login_type=jssdk&self_redirect=${c}`
+        e += a.style ? `&style=${a.style}` : ''
+        e += a.href ? `&href=${a.href}` : ''
+        d.src = e
+        d.frameBorder = '0'
+        d.allowTransparency = 'true'
+        d.scrolling = 'no'
+        d.width = '300px'
+        d.height = '400px'
+      }
+    }
+
+    this.intiWxScript()
+
     this.initWXLogin = () => {
       this.setState({ login: true }, () => {
-        const wxArgs = new WxLogin({
+        this.WxLogin({
           id: 'login_container',
           appid: 'wxd7e08af781bea6a2',
           scope: 'snsapi_login',
@@ -206,7 +205,7 @@ class LoginApp extends React.Component {
           href: ''
         })
         const f = document.getElementById('login_container')
-        const d = wxiframe
+        const d = this.wxiframe
         if (f) f.innerHTML = ''
         try {
           d.onload = (e) => {
@@ -223,7 +222,7 @@ class LoginApp extends React.Component {
 
     this.getWXCode = (code) => {
       /* init wx_code */
-      wxiframe.contentWindow.wx_code = null
+      this.wxiframe.contentWindow.wx_code = null
 
       /* clear countDown time */
       clearInterval(this.interval)
@@ -259,9 +258,9 @@ class LoginApp extends React.Component {
 
     /* catch CODE of wechat login */
     window.onbeforeunload = () => {
-      if (wxiframe && wxiframe.contentWindow.wx_code) {
-        console.log(wxiframe.contentWindow.wx_code)
-        this.getWXCode(wxiframe.contentWindow.wx_code)
+      if (this.wxiframe && this.wxiframe.contentWindow.wx_code) {
+        console.log(this.wxiframe.contentWindow.wx_code)
+        this.getWXCode(this.wxiframe.contentWindow.wx_code)
         return false // This will stop the redirecting.
       }
       return null

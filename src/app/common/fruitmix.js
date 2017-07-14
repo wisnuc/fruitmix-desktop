@@ -222,6 +222,19 @@ class Fruitmix extends EventEmitter {
         r = request.get('http://10.10.9.86:3000/server')
         break
 
+    /** Wechat API **/
+      case 'creatTicket':
+        r = this.apost('station/tickets/', { type: 2 })
+        break
+
+      case 'wxBind':
+        r = request
+          .get('http://10.10.9.59:5757/v1/wx/oauth2')
+          .query({ ticketId: args.ticketId })
+          .query({ code: args.code })
+          .query({ platform: args.platform })
+        break
+
       default:
         break
     }

@@ -1,6 +1,6 @@
 import React from 'react'
 import Debug from 'debug'
-import { Divider, IconButton } from 'material-ui'
+import { Divider, IconButton, CircularProgress } from 'material-ui'
 import ActionAccountCircle from 'material-ui/svg-icons/action/account-circle'
 import Username from 'material-ui/svg-icons/action/perm-identity'
 import Password from 'material-ui/svg-icons/action/lock-outline'
@@ -8,15 +8,17 @@ import HelpIcon from 'material-ui/svg-icons/action/help-outline'
 import FlatButton from '../common/FlatButton'
 import DialogOverlay from '../common/DialogOverlay'
 import ChangeAccountDialog from './ChangeAccountDialog'
+import Checkmark from '../common/Checkmark'
 
 const debug = Debug('component:control:device')
 
 class AccountApp extends React.Component {
-
   constructor(props) {
     super(props)
     this.state = {
+      status: '',
       openDialog: '',
+      error: '',
       editAvatar: false
     }
 
@@ -27,12 +29,176 @@ class AccountApp extends React.Component {
     this.onCloseDialog = () => {
       this.setState({ openDialog: '' })
     }
+
+    this.intiWxScript = () => {
+      this.wxiframe = null
+      this.WxLogin = (a) => {
+        let c = 'default'
+        a.self_redirect === !0 ? c = 'true' : a.self_redirect === !1 && (c = 'false')
+        const d = document.createElement('iframe')
+        this.wxiframe = d
+        let e = `https://open.weixin.qq.com/connect/qrconnect?appid=${a.appid}&scope=${a.scope}&redirect_uri=${a.redirect_uri}&state=${a.state}&login_type=jssdk&self_redirect=${c}`
+        e += a.style ? `&style=${a.style}` : ''
+        e += a.href ? `&href=${a.href}` : ''
+        d.src = e
+        d.frameBorder = '0'
+        d.allowTransparency = 'true'
+        d.scrolling = 'no'
+        d.width = '300px'
+        d.height = '400px'
+      }
+    }
+
+    this.intiWxScript()
+
+    this.initWXLogin = () => {
+      this.setState({ status: 'wechat' }, () => {
+        this.WxLogin({
+          id: 'wechat_bind_container',
+          appid: 'wxd7e08af781bea6a2',
+          scope: 'snsapi_login',
+          redirect_uri: 'http%3A%2F%2Fwxlogin.siyouqun.com',
+          state: 'uuid',
+          language: 'zh_CN',
+          style: '',
+          href: ''
+        })
+
+        const f = document.getElementById('wechat_bind_container')
+        const d = this.wxiframe
+        if (f) f.innerHTML = ''
+        try {
+          d.onload = (e) => {
+            d.contentWindow.onerror = (e) => { debug('wxiframe error', e) }
+          }
+          f.appendChild(d)
+        } catch (e) {
+          debug('error', e)
+        }
+      })
+    }
+
+    this.getWXCode = (code) => {
+      /* init wx_code */
+      this.wxiframe.contentWindow.wx_code = null
+
+      this.props.apis.request('wxBind', { ticketId: this.ticket, code, platform: 'web' }, (err, data) => {
+        if (err) {
+          debug('this.getWXCode', code, err)
+          this.setState({ error: 'wxLogin' })
+        } else {
+          debug('this.getWXCode after wxLogin', data)
+          this.setState({ status: 'success' })
+        }
+      })
+    }
+
+    this.bindWechat = () => {
+      this.setState({ status: 'connecting' }, () => {
+        this.props.apis.request('creatTicket', null, (error, data) => {
+          if (error) {
+            debug('this.bindWechat error', error)
+            this.setState({ error: 'creatTicket' })
+          } else {
+            debug('this.bindWechat success', data)
+            this.ticket = data.id
+            setTimeout(this.initWXLogin, 1000)
+          }
+        })
+      })
+    }
+
+    this.done = () => {
+      // this.props.apis.request('account')
+      this.setState({ status: '' })
+    }
+  }
+
+  renderBind() {
+    return (
+      <div>
+        <FlatButton label="绑定微信" onTouchTap={this.bindWechat} />
+
+        {/* dialog */}
+        <DialogOverlay open={!!this.state.status}>
+          <div>
+            {
+              this.state.status === 'connecting' &&
+                <div style={{ width: 332, height: 492, padding: 24, position: 'relative' }}>
+                  <div style={{ height: 16 }} />
+                  <div style={{ height: 270, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CircularProgress size={64} thickness={5} />
+                  </div>
+                  <div style={{ height: 36 }} />
+                  <div style={{ textAlign: 'center', fontSize: 20, height: 36 }}>
+                    { '连接中...' }
+                  </div>
+                </div>
+            }
+            {
+              this.state.status === 'wechat' &&
+                <div style={{ width: 332, height: 492, padding: 24, position: 'relative' }}>
+                  <div style={{ height: 42 }} />
+                  <div style={{ height: 406, width: 300, margin: 'auto' }} id="wechat_bind_container" />
+                  <div style={{ height: 36 }} />
+
+                  {/* overlay text */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      height: 108,
+                      width: '100%',
+                      zIndex: 100,
+                      backgroundColor: '#FFFFFF'
+                    }}
+                  >
+                    <div style={{ height: 72 }} />
+                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      { '请使用微信扫码' }
+                    </div>
+                  </div>
+                </div>
+            }
+            {
+              this.state.status === 'success' &&
+                <div style={{ width: 332, height: 492, padding: 24, position: 'relative' }}>
+                  <div style={{ height: 16 }} />
+                  <div style={{ height: 270, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Checkmark delay={300} color={this.props.primaryColor} />
+                  </div>
+                  <div style={{ height: 36 }} />
+                  <div style={{ textAlign: 'center', fontSize: 20, height: 36 }}>
+                    { '绑定成功' }
+                  </div>
+                  <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                    <FlatButton label="确定" primary onTouchTap={this.done} />
+                  </div>
+                </div>
+            }
+          </div>
+        </DialogOverlay>
+      </div>
+    )
+  }
+
+  componentDidMount() {
+    /* catch CODE of wechat login */
+    window.onbeforeunload = () => {
+      if (this.wxiframe && this.wxiframe.contentWindow.wx_code) {
+        console.log(this.wxiframe.contentWindow.wx_code)
+        this.getWXCode(this.wxiframe.contentWindow.wx_code)
+        return false // This will stop the redirecting.
+      }
+      return null
+    }
   }
 
   render() {
     debug('this.props Account', this.props)
     const { account, primaryColor, apis, refresh, openSnackBar } = this.props
-    if (!account) return <div />
+    if (!account) return this.renderBind()
     const tooltipStyle = {
     }
 
@@ -217,6 +383,7 @@ class AccountApp extends React.Component {
             </div>
           }
         </DialogOverlay>
+
       </div>
     )
   }
