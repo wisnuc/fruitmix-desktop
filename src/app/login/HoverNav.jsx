@@ -1,51 +1,47 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
-
-import Radium from 'radium'
-
+import { Avatar } from 'material-ui'
 import NavigationChevronLeft from 'material-ui/svg-icons/navigation/chevron-left'
 import NavigationChevronRight from 'material-ui/svg-icons/navigation/chevron-right'
 
-@Radium
 class HoverNav extends React.Component {
-
   constructor(props) {
     super(props)
+    this.state = {
+      hover: false
+    }
+  }
+
+  renderIcon(Icon) {
+    return (
+      <Avatar
+        icon={<Icon style={{ width: 32, height: 32 }} color="#FFF" />}
+        backgroundColor={this.state.hover ? '#9E9E9E' : '#FFF'}
+      />
+    )
   }
 
   render() {
-    const style = {
-
-      width: '100%',
-      height: '100%',
-
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-
-      opacity: 0.5,
-
-      ':hover': {
-        background: '#212121', // gray900
-        opacity: 0.7
-      }
-    }
-
     const enabled = !!this.props.onTouchTap
-
     return (
       <div style={this.props.style}>
-        { enabled &&
-          <div style={style} onTouchTap={this.props.onTouchTap}>
-            { this.props.direction === 'left' &&
-              <NavigationChevronLeft style={{ width: 32, height: 32 }} color="#FFF" /> }
-            { this.props.direction === 'right' &&
-              <NavigationChevronRight style={{ width: 32, height: 32 }} color="#FFF" /> }
-          </div> }
+        {
+          enabled &&
+          <div
+            style={{ width: '100%', height: '100%' }}
+            onTouchTap={this.props.onTouchTap}
+            onMouseMove={() => this.setState({ hover: true })}
+            onMouseLeave={() => this.setState({ hover: false })}
+          >
+            <div style={{ height: 76 }} />
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              { this.props.direction === 'left' && this.renderIcon(NavigationChevronLeft) }
+              { this.props.direction === 'right' && this.renderIcon(NavigationChevronRight) }
+            </div>
+          </div>
+        }
       </div>
     )
   }
 }
 
 export default HoverNav
-

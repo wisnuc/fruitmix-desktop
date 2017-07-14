@@ -331,7 +331,7 @@ class TaskManager {
       this.finishDate = utils.formatDate()
       userTasks.splice(userTasks.indexOf(this), 1)
       finishTasks.unshift(this)
-      getMainWindow().webContents.send('driveListUpdate', Object.assign({}, { uuid: this.target, message: '上传成功' }))
+      // getMainWindow().webContents.send('driveListUpdate', Object.assign({}, { uuid: this.target, message: '上传成功' }))
       sendMessage()
       return this.finishStore()
     } return this.uploadSchedule()
@@ -722,7 +722,7 @@ class UploadFileSTM extends STM {
     const tempStream = fs.createReadStream(this.wrapper.abspath).pipe(transform)
     const options = {
       host: ip,
-      port: 3721,
+      port: 3000,
       headers: {
         Authorization: `${tokenObj.type} ${tokenObj.token}`
       },
@@ -802,7 +802,7 @@ class UploadFileSTM extends STM {
 
     const options = {
       host: ip,
-      port: 3721,
+      port: 3000,
       headers: {
         Authorization: `${tokenObj.type} ${tokenObj.token}`
       },
@@ -869,7 +869,7 @@ class UploadFileSTM extends STM {
 
 const initArgs = () => {
   ip = store.getState().login.device.mdev.address
-  server = `http://${store.getState().login.device.mdev.address}:3721`
+  server = `http://${store.getState().login.device.mdev.address}:3000`
   tokenObj = store.getState().login.device.token.data
 }
 

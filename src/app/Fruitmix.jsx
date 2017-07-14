@@ -5,7 +5,7 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
 import { teal500, pinkA200 } from 'material-ui/styles/colors'
 
-import Login from './login/Login'
+import Login from './login/LoginApp'
 import Navigation from './nav/Navigation'
 import Maintenance from './maintenance/Maintenance'
 import Device from './common/device'
@@ -22,7 +22,7 @@ class Fruitmix extends React.Component {
       if (mdns.length > 0) {
         this.selectDevice(mdns[0])
       }
-    }, 3000)
+    }, 1000)
 
     this.state = {
 
@@ -32,6 +32,7 @@ class Fruitmix extends React.Component {
 
       theme: getMuiTheme({
         fontFamily: 'Roboto, Noto Sans SC, sans-serif',
+        color: 'rgba(0,0,0,0.87)',
         palette: { primary1Color: teal500, accent1Color: pinkA200 }
       }),
 
@@ -78,7 +79,7 @@ class Fruitmix extends React.Component {
       if (mdns.length > 0) {
         this.selectDevice(mdns[0])
       }
-    }, 3000)
+    }, 1000)
     this.setState({ view, selectedDevice: null })
   }
 
@@ -95,7 +96,7 @@ class Fruitmix extends React.Component {
 
     switch (this.state.view) {
       case 'login':
-        view = <Login mdns={global.mdnsStore} {...this.state} />
+        view = <Login mdns={global.mdnsStore} primaryColor={teal500} {...this.state} />
         break
 
       case 'maintenance':

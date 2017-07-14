@@ -164,8 +164,8 @@ class Maintenance extends StateUp(React.Component) {
       设备的ip为 ${data.address}，model为 ${data.model}，serial为 ${data.serial}`
     return (
       <this.TextButtonTop
-        text={this.state.boot.state !== 'maintenance' ? TextMaintence : ''}
-        disabled={this.state.boot.state !== 'maintenance'}
+        text={this.state.boot.current !== null ? TextMaintence : ''}
+        disabled={this.state.boot.current !== null}
       />
     )
   }
@@ -206,7 +206,7 @@ class Maintenance extends StateUp(React.Component) {
                   that={this}
                   device={this.props.selectedDevice}
                   nav={this.props.nav}
-                  reloadBootStorage={this.reloadBootStorage.bind(this)}
+                  reloadBootStorage={this.reloadBootStorage}
                 /> : this.renderBootStatus()}
             </div>
 

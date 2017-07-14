@@ -36,6 +36,12 @@ class CrossNav extends React.Component {
         top: -60,
         onComplete: () => callback()
       })
+    } else if (enter === 'none') {
+      TweenMax.from(el, duration, {
+        delay: duration,
+        opacity: 0,
+        onComplete: () => callback()
+      })
     }
   }
 
@@ -73,8 +79,8 @@ class CrossNav extends React.Component {
   render() {
     const cardProps = {
       style: { position: 'absolute',
-        width: 448,
-        right: -224,
+        width: 380,
+        right: -190,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center' },

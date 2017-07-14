@@ -88,7 +88,7 @@ class Transfer {
 
   initArgs() {
     this.ip = store.getState().login.device.mdev.address
-    this.server = `http://${store.getState().login.device.mdev.address}:3721`
+    this.server = `http://${store.getState().login.device.mdev.address}:3000`
     this.tokenObj = store.getState().login.device.token.data
   }
 }

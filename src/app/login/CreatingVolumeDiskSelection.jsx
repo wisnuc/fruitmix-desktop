@@ -27,9 +27,9 @@ class CreatingVolumeDiskSelection extends React.PureComponent {
     const valid = !blk.unformattable
 
     let comment
-    if (blk.unformattable && blk.unformattable[0].reason === 'isActiveSwap') {
+    if (blk.unformattable === 'isActiveSwap') {
       comment = '该磁盘含有在使用的交换分区，不可用'
-    } else if (blk.unformattable && blk.unformattable[0].reason === 'isRootFS') {
+    } else if (blk.unformattable === 'isRootFS') {
       comment = '该磁盘含有rootfs，不可用'
     } else if (blk.unformattable) {
       comment = '该磁盘无法格式化，不可用'
@@ -38,7 +38,16 @@ class CreatingVolumeDiskSelection extends React.PureComponent {
     } else comment = '该磁盘可以加入磁盘卷'
 
     return (
-      <div key={name} style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center', color: valid ? 'rgba(0,0,0,0.87)' : 'rgba(0,0,0,0.38)' }}>
+      <div
+        key={name}
+        style={{
+          width: '100%',
+          height: 40,
+          display: 'flex',
+          alignItems: 'center',
+          color: valid ? 'rgba(0,0,0,0.87)' : 'rgba(0,0,0,0.38)'
+        }}
+      >
         <div style={{ flex: '0 0 64px' }}>
           { valid && <Checkbox
             style={{ marginLeft: 16 }}
@@ -77,12 +86,13 @@ class CreatingVolumeDiskSelection extends React.PureComponent {
       </div>
     )
   }
+
   render() {
     return (
       <div>
         <div style={{ height: 40, display: 'flex', alignItems: 'center', color: cyan500, paddingLeft: 10, paddingBottom: 20 }}>选择磁盘创建新的磁盘卷，所选磁盘的数据会被清除</div>
         <div style={{ color: 'rgba(0,0,0,0.87)' }}>
-          <div style={{ marginLeft: 10, width: 760, fontSize: 13 }}>
+          <div style={{ marginLeft: 10, fontSize: 13 }}>
             <Divider />
             <div style={{ width: '100%', height: 32, display: 'flex', alignItems: 'center' }}>
               <div style={{ flex: '0 0 64px' }} />
@@ -94,7 +104,10 @@ class CreatingVolumeDiskSelection extends React.PureComponent {
               <div style={{ flex: '0 0 240px' }}>说明</div>
             </div>
             <Divider />
-            { this.props.storage && this.props.storage.blocks.filter(blk => blk.isDisk).map(blk => this.renderDiskRow(blk)) }
+            
+            <div style={{ maxHeight: 160, overflowY: 'auto' }}>
+              { this.props.storage && this.props.storage.blocks.filter(blk => blk.isDisk).map(blk => this.renderDiskRow(blk)) }
+            </div>
             <Divider />
           </div>
 

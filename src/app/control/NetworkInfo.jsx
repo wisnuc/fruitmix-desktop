@@ -61,17 +61,13 @@ class Ethernet extends React.Component {
 
   render() {
     const net = this.props.net
-    if (!net) return <div />
-    let NIC
-    for (const name in net.os) {
-      const ipv4 = net.os[name].find(addr => addr.internal === false && addr.family === 'IPv4')
-      if (ipv4) NIC = name
-    }
-    const data = net.os[NIC].find(item => item.family === 'IPv4')
+    if (!net) return (<div />)
+
+    const NIC = net[0]
+    const ipv4 = NIC.ipAddresses.find(addr => addr.internal === false && addr.family === 'IPv4')
 
     const getAddress = () => (
       <div>
-        {data.address}
         {/*
         <div onTouchTap={this.setIp}>
           {data.address}
@@ -85,6 +81,7 @@ class Ethernet extends React.Component {
 
     const Titles = [
       '网卡名称',
+      '带宽',
       '地址类型',
       '网络地址',
       '子网掩码',
@@ -92,11 +89,12 @@ class Ethernet extends React.Component {
     ]
 
     const Values = [
-      NIC,
-      data.family,
-      getAddress(),
-      data.netmask,
-      data.mac.toUpperCase()
+      NIC.name,
+      `${NIC.speed} M`,
+      ipv4.family,
+      ipv4.address,
+      ipv4.netmask,
+      ipv4.mac.toUpperCase()
     ]
 
     // debug('this.props', this.props, NIC)

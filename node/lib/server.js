@@ -159,7 +159,7 @@ const requestDeleteAsync = Promise.promisify(requestDelete)
 
 export const retrieveUsers = async (token) => {
   const ip = getIpAddr()
-  const port = 3721
+  const port = 3000
 
   return requestGetAsync(`http://${ip}:${port}/users`, null, token)
 }
@@ -168,35 +168,35 @@ export const serverGetAsync = async (endpoint, qs) => {
   debug('serverGetAsync', endpoint, qs)
 
   const ip = getIpAddr()
-  const port = 3721
+  const port = 3000
   const token = getToken()
   return requestGetAsync(`http://${ip}:${port}/${endpoint}`, qs, token)
 }
 
 export const serverDeleteAsync = async (endpoint) => {
   const ip = getIpAddr()
-  const port = 3721
+  const port = 3000
   const token = getToken()
   return requestDeleteAsync(`http://${ip}:${port}/${endpoint}`, token)
 }
 
 export const serverPostAsync = async (endpoint, body) => {
   const ip = getIpAddr()
-  const port = 3721
+  const port = 3000
   const token = getToken()
   return requestPostAsync(`http://${ip}:${port}/${endpoint}`, token, body)
 }
 
 export const serverPatchAsync = async (endpoint, body) => {
   const ip = getIpAddr()
-  const port = 3721
+  const port = 3000
   const token = getToken()
   return requestPatchAsync(`http://${ip}:${port}/${endpoint}`, token, body)
 }
 
 export const serverDownloadAsync = (endpoint, qs, downloadPath, name) => {
   const ip = getIpAddr()
-  const port = 3721
+  const port = 3000
   const token = getToken()
   return requestDownloadAsync(`http://${ip}:${port}/${endpoint}`, qs, token, downloadPath, name)
 }

@@ -65,7 +65,7 @@ class DeviceInfo extends React.PureComponent {
     if (!this.props.device || !this.props.storage) return <div />
 
     const { cpuInfo, memInfo, ws215i } = this.props.device
-    const volume = this.props.storage.volumes[0] //FIXME
+    const volume = this.props.storage.volumes[0] // FIXME
 
     /* File System */
     const fsIcon = RAIDIcon

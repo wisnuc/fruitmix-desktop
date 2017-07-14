@@ -60,7 +60,7 @@ class InitWizard extends StateUp(React.Component) {
       const { selection, mode } = this.state.volumeselect
       const { username, password } = this.state.userpass
 
-      device.initWizard({ type: 'btrfs', target: selection, mode, username, password })
+      device.initWizard({ target: selection, mode, username, password })
     }
   }
 
@@ -136,12 +136,37 @@ class InitWizard extends StateUp(React.Component) {
   finishedInfo() {
     const { mkfs, storage, install, boot, users, firstUser, token } = this.props.device
 
-    if (!mkfs || mkfs.isPending()) { return ['busy', '创建文件系统'] } else if (mkfs.isRejected()) { return ['error', '创建文件系统失败'] } else if (!storage || storage.isPending()) { return ['busy', '更新文件系统信息'] } else if (storage.isRejected()) { return ['error', '更新文件系统信息失败'] } else if (!install || install.isPending()) { return ['busy', '安装应用'] } else if (install.isRejected()) { return ['error', '安装应用失败'] } else if (!boot || boot.isPending()
-      || (boot.isFulfilled() && boot.value().fruitmix === null)
-      || (boot.isFulfilled() && boot.value().fruitmix
-        && boot.value().fruitmix.state === 'starting')) { return ['busy', '启动应用'] } else if (boot.isRejected()
-      || (boot.isFulfilled() && boot.value().fruitmix
-        && boot.value().fruitmix.state === 'exited')) { return ['error', '启动应用失败'] } else if (!firstUser || firstUser.isPending()) { return ['busy', '创建用户'] } else if (firstUser.isRejected()) { return ['error', '创建用户失败'] } else if (!users || users.isPending()) { return ['busy', '获取最新用户列表'] } else if (users.isRejected()) { return ['error', '获取最新用户列表失败'] } else if (!token || token.isPending()) { return ['busy', '登录'] } else if (token.isRejected()) { return ['error', '登录失败'] }
+    if (!mkfs || mkfs.isPending()) {
+      return ['busy', '创建文件系统']
+    } else if (mkfs.isRejected()) {
+      return ['error', '创建文件系统失败']
+    } else if (!storage || storage.isPending()) {
+      return ['busy', '更新文件系统信息']
+    } else if (storage.isRejected()) {
+      return ['error', '更新文件系统信息失败']
+    } else if (!install || install.isPending()) {
+      return ['busy', '安装应用']
+    } else if (install.isRejected()) {
+      return ['error', '安装应用失败']
+    } else if (!boot || boot.isPending() || (boot.isFulfilled() && boot.value().fruitmix === null)
+      || (boot.isFulfilled() && boot.value().fruitmix && boot.value().fruitmix.state === 'starting')) {
+      return ['busy', '启动应用']
+    } else if (boot.isRejected() || (boot.isFulfilled() && boot.value().fruitmix
+      && boot.value().fruitmix.state === 'exited')) {
+      return ['error', '启动应用失败']
+    } else if (!firstUser || firstUser.isPending()) {
+      return ['busy', '创建用户']
+    } else if (firstUser.isRejected()) {
+      return ['error', '创建用户失败']
+    } else if (!users || users.isPending()) {
+      return ['busy', '获取最新用户列表']
+    } else if (users.isRejected()) {
+      return ['error', '获取最新用户列表失败']
+    } else if (!token || token.isPending()) {
+      return ['busy', '登录']
+    } else if (token.isRejected()) {
+      return ['error', '登录失败']
+    }
     return ['success', '成功']
   }
 
@@ -180,8 +205,8 @@ class InitWizard extends StateUp(React.Component) {
   }
 
   renderBottomButton() {
-    let label,
-      action
+    let label
+    let action
 
     if (this.state.finished && this.finishedInfo()[0] === 'error') {
       label = '退出'
@@ -207,23 +232,13 @@ class InitWizard extends StateUp(React.Component) {
   }
 
   render() {
+    const title = this.props.title || '初始化向导'
     const { finished, stepIndex } = this.state
-
-    const titleStyle = {
-      margin: '34px 64px 12px 64px',
-      fontSize: 34,
-      color: 'rgba(0,0,0,0.54)'
-    }
-
-    const storage =
-      this.props.device.storage.isFulfilled()
-        ? this.props.device.storage.value()
-        : null
+    const storage = this.props.device.storage.isFulfilled() ? this.props.device.storage.value() : null
 
     return (
-      <div style={{ width: '100%', height: 640, backgroundColor: '#FAFAFA', position: 'relative', overflowY: 'auto' }}>
-
-        <div style={titleStyle}>初始化向导</div>
+      <div style={{ width: '100%', minHeight: 640, backgroundColor: '#FAFAFA', position: 'relative', overflowY: 'auto' }}>
+        <div style={{ margin: '34px 64px 12px 64px', fontSize: 34, color: 'rgba(0,0,0,0.54)' }}>{ title }</div>
         <div style={{ marginLeft: 64, marginRight: 64 }}>
           <Stepper activeStep={stepIndex} orientation="vertical">
             <Step>

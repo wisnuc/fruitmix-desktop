@@ -37,13 +37,14 @@ class ModelNameCard extends React.Component {
     if (this.props.ws215i) {
       logoType = Barcelona
     }
+    logoType = Barcelona
 
     return logoType
   }
 
 
   render() {
-    const bcolor = this.props.toggle ? grey500 : this.props.backgroundColor || '#3f51B5'
+    const bcolor = this.props.toggle ? '#FAFAFA' : this.props.backgroundColor || '#3f51B5'
     const paperStyle = {
       width: '100%',
       display: 'flex',
@@ -59,7 +60,7 @@ class ModelNameCard extends React.Component {
         <Paper id="top-half-container" style={paperStyle} rounded={false}>
           <div style={{ width: '100%', display: 'flex', alignItems: 'stretch' }}>
             <HoverNav
-              style={{ flex: this.props.toggle ? '0 0 24px' : '0 0 64px', transition: 'all 300ms' }}
+              style={{ flex: this.props.toggle ? '0 0 24px' : '0 0 64px', transition: 'all 300ms', zIndex: 100 }}
               direction="left"
               color={bcolor}
               onTouchTap={this.props.toggle ? undefined : this.props.onNavPrev}
@@ -67,60 +68,60 @@ class ModelNameCard extends React.Component {
             <div style={{ flexGrow: 1, transition: 'height 300ms' }}>
               <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                 {
-                React.createElement(this.logoType(), {
+                  React.createElement(this.logoType(), {
 
-                  style: this.props.toggle ? {
-                    position: 'absolute',
-                    top: 12,
-                    right: 0,
-                    transition: 'all 300ms'
-                  } : {
-                    position: 'absolute',
-                    top: 64,
-                    left: 0,
-                    right: 0,
-                    margin: 'auto',
-                    transition: 'all 300ms'
-                  },
+                    style: this.props.toggle ? {
+                      position: 'absolute',
+                      top: 12,
+                      right: 0,
+                      transition: 'all 300ms'
+                    } : {
+                      position: 'absolute',
+                      top: 64,
+                      left: 0,
+                      right: 0,
+                      margin: 'auto',
+                      transition: 'all 300ms'
+                    },
 
-                  fill: this.props.toggle ? 'rgba(255,255,255,0.7)' : '#FFF',
-                  size: this.props.toggle ? 40 : 80
-                })
-              }
-                <div style={{ height: this.props.toggle ? 16 : 192, transition: 'height 300ms' }} />
-                <div style={{ position: 'relative', transition: 'all 300ms' }}>
+                    fill: this.props.toggle ? 'rgba(0,0,0,0.54)' : '#006064',
+                    size: this.props.toggle ? 40 : 80
+                  })
+                }
+                <div style={{ height: this.props.toggle ? 20 : 192, transition: 'height 300ms' }} />
+                <div style={{ position: 'relative', transition: 'all 300ms', marginLeft: this.props.toggle ? 0 : -40 }}>
                   <div
                     style={{
                       fontSize: this.props.toggle ? 14 : 24,
-                      fontWeight: 'medium',
-                      color: this.props.toggle ? 'rgba(255,255,255,0.7)' : '#FFF',
-                      marginBottom: this.props.toggle ? 0 : 12
+                      fontWeight: 500,
+                      color: this.props.toggle ? 'rgba(0,0,0,0.54)' : 'rgba(0,0,0,0.87)',
+                      marginBottom: this.props.toggle ? 4 : 12
                     }}
-                  >{this.model()}</div>
+                  >闻上盒子</div>
+                  { !this.props.toggle &&
                   <div
                     style={{
                       fontSize: 14,
-                      color: 'rgba(255,255,255,0.7)',
+                      color: 'rgba(0,0,0,0.54)',
+                      marginBottom: 8
+                    }}
+                  >{this.model()}</div> }
+                  <div
+                    style={{
+                      fontSize: 14,
+                      color: 'rgba(0,0,0,0.54)',
                       marginBottom: 12,
                       display: 'flex',
                       alignItems: 'center',
                       cursor: 'pointer'
                     }}
-                    onTouchTap={() =>
-                    ipcRenderer.send('newWebWindow', '固件版本管理', `http://${this.props.device.address}:3001`)
-                  }
                   >
                     {this.props.device.address}
-                    <ActionOpenInBrowser style={{ marginLeft: 8 }} color="rgba(255,255,255,0.7)" />
+                    { /*
+                    onTouchTap={() => ipcRenderer.send('newWebWindow', '固件版本管理', `http://${this.props.device.address}:3001`) }
+                      <ActionOpenInBrowser style={{ marginLeft: 8 }} color="rgba(0,0,0,0.54)" />
+                    */}
                   </div>
-                  { !this.props.toggle &&
-                  <div
-                    style={{
-                      fontSize: 14,
-                      color: 'rgba(255,255,255,0.7)',
-                      marginBottom: 16
-                    }}
-                  >{this.serial()}</div> }
                 </div>
               </div>
             </div>

@@ -35,11 +35,11 @@ class LoginBox extends React.Component {
   login() {
     const { uuid, username } = this.props.user
     const password = this.state.password
-    console.log(uuid, password)
     this.props.device.request('token', { uuid, password }, (err) => {
       if (err) {
         console.log(`err:${err}`)
       } else {
+        console.log(uuid, password, this.props.device, this.props.user)
         this.props.done('LOGIN', this.props.device, this.props.user)
       }
     })
@@ -48,12 +48,17 @@ class LoginBox extends React.Component {
   autologin() {
     const { uuid, username } = this.props.device.users.value()[0]
     const password = this.state.password
+    console.log('uuid', uuid)
+    console.log('password', 'w')
+    console.log('this.props.device', this.props.device)
+    console.log('this.props.user', this.props.user)
     this.props.device.request('token', { uuid, password: 'w' }, (err) => {
       if (err) { console.log(`err:${err}`) } else {
         this.props.done('LOGIN', this.props.device, this.props.user)
       }
     })
   }
+
   // componentDidMount() { this.autologin() }
 
   render() {

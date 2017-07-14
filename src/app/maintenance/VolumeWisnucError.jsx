@@ -47,9 +47,14 @@ export default class VolumeWisnucError extends React.Component {
   }
 
   render() {
-    // debug('VolumeWisnucError', this.props)
-    const VolumeisMissing = this.props.volume.isMissing
-    if (VolumeisMissing) {
+    debug('VolumeWisnucError', this.props)
+    const { boot, creatingNewVolume, volume } = this.props
+
+    /* wisnuc is running */
+    if (boot.current !== null) return (<div />)
+
+    /* volume is Missing */
+    if (volume.isMissing) {
       return (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <ReportProblemIcon color={this.props.creatingNewVolume === null ? pinkA200 : 'rgba(0,0,0,0.38)'} />
@@ -65,22 +70,26 @@ export default class VolumeWisnucError extends React.Component {
         </div>
       )
     }
-    if (typeof this.props.volume.wisnuc !== 'object') return null // ENOFRUITMIX can't work
-    const { status, users, error } = this.props.volume.wisnuc
+
+    let error = ''
+    let users = []
+    if (typeof volume.users === 'string') {
+      error = volume.users
+    } else if (typeof volume.users === 'array') {
+      users = volume.users
+    }
+
+    // if (error) return <div>{ `error: ${error}, status: ${status}` }</div>
+
     if (users) {
       if (users.length === 0) {
         return <div>WISNUC已安装但尚未创建用户</div>
       }
       return (<div />)
-    } else if (status !== 'READY') {
-      // debug("status",status)
-      // debug("error",error)
-        /*
-      let text = 'WISNUC未安装'
-      */
+    } else if (error) {
       let text
-      switch (status) {
-        case 'ENOENT' :
+      switch (error) {
+        case 'ENOALT' :
           text = 'WISNUC未安装'; break
         case 'EDATA':
           text = 'WISNUC未正确安装，用户信息未找到或不能正确解析'; break
@@ -102,7 +111,7 @@ export default class VolumeWisnucError extends React.Component {
           </div>
         </div>
       )
-    } else if (error) {
+    } else if (0) {
       return (
         <div style={{ display: 'flex' }}>
           <ReportProblemIcon color={this.props.creatingNewVolume === null ? pinkA200 : 'rgba(0,0,0,0.38)'} />

@@ -159,7 +159,7 @@ class Physical extends Base {
   }
 
   navGroup() {
-    return 'file'
+    return 'physical'
   }
 
   menuName() {
@@ -233,8 +233,9 @@ class Physical extends Base {
               detailFile={this.state.entries[this.state.detailIndex]}
               path={this.state.path}
               ipcRenderer={ipcRenderer}
+              primaryColor={this.groupPrimaryColor()}
             /> :
-            <div style={{ height: 128, backgroundColor: '#00796B' }} />
+            <div style={{ height: 128, backgroundColor: '#558B2F' }} />
         }
       </div>
     )

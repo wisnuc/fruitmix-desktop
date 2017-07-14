@@ -49,7 +49,8 @@ class Device extends RequestManager {
       mkFileSystem: this.mkFileSystem.bind(this),
       reInstall: this.reInstall.bind(this),
       refreshSystemState: this.refreshSystemState.bind(this),
-      manualBoot: this.manualBoot.bind(this)
+      manualBoot: this.manualBoot.bind(this),
+      addFirstUser: this.addFirstUser.bind(this)
     }
   }
 
@@ -59,22 +60,22 @@ class Device extends RequestManager {
     switch (name) {
       case 'device':
         r = request
-        .get(`http://${this.mdev.address}:3000/system/device`)
+        .get(`http://${this.mdev.address}:3000/control/system`)
         break
 
       case 'boot':
         r = request
-        .get(`http://${this.mdev.address}:3000/system/boot`)
+        .get(`http://${this.mdev.address}:3000/boot`)
         break
 
       case 'storage':
         r = request
-        .get(`http://${this.mdev.address}:3000/system/storage?wisnuc=true`)
+        .get(`http://${this.mdev.address}:3000/storage`)
         break
 
       case 'power':
         r = request
-        .post(`http://${this.mdev.address}:3000/system/boot`)
+        .post(`http://${this.mdev.address}:3000/boot`)
         .timeout(30000)
         .send(args)
         .set('Accept', 'application/json')
@@ -82,22 +83,22 @@ class Device extends RequestManager {
 
       case 'timedate':
         r = request
-        .get(`http://${this.mdev.address}:3000/system/timedate`)
+        .get(`http://${this.mdev.address}:3000/control/timedate`)
         break
 
       case 'net':
         r = request
-        .get(`http://${this.mdev.address}:3000/system/net`)
+        .get(`http://${this.mdev.address}:3000/control/net/interfaces`)
         break
 
       case 'fan':
         r = request
-        .get(`http://${this.mdev.address}:3000/system/fan`)
+        .get(`http://${this.mdev.address}:3000/control/fan`)
         break
 
       case 'setFanScale':
         r = request
-        .post(`http://${this.mdev.address}:3000/system/fan`)
+        .post(`http://${this.mdev.address}:3000/control/fan`)
         .timeout(30000)
         .send(args)
         .set('Accept', 'application/json')
@@ -105,32 +106,25 @@ class Device extends RequestManager {
 
       case 'ipaliasing':
         r = request
-        .get(`http://${this.mdev.address}:3000/system/ipaliasing`)
+        .get(`http://${this.mdev.address}:3000/control/net/ipaliasing`)
         break
 
       case 'setIpaliasing':
         r = request
-        .post(`http://${this.mdev.address}:3000/system/ipaliasing`)
+        .post(`http://${this.mdev.address}:3000/control/net/ipaliasing`)
         .timeout(30000)
-        .send(args)
-        .set('Accept', 'application/json')
-        break
-
-      case 'delIpaliasing':
-        r = request
-        .del(`http://${this.mdev.address}:3000/system/ipaliasing`)
         .send(args)
         .set('Accept', 'application/json')
         break
 
       case 'users':
         r = request
-        .get(`http://${this.mdev.address}:3721/login`)
+        .get(`http://${this.mdev.address}:3000/users`)
         break
 
       case 'mkfs':
         r = request
-        .post(`http://${this.mdev.address}:3000/system/mkfs`)
+        .post(`http://${this.mdev.address}:3000/storage/volumes`)
         .timeout(30000)
         .send(args)
         .set('Accept', 'application/json')
@@ -138,7 +132,15 @@ class Device extends RequestManager {
 
       case 'install':
         r = request
-        .post(`http://${this.mdev.address}:3000/system/install`)
+        .patch(`http://${this.mdev.address}:3000/boot`)
+        .timeout(30000)
+        .send(args)
+        .set('Accept', 'application/json')
+        break
+
+      case 'forceBoot':
+        r = request
+        .patch(`http://${this.mdev.address}:3000/boot`)
         .timeout(30000)
         .send(args)
         .set('Accept', 'application/json')
@@ -146,7 +148,7 @@ class Device extends RequestManager {
 
       case 'firstUser':
         r = request
-        .post(`http://${this.mdev.address}:3721/init`)
+        .post(`http://${this.mdev.address}:3000/users`)
         .send(args)
         .set('Accept', 'application/json')
         break
@@ -161,9 +163,22 @@ class Device extends RequestManager {
 
       case 'token':
         r = request
-        .get(`http://${this.mdev.address}:3721/token`)
+        .get(`http://${this.mdev.address}:3000/token`)
         .auth(args.uuid, args.password)
         .set('Accept', 'application/json')
+        break
+
+      case 'wxLogin':
+        r = request
+          .get('http://10.10.9.59:5757/v1/test/oauth2')
+          .query({ code: args.code })
+          .query({ platform: args.platform })
+        break
+
+      /** FirmwareUpdate API **/
+      case 'firm':
+        r = request
+          .get('http://10.10.9.86:3001/state')
         break
 
       default:
@@ -210,33 +225,36 @@ class Device extends RequestManager {
   //    12. creating first user failed
   // *  13. retrieving token
   //    14. retrieving token failed
-  async initWizardAsync(args) {
-    const { type, target, mode, username, password } = args
 
-    const uuid = await this.requestAsync('mkfs', { type, target, mode })
+  async initWizardAsync(args) {
+    const { target, mode, username, password } = args
+
+    const uuid = await this.requestAsync('mkfs', { target, mode })
     console.log('device initWizard:  mkfs returns uuid', uuid)
 
     await this.requestAsync('storage', null)
     console.log('device initWizard: storage refreshed')
 
-    await this.requestAsync('install', { target: uuid, username, password, install: true })
+    await this.requestAsync('install', { current: uuid.uuid })
     console.log('device initWizard: install fruitmix success')
 
     while (true) {
       await Promise.delay(1000)
       await this.requestAsync('boot', null)
 
-      const fruitmix = this.boot.value().fruitmix
-      if (fruitmix) {
-        if (fruitmix.state === 'started') {
+      const current = this.boot.value().current
+      const state = this.boot.value().state
+
+      if (current) {
+        if (state === 'started') {
           // this may be due to worker not started yet
           await Promise.delay(2000)
 
           console.log('device initWizard: fruitmix started')
           break
         }
-        if (fruitmix.state === 'exited') {
-          return console.log('device initWizard: fruitmix exited (unexpected), stop')
+        if (state === 'stopping') {
+          return console.log('device initWizard: fruitmix stopping (unexpected), stop')
         }
         console.log('device initWizard: fruitmix starting, waiting...')
       } else { console.log('device initWizard: fruitmix is null, legal ???') } // NO!!!
@@ -254,9 +272,24 @@ class Device extends RequestManager {
     console.log('device initWizard: token retrieved')
   }
 
+  async addFirstUserAsync(args) {
+    const { username, password } = args
+
+    await this.requestAsync('firstUser', { username, password })
+
+    const user = this.firstUser.value()
+    console.log('device initWizard: first user created')
+
+    await this.requestAsync('users', null)
+    console.log('device initWizard: users refreshed')
+
+    await this.requestAsync('token', { uuid: user.uuid, password })
+    console.log('device initWizard: token retrieved')
+  }
+
   async mkfsAsync(args) {
-    const { type, target, mode } = args
-    const uuid = await this.requestAsync('mkfs', { type, target, mode })
+    const { target, mode } = args
+    const uuid = await this.requestAsync('mkfs', { target, mode })
     await this.requestAsync('storage', null)
   }
 
@@ -265,7 +298,8 @@ class Device extends RequestManager {
     const install = true
     let reinstall = false
     if (remove === 'wisnuc') reinstall = true // FIXME
-    await this.requestAsync('install', { target, username, password, install, reinstall })
+    await this.requestAsync('install', { current: target })
+    // await this.requestAsync('install', { target, username, password, install, reinstall })
     while (true) {
       await Promise.delay(1000)
       await this.requestAsync('boot', null)
@@ -292,6 +326,10 @@ class Device extends RequestManager {
 
   initWizard(args) {
     this.initWizardAsync(args).asCallback(() => {})
+  }
+
+  addFirstUser(args) {
+    this.addFirstUserAsync(args).asCallback(() => {})
   }
 
   mkFileSystem(args) {
@@ -327,42 +365,24 @@ class Device extends RequestManager {
       return 'systemError'
     }
 
-    const bootState = this.boot.value().state
-
-    if (bootState === 'normal') { // fruitmix booted
-      if (this.users.isRejected()) { return 'fruitmixError' }
-      return 'ready'
-    }
-       // maintenance mode
-
     const boot = this.boot.value()
 
-    if (boot.bootMode === 'maintenance') {
+    /* normal mode */
+    if (!boot.error && boot.state === 'started') {
+      if (this.users.isRejected()) { return 'fruitmixError' }
+      return 'ready'
+    } else if (!boot.error && boot.state === 'starting'){
+      this.requestAsync('boot', null)
+    }
+
+    /* maintenance mode */
+    if (boot.mode === 'maintenance') {
       return 'userMaint'
-    } else if (boot.error === 'EFAIL') {
+    } else if (boot.error === 'ELASTNOTMOUNT' || boot.error === 'ELASTMISSING' || boot.error === 'ELASTDAMAGED') {
       return 'failLast'
-    } else if (boot.error === 'EMULTI') {
-      return 'failMulti'
     } else if (boot.error === 'ENOALT') {
-      const { blocks, volumes } = this.storage.value()
-
-           // TODO new boot not compatible with old one
-/**
-          if (volumes.length === 0) { // no existing btrfs volume
-
-            // all mounted file systems has no wisnuc
-            let noFruitmix =
-              blocks
-                .filter(blk => blk.isFileSystem && blk.isMounted)
-                 .every(blk => typeof blk.wisnuc === 'object' && blk.wisnuc !== null && blk.wisnuc.status === 'ENOENT')
-
-            if (noFruitmix && this.boot.lastFileSystem === null)
-              return 'uninitialized'
-          }
-**/
-
-      if (volumes.length === 0 && boot.lastFileSystem === null) { return 'uninitialized' }
-
+      const { volumes } = this.storage.value()
+      if (volumes.length === 0 && boot.last === null) { return 'uninitialized' }
       return 'failNoAlt'
     }
 

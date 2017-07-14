@@ -19,15 +19,15 @@ class Layout extends React.PureComponent {
 
   render() {
     return (
-      <div 
+      <div
         id="this-is-layout"
         key="this-is-layout"
-        style={{width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center'}}
+        style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       >
-        <Paper style={{width: this.props.hello ? '80%' : '60%', height: this.props.hello ? '80%' : '60%', transition: 'all 1s'}} onTouchTap={this.props.toggle}>
+        <Paper style={{ width: this.props.hello ? '80%' : '60%', height: this.props.hello ? '80%' : '60%', transition: 'all 1s' }} onTouchTap={this.props.toggle}>
           { this.props.title }
           { this.props.children}
-        </Paper> 
+        </Paper>
       </div>
     )
   }
@@ -41,7 +41,7 @@ class Frame01 extends React.Component {
 
   render() {
     return (
-      <Layout {...this.props.layoutProps} title="I am frame01" hello={true}>
+      <Layout {...this.props.layoutProps} title="I am frame01" hello>
         <div>Hello</div>
       </Layout>
     )
@@ -75,8 +75,7 @@ class Frame extends React.Component {
   }
 
   render() {
-   
-    return this.state.select 
+    return this.state.select
       ? <Frame01 layoutProps={this.layoutProps} />
       : <Frame02 layoutProps={this.layoutProps} />
   }

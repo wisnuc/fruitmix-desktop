@@ -23,11 +23,20 @@ const quickSort = (arr, type) => {
   return quickSort(left, type).concat([pivot], quickSort(right, type))
 }
 
+let preTasks = 0
+
 const sendInfor = () => {
   const concatUserTasks = [].concat(uploadingTasks, downloadingTasks)
   const concatFinishTasks = [].concat(uploadedTasks, downloadedTasks)
   const userTasks = quickSort(concatUserTasks, 'createTime')
   const finishTasks = quickSort(concatFinishTasks, 'finishDate')
+
+  if (preTasks !== 0 && userTasks.length === 0) {
+    getMainWindow().webContents.send('snackbarMessage', { message: '文件传输任务完成' })
+  }
+
+  preTasks = userTasks.length
+
   try {
     getMainWindow().webContents.send(
       'UPDATE_TRANSMISSION',

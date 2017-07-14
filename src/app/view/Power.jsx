@@ -22,7 +22,7 @@ class Power extends Base {
   }
 
   navGroup() {
-    return 'settings'
+    return 'device'
   }
 
   menuName() {

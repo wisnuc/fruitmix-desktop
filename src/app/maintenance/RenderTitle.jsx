@@ -22,7 +22,7 @@ const RenderTitle = props => (
       <BallOfYarn style={{ width: 24, height: 24, marginLeft: 24, zIndex: 1100 }} color="#FFF" />
       <div style={{ fontSize: 34, color: '#FFF', marginLeft: 36, zIndex: 1100 }} >
           WISNUC - { !props.state.boot ? '' :
-              props.state.boot.state === 'maintenance' ? '维护模式' : '已正常启动'
+              props.state.boot.current === null ? '维护模式' : '已正常启动'
           }
       </div>
     </div>

@@ -263,7 +263,12 @@ class FileContent extends Component {
 
   rowDoubleClick(e, index) {
     if (index === -1) return
-    this.props.listNavBySelect()
+    debug('rowDoubleClick', this.props, index)
+    const entry = this.props.entries[index]
+    if (entry.type === 'file') {
+      ipcRenderer.send('OPEN_FILE', { file: entry, path: this.props.home.path })
+    }
+    // this.props.listNavBySelect()
   }
 
   drop(e) {

@@ -7,8 +7,7 @@ import Request from './Request'
 class Fruitmix extends EventEmitter {
 
   constructor(address, userUUID, token) {
-
-    super()  
+    super()
 
     this.address = address
     this.userUUID = userUUID
@@ -18,19 +17,17 @@ class Fruitmix extends EventEmitter {
       address,
       userUUID,
       token,
-      request: this.request.bind(this),
+      request: this.request.bind(this)
     }
   }
 
   setState(name, nextState) {
-
-    let state = this.state
+    const state = this.state
     this.state = Object.assign({}, state, { [name]: nextState })
     this.emit('updated', state, this.state)
   }
 
   setRequest(name, props, f, next) {
-
     if (this[name]) {
       this[name].abort()
       this[name].removeAllListeners()
@@ -38,24 +35,22 @@ class Fruitmix extends EventEmitter {
 
     this[name] = new Request(props, f)
     this[name].on('updated', (prev, curr) => {
-
       this.setState(name, curr)
 
       // console.log(`${name} updated`, prev, curr, this[name].isFinished(), typeof next === 'function')
 
       if (this[name].isFinished() && next) {
-        this[name].isRejected() 
-          ? next(this[name].reason())  
+        this[name].isRejected()
+          ? next(this[name].reason())
           : next(null, this[name].value())
       }
     })
 
-    // emit 
+    // emit
     this.setState(name, this[name].state)
   }
 
   clearRequest(name) {
-
     if (this[name]) {
       this[name].abort()
       this[name].removeAllListeners()
@@ -66,15 +61,14 @@ class Fruitmix extends EventEmitter {
 
   aget(ep) {
     return request
-      .get(`http://${this.address}:3721/${ep}`)
-      .set('Authorization', 'JWT ' + this.token)
+      .get(`http://${this.address}:3000/${ep}`)
+      .set('Authorization', `JWT ${this.token}`)
   }
 
   apost(ep, data) {
-
-    let r = request
-      .post(`http://${this.address}:3721/${ep}`)
-      .set('Authorization', 'JWT ' + this.token)
+    const r = request
+      .post(`http://${this.address}:3000/${ep}`)
+      .set('Authorization', `JWT ${this.token}`)
 
     return typeof data === 'object'
       ? r.send(data)
@@ -82,10 +76,9 @@ class Fruitmix extends EventEmitter {
   }
 
   apatch(ep, data) {
-
-    let r = request
-      .patch(`http://${this.address}:3721/${ep}`)
-      .set('Authorization', 'JWT ' + this.token)
+    const r = request
+      .patch(`http://${this.address}:3000/${ep}`)
+      .set('Authorization', `JWT ${this.token}`)
 
     return typeof data === 'object'
       ? r.send(data)
@@ -94,149 +87,160 @@ class Fruitmix extends EventEmitter {
 
   adel(ep) {
     return request
-      .del(`http://${this.address}:3721/${ep}`)
-      .set('Authorization', 'JWT ' + this.token)
+      .del(`http://${this.address}:3000/${ep}`)
+      .set('Authorization', `JWT ${this.token}`)
   }
 
   request(name, args, next) {
-
     let r
 
-    switch(name) {
-    case 'login':
-      r = request.get(`http://${this.address}:3721/login`)
-      break
+    switch (name) {
 
-    case 'getToken':
-      r = request.get(`http://${this.address}:3721/token`)
+      case 'getToken':
+        r = request
+          .get(`http://${this.address}:3000/token`)
           .auth(args.uuid, args.password)
           .set('Accept', 'application/json')
-      break
+        break
 
-    case 'account':
-      r = this.aget('account')
-      break
+      case 'account':
+        r = this.aget(`users/${args.uuid}`)
+        break
 
-    case 'updateAccount':
+      case 'updateAccount':
         r = this.apatch(`users/${args.uuid}`, args)
-      break
+        break
 
-    case 'users':
-      r = this.aget('users')
-      break
+      case 'users':
+        r = this.aget('users')
+        break
 
-    case 'drives':
-      r = this.aget('drives')
-      break
+      case 'drives':
+        r = this.aget('drives')
+        break
 
-    case 'adminUsers':
-      r = this.aget('admin/users')
-      break
+      case 'adminUsers':
+        r = this.aget('admin/users')
+        break
 
-    case 'adminCreateUser':
-      r = this.apost('admin/users', {
-        type: 'local',
-        username: args.username,
-        password: args.password
-      })
-      break
+      case 'adminCreateUser':
+        r = this.apost('admin/users', {
+          type: 'local',
+          username: args.username,
+          password: args.password
+        })
+        break
 
-    case 'adminDrives':
-      r = this.aget('admin/drives')
-      break
+      case 'adminDrives':
+        r = this.aget('drives')
+        break
 
-    case 'driveListNavDir':
-      r = this.aget(`files/fruitmix/list-nav/${args.dirUUID}/${args.rootUUID}`)
-      break
+      case 'driveListNavDir':
+        r = this.aget(`files/fruitmix/list-nav/${args.dirUUID}/${args.rootUUID}`)
+        break
 
-    case 'adminCreateDrive':
-      r = this.apost('admin/drives', {
-        label: args.label,
-        writelist: args.writelist,
-        readlist: [],
-        shareAllowed: true
-      })
-      break
+      case 'adminCreateDrive':
+        r = this.apost('admin/drives', {
+          label: args.label,
+          writelist: args.writelist,
+          readlist: [],
+          shareAllowed: true
+        })
+        break
 
-    case 'adminUpdateDrive':
-      r = this.apatch(`admin/drives/${args.uuid}`, args)
-      break
+      case 'adminUpdateDrive':
+        r = this.apatch(`admin/drives/${args.uuid}`, args)
+        break
 
     /** File APIs **/
-    case 'listDir':
-      r = this.aget(`files/fruitmix/list/${args.dirUUID}`)
-      break
+      case 'listDir':
+        r = this.aget(`drives/${args.driveUUID}`)
+        break
 
-    case 'listNavDir':
-      r = this.aget(`files/fruitmix/list-nav/${args.dirUUID}/${args.rootUUID}`)
-      break
+      case 'listNavDir':
+        r = this.aget(`drives/${args.driveUUID}/dirs/${args.dirUUID}/files`)
+        break
 
-    case 'downloadFile':
-      r = this.aget(`files/fruitmix/download/${args.dirUUID}/${args.fileUUID}`)
-      break
+      case 'mkdir':
+        r = this.apost(`drives/${args.driveUUID}`, { parent: args.dirUUID, name: args.dirname })
+        break
 
-    case 'mkdir':
-      r = this.apost(`files/fruitmix/mkdir/${args.dirUUID}`, { dirname: args.dirname})
-      break
+      case 'renameDir':
+        r = this.apatch(`drives/${args.driveUUID}/dirs/${args.dirUUID}`, { name: args.dirname })
+        break
 
-    case 'uploadFile':
-      r = null // TODO
-      break
+      case 'renameFile':
+        r = this.apatch(`drives/${args.driveUUID}/dirs/${args.dirUUID}/files/${args.fileUUID}`, { name: args.filename })
+        break
 
-    case 'overwriteFile':
-      r = null // TODO
-      break
+      case 'deleteDir':
+        r = this.adel(`drives/${args.driveUUID}/dirs/${args.dirUUID}`)
+        break
 
-    case 'renameDirOrFile':
-      r = this.apatch(`files/fruitmix/rename/${args.dirUUID}/${args.nodeUUID}`, {filename: args.filename})
-      break
-
-    case 'deleteDirOrFile':
-      r = this.adel(`files/fruitmix/${args.dirUUID}/${args.nodeUUID}`)
-      break
+      case 'deleteFile':
+        r = this.adel(`drives/${args.driveUUID}/dirs/${args.dirUUID}/files/${args.fileUUID}`)
+        break
 
     /** Ext APIs **/
-    case 'extDrives':
-      r = this.aget(`files/external/fs`)
-      break
+      case 'extDrives':
+        r = this.aget('files/external/fs')
+        break
 
-    case 'extListDir':
-      r = this.aget(`files/external/fs/${args.path}`)
-      break
+      case 'extListDir':
+        r = this.aget(`files/external/fs/${args.path}`)
+        break
 
-    case 'extMkdir':
-      break
-    
-    case 'extRenameDirOrFile':
-      break
+      case 'extMkdir':
+        break
 
-    case 'extDeleteDirOrFile':
-      break
+      case 'extRenameDirOrFile':
+        break
+
+      case 'extDeleteDirOrFile':
+        break
 
     /** File Transfer API **/
     // ????
 
     /** File Share API **/
-    case 'fileShare':
-      r = this.aget(`fileshare`)
-      break
+      case 'fileShare':
+        r = this.aget('fileshare')
+        break
 
     /** Media Share API **/
-    case 'mediaShare':
-      r = this.aget(`mediashare`)
-      break
+      case 'mediaShare':
+        r = this.aget('mediashare')
+        break
 
     /** Media API **/
-    case 'media':
-      r = this.aget(`media`)
-      break
+      case 'media':
+        r = this.aget('media')
+        break
 
-    default:
-      break
+    /** Docker API **/
+      case 'docker':
+        r = request.get('http://10.10.9.86:3000/server')
+        break
+
+    /** Wechat API **/
+      case 'creatTicket':
+        r = this.apost('station/tickets/', { type: 2 })
+        break
+
+      case 'wxBind':
+        r = request
+          .get('http://10.10.9.59:5757/v1/wx/oauth2')
+          .query({ ticketId: args.ticketId })
+          .query({ code: args.code })
+          .query({ platform: args.platform })
+        break
+
+      default:
+        break
     }
 
     if (!r) return console.log(`no request handler found for ${name}`)
-    this.setRequest(name, args, cb => r.end(cb), next) 
+    this.setRequest(name, args, cb => r.end(cb), next)
   }
 
   async requestAsync(name, args) {
@@ -244,10 +248,9 @@ class Fruitmix extends EventEmitter {
   }
 
   start() {
-
-    this.requestAsync('account', null).asCallback((err, account) => {
+    this.requestAsync('account', { uuid: this.userUUID }).asCallback((err, account) => {
       if (account) {
-        this.request('listNavDir', { dirUUID: account.home, rootUUID: account.home })
+        this.request('listNavDir', { drivesUUID: account.home, dirUUID: account.home })
         if (account.isAdmin) {
           this.request('adminUsers')
           this.request('adminDrives')
@@ -256,7 +259,13 @@ class Fruitmix extends EventEmitter {
     })
 
     this.request('users')
-    this.request('drives')
+    // this.request('drives')
+    this.requestAsync('drives').asCallback((err, drives) => {
+      if (drives) {
+        const drive = drives[0]
+        this.request('listNavDir', { driveUUID: drive.uuid, dirUUID: drive.uuid })
+      }
+    })
     this.request('fileShare')
     this.request('mediaShare')
     this.request('media')
@@ -264,4 +273,3 @@ class Fruitmix extends EventEmitter {
 }
 
 export default Fruitmix
-

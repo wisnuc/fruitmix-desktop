@@ -377,6 +377,7 @@ class Public extends Base {
               detailFile={this.state.entries[this.state.detailIndex]}
               path={this.state.path}
               ipcRenderer={ipcRenderer}
+              primaryColor={this.groupPrimaryColor()}
             /> :
             <div style={{ height: 128, backgroundColor: '#00796B' }} />
         }
@@ -472,7 +473,7 @@ class Public extends Base {
         </DialogOverlay>
 
         <DialogOverlay open={this.state.noAccess}>
-          { 
+          {
             this.state.noAccess &&
             <div style={{ width: 280, padding: '24px 24px 0px 24px' }}>
               <div style={{ color: 'rgba(0,0,0,0.54)' }}>{'对不起，您没有访问权限！'}</div>

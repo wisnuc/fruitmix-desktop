@@ -218,12 +218,12 @@ class InitVolumeDialogs extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.props.volume === undefined && nextProps.volume !== undefined) {
-      const wisnuc = nextProps.volume.wisnuc
+      const error = nextProps.boot.error
       this.setState({
         // wisnuc directory is not exist when intact is true
         // stage: wisnuc.intact ? 'SETUSER' : 'CONFIRM',
-        stage: wisnuc.status === 'ENOENT' ? 'SETUSER' : 'CONFIRM',
-        remove: wisnuc.status === 'ENOENT' ? undefined : 'wisnuc',
+        stage: error === 'ENOALT' ? 'SETUSER' : 'CONFIRM',
+        remove: undefined,
         user: null,
         err: null,
         body: null

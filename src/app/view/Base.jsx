@@ -1,7 +1,6 @@
 import React from 'react'
 
-import { teal600, indigo600, lightBlue600, cyan500, green600, lightGreen700, lime800, blue500, brown500, purple300, deepPurple500, indigo300, red400, orange600 } from 'material-ui/styles/colors'
-import { pinkA200 } from 'material-ui/styles/colors'
+import { teal600, indigo600, lightBlue600, cyan500, green600, lightGreen700, lime800, blue500, blueGrey400, blueGrey500, brown500, purple300, deepPurple500, indigo300, red400, orange600, pinkA200 } from 'material-ui/styles/colors'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import { IconButton } from 'material-ui'
 import EventEmitter from 'eventemitter3'
@@ -40,9 +39,19 @@ class Base extends EventEmitter {
         return teal600
       case 'media':
         return lightBlue600
-      case 'other':
-        return indigo600
+      case 'trash':
+        return lime800
+      case 'physical':
+        return lightGreen700
+      case 'docker':
+        return blueGrey500
       case 'settings':
+        return deepPurple500
+      case 'device':
+        return blueGrey400
+      case 'update':
+        return blueGrey400
+      case 'other':
         return deepPurple500
       default:
         return 'white'
@@ -107,6 +116,10 @@ class Base extends EventEmitter {
 
   detailWidth() {
     return 360
+  }
+
+  detailIcon() {
+    return null
   }
 
   renderTitle({ style }) {

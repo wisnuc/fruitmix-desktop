@@ -13,8 +13,8 @@ export default class Users extends React.Component {
     }
   }
   render() {
-    if (typeof this.props.volume.wisnuc !== 'object') return null // ENOFRUITMIX can't work
-    const users = this.props.volume.wisnuc.users
+    if (typeof this.props.volume.users !== 'object') return null // ENOFRUITMIX can't work
+    const users = this.props.volume.users
     const divStyle = {
       height: 56,
       display: 'flex',

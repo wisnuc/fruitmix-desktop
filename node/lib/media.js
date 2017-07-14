@@ -114,7 +114,7 @@ class Worker extends EventEmitter {
   serverDownloadAsync(endpoint, qs, downloadPath, name) {
     const requestDownloadAsync = Promise.promisify(this.requestDownload.bind(this))
     const ip = getIpAddr()
-    const port = 3721
+    const port = 3000
     const token = store.getState().login.device.token.data.token
     return requestDownloadAsync(`http://${ip}:${port}/${endpoint}`, qs, token, downloadPath, name)
   }

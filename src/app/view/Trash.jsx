@@ -32,6 +32,10 @@ class Trash extends Home {
     this.updateState(listNavDir.value())
   }
 
+  navGroup() {
+    return 'trash'
+  }
+
   menuName() {
     return '回收站'
   }

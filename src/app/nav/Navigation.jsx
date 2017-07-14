@@ -30,14 +30,17 @@ import MediaAlbum from '../view/MediaAlbum'
 import Trash from '../view/Trash'
 
 import Account from '../view/Account'
+import Docker from '../view/Docker'
+import InstalledApps from '../view/InstalledApps'
 
 import AdminUsers from '../view/AdminUsers'
 import AdminDrives from '../view/AdminDrives'
 import Device from '../view/Device'
-import Storage from '../view/Storage'
+import FirmwareUpdate from '../view/FirmwareUpdate'
 import Networking from '../view/Networking'
 import TimeDate from '../view/TimeDate'
 import FanControl from '../view/FanControl'
+import SystemUpdate from '../view/Update'
 import Power from '../view/Power'
 
 import Debug from 'debug'
@@ -47,7 +50,6 @@ const debug = Debug('component:nav:Navigation')
 class NavViews extends Component {
 
   constructor(props) {
-
     super(props)
 
     this.navBoundObj = {}
@@ -69,15 +71,20 @@ class NavViews extends Component {
 
     this.install('trash', Trash)
 
+    this.install('docker', Docker)
+    this.install('installedApps', InstalledApps)
+
     this.install('account', Account)
     this.install('adminUsers', AdminUsers)
     this.install('adminDrives', AdminDrives)
     this.install('device', Device)
-    // this.install('storage', Storage)
     this.install('networking', Networking)
     this.install('timeDate', TimeDate)
     this.install('fanControl', FanControl)
+    this.install('systemUpdate', SystemUpdate)
+    this.install('firmwareUpdate', FirmwareUpdate)
     this.install('power', Power)
+
 
     Object.assign(this.state, {
       nav: null,
@@ -92,7 +99,7 @@ class NavViews extends Component {
   }
 
   install(name, View) {
-    this.views[name] = new View(this) 
+    this.views[name] = new View(this)
     this.views[name].on('updated', next => this.setState({ [name]: next }))
     this.state.home = this.views[name].state
   }
@@ -117,7 +124,7 @@ class NavViews extends Component {
   }
 
   navTo(nav) {
-    this.setState({ nav, openDrawer: false })
+    this.setState({ nav, openDrawer: false, showDetail: false })
     if (nav === this.state.nav) return
     if (this.state.nav) this.views[this.state.nav].navLeave()
     this.props.setPalette(this.views[nav].primaryColor(), this.views[nav].accentColor())
@@ -126,16 +133,16 @@ class NavViews extends Component {
 
   // not used, decorate onto navmap ? TODO
   navBound(navname) {
-    return this.navBoundObj[navname] 
-      || (this.navBoundObj[navname] = this.navTo.bind(this, navname)) 
-  } 
+    return this.navBoundObj[navname]
+      || (this.navBoundObj[navname] = this.navTo.bind(this, navname))
+  }
 
   openDrawer(open) {
-    this.setState({openDrawer: open})
+    this.setState({ openDrawer: open })
   }
 
   toggleDetail() {
-    this.setState({showDetail: !this.state.showDetail})
+    this.setState({ showDetail: !this.state.showDetail })
   }
 
   openSnackBar(message) {
@@ -148,22 +155,30 @@ class NavViews extends Component {
   }
 
   renderQuickNavs() {
-
     if (!this.state.nav) return null
 
-    let color = this.currentView().primaryColor()
-    let group = this.views[this.state.nav].navGroup()
-    let hasQuickNavs = this.currentView().hasQuickNav()
-    let navGroupList = Object.keys(this.views).filter(key => this.views[key].navGroup() === this.views[this.state.nav].navGroup())
+    const color = this.currentView().primaryColor()
+    const group = this.views[this.state.nav].navGroup()
+    const hasQuickNavs = this.currentView().hasQuickNav()
+    const navGroupList = Object.keys(this.views).filter(key => this.views[key].navGroup() === this.views[this.state.nav].navGroup())
 
     /* hide QuickNav if there is only one nav */
     if (navGroupList.length === 1) { return <div /> }
 
+    /* is ws215i ? */
     let ws215i = false
     const device = this.props.selectedDevice.device
     if (device && device.data && device.data.ws215i) {
       ws215i = true
     }
+
+    /* is admin ? */
+    let isAdmin = false
+    const account = this.views.account.ctx.props.apis.account
+    if (!account.isPending() && !account.isRejected() && account.vaule() && account.vaule().isAdmin) {
+      isAdmin = true
+    }
+
     return (
       <div
         style={{
@@ -177,7 +192,8 @@ class NavViews extends Component {
       >
         {
           hasQuickNavs && navGroupList.map((key) => {
-            if (!ws215i && key === 'fanControl') return <div key={`quicknav-${key}`} />
+            if ((!ws215i || !isAdmin) && key === 'fanControl') return <div key={`quicknav-${key}`} />
+            if (!isAdmin && (key === 'firmwareUpdate' || key === 'power')) return <div key={`quicknav-${key}`} />
             return (
               <QuickNav
                 key={`quicknav-${key}`}
@@ -198,86 +214,92 @@ class NavViews extends Component {
   }
 
   renderDetailButton() {
-
     const view = this.currentView()
     if (!view.hasDetail()) return null
+    let DetailIcon = ActionInfo
+    if (view.detailIcon()) {
+      DetailIcon = view.detailIcon()
+    }
 
     const onTouchTap = view.detailEnabled()
       ? this.toggleDetail.bind(this)
       : undefined
-    
+
     const color = view.detailEnabled()
       ? 'rgba(255,255,255,1)'
       : 'rgba(255,255,255,0.3)'
 
-    return (  
-      <div style={{width: 48, height: 48, position: 'relative'}} >
+    return (
+      <div style={{ width: 48, height: 48, position: 'relative' }} >
 
-        <div style={{
-          position: 'absolute',
-          top: 4, left: 4,
-          width: 40, height: 40,
-          backgroundColor: '#FFF',
-          borderRadius: 20,
-          opacity: this.state.showDetail ? 0.3 : 0,
-          transition: 'opacity 300ms'
-        }}/> 
+        <div
+          style={{
+            position: 'absolute',
+            top: 4,
+            left: 4,
+            width: 40,
+            height: 40,
+            backgroundColor: '#FFF',
+            borderRadius: 20,
+            opacity: this.state.showDetail ? 0.3 : 0,
+            transition: 'opacity 300ms'
+          }}
+        />
 
-        <IconButton style={{position: 'absolute'}} onTouchTap={onTouchTap} >
-          <ActionInfo color={color} />
-        </IconButton> 
+        <IconButton style={{ position: 'absolute' }} onTouchTap={onTouchTap} >
+          <DetailIcon color={color} />
+        </IconButton>
       </div>
     )
   }
 
   renderAppBar() {
-
-    let view = this.currentView()
+    const view = this.currentView()
     let backgroundColor
-    switch(view.appBarStyle()) {
-    case 'light':
-      backgroundColor = '#FFF'
-      break
-    case 'colored':
-    case 'dark':
-      backgroundColor = view.appBarColor()
-      break
-    case 'transparent':
-    default:
-      break
+    switch (view.appBarStyle()) {
+      case 'light':
+        backgroundColor = '#FFF'
+        break
+      case 'colored':
+      case 'dark':
+        backgroundColor = view.appBarColor()
+        break
+      case 'transparent':
+      default:
+        break
     }
 
 
-    let appBarStyle = {
-      position: 'absolute', 
-      width: '100%', 
-      height: this.appBarHeight(), 
+    const appBarStyle = {
+      position: 'absolute',
+      width: '100%',
+      height: this.appBarHeight(),
       backgroundColor,
       overflow: 'hidden'
     }
 
-    let topBarStyle = {
-      width: '100%', 
-      height: 64, 
-      display: 'flex', 
-      alignItems: 'center', 
+    const topBarStyle = {
+      width: '100%',
+      height: 64,
+      display: 'flex',
+      alignItems: 'center',
       justifyContent: 'space-between'
     }
 
-    let titleStyle = {
+    const titleStyle = {
       color: '#FFF',
       fontSize: 20,
       fontWeight: 500
     }
 
-    let toolBarStyle = {
-      flexGrow: 1, 
-      display: 'flex', 
-      alignItems: 'center', 
+    const toolBarStyle = {
+      flexGrow: 1,
+      display: 'flex',
+      alignItems: 'center',
       justifyContent: 'flex-end'
     }
 
-    let titleRegionStyle = {
+    const titleRegionStyle = {
       width: view.showQuickNav() ? 'calc(100% - 72)' : '100%',
       height: 64,
       marginLeft: view.showQuickNav() ? 72 : 0,
@@ -293,15 +315,15 @@ class NavViews extends Component {
       <Paper style={appBarStyle} rounded={false}>
 
         <div style={topBarStyle}>
-          
-          <div style={{flex: '0 0 12px'}} />
+
+          <div style={{ flex: '0 0 12px' }} />
 
           {/** NavigationMenu ({ style, onTouchTap })**/}
           { view.renderNavigationMenu({ style: {}, onTouchTap: () => this.openDrawer(true) }) }
 
-          <div style={{flex: '0 0 20px'}} />
-         
-          {/** non-prominent title **/} 
+          <div style={{ flex: '0 0 20px' }} />
+
+          {/** non-prominent title **/}
           { !view.prominent() && view.renderTitle({ style: titleStyle }) }
 
           {/** context-sensitive toolbar, passing style for component list **/}
@@ -315,20 +337,19 @@ class NavViews extends Component {
           {/** optional toggle detail button **/}
           { this.renderDetailButton() }
 
-          <div style={{flex: '0 0 12px'}} />
+          <div style={{ flex: '0 0 12px' }} />
         </div>
 
         { view.prominent() && view.renderTitle({ style: titleRegionStyle }) }
       </Paper>
     )
-  } 
+  }
 
   renderAppBarShadow() {
-    return <div style={{ width: '100%', height: this.appBarHeight(), transition: 'height 300ms'}} />
+    return <div style={{ width: '100%', height: this.appBarHeight(), transition: 'height 300ms' }} />
   }
 
   renderDetail() {
-
     const view = this.currentView()
 
     if (!view.hasDetail() || !view.detailEnabled()) return null
@@ -356,21 +377,20 @@ class NavViews extends Component {
     )
   }
 
-  render () {
-
+  render() {
     if (!this.state.nav) return null
 
     const style = {
-      width: '100%',  
-      height: '100%', 
-      display: 'flex', 
+      width: '100%',
+      height: '100%',
+      display: 'flex',
       justifyContent: 'space-between',
       overflow: 'hidden'
     }
 
-    let view = this.views[this.state.nav]
-    let prominent = view.prominent()
-    let cardTitleStyle = {
+    const view = this.views[this.state.nav]
+    const prominent = view.prominent()
+    const cardTitleStyle = {
       height: 64,
       display: 'flex',
       alignItems: 'center',
@@ -383,20 +403,24 @@ class NavViews extends Component {
     return (
       <div style={style}>
 
-        {/* left frame */} 
-        <div style={{height: '100%', position: 'relative', flexGrow: 1}}>
-          
+        {/* left frame */}
+        <div style={{ height: '100%', position: 'relative', flexGrow: 1 }}>
+
           { this.renderAppBar() }
           { this.renderAppBarShadow() }
-        
-          {/* content + shortcut container*/}
-          <div style={{width: '100%', height: `calc(100% - ${this.appBarHeight()}px)`,
-            display: 'flex', justifyContent: 'space-between'}}>
 
-            { view.showQuickNav() && this.renderQuickNavs() } 
+          {/* content + shortcut container*/}
+          <div
+            style={{ width: '100%',
+              height: `calc(100% - ${this.appBarHeight()}px)`,
+              display: 'flex',
+              justifyContent: 'space-between' }}
+          >
+
+            { view.showQuickNav() && this.renderQuickNavs() }
 
             {/* content */}
-            <div style={{flexGrow: 1, height: '100%', paddingLeft: 8, paddingTop: 8, boxSizing: 'border-box' }} id='content-container'>
+            <div style={{ width: '100%', height: '100%', paddingLeft: 8, paddingTop: 8, boxSizing: 'border-box' }} id="content-container">
               {
                 view.renderContent({
                   navTo: this.navTo.bind(this),
@@ -409,10 +433,10 @@ class NavViews extends Component {
         </div>
 
         {/* right frame */}
-        { this.renderDetail() }       
- 
-        <NavDrawer 
-          open={this.state.openDrawer} 
+        { this.renderDetail() }
+
+        <NavDrawer
+          open={this.state.openDrawer}
           onRequestChange={this.openDrawerBound}
           views={this.views}
           nav={this.state.nav}
@@ -439,13 +463,13 @@ class Navigation extends Component {
     super(props)
 
     /** init apis **/
-    let token = props.selectedDevice.token
+    const token = props.selectedDevice.token
     if (!token.isFulfilled()) throw new Error('token not fulfilled')
 
-    let address = props.selectedDevice.mdev.address
-    let userUUID = token.ctx.uuid
+    const address = props.selectedDevice.mdev.address
+    const userUUID = token.ctx.uuid
     this.fruitmix = new Fruitmix(address, userUUID, token.value().token)
-    this.fruitmix.on('updated', (prev, next) => this.setState({ apis: next }))   
+    this.fruitmix.on('updated', (prev, next) => this.setState({ apis: next }))
 
     this.state = { apis: null }
   }
