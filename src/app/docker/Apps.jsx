@@ -99,11 +99,15 @@ class Market extends React.PureComponent {
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', margin: '-4px 0px 8px 8px' }}>
-          <FlatButton
-            style={{ color: CState ? this.props.primaryColor : 'rgba(0,0,0,0.54)' }}
-            label={CState ? '进入应用' : '卸载应用'}
-            onTouchTap={() => this.setState({ openURL: `http://10.10.9.86:${container.Ports[0].PublicPort}/` })}
-          />
+          {
+            CState ?
+              <FlatButton
+                style={{ color: this.props.primaryColor }}
+                label="进入应用"
+                onTouchTap={() => this.setState({ openURL: `http://10.10.9.86:${container.Ports[0].PublicPort}/` })}
+              />
+            : <div style={{ height: 36, display: 'flex', alignItems: 'center', marginLeft: 8, fontSize: 15 }}>{ '应用未启动' }</div>
+          }
         </div>
       </Paper>
     )

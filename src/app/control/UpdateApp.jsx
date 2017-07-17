@@ -1,296 +1,118 @@
 import React from 'react'
 import Debug from 'debug'
 import { CircularProgress, Divider } from 'material-ui'
-import { ipcRenderer } from 'electron'
-import PowerSetting from 'material-ui/svg-icons/action/power-settings-new'
-import Build from 'material-ui/svg-icons/action/build'
+import { cyan600, grey200 } from 'material-ui/styles/colors'
 import FlatButton from '../common/FlatButton'
 import Checkmark from '../common/Checkmark'
 import DialogOverlay from '../common/DialogOverlay'
 
 const debug = Debug('component:control:power:')
 
-class Power extends React.Component {
-
+class Update extends React.Component {
   constructor(props) {
     super(props)
-    this.address = this.props.selectedDevice.mdev.address
-    this.serial = this.props.selectedDevice.mdev.serial
 
-    /*
-     * operation: '', 'confirm', 'progress', done'
-     * choice: '', 'POWEROFF', 'REBOOT', 'REBOOTMAINTENANCE'
-     */
     this.state = {
-      operation: '',
-      choice: ''
+      confirm: false,
     }
 
-    this.boot = (op) => {
-      this.props.selectedDevice.request('power', { op }, (err) => {
-        if (!err) {
-          this.scanMdns()
-          this.setState({
-            operation: 'progress'
-          })
-        } else {
-          this.props.openSnackBar(`操作失败：${err.message}`)
-          this.setState({
-            operation: ''
-          })
-        }
-      })
+    this.install = () => {
+      this.props.api.request()
+      debug('this.install')
     }
 
-    this.handleOpen = (CHOICE) => {
-      setTimeout(() =>
-        this.setState({
-          choice: CHOICE,
-          operation: 'confirm'
-        }), 10)
+    this.toggleDialog = (op) => {
+      this.setState({ [op]: !this.state[op] })
     }
-
-    this.handleClose = () => {
-      this.setState({
-        operation: ''
-      })
-    }
-
-    this.handleStartProgress = (operation) => {
-      ipcRenderer.send('LOGIN_OFF')
-      setTimeout(() => this.boot(operation), 100)
-    }
-
-    this.handleEndProgress = () => {
-      this.setState({
-        operation: ''
-      })
-      switch (this.state.choice) {
-        case 'POWEROFF':
-      // go to login page
-          this.props.nav('login')
-          break
-        case 'REBOOT':
-      // go to login page & select target device
-          this.props.nav('login')
-          break
-        case 'REBOOTMAINTENANCE':
-      // go to login page & select target device
-          this.props.nav('maintenance')
-          break
-      }
-    }
-
-    this.handleExit = () => {
-      clearInterval(this.interval)
-      this.setState({ operation: '' })
-      this.props.nav('login')
-    }
-
-    this.scanMdns = () => {
-      let hasBeenShutDown = false
-      this.interval = setInterval(() => {
-        global.mdns.scan()
-        setTimeout(() => {
-          switch (this.state.choice) {
-            case 'POWEROFF':
-              if (global.mdns.devices.every(d => d.serial !== this.serial)) {
-                clearInterval(this.interval)
-                this.setState({ operation: 'done' })
-              }
-              break
-            case 'REBOOT':
-            case 'REBOOTMAINTENANCE':
-              if (hasBeenShutDown) {
-                if (global.mdns.devices.find(d => d.serial === this.serial)
-                || global.mdns.devices.find(d => d.address === this.address)) {
-                  clearInterval(this.interval)
-                  this.setState({ operation: 'done' })
-                }
-              } else if (global.mdns.devices.every(d => d.serial !== this.serial)) {
-                hasBeenShutDown = true
-              }
-              break
-          }
-        }, 500)
-      }, 1000)
-    }
-  }
-
-  renderActions() {
-    let operation = ''
-    switch (this.state.choice) {
-      case 'POWEROFF':
-        operation = 'poweroff'
-        break
-      case 'REBOOT':
-        operation = 'reboot'
-        break
-      case 'REBOOTMAINTENANCE':
-        operation = 'rebootMaintenance'
-        break
-    }
-
-    return (
-      <div>
-        <FlatButton label="取消" primary onTouchTap={this.handleClose} />
-        <FlatButton
-          label="确定"
-          primary
-          onTouchTap={() => this.handleStartProgress(operation)}
-          disabled
-        />
-      </div>
-    )
-  }
-
-  renderDiaContent() {
-    if (this.state.operation === 'done') {
-      let hintText = ''
-      let linkText = ''
-      switch (this.state.choice) {
-        case 'POWEROFF':
-          hintText = '设备已关机，去'
-          linkText = '登陆'
-          break
-        case 'REBOOT':
-          hintText = '设备已重启完毕，去'
-          linkText = '登陆'
-          break
-        case 'REBOOTMAINTENANCE':
-          hintText = '设备已重启至维护模式，去'
-          linkText = '维护页面'
-          break
-      }
-
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <div style={{ marginTop: 48, marginLeft: 136 }}>
-            <Checkmark delay={300} color={this.props.primaryColor} />
-          </div>
-          <div style={{ textAlign: 'center', marginTop: 24 }}>
-            {hintText}
-          </div>
-          <div style={{ textAlign: 'center', marginTop: 24 }}>
-            <FlatButton label={linkText} primary onTouchTap={this.handleEndProgress} />
-          </div>
-        </div>
-      )
-    }
-    let hintText = ''
-    switch (this.state.choice) {
-      case 'POWEROFF':
-        hintText = '设备正在关机...'
-        break
-      case 'REBOOT':
-        hintText = '设备正在重启...'
-        break
-      case 'REBOOTMAINTENANCE':
-        hintText = '设备正在重启至维护模式 ...'
-        break
-    }
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <CircularProgress style={{ marginTop: 48, marginLeft: 160 }} />
-        <div style={{ textAlign: 'center', marginTop: 24 }}>{hintText} </div>
-        <div style={{ textAlign: 'center', marginTop: 24 }}>
-          <FlatButton label="退出" primary onTouchTap={this.handleExit} />
-        </div>
-      </div>
-    )
   }
 
   render() {
-    // debug('power', this.props)
+    const { firm, showRel, latest, installed, toggleDetail } = this.props
+    debug('render!', this.props)
+    // if (!firm) return (<div />)
+    const current = {}
+
+    this.rel = showRel
     return (
-      <div style={{ paddingLeft: 24, paddingTop: 32 }}>
-        {/* poweroff and reboot */}
-        <div style={{ display: 'flex', alignItems: 'center' }} >
-          <div style={{ flex: '0 0 56px', height: 36 }} >
-            <div style={{ height: 8 }} />
-            <PowerSetting color={this.props.primaryColor} />
-          </div>
-          <div style={{ flex: '0 0 560px', fontSize: 20, color: 'rgba(0, 0, 0, 0.87)' }}>
-              客户端系统升级
+      <div style={{ height: '100%', margin: 16 }}>
+        <div style={{ width: '100%', height: 72 }}>
+          <div style={{ display: 'flex', alignItems: 'center', fontSize: 34, color: cyan600 }}>
+            { '1.9.6 (beta)' }
+            <div style={{ width: 8 }} />
+            <div style={{ width: 8 }} />
+            <div style={{ fontSize: 14, height: 40 }}>
+              <div style={{ height: 16 }} />
+              { '最新稳定版' }
             </div>
-        </div>
-        <div style={{ height: 8 }} />
-        <div style={{ display: 'flex', alignItems: 'center' }} >
-          <div style={{ flex: '0 0 56px' }} />
-          <div style={{ flex: '0 0 560px' }}>
-            <FlatButton
-              label="检查更新" primary style={{ marginLeft: -8 }}
-              onTouchTap={() => this.handleOpen('POWEROFF')}
-            />
+          </div>
+          <div style={{ height: 8 }} />
+          <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }}>
+            { `发布日期：2017年02月30日` }
           </div>
         </div>
 
-        {/* divider */}
-        <div style={{ height: 16 }} />
-        <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
-        <div style={{ height: 32 }} />
-
-        {/* enter maintenance */}
-        <div style={{ display: 'flex', alignItems: 'center' }} >
-          <div style={{ flex: '0 0 56px', height: 36 }} >
-            <div style={{ height: 8 }} />
-            <Build color={this.props.primaryColor} />
-          </div>
-          <div style={{ flex: '0 0 560px', fontSize: 20, color: 'rgba(0, 0, 0, 0.87)' }}>
-              wisnuc固件升级
-            </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center' }} >
-          <div style={{ flex: '0 0 56px' }} />
-          <div style={{ flex: '0 0 560px' }}>
-            <div style={{ height: 16 }} />
-            <FlatButton
-              label="检查更新" primary style={{ marginLeft: -8 }}
-              onTouchTap={(e) => {
-                this.handleOpen('REBOOTMAINTENANCE')
-              }}
-            />
-          </div>
-        </div>
-
-        {/* confirm dialog */}
-        <DialogOverlay open={this.state.operation === 'confirm'}>
+        <div style={{ height: 24 }} />
+        <div style={{ color: 'rgba(0,0,0,0.54)', height: 36, display: 'flex', alignItems: 'center' }}>
           {
-            this.state.operation === 'confirm' &&
-            <div style={{ width: 336, padding: '24px 24px 0px 24px' }}>
-              {/* title */}
-              <div style={{ fontSize: 16, color: 'rgba(0,0,0,0.54)' }}>
-                {
-                  this.state.choice === 'POWEROFF' ?
-                  '更新客户端？' : this.state.choice === 'REBOOT' ?
-                  '确定重启？' : '更新固件？'
-                }
-              </div>
-              <div style={{ height: 24 }} />
-              {/* button */}
-              <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                { this.renderActions() }
-              </div>
-            </div>
+            1 ? '已安装的版本'
+            : <FlatButton
+              style={{ marginLeft: -8 }}
+              label="安装并使用"
+              onTouchTap={() => this.toggleDialog('confirm')}
+              primary
+            />
           }
-        </DialogOverlay>
+        </div>
+        <div style={{ height: 48 }} />
+        <div style={{ fontWeight: 500, height: 56, display: 'flex', alignItems: 'center' }}>
+          { '更新内容：' }
+        </div>
+        {
+          current.body ? current.body.split(/[1-9]\./).map(list => list && (
+            <div style={{ marginLeft: 24, height: 40, display: 'flex', alignItems: 'center' }} key={list}>
+              { '*' }
+              <div style={{ width: 16 }} />
+              { list }
+            </div>
+          ))
+          : (
+            <div style={{ marginLeft: 24, height: 40, display: 'flex', alignItems: 'center' }}>
+              { '*' }
+              <div style={{ width: 16 }} />
+              { '修复bugs' }
+            </div>
+          )
+        }
 
-        {/* progress dialog */}
-        <DialogOverlay open={this.state.operation === 'progress'} >
+        {/* dialog */}
+        <DialogOverlay open={this.state.confirm} >
           {
-            this.state.operation === 'progress' &&
-              <div
-                style={{
-                  position: 'absolute',
-                  width: 360,
-                  height: 240,
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  backgroundColor: 'white'
-                }}
-              >
-                { this.renderDiaContent()}
+            this.state.confirm &&
+              <div style={{ width: 560, padding: '24px 24px 0px 24px' }}>
+                <div style={{ fontSize: 21, fontWeight: 500 }}>
+                  { '固件安装' }
+                </div>
+                <div style={{ height: 20 }} />
+                <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }}>
+                  { `将要为您安装版本号为 ${this.rel.tag_name} 的固件程序。` }
+                </div>
+                <div style={{ height: 8 }} />
+                <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }} >
+                  { '固件安装后需要重启WISNUC系统，客户端将退出至登录界面，需重新登录。' }
+                </div>
+                <div style={{ height: 24 }} />
+                <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                  <FlatButton
+                    label="取消"
+                    primary
+                    onTouchTap={() => this.toggleDialog('confirm')}
+                  />
+                  <FlatButton
+                    label={'安装'}
+                    primary
+                    onTouchTap={this.install}
+                  />
+                </div>
               </div>
           }
         </DialogOverlay>
@@ -299,4 +121,4 @@ class Power extends React.Component {
   }
 }
 
-export default Power
+export default Update
