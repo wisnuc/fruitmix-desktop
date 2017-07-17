@@ -228,6 +228,7 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'getTicket':
+        console.log('getTicket API', args)
         r = this.aget(`station/tickets/${args.ticketId}`)
         break
 

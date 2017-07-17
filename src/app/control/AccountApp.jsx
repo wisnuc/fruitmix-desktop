@@ -82,6 +82,19 @@ class AccountApp extends React.Component {
       getTicket
       confirmTicket
     */
+
+    this.confirm = () => {
+      this.setState({ status: 'connectingCloud', error: '' })
+      this.props.apis.request('confirmTicket', { ticketId: this.userIds.ticketId, guid: this.userIds.guid, state: true }, (e) => {
+        if (e) {
+          debug('confirmTicket error', e)
+          this.setState({ error: 'confirmTicket', status: '' })
+        } else {
+          setTimeout(() => this.setState({ status: 'success', error: '' }), 500)
+        }
+      })
+    }
+
     this.getWXCode = (code) => {
       /* init wx_code */
       this.wxiframe.contentWindow.wx_code = null
@@ -94,20 +107,15 @@ class AccountApp extends React.Component {
         } else {
           debug('this.getWXCode success', data)
           // this.setState({ status: 'success' })
-          this.props.apis.request('getTicket', { ticketId: data.id }, (err, wechatInfo) => {
+          this.props.apis.request('getTicket', { ticketId: data.data.ticketId }, (err, wechatInfo) => {
             if (error) {
               debug('getTicket error', code, data, err)
               this.setState({ error: 'getTicket', status: '' })
             } else {
               debug('getTicket success', wechatInfo)
-              this.props.apis.request('confirmTicket', { guid: wechatInfo.guid, state: true }, (e) => {
-                if (e) {
-                  debug('confirmTicket error', e)
-                  this.setState({ error: 'confirmTicket', status: '' })
-                } else {
-                  this.setState({ status: 'success' })
-                }
-              })
+              this.userInfo = wechatInfo.userInfo
+              this.userIds = { ticketId: data.data.ticketId, guid: wechatInfo.guid }
+              this.setState({ status: 'confirm' })
             }
           })
         }
@@ -119,7 +127,7 @@ class AccountApp extends React.Component {
         this.props.apis.request('creatTicket', null, (error, data) => {
           if (error) {
             debug('this.bindWechat error', error)
-            this.setState({ error: 'creatTicket' })
+            this.setState({ error: 'creatTicket', status: '' })
           } else {
             debug('this.bindWechat success', data)
             this.ticket = data.id
@@ -131,7 +139,7 @@ class AccountApp extends React.Component {
 
     this.done = () => {
       // this.props.apis.request('account')
-      this.setState({ error: 'net' })
+      this.setState({ error: '', status: '' })
     }
   }
 
@@ -211,6 +219,36 @@ class AccountApp extends React.Component {
                 </div>
             }
             {
+              status === 'confirm' &&
+                <div style={{ width: 332, height: 492, padding: 24, position: 'relative' }}>
+                  <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}> 绑定微信 </div>
+                  <div style={{ height: 20 }} />
+                  <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }} >
+                    { '确定使用以下帐号绑定Wisnuc吗？'}
+                  </div>
+
+                  {/* Icon */}
+                  <div style={{ height: 72 }} />
+                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <div style={{ borderRadius: 60, width: 120, height: 120, overflow: 'hidden' }}>
+                      <img width={120} height={120} alt="" src={this.userInfo.headimgurl} />
+                    </div>
+                  </div>
+
+                  {/* Name */}
+                  <div style={{ height: 48 }} />
+                  <div style={{ display: 'flex', justifyContent: 'center', height: 32 }}>
+                    { this.userInfo.nickname || 'Error'}
+                  </div>
+
+                  <div style={{ height: 124 }} />
+                  <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                    <FlatButton label="取消" primary onTouchTap={this.done} />
+                    <FlatButton label="绑定" primary onTouchTap={this.confirm} />
+                  </div>
+                </div>
+            }
+            {
               status === 'success' &&
                 <div style={{ width: 332, height: 492, padding: 24, position: 'relative' }}>
                   <div style={{ height: 16 }} />
@@ -221,7 +259,7 @@ class AccountApp extends React.Component {
                   <div style={{ textAlign: 'center', fontSize: 20, height: 36 }}>
                     { '绑定成功' }
                   </div>
-                  <div style={{ height: 34 }} />
+                  <div style={{ height: 106 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                     <FlatButton label="确定" primary onTouchTap={this.done} />
                   </div>

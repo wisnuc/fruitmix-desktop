@@ -56,6 +56,7 @@ app.on('ready', () => {
       initMainWindow()
       if (global.BABEL_IS_RUNNING) return
       autoUpdater.checkForUpdates()
+      console.log('autoUpdater checkForUpdates...')
     }
   })
 
