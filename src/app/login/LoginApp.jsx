@@ -193,7 +193,8 @@ class LoginApp extends React.Component {
     this.intiWxScript()
 
     this.initWXLogin = () => {
-      this.setState({ login: true }, () => {
+      // debug('this.initWXLogin start!')
+      this.setState({ login: true, error: '' }, () => {
         this.WxLogin({
           id: 'login_container',
           appid: 'wxd7e08af781bea6a2',
@@ -206,16 +207,12 @@ class LoginApp extends React.Component {
         })
         const f = document.getElementById('login_container')
         const d = this.wxiframe
+        // debug('this.initWXLogin this.wxiframe', this.wxiframe, this.state)
         if (f) f.innerHTML = ''
-        try {
-          d.onload = (e) => {
-            // debug('d.contentWindow', e, d.contentWindow)
-            d.contentWindow.onerror = (e) => { debug('wxiframe error', e) }
-          }
-          f.appendChild(d)
-        } catch (e) {
-          debug('error', e)
+        if (!window.navigator.onLine) {
           this.setState({ error: 'net' })
+        } else {
+          f.appendChild(d)
         }
       })
     }
@@ -442,11 +439,18 @@ class LoginApp extends React.Component {
       <div style={{ zIndex: 100, opacity: this.state.hello ? 0 : 1, transition: `opacity ${duration}ms` }}>
         {
           !this.state.error ?
-            <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>
+            <div style={{ width: 332, height: 492, padding: 24, position: 'relative', backgroundColor: '#FAFAFA' }}>
               <div style={{ height: 42 }} />
-              {/* <div style={{ width: 270, height: 270, margin: 'auto', backgroundColor: 'grey' }} /> */}
               <div style={{ height: 406, width: 300, margin: 'auto' }} id="login_container" />
               <div style={{ height: 36 }} />
+
+              {/* overlay text */}
+              <div style={{ position: 'absolute', top: 0, left: 0, height: 108, width: '100%', backgroundColor: '#FAFAFA' }} >
+                <div style={{ height: 72 }} />
+                <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
+                  { '微信登录' }
+                </div>
+              </div>
             </div>
             :
             <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>

@@ -68,13 +68,10 @@ class AccountApp extends React.Component {
         const f = document.getElementById('wechat_bind_container')
         const d = this.wxiframe
         if (f) f.innerHTML = ''
-        try {
-          d.onload = (e) => {
-            d.contentWindow.onerror = (e) => { debug('wxiframe error', e) }
-          }
+        if (!window.navigator.onLine) {
+          this.setState({ error: 'net' })
+        } else {
           f.appendChild(d)
-        } catch (e) {
-          debug('error', e)
         }
       })
     }
@@ -134,7 +131,7 @@ class AccountApp extends React.Component {
 
     this.done = () => {
       // this.props.apis.request('account')
-      this.setState({ status: '', error: '' })
+      this.setState({ error: 'net' })
     }
   }
 
@@ -152,6 +149,21 @@ class AccountApp extends React.Component {
 
   renderBind() {
     const { error, status } = this.state
+    let text = ''
+    switch (error) {
+      case 'net':
+        text = '无法连接到互联网，请检查您的网络设置！'
+        break
+      case 'wxBind':
+        text = '绑定失败，请重试！'
+        break
+      case 'getTicket':
+        text = '绑定失败，请重试！'
+        break
+      case 'confirmTicket':
+        text = '绑定失败，请重试！'
+        break
+    }
     return (
       <div>
         <FlatButton label="绑定微信" onTouchTap={this.bindWechat} />
@@ -224,7 +236,7 @@ class AccountApp extends React.Component {
                   </div>
                   <div style={{ height: 36 }} />
                   <div style={{ textAlign: 'center', fontSize: 20, height: 36 }}>
-                    { `绑定失败, Error: ${error}` }
+                    { text }
                   </div>
                   <div style={{ height: 34 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
