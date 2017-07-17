@@ -5,6 +5,7 @@ import ActionAccountCircle from 'material-ui/svg-icons/action/account-circle'
 import Username from 'material-ui/svg-icons/action/perm-identity'
 import Password from 'material-ui/svg-icons/action/lock-outline'
 import HelpIcon from 'material-ui/svg-icons/action/help-outline'
+import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import FlatButton from '../common/FlatButton'
 import DialogOverlay from '../common/DialogOverlay'
 import ChangeAccountDialog from './ChangeAccountDialog'
@@ -78,25 +79,38 @@ class AccountApp extends React.Component {
       })
     }
 
+    /*
+      creatTicket
+      wxBind
+      getTicket
+      confirmTicket
+    */
     this.getWXCode = (code) => {
       /* init wx_code */
       this.wxiframe.contentWindow.wx_code = null
 
-      this.props.apis.request('wxBind', { ticketId: this.ticket, code, platform: 'web' }, (err, data) => {
-        if (err) {
-          debug('this.getWXCode error', code, err)
-          this.setState({ error: 'wxLogin' })
+      this.setState({ status: 'connectingCloud' })
+      this.props.apis.request('wxBind', { ticketId: this.ticket, code, platform: 'web' }, (error, data) => {
+        if (error) {
+          debug('this.getWXCode error', code, error)
+          this.setState({ error: 'wxBind', status: '' })
         } else {
           debug('this.getWXCode success', data)
           // this.setState({ status: 'success' })
-          this.setState({ status: 'connecting' })
-          this.props.apis.request('getTicket', { ticketId: data.id }, (error, wechatInfo) => {
+          this.props.apis.request('getTicket', { ticketId: data.id }, (err, wechatInfo) => {
             if (error) {
-              debug('getTicket error', code, data, error)
-              this.setState({ error: 'wxLogin' })
+              debug('getTicket error', code, data, err)
+              this.setState({ error: 'getTicket', status: '' })
             } else {
               debug('getTicket success', wechatInfo)
-              this.setState({ status: 'success' })
+              this.props.apis.request('confirmTicket', { guid: wechatInfo.guid, state: true }, (e) => {
+                if (e) {
+                  debug('confirmTicket error', e)
+                  this.setState({ error: 'confirmTicket', status: '' })
+                } else {
+                  this.setState({ status: 'success' })
+                }
+              })
             }
           })
         }
@@ -104,7 +118,7 @@ class AccountApp extends React.Component {
     }
 
     this.bindWechat = () => {
-      this.setState({ status: 'connecting' }, () => {
+      this.setState({ status: 'connectingWX' }, () => {
         this.props.apis.request('creatTicket', null, (error, data) => {
           if (error) {
             debug('this.bindWechat error', error)
@@ -120,33 +134,46 @@ class AccountApp extends React.Component {
 
     this.done = () => {
       // this.props.apis.request('account')
-      this.setState({ status: '' })
+      this.setState({ status: '', error: '' })
+    }
+  }
+
+  componentDidMount() {
+    /* catch CODE of wechat login */
+    window.onbeforeunload = () => {
+      if (this.wxiframe && this.wxiframe.contentWindow.wx_code) {
+        console.log(this.wxiframe.contentWindow.wx_code)
+        this.getWXCode(this.wxiframe.contentWindow.wx_code)
+        return false // This will stop the redirecting.
+      }
+      return null
     }
   }
 
   renderBind() {
+    const { error, status } = this.state
     return (
       <div>
         <FlatButton label="绑定微信" onTouchTap={this.bindWechat} />
 
         {/* dialog */}
-        <DialogOverlay open={!!this.state.status}>
+        <DialogOverlay open={!!status}>
           <div>
             {
-              this.state.status === 'connecting' &&
+              (status === 'connectingWX' || status === 'connectingCloud') &&
                 <div style={{ width: 332, height: 492, padding: 24, position: 'relative' }}>
                   <div style={{ height: 16 }} />
                   <div style={{ height: 270, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <CircularProgress size={64} thickness={5} />
                   </div>
-                  <div style={{ height: 36 }} />
+                  <div style={{ height: 56 }} />
                   <div style={{ textAlign: 'center', fontSize: 20, height: 36 }}>
-                    { '连接中...' }
+                    { status === 'connectingWX' ? '连接微信中...' : '连接WISNUC云服务器中...' }
                   </div>
                 </div>
             }
             {
-              this.state.status === 'wechat' &&
+              status === 'wechat' &&
                 <div style={{ width: 332, height: 492, padding: 24, position: 'relative' }}>
                   <div style={{ height: 42 }} />
                   <div style={{ height: 406, width: 300, margin: 'auto' }} id="wechat_bind_container" />
@@ -172,7 +199,7 @@ class AccountApp extends React.Component {
                 </div>
             }
             {
-              this.state.status === 'success' &&
+              status === 'success' &&
                 <div style={{ width: 332, height: 492, padding: 24, position: 'relative' }}>
                   <div style={{ height: 16 }} />
                   <div style={{ height: 270, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -182,8 +209,26 @@ class AccountApp extends React.Component {
                   <div style={{ textAlign: 'center', fontSize: 20, height: 36 }}>
                     { '绑定成功' }
                   </div>
+                  <div style={{ height: 34 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                     <FlatButton label="确定" primary onTouchTap={this.done} />
+                  </div>
+                </div>
+            }
+            {
+              error &&
+                <div style={{ width: 332, height: 492, padding: 24, position: 'relative' }}>
+                  <div style={{ height: 16 }} />
+                  <div style={{ height: 270, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CloseIcon style={{ height: 72, width: 72 }} />
+                  </div>
+                  <div style={{ height: 36 }} />
+                  <div style={{ textAlign: 'center', fontSize: 20, height: 36 }}>
+                    { `绑定失败, Error: ${error}` }
+                  </div>
+                  <div style={{ height: 34 }} />
+                  <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                    <FlatButton label="返回" primary onTouchTap={this.done} />
                   </div>
                 </div>
             }
@@ -193,24 +238,10 @@ class AccountApp extends React.Component {
     )
   }
 
-  componentDidMount() {
-    /* catch CODE of wechat login */
-    window.onbeforeunload = () => {
-      if (this.wxiframe && this.wxiframe.contentWindow.wx_code) {
-        console.log(this.wxiframe.contentWindow.wx_code)
-        this.getWXCode(this.wxiframe.contentWindow.wx_code)
-        return false // This will stop the redirecting.
-      }
-      return null
-    }
-  }
-
   render() {
-    debug('this.props Account', this.props)
+    // debug('this.props Account', this.props)
     const { account, primaryColor, apis, refresh, openSnackBar } = this.props
     if (!account) return this.renderBind()
-    const tooltipStyle = {
-    }
 
     const tooltipWeChat = (
       <div
@@ -251,6 +282,7 @@ class AccountApp extends React.Component {
         设备登录用户名是系统用户名，也是您登录Samba的用户名。
       </div>
     )
+
     return (
       <div style={{ paddingLeft: 68, paddingTop: 16 }}>
 
