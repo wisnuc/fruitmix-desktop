@@ -10,6 +10,7 @@ import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-fil
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import PhotoIcon from 'material-ui/svg-icons/image/photo'
 import { List, AutoSizer } from 'react-virtualized'
+import Preview from './Preview'
 import { TXTIcon, WORDIcon, EXCELIcon, PPTIcon, PDFIcon } from '../common/Svg'
 
 const debug = Debug('component:file:FileContent:')
@@ -200,6 +201,10 @@ class FileContent extends Component {
         onRowDoubleClick={this.onRowDoubleClick}
       />
     )
+
+    this.openFile = (file) => {
+      ipcRenderer.send('OPEN_FILE', { file, path: this.props.home.path })
+    }
   }
 
   willReceiveProps(nextProps) {
@@ -265,10 +270,11 @@ class FileContent extends Component {
     if (index === -1) return
     debug('rowDoubleClick', this.props, index)
     const entry = this.props.entries[index]
+    this.props.listNavBySelect()
     if (entry.type === 'file') {
-      ipcRenderer.send('OPEN_FILE', { file: entry, path: this.props.home.path })
+      this.setState({ seqIndex: index, preview: true })
+      // ipcRenderer.send('OPEN_FILE', { file: entry, path: this.props.home.path })
     }
-    // this.props.listNavBySelect()
   }
 
   drop(e) {
@@ -341,6 +347,19 @@ class FileContent extends Component {
             </AutoSizer>
           }
         </div>
+
+        {/* open file */}
+
+        <Preview
+          onRequestClose={() => this.setState({ preview: false })}
+          open={this.state.preview}
+          items={this.props.entries}
+          seqIndex={this.state.seqIndex}
+          ipcRenderer={this.props.ipcRenderer}
+          setAnimation={this.props.setAnimation}
+          memoize={this.props.memoize}
+          startDownload={this.props.startDownload}
+        />
       </div>
     )
   }
