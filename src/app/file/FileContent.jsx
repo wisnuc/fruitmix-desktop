@@ -10,7 +10,7 @@ import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-fil
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import PhotoIcon from 'material-ui/svg-icons/image/photo'
 import { List, AutoSizer } from 'react-virtualized'
-import Preview from './Preview'
+import ContainerOverlay from './ContainerOverlay'
 import { TXTIcon, WORDIcon, EXCELIcon, PPTIcon, PDFIcon } from '../common/Svg'
 
 const debug = Debug('component:file:FileContent:')
@@ -350,7 +350,7 @@ class FileContent extends Component {
 
         {/* open file */}
 
-        <Preview
+        <ContainerOverlay
           onRequestClose={() => this.setState({ preview: false })}
           open={this.state.preview}
           items={this.props.entries}
@@ -358,7 +358,8 @@ class FileContent extends Component {
           ipcRenderer={this.props.ipcRenderer}
           setAnimation={this.props.setAnimation}
           memoize={this.props.memoize}
-          startDownload={this.props.startDownload}
+          download={this.props.download}
+          openByLocal={this.props.openByLocal}
         />
       </div>
     )

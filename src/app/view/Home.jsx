@@ -4,6 +4,7 @@ import { ipcRenderer } from 'electron'
 import { IconButton, MenuItem } from 'material-ui'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
+import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 
 import Base from './Base'
 import FileDetail from '../file/FileDetail'
@@ -92,8 +93,48 @@ class Home extends Base {
       this.toggleDialog('delete')
     }
 
+    this.download = () => {
+      const entries = this.state.entries
+      const selected = this.state.select.selected
+      const path = this.state.path
+      const folders = []
+      const files = []
+
+      selected.forEach((item) => {
+        const obj = entries[item]
+        if (obj.type === 'folder') folders.push(obj)
+        else if (obj.type === 'file') files.push(obj)
+      })
+
+      ipcRenderer.send('DOWNLOAD', { folders, files, dirUUID: path[path.length - 1].uuid })
+    }
+
+    this.openByLocal = () => {
+      const entries = this.state.entries
+      const selected = this.state.select.selected[0]
+      const path = this.state.path
+      const entry = entries[selected]
+      ipcRenderer.send('OPEN_FILE', { file: entry, path: path[path.length - 1].uuid })
+    }
+
     this.updateDetail = (index) => {
       this.setState({ detailIndex: index })
+    }
+
+    /* NavigationMenu animation */
+    this.setAnimation = (component, status) => {
+      if (component === 'NavigationMenu') {
+        /* add animation to NavigationMenu */
+        const transformItem = this.refNavigationMenu
+        const time = 0.4
+        const ease = global.Power4.easeOut
+        if (status === 'In') {
+          TweenMax.to(transformItem, time, { rotation: 180, opacity: 1, ease })
+        }
+        if (status === 'Out') {
+          TweenMax.to(transformItem, time, { rotation: -180, opacity: 0, ease })
+        }
+      }
     }
 
     ipcRenderer.on('driveListUpdate', (e, obj) => {
@@ -253,21 +294,6 @@ class Home extends Base {
     this.setState({ copy: false })
   }
 
-  download() {
-    const entries = this.state.entries
-    const selected = this.state.select.selected
-    const path = this.state.path
-    const folders = []
-    const files = []
-
-    selected.forEach((item) => {
-      const obj = entries[item]
-      if (obj.type === 'folder') folders.push(obj)
-      else if (obj.type === 'file') files.push(obj)
-    })
-
-    ipcRenderer.send('DOWNLOAD', { folders, files, dirUUID: path[path.length - 1].uuid })
-  }
 
   upload(type) {
     const dirPath = this.state.path
@@ -283,6 +309,17 @@ class Home extends Base {
   }
 
   /* renderers */
+  renderNavigationMenu({ style, onTouchTap }) {
+    const CustomStyle = Object.assign(style, { opacity: 1 })
+    return (
+      <div style={CustomStyle} ref={ref => (this.refNavigationMenu = ref)}>
+        <IconButton onTouchTap={onTouchTap}>
+          <NavigationMenu color="#FFFFFF" />
+        </IconButton>
+      </div>
+    )
+  }
+
   renderTitle({ style }) {
     if (!this.state.listNavDir) return
 
@@ -373,6 +410,10 @@ class Home extends Base {
           listNavBySelect={this.onListNavBySelect}
           showContextMenu={this.onShowContextMenu}
           updateDetail={this.updateDetail}
+          setAnimation={this.setAnimation}
+          ipcRenderer={ipcRenderer}
+          download={this.download}
+          openByLocal={this.openByLocal}
         />
 
         <ContextMenu
@@ -382,7 +423,7 @@ class Home extends Base {
           onRequestClose={() => this.hideContextMenu()}
         >
           <MenuItem primaryText="新建文件夹" onTouchTap={this.openCreateNewFolder.bind(this)} />
-          <MenuItem primaryText="下载" onTouchTap={this.download.bind(this)} />
+          <MenuItem primaryText="下载" onTouchTap={this.download} />
           <MenuItem primaryText="详细信息" onTouchTap={toggleDetail} />
           <MenuItem primaryText="刪除" onTouchTap={() => this.toggleDialog('delete')} />
           <MenuItem primaryText="重命名" onTouchTap={this.openRenameFolder.bind(this)} />
