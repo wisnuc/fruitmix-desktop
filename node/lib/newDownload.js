@@ -26,7 +26,7 @@ const openHandle = (event, args, callback) => {
   console.log(args)
   console.log('openHandle start download')
   // downloadHandle(event, args, callback)
-  shell.openItem('/home/lxw/Desktop/PC_Design/PC_Client_Design_Function_Photo.pdf')
+  shell.openItem('/home/lxw/Desktop/PC_Design/PC_Client_Design_Function_Avatar.pdf')
   console.log('openHandle end')
 }
 

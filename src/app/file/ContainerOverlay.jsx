@@ -2,7 +2,9 @@ import React from 'react'
 import Debug from 'debug'
 import UUID from 'node-uuid'
 import prettysize from 'prettysize'
-import { IconButton } from 'material-ui'
+import { IconButton, Avatar } from 'material-ui'
+import ErrorIcon from 'material-ui/svg-icons/alert/error'
+import FileFolder from 'material-ui/svg-icons/file/folder'
 import CheckIcon from 'material-ui/svg-icons/action/check-circle'
 import DeleteIcon from 'material-ui/svg-icons/action/delete'
 import DateIcon from 'material-ui/svg-icons/action/today'
@@ -13,6 +15,8 @@ import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import VisibilityOff from 'material-ui/svg-icons/action/visibility-off'
 import InfoIcon from 'material-ui/svg-icons/action/info'
 import DownloadIcon from 'material-ui/svg-icons/file/file-download'
+import PhotoIcon from 'material-ui/svg-icons/image/photo'
+import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
 import RenderToLayer from 'material-ui/internal/RenderToLayer'
 import keycode from 'keycode'
 import EventListener from 'react-event-listener'
@@ -22,6 +26,7 @@ import Preview from './Preview'
 import DialogOverlay from '../common/DialogOverlay'
 import FlatButton from '../common/FlatButton'
 import Map from '../common/map'
+import { TXTIcon, WORDIcon, EXCELIcon, PPTIcon, PDFIcon } from '../common/Svg'
 
 const debug = Debug('component:file:ContainerOverlay')
 
@@ -32,6 +37,37 @@ const mousePosition = (ev) => {
   return {
     x: ev.clientX + document.body.scrollLeft - document.body.clientLeft,
     y: ev.clientY + document.body.scrollTop - document.body.clientTop
+  }
+}
+
+const renderFileIcon = (name, metadata) => {
+  /* media */
+  if (metadata) return <PhotoIcon style={{ color: '#ea4335' }} />
+
+  /* PDF, TXT, Word, Excel, PPT */
+  let extension = name.replace(/^.*\./, '')
+  if (!extension || extension === name) extension = 'OTHER'
+  switch (extension.toUpperCase()) {
+    case 'PDF':
+      return (<PDFIcon style={{ color: '#db4437' }} />)
+    case 'TXT':
+      return (<TXTIcon style={{ color: '#FAFAFA' }} />)
+    case 'DOCX':
+      return (<WORDIcon style={{ color: '#4285f4' }} />)
+    case 'DOC':
+      return (<WORDIcon style={{ color: '#4285f4' }} />)
+    case 'XLS':
+      return (<EXCELIcon style={{ color: '#0f9d58' }} />)
+    case 'XLSX':
+      return (<EXCELIcon style={{ color: '#0f9d58' }} />)
+    case 'PPT':
+      return (<PPTIcon style={{ color: '#db4437' }} />)
+    case 'PPTX':
+      return (<PPTIcon style={{ color: '#db4437' }} />)
+    case 'OTHER':
+      return (<EditorInsertDriveFile style={{ color: '#FAFAFA' }} />)
+    default:
+      return (<EditorInsertDriveFile style={{ color: '#FAFAFA' }} />)
   }
 }
 
@@ -57,15 +93,66 @@ class ContainerOverlayInline extends React.Component {
     /* change image */
     this.requestNext = (currentIndex) => {
       debug('this.requestNext', currentIndex)
+      // this.forceUpdate()
     }
 
     this.changeIndex = (direction) => {
+      debug('this.changeIndex', direction, this)
       if (direction === 'right' && this.currentIndex < this.props.items.length - 1) {
         this.currentIndex += 1
+
+        /* hidden left div which move 200%, show other divs */
+        for (let i = 0; i < 3; i++) {
+          if (this[`refPreview_${i}`].style.left === '-100%') {
+            this[`refPreview_${i}`].style.opacity = 0
+            /* update div content */
+            let item = {}
+            if (this.currentIndex < this.props.items.length - 1) item = this.props.items[this.currentIndex + 1]
+            if (!i) {
+              this.leftItem = item
+            } else if (i === 1) {
+              this.centerItem = item
+            } else {
+              this.rightItem = item
+            }
+          } else {
+            this[`refPreview_${i}`].style.opacity = 1
+          }
+        }
+        const tmp = this.refPreview_2.style.left
+        this.refPreview_2.style.left = this.refPreview_1.style.left
+        this.refPreview_1.style.left = this.refPreview_0.style.left
+        this.refPreview_0.style.left = tmp
       } else if (direction === 'left' && this.currentIndex > 0) {
         this.currentIndex -= 1
+
+        /* hidden right div which move 200%, show other divs */
+        debug('direction === left', this.leftItem, this.centerItem, this.rightItem)
+        for (let i = 0; i < 3; i++) {
+          if (this[`refPreview_${i}`].style.left === '100%') {
+            /* update div content */
+            let item = {}
+            if (this.currentIndex) item = this.props.items[this.currentIndex - 1]
+            if (!i) {
+              this.leftItem = item
+            } else if (i === 1) {
+              this.centerItem = item
+            } else {
+              this.rightItem = item
+            }
+            this[`refPreview_${i}`].style.opacity = 0
+          } else {
+            this[`refPreview_${i}`].style.opacity = 1
+          }
+        }
+        const tmp = this.refPreview_0.style.left
+        this.refPreview_0.style.left = this.refPreview_1.style.left
+        this.refPreview_1.style.left = this.refPreview_2.style.left
+        this.refPreview_2.style.left = tmp
+        this.RightItem = this.props.items[this.currentIndex - 2]
       } else return
-      this.requestNext(this.currentIndex)
+      // this.requestNext(this.currentIndex)
+      this.forceUpdate()
     }
 
     /* calculate positon of mouse */
@@ -118,9 +205,18 @@ class ContainerOverlayInline extends React.Component {
   }
 
   componentWillMount() {
-    this.requestNext(this.props.seqIndex)
+    // this.requestNext(this.props.seqIndex)
+    /* init three items' content */
+    this.centerItem = this.props.items[this.currentIndex]
+    this.leftItem = {}
+    this.rightItem = {}
+    if (this.currentIndex) {
+      this.leftItem = this.props.items[this.currentIndex - 1]
+    }
+    if (this.currentIndex < this.props.items.length - 1) {
+      this.rightItem = this.props.items[this.currentIndex + 1]
+    }
   }
-
 
   componentWillUnmount() {
     clearTimeout(this.enterTimeout)
@@ -157,8 +253,6 @@ class ContainerOverlayInline extends React.Component {
           justifyContent: 'center'
         }}
       >
-        {/* add EventListener to listen keyup */}
-        <EventListener target="window" onKeyUp={this.handleKeyUp} />
         <div
           ref={ref => (this.refContainer = ref)}
           style={{
@@ -189,11 +283,8 @@ class ContainerOverlayInline extends React.Component {
 
   render() {
     debug('redner ContainerOverlay', this.props)
-    const items = [
-      { digest: '12345', photo: { metadata: {} } },
-      { digest: '12323', photo: { metadata: {} } },
-      { digest: '11111', photo: { metadata: {} } }
-    ]
+    const entry = this.props.items[this.currentIndex]
+
     return (
       <div
         ref={ref => (this.refRoot = ref)}
@@ -208,6 +299,9 @@ class ContainerOverlayInline extends React.Component {
           alignItems: 'center'
         }}
       >
+        {/* add EventListener to listen keyup */}
+        <EventListener target="window" onKeyUp={this.handleKeyUp} />
+
         {/* overlay */}
         <div
           ref={ref => (this.refOverlay = ref)}
@@ -240,28 +334,28 @@ class ContainerOverlayInline extends React.Component {
         >
           {/* main image */}
           {
-            items.map((item, index) => (
-              <Preview
-                ref={ref => (this[`refPreview${index}`] = ref)}
+            [this.leftItem, this.centerItem, this.rightItem].map((item, index) => (
+              <div
+                key={index.toString()}
+                ref={ref => (this[`refPreview_${index}`] = ref)}
                 style={{
                   position: 'absolute',
                   top: 0,
                   left: index ? index === 1 ? 0 : '100%' : '-100%',
                   height: '100%',
                   width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
                   cursor: 'pointer',
-                  transition: 'all 225ms cubic-bezier(0.0, 0.0, 0.2, 1)'
+                  transition: 'left 225ms cubic-bezier(0.0, 0.0, 0.2, 1)'
                 }}
-                key={item.digest || item.uuid}
-                item={item}
-                ipcRenderer={this.props.ipcRenderer}
-                memoize={this.props.memoize}
-                download={this.props.download}
-                openByLocal={this.props.openByLocal}
-              />
+              >
+                <Preview
+                  item={item}
+                  ipcRenderer={this.props.ipcRenderer}
+                  memoize={this.props.memoize}
+                  download={this.props.download}
+                  openByLocal={this.props.openByLocal}
+                />
+              </div>
             ))
           }
 
@@ -290,6 +384,26 @@ class ContainerOverlayInline extends React.Component {
                   </svg>
                 </div>
               </IconButton>
+              {
+                entry.type === 'folder' || entry.type === 'public' || entry.type === 'directory'
+                  ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)' }} />
+                  : entry.type === 'file'
+                  ? renderFileIcon(entry.name, entry.metadata)
+                  : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)' }} />
+              }
+              <div style={{ width: 16 }} />
+              <div
+                style={{
+                  width: 540,
+                  fontSize: 14,
+                  color: '#FFFFFF',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis'
+                }}
+              >
+                { entry.name }
+              </div>
 
               <div style={{ flexGrow: 1 }} />
 

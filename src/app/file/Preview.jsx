@@ -81,17 +81,20 @@ class PreviewInline extends React.Component {
     this.request = () => {
       /* get current image */
       this.session = UUID.v4()
-      this.digest = this.props.item.digest || ''
-      this.photo = this.props.item.photo || null
-      // this.props.ipcRenderer.send('mediaShowThumb', this.session, this.digest, 210, 210)
+      const metadata = this.props.item.metadata
+      if (metadata) {
+        this.digest = this.props.item.digest || ''
+        this.photo = this.props.item.photo || null
+        // this.props.ipcRenderer.send('mediaShowThumb', this.session, this.digest, 210, 210)
 
-      /* memoize digest */
-      // this.props.memoize({ currentDigest: this.digest, currentScrollTop: 0 })
+        /* memoize digest */
+        // this.props.memoize({ currentDigest: this.digest, currentScrollTop: 0 })
 
-      /* init image */
-      this.setState({ thumbPath: '', detailPath: '' })
+        /* init image */
+        this.setState({ thumbPath: '', detailPath: '' })
 
-      // debug('this.props.memoize', this.props.memoize())
+        // debug('this.props.memoize', this.props.memoize())
+      }
     }
 
     /* update detail image */
@@ -360,6 +363,7 @@ class PreviewInline extends React.Component {
   }
 
   renderOtherFiles() {
+    debug('this.props renderOtherFiles', this.props)
     return (
       <div
         style={{
@@ -400,9 +404,15 @@ class PreviewInline extends React.Component {
     return (
       <div
         ref={ref => (this.refBackground = ref)}
-        style={this.props.style}
+        style={{
+          height: '100%',
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
       >
-        { !this.props.item ? this.renderPhoto() : this.renderOtherFiles() }
+        { this.props.item.metatdata ? this.renderPhoto() : this.renderOtherFiles() }
       </div>
     )
   }
