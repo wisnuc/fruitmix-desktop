@@ -175,7 +175,8 @@ class NavViews extends Component {
     /* is admin ? */
     let isAdmin = false
     const account = this.views.account.ctx.props.apis.account
-    if (!account.isPending() && !account.isRejected() && account.vaule() && account.vaule().isAdmin) {
+    // debug('renderQuickNavs', account)
+    if (!account.isPending() && !account.isRejected() && account.value() && account.value().isAdmin) {
       isAdmin = true
     }
 

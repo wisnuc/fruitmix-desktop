@@ -158,7 +158,7 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'listNavDir':
-        r = this.aget(`drives/${args.driveUUID}/dirs/${args.dirUUID}/files`)
+        r = this.aget(`drives/${args.driveUUID}/dirs/${args.dirUUID}`)
         break
 
       case 'mkdir':
@@ -262,6 +262,7 @@ class Fruitmix extends EventEmitter {
   start() {
     this.requestAsync('account', { uuid: this.userUUID }).asCallback((err, account) => {
       if (account) {
+        console.log('requestAsync account success', account)
         this.request('listNavDir', { drivesUUID: account.home, dirUUID: account.home })
         if (account.isAdmin) {
           this.request('adminUsers')

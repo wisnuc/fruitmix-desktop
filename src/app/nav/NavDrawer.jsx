@@ -107,8 +107,8 @@ class NavDrawer extends React.Component {
 
     const account = views.account.ctx.props.apis.account
     let value = null
-    if (!account.isPending() && !account.isRejected() && account.vaule()) {
-      value = account.vaule()
+    if (!account.isPending() && !account.isRejected() && account.value()) {
+      value = account.value()
     }
 
     let serial = views.account.ctx.props.selectedDevice.mdev.serial

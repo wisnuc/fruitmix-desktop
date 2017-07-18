@@ -171,13 +171,13 @@ class AccountApp extends React.Component {
       case 'confirmTicket':
         text = '绑定失败，请重试！'
         break
+      default:
+        text = '绑定失败，请重试！'
     }
     return (
       <div>
-        <FlatButton label="绑定微信" onTouchTap={this.bindWechat} />
-
         {/* dialog */}
-        <DialogOverlay open={!!status}>
+        <DialogOverlay open={!!status || !!error}>
           <div>
             {
               (status === 'connectingWX' || status === 'connectingCloud') &&
@@ -276,7 +276,7 @@ class AccountApp extends React.Component {
                   <div style={{ textAlign: 'center', fontSize: 20, height: 36 }}>
                     { text }
                   </div>
-                  <div style={{ height: 34 }} />
+                  <div style={{ height: 106 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                     <FlatButton label="返回" primary onTouchTap={this.done} />
                   </div>
@@ -292,26 +292,6 @@ class AccountApp extends React.Component {
     // debug('this.props Account', this.props)
     const { account, primaryColor, apis, refresh, openSnackBar } = this.props
     if (!account) return this.renderBind()
-
-    const tooltipWeChat = (
-      <div
-        style={{
-          width: 350,
-          textAlign: 'left',
-          whiteSpace: 'normal',
-          fontSize: 14,
-          fontWeight: 500,
-          lineHeight: '26px',
-          display: 'flex',
-          alignItems: 'center',
-          height: 96
-        }}
-      >
-        请您下载手机APP“私有群”进行微信绑定
-        <br />
-        闻上私有群是一款将您通过微信小程序或私有群APP分享的所有内容均保存到当前设备的独立应用。
-      </div>
-    )
 
     const tooltipUserName = (
       <div
@@ -337,12 +317,12 @@ class AccountApp extends React.Component {
       <div style={{ paddingLeft: 68, paddingTop: 16 }}>
 
         {/* avatar */}
-        <div style={{ height: 96, marginLeft: -24 }} >
+        <div style={{ height: 67, marginLeft: -4 }} >
           {
             account.avatar ? <div /> :
             <IconButton
-              iconStyle={{ width: 64, height: 64, color: primaryColor }}
-              style={{ width: 96, height: 96, padding: 16 }}
+              iconStyle={{ width: 67, height: 67, color: primaryColor }}
+              style={{ width: 67, height: 67, padding: 0 }}
               onTouchTap={() => this.toggleDialog('editAvatar')}
             >
               <ActionAccountCircle />
@@ -351,30 +331,29 @@ class AccountApp extends React.Component {
         </div>
 
         {/* username */}
-        <div style={{ flex: '0 0 560px', fontSize: 24, color: 'rgba(0, 0, 0, 0.87)', height: 24 }}>
+        <div style={{ flex: '0 0 560px', fontSize: 24, height: 24, display: 'flex', alignItems: 'center' }}>
           { account.username }
         </div>
 
         {/* usertype */}
         <div style={{ flex: '0 0 560px' }}>
-          <div style={{ fontSize: 14, lineHeight: '26px', color: 'rgba(0, 0, 0, 0.87)' }}>
+          <div style={{ fontSize: 14, lineHeight: '26px', color: 'rgba(0, 0, 0, 0.87)', display: 'flex' }}>
             {
               account.isAdmin && account.isFirstUser ?
                 '您是系统的第一个用户，是最高权限的系统管理员。' :
                 account.isAdmin ? '您是系统管理员。' : '您是系统普通用户。'
             }
             {
-              '您尚未绑定您的微信帐号'
+              account.global && account.global.wx ?
+                <div style={{ display: 'flex', alignItems: 'center', height: 26 }}>
+                  { `您已绑定了您的微信，ID: test，微信昵称: 牛牛牛` }
+                </div>
+                :
+                <div style={{ display: 'flex', alignItems: 'center', height: 26 }}>
+                  { '您尚未绑定您的微信帐号。' }
+                  <FlatButton label="绑定微信" onTouchTap={this.bindWechat} primary />
+                </div>
             }
-            <IconButton
-              iconStyle={{ width: 18, height: 18, color: primaryColor }}
-              style={{ width: 36, height: 36, padding: 8, verticalAlign: 'sub' }}
-              tooltip={tooltipWeChat}
-              touch
-              tooltipPosition="bottom-right"
-            >
-              <HelpIcon />
-            </IconButton>
           </div>
         </div>
 
@@ -475,6 +454,8 @@ class AccountApp extends React.Component {
             </div>
           }
         </DialogOverlay>
+
+        { this.renderBind() }
 
       </div>
     )
