@@ -22,7 +22,6 @@ import { BreadCrumbItem, BreadCrumbSeparator } from '../common/BreadCrumb'
 const debug = Debug('component:viewModel:Home: ')
 
 class Home extends Base {
-
   constructor(ctx) {
     super(ctx)
     this.select = new ListSelect(this)
@@ -30,7 +29,7 @@ class Home extends Base {
     this.state = {
       select: this.select.state,
       listNavDir: null, // save a reference
-      path: [],         //
+      path: [],
       entries: [],      // sorted
       contextMenuOpen: false,
       contextMenuY: -1,
@@ -44,9 +43,6 @@ class Home extends Base {
       detailIndex: -1
     }
 
-    this.onListNavBySelect = this.listNavBySelect.bind(this)
-    this.onShowContextMenu = this.showContextMenu.bind(this)
-
     this.onRequestClose = (dirty) => {
       this.setState({ createNewFolder: null })
       if (dirty) {
@@ -59,6 +55,30 @@ class Home extends Base {
 
     this.toggleDialog = (type) => {
       this.setState({ [type]: !this.state[type] })
+    }
+
+    /* file or dir operations */
+    this.upload = (type) => {
+      const dirPath = this.state.path
+      const dirUUID = dirPath[dirPath.length - 1].uuid
+      // console.log(dirUUID, type)
+      ipcRenderer.send('UPLOAD', { dirUUID, type })
+    }
+
+    this.download = () => {
+      const entries = this.state.entries
+      const selected = this.state.select.selected
+      const path = this.state.path
+      const folders = []
+      const files = []
+
+      selected.forEach((item) => {
+        const obj = entries[item]
+        if (obj.type === 'folder') folders.push(obj)
+        else if (obj.type === 'file') files.push(obj)
+      })
+
+      ipcRenderer.send('DOWNLOAD', { folders, files, dirUUID: path[path.length - 1].uuid })
     }
 
     this.delete = () => {
@@ -91,22 +111,6 @@ class Home extends Base {
       this.toggleDialog('delete')
     }
 
-    this.download = () => {
-      const entries = this.state.entries
-      const selected = this.state.select.selected
-      const path = this.state.path
-      const folders = []
-      const files = []
-
-      selected.forEach((item) => {
-        const obj = entries[item]
-        if (obj.type === 'folder') folders.push(obj)
-        else if (obj.type === 'file') files.push(obj)
-      })
-
-      ipcRenderer.send('DOWNLOAD', { folders, files, dirUUID: path[path.length - 1].uuid })
-    }
-
     this.openByLocal = () => {
       const entries = this.state.entries
       const selected = this.state.select.selected[0]
@@ -115,8 +119,51 @@ class Home extends Base {
       ipcRenderer.send('OPEN_FILE', { file: entry, path: path[path.length - 1].uuid })
     }
 
+    /* actions */
+    this.listNavBySelect = () => {
+      debug('listNavBySelect', this.select, this.state)
+      const selected = this.select.state.selected
+      if (selected.length !== 1) return
+
+      const entry = this.state.entries[selected[0]]
+      if (entry.type !== 'directory') return
+
+      this.ctx.props.apis.request('listNavDir', {
+        driveUUID: this.state.path[0].uuid,
+        dirUUID: entry.uuid
+      })
+    }
+
+    this.refresh = () => {
+      const rUUID = this.state.path[0].uuid
+      const dUUID = this.state.path[this.state.path.length - 1].uuid
+      this.ctx.props.apis.request('listNavDir', { driveUUID: rUUID, dirUUID: dUUID })
+    }
+
     this.updateDetail = (index) => {
       this.setState({ detailIndex: index })
+    }
+
+    this.showContextMenu = (clientX, clientY) => {
+      if (this.select.state.ctrl || this.select.state.shift) return
+      const containerDom = document.getElementById('content-container')
+      const maxLeft = containerDom.offsetLeft + containerDom.clientWidth - 240
+      const x = clientX > maxLeft ? maxLeft : clientX
+      const maxTop = containerDom.offsetTop + containerDom.offsetHeight - 336
+      const y = clientY > maxTop ? maxTop : clientY
+      this.setState({
+        contextMenuOpen: true,
+        contextMenuX: x,
+        contextMenuY: y
+      })
+    }
+
+    this.hideContextMenu = () => {
+      this.setState({
+        contextMenuOpen: false
+        // contextMenuX: -1,
+        // contextMenuY: -1,
+      })
     }
 
     /* NavigationMenu animation */
@@ -173,7 +220,7 @@ class Home extends Base {
 
   navEnter() {
     const apis = this.ctx.props.apis
-    if (!apis || !apis.drives || !apis.drives.data) return null
+    if (!apis || !apis.drives || !apis.drives.data) return
     const homeDrive = apis.drives.data.find(drive => drive.tag === 'home')
     if (homeDrive) this.ctx.props.apis.request('listNavDir', { driveUUID: homeDrive.uuid, dirUUID: homeDrive.uuid })
   }
@@ -215,96 +262,6 @@ class Home extends Base {
 
   detailEnabled() {
     return true
-  }
-
-  /** operations **/
-  listNavBySelect() {
-    debug('listNavBySelect', this.select, this.state)
-    const selected = this.select.state.selected
-    if (selected.length !== 1) return
-
-    const entry = this.state.entries[selected[0]]
-    if (entry.type !== 'directory') return
-
-    this.ctx.props.apis.request('listNavDir', {
-      driveUUID: this.state.path[0].uuid,
-      dirUUID: entry.uuid
-    })
-  }
-
-  showContextMenu(clientX, clientY) {
-    if (this.select.state.ctrl || this.select.state.shift) return
-    const containerDom = document.getElementById('content-container')
-    const maxLeft = containerDom.offsetLeft + containerDom.clientWidth - 240
-    const x = clientX > maxLeft ? maxLeft : clientX
-    const maxTop = containerDom.offsetTop + containerDom.offsetHeight - 336
-    const y = clientY > maxTop ? maxTop : clientY
-    this.setState({
-      contextMenuOpen: true,
-      contextMenuX: x,
-      contextMenuY: y
-    })
-  }
-
-  hideContextMenu() {
-    this.setState({
-      contextMenuOpen: false
-      // contextMenuX: -1,
-      // contextMenuY: -1,
-    })
-  }
-
-  openCreateNewFolder() {
-    this.setState({ createNewFolder: true })
-  }
-
-  closeCreateNewFolder(dirty) {
-    this.setState({ createNewFolder: false })
-    if (dirty) {
-      this.ctx.props.apis.request('listNavDir', {
-        driveUUID: this.state.path[0].uuid,
-        dirUUID: this.state.path[this.state.path.length - 1].uuid
-      })
-    }
-  }
-
-  openRenameFolder() {
-    this.setState({ rename: true })
-  }
-
-  closeRename() {
-    this.setState({ rename: false })
-    this.refresh()
-  }
-
-  openMove() {
-    this.setState({ move: true })
-  }
-
-  closeMove() {
-    this.setState({ move: false })
-  }
-
-  openCopy() {
-    this.setState({ copy: true })
-  }
-
-  closeCopy() {
-    this.setState({ copy: false })
-  }
-
-
-  upload(type) {
-    const dirPath = this.state.path
-    const dirUUID = dirPath[dirPath.length - 1].uuid
-    // console.log(dirUUID, type)
-    ipcRenderer.send('UPLOAD', { dirUUID, type })
-  }
-
-  refresh() {
-    const rUUID = this.state.path[0].uuid
-    const dUUID = this.state.path[this.state.path.length - 1].uuid
-    this.ctx.props.apis.request('listNavDir', { driveUUID: rUUID, dirUUID: dUUID })
   }
 
   /* renderers */
@@ -372,7 +329,7 @@ class Home extends Base {
   renderToolBar({ style }) {
     return (
       <div style={style}>
-        <IconButton onTouchTap={this.openCreateNewFolder.bind(this)}>
+        <IconButton onTouchTap={() => this.toggleDialog('createNewFolder')}>
           <FileCreateNewFolder color="#FFF" />
         </IconButton>
       </div>
@@ -396,41 +353,10 @@ class Home extends Base {
     )
   }
 
-  renderContent({ toggleDetail, openSnackBar }) {
+  renderDialogs(openSnackBar) {
     return (
-      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-
-        <FileUploadButton upload={this.upload.bind(this)} />
-
-        <FileContent
-          home={this.state}
-          select={this.state.select}
-          entries={this.state.entries}
-          listNavBySelect={this.onListNavBySelect}
-          showContextMenu={this.onShowContextMenu}
-          updateDetail={this.updateDetail}
-          setAnimation={this.setAnimation}
-          ipcRenderer={ipcRenderer}
-          download={this.download}
-          openByLocal={this.openByLocal}
-        />
-
-        <ContextMenu
-          open={this.state.contextMenuOpen}
-          top={this.state.contextMenuY}
-          left={this.state.contextMenuX}
-          onRequestClose={() => this.hideContextMenu()}
-        >
-          <MenuItem primaryText="新建文件夹" onTouchTap={this.openCreateNewFolder.bind(this)} />
-          <MenuItem primaryText="下载" onTouchTap={this.download} />
-          <MenuItem primaryText="详细信息" onTouchTap={toggleDetail} />
-          <MenuItem primaryText="刪除" onTouchTap={() => this.toggleDialog('delete')} />
-          <MenuItem primaryText="重命名" onTouchTap={this.openRenameFolder.bind(this)} />
-          <MenuItem primaryText="移动" onTouchTap={this.openMove.bind(this)} />
-          <MenuItem primaryText="拷贝" onTouchTap={this.openCopy.bind(this)} />
-        </ContextMenu>
-
-        <DialogOverlay open={this.state.createNewFolder} onRequestClose={this.closeCreateNewFolder.bind(this)}>
+      <div style={{ width: '100%', height: '100%' }}>
+        <DialogOverlay open={this.state.createNewFolder} onRequestClose={() => this.toggleDialog('createNewFolder')}>
           { this.state.createNewFolder &&
             <NewFolderDialog
               apis={this.ctx.props.apis}
@@ -440,36 +366,39 @@ class Home extends Base {
             /> }
         </DialogOverlay>
 
-        <DialogOverlay open={this.state.rename} onRequestClose={this.closeRename.bind(this)}>
+        <DialogOverlay open={this.state.rename} onRequestClose={() => this.toggleDialog('rename')}>
           { this.state.rename &&
             <RenameDialog
               apis={this.ctx.props.apis}
               path={this.state.path}
               entries={this.state.entries}
               select={this.state.select}
+              openSnackBar={openSnackBar}
             /> }
         </DialogOverlay>
 
-        <DialogOverlay open={this.state.move} onRequestClose={this.closeMove.bind(this)}>
+        <DialogOverlay open={this.state.move} onRequestClose={() => this.toggleDialog('move')}>
           { this.state.move && <MoveDialog
             apis={this.ctx.props.apis}
             path={this.state.path}
             entries={this.state.entries}
             select={this.state.select}
+            openSnackBar={openSnackBar}
             type="home"
             operation="move"
-          />}
+          /> }
         </DialogOverlay>
 
-        <DialogOverlay open={this.state.copy} onRequestClose={this.closeCopy.bind(this)}>
+        <DialogOverlay open={this.state.copy} onRequestClose={() => this.toggleDialog('copy')}>
           { this.state.copy && <MoveDialog
             apis={this.ctx.props.apis}
             path={this.state.path}
             entries={this.state.entries}
             select={this.state.select}
+            openSnackBar={openSnackBar}
             type="home"
             operation="copy"
-          />}
+          /> }
         </DialogOverlay>
 
         <DialogOverlay open={this.state.delete}>
@@ -487,9 +416,47 @@ class Home extends Base {
                 />
               </div>
             </div>
-
           }
         </DialogOverlay>
+      </div>
+    )
+  }
+
+  renderContent({ toggleDetail, openSnackBar }) {
+    return (
+      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+
+        <FileUploadButton upload={this.upload} />
+
+        <FileContent
+          home={this.state}
+          select={this.state.select}
+          entries={this.state.entries}
+          listNavBySelect={this.listNavBySelect}
+          showContextMenu={this.showContextMenu}
+          updateDetail={this.updateDetail}
+          setAnimation={this.setAnimation}
+          ipcRenderer={ipcRenderer}
+          download={this.download}
+          openByLocal={this.openByLocal}
+        />
+
+        <ContextMenu
+          open={this.state.contextMenuOpen}
+          top={this.state.contextMenuY}
+          left={this.state.contextMenuX}
+          onRequestClose={this.hideContextMenu}
+        >
+          <MenuItem primaryText="新建文件夹" onTouchTap={() => this.toggleDialog('createNewFolder')} />
+          <MenuItem primaryText="下载" onTouchTap={this.download} />
+          <MenuItem primaryText="详细信息" onTouchTap={toggleDetail} />
+          <MenuItem primaryText="刪除" onTouchTap={() => this.toggleDialog('delete')} />
+          <MenuItem primaryText="重命名" onTouchTap={() => this.toggleDialog('rename')} />
+          <MenuItem primaryText="移动" onTouchTap={() => this.toggleDialog('move')} />
+          <MenuItem primaryText="拷贝" onTouchTap={() => this.toggleDialog('copy')} />
+        </ContextMenu>
+
+        { this.renderDialogs(openSnackBar) }
 
       </div>
     )
