@@ -1,493 +1,228 @@
-import React, { Component, PureComponent } from 'react'
-import { MenuItem, FloatingActionButton, IconButton } from 'material-ui'
+import React from 'react'
+import Debug from 'debug'
+import { ipcRenderer } from 'electron'
+import { IconButton, MenuItem } from 'material-ui'
 import FileFolderShared from 'material-ui/svg-icons/file/folder-shared'
 import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
-import Radium from 'radium'
-import { ipcRenderer } from 'electron'
 
-import DialogOverlay from '../common/DialogOverlay'
+import Home from './Home'
+import FileContent from '../file/FileContent'
+import FileUploadButton from '../file/FileUploadButton'
+import ContextMenu from '../common/ContextMenu'
 import { BreadCrumbItem, BreadCrumbSeparator } from '../common/BreadCrumb'
 
-import ListSelect from '../file/ListSelect'
-import FileContent from '../file/FileContent'
-import NewFolderDialog from '../file/NewFolderDialog'
-import RenameDialog from '../file/RenameDialog'
-import MoveDialog from '../file/MoveDialog'
-import Base from './Base'
-import ContextMenu from '../common/ContextMenu'
-import FlatButton from '../common/FlatButton'
-import FileUploadButton from '../file/FileUploadButton'
-import FileDetail from '../file/FileDetail'
+const debug = Debug('component:viewModel:public: ')
 
-class Public extends Base {
-
+class Public extends Home {
   constructor(ctx) {
     super(ctx)
-    this.select = new ListSelect(this)
-    this.select.on('updated', next => this.setState({ select: next }))
+
     this.state = {
-
-      select: this.select.state,
-      driveListNavDir: null, // save a reference
-      drives: null,
-      path: [],         //
-      entries: [],      // sorted
-
-      contextMenuOpen: false,
-      contextMenuY: -1,
-      contextMenuX: -1,
-
-      createNewFolder: false,
-      rename: false,
-      move: false,
-      inRoot: false,
-      copy: false,
-      delete: false,
-      noAccess: false,
-      detailIndex: -1
+      inRoot: true
     }
 
-    this.updateDetail = (index) => {
-      this.setState({ detailIndex: index })
-    }
+    this.rootDrive = null
 
-    this.toggleDialog = (type) => {
-      this.setState({ [type]: !this.state[type] })
-    }
+    this.listNavBySelect = () => {
+      debug('listNavBySelect', this.select, this.state)
+      const selected = this.select.state.selected
+      if (selected.length !== 1) return
 
-    this.delete = () => {
-      const entries = this.state.entries
-      const selected = this.state.select.selected
-      const count = selected.length
-      let finishCount = 0
-      const path = this.state.path
-      const dirUUID = path[path.length - 1].uuid
-
-      const loop = () => {
-        const nodeUUID = entries[selected[finishCount]].uuid
-        this.ctx.props.apis.request('deleteDirOrFile', { dirUUID, nodeUUID }, (err, data) => {
-          // need to handle this err ? TODO
-          if (err) console.log(err)
-          finishCount += 1
-          if (finishCount === count) {
-            if (this.state.path[this.state.path.length - 1].uuid === dirUUID) {
-              if (this.state.path.length == 1) { this.ctx.props.apis.request('drives') }
-              this.ctx.props.apis.request('driveListNavDir', { rootUUID: this.state.path[1].uuid, dirUUID }, (err, data) => {
-                if (!err) {
-                  this.ctx.openSnackBar('删除成功')
-                } else {
-                  this.ctx.openSnackBar(`删除失败: ${err.message}`)
-                }
-              })
-            } else return
-          } else loop()
+      const entry = this.state.entries[selected[0]]
+      if (entry.type === 'directory') {
+        this.ctx.props.apis.request('listNavDir', {
+          driveUUID: this.state.path[0].uuid,
+          dirUUID: entry.uuid
+        })
+      } else if (entry.type === 'public') {
+        const myUUID = this.ctx.props.apis.account.data.uuid
+        const writable = entry.writelist.findIndex(uuid => uuid === myUUID) > -1
+        if (!writable) {
+          this.toggleDialog('noAccess')
+          return
+        }
+        this.rootDrive = entry
+        this.ctx.props.apis.request('listNavDir', {
+          driveUUID: entry.uuid,
+          dirUUID: entry.uuid
         })
       }
-      loop()
-      this.toggleDialog('delete')
     }
-
-
-    ipcRenderer.on('driveListUpdate', (e, obj) => {
-      if (this.state.path.length == 0) return
-      if (obj.uuid == this.state.path[this.state.path.length - 1].uuid) {
-        // this.ctx.openSnackBar(obj.message)
-        this.refresh()
-      }
-    })
   }
 
-  updateState(listNavDir) {
-    // console.log(listNavDir)
-    if (listNavDir.driveListNavDir === this.state.driveListNavDir &&
-     listNavDir.drives === this.state.drives) return
-
+  updateState(type, data) {
+    debug('updateState', type, data)
     let path
     let entries
-    if (this.state.inRoot) {
+    let select
+    /* update drives or listNavDir */
+    if (type === 'drives') {
+      if (data === this.state.drives) return
       path = [{ name: '共享文件夹', uuid: null, type: 'publicRoot' }]
-      entries = listNavDir.drives.drives.filter(drive => drive.type === 'public')
+      entries = data.filter(drive => drive.type === 'public')
       entries.forEach(item => Object.assign(item, { name: item.label }))
+      select = this.select.reset(entries.length)
+
+      this.setState({ drives: data, path, entries, select, inRoot: true })
     } else {
-      path = [{ type: 'public', name: '共享文件夹', uuid: null }].concat(listNavDir.driveListNavDir.path)
-      entries = listNavDir.driveListNavDir.entries
+      if (data === this.state.listNavDir) return
+      path = [{ name: '共享文件夹', uuid: this.rootDrive.uuid, type: 'publicRoot' }, ...data.path]
+      path[1].name = this.rootDrive.name
+      entries = data.entries
       entries = [...entries].sort((a, b) => {
         if (a.type === 'folder' && b.type === 'file') return -1
         if (a.type === 'file' && b.type === 'folder') return 1
-        if (a.name) return a.name.localeCompare(b.name)
-        return a.label.localeCompare(b.label)
+        return a.name.localeCompare(b.name)
       })
+      select = this.select.reset(entries.length)
+
+      this.setState({ listNavDir: data, path, entries, select, inRoot: false })
     }
-    const select = this.select.reset(entries.length)
-    const state = { select,
-      path,
-      entries,
-      driveListNavDir: listNavDir.driveListNavDir,
-      drives: listNavDir.drives
-    }
-    this.setState(state)
   }
 
   willReceiveProps(nextProps) {
-    // console.log(nextProps)
-    if (!nextProps.apis || !nextProps.apis.drives) return
-    if (nextProps.apis.drives.isPending()) return
-    if (nextProps.apis.driveListNavDir && nextProps.apis.driveListNavDir.isPending()) return
-    const driveListNavDir = nextProps.apis.driveListNavDir ? nextProps.apis.driveListNavDir.value() : null
-    const drives = nextProps.apis.drives.value()
-    this.updateState({
-      driveListNavDir,
-      drives
-    })
+    // console.log('willReceiveProps', nextProps, this.state)
+    if (!this.rootDrive) {
+      if (!nextProps.apis || !nextProps.apis.drives) return
+      const drives = nextProps.apis.drives
+      if (drives.isPending() || drives.isRejected()) return
+      this.updateState('drives', drives.value())
+    } else {
+      if (!nextProps.apis || !nextProps.apis.listNavDir) return
+      const listNavDir = nextProps.apis.listNavDir
+      if (listNavDir.isPending() || listNavDir.isRejected()) return
+      this.updateState('dir', listNavDir.value())
+    }
   }
 
   navEnter() {
-    this.setState({ inRoot: true })
+    this.rootDrive = null
     this.ctx.props.apis.request('drives')
   }
 
-  navLeave() {
-  }
-
-  navGroup() {
-    return 'file'
-  }
-
-  menuName() {
+  quickName() {
     return '共享文件夹'
   }
 
-  menuIcon() {
+  quickIcon() {
     return FileFolderShared
   }
 
-  appBarStyle() {
-    return 'colored'
-  }
+  /* renderers */
 
-  prominent() {
-    return true
-  }
+  renderTitle({ style }) {
+    if (!this.state.listNavDir && !this.state.drives) return (<div />)
 
-  hasDetail() {
-    return true
-  }
+    // debug('renderTitle', this.state)
+    const path = this.state.path
 
-  detailEnabled() {
-    return true
-  }
-
-  renderToolBar({ style }) {
-    if (this.state.path.length > 1) {
+    /* in the public drives */
+    if (this.state.inRoot) {
       return (
-        <div style={style}>
-          <IconButton onTouchTap={this.createNewFolder.bind(this)}>
-            <FileCreateNewFolder color="#FFF" />
-          </IconButton>
+        <div style={Object.assign({}, style, { marginLeft: 168 })}>
+          <BreadCrumbItem
+            text="共享文件夹"
+            onTouchTap={() => {
+              this.rootDrive = null
+              this.ctx.props.apis.request('drives')
+            }}
+          />
         </div>
       )
     }
-    return (<div style={style} />)
-  }
 
-  renderTitle({ style }) {
-    if (!this.state.listNavDir && !this.state.drives) return
+    /*
+      each one is preceded with a separator, except for the first one
+      each one is assigned an action, except for the last one
+    */
 
-    const path = this.state.path
+    const touchTap = node => this.ctx.props.apis.request('listNavDir', { driveUUID: path[1].uuid, dirUUID: node.uuid })
 
-    const listByBread = (node) => {
-      this.ctx.props.apis.request('driveListNavDir', {
-        dirUUID: node.uuid,
-        rootUUID: this.state.path.length > 1 ? this.state.path[1].uuid : node.uuid
-      })
-    }
-
-    // each one is preceded with a separator, except for the first one
-    // each one is assigned an action, except for the last one
     return (
-      <div id="file-breadcrumbs" style={Object.assign({}, style, { marginLeft: '176px' })}>
-        { path.reduce((acc, node, index, arr) => {
-          if (path.length > 4 && index > 0 && index < path.length - 3) {
-            if (index === 1) {
-              acc.push(<BreadCrumbSeparator key={node.uuid + index} />)
-              acc.push(<BreadCrumbItem text="..." key="..." />)
+      <div style={Object.assign({}, style, { marginLeft: 168 })}>
+        {
+          this.state.path.reduce((acc, node, index) => {
+            if (path.length > 4 && index > 0 && index < path.length - 3) {
+              if (index === path.length - 4) {
+                acc.push(<BreadCrumbSeparator key={`Separator${node.uuid}`} />)
+                acc.push(<BreadCrumbItem text="..." key="..." onTouchTap={() => touchTap(node)} />)
+              }
+              return acc
+            }
+
+            if (index !== 0) acc.push(<BreadCrumbSeparator key={`Separator${node.uuid}`} />)
+
+            /* the first one is always special */
+            if (index === 0) {
+              acc.push(
+                <BreadCrumbItem
+                  text="共享文件夹"
+                  key="root"
+                  onTouchTap={() => {
+                    this.rootDrive = null
+                    this.ctx.props.apis.request('drives')
+                  }}
+                />
+              )
+            } else {
+              acc.push(<BreadCrumbItem text={node.name} key={`Item${node.uuid}`} onTouchTap={() => touchTap(node)} />)
             }
             return acc
-          }
-
-          if (index !== 0) acc.push(<BreadCrumbSeparator key={node.uuid + index} />)
-
-          if (index === 0) { // the first one is always special
-            acc.push(<BreadCrumbItem
-              text="共享文件夹" key={node.uuid} onTouchTap={() => {
-                this.setState({ inRoot: true })
-                this.ctx.props.apis.request('drives')
-              }}
-            />)
-          } else if (index === 1) {
-            acc.push(
-              <BreadCrumbItem
-                text={this.state.drives.drives.find(item => item.uuid === node.name).label}
-                key={node.uuid} onTouchTap={listByBread.bind(this, node)}
-              />)
-          } else acc.push(<BreadCrumbItem text={node.name} key={node.uuid} onTouchTap={listByBread.bind(this, node)} />)
-          return acc
-        }, [])}
-      </div>
-    )
-  }
-
-  listNavBySelect() {
-    const selected = this.select.state.selected
-    if (selected.length !== 1) return
-
-    const entry = this.state.entries[selected[0]]
-    if (entry.type !== 'folder' && entry.type !== 'public') return
-    const myUUID = this.ctx.props.apis.account.data.uuid
-    const writable = entry.writelist.findIndex(uuid => uuid === myUUID) > -1
-    if (!writable) {
-      this.toggleDialog('noAccess')
-      return
-    }
-    this.setState({ inRoot: false })
-    this.ctx.props.apis.request('driveListNavDir', {
-      dirUUID: entry.uuid,
-      rootUUID: this.state.path.length > 1 ? this.state.path[1].uuid : entry.uuid
-    })
-  }
-
-  showContextMenu(clientX, clientY) {
-    if (this.select.state.ctrl || this.select.state.shift) return
-    const containerDom = document.getElementById('content-container')
-    const maxLeft = containerDom.offsetLeft + containerDom.clientWidth - 240
-    const x = clientX > maxLeft ? maxLeft : clientX
-    const maxTop = containerDom.offsetTop + containerDom.offsetHeight - 192
-    const y = clientY > maxTop ? maxTop : clientY
-    this.setState({
-      contextMenuOpen: true,
-      contextMenuX: x,
-      contextMenuY: y
-    })
-  }
-
-  hideContextMenu() {
-    this.setState({
-      contextMenuOpen: false,
-      contextMenuX: -1,
-      contextMenuY: -1
-    })
-  }
-
-  openRename() {
-    this.setState({ rename: true })
-  }
-
-  closeRename() {
-    this.setState({ rename: false })
-    this.refresh()
-  }
-
-  openMove() {
-    this.setState({ move: true })
-  }
-
-  closeMove() {
-    this.setState({ move: false })
-  }
-
-  openCopy() {
-    this.setState({ copy: true })
-  }
-
-  closeCopy() {
-    this.setState({ copy: false })
-  }
-
-  createNewFolder() {
-    this.setState({ createNewFolder: true })
-  }
-
-  closeCreateFolder() {
-    this.setState({ createNewFolder: false })
-    this.refresh()
-  }
-
-  refresh() {
-    const request = this.ctx.props.apis.request
-    const path = this.state.path
-    if (this.state.inRoot) request('drives')
-    else {
-      request('driveListNavDir', {
-        dirUUID: path[path.length - 1].uuid,
-        rootUUID: path[1].uuid
-      })
-    }
-  }
-
-  download() {
-    const entries = this.state.entries
-    const selected = this.state.select.selected
-    const path = this.state.path
-    const folders = []
-    const files = []
-
-    selected.forEach((item) => {
-      const obj = entries[item]
-      if (obj.type == 'public') obj.type = 'folder'
-      if (obj.type == 'folder') folders.push(obj)
-      else if (obj.type == 'file') files.push(obj)
-    })
-
-    const args = { folders, files, dirUUID: path[path.length - 1].uuid }
-    // console.log(args)
-    ipcRenderer.send('DOWNLOAD', args)
-  }
-
-  upload(type) {
-    const dirPath = this.state.path
-    const dirUUID = dirPath[dirPath.length - 1].uuid
-    console.log(dirUUID, type)
-    ipcRenderer.send('UPLOAD', { dirUUID, type })
-  }
-
-  createFolder(value) {
-    this.setState({ createNewFolder: false })
-    const path = this.state.path
-    const curr = path[path.length - 1]
-    const args = {
-      dirUUID: curr.uuid,
-      dirname: value
-    }
-    console.log(args)
-    this.ctx.props.apis.request('mkdir', args, (err, data) => {
-      if (err) this.setState({ errorText: err.message })
-      else this.props.onRequestClose(true)
-    })
-  }
-
-
-  /** renderers **/
-
-  renderDetail({ style }) {
-    return (
-      <div style={style}>
-        {
-          this.state.entries.length ?
-            <FileDetail
-              detailFile={this.state.entries[this.state.detailIndex]}
-              path={this.state.path}
-              ipcRenderer={ipcRenderer}
-              primaryColor={this.groupPrimaryColor()}
-            /> :
-            <div style={{ height: 128, backgroundColor: '#00796B' }} />
+          }, [])
         }
       </div>
     )
   }
-  renderContent({ openSnackBar }) {
+
+  renderToolBar({ style }) {
+    return (
+      <div style={style}>
+        <IconButton onTouchTap={() => this.toggleDialog('createNewFolder')} disabled={this.state.inRoot} >
+          <FileCreateNewFolder color="#FFF" />
+        </IconButton>
+      </div>
+    )
+  }
+
+  renderContent({ toggleDetail, openSnackBar }) {
+    // debug('renderContent', this.state)
+    if (!this.state.listNavDir && !this.state.drives) return (<div />)
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-        {this.state.path.length > 1 && <FileUploadButton upload={this.upload.bind(this)} />}
+
+        { this.state.path.length > 1 && <FileUploadButton upload={this.upload} /> }
+
         <FileContent
           home={this.state}
           select={this.state.select}
           entries={this.state.entries}
-          listNavBySelect={this.listNavBySelect.bind(this)}
-          showContextMenu={this.showContextMenu.bind(this)}
+          listNavBySelect={this.listNavBySelect}
+          showContextMenu={this.showContextMenu}
           updateDetail={this.updateDetail}
+          setAnimation={this.setAnimation}
+          ipcRenderer={ipcRenderer}
+          download={this.download}
+          openByLocal={this.openByLocal}
         />
 
         <ContextMenu
-          open={this.state.contextMenuOpen}
+          open={this.state.contextMenuOpen && !this.state.inRoot}
           top={this.state.contextMenuY}
           left={this.state.contextMenuX}
-          onRequestClose={() => this.hideContextMenu()}
+          onRequestClose={this.hideContextMenu}
         >
-          <MenuItem primaryText="新建文件夹" disabled={!(this.state.path.length > 1)} onTouchTap={this.createNewFolder.bind(this)} />
-          <MenuItem primaryText="下载" onTouchTap={this.download.bind(this)} />
-          <MenuItem primaryText="刪除" disabled={!(this.state.path.length > 1)} onTouchTap={() => this.toggleDialog('delete')} />
-          <MenuItem primaryText="重命名" disabled={!(this.state.path.length > 1)} onTouchTap={this.openRename.bind(this)} />
-          <MenuItem primaryText="移动" disabled={!(this.state.path.length > 1)} onTouchTap={this.openMove.bind(this)} />
-          <MenuItem primaryText="拷贝" disabled={!(this.state.path.length > 1)} onTouchTap={this.openCopy.bind(this)} />
+          <MenuItem primaryText="新建文件夹" onTouchTap={() => this.toggleDialog('createNewFolder')} />
+          <MenuItem primaryText="下载" onTouchTap={this.download} />
+          <MenuItem primaryText="详细信息" onTouchTap={toggleDetail} />
+          <MenuItem primaryText="刪除" onTouchTap={() => this.toggleDialog('delete')} />
+          <MenuItem primaryText="重命名" onTouchTap={() => this.toggleDialog('rename')} />
+          <MenuItem primaryText="移动" onTouchTap={() => this.toggleDialog('move')} />
+          <MenuItem primaryText="拷贝" onTouchTap={() => this.toggleDialog('copy')} />
         </ContextMenu>
 
-        <DialogOverlay open={!!this.state.createNewFolder} onRequestClose={this.closeCreateFolder.bind(this)}>
-          { this.state.createNewFolder &&
-            <NewFolderDialog
-              apis={this.ctx.props.apis}
-              path={this.state.path}
-              entries={this.state.entries}
-              openSnackBar={openSnackBar}
-            /> }
-        </DialogOverlay>
+        { this.renderDialogs(openSnackBar) }
 
-        <DialogOverlay open={this.state.rename} onRequestClose={this.closeRename.bind(this)}>
-          { this.state.rename &&
-            <RenameDialog
-              apis={this.ctx.props.apis}
-              path={this.state.path}
-              entries={this.state.entries}
-              select={this.state.select}
-            /> }
-        </DialogOverlay>
-
-        <DialogOverlay open={this.state.move} onRequestClose={this.closeMove.bind(this)}>
-          { this.state.move && <MoveDialog
-            apis={this.ctx.props.apis}
-            path={this.state.path}
-            entries={this.state.entries}
-            select={this.state.select}
-            type="public"
-            operation="move"
-          />}
-        </DialogOverlay>
-
-        <DialogOverlay open={this.state.copy} onRequestClose={this.closeCopy.bind(this)}>
-          { this.state.copy && <MoveDialog
-            apis={this.ctx.props.apis}
-            path={this.state.path}
-            entries={this.state.entries}
-            select={this.state.select}
-            type="public"
-            operation="copy"
-          />}
-        </DialogOverlay>
-
-        <DialogOverlay open={this.state.delete}>
-          {
-            this.state.delete &&
-            <div style={{ width: 280, padding: '24px 24px 0px 24px' }}>
-              <div style={{ color: 'rgba(0,0,0,0.54)' }}>{'确定删除？'}</div>
-              <div style={{ height: 24 }} />
-              <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('delete')} />
-                <FlatButton
-                  label="确认"
-                  primary
-                  onTouchTap={this.delete}
-                />
-              </div>
-            </div>
-
-          }
-        </DialogOverlay>
-
-        <DialogOverlay open={this.state.noAccess}>
-          {
-            this.state.noAccess &&
-            <div style={{ width: 280, padding: '24px 24px 0px 24px' }}>
-              <div style={{ color: 'rgba(0,0,0,0.54)' }}>{'对不起，您没有访问权限！'}</div>
-              <div style={{ height: 24 }} />
-              <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                <FlatButton label="确定" primary onTouchTap={() => this.toggleDialog('noAccess')} />
-              </div>
-            </div>
-
-          }
-        </DialogOverlay>
       </div>
-
-
     )
   }
 }

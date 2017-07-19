@@ -121,17 +121,17 @@ class Home extends Base {
 
     /* actions */
     this.listNavBySelect = () => {
-      debug('listNavBySelect', this.select, this.state)
+      // debug('listNavBySelect', this.select, this.state)
       const selected = this.select.state.selected
       if (selected.length !== 1) return
 
       const entry = this.state.entries[selected[0]]
-      if (entry.type !== 'directory') return
-
-      this.ctx.props.apis.request('listNavDir', {
-        driveUUID: this.state.path[0].uuid,
-        dirUUID: entry.uuid
-      })
+      if (entry.type === 'directory') {
+        this.ctx.props.apis.request('listNavDir', {
+          driveUUID: this.state.path[0].uuid,
+          dirUUID: entry.uuid
+        })
+      }
     }
 
     this.refresh = () => {
@@ -183,7 +183,6 @@ class Home extends Base {
     }
 
     ipcRenderer.on('driveListUpdate', (e, obj) => {
-      console.log('in home')
       console.log(obj, this.state.path)
       if (!this.state.path.length) return
       if (obj.uuid === this.state.path[this.state.path.length - 1].uuid) {
@@ -277,7 +276,7 @@ class Home extends Base {
   }
 
   renderTitle({ style }) {
-    if (!this.state.listNavDir) return
+    if (!this.state.listNavDir) return (<div />)
 
     const path = this.state.path
 
@@ -285,39 +284,28 @@ class Home extends Base {
       each one is preceded with a separator, except for the first one
       each one is assigned an action, except for the last one
     */
+
+    const touchTap = node => this.ctx.props.apis.request('listNavDir', { driveUUID: path[0].uuid, dirUUID: node.uuid })
+
     return (
-      <div id="file-breadcrumbs" style={Object.assign({}, style, { marginLeft: '176px' })}>
+      <div style={Object.assign({}, style, { marginLeft: 168 })}>
         {
-          this.state.listNavDir.path.reduce((acc, node, index, arr) => {
+          this.state.listNavDir.path.reduce((acc, node, index) => {
             if (path.length > 4 && index > 0 && index < path.length - 3) {
-              if (index === 1) {
-                acc.push(<BreadCrumbSeparator key={node.uuid + index} />)
-                acc.push(<BreadCrumbItem text="..." key="..." />)
+              if (index === path.length - 4) {
+                acc.push(<BreadCrumbSeparator key={`Separator${node.uuid}`} />)
+                acc.push(<BreadCrumbItem text="..." key="..." onTouchTap={() => touchTap(node)} />)
               }
               return acc
             }
 
-            if (index !== 0) acc.push(<BreadCrumbSeparator key={node.uuid + index} />)
+            if (index !== 0) acc.push(<BreadCrumbSeparator key={`Separator${node.uuid}`} />)
 
             /* the first one is always special */
             if (index === 0) {
-              acc.push(
-                <BreadCrumbItem
-                  text="我的文件" key={node.uuid}
-                  onTouchTap={() => this.ctx.props.apis.request('listNavDir', {
-                    driveUUID: path[0].uuid,
-                    dirUUID: path[0].uuid
-                  })}
-                />
-              )
+              acc.push(<BreadCrumbItem text="我的文件" key="root" onTouchTap={() => touchTap(path[0])} />)
             } else {
-              acc.push(<BreadCrumbItem
-                text={node.name} key={node.uuid}
-                onTouchTap={() => this.ctx.props.apis.request('listNavDir', {
-                  driveUUID: path[0].uuid,
-                  dirUUID: node.uuid
-                })}
-              />)
+              acc.push(<BreadCrumbItem text={node.name} key={`Item${node.uuid}`} onTouchTap={() => touchTap(node)} />)
             }
             return acc
           }, [])
@@ -337,6 +325,7 @@ class Home extends Base {
   }
 
   renderDetail({ style }) {
+    if (!this.state.entries) return (<div />)
     return (
       <div style={style}>
         {
@@ -418,6 +407,19 @@ class Home extends Base {
             </div>
           }
         </DialogOverlay>
+        {/* used in Public drives */}
+        <DialogOverlay open={this.state.noAccess}>
+          {
+            this.state.noAccess &&
+            <div style={{ width: 280, padding: '24px 24px 0px 24px' }}>
+              <div style={{ color: 'rgba(0,0,0,0.54)' }}>{'对不起，您没有访问权限！'}</div>
+              <div style={{ height: 24 }} />
+              <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                <FlatButton label="确定" primary onTouchTap={() => this.toggleDialog('noAccess')} />
+              </div>
+            </div>
+          }
+        </DialogOverlay>)
       </div>
     )
   }
