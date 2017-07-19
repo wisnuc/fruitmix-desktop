@@ -24,9 +24,13 @@ const debug = Debug('component:viewModel:Home: ')
 class Home extends Base {
   constructor(ctx) {
     super(ctx)
+
+    /* handle select TODO */
     this.select = new ListSelect(this)
     this.select.on('updated', next => this.setState({ select: next }))
+
     this.state = {
+      sortType: '', // nameUp, nameDown, timeUp, timeDown, sizeUp, sizeDown
       select: this.select.state,
       listNavDir: null, // save a reference
       path: [],
@@ -43,14 +47,11 @@ class Home extends Base {
       detailIndex: -1
     }
 
-    this.onRequestClose = (dirty) => {
-      this.setState({ createNewFolder: null })
-      if (dirty) {
-        this.ctx.props.apis.request('listNavDir', {
-          driveUUID: this.state.path[0].uuid,
-          dirUUID: this.state.path[this.state.path.length - 1].uuid
-        })
-      }
+    /* handle update sortType */
+    this.force = false
+    this.changeSortType = (sortType) => {
+      this.force = true
+      this.setState({ sortType })
     }
 
     this.toggleDialog = (type) => {
@@ -193,19 +194,36 @@ class Home extends Base {
   }
 
   updateState(listNavDir) {
-    if (listNavDir === this.state.listNavDir) return
+    if (listNavDir === this.state.listNavDir && !this.force) return
 
     let { path, entries } = listNavDir
 
+    /* sort enries */
     entries = [...entries].sort((a, b) => {
       if (a.type === 'directory' && b.type === 'file') return -1
       if (a.type === 'file' && b.type === 'directory') return 1
-      return a.name.localeCompare(b.name)
+      switch (this.state.sortType) {
+        case 'nameUp':
+          return a.name.localeCompare(b.name)
+        case 'nameDown':
+          return b.name.localeCompare(a.name)
+        case 'sizeUp':
+          return (a.size && b.size) ? (a.size > b.size) : a.name.localeCompare(b.name)
+        case 'sizeDown':
+          return (a.size && b.size) ? (a.size < b.size) : a.name.localeCompare(b.name)
+        case 'timeUp':
+          return (a.time && b.time) ? (a.time > b.time) : a.name.localeCompare(b.name)
+        case 'timeDown':
+          return (a.time && b.time) ? (a.time < b.time) : a.name.localeCompare(b.name)
+        default:
+          return a.name.localeCompare(b.name)
+      }
     })
 
     const select = this.select.reset(entries.length)
     const state = { select, listNavDir, path, entries }
 
+    this.force = false
     this.setState(state)
   }
 
@@ -442,6 +460,8 @@ class Home extends Base {
           download={this.download}
           openByLocal={this.openByLocal}
           primaryColor={this.groupPrimaryColor()}
+          sortType={this.state.sortType}
+          changeSortType={this.changeSortType}
         />
 
         <ContextMenu

@@ -204,6 +204,8 @@ class Public extends Home {
           download={this.download}
           openByLocal={this.openByLocal}
           primaryColor={this.groupPrimaryColor()}
+          sortType={this.state.sortType}
+          changeSortType={this.changeSortType}
         />
 
         <ContextMenu

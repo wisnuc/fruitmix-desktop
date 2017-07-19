@@ -9,6 +9,8 @@ import ToggleCheckBoxOutlineBlank from 'material-ui/svg-icons/toggle/check-box-o
 import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import PhotoIcon from 'material-ui/svg-icons/image/photo'
+import ArrowUpward from 'material-ui/svg-icons/navigation/arrow-upward'
+import ArrowDownward from 'material-ui/svg-icons/navigation/arrow-downward'
 import { List, AutoSizer } from 'react-virtualized'
 import ContainerOverlay from './ContainerOverlay'
 import { TXTIcon, WORDIcon, EXCELIcon, PPTIcon, PDFIcon } from '../common/Svg'
@@ -288,43 +290,62 @@ class FileContent extends Component {
   render() {
     const { apis } = this.props
     // debug('render FileContent', this.props, this.state)
+    const headers = [
+      {
+        title: '名称',
+        width: 494,
+        up: 'nameUp',
+        down: 'nameDown'
+      },
+      {
+        title: '修改时间',
+        width: 160,
+        up: 'timeUp',
+        down: 'timeDown'
+      },
+      {
+        title: '文件大小',
+        width: 160,
+        up: 'sizeUp',
+        down: 'sizeDown'
+      }
+    ]
     return (
-      <div id="file-content" style={{ width: '100%', height: '100%' }} onDrop={this.drop.bind(this)}>
+      <div style={{ width: '100%', height: '100%' }} onDrop={this.drop.bind(this)}>
         {/* header*/}
-        <div style={{ width: '100%', height: 40 }}>
-          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center' }}>
-            <div style={{ flex: '0 0 104px' }} />
-            <div
-              style={{
-                flex: '0 0 390px',
-                overflow: 'hidden',
-                whiteSpace: 'nowrap',
-                textOverflow: 'ellipsis',
-                fontSize: 14,
-                fontWeight: 500,
-                color: 'rgba(0,0,0,0.54)'
-              }}
-            >
-              类型
-            </div>
-            <div style={{ flex: '0 1 160px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)', textAlign: 'right' }}>
-              修改时间
-            </div>
-            <div
-              style={{
-                flex: '0 1 160px',
-                fontSize: 14,
-                fontWeight: 500,
-                color: 'rgba(0,0,0,0.54)',
-                textAlign: 'right',
-                marginRight: 72
-              }}
-            >
-              文件大小
-            </div>
-            <div style={{ flexGrow: 1 }} />
-          </div>
+        <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }}>
+          <div style={{ flex: '0 0 104px' }} />
+          {
+            headers.map(h => (
+              <div
+                style={{ width: h.width, display: 'flex', alignItems: 'center' }}
+                key={h.title}
+                onTouchTap={() => {
+                  this.props.sortType === h.up ? this.props.changeSortType(h.down) : this.props.changeSortType(h.up)
+                }}
+              >
+                <div
+                  style={{
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap',
+                    textOverflow: 'ellipsis',
+                    fontSize: 14,
+                    fontWeight: 500,
+                    color: 'rgba(0,0,0,0.54)'
+                  }}
+                >
+                  { h.title }
+                </div>
+                <div style={{ marginLeft: 8, marginTop: 6 }}>
+                  { this.props.sortType === h.up && <ArrowUpward style={{ height: 18, width: 18, color: '#9E9E9E' }} /> }
+                  { this.props.sortType === h.down && <ArrowDownward style={{ height: 18, width: 18, color: '#9E9E9E' }} /> }
+                </div>
+              </div>
+            ))
+          }
+          <div style={{ flexGrow: 1 }} />
         </div>
+
         <div style={{ width: '100%', height: 8 }} />
 
         {/* list content */}
