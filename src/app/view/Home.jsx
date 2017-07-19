@@ -336,7 +336,7 @@ class Home extends Base {
               ipcRenderer={ipcRenderer}
               primaryColor={this.groupPrimaryColor()}
             /> :
-            <div style={{ height: 128, backgroundColor: '#00796B' }} />
+            <div style={{ height: 128, backgroundColor: this.groupPrimaryColor(), filter: 'brightness(0.9)' }} />
         }
       </div>
     )

@@ -38,7 +38,7 @@ const getPath = (path) => {
   const newPath = []
   path.map((item, index) => {
     if (!index) {
-      newPath.push('我的文件')
+      newPath.push(item.type === 'publicRoot' ? '共享文件夹' : '我的文件')
     } else {
       newPath.push(item.name)
     }
@@ -175,7 +175,7 @@ class FileDetail extends React.PureComponent {
           height: 32,
           fontSize: 20,
           fontWeight: 500,
-          color: '#FAFAFA'
+          color: '#FFFFFF'
         }}
       >
         <div style={{ flex: '0 0 24px', display: 'flex', alignItems: 'center' }}>

@@ -59,7 +59,7 @@ class NavViews extends Component {
 
     this.install('home', Home)
     this.install('public', Public)
-    this.install('physical', Physical)
+    // this.install('physical', Physical)
     // this.install('fileSharedWithMe', FileSharedWithMe)
     // this.install('fileSharedWithOthers', FileSharedWithOthers)
     this.install('transmission', Transmission)

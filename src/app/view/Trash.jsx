@@ -74,8 +74,8 @@ class Trash extends Home {
           home={this.state}
           select={this.state.select}
           entries={this.state.entries}
-          listNavBySelect={this.onListNavBySelect}
-          showContextMenu={this.onShowContextMenu}
+          listNavBySelect={this.listNavBySelect}
+          showContextMenu={this.showContextMenu}
           updateDetail={this.updateDetail}
         />
 
@@ -83,7 +83,7 @@ class Trash extends Home {
           open={this.state.contextMenuOpen}
           top={this.state.contextMenuY}
           left={this.state.contextMenuX}
-          onRequestClose={() => this.hideContextMenu()}
+          onRequestClose={this.hideContextMenu}
         >
           <MenuItem primaryText="详细信息" onTouchTap={toggleDetail} />
           <MenuItem primaryText="还原" onTouchTap={toggleDetail} />

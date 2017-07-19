@@ -122,8 +122,9 @@ class AdminDrives extends Base {
               detailDrive={this.state.detailDrive}
               apis={this.ctx.props.apis}
               refreshDrives={this.refreshDrives}
+              primaryColor={this.groupPrimaryColor()}
             /> :
-            <div style={{ height: 128, backgroundColor: '#5E35B1' }} />
+            <div style={{ height: 128, backgroundColor: this.groupPrimaryColor(), filter: 'brightness(0.9)' }} />
         }
       </div>
     )

@@ -95,11 +95,11 @@ class DrivesDetail extends PureComponent {
   }
 
   render() {
-    const { users, detailDrive, primary } = this.props
-    if (!users || !detailDrive) return <div />
+    const { users, detailDrive, primaryColor } = this.props
+    if (!users || !detailDrive) return <div style={{ height: 128, backgroundColor: primaryColor, filter: 'brightness(0.9)' }} />
     return (
       <div style={{ height: '100%' }}>
-        <div style={{ height: 128, backgroundColor: '#5E35B1' }}>
+        <div style={{ height: 128, backgroundColor: primaryColor, filter: 'brightness(0.9)' }}>
           <div style={{ height: 64 }} />
           {/* header */}
           <div
@@ -122,9 +122,9 @@ class DrivesDetail extends PureComponent {
                     errorText={this.state.errorText}
                     onBlur={() => this.setState({ modify: false, changed: true })}
                     ref={(input) => { if (input && this.state.modify) { input.focus() } }}
-                    inputStyle={{ fontSize: 20, fontWeight: 500, color: '#FAFAFA' }}
-                    underlineFocusStyle={{ borderColor: '#FAFAFA' }}
-                    underlineStyle={{ borderColor: '#5E35B1' }}
+                    inputStyle={{ fontSize: 20, fontWeight: 500, color: '#FFFFFF' }}
+                    underlineFocusStyle={{ borderColor: '#FFFFFF' }}
+                    underlineStyle={{ borderColor: primaryColor }}
                     errorStyle={{ marginTop: 16 }}
                   />
                 </div> :
@@ -135,7 +135,7 @@ class DrivesDetail extends PureComponent {
                     height: 32,
                     fontSize: 20,
                     fontWeight: 500,
-                    color: '#FAFAFA'
+                    color: '#FFFFFF'
                   }}
                   onTouchTap={() => this.setState({ modify: true })}
                 >
@@ -201,7 +201,7 @@ class DrivesDetail extends PureComponent {
             />
             */}
             <FlatButton
-              label="应用" primary={primary}
+              label="应用" primary
               disabled={!this.state.changed || !!this.state.errorText || this.state.modify}
               onTouchTap={this.fire}
             />
