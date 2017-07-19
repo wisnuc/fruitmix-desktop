@@ -37,7 +37,7 @@ class Fruitmix extends EventEmitter {
     this[name].on('updated', (prev, curr) => {
       this.setState(name, curr)
 
-      // console.log(`${name} updated`, prev, curr, this[name].isFinished(), typeof next === 'function')
+      console.log(`${name} updated`, prev, curr, this[name].isFinished(), typeof next === 'function')
 
       if (this[name].isFinished() && next) {
         this[name].isRejected()
@@ -104,15 +104,17 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'account':
-        r = this.aget(`users/${args.uuid}`)
+        r = this.aget(`users/${this.userUUID}`)
         break
 
       case 'updateAccount':
+        console.log('updateAccount', args)
         r = this.apatch(`users/${args.uuid}`, args)
         break
 
       case 'users':
-        r = this.aget('users')
+        r = request.get(`http://${this.address}:3000/users`)
+        // r = this.aget('users')
         break
 
       case 'drives':
@@ -131,25 +133,19 @@ class Fruitmix extends EventEmitter {
         })
         break
 
-      case 'adminDrives':
-        r = this.aget('drives')
-        break
-
       case 'driveListNavDir':
         r = this.aget(`files/fruitmix/list-nav/${args.dirUUID}/${args.rootUUID}`)
         break
 
       case 'adminCreateDrive':
-        r = this.apost('admin/drives', {
+        r = this.apost('drives', {
           label: args.label,
-          writelist: args.writelist,
-          readlist: [],
-          shareAllowed: true
+          writelist: args.writelist
         })
         break
 
       case 'adminUpdateDrive':
-        r = this.apatch(`admin/drives/${args.uuid}`, args)
+        r = this.apost(`drives/${args.uuid}`, args)
         break
 
     /** File APIs **/
@@ -260,27 +256,15 @@ class Fruitmix extends EventEmitter {
   }
 
   start() {
-    this.requestAsync('account', { uuid: this.userUUID }).asCallback((err, account) => {
-      if (account) {
-        console.log('requestAsync account success', account)
-        this.request('listNavDir', { drivesUUID: account.home, dirUUID: account.home })
-        if (account.isAdmin) {
-          this.request('adminUsers')
-          this.request('adminDrives')
-        }
-      }
-    })
-
+    this.request('account')
     this.request('users')
-    // this.request('drives')
     this.requestAsync('drives').asCallback((err, drives) => {
       if (drives) {
-        const drive = drives[0]
+        console.log('requestAsync drives success', drives)
+        const drive = drives.find(drive => drive.tag === 'home')
         this.request('listNavDir', { driveUUID: drive.uuid, dirUUID: drive.uuid })
       }
     })
-    this.request('fileShare')
-    this.request('mediaShare')
     this.request('media')
   }
 }

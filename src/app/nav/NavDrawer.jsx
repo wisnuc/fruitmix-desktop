@@ -117,7 +117,7 @@ class NavDrawer extends React.Component {
     let username = ''
     let isAdmin = false
     if (value) {
-      username = account.username
+      username = value.username
       isAdmin = value.isAdmin
     }
 
@@ -133,7 +133,8 @@ class NavDrawer extends React.Component {
     /*
     console.log('>>>>>>>>>>>>>>>>>>>')
     console.log(this.props)
-    console.log(this.props.views[nav])
+    console.log(account)
+    console.log(value)
     console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<')
     backgroundImage: 'url(../src/assets/images/bg.png)',
     backgroundSize: 'cover'
@@ -155,8 +156,8 @@ class NavDrawer extends React.Component {
             </IconButton>
           </div>
 
-          <div style={{ height: 40, marginLeft: 16, marginTop: -8 }}>
-            <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(255, 255, 255, 1)' }}>{username}</div>
+          <div style={{ height: 40, marginLeft: 24, marginTop: -8 }}>
+            <div style={{ fontSize: 20, fontWeight: 500, color: '#FFF' }}>{ username }</div>
           </div>
         </div>
 

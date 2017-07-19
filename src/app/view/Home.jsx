@@ -28,12 +28,10 @@ class Home extends Base {
     this.select = new ListSelect(this)
     this.select.on('updated', next => this.setState({ select: next }))
     this.state = {
-
       select: this.select.state,
       listNavDir: null, // save a reference
       path: [],         //
       entries: [],      // sorted
-
       contextMenuOpen: false,
       contextMenuY: -1,
       contextMenuX: -1,
@@ -174,10 +172,10 @@ class Home extends Base {
   }
 
   navEnter() {
-    if (!this.ctx.props.apis || !this.ctx.props.apis.account) return
-    if (!this.ctx.props.apis.account.data) return
-    const account = this.ctx.props.apis.account.data
-    if (account) this.ctx.props.apis.request('listNavDir', { driveUUID: account.home, dirUUID: account.home })
+    const apis = this.ctx.props.apis
+    if (!apis || !apis.drives || !apis.drives.data) return null
+    const homeDrive = apis.drives.data.find(drive => drive.tag === 'home')
+    if (homeDrive) this.ctx.props.apis.request('listNavDir', { driveUUID: homeDrive.uuid, dirUUID: homeDrive.uuid })
   }
 
   navLeave() {
@@ -221,11 +219,12 @@ class Home extends Base {
 
   /** operations **/
   listNavBySelect() {
+    debug('listNavBySelect', this.select, this.state)
     const selected = this.select.state.selected
     if (selected.length !== 1) return
 
     const entry = this.state.entries[selected[0]]
-    if (entry.type !== 'folder') return
+    if (entry.type !== 'directory') return
 
     this.ctx.props.apis.request('listNavDir', {
       driveUUID: this.state.path[0].uuid,

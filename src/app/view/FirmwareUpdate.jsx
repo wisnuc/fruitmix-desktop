@@ -55,7 +55,7 @@ class FirmwareUpdate extends Base {
   }
 
   navGroup() {
-    return 'update'
+    return 'device'
   }
 
   menuName() {

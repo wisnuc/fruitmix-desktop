@@ -30,11 +30,11 @@ class Account extends Base {
 
   refresh() {
     this.ctx.props.apis.request('account')
-    this.ctx.props.apis.request('login')
+    this.ctx.props.apis.request('users')
   }
   navEnter() {
     /* get user list */
-    this.ctx.props.apis.request('login')
+    this.ctx.props.apis.request('users')
   }
 
   navLeave() {

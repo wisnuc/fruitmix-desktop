@@ -31,6 +31,14 @@ class AccountApp extends React.Component {
       this.setState({ openDialog: '' })
     }
 
+    /* wechat */
+    /*
+      creatTicket
+      wxBind
+      getTicket
+      confirmTicket
+    */
+
     this.intiWxScript = () => {
       this.wxiframe = null
       this.WxLogin = (a) => {
@@ -75,13 +83,6 @@ class AccountApp extends React.Component {
         }
       })
     }
-
-    /*
-      creatTicket
-      wxBind
-      getTicket
-      confirmTicket
-    */
 
     this.confirm = () => {
       this.setState({ status: 'connectingCloud', error: '' })

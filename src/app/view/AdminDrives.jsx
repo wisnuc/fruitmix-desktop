@@ -7,66 +7,66 @@ import DriversDetail from '../control/DriversDetail'
 import ContextMenu from '../common/ContextMenu'
 import Base from './Base'
 
-const debug = Debug('component:viewModel:Media: ')
+const debug = Debug('component:viewModel:AdminDrives: ')
 
 class AdminDrives extends Base {
 
   constructor(ctx) {
     super(ctx)
-    this.refreshDrives = this.refresh.bind(this)
-    this.updateDetail = this.update.bind(this)
+
     this.state = {
       contextMenuOpen: false,
       contextMenuY: -1,
       contextMenuX: -1
     }
+
+    this.refreshDrives = () => {
+      this.ctx.props.apis.request('users')
+      this.ctx.props.apis.request('drives')
+    }
+
+
+    this.updateDetail = (detailDrive, detailUsers) => {
+      this.setState({ detailDrive, detailUsers })
+    }
+
+    this.showContextMenu = (clientX, clientY) => {
+      this.setState({
+        contextMenuOpen: true,
+        contextMenuX: clientX,
+        contextMenuY: clientY
+      })
+    }
+
+    this.hideContextMenu = () => {
+      this.setState({
+        contextMenuOpen: false,
+        contextMenuX: -1,
+        contextMenuY: -1
+      })
+    }
   }
 
   willReceiveProps(nextProps) {
-    // console.log('adminusers nextProps', nextProps)
-    if (!nextProps.apis || !nextProps.apis.adminUsers) return
-    const adminUsers = nextProps.apis.adminUsers
+    console.log('adminusers nextProps', nextProps)
+    if (!nextProps.apis || !nextProps.apis.users) return
+    const adminUsers = nextProps.apis.users
     if (adminUsers.isPending() || adminUsers.isRejected()) return
-    const adminDrives = nextProps.apis.adminDrives
-    if (adminDrives.isPending() || adminDrives.isRejected()) return
+    const adminDrives = nextProps.apis.drives
+    if (!adminDrives || adminDrives.isPending() || adminDrives.isRejected()) return
 
     /* now it's fulfilled */
-    const users = adminUsers.value().users
-    const drives = adminDrives.value().drives
+    const users = adminUsers.value()
+    const drives = adminDrives.value()
 
     if (users !== this.state.users || drives !== this.state.drives) {
       this.setState({ users, drives })
     }
   }
 
-  showContextMenu(clientX, clientY) {
-    this.setState({
-      contextMenuOpen: true,
-      contextMenuX: clientX,
-      contextMenuY: clientY
-    })
-  }
-
-  hideContextMenu() {
-    this.setState({
-      contextMenuOpen: false,
-      contextMenuX: -1,
-      contextMenuY: -1
-    })
-  }
-
-  refresh() {
-    this.ctx.props.apis.request('adminUsers')
-    this.ctx.props.apis.request('adminDrives')
-  }
-
-  update(detailDrive, detailUsers) {
-    this.setState({ detailDrive, detailUsers })
-  }
-
   navEnter() {
-    this.ctx.props.apis.request('adminUsers')
-    this.ctx.props.apis.request('adminDrives')
+    this.ctx.props.apis.request('users')
+    this.ctx.props.apis.request('drives')
   }
 
   navLeave() {
@@ -141,14 +141,14 @@ class AdminDrives extends Base {
           refreshDrives={this.refreshDrives}
           updateDetail={this.updateDetail}
           navTo={navTo}
-          showContextMenu={this.showContextMenu.bind(this)}
+          showContextMenu={this.showContextMenu}
           openSnackBar={openSnackBar}
         />
         <ContextMenu
           open={this.state.contextMenuOpen}
           top={this.state.contextMenuY}
           left={this.state.contextMenuX}
-          onRequestClose={() => this.hideContextMenu()}
+          onRequestClose={this.hideContextMenu}
         >
           <MenuItem primaryText="打开" onTouchTap={() => navTo('public')} />
           <MenuItem primaryText="修改" onTouchTap={toggleDetail} />
