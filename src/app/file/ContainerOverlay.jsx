@@ -123,7 +123,7 @@ class ContainerOverlayInline extends React.Component {
         this.refPreview_2.style.left = this.refPreview_1.style.left
         this.refPreview_1.style.left = this.refPreview_0.style.left
         this.refPreview_0.style.left = tmp
-      } else if (direction === 'left' && this.currentIndex > 0) {
+      } else if (direction === 'left' && this.currentIndex > this.firstFileIndex) {
         this.currentIndex -= 1
 
         /* hidden right div which move 200%, show other divs */
@@ -153,23 +153,6 @@ class ContainerOverlayInline extends React.Component {
       } else return
       // this.requestNext(this.currentIndex)
       this.forceUpdate()
-    }
-
-    /* calculate positon of mouse */
-    this.calcPositon = (ev) => {
-      const { x, y } = mousePosition(ev)
-      const clientWidth = this.state.detailInfo ? window.innerWidth - 360 : window.innerWidth
-
-      if (this.currentIndex > 0 && x < clientWidth * 0.3 && y > 96) {
-        this.refBackground.style.cursor = 'pointer'
-        if (this.state.direction !== 'left') this.setState({ direction: 'left' })
-      } else if (this.currentIndex < this.props.items.length - 1 && x > clientWidth * 0.7 && y > 96) {
-        this.refBackground.style.cursor = 'pointer'
-        if (this.state.direction !== 'right') this.setState({ direction: 'right' })
-      } else {
-        this.refBackground.style.cursor = 'default'
-        if (this.state.direction !== null) this.setState({ direction: null })
-      }
     }
 
     /* animation */
@@ -283,8 +266,9 @@ class ContainerOverlayInline extends React.Component {
 
   render() {
     debug('redner ContainerOverlay', this.props)
+    const { primaryColor } = this.props
     const entry = this.props.items[this.currentIndex]
-
+    this.firstFileIndex = this.props.items.findIndex(item => item.type === 'file')
     return (
       <div
         ref={ref => (this.refRoot = ref)}
@@ -313,7 +297,6 @@ class ContainerOverlayInline extends React.Component {
             left: 0,
             backgroundColor: 'rgba(0, 0, 0, 0.87)'
           }}
-          onTouchTap={this.close}
         />
 
         {/* detail image content */}
@@ -326,11 +309,9 @@ class ContainerOverlayInline extends React.Component {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            cursor: 'pointer',
             transition: 'all 225ms cubic-bezier(0.0, 0.0, 0.2, 1)'
           }}
-          onMouseMove={this.calcPositon}
-          onTouchTap={() => this.changeIndex(this.state.direction)}
+          onTouchTap={this.close}
         >
           {/* main image */}
           {
@@ -344,7 +325,6 @@ class ContainerOverlayInline extends React.Component {
                   left: index ? index === 1 ? 0 : '100%' : '-100%',
                   height: '100%',
                   width: '100%',
-                  cursor: 'pointer',
                   transition: 'left 225ms cubic-bezier(0.0, 0.0, 0.2, 1)'
                 }}
               >
@@ -423,7 +403,7 @@ class ContainerOverlayInline extends React.Component {
           {/* left Button */}
           <IconButton
             style={{
-              display: this.state.direction === 'left' ? 'flex' : 'none',
+              opacity: this.currentIndex > this.firstFileIndex ? 1 : 0,
               alignItems: 'center',
               justifyContent: 'center',
               backgroundColor: 'rgba(66, 66, 66, 0.541176)',
@@ -433,6 +413,8 @@ class ContainerOverlayInline extends React.Component {
               height: 56,
               left: '2%'
             }}
+            hoveredStyle={{ backgroundColor: primaryColor }}
+            onTouchTap={(e) => { this.changeIndex('left'); e.preventDefault(); e.stopPropagation() }}
           >
             <svg width={36} height={36} viewBox="0 0 24 24" fill="white">
               <path d="M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z" />
@@ -442,7 +424,7 @@ class ContainerOverlayInline extends React.Component {
           {/* right Button */}
           <IconButton
             style={{
-              display: this.state.direction === 'right' ? 'flex' : 'none',
+              opacity: this.currentIndex < this.props.items.length - 1 ? 1 : 0,
               alignItems: 'center',
               justifyContent: 'center',
               backgroundColor: 'rgba(66, 66, 66, 0.541176)',
@@ -452,6 +434,8 @@ class ContainerOverlayInline extends React.Component {
               height: 56,
               right: '2%'
             }}
+            hoveredStyle={{ backgroundColor: primaryColor }}
+            onTouchTap={(e) => { this.changeIndex('right'); e.preventDefault(); e.stopPropagation() }}
           >
             <svg width={36} height={36} viewBox="0 0 24 24" fill="white">
               <path d="M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z" />

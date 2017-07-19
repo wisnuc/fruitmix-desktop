@@ -70,8 +70,8 @@ class Public extends Home {
       path[1].name = this.rootDrive.name
       entries = data.entries
       entries = [...entries].sort((a, b) => {
-        if (a.type === 'folder' && b.type === 'file') return -1
-        if (a.type === 'file' && b.type === 'folder') return 1
+        if (a.type === 'directory' && b.type === 'file') return -1
+        if (a.type === 'file' && b.type === 'directory') return 1
         return a.name.localeCompare(b.name)
       })
       select = this.select.reset(entries.length)
@@ -203,6 +203,7 @@ class Public extends Home {
           ipcRenderer={ipcRenderer}
           download={this.download}
           openByLocal={this.openByLocal}
+          primaryColor={this.groupPrimaryColor()}
         />
 
         <ContextMenu

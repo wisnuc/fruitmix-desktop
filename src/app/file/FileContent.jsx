@@ -360,6 +360,7 @@ class FileContent extends Component {
           memoize={this.props.memoize}
           download={this.props.download}
           openByLocal={this.props.openByLocal}
+          primaryColor={this.props.primaryColor}
         />
       </div>
     )

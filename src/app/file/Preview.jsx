@@ -311,6 +311,7 @@ class PreviewInline extends React.Component {
     return (
       <div
         ref={ref => (this.refContainer = ref)}
+        onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -376,6 +377,7 @@ class PreviewInline extends React.Component {
           backgroundColor: '#424242',
           borderRadius: '20px'
         }}
+        onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
       >
         <div style={{ color: '#FFFFFF', fontSize: 20, fontWeight: 500 }}>
           { '无法预览' }

@@ -198,8 +198,8 @@ class Home extends Base {
     let { path, entries } = listNavDir
 
     entries = [...entries].sort((a, b) => {
-      if (a.type === 'folder' && b.type === 'file') return -1
-      if (a.type === 'file' && b.type === 'folder') return 1
+      if (a.type === 'directory' && b.type === 'file') return -1
+      if (a.type === 'file' && b.type === 'directory') return 1
       return a.name.localeCompare(b.name)
     })
 
@@ -441,6 +441,7 @@ class Home extends Base {
           ipcRenderer={ipcRenderer}
           download={this.download}
           openByLocal={this.openByLocal}
+          primaryColor={this.groupPrimaryColor()}
         />
 
         <ContextMenu
