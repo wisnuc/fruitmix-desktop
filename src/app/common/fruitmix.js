@@ -223,6 +223,13 @@ class Fruitmix extends EventEmitter {
         r = this.apost('station/tickets/', { type: 2 })
         break
 
+      case 'getWechatToken':
+        r = request
+          .get('http://10.10.9.59:5757/v1/token')
+          .query({ code: args.code })
+          .query({ platform: args.platform })
+        break
+
       case 'getTicket':
         console.log('getTicket API', args)
         r = this.aget(`station/tickets/${args.ticketId}`)

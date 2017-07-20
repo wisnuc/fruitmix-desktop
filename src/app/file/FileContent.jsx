@@ -1,376 +1,114 @@
-import React, { Component, PureComponent } from 'react'
+import React from 'react'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
-import prettysize from 'prettysize'
-import { Avatar } from 'material-ui'
-import ErrorIcon from 'material-ui/svg-icons/alert/error'
-import ToggleCheckBox from 'material-ui/svg-icons/toggle/check-box'
-import ToggleCheckBoxOutlineBlank from 'material-ui/svg-icons/toggle/check-box-outline-blank'
-import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
-import FileFolder from 'material-ui/svg-icons/file/folder'
-import PhotoIcon from 'material-ui/svg-icons/image/photo'
-import ArrowUpward from 'material-ui/svg-icons/navigation/arrow-upward'
-import ArrowDownward from 'material-ui/svg-icons/navigation/arrow-downward'
-import { List, AutoSizer } from 'react-virtualized'
 import ContainerOverlay from './ContainerOverlay'
-import { TXTIcon, WORDIcon, EXCELIcon, PPTIcon, PDFIcon } from '../common/Svg'
+import RenderListByRow from './RenderListByRow'
 
 const debug = Debug('component:file:FileContent:')
 
-const formatTime = (mtime) => {
-  if (!mtime) {
-    return null
-  }
-
-  const time = new Date()
-  time.setTime(parseInt(mtime, 10))
-  return `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`
-}
-
-const renderLeading = (leading) => {
-  let height = '100%'
-  let backgroundColor = '#FFF'
-  let opacity = 0
-
-  switch (leading) {
-    case 'inactiveHint':
-      height = 20
-      backgroundColor = '#000'
-      opacity = 0.26
-      break
-    case 'activeHint':
-      height = 20
-      backgroundColor = '#FF0000'
-      opacity = 1
-      break
-    case 'fullOn':
-      backgroundColor = '#FF0000'
-      opacity = 1
-      break
-  }
-
-  return <div style={{ flex: '0 0 4px', height, backgroundColor, opacity, zIndex: 1000 }} />
-}
-
-const renderCheck = check =>
-  (check === 'checked' || check === 'unchecking')
-    ? <ToggleCheckBox style={{ color: '#FF0000' }} />
-    : check === 'checking'
-      ? <ToggleCheckBoxOutlineBlank style={{ color: 'rgba(0,0,0,0.38)' }} />
-      : null
-
-const renderFileIcon = (name, metadata) => {
-  /* media */
-  if (metadata) return <PhotoIcon style={{ color: '#ea4335' }} />
-
-  /* PDF, TXT, Word, Excel, PPT */
-  let extension = name.replace(/^.*\./, '')
-  if (!extension || extension === name) extension = 'OTHER'
-  switch (extension.toUpperCase()) {
-    case 'PDF':
-      return (<PDFIcon style={{ color: '#db4437' }} />)
-    case 'TXT':
-      return (<TXTIcon style={{ color: 'rgba(0,0,0,0.54)' }} />)
-    case 'DOCX':
-      return (<WORDIcon style={{ color: '#4285f4' }} />)
-    case 'DOC':
-      return (<WORDIcon style={{ color: '#4285f4' }} />)
-    case 'XLS':
-      return (<EXCELIcon style={{ color: '#0f9d58' }} />)
-    case 'XLSX':
-      return (<EXCELIcon style={{ color: '#0f9d58' }} />)
-    case 'PPT':
-      return (<PPTIcon style={{ color: '#db4437' }} />)
-    case 'PPTX':
-      return (<PPTIcon style={{ color: '#db4437' }} />)
-    case 'OTHER':
-      return (<EditorInsertDriveFile style={{ color: 'rgba(0,0,0,0.54)' }} />)
-    default:
-      return (<EditorInsertDriveFile style={{ color: 'rgba(0,0,0,0.54)' }} />)
-  }
-}
-
-class Row extends PureComponent {
-
-  render() {
-    const {
-
-      /* these are react-virtualized List props */
-      index,       // Index of row
-      isScrolling, // The List is currently being scrolled
-      isVisible,   // This row is visible within the List (eg it is not an overscanned row)
-      parent,      // Reference to the parent List (instance)
-      style,       // Style object to be applied to row (to position it);
-                   // This must be passed through to the rendered row element.
-
-      /* these are view-model state */
-      entries,
-      select
-    } = this.props
-
-    const entry = entries[index]
-    const leading = select.rowLeading(index)
-    const check = select.rowCheck(index)
-    const color = select.rowColor(index)
-
-    const innerStyle = {
-      width: '100%',
-      height: '100%',
-      backgroundColor: color,
-      display: 'flex',
-      alignItems: 'center'
-    }
-
-    const outerStyle = style
-    // debug('select', select)
-
-    return (
-      <div key={`${entry.name}+${index.toString()}`} style={outerStyle}>
-        <div
-          style={innerStyle}
-          onTouchTap={e => this.props.onRowTouchTap(e, index)}
-          onMouseEnter={e => this.props.onRowMouseEnter(e, index)}
-          onMouseLeave={e => this.props.onRowMouseLeave(e, index)}
-          onDoubleClick={e => this.props.onRowDoubleClick(e, index)}
-        >
-          { renderLeading(leading) }
-          <div style={{ flex: '0 0 8px' }} />
-          <div style={{ flex: '0 0 36px', display: 'flex', alignItems: 'center' }}>
-            { renderCheck(check) }
-          </div>
-          <div style={{ flex: '0 0 8px' }} />
-
-          {/* file type may be: folder, public, directory, file, unsupported */}
-          <div style={{ flex: '0 0 48px', display: 'flex', alignItems: 'center' }}>
-            <Avatar style={{ backgroundColor: 'white' }}>
-              {
-                entry.type === 'folder' || entry.type === 'public' || entry.type === 'directory'
-                ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)' }} />
-                : entry.type === 'file'
-                ? renderFileIcon(entry.name, entry.metadata)
-                : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)' }} />
-              }
-            </Avatar>
-          </div>
-
-          <div style={{ flex: '0 0 390px', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-            { entry.name }
-          </div>
-
-          <div style={{ flex: '0 1 160px', fontSize: 13, color: 'rgba(0,0,0,0.54)', textAlign: 'right' }}>
-            { entry.mtime && formatTime(entry.mtime) }
-          </div>
-
-          <div
-            style={{ flex: '0 1 160px',
-              fontSize: 13,
-              color: 'rgba(0,0,0,0.54)',
-              textAlign: 'right',
-              marginRight: 72 }}
-          >
-            { entry.type === 'file' && prettysize(entry.size) }
-          </div>
-
-          <div style={{ flexGrow: 1 }} />
-        </div>
-      </div>
-    )
-  }
-}
-
-class FileContent extends Component {
-
+class FileContent extends React.Component {
   constructor(props) {
     super(props)
 
     this.state = { contextMenu: false }
 
-    this.keyDownBound = this.keyDown.bind(this)
-    this.keyUpBound = this.keyUp.bind(this)
+    /* cathc key action */
+    this.keyDown = (e) => {
+      if (this.props.select) { this.props.select.keyEvent(e.ctrlKey, e.shiftKey) }
+    }
 
-    this.onRowTouchTap = this.rowTouchTap.bind(this)
-    this.onRowMouseEnter = this.rowMouseEnter.bind(this)
-    this.onRowMouseLeave = this.rowMouseLeave.bind(this)
-    this.onRowDoubleClick = this.rowDoubleClick.bind(this)
+    this.keyUp = (e) => {
+      if (this.props.select) { this.props.select.keyEvent(e.ctrlKey, e.shiftKey) }
+    }
 
-    this.rowRenderer = props => (
-      <Row
-        {...props}
-        {...this.props}
-        onRowTouchTap={this.onRowTouchTap}
-        onRowMouseEnter={this.onRowMouseEnter}
-        onRowMouseLeave={this.onRowMouseLeave}
-        onRowDoubleClick={this.onRowDoubleClick}
-      />
-    )
+    /* touchTap file */
+    this.onRowTouchTap = (e, index) => {
+      /*
+       * using e.nativeEvent.button instead of e.nativeEvent.which
+       * 0 - left
+       * 1 - middle
+       * 2 - right
+       * e.type must be mouseup
+       * must be button 1 or button 2 of mouse
+       */
+
+      e.preventDefault()  // important, to prevent other event
+      e.stopPropagation()
+
+      const type = e.type
+      const button = e.nativeEvent.button
+      if (type !== 'mouseup' || !(button === 0 || button === 2)) return
+
+      /* just touch */
+      this.props.select.touchTap(button, index)
+      this.props.updateDetail(index)
+
+      /* right click */
+      if (button === 2) {
+        this.props.showContextMenu(e.nativeEvent.clientX, e.nativeEvent.clientY)
+      }
+    }
+
+    this.onRowDoubleClick = (e, index) => {
+      if (index === -1) return
+      debug('rowDoubleClick', this.props, index)
+      const entry = this.props.entries[index]
+      this.props.listNavBySelect()
+      if (entry.type === 'file') {
+        this.setState({ seqIndex: index, preview: true })
+        // ipcRenderer.send('OPEN_FILE', { file: entry, path: this.props.home.path })
+      }
+    }
+
+    this.onRowMouseEnter = (e, index) => {
+      this.props.select.mouseEnter(index)
+    }
+
+    this.onRowMouseLeave = (e, index) => {
+      this.deferredLeave = setTimeout(() => this.props.select.mouseLeave(index), 1)
+    }
+
+    /* handle files */
+    this.drop = (e) => {
+      const files = []
+      for (const item of e.dataTransfer.files) files.push(item.path)
+      const dir = this.props.home.path
+      const rUUID = this.props.home.path[0].uuid
+      ipcRenderer.send('DRAG_FILE', { files, dirUUID: dir[dir.length - 1].uuid })
+    }
 
     this.openFile = (file) => {
       ipcRenderer.send('OPEN_FILE', { file, path: this.props.home.path })
     }
   }
 
-  willReceiveProps(nextProps) {
-    // console.log(nextProps, '.......')
-  }
-
   componentDidMount() {
-    // bind keydown event
-    document.addEventListener('keydown', this.keyDownBound)
-    document.addEventListener('keyup', this.keyUpBound)
+    /* bind keydown event */
+    document.addEventListener('keydown', this.keyDown)
+    document.addEventListener('keyup', this.keyUp)
   }
 
   componentWillUnmount() {
-    // remove keydown event
-    document.removeEventListener('keydown', this.keyDownBound)
-    document.removeEventListener('keyup', this.keyUpBound)
-  }
-
-  keyDown(e) {
-    if (this.props.select) { this.props.select.keyEvent(e.ctrlKey, e.shiftKey) }
-  }
-
-  keyUp(e) {
-    if (this.props.select) { this.props.select.keyEvent(e.ctrlKey, e.shiftKey) }
-  }
-
-  rowTouchTap(e, index) {
-    /*
-     * using e.nativeEvent.button instead of e.nativeEvent.which
-     * 0 - left
-     * 1 - middle
-     * 2 - right
-     * e.type must be mouseup
-     * must be button 1 or button 2 of mouse
-     */
-
-    e.preventDefault()  // important!
-    e.stopPropagation()
-
-    const type = e.type
-    const button = e.nativeEvent.button
-    if (type !== 'mouseup' || !(button === 0 || button === 2)) return
-
-    /* just touch */
-    this.props.select.touchTap(button, index)
-    this.props.updateDetail(index)
-
-    /* right click */
-    if (button === 2) {
-      this.props.showContextMenu(e.nativeEvent.clientX, e.nativeEvent.clientY)
-    }
-  }
-
-  rowMouseEnter(e, index) {
-    this.props.select.mouseEnter(index)
-  }
-
-  rowMouseLeave(e, index) {
-    this.deferredLeave = setTimeout(() => this.props.select.mouseLeave(index), 1)
-  }
-
-  rowDoubleClick(e, index) {
-    if (index === -1) return
-    debug('rowDoubleClick', this.props, index)
-    const entry = this.props.entries[index]
-    this.props.listNavBySelect()
-    if (entry.type === 'file') {
-      this.setState({ seqIndex: index, preview: true })
-      // ipcRenderer.send('OPEN_FILE', { file: entry, path: this.props.home.path })
-    }
-  }
-
-  drop(e) {
-    const files = []
-    for (const item of e.dataTransfer.files) files.push(item.path)
-    const dir = this.props.home.path
-    const rUUID = this.props.home.path[0].uuid
-    ipcRenderer.send('DRAG_FILE', { files, dirUUID: dir[dir.length - 1].uuid })
+    /* remove keydown event */
+    document.removeEventListener('keydown', this.keyDown)
+    document.removeEventListener('keyup', this.keyUp)
   }
 
   render() {
-    const { apis } = this.props
     // debug('render FileContent', this.props, this.state)
-    const headers = [
-      {
-        title: '名称',
-        width: 494,
-        up: 'nameUp',
-        down: 'nameDown'
-      },
-      {
-        title: '修改时间',
-        width: 160,
-        up: 'timeUp',
-        down: 'timeDown'
-      },
-      {
-        title: '文件大小',
-        width: 160,
-        up: 'sizeUp',
-        down: 'sizeDown'
-      }
-    ]
     return (
-      <div style={{ width: '100%', height: '100%' }} onDrop={this.drop.bind(this)}>
-        {/* header*/}
-        <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }}>
-          <div style={{ flex: '0 0 104px' }} />
-          {
-            headers.map(h => (
-              <div
-                style={{ width: h.width, display: 'flex', alignItems: 'center' }}
-                key={h.title}
-                onTouchTap={() => {
-                  this.props.sortType === h.up ? this.props.changeSortType(h.down) : this.props.changeSortType(h.up)
-                }}
-              >
-                <div
-                  style={{
-                    overflow: 'hidden',
-                    whiteSpace: 'nowrap',
-                    textOverflow: 'ellipsis',
-                    fontSize: 14,
-                    fontWeight: 500,
-                    color: 'rgba(0,0,0,0.54)'
-                  }}
-                >
-                  { h.title }
-                </div>
-                <div style={{ marginLeft: 8, marginTop: 6 }}>
-                  { this.props.sortType === h.up && <ArrowUpward style={{ height: 18, width: 18, color: '#9E9E9E' }} /> }
-                  { this.props.sortType === h.down && <ArrowDownward style={{ height: 18, width: 18, color: '#9E9E9E' }} /> }
-                </div>
-              </div>
-            ))
-          }
-          <div style={{ flexGrow: 1 }} />
-        </div>
+      <div style={{ width: '100%', height: '100%' }}>
+        {/* render list */}
+        <RenderListByRow
+          {...this.props}
+          onRowTouchTap={this.onRowTouchTap}
+          onRowMouseEnter={this.onRowMouseEnter}
+          onRowMouseLeave={this.onRowMouseLeave}
+          onRowDoubleClick={this.onRowDoubleClick}
+          drop={this.props.drop}
+        />
 
-        <div style={{ width: '100%', height: 8 }} />
-
-        {/* list content */}
-        <div style={{ width: '100%', height: 'calc(100% - 48px)' }}>
-          {
-            this.props.entries.length !== 0 &&
-            <AutoSizer>
-              {({ height, width }) => (
-                <div onTouchTap={e => this.onRowTouchTap(e, -1)}>
-                  <List
-                    style={{ outline: 'none' }}
-                    height={height}
-                    width={width}
-                    rowCount={this.props.select.size}
-                    rowHeight={48}
-                    rowRenderer={this.rowRenderer}
-                  />
-                </div>
-              )}
-            </AutoSizer>
-          }
-        </div>
-
-        {/* open file */}
-
+        {/* preview file */}
         <ContainerOverlay
           onRequestClose={() => this.setState({ preview: false })}
           open={this.state.preview}
@@ -389,4 +127,3 @@ class FileContent extends Component {
 }
 
 export default FileContent
-

@@ -99,24 +99,24 @@ class AccountApp extends React.Component {
     this.getWXCode = (code) => {
       /* init wx_code */
       this.wxiframe.contentWindow.wx_code = null
-
+      // this.props.apis.request('wxBind', { ticketId: this.ticket, code, platform: 'web' }, (error, data) => {
       this.setState({ status: 'connectingCloud' })
-      this.props.apis.request('wxBind', { ticketId: this.ticket, code, platform: 'web' }, (error, data) => {
+      this.props.apis.request('getWechatToken', { code, platform: 'web' }, (error, data) => {
         if (error) {
           debug('this.getWXCode error', code, error)
           this.setState({ error: 'wxBind', status: '' })
         } else {
           debug('this.getWXCode success', data)
           // this.setState({ status: 'success' })
-          this.props.apis.request('getTicket', { ticketId: data.data.ticketId }, (err, wechatInfo) => {
+          this.props.apis.request('getTicket', { ticketId: data.data.ticketId }, (err, token) => {
             if (error) {
-              debug('getTicket error', code, data, err)
+              debug('getToken error', code, data, err)
               this.setState({ error: 'getTicket', status: '' })
             } else {
-              debug('getTicket success', wechatInfo)
-              this.userInfo = wechatInfo.userInfo
-              this.userIds = { ticketId: data.data.ticketId, guid: wechatInfo.guid }
-              this.setState({ status: 'confirm' })
+              debug('getToken success', token)
+              // this.userInfo = wechatInfo.userInfo
+              // this.userIds = { ticketId: data.data.ticketId, guid: wechatInfo.guid }
+              // this.setState({ status: 'confirm' })
             }
           })
         }
@@ -131,7 +131,7 @@ class AccountApp extends React.Component {
             this.setState({ error: 'creatTicket', status: '' })
           } else {
             debug('this.bindWechat success', data)
-            this.ticket = data.id
+            this.ticket = data.ticketId
             setTimeout(this.initWXLogin, 1000)
           }
         })
