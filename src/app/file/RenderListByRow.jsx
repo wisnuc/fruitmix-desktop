@@ -111,7 +111,7 @@ class Row extends React.PureComponent {
     const color = select.rowColor(index)
 
     return (
-      <div key={`${entry.name}+${index.toString()}`} style={style}>
+      <div key={entry.name} style={style}>
         <div
           style={{ width: '100%', height: '100%', backgroundColor: color, display: 'flex', alignItems: 'center' }}
           onTouchTap={e => this.props.onRowTouchTap(e, index)}

@@ -3,6 +3,7 @@ import Debug from 'debug'
 import { ipcRenderer } from 'electron'
 import ContainerOverlay from './ContainerOverlay'
 import RenderListByRow from './RenderListByRow'
+import GridView from './GridView'
 
 const debug = Debug('component:file:FileContent:')
 
@@ -99,14 +100,26 @@ class FileContent extends React.Component {
     return (
       <div style={{ width: '100%', height: '100%' }}>
         {/* render list */}
-        <RenderListByRow
-          {...this.props}
-          onRowTouchTap={this.onRowTouchTap}
-          onRowMouseEnter={this.onRowMouseEnter}
-          onRowMouseLeave={this.onRowMouseLeave}
-          onRowDoubleClick={this.onRowDoubleClick}
-          drop={this.props.drop}
-        />
+        {
+          1 ?
+            <GridView
+              {...this.props}
+              onRowTouchTap={this.onRowTouchTap}
+              onRowMouseEnter={this.onRowMouseEnter}
+              onRowMouseLeave={this.onRowMouseLeave}
+              onRowDoubleClick={this.onRowDoubleClick}
+              drop={this.props.drop}
+            />
+            :
+            <RenderListByRow
+              {...this.props}
+              onRowTouchTap={this.onRowTouchTap}
+              onRowMouseEnter={this.onRowMouseEnter}
+              onRowMouseLeave={this.onRowMouseLeave}
+              onRowDoubleClick={this.onRowDoubleClick}
+              drop={this.props.drop}
+            />
+        }
 
         {/* preview file */}
         <ContainerOverlay
