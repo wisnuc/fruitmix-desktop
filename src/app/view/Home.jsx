@@ -17,6 +17,7 @@ import FileUploadButton from '../file/FileUploadButton'
 import ContextMenu from '../common/ContextMenu'
 import DialogOverlay from '../common/DialogOverlay'
 import FlatButton from '../common/FlatButton'
+import sortByType from '../common/sort'
 import { BreadCrumbItem, BreadCrumbSeparator } from '../common/BreadCrumb'
 
 const debug = Debug('component:viewModel:Home: ')
@@ -199,26 +200,7 @@ class Home extends Base {
     let { path, entries } = listNavDir
 
     /* sort enries */
-    entries = [...entries].sort((a, b) => {
-      if (a.type === 'directory' && b.type === 'file') return -1
-      if (a.type === 'file' && b.type === 'directory') return 1
-      switch (this.state.sortType) {
-        case 'nameUp':
-          return a.name.localeCompare(b.name)
-        case 'nameDown':
-          return b.name.localeCompare(a.name)
-        case 'sizeUp':
-          return (a.size && b.size) ? (a.size > b.size) : a.name.localeCompare(b.name)
-        case 'sizeDown':
-          return (a.size && b.size) ? (a.size < b.size) : a.name.localeCompare(b.name)
-        case 'timeUp':
-          return (a.time && b.time) ? (a.time > b.time) : a.name.localeCompare(b.name)
-        case 'timeDown':
-          return (a.time && b.time) ? (a.time < b.time) : a.name.localeCompare(b.name)
-        default:
-          return a.name.localeCompare(b.name)
-      }
-    })
+    entries = [...entries].sort((a, b) => sortByType(a, b, this.state.sortType))
 
     const select = this.select.reset(entries.length)
     const state = { select, listNavDir, path, entries }

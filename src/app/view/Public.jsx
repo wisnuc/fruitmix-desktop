@@ -9,6 +9,7 @@ import Home from './Home'
 import FileContent from '../file/FileContent'
 import FileUploadButton from '../file/FileUploadButton'
 import ContextMenu from '../common/ContextMenu'
+import sortByType from '../common/sort'
 import { BreadCrumbItem, BreadCrumbSeparator } from '../common/BreadCrumb'
 
 const debug = Debug('component:viewModel:public: ')
@@ -57,25 +58,28 @@ class Public extends Home {
     let select
     /* update drives or listNavDir */
     if (type === 'drives') {
-      if (data === this.state.drives) return
+      if (data === this.state.drives && !this.force) return
       path = [{ name: '共享文件夹', uuid: null, type: 'publicRoot' }]
       entries = data.filter(drive => drive.type === 'public')
       entries.forEach(item => Object.assign(item, { name: item.label }))
+
+      /* sort enries */
+      entries = [...entries].sort((a, b) => sortByType(a, b, this.state.sortType))
       select = this.select.reset(entries.length)
 
+      this.force = false
       this.setState({ drives: data, path, entries, select, inRoot: true })
     } else {
-      if (data === this.state.listNavDir) return
+      if (data === this.state.listNavDir && !this.force) return
       path = [{ name: '共享文件夹', uuid: this.rootDrive.uuid, type: 'publicRoot' }, ...data.path]
       path[1].name = this.rootDrive.name
       entries = data.entries
-      entries = [...entries].sort((a, b) => {
-        if (a.type === 'directory' && b.type === 'file') return -1
-        if (a.type === 'file' && b.type === 'directory') return 1
-        return a.name.localeCompare(b.name)
-      })
+
+      /* sort enries */
+      entries = [...entries].sort((a, b) => sortByType(a, b, this.state.sortType))
       select = this.select.reset(entries.length)
 
+      this.force = false
       this.setState({ listNavDir: data, path, entries, select, inRoot: false })
     }
   }
