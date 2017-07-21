@@ -96,12 +96,12 @@ class FileContent extends React.Component {
   }
 
   render() {
-    // debug('render FileContent', this.props, this.state)
+    debug('render FileContent', this.props, this.state)
     return (
       <div style={{ width: '100%', height: '100%' }}>
         {/* render list */}
         {
-          1 ?
+          this.props.gridView ?
             <GridView
               {...this.props}
               onRowTouchTap={this.onRowTouchTap}

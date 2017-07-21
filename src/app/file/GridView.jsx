@@ -1,7 +1,7 @@
 import React from 'react'
 import Debug from 'debug'
 import prettysize from 'prettysize'
-import { Avatar, Paper } from 'material-ui'
+import { Avatar, IconButton, Paper, MenuItem, Popover, Menu } from 'material-ui'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import ToggleCheckBox from 'material-ui/svg-icons/toggle/check-box'
 import ToggleCheckBoxOutlineBlank from 'material-ui/svg-icons/toggle/check-box-outline-blank'
@@ -10,8 +10,10 @@ import FileFolder from 'material-ui/svg-icons/file/folder'
 import PhotoIcon from 'material-ui/svg-icons/image/photo'
 import ArrowUpward from 'material-ui/svg-icons/navigation/arrow-upward'
 import ArrowDownward from 'material-ui/svg-icons/navigation/arrow-downward'
+import ContextMenu from '../common/ContextMenu'
 import { List, AutoSizer, Grid } from 'react-virtualized'
 import { TXTIcon, WORDIcon, EXCELIcon, PPTIcon, PDFIcon } from '../common/Svg'
+import FlatButton from '../common/FlatButton'
 
 const debug = Debug('component:file:GridView:')
 
@@ -86,50 +88,137 @@ const renderFileIcon = (name, metadata, size) => {
 }
 
 class Row extends React.PureComponent {
-  render() {
-    const { isScrolling, entries, select, list, primaryColor } = this.props
+  constructor(props) {
+    super(props)
+    this.state = {
+      contextMenuOpen: false,
+      type: '名称'
+    }
 
-    debug('render row this.props', this.props)
+    this.handleChange = (type) => {
+      if (this.state.type !== type) {
+        switch (type) {
+          case '修改时间':
+            this.props.changeSortType('timeUp')
+            break
+          case '文件大小':
+            this.props.changeSortType('sizeUp')
+            break
+          default:
+            this.props.changeSortType('nameUp')
+        }
+        this.setState({ type, open: false })
+      } else {
+        this.setState({ open: false })
+      }
+    }
+
+    this.toggleMenu = (event) => {
+      if (!this.state.open && event && event.preventDefault) event.preventDefault()
+      this.setState({ open: !this.state.open, anchorEl: event.currentTarget })
+    }
+  }
+
+  shouldComponentUpdate(nextProps) {
+    return (!nextProps.isScrolling)
+  }
+
+  render() {
+    const { select, list, primaryColor, sortType, changeSortType } = this.props
+
+    const headers = [
+      { title: '名称', width: 494, up: 'nameUp', down: 'nameDown' },
+      { title: '修改时间', width: 160, up: 'timeUp', down: 'timeDown' },
+      { title: '文件大小', width: 160, up: 'sizeUp', down: 'sizeDown' }
+    ]
+    const h = headers[0]
+
+    // debug('render row this.props', this.props)
     return (
-      <div
-        style={{
-          height: '100%',
-          width: '100%',
-          marginLeft: 8
-        }}
-      >
+      <div style={{ height: '100%', width: '100%', marginLeft: 24 }} >
+        {/* header */}
         {
           list.first &&
-            <div style={{ height: 32, fontSize: 14, color: 'rgba(0,0,0,0.54)', marginTop: 6 }}>
-              { list.entries[0].entry.type === 'directory' ? '文件夹' : '文件' }
+            <div style={{ height: 40, display: 'flex', alignItems: 'center ', marginBottom: 8 }}>
+              <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.54)' }}>
+                { list.entries[0].entry.type === 'directory' ? '文件夹' : '文件' }
+              </div>
+              <div style={{ flexGrow: 1 }} />
+              {
+                !list.entries[0].index &&
+                  <div style={{ display: 'flex', alignItems: 'center ', marginRight: 48 }}>
+                    <FlatButton
+                      label={this.state.type}
+                      labelStyle={{ fontSize: 14, color: 'rgba(0,0,0,0.54)' }}
+                      onTouchTap={this.toggleMenu}
+                    />
+                    {/* menu */}
+                    <Popover
+                      open={this.state.open}
+                      anchorEl={this.state.anchorEl}
+                      anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                      targetOrigin={{ horizontal: 'right', vertical: 'top' }}
+                      onRequestClose={this.toggleMenu}
+                    >
+                      <Menu>
+                        <MenuItem primaryText="名称" onTouchTap={() => this.handleChange('名称')} />
+                        <MenuItem primaryText="修改时间" onTouchTap={() => this.handleChange('修改时间')} />
+                        <MenuItem primaryText="文件大小" onTouchTap={() => this.handleChange('文件大小')} />
+                      </Menu>
+                    </Popover>
+
+                    {/* direction icon */}
+                    <IconButton
+                      style={{ height: 36, width: 36, padding: 9, borderRadius: '18px' }}
+                      iconStyle={{ height: 18, width: 18, color: 'rgba(0,0,0,0.54)' }}
+                      hoveredStyle={{ backgroundColor: 'rgba(0,0,0,0.18)' }}
+                      onTouchTap={() => { sortType === h.up || !sortType ? changeSortType(h.down) : changeSortType(h.up) }}
+                    >
+                      { sortType === h.up || !sortType ? <ArrowUpward /> : <ArrowDownward /> }
+                    </IconButton>
+                  </div>
+              }
+
             </div>
         }
 
+        {/* file content */}
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {
             list.entries.map((item) => {
               const { index, entry } = item
               const selected = select.selected.findIndex(s => s === index) > -1
               return (
-                <Paper
-                  style={{ width: 180, height: entry.type !== 'directory' ? 184 : 48, marginRight: 20, marginBottom: 16 }}
+                <div
+                  style={{
+                    width: 180,
+                    height: entry.type !== 'directory' ? 184 : 48,
+                    marginRight: 20,
+                    marginBottom: 16,
+                    boxShadow: selected ? 'rgba(0, 0, 0, 0.188235) 0px 10px 30px, rgba(0, 0, 0, 0.227451) 0px 6px 10px'
+                    : 'rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px'
+                  }}
                   onTouchTap={e => this.props.onRowTouchTap(e, index)}
                   onMouseEnter={e => this.props.onRowMouseEnter(e, index)}
                   onMouseLeave={e => this.props.onRowMouseLeave(e, index)}
                   onDoubleClick={e => this.props.onRowDoubleClick(e, index)}
-                  zDepth={selected ? 3 : 1}
+                  key={index}
                 >
-
+                  {/* preview or icon */}
                   {
                   entry.type !== 'directory' &&
                     <div style={{ height: 136, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       {
-                        entry.type === 'file'
+                        entry.type === 'folder' || entry.type === 'public' || entry.type === 'directory'
+                        ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 64, height: 64 }} />
+                        : entry.type === 'file'
                         ? renderFileIcon(entry.name, entry.metadata, 64)
                         : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)', width: 64, height: 64 }} />
                       }
                     </div>
                 }
+
+                  {/* file name */}
                   <div
                     style={{
                       height: 48,
@@ -155,7 +244,7 @@ class Row extends React.PureComponent {
                     </div>
                     <div style={{ width: 24 }} />
                   </div>
-                </Paper>
+                </div>
               )
             })
           }
@@ -183,7 +272,7 @@ class GridView extends React.Component {
 
   render() {
     const calcGridInfo = (height, width, entries) => {
-      const MAX = Math.floor((width) / 200) - 1
+      const MAX = Math.floor((width - 24) / 200) - 1
       let MaxItem = 0
       let lineIndex = 0
       let lastType = 'diriectory'
@@ -218,7 +307,7 @@ class GridView extends React.Component {
       }
       /* calculate each row's heigth and their sum */
       this.mapData.forEach((list) => {
-        const tmp = 200 + !!list.first * 40 - !!(list.entries[0].entry.type === 'directory') * 136
+        const tmp = 200 + !!list.first * 48 - !!(list.entries[0].entry.type === 'directory') * 136
         this.allHeight.push(tmp)
         this.rowHeightSum += tmp
         this.indexHeightSum.push(this.rowHeightSum)
@@ -235,7 +324,7 @@ class GridView extends React.Component {
       }
     }
 
-    debug('GridView render', this.props)
+    // debug('GridView render', this.props)
 
     if (!this.props.entries || this.props.entries.length === 0) return (<div />)
     return (
@@ -245,7 +334,7 @@ class GridView extends React.Component {
           {({ height, width }) => {
             const gridInfo = calcGridInfo(height, width, this.props.entries)
             const { mapData, allHeight, rowHeightSum, indexHeightSum, maxScrollTop } = gridInfo
-            debug('gridInfo', gridInfo)
+            debug('gridInfo', gridInfo, this.props)
 
             const estimatedRowSize = rowHeightSum / allHeight.length
             const rowHeight = ({ index }) => allHeight[index]

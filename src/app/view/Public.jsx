@@ -4,6 +4,8 @@ import { ipcRenderer } from 'electron'
 import { IconButton, MenuItem } from 'material-ui'
 import FileFolderShared from 'material-ui/svg-icons/file/folder-shared'
 import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
+import ListIcon from 'material-ui/svg-icons/action/list'
+import GridIcon from 'material-ui/svg-icons/action/view-module'
 
 import Home from './Home'
 import FileContent from '../file/FileContent'
@@ -181,6 +183,9 @@ class Public extends Home {
   renderToolBar({ style }) {
     return (
       <div style={style}>
+        <IconButton onTouchTap={() => this.toggleDialog('gridView')}>
+          { this.state.gridView ? <GridIcon color="#FFF" /> : <ListIcon color="#FFF" /> }
+        </IconButton>
         <IconButton onTouchTap={() => this.toggleDialog('createNewFolder')} disabled={this.state.inRoot} >
           <FileCreateNewFolder color="#FFF" />
         </IconButton>
@@ -210,6 +215,7 @@ class Public extends Home {
           primaryColor={this.groupPrimaryColor()}
           sortType={this.state.sortType}
           changeSortType={this.changeSortType}
+          gridView={this.state.gridView}
         />
 
         <ContextMenu

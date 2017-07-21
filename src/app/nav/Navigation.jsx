@@ -218,8 +218,10 @@ class NavViews extends Component {
     const view = this.currentView()
     if (!view.hasDetail()) return null
     let DetailIcon = ActionInfo
+    let tooltip = '详情'
     if (view.detailIcon()) {
       DetailIcon = view.detailIcon()
+      tooltip = ''
     }
 
     const onTouchTap = view.detailEnabled()
@@ -231,7 +233,7 @@ class NavViews extends Component {
       : 'rgba(255,255,255,0.3)'
 
     return (
-      <div style={{ width: 48, height: 48, position: 'relative' }} >
+      <div style={{ width: 48, height: 48, position: 'relative', zIndex: 100000 }} >
 
         <div
           style={{
@@ -247,7 +249,7 @@ class NavViews extends Component {
           }}
         />
 
-        <IconButton style={{ position: 'absolute' }} onTouchTap={onTouchTap} >
+        <IconButton style={{ position: 'absolute' }} onTouchTap={onTouchTap} tooltip={tooltip}>
           <DetailIcon color={color} />
         </IconButton>
       </div>

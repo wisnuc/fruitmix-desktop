@@ -5,6 +5,8 @@ import { IconButton, MenuItem } from 'material-ui'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
+import ListIcon from 'material-ui/svg-icons/action/list'
+import GridIcon from 'material-ui/svg-icons/action/view-module'
 
 import Base from './Base'
 import FileDetail from '../file/FileDetail'
@@ -31,6 +33,7 @@ class Home extends Base {
     this.select.on('updated', next => this.setState({ select: next }))
 
     this.state = {
+      gridView: false, // false: list, true: grid
       sortType: '', // nameUp, nameDown, timeUp, timeDown, sizeUp, sizeDown
       select: this.select.state,
       listNavDir: null, // save a reference
@@ -317,7 +320,10 @@ class Home extends Base {
   renderToolBar({ style }) {
     return (
       <div style={style}>
-        <IconButton onTouchTap={() => this.toggleDialog('createNewFolder')}>
+        <IconButton onTouchTap={() => this.toggleDialog('gridView')} tooltip={this.state.gridView ? '列表视图' : '网格视图'}>
+          { this.state.gridView ? <GridIcon color="#FFF" /> : <ListIcon color="#FFF" /> }
+        </IconButton>
+        <IconButton onTouchTap={() => this.toggleDialog('createNewFolder')} tooltip="新建文件夹">
           <FileCreateNewFolder color="#FFF" />
         </IconButton>
       </div>
@@ -444,6 +450,7 @@ class Home extends Base {
           primaryColor={this.groupPrimaryColor()}
           sortType={this.state.sortType}
           changeSortType={this.changeSortType}
+          gridView={this.state.gridView}
         />
 
         <ContextMenu
