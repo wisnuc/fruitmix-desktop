@@ -66,8 +66,9 @@ class Home extends Base {
     this.upload = (type) => {
       const dirPath = this.state.path
       const dirUUID = dirPath[dirPath.length - 1].uuid
+      const driveUUID = dirPath[0].uuid
       // console.log(dirUUID, type)
-      ipcRenderer.send('UPLOAD', { dirUUID, type })
+      ipcRenderer.send('UPLOAD', { dirUUID, driveUUID, type })
     }
 
     this.download = () => {
