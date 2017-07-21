@@ -1,7 +1,7 @@
 import React from 'react'
 import Debug from 'debug'
 import prettysize from 'prettysize'
-import { Avatar } from 'material-ui'
+import { Avatar, Paper } from 'material-ui'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import ToggleCheckBox from 'material-ui/svg-icons/toggle/check-box'
 import ToggleCheckBoxOutlineBlank from 'material-ui/svg-icons/toggle/check-box-outline-blank'
@@ -57,47 +57,45 @@ const renderCheck = check =>
       ? <ToggleCheckBoxOutlineBlank style={{ color: 'rgba(0,0,0,0.38)' }} />
       : null
 
-const renderFileIcon = (name, metadata) => {
+const renderFileIcon = (name, metadata, size) => {
   /* media */
   if (metadata) return <PhotoIcon style={{ color: '#ea4335' }} />
 
   /* PDF, TXT, Word, Excel, PPT */
   let extension = name.replace(/^.*\./, '')
   if (!extension || extension === name) extension = 'OTHER'
-  switch (extension.toUpperCase()) {
-    case 'PDF':
-      return (<PDFIcon style={{ color: '#db4437' }} />)
-    case 'TXT':
-      return (<TXTIcon style={{ color: 'rgba(0,0,0,0.54)' }} />)
-    case 'DOCX':
-      return (<WORDIcon style={{ color: '#4285f4' }} />)
-    case 'DOC':
-      return (<WORDIcon style={{ color: '#4285f4' }} />)
-    case 'XLS':
-      return (<EXCELIcon style={{ color: '#0f9d58' }} />)
-    case 'XLSX':
-      return (<EXCELIcon style={{ color: '#0f9d58' }} />)
-    case 'PPT':
-      return (<PPTIcon style={{ color: '#db4437' }} />)
-    case 'PPTX':
-      return (<PPTIcon style={{ color: '#db4437' }} />)
-    case 'OTHER':
-      return (<EditorInsertDriveFile style={{ color: 'rgba(0,0,0,0.54)' }} />)
-    default:
-      return (<EditorInsertDriveFile style={{ color: 'rgba(0,0,0,0.54)' }} />)
+
+  const iconArray = {
+    PDF: { Icon: PDFIcon, color: '#db4437' },
+    TXT: { Icon: TXTIcon, color: 'rgba(0,0,0,0.54)' },
+    DOCX: { Icon: WORDIcon, color: '#4285f4' },
+    DOC: { Icon: WORDIcon, color: '#4285f4' },
+    XLS: { Icon: EXCELIcon, color: '#0f9d58' },
+    XLSX: { Icon: EXCELIcon, color: '#0f9d58' },
+    PPT: { Icon: PPTIcon, color: '#db4437' },
+    PPTX: { Icon: PPTIcon, color: '#db4437' },
+    OTHER: { Icon: EditorInsertDriveFile, color: 'rgba(0,0,0,0.54)' }
   }
+
+  let type = extension.toUpperCase()
+  // debug('renderFileIcon', name, metadata, extension, iconArray, type)
+  if (!iconArray[type]) type = 'OTHER'
+
+  const { Icon, color } = iconArray[type]
+  return (<Icon style={{ color, width: size, height: size }} />)
 }
 
 class Row extends React.PureComponent {
   render() {
-    const { isScrolling, entries, select, list } = this.props
+    const { isScrolling, entries, select, list, primaryColor } = this.props
 
     debug('render row this.props', this.props)
     return (
       <div
         style={{
           height: '100%',
-          width: '100%'
+          width: '100%',
+          marginLeft: 8
         }}
       >
         {
@@ -109,29 +107,58 @@ class Row extends React.PureComponent {
 
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {
-          list.entries.map((item) => {
-            const { index, entry } = item
-            return (
-              <div
-                style={{
-                  width: 180,
-                  height: 184,
-                  marginRight: 20,
-                  marginBottom: 16,
-                  display: 'flex',
-                  alignItems: 'center',
-                  backgroundColor: 'grey'
-                }}
-                onTouchTap={e => this.props.onRowTouchTap(e, index)}
-                onMouseEnter={e => this.props.onRowMouseEnter(e, index)}
-                onMouseLeave={e => this.props.onRowMouseLeave(e, index)}
-                onDoubleClick={e => this.props.onRowDoubleClick(e, index)}
-              >
-                { entry.name }
-              </div>
-            )
-          })
-        }
+            list.entries.map((item) => {
+              const { index, entry } = item
+              const selected = select.selected.findIndex(s => s === index) > -1
+              return (
+                <Paper
+                  style={{ width: 180, height: entry.type !== 'directory' ? 184 : 48, marginRight: 20, marginBottom: 16 }}
+                  onTouchTap={e => this.props.onRowTouchTap(e, index)}
+                  onMouseEnter={e => this.props.onRowMouseEnter(e, index)}
+                  onMouseLeave={e => this.props.onRowMouseLeave(e, index)}
+                  onDoubleClick={e => this.props.onRowDoubleClick(e, index)}
+                  zDepth={selected ? 3 : 1}
+                >
+
+                  {
+                  entry.type !== 'directory' &&
+                    <div style={{ height: 136, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {
+                        entry.type === 'file'
+                        ? renderFileIcon(entry.name, entry.metadata, 64)
+                        : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)', width: 64, height: 64 }} />
+                      }
+                    </div>
+                }
+                  <div
+                    style={{
+                      height: 48,
+                      display: 'flex',
+                      alignItems: 'center',
+                      backgroundColor: selected ? primaryColor : '#FFFFFF'
+                    }}
+                  >
+                    {/* file type may be: folder, public, directory, file, unsupported */}
+                    <div style={{ width: 48, display: 'flex', alignItems: 'center', marginLeft: 8 }}>
+                      <Avatar style={{ backgroundColor: 'white' }}>
+                        {
+                        entry.type === 'folder' || entry.type === 'public' || entry.type === 'directory'
+                        ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 16, height: 16 }} />
+                        : entry.type === 'file'
+                        ? renderFileIcon(entry.name, entry.metadata, 16)
+                        : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)', width: 16, height: 16 }} />
+                      }
+                      </Avatar>
+                    </div>
+                    <div style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', fontSize: 14, flexGrow: 1 }} >
+                      { entry.name }
+                    </div>
+                    <div style={{ width: 24 }} />
+                  </div>
+                </Paper>
+              )
+            })
+          }
         </div>
       </div>
     )
@@ -191,7 +218,7 @@ class GridView extends React.Component {
       }
       /* calculate each row's heigth and their sum */
       this.mapData.forEach((list) => {
-        const tmp = 200 + !!list.first * 32
+        const tmp = 200 + !!list.first * 40 - !!(list.entries[0].entry.type === 'directory') * 136
         this.allHeight.push(tmp)
         this.rowHeightSum += tmp
         this.indexHeightSum.push(this.rowHeightSum)
