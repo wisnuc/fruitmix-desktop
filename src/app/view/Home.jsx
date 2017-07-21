@@ -358,6 +358,7 @@ class Home extends Base {
               path={this.state.path}
               entries={this.state.entries}
               openSnackBar={openSnackBar}
+              refresh={this.refresh}
             /> }
         </DialogOverlay>
 

@@ -28,15 +28,18 @@ class NewFolderDialog extends React.PureComponent {
       const { apis, path } = this.props
       const curr = path[path.length - 1]
       const args = {
+        driveUUID: path[0].uuid,
         dirUUID: curr.uuid,
         dirname: this.state.value
       }
+      // console.log('creat new folder', this.props, args)
       apis.request('mkdir', args, (err) => {
         if (err) {
           this.props.openSnackBar(`创建失败: ${err.message}`)
         } else {
           this.props.onRequestClose(true)
           this.props.openSnackBar('创建成功')
+          this.props.refresh()
         }
       })
     }

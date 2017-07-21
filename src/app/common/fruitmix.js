@@ -158,7 +158,8 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'mkdir':
-        r = this.apost(`drives/${args.driveUUID}`, { parent: args.dirUUID, name: args.dirname })
+        r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`)
+          .field(args.dirname, JSON.stringify({ op: 'mkdir' }))
         break
 
       case 'renameDir':
