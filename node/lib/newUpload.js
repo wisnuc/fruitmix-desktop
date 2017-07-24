@@ -3,87 +3,13 @@ import fs from 'fs'
 import stream from 'stream'
 import crypto from 'crypto'
 import { dialog, ipcMain } from 'electron'
-
 import request from 'request'
-
 import { getMainWindow } from './window'
 import createTask, { sendMsg } from './uploadTaskCreater'
+import { uploadFile, hashFile, getFileInfo } from './upload'
 
 const userTasks = []
 const finishTasks = []
-
-/* >>>>> test code >>>>*/
-import store from '../serve/store/store'
-let ip
-let server
-let tokenObj
-const initArgs = () => {
-  ip = store.getState().login.device.mdev.address
-  server = `http://${store.getState().login.device.mdev.address}:3000`
-  tokenObj = store.getState().login.device.token.data
-}
-
-/* upload request */
-const newUpload = (args, path) => {
-  initArgs()
-  const name = path.replace(/.*\//, '')
-  const op = {
-    url: `${server}/drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`,
-    headers: { Authorization: `${tokenObj.type} ${tokenObj.token}` },
-    formData: {
-      [name]: {
-        value: fs.createReadStream(path),
-        options: JSON.stringify({
-          size: args.size,
-          sha256: args.hash
-        })
-      }
-    }
-  }
-  // console.log('newUpload>>')
-  // console.log(op)
-  // console.log('newUpload<<')
-  request.post(op, (error, data) => {
-    if (error) {
-      console.log('error', error)
-    } else {
-      console.log('upload success', data.statusCode)
-    }
-  })
-}
-
-/* hash File*/
-const hashFile = (args, path) => {
-  console.log('start hash file', path)
-  const startTime = new Date()
-  const hash = crypto.createHash('sha256')
-  hash.setEncoding('hex')
-  const fileStream = fs.createReadStream(path)
-  fileStream.on('end', (err) => {
-    if (err) throw new Error(err)
-    console.log('createReadStream end')
-    hash.end()
-    const newArgs = Object.assign({}, args, { hash: hash.read() })
-    console.log(`hash ${path} cost time: ${new Date() - startTime} ms`)
-    newUpload(newArgs, path)
-  })
-  fileStream.pipe(hash)
-}
-
-/* get file size by fs.stat */
-const getFileInfo = (args, path) => {
-  fs.stat(path, (error, stat) => {
-    if (error) {
-      console.log(error)
-    } else {
-      console.log('getFileInfo success size', stat.size)
-      const newArgs = Object.assign({}, args, { size: stat.size })
-      hashFile(newArgs, path)
-    }
-  })
-}
-
-/* <<<< test code <<<<*/
 
 // handler
 const uploadHandle = (event, args) => {
@@ -95,7 +21,7 @@ const uploadHandle = (event, args) => {
   dialog.showOpenDialog({ properties: [dialogType, 'multiSelections'], filters }, (data) => {
     if (!data) return console.log('get list err', null)
     console.log(data)
-    getFileInfo(args, data[0])
+    getFileInfo(driveUUID, dirUUID, data[0])
     return null
     let index = 0
     const count = data.length

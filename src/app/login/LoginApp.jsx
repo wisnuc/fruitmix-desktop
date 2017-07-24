@@ -225,13 +225,14 @@ class LoginApp extends React.Component {
       clearInterval(this.interval)
 
       this.setState({ wechatLogin: 'connecting', count: 3 })
-      this.props.selectedDevice.request('wxLogin', { code, platform: 'web' }, (err) => {
+      this.props.selectedDevice.request('wxToken', { code }, (err) => {
         if (err) {
           debug('this.getWXCode', code, err)
           this.setState({ wechatLogin: 'fail' })
         } else {
           debug('this.getWXCode after wxLogin', this.props.selectedDevice, this.props.selectedDevice.wxLogin)
           const wxLogin = this.props.selectedDevice.wxLogin
+          return console.log(wxLogin)
           if (wxLogin.data) {
             setTimeout(() => this.setState({ wxData: wxLogin.data.data, wechatLogin: 'authorization' }), 500)
             setTimeout(() => this.setState({ wechatLogin: 'getingList' }), 1000)

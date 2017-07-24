@@ -20,7 +20,7 @@ let tokenObj
 const httpRequestConcurrency = 4
 const fileHashConcurrency = 6
 const visitConcurrency = 2
-const partSize = 20000000
+const partSize = 1073741824
 let sendHandler = null
 
 const runningQueue = []
@@ -558,7 +558,7 @@ class FileUploadTask extends UploadTask {
     this.sha = ''
     this.parts = []
     this.taskid = ''
-    this.segmentsize = size > 1024000000 ? Math.ceil(size / 50) : this.size < partSize ? this.size : partSize
+    this.segmentsize = size > 1073741824 ? partSize : this.size
     this.failedTimes = 0
   }
 
