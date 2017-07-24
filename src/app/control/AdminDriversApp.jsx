@@ -12,7 +12,6 @@ import NewDriveDialog from './NewDriveDialog'
 const debug = Debug('component:control:drive:')
 
 class DriveHeader extends React.PureComponent {
-
   render() {
     return (
       <div style={{ height: 48, display: 'flex', alignItems: 'center', width: '100%' }}>
@@ -114,7 +113,7 @@ class AdminDrives extends React.Component {
 
   render() {
     const { users, drives, apis, refreshDrives, updateDetail, navTo, showContextMenu, openSnackBar } = this.props
-    // debug('AdminDrivesAdminDrivesAdminDrives', this.props)
+    debug('AdminDrivesAdminDrivesAdminDrives', this.props)
     if (!users || !drives) return <div />
 
     return (
@@ -133,7 +132,7 @@ class AdminDrives extends React.Component {
           <div style={{ height: 8 }} />
           <Divider style={{ marginLeft: 104 }} />
           {
-            drives && users && drives.map(drive =>
+            drives.filter(drive => drive.type === 'public').map(drive =>
               [<DriveRow
                 drive={drive}
                 users={users}
@@ -145,21 +144,18 @@ class AdminDrives extends React.Component {
             )
           }
         </div>
-        {
-          drives && users &&
-            <DialogOverlay open={!!this.state.newDrive} onRequestClose={this.onCloseDialog}>
-              {
-                this.state.newDrive && <NewDriveDialog
-                  primary
-                  apis={apis}
-                  users={users}
-                  drives={drives}
-                  refreshDrives={refreshDrives}
-                  openSnackBar={openSnackBar}
-                />
-              }
-            </DialogOverlay>
-        }
+        <DialogOverlay open={!!this.state.newDrive} onRequestClose={this.onCloseDialog}>
+          {
+            this.state.newDrive && <NewDriveDialog
+              primary
+              apis={apis}
+              users={users}
+              drives={drives}
+              refreshDrives={refreshDrives}
+              openSnackBar={openSnackBar}
+            />
+          }
+        </DialogOverlay>
       </div>
     )
   }

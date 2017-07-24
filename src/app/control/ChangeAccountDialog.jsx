@@ -95,10 +95,10 @@ class ChangeAccountDialog extends React.PureComponent {
         this.setState({ usernameErrorText: '用户名不能为空' })
       } else if (!validateUsername(text)) {
         this.setState({ usernameErrorText: '用户名不合法' })
-      } else if (!this.props.apis.login || !this.props.apis.login.data) {
+      } else if (!this.props.apis.users || !this.props.apis.users.data) {
         this.setState({ usernameErrorText: '' })
         this.props.openSnackBar('服务器连接错误')
-      } else if (this.props.apis.login.data.every(u => u.username !== this.state.username)) {
+      } else if (this.props.apis.users.data.every(u => u.username !== this.state.username)) {
         this.setState({ usernameErrorText: '' })
       } else {
         this.setState({ usernameErrorText: '用户名已存在' })

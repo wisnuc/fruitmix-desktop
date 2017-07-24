@@ -26,7 +26,7 @@ export class BreadCrumbItem extends React.PureComponent {
       >
         <div
           style={{
-            maxWidth: '100px',
+            maxWidth: 144,
             overflow: 'hidden',
             whiteSpace: 'nowrap',
             textOverflow: 'ellipsis'

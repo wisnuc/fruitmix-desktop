@@ -187,7 +187,7 @@ class MoveDialog extends React.PureComponent {
         this.updateState(path, currentDir, list)
       }).catch(err => console.log(err))
     } else if (node.type === 'public') {
-      const list = this.props.apis.adminDrives.data.drives
+      const list = this.props.apis.drives.data
       list.forEach(item => (item.type = 'folder'))
       this.setState({ loading: true })
       setTimeout(() => {
@@ -239,8 +239,8 @@ class MoveDialog extends React.PureComponent {
       // nav-dir
       this.list(currentDir.uuid).then(list => this.updateState(copyPath, currentDir, list))
     } else if (currentDir.type === 'public') {
-      // get adminDrives
-      const list = apis.adminDrives.data.drives
+      // get adminDrives FIXME
+      const list = apis.drives.data
       list.forEach(item => item.type = 'folder')
       this.updateState(copyPath, currentDir, list)
     } else if (currentDir.type === 'false') {

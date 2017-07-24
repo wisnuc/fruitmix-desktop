@@ -12,12 +12,12 @@ class AdminUsers extends Base {
 
   willReceiveProps(nextProps) {
     // console.log('adminusers nextProps', nextProps)
-    if (!nextProps.apis || !nextProps.apis.adminUsers) return
-    const adminUsers = nextProps.apis.adminUsers
-    if (adminUsers.isPending() || adminUsers.isRejected()) return
+    if (!nextProps.apis || !nextProps.apis.users) return
+    const users = nextProps.apis.users
+    if (users.isPending() || users.isRejected()) return
 
     /* now it's fulfilled */
-    const value = adminUsers.value().users
+    const value = users.value()
 
     if (value !== this.state.users) {
       this.setState({ users: value })
@@ -25,13 +25,11 @@ class AdminUsers extends Base {
   }
 
   refresh() {
-    this.ctx.props.apis.request('adminUsers')
-    this.ctx.props.apis.request('login')
+    this.ctx.props.apis.request('users')
   }
 
   navEnter() {
-    this.ctx.props.apis.request('adminUsers')
-    this.ctx.props.apis.request('login')
+    this.ctx.props.apis.request('users')
   }
 
   navLeave() {

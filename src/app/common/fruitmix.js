@@ -37,7 +37,7 @@ class Fruitmix extends EventEmitter {
     this[name].on('updated', (prev, curr) => {
       this.setState(name, curr)
 
-      // console.log(`${name} updated`, prev, curr, this[name].isFinished(), typeof next === 'function')
+      console.log(`${name} updated`, prev, curr, this[name].isFinished(), typeof next === 'function')
 
       if (this[name].isFinished() && next) {
         this[name].isRejected()
@@ -104,15 +104,17 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'account':
-        r = this.aget(`users/${args.uuid}`)
+        r = this.aget(`users/${this.userUUID}`)
         break
 
       case 'updateAccount':
+        console.log('updateAccount', args)
         r = this.apatch(`users/${args.uuid}`, args)
         break
 
       case 'users':
-        r = this.aget('users')
+        r = request.get(`http://${this.address}:3000/users`)
+        // r = this.aget('users')
         break
 
       case 'drives':
@@ -131,25 +133,19 @@ class Fruitmix extends EventEmitter {
         })
         break
 
-      case 'adminDrives':
-        r = this.aget('drives')
-        break
-
       case 'driveListNavDir':
         r = this.aget(`files/fruitmix/list-nav/${args.dirUUID}/${args.rootUUID}`)
         break
 
       case 'adminCreateDrive':
-        r = this.apost('admin/drives', {
+        r = this.apost('drives', {
           label: args.label,
-          writelist: args.writelist,
-          readlist: [],
-          shareAllowed: true
+          writelist: args.writelist
         })
         break
 
       case 'adminUpdateDrive':
-        r = this.apatch(`admin/drives/${args.uuid}`, args)
+        r = this.apost(`drives/${args.uuid}`, args)
         break
 
     /** File APIs **/
@@ -158,19 +154,16 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'listNavDir':
-        r = this.aget(`drives/${args.driveUUID}/dirs/${args.dirUUID}/files`)
+        r = this.aget(`drives/${args.driveUUID}/dirs/${args.dirUUID}`)
         break
 
       case 'mkdir':
-        r = this.apost(`drives/${args.driveUUID}`, { parent: args.dirUUID, name: args.dirname })
+        r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`)
+          .field(args.dirname, JSON.stringify({ op: 'mkdir' }))
         break
 
-      case 'renameDir':
-        r = this.apatch(`drives/${args.driveUUID}/dirs/${args.dirUUID}`, { name: args.dirname })
-        break
-
-      case 'renameFile':
-        r = this.apatch(`drives/${args.driveUUID}/dirs/${args.dirUUID}/files/${args.fileUUID}`, { name: args.filename })
+      case 'renameDirOrFile':
+        r = this.apatch(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries/${args.entryUUID}`, { name: args.newName })
         break
 
       case 'deleteDir':
@@ -222,9 +215,28 @@ class Fruitmix extends EventEmitter {
         r = request.get('http://10.10.9.86:3000/server')
         break
 
-    /** Wechat API **/
+    /** Ticket and Wechat API **/
       case 'creatTicket':
         r = this.apost('station/tickets/', { type: 2 })
+        break
+
+      case 'getWechatToken':
+        r = request
+          .get('http://10.10.9.59:5757/v1/token')
+          .query({ code: args.code })
+          .query({ platform: args.platform })
+        break
+
+      case 'getTicket':
+        console.log('getTicket API', args)
+        r = this.aget(`station/tickets/${args.ticketId}`)
+        break
+
+      case 'confirmTicket':
+        r = this.apost(`station/tickets/wechat/${args.ticketId}`, {
+          guid: args.guid,
+          state: args.state
+        })
         break
 
       case 'wxBind':
@@ -248,26 +260,15 @@ class Fruitmix extends EventEmitter {
   }
 
   start() {
-    this.requestAsync('account', { uuid: this.userUUID }).asCallback((err, account) => {
-      if (account) {
-        this.request('listNavDir', { drivesUUID: account.home, dirUUID: account.home })
-        if (account.isAdmin) {
-          this.request('adminUsers')
-          this.request('adminDrives')
-        }
-      }
-    })
-
+    this.request('account')
     this.request('users')
-    // this.request('drives')
     this.requestAsync('drives').asCallback((err, drives) => {
       if (drives) {
-        const drive = drives[0]
+        console.log('requestAsync drives success', drives)
+        const drive = drives.find(drive => drive.tag === 'home')
         this.request('listNavDir', { driveUUID: drive.uuid, dirUUID: drive.uuid })
       }
     })
-    this.request('fileShare')
-    this.request('mediaShare')
     this.request('media')
   }
 }

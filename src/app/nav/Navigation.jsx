@@ -59,7 +59,7 @@ class NavViews extends Component {
 
     this.install('home', Home)
     this.install('public', Public)
-    this.install('physical', Physical)
+    // this.install('physical', Physical)
     // this.install('fileSharedWithMe', FileSharedWithMe)
     // this.install('fileSharedWithOthers', FileSharedWithOthers)
     this.install('transmission', Transmission)
@@ -175,7 +175,8 @@ class NavViews extends Component {
     /* is admin ? */
     let isAdmin = false
     const account = this.views.account.ctx.props.apis.account
-    if (!account.isPending() && !account.isRejected() && account.vaule() && account.vaule().isAdmin) {
+    // debug('renderQuickNavs', account)
+    if (!account.isPending() && !account.isRejected() && account.value() && account.value().isAdmin) {
       isAdmin = true
     }
 
@@ -217,8 +218,10 @@ class NavViews extends Component {
     const view = this.currentView()
     if (!view.hasDetail()) return null
     let DetailIcon = ActionInfo
+    let tooltip = '详情'
     if (view.detailIcon()) {
       DetailIcon = view.detailIcon()
+      tooltip = ''
     }
 
     const onTouchTap = view.detailEnabled()
@@ -230,7 +233,7 @@ class NavViews extends Component {
       : 'rgba(255,255,255,0.3)'
 
     return (
-      <div style={{ width: 48, height: 48, position: 'relative' }} >
+      <div style={{ width: 48, height: 48, position: 'relative', zIndex: 100000 }} >
 
         <div
           style={{
@@ -246,7 +249,7 @@ class NavViews extends Component {
           }}
         />
 
-        <IconButton style={{ position: 'absolute' }} onTouchTap={onTouchTap} >
+        <IconButton style={{ position: 'absolute' }} onTouchTap={onTouchTap} tooltip={tooltip}>
           <DetailIcon color={color} />
         </IconButton>
       </div>
