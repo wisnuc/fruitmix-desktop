@@ -88,34 +88,29 @@ const calcFingerprint = (hashs) => {
       const digest = hash.digest('hex')
       accumulator.push(digest)
     }
-    console.log(accumulator)
+    // console.log(accumulator)
     return accumulator
   }, [])
 }
 
+const uploadAsync = async (driveUUID, dirUUID, path, parts) => {
+  try {
+    for (const part of parts) {
+      await Promise.promisify(uploadFile)(driveUUID, dirUUID, path, part).asCallback(() => {})
+    }
+  } catch (error) {
+    console.log('uploadAsync', error)
+  }
+}
+
 const uploadBigFile = (driveUUID, dirUUID, path, size, parts) => {
-  console.log('uploadBigFile', parts)
+  // console.log('uploadBigFile', parts)
   const fp = calcFingerprint(parts.map(part => part.sha))
-  console.log('uploadBigFile fp', fp)
+  // console.log('uploadBigFile fp', fp)
   parts.forEach((part, index) => (part.fingerprint = fp[index]))
 
-  /*
-
-    for (let part of parts) {
-      try {
-        if (!i) {
-          await Promise.promisify(uploadFile)(driveUUID, dirUUID, path, parts).asCallback(() => {})
-        } else {
-          await Promise.promisify(appendFile)(driveUUID, dirUUID, path, parts).asCallback(() => {})
-        }
-      } catch (error) {
-        console.log('async fire error', error)
-      }
-    }
-  */
-
-  uploadFile(driveUUID, dirUUID, path, parts[0], () => {
-    uploadFile(driveUUID, dirUUID, path, parts[1])
+  uploadAsync(driveUUID, dirUUID, path, parts).asCallback(() => {
+    console.log('!!!!!!!!!!!!!!uploadBigFile all success!!!!!!!!!!!')
   })
 }
 
@@ -153,11 +148,12 @@ const hashFile = (driveUUID, dirUUID, path, size) => {
       console.log('createReadStream end')
       hash.end()
       console.log(`hash ${path} cost time: ${new Date() - startTime} ms`)
+      const sha = hash.read()
       const part = {
         start: 0,
         end: size - 1,
-        sha: hash.read(),
-        fingerprint: hash.read()
+        sha,
+        fingerprint: sha
       }
       uploadFile(driveUUID, dirUUID, path, part)
     })
