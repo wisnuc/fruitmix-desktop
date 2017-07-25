@@ -25,56 +25,36 @@ Upload a single file using request formData
 @param {number} size
 @param {string} hash
 */
-const uploadFile = (driveUUID, dirUUID, path, size, hash, callback) => {
+const uploadFile = (driveUUID, dirUUID, path, part, callback) => {
   initArgs()
   const name = path.replace(/.*\//, '')
-  const op = {
-    url: `${server}/drives/${driveUUID}/dirs/${dirUUID}/entries`,
-    headers: { Authorization },
-    formData: {
-      [name]: {
-        value: fs.createReadStream(path),
-        options: JSON.stringify({
-          size,
-          sha256: hash
-        })
-      }
-    }
+  let formDataOptions = {
+    size: part.end - part.start + 1,
+    sha256: part.sha
   }
-  console.log(op)
-  request.post(op, (error, data) => {
-    if (error) {
-      console.log('error', error)
-    } else {
-      console.log('upload success: ', name)
-      callback()
-    }
-  })
-}
+  if (part.start) formDataOptions = Object.assign(formDataOptions, { append: part.fingerprint })
 
-const appendFile = (driveUUID, dirUUID, path, size, hash, fingerprint) => {
-  initArgs()
-  const name = path.replace(/.*\//, '')
   const op = {
     url: `${server}/drives/${driveUUID}/dirs/${dirUUID}/entries`,
     headers: { Authorization },
     formData: {
       [name]: {
-        value: fs.createReadStream(path),
-        options: JSON.stringify({
-          size,
-          sha256: hash,
-          append: fingerprint
-        })
+        value: fs.createReadStream(path, { start: part.start, end: part.end }),
+        options: JSON.stringify(formDataOptions)
       }
     }
   }
+  console.log(`>>>>>>>>>>>uploadFile part from ${part.start} to ${part.end} op`)
   console.log(op)
+  console.log('=========== part')
+  console.log(part)
+  console.log('<<<<<<<<<<< start')
   request.post(op, (error, data) => {
     if (error) {
       console.log('error', error)
     } else {
-      console.log('upload success: ', name)
+      console.log(`uploadFile part from ${part.start} to ${part.end} success`)
+      if (callback) callback()
     }
   })
 }
@@ -95,33 +75,42 @@ const spliceFile = (size, perSize) => {
 }
 
 
-const combineHash = (a, b) => {
-  let a1 = typeof a === 'string'
-    ? Buffer.from(a, 'hex')
-    : a
+const calcFingerprint = (hashs) => {
+  const hashBuffer = hashs.map(hash => typeof hash === 'string' ? Buffer.from(hash, 'hex') : hash)
 
-  let b1 = typeof b === 'string'
-    ? Buffer.from(b, 'hex')
-    : b
+  return hashBuffer.reduce((accumulator, currentValue, currentIndex, array) => {
+    if (!currentIndex) {
+      accumulator.push(currentValue.toString('hex'))
+    } else {
+      const hash = crypto.createHash('sha256')
+      hash.update(Buffer.from(accumulator[currentIndex - 1], 'hex'))
+      hash.update(currentValue)
+      const digest = hash.digest('hex')
+      accumulator.push(digest)
+    }
+    // console.log(accumulator)
+    return accumulator
+  }, [])
+}
 
-  let hash = crypto.createHash('sha256')
-  hash.update(a1)
-  hash.update(b1)
-
-  let digest = hash.digest('hex')
-  console.log('combined digest', digest)
-  return digest
+const uploadAsync = async (driveUUID, dirUUID, path, parts) => {
+  try {
+    for (const part of parts) {
+      await Promise.promisify(uploadFile)(driveUUID, dirUUID, path, part).asCallback(() => {})
+    }
+  } catch (error) {
+    console.log('uploadAsync', error)
+  }
 }
 
 const uploadBigFile = (driveUUID, dirUUID, path, size, parts) => {
-  parts.map((part, index, array) => {
-    if (!index) return (part.fingerprint = part.sha)
-    const lastfp = array[index - 1].fingerprint
-    part.fingerprint = combineHash(lastfp, part.sha)
-  })
+  // console.log('uploadBigFile', parts)
+  const fp = calcFingerprint(parts.map(part => part.sha))
+  // console.log('uploadBigFile fp', fp)
+  parts.forEach((part, index) => (part.fingerprint = fp[index]))
 
-  uploadFile(driveUUID, dirUUID, path, partSize, parts[0].fingerprint, () => {
-    appendFile(driveUUID, dirUUID, path, size - partSize, parts[1].fingerprint)
+  uploadAsync(driveUUID, dirUUID, path, parts).asCallback(() => {
+    console.log('!!!!!!!!!!!!!!uploadBigFile all success!!!!!!!!!!!')
   })
 }
 
@@ -159,7 +148,14 @@ const hashFile = (driveUUID, dirUUID, path, size) => {
       console.log('createReadStream end')
       hash.end()
       console.log(`hash ${path} cost time: ${new Date() - startTime} ms`)
-      uploadFile(driveUUID, dirUUID, path, size, hash.read())
+      const sha = hash.read()
+      const part = {
+        start: 0,
+        end: size - 1,
+        sha,
+        fingerprint: sha
+      }
+      uploadFile(driveUUID, dirUUID, path, part)
     })
     fileStream.pipe(hash)
   } else {

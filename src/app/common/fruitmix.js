@@ -269,7 +269,7 @@ class Fruitmix extends EventEmitter {
         this.request('listNavDir', { driveUUID: drive.uuid, dirUUID: drive.uuid })
       }
     })
-    this.request('media')
+    // this.request('media')
   }
 }
 
