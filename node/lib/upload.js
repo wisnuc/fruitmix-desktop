@@ -22,8 +22,12 @@ Upload a single file using request formData
 @param {string} driveUUID
 @param {string} dirUUID
 @param {string} path
-@param {number} size
-@param {string} hash
+@param {object} part
+@param {string} part.start
+@param {string} part.end
+@param {string} part.sha
+@param {string} part.fingerpringt
+@param {function} callback
 */
 const uploadFile = (driveUUID, dirUUID, path, part, callback) => {
   initArgs()
@@ -181,4 +185,55 @@ const getFileInfo = (driveUUID, dirUUID, path) => {
   })
 }
 
-export { uploadFile, hashFile, getFileInfo }
+
+/**
+Upload a single file using request formData
+
+@param {string} driveUUID
+@param {string} dirUUID
+@param {string} path
+@param {string} name
+@param {object} part
+@param {string} part.start
+@param {string} part.end
+@param {string} part.sha
+@param {string} part.fingerpringt
+@param {object} readStream
+@param {function} callback
+*/
+const uploadFileWithStream = (driveUUID, dirUUID, path, name, part, readStream, callback) => {
+  initArgs()
+  // const name = path.replace(/.*\//, '')
+  let formDataOptions = {
+    size: part.end - part.start + 1,
+    sha256: part.sha
+  }
+  if (part.start) formDataOptions = Object.assign(formDataOptions, { append: part.fingerprint })
+
+  const op = {
+    url: `${server}/drives/${driveUUID}/dirs/${dirUUID}/entries`,
+    headers: { Authorization },
+    formData: {
+      [name]: {
+        value: readStream,
+        options: JSON.stringify(formDataOptions)
+      }
+    }
+  }
+  console.log(`>>>>>>>>>>>uploadFile part from ${part.start} to ${part.end} op`)
+  console.log(op)
+  console.log('=========== part')
+  console.log(part)
+  console.log('<<<<<<<<<<< start')
+  request.post(op, (error, data) => {
+    if (error) {
+      console.log('error', error)
+    } else {
+      console.log(`uploadFile part from ${part.start} to ${part.end} success`)
+      if (callback) callback()
+    }
+  })
+}
+
+
+export { uploadFile, hashFile, getFileInfo, uploadFileWithStream }

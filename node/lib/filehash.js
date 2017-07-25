@@ -21,8 +21,33 @@ hashFile(0, (err) => {
 })
 
 
+const calcFingerprint = (hashs) => {
+  const hashBuffer = hashs.map(hash => typeof hash === 'string' ? Buffer.from(hash, 'hex') : hash)
+
+  return hashBuffer.reduce((accumulator, currentValue, currentIndex, array) => {
+    if (!currentIndex) {
+      accumulator.push(currentValue.toString('hex'))
+    } else {
+      const hash = crypto.createHash('sha256')
+      hash.update(Buffer.from(accumulator[currentIndex - 1], 'hex'))
+      hash.update(currentValue)
+      const digest = hash.digest('hex')
+      accumulator.push(digest)
+    }
+    // console.log(accumulator)
+    return accumulator
+  }, [])
+}
+
 function hashFile(index, callback) {
-  if (!parts[index]) return callback(null)
+  if (!parts[index]) {
+    const fp = calcFingerprint(parts.map(part => part.sha))
+    console.log('uploadBigFile fp', fp)
+    parts.forEach((part, index) => (part.fingerprint = fp[index]))
+
+    console.log('hash 成功！')
+    return callback(null)
+  }
   const part = parts[index]
   const hash = crypto.createHash('sha256')
   hash.setEncoding('hex')

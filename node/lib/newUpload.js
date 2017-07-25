@@ -20,15 +20,15 @@ const uploadHandle = (event, args) => {
   const dialogType = type === 'folder' ? 'openDirectory' : 'openFile'
   dialog.showOpenDialog({ properties: [dialogType, 'multiSelections'], filters }, (data) => {
     if (!data) return console.log('get list err', null)
-    console.log(data)
-    getFileInfo(driveUUID, dirUUID, data[0])
-    return null
+    // console.log(data)
+    // getFileInfo(driveUUID, dirUUID, data[0])
+    // return null
     let index = 0
     const count = data.length
     const readUploadInfor = (abspath) => {
       fs.stat(abspath, (err, infor) => {
         if (err) return console.log(`读取目录 ${abspath} 错误`)
-        createTask(abspath, dirUUID, type, true, null, null, null)
+        createTask(abspath, dirUUID, type, true, null, null, null, null, driveUUID)
         index++
         if (index < count) {
           readUploadInfor(data[index])
