@@ -86,7 +86,7 @@ class Login extends StateUp(React.Component) {
       compact: false,
       dim: false,
 
-      pin: 'initWizard', // initWizard, pin child UI view, prevent auto dispatch, see footer
+      pin: '', // initWizard, pin child UI view, prevent auto dispatch, see footer
 
       bye: false,
       byebye: false,
@@ -165,6 +165,8 @@ class Login extends StateUp(React.Component) {
     const { vexpand, hexpand, expanded } = this.state
     if (vexpand !== hexpand || hexpand !== expanded) return
 
+    debug('toggleExpandedAsync', this.state)
+
     /* if pure === true, just change expand */
     if (!expanded) {
       if (pure) {
@@ -175,6 +177,7 @@ class Login extends StateUp(React.Component) {
       await Promise.delay(duration)
       this.setState({ hexpand: true })
       await Promise.delay(duration)
+      debug('toggleExpandedAsync expand', this.state)
       this.setState({ expanded: true, pin: this.state.maint ? 'maintenance' : 'initWizard' })
     } else {
       this.setState({ vexpand: false })
@@ -304,7 +307,7 @@ class Login extends StateUp(React.Component) {
     }
 
     const status = this.props.selectedDevice.systemStatus()
-    // debug('footer', status, this.props.selectedDevice)
+    debug('footer', status, this.props.selectedDevice, this.state)
 
     if (this.state.pin === 'initWizard' || status === 'uninitialized') {
       const { hexpand, vexpand, expanded } = this.state
@@ -391,28 +394,13 @@ class Login extends StateUp(React.Component) {
             toggleExpanded={this.toggleExpanded}
             device={this.props.selectedDevice}
             refresh={this.refresh}
+            OKAndLogin={this.initWizardOnOKBound}
             enterMaint={() => this.done('maintenance')}
           />
         )
       }
 
       if (hexpand === vexpand && vexpand === expanded) {
-        /*
-        if (expanded) {
-          return (
-            <div>
-              <MaintGuide
-                toggleMaint={this.toggleMaint}
-              />
-              <div style={boxStyle}>
-                <div>{text}</div>
-                <FlatButton label="维护模式" onTouchTap={() => this.done('maintenance')} />
-              </div>
-            </div>
-          )
-        }
-        */
-
         return (
           <div style={boxStyle}>
             <div>{text}</div>
