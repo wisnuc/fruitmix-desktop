@@ -86,7 +86,7 @@ class Login extends StateUp(React.Component) {
       compact: false,
       dim: false,
 
-      pin: '', // initWizard, pin child UI view, prevent auto dispatch, see footer
+      pin: 'initWizard', // initWizard, pin child UI view, prevent auto dispatch, see footer
 
       bye: false,
       byebye: false,
@@ -150,6 +150,7 @@ class Login extends StateUp(React.Component) {
       debug('this.addFirstUser', this.state.userpass, this.props)
       const { username, password } = this.state.userpass
       this.props.selectedDevice.addFirstUser({ username, password })
+      this.toggleFirstUser()
     }
 
     /* change style of device info card */
@@ -174,7 +175,7 @@ class Login extends StateUp(React.Component) {
       await Promise.delay(duration)
       this.setState({ hexpand: true })
       await Promise.delay(duration)
-      this.setState({ expanded: true }) // pin: 'initWizard'
+      this.setState({ expanded: true, pin: this.state.maint ? 'maintenance' : 'initWizard' })
     } else {
       this.setState({ vexpand: false })
       await Promise.delay(duration)
@@ -324,28 +325,13 @@ class Login extends StateUp(React.Component) {
         return (
           <div style={boxStyle}>
             <div>该设备尚未初始化</div>
-            <FlatButton label="初始化" onTouchTap={this.toggleExpanded} />
+            <FlatButton label="初始化" onTouchTap={() => this.toggleExpanded()} />
           </div>
         )
       }
       return null
     }
 
-    if (status === 'ready') {
-      const users = this.props.selectedDevice.users.value()
-      const style = { width: '100%', transition: 'all 300ms', position: 'relative' }
-
-      if (users.length > 0) {
-        return (
-          <UserBox
-            style={style}
-            device={this.props.selectedDevice}
-            toggleDisplay={this.toggleDisplay}
-            done={this.done.bind(this)}
-          />
-        )
-      }
-    }
 
     let text
     let busy
@@ -394,15 +380,7 @@ class Login extends StateUp(React.Component) {
         break
     }
 
-    if (busy) {
-      return (
-        <div style={Object.assign({}, boxStyle, { paddingLeft: 16, justifyContent: 'start' })}>
-          <CircularProgress style={{ flexBasis: 32 }} size={28} />
-          <div style={{ flexBasis: 16 }} />
-          <div>{text}</div>
-        </div>
-      )
-    } else if (maint) {
+    if (maint || this.state.pin === 'maintenance') {
       const { hexpand, vexpand, expanded } = this.state
 
       if (this.state.maint) {
@@ -444,6 +422,28 @@ class Login extends StateUp(React.Component) {
       }
 
       return null
+    } else if (status === 'ready') {
+      const users = this.props.selectedDevice.users.value()
+      const style = { width: '100%', transition: 'all 300ms', position: 'relative' }
+
+      if (users.length > 0) {
+        return (
+          <UserBox
+            style={style}
+            device={this.props.selectedDevice}
+            toggleDisplay={this.toggleDisplay}
+            done={this.done.bind(this)}
+          />
+        )
+      }
+    } else if (busy) {
+      return (
+        <div style={Object.assign({}, boxStyle, { paddingLeft: 16, justifyContent: 'start' })}>
+          <CircularProgress style={{ flexBasis: 32 }} size={28} />
+          <div style={{ flexBasis: 16 }} />
+          <div>{text}</div>
+        </div>
+      )
     } else if (noUser) {
       if (!this.state.compact) {
         return (

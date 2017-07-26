@@ -236,10 +236,13 @@ class Device extends RequestManager {
   async initWizardAsync(args) {
     const { target, mode, username, password } = args
 
+    console.log('000000000')
     const uuid = await this.requestAsync('mkfs', { target, mode })
     console.log('device initWizard:  mkfs returns uuid', uuid)
+    console.log('1111111111111')
 
     await this.requestAsync('storage', null)
+    console.log('22222222222222')
     console.log('device initWizard: storage refreshed')
 
     await this.requestAsync('install', { current: uuid.uuid })
@@ -389,7 +392,7 @@ class Device extends RequestManager {
       return 'failLast'
     } else if (boot.error === 'ENOALT') {
       const { volumes } = this.storage.value()
-      if (volumes.length === 0 && boot.last === null) { return 'uninitialized' }
+      if (volumes.length === 0) { return 'uninitialized' }
       return 'failNoAlt'
     }
 

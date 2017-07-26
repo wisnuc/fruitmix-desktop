@@ -15,7 +15,7 @@ class HoverNav extends React.Component {
     return (
       <Avatar
         icon={<Icon style={{ width: 32, height: 32 }} color="#FFF" />}
-        backgroundColor={this.state.hover ? '#9E9E9E' : '#FFF'}
+        backgroundColor={this.state.hover ? '#9E9E9E' : '#FAFAFA'}
       />
     )
   }
