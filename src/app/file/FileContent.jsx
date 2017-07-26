@@ -97,6 +97,26 @@ class FileContent extends React.Component {
 
   render() {
     debug('render FileContent', this.props, this.state)
+    if (this.props.entries && !this.props.entries.length) {
+      return (
+        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div
+            style={{
+              width: 480,
+              height: 480,
+              borderRadius: '240px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: '#FAFAFA'
+            }}
+          >
+            { '将文件拖到此处' }
+            { '或点击上传按钮' }
+          </div>
+        </div>
+      )
+    }
     return (
       <div style={{ width: '100%', height: '100%' }}>
         {/* render list */}
