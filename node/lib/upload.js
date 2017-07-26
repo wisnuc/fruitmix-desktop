@@ -203,7 +203,7 @@ Upload a single file using request formData
 const uploadFileWithStream = (driveUUID, dirUUID, name, part, readStream, callback) => {
   initArgs()
   let formDataOptions = {
-    size: part.end - part.start + 1,
+    size: part.end ? part.end - part.start + 1 : 0,
     sha256: part.sha
   }
   if (part.start) formDataOptions = Object.assign(formDataOptions, { append: part.fingerprint })

@@ -40,12 +40,20 @@ const calcFingerprint = (hashs) => {
 }
 
 function hashFile(index, callback) {
+  /* empty file */
+  if (!parts.length) {
+    parts.push({
+      start: 0,
+      end: 0,
+      sha: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    })
+    return callback(null)
+  }
+
+  /* all parts finished */
   if (!parts[index]) {
     const fp = calcFingerprint(parts.map(part => part.sha))
-    // console.log('uploadBigFile fp', fp)
     parts.forEach((part, index) => (part.fingerprint = fp[index]))
-
-    // console.log('hash 成功！')
     return callback(null)
   }
   const part = parts[index]
