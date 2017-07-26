@@ -163,7 +163,9 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'renameDirOrFile':
-        r = this.apatch(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries/${args.entryUUID}`, { name: args.newName })
+        // r = this.apatch(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries/${args.entryUUID}`, { name: args.newName })
+        r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`)
+          .field(args.dirname, JSON.stringify({ op: 'rename', overwrite: args.entryUUID }))
         break
 
       case 'deleteDir':
