@@ -73,7 +73,7 @@ class Public extends Home {
       this.setState({ drives: data, path, entries, select, inRoot: true })
     } else {
       if (data === this.state.listNavDir && !this.force) return
-      path = [{ name: '共享文件夹', uuid: this.rootDrive.uuid, type: 'publicRoot' }, ...data.path]
+      path = [{ name: '共享文件夹', uuid: this.rootDrive.uuid, type: 'publicRoot' }, ...data.path] // important !!
       path[1].name = this.rootDrive.name
       entries = data.entries
 

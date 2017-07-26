@@ -256,7 +256,7 @@ const createFold = (driveUUID, dirUUID, dirname, callback) => {
   }
 
   const op2 = {
-    url: `${server}/drives/${driveUUID}/dirs/${dirUUID}/entries`,
+    url: `${server}/drives/${driveUUID}/dirs/${dirUUID}`,
     headers: { Authorization }
   }
   console.log(`>>>>>>>>>>>create Fold`)
@@ -273,7 +273,7 @@ const createFold = (driveUUID, dirUUID, dirname, callback) => {
           console.log('error', data)
         } else {
           console.log(`create Fold ${dirname} success`)
-          if (callback) callback(err, data.body)
+          if (callback) callback(err, JSON.parse(data.body).entries)
         }
       })
     }

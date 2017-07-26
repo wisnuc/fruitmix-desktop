@@ -53,6 +53,7 @@ const uploadMediaHandle = (event, rootUUID) => {
 }
 
 const dragFileHandle = (event, args) => {
+  console.log(args)
   if (!args.files.length) return
   let index = 0
   const loop = () => {
@@ -65,9 +66,9 @@ const dragFileHandle = (event, args) => {
       }
       if (stat.isDirectory()) type = 'folder'
       else type = 'file'
-      createTask(filePath, args.dirUUID, type, true, null, null, null)
+      createTask(filePath, args.dirUUID, type, true, null, null, null, null, args.driveUUID)
       index++
-      if (index == args.files.length) return getMainWindow().webContents.send('snackbarMessage', { message: `${args.files.length}个任务添加至上传队列` })
+      if (index === args.files.length) return getMainWindow().webContents.send('snackbarMessage', { message: `${args.files.length}个任务添加至上传队列` })
       loop()
     })
   }

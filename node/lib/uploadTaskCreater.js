@@ -233,7 +233,8 @@ class TaskManager {
     try {
       // console.log('检查名字', this.target)
       // console.log('this.driveUUID', this.driveUUID)
-      const list = await serverGetAsync(`drives/${this.driveUUID}/dirs/${this.target}/entries`)
+      const listNav = await serverGetAsync(`drives/${this.driveUUID}/dirs/${this.target}`)
+      const list = listNav.entries
       let name = _this.tree[0].name
       let times = 0
 
@@ -669,16 +670,17 @@ class createFolderSTM extends STM {
     this.wrapper.recordInfor(`${this.wrapper.name} 开始创建...`)
 
     const data = this.wrapper.manager
-    createFold(data.driveUUID, this.wrapper.target, this.wrapper.name, (error, data) => {
+    createFold(data.driveUUID, this.wrapper.target, this.wrapper.name, (error, entries) => {
       if (error) {
         this.wrapper.recordInfor(`${this.wrapper.name} 创建失败`)
-        console.log(error, res.statusCode)
+        console.log('error:', error)
       } else {
         console.log(`${this.wrapper.name} 创建成功`)
         removeOutOfRunningQueue(this)
-        this.wrapper.uuid = JSON.parse(data).find(entry => entry.name === this.wrapper.name).uuid
+        // console.log(entries)
+        this.wrapper.uuid = entries.find(entry => entry.name === this.wrapper.name).uuid
         // console.log(this.wrapper.uuid)
-        this.wrapper.children.forEach(item => item.target = this.wrapper.uuid)
+        this.wrapper.children.forEach(item => (item.target = this.wrapper.uuid))
         getMainWindow().webContents.send('driveListUpdate',
           Object.assign({}, { uuid: this.wrapper.target, message: '创建文件夹成功' })
         )

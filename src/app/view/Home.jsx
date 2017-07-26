@@ -67,7 +67,7 @@ class Home extends Base {
       const dirPath = this.state.path
       const dirUUID = dirPath[dirPath.length - 1].uuid
       const driveUUID = dirPath[0].uuid
-      // console.log(dirUUID, type)
+      console.log(dirPath, driveUUID, dirUUID, type)
       ipcRenderer.send('UPLOAD', { dirUUID, driveUUID, type })
     }
 
@@ -427,7 +427,7 @@ class Home extends Base {
               </div>
             </div>
           }
-        </DialogOverlay>)
+        </DialogOverlay>
       </div>
     )
   }
