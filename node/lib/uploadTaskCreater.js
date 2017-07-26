@@ -13,7 +13,7 @@ import { getMainWindow } from './window'
 import utils from './util'
 import { userTasks, finishTasks } from './newUpload'
 import sendInfor from './transmissionUpdate'
-import { uploadFileWithStream } from './upload'
+import { uploadFileWithStream, createFold } from './upload'
 
 let ip
 let server
@@ -296,12 +296,12 @@ class TaskManager {
   }
 
   uploadSchedule() {
-    console.log('')
-    console.log('上传调度...')
+    // console.log('')
+    // console.log('上传调度...')
     if (this.finishCount === this.worklist.length) return this.recordInfor('文件全部上传结束')
     if (this.uploading.length >= 2) return this.recordInfor('任务上传队列已满')
     if (this.fileIndex === this.worklist.length) return this.recordInfor('所有文件上传调度完成')
-    this.recordInfor(`正在调度第 ${this.fileIndex + 1} 个文件,总共 ${this.worklist.length} 个 : ${this.worklist[this.fileIndex].name}`)
+    // this.recordInfor(`正在调度第 ${this.fileIndex + 1} 个文件,总共 ${this.worklist.length} 个 : ${this.worklist[this.fileIndex].name}`)
 
     const _this = this
     const obj = this.worklist[this.fileIndex]
@@ -312,14 +312,14 @@ class TaskManager {
       return
     }
     if (obj.target === '') {
-      this.recordInfor('当前文件父文件夹正在创建，缺少目标，等待...')
+      // this.recordInfor('当前文件父文件夹正在创建，缺少目标，等待...')
       return
     } else if (obj.type === 'file' && obj.sha === '') {
       this.recordInfor('当前文件HASH尚未计算，等待...')
       return
     }
 
-    const stateMachine = obj.type == 'folder' ? createFolderSTM : UploadFileSTM
+    const stateMachine = obj.type === 'folder' ? createFolderSTM : UploadFileSTM
     obj.setState(stateMachine)
     this.uploading.push(obj)
     this.fileIndex += 1
@@ -648,6 +648,7 @@ class HashSTM extends STM {
   }
 }
 
+/* create Foloder */
 class createFolderSTM extends STM {
   constructor(wrapper) {
     super(wrapper)
@@ -663,33 +664,31 @@ class createFolderSTM extends STM {
     this.wrapper.stateName = 'uploading'
     removeOutOfReadyQueue(this)
     addToRunningQueue(this)
-    console.log(`创建文件夹的目标文件夹是：${this.wrapper.target}`)
-    const options = {
-      url: `${server}/files/fruitmix/mkdir/${this.wrapper.target}`,
-      method: 'post',
-      headers: {
-        Authorization: `${tokenObj.type} ${tokenObj.token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ dirname: this.wrapper.name })
-    }
 
+    console.log(`创建文件夹的目标文件夹是：${this.wrapper.target}`)
     this.wrapper.recordInfor(`${this.wrapper.name} 开始创建...`)
-    this.handle = request(options, (err, res, body) => {
-      if (err || res.statusCode !== 200) {
-        // todo
+
+    const data = this.wrapper.manager
+    createFold(data.driveUUID, this.wrapper.target, this.wrapper.name, (error, data) => {
+      if (error) {
         this.wrapper.recordInfor(`${this.wrapper.name} 创建失败`)
-        console.log(err, res.statusCode)
+        console.log(error, res.statusCode)
       } else {
+        console.log(`${this.wrapper.name} 创建成功`)
         removeOutOfRunningQueue(this)
-        this.wrapper.uuid = JSON.parse(body)
+        this.wrapper.uuid = JSON.parse(data).find(entry => entry.name === this.wrapper.name).uuid
+        // console.log(this.wrapper.uuid)
         this.wrapper.children.forEach(item => item.target = this.wrapper.uuid)
+        getMainWindow().webContents.send('driveListUpdate',
+          Object.assign({}, { uuid: this.wrapper.target, message: '创建文件夹成功' })
+        )
         return this.wrapper.uploadFinish()
       }
     })
   }
 }
 
+/* upload file */
 class UploadFileSTM extends STM {
   constructor(wrapper) {
     super(wrapper)
@@ -727,12 +726,15 @@ class UploadFileSTM extends STM {
   uploadSegment() {
     const wrapper = this.wrapper
     const data = wrapper.manager
+    const target = wrapper.target
     let seek = wrapper.seek
     const name = wrapper.name
     const part = wrapper.parts[seek]
 
     console.log('开始上传第' + wrapper.seek + '块')
     console.log('----------------------------------------------')
+    console.log(wrapper)
+    console.log('==============================================')
 
     const readStream = fs.createReadStream(wrapper.abspath, { start: part.start, end: part.end, autoClose: true })
     readStream.on('data', (chunk) => {
@@ -741,7 +743,7 @@ class UploadFileSTM extends STM {
       this.wrapper.manager.completeSize += chunk.length
     })
 
-    uploadFileWithStream(data.driveUUID, data.target, data.abspath, name, part, readStream, (error) => {
+    uploadFileWithStream(data.driveUUID, target, name, part, readStream, (error) => {
       if (error) { //FIXME
         this.wrapper.manager.completeSize -= this.partFinishSize
         this.partFinishSize = 0

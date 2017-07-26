@@ -191,7 +191,6 @@ Upload a single file using request formData
 
 @param {string} driveUUID
 @param {string} dirUUID
-@param {string} path
 @param {string} name
 @param {object} part
 @param {string} part.start
@@ -201,9 +200,8 @@ Upload a single file using request formData
 @param {object} readStream
 @param {function} callback
 */
-const uploadFileWithStream = (driveUUID, dirUUID, path, name, part, readStream, callback) => {
+const uploadFileWithStream = (driveUUID, dirUUID, name, part, readStream, callback) => {
   initArgs()
-  // const name = path.replace(/.*\//, '')
   let formDataOptions = {
     size: part.end - part.start + 1,
     sha256: part.sha
@@ -220,11 +218,13 @@ const uploadFileWithStream = (driveUUID, dirUUID, path, name, part, readStream, 
       }
     }
   }
+  /*
   console.log(`>>>>>>>>>>>uploadFile part from ${part.start} to ${part.end} op`)
   console.log(op)
   console.log('=========== part')
   console.log(part)
   console.log('<<<<<<<<<<< start')
+  */
   request.post(op, (error, data) => {
     if (error) {
       console.log('error', error)
@@ -236,4 +236,47 @@ const uploadFileWithStream = (driveUUID, dirUUID, path, name, part, readStream, 
 }
 
 
-export { uploadFile, hashFile, getFileInfo, uploadFileWithStream }
+/**
+createFold
+
+@param {string} driveUUID
+@param {string} dirUUID
+@param {string} dirname
+@param {function} callback
+*/
+const createFold = (driveUUID, dirUUID, dirname, callback) => {
+  initArgs()
+
+  const op = {
+    url: `${server}/drives/${driveUUID}/dirs/${dirUUID}/entries`,
+    headers: { Authorization },
+    formData: {
+      [dirname]: JSON.stringify({ op: 'mkdir' })
+    }
+  }
+
+  const op2 = {
+    url: `${server}/drives/${driveUUID}/dirs/${dirUUID}/entries`,
+    headers: { Authorization }
+  }
+  console.log(`>>>>>>>>>>>create Fold`)
+  console.log(op)
+  console.log('<<<<<<<<<<< start')
+  request.post(op, (error) => {
+    if (error) {
+      console.log('error', error)
+      if (callback) callback(error)
+    } else {
+      request.get(op2, (err, data) => {
+        if (err) {
+          if (callback) callback(err)
+          console.log('error', data)
+        } else {
+          console.log(`create Fold ${dirname} success`)
+          if (callback) callback(err, data.body)
+        }
+      })
+    }
+  })
+}
+export { uploadFile, hashFile, getFileInfo, uploadFileWithStream, createFold }

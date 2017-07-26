@@ -16,7 +16,7 @@ const uploadHandle = (event, args) => {
   console.log('uploadHandle...')
   console.log(args)
   const { driveUUID, dirUUID, type, filters } = args
-  if (type === 'folder') return null // TODO
+  // if (type === 'folder') return null // TODO
   const dialogType = type === 'folder' ? 'openDirectory' : 'openFile'
   dialog.showOpenDialog({ properties: [dialogType, 'multiSelections'], filters }, (data) => {
     if (!data) return console.log('get list err', null)
