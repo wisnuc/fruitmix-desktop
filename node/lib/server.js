@@ -3,12 +3,11 @@ import request from 'request'
 import fs from 'fs'
 import path from 'path'
 import util from 'util'
-
-const debug = Debug('lib:server')
+import crypto from 'crypto'
 import UUID from 'node-uuid'
-
 import store from '../serve/store/store'
 
+const debug = Debug('lib:server')
 const getIpAddr = () => store.getState().login.device.mdev.address
 const getToken = () => store.getState().login.device.token.data.token
 const getTmpPath = () => store.getState().config.tmpPath
@@ -199,4 +198,114 @@ export const serverDownloadAsync = (endpoint, qs, downloadPath, name) => {
   const port = 3000
   const token = getToken()
   return requestDownloadAsync(`http://${ip}:${port}/${endpoint}`, qs, token, downloadPath, name)
+}
+
+
+/***********************************************************
+new api TODO
+***********************************************************/
+
+/* init request */
+let server
+let tokenObj
+let Authorization
+const initArgs = () => {
+  server = `http://${store.getState().login.device.mdev.address}:3000`
+  tokenObj = store.getState().login.device.token.data
+  Authorization = `${tokenObj.type} ${tokenObj.token}`
+}
+
+/**
+Upload a single file using request formData
+
+@param {string} driveUUID
+@param {string} dirUUID
+@param {string} name
+@param {object} part
+@param {string} part.start
+@param {string} part.end
+@param {string} part.sha
+@param {string} part.fingerpringt
+@param {object} readStream
+@param {function} callback
+*/
+
+export const uploadFileWithStream = (driveUUID, dirUUID, name, part, readStream, callback) => {
+  initArgs()
+  let formDataOptions = {
+    size: part.end ? part.end - part.start + 1 : 0,
+    sha256: part.sha
+  }
+  if (part.start) formDataOptions = Object.assign(formDataOptions, { append: part.fingerprint })
+
+  const op = {
+    url: `${server}/drives/${driveUUID}/dirs/${dirUUID}/entries`,
+    headers: { Authorization },
+    formData: {
+      [name]: {
+        value: readStream,
+        options: JSON.stringify(formDataOptions)
+      }
+    }
+  }
+  /*
+  console.log(`>>>>>>>>>>>uploadFile part from ${part.start} to ${part.end} op`)
+  console.log(op)
+  console.log('=========== part')
+  console.log(part)
+  console.log('<<<<<<<<<<< start')
+  */
+  request.post(op, (error, data) => {
+    if (error) {
+      console.log('error', error)
+    } else {
+      console.log(`uploadFile part from ${part.start} to ${part.end} success`)
+      if (callback) callback()
+    }
+  })
+}
+
+/**
+createFold
+
+@param {string} driveUUID
+@param {string} dirUUID
+@param {string} dirname
+@param {function} callback
+*/
+
+export const createFold = (driveUUID, dirUUID, dirname, callback) => {
+  initArgs()
+  const op = {
+    url: `${server}/drives/${driveUUID}/dirs/${dirUUID}/entries`,
+    headers: { Authorization },
+    formData: {
+      [dirname]: JSON.stringify({ op: 'mkdir' })
+    }
+  }
+
+  const op2 = {
+    url: `${server}/drives/${driveUUID}/dirs/${dirUUID}`,
+    headers: { Authorization }
+  }
+
+  console.log(`>>>>>>>>>>>create Fold`)
+  console.log(op)
+  console.log('<<<<<<<<<<< start')
+  request.post(op, (error) => {
+    if (error) {
+      console.log('error', error)
+      if (callback) callback(error)
+    } else {
+      request.get(op2, (err, data) => {
+        if (err) {
+          if (callback) callback(err)
+          console.log('error', data)
+        } else {
+          console.log(`create Fold ${dirname} success`)
+          if (callback) callback(err, JSON.parse(data.body).entries)
+        }
+      })
+    }
+  })
 }

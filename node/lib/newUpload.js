@@ -6,7 +6,6 @@ import { dialog, ipcMain } from 'electron'
 import request from 'request'
 import { getMainWindow } from './window'
 import createTask, { sendMsg } from './uploadTaskCreater'
-import { uploadFile, hashFile, getFileInfo } from './upload'
 
 const userTasks = []
 const finishTasks = []
@@ -16,13 +15,9 @@ const uploadHandle = (event, args) => {
   console.log('uploadHandle...')
   console.log(args)
   const { driveUUID, dirUUID, type, filters } = args
-  // if (type === 'folder') return null // TODO
   const dialogType = type === 'folder' ? 'openDirectory' : 'openFile'
   dialog.showOpenDialog({ properties: [dialogType, 'multiSelections'], filters }, (data) => {
     if (!data) return console.log('get list err', null)
-    // console.log(data)
-    // getFileInfo(driveUUID, dirUUID, data[0])
-    // return null
     let index = 0
     const count = data.length
     const readUploadInfor = (abspath) => {

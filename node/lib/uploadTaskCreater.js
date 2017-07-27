@@ -7,13 +7,12 @@ import child_process from 'child_process'
 import request from 'request'
 import uuid from 'node-uuid'
 
-import { serverGetAsync } from './server'
+import { serverGetAsync, uploadFileWithStream, createFold } from './server'
 import store from '../serve/store/store'
 import { getMainWindow } from './window'
 import utils from './util'
 import { userTasks, finishTasks } from './newUpload'
 import sendInfor from './transmissionUpdate'
-import { uploadFileWithStream, createFold } from './upload'
 
 let ip
 let server
