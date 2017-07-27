@@ -14,8 +14,8 @@ const downloadHandle = (event, args, callback) => {
   const folders = args.folders
   // console.log('downloadHandle:')
   // console.log(files)
-  files.forEach(item => createTask(item.uuid, item.name, item.size, item.type, args.dirUUID, true))
-  folders.forEach(item => createTask(item.uuid, item.name, 0, item.type, args.dirUUID ? args.dirUUID : item.uuid, true))
+  files.forEach(item => createTask(item.uuid, item.name, item.size, item.type, args.dirUUID, true, null, null, null, null, args.driveUUID))
+  folders.forEach(item => createTask(item.uuid, item.name, 0, item.type, args.dirUUID ? args.dirUUID : item.uuid, true, null, null, null, null, args.driveUUID))
 
   const count = files.length + folders.length
   getMainWindow().webContents.send('snackbarMessage', { message: `${count}个任务添加至下载队列` })

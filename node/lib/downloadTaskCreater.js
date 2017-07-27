@@ -61,13 +61,13 @@ const sendMsg = () => {
 // TaskManager creater
 // new job :init manager with default parameter
 // old job :init manager with defined parameter(uuid, downloadpath, downloading information)
-const createTask = (target, name, size, type, dirUUID, newWork, p, u, d, ct) => {
+const createTask = (target, name, size, type, dirUUID, newWork, p, u, d, ct, driveUUID) => {
   initArgs()
   const taskUUID = u || uuid.v4()
   const abspath = p || getDownloadPath()
   const downloadingList = d || []
   const createTime = ct || (new Date()).getTime()
-  const task = new TaskManager(taskUUID, abspath, target, name, size, type, dirUUID, newWork, downloadingList, createTime)
+  const task = new TaskManager(taskUUID, abspath, target, name, size, type, dirUUID, newWork, downloadingList, createTime, driveUUID)
   task.createStore()
   userTasks.push(task)
   task.readyToVisit()
@@ -77,15 +77,17 @@ const createTask = (target, name, size, type, dirUUID, newWork, p, u, d, ct) => 
 
 // a download task manager for init/record/visit/schedule
 class TaskManager {
-  constructor(taskUUID, downloadPath, target, name, rootSize, type, dirUUID, newWork, downloadingList, createTime) {
+  constructor(taskUUID, downloadPath, target, name, rootSize, type, dirUUID, newWork, downloadingList, createTime, driveUUID) {
     this.uuid = taskUUID
     this.downloadPath = downloadPath
     this.target = target
     this.name = name
+    this.rawName = name
     this.rootSize = rootSize // for visit
     this.type = type
     this.createTime = createTime
     this.dirUUID = dirUUID
+    this.driveUUID = driveUUID
     this.newWork = newWork
     this.trsType = 'download'
 
@@ -156,7 +158,7 @@ class TaskManager {
     this.recordInfor('开始遍历文件树...')
     removeOutOfVisitlessQueue(this)
     addToVisitingQueue(this)
-    visitTask(this.target, this.name, this.type, this.rootSize, this.dirUUID, this.tree, this, (err, data) => {
+    visitTask(this.target, this.name, this.type, this.rootSize, this.dirUUID, this.tree, this, this.driveUUID, this.rawName, (err, data) => {
       if (err) return _this.error(err, '遍历服务器数据出错')
       _this.tree[0].downloadPath = _this.downloadPath
       removeOutOfVisitingQueue(this)
@@ -207,6 +209,7 @@ class TaskManager {
   checkNameExist() {
     fs.readdir(this.downloadPath, (err, files) => {
       if (err) return this.recordInfor('下载目录未找到')
+      this.rawName = this.tree[0].name
       const name = isFileNameExist(this.tree[0], 0, files)
       this.tree[0].name = name
       this.name = name
@@ -397,12 +400,12 @@ class TaskManager {
 }
 
 // visit tree from serve && check the seek of downloading files
-const visitTask = async (target, name, type, size, dirUUID, position, manager, callback) => {
+const visitTask = async (target, name, type, size, dirUUID, position, manager, driveUUID, rawName, callback) => {
   manager.count += 1
   manager.size += size
   const obj = type === 'file' ?
-    new FileDownloadTask(target, name, type, size, dirUUID, manager) :
-    new FolderDownloadTask(target, name, type, size, dirUUID, manager)
+    new FileDownloadTask(target, name, type, size, dirUUID, manager, driveUUID, rawName) :
+    new FolderDownloadTask(target, name, type, size, dirUUID, manager, driveUUID, rawName)
 
   const index = manager.downloadingList.findIndex(item => item.target === target)
   if (index !== -1) {
@@ -422,7 +425,9 @@ const visitTask = async (target, name, type, size, dirUUID, position, manager, c
     const count = tasks.length
     let index = 0
     let task = tasks[index]
-    const next = () => { visitTask(task.uuid, task.name, task.type, task.size ? task.size : 0, target, obj.children, manager, call) }
+    const next = () => {
+      visitTask(task.uuid, task.name, task.type, task.size ? task.size : 0, target, obj.children, manager, driveUUID, task.rawName, call)
+    }
     let call = (err) => {
       if (err) return callback(err)
       index += 1
@@ -514,12 +519,14 @@ const isFileNameExist = (position, times, list) => {
 
 // Each instance is a fileNode of tree
 class DownloadTask {
-  constructor(target, name, type, size, dirUUID, manager) {
+  constructor(target, name, type, size, dirUUID, manager, driveUUID, rawName) {
     this.target = target
     this.name = name
     this.type = type
     this.size = size
     this.dirUUID = dirUUID
+    this.driveUUID = driveUUID
+    this.rawName = rawName
     this.manager = manager
 
     this.downloadPath = ''
@@ -559,8 +566,8 @@ class DownloadTask {
 }
 
 class FileDownloadTask extends DownloadTask {
-  constructor(target, name, type, size, dirUUID, manager) {
-    super(target, name, type, size, dirUUID, manager)
+  constructor(target, name, type, size, dirUUID, manager, driveUUID, rawName) {
+    super(target, name, type, size, dirUUID, manager, driveUUID, rawName)
     this.progress = 0
     this.seek = 0
     this.lastTimeSize = 0
@@ -579,8 +586,8 @@ class FileDownloadTask extends DownloadTask {
 }
 
 class FolderDownloadTask extends DownloadTask {
-  constructor(target, name, type, size, dirUUID, manager) {
-    super(target, name, type, size, dirUUID, manager)
+  constructor(target, name, type, size, dirUUID, manager, driveUUID, rawName) {
+    super(target, name, type, size, dirUUID, manager, driveUUID, rawName)
     this.children = []
   }
 }
@@ -651,8 +658,10 @@ class DownloadFileSTM extends STM {
   downloading() {
     const _this = this
     const wrapper = this.wrapper
-    // console.log('in downloading...')
-    // console.log(wrapper)
+    console.log('in downloading...')
+    console.log(wrapper)
+    console.log(wrapper.name)
+
     if (wrapper.size === wrapper.seek) return wrapper.manager.downloadSchedule()
     wrapper.stateName = 'running'
 
@@ -660,16 +669,19 @@ class DownloadFileSTM extends STM {
       method: 'GET',
       url: wrapper.dirUUID === 'media'
       ? `${server}/media/${wrapper.target}/download`
-      : `${server}/drives/${wrapper.dirUUID}/dirs/${wrapper.dirUUID}/files/${wrapper.target}/data`,
+      : `${server}/drives/${wrapper.driveUUID}/dirs/${wrapper.dirUUID}/entries/${wrapper.target}`,
 
       headers: {
         Authorization: `${tokenObj.type} ${tokenObj.token}`,
         Range: `bytes=${this.wrapper.seek}-`
+      },
+      qs: {
+        name: wrapper.rawName
       }
     }
 
     const streamOptions = {
-      flags: this.wrapper.seek == 0 ? 'w' : 'r+',
+      flags: this.wrapper.seek === 0 ? 'w' : 'r+',
       start: this.wrapper.seek,
       defaultEncoding: 'utf8',
       fd: null,

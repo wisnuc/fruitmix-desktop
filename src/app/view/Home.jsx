@@ -83,7 +83,7 @@ class Home extends Base {
         else if (obj.type === 'file') files.push(obj)
       })
 
-      ipcRenderer.send('DOWNLOAD', { folders, files, dirUUID: path[path.length - 1].uuid })
+      ipcRenderer.send('DOWNLOAD', { folders, files, dirUUID: path[path.length - 1].uuid, driveUUID: path[0].uuid })
     }
 
     this.delete = () => {
