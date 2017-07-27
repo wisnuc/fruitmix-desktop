@@ -28,7 +28,7 @@ class Transmission extends Base {
   }
 
   menuName() {
-    return '文件传输'
+    return '传输列表'
   }
 
   menuIcon() {

@@ -299,7 +299,7 @@ class ContainerOverlayInline extends React.Component {
           }}
         />
 
-        {/* detail image content */}
+        {/* preview */}
         <div
           ref={ref => (this.refBackground = ref)}
           style={{
@@ -313,7 +313,6 @@ class ContainerOverlayInline extends React.Component {
           }}
           onTouchTap={this.close}
         >
-          {/* main image */}
           {
             [this.leftItem, this.centerItem, this.rightItem].map((item, index) => (
               <div
@@ -389,10 +388,16 @@ class ContainerOverlayInline extends React.Component {
 
               {/* toolbar */}
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <IconButton onTouchTap={this.props.startDownload} tooltip="下载">
+                <IconButton
+                  tooltip="下载"
+                  onTouchTap={(e) => { this.props.startDownload(); e.preventDefault(); e.stopPropagation() }}
+                >
                   <DownloadIcon color="#FFF" />
                 </IconButton>
-                <IconButton onTouchTap={() => this.toggleDialog('detailInfo')} tooltip="信息">
+                <IconButton
+                  tooltip="信息"
+                  onTouchTap={(e) => { this.toggleDialog('detailInfo'); e.preventDefault(); e.stopPropagation() }}
+                >
                   <InfoIcon color="#FFF" />
                 </IconButton>
               </div>

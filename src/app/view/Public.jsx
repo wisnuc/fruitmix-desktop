@@ -207,7 +207,6 @@ class Public extends Home {
           entries={this.state.entries}
           listNavBySelect={this.listNavBySelect}
           showContextMenu={this.showContextMenu}
-          updateDetail={this.updateDetail}
           setAnimation={this.setAnimation}
           ipcRenderer={ipcRenderer}
           download={this.download}

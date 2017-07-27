@@ -96,7 +96,6 @@ class Physical extends Base {
       detailIndex: -1
     }
 
-    this.updateDetailBound = this.updateDetail.bind(this)
 
     ipcRenderer.on('physicalListUpdate', (e, obj) => {
       if (this.state.path.length < 2) return
@@ -128,10 +127,6 @@ class Physical extends Base {
       const path = this.path
       this.setState({ select, entries, extDrives, extListDir, path })
     }
-  }
-
-  updateDetail(index) {
-    this.setState({ detailIndex: index })
   }
 
   willReceiveProps(nextProps) {
@@ -271,7 +266,6 @@ class Physical extends Base {
               select={this.state.select}
               entries={this.state.entries}
               listNavBySelect={this.enter.bind(this)}
-              updateDetail={this.updateDetailBound}
               showContextMenu={this.showContextMenu.bind(this)}
             />
         }

@@ -42,7 +42,6 @@ class FileContent extends React.Component {
 
       /* just touch */
       this.props.select.touchTap(button, index)
-      this.props.updateDetail(index)
 
       /* right click */
       if (button === 2) {

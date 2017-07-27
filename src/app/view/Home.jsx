@@ -47,8 +47,7 @@ class Home extends Base {
       rename: false,
       delete: false,
       move: false,
-      copy: false,
-      detailIndex: -1
+      copy: false
     }
 
     /* handle update sortType */
@@ -144,10 +143,6 @@ class Home extends Base {
       const rUUID = this.state.path[0].uuid
       const dUUID = this.state.path[this.state.path.length - 1].uuid
       this.ctx.props.apis.request('listNavDir', { driveUUID: rUUID, dirUUID: dUUID })
-    }
-
-    this.updateDetail = (index) => {
-      this.setState({ detailIndex: index })
     }
 
     this.showContextMenu = (clientX, clientY) => {
@@ -322,7 +317,7 @@ class Home extends Base {
     return (
       <div style={style}>
         <IconButton onTouchTap={() => this.toggleDialog('gridView')} tooltip={this.state.gridView ? '列表视图' : '网格视图'}>
-          { this.state.gridView ? <GridIcon color="#FFF" /> : <ListIcon color="#FFF" /> }
+          { this.state.gridView ? <ListIcon color="#FFF" /> : <GridIcon color="#FFF" /> }
         </IconButton>
         <IconButton onTouchTap={() => this.toggleDialog('createNewFolder')} tooltip="新建文件夹">
           <FileCreateNewFolder color="#FFF" />
@@ -338,7 +333,8 @@ class Home extends Base {
         {
           this.state.entries.length ?
             <FileDetail
-              detailFile={this.state.entries[this.state.detailIndex]}
+              detailIndex={this.select.state.selected}
+              entries={this.state.entries}
               path={this.state.path}
               ipcRenderer={ipcRenderer}
               primaryColor={this.groupPrimaryColor()}
@@ -444,7 +440,6 @@ class Home extends Base {
           entries={this.state.entries}
           listNavBySelect={this.listNavBySelect}
           showContextMenu={this.showContextMenu}
-          updateDetail={this.updateDetail}
           setAnimation={this.setAnimation}
           ipcRenderer={ipcRenderer}
           download={this.download}

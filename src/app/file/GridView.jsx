@@ -224,25 +224,35 @@ class Row extends React.PureComponent {
                       height: 48,
                       display: 'flex',
                       alignItems: 'center',
+                      color: selected ? 'rgba(255,255,255,0.87)' : 'rgba(0,0,0,0.72)',
                       backgroundColor: selected ? primaryColor : '#FFFFFF'
                     }}
                   >
                     {/* file type may be: folder, public, directory, file, unsupported */}
-                    <div style={{ width: 48, display: 'flex', alignItems: 'center', marginLeft: 8 }}>
-                      <Avatar style={{ backgroundColor: 'white' }}>
+                    <div style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', margin: 12 }}>
+                      <Avatar style={{ backgroundColor: 'white', width: 30, height: 30 }}>
                         {
                         entry.type === 'folder' || entry.type === 'public' || entry.type === 'directory'
-                        ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 16, height: 16 }} />
+                        ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
                         : entry.type === 'file'
-                        ? renderFileIcon(entry.name, entry.metadata, 16)
-                        : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)', width: 16, height: 16 }} />
+                        ? renderFileIcon(entry.name, entry.metadata, 24)
+                        : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
                       }
                       </Avatar>
                     </div>
-                    <div style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', fontSize: 14, flexGrow: 1 }} >
+                    <div
+                      style={{
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap',
+                        textOverflow: 'ellipsis',
+                        fontSize: 13,
+                        width: 114,
+                        marginRight: 12,
+                        fontWeight: 500
+                      }}
+                    >
                       { entry.name }
                     </div>
-                    <div style={{ width: 24 }} />
                   </div>
                 </div>
               )
