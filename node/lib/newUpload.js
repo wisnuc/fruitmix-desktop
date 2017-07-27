@@ -6,7 +6,6 @@ import { dialog, ipcMain } from 'electron'
 import request from 'request'
 import { getMainWindow } from './window'
 import createTask, { sendMsg } from './uploadTaskCreater'
-import { uploadFile, hashFile, getFileInfo } from './upload'
 
 const userTasks = []
 const finishTasks = []
@@ -16,19 +15,15 @@ const uploadHandle = (event, args) => {
   console.log('uploadHandle...')
   console.log(args)
   const { driveUUID, dirUUID, type, filters } = args
-  if (type === 'folder') return null // TODO
   const dialogType = type === 'folder' ? 'openDirectory' : 'openFile'
   dialog.showOpenDialog({ properties: [dialogType, 'multiSelections'], filters }, (data) => {
     if (!data) return console.log('get list err', null)
-    console.log(data)
-    getFileInfo(driveUUID, dirUUID, data[0])
-    return null
     let index = 0
     const count = data.length
     const readUploadInfor = (abspath) => {
       fs.stat(abspath, (err, infor) => {
         if (err) return console.log(`读取目录 ${abspath} 错误`)
-        createTask(abspath, dirUUID, type, true, null, null, null)
+        createTask(abspath, dirUUID, type, true, null, null, null, null, driveUUID)
         index++
         if (index < count) {
           readUploadInfor(data[index])
@@ -53,6 +48,7 @@ const uploadMediaHandle = (event, rootUUID) => {
 }
 
 const dragFileHandle = (event, args) => {
+  console.log(args)
   if (!args.files.length) return
   let index = 0
   const loop = () => {
@@ -65,9 +61,9 @@ const dragFileHandle = (event, args) => {
       }
       if (stat.isDirectory()) type = 'folder'
       else type = 'file'
-      createTask(filePath, args.dirUUID, type, true, null, null, null)
+      createTask(filePath, args.dirUUID, type, true, null, null, null, null, args.driveUUID)
       index++
-      if (index == args.files.length) return getMainWindow().webContents.send('snackbarMessage', { message: `${args.files.length}个任务添加至上传队列` })
+      if (index === args.files.length) return getMainWindow().webContents.send('snackbarMessage', { message: `${args.files.length}个任务添加至上传队列` })
       loop()
     })
   }

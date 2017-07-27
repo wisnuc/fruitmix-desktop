@@ -233,7 +233,7 @@ class NavViews extends Component {
       : 'rgba(255,255,255,0.3)'
 
     return (
-      <div style={{ width: 48, height: 48, position: 'relative', zIndex: 100000 }} >
+      <div style={{ width: 48, height: 48, position: 'relative' }} >
 
         <div
           style={{

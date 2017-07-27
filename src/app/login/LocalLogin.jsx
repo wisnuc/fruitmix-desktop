@@ -150,6 +150,7 @@ class Login extends StateUp(React.Component) {
       debug('this.addFirstUser', this.state.userpass, this.props)
       const { username, password } = this.state.userpass
       this.props.selectedDevice.addFirstUser({ username, password })
+      this.toggleFirstUser()
     }
 
     /* change style of device info card */
@@ -164,6 +165,8 @@ class Login extends StateUp(React.Component) {
     const { vexpand, hexpand, expanded } = this.state
     if (vexpand !== hexpand || hexpand !== expanded) return
 
+    debug('toggleExpandedAsync', this.state)
+
     /* if pure === true, just change expand */
     if (!expanded) {
       if (pure) {
@@ -174,7 +177,8 @@ class Login extends StateUp(React.Component) {
       await Promise.delay(duration)
       this.setState({ hexpand: true })
       await Promise.delay(duration)
-      this.setState({ expanded: true }) // pin: 'initWizard'
+      debug('toggleExpandedAsync expand', this.state)
+      this.setState({ expanded: true, pin: this.state.maint ? 'maintenance' : 'initWizard' })
     } else {
       this.setState({ vexpand: false })
       await Promise.delay(duration)
@@ -303,7 +307,7 @@ class Login extends StateUp(React.Component) {
     }
 
     const status = this.props.selectedDevice.systemStatus()
-    // debug('footer', status, this.props.selectedDevice)
+    debug('footer', status, this.props.selectedDevice, this.state)
 
     if (this.state.pin === 'initWizard' || status === 'uninitialized') {
       const { hexpand, vexpand, expanded } = this.state
@@ -324,28 +328,13 @@ class Login extends StateUp(React.Component) {
         return (
           <div style={boxStyle}>
             <div>该设备尚未初始化</div>
-            <FlatButton label="初始化" onTouchTap={this.toggleExpanded} />
+            <FlatButton label="初始化" onTouchTap={() => this.toggleExpanded()} />
           </div>
         )
       }
       return null
     }
 
-    if (status === 'ready') {
-      const users = this.props.selectedDevice.users.value()
-      const style = { width: '100%', transition: 'all 300ms', position: 'relative' }
-
-      if (users.length > 0) {
-        return (
-          <UserBox
-            style={style}
-            device={this.props.selectedDevice}
-            toggleDisplay={this.toggleDisplay}
-            done={this.done.bind(this)}
-          />
-        )
-      }
-    }
 
     let text
     let busy
@@ -394,15 +383,7 @@ class Login extends StateUp(React.Component) {
         break
     }
 
-    if (busy) {
-      return (
-        <div style={Object.assign({}, boxStyle, { paddingLeft: 16, justifyContent: 'start' })}>
-          <CircularProgress style={{ flexBasis: 32 }} size={28} />
-          <div style={{ flexBasis: 16 }} />
-          <div>{text}</div>
-        </div>
-      )
-    } else if (maint) {
+    if (maint || this.state.pin === 'maintenance') {
       const { hexpand, vexpand, expanded } = this.state
 
       if (this.state.maint) {
@@ -413,28 +394,13 @@ class Login extends StateUp(React.Component) {
             toggleExpanded={this.toggleExpanded}
             device={this.props.selectedDevice}
             refresh={this.refresh}
+            OKAndLogin={this.initWizardOnOKBound}
             enterMaint={() => this.done('maintenance')}
           />
         )
       }
 
       if (hexpand === vexpand && vexpand === expanded) {
-        /*
-        if (expanded) {
-          return (
-            <div>
-              <MaintGuide
-                toggleMaint={this.toggleMaint}
-              />
-              <div style={boxStyle}>
-                <div>{text}</div>
-                <FlatButton label="维护模式" onTouchTap={() => this.done('maintenance')} />
-              </div>
-            </div>
-          )
-        }
-        */
-
         return (
           <div style={boxStyle}>
             <div>{text}</div>
@@ -444,6 +410,28 @@ class Login extends StateUp(React.Component) {
       }
 
       return null
+    } else if (status === 'ready') {
+      const users = this.props.selectedDevice.users.value()
+      const style = { width: '100%', transition: 'all 300ms', position: 'relative' }
+
+      if (users.length > 0) {
+        return (
+          <UserBox
+            style={style}
+            device={this.props.selectedDevice}
+            toggleDisplay={this.toggleDisplay}
+            done={this.done.bind(this)}
+          />
+        )
+      }
+    } else if (busy) {
+      return (
+        <div style={Object.assign({}, boxStyle, { paddingLeft: 16, justifyContent: 'start' })}>
+          <CircularProgress style={{ flexBasis: 32 }} size={28} />
+          <div style={{ flexBasis: 16 }} />
+          <div>{text}</div>
+        </div>
+      )
     } else if (noUser) {
       if (!this.state.compact) {
         return (

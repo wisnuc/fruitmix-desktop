@@ -239,7 +239,7 @@ class Device extends RequestManager {
     const uuid = await this.requestAsync('mkfs', { target, mode })
     console.log('device initWizard:  mkfs returns uuid', uuid)
 
-    await this.requestAsync('storage', null)
+    // await this.requestAsync('storage', null) // FIXME can't finish ???
     console.log('device initWizard: storage refreshed')
 
     await this.requestAsync('install', { current: uuid.uuid })
@@ -389,7 +389,7 @@ class Device extends RequestManager {
       return 'failLast'
     } else if (boot.error === 'ENOALT') {
       const { volumes } = this.storage.value()
-      if (volumes.length === 0 && boot.last === null) { return 'uninitialized' }
+      if (volumes.length === 0) { return 'uninitialized' }
       return 'failNoAlt'
     }
 

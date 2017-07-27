@@ -47,8 +47,7 @@ class Home extends Base {
       rename: false,
       delete: false,
       move: false,
-      copy: false,
-      detailIndex: -1
+      copy: false
     }
 
     /* handle update sortType */
@@ -67,7 +66,7 @@ class Home extends Base {
       const dirPath = this.state.path
       const dirUUID = dirPath[dirPath.length - 1].uuid
       const driveUUID = dirPath[0].uuid
-      // console.log(dirUUID, type)
+      console.log(dirPath, driveUUID, dirUUID, type)
       ipcRenderer.send('UPLOAD', { dirUUID, driveUUID, type })
     }
 
@@ -84,7 +83,7 @@ class Home extends Base {
         else if (obj.type === 'file') files.push(obj)
       })
 
-      ipcRenderer.send('DOWNLOAD', { folders, files, dirUUID: path[path.length - 1].uuid })
+      ipcRenderer.send('DOWNLOAD', { folders, files, dirUUID: path[path.length - 1].uuid, driveUUID: path[0].uuid })
     }
 
     this.delete = () => {
@@ -146,10 +145,6 @@ class Home extends Base {
       this.ctx.props.apis.request('listNavDir', { driveUUID: rUUID, dirUUID: dUUID })
     }
 
-    this.updateDetail = (index) => {
-      this.setState({ detailIndex: index })
-    }
-
     this.showContextMenu = (clientX, clientY) => {
       if (this.select.state.ctrl || this.select.state.shift) return
       const containerDom = document.getElementById('content-container')
@@ -192,7 +187,7 @@ class Home extends Base {
       console.log(obj, this.state.path)
       if (!this.state.path.length) return
       if (obj.uuid === this.state.path[this.state.path.length - 1].uuid) {
-        this.ctx.openSnackBar(obj.message)
+        // this.ctx.openSnackBar(obj.message)
         this.refresh()
       }
     })
@@ -322,7 +317,7 @@ class Home extends Base {
     return (
       <div style={style}>
         <IconButton onTouchTap={() => this.toggleDialog('gridView')} tooltip={this.state.gridView ? '列表视图' : '网格视图'}>
-          { this.state.gridView ? <GridIcon color="#FFF" /> : <ListIcon color="#FFF" /> }
+          { this.state.gridView ? <ListIcon color="#FFF" /> : <GridIcon color="#FFF" /> }
         </IconButton>
         <IconButton onTouchTap={() => this.toggleDialog('createNewFolder')} tooltip="新建文件夹">
           <FileCreateNewFolder color="#FFF" />
@@ -338,7 +333,8 @@ class Home extends Base {
         {
           this.state.entries.length ?
             <FileDetail
-              detailFile={this.state.entries[this.state.detailIndex]}
+              detailIndex={this.select.state.selected}
+              entries={this.state.entries}
               path={this.state.path}
               ipcRenderer={ipcRenderer}
               primaryColor={this.groupPrimaryColor()}
@@ -427,7 +423,7 @@ class Home extends Base {
               </div>
             </div>
           }
-        </DialogOverlay>)
+        </DialogOverlay>
       </div>
     )
   }
@@ -444,7 +440,6 @@ class Home extends Base {
           entries={this.state.entries}
           listNavBySelect={this.listNavBySelect}
           showContextMenu={this.showContextMenu}
-          updateDetail={this.updateDetail}
           setAnimation={this.setAnimation}
           ipcRenderer={ipcRenderer}
           download={this.download}

@@ -31,7 +31,7 @@ class Checkmark extends React.Component {
 
     var ctx = canvas.getContext('2d');
     ctx.lineWidth = width;
-    ctx.strokeStyle = this.props.color || 'rgba(0, 150, 0, 1)'
+    ctx.strokeStyle = this.props.color || '#009688'
 
     for (var i = start; i < mid; i++) {
         var drawLeft = window.setTimeout(function () {

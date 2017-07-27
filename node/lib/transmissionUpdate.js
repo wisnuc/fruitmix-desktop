@@ -31,6 +31,7 @@ const sendInfor = () => {
   const userTasks = quickSort(concatUserTasks, 'createTime')
   const finishTasks = quickSort(concatFinishTasks, 'finishDate')
 
+  /* send message when all tasks finished */
   if (preTasks !== 0 && userTasks.length === 0) {
     getMainWindow().webContents.send('snackbarMessage', { message: '文件传输任务完成' })
   }

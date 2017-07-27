@@ -13,6 +13,7 @@ import FileUploadButton from '../file/FileUploadButton'
 import ContextMenu from '../common/ContextMenu'
 import sortByType from '../common/sort'
 import { BreadCrumbItem, BreadCrumbSeparator } from '../common/BreadCrumb'
+import FlatButton from '../common/FlatButton'
 
 const debug = Debug('component:viewModel:public: ')
 
@@ -73,7 +74,7 @@ class Public extends Home {
       this.setState({ drives: data, path, entries, select, inRoot: true })
     } else {
       if (data === this.state.listNavDir && !this.force) return
-      path = [{ name: '共享文件夹', uuid: this.rootDrive.uuid, type: 'publicRoot' }, ...data.path]
+      path = [{ name: '共享文件夹', uuid: this.rootDrive.uuid, type: 'publicRoot' }, ...data.path] // important !!
       path[1].name = this.rootDrive.name
       entries = data.entries
 
@@ -193,9 +194,37 @@ class Public extends Home {
     )
   }
 
-  renderContent({ toggleDetail, openSnackBar }) {
+  renderNoPublic(navTo) {
+    return (
+      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
+        <div
+          style={{
+            width: 360,
+            height: 360,
+            borderRadius: '180px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            backgroundColor: '#FAFAFA'
+          }}
+        >
+          <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.27)', height: 56 }}> { '尚未建立共享文件夹' } </div>
+          <FlatButton label="去创建" primary onTouchTap={() => navTo('adminDrives')} />
+        </div>
+      </div>
+    )
+  }
+
+  renderContent({ navTo, toggleDetail, openSnackBar }) {
     // debug('renderContent', this.state)
-    if (!this.state.listNavDir && !this.state.drives) return (<div />)
+
+    /* loading data */
+    if (!this.state.listNavDir && !this.state.drives || !this.state.path.length) return (<div />)
+
+    /* no public drives */
+    if (this.state.path.length === 1 && !this.state.entries.length) return this.renderNoPublic(navTo)
+
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
 
@@ -207,7 +236,6 @@ class Public extends Home {
           entries={this.state.entries}
           listNavBySelect={this.listNavBySelect}
           showContextMenu={this.showContextMenu}
-          updateDetail={this.updateDetail}
           setAnimation={this.setAnimation}
           ipcRenderer={ipcRenderer}
           download={this.download}

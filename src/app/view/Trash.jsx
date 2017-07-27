@@ -76,7 +76,6 @@ class Trash extends Home {
           entries={this.state.entries}
           listNavBySelect={this.listNavBySelect}
           showContextMenu={this.showContextMenu}
-          updateDetail={this.updateDetail}
         />
 
         <ContextMenu

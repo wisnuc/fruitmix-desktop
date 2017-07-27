@@ -5,6 +5,7 @@ import { Step, Stepper, StepLabel, StepContent } from 'material-ui/Stepper'
 
 import UsernamePassword from './UsernamePassword'
 import CreatingVolumeDiskSelection from './CreatingVolumeDiskSelection'
+import Checkmark from '../common/Checkmark'
 import FlatButton from '../common/FlatButton'
 
 const StateUp = base => class extends base {
@@ -125,7 +126,7 @@ class InitWizard extends StateUp(React.Component) {
         <ul style={lineStyle}>
           { storage.blocks
               .filter(blk => this.state.volumeselect.selection.indexOf(blk.name) !== -1)
-              .map(blk => (<li>{this.blockToString(blk)}</li>)) }
+              .map(blk => (<li key={blk.name}>{this.blockToString(blk)}</li>)) }
         </ul>
         <div style={lineStyle}>模式：{this.state.volumeselect.mode} </div>
         <div style={lineStyle}>用户名：{this.state.userpass.username}</div>
@@ -135,6 +136,7 @@ class InitWizard extends StateUp(React.Component) {
 
   finishedInfo() {
     const { mkfs, storage, install, boot, users, firstUser, token } = this.props.device
+    console.log('this.props.device', this.props.device)
 
     if (!mkfs || mkfs.isPending()) {
       return ['busy', '创建文件系统']
@@ -184,6 +186,7 @@ class InitWizard extends StateUp(React.Component) {
       >
         <div style={{ flex: '0 0 48px' }}>
           { info[0] === 'busy' && <CircularProgress /> }
+          { info[0] === 'success' && <Checkmark delay={300} /> }
         </div>
         <div
           style={{ flex: '0 0 64px',

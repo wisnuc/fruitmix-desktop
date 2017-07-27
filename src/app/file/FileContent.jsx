@@ -1,6 +1,6 @@
 import React from 'react'
 import Debug from 'debug'
-import { ipcRenderer } from 'electron'
+import UploadIcon from 'material-ui/svg-icons/file/cloud-upload'
 import ContainerOverlay from './ContainerOverlay'
 import RenderListByRow from './RenderListByRow'
 import GridView from './GridView'
@@ -42,7 +42,6 @@ class FileContent extends React.Component {
 
       /* just touch */
       this.props.select.touchTap(button, index)
-      this.props.updateDetail(index)
 
       /* right click */
       if (button === 2) {
@@ -57,7 +56,6 @@ class FileContent extends React.Component {
       this.props.listNavBySelect()
       if (entry.type === 'file') {
         this.setState({ seqIndex: index, preview: true })
-        // ipcRenderer.send('OPEN_FILE', { file: entry, path: this.props.home.path })
       }
     }
 
@@ -74,12 +72,14 @@ class FileContent extends React.Component {
       const files = []
       for (const item of e.dataTransfer.files) files.push(item.path)
       const dir = this.props.home.path
-      const rUUID = this.props.home.path[0].uuid
-      ipcRenderer.send('DRAG_FILE', { files, dirUUID: dir[dir.length - 1].uuid })
+      const dirUUID = dir[dir.length - 1].uuid
+      const driveUUID = this.props.home.path[0].uuid
+      debug('drop files!!', files, dirUUID, driveUUID)
+      this.props.ipcRenderer.send('DRAG_FILE', { files, dirUUID, driveUUID })
     }
 
     this.openFile = (file) => {
-      ipcRenderer.send('OPEN_FILE', { file, path: this.props.home.path })
+      this.props.ipcRenderer.send('OPEN_FILE', { file, path: this.props.home.path })
     }
   }
 
@@ -95,8 +95,42 @@ class FileContent extends React.Component {
     document.removeEventListener('keyup', this.keyUp)
   }
 
+  renderNoFile() {
+    return (
+      <div
+        style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        onDrop={this.drop}
+      >
+        <div
+          style={{
+            width: 360,
+            height: 360,
+            borderRadius: '180px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            backgroundColor: '#FAFAFA'
+          }}
+        >
+          <UploadIcon style={{ height: 64, width: 64, color: 'rgba(0,0,0,0.27)' }} />
+          <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.27)' }}> { '将文件拖到此处' } </div>
+          <div style={{ color: 'rgba(0,0,0,0.27)' }}> { '或点击上传按钮' } </div>
+        </div>
+      </div>
+    )
+  }
+
   render() {
     debug('render FileContent', this.props, this.state)
+
+    /* not get list yet */
+    if (!this.props.home.path.length) return (<div />)
+
+    /* dir is empty */
+    if (this.props.entries && !this.props.entries.length) return this.renderNoFile()
+
+    /* got list */
     return (
       <div style={{ width: '100%', height: '100%' }}>
         {/* render list */}
@@ -108,7 +142,7 @@ class FileContent extends React.Component {
               onRowMouseEnter={this.onRowMouseEnter}
               onRowMouseLeave={this.onRowMouseLeave}
               onRowDoubleClick={this.onRowDoubleClick}
-              drop={this.props.drop}
+              drop={this.drop}
             />
             :
             <RenderListByRow
@@ -117,7 +151,7 @@ class FileContent extends React.Component {
               onRowMouseEnter={this.onRowMouseEnter}
               onRowMouseLeave={this.onRowMouseLeave}
               onRowDoubleClick={this.onRowDoubleClick}
-              drop={this.props.drop}
+              drop={this.drop}
             />
         }
 

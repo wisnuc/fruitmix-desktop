@@ -7,7 +7,7 @@ import child_process from 'child_process'
 import request from 'request'
 import uuid from 'node-uuid'
 
-import { serverGetAsync } from './server'
+import { serverGetAsync, uploadFileWithStream, createFold } from './server'
 import store from '../serve/store/store'
 import { getMainWindow } from './window'
 import utils from './util'
@@ -55,12 +55,12 @@ const sendMessage = () => {
   }
 }
 
-const createTask = (abspath, target, type, newWork, u, r, rootNodeUUID, ct) => {
+const createTask = (abspath, target, type, newWork, u, r, rootNodeUUID, ct, driveUUID) => {
   initArgs()
   const taskUUID = u || uuid.v4()
   const uploadingList = r || []
   const createTime = ct || (new Date()).getTime()
-  const task = new TaskManager(taskUUID, abspath, target, type, createTime, newWork, uploadingList, rootNodeUUID)
+  const task = new TaskManager(taskUUID, abspath, target, type, createTime, newWork, uploadingList, rootNodeUUID, driveUUID)
   task.createStore()
   userTasks.push(task)
   task.readyToVisit()
@@ -79,7 +79,7 @@ const createTask = (abspath, target, type, newWork, u, r, rootNodeUUID, ct) => {
   schedule(): schedule work list
 */
 class TaskManager {
-  constructor(uuid, abspath, target, type, createTime, newWork, uploadingList, rootNodeUUID) {
+  constructor(uuid, abspath, target, type, createTime, newWork, uploadingList, rootNodeUUID, driveUUID) {
     this.uuid = uuid
     this.abspath = abspath
     this.target = target
@@ -88,6 +88,7 @@ class TaskManager {
     this.name = path.basename(abspath)
     this.newWork = newWork
     this.rootNodeUUID = rootNodeUUID || null
+    this.driveUUID = driveUUID 
     this.trsType = 'upload'
 
     this.size = 0// not need rootsize for visit
@@ -229,7 +230,10 @@ class TaskManager {
   async checkNameExist() {
     const _this = this
     try {
-      const list = await serverGetAsync(`files/fruitmix/list/${this.target}/${this.target}`)
+      // console.log('检查名字', this.target)
+      // console.log('this.driveUUID', this.driveUUID)
+      const listNav = await serverGetAsync(`drives/${this.driveUUID}/dirs/${this.target}`)
+      const list = listNav.entries
       let name = _this.tree[0].name
       let times = 0
 
@@ -292,12 +296,12 @@ class TaskManager {
   }
 
   uploadSchedule() {
-    console.log('')
-    console.log('上传调度...')
+    // console.log('')
+    // console.log('上传调度...')
     if (this.finishCount === this.worklist.length) return this.recordInfor('文件全部上传结束')
     if (this.uploading.length >= 2) return this.recordInfor('任务上传队列已满')
     if (this.fileIndex === this.worklist.length) return this.recordInfor('所有文件上传调度完成')
-    this.recordInfor(`正在调度第 ${this.fileIndex + 1} 个文件,总共 ${this.worklist.length} 个 : ${this.worklist[this.fileIndex].name}`)
+    // this.recordInfor(`正在调度第 ${this.fileIndex + 1} 个文件,总共 ${this.worklist.length} 个 : ${this.worklist[this.fileIndex].name}`)
 
     const _this = this
     const obj = this.worklist[this.fileIndex]
@@ -308,14 +312,14 @@ class TaskManager {
       return
     }
     if (obj.target === '') {
-      this.recordInfor('当前文件父文件夹正在创建，缺少目标，等待...')
+      // this.recordInfor('当前文件父文件夹正在创建，缺少目标，等待...')
       return
     } else if (obj.type === 'file' && obj.sha === '') {
       this.recordInfor('当前文件HASH尚未计算，等待...')
       return
     }
 
-    const stateMachine = obj.type == 'folder' ? createFolderSTM : UploadFileSTM
+    const stateMachine = obj.type === 'folder' ? createFolderSTM : UploadFileSTM
     obj.setState(stateMachine)
     this.uploading.push(obj)
     this.fileIndex += 1
@@ -331,7 +335,7 @@ class TaskManager {
       this.finishDate = utils.formatDate()
       userTasks.splice(userTasks.indexOf(this), 1)
       finishTasks.unshift(this)
-      // getMainWindow().webContents.send('driveListUpdate', Object.assign({}, { uuid: this.target, message: '上传成功' }))
+      getMainWindow().webContents.send('driveListUpdate', Object.assign({}, { uuid: this.target, message: '上传成功' }))
       sendMessage()
       return this.finishStore()
     } return this.uploadSchedule()
@@ -622,8 +626,12 @@ class HashSTM extends STM {
       const child = child_process.fork(path.join(__dirname, 'filehash'), [], options)
       child.on('message', (obj) => {
         // console.log('hash message' , obj)
-        wrapper.sha = obj.hash
+        wrapper.sha = obj.parts[obj.parts.length - 1].fingerprint
         wrapper.parts = obj.parts
+        // console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<hashing')
+        // console.log(wrapper)
+        // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>hashing')
+        // return null
         removeOutOfHashingQueue(this)
         wrapper.hashFinish()
       })
@@ -640,6 +648,7 @@ class HashSTM extends STM {
   }
 }
 
+/* create Foloder */
 class createFolderSTM extends STM {
   constructor(wrapper) {
     super(wrapper)
@@ -655,33 +664,32 @@ class createFolderSTM extends STM {
     this.wrapper.stateName = 'uploading'
     removeOutOfReadyQueue(this)
     addToRunningQueue(this)
-    console.log(`创建文件夹的目标文件夹是：${this.wrapper.target}`)
-    const options = {
-      url: `${server}/files/fruitmix/mkdir/${this.wrapper.target}`,
-      method: 'post',
-      headers: {
-        Authorization: `${tokenObj.type} ${tokenObj.token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ dirname: this.wrapper.name })
-    }
 
+    console.log(`创建文件夹的目标文件夹是：${this.wrapper.target}`)
     this.wrapper.recordInfor(`${this.wrapper.name} 开始创建...`)
-    this.handle = request(options, (err, res, body) => {
-      if (err || res.statusCode !== 200) {
-        // todo
+
+    const data = this.wrapper.manager
+    createFold(data.driveUUID, this.wrapper.target, this.wrapper.name, (error, entries) => {
+      if (error) {
         this.wrapper.recordInfor(`${this.wrapper.name} 创建失败`)
-        console.log(err, res.statusCode)
+        console.log('error:', error)
       } else {
+        console.log(`${this.wrapper.name} 创建成功`)
         removeOutOfRunningQueue(this)
-        this.wrapper.uuid = JSON.parse(body)
-        this.wrapper.children.forEach(item => item.target = this.wrapper.uuid)
+        // console.log(entries)
+        this.wrapper.uuid = entries.find(entry => entry.name === this.wrapper.name).uuid
+        // console.log(this.wrapper.uuid)
+        this.wrapper.children.forEach(item => (item.target = this.wrapper.uuid))
+        getMainWindow().webContents.send('driveListUpdate',
+          Object.assign({}, { uuid: this.wrapper.target, message: '创建文件夹成功' })
+        )
         return this.wrapper.uploadFinish()
       }
     })
   }
 }
 
+/* upload file */
 class UploadFileSTM extends STM {
   constructor(wrapper) {
     super(wrapper)
@@ -708,140 +716,60 @@ class UploadFileSTM extends STM {
     return this.createUploadTask()
   }
 
-  uploadWholeFile() {
-    const _this = this
-    const transform = new stream.Transform({
-      transform(chunk, encoding, next) {
-        _this.partFinishSize += chunk.length
-        _this.wrapper.manager.completeSize += chunk.length
-        this.push(chunk)
-        next()
-      }
-    })
-
-    const tempStream = fs.createReadStream(this.wrapper.abspath).pipe(transform)
-    const options = {
-      host: ip,
-      port: 3000,
-      headers: {
-        Authorization: `${tokenObj.type} ${tokenObj.token}`
-      },
-      method: 'PUT',
-      path: encodeURI(`/files/fruitmix/upload/${
-        this.wrapper.target}/${
-        this.wrapper.sha
-        }?filename=${this.wrapper.name}`
-      )
-    }
-
-    this.handle = http.request(options).on('error', (err) => {
-      console.log(err)
-    }).on('response', (res) => {
-      if (res.statusCode == 200) {
-        removeOutOfRunningQueue(this)
-        return this.wrapper.uploadFinish()
-      }
-    })
-
-    tempStream.pipe(this.handle)
-  }
-
   createUploadTask() {
-    const _this = this
-    const options = {
-      url: `${server}/filemap/${this.wrapper.target}`,
-      method: 'post',
-      headers: {
-        Authorization: `${tokenObj.type} ${tokenObj.token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        filename: this.wrapper.name,
-        size: this.wrapper.size,
-        segmentsize: this.wrapper.segmentsize,
-        sha256: this.wrapper.sha
-      })
-    }
-
-    request(options, (err, res, body) => {
-      if (err || res.statusCode !== 200) {
-        this.wrapper.recordInfor('创建上传任务失败，缺少对应API，上传整个文件')
-        console.log(err)
-        console.log(`任务创建的目标是：${this.wrapper.target}`)
-        return this.uploadWholeFile()
-      }
-      const b = JSON.parse(body)
-      console.log('上传任务创建成功')
-      _this.wrapper.taskid = b.taskid
-      this.uploadSegment()
-    })
+    return this.uploadSegment()
+    return this.uploadWholeFile()
+    this.wrapper.taskid = taskid //FIXME when part of file already upload
+    this.uploadSegment()
   }
 
+  /* update file by segment */
   uploadSegment() {
-    const _this = this
     const wrapper = this.wrapper
+    const data = wrapper.manager
+    const target = wrapper.target
     let seek = wrapper.seek
+    const name = wrapper.name
+    const part = wrapper.parts[seek]
 
-    const transform = new stream.Transform({
-      transform(chunk, encoding, next) {
-        _this.partFinishSize += chunk.length
-        _this.wrapper.manager.completeSize += chunk.length
-        this.push(chunk)
-        next()
+    console.log('开始上传第' + wrapper.seek + '块')
+    console.log('----------------------------------------------')
+    console.log(wrapper)
+    console.log('==============================================')
+
+    const readStream = fs.createReadStream(wrapper.abspath, { start: part.start, end: part.end, autoClose: true })
+    readStream.on('data', (chunk) => {
+      // console.log(`Received ${chunk.length} bytes of data.`)
+      this.partFinishSize += chunk.length
+      this.wrapper.manager.completeSize += chunk.length
+    })
+
+    uploadFileWithStream(data.driveUUID, target, name, part, readStream, (error) => {
+      if (error) { //FIXME
+        this.wrapper.manager.completeSize -= this.partFinishSize
+        this.partFinishSize = 0
+        console.log(`第${seek}块 ` + 'req : error', error)
+
+        /* retry ? */
+        wrapper.failedTimes += 1
+        wrapper.manager.completeSize -= (this.partFinishSize + wrapper.segmentsize * wrapper.seek)
+        this.partFinishSize = 0
+        seek = 0
+        if (wrapper.failedTimes < 5) return this.uploadSegment()
+        else if (wrapper.failedTimes < 6) return this.createUploadTask()
+        return console.log('failed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+
+      } else {
+        return this.partUploadFinish()
       }
     })
-
-    // console.log('开始上传第' + wrapper.seek + '块')
-    // console.log('----------------------------------------------')
-
-    const tempStream = fs.createReadStream(wrapper.abspath, { start: wrapper.parts[seek].start, end: wrapper.parts[seek].end, autoClose: true }).pipe(transform)
-
-    tempStream.on('error', (err) => {
-      console.log(`第${seek}块 ` + `stream: ${err}`)
-    })
-
-    const options = {
-      host: ip,
-      port: 3000,
-      headers: {
-        Authorization: `${tokenObj.type} ${tokenObj.token}`
-      },
-      method: 'PUT',
-      path: encodeURI(`/filemap/${wrapper.target}?filename=${wrapper.name
-        }&segmenthash=${wrapper.parts[seek].sha
-        }&start=${seek
-        }&taskid=${wrapper.taskid}`
-      )
-    }
-
-    this.handle = http.request(options).on('error', (err) => {
-      this.wrapper.manager.completeSize -= this.partFinishSize
-      this.partFinishSize = 0
-      console.log(`第${seek}块 ` + 'req : err', err)
-    }).on('response', (res) => {
-      // console.log('第' + seek +'块 ' + 'req : response')
-      if (res.statusCode == 200) return this.partUploadFinish()
-
-      console.log(`${res.statusCode} !!!!!!!!!!!!!!!!!!!`)
-      wrapper.failedTimes += 1
-      wrapper.manager.completeSize -= (this.partFinishSize + wrapper.segmentsize * wrapper.seek)
-      this.partFinishSize = 0
-      seek = 0
-      if (wrapper.failedTimes < 5) return this.uploadSegment()
-      else if (wrapper.failedTimes < 6) return this.createUploadTask()
-      return console.log('failed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-    }).on('abort', () => {
-      console.log(`第${seek}块 ` + 'req : abort')
-    })
-
-    tempStream.pipe(this.handle)
   }
 
   partUploadFinish() {
     this.wrapper.seek += 1
     this.partFinishSize = 0
     this.wrapper.manager.updateStore()
-    if (this.wrapper.seek == this.wrapper.parts.length) {
+    if (this.wrapper.seek === this.wrapper.parts.length) {
       removeOutOfRunningQueue(this)
       return this.wrapper.uploadFinish()
     } this.uploadSegment()

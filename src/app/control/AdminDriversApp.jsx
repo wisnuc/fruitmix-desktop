@@ -111,10 +111,33 @@ class AdminDrives extends React.Component {
     }
   }
 
+  renderNoDrive() {
+    return (
+      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
+        <div
+          style={{
+            width: 360,
+            height: 360,
+            borderRadius: '180px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            backgroundColor: '#FAFAFA'
+          }}
+        >
+          <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.27)' }}> { '尚未建立共享文件夹' } </div>
+          <div style={{ color: 'rgba(0,0,0,0.27)' }}> { '请点击左上按钮创建' } </div>
+        </div>
+      </div>
+    )
+  }
+
   render() {
     const { users, drives, apis, refreshDrives, updateDetail, navTo, showContextMenu, openSnackBar } = this.props
     debug('AdminDrivesAdminDrivesAdminDrives', this.props)
-    if (!users || !drives) return <div />
+    if (!users || !drives) return (<div />)
+    const publicDrives = drives.filter(drive => drive.type === 'public')
 
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -127,23 +150,27 @@ class AdminDrives extends React.Component {
           <ContentAdd />
         </FloatingActionButton>
 
-        <div style={{ overflow: 'auto', height: '100%', maxWidth: '100%' }}>
-          <DriveHeader />
-          <div style={{ height: 8 }} />
-          <Divider style={{ marginLeft: 104 }} />
-          {
-            drives.filter(drive => drive.type === 'public').map(drive =>
-              [<DriveRow
-                drive={drive}
-                users={users}
-                updateDetail={updateDetail}
-                navTo={navTo}
-                showContextMenu={showContextMenu}
-              />,
-                <Divider style={{ marginLeft: 104 }} />]
-            )
-          }
-        </div>
+        {
+          publicDrives.length ?
+            <div style={{ overflow: 'auto', height: '100%', maxWidth: '100%' }}>
+              <DriveHeader />
+              <div style={{ height: 8 }} />
+              <Divider style={{ marginLeft: 104 }} />
+              {
+                publicDrives.map(drive =>
+                  [<DriveRow
+                    drive={drive}
+                    users={users}
+                    updateDetail={updateDetail}
+                    navTo={navTo}
+                    showContextMenu={showContextMenu}
+                  />,
+                    <Divider style={{ marginLeft: 104 }} />]
+                )
+              }
+            </div>
+            : this.renderNoDrive()
+        }
         <DialogOverlay open={!!this.state.newDrive} onRequestClose={this.onCloseDialog}>
           {
             this.state.newDrive && <NewDriveDialog

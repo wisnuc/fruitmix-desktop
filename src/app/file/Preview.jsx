@@ -363,6 +363,23 @@ class PreviewInline extends React.Component {
     )
   }
 
+  renderText() {
+    return (
+      <div style={{ height: '100%', width: '60%' }}>
+        <div style={{ height: 64 }} />
+        <div style={{ height: 'calc(100% - 64px)', width: '100%', backgroundColor: '#FFFFFF' }}>
+          <iframe
+            src="/home/lxw/Desktop/api.md"
+            seamless
+            width="100%"
+            height="100%"
+            frameBorder={0}
+          />
+        </div>
+      </div>
+    )
+  }
+
   renderOtherFiles() {
     debug('this.props renderOtherFiles', this.props)
     return (
@@ -403,6 +420,10 @@ class PreviewInline extends React.Component {
   }
 
   render() {
+    const extension = this.props.item.name.replace(/^.*\./, '').toUpperCase()
+    const textExtension = ['TXT', 'MD', 'JS', 'JSX', 'HTML']
+
+    const isText = textExtension.findIndex(t => t === extension)
     return (
       <div
         ref={ref => (this.refBackground = ref)}

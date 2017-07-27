@@ -127,26 +127,26 @@ class Row extends React.PureComponent {
     const { select, list, primaryColor, sortType, changeSortType } = this.props
 
     const headers = [
-      { title: '名称', width: 494, up: 'nameUp', down: 'nameDown' },
-      { title: '修改时间', width: 160, up: 'timeUp', down: 'timeDown' },
-      { title: '文件大小', width: 160, up: 'sizeUp', down: 'sizeDown' }
+      { title: '名称', up: 'nameUp', down: 'nameDown' },
+      { title: '修改时间', up: 'timeUp', down: 'timeDown' },
+      { title: '文件大小', up: 'sizeUp', down: 'sizeDown' }
     ]
-    const h = headers[0]
+    const h = headers.find(header => header.title === this.state.type) || headers[0]
 
-    // debug('render row this.props', this.props)
+    debug('sortType', sortType)
     return (
-      <div style={{ height: '100%', width: '100%', marginLeft: 24 }} >
+      <div style={{ height: '100%', width: '100%', marginLeft: 52 }} >
         {/* header */}
         {
           list.first &&
             <div style={{ height: 40, display: 'flex', alignItems: 'center ', marginBottom: 8 }}>
-              <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.54)' }}>
+              <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.54)', width: 64 }}>
                 { list.entries[0].entry.type === 'directory' ? '文件夹' : '文件' }
               </div>
               <div style={{ flexGrow: 1 }} />
               {
                 !list.entries[0].index &&
-                  <div style={{ display: 'flex', alignItems: 'center ', marginRight: 48 }}>
+                  <div style={{ display: 'flex', alignItems: 'center ', marginRight: 84 }}>
                     <FlatButton
                       label={this.state.type}
                       labelStyle={{ fontSize: 14, color: 'rgba(0,0,0,0.54)' }}
@@ -224,25 +224,35 @@ class Row extends React.PureComponent {
                       height: 48,
                       display: 'flex',
                       alignItems: 'center',
+                      color: selected ? 'rgba(255,255,255,0.87)' : 'rgba(0,0,0,0.72)',
                       backgroundColor: selected ? primaryColor : '#FFFFFF'
                     }}
                   >
                     {/* file type may be: folder, public, directory, file, unsupported */}
-                    <div style={{ width: 48, display: 'flex', alignItems: 'center', marginLeft: 8 }}>
-                      <Avatar style={{ backgroundColor: 'white' }}>
+                    <div style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', margin: 12 }}>
+                      <Avatar style={{ backgroundColor: 'white', width: 30, height: 30 }}>
                         {
                         entry.type === 'folder' || entry.type === 'public' || entry.type === 'directory'
-                        ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 16, height: 16 }} />
+                        ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
                         : entry.type === 'file'
-                        ? renderFileIcon(entry.name, entry.metadata, 16)
-                        : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)', width: 16, height: 16 }} />
+                        ? renderFileIcon(entry.name, entry.metadata, 24)
+                        : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
                       }
                       </Avatar>
                     </div>
-                    <div style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', fontSize: 14, flexGrow: 1 }} >
+                    <div
+                      style={{
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap',
+                        textOverflow: 'ellipsis',
+                        fontSize: 13,
+                        width: 114,
+                        marginRight: 12,
+                        fontWeight: 500
+                      }}
+                    >
                       { entry.name }
                     </div>
-                    <div style={{ width: 24 }} />
                   </div>
                 </div>
               )
@@ -272,7 +282,7 @@ class GridView extends React.Component {
 
   render() {
     const calcGridInfo = (height, width, entries) => {
-      const MAX = Math.floor((width - 24) / 200) - 1
+      const MAX = Math.floor((width - 52) / 200) - 1
       let MaxItem = 0
       let lineIndex = 0
       let lastType = 'diriectory'

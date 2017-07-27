@@ -23,7 +23,7 @@ class RenameDialog extends React.PureComponent {
         driveUUID: path[0].uuid,
         dirUUID: curr.uuid,
         entryUUID: entries[select.selected[0]].uuid,
-        newName: this.state.value
+        dirname: this.state.value
       }
       console.log('renameDirOrFile', this.props, args)
       apis.request('renameDirOrFile', args, (err, data) => {

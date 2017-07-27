@@ -5,6 +5,7 @@ import prettysize from 'prettysize'
 import { CircularProgress, Divider } from 'material-ui'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
+import ContentCopy from 'material-ui/svg-icons/content/content-copy'
 import PhotoIcon from 'material-ui/svg-icons/image/photo'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import { TXTIcon, WORDIcon, EXCELIcon, PPTIcon, PDFIcon } from '../common/Svg'
@@ -196,11 +197,72 @@ class FileDetail extends React.PureComponent {
     )
   }
 
+  renderMultiFiles(detailFile) {
+    let size = 0
+    const noSize = detailFile.findIndex(f => f.size === undefined) > -1
+    if (!noSize) detailFile.forEach(f => (size += f.size))
+    // debug('renderMultiFiles', detailFile, noSize, size)
+    const Titles = [
+      '位置',
+      noSize ? '' : '总计大小'
+    ]
+
+    const Values = [
+      getPath(this.props.path),
+      prettysize(size)
+    ]
+
+    return (
+      <div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
+        <div style={{ height: 128, backgroundColor: this.props.primaryColor, filter: 'brightness(0.9)' }}>
+          <div style={{ height: 64 }} />
+          {/* header */}
+          <div style={{ height: 64, marginLeft: 24 }} >
+            <div style={{ height: 16 }} />
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                height: 32,
+                fontSize: 20,
+                fontWeight: 500,
+                color: '#FFFFFF'
+              }}
+            >
+              <div style={{ flex: '0 0 24px', display: 'flex', alignItems: 'center' }}>
+                <ContentCopy style={{ color: '#FFFFFF' }} />
+              </div>
+              <div style={{ flex: '0 0 16px' }} />
+              <div style={{ flexGrow: 1 }}>
+                { `您选择了${detailFile.length}项` }
+              </div>
+              <div style={{ flex: '0 0 24px' }} />
+            </div>
+          </div>
+        </div>
+
+        {/* data */}
+        <div style={{ width: 312, padding: 24, display: 'flex', flexDirection: 'column' }}>
+          { this.renderList(Titles, Values) }
+        </div>
+      </div>
+    )
+  }
 
   render() {
-    const { detailFile, path, primaryColor } = this.props
+    const { detailIndex, entries, path, primaryColor } = this.props
+    if (!detailIndex || !entries || !detailIndex.length) {
+      return (<div style={{ height: 128, backgroundColor: primaryColor, filter: 'brightness(0.9)' }} />)
+    }
+
+    let detailFile // object or array of object
+    if (detailIndex.length === 1) {
+      detailFile = entries[detailIndex]
+    } else {
+      detailFile = detailIndex.map(i => entries[i])
+      return this.renderMultiFiles(detailFile)
+    }
     // debug('detailFile', detailFile, this.state)
-    if (!detailFile) return <div style={{ height: 128, backgroundColor: primaryColor, filter: 'brightness(0.9)' }} />
 
     const { metadata, digest } = detailFile
     let exifDateTime = ''

@@ -47,10 +47,6 @@ class MaintGuide extends React.Component {
       })
     }
 
-    this.done = () => {
-      debug('done')
-    }
-
     this.toggleAction = () => {
       this.setState({ action: !this.state.action })
     }
@@ -158,41 +154,21 @@ class MaintGuide extends React.Component {
   }
 
   renderActions() {
-    const diskLabels = [
-      'Raid1恢复',
-      '增加磁盘',
-      '删减磁盘',
-      '更换磁盘'
-    ]
+    const diskLabels = ['Raid1恢复', '增加磁盘', '删减磁盘', '更换磁盘']
+    const diskFuncs = [this.recoverRaid1, this.addDisk, this.deleteDisk, this.replaceDisk]
+    const diskDisable = [true, true, true, true]
 
-    const diskFuncs = [
-      this.recoverRaid1,
-      this.addDisk,
-      this.deleteDisk,
-      this.replaceDisk
-    ]
+    const wisnucLabels = ['用户信息备份与恢复', '重新安装WISNUC', '导出磁盘数据', '找回数据', '强制启动']
+    const wisnucFuncs = [this.backup, this.reinstall, this.exportData, this.recoverData, this.forceBoot]
+    const wisnucDisable = [true, false, true, true, false]
 
-    const wisnucLabels = [
-      '用户信息备份与恢复',
-      '重新安装WISNUC',
-      '导出磁盘数据',
-      '找回数据',
-      '强制启动'
-    ]
-    const wisnucFuncs = [
-      this.backup,
-      this.reinstall,
-      this.exportData,
-      this.recoverData,
-      this.forceBoot
-    ]
-
-    const action = (label, func) => (
-      <div style={{ height: 56, display: 'flex', alignItems: 'center' }}>
+    const action = (label, func, disabled) => (
+      <div style={{ height: 56, display: 'flex', alignItems: 'center' }} key={label}>
         <FlatButton
           label={label}
           onTouchTap={func}
           style={{ marginLeft: -8 }}
+          disabled={disabled}
           primary
         />
       </div>
@@ -204,13 +180,13 @@ class MaintGuide extends React.Component {
           <div style={{ height: 56, display: 'flex', alignItems: 'center' }}>
             { '磁盘与卷管理' }
           </div>
-          { diskLabels.map((label, index) => action(label, diskFuncs[index])) }
+          { diskLabels.map((label, index) => action(label, diskFuncs[index], diskDisable[index])) }
         </div>
         <div style={{ marginLeft: 96 }}>
           <div style={{ height: 56, display: 'flex', alignItems: 'center' }}>
             { 'WISNUC系统管理' }
           </div>
-          { wisnucLabels.map((label, index) => action(label, wisnucFuncs[index])) }
+          { wisnucLabels.map((label, index) => action(label, wisnucFuncs[index], wisnucDisable[index])) }
         </div>
       </div>
     )
@@ -227,24 +203,11 @@ class MaintGuide extends React.Component {
         showContent
         onCancel={this.backToVolumeCard}
         onFail={this.backToVolumeCard}
-        onOK={this.done}
+        onOK={this.props.OKAndLogin}
         title="重新安装向导"
       />
     )
   }
-
-    /*
-        <div style={{ minHeight: 512, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ flexGrow: 1 }} />
-          <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-            <FlatButton
-              label="返回"
-              onTouchTap={this.backToVolumeCard}
-              primary
-            />
-          </div>
-        </div>
-    */
 
   render() {
     debug('render!', this.props, this.state)

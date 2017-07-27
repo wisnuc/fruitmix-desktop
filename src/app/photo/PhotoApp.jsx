@@ -7,6 +7,7 @@ import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import DeleteIcon from 'material-ui/svg-icons/action/delete'
 import VisibilityOff from 'material-ui/svg-icons/action/visibility-off'
 import DownloadIcon from 'material-ui/svg-icons/file/file-download'
+import UploadIcon from 'material-ui/svg-icons/file/cloud-upload'
 import DialogOverlay from '../common/DialogOverlay'
 import FlatButton from '../common/FlatButton'
 
@@ -69,6 +70,29 @@ class PhotoApp extends React.Component {
     document.removeEventListener('keyup', this.keyChange)
   }
 
+  renderNoMedia() {
+    return (
+      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
+        <div
+          style={{
+            width: 360,
+            height: 360,
+            borderRadius: '180px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            backgroundColor: '#FAFAFA'
+          }}
+        >
+          {/* <UploadIcon style={{ height: 64, width: 64, color: 'rgba(0,0,0,0.27)' }} /> */}
+          <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.27)', height: 56 }}> { '没有照片或视频' } </div>
+          <div style={{ color: 'rgba(0,0,0,0.27)' }}> { '请点击上传按钮' } </div>
+        </div>
+      </div>
+    )
+  }
+
   render() {
     // debug('PhotoApp, this.props', this.props)
     return (
@@ -116,16 +140,7 @@ class PhotoApp extends React.Component {
                 shiftStatus={this.props.shiftStatus}
                 headerHeight={66}
               /> :
-              <div
-                style={{
-                  position: 'relative',
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >没有照片！</div>
+              this.renderNoMedia()
         }
 
         {/* PhotoDetail */}
