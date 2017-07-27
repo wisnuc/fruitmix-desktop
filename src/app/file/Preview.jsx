@@ -77,6 +77,30 @@ class PreviewInline extends React.Component {
       this.props.ipcRenderer.send('OPEN_FILE', { file: this.props.item, path: this.rootPath })
     }
 
+    this.downloadSuccess = (event, session, path) => {
+      if (this.session === session) {
+        console.log('this.downloadSuccess', path)
+        this.setState({ filePath: path })
+      }
+    }
+
+    this.startDownload = () => {
+      this.session = UUID.v4()
+      // debug('this.startDownload', this.state, this.props)
+      const driveUUID = this.props.path[0].uuid
+      const dirUUID = this.props.path[this.props.path.length - 1].uuid
+      const entryUUID = this.props.item.uuid
+      const fileName = this.props.item.name
+      this.props.ipcRenderer.send('TEMP_DOWNLOADING', {
+        session: this.session,
+        driveUUID,
+        dirUUID,
+        entryUUID,
+        fileName
+      })
+      this.props.ipcRenderer.on('TEMP_DOWNLOAD_SUCCESS', this.downloadSuccess)
+    }
+
     /* change image */
     this.request = () => {
       /* get current image */
@@ -126,7 +150,6 @@ class PreviewInline extends React.Component {
       if (this.refDetailImage && this.refDetailImage.style.zoom > 1) {
         this.refBackground.style.cursor = 'default'
         if (this.state.direction !== null) this.setState({ direction: null })
-        return
       }
 
       const { x, y } = mousePosition(ev)
@@ -269,7 +292,7 @@ class PreviewInline extends React.Component {
   }
 
   componentWillMount() {
-    this.request()
+    // this.request()
   }
 
   componentDidMount() {
@@ -364,20 +387,29 @@ class PreviewInline extends React.Component {
   }
 
   renderText() {
-    return (
-      <div style={{ height: '100%', width: '60%' }}>
-        <div style={{ height: 64 }} />
-        <div style={{ height: 'calc(100% - 64px)', width: '100%', backgroundColor: '#FFFFFF' }}>
-          <iframe
-            src="/home/lxw/Desktop/api.md"
-            seamless
-            width="100%"
-            height="100%"
-            frameBorder={0}
-          />
+    if (this.name === this.props.item.name && this.state.filePath) {
+      return (
+        <div style={{ height: '100%', width: '60%' }}>
+          <div style={{ height: 64 }} />
+          <div style={{ height: 'calc(100% - 64px)', width: '100%', backgroundColor: '#FFFFFF' }}>
+            <iframe
+              src={this.state.filePath}
+              seamless
+              width="100%"
+              height="100%"
+              frameBorder={0}
+            />
+          </div>
         </div>
-      </div>
-    )
+      )
+    }
+
+    debug('before this.startDownload()', this.props.item.name, this.name, this.session)
+    if (!this.session) {
+      this.name = this.props.item.name
+      this.startDownload()
+    }
+    return (<CircularProgress size={64} thickness={5} />)
   }
 
   renderOtherFiles() {
@@ -420,10 +452,12 @@ class PreviewInline extends React.Component {
   }
 
   render() {
+    if (!this.props.item || !this.props.item.name) return (<div />)
     const extension = this.props.item.name.replace(/^.*\./, '').toUpperCase()
     const textExtension = ['TXT', 'MD', 'JS', 'JSX', 'HTML']
+    debug('render Preview', this.props.item.name)
 
-    const isText = textExtension.findIndex(t => t === extension)
+    const isText = textExtension.findIndex(t => t === extension) > -1
     return (
       <div
         ref={ref => (this.refBackground = ref)}
@@ -435,7 +469,7 @@ class PreviewInline extends React.Component {
           justifyContent: 'center'
         }}
       >
-        { this.props.item.metatdata ? this.renderPhoto() : this.renderOtherFiles() }
+        { isText ? this.renderText() : this.props.item.metatdata ? this.renderPhoto() : this.renderOtherFiles() }
       </div>
     )
   }

@@ -3,6 +3,7 @@ import child_process from 'child_process'
 import createTask, { sendMsg } from './downloadTaskCreater'
 import { getMainWindow } from './window'
 import { dialog, ipcMain, shell } from 'electron'
+import { downloadFile } from './server'
 
 const userTasks = []
 const finishTasks = []
@@ -76,6 +77,14 @@ const cleanRecord = (type, uuid) => {
   })
 }
 
+const tempDownloadHandle = (e, args) => {
+  const { session, driveUUID, dirUUID, entryUUID, fileName } = args
+  downloadFile(driveUUID, dirUUID, entryUUID, fileName, null, (error, filePath) => {
+    if (error) return console.log(error)
+    return getMainWindow().webContents.send('TEMP_DOWNLOAD_SUCCESS', session, filePath)
+  })
+}
+
 ipcMain.on('START_TRANSMISSION', startTransmissionHandle)
 ipcMain.on('GET_TRANSMISSION', sendMsg)
 ipcMain.on('DELETE_DOWNLOADING', deleteDownloadingHandle)
@@ -102,5 +111,6 @@ ipcMain.on('LOGIN_OUT', (e) => {
   sendMsg()
 })
 
+ipcMain.on('TEMP_DOWNLOADING', tempDownloadHandle)
 
 export { userTasks, finishTasks }

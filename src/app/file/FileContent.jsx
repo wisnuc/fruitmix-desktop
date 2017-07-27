@@ -167,6 +167,7 @@ class FileContent extends React.Component {
           download={this.props.download}
           openByLocal={this.props.openByLocal}
           primaryColor={this.props.primaryColor}
+          path={this.props.home.path}
         />
       </div>
     )

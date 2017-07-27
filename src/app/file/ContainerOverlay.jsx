@@ -333,6 +333,7 @@ class ContainerOverlayInline extends React.Component {
                   memoize={this.props.memoize}
                   download={this.props.download}
                   openByLocal={this.props.openByLocal}
+                  path={this.props.path}
                 />
               </div>
             ))
