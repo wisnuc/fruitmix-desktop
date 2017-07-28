@@ -19,7 +19,7 @@ class FinishedTask extends Component {
     this.updateDom = (isSelected) => {
       this.setState({ isSelected })
     }
-    
+
     this.selectFinishItem = (e) => {
       const event = e.nativeEvent
       this.props.select('finish', this.props.task.uuid, this.state.isSelected, null, event)

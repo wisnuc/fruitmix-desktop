@@ -165,9 +165,9 @@ class FileContent extends React.Component {
           setAnimation={this.props.setAnimation}
           memoize={this.props.memoize}
           download={this.props.download}
-          openByLocal={this.props.openByLocal}
           primaryColor={this.props.primaryColor}
           path={this.props.home.path}
+          select={this.props.select.touchTap}
         />
       </div>
     )

@@ -74,13 +74,30 @@ class PreviewInline extends React.Component {
 
 
     this.openByLocal = () => {
-      this.props.ipcRenderer.send('OPEN_FILE', { file: this.props.item, path: this.rootPath })
+      const driveUUID = this.props.path[0].uuid
+      const dirUUID = this.props.path[this.props.path.length - 1].uuid
+      const entryUUID = this.props.item.uuid
+      const fileName = this.props.item.name
+      this.props.ipcRenderer.send('OPEN_FILE', {
+        driveUUID,
+        dirUUID,
+        entryUUID,
+        fileName
+      })
     }
 
     this.downloadSuccess = (event, session, path) => {
       if (this.session === session) {
         console.log('this.downloadSuccess', path)
-        this.setState({ filePath: path })
+        clearTimeout(this.time)
+        this.session = ''
+        if (this.props.item.size > 1024) {
+          this.time = setTimeout(() => {
+            this.setState({ filePath: path })
+          }, 500)
+        } else {
+          this.setState({ filePath: path })
+        }
       }
     }
 
@@ -389,7 +406,7 @@ class PreviewInline extends React.Component {
   renderText() {
     if (this.name === this.props.item.name && this.state.filePath) {
       return (
-        <div style={{ height: '100%', width: '60%' }}>
+        <div style={{ height: '100%', width: '80%' }}>
           <div style={{ height: 64 }} />
           <div style={{ height: 'calc(100% - 64px)', width: '100%', backgroundColor: '#FFFFFF' }}>
             <iframe
@@ -408,8 +425,11 @@ class PreviewInline extends React.Component {
     if (!this.session) {
       this.name = this.props.item.name
       this.startDownload()
+      this.setState({ filePath: '' })
     }
-    return (<CircularProgress size={64} thickness={5} />)
+    return (
+      <CircularProgress size={64} thickness={5} />
+    )
   }
 
   renderOtherFiles() {
@@ -444,7 +464,7 @@ class PreviewInline extends React.Component {
             label="使用本地应用打开"
             style={{ margin: 12 }}
             icon={<OpenIcon />}
-            onTouchTap={this.props.openByLocal}
+            onTouchTap={this.openByLocal}
           />
         </div>
       </div>
@@ -457,7 +477,7 @@ class PreviewInline extends React.Component {
     const textExtension = ['TXT', 'MD', 'JS', 'JSX', 'HTML']
     debug('render Preview', this.props.item.name)
 
-    const isText = textExtension.findIndex(t => t === extension) > -1
+    const isText = textExtension.findIndex(t => t === extension) > -1 && this.props.item.size < 1024 * 1024
     return (
       <div
         ref={ref => (this.refBackground = ref)}

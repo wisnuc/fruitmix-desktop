@@ -116,14 +116,6 @@ class Home extends Base {
       this.toggleDialog('delete')
     }
 
-    this.openByLocal = () => {
-      const entries = this.state.entries
-      const selected = this.state.select.selected[0]
-      const path = this.state.path
-      const entry = entries[selected]
-      ipcRenderer.send('OPEN_FILE', { file: entry, path: path[path.length - 1].uuid })
-    }
-
     /* actions */
     this.listNavBySelect = () => {
       // debug('listNavBySelect', this.select, this.state)
@@ -443,7 +435,6 @@ class Home extends Base {
           setAnimation={this.setAnimation}
           ipcRenderer={ipcRenderer}
           download={this.download}
-          openByLocal={this.openByLocal}
           primaryColor={this.groupPrimaryColor()}
           sortType={this.state.sortType}
           changeSortType={this.changeSortType}
