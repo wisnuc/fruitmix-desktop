@@ -95,6 +95,37 @@ class Home extends Base {
       ipcRenderer.send('DOWNLOAD', { folders, files, dirUUID: path[path.length - 1].uuid, driveUUID: path[0].uuid })
     }
 
+    this.dupFile = () => {
+      const entries = this.state.entries
+      const selected = this.state.select.selected
+      const path = this.state.path
+      const curr = path[path.length - 1]
+      const oldName = entries[selected[0]].name
+      // const num = oldName.replace(/\([0-9]+\)/,'')
+      let extension = oldName.replace(/^.*\./, '')
+      let newName
+      if (!extension || extension === oldName) {
+        newName = `${oldName}(copy)`
+      } else {
+        const pureName = oldName.match(/^.*\./)[0]
+        newName = `${pureName.slice(0, pureName.length - 1)}(copy).${extension}`
+      }
+      const args = {
+        driveUUID: path[0].uuid,
+        dirUUID: curr.uuid,
+        entryUUID: entries[selected[0]].uuid,
+        newName,
+        oldName
+      }
+      this.ctx.props.apis.request('dupFile', args, (err, data) => {
+        if (err) this.ctx.openSnackBar('制作副本失败')
+        else {
+          this.refresh()
+          this.ctx.openSnackBar('制作成功')
+        }
+      })
+    }
+
     this.delete = () => {
       const entries = this.state.entries
       const selected = this.state.select.selected
@@ -500,7 +531,7 @@ class Home extends Base {
                   this.state.select && this.state.select.selected && this.state.select.selected.length === 1 &&
                     <MenuItem
                       leftIcon={<CopyIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                      primaryText="制作一个副本" onTouchTap={() => this.toggleDialog('copy')}
+                      primaryText="制作一个副本" onTouchTap={this.dupFile}
                     />
                 }
                 <MenuItem

@@ -172,6 +172,11 @@ class Fruitmix extends EventEmitter {
           .field(args.entryName, JSON.stringify({ op: 'remove' }))
         break
 
+      case 'dupFile':
+        r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`)
+          .field(`${args.oldName}|${args.newName}`, JSON.stringify({ op: 'dup' }))
+        break
+
     /** Ext APIs **/
       case 'extDrives':
         r = this.aget('files/external/fs')
