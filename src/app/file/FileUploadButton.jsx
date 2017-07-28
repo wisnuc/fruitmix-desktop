@@ -1,15 +1,18 @@
-
 import React from 'react'
 import { FloatingActionButton, RaisedButton, Popover, Menu, MenuItem } from 'material-ui'
-import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
-import FileFolder from 'material-ui/svg-icons/file/folder'
 import FileFileUpload from 'material-ui/svg-icons/file/file-upload'
+import { UploadFile, UploadFold } from '../common/Svg'
 
 class FileUploadButton extends React.Component {
 
   constructor(props) {
     super(props)
     this.state = { open: false }
+
+    this.upload = (type) => {
+      this.props.upload(type)
+      this.setState({ open: false })
+    }
   }
 
   render() {
@@ -33,18 +36,23 @@ class FileUploadButton extends React.Component {
           targetOrigin={{ horizontal: 'left', vertical: 'top' }}
           onRequestClose={() => this.setState({ open: false })}
         >
-          <Menu>
-            <MenuItem primaryText="上传文件夹" leftIcon={<FileFolder />} onTouchTap={this.upload.bind(this, 'folder')} />
-            <MenuItem primaryText="上传文件" leftIcon={<EditorInsertDriveFile />} onTouchTap={this.upload.bind(this, 'file')} />
+          <Menu style={{ minWidth: 240 }}>
+            <MenuItem
+              primaryText="上传文件夹"
+              leftIcon={<UploadFold />}
+              onTouchTap={() => this.upload('folder')}
+              style={{ fontSize: 13 }}
+            />
+            <MenuItem
+              primaryText="上传文件"
+              leftIcon={<UploadFile />}
+              onTouchTap={() => this.upload('file')}
+              style={{ fontSize: 13 }}
+            />
           </Menu>
         </Popover>
       </div>
     )
-  }
-
-  upload(type) {
-    this.props.upload(type)
-    this.setState({ open: false })
   }
 }
 
