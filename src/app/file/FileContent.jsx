@@ -99,6 +99,7 @@ class FileContent extends React.Component {
     return (
       <div
         style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        onTouchTap={e => this.onRowTouchTap(e, -1)}
         onDrop={this.drop}
       >
         <div
@@ -165,8 +166,9 @@ class FileContent extends React.Component {
           setAnimation={this.props.setAnimation}
           memoize={this.props.memoize}
           download={this.props.download}
-          openByLocal={this.props.openByLocal}
           primaryColor={this.props.primaryColor}
+          path={this.props.home.path}
+          select={this.props.select.touchTap}
         />
       </div>
     )

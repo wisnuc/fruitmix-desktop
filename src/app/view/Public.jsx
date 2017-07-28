@@ -217,7 +217,7 @@ class Public extends Home {
   }
 
   renderContent({ navTo, toggleDetail, openSnackBar }) {
-    // debug('renderContent', this.state)
+    debug('renderContent public', this.state.contextMenuOpen, !this.state.inRoot, this.state.contextMenuY, this.state.contextMenuX)
 
     /* loading data */
     if (!this.state.listNavDir && !this.state.drives || !this.state.path.length) return (<div />)
@@ -239,27 +239,13 @@ class Public extends Home {
           setAnimation={this.setAnimation}
           ipcRenderer={ipcRenderer}
           download={this.download}
-          openByLocal={this.openByLocal}
           primaryColor={this.groupPrimaryColor()}
           sortType={this.state.sortType}
           changeSortType={this.changeSortType}
           gridView={this.state.gridView}
         />
 
-        <ContextMenu
-          open={this.state.contextMenuOpen && !this.state.inRoot}
-          top={this.state.contextMenuY}
-          left={this.state.contextMenuX}
-          onRequestClose={this.hideContextMenu}
-        >
-          <MenuItem primaryText="新建文件夹" onTouchTap={() => this.toggleDialog('createNewFolder')} />
-          <MenuItem primaryText="下载" onTouchTap={this.download} />
-          <MenuItem primaryText="详细信息" onTouchTap={toggleDetail} />
-          <MenuItem primaryText="刪除" onTouchTap={() => this.toggleDialog('delete')} />
-          <MenuItem primaryText="重命名" onTouchTap={() => this.toggleDialog('rename')} />
-          <MenuItem primaryText="移动" onTouchTap={() => this.toggleDialog('move')} />
-          <MenuItem primaryText="拷贝" onTouchTap={() => this.toggleDialog('copy')} />
-        </ContextMenu>
+        { this.renderMenu(!!this.state.contextMenuOpen && !this.state.inRoot, toggleDetail) }
 
         { this.renderDialogs(openSnackBar) }
 

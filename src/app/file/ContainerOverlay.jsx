@@ -151,8 +151,8 @@ class ContainerOverlayInline extends React.Component {
         this.refPreview_2.style.left = tmp
         this.RightItem = this.props.items[this.currentIndex - 2]
       } else return
-      // this.requestNext(this.currentIndex)
-      this.forceUpdate()
+      this.props.select(0, this.currentIndex)
+      // this.forceUpdate()
     }
 
     /* animation */
@@ -332,7 +332,7 @@ class ContainerOverlayInline extends React.Component {
                   ipcRenderer={this.props.ipcRenderer}
                   memoize={this.props.memoize}
                   download={this.props.download}
-                  openByLocal={this.props.openByLocal}
+                  path={this.props.path}
                 />
               </div>
             ))
@@ -351,6 +351,7 @@ class ContainerOverlayInline extends React.Component {
                 alignItems: 'center',
                 background: 'linear-gradient(0deg, rgba(0,0,0,0), rgba(0,0,0,0.54))'
               }}
+              onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
             >
               {/* return Button */}
               <IconButton
@@ -390,13 +391,13 @@ class ContainerOverlayInline extends React.Component {
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <IconButton
                   tooltip="下载"
-                  onTouchTap={(e) => { this.props.startDownload(); e.preventDefault(); e.stopPropagation() }}
+                  onTouchTap={this.props.download}
                 >
                   <DownloadIcon color="#FFF" />
                 </IconButton>
                 <IconButton
                   tooltip="信息"
-                  onTouchTap={(e) => { this.toggleDialog('detailInfo'); e.preventDefault(); e.stopPropagation() }}
+                  onTouchTap={() => this.toggleDialog('detailInfo')}
                 >
                   <InfoIcon color="#FFF" />
                 </IconButton>

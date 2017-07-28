@@ -72,6 +72,7 @@ class TrsContainer extends React.Component {
     }
 
     this.open = () => {
+      debug('this.open', this.state.tasks)
       ipcRenderer.send('OPEN_TRANSMISSION', this.state.tasks)
     }
 
@@ -214,6 +215,7 @@ class TrsContainer extends React.Component {
         type === 'running' ? this.cleanTaskSelect() : this.cleanFinishSelect()
         selectedArray.push(id)
         this.refs[id].updateDom(true)
+        this.setState({ tasks: [this.refs[id].props.task] })
       }
 
       /* right click: open menu */
@@ -361,6 +363,7 @@ class TrsContainer extends React.Component {
               index={index}
               task={task}
               select={this.select}
+              open={this.open}
             />
           ))
         }
@@ -382,7 +385,7 @@ class TrsContainer extends React.Component {
                 <Menu>
                   { this.state.play && <MenuItem primaryText="继续" onTouchTap={() => this.playAll(this.state.tasks)} /> }
                   { this.state.pause && <MenuItem primaryText="暂停" onTouchTap={() => this.pauseAll(this.state.tasks)} /> }
-                  <MenuItem primaryText="打开所在文件夹" onTouchTap={this.open} />
+                  { this.state.tasks[0].trsType === 'download' && <MenuItem primaryText="打开所在文件夹" onTouchTap={this.open} /> }
                   <MenuItem primaryText="删除" onTouchTap={this.delete} />
                 </Menu>
               </Paper>

@@ -3,6 +3,7 @@ import child_process from 'child_process'
 import createTask, { sendMsg } from './downloadTaskCreater'
 import { getMainWindow } from './window'
 import { dialog, ipcMain, shell } from 'electron'
+import { downloadFile } from './server'
 
 const userTasks = []
 const finishTasks = []
@@ -21,13 +22,12 @@ const downloadHandle = (event, args, callback) => {
   getMainWindow().webContents.send('snackbarMessage', { message: `${count}个任务添加至下载队列` })
 }
 
-const openHandle = (event, args, callback) => {
-  console.log('openHandle start')
-  console.log(args)
-  console.log('openHandle start download')
-  // downloadHandle(event, args, callback)
-  shell.openItem('/home/lxw/Desktop/PC_Design/PC_Client_Design_Function_Avatar.pdf')
-  console.log('openHandle end')
+const openHandle = (event, args) => {
+  const { driveUUID, dirUUID, entryUUID, fileName } = args
+  downloadFile(driveUUID, dirUUID, entryUUID, fileName, null, (error, filePath) => {
+    if (error) return console.log(error)
+    return shell.openItem(filePath)
+  })
 }
 
 const startTransmissionHandle = () => {
@@ -76,12 +76,21 @@ const cleanRecord = (type, uuid) => {
   })
 }
 
+const tempDownloadHandle = (e, args) => {
+  const { session, driveUUID, dirUUID, entryUUID, fileName } = args
+  downloadFile(driveUUID, dirUUID, entryUUID, fileName, null, (error, filePath) => {
+    if (error) return console.log(error)
+    return getMainWindow().webContents.send('TEMP_DOWNLOAD_SUCCESS', session, filePath)
+  })
+}
+
 ipcMain.on('START_TRANSMISSION', startTransmissionHandle)
 ipcMain.on('GET_TRANSMISSION', sendMsg)
 ipcMain.on('DELETE_DOWNLOADING', deleteDownloadingHandle)
 ipcMain.on('DELETE_DOWNLOADED', deleteDownloadedHandle)
 ipcMain.on('DOWNLOAD', downloadHandle)
 ipcMain.on('OPEN_FILE', openHandle)
+ipcMain.on('TEMP_DOWNLOADING', tempDownloadHandle)
 
 ipcMain.on('PAUSE_DOWNLOADING', (e, uuid) => {
   if (!uuid) return

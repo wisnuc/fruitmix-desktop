@@ -19,10 +19,16 @@ class FinishedTask extends Component {
     this.updateDom = (isSelected) => {
       this.setState({ isSelected })
     }
-    
+
     this.selectFinishItem = (e) => {
       const event = e.nativeEvent
       this.props.select('finish', this.props.task.uuid, this.state.isSelected, null, event)
+    }
+
+    this.openFileLocation = () => {
+      console.log('this.openFileLocation')
+      clearTimeout(this.time)
+      if (this.props.task.trsType === 'download') this.time = setTimeout(this.props.open, 200)
     }
   }
 
@@ -57,6 +63,7 @@ class FinishedTask extends Component {
           backgroundColor: this.state.isSelected ? '#f4f4f4' : ''
         }}
         onMouseUp={this.selectFinishItem}
+        onDoubleClick={this.openFileLocation}
       >
         {/* task type */}
         <div style={{ flex: '0 0 48px' }}>

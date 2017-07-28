@@ -10,6 +10,7 @@ import FileFolder from 'material-ui/svg-icons/file/folder'
 import PhotoIcon from 'material-ui/svg-icons/image/photo'
 import ArrowUpward from 'material-ui/svg-icons/navigation/arrow-upward'
 import ArrowDownward from 'material-ui/svg-icons/navigation/arrow-downward'
+import CheckIcon from 'material-ui/svg-icons/navigation/check'
 import ContextMenu from '../common/ContextMenu'
 import { List, AutoSizer, Grid } from 'react-virtualized'
 import { TXTIcon, WORDIcon, EXCELIcon, PPTIcon, PDFIcon } from '../common/Svg'
@@ -160,10 +161,25 @@ class Row extends React.PureComponent {
                       targetOrigin={{ horizontal: 'right', vertical: 'top' }}
                       onRequestClose={this.toggleMenu}
                     >
-                      <Menu>
-                        <MenuItem primaryText="名称" onTouchTap={() => this.handleChange('名称')} />
-                        <MenuItem primaryText="修改时间" onTouchTap={() => this.handleChange('修改时间')} />
-                        <MenuItem primaryText="文件大小" onTouchTap={() => this.handleChange('文件大小')} />
+                      <Menu style={{ minWidth: 240 }}>
+                        <MenuItem
+                          style={{ fontSize: 13 }}
+                          leftIcon={this.state.type === "名称" ? <CheckIcon /> : <div />}
+                          primaryText="名称"
+                          onTouchTap={() => this.handleChange('名称')}
+                        />
+                        <MenuItem
+                          style={{ fontSize: 13 }}
+                          leftIcon={this.state.type === "修改时间" ? <CheckIcon /> : <div />}
+                          primaryText="修改时间"
+                          onTouchTap={() => this.handleChange('修改时间')}
+                        />
+                        <MenuItem
+                          style={{ fontSize: 13 }}
+                          leftIcon={this.state.type === "文件大小" ? <CheckIcon /> : <div />}
+                          primaryText="文件大小"
+                          onTouchTap={() => this.handleChange('文件大小')}
+                        />
                       </Menu>
                     </Popover>
 
