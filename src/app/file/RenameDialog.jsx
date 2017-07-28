@@ -1,5 +1,6 @@
 import React from 'react'
 import { TextField } from 'material-ui'
+import sanitize from 'sanitize-filename'
 import FlatButton from '../common/FlatButton'
 
 class RenameDialog extends React.PureComponent {
@@ -12,7 +13,16 @@ class RenameDialog extends React.PureComponent {
     }
 
     this.handleChange = (e) => {
-      this.setState({ value: e.target.value, errorText: undefined })
+      const value = e.target.value
+      const newValue = sanitize(value)
+      const entries = this.props.entries
+      if (entries.findIndex(entry => entry.name === value) > -1) {
+        this.setState({ value, errorText: '名称已存在' })
+      } else if (value !== newValue) {
+        this.setState({ value, errorText: '名称不合法' })
+      } else {
+        this.setState({ value, errorText: '' })
+      }
     }
 
     this.fire = () => {
@@ -23,12 +33,16 @@ class RenameDialog extends React.PureComponent {
         driveUUID: path[0].uuid,
         dirUUID: curr.uuid,
         entryUUID: entries[select.selected[0]].uuid,
-        dirname: this.state.value
+        newName: this.state.value,
+        oldName: entries[select.selected[0]].name
       }
       console.log('renameDirOrFile', this.props, args)
       apis.request('renameDirOrFile', args, (err, data) => {
         if (err) this.setState({ errorText: err.message })
-        else this.props.onRequestClose(true)
+        else {
+          this.props.onRequestClose(true)
+          this.props.refresh()
+        }
       })
     }
   }
@@ -48,7 +62,7 @@ class RenameDialog extends React.PureComponent {
           />
         </div>
         <div style={{ height: 24 }} />
-        <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+        <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
           <FlatButton label="取消" primary onTouchTap={this.props.onRequestClose} />
           <FlatButton label="确认" primary onTouchTap={this.fire} />
         </div>

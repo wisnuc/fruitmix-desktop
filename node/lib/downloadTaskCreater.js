@@ -261,7 +261,7 @@ class TaskManager {
       return this.downloadSchedule()
     }
     if (obj.downloadPath === '') return this.recordInfor('文件的父文件夹尚未创建，缺少目标，等待..')
-    obj.setState(obj.type == 'folder' ? createFolderSTM : DownloadFileSTM)
+    obj.setState(obj.type === 'directory' ? createFolderSTM : DownloadFileSTM)
     this.downloading.push(obj)
     this.downloadIndex += 1
     obj.requestProbe()
@@ -403,6 +403,9 @@ class TaskManager {
 const visitTask = async (target, name, type, size, dirUUID, position, manager, driveUUID, rawName, callback) => {
   manager.count += 1
   manager.size += size
+  console.log('============')
+  console.log(rawName)
+  console.log('============')
   const obj = type === 'file' ?
     new FileDownloadTask(target, name, type, size, dirUUID, manager, driveUUID, rawName) :
     new FolderDownloadTask(target, name, type, size, dirUUID, manager, driveUUID, rawName)
@@ -420,7 +423,9 @@ const visitTask = async (target, name, type, size, dirUUID, position, manager, d
   if (type === 'file') return callback(null)
 
   try {
-    const tasks = await serverGetAsync(`drives/${target}/dirs/${target}/files`)
+    const data = await serverGetAsync(`drives/${driveUUID}/dirs/${target}`)
+    const tasks = data.entries
+    tasks.forEach(t => (t.rawName = t.name))
     if (!tasks.length) return callback(null)
     const count = tasks.length
     let index = 0
