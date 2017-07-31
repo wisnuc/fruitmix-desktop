@@ -6,6 +6,7 @@ import { dialog, ipcMain } from 'electron'
 import request from 'request'
 import { getMainWindow } from './window'
 import createTask, { sendMsg } from './uploadTaskCreater'
+import { readUploadInfo } from './UploadAsync'
 
 const userTasks = []
 const finishTasks = []
@@ -18,6 +19,10 @@ const uploadHandle = (event, args) => {
   const dialogType = type === 'folder' ? 'openDirectory' : 'openFile'
   dialog.showOpenDialog({ properties: [dialogType, 'multiSelections'], filters }, (data) => {
     if (!data) return console.log('get list err', null)
+    /*
+    getMainWindow().webContents.send('snackbarMessage', { message: `${data.length}个任务添加至上传队列` })
+    readUploadInfo(data, dirUUID, driveUUID).catch(e => console.log(e))
+    */
     let index = 0
     const count = data.length
     const readUploadInfor = (abspath) => {
