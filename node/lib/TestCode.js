@@ -259,7 +259,7 @@ const createFold = (driveUUID, dirUUID, dirname, callback) => {
     url: `${server}/drives/${driveUUID}/dirs/${dirUUID}`,
     headers: { Authorization }
   }
-  console.log(`>>>>>>>>>>>create Fold`)
+  console.log('>>>>>>>>>>>create Fold')
   console.log(op)
   console.log('<<<<<<<<<<< start')
   request.post(op, (error) => {
@@ -279,4 +279,65 @@ const createFold = (driveUUID, dirUUID, dirname, callback) => {
     }
   })
 }
+
+// fork / join, race / settle
+
+// input dir path
+// output stat []
+
+const readdir = (dirPath, callback) => {
+  fs.readdir(dirPath, (err, entries) => {
+    if (err) return callback(err)
+    if (entries.length === 0) return callback(null, [])
+
+    let count = entries.length
+    const arr = []
+    entries.forEach((entry) => { // functor
+      fs.lstat(path.join(dirPath, entry), (err, stat) => {
+        if (!err) arr.push(stat)
+        if (!--count) return callback(null, arr)
+      })
+    })
+  })
+}
+
+// error race | success settle []
+
+const readdirStatsAsync = async (dirPath) => {
+  const entries = fs.readdirAsync(dirPath)
+  if (entries.length === 0) return []
+
+  const promises = entries.map(async (entry) => {
+    try {
+      const entryPath = path.join(dirPath, entry)
+      const stat = await fs.lstatAsync(path.join(dirPath, entry))
+
+      if (stat.isDirectory()) {
+        return Object.assign(stat, { children: await readdirStatsAsync(entryPath) })
+      }
+      return stat
+    } catch (e) {
+      return null
+    }
+  })
+
+  return (await Promise.all(promises)).filter(x => !!x)
+}
+
+const visitor = async (root, afunc) => {
+  await func(root)
+
+  if (root.children) {
+    Promise.map(root.children, async (child) => {})
+
+    root.children.map(async x => visitor(x, func))
+  }
+
+  if (root.children) {
+    for (let i = 0; i < root.children.length; i++) {
+      await visitor(root.children[i], afunc)
+    }
+  }
+}
+
 export { uploadFile, hashFile, getFileInfo, uploadFileWithStream, createFold }
