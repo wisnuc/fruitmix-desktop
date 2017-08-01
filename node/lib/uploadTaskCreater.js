@@ -1,10 +1,6 @@
 import path from 'path'
 import fs from 'fs'
-import stream from 'stream'
-import http from 'http'
-import { dialog, ipcMain } from 'electron'
-import child_process from 'child_process'
-import request from 'request'
+import childProcess from 'child_process'
 import uuid from 'node-uuid'
 
 import { serverGetAsync, uploadFileWithStream, createFold } from './server'
@@ -14,9 +10,6 @@ import utils from './util'
 import { userTasks, finishTasks } from './newUpload'
 import sendInfor from './transmissionUpdate'
 
-let ip
-let server
-let tokenObj
 const httpRequestConcurrency = 4
 const fileHashConcurrency = 6
 const visitConcurrency = 2
@@ -56,7 +49,6 @@ const sendMessage = () => {
 }
 
 const createTask = (abspath, target, type, newWork, u, r, rootNodeUUID, ct, driveUUID) => {
-  initArgs()
   const taskUUID = u || uuid.v4()
   const uploadingList = r || []
   const createTime = ct || (new Date()).getTime()
@@ -623,7 +615,7 @@ class HashSTM extends STM {
         encoding: 'utf8',
         cwd: process.cwd()
       }
-      const child = child_process.fork(path.join(__dirname, 'filehash'), [], options)
+      const child = childProcess.fork(path.join(__dirname, 'filehash'), [], options)
       child.on('message', (obj) => {
         // console.log('hash message' , obj)
         wrapper.sha = obj.parts[obj.parts.length - 1].fingerprint
@@ -793,12 +785,6 @@ class UploadFileSTM extends STM {
     this.beginUpload()
     this.wrapper.recordInfor(`${this.wrapper.name}继续上传`)
   }
-}
-
-const initArgs = () => {
-  ip = store.getState().login.device.mdev.address
-  server = `http://${store.getState().login.device.mdev.address}:3000`
-  tokenObj = store.getState().login.device.token.data
 }
 
 const scheduleHttpRequest = () => {
