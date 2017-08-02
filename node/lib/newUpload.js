@@ -1,78 +1,78 @@
 import path from 'path'
 import fs from 'fs'
-import stream from 'stream'
-import crypto from 'crypto'
+import UUID from 'uuid'
+import Debug from 'debug'
 import { dialog, ipcMain } from 'electron'
-import request from 'request'
 import { getMainWindow } from './window'
 import createTask, { sendMsg } from './uploadTaskCreater'
-import { readUploadInfo } from './UploadAsync'
 
+Promise.promisifyAll(fs) // babel would transform Promise to bluebird
+
+const debug = Debug('node:lib:newUpload: ')
 const userTasks = []
 const finishTasks = []
 
-// handler
-const uploadHandle = (event, args) => {
-  console.log('uploadHandle...')
-  console.log(args)
-  const { driveUUID, dirUUID, type, filters } = args
-  const dialogType = type === 'folder' ? 'openDirectory' : 'openFile'
-  dialog.showOpenDialog({ properties: [dialogType, 'multiSelections'], filters }, (data) => {
-    if (!data) return console.log('get list err', null)
-    /*
-    getMainWindow().webContents.send('snackbarMessage', { message: `${data.length}个任务添加至上传队列` })
-    readUploadInfo(data, dirUUID, driveUUID).catch(e => console.log(e))
-    */
-    let index = 0
-    const count = data.length
-    const readUploadInfor = (abspath) => {
-      fs.stat(abspath, (err, infor) => {
-        if (err) return console.log(`读取目录 ${abspath} 错误`)
-        createTask(abspath, dirUUID, type, true, null, null, null, null, driveUUID)
-        index++
-        if (index < count) {
-          readUploadInfor(data[index])
-        } else {
-          getMainWindow().webContents.send('snackbarMessage', { message: `${data.length}个任务添加至上传队列` })
-        }
-      })
+const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
+  let count = 0
+  for (let i = 0; i < entries.length; i++) {
+    const taskUUID = UUID.v4()
+    const entry = entries[i]
+    const entryStat = await fs.lstatAsync(path.resolve(entry))
+    const taskType = entryStat.isDirectory() ? 'folder' : entryStat.isFile() ? 'file' : 'others'
+    const createTime = (new Date()).getTime()
+    const newWork = true
+    const uploadingList = []
+    const rootNodeUUID = null
+    /* only upload folder or file, ignore others, such as symbolic link */
+    if (taskType !== 'others') {
+      createTask(taskUUID, entry, dirUUID, driveUUID, taskType, createTime, newWork, uploadingList, rootNodeUUID)
+      count += 1
     }
-    readUploadInfor(data[index])
-  })
+  }
+  return count
 }
 
-const uploadMediaHandle = (event, rootUUID) => {
-  const dirUUID = rootUUID
-  uploadHandle(event, { dirUUID,
-    type: 'file',
-    filters: [
-    { name: 'Images', extensions: ['jpg', 'png', 'gif'] },
-    { name: 'Movies', extensions: ['mkv', 'avi', 'mp4'] }
-    ]
+const readUploadInfo = (entries, dirUUID, driveUUID) => {
+  readUploadInfoAsync(entries, dirUUID, driveUUID)
+    .then((count) => {
+      let message = `${count}个任务添加至上传队列`
+      if (count < entries.length) message = `${message} (忽略了${entries.length - count}个不支持的文件)`
+      getMainWindow().webContents.send('snackbarMessage', { message })
+    })
+    .catch((e) => {
+      debug('readUploadInfo error: ', e)
+      getMainWindow().webContents.send('snackbarMessage', { message: '读取上传文件失败' })
+    })
+}
+
+/* handler */
+const uploadHandle = (event, args) => {
+  const { driveUUID, dirUUID, type, filters } = args
+  const dialogType = type === 'folder' ? 'openDirectory' : 'openFile'
+  dialog.showOpenDialog({ properties: [dialogType, 'multiSelections'], filters }, (entries) => {
+    if (!entries || !entries.length) return debug('no entry !')
+    readUploadInfo(entries, dirUUID, driveUUID)
   })
 }
 
 const dragFileHandle = (event, args) => {
-  console.log(args)
-  if (!args.files.length) return
-  let index = 0
-  const loop = () => {
-    const filePath = path.normalize(args.files[index])
-    let type = ''
-    fs.stat(filePath, (err, stat) => {
-      if (err) {
-        index++
-        return loop()
-      }
-      if (stat.isDirectory()) type = 'folder'
-      else type = 'file'
-      createTask(filePath, args.dirUUID, type, true, null, null, null, null, args.driveUUID)
-      index++
-      if (index === args.files.length) return getMainWindow().webContents.send('snackbarMessage', { message: `${args.files.length}个任务添加至上传队列` })
-      loop()
-    })
-  }
-  loop()
+  let entries = args.files
+  if (!entries || !entries.length) return debug('no entry !')
+  entries = entries.map(entry => path.normalize(entry))
+  readUploadInfo(entries, args.dirUUID, args.driveUUID)
+}
+
+const uploadMediaHandle = (event, args) => {
+  const { driveUUID, dirUUID } = args
+  uploadHandle(event, {
+    dirUUID,
+    driveUUID,
+    type: 'file',
+    filters: [
+      { name: 'Images', extensions: ['jpg', 'png', 'gif'] },
+      { name: 'Movies', extensions: ['mkv', 'avi', 'mp4'] }
+    ]
+  })
 }
 
 const startTransmissionHandle = () => {
@@ -121,11 +121,7 @@ const cleanRecord = (type, uuid) => {
   })
 }
 
-
-ipcMain.on('loginOff', (evt) => {
-  // todo
-})
-
+/* ipc listener */
 ipcMain.on('START_TRANSMISSION', startTransmissionHandle)
 ipcMain.on('GET_TRANSMISSION', sendMsg)
 ipcMain.on('DELETE_UPLOADING', deleteUploadingHandle)
@@ -134,7 +130,6 @@ ipcMain.on('DRAG_FILE', dragFileHandle)
 ipcMain.on('UPLOAD', uploadHandle)
 ipcMain.on('UPLOADMEDIA', uploadMediaHandle)
 
-// ipcMain.on('PAUSE_UPLOADING')
 ipcMain.on('PAUSE_UPLOADING', (e, uuid) => {
   if (!uuid) return
   const task = userTasks.find(item => item.uuid === uuid)
@@ -154,6 +149,5 @@ ipcMain.on('LOGIN_OUT', (e) => {
   finishTasks.length = 0
   sendMsg()
 })
-
 
 export { userTasks, finishTasks }

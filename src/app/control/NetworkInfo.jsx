@@ -63,7 +63,7 @@ class Ethernet extends React.Component {
     const net = this.props.net
     if (!net) return (<div />)
 
-    const NIC = net[0]
+    const NIC = net.find(card => card.ipAddresses && card.ipAddresses.length > 0)
     const ipv4 = NIC.ipAddresses.find(addr => addr.internal === false && addr.family === 'IPv4')
 
     const getAddress = () => (

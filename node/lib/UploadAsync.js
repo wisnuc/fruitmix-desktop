@@ -5,10 +5,12 @@ const crypto = require('crypto')
 
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
 
+/* return a new file name */
 const getName = async (currPath, dirUUID, driveUUID) => {
   return currPath.replace(/^.*\//, '') // TODO
 }
 
+/* splice file by given size */
 const spliceFile = (size, perSize) => {
   const parts = []
   let position = 0
@@ -24,6 +26,7 @@ const spliceFile = (size, perSize) => {
   return parts
 }
 
+/* calculate file's hash by part */
 const hashFile = (filePath, part) => {
   const hash = crypto.createHash('sha256')
   hash.setEncoding('hex')
@@ -39,6 +42,7 @@ const hashFile = (filePath, part) => {
   return promise
 }
 
+/* calculate file's fingerprint */
 const calcFingerprint = (hashs) => {
   const hashBuffer = hashs.map(hash => typeof hash === 'string' ? Buffer.from(hash, 'hex') : hash)
   return hashBuffer.reduce((accumulator, currentValue, currentIndex, array) => {
@@ -83,23 +87,20 @@ const creatFoldAsync = async (foldPath, dirUUID, driveUUID) => {
   return uuid
 }
 
-/* readUploadInfo and uploadTaskAsync would visit list of directories or files recursively */
-const uploadTaskAsync = async (entry, dirUUID, driveUUID) => {
-  const stat = await fs.lstatAsync(path.resolve(entry))
-  if (stat.isDirectory()) {
-    const children = await fs.readdirAsync(path.resolve(entry))
-    const uuid = await creatFoldAsync(entry, dirUUID, driveUUID)
-    const newEntries = []
-    children.forEach(c => newEntries.push(path.join(entry, c)))
-    await readUploadInfo(newEntries, uuid, driveUUID)
-  } else {
-    await uploadFileAsync(entry, dirUUID, driveUUID, stat)
-  }
-}
-
+/* readUploadInfo would visit list of directories or files recursively */
 const readUploadInfo = async (entries, dirUUID, driveUUID) => {
   for (let i = 0; i < entries.length; i++) {
-    await uploadTaskAsync(entries[i], dirUUID, driveUUID)
+    const entry = entries[i]
+    const stat = await fs.lstatAsync(path.resolve(entry))
+    if (stat.isDirectory()) {
+      const children = await fs.readdirAsync(path.resolve(entry))
+      const uuid = await creatFoldAsync(entry, dirUUID, driveUUID)
+      const newEntries = []
+      children.forEach(c => newEntries.push(path.join(entry, c)))
+      await readUploadInfo(newEntries, uuid, driveUUID)
+    } else {
+      await uploadFileAsync(entry, dirUUID, driveUUID, stat)
+    }
   }
 }
 
