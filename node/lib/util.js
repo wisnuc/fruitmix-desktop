@@ -102,7 +102,6 @@ const utils = {
     }
     return part
   }
-
 }
 
 export default utils

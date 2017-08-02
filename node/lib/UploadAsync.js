@@ -88,7 +88,6 @@ const creatFoldAsync = async (foldPath, dirUUID, driveUUID) => {
 }
 
 /* readUploadInfo would visit list of directories or files recursively */
-
 const readUploadInfo = async (entries, dirUUID, driveUUID) => {
   for (let i = 0; i < entries.length; i++) {
     const entry = entries[i]
