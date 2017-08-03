@@ -7,6 +7,7 @@ import { getMainWindow } from './window'
 import utils from './util'
 import { userTasks, finishTasks } from './newUpload'
 import sendInfor from './transmissionUpdate'
+import { readXattr, setXattr } from './xattr'
 
 const debug = Debug('node:lib:uploadTaskCreater: ')
 
@@ -592,6 +593,7 @@ class HashSTM extends STM {
     wrapper.stateName = 'hashing'
     removeOutOfHashlessQueue(this)
     addToHashingQueue(this)
+
     try {
       const options = {
         env: { absPath: wrapper.abspath, size: wrapper.size, partSize: wrapper.segmentsize },
@@ -600,15 +602,16 @@ class HashSTM extends STM {
       }
       const child = childProcess.fork(path.join(__dirname, 'filehash'), [], options)
       child.on('message', (obj) => {
-        // console.log('hash message' , obj)
-        wrapper.sha = obj.parts[obj.parts.length - 1].fingerprint
-        wrapper.parts = obj.parts
-        // console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<hashing')
-        // console.log(wrapper)
-        // console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>hashing')
-        // return null
-        removeOutOfHashingQueue(this)
-        wrapper.hashFinish()
+        console.log('hash message', obj)
+        setXattr(wrapper.abspath, obj, (error, na) => {
+          if (!error) {
+            console.log('setXattr', na)
+            wrapper.sha = obj.parts[obj.parts.length - 1].fingerprint
+            wrapper.parts = obj.parts
+            removeOutOfHashingQueue(this)
+            wrapper.hashFinish()
+          }
+        })
       })
 
       child.on('error', (err) => {
