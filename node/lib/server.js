@@ -345,4 +345,5 @@ export const downloadFile = (driveUUID, dirUUID, entryUUID, fileName, downloadPa
   })
   const handle = request(options).on('error', err => callback(err))
   handle.pipe(stream)
+  console.log('downloading... ', fileName)
 }

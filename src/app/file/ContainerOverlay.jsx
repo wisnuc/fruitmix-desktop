@@ -345,7 +345,7 @@ class ContainerOverlayInline extends React.Component {
                 position: 'fixed',
                 top: 0,
                 left: 0,
-                width: this.state.detailInfo ? 'calc(100% - 360px)' : '100%',
+                width: this.state.detailInfo ? 'calc(100% - 376px)' : 'calc(100% - 16px)',
                 height: 64,
                 display: 'flex',
                 alignItems: 'center',
