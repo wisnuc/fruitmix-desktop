@@ -409,17 +409,17 @@ class PreviewInline extends React.Component {
   renderText() {
     if (this.name === this.props.item.name && this.state.filePath) {
       return (
-        <div style={{ height: '100%', width: '80%' }}>
-          <div style={{ height: 64 }} />
-          <div style={{ height: 'calc(100% - 64px)', width: '100%', backgroundColor: '#FFFFFF' }}>
-            <iframe
-              src={this.state.filePath}
-              seamless
-              width="100%"
-              height="100%"
-              frameBorder={0}
-            />
-          </div>
+        <div
+          style={{ height: '100%', width: '61.8%', backgroundColor: '#FFFFFF' }}
+          onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
+        >
+          <iframe
+            src={this.state.filePath}
+            seamless
+            width="100%"
+            height="100%"
+            frameBorder={0}
+          />
         </div>
       )
     }
@@ -428,7 +428,7 @@ class PreviewInline extends React.Component {
     if (!this.session) {
       this.name = this.props.item.name
       this.startDownload()
-      this.setState({ filePath: '' })
+      this.state = Object.assign({}, this.state, { filePath: '', pages: null })
     }
     return (
       <CircularProgress size={64} thickness={5} />
@@ -477,29 +477,27 @@ class PreviewInline extends React.Component {
   renderPDF() {
     if (this.name === this.props.item.name && this.state.filePath) {
       return (
-        <div style={{ height: '100%', width: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
-          <div style={{ height: '100%', width: '80%', margin: '0 auto' }}>
-            <div style={{ height: 64 }} />
-            <div style={{ height: 'calc(100% - 64px)', width: '100%', backgroundColor: '#FFFFFF' }}>
-              <PDF url={this.state.filePath} onComplete={pages => this.setState({ pages })}>
-                {
-                  this.state.pages &&
-                  <div>
-                    { this.state.pages.map(page => <Page key={page.key} page={page} />)}
-                  </div>
-                }
-              </PDF>
-            </div>
-          </div>
+        <div
+          style={{ height: '100%', width: '61.8%', overflowY: 'auto', overflowX: 'hidden' }}
+          onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
+        >
+          <PDF url={this.state.filePath} onComplete={pages => this.setState({ pages })} onError={e => debug(e)}>
+            {
+              this.state.pages &&
+              <div>
+                { this.state.pages.map(page => <Page key={page.key} page={page} onError={e => debug(e)} />)}
+              </div>
+            }
+          </PDF>
         </div>
       )
     }
 
-    debug('before this.startDownload()', this.props.item.name, this.name, this.session)
+    // debug('before this.startDownload()', this.props.item.name, this.name, this.session)
     if (!this.session) {
       this.name = this.props.item.name
       this.startDownload()
-      this.setState({ filePath: '', pages: null })
+      this.state = Object.assign({}, this.state, { filePath: '', pages: null })
     }
     return (
       <CircularProgress size={64} thickness={5} />
@@ -510,7 +508,7 @@ class PreviewInline extends React.Component {
     if (!this.props.item || !this.props.item.name) return (<div />)
     const extension = this.props.item.name.replace(/^.*\./, '').toUpperCase()
     const textExtension = ['TXT', 'MD', 'JS', 'JSX', 'HTML']
-    debug('render Preview', this.props.item.name)
+    // debug('render Preview', this.props.item.name)
 
     const isText = textExtension.findIndex(t => t === extension) > -1 && this.props.item.size < 1024 * 1024
 

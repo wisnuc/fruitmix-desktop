@@ -395,12 +395,14 @@ class ContainerOverlayInline extends React.Component {
                 >
                   <DownloadIcon color="#FFF" />
                 </IconButton>
+                {/*
                 <IconButton
                   tooltip="信息"
                   onTouchTap={() => this.toggleDialog('detailInfo')}
                 >
                   <InfoIcon color="#FFF" />
                 </IconButton>
+                */}
               </div>
               <div style={{ width: 24 }} />
             </div>

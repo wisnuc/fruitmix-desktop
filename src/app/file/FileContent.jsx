@@ -123,7 +123,7 @@ class FileContent extends React.Component {
   }
 
   render() {
-    debug('render FileContent', this.props, this.state)
+    // debug('render FileContent', this.props, this.state)
 
     /* not get list yet */
     if (!this.props.home.path.length) return (<div />)
