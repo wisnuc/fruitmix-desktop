@@ -4,11 +4,9 @@ import UUID from 'node-uuid'
 import prettysize from 'prettysize'
 import { CircularProgress, Divider } from 'material-ui'
 import FileFolder from 'material-ui/svg-icons/file/folder'
-import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
 import ContentCopy from 'material-ui/svg-icons/content/content-copy'
-import PhotoIcon from 'material-ui/svg-icons/image/photo'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
-import { TXTIcon, WORDIcon, EXCELIcon, PPTIcon, PDFIcon } from '../common/Svg'
+import renderFileIcon from '../common/renderFileIcon'
 
 const debug = Debug('component:file:FileDetail:')
 
@@ -58,37 +56,6 @@ const getResolution = (height, width) => {
     return `${res} 万像素 ${height} x ${width}`
   }
   return `${res} 像素 ${height} x ${width}`
-}
-
-const renderFileIcon = (name, metadata) => {
-  /* media */
-  if (metadata) return <PhotoIcon style={{ color: '#FFFFFF' }} />
-
-  /* PDF, TXT, Word, Excel, PPT */
-  let extension = name.replace(/^.*\./, '')
-  if (!extension || extension === name) extension = 'OTHER'
-  switch (extension.toUpperCase()) {
-    case 'PDF':
-      return (<PDFIcon style={{ color: '#FFFFFF' }} />)
-    case 'TXT':
-      return (<TXTIcon style={{ color: '#FFFFFF' }} />)
-    case 'DOCX':
-      return (<WORDIcon style={{ color: '#FFFFFF' }} />)
-    case 'DOC':
-      return (<WORDIcon style={{ color: '#FFFFFF' }} />)
-    case 'XLS':
-      return (<EXCELIcon style={{ color: '#FFFFFF' }} />)
-    case 'XLSX':
-      return (<EXCELIcon style={{ color: '#FFFFFF' }} />)
-    case 'PPT':
-      return (<PPTIcon style={{ color: '#FFFFFF' }} />)
-    case 'PPTX':
-      return (<PPTIcon style={{ color: '#FFFFFF' }} />)
-    case 'OTHER':
-      return (<EditorInsertDriveFile style={{ color: '#FFFFFF' }} />)
-    default:
-      return (<EditorInsertDriveFile style={{ color: '#FFFFFF' }} />)
-  }
 }
 
 class FileDetail extends React.PureComponent {
@@ -184,7 +151,7 @@ class FileDetail extends React.PureComponent {
             type === 'folder' || type === 'public' || type === 'directory'
             ? <FileFolder style={{ color: '#FFFFFF' }} />
             : type === 'file'
-            ? renderFileIcon(name, metadata)
+            ? renderFileIcon(name, metadata, 24, false, true) // name, metadata, size, dark, white
             : <ErrorIcon style={{ color: '#FFFFFF' }} />
           }
         </div>

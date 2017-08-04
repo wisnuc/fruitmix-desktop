@@ -371,7 +371,7 @@ class Media extends Base {
   }
 
   willReceiveProps(nextProps) {
-    // console.log('media nextProps', nextProps)
+    console.log('media nextProps', nextProps)
     if (!nextProps.apis || !nextProps.apis.media) return
     const media = nextProps.apis.media
     if (media.isPending() || media.isRejected()) return
@@ -383,7 +383,7 @@ class Media extends Base {
 
     if (value !== this.state.preValue) {
       /* remove photos without metadata */
-      const filter = value.filter(item => !!item[1].metadata)
+      const filter = value.filter(item => !!item[1] && !!item[1].metadata)
 
       /* sort photos by date */
       filter.sort((prev, next) => (parseDate(next[1].metadata.exifDateTime) - parseDate(prev[1].metadata.exifDateTime)) || (
