@@ -61,7 +61,7 @@ class PhotoDetailInline extends React.Component {
   constructor(props) {
     super(props)
 
-    this.digest = this.props.items[this.props.seqIndex][0]
+    this.digest = this.props.items[this.props.seqIndex].hash
 
     this.dragPosition = { x: 0, y: 0, left: 0, top: 0 }
 
@@ -95,8 +95,8 @@ class PhotoDetailInline extends React.Component {
     this.requestNext = (currentIndex) => {
       /* get current image */
       this.session = UUID.v4()
-      this.digest = this.props.items[currentIndex][0]
-      this.photo = this.props.items[currentIndex][1]
+      this.digest = this.props.items[currentIndex].hash
+      this.photo = this.props.items[currentIndex]
       this.props.ipcRenderer.send('mediaShowThumb', this.session, this.digest, 210, 210)
 
       /* memoize digest */
@@ -115,7 +115,7 @@ class PhotoDetailInline extends React.Component {
         this.currentIndex -= 1
       } else return
       this.requestNext(this.currentIndex)
-      this.digest = this.props.items[this.currentIndex][0]
+      this.digest = this.props.items[this.currentIndex].hash
       this.setState({
         selected: this.props.selectedItems.findIndex(item => item === this.digest) >= 0
       })
@@ -173,18 +173,18 @@ class PhotoDetailInline extends React.Component {
       this.clientWidth = this.state.detailInfo ? window.innerWidth - 360 : window.innerWidth
 
       /* handle the exifOrientation */
-      this.exifOrientation = this.photo.metadata.exifOrientation || 1
+      this.exifOrientation = this.photo.orient || 1
       this.degRotate = ''
       if (this.exifOrientation) {
         this.degRotate = `rotate(${(this.exifOrientation - 1) * 90}deg)`
       }
 
       if (this.exifOrientation % 2) {
-        this.photoHeight = this.photo.metadata.height
-        this.photoWidth = this.photo.metadata.width
+        this.photoHeight = this.photo.h
+        this.photoWidth = this.photo.w
       } else {
-        this.photoHeight = this.photo.metadata.width
-        this.photoWidth = this.photo.metadata.height
+        this.photoHeight = this.photo.w
+        this.photoWidth = this.photo.h
       }
 
       const HWRatio = this.photoHeight / this.photoWidth
@@ -424,7 +424,8 @@ class PhotoDetailInline extends React.Component {
 
   renderInfo() {
     debug('renderInfo', this.props.items.length, this.photo)
-    const { exifDateTime, exifModel, exifMake, height, width, size } = this.photo.metadata
+    const { datetime, model, make, h, w, size } = this.photo
+    const [ exifDateTime, exifModel, exifMake, height, width ] = [datetime, model, make, h, w]
 
     const seed = (parseInt(this.digest.slice(0, 3), 16) - 4096) / 2048
     const longitude = Math.round((121 + seed) * 10000) / 10000
