@@ -10,27 +10,31 @@ const readXattrAsync = async (target) => {
     attr = JSON.parse(await xattr.getAsync(target, FRUITMIX))
   } catch (e) {
     /* may throw xattr ENOENT or JSON SyntaxError */
-    if (e.code === 'ENODATA' || e instanceof SyntaxError) {
-      console.log('readXattrAsync ENODATA or SyntaxError')
-    } else throw e
+    console.log('readXattrAsync error: ', e.code || e)
   }
-  return attr
+  const stats = await fs.lstatAsync(target)
+  if (attr && attr.htime && attr.htime === stats.mtime.getTime()) return attr
+  return null
 }
 
 const readXattr = (target, callback) => {
-  readXattrAsync.then(attr => callback(null, attr)).catch(error => callback(error))
+  readXattrAsync(target).then(attr => callback(null, attr)).catch(error => callback(error))
 }
 
 const setXattrAsync = async (target, attr) => {
   const stats = await fs.lstatAsync(target)
   const htime = stats.mtime.getTime()
   const newAttr = Object.assign({}, attr, { htime })
-  xattr.setAsync(target, FRUITMIX, JSON.stringify(newAttr))
+  try {
+    await xattr.setAsync(target, FRUITMIX, JSON.stringify(newAttr))
+  } catch (e) {
+    console.log('setXattrAsync error: ', e.code)
+  }
   return newAttr
 }
 
 const setXattr = (target, attr, callback) => {
-  setXattrAsync.then(na => callback(null, na)).catch(error => callback(error))
+  setXattrAsync(target, attr).then(na => callback(null, na)).catch(error => callback(error))
 }
 
 export { readXattrAsync, readXattr, setXattrAsync, setXattr }
