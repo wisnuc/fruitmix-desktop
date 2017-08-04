@@ -150,30 +150,15 @@ const visitFolderAsync = async (abspath, position, worklist, manager) => {
   }
 }
 
-const visitServerFiles = async (uuid, name, type, position, callback) => {
-  // console.log(name + '...' + type)
-  const obj = { name, type, children: [], uuid }
-  position.push(obj)
-  if (type === 'file') return callback(null)
-
-  try {
-    const entries = await serverGetAsync(`files/fruitmix/list/${uuid}/${uuid}`)
-    if (!entries.length) return callback(null)
-    const count = entries.length
-    let index = 0
-    const next = () => {
-      visitServerFiles(entries[index].uuid, entries[index].name, entries[index].type, obj.children, call)
-    }
-    let call = (err) => {
-      if (err) return callback(err)
-      index += 1
-      if (index >= count) return callback()
-      next()
-    }
-
-    return next()
-  } catch (e) {
-    return callback(e)
+const visitServerFiles = async (uuid, driveUUID, name, type, position) => {
+  const fileNode = { uuid, name, children: [] }
+  position.push(fileNode)
+  if (type !== 'folder') return
+  const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${uuid}`)
+  const entries = listNav.entries
+  if (!entries.length) return
+  for (let i = 0; i < entries.length; i++) {
+    await visitServerFiles(entries[i].uuid, driveUUID, entries[i].name, entries[i].type, fileNode.children)
   }
 }
 
@@ -636,16 +621,16 @@ class TaskManager {
             this.schedule()
           } else {
             this.recordInfor('已上传根目录存在')
-            visitServerFiles(this.rootNodeUUID, this.name, this.type, serverFileTree, (err, data) => {
-              if (err) return this.recordInfor('校验已上传文件出错')
-
+            visitServerFiles(this.rootNodeUUID, this.driveUUID, this.name, this.type, serverFileTree).then(() => {
               this.recordInfor('校验已上传文件完成')
+              console.log(serverFileTree[0])
+              console.log(this.tree[0])
               diffTree(this.tree[0], serverFileTree[0], this, (err) => {
                 if (err) console.log(err)
                 console.log('比较文件树完成')
                 this.schedule()
               })
-            })
+            }).catch(e => this.recordInfor('校验已上传文件出错'))
           }
         } catch (e) {
           this.error(e, '上传目标目录不存在')
@@ -711,7 +696,7 @@ class TaskManager {
 
   hashSchedule() {
     if (this.lastFileIndex === -1) return // this.recordInfor('任务列表中不包含文件')
-    if (this.hashing.length >= 2) return // this.recordInfor('任务的HASH队列已满')
+    if (this.hashing.length >= fileHashConcurrency) return // this.recordInfor('任务的HASH队列已满')
     if (this.hashIndex === this.lastFileIndex + 1) return // this.recordInfor(`${this.name} 所有文件hash调度完成`)
     this.recordInfor(`正在HASH第 ${this.hashIndex} 个文件 : ${this.worklist[this.hashIndex].name}`)
     const obj = this.worklist[this.hashIndex]
@@ -727,7 +712,7 @@ class TaskManager {
 
   uploadSchedule() {
     if (this.finishCount === this.worklist.length) return // this.recordInfor('文件全部上传结束')
-    if (this.uploading.length >= 2) return // this.recordInfor('任务上传队列已满')
+    if (this.uploading.length >= httpRequestConcurrency) return // this.recordInfor('任务上传队列已满')
     if (this.fileIndex === this.worklist.length) return // this.recordInfor('所有文件上传调度完成')
     // this.recordInfor(`调度第 ${this.fileIndex + 1} 个文件中,共 ${this.worklist.length} 个 : ${this.worklist[this.fileIndex].name}`)
 
