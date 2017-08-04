@@ -16,18 +16,18 @@ class RenderListByRow extends React.Component {
     super(props)
 
     this.state = {
-      selected: includeAll(this.props.selectedItems, this.props.photoListWithSameDate.photos.map(photo => photo[0]))
+      selected: includeAll(this.props.selectedItems, this.props.photoListWithSameDate.photos.map(photo => photo.hash))
     }
 
     this.onSelectIconButton = () => {
       // console.log('this.onSelectIconButton', this.props)
       if (!this.state.selected) {
         this.setState({ selected: true }, () => {
-          this.props.photoListWithSameDate.photos.forEach(photo => this.props.addListToSelection(photo[0]))
+          this.props.photoListWithSameDate.photos.forEach(photo => this.props.addListToSelection(photo.hash))
         })
       } else {
         this.setState({ selected: false }, () => {
-          this.props.photoListWithSameDate.photos.forEach(photo => this.props.removeListToSelection(photo[0]))
+          this.props.photoListWithSameDate.photos.forEach(photo => this.props.removeListToSelection(photo.hash))
         })
       }
     }
@@ -36,7 +36,7 @@ class RenderListByRow extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.selectedItems.length !== this.props.selectedItems.length) {
       this.setState({
-        selected: includeAll(nextProps.selectedItems, nextProps.photoListWithSameDate.photos.map(photo => photo[0]))
+        selected: includeAll(nextProps.selectedItems, nextProps.photoListWithSameDate.photos.map(photo => photo.hash))
       })
     }
   }
@@ -91,14 +91,14 @@ class RenderListByRow extends React.Component {
             photos.map(photo => (
               <div
                 style={{ width: 210, height: 210, marginRight: 8, marginBottom: 8, backgroundColor: '#eeeeee' }}
-                key={photo[0]}
+                key={photo.hash}
               />)) :
             photos.map(photo => (
               <PhotoItem
                 style={{ width: 210, height: 210, marginRight: 8, marginBottom: 8 }}
                 lookPhotoDetail={lookPhotoDetail}
-                digest={photo[0]}
-                key={photo[0]}
+                digest={photo.hash}
+                key={photo.hash}
                 ipcRenderer={this.props.ipcRenderer}
                 addListToSelection={this.props.addListToSelection}
                 removeListToSelection={this.props.removeListToSelection}

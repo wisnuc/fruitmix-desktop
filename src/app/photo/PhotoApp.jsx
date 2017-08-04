@@ -30,7 +30,7 @@ class PhotoApp extends React.Component {
     this.seqIndex = ''
 
     this.lookPhotoDetail = (digest) => {
-      this.seqIndex = this.props.media.findIndex(item => item[0] === digest)
+      this.seqIndex = this.props.media.findIndex(item => item.hash === digest)
       this.setState({ openDetail: true })
     }
 
@@ -94,7 +94,7 @@ class PhotoApp extends React.Component {
   }
 
   render() {
-    // debug('PhotoApp, this.props', this.props)
+    debug('PhotoApp, this.props', this.props)
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <EventListener target="window" onResize={this.handleResize} />

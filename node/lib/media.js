@@ -142,12 +142,13 @@ class GetThumbTask extends Worker {
 
   request() {
     const qs = {
+      alt: 'thumbnail',
       width: this.width,
       height: this.height,
       autoOrient: true,
       modifier: 'caret'
     }
-    this.serverDownloadAsync(`media/${this.digest}/thumbnail`, qs, this.dirpath, this.cacheName).then((data) => {
+    this.serverDownloadAsync(`media/${this.digest}`, qs, this.dirpath, this.cacheName).then((data) => {
       this.finish(path.join(this.dirpath, this.cacheName))
     }).catch((err) => {
       console.log(`fail download of digest:${this.digest} of session: ${this.session} err: ${err}`)
@@ -175,7 +176,8 @@ class GetImageTask extends Worker {
   }
 
   request() {
-    serverDownloadAsync(`media/${this.digest}/download`, null, this.dirpath, this.digest)
+    const qs = { alt: 'data' }
+    serverDownloadAsync(`media/${this.digest}`, qs, this.dirpath, this.digest)
     .then((data) => {
       this.finish(path.join(this.dirpath, this.digest))
     })

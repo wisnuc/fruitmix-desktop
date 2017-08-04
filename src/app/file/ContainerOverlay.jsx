@@ -1,32 +1,17 @@
 import React from 'react'
 import Debug from 'debug'
-import UUID from 'node-uuid'
-import prettysize from 'prettysize'
 import { IconButton, Avatar } from 'material-ui'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import FileFolder from 'material-ui/svg-icons/file/folder'
-import CheckIcon from 'material-ui/svg-icons/action/check-circle'
-import DeleteIcon from 'material-ui/svg-icons/action/delete'
-import DateIcon from 'material-ui/svg-icons/action/today'
-import ImageIcon from 'material-ui/svg-icons/image/image'
-import CameraIcon from 'material-ui/svg-icons/image/camera'
-import LoactionIcon from 'material-ui/svg-icons/communication/location-on'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
-import VisibilityOff from 'material-ui/svg-icons/action/visibility-off'
-import InfoIcon from 'material-ui/svg-icons/action/info'
 import DownloadIcon from 'material-ui/svg-icons/file/file-download'
-import PhotoIcon from 'material-ui/svg-icons/image/photo'
-import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
 import RenderToLayer from 'material-ui/internal/RenderToLayer'
 import keycode from 'keycode'
 import EventListener from 'react-event-listener'
 import { TweenMax } from 'gsap'
 import ReactTransitionGroup from 'react-addons-transition-group'
 import Preview from './Preview'
-import DialogOverlay from '../common/DialogOverlay'
-import FlatButton from '../common/FlatButton'
-import Map from '../common/map'
-import { TXTIcon, WORDIcon, EXCELIcon, PPTIcon, PDFIcon } from '../common/Svg'
+import renderFileIcon from '../common/renderFileIcon'
 
 const debug = Debug('component:file:ContainerOverlay')
 
@@ -37,37 +22,6 @@ const mousePosition = (ev) => {
   return {
     x: ev.clientX + document.body.scrollLeft - document.body.clientLeft,
     y: ev.clientY + document.body.scrollTop - document.body.clientTop
-  }
-}
-
-const renderFileIcon = (name, metadata) => {
-  /* media */
-  if (metadata) return <PhotoIcon style={{ color: '#ea4335' }} />
-
-  /* PDF, TXT, Word, Excel, PPT */
-  let extension = name.replace(/^.*\./, '')
-  if (!extension || extension === name) extension = 'OTHER'
-  switch (extension.toUpperCase()) {
-    case 'PDF':
-      return (<PDFIcon style={{ color: '#db4437' }} />)
-    case 'TXT':
-      return (<TXTIcon style={{ color: '#FAFAFA' }} />)
-    case 'DOCX':
-      return (<WORDIcon style={{ color: '#4285f4' }} />)
-    case 'DOC':
-      return (<WORDIcon style={{ color: '#4285f4' }} />)
-    case 'XLS':
-      return (<EXCELIcon style={{ color: '#0f9d58' }} />)
-    case 'XLSX':
-      return (<EXCELIcon style={{ color: '#0f9d58' }} />)
-    case 'PPT':
-      return (<PPTIcon style={{ color: '#db4437' }} />)
-    case 'PPTX':
-      return (<PPTIcon style={{ color: '#db4437' }} />)
-    case 'OTHER':
-      return (<EditorInsertDriveFile style={{ color: '#FAFAFA' }} />)
-    default:
-      return (<EditorInsertDriveFile style={{ color: '#FAFAFA' }} />)
   }
 }
 
@@ -345,7 +299,7 @@ class ContainerOverlayInline extends React.Component {
                 position: 'fixed',
                 top: 0,
                 left: 0,
-                width: this.state.detailInfo ? 'calc(100% - 360px)' : '100%',
+                width: this.state.detailInfo ? 'calc(100% - 376px)' : 'calc(100% - 16px)',
                 height: 64,
                 display: 'flex',
                 alignItems: 'center',
@@ -368,7 +322,7 @@ class ContainerOverlayInline extends React.Component {
                 entry.type === 'folder' || entry.type === 'public' || entry.type === 'directory'
                   ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)' }} />
                   : entry.type === 'file'
-                  ? renderFileIcon(entry.name, entry.metadata)
+                  ? renderFileIcon(entry.name, entry.metadata, 24, true) // name, metadata, size, dark
                   : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)' }} />
               }
               <div style={{ width: 16 }} />
@@ -395,12 +349,14 @@ class ContainerOverlayInline extends React.Component {
                 >
                   <DownloadIcon color="#FFF" />
                 </IconButton>
+                {/*
                 <IconButton
                   tooltip="信息"
                   onTouchTap={() => this.toggleDialog('detailInfo')}
                 >
                   <InfoIcon color="#FFF" />
                 </IconButton>
+                */}
               </div>
               <div style={{ width: 24 }} />
             </div>

@@ -1,30 +1,47 @@
 const crypto = require('crypto')
 const fs = require('fs')
-const stream = require('stream')
 
-const env = process.env
-let parts = []
-const absPath = env.absPath
-const allHash = crypto.createHash('sha256')
-allHash.setEncoding('hex')
+/* splice file by given size */
+const spliceFile = (size, perSize) => {
+  const parts = []
+  /* empty file */
+  if (size === 0) {
+    parts.push({ start: 0, end: 0 })
+    return parts
+  }
+  let position = 0
+  while (position < size) {
+    if (position + perSize >= size) {
+      parts.push({ start: position, end: size - 1 })
+      break
+    } else {
+      parts.push({ start: position, end: position + perSize - 1 })
+      position += perSize
+    }
+  }
+  return parts
+}
 
-const size = Number(env.size)
-const partSize = Number(env.partSize)
-parts = splice(size, partSize)
-
-hashFile(0, (err) => {
-  if (err) return console.log(err)
-  process.send({
-    parts,
-    hash: allHash.digest('hex')
+/* calculate file's hash by part */
+const hashFile = (filePath, part) => {
+  const hash = crypto.createHash('sha256')
+  hash.setEncoding('hex')
+  const fileStream = fs.createReadStream(filePath, { start: part.start, end: part.end })
+  const promise = new Promise((resolve, reject) => {
+    fileStream.on('end', () => {
+      hash.end()
+      resolve(hash.read())
+    })
+    fileStream.on('error', reject)
   })
-})
+  fileStream.pipe(hash)
+  return promise
+}
 
-
+/* calculate file's fingerprint */
 const calcFingerprint = (hashs) => {
-  const hashBuffer = hashs.map(hash => typeof hash === 'string' ? Buffer.from(hash, 'hex') : hash)
-
-  return hashBuffer.reduce((accumulator, currentValue, currentIndex, array) => {
+  const hashBuffer = hashs.map(hash => (typeof hash === 'string' ? Buffer.from(hash, 'hex') : hash))
+  return hashBuffer.reduce((accumulator, currentValue, currentIndex) => {
     if (!currentIndex) {
       accumulator.push(currentValue.toString('hex'))
     } else {
@@ -34,62 +51,22 @@ const calcFingerprint = (hashs) => {
       const digest = hash.digest('hex')
       accumulator.push(digest)
     }
-    // console.log(accumulator)
     return accumulator
   }, [])
 }
 
-function hashFile(index, callback) {
-  /* empty file */
-  if (!parts.length) {
-    parts.push({
-      start: 0,
-      end: 0,
-      sha: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-    })
-    return callback(null)
-  }
-
-  /* all parts finished */
-  if (!parts[index]) {
-    const fp = calcFingerprint(parts.map(part => part.sha))
-    parts.forEach((part, index) => (part.fingerprint = fp[index]))
-    return callback(null)
-  }
-  const part = parts[index]
-  const hash = crypto.createHash('sha256')
-  hash.setEncoding('hex')
-  const fileStream = fs.createReadStream(absPath, { start: part.start, end: part.end })
-  fileStream.on('end', (err) => {
-    if (err) throw new Error(err)
-    hash.end()
-    parts[index].sha = hash.read()
-    hashFile(++index, callback)
-  })
-
-  const t = new stream.Transform({
-    transform(chunk, encoding, next) {
-      allHash.update(chunk)
-      this.push(chunk)
-      next()
-    }
-  })
-
-  fileStream.pipe(t).pipe(hash)
+const hashFileAsync = async (absPath, size, partSize) => {
+  const parts = spliceFile(size, partSize)
+  const promises = parts.map(part => hashFile(absPath, part))
+  const hashs = await Promise.all(promises)
+  const fp = calcFingerprint(hashs)
+  const newParts = parts.map((part, index) => Object.assign({}, part, { sha: hashs[index], fingerprint: fp[index] }))
+  // console.log(newParts)
+  return newParts
 }
 
+const env = process.env
 
-function splice(size, partSize) {
-  const part = []
-  let position = 0
-  while (position < size) {
-    if (position + partSize >= size) {
-      part.push({ start: position, end: size - 1 })
-      break
-    } else {
-      part.push({ start: position, end: position + partSize - 1 })
-      position += partSize
-    }
-  }
-  return part
-}
+hashFileAsync(env.absPath, Number(env.size), Number(env.partSize))
+  .then(parts => process.send({ parts }))
+  .catch(error => console.log('hash error', error))

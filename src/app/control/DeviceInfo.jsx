@@ -62,7 +62,8 @@ class DeviceInfo extends React.PureComponent {
 
   render() {
     debug('this.props.device', this.props)
-    if (!this.props.device || !this.props.storage || !this.props.storage.usage) return <div />
+    if (!this.props.device || !this.props.storage) return <div />
+    debug('this.props.device true render', this.props)
 
     const { cpuInfo, memInfo, ws215i } = this.props.device
     const volume = this.props.storage.volumes[0] // FIXME

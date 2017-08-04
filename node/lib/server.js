@@ -7,6 +7,8 @@ import crypto from 'crypto'
 import UUID from 'node-uuid'
 import store from '../serve/store/store'
 
+Promise.promisifyAll(fs) // babel would transform Promise to bluebird
+
 const debug = Debug('lib:server')
 const getIpAddr = () => store.getState().login.device.mdev.address
 const getToken = () => store.getState().login.device.token.data.token
@@ -201,9 +203,9 @@ export const serverDownloadAsync = (endpoint, qs, downloadPath, name) => {
 }
 
 
-/***********************************************************
+/** *********************************************************
 new api TODO
-***********************************************************/
+ ***********************************************************/
 
 /* init request */
 let server
@@ -328,21 +330,33 @@ downloadFile
 @param {function} callback
 */
 
-export const downloadFile = (driveUUID, dirUUID, entryUUID, fileName, downloadPath, callback) => {
+export const downloadFile = async (driveUUID, dirUUID, entryUUID, fileName, downloadPath, callback) => {
   initArgs()
-  const tmpPath = downloadPath || path.join(getTmpPath(), entryUUID)
-  const options = {
-    method: 'GET',
-    url: `${server}/drives/${driveUUID}/dirs/${dirUUID}/entries/${entryUUID}`,
-    headers: { Authorization },
-    qs: { name: fileName }
-  }
+  const tmpName = `${entryUUID}AND${fileName}`
+  const filePath = path.join(getTmpPath(), tmpName)
+  fs.access(filePath, (error) => {
+    if (!error) {
+      console.log('find file', fileName)
+      return callback(null, filePath)
+    }
+    console.log('no file', fileName)
+    const tmpPath = downloadPath || path.join(getTmpPath(), entryUUID)
+    const options = {
+      method: 'GET',
+      url: `${server}/drives/${driveUUID}/dirs/${dirUUID}/entries/${entryUUID}`,
+      headers: { Authorization },
+      qs: { name: fileName }
+    }
 
-  const stream = fs.createWriteStream(tmpPath)
-  stream.on('finish', () => {
-    // if (!downloadPath) // TODO rename
-    return callback(null, tmpPath)
+    const stream = fs.createWriteStream(tmpPath)
+    stream.on('finish', () => {
+      // if (!downloadPath) // TODO rename
+      fs.rename(tmpPath, path.join(getTmpPath(), tmpName), (err) => {
+        if (err) return callback(err)
+        return callback(null, filePath)
+      })
+    })
+    const handle = request(options).on('error', err => callback(err))
+    handle.pipe(stream)
   })
-  const handle = request(options).on('error', err => callback(err))
-  handle.pipe(stream)
 }

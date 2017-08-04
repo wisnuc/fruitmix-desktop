@@ -22,10 +22,10 @@ const parseDate = (date) => {
   return parseInt(a, 10)
 }
 const getName = (photo) => {
-  if (!photo[1].metadata.exifDateTime) {
-    return `IMG_UnkownDate-${photo[0].slice(0, 5).toUpperCase()}-PC.${photo[1].metadata.format}`
+  if (!photo.datetime) {
+    return `IMG_UnkownDate-${photo.hash.slice(0, 5).toUpperCase()}-PC.${photo.m}`
   }
-  return `IMG-${photo[1].metadata.exifDateTime.split(/\s+/g)[0].replace(/[:\s]+/g, '')}-${photo[0].slice(0, 5).toUpperCase()}-PC.${photo[1].metadata.format}`
+  return `IMG-${photo.datetime.split(/\s+/g)[0].replace(/[:\s]+/g, '')}-${photo.hash.slice(0, 5).toUpperCase()}-PC.${photo.m}`
 }
 
 /* increase limit of listeners of EventEmitter */
@@ -79,11 +79,11 @@ class Media extends Base {
         let lineIndex = 0
         const dateUnknown = []
         this.allPhotos.forEach((item) => {
-          if (!item[1].metadata.exifDateTime) {
+          if (!item.datetime) {
             dateUnknown.push(item)
             return
           }
-          const formatExifDateTime = formatDate(item[1].metadata.exifDateTime)
+          const formatExifDateTime = formatDate(item.datetime)
           const isRepeat = this.photoDates[this.photoDates.length - 1] === formatExifDateTime
           if (!isRepeat || MaxItem === 0) {
             MaxItem = MAX
@@ -280,13 +280,13 @@ class Media extends Base {
     this.getHoverPhoto = (digest) => {
       if (!this.state.selectedItems.length) return
       const lastSelect = this.state.selectedItems[this.state.selectedItems.length - 1]
-      const lastSelectIndex = this.state.media.findIndex(photo => photo[0] === lastSelect)
-      const hoverIndex = this.state.media.findIndex(photo => photo[0] === digest)
+      const lastSelectIndex = this.state.media.findIndex(photo => photo.hash === lastSelect)
+      const hoverIndex = this.state.media.findIndex(photo => photo.hash === digest)
       let shiftHoverPhotos = this.state.media.slice(lastSelectIndex, hoverIndex + 1)
 
       if (hoverIndex < lastSelectIndex) shiftHoverPhotos = this.state.media.slice(hoverIndex, lastSelectIndex + 1)
       // debug('this.hover', digest, lastSelect, lastSelectIndex, hoverIndex, shiftHoverPhotos, this.state.shiftHoverItems)
-      this.setState({ shiftHoverItems: shiftHoverPhotos.map(photo => photo[0]) })
+      this.setState({ shiftHoverItems: shiftHoverPhotos.map(photo => photo.hash) })
     }
 
     this.getShiftStatus = (event) => {
@@ -299,23 +299,23 @@ class Media extends Base {
       // debug('this.startDownload', this.state.selectedItems, this.memoizeValue)
       if (this.state.selectedItems.length > 0) {
         const photos = this.state.selectedItems
-          .map(digest => this.state.media.find(photo => photo[0] === digest))
+          .map(digest => this.state.media.find(photo => photo.hash === digest))
           .map(photo => ({
             name: getName(photo),
-            size: photo[1].metadata.size,
+            size: photo.size,
             type: 'file',
-            uuid: photo[0]
+            uuid: photo.hash
           }))
-        debug('startDownload', photos, this.state.media.find(photo => photo[0] === this.state.selectedItems[0]))
+        debug('startDownload', photos, this.state.media.find(photo => photo.hash === this.state.selectedItems[0]))
         ipcRenderer.send('DOWNLOAD', { folders: [], files: photos, dirUUID: 'media' })
         this.setState({ selectedItems: [] })
       } else {
-        const photo = this.state.media.find(item => item[0] === this.memoizeValue.currentDigest)
+        const photo = this.state.media.find(item => item.hash === this.memoizeValue.currentDigest)
         const data = {
           name: getName(photo),
-          size: photo[1].metadata.size,
+          size: photo.size,
           type: 'file',
-          uuid: photo[0]
+          uuid: photo.hash
         }
         debug('startDownload', data, photo)
         ipcRenderer.send('DOWNLOAD', { folders: [], files: [data], dirUUID: 'media' })
@@ -371,7 +371,7 @@ class Media extends Base {
   }
 
   willReceiveProps(nextProps) {
-    // console.log('media nextProps', nextProps)
+    console.log('media nextProps', nextProps)
     if (!nextProps.apis || !nextProps.apis.media) return
     const media = nextProps.apis.media
     if (media.isPending() || media.isRejected()) return
@@ -382,12 +382,12 @@ class Media extends Base {
     this.apis = nextProps.apis
 
     if (value !== this.state.preValue) {
-      /* remove photos without metadata */
-      const filter = value.filter(item => !!item[1].metadata)
+      /* remove photos without hash */
+      const filter = value.filter(item => !!item.hash)
 
       /* sort photos by date */
-      filter.sort((prev, next) => (parseDate(next[1].metadata.exifDateTime) - parseDate(prev[1].metadata.exifDateTime)) || (
-        parseInt(`0x${next[0]}`, 16) - parseInt(`0x${prev[0]}`, 16)))
+      filter.sort((prev, next) => (parseDate(next.datetime) - parseDate(prev.datetime)) || (
+        parseInt(`0x${next.hash}`, 16) - parseInt(`0x${prev.hash}`, 16)))
 
       this.setState({ preValue: value, media: filter })
     }

@@ -5,88 +5,15 @@ import { Avatar, IconButton, Paper, MenuItem, Popover, Menu } from 'material-ui'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import ToggleCheckBox from 'material-ui/svg-icons/toggle/check-box'
 import ToggleCheckBoxOutlineBlank from 'material-ui/svg-icons/toggle/check-box-outline-blank'
-import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
 import FileFolder from 'material-ui/svg-icons/file/folder'
-import PhotoIcon from 'material-ui/svg-icons/image/photo'
 import ArrowUpward from 'material-ui/svg-icons/navigation/arrow-upward'
 import ArrowDownward from 'material-ui/svg-icons/navigation/arrow-downward'
 import CheckIcon from 'material-ui/svg-icons/navigation/check'
-import ContextMenu from '../common/ContextMenu'
-import { List, AutoSizer, Grid } from 'react-virtualized'
-import { TXTIcon, WORDIcon, EXCELIcon, PPTIcon, PDFIcon } from '../common/Svg'
+import { List, AutoSizer } from 'react-virtualized'
+import renderFileIcon from '../common/renderFileIcon'
 import FlatButton from '../common/FlatButton'
 
 const debug = Debug('component:file:GridView:')
-
-const formatTime = (mtime) => {
-  if (!mtime) {
-    return null
-  }
-
-  const time = new Date()
-  time.setTime(parseInt(mtime, 10))
-  return `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`
-}
-
-const renderLeading = (leading) => {
-  let height = '100%'
-  let backgroundColor = '#FFF'
-  let opacity = 0
-
-  switch (leading) {
-    case 'inactiveHint':
-      height = 20
-      backgroundColor = '#000'
-      opacity = 0.26
-      break
-    case 'activeHint':
-      height = 20
-      backgroundColor = '#FF0000'
-      opacity = 1
-      break
-    case 'fullOn':
-      backgroundColor = '#FF0000'
-      opacity = 1
-      break
-  }
-
-  return <div style={{ flex: '0 0 4px', height, backgroundColor, opacity, zIndex: 1000 }} />
-}
-
-const renderCheck = check =>
-  (check === 'checked' || check === 'unchecking')
-    ? <ToggleCheckBox style={{ color: '#FF0000' }} />
-    : check === 'checking'
-      ? <ToggleCheckBoxOutlineBlank style={{ color: 'rgba(0,0,0,0.38)' }} />
-      : null
-
-const renderFileIcon = (name, metadata, size) => {
-  /* media */
-  if (metadata) return <PhotoIcon style={{ color: '#ea4335' }} />
-
-  /* PDF, TXT, Word, Excel, PPT */
-  let extension = name.replace(/^.*\./, '')
-  if (!extension || extension === name) extension = 'OTHER'
-
-  const iconArray = {
-    PDF: { Icon: PDFIcon, color: '#db4437' },
-    TXT: { Icon: TXTIcon, color: 'rgba(0,0,0,0.54)' },
-    DOCX: { Icon: WORDIcon, color: '#4285f4' },
-    DOC: { Icon: WORDIcon, color: '#4285f4' },
-    XLS: { Icon: EXCELIcon, color: '#0f9d58' },
-    XLSX: { Icon: EXCELIcon, color: '#0f9d58' },
-    PPT: { Icon: PPTIcon, color: '#db4437' },
-    PPTX: { Icon: PPTIcon, color: '#db4437' },
-    OTHER: { Icon: EditorInsertDriveFile, color: 'rgba(0,0,0,0.54)' }
-  }
-
-  let type = extension.toUpperCase()
-  // debug('renderFileIcon', name, metadata, extension, iconArray, type)
-  if (!iconArray[type]) type = 'OTHER'
-
-  const { Icon, color } = iconArray[type]
-  return (<Icon style={{ color, width: size, height: size }} />)
-}
 
 class Row extends React.PureComponent {
   constructor(props) {
