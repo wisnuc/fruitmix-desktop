@@ -155,7 +155,7 @@ class Row extends React.PureComponent {
                         entry.type === 'folder' || entry.type === 'public' || entry.type === 'directory'
                         ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 64, height: 64 }} />
                         : entry.type === 'file'
-                        ? renderFileIcon(entry.name, entry.metadata, 64)
+                        ? renderFileIcon(entry.name, entry.magic, 64)
                         : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)', width: 64, height: 64 }} />
                       }
                     </div>

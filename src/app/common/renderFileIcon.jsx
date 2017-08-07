@@ -3,9 +3,7 @@ import PhotoIcon from 'material-ui/svg-icons/image/photo'
 import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
 import { TXTIcon, WORDIcon, EXCELIcon, PPTIcon, PDFIcon, VideoIcon, AudioIcon } from '../common/Svg'
 
-const renderFileIcon = (name, metadata, setSize, dark, white) => {
-  /* media */
-  if (metadata) return <PhotoIcon style={{ color: '#ea4335' }} />
+const renderFileIcon = (name, magic, setSize, dark, white) => {
 
   /* PDF, TXT, Word, Excel, PPT */
   let extension = name.replace(/^.*\./, '')
@@ -35,9 +33,19 @@ const renderFileIcon = (name, metadata, setSize, dark, white) => {
   // debug('renderFileIcon', name, metadata, extension, iconArray, type)
   if (!iconArray[type]) type = 'OTHER'
 
-  const { Icon, color } = iconArray[type]
+  let { Icon, color } = iconArray[type]
   const size = setSize || 24
-  if (white) return (<Icon style={{ color: '#FFFFFF', width: size, height: size }} />)
+
+  /* media */
+  const Pic = ['JPEG']
+  if (Pic.findIndex(p => p === magic) > -1) {
+    Icon = PhotoIcon
+    color = '#ea4335'
+  }
+
+  /* when background is dark, icon color should adjust to white */
+  if (white) color = '#FFFFFF'
+    
   return (<Icon style={{ color, width: size, height: size }} />)
 }
 

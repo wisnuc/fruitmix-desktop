@@ -44,7 +44,7 @@ class PhotoList extends React.Component {
       const currentIndex = this.indexHeightSum.findIndex(data => data > list.scrollTop + 200)
       const percentage = list.scrollTop / this.maxScrollTop
       this.date = this.photoMapDates[currentIndex].date
-      this.currentDigest = this.photoMapDates[currentIndex].photos[0][0]
+      this.currentDigest = this.photoMapDates[currentIndex].photos[0].hash
       if (!this.firstScroll) this.props.memoize({ currentDigest: '', currentScrollTop: list.scrollTop })
       // debug('this.props.memoize()', this.props.memoize())
 
@@ -228,7 +228,7 @@ class PhotoList extends React.Component {
                 previousScrollTop = this.props.memoize().currentScrollTop
               } else if (this.props.memoize().currentDigest) {
                 this.photoMapDates.forEach((list, index) => {
-                  const Got = list.photos.findIndex(photo => photo[0] === this.props.memoize().currentDigest)
+                  const Got = list.photos.findIndex(photo => photo.hash === this.props.memoize().currentDigest)
                   if (Got >= 0) {
                     previousScrollTop = this.indexHeightSum[index - 1]
                   }
