@@ -9,7 +9,7 @@ import WifiIcon from 'material-ui/svg-icons/notification/wifi'
 import LocalLogin from './LocalLogin'
 import FlatButton from '../common/FlatButton'
 import Checkmark from '../common/Checkmark'
-import { Barcelona } from '../common/Svg'
+import { Barcelona, WISNUC } from '../common/Svg'
 
 const debug = Debug('component:Login')
 const duration = 300
@@ -505,7 +505,6 @@ class LoginApp extends React.Component {
             position: 'absolute',
             width: '100%',
             height: '100%',
-            filter: 'blur(4px)',
             opacity: this.state.hello ? 0 : 1,
             transition: `opacity ${duration}ms`
           }}
@@ -518,15 +517,8 @@ class LoginApp extends React.Component {
         </div>
 
         {/* Icon */}
-        <div style={{ position: 'absolute', top: -16, left: 24 }} >
-          <img
-            width={96}
-            height={96}
-            alt=""
-            src="../src/assets/images/index/wisnuc.png"
-            style={{ filter: 'brightness(5000%)' }}
-            onTouchTap={this.QRScaned}
-          />
+        <div style={{ position: 'absolute', top: -4, left: 24 }} >
+          <WISNUC />
         </div>
 
         {/* change mode button */}
