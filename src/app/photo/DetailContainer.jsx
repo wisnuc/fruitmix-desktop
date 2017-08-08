@@ -57,6 +57,27 @@ const getResolution = (height, width) => {
   return `${res} 像素 ${height} x ${width}`
 }
 
+const convertGPS = (value, direction) => {
+  let d
+  let c
+  if (direction === 'N' || direction === 'E') {
+    d = 1
+  } else if (direction === 'S' || direction === 'W') {
+    d = -1
+  } else {
+    return null
+  }
+  try {
+    c = value.split(',').reduce((acc, data, index) => {
+      const [a, b] = data.split('/')
+      return (acc + (a / b) / 60 ** index)
+    }, 0)
+  } catch (e) {
+    return null
+  }
+  return Math.round(d * c * 1000) / 1000
+}
+
 class DetailContainerInline extends React.Component {
   constructor(props) {
     super(props)
@@ -229,7 +250,7 @@ class DetailContainerInline extends React.Component {
       } else return
       /* memoize digest */
       this.digest = this.props.items[this.currentIndex].hash
-      this.props.memoize({ currentDigest: this.digest, currentScrollTop: 0 })
+      this.props.memoize({ currentDigest: this.digest, currentScrollTop: 0, downloadingDigest: this.digest })
       this.refContainer.style.overflow = 'hidden'
       this.zoom = 1
       this.setState({
@@ -268,10 +289,6 @@ class DetailContainerInline extends React.Component {
       }
     }
   }
-  componentDidMount() {
-    this.forceUpdate()
-  }
-
   componentWillMount() {
     /* init three items' content */
     this.centerItem = this.props.items[this.currentIndex]
@@ -283,6 +300,13 @@ class DetailContainerInline extends React.Component {
     if (this.currentIndex < this.props.items.length - 1) {
       this.rightItem = this.props.items[this.currentIndex + 1]
     }
+    /* memoize Digest for downloading */
+    this.props.memoize({ downloadDigest: this.centerItem.hash })
+  }
+
+  componentDidMount() {
+    /* update refContainer size */
+    this.forceUpdate()
   }
 
   componentWillUnmount() {
@@ -313,27 +337,6 @@ class DetailContainerInline extends React.Component {
   renderInfo() {
     debug('renderInfo', this.props.items.length, this.photo)
     const { datetime, model, make, h, w, size, lat, latr, long, longr } = this.photo
-
-    const convertGPS = (value, direction) => {
-      let d
-      let c
-      if (direction === 'N' || direction === 'E') {
-        d = 1
-      } else if (direction === 'S' || direction === 'W') {
-        d = -1
-      } else {
-        return null
-      }
-      try {
-        c = value.split(',').reduce((acc, data, index) => {
-          const [a, b] = data.split('/')
-          return (acc + (a / b) / 60 ** index)
-        }, 0)
-      } catch (e) {
-        return null
-      }
-      return Math.round(d * c * 1000) / 1000
-    }
 
     const latitude = convertGPS(lat, latr)
     const longitude = convertGPS(long, longr)
@@ -382,7 +385,7 @@ class DetailContainerInline extends React.Component {
         }
 
         {/* location */}
-        { lat && latr && long && longr &&
+        { lat && latr && long && longr && longitude !== null && latitude !== null &&
         <div style={{ height: 72, display: 'flex', alignItems: 'center' }}>
           <LoactionIcon color="rgba(0,0,0,0.54)" />
           <div style={{ marginLeft: 64 }}>
@@ -395,7 +398,7 @@ class DetailContainerInline extends React.Component {
         }
 
         {/* map */}
-        { lat && latr && long && longr &&
+        { lat && latr && long && longr && longitude !== null && latitude !== null &&
           <div style={{ width: 360, height: 360, marginLeft: -32 }}>
             <Map
               longitude={longitude}
@@ -503,6 +506,7 @@ class DetailContainerInline extends React.Component {
                 top: 0,
                 left: 0,
                 width: this.state.detailInfo ? 'calc(100% - 360px)' : '100%',
+                zIndex: 100,
                 height: 64,
                 display: 'flex',
                 alignItems: 'center',
@@ -571,6 +575,7 @@ class DetailContainerInline extends React.Component {
               borderRadius: 28,
               width: 56,
               height: 56,
+              zIndex: 100,
               left: '2%'
             }}
           >
@@ -590,6 +595,7 @@ class DetailContainerInline extends React.Component {
               position: 'absolute',
               width: 56,
               height: 56,
+              zIndex: 100,
               right: '2%'
             }}
           >

@@ -310,8 +310,8 @@ class Media extends Base {
         ipcRenderer.send('DOWNLOAD', { folders: [], files: photos, dirUUID: 'media' })
         this.setState({ selectedItems: [] })
       } else {
-        const photo = this.state.media.find(item => item.hash === this.memoizeValue.currentDigest)
-        debug(this.memoizeValue.currentDigest, photo)
+        const photo = this.state.media.find(item => item.hash === this.memoizeValue.downloadDigest)
+        debug(this.memoizeValue.downloadDigest, photo)
         const data = {
           name: getName(photo),
           size: photo.size,
