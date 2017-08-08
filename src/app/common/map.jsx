@@ -29,6 +29,9 @@ class Map extends React.Component {
         if (data && data.regeocode) {
           const compo = data.regeocode.addressComponent
           address = `${compo.province} ${compo.district}`
+          map.setZoomAndCenter(15, lnglatXY)
+        } else {
+          map.setZoomAndCenter(5, lnglatXY)
         }
         if (this.props.resultId) {
           document.getElementById(this.props.resultId).innerHTML = address
@@ -52,7 +55,6 @@ class Map extends React.Component {
           map,
           position: lnglatXY
         })
-        // map.setFitView()
       }
       regeocoder()
     }

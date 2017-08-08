@@ -40,7 +40,7 @@ import FirmwareUpdate from '../view/FirmwareUpdate'
 import Networking from '../view/Networking'
 import TimeDate from '../view/TimeDate'
 import FanControl from '../view/FanControl'
-import SystemUpdate from '../view/Update'
+import ClientUpdate from '../view/ClientUpdate'
 import Power from '../view/Power'
 
 import Debug from 'debug'
@@ -81,7 +81,7 @@ class NavViews extends Component {
     this.install('networking', Networking)
     this.install('timeDate', TimeDate)
     this.install('fanControl', FanControl)
-    this.install('systemUpdate', SystemUpdate)
+    this.install('clientUpdate', ClientUpdate)
     this.install('firmwareUpdate', FirmwareUpdate)
     this.install('power', Power)
 
