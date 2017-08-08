@@ -11,7 +11,7 @@ import UploadIcon from 'material-ui/svg-icons/file/cloud-upload'
 import DialogOverlay from '../common/DialogOverlay'
 import FlatButton from '../common/FlatButton'
 
-import PhotoDetail from './PhotoDetail'
+import DetailContainer from './DetailContainer'
 import PhotoList from './PhotoList'
 
 const debug = Debug('component:photoApp:')
@@ -144,7 +144,7 @@ class PhotoApp extends React.Component {
         }
 
         {/* PhotoDetail */}
-        <PhotoDetail
+        <DetailContainer
           onRequestClose={() => this.setState({ openDetail: false })}
           open={this.state.openDetail}
           style={{ position: 'fixed', left: 0, top: 0, width: '100%', height: '100%' }}
@@ -193,6 +193,7 @@ class PhotoApp extends React.Component {
                 <DownloadIcon color="#FFF" />
               </IconButton>
 
+              {/*
               <IconButton onTouchTap={() => this.toggleDialog('deleteDialog')}>
                 <DeleteIcon color="#FFF" />
               </IconButton>
@@ -200,6 +201,7 @@ class PhotoApp extends React.Component {
               <IconButton onTouchTap={() => this.toggleDialog('hideDialog')}>
                 <VisibilityOff color="#FFF" />
               </IconButton>
+              */}
               <div style={{ width: 24 }} />
 
             </div>

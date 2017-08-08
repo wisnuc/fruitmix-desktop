@@ -661,10 +661,9 @@ class DownloadFileSTM extends STM {
   }
 
   downloading() {
-    const _this = this
     const wrapper = this.wrapper
     console.log('in downloading...')
-    console.log(wrapper)
+    // console.log(wrapper)
     console.log(wrapper.name)
 
     if (wrapper.size === wrapper.seek) return wrapper.manager.downloadSchedule()
@@ -673,16 +672,14 @@ class DownloadFileSTM extends STM {
     const options = {
       method: 'GET',
       url: wrapper.dirUUID === 'media'
-      ? `${server}/media/${wrapper.target}/download`
+      ? `${server}/media/${wrapper.target}`
       : `${server}/drives/${wrapper.driveUUID}/dirs/${wrapper.dirUUID}/entries/${wrapper.target}`,
 
       headers: {
         Authorization: `${tokenObj.type} ${tokenObj.token}`,
         Range: `bytes=${this.wrapper.seek}-`
       },
-      qs: {
-        name: wrapper.rawName
-      }
+      qs: wrapper.dirUUID === 'media' ? { alt: 'data' } : { name: wrapper.rawName }
     }
 
     const streamOptions = {
@@ -699,21 +696,21 @@ class DownloadFileSTM extends STM {
 
     stream.on('drain', () => {
       const gap = stream.bytesWritten - this.wrapper.lastTimeSize
-      _this.wrapper.seek += gap
+      this.wrapper.seek += gap
       this.wrapper.manager.completeSize += gap
       this.wrapper.lastTimeSize = stream.bytesWritten
-      // console.log('一段文件写入完成 当前seek位置为 ：' + (_this.wrapper.seek/_this.wrapper.size * 100).toFixed(2) + '% 增加了 ：' + gap/this.wrapper.size *100 )
+      // console.log('一段文件写入完成 当前seek位置为 ：' + (this.wrapper.seek/this.wrapper.size * 100).toFixed(2) + '% 增加了 ：' + gap/this.wrapper.size *100 )
       wrapper.manager.updateStore()
     })
 
     stream.on('finish', () => {
       const gap = stream.bytesWritten - this.wrapper.lastTimeSize
-      _this.wrapper.seek += gap
+      this.wrapper.seek += gap
       this.wrapper.manager.completeSize += gap
       this.wrapper.lastTimeSize = stream.bytesWritten
 
       console.log(`一段文件写入结束 当前seek位置为 ：${
-         (_this.wrapper.seek / _this.wrapper.size * 100).toFixed(2)
+         (this.wrapper.seek / this.wrapper.size * 100).toFixed(2)
          }% 增加了 ：${(gap / this.wrapper.size * 100).toFixed(2)}`)
 
       this.wrapper.lastTimeSize = 0
@@ -723,7 +720,7 @@ class DownloadFileSTM extends STM {
     this.handle = request(options)
       .on('error', err => console.log('req : error', err))
 
-    _this.handle.pipe(stream)
+    this.handle.pipe(stream)
   }
 
   rename(oldPath) {

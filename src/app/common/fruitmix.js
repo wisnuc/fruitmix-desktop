@@ -17,7 +17,8 @@ class Fruitmix extends EventEmitter {
       address,
       userUUID,
       token,
-      request: this.request.bind(this)
+      request: this.request.bind(this),
+      requestAsync: this.requestAsync.bind(this)
     }
   }
 
@@ -250,6 +251,12 @@ class Fruitmix extends EventEmitter {
           .query({ platform: args.platform })
         break
 
+    /** client update **/
+      case 'releases':
+        r = request
+          .get(`https://api.github.com/repos/wisnuc/wisnuc-desktop-${args.platform}/releases`) // platform: mac, windows
+        break
+
       default:
         break
     }
@@ -268,7 +275,7 @@ class Fruitmix extends EventEmitter {
     this.requestAsync('drives').asCallback((err, drives) => {
       if (drives) {
         console.log('requestAsync drives success', drives)
-        const drive = drives.find(drive => drive.tag === 'home')
+        const drive = drives.find(d => d.tag === 'home')
         this.request('listNavDir', { driveUUID: drive.uuid, dirUUID: drive.uuid })
       }
     })

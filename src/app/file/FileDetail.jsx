@@ -134,7 +134,7 @@ class FileDetail extends React.PureComponent {
   }
 
   renderTitle(detailFile) {
-    const { name, type, metadata } = detailFile
+    const { name, type, magic } = detailFile
     return (
       <div
         style={{
@@ -151,7 +151,7 @@ class FileDetail extends React.PureComponent {
             type === 'folder' || type === 'public' || type === 'directory'
             ? <FileFolder style={{ color: '#FFFFFF' }} />
             : type === 'file'
-            ? renderFileIcon(name, metadata, 24, false, true) // name, metadata, size, dark, white
+            ? renderFileIcon(name, magic, 24, false, true) // name, metadata, size, dark, white
             : <ErrorIcon style={{ color: '#FFFFFF' }} />
           }
         </div>
