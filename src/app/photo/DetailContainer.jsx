@@ -248,7 +248,7 @@ class DetailContainerInline extends React.Component {
       } else return
       /* memoize digest */
       this.digest = this.props.items[this.currentIndex].hash
-      this.props.memoize({ currentDigest: this.digest, currentScrollTop: 0, downloadingDigest: this.digest })
+      this.props.memoize({ currentDigest: this.digest, currentScrollTop: 0, downloadDigest: this.digest })
       this.refContainer.style.overflow = 'hidden'
       this.zoom = 1
       this.setState({

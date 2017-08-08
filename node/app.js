@@ -36,6 +36,7 @@ const mocha = false
 
 store.subscribe(configObserver)
 
+console.log('version:', app.getVersion())
 /*
 store.subscribe(() => {
   console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
