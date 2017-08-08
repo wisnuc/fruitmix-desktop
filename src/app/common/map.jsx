@@ -23,10 +23,13 @@ class Map extends React.Component {
       })
 
       const geocoderCallBack = (data) => {
-        console.log('address', data.regeocode)
+        console.log('address', data)
         /* 返回地址描述 */
-        const compo = data.regeocode.addressComponent
-        const address = `${compo.province} ${compo.district}`
+        let address = '其它地区'
+        if (data && data.regeocode) {
+          const compo = data.regeocode.addressComponent
+          address = `${compo.province} ${compo.district}`
+        }
         if (this.props.resultId) {
           document.getElementById(this.props.resultId).innerHTML = address
         }
@@ -40,7 +43,7 @@ class Map extends React.Component {
         })
         geocoder.getAddress(lnglatXY, (status, result) => {
           console.log(status, result)
-          if (status === 'complete' && result.info === 'OK') {
+          if ((status === 'complete' && result.info === 'OK') || status === 'no_data') {
             geocoderCallBack(result)
           }
         })

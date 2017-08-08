@@ -137,7 +137,6 @@ class DetailContainerInline extends React.Component {
       }
     }
 
-
     this.changeContainer = () => {
       this.photo = this.props.items[this.currentIndex]
       this.clientHeight = window.innerHeight
@@ -180,7 +179,6 @@ class DetailContainerInline extends React.Component {
         this.zoom = zoom
       }
     }
-
 
     /* change image */
     this.changeIndex = (direction) => {
@@ -315,7 +313,6 @@ class DetailContainerInline extends React.Component {
   }
 
   /* ReactTransitionGroup */
-
   componentWillEnter(callback) {
     this.componentWillAppear(callback)
   }
