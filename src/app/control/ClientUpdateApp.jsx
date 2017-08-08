@@ -27,12 +27,12 @@ class Update extends React.Component {
   }
 
   render() {
-    const { firm, showRel, latest, installed, toggleDetail } = this.props
-    debug('render!', this.props)
-    // if (!firm) return (<div />)
-    const current = {}
+    const { rels, toggleDetail } = this.props
+    debug('render client', this.props)
+    if (!rels) return (<div />)
+    const current = rels[0]
 
-    this.rel = showRel
+    this.rel = rels[0]
     return (
       <div style={{ height: '100%', margin: 16 }}>
         <div style={{ width: '100%', height: 72 }}>

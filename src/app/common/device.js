@@ -185,7 +185,7 @@ class Device extends RequestManager {
       /** FirmwareUpdate API **/
       case 'firm':
         r = request
-          .get('http://10.10.9.86:3001/state')
+          .get('http://10.10.9.124:3001/state')
         break
 
       default:

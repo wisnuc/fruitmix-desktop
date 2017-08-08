@@ -57,7 +57,7 @@ class Update extends Base {
   renderContent({ openSnackBar }) {
     return (
       <UpdateApp
-        rel={this.state.releases}
+        rels={this.state.releases}
         apis={this.ctx.props.apis}
         nav={this.ctx.props.nav}
         selectedDevice={this.ctx.props.selectedDevice}
