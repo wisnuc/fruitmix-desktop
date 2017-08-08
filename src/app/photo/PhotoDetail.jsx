@@ -1,63 +1,11 @@
 import React from 'react'
 import Debug from 'debug'
 import UUID from 'node-uuid'
-import prettysize from 'prettysize'
-import { IconButton, CircularProgress } from 'material-ui'
-import CheckIcon from 'material-ui/svg-icons/action/check-circle'
-import DeleteIcon from 'material-ui/svg-icons/action/delete'
-import DateIcon from 'material-ui/svg-icons/action/today'
-import ImageIcon from 'material-ui/svg-icons/image/image'
-import CameraIcon from 'material-ui/svg-icons/image/camera'
-import LoactionIcon from 'material-ui/svg-icons/communication/location-on'
-import CloseIcon from 'material-ui/svg-icons/navigation/close'
-import VisibilityOff from 'material-ui/svg-icons/action/visibility-off'
-import InfoIcon from 'material-ui/svg-icons/action/info'
-import DownloadIcon from 'material-ui/svg-icons/file/file-download'
-import RenderToLayer from 'material-ui/internal/RenderToLayer'
-import keycode from 'keycode'
-import EventListener from 'react-event-listener'
-import { TweenMax } from 'gsap'
-import ReactTransitionGroup from 'react-addons-transition-group'
-import DialogOverlay from '../common/DialogOverlay'
-import FlatButton from '../common/FlatButton'
-import Map from '../common/map'
+import { CircularProgress } from 'material-ui'
 
 const debug = Debug('component:photoApp:PhotoDetail')
 
-const mousePosition = (ev) => {
-  if (ev.pageX || ev.pageY) {
-    return { x: ev.pageX, y: ev.pageY }
-  }
-  return {
-    x: ev.clientX + document.body.scrollLeft - document.body.clientLeft,
-    y: ev.clientY + document.body.scrollTop - document.body.clientTop
-  }
-}
-
-const phaseExifTime = (time, type) => {
-  const a = time.replace(/\s+/g, ':').split(':')
-  const date = new Date()
-  const week = ['日', '一', '二', '三', '四', '五', '六']
-  date.setFullYear(a[0], a[1] - 1, a[2])
-  if (type === 'date') return `${a[0]}年${a[1]}月${a[2]}日`
-  if (type === 'time') return `${a[3]} : ${a[4]}`
-  if (type === 'week') return `星期${week[date.getDay()]}`
-  return `${a[0]}年${a[1]}月${a[2]}日 星期${week[date.getDay()]} ${a[3]} : ${a[4]}`
-}
-
-const getResolution = (height, width) => {
-  let res = height * width
-  if (res > 100000000) {
-    res = Math.ceil(res / 100000000)
-    return `${res} 亿像素 ${height} x ${width}`
-  } else if (res > 10000) {
-    res = Math.ceil(res / 10000)
-    return `${res} 万像素 ${height} x ${width}`
-  }
-  return `${res} 像素 ${height} x ${width}`
-}
-
-class PhotoDetailInline extends React.Component {
+class PhotoDetail extends React.Component {
   constructor(props) {
     super(props)
 
@@ -66,9 +14,6 @@ class PhotoDetailInline extends React.Component {
     this.dragPosition = { x: 0, y: 0, left: 0, top: 0 }
 
     this.state = {
-      direction: null,
-      hideDialog: false,
-      deleteDialog: false,
       thumbPath: '',
       detailPath: ''
     }
@@ -143,27 +88,6 @@ class PhotoDetailInline extends React.Component {
       } else if (this.photoWidth > this.clientWidth) {
         this.photoWidth = this.clientWidth
         this.photoHeight = this.photoWidth * HWRatio
-      }
-    }
-
-    /* animation */
-    this.animation = (status) => {
-      const transformItem = this.refReturn
-      const root = this.refRoot
-      const overlay = this.refOverlay
-      const time = 0.2
-      const ease = global.Power4.easeOut
-
-      if (status === 'In') {
-        TweenMax.from(overlay, time, { opacity: 0, ease })
-        TweenMax.from(transformItem, time, { rotation: 180, opacity: 0, ease })
-        TweenMax.from(root, time, { opacity: 0, ease })
-      }
-
-      if (status === 'Out') {
-        TweenMax.to(overlay, time, { opacity: 0, ease })
-        TweenMax.to(transformItem, time, { rotation: 180, opacity: 0, ease })
-        TweenMax.to(root, time, { opacity: 0, ease })
       }
     }
 
@@ -259,20 +183,6 @@ class PhotoDetailInline extends React.Component {
     this.props.ipcRenderer.send('mediaHideImage', this.session)
   }
 
-  /* ReactTransitionGroup */
-
-  componentWillEnter(callback) {
-    this.componentWillAppear(callback)
-  }
-
-  componentWillAppear(callback) {
-    this.enterTimeout = setTimeout(callback, 200) // matches transition duration
-  }
-
-  componentWillLeave(callback) {
-    this.leaveTimeout = setTimeout(callback, 200) // matches transition duration
-  }
-
   renderDetail() {
     /* calculate photoHeight and photoWidth */
     if (this.digest === this.props.item.hash && (this.state.thumbPath || this.state.detailPath)) {
@@ -329,6 +239,7 @@ class PhotoDetailInline extends React.Component {
     if (!this.session) {
       this.startDownload()
     }
+
     return (
       <CircularProgress size={64} thickness={5} />
     )
@@ -351,20 +262,6 @@ class PhotoDetailInline extends React.Component {
         {/* main image */}
         { this.renderDetail() }
       </div>
-    )
-  }
-}
-
-/*
- * Use RenderToLayer method to move the componet to root node
-*/
-
-class PhotoDetail extends React.Component {
-  render() {
-    return (
-      <ReactTransitionGroup>
-        <PhotoDetailInline {...this.props} />
-      </ReactTransitionGroup>
     )
   }
 }

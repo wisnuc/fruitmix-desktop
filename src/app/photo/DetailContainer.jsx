@@ -1,6 +1,5 @@
 import React from 'react'
 import Debug from 'debug'
-import UUID from 'node-uuid'
 import prettysize from 'prettysize'
 import { IconButton } from 'material-ui'
 import CheckIcon from 'material-ui/svg-icons/action/check-circle'
@@ -312,31 +311,50 @@ class DetailContainerInline extends React.Component {
   }
 
   renderInfo() {
-    // debug('renderInfo', this.props.items.length, this.photo)
-    const { datetime, model, make, h, w, size } = this.photo
-    const [ exifDateTime, exifModel, exifMake, height, width ] = [datetime, model, make, h, w]
+    debug('renderInfo', this.props.items.length, this.photo)
+    const { datetime, model, make, h, w, size, lat, latr, long, longr } = this.photo
 
-    const seed = (parseInt(this.digest.slice(0, 3), 16) - 4096) / 2048
-    const longitude = Math.round((121 + seed) * 10000) / 10000
-    const latitude = Math.round((31 + seed) * 10000) / 10000
+    const convertGPS = (value, direction) => {
+      let d
+      let c
+      if (direction === 'N' || direction === 'E') {
+        d = 1
+      } else if (direction === 'S' || direction === 'W') {
+        d = -1
+      } else {
+        return null
+      }
+      try {
+        c = value.split(',').reduce((acc, data, index) => {
+          const [a, b] = data.split('/')
+          return (acc + (a / b) / 60 ** index)
+        }, 0)
+      } catch (e) {
+        return null
+      }
+      return Math.round(d * c * 1000) / 1000
+    }
+
+    const latitude = convertGPS(lat, latr)
+    const longitude = convertGPS(long, longr)
 
     return (
       <div style={{ padding: '0px 32px 0px 32px', width: 296 }}>
         <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.54)', height: 48, display: 'flex', alignItems: 'center' }}> 详情 </div>
-        { exifDateTime &&
+        { datetime &&
         <div style={{ height: 72, display: 'flex', alignItems: 'center' }}>
           <DateIcon color="rgba(0,0,0,0.54)" />
           <div style={{ marginLeft: 64 }}>
             <div style={{ color: 'rgba(0,0,0,0.87)', lineHeight: '24px' }}>
-              { phaseExifTime(exifDateTime, 'date') }
+              { phaseExifTime(datetime, 'date') }
             </div>
             <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14, lineHeight: '20px' }}>
-              { `${phaseExifTime(exifDateTime, 'week')}  ${phaseExifTime(exifDateTime, 'time')}` }
+              { `${phaseExifTime(datetime, 'week')}  ${phaseExifTime(datetime, 'time')}` }
             </div>
           </div>
         </div>
         }
-        { height && width && size &&
+        { h && w && size &&
         <div style={{ height: 72, display: 'flex', alignItems: 'center' }}>
           <ImageIcon color="rgba(0,0,0,0.54)" />
           <div style={{ marginLeft: 64 }}>
@@ -344,27 +362,27 @@ class DetailContainerInline extends React.Component {
               { this.digest.slice(0, 9) }
             </div>
             <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14, lineHeight: '20px' }}>
-              { `${getResolution(height, width)} ${prettysize(size)}` }
+              { `${getResolution(h, w)} ${prettysize(size)}` }
             </div>
           </div>
         </div>
         }
-        { exifMake && exifModel &&
+        { make && model &&
         <div style={{ height: 72, display: 'flex', alignItems: 'center' }}>
           <CameraIcon color="rgba(0,0,0,0.54)" />
           <div style={{ marginLeft: 64 }}>
             <div style={{ color: 'rgba(0,0,0,0.87)', lineHeight: '24px' }}>
-              { exifModel }
+              { model }
             </div>
             <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14, lineHeight: '20px' }}>
-              { exifMake }
+              { make }
             </div>
           </div>
         </div>
         }
 
         {/* location */}
-        { exifDateTime &&
+        { lat && latr && long && longr &&
         <div style={{ height: 72, display: 'flex', alignItems: 'center' }}>
           <LoactionIcon color="rgba(0,0,0,0.54)" />
           <div style={{ marginLeft: 64 }}>
@@ -377,7 +395,7 @@ class DetailContainerInline extends React.Component {
         }
 
         {/* map */}
-        { exifDateTime &&
+        { lat && latr && long && longr &&
           <div style={{ width: 360, height: 360, marginLeft: -32 }}>
             <Map
               longitude={longitude}

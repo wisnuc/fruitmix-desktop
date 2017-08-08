@@ -311,6 +311,7 @@ class Media extends Base {
         this.setState({ selectedItems: [] })
       } else {
         const photo = this.state.media.find(item => item.hash === this.memoizeValue.currentDigest)
+        debug(this.memoizeValue.currentDigest, photo)
         const data = {
           name: getName(photo),
           size: photo.size,
