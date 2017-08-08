@@ -110,7 +110,7 @@
     "validator": "^6.0.0"
   },
   "optionalDependencies": {
-    "fs-xattr": "^0.1.15"
+    "fs-xattr": "^0.1.17"
   },
   "src": "src",
   "test": "test",
