@@ -341,28 +341,30 @@ class Media extends Base {
       }
     }
 
+    this.uploadMediaAsync = async (driveUUID) => {
+      const data = await this.ctx.props.apis.requestAsync('listNavDir', { driveUUID, dirUUID: driveUUID })
+      const index = data.entries.findIndex(entry => entry.name === '上传的照片')
+      if (index > -1) {
+        ipcRenderer.send('UPLOADMEDIA', { driveUUID, dirUUID: data.entries[index].uuid })
+      } else {
+        const uuid = await this.ctx.props.apis.request('mkdir', { driveUUID, dirUUID: driveUUID, dirname: '上传的照片' })
+        if (typeof uuid !== 'string') return this.uploadMedia() // FIXME
+        ipcRenderer.send('UPLOADMEDIA', { driveUUID, dirUUID: uuid })
+      } 
+    }
+
     this.uploadMedia = () => {
+      // debug('this.uploadMedia', this.ctx.props.apis, this.ctx.props.apis.listNavDir)
       if (!this.ctx.props.apis.listNavDir || !this.ctx.props.apis.listNavDir.data) {
         this.ctx.openSnackBar('上传失败！')
         return
       }
       const data = this.ctx.props.apis.listNavDir.data
       const rootUUID = data.path[0].uuid
-      const index = data.entries.findIndex(entry => entry.name === '上传的照片')
-      if (index > -1) {
-        // debug('uploadMedia', rootUUID, this.ctx.props.apis.listNavDir.data)
-        ipcRenderer.send('UPLOADMEDIA', data.entries[index].uuid)
-      } else {
-        // debug('mkdir', rootUUID, this.ctx.props.apis.listNavDir.data)
-        this.ctx.props.apis.request('mkdir', { dirUUID: rootUUID, dirname: '上传的照片' }, (err, uuid) => {
-          if (err) {
-            this.ctx.openSnackBar(`上传失败：${err.message}`)
-          } else {
-            ipcRenderer.send('UPLOADMEDIA', uuid)
-          }
-        })
-      }
-      // ipcRenderer.send('UPLOADMEDIA', rootUUID)
+      this.uploadMediaAsync(rootUUID).catch((e) => {
+        debug('上传失败', e)
+        this.ctx.openSnackBar('上传失败！')
+      })
     }
   }
 
@@ -372,7 +374,7 @@ class Media extends Base {
   }
 
   willReceiveProps(nextProps) {
-    console.log('media nextProps', nextProps)
+    // console.log('media nextProps', nextProps)
     if (!nextProps.apis || !nextProps.apis.media) return
     const media = nextProps.apis.media
     if (media.isPending() || media.isRejected()) return

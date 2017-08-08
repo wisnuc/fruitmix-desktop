@@ -547,6 +547,7 @@ class DetailContainerInline extends React.Component {
                       <DownloadIcon color="#FFF" />
                     </IconButton>
 
+                    {/*
                     <IconButton onTouchTap={() => this.toggleDialog('deleteDialog')} tooltip="删除">
                       <DeleteIcon color="#FFF" />
                     </IconButton>
@@ -554,6 +555,7 @@ class DetailContainerInline extends React.Component {
                     <IconButton onTouchTap={() => this.toggleDialog('hideDialog')} tooltip="隐藏">
                       <VisibilityOff color="#FFF" />
                     </IconButton>
+                    */}
 
                     <IconButton onTouchTap={() => this.toggleDialog('detailInfo')} tooltip="信息">
                       <InfoIcon color="#FFF" />
@@ -629,7 +631,6 @@ class DetailContainerInline extends React.Component {
         </div>
 
         {/* delete dialog */}
-
         <DialogOverlay open={!!this.state.deleteDialog}>
           <div>
             {

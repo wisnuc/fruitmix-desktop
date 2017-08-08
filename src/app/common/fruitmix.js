@@ -17,7 +17,8 @@ class Fruitmix extends EventEmitter {
       address,
       userUUID,
       token,
-      request: this.request.bind(this)
+      request: this.request.bind(this),
+      requestAsync: this.requestAsync.bind(this)
     }
   }
 
