@@ -43,7 +43,7 @@ const checkUpdateAsync = async () => {
 }
 
 const checkUpdate = () => {
-  if (os.platform() !== 'win32' || os.platform() !== 'darwin') return
+  if (os.platform() !== 'win32' && os.platform() !== 'darwin') return
   checkUpdateAsync().catch(e => console.log(e))
 }
 
@@ -74,11 +74,11 @@ const download = (url, filePath) => {
 }
 
 const downloadAsync = async () => {
-  if (os.platform() !== 'win32' || os.platform() !== 'darwin') return
+  if (os.platform() !== 'win32' && os.platform() !== 'darwin') return
   const { filePath, url, rel } = await checkAsync()
   console.log('downloadAsync: check release')
   const currVersion = app.getVersion()
-  if (rel.name.localeCompare(currVersion) > 0) return console.log('already lts')
+  if (rel.name.localeCompare(currVersion) < 0) return console.log('already lts')
   try {
     await fs.accessAsync(filePath)
   } catch (error) {
