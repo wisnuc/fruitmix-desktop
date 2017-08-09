@@ -49,9 +49,7 @@ store.subscribe(() => {
 /* app ready and open window */
 app.on('ready', () => {
   const appDataPath = app.getPath('appData')
-  // console.log(`appDataPath is ${appDataPath}`)
   const configuration = new Configuration(appDataPath)
-
   configuration.initAsync().asCallback((err) => {
     if (err) {
       console.log('failed to load configuration, die', err)
@@ -68,6 +66,9 @@ app.on('ready', () => {
 })
 
 app.on('window-all-closed', () => app.quit())
+
+
+/* autoUpdater FIXME */
 
 autoUpdater.logger = log
 autoUpdater.logger.transports.file.level = 'info'

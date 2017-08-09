@@ -179,6 +179,20 @@ class Configuration {
     return new Config(config, persistence)
   }
 
+  // update global config
+  async updateGlobalConfigAsync(newConfig) {
+    const configPath = this.getGlobalConfigPath()
+    const oldConfig = await this.loadObjectAsync(configPath) || {}
+    const config = Object.assign({}, oldConfig, newConfig)
+    const tmpdir = this.getTmpDir()
+    const persistence = createPersistenceAsync(configPath, tmpdir)
+    global.dispatch({
+      type: 'CONFIG_UPDATE',
+      data: config
+    })
+    return new Config(config, persistence)
+  }
+
   // init
   async initAsync() {
     // prepare directories
@@ -209,6 +223,7 @@ class Configuration {
         thumbPath: this.getThumbnailDir(),
         imagePath: this.getImageCacheDir(),
         downloadPath: this.getWisnucDownloadsDir(),
+        lastDevice: globalConfig.getConfig().lastDevice,
         users: this.userConfigs.map(uc => uc.getConfig())
       }
     })

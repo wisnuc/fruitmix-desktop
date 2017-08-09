@@ -5,6 +5,9 @@ module.exports = (state = defaultState, action) => {
     case 'CONFIG_INIT':
       return action.data
 
+    case 'CONFIG_UPDATE':
+      return action.data
+
     default:
       return state
   }
