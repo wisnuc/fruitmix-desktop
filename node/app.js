@@ -22,6 +22,8 @@ import mediaApi from './lib/media'
 import newUpload from './lib/newUpload'
 import download from './lib/newDownload'
 
+import clientUpdate from './lib/clientUpdate'
+
 // init window
 import { initMainWindow, getMainWindow } from './lib/window'
 import { initTestWindow } from './lib/testHook'
@@ -36,7 +38,6 @@ const mocha = false
 
 store.subscribe(configObserver)
 
-console.log('version:', app.getVersion())
 /*
 store.subscribe(() => {
   console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')

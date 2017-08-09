@@ -1,5 +1,6 @@
 const path = require('path')
 const fs = Promise.promisifyAll(require('fs'))
+const os = require('os')
 const app = require('electron').app
 const mkdirpAsync = Promise.promisify(require('mkdirp'))
 const validator = require('validator')
@@ -77,6 +78,14 @@ class Configuration {
   // public
   getImageCacheDir() {
     return path.join(this.root, 'imagecache')
+  }
+
+  getVersion() {
+    return app.getVersion()
+  }
+
+  getPlatform() {
+    return os.platform()
   }
 
   getUsersDir() {
@@ -208,7 +217,9 @@ class Configuration {
   getConfiguration() {
     return {
       global: this.globalConfig.getConfig(),
-      users: this.userConfigs.map(uc => uc.getConfig())
+      users: this.userConfigs.map(uc => uc.getConfig()),
+      appVersion: this.getVersion(),
+      platform: this.getPlatform()
     }
   }
 }
