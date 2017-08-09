@@ -1,4 +1,5 @@
 import fs from 'fs'
+import os from 'os'
 import path from 'path'
 import UUID from 'uuid'
 import request from 'request'
@@ -13,8 +14,9 @@ const getTmpPath = () => store.getState().config.tmpPath
 
 const checkAsync = async () => {
   console.log('CHECK_UPDATE...')
-  const platform = 'mac'
-  const url = `https://api.github.com/repos/wisnuc/wisnuc-desktop-${platform}/releases`
+  const platform = os.platform()
+  const type = platform === 'win32' ? 'windows' : 'mac' // mac or windows
+  const url = `https://api.github.com/repos/wisnuc/wisnuc-desktop-${type}/releases`
   const req = await request.getAsync({ url, headers: { 'User-Agent': 'request' } })
   const rels = JSON.parse(req.body)
 
@@ -41,6 +43,7 @@ const checkUpdateAsync = async () => {
 }
 
 const checkUpdate = () => {
+  if (os.platform() !== 'win32' || os.platform() !== 'darwin') return
   checkUpdateAsync().catch(e => console.log(e))
 }
 
@@ -71,8 +74,11 @@ const download = (url, filePath) => {
 }
 
 const downloadAsync = async () => {
-  const { filePath, url } = await checkAsync()
+  if (os.platform() !== 'win32' || os.platform() !== 'darwin') return
+  const { filePath, url, rel } = await checkAsync()
   console.log('downloadAsync: check release')
+  const currVersion = app.getVersion()
+  if (rel.name.localeCompare(currVersion) > 0) return console.log('already lts')
   try {
     await fs.accessAsync(filePath)
   } catch (error) {
