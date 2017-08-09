@@ -1,6 +1,6 @@
 import React from 'react'
 import Debug from 'debug'
-import { clipboard, shell } from 'electron'
+import { clipboard, shell, app } from 'electron'
 import { CircularProgress, Divider } from 'material-ui'
 import { cyan600, grey200 } from 'material-ui/styles/colors'
 import FlatButton from '../common/FlatButton'
@@ -14,7 +14,9 @@ class Update extends React.Component {
     super(props)
 
     this.state = {
-      confirm: false
+      status: 'checking',
+      confirm: false,
+      rel: null
     }
 
     this.toggleDialog = (op) => {
@@ -31,155 +33,133 @@ class Update extends React.Component {
       shell.openExternal(`https://github.com/wisnuc/${type}`)
     }
 
-    this.download = () => {
-      const asset = this.rel.assets.find((item) => {
-        const extension = item.name.replace(/.*\./, '')
-        return (extension === 'exe' || extension === 'dmg')
-      })
-      debug(asset.browser_download_url)
-      this.props.ipcRenderer.send('CHECK_UPDATE', asset.browser_download_url)
+    this.install = () => {
+      console.log('this.state.filePath')
+      this.props.ipcRenderer.send('INSTALL_NEW_VERSION', this.state.filePath)
     }
 
-    this.getPath = (event, path) => {
-      debug('this.getPath', path)
-      shell.openItem(path)
+    this.newRelease = (event, result) => {
+      debug('this.getPath', result)
+      const { rel, filePath } = result
+      let status = 'checking'
+      // console.log(global.config.appVersion.localeCompare(rel.name))
+      // console.log(rel.name.localeCompare(global.config.appVersion))
+      if (global.config.appVersion.localeCompare(rel.name) > 0 || !filePath) {
+        status = 'latest'
+      } else {
+        status = 'needUpdate'
+      }
+      status = 'needUpdate'
+      this.setState({ rel, filePath, status })
     }
   }
-
-  renderLoading() {
-    return (
-      <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <CircularProgress />
-      </div>
-    )
-  }
-
 
   componentDidMount() {
-    this.props.ipcRenderer.on('RELEASE_PATH', this.getPath)
+    this.props.ipcRenderer.send('CHECK_UPDATE')
+    this.props.ipcRenderer.on('NEW_RELEASE', this.newRelease)
   }
 
-  render() {
-    const { rels, toggleDetail } = this.props
-    debug('render client', this.props, global.config)
-    if (!rels) return this.renderLoading()
-    const currentVersion = global.config.appVersion
-    const showRel = rels.filter(rel => !rel.prerelease)[0]
-    const date = showRel.published_at.split('T')[0].split('-')
-
-    this.rel = showRel
+  renderCheckUpdate() {
+    const rel = this.state.rel
+    const date = rel.published_at.split('T')[0].split('-')
     return (
-      <div style={{ height: '100%', margin: 16 }}>
-        <div style={{ width: '100%', height: 72, display: 'flex', alignItems: 'center' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', fontSize: 34, color: cyan600 }}>
-              { showRel.name.replace(/\./g, ' . ') }
-              <div style={{ width: 8 }} />
-              { showRel.prerelease && '(beta)' }
-              <div style={{ width: 8 }} />
-              <div style={{ fontSize: 14, height: 40 }}>
-                <div style={{ height: 16 }} />
-                { '最新稳定版' }
-              </div>
-            </div>
-            <div style={{ height: 8 }} />
-            <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }}>
-              { `发布日期：${date[0]}年${date[1]}月${date[2]}日` }
-            </div>
-          </div>
-          <div style={{ flexGrow: 1 }} />
-          <div
-            style={{
-              height: 56,
-              width: 96,
-              marginRight: 16,
-              backgroundColor: grey200,
-              borderRadius: '8px',
-              fontSize: 14
-            }}
-            onTouchTap={toggleDetail}
-          >
-            <div style={{ height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              { currentVersion }
-            </div>
-            <div style={{ height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: -6 }}>
-              { '当前版本' }
-            </div>
-          </div>
-        </div>
-
+      <div>
         <div style={{ height: 24 }} />
-        <div style={{ color: 'rgba(0,0,0,0.54)', height: 36, display: 'flex', alignItems: 'center' }}>
-          {
-            showRel.id === currentVersion ? '已是最新稳定版'
-            : <FlatButton
-              style={{ marginLeft: -8 }}
-              label="下载并安装"
-              onTouchTap={() => this.toggleDialog('confirm')}
-              primary
-            />
-          }
+        <div> { `发现新版本： ${rel.name}` } </div>
+        <div style={{ height: 16 }} />
+        <div> { '发布日期：' } </div>
+        <div style={{ height: 8 }} />
+
+        <div style={{ marginLeft: 24, height: 40, display: 'flex', alignItems: 'center' }}>
+          { `${date[0]}年${date[1]}月${date[2]}日` }
         </div>
-        <div style={{ height: 48 }} />
-        <div style={{ fontWeight: 500, height: 56, display: 'flex', alignItems: 'center' }}>
-          { '更新内容：' }
-        </div>
+        <div style={{ height: 16 }} />
+        <div> { '更新内容：' } </div>
+        <div style={{ height: 8 }} />
         {
-          showRel.body ? showRel.body.split(/[1-9]\./).map(list => list && (
+          rel.body ? rel.body.split(/[1-9]\./).map(list => list && (
             <div style={{ marginLeft: 24, height: 40, display: 'flex', alignItems: 'center' }} key={list}>
               { '*' }
               <div style={{ width: 16 }} />
               { list }
             </div>
           ))
-            : (
-              <div style={{ marginLeft: 24, height: 40, display: 'flex', alignItems: 'center' }}>
-                { '*' }
-                <div style={{ width: 16 }} />
-                { '修复bugs' }
-              </div>
-            )
+            :
+          <div style={{ marginLeft: 24, height: 40, display: 'flex', alignItems: 'center' }}>
+            { '*' }
+            <div style={{ width: 16 }} />
+            { '修复bugs' }
+          </div>
+
         }
         <div style={{ height: 48 }} />
         <Divider />
         <div style={{ height: 8 }} />
         <FlatButton
+          style={{ marginLeft: -8 }}
+          label="安装"
+          onTouchTap={() => this.toggleDialog('confirm')}
           primary
-          label="更多版本"
-          onTouchTap={this.moreVersion}
         />
+      </div>
+    )
+  }
+
+  render() {
+    debug('render client', this.props, global.config)
+    const currentVersion = global.config.appVersion
+    return (
+      <div style={{ height: '100%', margin: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', fontSize: 20, color: cyan600 }}>
+          { `当前版本: ${currentVersion}` }
+        </div>
+
+        {
+          this.state.status === 'checking'
+            ? <div> 检查更新中... </div>
+            : this.state.status === 'latest'
+            ? <div style={{ display: 'flex', alignItems: 'center', height: 48 }}>
+              <div style={{ fontSize: 15 }}>
+                { '已是最新稳定版' }
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', marginTop: 2 }}>
+                <FlatButton primary label="查看更多版本" onTouchTap={this.moreVersion} />
+              </div>
+            </div>
+            : this.renderCheckUpdate()
+        }
 
         {/* dialog */}
         <DialogOverlay open={this.state.confirm} >
           {
-            this.state.confirm &&
-              <div style={{ width: 560, padding: '24px 24px 0px 24px' }}>
-                <div style={{ fontSize: 21, fontWeight: 500 }}>
-                  { '客户端升级' }
-                </div>
-                <div style={{ height: 20 }} />
-                <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }}>
-                  { `将要为您安装版本号为 ${this.rel.name} 的程序。` }
-                </div>
-                <div style={{ height: 8 }} />
-                <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }} >
-                  { '建议配合最新的WISNUC系统固件使用' }
-                </div>
-                <div style={{ height: 24 }} />
-                <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                  <FlatButton
-                    label="取消"
-                    primary
-                    onTouchTap={() => this.toggleDialog('confirm')}
-                  />
-                  <FlatButton
-                    label={'安装'}
-                    primary
-                    onTouchTap={this.download}
-                  />
-                </div>
+          this.state.confirm &&
+            <div style={{ width: 560, padding: '24px 24px 0px 24px' }}>
+              <div style={{ fontSize: 21, fontWeight: 500 }}>
+                { '客户端升级' }
               </div>
-          }
+              <div style={{ height: 20 }} />
+              <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }}>
+                { `将要为您安装版本号为 ${this.state.rel.name} 的程序。` }
+              </div>
+              <div style={{ height: 8 }} />
+              <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }} >
+                { '建议配合最新的WISNUC系统固件使用' }
+              </div>
+              <div style={{ height: 24 }} />
+              <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                <FlatButton
+                  label="取消"
+                  primary
+                  onTouchTap={() => this.toggleDialog('confirm')}
+                />
+                <FlatButton
+                  label={'安装'}
+                  primary
+                  onTouchTap={this.install}
+                />
+              </div>
+            </div>
+        }
         </DialogOverlay>
       </div>
     )

@@ -17,7 +17,7 @@ try {
         return data
       },
       setAsync: async (target, string, attr) => {
-        await fs.writeFileAsync(`${target}:${string}`, JSON.stringify(attr))
+        await fs.writeFileAsync(`${target}:${string}`, attr)
       }
     }
   }
@@ -33,7 +33,6 @@ const readXattrAsync = async (target) => {
     /* may throw xattr ENOENT or JSON SyntaxError */
     console.log('readXattrAsync error: ', e.code || e)
   }
-  if (typeof attr === 'string') attr = JSON.parse(attr)
   const stats = await fs.lstatAsync(target)
   const htime = os.platform() === 'win32' ? stats.atime.getTime() : stats.mtime.getTime()
   if (attr && attr.htime && attr.htime === htime) return attr

@@ -1,6 +1,7 @@
 import path from 'path'
 import fs from 'fs'
 import childProcess from 'child_process'
+import request from 'request'
 import Debug from 'debug'
 import { serverGetAsync, uploadFileWithStream, createFold } from './server'
 import { getMainWindow } from './window'
@@ -8,6 +9,7 @@ import utils from './util'
 import { userTasks, finishTasks } from './newUpload'
 import sendInfor from './transmissionUpdate'
 import { readXattr, setXattr } from './xattr'
+import store from '../serve/store/store'
 
 const debug = Debug('node:lib:uploadTaskCreater: ')
 const partSize = 1073741824
@@ -381,12 +383,49 @@ class createFolderSTM extends STM {
   }
 }
 
+/* init request */
+let server
+let tokenObj
+let Authorization
+const initArgs = () => {
+  server = `http://${store.getState().login.device.mdev.address}:3000`
+  tokenObj = store.getState().login.device.token.data
+  Authorization = `${tokenObj.type} ${tokenObj.token}`
+}
+
 /* upload file */
 class UploadFileSTM extends STM {
   constructor(wrapper) {
     super(wrapper)
     this.handle = null
     this.partFinishSize = 0
+
+    this.uploadFileWithStream = (driveUUID, dirUUID, name, part, readStream, callback) => {
+      initArgs()
+      let formDataOptions = {
+        size: part.end ? part.end - part.start + 1 : 0,
+        sha256: part.sha
+      }
+      if (part.start) formDataOptions = Object.assign(formDataOptions, { append: part.fingerprint })
+
+      const op = {
+        url: `${server}/drives/${driveUUID}/dirs/${dirUUID}/entries`,
+        headers: { Authorization },
+        formData: {
+          [name]: {
+            value: readStream,
+            options: JSON.stringify(formDataOptions)
+          }
+        }
+      }
+      this.handle = request.post(op, (error, data) => {
+        if (error) {
+          console.log('error', error)
+        } else {
+          if (callback) callback()
+        }
+      })
+    }
   }
 
   destructor() {
@@ -417,6 +456,7 @@ class UploadFileSTM extends STM {
 
   /* update file by segment */
   uploadSegment() {
+    if (this.wrapper.stateName !== 'running') return
     const wrapper = this.wrapper
     const data = wrapper.manager
     const target = wrapper.target
@@ -427,11 +467,12 @@ class UploadFileSTM extends STM {
     const readStream = fs.createReadStream(wrapper.abspath, { start: part.start, end: part.end, autoClose: true })
     readStream.on('data', (chunk) => {
       // console.log(`Received ${chunk.length} bytes of data.`)
+      if (this.wrapper.stateName !== 'running') return
       this.partFinishSize += chunk.length
       this.wrapper.manager.completeSize += chunk.length
     })
 
-    uploadFileWithStream(data.driveUUID, target, name, part, readStream, (error) => {
+    this.uploadFileWithStream(data.driveUUID, target, name, part, readStream, (error) => {
       if (error) { // FIXME
         this.wrapper.manager.completeSize -= this.partFinishSize
         this.partFinishSize = 0
@@ -464,7 +505,10 @@ class UploadFileSTM extends STM {
     if (this.wrapper.stateName !== 'running') return
     this.wrapper.stateName = 'pause'
     sendMsg()
-    if (this.handle) this.handle.abort()
+    if (this.handle) { 
+      this.handle.abort() 
+      console.log('abort!', this.wrapper.name)
+    }
     this.wrapper.manager.completeSize -= this.partFinishSize
     this.partFinishSize = 0
     this.wrapper.recordInfor(`${this.wrapper.name}暂停了`)
