@@ -6,6 +6,7 @@ import request from 'request'
 import { ipcMain, shell, app } from 'electron'
 import { getMainWindow } from './window'
 import store from '../serve/store/store'
+import { ftpGet } from './ftp'
 
 Promise.promisifyAll(request) // babel would transform Promise to bluebird
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
@@ -16,6 +17,7 @@ const checkAsync = async () => {
   console.log('CHECK_UPDATE...')
   const platform = os.platform()
   const type = platform === 'win32' ? 'windows' : 'mac' // mac or windows
+  // const type = 'mac'
   const url = `https://api.github.com/repos/wisnuc/wisnuc-desktop-${type}/releases`
   const req = await request.getAsync({ url, headers: { 'User-Agent': 'request' } })
   const rels = JSON.parse(req.body)
@@ -81,7 +83,7 @@ const download = (url, filePath) => {
 
 const downloadAsync = async () => {
   if (os.platform() !== 'win32' && os.platform() !== 'darwin') return
-  const { filePath, url, rel } = await checkAsync()
+  const { filePath, url, rel, fileName } = await checkAsync()
   console.log('downloadAsync: check release')
   const currVersion = app.getVersion()
   if (rel.name.localeCompare(currVersion) < 0) return
@@ -89,7 +91,10 @@ const downloadAsync = async () => {
     await fs.accessAsync(filePath)
   } catch (error) {
     console.log('downloadAsync: downloading')
-    await download(url, filePath)
+    // await download(url, filePath)
+    const tmpPath = path.join(getTmpPath(), `${UUID.v4()}AND${fileName}`)
+    const remotePath = `wisnuc_update/download/${fileName}`
+    await ftpGet(remotePath, tmpPath, filePath)
   }
   console.log('downloadAsync: download success')
 }

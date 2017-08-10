@@ -43,7 +43,7 @@ class Update extends React.Component {
       const { rel, filePath, error } = result
       if (!rel || error) return this.setState({ status: 'error' })
       let status = 'needUpdate'
-      if (global.config.appVersion.localeCompare(rel.name) > 0 || !filePath) status = 'latest'
+      if (global.config.appVersion.localeCompare(rel.name) >= 0 || !filePath) status = 'latest'
       return this.setState({ rel, filePath, status })
     }
   }

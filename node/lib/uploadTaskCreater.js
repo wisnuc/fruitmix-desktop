@@ -155,7 +155,7 @@ const visitFolderAsync = async (abspath, position, worklist, manager) => {
 const visitServerFiles = async (uuid, driveUUID, name, type, position) => {
   const fileNode = { uuid, name, children: [] }
   position.push(fileNode)
-  if (type !== 'folder') return
+  if (type !== 'folder' && type !== 'directory') return
   const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${uuid}`)
   const entries = listNav.entries
   if (!entries.length) return
@@ -164,33 +164,23 @@ const visitServerFiles = async (uuid, driveUUID, name, type, position) => {
   }
 }
 
-const diffTree = (taskPosition, serverPosition, manager, callback) => {
-  if (taskPosition.name !== serverPosition.name) return callback()
+const diffTree = async (taskPosition, serverPosition, manager) => {
+  if (taskPosition.name !== serverPosition.name) return
   taskPosition.stateName = 'finish'
   taskPosition.uuid = serverPosition.uuid
   manager.finishCount += 1
   manager.completeSize += taskPosition.size ? taskPosition.size : 0
-  if (taskPosition.type === 'file') return callback()
+  if (taskPosition.type === 'file') return
   const children = taskPosition.children
-  if (!children.length) return callback()
-  children.forEach(item => item.target = taskPosition.uuid)
-  const count = children.length
-  let index = 0
-  const next = () => {
-    const currentObj = taskPosition.children[index]
-    const i = serverPosition.children.findIndex(item => item.name === currentObj.name)
-    if (i !== -1) {
-      diffTree(currentObj, serverPosition.children[i], manager, call)
-    } else {
-      call()
+  if (!children.length) return
+  children.forEach(item => (item.target = taskPosition.uuid))
+  for (let index = 0; index < children.length; index++) {
+    const newTaskPosition = taskPosition.children[index]
+    const newServerPosition = serverPosition.children.find(item => item.name === newTaskPosition.name)
+    if (newServerPosition) {
+      await diffTree(newTaskPosition, newServerPosition, manager)
     }
   }
-  let call = (err) => {
-    index += 1
-    if (index >= count) return callback()
-    next()
-  }
-  next()
 }
 
 class UploadTask {
@@ -421,9 +411,7 @@ class UploadFileSTM extends STM {
       this.handle = request.post(op, (error, data) => {
         if (error) {
           console.log('error', error)
-        } else {
-          if (callback) callback()
-        }
+        } else if (callback) callback()
       })
     }
   }
@@ -505,8 +493,8 @@ class UploadFileSTM extends STM {
     if (this.wrapper.stateName !== 'running') return
     this.wrapper.stateName = 'pause'
     sendMsg()
-    if (this.handle) { 
-      this.handle.abort() 
+    if (this.handle) {
+      this.handle.abort()
       console.log('abort!', this.wrapper.name)
     }
     this.wrapper.manager.completeSize -= this.partFinishSize
@@ -665,16 +653,15 @@ class TaskManager {
             this.schedule()
           } else {
             this.recordInfor('已上传根目录存在')
-            visitServerFiles(this.rootNodeUUID, this.driveUUID, this.name, this.type, serverFileTree).then(() => {
-              this.recordInfor('校验已上传文件完成')
-              console.log(serverFileTree[0])
-              console.log(this.tree[0])
-              diffTree(this.tree[0], serverFileTree[0], this, (err) => {
-                if (err) console.log(err)
-                console.log('比较文件树完成')
-                this.schedule()
-              })
-            }).catch(e => this.recordInfor('校验已上传文件出错'))
+            try {
+              await visitServerFiles(this.rootNodeUUID, this.driveUUID, this.name, this.type, serverFileTree)
+            } catch (e) { this.recordInfor('校验已上传文件出错') }
+            this.recordInfor('校验已上传文件完成')
+            // console.log(serverFileTree[0])
+            // console.log(this.tree[0])
+            await diffTree(this.tree[0], serverFileTree[0], this)
+            console.log('比较文件树完成，已完成：', this.finishCount, )
+            this.schedule()
           }
         } catch (e) {
           this.error(e, '上传目标目录不存在')
