@@ -1,5 +1,6 @@
 const path = require('path')
 const fs = Promise.promisifyAll(require('fs'))
+const os = require('os')
 const app = require('electron').app
 const mkdirpAsync = Promise.promisify(require('mkdirp'))
 const validator = require('validator')
@@ -77,6 +78,14 @@ class Configuration {
   // public
   getImageCacheDir() {
     return path.join(this.root, 'imagecache')
+  }
+
+  getVersion() {
+    return app.getVersion()
+  }
+
+  getPlatform() {
+    return os.platform()
   }
 
   getUsersDir() {
@@ -170,6 +179,20 @@ class Configuration {
     return new Config(config, persistence)
   }
 
+  // update global config
+  async updateGlobalConfigAsync(newConfig) {
+    const configPath = this.getGlobalConfigPath()
+    const oldConfig = await this.loadObjectAsync(configPath) || {}
+    const config = Object.assign({}, oldConfig, newConfig)
+    const tmpdir = this.getTmpDir()
+    const persistence = createPersistenceAsync(configPath, tmpdir)
+    global.dispatch({
+      type: 'CONFIG_UPDATE',
+      data: config
+    })
+    return new Config(config, persistence)
+  }
+
   // init
   async initAsync() {
     // prepare directories
@@ -200,6 +223,7 @@ class Configuration {
         thumbPath: this.getThumbnailDir(),
         imagePath: this.getImageCacheDir(),
         downloadPath: this.getWisnucDownloadsDir(),
+        lastDevice: globalConfig.getConfig().lastDevice,
         users: this.userConfigs.map(uc => uc.getConfig())
       }
     })
@@ -208,7 +232,9 @@ class Configuration {
   getConfiguration() {
     return {
       global: this.globalConfig.getConfig(),
-      users: this.userConfigs.map(uc => uc.getConfig())
+      users: this.userConfigs.map(uc => uc.getConfig()),
+      appVersion: this.getVersion(),
+      platform: this.getPlatform()
     }
   }
 }

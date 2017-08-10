@@ -10,6 +10,17 @@ import Navigation from './nav/Navigation'
 import Maintenance from './maintenance/Maintenance'
 import Device from './common/device'
 
+const adjustSeq = (pre) => {
+  let mdns = pre
+  if (!global.config || !global.config.global.lastDevice) return mdns
+  const lastSerial = global.config.global.lastDevice.serial
+  const index = mdns.findIndex(m => m.serial === lastSerial)
+  if (index > -1) {
+    mdns = [mdns[index], ...mdns.slice(0, index), ...mdns.slice(index + 1)]
+  }
+  return mdns
+}
+
 class Fruitmix extends React.Component {
   constructor() {
     super()
@@ -18,7 +29,7 @@ class Fruitmix extends React.Component {
     this.user = null
 
     setTimeout(() => {
-      const mdns = global.mdnsStore
+      const mdns = adjustSeq(global.mdnsStore)
       if (mdns.length > 0) {
         this.selectDevice(mdns[0])
       }
@@ -75,7 +86,7 @@ class Fruitmix extends React.Component {
   nav(view) {
     global.mdns.scan()
     setTimeout(() => {
-      const mdns = global.mdnsStore
+      const mdns = adjustSeq(global.mdnsStore)
       if (mdns.length > 0) {
         this.selectDevice(mdns[0])
       }
@@ -96,7 +107,7 @@ class Fruitmix extends React.Component {
 
     switch (this.state.view) {
       case 'login':
-        view = <Login mdns={global.mdnsStore} primaryColor={teal500} {...this.state} />
+        view = <Login mdns={adjustSeq(global.mdnsStore)} primaryColor={teal500} {...this.state} />
         break
 
       case 'maintenance':

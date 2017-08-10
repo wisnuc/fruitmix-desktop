@@ -1,5 +1,6 @@
 import React from 'react'
 import Debug from 'debug'
+import { ipcRenderer } from 'electron'
 import UpdateIcon from 'material-ui/svg-icons/action/system-update-alt'
 import Base from './Base'
 import UpdateApp from '../control/ClientUpdateApp'
@@ -16,7 +17,7 @@ class Update extends Base {
   }
 
   willReceiveProps(nextProps) {
-    debug('account nextProps', nextProps)
+    debug('ClientUpdate nextProps', nextProps)
     if (!nextProps.apis || !nextProps.apis.releases) return
     const releases = nextProps.apis.releases
     if (releases.isPending() || releases.isRejected()) return
@@ -57,12 +58,13 @@ class Update extends Base {
   renderContent({ openSnackBar }) {
     return (
       <UpdateApp
-        rel={this.state.releases}
+        rels={this.state.releases}
         apis={this.ctx.props.apis}
         nav={this.ctx.props.nav}
         selectedDevice={this.ctx.props.selectedDevice}
         primaryColor={this.groupPrimaryColor()}
         openSnackBar={openSnackBar}
+        ipcRenderer={ipcRenderer}
       />
     )
   }

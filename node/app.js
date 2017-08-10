@@ -22,6 +22,8 @@ import mediaApi from './lib/media'
 import newUpload from './lib/newUpload'
 import download from './lib/newDownload'
 
+import clientUpdate from './lib/clientUpdate'
+
 // init window
 import { initMainWindow, getMainWindow } from './lib/window'
 import { initTestWindow } from './lib/testHook'
@@ -47,18 +49,13 @@ store.subscribe(() => {
 /* app ready and open window */
 app.on('ready', () => {
   const appDataPath = app.getPath('appData')
-  // console.log(`appDataPath is ${appDataPath}`)
   const configuration = new Configuration(appDataPath)
-
   configuration.initAsync().asCallback((err) => {
     if (err) {
       console.log('failed to load configuration, die', err)
       process.exit(1)
     } else {
       initMainWindow()
-      if (global.BABEL_IS_RUNNING) return
-      autoUpdater.checkForUpdates()
-      console.log('autoUpdater checkForUpdates...')
     }
   })
 
@@ -66,37 +63,3 @@ app.on('ready', () => {
 })
 
 app.on('window-all-closed', () => app.quit())
-
-autoUpdater.logger = log
-autoUpdater.logger.transports.file.level = 'info'
-log.info('App starting...')
-
-const sendStatusToWindow = (text) => {
-  log.info(text)
-  getMainWindow().webContents.send('message', text)
-}
-
-autoUpdater.on('checking-for-update', () => {
-  sendStatusToWindow('Checking for update...')
-})
-
-autoUpdater.on('update-available', (ev, info) => {
-  sendStatusToWindow('Update available.')
-})
-
-autoUpdater.on('update-not-available', (ev, info) => {
-  sendStatusToWindow('Update not available.')
-})
-
-autoUpdater.on('error', (ev, err) => {
-  sendStatusToWindow(err)
-  sendStatusToWindow('Error in auto-updater.')
-})
-
-autoUpdater.on('download-progress', (ev, progressObj) => {
-  sendStatusToWindow('Download progress...')
-})
-
-autoUpdater.on('update-downloaded', (ev, info) => {
-  sendStatusToWindow('Update downloaded; will install in 5 seconds')
-})

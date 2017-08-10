@@ -251,12 +251,6 @@ class Fruitmix extends EventEmitter {
           .query({ platform: args.platform })
         break
 
-    /** client update **/
-      case 'releases':
-        r = request
-          .get(`https://api.github.com/repos/wisnuc/wisnuc-desktop-${args.platform}/releases`) // platform: mac, windows
-        break
-
       default:
         break
     }

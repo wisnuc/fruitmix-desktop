@@ -36,17 +36,21 @@ class FirmwareUpdate extends Base {
     const value = firm.value()
 
     if (value && value !== this.state.firm) {
+      const rels = value.locals
+      const installed = rels.findIndex(rel => rel.release.id === value.current.id)
+      const latest = rels.findIndex(rel => !rel.release.prerelease)
+      /*
       const rels = value.remotes
       const installed = rels.findIndex(rel => rel.id === value.current.id)
-      // const latest = rels.findIndex(rel => !rel.prerelease)
       const latest = rels.findIndex(rel => !rel.prerelease)
+      */
       let showRel
       if (latest < installed) {
-        showRel = rels[latest]
+        showRel = rels[latest].release
       } else {
-        showRel = rels[installed]
+        showRel = rels[installed].release
       }
-      this.setState({ firm: value, showRel, latest: rels[latest], installed: rels[installed] })
+      this.setState({ firm: value, showRel, latest: rels[latest].release, installed: rels[installed].release })
     }
   }
 

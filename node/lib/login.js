@@ -7,6 +7,10 @@ ipcMain.on('LOGIN', (event, device, user) => {
     data: { device, user }
   })
 
+  /* save last Device info */
+  const lastDevice = device.mdev
+  global.configuration.updateGlobalConfigAsync({ lastDevice }).catch(e => console.log(e))
+
   process.nextTick(() => {
     retrieveUsers(device.token.data.token).asCallback((err, users) => {
       if (err) return

@@ -250,18 +250,10 @@ export const uploadFileWithStream = (driveUUID, dirUUID, name, part, readStream,
       }
     }
   }
-  /*
-  console.log(`>>>>>>>>>>>uploadFile part from ${part.start} to ${part.end} op`)
-  console.log(op)
-  console.log('=========== part')
-  console.log(part)
-  console.log('<<<<<<<<<<< start')
-  */
   request.post(op, (error, data) => {
     if (error) {
       console.log('error', error)
     } else {
-      // console.log(`uploadFile part from ${part.start} to ${part.end} success`)
       if (callback) callback()
     }
   })

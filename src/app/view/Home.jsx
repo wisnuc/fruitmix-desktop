@@ -221,7 +221,7 @@ class Home extends Base {
 
     ipcRenderer.on('driveListUpdate', (e, obj) => {
       console.log(obj, this.state.path)
-      if (!this.state.path.length) return
+      if (!this.state.path || !this.state.path.length) return
       if (obj.uuid === this.state.path[this.state.path.length - 1].uuid) {
         // this.ctx.openSnackBar(obj.message)
         this.refresh()
