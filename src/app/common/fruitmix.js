@@ -127,8 +127,7 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'adminCreateUser':
-        r = this.apost('admin/users', {
-          type: 'local',
+        r = this.apost('users', {
           username: args.username,
           password: args.password
         })

@@ -71,17 +71,19 @@ class PreviewInline extends React.Component {
       direction: null,
       thumbPath: '',
       detailPath: '',
-      pages: null
+      pages: null,
+      alert: false
     }
 
     this.toggleDialog = op => this.setState({ [op]: !this.state[op] })
 
     this.openByLocal = () => {
+      if (this.props.item.size > 50 * 1024 * 1024) return this.setState({ alert: true })
       const driveUUID = this.props.path[0].uuid
       const dirUUID = this.props.path[this.props.path.length - 1].uuid
       const entryUUID = this.props.item.uuid
       const fileName = this.props.item.name
-      this.props.ipcRenderer.send('OPEN_FILE', {
+      return this.props.ipcRenderer.send('OPEN_FILE', {
         driveUUID,
         dirUUID,
         entryUUID,
@@ -161,19 +163,6 @@ class PreviewInline extends React.Component {
         /* update thumbPath */
         this.setState({ thumbPath: path, detailPath: '' })
       }
-    }
-
-    /* calculate positon of mouse */
-    this.calcPositon = (ev) => {
-      return null
-      /* hide change image button when zoom */
-      if (this.refDetailImage && this.refDetailImage.style.zoom > 1) {
-        this.refBackground.style.cursor = 'default'
-        if (this.state.direction !== null) this.setState({ direction: null })
-      }
-
-      const { x, y } = mousePosition(ev)
-      const clientWidth = this.props.detailInfo ? window.innerWidth - 360 : window.innerWidth
     }
 
     /* calculate size of image */
@@ -508,7 +497,6 @@ class PreviewInline extends React.Component {
     if (!this.props.item || !this.props.item.name) return (<div />)
     const extension = this.props.item.name.replace(/^.*\./, '').toUpperCase()
     const textExtension = ['TXT', 'MD', 'JS', 'JSX', 'HTML']
-    // debug('render Preview', this.props.item.name)
 
     const isText = textExtension.findIndex(t => t === extension) > -1 && this.props.item.size < 1024 * 1024
 
@@ -525,6 +513,38 @@ class PreviewInline extends React.Component {
         }}
       >
         { isText ? this.renderText() : this.props.item.metatdata ? this.renderPhoto() : isPDF ? this.renderPDF() : this.renderOtherFiles() }
+
+        {/* dialog */}
+        <DialogOverlay open={this.state.alert} >
+          {
+            this.state.alert &&
+              <div
+                style={{ width: 560, padding: '24px 24px 0px 24px' }}
+                onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
+              >
+                <div style={{ fontSize: 21, fontWeight: 500 }}>
+                  { '提示' }
+                </div>
+                <div style={{ height: 20 }} />
+                <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }}>
+                  { '该文件大于50M，建议下载后再使用本地应用打开' }
+                </div>
+                <div style={{ height: 24 }} />
+                <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                  <FlatButton
+                    label="取消"
+                    primary
+                    onTouchTap={() => this.setState({ alert: false })}
+                  />
+                  <FlatButton
+                    label={'下载'}
+                    primary
+                    onTouchTap={() => { this.props.download(); this.setState({ alert: false }) }}
+                  />
+                </div>
+              </div>
+          }
+        </DialogOverlay>
       </div>
     )
   }

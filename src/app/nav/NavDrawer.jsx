@@ -169,7 +169,7 @@ class NavDrawer extends React.Component {
           icon={views.home.menuIcon()}
           text={views.home.menuName()}
           primaryColor={primaryColor}
-          selected={views[nav].navGroup() === 'file'}
+          selected={nav === 'home' || nav === 'public'}
           onTouchTap={() => navTo('home')}
         />
 
@@ -179,6 +179,14 @@ class NavDrawer extends React.Component {
           primaryColor={primaryColor}
           selected={views[nav].navGroup() === 'media'}
           onTouchTap={() => navTo('media')}
+        />
+
+        <MenuItem
+          icon={views.transmission.menuIcon()}
+          text={views.transmission.menuName()}
+          primaryColor={primaryColor}
+          selected={nav === 'transmission'}
+          onTouchTap={() => navTo('transmission')}
         />
 
         { this.renderGroup('physical') }
