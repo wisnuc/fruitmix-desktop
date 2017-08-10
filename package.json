@@ -101,7 +101,7 @@
     "react": "^15.6.1",
     "react-event-listener": "^0.4.5",
     "react-pdf-pages": "^0.1.8",
-    "react-virtualized": "^9.4.1",
+    "react-virtualized": "^9.9.0",
     "redux": "^3.5.2",
     "request": "^2.74.0",
     "rimraf": "^2.5.4",

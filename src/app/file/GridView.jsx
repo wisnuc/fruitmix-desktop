@@ -1,5 +1,6 @@
 import React from 'react'
 import Debug from 'debug'
+import UUID from 'uuid'
 import prettysize from 'prettysize'
 import { Avatar, IconButton, Paper, MenuItem, Popover, Menu } from 'material-ui'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
@@ -61,7 +62,7 @@ class Row extends React.PureComponent {
     ]
     const h = headers.find(header => header.title === this.state.type) || headers[0]
 
-    debug('sortType', sortType)
+    // debug('sortType', sortType)
     return (
       <div style={{ height: '100%', width: '100%', marginLeft: 52 }} >
         {/* header */}
@@ -142,8 +143,6 @@ class Row extends React.PureComponent {
                     : 'rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px'
                   }}
                   onTouchTap={e => this.props.onRowTouchTap(e, index)}
-                  onMouseEnter={e => this.props.onRowMouseEnter(e, index)}
-                  onMouseLeave={e => this.props.onRowMouseLeave(e, index)}
                   onDoubleClick={e => this.props.onRowDoubleClick(e, index)}
                   key={index}
                 >
@@ -283,11 +282,11 @@ class GridView extends React.Component {
     return (
       <div style={{ width: '100%', height: '100%' }} onDrop={this.props.drop}>
         <div style={{ height: 24 }} />
-        <AutoSizer>
+        <AutoSizer key={this.props.entries && this.props.entries[0] && this.props.entries[0].uuid}>
           {({ height, width }) => {
             const gridInfo = calcGridInfo(height, width, this.props.entries)
             const { mapData, allHeight, rowHeightSum, indexHeightSum, maxScrollTop } = gridInfo
-            debug('gridInfo', gridInfo, this.props)
+            debug('gridInfo', allHeight, this.props.entries.length)
 
             const estimatedRowSize = rowHeightSum / allHeight.length
             const rowHeight = ({ index }) => allHeight[index]
