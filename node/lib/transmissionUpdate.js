@@ -25,7 +25,12 @@ const quickSort = (arr, type) => {
 
 let preTasks = 0
 
+let wait = false
+let last = true
+
 const sendInfor = () => {
+  if (wait || !last) return (last = true)
+  wait = true
   const concatUserTasks = [].concat(uploadingTasks, downloadingTasks)
   const concatFinishTasks = [].concat(uploadedTasks, downloadedTasks)
   const userTasks = quickSort(concatUserTasks, 'createTime')
@@ -50,6 +55,9 @@ const sendInfor = () => {
       console.error(error)
     }
   }
+  setTimeout(() => { wait = false; sendInfor() }, 2000)
+  console.log('sendInfor!!')
+  return (last = false)
 }
 
 // handle will open dialog from electron to clean record of the task have been downloaded

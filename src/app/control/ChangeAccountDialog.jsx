@@ -222,26 +222,29 @@ class ChangeAccountDialog extends React.PureComponent {
         {
           (op === 'password' || op === 'createUser') &&
             <div>
+              {
+                op === 'password' &&
+                  <div style={{ height: 56, display: 'flex', marginBottom: 10 }}>
+                    <IconBox style={{ marginLeft: -12 }} size={48} icon={CommunicationVpnKey} />
+                    <TextField
+                      style={{ flexGrow: 1 }}
+                      fullWidth
+                      hintText="输入原密码"
+                      type="password"
+                      errorText={this.state.prePasswordErrorText}
+                      onChange={e => this.updatePrePassword(e.target.value)}
+                      onBlur={e => this.updatePrePassword(e.target.value)}
+                      ref={(input) => {
+                        if (input && this.state.focusFirst && (op !== 'createUser')) {
+                          input.focus()
+                          this.setState({ focusFirst: false })
+                        }
+                      }}
+                    />
+                  </div>
+              }
               <div style={{ height: 56, display: 'flex', marginBottom: 10 }}>
-                <IconBox style={{ marginLeft: -12 }} size={48} icon={CommunicationVpnKey} />
-                <TextField
-                  style={{ flexGrow: 1 }}
-                  fullWidth
-                  hintText="输入原密码"
-                  type="password"
-                  errorText={this.state.prePasswordErrorText}
-                  onChange={e => this.updatePrePassword(e.target.value)}
-                  onBlur={e => this.updatePrePassword(e.target.value)}
-                  ref={(input) => {
-                    if (input && this.state.focusFirst && (op !== 'createUser')) {
-                      input.focus()
-                      this.setState({ focusFirst: false })
-                    }
-                  }}
-                />
-              </div>
-              <div style={{ height: 56, display: 'flex', marginBottom: 10 }}>
-                <IconBox style={{ marginLeft: -12 }} size={48} icon={null} />
+                <IconBox style={{ marginLeft: -12 }} size={48} icon={ op === 'createUser' ? CommunicationVpnKey : null } />
                 <TextField
                   style={{ flexGrow: 1 }}
                   fullWidth

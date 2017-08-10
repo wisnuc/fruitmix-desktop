@@ -43,7 +43,7 @@ class Update extends React.Component {
       const { rel, filePath, error } = result
       if (!rel || error) return this.setState({ status: 'error' })
       let status = 'needUpdate'
-      if (global.config.appVersion.localeCompare(rel.name) > 0 || !filePath) status = 'latest'
+      if (global.config.appVersion.localeCompare(rel.name) >= 0 || !filePath) status = 'latest'
       return this.setState({ rel, filePath, status })
     }
   }
@@ -132,34 +132,34 @@ class Update extends React.Component {
         {/* dialog */}
         <DialogOverlay open={this.state.confirm} >
           {
-          this.state.confirm &&
-            <div style={{ width: 560, padding: '24px 24px 0px 24px' }}>
-              <div style={{ fontSize: 21, fontWeight: 500 }}>
-                { '客户端升级' }
+            this.state.confirm &&
+              <div style={{ width: 560, padding: '24px 24px 0px 24px' }}>
+                <div style={{ fontSize: 21, fontWeight: 500 }}>
+                  { '客户端升级' }
+                </div>
+                <div style={{ height: 20 }} />
+                <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }}>
+                  { `将要为您安装版本号为 ${this.state.rel.name} 的程序。` }
+                </div>
+                <div style={{ height: 8 }} />
+                <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }} >
+                  { '建议配合最新的WISNUC系统固件使用' }
+                </div>
+                <div style={{ height: 24 }} />
+                <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                  <FlatButton
+                    label="取消"
+                    primary
+                    onTouchTap={() => this.toggleDialog('confirm')}
+                  />
+                  <FlatButton
+                    label={'安装'}
+                    primary
+                    onTouchTap={this.install}
+                  />
+                </div>
               </div>
-              <div style={{ height: 20 }} />
-              <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }}>
-                { `将要为您安装版本号为 ${this.state.rel.name} 的程序。` }
-              </div>
-              <div style={{ height: 8 }} />
-              <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }} >
-                { '建议配合最新的WISNUC系统固件使用' }
-              </div>
-              <div style={{ height: 24 }} />
-              <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                <FlatButton
-                  label="取消"
-                  primary
-                  onTouchTap={() => this.toggleDialog('confirm')}
-                />
-                <FlatButton
-                  label={'安装'}
-                  primary
-                  onTouchTap={this.install}
-                />
-              </div>
-            </div>
-        }
+          }
         </DialogOverlay>
       </div>
     )
