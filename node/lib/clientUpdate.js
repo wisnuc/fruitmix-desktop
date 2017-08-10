@@ -3,7 +3,7 @@ import os from 'os'
 import path from 'path'
 import UUID from 'uuid'
 import request from 'request'
-import { dialog, ipcMain, shell, app } from 'electron'
+import { ipcMain, shell, app } from 'electron'
 import { getMainWindow } from './window'
 import store from '../serve/store/store'
 
@@ -33,13 +33,19 @@ const checkAsync = async () => {
 }
 
 const checkUpdateAsync = async () => {
-  const { filePath, rel } = await checkAsync()
+  let data
+  try {
+    data = await checkAsync()
+  } catch (error) {
+    return getMainWindow().webContents.send('NEW_RELEASE', { error })
+  }
+  const { filePath, rel } = data
   try {
     await fs.accessAsync(filePath)
   } catch (error) {
-    getMainWindow().webContents.send('NEW_RELEASE', { filePath: '', rel })
+    return getMainWindow().webContents.send('NEW_RELEASE', { rel })
   }
-  getMainWindow().webContents.send('NEW_RELEASE', { filePath, rel })
+  return getMainWindow().webContents.send('NEW_RELEASE', { filePath, rel })
 }
 
 const checkUpdate = () => {
@@ -78,7 +84,7 @@ const downloadAsync = async () => {
   const { filePath, url, rel } = await checkAsync()
   console.log('downloadAsync: check release')
   const currVersion = app.getVersion()
-  if (rel.name.localeCompare(currVersion) < 0) return console.log('already lts')
+  if (rel.name.localeCompare(currVersion) < 0) return
   try {
     await fs.accessAsync(filePath)
   } catch (error) {

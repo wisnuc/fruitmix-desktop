@@ -1,11 +1,11 @@
 import React from 'react'
 import Debug from 'debug'
-import { clipboard, shell, app } from 'electron'
+import { shell } from 'electron'
 import { CircularProgress, Divider } from 'material-ui'
-import { cyan600, grey200 } from 'material-ui/styles/colors'
+import { cyan600 } from 'material-ui/styles/colors'
 import FlatButton from '../common/FlatButton'
-import Checkmark from '../common/Checkmark'
 import DialogOverlay from '../common/DialogOverlay'
+import { GithubIcon } from '../common/Svg'
 
 const debug = Debug('component:control:ClientUpdate:')
 
@@ -40,17 +40,11 @@ class Update extends React.Component {
 
     this.newRelease = (event, result) => {
       debug('this.getPath', result)
-      const { rel, filePath } = result
-      let status = 'checking'
-      // console.log(global.config.appVersion.localeCompare(rel.name))
-      // console.log(rel.name.localeCompare(global.config.appVersion))
-      if (global.config.appVersion.localeCompare(rel.name) > 0 || !filePath) {
-        status = 'latest'
-      } else {
-        status = 'needUpdate'
-      }
-      status = 'needUpdate'
-      this.setState({ rel, filePath, status })
+      const { rel, filePath, error } = result
+      if (!rel || error) return this.setState({ status: 'error' })
+      let status = 'needUpdate'
+      if (global.config.appVersion.localeCompare(rel.name) > 0 || !filePath) status = 'latest'
+      return this.setState({ rel, filePath, status })
     }
   }
 
@@ -64,15 +58,12 @@ class Update extends React.Component {
     const date = rel.published_at.split('T')[0].split('-')
     return (
       <div>
-        <div style={{ height: 24 }} />
-        <div> { `发现新版本： ${rel.name}` } </div>
-        <div style={{ height: 16 }} />
-        <div> { '发布日期：' } </div>
-        <div style={{ height: 8 }} />
-
-        <div style={{ marginLeft: 24, height: 40, display: 'flex', alignItems: 'center' }}>
-          { `${date[0]}年${date[1]}月${date[2]}日` }
+        <div>
+          { `发现新版本： ${rel.name}` }
+          <FlatButton style={{ marginLeft: 8 }} label="安装" onTouchTap={() => this.toggleDialog('confirm')} primary />
         </div>
+        <div style={{ height: 16 }} />
+        <div> { `发布日期：${date[0]}年${date[1]}月${date[2]}日` } </div>
         <div style={{ height: 16 }} />
         <div> { '更新内容：' } </div>
         <div style={{ height: 8 }} />
@@ -90,17 +81,7 @@ class Update extends React.Component {
             <div style={{ width: 16 }} />
             { '修复bugs' }
           </div>
-
         }
-        <div style={{ height: 48 }} />
-        <Divider />
-        <div style={{ height: 8 }} />
-        <FlatButton
-          style={{ marginLeft: -8 }}
-          label="安装"
-          onTouchTap={() => this.toggleDialog('confirm')}
-          primary
-        />
       </div>
     )
   }
@@ -108,26 +89,45 @@ class Update extends React.Component {
   render() {
     debug('render client', this.props, global.config)
     const currentVersion = global.config.appVersion
+    const platform = global.config.platform
     return (
       <div style={{ height: '100%', margin: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', fontSize: 20, color: cyan600 }}>
           { `当前版本: ${currentVersion}` }
         </div>
-
+        <div style={{ height: 16 }} />
+        <Divider />
+        <div style={{ height: 16 }} />
         {
-          this.state.status === 'checking'
-            ? <div> 检查更新中... </div>
-            : this.state.status === 'latest'
-            ? <div style={{ display: 'flex', alignItems: 'center', height: 48 }}>
-              <div style={{ fontSize: 15 }}>
-                { '已是最新稳定版' }
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', marginTop: 2 }}>
-                <FlatButton primary label="查看更多版本" onTouchTap={this.moreVersion} />
+          platform !== 'darwin' && platform !== 'win32'
+            ? <div> { '当前版本不支持自动更新！' } </div>
+            : this.state.status === 'checking'
+            ? <div>
+              <div>{ '检查更新中...' } </div>
+              <div style={{ margin: 48 }}>
+                <CircularProgress size={64} />
               </div>
             </div>
-            : this.renderCheckUpdate()
+            : this.state.status === 'latest'
+            ? <div style={{ display: 'flex', alignItems: 'center', height: 48 }}>
+              { '已是最新稳定版' }
+            </div>
+            : this.state.status === 'needUpdate'
+            ? this.renderCheckUpdate()
+            : <div style={{ display: 'flex', alignItems: 'center', height: 48 }}>
+              { '检查更新失败，请检查网络设置或重试！' }
+            </div>
         }
+        <div style={{ height: 16 }} />
+        <Divider />
+        <div style={{ height: 16 }} />
+        <FlatButton
+          icon={<GithubIcon style={{ marginTop: 4 }} />}
+          style={{ marginLeft: -8 }}
+          primary
+          label="查看更多版本"
+          onTouchTap={this.moreVersion}
+        />
 
         {/* dialog */}
         <DialogOverlay open={this.state.confirm} >
