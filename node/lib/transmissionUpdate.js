@@ -1,13 +1,14 @@
 import os from 'os'
 import child_process from 'child_process'
 import { dialog, ipcMain } from 'electron'
+import Debug from 'debug'
 
 import { getMainWindow } from './window'
 import { userTasks as uploadingTasks, finishTasks as uploadedTasks } from './newUpload'
 import { userTasks as downloadingTasks, finishTasks as downloadedTasks } from './newDownload'
 import TransferManager from './transferManager'
 
-const lock = false
+const debug = Debug('node:lib:transmissionUpdate:')
 
 const quickSort = (arr, type) => {
   if (arr.length < 1) return arr
@@ -23,26 +24,24 @@ const quickSort = (arr, type) => {
   return quickSort(left, type).concat([pivot], quickSort(right, type))
 }
 
-let preTasks = 0
-
-let wait = false
+let preLength = 0
+let preSize = -1
+let lock = false
 let last = true
 
 const sendInfor = () => {
-  if (wait || !last) return (last = true)
-  wait = true
+  if (lock || !last) return (last = true)
+  lock = true
   const concatUserTasks = [].concat(uploadingTasks, downloadingTasks)
   const concatFinishTasks = [].concat(uploadedTasks, downloadedTasks)
   const userTasks = quickSort(concatUserTasks, 'createTime')
   const finishTasks = quickSort(concatFinishTasks, 'finishDate')
 
   /* send message when all tasks finished */
-  if (preTasks !== 0 && userTasks.length === 0) {
+  if (preLength !== 0 && userTasks.length === 0) {
     getMainWindow().webContents.send('snackbarMessage', { message: '文件传输任务完成' })
   }
-
-  preTasks = userTasks.length
-
+  preLength = userTasks.length
   try {
     getMainWindow().webContents.send(
       'UPDATE_TRANSMISSION',
@@ -55,8 +54,8 @@ const sendInfor = () => {
       console.error(error)
     }
   }
-  setTimeout(() => { wait = false; sendInfor() }, 2000)
-  console.log('sendInfor!!')
+  setTimeout(() => { lock = false; sendInfor() }, 200)
+  // debug('sendInfor end')
   return (last = false)
 }
 
@@ -65,11 +64,11 @@ const cleanRecordHandle = () => {
   if (uploadedTasks.length === 0 && downloadedTasks.length === 0) return
 
   global.db.uploaded.remove({}, { multi: true }, (err) => {
-    if (err) return console.log(err)
+    if (err) return debug(err)
     uploadedTasks.length = 0
 
     global.db.downloaded.remove({}, { multi: true }, (err) => {
-      if (err) return console.log(err)
+      if (err) return debug(err)
       downloadedTasks.length = 0
       sendInfor()
     })
@@ -82,7 +81,7 @@ const openHandle = (e, tasks) => {
     const pathProperty = task.trsType === 'download' ? 'downloadPath' : 'abspath'
     const taskPath = task.trsType === 'download' ?
       task[pathProperty] : task[pathProperty].substring(0, task[pathProperty].lastIndexOf('\\'))
-    console.log('打开目录的文件资源管理器', taskPath) //FIXME
+    debug('打开目录的文件资源管理器', taskPath) //FIXME
     switch (osType) {
       case 'win32':
         child_process.exec(`explorer ${taskPath}`, {})
