@@ -126,35 +126,26 @@ class Home extends Base {
       })
     }
 
-    this.delete = () => {
+    this.deleteAsync = async () => {
       const entries = this.state.entries
       const selected = this.state.select.selected
-      const count = selected.length
-      let finishCount = 0
       const path = this.state.path
       const dirUUID = path[path.length - 1].uuid
       const driveUUID = this.state.path[0].uuid
-      const loop = () => {
-        const entryName = entries[selected[finishCount]].name
-        this.ctx.props.apis.request('deleteDirOrFile', { driveUUID, dirUUID, entryName }, (err, data) => {
-          // need to handle this err ? TODO
-          if (err) console.log(err)
-          finishCount += 1
-          if (finishCount === count) {
-            if (this.state.path[this.state.path.length - 1].uuid === dirUUID) {
-              this.ctx.props.apis.request('listNavDir', { driveUUID: this.state.path[0].uuid, dirUUID }, (err, data) => {
-                if (!err) {
-                  this.ctx.openSnackBar('删除成功')
-                } else {
-                  this.ctx.openSnackBar(`删除失败: ${err.message}`)
-                }
-              })
-            } else return null
-          } else loop()
-        })
+
+      for (let i = 0; i < selected.length; i++) {
+        const entryName = entries[selected[i]].name
+        await this.ctx.props.apis.requestAsync('deleteDirOrFile', { driveUUID, dirUUID, entryName })
       }
-      loop()
+
+      if (this.state.path[this.state.path.length - 1].uuid === dirUUID) {
+        await this.ctx.props.apis.requestAsync('listNavDir', { driveUUID: this.state.path[0].uuid, dirUUID })
+      }
+    }
+
+    this.delete = () => {
       this.toggleDialog('delete')
+      this.deleteAsync().then(() => this.ctx.openSnackBar('删除成功')).catch(e => this.ctx.openSnackBar(`删除失败: ${e}`))
     }
 
     /* actions */

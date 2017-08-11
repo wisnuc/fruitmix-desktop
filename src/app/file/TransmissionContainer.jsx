@@ -1,6 +1,7 @@
 import React from 'react'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
+import { List, AutoSizer } from 'react-virtualized'
 import { Paper, Menu, MenuItem } from 'material-ui'
 import DeleteSvg from 'material-ui/svg-icons/action/delete'
 import PlaySvg from 'material-ui/svg-icons/av/play-arrow'
@@ -259,9 +260,9 @@ class TrsContainer extends React.Component {
   }
 
   render() {
+    debug('render TrsContainer')
     const userTasks = this.state.userTasks
     const finishTasks = this.state.finishTasks
-    // debug('render', userTasks)
 
     const titileStyle = {
       display: 'flex',
@@ -286,31 +287,32 @@ class TrsContainer extends React.Component {
       }
     })
 
-    return (
-      <div style={{ padding: 16 }}>
-        <div style={{ height: 24 }} />
+    const list = []
 
-        {/* running task title */}
+    /* running task title */
+    const runningTaskTitle = () => (
+      <div>
+        <div style={{ height: 24 }} />
         <div style={titileStyle} >
           <div style={{ flexGrow: 1 }}>
             { `传输中（${userTasks.length}）` }
           </div>
           <div style={{ flex: '0 0 240px', display: 'flex', alignItems: 'center' }}>
             {
-              allPaused ?
-                <FlatButton
-                  label="全部开始"
-                  disabled={!userTasks.length}
-                  icon={<PlaySvg style={{ color: '#000', opacity: 0.54 }} />}
-                  onTouchTap={() => this.playAll(userTasks)}
-                /> :
-                <FlatButton
-                  label="全部暂停"
-                  disabled={!userTasks.length}
-                  icon={<PauseSvg style={{ color: '#000', opacity: 0.54 }} />}
-                  onTouchTap={() => this.pauseAll(userTasks)}
-                />
-            }
+                allPaused ?
+                  <FlatButton
+                    label="全部开始"
+                    disabled={!userTasks.length}
+                    icon={<PlaySvg style={{ color: '#000', opacity: 0.54 }} />}
+                    onTouchTap={() => this.playAll(userTasks)}
+                  /> :
+                  <FlatButton
+                    label="全部暂停"
+                    disabled={!userTasks.length}
+                    icon={<PauseSvg style={{ color: '#000', opacity: 0.54 }} />}
+                    onTouchTap={() => this.pauseAll(userTasks)}
+                  />
+              }
             <FlatButton
               label="全部取消"
               disabled={!userTasks.length}
@@ -320,25 +322,30 @@ class TrsContainer extends React.Component {
           </div>
         </div>
         <div style={hrStyle} />
+      </div>
+    )
 
-        {/* running task list */}
-        {
-          userTasks.map((task, index) => (
-            <RunningTask
-              ref={task.uuid}
-              key={task.uuid}
-              trsType={task.trsType}
-              index={index}
-              task={task}
-              pause={this.pause}
-              resume={this.resume}
-              select={this.select}
-            />
-          ))
-        }
-        <div style={{ height: 48 }} />
+    list.push(runningTaskTitle())
 
-        {/* finished task title */}
+    /* running task list */
+    list.push(...userTasks.map((task, index) => (
+      <RunningTask
+        ref={task.uuid}
+        key={task.uuid}
+        trsType={task.trsType}
+        index={index}
+        task={task}
+        pause={this.pause}
+        resume={this.resume}
+        select={this.select}
+      />
+    )))
+
+    list.push(<div style={{ height: 56 }} />)
+
+    /* finished task title */
+    const finishedTaskTitle = () => (
+      <div>
         <div style={titileStyle}>
           <div style={{ flexGrow: 1 }}>
             { `已完成（${finishTasks.length}）` }
@@ -353,20 +360,56 @@ class TrsContainer extends React.Component {
           </div>
         </div>
         <div style={hrStyle} />
+      </div>
+      )
 
-        {/* finished task list*/}
-        {
-          finishTasks.map((task, index) => (
-            <FinishedTask
-              ref={task.uuid}
-              key={task.uuid}
-              index={index}
-              task={task}
-              select={this.select}
-              open={this.open}
+    list.push(finishedTaskTitle())
+
+    /* finished task list*/
+    list.push(...finishTasks.map((task, index) => (
+      <FinishedTask
+        ref={task.uuid}
+        key={task.uuid}
+        index={index}
+        task={task}
+        select={this.select}
+        open={this.open}
+      />
+    )))
+
+    /* rowCount */
+    const rowCount = userTasks.length + finishTasks.length + 3
+
+    /* rowHeight */
+    const allHeight = []
+    allHeight.length = rowCount
+    allHeight.fill(40)
+    allHeight[0] = 80
+    allHeight[userTasks.length + 1] = 56
+    allHeight[userTasks.length + 2] = 56
+    const rowHeight = ({ index }) => allHeight[index]
+
+    /* rowRenderer */
+    const rowRenderer = ({ key, index, style }) => (
+      <div key={key} style={Object.assign({ marginLeft: 20 }, style)}>
+        { list[index] }
+      </div>
+    )
+    return (
+      <div style={{ height: '100%', width: '100%' }}>
+        <AutoSizer>
+          {({ height, width }) => (
+            <List
+              height={height}
+              width={width}
+              rowHeight={rowHeight}
+              rowRenderer={rowRenderer}
+              rowCount={rowCount}
+              overscanRowCount={3}
+              style={{ outline: 'none' }}
             />
-          ))
-        }
+            )}
+        </AutoSizer>
 
         {/* menu */}
         {
