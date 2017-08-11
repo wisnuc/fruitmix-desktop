@@ -9,7 +9,6 @@ let _mainWindow = null
 const getMainWindow = () => _mainWindow
 
 const initMainWindow = () => {
-
   // create window
   _mainWindow = new BrowserWindow({
     frame: true,

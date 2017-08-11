@@ -413,6 +413,7 @@ class UploadFileSTM extends STM {
       this.handle = request.post(op, (error, data) => {
         if (error) {
           debug('error', error)
+          this.wrapper.manager.state = 'failed'
         } else if (callback) callback()
       })
     }
@@ -434,7 +435,7 @@ class UploadFileSTM extends STM {
     removeOutOfReadyQueue(this)
     addToRunningQueue(this)
     this.wrapper.manager.updateStore()
-    this.wrapper.recordInfor(this.wrapper.name + ' 开始上传.....')
+    this.wrapper.recordInfor(`${this.wrapper.name} 开始上传.....`)
     if (this.wrapper.taskid) return this.uploadSegment()
     return this.createUploadTask()
   }

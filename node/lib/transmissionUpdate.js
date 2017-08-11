@@ -25,7 +25,7 @@ const quickSort = (arr, type) => {
 }
 
 let preLength = 0
-let preSize = -1
+const preSize = -1
 let lock = false
 let last = true
 
@@ -81,7 +81,7 @@ const openHandle = (e, tasks) => {
     const pathProperty = task.trsType === 'download' ? 'downloadPath' : 'abspath'
     const taskPath = task.trsType === 'download' ?
       task[pathProperty] : task[pathProperty].substring(0, task[pathProperty].lastIndexOf('\\'))
-    debug('打开目录的文件资源管理器', taskPath) //FIXME
+    debug('打开目录的文件资源管理器', taskPath) // FIXME
     switch (osType) {
       case 'win32':
         child_process.exec(`explorer ${taskPath}`, {})

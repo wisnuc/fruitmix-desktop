@@ -11,9 +11,7 @@ const debug = Debug('node:lib:uploadSchedule: ')
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
 
 /* return a new file name */
-const getName = async (currPath, dirUUID, driveUUID) => {
-  return currPath.replace(/^.*\//, '') // TODO
-}
+const getName = async (currPath, dirUUID, driveUUID) => currPath.replace(/^.*\//, '') // TODO
 
 
 /* spliceFile -> hashFile -> calcFingerprint -> upload */
@@ -78,7 +76,6 @@ const visitEntries = async (entries, position, dirUUID, driveUUID, workList, Tas
       children.forEach(c => newEntries.push(path.join(entry, c)))
 
       await visitEntries(newEntries, newWork.chilren, null, driveUUID)
-
     } else {
       const newWorker = new UploadFileTask(entry, dirUUID, driveUUID, stat, Task)
       workerList.push(uploadWorker)
@@ -114,15 +111,14 @@ class Task {
       if (this.parts) return
       const hashWork = new HashFileTask(entry, entryStat)
       hashWork.on('error', error => this.error(error))
-      hashWork.on('finish', parts => { this.parts = parts; this.schedule() })
+      hashWork.on('finish', (parts) => { this.parts = parts; this.schedule() })
       this.workerList.push(hashWork)
     }
-
   }
 
   /* spliceFile -> hashFile -> calcFingerprint -> upload */
 
-  schedule () {
+  schedule() {
     this.hashFile()
     this.uploadFile()
   }
@@ -131,7 +127,7 @@ class Task {
     debug('error', error)
   }
 
-  run () {
+  run() {
     debug('run...')
     visitEntries([this.entry], this.dirUUID, this.driveUUID, this.workList, this).then(this.schedule).catch(e => debug('error:', e))
   }
@@ -145,7 +141,7 @@ class Task {
   abort() {
   }
 
-  finish(){
+  finish() {
     debug('finish success')
   }
 }
@@ -163,7 +159,7 @@ const readUploadInfo = async (entries, dirUUID, driveUUID) => {
     const entry = entries[i]
     const entryStat = await fs.lstatAsync(path.resolve(entry))
     const taskStat = { uuid: UUID.v4(), createTime: (new Date()).getTime() }
-    const taskType = entryStat.isDirectory() ? 'fold' : 'file'
+    const taskType = entryStat.isDirectory() ? 'directory' : 'file'
     createTask(entry, dirUUID, driveUUID, entryStat, taskType, taskStat)
   }
 }

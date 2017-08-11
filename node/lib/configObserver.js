@@ -10,7 +10,7 @@ const configObserver = () => {
   if (store.getState().config === prevConfig) { return }
 
   prevConfig = store.getState().config
-  console.log('update config !')
+  // console.log('update config !', prevConfig)
 
   // temp file
   // write to temp file
