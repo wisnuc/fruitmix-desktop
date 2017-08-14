@@ -5,6 +5,8 @@ import Debug from 'debug'
 import { dialog, ipcMain } from 'electron'
 import { getMainWindow } from './window'
 import createTask, { sendMsg } from './uploadTaskCreater'
+// import { sendMsg } from './uploadTaskCreater'
+// import createTask from './uploadSchedule'
 import { serverGetAsync } from './server'
 
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
@@ -15,7 +17,6 @@ const finishTasks = []
 
 const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
   let count = 0
-
   const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
   const remoteEntries = listNav.entries
   let overWrite = false
@@ -28,11 +29,11 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
       const response = dialog.showMessageBox({
         type: 'warning',
         title: '文件名冲突',
-        buttons: ['取消', '覆盖', '单独保存'],
+        buttons: ['取消', '单独保存'], // ['取消', '单独保存', '覆盖']
         message: `上传内容中${fileName}等文件与此文件夹中的现有文件存在命名冲突。\n是否覆盖已有文件？`
       })
       if (!response) throw new Error('cancel')
-      if (response === 1) overWrite = true
+      if (response === 2) overWrite = true
       break
     }
   }

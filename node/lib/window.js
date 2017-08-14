@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import path from 'path'
-import { ipcMain, BrowserWindow } from 'electron'
+import { ipcMain, BrowserWindow, app } from 'electron'
 
 const debug = Debug('lib:window')
 
@@ -62,5 +62,7 @@ const openNewWindow = (title, url) => {
 }
 
 ipcMain.on('newWebWindow', (event, title, url) => openNewWindow(title, url))
+
+ipcMain.on('POWEROFF', () => app.quit())
 
 export { initMainWindow, getMainWindow }
