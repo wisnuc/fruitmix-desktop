@@ -11,9 +11,7 @@ const debug = Debug('node:lib:uploadSchedule: ')
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
 
 /* return a new file name */
-const getName = async (currPath, dirUUID, driveUUID) => {
-  return currPath.replace(/^.*\//, '') // TODO
-}
+const getName = async (currPath, dirUUID, driveUUID) => currPath.replace(/^.*\//, '') // TODO
 
 
 /* spliceFile -> hashFile -> calcFingerprint -> upload */
@@ -55,10 +53,6 @@ const uploadTaskAsync = async (entry, dirUUID, driveUUID) => {
   }
 }
 
-/*
- taskStat { uuid, createTime }
- */
-
 const userTasks = []
 const uploadQueue = []
 const hashQueue = []
@@ -78,7 +72,6 @@ const visitEntries = async (entries, position, dirUUID, driveUUID, workList, Tas
       children.forEach(c => newEntries.push(path.join(entry, c)))
 
       await visitEntries(newEntries, newWork.chilren, null, driveUUID)
-
     } else {
       const newWorker = new UploadFileTask(entry, dirUUID, driveUUID, stat, Task)
       workerList.push(uploadWorker)
@@ -87,42 +80,42 @@ const visitEntries = async (entries, position, dirUUID, driveUUID, workList, Tas
   }
 }
 
+/* 20170814
+ taskUUID: uuid of task
+ entry: path of file or directory
+ dirUUID: uuid of directory to upload
+ driveUUID: uuid of drive to upload
+ taskType: directory or file
+ createTime: time creating of task
+ overwrite: overwrite or make a copy when encountering the problem of naming conflict
+*/
+
 class Task {
-  constructor(entry, dirUUID, driveUUID, entryStat, taskType, taskStat) {
+  constructor(taskUUID, entry, dirUUID, driveUUID, taskType, createTime, overwrite) {
+    /* assign props */
+    this.taskUUID = taskUUID
     this.entry = entry
     this.dirUUID = dirUUID
     this.driveUUID = driveUUID
-    this.entryStat = entryStat
     this.taskType = taskType
-    this.taskStat = taskStat
+    this.createTime = createTime
+    this.overwrite = overwrite
 
-    this.parts = null
-    this.workerList = []
+    /* state */
+    this.state = 'visitless' // visitless, visiting, diffing, running, finished, error
 
-    this.name = this.entry.replace(/^.*\//, '')
 
-    this.uploadFile = () => {
-      if (!this.parts) return
-      const readStreams = this.parts.map(part => fs.createReadStream(this.entry, { start: part.start, end: part.end }))
-      const uploadWork = new UploadFileTask(this.dirUUID, this.driveUUID, this.name, this.parts, readStreams)
-      uploadWork.on('error', error => this.error(error))
-      uploadWork.on('finish', () => this.schedule())
-      this.workerList.push(uploadWork)
+    this.visit = () => {
     }
 
-    this.hashFile = () => {
-      if (this.parts) return
-      const hashWork = new HashFileTask(entry, entryStat)
-      hashWork.on('error', error => this.error(error))
-      hashWork.on('finish', parts => { this.parts = parts; this.schedule() })
-      this.workerList.push(hashWork)
+    this.diff = () => {
     }
-
+    
+    this.run = () => {
+    }
   }
 
-  /* spliceFile -> hashFile -> calcFingerprint -> upload */
-
-  schedule () {
+  schedule() {
     this.hashFile()
     this.uploadFile()
   }
@@ -131,7 +124,7 @@ class Task {
     debug('error', error)
   }
 
-  run () {
+  run() {
     debug('run...')
     visitEntries([this.entry], this.dirUUID, this.driveUUID, this.workList, this).then(this.schedule).catch(e => debug('error:', e))
   }
@@ -145,27 +138,19 @@ class Task {
   abort() {
   }
 
-  finish(){
+  finish() {
     debug('finish success')
   }
 }
 
-const createTask = (entry, dirUUID, driveUUID, entryStat, taskType, taskStat) => {
-  // debug('createTask', entry, dirUUID, driveUUID, entryStat, taskType, taskStat)
-  const task = new Task(entry, dirUUID, driveUUID, entryStat, taskType, taskStat)
+
+const createTask = (taskUUID, entry, dirUUID, driveUUID, taskType, createTime, newWork, uploadingList, rootNodeUUID) => {
+  const task = new Task(taskUUID, entry, dirUUID, driveUUID, taskType, createTime, overwrite)
+  /*
   userTasks.push(task)
   task.run()
+  */
   return task
 }
 
-const readUploadInfo = async (entries, dirUUID, driveUUID) => {
-  for (let i = 0; i < entries.length; i++) {
-    const entry = entries[i]
-    const entryStat = await fs.lstatAsync(path.resolve(entry))
-    const taskStat = { uuid: UUID.v4(), createTime: (new Date()).getTime() }
-    const taskType = entryStat.isDirectory() ? 'fold' : 'file'
-    createTask(entry, dirUUID, driveUUID, entryStat, taskType, taskStat)
-  }
-}
-
-export { readUploadInfo }
+export default createTask

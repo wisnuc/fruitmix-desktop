@@ -7,11 +7,11 @@ Concrete worker classes use `error` and `finish` function to emit events.
 
 They should guarantee `error` or `finish` is called exactly once.
 
-They must implement/override `run` virtual method. 
+They must implement/override `run` virtual method.
 
 They can override `cleanup` virtual method for proper destruction.
 
-`start` and `abort` are public (interface) functions. 
+`start` and `abort` are public (interface) functions.
 
 When aborting, an `EABORT` error is emitted.
 
@@ -20,8 +20,8 @@ When aborting, an `EABORT` error is emitted.
 class Worker extends EventEmitter {
 
   /**
-    Base class constructor 
-  */ 
+    Base class constructor
+  */
   constructor() {
     super()
     this.finished = false
@@ -39,20 +39,20 @@ class Worker extends EventEmitter {
     recycled when finishing.
 
     This function is called by `finalize`, when emitting `error` or `finish` event, as well as aborting.
-    @virtual 
+    @virtual
   */
   cleanUp() {
   }
 
   /**
-    Finalize when finished. 
+    Finalize when finished.
 
     This is a private function for base class. Subclasses should not call this function generally.
     @private
   */
   finalize() {
     this.finished = true
-    this.cleanUp() 
+    this.cleanUp()
   }
 
   /**

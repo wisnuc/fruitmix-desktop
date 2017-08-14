@@ -75,7 +75,7 @@ class Device extends RequestManager {
 
       case 'power':
         r = request
-        .post(`http://${this.mdev.address}:3000/boot`)
+        .patch(`http://${this.mdev.address}:3000/boot`)
         .timeout(30000)
         .send(args)
         .set('Accept', 'application/json')
@@ -375,7 +375,7 @@ class Device extends RequestManager {
     const boot = this.boot.value()
 
     /* normal mode */
-    if (!boot.error && boot.state === 'started') {
+    if (!boot.error && boot.state === 'started' && boot.current) {
       if (this.users.isRejected()) { return 'fruitmixError' }
       return 'ready'
     } else if (!boot.error && boot.state === 'starting'){

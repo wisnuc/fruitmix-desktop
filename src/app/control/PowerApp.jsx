@@ -22,12 +22,13 @@ class Power extends React.Component {
      * choice: '', 'POWEROFF', 'REBOOT', 'REBOOTMAINTENANCE'
      */
     this.state = {
-      operation: '',
+      operation: '', // '', progress, done
       choice: ''
     }
 
     this.boot = (op) => {
-      this.props.selectedDevice.request('power', { op }, (err) => {
+      debug('this.boot', op)
+      this.props.selectedDevice.request('power', op, (err) => {
         if (!err) {
           this.scanMdns()
           this.setState({
@@ -65,19 +66,10 @@ class Power extends React.Component {
       this.setState({
         operation: ''
       })
-      switch (this.state.choice) {
-        case 'POWEROFF':
-      // go to login page
-          this.props.nav('login')
-          break
-        case 'REBOOT':
-      // go to login page & select target device
-          this.props.nav('login')
-          break
-        case 'REBOOTMAINTENANCE':
-      // go to login page & select target device
-          this.props.nav('maintenance')
-          break
+      if (this.state.choice === 'POWEROFF') {
+        ipcRenderer.send('POWEROFF')
+      } else {
+        this.props.nav('login')
       }
     }
 
@@ -92,9 +84,11 @@ class Power extends React.Component {
       this.interval = setInterval(() => {
         global.mdns.scan()
         setTimeout(() => {
+          const store = [...global.mdns.store]
+          debug('this.scanMdns', store)
           switch (this.state.choice) {
             case 'POWEROFF':
-              if (global.mdns.devices.every(d => d.serial !== this.serial)) {
+              if (store.every(d => d.serial !== this.serial)) {
                 clearInterval(this.interval)
                 this.setState({ operation: 'done' })
               }
@@ -102,12 +96,13 @@ class Power extends React.Component {
             case 'REBOOT':
             case 'REBOOTMAINTENANCE':
               if (hasBeenShutDown) {
-                if (global.mdns.devices.find(d => d.serial === this.serial)
-                || global.mdns.devices.find(d => d.address === this.address)) {
+                if (store.find(d => d.serial === this.serial)
+                || store.find(d => d.address === this.address)) {
                   clearInterval(this.interval)
+                  debug('reboot success')
                   this.setState({ operation: 'done' })
                 }
-              } else if (global.mdns.devices.every(d => d.serial !== this.serial)) {
+              } else if (store.every(d => d.serial !== this.serial)) {
                 hasBeenShutDown = true
               }
               break
@@ -118,16 +113,16 @@ class Power extends React.Component {
   }
 
   renderActions() {
-    let operation = ''
+    let operation = null
     switch (this.state.choice) {
       case 'POWEROFF':
-        operation = 'poweroff'
+        operation = { state: 'poweroff' }
         break
       case 'REBOOT':
-        operation = 'reboot'
+        operation = { state: 'reboot' }
         break
       case 'REBOOTMAINTENANCE':
-        operation = 'rebootMaintenance'
+        operation = { state: 'reboot', mode: 'maintenance' }
         break
     }
 
@@ -144,13 +139,61 @@ class Power extends React.Component {
   }
 
   renderDiaContent() {
+    /* confirm dialog */
+    if (this.state.operation === 'confirm') {
+      return (
+        <div>
+          {/* title */}
+          <div style={{ fontSize: 16, color: 'rgba(0,0,0,0.54)' }}>
+            {
+              this.state.choice === 'POWEROFF' ?
+              '确定关机？' : this.state.choice === 'REBOOT' ?
+              '确定重启？' : '确定重启并进入维护模式？'
+            }
+          </div>
+          <div style={{ height: 24 }} />
+          {/* button */}
+          <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+            { this.renderActions() }
+          </div>
+        </div>
+      )
+    }
+
+    /* progress dialog */
+    if (this.state.operation === 'progress') {
+      let hintText = ''
+      switch (this.state.choice) {
+        case 'POWEROFF':
+          hintText = '设备正在关机...'
+          break
+        case 'REBOOT':
+          hintText = '设备正在重启...'
+          break
+        case 'REBOOTMAINTENANCE':
+          hintText = '设备正在重启至维护模式 ...'
+          break
+      }
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <CircularProgress style={{ marginTop: 48, marginLeft: 148 }} />
+          <div style={{ textAlign: 'center', marginTop: 24 }}>{hintText} </div>
+          <div style={{ textAlign: 'center', marginTop: 24 }}>
+            <FlatButton label="退出" primary onTouchTap={this.handleExit} />
+          </div>
+        </div>
+      )
+    }
+
+    /* done dialog */
     if (this.state.operation === 'done') {
+      debug('renderDiaContent this.state.operation === done')
       let hintText = ''
       let linkText = ''
       switch (this.state.choice) {
         case 'POWEROFF':
-          hintText = '设备已关机，去'
-          linkText = '登陆'
+          hintText = '设备已关机'
+          linkText = '关闭客户端'
           break
         case 'REBOOT':
           hintText = '设备已重启完毕，去'
@@ -164,7 +207,7 @@ class Power extends React.Component {
 
       return (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <div style={{ marginTop: 48, marginLeft: 136 }}>
+          <div style={{ marginTop: 48, marginLeft: 120 }}>
             <Checkmark delay={300} color={this.props.primaryColor} />
           </div>
           <div style={{ textAlign: 'center', marginTop: 24 }}>
@@ -176,27 +219,8 @@ class Power extends React.Component {
         </div>
       )
     }
-    let hintText = ''
-    switch (this.state.choice) {
-      case 'POWEROFF':
-        hintText = '设备正在关机...'
-        break
-      case 'REBOOT':
-        hintText = '设备正在重启...'
-        break
-      case 'REBOOTMAINTENANCE':
-        hintText = '设备正在重启至维护模式 ...'
-        break
-    }
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <CircularProgress style={{ marginTop: 48, marginLeft: 160 }} />
-        <div style={{ textAlign: 'center', marginTop: 24 }}>{hintText} </div>
-        <div style={{ textAlign: 'center', marginTop: 24 }}>
-          <FlatButton label="退出" primary onTouchTap={this.handleExit} />
-        </div>
-      </div>
-    )
+
+    return (<div />)
   }
 
   render() {
@@ -259,43 +283,10 @@ class Power extends React.Component {
           </div>
         </div>
 
-        {/* confirm dialog */}
-        <DialogOverlay open={this.state.operation === 'confirm'}>
+        <DialogOverlay open={!!this.state.operation} >
           {
-            this.state.operation === 'confirm' &&
-            <div style={{ width: 336, padding: '24px 24px 0px 24px' }}>
-              {/* title */}
-              <div style={{ fontSize: 16, color: 'rgba(0,0,0,0.54)' }}>
-                {
-                  this.state.choice === 'POWEROFF' ?
-                  '确定关机？' : this.state.choice === 'REBOOT' ?
-                  '确定重启？' : '确定重启并进入维护模式？'
-                }
-              </div>
-              <div style={{ height: 24 }} />
-              {/* button */}
-              <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                { this.renderActions() }
-              </div>
-            </div>
-          }
-        </DialogOverlay>
-
-        {/* progress dialog */}
-        <DialogOverlay open={this.state.operation === 'progress'} >
-          {
-            this.state.operation === 'progress' &&
-              <div
-                style={{
-                  position: 'absolute',
-                  width: 360,
-                  height: 240,
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  backgroundColor: 'white'
-                }}
-              >
+            !!this.state.operation &&
+              <div style={{ width: 336, height: this.state.operation === 'confirm' ? '' : 240, padding: '24px 24px 0px 24px' }}>
                 { this.renderDiaContent()}
               </div>
           }

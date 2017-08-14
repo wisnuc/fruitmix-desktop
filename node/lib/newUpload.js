@@ -5,6 +5,9 @@ import Debug from 'debug'
 import { dialog, ipcMain } from 'electron'
 import { getMainWindow } from './window'
 import createTask, { sendMsg } from './uploadTaskCreater'
+// import { sendMsg } from './uploadTaskCreater'
+// import createTask from './uploadSchedule'
+import { serverGetAsync } from './server'
 
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
 
@@ -14,6 +17,29 @@ const finishTasks = []
 
 const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
   let count = 0
+  const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
+  const remoteEntries = listNav.entries
+  let overWrite = false
+  for (let i = 0; i < entries.length; i++) {
+    const entry = entries[i]
+    const fileName = entry.replace(/^.*\//, '')
+    const index = remoteEntries.findIndex(e => (e.name === fileName))
+    if (index > -1) {
+      debug('find name conflict', entry)
+      const response = dialog.showMessageBox({
+        type: 'warning',
+        title: '文件名冲突',
+        buttons: ['取消', '单独保存'], // ['取消', '单独保存', '覆盖']
+        message: `上传内容中${fileName}等文件与此文件夹中的现有文件存在命名冲突。\n是否覆盖已有文件？`
+      })
+      if (!response) throw new Error('cancel')
+      if (response === 2) overWrite = true
+      break
+    }
+  }
+
+  debug('check name, overWrite ?', overWrite)
+
   for (let i = 0; i < entries.length; i++) {
     const taskUUID = UUID.v4()
     const entry = entries[i]
@@ -40,8 +66,8 @@ const readUploadInfo = (entries, dirUUID, driveUUID) => {
       getMainWindow().webContents.send('snackbarMessage', { message })
     })
     .catch((e) => {
-      debug('readUploadInfo error: ', e)
-      getMainWindow().webContents.send('snackbarMessage', { message: '读取上传文件失败' })
+      debug('readUploadInfo error: ', e.message)
+      if (e.message !== 'cancel') getMainWindow().webContents.send('snackbarMessage', { message: '读取上传文件失败' })
     })
 }
 

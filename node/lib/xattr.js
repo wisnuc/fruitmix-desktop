@@ -7,7 +7,7 @@ const FRUITMIX = 'user.fruitmix'
 let xattr
 try {
   if (os.platform() === 'linux' || os.platform() === 'darwin') {
-    console.log('os.platform', os.platform())
+    // console.log('os.platform', os.platform())
     xattr = Promise.promisifyAll(require('fs-xattr'))
   } else if (os.platform() === 'win32') {
     xattr = {

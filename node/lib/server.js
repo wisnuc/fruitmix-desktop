@@ -253,9 +253,7 @@ export const uploadFileWithStream = (driveUUID, dirUUID, name, part, readStream,
   request.post(op, (error, data) => {
     if (error) {
       console.log('error', error)
-    } else {
-      if (callback) callback()
-    }
+    } else if (callback) callback()
   })
 }
 

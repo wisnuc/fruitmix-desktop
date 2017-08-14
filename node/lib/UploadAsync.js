@@ -6,9 +6,8 @@ const crypto = require('crypto')
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
 
 /* return a new file name */
-const getName = async (currPath, dirUUID, driveUUID) => {
-  return currPath.replace(/^.*\//, '') // TODO
-}
+const getName = async (currPath, dirUUID, driveUUID) => currPath.replace(/^.*\//, '') // TODO
+
 
 /* splice file by given size */
 const spliceFile = (size, perSize) => {
