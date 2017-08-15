@@ -10,22 +10,7 @@ import TransferManager from './transferManager'
 
 const debug = Debug('node:lib:transmissionUpdate:')
 
-const quickSort = (arr, type) => {
-  if (arr.length < 1) return arr
-  const pivotIndex = Math.floor(arr.length / 2)
-  const pivot = arr.splice(pivotIndex, 1)[0]
-  const left = []
-  const right = []
-  for (let i = 0; i < arr.length; i++) {
-    if (arr[i][type] < pivot[type]) right.push(arr[i])
-    else left.push(arr[i])
-  }
-
-  return quickSort(left, type).concat([pivot], quickSort(right, type))
-}
-
 let preLength = 0
-const preSize = -1
 let lock = false
 let last = true
 
@@ -34,13 +19,14 @@ const sendInfor = () => {
   lock = true
   const concatUserTasks = [].concat(uploadingTasks, downloadingTasks)
   const concatFinishTasks = [].concat(uploadedTasks, downloadedTasks)
-  const userTasks = quickSort(concatUserTasks, 'createTime')
-  const finishTasks = quickSort(concatFinishTasks, 'finishDate')
+  const userTasks = concatUserTasks.sort((a, b) => a.createTime - b.createTime) // Ascending
+  const finishTasks = concatFinishTasks.sort((a, b) => b.finishDate - a.finishDate) // Descending
 
   /* send message when all tasks finished */
   if (preLength !== 0 && userTasks.length === 0) {
     getMainWindow().webContents.send('snackbarMessage', { message: '文件传输任务完成' })
   }
+
   preLength = userTasks.length
   try {
     getMainWindow().webContents.send(

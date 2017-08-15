@@ -34,7 +34,7 @@ const startTransmissionHandle = () => {
   db.downloading.find({}, (err, tasks) => {
     if (err) return
     tasks.forEach(item => createTask(item.target, item.name, item.rootSize, item.type, item.dirUUID,
-      false, item.downloadPath, item._id, item.downloading, item.createTime))
+      false, item.downloadPath, item._id, item.downloading, item.createTime, item.driveUUID))
   })
 
   db.downloaded.find({}).sort({ finishDate: -1 }).exec((err, tasks) => {

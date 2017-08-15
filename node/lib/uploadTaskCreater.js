@@ -787,7 +787,7 @@ class TaskManager {
     if (this.finishCount === this.worklist.length) {
       clearInterval(this.countSpeed)
       this.state = 'finish'
-      this.finishDate = utils.formatDate()
+      this.finishDate = (new Date()).getTime()
       userTasks.splice(userTasks.indexOf(this), 1)
       finishTasks.unshift(this)
       getMainWindow().webContents.send('driveListUpdate', Object.assign({}, { uuid: this.target, message: '上传成功' }))
