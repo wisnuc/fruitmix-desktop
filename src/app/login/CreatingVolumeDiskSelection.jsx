@@ -104,8 +104,7 @@ class CreatingVolumeDiskSelection extends React.PureComponent {
               <div style={{ flex: '0 0 240px' }}>说明</div>
             </div>
             <Divider />
-            
-            <div style={{ maxHeight: 160, overflowY: 'auto' }}>
+            <div style={{ maxHeight: 180, overflowY: 'auto' }}>
               { this.props.storage && this.props.storage.blocks.filter(blk => blk.isDisk).map(blk => this.renderDiskRow(blk)) }
             </div>
             <Divider />

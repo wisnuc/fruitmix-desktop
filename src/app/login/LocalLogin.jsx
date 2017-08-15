@@ -341,19 +341,19 @@ class Login extends StateUp(React.Component) {
     let maint
     let error
     let uninit
-    let noUser
 
     switch (status) {
       case 'ready': // users.length === 0 need to add FirstUser Box TODO
+        break
+      case 'noUser':
         text = '系统错误：未发现用户'
-        noUser = true
         break
       case 'probing':
         text = '通讯中....'
         busy = true
         break
       case 'systemError':
-        text = '系统错误：无法与该设备通讯，它可能刚刚离线或正在启动'
+        text = '系统错误：无法与该设备通讯'
         error = pullError()
         break
       case 'fruitmixError':
@@ -432,7 +432,7 @@ class Login extends StateUp(React.Component) {
           <div>{text}</div>
         </div>
       )
-    } else if (noUser) {
+    } else if (status === 'noUser') {
       if (!this.state.compact) {
         return (
           <div style={boxStyle}>
