@@ -191,7 +191,8 @@ class NavDrawer extends React.Component {
 
         { this.renderGroup('physical') }
 
-        { this.renderGroup('trash') }
+        
+        {/* this.renderGroup('trash') */}
 
 
         {/*
@@ -202,6 +203,7 @@ class NavDrawer extends React.Component {
 
         <SubHeader>管理</SubHeader>
 
+        {/*
         <MenuItem
           icon={views.docker.menuIcon()}
           text="应用市场"
@@ -209,6 +211,7 @@ class NavDrawer extends React.Component {
           selected={views[nav].navGroup() === 'docker'}
           onTouchTap={() => navTo('docker')}
         />
+        */}
 
         {
           isAdmin && <MenuItem

@@ -106,7 +106,7 @@ class UserBox extends React.Component {
             { users.map((user, index) =>
               <NamedAvatar
                 key={user.uuid}
-                style={{ margin: 8 }}
+                style={{ margin: 7 }}
                 name={user.username}
                 selected={index === this.state.selectedIndex}
                 onTouchTap={this.selectUser.bind(this, index)}

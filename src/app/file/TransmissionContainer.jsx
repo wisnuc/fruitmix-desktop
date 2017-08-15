@@ -383,10 +383,8 @@ class TrsContainer extends React.Component {
     /* rowHeight */
     const allHeight = []
     allHeight.length = rowCount
-    allHeight.fill(40)
+    allHeight.fill(56)
     allHeight[0] = 80
-    allHeight[userTasks.length + 1] = 56
-    allHeight[userTasks.length + 2] = 56
     const rowHeight = ({ index }) => allHeight[index]
 
     /* rowRenderer */

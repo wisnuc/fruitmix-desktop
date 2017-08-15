@@ -66,8 +66,12 @@ const readUploadInfo = (entries, dirUUID, driveUUID) => {
       getMainWindow().webContents.send('snackbarMessage', { message })
     })
     .catch((e) => {
-      debug('readUploadInfo error: ', e.message)
-      if (e.message !== 'cancel') getMainWindow().webContents.send('snackbarMessage', { message: '读取上传文件失败' })
+      debug('readUploadInfo error: ', e.code)
+      if (e.code === 'ECONNREFUSED') {
+        getMainWindow().webContents.send('snackbarMessage', { message: '与wisnuc的连接已断开' })
+      } else if (e.message !== 'cancel') {
+        getMainWindow().webContents.send('snackbarMessage', { message: '读取上传文件失败' })
+      }
     })
 }
 

@@ -410,9 +410,9 @@ class UploadFileSTM extends STM {
           }
         }
       }
-      this.handle = request.post(op, (error, data) => {
+      this.handle = request.post(op, (error, response, body) => {
+        debug('request.post error', error, response && response.statusCode, body)
         if (error) {
-          debug('error', error)
           this.wrapper.manager.state = 'failed'
         } else if (callback) callback()
       })
@@ -429,7 +429,7 @@ class UploadFileSTM extends STM {
   }
 
   beginUpload() {
-    debug('beginUpload state', this.wrapper.stateName, this.paused)
+    // debug('beginUpload state', this.wrapper.stateName, this.paused)
     if (this.paused) return
     this.wrapper.stateName = 'running'
     removeOutOfReadyQueue(this)
@@ -511,11 +511,14 @@ class UploadFileSTM extends STM {
 
   resume() {
     this.paused = false
+    // debug('resume', this.wrapper.stateName, runningQueue.length)
     if (this.wrapper.stateName !== 'pause') return
     this.wrapper.stateName = 'running'
-    sendMsg()
-    this.beginUpload()
-    this.wrapper.recordInfor(`${this.wrapper.name}继续上传`)
+    if (runningQueue.length < httpRequestConcurrency) {
+      this.beginUpload()
+      this.wrapper.recordInfor(`${this.wrapper.name}继续上传`)
+      sendMsg()
+    }
   }
 }
 
@@ -729,7 +732,7 @@ class TaskManager {
     this.state = 'schedule'
     sendMessage()
     if (this.pause || !this.count) return
-    debug('task schedule')
+    debug('task schedule in schedule')
     this.hashSchedule()
     this.uploadSchedule()
   }

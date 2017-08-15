@@ -63,13 +63,13 @@ const sendMsg = () => {
 // TaskManager creater
 // new job :init manager with default parameter
 // old job :init manager with defined parameter(uuid, downloadpath, downloading information)
-const createTask = (target, name, size, type, dirUUID, newWork, p, u, d, ct, driveUUID) => {
+const createTask = (target, name, size, type, dirUUID, newWork, p, u, d, ct, driveUUID, rawName) => {
   initArgs()
   const taskUUID = u || uuid.v4()
   const abspath = p || getDownloadPath()
   const downloadingList = d || []
   const createTime = ct || (new Date()).getTime()
-  const task = new TaskManager(taskUUID, abspath, target, name, size, type, dirUUID, newWork, downloadingList, createTime, driveUUID)
+  const task = new TaskManager(taskUUID, abspath, target, name, size, type, dirUUID, newWork, downloadingList, createTime, driveUUID, rawName)
   task.createStore()
   userTasks.push(task)
   task.readyToVisit()
@@ -79,12 +79,12 @@ const createTask = (target, name, size, type, dirUUID, newWork, p, u, d, ct, dri
 
 // a download task manager for init/record/visit/schedule
 class TaskManager {
-  constructor(taskUUID, downloadPath, target, name, rootSize, type, dirUUID, newWork, downloadingList, createTime, driveUUID) {
+  constructor(taskUUID, downloadPath, target, name, rootSize, type, dirUUID, newWork, downloadingList, createTime, driveUUID, rawName) {
     this.uuid = taskUUID
     this.downloadPath = downloadPath
     this.target = target
     this.name = name
-    this.rawName = name
+    this.rawName = rawName || name
     this.rootSize = rootSize // for visit
     this.type = type
     this.createTime = createTime
@@ -216,7 +216,6 @@ class TaskManager {
   checkNameExist() {
     fs.readdir(this.downloadPath, (err, files) => {
       if (err) return this.recordInfor('下载目录未找到')
-      this.rawName = this.tree[0].name
       const name = isFileNameExist(this.tree[0], 0, files)
       this.tree[0].name = name
       this.name = name
@@ -307,6 +306,7 @@ class TaskManager {
       target: this.target,
       driveUUID: this.driveUUID,
       name: this.name,
+      rawName: this.rawName,
       rootSize: this.rootSize,
       type: this.type,
       dirUUID: this.dirUUID,
@@ -593,6 +593,7 @@ class createFolderSTM extends STM {
   constructor(wrapper) {
     super(wrapper)
     this.handle = null
+    this.paused = false
   }
 
   beginDownload() {
@@ -622,6 +623,7 @@ class DownloadFileSTM extends STM {
   }
 
   beginDownload() {
+    if (this.paused) return
     removeOutOfReadyQueue(this)
     addToRunningQueue(this)
     this.wrapper.manager.updateStore()
@@ -692,8 +694,15 @@ class DownloadFileSTM extends STM {
       if (this.wrapper.seek >= this.wrapper.size) this.rename(this.tmpDownloadPath)
     })
 
-    this.handle = request(options)
-      .on('error', err => console.log('req : error', err))
+    this.handle = request(options, (error, response, body) => {
+      // console.log(error, response, body)
+      if (error || (response && response.statusCode && (response.statusCode !== 200 && response.statusCode !== 206))) {
+        console.log('req:', error, response && response.statusCode, this.wrapper.manager.type)
+        if (this.wrapper.manager.type === 'file') {
+          this.wrapper.manager.error(error, body)
+        }
+      }
+    })
 
     this.handle.pipe(stream)
   }
@@ -708,6 +717,8 @@ class DownloadFileSTM extends STM {
   }
 
   pause() {
+    this.wrapper.recordInfor(`${this.wrapper.name} pause`)
+    this.paused = true
     if (this.wrapper.stateName !== 'running') return
     this.wrapper.stateName = 'pause'
     sendMsg()
@@ -717,11 +728,22 @@ class DownloadFileSTM extends STM {
   }
 
   resume() {
-    if (this.wrapper.stateName !== 'pause') return
+    this.wrapper.recordInfor(`${this.wrapper.name} reusme, stateName: ${this.wrapper.stateName}`)
+    console.log('readyQueue.length:', readyQueue.length, 'runningQueue.length:', runningQueue.length)
+    this.paused = false
+    this.wrapper.manager.schedule()
+    if (this.wrapper.stateName !== 'pause') {
+      if (this.wrapper.stateName === 'ready' && readyQueue.findIndex(q => q === this) < 0) {
+        addToReadyQueue(this)
+      }
+      return
+    }
     this.wrapper.stateName = 'running'
-    sendMsg()
-    this.beginDownload()
-    this.wrapper.recordInfor(`${this.wrapper.name}继续下载`)
+    if (runningQueue.length < httpRequestConcurrency) {
+      sendMsg()
+      this.beginDownload()
+      this.wrapper.recordInfor(`${this.wrapper.name}继续下载`)
+    }
   }
 }
 
@@ -730,7 +752,7 @@ const scheduleVisit = () => {
 }
 
 const scheduleHttpRequest = () => {
-  while (runningQueue.length < httpRequestConcurrency && readyQueue.length) { readyQueue[0].beginDownload() }
+  while (runningQueue.length < httpRequestConcurrency && readyQueue.length && !readyQueue[0].paused) { readyQueue[0].beginDownload() }
 }
 
 // visitless

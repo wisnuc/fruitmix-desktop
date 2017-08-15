@@ -60,8 +60,7 @@ class FinishedTask extends Component {
           display: 'flex',
           alignItems: 'center',
           padding: '0 88px',
-          height: 40,
-          lindeHeight: 40,
+          height: 56,
           fontSize: 14,
           color: 'rgba(0,0,0,0.87)',
           backgroundColor: this.state.isSelected ? '#f4f4f4' : ''
