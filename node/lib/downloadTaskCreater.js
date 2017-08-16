@@ -581,8 +581,8 @@ class STM {
   }
 
   requestProbe() {
-    this.wrapper.stateName = 'ready'
     addToReadyQueue(this)
+    this.wrapper.stateName = 'ready'
   }
 
   destructor() {
@@ -597,7 +597,6 @@ class createFolderSTM extends STM {
   }
 
   beginDownload() {
-    const _this = this
     const wrapper = this.wrapper
     wrapper.stateName = 'running'
     removeOutOfReadyQueue(this)
@@ -605,11 +604,9 @@ class createFolderSTM extends STM {
     wrapper.recordInfor(`${wrapper.name} 开始创建...`)
     fs.mkdir(path.join(wrapper.downloadPath, wrapper.name), (err) => {
       if (!err) {
-        removeOutOfRunningQueue(_this)
+        removeOutOfRunningQueue(this)
         wrapper.children.forEach(item => item.downloadPath = path.join(wrapper.downloadPath, wrapper.name))
         wrapper.downloadFinish()
-      } else {
-
       }
     })
   }
@@ -624,6 +621,7 @@ class DownloadFileSTM extends STM {
 
   beginDownload() {
     if (this.paused) return
+    this.wrapper.stateName = 'running'
     removeOutOfReadyQueue(this)
     addToRunningQueue(this)
     this.wrapper.manager.updateStore()
@@ -647,7 +645,6 @@ class DownloadFileSTM extends STM {
     console.log(wrapper.name)
 
     if (wrapper.size === wrapper.seek && wrapper.size !== 0) return wrapper.manager.downloadSchedule()
-    wrapper.stateName = 'running'
 
     const options = {
       method: 'GET',
@@ -717,27 +714,21 @@ class DownloadFileSTM extends STM {
   }
 
   pause() {
-    this.wrapper.recordInfor(`${this.wrapper.name} pause`)
+    this.wrapper.recordInfor(`${this.wrapper.name} pause, stateName: ${this.wrapper.stateName} readyQueue: ${readyQueue.length}`)
     this.paused = true
     if (this.wrapper.stateName !== 'running') return
     this.wrapper.stateName = 'pause'
     sendMsg()
     if (this.handle) this.handle.abort()
     this.wrapper.recordInfor(`${this.wrapper.name}暂停了`)
-    removeOutOfRunningQueue(this)
+    this.timehandle = setTimeout(() => removeOutOfRunningQueue(this), 10) // it's necessary when pausing lots of tasks at the same time
   }
 
   resume() {
-    this.wrapper.recordInfor(`${this.wrapper.name} reusme, stateName: ${this.wrapper.stateName}`)
-    console.log('readyQueue.length:', readyQueue.length, 'runningQueue.length:', runningQueue.length)
+    //  this.wrapper.recordInfor(`${this.wrapper.name} reusme, stateName: ${this.wrapper.stateName}`)
+    if (this.timehandle) clearTimeout(this.timehandle)
     this.paused = false
-    this.wrapper.manager.schedule()
-    if (this.wrapper.stateName !== 'pause') {
-      if (this.wrapper.stateName === 'ready' && readyQueue.findIndex(q => q === this) < 0) {
-        addToReadyQueue(this)
-      }
-      return
-    }
+    if (this.wrapper.stateName !== 'pause') return
     this.wrapper.stateName = 'running'
     if (runningQueue.length < httpRequestConcurrency) {
       sendMsg()
@@ -771,7 +762,8 @@ const addToVisitingQueue = (task) => {
 }
 
 const removeOutOfVisitingQueue = (task) => {
-  visitingQueue.splice(visitingQueue.indexOf(task), 1)
+  const index = visitingQueue.indexOf(task)
+  if (index > -1) visitingQueue.splice(index, 1)
   scheduleVisit()
 }
 
@@ -782,7 +774,8 @@ const addToReadyQueue = (task) => {
 }
 
 const removeOutOfReadyQueue = (task) => {
-  readyQueue.splice(readyQueue.indexOf(task), 1)
+  const index = readyQueue.indexOf(task)
+  if (index > -1) readyQueue.splice(index, 1)
 }
 
 // running
@@ -791,7 +784,8 @@ const addToRunningQueue = (task) => {
 }
 
 const removeOutOfRunningQueue = (task) => {
-  runningQueue.splice(runningQueue.indexOf(task), 1)
+  const index = runningQueue.indexOf(task)
+  if (index > -1) runningQueue.splice(index, 1)
   scheduleHttpRequest()
 }
 

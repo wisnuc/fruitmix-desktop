@@ -43,7 +43,7 @@ class RunningTask extends React.Component {
     if (task.state === 'finish') return '已完成'
     if (task.size === 0) return '0%'
     const percent = (Math.abs(task.completeSize / task.size) * 100).toFixed(2)
-    if (percent > 100) return '下载出错'
+    if (percent > 100) return '传输出错'
     return `${percent}%`
   }
 
