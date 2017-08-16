@@ -87,6 +87,10 @@ class ChangeAccountDialog extends React.PureComponent {
         this.fire()
       }
     }
+
+    this.onKeyDown = (e) => {
+      if (e.which === 13 && this.inputOK()) this.check()
+    }
   }
 
   updateUsername(text) {
@@ -214,6 +218,7 @@ class ChangeAccountDialog extends React.PureComponent {
                     this.setState({ focusFirst: false })
                   }
                 }}
+                onKeyDown={this.onKeyDown}
               />
             </div>
         }
@@ -263,6 +268,7 @@ class ChangeAccountDialog extends React.PureComponent {
                   errorText={this.state.passwordAgainErrorText}
                   onChange={e => this.updatePasswordAgain(e.target.value, 'onChange')}
                   onBlur={e => this.updatePasswordAgain(e.target.value, 'onBlur')}
+                  onKeyDown={this.onKeyDown}
                 />
               </div>
             </div>

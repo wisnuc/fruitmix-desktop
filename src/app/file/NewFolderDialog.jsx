@@ -35,13 +35,17 @@ class NewFolderDialog extends React.PureComponent {
       // console.log('creat new folder', this.props, args)
       apis.request('mkdir', args, (err) => {
         if (err) {
-          this.props.openSnackBar(`创建失败: ${err.message}`)
+          this.setState({ errorText: err.message })
         } else {
           this.props.onRequestClose(true)
           this.props.openSnackBar('创建成功')
           this.props.refresh()
         }
       })
+    }
+
+    this.onKeyDown = (e) => {
+      if (e.which === 13 && !this.state.errorText && this.state.value.length !== 0) this.fire()
     }
   }
 
@@ -58,6 +62,7 @@ class NewFolderDialog extends React.PureComponent {
             errorText={this.state.errorText}
             onChange={e => this.handleChange(e.target.value)}
             ref={input => input && input.focus()}
+            onKeyDown={this.onKeyDown}
           />
         </div>
         <div style={{ height: 24 }} />
