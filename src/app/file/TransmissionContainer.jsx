@@ -243,6 +243,7 @@ class TrsContainer extends React.Component {
     }
 
     this.updateTransmission = (e, userTasks, finishTasks) => {
+      debug('this.updateTransmission', userTasks, finishTasks)
       this.setState({ userTasks, finishTasks })
     }
   }

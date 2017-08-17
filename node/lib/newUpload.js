@@ -6,7 +6,7 @@ import { dialog, ipcMain } from 'electron'
 import { getMainWindow } from './window'
 import createTask, { sendMsg } from './uploadTaskCreater'
 // import { sendMsg } from './uploadTaskCreater'
-// import createTask from './uploadSchedule'
+// import { createTask } from './TestCode/applyTransform'
 import { serverGetAsync } from './server'
 
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
@@ -81,6 +81,7 @@ const uploadHandle = (event, args) => {
   const dialogType = type === 'folder' ? 'openDirectory' : 'openFile'
   dialog.showOpenDialog({ properties: [dialogType, 'multiSelections'], filters }, (entries) => {
     if (!entries || !entries.length) return debug('no entry !')
+    // readDir.push({ entries, dirUUID, driveUUID })
     readUploadInfo(entries, dirUUID, driveUUID)
   })
 }
