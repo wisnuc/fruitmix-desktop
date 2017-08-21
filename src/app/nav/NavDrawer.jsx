@@ -165,6 +165,9 @@ class NavDrawer extends React.Component {
 
         <SubHeader>我的盒子</SubHeader>
 
+        { this.renderGroup('file') }
+
+        {/*
         <MenuItem
           icon={views.home.menuIcon()}
           text={views.home.menuName()}
@@ -174,6 +177,15 @@ class NavDrawer extends React.Component {
         />
 
         <MenuItem
+          icon={views.transmission.menuIcon()}
+          text={views.transmission.menuName()}
+          primaryColor={primaryColor}
+          selected={nav === 'transmission'}
+          onTouchTap={() => navTo('transmission')}
+        />
+        */}
+
+        <MenuItem
           icon={views.media.menuIcon()}
           text={views.media.menuName()}
           primaryColor={primaryColor}
@@ -181,13 +193,6 @@ class NavDrawer extends React.Component {
           onTouchTap={() => navTo('media')}
         />
 
-        <MenuItem
-          icon={views.transmission.menuIcon()}
-          text={views.transmission.menuName()}
-          primaryColor={primaryColor}
-          selected={nav === 'transmission'}
-          onTouchTap={() => navTo('transmission')}
-        />
 
         { this.renderGroup('physical') }
 

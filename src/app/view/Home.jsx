@@ -56,7 +56,8 @@ class Home extends Base {
       rename: false,
       delete: false,
       move: false,
-      copy: false
+      copy: false,
+      share: false
     }
 
     /* handle update sortType */
@@ -265,14 +266,6 @@ class Home extends Base {
     return FileFolder
   }
 
-  quickName() {
-    return '我的文件'
-  }
-
-  quickIcon() {
-    return FileFolder
-  }
-
   appBarStyle() {
     return 'colored'
   }
@@ -405,7 +398,7 @@ class Home extends Base {
             entries={this.state.entries}
             select={this.state.select}
             openSnackBar={openSnackBar}
-            type="home"
+            type="move"
             operation="move"
           /> }
         </DialogOverlay>
@@ -417,7 +410,19 @@ class Home extends Base {
             entries={this.state.entries}
             select={this.state.select}
             openSnackBar={openSnackBar}
-            type="home"
+            type="copy"
+            operation="copy"
+          /> }
+        </DialogOverlay>
+
+        <DialogOverlay open={!!this.state.share} onRequestClose={() => this.toggleDialog('share')}>
+          { this.state.share && <MoveDialog
+            apis={this.ctx.props.apis}
+            path={this.state.path}
+            entries={this.state.entries}
+            select={this.state.select}
+            openSnackBar={openSnackBar}
+            type="share"
             operation="copy"
           /> }
         </DialogOverlay>
@@ -491,9 +496,8 @@ class Home extends Base {
               :
               <div>
                 <MenuItem
-                  primaryText="分享至共享文件夹"
                   leftIcon={<ShareIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                  onTouchTap={() => {}}
+                  primaryText="分享至共享文件夹" onTouchTap={() => this.toggleDialog('share')}
                 />
                 <MenuItem
                   leftIcon={<CopyIcon style={{ height: 20, width: 20, marginTop: 6 }} />}

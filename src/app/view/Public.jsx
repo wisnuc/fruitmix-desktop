@@ -107,11 +107,11 @@ class Public extends Home {
     this.ctx.props.apis.request('drives')
   }
 
-  quickName() {
+  menuName() {
     return '共享文件夹'
   }
 
-  quickIcon() {
+  menuIcon() {
     return FileFolderShared
   }
 
