@@ -173,7 +173,7 @@ class DrivesDetail extends PureComponent {
             />
           </div>
           <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
-          <div style={{ overflow: 'auto', flexGrow: 1 }}>
+          <div style={{ overflowY: 'auto', flexGrow: 1, width: 336 }}>
             {
               users.map(user =>
                 <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.username} >

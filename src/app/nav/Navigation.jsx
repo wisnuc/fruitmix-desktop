@@ -82,7 +82,7 @@ class NavViews extends Component {
     this.install('timeDate', TimeDate)
     this.install('fanControl', FanControl)
     this.install('clientUpdate', ClientUpdate)
-    this.install('firmwareUpdate', FirmwareUpdate)
+    // this.install('firmwareUpdate', FirmwareUpdate)
     this.install('power', Power)
 
 

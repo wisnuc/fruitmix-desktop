@@ -5,6 +5,7 @@ import ListIcon from 'material-ui/svg-icons/action/list'
 import Base from './Base'
 import FirmwareUpdateApp from '../control/FirmwareUpdateApp'
 import FirmDetail from '../control/FirmDetail'
+import FlatButton from '../common/FlatButton'
 
 const debug = Debug('view:component:update')
 
@@ -107,6 +108,17 @@ class FirmwareUpdate extends Base {
 
   /** renderers **/
   renderContent({ openSnackBar, toggleDetail }) {
+    return (
+      <div style={{ margin: 24 }}>
+        { ` 请访问 http://${this.ctx.props.selectedDevice.mdev.address}:3001` }
+        <FlatButton
+          primary
+          label="打开"
+          href={`http://${this.ctx.props.selectedDevice.mdev.address}:3001`}
+          target="_blank"
+        />
+      </div>
+    )
     return (
       <FirmwareUpdateApp
         firm={this.state.firm}

@@ -43,13 +43,13 @@ class RunningTask extends React.Component {
     if (task.state === 'finish') return '已完成'
     if (task.size === 0) return '0%'
     const percent = (Math.abs(task.completeSize / task.size) * 100).toFixed(2)
-    if (percent > 100) return '下载出错'
+    if (percent > 100) return '传输出错'
     return `${percent}%`
   }
 
   getUploadedSize(task) {
     // console.log(task)
-    if (task.type === 'folder' && task.count) {
+    if ((task.type === 'folder' || task.type === 'directory') && task.count) {
       return `${task.finishCount}/${task.count}  ${this.props.task.pause ? '' : task.speed}`
     } else if (task.type === 'file') {
       return `${this.formatSize(Math.abs(task.completeSize))}  ${this.props.task.pause ? '' : task.speed}`
@@ -67,6 +67,7 @@ class RunningTask extends React.Component {
   }
 
   render() {
+    console.log('RunningTask', this.props)
     const task = this.props.task
     const pColor = task.pause ? 'rgba(0,0,0,.12)' : '#89c2f2'
     let pWidth = task.completeSize / task.size * 100
@@ -78,8 +79,7 @@ class RunningTask extends React.Component {
           display: 'flex',
           alignItems: 'center',
           padding: '0 88px',
-          height: 40,
-          lindeHeight: 40,
+          height: 56,
           fontSize: 14,
           color: 'rgba(0,0,0,0.87)',
           backgroundColor: this.state.isSelected ? '#f4f4f4' : ''

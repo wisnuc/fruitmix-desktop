@@ -351,18 +351,18 @@ class Device extends RequestManager {
     this.manualBootAsync(args).asCallback(() => {})
   }
 
-  // probing -> message + progress
-  // systemError -> message
-  // fruitmixError -> message + maint, userMaint, failLast, failMulti, failNoAlt, unknownMaintenance
-  // [...] -> userbox
-  // [] -> firstUser
-  // uninitialized -> guide
-
-  // idle
-  // probing, systemError, fruitmixError,
-  // userMaint, failLast, faltMulti, failNoAlt, unknownMaint, unintialized (a special case for failNoAlt)
-  // [] (users)
-  //
+  /*
+   probing -> wait
+   starting -> wait
+   systemError -> error
+   fruitmixError -> maint
+   noUser -> create first user
+   ready -> show user list
+   userMaint -> maint
+   failLast -> maint
+   uninitialized -> init
+   failNoAlt -> maint
+  */
   systemStatus() {
     if (!this.device || !this.boot || !this.storage ||
       !this.users || this.device.isPending() || this.boot.isPending()
@@ -376,9 +376,13 @@ class Device extends RequestManager {
 
     /* normal mode */
     if (!boot.error && boot.state === 'started' && boot.current) {
-      if (this.users.isRejected()) { return 'fruitmixError' }
+      if (this.users.isRejected()) {
+        return 'fruitmixError'
+      } else if (this.users.value() && !this.users.value().length) {
+        return 'noUser'
+      }
       return 'ready'
-    } else if (!boot.error && boot.state === 'starting'){
+    } else if (!boot.error && boot.state === 'starting') {
       this.requestAsync('boot', null)
     }
 

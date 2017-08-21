@@ -177,6 +177,14 @@ class Fruitmix extends EventEmitter {
           .field(`${args.oldName}|${args.newName}`, JSON.stringify({ op: 'dup' }))
         break
 
+      case 'copy':
+        r = this.apost('tasks', args)
+        break
+
+      case 'task':
+        r = this.aget(`tasks/${args.taskUUID}`)
+        break
+
     /** Ext APIs **/
       case 'extDrives':
         r = this.aget('files/external/fs')

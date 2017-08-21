@@ -12,6 +12,8 @@ import utils from './util'
 import { serverGetAsync } from './server'
 import store from '../serve/store/store'
 
+Promise.promisifyAll(fs) // babel would transform Promise to bluebird
+
 let server
 let tokenObj
 const httpRequestConcurrency = 4
@@ -61,13 +63,13 @@ const sendMsg = () => {
 // TaskManager creater
 // new job :init manager with default parameter
 // old job :init manager with defined parameter(uuid, downloadpath, downloading information)
-const createTask = (target, name, size, type, dirUUID, newWork, p, u, d, ct, driveUUID) => {
+const createTask = (target, name, size, type, dirUUID, newWork, p, u, d, ct, driveUUID, rawName) => {
   initArgs()
   const taskUUID = u || uuid.v4()
   const abspath = p || getDownloadPath()
   const downloadingList = d || []
   const createTime = ct || (new Date()).getTime()
-  const task = new TaskManager(taskUUID, abspath, target, name, size, type, dirUUID, newWork, downloadingList, createTime, driveUUID)
+  const task = new TaskManager(taskUUID, abspath, target, name, size, type, dirUUID, newWork, downloadingList, createTime, driveUUID, rawName)
   task.createStore()
   userTasks.push(task)
   task.readyToVisit()
@@ -77,12 +79,12 @@ const createTask = (target, name, size, type, dirUUID, newWork, p, u, d, ct, dri
 
 // a download task manager for init/record/visit/schedule
 class TaskManager {
-  constructor(taskUUID, downloadPath, target, name, rootSize, type, dirUUID, newWork, downloadingList, createTime, driveUUID) {
+  constructor(taskUUID, downloadPath, target, name, rootSize, type, dirUUID, newWork, downloadingList, createTime, driveUUID, rawName) {
     this.uuid = taskUUID
     this.downloadPath = downloadPath
     this.target = target
     this.name = name
-    this.rawName = name
+    this.rawName = rawName || name
     this.rootSize = rootSize // for visit
     this.type = type
     this.createTime = createTime
@@ -154,51 +156,56 @@ class TaskManager {
   // consist tree from server
   visit() {
     this.state = 'visiting'
-    const _this = this
     this.recordInfor('开始遍历文件树...')
     removeOutOfVisitlessQueue(this)
     addToVisitingQueue(this)
-    visitTask(this.target, this.name, this.type, this.rootSize, this.dirUUID, this.tree, this, this.driveUUID, this.rawName, (err, data) => {
-      if (err) return _this.error(err, '遍历服务器数据出错')
-      _this.tree[0].downloadPath = _this.downloadPath
-      removeOutOfVisitingQueue(this)
-      _this.recordInfor('遍历文件树结束...')
-      this.diff()
-    })
+    visitTask(this.target, this.name, this.type, this.rootSize, this.dirUUID, this.tree, this, this.driveUUID, this.rawName)
+      .then(() => {
+        this.tree[0].downloadPath = this.downloadPath
+        removeOutOfVisitingQueue(this)
+        this.recordInfor('遍历文件树结束...')
+        this.diff().catch(e => this.recordInfor('diff 出错！'))
+      })
+      .catch(err => {
+        this.error(err, '遍历服务器数据出错')   
+      })
   }
 
   // if task is new , check rootName isRepeat
   // if task is old , visit local file tree && diff the trees
-  diff() {
+  async diff() {
     this.state = 'diffing'
     if (!this.newWork) {
-      fs.stat(path.join(this.downloadPath, this.name), (err, stat) => {
-        if (err) {
-          this.recordInfor('没有找到已下载的文件, 从头开始下载')
-          this.checkNameExist()
-          this.pause = true
-        } else if (stat.isFile()) {
-          this.recordInfor('文件下载任务 继续下载文件')
-          this.pause = true
+      let stat
+      try {
+        stat = await fs.lstatAsync(path.join(this.downloadPath, this.name))
+      } catch (err) {
+        this.recordInfor('没有找到已下载的文件, 从头开始下载')
+        this.checkNameExist()
+        this.pause = true
+        return
+      }
+      if (stat.isFile()) {
+        this.recordInfor('文件下载任务 继续下载文件')
+        this.pause = true
+        this.schedule()
+      } else {
+        this.recordInfor('文件夹下载任务 查找本地已下载文件信息')
+        const localObj = []
+        try {
+          await visitLocalFiles(path.join(this.downloadPath, this.name), localObj)
+        } catch(err) {
+          this.recordInfor('校验本地文件出错')
           this.schedule()
-        } else {
-          this.recordInfor('文件夹下载任务 查找本地已下载文件信息')
-          const localObj = []
-          visitLocalFiles(path.join(this.downloadPath, this.name), localObj, (err) => {
-            if (err) {
-              this.recordInfor('校验本地文件出错')
-              this.schedule()
-            } else {
-              this.recordInfor('校验本地文件结束')
-              diffTree(this.tree[0], localObj[0], this, (err) => {
-                if (err) console.log(err)
-                this.pause = true
-                this.schedule()
-              })
-            }
-          })
+          return
         }
-      })
+        this.recordInfor('校验本地文件结束')
+        try {
+          await diffTree(this.tree[0], localObj[0], this)
+        } catch(e) { this.recordInfor('diffTree error', e) }
+        this.pause = true
+        this.schedule()
+      }
     } else {
       this.recordInfor('新任务 不需要与服务器进行比较, 检查文件名是否重复')
       this.checkNameExist()
@@ -209,7 +216,6 @@ class TaskManager {
   checkNameExist() {
     fs.readdir(this.downloadPath, (err, files) => {
       if (err) return this.recordInfor('下载目录未找到')
-      this.rawName = this.tree[0].name
       const name = isFileNameExist(this.tree[0], 0, files)
       this.tree[0].name = name
       this.name = name
@@ -273,7 +279,7 @@ class TaskManager {
     // all nodes have been downloaded
     if (this.finishCount === this.worklist.length) {
       this.state = 'finish'
-      this.finishDate = utils.formatDate()
+      this.finishDate = (new Date()).getTime()
       userTasks.splice(userTasks.indexOf(this), 1)
       finishTasks.unshift(this)
       clearInterval(this.countSpeed)
@@ -298,7 +304,9 @@ class TaskManager {
       _id: this.uuid,
       downloadPath: this.downloadPath,
       target: this.target,
+      driveUUID: this.driveUUID,
       name: this.name,
+      rawName: this.rawName,
       rootSize: this.rootSize,
       type: this.type,
       dirUUID: this.dirUUID,
@@ -400,103 +408,73 @@ class TaskManager {
 }
 
 // visit tree from serve && check the seek of downloading files
-const visitTask = async (target, name, type, size, dirUUID, position, manager, driveUUID, rawName, callback) => {
+const visitTask = async (target, name, type, size, dirUUID, position, manager, driveUUID, rawName) => {
   manager.count += 1
   manager.size += size
+  /*
   console.log('============')
-  console.log(rawName)
+  console.log(target, name, type, size, dirUUID, driveUUID, rawName)
   console.log('============')
+  */
   const obj = type === 'file' ?
     new FileDownloadTask(target, name, type, size, dirUUID, manager, driveUUID, rawName) :
     new FolderDownloadTask(target, name, type, size, dirUUID, manager, driveUUID, rawName)
 
   const index = manager.downloadingList.findIndex(item => item.target === target)
   if (index !== -1) {
-    // may be local file has been removed
     obj.seek = manager.downloadingList[index].seek
     obj.timeStamp = manager.downloadingList[index].timeStamp
     manager.completeSize += manager.downloadingList[index].seek
   }
   manager.worklist.push(obj)
   position.push(obj)
-
-  if (type === 'file') return callback(null)
-
-  try {
-    const data = await serverGetAsync(`drives/${driveUUID}/dirs/${target}`)
-    const tasks = data.entries
-    tasks.forEach(t => (t.rawName = t.name))
-    if (!tasks.length) return callback(null)
-    const count = tasks.length
-    let index = 0
-    let task = tasks[index]
-    const next = () => {
-      visitTask(task.uuid, task.name, task.type, task.size ? task.size : 0, target, obj.children, manager, driveUUID, task.rawName, call)
-    }
-    let call = (err) => {
-      if (err) return callback(err)
-      index += 1
-      if (index >= count) return callback(null)
-      task = tasks[index]
-      next()
-    }
-    next()
-  } catch (err) { return callback(err) }
+  if (type === 'file') return
+  const data = await serverGetAsync(`drives/${driveUUID}/dirs/${target}`)
+  const tasks = data.entries
+  tasks.forEach(t => (t.rawName = t.name))
+  if (!tasks.length) return
+  for (let i = 0; i < tasks.length; i++) {
+    const task = tasks[i]
+    await visitTask(task.uuid, task.name, task.type, task.size ? task.size : 0, target, obj.children, manager, driveUUID, task.rawName)
+  }
 }
 
 // visit local files
-const visitLocalFiles = (abspath, position, callback) => {
-  fs.stat(abspath, (err, stat) => {
-    if (err || (!stat.isDirectory() && !stat.isFile())) return callback(err)
-    const type = stat.isDirectory() ? 'folder' : 'file'
-    const obj = { name: path.basename(abspath), type, children: [] }
-    position.push(obj)
-    if (stat.isFile()) return callback(null)
-    fs.readdir(abspath, (err, entries) => {
-      if (err) return callback(err)
-      if (!entries.length) return callback(null)
-      const count = entries.length
-      let index = 0
-      const next = () => { visitLocalFiles(path.join(abspath, entries[index]), obj.children, call) }
-      let call = (err) => {
-        if (err) return callback(err)
-        index += 1
-        if (index >= count) return callback()
-        next()
-      }
-      next()
-    })
-  })
+const visitLocalFiles = async (abspath, position) => {
+  const stat = await fs.statAsync(abspath)
+  if (!stat.isDirectory() && !stat.isFile()) throw Error('not Directory or File')
+  const type = stat.isDirectory() ? 'folder' : 'file'
+  const obj = { name: path.basename(abspath), type, children: [] }
+  position.push(obj)
+  if (stat.isFile()) return
+  const entries = await fs.readdirAsync(abspath)
+  for (let i = 0; i < entries.length; i++) {
+    await visitLocalFiles(path.join(abspath, entries[i]), obj.children)
+  }
 }
 
 // diff server file tree && local file tree
 // mark the node has been finished
-const diffTree = (taskPosition, localPosition, manager, callback) => {
-  if (taskPosition.name !== localPosition.name) return callback()
+const diffTree = async (taskPosition, localPosition, manager) => {
+  console.log(taskPosition)
+  console.log('========')
+  console.log('========')
+  console.log(localPosition)
+  if (taskPosition.name !== localPosition.name) return
   taskPosition.stateName = 'finish'
   manager.finishCount += 1
   manager.completeSize += taskPosition.size ? taskPosition.size : 0
-  if (taskPosition.type === 'file') return callback()
+  if (taskPosition.type === 'file') return
   const children = taskPosition.children
-  if (!children.length) return callback()
+  if (!children.length) return
   children.forEach(item => item.downloadPath = path.join(taskPosition.downloadPath, taskPosition.name))
-  const count = children.length
-  let index = 0
-  const next = () => {
-    const currentObj = taskPosition.children[index]
-    const i = localPosition.children.findIndex(item => item.name == currentObj.name)
-    if (i !== -1) {
-      diffTree(currentObj, localPosition.children[i], manager, call)
-    } else {
-      call()
+  for (let i = 0; i< children.length; i++){
+    const currentObj = taskPosition.children[i]
+    const index = localPosition.children.findIndex(item => item.name === currentObj.name)
+    if (index !== -1) {
+      await diffTree(currentObj, localPosition.children[index], manager)
     }
   }
-  let call = (err) => {
-    index += 1
-    if (index >= count) return callback()
-    next()
-  }
-  next()
 }
 
 // check the name isExist in download folder
@@ -603,8 +581,8 @@ class STM {
   }
 
   requestProbe() {
-    this.wrapper.stateName = 'ready'
     addToReadyQueue(this)
+    this.wrapper.stateName = 'ready'
   }
 
   destructor() {
@@ -615,10 +593,10 @@ class createFolderSTM extends STM {
   constructor(wrapper) {
     super(wrapper)
     this.handle = null
+    this.paused = false
   }
 
   beginDownload() {
-    const _this = this
     const wrapper = this.wrapper
     wrapper.stateName = 'running'
     removeOutOfReadyQueue(this)
@@ -626,11 +604,9 @@ class createFolderSTM extends STM {
     wrapper.recordInfor(`${wrapper.name} 开始创建...`)
     fs.mkdir(path.join(wrapper.downloadPath, wrapper.name), (err) => {
       if (!err) {
-        removeOutOfRunningQueue(_this)
+        removeOutOfRunningQueue(this)
         wrapper.children.forEach(item => item.downloadPath = path.join(wrapper.downloadPath, wrapper.name))
         wrapper.downloadFinish()
-      } else {
-
       }
     })
   }
@@ -644,6 +620,8 @@ class DownloadFileSTM extends STM {
   }
 
   beginDownload() {
+    if (this.paused) return
+    this.wrapper.stateName = 'running'
     removeOutOfReadyQueue(this)
     addToRunningQueue(this)
     this.wrapper.manager.updateStore()
@@ -666,8 +644,7 @@ class DownloadFileSTM extends STM {
     // console.log(wrapper)
     console.log(wrapper.name)
 
-    if (wrapper.size === wrapper.seek) return wrapper.manager.downloadSchedule()
-    wrapper.stateName = 'running'
+    if (wrapper.size === wrapper.seek && wrapper.size !== 0) return wrapper.manager.downloadSchedule()
 
     const options = {
       method: 'GET',
@@ -677,7 +654,7 @@ class DownloadFileSTM extends STM {
 
       headers: {
         Authorization: `${tokenObj.type} ${tokenObj.token}`,
-        Range: `bytes=${this.wrapper.seek}-`
+        Range: wrapper.size ? `bytes=${this.wrapper.seek}-` : undefined
       },
       qs: wrapper.dirUUID === 'media' ? { alt: 'data' } : { name: wrapper.rawName }
     }
@@ -699,7 +676,6 @@ class DownloadFileSTM extends STM {
       this.wrapper.seek += gap
       this.wrapper.manager.completeSize += gap
       this.wrapper.lastTimeSize = stream.bytesWritten
-      // console.log('一段文件写入完成 当前seek位置为 ：' + (this.wrapper.seek/this.wrapper.size * 100).toFixed(2) + '% 增加了 ：' + gap/this.wrapper.size *100 )
       wrapper.manager.updateStore()
     })
 
@@ -709,16 +685,21 @@ class DownloadFileSTM extends STM {
       this.wrapper.manager.completeSize += gap
       this.wrapper.lastTimeSize = stream.bytesWritten
 
-      console.log(`一段文件写入结束 当前seek位置为 ：${
-         (this.wrapper.seek / this.wrapper.size * 100).toFixed(2)
-         }% 增加了 ：${(gap / this.wrapper.size * 100).toFixed(2)}`)
+      console.log(`一段文件写入结束 当前seek位置为 ：${this.wrapper.seek}, 共${this.wrapper.size}`)
 
       this.wrapper.lastTimeSize = 0
-      if (this.wrapper.seek == this.wrapper.size) this.rename(this.tmpDownloadPath)
+      if (this.wrapper.seek >= this.wrapper.size) this.rename(this.tmpDownloadPath)
     })
 
-    this.handle = request(options)
-      .on('error', err => console.log('req : error', err))
+    this.handle = request(options, (error, response, body) => {
+      // console.log(error, response, body)
+      if (error || (response && response.statusCode && (response.statusCode !== 200 && response.statusCode !== 206))) {
+        console.log('req:', error, response && response.statusCode, this.wrapper.manager.type)
+        if (this.wrapper.manager.type === 'file') {
+          this.wrapper.manager.error(error, body)
+        }
+      }
+    })
 
     this.handle.pipe(stream)
   }
@@ -733,20 +714,27 @@ class DownloadFileSTM extends STM {
   }
 
   pause() {
+    this.wrapper.recordInfor(`${this.wrapper.name} pause, stateName: ${this.wrapper.stateName} readyQueue: ${readyQueue.length}`)
+    this.paused = true
     if (this.wrapper.stateName !== 'running') return
     this.wrapper.stateName = 'pause'
     sendMsg()
     if (this.handle) this.handle.abort()
     this.wrapper.recordInfor(`${this.wrapper.name}暂停了`)
-    removeOutOfRunningQueue(this)
+    this.timehandle = setTimeout(() => removeOutOfRunningQueue(this), 10) // it's necessary when pausing lots of tasks at the same time
   }
 
   resume() {
+    //  this.wrapper.recordInfor(`${this.wrapper.name} reusme, stateName: ${this.wrapper.stateName}`)
+    if (this.timehandle) clearTimeout(this.timehandle)
+    this.paused = false
     if (this.wrapper.stateName !== 'pause') return
     this.wrapper.stateName = 'running'
-    sendMsg()
-    this.beginDownload()
-    this.wrapper.recordInfor(`${this.wrapper.name}继续下载`)
+    if (runningQueue.length < httpRequestConcurrency) {
+      sendMsg()
+      this.beginDownload()
+      this.wrapper.recordInfor(`${this.wrapper.name}继续下载`)
+    }
   }
 }
 
@@ -755,7 +743,7 @@ const scheduleVisit = () => {
 }
 
 const scheduleHttpRequest = () => {
-  while (runningQueue.length < httpRequestConcurrency && readyQueue.length) { readyQueue[0].beginDownload() }
+  while (runningQueue.length < httpRequestConcurrency && readyQueue.length && !readyQueue[0].paused) { readyQueue[0].beginDownload() }
 }
 
 // visitless
@@ -774,7 +762,8 @@ const addToVisitingQueue = (task) => {
 }
 
 const removeOutOfVisitingQueue = (task) => {
-  visitingQueue.splice(visitingQueue.indexOf(task), 1)
+  const index = visitingQueue.indexOf(task)
+  if (index > -1) visitingQueue.splice(index, 1)
   scheduleVisit()
 }
 
@@ -785,7 +774,8 @@ const addToReadyQueue = (task) => {
 }
 
 const removeOutOfReadyQueue = (task) => {
-  readyQueue.splice(readyQueue.indexOf(task), 1)
+  const index = readyQueue.indexOf(task)
+  if (index > -1) readyQueue.splice(index, 1)
 }
 
 // running
@@ -794,7 +784,8 @@ const addToRunningQueue = (task) => {
 }
 
 const removeOutOfRunningQueue = (task) => {
-  runningQueue.splice(runningQueue.indexOf(task), 1)
+  const index = runningQueue.indexOf(task)
+  if (index > -1) runningQueue.splice(index, 1)
   scheduleHttpRequest()
 }
 

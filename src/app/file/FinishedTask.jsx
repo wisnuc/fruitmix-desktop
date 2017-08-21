@@ -36,16 +36,20 @@ class FinishedTask extends Component {
     return (this.state !== nextState)
   }
 
-  getFinishDate(date) {
-    const d = this.createDate
-    const year = d.getFullYear()
-    const mouth = d.getMonth() + 1
-    const day = d.getDate()
-    const hour = d.getHours()
-    const minute = d.getMinutes()
-    if (year === date[0] && mouth === date[1] && day === date[2]) return `${date[3]}:${date[4]}`
-    if (year === date[0] && mouth === date[1] && day === date[2] + 1) return '昨天'
-    return `${date[0]}-${date[1]}-${date[2]}`
+  getFinishDate(d) {
+    console.log(d, typeof d)
+    const date = new Date()
+    if (typeof d === 'number') {
+      date.setTime(d)
+    } else {
+      return '-'
+    }
+    const year = date.getFullYear()
+    const mouth = date.getMonth() + 1
+    const day = date.getDate()
+    const hour = date.getHours()
+    const minute = date.getMinutes()
+    return `${year}-${mouth}-${day} ${hour}:${minute}`
   }
 
   render() {
@@ -56,8 +60,7 @@ class FinishedTask extends Component {
           display: 'flex',
           alignItems: 'center',
           padding: '0 88px',
-          height: 40,
-          lindeHeight: 40,
+          height: 56,
           fontSize: 14,
           color: 'rgba(0,0,0,0.87)',
           backgroundColor: this.state.isSelected ? '#f4f4f4' : ''
@@ -72,7 +75,7 @@ class FinishedTask extends Component {
 
         {/* task item type */}
         <div style={{ flex: '0 0 32px' }}>
-          { task.type === 'folder' ? <FolderSvg style={svgStyle} /> : <FileSvg style={svgStyle} /> }
+          { (task.type === 'folder' || task.type === 'directory') ? <FolderSvg style={svgStyle} /> : <FileSvg style={svgStyle} /> }
         </div>
 
         {/* task item name */}

@@ -500,7 +500,7 @@ class PreviewInline extends React.Component {
 
     const isText = textExtension.findIndex(t => t === extension) > -1 && this.props.item.size < 1024 * 1024
 
-    const isPDF = extension === 'PDF'
+    const isPDF = extension === 'PDF' && this.props.item.size < 1024 * 1024 * 50
     return (
       <div
         ref={ref => (this.refBackground = ref)}

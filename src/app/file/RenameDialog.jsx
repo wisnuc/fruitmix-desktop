@@ -7,8 +7,11 @@ class RenameDialog extends React.PureComponent {
 
   constructor(props) {
     super(props)
+
+    this.value = this.props.entries[this.props.select.selected[0]].name
+
     this.state = {
-      value: '',
+      value: this.value,
       errorText: undefined
     }
 
@@ -37,13 +40,19 @@ class RenameDialog extends React.PureComponent {
         oldName: entries[select.selected[0]].name
       }
       console.log('renameDirOrFile', this.props, args)
-      apis.request('renameDirOrFile', args, (err, data) => {
-        if (err) this.setState({ errorText: err.message })
-        else {
+      apis.request('renameDirOrFile', args, (err) => {
+        if (err) {
+          this.setState({ errorText: err.message })
+        } else {
           this.props.onRequestClose(true)
+          this.props.openSnackBar('修改成功')
           this.props.refresh()
         }
       })
+    }
+
+    this.onKeyDown = (e) => {
+      if (e.which === 13 && !this.state.errorText && this.state.value.length !== 0 && this.state.value !== this.value) this.fire()
     }
   }
 
@@ -55,16 +64,18 @@ class RenameDialog extends React.PureComponent {
         <div style={{ height: 60 /** 48 + 12 **/}}>
           <TextField
             fullWidth
-            hintText={this.props.hintText ? this.props.hintText : '输入名称'}
+            name="rename"
+            value={this.state.value}
             errorText={this.state.errorText}
             onChange={this.handleChange}
             ref={input => input && input.focus()}
+            onKeyDown={this.onKeyDown}
           />
         </div>
         <div style={{ height: 24 }} />
         <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
           <FlatButton label="取消" primary onTouchTap={this.props.onRequestClose} />
-          <FlatButton label="确认" primary onTouchTap={this.fire} />
+          <FlatButton label="确认" primary disabled={!!this.state.errorText || this.state.value.length === 0 || this.state.value === this.value} onTouchTap={this.fire} />A
         </div>
       </div>
     )

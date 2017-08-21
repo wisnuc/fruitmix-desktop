@@ -44,7 +44,8 @@ const addToVisitlessQueue = (task) => {
 }
 
 const removeOutOfVisitlessQueue = (task) => {
-  visitlessQueue.splice(visitlessQueue.indexOf(task), 1)
+  const index = visitlessQueue.indexOf(task)
+  if (index > -1) visitlessQueue.splice(index, 1)
 }
 
 /* visiting */
@@ -53,7 +54,8 @@ const addToVisitingQueue = (task) => {
 }
 
 const removeOutOfVisitingQueue = (task) => {
-  visitingQueue.splice(visitingQueue.indexOf(task), 1)
+  const index = visitingQueue.indexOf(task)
+  if (index > -1) visitingQueue.splice(index, 1)
   scheduleVisit()
 }
 
@@ -64,7 +66,8 @@ const addToHashlessQueue = (task) => {
 }
 
 const removeOutOfHashlessQueue = (task) => {
-  hashlessQueue.splice(hashlessQueue.indexOf(task), 1)
+  const index = hashlessQueue.indexOf(task)
+  if (index > -1) hashlessQueue.splice(index, 1)
 }
 
 /* hashing */
@@ -73,7 +76,8 @@ const addToHashingQueue = (task) => {
 }
 
 const removeOutOfHashingQueue = (task) => {
-  hashingQueue.splice(hashingQueue.indexOf(task), 1)
+  const index = hashingQueue.indexOf(task)
+  if (index > -1) hashingQueue.splice(index, 1)
   scheduleFileHash()
 }
 
@@ -83,7 +87,10 @@ const addToReadyQueue = (task) => {
   scheduleHttpRequest()
 }
 
-const removeOutOfReadyQueue = task => readyQueue.splice(readyQueue.indexOf(task), 1)
+const removeOutOfReadyQueue = (task) => {
+  const index = readyQueue.indexOf(task)
+  if (index > -1) readyQueue.splice(index, 1)
+}
 
 
 /* running */
@@ -92,7 +99,8 @@ const addToRunningQueue = (task) => {
 }
 
 const removeOutOfRunningQueue = (task) => {
-  runningQueue.splice(runningQueue.indexOf(task), 1)
+  const index = runningQueue.indexOf(task)
+  if (index > -1) runningQueue.splice(index, 1)
   scheduleHttpRequest()
 }
 
@@ -410,9 +418,9 @@ class UploadFileSTM extends STM {
           }
         }
       }
-      this.handle = request.post(op, (error, data) => {
-        if (error) {
-          debug('error', error)
+      this.handle = request.post(op, (error, response, body) => {
+        debug('request.post error', error, response && response.statusCode, body)
+        if (error || (response && response.statusCode !== 200 && response.statusCode !== 206)) {
           this.wrapper.manager.state = 'failed'
         } else if (callback) callback()
       })
@@ -429,10 +437,11 @@ class UploadFileSTM extends STM {
   }
 
   beginUpload() {
-    debug('beginUpload state', this.wrapper.stateName, this.paused)
+    // debug('beginUpload state', this.wrapper.stateName, this.paused)
     if (this.paused) return
     this.wrapper.stateName = 'running'
     removeOutOfReadyQueue(this)
+    debug('removeOutOfReadyQueue in beginUpload', this.wrapper.stateName, this.wrapper.name)
     addToRunningQueue(this)
     this.wrapper.manager.updateStore()
     this.wrapper.recordInfor(`${this.wrapper.name} 开始上传.....`)
@@ -456,10 +465,14 @@ class UploadFileSTM extends STM {
     let seek = wrapper.seek
     const name = wrapper.name
     const part = wrapper.parts[seek]
+    if (!part) {
+      this.wrapper.manager.state = 'failed'
+      return
+    }
 
     const readStream = fs.createReadStream(wrapper.abspath, { start: part.start, end: part.end, autoClose: true })
     readStream.on('data', (chunk) => {
-      // debug(`Received ${chunk.length} bytes of data.`)
+      // debug( `Received ${chunk.length} bytes of data.`)
       if (this.wrapper.stateName !== 'running') return
       this.partFinishSize += chunk.length
       this.wrapper.manager.completeSize += chunk.length
@@ -495,27 +508,29 @@ class UploadFileSTM extends STM {
   }
 
   pause() {
+    this.wrapper.recordInfor(`${this.wrapper.name} pause, stateName: ${this.wrapper.stateName} readyQueue: ${readyQueue.length}`)
     this.paused = true
     if (this.wrapper.stateName !== 'running') return
     this.wrapper.stateName = 'pause'
     sendMsg()
-    if (this.handle) {
-      this.handle.abort()
-      debug('abort!', this.wrapper.name)
-    }
+    if (this.handle) this.handle.abort()
     this.wrapper.manager.completeSize -= this.partFinishSize
     this.partFinishSize = 0
     this.wrapper.recordInfor(`${this.wrapper.name}暂停了`)
-    removeOutOfRunningQueue(this)
+    this.timehandle = setTimeout(() => removeOutOfRunningQueue(this), 10) // it's necessary when pausing lots of tasks at the same time
   }
 
   resume() {
+    this.wrapper.recordInfor(`${this.wrapper.name} reusme, stateName: ${this.wrapper.stateName}`)
+    if (this.timehandle) clearTimeout(this.timehandle)
     this.paused = false
     if (this.wrapper.stateName !== 'pause') return
     this.wrapper.stateName = 'running'
-    sendMsg()
-    this.beginUpload()
-    this.wrapper.recordInfor(`${this.wrapper.name}继续上传`)
+    if (runningQueue.length < httpRequestConcurrency) {
+      this.beginUpload()
+      this.wrapper.recordInfor(`${this.wrapper.name}继续上传`)
+      sendMsg()
+    }
   }
 }
 
@@ -729,7 +744,7 @@ class TaskManager {
     this.state = 'schedule'
     sendMessage()
     if (this.pause || !this.count) return
-    debug('task schedule')
+    debug('task schedule in schedule')
     this.hashSchedule()
     this.uploadSchedule()
   }
@@ -787,7 +802,7 @@ class TaskManager {
     if (this.finishCount === this.worklist.length) {
       clearInterval(this.countSpeed)
       this.state = 'finish'
-      this.finishDate = utils.formatDate()
+      this.finishDate = (new Date()).getTime()
       userTasks.splice(userTasks.indexOf(this), 1)
       finishTasks.unshift(this)
       getMainWindow().webContents.send('driveListUpdate', Object.assign({}, { uuid: this.target, message: '上传成功' }))
