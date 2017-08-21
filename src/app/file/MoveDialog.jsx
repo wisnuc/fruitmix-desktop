@@ -1,13 +1,15 @@
 import React from 'react'
-import { ipcRenderer } from 'electron'
 import { IconButton, CircularProgress } from 'material-ui'
 import BackIcon from 'material-ui/svg-icons/navigation/arrow-back'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import ArrowRight from 'material-ui/svg-icons/hardware/keyboard-arrow-right'
+import Promise from 'bluebird'
 import request from 'superagent'
 import FlatButton from '../common/FlatButton'
+
+Promise.promisifyAll(request)
 
 class Row extends React.PureComponent {
   render() {
@@ -30,37 +32,37 @@ class Row extends React.PureComponent {
         onTouchTap={disable ? null : this.props.selectNode}
         onDoubleClick={() => this.props.enter(node)}
       >
-        <div style={{ margin: '0 18px 0 13px', display: 'flex' }}>
+        <div style={{ margin: '0 12px 0 12px', display: 'flex' }}>
           {
             node.type === 'file' ?
               <EditorInsertDriveFile style={{ color: 'rgba(0,0,0,0.54)' }} /> :
               <FileFolder style={{ color: 'rgba(0,0,0,0.54)' }} />
           }
         </div>
-        <span
+        <div
           style={{
-            width: 150,
+            width: 240,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
-            marginRight: 5
+            marginRight: 5,
+            fontSize: 14
           }}
         >
           { node.name || node.label || node.mountpoint }
-        </span>
-        <span
+        </div>
+        <div
           style={{
-            display: 'none',
-            width: 23,
-            height: '25px!important',
-            lineHeight: '25px!important',
+            display: isSelected ? '' : 'none',
+            width: 24,
+            marginTop: 16,
             cursor: 'pointer',
             justifyContent: 'center'
           }}
           onTouchTap={() => this.props.enter(node)}
         >
-          <ArrowRight />
-        </span>
+          <ArrowRight color="rgba(0,0,0,0.54)" />
+        </div>
       </div>
     )
   }
@@ -79,7 +81,8 @@ class MoveDialog extends React.PureComponent {
       currentDir: Object.assign({}, this.path[this.path.length - 1], { type: 'directory' }),
       path: [{ name: '我的所有文件', uuid: this.path[0].uuid, type: 'root' }, ...this.path],
       loading: false,
-      currentSelectedIndex: -1
+      currentSelectedIndex: -1,
+      error: null
     }
 
     /** actions **/
@@ -174,11 +177,42 @@ class MoveDialog extends React.PureComponent {
       }
       const entries = this.selectedArr.map(e => e.uuid)
 
-      this.apost('tasks', { type, src, dst, entries }).end((err, res) => {
-        if (err) return console.log(err)
-        console.log(JSON.parse(res.text))
+      this.setState({ loading: true })
+      this.apost('tasks', { type, src, dst, entries }).end(this.finish)
+    }
+
+    /* finish post change dialog content to waiting/result */
+    this.finish = (error, res) => {
+      if (error) {
+        this.setState({ loading: false })
         this.closeDialog()
+        this.props.openSnackBar('失败')
+        return
+      }
+      const data = JSON.parse(res.text)
+      this.getTaskState(data.uuid).asCallback((err) => {
+        if (err) {
+          this.setState({ loading: false })
+          this.closeDialog()
+          return this.props.openSnackBar('失败')
+        }
+        this.setState({ loading: false })
+        this.closeDialog()
+        return this.props.openSnackBar('成功')
       })
+    }
+
+    /* request task state */
+    this.getTaskState = async (uuid) => {
+      // const data = await this.agetAsync(`tasks/${uuid}`)
+      const list = await this.agetAsync('tasks')
+      const data = list.find(l => l.uuid === uuid)
+      if (!data.isStopped) {
+        console.log('retry', data)
+        await this.sleep(200)
+        await this.getTaskState(uuid)
+      }
+      return data
     }
 
     /* close dialog */
@@ -192,12 +226,14 @@ class MoveDialog extends React.PureComponent {
       return a.name.localeCompare(b.name)
     })
 
+    this.sleep = time => new Promise(resolve => setTimeout(resolve, time))
+
     /* get file list */
     this.list = (driveUUID, dirUUID) => new Promise((resolve, reject) => {
       this.setState({ loading: true })
       this.aget(`drives/${driveUUID}/dirs/${dirUUID}`).end((err, res) => {
         if (err) return reject(err)
-        resolve(this.sort(JSON.parse(res.text)))
+        return resolve(this.sort(JSON.parse(res.text)))
       })
     })
 
@@ -208,6 +244,13 @@ class MoveDialog extends React.PureComponent {
       return request.get(encodeURI(string)).set('Authorization', `JWT ${token}`)
     }
 
+    this.agetAsync = ep => new Promise((resolve, reject) => {
+      this.aget(ep).end((err, res) => {
+        if (err) return reject(err)
+        return resolve(JSON.parse(res.text))
+      })
+    })
+
     this.apost = (ep, data) => {
       const { address, token } = this.props.apis
       const string = `http://${address}:3000/${ep}`
@@ -216,10 +259,11 @@ class MoveDialog extends React.PureComponent {
     }
   }
 
-  /* 移动按钮是否工作 */
+  /* 移动按钮是否工作 disabled ? */
   getButtonStatus() {
     const { name, uuid, type } = this.state.currentDir
     const selectedObj = this.state.currentSelectedIndex !== -1 ? this.state.list[this.state.currentSelectedIndex] : null
+    if (this.state.loading) return true
 
     /* root 不能被指定为目标, 文件夹、共享盘、home可以被定为目标 */
     if (type !== 'directory' && type !== 'publicRoot' && type !== 'public' && name !== uuid) return true
@@ -297,12 +341,12 @@ class MoveDialog extends React.PureComponent {
 
   render() {
     return (
-      <div style={{ width: 336 }}>
+      <div style={{ width: 336, height: 448 }}>
         {/* header */}
         <div
           style={{
             height: 56,
-            backgroundColor: '#f1f1f1',
+            backgroundColor: '#EEEEEE',
             position: 'relative',
             display: 'flex',
             flexFlow: 'row nowrap',
@@ -316,7 +360,7 @@ class MoveDialog extends React.PureComponent {
             onTouchTap={this.back}
           >
             <IconButton style={{ display: this.state.path.length > 1 ? '' : 'none' }}>
-              <BackIcon />
+              <BackIcon color="rgba(0,0,0,0.54)" />
             </IconButton>
           </div>
 
@@ -324,10 +368,11 @@ class MoveDialog extends React.PureComponent {
           <div
             style={{
               flex: '0 0 240px',
-              color: 'rgba(0,0,0,0.87)',
+              color: 'rgba(0,0,0,0.54)',
               whiteSpace: 'nowrap',
               textOverflow: 'ellipsis',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              fontWeight: 500
             }}
           >
             { this.renderCurrentDir() }
@@ -339,7 +384,7 @@ class MoveDialog extends React.PureComponent {
             onTouchTap={this.closeDialog}
           >
             <IconButton>
-              <CloseIcon />
+              <CloseIcon color="rgba(0,0,0,0.54)" />
             </IconButton>
           </div>
         </div>
@@ -350,10 +395,9 @@ class MoveDialog extends React.PureComponent {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: 288,
-            height: 200,
+            width: 336,
+            height: 340,
             overflowY: 'auto',
-            padding: '8px 24px 0px 24px',
             color: 'rgba(0,0,0,0.87)'
           }}
         >
@@ -361,17 +405,20 @@ class MoveDialog extends React.PureComponent {
             this.state.loading ? <CircularProgress /> :
             <div style={{ height: '100%', width: '100%' }}>
               {
-                  this.state.list.map((item, index) => (
-                    <Row
-                      key={item.uuid || item.path || item.name}
-                      node={item}
-                      selectNode={() => this.selectNode(index)}
-                      enter={this.enter}
-                      disable={this.isRowDisable(item)}
-                      isSelected={index === this.state.currentSelectedIndex}
-                    />
-                  ))
-                }
+                this.state.list.length ? this.state.list.map((item, index) => (
+                  <Row
+                    key={item.uuid || item.path || item.name}
+                    node={item}
+                    selectNode={() => this.selectNode(index)}
+                    enter={this.enter}
+                    disable={this.isRowDisable(item)}
+                    isSelected={index === this.state.currentSelectedIndex}
+                  />
+                ))
+                : <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  { '此文件夹为空' }
+                </div>
+              }
             </div>
           }
         </div>
