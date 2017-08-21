@@ -398,6 +398,8 @@ class Home extends Base {
             entries={this.state.entries}
             select={this.state.select}
             openSnackBar={openSnackBar}
+            primaryColor={this.groupPrimaryColor()}
+            refresh={this.refresh}
             type="move"
             operation="move"
           /> }
@@ -410,6 +412,8 @@ class Home extends Base {
             entries={this.state.entries}
             select={this.state.select}
             openSnackBar={openSnackBar}
+            primaryColor={this.groupPrimaryColor()}
+            refresh={this.refresh}
             type="copy"
             operation="copy"
           /> }
@@ -422,6 +426,8 @@ class Home extends Base {
             entries={this.state.entries}
             select={this.state.select}
             openSnackBar={openSnackBar}
+            primaryColor={this.groupPrimaryColor()}
+            refresh={this.refresh}
             type="share"
             operation="copy"
           /> }

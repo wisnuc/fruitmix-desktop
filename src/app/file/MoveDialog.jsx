@@ -1,12 +1,15 @@
 import React from 'react'
-import { IconButton, CircularProgress } from 'material-ui'
-import BackIcon from 'material-ui/svg-icons/navigation/arrow-back'
+import { IconButton, CircularProgress, RaisedButton, TextField } from 'material-ui'
+import DoneIcon from 'material-ui/svg-icons/action/done'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
+import BackIcon from 'material-ui/svg-icons/navigation/arrow-back'
 import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
+import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import ArrowRight from 'material-ui/svg-icons/hardware/keyboard-arrow-right'
 import Promise from 'bluebird'
 import request from 'superagent'
+import sanitize from 'sanitize-filename'
 import FlatButton from '../common/FlatButton'
 
 Promise.promisifyAll(request)
@@ -82,7 +85,8 @@ class MoveDialog extends React.PureComponent {
       path: [{ name: '我的所有文件', uuid: this.path[0].uuid, type: 'root' }, ...this.path],
       loading: false,
       currentSelectedIndex: -1,
-      error: null
+      errorText: '',
+      newFoldName: ''
     }
 
     /** actions **/
@@ -150,6 +154,45 @@ class MoveDialog extends React.PureComponent {
         const list = this.props.apis.drives.value().filter(d => d.tag !== 'home')
         setImmediate(() => this.updateState(path, currentDir, list))
       }
+    }
+
+    /* create new folder */
+    this.createNewFolder = () => {
+      console.log('this.createNewFolder', this.props, this.state)
+      const args = {
+        driveUUID: this.state.path[0].uuid,
+        dirUUID: this.state.currentSelectedIndex > -1
+        ? this.state.list[this.state.currentSelectedIndex].uuid
+        : this.state.currentDir.uuid,
+        dirname: this.state.newFoldName
+      }
+      if (this.state.currentSelectedIndex > -1) this.enter(this.state.list[this.state.currentSelectedIndex])
+      this.props.apis.request('mkdir', args, (err, data) => {
+        if (err) {
+          this.setState({ errorText: err.message })
+        } else {
+          const node = data.entries.find(entry => entry.name === this.state.newFoldName)
+          this.enter(node)
+          this.props.refresh()
+          this.setState({ cnf: false, newFoldName: '', errorText: '' })
+        }
+      })
+    }
+
+    this.handleChange = (newFoldName) => {
+      const newValue = sanitize(newFoldName)
+      const entries = this.state.list
+      if (entries.findIndex(entry => entry.name === newFoldName) > -1) {
+        this.setState({ newFoldName, errorText: '名称已存在' })
+      } else if (newFoldName !== newValue) {
+        this.setState({ newFoldName, errorText: '名称不合法' })
+      } else {
+        this.setState({ newFoldName, errorText: '' })
+      }
+    }
+
+    this.onKeyDown = (e) => {
+      if (e.which === 13 && !this.state.errorText && !!this.state.newFoldName.length) this.createNewFolder()
     }
 
     /* select node */
@@ -267,7 +310,7 @@ class MoveDialog extends React.PureComponent {
   getButtonStatus() {
     const { name, uuid, type } = this.state.currentDir
     const selectedObj = this.state.currentSelectedIndex !== -1 ? this.state.list[this.state.currentSelectedIndex] : null
-    if (this.state.loading) return true
+    if (this.state.loading || this.state.cnf) return true
 
     /* root 不能被指定为目标, 文件夹、共享盘、home可以被定为目标 */
     if (type !== 'directory' && type !== 'publicRoot' && type !== 'public' && name !== uuid) return true
@@ -344,55 +387,71 @@ class MoveDialog extends React.PureComponent {
       : this.state.currentDir.name || this.state.currentDir.label
   }
 
+  renderHeader() {
+    return (
+      <div
+        style={{
+          height: 56,
+          backgroundColor: '#EEEEEE',
+          position: 'relative',
+          display: 'flex',
+          flexFlow: 'row nowrap',
+          justifyContent: 'flex-start',
+          alignItems: 'center'
+        }}
+      >
+        {/* back button */}
+        <div
+          style={{ flex: '0 0 48px', display: 'flex', justifyContent: 'center' }}
+          onTouchTap={this.state.cnf ? () => this.setState({ cnf: false }) : this.back}
+        >
+          <IconButton style={{ display: this.state.path.length > 1 ? '' : 'none' }}>
+            <BackIcon color="rgba(0,0,0,0.54)" style={{ height: 16, width: 16 }} />
+          </IconButton>
+        </div>
+
+        {/* name */}
+        <div
+          style={{
+            flex: '0 0 240px',
+            color: 'rgba(0,0,0,0.54)',
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis',
+            overflow: 'hidden',
+            fontWeight: 500
+          }}
+        >
+          { this.state.cnf
+              ? <TextField
+                fullWidth
+                name="createNewFolder"
+                value={this.state.newFoldName}
+                errorText={this.state.errorText}
+                onChange={e => this.handleChange(e.target.value)}
+                ref={input => input && input.focus()}
+                onKeyDown={this.onKeyDown}
+              />
+              : this.renderCurrentDir() }
+        </div>
+
+        {/* confirm or close button */}
+        <div style={{ flex: '0 0 48px', display: 'flex', justifyContent: 'center' }}>
+          <IconButton
+            onTouchTap={this.state.cnf ? this.createNewFolder : this.closeDialog}
+            disabled={!!this.state.errorText || (this.state.cnf && !this.state.newFoldName.length)}
+          >
+            { this.state.cnf ? <DoneIcon color={this.props.primaryColor} /> : <CloseIcon color="rgba(0,0,0,0.54)" /> }
+          </IconButton>
+        </div>
+      </div>
+    )
+  }
+
   render() {
     return (
       <div style={{ width: 336, height: 448 }}>
         {/* header */}
-        <div
-          style={{
-            height: 56,
-            backgroundColor: '#EEEEEE',
-            position: 'relative',
-            display: 'flex',
-            flexFlow: 'row nowrap',
-            justifyContent: 'flex-start',
-            alignItems: 'center'
-          }}
-        >
-          {/* back button */}
-          <div
-            style={{ flex: '0 0 48px', display: 'flex', justifyContent: 'center' }}
-            onTouchTap={this.back}
-          >
-            <IconButton style={{ display: this.state.path.length > 1 ? '' : 'none' }}>
-              <BackIcon color="rgba(0,0,0,0.54)" />
-            </IconButton>
-          </div>
-
-          {/* current directory */}
-          <div
-            style={{
-              flex: '0 0 240px',
-              color: 'rgba(0,0,0,0.54)',
-              whiteSpace: 'nowrap',
-              textOverflow: 'ellipsis',
-              overflow: 'hidden',
-              fontWeight: 500
-            }}
-          >
-            { this.renderCurrentDir() }
-          </div>
-
-          {/* close button */}
-          <div
-            style={{ flex: '0 0 48px', display: 'flex', justifyContent: 'center' }}
-            onTouchTap={this.closeDialog}
-          >
-            <IconButton>
-              <CloseIcon color="rgba(0,0,0,0.54)" />
-            </IconButton>
-          </div>
-        </div>
+        { this.renderHeader() }
 
         {/* list of directory */}
         <div
@@ -401,41 +460,61 @@ class MoveDialog extends React.PureComponent {
             alignItems: 'center',
             justifyContent: 'center',
             width: 336,
-            height: 340,
+            height: 324,
             overflowY: 'auto',
             color: 'rgba(0,0,0,0.87)'
           }}
         >
           {
-            this.state.loading ? <CircularProgress /> :
-            <div style={{ height: '100%', width: '100%' }}>
-              {
-                this.state.list.length ? this.state.list.map((item, index) => (
-                  <Row
-                    key={item.uuid || item.path || item.name}
-                    node={item}
-                    selectNode={() => this.selectNode(index)}
-                    enter={this.enter}
-                    disable={this.isRowDisable(item)}
-                    isSelected={index === this.state.currentSelectedIndex}
-                  />
-                ))
-                : <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  { '此文件夹为空' }
-                </div>
-              }
-            </div>
+            this.state.loading
+              ? <CircularProgress />
+              : this.state.cnf
+              ? <div style={{ fontSize: 14 }}>
+                { `在“${this.state.currentSelectedIndex > -1
+                    ? this.state.list[this.state.currentSelectedIndex].name
+                    : this.renderCurrentDir()}”中创建新文件夹`
+                } </div>
+              : <div style={{ height: '100%', width: '100%' }}>
+                {
+                  this.state.list.length ? this.state.list.map((item, index) => (
+                    <Row
+                      key={item.uuid || item.path || item.name}
+                      node={item}
+                      selectNode={() => this.selectNode(index)}
+                      enter={this.enter}
+                      disable={this.isRowDisable(item)}
+                      isSelected={index === this.state.currentSelectedIndex}
+                    />
+                  ))
+                  : <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    { '此文件夹为空' }
+                  </div>
+                }
+              </div>
           }
         </div>
 
         {/* confirm button */}
-        <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-          <FlatButton
-            label={this.getButtonText()}
+        <div style={{ height: 68, display: 'flex', alignItems: 'center', backgroundColor: '#FAFAFA' }}>
+          <RaisedButton
             primary
+            style={{ marginLeft: 16 }}
+            label={this.getButtonText()}
             disabled={this.getButtonStatus()}
+            disabledBackgroundColor="#FAFAFA"
             onTouchTap={this.move}
           />
+          <div style={{ flexGrow: 1 }} />
+          { /* can't add new fold in root or publicRoot */
+            this.state.path.length > 1 && (this.state.path.length !== 2 || this.state.path[1].type !== 'publicRoot') &&
+              <IconButton
+                tooltip="新建文件夹" tooltipPosition="top-center"
+                style={{ marginRight: 16 }} onTouchTap={() => this.setState({ cnf: true })}
+                disabled={this.state.cnf}
+              >
+                <FileCreateNewFolder color="rgba(0,0,0,0.54)" />
+              </IconButton>
+          }
         </div>
       </div>
     )
