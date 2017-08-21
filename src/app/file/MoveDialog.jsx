@@ -94,7 +94,7 @@ class MoveDialog extends React.PureComponent {
 
       /* update current path and dir */
       const currentDir = node
-      const path = [...this.state.path, node]
+      const path = node.setRoot ? [node] : [...this.state.path, node]
 
       /* set parameter to get file list */
       const dirUUID = node.uuid
@@ -259,6 +259,10 @@ class MoveDialog extends React.PureComponent {
     }
   }
 
+  componentWillMount() {
+    if (this.props.type === 'share') this.enter({ type: 'publicRoot', name: '共享文件夹', setRoot: true })
+  }
+
   /* 移动按钮是否工作 disabled ? */
   getButtonStatus() {
     const { name, uuid, type } = this.state.currentDir
@@ -289,10 +293,11 @@ class MoveDialog extends React.PureComponent {
 
   /* 按钮文字 */
   getButtonText() {
+    const type = this.props.type === 'copy' ? '拷贝' : this.props.type === 'move' ? '移动' : '分享'
     if (this.state.currentSelectedIndex !== -1 || this.directory.uuid === this.state.currentDir.uuid) {
-      return this.props.operation === 'move' ? '移动至选中文件夹' : '拷贝至选中文件夹'
+      return `${type}至选中文件夹`
     }
-    return this.props.operation === 'move' ? '移动至当前文件夹' : '拷贝至当前文件夹'
+    return `${type}至当前文件夹`
   }
 
   /* 是否在同一目录 */
