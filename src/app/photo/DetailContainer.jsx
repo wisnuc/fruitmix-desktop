@@ -193,14 +193,19 @@ class DetailContainerInline extends React.Component {
             this[`refPreview_${i}`].style.opacity = 0
             this[`refPreview_${i}`].style.zIndex = 0
             /* update div content */
-            let item = {}
-            if (this.currentIndex < this.props.items.length - 1) item = this.props.items[this.currentIndex + 1]
+            const max = this.props.items.length - 1
             if (!i) {
-              this.leftItem = item
+              this.leftItem = this.currentIndex < max ? this.props.items[this.currentIndex + 1] : {}
+              this.centerItem = this.currentIndex < max - 1 ? this.props.items[this.currentIndex + 2] : {}
+              this.rightItem = this.currentIndex < max + 1 ? this.props.items[this.currentIndex] : {}
             } else if (i === 1) {
-              this.centerItem = item
+              this.leftItem = this.currentIndex < max + 1 ? this.props.items[this.currentIndex] : {}
+              this.centerItem = this.currentIndex < max ? this.props.items[this.currentIndex + 1] : {}
+              this.rightItem = this.currentIndex < max - 1 ? this.props.items[this.currentIndex + 2] : {}
             } else {
-              this.rightItem = item
+              this.leftItem = this.currentIndex < max - 1 ? this.props.items[this.currentIndex + 2] : {}
+              this.centerItem = this.currentIndex < max + 1 ? this.props.items[this.currentIndex] : {}
+              this.rightItem = this.currentIndex < max ? this.props.items[this.currentIndex + 1] : {}
             }
           } else if (this[`refPreview_${i}`].style.left === '20%') {
             this[`refPreview_${i}`].style.opacity = 1
@@ -222,14 +227,18 @@ class DetailContainerInline extends React.Component {
         for (let i = 0; i < 3; i++) {
           if (this[`refPreview_${i}`].style.left === '20%') {
             /* update div content */
-            let item = {}
-            if (this.currentIndex) item = this.props.items[this.currentIndex - 1]
             if (!i) {
-              this.leftItem = item
+              this.leftItem = this.currentIndex > 0 ? this.props.items[this.currentIndex - 1] : {}
+              this.centerItem = this.currentIndex > -1 ? this.props.items[this.currentIndex] : {}
+              this.rightItem = this.currentIndex > 1 ? this.props.items[this.currentIndex - 2] : {}
             } else if (i === 1) {
-              this.centerItem = item
+              this.leftItem = this.currentIndex > 1 ? this.props.items[this.currentIndex - 2] : {}
+              this.centerItem = this.currentIndex > 0 ? this.props.items[this.currentIndex - 1] : {}
+              this.rightItem = this.currentIndex > -1 ? this.props.items[this.currentIndex] : {}
             } else {
-              this.rightItem = item
+              this.leftItem = this.currentIndex > -1 ? this.props.items[this.currentIndex] : {}
+              this.centerItem = this.currentIndex > 1 ? this.props.items[this.currentIndex - 2] : {}
+              this.rightItem = this.currentIndex > 0 ? this.props.items[this.currentIndex - 1] : {}
             }
             this[`refPreview_${i}`].style.opacity = 0
             this[`refPreview_${i}`].style.zIndex = 0
@@ -288,7 +297,10 @@ class DetailContainerInline extends React.Component {
       }
     }
   }
+
   componentWillMount() {
+    debug('componentWillMount', this.currentIndex, this.props.items.length)
+
     /* init three items' content */
     this.centerItem = this.props.items[this.currentIndex]
     this.leftItem = {}
@@ -306,6 +318,15 @@ class DetailContainerInline extends React.Component {
   componentDidMount() {
     /* update refContainer size */
     this.forceUpdate()
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.forceChange && prevProps && this.props && prevProps.items.length !== this.props.items.length) {
+      debug('componentWillReceiveProps', prevProps, this.props)
+      this.currentIndex -= 1
+      this.changeIndex('right')
+      this.forceChange = false
+    }
   }
 
   componentWillUnmount() {
@@ -410,7 +431,7 @@ class DetailContainerInline extends React.Component {
   }
 
   render() {
-    // debug('renderContainer', this.leftItem, this.centerItem, this.rightItem)
+    debug('renderContainer', this.leftItem, this.centerItem, this.rightItem)
     this.changeContainer()
 
     /* show hidden media or just normal view */
@@ -672,7 +693,7 @@ class DetailContainerInline extends React.Component {
                   </div>
                   <div style={{ height: 20 }} />
                   <div style={{ color: 'rgba(0,0,0,0.54)' }}>
-                    { h ? '内容将重新在我的照片内显示': '内容被隐藏后，我的照片内将不显示，可在智能助理中恢复。' }
+                    { h ? '内容将重新在我的照片内显示' : '内容被隐藏后，我的照片内将不显示，可在智能助理中恢复。' }
                   </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
@@ -683,7 +704,7 @@ class DetailContainerInline extends React.Component {
                       onTouchTap={() => {
                         this.props.hideMedia(h)
                         this.toggleDialog('hideDialog')
-                        this.changeIndex('right')
+                        this.forceChange = true
                       }}
                     />
                   </div>
