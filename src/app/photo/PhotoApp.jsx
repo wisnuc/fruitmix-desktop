@@ -197,11 +197,11 @@ class PhotoApp extends React.Component {
               <IconButton onTouchTap={() => this.toggleDialog('deleteDialog')}>
                 <DeleteIcon color="#FFF" />
               </IconButton>
+              */}
 
               <IconButton onTouchTap={() => this.toggleDialog('hideDialog')}>
                 <VisibilityOff color="#FFF" />
               </IconButton>
-              */}
               <div style={{ width: 24 }} />
 
             </div>

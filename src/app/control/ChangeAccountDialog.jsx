@@ -47,7 +47,6 @@ class ChangeAccountDialog extends React.PureComponent {
         })
       } else {
         const args = {
-          uuid: apis.account.data.uuid,
           username: op === 'username' ? this.state.username : undefined,
           password: op === 'password' ? this.state.password : undefined
         }

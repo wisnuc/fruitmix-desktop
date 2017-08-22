@@ -13,63 +13,15 @@ import UpIcon from 'material-ui/svg-icons/hardware/keyboard-arrow-up'
 import DialogOverlay from '../common/DialogOverlay'
 import FlatButton from '../common/FlatButton'
 
-import PhotoDetail from './PhotoDetail'
+import PhotoApp from './PhotoApp'
+import DetailContainer from './DetailContainer'
 import PhotoList from './PhotoList'
 
-const debug = Debug('component:photoApp:')
+const debug = Debug('component:AssistantApp:')
 
-class AssistantApp extends React.Component {
+class AssistantApp extends PhotoApp {
   constructor(props) {
     super(props)
-
-    this.state = {
-      openDetail: false,
-      shift: '',
-      deleteDialog: false,
-      hideDialog: false
-    }
-
-    this.seqIndex = ''
-
-    this.lookPhotoDetail = (digest) => {
-      this.seqIndex = this.props.media.findIndex(item => item[0] === digest)
-      this.setState({ openDetail: true })
-    }
-
-    this.handleResize = () => {
-      this.forceUpdate()
-    }
-
-    this.toggleDialog = op => this.setState({ [op]: !this.state[op] })
-
-    this.setAnimation2 = (component, status) => {
-      if (component === 'ClearSelected') {
-        /* add animation to ClearSelected */
-        const transformItem = this.refClearSelected
-        const time = 0.4
-        const ease = global.Power4.easeOut
-        if (status === 'In') {
-          TweenMax.to(transformItem, time, { rotation: 180, opacity: 1, ease })
-        }
-        if (status === 'Out') {
-          TweenMax.to(transformItem, time, { rotation: -180, opacity: 0, ease })
-        }
-      }
-    }
-
-    this.keyChange = (event) => {
-      this.props.getShiftStatus(event)
-    }
-  }
-
-  componentDidMount() {
-    document.addEventListener('keydown', this.keyChange)
-    document.addEventListener('keyup', this.keyChange)
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('keydown', this.keyChange)
-    document.removeEventListener('keyup', this.keyChange)
   }
 
   render() {
@@ -167,7 +119,8 @@ class AssistantApp extends React.Component {
         </div>
 
         {/* PhotoDetail */}
-        <PhotoDetail
+        <DetailContainer
+          type="hidden"
           onRequestClose={() => this.setState({ openDetail: false })}
           open={this.state.openDetail}
           style={{ position: 'fixed', left: 0, top: 0, width: '100%', height: '100%' }}
@@ -216,9 +169,11 @@ class AssistantApp extends React.Component {
                 <DownloadIcon color="#FFF" />
               </IconButton>
 
+              {/*
               <IconButton onTouchTap={() => this.toggleDialog('deleteDialog')}>
                 <DeleteIcon color="#FFF" />
               </IconButton>
+              */}
 
               <IconButton onTouchTap={() => this.toggleDialog('hideDialog')}>
                 <Visibility color="#FFF" />
@@ -279,7 +234,7 @@ class AssistantApp extends React.Component {
                       primary
                       onTouchTap={() => {
                         this.toggleDialog('hideDialog')
-                        this.props.hideMedia()
+                        this.props.hideMedia(true)
                       }}
                     />
                   </div>
