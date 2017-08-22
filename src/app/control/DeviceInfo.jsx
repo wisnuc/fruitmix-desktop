@@ -62,11 +62,11 @@ class DeviceInfo extends React.PureComponent {
 
   render() {
     debug('this.props.device', this.props)
-    if (!this.props.device || !this.props.storage) return <div />
+    if (!this.props.device || !this.props.storage || !this.props.boot) return <div />
     debug('this.props.device true render', this.props)
 
     const { cpuInfo, memInfo, ws215i } = this.props.device
-    const volume = this.props.storage.volumes[0] // FIXME
+    const volume = this.props.storage.volumes.find(v => v.fileSystemUUID === this.props.boot.current)
 
     /* File System */
     const fsIcon = RAIDIcon
@@ -168,6 +168,7 @@ class DeviceInfo extends React.PureComponent {
                 this.state.modify ?
                   <div style={{ marginTop: -8 }}>
                     {/* FIXME */}
+                    {/*
                     <TextField
                       name="deviceName"
                       onChange={e => this.updateLabel(e.target.value)}
@@ -177,19 +178,20 @@ class DeviceInfo extends React.PureComponent {
                       onBlur={() => this.setState({ modify: false, changed: true })}
                       ref={(input) => { if (input && this.state.modify) { input.focus() } }}
                     />
+                    */}
                   </div> :
                   <div
                     style={{ display: 'flex', alignItems: 'center', height: 32 }}
-                    onTouchTap={() => this.setState({ modify: true })}
                   >
+                    {/* onTouchTap={() => this.setState({ modify: true }) */}
                     { this.state.label ? this.state.label : this.currentLabel }
-                    { <ModeEdit color={this.props.primaryColor} style={{ marginLeft: 24 }} /> }
+                    {/* <ModeEdit color={this.props.primaryColor} style={{ marginLeft: 24 }} /> */}
                   </div>
               }
               {
                 <Divider
                   color="rgba(0, 0, 0, 0.87)"
-                  style={{ opacity: !this.state.modify && this.state.titleHover ? 1 : 0 }}
+                  style={{ opacity: !this.state.modify && this.state.titleHover ? 0 : 0 }}
                 />
               }
             </div>
