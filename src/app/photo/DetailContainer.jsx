@@ -9,6 +9,7 @@ import ImageIcon from 'material-ui/svg-icons/image/image'
 import CameraIcon from 'material-ui/svg-icons/image/camera'
 import LoactionIcon from 'material-ui/svg-icons/communication/location-on'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
+import Visibility from 'material-ui/svg-icons/action/visibility'
 import VisibilityOff from 'material-ui/svg-icons/action/visibility-off'
 import InfoIcon from 'material-ui/svg-icons/action/info'
 import DownloadIcon from 'material-ui/svg-icons/file/file-download'
@@ -411,6 +412,9 @@ class DetailContainerInline extends React.Component {
   render() {
     // debug('renderContainer', this.leftItem, this.centerItem, this.rightItem)
     this.changeContainer()
+
+    /* show hidden media or just normal view */
+    const h = this.props.type === 'hidden'
     return (
       <div
         ref={ref => (this.refRoot = ref)}
@@ -548,11 +552,11 @@ class DetailContainerInline extends React.Component {
                     <IconButton onTouchTap={() => this.toggleDialog('deleteDialog')} tooltip="删除">
                       <DeleteIcon color="#FFF" />
                     </IconButton>
-
-                    <IconButton onTouchTap={() => this.toggleDialog('hideDialog')} tooltip="隐藏">
-                      <VisibilityOff color="#FFF" />
-                    </IconButton>
                     */}
+
+                    <IconButton onTouchTap={() => this.toggleDialog('hideDialog')} tooltip={h ? '显示' : '隐藏'}>
+                      { h ? <Visibility color="#FFF" /> : <VisibilityOff color="#FFF" /> }
+                    </IconButton>
 
                     <IconButton onTouchTap={() => this.toggleDialog('detailInfo')} tooltip="信息">
                       <InfoIcon color="#FFF" />
@@ -664,21 +668,22 @@ class DetailContainerInline extends React.Component {
               this.state.hideDialog &&
                 <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
                   <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-                    { '要将照片隐藏吗？' }
+                    { h ? '要恢复照片吗' : '要将照片隐藏吗？' }
                   </div>
                   <div style={{ height: 20 }} />
                   <div style={{ color: 'rgba(0,0,0,0.54)' }}>
-                    { '内容被隐藏后，我的照片内将不显示，可在智能助理中恢复。' }
+                    { h ? '内容将重新在我的照片内显示': '内容被隐藏后，我的照片内将不显示，可在智能助理中恢复。' }
                   </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                     <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('hideDialog')} keyboardFocused />
                     <FlatButton
-                      label="隐藏"
+                      label={h ? '显示' : '隐藏'}
                       primary
                       onTouchTap={() => {
+                        this.props.hideMedia(h)
                         this.toggleDialog('hideDialog')
-                        this.props.hideMedia()
+                        this.changeIndex('right')
                       }}
                     />
                   </div>

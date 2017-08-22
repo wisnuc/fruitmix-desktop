@@ -86,10 +86,24 @@ class Fruitmix extends EventEmitter {
       : r
   }
 
-  adel(ep) {
-    return request
+  aput(ep, data) {
+    const r = request
+      .put(`http://${this.address}:3000/${ep}`)
+      .set('Authorization', `JWT ${this.token}`)
+
+    return typeof data === 'object'
+      ? r.send(data)
+      : r
+  }
+
+  adel(ep, data) {
+    const r = request
       .del(`http://${this.address}:3000/${ep}`)
       .set('Authorization', `JWT ${this.token}`)
+
+    return typeof data === 'object'
+      ? r.send(data)
+      : r
   }
 
   request(name, args, next) {
@@ -110,7 +124,7 @@ class Fruitmix extends EventEmitter {
 
       case 'updateAccount':
         console.log('updateAccount', args)
-        r = this.apatch(`users/${args.uuid}`, { username: args.username, password: args.password })
+        r = this.apatch(`users/${this.userUUID}`, args)
         break
 
       case 'users':
@@ -219,6 +233,22 @@ class Fruitmix extends EventEmitter {
     /** Media API **/
       case 'media':
         r = this.aget('media')
+        break
+
+      case 'blacklist':
+        r = this.aget(`users/${this.userUUID}/media-blacklist`)
+        break
+
+      case 'addBlacklist':
+        r = this.apost(`users/${this.userUUID}/media-blacklist`, args)
+        break
+
+      case 'putBlacklist':
+        r = this.aput(`users/${this.userUUID}/media-blacklist`, args)
+        break
+
+      case 'subtractBlacklist':
+        r = this.adel(`users/${this.userUUID}/media-blacklist`, args)
         break
 
     /** Docker API **/

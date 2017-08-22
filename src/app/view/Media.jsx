@@ -247,7 +247,7 @@ class Media extends Base {
       return this.memoizeValue
     }
 
-    this.requestData = eq => this.apis.request(eq)
+    this.requestData = eq => this.ctx.props.apis.request(eq)
 
     this.addListToSelection = (digest) => {
       if (this.firstSelect) {
@@ -297,30 +297,20 @@ class Media extends Base {
 
     this.startDownload = () => {
       // debug('this.startDownload', this.state.selectedItems, this.memoizeValue)
-      if (this.state.selectedItems.length > 0) {
-        const photos = this.state.selectedItems
-          .map(digest => this.state.media.find(photo => photo.hash === digest))
-          .map(photo => ({
-            name: getName(photo),
-            size: photo.size,
-            type: 'file',
-            uuid: photo.hash
-          }))
-        debug('startDownload', photos, this.state.media.find(photo => photo.hash === this.state.selectedItems[0]))
-        ipcRenderer.send('DOWNLOAD', { folders: [], files: photos, dirUUID: 'media' })
-        this.setState({ selectedItems: [] })
-      } else {
-        const photo = this.state.media.find(item => item.hash === this.memoizeValue.downloadDigest)
-        debug(this.memoizeValue.downloadDigest, photo)
-        const data = {
+      const list = this.state.selectedItems.length
+        ? this.state.selectedItems
+        : [this.memoizeValue.downloadDigest]
+
+      const photos = list.map(digest => this.state.media.find(photo => photo.hash === digest))
+        .map(photo => ({
           name: getName(photo),
           size: photo.size,
           type: 'file',
           uuid: photo.hash
-        }
-        debug('startDownload', data, photo)
-        ipcRenderer.send('DOWNLOAD', { folders: [], files: [data], dirUUID: 'media' })
-      }
+        }))
+
+      ipcRenderer.send('DOWNLOAD', { folders: [], files: photos, dirUUID: 'media' })
+      this.setState({ selectedItems: [] })
     }
 
     this.removeMedia = () => {
@@ -332,13 +322,21 @@ class Media extends Base {
       }
     }
 
-    this.hideMedia = () => {
-      if (this.state.selectedItems.length > 0) {
-        this.ctx.openSnackBar(`隐藏${this.state.selectedItems.length}张照片`)
+    this.hideMedia = (show) => { // show === true ? show media : hide media
+      debug('this.hideMedia', this.state.selectedItems)
+      const txt = show ? '恢复' : '隐藏'
+      const list = this.state.selectedItems.length
+        ? this.state.selectedItems
+        : [this.state.media.find(item => item.hash === this.memoizeValue.downloadDigest).hash]
+      this.ctx.props.apis.request(show ? 'subtractBlacklist' : 'addBlacklist', list, (error) => {
+        if (error) {
+          this.ctx.openSnackBar(`${txt}照片失败！`)
+          return
+        }
+        this.ctx.openSnackBar(`${txt}了${list.length}张照片`)
+        this.navEnter()
         this.setState({ selectedItems: [] })
-      } else {
-        this.ctx.openSnackBar('隐藏照片成功')
-      }
+      })
     }
 
     this.uploadMediaAsync = async (driveUUID) => {
@@ -350,7 +348,7 @@ class Media extends Base {
         const uuid = await this.ctx.props.apis.request('mkdir', { driveUUID, dirUUID: driveUUID, dirname: '上传的照片' })
         if (typeof uuid !== 'string') return this.uploadMedia() // FIXME
         ipcRenderer.send('UPLOADMEDIA', { driveUUID, dirUUID: uuid })
-      } 
+      }
     }
 
     this.uploadMedia = () => {
@@ -374,30 +372,38 @@ class Media extends Base {
   }
 
   willReceiveProps(nextProps) {
-    // console.log('media nextProps', nextProps)
-    if (!nextProps.apis || !nextProps.apis.media) return
+    console.log('media nextProps', nextProps)
+    if (!nextProps.apis || !nextProps.apis.media || !nextProps.apis.blacklist) return
     const media = nextProps.apis.media
-    if (media.isPending() || media.isRejected()) return
+    const blacklist = nextProps.apis.blacklist
+    if (media.isPending() || media.isRejected() || blacklist.isPending() || blacklist.isRejected()) return
 
-    /* now it's fulfilled */
-    const value = media.value()
+    const removeBlacklist = (m, l) => {
+      if (!m.length || !l.length) return m
+      const map = new Map()
+      m.filter(item => !!item.hash).forEach(d => map.set(d.hash, d))
+      l.forEach(b => map.delete(b))
+      return [...map.values()]
+    }
 
-    this.apis = nextProps.apis
 
-    if (value !== this.state.preValue) {
-      /* remove photos without hash */
-      const filter = value.filter(item => !!item.hash)
+    const preValue = media.value()
+    const blValue = blacklist.value()
 
+    if (preValue !== this.state.preValue || blValue !== this.state.blValue) {
+      /* remove photos without hash and filter media by blacklist */
+      const value = removeBlacklist(preValue, blValue)
       /* sort photos by date */
-      filter.sort((prev, next) => (parseDate(next.datetime) - parseDate(prev.datetime)) || (
+      value.sort((prev, next) => (parseDate(next.datetime) - parseDate(prev.datetime)) || (
         parseInt(`0x${next.hash}`, 16) - parseInt(`0x${prev.hash}`, 16)))
 
-      this.setState({ preValue: value, media: filter })
+      this.setState({ preValue, media: value, blValue })
     }
   }
 
   navEnter() {
     this.ctx.props.apis.request('media')
+    this.ctx.props.apis.request('blacklist')
   }
 
   navLeave() {
@@ -477,7 +483,7 @@ class Media extends Base {
       setPhotoInfo={this.setPhotoInfo}
       getTimeline={this.getTimeline}
       ipcRenderer={ipcRenderer}
-      apis={this.apis}
+      apis={this.ctx.props.apis}
       requestData={this.requestData}
       setAnimation={this.setAnimation}
       memoize={this.memoize}
