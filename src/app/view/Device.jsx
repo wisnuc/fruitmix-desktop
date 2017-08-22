@@ -21,20 +21,24 @@ class Device extends Base {
 
   willReceiveProps(nextProps) {
     // console.log('device nextProps', nextProps)
-    if (!nextProps.selectedDevice || !nextProps.selectedDevice.device || !nextProps.selectedDevice.storage) return
+    if (!nextProps.selectedDevice || !nextProps.selectedDevice.device || !nextProps.selectedDevice.storage
+      || !nextProps.selectedDevice.boot) return
     const device = nextProps.selectedDevice.device
     if (device.isPending() || device.isRejected()) return
     const storage = nextProps.selectedDevice.storage
     if (storage.isPending() || storage.isRejected()) return
+    const boot = nextProps.selectedDevice.boot
+    if (boot.isPending() || boot.isRejected()) return
 
-    if (device.value() !== this.state.device || storage.value() !== this.state.storage) {
-      this.setState({ device: device.value(), storage: storage.value() })
+    if (device.value() !== this.state.device || storage.value() !== this.state.storage || boot.value() !== this.state.boot) {
+      this.setState({ device: device.value(), storage: storage.value(), boot: boot.value() })
     }
   }
 
   navEnter() {
     this.ctx.props.selectedDevice.request('device')
     this.ctx.props.selectedDevice.request('storage')
+    this.ctx.props.selectedDevice.request('boot')
   }
 
   navLeave() {
@@ -69,6 +73,7 @@ class Device extends Base {
       <DeviceInfo
         device={this.state.device}
         storage={this.state.storage}
+        boot={this.state.boot}
         primaryColor={this.groupPrimaryColor()}
       />
     )

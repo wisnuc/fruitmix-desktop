@@ -125,7 +125,7 @@ class MaintGuide extends React.Component {
               { check[index] ? <DoneIcon color={primaryColor} /> : <ClearIcon color={accentColor} /> }
               <div style={{ width: 28 }} />
               <div style={{ width: 220 }}> { text } </div>
-              { !check[index] && '提示' }
+              {/* !check[index] && '提示' */}
             </div>
           ))
         }
