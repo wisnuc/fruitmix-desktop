@@ -331,10 +331,14 @@ class AccountApp extends React.Component {
           }
         </div>
 
+        <div style={{ height: 4 }} />
+
         {/* username */}
         <div style={{ flex: '0 0 560px', fontSize: 24, height: 24, display: 'flex', alignItems: 'center' }}>
           { account.username }
         </div>
+
+        <div style={{ height: 8 }} />
 
         {/* usertype */}
         <div style={{ flex: '0 0 560px' }}>
@@ -352,7 +356,7 @@ class AccountApp extends React.Component {
                 :
                 <div style={{ display: 'flex', alignItems: 'center', height: 26 }}>
                   { '您尚未绑定您的微信帐号。' }
-                  <FlatButton label="绑定微信" onTouchTap={this.bindWechat} primary />
+                  {/* <FlatButton label="绑定微信" onTouchTap={this.bindWechat} primary /> */}
                 </div>
             }
           </div>

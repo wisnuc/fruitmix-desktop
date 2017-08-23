@@ -126,7 +126,8 @@ class Login extends StateUp(React.Component) {
         hexpand: false,
         compact: false,
         dim: false,
-        maint: false
+        maint: false,
+        pin: ''
       })
 
       this.props.nav('login')
