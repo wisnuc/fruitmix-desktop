@@ -11,6 +11,8 @@ import ArrowUpward from 'material-ui/svg-icons/navigation/arrow-upward'
 import ArrowDownward from 'material-ui/svg-icons/navigation/arrow-downward'
 import CheckIcon from 'material-ui/svg-icons/navigation/check'
 import { List, AutoSizer } from 'react-virtualized'
+
+import Thumb from './Thumb'
 import renderFileIcon from '../common/renderFileIcon'
 import FlatButton from '../common/FlatButton'
 import { ShareDisk } from '../common/Svg'
@@ -93,19 +95,19 @@ class Row extends React.PureComponent {
                       <Menu style={{ minWidth: 240 }}>
                         <MenuItem
                           style={{ fontSize: 13 }}
-                          leftIcon={this.state.type === "名称" ? <CheckIcon /> : <div />}
+                          leftIcon={this.state.type === '名称' ? <CheckIcon /> : <div />}
                           primaryText="名称"
                           onTouchTap={() => this.handleChange('名称')}
                         />
                         <MenuItem
                           style={{ fontSize: 13 }}
-                          leftIcon={this.state.type === "修改时间" ? <CheckIcon /> : <div />}
+                          leftIcon={this.state.type === '修改时间' ? <CheckIcon /> : <div />}
                           primaryText="修改时间"
                           onTouchTap={() => this.handleChange('修改时间')}
                         />
                         <MenuItem
                           style={{ fontSize: 13 }}
-                          leftIcon={this.state.type === "文件大小" ? <CheckIcon /> : <div />}
+                          leftIcon={this.state.type === '文件大小' ? <CheckIcon /> : <div />}
                           primaryText="文件大小"
                           onTouchTap={() => this.handleChange('文件大小')}
                         />
@@ -150,8 +152,17 @@ class Row extends React.PureComponent {
                   {/* preview or icon */}
                   {
                     entry.type === 'file' &&
-                      <div style={{ height: 136, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        { renderFileIcon(entry.name, entry.magic, 64) }
+                      <div style={{ height: 136, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                        {
+                          entry.metadata
+                          ? <Thumb
+                            digest={entry.hash}
+                            ipcRenderer={this.props.ipcRenderer}
+                            height={180}
+                            width={180}
+                          />
+                          : renderFileIcon(entry.name, entry.metadata, 64)
+                        }
                       </div>
                   }
 
@@ -283,7 +294,7 @@ class GridView extends React.Component {
           {({ height, width }) => {
             const gridInfo = calcGridInfo(height, width, this.props.entries)
             const { mapData, allHeight, rowHeightSum, indexHeightSum, maxScrollTop } = gridInfo
-            debug('gridInfo', allHeight, this.props.entries.length)
+            // debug('gridInfo', allHeight, this.props.entries.length)
 
             const estimatedRowSize = rowHeightSum / allHeight.length
             const rowHeight = ({ index }) => allHeight[index]

@@ -160,10 +160,6 @@ class Fruitmix extends EventEmitter {
         })
         break
 
-      case 'driveListNavDir':
-        r = this.aget(`files/fruitmix/list-nav/${args.dirUUID}/${args.rootUUID}`)
-        break
-
       case 'adminCreateDrive':
         r = this.apost('drives', {
           label: args.label,
@@ -185,6 +181,7 @@ class Fruitmix extends EventEmitter {
 
       case 'listNavDir':
         r = this.aget(`drives/${args.driveUUID}/dirs/${args.dirUUID}`)
+          .query({ metadata: true })
         break
 
       case 'mkdir':
