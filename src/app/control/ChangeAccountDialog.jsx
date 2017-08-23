@@ -31,35 +31,23 @@ class ChangeAccountDialog extends React.PureComponent {
 
     this.fire = () => {
       const { apis, op } = this.props
-      if (op === 'createUser') {
-        apis.request('adminCreateUser', {
-          username: this.state.username,
-          password: this.state.password
-        }, (err) => {
-          if (!err) {
-            this.props.onRequestClose(true)
-            this.props.refreshUsers()
-            debug('adminCreateUser', this.props)
-            this.props.openSnackBar('创建成功')
-          } else {
-            this.props.openSnackBar(`创建失败：${err.message}`)
-          }
-        })
-      } else {
-        const args = {
-          username: op === 'username' ? this.state.username : undefined,
-          password: op === 'password' ? this.state.password : undefined
+      const cb = (error) => {
+        if (error) {
+          debug('error', op, error)
+          this.props.openSnackBar(`修改失败：${error.message}`)
+        } else {
+          this.props.onRequestClose(true)
+          op === 'createUser' ? this.props.refreshUsers() : this.props.refresh()
+          this.props.openSnackBar('修改成功')
         }
-        apis.request('updateAccount', args, (err) => {
-          if (err) {
-            debug('err', args, err, err.message)
-            this.props.openSnackBar(`修改失败：${err.message}`)
-          } else {
-            this.props.onRequestClose(true)
-            this.props.refresh()
-            this.props.openSnackBar('修改成功')
-          }
-        })
+      }
+
+      if (op === 'createUser') {
+        apis.request('adminCreateUser', { username: this.state.username, password: this.state.password }, cb)
+      } else if (op === 'username') {
+        apis.request('updateAccount', { username: this.state.username }, cb)
+      } else if (op === 'password') {
+        apis.request('updatePassword', { prePassword: this.state.prePassword, newPassword: this.state.password }, cb)
       }
     }
 

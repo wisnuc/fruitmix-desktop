@@ -148,17 +148,17 @@ class Row extends React.PureComponent {
                 >
                   {/* preview or icon */}
                   {
-                  entry.type !== 'directory' &&
-                    <div style={{ height: 136, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {
-                        entry.type === 'folder' || entry.type === 'public' || entry.type === 'directory'
-                        ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 64, height: 64 }} />
-                        : entry.type === 'file'
-                        ? renderFileIcon(entry.name, entry.magic, 64)
-                        : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)', width: 64, height: 64 }} />
-                      }
-                    </div>
-                }
+                    entry.type !== 'directory' &&
+                      <div style={{ height: 136, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {
+                          entry.type === 'folder' || entry.type === 'public' || entry.type === 'directory'
+                          ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 64, height: 64 }} />
+                          : entry.type === 'file'
+                          ? renderFileIcon(entry.name, entry.magic, 64)
+                          : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)', width: 64, height: 64 }} />
+                        }
+                      </div>
+                  }
 
                   {/* file name */}
                   <div
