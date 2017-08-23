@@ -133,6 +133,12 @@ class ContainerOverlayInline extends React.Component {
         default: return null
       }
     }
+
+    this.updateContainerSize = (zoom) => {
+      debug('this.updateContainerSize', zoom)
+      this.zoom = zoom
+      this.forceUpdate()
+    }
   }
 
   componentWillMount() {
@@ -171,37 +177,6 @@ class ContainerOverlayInline extends React.Component {
     this.leaveTimeout = setTimeout(callback, 200) // matches transition duration
   }
 
-  renderDetail() {
-    return (
-      <div
-        style={{
-          position: 'fixed',
-          height: '100%',
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-      >
-        <div
-          ref={ref => (this.refContainer = ref)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            position: 'relative',
-            height: 0,
-            width: 0,
-            backgroundColor: 'black',
-            overflow: 'hidden',
-            transition: 'all 200ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
-          }}
-        >
-          nothing there!
-        </div>
-      </div>
-    )
-  }
 
   renderInfo() {
     return (
@@ -280,6 +255,7 @@ class ContainerOverlayInline extends React.Component {
                   memoize={this.props.memoize}
                   download={this.props.download}
                   path={this.props.path}
+                  updateContainerSize={this.updateContainerSize}
                 />
               </div>
             ))
@@ -358,6 +334,7 @@ class ContainerOverlayInline extends React.Component {
           {/* left Button */}
           <IconButton
             style={{
+              display: this.zoom > 1 ? 'none' : '',
               opacity: this.currentIndex > this.firstFileIndex ? 1 : 0,
               alignItems: 'center',
               justifyContent: 'center',
@@ -379,6 +356,7 @@ class ContainerOverlayInline extends React.Component {
           {/* right Button */}
           <IconButton
             style={{
+              display: this.zoom > 1 ? 'none' : '',
               opacity: this.currentIndex < this.props.items.length - 1 ? 1 : 0,
               alignItems: 'center',
               justifyContent: 'center',
@@ -396,29 +374,6 @@ class ContainerOverlayInline extends React.Component {
               <path d="M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z" />
             </svg>
           </IconButton>
-        </div>
-
-        {/* detail Info */}
-        <div
-          style={{
-            position: 'fixed',
-            width: this.state.detailInfo ? 360 : 0,
-            height: '100%',
-            top: 0,
-            right: 0,
-            backgroundColor: '#FFF',
-            overflow: 'hidden',
-            transition: 'all 225ms cubic-bezier(0.0, 0.0, 0.2, 1)'
-          }}
-        >
-          <div style={{ height: 48, display: 'flex', alignItems: 'center', padding: '8px 16px 8px 32px' }}>
-            <div style={{ fontSize: 20, width: 360 }}> 信息 </div>
-            <div style={{ flexGrow: 1 }} />
-            <IconButton onTouchTap={() => this.toggleDialog('detailInfo')}>
-              <CloseIcon color="rgba(0,0,0,0.54)" />
-            </IconButton>
-          </div>
-          { this.state.detailInfo && this.renderInfo() }
         </div>
       </div>
     )
