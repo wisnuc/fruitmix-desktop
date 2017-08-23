@@ -165,7 +165,10 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'adminUpdateDrive':
-        r = this.apost(`drives/${args.uuid}`, args)
+        r = this.apatch(`drives/${args.uuid}`, {
+          label: args.label,
+          writelist: args.writelist
+        })
         break
 
     /** File APIs **/
