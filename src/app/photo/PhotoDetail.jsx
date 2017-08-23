@@ -206,6 +206,7 @@ class PhotoDetail extends React.Component {
                   width={this.photoWidth}
                   alt="ThumbImage"
                   src={this.state.thumbPath}
+                  onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
                 />
             }
           </div>
@@ -229,6 +230,7 @@ class PhotoDetail extends React.Component {
                   onMouseMove={this.dragImage}
                   onMouseLeave={() => { this.setState({ drag: false }); this.dragPosition.x = 0; this.dragPosition.y = 0 }}
                   draggable={false}
+                  onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
                 />
             }
           </div>

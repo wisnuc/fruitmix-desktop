@@ -23,6 +23,7 @@ import pdfjsLib from 'pdfjs-dist'
 import PDF, { Page } from 'react-pdf-pages'
 import DialogOverlay from '../common/DialogOverlay'
 import FlatButton from '../common/FlatButton'
+import PhotoDetail from '../photo/PhotoDetail'
 
 pdfjsLib.PDFJS.workerSrc = './assets/pdf.worker.bundle.js'
 
@@ -65,12 +66,7 @@ class Preview extends React.Component {
   constructor(props) {
     super(props)
 
-    this.dragPosition = { x: 0, y: 0, left: 0, top: 0 }
-
     this.state = {
-      direction: null,
-      thumbPath: '',
-      detailPath: '',
       pages: null,
       alert: false
     }
@@ -123,275 +119,16 @@ class Preview extends React.Component {
       this.props.ipcRenderer.on('TEMP_DOWNLOAD_SUCCESS', this.downloadSuccess)
     }
 
-    /* change image */
-    this.request = () => {
-      /* get current image */
-      this.session = UUID.v4()
-      const metadata = this.props.item.metadata
-      if (metadata) {
-        this.digest = this.props.item.digest || ''
-        this.photo = this.props.item.photo || null
-        // this.props.ipcRenderer.send('mediaShowThumb', this.session, this.digest, 210, 210)
-
-        /* memoize digest */
-        // this.props.memoize({ currentDigest: this.digest, currentScrollTop: 0 })
-
-        /* init image */
-        this.setState({ thumbPath: '', detailPath: '' })
-
-        // debug('this.props.memoize', this.props.memoize())
-      }
-    }
-
-    /* update detail image */
-    this.updatePath = (event, session, path) => {
-      if (this.session === session) {
-        clearTimeout(this.time)
-        this.time = setTimeout(() => {
-          this.refTransition.style.transform = this.degRotate
-          this.setState({ detailPath: path })
-        }, 150)
-      }
-    }
-
-    /* update thumbnail */
-    this.updateThumbPath = (event, session, path) => {
-      if (this.session === session) {
-        /* get detail image */
-        this.props.ipcRenderer.send('mediaShowImage', this.session, this.digest)
-
-        /* update thumbPath */
-        this.setState({ thumbPath: path, detailPath: '' })
-      }
-    }
-
-    /* calculate size of image */
-    this.calcSize = () => {
-      this.clientHeight = window.innerHeight
-      this.clientWidth = this.props.detailInfo ? window.innerWidth - 360 : window.innerWidth
-
-      /* handle the exifOrientation */
-      this.exifOrientation = this.photo.metadata.exifOrientation || 1
-      this.degRotate = ''
-      if (this.exifOrientation) {
-        this.degRotate = `rotate(${(this.exifOrientation - 1) * 90}deg)`
-      }
-
-      if (this.exifOrientation % 2) {
-        this.photoHeight = this.photo.metadata.height
-        this.photoWidth = this.photo.metadata.width
-      } else {
-        this.photoHeight = this.photo.metadata.width
-        this.photoWidth = this.photo.metadata.height
-      }
-
-      const HWRatio = this.photoHeight / this.photoWidth
-      if (this.photoHeight > this.clientHeight) {
-        this.photoHeight = this.clientHeight
-        this.photoWidth = this.photoHeight / HWRatio
-        if (this.photoWidth > this.clientWidth) {
-          this.photoWidth = this.clientWidth
-          this.photoHeight = this.photoWidth * HWRatio
-        }
-      } else if (this.photoWidth > this.clientWidth) {
-        this.photoWidth = this.clientWidth
-        this.photoHeight = this.photoWidth * HWRatio
-      }
-      if (this.refContainer) {
-        this.refContainer.style.height = `${this.photoHeight}px`
-        this.refContainer.style.width = `${this.photoWidth}px`
-      }
-    }
-
-    /* animation */
-    this.animation = (status) => {
-      const transformItem = this.refReturn
-      const root = this.refRoot
-      const overlay = this.refOverlay
-      const time = 0.2
-      const ease = global.Power4.easeOut
-
-      if (status === 'In') {
-        TweenMax.from(overlay, time, { opacity: 0, ease })
-        TweenMax.from(transformItem, time, { rotation: 180, opacity: 0, ease })
-        TweenMax.from(root, time, { opacity: 0, ease })
-      }
-
-      if (status === 'Out') {
-        TweenMax.to(overlay, time, { opacity: 0, ease })
-        TweenMax.to(transformItem, time, { rotation: 180, opacity: 0, ease })
-        TweenMax.to(root, time, { opacity: 0, ease })
-      }
-    }
-
-    /* handle zoom image */
-    this.handleZoom = (event) => {
-      if (this.refDetailImage) {
-        if (this.state.thumbPath) this.setState({ thumbPath: '' })
-        let zoom = this.refDetailImage.style.zoom
-        zoom *= 0.6 + (event.wheelDelta + 240) / 600
-        if (zoom <= 1) {
-          zoom = 1
-          this.refTransition.style.transform = this.degRotate
-          this.dragPosition.left = 0
-          this.dragPosition.top = 0
-        } else if (zoom > 10000) {
-          zoom = 10000
-        } else {
-          this.dragPosition.left *= 0.6 + (event.wheelDelta + 240) / 600
-          this.dragPosition.top *= 0.6 + (event.wheelDelta + 240) / 600
-
-          /* calculate the size diff between photo and client */
-          const width = (this.photoWidth * zoom - this.clientWidth) / 2
-          const height = (this.photoHeight * zoom - this.clientHeight) / 2
-
-          /* the photo can't be move to outside of client */
-          if (width > 0 && this.dragPosition.left < -width) this.dragPosition.left = -width
-          if (width > 0 && this.dragPosition.left > width) this.dragPosition.left = width
-
-          if (height > 0 && this.dragPosition.top < -height) this.dragPosition.top = -height
-          if (height > 0 && this.dragPosition.top > height) this.dragPosition.top = height
-
-          /* when the photo is smaller than client, it can't be move */
-          if (width < 0) this.dragPosition.left = 0
-          if (height < 0) this.dragPosition.top = 0
-
-          this.refTransition.style.transform = `translate(${this.dragPosition.left}px,${this.dragPosition.top}px) ${this.degRotate}`
-        }
-        // debug('onMouseWheel', event.wheelDelta, zoom)
-        this.refContainer.style.overflow = ''
-        this.refDetailImage.style.zoom = zoom
-      }
-    }
-
-    /* handle drag image when zoom */
-    this.dragImage = (event) => {
-      // debug('this.dragImage before', this.degRotate)
-      const zoom = event.target.style.zoom
-      if (zoom > 1 && this.state.drag) {
-        const style = this.refTransition.style
-
-        /* calculate the size diff between photo and client */
-        const width = (this.photoWidth * zoom - this.clientWidth) / 2
-        const height = (this.photoHeight * zoom - this.clientHeight) / 2
-
-        this.dragPosition.left += this.dragPosition.x ? event.clientX - this.dragPosition.x : 0
-        this.dragPosition.top += this.dragPosition.y ? event.clientY - this.dragPosition.y : 0
-
-        /* the photo can't be move to outside of client */
-        if (width > 0 && this.dragPosition.left < -width) this.dragPosition.left = -width
-        if (width > 0 && this.dragPosition.left > width) this.dragPosition.left = width
-
-        if (height > 0 && this.dragPosition.top < -height) this.dragPosition.top = -height
-        if (height > 0 && this.dragPosition.top > height) this.dragPosition.top = height
-
-        /* when the photo is smaller than client, it can't be move */
-        if (width < 0) this.dragPosition.left = 0
-        if (height < 0) this.dragPosition.top = 0
-
-        /* memoize last position */
-        this.dragPosition.x = event.clientX
-        this.dragPosition.y = event.clientY
-
-        /* move photo */
-        style.transform = `translate(${this.dragPosition.left}px,${this.dragPosition.top}px) ${this.degRotate}`
-        // debug('this.dragImage', width, height, this.dragPosition.left, this.dragPosition.top)
-      }
-    }
   }
 
-  componentWillMount() {
-    // this.request()
-  }
-
-  componentDidMount() {
-    this.props.ipcRenderer.on('donwloadMediaSuccess', this.updatePath)
-    this.props.ipcRenderer.on('getThumbSuccess', this.updateThumbPath)
-    // this.refContainer.addEventListener('mousewheel', this.handleZoom)
-  }
-
-  componentWillUnmount() {
-    clearTimeout(this.enterTimeout)
-    clearTimeout(this.leaveTimeout)
-    // this.refContainer.removeEventListener('mousewheel', this.handleZoom)
-    this.props.ipcRenderer.removeListener('getThumbSuccess', this.updateThumbPath)
-    this.props.ipcRenderer.removeListener('donwloadMediaSuccess', this.updatePath)
-    this.props.ipcRenderer.send('mediaHideThumb', this.session)
-    this.props.ipcRenderer.send('mediaHideImage', this.session)
-  }
-
-  /* ReactTransitionGroup */
-
-  componentWillEnter(callback) {
-    this.componentWillAppear(callback)
-  }
-
-  componentWillAppear(callback) {
-    // this.animation('In')
-    this.enterTimeout = setTimeout(callback, 200) // matches transition duration
-  }
-
-  componentWillLeave(callback) {
-    // this.animation('Out')
-    this.leaveTimeout = setTimeout(callback, 200) // matches transition duration
-  }
-
-  renderPhoto() {
-    /* calculate photoHeight and photoWidth */
-    // this.calcSize()
-    // <EventListener target="window" onKeyUp={this.handleKeyUp} />
-    return (
-      <div
-        ref={ref => (this.refContainer = ref)}
-        onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative',
-          height: '100%',
-          width: '100%',
-          overflow: 'hidden',
-          transition: 'all 200ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
-        }}
-      >
-        { !this.state.thumbPath && !this.state.detailPath && <CircularProgress /> }
-        {/* ThumbImage */}
-        <div style={{ position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
-          {
-            this.state.thumbPath &&
-              <img
-                height={this.photoHeight}
-                width={this.photoWidth}
-                alt="ThumbImage"
-                src={this.state.thumbPath}
-              />
-          }
-        </div>
-
-        {/* DetailImage */}
-        <div
-          style={{ position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          ref={ref => (this.refTransition = ref)}
-        >
-          {
-            this.state.detailPath &&
-              <img
-                height={this.exifOrientation % 2 === 0 ? this.photoWidth : this.photoHeight}
-                width={this.exifOrientation % 2 === 0 ? this.photoHeight : this.photoWidth}
-                alt="DetailImage"
-                src={this.state.detailPath}
-                ref={ref => (this.refDetailImage = ref)}
-                style={{ zoom: 1, transition: 'translate .5s cubic-bezier(0.0, 0.0, 0.2, 1)' }}
-                onMouseDown={() => this.setState({ drag: true })}
-                onMouseUp={() => { this.setState({ drag: false }); this.dragPosition.x = 0; this.dragPosition.y = 0 }}
-                onMouseMove={this.dragImage}
-                onMouseLeave={() => { this.setState({ drag: false }); this.dragPosition.x = 0; this.dragPosition.y = 0 }}
-                draggable={false}
-              />
-          }
-        </div>
-      </div>
+  renderPhoto(hash, metadata) {
+    const item = Object.assign({}, metadata, { hash })
+    return(
+      <PhotoDetail
+        item={item}
+        ipcRenderer={this.props.ipcRenderer}
+        updateContainerSize={this.props.updateContainerSize}
+      />
     )
   }
 
@@ -512,7 +249,9 @@ class Preview extends React.Component {
           justifyContent: 'center'
         }}
       >
-        { isText ? this.renderText() : this.props.item.metatdata ? this.renderPhoto() : isPDF ? this.renderPDF() : this.renderOtherFiles() }
+        { isText ? this.renderText() : this.props.item.metadata
+            ? this.renderPhoto(this.props.item.hash, this.props.item.metadata) : isPDF
+            ? this.renderPDF() : this.renderOtherFiles() }
 
         {/* dialog */}
         <DialogOverlay open={this.state.alert} >

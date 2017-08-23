@@ -254,7 +254,6 @@ class FileDetail extends React.PureComponent {
                 margin: 24,
                 width: 312,
                 height: 234,
-                overflow: 'hidden',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
@@ -263,9 +262,9 @@ class FileDetail extends React.PureComponent {
               <Thumb
                 digest={hash}
                 ipcRenderer={this.props.ipcRenderer}
-                height={312}
+                height={234}
                 width={312}
-                full={true}
+                full
               />
             </div>
         }
