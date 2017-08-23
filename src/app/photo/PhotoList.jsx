@@ -144,36 +144,42 @@ class PhotoList extends React.Component {
     this.renderTimeline = () => {
       // debug('this.renderTimeline')
       if (!this.timeline) { return <div /> }
-      return this.timeline.map((data, index) => {
-        let date = data[0]
-        const top = data[1]
-        const zIndex = data[2]
-        if (date === 0) date = '神秘时间'
-        return (
-          <div
-            onMouseEnter={() => this.showDateBar(true)}
-            key={index.toString()}
-            style={{
-              position: 'absolute',
-              boxSizing: 'border-box',
-              borderRadius: 11,
-              fontSize: 13,
-              top,
-              zIndex,
-              opacity: 0.54,
-              color: 'rgba(0, 0, 0, 1)',
-              backgroundColor: 'white',
-              paddingTop: 4,
-              paddingBottom: 4,
-              paddingLeft: 8,
-              right: (data[0] === 0) ? 8 : 20,
-              textAlign: 'center'
-            }}
-          >
-            { date }
-          </div>
-        )
-      })
+      return (
+        <div onMouseEnter={() => this.showDateBar(true)} >
+          {
+            this.timeline.map((data, index) => {
+              let date = data[0]
+              const top = data[1]
+              const zIndex = data[2]
+              if (date === 0) date = '神秘时间'
+              return (
+                <div
+                  onTouchTap={this.scrollToPosition}
+                  key={index.toString()}
+                  style={{
+                    position: 'absolute',
+                    boxSizing: 'border-box',
+                    borderRadius: 11,
+                    fontSize: 13,
+                    top,
+                    zIndex,
+                    opacity: 0.54,
+                    color: 'rgba(0, 0, 0, 1)',
+                    backgroundColor: 'white',
+                    paddingTop: 4,
+                    paddingBottom: 4,
+                    paddingLeft: 8,
+                    right: (data[0] === 0) ? 8 : 20,
+                    textAlign: 'center'
+                  }}
+                >
+                  { date }
+                </div>
+              )
+            })
+          }
+        </div>
+      )
     }
   }
 
