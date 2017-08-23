@@ -10,6 +10,7 @@ import ArrowUpward from 'material-ui/svg-icons/navigation/arrow-upward'
 import ArrowDownward from 'material-ui/svg-icons/navigation/arrow-downward'
 import { List, AutoSizer } from 'react-virtualized'
 import renderFileIcon from '../common/renderFileIcon'
+import { ShareDisk } from '../common/Svg'
 
 const debug = Debug('component:file:RenderListByRow:')
 
@@ -97,11 +98,13 @@ class Row extends React.PureComponent {
           <div style={{ flex: '0 0 48px', display: 'flex', alignItems: 'center' }}>
             <Avatar style={{ backgroundColor: 'white' }}>
               {
-                entry.type === 'folder' || entry.type === 'public' || entry.type === 'directory'
-                ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)' }} />
+                entry.type === 'directory'
+                ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
+                : entry.type === 'public'
+                ? <ShareDisk style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
                 : entry.type === 'file'
-                ? renderFileIcon(entry.name, entry.magic)
-                : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)' }} />
+                ? renderFileIcon(entry.name, entry.metadata, 24)
+                : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
               }
             </Avatar>
           </div>

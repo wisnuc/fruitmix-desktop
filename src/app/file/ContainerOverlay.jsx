@@ -44,12 +44,6 @@ class ContainerOverlayInline extends React.Component {
       this.props.onRequestClose()
     }
 
-    /* change image */
-    this.requestNext = (currentIndex) => {
-      debug('this.requestNext', currentIndex)
-      // this.forceUpdate()
-    }
-
     this.changeIndex = (direction) => {
       debug('this.changeIndex', direction, this)
       if (direction === 'right' && this.currentIndex < this.props.items.length - 1) {
@@ -142,7 +136,6 @@ class ContainerOverlayInline extends React.Component {
   }
 
   componentWillMount() {
-    // this.requestNext(this.props.seqIndex)
     /* init three items' content */
     this.centerItem = this.props.items[this.currentIndex]
     this.leftItem = {}

@@ -1,13 +1,12 @@
 import React from 'react'
 import Radium from 'radium'
 import Debug from 'debug'
-import { Avatar, Divider, FloatingActionButton, TextField, IconButton } from 'material-ui'
-import FileFolder from 'material-ui/svg-icons/file/folder'
 import ContentAdd from 'material-ui/svg-icons/content/add'
-import IconBox from '../common/IconBox'
-import FlatButton from '../common/FlatButton'
-import DialogOverlay from '../common/DialogOverlay'
+import { Avatar, Divider, FloatingActionButton } from 'material-ui'
+
 import NewDriveDialog from './NewDriveDialog'
+import DialogOverlay from '../common/DialogOverlay'
+import { ShareDisk } from '../common/Svg'
 
 const debug = Debug('component:control:drive:')
 
@@ -66,7 +65,7 @@ class DriveRow extends React.PureComponent {
       >
         <div style={{ flex: '0 0 32px' }} />
         <div style={{ flex: '0 0 40px' }}>
-          <Avatar><FileFolder color="white" /></Avatar>
+          <Avatar><ShareDisk color="white" /></Avatar>
         </div>
         <div style={{ flex: '0 0 32px' }} />
         <div
@@ -126,7 +125,7 @@ class AdminDrives extends React.Component {
             backgroundColor: '#FAFAFA'
           }}
         >
-          <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.27)' }}> { '尚未建立共享文件夹' } </div>
+          <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.27)' }}> { '尚未建立共享盘' } </div>
           <div style={{ color: 'rgba(0,0,0,0.27)' }}> { '请点击左上按钮创建' } </div>
         </div>
       </div>

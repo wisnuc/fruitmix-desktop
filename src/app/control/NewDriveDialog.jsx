@@ -77,7 +77,7 @@ class NewDriveDialog extends PureComponent {
     return (
       <div style={{ width: 336, padding: '24px 24px 0px 24px', zIndex: 2000 }}>
 
-        <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>新建共享文件夹</div>
+        <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>新建共享盘</div>
         <div style={{ height: 20 }} />
         <div
           style={{ height: 32,

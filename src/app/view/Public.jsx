@@ -2,7 +2,6 @@ import React from 'react'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
 import { IconButton, MenuItem } from 'material-ui'
-import FileFolderShared from 'material-ui/svg-icons/file/folder-shared'
 import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
 import ListIcon from 'material-ui/svg-icons/action/list'
 import GridIcon from 'material-ui/svg-icons/action/view-module'
@@ -14,6 +13,7 @@ import ContextMenu from '../common/ContextMenu'
 import sortByType from '../common/sort'
 import { BreadCrumbItem, BreadCrumbSeparator } from '../common/BreadCrumb'
 import FlatButton from '../common/FlatButton'
+import { ShareDisk } from '../common/Svg'
 
 const debug = Debug('component:viewModel:public: ')
 
@@ -62,7 +62,7 @@ class Public extends Home {
     /* update drives or listNavDir */
     if (type === 'drives') {
       if (data === this.state.drives && !this.force) return
-      path = [{ name: '共享文件夹', uuid: null, type: 'publicRoot' }]
+      path = [{ name: '共享盘', uuid: null, type: 'publicRoot' }]
       entries = data.filter(drive => drive.type === 'public')
       entries.forEach(item => Object.assign(item, { name: item.label }))
 
@@ -74,7 +74,7 @@ class Public extends Home {
       this.setState({ drives: data, path, entries, select, inRoot: true })
     } else {
       if (data === this.state.listNavDir && !this.force) return
-      path = [{ name: '共享文件夹', uuid: this.rootDrive.uuid, type: 'publicRoot' }, ...data.path] // important !!
+      path = [{ name: '共享盘', uuid: this.rootDrive.uuid, type: 'publicRoot' }, ...data.path] // important !!
       path[1].name = this.rootDrive.name
       entries = data.entries
 
@@ -108,11 +108,11 @@ class Public extends Home {
   }
 
   menuName() {
-    return '共享文件夹'
+    return '共享盘'
   }
 
   menuIcon() {
-    return FileFolderShared
+    return ShareDisk
   }
 
   /* renderers */
@@ -128,7 +128,7 @@ class Public extends Home {
       return (
         <div style={Object.assign({}, style, { marginLeft: 168 })}>
           <BreadCrumbItem
-            text="共享文件夹"
+            text="共享盘"
             onTouchTap={() => {
               this.rootDrive = null
               this.ctx.props.apis.request('drives')
@@ -163,7 +163,7 @@ class Public extends Home {
             if (index === 0) {
               acc.push(
                 <BreadCrumbItem
-                  text="共享文件夹"
+                  text="共享盘"
                   key="root"
                   onTouchTap={() => {
                     this.rootDrive = null
@@ -184,10 +184,10 @@ class Public extends Home {
   renderToolBar({ style }) {
     return (
       <div style={style}>
-        <IconButton onTouchTap={() => this.toggleDialog('gridView')}>
-          { this.state.gridView ? <GridIcon color="#FFF" /> : <ListIcon color="#FFF" /> }
+        <IconButton onTouchTap={() => this.toggleDialog('gridView')} tooltip={this.state.gridView ? '列表视图' : '网格视图'}>
+          { this.state.gridView ? <ListIcon color="#FFF" /> : <GridIcon color="#FFF" /> }
         </IconButton>
-        <IconButton onTouchTap={() => this.toggleDialog('createNewFolder')} disabled={this.state.inRoot} >
+        <IconButton onTouchTap={() => this.toggleDialog('createNewFolder')} tooltip="新建文件夹" disabled={this.state.inRoot} >
           <FileCreateNewFolder color="#FFF" />
         </IconButton>
       </div>
@@ -209,7 +209,7 @@ class Public extends Home {
             backgroundColor: '#FAFAFA'
           }}
         >
-          <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.27)', height: 56 }}> { '尚未建立共享文件夹' } </div>
+          <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.27)', height: 56 }}> { '尚未建立共享盘' } </div>
           <FlatButton label="去创建" primary onTouchTap={() => navTo('adminDrives')} />
         </div>
       </div>

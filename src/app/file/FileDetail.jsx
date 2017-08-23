@@ -25,7 +25,7 @@ const phaseExifTime = (time) => {
 
 const getType = (type, name, metadata) => {
   if (type === 'folder') return '文件夹'
-  if (type === 'public') return '共享文件夹'
+  if (type === 'public') return '共享盘'
   if (type === 'directory') return '文件夹'
   if (metadata && metadata.format) return metadata.format
   let extension = name.replace(/^.*\./, '')
@@ -37,7 +37,7 @@ const getPath = (path) => {
   const newPath = []
   path.map((item, index) => {
     if (!index) {
-      newPath.push(item.type === 'publicRoot' ? '共享文件夹' : '我的文件')
+      newPath.push(item.type === 'publicRoot' ? '共享盘' : '我的文件')
     } else {
       newPath.push(item.name)
     }
