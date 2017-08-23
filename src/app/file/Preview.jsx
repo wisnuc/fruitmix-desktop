@@ -61,7 +61,7 @@ const getResolution = (height, width) => {
   return `${res} 像素 ${height} x ${width}`
 }
 
-class PreviewInline extends React.Component {
+class Preview extends React.Component {
   constructor(props) {
     super(props)
 
@@ -546,20 +546,6 @@ class PreviewInline extends React.Component {
           }
         </DialogOverlay>
       </div>
-    )
-  }
-}
-
-/*
- * Use ReactTransitionGroup to handle animation
-*/
-
-class Preview extends React.Component {
-  render() {
-    return (
-      <ReactTransitionGroup>
-        <PreviewInline {...this.props} />
-      </ReactTransitionGroup>
     )
   }
 }
