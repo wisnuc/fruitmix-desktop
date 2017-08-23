@@ -2,28 +2,9 @@ const Promise = require('bluebird')
 const os = require('os')
 const fs = Promise.promisifyAll(require('fs'))
 
-const FRUITMIX = 'user.fruitmix'
+const xattr = Promise.promisifyAll(os.platform() === 'win32' ? require('fs-ads') : require('fs-xattr'))
 
-let xattr
-try {
-  if (os.platform() === 'linux' || os.platform() === 'darwin') {
-    // console.log('os.platform', os.platform())
-    xattr = Promise.promisifyAll(require('fs-xattr'))
-  } else if (os.platform() === 'win32') {
-    xattr = {
-      getAsync: async (target, string) => {
-        const data = await fs.readFileAsync(`${target}:${string}`, { encoding: 'utf-8' })
-        console.log('read xattr', data)
-        return data
-      },
-      setAsync: async (target, string, attr) => {
-        await fs.writeFileAsync(`${target}:${string}`, attr)
-      }
-    }
-  }
-} catch (e) {
-  console.log('load fs.xattr error', e)
-}
+const FRUITMIX = 'user.fruitmix'
 
 const readXattrAsync = async (target) => {
   let attr
