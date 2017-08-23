@@ -6,6 +6,7 @@ import AdminDriversApp from '../control/AdminDriversApp'
 import DriversDetail from '../control/DriversDetail'
 import ContextMenu from '../common/ContextMenu'
 import Base from './Base'
+import { ShareDisk } from '../common/Svg'
 
 const debug = Debug('component:viewModel:AdminDrives: ')
 
@@ -77,15 +78,15 @@ class AdminDrives extends Base {
   }
 
   menuName() {
-    return '共享文件夹管理'
+    return '共享盘管理'
   }
 
   quickName() {
-    return '共享文件夹'
+    return '共享盘'
   }
 
   menuIcon() {
-    return FileFolderShared
+    return ShareDisk
   }
 
   appBarStyle() {
@@ -105,7 +106,7 @@ class AdminDrives extends Base {
   }
 
   renderTitle({ style }) {
-    return <div style={Object.assign({}, style, { marginLeft: 176 })}>共享文件夹管理</div>
+    return <div style={Object.assign({}, style, { marginLeft: 176 })}>共享盘管理</div>
   }
 
   renderDetail({ style, openSnackBar }) {

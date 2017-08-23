@@ -503,7 +503,7 @@ class Home extends Base {
               <div>
                 <MenuItem
                   leftIcon={<ShareIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                  primaryText="分享至共享文件夹" onTouchTap={() => this.toggleDialog('share')}
+                  primaryText="分享至共享盘" onTouchTap={() => this.toggleDialog('share')}
                 />
                 <MenuItem
                   leftIcon={<CopyIcon style={{ height: 20, width: 20, marginTop: 6 }} />}

@@ -147,7 +147,7 @@ class MoveDialog extends React.PureComponent {
         const drives = this.props.apis.drives.value()
         const list = [
           { name: '我的文件', type: 'directory', uuid: drives.find(d => d.tag === 'home').uuid, tag: 'home' },
-          { name: '共享文件夹', type: 'publicRoot' }
+          { name: '共享盘', type: 'publicRoot' }
         ]
         setImmediate(() => this.updateState(path, currentDir, list))
       } else if (currentDir.type === 'publicRoot') {                // list public drives
@@ -303,7 +303,7 @@ class MoveDialog extends React.PureComponent {
   }
 
   componentWillMount() {
-    if (this.props.type === 'share') this.enter({ type: 'publicRoot', name: '共享文件夹', setRoot: true })
+    if (this.props.type === 'share') this.enter({ type: 'publicRoot', name: '共享盘', setRoot: true })
   }
 
   /* 移动按钮是否工作 disabled ? */
@@ -381,7 +381,7 @@ class MoveDialog extends React.PureComponent {
     return this.state.currentDir.name === this.state.currentDir.uuid
       ? '我的文件'
       : type === 'publicRoot'
-      ? '共享文件夹'
+      ? '共享盘'
       : type === 'root'
       ? '所有文件'
       : this.state.currentDir.name || this.state.currentDir.label

@@ -13,6 +13,7 @@ import CheckIcon from 'material-ui/svg-icons/navigation/check'
 import { List, AutoSizer } from 'react-virtualized'
 import renderFileIcon from '../common/renderFileIcon'
 import FlatButton from '../common/FlatButton'
+import { ShareDisk } from '../common/Svg'
 
 const debug = Debug('component:file:GridView:')
 
@@ -70,7 +71,7 @@ class Row extends React.PureComponent {
           list.first &&
             <div style={{ height: 40, display: 'flex', alignItems: 'center ', marginBottom: 8 }}>
               <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.54)', width: 64 }}>
-                { list.entries[0].entry.type === 'directory' ? '文件夹' : '文件' }
+                { list.entries[0].entry.type === 'file' ? '文件' : list.entries[0].entry.type === 'public' ? '共享盘' : '文件夹' }
               </div>
               <div style={{ flexGrow: 1 }} />
               {
@@ -136,7 +137,7 @@ class Row extends React.PureComponent {
                 <div
                   style={{
                     width: 180,
-                    height: entry.type !== 'directory' ? 184 : 48,
+                    height: entry.type === 'file' ? 184 : 48,
                     marginRight: 20,
                     marginBottom: 16,
                     boxShadow: selected ? 'rgba(0, 0, 0, 0.188235) 0px 10px 30px, rgba(0, 0, 0, 0.227451) 0px 6px 10px'
@@ -148,15 +149,9 @@ class Row extends React.PureComponent {
                 >
                   {/* preview or icon */}
                   {
-                    entry.type !== 'directory' &&
+                    entry.type === 'file' &&
                       <div style={{ height: 136, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {
-                          entry.type === 'folder' || entry.type === 'public' || entry.type === 'directory'
-                          ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 64, height: 64 }} />
-                          : entry.type === 'file'
-                          ? renderFileIcon(entry.name, entry.magic, 64)
-                          : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)', width: 64, height: 64 }} />
-                        }
+                        { renderFileIcon(entry.name, entry.magic, 64) }
                       </div>
                   }
 
@@ -174,12 +169,14 @@ class Row extends React.PureComponent {
                     <div style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', margin: 12 }}>
                       <Avatar style={{ backgroundColor: 'white', width: 30, height: 30 }}>
                         {
-                        entry.type === 'folder' || entry.type === 'public' || entry.type === 'directory'
-                        ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
-                        : entry.type === 'file'
-                        ? renderFileIcon(entry.name, entry.metadata, 24)
-                        : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
-                      }
+                          entry.type === 'directory'
+                          ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
+                          : entry.type === 'public'
+                          ? <ShareDisk style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
+                          : entry.type === 'file'
+                          ? renderFileIcon(entry.name, entry.metadata, 24)
+                          : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
+                        }
                       </Avatar>
                     </div>
                     <div
@@ -259,7 +256,7 @@ class GridView extends React.Component {
       }
       /* calculate each row's heigth and their sum */
       this.mapData.forEach((list) => {
-        const tmp = 200 + !!list.first * 48 - !!(list.entries[0].entry.type === 'directory') * 136
+        const tmp = 64 + !!list.first * 48 + (list.entries[0].entry.type === 'file') * 136
         this.allHeight.push(tmp)
         this.rowHeightSum += tmp
         this.indexHeightSum.push(this.rowHeightSum)
