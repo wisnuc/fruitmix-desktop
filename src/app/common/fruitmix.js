@@ -123,8 +123,14 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'updateAccount':
-        console.log('updateAccount', args)
         r = this.apatch(`users/${this.userUUID}`, args)
+        break
+
+      case 'updatePassword':
+        r = request
+          .put(`http://${this.address}:3000/users/${this.userUUID}/password`, { password: args.newPassword })
+          .auth(this.userUUID, args.prePassword)
+          .set('Accept', 'application/json')
         break
 
       case 'users':
