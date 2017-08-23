@@ -48,6 +48,24 @@ class AdminUsersApp extends React.Component {
       this.setState({ password })
     }
 
+    this.updateAccount = () => {
+      const args = {
+        userUUID: this.state.user.uuid,
+        disabled: !this.state.user.disabled,
+        // isAdmin: !this.state.user.isAdmin
+      }
+
+      this.props.apis.request('adminUpdateUsers', args, (err) => {
+        if (err) {
+          debug('err', args, err, err.message)
+        } else {
+          this.props.refreshUsers()
+          this.setState({ confirmPwd: '' })
+          this.props.openSnackBar('更新成功')
+        }
+      })
+    }
+
     this.getToken = () => {
       const args = {
         uuid: this.props.apis.account.data.uuid,
@@ -63,8 +81,7 @@ class AdminUsersApp extends React.Component {
             this.props.openSnackBar(`出现错误：${err.message}`)
           }
         } else {
-          this.setState({ confirmPwd: '' })
-          this.props.openSnackBar('密码正确')
+          this.updateAccount()
         }
       })
     }

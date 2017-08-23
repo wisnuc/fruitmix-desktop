@@ -134,8 +134,8 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'users':
-        r = request.get(`http://${this.address}:3000/users`)
-        // r = this.aget('users')
+        // r = request.get(`http://${this.address}:3000/users`)
+        r = this.aget('users')
         break
 
       case 'drives':
@@ -144,6 +144,13 @@ class Fruitmix extends EventEmitter {
 
       case 'adminUsers':
         r = this.aget('admin/users')
+        break
+
+      case 'adminUpdateUsers':
+        r = this.apatch(`users/${args.userUUID}`, {
+          isAdmin: args.isAdmin,
+          disabled: args.disabled
+        })
         break
 
       case 'adminCreateUser':

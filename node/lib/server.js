@@ -13,6 +13,7 @@ const debug = Debug('lib:server')
 const getIpAddr = () => store.getState().login.device.mdev.address
 const getToken = () => store.getState().login.device.token.data.token
 const getTmpPath = () => store.getState().config.tmpPath
+const getTmpTransPath = () => store.getState().config.tmpTransPath
 
 // TODO token can also be auth, or not provided
 const requestGet = (url, qs, token, callback) => {
@@ -322,15 +323,14 @@ downloadFile
 
 export const downloadFile = async (driveUUID, dirUUID, entryUUID, fileName, downloadPath, callback) => {
   initArgs()
-  const tmpName = `${entryUUID}AND${fileName}`
-  const filePath = path.join(getTmpPath(), tmpName)
+  const filePath = path.join(getTmpPath(), `${entryUUID}AND${fileName}`)
   fs.access(filePath, (error) => {
     if (!error) {
       console.log('find file', fileName)
       return callback(null, filePath)
     }
     console.log('no file', fileName)
-    const tmpPath = downloadPath || path.join(getTmpPath(), entryUUID)
+    const tmpPath = downloadPath || path.join(getTmpTransPath(), entryUUID)
     const options = {
       method: 'GET',
       url: `${server}/drives/${driveUUID}/dirs/${dirUUID}/entries/${entryUUID}`,
@@ -341,7 +341,7 @@ export const downloadFile = async (driveUUID, dirUUID, entryUUID, fileName, down
     const stream = fs.createWriteStream(tmpPath)
     stream.on('finish', () => {
       // if (!downloadPath) // TODO rename
-      fs.rename(tmpPath, path.join(getTmpPath(), tmpName), (err) => {
+      fs.rename(tmpPath, filePath, (err) => {
         if (err) return callback(err)
         return callback(null, filePath)
       })
