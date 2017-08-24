@@ -94,7 +94,7 @@ class PhotoApp extends React.Component {
   }
 
   render() {
-    debug('PhotoApp, this.props', this.props)
+    debug('PhotoApp, this.props', this.props, this.state)
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%', marginTop: 2 }}>
         <EventListener target="window" onResize={this.handleResize} />
@@ -189,7 +189,7 @@ class PhotoApp extends React.Component {
               </div>
               <div style={{ flexGrow: 1 }} />
 
-              <IconButton onTouchTap={this.props.startDownload}>
+              <IconButton onTouchTap={this.props.startDownload} tooltip="下载">
                 <DownloadIcon color="#FFF" />
               </IconButton>
 
@@ -199,7 +199,7 @@ class PhotoApp extends React.Component {
               </IconButton>
               */}
 
-              <IconButton onTouchTap={() => this.toggleDialog('hideDialog')}>
+              <IconButton onTouchTap={() => this.toggleDialog('hideDialog')} tooltip="隐藏">
                 <VisibilityOff color="#FFF" />
               </IconButton>
               <div style={{ width: 24 }} />

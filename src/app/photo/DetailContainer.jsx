@@ -140,6 +140,7 @@ class DetailContainerInline extends React.Component {
 
     this.changeContainer = () => {
       this.photo = this.props.items[this.currentIndex]
+      if (!this.photo) return
       this.clientHeight = window.innerHeight
       this.clientWidth = this.state.detailInfo ? window.innerWidth - 360 : window.innerWidth
 
@@ -320,9 +321,19 @@ class DetailContainerInline extends React.Component {
     this.forceUpdate()
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    debug('shouldComponentUpdate', nextProps.items.length, this.currentIndex)
+    /* when nextProps.items.length === 0, close this DetailContainer */
+    if (!nextProps.items.length || this.currentIndex > nextProps.items.length - 1) {
+      setImmediate(this.close) // to avoid infinite loop
+      return false
+    }
+    return true
+  }
+
   componentDidUpdate(prevProps, prevState) {
     if (this.forceChange && prevProps && this.props && prevProps.items.length !== this.props.items.length) {
-      debug('componentWillReceiveProps', prevProps, this.props)
+      debug('componentDidUpdate', prevProps, this.props)
       this.currentIndex -= 1
       this.changeIndex('right')
       this.forceChange = false
@@ -355,6 +366,7 @@ class DetailContainerInline extends React.Component {
 
   renderInfo() {
     debug('renderInfo', this.props.items.length, this.photo)
+    if (!this.photo) return <div />
     const { datetime, model, make, h, w, size, lat, latr, long, longr } = this.photo
 
     const latitude = convertGPS(lat, latr)
