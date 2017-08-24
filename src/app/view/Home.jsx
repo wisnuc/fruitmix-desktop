@@ -365,7 +365,7 @@ class Home extends Base {
     )
   }
 
-  renderDialogs(openSnackBar) {
+  renderDialogs(openSnackBar, navTo) {
     return (
       <div style={{ width: '100%', height: '100%' }}>
         <DialogOverlay open={!!this.state.createNewFolder} onRequestClose={() => this.toggleDialog('createNewFolder')}>
@@ -400,6 +400,7 @@ class Home extends Base {
             openSnackBar={openSnackBar}
             primaryColor={this.groupPrimaryColor()}
             refresh={this.refresh}
+            navTo={navTo}
             type="move"
             operation="move"
           /> }
@@ -414,6 +415,7 @@ class Home extends Base {
             openSnackBar={openSnackBar}
             primaryColor={this.groupPrimaryColor()}
             refresh={this.refresh}
+            navTo={navTo}
             type="copy"
             operation="copy"
           /> }
@@ -428,6 +430,7 @@ class Home extends Base {
             openSnackBar={openSnackBar}
             primaryColor={this.groupPrimaryColor()}
             refresh={this.refresh}
+            navTo={navTo}
             type="share"
             operation="copy"
           /> }
@@ -552,7 +555,7 @@ class Home extends Base {
     )
   }
 
-  renderContent({ toggleDetail, openSnackBar }) {
+  renderContent({ toggleDetail, openSnackBar, navTo }) {
     // debug('renderContent', this.state, this.select.state)
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -576,7 +579,7 @@ class Home extends Base {
 
         { this.renderMenu(this.state.contextMenuOpen, toggleDetail) }
 
-        { this.renderDialogs(openSnackBar) }
+        { this.renderDialogs(openSnackBar, navTo) }
 
       </div>
     )

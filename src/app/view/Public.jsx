@@ -210,7 +210,8 @@ class Public extends Home {
           }}
         >
           <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.27)', height: 56 }}> { '尚未建立共享盘' } </div>
-          <FlatButton label="去创建" primary onTouchTap={() => navTo('adminDrives')} />
+          { this.ctx.props.apis.account && this.ctx.props.apis.account.data && this.ctx.props.apis.account.data.isAdmin &&
+            <FlatButton label="去创建" primary onTouchTap={() => navTo('adminDrives')} /> }
         </div>
       </div>
     )
