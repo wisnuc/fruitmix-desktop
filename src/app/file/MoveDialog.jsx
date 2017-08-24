@@ -486,6 +486,12 @@ class MoveDialog extends React.PureComponent {
                       isSelected={index === this.state.currentSelectedIndex}
                     />
                   ))
+                  : this.state.currentDir.type === 'publicRoot'
+                  ? <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                    <div> { '尚未创建共享盘' } </div>
+                    { this.props.apis.account && this.props.apis.account.data && this.props.apis.account.data.isAdmin &&
+                    <FlatButton label="去创建" primary onTouchTap={() => this.props.navTo('adminDrives')} /> }
+                  </div>
                   : <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     { '此文件夹为空' }
                   </div>
