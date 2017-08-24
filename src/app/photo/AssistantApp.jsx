@@ -165,7 +165,7 @@ class AssistantApp extends PhotoApp {
               </div>
               <div style={{ flexGrow: 1 }} />
 
-              <IconButton onTouchTap={this.props.startDownload}>
+              <IconButton onTouchTap={this.props.startDownload} tooltip="下载">
                 <DownloadIcon color="#FFF" />
               </IconButton>
 
@@ -175,11 +175,10 @@ class AssistantApp extends PhotoApp {
               </IconButton>
               */}
 
-              <IconButton onTouchTap={() => this.toggleDialog('hideDialog')}>
+              <IconButton onTouchTap={() => this.toggleDialog('hideDialog')} tooltip="恢复">
                 <Visibility color="#FFF" />
               </IconButton>
               <div style={{ width: 24 }} />
-
             </div>
         }
 

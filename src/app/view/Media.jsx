@@ -339,27 +339,17 @@ class Media extends Base {
       })
     }
 
-    this.uploadMediaAsync = async (driveUUID) => {
-      const data = await this.ctx.props.apis.requestAsync('listNavDir', { driveUUID, dirUUID: driveUUID })
-      const index = data.entries.findIndex(entry => entry.name === '上传的照片')
-      if (index > -1) {
-        ipcRenderer.send('UPLOADMEDIA', { driveUUID, dirUUID: data.entries[index].uuid })
-      } else {
-        const uuid = await this.ctx.props.apis.request('mkdir', { driveUUID, dirUUID: driveUUID, dirname: '上传的照片' })
-        if (typeof uuid !== 'string') return this.uploadMedia() // FIXME
-        ipcRenderer.send('UPLOADMEDIA', { driveUUID, dirUUID: uuid })
-      }
+    this.uploadMediaAsync = async () => {
+      const driveUUID = this.ctx.props.apis.listNavDir.data.path[0].uuid
+      const data = await this.ctx.props.apis.requestAsync('mkdir', { driveUUID, dirUUID: driveUUID, dirname: '上传的照片' })
+      const dirUUID = data.entries.find(entry => entry.name === '上传的照片').uuid
+      const newData = await this.ctx.props.apis.requestAsync('mkdir', { driveUUID, dirUUID, dirname: '来自个人电脑' })
+      const targetUUID = newData.entries.find(entry => entry.name === '来自个人电脑').uuid
+      ipcRenderer.send('UPLOADMEDIA', { driveUUID, dirUUID: targetUUID })
     }
 
     this.uploadMedia = () => {
-      // debug('this.uploadMedia', this.ctx.props.apis, this.ctx.props.apis.listNavDir)
-      if (!this.ctx.props.apis.listNavDir || !this.ctx.props.apis.listNavDir.data) {
-        this.ctx.openSnackBar('上传失败！')
-        return
-      }
-      const data = this.ctx.props.apis.listNavDir.data
-      const rootUUID = data.path[0].uuid
-      this.uploadMediaAsync(rootUUID).catch((e) => {
+      this.uploadMediaAsync().catch((e) => {
         debug('上传失败', e)
         this.ctx.openSnackBar('上传失败！')
       })
