@@ -68,7 +68,16 @@ class RenameDialog extends React.PureComponent {
             value={this.state.value}
             errorText={this.state.errorText}
             onChange={this.handleChange}
-            ref={input => input && input.focus()}
+            ref={(tf) => { // forcus on TextField and autoselect file name without extension
+              if (tf && tf.input && !this.notFirst) {
+                const input = tf.input
+                input.focus()
+                const end = input.value.lastIndexOf('.')
+                input.selectionStart = 0
+                input.selectionEnd = end > -1 ? end : input.value.length
+                this.notFirst = true
+              }
+            }}
             onKeyDown={this.onKeyDown}
           />
         </div>
