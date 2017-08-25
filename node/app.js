@@ -62,4 +62,8 @@ app.on('ready', () => {
   global.configuration = configuration
 })
 
+process.on('uncaughtException', (err) => {
+  console.log(`!!!!!!\nuncaughtException:\n${err.stack}\n------`)
+})
+
 app.on('window-all-closed', () => app.quit())

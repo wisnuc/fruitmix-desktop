@@ -240,7 +240,7 @@ class MaintGuide extends React.Component {
                   {`磁盘阵列 ${this.state.index + 1}`}
                 </div>
                 <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.54)' }}>
-                  {`Brtfs | ${volume.usage.data.mode}`}
+                  {`Brtfs | ${volume && volume.usage && volume.usage.data && volume.usage.data.mode}`}
                 </div>
               </div>
             </div>
