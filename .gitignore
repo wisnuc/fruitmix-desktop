@@ -23,4 +23,4 @@ wisnuc-win32-x64/
 /public/*.hot-update.json
 /public/bundle.js
 
-
+package-lock.json

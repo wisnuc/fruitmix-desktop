@@ -22,9 +22,18 @@ const debug = Debug('component:file:GridView:')
 class Row extends React.PureComponent {
   constructor(props) {
     super(props)
+
+    this.headers = [
+      { title: '名称', up: 'nameUp', down: 'nameDown' },
+      { title: '修改时间', up: 'timeUp', down: 'timeDown' },
+      { title: '文件大小', up: 'sizeUp', down: 'sizeDown' }
+    ]
+
+    this.header = this.headers.find(header => (header.up === this.props.sortType) || (header.down === this.props.sortType)) || this.headers[0]
+
     this.state = {
       contextMenuOpen: false,
-      type: '名称'
+      type: this.header.title
     }
 
     this.handleChange = (type) => {
@@ -58,14 +67,9 @@ class Row extends React.PureComponent {
   render() {
     const { select, list, primaryColor, sortType, changeSortType } = this.props
 
-    const headers = [
-      { title: '名称', up: 'nameUp', down: 'nameDown' },
-      { title: '修改时间', up: 'timeUp', down: 'timeDown' },
-      { title: '文件大小', up: 'sizeUp', down: 'sizeDown' }
-    ]
-    const h = headers.find(header => header.title === this.state.type) || headers[0]
+    const h = this.headers.find(header => header.title === this.state.type) || this.headers[0]
 
-    // debug('sortType', sortType)
+    // debug('sortType', sortType, this.state)
     return (
       <div style={{ height: '100%', width: '100%', marginLeft: 52 }} >
         {/* header */}
