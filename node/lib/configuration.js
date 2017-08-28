@@ -224,6 +224,7 @@ class Configuration {
         imagePath: this.getImageCacheDir(),
         downloadPath: this.getWisnucDownloadsDir(),
         lastDevice: globalConfig.getConfig().lastDevice,
+        closeConfirm: globalConfig.getConfig().closeConfirm,
         users: this.userConfigs.map(uc => uc.getConfig())
       }
     })
