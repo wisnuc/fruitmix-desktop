@@ -26,7 +26,7 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
     const index = remoteEntries.findIndex(e => (e.name === fileName))
     if (index > -1) {
       debug('find name conflict', entry)
-      const response = dialog.showMessageBox({
+      const response = dialog.showMessageBox(getMainWindow(), {
         type: 'warning',
         title: '文件名冲突',
         buttons: ['取消', '单独保存'], // ['取消', '单独保存', '覆盖']

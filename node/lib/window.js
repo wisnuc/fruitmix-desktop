@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import path from 'path'
-import { ipcMain, BrowserWindow, app } from 'electron'
+import { ipcMain, BrowserWindow, app, dialog } from 'electron'
 
 const debug = Debug('lib:window')
 
@@ -28,6 +28,29 @@ const initMainWindow = () => {
   // window title
   _mainWindow.on('page-title-updated', (event) => {
     event.preventDefault()
+  })
+
+  let close = false
+  _mainWindow.on('close', (e) => {
+    // console.log('global.configuration', global.configuration.globalConfig.getConfig().closeConfirm)
+    if (close || (global.configuration && global.configuration.globalConfig.config.closeConfirm)) return
+    dialog.showMessageBox(_mainWindow, {
+      type: 'warning',
+      title: '关闭应用',
+      buttons: ['取消', '关闭'],
+      checkboxLabel: '不再提示',
+      checkboxChecked: false,
+      message: '确定退出并关闭应用吗？'
+    }, (response, checkboxChecked) => {
+      if (response === 1 && checkboxChecked) {
+        close = true
+        global.configuration.updateGlobalConfigAsync({ closeConfirm: true }).then(() => setImmediate(app.quit)).catch(e => console.log(e))
+      } else if (response === 1) {
+        close = true
+        setImmediate(app.quit)
+      }
+    })
+    e.preventDefault()
   })
 
   // debug mode
