@@ -418,7 +418,8 @@ class UploadFileSTM extends STM {
           }
         }
       }
-      this.handle = request.post(op, (error, response, body) => {
+      this.handle = request.post(op)
+      this.handle.on('end', (error, response, body) => {
         debug('request.post error', error, response && response.statusCode, body)
         if (error || (response && response.statusCode !== 200 && response.statusCode !== 206)) {
           this.wrapper.manager.state = 'failed'
