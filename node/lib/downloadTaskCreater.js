@@ -581,8 +581,8 @@ class STM {
   }
 
   requestProbe() {
-    addToReadyQueue(this)
     this.wrapper.stateName = 'ready'
+    addToReadyQueue(this)
   }
 
   destructor() {
@@ -691,7 +691,8 @@ class DownloadFileSTM extends STM {
       if (this.wrapper.seek >= this.wrapper.size) this.rename(this.tmpDownloadPath)
     })
 
-    this.handle = request(options, (error, response, body) => {
+    this.handle = request(options)
+    this.handle.on('end', (error, response, body) => {
       // console.log(error, response, body)
       if (error || (response && response.statusCode && (response.statusCode !== 200 && response.statusCode !== 206))) {
         console.log('req:', error, response && response.statusCode, this.wrapper.manager.type)
