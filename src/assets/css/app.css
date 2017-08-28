@@ -11,7 +11,7 @@
   -moz-user-select: none;
   -webkit-user-select: none;
   user-select: none;
-  font-family: Roboto, "Noto Sans SC" , sans-serif!important;
+  font-family: Roboto, "Noto Sans SC" , "Microsoft YaHei", sans-serif!important;
 }
 
 .clearfix {
