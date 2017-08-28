@@ -145,8 +145,14 @@ class Home extends Base {
     }
 
     this.delete = () => {
-      this.toggleDialog('delete')
-      this.deleteAsync().then(() => this.ctx.openSnackBar('删除成功')).catch(e => this.ctx.openSnackBar(`删除失败: ${e}`))
+      this.setState({ loading: true })
+      this.deleteAsync().then(() => {
+        this.setState({ loading: false, delete: false })
+        this.ctx.openSnackBar('删除成功')
+      }).catch((e) => {
+        this.setState({ loading: false, delete: false })
+        this.ctx.openSnackBar(`删除失败: ${e}`)
+      })
     }
 
     /* actions */
@@ -443,9 +449,10 @@ class Home extends Base {
               <div style={{ color: 'rgba(0,0,0,0.54)' }}>{'确定删除？'}</div>
               <div style={{ height: 24 }} />
               <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('delete')} />
+                <FlatButton label="取消" primary disabled={this.state.loading} onTouchTap={() => this.toggleDialog('delete')} />
                 <FlatButton
                   label="确认"
+                  disabled={this.state.loading}
                   primary
                   onTouchTap={this.delete}
                 />
