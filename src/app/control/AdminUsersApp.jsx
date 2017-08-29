@@ -78,7 +78,8 @@ class AdminUsersApp extends React.Component {
           if (err.message === 'Unauthorized') {
             this.props.openSnackBar('密码错误')
           } else {
-            this.props.openSnackBar(`出现错误：${err.message}`)
+            // this.props.openSnackBar(`出现错误：${err.message}`)
+            this.props.openSnackBar(`出现错误，请重试`)
           }
         } else {
           this.updateAccount()

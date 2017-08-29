@@ -42,7 +42,8 @@ class RenameDialog extends React.PureComponent {
       console.log('renameDirOrFile', this.props, args)
       apis.request('renameDirOrFile', args, (err) => {
         if (err) {
-          this.setState({ errorText: err.message })
+          // this.setState({ errorText: err.message })
+          this.setState({ errorText: '出现错误，请重试！' })
         } else {
           this.props.onRequestClose(true)
           this.props.openSnackBar('修改成功')

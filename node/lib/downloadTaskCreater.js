@@ -709,6 +709,7 @@ class DownloadFileSTM extends STM {
     const _this = this
     const wrapper = this.wrapper
     fs.rename(oldPath, path.join(wrapper.downloadPath, wrapper.name), (err, data) => {
+      if (err) console.log('rename error', err)
       removeOutOfRunningQueue(_this)
       _this.wrapper.downloadFinish()
     })

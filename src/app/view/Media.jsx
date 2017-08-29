@@ -349,6 +349,7 @@ class Media extends Base {
     }
 
     this.uploadMedia = () => {
+      if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
       this.uploadMediaAsync().catch((e) => {
         debug('上传失败', e)
         this.ctx.openSnackBar('上传失败！')

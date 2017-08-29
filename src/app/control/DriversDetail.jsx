@@ -38,7 +38,8 @@ class DrivesDetail extends PureComponent {
           this.props.openSnackBar('修改成功')
         } else {
           debug('err!!!!!!!!!!!!!!', err)
-          this.props.openSnackBar(`修改失败 ${err.message}`)
+          // this.props.openSnackBar(`修改失败 ${err.message}`)
+          this.props.openSnackBar(`修改失败`)
         }
       })
     }
