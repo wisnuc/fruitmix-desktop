@@ -99,14 +99,17 @@ class UserBox extends React.Component {
             width: '100%',
             paddingLeft: 8,
             paddingRight: 8,
-            backgroundColor: this.state.selectedIndex > -1 ? '#FFFFFF' : '#FAFAFA'
+            backgroundColor: this.state.selectedIndex > -1 ? '#FFFFFF' : '#FAFAFA',
+            maxHeight: 172,
+            overflowY: 'auto',
+            overflowX: 'hidden'
           }}
         >
           <div style={{ ...styles.flexWrap, padding: 8 }}>
             { users.map((user, index) =>
               <NamedAvatar
                 key={user.uuid}
-                style={{ margin: 7 }}
+                style={{ margin: users.length > 21 ? 6 : 7 }}
                 name={user.username}
                 selected={index === this.state.selectedIndex}
                 onTouchTap={this.selectUser.bind(this, index)}
@@ -115,7 +118,7 @@ class UserBox extends React.Component {
         </div>
 
         <div style={{ width: '100%', boxSizing: 'border-box', paddingLeft: 0, paddingRight: 0 }}>
-          <div style={{ width: '100%', height: Math.ceil(users.length / 8) * 52 + 16 }} />
+          <div style={{ width: '100%', height: Math.ceil(users.length / 7) * 52 + 16, maxHeight: 172 }} />
           <LoginBox
             open={this.state.selectedIndex !== -1}
             device={this.props.device}
