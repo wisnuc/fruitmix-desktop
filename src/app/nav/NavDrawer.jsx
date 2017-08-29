@@ -9,6 +9,7 @@ import ActionSettings from 'material-ui/svg-icons/action/settings'
 import ActionExitToApp from 'material-ui/svg-icons/action/exit-to-app'
 import ActionAccountCircle from 'material-ui/svg-icons/action/account-circle'
 import SocialPerson from 'material-ui/svg-icons/social/person'
+import ActionDns from 'material-ui/svg-icons/action/dns'
 import { indigo500 } from 'material-ui/styles/colors'
 
 import { DockerIcon } from '../common/Svg'
@@ -220,23 +221,21 @@ class NavDrawer extends React.Component {
 
         {
           isAdmin && <MenuItem
-            icon={ActionSettings}
-            text="系统设置"
+            icon={ActionDns}
+            text="设备管理"
             primaryColor={primaryColor}
-            selected={views[nav].navGroup() === 'settings'}
+            selected={views[nav].navGroup() === 'device'}
             onTouchTap={() => navTo('adminUsers')}
           />
         }
 
         <MenuItem
-          icon={views.device.menuIcon()}
-          text={views.device.menuName()}
+          icon={ActionSettings}
+          text="客户端设置"
           primaryColor={primaryColor}
-          selected={views[nav].navGroup() === 'device'}
-          onTouchTap={() => navTo('device')}
+          selected={views[nav].navGroup() === 'settings'}
+          onTouchTap={() => navTo('clientUpdate')}
         />
-
-        { this.renderGroup('update') }
 
         <div style={{ height: 4 }} />
         <Divider />

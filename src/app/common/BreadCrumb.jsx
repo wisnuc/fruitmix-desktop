@@ -1,5 +1,6 @@
 import React from 'react'
 import Radium from 'radium'
+import RightIcon from 'material-ui/svg-icons/navigation/chevron-right'
 
 @Radium
 export class BreadCrumbItem extends React.PureComponent {
@@ -19,7 +20,7 @@ export class BreadCrumbItem extends React.PureComponent {
           alignItems: 'center',
           backgroundColor: 'rgba(255,255,255,0)',
           ':hover': {
-            backgroundColor: 'rgba(255,255,255,0.14)' // value from material-component card example
+            backgroundColor: 'rgba(255,255,255,0.28)' // value from material-component card example
           }
         }}
         onTouchTap={this.props.onTouchTap}
@@ -42,8 +43,8 @@ export class BreadCrumbItem extends React.PureComponent {
 export class BreadCrumbSeparator extends React.PureComponent {
   render() {
     return (
-      <div style={{ height: 32, width: 8, display: 'flex', alignItems: 'center' }}>
-        &rsaquo;
+      <div style={{ height: 32, width: 24, display: 'flex', alignItems: 'center', marginTop: 4 }}>
+        <RightIcon color="#FFFFFF" />
       </div>
     )
   }

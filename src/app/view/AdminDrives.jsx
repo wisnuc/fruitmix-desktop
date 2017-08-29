@@ -74,7 +74,7 @@ class AdminDrives extends Base {
   }
 
   navGroup() {
-    return 'settings'
+    return 'device'
   }
 
   menuName() {
