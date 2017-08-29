@@ -35,7 +35,7 @@ class Update extends Base {
   }
 
   navGroup() {
-    return 'update'
+    return 'settings'
   }
 
   menuName() {

@@ -36,7 +36,7 @@ class AdminUsers extends Base {
   }
 
   navGroup() {
-    return 'settings'
+    return 'device'
   }
 
   menuName() {

@@ -261,7 +261,10 @@ class Home extends Base {
     const apis = this.ctx.props.apis
     if (!apis || !apis.drives || !apis.drives.data) return
     const homeDrive = apis.drives.data.find(drive => drive.tag === 'home')
-    if (homeDrive) this.ctx.props.apis.request('listNavDir', { driveUUID: homeDrive.uuid, dirUUID: homeDrive.uuid })
+    const preDriveUUID = apis.listNavDir && apis.listNavDir.data && apis.listNavDir.data.path[0].uuid
+    if (homeDrive && preDriveUUID !== homeDrive.uuid) {
+      this.ctx.props.apis.request('listNavDir', { driveUUID: homeDrive.uuid, dirUUID: homeDrive.uuid })
+    }
   }
 
   navLeave() {

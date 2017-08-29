@@ -46,9 +46,10 @@ class Base extends EventEmitter {
       case 'docker':
         return blueGrey500
       case 'settings':
-        return deepPurple500
-      case 'device':
+        // return deepPurple500
         return blueGrey400
+      case 'device':
+        return deepPurple500
       case 'update':
         return blueGrey400
       case 'other':
