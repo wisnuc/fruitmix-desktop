@@ -34,7 +34,8 @@ class ChangeAccountDialog extends React.PureComponent {
       const cb = (error) => {
         if (error) {
           debug('error', op, error)
-          this.props.openSnackBar(`修改失败：${error.message}`)
+          // this.props.openSnackBar(`修改失败：${error.message}`)
+          this.props.openSnackBar(`修改失败`)
         } else {
           this.props.onRequestClose(true)
           op === 'createUser' ? this.props.refreshUsers() : this.props.refresh()
@@ -64,7 +65,8 @@ class ChangeAccountDialog extends React.PureComponent {
             if (err.message === 'Unauthorized') {
               this.props.openSnackBar('修改失败：原密码错误')
             } else {
-              this.props.openSnackBar(`修改失败：${err.message}`)
+              // this.props.openSnackBar(`修改失败：${err.message}`)
+              this.props.openSnackBar(`修改失败`)
             }
           } else {
             this.fire()

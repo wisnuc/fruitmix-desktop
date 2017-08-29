@@ -169,7 +169,8 @@ class MoveDialog extends React.PureComponent {
       if (this.state.currentSelectedIndex > -1) this.enter(this.state.list[this.state.currentSelectedIndex])
       this.props.apis.request('mkdir', args, (err, data) => {
         if (err) {
-          this.setState({ errorText: err.message })
+          // this.setState({ errorText: err.message })
+          this.setState({ errorText: '出现错误，请重试！' })
         } else {
           const node = data.entries.find(entry => entry.name === this.state.newFoldName)
           this.enter(node)

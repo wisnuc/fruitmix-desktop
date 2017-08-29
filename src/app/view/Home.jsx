@@ -68,11 +68,13 @@ class Home extends Base {
     }
 
     this.toggleDialog = (type) => {
+      if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
       this.setState({ [type]: !this.state[type] })
     }
 
     /* file or dir operations */
     this.upload = (type) => {
+      if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
       const dirPath = this.state.path
       const dirUUID = dirPath[dirPath.length - 1].uuid
       const driveUUID = dirPath[0].uuid
@@ -81,6 +83,7 @@ class Home extends Base {
     }
 
     this.download = () => {
+      if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
       const entries = this.state.entries
       const selected = this.state.select.selected
       const path = this.state.path
@@ -97,6 +100,7 @@ class Home extends Base {
     }
 
     this.dupFile = () => {
+      if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
       const entries = this.state.entries
       const selected = this.state.select.selected
       const path = this.state.path
@@ -136,7 +140,8 @@ class Home extends Base {
 
       for (let i = 0; i < selected.length; i++) {
         const entryName = entries[selected[i]].name
-        await this.ctx.props.apis.requestAsync('deleteDirOrFile', { driveUUID, dirUUID, entryName })
+        const entryUUID = entries[selected[i]].uuid
+        await this.ctx.props.apis.requestAsync('deleteDirOrFile', { driveUUID, dirUUID, entryName, entryUUID })
       }
 
       if (this.state.path[this.state.path.length - 1].uuid === dirUUID) {
@@ -145,6 +150,7 @@ class Home extends Base {
     }
 
     this.delete = () => {
+      if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
       this.setState({ loading: true })
       this.deleteAsync().then(() => {
         this.setState({ loading: false, delete: false })
@@ -157,6 +163,7 @@ class Home extends Base {
 
     /* actions */
     this.listNavBySelect = () => {
+      if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
       // debug('listNavBySelect', this.select, this.state)
       const selected = this.select.state.selected
       if (selected.length !== 1) return

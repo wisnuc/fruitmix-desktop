@@ -35,7 +35,8 @@ class NewFolderDialog extends React.PureComponent {
       // console.log('creat new folder', this.props, args)
       apis.request('mkdir', args, (err) => {
         if (err) {
-          this.setState({ errorText: err.message })
+          console.log('mkdir error', err.code)
+          this.setState({ errorText: '创建失败' })
         } else {
           this.props.onRequestClose(true)
           this.props.openSnackBar('创建成功')
