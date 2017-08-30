@@ -297,7 +297,7 @@ class AccountApp extends React.Component {
     const tooltipUserName = (
       <div
         style={{
-          width: 380,
+          width: 400,
           textAlign: 'left',
           whiteSpace: 'normal',
           fontSize: 14,
