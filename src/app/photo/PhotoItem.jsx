@@ -94,6 +94,26 @@ class PhotoItem extends React.Component {
     return (
       <div style={style}>
         <div style={{ position: 'relative', height: '100%', width: '100%' }} >
+          {/* render circle background */}
+          {
+            !this.state.selected && this.props.selectedItems.length > 0 && <div
+              style={{
+                position: 'absolute',
+                zIndex: 100,
+                width: 210,
+                height: 56,
+                left: 0,
+                top: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                background: 'linear-gradient(0deg, rgba(0,0,0,0), rgba(0,0,0,0.26))'
+              }}
+              onMouseEnter={this.mouseEnter}
+              onMouseLeave={this.mouseLeave}
+            />
+          }
+
           {/* renderSelectCircle */}
           {
             this.props.selectedItems.length > 0 && !this.state.hover && <div
