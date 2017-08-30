@@ -245,6 +245,7 @@ class Public extends Home {
           changeSortType={this.changeSortType}
           gridView={this.state.gridView}
           scrollTo={this.state.scrollTo}
+          openSnackBar={openSnackBar}
         />
 
         { this.renderMenu(!!this.state.contextMenuOpen && !this.state.inRoot, toggleDetail, getDetailStatus) }

@@ -1,18 +1,19 @@
 import os from 'os'
-import child_process from 'child_process'
-import { dialog, ipcMain } from 'electron'
 import Debug from 'debug'
+import { ipcMain, powerSaveBlocker } from 'electron'
 
 import { getMainWindow } from './window'
 import { userTasks as uploadingTasks, finishTasks as uploadedTasks } from './newUpload'
 import { userTasks as downloadingTasks, finishTasks as downloadedTasks } from './newDownload'
 import TransferManager from './transferManager'
+import store from '../serve/store/store'
 
 const debug = Debug('node:lib:transmissionUpdate:')
 
 let preLength = 0
 let lock = false
 let last = true
+let id = -1 // The power save blocker id returned by powerSaveBlocker.start
 
 const sendInfor = () => {
   if (lock || !last) return (last = true)
@@ -22,8 +23,17 @@ const sendInfor = () => {
   const userTasks = concatUserTasks.sort((a, b) => a.createTime - b.createTime) // Ascending
   const finishTasks = concatFinishTasks.sort((a, b) => b.finishDate - a.finishDate) // Descending
 
+  if (!powerSaveBlocker.isStarted(id) && userTasks.length !== 0 && !store.getState().config.enableSleep) {
+    id = powerSaveBlocker.start('prevent-display-sleep')
+    console.log('powerSaveBlocker start', id, powerSaveBlocker.isStarted(id))
+  }
+
   /* send message when all tasks finished */
   if (preLength !== 0 && userTasks.length === 0) {
+    if (powerSaveBlocker.isStarted(id)) {
+      powerSaveBlocker.stop(id)
+      console.log('powerSaveBlocker stop', id, powerSaveBlocker.isStarted(id))
+    }
     getMainWindow().webContents.send('snackbarMessage', { message: '文件传输任务完成' })
   }
 

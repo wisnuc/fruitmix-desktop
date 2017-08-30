@@ -75,8 +75,12 @@ class FileContent extends React.Component {
       const dir = this.props.home.path
       const dirUUID = dir[dir.length - 1].uuid
       const driveUUID = this.props.home.path[0].uuid
-      debug('drop files!!', files, dirUUID, driveUUID)
-      this.props.ipcRenderer.send('DRAG_FILE', { files, dirUUID, driveUUID })
+      debug('drop files!!', files, dirUUID, driveUUID, dir)
+      if (!dirUUID || !driveUUID) {
+        this.props.openSnackBar('共享盘列表不能上传文件或文件夹') 
+      } else {
+        this.props.ipcRenderer.send('DRAG_FILE', { files, dirUUID, driveUUID })
+      }
     }
 
     this.openFile = (file) => {

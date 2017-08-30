@@ -1,13 +1,13 @@
 import React from 'react'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
-import UpdateIcon from 'material-ui/svg-icons/action/system-update-alt'
+import ActionSettings from 'material-ui/svg-icons/action/settings'
 import Base from './Base'
-import UpdateApp from '../control/ClientUpdateApp'
+import SettingsApp from '../control/SettingsApp'
 
-const debug = Debug('view:component:ClientUpdate')
+const debug = Debug('view:component:Settings')
 
-class Update extends Base {
+class Settings extends Base {
 
   constructor(ctx) {
     super(ctx)
@@ -18,15 +18,15 @@ class Update extends Base {
   }
 
   menuName() {
-    return '客户端升级'
+    return '客户端设置'
   }
 
   menuIcon() {
-    return UpdateIcon
+    return ActionSettings
   }
 
   quickName() {
-    return '升级'
+    return '设置'
   }
 
   appBarStyle() {
@@ -36,11 +36,13 @@ class Update extends Base {
   /** renderers **/
   renderContent({ openSnackBar }) {
     return (
-      <UpdateApp
+      <SettingsApp
+        primaryColor={this.groupPrimaryColor()}
+        openSnackBar={openSnackBar}
         ipcRenderer={ipcRenderer}
       />
     )
   }
 }
 
-export default Update
+export default Settings
