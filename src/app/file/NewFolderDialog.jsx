@@ -40,7 +40,7 @@ class NewFolderDialog extends React.PureComponent {
         } else {
           this.props.onRequestClose(true)
           this.props.openSnackBar('创建成功')
-          this.props.refresh()
+          this.props.refresh({ fileName: this.state.value })
         }
       })
     }
