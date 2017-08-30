@@ -148,6 +148,19 @@ class RenderListByRow extends React.Component {
     this.leaveDiv = () => {
       this.setState({ type: '' })
     }
+
+    this.scrollToRow = index => this.ListRef.scrollToRow(index)
+  }
+
+  componentDidUpdate() {
+    if (this.props.scrollTo) {
+      const index = this.props.entries.findIndex(entry => entry.name === this.props.scrollTo)
+      if (index > -1) {
+        this.scrollToRow(index)
+        Object.assign(this.props.home, { scrollTo: '' })
+        this.props.select.touchTap(0, index)
+      }
+    }
   }
 
   render() {
@@ -219,6 +232,7 @@ class RenderListByRow extends React.Component {
               {({ height, width }) => (
                 <div onTouchTap={e => this.props.onRowTouchTap(e, -1)}>
                   <List
+                    ref={ref => (this.ListRef = ref)}
                     style={{ outline: 'none' }}
                     height={height}
                     width={width}

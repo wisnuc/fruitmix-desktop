@@ -177,10 +177,12 @@ class Home extends Base {
       }
     }
 
-    this.refresh = () => {
+    this.refresh = ({ fileName }) => {
+      debug('this.refresh', fileName)
       const rUUID = this.state.path[0].uuid
       const dUUID = this.state.path[this.state.path.length - 1].uuid
       this.ctx.props.apis.request('listNavDir', { driveUUID: rUUID, dirUUID: dUUID })
+      if (fileName) this.setState({ scrollTo: fileName })
     }
 
     this.showContextMenu = (clientX, clientY) => {
@@ -573,7 +575,7 @@ class Home extends Base {
   }
 
   renderContent({ toggleDetail, openSnackBar, navTo, getDetailStatus }) {
-    // debug('renderContent', this.state, this.select.state)
+    debug('renderContent', this.state, this.select.state)
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
 
@@ -592,6 +594,7 @@ class Home extends Base {
           sortType={this.state.sortType}
           changeSortType={this.changeSortType}
           gridView={this.state.gridView}
+          scrollTo={this.state.scrollTo}
         />
 
         { this.renderMenu(this.state.contextMenuOpen, toggleDetail, getDetailStatus) }

@@ -225,12 +225,25 @@ class GridView extends React.Component {
       type: ''
     }
 
-    this.enterDiv = (type) => {
-      this.setState({ type })
-    }
+    this.scrollToRow = index => this.ListRef.scrollToRow(index)
+  }
 
-    this.leaveDiv = () => {
-      this.setState({ type: '' })
+  componentDidUpdate() {
+    if (this.props.scrollTo) {
+      const index = this.props.entries.findIndex(entry => entry.name === this.props.scrollTo)
+      if (index > -1) {
+        let rowIndex = 0
+        let sum = 0
+        /* calc rowIndex */
+        for (let i = 0; i < this.mapData.length; i++) {
+          sum += this.mapData[i].entries.length
+          if (index < sum) break
+          rowIndex += 1
+        }
+        if (rowIndex < this.mapData.length) this.scrollToRow(rowIndex)
+        Object.assign(this.props.home, { scrollTo: '' })
+        this.props.select.touchTap(0, index)
+      }
     }
   }
 
@@ -299,6 +312,10 @@ class GridView extends React.Component {
             const gridInfo = calcGridInfo(height, width, this.props.entries)
             const { mapData, allHeight, rowHeightSum, indexHeightSum, maxScrollTop } = gridInfo
             // debug('gridInfo', allHeight, this.props.entries.length)
+            
+            /* To get row index of scrollToRow */
+            debug('gridInfo', this.mapData)
+            this.mapDate = mapData
 
             const estimatedRowSize = rowHeightSum / allHeight.length
             const rowHeight = ({ index }) => allHeight[index]
@@ -320,6 +337,7 @@ class GridView extends React.Component {
             return (
               <div onTouchTap={e => this.props.onRowTouchTap(e, -1)}>
                 <List
+                  ref={ref => (this.ListRef = ref)}
                   height={height - 24}
                   width={width}
                   estimatedRowSize={estimatedRowSize}
