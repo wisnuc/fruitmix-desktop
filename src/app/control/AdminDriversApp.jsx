@@ -15,7 +15,7 @@ class DriveHeader extends React.PureComponent {
     return (
       <div style={{ height: 48, display: 'flex', alignItems: 'center', width: '100%' }}>
         <div style={{ flex: '0 0 104px' }} />
-        <div style={{ flex: '0 0 300px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
+        <div style={{ flex: '0 0 300px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)', marginRight: 24 }}>
           名称
         </div>
         <div style={{ flex: '0 0 480px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
@@ -70,9 +70,10 @@ class DriveRow extends React.PureComponent {
         <div style={{ flex: '0 0 32px' }} />
         <div
           style={{
-            flex: '0 0 300px',
+            width: 300,
             fontSize: 16,
             color: 'rgba(0,0,0,0.87)',
+            marginRight: 24,
             overflow: 'hidden',
             whiteSpace: 'nowrap',
             textOverflow: 'ellipsis'
@@ -82,7 +83,7 @@ class DriveRow extends React.PureComponent {
         </div>
         <div
           style={{
-            flex: '0 0 480px',
+            width: 480,
             fontSize: 16,
             color: 'rgba(0,0,0,0.54)',
             overflow: 'hidden',

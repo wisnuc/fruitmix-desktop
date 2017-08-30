@@ -106,7 +106,8 @@ class DrivesDetail extends PureComponent {
           <div
             style={{
               height: 64,
-              marginLeft: 24
+              marginLeft: 24,
+              marginRight: 24
             }}
             onMouseOver={() => this.setState({ titleHover: true })}
             onMouseOut={() => this.setState({ titleHover: false })}
@@ -131,12 +132,15 @@ class DrivesDetail extends PureComponent {
                 </div> :
                 <div
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
+                    width: 312,
                     height: 32,
                     fontSize: 20,
                     fontWeight: 500,
-                    color: '#FFFFFF'
+                    marginTop: 2,
+                    color: '#FFFFFF',
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap',
+                    textOverflow: 'ellipsis'
                   }}
                   onTouchTap={() => this.setState({ modify: true })}
                 >
@@ -147,14 +151,14 @@ class DrivesDetail extends PureComponent {
             {
               <Divider
                 color="rgba(0, 0, 0, 0.87)"
-                style={{ opacity: !this.state.modify && this.state.titleHover ? 1 : 0 }}
+                style={{ opacity: !this.state.modify && this.state.titleHover ? 1 : 0, width: 312, marginTop: -2 }}
               />
             }
           </div>
         </div>
 
         {/* content */}
-        <div style={{ width: 312, height: 'calc(100% - 152px)', padding: 24, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ width: 312, height: 'calc(100% - 152px)', padding: 24 }}>
           {/* users */}
           <div
             style={{
@@ -174,7 +178,7 @@ class DrivesDetail extends PureComponent {
             />
           </div>
           <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
-          <div style={{ overflowY: 'auto', flexGrow: 1, width: 336 }}>
+          <div style={{ overflowY: 'auto', height: 'calc(100% - 126px)', width: 336 }}>
             {
               users.map(user =>
                 <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.username} >
