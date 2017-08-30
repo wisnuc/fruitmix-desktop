@@ -1,5 +1,6 @@
-import Debug from 'debug'
 import path from 'path'
+import Debug from 'debug'
+import store from '../serve/store/store'
 import { ipcMain, BrowserWindow, app, dialog } from 'electron'
 
 const debug = Debug('lib:window')
@@ -32,8 +33,8 @@ const initMainWindow = () => {
 
   let close = false
   _mainWindow.on('close', (e) => {
-    // console.log('global.configuration', global.configuration.globalConfig.getConfig().closeConfirm)
-    if (close || (global.configuration && global.configuration.globalConfig.config.closeConfirm)) return
+    // console.log('global.configuration', global.configuration.globalConfig.getConfig().noCloseConfirm)
+    if (close || (store.getState().config && store.getState().config.noCloseConfirm)) return
     dialog.showMessageBox(_mainWindow, {
       type: 'warning',
       title: '关闭应用',
@@ -44,7 +45,7 @@ const initMainWindow = () => {
     }, (response, checkboxChecked) => {
       if (response === 1 && checkboxChecked) {
         close = true
-        global.configuration.updateGlobalConfigAsync({ closeConfirm: true }).then(() => setImmediate(app.quit)).catch(e => console.log(e))
+        global.configuration.updateGlobalConfigAsync({ noCloseConfirm: true }).then(() => setImmediate(app.quit)).catch(e => console.log(e))
       } else if (response === 1) {
         close = true
         setImmediate(app.quit)
@@ -87,5 +88,11 @@ const openNewWindow = (title, url) => {
 ipcMain.on('newWebWindow', (event, title, url) => openNewWindow(title, url))
 
 ipcMain.on('POWEROFF', () => app.quit())
+
+ipcMain.on('SETCONFIG', (event, args) => {
+  console.log('SETCONFIG:', args)
+  global.configuration.updateGlobalConfigAsync(args)
+    .catch(e => console.log('SETCONFIG error', e))
+})
 
 export { initMainWindow, getMainWindow }

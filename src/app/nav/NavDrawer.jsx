@@ -234,7 +234,7 @@ class NavDrawer extends React.Component {
           text="客户端设置"
           primaryColor={primaryColor}
           selected={views[nav].navGroup() === 'settings'}
-          onTouchTap={() => navTo('clientUpdate')}
+          onTouchTap={() => navTo('clientSettings')}
         />
 
         <div style={{ height: 4 }} />

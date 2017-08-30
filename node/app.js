@@ -58,7 +58,6 @@ app.on('ready', () => {
       initMainWindow()
     }
   })
-
   global.configuration = configuration
 })
 

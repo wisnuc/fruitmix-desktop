@@ -40,3 +40,9 @@ ipcRenderer.on('CONFIG_LOADED', (event, config) => {
   global.config = config
   render()
 })
+
+ipcRenderer.on('CONFIG_UPDATE', (event, config) => {
+  console.log('CONFIG_UPDATE', config)
+  global.config = config
+  render()
+})
