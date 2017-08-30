@@ -80,13 +80,26 @@ const download = (url, filePath) => {
   handle.pipe(stream)
   return promise
 }
+const compareVerison = (a, b) => {
+  const aArray = a.split('.')
+  const bArray = b.split('.')
+
+  const len = Math.min(aArray.length, bArray.length)
+  for (let i = 0; i < len; i++) {
+    if (parseInt(aArray[i], 10) > parseInt(bArray[i], 10)) return 1
+    if (parseInt(aArray[i], 10) < parseInt(bArray[i], 10)) return -1
+  }
+  if (aArray.length > bArray.length) return 1
+  if (aArray.length < bArray.length) return -1
+  return 0
+}
 
 const downloadAsync = async () => {
   if (os.platform() !== 'win32' && os.platform() !== 'darwin') return
   const { filePath, url, rel, fileName } = await checkAsync()
   console.log('downloadAsync: check release')
   const currVersion = app.getVersion()
-  if (rel.name.localeCompare(currVersion) < 0) return
+  if (compareVerison(currVersion, rel.name) < 0) return
   try {
     await fs.accessAsync(filePath)
   } catch (error) {
