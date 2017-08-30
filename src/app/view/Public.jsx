@@ -217,7 +217,7 @@ class Public extends Home {
     )
   }
 
-  renderContent({ navTo, toggleDetail, openSnackBar }) {
+  renderContent({ navTo, toggleDetail, openSnackBar, getDetailStatus }) {
     debug('renderContent public', this.state.contextMenuOpen, !this.state.inRoot, this.state.contextMenuY, this.state.contextMenuX)
 
     /* loading data */
@@ -246,7 +246,7 @@ class Public extends Home {
           gridView={this.state.gridView}
         />
 
-        { this.renderMenu(!!this.state.contextMenuOpen && !this.state.inRoot, toggleDetail) }
+        { this.renderMenu(!!this.state.contextMenuOpen && !this.state.inRoot, toggleDetail, getDetailStatus) }
 
         { this.renderDialogs(openSnackBar) }
 

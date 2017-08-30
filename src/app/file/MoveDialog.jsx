@@ -11,6 +11,7 @@ import Promise from 'bluebird'
 import request from 'superagent'
 import sanitize from 'sanitize-filename'
 import FlatButton from '../common/FlatButton'
+import { ShareDisk } from '../common/Svg'
 
 Promise.promisifyAll(request)
 
@@ -37,9 +38,11 @@ class Row extends React.PureComponent {
       >
         <div style={{ margin: '0 12px 0 12px', display: 'flex' }}>
           {
-            node.type === 'file' ?
-              <EditorInsertDriveFile style={{ color: 'rgba(0,0,0,0.54)' }} /> :
-              <FileFolder style={{ color: 'rgba(0,0,0,0.54)' }} />
+            node.type === 'file'
+            ? <EditorInsertDriveFile style={{ color: 'rgba(0,0,0,0.54)' }} />
+            : node.type === 'public' || node.type === 'publicRoot'
+            ? <ShareDisk style={{ color: 'rgba(0,0,0,0.54)' }} />
+            : <FileFolder style={{ color: 'rgba(0,0,0,0.54)' }} />
           }
         </div>
         <div
@@ -82,7 +85,7 @@ class MoveDialog extends React.PureComponent {
     this.state = {
       list: this.props.entries,
       currentDir: Object.assign({}, this.path[this.path.length - 1], { type: 'directory' }),
-      path: [{ name: '我的所有文件', uuid: this.path[0].uuid, type: 'root' }, ...this.path],
+      path: [{ name: '我的盒子', uuid: this.path[0].uuid, type: 'root' }, ...this.path],
       loading: false,
       currentSelectedIndex: -1,
       errorText: '',
@@ -384,7 +387,7 @@ class MoveDialog extends React.PureComponent {
       : type === 'publicRoot'
       ? '共享盘'
       : type === 'root'
-      ? '所有文件'
+      ? '我的盒子'
       : this.state.currentDir.name || this.state.currentDir.label
   }
 

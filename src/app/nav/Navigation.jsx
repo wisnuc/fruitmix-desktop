@@ -94,6 +94,7 @@ class NavViews extends Component {
     })
 
     this.toggleDetailBound = this.toggleDetail.bind(this)
+    this.getDetailStatusBound = this.getDetailStatus.bind(this)
     this.openDrawerBound = this.openDrawer.bind(this)
     this.openSnackBarBound = this.openSnackBar.bind(this)
   }
@@ -143,6 +144,10 @@ class NavViews extends Component {
 
   toggleDetail() {
     this.setState({ showDetail: !this.state.showDetail })
+  }
+
+  getDetailStatus() {
+    return this.state.showDetail
   }
 
   openSnackBar(message) {
@@ -428,7 +433,8 @@ class NavViews extends Component {
                 view.renderContent({
                   navTo: this.navTo.bind(this),
                   toggleDetail: this.toggleDetailBound,
-                  openSnackBar: this.openSnackBarBound
+                  openSnackBar: this.openSnackBarBound,
+                  getDetailStatus: this.getDetailStatusBound
                 })
               }
             </div>

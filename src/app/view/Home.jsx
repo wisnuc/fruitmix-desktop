@@ -487,7 +487,7 @@ class Home extends Base {
     )
   }
 
-  renderMenu(open, toggleDetail) {
+  renderMenu(open, toggleDetail, getDetailStatus) {
     // debug('renderMenu', open, this.state.contextMenuY, this.state.contextMenuX)
     return (
       <ContextMenu
@@ -545,7 +545,7 @@ class Home extends Base {
                 <div style={{ height: 8 }} />
                 <MenuItem
                   leftIcon={<InfoIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                  primaryText="详细信息"
+                  primaryText={getDetailStatus() ? '关闭详情' : '详细信息'}
                   onTouchTap={toggleDetail}
                 />
                 {
@@ -572,7 +572,7 @@ class Home extends Base {
     )
   }
 
-  renderContent({ toggleDetail, openSnackBar, navTo }) {
+  renderContent({ toggleDetail, openSnackBar, navTo, getDetailStatus }) {
     // debug('renderContent', this.state, this.select.state)
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -594,7 +594,7 @@ class Home extends Base {
           gridView={this.state.gridView}
         />
 
-        { this.renderMenu(this.state.contextMenuOpen, toggleDetail) }
+        { this.renderMenu(this.state.contextMenuOpen, toggleDetail, getDetailStatus) }
 
         { this.renderDialogs(openSnackBar, navTo) }
 
