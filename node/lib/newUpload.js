@@ -79,7 +79,7 @@ const readUploadInfo = (entries, dirUUID, driveUUID) => {
 const uploadHandle = (event, args) => {
   const { driveUUID, dirUUID, type, filters } = args
   const dialogType = type === 'folder' ? 'openDirectory' : 'openFile'
-  dialog.showOpenDialog({ properties: [dialogType, 'multiSelections'], filters }, (entries) => {
+  dialog.showOpenDialog(getMainWindow(), { properties: [dialogType, 'multiSelections'], filters }, (entries) => {
     if (!entries || !entries.length) return debug('no entry !')
     // readDir.push({ entries, dirUUID, driveUUID })
     readUploadInfo(entries, dirUUID, driveUUID)
