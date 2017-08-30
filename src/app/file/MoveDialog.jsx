@@ -473,11 +473,13 @@ class MoveDialog extends React.PureComponent {
             this.state.loading
               ? <CircularProgress />
               : this.state.cnf
-              ? <div style={{ fontSize: 14 }}>
-                { `在“${this.state.currentSelectedIndex > -1
+              ? <div style={{ fontSize: 14, width: 288, margin: 24, textAlign: 'center', wordWrap: 'break-word' }}>
+                {
+                  `在“${this.state.currentSelectedIndex > -1
                     ? this.state.list[this.state.currentSelectedIndex].name
-                    : this.renderCurrentDir()}”中创建新文件夹`
-                } </div>
+                      : this.renderCurrentDir()}”中创建新文件夹`
+                }
+              </div>
               : <div style={{ height: '100%', width: '100%' }}>
                 {
                   this.state.list.length ? this.state.list.map((item, index) => (

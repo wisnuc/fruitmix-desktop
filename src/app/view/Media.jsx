@@ -352,7 +352,11 @@ class Media extends Base {
       if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
       this.uploadMediaAsync().catch((e) => {
         debug('上传失败', e)
-        this.ctx.openSnackBar('上传失败！')
+        if (e && e.response && e.response.body && e.response.body.code === 'EEXIST') {
+          this.ctx.openSnackBar('无法创建目录‘上传的照片/来自个人电脑‘，可能存在重名文件！')
+        } else {
+          this.ctx.openSnackBar('上传失败！')
+        }
       })
     }
   }
