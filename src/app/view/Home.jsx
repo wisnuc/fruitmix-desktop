@@ -138,11 +138,14 @@ class Home extends Base {
       const dirUUID = path[path.length - 1].uuid
       const driveUUID = this.state.path[0].uuid
 
+      const op = []
       for (let i = 0; i < selected.length; i++) {
         const entryName = entries[selected[i]].name
         const entryUUID = entries[selected[i]].uuid
-        await this.ctx.props.apis.requestAsync('deleteDirOrFile', { driveUUID, dirUUID, entryName, entryUUID })
+        op.push({ driveUUID, dirUUID, entryName, entryUUID })
       }
+
+      await this.ctx.props.apis.requestAsync('deleteDirOrFile', op)
 
       if (this.state.path[this.state.path.length - 1].uuid === dirUUID) {
         await this.ctx.props.apis.requestAsync('listNavDir', { driveUUID: this.state.path[0].uuid, dirUUID })
@@ -177,12 +180,11 @@ class Home extends Base {
       }
     }
 
-    this.refresh = ({ fileName }) => {
-      debug('this.refresh', fileName)
+    this.refresh = (op) => {
       const rUUID = this.state.path[0].uuid
       const dUUID = this.state.path[this.state.path.length - 1].uuid
       this.ctx.props.apis.request('listNavDir', { driveUUID: rUUID, dirUUID: dUUID })
-      if (fileName) this.setState({ scrollTo: fileName })
+      if (op && op.fileName) this.setState({ scrollTo: op.fileName })
     }
 
     this.showContextMenu = (clientX, clientY) => {
@@ -196,7 +198,7 @@ class Home extends Base {
       const maxTop = containerDom.offsetTop + containerDom.offsetHeight - adjust
       const y = clientY > maxTop ? maxTop : clientY
       this.setState({
-        contextMenuOpen: !this.state.inRoot, //not show menu in Public root
+        contextMenuOpen: !this.state.inRoot, // not show menu in Public root
         contextMenuX: x,
         contextMenuY: y
       })
@@ -575,7 +577,7 @@ class Home extends Base {
   }
 
   renderContent({ toggleDetail, openSnackBar, navTo, getDetailStatus }) {
-    debug('renderContent', this.state, this.select.state)
+    // debug('renderContent', this.state, this.select.state)
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
 
