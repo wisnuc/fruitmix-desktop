@@ -244,6 +244,7 @@ class Public extends Home {
           sortType={this.state.sortType}
           changeSortType={this.changeSortType}
           gridView={this.state.gridView}
+          scrollTo={this.state.scrollTo}
         />
 
         { this.renderMenu(!!this.state.contextMenuOpen && !this.state.inRoot, toggleDetail, getDetailStatus) }

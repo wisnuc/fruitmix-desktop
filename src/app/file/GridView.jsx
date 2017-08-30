@@ -314,7 +314,6 @@ class GridView extends React.Component {
             // debug('gridInfo', allHeight, this.props.entries.length)
             
             /* To get row index of scrollToRow */
-            debug('gridInfo', this.mapData)
             this.mapDate = mapData
 
             const estimatedRowSize = rowHeightSum / allHeight.length
