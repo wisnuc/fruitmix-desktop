@@ -26,7 +26,15 @@ class MDNS {
 
   scan() {
     this.session = UUID.v4()
+    console.log('mdns store', this.store)
+    const manual = this.store.find(s => s && s.domain === 'manual')
     this.store.length = 0
+    if (manual && this.pre !== manual) {
+      this.store.push(manual)
+      this.pre = manual
+    } else {
+      this.pre = null
+    }
     this.ipc.send('MDNS_SCAN', this.session)
     // console.log('start new mdns scan session ', this.session)
   }
