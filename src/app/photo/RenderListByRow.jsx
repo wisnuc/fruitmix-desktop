@@ -46,7 +46,7 @@ class RenderListByRow extends React.Component {
   }
 
   render() {
-    const { list, lookPhotoDetail, isScrolling } = this.props
+    const { list, lookPhotoDetail, isScrolling, rowSum } = this.props
     const { photos, first, date } = list
     const selected = this.props.selectedItems.length > 0
     return (
@@ -87,7 +87,7 @@ class RenderListByRow extends React.Component {
           </div>
         }
         <div style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start' }}>
-          { isScrolling ?
+          { isScrolling && rowSum > 500 ?
             photos.map(photo => (
               <div
                 style={{ width: 210, height: 210, marginRight: 8, marginBottom: 8, backgroundColor: '#eeeeee' }}

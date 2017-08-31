@@ -107,13 +107,16 @@ class Home extends Base {
       const curr = path[path.length - 1]
       const oldName = entries[selected[0]].name
       // const num = oldName.replace(/\([0-9]+\)/,'')
-      let extension = oldName.replace(/^.*\./, '')
-      let newName
-      if (!extension || extension === oldName) {
-        newName = `${oldName}(copy)`
-      } else {
-        const pureName = oldName.match(/^.*\./)[0]
-        newName = `${pureName.slice(0, pureName.length - 1)}(copy).${extension}`
+      const extension = oldName.replace(/^.*\./, '')
+      let newName = oldName
+      for (let i = 0; entries.findIndex(e => e.name === newName) > -1; i++) {
+        const addText = i ? ` - 副本 (${i})` : ' - 副本'
+        if (!extension || extension === oldName) {
+          newName = `${oldName}${addText}`
+        } else {
+          const pureName = oldName.match(/^.*\./)[0]
+          newName = `${pureName.slice(0, pureName.length - 1)}${addText}.${extension}`
+        }
       }
       const args = {
         driveUUID: path[0].uuid,

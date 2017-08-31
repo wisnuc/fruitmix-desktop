@@ -184,7 +184,7 @@ class DetailContainerInline extends React.Component {
 
     /* change image */
     this.changeIndex = (direction) => {
-      // debug('this.changeIndex', direction, this)
+      // debug('this.changeIndex before', direction, this.leftItem, this.centerItem, this.rightItem)
       if (direction === 'right' && this.currentIndex < this.props.items.length - 1) {
         this.currentIndex += 1
 
@@ -197,14 +197,14 @@ class DetailContainerInline extends React.Component {
             const max = this.props.items.length - 1
             if (!i) {
               this.leftItem = this.currentIndex < max ? this.props.items[this.currentIndex + 1] : {}
-              this.centerItem = this.currentIndex < max - 1 ? this.props.items[this.currentIndex + 2] : {}
+              this.centerItem = this.props.items[this.currentIndex - 1]
               this.rightItem = this.currentIndex < max + 1 ? this.props.items[this.currentIndex] : {}
             } else if (i === 1) {
               this.leftItem = this.currentIndex < max + 1 ? this.props.items[this.currentIndex] : {}
               this.centerItem = this.currentIndex < max ? this.props.items[this.currentIndex + 1] : {}
-              this.rightItem = this.currentIndex < max - 1 ? this.props.items[this.currentIndex + 2] : {}
+              this.rightItem = this.props.items[this.currentIndex - 1]
             } else {
-              this.leftItem = this.currentIndex < max - 1 ? this.props.items[this.currentIndex + 2] : {}
+              this.leftItem = this.props.items[this.currentIndex - 1]
               this.centerItem = this.currentIndex < max + 1 ? this.props.items[this.currentIndex] : {}
               this.rightItem = this.currentIndex < max ? this.props.items[this.currentIndex + 1] : {}
             }
@@ -231,14 +231,14 @@ class DetailContainerInline extends React.Component {
             if (!i) {
               this.leftItem = this.currentIndex > 0 ? this.props.items[this.currentIndex - 1] : {}
               this.centerItem = this.currentIndex > -1 ? this.props.items[this.currentIndex] : {}
-              this.rightItem = this.currentIndex > 1 ? this.props.items[this.currentIndex - 2] : {}
+              this.rightItem = this.props.items[this.currentIndex + 1]
             } else if (i === 1) {
-              this.leftItem = this.currentIndex > 1 ? this.props.items[this.currentIndex - 2] : {}
+              this.leftItem = this.props.items[this.currentIndex + 1]
               this.centerItem = this.currentIndex > 0 ? this.props.items[this.currentIndex - 1] : {}
               this.rightItem = this.currentIndex > -1 ? this.props.items[this.currentIndex] : {}
             } else {
               this.leftItem = this.currentIndex > -1 ? this.props.items[this.currentIndex] : {}
-              this.centerItem = this.currentIndex > 1 ? this.props.items[this.currentIndex - 2] : {}
+              this.centerItem = this.props.items[this.currentIndex + 1]
               this.rightItem = this.currentIndex > 0 ? this.props.items[this.currentIndex - 1] : {}
             }
             this[`refPreview_${i}`].style.opacity = 0
