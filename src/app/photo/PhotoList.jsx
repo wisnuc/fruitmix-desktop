@@ -109,7 +109,7 @@ class PhotoList extends React.Component {
         /* convert currentScrollTop to currentIndex */
         const currentScrollTop = Math.round((this.maxScrollTop * percentage / 1000))
         const currentIndex = this.indexHeightSum.findIndex(data => data > currentScrollTop + 200)
-        this.date = this.photoMapDates[currentIndex].date
+        if (currentIndex > -1) this.date = this.photoMapDates[currentIndex].date
 
         /* change cursor */
         if (this.refBackground) {
@@ -245,6 +245,7 @@ class PhotoList extends React.Component {
               const rowRenderer = ({ key, index, style, isScrolling }) => (
                 <div key={key} style={style} >
                   <RenderListByRow
+                    rowSum={this.photoMapDates.length}
                     lookPhotoDetail={this.props.lookPhotoDetail}
                     isScrolling={isScrolling}
                     list={this.photoMapDates[index]}

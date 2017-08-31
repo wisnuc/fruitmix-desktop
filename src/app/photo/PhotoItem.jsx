@@ -217,16 +217,25 @@ class PhotoItem extends React.Component {
             onMouseMove={this.mouseEnter}
             onMouseLeave={this.mouseLeave}
           >
-            {
-              this.path &&
-                <img
-                  src={this.path}
-                  alt="img"
-                  height={this.state.selected ? 180 : 210}
-                  width={this.state.selected ? 180 : 210}
-                  style={{ objectFit: 'cover', transition: 'all 225ms cubic-bezier(0.0, 0.0, 0.2, 1)' }}
-                />
-            }
+            <img
+              src={this.path}
+              alt="img"
+              height={this.state.selected ? 180 : 210}
+              width={this.state.selected ? 180 : 210}
+              style={{ objectFit: 'cover' }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                height: '100%',
+                width: '100%',
+                top: 0,
+                left: 0,
+                opacity: this.path ? 0 : 1,
+                backgroundColor: '#eeeeee',
+                transition: 'all 225ms cubic-bezier(0.0, 0.0, 0.2, 1)'
+              }}
+            />
           </div>
 
           {/* render Shift Blue Hover */}

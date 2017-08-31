@@ -64,57 +64,57 @@ class AssistantApp extends PhotoApp {
         </div>
 
         {/* PhotoList */}
-        <div style={{ height: 580, marginLeft: 80, display: this.state.showPhotos ? '' : 'none' }}>
+        <div style={{ height: 'calc(100% - 120px)', marginLeft: 80, display: this.state.showPhotos ? '' : 'none' }}>
           {
             !this.props.media ?
-            <div
-              style={{
-                position: 'relative',
-                marginTop: -7,
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <CircularProgress />
-            </div> :
+              <div
+                style={{
+                  position: 'relative',
+                  marginTop: -7,
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <CircularProgress />
+              </div> :
             this.props.media.length ?
-            <PhotoList
-              style={{
-                position: 'relative',
-                marginTop: -7,
-                width: '100%',
-                height: '100%',
-                backgroundColor: '#FFFFFF',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-              setPhotoInfo={this.props.setPhotoInfo}
-              media={this.props.media}
-              lookPhotoDetail={this.lookPhotoDetail}
-              getTimeline={this.props.getTimeline}
-              ipcRenderer={this.props.ipcRenderer}
-              addListToSelection={this.props.addListToSelection}
-              removeListToSelection={this.props.removeListToSelection}
-              memoize={this.props.memoize}
-              selectedItems={this.props.selectedItems}
-              getHoverPhoto={this.props.getHoverPhoto}
-              shiftStatus={this.props.shiftStatus}
-              headerHeight={186}
-            /> :
-            <div
-              style={{
-                position: 'relative',
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >没有照片！</div>
+              <PhotoList
+                style={{
+                  position: 'relative',
+                  marginTop: -7,
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: '#FFFFFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                setPhotoInfo={this.props.setPhotoInfo}
+                media={this.props.media}
+                lookPhotoDetail={this.lookPhotoDetail}
+                getTimeline={this.props.getTimeline}
+                ipcRenderer={this.props.ipcRenderer}
+                addListToSelection={this.props.addListToSelection}
+                removeListToSelection={this.props.removeListToSelection}
+                memoize={this.props.memoize}
+                selectedItems={this.props.selectedItems}
+                getHoverPhoto={this.props.getHoverPhoto}
+                shiftStatus={this.props.shiftStatus}
+                headerHeight={186}
+              /> :
+              <div
+                style={{
+                  position: 'relative',
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >没有照片！</div>
           }
         </div>
 

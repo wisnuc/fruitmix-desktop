@@ -51,8 +51,7 @@ class ContainerOverlayInline extends React.Component {
 
         /* hidden left div which move 200%, show other divs */
         for (let i = 0; i < 3; i++) {
-          if (this[`refPreview_${i}`].style.left === '-100%') {
-            this[`refPreview_${i}`].style.opacity = 0
+          if (this[`refPreview_${i}`].style.left === '-20%') {
             /* update div content */
             let item = {}
             if (this.currentIndex < this.props.items.length - 1) item = this.props.items[this.currentIndex + 1]
@@ -63,8 +62,14 @@ class ContainerOverlayInline extends React.Component {
             } else {
               this.rightItem = item
             }
-          } else {
+            this[`refPreview_${i}`].style.opacity = 0
+            this[`refPreview_${i}`].style.zIndex = 0
+          } else if (this[`refPreview_${i}`].style.left === '20%') {
             this[`refPreview_${i}`].style.opacity = 1
+            this[`refPreview_${i}`].style.zIndex = 1
+          } else {
+            this[`refPreview_${i}`].style.opacity = 0
+            this[`refPreview_${i}`].style.zIndex = 0
           }
         }
         const tmp = this.refPreview_2.style.left
@@ -77,7 +82,7 @@ class ContainerOverlayInline extends React.Component {
         /* hidden right div which move 200%, show other divs */
         debug('direction === left', this.leftItem, this.centerItem, this.rightItem)
         for (let i = 0; i < 3; i++) {
-          if (this[`refPreview_${i}`].style.left === '100%') {
+          if (this[`refPreview_${i}`].style.left === '20%') {
             /* update div content */
             let item = {}
             if (this.currentIndex) item = this.props.items[this.currentIndex - 1]
@@ -89,8 +94,13 @@ class ContainerOverlayInline extends React.Component {
               this.rightItem = item
             }
             this[`refPreview_${i}`].style.opacity = 0
-          } else {
+            this[`refPreview_${i}`].style.zIndex = 0
+          } else if (this[`refPreview_${i}`].style.left === '-20%') {
             this[`refPreview_${i}`].style.opacity = 1
+            this[`refPreview_${i}`].style.zIndex = 1
+          } else {
+            this[`refPreview_${i}`].style.opacity = 0
+            this[`refPreview_${i}`].style.zIndex = 0
           }
         }
         const tmp = this.refPreview_0.style.left
@@ -243,10 +253,12 @@ class ContainerOverlayInline extends React.Component {
                 style={{
                   position: 'absolute',
                   top: 0,
-                  left: index ? index === 1 ? 0 : '100%' : '-100%',
+                  left: index ? index === 1 ? 0 : '20%' : '-20%',
+                  opacity: index === 1 ? 1 : 0,
+                  zIndex: index === 1 ? 1 : 0,
                   height: '100%',
                   width: '100%',
-                  transition: 'left 225ms cubic-bezier(0.0, 0.0, 0.2, 1)'
+                  transition: 'all 200ms cubic-bezier(0.0, 0.0, 0.2, 1)'
                 }}
               >
                 <Preview
@@ -266,6 +278,7 @@ class ContainerOverlayInline extends React.Component {
             <div
               style={{
                 position: 'fixed',
+                zIndex: 100,
                 top: 0,
                 left: 0,
                 width: this.state.detailInfo ? 'calc(100% - 376px)' : 'calc(100% - 16px)',
@@ -341,6 +354,7 @@ class ContainerOverlayInline extends React.Component {
               backgroundColor: 'rgba(66, 66, 66, 0.541176)',
               position: 'absolute',
               borderRadius: 28,
+              zIndex: 100,
               width: 56,
               height: 56,
               left: '2%'
@@ -363,6 +377,7 @@ class ContainerOverlayInline extends React.Component {
               backgroundColor: 'rgba(66, 66, 66, 0.541176)',
               borderRadius: 28,
               position: 'absolute',
+              zIndex: 100,
               width: 56,
               height: 56,
               right: '2%'

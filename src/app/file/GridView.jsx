@@ -65,11 +65,11 @@ class Row extends React.PureComponent {
   }
 
   render() {
-    const { select, list, primaryColor, sortType, changeSortType } = this.props
+    const { select, list, primaryColor, sortType, changeSortType, isScrolling, rowSum } = this.props
 
     const h = this.headers.find(header => header.title === this.state.type) || this.headers[0]
 
-    // debug('sortType', sortType, this.state)
+    debug('sortType', sortType, this.state, this.props)
     return (
       <div style={{ height: '100%', width: '100%', marginLeft: 52 }} >
         {/* header */}
@@ -158,7 +158,7 @@ class Row extends React.PureComponent {
                     entry.type === 'file' &&
                       <div style={{ height: 136, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                         {
-                          entry.metadata
+                          (rowSum < 500 || !isScrolling) && entry.metadata
                           ? <Thumb
                             digest={entry.hash}
                             ipcRenderer={this.props.ipcRenderer}
@@ -323,6 +323,7 @@ class GridView extends React.Component {
               <div key={key} style={style} >
                 <Row
                   {...this.props}
+                  rowSum={mapData.length}
                   isScrolling={isScrolling}
                   list={mapData[index]}
                   onRowTouchTap={this.props.onRowTouchTap}

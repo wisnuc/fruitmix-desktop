@@ -40,20 +40,29 @@ class PhotoDetail extends React.Component {
         clearTimeout(this.time)
         this.session = ''
         this.time = setTimeout(() => {
-          this.refTransition.style.transform = this.degRotate
-          this.setState({ detailPath: path })
+          if (this.digest !== this.props.item.hash) {
+            this.setState({ detailPath: '', thumbPath: '' })
+          } else {
+            this.refTransition.style.transform = this.degRotate
+            this.setState({ detailPath: path })
+          }
         }, 200)
       }
     }
 
     /* update thumbnail */
     this.updateThumbPath = (event, session, path) => {
+      if (this.digest !== this.props.item.hash) {
+        this.session = ''
+        this.setState({ detailPath: '', thumbPath: '' })
+        return
+      }
       if (this.session === session) {
-        /* get detail image */
-        this.props.ipcRenderer.send('mediaShowImage', this.session, this.digest)
-
         /* update thumbPath */
-        this.setState({ thumbPath: path, detailPath: '' })
+        this.setState({ thumbPath: path, detailPath: '' }, () => {
+          /* get detail image */
+          this.props.ipcRenderer.send('mediaShowImage', this.session, this.digest)
+        })
       }
     }
 
