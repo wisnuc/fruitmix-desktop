@@ -118,7 +118,6 @@ class Preview extends React.Component {
       })
       this.props.ipcRenderer.on('TEMP_DOWNLOAD_SUCCESS', this.downloadSuccess)
     }
-
   }
 
   renderPhoto(hash, metadata) {
@@ -136,7 +135,7 @@ class Preview extends React.Component {
     if (this.name === this.props.item.name && this.state.filePath) {
       return (
         <div
-          style={{ height: '100%', width: '61.8%', backgroundColor: '#FFFFFF' }}
+          style={{ height: '80%', width: '80%', backgroundColor: '#FFFFFF' }}
           onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
         >
           <iframe
@@ -151,6 +150,30 @@ class Preview extends React.Component {
     }
 
     debug('before this.startDownload()', this.props.item.name, this.name, this.session)
+    if (!this.session) {
+      this.name = this.props.item.name
+      this.startDownload()
+      this.state = Object.assign({}, this.state, { filePath: '', pages: null })
+    }
+    return (
+      <CircularProgress size={64} thickness={5} />
+    )
+  }
+
+  renderVideo() {
+    if (this.name === this.props.item.name && this.state.filePath) {
+      return (
+        <div
+          style={{ width: '80%', backgroundColor: 'rgba(0,0,0,0)' }}
+          onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
+        >
+          <video width="100%" height="100%" controls >
+            <source src={this.state.filePath} />
+          </video>
+        </div>
+      )
+    }
+
     if (!this.session) {
       this.name = this.props.item.name
       this.startDownload()
@@ -204,7 +227,7 @@ class Preview extends React.Component {
     if (this.name === this.props.item.name && this.state.filePath) {
       return (
         <div
-          style={{ height: '100%', width: '61.8%', overflowY: 'auto', overflowX: 'hidden' }}
+          style={{ height: '80%', width: '80%', overflowY: 'auto', overflowX: 'hidden' }}
           onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
         >
           <PDF url={this.state.filePath} onComplete={pages => this.setState({ pages })} onError={e => debug(e)}>
@@ -233,9 +256,11 @@ class Preview extends React.Component {
   render() {
     if (!this.props.item || !this.props.item.name) return (<div />)
     const extension = this.props.item.name.replace(/^.*\./, '').toUpperCase()
-    const textExtension = ['TXT', 'MD', 'JS', 'JSX', 'HTML']
+    const textExtension = ['TXT', 'MD', 'JS', 'JSX', 'HTML', 'MP4']
+    const videoExtension = ['MP4', 'MOV', 'AVI', 'MKV']
 
     const isText = textExtension.findIndex(t => t === extension) > -1 && this.props.item.size < 1024 * 1024
+    const isVideo = videoExtension.findIndex(t => t === extension) > -1 && this.props.item.size < 1024 * 1024 * 50
 
     const isPDF = extension === 'PDF' && this.props.item.size < 1024 * 1024 * 50
     return (
@@ -251,7 +276,8 @@ class Preview extends React.Component {
       >
         { isText ? this.renderText() : this.props.item.metadata
             ? this.renderPhoto(this.props.item.hash, this.props.item.metadata) : isPDF
-            ? this.renderPDF() : this.renderOtherFiles() }
+            ? this.renderPDF() : isVideo
+            ? this.renderVideo() : this.renderOtherFiles() }
 
         {/* dialog */}
         <DialogOverlay open={this.state.alert} >
