@@ -1,7 +1,7 @@
 import Debug from 'debug'
 import React, { Component, PureComponent } from 'react'
 import ReactDOM from 'react-dom'
-import { FlatButton, CircularProgress, Divider, IconButton } from 'material-ui'
+import { FlatButton, CircularProgress, Divider, IconButton, TextField } from 'material-ui'
 import { indigo900, cyan500, cyan900, teal900, lightGreen900, lime900, yellow900
 } from 'material-ui/styles/colors'
 import RefreshIcon from 'material-ui/svg-icons/navigation/refresh'
@@ -12,6 +12,7 @@ import ErrorBox from './ErrorBox'
 import DeviceInfo from './ModelNameCard'
 import InitWizard from './InitWizard'
 import MaintGuide from './MaintGuide'
+import NoDevice from './NoDevice'
 
 import UsernamePassword from './UsernamePassword'
 
@@ -474,32 +475,6 @@ class Login extends StateUp(React.Component) {
     return <div style={boxStyle} />
   }
 
-  renderNoDevice() {
-    return (
-      <div>
-        <div style={{ height: 16 }} />
-        <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
-          未发现WISNUC OS设备
-        </div>
-        <div style={{ fontSize: 14, marginBottom: 12, color: 'rgba(0,0,0,0.54)' }}>
-          局域网登录仅支持同一网段的WISNUC设备登录
-        </div>
-        <div style={{ height: 24 }} />
-        <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
-          1. 请确保WISNUC设备电源开启并已连接网络
-        </div>
-        <div style={{ height: 24 }} />
-        <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
-          2. 请尝试微信扫码登录
-        </div>
-        <div style={{ height: 24 }} />
-        <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
-          3. 请刷新再次搜索
-        </div>
-      </div>
-    )
-  }
-
   render() {
     const { mdns, selectedDevice } = this.props
 
@@ -598,11 +573,13 @@ class Login extends StateUp(React.Component) {
               <div style={{ height: 8 }} />
               {/* content */}
               <div style={{ marginLeft: 24 }} >
-                { this.renderNoDevice() }
+                <NoDevice
+                  refresh={this.refresh}
+                />
               </div>
 
               {/* button */}
-              <div style={{ height: 152 }} />
+              <div style={{ height: 128 }} />
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginRight: 8 }}>
                 <FlatButton
                   label={'刷新'}
