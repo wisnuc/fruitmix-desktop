@@ -79,7 +79,7 @@ class Media extends Base {
         let lineIndex = 0
         const dateUnknown = []
         this.allPhotos.forEach((item) => {
-          if (!item.datetime || item.datetime.search(/:/g) !== 4) {
+          if (!item.datetime || item.datetime.search(/:/g) !== 4) { // only allow format: "2017:06:17 17:31:18"
             dateUnknown.push(item)
             return
           }

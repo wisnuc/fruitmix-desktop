@@ -1,24 +1,9 @@
 import React from 'react'
 import Debug from 'debug'
 import UUID from 'node-uuid'
-import prettysize from 'prettysize'
 import { IconButton, CircularProgress, RaisedButton } from 'material-ui'
-import CheckIcon from 'material-ui/svg-icons/action/check-circle'
-import DeleteIcon from 'material-ui/svg-icons/action/delete'
-import DateIcon from 'material-ui/svg-icons/action/today'
-import ImageIcon from 'material-ui/svg-icons/image/image'
-import CameraIcon from 'material-ui/svg-icons/image/camera'
-import LoactionIcon from 'material-ui/svg-icons/communication/location-on'
-import CloseIcon from 'material-ui/svg-icons/navigation/close'
-import VisibilityOff from 'material-ui/svg-icons/action/visibility-off'
 import OpenIcon from 'material-ui/svg-icons/action/open-with'
-import InfoIcon from 'material-ui/svg-icons/action/info'
 import DownloadIcon from 'material-ui/svg-icons/file/file-download'
-import RenderToLayer from 'material-ui/internal/RenderToLayer'
-import keycode from 'keycode'
-import EventListener from 'react-event-listener'
-import { TweenMax } from 'gsap'
-import ReactTransitionGroup from 'react-addons-transition-group'
 import pdfjsLib from 'pdfjs-dist'
 import PDF, { Page } from 'react-pdf-pages'
 import DialogOverlay from '../common/DialogOverlay'
@@ -27,40 +12,7 @@ import PhotoDetail from '../photo/PhotoDetail'
 
 pdfjsLib.PDFJS.workerSrc = './assets/pdf.worker.bundle.js'
 
-const debug = Debug('component:photoApp:PhotoDetail')
-
-const mousePosition = (ev) => {
-  if (ev.pageX || ev.pageY) {
-    return { x: ev.pageX, y: ev.pageY }
-  }
-  return {
-    x: ev.clientX + document.body.scrollLeft - document.body.clientLeft,
-    y: ev.clientY + document.body.scrollTop - document.body.clientTop
-  }
-}
-
-const phaseExifTime = (time, type) => {
-  const a = time.replace(/\s+/g, ':').split(':')
-  const date = new Date()
-  const week = ['日', '一', '二', '三', '四', '五', '六']
-  date.setFullYear(a[0], a[1] - 1, a[2])
-  if (type === 'date') return `${a[0]}年${a[1]}月${a[2]}日`
-  if (type === 'time') return `${a[3]} : ${a[4]}`
-  if (type === 'week') return `星期${week[date.getDay()]}`
-  return `${a[0]}年${a[1]}月${a[2]}日 星期${week[date.getDay()]} ${a[3]} : ${a[4]}`
-}
-
-const getResolution = (height, width) => {
-  let res = height * width
-  if (res > 100000000) {
-    res = Math.ceil(res / 100000000)
-    return `${res} 亿像素 ${height} x ${width}`
-  } else if (res > 10000) {
-    res = Math.ceil(res / 10000)
-    return `${res} 万像素 ${height} x ${width}`
-  }
-  return `${res} 像素 ${height} x ${width}`
-}
+const debug = Debug('component:file:preview: ')
 
 class Preview extends React.Component {
   constructor(props) {
@@ -122,7 +74,7 @@ class Preview extends React.Component {
 
   renderPhoto(hash, metadata) {
     const item = Object.assign({}, metadata, { hash })
-    return(
+    return (
       <PhotoDetail
         item={item}
         ipcRenderer={this.props.ipcRenderer}
@@ -132,55 +84,43 @@ class Preview extends React.Component {
   }
 
   renderText() {
-    if (this.name === this.props.item.name && this.state.filePath) {
-      return (
-        <div
-          style={{ height: '80%', width: '80%', backgroundColor: '#FFFFFF' }}
-          onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
-        >
-          <iframe
-            src={this.state.filePath}
-            seamless
-            width="100%"
-            height="100%"
-            frameBorder={0}
-          />
-        </div>
-      )
-    }
-
-    debug('before this.startDownload()', this.props.item.name, this.name, this.session)
-    if (!this.session) {
-      this.name = this.props.item.name
-      this.startDownload()
-      this.state = Object.assign({}, this.state, { filePath: '', pages: null })
-    }
     return (
-      <CircularProgress size={64} thickness={5} />
+      <div
+        style={{ height: '80%', width: '80%', backgroundColor: '#FFFFFF' }}
+        onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
+      >
+        <iframe
+          sandbox
+          seamless
+          width="100%"
+          height="100%"
+          frameBorder={0}
+          src={this.state.filePath}
+        />
+      </div>
     )
   }
 
   renderVideo() {
-    if (this.name === this.props.item.name && this.state.filePath) {
-      return (
-        <div
-          style={{ width: '80%', backgroundColor: 'rgba(0,0,0,0)' }}
-          onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
-        >
-          <video width="100%" height="100%" controls >
-            <source src={this.state.filePath} />
-          </video>
-        </div>
-      )
-    }
-
-    if (!this.session) {
-      this.name = this.props.item.name
-      this.startDownload()
-      this.state = Object.assign({}, this.state, { filePath: '', pages: null })
-    }
     return (
-      <CircularProgress size={64} thickness={5} />
+      <div
+        style={{ width: '80%', backgroundColor: 'rgba(0,0,0,0)' }}
+        onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
+      >
+        <video width="100%" height="100%" controls >
+          <source src={this.state.filePath} />
+        </video>
+      </div>
+    )
+  }
+
+  renderAudio() {
+    return (
+      <div onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }} >
+        <audio width="100%" height="100%" controls >
+          <source src={this.state.filePath} />
+        </audio>
+      </div>
     )
   }
 
@@ -224,22 +164,37 @@ class Preview extends React.Component {
   }
 
   renderPDF() {
+    return (
+      <div
+        style={{ height: '80%', width: '80%', overflowY: 'auto', overflowX: 'hidden' }}
+        onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
+      >
+        <PDF url={this.state.filePath} onComplete={pages => this.setState({ pages })} onError={e => debug(e)}>
+          {
+            this.state.pages &&
+            <div>
+              { this.state.pages.map(page => <Page key={page.key} page={page} onError={e => debug(e)} />)}
+            </div>
+          }
+        </PDF>
+      </div>
+    )
+  }
+
+  renderPreview() {
+    const extension = this.props.item.name.replace(/^.*\./, '').toUpperCase()
+    const textExtension = ['TXT', 'MD', 'JS', 'JSX', 'HTML', 'MP4']
+    const videoExtension = ['MP4', 'MOV', 'AVI', 'MKV']
+    const audioExtension = ['MP3', 'APE', 'FLAC', 'WMA']
+    const isText = textExtension.findIndex(t => t === extension) > -1 && this.props.item.size < 1024 * 1024
+    const isVideo = videoExtension.findIndex(t => t === extension) > -1
+    const isAudio = audioExtension.findIndex(t => t === extension) > -1
+    const isPDF = extension === 'PDF'
+
+    if ((!isText && !isVideo && !isAudio && !isPDF) || this.props.item.size > 1024 * 1024 * 50) return this.renderOtherFiles()
+
     if (this.name === this.props.item.name && this.state.filePath) {
-      return (
-        <div
-          style={{ height: '80%', width: '80%', overflowY: 'auto', overflowX: 'hidden' }}
-          onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
-        >
-          <PDF url={this.state.filePath} onComplete={pages => this.setState({ pages })} onError={e => debug(e)}>
-            {
-              this.state.pages &&
-              <div>
-                { this.state.pages.map(page => <Page key={page.key} page={page} onError={e => debug(e)} />)}
-              </div>
-            }
-          </PDF>
-        </div>
-      )
+      return isVideo ? this.renderVideo() : isPDF ? this.renderPDF() : isAudio ? this.renderAudio() : this.renderText()
     }
 
     // debug('before this.startDownload()', this.props.item.name, this.name, this.session)
@@ -255,14 +210,7 @@ class Preview extends React.Component {
 
   render() {
     if (!this.props.item || !this.props.item.name) return (<div />)
-    const extension = this.props.item.name.replace(/^.*\./, '').toUpperCase()
-    const textExtension = ['TXT', 'MD', 'JS', 'JSX', 'HTML', 'MP4']
-    const videoExtension = ['MP4', 'MOV', 'AVI', 'MKV']
 
-    const isText = textExtension.findIndex(t => t === extension) > -1 && this.props.item.size < 1024 * 1024
-    const isVideo = videoExtension.findIndex(t => t === extension) > -1 && this.props.item.size < 1024 * 1024 * 50
-
-    const isPDF = extension === 'PDF' && this.props.item.size < 1024 * 1024 * 50
     return (
       <div
         ref={ref => (this.refBackground = ref)}
@@ -274,11 +222,7 @@ class Preview extends React.Component {
           justifyContent: 'center'
         }}
       >
-        { isText ? this.renderText() : this.props.item.metadata
-            ? this.renderPhoto(this.props.item.hash, this.props.item.metadata) : isPDF
-            ? this.renderPDF() : isVideo
-            ? this.renderVideo() : this.renderOtherFiles() }
-
+        { this.props.item.metadata ? this.renderPhoto(this.props.item.hash, this.props.item.metadata) : this.renderPreview() }
         {/* dialog */}
         <DialogOverlay open={this.state.alert} >
           {
