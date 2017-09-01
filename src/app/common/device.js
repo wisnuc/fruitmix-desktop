@@ -351,7 +351,7 @@ class Device extends RequestManager {
     this.manualBootAsync(args).asCallback(() => {})
   }
 
-  /*
+  /**
    probing -> wait
    starting -> wait
    systemError -> error
@@ -362,7 +362,7 @@ class Device extends RequestManager {
    failLast -> maint
    uninitialized -> init
    failNoAlt -> maint
-  */
+  **/
   systemStatus() {
     if (!this.device || !this.boot || !this.storage ||
       !this.users || this.device.isPending() || this.boot.isPending()
@@ -373,6 +373,8 @@ class Device extends RequestManager {
     }
 
     const boot = this.boot.value()
+    const storage = this.storage.value()
+    if (!boot || !storage) return 'systemError'
 
     /* normal mode */
     if (!boot.error && boot.state === 'started' && boot.current) {
@@ -392,14 +394,13 @@ class Device extends RequestManager {
     } else if (boot.error === 'ELASTNOTMOUNT' || boot.error === 'ELASTMISSING' || boot.error === 'ELASTDAMAGED') {
       return 'failLast'
     } else if (boot.error === 'ENOALT') {
-      const { volumes } = this.storage.value()
-      if (volumes.length === 0) { return 'uninitialized' }
+      const { volumes } = storage
+      if (volumes && volumes.length === 0) return 'uninitialized'
       return 'failNoAlt'
     }
 
     return 'unknownMaint'
   }
-
 }
 
 export default Device
