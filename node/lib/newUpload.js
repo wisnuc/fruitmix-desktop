@@ -4,10 +4,9 @@ import UUID from 'uuid'
 import Debug from 'debug'
 import { dialog, ipcMain } from 'electron'
 import { getMainWindow } from './window'
-import createTask, { sendMsg } from './uploadTaskCreater'
-// import { sendMsg } from './uploadTaskCreater'
-// import { createTask } from './TestCode/applyTransform'
+import { createTask, forceSchedule, abortTask } from './uploadTransform'
 import { serverGetAsync } from './server'
+import { sendMsg, Tasks } from './transmissionUpdate'
 
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
 
@@ -66,7 +65,7 @@ const readUploadInfo = (entries, dirUUID, driveUUID) => {
       getMainWindow().webContents.send('snackbarMessage', { message })
     })
     .catch((e) => {
-      debug('readUploadInfo error: ', e.code)
+      debug('readUploadInfo error: ', e)
       if (e.code === 'ECONNREFUSED') {
         getMainWindow().webContents.send('snackbarMessage', { message: '与wisnuc的连接已断开' })
       } else if (e.message !== 'cancel') {
@@ -122,13 +121,6 @@ const startTransmissionHandle = () => {
   })
 }
 
-const deleteUploadingHandle = (e, tasks) => {
-  tasks.forEach((item) => {
-    const obj = userTasks.find(task => task.uuid === item.uuid)
-    if (obj) obj.delete(cleanRecord)
-  })
-}
-
 const deleteUploadedHandle = (e, tasks) => {
   tasks.forEach((item) => {
     const obj = finishTasks.find(task => task.uuid === item.uuid)
@@ -154,23 +146,38 @@ const cleanRecord = (type, uuid) => {
 
 /* ipc listener */
 ipcMain.on('START_TRANSMISSION', startTransmissionHandle)
-ipcMain.on('GET_TRANSMISSION', sendMsg)
-ipcMain.on('DELETE_UPLOADING', deleteUploadingHandle)
+// ipcMain.on('GET_TRANSMISSION', sendMsg)
 ipcMain.on('DELETE_UPLOADED', deleteUploadedHandle)
 ipcMain.on('DRAG_FILE', dragFileHandle)
 ipcMain.on('UPLOAD', uploadHandle)
 ipcMain.on('UPLOADMEDIA', uploadMediaHandle)
 
-ipcMain.on('PAUSE_UPLOADING', (e, uuid) => {
-  if (!uuid) return
-  const task = userTasks.find(item => item.uuid === uuid)
-  if (task) { task.pauseTask() }
+ipcMain.on('DELETE_UPLOADING', (e, tasks) => {
+  return // TODO
+  tasks.forEach((item) => {
+    const obj = userTasks.find(task => task.uuid === item.uuid)
+    if (obj) obj.delete(cleanRecord)
+  })
+})
+
+ipcMain.on('PAUSE_UPLOADING', (e, uuids) => {
+  if (!Tasks.length || !uuids || !uuids.length) return
+  const abortArray = []
+  uuids.forEach((u) => {
+    const task = Tasks.find(t => t.uuid === u)
+    if (task) {
+      task.pause = true
+      abortArray.push(u)
+    }
+  })
+  abortTask(abortArray)
+  debug('PAUSE_UPLOADING', uuids.length, uuids[0])
 })
 
 ipcMain.on('RESUME_UPLOADING', (e, uuid) => {
   if (!uuid) return
-  const task = userTasks.find(item => item.uuid === uuid)
-  if (task) task.resumeTask()
+  const task = Tasks.find(item => item.uuid === uuid)
+  if (task) { task.pause = false; forceSchedule() }
 })
 
 ipcMain.on('LOGIN_OUT', (e) => {

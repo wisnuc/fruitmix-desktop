@@ -4,25 +4,32 @@ import { ipcMain, powerSaveBlocker } from 'electron'
 import child from 'child_process'
 
 import { getMainWindow } from './window'
-import { userTasks as uploadingTasks, finishTasks as uploadedTasks } from './newUpload'
-import { userTasks as downloadingTasks, finishTasks as downloadedTasks } from './newDownload'
 import TransferManager from './transferManager'
 import store from '../serve/store/store'
 
 const debug = Debug('node:lib:transmissionUpdate:')
 
+/* send message */
 let preLength = 0
 let lock = false
 let last = true
 let id = -1 // The power save blocker id returned by powerSaveBlocker.start
 
-const sendInfor = () => {
+const Tasks = []
+const sendMsg = () => {
   if (lock || !last) return (last = true)
   lock = true
-  const concatUserTasks = [].concat(uploadingTasks, downloadingTasks)
-  const concatFinishTasks = [].concat(uploadedTasks, downloadedTasks)
-  const userTasks = concatUserTasks.sort((a, b) => a.createTime - b.createTime) // Ascending
-  const finishTasks = concatFinishTasks.sort((a, b) => b.finishDate - a.finishDate) // Descending
+  const userTasks = []
+  const finishTasks = []
+  Tasks.forEach((task) => {
+    if (task.state === 'finished') {
+      finishTasks.push(task)
+    } else {
+      userTasks.push(task)
+    }
+  })
+  userTasks.sort((a, b) => a.createTime - b.createTime) // Ascending
+  finishTasks.sort((a, b) => b.finishDate - a.finishDate) // Descending
 
   if (!powerSaveBlocker.isStarted(id) && userTasks.length !== 0 && !store.getState().config.enableSleep) {
     id = powerSaveBlocker.start('prevent-display-sleep')
@@ -37,27 +44,28 @@ const sendInfor = () => {
     }
     getMainWindow().webContents.send('snackbarMessage', { message: '文件传输任务完成' })
   }
-
   preLength = userTasks.length
+
+  /* Error: Object has been destroyed */
   try {
-    getMainWindow().webContents.send(
-      'UPDATE_TRANSMISSION',
-      userTasks.map(item => item.getSummary()),
-      finishTasks.map(i => (i.getSummary ? i.getSummary() : i))
-    )
+    getMainWindow().webContents.send('UPDATE_TRANSMISSION', [...userTasks], [...finishTasks])
   } catch (error) {
-    /* Error: Object has been destroyed */
-    if (error) {
-      console.error(error)
-    }
+    console.error(error)
   }
-  setTimeout(() => { lock = false; sendInfor() }, 200)
-  // debug('sendInfor end')
+  setTimeout(() => { lock = false; sendMsg() }, 200)
   return (last = false)
 }
 
+
 // handle will open dialog from electron to clean record of the task have been downloaded
 const cleanRecordHandle = () => {
+  debug('Tasks before', Tasks.length)
+  for (let i = Tasks.length - 1; i > -1; i--) {
+    if (Tasks[i].state === 'finished') Tasks.splice(i, 1)
+  }
+  sendMsg()
+  debug('Tasks after', Tasks.length)
+  return
   if (uploadedTasks.length === 0 && downloadedTasks.length === 0) return
 
   global.db.uploaded.remove({}, { multi: true }, (err) => {
@@ -98,8 +106,10 @@ const transferHandle = (event, args) => {
   TransferManager.addTask(args)
 }
 
+ipcMain.on('GET_TRANSMISSION', sendMsg)
 ipcMain.on('OPEN_TRANSMISSION', openHandle)
 ipcMain.on('CLEAN_RECORD', cleanRecordHandle)
 ipcMain.on('TRANSFER', transferHandle)
 
-export default sendInfor
+export { Tasks, sendMsg }
+export default sendMsg

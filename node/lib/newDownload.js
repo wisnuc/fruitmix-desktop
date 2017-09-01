@@ -85,7 +85,7 @@ const tempDownloadHandle = (e, args) => {
 }
 
 ipcMain.on('START_TRANSMISSION', startTransmissionHandle)
-ipcMain.on('GET_TRANSMISSION', sendMsg)
+// ipcMain.on('GET_TRANSMISSION', sendMsg)
 ipcMain.on('DELETE_DOWNLOADING', deleteDownloadingHandle)
 ipcMain.on('DELETE_DOWNLOADED', deleteDownloadedHandle)
 ipcMain.on('DOWNLOAD', downloadHandle)

@@ -61,7 +61,7 @@ const hashFileAsync = async (absPath, size, partSize) => {
   const hashs = await Promise.all(promises)
   const fp = calcFingerprint(hashs)
   const newParts = parts.map((part, index) => Object.assign({}, part, { sha: hashs[index], fingerprint: fp[index] }))
-  console.log('hashFileAsync', newParts)
+  // console.log('hashFileAsync', newParts)
   return newParts
 }
 

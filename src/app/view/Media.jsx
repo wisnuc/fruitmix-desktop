@@ -381,7 +381,6 @@ class Media extends Base {
       return [...map.values()]
     }
 
-
     const preValue = media.value()
     const blValue = blacklist.value()
 
