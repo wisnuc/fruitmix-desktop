@@ -1,6 +1,7 @@
 import os from 'os'
 import Debug from 'debug'
 import { ipcMain, powerSaveBlocker } from 'electron'
+import child from 'child_process'
 
 import { getMainWindow } from './window'
 import { userTasks as uploadingTasks, finishTasks as uploadedTasks } from './newUpload'
@@ -80,13 +81,13 @@ const openHandle = (e, tasks) => {
     debug('打开目录的文件资源管理器', taskPath) // FIXME
     switch (osType) {
       case 'win32':
-        child_process.exec(`explorer ${taskPath}`, {})
+        child.exec(`explorer ${taskPath}`, {})
         break
       case 'linux':
-        child_process.exec(`nautilus ${taskPath}`, {})
+        child.exec(`nautilus ${taskPath}`, {})
         break
       case 'darwin':
-        child_process.exec(`open ${taskPath}`, {})
+        child.exec(`open ${taskPath}`, {})
         break
       default :
     }
