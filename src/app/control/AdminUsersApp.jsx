@@ -128,14 +128,14 @@ class AdminUsersApp extends React.Component {
         </div>
         */}
         <div style={{ flex: '0 0 50px' }}>
-          {
+          {/*
             user.isFirstUser
             ? <div />
             : <Toggle
               toggled={!user.nologin}
               onToggle={() => this.toggleDialog('disableUser', user)}
             />
-          }
+            */}
         </div>
       </div>
     )
