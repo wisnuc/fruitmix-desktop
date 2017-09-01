@@ -17,7 +17,7 @@ class FileUploadButton extends React.Component {
 
   render() {
     return (
-      <div style={{ position: 'absolute', top: -36, left: 24 }}>
+      <div style={{ position: 'absolute', top: -36, left: 24, zIndex: 1000 }}>
         <FloatingActionButton
           backgroundColor="#2196F3"
           zDepth={3}
