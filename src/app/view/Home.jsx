@@ -106,7 +106,6 @@ class Home extends Base {
       const path = this.state.path
       const curr = path[path.length - 1]
       const oldName = entries[selected[0]].name
-      // const num = oldName.replace(/\([0-9]+\)/,'')
       const extension = oldName.replace(/^.*\./, '')
       let newName = oldName
       for (let i = 0; entries.findIndex(e => e.name === newName) > -1; i++) {
@@ -557,6 +556,7 @@ class Home extends Base {
                 />
                 {
                   this.state.select && this.state.select.selected && this.state.select.selected.length === 1 &&
+                  this.state.entries[this.state.select.selected[0]].type === 'file' &&
                     <MenuItem
                       leftIcon={<CopyIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
                       primaryText="制作一个副本" onTouchTap={this.dupFile}
