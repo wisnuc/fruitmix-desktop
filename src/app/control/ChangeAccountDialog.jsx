@@ -39,7 +39,7 @@ class ChangeAccountDialog extends React.PureComponent {
         } else {
           this.props.onRequestClose(true)
           op === 'createUser' ? this.props.refreshUsers() : this.props.refresh()
-          this.props.openSnackBar('修改成功')
+          this.props.openSnackBar(op === 'createUser' ? '创建成功' : '修改成功')
         }
       }
 
