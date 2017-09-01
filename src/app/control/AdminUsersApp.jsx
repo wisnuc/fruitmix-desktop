@@ -58,6 +58,7 @@ class AdminUsersApp extends React.Component {
       this.props.apis.request('adminUpdateUsers', args, (err) => {
         if (err) {
           debug('err', args, err, err.message)
+          this.props.openSnackBar(`出现错误，请重试`)
         } else {
           this.props.refreshUsers()
           this.setState({ confirmPwd: '' })

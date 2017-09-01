@@ -32,8 +32,8 @@ class NoDevice extends React.Component {
       if (!validator.isIP(this.state.IP)) {
         this.setState({ errorText: '请输入正确的IP' })
       } else {
-        request.get(`${this.state.IP}:3000/boot`, (error) => {
-          if (!error) {
+        request.get(`${this.state.IP}:3000/boot`, (error, res) => {
+          if (!error && res && res.body && res.body.state) {
             this.updateStore()
           } else {
             this.setState({ errorText: '连接失败' })
@@ -77,7 +77,7 @@ class NoDevice extends React.Component {
             onTouchTap={this.checkIP}
             disabled={!!this.state.errorText || !this.state.IP}
           >
-            <DoneIcon primary />
+            <DoneIcon color="#006064" />
           </IconButton>
         </div>
       </div>
