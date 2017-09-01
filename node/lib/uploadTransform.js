@@ -4,7 +4,7 @@ const Promise = require('bluebird')
 const fs = Promise.promisifyAll(require('fs'))
 const path = require('path')
 const childProcess = require('child_process')
-const debug = require('debug')('node:lib:applyTransform:')
+const debug = require('debug')('node:lib:uploadTransform:')
 const request = require('request')
 
 const Transform = require('./transform')
@@ -66,7 +66,6 @@ const readDir = new Transform({
         const entry = entries[i]
         const stat = await fs.lstatAsync(path.resolve(entry))
         taskStatus.count += 1
-        if (taskStatus.type === 'file') taskStatus.size = stat.size
         if (stat.isDirectory()) {
           /* create fold and return the uuid */
           const dirname = await getName(entry, dirUUID, driveUUID)
@@ -78,6 +77,8 @@ const readDir = new Transform({
           const newEntries = []
           children.forEach(c => newEntries.push(path.join(entry, c)))
           this.push({ entries: newEntries, dirUUID: uuid, driveUUID, taskStatus })
+        } else {
+          taskStatus.size += stat.size
         }
         callback(null, { entry, dirUUID, driveUUID, stat, taskStatus })
       }
@@ -129,7 +130,13 @@ const upload = new Transform({
     if (x.type === 'folder') {
       this.root().emit('data', x)
     } else {
-      this.pending.push(x)
+      const { dirUUID, driveUUID } = x
+      const index = this.pending.findIndex(p => p[0].dirUUID === dirUUID && p[0].driveUUID === driveUUID)
+      if (index > -1 && this.pending[index].length < 100) {
+        this.pending[index].push(x)
+      } else {
+        this.pending.push([x])
+      }
       this.schedule()
     }
   },
@@ -169,60 +176,75 @@ const upload = new Transform({
     }
   },
 
-  transform: (x, callback) => {
-    const { entry, dirUUID, driveUUID, type, parts, taskStatus } = x
-    taskStatus.state = 'uploading'
+  transform: (X, callback) => {
+    debug('upload transform', X.length, X[0].dirUUID)
+
     initArgs()
-    const name = entry.replace(/^.*\//, '')
-    const readStreams = parts.map(part => fs.createReadStream(entry, { start: part.start, end: part.end, autoClose: true }))
     const op = {
-      url: `${server}/drives/${driveUUID}/dirs/${dirUUID}/entries`,
+      url: `${server}/drives/${X[0].driveUUID}/dirs/${X[0].dirUUID}/entries`,
       headers: { Authorization }
     }
 
     const handle = request.post(op, (error, response, body) => {
       if (error) return callback(error)
-      if (response && response.statusCode === 200) return callback(null, { entry, dirUUID, driveUUID, type, parts, taskStatus })
+      if (response && response.statusCode === 200) return callback(null, X)
       debug(error, response && response.statusCode, body)
       return callback(Error('respose not 200'))
     })
-    const form = handle.form()
-    x.abort = () => {
-      handle.abort()
-    }
 
-    for (let i = 0; i < parts.length; i++) {
-      const rs = readStreams[i]
-      rs.on('data', (chunk) => {
-        sendMsg()
-        if (taskStatus.pause) {
-          taskStatus.completeSize = 0
-          return
+    const form = handle.form()
+
+    // X.abort = () => { handle.abort() }
+
+    /* X: array of x which have the same driveUUID and dirUUId */
+    debug('X[2]', X[2])
+    X.forEach((x) => {
+      const { entry, parts, taskStatus } = x
+      taskStatus.state = 'uploading'
+      const name = entry.replace(/^.*\//, '')
+      const readStreams = parts.map(part => fs.createReadStream(entry, { start: part.start, end: part.end, autoClose: true }))
+      for (let i = 0; i < parts.length; i++) {
+        const rs = readStreams[i]
+        rs.on('data', (chunk) => {
+          sendMsg()
+          taskStatus.completeSize += chunk.length
+        })
+        rs.on('end', () => {
+          taskStatus.finishCount += 1
+          if (taskStatus.finishCount === taskStatus.count) {
+            taskStatus.finishDate = (new Date()).getTime()
+            taskStatus.state = 'finished'
+          }
+          sendMsg()
+        })
+        const part = parts[i]
+        let formDataOptions = {
+          size: part.end ? part.end - part.start + 1 : 0,
+          sha256: part.sha
         }
-        taskStatus.completeSize += chunk.length
-      })
-      const part = parts[i]
-      let formDataOptions = {
-        size: part.end ? part.end - part.start + 1 : 0,
-        sha256: part.sha
+        // debug('formDataOptions', i, formDataOptions.size)
+        if (part.start) formDataOptions = Object.assign(formDataOptions, { append: part.fingerprint })
+        form.append(name, rs, JSON.stringify(formDataOptions))
       }
-      debug('formDataOptions', i, formDataOptions.size)
-      if (part.start) formDataOptions = Object.assign(formDataOptions, { append: part.fingerprint })
-      form.append(name, rs, JSON.stringify(formDataOptions))
-    }
+    })
   }
 })
 
 task.pipe(readDir).pipe(hash).pipe(upload)
 
-task.on('data', (x) => {
-  x.taskStatus.finishCount += 1
-  if (x.taskStatus.finishCount === x.taskStatus.count) {
-    x.taskStatus.finishDate = (new Date()).getTime()
-    x.taskStatus.state = 'finished'
-  }
-  debug('done:', x.taskStatus.abspath)
-  sendMsg()
+task.on('data', (X) => {
+  if (!Array.isArray(X)) return
+  X.forEach((x) => {
+    /*
+    x.taskStatus.finishCount += 1
+    if (x.taskStatus.finishCount === x.taskStatus.count) {
+      x.taskStatus.finishDate = (new Date()).getTime()
+      x.taskStatus.state = 'finished'
+    }
+    */
+    debug('done:', x.taskStatus.abspath)
+    sendMsg()
+  })
 })
 
 task.on('step', () => {
