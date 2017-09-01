@@ -99,7 +99,8 @@ const downloadAsync = async () => {
   const { filePath, url, rel, fileName } = await checkAsync()
   console.log('downloadAsync: check release')
   const currVersion = app.getVersion()
-  if (compareVerison(currVersion, rel.name) < 0) return
+  if (compareVerison(currVersion, rel.name) >= 0) return console.log('already latest')
+  console.log('downloadAsync: start download...', currVersion, rel.name, compareVerison(currVersion, rel.name) < 0)
   try {
     await fs.accessAsync(filePath)
   } catch (error) {
@@ -109,7 +110,7 @@ const downloadAsync = async () => {
     const remotePath = `wisnuc_update/download/${fileName}`
     await ftpGet(remotePath, tmpPath, filePath)
   }
-  console.log('downloadAsync: download success')
+  return console.log('downloadAsync: download success')
 }
 
 downloadAsync().catch(e => console.error(e))
