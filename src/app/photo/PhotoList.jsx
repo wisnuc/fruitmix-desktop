@@ -271,7 +271,7 @@ class PhotoList extends React.Component {
                     rowCount={PhotoInfo.photoDates.length}
                     onScroll={this.onScroll}
                     scrollTop={previousScrollTop}
-                    overscanRowCount={10}
+                    overscanRowCount={4}
                     style={{ outline: 'none' }}
                   />
                 </div>
@@ -286,7 +286,7 @@ class PhotoList extends React.Component {
           style={{ position: 'absolute', height: '100%', width: 80, right: 16 }}
           onMouseLeave={() => {
             if (!this.onMouseDown) this.showDateBar(false)
-            this.scrollTop = null
+            // this.scrollTop = null
           }}
           onMouseEnter={() => this.showDateBar(true)}
           onMouseDown={() => (this.onMouseDown = true)}
