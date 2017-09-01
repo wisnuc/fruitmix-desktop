@@ -135,7 +135,7 @@ class GetThumbTask extends Worker {
     this.state = 'RUNNING'
     const fpath = path.join(this.dirpath, this.cacheName)
     fs.lstat(fpath, (err, stat) => {
-      if (err) return this.request()
+      if (err || !stat.size) return this.request()
       return this.finish(fpath)
     })
   }
