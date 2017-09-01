@@ -128,10 +128,15 @@ class TrsContainer extends React.Component {
 
     this.pauseAll = (tasks) => {
       // debug('this.pause', tasks)
+      const downloadArr = []
+      const uploadArr = []
+
       tasks.forEach((item) => {
-        if (item.trsType === 'download') ipcRenderer.send('PAUSE_DOWNLOADING', item.uuid)
-        else ipcRenderer.send('PAUSE_UPLOADING', item.uuid)
+        if (item.trsType === 'download') downloadArr.push(item.uuid)
+        else uploadArr.push(item.uuid)
       })
+      ipcRenderer.send('PAUSE_DOWNLOADING', downloadArr)
+      ipcRenderer.send('PAUSE_UPLOADING', uploadArr)
     }
 
     this.deleteAll = (tasks) => {
