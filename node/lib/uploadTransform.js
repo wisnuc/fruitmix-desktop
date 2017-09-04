@@ -1,5 +1,3 @@
-import store from '../serve/store/store'
-
 const Promise = require('bluebird')
 const fs = Promise.promisifyAll(require('fs'))
 const path = require('path')
@@ -9,19 +7,8 @@ const request = require('request')
 
 const Transform = require('./transform')
 const { readXattr, setXattr } = require('./xattr')
-const { createFoldAsync } = require('./server')
+const { createFoldAsync, UploadMultipleFiles } = require('./server')
 const { Tasks, sendMsg } = require('./transmissionUpdate')
-
-
-/* init request */
-let server
-let tokenObj
-let Authorization
-const initArgs = () => {
-  server = `http://${store.getState().login.device.mdev.address}:3000`
-  tokenObj = store.getState().login.device.token.data
-  Authorization = `${tokenObj.type} ${tokenObj.token}`
-}
 
 /* return a new file name */
 const getName = async (currPath, dirUUID, driveUUID) => currPath.replace(/^.*\//, '') // TODO
@@ -143,65 +130,11 @@ class Task {
           this.schedule()
         }
       },
-      /* targets: array of taskUUIDs which need to be aborted */
-      abort(targets) {
-        if (targets && targets.length) {
-          const aborted = []
-          targets.forEach((t) => {
-            const index = this.working.findIndex(x => x.taskStatus && x.taskStatus.uuid === t)
-            if (index > -1) {
-              const x = this.working[index]
-              if (x.taskStatus) x.taskStatus.pause = true
-              if (x.abort) {
-                debug('abort', x.taskStatus.abspath)
-                x.abort()
-                this.working.splice(index, 1)
-                aborted.push(x)
-              }
-            }
-          })
-          this.pending.unshift(...aborted)
-        }
-      },
-
-      delete(targets) {
-        debug('delete', targets)
-        if (targets && targets.length) {
-          targets.forEach((t) => {
-            let index = this.pending.findIndex(x => x.taskStatus && x.taskStatus.uuid === t)
-            if (index > -1) {
-              this.pending.splice(index, 1)
-            } else {
-              index = this.working.findIndex(x => x.taskStatus && x.taskStatus.uuid === t)
-              if (index > -1) this.working.splice(index, 1)
-            }
-          })
-        }
-      },
 
       transform: (X, callback) => {
         debug('upload transform', X.length, X[0].dirUUID)
 
-        initArgs()
-        const op = {
-          url: `${server}/drives/${X[0].driveUUID}/dirs/${X[0].dirUUID}/entries`,
-          headers: { Authorization }
-        }
-
-        const handle = request.post(op, (error, response, body) => {
-          if (error) return callback(error)
-          if (response && response.statusCode === 200) return callback(null, X)
-          debug(error, response && response.statusCode, body)
-          return callback(Error('respose not 200'))
-        })
-
-        const form = handle.form()
-
-        // X.abort = () => { handle.abort() }
-
-        /* X: array of x which have the same driveUUID and dirUUId */
-        // debug('X[2]', X[2])
-        X.forEach((x) => {
+        const Files = X.map((x) => {
           const { entry, parts, taskStatus } = x
           taskStatus.state = 'uploading'
           const name = entry.replace(/^.*\//, '')
@@ -213,6 +146,7 @@ class Task {
               taskStatus.completeSize += chunk.length
             })
             rs.on('end', () => {
+              debug('readStreams end', entry)
               taskStatus.finishCount += 1
               if (taskStatus.finishCount === taskStatus.count) {
                 taskStatus.finishDate = (new Date()).getTime()
@@ -220,16 +154,12 @@ class Task {
               }
               sendMsg()
             })
-            const part = parts[i]
-            let formDataOptions = {
-              size: part.end ? part.end - part.start + 1 : 0,
-              sha256: part.sha
-            }
-            // debug('formDataOptions', i, formDataOptions.size)
-            if (part.start) formDataOptions = Object.assign(formDataOptions, { append: part.fingerprint })
-            form.append(name, rs, JSON.stringify(formDataOptions))
           }
+          return ({ name, parts, readStreams })
         })
+        const { driveUUID, dirUUID } = X[0]
+        const handle = new UploadMultipleFiles(driveUUID, dirUUID, Files, callback)
+        handle.upload()
       }
     })
 
@@ -238,7 +168,7 @@ class Task {
     this.task.on('data', (X) => {
       if (!Array.isArray(X)) return
       X.forEach((x) => {
-        debug('done:', x.taskStatus.abspath)
+        debug('done:', x.name)
         sendMsg()
       })
     })
@@ -251,6 +181,10 @@ class Task {
 
   push({ taskUUID, entry, dirUUID, driveUUID, taskType, createTime, newWork }) {
     this.task.push({ taskUUID, entry, dirUUID, driveUUID, taskType, createTime, newWork })
+  }
+
+  status() {
+    return this.taskStatus
   }
 
   pause() {

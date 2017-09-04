@@ -261,6 +261,55 @@ export const uploadFileWithStream = (driveUUID, dirUUID, name, part, readStream,
 export const uploadFileWithStreamAsync = Promise.promisify(uploadFileWithStream)
 
 /**
+Upload multiple files in one request.post
+
+@param {string} driveUUID
+@param {string} dirUUID
+@param {Object[]} Files
+@param {string} Files[].name
+@param {Object} Files[].parts
+@param {Object} Files[].readStream
+@param {function} callback
+*/
+export class UploadMultipleFiles {
+  constructor(driveUUID, dirUUID, Files, callback) {
+    this.driveUUID = driveUUID
+    this.dirUUID = dirUUID
+    this.Files = Files
+    this.callback = callback
+    this.handle = null
+  }
+
+  upload() {
+    initArgs()
+
+    this.handle = request.post({ url: `${server}/drives/${this.driveUUID}/dirs/${this.dirUUID}/entries`, headers: { Authorization } })
+
+    this.handle.on('end', (error, response) => {
+      if (error) return this.callback(error)
+      if (response && response.statusCode !== 200) return this.callback(`Respose not 200 but ${response.statusCode}`)
+      return this.callback(null, this.Files)
+    })
+
+    const form = this.handle.form()
+
+    this.Files.forEach((file) => {
+      const { name, parts, readStreams } = file
+      for (let i = 0; i < parts.length; i++) {
+        const rs = readStreams[i]
+        const part = parts[i]
+        let formDataOptions = {
+          size: part.end ? part.end - part.start + 1 : 0,
+          sha256: part.sha
+        }
+        if (part.start) formDataOptions = Object.assign(formDataOptions, { append: part.fingerprint })
+        form.append(name, rs, JSON.stringify(formDataOptions))
+      }
+    })
+  }
+}
+
+/**
 createFold
 
 @param {string} driveUUID
