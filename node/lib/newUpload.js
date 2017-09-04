@@ -15,7 +15,6 @@ const userTasks = []
 const finishTasks = []
 
 const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
-  let count = 0
   const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
   const remoteEntries = listNav.entries
   let overWrite = false
@@ -38,23 +37,30 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
   }
 
   debug('check name, overWrite ?', overWrite)
-
+  let taskType = ''
+  const filtered = []
   for (let i = 0; i < entries.length; i++) {
-    const taskUUID = UUID.v4()
     const entry = entries[i]
     const entryStat = await fs.lstatAsync(path.resolve(entry))
-    const taskType = entryStat.isDirectory() ? 'folder' : entryStat.isFile() ? 'file' : 'others'
-    const createTime = (new Date()).getTime()
-    const newWork = true
-    const uploadingList = []
-    const rootNodeUUID = null
+    const entryType = entryStat.isDirectory() ? 'folder' : entryStat.isFile() ? 'file' : 'others'
     /* only upload folder or file, ignore others, such as symbolic link */
-    if (taskType !== 'others') {
-      createTask(taskUUID, entry, dirUUID, driveUUID, taskType, createTime, newWork, uploadingList, rootNodeUUID)
-      count += 1
+    if (entryType !== 'others') {
+      if (!taskType) taskType = entryType
+      filtered.push(entry)
     }
   }
-  return count
+
+  debug('entries', entries)
+  debug('filtered', filtered)
+  const taskUUID = UUID.v4()
+  const createTime = (new Date()).getTime()
+  const newWork = true
+  const uploadingList = []
+  const rootNodeUUID = null
+  if (filtered.length) {
+    createTask(taskUUID, filtered, dirUUID, driveUUID, taskType, createTime, newWork, uploadingList, rootNodeUUID)
+  }
+  return filtered.length
 }
 
 const readUploadInfo = (entries, dirUUID, driveUUID) => {
