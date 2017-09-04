@@ -26,234 +26,246 @@ const initArgs = () => {
 /* return a new file name */
 const getName = async (currPath, dirUUID, driveUUID) => currPath.replace(/^.*\//, '') // TODO
 
-/* Transform must be an asynchronous function !!! */
-const task = new Transform({
-  name: 'task',
-  concurrency: 10240,
-  transform(x, callback) {
-    const { taskUUID, entry, dirUUID, driveUUID, taskType, createTime, newWork } = x
-    const taskStatus = {
-      abspath: entry,
-      completeSize: 0,
-      count: 0,
-      finishCount: 0,
-      finishDate: '',
-      name: entry.replace(/^.*\//, ''),
-      pause: false,
-      restTime: '',
-      size: 0,
-      speed: '',
-      state: 'visitless',
-      trsType: 'upload',
-      type: taskType,
-      uuid: taskUUID
-    }
-    /* add task to global task list */
-    Tasks.push(taskStatus)
-    sendMsg()
-    setImmediate(() => {
-      callback(null, { entries: [entry], dirUUID, driveUUID, taskStatus })
-    })
-  }
-})
-
-const readDir = new Transform({
-  name: 'readDir',
-  concurrency: 4,
-  transform(x, callback) {
-    const read = async (entries, dirUUID, driveUUID, taskStatus) => {
-      for (let i = 0; i < entries.length; i++) {
-        const entry = entries[i]
-        const stat = await fs.lstatAsync(path.resolve(entry))
-        taskStatus.count += 1
-        if (stat.isDirectory()) {
-          /* create fold and return the uuid */
-          const dirname = await getName(entry, dirUUID, driveUUID)
-          const Entries = await createFoldAsync(driveUUID, dirUUID, dirname)
-          const uuid = Entries.find(e => e.name === dirname).uuid
-
-          /* read child */
-          const children = await fs.readdirAsync(path.resolve(entry))
-          const newEntries = []
-          children.forEach(c => newEntries.push(path.join(entry, c)))
-          this.push({ entries: newEntries, dirUUID: uuid, driveUUID, taskStatus })
-        } else {
-          taskStatus.size += stat.size
+class Task {
+  constructor() {
+    /* Transform must be an asynchronous function !!! */
+    this.task = new Transform({
+      name: 'task',
+      concurrency: 10240,
+      transform(x, callback) {
+        const { taskUUID, entry, dirUUID, driveUUID, taskType, createTime, newWork } = x
+        const taskStatus = {
+          abspath: entry,
+          completeSize: 0,
+          count: 0,
+          finishCount: 0,
+          finishDate: '',
+          name: entry.replace(/^.*\//, ''),
+          pause: false,
+          restTime: '',
+          size: 0,
+          speed: '',
+          state: 'visitless',
+          trsType: 'upload',
+          type: taskType,
+          uuid: taskUUID
         }
-        callback(null, { entry, dirUUID, driveUUID, stat, taskStatus })
-      }
-    }
-    const { entries, dirUUID, driveUUID, taskStatus } = x
-    read(entries, dirUUID, driveUUID, taskStatus).catch(e => callback(e))
-  }
-})
-
-const hash = new Transform({
-  name: 'hash',
-  concurrency: 4,
-  push(x) {
-    if (x.stat.isDirectory()) {
-      this.outs.forEach(t => t.push(Object.assign({}, x, { type: 'folder' })))
-    } else {
-      this.pending.push(x)
-      this.schedule()
-    }
-  },
-  transform: (x, callback) => {
-    const { entry, dirUUID, driveUUID, stat, taskStatus } = x
-    taskStatus.state = 'hashing'
-    readXattr(entry, (error, attr) => {
-      if (!error && attr && attr.parts) {
-        callback(null, { entry, dirUUID, driveUUID, parts: attr.parts, type: 'file', taskStatus })
-        return
-      }
-      const options = {
-        env: { absPath: entry, size: stat.size, partSize: 1024 * 1024 * 1024 },
-        encoding: 'utf8',
-        cwd: process.cwd()
-      }
-      const child = childProcess.fork(path.join(__dirname, './filehash'), [], options)
-      child.on('message', (result) => {
-        setXattr(entry, result, (err, xattr) => {
-          callback(err, { entry, dirUUID, driveUUID, parts: xattr && xattr.parts, type: 'file', taskStatus })
+        /* add task to global task list */
+        Tasks.push(taskStatus)
+        sendMsg()
+        setImmediate(() => {
+          callback(null, { entries: [entry], dirUUID, driveUUID, taskStatus })
         })
-      })
-      child.on('error', callback)
-    })
-  }
-})
-
-const upload = new Transform({
-  name: 'upload',
-  concurrency: 4,
-  push(x) {
-    if (x.type === 'folder') {
-      x.taskStatus.finishCount += 1
-      this.root().emit('data', x)
-    } else {
-      const { dirUUID, driveUUID } = x
-      const index = this.pending.findIndex(p => p[0].dirUUID === dirUUID && p[0].driveUUID === driveUUID)
-      if (index > -1 && this.pending[index].length < 100) {
-        this.pending[index].push(x)
-      } else {
-        this.pending.push([x])
       }
-      this.schedule()
-    }
-  },
-  /* targets: array of taskUUIDs which need to be aborted */
-  abort(targets) {
-    if (targets && targets.length) {
-      const aborted = []
-      targets.forEach((t) => {
-        const index = this.working.findIndex(x => x.taskStatus && x.taskStatus.uuid === t)
-        if (index > -1) {
-          const x = this.working[index]
-          if (x.taskStatus) x.taskStatus.pause = true
-          if (x.abort) {
-            debug('abort', x.taskStatus.abspath)
-            x.abort()
-            this.working.splice(index, 1)
-            aborted.push(x)
+    })
+
+    this.readDir = new Transform({
+      name: 'readDir',
+      concurrency: 4,
+      transform(x, callback) {
+        const read = async (entries, dirUUID, driveUUID, taskStatus) => {
+          for (let i = 0; i < entries.length; i++) {
+            const entry = entries[i]
+            const stat = await fs.lstatAsync(path.resolve(entry))
+            taskStatus.count += 1
+            if (stat.isDirectory()) {
+              /* create fold and return the uuid */
+              const dirname = await getName(entry, dirUUID, driveUUID)
+              const Entries = await createFoldAsync(driveUUID, dirUUID, dirname)
+              const uuid = Entries.find(e => e.name === dirname).uuid
+
+              /* read child */
+              const children = await fs.readdirAsync(path.resolve(entry))
+              const newEntries = []
+              children.forEach(c => newEntries.push(path.join(entry, c)))
+              this.push({ entries: newEntries, dirUUID: uuid, driveUUID, taskStatus })
+            } else {
+              taskStatus.size += stat.size
+            }
+            callback(null, { entry, dirUUID, driveUUID, stat, taskStatus })
           }
         }
-      })
-      this.pending.unshift(...aborted)
-    }
-  },
-
-  delete(targets) {
-    debug('delete', targets)
-    if (targets && targets.length) {
-      targets.forEach((t) => {
-        let index = this.pending.findIndex(x => x.taskStatus && x.taskStatus.uuid === t)
-        if (index > -1) {
-          this.pending.splice(index, 1)
-        } else {
-          index = this.working.findIndex(x => x.taskStatus && x.taskStatus.uuid === t)
-          if (index > -1) this.working.splice(index, 1)
-        }
-      })
-    }
-  },
-
-  transform: (X, callback) => {
-    debug('upload transform', X.length, X[0].dirUUID)
-
-    initArgs()
-    const op = {
-      url: `${server}/drives/${X[0].driveUUID}/dirs/${X[0].dirUUID}/entries`,
-      headers: { Authorization }
-    }
-
-    const handle = request.post(op, (error, response, body) => {
-      if (error) return callback(error)
-      if (response && response.statusCode === 200) return callback(null, X)
-      debug(error, response && response.statusCode, body)
-      return callback(Error('respose not 200'))
-    })
-
-    const form = handle.form()
-
-    // X.abort = () => { handle.abort() }
-
-    /* X: array of x which have the same driveUUID and dirUUId */
-    debug('X[2]', X[2])
-    X.forEach((x) => {
-      const { entry, parts, taskStatus } = x
-      taskStatus.state = 'uploading'
-      const name = entry.replace(/^.*\//, '')
-      const readStreams = parts.map(part => fs.createReadStream(entry, { start: part.start, end: part.end, autoClose: true }))
-      for (let i = 0; i < parts.length; i++) {
-        const rs = readStreams[i]
-        rs.on('data', (chunk) => {
-          sendMsg()
-          taskStatus.completeSize += chunk.length
-        })
-        rs.on('end', () => {
-          taskStatus.finishCount += 1
-          if (taskStatus.finishCount === taskStatus.count) {
-            taskStatus.finishDate = (new Date()).getTime()
-            taskStatus.state = 'finished'
-          }
-          sendMsg()
-        })
-        const part = parts[i]
-        let formDataOptions = {
-          size: part.end ? part.end - part.start + 1 : 0,
-          sha256: part.sha
-        }
-        // debug('formDataOptions', i, formDataOptions.size)
-        if (part.start) formDataOptions = Object.assign(formDataOptions, { append: part.fingerprint })
-        form.append(name, rs, JSON.stringify(formDataOptions))
+        const { entries, dirUUID, driveUUID, taskStatus } = x
+        read(entries, dirUUID, driveUUID, taskStatus).catch(e => callback(e))
       }
     })
+
+    this.hash = new Transform({
+      name: 'hash',
+      concurrency: 4,
+      push(x) {
+        if (x.stat.isDirectory()) {
+          this.outs.forEach(t => t.push(Object.assign({}, x, { type: 'folder' })))
+        } else {
+          this.pending.push(x)
+          this.schedule()
+        }
+      },
+      transform: (x, callback) => {
+        const { entry, dirUUID, driveUUID, stat, taskStatus } = x
+        taskStatus.state = 'hashing'
+        readXattr(entry, (error, attr) => {
+          if (!error && attr && attr.parts) {
+            callback(null, { entry, dirUUID, driveUUID, parts: attr.parts, type: 'file', taskStatus })
+            return
+          }
+          const options = {
+            env: { absPath: entry, size: stat.size, partSize: 1024 * 1024 * 1024 },
+            encoding: 'utf8',
+            cwd: process.cwd()
+          }
+          const child = childProcess.fork(path.join(__dirname, './filehash'), [], options)
+          child.on('message', (result) => {
+            setXattr(entry, result, (err, xattr) => {
+              callback(err, { entry, dirUUID, driveUUID, parts: xattr && xattr.parts, type: 'file', taskStatus })
+            })
+          })
+          child.on('error', callback)
+        })
+      }
+    })
+
+    this.upload = new Transform({
+      name: 'upload',
+      concurrency: 4,
+      push(x) {
+        if (x.type === 'folder') {
+          x.taskStatus.finishCount += 1
+          this.root().emit('data', x)
+        } else {
+          const { dirUUID, driveUUID } = x
+          const index = this.pending.findIndex(p => p[0].dirUUID === dirUUID && p[0].driveUUID === driveUUID)
+          if (index > -1 && this.pending[index].length < 100) {
+            this.pending[index].push(x)
+          } else {
+            this.pending.push([x])
+          }
+          this.schedule()
+        }
+      },
+      /* targets: array of taskUUIDs which need to be aborted */
+      abort(targets) {
+        if (targets && targets.length) {
+          const aborted = []
+          targets.forEach((t) => {
+            const index = this.working.findIndex(x => x.taskStatus && x.taskStatus.uuid === t)
+            if (index > -1) {
+              const x = this.working[index]
+              if (x.taskStatus) x.taskStatus.pause = true
+              if (x.abort) {
+                debug('abort', x.taskStatus.abspath)
+                x.abort()
+                this.working.splice(index, 1)
+                aborted.push(x)
+              }
+            }
+          })
+          this.pending.unshift(...aborted)
+        }
+      },
+
+      delete(targets) {
+        debug('delete', targets)
+        if (targets && targets.length) {
+          targets.forEach((t) => {
+            let index = this.pending.findIndex(x => x.taskStatus && x.taskStatus.uuid === t)
+            if (index > -1) {
+              this.pending.splice(index, 1)
+            } else {
+              index = this.working.findIndex(x => x.taskStatus && x.taskStatus.uuid === t)
+              if (index > -1) this.working.splice(index, 1)
+            }
+          })
+        }
+      },
+
+      transform: (X, callback) => {
+        debug('upload transform', X.length, X[0].dirUUID)
+
+        initArgs()
+        const op = {
+          url: `${server}/drives/${X[0].driveUUID}/dirs/${X[0].dirUUID}/entries`,
+          headers: { Authorization }
+        }
+
+        const handle = request.post(op, (error, response, body) => {
+          if (error) return callback(error)
+          if (response && response.statusCode === 200) return callback(null, X)
+          debug(error, response && response.statusCode, body)
+          return callback(Error('respose not 200'))
+        })
+
+        const form = handle.form()
+
+        // X.abort = () => { handle.abort() }
+
+        /* X: array of x which have the same driveUUID and dirUUId */
+        // debug('X[2]', X[2])
+        X.forEach((x) => {
+          const { entry, parts, taskStatus } = x
+          taskStatus.state = 'uploading'
+          const name = entry.replace(/^.*\//, '')
+          const readStreams = parts.map(part => fs.createReadStream(entry, { start: part.start, end: part.end, autoClose: true }))
+          for (let i = 0; i < parts.length; i++) {
+            const rs = readStreams[i]
+            rs.on('data', (chunk) => {
+              sendMsg()
+              taskStatus.completeSize += chunk.length
+            })
+            rs.on('end', () => {
+              taskStatus.finishCount += 1
+              if (taskStatus.finishCount === taskStatus.count) {
+                taskStatus.finishDate = (new Date()).getTime()
+                taskStatus.state = 'finished'
+              }
+              sendMsg()
+            })
+            const part = parts[i]
+            let formDataOptions = {
+              size: part.end ? part.end - part.start + 1 : 0,
+              sha256: part.sha
+            }
+            // debug('formDataOptions', i, formDataOptions.size)
+            if (part.start) formDataOptions = Object.assign(formDataOptions, { append: part.fingerprint })
+            form.append(name, rs, JSON.stringify(formDataOptions))
+          }
+        })
+      }
+    })
+
+    this.task.pipe(this.readDir).pipe(this.hash).pipe(this.upload)
+
+    this.task.on('data', (X) => {
+      if (!Array.isArray(X)) return
+      X.forEach((x) => {
+        debug('done:', x.taskStatus.abspath)
+        sendMsg()
+      })
+    })
+
+    this.task.on('step', () => {
+      // debug('===================================')
+      // task.print()
+    })
   }
-})
 
-task.pipe(readDir).pipe(hash).pipe(upload)
+  push({ taskUUID, entry, dirUUID, driveUUID, taskType, createTime, newWork }) {
+    this.task.push({ taskUUID, entry, dirUUID, driveUUID, taskType, createTime, newWork })
+  }
 
-task.on('data', (X) => {
-  if (!Array.isArray(X)) return
-  X.forEach((x) => {
-    /*
-    x.taskStatus.finishCount += 1
-    if (x.taskStatus.finishCount === x.taskStatus.count) {
-      x.taskStatus.finishDate = (new Date()).getTime()
-      x.taskStatus.state = 'finished'
-    }
-    */
-    debug('done:', x.taskStatus.abspath)
-    sendMsg()
-  })
-})
+  pause() {
+  }
 
-task.on('step', () => {
-  // debug('===================================')
-  // task.print()
-})
+  resume() {
+    this.upload.schedule()
+  }
+
+  abort() {
+  }
+}
 
 const createTask = (taskUUID, entry, dirUUID, driveUUID, taskType, createTime, newWork) => {
+  const task = new Task()
   task.push({ taskUUID, entry, dirUUID, driveUUID, taskType, createTime, newWork })
 }
 
