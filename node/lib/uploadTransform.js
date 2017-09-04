@@ -128,6 +128,7 @@ const upload = new Transform({
   concurrency: 4,
   push(x) {
     if (x.type === 'folder') {
+      x.taskStatus.finishCount += 1
       this.root().emit('data', x)
     } else {
       const { dirUUID, driveUUID } = x
