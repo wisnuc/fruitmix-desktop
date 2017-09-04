@@ -20,14 +20,14 @@ class Task {
       name: 'task',
       concurrency: 10240,
       transform(x, callback) {
-        const { taskUUID, entry, dirUUID, driveUUID, taskType, createTime, newWork } = x
+        const { taskUUID, entries, dirUUID, driveUUID, taskType, createTime, newWork } = x
         const taskStatus = {
-          abspath: entry,
+          entries,
           completeSize: 0,
           count: 0,
           finishCount: 0,
           finishDate: '',
-          name: entry.replace(/^.*\//, ''),
+          name: entries[0].replace(/^.*\//, ''),
           pause: false,
           restTime: '',
           size: 0,
@@ -41,7 +41,7 @@ class Task {
         Tasks.push(taskStatus)
         sendMsg()
         setImmediate(() => {
-          callback(null, { entries: [entry], dirUUID, driveUUID, taskStatus })
+          callback(null, { entries, dirUUID, driveUUID, taskStatus })
         })
       }
     })
@@ -179,8 +179,8 @@ class Task {
     })
   }
 
-  push({ taskUUID, entry, dirUUID, driveUUID, taskType, createTime, newWork }) {
-    this.task.push({ taskUUID, entry, dirUUID, driveUUID, taskType, createTime, newWork })
+  push({ taskUUID, entries, dirUUID, driveUUID, taskType, createTime, newWork }) {
+    this.task.push({ taskUUID, entries, dirUUID, driveUUID, taskType, createTime, newWork })
   }
 
   status() {
@@ -198,9 +198,10 @@ class Task {
   }
 }
 
-const createTask = (taskUUID, entry, dirUUID, driveUUID, taskType, createTime, newWork) => {
-  const task = new Task()
-  task.push({ taskUUID, entry, dirUUID, driveUUID, taskType, createTime, newWork })
+const task = new Task()
+const createTask = (taskUUID, entries, dirUUID, driveUUID, taskType, createTime, newWork) => {
+  debug('createTask', taskUUID, entries, dirUUID, driveUUID, taskType, createTime, newWork)
+  task.push({ taskUUID, entries, dirUUID, driveUUID, taskType, createTime, newWork })
 }
 
 const forceSchedule = () => upload.schedule()
