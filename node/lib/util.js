@@ -49,12 +49,12 @@ const utils = {
   },
 
   formatSize(size) {
-    if (!size) return `${0}KB`
+    if (!size) return '0 KB'
     size = parseFloat(size)
-    if (size < 1024) return `${size.toFixed(2)}B`
-    else if (size < (1024 * 1024)) return `${(size / 1024).toFixed(2)}KB`
-    else if (size < (1024 * 1024 * 1024)) return `${(size / 1024 / 1024).toFixed(2)}M`
-    return `${(size / 1024 / 1024 / 1024).toFixed(2)}G`
+    if (size < 1024) return `${size.toFixed(2)} B`
+    else if (size < (1024 * 1024)) return `${(size / 1024).toFixed(2)} KB`
+    else if (size < (1024 * 1024 * 1024)) return `${(size / 1024 / 1024).toFixed(2)} MB`
+    return `${(size / 1024 / 1024 / 1024).toFixed(2)} GB`
   },
 
   formatSeconds(seconds) {

@@ -50,20 +50,43 @@ class RunningTask extends React.Component {
   getUploadedSize(task) {
     // console.log(task)
     if ((task.type === 'folder' || task.type === 'directory') && task.count) {
-      return `${task.finishCount}/${task.count}  ${this.props.task.pause ? '' : task.speed}`
+      return `${task.finishCount}/${task.count}  ${this.props.task.pause ? '' : this.formatSpeed(task.speed)}`
     } else if (task.type === 'file') {
-      return `${this.formatSize(Math.abs(task.completeSize))}  ${this.props.task.pause ? '' : task.speed}`
+      return `${this.formatSize(Math.abs(task.completeSize))}  ${this.props.task.pause ? '' : this.formatSpeed(task.speed)}`
     }
     return ''
   }
 
-  formatSize(size) {
-    if (!size) return `${0}KB`
-    size = parseFloat(size)
-    if (size < 1024) return `${size.toFixed(2)}B`
-    else if (size < (1024 * 1024)) return `${(size / 1024).toFixed(2)}KB`
-    else if (size < (1024 * 1024 * 1024)) return `${(size / 1024 / 1024).toFixed(2)}M`
-    return `${(size / 1024 / 1024 / 1024).toFixed(2)}G`
+  formatSize(s) {
+    const size = parseFloat(s, 10)
+    if (!size) return `${0} KB`
+    if (size < 1024) return `${size.toFixed(2)} B`
+    else if (size < (1024 * 1024)) return `${(size / 1024).toFixed(2)} KB`
+    else if (size < (1024 * 1024 * 1024)) return `${(size / 1024 / 1024).toFixed(2)} MB`
+    return `${(size / 1024 / 1024 / 1024).toFixed(2)} GB`
+  }
+
+  formatSpeed(size) {
+    return `${this.formatSize(size)}/s`
+  }
+
+  formatSeconds(seconds) {
+    if (!seconds || seconds === Infinity || seconds === -Infinity) return '--'
+    let s = parseInt(seconds)
+    let m = 0
+    let h = 0
+    if (s > 60) {
+      m = parseInt(s / 60)
+      s = parseInt(s % 60)
+      if (m > 60) {
+        h = parseInt(m / 60)
+        m = parseInt(m % 60)
+      }
+    }
+    if (s.toString().length === 1) s = `0${s}`
+    if (h.toString().length === 1) h = `0${h}`
+    if (m.toString().length === 1) m = `0${m}`
+    return `${h}:${m}:${s}`
   }
 
   render() {
@@ -110,7 +133,7 @@ class RunningTask extends React.Component {
         </div>
 
         {/* task restTime */}
-        <div style={{ flex: '0 0 100px' }}>{ task.restTime }</div>
+        <div style={{ flex: '0 0 100px' }}>{ this.formatSeconds(task.restTime) }</div>
 
         {/* progress bar */}
         <div style={{ flex: '0 0 240px' }}>
