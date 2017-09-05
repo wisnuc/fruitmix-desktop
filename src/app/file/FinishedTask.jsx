@@ -75,7 +75,7 @@ class FinishedTask extends Component {
 
         {/* task item type */}
         <div style={{ flex: '0 0 32px' }}>
-          { (task.type === 'folder' || task.type === 'directory') ? <FolderSvg style={svgStyle} /> : <FileSvg style={svgStyle} /> }
+          { task.type === 'file' ? <FileSvg style={svgStyle} /> : <FolderSvg style={svgStyle} /> }
         </div>
 
         {/* task item name */}
@@ -87,7 +87,8 @@ class FinishedTask extends Component {
             whiteSpace: 'nowrap'
           }}
         >
-          {task.name}
+          { task.name }
+          { task.entries.length > 1 && ` 等${task.entries.length}个项目` }
         </div>
 
         <div style={{ flex: '0 0 32px' }} />
