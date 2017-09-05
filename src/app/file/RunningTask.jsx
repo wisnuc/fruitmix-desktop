@@ -93,7 +93,7 @@ class RunningTask extends React.Component {
 
         {/* task item type */}
         <div style={{ flex: '0 0 32px' }}>
-          { task.type === 'folder' ? <FolderSvg style={svgStyle} /> : <FileSvg style={svgStyle} /> }
+          { task.type === 'file' ? <FileSvg style={svgStyle} /> : <FolderSvg style={svgStyle} /> }
         </div>
 
         {/* task item name */}
@@ -105,7 +105,8 @@ class RunningTask extends React.Component {
             whiteSpace: 'nowrap'
           }}
         >
-          {task.name}
+          { task.name }
+          { task.entries.length > 1 && ` 等${task.entries.length}个项目` }
         </div>
 
         {/* task restTime */}
