@@ -176,8 +176,8 @@ ipcMain.on('PAUSE_UPLOADING', (e, uuids) => {
       abortArray.push(u)
     }
   })
+  debug('PAUSE_UPLOADING', uuids, uuids.length, uuids[0])
   abortTask(abortArray)
-  debug('PAUSE_UPLOADING', uuids.length, uuids[0])
 })
 
 ipcMain.on('RESUME_UPLOADING', (e, uuid) => {

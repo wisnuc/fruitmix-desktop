@@ -22,7 +22,12 @@ class Task {
       transform(x, callback) {
         const { taskUUID, entries, dirUUID, driveUUID, taskType, createTime, newWork } = x
         const taskStatus = {
+          uuid: taskUUID,
           entries,
+          dirUUID,
+          driveUUID,
+          taskType,
+          createTime,
           completeSize: 0,
           lastTimeSize: 0,
           count: 0,
@@ -36,8 +41,6 @@ class Task {
           lastSpeed: 0,
           state: 'visitless',
           trsType: 'upload',
-          type: taskType,
-          uuid: taskUUID
         }
         taskStatus.countSpeed = setInterval(() => {
           if (taskStatus.pause) {
@@ -123,7 +126,7 @@ class Task {
             })
           })
           child.on('error', callback)
-        })
+         })
       }
     })
 
@@ -137,7 +140,7 @@ class Task {
           this.root().emit('data', x)
         } else {
           const { dirUUID, taskUUID } = x
-          const i = this.pending.findIndex(p => p.length < 10 && p[0].dirUUID === dirUUID && p[0].taskUUID === taskUUID)
+          const i = this.pending.findIndex(p => p.length < 3 && p[0].dirUUID === dirUUID && p[0].taskUUID === taskUUID)
           if (i > -1) {
             this.pending[i].push(x)
           } else {
@@ -177,7 +180,7 @@ class Task {
         const { driveUUID, dirUUID } = X[0]
         const handle = new UploadMultipleFiles(driveUUID, dirUUID, Files, callback)
         handle.upload()
-      }
+       }
     })
 
     this.task.pipe(this.readDir).pipe(this.hash).pipe(this.upload)
@@ -211,7 +214,15 @@ class Task {
     this.upload.schedule()
   }
 
-  abort() {
+  abort(uuids) {
+    debug('abort!!', uuids)
+    uuids.forEach((u) => {
+      const i = this.hash.pending.findIndex(p => p.taskStatus.taskUUID === u)
+      if (i > -1) this.hash.pending.splice(i, 1)
+      const j = this.upload.pending.findIndex(p => p[0].taskStatus.taskUUID === u)
+      if (j > -1) this.upload.pending.splice(j, 1)
+      debug('pending list')
+    })
   }
 }
 
@@ -220,8 +231,8 @@ const createTask = (taskUUID, entries, dirUUID, driveUUID, taskType, createTime,
   task.push({ taskUUID, entries, dirUUID, driveUUID, taskType, createTime, newWork })
 }
 
-const forceSchedule = () => upload.schedule()
+const abortTask = uuids => task.abort(uuids)
 
-const abortTask = targets => upload.abort(targets)
+const resumeTask = uuids => {}
 
-export { createTask, forceSchedule, abortTask }
+export { createTask, abortTask }
