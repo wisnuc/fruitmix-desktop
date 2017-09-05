@@ -12,7 +12,7 @@ const readXattrAsync = async (target) => {
     attr = JSON.parse(await xattr.getAsync(target, FRUITMIX))
   } catch (e) {
     /* may throw xattr ENOENT or JSON SyntaxError */
-    console.log('readXattrAsync error: ', e.code || e)
+    // console.log('readXattrAsync error: ', e.code || e)
   }
   const stats = await fs.lstatAsync(target)
   const htime = os.platform() === 'win32' ? stats.atime.getTime() : stats.mtime.getTime()
@@ -31,7 +31,7 @@ const setXattrAsync = async (target, attr) => {
   try {
     await xattr.setAsync(target, FRUITMIX, JSON.stringify(newAttr))
   } catch (e) {
-    console.log('setXattrAsync error: ', e.code || e)
+    // console.log('setXattrAsync error: ', e.code || e)
   }
   return newAttr
 }
