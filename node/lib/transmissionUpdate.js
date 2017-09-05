@@ -56,7 +56,6 @@ const sendMsg = () => {
   return (last = false)
 }
 
-
 // handle will open dialog from electron to clean record of the task have been downloaded
 const cleanRecordHandle = () => {
   debug('Tasks before', Tasks.length)

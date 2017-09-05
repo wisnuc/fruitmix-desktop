@@ -90,7 +90,7 @@ class Transform extends EventEmitter {
 
     while (this.working.length < this.concurrency && this.pending.length) {
       /* ingnore paused tasks */
-      const index = this.pending.findIndex(p => !(p.taskStatus && p.taskStatus.pause))
+      const index = this.pending.findIndex(p => !(Array.isArray(p) ? p[0].taskStatus.pause : p.taskStatus.pause))
       const x = index > -1 ? this.pending.splice(index, 1)[0] : null
       if (!x) return
 
