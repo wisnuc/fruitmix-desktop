@@ -46,7 +46,6 @@ class Task {
             return
           }
           const speed = taskStatus.completeSize - taskStatus.lastTimeSize
-          debug('taskStatus.countSpeed', taskStatus.completeSize, taskStatus.lastTimeSize, speed, taskStatus.lastSpeed, taskStatus.speed)
           taskStatus.speed = (taskStatus.lastSpeed + speed) / 2
           taskStatus.lastSpeed = speed
           taskStatus.restTime = taskStatus.speed && (taskStatus.size - taskStatus.completeSize) / taskStatus.speed
@@ -106,7 +105,7 @@ class Task {
       },
       transform: (x, callback) => {
         const { entry, dirUUID, driveUUID, stat, taskStatus } = x
-        taskStatus.state = 'hashing'
+        if (taskStatus.state !== 'uploading' && taskStatus.state !== 'uploadless') taskStatus.state = 'hashing'
         readXattr(entry, (error, attr) => {
           if (!error && attr && attr.parts) {
             callback(null, { entry, dirUUID, driveUUID, parts: attr.parts, type: 'file', taskStatus })
@@ -132,12 +131,13 @@ class Task {
       name: 'upload',
       concurrency: 4,
       push(x) {
+        if (x.taskStatus.state !== 'uploading') x.taskStatus.state = 'uploadless'
         if (x.type === 'folder') {
           x.taskStatus.finishCount += 1
           this.root().emit('data', x)
         } else {
           const { dirUUID, taskUUID } = x
-          const i = this.pending.findIndex(p => p.length < 100 && p[0].dirUUID === dirUUID && p[0].taskUUID === taskUUID)
+          const i = this.pending.findIndex(p => p.length < 10 && p[0].dirUUID === dirUUID && p[0].taskUUID === taskUUID)
           if (i > -1) {
             this.pending[i].push(x)
           } else {
@@ -148,7 +148,7 @@ class Task {
       },
 
       transform: (X, callback) => {
-        debug('upload transform', X.length, X[0].dirUUID)
+        debug('upload transform start', X.length, X[0].entry)
 
         const Files = X.map((x) => {
           const { entry, parts, taskStatus } = x

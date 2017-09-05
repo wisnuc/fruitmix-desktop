@@ -79,16 +79,20 @@ class FinishedTask extends Component {
         </div>
 
         {/* task item name */}
-        <div
-          style={{
-            flexGrow: 1,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap'
-          }}
-        >
-          { task.name }
-          { task.entries.length > 1 && ` 等${task.entries.length}个项目` }
+        <div style={{ display: 'flex', flexGrow: 1, alignItems: 'center' }}>
+          <div
+            style={{
+              maxWidth: 540,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            { task.name }
+          </div>
+          <div>
+            { task.entries.length > 1 && ` 等${task.entries.length}个项目` }
+          </div>
         </div>
 
         <div style={{ flex: '0 0 32px' }} />
