@@ -168,16 +168,11 @@ ipcMain.on('DELETE_UPLOADING', (e, tasks) => {
 
 ipcMain.on('PAUSE_UPLOADING', (e, uuids) => {
   if (!Tasks.length || !uuids || !uuids.length) return
-  const abortArray = []
   uuids.forEach((u) => {
     const task = Tasks.find(t => t.uuid === u)
-    if (task) {
-      task.pause = true
-      abortArray.push(u)
-    }
+    if (task) task.pause()
   })
   debug('PAUSE_UPLOADING', uuids, uuids.length, uuids[0])
-  abortTask(abortArray)
 })
 
 ipcMain.on('RESUME_UPLOADING', (e, uuid) => {

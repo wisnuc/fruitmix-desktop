@@ -16,12 +16,14 @@ let last = true
 let id = -1 // The power save blocker id returned by powerSaveBlocker.start
 
 const Tasks = []
+
 const sendMsg = () => {
   if (lock || !last) return (last = true)
   lock = true
   const userTasks = []
   const finishTasks = []
-  Tasks.forEach((task) => {
+  Tasks.forEach((t) => {
+    const task = t.taskStatus
     if (task.state === 'finished') {
       finishTasks.push(task)
     } else {
@@ -60,7 +62,7 @@ const sendMsg = () => {
 const cleanRecordHandle = () => {
   debug('Tasks before', Tasks.length)
   for (let i = Tasks.length - 1; i > -1; i--) {
-    if (Tasks[i].state === 'finished') Tasks.splice(i, 1)
+    if (Tasks[i].taskStatus.state === 'finished') Tasks.splice(i, 1)
   }
   sendMsg()
   debug('Tasks after', Tasks.length)
