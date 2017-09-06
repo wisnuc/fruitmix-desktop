@@ -83,19 +83,35 @@ class Transform extends EventEmitter {
     this.outs.forEach(t => t.print())
   }
 
+  clear() {
+    this.pending.length = 0
+    this.working.length = 0
+    this.finished.length = 0
+    this.failed.length = 0
+    this.ins.length = 0
+    this.outs.length = 0
+  }
+
   schedule() {
     if (this.isBlocked()) return
 
     this.pending = this.ins.reduce((acc, t) => [...acc, ...t.pull()], this.pending)
 
     while (this.working.length < this.concurrency && this.pending.length) {
+      const x = this.pending.shift()
+      this.working.push(x)
+
       /* ingnore paused tasks */
-      const index = this.pending.findIndex(p => !(Array.isArray(p) ? p[0].taskStatus.pause : p.taskStatus.pause))
-      const x = index > -1 ? this.pending.splice(index, 1)[0] : null
+      /*
+      const index = this.pending.findIndex(p => {
+        // debug('schedule', p)
+        return !(Array.isArray(p) ? p[0].taskStatus && p[0].taskStatus.pause : p.taskStatus && p.taskStatus.pause)
+      })
+      const x = this.pending.splice(index, 1)[0] : null
       if (!x) return
 
       this.working.push(x)
-      // debug('x', x)
+      */
 
       if (this.transform) {
         this.transform(x, (err, y) => {
@@ -147,7 +163,6 @@ class Transform extends EventEmitter {
       }
     }
   }
-
 }
 
 module.exports = Transform
