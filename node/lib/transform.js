@@ -114,7 +114,7 @@ class Transform extends EventEmitter {
       if (this.transform) {
         this.transform(x, (err, y) => {
           const curr = this.working.splice(this.working.indexOf(x), 1)
-          if (!curr) return
+          if (!curr) return // error ? FIXME
           if (err) {
             x.error = err
             this.failed.push(x)
