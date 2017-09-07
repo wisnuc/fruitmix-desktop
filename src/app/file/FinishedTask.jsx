@@ -3,6 +3,7 @@ import FolderSvg from 'material-ui/svg-icons/file/folder'
 import FileSvg from 'material-ui/svg-icons/editor/insert-drive-file'
 import DownloadSvg from 'material-ui/svg-icons/file/file-download'
 import UploadSvg from 'material-ui/svg-icons/file/file-upload'
+import MultiSvg from 'material-ui/svg-icons/content/content-copy'
 
 const svgStyle = { color: '#000', opacity: 0.54 }
 
@@ -75,7 +76,7 @@ class FinishedTask extends Component {
 
         {/* task item type */}
         <div style={{ flex: '0 0 32px' }}>
-          { task.type === 'file' ? <FileSvg style={svgStyle} /> : <FolderSvg style={svgStyle} /> }
+          { task.entries.length > 1 ? <MultiSvg style={svgStyle} /> : task.taskType === 'file' ? <FileSvg style={svgStyle} /> : <FolderSvg style={svgStyle} /> }
         </div>
 
         {/* task item name */}

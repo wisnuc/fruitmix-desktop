@@ -5,6 +5,7 @@ import PlaySvg from 'material-ui/svg-icons/av/play-arrow'
 import PauseSvg from 'material-ui/svg-icons/av/pause'
 import DownloadSvg from 'material-ui/svg-icons/file/file-download'
 import UploadSvg from 'material-ui/svg-icons/file/file-upload'
+import MultiSvg from 'material-ui/svg-icons/content/content-copy'
 
 const svgStyle = { color: '#000', opacity: 0.54 }
 class RunningTask extends React.Component {
@@ -80,7 +81,7 @@ class RunningTask extends React.Component {
 
   renderSizeAndSpeed(task) {
     const speed = this.props.task.paused ? '' : this.formatSpeed(task.speed)
-    const uploaded = task.type === 'file' ? this.formatSize(task.completeSize) : `${task.finishCount}/${task.count}`
+    const uploaded = task.count === 1 ? this.formatSize(task.completeSize) : `${task.finishCount}/${task.count}`
     return (
       <div style={{ height: 20, width: 160, display: 'flex', alignItems: 'center' }}>
         <div> { uploaded } </div>
@@ -123,7 +124,8 @@ class RunningTask extends React.Component {
 
         {/* task item type */}
         <div style={{ flex: '0 0 32px' }}>
-          { task.type === 'file' ? <FileSvg style={svgStyle} /> : <FolderSvg style={svgStyle} /> }
+          { task.entries.length > 1 ? <MultiSvg style={svgStyle} />
+          : task.taskType === 'file' ? <FileSvg style={svgStyle} /> : <FolderSvg style={svgStyle} /> }
         </div>
 
         {/* task item name */}
