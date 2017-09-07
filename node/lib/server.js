@@ -307,6 +307,10 @@ export class UploadMultipleFiles {
       }
     })
   }
+
+  abort() {
+    if (this.handle) this.handle.abort()
+  }
 }
 
 /**
