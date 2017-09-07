@@ -88,8 +88,6 @@ class Transform extends EventEmitter {
     this.working.length = 0
     this.finished.length = 0
     this.failed.length = 0
-    this.ins.length = 0
-    this.outs.length = 0
   }
 
   schedule() {
@@ -115,7 +113,8 @@ class Transform extends EventEmitter {
 
       if (this.transform) {
         this.transform(x, (err, y) => {
-          this.working.splice(this.working.indexOf(x), 1)
+          const curr = this.working.splice(this.working.indexOf(x), 1)
+          if (!curr) return
           if (err) {
             x.error = err
             this.failed.push(x)

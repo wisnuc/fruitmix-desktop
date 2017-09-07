@@ -119,22 +119,19 @@ class TrsContainer extends React.Component {
     }
 
     this.playAll = (tasks) => {
-      // debug('this.play', tasks)
-      tasks.forEach((item) => {
-        if (item.trsType === 'download') ipcRenderer.send('RESUME_DOWNLOADING', item.uuid)
-        else ipcRenderer.send('RESUME_UPLOADING', item.uuid)
-      })
-    }
-
-    this.pauseAll = (tasks) => {
-      // debug('this.pause', tasks)
       const downloadArr = []
       const uploadArr = []
 
-      tasks.forEach((item) => {
-        if (item.trsType === 'download') downloadArr.push(item.uuid)
-        else uploadArr.push(item.uuid)
-      })
+      tasks.forEach(item => item.trsType === 'download' ? downloadArr.push(item.uuid) : uploadArr.push(item.uuid))
+      ipcRenderer.send('RESUME_DOWNLOADING', downloadArr)
+      ipcRenderer.send('RESUME_UPLOADING', uploadArr)
+    }
+
+    this.pauseAll = (tasks) => {
+      const downloadArr = []
+      const uploadArr = []
+
+      tasks.forEach(item => item.trsType === 'download' ? downloadArr.push(item.uuid) : uploadArr.push(item.uuid))
       ipcRenderer.send('PAUSE_DOWNLOADING', downloadArr)
       ipcRenderer.send('PAUSE_UPLOADING', uploadArr)
     }
@@ -288,7 +285,7 @@ class TrsContainer extends React.Component {
     /* show playAll button when allPaused = true */
     let allPaused = true
     userTasks.forEach((task) => {
-      if (!task.pause) {
+      if (!task.paused) {
         allPaused = false
       }
     })

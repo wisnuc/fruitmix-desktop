@@ -112,6 +112,7 @@ const uploadMediaHandle = (event, args) => {
 }
 
 const startTransmissionHandle = () => {
+  return
   db.uploaded.find({}).sort({ finishDate: -1 }).exec((err, docs) => {
     if (err) return console.log(err)
     docs.forEach(item => item.uuid = item._id)
@@ -172,13 +173,16 @@ ipcMain.on('PAUSE_UPLOADING', (e, uuids) => {
     const task = Tasks.find(t => t.uuid === u)
     if (task) task.pause()
   })
-  debug('PAUSE_UPLOADING', uuids, uuids.length, uuids[0])
+  debug('PAUSE_UPLOADING', uuids)
 })
 
-ipcMain.on('RESUME_UPLOADING', (e, uuid) => {
-  if (!uuid) return
-  const task = Tasks.find(item => item.uuid === uuid)
-  if (task) { task.pause = false; forceSchedule() }
+ipcMain.on('RESUME_UPLOADING', (e, uuids) => {
+  if (!Tasks.length || !uuids || !uuids.length) return
+  uuids.forEach((u) => {
+    const task = Tasks.find(t => t.uuid === u)
+    if (task) task.resume()
+  })
+  debug('RESUME_UPLOADING', uuids)
 })
 
 ipcMain.on('LOGIN_OUT', (e) => {

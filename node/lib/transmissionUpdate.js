@@ -23,7 +23,7 @@ const sendMsg = () => {
   const userTasks = []
   const finishTasks = []
   Tasks.forEach((t) => {
-    const task = t.taskStatus
+    const task = t.status()
     if (task.state === 'finished') {
       finishTasks.push(task)
     } else {
@@ -62,7 +62,7 @@ const sendMsg = () => {
 const cleanRecordHandle = () => {
   debug('Tasks before', Tasks.length)
   for (let i = Tasks.length - 1; i > -1; i--) {
-    if (Tasks[i].taskStatus.state === 'finished') Tasks.splice(i, 1)
+    if (Tasks[i].state === 'finished') Tasks.splice(i, 1)
   }
   sendMsg()
   debug('Tasks after', Tasks.length)

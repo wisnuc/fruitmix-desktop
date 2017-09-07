@@ -26,7 +26,7 @@ class RunningTask extends React.Component {
 
     this.toggleTask = () => {
       const task = this.props.task
-      if (task.pause) {
+      if (task.paused) {
         this.props.resume(task.uuid, task.trsType)
       } else {
         this.props.pause(task.uuid, task.trsType)
@@ -36,7 +36,7 @@ class RunningTask extends React.Component {
 
   getStatus(task) {
     if (task.state === 'failed') return '传输失败'
-    if (task.pause) return '已暂停'
+    if (task.paused) return '已暂停'
     if (task.state === 'visitless') return '等待中'
     if (task.state === 'hashing') return '正在校验'
     if (task.state === 'diffing') return '正在校验'
@@ -79,7 +79,7 @@ class RunningTask extends React.Component {
   }
 
   renderSizeAndSpeed(task) {
-    const speed = this.props.task.pause ? '' : this.formatSpeed(task.speed)
+    const speed = this.props.task.paused ? '' : this.formatSpeed(task.speed)
     const uploaded = task.type === 'file' ? this.formatSize(task.completeSize) : `${task.finishCount}/${task.count}`
     return (
       <div style={{ height: 20, width: 160, display: 'flex', alignItems: 'center' }}>
@@ -99,7 +99,7 @@ class RunningTask extends React.Component {
   render() {
     console.log('RunningTask', this.props)
     const task = this.props.task
-    const pColor = task.pause ? 'rgba(0,0,0,.12)' : '#89c2f2'
+    const pColor = task.paused ? 'rgba(0,0,0,.12)' : '#89c2f2'
     let pWidth = task.completeSize / task.size * 100
     if (pWidth === Infinity || !pWidth) pWidth = 0
 
@@ -175,7 +175,7 @@ class RunningTask extends React.Component {
         {/* Pause and resume */}
         <div style={{ flex: '0 0 108px', display: 'flex', alignItems: 'center' }}>
           {
-            task.pause ?
+            task.paused ?
               <PlaySvg style={svgStyle} onTouchTap={this.toggleTask} /> :
               <PauseSvg style={svgStyle} onTouchTap={this.toggleTask} />
           }

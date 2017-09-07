@@ -16,50 +16,50 @@ const getName = async (currPath, dirUUID, driveUUID) => currPath.replace(/^.*\//
 class Task {
   constructor(props) {
     /* props: { uuid, entries, dirUUID, driveUUID, taskType, createTime, newWork } */
-    Object.assign(this, props)
+
     this.initStatus = () => {
-      this.taskStatus = Object.assign({}, props, {
-        completeSize: 0,
-        lastTimeSize: 0,
-        count: 0,
-        finishCount: 0,
-        finishDate: '',
-        name: props.entries[0].replace(/^.*\//, ''),
-        pause: false,
-        restTime: '',
-        size: 0,
-        speed: 0,
-        lastSpeed: 0,
-        state: 'visitless',
-        trsType: 'upload'
-      })
+      Object.assign(this, props)
+      this.completeSize = 0
+      this.lastTimeSize = 0
+      this.count = 0
+      this.finishCount = 0
+      this.finishDate = 0
+      this.name = props.entries[0].replace(/^.*\//, '')
+      this.paused = false
+      this.restTime = 0
+      this.size = 0
+      this.speed = 0
+      this.lastSpeed = 0
+      this.state = 'visitless'
+      this.trsType = 'upload'
     }
 
-    this.initStatus()
-
-    this.taskStatus.countSpeed = setInterval(() => {
-      if (this.taskStatus.pause) {
-        this.taskStatus.speed = 0
-        this.taskStatus.restTime = '--'
+    this.countSpeedFunc = () => {
+      if (this.paused) {
+        this.speed = 0
+        this.restTime = 0
         return
       }
-      const speed = this.taskStatus.completeSize - this.taskStatus.lastTimeSize
-      this.taskStatus.speed = (this.taskStatus.lastSpeed + speed) / 2
-      this.taskStatus.lastSpeed = speed
-      this.taskStatus.restTime = this.taskStatus.speed && (this.taskStatus.size - this.taskStatus.completeSize) / this.taskStatus.speed
-      this.taskStatus.lastTimeSize = this.taskStatus.completeSize
-    }, 1000)
+      const speed = this.completeSize - this.lastTimeSize
+      this.speed = (this.lastSpeed + speed) / 2
+      this.lastSpeed = speed
+      this.restTime = this.speed && (this.size - this.completeSize) / this.speed
+      this.lastTimeSize = this.completeSize
+    }
+
+    this.reqHandles = []
 
     /* Transform must be an asynchronous function !!! */
     this.readDir = new Transform({
       name: 'readDir',
       concurrency: 8,
       transform(x, callback) {
-        const read = async (entries, dirUUID, driveUUID, taskStatus) => {
+        const read = async (entries, dirUUID, driveUUID, task) => {
+          const files = []
           for (let i = 0; i < entries.length; i++) {
             const entry = entries[i]
             const stat = await fs.lstatAsync(path.resolve(entry))
-            taskStatus.count += 1
+            task.count += 1
             if (stat.isDirectory()) {
               /* create fold and return the uuid */
               const dirname = await getName(entry, dirUUID, driveUUID)
@@ -70,15 +70,16 @@ class Task {
               const children = await fs.readdirAsync(path.resolve(entry))
               const newEntries = []
               children.forEach(c => newEntries.push(path.join(entry, c)))
-              this.push({ entries: newEntries, dirUUID: uuid, driveUUID, taskStatus })
+              this.push({ entries: newEntries, dirUUID: uuid, driveUUID, task })
             } else {
-              taskStatus.size += stat.size
+              task.size += stat.size
             }
-            callback(null, { entry, dirUUID, driveUUID, stat, taskStatus })
+            files.push({ entry, stat })
           }
+          callback(null, { files, dirUUID, driveUUID, task })
         }
-        const { entries, dirUUID, driveUUID, taskStatus } = x
-        read(entries, dirUUID, driveUUID, taskStatus).catch(e => callback(e))
+        const { entries, dirUUID, driveUUID, task } = x
+        read(entries, dirUUID, driveUUID, task).catch(e => callback(e))
       }
     })
 
@@ -86,19 +87,22 @@ class Task {
       name: 'hash',
       concurrency: 4,
       push(x) {
-        if (x.stat.isDirectory()) {
-          this.outs.forEach(t => t.push(Object.assign({}, x, { type: 'folder' })))
-        } else {
-          this.pending.push(x)
-          this.schedule()
-        }
+        const { files, dirUUID, driveUUID, task } = x
+        files.forEach((f) => {
+          if (f.stat.isDirectory()) {
+            this.outs.forEach(t => t.push(Object.assign({}, f, { dirUUID, driveUUID, task, type: 'folder' })))
+          } else {
+            this.pending.push(Object.assign({}, f, { dirUUID, driveUUID, task }))
+            this.schedule()
+          }
+        })
       },
       transform: (x, callback) => {
-        const { entry, dirUUID, driveUUID, stat, taskStatus } = x
-        if (taskStatus.state !== 'uploading' && taskStatus.state !== 'uploadless') taskStatus.state = 'hashing'
+        const { entry, dirUUID, driveUUID, stat, task } = x
+        if (task.state !== 'uploading' && task.state !== 'uploadless') task.state = 'hashing'
         readXattr(entry, (error, attr) => {
           if (!error && attr && attr.parts) {
-            callback(null, { entry, dirUUID, driveUUID, parts: attr.parts, type: 'file', taskStatus })
+            callback(null, { entry, dirUUID, driveUUID, parts: attr.parts, type: 'file', task })
             return
           }
           const options = {
@@ -109,11 +113,11 @@ class Task {
           const child = childProcess.fork(path.join(__dirname, './filehash'), [], options)
           child.on('message', (result) => {
             setXattr(entry, result, (err, xattr) => {
-              callback(err, { entry, dirUUID, driveUUID, parts: xattr && xattr.parts, type: 'file', taskStatus })
+              callback(err, { entry, dirUUID, driveUUID, parts: xattr && xattr.parts, type: 'file', task })
             })
           })
           child.on('error', callback)
-         })
+        })
       }
     })
 
@@ -121,13 +125,14 @@ class Task {
       name: 'upload',
       concurrency: 4,
       push(x) {
-        if (x.taskStatus.state !== 'uploading') x.taskStatus.state = 'uploadless'
+        if (x.task.state !== 'uploading') x.task.state = 'uploadless'
         if (x.type === 'folder') {
-          x.taskStatus.finishCount += 1
+          x.task.finishCount += 1
           this.root().emit('data', x)
         } else {
+          /* combine to one post */
           const { dirUUID, uuid } = x
-          const i = this.pending.findIndex(p => p.length < 3 && p[0].dirUUID === dirUUID && p[0].uuid === uuid)
+          const i = this.pending.findIndex(p => p.length < 5 && p[0].dirUUID === dirUUID && p[0].uuid === uuid)
           if (i > -1) {
             this.pending[i].push(x)
           } else {
@@ -141,23 +146,23 @@ class Task {
         debug('upload transform start', X.length, X[0].entry)
 
         const Files = X.map((x) => {
-          const { entry, parts, taskStatus } = x
-          taskStatus.state = 'uploading'
+          const { entry, parts, task } = x
+          task.state = 'uploading'
           const name = entry.replace(/^.*\//, '')
           const readStreams = parts.map(part => fs.createReadStream(entry, { start: part.start, end: part.end, autoClose: true }))
           for (let i = 0; i < parts.length; i++) {
             const rs = readStreams[i]
             rs.on('data', (chunk) => {
               sendMsg()
-              taskStatus.completeSize += chunk.length
+              task.completeSize += chunk.length
             })
             rs.on('end', () => {
               // debug('readStreams end', entry)
-              taskStatus.finishCount += 1
-              if (taskStatus.finishCount === taskStatus.count) {
-                taskStatus.finishDate = (new Date()).getTime()
-                taskStatus.state = 'finished'
-                clearInterval(taskStatus.countSpeed)
+              task.finishCount += 1
+              if (task.finishCount === task.count) {
+                task.finishDate = (new Date()).getTime()
+                task.state = 'finished'
+                clearInterval(task.countSpeed)
               }
               sendMsg()
             })
@@ -165,9 +170,13 @@ class Task {
           return ({ name, parts, readStreams })
         })
         const { driveUUID, dirUUID } = X[0]
-        const handle = new UploadMultipleFiles(driveUUID, dirUUID, Files, callback)
+        const handle = new UploadMultipleFiles(driveUUID, dirUUID, Files, (error, value) => {
+          this.reqHandles.splice(this.reqHandles.indexOf(handle), 1)
+          callback(error, value)
+        })
+        this.reqHandles.push(handle)
         handle.upload()
-       }
+      }
     })
 
     this.readDir.pipe(this.hash).pipe(this.upload)
@@ -187,23 +196,35 @@ class Task {
   }
 
   run() {
-    this.readDir.push({ entries: this.entries, dirUUID: this.dirUUID, driveUUID: this.driveUUID, taskStatus: this.taskStatus })
+    this.initStatus()
+    this.countSpeed = setInterval(this.countSpeedFunc, 1000)
+    this.readDir.push({ entries: this.entries, dirUUID: this.dirUUID, driveUUID: this.driveUUID, task: this })
   }
 
   status() {
-    return this.taskStatus
+    const { uuid, entries, dirUUID, driveUUID, taskType, createTime, newWork, completeSize, lastTimeSize, count,
+      finishCount, finishDate, name, paused, restTime, size, speed, lastSpeed, state, trsType } = this
+    return ({ uuid, entries, dirUUID, driveUUID, taskType, createTime, newWork, completeSize, lastTimeSize, count,
+      finishCount, finishDate, name, paused, restTime, size, speed, lastSpeed, state, trsType })
   }
 
   pause() {
+    if (this.paused) return
+    this.paused = true
     this.readDir.clear()
     this.hash.clear()
     this.upload.clear()
+    this.reqHandles.forEach(h => h.abort())
+    clearInterval(this.countSpeed)
+    sendMsg()
   }
 
   resume() {
+    debug('resume!', this.uuid)
     this.initStatus()
-    this.taskStatus.newWork = false
-    this.readDir.push({ entries: this.entries, dirUUID: this.dirUUID, driveUUID: this.driveUUID, taskStatus: this.taskStatus })
+    this.newWork = false
+    this.run()
+    sendMsg()
   }
 }
 
