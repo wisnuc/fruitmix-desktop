@@ -159,12 +159,16 @@ ipcMain.on('DRAG_FILE', dragFileHandle)
 ipcMain.on('UPLOAD', uploadHandle)
 ipcMain.on('UPLOADMEDIA', uploadMediaHandle)
 
-ipcMain.on('DELETE_UPLOADING', (e, tasks) => {
-  return // TODO
-  tasks.forEach((item) => {
-    const obj = userTasks.find(task => task.uuid === item.uuid)
-    if (obj) obj.delete(cleanRecord)
+ipcMain.on('DELETE_UPLOADING', (e, uuids) => {
+  if (!Tasks.length || !uuids || !uuids.length) return
+  uuids.forEach((u) => {
+    const task = Tasks.find(t => t.uuid === u)
+    if (task) {
+      task.pause()
+      Tasks.splice(Tasks.indexOf(task), 1)
+    }
   })
+  debug('DELETE_UPLOADING', uuids)
 })
 
 ipcMain.on('PAUSE_UPLOADING', (e, uuids) => {

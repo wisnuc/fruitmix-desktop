@@ -78,13 +78,13 @@ class TrsContainer extends React.Component {
     }
 
     this.pause = (uuid, type) => {
-      if (type === 'download') ipcRenderer.send('PAUSE_DOWNLOADING', uuid)
-      else ipcRenderer.send('PAUSE_UPLOADING', uuid)
+      if (type === 'download') ipcRenderer.send('PAUSE_DOWNLOADING', [uuid])
+      else ipcRenderer.send('PAUSE_UPLOADING', [uuid])
     }
 
     this.resume = (uuid, type) => {
-      if (type === 'download') ipcRenderer.send('RESUME_DOWNLOADING', uuid)
-      else ipcRenderer.send('RESUME_UPLOADING', uuid)
+      if (type === 'download') ipcRenderer.send('RESUME_DOWNLOADING', [uuid])
+      else ipcRenderer.send('RESUME_UPLOADING', [uuid])
     }
 
     this.cleanRecord = () => {
@@ -139,10 +139,7 @@ class TrsContainer extends React.Component {
     this.deleteAll = (tasks) => {
       const downloadArr = []
       const uploadArr = []
-      tasks.forEach((item) => {
-        if (item.trsType === 'download') downloadArr.push(item)
-        else uploadArr.push(item)
-      })
+      tasks.forEach(item => item.trsType === 'download' ? downloadArr.push(item.uuid) : uploadArr.push(item.uuid))
 
       ipcRenderer.send('DELETE_DOWNLOADING', downloadArr)
       ipcRenderer.send('DELETE_UPLOADING', uploadArr)
