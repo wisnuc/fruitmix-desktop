@@ -1,5 +1,5 @@
-import path from 'path'
 import fs from 'fs'
+import path from 'path'
 import UUID from 'uuid'
 import Debug from 'debug'
 import { dialog, ipcMain } from 'electron'
@@ -55,7 +55,7 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
   const uploadingList = []
   const rootNodeUUID = null
   if (filtered.length) {
-    createTask(taskUUID, filtered, dirUUID, driveUUID, taskType, createTime, newWork, uploadingList, rootNodeUUID)
+    createTask(taskUUID, filtered, dirUUID, driveUUID, taskType, createTime, newWork)
   }
   return filtered.length
 }

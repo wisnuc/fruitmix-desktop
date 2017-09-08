@@ -283,7 +283,7 @@ class TrsContainer extends React.Component {
                     label="全部开始"
                     disabled={!userTasks.length}
                     icon={<PlaySvg style={{ color: '#000', opacity: 0.54 }} />}
-                    onTouchTap={() => this.hanldeAll(userTasks, 'RESUME')}
+                    onTouchTap={() => this.handleAll(userTasks, 'RESUME')}
                   /> :
                   <FlatButton
                     label="全部暂停"

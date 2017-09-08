@@ -271,6 +271,7 @@ Upload multiple files in one request.post
 @param {Object} Files[].readStream
 @param {function} callback
 */
+
 export class UploadMultipleFiles {
   constructor(driveUUID, dirUUID, Files, callback) {
     this.driveUUID = driveUUID
@@ -306,6 +307,91 @@ export class UploadMultipleFiles {
         form.append(name, rs, JSON.stringify(formDataOptions))
       }
     })
+  }
+
+  abort() {
+    if (this.handle) this.handle.abort()
+  }
+}
+
+export class DownloadFile {
+  constructor(driveUUID, dirUUID, entryUUID, fileName, newName, downloadPath, callback) {
+    this.driveUUID = driveUUID
+    this.dirUUID = dirUUID
+    this.entryUUID = entryUUID
+    this.fileName = fileName
+    this.newName = newName
+    this.downloadPath = downloadPath
+    this.callback = callback
+    this.handle = null
+  }
+
+  download() {
+    initArgs()
+    const options = {
+      method: 'GET',
+      url: this.dirUUID === 'media'
+      ? `${server}/media/${this.entryUUID}`
+      : `${server}/drives/${this.driveUUID}/dirs/${this.dirUUID}/entries/${this.entryUUID}`,
+
+      headers: {
+        Authorization,
+        // Range: wrapper.size ? `bytes=${this.wrapper.seek}-` : undefined
+      },
+      qs: this.dirUUID === 'media' ? { alt: 'data' } : { name: this.fileName }
+    }
+
+      /*
+    const streamOptions = {
+      flags: this.wrapper.seek === 0 ? 'w' : 'r+',
+      start: this.wrapper.seek,
+      defaultEncoding: 'utf8',
+      fd: null,
+      mode: 0o666,
+      autoClose: true
+    }
+    */
+
+    const absPath = path.join(this.downloadPath, this.newName)
+    const stream = fs.createWriteStream(absPath)
+    // const stream = fs.createWriteStream(this.tmpDownloadPath, streamOptions)
+
+    stream.on('error', err => console.log('stream error trigger', err))
+
+    stream.on('drain', () => {
+      /*
+      const gap = stream.bytesWritten - this.wrapper.lastTimeSize
+      this.wrapper.seek += gap
+      this.wrapper.manager.completeSize += gap
+      this.wrapper.lastTimeSize = stream.bytesWritten
+      wrapper.manager.updateStore()
+      */
+    })
+
+    stream.on('finish', () => {
+      /*
+      const gap = stream.bytesWritten - this.wrapper.lastTimeSize
+      this.wrapper.seek += gap
+      this.wrapper.manager.completeSize += gap
+      this.wrapper.lastTimeSize = stream.bytesWritten
+
+      console.log(`一段文件写入结束 当前seek位置为 ：${this.wrapper.seek}, 共${this.wrapper.size}`)
+
+      this.wrapper.lastTimeSize = 0
+      if (this.wrapper.seek >= this.wrapper.size) this.rename(this.tmpDownloadPath)
+      */
+    })
+
+    this.handle = request(options)
+    this.handle.on('end', (error, response, body) => {
+      if (error) return this.callback(error)
+      if (response && response.statusCode && (response.statusCode !== 200 && response.statusCode !== 206)) {
+        return this.callback(Error('response code not 200'))
+      }
+      return this.callback(null)
+    })
+
+    this.handle.pipe(stream)
   }
 
   abort() {

@@ -1,3 +1,4 @@
+import store from '../serve/store/store'
 const Promise = require('bluebird')
 const fs = Promise.promisifyAll(require('fs'))
 const path = require('path')
@@ -7,16 +8,18 @@ const request = require('request')
 
 const Transform = require('./transform')
 const { readXattr, setXattr } = require('./xattr')
-const { createFoldAsync, UploadMultipleFiles, serverGetAsync } = require('./server')
+const { serverGetAsync, DownloadFile } = require('./server')
 const { getMainWindow } = require('./window')
 const { Tasks, sendMsg } = require('./transmissionUpdate')
 
 /* return a new file name */
-const getName = async (currPath, dirUUID, driveUUID) => currPath.replace(/^.*\//, '') // TODO
+const getName = async (currName, dirUUID, driveUUID) => currName // TODO
+
+const getDownloadPath = () => store.getState().config.downloadPath
 
 class Task {
   constructor(props) {
-    /* props: { uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew } */
+    /* props: { uuid, downloadPath, entries, dirUUID, driveUUID, taskType, createTime, isNew } */
 
     this.initStatus = () => {
       Object.assign(this, props)
@@ -25,14 +28,14 @@ class Task {
       this.count = 0
       this.finishCount = 0
       this.finishDate = 0
-      this.name = props.entries[0].replace(/^.*\//, '')
+      this.name = props.entries[0].name
       this.paused = false
       this.restTime = 0
       this.size = 0
       this.speed = 0
       this.lastSpeed = 0
       this.state = 'visitless'
-      this.trsType = 'upload'
+      this.trsType = 'download'
     }
 
     this.initStatus()
@@ -53,84 +56,11 @@ class Task {
 
     this.reqHandles = []
 
-    /* Transform must be an asynchronous function !!! */
-    this.readDir = new Transform({
-      name: 'readDir',
-      concurrency: 8,
-      transform(x, callback) {
-        const read = async (entries, dirUUID, driveUUID, task) => {
-          const files = []
-          for (let i = 0; i < entries.length; i++) {
-            if (task.paused) throw Error('task paused !')
-            const entry = entries[i]
-            const stat = await fs.lstatAsync(path.resolve(entry))
-            task.count += 1
-            if (stat.isDirectory()) {
-              /* create fold and return the uuid */
-              const dirname = await getName(entry, dirUUID, driveUUID)
-              const Entries = await createFoldAsync(driveUUID, dirUUID, dirname)
-              const uuid = Entries.find(e => e.name === dirname).uuid
-
-              /* read child */
-              const children = await fs.readdirAsync(path.resolve(entry))
-              const newEntries = []
-              children.forEach(c => newEntries.push(path.join(entry, c)))
-              this.push({ entries: newEntries, dirUUID: uuid, driveUUID, task })
-            } else {
-              task.size += stat.size
-            }
-            files.push({ entry, stat })
-          }
-          return ({ files, dirUUID, driveUUID, task })
-        }
-        const { entries, dirUUID, driveUUID, task } = x
-        read(entries, dirUUID, driveUUID, task).then(y => callback(null, y)).catch(e => callback(e))
-      }
-    })
-
-    this.hash = new Transform({
-      name: 'hash',
-      concurrency: 4,
-      push(x) {
-        const { files, dirUUID, driveUUID, task } = x
-        files.forEach((f) => {
-          if (f.stat.isDirectory()) {
-            this.outs.forEach(t => t.push(Object.assign({}, f, { dirUUID, driveUUID, task, type: 'folder' })))
-          } else {
-            this.pending.push(Object.assign({}, f, { dirUUID, driveUUID, task }))
-            this.schedule()
-          }
-        })
-      },
-      transform: (x, callback) => {
-        const { entry, dirUUID, driveUUID, stat, task } = x
-        if (task.state !== 'uploading' && task.state !== 'diffing') task.state = 'hashing'
-        readXattr(entry, (error, attr) => {
-          if (!error && attr && attr.parts) {
-            callback(null, { entry, dirUUID, driveUUID, parts: attr.parts, type: 'file', stat, task })
-            return
-          }
-          const options = {
-            env: { absPath: entry, size: stat.size, partSize: 1024 * 1024 * 1024 },
-            encoding: 'utf8',
-            cwd: process.cwd()
-          }
-          const child = childProcess.fork(path.join(__dirname, './filehash'), [], options)
-          child.on('message', (result) => {
-            setXattr(entry, result, (err, xattr) => {
-              callback(err, { entry, dirUUID, driveUUID, parts: xattr && xattr.parts, type: 'file', stat, task })
-            })
-          })
-          child.on('error', callback)
-        })
-      }
-    })
-
     this.diff = new Transform({
       name: 'diff',
       concurrency: 4,
       push(x) {
-        if (x.type === 'folder' || x.task.isNew) {
+        if (x.type === 'directory' || x.task.isNew) {
           this.outs.forEach(t => t.push([x]))
         } else {
           /* combine to one post */
@@ -171,78 +101,84 @@ class Task {
       }
     })
 
-    this.upload = new Transform({
-      name: 'upload',
+    /* Transform must be an asynchronous function !!! */
+    this.readRemote = new Transform({
+      name: 'readRemote',
       concurrency: 4,
-      push(X) {
-        X.forEach((x) => {
-          if (x.type === 'folder') {
-            x.task.finishCount += 1
-            this.root().emit('data', x)
-          } else {
-            /* combine to one post */
-            const { dirUUID, uuid } = x
-            const i = this.pending.findIndex(p => p.length < 10 && p[0].dirUUID === dirUUID && p[0].uuid === uuid)
-            if (i > -1) {
-              this.pending[i].push(x)
+      transform(x, callback) {
+        const read = async (entries, downloadPath, dirUUID, driveUUID, task) => {
+          for (let i = 0; i < entries.length; i++) {
+            if (task.paused) throw Error('task paused !')
+            const entry = entries[i]
+            task.count += 1
+            if (entry.type === 'directory') {
+              /* mkdir */
+              entry.newName = await getName(entry.name, dirUUID, driveUUID)
+              const newPath = path.join(downloadPath, entry.newName)
+
+              await fs.mkdirAsync(newPath)
+
+              /* read remote child */
+              const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${entry.uuid}`)
+              const children = listNav.entries
+
+              this.push({ entries: children, downloadPath: newPath, dirUUID: entry.uuid, driveUUID, task })
             } else {
-              this.pending.push([x])
+              task.size += entry.size
             }
+          }
+          return ({ entries, downloadPath, dirUUID, driveUUID, task })
+        }
+        const { entries, downloadPath, dirUUID, driveUUID, task } = x
+        read(entries, downloadPath, dirUUID, driveUUID, task).then(y => callback(null, y)).catch(e => callback(e))
+      }
+    })
+
+    this.download = new Transform({
+      name: 'download',
+      concurrency: 1,
+      push(X) {
+        const { entries, downloadPath, dirUUID, driveUUID, task } = X
+        entries.forEach((entry) => {
+          if (entry.type === 'directory') {
+            task.finishCount += 1
+            this.root().emit('data', { entry, downloadPath, dirUUID, driveUUID, task })
+          } else {
+            this.pending.push({ entry, downloadPath, dirUUID, driveUUID, task })
           }
         })
         this.schedule()
       },
-      transform: (X, callback) => {
-        debug('upload transform start', X.length, X[0].entry)
-
-        const Files = X.map((x) => {
-          const { entry, parts, task } = x
-          const name = entry.replace(/^.*\//, '')
-          const readStreams = parts.map(part => fs.createReadStream(entry, { start: part.start, end: part.end, autoClose: true }))
-          for (let i = 0; i < parts.length; i++) {
-            const rs = readStreams[i]
-            rs.on('data', (chunk) => {
-              sendMsg()
-              if (task.paused) return
-              task.completeSize += chunk.length
-            })
-            rs.on('end', () => {
-              // debug('readStreams end', entry)
-              if (task.paused) return
-              task.finishCount += 1
-              if (task.finishCount === task.count) {
-                task.finishDate = (new Date()).getTime()
-                task.state = 'finished'
-                clearInterval(task.countSpeed)
-              }
-              sendMsg()
-            })
-          }
-          return ({ name, parts, readStreams })
-        })
-
-        const { driveUUID, dirUUID, task } = X[0]
-        task.state = 'uploading'
-        const handle = new UploadMultipleFiles(driveUUID, dirUUID, Files, (error) => {
+      transform: (x, callback) => {
+        debug('download transform start', x.entry)
+        const { entry, downloadPath, dirUUID, driveUUID, task } = x
+        task.state = 'downloading'
+        entry.newName = entry.name
+        const handle = new DownloadFile(driveUUID, dirUUID, entry.uuid, entry.name, entry.newName, downloadPath, (error) => {
           this.reqHandles.splice(this.reqHandles.indexOf(handle), 1)
-          callback(error, { driveUUID, dirUUID, Files, task })
+          if (!error) {
+            task.finishCount += 1
+            if (task.count === task.finishCount) {
+              task.state = 'finished'
+              task.finishDate = (new Date()).getTime()
+            }
+          }
+          callback(error, { entry, downloadPath, dirUUID, driveUUID, task })
         })
         this.reqHandles.push(handle)
-        handle.upload()
+        handle.download()
       }
     })
 
-    this.readDir.pipe(this.hash).pipe(this.diff).pipe(this.upload)
+    this.readRemote.pipe(this.download)
 
-    this.readDir.on('data', (x) => {
-      const { dirUUID } = x
-      getMainWindow().webContents.send('driveListUpdate', { uuid: dirUUID })
-      if (x.type === 'folder') debug('done folder', x.name)
-      if (x.Files) debug('done files:', x.Files.length, x.Files[0].name)
+    this.readRemote.on('data', (x) => {
+      const { task, entry } = x
+      debug('Download finished:', entry.newName)
       sendMsg()
     })
 
-    this.readDir.on('step', () => {
+    this.readRemote.on('step', () => {
       // debug('===================================')
       // this.readDir.print()
     })
@@ -250,13 +186,14 @@ class Task {
 
   run() {
     this.countSpeed = setInterval(this.countSpeedFunc, 1000)
-    this.readDir.push({ entries: this.entries, dirUUID: this.dirUUID, driveUUID: this.driveUUID, task: this })
+    this.readRemote.push({ entries: this.entries, downloadPath: this.downloadPath, dirUUID: this.dirUUID, driveUUID: this.driveUUID, task: this })
   }
 
   status() {
-    const { uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew, completeSize, lastTimeSize, count,
+    const { uuid, downloadPath, entries, dirUUID, driveUUID, taskType, createTime, isNew, completeSize, lastTimeSize, count,
       finishCount, finishDate, name, paused, restTime, size, speed, lastSpeed, state, trsType } = this
     return ({ uuid,
+      downloadPath,
       entries,
       dirUUID,
       driveUUID,
@@ -281,9 +218,8 @@ class Task {
   pause() {
     if (this.paused) return
     this.paused = true
-    this.readDir.clear()
-    this.hash.clear()
-    this.upload.clear()
+    this.readRemote.clear()
+    this.download.clear()
     this.reqHandles.forEach(h => h.abort())
     clearInterval(this.countSpeed)
     sendMsg()
@@ -297,8 +233,9 @@ class Task {
   }
 }
 
-const createTask = (uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew) => {
-  const task = new Task({ uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew })
+const createTask = (uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew, absPath) => {
+  const downloadPath = absPath || getDownloadPath()
+  const task = new Task({ uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew, downloadPath })
   Tasks.push(task)
   task.run()
   sendMsg()
