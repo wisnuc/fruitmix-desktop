@@ -1,18 +1,23 @@
+import fs from 'fs'
+import path from 'path'
+import UUID from 'uuid'
 import Debug from 'debug'
 import { getMainWindow } from './window'
 import { ipcMain, shell } from 'electron'
+import { createTask } from './downloadTransform'
 import { downloadFile } from './server'
 
 const debug = Debug('node:lib:newDownload: ')
 
-const downloadHandle = (event, args, callback) => {
-  const files = args.files
-  const folders = args.folders
-  files.forEach(item => createTask(item.uuid, item.name, item.size, item.type, args.dirUUID, true, null, null, null, null, args.driveUUID, item.name))
-  folders.forEach(item => createTask(item.uuid, item.name, 0, item.type, args.dirUUID ? args.dirUUID : item.uuid, true, null, null, null, null, args.driveUUID, item.name))
-
-  const count = files.length + folders.length
-  getMainWindow().webContents.send('snackbarMessage', { message: `${count}个任务添加至下载队列` })
+const downloadHandle = (event, args) => {
+  const { entries, dirUUID, driveUUID } = args
+  const taskUUID = UUID.v4()
+  const taskType = entries[0].type
+  const createTime = (new Date()).getTime()
+  const newWork = true
+  debug('downloadHandle', taskUUID, entries, dirUUID, driveUUID, taskType, createTime, newWork)
+  createTask(taskUUID, entries, dirUUID, driveUUID, taskType, createTime, newWork)
+  getMainWindow().webContents.send('snackbarMessage', { message: `${entries.length}个项目添加至下载队列` })
 }
 
 const openHandle = (event, args) => {

@@ -56,7 +56,7 @@ class Task {
     /* Transform must be an asynchronous function !!! */
     this.readDir = new Transform({
       name: 'readDir',
-      concurrency: 8,
+      concurrency: 4,
       transform(x, callback) {
         const read = async (entries, dirUUID, driveUUID, task) => {
           const files = []
@@ -93,6 +93,7 @@ class Task {
       concurrency: 4,
       push(x) {
         const { files, dirUUID, driveUUID, task } = x
+        debug('this.hash push', { files, dirUUID, driveUUID })
         files.forEach((f) => {
           if (f.stat.isDirectory()) {
             this.outs.forEach(t => t.push(Object.assign({}, f, { dirUUID, driveUUID, task, type: 'folder' })))
@@ -146,7 +147,7 @@ class Task {
       },
 
       transform: (X, callback) => {
-        debug('this.diff transform', X.length)
+        // debug('this.diff transform', X.length)
         const diffAsync = async (local, driveUUID, dirUUID, task) => {
           const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
           const remote = listNav.entries
@@ -156,7 +157,7 @@ class Task {
           remote.forEach((r) => {
             if (map.has(r.name)) {
               task.finishCount += 1
-              debug('this.diff transform find already finished', task.finishCount, r.name)
+              // debug('this.diff transform find already finished', task.finishCount, r.name)
               task.completeSize += map.get(r.name).stat.size
               map.delete(r.name)
             }
@@ -173,7 +174,7 @@ class Task {
 
     this.upload = new Transform({
       name: 'upload',
-      concurrency: 4,
+      concurrency: 1,
       push(X) {
         X.forEach((x) => {
           if (x.type === 'folder') {
@@ -182,7 +183,7 @@ class Task {
           } else {
             /* combine to one post */
             const { dirUUID, uuid } = x
-            const i = this.pending.findIndex(p => p.length < 10 && p[0].dirUUID === dirUUID && p[0].uuid === uuid)
+            const i = this.pending.findIndex(p => p.length < 10 && p[0].dirUUID === dirUUID)
             if (i > -1) {
               this.pending[i].push(x)
             } else {
@@ -193,7 +194,7 @@ class Task {
         this.schedule()
       },
       transform: (X, callback) => {
-        debug('upload transform start', X.length, X[0].entry)
+        // debug('upload transform start', X.length, X[0].entry)
 
         const Files = X.map((x) => {
           const { entry, parts, task } = x
@@ -237,8 +238,8 @@ class Task {
     this.readDir.on('data', (x) => {
       const { dirUUID } = x
       getMainWindow().webContents.send('driveListUpdate', { uuid: dirUUID })
-      if (x.type === 'folder') debug('done folder', x.name)
-      if (x.Files) debug('done files:', x.Files.length, x.Files[0].name)
+      // if (x.type === 'folder') debug('done folder', x.name)
+      // if (x.Files) debug('done files:', x.Files.length, x.Files[0].name)
       sendMsg()
     })
 

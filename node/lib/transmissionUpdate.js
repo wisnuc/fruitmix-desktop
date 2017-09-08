@@ -92,9 +92,7 @@ ipcMain.on('GET_TRANSMISSION', sendMsg)
 ipcMain.on('OPEN_TRANSMISSION', (e, tasks) => { // FIXME
   const osType = os.platform()
   tasks.forEach((task) => {
-    const pathProperty = task.trsType === 'download' ? 'downloadPath' : 'abspath'
-    const taskPath = task.trsType === 'download' ?
-      task[pathProperty] : task[pathProperty].substring(0, task[pathProperty].lastIndexOf('\\'))
+    const taskPath = task.downloadPath
     debug('打开目录的文件资源管理器', taskPath) // FIXME
     switch (osType) {
       case 'win32':

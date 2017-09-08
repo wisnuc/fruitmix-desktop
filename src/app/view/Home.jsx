@@ -84,19 +84,10 @@ class Home extends Base {
 
     this.download = () => {
       if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
-      const entries = this.state.entries
       const selected = this.state.select.selected
+      const entries = selected.map(index => this.state.entries[index])
       const path = this.state.path
-      const folders = []
-      const files = []
-
-      selected.forEach((item) => {
-        const obj = entries[item]
-        if (obj.type === 'directory') folders.push(obj)
-        else if (obj.type === 'file') files.push(obj)
-      })
-
-      ipcRenderer.send('DOWNLOAD', { folders, files, dirUUID: path[path.length - 1].uuid, driveUUID: path[0].uuid })
+      ipcRenderer.send('DOWNLOAD', { entries, dirUUID: path[path.length - 1].uuid, driveUUID: path[0].uuid })
     }
 
     this.dupFile = () => {

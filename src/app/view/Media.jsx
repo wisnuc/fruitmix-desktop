@@ -309,7 +309,7 @@ class Media extends Base {
           uuid: photo.hash
         }))
 
-      ipcRenderer.send('DOWNLOAD', { folders: [], files: photos, dirUUID: 'media' })
+      ipcRenderer.send('DOWNLOAD', { entries: photos, dirUUID: 'media' })
       this.setState({ selectedItems: [] })
     }
 
