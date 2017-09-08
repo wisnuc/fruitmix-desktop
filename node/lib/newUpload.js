@@ -4,15 +4,13 @@ import UUID from 'uuid'
 import Debug from 'debug'
 import { dialog, ipcMain } from 'electron'
 import { getMainWindow } from './window'
-import { createTask, forceSchedule, abortTask } from './uploadTransform'
+import { createTask } from './uploadTransform'
 import { serverGetAsync } from './server'
-import { sendMsg, Tasks } from './transmissionUpdate'
+import { sendMsg } from './transmissionUpdate'
 
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
 
 const debug = Debug('node:lib:newUpload: ')
-const userTasks = []
-const finishTasks = []
 
 const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
   const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
@@ -66,14 +64,14 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
 const readUploadInfo = (entries, dirUUID, driveUUID) => {
   readUploadInfoAsync(entries, dirUUID, driveUUID)
     .then((count) => {
-      let message = `${count}个任务添加至上传队列`
+      let message = `${count}个项目添加至上传队列`
       if (count < entries.length) message = `${message} (忽略了${entries.length - count}个不支持的文件)`
       getMainWindow().webContents.send('snackbarMessage', { message })
     })
     .catch((e) => {
       debug('readUploadInfo error: ', e)
       if (e.code === 'ECONNREFUSED') {
-        getMainWindow().webContents.send('snackbarMessage', { message: '与wisnuc的连接已断开' })
+        getMainWindow().webContents.send('snackbarMessage', { message: '与设备的连接已断开' })
       } else if (e.message !== 'cancel') {
         getMainWindow().webContents.send('snackbarMessage', { message: '读取上传文件失败' })
       }
@@ -85,15 +83,14 @@ const uploadHandle = (event, args) => {
   const { driveUUID, dirUUID, type, filters } = args
   const dialogType = type === 'folder' ? 'openDirectory' : 'openFile'
   dialog.showOpenDialog(getMainWindow(), { properties: [dialogType, 'multiSelections'], filters }, (entries) => {
-    if (!entries || !entries.length) return debug('no entry !')
-    // readDir.push({ entries, dirUUID, driveUUID })
+    if (!entries || !entries.length) return
     readUploadInfo(entries, dirUUID, driveUUID)
   })
 }
 
 const dragFileHandle = (event, args) => {
   let entries = args.files
-  if (!entries || !entries.length) return debug('no entry !')
+  if (!entries || !entries.length) return
   entries = entries.map(entry => path.normalize(entry))
   readUploadInfo(entries, args.dirUUID, args.driveUUID)
 }
@@ -128,73 +125,9 @@ const startTransmissionHandle = () => {
   })
 }
 
-const deleteUploadedHandle = (e, tasks) => {
-  tasks.forEach((item) => {
-    const obj = finishTasks.find(task => task.uuid === item.uuid)
-    if (obj) cleanRecord('finish', item.uuid)
-  })
-}
-
-const cleanRecord = (type, uuid) => {
-  const list = type === 'finish' ? finishTasks : userTasks
-  const d = type === 'finish' ? db.uploaded : db.uploading
-  const index = list.findIndex(item => item.uuid === uuid)
-  if (index === -1) return console.log('任务没有在任务列表中')
-
-  console.log(`删除列表中任务... 第${index + 1}个 共${list.length}个`)
-  list.splice(index, 1)
-  console.log(`列表中任务删除完成 剩余${list.length}个`)
-  d.remove({ _id: uuid }, {}, (err, doc) => {
-    if (err) return console.log('删除数据库记录出错')
-    console.log('删除数据库记录成功')
-    sendMsg()
-  })
-}
-
 /* ipc listener */
-ipcMain.on('START_TRANSMISSION', startTransmissionHandle)
-// ipcMain.on('GET_TRANSMISSION', sendMsg)
-ipcMain.on('DELETE_UPLOADED', deleteUploadedHandle)
 ipcMain.on('DRAG_FILE', dragFileHandle)
 ipcMain.on('UPLOAD', uploadHandle)
 ipcMain.on('UPLOADMEDIA', uploadMediaHandle)
-
-ipcMain.on('DELETE_UPLOADING', (e, uuids) => {
-  if (!Tasks.length || !uuids || !uuids.length) return
-  uuids.forEach((u) => {
-    const task = Tasks.find(t => t.uuid === u)
-    if (task) {
-      task.pause()
-      Tasks.splice(Tasks.indexOf(task), 1)
-    }
-  })
-  debug('DELETE_UPLOADING', uuids)
-})
-
-ipcMain.on('PAUSE_UPLOADING', (e, uuids) => {
-  if (!Tasks.length || !uuids || !uuids.length) return
-  uuids.forEach((u) => {
-    const task = Tasks.find(t => t.uuid === u)
-    if (task) task.pause()
-  })
-  debug('PAUSE_UPLOADING', uuids)
-})
-
-ipcMain.on('RESUME_UPLOADING', (e, uuids) => {
-  if (!Tasks.length || !uuids || !uuids.length) return
-  uuids.forEach((u) => {
-    const task = Tasks.find(t => t.uuid === u)
-    if (task) task.resume()
-  })
-  debug('RESUME_UPLOADING', uuids)
-})
-
-ipcMain.on('LOGIN_OUT', (e) => {
-  console.log('LOGIN_OUT in upload')
-  userTasks.forEach(item => item.pauseTask())
-  userTasks.length = 0
-  finishTasks.length = 0
-  sendMsg()
-})
-
-export { userTasks, finishTasks }
+// ipcMain.on('START_TRANSMISSION', startTransmissionHandle)
+// ipcMain.on('GET_TRANSMISSION', sendMsg)

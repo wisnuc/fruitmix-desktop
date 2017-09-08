@@ -60,89 +60,14 @@ class TrsContainer extends React.Component {
       })
     }
 
-    this.delete = () => {
-      const downloadArr = []
-      const uploadArr = []
-      this.state.tasks.forEach((item) => {
-        if (item.trsType === 'download') downloadArr.push(item)
-        else uploadArr.push(item)
-      })
-
-      ipcRenderer.send(this.taskSelected.length ? 'DELETE_DOWNLOADING' : 'DELETE_DOWNLOADED', downloadArr)
-      ipcRenderer.send(this.taskSelected.length ? 'DELETE_UPLOADING' : 'DELETE_UPLOADED', uploadArr)
-    }
-
-    this.open = () => {
-      debug('this.open', this.state.tasks)
-      ipcRenderer.send('OPEN_TRANSMISSION', this.state.tasks)
-    }
-
-    this.pause = (uuid, type) => {
-      if (type === 'download') ipcRenderer.send('PAUSE_DOWNLOADING', [uuid])
-      else ipcRenderer.send('PAUSE_UPLOADING', [uuid])
-    }
-
-    this.resume = (uuid, type) => {
-      if (type === 'download') ipcRenderer.send('RESUME_DOWNLOADING', [uuid])
-      else ipcRenderer.send('RESUME_UPLOADING', [uuid])
-    }
-
-    this.cleanRecord = () => {
-      ipcRenderer.send('CLEAN_RECORD')
-    }
-
-    this.cleanTaskSelect = () => {
-      this.taskSelected.forEach((item) => {
-        if (this.refs[item]) {
-          this.refs[item].updateDom(false)
-        }
-      })
-      this.taskSelected.length = 0 // need to keep the same reference
-    }
-
-    this.cleanFinishSelect = () => {
-      this.finishSelected.forEach((item) => {
-        if (this.refs[item]) {
-          this.refs[item].updateDom(false)
-        }
-      })
-      this.finishSelected.length = 0 // need to keep the same reference
-    }
-
     this.openMenu = (event, obj) => {
+      debug('this.openMenu', obj.tasks)
       const containerDom = document.getElementById('content-container')
       const maxLeft = containerDom.offsetLeft + containerDom.clientWidth - 168
       const x = event.clientX > maxLeft ? maxLeft : event.clientX
       const maxTop = containerDom.offsetTop + containerDom.offsetHeight - (16 + 96 + (obj.play + obj.pause) * 48)
       const y = event.clientY > maxTop ? maxTop : event.clientY
       this.setState({ menuShow: true, x, y, play: obj.play, pause: obj.pause, tasks: obj.tasks })
-    }
-
-    this.playAll = (tasks) => {
-      const downloadArr = []
-      const uploadArr = []
-
-      tasks.forEach(item => item.trsType === 'download' ? downloadArr.push(item.uuid) : uploadArr.push(item.uuid))
-      ipcRenderer.send('RESUME_DOWNLOADING', downloadArr)
-      ipcRenderer.send('RESUME_UPLOADING', uploadArr)
-    }
-
-    this.pauseAll = (tasks) => {
-      const downloadArr = []
-      const uploadArr = []
-
-      tasks.forEach(item => item.trsType === 'download' ? downloadArr.push(item.uuid) : uploadArr.push(item.uuid))
-      ipcRenderer.send('PAUSE_DOWNLOADING', downloadArr)
-      ipcRenderer.send('PAUSE_UPLOADING', uploadArr)
-    }
-
-    this.deleteAll = (tasks) => {
-      const downloadArr = []
-      const uploadArr = []
-      tasks.forEach(item => item.trsType === 'download' ? downloadArr.push(item.uuid) : uploadArr.push(item.uuid))
-
-      ipcRenderer.send('DELETE_DOWNLOADING', downloadArr)
-      ipcRenderer.send('DELETE_UPLOADING', uploadArr)
     }
 
     this.select = (type, id, isSelected, index, e) => {
@@ -232,13 +157,67 @@ class TrsContainer extends React.Component {
         /* add play or pause option to running task */
         if (type === 'running') {
           for (let i = 0; i < tasks.length; i++) {
-            if (tasks[i].pause) play = true
+            if (tasks[i].paused) play = true
             else pause = true
           }
         }
 
         this.openMenu(e, { type, pause, play, tasks })
       }
+    }
+
+    this.cleanTaskSelect = () => {
+      this.taskSelected.forEach((item) => {
+        if (this.refs[item]) {
+          this.refs[item].updateDom(false)
+        }
+      })
+      this.taskSelected.length = 0 // need to keep the same reference
+    }
+
+    this.cleanFinishSelect = () => {
+      this.finishSelected.forEach((item) => {
+        if (this.refs[item]) {
+          this.refs[item].updateDom(false)
+        }
+      })
+      this.finishSelected.length = 0 // need to keep the same reference
+    }
+
+    /* ipc communication */
+    this.pause = (uuid, type) => {
+      if (type === 'download') ipcRenderer.send('PAUSE_DOWNLOADING', [uuid])
+      else ipcRenderer.send('PAUSE_UPLOADING', [uuid])
+    }
+
+    this.resume = (uuid, type) => {
+      if (type === 'download') ipcRenderer.send('RESUME_DOWNLOADING', [uuid])
+      else ipcRenderer.send('RESUME_UPLOADING', [uuid])
+    }
+
+    /* type: 'PAUSE', 'RESUME', 'DELETE' */
+    this.handleAll = (tasks, type) => {
+      debug('handleALL', tasks, type, this.taskSelected)
+      const downloadArr = []
+      const uploadArr = []
+
+      tasks.forEach(item => item.trsType === 'download' ? downloadArr.push(item.uuid) : uploadArr.push(item.uuid))
+      if (type === 'DELETE') {
+        ipcRenderer.send(this.taskSelected.length ? 'DELETE_DOWNLOADING' : 'DELETE_DOWNLOADED', downloadArr)
+        ipcRenderer.send(this.taskSelected.length ? 'DELETE_UPLOADING' : 'DELETE_UPLOADED', uploadArr)
+      } else {
+        ipcRenderer.send(`${type}_DOWNLOADING`, downloadArr)
+        ipcRenderer.send(`${type}_UPLOADING`, uploadArr)
+      }
+    }
+
+    this.cleanRecord = () => {
+      ipcRenderer.send('CLEAN_RECORD')
+    }
+
+    this.open = () => {
+      debug('this.open', this.state.tasks)
+      ipcRenderer.send('OPEN_TRANSMISSION', this.state.tasks)
     }
 
     this.updateTransmission = (e, userTasks, finishTasks) => {
@@ -260,7 +239,7 @@ class TrsContainer extends React.Component {
   }
 
   render() {
-    debug('render TrsContainer')
+    // debug('render TrsContainer')
     const userTasks = this.state.userTasks
     const finishTasks = this.state.finishTasks
 
@@ -279,7 +258,7 @@ class TrsContainer extends React.Component {
       margin: '8px 88px 12px 88px'
     }
 
-    /* show playAll button when allPaused = true */
+    /* show resumeAll button when allPaused = true */
     let allPaused = true
     userTasks.forEach((task) => {
       if (!task.paused) {
@@ -304,13 +283,13 @@ class TrsContainer extends React.Component {
                     label="全部开始"
                     disabled={!userTasks.length}
                     icon={<PlaySvg style={{ color: '#000', opacity: 0.54 }} />}
-                    onTouchTap={() => this.playAll(userTasks)}
+                    onTouchTap={() => this.hanldeAll(userTasks, 'RESUME')}
                   /> :
                   <FlatButton
                     label="全部暂停"
                     disabled={!userTasks.length}
                     icon={<PauseSvg style={{ color: '#000', opacity: 0.54 }} />}
-                    onTouchTap={() => this.pauseAll(userTasks)}
+                    onTouchTap={() => this.handleAll(userTasks, 'PAUSE')}
                   />
               }
             <FlatButton
@@ -424,10 +403,10 @@ class TrsContainer extends React.Component {
             >
               <Paper style={{ position: 'absolute', top: this.state.y, left: this.state.x }}>
                 <Menu>
-                  { this.state.play && <MenuItem primaryText="继续" onTouchTap={() => this.playAll(this.state.tasks)} /> }
-                  { this.state.pause && <MenuItem primaryText="暂停" onTouchTap={() => this.pauseAll(this.state.tasks)} /> }
+                  { this.state.play && <MenuItem primaryText="继续" onTouchTap={() => this.handleAll(this.state.tasks, 'RESUME')} /> }
+                  { this.state.pause && <MenuItem primaryText="暂停" onTouchTap={() => this.handleAll(this.state.tasks, 'PAUSE')} /> }
                   { this.state.tasks[0].trsType === 'download' && <MenuItem primaryText="打开所在文件夹" onTouchTap={this.open} /> }
-                  <MenuItem primaryText="删除" onTouchTap={this.delete} />
+                  <MenuItem primaryText="删除" onTouchTap={() => this.handleAll(this.state.tasks, 'DELETE')} />
                 </Menu>
               </Paper>
             </div>
@@ -455,7 +434,7 @@ class TrsContainer extends React.Component {
                       primary
                       onTouchTap={() => {
                         this.toggleDialog('clearRunningDialog')
-                        this.deleteAll(userTasks)
+                        this.handleAll(userTasks, 'DELETE')
                       }}
                     />
                   </div>

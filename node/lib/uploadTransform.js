@@ -8,6 +8,7 @@ const request = require('request')
 const Transform = require('./transform')
 const { readXattr, setXattr } = require('./xattr')
 const { createFoldAsync, UploadMultipleFiles, serverGetAsync } = require('./server')
+const { getMainWindow } = require('./window')
 const { Tasks, sendMsg } = require('./transmissionUpdate')
 
 /* return a new file name */
@@ -129,7 +130,6 @@ class Task {
       name: 'diff',
       concurrency: 4,
       push(x) {
-        debug('this.diff push x.task.isNew', x.task.isNew)
         if (x.type === 'folder' || x.task.isNew) {
           this.outs.forEach(t => t.push([x]))
         } else {
@@ -220,11 +220,12 @@ class Task {
           }
           return ({ name, parts, readStreams })
         })
+
         const { driveUUID, dirUUID, task } = X[0]
         task.state = 'uploading'
-        const handle = new UploadMultipleFiles(driveUUID, dirUUID, Files, (error, value) => {
+        const handle = new UploadMultipleFiles(driveUUID, dirUUID, Files, (error) => {
           this.reqHandles.splice(this.reqHandles.indexOf(handle), 1)
-          callback(error, value)
+          callback(error, { driveUUID, dirUUID, Files, task })
         })
         this.reqHandles.push(handle)
         handle.upload()
@@ -233,12 +234,12 @@ class Task {
 
     this.readDir.pipe(this.hash).pipe(this.diff).pipe(this.upload)
 
-    this.readDir.on('data', (X) => {
-      if (!Array.isArray(X)) return
-      X.forEach((x) => {
-        debug('done:', x.name)
-        sendMsg()
-      })
+    this.readDir.on('data', (x) => {
+      const { dirUUID } = x
+      getMainWindow().webContents.send('driveListUpdate', { uuid: dirUUID })
+      if (x.type === 'folder') debug('done folder', x.name)
+      if (x.Files) debug('done files:', x.Files.length, x.Files[0].name)
+      sendMsg()
     })
 
     this.readDir.on('step', () => {
@@ -289,11 +290,8 @@ class Task {
   }
 
   resume() {
-    debug('resume!', this.uuid)
     this.initStatus()
-    debug('resume', this.isNew)
     this.isNew = false
-    debug('resume', this.isNew)
     this.run()
     sendMsg()
   }
