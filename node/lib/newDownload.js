@@ -1,7 +1,9 @@
-import os from 'os'
+import Debug from 'debug'
 import { getMainWindow } from './window'
-import { dialog, ipcMain, shell } from 'electron'
+import { ipcMain, shell } from 'electron'
 import { downloadFile } from './server'
+
+const debug = Debug('node:lib:newDownload: ')
 
 const downloadHandle = (event, args, callback) => {
   const files = args.files
@@ -16,19 +18,19 @@ const downloadHandle = (event, args, callback) => {
 const openHandle = (event, args) => {
   const { driveUUID, dirUUID, entryUUID, fileName } = args
   downloadFile(driveUUID, dirUUID, entryUUID, fileName, null, (error, filePath) => {
-    if (error) return console.log(error)
-    return shell.openItem(filePath)
+    if (error) debug('open file error', error)
+    else shell.openItem(filePath)
   })
 }
 
 const tempDownloadHandle = (e, args) => {
   const { session, driveUUID, dirUUID, entryUUID, fileName } = args
   downloadFile(driveUUID, dirUUID, entryUUID, fileName, null, (error, filePath) => {
-    if (error) return console.log(error)
-    return getMainWindow().webContents.send('TEMP_DOWNLOAD_SUCCESS', session, filePath)
+    if (error) debug('temp Download error', error)
+    else getMainWindow().webContents.send('TEMP_DOWNLOAD_SUCCESS', session, filePath)
   })
 }
 
 ipcMain.on('DOWNLOAD', downloadHandle)
-ipcMain.on('OPEN_FILE', openHandle) // open file use system applications
 ipcMain.on('TEMP_DOWNLOADING', tempDownloadHandle)
+ipcMain.on('OPEN_FILE', openHandle) // open file use system applications
