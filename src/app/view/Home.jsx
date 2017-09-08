@@ -182,6 +182,7 @@ class Home extends Base {
       }
     }
 
+    /* op: scrollTo file */
     this.refresh = (op) => {
       const rUUID = this.state.path[0].uuid
       const dUUID = this.state.path[this.state.path.length - 1].uuid
@@ -230,13 +231,10 @@ class Home extends Base {
       }
     }
 
-    ipcRenderer.on('driveListUpdate', (e, obj) => {
-      console.log(obj, this.state.path)
-      if (!this.state.path || !this.state.path.length) return
-      if (obj.uuid === this.state.path[this.state.path.length - 1].uuid) {
-        // this.ctx.openSnackBar(obj.message)
-        this.refresh()
-      }
+    ipcRenderer.on('driveListUpdate', (e, dir) => {
+      const path = this.state.path
+      console.log(dir, path)
+      if (path && path.length && dir.uuid === path[path.length - 1].uuid) this.refresh()
     })
   }
 

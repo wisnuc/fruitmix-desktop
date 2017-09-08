@@ -7,7 +7,7 @@ import uuid from 'node-uuid'
 import { ipcMain } from 'electron'
 
 import { userTasks, finishTasks } from './newDownload'
-import sendInfor from './transmissionUpdate'
+import { sendMsg } from './transmissionUpdate'
 import utils from './util'
 import { serverGetAsync } from './server'
 import store from '../serve/store/store'
@@ -55,10 +55,6 @@ const sendMessage = () => {
   }
 }
 
-// send summary information to browser
-const sendMsg = () => {
-  sendInfor()
-}
 
 // TaskManager creater
 // new job :init manager with default parameter

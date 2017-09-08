@@ -288,7 +288,7 @@ export class UploadMultipleFiles {
     this.handle.on('end', (error, response) => {
       if (error) return this.callback(error)
       if (response && response.statusCode !== 200) return this.callback(`Respose not 200 but ${response.statusCode}`)
-      return this.callback(null, this.Files)
+      return this.callback(null)
     })
 
     const form = this.handle.form()

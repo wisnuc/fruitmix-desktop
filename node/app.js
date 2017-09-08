@@ -18,7 +18,6 @@ import Configuration from './lib/configuration'
 import loginApi from './lib/login'
 import mediaApi from './lib/media'
 
-// import upload from './lib/upload'
 import newUpload from './lib/newUpload'
 import download from './lib/newDownload'
 

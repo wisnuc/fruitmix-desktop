@@ -1,21 +1,20 @@
 import os from 'os'
 import Debug from 'debug'
-import { ipcMain, powerSaveBlocker } from 'electron'
 import child from 'child_process'
+import { ipcMain, powerSaveBlocker } from 'electron'
 
 import { getMainWindow } from './window'
-import TransferManager from './transferManager'
 import store from '../serve/store/store'
 
 const debug = Debug('node:lib:transmissionUpdate:')
+
+const Tasks = []
 
 /* send message */
 let preLength = 0
 let lock = false
 let last = true
 let id = -1 // The power save blocker id returned by powerSaveBlocker.start
-
-const Tasks = []
 
 const sendMsg = () => {
   if (lock || !last) return (last = true)
@@ -58,30 +57,10 @@ const sendMsg = () => {
   return (last = false)
 }
 
-// handle will open dialog from electron to clean record of the task have been downloaded
-const cleanRecordHandle = () => {
-  debug('Tasks before', Tasks.length)
-  for (let i = Tasks.length - 1; i > -1; i--) {
-    if (Tasks[i].state === 'finished') Tasks.splice(i, 1)
-  }
-  sendMsg()
-  debug('Tasks after', Tasks.length)
-  return
-  if (uploadedTasks.length === 0 && downloadedTasks.length === 0) return
+/* ipc listeners */
+ipcMain.on('GET_TRANSMISSION', sendMsg)
 
-  global.db.uploaded.remove({}, { multi: true }, (err) => {
-    if (err) return debug(err)
-    uploadedTasks.length = 0
-
-    global.db.downloaded.remove({}, { multi: true }, (err) => {
-      if (err) return debug(err)
-      downloadedTasks.length = 0
-      sendInfor()
-    })
-  })
-}
-
-const openHandle = (e, tasks) => {
+ipcMain.on('OPEN_TRANSMISSION', (e, tasks) => { // FIXME
   const osType = os.platform()
   tasks.forEach((task) => {
     const pathProperty = task.trsType === 'download' ? 'downloadPath' : 'abspath'
@@ -101,16 +80,79 @@ const openHandle = (e, tasks) => {
       default :
     }
   })
-}
+})
 
-const transferHandle = (event, args) => {
-  TransferManager.addTask(args)
-}
+ipcMain.on('DELETE_UPLOADED', (e, uuids) => {
+  if (!Tasks.length || !uuids || !uuids.length) return
+  uuids.forEach((u) => {
+    const task = Tasks.find(t => t.uuid === u)
+    if (task) {
+      Tasks.splice(Tasks.indexOf(task), 1)
+    }
+  })
+  debug('DELETE_UPLOADED', uuids)
+  sendMsg()
+})
 
-ipcMain.on('GET_TRANSMISSION', sendMsg)
-ipcMain.on('OPEN_TRANSMISSION', openHandle)
-ipcMain.on('CLEAN_RECORD', cleanRecordHandle)
-ipcMain.on('TRANSFER', transferHandle)
+ipcMain.on('DELETE_UPLOADING', (e, uuids) => {
+  if (!Tasks.length || !uuids || !uuids.length) return
+  uuids.forEach((u) => {
+    const task = Tasks.find(t => t.uuid === u)
+    if (task) {
+      task.pause()
+      Tasks.splice(Tasks.indexOf(task), 1)
+    }
+  })
+  debug('DELETE_UPLOADING', uuids)
+  sendMsg()
+})
+
+ipcMain.on('PAUSE_UPLOADING', (e, uuids) => {
+  if (!Tasks.length || !uuids || !uuids.length) return
+  uuids.forEach((u) => {
+    const task = Tasks.find(t => t.uuid === u)
+    if (task) task.pause()
+  })
+  debug('PAUSE_UPLOADING', uuids)
+  sendMsg()
+})
+
+ipcMain.on('RESUME_UPLOADING', (e, uuids) => {
+  if (!Tasks.length || !uuids || !uuids.length) return
+  uuids.forEach((u) => {
+    const task = Tasks.find(t => t.uuid === u)
+    if (task) task.resume()
+  })
+  debug('RESUME_UPLOADING', uuids)
+  sendMsg()
+})
+
+ipcMain.on('CLEAN_RECORD', () => {
+  debug('Tasks before', Tasks.length)
+  for (let i = Tasks.length - 1; i > -1; i--) {
+    if (Tasks[i].state === 'finished') Tasks.splice(i, 1)
+  }
+  sendMsg()
+  debug('Tasks after', Tasks.length)
+  return
+  if (uploadedTasks.length === 0 && downloadedTasks.length === 0) return
+
+  global.db.uploaded.remove({}, { multi: true }, (err) => {
+    if (err) return debug(err)
+    uploadedTasks.length = 0
+
+    global.db.downloaded.remove({}, { multi: true }, (err) => {
+      if (err) return debug(err)
+      downloadedTasks.length = 0
+      sendInfor()
+    })
+  })
+})
+
+ipcMain.on('LOGIN_OUT', () => {
+  debug('LOGIN_OUT')
+  Tasks.forEach(task => task.state !== 'finished' && task.pause())
+  sendMsg()
+})
 
 export { Tasks, sendMsg }
-export default sendMsg
