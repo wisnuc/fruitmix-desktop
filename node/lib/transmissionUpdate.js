@@ -57,6 +57,35 @@ const sendMsg = () => {
   return (last = false)
 }
 
+const actionHandler = (e, uuids, type) => {
+  if (!Tasks.length || !uuids || !uuids.length) return
+
+  let func
+  switch (type) {
+    case 'DELETE_FINISHED':
+      func = task => Tasks.splice(Tasks.indexOf(task), 1)
+      break
+    case 'DELETE_RUNNING':
+      func = (task) => { task.pause(); Tasks.splice(Tasks.indexOf(task), 1) }
+      break
+    case 'PAUSE':
+      func = task => task.pause()
+      break
+    case 'RESUME':
+      func = task => task.resume()
+      break
+    default:
+      func = () => debug('error in actionHandler: no such action')
+  }
+
+  uuids.forEach((u) => {
+    const task = Tasks.find(t => t.uuid === u)
+    if (task) func(task)
+  })
+  debug(type, uuids)
+  sendMsg()
+}
+
 /* ipc listeners */
 ipcMain.on('GET_TRANSMISSION', sendMsg)
 
@@ -82,52 +111,17 @@ ipcMain.on('OPEN_TRANSMISSION', (e, tasks) => { // FIXME
   })
 })
 
-ipcMain.on('DELETE_UPLOADED', (e, uuids) => {
-  if (!Tasks.length || !uuids || !uuids.length) return
-  uuids.forEach((u) => {
-    const task = Tasks.find(t => t.uuid === u)
-    if (task) {
-      Tasks.splice(Tasks.indexOf(task), 1)
-    }
-  })
-  debug('DELETE_UPLOADED', uuids)
-  sendMsg()
-})
+ipcMain.on('PAUSE_UPLOADING', (e, uuids) => actionHandler(e, uuids, 'PAUSE'))
+ipcMain.on('RESUME_UPLOADING', (e, uuids) => actionHandler(e, uuids, 'RESUME'))
+ipcMain.on('DELETE_UPLOADING', (e, uuids) => actionHandler(e, uuids, 'DELETE_RUNNING'))
+ipcMain.on('DELETE_UPLOADED', (e, uuids) => actionHandler(e, uuids, 'DELETE_FINISHED'))
 
-ipcMain.on('DELETE_UPLOADING', (e, uuids) => {
-  if (!Tasks.length || !uuids || !uuids.length) return
-  uuids.forEach((u) => {
-    const task = Tasks.find(t => t.uuid === u)
-    if (task) {
-      task.pause()
-      Tasks.splice(Tasks.indexOf(task), 1)
-    }
-  })
-  debug('DELETE_UPLOADING', uuids)
-  sendMsg()
-})
+ipcMain.on('PAUSE_DOWNLOADING', (e, uuids) => actionHandler(e, uuids, 'PAUSE'))
+ipcMain.on('RESUME_DOWNLOADING', (e, uuids) => actionHandler(e, uuids, 'RESUME'))
+ipcMain.on('DELETE_DOWNLOADING', (e, uuids) => actionHandler(e, uuids, 'DELETE_RUNNING'))
+ipcMain.on('DELETE_DOWNLOADED', (e, uuids) => actionHandler(e, uuids, 'DELETE_FINISHED'))
 
-ipcMain.on('PAUSE_UPLOADING', (e, uuids) => {
-  if (!Tasks.length || !uuids || !uuids.length) return
-  uuids.forEach((u) => {
-    const task = Tasks.find(t => t.uuid === u)
-    if (task) task.pause()
-  })
-  debug('PAUSE_UPLOADING', uuids)
-  sendMsg()
-})
-
-ipcMain.on('RESUME_UPLOADING', (e, uuids) => {
-  if (!Tasks.length || !uuids || !uuids.length) return
-  uuids.forEach((u) => {
-    const task = Tasks.find(t => t.uuid === u)
-    if (task) task.resume()
-  })
-  debug('RESUME_UPLOADING', uuids)
-  sendMsg()
-})
-
-ipcMain.on('CLEAN_RECORD', () => {
+ipcMain.on('CLEAN_RECORD', () => { // TODO
   debug('Tasks before', Tasks.length)
   for (let i = Tasks.length - 1; i > -1; i--) {
     if (Tasks[i].state === 'finished') Tasks.splice(i, 1)

@@ -82,10 +82,6 @@ class FileContent extends React.Component {
         this.props.ipcRenderer.send('DRAG_FILE', { files, dirUUID, driveUUID })
       }
     }
-
-    this.openFile = (file) => {
-      this.props.ipcRenderer.send('OPEN_FILE', { file, path: this.props.home.path })
-    }
   }
 
   componentDidMount() {
