@@ -149,4 +149,23 @@ ipcMain.on('LOGIN_OUT', () => {
   sendMsg()
 })
 
+const startTransmissionHandle = () => {
+  return
+  db.uploaded.find({}).sort({ finishDate: -1 }).exec((err, docs) => {
+    if (err) return console.log(err)
+    docs.forEach(item => item.uuid = item._id)
+    finishTasks.splice(0, 0, ...docs)
+    sendMsg()
+  })
+
+  db.uploading.find({}, (err, tasks) => {
+    if (err) return
+    tasks.forEach((item) => {
+      createTask(item._id, item.abspath, item.target, item.driveUUID, item.type, item.createTime, false, item.uploading, item.rootNodeUUID)
+    })
+  })
+}
+
+// ipcMain.on('START_TRANSMISSION', startTransmissionHandle)
+
 export { Tasks, sendMsg }

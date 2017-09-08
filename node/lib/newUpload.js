@@ -6,7 +6,6 @@ import { dialog, ipcMain } from 'electron'
 import { getMainWindow } from './window'
 import { createTask } from './uploadTransform'
 import { serverGetAsync } from './server'
-import { sendMsg } from './transmissionUpdate'
 
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
 
@@ -108,26 +107,7 @@ const uploadMediaHandle = (event, args) => {
   })
 }
 
-const startTransmissionHandle = () => {
-  return
-  db.uploaded.find({}).sort({ finishDate: -1 }).exec((err, docs) => {
-    if (err) return console.log(err)
-    docs.forEach(item => item.uuid = item._id)
-    finishTasks.splice(0, 0, ...docs)
-    sendMsg()
-  })
-
-  db.uploading.find({}, (err, tasks) => {
-    if (err) return
-    tasks.forEach((item) => {
-      createTask(item._id, item.abspath, item.target, item.driveUUID, item.type, item.createTime, false, item.uploading, item.rootNodeUUID)
-    })
-  })
-}
-
 /* ipc listener */
-ipcMain.on('DRAG_FILE', dragFileHandle)
 ipcMain.on('UPLOAD', uploadHandle)
 ipcMain.on('UPLOADMEDIA', uploadMediaHandle)
-// ipcMain.on('START_TRANSMISSION', startTransmissionHandle)
-// ipcMain.on('GET_TRANSMISSION', sendMsg)
+ipcMain.on('DRAG_FILE', dragFileHandle)
