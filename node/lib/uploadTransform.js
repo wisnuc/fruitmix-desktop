@@ -93,7 +93,7 @@ class Task {
       concurrency: 4,
       push(x) {
         const { files, dirUUID, driveUUID, task } = x
-        debug('this.hash push', { files, dirUUID, driveUUID })
+        // debug('this.hash push', { files, dirUUID, driveUUID })
         files.forEach((f) => {
           if (f.stat.isDirectory()) {
             this.outs.forEach(t => t.push(Object.assign({}, f, { dirUUID, driveUUID, task, type: 'folder' })))
@@ -208,14 +208,8 @@ class Task {
               task.completeSize += chunk.length
             })
             rs.on('end', () => {
-              // debug('readStreams end', entry)
               if (task.paused) return
               task.finishCount += 1
-              if (task.finishCount === task.count) {
-                task.finishDate = (new Date()).getTime()
-                task.state = 'finished'
-                clearInterval(task.countSpeed)
-              }
               sendMsg()
             })
           }
@@ -236,10 +230,13 @@ class Task {
     this.readDir.pipe(this.hash).pipe(this.diff).pipe(this.upload)
 
     this.readDir.on('data', (x) => {
-      const { dirUUID } = x
+      const { dirUUID, task } = x
       getMainWindow().webContents.send('driveListUpdate', { uuid: dirUUID })
-      // if (x.type === 'folder') debug('done folder', x.name)
-      // if (x.Files) debug('done files:', x.Files.length, x.Files[0].name)
+      if (task.finishCount === task.count && this.readDir.isStopped()) {
+        task.finishDate = (new Date()).getTime()
+        task.state = 'finished'
+        clearInterval(task.countSpeed)
+      }
       sendMsg()
     })
 

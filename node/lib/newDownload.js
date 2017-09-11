@@ -15,7 +15,7 @@ const downloadHandle = (event, args) => {
   const taskType = entries[0].type
   const createTime = (new Date()).getTime()
   const newWork = true
-  debug('downloadHandle', taskUUID, entries, dirUUID, driveUUID, taskType, createTime, newWork)
+  // debug('downloadHandle', taskUUID, entries, dirUUID, driveUUID, taskType, createTime, newWork)
   createTask(taskUUID, entries, dirUUID, driveUUID, taskType, createTime, newWork)
   getMainWindow().webContents.send('snackbarMessage', { message: `${entries.length}个项目添加至下载队列` })
 }

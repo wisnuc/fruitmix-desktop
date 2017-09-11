@@ -141,7 +141,6 @@ class Task {
         const { entries, downloadPath, dirUUID, driveUUID, task } = X
         entries.forEach((entry) => {
           if (entry.type === 'directory') {
-            task.finishCount += 1
             this.root().emit('data', { entry, downloadPath, dirUUID, driveUUID, task })
           } else {
             this.pending.push({ entry, downloadPath, dirUUID, driveUUID, task })
@@ -150,19 +149,35 @@ class Task {
         this.schedule()
       },
       transform: (x, callback) => {
-        debug('download transform start', x.entry)
+        debug('download transform start', x.entry.name)
         const { entry, downloadPath, dirUUID, driveUUID, task } = x
         task.state = 'downloading'
         entry.newName = entry.name
-        const handle = new DownloadFile(driveUUID, dirUUID, entry.uuid, entry.name, entry.newName, downloadPath, (error) => {
+        entry.timeStamp = (new Date()).getTime()
+        entry.downloadPath = path.join(downloadPath, entry.newName)
+        entry.tmpPath = path.join(downloadPath, `${entry.newName}.download`)
+        entry.seek = 0
+        entry.lastTimeSize = 0
+        const stream = fs.createWriteStream(entry.tmpPath)
+        stream.on('error', (err) => { throw new Error(`createWriteStream error ${err}`) })
+
+        stream.on('drain', () => {
+          const gap = stream.bytesWritten - entry.lastTimeSize
+          entry.seek += gap
+          task.completeSize += gap
+          entry.lastTimeSize = stream.bytesWritten
+        })
+
+        stream.on('finish', () => {
+          const gap = stream.bytesWritten - entry.lastTimeSize
+          entry.seek += gap
+          task.completeSize += gap
+          debug(`一段文件写入结束 当前seek位置为 ：${entry.seek}, 共${entry.size}`)
+          entry.lastTimeSize = 0
+        })
+
+        const handle = new DownloadFile(driveUUID, dirUUID, entry.uuid, entry.name, entry.seek, stream, (error) => {
           this.reqHandles.splice(this.reqHandles.indexOf(handle), 1)
-          if (!error) {
-            task.finishCount += 1
-            if (task.count === task.finishCount) {
-              task.state = 'finished'
-              task.finishDate = (new Date()).getTime()
-            }
-          }
           callback(error, { entry, downloadPath, dirUUID, driveUUID, task })
         })
         this.reqHandles.push(handle)
@@ -170,11 +185,28 @@ class Task {
       }
     })
 
-    this.readRemote.pipe(this.download)
+    this.rename = new Transform({
+      name: 'rename',
+      concurrency: 4,
+      transform: (x, callback) => {
+        debug('rename transform start', x.entry.name)
+        const { entry, downloadPath, dirUUID, driveUUID, task } = x
+        fs.rename(entry.tmpPath, entry.downloadPath, (error) => {
+          callback(error, { entry, downloadPath, dirUUID, driveUUID, task })
+        })
+      }
+    })
+
+    this.readRemote.pipe(this.download).pipe(this.rename)
 
     this.readRemote.on('data', (x) => {
       const { task, entry } = x
+      task.finishCount += 1
       debug('Download finished:', entry.newName)
+      if (task.count === task.finishCount) {
+        task.state = 'finished'
+        task.finishDate = (new Date()).getTime()
+      }
       sendMsg()
     })
 
