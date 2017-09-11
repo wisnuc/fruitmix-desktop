@@ -1,4 +1,3 @@
-import store from '../serve/store/store'
 const Promise = require('bluebird')
 const fs = Promise.promisifyAll(require('fs'))
 const path = require('path')
@@ -13,13 +12,18 @@ const { getMainWindow } = require('./window')
 const { Tasks, sendMsg } = require('./transmissionUpdate')
 
 /* return a new file name */
-const getName = async (currName, dirUUID, driveUUID) => currName // TODO
-
-const getDownloadPath = () => store.getState().config.downloadPath
+const getName = async (name, dirPath) => {
+  const list = await fs.readdirAsync(dirPath)
+  let newName = name
+  for (let i = 1; list.findIndex(n => n === newName || n === `${newName}.download`) > -1; i++) {
+    newName = `${name}(${i})`
+  }
+  return newName
+}
 
 class Task {
   constructor(props) {
-    /* props: { uuid, downloadPath, entries, dirUUID, driveUUID, taskType, createTime, isNew } */
+    /* props: { uuid, downloadPath, name, entries, dirUUID, driveUUID, taskType, createTime, isNew } */
 
     this.initStatus = () => {
       Object.assign(this, props)
@@ -28,7 +32,6 @@ class Task {
       this.count = 0
       this.finishCount = 0
       this.finishDate = 0
-      this.name = props.entries[0].name
       this.paused = false
       this.restTime = 0
       this.size = 0
@@ -111,19 +114,22 @@ class Task {
             if (task.paused) throw Error('task paused !')
             const entry = entries[i]
             task.count += 1
+            entry.newName = await getName(entry.name, downloadPath)
+            entry.downloadPath = path.join(downloadPath, entry.newName)
+            entry.timeStamp = (new Date()).getTime()
             if (entry.type === 'directory') {
               /* mkdir */
-              entry.newName = await getName(entry.name, dirUUID, driveUUID)
-              const newPath = path.join(downloadPath, entry.newName)
-
-              await fs.mkdirAsync(newPath)
+              await fs.mkdirAsync(entry.downloadPath)
 
               /* read remote child */
               const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${entry.uuid}`)
               const children = listNav.entries
 
-              this.push({ entries: children, downloadPath: newPath, dirUUID: entry.uuid, driveUUID, task })
+              this.push({ entries: children, downloadPath: entry.downloadPath, dirUUID: entry.uuid, driveUUID, task })
             } else {
+              entry.tmpPath = path.join(downloadPath, `${entry.newName}.download`)
+              entry.seek = 0
+              entry.lastTimeSize = 0
               task.size += entry.size
             }
           }
@@ -152,12 +158,6 @@ class Task {
         debug('download transform start', x.entry.name)
         const { entry, downloadPath, dirUUID, driveUUID, task } = x
         task.state = 'downloading'
-        entry.newName = entry.name
-        entry.timeStamp = (new Date()).getTime()
-        entry.downloadPath = path.join(downloadPath, entry.newName)
-        entry.tmpPath = path.join(downloadPath, `${entry.newName}.download`)
-        entry.seek = 0
-        entry.lastTimeSize = 0
         const stream = fs.createWriteStream(entry.tmpPath)
         stream.on('error', (err) => { throw new Error(`createWriteStream error ${err}`) })
 
@@ -265,9 +265,9 @@ class Task {
   }
 }
 
-const createTask = (uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew, absPath) => {
-  const downloadPath = absPath || getDownloadPath()
-  const task = new Task({ uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew, downloadPath })
+const createTask = (uuid, entries, name, dirUUID, driveUUID, taskType, createTime, isNew, downloadPath) => {
+  debug('createTask', name)
+  const task = new Task({ uuid, entries, name, dirUUID, driveUUID, taskType, createTime, isNew, downloadPath })
   Tasks.push(task)
   task.run()
   sendMsg()

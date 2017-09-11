@@ -6,8 +6,20 @@ import { getMainWindow } from './window'
 import { ipcMain, shell } from 'electron'
 import { createTask } from './downloadTransform'
 import { downloadFile } from './server'
+import store from '../serve/store/store'
 
 const debug = Debug('node:lib:newDownload: ')
+
+const getDownloadPath = () => store.getState().config.downloadPath
+
+const getName = async (name, dirPath) => {
+  const list = await fs.readdirAsync(dirPath)
+  let newName = name
+  for (let i = 1; list.findIndex(n => n === newName || n === `${newName}.download`) > -1; i++) {
+    newName = `${name}(${i})`
+  }
+  return newName
+}
 
 const downloadHandle = (event, args) => {
   const { entries, dirUUID, driveUUID } = args
@@ -16,8 +28,22 @@ const downloadHandle = (event, args) => {
   const createTime = (new Date()).getTime()
   const newWork = true
   // debug('downloadHandle', taskUUID, entries, dirUUID, driveUUID, taskType, createTime, newWork)
-  createTask(taskUUID, entries, dirUUID, driveUUID, taskType, createTime, newWork)
-  getMainWindow().webContents.send('snackbarMessage', { message: `${entries.length}个项目添加至下载队列` })
+
+  const downloadPath = getDownloadPath()
+  fs.readdir(downloadPath, (err, files) => {
+    if (err) {
+      debug('downloadHandle fs.readdir error: ', err)
+      getMainWindow().webContents.send('snackbarMessage', { message: '读取下载目录失败' })
+    } else {
+      const name = entries[0].name
+      let newName = name
+      for (let i = 1; files.findIndex(n => n === newName || n === `${newName}.download`) > -1; i++) {
+        newName = `${name}(${i})`
+      }
+      createTask(taskUUID, entries, newName, dirUUID, driveUUID, taskType, createTime, newWork, downloadPath)
+      getMainWindow().webContents.send('snackbarMessage', { message: `${entries.length}个项目添加至下载队列` })
+    }
+  })
 }
 
 const openHandle = (event, args) => {
