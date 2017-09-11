@@ -14,7 +14,8 @@ class ListSelect extends EventEmitter {
       touchTap: this.touchTap.bind(this),
       rowColor: this.rowColor.bind(this),
       rowLeading: this.rowLeading.bind(this),
-      rowCheck: this.rowCheck.bind(this)
+      rowCheck: this.rowCheck.bind(this),
+      addByRange: this.addByRange.bind(this)
     }
   }
 
@@ -35,6 +36,14 @@ class ListSelect extends EventEmitter {
     })
 
     return this.state
+  }
+
+  addByRange(start, end) {
+    const arr = []
+    for (let i = start; i <= end; i++) {
+      arr.push(i)
+    }
+    this.setState({ selected: arr })
   }
 
   keyEvent(ctrl, shift) {
