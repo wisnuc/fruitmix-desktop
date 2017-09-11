@@ -9,7 +9,7 @@ import store from '../serve/store/store'
 
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
 
-const debug = Debug('lib:server')
+const debug = Debug('node:lib:server')
 const getIpAddr = () => store.getState().login.device.mdev.address
 const getToken = () => store.getState().login.device.token.data.token
 const getTmpPath = () => store.getState().config.tmpPath
@@ -286,10 +286,15 @@ export class UploadMultipleFiles {
 
     this.handle = request.post({ url: `${server}/drives/${this.driveUUID}/dirs/${this.dirUUID}/entries`, headers: { Authorization } })
 
-    this.handle.on('end', (error, response) => {
-      if (error) return this.callback(error)
-      if (response && response.statusCode !== 200) return this.callback(`Respose not 200 but ${response.statusCode}`)
-      return this.callback(null)
+    this.handle.on('error', error => this.finish(error))
+
+    this.handle.on('response', (response) => {
+      // debug('this.handle.on response', response && response.statusCode)
+      if (response && response.statusCode === 200) {
+        this.finish()
+      } else {
+        this.finish(Error(`Respose not 200 but ${response.statusCode}`))
+      }
     })
 
     const form = this.handle.form()
@@ -309,19 +314,25 @@ export class UploadMultipleFiles {
     })
   }
 
+  finish(error) {
+    if (this.finished) return
+    this.finished = true
+    this.callback(error)
+  }
+
   abort() {
     if (this.handle) this.handle.abort()
   }
 }
 
 export class DownloadFile {
-  constructor(driveUUID, dirUUID, entryUUID, fileName, newName, downloadPath, callback) {
+  constructor(driveUUID, dirUUID, entryUUID, fileName, seek, stream, callback) {
     this.driveUUID = driveUUID
     this.dirUUID = dirUUID
     this.entryUUID = entryUUID
     this.fileName = fileName
-    this.newName = newName
-    this.downloadPath = downloadPath
+    this.seek = seek || 0
+    this.stream = stream
     this.callback = callback
     this.handle = null
   }
@@ -336,62 +347,22 @@ export class DownloadFile {
 
       headers: {
         Authorization,
+        Range: `bytes=${this.seek}-`
         // Range: wrapper.size ? `bytes=${this.wrapper.seek}-` : undefined
       },
       qs: this.dirUUID === 'media' ? { alt: 'data' } : { name: this.fileName }
     }
 
-      /*
-    const streamOptions = {
-      flags: this.wrapper.seek === 0 ? 'w' : 'r+',
-      start: this.wrapper.seek,
-      defaultEncoding: 'utf8',
-      fd: null,
-      mode: 0o666,
-      autoClose: true
-    }
-    */
-
-    const absPath = path.join(this.downloadPath, this.newName)
-    const stream = fs.createWriteStream(absPath)
-    // const stream = fs.createWriteStream(this.tmpDownloadPath, streamOptions)
-
-    stream.on('error', err => console.log('stream error trigger', err))
-
-    stream.on('drain', () => {
-      /*
-      const gap = stream.bytesWritten - this.wrapper.lastTimeSize
-      this.wrapper.seek += gap
-      this.wrapper.manager.completeSize += gap
-      this.wrapper.lastTimeSize = stream.bytesWritten
-      wrapper.manager.updateStore()
-      */
-    })
-
-    stream.on('finish', () => {
-      /*
-      const gap = stream.bytesWritten - this.wrapper.lastTimeSize
-      this.wrapper.seek += gap
-      this.wrapper.manager.completeSize += gap
-      this.wrapper.lastTimeSize = stream.bytesWritten
-
-      console.log(`一段文件写入结束 当前seek位置为 ：${this.wrapper.seek}, 共${this.wrapper.size}`)
-
-      this.wrapper.lastTimeSize = 0
-      if (this.wrapper.seek >= this.wrapper.size) this.rename(this.tmpDownloadPath)
-      */
-    })
-
     this.handle = request(options)
-    this.handle.on('end', (error, response, body) => {
+    this.handle.on('end', (error, response) => {
       if (error) return this.callback(error)
-      if (response && response.statusCode && (response.statusCode !== 200 && response.statusCode !== 206)) {
+      if (response && response.statusCode && (response.statusCode !== 200)) {
         return this.callback(Error('response code not 200'))
       }
       return this.callback(null)
     })
 
-    this.handle.pipe(stream)
+    this.handle.pipe(this.stream)
   }
 
   abort() {
