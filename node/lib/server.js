@@ -326,12 +326,13 @@ export class UploadMultipleFiles {
 }
 
 export class DownloadFile {
-  constructor(driveUUID, dirUUID, entryUUID, fileName, seek, stream, callback) {
+  constructor(driveUUID, dirUUID, entryUUID, fileName, size, seek, stream, callback) {
     this.driveUUID = driveUUID
     this.dirUUID = dirUUID
     this.entryUUID = entryUUID
     this.fileName = fileName
     this.seek = seek || 0
+    this.size = size
     this.stream = stream
     this.callback = callback
     this.handle = null
@@ -347,26 +348,30 @@ export class DownloadFile {
 
       headers: {
         Authorization,
-        Range: `bytes=${this.seek}-`
-        // Range: wrapper.size ? `bytes=${this.wrapper.seek}-` : undefined
+        Range: this.size ? `bytes=${this.seek}-` : undefined
       },
       qs: this.dirUUID === 'media' ? { alt: 'data' } : { name: this.fileName }
     }
 
     this.handle = request(options)
-    this.handle.on('end', (error, response) => {
-      if (error) return this.callback(error)
-      if (response && response.statusCode && (response.statusCode !== 200)) {
-        return this.callback(Error('response code not 200'))
-      }
-      return this.callback(null)
-    })
+
+    this.handle.on('error', error => this.finish(error))
+
+    this.handle.on('end', () => this.finish(null))
 
     this.handle.pipe(this.stream)
   }
 
   abort() {
+    debug('download abort', this.fileName)
+    this.finish(Error('abort !'))
     if (this.handle) this.handle.abort()
+  }
+
+  finish(error) {
+    if (this.finished) return
+    this.callback(error)
+    this.finished = true
   }
 }
 
