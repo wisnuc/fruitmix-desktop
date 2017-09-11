@@ -37,8 +37,14 @@ const downloadHandle = (event, args) => {
     } else {
       const name = entries[0].name
       let newName = name
-      for (let i = 1; files.findIndex(n => n === newName || n === `${newName}.download`) > -1; i++) {
-        newName = `${name}(${i})`
+      const extension = name.replace(/^.*\./, '')
+      for (let i = 1; files.includes(newName) || files.includes(`${newName}.download`); i++) {
+        if (!extension || extension === name) {
+          newName = `${name}(${i})`
+        } else {
+          const pureName = name.match(/^.*\./)[0]
+          newName = `${pureName.slice(0, pureName.length - 1)}(${i}).${extension}`
+        }
       }
       createTask(taskUUID, entries, newName, dirUUID, driveUUID, taskType, createTime, newWork, downloadPath)
       getMainWindow().webContents.send('snackbarMessage', { message: `${entries.length}个项目添加至下载队列` })
