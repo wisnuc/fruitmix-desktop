@@ -41,8 +41,10 @@ class RunningTask extends React.Component {
     if (task.state === 'visitless') return '等待中'
     if (task.state === 'hashing') return '正在校验'
     if (task.state === 'diffing') return '正在校验'
-    if (task.state === 'uploadless') return task.trsType === 'upload' ? '等待上传' : '等待下载'
-    if (task.state === 'uploading') return task.trsType === 'upload' ? '正在上传' : '正在下载'
+    if (task.state === 'uploadless') return '等待上传'
+    if (task.state === 'uploading') return '正在上传'
+    if (task.state === 'downloadless') return '等待下载'
+    if (task.state === 'downloading') return '正在下载'
     if (task.state === 'finish') return '已完成'
     return '未知状态'
   }

@@ -102,6 +102,7 @@ class Task {
         }
 
         const { entries, downloadPath, dirUUID, driveUUID, task } = x
+        if (task.state !== 'downloading') task.state = 'diffing'
         read(entries, downloadPath, dirUUID, driveUUID, task).then(y => callback(null, y)).catch(e => callback(e))
       }
     })

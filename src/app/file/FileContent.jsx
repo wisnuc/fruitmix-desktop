@@ -1,5 +1,6 @@
 import React from 'react'
 import Debug from 'debug'
+import { CircularProgress } from 'material-ui'
 import UploadIcon from 'material-ui/svg-icons/file/cloud-upload'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import ContainerOverlay from './ContainerOverlay'
@@ -64,6 +65,9 @@ class FileContent extends React.Component {
       this.props.listNavBySelect()
       if (entry.type === 'file') {
         this.setState({ seqIndex: index, preview: true })
+      } else {
+        debug('should change to loading')
+        this.setState({ loading: true })
       }
     }
 
@@ -95,6 +99,11 @@ class FileContent extends React.Component {
     /* bind keydown event */
     document.addEventListener('keydown', this.keyDown)
     document.addEventListener('keyup', this.keyUp)
+  }
+
+
+  componentWillReceiveProps(nextProps) {
+    if (this.props.entries !== nextProps.entries) this.setState({ loading: false })
   }
 
   componentWillUnmount() {
@@ -135,7 +144,6 @@ class FileContent extends React.Component {
       <div
         style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         onTouchTap={e => this.onRowTouchTap(e, -1)}
-        onDrop={this.drop}
       >
         <div
           style={{
@@ -156,8 +164,16 @@ class FileContent extends React.Component {
     )
   }
 
+  renderLoading() {
+    return (
+      <div style={{ width: '100%', height: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
+        <CircularProgress size={32} thickness={3} />
+      </div>
+    )
+  }
+
   render() {
-    // debug('render FileContent', this.props, this.state)
+    debug('render FileContent loading', this.state.loading)
 
     /* not get list yet */
     if (!this.props.home.path.length) return (<div />)
@@ -173,8 +189,10 @@ class FileContent extends React.Component {
       <div style={{ width: '100%', height: '100%' }}>
         {/* render list */}
         {
-          this.props.gridView ?
-            <GridView
+          this.state.loading
+            ? this.renderLoading()
+            : this.props.gridView
+            ? <GridView
               {...this.props}
               onRowTouchTap={this.onRowTouchTap}
               onRowMouseEnter={this.onRowMouseEnter}
