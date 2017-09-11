@@ -16,7 +16,14 @@ class FileContent extends React.Component {
 
     /* cathc key action */
     this.keyDown = (e) => {
-      if (this.props.select) { this.props.select.keyEvent(e.ctrlKey, e.shiftKey) }
+      // debug('keyEvent', e)
+      if (this.props.select) {
+        if (e.ctrlKey && e.key === 'a') {
+          debug('ctrl + a')
+          this.props.select.addByRange(0, this.props.entries.length - 1)
+        }
+        this.props.select.keyEvent(e.ctrlKey, e.shiftKey)
+      }
     }
 
     this.keyUp = (e) => {
