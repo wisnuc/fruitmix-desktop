@@ -12,15 +12,6 @@ const debug = Debug('node:lib:newDownload: ')
 
 const getDownloadPath = () => store.getState().config.downloadPath
 
-const getName = async (name, dirPath) => {
-  const list = await fs.readdirAsync(dirPath)
-  let newName = name
-  for (let i = 1; list.findIndex(n => n === newName || n === `${newName}.download`) > -1; i++) {
-    newName = `${name}(${i})`
-  }
-  return newName
-}
-
 const downloadHandle = (event, args) => {
   const { entries, dirUUID, driveUUID } = args
   const taskUUID = UUID.v4()

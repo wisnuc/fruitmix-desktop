@@ -11,51 +11,113 @@ Promise.promisifyAll(fs) // babel would transform Promise to bluebird
 
 const debug = Debug('node:lib:newUpload: ')
 
-const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
-  const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
-  const remoteEntries = listNav.entries
-  let overWrite = false
-  for (let i = 0; i < entries.length; i++) {
-    const entry = entries[i]
-    const fileName = entry.replace(/^.*\//, '')
-    const index = remoteEntries.findIndex(e => (e.name === fileName))
-    if (index > -1) {
-      debug('find name conflict', entry)
-      const response = dialog.showMessageBox(getMainWindow(), {
-        type: 'warning',
-        title: '文件名冲突',
-        buttons: ['取消', '单独保存'], // ['取消', '单独保存', '覆盖']
-        message: `上传内容中${fileName}等文件与此文件夹中的现有文件存在命名冲突。\n是否覆盖已有文件？`
-      })
-      if (!response) throw new Error('cancel')
-      if (response === 2) overWrite = true
-      break
-    }
+const getName = async (name, dirUUID, driveUUID) => {
+  
+  let newName = name
+  for (let i = 1; entries.findIndex(e => (e === newName)) > -1; i++) {
+    newName = `${name}(${i})`
   }
+  return newName
+}
 
-  debug('check name, overWrite ?', overWrite)
+/*
+policy: { uuid, promise }
+*/
+
+const Policies = []
+
+const choosePolicy = (conflicts) => {
+  const session = UUID.v4()
+  const promise = new Promise((resolve, reject) => {
+    Policies.push({ session, resolve: value => resolve(value), reject: error => reject(error) })
+    getMainWindow().webContents.send('conflicts', { session, conflicts })
+    debug('choosePolicy session conflicts', session, conflicts)
+  })
+  return promise
+}
+
+const resolveHandle = (event, args) => {
+  const index = Policies.findIndex(p => p.session === args.session)
+  if (index < 0) throw Error('no such session !')
+  debug('resolveHandle', index, Policies[index])
+  if (args.response) return Policies[index].resolve(args.response)
+  return Policies[index].reject(Error('cancel'))
+}
+
+const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
+  /* remove unsupport files */
   let taskType = ''
   const filtered = []
   for (let i = 0; i < entries.length; i++) {
     const entry = entries[i]
-    const entryStat = await fs.lstatAsync(path.resolve(entry))
-    const entryType = entryStat.isDirectory() ? 'folder' : entryStat.isFile() ? 'file' : 'others'
+    const name = entry.replace(/^.*\//, '')
+    const stat = await fs.lstatAsync(path.resolve(entry))
+    const entryType = stat.isDirectory() ? 'folder' : stat.isFile() ? 'file' : 'others'
     /* only upload folder or file, ignore others, such as symbolic link */
     if (entryType !== 'others') {
       if (!taskType) taskType = entryType
-      filtered.push(entry)
+      filtered.push({ entry, name, stat })
     }
   }
 
-  debug('entries', entries)
-  debug('filtered', filtered)
-  const taskUUID = UUID.v4()
-  const createTime = (new Date()).getTime()
-  const newWork = true
-  const uploadingList = []
-  const rootNodeUUID = null
+  const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
+  const remoteEntries = listNav.entries
+  const conflicts = []
+  for (let i = 0; i < filtered.length; i++) {
+    const { entry, name, stat } = filtered[i]
+    const index = remoteEntries.findIndex(e => (e.name === name))
+    if (index > -1) {
+      let checkedName = name
+      const extension = name.replace(/^.*\./, '')
+      for (let j = 1; remoteEntries.findIndex(e => (e.name === checkedName)) > -1; j++) {
+        if (!extension || extension === name) {
+          checkedName = `${name}(${j})`
+        } else {
+          const pureName = name.match(/^.*\./)[0]
+          checkedName = `${pureName.slice(0, pureName.length - 1)}(${j}).${extension}`
+        }
+      }
+      conflicts.push({ entry, name, checkedName, stat, remote: remoteEntries[i] })
+    }
+  }
+
+  /* wait user to choose policy
+   *
+   * cancel: cancel all uploading
+   * skip: skip specific entry
+   * rename: need a checkedName
+   * replace: need remote target's uuid
+   * merge: using mkdirp when create folders
+   *
+   */
+  if (conflicts.length) {
+    const response = await choosePolicy(conflicts)
+    conflicts.forEach((c, i) => {
+      const res = response[i]
+      const index = filtered.findIndex(f => (f.entry === c.entry))
+      if (res === 'skip') {
+        filtered.splice(index, 1)
+      } else {
+        filtered[index].policy = res
+        filtered[index].remoteUUID = c.remote.uuid
+        filtered[index].checkedName = c.checkedName
+      }
+    })
+  }
+
+  /* createTask */
   if (filtered.length) {
-    createTask(taskUUID, filtered, dirUUID, driveUUID, taskType, createTime, newWork)
+    const policies = []
+    const newEntries = filtered.map((f, i) => {
+      const mode = f.policy ? f.policy : 'normal'
+      policies[i] = { mode, checkedName: f.checkedName, remoteUUID: f.remoteUUID }
+      return f.entry
+    })
+    const taskUUID = UUID.v4()
+    const createTime = (new Date()).getTime()
+    const newWork = true
+    // debug('conflicts response', newEntries, policies)
+    createTask(taskUUID, newEntries, dirUUID, driveUUID, taskType, createTime, newWork, policies)
   }
   return filtered.length
 }
@@ -64,7 +126,7 @@ const readUploadInfo = (entries, dirUUID, driveUUID) => {
   readUploadInfoAsync(entries, dirUUID, driveUUID)
     .then((count) => {
       let message = `${count}个项目添加至上传队列`
-      if (count < entries.length) message = `${message} (忽略了${entries.length - count}个不支持的文件)`
+      if (count < entries.length) message = `${message} (忽略了${entries.length - count}个跳过或不支持的文件)`
       getMainWindow().webContents.send('snackbarMessage', { message })
     })
     .catch((e) => {
@@ -111,3 +173,4 @@ const uploadMediaHandle = (event, args) => {
 ipcMain.on('UPLOAD', uploadHandle)
 ipcMain.on('UPLOADMEDIA', uploadMediaHandle)
 ipcMain.on('DRAG_FILE', dragFileHandle)
+ipcMain.on('resolveConflicts', resolveHandle)

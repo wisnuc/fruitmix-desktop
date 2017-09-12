@@ -65,8 +65,8 @@ class RunningTask extends React.Component {
   }
 
   formatSeconds(seconds) {
-    if (!seconds || seconds === Infinity || seconds === -Infinity) return '--'
-    let s = parseInt(seconds)
+    if (!seconds || seconds === Infinity || seconds === -Infinity || this.props.task.paused) return '- - : - - : - -'
+    let s = parseInt(seconds, 10)
     let m = 0
     let h = 0
     if (s > 60) {
@@ -77,9 +77,10 @@ class RunningTask extends React.Component {
         m = parseInt(m % 60)
       }
     }
-    if (s.toString().length === 1) s = `0${s}`
     if (h.toString().length === 1) h = `0${h}`
     if (m.toString().length === 1) m = `0${m}`
+    if (s.toString().length === 1) s = `0${s}`
+    if (h > 24) return '> 24 小时'
     return `${h} : ${m} : ${s}`
   }
 

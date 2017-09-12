@@ -16,7 +16,7 @@ const getName = async (currPath, dirUUID, driveUUID) => currPath.replace(/^.*\//
 
 class Task {
   constructor(props) {
-    /* props: { uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew } */
+    /* props: { uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew, policies } */
 
     this.initStatus = () => {
       Object.assign(this, props)
@@ -41,6 +41,7 @@ class Task {
       if (this.paused) {
         this.speed = 0
         this.restTime = 0
+        sendMsg()
         return
       }
       const speed = this.completeSize - this.lastTimeSize
@@ -58,11 +59,12 @@ class Task {
       name: 'readDir',
       concurrency: 4,
       transform(x, callback) {
-        const read = async (entries, dirUUID, driveUUID, task) => {
+        const read = async (entries, dirUUID, driveUUID, policies, task) => {
           const files = []
           for (let i = 0; i < entries.length; i++) {
             if (task.paused) throw Error('task paused !')
             const entry = entries[i]
+            const policy = policies[i]
             const stat = await fs.lstatAsync(path.resolve(entry))
             task.count += 1
             if (stat.isDirectory()) {
@@ -75,16 +77,16 @@ class Task {
               const children = await fs.readdirAsync(path.resolve(entry))
               const newEntries = []
               children.forEach(c => newEntries.push(path.join(entry, c)))
-              this.push({ entries: newEntries, dirUUID: uuid, driveUUID, task })
+              this.push({ entries: newEntries, dirUUID: uuid, driveUUID, policies: [], task })
             } else {
               task.size += stat.size
             }
-            files.push({ entry, stat })
+            files.push({ entry, stat, policy })
           }
           return ({ files, dirUUID, driveUUID, task })
         }
-        const { entries, dirUUID, driveUUID, task } = x
-        read(entries, dirUUID, driveUUID, task).then(y => callback(null, y)).catch(e => callback(e))
+        const { entries, dirUUID, driveUUID, policies, task } = x
+        read(entries, dirUUID, driveUUID, policies, task).then(y => callback(null, y)).catch(e => callback(e))
       }
     })
 
@@ -93,7 +95,7 @@ class Task {
       concurrency: 4,
       push(x) {
         const { files, dirUUID, driveUUID, task } = x
-        // debug('this.hash push', { files, dirUUID, driveUUID })
+        debug('this.hash push', { files, dirUUID, driveUUID })
         files.forEach((f) => {
           if (f.stat.isDirectory()) {
             this.outs.forEach(t => t.push(Object.assign({}, f, { dirUUID, driveUUID, task, type: 'folder' })))
@@ -104,11 +106,11 @@ class Task {
         })
       },
       transform: (x, callback) => {
-        const { entry, dirUUID, driveUUID, stat, task } = x
+        const { entry, dirUUID, driveUUID, stat, policy, task } = x
         if (task.state !== 'uploading' && task.state !== 'diffing') task.state = 'hashing'
         readXattr(entry, (error, attr) => {
           if (!error && attr && attr.parts) {
-            callback(null, { entry, dirUUID, driveUUID, parts: attr.parts, type: 'file', stat, task })
+            callback(null, { entry, dirUUID, driveUUID, parts: attr.parts, type: 'file', stat, policy, task })
             return
           }
           const options = {
@@ -119,7 +121,7 @@ class Task {
           const child = childProcess.fork(path.join(__dirname, './filehash'), [], options)
           child.on('message', (result) => {
             setXattr(entry, result, (err, xattr) => {
-              callback(err, { entry, dirUUID, driveUUID, parts: xattr && xattr.parts, type: 'file', stat, task })
+              callback(err, { entry, dirUUID, driveUUID, parts: xattr && xattr.parts, type: 'file', stat, policy, task })
             })
           })
           child.on('error', callback)
@@ -135,8 +137,8 @@ class Task {
           this.outs.forEach(t => t.push([x]))
         } else {
           /* combine to one post */
-          const { dirUUID } = x
-          const i = this.pending.findIndex(p => p[0].dirUUID === dirUUID)
+          const { dirUUID, policy } = x
+          const i = this.pending.findIndex(p => p[0].dirUUID === dirUUID && (!policy || policy.type === 'nomal'))
           if (i > -1) {
             this.pending[i].push(x)
           } else {
@@ -182,8 +184,8 @@ class Task {
             this.root().emit('data', x)
           } else {
             /* combine to one post */
-            const { dirUUID, uuid } = x
-            const i = this.pending.findIndex(p => p.length < 10 && p[0].dirUUID === dirUUID)
+            const { dirUUID, policy } = x
+            const i = this.pending.findIndex(p => p.length < 10 && p[0].dirUUID === dirUUID && (!policy || policy.type === 'nomal'))
             if (i > -1) {
               this.pending[i].push(x)
             } else {
@@ -194,11 +196,11 @@ class Task {
         this.schedule()
       },
       transform: (X, callback) => {
-        // debug('upload transform start', X.length, X[0].entry)
+        debug('upload transform start', X.length, X[0].policy)
 
         const Files = X.map((x) => {
-          const { entry, parts, task } = x
-          const name = entry.replace(/^.*\//, '')
+          const { entry, parts, policy, task } = x
+          const name = policy && policy.mode === 'rename' ? policy.checkedName : entry.replace(/^.*\//, '')
           const readStreams = parts.map(part => fs.createReadStream(entry, { start: part.start, end: part.end, autoClose: true }))
           for (let i = 0; i < parts.length; i++) {
             const rs = readStreams[i]
@@ -248,13 +250,17 @@ class Task {
       arr.forEach(t => (errorCount += t.failed.length))
       if (this.readDir.isStopped() || errorCount) {
         debug('errorCount', errorCount)
+        if (errorCount) {
+          this.paused = true
+          this.state = 'failed'
+        }
       }
     })
   }
 
   run() {
     this.countSpeed = setInterval(this.countSpeedFunc, 1000)
-    this.readDir.push({ entries: this.entries, dirUUID: this.dirUUID, driveUUID: this.driveUUID, task: this })
+    this.readDir.push({ entries: this.entries, dirUUID: this.dirUUID, driveUUID: this.driveUUID, policies: this.policies, task: this })
   }
 
   status() {
@@ -301,8 +307,8 @@ class Task {
   }
 }
 
-const createTask = (uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew) => {
-  const task = new Task({ uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew })
+const createTask = (uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew, policies) => {
+  const task = new Task({ uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew, policies })
   Tasks.push(task)
   task.run()
   sendMsg()
