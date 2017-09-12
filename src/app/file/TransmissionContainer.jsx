@@ -317,6 +317,7 @@ class TrsContainer extends React.Component {
         pause={this.pause}
         resume={this.resume}
         select={this.select}
+        delete={() => this.toggleDialog('deleteRunningDialog')}
       />
     )))
 
@@ -406,12 +407,41 @@ class TrsContainer extends React.Component {
                   { this.state.play && <MenuItem primaryText="继续" onTouchTap={() => this.handleAll(this.state.tasks, 'RESUME')} /> }
                   { this.state.pause && <MenuItem primaryText="暂停" onTouchTap={() => this.handleAll(this.state.tasks, 'PAUSE')} /> }
                   { this.state.tasks[0].trsType === 'download' && <MenuItem primaryText="打开所在文件夹" onTouchTap={this.open} /> }
-                  <MenuItem primaryText="删除" onTouchTap={() => this.handleAll(this.state.tasks, 'DELETE')} />
+                  { this.state.play && <MenuItem primaryText="删除" onTouchTap={() => this.toggleDialog('deleteRunningDialog')} /> }
                 </Menu>
               </Paper>
             </div>
           )
         }
+        {/* Delete Runing Tasks Dialog */}
+        <DialogOverlay open={!!this.state.deleteRunningDialog}>
+          <div>
+            {
+              this.state.deleteRunningDialog &&
+                <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
+                  <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
+                    { '要取消选中的任务吗？' }
+                  </div>
+                  <div style={{ height: 20 }} />
+                  <div style={{ color: 'rgba(0,0,0,0.54)' }}>
+                    { '但如果是下载或上传的是文件夹，文件夹内已完成的文件将保留。' }
+                  </div>
+                  <div style={{ height: 24 }} />
+                  <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                    <FlatButton label="放弃" primary onTouchTap={() => this.toggleDialog('deleteRunningDialog')} keyboardFocused />
+                    <FlatButton
+                      label="取消任务"
+                      primary
+                      onTouchTap={() => {
+                        this.toggleDialog('deleteRunningDialog')
+                        this.handleAll(this.state.tasks, 'DELETE')
+                      }}
+                    />
+                  </div>
+                </div>
+            }
+          </div>
+        </DialogOverlay>
 
         {/* clear Running Tasks dialog */}
         <DialogOverlay open={!!this.state.clearRunningDialog}>

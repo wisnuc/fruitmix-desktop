@@ -1,4 +1,6 @@
 import React from 'react'
+import { IconButton } from 'material-ui'
+import DeleteSvg from 'material-ui/svg-icons/action/delete'
 import FileSvg from 'material-ui/svg-icons/editor/insert-drive-file'
 import FolderSvg from 'material-ui/svg-icons/file/folder'
 import PlaySvg from 'material-ui/svg-icons/av/play-arrow'
@@ -174,16 +176,21 @@ class RunningTask extends React.Component {
         <div style={{ flex: '0 0 164px' }}>{ this.formatSeconds(task.restTime) }</div>
 
         {/* Status */}
-        <div style={{ flex: '0 0 116px' }}>{ this.getStatus(task) }</div>
+        <div style={{ flex: '0 0 100px' }}>{ this.getStatus(task) }</div>
 
-        {/* Pause and resume */}
-        <div style={{ flex: '0 0 108px', display: 'flex', alignItems: 'center' }}>
+        {/* Pause, resume and delete task*/}
+        <div style={{ flex: '0 0 120px', display: 'flex', alignItems: 'center' }}>
+          <IconButton iconStyle={svgStyle} onTouchTap={this.toggleTask} tooltip={task.paused ? '开始' : '暂停'}>
+            { task.paused ? <PlaySvg /> : <PauseSvg /> }
+          </IconButton>
           {
-            task.paused ?
-              <PlaySvg style={svgStyle} onTouchTap={this.toggleTask} /> :
-              <PauseSvg style={svgStyle} onTouchTap={this.toggleTask} />
+            task.paused &&
+              <IconButton iconStyle={svgStyle} onTouchTap={this.props.delete} tooltip="取消">
+                <DeleteSvg />
+              </IconButton>
           }
         </div>
+
       </div>
     )
   }

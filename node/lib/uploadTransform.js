@@ -243,6 +243,12 @@ class Task {
     this.readDir.on('step', () => {
       // debug('===================================')
       // this.readDir.print()
+      let errorCount = 0
+      const arr = [this.readDir, this.hash, this.diff, this.upload]
+      arr.forEach(t => (errorCount += t.failed.length))
+      if (this.readDir.isStopped() || errorCount) {
+        debug('errorCount', errorCount)
+      }
     })
   }
 
