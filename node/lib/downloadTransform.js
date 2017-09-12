@@ -92,7 +92,18 @@ class Task {
               this.push({ entries: entries.children, downloadPath: entry.downloadPath, dirUUID: entry.uuid, driveUUID, task })
             } else {
               entry.tmpPath = path.join(downloadPath, `${entry.newName}.download`)
+              /* download start from entry.seek */
               entry.seek = entry.seek || 0
+              /* when entry.seek > 0 && entry.seek !== partDownloadFile's size, reDownload file */
+              if (entry.seek) {
+                try {
+                  const stat = await fs.lstatAsync(entry.tmpPath)
+                  if (stat.size !== entry.seek) entry.seek = 0
+                } catch (e) {
+                  if (e.code === 'ENOENT') entry.seek = 0
+                  else throw new Error(`read pre-download file error: ${e}`)
+                }
+              }
               entry.lastTimeSize = 0
               task.size += entry.size
               task.completeSize = entry.seek
@@ -137,6 +148,8 @@ class Task {
         })
 
         stream.on('finish', () => {
+          entry.timeStamp = (new Date()).getTime()
+          debug('stream on finish', entry.timeStamp)
           const gap = stream.bytesWritten - entry.lastTimeSize
           entry.seek += gap
           task.completeSize += gap

@@ -5,6 +5,7 @@ import { IconButton, Divider } from 'material-ui'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
+import RefreshIcon from 'material-ui/svg-icons/navigation/refresh'
 import ListIcon from 'material-ui/svg-icons/action/list'
 import GridIcon from 'material-ui/svg-icons/action/view-module'
 import DownloadIcon from 'material-ui/svg-icons/file/file-download'
@@ -224,7 +225,7 @@ class Home extends Base {
 
     ipcRenderer.on('driveListUpdate', (e, dir) => {
       const path = this.state.path
-      console.log(dir, path)
+      // console.log(dir, path)
       if (path && path.length && dir.uuid === path[path.length - 1].uuid) this.refresh()
     })
   }
@@ -347,6 +348,9 @@ class Home extends Base {
   renderToolBar({ style }) {
     return (
       <div style={style}>
+        <IconButton onTouchTap={() => this.refresh()} tooltip="刷新" >
+          <RefreshIcon color="#FFF" />
+        </IconButton>
         <IconButton onTouchTap={() => this.toggleDialog('gridView')} tooltip={this.state.gridView ? '列表视图' : '网格视图'}>
           { this.state.gridView ? <ListIcon color="#FFF" /> : <GridIcon color="#FFF" /> }
         </IconButton>
