@@ -29,7 +29,7 @@ const requestGet = (url, qs, token, callback) => {
     opts.auth = token
   }
 
-  debug('requestGet, opts', opts)
+  // debug('requestGet, opts', opts)
 
   request.get(opts, (err, res) => {
     if (err) return callback(err)
@@ -99,7 +99,7 @@ const requestPost = (url, token, body, callback) => {
     'Content-Type': 'application/json'
   }
 
-  debug('requestPost', opts)
+  // debug('requestPost', opts)
   request(opts, (err, res) => {
     if (err) return callback(err)
     if (res.statusCode !== 200) {
@@ -121,7 +121,7 @@ const requestPatch = (url, token, body, callback) => {
     'Content-Type': 'application/json'
   }
 
-  debug('requestPatch', opts)
+  // debug('requestPatch', opts)
 
   request(opts, (err, res) => {
     if (err) return callback(err)
@@ -141,7 +141,7 @@ const requestDelete = (url, token, callback) => {
   const opts = { method: 'DELETE', url }
   opts.headers = { Authorization: `JWT ${token}` }
 
-  debug('requestDelete, opts', opts)
+  // debug('requestDelete, opts', opts)
 
   request(opts, (err, res) => {
     if (err) return callback(err)
@@ -167,7 +167,7 @@ export const retrieveUsers = async (token) => {
 }
 
 export const serverGetAsync = async (endpoint, qs) => {
-  debug('serverGetAsync', endpoint, qs)
+  // debug('serverGetAsync', endpoint, qs)
 
   const ip = getIpAddr()
   const port = 3000
