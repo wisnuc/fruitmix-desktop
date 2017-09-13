@@ -510,7 +510,7 @@ class Home extends Base {
                 <MenuItem
                   primaryText="上传文件夹"
                   leftIcon={<UploadFold style={{ height: 20, width: 20, marginTop: 6 }} />}
-                  onTouchTap={() => this.upload('folder')}
+                  onTouchTap={() => this.upload('directory')}
                 />
                 <MenuItem
                   primaryText="上传文件"

@@ -34,7 +34,7 @@ class PolicyDialog extends React.PureComponent {
       const session = this.props.data.session
       const response = this.response
       debug('this.fire', session, response)
-      this.props.ipcRenderer.send('resolveConflicts', { session, response })
+      this.props.ipcRenderer.send('resolveConflicts', { session, response, conflicts: this.props.data.conflicts })
       this.props.onRequestClose()
     }
 
@@ -64,6 +64,37 @@ class PolicyDialog extends React.PureComponent {
     }
   }
 
+  renderChoice() {
+    const curr = this.props.data.conflicts[this.state.current]
+    debug('renderChoice', curr.entryType, curr.remote.type)
+    const choices = [
+      { value: 'rename', label: '保留，两个项目均保留，自动重命名新项目' },
+      { value: 'replace', label: '替换，使用新上传的项目替换原有项目' },
+      { value: 'skip', label: '跳过，该项目将不会被上传' },
+      { value: 'merge', label: '合并，两个文件夹的内容都保留' }
+    ]
+    return (
+      <RadioButtonGroup
+        onChange={(e, value) => this.handleChange(value)}
+        defaultSelected={choices[0].value}
+        name={'policy'}
+      >
+        {
+          choices.map(c => (
+            <RadioButton
+              key={c.value}
+              style={{ marginBottom: 16 }}
+              labelStyle={{ color: '#757575' }}
+              iconStyle={{ fill: this.state.value === c.value ? this.props.primaryColor : '#757575' }}
+              value={c.value}
+              label={c.label}
+            />
+          ))
+        }
+      </RadioButtonGroup>
+    )
+  }
+
   render() {
     debug('PolicyDialog', this.props, this.state)
     const name = this.props.data.conflicts[this.state.current].name
@@ -75,31 +106,8 @@ class PolicyDialog extends React.PureComponent {
         </div>
         <div style={{ height: 20 }} />
 
-        {/* choose */}
-        <RadioButtonGroup
-          onChange={(e, value) => this.handleChange(value)}
-          defaultSelected="rename"
-          name={'policy'}
-        >
-          <RadioButton
-            style={{ marginBottom: 16 }}
-            labelStyle={{ color: '#757575' }}
-            iconStyle={{ fill: this.state.value === 'rename' ? this.props.primaryColor : '#757575' }}
-            value="rename" label="保留，两个文件均保留，自动重命名新文件"
-          />
-          <RadioButton
-            style={{ marginBottom: 16 }}
-            labelStyle={{ color: '#757575' }}
-            iconStyle={{ fill: this.state.value === 'replace' ? this.props.primaryColor : '#757575' }}
-            value="replace" label="替换，使用新上传的文件替换原有文件"
-          />
-          <RadioButton
-            style={{ marginBottom: 16 }}
-            labelStyle={{ color: '#757575' }}
-            iconStyle={{ fill: this.state.value === 'skip' ? this.props.primaryColor : '#757575' }}
-            value="skip" label="跳过，该文件将不会被上传"
-          />
-        </RadioButtonGroup>
+        {/* choice */}
+        { this.renderChoice() }
         <div style={{ height: 24 }} />
 
         <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
