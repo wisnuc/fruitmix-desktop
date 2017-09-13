@@ -27,9 +27,11 @@ const downloadHandle = (event, args) => {
       getMainWindow().webContents.send('snackbarMessage', { message: '读取下载目录失败' })
     } else {
       const name = entries[0].name
+      const nameSpace = entries.map(e => e.name)
+      nameSpace.push(...files)
       let newName = name
       const extension = name.replace(/^.*\./, '')
-      for (let i = 1; files.includes(newName) || files.includes(`${newName}.download`); i++) {
+      for (let i = 1; nameSpace.includes(newName) || nameSpace.includes(`${newName}.download`); i++) {
         if (!extension || extension === name) {
           newName = `${name}(${i})`
         } else {

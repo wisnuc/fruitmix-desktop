@@ -25,7 +25,7 @@ class Task {
       this.count = 0
       this.finishCount = 0
       this.finishDate = 0
-      this.name = props.entries[0].replace(/^.*\//, '')
+      this.name = props.policies[0] && props.policies[0].checkedName || props.entries[0].replace(/^.*\//, '')
       this.paused = false
       this.restTime = 0
       this.size = 0
