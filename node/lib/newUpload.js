@@ -69,7 +69,7 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
           checkedName = `${pureName.slice(0, pureName.length - 1)}(${j}).${extension}`
         }
       }
-      debug('conflicts find', name, Object.keys(stat))
+      debug('conflicts find', name)
       conflicts.push({ entry, entryType, name, checkedName, stat, remote: remoteEntries[index] })
     }
   }

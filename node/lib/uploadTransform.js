@@ -70,14 +70,20 @@ class Task {
             if (stat.isDirectory()) {
               /* create fold and return the uuid */
               const dirname = policy && policy.mode === 'rename' ? policy.checkedName : entry.replace(/^.*\//, '')
-              const Entries = await createFoldAsync(driveUUID, dirUUID, dirname)
+              const Entries = await createFoldAsync(driveUUID, dirUUID, dirname, policy)
               const uuid = Entries.find(e => e.name === dirname).uuid
 
               /* read child */
               const children = await fs.readdirAsync(path.resolve(entry))
               const newEntries = []
               children.forEach(c => newEntries.push(path.join(entry, c)))
-              this.push({ entries: newEntries, dirUUID: uuid, driveUUID, policies: [], task })
+
+              /* mode 'merge' should apply to children */
+              const childPolicies = []
+              childPolicies.length = newEntries.length
+              if (policy && policy.mode === 'merge') childPolicies.fill({ mode: 'merge' })
+              // debug('childPolicies', childPolicies)
+              this.push({ entries: newEntries, dirUUID: uuid, driveUUID, policies: childPolicies, task })
             } else {
               task.size += stat.size
             }
@@ -95,7 +101,7 @@ class Task {
       concurrency: 4,
       push(x) {
         const { files, dirUUID, driveUUID, task } = x
-        debug('this.hash push', { files, dirUUID, driveUUID })
+        // debug('this.hash push', { files, dirUUID, driveUUID })
         files.forEach((f) => {
           if (f.stat.isDirectory()) {
             this.outs.forEach(t => t.push(Object.assign({}, f, { dirUUID, driveUUID, task, type: 'directory' })))
@@ -133,7 +139,7 @@ class Task {
       name: 'diff',
       concurrency: 4,
       push(x) {
-        if (x.type === 'directory' || x.task.isNew) {
+        if (x.type === 'directory' || !(x.policy && x.policy.mode === 'merge') && x.task.isNew) {
           this.outs.forEach(t => t.push([x]))
         } else {
           /* combine to one post */
@@ -149,7 +155,7 @@ class Task {
       },
 
       transform: (X, callback) => {
-        // debug('this.diff transform', X.length)
+        // debug('this.diff transform', X.length, X[0])
         const diffAsync = async (local, driveUUID, dirUUID, task) => {
           const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
           const remote = listNav.entries
@@ -157,9 +163,11 @@ class Task {
           const map = new Map() // TODO compare hash and name
           local.forEach((l) => {
             const name = l.policy && l.policy.mode === 'rename' ? l.policy.checkedName : l.entry.replace(/^.*\//, '')
+            const key = name.concat(l.parts.fingerprint) // TODO
             map.set(name, l)
           })
           remote.forEach((r) => {
+            const rKey = r.name.concat(r.hash) // remote file's key: name + hash
             if (map.has(r.name)) {
               task.finishCount += 1
               // debug('this.diff transform find already finished', task.finishCount, r.name)
@@ -167,7 +175,14 @@ class Task {
               map.delete(r.name)
             }
           })
-          return [...map.values()]
+          const result = [...map.values()]
+          if (!result.length && task.finishCount === task.count && this.readDir.isSelfStopped() && this.hash.isSelfStopped()) {
+            task.finishDate = (new Date()).getTime()
+            task.state = 'finished'
+            clearInterval(task.countSpeed)
+            sendMsg()
+          }
+          return result
         }
 
         const { driveUUID, dirUUID, task } = X[0]
@@ -199,7 +214,7 @@ class Task {
         this.schedule()
       },
       transform: (X, callback) => {
-        debug('upload transform start', X.length, X[0].policy)
+        // debug('upload transform start', X.length, X[0].policy)
 
         const Files = X.map((x) => {
           const { entry, parts, policy, task } = x
@@ -237,6 +252,7 @@ class Task {
     this.readDir.on('data', (x) => {
       const { dirUUID, task } = x
       getMainWindow().webContents.send('driveListUpdate', { uuid: dirUUID })
+      // debug('this.readDir.on data', task.finishCount, task.count, this.readDir.isStopped())
       if (task.finishCount === task.count && this.readDir.isStopped()) {
         task.finishDate = (new Date()).getTime()
         task.state = 'finished'
@@ -251,7 +267,7 @@ class Task {
       let errorCount = 0
       const arr = [this.readDir, this.hash, this.diff, this.upload]
       arr.forEach(t => (errorCount += t.failed.length))
-      if (this.readDir.isStopped() || errorCount) {
+      if (errorCount > 15 || (this.readDir.isStopped() && errorCount)) {
         debug('errorCount', errorCount)
         if (errorCount) {
           this.paused = true
