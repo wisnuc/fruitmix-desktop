@@ -24,7 +24,6 @@ const phaseExifTime = (time) => {
 }
 
 const getType = (type, name, metadata) => {
-  if (type === 'folder') return '文件夹'
   if (type === 'public') return '共享盘'
   if (type === 'directory') return '文件夹'
   if (metadata && metadata.format) return metadata.format
@@ -115,7 +114,7 @@ class FileDetail extends React.PureComponent {
       >
         <div style={{ flex: '0 0 24px', display: 'flex', alignItems: 'center' }}>
           {
-            type === 'folder' || type === 'public' || type === 'directory'
+            type === 'public' || type === 'directory'
             ? <FileFolder style={{ color: '#FFFFFF' }} />
             : type === 'file'
             ? renderFileIcon(name, metadata, 24, false, true) // name, metadata, size, dark, white

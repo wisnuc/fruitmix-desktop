@@ -40,7 +40,7 @@ class FileUploadButton extends React.Component {
             <MenuItem
               primaryText="上传文件夹"
               leftIcon={<UploadFold />}
-              onTouchTap={() => this.upload('folder')}
+              onTouchTap={() => this.upload('directory')}
               style={{ fontSize: 13 }}
             />
             <MenuItem

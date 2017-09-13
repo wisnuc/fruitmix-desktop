@@ -11,15 +11,6 @@ Promise.promisifyAll(fs) // babel would transform Promise to bluebird
 
 const debug = Debug('node:lib:newUpload: ')
 
-const getName = async (name, dirUUID, driveUUID) => {
-  
-  let newName = name
-  for (let i = 1; entries.findIndex(e => (e === newName)) > -1; i++) {
-    newName = `${name}(${i})`
-  }
-  return newName
-}
-
 /*
 policy: { uuid, promise }
 */
@@ -31,7 +22,6 @@ const choosePolicy = (conflicts) => {
   const promise = new Promise((resolve, reject) => {
     Policies.push({ session, resolve: value => resolve(value), reject: error => reject(error) })
     getMainWindow().webContents.send('conflicts', { session, conflicts })
-    debug('choosePolicy session conflicts', session, conflicts)
   })
   return promise
 }
@@ -39,7 +29,6 @@ const choosePolicy = (conflicts) => {
 const resolveHandle = (event, args) => {
   const index = Policies.findIndex(p => p.session === args.session)
   if (index < 0) throw Error('no such session !')
-  debug('resolveHandle', index, Policies[index])
   if (args.response) return Policies[index].resolve(args.response)
   return Policies[index].reject(Error('cancel'))
 }
@@ -54,11 +43,11 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
     const name = entry.replace(/^.*\//, '')
     nameSpace.push(name)
     const stat = await fs.lstatAsync(path.resolve(entry))
-    const entryType = stat.isDirectory() ? 'folder' : stat.isFile() ? 'file' : 'others'
-    /* only upload folder or file, ignore others, such as symbolic link */
+    const entryType = stat.isDirectory() ? 'directory' : stat.isFile() ? 'file' : 'others'
+    /* only upload directory or file, ignore others, such as symbolic link */
     if (entryType !== 'others') {
       if (!taskType) taskType = entryType
-      filtered.push({ entry, name, stat })
+      filtered.push({ entry, name, stat, entryType })
     }
   }
 
@@ -67,7 +56,7 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
   nameSpace.push(...remoteEntries.map(e => e.name))
   const conflicts = []
   for (let i = 0; i < filtered.length; i++) {
-    const { entry, name, stat } = filtered[i]
+    const { entry, entryType, name, stat } = filtered[i]
     const index = remoteEntries.findIndex(e => (e.name === name))
     if (index > -1) {
       let checkedName = name
@@ -80,7 +69,8 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
           checkedName = `${pureName.slice(0, pureName.length - 1)}(${j}).${extension}`
         }
       }
-      conflicts.push({ entry, name, checkedName, stat, remote: remoteEntries[index] })
+      debug('conflicts find', name, Object.keys(stat))
+      conflicts.push({ entry, entryType, name, checkedName, stat, remote: remoteEntries[index] })
     }
   }
 
@@ -90,7 +80,7 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
    * skip: skip specific entry
    * rename: need a checkedName
    * replace: need remote target's uuid
-   * merge: using mkdirp when create folders
+   * merge: using mkdirp when create directory
    *
    */
   if (conflicts.length) {
@@ -146,7 +136,7 @@ const readUploadInfo = (entries, dirUUID, driveUUID) => {
 /* handler */
 const uploadHandle = (event, args) => {
   const { driveUUID, dirUUID, type, filters } = args
-  const dialogType = type === 'folder' ? 'openDirectory' : 'openFile'
+  const dialogType = type === 'directory' ? 'openDirectory' : 'openFile'
   dialog.showOpenDialog(getMainWindow(), { properties: [dialogType, 'multiSelections'], filters }, (entries) => {
     if (!entries || !entries.length) return
     readUploadInfo(entries, dirUUID, driveUUID)

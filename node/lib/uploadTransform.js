@@ -69,7 +69,7 @@ class Task {
             task.count += 1
             if (stat.isDirectory()) {
               /* create fold and return the uuid */
-              const dirname = await getName(entry, dirUUID, driveUUID)
+              const dirname = policy && policy.mode === 'rename' ? policy.checkedName : entry.replace(/^.*\//, '')
               const Entries = await createFoldAsync(driveUUID, dirUUID, dirname)
               const uuid = Entries.find(e => e.name === dirname).uuid
 
@@ -98,7 +98,7 @@ class Task {
         debug('this.hash push', { files, dirUUID, driveUUID })
         files.forEach((f) => {
           if (f.stat.isDirectory()) {
-            this.outs.forEach(t => t.push(Object.assign({}, f, { dirUUID, driveUUID, task, type: 'folder' })))
+            this.outs.forEach(t => t.push(Object.assign({}, f, { dirUUID, driveUUID, task, type: 'directory' })))
           } else {
             this.pending.push(Object.assign({}, f, { dirUUID, driveUUID, task }))
             this.schedule()
@@ -133,7 +133,7 @@ class Task {
       name: 'diff',
       concurrency: 4,
       push(x) {
-        if (x.type === 'folder' || x.task.isNew) {
+        if (x.type === 'directory' || x.task.isNew) {
           this.outs.forEach(t => t.push([x]))
         } else {
           /* combine to one post */
@@ -154,8 +154,11 @@ class Task {
           const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
           const remote = listNav.entries
           if (!remote.length) return local
-          const map = new Map()
-          local.forEach(l => map.set(l.entry.replace(/^.*\//, ''), l))
+          const map = new Map() // TODO compare hash and name
+          local.forEach((l) => {
+            const name = l.policy && l.policy.mode === 'rename' ? l.policy.checkedName : l.entry.replace(/^.*\//, '')
+            map.set(name, l)
+          })
           remote.forEach((r) => {
             if (map.has(r.name)) {
               task.finishCount += 1
@@ -179,7 +182,7 @@ class Task {
       concurrency: 1,
       push(X) {
         X.forEach((x) => {
-          if (x.type === 'folder') {
+          if (x.type === 'directory') {
             x.task.finishCount += 1
             this.root().emit('data', x)
           } else {
