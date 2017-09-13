@@ -80,7 +80,7 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
           checkedName = `${pureName.slice(0, pureName.length - 1)}(${j}).${extension}`
         }
       }
-      conflicts.push({ entry, name, checkedName, stat, remote: remoteEntries[i] })
+      conflicts.push({ entry, name, checkedName, stat, remote: remoteEntries[index] })
     }
   }
 
@@ -113,7 +113,8 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
     const policies = []
     const newEntries = filtered.map((f, i) => {
       const mode = f.policy ? f.policy : 'normal'
-      policies[i] = { mode, checkedName: f.checkedName, remoteUUID: f.remoteUUID }
+      const checkedName = mode === 'rename' ? f.checkedName : undefined
+      policies[i] = { mode, checkedName, remoteUUID: f.remoteUUID }
       return f.entry
     })
     const taskUUID = UUID.v4()

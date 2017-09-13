@@ -215,7 +215,7 @@ class Task {
               sendMsg()
             })
           }
-          return ({ name, parts, readStreams })
+          return ({ name, parts, readStreams, policy })
         })
 
         const { driveUUID, dirUUID, task } = X[0]
