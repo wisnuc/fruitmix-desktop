@@ -143,8 +143,8 @@ class Task {
           this.outs.forEach(t => t.push([x]))
         } else {
           /* combine to one post */
-          const { dirUUID, policy } = x
-          const i = this.pending.findIndex(p => p[0].dirUUID === dirUUID && (!policy || policy.type === 'nomal'))
+          const { dirUUID } = x
+          const i = this.pending.findIndex(p => p[0].dirUUID === dirUUID)
           if (i > -1) {
             this.pending[i].push(x)
           } else {
@@ -163,16 +163,17 @@ class Task {
           const map = new Map() // TODO compare hash and name
           local.forEach((l) => {
             const name = l.policy && l.policy.mode === 'rename' ? l.policy.checkedName : l.entry.replace(/^.*\//, '')
-            const key = name.concat(l.parts.fingerprint) // TODO
-            map.set(name, l)
+            const key = name.concat(l.parts[l.parts.length - 1].fingerprint) // local file's key: name + fingerprint
+            map.set(key, l)
           })
+          // debug('diffAsync map', map, remote)
           remote.forEach((r) => {
             const rKey = r.name.concat(r.hash) // remote file's key: name + hash
-            if (map.has(r.name)) {
+            if (map.has(rKey)) {
               task.finishCount += 1
               // debug('this.diff transform find already finished', task.finishCount, r.name)
-              task.completeSize += map.get(r.name).stat.size
-              map.delete(r.name)
+              task.completeSize += map.get(rKey).stat.size
+              map.delete(rKey)
             }
           })
           const result = [...map.values()]

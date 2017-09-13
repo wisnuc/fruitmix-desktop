@@ -308,8 +308,12 @@ export class UploadMultipleFiles {
           size: part.end ? part.end - part.start + 1 : 0,
           sha256: part.sha
         }
-        if (part.start) formDataOptions = Object.assign(formDataOptions, { append: part.fingerprint })
-        else if (policy && policy.mode === 'replace') Object.assign(formDataOptions, { overwrite: policy.remoteUUID })
+        if (part.start) {
+          formDataOptions = Object.assign(formDataOptions, { append: part.fingerprint })
+        } else if (policy && policy.mode === 'replace') {
+          form.append(name, JSON.stringify({ op: 'remove', uuid: policy.remoteUUID }))
+          // Object.assign(formDataOptions, { overwrite: policy.remoteUUID })
+        }
         form.append(name, rs, JSON.stringify(formDataOptions))
       }
     })
@@ -387,22 +391,12 @@ createFold
 
 export const createFold = (driveUUID, dirUUID, dirname, policy, callback) => {
   initArgs()
-  const overwrite = policy && policy.mode === 'replace' ? policy.remoteUUID : undefined
-  const parents = policy && policy.mode === 'replace' ? undefined : true // TODO mkdirp
-  const op = {
-    url: `${server}/drives/${driveUUID}/dirs/${dirUUID}/entries`,
-    headers: { Authorization },
-    formData: {
-      [dirname]: JSON.stringify({ op: 'mkdir', parents, overwrite })
-    }
-  }
 
-  /*
-  console.log(`>>>>>>>>>>>create Fold`)
-  console.log(op)
-  console.log('<<<<<<<<<<< start')
-  */
-  request.post(op, (error, res) => {
+  const parents = true // mkdirp
+
+  const op = { url: `${server}/drives/${driveUUID}/dirs/${dirUUID}/entries`, headers: { Authorization } }
+
+  const handle = request.post(op, (error, res) => {
     if (error) {
       debug('createFold error', error)
       callback(error)
@@ -412,6 +406,10 @@ export const createFold = (driveUUID, dirUUID, dirname, policy, callback) => {
       else callback(Error('response code not 200'))
     }
   })
+
+  const form = handle.form()
+  if (policy && policy.mode === 'replace') form.append(dirname, JSON.stringify({ op: 'remove', uuid: policy.remoteUUID }))
+  form.append(dirname, JSON.stringify({ op: 'mkdir', parents }))
 }
 
 export const createFoldAsync = Promise.promisify(createFold)
