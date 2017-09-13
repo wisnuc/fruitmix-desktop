@@ -300,7 +300,7 @@ export class UploadMultipleFiles {
     const form = this.handle.form()
 
     this.Files.forEach((file) => {
-      const { name, parts, readStreams } = file
+      const { name, parts, readStreams, policy } = file
       for (let i = 0; i < parts.length; i++) {
         const rs = readStreams[i]
         const part = parts[i]
@@ -309,6 +309,7 @@ export class UploadMultipleFiles {
           sha256: part.sha
         }
         if (part.start) formDataOptions = Object.assign(formDataOptions, { append: part.fingerprint })
+        else if (policy && policy.mode === 'replace') Object.assign(formDataOptions, { overwrite: policy.remoteUUID })
         form.append(name, rs, JSON.stringify(formDataOptions))
       }
     })
