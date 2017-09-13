@@ -246,6 +246,7 @@ class Public extends Home {
           gridView={this.state.gridView}
           scrollTo={this.state.scrollTo}
           openSnackBar={openSnackBar}
+          toggleDialog={this.toggleDialog}
         />
 
         { this.renderMenu(!!this.state.contextMenuOpen && !this.state.inRoot, toggleDetail, getDetailStatus) }

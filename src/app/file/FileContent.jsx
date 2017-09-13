@@ -23,6 +23,10 @@ class FileContent extends React.Component {
           debug('ctrl + a')
           this.props.select.addByRange(0, this.props.entries.length - 1)
         }
+        if (e.key === 'Delete') {
+          debug('press Delete')
+          this.props.toggleDialog('delete')
+        }
         this.props.select.keyEvent(e.ctrlKey, e.shiftKey)
       }
     }
