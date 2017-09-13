@@ -13,11 +13,13 @@ const { getMainWindow } = require('./window')
 const { Tasks, sendMsg } = require('./transmissionUpdate')
 
 /* return a new file name */
-const getName = async (name, dirPath) => {
+const getName = async (name, dirPath, entries) => {
   const list = await fs.readdirAsync(dirPath)
+  const nameSpace = entries.map(e => e.name)
+  nameSpace.push(...list)
   let newName = name
   const extension = name.replace(/^.*\./, '')
-  for (let i = 1; list.includes(newName) || list.includes(`${newName}.download`); i++) {
+  for (let i = 1; nameSpace.includes(newName) || nameSpace.includes(`${newName}.download`); i++) {
     if (!extension || extension === name) {
       newName = `${name}(${i})`
     } else {
@@ -76,7 +78,7 @@ class Task {
             if (task.paused) throw Error('task paused !')
             const entry = entries[i]
             task.count += 1
-            if (!entry.newName) entry.newName = await getName(entry.name, downloadPath)
+            if (!entry.newName) entry.newName = await getName(entry.name, downloadPath, entries)
             entry.downloadPath = path.join(downloadPath, entry.newName)
             entry.timeStamp = (new Date()).getTime()
             if (entry.type === 'directory') {

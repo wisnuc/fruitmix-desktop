@@ -47,6 +47,7 @@ class PolicyDialog extends React.PureComponent {
     this.next = () => {
       let current = this.state.current + 1
       const length = this.props.data.conflicts.length
+      this.response[this.state.current] = this.state.value
       debug('this.next', current, length, this.state.checked, this.response, this.state.value)
       if (this.state.checked) {
         this.response.length = length

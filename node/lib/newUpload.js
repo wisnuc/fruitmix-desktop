@@ -48,9 +48,11 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
   /* remove unsupport files */
   let taskType = ''
   const filtered = []
+  const nameSpace = []
   for (let i = 0; i < entries.length; i++) {
     const entry = entries[i]
     const name = entry.replace(/^.*\//, '')
+    nameSpace.push(name)
     const stat = await fs.lstatAsync(path.resolve(entry))
     const entryType = stat.isDirectory() ? 'folder' : stat.isFile() ? 'file' : 'others'
     /* only upload folder or file, ignore others, such as symbolic link */
@@ -62,6 +64,7 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
 
   const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
   const remoteEntries = listNav.entries
+  nameSpace.push(...remoteEntries.map(e => e.name))
   const conflicts = []
   for (let i = 0; i < filtered.length; i++) {
     const { entry, name, stat } = filtered[i]
@@ -69,7 +72,7 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
     if (index > -1) {
       let checkedName = name
       const extension = name.replace(/^.*\./, '')
-      for (let j = 1; remoteEntries.findIndex(e => (e.name === checkedName)) > -1; j++) {
+      for (let j = 1; nameSpace.includes(checkedName); j++) {
         if (!extension || extension === name) {
           checkedName = `${name}(${j})`
         } else {
