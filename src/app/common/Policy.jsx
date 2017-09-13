@@ -75,7 +75,10 @@ class PolicyDialog extends React.PureComponent {
       { value: 'skip', label: `跳过，该${type}将不会被上传` }
     ]
     if (entryType === 'directory' && entryType === remote.type) {
-      choices.splice(0, 1, { value: 'merge', label: '合并，两个文件夹的内容都保留' })
+      choices.splice(0, 2,
+        { value: 'merge', label: '合并，全部内容均保留，如遇同名但内容不同的文件将自动重命名后上传' },
+        { value: 'overwrite', label: '覆盖，如遇同名文件将使用新上传的文件替换已有文件' },
+      )
     }
     let text = `${type} “${name}” 在上传目标路径下已经存在，请选择您要执行的操作：`
     if (entryType !== remote.type) {
@@ -88,9 +91,7 @@ class PolicyDialog extends React.PureComponent {
     return (
       <div>
         {/* title */}
-        <div style={{ fontSize: 16 }}>
-          { text }
-        </div>
+        <div> { text } </div>
         <div style={{ height: 20 }} />
 
         {/* choice */}
@@ -104,7 +105,7 @@ class PolicyDialog extends React.PureComponent {
               <RadioButton
                 key={c.value}
                 style={{ marginBottom: 16 }}
-                labelStyle={{ color: '#757575' }}
+                labelStyle={{ color: '#757575', fontSize: 14 }}
                 iconStyle={{ fill: this.state.value === c.value ? this.props.primaryColor : '#757575' }}
                 value={c.value}
                 label={c.label}
