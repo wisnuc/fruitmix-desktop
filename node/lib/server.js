@@ -385,19 +385,16 @@ createFold
 @param {function} callback
 */
 
-export const createFold = (driveUUID, dirUUID, dirname, callback) => {
+export const createFold = (driveUUID, dirUUID, dirname, policy, callback) => {
   initArgs()
+  const overwrite = policy && policy.mode === 'replace' ? policy.remoteUUID : undefined
+  const parents = policy && policy.mode === 'replace' ? undefined : true // TODO mkdirp
   const op = {
     url: `${server}/drives/${driveUUID}/dirs/${dirUUID}/entries`,
     headers: { Authorization },
     formData: {
-      [dirname]: JSON.stringify({ op: 'mkdir' })
+      [dirname]: JSON.stringify({ op: 'mkdir', parents, overwrite })
     }
-  }
-
-  const op2 = {
-    url: `${server}/drives/${driveUUID}/dirs/${dirUUID}`,
-    headers: { Authorization }
   }
 
   /*
@@ -405,21 +402,14 @@ export const createFold = (driveUUID, dirUUID, dirname, callback) => {
   console.log(op)
   console.log('<<<<<<<<<<< start')
   */
-  request.post(op, (error) => {
+  request.post(op, (error, res) => {
     if (error) {
-      console.log('error', error)
-      if (callback) callback(error)
+      debug('createFold error', error)
+      callback(error)
     } else {
-      request.get(op2, (err, data) => {
-        if (err) {
-          if (callback) callback(err)
-          console.log('error', data)
-        } else {
-          // console.log(`create Fold ${dirname} success`)
-          if (callback) callback(err, JSON.parse(data.body).entries)
-          return JSON.parse(data.body).entries
-        }
-      })
+      // debug('createFold res', res && JSON.parse(res.body).entries)
+      if (res && res.statusCode === 200) callback(null, JSON.parse(res.body).entries)
+      else callback(Error('response code not 200'))
     }
   })
 }

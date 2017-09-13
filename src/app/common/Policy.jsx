@@ -21,12 +21,12 @@ class PolicyDialog extends React.PureComponent {
     super(props)
 
     this.state = {
-      value: 'rename',
+      value: '',
       checked: true,
       current: 0
     }
 
-    this.response = ['rename']
+    this.response = []
 
     this.toggleCheck = () => this.setState({ checked: !this.state.checked })
 
@@ -65,48 +65,63 @@ class PolicyDialog extends React.PureComponent {
   }
 
   renderChoice() {
-    const curr = this.props.data.conflicts[this.state.current]
-    debug('renderChoice', curr.entryType, curr.remote.type)
+    const { name, entryType, remote } = this.props.data.conflicts[this.state.current]
+    debug('renderChoice', entryType, remote.type)
+    const type = entryType === 'directory' ? '文件夹' : '文件'
+    const remoteType = remote.type === 'directory' ? '文件夹' : '文件'
     const choices = [
-      { value: 'rename', label: '保留，两个项目均保留，自动重命名新项目' },
-      { value: 'replace', label: '替换，使用新上传的项目替换原有项目' },
-      { value: 'skip', label: '跳过，该项目将不会被上传' },
-      { value: 'merge', label: '合并，两个文件夹的内容都保留' }
+      { value: 'rename', label: `保留，两个项目均保留，自动重命名新上传的${type}` },
+      { value: 'replace', label: `替换，使用新上传的${type}替换已有${remoteType}` },
+      { value: 'skip', label: `跳过，该${type}将不会被上传` }
     ]
+    if (entryType === 'directory' && entryType === remote.type) {
+      choices.splice(0, 1, { value: 'merge', label: '合并，两个文件夹的内容都保留' })
+    }
+    let text = `${type} “${name}” 在上传目标路径下已经存在，请选择您要执行的操作：`
+    if (entryType !== remote.type) {
+      text = `上传${type} “${name}” 时，发现上传目标路径下已经存在同名的${remoteType}，请选择您要执行的操作：`
+    }
+
+    /* default: choose the first option */
+    if (!this.state.value) Object.assign(this.state, { value: choices[0].value })
+    debug('this.state.value', this.state.value, 'choices[0].value', choices[0].value)
     return (
-      <RadioButtonGroup
-        onChange={(e, value) => this.handleChange(value)}
-        defaultSelected={choices[0].value}
-        name={'policy'}
-      >
-        {
-          choices.map(c => (
-            <RadioButton
-              key={c.value}
-              style={{ marginBottom: 16 }}
-              labelStyle={{ color: '#757575' }}
-              iconStyle={{ fill: this.state.value === c.value ? this.props.primaryColor : '#757575' }}
-              value={c.value}
-              label={c.label}
-            />
-          ))
-        }
-      </RadioButtonGroup>
+      <div>
+        {/* title */}
+        <div style={{ fontSize: 16 }}>
+          { text }
+        </div>
+        <div style={{ height: 20 }} />
+
+        {/* choice */}
+        <RadioButtonGroup
+          onChange={(e, value) => this.handleChange(value)}
+          defaultSelected={choices[0].value}
+          name={'policy'}
+        >
+          {
+            choices.map(c => (
+              <RadioButton
+                key={c.value}
+                style={{ marginBottom: 16 }}
+                labelStyle={{ color: '#757575' }}
+                iconStyle={{ fill: this.state.value === c.value ? this.props.primaryColor : '#757575' }}
+                value={c.value}
+                label={c.label}
+              />
+            ))
+          }
+        </RadioButtonGroup>
+      </div>
     )
   }
 
   render() {
     debug('PolicyDialog', this.props, this.state)
-    const name = this.props.data.conflicts[this.state.current].name
     return (
       <div style={{ width: 576, padding: '24px 24px 0px 24px' }}>
-        {/* title */}
-        <div style={{ fontSize: 16 }}>
-          { `文件“${name}”在上传目标目录路径下已经存在，请选择您要执行的操作：` }
-        </div>
-        <div style={{ height: 20 }} />
 
-        {/* choice */}
+        {/* title and choice */}
         { this.renderChoice() }
         <div style={{ height: 24 }} />
 
