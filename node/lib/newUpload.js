@@ -74,6 +74,24 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
     }
   }
 
+  /*  sort conflicts by order of following:
+   *
+   *  directory => directory: 1
+   *  directory => file: 2
+   *  file => directory: 3
+   *  file => file: 4
+   *
+   */
+  const typeCheck = (c) => {
+    if (c.entryType === 'directory' && c.remote.type === 'directory') return 1
+    if (c.entryType === 'directory' && c.remote.type === 'file') return 2
+    if (c.entryType === 'file' && c.remote.type === 'directory') return 3
+    if (c.entryType === 'file' && c.remote.type === 'file') return 4
+    return 5 // error ?
+  }
+  conflicts.forEach(c => (c.type = typeCheck(c)))
+  conflicts.sort((a, b) => (a.type - b.type))
+
   /* wait user to choose policy
    *
    * cancel: cancel all uploading
