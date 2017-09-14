@@ -12,7 +12,19 @@ const { getMainWindow } = require('./window')
 const { Tasks, sendMsg } = require('./transmissionUpdate')
 
 /* return a new file name */
-const getName = async (currPath, dirUUID, driveUUID) => currPath.replace(/^.*\//, '') // TODO
+const getName = (name, nameSpace) => {
+  let checkedName = name
+  const extension = name.replace(/^.*\./, '')
+  for (let i = 1; nameSpace.includes(checkedName); i++) {
+    if (!extension || extension === name) {
+      checkedName = `${name}(${i})`
+    } else {
+      const pureName = name.match(/^.*\./)[0]
+      checkedName = `${pureName.slice(0, pureName.length - 1)}(${i}).${extension}`
+    }
+  }
+  return checkedName
+}
 
 class Task {
   constructor(props) {
@@ -69,9 +81,9 @@ class Task {
             task.count += 1
             if (stat.isDirectory()) {
               /* create fold and return the uuid */
-              const dirname = policy && policy.mode === 'rename' ? policy.checkedName : entry.replace(/^.*\//, '')
-              const Entries = await createFoldAsync(driveUUID, dirUUID, dirname, policy)
-              const uuid = Entries.find(e => e.name === dirname).uuid
+              const dirname = policy.mode === 'rename' ? policy.checkedName : entry.replace(/^.*\//, '')
+              const dirEntry = await createFoldAsync(driveUUID, dirUUID, dirname, entries, policy)
+              const uuid = dirEntry.uuid
 
               /* read child */
               const children = await fs.readdirAsync(path.resolve(entry))
@@ -81,7 +93,8 @@ class Task {
               /* mode 'merge' should apply to children */
               const childPolicies = []
               childPolicies.length = newEntries.length
-              if (policy && policy.mode === 'merge') childPolicies.fill({ mode: 'merge' })
+              childPolicies.fill({ mode: policy.mode }) // !!! fill with one object, all shared !!!
+              if (policy.mode === 'rename' || policy.mode === 'replace') childPolicies.fill({ mode: 'normal' })
               // debug('childPolicies', childPolicies)
               this.push({ entries: newEntries, dirUUID: uuid, driveUUID, policies: childPolicies, task })
             } else {
@@ -139,12 +152,12 @@ class Task {
       name: 'diff',
       concurrency: 4,
       push(x) {
-        if (x.type === 'directory' || !(x.policy && x.policy.mode === 'merge') && x.task.isNew) {
+        if (x.type === 'directory' || !(x.policy.mode === 'merge' || x.policy.mode === 'overwrite') && x.task.isNew) {
           this.outs.forEach(t => t.push([x]))
         } else {
           /* combine to one post */
-          const { dirUUID } = x
-          const i = this.pending.findIndex(p => p[0].dirUUID === dirUUID)
+          const { dirUUID, policy } = x
+          const i = this.pending.findIndex(p => p[0].dirUUID === dirUUID && policy.mode === p[0].policy.mode)
           if (i > -1) {
             this.pending[i].push(x)
           } else {
@@ -155,16 +168,19 @@ class Task {
       },
 
       transform: (X, callback) => {
-        // debug('this.diff transform', X.length, X[0])
         const diffAsync = async (local, driveUUID, dirUUID, task) => {
           const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
           const remote = listNav.entries
           if (!remote.length) return local
-          const map = new Map() // TODO compare hash and name
+          const map = new Map() // compare hash and name
+          const nameMap = new Map() // only same name
+          const nameSpace = [] // used to check name
           local.forEach((l) => {
-            const name = l.policy && l.policy.mode === 'rename' ? l.policy.checkedName : l.entry.replace(/^.*\//, '')
+            const name = l.policy.mode === 'rename' ? l.policy.checkedName : l.entry.replace(/^.*\//, '')
             const key = name.concat(l.parts[l.parts.length - 1].fingerprint) // local file's key: name + fingerprint
             map.set(key, l)
+            nameMap.set(name, key)
+            nameSpace.push(name)
           })
           // debug('diffAsync map', map, remote)
           remote.forEach((r) => {
@@ -175,8 +191,28 @@ class Task {
               task.completeSize += map.get(rKey).stat.size
               map.delete(rKey)
             }
+            if (nameMap.has(r.name)) nameMap.delete(r.name)
+            else nameSpace.push(r.name)
           })
-          const result = [...map.values()]
+          const result = [...map.values()] // local files that need to upload
+
+          /* get files with same name but different hash */
+          const nameValue = [...nameMap.values()]
+          nameValue.forEach(key => map.delete(key))
+          const mapValue = [...map.values()]
+          debug('this.diff transform', X.length, X[0].entry, mapValue)
+          if (mapValue.length) {
+            let mode = mapValue[0].policy.mode
+            if (mode === 'merge') mode = 'rename'
+            if (mode === 'overwrite') mode = 'replace'
+            mapValue.forEach((l) => {
+              const name = l.entry.replace(/^.*\//, '') // TODO mode rename but still same name ?
+              const checkedName = getName(name, nameSpace)
+              const remoteUUID = remote.find(r => r.name === name).uuid
+              debug('get files with same name but different hash', { entry: l.entry, mode, checkedName, remoteUUID })
+              l.policy = Object.assign({}, { mode, checkedName, remoteUUID }) // important: assign a new object !
+            })
+          }
           if (!result.length && task.finishCount === task.count && this.readDir.isSelfStopped() && this.hash.isSelfStopped()) {
             task.finishDate = (new Date()).getTime()
             task.state = 'finished'
@@ -204,7 +240,7 @@ class Task {
           } else {
             /* combine to one post */
             const { dirUUID, policy } = x
-            const i = this.pending.findIndex(p => p.length < 10 && p[0].dirUUID === dirUUID && (!policy || policy.type === 'nomal'))
+            const i = this.pending.findIndex(p => p.length < 10 && p[0].dirUUID === dirUUID && policy.mode === p[0].policy.mode)
             if (i > -1) {
               this.pending[i].push(x)
             } else {
@@ -219,7 +255,7 @@ class Task {
 
         const Files = X.map((x) => {
           const { entry, parts, policy, task } = x
-          const name = policy && policy.mode === 'rename' ? policy.checkedName : entry.replace(/^.*\//, '')
+          const name = policy.mode === 'rename' ? policy.checkedName : entry.replace(/^.*\//, '')
           const readStreams = parts.map(part => fs.createReadStream(entry, { start: part.start, end: part.end, autoClose: true }))
           for (let i = 0; i < parts.length; i++) {
             const rs = readStreams[i]
