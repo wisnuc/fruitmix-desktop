@@ -389,7 +389,22 @@ createFold
 @param {function} callback
 */
 
-export const createFold = (driveUUID, dirUUID, dirname, policy, callback) => {
+/* return a new file name */
+const getName = (name, nameSpace) => {
+  let checkedName = name
+  const extension = name.replace(/^.*\./, '')
+  for (let i = 1; nameSpace.includes(checkedName); i++) {
+    if (!extension || extension === name) {
+      checkedName = `${name}(${i})`
+    } else {
+      const pureName = name.match(/^.*\./)[0]
+      checkedName = `${pureName.slice(0, pureName.length - 1)}(${i}).${extension}`
+    }
+  }
+  return checkedName
+}
+
+export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, callback) => {
   initArgs()
 
   const parents = true // mkdirp
@@ -398,12 +413,28 @@ export const createFold = (driveUUID, dirUUID, dirname, policy, callback) => {
 
   const handle = request.post(op, (error, res) => {
     if (error) {
-      debug('createFold error', error)
+      debug('createFold error', error, res)
       callback(error)
     } else {
-      // debug('createFold res', res && JSON.parse(res.body).entries)
-      if (res && res.statusCode === 200) callback(null, JSON.parse(res.body).entries)
-      else callback(Error('response code not 200'))
+      /* callback the created dir entry */
+      if (res && res.statusCode === 200) callback(null, JSON.parse(res.body).entries.find(e => e.name === dirname))
+      else if (res && res.statusCode === 403 && (policy.mode === 'overwrite' || policy.mode === 'merge')) {
+        /* when a file with the same name in remote, retry if given policy of overwrite or merge */
+        serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
+          .then((listNav) => {
+            const entries = listNav.entries
+            const index = entries.findIndex(e => e.name === dirname)
+            if (index > -1) {
+              const nameSpace = [...entries.map(e => e.name), localEntries.map(e => e.replace(/^.*\//, ''))]
+              const mode = policy.mode === 'overwrite' ? 'replace' : 'rename'
+              const checkedName = policy.mode === 'overwrite' ? dirname : getName(dirname, nameSpace)
+              const remoteUUID = entries[index].uuid
+              debug('retry createFold', dirname, mode, checkedName, remoteUUID)
+              createFold(driveUUID, dirUUID, checkedName, localEntries, { mode, checkedName, remoteUUID }, callback)
+            } else callback(Error('403 error but not EEXIST'))
+          })
+          .catch(e => callback(e))
+      } else callback(Error(`createFold response code not 200 but ${res && res.statusCode}`))
     }
   })
 
