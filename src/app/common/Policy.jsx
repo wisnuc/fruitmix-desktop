@@ -46,16 +46,17 @@ class PolicyDialog extends React.PureComponent {
 
     this.next = () => {
       let current = this.state.current + 1
-      const length = this.props.data.conflicts.length
+      const c = this.props.data.conflicts
       this.response[this.state.current] = this.state.value
-      debug('this.next', current, length, this.state.checked, this.response, this.state.value)
+      debug('this.next', current, c.length, this.state.checked, this.response, this.state.value)
       if (this.state.checked) {
-        this.response.length = length
-        this.response.fill(this.state.value, current, length)
-        current = length
+        while (c[current] && c[current].type === c[current - 1].type) {
+          this.response[current] = this.state.value
+          current += 1
+        }
       }
-      if (current === length) this.fire()
-      else this.setState({ current })
+      if (current === c.length) this.fire()
+      else this.setState({ current, value: '' })
     }
 
     this.handleChange = (value) => {
@@ -69,18 +70,24 @@ class PolicyDialog extends React.PureComponent {
     debug('renderChoice', entryType, remote.type)
     const type = entryType === 'directory' ? '文件夹' : '文件'
     const remoteType = remote.type === 'directory' ? '文件夹' : '文件'
+    /* file => file */
     const choices = [
       { value: 'rename', label: `保留，两个项目均保留，自动重命名新上传的${type}` },
       { value: 'replace', label: `替换，使用新上传的${type}替换已有${remoteType}` },
       { value: 'skip', label: `跳过，该${type}将不会被上传` }
     ]
+
+    /* directory => directory */
     if (entryType === 'directory' && entryType === remote.type) {
       choices.splice(0, 2,
         { value: 'merge', label: '保留，全部内容均保留，如遇同名但内容不同的文件将自动重命名后上传' },
         { value: 'overwrite', label: '覆盖，如遇同名文件将使用新上传的文件替换已有文件' },
       )
     }
+
     let text = `${type} “${name}” 在上传目标路径下已经存在，请选择您要执行的操作：`
+
+    /* directory => file || file => directory */
     if (entryType !== remote.type) {
       text = `上传${type} “${name}” 时，发现上传目标路径下已经存在同名的${remoteType}，请选择您要执行的操作：`
     }
@@ -96,6 +103,7 @@ class PolicyDialog extends React.PureComponent {
 
         {/* choice */}
         <RadioButtonGroup
+          key={this.state.current}
           onChange={(e, value) => this.handleChange(value)}
           defaultSelected={choices[0].value}
           name={'policy'}
@@ -119,6 +127,8 @@ class PolicyDialog extends React.PureComponent {
 
   render() {
     debug('PolicyDialog', this.props, this.state)
+    const c = this.props.data.conflicts
+    const leftCount = c.filter((conflict, index) => index > this.state.current && conflict.type === c[this.state.current].type).length
     return (
       <div style={{ width: 576, padding: '24px 24px 0px 24px' }}>
 
@@ -127,9 +137,9 @@ class PolicyDialog extends React.PureComponent {
         <div style={{ height: 24 }} />
 
         <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-          { this.props.data.conflicts.length - this.state.current - 1 > 0 &&
+          { leftCount > 0 &&
             <Checkbox
-              label={`其他冲突也执行此操作（还有${this.props.data.conflicts.length - this.state.current - 1}项）`}
+              label={`其他同类型冲突也执行此操作（还有${leftCount}项）`}
               labelStyle={{ color: '#757575' }}
               iconStyle={{ fill: this.state.checked ? this.props.primaryColor : '#757575' }}
               checked={this.state.checked}
