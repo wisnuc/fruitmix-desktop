@@ -220,6 +220,12 @@ class TrsContainer extends React.Component {
       ipcRenderer.send('OPEN_TRANSMISSION', this.state.tasks)
     }
 
+    this.openInDrive = () => {
+      debug('this.openInDrive', this.state.tasks)
+      const { driveUUID, dirUUID } = this.state.tasks[0]
+      this.props.navToDrive(driveUUID, dirUUID)
+    }
+
     this.updateTransmission = (e, userTasks, finishTasks) => {
       debug('this.updateTransmission', userTasks, finishTasks)
       this.setState({ userTasks, finishTasks })
@@ -354,6 +360,7 @@ class TrsContainer extends React.Component {
         task={task}
         select={this.select}
         open={this.open}
+        openInDrive={this.openInDrive}
       />
     )))
 
@@ -407,6 +414,7 @@ class TrsContainer extends React.Component {
                   { this.state.play && <MenuItem primaryText="继续" onTouchTap={() => this.handleAll(this.state.tasks, 'RESUME')} /> }
                   { this.state.pause && <MenuItem primaryText="暂停" onTouchTap={() => this.handleAll(this.state.tasks, 'PAUSE')} /> }
                   { this.state.tasks[0].trsType === 'download' && <MenuItem primaryText="打开所在文件夹" onTouchTap={this.open} /> }
+                  { this.state.tasks[0].trsType === 'upload' && <MenuItem primaryText="查看" onTouchTap={this.openInDrive} /> }
                   { this.state.play && <MenuItem primaryText="删除" onTouchTap={() => this.toggleDialog('deleteRunningDialog')} /> }
                   { this.state.tasks[0].state === 'finished' &&
                   <MenuItem primaryText="删除" onTouchTap={() => this.handleAll(this.state.tasks, 'DELETE')} /> }

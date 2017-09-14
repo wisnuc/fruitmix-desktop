@@ -90,6 +90,7 @@ class NavViews extends React.Component {
     this.getDetailStatusBound = this.getDetailStatus.bind(this)
     this.openDrawerBound = this.openDrawer.bind(this)
     this.openSnackBarBound = this.openSnackBar.bind(this)
+    this.navToDriveBound = this.navToDrive.bind(this)
   }
 
   install(name, View) {
@@ -114,12 +115,20 @@ class NavViews extends React.Component {
     this.currentView().willReceiveProps(this.props)
   }
 
-  navTo(nav) {
+  navTo(nav, target) {
     this.setState({ nav, openDrawer: false, showDetail: false })
     if (nav === this.state.nav) return
     if (this.state.nav) this.views[this.state.nav].navLeave()
     this.props.setPalette(this.views[nav].primaryColor(), this.views[nav].accentColor())
-    this.views[nav].navEnter()
+    this.views[nav].navEnter(target)
+  }
+
+  navToDrive(driveUUID, dirUUID) {
+    const drives = this.views.account.ctx.props.apis.drives.data
+    const drive = drives.find(d => d.uuid === driveUUID)
+    if (drive.tag === 'home') this.navTo('home', { driveUUID, dirUUID })
+    else this.navTo('public', { driveUUID, dirUUID })
+    debug('navToDrive', driveUUID, dirUUID, this.views.account.ctx.props.apis.account)
   }
 
   // not used, decorate onto navmap ? TODO
@@ -424,7 +433,8 @@ class NavViews extends React.Component {
                   navTo: this.navTo.bind(this),
                   toggleDetail: this.toggleDetailBound,
                   openSnackBar: this.openSnackBarBound,
-                  getDetailStatus: this.getDetailStatusBound
+                  getDetailStatus: this.getDetailStatusBound,
+                  navToDrive: this.navToDriveBound
                 })
               }
             </div>
