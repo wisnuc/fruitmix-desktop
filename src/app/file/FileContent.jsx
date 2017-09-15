@@ -17,22 +17,20 @@ class FileContent extends React.Component {
 
     /* cathc key action */
     this.keyDown = (e) => {
-      // debug('keyEvent', e)
+      // debug('keyEvent')
+      const { copy, createNewFolder, loading, move, rename, share } = this.props.home
+      if (copy || createNewFolder || this.props.home.delete || loading || move || rename || share) return
       if (this.props.select) {
-        if (e.ctrlKey && e.key === 'a') {
-          debug('ctrl + a')
-          this.props.select.addByRange(0, this.props.entries.length - 1)
-        }
-        if (e.key === 'Delete') {
-          debug('press Delete')
-          this.props.toggleDialog('delete')
-        }
+        if (e.ctrlKey && e.key === 'a') this.props.select.addByRange(0, this.props.entries.length - 1)
+        if (e.key === 'Delete') this.props.toggleDialog('delete')
         this.props.select.keyEvent(e.ctrlKey, e.shiftKey)
       }
     }
 
     this.keyUp = (e) => {
-      if (this.props.select) { this.props.select.keyEvent(e.ctrlKey, e.shiftKey) }
+      const { copy, createNewFolder, loading, move, rename, share } = this.props.home
+      if (copy || createNewFolder || this.props.home.delete || loading || move || rename || share) return
+      if (this.props.select) this.props.select.keyEvent(e.ctrlKey, e.shiftKey)
     }
 
     /* touchTap file */
@@ -92,7 +90,7 @@ class FileContent extends React.Component {
       const driveUUID = this.props.home.path[0].uuid
       debug('drop files!!', files, dirUUID, driveUUID, dir)
       if (!dirUUID || !driveUUID) {
-        this.props.openSnackBar('共享盘列表不能上传文件或文件夹') 
+        this.props.openSnackBar('共享盘列表不能上传文件或文件夹')
       } else {
         this.props.ipcRenderer.send('DRAG_FILE', { files, dirUUID, driveUUID })
       }
