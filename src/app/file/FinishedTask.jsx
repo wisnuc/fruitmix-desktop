@@ -28,9 +28,8 @@ class FinishedTask extends Component {
 
     this.openFileLocation = () => {
       console.log('this.openFileLocation')
-      clearTimeout(this.time)
-      if (this.props.task.trsType === 'download') this.time = setTimeout(this.props.open, 200)
-      else this.time = setTimeout(this.props.openInDrive, 200)
+      if (this.props.task.trsType === 'download') setImmediate(this.props.open)
+      else setImmediate(this.props.openInDrive)
     }
   }
 

@@ -116,19 +116,20 @@ class NavViews extends React.Component {
   }
 
   navTo(nav, target) {
-    this.setState({ nav, openDrawer: false, showDetail: false })
+    debug('navTo', nav, target, this.state.nav)
     if (nav === this.state.nav) return
+    this.setState({ nav, openDrawer: false, showDetail: false })
     if (this.state.nav) this.views[this.state.nav].navLeave()
     this.props.setPalette(this.views[nav].primaryColor(), this.views[nav].accentColor())
     this.views[nav].navEnter(target)
   }
 
   navToDrive(driveUUID, dirUUID) {
-    const drives = this.views.account.ctx.props.apis.drives.data
+    const drives = this.props.apis.drives.data // no drives ?
     const drive = drives.find(d => d.uuid === driveUUID)
     if (drive.tag === 'home') this.navTo('home', { driveUUID, dirUUID })
     else this.navTo('public', { driveUUID, dirUUID })
-    debug('navToDrive', driveUUID, dirUUID, this.views.account.ctx.props.apis.account)
+    debug('navToDrive', driveUUID, dirUUID, this.props)
   }
 
   // not used, decorate onto navmap ? TODO
@@ -178,7 +179,7 @@ class NavViews extends React.Component {
 
     /* is admin ? */
     let isAdmin = false
-    const account = this.views.account.ctx.props.apis.account
+    const account = this.props.apis.account
     // debug('renderQuickNavs', account)
     if (!account.isPending() && !account.isRejected() && account.value() && account.value().isAdmin) {
       isAdmin = true

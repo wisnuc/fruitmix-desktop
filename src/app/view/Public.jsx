@@ -71,11 +71,11 @@ class Public extends Home {
       select = this.select.reset(entries.length)
 
       this.force = false
-      this.setState({ drives: data, path, entries, select, inRoot: true })
+      this.setState({ drives: data, path, entries, select, inRoot: true, loading: false })
     } else {
       if (data === this.state.listNavDir && !this.force) return
       path = [{ name: '共享盘', uuid: this.rootDrive.uuid, type: 'publicRoot' }, ...data.path] // important !!
-      path[1].name = this.rootDrive.name
+      path[1].name = this.rootDrive.name || this.state.drives.find(d => d.uuid === this.rootDrive.uuid).label
       entries = data.entries
 
       /* sort enries */
@@ -83,7 +83,7 @@ class Public extends Home {
       select = this.select.reset(entries.length)
 
       this.force = false
-      this.setState({ listNavDir: data, path, entries, select, inRoot: false })
+      this.setState({ listNavDir: data, path, entries, select, inRoot: false, loading: false })
     }
   }
 
@@ -102,9 +102,18 @@ class Public extends Home {
     }
   }
 
-  navEnter() {
+  navEnter(target) {
     this.rootDrive = null
-    this.ctx.props.apis.request('drives')
+    const apis = this.ctx.props.apis
+    if (target && target.driveUUID) {
+      const { driveUUID, dirUUID } = target
+      debug('navEnter', driveUUID, dirUUID)
+      apis.request('listNavDir', { driveUUID, dirUUID }, error => error && this.refresh())
+      this.rootDrive = { uuid: driveUUID }
+      this.setState({ loading: true })
+    } else {
+      apis.request('drives')
+    }
   }
 
   menuName() {
@@ -218,7 +227,7 @@ class Public extends Home {
   }
 
   renderContent({ navTo, toggleDetail, openSnackBar, getDetailStatus }) {
-    debug('renderContent public', this.state.contextMenuOpen, !this.state.inRoot, this.state.contextMenuY, this.state.contextMenuX)
+    // debug('renderContent public', this.state.contextMenuOpen, !this.state.inRoot, this.state.contextMenuY, this.state.contextMenuX)
 
     /* loading data */
     if (!this.state.listNavDir && !this.state.drives || !this.state.path.length) return (<div />)
