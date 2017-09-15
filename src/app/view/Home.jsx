@@ -58,7 +58,8 @@ class Home extends Base {
       delete: false,
       move: false,
       copy: false,
-      share: false
+      share: false,
+      loading: false
     }
 
     /* handle update sortType */
@@ -239,7 +240,7 @@ class Home extends Base {
     entries = [...entries].sort((a, b) => sortByType(a, b, this.state.sortType))
 
     const select = this.select.reset(entries.length)
-    const state = { select, listNavDir, path, entries }
+    const state = { select, listNavDir, path, entries, loading: false }
 
     this.force = false
     this.setState(state)
@@ -253,13 +254,21 @@ class Home extends Base {
     this.updateState(listNavDir.value())
   }
 
-  navEnter() {
+  navEnter(target) {
     const apis = this.ctx.props.apis
+    debug('navEnter before', apis, target)
     if (!apis || !apis.drives || !apis.drives.data) return
-    const homeDrive = apis.drives.data.find(drive => drive.tag === 'home')
-    const preDriveUUID = apis.listNavDir && apis.listNavDir.data && apis.listNavDir.data.path[0].uuid
-    if (homeDrive && preDriveUUID !== homeDrive.uuid) {
-      this.ctx.props.apis.request('listNavDir', { driveUUID: homeDrive.uuid, dirUUID: homeDrive.uuid })
+    if (target && target.driveUUID) {
+      const { driveUUID, dirUUID } = target
+      debug('navEnter', driveUUID, dirUUID)
+      apis.request('listNavDir', { driveUUID, dirUUID }, err => err && this.refresh())
+      this.setState({ loading: true })
+    } else {
+      const homeDrive = apis.drives.data.find(drive => drive.tag === 'home')
+      const preDriveUUID = apis.listNavDir && apis.listNavDir.data && apis.listNavDir.data.path[0].uuid
+      if (homeDrive && preDriveUUID !== homeDrive.uuid) {
+        apis.request('listNavDir', { driveUUID: homeDrive.uuid, dirUUID: homeDrive.uuid })
+      }
     }
   }
 
