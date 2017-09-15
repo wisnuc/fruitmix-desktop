@@ -284,17 +284,12 @@ export class UploadMultipleFiles {
   upload() {
     initArgs()
 
-    this.handle = request.post({ url: `${server}/drives/${this.driveUUID}/dirs/${this.dirUUID}/entries`, headers: { Authorization } })
+    const op = { url: `${server}/drives/${this.driveUUID}/dirs/${this.dirUUID}/entries`, headers: { Authorization } }
 
-    this.handle.on('error', error => this.finish(error))
-
-    this.handle.on('response', (response) => {
-      // debug('this.handle.on response', response && response.statusCode)
-      if (response && response.statusCode === 200) {
-        this.finish()
-      } else {
-        this.finish(Error(`Respose not 200 but ${response.statusCode}`))
-      }
+    this.handle = request.post(op, (err, res) => {
+      if (err) this.finish(err)
+      else if (res && res.statusCode === 200) this.finish(null)
+      else this.finish(JSON.parse(res.body))
     })
 
     const form = this.handle.form()
@@ -380,15 +375,6 @@ export class DownloadFile {
   }
 }
 
-/**
-createFold
-
-@param {string} driveUUID
-@param {string} dirUUID
-@param {string} dirname
-@param {function} callback
-*/
-
 /* return a new file name */
 const getName = (name, nameSpace) => {
   let checkedName = name
@@ -404,6 +390,15 @@ const getName = (name, nameSpace) => {
   return checkedName
 }
 
+/**
+createFold
+
+@param {string} driveUUID
+@param {string} dirUUID
+@param {string} dirname
+@param {function} callback
+*/
+
 export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, callback) => {
   initArgs()
 
@@ -415,27 +410,26 @@ export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, ca
     if (error) {
       debug('createFold error', error, res)
       callback(error)
-    } else {
+    } else if (res && res.statusCode === 200) {
       /* callback the created dir entry */
-      if (res && res.statusCode === 200) callback(null, JSON.parse(res.body).entries.find(e => e.name === dirname))
-      else if (res && res.statusCode === 403 && (policy.mode === 'overwrite' || policy.mode === 'merge')) {
-        /* when a file with the same name in remote, retry if given policy of overwrite or merge */
-        serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
-          .then((listNav) => {
-            const entries = listNav.entries
-            const index = entries.findIndex(e => e.name === dirname)
-            if (index > -1) {
-              const nameSpace = [...entries.map(e => e.name), localEntries.map(e => e.replace(/^.*\//, ''))]
-              const mode = policy.mode === 'overwrite' ? 'replace' : 'rename'
-              const checkedName = policy.mode === 'overwrite' ? dirname : getName(dirname, nameSpace)
-              const remoteUUID = entries[index].uuid
-              debug('retry createFold', dirname, mode, checkedName, remoteUUID)
-              createFold(driveUUID, dirUUID, checkedName, localEntries, { mode, checkedName, remoteUUID }, callback)
-            } else callback(Error('403 error but not EEXIST'))
-          })
-          .catch(e => callback(e))
-      } else callback(Error(`createFold response code not 200 but ${res && res.statusCode}`))
-    }
+      callback(null, JSON.parse(res.body).entries.find(e => e.name === dirname))
+    } else if (res && res.statusCode === 403 && (policy.mode === 'overwrite' || policy.mode === 'merge')) {
+      /* when a file with the same name in remote, retry if given policy of overwrite or merge */
+      serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
+        .then((listNav) => {
+          const entries = listNav.entries
+          const index = entries.findIndex(e => e.name === dirname)
+          if (index > -1) {
+            const nameSpace = [...entries.map(e => e.name), localEntries.map(e => e.replace(/^.*\//, ''))]
+            const mode = policy.mode === 'overwrite' ? 'replace' : 'rename'
+            const checkedName = policy.mode === 'overwrite' ? dirname : getName(dirname, nameSpace)
+            const remoteUUID = entries[index].uuid
+            debug('retry createFold', dirname, mode, checkedName, remoteUUID)
+            createFold(driveUUID, dirUUID, checkedName, localEntries, { mode, checkedName, remoteUUID }, callback)
+          } else callback(JSON.parse(res.body))
+        })
+        .catch(e => callback(e))
+    } else callback(JSON.parse(res.body)) // response code not 200 and no policy
   })
 
   const form = handle.form()

@@ -91,6 +91,8 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
   }
   conflicts.forEach(c => (c.type = typeCheck(c)))
   conflicts.sort((a, b) => (a.type - b.type))
+  
+  // conflicts.length = 0
 
   /* wait user to choose policy
    *
