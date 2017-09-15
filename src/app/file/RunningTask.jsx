@@ -1,14 +1,17 @@
 import React from 'react'
+import Debug from 'debug'
 import { IconButton } from 'material-ui'
 import DeleteSvg from 'material-ui/svg-icons/action/delete'
 import FileSvg from 'material-ui/svg-icons/editor/insert-drive-file'
 import FolderSvg from 'material-ui/svg-icons/file/folder'
 import PlaySvg from 'material-ui/svg-icons/av/play-arrow'
 import PauseSvg from 'material-ui/svg-icons/av/pause'
+import InfoSvg from 'material-ui/svg-icons/action/info'
 import DownloadSvg from 'material-ui/svg-icons/file/file-download'
 import UploadSvg from 'material-ui/svg-icons/file/file-upload'
 import MultiSvg from 'material-ui/svg-icons/content/content-copy'
 
+const debug = Debug('component:file:RunningTask: ')
 const svgStyle = { color: '#000', opacity: 0.54 }
 class RunningTask extends React.Component {
   constructor(props) {
@@ -34,6 +37,11 @@ class RunningTask extends React.Component {
       } else {
         this.props.pause(task.uuid, task.trsType)
       }
+    }
+
+    this.checkError = () => {
+      debug('this.checkError', this.props.task)
+      this.props.openErrorDialog(this.props.task.errors)
     }
   }
 
@@ -181,9 +189,13 @@ class RunningTask extends React.Component {
 
         {/* Pause, resume and delete task*/}
         <div style={{ flex: '0 0 120px', display: 'flex', alignItems: 'center' }}>
-          <IconButton iconStyle={svgStyle} onTouchTap={this.toggleTask} tooltip={task.paused ? '开始' : '暂停'}>
-            { task.paused ? <PlaySvg /> : <PauseSvg /> }
-          </IconButton>
+          {
+            task.state === 'failed'
+            ? <IconButton iconStyle={{ color: '#F44336 ' }} onTouchTap={this.checkError} tooltip="查看"> <InfoSvg /> </IconButton>
+            : <IconButton iconStyle={svgStyle} onTouchTap={this.toggleTask} tooltip={task.paused ? '开始' : '暂停'}>
+              { task.paused ? <PlaySvg /> : <PauseSvg /> }
+            </IconButton>
+          }
           {
             task.paused &&
               <IconButton iconStyle={svgStyle} onTouchTap={this.props.delete} tooltip="取消">
@@ -191,7 +203,6 @@ class RunningTask extends React.Component {
               </IconButton>
           }
         </div>
-
       </div>
     )
   }

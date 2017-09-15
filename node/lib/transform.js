@@ -118,7 +118,7 @@ class Transform extends EventEmitter {
           if (err) {
             x.error = err
             this.failed.push(x)
-            debug('err in', x, '\nerror': err)
+            debug('err in', x.entry || (x[0] && x[0].entry) || x, '\nerror': err)
           } else if (this.outs.length) {
             this.outs.forEach(t => t.push(y))
           } else if (this.root().listenerCount('data')) {

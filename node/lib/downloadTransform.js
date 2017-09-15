@@ -190,6 +190,7 @@ class Task {
       entry.finished = true
       if (task.count === task.finishCount) {
         task.state = 'finished'
+        clearInterval(this.countSpeed)
         task.finishDate = (new Date()).getTime()
       }
       sendMsg()

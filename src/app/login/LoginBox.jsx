@@ -64,7 +64,7 @@ class LoginBox extends React.Component {
   render() {
     const { token } = this.props.device
     const busy = token && token.isPending()
-    const error = (token && token.isRejected()) ? token.reason().message : null
+    const error = (token && token.isRejected()) ? token.reason().message === 'Unauthorized' ? '密码错误' : token.reason().message : null
     const success = token && token.isFulfilled()
 
     // 24 + 24 + 36 + 20 + 48 + 20 + 36 = ???

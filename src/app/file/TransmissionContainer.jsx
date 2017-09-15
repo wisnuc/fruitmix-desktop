@@ -9,6 +9,7 @@ import PauseSvg from 'material-ui/svg-icons/av/pause'
 
 import RunningTask from './RunningTask'
 import FinishedTask from './FinishedTask'
+import ErrorDialogInTrans from './ErrorDialogInTrans'
 import FlatButton from '../common/FlatButton'
 import DialogOverlay from '../common/DialogOverlay'
 
@@ -30,7 +31,8 @@ class TrsContainer extends React.Component {
       userTasks: [],
       finishTasks: [],
       clearRunningDialog: false,
-      clearFinishedDialog: false
+      clearFinishedDialog: false,
+      errors: null
     }
 
     this.taskSelected = []
@@ -226,6 +228,10 @@ class TrsContainer extends React.Component {
       this.props.navToDrive(driveUUID, dirUUID)
     }
 
+    this.openErrorDialog = (errors) => {
+      this.setState({ errors })
+    }
+
     this.updateTransmission = (e, userTasks, finishTasks) => {
       debug('this.updateTransmission', userTasks, finishTasks)
       this.setState({ userTasks, finishTasks })
@@ -324,6 +330,7 @@ class TrsContainer extends React.Component {
         resume={this.resume}
         select={this.select}
         delete={() => this.toggleDialog('deleteRunningDialog')}
+        openErrorDialog={this.openErrorDialog}
       />
     )))
 
@@ -411,7 +418,13 @@ class TrsContainer extends React.Component {
             >
               <Paper style={{ position: 'absolute', top: this.state.y, left: this.state.x }}>
                 <Menu>
-                  { this.state.play && <MenuItem primaryText="继续" onTouchTap={() => this.handleAll(this.state.tasks, 'RESUME')} /> }
+                  {
+                    this.state.play &&
+                      <MenuItem
+                        primaryText={this.state.tasks[0].state === 'failed' ? '重试' : '继续'}
+                        onTouchTap={() => this.handleAll(this.state.tasks, 'RESUME')}
+                      />
+                  }
                   { this.state.pause && <MenuItem primaryText="暂停" onTouchTap={() => this.handleAll(this.state.tasks, 'PAUSE')} /> }
                   { this.state.tasks[0].trsType === 'download' && <MenuItem primaryText="打开所在文件夹" onTouchTap={this.open} /> }
                   { this.state.tasks[0].trsType === 'upload' && <MenuItem primaryText="查看" onTouchTap={this.openInDrive} /> }
@@ -511,6 +524,11 @@ class TrsContainer extends React.Component {
                 </div>
             }
           </div>
+        </DialogOverlay>
+
+        {/* error dialog */}
+        <DialogOverlay open={!!this.state.errors} onRequestClose={() => this.setState({ errors: null })}>
+          { this.state.errors && <ErrorDialogInTrans errors={this.state.errors} /> }
         </DialogOverlay>
       </div>
     )

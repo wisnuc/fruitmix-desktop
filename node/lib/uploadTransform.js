@@ -45,6 +45,7 @@ class Task {
       this.lastSpeed = 0
       this.state = 'visitless'
       this.trsType = 'upload'
+      this.errors = []
     }
 
     this.initStatus()
@@ -105,7 +106,10 @@ class Task {
           return ({ files, dirUUID, driveUUID, task })
         }
         const { entries, dirUUID, driveUUID, policies, task } = x
-        read(entries, dirUUID, driveUUID, policies, task).then(y => callback(null, y)).catch(e => callback(e))
+        read(entries, dirUUID, driveUUID, policies, task).then(y => callback(null, y)).catch((e) => {
+          task.errors.push({ pipe: 'readDir', type: 'directory', driveUUID, dirUUID, entries, error: e })
+          callback(e)
+        })
       }
     })
 
@@ -232,6 +236,7 @@ class Task {
     this.upload = new Transform({
       name: 'upload',
       concurrency: 1,
+      isBlocked: () => this.paused,
       push(X) {
         X.forEach((x) => {
           if (x.type === 'directory') {
@@ -270,13 +275,14 @@ class Task {
               sendMsg()
             })
           }
-          return ({ name, parts, readStreams, policy })
+          return ({ entry, name, parts, readStreams, policy })
         })
 
         const { driveUUID, dirUUID, task } = X[0]
         task.state = 'uploading'
         const handle = new UploadMultipleFiles(driveUUID, dirUUID, Files, (error) => {
           this.reqHandles.splice(this.reqHandles.indexOf(handle), 1)
+          if (error) this.errors.push({ pipe: 'upload', type: 'file', driveUUID, dirUUID, Files, error })
           callback(error, { driveUUID, dirUUID, Files, task })
         })
         this.reqHandles.push(handle)
@@ -303,13 +309,14 @@ class Task {
       // this.readDir.print()
       let errorCount = 0
       const arr = [this.readDir, this.hash, this.diff, this.upload]
-      arr.forEach(t => (errorCount += t.failed.length))
+      arr.forEach((t) => {
+        errorCount += t.failed.length
+      })
       if (errorCount > 15 || (this.readDir.isStopped() && errorCount)) {
         debug('errorCount', errorCount)
-        if (errorCount) {
-          this.paused = true
-          this.state = 'failed'
-        }
+        this.paused = true
+        clearInterval(this.countSpeed)
+        this.state = 'failed'
       }
     })
   }
@@ -320,8 +327,8 @@ class Task {
   }
 
   status() {
-    const { uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew, completeSize, lastTimeSize, count,
-      finishCount, finishDate, name, paused, restTime, size, speed, lastSpeed, state, trsType } = this
+    const { uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew, completeSize, lastTimeSize, count, finishCount,
+      finishDate, name, paused, restTime, size, speed, lastSpeed, errors, state, trsType } = this
     return ({ uuid,
       entries,
       dirUUID,
@@ -341,6 +348,7 @@ class Task {
       speed,
       lastSpeed,
       state,
+      errors,
       trsType })
   }
 
