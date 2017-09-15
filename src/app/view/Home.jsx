@@ -149,7 +149,7 @@ class Home extends Base {
 
     this.delete = () => {
       if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
-      this.setState({ loading: true })
+      // this.setState({ loading: true })
       this.deleteAsync().then(() => {
         this.setState({ loading: false, delete: false })
         this.ctx.openSnackBar('删除成功')
@@ -177,10 +177,13 @@ class Home extends Base {
 
     /* op: scrollTo file */
     this.refresh = (op) => {
+      if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
       const rUUID = this.state.path[0].uuid
       const dUUID = this.state.path[this.state.path.length - 1].uuid
       this.ctx.props.apis.request('listNavDir', { driveUUID: rUUID, dirUUID: dUUID })
-      if (op && op.fileName) this.setState({ scrollTo: op.fileName })
+      debug('this.refresh op', op)
+      if (op) this.setState({ scrollTo: op.fileName, loading: !op.noloading })
+      else this.setState({ loading: true })
     }
 
     this.showContextMenu = (clientX, clientY) => {
@@ -227,7 +230,7 @@ class Home extends Base {
     ipcRenderer.on('driveListUpdate', (e, dir) => {
       const path = this.state.path
       // console.log(dir, path)
-      if (path && path.length && dir.uuid === path[path.length - 1].uuid) this.refresh()
+      if (path && path.length && dir.uuid === path[path.length - 1].uuid) this.refresh({ noloading: true })
     })
   }
 
@@ -261,7 +264,11 @@ class Home extends Base {
     if (target && target.driveUUID) {
       const { driveUUID, dirUUID } = target
       debug('navEnter', driveUUID, dirUUID)
-      apis.request('listNavDir', { driveUUID, dirUUID }, err => err && this.refresh())
+      apis.request('listNavDir', { driveUUID, dirUUID }, (err) => {
+        if (!err) return
+        this.ctx.openSnackBar('打开目录失败')
+        this.refresh()
+      })
       this.setState({ loading: true })
     } else {
       const homeDrive = apis.drives.data.find(drive => drive.tag === 'home')

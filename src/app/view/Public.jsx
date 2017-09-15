@@ -5,6 +5,7 @@ import { IconButton, MenuItem } from 'material-ui'
 import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
 import ListIcon from 'material-ui/svg-icons/action/list'
 import GridIcon from 'material-ui/svg-icons/action/view-module'
+import RefreshIcon from 'material-ui/svg-icons/navigation/refresh'
 
 import Home from './Home'
 import FileContent from '../file/FileContent'
@@ -108,7 +109,11 @@ class Public extends Home {
     if (target && target.driveUUID) {
       const { driveUUID, dirUUID } = target
       debug('navEnter', driveUUID, dirUUID)
-      apis.request('listNavDir', { driveUUID, dirUUID }, error => error && this.refresh())
+      apis.request('listNavDir', { driveUUID, dirUUID }, (err) => {
+        if (!err) return
+        this.ctx.openSnackBar('打开目录失败')
+        this.refresh()
+      })
       this.rootDrive = { uuid: driveUUID }
       this.setState({ loading: true })
     } else {
@@ -193,6 +198,9 @@ class Public extends Home {
   renderToolBar({ style }) {
     return (
       <div style={style}>
+        <IconButton onTouchTap={() => this.refresh()} tooltip="刷新" >
+          <RefreshIcon color="#FFF" />
+        </IconButton>
         <IconButton onTouchTap={() => this.toggleDialog('gridView')} tooltip={this.state.gridView ? '列表视图' : '网格视图'}>
           { this.state.gridView ? <ListIcon color="#FFF" /> : <GridIcon color="#FFF" /> }
         </IconButton>
