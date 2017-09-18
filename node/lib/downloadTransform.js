@@ -3,7 +3,7 @@ const fs = Promise.promisifyAll(require('fs'))
 const mkdirp = Promise.promisify(require('mkdirp'))
 const path = require('path')
 const childProcess = require('child_process')
-const debug = require('debug')('node:lib:uploadTransform:')
+const debug = require('debug')('node:lib:downloadTransform:')
 const request = require('request')
 
 const Transform = require('./transform')
@@ -15,6 +15,7 @@ const { Tasks, sendMsg } = require('./transmissionUpdate')
 /* return a new file name */
 const getName = async (name, dirPath, entries) => {
   const list = await fs.readdirAsync(dirPath)
+  if (!list.includes(name)) return name
   const nameSpace = entries.map(e => e.name)
   nameSpace.push(...list)
   let newName = name
@@ -36,18 +37,20 @@ class Task {
 
     this.initStatus = () => {
       Object.assign(this, props)
+      this.props = props
       this.completeSize = 0
       this.lastTimeSize = 0
       this.count = 0
       this.finishCount = 0
       this.finishDate = 0
-      this.paused = false
+      this.paused = true
       this.restTime = 0
       this.size = 0
       this.speed = 0
       this.lastSpeed = 0
       this.state = 'visitless'
       this.trsType = 'download'
+      this.errors = []
     }
 
     this.initStatus()
@@ -86,16 +89,20 @@ class Task {
               await mkdirp(entry.downloadPath)
 
               /* read children in entries.children or get from remote */
-              if (!entries.children) {
+              if (!entry.children) {
                 const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${entry.uuid}`)
-                entries.children = listNav.entries
+                entry.children = listNav.entries
               }
 
-              this.push({ entries: entries.children, downloadPath: entry.downloadPath, dirUUID: entry.uuid, driveUUID, task })
+              this.push({ entries: entry.children, downloadPath: entry.downloadPath, dirUUID: entry.uuid, driveUUID, task })
+            } else if (entry.finished) {
+              task.size += entry.size
+              task.completeSize += entry.size
             } else {
               entry.tmpPath = path.join(downloadPath, `${entry.newName}.download`)
               /* download start from entry.seek */
               entry.seek = entry.seek || 0
+
               /* when entry.seek > 0 && entry.seek !== partDownloadFile's size, reDownload file */
               if (entry.seek) {
                 try {
@@ -103,12 +110,12 @@ class Task {
                   if (stat.size !== entry.seek) entry.seek = 0
                 } catch (e) {
                   if (e.code === 'ENOENT') entry.seek = 0
-                  else throw new Error(`read pre-download file error: ${e}`)
+                  else throw e
                 }
               }
               entry.lastTimeSize = 0
               task.size += entry.size
-              task.completeSize = entry.seek
+              task.completeSize += entry.seek
             }
           }
           return ({ entries, downloadPath, dirUUID, driveUUID, task })
@@ -138,7 +145,7 @@ class Task {
         // debug('download transform start', x.entry.name)
         const { entry, downloadPath, dirUUID, driveUUID, task } = x
         task.state = 'downloading'
-        debug('transform', entry.seek)
+        // debug('download transform entry.seek', entry.seek)
         const stream = fs.createWriteStream(entry.tmpPath, { flags: entry.seek ? 'r+' : 'w', start: entry.seek })
         stream.on('error', err => callback(err))
 
@@ -147,16 +154,16 @@ class Task {
           entry.seek += gap
           task.completeSize += gap
           entry.lastTimeSize = stream.bytesWritten
+          task.updateStore()
         })
 
         stream.on('finish', () => {
           entry.timeStamp = (new Date()).getTime()
-          debug('stream on finish', entry.timeStamp)
           const gap = stream.bytesWritten - entry.lastTimeSize
           entry.seek += gap
           task.completeSize += gap
-          debug(`一段文件写入结束 当前seek位置为 ：${entry.seek}, 共${entry.size}`)
           entry.lastTimeSize = 0
+          task.updateStore()
           if (entry.seek === entry.size) callback(null, { entry, downloadPath, dirUUID, driveUUID, task })
         })
 
@@ -176,6 +183,7 @@ class Task {
         // debug('rename transform start', x.entry.name)
         const { entry, downloadPath, dirUUID, driveUUID, task } = x
         fs.rename(entry.tmpPath, entry.downloadPath, (error) => {
+          if (error) debug('rename error', error)
           callback(error, { entry, downloadPath, dirUUID, driveUUID, task })
         })
       }
@@ -193,6 +201,7 @@ class Task {
         clearInterval(this.countSpeed)
         task.finishDate = (new Date()).getTime()
       }
+      task.updateStore()
       sendMsg()
     })
 
@@ -203,34 +212,36 @@ class Task {
   }
 
   run() {
+    this.paused = false
     this.countSpeed = setInterval(this.countSpeedFunc, 1000)
     this.readRemote.push({ entries: this.entries, downloadPath: this.downloadPath, dirUUID: this.dirUUID, driveUUID: this.driveUUID, task: this })
   }
 
   status() {
-    const { uuid, downloadPath, entries, dirUUID, driveUUID, taskType, createTime, isNew, completeSize, lastTimeSize, count,
-      finishCount, finishDate, name, paused, restTime, size, speed, lastSpeed, state, trsType } = this
-    return ({ uuid,
-      downloadPath,
-      entries,
-      dirUUID,
-      driveUUID,
-      taskType,
-      createTime,
-      isNew,
-      completeSize,
-      lastTimeSize,
-      count,
-      finishCount,
-      finishDate,
-      name,
-      paused,
-      restTime,
-      size,
-      speed,
-      lastSpeed,
-      state,
-      trsType })
+    return Object.assign({}, this.props, {
+      completeSize: this.completeSize,
+      lastTimeSize: this.lastTimeSize,
+      count: this.count,
+      finishCount: this.finishCount,
+      finishDate: this.finishDate,
+      paused: this.paused,
+      restTime: this.restTime,
+      size: this.size,
+      speed: this.speed,
+      lastSpeed: this.lastSpeed,
+      state: this.state,
+      trsType: this.trsType
+    })
+  }
+
+  createStore() {
+    if (!this.isNew) return
+    const data = Object.assign({}, { _id: this.uuid }, this.status())
+    global.db.task.insert(data, err => err && debug(this.name, 'createStore error: ', err))
+  }
+
+  updateStore() {
+    global.db.task.update({ _id: this.uuid }, { $set: this.status() }, {}, err => err && debug(this.name, 'updateStore error: ', err))
   }
 
   pause() {
@@ -251,11 +262,11 @@ class Task {
   }
 }
 
-const createTask = (uuid, entries, name, dirUUID, driveUUID, taskType, createTime, isNew, downloadPath) => {
-  debug('createTask', name)
+const createTask = (uuid, entries, name, dirUUID, driveUUID, taskType, createTime, isNew, downloadPath, isPaused) => {
   const task = new Task({ uuid, entries, name, dirUUID, driveUUID, taskType, createTime, isNew, downloadPath })
   Tasks.push(task)
-  task.run()
+  task.createStore()
+  if (!isPaused) task.run()
   sendMsg()
 }
 
