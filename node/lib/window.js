@@ -1,7 +1,8 @@
 import path from 'path'
 import Debug from 'debug'
-import store from '../serve/store/store'
 import { ipcMain, BrowserWindow, app, dialog } from 'electron'
+import { clearTasks } from './transmissionUpdate'
+import store from '../serve/store/store'
 
 const debug = Debug('lib:window')
 
@@ -34,24 +35,27 @@ const initMainWindow = () => {
   let close = false
   _mainWindow.on('close', (e) => {
     // console.log('global.configuration', global.configuration.globalConfig.getConfig().noCloseConfirm)
-    if (close || (store.getState().config && store.getState().config.noCloseConfirm)) return
-    dialog.showMessageBox(_mainWindow, {
-      type: 'warning',
-      title: '关闭应用',
-      buttons: ['取消', '关闭'],
-      checkboxLabel: '不再提示',
-      checkboxChecked: false,
-      message: '确定退出并关闭应用吗？'
-    }, (response, checkboxChecked) => {
-      if (response === 1 && checkboxChecked) {
-        close = true
-        global.configuration.updateGlobalConfigAsync({ noCloseConfirm: true }).then(() => setImmediate(app.quit)).catch(e => console.log(e))
-      } else if (response === 1) {
-        close = true
-        setImmediate(app.quit)
-      }
-    })
-    e.preventDefault()
+    if (close || (store.getState().config && store.getState().config.noCloseConfirm)) {
+      clearTasks()
+    } else {
+      dialog.showMessageBox(_mainWindow, {
+        type: 'warning',
+        title: '关闭应用',
+        buttons: ['取消', '关闭'],
+        checkboxLabel: '不再提示',
+        checkboxChecked: false,
+        message: '确定退出并关闭应用吗？'
+      }, (response, checkboxChecked) => {
+        if (response === 1 && checkboxChecked) {
+          close = true
+          global.configuration.updateGlobalConfigAsync({ noCloseConfirm: true }).then(() => setImmediate(app.quit)).catch(e => console.log(e))
+        } else if (response === 1) {
+          close = true
+          setImmediate(app.quit)
+        }
+      })
+      e.preventDefault()
+    }
   })
 
   // debug mode

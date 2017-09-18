@@ -199,22 +199,8 @@ class TrsContainer extends React.Component {
 
     /* type: 'PAUSE', 'RESUME', 'DELETE' */
     this.handleAll = (tasks, type) => {
-      debug('handleALL', tasks, type, this.taskSelected)
-      const downloadArr = []
-      const uploadArr = []
-
-      tasks.forEach(item => item.trsType === 'download' ? downloadArr.push(item.uuid) : uploadArr.push(item.uuid))
-      if (type === 'DELETE') {
-        ipcRenderer.send(this.taskSelected.length ? 'DELETE_DOWNLOADING' : 'DELETE_DOWNLOADED', downloadArr)
-        ipcRenderer.send(this.taskSelected.length ? 'DELETE_UPLOADING' : 'DELETE_UPLOADED', uploadArr)
-      } else {
-        ipcRenderer.send(`${type}_DOWNLOADING`, downloadArr)
-        ipcRenderer.send(`${type}_UPLOADING`, uploadArr)
-      }
-    }
-
-    this.cleanRecord = () => {
-      ipcRenderer.send('CLEAN_RECORD')
+      debug('ipcRenderer.send', `${type}_TASK`, tasks.map(t => t.uuid))
+      ipcRenderer.send(`${type}_TASK`, tasks.map(t => t.uuid))
     }
 
     this.open = () => {
@@ -516,8 +502,8 @@ class TrsContainer extends React.Component {
                       label="清除"
                       primary
                       onTouchTap={() => {
+                        this.handleAll(this.state.finishTasks, 'DELETE')
                         this.toggleDialog('clearFinishedDialog')
-                        this.cleanRecord()
                       }}
                     />
                   </div>

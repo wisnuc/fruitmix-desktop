@@ -13,11 +13,12 @@ const login = (state = defaultState, action) => {
   if (action.type === 'LOGIN') {
     const dbPath = path.join(app.getPath('appData'), 'wisnuc', 'dbCache')
     const uuid = action.data.user.uuid
+    global.db.task = new DataStore({ filename: path.join(dbPath, `${uuid}-task.db`), autoload: true })
+    /*
     global.db.uploading = new DataStore({ filename: path.join(dbPath, `${uuid}uploading.db`), autoload: true })
     global.db.uploaded = new DataStore({ filename: path.join(dbPath, `${uuid}uploaded.db`), autoload: true })
     global.db.downloading = new DataStore({ filename: path.join(dbPath, `${uuid}downloading.db`), autoload: true })
     global.db.downloaded = new DataStore({ filename: path.join(dbPath, `${uuid}downloaded.db`), autoload: true })
-    /*
     global.db.uploading.find({}, (err, data) => console.log(`uploading count is : ${data.length}`))
     global.db.uploaded.find({}, (err, data) => console.log(`uploaded count is : ${data.length}`))
     global.db.downloading.find({}, (err, data) => console.log(`downloading count is : ${data.length}`))

@@ -27,16 +27,18 @@ const downloadHandle = (event, args) => {
       getMainWindow().webContents.send('snackbarMessage', { message: '读取下载目录失败' })
     } else {
       const name = entries[0].name
-      const nameSpace = entries.map(e => e.name)
-      nameSpace.push(...files)
       let newName = name
-      const extension = name.replace(/^.*\./, '')
-      for (let i = 1; nameSpace.includes(newName) || nameSpace.includes(`${newName}.download`); i++) {
-        if (!extension || extension === name) {
-          newName = `${name}(${i})`
-        } else {
-          const pureName = name.match(/^.*\./)[0]
-          newName = `${pureName.slice(0, pureName.length - 1)}(${i}).${extension}`
+      if (files.includes(name)) {
+        const nameSpace = entries.map(e => e.name)
+        nameSpace.push(...files)
+        const extension = name.replace(/^.*\./, '')
+        for (let i = 1; nameSpace.includes(newName) || nameSpace.includes(`${newName}.download`); i++) {
+          if (!extension || extension === name) {
+            newName = `${name}(${i})`
+          } else {
+            const pureName = name.match(/^.*\./)[0]
+            newName = `${pureName.slice(0, pureName.length - 1)}(${i}).${extension}`
+          }
         }
       }
       createTask(taskUUID, entries, newName, dirUUID, driveUUID, taskType, createTime, newWork, downloadPath)
@@ -61,6 +63,16 @@ const tempDownloadHandle = (e, args) => {
   })
 }
 
+const startTransmissionHandle = (event, args) => {
+  global.db.task.find({}, (error, tasks) => {
+    if (error) return debug('load nedb store error', error)
+    tasks.forEach(t => t.state !== 'finished' && t.trsType === 'download' &&
+      createTask(t.uuid, t.entries, t.name, t.dirUUID, t.driveUUID, t.taskType, t.createTime, false, t.downloadPath, true)
+    )
+  })
+}
+
 ipcMain.on('DOWNLOAD', downloadHandle)
 ipcMain.on('TEMP_DOWNLOADING', tempDownloadHandle)
 ipcMain.on('OPEN_FILE', openHandle) // open file use system applications
+ipcMain.on('START_TRANSMISSION', startTransmissionHandle)

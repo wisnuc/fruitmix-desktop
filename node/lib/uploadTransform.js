@@ -32,13 +32,14 @@ class Task {
 
     this.initStatus = () => {
       Object.assign(this, props)
+      this.props = props
       this.completeSize = 0
       this.lastTimeSize = 0
       this.count = 0
       this.finishCount = 0
       this.finishDate = 0
       this.name = props.policies[0] && props.policies[0].checkedName || props.entries[0].replace(/^.*\//, '')
-      this.paused = false
+      this.paused = true
       this.restTime = 0
       this.size = 0
       this.speed = 0
@@ -55,6 +56,7 @@ class Task {
         this.speed = 0
         this.restTime = 0
         sendMsg()
+        clearInterval(this.countSpeed)
         return
       }
       const speed = this.completeSize - this.lastTimeSize
@@ -301,6 +303,7 @@ class Task {
         task.state = 'finished'
         clearInterval(task.countSpeed)
       }
+      task.updateStore()
       sendMsg()
     })
 
@@ -322,34 +325,38 @@ class Task {
   }
 
   run() {
+    this.paused = false
     this.countSpeed = setInterval(this.countSpeedFunc, 1000)
     this.readDir.push({ entries: this.entries, dirUUID: this.dirUUID, driveUUID: this.driveUUID, policies: this.policies, task: this })
   }
 
   status() {
-    const { uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew, completeSize, lastTimeSize, count, finishCount,
-      finishDate, name, paused, restTime, size, speed, lastSpeed, errors, state, trsType } = this
-    return ({ uuid,
-      entries,
-      dirUUID,
-      driveUUID,
-      taskType,
-      createTime,
-      isNew,
-      completeSize,
-      lastTimeSize,
-      count,
-      finishCount,
-      finishDate,
-      name,
-      paused,
-      restTime,
-      size,
-      speed,
-      lastSpeed,
-      state,
-      errors,
-      trsType })
+    return Object.assign({}, this.props, {
+      completeSize: this.completeSize,
+      lastTimeSize: this.lastTimeSize,
+      count: this.count,
+      finishCount: this.finishCount,
+      finishDate: this.finishDate,
+      name: this.name,
+      paused: this.paused,
+      restTime: this.restTime,
+      size: this.size,
+      speed: this.speed,
+      lastSpeed: this.lastSpeed,
+      state: this.state,
+      errors: this.errors,
+      trsType: this.trsType
+    })
+  }
+
+  createStore() {
+    if (!this.isNew) return
+    const data = Object.assign({}, { _id: this.uuid }, this.status())
+    global.db.task.insert(data, err => err && debug(this.name, 'createStore error: ', err))
+  }
+
+  updateStore() {
+    global.db.task.update({ _id: this.uuid }, { $set: this.status() }, {}, err => err && debug(this.name, 'updateStore error: ', err))
   }
 
   pause() {
@@ -371,11 +378,13 @@ class Task {
   }
 }
 
-const createTask = (uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew, policies) => {
+const createTask = (uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew, policies, isPaused) => {
   const task = new Task({ uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew, policies })
   Tasks.push(task)
-  task.run()
+  task.createStore()
+  if (!isPaused) task.run()
   sendMsg()
 }
+
 
 export { createTask }

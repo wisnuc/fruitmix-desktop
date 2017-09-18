@@ -22,26 +22,22 @@ const sendMsg = () => {
   const userTasks = []
   const finishTasks = []
   Tasks.forEach((t) => {
-    const task = t.status()
-    if (task.state === 'finished') {
-      finishTasks.push(task)
-    } else {
-      userTasks.push(task)
-    }
+    if (t.state === 'finished') finishTasks.push(t)
+    else userTasks.push(t.status())
   })
   userTasks.sort((a, b) => a.createTime - b.createTime) // Ascending
   finishTasks.sort((a, b) => b.finishDate - a.finishDate) // Descending
 
   if (!powerSaveBlocker.isStarted(id) && userTasks.length !== 0 && !store.getState().config.enableSleep) {
     id = powerSaveBlocker.start('prevent-display-sleep')
-    console.log('powerSaveBlocker start', id, powerSaveBlocker.isStarted(id))
+    // console.log('powerSaveBlocker start', id, powerSaveBlocker.isStarted(id))
   }
 
   /* send message when all tasks finished */
   if (preLength !== 0 && userTasks.length === 0) {
     if (powerSaveBlocker.isStarted(id)) {
       powerSaveBlocker.stop(id)
-      console.log('powerSaveBlocker stop', id, powerSaveBlocker.isStarted(id))
+      // console.log('powerSaveBlocker stop', id, powerSaveBlocker.isStarted(id))
     }
     getMainWindow().webContents.send('snackbarMessage', { message: '文件传输任务完成' })
   }
@@ -62,11 +58,12 @@ const actionHandler = (e, uuids, type) => {
 
   let func
   switch (type) {
-    case 'DELETE_FINISHED':
-      func = task => Tasks.splice(Tasks.indexOf(task), 1)
-      break
-    case 'DELETE_RUNNING':
-      func = (task) => { task.pause(); Tasks.splice(Tasks.indexOf(task), 1) }
+    case 'DELETE':
+      func = (task) => {
+        if (typeof task.pause === 'function') task.pause()
+        Tasks.splice(Tasks.indexOf(task), 1)
+        global.db.task.remove({ _id: task.uuid }, { multi: true }, err => err && debug('DELETE_RUNNING error: ', err))
+      }
       break
     case 'PAUSE':
       func = task => task.pause()
@@ -83,6 +80,13 @@ const actionHandler = (e, uuids, type) => {
     if (task) func(task)
   })
   debug(type, uuids)
+  sendMsg()
+}
+
+const clearTasks = () => {
+  debug('clearTasks !!')
+  Tasks.forEach(task => task.state !== 'finished' && task.pause())
+  Tasks.length = 0
   sendMsg()
 }
 
@@ -109,61 +113,18 @@ ipcMain.on('OPEN_TRANSMISSION', (e, tasks) => { // FIXME
   })
 })
 
-ipcMain.on('PAUSE_UPLOADING', (e, uuids) => actionHandler(e, uuids, 'PAUSE'))
-ipcMain.on('RESUME_UPLOADING', (e, uuids) => actionHandler(e, uuids, 'RESUME'))
-ipcMain.on('DELETE_UPLOADING', (e, uuids) => actionHandler(e, uuids, 'DELETE_RUNNING'))
-ipcMain.on('DELETE_UPLOADED', (e, uuids) => actionHandler(e, uuids, 'DELETE_FINISHED'))
+ipcMain.on('PAUSE_TASK', (e, uuids) => actionHandler(e, uuids, 'PAUSE'))
+ipcMain.on('RESUME_TASK', (e, uuids) => actionHandler(e, uuids, 'RESUME'))
+ipcMain.on('DELETE_TASK', (e, uuids) => actionHandler(e, uuids, 'DELETE'))
 
-ipcMain.on('PAUSE_DOWNLOADING', (e, uuids) => actionHandler(e, uuids, 'PAUSE'))
-ipcMain.on('RESUME_DOWNLOADING', (e, uuids) => actionHandler(e, uuids, 'RESUME'))
-ipcMain.on('DELETE_DOWNLOADING', (e, uuids) => actionHandler(e, uuids, 'DELETE_RUNNING'))
-ipcMain.on('DELETE_DOWNLOADED', (e, uuids) => actionHandler(e, uuids, 'DELETE_FINISHED'))
-
-ipcMain.on('CLEAN_RECORD', () => { // TODO
-  debug('Tasks before', Tasks.length)
-  for (let i = Tasks.length - 1; i > -1; i--) {
-    if (Tasks[i].state === 'finished') Tasks.splice(i, 1)
-  }
-  sendMsg()
-  debug('Tasks after', Tasks.length)
-  return
-  if (uploadedTasks.length === 0 && downloadedTasks.length === 0) return
-
-  global.db.uploaded.remove({}, { multi: true }, (err) => {
-    if (err) return debug(err)
-    uploadedTasks.length = 0
-
-    global.db.downloaded.remove({}, { multi: true }, (err) => {
-      if (err) return debug(err)
-      downloadedTasks.length = 0
-      sendInfor()
-    })
+ipcMain.on('START_TRANSMISSION', () => {
+  global.db.task.find({}, (error, tasks) => {
+    if (error) return debug('load nedb store error', error)
+    // debug('startTransmissionHandle', tasks)
+    tasks.forEach(t => t.state === 'finished' && Tasks.push(t))
   })
 })
 
-ipcMain.on('LOGIN_OUT', () => {
-  debug('LOGIN_OUT')
-  Tasks.forEach(task => task.state !== 'finished' && task.pause())
-  sendMsg()
-})
+ipcMain.on('LOGIN_OUT', clearTasks)
 
-const startTransmissionHandle = () => {
-  return
-  db.uploaded.find({}).sort({ finishDate: -1 }).exec((err, docs) => {
-    if (err) return console.log(err)
-    docs.forEach(item => item.uuid = item._id)
-    finishTasks.splice(0, 0, ...docs)
-    sendMsg()
-  })
-
-  db.uploading.find({}, (err, tasks) => {
-    if (err) return
-    tasks.forEach((item) => {
-      createTask(item._id, item.abspath, item.target, item.driveUUID, item.type, item.createTime, false, item.uploading, item.rootNodeUUID)
-    })
-  })
-}
-
-// ipcMain.on('START_TRANSMISSION', startTransmissionHandle)
-
-export { Tasks, sendMsg }
+export { Tasks, sendMsg, clearTasks }

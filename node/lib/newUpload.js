@@ -183,8 +183,18 @@ const uploadMediaHandle = (event, args) => {
   })
 }
 
+const startTransmissionHandle = (event, args) => {
+  global.db.task.find({}, (error, tasks) => {
+    if (error) return debug('load nedb store error', error)
+    tasks.forEach(t => t.state !== 'finished' && t.trsType === 'upload' &&
+      createTask(t.uuid, t.entries, t.dirUUID, t.driveUUID, t.taskType, t.createTime, false, t.policies, true)
+    )
+  })
+}
+
 /* ipc listener */
 ipcMain.on('UPLOAD', uploadHandle)
 ipcMain.on('UPLOADMEDIA', uploadMediaHandle)
 ipcMain.on('DRAG_FILE', dragFileHandle)
 ipcMain.on('resolveConflicts', resolveHandle)
+ipcMain.on('START_TRANSMISSION', startTransmissionHandle)
