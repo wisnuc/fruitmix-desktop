@@ -301,6 +301,7 @@ class Task {
       if (task.finishCount === task.count && this.readDir.isStopped()) {
         task.finishDate = (new Date()).getTime()
         task.state = 'finished'
+        task.compactStore()
         clearInterval(task.countSpeed)
       }
       task.updateStore()
@@ -359,6 +360,11 @@ class Task {
     global.db.task.update({ _id: this.uuid }, { $set: this.status() }, {}, err => err && debug(this.name, 'updateStore error: ', err))
   }
 
+  compactStore() {
+    /* it's necessary to compact the data file to avoid size of db growing too large */
+    global.db.task.persistence.compactDatafile()
+  }
+
   pause() {
     if (this.paused) return
     this.paused = true
@@ -367,6 +373,7 @@ class Task {
     this.upload.clear()
     this.reqHandles.forEach(h => h.abort())
     clearInterval(this.countSpeed)
+    this.updateStore()
     sendMsg()
   }
 
@@ -378,11 +385,12 @@ class Task {
   }
 }
 
-const createTask = (uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew, policies, isPaused) => {
+const createTask = (uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew, policies, preStatus) => {
   const task = new Task({ uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew, policies })
   Tasks.push(task)
   task.createStore()
-  if (!isPaused) task.run()
+  if (preStatus) Object.assign(task, preStatus, { isNew: false, paused: true, speed: 0, restTime: 0 })
+  else task.run()
   sendMsg()
 }
 

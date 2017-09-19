@@ -66,11 +66,12 @@ const tempDownloadHandle = (e, args) => {
   })
 }
 
-const startTransmissionHandle = (event, args) => {
+const startTransmissionHandle = () => {
   global.db.task.find({}, (error, tasks) => {
     if (error) return debug('load nedb store error', error)
+    /* add t to load pre status */
     tasks.forEach(t => t.state !== 'finished' && t.trsType === 'download' &&
-      createTask(t.uuid, t.entries, t.name, t.dirUUID, t.driveUUID, t.taskType, t.createTime, false, t.downloadPath, true)
+      createTask(t.uuid, t.entries, t.name, t.dirUUID, t.driveUUID, t.taskType, t.createTime, false, t.downloadPath, t)
     )
   })
 }
