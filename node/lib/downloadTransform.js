@@ -202,6 +202,7 @@ class Task {
         task.finishDate = (new Date()).getTime()
       }
       task.updateStore()
+      this.compactStore()
       sendMsg()
     })
 
@@ -242,6 +243,11 @@ class Task {
 
   updateStore() {
     global.db.task.update({ _id: this.uuid }, { $set: this.status() }, {}, err => err && debug(this.name, 'updateStore error: ', err))
+  }
+
+  compactStore() {
+    /* it's necessary to compact the data file to avoid size of db growing too large */
+    global.db.task.persistence.compactDatafile()
   }
 
   pause() {
