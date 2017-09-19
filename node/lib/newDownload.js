@@ -26,22 +26,25 @@ const downloadHandle = (event, args) => {
       debug('downloadHandle fs.readdir error: ', err)
       getMainWindow().webContents.send('snackbarMessage', { message: '读取下载目录失败' })
     } else {
-      const name = entries[0].name
-      let newName = name
-      if (files.includes(name)) {
-        const nameSpace = entries.map(e => e.name)
-        nameSpace.push(...files)
-        const extension = name.replace(/^.*\./, '')
-        for (let i = 1; nameSpace.includes(newName) || nameSpace.includes(`${newName}.download`); i++) {
-          if (!extension || extension === name) {
-            newName = `${name}(${i})`
-          } else {
-            const pureName = name.match(/^.*\./)[0]
-            newName = `${pureName.slice(0, pureName.length - 1)}(${i}).${extension}`
+      entries.forEach((entry) => {
+        const name = entry.name
+        let newName = name
+        if (files.includes(name)) {
+          const nameSpace = entries.map(e => e.name)
+          nameSpace.push(...files)
+          const extension = name.replace(/^.*\./, '')
+          for (let i = 1; nameSpace.includes(newName) || nameSpace.includes(`${newName}.download`); i++) {
+            if (!extension || extension === name) {
+              newName = `${name}(${i})`
+            } else {
+              const pureName = name.match(/^.*\./)[0]
+              newName = `${pureName.slice(0, pureName.length - 1)}(${i}).${extension}`
+            }
           }
         }
-      }
-      createTask(taskUUID, entries, newName, dirUUID, driveUUID, taskType, createTime, newWork, downloadPath)
+        entry.newName = newName
+      })
+      createTask(taskUUID, entries, entries[0].newName, dirUUID, driveUUID, taskType, createTime, newWork, downloadPath)
       getMainWindow().webContents.send('snackbarMessage', { message: `${entries.length}个项目添加至下载队列` })
     }
   })
