@@ -284,7 +284,10 @@ class Task {
         task.state = 'uploading'
         const handle = new UploadMultipleFiles(driveUUID, dirUUID, Files, (error) => {
           this.reqHandles.splice(this.reqHandles.indexOf(handle), 1)
-          if (error) this.errors.push({ pipe: 'upload', type: 'file', driveUUID, dirUUID, Files, error })
+          if (error) {
+            this.errors.push({ pipe: 'upload', type: 'file', driveUUID, dirUUID, Files, error })
+            task.finishCount -= 1
+          }
           callback(error, { driveUUID, dirUUID, Files, task })
         })
         this.reqHandles.push(handle)
@@ -298,7 +301,7 @@ class Task {
       const { dirUUID, task } = x
       getMainWindow().webContents.send('driveListUpdate', { uuid: dirUUID })
       // debug('this.readDir.on data', task.finishCount, task.count, this.readDir.isStopped())
-      if (task.finishCount === task.count && this.readDir.isStopped()) {
+      if (task.finishCount === task.count && this.readDir.isStopped() && !task.errors.length) {
         task.finishDate = (new Date()).getTime()
         task.state = 'finished'
         task.compactStore()
@@ -309,8 +312,6 @@ class Task {
     })
 
     this.readDir.on('step', () => {
-      // debug('===================================')
-      // this.readDir.print()
       let errorCount = 0
       const arr = [this.readDir, this.hash, this.diff, this.upload]
       arr.forEach((t) => {
@@ -321,6 +322,7 @@ class Task {
         this.paused = true
         clearInterval(this.countSpeed)
         this.state = 'failed'
+        sendMsg()
       }
     })
   }
@@ -368,9 +370,6 @@ class Task {
   pause() {
     if (this.paused) return
     this.paused = true
-    this.readDir.clear()
-    this.hash.clear()
-    this.upload.clear()
     this.reqHandles.forEach(h => h.abort())
     clearInterval(this.countSpeed)
     this.updateStore()
@@ -378,6 +377,7 @@ class Task {
   }
 
   resume() {
+    this.readDir.clear()
     this.initStatus()
     this.isNew = false
     this.run()
