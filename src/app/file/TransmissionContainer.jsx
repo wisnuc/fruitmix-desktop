@@ -188,13 +188,11 @@ class TrsContainer extends React.Component {
 
     /* ipc communication */
     this.pause = (uuid, type) => {
-      if (type === 'download') ipcRenderer.send('PAUSE_DOWNLOADING', [uuid])
-      else ipcRenderer.send('PAUSE_UPLOADING', [uuid])
+      ipcRenderer.send('PAUSE_TASK', [uuid])
     }
 
     this.resume = (uuid, type) => {
-      if (type === 'download') ipcRenderer.send('RESUME_DOWNLOADING', [uuid])
-      else ipcRenderer.send('RESUME_UPLOADING', [uuid])
+      ipcRenderer.send('RESUME_TASK', [uuid])
     }
 
     /* type: 'PAUSE', 'RESUME', 'DELETE' */
