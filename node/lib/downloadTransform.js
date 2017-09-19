@@ -81,41 +81,22 @@ class Task {
             if (task.paused) throw Error('task paused !')
             const entry = entries[i]
             task.count += 1
-            if (!entry.newName) entry.newName = await getName(entry.name, downloadPath, entries)
+            entry.newName = entry.newName || entry.name
             entry.downloadPath = path.join(downloadPath, entry.newName)
-            entry.timeStamp = (new Date()).getTime()
+            entry.tmpPath = path.join(downloadPath, `${entry.newName}.download`)
             if (entry.type === 'directory') {
               /* mkdir */
               await mkdirp(entry.downloadPath)
 
-              /* read children in entries.children or get from remote */
-              if (!entry.children) {
-                const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${entry.uuid}`)
-                entry.children = listNav.entries
-              }
+              /* get children from remote */
+              const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${entry.uuid}`)
+              const children = listNav.entries
 
-              this.push({ entries: entry.children, downloadPath: entry.downloadPath, dirUUID: entry.uuid, driveUUID, task })
-            } else if (entry.finished) {
-              task.size += entry.size
-              task.completeSize += entry.size
+              this.push({ entries: children, downloadPath: entry.downloadPath, dirUUID: entry.uuid, driveUUID, task })
             } else {
-              entry.tmpPath = path.join(downloadPath, `${entry.newName}.download`)
-              /* download start from entry.seek */
-              entry.seek = entry.seek || 0
-
-              /* when entry.seek > 0 && entry.seek !== partDownloadFile's size, reDownload file */
-              if (entry.seek) {
-                try {
-                  const stat = await fs.lstatAsync(entry.tmpPath)
-                  if (stat.size !== entry.seek) entry.seek = 0
-                } catch (e) {
-                  if (e.code === 'ENOENT') entry.seek = 0
-                  else throw e
-                }
-              }
-              entry.lastTimeSize = 0
               task.size += entry.size
-              task.completeSize += entry.seek
+              entry.lastTimeSize = 0
+              entry.seek = 0
             }
           }
           return ({ entries, downloadPath, dirUUID, driveUUID, task })
@@ -124,6 +105,46 @@ class Task {
         const { entries, downloadPath, dirUUID, driveUUID, task } = x
         if (task.state !== 'downloading') task.state = 'diffing'
         read(entries, downloadPath, dirUUID, driveUUID, task).then(y => callback(null, y)).catch(e => callback(e))
+      }
+    })
+
+    this.diff = new Transform({
+      name: 'diff',
+      concurrency: 1,
+      push(X) {
+        const { entries, downloadPath, dirUUID, driveUUID, task } = X
+        if (task.isNew) {
+          this.outs.forEach(t => t.push(X))
+        } else {
+          const dirEntry = []
+          const fileEntry = []
+          entries.forEach((entry) => {
+            if (entry.type === 'directory') dirEntry.push(entry)
+            else fileEntry.push(entry)
+          })
+          if (dirEntry.length) this.outs.forEach(t => t.push({ entries: dirEntry, downloadPath, dirUUID, driveUUID, task }))
+          if (fileEntry.length) this.pending.push({ entries: fileEntry, downloadPath, dirUUID, driveUUID, task })
+        }
+        this.schedule()
+      },
+      transform: (x, callback) => {
+        const diffAsync = async (entries, downloadPath, dirUUID, driveUUID, task) => {
+          debug('diff async', entries.length, downloadPath, dirUUID, driveUUID)
+          const localFiles = await fs.readdirAsync(downloadPath)
+          for (let i = 0; i < entries.length; i++) {
+            const entry = entries[i]
+            if (localFiles.includes(entry.newName)) {
+              task.completeSize += entry.size
+              entry.finished = true
+            } else if (localFiles.includes(`${entry.newName}.download`)) {
+              const stat = await fs.lstatAsync(entry.tmpPath)
+              entry.seek = stat.size
+            }
+          }
+          return ({ entries, downloadPath, dirUUID, driveUUID, task })
+        }
+        const { entries, downloadPath, dirUUID, driveUUID, task } = x
+        diffAsync(entries, downloadPath, dirUUID, driveUUID, task).then(y => callback(null, y)).catch(e => callback(e))
       }
     })
 
@@ -142,7 +163,7 @@ class Task {
         this.schedule()
       },
       transform: (x, callback) => {
-        // debug('download transform start', x.entry.name)
+        debug('download transform start', x.entry.name)
         const { entry, downloadPath, dirUUID, driveUUID, task } = x
         task.state = 'downloading'
         // debug('download transform entry.seek', entry.seek)
@@ -154,11 +175,9 @@ class Task {
           entry.seek += gap
           task.completeSize += gap
           entry.lastTimeSize = stream.bytesWritten
-          task.updateStore()
         })
 
         stream.on('finish', () => {
-          entry.timeStamp = (new Date()).getTime()
           const gap = stream.bytesWritten - entry.lastTimeSize
           entry.seek += gap
           task.completeSize += gap
@@ -189,7 +208,7 @@ class Task {
       }
     })
 
-    this.readRemote.pipe(this.download).pipe(this.rename)
+    this.readRemote.pipe(this.diff).pipe(this.download).pipe(this.rename)
 
     this.readRemote.on('data', (x) => {
       const { task, entry } = x
@@ -200,9 +219,9 @@ class Task {
         task.state = 'finished'
         clearInterval(this.countSpeed)
         task.finishDate = (new Date()).getTime()
+        this.compactStore()
       }
       task.updateStore()
-      this.compactStore()
       sendMsg()
     })
 
