@@ -139,6 +139,7 @@ class Task {
             } else if (localFiles.includes(`${entry.newName}.download`)) {
               const stat = await fs.lstatAsync(entry.tmpPath)
               entry.seek = stat.size
+              task.completeSize += entry.seek
             }
           }
           return ({ entries, downloadPath, dirUUID, driveUUID, task })
@@ -217,9 +218,9 @@ class Task {
       entry.finished = true
       if (task.count === task.finishCount) {
         task.state = 'finished'
-        clearInterval(this.countSpeed)
+        clearInterval(task.countSpeed)
         task.finishDate = (new Date()).getTime()
-        this.compactStore()
+        task.compactStore()
       }
       task.updateStore()
       sendMsg()
@@ -287,11 +288,12 @@ class Task {
   }
 }
 
-const createTask = (uuid, entries, name, dirUUID, driveUUID, taskType, createTime, isNew, downloadPath, isPaused) => {
+const createTask = (uuid, entries, name, dirUUID, driveUUID, taskType, createTime, isNew, downloadPath, preStatus) => {
   const task = new Task({ uuid, entries, name, dirUUID, driveUUID, taskType, createTime, isNew, downloadPath })
   Tasks.push(task)
   task.createStore()
-  if (!isPaused) task.run()
+  if (preStatus) Object.assign(task, preStatus, { isNew: false, paused: true, speed: 0, restTime: 0 })
+  else task.run()
   sendMsg()
 }
 

@@ -91,7 +91,7 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
   }
   conflicts.forEach(c => (c.type = typeCheck(c)))
   conflicts.sort((a, b) => (a.type - b.type))
-  
+
   // conflicts.length = 0
 
   /* wait user to choose policy
@@ -187,7 +187,7 @@ const startTransmissionHandle = (event, args) => {
   global.db.task.find({}, (error, tasks) => {
     if (error) return debug('load nedb store error', error)
     tasks.forEach(t => t.state !== 'finished' && t.trsType === 'upload' &&
-      createTask(t.uuid, t.entries, t.dirUUID, t.driveUUID, t.taskType, t.createTime, false, t.policies, true)
+      createTask(t.uuid, t.entries, t.dirUUID, t.driveUUID, t.taskType, t.createTime, false, t.policies, t)
     )
   })
 }
