@@ -75,6 +75,7 @@ class Task {
     this.readRemote = new Transform({
       name: 'readRemote',
       concurrency: 4,
+      isBlocked: () => this.paused,
       transform(x, callback) {
         const read = async (entries, downloadPath, dirUUID, driveUUID, task) => {
           for (let i = 0; i < entries.length; i++) {
@@ -111,6 +112,7 @@ class Task {
     this.diff = new Transform({
       name: 'diff',
       concurrency: 1,
+      isBlocked: () => this.paused,
       push(X) {
         const { entries, downloadPath, dirUUID, driveUUID, task } = X
         if (task.isNew) {
@@ -152,6 +154,7 @@ class Task {
     this.download = new Transform({
       name: 'download',
       concurrency: 1,
+      isBlocked: () => this.paused,
       push(X) {
         const { entries, downloadPath, dirUUID, driveUUID, task } = X
         entries.forEach((entry) => {
@@ -189,7 +192,7 @@ class Task {
 
         const handle = new DownloadFile(driveUUID, dirUUID, entry.uuid, entry.name, entry.size, entry.seek, stream, (error) => {
           this.reqHandles.splice(this.reqHandles.indexOf(handle), 1)
-          if (error) debug('DownloadFile error', error)
+          if (error) task.errors.push({ pipe: 'download', type: 'file', entry, downloadPath, dirUUID, driveUUID, error })
         })
         this.reqHandles.push(handle)
         handle.download()
@@ -199,11 +202,12 @@ class Task {
     this.rename = new Transform({
       name: 'rename',
       concurrency: 4,
+      isBlocked: () => this.paused,
       transform: (x, callback) => {
         // debug('rename transform start', x.entry.name)
         const { entry, downloadPath, dirUUID, driveUUID, task } = x
         fs.rename(entry.tmpPath, entry.downloadPath, (error) => {
-          if (error) debug('rename error', error)
+          if (error) task.errors.push({ pipe: 'download', type: 'file', entry, downloadPath, dirUUID, driveUUID, error })
           callback(error, { entry, downloadPath, dirUUID, driveUUID, task })
         })
       }
@@ -227,8 +231,18 @@ class Task {
     })
 
     this.readRemote.on('step', () => {
-      // debug('===================================')
-      // this.readDir.print()
+      let errorCount = 0
+      const arr = [this.readRemote, this.diff, this.download, this.rename]
+      arr.forEach((t) => {
+        errorCount += t.failed.length
+      })
+      if (errorCount > 15 || (this.readRemote.isStopped() && errorCount)) {
+        debug('errorCount', errorCount)
+        this.paused = true
+        clearInterval(this.countSpeed)
+        this.state = 'failed'
+        sendMsg()
+      }
     })
   }
 
@@ -251,6 +265,7 @@ class Task {
       speed: this.speed,
       lastSpeed: this.lastSpeed,
       state: this.state,
+      errors: this.errors,
       trsType: this.trsType
     })
   }
@@ -273,14 +288,14 @@ class Task {
   pause() {
     if (this.paused) return
     this.paused = true
-    this.readRemote.clear()
-    this.download.clear()
     this.reqHandles.forEach(h => h.abort())
     clearInterval(this.countSpeed)
+    this.updateStore()
     sendMsg()
   }
 
   resume() {
+    this.readRemote.clear()
     this.initStatus()
     this.isNew = false
     this.run()

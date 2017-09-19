@@ -19,6 +19,8 @@ const convert = (code) => {
       return '与WISNUC的连接被断开'
     case 'ECONNREFUSED':
       return '无法连接到WISNUC'
+    case 'ENOENT':
+      return '文件或目录未找到'
     default:
       return '未知错误'
   }
@@ -32,6 +34,7 @@ class Row extends React.PureComponent {
     if (node.Files && node.Files[0]) name = node.Files[0].entry.replace(/^.*\//, '')
     if (node.entries && node.entries[0]) name = node.entries[0].replace(/^.*\//, '')
     if (node.error && node.error.where) name = node.error.where.name
+    if (node.pipe === 'download') name = node.entry.name
     return (
       <div
         style={{ height: 56, width: '100%', display: 'flex', alignItems: 'center', cursor: 'pointer' }}

@@ -88,6 +88,7 @@ class Transform extends EventEmitter {
     this.working.length = 0
     this.finished.length = 0
     this.failed.length = 0
+    this.outs.forEach(t => t.clear())
   }
 
   schedule() {
