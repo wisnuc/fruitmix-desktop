@@ -105,7 +105,7 @@ class Task {
             }
             files.push({ entry, stat, policy })
           }
-          return ({ files, dirUUID, driveUUID, task })
+          return ({ files, dirUUID, driveUUID, task, entries })
         }
         const { entries, dirUUID, driveUUID, policies, task } = x
         read(entries, dirUUID, driveUUID, policies, task).then(y => callback(null, y)).catch(callback)
@@ -325,6 +325,7 @@ class Task {
         this.paused = true
         clearInterval(this.countSpeed)
         this.state = 'failed'
+        this.updateStore()
         sendMsg()
       }
     })

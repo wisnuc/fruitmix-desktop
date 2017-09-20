@@ -24,7 +24,7 @@ const convert = (code) => {
     case 'ENOENT':
       return '文件不可读'
     default:
-      return `未知的错误:${code}`
+      return code
   }
 }
 
@@ -34,15 +34,20 @@ class Row extends React.PureComponent {
     const { node } = this.props
     const error = convert(node.error.code)
     let name = ''
-    if (node.pipe === 'download') name = node.entry.name
-    else if (node.entry) name = node.entry.replace(/^.*\//, '')
+    if (node.entry && typeof node.entry === 'object') name = node.entry.name
+    if (node.entry && typeof node.entry === 'string') name = node.entry.replace(/^.*\//, '')
+    if (node.entries && typeof node.entries[0] === 'object') name = node.entries[0].newName
+    if (node.entries && typeof node.entries[0] === 'string') name = node.entries[0].replace(/^.*\//, '')
 
     const svgStyle = { color: 'rgba(0,0,0,0.54)', width: 16, height: 16 }
     return (
       <div style={{ height: 32, width: '100%', display: 'flex', alignItems: 'center' }} >
         <div style={{ margin: '-2px 4px 0 4px', display: 'flex' }}>
-          { node.type === 'directory' && <FileFolder style={svgStyle} /> }
-          { node.type === 'file' && <EditorInsertDriveFile style={svgStyle} /> }
+          {
+            node.type === 'directory' ? <FileFolder style={svgStyle} />
+            : node.type === 'file' ? <EditorInsertDriveFile style={svgStyle} />
+            : <ErrorIcon style={svgStyle} />
+          }
         </div>
         <div style={{ width: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: 5, fontSize: 13 }} >
           { name }
