@@ -108,11 +108,7 @@ class Task {
           return ({ files, dirUUID, driveUUID, task })
         }
         const { entries, dirUUID, driveUUID, policies, task } = x
-        read(entries, dirUUID, driveUUID, policies, task).then(y => callback(null, y)).catch((e) => {
-          task.errors.push({ pipe: 'readDir', type: 'directory', driveUUID, dirUUID, entries, uuid: task.uuid, error: e })
-          task.updateStore()
-          callback(e)
-        })
+        read(entries, dirUUID, driveUUID, policies, task).then(y => callback(null, y)).catch(callback)
       }
     })
 
@@ -147,7 +143,7 @@ class Task {
           const child = childProcess.fork(path.join(__dirname, './filehash'), [], options)
           child.on('message', (result) => {
             setXattr(entry, result, (err, xattr) => {
-              callback(err, { entry, dirUUID, driveUUID, parts: xattr && xattr.parts, type: 'file', stat, policy, task })
+              callback(null, { entry, dirUUID, driveUUID, parts: xattr && xattr.parts, type: 'file', stat, policy, task })
             })
           })
           child.on('error', callback)
@@ -287,9 +283,7 @@ class Task {
         const handle = new UploadMultipleFiles(driveUUID, dirUUID, Files, (error) => {
           task.reqHandles.splice(task.reqHandles.indexOf(handle), 1)
           if (error) {
-            task.errors.push({ pipe: 'upload', type: 'file', driveUUID, dirUUID, Files, uuid: task.uuid, error })
             task.finishCount -= 1
-            task.updateStore()
           }
           callback(error, { driveUUID, dirUUID, Files, task })
         })
@@ -315,13 +309,19 @@ class Task {
     })
 
     this.readDir.on('step', () => {
-      let errorCount = 0
-      const arr = [this.readDir, this.hash, this.diff, this.upload]
-      arr.forEach((t) => {
-        errorCount += t.failed.length
+      const preLength = this.errors.length
+      this.errors.length = 0
+      const pipes = ['readDir', 'hash', 'diff', 'upload']
+      pipes.forEach((p) => {
+        if (!this[p].failed.length) return
+        this[p].failed.forEach((x) => {
+          if (Array.isArray(x)) x.forEach(c => this.errors.push(Object.assign({ pipe: p }, c, { task: c.task.uuid })))
+          else this.errors.push(Object.assign({ pipe: p }, x, { task: x.task.uuid }))
+        })
       })
-      if (errorCount > 15 || (this.readDir.isStopped() && errorCount)) {
-        debug('errorCount', errorCount)
+      if (this.errors.length !== preLength) this.updateStore()
+      if (this.errors.length > 15 || (this.readDir.isStopped() && this.errors.length)) {
+        debug('errorCount', this.errors.length)
         this.paused = true
         clearInterval(this.countSpeed)
         this.state = 'failed'

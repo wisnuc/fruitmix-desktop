@@ -188,14 +188,12 @@ class Task {
           entry.lastTimeSize = 0
           task.updateStore()
           if (entry.seek === entry.size) callback(null, { entry, downloadPath, dirUUID, driveUUID, task })
+          if (!task.paused && entry.seek !== entry.size) callback({ code: 'ECONNEND' })
         })
 
         const handle = new DownloadFile(driveUUID, dirUUID, entry.uuid, entry.name, entry.size, entry.seek, stream, (error) => {
           this.reqHandles.splice(this.reqHandles.indexOf(handle), 1)
-          if (error) {
-            task.errors.push({ pipe: 'download', type: 'file', entry, downloadPath, dirUUID, driveUUID, error })
-            task.updateStore()
-          }
+          if (error) callback(error)
         })
         this.reqHandles.push(handle)
         handle.download()
@@ -210,10 +208,6 @@ class Task {
         // debug('rename transform start', x.entry.name)
         const { entry, downloadPath, dirUUID, driveUUID, task } = x
         fs.rename(entry.tmpPath, entry.downloadPath, (error) => {
-          if (error) {
-            task.errors.push({ pipe: 'download', type: 'file', entry, downloadPath, dirUUID, driveUUID, error })
-            task.updateStore()
-          }
           callback(error, { entry, downloadPath, dirUUID, driveUUID, task })
         })
       }
@@ -237,13 +231,19 @@ class Task {
     })
 
     this.readRemote.on('step', () => {
-      let errorCount = 0
-      const arr = [this.readRemote, this.diff, this.download, this.rename]
-      arr.forEach((t) => {
-        errorCount += t.failed.length
+      const preLength = this.errors.length
+      this.errors.length = 0
+      const pipes = ['readRemote', 'diff', 'download', 'rename']
+      pipes.forEach((p) => {
+        if (!this[p].failed.length) return
+        this[p].failed.forEach((x) => {
+          if (Array.isArray(x)) x.forEach(c => this.errors.push(Object.assign({ pipe: p }, c, { task: c.task.uuid, type: c.entry.type })))
+          else this.errors.push(Object.assign({ pipe: p }, x, { task: x.task.uuid, type: x.entry.type }))
+        })
       })
-      if (errorCount > 15 || (this.readRemote.isStopped() && errorCount)) {
-        debug('errorCount', errorCount)
+      if (this.errors.length !== preLength) this.updateStore()
+      if (this.errors.length > 15 || (this.readRemote.isStopped() && this.errors.length)) {
+        debug('errorCount', this.errors.length)
         this.paused = true
         clearInterval(this.countSpeed)
         this.state = 'failed'

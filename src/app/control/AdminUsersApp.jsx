@@ -97,7 +97,7 @@ class AdminUsersApp extends React.Component {
           display: 'flex',
           alignItems: 'center',
           fontSize: 14,
-          color: user.nologin ? 'rgba(0,0,0,0.54)' : 'rgba(0,0,0,0.87)'
+          color: user.disabled ? 'rgba(0,0,0,0.54)' : 'rgba(0,0,0,0.87)'
         }}
         key={user.uuid}
       >
@@ -128,14 +128,14 @@ class AdminUsersApp extends React.Component {
         </div>
         */}
         <div style={{ flex: '0 0 50px' }}>
-          {/*
+          {
             user.isFirstUser
             ? <div />
             : <Toggle
-              toggled={!user.nologin}
+              toggled={!user.disabled}
               onToggle={() => this.toggleDialog('disableUser', user)}
             />
-            */}
+          }
         </div>
       </div>
     )
@@ -144,14 +144,14 @@ class AdminUsersApp extends React.Component {
   renderConfirmPwd() {
     return (
       <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
-        <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}> 输入密码 </div>
+        <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}> 输入管理员密码 </div>
         <div style={{ height: 56 }} />
         <div style={{ height: 56, display: 'flex', marginBottom: 10 }}>
           <IconBox style={{ marginLeft: -12 }} size={48} icon={CommunicationVpnKey} />
           <TextField
             style={{ flexGrow: 1 }}
             fullWidth
-            hintText="输入密码"
+            hintText="输入管理员密码"
             type="password"
             onChange={e => this.updatePassword(e.target.value)}
             onBlur={e => this.updatePassword(e.target.value)}
@@ -266,12 +266,12 @@ class AdminUsersApp extends React.Component {
               this.state.disableUser &&
                 <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
                   <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-                    { this.state.user.nologin ? '启用用户' : '禁用用户' }
+                    { this.state.user.disabled ? '启用用户' : '禁用用户' }
                   </div>
                   <div style={{ height: 20 }} />
                   <div style={{ color: 'rgba(0,0,0,0.54)' }}>
                     {
-                      this.state.user.nologin
+                      this.state.user.disabled
                       ? '您启用后，该用户将恢复权限，可登录并访问设备，确定吗？'
                       : '您禁用后，该用户将无法登录并访问设备，确定吗？'
                     }
