@@ -117,7 +117,8 @@ class Transform extends EventEmitter {
           const curr = this.working.splice(this.working.indexOf(x), 1)
           if (!curr) return // error ? FIXME
           if (err) {
-            x.error = err
+            if (Array.isArray(x)) x.forEach(c => (c.error = err))
+            else x.error = err
             this.failed.push(x)
             debug('err in', x.entry || (x[0] && x[0].entry) || x, '\nerror': err)
           } else if (this.outs.length) {

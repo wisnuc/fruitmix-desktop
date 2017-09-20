@@ -19,6 +19,8 @@ const convert = (code) => {
       return '连接已断开'
     case 'ECONNREFUSED':
       return '连接已断开'
+    case 'ECONNEND':
+      return '连接已断开'
     case 'ENOENT':
       return '文件不可读'
     default:
@@ -32,10 +34,9 @@ class Row extends React.PureComponent {
     const { node } = this.props
     const error = convert(node.error.code)
     let name = ''
-    if (node.Files && node.Files[0]) name = node.Files[0].entry.replace(/^.*\//, '')
-    if (node.entries && node.entries[0]) name = node.entries[0].replace(/^.*\//, '')
-    if (node.error && node.error.where) name = node.error.where.name
     if (node.pipe === 'download') name = node.entry.name
+    else if (node.entry) name = node.entry.replace(/^.*\//, '')
+
     const svgStyle = { color: 'rgba(0,0,0,0.54)', width: 16, height: 16 }
     return (
       <div style={{ height: 32, width: '100%', display: 'flex', alignItems: 'center' }} >
@@ -43,7 +44,7 @@ class Row extends React.PureComponent {
           { node.type === 'directory' && <FileFolder style={svgStyle} /> }
           { node.type === 'file' && <EditorInsertDriveFile style={svgStyle} /> }
         </div>
-        <div style={{ width: 144, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: 5, fontSize: 13 }} >
+        <div style={{ width: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: 5, fontSize: 13 }} >
           { name }
         </div>
         <div style={{ fontSize: 13 }} >
@@ -61,7 +62,7 @@ class ErrorTree extends React.PureComponent {
     }
 
     this.retry = () => {
-      const uuid = this.props.errors[0].uuid
+      const uuid = this.props.errors[0].task
       this.props.resume(uuid)
       this.props.onRequestClose()
     }
