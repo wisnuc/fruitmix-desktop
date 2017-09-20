@@ -237,8 +237,9 @@ class Task {
       pipes.forEach((p) => {
         if (!this[p].failed.length) return
         this[p].failed.forEach((x) => {
-          if (Array.isArray(x)) x.forEach(c => this.errors.push(Object.assign({ pipe: p }, c, { task: c.task.uuid, type: c.entry.type })))
-          else this.errors.push(Object.assign({ pipe: p }, x, { task: x.task.uuid, type: x.entry.type }))
+          if (Array.isArray(x)) {
+            x.forEach(c => this.errors.push(Object.assign({ pipe: p }, c, { task: c.task.uuid, type: c.entry && c.entry.type })))
+          } else this.errors.push(Object.assign({ pipe: p }, x, { task: x.task.uuid, type: x.entry && x.entry.type }))
         })
       })
       if (this.errors.length !== preLength) this.updateStore()
@@ -247,6 +248,7 @@ class Task {
         this.paused = true
         clearInterval(this.countSpeed)
         this.state = 'failed'
+        this.updateStore()
         sendMsg()
       }
     })

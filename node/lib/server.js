@@ -356,7 +356,6 @@ export class DownloadFile {
     this.handle = request(options)
 
     this.handle.on('error', error => this.finish(error))
-    this.handle.on('aborted', error => this.finish(error))
 
     this.handle.pipe(this.stream)
   }
@@ -368,7 +367,6 @@ export class DownloadFile {
   }
 
   finish(error) {
-    debug('download finish error:', error)
     if (this.finished) return
     this.callback(error)
     this.finished = true
