@@ -192,7 +192,10 @@ class Task {
 
         const handle = new DownloadFile(driveUUID, dirUUID, entry.uuid, entry.name, entry.size, entry.seek, stream, (error) => {
           this.reqHandles.splice(this.reqHandles.indexOf(handle), 1)
-          if (error) task.errors.push({ pipe: 'download', type: 'file', entry, downloadPath, dirUUID, driveUUID, error })
+          if (error) {
+            task.errors.push({ pipe: 'download', type: 'file', entry, downloadPath, dirUUID, driveUUID, error })
+            task.updateStore()
+          }
         })
         this.reqHandles.push(handle)
         handle.download()
@@ -207,7 +210,10 @@ class Task {
         // debug('rename transform start', x.entry.name)
         const { entry, downloadPath, dirUUID, driveUUID, task } = x
         fs.rename(entry.tmpPath, entry.downloadPath, (error) => {
-          if (error) task.errors.push({ pipe: 'download', type: 'file', entry, downloadPath, dirUUID, driveUUID, error })
+          if (error) {
+            task.errors.push({ pipe: 'download', type: 'file', entry, downloadPath, dirUUID, driveUUID, error })
+            task.updateStore()
+          }
           callback(error, { entry, downloadPath, dirUUID, driveUUID, task })
         })
       }

@@ -32,11 +32,8 @@ class RunningTask extends React.Component {
 
     this.toggleTask = () => {
       const task = this.props.task
-      if (task.paused) {
-        this.props.resume(task.uuid, task.trsType)
-      } else {
-        this.props.pause(task.uuid, task.trsType)
-      }
+      if (task.paused) this.props.resume(task.uuid)
+      else this.props.pause(task.uuid)
     }
 
     this.checkError = () => {

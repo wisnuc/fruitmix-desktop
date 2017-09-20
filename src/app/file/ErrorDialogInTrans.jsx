@@ -59,9 +59,16 @@ class ErrorTree extends React.PureComponent {
     super(props)
     this.state = {
     }
+
+    this.retry = () => {
+      const uuid = this.props.errors[0].uuid
+      this.props.resume(uuid)
+      this.props.onRequestClose()
+    }
   }
 
   render() {
+    console.log('ErrorDialog', this.props)
     return (
       <div style={{ width: 336, height: 520, padding: '0px 24px 0px 24px' }}>
         <div style={{ height: 56, display: 'flex', alignItems: 'center' }} >
@@ -93,7 +100,7 @@ class ErrorTree extends React.PureComponent {
           <FlatButton
             primary
             label="全部重试"
-            onTouchTap={() => this.props.onRequestClose()}
+            onTouchTap={this.retry}
           />
         </div>
       </div>
