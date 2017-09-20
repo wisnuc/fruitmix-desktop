@@ -223,6 +223,7 @@ class Task {
             task.finishDate = (new Date()).getTime()
             task.state = 'finished'
             clearInterval(task.countSpeed)
+            task.updateStore()
             sendMsg()
           }
           return result

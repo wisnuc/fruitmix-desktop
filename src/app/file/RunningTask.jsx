@@ -46,7 +46,7 @@ class RunningTask extends React.Component {
   }
 
   getStatus(task) {
-    if (task.state === 'failed') return '传输失败'
+    if (task.state === 'failed') return '已停止'
     if (task.paused) return '已暂停'
     if (task.state === 'visitless') return '等待中'
     if (task.state === 'hashing') return '正在校验'
