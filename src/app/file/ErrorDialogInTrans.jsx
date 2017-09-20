@@ -14,39 +14,40 @@ import FlatButton from '../common/FlatButton'
 const convert = (code) => {
   switch (code) {
     case 'EEXIST':
-      return '命名冲突错误'
+      return '文件命名冲突'
     case 'ECONNRESET':
-      return '与WISNUC的连接被断开'
+      return '连接已断开'
     case 'ECONNREFUSED':
-      return '无法连接到WISNUC'
+      return '连接已断开'
     case 'ENOENT':
-      return '文件或目录未找到'
+      return '文件不可读'
     default:
-      return '未知错误'
+      return `未知的错误:${code}`
   }
 }
 
 class Row extends React.PureComponent {
   render() {
     console.log('Row', this.props)
-    const { node, isRoot, enter } = this.props
-    let name = isRoot ? convert(node[0]) : ''
+    const { node } = this.props
+    const error = convert(node.error.code)
+    let name = ''
     if (node.Files && node.Files[0]) name = node.Files[0].entry.replace(/^.*\//, '')
     if (node.entries && node.entries[0]) name = node.entries[0].replace(/^.*\//, '')
     if (node.error && node.error.where) name = node.error.where.name
     if (node.pipe === 'download') name = node.entry.name
+    const svgStyle = { color: 'rgba(0,0,0,0.54)', width: 16, height: 16 }
     return (
-      <div
-        style={{ height: 56, width: '100%', display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-        onDoubleClick={() => isRoot && enter(node[1])}
-      >
-        <div style={{ margin: '2px 12px 0 12px', display: 'flex' }}>
-          { node.type === 'directory' && <FileFolder style={{ color: 'rgba(0,0,0,0.54)' }} /> }
-          { node.type === 'file' && <EditorInsertDriveFile style={{ color: 'rgba(0,0,0,0.54)' }} /> }
-          { isRoot && <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)' }} /> }
+      <div style={{ height: 32, width: '100%', display: 'flex', alignItems: 'center' }} >
+        <div style={{ margin: '-2px 4px 0 4px', display: 'flex' }}>
+          { node.type === 'directory' && <FileFolder style={svgStyle} /> }
+          { node.type === 'file' && <EditorInsertDriveFile style={svgStyle} /> }
         </div>
-        <div style={{ width: 240, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: 5, fontSize: 14 }} >
+        <div style={{ width: 144, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: 5, fontSize: 13 }} >
           { name }
+        </div>
+        <div style={{ fontSize: 13 }} >
+          { error }
         </div>
       </div>
     )
@@ -56,110 +57,42 @@ class Row extends React.PureComponent {
 class ErrorTree extends React.PureComponent {
   constructor(props) {
     super(props)
-
-    this.map = new Map()
-    this.props.errors.forEach((e) => {
-      const code = e.error.code
-      if (this.map.has(code)) {
-        this.map.get(code).push(e)
-      } else {
-        this.map.set(code, [e])
-      }
-    })
-
     this.state = {
-      root: true,
-      list: [...this.map]
     }
-
-    /* enter dir */
-    this.enter = (node) => {
-      this.setState({ root: false, list: node })
-    }
-
-    /* back to parent */
-    this.back = () => {
-      this.setState({ root: true, list: [...this.map] })
-    }
-
-    /* close dialog */
-    this.closeDialog = () => this.props.onRequestClose()
-  }
-
-  renderHeader() {
-    return (
-      <div
-        style={{
-          height: 56,
-          backgroundColor: '#EEEEEE',
-          position: 'relative',
-          display: 'flex',
-          flexFlow: 'row nowrap',
-          justifyContent: 'flex-start',
-          alignItems: 'center'
-        }}
-      >
-        {/* back button */}
-        <div
-          style={{ flex: '0 0 48px', display: 'flex', justifyContent: 'center' }}
-          onTouchTap={this.back}
-        >
-          <IconButton style={{ display: this.state.root ? 'none' : '' }}>
-            <BackIcon color="rgba(0,0,0,0.54)" style={{ height: 16, width: 16 }} />
-          </IconButton>
-        </div>
-
-        {/* name */}
-        <div
-          style={{
-            flex: '0 0 240px',
-            color: 'rgba(0,0,0,0.54)',
-            whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis',
-            overflow: 'hidden',
-            fontWeight: 500
-          }}
-        >
-          { this.state.root ? '传输错误列表' : convert(this.state.list[0].error.code) }
-        </div>
-      </div>
-    )
   }
 
   render() {
     return (
-      <div style={{ width: 336, height: 448 }}>
-        {/* header */}
-        { this.renderHeader() }
+      <div style={{ width: 336, height: 520, padding: '0px 24px 0px 24px' }}>
+        <div style={{ height: 56, display: 'flex', alignItems: 'center' }} >
+          <div style={{ fontSize: 20 }}> { ' 传输问题' } </div>
+          <div style={{ flexGrow: 1 }} />
+          <IconButton
+            onTouchTap={() => this.props.onRequestClose()}
+            style={{ width: 40, height: 40, padding: 10, marginRight: -10 }}
+            iconStyle={{ width: 20, height: 20, color: 'rgba(0,0,0,0.54)' }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </div>
+        <div style={{ fontSize: 14, marginBottom: 16 }}> { '传输以下文件时出现问题：' } </div>
 
-        {/* list of directory */}
-        <div
-          style={{
-            width: 336,
-            height: 324,
-            overflowY: 'auto',
-            color: 'rgba(0,0,0,0.87)'
-          }}
-        >
-          {
-            !!this.state.list.length && this.state.list.map((node, index) => (
-              <Row
-                key={index.toString()}
-                node={node}
-                enter={this.enter}
-                isRoot={this.state.root}
-              />
-            ))
-          }
+        {/* list of errors */}
+        <div style={{ width: 336, height: 374, overflowY: 'auto', border: 'solid #ccc 1px' }} >
+          { this.props.errors.map((node, index) => (<Row key={index.toString()} node={node} />)) }
         </div>
 
         {/* confirm button */}
-        <div style={{ height: 68, display: 'flex', alignItems: 'center', backgroundColor: '#FAFAFA' }}>
+        <div style={{ height: 52, display: 'flex', alignItems: 'center', marginRight: -24 }}>
           <div style={{ flexGrow: 1 }} />
-          <RaisedButton
+          <FlatButton
             primary
-            style={{ marginRight: 16 }}
-            label="确定"
+            label="取消"
+            onTouchTap={() => this.props.onRequestClose()}
+          />
+          <FlatButton
+            primary
+            label="全部重试"
             onTouchTap={() => this.props.onRequestClose()}
           />
         </div>
