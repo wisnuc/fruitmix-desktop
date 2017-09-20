@@ -2,6 +2,8 @@ const request = require('superagent')
 
 import RequestManager from './reqman'
 
+const cloudAddress = 'http://www.siyouqun.org:80'
+
 /**
 
   it should not emit anything in constructor, for there is no chance to
@@ -170,16 +172,15 @@ class Device extends RequestManager {
 
       case 'wxToken':
         r = request
-          .get('http://10.10.9.59:5757/v1/token')
+          .get(`${cloudAddress}/c/v1/token`)
           .query({ code: args.code })
           .query({ platform: 'web' })
         break
 
-      case 'wxLogin':
+      case 'getStations':
         r = request
-          .get('http://10.10.9.59:5757/v1/test/oauth2')
-          .query({ code: args.code })
-          .query({ platform: args.platform })
+          .get(`${cloudAddress}/c/v1/users/${args.guid}/stations`)
+          .set('Authorization', args.token)
         break
 
       /** FirmwareUpdate API **/

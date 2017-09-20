@@ -35,7 +35,11 @@ class ChangeAccountDialog extends React.PureComponent {
         if (error) {
           debug('error', op, error)
           // this.props.openSnackBar(`修改失败：${error.message}`)
-          this.props.openSnackBar(`修改失败`)
+          if (op === 'password' && error.message === 'Unauthorized') {
+            this.setState({ prePasswordErrorText: '原密码错误' })
+          } else {
+            this.props.openSnackBar('修改失败')
+          }
         } else {
           this.props.onRequestClose(true)
           op === 'createUser' ? this.props.refreshUsers() : this.props.refresh()
@@ -52,33 +56,8 @@ class ChangeAccountDialog extends React.PureComponent {
       }
     }
 
-    this.check = () => {
-      const { apis, op } = this.props
-      if (op === 'password') {
-        const args = {
-          uuid: apis.account.data.uuid,
-          password: this.state.prePassword
-        }
-        apis.request('getToken', args, (err) => {
-          if (err) {
-            debug('err', args, err, err.message)
-            if (err.message === 'Unauthorized') {
-              this.props.openSnackBar('修改失败：原密码错误')
-            } else {
-              // this.props.openSnackBar(`修改失败：${err.message}`)
-              this.props.openSnackBar(`修改失败`)
-            }
-          } else {
-            this.fire()
-          }
-        })
-      } else {
-        this.fire()
-      }
-    }
-
     this.onKeyDown = (e) => {
-      if (e.which === 13 && this.inputOK()) this.check()
+      if (e.which === 13 && this.inputOK()) this.fire()
     }
   }
 
@@ -266,7 +245,7 @@ class ChangeAccountDialog extends React.PureComponent {
         {/* button */}
         <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
           <FlatButton label="取消" onTouchTap={this.props.onRequestClose} primary />
-          <FlatButton label="确认" disabled={!this.inputOK()} onTouchTap={this.check} primary />
+          <FlatButton label="确认" disabled={!this.inputOK()} onTouchTap={this.fire} primary />
         </div>
       </div>
     )
