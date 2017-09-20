@@ -84,7 +84,7 @@ class UserBox extends React.Component {
   }
 
   render() {
-    const users = this.props.device.users.value()
+    const users = this.props.device.users.value().filter(u => !u.disabled)
 
     let user
     if (this.state.selectedIndex !== -1) { user = users[this.state.selectedIndex] }
