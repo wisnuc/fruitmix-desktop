@@ -109,7 +109,8 @@ class Task {
         }
         const { entries, dirUUID, driveUUID, policies, task } = x
         read(entries, dirUUID, driveUUID, policies, task).then(y => callback(null, y)).catch((e) => {
-          task.errors.push({ pipe: 'readDir', type: 'directory', driveUUID, dirUUID, entries, error: e })
+          task.errors.push({ pipe: 'readDir', type: 'directory', driveUUID, dirUUID, entries, uuid: task.uuid, error: e })
+          task.updateStore()
           callback(e)
         })
       }
@@ -284,14 +285,15 @@ class Task {
         const { driveUUID, dirUUID, task } = X[0]
         task.state = 'uploading'
         const handle = new UploadMultipleFiles(driveUUID, dirUUID, Files, (error) => {
-          this.reqHandles.splice(this.reqHandles.indexOf(handle), 1)
+          task.reqHandles.splice(task.reqHandles.indexOf(handle), 1)
           if (error) {
-            this.errors.push({ pipe: 'upload', type: 'file', driveUUID, dirUUID, Files, error })
+            task.errors.push({ pipe: 'upload', type: 'file', driveUUID, dirUUID, Files, uuid: task.uuid, error })
             task.finishCount -= 1
+            task.updateStore()
           }
           callback(error, { driveUUID, dirUUID, Files, task })
         })
-        this.reqHandles.push(handle)
+        task.reqHandles.push(handle)
         handle.upload()
       }
     })
@@ -390,6 +392,7 @@ const createTask = (uuid, entries, dirUUID, driveUUID, taskType, createTime, isN
   const task = new Task({ uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew, policies })
   Tasks.push(task)
   task.createStore()
+  debug('createTask', preStatus)
   if (preStatus) Object.assign(task, preStatus, { isNew: false, paused: true, speed: 0, restTime: 0 })
   else task.run()
   sendMsg()

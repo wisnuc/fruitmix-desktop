@@ -187,11 +187,11 @@ class TrsContainer extends React.Component {
     }
 
     /* ipc communication */
-    this.pause = (uuid, type) => {
+    this.pause = (uuid) => {
       ipcRenderer.send('PAUSE_TASK', [uuid])
     }
 
-    this.resume = (uuid, type) => {
+    this.resume = (uuid) => {
       ipcRenderer.send('RESUME_TASK', [uuid])
     }
 
@@ -411,7 +411,7 @@ class TrsContainer extends React.Component {
                   }
                   { this.state.pause && <MenuItem primaryText="暂停" onTouchTap={() => this.handleAll(this.state.tasks, 'PAUSE')} /> }
                   { this.state.tasks[0].trsType === 'download' && <MenuItem primaryText="打开所在文件夹" onTouchTap={this.open} /> }
-                  { this.state.tasks[0].trsType === 'upload' && <MenuItem primaryText="查看" onTouchTap={this.openInDrive} /> }
+                  { this.state.tasks[0].trsType === 'upload' && <MenuItem primaryText="查看所在目录" onTouchTap={this.openInDrive} /> }
                   { this.state.play && <MenuItem primaryText="删除" onTouchTap={() => this.toggleDialog('deleteRunningDialog')} /> }
                   { this.state.tasks[0].state === 'finished' &&
                   <MenuItem primaryText="删除" onTouchTap={() => this.handleAll(this.state.tasks, 'DELETE')} /> }
@@ -512,7 +512,7 @@ class TrsContainer extends React.Component {
 
         {/* error dialog */}
         <DialogOverlay open={!!this.state.errors} onRequestClose={() => this.setState({ errors: null })}>
-          { this.state.errors && <ErrorDialogInTrans errors={this.state.errors} /> }
+          { this.state.errors && <ErrorDialogInTrans errors={this.state.errors} resume={this.resume} /> }
         </DialogOverlay>
       </div>
     )
