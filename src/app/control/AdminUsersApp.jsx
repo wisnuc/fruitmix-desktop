@@ -108,7 +108,7 @@ class AdminUsersApp extends React.Component {
         <div style={{ flex: '0 0 32px' }} />
         <div style={{ flex: '0 0 320px' }}>{ user.username }</div>
         <div style={{ flex: '0 0 141px' }}>{ user.isAdmin ? '管理员' : '普通用户' }</div>
-        <div style={{ flex: '0 0 96px' }}>{ 0 ? '是' : '否' }</div>
+        <div style={{ flex: '0 0 96px' }}>{ user.gloabl && user.global.wx ? '是' : '否' }</div>
         <div style={{ flex: '0 0 150px', textAlign: 'right' }}>{ 0 ? '' : '-' }</div>
         <div style={{ flex: '0 0 178px', textAlign: 'right' }}>{ 0 ? '' : '-' }</div>
         <div style={{ flex: '0 0 56px' }} />

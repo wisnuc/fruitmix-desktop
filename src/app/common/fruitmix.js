@@ -1,9 +1,11 @@
+import Request from './Request'
+
 const request = require('superagent')
 const EventEmitter = require('eventemitter3')
 
-import Request from './Request'
+const cloudAddress = 'http://www.siyouqun.org:80'
 
-// this module encapsulate most fruitmix apis
+/* this module encapsulate most fruitmix apis */
 class Fruitmix extends EventEmitter {
 
   constructor(address, userUUID, token) {
@@ -110,7 +112,6 @@ class Fruitmix extends EventEmitter {
     let r
 
     switch (name) {
-
       case 'getToken':
         r = request
           .get(`http://${this.address}:3000/token`)
@@ -118,6 +119,15 @@ class Fruitmix extends EventEmitter {
           .set('Accept', 'application/json')
         break
 
+      case 'users':
+        r = this.aget('users')
+        break
+
+      case 'drives':
+        r = this.aget('drives')
+        break
+
+      /** account APIs **/
       case 'account':
         r = this.aget(`users/${this.userUUID}`)
         break
@@ -133,15 +143,7 @@ class Fruitmix extends EventEmitter {
           .set('Accept', 'application/json')
         break
 
-      case 'users':
-        // r = request.get(`http://${this.address}:3000/users`)
-        r = this.aget('users')
-        break
-
-      case 'drives':
-        r = this.aget('drives')
-        break
-
+      /** admins APIs **/
       case 'adminUsers':
         r = this.aget('admin/users')
         break
@@ -174,7 +176,7 @@ class Fruitmix extends EventEmitter {
         })
         break
 
-    /** File APIs **/
+      /** File APIs **/
       case 'listDir':
         r = this.aget(`drives/${args.driveUUID}`)
         break
@@ -214,7 +216,7 @@ class Fruitmix extends EventEmitter {
         r = this.aget(`tasks/${args.taskUUID}`)
         break
 
-    /** Ext APIs **/
+      /** Ext APIs **/
       case 'extDrives':
         r = this.aget('files/external/fs')
         break
@@ -230,22 +232,9 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'extDeleteDirOrFile':
-        break
+         break
 
-    /** File Transfer API **/
-    // ????
-
-    /** File Share API **/
-      case 'fileShare':
-        r = this.aget('fileshare')
-        break
-
-    /** Media Share API **/
-      case 'mediaShare':
-        r = this.aget('mediashare')
-        break
-
-    /** Media API **/
+      /** Media API **/
       case 'media':
         r = this.aget('media')
         break
@@ -264,28 +253,33 @@ class Fruitmix extends EventEmitter {
 
       case 'subtractBlacklist':
         r = this.adel(`users/${this.userUUID}/media-blacklist`, args)
-        break
+         break
 
-    /** Docker API **/
+      /** Docker API **/
       case 'docker':
         r = request.get('http://10.10.9.86:3000/server')
         break
 
-    /** Ticket and Wechat API **/
+      /** Ticket and Wechat API **/
       case 'creatTicket':
-        r = this.apost('station/tickets/', { type: 2 })
+        r = this.apost('station/tickets/', { type: 'bind' })
+        break
+
+      case 'getTicket':
+        r = this.aget(`station/tickets/${args.ticketId}`)
         break
 
       case 'getWechatToken':
         r = request
-          .get('http://10.10.9.59:5757/v1/token')
+          .get(`${cloudAddress}/c/v1/token`)
           .query({ code: args.code })
           .query({ platform: args.platform })
         break
 
-      case 'getTicket':
-        console.log('getTicket API', args)
-        r = this.aget(`station/tickets/${args.ticketId}`)
+      case 'fillTicket':
+        r = request
+          .post(`${cloudAddress}/c/v1/tickets/${args.ticketId}/users`)
+          .set('Authorization', args.token)
         break
 
       case 'confirmTicket':
@@ -293,14 +287,6 @@ class Fruitmix extends EventEmitter {
           guid: args.guid,
           state: args.state
         })
-        break
-
-      case 'wxBind':
-        r = request
-          .get('http://10.10.9.59:5757/v1/wx/oauth2')
-          .query({ ticketId: args.ticketId })
-          .query({ code: args.code })
-          .query({ platform: args.platform })
         break
 
       default:
@@ -320,12 +306,10 @@ class Fruitmix extends EventEmitter {
     this.request('users')
     this.requestAsync('drives').asCallback((err, drives) => {
       if (drives) {
-        console.log('requestAsync drives success', drives)
         const drive = drives.find(d => d.tag === 'home')
         this.request('listNavDir', { driveUUID: drive.uuid, dirUUID: drive.uuid })
       }
     })
-    // this.request('media')
   }
 }
 
