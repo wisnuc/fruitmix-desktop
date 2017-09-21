@@ -289,7 +289,7 @@ class WechatLogin extends React.Component {
                   width={96}
                   height={96}
                   alt=""
-                  src="../src/assets/images/index/icon.png"
+                  src="./assets/images/icon.png"
                   style={{ filter: 'grayscale(100%)' }}
                 />
               </div>
