@@ -105,7 +105,7 @@ class FileContent extends React.Component {
 
 
   componentWillReceiveProps(nextProps) {
-    debug('componentWillReceiveProps', nextProps)
+    // debug('componentWillReceiveProps', nextProps)
     if (nextProps.home.loading) this.setState({ loading: true })
     if (this.props.entries !== nextProps.entries) this.setState({ loading: false })
   }

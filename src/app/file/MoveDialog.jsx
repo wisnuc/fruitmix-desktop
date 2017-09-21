@@ -225,18 +225,17 @@ class MoveDialog extends React.PureComponent {
       const entries = this.selectedArr.map(e => e.uuid)
 
       this.setState({ loading: true })
-      this.apost('tasks', { type, src, dst, entries }).end(this.finish)
+      this.props.apis.request('copy', { type, src, dst, entries }, this.finish)
     }
 
     /* finish post change dialog content to waiting/result */
-    this.finish = (error, res) => {
+    this.finish = (error, data) => {
       if (error) {
         this.setState({ loading: false })
         this.closeDialog()
         this.props.openSnackBar('失败')
         return
       }
-      const data = JSON.parse(res.text)
       this.getTaskState(data.uuid).asCallback((err) => {
         if (err) {
           this.setState({ loading: false })
@@ -280,30 +279,33 @@ class MoveDialog extends React.PureComponent {
       this.setState({ loading: true })
       this.aget(`drives/${driveUUID}/dirs/${dirUUID}`).end((err, res) => {
         if (err) return reject(err)
-        return resolve(this.sort(JSON.parse(res.text)))
+        console.log('this.list', res.body)
+        return resolve(this.sort(this.props.apis.stationID ? res.body.data : res.body))
       })
     })
 
     this.aget = (ep) => {
-      const { address, token } = this.props.apis
-      const string = `http://${address}:3000/${ep}`
+      const { address, token, stationID } = this.props.apis
       this.setState({ loading: true })
+      if (stationID) {
+        const url = `${address}/c/v1/stations/${stationID}/json`
+        const resource = new Buffer(`/${ep}`).toString('base64')
+        return request
+          .get(url)
+          .query({ resource, method: 'GET' })
+          .set('Authorization', token)
+      }
+      const string = `http://${address}:3000/${ep}`
       return request.get(encodeURI(string)).set('Authorization', `JWT ${token}`)
     }
 
     this.agetAsync = ep => new Promise((resolve, reject) => {
       this.aget(ep).end((err, res) => {
         if (err) return reject(err)
-        return resolve(JSON.parse(res.text))
+        console.log('this.agetAsync', res)
+        return this.props.apis.stationID ? resolve(res.body.data) : resolve(res.body)
       })
     })
-
-    this.apost = (ep, data) => {
-      const { address, token } = this.props.apis
-      const string = `http://${address}:3000/${ep}`
-      const r = request.post(string).set('Authorization', `JWT ${token}`)
-      return typeof data === 'object' ? r.send(data) : r
-    }
   }
 
   componentWillMount() {
