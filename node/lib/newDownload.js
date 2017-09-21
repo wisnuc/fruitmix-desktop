@@ -2,11 +2,11 @@ import fs from 'fs'
 import path from 'path'
 import UUID from 'uuid'
 import Debug from 'debug'
+import store from './store'
 import { getMainWindow } from './window'
 import { ipcMain, shell } from 'electron'
-import { createTask } from './downloadTransform'
 import { downloadFile } from './server'
-import store from './store'
+import { createTask } from './downloadTransform'
 
 const debug = Debug('node:lib:newDownload: ')
 

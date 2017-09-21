@@ -3,10 +3,10 @@ import os from 'os'
 import path from 'path'
 import UUID from 'uuid'
 import request from 'request'
-import { ipcMain, shell, app } from 'electron'
-import { getMainWindow } from './window'
 import store from './store'
 import { ftpGet } from './ftp'
+import { getMainWindow } from './window'
+import { ipcMain, shell, app } from 'electron'
 
 Promise.promisifyAll(request) // babel would transform Promise to bluebird
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird

@@ -13,23 +13,26 @@ const getToken = () => store.getState().login.device.token.data.token
 const getTmpPath = () => store.getState().config.tmpPath
 const getTmpTransPath = () => store.getState().config.tmpTransPath
 
-// TODO token can also be auth, or not provided
-const requestGet = (url, qs, token, callback) => {
-  // auth-less
-  if (typeof token === 'function') {
-    callback = token
-    token = null
-  }
+/* init request */
+let server
+let Authorization
+const initArgs = () => {
+  server = `http://${store.getState().login.device.mdev.address}:3000`
+  const tokenObj = store.getState().login.device.token.data
+  Authorization = tokenObj.type ? `${tokenObj.type} ${tokenObj.token}` : tokenObj.token
+}
 
-  const opts = { method: 'GET', url }
-  if (qs) opts.qs = qs
-  if (typeof token === 'string') { opts.headers = { Authorization: `JWT ${token}` } } else if (typeof token === 'object' && token !== null) {
-    opts.auth = token
-  }
+/**
+get json data from server
 
-  // debug('requestGet, opts', opts)
+@param {string} string
+@param {Object} qs
+*/
 
-  request.get(opts, (err, res) => {
+export const serverGet = (endpoint, callback) => {
+  initArgs()
+  const options = { method: 'GET', headers: { Authorization }, url: `${server}/${endpoint}` }
+  request.get(options, (err, res) => {
     if (err) return callback(err)
     if (res.statusCode !== 200) {
       const e = new Error('http status code not 200')
@@ -38,21 +41,18 @@ const requestGet = (url, qs, token, callback) => {
       e.url = url
       return callback(e)
     }
-
     try {
-      const obj = JSON.parse(res.body)
-      return callback(null, obj)
+      const data = JSON.parse(res.body)
+      return callback(null, data)
     } catch (e) {
-      console.log('req GET json parse err')
-      console.log(e)
-      const e1 = new Error('json parse error')
-      e1.code === 'EJSONPARSE'
-      return callback(e1)
+      const e = new Error('json parse error')
+      e.code === 'EJSONPARSE'
+      return callback(e)
     }
   })
 }
 
-export const requestGetAsync = Promise.promisify(requestGet)
+export const serverGetAsync = Promise.promisify(serverGet)
 
 const requestDownload = (url, qs, token, downloadPath, name, callback) => {
   const opts = { method: 'GET', url }
@@ -68,7 +68,7 @@ const requestDownload = (url, qs, token, downloadPath, name, callback) => {
   request(opts, (err, res) => {
     if (err) return callback(err)
     if (res.statusCode !== 200) {
-      console.log(res.body)
+      debug(res.body)
       const e = new Error('http status code not 200')
       e.code = 'EHTTPSTATUS'
       e.status = res.statusCode
@@ -79,120 +79,16 @@ const requestDownload = (url, qs, token, downloadPath, name, callback) => {
       fs.renameSync(tmpPath, dst)
       return callback(null, null)
     } catch (e) {
-      console.log('req GET json parse err')
-      console.log(e)
+      debug('req GET json parse err')
+      debug(e)
       const e1 = new Error('json parse error')
-      e1.code === 'EJSONPARSE'
+      e1.code = 'EJSONPARSE'
       return callback(e1)
     }
   }).pipe(stream)
 }
 
 export const requestDownloadAsync = Promise.promisify(requestDownload)
-
-const requestPost = (url, token, body, callback) => {
-  const opts = { method: 'POST', url, body: JSON.stringify(body) }
-  opts.headers = {
-    Authorization: `JWT ${token}`,
-    'Content-Type': 'application/json'
-  }
-
-  // debug('requestPost', opts)
-  request(opts, (err, res) => {
-    if (err) return callback(err)
-    if (res.statusCode !== 200) {
-      const e = new Error('http status code not 200')
-      e.code = 'EHTTPSTATUS'
-      e.status = res.statusCode
-      return callback(e)
-    }
-    callback(null, res.body)
-  })
-}
-
-const requestPostAsync = Promise.promisify(requestPost)
-
-const requestPatch = (url, token, body, callback) => {
-  const opts = { method: 'PATCH', url, body: JSON.stringify(body) }
-  opts.headers = {
-    Authorization: `JWT ${token}`,
-    'Content-Type': 'application/json'
-  }
-
-  // debug('requestPatch', opts)
-
-  request(opts, (err, res) => {
-    if (err) return callback(err)
-    if (res.statusCode !== 200) {
-      const e = new Error('http status code node 200')
-      e.code = 'EHTTPSTATUS'
-      e.status = res.statusCode
-      return callback(e)
-    }
-    callback(null, res.body)
-  })
-}
-
-const requestPatchAsync = Promise.promisify(requestPatch)
-
-const requestDelete = (url, token, callback) => {
-  const opts = { method: 'DELETE', url }
-  opts.headers = { Authorization: `JWT ${token}` }
-
-  // debug('requestDelete, opts', opts)
-
-  request(opts, (err, res) => {
-    if (err) return callback(err)
-    if (res.statusCode !== 200) {
-      console.log('a delete error ~~~~~~~~~~~~')
-      const e = new Error('http status code not 200')
-      e.code = 'EHTTPSTATUS'
-      e.status = res.statusCode
-      return callback(e)
-    }
-    console.log('a delete finish ~~~~~~~~~~~~')
-    callback(null)
-  })
-}
-
-const requestDeleteAsync = Promise.promisify(requestDelete)
-
-export const retrieveUsers = async (token) => {
-  const ip = getIpAddr()
-  const port = 3000
-
-  return requestGetAsync(`http://${ip}:${port}/users`, null, token)
-}
-
-export const serverGetAsync = async (endpoint, qs) => {
-  // debug('serverGetAsync', endpoint, qs)
-
-  const ip = getIpAddr()
-  const port = 3000
-  const token = getToken()
-  return requestGetAsync(`http://${ip}:${port}/${endpoint}`, qs, token)
-}
-
-export const serverDeleteAsync = async (endpoint) => {
-  const ip = getIpAddr()
-  const port = 3000
-  const token = getToken()
-  return requestDeleteAsync(`http://${ip}:${port}/${endpoint}`, token)
-}
-
-export const serverPostAsync = async (endpoint, body) => {
-  const ip = getIpAddr()
-  const port = 3000
-  const token = getToken()
-  return requestPostAsync(`http://${ip}:${port}/${endpoint}`, token, body)
-}
-
-export const serverPatchAsync = async (endpoint, body) => {
-  const ip = getIpAddr()
-  const port = 3000
-  const token = getToken()
-  return requestPatchAsync(`http://${ip}:${port}/${endpoint}`, token, body)
-}
 
 export const serverDownloadAsync = (endpoint, qs, downloadPath, name) => {
   const ip = getIpAddr()
@@ -201,20 +97,6 @@ export const serverDownloadAsync = (endpoint, qs, downloadPath, name) => {
   return requestDownloadAsync(`http://${ip}:${port}/${endpoint}`, qs, token, downloadPath, name)
 }
 
-
-/***********************************************************
-new api
-***********************************************************/
-
-/* init request */
-let server
-let tokenObj
-let Authorization
-const initArgs = () => {
-  server = `http://${store.getState().login.device.mdev.address}:3000`
-  tokenObj = store.getState().login.device.token.data
-  Authorization = tokenObj.type ? `${tokenObj.type} ${tokenObj.token}` : tokenObj.token
-}
 
 /**
 Upload multiple files in one request.post
@@ -230,8 +112,6 @@ Upload multiple files in one request.post
 @param {string} Files[].parts[].fingerpringt
 @param {Object[]} Files[].readStreams
 @param {Object} Files[].policy
-
-      const { name, parts, readStreams, policy } = file
 @param {function} callback
 */
 
@@ -337,6 +217,7 @@ export class DownloadFile {
   }
 
   abort() {
+    if (this.finished) return
     debug('download abort', this.fileName)
     this.finish(null)
     if (this.handle) this.handle.abort()
@@ -418,7 +299,7 @@ export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, ca
 export const createFoldAsync = Promise.promisify(createFold)
 
 /**
-download tmp File 
+download tmp File
 
 @param {string} driveUUID
 @param {string} dirUUID
@@ -428,32 +309,31 @@ download tmp File
 @param {function} callback
 */
 
-export const downloadFile = async (driveUUID, dirUUID, entryUUID, fileName, downloadPath, callback) => {
+export const downloadFile = (driveUUID, dirUUID, entryUUID, fileName, downloadPath, callback) => {
   initArgs()
-  const filePath = path.join(getTmpPath(), `${entryUUID}AND${fileName}`)
+  const filePath = downloadPath ? path.join(downloadPath, fileName) : path.join(getTmpPath(), `${entryUUID}AND${fileName}`)
   fs.access(filePath, (error) => {
-    if (!error) {
-      console.log('find file', fileName)
-      return callback(null, filePath)
-    }
-    console.log('no file', fileName)
-    const tmpPath = downloadPath || path.join(getTmpTransPath(), entryUUID)
-    const options = {
-      method: 'GET',
-      url: `${server}/drives/${driveUUID}/dirs/${dirUUID}/entries/${entryUUID}`,
-      headers: { Authorization },
-      qs: { name: fileName }
-    }
+    if (error) {
+      debug('no cache download file', fileName)
+      const tmpPath = path.join(getTmpTransPath(), entryUUID)
+      const options = {
+        method: 'GET',
+        url: dirUUID === 'media' ? `${server}/media/${entryUUID}`
+        : `${server}/drives/${driveUUID}/dirs/${dirUUID}/entries/${entryUUID}`,
+        headers: { Authorization },
+        qs: { name: fileName }
+      }
 
-    const stream = fs.createWriteStream(tmpPath)
-    stream.on('finish', () => {
-      // if (!downloadPath) // TODO rename
-      fs.rename(tmpPath, filePath, (err) => {
-        if (err) return callback(err)
-        return callback(null, filePath)
+      const stream = fs.createWriteStream(tmpPath)
+      stream.on('error', err => callback(err))
+      stream.on('finish', () => {
+        fs.rename(tmpPath, filePath, (err) => {
+          if (err) return callback(err)
+          return callback(null, filePath)
+        })
       })
-    })
-    const handle = request(options).on('error', err => callback(err))
-    handle.pipe(stream)
+      const handle = request(options).on('error', err => callback(err))
+      handle.pipe(stream)
+    } else callback(null, filePath)
   })
 }
