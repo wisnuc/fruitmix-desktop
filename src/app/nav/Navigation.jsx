@@ -492,6 +492,7 @@ class Navigation extends React.Component {
 
     const address = props.selectedDevice.mdev.address
     const userUUID = token.ctx.uuid
+    debug('init Fruitmix', address, userUUID, token.data.token, token.data.stationID)
     this.fruitmix = new Fruitmix(address, userUUID, token.data.token, token.data.stationID)
     this.fruitmix.on('updated', (prev, next) => this.setState({ apis: next }))
 
