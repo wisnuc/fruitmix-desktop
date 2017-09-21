@@ -1,7 +1,6 @@
 import Request from './Request'
-
-const request = require('superagent')
-const EventEmitter = require('eventemitter3')
+import request from 'superagent'
+import EventEmitter from 'eventemitter3'
 
 const cloudAddress = 'http://www.siyouqun.org:80'
 
@@ -25,14 +24,12 @@ class Fruitmix extends EventEmitter {
       requestAsync: this.requestAsync.bind(this)
     }
 
-    this.reqCloud = (ep, type) => {
+    this.reqCloud = (ep, data, type) => {
       const url = `${address}/c/v1/stations/${this.stationID}/json`
       const resource = new Buffer(`/${ep}`).toString('base64')
       console.log('this.reqCloud', url, resource, type, this.stationID, this.token)
-      return request
-        .get(url)
-        .query({ resource, method: type })
-        .set('Authorization', this.token)
+      if (type === 'GET') return request.get(url).set('Authorization', this.token).query({ resource, method: type })
+      if (data) return request.post(url).set('Authorization', this.token).send(Object.assign({ resource, method: type }, data))
     }
   }
 
@@ -78,13 +75,14 @@ class Fruitmix extends EventEmitter {
   }
 
   aget(ep) {
-    if (this.stationID) return this.reqCloud(ep, 'GET')
+    if (this.stationID) return this.reqCloud(ep, null, 'GET')
     return request
       .get(`http://${this.address}:3000/${ep}`)
       .set('Authorization', `JWT ${this.token}`)
   }
 
   apost(ep, data) {
+    if (this.stationID) return this.reqCloud(ep, data, 'POST')
     const r = request
       .post(`http://${this.address}:3000/${ep}`)
       .set('Authorization', `JWT ${this.token}`)
@@ -95,6 +93,7 @@ class Fruitmix extends EventEmitter {
   }
 
   apatch(ep, data) {
+    if (this.stationID) return this.reqCloud(ep, data, 'PATCH')
     const r = request
       .patch(`http://${this.address}:3000/${ep}`)
       .set('Authorization', `JWT ${this.token}`)
@@ -105,6 +104,7 @@ class Fruitmix extends EventEmitter {
   }
 
   aput(ep, data) {
+    if (this.stationID) return this.reqCloud(ep, data, 'PUT')
     const r = request
       .put(`http://${this.address}:3000/${ep}`)
       .set('Authorization', `JWT ${this.token}`)
@@ -115,6 +115,7 @@ class Fruitmix extends EventEmitter {
   }
 
   adel(ep, data) {
+    if (this.stationID) return this.reqCloud(ep, data, 'DELETE')
     const r = request
       .del(`http://${this.address}:3000/${ep}`)
       .set('Authorization', `JWT ${this.token}`)
