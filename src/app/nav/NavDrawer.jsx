@@ -242,7 +242,7 @@ class NavDrawer extends React.Component {
           icon={ActionExitToApp}
           text="退出"
           onTouchTap={() => {
-            ipcRenderer.send('LOGIN_OUT')
+            ipcRenderer.send('LOGOUT')
             this.props.navToMain('login')
           }}
         />

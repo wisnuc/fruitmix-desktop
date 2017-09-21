@@ -213,6 +213,8 @@ export class DownloadFile {
 
     this.handle.on('error', error => this.finish(error))
 
+    this.handle.on('end', () => this.finish(null))
+
     this.handle.pipe(this.stream)
   }
 

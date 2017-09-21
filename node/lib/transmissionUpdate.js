@@ -1,7 +1,7 @@
 import os from 'os'
 import Debug from 'debug'
 import child from 'child_process'
-import { ipcMain, powerSaveBlocker } from 'electron'
+import { ipcMain, powerSaveBlocker, shell } from 'electron'
 
 import { getMainWindow } from './window'
 import store from './store'
@@ -22,7 +22,7 @@ const sendMsg = () => {
   const userTasks = []
   const finishTasks = []
   Tasks.forEach((t) => {
-    if (t.state === 'finished') finishTasks.push(t)
+    if (t.state === 'finished') finishTasks.push(typeof t.status === 'function' ? t.status() : t)
     else userTasks.push(t.status())
   })
   userTasks.sort((a, b) => a.createTime - b.createTime) // Ascending
@@ -93,25 +93,7 @@ const clearTasks = () => {
 /* ipc listeners */
 ipcMain.on('GET_TRANSMISSION', sendMsg)
 
-ipcMain.on('OPEN_TRANSMISSION', (e, tasks) => { // FIXME
-  const osType = os.platform()
-  tasks.forEach((task) => {
-    const taskPath = task.downloadPath
-    debug('打开目录的文件资源管理器', taskPath) // FIXME
-    switch (osType) {
-      case 'win32':
-        child.exec(`explorer ${taskPath}`, {})
-        break
-      case 'linux':
-        child.exec(`nautilus ${taskPath}`, {})
-        break
-      case 'darwin':
-        child.exec(`open ${taskPath}`, {})
-        break
-      default :
-    }
-  })
-})
+ipcMain.on('OPEN_TRANSMISSION', (e, paths) => paths.forEach(p => shell.openItem(p)))
 
 ipcMain.on('PAUSE_TASK', (e, uuids) => actionHandler(e, uuids, 'PAUSE'))
 ipcMain.on('RESUME_TASK', (e, uuids) => actionHandler(e, uuids, 'RESUME'))
@@ -125,6 +107,6 @@ ipcMain.on('START_TRANSMISSION', () => {
   })
 })
 
-ipcMain.on('LOGIN_OUT', clearTasks)
+ipcMain.on('LOGOUT', clearTasks)
 
 export { Tasks, sendMsg, clearTasks }
