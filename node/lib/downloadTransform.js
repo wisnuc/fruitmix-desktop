@@ -167,7 +167,7 @@ class Task {
         this.schedule()
       },
       transform: (x, callback) => {
-        debug('download transform start', x.entry.name)
+        // debug('download transform start', x.entry.name)
         const { entry, downloadPath, dirUUID, driveUUID, task } = x
         task.state = 'downloading'
         // debug('download transform entry.seek', entry.seek)
@@ -192,10 +192,11 @@ class Task {
         })
 
         const handle = new DownloadFile(driveUUID, dirUUID, entry.uuid, entry.name, entry.size, entry.seek, stream, (error) => {
-          this.reqHandles.splice(this.reqHandles.indexOf(handle), 1)
+          debug('finish', entry.name, task.reqHandles.indexOf(handle))
+          task.reqHandles.splice(task.reqHandles.indexOf(handle), 1)
           if (error) callback(error)
         })
-        this.reqHandles.push(handle)
+        task.reqHandles.push(handle)
         handle.download()
       }
     })
@@ -218,7 +219,7 @@ class Task {
     this.readRemote.on('data', (x) => {
       const { task, entry } = x
       task.finishCount += 1
-      debug('Download finished:', entry.newName)
+      // debug('Download finished:', entry.newName)
       entry.finished = true
       if (task.count === task.finishCount) {
         task.state = 'finished'

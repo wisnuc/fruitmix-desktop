@@ -111,4 +111,3 @@ const createPersistenceAsync = async (target, tmpdir, delay) => {
 }
 
 module.exports = createPersistenceAsync
-

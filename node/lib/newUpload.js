@@ -4,8 +4,8 @@ import UUID from 'uuid'
 import Debug from 'debug'
 import { dialog, ipcMain } from 'electron'
 import { getMainWindow } from './window'
-import { createTask } from './uploadTransform'
 import { serverGetAsync } from './server'
+import { createTask } from './uploadTransform'
 
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
 

@@ -60,7 +60,7 @@ const actionHandler = (e, uuids, type) => {
   switch (type) {
     case 'DELETE':
       func = (task) => {
-        if (typeof task.pause === 'function') task.pause()
+        if (typeof task.pause === 'function' && task.state !== 'finished') task.pause()
         Tasks.splice(Tasks.indexOf(task), 1)
         global.db.task.remove({ _id: task.uuid }, { multi: true }, err => err && debug('DELETE_RUNNING error: ', err))
       }
