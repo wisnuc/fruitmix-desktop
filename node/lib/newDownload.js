@@ -6,7 +6,7 @@ import { getMainWindow } from './window'
 import { ipcMain, shell } from 'electron'
 import { createTask } from './downloadTransform'
 import { downloadFile } from './server'
-import store from '../serve/store/store'
+import store from './store'
 
 const debug = Debug('node:lib:newDownload: ')
 

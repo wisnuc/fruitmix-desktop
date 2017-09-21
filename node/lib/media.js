@@ -9,7 +9,7 @@ import request from 'request'
 /* import file module */
 import { serverDownloadAsync } from './server'
 import { getMainWindow } from './window'
-import store from '../serve/store/store'
+import store from './store'
 
 /* init */
 const getIpAddr = () => store.getState().login.device.mdev.address

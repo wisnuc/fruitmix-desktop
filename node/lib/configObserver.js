@@ -2,7 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import UUID from 'uuid'
 import { app } from 'electron'
-import store from '../serve/store/store'
+import store from './store'
 import { getMainWindow } from './window'
 
 let prevConfig

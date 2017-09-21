@@ -1,11 +1,9 @@
-import Debug from 'debug'
-import request from 'request'
 import fs from 'fs'
 import path from 'path'
-import util from 'util'
-import crypto from 'crypto'
+import Debug from 'debug'
 import UUID from 'node-uuid'
-import store from '../serve/store/store'
+import request from 'request'
+import store from './store'
 
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
 
@@ -204,9 +202,9 @@ export const serverDownloadAsync = (endpoint, qs, downloadPath, name) => {
 }
 
 
-/** *********************************************************
-new api TODO
- ***********************************************************/
+/***********************************************************
+new api
+***********************************************************/
 
 /* init request */
 let server
@@ -215,50 +213,8 @@ let Authorization
 const initArgs = () => {
   server = `http://${store.getState().login.device.mdev.address}:3000`
   tokenObj = store.getState().login.device.token.data
-  Authorization = `${tokenObj.type} ${tokenObj.token}`
+  Authorization = tokenObj.type ? `${tokenObj.type} ${tokenObj.token}` : tokenObj.token
 }
-
-/**
-Upload a single file using request formData
-
-@param {string} driveUUID
-@param {string} dirUUID
-@param {string} name
-@param {object} part
-@param {string} part.start
-@param {string} part.end
-@param {string} part.sha
-@param {string} part.fingerpringt
-@param {object} readStream
-@param {function} callback
-*/
-
-export const uploadFileWithStream = (driveUUID, dirUUID, name, part, readStream, callback) => {
-  initArgs()
-  let formDataOptions = {
-    size: part.end ? part.end - part.start + 1 : 0,
-    sha256: part.sha
-  }
-  if (part.start) formDataOptions = Object.assign(formDataOptions, { append: part.fingerprint })
-
-  const op = {
-    url: `${server}/drives/${driveUUID}/dirs/${dirUUID}/entries`,
-    headers: { Authorization },
-    formData: {
-      [name]: {
-        value: readStream,
-        options: JSON.stringify(formDataOptions)
-      }
-    }
-  }
-  request.post(op, (error, data) => {
-    if (error) {
-      console.log('error', error)
-    } else if (callback) callback()
-  })
-}
-
-export const uploadFileWithStreamAsync = Promise.promisify(uploadFileWithStream)
 
 /**
 Upload multiple files in one request.post
@@ -267,8 +223,15 @@ Upload multiple files in one request.post
 @param {string} dirUUID
 @param {Object[]} Files
 @param {string} Files[].name
-@param {Object} Files[].parts
-@param {Object} Files[].readStream
+@param {Object[]} Files[].parts
+@param {string} Files[].parts[].start
+@param {string} Files[].parts[].end
+@param {string} Files[].parts[].sha
+@param {string} Files[].parts[].fingerpringt
+@param {Object[]} Files[].readStreams
+@param {Object} Files[].policy
+
+      const { name, parts, readStreams, policy } = file
 @param {function} callback
 */
 
@@ -324,6 +287,19 @@ export class UploadMultipleFiles {
     if (this.handle) this.handle.abort()
   }
 }
+
+/**
+download a entire file or part of file
+
+@param {string} driveUUID
+@param {string} dirUUID
+@param {string} entryUUID
+@param {string} fileName
+@param {number} size
+@param {number} seek
+@param {Object} stream
+@param {function} callback
+*/
 
 export class DownloadFile {
   constructor(driveUUID, dirUUID, entryUUID, fileName, size, seek, stream, callback) {
@@ -394,6 +370,10 @@ createFold
 @param {string} driveUUID
 @param {string} dirUUID
 @param {string} dirname
+@param {Object[]} localEntries
+@param {string} localEntries[].entry
+@param {Object} policy
+@param {string} policy.mode
 @param {function} callback
 */
 
@@ -438,7 +418,7 @@ export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, ca
 export const createFoldAsync = Promise.promisify(createFold)
 
 /**
-downloadFile
+download tmp File 
 
 @param {string} driveUUID
 @param {string} dirUUID

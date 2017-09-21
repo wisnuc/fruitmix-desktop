@@ -5,7 +5,7 @@ import UUID from 'uuid'
 import request from 'request'
 import { ipcMain, shell, app } from 'electron'
 import { getMainWindow } from './window'
-import store from '../serve/store/store'
+import store from './store'
 import { ftpGet } from './ftp'
 
 Promise.promisifyAll(request) // babel would transform Promise to bluebird

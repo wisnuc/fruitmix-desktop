@@ -2,7 +2,7 @@ import path from 'path'
 import Debug from 'debug'
 import { ipcMain, BrowserWindow, app, dialog } from 'electron'
 import { clearTasks } from './transmissionUpdate'
-import store from '../serve/store/store'
+import store from './store'
 
 const debug = Debug('lib:window')
 

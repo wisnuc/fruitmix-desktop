@@ -4,7 +4,7 @@ import child from 'child_process'
 import { ipcMain, powerSaveBlocker } from 'electron'
 
 import { getMainWindow } from './window'
-import store from '../serve/store/store'
+import store from './store'
 
 const debug = Debug('node:lib:transmissionUpdate:')
 

@@ -1,39 +1,18 @@
-import path from 'path'
-import fs from 'fs'
-import os from 'os'
-
-import Debug from 'debug'
 import { app } from 'electron'
-import { autoUpdater } from 'electron-updater'
-import log from 'electron-log'
 
-import store from './serve/store/store'
+import store from './lib/store'
 import configObserver from './lib/configObserver'
-
-import migration from './lib/migration'
-import systemModule from './lib/system'
 import Configuration from './lib/configuration'
-
-// init api
-import loginApi from './lib/login'
-import mediaApi from './lib/media'
-
-import newUpload from './lib/newUpload'
-import download from './lib/newDownload'
-
-import clientUpdate from './lib/clientUpdate'
-
-// init window
-import { initMainWindow, getMainWindow } from './lib/window'
-import { initTestWindow } from './lib/testHook'
-
 import mdns from './lib/mdns'
+import login from './lib/login'
+import media from './lib/media'
+import newUpload from './lib/newUpload'
+import newDownload from './lib/newDownload'
+import clientUpdate from './lib/clientUpdate'
+import { initMainWindow, getMainWindow } from './lib/window'
 
 global.entryFileDir = __dirname
 global.db = {}
-
-const debug = Debug('main')
-const mocha = false
 
 store.subscribe(configObserver)
 
@@ -60,8 +39,9 @@ app.on('ready', () => {
   global.configuration = configuration
 })
 
+app.on('window-all-closed', () => app.quit())
+
+/* handle uncaught Exception */
 process.on('uncaughtException', (err) => {
   console.log(`!!!!!!\nuncaughtException:\n${err.stack}\n------`)
 })
-
-app.on('window-all-closed', () => app.quit())
