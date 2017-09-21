@@ -51,13 +51,10 @@ class NavViews extends React.Component {
     this.install('home', Home)
     this.install('public', Public)
     // this.install('physical', Physical)
-    // this.install('fileSharedWithMe', FileSharedWithMe)
-    // this.install('fileSharedWithOthers', FileSharedWithOthers)
     this.install('transmission', Transmission)
 
     this.install('media', Media)
     this.install('assistant', Assistant)
-    // this.install('mediaShare', MediaShare)
     // this.install('mediaAlbum', MediaAlbum)
 
     this.install('trash', Trash)

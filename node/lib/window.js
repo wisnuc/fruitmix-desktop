@@ -20,7 +20,7 @@ const initMainWindow = () => {
     minWidth: 1366,
     minHeight: 768,
     title: 'WISNUC',
-    icon: path.join(global.rootPath, 'icon.png'), // it doesn't work in devel mode
+    icon: path.join(global.rootPath, 'public/assets/images/icon.png'), // it doesn't work in devel mode
     webPreferences: {
       webSecurity: true, // set false to disable the same-origin policy
       experimentalFeatures: true

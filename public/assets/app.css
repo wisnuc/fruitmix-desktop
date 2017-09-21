@@ -1,42 +1,17 @@
 /**
-  * @name global style
-  * @author liuhua
-  * @datetime 2016-4-5
-*/
+ * @name global style
+ * @author liuhua
+ * @datetime 2016-4-5
+ */
 
 @charset "utf-8";
 
 /******** 全站通用 *********/
-*{
+* {
   -moz-user-select: none;
   -webkit-user-select: none;
   user-select: none;
   font-family: Roboto, "Noto Sans SC" , "Microsoft YaHei", sans-serif!important;
-}
-
-.clearfix {
-    display: block;
-}
-
-.clearfix:after {
-    display: block;
-    content: "\0020";
-    clear: both;
-    height: 0;
-    font-size: 0;
-    visibility: hidden;
-}
-
-.fl {
-    float: left;
-}
-
-.fr {
-    float: right;
-}
-
-.visible {
-  visibility: visible;
 }
 
 html {
@@ -49,7 +24,7 @@ body {
   padding:0;
   width:100%;
   height:100%;
-  color: rgba(0,0,0,0.87);
+  color:rgba(0,0,0,0.87);
 }
 
 a {
@@ -74,13 +49,4 @@ img[src=""] {
   width:100%;
   height:100%;
   overflow-x: hidden;
-}
-
-.app {
-  width:100%;
-  height:100%;
-}
-
-:root {
-  --hello: red;
 }

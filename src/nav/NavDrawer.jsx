@@ -128,16 +128,6 @@ class NavDrawer extends React.Component {
       ws215i = true
     }
 
-    /*
-    console.log('>>>>>>>>>>>>>>>>>>>')
-    console.log(this.props)
-    console.log(account)
-    console.log(value)
-    console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<')
-    backgroundImage: 'url(../src/assets/images/bg.png)',
-    backgroundSize: 'cover'
-    */
-
     return (
 
       <Drawer docked={false} width={256} open={open} onRequestChange={onRequestChange}>
