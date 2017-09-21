@@ -8,12 +8,13 @@ const cloudAddress = 'http://www.siyouqun.org:80'
 /* this module encapsulate most fruitmix apis */
 class Fruitmix extends EventEmitter {
 
-  constructor(address, userUUID, token) {
+  constructor(address, userUUID, token, stationID) {
     super()
 
     this.address = address
     this.userUUID = userUUID
     this.token = token
+    this.stationID = stationID
 
     this.state = {
       address,
@@ -21,6 +22,16 @@ class Fruitmix extends EventEmitter {
       token,
       request: this.request.bind(this),
       requestAsync: this.requestAsync.bind(this)
+    }
+
+    this.reqCloud = (ep, type) => {
+      const url = `${address}/c/v1/stations/${this.stationID}/json`
+      const resource = new Buffer(`/${ep}`).toString('base64')
+      console.log('this.reqCloud', url, resource, type, this.stationID, this.token)
+      return request
+        .get(url)
+        .query({ resource, method: type })
+        .set('Authorization', this.token)
     }
   }
 
@@ -38,6 +49,9 @@ class Fruitmix extends EventEmitter {
 
     this[name] = new Request(props, f)
     this[name].on('updated', (prev, curr) => {
+      if (this.stationID && this[name].isFinished() && !this[name].isRejected()) {
+        curr.data = curr.data.data
+      }
       this.setState(name, curr)
 
       console.log(`${name} updated`, prev, curr, this[name].isFinished(), typeof next === 'function')
@@ -63,6 +77,7 @@ class Fruitmix extends EventEmitter {
   }
 
   aget(ep) {
+    if (this.stationID) return this.reqCloud(ep, 'GET')
     return request
       .get(`http://${this.address}:3000/${ep}`)
       .set('Authorization', `JWT ${this.token}`)

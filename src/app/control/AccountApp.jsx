@@ -36,6 +36,7 @@ class AccountApp extends React.Component {
 
   render() {
     const { account, primaryColor, apis, refresh, openSnackBar } = this.props
+    debug('account', account)
     if (!account) return <div />
 
     const tooltipUserName = (

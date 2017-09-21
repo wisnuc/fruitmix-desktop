@@ -1,5 +1,4 @@
-const request = require('superagent')
-
+import request from 'superagent'
 import RequestManager from './reqman'
 
 const cloudAddress = 'http://www.siyouqun.org:80'
@@ -39,7 +38,6 @@ class Device extends RequestManager {
 
     // immutable
     this.state = {
-
       // static data
       mdev: this.mdev,
 
@@ -54,12 +52,26 @@ class Device extends RequestManager {
       manualBoot: this.manualBoot.bind(this),
       addFirstUser: this.addFirstUser.bind(this)
     }
+
+    this.reqCloud = (type, ep, stationID, token) => {
+      const url = `${cloudAddress}/c/v1/stations/${stationID}/json`
+      const resource = new Buffer(`/${ep}`).toString('base64')
+      console.log('this.reqCloud device', url, resource, type, stationID, token)
+      return request
+        .get(url)
+        .query({ resource, method: type })
+        .set('Authorization', token)
+    }
   }
 
   request(name, args, next) {
     let r
 
     switch (name) {
+      case 'cloudUsers':
+        r = this.reqCloud('GET', 'users', args.stationID, args.token)
+        break
+
       case 'device':
         r = request
         .get(`http://${this.mdev.address}:3000/control/system`)

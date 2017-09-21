@@ -40,7 +40,7 @@ class Fruitmix extends React.Component {
 
       view: 'login',
 
-      selectedDevice: null,
+      selectedDevice: new Device({ address: '' }),
 
       theme: getMuiTheme({
         fontFamily: 'Roboto, Noto Sans SC, sans-serif',
