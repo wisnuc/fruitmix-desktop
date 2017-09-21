@@ -112,9 +112,6 @@ class NavDrawer extends React.Component {
       value = account.value()
     }
 
-    let serial = views.account.ctx.props.selectedDevice.mdev.serial
-    if (serial.length > 11) serial = serial.substring(serial.length - 11)
-
     let username = ''
     let isAdmin = false
     if (value) {

@@ -173,17 +173,17 @@ class NavViews extends React.Component {
     /* is ws215i ? */
     let ws215i = false
     const device = this.props.selectedDevice.device
-    if (device && device.data && device.data.ws215i) {
-      ws215i = true
-    }
+    if (device && device.data && device.data.ws215i) ws215i = true
 
     /* is admin ? */
     let isAdmin = false
     const account = this.props.apis.account
-    // debug('renderQuickNavs', account)
-    if (!account.isPending() && !account.isRejected() && account.value() && account.value().isAdmin) {
-      isAdmin = true
-    }
+    if (!account.isPending() && !account.isRejected() && account.value() && account.value().isAdmin) isAdmin = true
+
+    /* is cloud ? */
+    let isCloud = false
+    const token = this.props.selectedDevice.token
+    if (token && token.data && token.data.stationID) isCloud = true
 
     return (
       <div
@@ -198,8 +198,10 @@ class NavViews extends React.Component {
       >
         {
           hasQuickNavs && navGroupList.map((key) => {
-            if ((!ws215i || !isAdmin) && key === 'fanControl') return <div key={`quicknav-${key}`} />
-            if (!isAdmin && (key === 'firmwareUpdate' || key === 'power')) return <div key={`quicknav-${key}`} />
+            const noRender = <div key={`quicknav-${key}`} />
+            if ((!ws215i || !isAdmin) && key === 'fanControl') return noRender
+            if (!isAdmin && (key === 'firmwareUpdate' || key === 'power')) return noRender
+            if (isCloud && ['device', 'networking', 'timeDate', 'fanControl', 'power'].includes(key)) return noRender
             return (
               <QuickNav
                 key={`quicknav-${key}`}
@@ -490,7 +492,7 @@ class Navigation extends React.Component {
 
     const address = props.selectedDevice.mdev.address
     const userUUID = token.ctx.uuid
-    this.fruitmix = new Fruitmix(address, userUUID, token.value().token)
+    this.fruitmix = new Fruitmix(address, userUUID, token.data.token, token.data.stationID)
     this.fruitmix.on('updated', (prev, next) => this.setState({ apis: next }))
 
     this.state = { apis: null }

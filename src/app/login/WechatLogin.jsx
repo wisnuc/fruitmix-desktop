@@ -104,27 +104,25 @@ class WechatLogin extends React.Component {
     }
 
     this.autologin = () => {
-      debug(this.props)
-      if (!this.props.selectedDevice) {
-        this.setState({ wechatLogin: 'fail' })
-        return
-      }
+      const stationID = this.state.lastDevice
+      const token = this.state.wxData.token
+      const guid = this.state.wxData.user.id
 
-      const users = this.props.selectedDevice.users
-      if (users.isPending() || users.isRejected()) {
-        this.setState({ wechatLogin: 'fail' })
-        return
-      }
-
-      const uuid = '7b81bf88-70d3-4d3e-9d57-6493f62365b4'
-      const password = '1'
-      this.props.selectedDevice.request('token', { uuid, password }, (err) => {
-        if (err) {
-          console.log(`err:${err}`)
-          this.setState({ wechatLogin: 'fail' })
-        } else {
-          this.done('LOGIN', this.props.selectedDevice, this.props.selectedDevice.users.data[0])
-        }
+      debug('autologin', this.props)
+      this.props.selectedDevice.request('cloudUsers', { stationID, token }, (err, res) => {
+        debug('cloudUsers', err, res)
+        if (err) return this.setState({ wechatLogin: 'fail' })
+        const user = res && res.data.find(u => u.global && u.global.id === guid)
+        if (!user) return this.setState({ wechatLogin: 'fail' })
+        Object.assign(this.props.selectedDevice, {
+          token: {
+            isFulfilled: () => true,
+            ctx: user,
+            data: { token, stationID }
+          },
+          mdev: { address: 'http://www.siyouqun.org' }
+        })
+        return this.done('LOGIN', this.props.selectedDevice, user)
       })
     }
 
@@ -203,7 +201,7 @@ class WechatLogin extends React.Component {
         if (err) return debug('this.getStations error', err)
         debug('this.getStations success', res)
         setTimeout(() => this.setState({ wechatLogin: 'success', count: 3 }), 500)
-        setTimeout(() => this.setState({ wechatLogin: 'lastDevice' }, this.countDown), 1000)
+        setTimeout(() => this.setState({ wechatLogin: 'lastDevice', lastDevice: res.data[0].id }, this.countDown), 1000)
       })
     }
 
@@ -417,8 +415,8 @@ class WechatLogin extends React.Component {
                   <div>
                     <div style={{ height: 8 }} />
                     <div style={{ fontSize: 16, lineHeight: '24px', color: 'rgba(0,0,0,0.87)' }}> { '闻上盒子' } </div>
-                    <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}> { 'ws215i' } </div>
-                    <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}> { '10.10.9.96' } </div>
+                    <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}> { '' } </div>
+                    <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}> { '远程访问' } </div>
                   </div>
                 </div>
                 <div style={{ height: 8 }} />

@@ -39,7 +39,7 @@ class LoginBox extends React.Component {
       if (err) {
         console.log(`err:${err}`)
       } else {
-        // console.log(uuid, password, this.props.device, this.props.user)
+        console.log('Login !!', uuid, password, this.props.device, this.props.user)
         this.props.done('LOGIN', this.props.device, this.props.user)
       }
     })
