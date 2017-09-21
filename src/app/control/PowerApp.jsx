@@ -59,8 +59,8 @@ class Power extends React.Component {
     }
 
     this.handleStartProgress = (operation) => {
-      ipcRenderer.send('LOGIN_OFF')
-      setTimeout(() => this.boot(operation), 100)
+      ipcRenderer.send('LOGOUT')
+      setimmediate(() => this.boot(operation))
     }
 
     this.handleEndProgress = () => {

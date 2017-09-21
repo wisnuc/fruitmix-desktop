@@ -125,6 +125,8 @@ class TrsContainer extends React.Component {
             minor = currentIndex
             major = lastIndex
           }
+          if (type === 'running') this.cleanTaskSelect()
+          else this.cleanFinishSelect()
           for (let i = minor; i <= major; i++) {
             let uuid
             if (type === 'running') {
@@ -139,7 +141,8 @@ class TrsContainer extends React.Component {
         }
       } else if (!(e.button === 2 && isSelected)) {
         /* select an item: no shift or ctrl, not right click a selected item */
-        type === 'running' ? this.cleanTaskSelect() : this.cleanFinishSelect()
+        if (type === 'running') this.cleanTaskSelect()
+        else this.cleanFinishSelect()
         selectedArray.push(id)
         this.refs[id].updateDom(true)
         this.setState({ tasks: [this.refs[id].props.task] })
@@ -203,7 +206,7 @@ class TrsContainer extends React.Component {
 
     this.open = () => {
       debug('this.open', this.state.tasks)
-      ipcRenderer.send('OPEN_TRANSMISSION', this.state.tasks)
+      ipcRenderer.send('OPEN_TRANSMISSION', this.state.tasks.map(t => t.downloadPath))
     }
 
     this.openInDrive = () => {
@@ -410,8 +413,14 @@ class TrsContainer extends React.Component {
                       />
                   }
                   { this.state.pause && <MenuItem primaryText="暂停" onTouchTap={() => this.handleAll(this.state.tasks, 'PAUSE')} /> }
-                  { this.state.tasks[0].trsType === 'download' && <MenuItem primaryText="打开所在文件夹" onTouchTap={this.open} /> }
-                  { this.state.tasks[0].trsType === 'upload' && <MenuItem primaryText="查看所在目录" onTouchTap={this.openInDrive} /> }
+                  {
+                    this.state.tasks.length === 1 && this.state.tasks[0].trsType === 'download' &&
+                      <MenuItem primaryText="打开所在文件夹" onTouchTap={this.open} />
+                  }
+                  {
+                    this.state.tasks.length === 1 && this.state.tasks[0].trsType === 'upload' &&
+                      <MenuItem primaryText="查看所在目录" onTouchTap={this.openInDrive} />
+                  }
                   { this.state.play && <MenuItem primaryText="删除" onTouchTap={() => this.toggleDialog('deleteRunningDialog')} /> }
                   { this.state.tasks[0].state === 'finished' &&
                   <MenuItem primaryText="删除" onTouchTap={() => this.handleAll(this.state.tasks, 'DELETE')} /> }

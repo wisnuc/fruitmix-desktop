@@ -192,7 +192,7 @@ class Task {
         })
 
         const handle = new DownloadFile(driveUUID, dirUUID, entry.uuid, entry.name, entry.size, entry.seek, stream, (error) => {
-          debug('finish', entry.name, task.reqHandles.indexOf(handle))
+          debug('donwload handle finish', entry.name, task.reqHandles.indexOf(handle))
           task.reqHandles.splice(task.reqHandles.indexOf(handle), 1)
           if (error) callback(error)
         })

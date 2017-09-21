@@ -8,6 +8,6 @@ ipcMain.on('LOGIN', (event, device, user) => {
   global.configuration.updateGlobalConfigAsync({ lastDevice }).catch(e => console.log(e))
 })
 
-ipcMain.on('LOGIN_OUT', () => {
-  global.dispatch({ type: 'LOGIN' })
+ipcMain.on('LOGOUT', () => {
+  global.dispatch({ type: 'LOGOUT' })
 })
