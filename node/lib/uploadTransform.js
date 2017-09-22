@@ -38,7 +38,7 @@ class Task {
       this.count = 0
       this.finishCount = 0
       this.finishDate = 0
-      this.name = props.policies[0] && props.policies[0].checkedName || props.entries[0].replace(/^.*\//, '')
+      this.name = props.policies[0] && props.policies[0].checkedName || path.parse(props.entries[0]).base
       this.paused = true
       this.restTime = 0
       this.size = 0
@@ -84,7 +84,7 @@ class Task {
             task.count += 1
             if (stat.isDirectory()) {
               /* create fold and return the uuid */
-              const dirname = policy.mode === 'rename' ? policy.checkedName : entry.replace(/^.*\//, '')
+              const dirname = policy.mode === 'rename' ? policy.checkedName : path.parse(entry).base
               const dirEntry = await createFoldAsync(driveUUID, dirUUID, dirname, entries, policy)
               const uuid = dirEntry.uuid
 
@@ -114,7 +114,7 @@ class Task {
 
     this.hash = new Transform({
       name: 'hash',
-      concurrency: 4,
+      concurrency: 2,
       push(x) {
         const { files, dirUUID, driveUUID, task } = x
         // debug('this.hash push', { files, dirUUID, driveUUID })
@@ -179,7 +179,7 @@ class Task {
           const nameMap = new Map() // only same name
           const nameSpace = [] // used to check name
           local.forEach((l) => {
-            const name = l.policy.mode === 'rename' ? l.policy.checkedName : l.entry.replace(/^.*\//, '')
+            const name = l.policy.mode === 'rename' ? l.policy.checkedName : path.parse(l.entry).base
             const key = name.concat(l.parts[l.parts.length - 1].fingerprint) // local file's key: name + fingerprint
             map.set(key, l)
             nameMap.set(name, key)
@@ -209,7 +209,7 @@ class Task {
             if (mode === 'merge') mode = 'rename'
             if (mode === 'overwrite') mode = 'replace'
             mapValue.forEach((l) => {
-              const name = l.entry.replace(/^.*\//, '') // TODO mode rename but still same name ?
+              const name = path.parse(l.entry).base // TODO mode rename but still same name ?
               const checkedName = getName(name, nameSpace)
               const remoteUUID = remote.find(r => r.name === name).uuid
               debug('get files with same name but different hash', { entry: l.entry, mode, checkedName, remoteUUID })
@@ -260,7 +260,7 @@ class Task {
 
         const Files = X.map((x) => {
           const { entry, parts, policy, task } = x
-          const name = policy.mode === 'rename' ? policy.checkedName : entry.replace(/^.*\//, '')
+          const name = policy.mode === 'rename' ? policy.checkedName : path.parse(entry).base
           const readStreams = parts.map(part => fs.createReadStream(entry, { start: part.start, end: part.end, autoClose: true }))
           for (let i = 0; i < parts.length; i++) {
             const rs = readStreams[i]

@@ -40,7 +40,7 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
   const nameSpace = []
   for (let i = 0; i < entries.length; i++) {
     const entry = entries[i]
-    const name = entry.replace(/^.*\//, '')
+    const name = path.parse(entry).base
     nameSpace.push(name)
     const stat = await fs.lstatAsync(path.resolve(entry))
     const entryType = stat.isDirectory() ? 'directory' : stat.isFile() ? 'file' : 'others'

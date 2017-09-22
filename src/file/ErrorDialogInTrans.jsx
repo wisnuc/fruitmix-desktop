@@ -35,9 +35,9 @@ class Row extends React.PureComponent {
     const error = convert(node.error.code)
     let name = ''
     if (node.entry && typeof node.entry === 'object') name = node.entry.name
-    if (node.entry && typeof node.entry === 'string') name = node.entry.replace(/^.*\//, '')
+    if (node.entry && typeof node.entry === 'string') name = node.entry.replace(/^.*\//, '').replace(/^.*\\/, '')
     if (node.entries && typeof node.entries[0] === 'object') name = node.entries[0].newName
-    if (node.entries && typeof node.entries[0] === 'string') name = node.entries[0].replace(/^.*\//, '')
+    if (node.entries && typeof node.entries[0] === 'string') name = node.entries[0].replace(/^.*\//, '').replace(/^.*\\/, '')
 
     const svgStyle = { color: 'rgba(0,0,0,0.54)', width: 16, height: 16 }
     return (
