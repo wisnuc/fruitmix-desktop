@@ -92,7 +92,7 @@ class Fruitmix extends React.Component {
         this.selectDevice(mdns[0])
       }
     }, 1000)
-    this.setState({ view, selectedDevice: null })
+    this.setState({ view, selectedDevice: new Device({ address: '' }) })
   }
 
   maintain() {

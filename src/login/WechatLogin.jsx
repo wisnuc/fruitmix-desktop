@@ -107,7 +107,6 @@ class WechatLogin extends React.Component {
       const stationID = this.state.lastDevice
       const token = this.state.wxData.token
       const guid = this.state.wxData.user.id
-
       debug('autologin', this.props)
       this.props.selectedDevice.request('cloudUsers', { stationID, token }, (err, res) => {
         debug('cloudUsers', err, res)
@@ -120,8 +119,9 @@ class WechatLogin extends React.Component {
             ctx: user,
             data: { token, stationID }
           },
-          mdev: { address: 'http://www.siyouqun.org' }
+          mdev: { address: 'http://www.siyouqun.org', domain: 'remote' }
         })
+        debug('this.props.selectedDevice', this.props.selectedDevice)
         return this.done('LOGIN', this.props.selectedDevice, user)
       })
     }
