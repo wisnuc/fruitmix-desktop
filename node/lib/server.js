@@ -38,65 +38,22 @@ export const serverGet = (endpoint, callback) => {
       const e = new Error('http status code not 200')
       e.code = 'EHTTPSTATUS'
       e.status = res.statusCode
-      e.url = url
+      e.url = `${server}/${endpoint}`
       return callback(e)
     }
     try {
       const data = JSON.parse(res.body)
       return callback(null, data)
-    } catch (e) {
+    } catch (error) {
       const e = new Error('json parse error')
-      e.code === 'EJSONPARSE'
+      e.code = 'EJSONPARSE'
+      e.text = error
       return callback(e)
     }
   })
 }
 
 export const serverGetAsync = Promise.promisify(serverGet)
-
-const requestDownload = (url, qs, token, downloadPath, name, callback) => {
-  const opts = { method: 'GET', url }
-  if (qs) opts.qs = qs
-  if (typeof token === 'string') { opts.headers = { Authorization: `JWT ${token}` } } else if (typeof token === 'object' && token !== null) {
-    opts.auth = token
-  }
-
-  const tmpPath = path.join(getTmpPath(), UUID.v4())
-  const dst = path.join(downloadPath, name)
-
-  const stream = fs.createWriteStream(tmpPath)
-  request(opts, (err, res) => {
-    if (err) return callback(err)
-    if (res.statusCode !== 200) {
-      debug(res.body)
-      const e = new Error('http status code not 200')
-      e.code = 'EHTTPSTATUS'
-      e.status = res.statusCode
-      return callback(e)
-    }
-
-    try {
-      fs.renameSync(tmpPath, dst)
-      return callback(null, null)
-    } catch (e) {
-      debug('req GET json parse err')
-      debug(e)
-      const e1 = new Error('json parse error')
-      e1.code = 'EJSONPARSE'
-      return callback(e1)
-    }
-  }).pipe(stream)
-}
-
-export const requestDownloadAsync = Promise.promisify(requestDownload)
-
-export const serverDownloadAsync = (endpoint, qs, downloadPath, name) => {
-  const ip = getIpAddr()
-  const port = 3000
-  const token = getToken()
-  return requestDownloadAsync(`http://${ip}:${port}/${endpoint}`, qs, token, downloadPath, name)
-}
-
 
 /**
 Upload multiple files in one request.post
@@ -182,10 +139,9 @@ download a entire file or part of file
 */
 
 export class DownloadFile {
-  constructor(driveUUID, dirUUID, entryUUID, fileName, size, seek, stream, callback) {
-    this.driveUUID = driveUUID
-    this.dirUUID = dirUUID
-    this.entryUUID = entryUUID
+  constructor(endpoint, qs, fileName, size, seek, stream, callback) {
+    this.endpoint = endpoint
+    this.qs = qs
     this.fileName = fileName
     this.seek = seek || 0
     this.size = size
@@ -198,20 +154,26 @@ export class DownloadFile {
     initArgs()
     const options = {
       method: 'GET',
-      url: this.dirUUID === 'media'
-      ? `${server}/media/${this.entryUUID}`
-      : `${server}/drives/${this.driveUUID}/dirs/${this.dirUUID}/entries/${this.entryUUID}`,
-
+      url: `${server}/${this.endpoint}`,
       headers: {
         Authorization,
         Range: this.size ? `bytes=${this.seek}-` : undefined
       },
-      qs: this.dirUUID === 'media' ? { alt: 'data' } : { name: this.fileName }
+      qs: this.qs
     }
 
     this.handle = request(options)
 
     this.handle.on('error', error => this.finish(error))
+
+    this.handle.on('response', (res) => {
+      if (res.statusCode !== 200) {
+        const e = new Error('http status code not 200')
+        e.code = 'EHTTPSTATUS'
+        e.status = res.statusCode
+        this.finish(e)
+      }
+    })
 
     this.handle.on('end', () => this.finish(null))
 

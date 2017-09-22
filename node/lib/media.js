@@ -1,26 +1,60 @@
 /* import core module */
-import path from 'path'
 import fs from 'fs'
+import path from 'path'
+import UUID from 'node-uuid'
 import { ipcMain } from 'electron'
 import { EventEmitter } from 'events'
-import UUID from 'node-uuid'
-import request from 'request'
 
 /* import file module */
-import { serverDownloadAsync } from './server'
-import { getMainWindow } from './window'
 import store from './store'
+import { DownloadFile } from './server'
+import { getMainWindow } from './window'
 
 /* init */
-const getIpAddr = () => store.getState().login.device.mdev.address
-const getTmpPath = () => store.getState().config.tmpPath
+const getTmpTransPath = () => store.getState().config.tmpTransPath
 
 class Worker extends EventEmitter {
   constructor(id) {
     super()
     this.finished = false
     this.id = id
-    this.state = 'PADDING'
+    this.state = 'PENDDING'
+
+    this.serverDownload = (endpoint, qs, downloadPath, name, callback) => {
+      const tmpPath = path.join(getTmpTransPath(), UUID.v4())
+      const dst = path.join(downloadPath, name)
+
+      const stream = fs.createWriteStream(tmpPath)
+      stream.on('error', (error) => {
+        console.log(error)
+        const e = new Error('write image error')
+        e.text = error
+        this.finished = true
+        this.state = 'FINISHED'
+        return callback(e)
+      })
+
+      stream.on('finish', () => {
+        if (this.finished) return null
+        fs.rename(tmpPath, dst, (error) => {
+          if (error) {
+            console.log(error)
+            const e = new Error('move image error')
+            e.text = error
+            return callback(e)
+          }
+          return callback(null)
+        })
+      })
+
+      this.requestHandler = new DownloadFile(endpoint, qs, name, 0, 0, stream, (error) => {
+        if (error) callback(error)
+        this.requestHandler = null
+      })
+      this.requestHandler.download()
+    }
+
+    this.serverDownloadAsync = Promise.promisify(this.serverDownload)
   }
 
   abort() {
@@ -53,7 +87,7 @@ class Worker extends EventEmitter {
   }
 
   isPadding() {
-    return this.state === 'PADDING'
+    return this.state === 'PENDDING'
   }
 
   isFinished() {
@@ -63,61 +97,6 @@ class Worker extends EventEmitter {
   run() {}
 
   cleanup() {}
-
-  requestDownload(url, qs, token, downloadPath, name, callback) {
-    const opts = { method: 'GET', url }
-    if (qs) opts.qs = qs
-    if (typeof token === 'string') { opts.headers = { Authorization: `JWT ${token}` } } else if (typeof token === 'object' && token !== null) {
-      opts.auth = token
-    }
-
-    // TODO TMP file and rename JACK
-
-    const tmpPath = path.join(getTmpPath(), UUID.v4())
-    const dst = path.join(downloadPath, name)
-    const stream = fs.createWriteStream(path.join(tmpPath))
-    this.requestHandler = request(opts)
-      .on('error', err => callback(err))
-      .on('response', (res) => {
-        if (res.statusCode !== 200) {
-          console.log(res.body)
-          const e = new Error('http status code not 200')
-          e.code = 'EHTTPSTATUS'
-          e.status = res.statusCode
-          return callback(e)
-        }
-      })
-    this.requestHandler.pipe(stream)
-      .on('error', (error) => {
-        console.log(error)
-        const e1 = new Error('write image error')
-        e1.text = err
-        this.finished = true
-        this.state = 'FINISHED'
-        return callback(e1)
-      })
-      .on('finish', () => {
-        if (this.finished) return null
-        fs.rename(tmpPath, dst, (err) => {
-          if (err) {
-            console.log(err)
-            const e1 = new Error('move image error')
-            e1.text = err
-            return callback(e1)
-          }
-          return callback(null, null)
-        })
-      }
-    )
-  }
-
-  serverDownloadAsync(endpoint, qs, downloadPath, name) {
-    const requestDownloadAsync = Promise.promisify(this.requestDownload.bind(this))
-    const ip = getIpAddr()
-    const port = 3000
-    const token = store.getState().login.device.token.data.token
-    return requestDownloadAsync(`http://${ip}:${port}/${endpoint}`, qs, token, downloadPath, name)
-  }
 }
 
 class GetThumbTask extends Worker {
@@ -177,7 +156,7 @@ class GetImageTask extends Worker {
 
   request() {
     const qs = { alt: 'data' }
-    serverDownloadAsync(`media/${this.digest}`, qs, this.dirpath, this.digest)
+    this.serverDownloadAsync(`media/${this.digest}`, qs, this.dirpath, this.digest)
     .then((data) => {
       this.finish(path.join(this.dirpath, this.digest))
     })
