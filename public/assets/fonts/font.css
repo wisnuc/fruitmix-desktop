@@ -3,37 +3,37 @@
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 100;
-  src: url('Roboto-Thin.ttf') format('ttf');
+  src: url('Roboto-Thin.ttf') format('truetype');
 }
 @font-face {
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 300;
-  src: url('Roboto-Light.ttf') format('ttf');
+  src: url('Roboto-Light.ttf') format('truetype');
 }
 @font-face {
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 400;
-  src: url('Roboto-Regular.ttf') format('ttf');
+  src: url('Roboto-Regular.ttf') format('truetype');
 }
 @font-face {
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 500;
-  src: url('Roboto-Medium.ttf') format('ttf');
+  src: url('Roboto-Medium.ttf') format('truetype');
 }
 @font-face {
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 700;
-  src: url('Roboto-Bold.ttf') format('ttf');
+  src: url('Roboto-Bold.ttf') format('truetype');
 }
 @font-face {
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 900;
-  src: url('Roboto-Black.ttf') format('ttf');
+  src: url('Roboto-Black.ttf') format('truetype');
 }
 
 /* Noto */
