@@ -225,10 +225,10 @@ class Login extends StateUp(React.Component) {
     const currProps = this.props
 
     // device card enter from bottom
-    if (!currProps.selectedDevice && nextProps.selectedDevice) { this.setState({ enter: 'bottom' }) }
+    if (!currProps.selectedDevice.mdev.address && nextProps.selectedDevice.mdev.address) this.setState({ enter: 'bottom' })
 
     // device card leave from top
-    else if (currProps.selectedDevice && !nextProps.selectedDevice) { this.setState({ enter: 'top' }) }
+    else if (currProps.selectedDevice.mdev.address && !nextProps.selectedDevice.mdev.address) this.setState({ enter: 'top' })
 
     // device card change
     else if (currProps.selectedDevice && nextProps.selectedDevice) {
@@ -477,12 +477,13 @@ class Login extends StateUp(React.Component) {
 
   render() {
     const { mdns, selectedDevice } = this.props
+    debug('Local Login render', this.props)
 
     let cardProps
     let displayProps
     let cardInnerStyle
 
-    if (selectedDevice === null) {
+    if (selectedDevice === null || (selectedDevice && !selectedDevice.mdev.address)) {
       cardProps = {
         key: 'info-card',
         text: '正在搜索网络上的WISNUC OS设备'
@@ -494,8 +495,8 @@ class Login extends StateUp(React.Component) {
         device: selectedDevice.mdev,
         ws215i: selectedDevice.device && selectedDevice.device.data && !!selectedDevice.device.data.ws215i,
         backgroundColor: '#FAFAFA',
-        onNavPrev: (!selectedDevice || this.isFirst()) ? null : this.navPrevBound,
-        onNavNext: (!selectedDevice || this.isLast()) ? null : this.navNextBound
+        onNavPrev: (!selectedDevice || (selectedDevice && !selectedDevice.mdev.address) || this.isFirst()) ? null : this.navPrevBound,
+        onNavNext: (!selectedDevice || (selectedDevice && !selectedDevice.mdev.address) || this.isLast()) ? null : this.navNextBound
       }
 
       cardInnerStyle = {
@@ -519,7 +520,7 @@ class Login extends StateUp(React.Component) {
                 {
                   (this.state.bye || this.state.hello)
                   ? <DeviceCard />
-                  : selectedDevice === null
+                  : selectedDevice === null || (selectedDevice && !selectedDevice.mdev.address)
                   ? <DeviceCard {...cardProps}>
                     <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>
                       <div style={{ height: 72, backgroundColor: '#FAFAFA', display: 'flex', alignItems: 'center' }} >

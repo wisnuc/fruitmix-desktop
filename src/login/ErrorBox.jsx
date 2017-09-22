@@ -4,14 +4,6 @@ import { IconButton, Dialog, RaisedButton } from 'material-ui'
 import AlertError from 'material-ui/svg-icons/alert/error'
 
 class ErrorBox extends React.PureComponent {
-
-  /*
-  propTypes:{
-    text: React.PropTypes.string.isRequired,
-    error: React.PropTypes.string.isRequired,
-  }
-  */
-
   constructor(props) {
     super(props)
     this.state = { open: false }

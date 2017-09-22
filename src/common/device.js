@@ -56,7 +56,7 @@ class Device extends RequestManager {
     this.reqCloud = (type, ep, stationID, token) => {
       const url = `${cloudAddress}/c/v1/stations/${stationID}/json`
       const resource = new Buffer(`/${ep}`).toString('base64')
-      console.log('this.reqCloud device', url, resource, type, stationID, token)
+      console.log('this.reqCloud device', type, ep)
       return request
         .get(url)
         .query({ resource, method: type })
