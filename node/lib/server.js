@@ -281,7 +281,7 @@ export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, ca
           const entries = listNav.entries
           const index = entries.findIndex(e => e.name === dirname)
           if (index > -1) {
-            const nameSpace = [...entries.map(e => e.name), localEntries.map(e => e.replace(/^.*\//, ''))]
+            const nameSpace = [...entries.map(e => e.name), localEntries.map(e => path.parse(e).base)]
             const mode = policy.mode === 'overwrite' ? 'replace' : 'rename'
             const checkedName = policy.mode === 'overwrite' ? dirname : getName(dirname, nameSpace)
             const remoteUUID = entries[index].uuid
