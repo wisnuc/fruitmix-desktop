@@ -121,12 +121,16 @@ class NavDrawer extends React.Component {
 
     const primaryColor = views[nav].primaryColor()
 
-
     let ws215i = false
     const device = views.account.ctx.props.selectedDevice.device
     if (device && device.data && device.data.ws215i) {
       ws215i = true
     }
+
+    /* avatar */
+    let avatarUrl = null
+    const index = global.config.users.findIndex(uc => uc && value && uc.userUUID === value.uuid && uc.weChat)
+    if (index > -1) avatarUrl = global.config.users[index].weChat.avatarUrl
 
     return (
 
@@ -135,6 +139,12 @@ class NavDrawer extends React.Component {
         <div style={{ position: 'relative', width: '100%', backgroundColor: primaryColor }} >
           <div style={{ height: 96, width: '100%', display: 'flex', alignItems: 'center' }} >
             {/* set background of icon */}
+            { avatarUrl ? <div
+              style={{ borderRadius: 28, width: 56, height: 56, overflow: 'hidden', marginLeft: 23, cursor: 'pointer' }}
+              onTouchTap={() => navTo('account')}
+            >
+              <img width={56} height={56} alt="" src={avatarUrl} />
+            </div> :
             <IconButton
               iconStyle={{ width: 67, height: 67, color: 'white' }}
               style={{ width: 105, height: 105, padding: 19 }}
@@ -142,10 +152,11 @@ class NavDrawer extends React.Component {
             >
               <ActionAccountCircle />
             </IconButton>
+            }
           </div>
 
           <div style={{ height: 40, marginLeft: 24, marginTop: -8 }}>
-            <div style={{ fontSize: 20, fontWeight: 500, color: '#FFF' }}>{ username }</div>
+            <div style={{ fontSize: 16, fontWeight: 500, color: '#FFF' }}>{ username }</div>
           </div>
         </div>
 

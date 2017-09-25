@@ -3,13 +3,24 @@ import nedb from 'nedb'
 import { app } from 'electron'
 import { combineReducers, createStore } from 'redux'
 
-/* reducer: config */
+/* reducer: global config */
 const config = (state = {}, action) => {
   switch (action.type) {
     case 'CONFIG_INIT':
       return action.data
 
     case 'CONFIG_UPDATE':
+      return action.data
+
+    default:
+      return state
+  }
+}
+
+/* reducer: user config */
+const userConfig = (state = {}, action) => {
+  switch (action.type) {
+    case 'USER_CONFIG_UPDATE':
       return action.data
 
     default:
@@ -43,7 +54,7 @@ const login = (state = defaultState, action) => {
   }
 }
 
-const store = createStore(combineReducers({ config, login }))
+const store = createStore(combineReducers({ config, userConfig, login }))
 
 global.dispatch = action => store.dispatch(action)
 

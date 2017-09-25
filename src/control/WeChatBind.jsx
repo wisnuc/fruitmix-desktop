@@ -18,7 +18,7 @@ class WeChatBind extends React.Component {
     super(props)
     this.state = {
       status: '',
-      error: '',
+      error: ''
     }
 
     /* bind wechat */
@@ -80,7 +80,6 @@ class WeChatBind extends React.Component {
     this.getWXCode = (code) => {
       /* init wx_code */
       this.wxiframe.contentWindow.wx_code = null
-      // this.props.apis.request('wxBind', { ticketId: this.ticket, code, platform: 'web' }, (error, data) => {
       this.setState({ status: 'connectingCloud' })
       this.props.apis.request('getWechatToken', { code, platform: 'web' }, (error, res) => {
         if (error) {
@@ -108,7 +107,7 @@ class WeChatBind extends React.Component {
           } else {
             debug('this.bindWechat success', data)
             this.ticketId = data.id
-            setTimeout(this.initWXLogin, 1000)
+            this.initWXLogin()
           }
         })
       })
@@ -116,11 +115,15 @@ class WeChatBind extends React.Component {
 
     this.confirm = () => {
       debug('this.confirm', this.ticketId, this.guid)
+      this.setState({ status: 'connectingCloud' })
       this.props.apis.request('confirmTicket', { ticketId: this.ticketId, guid: this.guid, state: true }, (e) => {
         if (e) {
           debug('confirmTicket error', e)
           this.setState({ error: 'confirmTicket', status: '' })
         } else {
+          debug('this.confirm this.userInfo', this.userInfo, this.props.account, this.props)
+
+          this.props.ipcRenderer.send('WECHAT_LOGIN', this.props.account.uuid, { weChat: this.userInfo })
           setTimeout(() => this.setState({ status: 'success', error: '' }), 500)
         }
       })
@@ -153,16 +156,13 @@ class WeChatBind extends React.Component {
         text = '无法连接到互联网，请检查您的网络设置！'
         break
       case 'wxBind':
-        text = '绑定失败，wxBind error'
-        break
-      case 'getTicket':
-        text = '绑定失败，getTicket error'
+        text = '绑定失败，无法获取微信授权'
         break
       case 'confirmTicket':
-        text = '绑定失败，confirmTicket error'
+        text = '绑定失败，无法确认绑定信息'
         break
       case 'creatTicket':
-        text = '绑定失败，creatTicket error'
+        text = '绑定失败，无法创建绑定动作'
         break
       default:
         text = ''
