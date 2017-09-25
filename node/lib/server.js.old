@@ -2,8 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import Debug from 'debug'
 import UUID from 'node-uuid'
-import request from 'superagent'
-import { ipcMain } from 'electron'
+import request from 'request'
 import store from './store'
 
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
@@ -13,69 +12,44 @@ const getTmpPath = () => store.getState().config.tmpPath
 const getTmpTransPath = () => store.getState().config.tmpTransPath
 
 /* init request */
-let stationID = null
-let address = null
-let token = null
-
-ipcMain.on('LOGIN', (event, device, user) => {
-  address = device.mdev.address
-  token = device.token.data.token
-  stationID = device.token.data.stationID
-  debug('Got device, address, token, stationID: ', address, stationID)
-})
-
-const reqCloud = (ep, data, type) => {
-  const url = `${address}/c/v1/stations/${stationID}/json`
-  const url2 = `${address}/c/v1/stations/${stationID}/pipe`
-  const resource = new Buffer(`/${ep}`).toString('base64')
-  debug('reqCloud', type, ep)
-  if (type === 'GET') return request.get(url).set('Authorization', token).query({ resource, method: type })
-  if (type === 'DOWNLOAD') return request.get(url2).set('Authorization', token).query({ resource, method: 'GET' })
-  return request.post(url).set('Authorization', token).send(Object.assign({ resource, method: type }, data))
-}
-
-const aget = (ep) => {
-  if (stationID) return reqCloud(ep, null, 'GET')
-  return request
-    .get(`http://${address}:3000/${ep}`)
-    .set('Authorization', `JWT ${token}`)
-}
-
-const adownload = (ep) => {
-  if (stationID) return reqCloud(ep, null, 'DOWNLOAD')
-  return request
-    .get(`http://${address}:3000/${ep}`)
-    .set('Authorization', `JWT ${token}`)
-}
-
-const apost = (ep, data) => {
-  if (stationID) return reqCloud(ep, data, 'POST')
-  const r = request
-    .post(`http://${address}:3000/${ep}`)
-    .set('Authorization', `JWT ${token}`)
-
-  return typeof data === 'object'
-    ? r.send(data)
-    : r
+let server
+let Authorization
+const initArgs = () => {
+  const { token, mdev } = store.getState().login.device
+  debug('initArgs token, medv', token, mdev)
+  if (mdev.domain === 'local') server = `http://${mdev.address}:3000`
+  else server = mdev.address
+  Authorization = token.data.type ? `${token.data.type} ${token.data.token}` : token.data.token
 }
 
 /**
 get json data from server
-@param {string} endpoint
-@param {function} callback
+
+@param {string} string
+@param {Object} qs
 */
 
 export const serverGet = (endpoint, callback) => {
-  aget(endpoint).end((err, res) => {
+  initArgs()
+  const options = { method: 'GET', headers: { Authorization }, url: `${server}/${endpoint}` }
+  request.get(options, (err, res) => {
     if (err) return callback(err)
-    if (res.statusCode !== 200 && res.statusCode !== 206) {
+    if (res.statusCode !== 200) {
       const e = new Error('http status code not 200')
       e.code = 'EHTTPSTATUS'
       e.status = res.statusCode
+      e.url = `${server}/${endpoint}`
       return callback(e)
     }
-    const data = res.body
-    return callback(null, data)
+    try {
+      const data = JSON.parse(res.body)
+      return callback(null, data)
+    } catch (error) {
+      const e = new Error('json parse error')
+      e.code = 'EJSONPARSE'
+      e.text = error
+      return callback(e)
+    }
   })
 }
 
@@ -108,8 +82,18 @@ export class UploadMultipleFiles {
   }
 
   upload() {
-    this.handle = apost(`drives/${this.driveUUID}/dirs/${this.dirUUID}/entries`)
-    
+    initArgs()
+
+    const op = { url: `${server}/drives/${this.driveUUID}/dirs/${this.dirUUID}/entries`, headers: { Authorization } }
+
+    this.handle = request.post(op, (err, res) => {
+      if (err) this.finish(err)
+      else if (res && res.statusCode === 200) this.finish(null)
+      else this.finish(JSON.parse(res.body))
+    })
+
+    const form = this.handle.form()
+
     this.Files.forEach((file) => {
       const { name, parts, readStreams, policy } = file
       for (let i = 0; i < parts.length; i++) {
@@ -122,26 +106,16 @@ export class UploadMultipleFiles {
         if (part.start) {
           formDataOptions = Object.assign(formDataOptions, { append: part.fingerprint })
         } else if (policy && policy.mode === 'replace') {
-          this.handle.attach(name, JSON.stringify({ op: 'remove', uuid: policy.remoteUUID }))
+          form.append(name, JSON.stringify({ op: 'remove', uuid: policy.remoteUUID }))
+          // Object.assign(formDataOptions, { overwrite: policy.remoteUUID })
         }
-        this.handle.attach(name, rs, JSON.stringify(formDataOptions))
+        form.append(name, rs, JSON.stringify(formDataOptions))
       }
-    })
-
-    this.handle.end((err, res) => {
-      if (err) this.finish(err)
-      else if (res && res.statusCode === 200) this.finish(null)
-      else this.finish(res.body)
     })
   }
 
   finish(error) {
     if (this.finished) return
-    if (error) {
-      error.code = error.status === 500 ? 'ESERVER' : 'EOTHER'
-      error.response = null
-    }
-    debug('upload finish, error:', error)
     this.finished = true
     this.callback(error)
   }
@@ -177,20 +151,32 @@ export class DownloadFile {
   }
 
   download() {
-    this.handle = adownload(this.endpoint)
-    if (this.size) this.handle.set('Range', `bytes=${this.seek}-`)
-    this.handle
-      .query(this.qs)
-      .on('error', error => this.finish(error))
-      .on('response', (res) => {
-        if (res.status !== 200 && res.status !== 206) {
-          const e = new Error('http status code not 200')
-          e.code = 'EHTTPSTATUS'
-          e.status = res.status
-          this.finish(e)
-        }
-        res.on('end', () => this.finish(null))
-      })
+    initArgs()
+    const options = {
+      method: 'GET',
+      url: `${server}/${this.endpoint}`,
+      headers: {
+        Authorization,
+        Range: this.size ? `bytes=${this.seek}-` : undefined
+      },
+      qs: this.qs
+    }
+
+    this.handle = request(options)
+
+    this.handle.on('error', error => this.finish(error))
+
+    this.handle.on('response', (res) => {
+      if (res.statusCode !== 200 || res.statusCode !== 206) {
+        const e = new Error('http status code not 200')
+        e.code = 'EHTTPSTATUS'
+        e.status = res.statusCode
+        this.finish(e)
+      }
+    })
+
+    this.handle.on('end', () => this.finish(null))
+
     this.handle.pipe(this.stream)
   }
 
@@ -237,20 +223,19 @@ createFold
 */
 
 export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, callback) => {
+  initArgs()
+
   const parents = true // mkdirp
 
-  const handle = apost(`drives/${driveUUID}/dirs/${dirUUID}/entries`)
+  const op = { url: `${server}/drives/${driveUUID}/dirs/${dirUUID}/entries`, headers: { Authorization } }
 
-  if (policy && policy.mode === 'replace') handle.field(dirname, JSON.stringify({ op: 'remove', uuid: policy.remoteUUID }))
-  handle.field(dirname, JSON.stringify({ op: 'mkdir', parents }))
-
-  handle.end((error, res) => {
+  const handle = request.post(op, (error, res) => {
     if (error) {
       debug('createFold error', error, res)
       callback(error)
     } else if (res && res.statusCode === 200) {
       /* callback the created dir entry */
-      callback(null, res.body.entries.find(e => e.name === dirname))
+      callback(null, JSON.parse(res.body).entries.find(e => e.name === dirname))
     } else if (res && res.statusCode === 403 && (policy.mode === 'overwrite' || policy.mode === 'merge')) {
       /* when a file with the same name in remote, retry if given policy of overwrite or merge */
       serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
@@ -264,11 +249,15 @@ export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, ca
             const remoteUUID = entries[index].uuid
             debug('retry createFold', dirname, mode, checkedName, remoteUUID)
             createFold(driveUUID, dirUUID, checkedName, localEntries, { mode, checkedName, remoteUUID }, callback)
-          } else callback(res.body)
+          } else callback(JSON.parse(res.body))
         })
         .catch(e => callback(e))
-    } else callback(res.body) // response code not 200 and no policy
+    } else callback(JSON.parse(res.body)) // response code not 200 and no policy
   })
+
+  const form = handle.form()
+  if (policy && policy.mode === 'replace') form.append(dirname, JSON.stringify({ op: 'remove', uuid: policy.remoteUUID }))
+  form.append(dirname, JSON.stringify({ op: 'mkdir', parents }))
 }
 
 export const createFoldAsync = Promise.promisify(createFold)
@@ -285,11 +274,20 @@ download tmp File
 */
 
 export const downloadFile = (driveUUID, dirUUID, entryUUID, fileName, downloadPath, callback) => {
+  initArgs()
   const filePath = downloadPath ? path.join(downloadPath, fileName) : path.join(getTmpPath(), `${entryUUID}AND${fileName}`)
   fs.access(filePath, (error) => {
     if (error) {
       debug('no cache download file', fileName)
       const tmpPath = path.join(getTmpTransPath(), UUID.v4())
+      const options = {
+        method: 'GET',
+        url: dirUUID === 'media' ? `${server}/media/${entryUUID}`
+        : `${server}/drives/${driveUUID}/dirs/${dirUUID}/entries/${entryUUID}`,
+        headers: { Authorization },
+        qs: { name: fileName }
+      }
+
       const stream = fs.createWriteStream(tmpPath)
       stream.on('error', err => callback(err))
       stream.on('finish', () => {
@@ -298,10 +296,7 @@ export const downloadFile = (driveUUID, dirUUID, entryUUID, fileName, downloadPa
           return callback(null, filePath)
         })
       })
-
-      const handle = adownload(dirUUID === 'media' ? `media/${entryUUID}` : `drives/${driveUUID}/dirs/${dirUUID}/entries/${entryUUID}`)
-        .query({ name: fileName })
-        .on('error', err => callback(err))
+      const handle = request(options).on('error', err => callback(err))
       handle.pipe(stream)
     } else callback(null, filePath)
   })
