@@ -8,8 +8,6 @@ import store from './store'
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
 
 const debug = Debug('node:lib:server')
-const getIpAddr = () => store.getState().login.device.mdev.address
-const getToken = () => store.getState().login.device.token.data.token
 const getTmpPath = () => store.getState().config.tmpPath
 const getTmpTransPath = () => store.getState().config.tmpTransPath
 
@@ -17,9 +15,11 @@ const getTmpTransPath = () => store.getState().config.tmpTransPath
 let server
 let Authorization
 const initArgs = () => {
-  server = `http://${store.getState().login.device.mdev.address}:3000`
-  const tokenObj = store.getState().login.device.token.data
-  Authorization = tokenObj.type ? `${tokenObj.type} ${tokenObj.token}` : tokenObj.token
+  const { token, mdev } = store.getState().login.device
+  debug('initArgs token, medv', token, mdev)
+  if (mdev.domain === 'local') server = `http://${mdev.address}:3000`
+  else server = mdev.address
+  Authorization = token.data.type ? `${token.data.type} ${token.data.token}` : token.data.token
 }
 
 /**
@@ -167,7 +167,7 @@ export class DownloadFile {
     this.handle.on('error', error => this.finish(error))
 
     this.handle.on('response', (res) => {
-      if (res.statusCode !== 200) {
+      if (res.statusCode !== 200 || res.statusCode !== 206) {
         const e = new Error('http status code not 200')
         e.code = 'EHTTPSTATUS'
         e.status = res.statusCode
@@ -279,7 +279,7 @@ export const downloadFile = (driveUUID, dirUUID, entryUUID, fileName, downloadPa
   fs.access(filePath, (error) => {
     if (error) {
       debug('no cache download file', fileName)
-      const tmpPath = path.join(getTmpTransPath(), entryUUID)
+      const tmpPath = path.join(getTmpTransPath(), UUID.v4())
       const options = {
         method: 'GET',
         url: dirUUID === 'media' ? `${server}/media/${entryUUID}`
