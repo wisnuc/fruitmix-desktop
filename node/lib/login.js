@@ -11,3 +11,7 @@ ipcMain.on('LOGIN', (event, device, user) => {
 ipcMain.on('LOGOUT', () => {
   global.dispatch({ type: 'LOGOUT' })
 })
+
+ipcMain.on('WECHAT_LOGIN', (event, userUUID, data) => {
+  global.configuration.updateUserConfigAsync(userUUID, data).catch(e => console.log(e))
+})

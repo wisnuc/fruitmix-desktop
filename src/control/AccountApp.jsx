@@ -36,8 +36,17 @@ class AccountApp extends React.Component {
 
   render() {
     const { account, primaryColor, apis, refresh, openSnackBar } = this.props
-    debug('account', account)
     if (!account) return <div />
+    debug('this.props account', this.props, global.config.users)
+
+    let avatarUrl = null
+    let nickName = ''
+    const index = global.config.users.findIndex(uc => uc && uc.userUUID === account.uuid && uc.weChat)
+    if (index > -1) {
+      const weChatInfo = global.config.users[index].weChat
+      avatarUrl = weChatInfo.avatarUrl
+      nickName = weChatInfo.nickName
+    }
 
     const tooltipUserName = (
       <div
@@ -60,12 +69,14 @@ class AccountApp extends React.Component {
     )
 
     return (
-      <div style={{ paddingLeft: 68, paddingTop: 16 }}>
+      <div style={{ paddingLeft: 68, paddingTop: 24 }}>
 
         {/* avatar */}
         <div style={{ height: 67, marginLeft: -4 }} >
           {
-            account.avatar ? <div /> :
+            avatarUrl ? <div style={{ borderRadius: 28, width: 56, height: 56, overflow: 'hidden', marginLeft: 4 }}>
+              <img width={56} height={56} alt="" src={avatarUrl} />
+            </div> :
             <IconButton
               iconStyle={{ width: 67, height: 67, color: primaryColor }}
               style={{ width: 67, height: 67, padding: 0 }}
@@ -76,14 +87,12 @@ class AccountApp extends React.Component {
           }
         </div>
 
-        <div style={{ height: 4 }} />
-
         {/* username */}
-        <div style={{ flex: '0 0 560px', fontSize: 24, height: 24, display: 'flex', alignItems: 'center' }}>
+        <div style={{ flex: '0 0 560px', fontSize: 16, height: 24, display: 'flex', alignItems: 'center', marginTop: -4 }}>
           { account.username }
         </div>
 
-        <div style={{ height: 8 }} />
+        <div style={{ height: 24 }} />
 
         {/* usertype */}
         <div style={{ flex: '0 0 560px' }}>
@@ -96,7 +105,7 @@ class AccountApp extends React.Component {
             {
               account.global && account.global.wx ?
                 <div style={{ display: 'flex', alignItems: 'center', height: 26 }}>
-                  { `您已绑定了您的微信，ID: test，微信昵称: 牛牛牛` }
+                  { `您已绑定了您的微信，微信昵称: ${nickName}` }
                 </div>
                 :
                 <div style={{ display: 'flex', alignItems: 'center', height: 26 }}>

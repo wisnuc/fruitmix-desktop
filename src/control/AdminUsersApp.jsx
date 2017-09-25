@@ -8,6 +8,7 @@ import DialogOverlay from '../common/DialogOverlay'
 import ChangeAccountDialog from './ChangeAccountDialog'
 import FlatButton from '../common/FlatButton'
 import IconBox from '../common/IconBox'
+import slice from '../common/slice'
 
 const debug = Debug('component:control:AdminUsers: ')
 
@@ -90,6 +91,16 @@ class AdminUsersApp extends React.Component {
   }
 
   renderUserRow(user) {
+    let avatarUrl = null
+    let nickName = ''
+    const index = global.config.users.findIndex(uc => uc && uc.userUUID === user.uuid && uc.weChat)
+    if (index > -1) {
+      const weChatInfo = global.config.users[index].weChat
+      avatarUrl = weChatInfo.avatarUrl
+      nickName = weChatInfo.nickName
+    }
+    debug('renderUserRow user', user)
+
     return (
       <div
         style={{
@@ -103,14 +114,19 @@ class AdminUsersApp extends React.Component {
       >
         <div style={{ flex: '0 0 32px' }} />
         <div style={{ flex: '0 0 40px' }}>
-          <Avatar>{ user.username.slice(0, 1).toUpperCase() }</Avatar>
+          {
+            avatarUrl ?
+            <div style={{ borderRadius: 20, width: 40, height: 40, overflow: 'hidden' }}>
+              <img width={40} height={40} alt="" src={avatarUrl} />
+            </div> :
+            <Avatar>{ slice(user.username, 0, 2).toUpperCase() }</Avatar>
+          }
         </div>
         <div style={{ flex: '0 0 32px' }} />
         <div style={{ flex: '0 0 320px' }}>{ user.username }</div>
-        <div style={{ flex: '0 0 141px' }}>{ user.isAdmin ? '管理员' : '普通用户' }</div>
-        <div style={{ flex: '0 0 96px' }}>{ user.gloabl && user.global.wx ? '是' : '否' }</div>
-        <div style={{ flex: '0 0 150px', textAlign: 'right' }}>{ 0 ? '' : '-' }</div>
-        <div style={{ flex: '0 0 178px', textAlign: 'right' }}>{ 0 ? '' : '-' }</div>
+        <div style={{ flex: '0 0 140px' }}>{ user.isFirstUser ? '超级管理员' : user.isAdmin ? '管理员' : '普通用户' }</div>
+        <div style={{ flex: '0 0 112px' }}>{ user.global && user.global.wx ? '是' : '否' }</div>
+        <div style={{ flex: '0 0 256px' }}>{ nickName || '-' }</div>
         <div style={{ flex: '0 0 56px' }} />
         <div style={{ flex: '0 0 56px' }} />
         {/*
@@ -185,16 +201,13 @@ class AdminUsersApp extends React.Component {
             <div style={{ flex: '0 0 320px' }}>
               设备登录用户名
             </div>
-            <div style={{ flex: '0 0 141px' }}>
+            <div style={{ flex: '0 0 140px' }}>
               设备使用权限
             </div>
-            <div style={{ flex: '0 0 96px' }}>
+            <div style={{ flex: '0 0 112px' }}>
               绑定微信
             </div>
-            <div style={{ flex: '0 0 150px', textAlign: 'right' }}>
-              微信ID
-            </div>
-            <div style={{ flex: '0 0 178px', textAlign: 'right' }}>
+            <div style={{ flex: '0 0 256px' }}>
               微信昵称
             </div>
           </div>

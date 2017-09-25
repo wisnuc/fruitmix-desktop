@@ -2,6 +2,7 @@ import React, { Component, PureComponent } from 'react'
 import Radium from 'radium'
 import ActionAccountBox from 'material-ui/svg-icons/action/account-box'
 import Debug from 'debug'
+import { ipcRenderer } from 'electron'
 import Base from './Base'
 import AccountApp from '../control/AccountApp.jsx'
 
@@ -66,6 +67,7 @@ class Account extends Base {
         apis={this.ctx.props.apis}
         primaryColor={this.groupPrimaryColor()}
         refresh={this.refreshData}
+        ipcRenderer={ipcRenderer}
       />
     )
   }

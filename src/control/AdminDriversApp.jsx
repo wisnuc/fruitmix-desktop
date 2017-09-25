@@ -91,7 +91,11 @@ class DriveRow extends React.PureComponent {
             textOverflow: 'ellipsis'
           }}
         >
-          { drive.writelist.map(uuid => users.find(u => u.uuid === uuid).username).join(', ') }
+          {
+            drive.writelist
+              .filter(uuid => users.find(u => u.uuid === uuid))
+              .map(uuid => users.find(u => u.uuid === uuid).username).join(', ')
+          }
         </div>
         <div style={{ flexGrow: 1 }} />
       </div>

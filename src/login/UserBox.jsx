@@ -30,14 +30,11 @@ const styles = {
 const RadiumAvatar = Radium(Avatar)
 
 class NamedAvatar extends React.Component {
-
-  constructor(props) {
-    super(props)
-  }
-
   render() {
-    const { style, name, selected, onTouchTap } = this.props
-
+    const { style, name, selected, onTouchTap, uuid } = this.props
+    let avatarUrl = null
+    const index = global.config.users.findIndex(uc => uc && uc.userUUID === uuid && uc.weChat)
+    if (index > -1) avatarUrl = global.config.users[index].weChat.avatarUrl
     return (
       <div style={style}>
         <div style={styles.flexCenter}>
@@ -50,13 +47,20 @@ class NamedAvatar extends React.Component {
               ':hover': {
                 color: '#FFF',
                 backgroundColor: selected ? cyan300 : grey500
-              }
+              },
+              cursor: 'pointer'
             }}
             size={36}
             onTouchTap={onTouchTap}
           >
             <div style={{ lineHeight: '24px', fontSize: 14 }}>
-              {name.slice(0, 2).toUpperCase()}
+              {
+                avatarUrl ?
+                <div style={{ borderRadius: 18, width: 36, height: 36, overflow: 'hidden' }}>
+                  <img width={36} height={36} alt="" src={avatarUrl} />
+                </div> :
+                name.slice(0, 2).toUpperCase()
+              }
             </div>
           </RadiumAvatar>
         </div>
@@ -111,6 +115,7 @@ class UserBox extends React.Component {
                 key={user.uuid}
                 style={{ margin: users.length > 21 ? 6 : 7 }}
                 name={user.username}
+                uuid={user.uuid}
                 selected={index === this.state.selectedIndex}
                 onTouchTap={this.selectUser.bind(this, index)}
               />)}
