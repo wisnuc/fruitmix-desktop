@@ -77,7 +77,8 @@ class Task {
         const read = async (entries, dirUUID, driveUUID, policies, task) => {
           const files = []
           for (let i = 0; i < entries.length; i++) {
-            if (task.paused) throw Error('task paused !')
+            // if (task.paused) throw Error('task paused !')
+            if (task.paused) break
             const entry = entries[i]
             const policy = policies[i]
             const stat = await fs.lstatAsync(path.resolve(entry))
@@ -216,7 +217,8 @@ class Task {
               l.policy = Object.assign({}, { mode, checkedName, remoteUUID }) // important: assign a new object !
             })
           }
-          if (!result.length && task.finishCount === task.count && this.readDir.isSelfStopped() && this.hash.isSelfStopped()) {
+          if (!task.paused && !result.length && task.finishCount === task.count &&
+            this.readDir.isSelfStopped() && this.hash.isSelfStopped()) {
             task.finishDate = (new Date()).getTime()
             task.state = 'finished'
             clearInterval(task.countSpeed)
@@ -288,7 +290,11 @@ class Task {
           callback(error, { driveUUID, dirUUID, Files, task })
         })
         task.reqHandles.push(handle)
+        try {
         handle.upload()
+        } catch (e) {
+          debug('handle.upload error', e)
+        }
       }
     })
 
@@ -298,7 +304,7 @@ class Task {
       const { dirUUID, task } = x
       getMainWindow().webContents.send('driveListUpdate', { uuid: dirUUID })
       // debug('this.readDir.on data', task.finishCount, task.count, this.readDir.isStopped())
-      if (task.finishCount === task.count && this.readDir.isStopped() && !task.errors.length) {
+      if (!task.paused && task.finishCount === task.count && this.readDir.isStopped() && !task.errors.length) {
         task.finishDate = (new Date()).getTime()
         task.state = 'finished'
         task.compactStore()

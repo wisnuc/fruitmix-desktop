@@ -23,8 +23,12 @@ const convert = (code) => {
       return '连接已断开'
     case 'ENOENT':
       return '文件不可读'
+    case 'ESERVER':
+      return '服务器内部错误'
+    case 'EOHTER':
+      return '请求失败'
     default:
-      return code
+      return code || '未知错误'
   }
 }
 

@@ -41,5 +41,5 @@ app.on('window-all-closed', () => app.quit())
 
 /* handle uncaught Exception */
 process.on('uncaughtException', (err) => {
-  console.log(`!!!!!!\nuncaughtException:\n${err.stack}\n------`)
+  console.log(`!!!!!!\nuncaughtException:\n${err}\n------`)
 })
