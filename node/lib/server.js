@@ -131,6 +131,10 @@ export class UploadMultipleFiles {
         }
       }
     })
+    this.handle.on('error', (err) => {
+      debug('this.handle.on error', err)
+      this.finish(err)
+    })
 
     this.handle.end((err, res) => {
       if (err) this.finish(err)
@@ -142,8 +146,8 @@ export class UploadMultipleFiles {
   finish(error) {
     if (this.finished) return
     if (error) {
-      debug('upload finish, error:', error)
-      error.code = error.status >= 500 ? 'ESERVER' : 'EOTHER'
+      debug('upload finish, error:', error, error.code)
+      error.code = error.code || (error.status >= 500 ? 'ESERVER' : 'EOTHER')
       error.response = null
     }
     this.finished = true
@@ -209,7 +213,7 @@ export class DownloadFile {
     if (this.finished) return
     if (error) {
       debug('download finish, error:', error)
-      error.code = error.status >= 500 ? 'ESERVER' : 'EOTHER'
+      error.code = error.code || (error.status >= 500 ? 'ESERVER' : 'EOTHER')
       error.response = null
     }
     this.callback(error)
