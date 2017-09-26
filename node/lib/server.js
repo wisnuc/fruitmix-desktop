@@ -67,7 +67,7 @@ get json data from server
 
 export const serverGet = (endpoint, callback) => {
   aget(endpoint).end((err, res) => {
-    if (err) return callback(err)
+    if (err) return callback(Object.assign({}, err, { response: null }))
     if (res.statusCode !== 200 && res.statusCode !== 206) {
       const e = new Error('http status code not 200')
       e.code = 'EHTTPSTATUS'
@@ -119,12 +119,16 @@ export class UploadMultipleFiles {
           size: part.end ? part.end - part.start + 1 : 0,
           sha256: part.sha
         }
-        if (part.start) {
-          formDataOptions = Object.assign(formDataOptions, { append: part.fingerprint })
-        } else if (policy && policy.mode === 'replace') {
-          this.handle.attach(name, JSON.stringify({ op: 'remove', uuid: policy.remoteUUID }))
+        try {
+          if (part.start) {
+            formDataOptions = Object.assign(formDataOptions, { append: part.fingerprint })
+          } else if (policy && policy.mode === 'replace') {
+            this.handle.attach(name, JSON.stringify({ op: 'remove', uuid: policy.remoteUUID }))
+          }
+          this.handle.attach(name, rs, JSON.stringify(formDataOptions))
+        } catch (e) {
+          debug('upload this.Files.forEach error', e)
         }
-        this.handle.attach(name, rs, JSON.stringify(formDataOptions))
       }
     })
 
@@ -139,7 +143,7 @@ export class UploadMultipleFiles {
     if (this.finished) return
     if (error) {
       debug('upload finish, error:', error)
-      error.code = error.status === 500 ? 'ESERVER' : 'EOTHER'
+      error.code = error.status >= 500 ? 'ESERVER' : 'EOTHER'
       error.response = null
     }
     this.finished = true
@@ -203,6 +207,11 @@ export class DownloadFile {
 
   finish(error) {
     if (this.finished) return
+    if (error) {
+      debug('download finish, error:', error)
+      error.code = error.status >= 500 ? 'ESERVER' : 'EOTHER'
+      error.response = null
+    }
     this.callback(error)
     this.finished = true
   }
@@ -246,13 +255,13 @@ export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, ca
 
   handle.end((error, res) => {
     if (error) {
-      debug('createFold error', error, res)
-      callback(error)
+      debug('createFold error', error.response && error.response.body)
+      callback(Object.assign({}, error, { response: null }))
     } else if (res && res.statusCode === 200) {
       /* callback the created dir entry */
-      debug('createFold', res.body)
-      // callback(null, res.body[0].data)
-      callback(null, res.body.entries.find(e => e.name === dirname))
+      // debug('createFold', res.body)
+      callback(null, res.body[0].data)
+      // callback(null, res.body.entries.find(e => e.name === dirname))
     } else if (res && res.statusCode === 403 && (policy.mode === 'overwrite' || policy.mode === 'merge')) {
       /* when a file with the same name in remote, retry if given policy of overwrite or merge */
       serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
@@ -268,7 +277,7 @@ export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, ca
             createFold(driveUUID, dirUUID, checkedName, localEntries, { mode, checkedName, remoteUUID }, callback)
           } else callback(res.body)
         })
-        .catch(e => callback(e))
+        .catch(e => callback(Object.assign({}, e, { response: null })))
     } else callback(res.body) // response code not 200 and no policy
   })
 }
@@ -303,7 +312,7 @@ export const downloadFile = (driveUUID, dirUUID, entryUUID, fileName, downloadPa
 
       const handle = adownload(dirUUID === 'media' ? `media/${entryUUID}` : `drives/${driveUUID}/dirs/${dirUUID}/entries/${entryUUID}`)
         .query({ name: fileName })
-        .on('error', err => callback(err))
+        .on('error', err => callback(Object.assign({}, err, { response: null })))
       handle.pipe(stream)
     } else callback(null, filePath)
   })
