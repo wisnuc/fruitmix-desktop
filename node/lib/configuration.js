@@ -217,7 +217,16 @@ class Configuration {
 
     global.dispatch({
       type: 'CONFIG_UPDATE',
-      data: config
+      data: {
+        tmpTransPath: this.getTmpTransDir(),
+        tmpPath: this.getTmpDir(),
+        thumbPath: this.getThumbnailDir(),
+        imagePath: this.getImageCacheDir(),
+        downloadPath: this.getWisnucDownloadsDir(),
+        lastDevice: this.globalConfig.getConfig().lastDevice,
+        noCloseConfirm: this.globalConfig.getConfig().noCloseConfirm,
+        enableSleep: this.globalConfig.getConfig().enableSleep
+      }
     })
     return config
   }

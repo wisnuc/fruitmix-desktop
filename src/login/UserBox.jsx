@@ -56,9 +56,9 @@ class NamedAvatar extends React.Component {
             <div style={{ lineHeight: '24px', fontSize: 14 }}>
               {
                 avatarUrl ?
-                <div style={{ borderRadius: 18, width: 36, height: 36, overflow: 'hidden' }}>
-                  <img width={36} height={36} alt="" src={avatarUrl} />
-                </div> :
+                  <div style={{ borderRadius: 16, width: 32, height: 32, overflow: 'hidden' }}>
+                    <img width={32} height={32} alt="" src={avatarUrl} />
+                  </div> :
                 name.slice(0, 2).toUpperCase()
               }
             </div>
