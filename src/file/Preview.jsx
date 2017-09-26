@@ -1,16 +1,13 @@
 import React from 'react'
 import Debug from 'debug'
 import UUID from 'node-uuid'
-import { IconButton, CircularProgress, RaisedButton } from 'material-ui'
+import { CircularProgress, RaisedButton } from 'material-ui'
 import OpenIcon from 'material-ui/svg-icons/action/open-with'
 import DownloadIcon from 'material-ui/svg-icons/file/file-download'
-import pdfjsLib from 'pdfjs-dist'
-import PDF, { Page } from 'react-pdf-pages'
+import PDFView from './PDF'
 import DialogOverlay from '../common/DialogOverlay'
 import FlatButton from '../common/FlatButton'
 import PhotoDetail from '../photo/PhotoDetail'
-
-pdfjsLib.PDFJS.workerSrc = './assets/pdf.worker.bundle.js'
 
 const debug = Debug('component:file:preview: ')
 
@@ -169,14 +166,9 @@ class Preview extends React.Component {
         style={{ height: '80%', width: '80%', overflowY: 'auto', overflowX: 'hidden' }}
         onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
       >
-        <PDF url={this.state.filePath} onComplete={pages => this.setState({ pages })} onError={e => debug(e)}>
-          {
-            this.state.pages &&
-            <div>
-              { this.state.pages.map(page => <Page key={page.key} page={page} onError={e => debug(e)} />)}
-            </div>
-          }
-        </PDF>
+        <PDFView
+          filePath={this.state.filePath}
+        />
       </div>
     )
   }

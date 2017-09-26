@@ -138,10 +138,10 @@ export class UploadMultipleFiles {
   finish(error) {
     if (this.finished) return
     if (error) {
+      debug('upload finish, error:', error)
       error.code = error.status === 500 ? 'ESERVER' : 'EOTHER'
       error.response = null
     }
-    debug('upload finish, error:', error)
     this.finished = true
     this.callback(error)
   }
@@ -251,6 +251,7 @@ export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, ca
     } else if (res && res.statusCode === 200) {
       /* callback the created dir entry */
       debug('createFold', res.body)
+      // callback(null, res.body[0].data)
       callback(null, res.body.entries.find(e => e.name === dirname))
     } else if (res && res.statusCode === 403 && (policy.mode === 'overwrite' || policy.mode === 'merge')) {
       /* when a file with the same name in remote, retry if given policy of overwrite or merge */
