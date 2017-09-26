@@ -21,7 +21,7 @@ const duration = 300
 @Radium
 class DeviceList extends React.PureComponent {
   render() {
-    const { list, primaryColor } = this.props
+    const { list, primaryColor, select } = this.props
     return (
       <div
         style={{
@@ -33,13 +33,14 @@ class DeviceList extends React.PureComponent {
           alignItems: 'center',
           ':hover': { backgroundColor: '#EEEEEE' }
         }}
+        onTouchTap={() => list.isOnline && select(list)}
       >
         {
-          list.type === 'remote'
-            ? list.accessible
+          list.LANIP
+            ? list.isOnline
             ? <CloudDoneIcon color={primaryColor} />
             : <CloudOffIcon color="rgba(0,0,0,0.54)" />
-            : list.accessible
+            : list.isOnline
             ? <WifiIcon color={primaryColor} />
             : <WifiIcon color="rgba(0,0,0,0.54)" />
         }
@@ -48,7 +49,7 @@ class DeviceList extends React.PureComponent {
             { list.name }
           </div>
           <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14, lineHeight: '20px' }}>
-            { list.type === 'remote' ? 'remote' : list.ip }
+            { list.LANIP }
           </div>
         </div>
       </div>
@@ -67,36 +68,7 @@ class WechatLogin extends React.Component {
       error: '', // '', 'net', 'wisnuc'
       wechatLogin: '', // '', 'progress', 'authorization', 'getingList', 'success', 'lastDevice', 'list', 'fail'
       count: 3,
-      lists: [
-        {
-          name: '公司的闻上盒子',
-          ip: '120.160.23.1',
-          type: 'remote',
-          accessible: true,
-          token: 'token123'
-        },
-        {
-          name: '书房的NAS',
-          ip: '192.0.0.103',
-          type: 'local',
-          accessible: true,
-          token: 'token123'
-        },
-        {
-          name: '朋友A',
-          ip: '110.198.54.9',
-          type: 'remote',
-          accessible: false,
-          token: ''
-        },
-        {
-          name: '新盒子',
-          ip: '192.0.0.104',
-          type: 'local',
-          accessible: false,
-          token: ''
-        }
-      ]
+      lists: []
     }
 
     this.done = (view, device, user) => {
@@ -107,7 +79,8 @@ class WechatLogin extends React.Component {
       const stationID = this.state.lastDevice
       const token = this.state.wxData.token
       const guid = this.state.wxData.user.id
-      debug('autologin', this.props)
+
+      debug('autologin', stationID, token)
       this.props.selectedDevice.request('cloudUsers', { stationID, token }, (err, res) => {
         debug('cloudUsers', err, res)
         if (err) return this.setState({ wechatLogin: 'fail' })
@@ -198,10 +171,19 @@ class WechatLogin extends React.Component {
 
     this.getStations = (guid, token) => {
       this.props.selectedDevice.request('getStations', { guid, token }, (err, res) => {
-        if (err) return debug('this.getStations error', err)
+        if (err) {
+          debug('this.getStations error', err)
+          return this.setState({ wechatLogin: 'fail' })
+        }
         debug('this.getStations success', res)
-        setTimeout(() => this.setState({ wechatLogin: 'success', count: 3 }), 500)
-        setTimeout(() => this.setState({ wechatLogin: 'lastDevice', lastDevice: res.data[0].id }, this.countDown), 1000)
+        const lists = res.data
+        const index = lists.findIndex(l => l.isOnline)
+        if (index > -1) {
+          debug('lastDevice', lists[index])
+          this.setState({ lists })
+          setTimeout(() => this.setState({ wechatLogin: 'success', count: 3 }), 500)
+          setTimeout(() => this.setState({ wechatLogin: 'lastDevice', lastDevice: lists[index].id }, this.countDown), 1000)
+        } else return this.setState({ wechatLogin: 'fail' })
       })
     }
 
@@ -229,6 +211,11 @@ class WechatLogin extends React.Component {
           }
         }
       })
+    }
+
+    this.select = (list) => {
+      debug('this.select', list)
+      this.setState({ wechatLogin: 'lastDevice', lastDevice: list.id }, this.countDown)
     }
   }
 
@@ -361,6 +348,10 @@ class WechatLogin extends React.Component {
             <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
               3. 您可能尚未加入私有群
             </div>
+            <div style={{ height: 24 }} />
+            <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
+              4. 您绑定的设备都不在线
+            </div>
           </div>
 
           {/* button */}
@@ -445,18 +436,24 @@ class WechatLogin extends React.Component {
                 />
               </div>
             </div>
-            :
-            <div>
+            : wcl === 'list'
+            ? <div>
+              <div style={{ height: 16 }} />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '100%', height: 436, overflowY: 'auto' }}>
+                  {
+                    this.state.lists.map((list, index) => (
+                      <DeviceList list={list} primaryColor={this.props.primaryColor} key={index} select={this.select} />)
+                    )
+                  }
+                </div>
+              </div>
+            </div>
+            : <div>
               <div style={{ height: 16 }} />
               <div style={{ height: 270, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {
-                  wcl === 'list'
-                  ? <div style={{ width: '100%' }}>
-                    {
-                      this.state.lists.map(list => (<DeviceList list={list} primaryColor={this.props.primaryColor} key={list.name} />))
-                    }
-                  </div>
-                  : wcl === 'success'
+                  wcl === 'success'
                   ? <Checkmark delay={300} color={this.props.primaryColor} />
                   : <CircularProgress size={64} thickness={5} />
                 }
