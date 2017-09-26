@@ -104,6 +104,7 @@ class Public extends Home {
   }
 
   navEnter(target) {
+    this.isNavEnter = true
     this.rootDrive = null
     const apis = this.ctx.props.apis
     if (target && target.driveUUID) {
@@ -119,6 +120,10 @@ class Public extends Home {
     } else {
       apis.request('drives')
     }
+  }
+
+  navLeave() {
+    this.isNavEnter = false
   }
 
   menuName() {

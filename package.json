@@ -81,9 +81,9 @@
     "webpack": "^2.4.1"
   },
   "dependencies": {
-    "debug": "^2.3.3",
     "babel-runtime": "^6.18.0",
     "bluebird": "^3.4.1",
+    "debug": "^2.3.3",
     "electron-log": "^2.2.4",
     "electron-updater": "^1.15.0",
     "exif-js": "^2.1.1",
@@ -96,7 +96,7 @@
     "mkdirp": "^0.5.1",
     "nedb": "^1.8.0",
     "node-uuid": "^1.4.7",
-    "pdfjs-dist": "^1.8.595",
+    "pdfjs-dist": "^1.9.598",
     "prettysize": "0.0.3",
     "react": "^15.6.1",
     "react-event-listener": "^0.4.5",

@@ -149,7 +149,7 @@ class Home extends Base {
 
     this.delete = () => {
       if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
-      // this.setState({ loading: true })
+      this.setState({ loading: true })
       this.deleteAsync().then(() => {
         this.setState({ loading: false, delete: false })
         this.ctx.openSnackBar('删除成功')
@@ -230,7 +230,7 @@ class Home extends Base {
     ipcRenderer.on('driveListUpdate', (e, dir) => {
       const path = this.state.path
       // console.log(dir, path)
-      if (path && path.length && dir.uuid === path[path.length - 1].uuid) this.refresh({ noloading: true })
+      if (this.isNavEnter && path && path.length && dir.uuid === path[path.length - 1].uuid) this.refresh({ noloading: true })
     })
   }
 
@@ -258,6 +258,7 @@ class Home extends Base {
   }
 
   navEnter(target) {
+    this.isNavEnter = true
     const apis = this.ctx.props.apis
     debug('navEnter before', apis, target)
     if (!apis || !apis.drives || !apis.drives.data) return
@@ -280,6 +281,7 @@ class Home extends Base {
   }
 
   navLeave() {
+    this.isNavEnter = false
   }
 
   navGroup() {
