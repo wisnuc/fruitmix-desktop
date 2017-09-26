@@ -94,7 +94,7 @@ class Persistence {
   constructor(target, tmpdir, delay) {
     this.target = target
     this.tmpdir = tmpdir
-    this.delay = delay || 500
+    this.delay = delay || 50
     this.state = new Idle(this)
   }
 
