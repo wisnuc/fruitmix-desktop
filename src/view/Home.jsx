@@ -1,7 +1,7 @@
 import React from 'react'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
-import { IconButton, Divider } from 'material-ui'
+import { IconButton, Divider, CircularProgress } from 'material-ui'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
@@ -149,12 +149,12 @@ class Home extends Base {
 
     this.delete = () => {
       if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
-      this.setState({ loading: true })
+      this.setState({ deleteLoading: true })
       this.deleteAsync().then(() => {
-        this.setState({ loading: false, delete: false })
+        this.setState({ deleteLoading: false, delete: false })
         this.ctx.openSnackBar('删除成功')
       }).catch((e) => {
-        this.setState({ loading: false, delete: false })
+        this.setState({ deleteLoading: false, delete: false })
         this.ctx.openSnackBar(`删除失败: ${e}`)
       })
     }
@@ -474,12 +474,14 @@ class Home extends Base {
             this.state.delete &&
             <div style={{ width: 280, padding: '24px 24px 0px 24px' }}>
               <div style={{ color: 'rgba(0,0,0,0.54)' }}>{'确定删除？'}</div>
-              <div style={{ height: 24 }} />
+              <div style={{ height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                { this.state.deleteLoading && <CircularProgress size={24} thickness={3} /> }
+              </div>
               <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                <FlatButton label="取消" primary disabled={this.state.loading} onTouchTap={() => this.toggleDialog('delete')} />
+                <FlatButton label="取消" primary disabled={this.state.deleteLoading} onTouchTap={() => this.toggleDialog('delete')} />
                 <FlatButton
                   label="确认"
-                  disabled={this.state.loading}
+                  disabled={this.state.deleteLoading}
                   primary
                   onTouchTap={this.delete}
                 />
