@@ -4,7 +4,8 @@ import Debug from 'debug'
 import { Avatar, Divider, FloatingActionButton, Toggle, TextField, Popover, Menu, MenuItem } from 'material-ui'
 import CommunicationVpnKey from 'material-ui/svg-icons/communication/vpn-key'
 import SocialPersonAdd from 'material-ui/svg-icons/social/person-add'
-import CheckIcon from 'material-ui/svg-icons/navigation/check'
+import CircleIcon from 'material-ui/svg-icons/toggle/radio-button-checked'
+import DeltaIcon from 'material-ui/svg-icons/navigation/arrow-drop-down'
 import DialogOverlay from '../common/DialogOverlay'
 import ChangeAccountDialog from './ChangeAccountDialog'
 import FlatButton from '../common/FlatButton'
@@ -25,19 +26,22 @@ class AdminUsersApp extends React.Component {
       resetPwd: false,
       randomPwd: false,
       disableUser: false,
+      changeAuth: false,
       open: false // open menu
     }
 
     this.toggleDialog = (op, user) => {
+      debug('this.toggleDialog', op, user && user.username)
       this.setState({ [op]: !this.state[op], user, open: false, anchorEl: null })
     }
 
-    this.toggleMenu = (event) => {
+    this.toggleMenu = (event, user) => {
       if (!this.state.open && event && event.preventDefault) event.preventDefault()
-      this.setState({ open: !this.state.open, anchorEl: event.currentTarget })
+      this.setState({ open: !this.state.open, anchorEl: event.currentTarget, user })
     }
 
-    this.handleChange = (op) => {
+    this.toggleAuth = () => {
+      this.setState({ changeAuth: false, confirmPwd: 'changeAuth' })
     }
 
     this.resetPwd = () => {
@@ -59,17 +63,12 @@ class AdminUsersApp extends React.Component {
       this.setState({ password })
     }
 
-    this.updateAccount = () => {
-      const args = {
-        userUUID: this.state.user.uuid,
-        disabled: !this.state.user.disabled,
-        // isAdmin: !this.state.user.isAdmin
-      }
-
+    this.updateAccount = (op) => {
+      const args = Object.assign({ userUUID: this.state.user.uuid }, op)
       this.props.apis.request('adminUpdateUsers', args, (err) => {
         if (err) {
           debug('err', args, err, err.message)
-          this.props.openSnackBar(`出现错误，请重试`)
+          this.props.openSnackBar('出现错误，请重试')
         } else {
           this.props.refreshUsers()
           this.setState({ confirmPwd: '' })
@@ -78,7 +77,7 @@ class AdminUsersApp extends React.Component {
       })
     }
 
-    this.getToken = () => {
+    this.getToken = (op) => {
       const args = {
         uuid: this.props.apis.account.data.uuid,
         password: this.state.password
@@ -90,12 +89,10 @@ class AdminUsersApp extends React.Component {
           if (err.message === 'Unauthorized') {
             this.props.openSnackBar('密码错误')
           } else {
-            // this.props.openSnackBar(`出现错误：${err.message}`)
-            this.props.openSnackBar(`出现错误，请重试`)
+            this.props.openSnackBar('出现错误，请重试')
           }
-        } else {
-          this.updateAccount()
-        }
+        } else if (op === 'disableUser') this.updateAccount({ disabled: !this.state.user.disabled })
+        else this.updateAccount({ isAdmin: !this.state.user.isAdmin })
       })
     }
   }
@@ -109,7 +106,8 @@ class AdminUsersApp extends React.Component {
       avatarUrl = weChatInfo.avatarUrl
       nickName = weChatInfo.nickName
     }
-    debug('renderUserRow user', user)
+    const u = Object.assign({}, user)
+    debug('renderUserRow user', user.username)
 
     return (
       <div
@@ -126,10 +124,10 @@ class AdminUsersApp extends React.Component {
         <div style={{ flex: '0 0 40px' }}>
           {
             avatarUrl ?
-            <div style={{ borderRadius: 20, width: 40, height: 40, overflow: 'hidden' }}>
-              <img width={40} height={40} alt="" src={avatarUrl} />
-            </div> :
-            <Avatar>{ slice(user.username, 0, 2).toUpperCase() }</Avatar>
+              <div style={{ borderRadius: 20, width: 40, height: 40, overflow: 'hidden' }}>
+                <img width={40} height={40} alt="" src={avatarUrl} />
+              </div> :
+              <Avatar>{ slice(user.username, 0, 2).toUpperCase() }</Avatar>
           }
         </div>
         <div style={{ flex: '0 0 32px' }} />
@@ -144,9 +142,11 @@ class AdminUsersApp extends React.Component {
           <FlatButton
             label={user.isFirstUser ? '超级管理员' : user.disabled ? '已禁用' : user.isAdmin ? '管理员' : '普通用户'}
             labelStyle={{ fontSize: 14, color: 'rgba(0,0,0,0.54)' }}
-            onTouchTap={this.toggleMenu}
+            labelPosition="before"
+            onTouchTap={event => this.toggleMenu(event, user)}
             style={{ marginLeft: -4 }}
-            disabled={user.isFirstUser}
+            disabled={user.isFirstUser || user.disabled || (!this.props.apis.account.data.isFirstUser)}
+            icon={user.isFirstUser || user.disabled || (!this.props.apis.account.data.isFirstUser) ? <div /> : <DeltaIcon />}
           />
           {/* menu */}
           <Popover
@@ -154,28 +154,24 @@ class AdminUsersApp extends React.Component {
             anchorEl={this.state.anchorEl}
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             targetOrigin={{ horizontal: 'right', vertical: 'top' }}
-            onRequestClose={this.toggleMenu}
+            onRequestClose={event => this.toggleMenu(event)}
           >
-            <Menu style={{ minWidth: 240 }}>
+            { this.state.user &&
+            <Menu style={{ minWidth: 180 }}>
               <MenuItem
                 style={{ fontSize: 13 }}
-                leftIcon={!user.disabled && user.isAdmin ? <CheckIcon /> : <div />}
+                leftIcon={this.state.user.isAdmin ? <CircleIcon /> : <div />}
                 primaryText="管理员"
-                onTouchTap={() => this.handleChange('admin')}
+                onTouchTap={() => this.toggleDialog('changeAuth', this.state.user)}
               />
               <MenuItem
                 style={{ fontSize: 13 }}
-                leftIcon={!user.disabled && !user.isAdmin ? <CheckIcon /> : <div />}
+                leftIcon={!this.state.user.isAdmin ? <CircleIcon /> : <div />}
                 primaryText="普通用户"
-                onTouchTap={() => user.disabled && this.toggleDialog('disableUser', user)}
-              />
-              <MenuItem
-                style={{ fontSize: 13 }}
-                leftIcon={user.disabled ? <CheckIcon /> : <div />}
-                primaryText="禁用"
-                onTouchTap={() => this.toggleDialog('disableUser', user)}
+                onTouchTap={() => this.toggleDialog('changeAuth', this.state.user)}
               />
             </Menu>
+            }
           </Popover>
         </div>
 
@@ -199,7 +195,7 @@ class AdminUsersApp extends React.Component {
         */}
         <div style={{ flex: '0 0 50px' }}>
           {
-            user.isFirstUser
+            user.isFirstUser || !this.props.apis.account.data.isFirstUser
             ? <div />
             : <Toggle
               toggled={!user.disabled}
@@ -211,7 +207,7 @@ class AdminUsersApp extends React.Component {
     )
   }
 
-  renderConfirmPwd() {
+  renderConfirmPwd(op) {
     return (
       <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
         <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}> 输入管理员密码 </div>
@@ -230,7 +226,7 @@ class AdminUsersApp extends React.Component {
         <div style={{ height: 24 }} />
         <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
           <FlatButton label="取消" primary onTouchTap={() => this.setState({ confirmPwd: '', password: '' })} />
-          <FlatButton label="确定" primary onTouchTap={this.getToken} disabled={!this.state.password} />
+          <FlatButton label="确定" primary onTouchTap={() => this.getToken(op)} disabled={!this.state.password} />
         </div>
       </div>
     )
@@ -305,7 +301,7 @@ class AdminUsersApp extends React.Component {
             }
 
             {/* render confirm password */}
-            { this.state.confirmPwd && this.renderConfirmPwd() }
+            { this.state.confirmPwd && this.renderConfirmPwd(this.state.confirmPwd) }
 
             {
               this.state.randomPwd &&
@@ -351,7 +347,36 @@ class AdminUsersApp extends React.Component {
                 </div>
             }
             {/* render confirm password */}
-            { this.state.confirmPwd && this.renderConfirmPwd() }
+            { this.state.confirmPwd && this.renderConfirmPwd(this.state.confirmPwd) }
+          </div>
+        </DialogOverlay>
+
+        {/* change user auth dialog */}
+        <DialogOverlay open={!!this.state.changeAuth || this.state.confirmPwd === 'changeAuth'}>
+          <div>
+            {
+              this.state.changeAuth &&
+                <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
+                  <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
+                    { '修改用户权限' }
+                  </div>
+                  <div style={{ height: 20 }} />
+                  <div style={{ color: 'rgba(0,0,0,0.54)' }}>
+                    {
+                      this.state.user.isAdmin
+                      ? '确定将此用户降为普通用户吗？'
+                      : '确定将此用户设为管理员吗？'
+                    }
+                  </div>
+                  <div style={{ height: 24 }} />
+                  <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                    <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('changeAuth')} />
+                    <FlatButton label="确定" primary onTouchTap={this.toggleAuth} />
+                  </div>
+                </div>
+            }
+            {/* render confirm password */}
+            { this.state.confirmPwd && this.renderConfirmPwd(this.state.confirmPwd) }
           </div>
         </DialogOverlay>
       </div>
