@@ -1,9 +1,10 @@
 import React from 'react'
 import { clipboard } from 'electron'
 import Debug from 'debug'
-import { Avatar, Divider, FloatingActionButton, Toggle, TextField } from 'material-ui'
+import { Avatar, Divider, FloatingActionButton, Toggle, TextField, Popover, Menu, MenuItem } from 'material-ui'
 import CommunicationVpnKey from 'material-ui/svg-icons/communication/vpn-key'
 import SocialPersonAdd from 'material-ui/svg-icons/social/person-add'
+import CheckIcon from 'material-ui/svg-icons/navigation/check'
 import DialogOverlay from '../common/DialogOverlay'
 import ChangeAccountDialog from './ChangeAccountDialog'
 import FlatButton from '../common/FlatButton'
@@ -23,11 +24,20 @@ class AdminUsersApp extends React.Component {
       createNewUser: false,
       resetPwd: false,
       randomPwd: false,
-      disableUser: false
+      disableUser: false,
+      open: false // open menu
     }
 
     this.toggleDialog = (op, user) => {
-      this.setState({ [op]: !this.state[op], user })
+      this.setState({ [op]: !this.state[op], user, open: false, anchorEl: null })
+    }
+
+    this.toggleMenu = (event) => {
+      if (!this.state.open && event && event.preventDefault) event.preventDefault()
+      this.setState({ open: !this.state.open, anchorEl: event.currentTarget })
+    }
+
+    this.handleChange = (op) => {
     }
 
     this.resetPwd = () => {
@@ -124,7 +134,51 @@ class AdminUsersApp extends React.Component {
         </div>
         <div style={{ flex: '0 0 32px' }} />
         <div style={{ flex: '0 0 320px' }}>{ user.username }</div>
-        <div style={{ flex: '0 0 140px' }}>{ user.isFirstUser ? '超级管理员' : user.isAdmin ? '管理员' : '普通用户' }</div>
+
+        {/*
+        <div style={{ flex: '0 0 140px' }}>
+          { user.isFirstUser ? '超级管理员' : user.isAdmin ? '管理员' : '普通用户' }
+        </div>
+        */}
+        <div style={{ flex: '0 0 140px', display: 'flex', alignItems: 'center ' }}>
+          <FlatButton
+            label={user.isFirstUser ? '超级管理员' : user.disabled ? '已禁用' : user.isAdmin ? '管理员' : '普通用户'}
+            labelStyle={{ fontSize: 14, color: 'rgba(0,0,0,0.54)' }}
+            onTouchTap={this.toggleMenu}
+            style={{ marginLeft: -4 }}
+            disabled={user.isFirstUser}
+          />
+          {/* menu */}
+          <Popover
+            open={this.state.open}
+            anchorEl={this.state.anchorEl}
+            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            targetOrigin={{ horizontal: 'right', vertical: 'top' }}
+            onRequestClose={this.toggleMenu}
+          >
+            <Menu style={{ minWidth: 240 }}>
+              <MenuItem
+                style={{ fontSize: 13 }}
+                leftIcon={!user.disabled && user.isAdmin ? <CheckIcon /> : <div />}
+                primaryText="管理员"
+                onTouchTap={() => this.handleChange('admin')}
+              />
+              <MenuItem
+                style={{ fontSize: 13 }}
+                leftIcon={!user.disabled && !user.isAdmin ? <CheckIcon /> : <div />}
+                primaryText="普通用户"
+                onTouchTap={() => user.disabled && this.toggleDialog('disableUser', user)}
+              />
+              <MenuItem
+                style={{ fontSize: 13 }}
+                leftIcon={user.disabled ? <CheckIcon /> : <div />}
+                primaryText="禁用"
+                onTouchTap={() => this.toggleDialog('disableUser', user)}
+              />
+            </Menu>
+          </Popover>
+        </div>
+
         <div style={{ flex: '0 0 112px' }}>{ user.global && user.global.wx ? '是' : '否' }</div>
         <div style={{ flex: '0 0 256px' }}>{ nickName || '-' }</div>
         <div style={{ flex: '0 0 56px' }} />
