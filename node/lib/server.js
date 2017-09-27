@@ -48,6 +48,15 @@ const adownload = (ep) => {
     .set('Authorization', `JWT ${token}`)
 }
 
+const awriteDir = (ep, data, type) => {
+  const url = `${address}/c/v1/stations/${stationID}/json`
+  const resource = new Buffer(`/${ep}`).toString('base64')
+  if (type === 'mkdir') return request.post(url).set('Authorization', token)
+    .send({ resource, method: 'POST', toName: data.name, op: 'mkdir' })
+  if (type === 'remove') return request.post(url).set('Authorization', token)
+    .send({ resource, method: 'POST', toName: data.name, uuid: data.uuid, op: 'remove' })
+}
+
 const apost = (ep, data) => {
   if (stationID) return reqCloud(ep, data, 'POST')
   const r = request
@@ -107,7 +116,7 @@ export class UploadMultipleFiles {
     this.handle = null
   }
 
-  upload() {
+  localUpload() {
     this.handle = apost(`drives/${this.driveUUID}/dirs/${this.dirUUID}/entries`)
     
     this.Files.forEach((file) => {
@@ -123,7 +132,7 @@ export class UploadMultipleFiles {
           if (part.start) {
             formDataOptions = Object.assign(formDataOptions, { append: part.fingerprint })
           } else if (policy && policy.mode === 'replace') {
-            this.handle.attach(name, JSON.stringify({ op: 'remove', uuid: policy.remoteUUID }))
+            this.handle.field(name, JSON.stringify({ op: 'remove', uuid: policy.remoteUUID }))
           }
           this.handle.attach(name, rs, JSON.stringify(formDataOptions))
         } catch (e) {
@@ -141,6 +150,49 @@ export class UploadMultipleFiles {
       else if (res && res.statusCode === 200) this.finish(null)
       else this.finish(res.body)
     })
+  }
+
+  cloudUpload() {
+    const ep = `drives/${this.driveUUID}/dirs/${this.dirUUID}/entries`
+    const file = this.Files[0]
+    
+    const { name, parts, readStreams, policy } = file
+    const rs = readStreams[0]
+    const part = parts[0]
+
+    const url = `${address}/c/v1/stations/${stationID}/pipe`
+    const resource = new Buffer(`/${ep}`).toString('base64')
+
+    const option = {
+      op: 'newfile',
+      resource,
+      method: 'POST',
+      toName: name,
+      size: part.end ? part.end - part.start + 1 : 0,
+      sha256: part.sha
+    }
+    this.handle = request.post(url).set('Authorization', token).field('manifest', JSON.stringify(option)).attach(name, rs)
+    /*
+    if (policy && policy.mode === 'replace') {
+      this.handle.field(name, JSON.stringify({ op: 'remove', uuid: policy.remoteUUID }))
+    }
+    */
+    
+    this.handle.on('error', (err) => {
+      debug('this.handle.on error', err)
+      this.finish(err)
+    })
+
+    this.handle.end((err, res) => {
+      if (err) this.finish(err)
+      else if (res && res.statusCode === 200) this.finish(null)
+      else this.finish(res.body)
+    })
+  }
+
+  upload() {
+    if (stationID) this.cloudUpload()
+    else this.localUpload()
   }
 
   finish(error) {
@@ -254,6 +306,7 @@ export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, ca
 
   const handle = apost(`drives/${driveUUID}/dirs/${dirUUID}/entries`)
 
+ 
   if (policy && policy.mode === 'replace') handle.field(dirname, JSON.stringify({ op: 'remove', uuid: policy.remoteUUID }))
   handle.field(dirname, JSON.stringify({ op: 'mkdir', parents }))
 

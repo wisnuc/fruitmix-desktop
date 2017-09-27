@@ -29,6 +29,19 @@ class Fruitmix extends EventEmitter {
       const resource = new Buffer(`/${ep}`).toString('base64')
       console.log('this.reqCloud', type, ep)
       if (type === 'GET') return request.get(url).set('Authorization', this.token).query({ resource, method: type })
+      if (data && data.op) {
+        const r = request.post(url).set('Authorization', this.token)
+        switch (data.op) {
+          case 'mkdir':
+            return r.send(Object.assign({ resource, method: type, op: 'mkdir', toName: data.dirname }))
+          case 'rename':
+            return r.send(Object.assign({ resource, method: type, op: 'rename', toName: data.newName, fromName: data.oldName }))
+          case 'remove':
+            return r.send(Object.assign({ resource, method: type, op: 'remove', toName: data.entryName, uuid: data.entryUUID }))
+          case 'dup':
+            return r.send(Object.assign({ resource, method: type, op: 'dup', toName: data.newName, fromName: data.oldName }))
+        }
+      }
       if (data) return request.post(url).set('Authorization', this.token).send(Object.assign({ resource, method: type }, data))
     }
   }
@@ -204,25 +217,41 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'mkdir':
-        r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`)
-          .field(args.dirname, JSON.stringify({ op: 'mkdir' }))
+        if (this.stationID) {
+          r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`, Object.assign({}, args, { op: 'mkdir' }))
+        } else {
+          r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`)
+            .field(args.dirname, JSON.stringify({ op: 'mkdir' }))
+        }
         break
 
       case 'renameDirOrFile':
-        r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`)
-          .field(`${args.oldName}|${args.newName}`, JSON.stringify({ op: 'rename' }))
+        if (this.stationID) {
+          r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`, Object.assign({}, args, { op: 'rename' })) 
+        } else {
+          r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`)
+            .field(`${args.oldName}|${args.newName}`, JSON.stringify({ op: 'rename' }))
+        }
         break
 
       case 'deleteDirOrFile':
-        r = this.apost(`drives/${args[0].driveUUID}/dirs/${args[0].dirUUID}/entries`)
-        for (let i = 0; i < args.length; i++) {
-          r.field(args[i].entryName, JSON.stringify({ op: 'remove', uuid: args[i].entryUUID }))
+        if (this.stationID) {
+          r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`, Object.assign({}, args, { op: 'remove' }))
+        } else {
+          r = this.apost(`drives/${args[0].driveUUID}/dirs/${args[0].dirUUID}/entries`)
+          for (let i = 0; i < args.length; i++) {
+            r.field(args[i].entryName, JSON.stringify({ op: 'remove', uuid: args[i].entryUUID }))
+          }
         }
         break
 
       case 'dupFile':
-        r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`)
-          .field(`${args.oldName}|${args.newName}`, JSON.stringify({ op: 'dup' }))
+        if (this.stationID) {
+          r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`, Object.assign({}, args, { op: 'dup' }))
+        } else {
+          r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`)
+            .field(`${args.oldName}|${args.newName}`, JSON.stringify({ op: 'dup' }))
+        }
         break
 
       case 'copy':

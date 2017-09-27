@@ -52,7 +52,9 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
   }
 
   const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
-  const remoteEntries = listNav.entries
+  let remoteEntries = listNav.entries
+  if (listNav.data && listNav.code === 200) remoteEntries = listNav.data.entries
+  debug('listNav', listNav, remoteEntries)
   nameSpace.push(...remoteEntries.map(e => e.name))
   const conflicts = []
   for (let i = 0; i < filtered.length; i++) {

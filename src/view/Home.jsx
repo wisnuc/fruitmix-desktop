@@ -127,20 +127,28 @@ class Home extends Base {
     }
 
     this.deleteAsync = async () => {
+      debug('this.deleteAsync this.props', this.ctx)
       const entries = this.state.entries
       const selected = this.state.select.selected
       const path = this.state.path
       const dirUUID = path[path.length - 1].uuid
       const driveUUID = this.state.path[0].uuid
 
-      const op = []
-      for (let i = 0; i < selected.length; i++) {
-        const entryName = entries[selected[i]].name
-        const entryUUID = entries[selected[i]].uuid
-        op.push({ driveUUID, dirUUID, entryName, entryUUID })
+      if (this.ctx.props.selectedDevice.token.data.stationID) {
+        for (let i = 0; i < selected.length; i++) {
+          const entryName = entries[selected[i]].name
+          const entryUUID = entries[selected[i]].uuid
+          await this.ctx.props.apis.requestAsync('deleteDirOrFile', { driveUUID, dirUUID, entryName, entryUUID })
+        }
+      } else {
+        const op = []
+        for (let i = 0; i < selected.length; i++) {
+          const entryName = entries[selected[i]].name
+          const entryUUID = entries[selected[i]].uuid
+          op.push({ driveUUID, dirUUID, entryName, entryUUID })
+        }
+        await this.ctx.props.apis.requestAsync('deleteDirOrFile', op)
       }
-
-      await this.ctx.props.apis.requestAsync('deleteDirOrFile', op)
 
       if (this.state.path[this.state.path.length - 1].uuid === dirUUID) {
         await this.ctx.props.apis.requestAsync('listNavDir', { driveUUID: this.state.path[0].uuid, dirUUID })
