@@ -64,7 +64,8 @@ class Public extends Home {
     if (type === 'drives') {
       if (data === this.state.drives && !this.force) return
       path = [{ name: '共享盘', uuid: null, type: 'publicRoot' }]
-      entries = data.filter(drive => drive.type === 'public')
+      const myUUID = this.ctx.props.apis.account.data && this.ctx.props.apis.account.data.uuid
+      entries = data.filter(drive => drive.type === 'public' && drive.writelist.find(u => u === myUUID))
       entries.forEach(item => Object.assign(item, { name: item.label }))
 
       /* sort enries */
