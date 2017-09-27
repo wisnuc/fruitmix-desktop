@@ -24,6 +24,8 @@ ipcMain.on('LOGIN', (event, device, user) => {
   debug('Got device, address, token, stationID: ', address, stationID)
 })
 
+export const isCloud = () => !!stationID
+
 const reqCloud = (ep, data, type) => {
   const url = `${address}/c/v1/stations/${stationID}/json`
   const url2 = `${address}/c/v1/stations/${stationID}/pipe`
@@ -303,27 +305,32 @@ createFold
 
 export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, callback) => {
   const parents = true // mkdirp
-
-  const handle = apost(`drives/${driveUUID}/dirs/${dirUUID}/entries`)
-
+  const ep = `drives/${driveUUID}/dirs/${dirUUID}/entries`
+  let handle = null
+  if (stationID) {
+    const url = `${address}/c/v1/stations/${stationID}/json`
+    const resource = new Buffer(`/${ep}`).toString('base64')
+    handle = request.post(url).set('Authorization', token).send(Object.assign({ resource, method: 'POST', op: 'mkdir', toName: dirname }))
+  } else {
+    handle = apost(ep)
+    if (policy && policy.mode === 'replace') handle.field(dirname, JSON.stringify({ op: 'remove', uuid: policy.remoteUUID }))
+    handle.field(dirname, JSON.stringify({ op: 'mkdir', parents }))
+  }
  
-  if (policy && policy.mode === 'replace') handle.field(dirname, JSON.stringify({ op: 'remove', uuid: policy.remoteUUID }))
-  handle.field(dirname, JSON.stringify({ op: 'mkdir', parents }))
-
   handle.end((error, res) => {
     if (error) {
       debug('createFold error', error.response && error.response.body)
       callback(Object.assign({}, error, { response: null }))
     } else if (res && res.statusCode === 200) {
       /* callback the created dir entry */
-      // debug('createFold', res.body)
-      callback(null, res.body[0].data)
+      debug('createFold', res.body)
+      callback(null, stationID ? res.body.data : res.body[0].data)
       // callback(null, res.body.entries.find(e => e.name === dirname))
     } else if (res && res.statusCode === 403 && (policy.mode === 'overwrite' || policy.mode === 'merge')) {
       /* when a file with the same name in remote, retry if given policy of overwrite or merge */
       serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
         .then((listNav) => {
-          const entries = listNav.entries
+          const entries = stationID ? listNav.data.entries : listNav.entries
           const index = entries.findIndex(e => e.name === dirname)
           if (index > -1) {
             const nameSpace = [...entries.map(e => e.name), localEntries.map(e => path.parse(e).base)]

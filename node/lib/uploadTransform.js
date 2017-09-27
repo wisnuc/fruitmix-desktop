@@ -7,7 +7,7 @@ const request = require('request')
 
 const Transform = require('./transform')
 const { readXattr, setXattr } = require('./xattr')
-const { createFoldAsync, UploadMultipleFiles, serverGetAsync } = require('./server')
+const { createFoldAsync, UploadMultipleFiles, serverGetAsync, isCloud } = require('./server')
 const { getMainWindow } = require('./window')
 const { Tasks, sendMsg } = require('./transmissionUpdate')
 
@@ -247,7 +247,7 @@ class Task {
           } else {
             /* combine to one post */
             const { dirUUID, policy } = x
-            const i = this.pending.findIndex(p => p.length < 10 && p[0].dirUUID === dirUUID && policy.mode === p[0].policy.mode)
+            const i = this.pending.findIndex(p => !isCloud() && p.length < 10 && p[0].dirUUID === dirUUID && policy.mode === p[0].policy.mode)
             if (i > -1) {
               this.pending[i].push(x)
             } else {

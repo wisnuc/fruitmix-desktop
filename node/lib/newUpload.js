@@ -4,7 +4,7 @@ import UUID from 'uuid'
 import Debug from 'debug'
 import { dialog, ipcMain } from 'electron'
 import { getMainWindow } from './window'
-import { serverGetAsync } from './server'
+import { serverGetAsync, isCloud } from './server'
 import { createTask } from './uploadTransform'
 
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
@@ -53,7 +53,7 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
 
   const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
   let remoteEntries = listNav.entries
-  if (listNav.data && listNav.code === 200) remoteEntries = listNav.data.entries
+  if (isCloud()) remoteEntries = listNav.data.entries
   debug('listNav', listNav, remoteEntries)
   nameSpace.push(...remoteEntries.map(e => e.name))
   const conflicts = []
