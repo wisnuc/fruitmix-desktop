@@ -105,7 +105,7 @@ class AccountApp extends React.Component {
             {
               account.global && account.global.wx ?
                 <div style={{ display: 'flex', alignItems: 'center', height: 26 }}>
-                  { `您已绑定了您的微信，微信昵称: ${nickName}` }
+                  { nickName ? `您已绑定了您的微信，微信昵称: ${nickName}` : '您已绑定了您的微信' }
                 </div>
                 :
                 <div style={{ display: 'flex', alignItems: 'center', height: 26 }}>
