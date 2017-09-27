@@ -233,6 +233,7 @@ class MoveDialog extends React.PureComponent {
       if (error) {
         this.setState({ loading: false })
         this.closeDialog()
+        this.props.refresh()
         this.props.openSnackBar('失败')
         return
       }
@@ -240,10 +241,12 @@ class MoveDialog extends React.PureComponent {
         if (err) {
           this.setState({ loading: false })
           this.closeDialog()
+          this.props.refresh()
           return this.props.openSnackBar('失败')
         }
         this.setState({ loading: false })
         this.closeDialog()
+        this.props.refresh()
         return this.props.openSnackBar('成功')
       })
     }
