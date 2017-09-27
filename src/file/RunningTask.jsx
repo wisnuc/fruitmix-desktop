@@ -91,7 +91,8 @@ class RunningTask extends React.Component {
 
   renderSizeAndSpeed(task) {
     const speed = this.props.task.paused ? '' : this.formatSpeed(task.speed)
-    const uploaded = task.count === 1 ? this.formatSize(task.completeSize) : `${task.finishCount}/${task.count}`
+    const finishCount = task.finishCount > 0 ? task.finishCount : 0
+    const uploaded = task.count === 1 ? this.formatSize(task.completeSize) : `${finishCount}/${task.count}`
     return (
       <div style={{ height: 20, width: 160, display: 'flex', alignItems: 'center' }}>
         <div> { uploaded } </div>
