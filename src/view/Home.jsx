@@ -284,7 +284,7 @@ class Home extends Base {
       const preDriveUUID = apis.listNavDir && apis.listNavDir.data && apis.listNavDir.data.path[0].uuid
       if (homeDrive && preDriveUUID !== homeDrive.uuid) {
         apis.request('listNavDir', { driveUUID: homeDrive.uuid, dirUUID: homeDrive.uuid })
-      }
+      } else this.refresh()
     }
   }
 

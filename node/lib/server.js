@@ -30,7 +30,7 @@ const reqCloud = (ep, data, type) => {
   const url = `${address}/c/v1/stations/${stationID}/json`
   const url2 = `${address}/c/v1/stations/${stationID}/pipe`
   const resource = new Buffer(`/${ep}`).toString('base64')
-  debug('reqCloud', type, ep)
+  // debug('reqCloud', type, ep)
   if (type === 'GET') return request.get(url).set('Authorization', token).query({ resource, method: type })
   if (type === 'DOWNLOAD') return request.get(url2).set('Authorization', token).query({ resource, method: 'GET' })
   return request.post(url).set('Authorization', token).send(Object.assign({ resource, method: type }, data))
@@ -48,15 +48,6 @@ const adownload = (ep) => {
   return request
     .get(`http://${address}:3000/${ep}`)
     .set('Authorization', `JWT ${token}`)
-}
-
-const awriteDir = (ep, data, type) => {
-  const url = `${address}/c/v1/stations/${stationID}/json`
-  const resource = new Buffer(`/${ep}`).toString('base64')
-  if (type === 'mkdir') return request.post(url).set('Authorization', token)
-    .send({ resource, method: 'POST', toName: data.name, op: 'mkdir' })
-  if (type === 'remove') return request.post(url).set('Authorization', token)
-    .send({ resource, method: 'POST', toName: data.name, uuid: data.uuid, op: 'remove' })
 }
 
 const apost = (ep, data) => {
@@ -142,6 +133,7 @@ export class UploadMultipleFiles {
         }
       }
     })
+
     this.handle.on('error', (err) => {
       debug('this.handle.on error', err)
       this.finish(err)
@@ -155,6 +147,7 @@ export class UploadMultipleFiles {
   }
 
   cloudUpload() {
+    if (this.finished) return
     const ep = `drives/${this.driveUUID}/dirs/${this.dirUUID}/entries`
     const file = this.Files[0]
     
@@ -174,12 +167,8 @@ export class UploadMultipleFiles {
       sha256: part.sha
     }
     this.handle = request.post(url).set('Authorization', token).field('manifest', JSON.stringify(option)).attach(name, rs)
-    /*
-    if (policy && policy.mode === 'replace') {
-      this.handle.field(name, JSON.stringify({ op: 'remove', uuid: policy.remoteUUID }))
-    }
-    */
-    
+
+    debug('cloudUpload', name, policy)
     this.handle.on('error', (err) => {
       debug('this.handle.on error', err)
       this.finish(err)
@@ -192,8 +181,26 @@ export class UploadMultipleFiles {
     })
   }
 
+  remove() {
+    const ep = `drives/${this.driveUUID}/dirs/${this.dirUUID}/entries`
+    const file = this.Files[0]
+    const { name, policy } = file
+    const url = `${address}/c/v1/stations/${stationID}/json`
+    const resource = new Buffer(`/${ep}`).toString('base64')
+    this.handle = request.post(url).set('Authorization', token)
+      .send({ resource, method: 'POST', toName: name, uuid: policy.remoteUUID, op: 'remove' })
+      .end((err, res) => {
+        debug('remove !!!!', err, res && res.body)
+        this.handle = null
+        if (err) this.finish(err)
+        else this.cloudUpload()
+        // else setImmediate(() => this.cloudUpload())
+      })
+  }
+
   upload() {
-    if (stationID) this.cloudUpload()
+    if (stationID && this.Files[0].policy && this.Files[0].policy.mode === 'replace') this.remove()
+    else if (stationID) this.cloudUpload()
     else this.localUpload()
   }
 
@@ -209,6 +216,7 @@ export class UploadMultipleFiles {
   }
 
   abort() {
+    this.finished = true
     if (this.handle) this.handle.abort()
   }
 }
@@ -301,6 +309,17 @@ createFold
 @param {Object} policy
 @param {string} policy.mode
 @param {function} callback
+
+normal mode:
+createFold -> callback
+
+merge mode:
+createFold -> if error -> rename -> retry createFold -> callback
+
+overwrite mode:
+createFold -> if error -> remove -> retry createFold -> callback
+
+TODO: fix this callback hell
 */
 
 export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, callback) => {
@@ -310,39 +329,46 @@ export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, ca
   if (stationID) {
     const url = `${address}/c/v1/stations/${stationID}/json`
     const resource = new Buffer(`/${ep}`).toString('base64')
-    handle = request.post(url).set('Authorization', token).send(Object.assign({ resource, method: 'POST', op: 'mkdir', toName: dirname }))
+    handle = request.post(url).set('Authorization', token)
+    if (policy && policy.mode === 'replace') handle.send(Object.assign({ resource, method: 'POST', op: 'remove', toName: dirname, uuid: policy.remoteUUID }))
+    else handle.send(Object.assign({ resource, method: 'POST', op: 'mkdir', toName: dirname }))
   } else {
     handle = apost(ep)
     if (policy && policy.mode === 'replace') handle.field(dirname, JSON.stringify({ op: 'remove', uuid: policy.remoteUUID }))
     handle.field(dirname, JSON.stringify({ op: 'mkdir', parents }))
   }
- 
+
   handle.end((error, res) => {
     if (error) {
-      debug('createFold error', error.response && error.response.body)
-      callback(Object.assign({}, error, { response: null }))
+      debug('createFold error', error.response && error.response.body, driveUUID, dirUUID, dirname, policy)
+      if (policy.mode === 'overwrite' || policy.mode === 'merge') {
+        /* when a file with the same name in remote, retry if given policy of overwrite or merge */
+        serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
+          .then((listNav) => {
+            const entries = stationID ? listNav.data.entries : listNav.entries
+            debug('retry creat fold entries', entries)
+            const index = entries.findIndex(e => e.name === dirname)
+            if (index > -1) {
+              const nameSpace = [...entries.map(e => e.name), localEntries.map(e => path.parse(e).base)]
+              const mode = policy.mode === 'overwrite' ? 'replace' : 'rename'
+              const checkedName = policy.mode === 'overwrite' ? dirname : getName(dirname, nameSpace)
+              const remoteUUID = entries[index].uuid
+              debug('retry createFold', dirname, mode, checkedName, remoteUUID)
+              createFold(driveUUID, dirUUID, checkedName, localEntries, { mode, checkedName, remoteUUID }, callback)
+            } else callback(res.body)
+          })
+          .catch(e => callback(Object.assign({}, e, { response: null })))
+      } else callback(Object.assign({}, error, { response: null, code: error.response.body[0].error.code }))
     } else if (res && res.statusCode === 200) {
+      // debug('createFold handle.end res.statusCode 200', res.body)
+      /* mode === 'replace' && stationID: need to retry creatFold */
+      if (stationID && policy && policy.mode === 'replace') createFold(driveUUID, dirUUID, dirname, localEntries, { mode: 'normal' }, callback)
       /* callback the created dir entry */
-      debug('createFold', res.body)
-      callback(null, stationID ? res.body.data : res.body[0].data)
-      // callback(null, res.body.entries.find(e => e.name === dirname))
-    } else if (res && res.statusCode === 403 && (policy.mode === 'overwrite' || policy.mode === 'merge')) {
-      /* when a file with the same name in remote, retry if given policy of overwrite or merge */
-      serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
-        .then((listNav) => {
-          const entries = stationID ? listNav.data.entries : listNav.entries
-          const index = entries.findIndex(e => e.name === dirname)
-          if (index > -1) {
-            const nameSpace = [...entries.map(e => e.name), localEntries.map(e => path.parse(e).base)]
-            const mode = policy.mode === 'overwrite' ? 'replace' : 'rename'
-            const checkedName = policy.mode === 'overwrite' ? dirname : getName(dirname, nameSpace)
-            const remoteUUID = entries[index].uuid
-            debug('retry createFold', dirname, mode, checkedName, remoteUUID)
-            createFold(driveUUID, dirUUID, checkedName, localEntries, { mode, checkedName, remoteUUID }, callback)
-          } else callback(res.body)
-        })
-        .catch(e => callback(Object.assign({}, e, { response: null })))
-    } else callback(res.body) // response code not 200 and no policy
+      else callback(null, stationID ? res.body.data : res.body[res.body.length - 1].data)
+    } else {
+      debug('createFold no error but res not 200', res.body)
+      callback(res.body) // response code not 200 and no policy
+    }
   })
 }
 
