@@ -80,7 +80,7 @@ class AccountApp extends React.Component {
             <IconButton
               iconStyle={{ width: 67, height: 67, color: primaryColor }}
               style={{ width: 67, height: 67, padding: 0 }}
-              onTouchTap={() => this.toggleDialog('editAvatar')}
+              onTouchTap={() => !(account.global && account.global.wx) && this.toggleDialog('editAvatar')}
             >
               <ActionAccountCircle />
             </IconButton>

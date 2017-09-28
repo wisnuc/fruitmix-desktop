@@ -43,6 +43,7 @@ class Device extends RequestManager {
 
       // methods
       request: this.request.bind(this),
+      requestAsync: this.requestAsync.bind(this),
       clearRequest: this.clearRequest.bind(this),
       initWizard: this.initWizard.bind(this),
       systemStatus: this.systemStatus.bind(this),
@@ -70,6 +71,15 @@ class Device extends RequestManager {
     switch (name) {
       case 'cloudUsers':
         r = this.reqCloud('GET', 'users', args.stationID, args.token)
+        break
+
+      case 'localTokenByCloud':
+        r = this.reqCloud('GET', 'token', args.stationID, args.token)
+        break
+
+      case 'info':
+        r = request
+          .get(`http://${args.ip}:3000/station/info`)
         break
 
       case 'device':

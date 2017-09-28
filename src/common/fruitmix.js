@@ -143,10 +143,14 @@ class Fruitmix extends EventEmitter {
 
     switch (name) {
       case 'getToken':
-        r = request
-          .get(`http://${this.address}:3000/token`)
-          .auth(args.uuid, args.password)
-          .set('Accept', 'application/json')
+        if (this.stationID) {
+          r = this.aget('token')
+        } else {
+          r = request
+            .get(`http://${this.address}:3000/token`)
+            .auth(args.uuid, args.password)
+            .set('Accept', 'application/json')
+        }
         break
 
       case 'users':
@@ -167,10 +171,14 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'updatePassword':
-        r = request
-          .put(`http://${this.address}:3000/users/${this.userUUID}/password`, { password: args.newPassword })
-          .auth(this.userUUID, args.prePassword)
-          .set('Accept', 'application/json')
+        if (this.stationID) {
+          r = this.aput(`users/${this.userUUID}/password`, { password: args.newPassword })
+        } else {
+          r = request
+            .put(`http://${this.address}:3000/users/${this.userUUID}/password`, { password: args.newPassword })
+            .auth(this.userUUID, args.prePassword)
+            .set('Accept', 'application/json')
+        }
         break
 
       /** admins APIs **/

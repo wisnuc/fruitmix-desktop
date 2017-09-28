@@ -75,17 +75,47 @@ class WechatLogin extends React.Component {
       this.doneAsync(view, device, user).asCallback()
     }
 
-    this.autologin = () => {
-      const stationID = this.state.lastDevice
-      const token = this.state.wxData.token
-      const guid = this.state.wxData.user.id
+    this.autologinAsync = async () => {
+      const stationID = this.state.lastDevice.id
+      const ips = this.state.lastDevice.LANIP
 
-      debug('autologin', stationID, token)
-      this.props.selectedDevice.request('cloudUsers', { stationID, token }, (err, res) => {
-        debug('cloudUsers', err, res)
-        if (err) return this.setState({ wechatLogin: 'fail' })
+      let lanip = null
+      for (let i = 0; i < ips.length; i++) {
+        try {
+          const info = await this.props.selectedDevice.requestAsync('info', { ip: ips[i] })
+          if (info && info.id === stationID) {
+            lanip = ips[0]
+            break
+          }
+        } catch(e) {
+          debug('this.autologinAsync can not connect lanip', ips[i], e)
+        }
+      }
+      if (lanip) {
+        const token = this.state.wxData.token
+        const guid = this.state.wxData.user.id
+
+        const res = await this.props.selectedDevice.requestAsync('cloudUsers', { stationID, token })
         const user = res && res.data.find(u => u.global && u.global.id === guid)
-        if (!user) return this.setState({ wechatLogin: 'fail' })
+        if (!user) throw Error('no user')
+        const localToken = await this.props.selectedDevice.requestAsync('localTokenByCloud', { stationID, token })
+
+        Object.assign(this.props.selectedDevice, {
+          token: {
+            isFulfilled: () => true,
+            ctx: user,
+            data: localToken.data
+          },
+          mdev: { address: lanip, domain: 'local' }
+        })
+        this.done('LOGIN', this.props.selectedDevice, user)
+      } else {
+        const token = this.state.wxData.token
+        const guid = this.state.wxData.user.id
+
+        const res = await this.props.selectedDevice.requestAsync('cloudUsers', { stationID, token })
+        const user = res && res.data.find(u => u.global && u.global.id === guid)
+        if (!user) throw Error('no user')
         Object.assign(this.props.selectedDevice, {
           token: {
             isFulfilled: () => true,
@@ -94,8 +124,17 @@ class WechatLogin extends React.Component {
           },
           mdev: { address: 'http://www.siyouqun.org', domain: 'remote' }
         })
-        debug('this.props.selectedDevice', this.props.selectedDevice)
+        debug('this.autologinAsync this.props.selectedDevice', this.props.selectedDevice)
+        this.props.ipcRenderer.send('WECHAT_LOGIN', user.uuid, { weChat: this.state.wxData.user })
         return this.done('LOGIN', this.props.selectedDevice, user)
+      }
+    }
+
+    this.autologin = () => {
+      if (this.out) return
+      this.autologinAsync().catch((e) => {
+        debug('this.autologin', e)
+        this.setState({ wechatLogin: 'fail' })
       })
     }
 
@@ -115,7 +154,7 @@ class WechatLogin extends React.Component {
 
     this.enterList = () => {
       clearInterval(this.interval)
-      this.setState({ wechatLogin: 'list' })
+      this.setState({ wechatLogin: 'list', count: 3 })
     }
 
     this.resetWCL = () => {
@@ -182,7 +221,7 @@ class WechatLogin extends React.Component {
           debug('lastDevice', lists[index])
           this.setState({ lists })
           setTimeout(() => this.setState({ wechatLogin: 'success', count: 3 }), 500)
-          setTimeout(() => this.setState({ wechatLogin: 'lastDevice', lastDevice: lists[index].id }, this.countDown), 1000)
+          setTimeout(() => this.setState({ wechatLogin: 'lastDevice', lastDevice: lists[index] }, this.countDown), 1000)
         } else return this.setState({ wechatLogin: 'fail' })
       })
     }
@@ -215,7 +254,7 @@ class WechatLogin extends React.Component {
 
     this.select = (list) => {
       debug('this.select', list)
-      this.setState({ wechatLogin: 'lastDevice', lastDevice: list.id }, this.countDown)
+      this.setState({ wechatLogin: 'lastDevice', lastDevice: list }, this.countDown)
     }
   }
 
@@ -231,6 +270,10 @@ class WechatLogin extends React.Component {
       }
       return null
     }
+  }
+
+  componentWillUnmount() {
+    this.out = true
   }
 
   async doneAsync(view, device, user) {

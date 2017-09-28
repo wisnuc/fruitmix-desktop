@@ -86,6 +86,7 @@ class Task {
             if (stat.isDirectory()) {
               /* create fold and return the uuid */
               const dirname = policy.mode === 'rename' ? policy.checkedName : path.parse(entry).base
+
               const dirEntry = await createFoldAsync(driveUUID, dirUUID, dirname, entries, policy)
               const uuid = dirEntry.uuid
 
@@ -174,7 +175,7 @@ class Task {
       transform: (X, callback) => {
         const diffAsync = async (local, driveUUID, dirUUID, task) => {
           const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
-          const remote = listNav.entries
+          const remote = isCloud() ? listNav.data.entries : listNav.entries
           if (!remote.length) return local
           const map = new Map() // compare hash and name
           const nameMap = new Map() // only same name
@@ -266,12 +267,25 @@ class Task {
           const readStreams = parts.map(part => fs.createReadStream(entry, { start: part.start, end: part.end, autoClose: true }))
           for (let i = 0; i < parts.length; i++) {
             const rs = readStreams[i]
-            rs.on('data', (chunk) => {
+            let lastTimeSize = 0
+            let countReadHandle = null
+            const countRead = () => {
               sendMsg()
-              if (task.paused) return
-              task.completeSize += chunk.length
+              if (task.paused) return clearInterval(countReadHandle)
+              const gap = rs.bytesRead - lastTimeSize
+              task.completeSize += gap
+              lastTimeSize = rs.bytesRead
+              debug('task.completeSize', task.completeSize)
+            }
+            // rs.on('data', (c) => {count += c.length;debug('data',count)})
+            rs.on('open', () => {
+              countReadHandle = setInterval(countRead, 100)
             })
             rs.on('end', () => {
+              clearInterval(countReadHandle)
+              const gap = rs.bytesRead - lastTimeSize
+              task.completeSize += gap
+              lastTimeSize = rs.bytesRead
               if (task.paused) return
               task.finishCount += 1
               sendMsg()
@@ -290,11 +304,7 @@ class Task {
           callback(error, { driveUUID, dirUUID, Files, task })
         })
         task.reqHandles.push(handle)
-        try {
         handle.upload()
-        } catch (e) {
-          debug('handle.upload error', e)
-        }
       }
     })
 
