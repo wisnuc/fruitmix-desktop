@@ -206,7 +206,7 @@ class Task {
           const nameValue = [...nameMap.values()]
           nameValue.forEach(key => map.delete(key))
           const mapValue = [...map.values()]
-          debug('this.diff transform', X.length, X[0].entry, mapValue)
+          // debug('this.diff transform', X.length, X[0].entry, mapValue)
           if (mapValue.length) {
             let mode = mapValue[0].policy.mode
             if (mode === 'merge') mode = 'rename'
@@ -214,11 +214,26 @@ class Task {
             mapValue.forEach((l) => {
               const name = path.parse(l.entry).base // TODO mode rename but still same name ?
               const checkedName = getName(name, nameSpace)
-              const remoteUUID = remote.find(r => r.name === name).uuid
-              debug('get files with same name but different hash', { entry: l.entry, mode, checkedName, remoteUUID })
-              l.policy = Object.assign({}, { mode, checkedName, remoteUUID }) // important: assign a new object !
+              const remoteFile = remote.find(r => r.name === name)
+              const remoteUUID = remoteFile.uuid
+              const remoteHash = remoteFile.hash
+
+              let seed = 0
+              if (l.parts.length > 0) {
+                const index = l.parts.findIndex(p => p.target === remoteHash)
+                if (index > 0) {
+                  seed = index
+                  task.completeSize += index * 1024 * 1024 * 1024
+                }
+              }
+              
+              /* continue to upload big file */
+              debug('get files with same name but different hash\n', l.entry, mode, checkedName, remoteUUID, seed, l.parts)
+
+              l.policy = Object.assign({}, { mode, checkedName, remoteUUID, seed }) // important: assign a new object !
             })
           }
+          /* task all finished */
           if (!task.paused && !result.length && task.finishCount === task.count &&
             this.readDir.isSelfStopped() && this.hash.isSelfStopped()) {
             task.finishDate = (new Date()).getTime()
@@ -288,7 +303,7 @@ class Task {
               task.completeSize += gap
               lastTimeSize = rs.bytesRead
               if (task.paused) return
-              task.finishCount += 1
+              if (i === parts.length - 1) task.finishCount += 1
               sendMsg()
             })
           }

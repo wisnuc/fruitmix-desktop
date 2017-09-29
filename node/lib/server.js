@@ -111,26 +111,22 @@ export class UploadMultipleFiles {
 
   localUpload() {
     this.handle = apost(`drives/${this.driveUUID}/dirs/${this.dirUUID}/entries`)
-    
     this.Files.forEach((file) => {
       const { name, parts, readStreams, policy } = file
       for (let i = 0; i < parts.length; i++) {
+        if (policy && policy.seed !== 0 && policy.seed > i) continue // big file, upload from part[seed]
         const rs = readStreams[i]
         const part = parts[i]
         let formDataOptions = {
           size: part.end ? part.end - part.start + 1 : 0,
           sha256: part.sha
         }
-        try {
-          if (part.start) {
-            formDataOptions = Object.assign(formDataOptions, { append: part.fingerprint })
-          } else if (policy && policy.mode === 'replace') {
-            this.handle.field(name, JSON.stringify({ op: 'remove', uuid: policy.remoteUUID }))
-          }
-          this.handle.attach(name, rs, JSON.stringify(formDataOptions))
-        } catch (e) {
-          debug('upload this.Files.forEach error', e)
+        if (part.start) {
+          formDataOptions = Object.assign(formDataOptions, { append: part.target })
+        } else if (policy && policy.mode === 'replace') {
+          this.handle.field(name, JSON.stringify({ op: 'remove', uuid: policy.remoteUUID }))
         }
+        this.handle.attach(name, rs, JSON.stringify(formDataOptions))
       }
     })
 
@@ -140,6 +136,7 @@ export class UploadMultipleFiles {
     })
 
     this.handle.end((err, res) => {
+      // debug('localUpload this.handle.end', err, res && res.body)
       if (err) this.finish(err)
       else if (res && res.statusCode === 200) this.finish(null)
       else this.finish(res.body)
@@ -150,7 +147,7 @@ export class UploadMultipleFiles {
     if (this.finished) return
     const ep = `drives/${this.driveUUID}/dirs/${this.dirUUID}/entries`
     const file = this.Files[0]
-    
+
     const { name, parts, readStreams, policy } = file
     const rs = readStreams[0]
     const part = parts[0]
