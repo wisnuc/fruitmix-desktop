@@ -45,7 +45,7 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
     const stat = await fs.lstatAsync(path.resolve(entry))
     const entryType = stat.isDirectory() ? 'directory' : stat.isFile() ? 'file' : 'others'
     /* only upload directory or file, ignore others, such as symbolic link */
-    if (entryType !== 'others') {
+    if (entryType !== 'others' && !(isCloud() && stat.size > 1073741824)) {
       if (!taskType) taskType = entryType
       filtered.push({ entry, name, stat, entryType })
     }

@@ -9,6 +9,7 @@ import ActionSettings from 'material-ui/svg-icons/action/settings'
 import ActionExitToApp from 'material-ui/svg-icons/action/exit-to-app'
 import ActionAccountCircle from 'material-ui/svg-icons/action/account-circle'
 import SocialPerson from 'material-ui/svg-icons/social/person'
+import CloudIcon from 'material-ui/svg-icons/file/cloud'
 import ActionDns from 'material-ui/svg-icons/action/dns'
 import { indigo500 } from 'material-ui/styles/colors'
 
@@ -104,6 +105,7 @@ class NavDrawer extends React.Component {
 
   render() {
     const { open, onRequestChange, views, nav, navTo } = this.props
+    console.log(' NavDrawer render', this.props)
     const dense = true
 
     const account = views.account.ctx.props.apis.account
@@ -157,6 +159,10 @@ class NavDrawer extends React.Component {
 
           <div style={{ height: 40, marginLeft: 24, marginTop: -8 }}>
             <div style={{ fontSize: 16, fontWeight: 500, color: '#FFF' }}>{ username }</div>
+          </div>
+
+          <div style={{ position: 'absolute', right: 24, top: 16, display: this.props.isCloud ? '' : 'none' }}>
+            <CloudIcon color="#FFFFFF" />
           </div>
         </div>
 

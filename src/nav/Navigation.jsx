@@ -407,6 +407,11 @@ class NavViews extends React.Component {
       flexWrap: 'wrap'
     }
 
+    /* is cloud ? */
+    let isCloud = false
+    const token = this.props.selectedDevice.token
+    if (token && token.data && token.data.stationID) isCloud = true
+
     return (
       <div style={style}>
 
@@ -451,6 +456,7 @@ class NavViews extends React.Component {
           nav={this.state.nav}
           navTo={this.navTo.bind(this)}
           navToMain={this.props.nav}
+          isCloud={isCloud}
         />
 
         {/* snackBar */}
