@@ -341,10 +341,13 @@ class Media extends Base {
 
     this.uploadMediaAsync = async () => {
       const driveUUID = this.ctx.props.apis.listNavDir.data.path[0].uuid
+      const stationID = this.ctx.props.selectedDevice.token.data.stationID
       const data = await this.ctx.props.apis.requestAsync('mkdir', { driveUUID, dirUUID: driveUUID, dirname: '上传的照片' })
-      const dirUUID = data.entries.find(entry => entry.name === '上传的照片').uuid
+      debug('this.uploadMediaAsync data', data)
+      const dirUUID = stationID ? data.uuid : data[0].data.uuid
       const newData = await this.ctx.props.apis.requestAsync('mkdir', { driveUUID, dirUUID, dirname: '来自个人电脑' })
-      const targetUUID = newData.entries.find(entry => entry.name === '来自个人电脑').uuid
+      const targetUUID = stationID ? newData.uuid : newData[0].data.uuid
+      debug('this.uploadMediaAsync newdata', newData)
       ipcRenderer.send('UPLOADMEDIA', { driveUUID, dirUUID: targetUUID })
     }
 

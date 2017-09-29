@@ -19,6 +19,7 @@ class LoginApp extends React.Component {
   }
 
   componentDidMount() {
+    document.getElementById('start-bg').style.display = 'none'
     setTimeout(() => this.setState({ hello: false }), 300)
   }
 
