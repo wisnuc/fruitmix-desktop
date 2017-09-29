@@ -26,18 +26,21 @@ class ChangeAccountDialog extends React.PureComponent {
       password: '',
       passwordAgain: '',
       passwordErrorText: '',
-      passwordAgainErrorText: ''
+      passwordAgainErrorText: '',
+      loading: false
     }
 
     this.fire = () => {
+      this.setState({ loading: true })
       const { apis, op } = this.props
       const cb = (error) => {
         if (error) {
           debug('error', op, error)
           // this.props.openSnackBar(`修改失败：${error.message}`)
           if (op === 'password' && error.message === 'Unauthorized') {
-            this.setState({ prePasswordErrorText: '原密码错误' })
+            this.setState({ prePasswordErrorText: '原密码错误', loading: false })
           } else {
+            this.setState({ loading: false })
             this.props.openSnackBar('修改失败')
           }
         } else {
@@ -133,6 +136,7 @@ class ChangeAccountDialog extends React.PureComponent {
       || this.state.passwordErrorText || this.state.prePasswordErrorText) {
       return false
     }
+    if (this.state.loading) return false
     if (this.props.op === 'username') {
       return this.state.username.length > 0 && !this.state.usernameErrorText
     }

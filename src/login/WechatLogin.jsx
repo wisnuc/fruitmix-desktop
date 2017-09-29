@@ -90,7 +90,7 @@ class WechatLogin extends React.Component {
           debug('this.autologinAsync can not connect lanip', ips[i], e)
         }
       }
-      lanip = null
+      // lanip = null
       if (lanip) {
         const token = this.state.wxData.token
         const guid = this.state.wxData.user.id

@@ -181,7 +181,7 @@ class Preview extends React.Component {
     const isText = textExtension.findIndex(t => t === extension) > -1 && this.props.item.size < 1024 * 1024
     const isVideo = videoExtension.findIndex(t => t === extension) > -1
     const isAudio = audioExtension.findIndex(t => t === extension) > -1
-    const isPDF = extension === 'PDF'
+    const isPDF = extension === 'PDF' && global.config.platform !== 'win32'
 
     if ((!isText && !isVideo && !isAudio && !isPDF) || this.props.item.size > 1024 * 1024 * 50) return this.renderOtherFiles()
 

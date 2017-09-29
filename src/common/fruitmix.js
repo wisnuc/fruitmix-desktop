@@ -298,16 +298,19 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'addBlacklist':
-        r = this.apost(`users/${this.userUUID}/media-blacklist`, args)
+        if (this.stationID) r = this.apost(`users/${this.userUUID}/media-blacklist`, { blacklist: args })
+        else r = this.apost(`users/${this.userUUID}/media-blacklist`, args)
         break
 
       case 'putBlacklist':
-        r = this.aput(`users/${this.userUUID}/media-blacklist`, args)
+        if (this.stationID) r = this.aput(`users/${this.userUUID}/media-blacklist`, { blacklist: args })
+        else r = this.aput(`users/${this.userUUID}/media-blacklist`, args)
         break
 
       case 'subtractBlacklist':
-        r = this.adel(`users/${this.userUUID}/media-blacklist`, args)
-         break
+        if (this.stationID) r = this.adel(`users/${this.userUUID}/media-blacklist`, { blacklist: args })
+        else r = this.adel(`users/${this.userUUID}/media-blacklist`, args)
+        break
 
       /** Docker API **/
       case 'docker':
