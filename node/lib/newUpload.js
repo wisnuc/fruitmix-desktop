@@ -45,7 +45,7 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
     const stat = await fs.lstatAsync(path.resolve(entry))
     const entryType = stat.isDirectory() ? 'directory' : stat.isFile() ? 'file' : 'others'
     /* only upload directory or file, ignore others, such as symbolic link */
-    if (entryType !== 'others' && !(isCloud() && stat.size > 1073741824)) {
+    if (entryType !== 'others' && !(isCloud() && stat.size > 1073741824) && !(entryType === 'file' && name === '.DS_Store')) {
       if (!taskType) taskType = entryType
       filtered.push({ entry, name, stat, entryType })
     }
@@ -62,13 +62,12 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
     const index = remoteEntries.findIndex(e => (e.name === name))
     if (index > -1) {
       let checkedName = name
-      const extension = name.replace(/^.*\./, '')
+      const extension = path.parse(name).ext
       for (let j = 1; nameSpace.includes(checkedName); j++) {
         if (!extension || extension === name) {
           checkedName = `${name}(${j})`
         } else {
-          const pureName = name.match(/^.*\./)[0]
-          checkedName = `${pureName.slice(0, pureName.length - 1)}(${j}).${extension}`
+          checkedName = `${path.parse(name).name}(${j}).${extension}`
         }
       }
       debug('conflicts find', name)

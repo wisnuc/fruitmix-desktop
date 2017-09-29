@@ -283,13 +283,12 @@ export class DownloadFile {
 /* return a new file name */
 const getName = (name, nameSpace) => {
   let checkedName = name
-  const extension = name.replace(/^.*\./, '')
+  const extension = path.parse(name).ext
   for (let i = 1; nameSpace.includes(checkedName); i++) {
     if (!extension || extension === name) {
       checkedName = `${name}(${i})`
     } else {
-      const pureName = name.match(/^.*\./)[0]
-      checkedName = `${pureName.slice(0, pureName.length - 1)}(${i}).${extension}`
+      checkedName = `${path.parse(name).name}(${i}).${extension}`
     }
   }
   return checkedName
