@@ -100,10 +100,11 @@ class Home extends Base {
       const curr = path[path.length - 1]
       const oldName = entries[selected[0]].name
       const extension = oldName.replace(/^.*\./, '')
+      const nameNoExt = oldName.match(/^.*\./) ? oldName.match(/^.*\./)[0] : oldName
       let newName = oldName
       for (let i = 0; entries.findIndex(e => e.name === newName) > -1; i++) {
         const addText = i ? ` - 副本 (${i})` : ' - 副本'
-        if (!extension || extension === oldName) {
+        if (!extension || extension === oldName || nameNoExt === '.') {
           newName = `${oldName}${addText}`
         } else {
           const pureName = oldName.match(/^.*\./)[0]

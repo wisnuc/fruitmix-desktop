@@ -32,13 +32,12 @@ const downloadHandle = (event, args) => {
         if (files.includes(name)) {
           const nameSpace = entries.map(e => e.name)
           nameSpace.push(...files)
-          const extension = name.replace(/^.*\./, '')
+          const extension = path.parse(name).ext
           for (let i = 1; nameSpace.includes(newName) || nameSpace.includes(`${newName}.download`); i++) {
             if (!extension || extension === name) {
               newName = `${name}(${i})`
             } else {
-              const pureName = name.match(/^.*\./)[0]
-              newName = `${pureName.slice(0, pureName.length - 1)}(${i}).${extension}`
+              newName = `${path.parse(name).name}(${j}).${extension}`
             }
           }
         }
