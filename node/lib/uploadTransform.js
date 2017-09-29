@@ -19,7 +19,7 @@ const getName = (name, nameSpace) => {
     if (!extension || extension === name) {
       checkedName = `${name}(${i})`
     } else {
-      checkedName = `${path.parse(name).name}(${j}).${extension}`
+      checkedName = `${path.parse(name).name}(${i}).${extension}`
     }
   }
   return checkedName
@@ -179,6 +179,7 @@ class Task {
         const diffAsync = async (local, driveUUID, dirUUID, task) => {
           const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
           const remote = isCloud() ? listNav.data.entries : listNav.entries
+          debug('listNav diff', listNav, remote)
           if (!remote.length) return local
           const map = new Map() // compare hash and name
           const nameMap = new Map() // only same name
@@ -250,7 +251,10 @@ class Task {
         const { driveUUID, dirUUID, task } = X[0]
         if (task.state !== 'uploading') task.state = 'diffing'
 
-        diffAsync(X, driveUUID, dirUUID, task).then(value => callback(null, value)).catch(callback)
+        diffAsync(X, driveUUID, dirUUID, task).then(value => callback(null, value)).catch(e => {
+          debug('diffAsync error', e)
+          callback(e)
+        })
       }
     })
 

@@ -200,6 +200,7 @@ export class UploadMultipleFiles {
   }
 
   finish(error) {
+    debug('cloudUpload error', error)
     if (this.finished) return
     if (error) {
       debug('upload error', error.response && error.response.body)
