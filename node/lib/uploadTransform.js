@@ -78,13 +78,16 @@ class Task {
           for (let i = 0; i < entries.length; i++) {
             // if (task.paused) throw Error('task paused !')
             if (task.paused) break
-            const entry = entries[i]
             const policy = policies[i]
+            const entry = entries[i]
             const stat = await fs.lstatAsync(path.resolve(entry))
-            task.count += 1
+            const fullName = path.parse(entry).base
+            if (fullName === '.DS_Store' && !stat.isDirectory()) continue
+            else task.count += 1
+
             if (stat.isDirectory()) {
               /* create fold and return the uuid */
-              const dirname = policy.mode === 'rename' ? policy.checkedName : path.parse(entry).base
+              const dirname = policy.mode === 'rename' ? policy.checkedName : fullName
 
               const dirEntry = await createFoldAsync(driveUUID, dirUUID, dirname, entries, policy)
               const uuid = dirEntry.uuid
