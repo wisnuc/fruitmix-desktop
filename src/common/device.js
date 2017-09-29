@@ -80,6 +80,7 @@ class Device extends RequestManager {
       case 'info':
         r = request
           .get(`http://${args.ip}:3000/station/info`)
+          .timeout(2000)
         break
 
       case 'device':
