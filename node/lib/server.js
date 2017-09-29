@@ -69,7 +69,7 @@ get json data from server
 
 export const serverGet = (endpoint, callback) => {
   aget(endpoint).end((err, res) => {
-    if (err) return callback(Object.assign({}, err, { response: null }))
+    if (err) return callback(Object.assign({}, err, { response: err.response && err.response.body }))
     if (res.statusCode !== 200 && res.statusCode !== 206) {
       const e = new Error('http status code not 200')
       e.code = 'EHTTPSTATUS'
@@ -131,7 +131,6 @@ export class UploadMultipleFiles {
     })
 
     this.handle.on('error', (err) => {
-      debug('this.handle.on error', err)
       this.finish(err)
     })
 
@@ -167,7 +166,6 @@ export class UploadMultipleFiles {
 
     debug('cloudUpload', name, policy)
     this.handle.on('error', (err) => {
-      debug('this.handle.on error', err)
       this.finish(err)
     })
 
@@ -204,9 +202,8 @@ export class UploadMultipleFiles {
   finish(error) {
     if (this.finished) return
     if (error) {
-      debug('upload finish, error:', error, error.code)
-      error.code = error.code || (error.status >= 500 ? 'ESERVER' : 'EOTHER')
-      error.response = null
+      debug('upload error', error.response && error.response.body)
+      error.response = error.response && error.response.body
     }
     this.finished = true
     this.callback(error)
@@ -271,9 +268,8 @@ export class DownloadFile {
   finish(error) {
     if (this.finished) return
     if (error) {
-      debug('download finish, error:', error)
-      error.code = error.code || (error.status >= 500 ? 'ESERVER' : 'EOTHER')
-      error.response = null
+      debug('download finish, error:', error.response && error.response.body)
+      error.response = error.response && error.response.body
     }
     this.callback(error)
     this.finished = true
@@ -353,8 +349,8 @@ export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, ca
               createFold(driveUUID, dirUUID, checkedName, localEntries, { mode, checkedName, remoteUUID }, callback)
             } else callback(res.body)
           })
-          .catch(e => callback(Object.assign({}, e, { response: null })))
-      } else callback(Object.assign({}, error, { response: null, code: error.response.body[0].error.code }))
+          .catch(e => callback(Object.assign({}, e, { response: e.response && e.response.body })))
+      } else callback(Object.assign({}, error, { response: error.response && error.response.body }))
     } else if (res && res.statusCode === 200) {
       // debug('createFold handle.end res.statusCode 200', res.body)
       /* mode === 'replace' && stationID: need to retry creatFold */
@@ -398,7 +394,7 @@ export const downloadFile = (driveUUID, dirUUID, entryUUID, fileName, downloadPa
 
       const handle = adownload(dirUUID === 'media' ? `media/${entryUUID}` : `drives/${driveUUID}/dirs/${dirUUID}/entries/${entryUUID}`)
         .query({ name: fileName })
-        .on('error', err => callback(Object.assign({}, err, { response: null })))
+        .on('error', err => callback(Object.assign({}, err, { response: err.response && err.response.body })))
       handle.pipe(stream)
     } else callback(null, filePath)
   })

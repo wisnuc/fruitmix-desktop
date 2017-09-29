@@ -36,7 +36,7 @@ class Row extends React.PureComponent {
   render() {
     console.log('Row', this.props)
     const { node } = this.props
-    const error = convert(node.error.code)
+    const error = node.error.code ? convert(node.error.code) : node.error.status ? `请求失败： ${node.error.status}` : '未知错误'
     let name = ''
     if (node.entry && typeof node.entry === 'object') name = node.entry.name
     if (node.entry && typeof node.entry === 'string') name = node.entry.replace(/^.*\//, '').replace(/^.*\\/, '')
@@ -53,7 +53,7 @@ class Row extends React.PureComponent {
             : <ErrorIcon style={svgStyle} />
           }
         </div>
-        <div style={{ width: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: 5, fontSize: 13 }} >
+        <div style={{ width: 196, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: 5, fontSize: 13 }} >
           { name }
         </div>
         <div style={{ fontSize: 13 }} >
