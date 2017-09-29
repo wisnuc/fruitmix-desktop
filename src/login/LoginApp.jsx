@@ -74,6 +74,11 @@ class LoginApp extends React.Component {
           />
         </div>
 
+        {/* version */}
+        <div style={{ position: 'absolute', bottom: 24, left: 24, fontSize: 14, color: '#FAFAFA' }}>
+          { `版本: ${global.config.appVersion}` }
+        </div>
+
         {/* copyright */}
         <div style={{ position: 'absolute', bottom: 24, right: 24, fontSize: 14, color: '#FAFAFA' }}>
           ©2017 上海闻上信息科技有限公司 版权所有
