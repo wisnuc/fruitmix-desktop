@@ -8,7 +8,7 @@ const request = require('request')
 
 const Transform = require('./transform')
 const { readXattr, setXattr } = require('./xattr')
-const { serverGetAsync, DownloadFile } = require('./server')
+const { serverGetAsync, DownloadFile, isCloud } = require('./server')
 const { getMainWindow } = require('./window')
 const { Tasks, sendMsg } = require('./transmissionUpdate')
 
@@ -91,7 +91,7 @@ class Task {
 
               /* get children from remote */
               const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${entry.uuid}`)
-              const children = listNav.entries
+              const children = isCloud() ? listNav.data.entries : listNav.entries
 
               this.push({ entries: children, downloadPath: entry.downloadPath, dirUUID: entry.uuid, driveUUID, task })
             } else {

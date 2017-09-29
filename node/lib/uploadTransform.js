@@ -101,6 +101,7 @@ class Task {
               childPolicies.fill({ mode: policy.mode }) // !!! fill with one object, all shared !!!
               if (policy.mode === 'rename' || policy.mode === 'replace') childPolicies.fill({ mode: 'normal' })
               // debug('childPolicies', childPolicies)
+              if (task.paused) break
               this.push({ entries: newEntries, dirUUID: uuid, driveUUID, policies: childPolicies, task })
             } else {
               task.size += stat.size
@@ -275,7 +276,7 @@ class Task {
               const gap = rs.bytesRead - lastTimeSize
               task.completeSize += gap
               lastTimeSize = rs.bytesRead
-              debug('task.completeSize', task.completeSize)
+              // debug('task.completeSize', task.completeSize)
             }
             // rs.on('data', (c) => {count += c.length;debug('data',count)})
             rs.on('open', () => {

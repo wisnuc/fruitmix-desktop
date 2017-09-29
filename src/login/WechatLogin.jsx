@@ -1,12 +1,11 @@
 import React from 'react'
 import Debug from 'debug'
 import Radium from 'radium'
-import { Avatar, CircularProgress, Divider } from 'material-ui'
+import { CircularProgress, Divider } from 'material-ui'
 import RightIcon from 'material-ui/svg-icons/hardware/keyboard-arrow-right'
 import CloudDoneIcon from 'material-ui/svg-icons/file/cloud-done'
 import CloudOffIcon from 'material-ui/svg-icons/file/cloud-off'
 import WifiIcon from 'material-ui/svg-icons/notification/wifi'
-import LocalLogin from './LocalLogin'
 import FlatButton from '../common/FlatButton'
 import Checkmark from '../common/Checkmark'
 import { Barcelona, WISNUC } from '../common/Svg'
@@ -87,10 +86,11 @@ class WechatLogin extends React.Component {
             lanip = ips[0]
             break
           }
-        } catch(e) {
+        } catch (e) {
           debug('this.autologinAsync can not connect lanip', ips[i], e)
         }
       }
+      lanip = null
       if (lanip) {
         const token = this.state.wxData.token
         const guid = this.state.wxData.user.id

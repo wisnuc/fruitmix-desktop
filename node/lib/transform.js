@@ -100,22 +100,11 @@ class Transform extends EventEmitter {
       const x = this.pending.shift()
       this.working.push(x)
 
-      /* ingnore paused tasks */
-      /*
-      const index = this.pending.findIndex(p => {
-        // debug('schedule', p)
-        return !(Array.isArray(p) ? p[0].taskStatus && p[0].taskStatus.pause : p.taskStatus && p.taskStatus.pause)
-      })
-      const x = this.pending.splice(index, 1)[0] : null
-      if (!x) return
-
-      this.working.push(x)
-      */
-
       if (this.transform) {
         this.transform(x, (err, y) => {
-          const curr = this.working.splice(this.working.indexOf(x), 1)
-          if (!curr) return // error ? FIXME
+          const index = this.working.indexOf(x)
+          const curr = index > -1 ? this.working.splice(index, 1) : null
+          if (!curr) return debug('there is no this x', x)// error ? FIXME
           if (err) {
             if (Array.isArray(x)) x.forEach(c => (c.error = err))
             else x.error = err
