@@ -4,7 +4,7 @@ const fs = Promise.promisifyAll(require('fs'))
 
 const xattr = Promise.promisifyAll(os.platform() === 'win32' ? require('fs-ads') : require('fs-xattr'))
 
-const FRUITMIX = 'user.fruitmix'
+const FRUITMIX = 'user.fruitmix2'
 
 const readXattrAsync = async (target) => {
   let attr
