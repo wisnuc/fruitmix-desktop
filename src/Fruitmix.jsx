@@ -34,7 +34,7 @@ class Fruitmix extends React.Component {
       if (mdns.length > 0) {
         this.selectDevice(mdns[0])
       }
-    }, 1000)
+    }, 0)
 
     this.state = {
 
