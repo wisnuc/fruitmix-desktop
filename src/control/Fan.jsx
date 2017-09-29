@@ -16,15 +16,18 @@ class Fan extends React.Component {
       fanSpeed: ''
     }
 
+
     this.setFanScale = (fanScale) => {
-      this.props.request('setFanScale', { fanScale }, (err) => {
+      this.props.request('setFanScale', { fanScale }, (err, res) => {
         if (!err) {
+          debug('this.setFanScale res', res)
           this.props.openSnackBar('调节成功')
           this.setState({ fanScale })
         } else {
           // this.props.openSnackBar(`调节失败: ${err.message}`)
           this.props.openSnackBar(`调节失败`)
         }
+        this.propsrefresh()
       })
     }
 
@@ -56,6 +59,14 @@ class Fan extends React.Component {
         fanSpeed: nextProps.fan.fanSpeed
       })
     }
+  }
+
+  componentDidMount() {
+    this.autoRefresh = setInterval(() => this.props.refresh(), 1000)
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.autoRefresh)
   }
 
   render() {

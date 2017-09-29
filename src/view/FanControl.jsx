@@ -10,6 +10,7 @@ class FanControl extends Base {
     this.state = {
       fan: null
     }
+    this.refresh = () => this.navEnter()
   }
 
   willReceiveProps(nextProps) {
@@ -63,6 +64,7 @@ class FanControl extends Base {
         primaryColor={this.groupPrimaryColor()}
         request={this.request}
         openSnackBar={openSnackBar}
+        refresh={this.refresh}
       />
     )
   }
