@@ -76,7 +76,7 @@ class LoginApp extends React.Component {
 
         {/* version */}
         <div style={{ position: 'absolute', bottom: 24, left: 24, fontSize: 14, color: '#FAFAFA' }}>
-          { `版本: ${global.config.appVersion}` }
+          { `版本: ${global.config && global.config.appVersion}` }
         </div>
 
         {/* copyright */}

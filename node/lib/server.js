@@ -164,7 +164,7 @@ export class UploadMultipleFiles {
     }
     this.handle = request.post(url).set('Authorization', token).field('manifest', JSON.stringify(option)).attach(name, rs)
 
-    debug('cloudUpload', name, policy)
+    // debug('cloudUpload', name, policy)
     this.handle.on('error', (err) => {
       this.finish(err)
     })
@@ -200,7 +200,7 @@ export class UploadMultipleFiles {
   }
 
   finish(error) {
-    debug('cloudUpload error', error)
+    // debug('cloudUpload error', error)
     if (this.finished) return
     if (error) {
       debug('upload error', error.response && error.response.body)
@@ -269,7 +269,7 @@ export class DownloadFile {
   finish(error) {
     if (this.finished) return
     if (error) {
-      debug('download finish, error:', error.response && error.response.body)
+      // debug('download finish, error:', error.response && error.response.body)
       error.response = error.response && error.response.body
     }
     this.callback(error)
@@ -339,7 +339,7 @@ export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, ca
         serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
           .then((listNav) => {
             const entries = stationID ? listNav.data.entries : listNav.entries
-            debug('retry creat fold entries', entries)
+            // debug('retry creat fold entries', entries)
             const index = entries.findIndex(e => e.name === dirname)
             if (index > -1) {
               const nameSpace = [...entries.map(e => e.name), localEntries.map(e => path.parse(e).base)]

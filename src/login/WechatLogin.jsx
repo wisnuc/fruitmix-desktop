@@ -100,6 +100,7 @@ class WechatLogin extends React.Component {
         if (!user) throw Error('no user')
         const localToken = await this.props.selectedDevice.requestAsync('localTokenByCloud', { stationID, token })
 
+        debug('this.props.selectedDevice, before', this.props.selectedDevice)
         Object.assign(this.props.selectedDevice, {
           token: {
             isFulfilled: () => true,
@@ -108,6 +109,15 @@ class WechatLogin extends React.Component {
           },
           mdev: { address: lanip, domain: 'local' }
         })
+        this.props.assignDevice({
+          token: {
+            isFulfilled: () => true,
+            ctx: user,
+            data: localToken.data
+          },
+          mdev: { address: lanip, domain: 'local' }
+        })
+        debug('this.props.selectedDevice, after', this.props.selectedDevice)
         this.props.ipcRenderer.send('WECHAT_LOGIN', user.uuid, { weChat: this.state.wxData.user })
         this.done('LOGIN', this.props.selectedDevice, user)
       } else {
@@ -297,9 +307,7 @@ class WechatLogin extends React.Component {
               <div
                 style={{ height: 406, width: 300, margin: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 id="login_container"
-              >
-                <CircularProgress />
-              </div>
+              />
               <div style={{ height: 36 }} />
 
               {/* overlay text */}
@@ -310,7 +318,7 @@ class WechatLogin extends React.Component {
                 </div>
               </div>
             </div>
-            :
+          :
             <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>
               <div
                 style={{
