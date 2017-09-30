@@ -37,7 +37,7 @@ const downloadHandle = (event, args) => {
             if (!extension || extension === name) {
               newName = `${name}(${i})`
             } else {
-              newName = `${path.parse(name).name}(${j}).${extension}`
+              newName = `${path.parse(name).name}(${i}).${extension}`
             }
           }
         }
