@@ -161,8 +161,13 @@ class NavDrawer extends React.Component {
             <div style={{ fontSize: 16, fontWeight: 500, color: '#FFF' }}>{ username }</div>
           </div>
 
-          <div style={{ position: 'absolute', right: 24, top: 16, display: this.props.isCloud ? '' : 'none' }}>
-            <CloudIcon color="#FFFFFF" />
+          <div style={{ position: 'absolute', right: 16, top: 8, display: this.props.isCloud ? '' : 'none' }}>
+            <IconButton
+              iconStyle={{ color: '#FFFFFF' }}
+              tooltip="闻上云连接中"
+            >
+              <CloudIcon />
+            </IconButton>
           </div>
         </div>
 

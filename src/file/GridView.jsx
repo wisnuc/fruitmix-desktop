@@ -55,8 +55,9 @@ class Row extends React.PureComponent {
     }
 
     this.toggleMenu = (event) => {
+      debug('this.toggleMenu', this.state.open, event)
       if (!this.state.open && event && event.preventDefault) event.preventDefault()
-      this.setState({ open: !this.state.open, anchorEl: event.currentTarget })
+      this.setState({ open: event !== 'clickAway' && !this.state.open, anchorEl: event.currentTarget })
     }
   }
 
@@ -69,7 +70,7 @@ class Row extends React.PureComponent {
 
     const h = this.headers.find(header => header.title === this.state.type) || this.headers[0]
 
-    debug('sortType', sortType, this.state, this.props)
+    // debug('sortType', sortType, this.state, this.props)
     return (
       <div style={{ height: '100%', width: '100%', marginLeft: 52 }} >
         {/* header */}
