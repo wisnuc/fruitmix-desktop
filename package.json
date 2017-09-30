@@ -95,7 +95,7 @@
     "nedb": "^1.8.0",
     "node-uuid": "^1.4.7",
     "pdfjs-dist": "^1.9.598",
-    "prettysize": "0.0.3",
+    "prettysize": "^1.1.0",
     "react": "^15.6.1",
     "react-event-listener": "^0.4.5",
     "react-pdf-pages": "^0.1.8",

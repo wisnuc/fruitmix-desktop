@@ -142,7 +142,7 @@ class FileDetail extends React.PureComponent {
 
     const Values = [
       getPath(this.props.path),
-      prettysize(size, false, true, 3)
+      prettysize(size, false, true, 2)
     ]
 
     return (
@@ -226,7 +226,7 @@ class FileDetail extends React.PureComponent {
 
     const Values = [
       getType(detailFile.type, detailFile.name, metadata),
-      prettysize(detailFile.size, false, true, 3),
+      prettysize(detailFile.size, false, true, 2),
       getPath(path),
       phaseDate(detailFile.mtime),
       exifDateTime ? phaseExifTime(exifDateTime) : '',
