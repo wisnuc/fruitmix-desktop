@@ -20,7 +20,7 @@ class Device extends Base {
   }
 
   willReceiveProps(nextProps) {
-    // console.log('device nextProps', nextProps)
+    console.log('device nextProps', nextProps)
     if (!nextProps.selectedDevice || !nextProps.selectedDevice.device || !nextProps.selectedDevice.storage
       || !nextProps.selectedDevice.boot) return
     const device = nextProps.selectedDevice.device

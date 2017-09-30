@@ -53,6 +53,7 @@ class Fruitmix extends React.Component {
       maintain: this.maintain.bind(this),
       selectDevice: this.selectDevice.bind(this),
       setPalette: this.setPalette.bind(this),
+      assignDevice: this.assignDevice.bind(this),
       ipcRenderer
     }
   }
@@ -92,7 +93,13 @@ class Fruitmix extends React.Component {
         this.selectDevice(mdns[0])
       }
     }, 1000)
-    this.setState({ view, selectedDevice: new Device({ address: '' }) })
+    this.selectDevice({ address: '' })
+    this.setState({ view })
+  }
+
+  assignDevice(args) {
+    Object.assign(this.selectedDevice, args) 
+    this.selectedDevice.start()
   }
 
   maintain() {

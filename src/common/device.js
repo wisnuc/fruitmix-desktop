@@ -225,7 +225,7 @@ class Device extends RequestManager {
   }
 
   start() {
-    this.refreshSystemState(() => console.log('init refresh done'))
+    this.refreshSystemState(() => console.log('init refresh done', this))
   }
 
   refreshSystemState(next) {
