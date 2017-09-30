@@ -124,7 +124,7 @@ class Row extends React.PureComponent {
               textAlign: 'right',
               marginRight: 72 }}
           >
-            { entry.type === 'file' && prettysize(entry.size) }
+            { entry.type === 'file' && prettysize(entry.size, false, true, 2) }
           </div>
 
           <div style={{ flexGrow: 1 }} />

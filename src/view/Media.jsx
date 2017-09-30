@@ -340,7 +340,7 @@ class Media extends Base {
     }
 
     this.uploadMediaAsync = async () => {
-      const driveUUID = this.ctx.props.apis.listNavDir.data.path[0].uuid
+      const driveUUID = this.ctx.props.apis.drives.data.find(d => d.tag === 'home').uuid
       const stationID = this.ctx.props.selectedDevice.token.data.stationID
       const data = await this.ctx.props.apis.requestAsync('mkdir', { driveUUID, dirUUID: driveUUID, dirname: '上传的照片' })
       debug('this.uploadMediaAsync data', data)
