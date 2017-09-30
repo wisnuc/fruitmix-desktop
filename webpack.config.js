@@ -26,7 +26,7 @@ module.exports = {
     './src/app.js'
   ],
   stats: { colors : true, reasons: true },
-  resolve: { extensions: ['.js', '.jsx', '.css'] },
+  resolve: { extensions: ['.js', '.jsx', '.css', '.json'] },
   module: {
     rules: [
       {
@@ -47,7 +47,11 @@ module.exports = {
             }
           },
         ]
-      }
+      },
+      {
+        test: /\.json$/,
+        loader: 'json-loader'
+      },
     ]
   },
   plugins: [
