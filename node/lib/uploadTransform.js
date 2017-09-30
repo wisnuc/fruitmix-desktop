@@ -83,6 +83,7 @@ class Task {
             const stat = await fs.lstatAsync(path.resolve(entry))
             const fullName = path.parse(entry).base
             if (fullName === '.DS_Store' && !stat.isDirectory()) continue
+            if (!stat.isFile() && !stat.isDirectory()) continue
             else task.count += 1
 
             if (stat.isDirectory()) {
