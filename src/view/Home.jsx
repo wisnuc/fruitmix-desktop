@@ -549,18 +549,22 @@ class Home extends Base {
               </div>
               :
               <div>
-                <MenuItem
-                  leftIcon={<ShareIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                  primaryText="分享至共享盘" onTouchTap={() => this.toggleDialog('share')}
-                />
-                <MenuItem
-                  leftIcon={<CopyIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                  primaryText="拷贝至..." onTouchTap={() => this.toggleDialog('copy')}
-                />
-                <MenuItem
-                  leftIcon={<MoveIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                  primaryText="移动至..." onTouchTap={() => this.toggleDialog('move')}
-                />
+                { !this.ctx.props.selectedDevice.token.data.stationID &&
+                  <div>
+                    <MenuItem
+                      leftIcon={<ShareIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
+                      primaryText="分享至共享盘" onTouchTap={() => this.toggleDialog('share')}
+                    />
+                    <MenuItem
+                      leftIcon={<CopyIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
+                      primaryText="拷贝至..." onTouchTap={() => this.toggleDialog('copy')}
+                    />
+                    <MenuItem
+                      leftIcon={<MoveIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
+                      primaryText="移动至..." onTouchTap={() => this.toggleDialog('move')}
+                    />
+                  </div>
+                }
                 {
                   this.state.select && this.state.select.selected && this.state.select.selected.length === 1 &&
                     <MenuItem
