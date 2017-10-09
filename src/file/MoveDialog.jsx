@@ -123,7 +123,8 @@ class MoveDialog extends React.PureComponent {
           })
           .catch(err => console.log(err))
       } else if (node.type === 'publicRoot') { // list public drives
-        const list = this.props.apis.drives.value().filter(d => d.tag !== 'home')
+        const myUUID = this.props.apis.account.data && this.props.apis.account.data.uuid
+        const list = this.props.apis.drives.value().filter(d => d.type === 'public' && d.writelist.find(u => u === myUUID))
         setImmediate(() => this.updateState(path, currentDir, list))
       }
     }
@@ -154,7 +155,8 @@ class MoveDialog extends React.PureComponent {
         ]
         setImmediate(() => this.updateState(path, currentDir, list))
       } else if (currentDir.type === 'publicRoot') { // list public drives
-        const list = this.props.apis.drives.value().filter(d => d.tag !== 'home')
+        const myUUID = this.props.apis.account.data && this.props.apis.account.data.uuid
+        const list = this.props.apis.drives.value().filter(d => d.type === 'public' && d.writelist.find(u => u === myUUID))
         setImmediate(() => this.updateState(path, currentDir, list))
       }
     }
