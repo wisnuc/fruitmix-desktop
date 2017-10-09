@@ -2,7 +2,6 @@ import React, { PureComponent } from 'react'
 import { dialogBoxShadow } from '../common/boxShadow'
 
 class DialogOverlay extends PureComponent {
-
   constructor(props) {
     super(props)
     this.distance = 16

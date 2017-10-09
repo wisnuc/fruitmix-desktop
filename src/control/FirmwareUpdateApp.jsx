@@ -110,7 +110,7 @@ class FirmwareUpdate extends React.Component {
                     onTouchTap={() => this.toggleDialog('confirm')}
                   />
                   <FlatButton
-                    label={'安装'}
+                    label="安装"
                     primary
                     onTouchTap={this.install}
                   />

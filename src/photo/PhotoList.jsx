@@ -27,7 +27,7 @@ class PhotoList extends React.Component {
     this.firstScroll = 2
 
     this.onRowTouchTap = (e, index) => {
-      e.preventDefault()  // important!
+      e.preventDefault() // important!
       e.stopPropagation()
     }
 
@@ -48,7 +48,7 @@ class PhotoList extends React.Component {
       if (!this.firstScroll) this.props.memoize({ currentDigest: '', currentScrollTop: list.scrollTop })
       // debug('this.props.memoize()', this.props.memoize())
 
-      /* forceUpdate when first two scroll, this is necessary to show timeline*/
+      /* forceUpdate when first two scroll, this is necessary to show timeline */
       if (this.firstScroll) {
         this.firstScroll -= 1
         this.forceUpdate()
@@ -89,7 +89,7 @@ class PhotoList extends React.Component {
     this.onMouseMove = (event) => {
       if (!this.photoMapDates.length) return null
 
-      /* get mouse position*/
+      /* get mouse position */
       const { x, y } = mousePosition(event)
       let top = y - this.headerHeight
       if (top < timelineMargin) top = timelineMargin
@@ -190,9 +190,7 @@ class PhotoList extends React.Component {
 
   renderLater() {
     clearTimeout(this.timeRenderLater)
-    this.timeRenderLater = setTimeout(() => ReactDom.render(
-      <div>{ this.renderTimeline() }</div>, document.getElementById('timeline')
-    ), 100)
+    this.timeRenderLater = setTimeout(() => ReactDom.render(<div>{ this.renderTimeline() }</div>, document.getElementById('timeline')), 100)
   }
 
   render() {

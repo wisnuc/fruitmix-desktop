@@ -58,7 +58,6 @@ const getResolution = (height, width) => {
 }
 
 class FileDetail extends React.PureComponent {
-
   constructor(props) {
     super(props)
   }
@@ -90,7 +89,9 @@ class FileDetail extends React.PureComponent {
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap'
                   }}
-                > { values[index] }</div>
+                >
+                  { values[index] }
+                </div>
               </div>
             )
           })

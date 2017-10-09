@@ -9,7 +9,6 @@ import Checkmark from '../common/Checkmark'
 import FlatButton from '../common/FlatButton'
 
 const StateUp = base => class extends base {
-
   setSubState(name, nextSubState) {
     const state = this.props.state || this.state
     const subState = state[name]
@@ -34,7 +33,6 @@ const StateUp = base => class extends base {
 }
 
 class InitWizard extends StateUp(React.Component) {
-
   constructor(props) {
     super(props)
 
@@ -107,8 +105,8 @@ class InitWizard extends StateUp(React.Component) {
     const name = blk.name
     const size = prettysize(blk.size * 512)
     const iface = blk.isATA ? 'ATA' :
-                blk.isSCSI ? 'SCSI' :
-                blk.isUSB ? 'USB' : '(未知接口)'
+      blk.isSCSI ? 'SCSI' :
+        blk.isUSB ? 'USB' : '(未知接口)'
 
     return `${model}, ${name}, ${size}, ${iface}`
   }

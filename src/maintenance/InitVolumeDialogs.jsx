@@ -11,7 +11,6 @@ import { UpIcon, DownIcon, FailedIcon } from './Svg'
 const debug = Debug('component:maintenance:InitVolumeDialogs')
 
 class UsernamePassword extends React.Component {
-
   constructor(props) {
     super(props)
     this.state = {}
@@ -36,17 +35,28 @@ class UsernamePassword extends React.Component {
     return (
       <div>
         <div><TextField
-          hintText="" floatingLabelText="用户名" maxLength={20}
+          hintText=""
+          floatingLabelText="用户名"
+          maxLength={20}
           onChange={e => this.onChange('username', e.target.value)}
-        /></div>
+        />
+        </div>
         <div><TextField
-          hintText="" floatingLabelText="输入密码" type="password" maxLength={40}
+          hintText=""
+          floatingLabelText="输入密码"
+          type="password"
+          maxLength={40}
           onChange={e => this.onChange('password', e.target.value)}
-        /></div>
+        />
+        </div>
         <div><TextField
-          hintText="" floatingLabelText="再次输入密码" type="password" maxLength={40}
+          hintText=""
+          floatingLabelText="再次输入密码"
+          type="password"
+          maxLength={40}
           onChange={e => this.onChange('passwordAgain', e.target.value)}
-        /></div>
+        />
+        </div>
       </div>
     )
   }
@@ -104,7 +114,7 @@ const ReinitVolumeConfirm = (props) => {
         </div>
         <div style={{ width: 48 }} />
         <div>
-          {expandableHeight ? <UpIcon color={'#9e9e9e'} /> : <DownIcon color={'#9e9e9e'} />}
+          {expandableHeight ? <UpIcon color="#9e9e9e" /> : <DownIcon color="#9e9e9e" />}
         </div>
       </div>
       <VerticalExpandable height={expandableHeight}>
@@ -363,7 +373,7 @@ class InitVolumeDialogs extends React.Component {
         <div style={{ flex: '0 0 48px' }}>
           { info[0] === 'busy' ? <CircularProgress /> :
             info[0] === 'success' ? <Checkmark delay={300} /> :
-            <FailedIcon color={'red'} />
+            <FailedIcon color="red" />
           }
         </div>
         <div

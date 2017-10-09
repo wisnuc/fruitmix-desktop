@@ -9,7 +9,6 @@ import DialogOverlay from '../common/PureDialog'
 const debug = Debug('component:control:deviceinfo')
 
 class Market extends React.PureComponent {
-
   constructor(props) {
     super(props)
 
@@ -77,7 +76,7 @@ class Market extends React.PureComponent {
               <div style={{ height: 18, width: 91, fontSize: 15, margin: '8px 0px 0px 8px' }}>已安装</div> :
               <FlatButton
                 primary
-                label={'下载并安装'}
+                label="下载并安装"
                 onTouchTap={() => this.setState({ uninstall: detail })}
               />
           }

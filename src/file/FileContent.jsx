@@ -44,7 +44,7 @@ class FileContent extends React.Component {
        * must be button 1 or button 2 of mouse
        */
 
-      e.preventDefault()  // important, to prevent other event
+      e.preventDefault() // important, to prevent other event
       e.stopPropagation()
 
       const type = e.type

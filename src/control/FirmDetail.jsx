@@ -62,7 +62,6 @@ class RelList extends React.PureComponent {
 }
 
 class FirmDetail extends PureComponent {
-
   constructor(props) {
     super(props)
   }

@@ -10,7 +10,6 @@ import { validateUsername, validatePassword } from '../common/validate'
 const debug = Debug('component:control:Account')
 
 class ChangeAccountDialog extends React.PureComponent {
-
   constructor(props) {
     super(props)
     this.state = {

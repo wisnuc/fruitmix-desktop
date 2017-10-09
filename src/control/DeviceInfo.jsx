@@ -16,7 +16,6 @@ const debug = Debug('component:control:deviceinfo')
 const phaseData = value => prettysize(parseInt(value, 10) * 1024)
 
 class DeviceInfo extends React.PureComponent {
-
   constructor(props) {
     super(props)
     this.state = {

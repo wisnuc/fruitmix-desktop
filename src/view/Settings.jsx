@@ -8,7 +8,6 @@ import SettingsApp from '../control/SettingsApp'
 const debug = Debug('view:component:Settings')
 
 class Settings extends Base {
-
   constructor(ctx) {
     super(ctx)
   }
@@ -33,7 +32,6 @@ class Settings extends Base {
     return 'colored'
   }
 
-  /** renderers **/
   renderContent({ openSnackBar }) {
     return (
       <SettingsApp

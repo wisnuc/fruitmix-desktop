@@ -2,7 +2,6 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 
 class Checkmark extends React.Component {
-
   constructor() {
     super()
   }

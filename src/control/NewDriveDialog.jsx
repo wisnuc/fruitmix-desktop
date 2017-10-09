@@ -7,7 +7,6 @@ import FlatButton from '../common/FlatButton'
 const debug = Debug('component:control:NewDriveDialog')
 
 class NewDriveDialog extends PureComponent {
-
   constructor(props) {
     super(props)
 
@@ -87,7 +86,8 @@ class NewDriveDialog extends PureComponent {
             color: 'rgba(0,0,0,0.54)',
             display: 'flex',
             alignItems: 'center' }}
-        >名称</div>
+        >名称
+        </div>
 
         <div style={{ height: 60 }}>
           <TextField
@@ -131,7 +131,7 @@ class NewDriveDialog extends PureComponent {
         <div style={{ maxHeight: 40 * 8, overflow: 'auto' }}>
           {
             users.map(user =>
-              <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.username} >
+              (<div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.username} >
                 <Checkbox
                   label={user.username}
                   iconStyle={{ fill: this.state.writelist.includes(user.uuid) ? '#5E35B1' : 'rgba(0, 0, 0, 0.54)' }}
@@ -139,8 +139,7 @@ class NewDriveDialog extends PureComponent {
                   checked={this.state.writelist.includes(user.uuid)}
                   onCheck={() => this.handleCheck(user.uuid)}
                 />
-              </div>
-            )
+               </div>))
           }
           <div style={{ height: 8 }} />
         </div>
@@ -149,11 +148,15 @@ class NewDriveDialog extends PureComponent {
         <div style={{ height: 16 }} />
         <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
           <FlatButton
-            label="取消" primary={this.props.primary} secondary={this.props.accent}
+            label="取消"
+            primary={this.props.primary}
+            secondary={this.props.accent}
             onTouchTap={this.props.onRequestClose}
           />
           <FlatButton
-            label="创建" primary={this.props.primary} secondary={this.props.accent}
+            label="创建"
+            primary={this.props.primary}
+            secondary={this.props.accent}
             disabled={this.state.label.length === 0 || !!this.state.errorText}
             onTouchTap={this.fire}
           />

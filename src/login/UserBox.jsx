@@ -70,7 +70,6 @@ class NamedAvatar extends React.Component {
 }
 
 class UserBox extends React.Component {
-
   constructor(props) {
     super(props)
     this.state = { selectedIndex: -1 }
@@ -111,14 +110,14 @@ class UserBox extends React.Component {
         >
           <div style={{ ...styles.flexWrap, padding: 8 }}>
             { users.map((user, index) =>
-              <NamedAvatar
+              (<NamedAvatar
                 key={user.uuid}
                 style={{ margin: users.length > 21 ? 6 : 7 }}
                 name={user.username}
                 uuid={user.uuid}
                 selected={index === this.state.selectedIndex}
                 onTouchTap={this.selectUser.bind(this, index)}
-              />)}
+              />))}
           </div>
         </div>
 

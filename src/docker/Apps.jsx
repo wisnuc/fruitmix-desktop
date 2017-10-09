@@ -12,7 +12,6 @@ import DialogOverlay from '../common/PureDialog'
 const debug = Debug('component:control:deviceinfo')
 
 class Market extends React.PureComponent {
-
   constructor(props) {
     super(props)
     /* CId, id of container; CState, state of container */
@@ -106,7 +105,7 @@ class Market extends React.PureComponent {
                 label="进入应用"
                 onTouchTap={() => this.setState({ openURL: `http://10.10.9.86:${container.Ports[0].PublicPort}/` })}
               />
-            : <div style={{ height: 36, display: 'flex', alignItems: 'center', marginLeft: 8, fontSize: 15 }}>{ '应用未启动' }</div>
+            : <div style={{ height: 36, display: 'flex', alignItems: 'center', marginLeft: 8, fontSize: 15 }}>应用未启动</div>
           }
         </div>
       </Paper>

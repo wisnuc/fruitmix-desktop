@@ -92,7 +92,7 @@ class MoveDialog extends React.PureComponent {
       newFoldName: ''
     }
 
-    /** actions **/
+    /** actions * */
 
     /* enter dir */
     this.enter = (node) => {
@@ -107,7 +107,7 @@ class MoveDialog extends React.PureComponent {
       const dirUUID = node.uuid
       const driveUUID = this.state.path[0].uuid
 
-      if (node.tag === 'home' || node.type === 'public') {  // home drive or public drives, driveUUID = dirUUID
+      if (node.tag === 'home' || node.type === 'public') { // home drive or public drives, driveUUID = dirUUID
         this.list(dirUUID, dirUUID)
           .then((list) => {
             /* reset driveUUID */
@@ -116,13 +116,13 @@ class MoveDialog extends React.PureComponent {
             this.updateState(path, currentDir, list)
           })
           .catch(err => console.log(err))
-      } else if (node.type === 'directory') {               // normal directory in drives
+      } else if (node.type === 'directory') { // normal directory in drives
         this.list(driveUUID, dirUUID)
           .then((list) => {
             this.updateState(path, currentDir, list)
           })
           .catch(err => console.log(err))
-      } else if (node.type === 'publicRoot') {              // list public drives
+      } else if (node.type === 'publicRoot') { // list public drives
         const list = this.props.apis.drives.value().filter(d => d.tag !== 'home')
         setImmediate(() => this.updateState(path, currentDir, list))
       }
@@ -142,18 +142,18 @@ class MoveDialog extends React.PureComponent {
       const dirUUID = currentDir.uuid
       const driveUUID = path[0].uuid
 
-      if (currentDir.type === 'directory' || currentDir.type === 'public') {    // normal directory
+      if (currentDir.type === 'directory' || currentDir.type === 'public') { // normal directory
         this.list(driveUUID, dirUUID)
           .then(list => this.updateState(path, currentDir, list))
           .catch(err => console.log(err))
-      } else if (currentDir.type === 'root') {                      // root
+      } else if (currentDir.type === 'root') { // root
         const drives = this.props.apis.drives.value()
         const list = [
           { name: '我的文件', type: 'directory', uuid: drives.find(d => d.tag === 'home').uuid, tag: 'home' },
           { name: '共享盘', type: 'publicRoot' }
         ]
         setImmediate(() => this.updateState(path, currentDir, list))
-      } else if (currentDir.type === 'publicRoot') {                // list public drives
+      } else if (currentDir.type === 'publicRoot') { // list public drives
         const list = this.props.apis.drives.value().filter(d => d.tag !== 'home')
         setImmediate(() => this.updateState(path, currentDir, list))
       }
@@ -165,8 +165,8 @@ class MoveDialog extends React.PureComponent {
       const args = {
         driveUUID: this.state.path[0].uuid,
         dirUUID: this.state.currentSelectedIndex > -1
-        ? this.state.list[this.state.currentSelectedIndex].uuid
-        : this.state.currentDir.uuid,
+          ? this.state.list[this.state.currentSelectedIndex].uuid
+          : this.state.currentDir.uuid,
         dirname: this.state.newFoldName
       }
       if (this.state.currentSelectedIndex > -1) this.enter(this.state.list[this.state.currentSelectedIndex])
@@ -216,11 +216,11 @@ class MoveDialog extends React.PureComponent {
       const node = this.state.currentSelectedIndex > -1 ? this.state.list[this.state.currentSelectedIndex] : null
       const dst = {
         drive: node && (node.tag === 'home' || node.type === 'public')
-        ? node.uuid
-        : this.state.path[0].uuid,
+          ? node.uuid
+          : this.state.path[0].uuid,
         dir: node
-        ? node.uuid
-        : this.state.path[this.state.path.length - 1].uuid
+          ? node.uuid
+          : this.state.path[this.state.path.length - 1].uuid
       }
       const entries = this.selectedArr.map(e => e.uuid)
 
@@ -268,7 +268,7 @@ class MoveDialog extends React.PureComponent {
     /* close dialog */
     this.closeDialog = () => this.props.onRequestClose()
 
-    /** apis and other funcs **/
+    /** apis and other funcs * */
     /* sort file list */
     this.sort = data => [...data.entries].sort((a, b) => {
       if (a.type === 'directory' && b.type === 'file') return -1
@@ -372,14 +372,14 @@ class MoveDialog extends React.PureComponent {
   /* 行是否能被选中 */
   isRowDisable(node) {
     const type = node.type
-    if (type === 'file') {                   // 文件不能被选中
+    if (type === 'file') { // 文件不能被选中
       return true
-    } else if (node.type === 'directory') {  // drive路径下：节点不在被选中数组内
+    } else if (node.type === 'directory') { // drive路径下：节点不在被选中数组内
       if (this.inSameDirectory()) {
         if (this.selectedArr.findIndex(item => item.uuid === node.uuid) === -1) return false
-        return true                         // 被移动的文件夹不能被选中
+        return true // 被移动的文件夹不能被选中
       }
-      return false                          // 不在同一级文件夹 可以被选中
+      return false // 不在同一级文件夹 可以被选中
     }
     return false
   }
@@ -391,10 +391,10 @@ class MoveDialog extends React.PureComponent {
     return this.state.currentDir.name === this.state.currentDir.uuid
       ? '我的文件'
       : type === 'publicRoot'
-      ? '共享盘'
-      : type === 'root'
-      ? '我的盒子'
-      : this.state.currentDir.name || this.state.currentDir.label
+        ? '共享盘'
+        : type === 'root'
+          ? '我的盒子'
+          : this.state.currentDir.name || this.state.currentDir.label
   }
 
   renderHeader() {
@@ -526,8 +526,10 @@ class MoveDialog extends React.PureComponent {
           { /* can't add new fold in root or publicRoot */
             this.state.path.length > 1 && (this.state.path.length !== 2 || this.state.path[1].type !== 'publicRoot') &&
               <IconButton
-                tooltip="新建文件夹" tooltipPosition="top-center"
-                style={{ marginRight: 16 }} onTouchTap={() => this.setState({ cnf: true })}
+                tooltip="新建文件夹"
+                tooltipPosition="top-center"
+                style={{ marginRight: 16 }}
+                onTouchTap={() => this.setState({ cnf: true })}
                 disabled={this.state.cnf}
               >
                 <FileCreateNewFolder color="rgba(0,0,0,0.54)" />

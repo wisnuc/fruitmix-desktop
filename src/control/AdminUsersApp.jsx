@@ -15,7 +15,6 @@ import slice from '../common/slice'
 const debug = Debug('component:control:AdminUsers: ')
 
 class AdminUsersApp extends React.Component {
-
   constructor(props) {
     super(props)
     this.state = {
@@ -238,9 +237,10 @@ class AdminUsersApp extends React.Component {
           </div>
           <div style={{ height: 8 }} />
           <Divider style={{ marginLeft: 104, width: 1143 }} />
-          { users.reduce((acc, user) =>
-              [...acc, this.renderUserRow(user), <Divider style={{ marginLeft: 104, width: 1143 }} key={user.username} />],
-              []) }
+          {
+            users.reduce((acc, user) => [...acc, this.renderUserRow(user),
+              <Divider style={{ marginLeft: 104, width: 1143 }} key={user.username} />], [])
+          }
         </div>
 
         {/* menu */}
@@ -290,7 +290,7 @@ class AdminUsersApp extends React.Component {
                 <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
                   <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}> 重置密码 </div>
                   <div style={{ height: 20 }} />
-                  <div style={{ color: 'rgba(0,0,0,0.54)' }}>{'重置密码后，该用户当前密码将会失效。'}</div>
+                  <div style={{ color: 'rgba(0,0,0,0.54)' }}>重置密码后，该用户当前密码将会失效。</div>
                   <div style={{ color: 'rgba(0,0,0,0.54)' }}>
                     { '确认后，系统会提供随机密码并仅有一次登录时效。用户登录后请立刻修改密码。' }
                   </div>

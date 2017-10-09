@@ -238,7 +238,7 @@ class Preview extends React.Component {
                     onTouchTap={() => this.setState({ alert: false })}
                   />
                   <FlatButton
-                    label={'下载'}
+                    label="下载"
                     primary
                     onTouchTap={() => { this.props.download(); this.setState({ alert: false }) }}
                   />

@@ -19,7 +19,7 @@ export const Operation = (props) => {
       modal
       actions={state &&
         state.getActions().map(action =>
-          <FlatButton
+          (<FlatButton
             key={action.label}
             label={action.label}
             labelStyle={{
@@ -29,7 +29,7 @@ export const Operation = (props) => {
             }}
             onTouchTap={action.onTouchTap}
             disabled={typeof action.disabled === 'function' ? action.disabled() : action.disabled}
-          />)
+          />))
       }
     >
       { state && state.render() }
@@ -38,7 +38,6 @@ export const Operation = (props) => {
 }
 
 export class operationBase {
-
   constructor(obj) {
     debug('base constructor', obj)
 
@@ -97,7 +96,6 @@ export class operationBase {
 }
 
 export class operationBusy extends operationBase {
-
   constructor(obj) {
     super(obj)
   }
@@ -124,7 +122,6 @@ export class operationBusy extends operationBase {
 }
 
 export class operationText extends operationBase {
-
   constructor(obj, title, text) {
     super(obj)
     this.title = title
@@ -154,14 +151,14 @@ export class operationText extends operationBase {
               color: '#757575',
               marginBottom: index === array.length - 1 ? 0 : 32
             }}
-          >{ line }</div>))}
+          >{ line }
+          </div>))}
       </div>
     )
   }
 }
 
 export class operationFinish extends operationText {
-
   constructor(obj, title, text) {
     super(obj, title, text)
     this.actions = [{ label: '晓得了', onTouchTap: this.close }]
@@ -169,21 +166,18 @@ export class operationFinish extends operationText {
 }
 
 export class operationSuccess extends operationFinish {
-
   constructor(obj, text) {
     super(obj, '操作成功', text)
   }
 }
 
 export class operationFailed extends operationFinish {
-
   constructor(obj, text) {
     super(obj, '操作失败', text)
   }
 }
 
 export class operationTextConfirm extends operationText {
-
   constructor(obj, text, onTouchTap) {
     super(obj, '确认操作', text)
     this.actions = [{ label: '取消', onTouchTap: this.close }, { label: '确认', onTouchTap }]
@@ -191,7 +185,6 @@ export class operationTextConfirm extends operationText {
 }
 
 export class operationUsernamePassword extends operationBase {
-
   constructor(obj, next) {
     super(obj)
 
@@ -227,15 +220,23 @@ export class operationUsernamePassword extends operationBase {
     return (
       <div>
         <TextField
-          hintText="用户名" floatingLabelText="用户名" maxLength={20}
+          hintText="用户名"
+          floatingLabelText="用户名"
+          maxLength={20}
           onChange={e => onChange('username', e.target.value)}
         />
         <TextField
-          hintText="输入密码" floatingLabelText="输入密码" type="password" maxLength={40}
+          hintText="输入密码"
+          floatingLabelText="输入密码"
+          type="password"
+          maxLength={40}
           onChange={e => onChange('password', e.target.value)}
         />
         <TextField
-          hintText="再次输入密码" floatingLabelText="再次输入密码" type="password" maxLength={40}
+          hintText="再次输入密码"
+          floatingLabelText="再次输入密码"
+          type="password"
+          maxLength={40}
           onChange={e => onChange('passwordAgain', e.target.value)}
         />
       </div>
@@ -257,11 +258,10 @@ export class operationUsernamePassword extends operationBase {
       EUSERSNOTFILE         // users.json is not a file
       EUSERSPARSE           // users.json parse fail
       EUSERSFORMAT          // users.json is not well formatted
-**/
+* */
 
 // this dialog content has copy constructor
 export class operationReinitConfirmDeletion extends operationBase {
-
   constructor(obj, volume, next) {
     super(obj)
     if (obj instanceof operationReinitConfirmDeletion) {

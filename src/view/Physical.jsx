@@ -185,8 +185,6 @@ class Physical extends Base {
     return true
   }
 
-  /** renderers **/
-
   renderTitle({ style }) {
     if (!this.state.extDrives && !this.state.extListDir) return null
     const path = this.state.path
@@ -206,18 +204,17 @@ class Physical extends Base {
           if (index === 0) { // the first one is always special
             acc.push(<BreadCrumbItem text="物理磁盘" key="物理磁盘" onTouchTap={this.navEnter.bind(this)} />)
           } else if (index === 1) {
-            acc.push(
-              <BreadCrumbItem
-                text={node.name}
-                key={`${node.name}index`} onTouchTap={this.listByBread.bind(this, index)}
-              />)
+            acc.push(<BreadCrumbItem
+              text={node.name}
+              key={`${node.name}index`}
+              onTouchTap={this.listByBread.bind(this, index)}
+            />)
           } else acc.push(<BreadCrumbItem text={node.name} key={`${node.name}index`} onTouchTap={this.listByBread.bind(this, index)} />)
           return acc
         }, [])}
       </div>
     )
   }
-
 
   renderDetail({ style }) {
     return (

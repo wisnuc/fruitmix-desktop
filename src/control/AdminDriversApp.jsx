@@ -33,7 +33,7 @@ class DriveRow extends React.PureComponent {
     super(props)
 
     this.rowTouchTap = (e) => {
-      e.preventDefault()  // important!
+      e.preventDefault() // important!
       e.stopPropagation()
 
       const type = e.type
@@ -169,8 +169,7 @@ class AdminDrives extends React.Component {
                     navTo={navTo}
                     showContextMenu={showContextMenu}
                   />,
-                    <Divider style={{ marginLeft: 104 }} />]
-                )
+                    <Divider style={{ marginLeft: 104 }} />])
               }
             </div>
             : this.renderNoDrive()

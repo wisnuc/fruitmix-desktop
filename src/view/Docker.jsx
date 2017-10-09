@@ -7,7 +7,6 @@ import { DockerIcon } from '../common/Svg'
 const debug = Debug('view:component:Docker:')
 
 class Docker extends Base {
-
   constructor(ctx) {
     super(ctx)
 
@@ -53,7 +52,6 @@ class Docker extends Base {
     return 'colored'
   }
 
-  /** renderers **/
   renderContent({ openSnackBar }) {
     return (
       <Market

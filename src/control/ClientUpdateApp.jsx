@@ -28,8 +28,8 @@ class Update extends React.Component {
       const type = platform === 'win32'
         ? 'wisnuc-desktop-windows/releases'
         : platform === 'darwin'
-        ? 'wisnuc-desktop-mac/releases'
-        : 'fruitmix-desktop'
+          ? 'wisnuc-desktop-mac/releases'
+          : 'fruitmix-desktop'
       shell.openExternal(`https://github.com/wisnuc/${type}`)
     }
 
@@ -153,7 +153,7 @@ class Update extends React.Component {
                     onTouchTap={() => this.toggleDialog('confirm')}
                   />
                   <FlatButton
-                    label={'安装'}
+                    label="安装"
                     primary
                     onTouchTap={this.install}
                   />

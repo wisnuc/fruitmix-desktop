@@ -17,7 +17,6 @@ const debug = Debug('component:maintenance')
 
 @muiThemeable()
 class Maintenance extends StateUp(React.Component) {
-
   constructor(props) {
     super(props)
 
@@ -100,7 +99,7 @@ class Maintenance extends StateUp(React.Component) {
       transition: 'all 300ms'
     })
 
-    this.cardDepth = () => this.state.creatingNewVolume === null ? 1 : 0
+    this.cardDepth = () => (this.state.creatingNewVolume === null ? 1 : 0)
 
     // //////////////////////////////////////////////////////////////////////////
     //
@@ -142,7 +141,7 @@ class Maintenance extends StateUp(React.Component) {
       if (disk.isPartitioned) {
         return blocks
           .filter(blk => blk.parentName === disk.name && !blk.isExtended)
-          .reduce((p, c) => (c.isActiveSwap || c.isRootFS) ? K(p)(p.push(c)) : p, [])
+          .reduce((p, c) => ((c.isActiveSwap || c.isRootFS) ? K(p)(p.push(c)) : p), [])
       } else if (disk.isFileSystem) {
         return (disk.isActiveSwap || disk.isRootFS) ? [disk] : []
       } return []
@@ -213,7 +212,7 @@ class Maintenance extends StateUp(React.Component) {
             {
               typeof this.state.boot === 'object' && typeof this.state.storage === 'object' &&
                 this.state.storage.volumes.map((vol, index) =>
-                  <BtrfsVolume
+                  (<BtrfsVolume
                     state={this.state}
                     setState={this.ssb}
                     that={this}
@@ -223,7 +222,7 @@ class Maintenance extends StateUp(React.Component) {
                     zDepth={this.cardDepth(vol)}
                     device={this.props.selectedDevice}
                     nav={this.props.nav}
-                  />)
+                  />))
             }
 
             {

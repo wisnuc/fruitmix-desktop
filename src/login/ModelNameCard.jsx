@@ -9,7 +9,6 @@ import Computer from './Computer'
 import HoverNav from './HoverNav'
 
 class ModelNameCard extends React.Component {
-
   serial = () => {
     let serial = '未知序列号'
     if (this.props.device.name) {

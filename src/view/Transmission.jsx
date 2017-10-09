@@ -7,7 +7,6 @@ import TrsContainer from '../file/TransmissionContainer'
 import Base from './Base'
 
 class Transmission extends Base {
-
   constructor(ctx) {
     super(ctx)
     this.state = {}
@@ -55,7 +54,6 @@ class Transmission extends Base {
     return <div style={Object.assign({}, style, { marginLeft: 184 })}>文件传输</div>
   }
 
-  /** renderers **/
   renderContent({ navToDrive }) {
     return (
       <div style={{ width: '100%', height: '100%', overflow: 'auto' }}>

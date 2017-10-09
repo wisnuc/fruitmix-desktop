@@ -219,7 +219,7 @@ class Media extends Base {
           zIndex = 1
         }
 
-        /* set range of displaying date*/
+        /* set range of displaying date */
         if (top < 16 && index) date = null
         if (top > (height - 46) && index !== month.size - 1) date = null
         return [date, top, zIndex, percentage]

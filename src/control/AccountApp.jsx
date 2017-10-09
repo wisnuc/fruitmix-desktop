@@ -205,7 +205,7 @@ class AccountApp extends React.Component {
           {
             this.state.editAvatar &&
             <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
-              <div style={{ color: 'rgba(0,0,0,0.54)' }}>{'请绑定微信，将会自动获取您的微信头像。'}</div>
+              <div style={{ color: 'rgba(0,0,0,0.54)' }}>请绑定微信，将会自动获取您的微信头像。</div>
               <div style={{ height: 24 }} />
               <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                 <FlatButton label="确定" primary onTouchTap={() => this.toggleDialog('editAvatar')} />

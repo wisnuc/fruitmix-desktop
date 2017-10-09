@@ -11,7 +11,6 @@ const includeAll = (parent, child) => {
 }
 
 class RenderListByRow extends React.Component {
-
   constructor(props) {
     super(props)
 

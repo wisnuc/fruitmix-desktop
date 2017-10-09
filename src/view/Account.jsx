@@ -9,7 +9,6 @@ import AccountApp from '../control/AccountApp.jsx'
 const debug = Debug('component:viewModel:Account')
 
 class Account extends Base {
-
   constructor(ctx) {
     super(ctx)
     this.refreshData = this.refresh.bind(this)
@@ -57,7 +56,6 @@ class Account extends Base {
     return 'colored'
   }
 
-  /** renderers **/
   renderContent({ openSnackBar }) {
     // debug('renderContent', this.state.account)
     return (

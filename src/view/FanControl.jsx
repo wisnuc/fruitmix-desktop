@@ -4,7 +4,6 @@ import Base from './Base'
 import Fan from '../control/Fan'
 
 class FanControl extends Base {
-
   constructor(ctx) {
     super(ctx)
     this.state = {
@@ -56,7 +55,6 @@ class FanControl extends Base {
     return 'colored'
   }
 
-  /** renderers **/
   renderContent({ openSnackBar }) {
     return (
       <Fan

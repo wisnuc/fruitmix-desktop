@@ -341,11 +341,11 @@ class TrsContainer extends React.Component {
         </div>
         <div style={hrStyle} />
       </div>
-      )
+    )
 
     list.push(finishedTaskTitle())
 
-    /* finished task list*/
+    /* finished task list */
     list.push(...finishTasks.map((task, index) => (
       <FinishedTask
         ref={task.uuid}

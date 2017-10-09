@@ -11,7 +11,6 @@ import DialogOverlay from '../common/DialogOverlay'
 const debug = Debug('component:control:power:')
 
 class Power extends React.Component {
-
   constructor(props) {
     super(props)
     this.address = this.props.selectedDevice.mdev.address
@@ -236,18 +235,22 @@ class Power extends React.Component {
           </div>
           <div style={{ flex: '0 0 560px', fontSize: 20, color: 'rgba(0, 0, 0, 0.87)' }}>
               重启和关机
-            </div>
+          </div>
         </div>
         <div style={{ height: 8 }} />
         <div style={{ display: 'flex', alignItems: 'center' }} >
           <div style={{ flex: '0 0 56px' }} />
           <div style={{ flex: '0 0 560px' }}>
             <FlatButton
-              label="关机" primary style={{ marginLeft: -16 }}
+              label="关机"
+              primary
+              style={{ marginLeft: -16 }}
               onTouchTap={() => this.handleOpen('POWEROFF')}
             />
             <FlatButton
-              label="重启" primary style={{ marginLeft: 0 }}
+              label="重启"
+              primary
+              style={{ marginLeft: 0 }}
               onTouchTap={() => this.handleOpen('REBOOT')}
             />
           </div>
@@ -266,7 +269,7 @@ class Power extends React.Component {
           </div>
           <div style={{ flex: '0 0 560px', fontSize: 20, color: 'rgba(0, 0, 0, 0.87)' }}>
               进入维护模式
-            </div>
+          </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }} >
           <div style={{ flex: '0 0 56px' }} />
@@ -276,7 +279,9 @@ class Power extends React.Component {
             </div>
             <div style={{ height: 16 }} />
             <FlatButton
-              label="重启进入维护模式" primary style={{ marginLeft: -8 }}
+              label="重启进入维护模式"
+              primary
+              style={{ marginLeft: -8 }}
               onTouchTap={(e) => {
                 this.handleOpen('REBOOTMAINTENANCE')
               }}

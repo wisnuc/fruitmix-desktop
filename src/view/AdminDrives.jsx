@@ -11,7 +11,6 @@ import { ShareDisk } from '../common/Svg'
 const debug = Debug('component:viewModel:AdminDrives: ')
 
 class AdminDrives extends Base {
-
   constructor(ctx) {
     super(ctx)
 
@@ -131,7 +130,6 @@ class AdminDrives extends Base {
     )
   }
 
-  /** renderers **/
   renderContent({ navTo, toggleDetail, openSnackBar }) {
     // debug('renderContent openSnackBar', openSnackBar)
     return (

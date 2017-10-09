@@ -4,7 +4,6 @@ import Base from './Base'
 import TimeDateInfo from '../control/TimeDateInfo'
 
 class TimeDate extends Base {
-
   constructor(ctx) {
     super(ctx)
   }
@@ -51,7 +50,6 @@ class TimeDate extends Base {
     return 'colored'
   }
 
-  /** renderers **/
   renderContent() {
     return (
       <TimeDateInfo

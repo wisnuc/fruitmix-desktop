@@ -7,7 +7,6 @@ import PowerApp from '../control/PowerApp'
 const debug = Debug('view:admin:power')
 
 class Power extends Base {
-
   constructor(ctx) {
     super(ctx)
   }
@@ -41,7 +40,6 @@ class Power extends Base {
     return 'colored'
   }
 
-  /** renderers **/
   renderContent({ openSnackBar }) {
     return (
       <PowerApp

@@ -17,7 +17,6 @@ const primaryColor = teal500
 const accentColor = pinkA200
 
 class MaintGuide extends React.Component {
-
   constructor(props) {
     super(props)
     this.state = {
@@ -117,7 +116,7 @@ class MaintGuide extends React.Component {
         <div style={{ fontSize: 20, fontWeight: 500, height: 56, display: 'flex', alignItems: 'center' }}>
           { '自动检测' }
           <div style={{ flexGrow: 1 }} />
-          { allCheck && <FlatButton label={'启动'} onTouchTap={this.forceBoot} style={{ marginRight: 24 }} primary /> }
+          { allCheck && <FlatButton label="启动" onTouchTap={this.forceBoot} style={{ marginRight: 24 }} primary /> }
         </div>
         {
           test.map((text, index) => (
@@ -172,7 +171,7 @@ class MaintGuide extends React.Component {
           primary
         />
       </div>
-      )
+    )
 
     return (
       <div style={{ display: 'flex' }}>

@@ -8,7 +8,6 @@ import UpdateApp from '../control/ClientUpdateApp'
 const debug = Debug('view:component:ClientUpdate')
 
 class Update extends Base {
-
   constructor(ctx) {
     super(ctx)
   }
@@ -33,7 +32,6 @@ class Update extends Base {
     return 'colored'
   }
 
-  /** renderers **/
   renderContent({ openSnackBar }) {
     return (
       <UpdateApp

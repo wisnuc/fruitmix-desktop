@@ -1,7 +1,6 @@
 import EventEmitter from 'eventemitter3'
 
 class ListSelect extends EventEmitter {
-
   constructor() {
     super()
     this.state = {
@@ -96,18 +95,22 @@ class ListSelect extends EventEmitter {
   shiftLeftClick(index) {
     const { specified, selected } = this.state
 
-    if (index === -1)  // click outside
-      { this.setState({ selected: [], specified: -1, hover: -1 }) } else if (specified === -1) {
-        if (!selected.includes(index)) { this.setState({ selected: [...selected, index], specified: index }) } else { this.setState({ specified: index }) }
+    if (index === -1) // click outside
+    { this.setState({ selected: [], specified: -1, hover: -1 }) } else if (specified === -1) {
+      if (!selected.includes(index)) {
+        this.setState({ selected: [...selected, index], specified: index })
       } else {
-        const arr = []
-        for (let i = Math.min(specified, index); i <= Math.max(specified, index); i++) { arr.push(i) }
-
-        this.setState({
-          selected: Array.from(new Set([...selected, ...arr])),
-          specified: -1
-        })
+        this.setState({ specified: index })
       }
+    } else {
+      const arr = []
+      for (let i = Math.min(specified, index); i <= Math.max(specified, index); i++) { arr.push(i) }
+
+      this.setState({
+        selected: Array.from(new Set([...selected, ...arr])),
+        specified: -1
+      })
+    }
   }
 
   // if there is no selection and index === -1, contextmenu
@@ -132,20 +135,19 @@ class ListSelect extends EventEmitter {
     switch (button) {
       case 0:
         return this.state.shift
-        ? this.shiftLeftClick(index)
-        : this.state.ctrl
-          ? this.ctrlLeftClick(index)
-          : this.leftClick(index)
+          ? this.shiftLeftClick(index)
+          : this.state.ctrl
+            ? this.ctrlLeftClick(index)
+            : this.leftClick(index)
 
       case 2:
         return this.state.shift
-        ? this.shiftRightClick(index)
-        : this.state.ctrl
-          ? this.ctrlRightClick(index)
-          : this.rightClick(index)
+          ? this.shiftRightClick(index)
+          : this.state.ctrl
+            ? this.ctrlRightClick(index)
+            : this.rightClick(index)
 
       default:
-
     }
   }
 
@@ -176,27 +178,22 @@ class ListSelect extends EventEmitter {
     //  else
       return 'none'
     }
-      // return index === this.specified ? 'inactiveHint' : 'none'
+    // return index === this.specified ? 'inactiveHint' : 'none'
     return 'none'
   }
 
   rowCheck(index) {
     if (this.state.shift) {
-      if (this.state.selected.includes(index)) { return 'checked' }
-        // return 'none'
-      else if (this.shiftInRange(index) || index === this.state.hover) { return 'checking' }
-        // return 'none'
+      if (this.state.selected.includes(index)) return 'checked'
+      else if (this.shiftInRange(index) || index === this.state.hover) return 'checking'
       return 'none'
     } else if (this.state.ctrl) {
-      if (this.state.selected.includes(index)) { return 'checked' }
-        // return 'none'
-      else if (index === this.state.hover) { return 'checking' }
-        // return 'none'
+      if (this.state.selected.includes(index)) return 'checked'
+      else if (index === this.state.hover) return 'checking'
       return 'none'
     }
 
-    if (this.state.selected.length > 1 && this.state.selected.includes(index)) { return 'checked' }
-        // return 'none'
+    if (this.state.selected.length > 1 && this.state.selected.includes(index)) return 'checked'
     return 'none'
   }
 }

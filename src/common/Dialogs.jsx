@@ -7,7 +7,6 @@ import UUID from 'node-uuid'
 import TreeTable from './TreeTable'
 
 export class DialogInput extends React.Component {
-
   constructor(props) {
     super(props)
     this.inputValue = props.value || ''
@@ -58,7 +57,6 @@ export class DialogInput extends React.Component {
 }
 
 export class DialogConfirm extends React.Component {
-
   constructor(props) {
     super(props)
   }
@@ -99,7 +97,6 @@ export class DialogConfirm extends React.Component {
 //     2.2.3 error / message
 
 export class DialogImportFile extends React.Component {
-
   constructor(props) {
     super(props)
     this.state = {
