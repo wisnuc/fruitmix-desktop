@@ -249,8 +249,9 @@ export class DownloadFile {
       .on('error', error => this.finish(error))
       .on('response', (res) => {
         if (res.status !== 200 && res.status !== 206) {
+          debug('download http status code not 200', res.error)
           const e = new Error('http status code not 200')
-          e.code = 'EHTTPSTATUS'
+          e.error = res.error
           e.status = res.status
           this.finish(e)
         }
