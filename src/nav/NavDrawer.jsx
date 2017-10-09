@@ -206,7 +206,7 @@ class NavDrawer extends React.Component {
 
         { this.renderGroup('physical') }
 
-        
+
         {/* this.renderGroup('trash') */}
 
 

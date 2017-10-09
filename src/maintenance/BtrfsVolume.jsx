@@ -66,38 +66,36 @@ export default class BtrfsVolume extends React.Component {
       return '#000'
     }
 
-    this.VolumeTitle = (volume, boot) => {
-      return (
-        <div style={{ width: '100%', height: HEADER_HEIGHT, display: 'flex', alignItems: 'center' }}>
-          <HeaderIcon>
-            <Avatar
-              size={40}
-              color={'white'}
-              backgroundColor={this.volumeIconColor(volume, boot)}
-              icon={<RAIDIcon />}
-            />
-          </HeaderIcon>
-          <div style={{ width: 176 }}>
-            <HeaderTitle1
-              style={{
-                fontWeight: 500,
-                fontSize: 21,
-                width: 176,
-                color: this.props.state.creatingNewVolume ? 'rgba(0,0,0,0.38)' : '#212121'
-              }}
-              title="磁盘阵列"
-            />
-            <div
-              style={{ textTransform: 'capitalize', fontSize: 14, fontWeight: 500, color: '#9e9e9e', marginTop: 2 }}
-              onTouchTap={props.onTouchTap}
-            >
-              <span style={{ marginRight: 5 }}>Btrfs</span>
-              { volume.usage.data.mode && <span style={{ marginRight: 5 }}> {volume.usage.data.mode.toLowerCase()} </span> }
-            </div>
+    this.VolumeTitle = (volume, boot) => (
+      <div style={{ width: '100%', height: HEADER_HEIGHT, display: 'flex', alignItems: 'center' }}>
+        <HeaderIcon>
+          <Avatar
+            size={40}
+            color={'white'}
+            backgroundColor={this.volumeIconColor(volume, boot)}
+            icon={<RAIDIcon />}
+          />
+        </HeaderIcon>
+        <div style={{ width: 176 }}>
+          <HeaderTitle1
+            style={{
+              fontWeight: 500,
+              fontSize: 21,
+              width: 176,
+              color: this.props.state.creatingNewVolume ? 'rgba(0,0,0,0.38)' : '#212121'
+            }}
+            title="磁盘阵列"
+          />
+          <div
+            style={{ textTransform: 'capitalize', fontSize: 14, fontWeight: 500, color: '#9e9e9e', marginTop: 2 }}
+            onTouchTap={props.onTouchTap}
+          >
+            <span style={{ marginRight: 5 }}>Btrfs</span>
+            { volume.usage.data.mode && <span style={{ marginRight: 5 }}> {volume.usage.data.mode.toLowerCase()} </span> }
           </div>
         </div>
+      </div>
       )
-    }
 
     this.createOperation = (operation, ...args) =>
       createOperation(this, 'dialog', operation, ...args)
@@ -398,7 +396,7 @@ export default class BtrfsVolume extends React.Component {
                 this.props.state.creatingNewVolume === null &&
                 boot.current === null &&
                 <FlatButton
-                  label={boot.error === 'ENOALT' ? '安装' : '修复问题' }
+                  label={boot.error === 'ENOALT' ? '安装' : '修复问题'}
                   primary
                   onTouchTap={() => this.initWisnucOnVolume(volume)}
                 />

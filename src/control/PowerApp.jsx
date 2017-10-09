@@ -36,7 +36,7 @@ class Power extends React.Component {
           })
         } else {
           // this.props.openSnackBar(`操作失败：${err.message}`)
-          this.props.openSnackBar(`操作失败`)
+          this.props.openSnackBar('操作失败')
           this.setState({
             operation: ''
           })

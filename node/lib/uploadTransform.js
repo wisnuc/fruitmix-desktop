@@ -230,7 +230,7 @@ class Task {
                   task.completeSize += index * 1024 * 1024 * 1024
                 }
               }
-              
+
               /* continue to upload big file */
               debug('get files with same name but different hash\n', l.entry, mode, checkedName, remoteUUID, seed, l.parts)
 
@@ -252,7 +252,7 @@ class Task {
         const { driveUUID, dirUUID, task } = X[0]
         if (task.state !== 'uploading') task.state = 'diffing'
 
-        diffAsync(X, driveUUID, dirUUID, task).then(value => callback(null, value)).catch(e => {
+        diffAsync(X, driveUUID, dirUUID, task).then(value => callback(null, value)).catch((e) => {
           debug('diffAsync error', e)
           callback(e)
         })

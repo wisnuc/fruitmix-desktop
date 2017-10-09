@@ -32,7 +32,7 @@ class NewDriveDialog extends PureComponent {
         } else {
           debug('adminCreateDrive failed', err)
           // this.props.openSnackBar(`创建失败: ${err.message}`)
-          this.props.openSnackBar(`创建失败`)
+          this.props.openSnackBar('创建失败')
         }
       })
     }
