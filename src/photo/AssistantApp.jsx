@@ -40,7 +40,9 @@ class AssistantApp extends PhotoApp {
             <div style={{ flex: '0 0 540px' }}>
               <div style={{ color: 'rgba(0,0,0,0.87)' }}> 隐藏的照片 </div>
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div style={{ fontSize: 14, color: 'rgba(0, 0, 0, 0.54)' }}> { `数量: ${this.props.media.length}` }</div>
+                <div style={{ fontSize: 14, color: 'rgba(0, 0, 0, 0.54)' }}>
+                  { `数量: ${this.props.media ? this.props.media.length : 0}` }
+                </div>
                 <div style={{ flex: '0 0 48px' }} />
                 <FlatButton
                   label="查看"
