@@ -68,6 +68,7 @@ get json data from server
 */
 
 export const serverGet = (endpoint, callback) => {
+  // debug('serverGet', endpoint)
   aget(endpoint).end((err, res) => {
     if (err) return callback(Object.assign({}, err, { response: err.response && err.response.body }))
     if (res.statusCode !== 200 && res.statusCode !== 206) {
