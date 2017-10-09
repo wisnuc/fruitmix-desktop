@@ -261,7 +261,7 @@ class MoveDialog extends React.PureComponent {
       console.log('this.getTaskState', data)
       if (!data.isStopped) {
         console.log('retry', data)
-        await this.sleep(200)
+        await this.sleep(500)
         await this.getTaskState(uuid)
       }
       return data
