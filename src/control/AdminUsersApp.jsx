@@ -257,13 +257,13 @@ class AdminUsersApp extends React.Component {
               style={{ fontSize: 13, marginLeft: -8 }}
               leftIcon={this.state.user.isAdmin ? <CircleIcon /> : <div />}
               primaryText="管理员"
-              onTouchTap={() => this.toggleDialog('changeAuth', this.state.user)}
+              onTouchTap={() => !this.state.user.isAdmin && this.toggleDialog('changeAuth', this.state.user)}
             />
             <MenuItem
               style={{ fontSize: 13, marginLeft: -8 }}
               leftIcon={!this.state.user.isAdmin ? <CircleIcon /> : <div />}
               primaryText="普通用户"
-              onTouchTap={() => this.toggleDialog('changeAuth', this.state.user)}
+              onTouchTap={() => this.state.user.isAdmin && this.toggleDialog('changeAuth', this.state.user)}
             />
           </Menu>
           }

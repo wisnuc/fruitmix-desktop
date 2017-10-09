@@ -35,7 +35,7 @@ class Media extends Base {
   constructor(ctx) {
     super(ctx)
     this.state = {
-      media: [],
+      media: null,
       preValue: [],
       selectedItems: [],
       shiftHoverItems: [],
