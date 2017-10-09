@@ -313,7 +313,7 @@ class GridView extends React.Component {
             const gridInfo = calcGridInfo(height, width, this.props.entries)
             const { mapData, allHeight, rowHeightSum, indexHeightSum, maxScrollTop } = gridInfo
             // debug('gridInfo', allHeight, this.props.entries.length)
-            
+
             /* To get row index of scrollToRow */
             this.mapDate = mapData
 

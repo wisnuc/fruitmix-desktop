@@ -98,7 +98,7 @@ class Fruitmix extends React.Component {
   }
 
   assignDevice(args) {
-    Object.assign(this.selectedDevice, args) 
+    Object.assign(this.selectedDevice, args)
     this.selectedDevice.start()
   }
 

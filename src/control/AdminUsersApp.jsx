@@ -252,20 +252,20 @@ class AdminUsersApp extends React.Component {
           onRequestClose={event => this.toggleMenu(event)}
         >
           { this.state.user &&
-              <Menu>
-                <MenuItem
-                  style={{ fontSize: 13, marginLeft: -8 }}
-                  leftIcon={this.state.user.isAdmin ? <CircleIcon /> : <div />}
-                  primaryText="管理员"
-                  onTouchTap={() => this.toggleDialog('changeAuth', this.state.user)}
-                />
-                <MenuItem
-                  style={{ fontSize: 13, marginLeft: -8 }}
-                  leftIcon={!this.state.user.isAdmin ? <CircleIcon /> : <div />}
-                  primaryText="普通用户"
-                  onTouchTap={() => this.toggleDialog('changeAuth', this.state.user)}
-                />
-              </Menu>
+          <Menu>
+            <MenuItem
+              style={{ fontSize: 13, marginLeft: -8 }}
+              leftIcon={this.state.user.isAdmin ? <CircleIcon /> : <div />}
+              primaryText="管理员"
+              onTouchTap={() => this.toggleDialog('changeAuth', this.state.user)}
+            />
+            <MenuItem
+              style={{ fontSize: 13, marginLeft: -8 }}
+              leftIcon={!this.state.user.isAdmin ? <CircleIcon /> : <div />}
+              primaryText="普通用户"
+              onTouchTap={() => this.toggleDialog('changeAuth', this.state.user)}
+            />
+          </Menu>
           }
         </Popover>
 

@@ -15,42 +15,40 @@ export class DialogInput extends React.Component {
   }
 
   render() {
-
     const actions = [
       <FlatButton
         label="取消"
         onTouchTap={() => this.props.onCancel()}
-        labelStyle={{fontSize:'15px', fontWeight: 500}}
+        labelStyle={{ fontSize: '15px', fontWeight: 500 }}
       />,
       <FlatButton
         label="确认"
-        primary={true}
+        primary
         onTouchTap={() => this.props.onOK(this.inputValue)}
-        labelStyle={{fontSize:'15px', fontWeight: 500}}
-      />,
-    ]    
+        labelStyle={{ fontSize: '15px', fontWeight: 500 }}
+      />
+    ]
 
     return (
       <Dialog
         title={this.props.title}
         actions={actions}
-        modal={true}
-        contentStyle={{width:480}}
+        modal
+        contentStyle={{ width: 480 }}
         open={this.props.open}
       >
-        <TextField 
+        <TextField
           id={this.id}
           hintText={this.props.hint}
-          fullWidth={true}
-          ref={input => {
+          fullWidth
+          ref={(input) => {
             if (input) {
-              if (this.inputValue) 
-                input.value = this.inputValue
+              if (this.inputValue) { input.value = this.inputValue }
               input.focus()
             }
           }}
 
-          onChange={e => {
+          onChange={(e) => {
             this.inputValue = e.target.value
           }}
         />
@@ -63,31 +61,30 @@ export class DialogConfirm extends React.Component {
 
   constructor(props) {
     super(props)
-  } 
+  }
 
   render() {
-
     const actions = [
       <FlatButton
         label="取消"
         onTouchTap={() => this.props.onCancel()}
-        labelStyle={{fontSize:'15px', fontWeight: 500}}
+        labelStyle={{ fontSize: '15px', fontWeight: 500 }}
       />,
       <FlatButton
         label="确认"
-        primary={true}
+        primary
         onTouchTap={() => this.props.onOK(this.inputValue)}
-        labelStyle={{fontSize:'15px', fontWeight: 500}}
-      />,
-    ]    
+        labelStyle={{ fontSize: '15px', fontWeight: 500 }}
+      />
+    ]
 
     return (
       <Dialog
         title={this.props.title}
         actions={actions}
-        modal={true}
-        contentStyle={{width:400}}
-        open={this.props.open} 
+        modal
+        contentStyle={{ width: 400 }}
+        open={this.props.open}
       />
     )
   }
@@ -105,8 +102,8 @@ export class DialogImportFile extends React.Component {
 
   constructor(props) {
     super(props)
-    this.state = { 
-      select: null 
+    this.state = {
+      select: null
     }
 
     this.cancel = () => {
@@ -116,51 +113,51 @@ export class DialogImportFile extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-
     if (nextProps.open && !this.props.open) {
       this.setState({ select: null })
     }
   }
 
   render() {
-
     return (
       <Dialog
-        contentStyle={{width: 672}}
-        titleStyle={{fontSize: 20}}
-        title='导入文件'
+        contentStyle={{ width: 672 }}
+        titleStyle={{ fontSize: 20 }}
+        title="导入文件"
         open={this.props.open}
-        model={true}
+        model
         onRequestClose={this.cancel}
       >
         <p>'选择需要导入的文件夹，点击确定，该文件夹将被移动到当前用户的当前文件夹。'</p>
 
         <Divider />
-        <TreeTable 
-          style={{width: '100%', height: 400}}
+        <TreeTable
+          style={{ width: '100%', height: 400 }}
           data={this.props.data}
           columns={this.props.columns}
           showHeader={this.props.showHeader}
           select={this.state.select}
-          onSelect={select => {
+          onSelect={(select) => {
             this.setState(Object.assign({}, this.state, { select }))
           }}
         />
 
-        <div style={{
-          marginTop: 24, 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'flex-end'
-        }}>
-          <FlatButton 
-            label='取消' 
-            primary={true}
+        <div
+          style={{
+            marginTop: 24,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end'
+          }}
+        >
+          <FlatButton
+            label="取消"
+            primary
             onTouchTap={this.cancel}
           />
-          <FlatButton 
-            label='确认' 
-            primary={true}
+          <FlatButton
+            label="确认"
+            primary
             disabled={this.state.select === null}
             onTouchTap={() => this.state.select && this.props.onOK(this.state.select)}
           />
@@ -169,22 +166,4 @@ export class DialogImportFile extends React.Component {
     )
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -4,7 +4,6 @@ import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-fil
 import { TXTIcon, WORDIcon, EXCELIcon, PPTIcon, PDFIcon, VideoIcon, AudioIcon } from '../common/Svg'
 
 const renderFileIcon = (name, metadata, setSize, dark, white) => {
-
   /* PDF, TXT, Word, Excel, PPT */
   let extension = name.replace(/^.*\./, '')
   if (!extension || extension === name) extension = 'OTHER'

@@ -221,7 +221,7 @@ class ChangeAccountDialog extends React.PureComponent {
                   </div>
               }
               <div style={{ height: 56, display: 'flex', marginBottom: 10 }}>
-                <IconBox style={{ marginLeft: -12 }} size={48} icon={ op === 'createUser' ? CommunicationVpnKey : null } />
+                <IconBox style={{ marginLeft: -12 }} size={48} icon={op === 'createUser' ? CommunicationVpnKey : null} />
                 <TextField
                   style={{ flexGrow: 1 }}
                   fullWidth

@@ -9,11 +9,16 @@ class IconBox extends PureComponent {
   render() {
     return (
       <div style={this.props.style}>
-        <div style={{
-          width: this.props.size, height: this.props.size, 
-          display: 'flex', alignItems: 'center', justifyContent: 'center'
-        }}>
-          { this.props.icon && <this.props.icon color='rgba(0,0,0,0.54)' /> }
+        <div
+          style={{
+            width: this.props.size,
+            height: this.props.size,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          { this.props.icon && <this.props.icon color="rgba(0,0,0,0.54)" /> }
         </div>
       </div>
     )

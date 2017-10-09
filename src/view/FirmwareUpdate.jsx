@@ -88,7 +88,7 @@ class FirmwareUpdate extends Base {
   }
 
   detailIcon() {
-    return ListIcon 
+    return ListIcon
   }
 
   renderDetail({ style, openSnackBar }) {

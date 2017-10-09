@@ -25,7 +25,7 @@ class Fan extends React.Component {
           this.setState({ fanScale })
         } else {
           // this.props.openSnackBar(`调节失败: ${err.message}`)
-          this.props.openSnackBar(`调节失败`)
+          this.props.openSnackBar('调节失败')
         }
         this.propsrefresh()
       })

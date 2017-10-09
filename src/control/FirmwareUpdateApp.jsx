@@ -13,7 +13,7 @@ class FirmwareUpdate extends React.Component {
     super(props)
 
     this.state = {
-      confirm: false,
+      confirm: false
     }
 
     this.install = () => {
