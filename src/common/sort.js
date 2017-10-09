@@ -1,3 +1,5 @@
+import { toTimeSecond } from '../common/datetime'
+
 const sort = (a, b, sortType) => {
   if (a.type === 'directory' && b.type === 'file') return -1
   if (a.type === 'file' && b.type === 'directory') return 1
@@ -14,6 +16,12 @@ const sort = (a, b, sortType) => {
       return (a.mtime && b.mtime) ? (a.mtime - b.mtime) : a.name.localeCompare(b.name)
     case 'timeDown':
       return (a.mtime && b.mtime) ? (b.mtime - a.mtime) : a.name.localeCompare(b.name)
+    case 'takenUp':
+      return (a.metadata && a.metadata.datetime && b.metadata && b.metadata.datetime)
+        ? toTimeSecond(a.metadata.datetime) - toTimeSecond(b.metadata.datetime) : a.name.localeCompare(b.name)
+    case 'takenDown':
+      return (a.metadata && a.metadata.datetime && b.metadata && b.metadata.datetime)
+        ? toTimeSecond(b.metadata.datetime) - toTimeSecond(a.metadata.datetime) : a.name.localeCompare(b.name)
     default:
       return a.name.localeCompare(b.name)
   }
