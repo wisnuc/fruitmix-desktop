@@ -358,16 +358,16 @@ class WechatLogin extends React.Component {
     let text = ''
     const wcl = this.state.wechatLogin
     switch (wcl) {
-      case 'connecting' :
+      case 'connecting':
         text = '连接服务器中...'
         break
-      case 'authorization' :
+      case 'authorization':
         text = '正在进行权限认证...'
         break
-      case 'getingList' :
+      case 'getingList':
         text = '正在获取设备列表...'
         break
-      case 'success' :
+      case 'success':
         text = '成功获取设备列表'
         break
       default:
@@ -501,8 +501,7 @@ class WechatLogin extends React.Component {
                 <div style={{ width: '100%', height: 436, overflowY: 'auto' }}>
                   {
                     this.state.lists.map((list, index) => (
-                      <DeviceList list={list} primaryColor={this.props.primaryColor} key={index} select={this.select} />)
-                    )
+                      <DeviceList list={list} primaryColor={this.props.primaryColor} key={index} select={this.select} />))
                   }
                 </div>
               </div>

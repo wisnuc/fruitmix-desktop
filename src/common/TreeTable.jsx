@@ -11,7 +11,6 @@ import HardwareKeyboardArrowUp from 'material-ui/svg-icons/hardware/keyboard-arr
 import HardwareKeyboardArrowDown from 'material-ui/svg-icons/hardware/keyboard-arrow-down'
 
 class TreeTable extends React.Component {
-
   constructor(props) {
     super(props)
 
@@ -40,15 +39,14 @@ class TreeTable extends React.Component {
             ))
           }
       </div>
-      )
+    )
 
     this.renderData = () => {
       const rows = []
 
       const renderItem = (item, level) => {
-        rows.push(
-          <div
-            style={{
+        rows.push(<div
+          style={{
               height: 40,
               display: 'flex',
               alignItems: 'center',
@@ -57,20 +55,21 @@ class TreeTable extends React.Component {
               fontSize: 14
             }}
 
-            onClick={() => this.props.onSelect && this.props.onSelect(item)}
-          >
+          onClick={() => this.props.onSelect && this.props.onSelect(item)}
+        >
 
-            <div style={{ flex: `0 0 ${level * 24}px` }} />
-            <div style={{ flex: '0 0 40px' }}>
+          <div style={{ flex: `0 0 ${level * 24}px` }} />
+          <div style={{ flex: '0 0 40px' }}>
 
-              { this.state.expansion.has(item) ?
-                <IconButton
-                  style={{ width: 40, height: 40, padding: 10 }}
-                  iconStyle={{ width: 20, height: 20 }}
-                  disableTouchRipple
-                  disableFocusRipple
-                  onTouchTap={() => this.toggleExpansion(item)}
-                ><HardwareKeyboardArrowDown /></IconButton> :
+            { this.state.expansion.has(item) ?
+              <IconButton
+                style={{ width: 40, height: 40, padding: 10 }}
+                iconStyle={{ width: 20, height: 20 }}
+                disableTouchRipple
+                disableFocusRipple
+                onTouchTap={() => this.toggleExpansion(item)}
+              ><HardwareKeyboardArrowDown />
+              </IconButton> :
                 item.children && item.children.length ?
                   <IconButton
                     style={{ width: 40, height: 40, padding: 10 }}
@@ -78,13 +77,13 @@ class TreeTable extends React.Component {
                     disableTouchRipple
                     disableFocusRipple
                     onTouchTap={() => this.toggleExpansion(item)}
-                  ><HardwareKeyboardArrowRight /></IconButton> :
+                  ><HardwareKeyboardArrowRight />
+                  </IconButton> :
                 null }
 
-            </div>
-            <div>{item.name || '(no name)'}</div>
           </div>
-        )
+          <div>{item.name || '(no name)'}</div>
+                  </div>)
 
         rows.push(<Divider />)
 

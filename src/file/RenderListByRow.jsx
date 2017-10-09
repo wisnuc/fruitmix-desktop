@@ -50,22 +50,22 @@ const renderLeading = (leading) => {
 }
 
 const renderCheck = check =>
-  (check === 'checked' || check === 'unchecking')
+  ((check === 'checked' || check === 'unchecking')
     ? <ToggleCheckBox style={{ color: '#FF0000' }} />
     : check === 'checking'
       ? <ToggleCheckBoxOutlineBlank style={{ color: 'rgba(0,0,0,0.38)' }} />
-      : null
+      : null)
 
 class Row extends React.PureComponent {
   render() {
     // debug('renderRow this.props', this.props)
     const {
       /* these are react-virtualized List props */
-      index,       // Index of row
+      index, // Index of row
       isScrolling, // The List is currently being scrolled
-      isVisible,   // This row is visible within the List (eg it is not an overscanned row)
-      parent,      // Reference to the parent List (instance)
-      style,       // Style object to be applied to row (to position it);
+      isVisible, // This row is visible within the List (eg it is not an overscanned row)
+      parent, // Reference to the parent List (instance)
+      style, // Style object to be applied to row (to position it);
       // This must be passed through to the rendered row element.
 
       /* these are view-model state */
@@ -184,7 +184,7 @@ class RenderListByRow extends React.Component {
 
     return (
       <div style={{ width: '100%', height: '100%' }} onDrop={this.props.drop}>
-        {/* header*/}
+        {/* header */}
         <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }}>
           <div style={{ flex: '0 0 104px' }} />
           {

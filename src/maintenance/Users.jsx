@@ -52,7 +52,7 @@ export default class Users extends React.Component {
             onMouseLeave={this.toggleHover}
           >
             <IconButton iconStyle={{ width: 20, height: 20 }}>
-              <Account color={'#757575'} />
+              <Account color="#757575" />
             </IconButton>
           </Badge>
           <div
@@ -64,10 +64,9 @@ export default class Users extends React.Component {
             }}
           >
             {users.map(user =>
-              <Avatar key={user.username.toString()} size={24} style={{ marginRight: 8 }}>
+              (<Avatar key={user.username.toString()} size={24} style={{ marginRight: 8 }}>
                 {user.username.slice(0, 2).toUpperCase()}
-              </Avatar>
-              )}
+               </Avatar>))}
           </div>
         </div>
       )

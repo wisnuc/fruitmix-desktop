@@ -2,7 +2,6 @@ import React, { PureComponent } from 'react'
 import { menuBoxShadow } from './boxShadow'
 
 class ContextMenu extends PureComponent {
-
   constructor() {
     super()
     this.out = 195

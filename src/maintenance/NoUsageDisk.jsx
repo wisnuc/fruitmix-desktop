@@ -49,15 +49,19 @@ export default class NoUsageDisk extends React.Component {
         <div style={styles.paperHeader} onTouchTap={() => this.toggleExpanded()}>
           <div style={{ flex: '0 0 256px' }}>
             <DiskTitle
-              disk={disk} top={floatingTitleTop()} colors={this.props.that.colors}
-              cnv={cnv} uf={uf} toggleCandidate={this.props.that.toggleCandidate}
+              disk={disk}
+              top={floatingTitleTop()}
+              colors={this.props.that.colors}
+              cnv={cnv}
+              uf={uf}
+              toggleCandidate={this.props.that.toggleCandidate}
             />
           </div>
           <div style={{ flex: '0 0 336px' }}>
             <DiskHeadline disk={disk} cnv={cnv} />
           </div>
           <div style={{ marginLeft: 560 }}>
-            {this.state.expanded ? <UpIcon color={'#9e9e9e'} /> : <DownIcon color={'#9e9e9e'} />}
+            {this.state.expanded ? <UpIcon color="#9e9e9e" /> : <DownIcon color="#9e9e9e" />}
           </div>
         </div>
 
@@ -106,5 +110,4 @@ export default class NoUsageDisk extends React.Component {
       </Paper>
     )
   }
-
 }

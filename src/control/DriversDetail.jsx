@@ -9,7 +9,6 @@ import FlatButton from '../common/FlatButton'
 const debug = Debug('component:control:NewDriveDialog')
 
 class DrivesDetail extends PureComponent {
-
   constructor(props) {
     super(props)
 
@@ -167,7 +166,8 @@ class DrivesDetail extends PureComponent {
               color: 'rgba(0,0,0,0.54)',
               marginTop: -2
             }}
-          > 共享用户 </div>
+          > 共享用户
+          </div>
           <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key="all" >
             <Checkbox
               label="所有人"
@@ -181,7 +181,7 @@ class DrivesDetail extends PureComponent {
           <div style={{ overflowY: 'auto', height: 'calc(100% - 126px)', width: 336 }}>
             {
               users.map(user =>
-                <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.username} >
+                (<div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.username} >
                   <Checkbox
                     label={user.username}
                     labelStyle={{ fontSize: 14 }}
@@ -189,8 +189,7 @@ class DrivesDetail extends PureComponent {
                     checked={this.state.writelist.includes(user.uuid)}
                     onCheck={() => this.handleCheck(user.uuid)}
                   />
-                </div>
-              )
+                 </div>))
             }
             <div style={{ height: 8 }} />
           </div>
@@ -206,7 +205,8 @@ class DrivesDetail extends PureComponent {
             />
             */}
             <FlatButton
-              label="应用" primary
+              label="应用"
+              primary
               disabled={!this.state.changed || !!this.state.errorText || this.state.modify}
               onTouchTap={this.fire}
             />

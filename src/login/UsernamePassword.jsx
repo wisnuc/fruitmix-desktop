@@ -3,7 +3,6 @@ import { TextField } from 'material-ui'
 
 
 class UsernamePassword extends React.PureComponent {
-
   static State = class State {
     constructor() {
       this.username = ''
@@ -23,7 +22,8 @@ class UsernamePassword extends React.PureComponent {
       <div>
         <div>
           <TextField
-            key="guide-box-username" hintText="用户名"
+            key="guide-box-username"
+            hintText="用户名"
             value={this.props.state.username}
             maxLength={20}
             onChange={e => this.props.setState({ username: e.target.value })}
@@ -31,7 +31,8 @@ class UsernamePassword extends React.PureComponent {
         </div>
         <div>
           <TextField
-            key="guide-box-password" hintText="密码"
+            key="guide-box-password"
+            hintText="密码"
             value={this.props.state.password}
             type="password"
             maxLength={40}
@@ -40,7 +41,8 @@ class UsernamePassword extends React.PureComponent {
         </div>
         <div>
           <TextField
-            key="guide-box-password-again" hintText="再次输入密码"
+            key="guide-box-password-again"
+            hintText="再次输入密码"
             value={this.props.state.passwordAgain}
             type="password"
             maxLength={40}

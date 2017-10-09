@@ -93,7 +93,7 @@ class Trash extends Home {
           {
             this.state.delete &&
             <div style={{ width: 280, padding: '24px 24px 0px 24px' }}>
-              <div style={{ color: 'rgba(0,0,0,0.54)' }}>{'确定删除？'}</div>
+              <div style={{ color: 'rgba(0,0,0,0.54)' }}>确定删除？</div>
               <div style={{ height: 24 }} />
               <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                 <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('delete')} />

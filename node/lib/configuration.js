@@ -50,7 +50,6 @@ class UserConfig {
 //        /thumbnail/                 thumbnail folder
 //        /imagecache/                image folder
 class Configuration {
-
   constructor(root) {
     this.root = path.join(root, 'wisnuc')
   }

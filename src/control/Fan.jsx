@@ -7,7 +7,6 @@ import HardwareKeyboardArrowDown from 'material-ui/svg-icons/hardware/keyboard-a
 const debug = Debug('component:control:Fan')
 
 class Fan extends React.Component {
-
   constructor(props) {
     super(props)
 

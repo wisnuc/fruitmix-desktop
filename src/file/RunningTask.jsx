@@ -185,7 +185,7 @@ class RunningTask extends React.Component {
         {/* Status */}
         <div style={{ flex: '0 0 100px' }}>{ this.getStatus(task) }</div>
 
-        {/* Pause, resume and delete task*/}
+        {/* Pause, resume and delete task */}
         <div style={{ flex: '0 0 120px', display: 'flex', alignItems: 'center' }}>
           {
             task.state === 'failed'

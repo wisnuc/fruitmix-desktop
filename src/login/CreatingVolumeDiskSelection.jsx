@@ -5,7 +5,6 @@ import { Checkbox, Divider } from 'material-ui'
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
 
 class CreatingVolumeDiskSelection extends React.PureComponent {
-
   static State = class State {
     constructor() {
       this.selection = []
@@ -18,11 +17,11 @@ class CreatingVolumeDiskSelection extends React.PureComponent {
     const name = blk.name
     const size = prettysize(blk.size * 512)
     const iface = blk.isATA ? 'ATA' :
-                blk.isSCSI ? 'SCSI' :
-                blk.isUSB ? 'USB' : '未知'
+      blk.isSCSI ? 'SCSI' :
+        blk.isUSB ? 'USB' : '未知'
 
     const usage = blk.isFileSystem ? `${blk.fileSystemType} 文件系统` :
-                blk.isPartitioned ? '有文件分区' : '未发现文件系统或分区'
+      blk.isPartitioned ? '有文件分区' : '未发现文件系统或分区'
 
     const valid = !blk.unformattable
 
@@ -51,7 +50,8 @@ class CreatingVolumeDiskSelection extends React.PureComponent {
         <div style={{ flex: '0 0 64px' }}>
           { valid && <Checkbox
             style={{ marginLeft: 16 }}
-            checked={this.props.state.selection.indexOf(name) !== -1} onCheck={() => {
+            checked={this.props.state.selection.indexOf(name) !== -1}
+            onCheck={() => {
               console.log('......=============.......', this.props.state.selection)
               let nextState
 
@@ -117,27 +117,33 @@ class CreatingVolumeDiskSelection extends React.PureComponent {
                 style={{ position: 'relative', display: 'flex' }}
                 valueSelected={this.props.state.mode}
                 onChange={(e, value) => this.props.setState({ mode: value })}
-                name={'volume-name'}
+                name="volume-name"
               >
                 <RadioButton
-                  style={{ fontSize: 13, width: 128 }} iconStyle={{ width: 16, height: 16, padding: 2 }}
+                  style={{ fontSize: 13, width: 128 }}
+                  iconStyle={{ width: 16, height: 16, padding: 2 }}
                   disableTouchRipple
                   disableFocusRipple
-                  value="single" label="single模式"
+                  value="single"
+                  label="single模式"
                   disabled={this.props.state.selection.length === 0}
                 />
                 <RadioButton
-                  style={{ fontSize: 13, width: 128 }} iconStyle={{ width: 16, height: 16, padding: 2 }}
+                  style={{ fontSize: 13, width: 128 }}
+                  iconStyle={{ width: 16, height: 16, padding: 2 }}
                   disableTouchRipple
                   disableFocusRipple
-                  value="raid0" label="raid0模式"
+                  value="raid0"
+                  label="raid0模式"
                   disabled={this.props.state.selection.length < 2}
                 />
                 <RadioButton
-                  style={{ fontSize: 13, width: 128 }} iconStyle={{ width: 16, height: 16, padding: 2 }}
+                  style={{ fontSize: 13, width: 128 }}
+                  iconStyle={{ width: 16, height: 16, padding: 2 }}
                   disableTouchRipple
                   disableFocusRipple
-                  value="raid1" label="raid1模式"
+                  value="raid1"
+                  label="raid1模式"
                   disabled={this.props.state.selection.length < 2}
                 />
               </RadioButtonGroup>

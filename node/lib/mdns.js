@@ -23,7 +23,7 @@ mdns.excludeInterface('0.0.0.0')
   host: 'wisnuc-generic-04AF2BFC.local',
   interfaceIndex: 0,
   networkInterface: 'enp14s0' }
-**/
+*/
 
 // return null if not wisnuc device
 // otherwise return { model, serial }

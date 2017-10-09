@@ -4,7 +4,6 @@ import sanitize from 'sanitize-filename'
 import FlatButton from '../common/FlatButton'
 
 class NewFolderDialog extends React.PureComponent {
-
   constructor(props) {
     super(props)
     this.state = {
@@ -56,7 +55,7 @@ class NewFolderDialog extends React.PureComponent {
       <div style={{ width: 280, padding: '24px 24px 0px 24px' }}>
         <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>{this.props.title ? this.props.title : '创建新文件夹'}</div>
         <div style={{ height: 20 }} />
-        <div style={{ height: 60 /** 48 + 12 **/}}>
+        <div style={{ height: 60 }}>
           <TextField
             fullWidth
             hintText={this.props.hintText ? this.props.hintText : '输入文件夹名称'}

@@ -3,7 +3,6 @@ import { TweenMax } from 'gsap'
 import TransitionGroup from 'react-addons-transition-group'
 
 class CrossNav extends React.Component {
-
   cardWillEnter(el, callback) {
     const { enter, duration } = this.props
 

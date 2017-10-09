@@ -8,7 +8,6 @@ import FlatButton from '../common/FlatButton'
 const debug = Debug('component:maintenance:NewVolumeTop')
 
 class RaidModePopover extends React.Component {
-
   constructor(props) {
     super(props)
     this.state = { open: false, hover: false }
@@ -76,7 +75,6 @@ class RaidModePopover extends React.Component {
 }
 
 export default class NewVolumeTop extends React.Component {
-
   constructor(props) {
     super(props)
     this.state = {
@@ -217,12 +215,14 @@ export default class NewVolumeTop extends React.Component {
               onSelect={this.setVolumeMode}
             />
             <FlatButton
-              label="创建" secondary
+              label="创建"
+              secondary
               onTouchTap={this.mkfsBtrfsVolume}
               disabled={this.props.state.creatingNewVolume.disks.length === 0}
             />
             <FlatButton
-              label="取消" secondary
+              label="取消"
+              secondary
               onTouchTap={this.onToggleCreatingNewVolume}
             />
           </div>

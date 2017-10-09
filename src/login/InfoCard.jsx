@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom'
 import { LinearProgress } from 'material-ui'
 
 class InfoCard extends React.Component {
-
   constructor(props) {
     super(props)
   }

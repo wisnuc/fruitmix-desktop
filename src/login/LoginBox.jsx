@@ -6,7 +6,6 @@ import FlatButton from '../common/FlatButton'
 import { sharpCurve, sharpCurveDuration } from '../common/motion'
 
 class LoginBox extends React.Component {
-
   constructor(props) {
     super(props)
     this.state = {
@@ -91,7 +90,8 @@ class LoginBox extends React.Component {
                 color: 'rgba(0,0,0,0.38)',
                 marginBottom: 8
               }}
-            >用户登录</div>
+            >用户登录
+            </div>
             <div
               style={{
                 flex: '0 0 36px',
@@ -132,13 +132,16 @@ class LoginBox extends React.Component {
               <div style={{ flexGrow: 1 }} />
               { !success &&
               <FlatButton
-                label="取消" primary
+                label="取消"
+                primary
                 disabled={busy}
                 onTouchTap={this.props.cancel}
               /> }
               { !success &&
               <FlatButton
-                style={{ marginRight: -16 }} label="确认" primary
+                style={{ marginRight: -16 }}
+                label="确认"
+                primary
                 disabled={this.state.password.length === 0 || busy}
                 onTouchTap={this.login.bind(this)}
               /> }

@@ -4,7 +4,6 @@ import sanitize from 'sanitize-filename'
 import FlatButton from '../common/FlatButton'
 
 class RenameDialog extends React.PureComponent {
-
   constructor(props) {
     super(props)
 
@@ -62,7 +61,7 @@ class RenameDialog extends React.PureComponent {
       <div style={{ width: 280, padding: '24px 24px 0px 24px' }}>
         <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>{this.props.title ? this.props.title : '重命名'}</div>
         <div style={{ height: 20 }} />
-        <div style={{ height: 60 /** 48 + 12 **/}}>
+        <div style={{ height: 60 /** 48 + 12 * */}}>
           <TextField
             fullWidth
             name="rename"

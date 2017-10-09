@@ -4,7 +4,6 @@ import Base from './Base'
 import NetworkInfo from '../control/NetworkInfo'
 
 class Ethernet extends Base {
-
   constructor(ctx) {
     super(ctx)
   }
@@ -51,7 +50,6 @@ class Ethernet extends Base {
     return 'colored'
   }
 
-  /** renderers **/
   renderContent({ openSnackBar }) {
     return (
       <NetworkInfo

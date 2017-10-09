@@ -48,7 +48,7 @@ class Home extends Base {
       select: this.select.state,
       listNavDir: null, // save a reference
       path: [],
-      entries: [],      // sorted
+      entries: [], // sorted
       contextMenuOpen: false,
       contextMenuY: -1,
       contextMenuX: -1,
@@ -482,7 +482,7 @@ class Home extends Base {
           {
             this.state.delete &&
             <div style={{ width: 280, padding: '24px 24px 0px 24px' }}>
-              <div style={{ color: 'rgba(0,0,0,0.54)' }}>{'确定删除？'}</div>
+              <div style={{ color: 'rgba(0,0,0,0.54)' }}>确定删除？</div>
               <div style={{ height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 { this.state.deleteLoading && <CircularProgress size={24} thickness={3} /> }
               </div>
@@ -503,7 +503,7 @@ class Home extends Base {
           {
             this.state.noAccess &&
             <div style={{ width: 280, padding: '24px 24px 0px 24px' }}>
-              <div style={{ color: 'rgba(0,0,0,0.54)' }}>{'对不起，您没有访问权限！'}</div>
+              <div style={{ color: 'rgba(0,0,0,0.54)' }}>对不起，您没有访问权限！</div>
               <div style={{ height: 24 }} />
               <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                 <FlatButton label="确定" primary onTouchTap={() => this.toggleDialog('noAccess')} />
@@ -553,15 +553,18 @@ class Home extends Base {
                   <div>
                     <MenuItem
                       leftIcon={<ShareIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                      primaryText="分享至共享盘" onTouchTap={() => this.toggleDialog('share')}
+                      primaryText="分享至共享盘"
+                      onTouchTap={() => this.toggleDialog('share')}
                     />
                     <MenuItem
                       leftIcon={<CopyIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                      primaryText="拷贝至..." onTouchTap={() => this.toggleDialog('copy')}
+                      primaryText="拷贝至..."
+                      onTouchTap={() => this.toggleDialog('copy')}
                     />
                     <MenuItem
                       leftIcon={<MoveIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                      primaryText="移动至..." onTouchTap={() => this.toggleDialog('move')}
+                      primaryText="移动至..."
+                      onTouchTap={() => this.toggleDialog('move')}
                     />
                   </div>
                 }
@@ -569,7 +572,8 @@ class Home extends Base {
                   this.state.select && this.state.select.selected && this.state.select.selected.length === 1 &&
                     <MenuItem
                       leftIcon={<EditIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                      primaryText="重命名" onTouchTap={() => this.toggleDialog('rename')}
+                      primaryText="重命名"
+                      onTouchTap={() => this.toggleDialog('rename')}
                     />
                 }
                 <div style={{ height: 8 }} />
@@ -585,19 +589,22 @@ class Home extends Base {
                   this.state.entries[this.state.select.selected[0]].type === 'file' &&
                     <MenuItem
                       leftIcon={<CopyIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                      primaryText="制作一个副本" onTouchTap={this.dupFile}
+                      primaryText="制作一个副本"
+                      onTouchTap={this.dupFile}
                     />
                 }
                 <MenuItem
                   leftIcon={<DownloadIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                  primaryText="下载至本地" onTouchTap={this.download}
+                  primaryText="下载至本地"
+                  onTouchTap={this.download}
                 />
                 <div style={{ height: 8 }} />
                 <Divider />
                 <div style={{ height: 8 }} />
                 <MenuItem
                   leftIcon={<DeleteIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                  primaryText="刪除" onTouchTap={() => this.toggleDialog('delete')}
+                  primaryText="刪除"
+                  onTouchTap={() => this.toggleDialog('delete')}
                 />
               </div>
           }

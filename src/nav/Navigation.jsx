@@ -39,7 +39,6 @@ import Power from '../view/Power'
 const debug = Debug('component:nav:Navigation')
 
 class NavViews extends React.Component {
-
   constructor(props) {
     super(props)
 
@@ -325,23 +324,22 @@ class NavViews extends React.Component {
 
           <div style={{ flex: '0 0 12px' }} />
 
-          {/** NavigationMenu ({ style, onTouchTap })**/}
           { view.renderNavigationMenu({ style: {}, onTouchTap: () => this.openDrawer(true) }) }
 
           <div style={{ flex: '0 0 20px' }} />
 
-          {/** non-prominent title **/}
+          {/* non-prominent title */}
           { !view.prominent() && view.renderTitle({ style: titleStyle }) }
 
-          {/** context-sensitive toolbar, passing style for component list **/}
+          {/* context-sensitive toolbar, passing style for component list */}
           { view.renderToolBar({ style: toolBarStyle }) }
 
-          {/** global notification button **/}
+          {/* global notification button */}
           <IconButton>
             <SocialNotifications color={view.appBarStyle() === 'light' ? 'rgba(0,0,0,0.54)' : 'rgba(255,255,255,0.5)'} />
           </IconButton>
 
-          {/** optional toggle detail button **/}
+          {/* optional toggle detail button */}
           { this.renderDetailButton() }
 
           <div style={{ flex: '0 0 12px' }} />
@@ -421,7 +419,7 @@ class NavViews extends React.Component {
           { this.renderAppBar() }
           { this.renderAppBarShadow() }
 
-          {/* content + shortcut container*/}
+          {/* content + shortcut container */}
           <div
             style={{ width: '100%',
               height: `calc(100% - ${this.appBarHeight()}px)`,
@@ -483,13 +481,12 @@ class NavViews extends React.Component {
   if both apis and views are put into the same component, it is hard to inform view model
   to process states like componentWillReceiveProps does. React props is essentially an
   event routing.
-**/
+*/
 class Navigation extends React.Component {
-
   constructor(props) {
     super(props)
 
-    /** init apis **/
+    /* init apis */
     const token = props.selectedDevice.token
     if (!token.isFulfilled()) throw new Error('token not fulfilled')
 

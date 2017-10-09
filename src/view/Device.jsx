@@ -8,7 +8,6 @@ import DeviceInfo from '../control/DeviceInfo'
 const debug = Debug('component:view:device')
 
 class Device extends Base {
-
   constructor(ctx) {
     super(ctx)
 

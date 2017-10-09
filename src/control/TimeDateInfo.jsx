@@ -5,7 +5,6 @@ import { CircularProgress } from 'material-ui'
 import request from 'superagent'
 
 class TimeDate extends React.Component {
-
   constructor(props) {
     super(props)
   }

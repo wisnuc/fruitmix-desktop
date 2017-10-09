@@ -12,10 +12,9 @@ import Radium from 'radium'
 
   onTouchTap
 
-**/
+*/
 @Radium
 class QuickNav extends PureComponent {
-
   render() {
     let { icon, text, color, selected, disabled } = this.props
     const Icon = icon
@@ -46,4 +45,3 @@ class QuickNav extends PureComponent {
 }
 
 export default QuickNav
-

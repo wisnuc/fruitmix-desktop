@@ -118,7 +118,8 @@ export const HeaderTitle1 = props => (
 export const Checkbox40 = props => (
   <div style={{ width: 40, height: 40 }}>
     <Checkbox
-      {...props} style={{ margin: 8 }}
+      {...props}
+      style={{ margin: 8 }}
       iconStyle={{ fill: props.fill }}
     />
   </div>

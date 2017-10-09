@@ -15,7 +15,6 @@ const parseDate = (date) => {
 
 /* Extends Media to get medthods about PhotoList */
 class Assistant extends Media {
-
   willReceiveProps(nextProps) {
     console.log('Assistant nextProps', nextProps)
     if (!nextProps.apis || !nextProps.apis.media || !nextProps.apis.blacklist) return

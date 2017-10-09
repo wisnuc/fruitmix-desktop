@@ -4,7 +4,6 @@ import AdminUsersApp from '../control/AdminUsersApp'
 import Base from './Base'
 
 class AdminUsers extends Base {
-
   constructor(ctx) {
     super(ctx)
     this.refreshUsers = this.refresh.bind(this)
@@ -59,7 +58,6 @@ class AdminUsers extends Base {
     return <div style={Object.assign({}, style, { marginLeft: 176 })}>用户管理</div>
   }
 
-  /** renderers **/
   renderContent({ openSnackBar }) {
     return (
       <AdminUsersApp

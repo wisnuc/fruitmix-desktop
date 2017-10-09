@@ -4,7 +4,6 @@ import FileFileUpload from 'material-ui/svg-icons/file/file-upload'
 import { UploadFile, UploadFold } from '../common/Svg'
 
 class FileUploadButton extends React.Component {
-
   constructor(props) {
     super(props)
     this.state = { open: false }

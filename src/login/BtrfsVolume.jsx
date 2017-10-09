@@ -78,8 +78,8 @@ class BtrfsVolume extends React.Component {
     const model = blk.model ? blk.model : '未知型号'
     const name = blk.name
     const iface = blk.isATA ? 'ATA' :
-                blk.isSCSI ? 'SCSI' :
-                blk.isUSB ? 'USB' : '未知'
+      blk.isSCSI ? 'SCSI' :
+        blk.isUSB ? 'USB' : '未知'
 
     const size = prettysize(blk.size * 512)
     const usage = device.used
@@ -224,8 +224,6 @@ class BtrfsVolume extends React.Component {
       </div>
     )
   }
-
-
 }
 
 export default BtrfsVolume

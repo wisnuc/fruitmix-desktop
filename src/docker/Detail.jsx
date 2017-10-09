@@ -9,10 +9,9 @@ const debug = Debug('component:control:deviceinfo')
 const formatNumber = num => ((num > 999999)
   ? `${(num / 1000000).toFixed(1)}M`
   : (num > 999)
-  ? `${(num / 1000).toFixed(1)}K` : num)
+    ? `${(num / 1000).toFixed(1)}K` : num)
 
 class Detail extends React.Component {
-
   constructor(props) {
     super(props)
 

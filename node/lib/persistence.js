@@ -13,7 +13,6 @@ const UUID = require('node-uuid')
 //                                                                                      : -> IDLE                            : -> PENDING with req as req
 
 class State {
-
   constructor(ctx) {
     this.ctx = ctx
   }
@@ -27,14 +26,12 @@ class State {
 }
 
 class Idle extends State {
-
   save(data) {
     this.setState(Pending, data)
   }
 }
 
 class Pending extends State {
-
   constructor(ctx, data) {
     super(ctx)
     this.save(data)
@@ -54,7 +51,6 @@ class Pending extends State {
 }
 
 class Working extends State {
-
   constructor(ctx, data) {
     super(ctx)
     this.data = data
@@ -90,7 +86,6 @@ class Working extends State {
 }
 
 class Persistence {
-
   constructor(target, tmpdir, delay) {
     this.target = target
     this.tmpdir = tmpdir

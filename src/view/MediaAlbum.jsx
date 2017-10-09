@@ -8,7 +8,6 @@ import Base from './Base'
 import AlbumApp from '../photo/AlbumApp'
 
 class MediaAlbum extends Base {
-
   constructor(ctx) {
     super(ctx)
     this.state = {}
@@ -65,7 +64,6 @@ class MediaAlbum extends Base {
     return true
   }
 
-  /** renderers **/
   renderContent() {
     return (<AlbumApp
       mediaShare={this.state.mediaShare}

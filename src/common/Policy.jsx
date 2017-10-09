@@ -79,7 +79,8 @@ class PolicyDialog extends React.PureComponent {
 
     /* directory => directory */
     if (entryType === 'directory' && entryType === remote.type) {
-      choices.splice(0, 2,
+      choices.splice(
+        0, 2,
         { value: 'merge', label: '保留，全部内容均保留，如遇同名但内容不同的文件将自动重命名后上传' },
         { value: 'overwrite', label: '覆盖，如遇同名文件将使用新上传的文件替换已有文件' },
       )
@@ -106,7 +107,7 @@ class PolicyDialog extends React.PureComponent {
           key={this.state.current}
           onChange={(e, value) => this.handleChange(value)}
           defaultSelected={choices[0].value}
-          name={'policy'}
+          name="policy"
         >
           {
             choices.map(c => (

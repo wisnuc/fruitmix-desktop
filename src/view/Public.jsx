@@ -136,7 +136,6 @@ class Public extends Home {
   }
 
   /* renderers */
-
   renderTitle({ style }) {
     if (!this.state.listNavDir && !this.state.drives) return (<div />)
 
@@ -181,16 +180,14 @@ class Public extends Home {
 
             /* the first one is always special */
             if (index === 0) {
-              acc.push(
-                <BreadCrumbItem
-                  text="共享盘"
-                  key="root"
-                  onTouchTap={() => {
+              acc.push(<BreadCrumbItem
+                text="共享盘"
+                key="root"
+                onTouchTap={() => {
                     this.rootDrive = null
                     this.ctx.props.apis.request('drives')
                   }}
-                />
-              )
+              />)
             } else {
               acc.push(<BreadCrumbItem text={node.name} key={`Item${node.uuid}`} onTouchTap={() => touchTap(node)} />)
             }

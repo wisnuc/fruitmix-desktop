@@ -21,7 +21,6 @@ const colorArray = [indigo900, cyan900, teal900, lightGreen900, lime900, yellow9
 const duration = 300
 
 const StateUp = base => class extends base {
-
   setSubState(name, nextSubState) {
     const state = this.props.state || this.state
     const subState = state[name]
@@ -47,7 +46,6 @@ const StateUp = base => class extends base {
 
 // pure animation frame !
 class DeviceCard extends PureComponent {
-
   componentWillEnter(callback) {
     this.props.onWillEnter(ReactDOM.findDOMNode(this), callback)
   }
@@ -71,7 +69,6 @@ class DeviceCard extends PureComponent {
 // 3. background dim
 // 4. card color
 class Login extends StateUp(React.Component) {
-
   constructor(props) {
     super(props)
 
@@ -118,7 +115,7 @@ class Login extends StateUp(React.Component) {
     this.initWizardOnFailBound = this.initWizardOnFail.bind(this)
     this.initWizardOnOKBound = this.initWizardOnOK.bind(this)
 
-    /* refresh mdns*/
+    /* refresh mdns */
     this.refresh = () => {
       this.setState({
         enterUserpass: false,
@@ -456,10 +453,10 @@ class Login extends StateUp(React.Component) {
           <div style={{ height: 24 }} />
           <div style={{ fontSize: 16, lineHeight: '24px', color: 'rgba(0,0,0,0.87)' }}>
               请输入第一个用户的用户名和密码
-            </div>
+          </div>
           <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}>
               该用户会成为系统权限最高的管理员
-            </div>
+          </div>
           <div style={{ height: 16 }} />
           <UsernamePassword {...this.bindVState('userpass')} />
           <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -16 }}>
@@ -583,7 +580,7 @@ class Login extends StateUp(React.Component) {
               <div style={{ height: 128 }} />
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginRight: 8 }}>
                 <FlatButton
-                  label={'刷新'}
+                  label="刷新"
                   labelStyle={{ color: '#424242', fontWeight: 500 }}
                   onTouchTap={this.refresh}
                 />

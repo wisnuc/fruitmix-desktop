@@ -7,7 +7,6 @@ import Apps from '../docker/Apps'
 const debug = Debug('view:component:Docker:')
 
 class InstalledApps extends Base {
-
   constructor(ctx) {
     super(ctx)
 
@@ -53,7 +52,6 @@ class InstalledApps extends Base {
     return 'colored'
   }
 
-  /** renderers **/
   renderContent({ openSnackBar }) {
     return (
       <Apps

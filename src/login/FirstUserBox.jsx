@@ -7,7 +7,6 @@ import FlatButton from '../common/FlatButton'
 
 
 class FirstUser extends React.Component {
-
   constructor(props) {
     super(props)
   }
@@ -20,7 +19,6 @@ class FirstUser extends React.Component {
 }
 
 class FirstUserBox extends React.Component {
-
   constructor(props) {
     super(props)
     this.state = {
@@ -68,6 +66,6 @@ class FirstUserBox extends React.Component {
             requestToken={this.props.requestToken}
             success={this.success.bind(this)}
           />
-**/
+* */
 
 export default muiThemeable()(FirstUserBox)

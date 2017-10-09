@@ -2,13 +2,12 @@ const EventEmitter = require('events')
 const debug = require('debug')('transform')
 
 class Transform extends EventEmitter {
-
   constructor(options) {
     if (Array.isArray(options)) {
       debug('get array')
-      return options.reduce((pipe, opts) => pipe
+      return options.reduce((pipe, opts) => (pipe
         ? pipe.pipe(new Transform(opts))
-        : new Transform(opts), null).root()
+        : new Transform(opts)), null).root()
     }
     super()
 
@@ -43,9 +42,9 @@ class Transform extends EventEmitter {
 
   // for inputs, isBlocked means I won't process new jobs.
   isBlocked() {
-    return !!this.failed.length ||              // blocked by failed
-      !!this.finished.length ||                 // blocked by output buffer (lazy)
-      this.outs.some(t => t.isBlocked())        // blocked by outputs transform
+    return !!this.failed.length ||        // blocked by failed
+      !!this.finished.length ||           // blocked by output buffer (lazy)
+      this.outs.some(t => t.isBlocked())  // blocked by outputs transform
   }
 
   isStopped() {
@@ -74,12 +73,14 @@ class Transform extends EventEmitter {
   }
 
   print() {
-    debug(this.name,
+    debug(
+      this.name,
       this.pending.map(x => x.name || x),
       this.working.map(x => x.name || x),
       this.finished.map(x => x.name || x),
       this.failed.map(x => x.name || x),
-      this.isStopped())
+      this.isStopped()
+    )
     this.outs.forEach(t => t.print())
   }
 

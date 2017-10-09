@@ -19,12 +19,11 @@ const debug = Debug('component:maintenance:VolumeWisnucError')
           EUSERSPARSE       // users.json parse fail                // damaged        RED
           EUSERSFORMAT      // users.json is not well formatted     // damaged        RED
 
- ** **/
+ ** * */
 
 const ReportProblemIcon = props => <ReportProblem style={{ marginRight: 8 }} {...props} />
 
 export default class VolumeWisnucError extends React.Component {
-
   constructor(props) {
     super(props)
     this.state = {
@@ -89,7 +88,7 @@ export default class VolumeWisnucError extends React.Component {
     } else if (error) {
       let text
       switch (error) {
-        case 'ENOALT' :
+        case 'ENOALT':
           text = 'WISNUC未安装'; break
         case 'EDATA':
           text = 'WISNUC未正确安装，用户信息未找到或不能正确解析'; break

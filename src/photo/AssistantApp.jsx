@@ -114,7 +114,8 @@ class AssistantApp extends PhotoApp {
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}
-              >没有照片！</div>
+              >没有照片！
+              </div>
           }
         </div>
 
