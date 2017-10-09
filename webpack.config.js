@@ -2,18 +2,13 @@
  * @description webpack 开发环境配置
  *
  **/
-
-// 'use strict';
-
-var path = require('path');
-var webpack = require('webpack');
-var HtmlWebpackPlugin=require("html-webpack-plugin");
-var MDC_DIR = path.resolve(__dirname, 'node_modules', '@material');
+const path = require('path')
+const webpack = require('webpack')
 
 module.exports = {
   output: {
     path: path.join(__dirname, 'public'),
-    filename: 'bundle.js',
+    filename: 'bundle.js'
   },
   cache: true,
   target: 'electron',
@@ -25,7 +20,7 @@ module.exports = {
     'webpack/hot/poll?1000',
     './src/app.js'
   ],
-  stats: { colors : true, reasons: true },
+  stats: { colors: true, minimal: true },
   resolve: { extensions: ['.js', '.jsx', '.css', '.json'] },
   module: {
     rules: [
@@ -36,26 +31,16 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: [
-          {
-            loader: 'style-loader',
-          },
-          {
-            loader: 'css-loader',
-            options: {
-              importLoaders: 1,
-            }
-          },
-        ]
+        use: [ 'style-loader', 'css-loader' ]
       },
       {
         test: /\.json$/,
         loader: 'json-loader'
-      },
+      }
     ]
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.DefinePlugin({ "global.GENTLY": false })
+    new webpack.DefinePlugin({ 'global.GENTLY': false })
   ]
 }
