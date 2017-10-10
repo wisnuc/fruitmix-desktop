@@ -4,7 +4,9 @@ import PDF, { Page } from 'react-pdf-pages'
 import { List, AutoSizer } from 'react-virtualized'
 import 'pdfjs-dist'
 
-PDFJS.workerSrc = require('file-loader!pdfjs-dist/build/pdf.worker.min.js')
+PDFJS.workerSrc = '../node_modules/pdfjs-dist/build/pdf.worker.min.js'
+PDFJS.cMapUrl = '../node_modules/pdfjs-dist/cmaps/'
+PDFJS.cMapPacked = true
 
 const debug = Debug('component:file:preview: ')
 
