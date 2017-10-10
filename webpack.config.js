@@ -41,6 +41,9 @@ module.exports = {
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.DefinePlugin({ 'global.GENTLY': false })
+    new webpack.DefinePlugin({ 'global.GENTLY': false }),
+    new webpack.ProvidePlugin({
+      'fetch': 'imports-loader?this=>global!exports-loader?global.fetch!whatwg-fetch'
+    })
   ]
 }
