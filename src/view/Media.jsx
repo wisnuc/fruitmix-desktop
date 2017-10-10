@@ -48,6 +48,7 @@ class Media extends Base {
 
     this.height = 0
     this.width = 0
+    this.size = 218
     this.allPhotos = []
     this.photoDates = []
     this.photoMapDates = []
@@ -59,6 +60,8 @@ class Media extends Base {
     this.previousIndex = 1
 
     this.setPhotoInfo = (height, width, media) => {
+      const size = Math.floor((width - 60) / Math.floor((width - 60) / 218 + 0.5))
+
       /* mediaStore were sorted by date in Node */
       if ((this.allPhotos !== media || this.width !== width) && width) {
         /* init */
@@ -74,7 +77,7 @@ class Media extends Base {
         this.previousIndex = 1
 
         /* calculate photoMapDates and photoDates */
-        const MAX = Math.floor((width - 60) / 218) - 1
+        const MAX = Math.floor((width - 60) / size) - 1
         let MaxItem = MAX
         let lineIndex = 0
         const dateUnknown = []
@@ -143,7 +146,7 @@ class Media extends Base {
 
         /* calculate each row's heigth and their sum */
         this.photoMapDates.forEach((list) => {
-          const tmp = 218 * Math.ceil(list.photos.length / Math.floor((width - 60) / 218)) + !!list.first * 48
+          const tmp = size * Math.ceil(list.photos.length / Math.floor((width - 60) / size)) + !!list.first * 48
           this.allHeight.push(tmp)
           this.rowHeightSum += tmp
           this.indexHeightSum.push(this.rowHeightSum)
@@ -160,7 +163,8 @@ class Media extends Base {
         maxScrollTop: this.maxScrollTop,
         rowHeightSum: this.rowHeightSum,
         currentDigest: this.memoizeValue.currentDigest,
-        photoListWithSameDate: this.photoListWithSameDate
+        photoListWithSameDate: this.photoListWithSameDate,
+        size: size - 8
       }
     }
 

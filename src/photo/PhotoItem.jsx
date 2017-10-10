@@ -88,7 +88,7 @@ class PhotoItem extends React.Component {
   }
 
   render() {
-    const { style, shiftStatus } = this.props
+    const { style, shiftStatus, size } = this.props
     this.showShiftOverlay = shiftStatus.shift && shiftStatus.items.includes(this.props.digest)
     // debug('Render PhotoItem this.props', this.props)
     return (
@@ -100,7 +100,7 @@ class PhotoItem extends React.Component {
               style={{
                 position: 'absolute',
                 zIndex: 100,
-                width: 210,
+                width: size,
                 height: 56,
                 left: 0,
                 top: 0,
@@ -180,7 +180,7 @@ class PhotoItem extends React.Component {
               style={{
                 position: 'absolute',
                 zIndex: 100,
-                width: this.state.selected ? 180 : 210,
+                width: this.state.selected ? 180 : size,
                 height: 36,
                 left: this.state.selected ? 15 : 0,
                 bottom: this.state.selected ? 15 : 0,
@@ -220,8 +220,8 @@ class PhotoItem extends React.Component {
             <img
               src={this.path}
               alt="img"
-              height={this.state.selected ? 180 : 210}
-              width={this.state.selected ? 180 : 210}
+              height={this.state.selected ? 180 : size}
+              width={this.state.selected ? 180 : size}
               style={{ objectFit: 'cover' }}
             />
             <div
@@ -245,8 +245,8 @@ class PhotoItem extends React.Component {
                 style={{
                   position: 'absolute',
                   zIndex: 100,
-                  width: this.state.selected ? 180 : 210,
-                  height: this.state.selected ? 180 : 210,
+                  width: this.state.selected ? 180 : size,
+                  height: this.state.selected ? 180 : size,
                   top: this.state.selected ? 15 : 0,
                   left: this.state.selected ? 15 : 0,
                   backgroundColor: 'rgba(30, 136, 229, 0.26)'

@@ -218,6 +218,7 @@ class PhotoList extends React.Component {
               this.maxScrollTop = PhotoInfo.maxScrollTop
               this.rowHeightSum = PhotoInfo.rowHeightSum
               this.photoListWithSameDate = PhotoInfo.photoListWithSameDate
+              this.size = PhotoInfo.size
 
               /* get timeline */
               this.timeline = this.props.getTimeline(this.photoDates, this.indexHeightSum, this.maxScrollTop, this.height)
@@ -254,6 +255,7 @@ class PhotoList extends React.Component {
                     selectedItems={this.props.selectedItems}
                     getHoverPhoto={this.props.getHoverPhoto}
                     shiftStatus={this.props.shiftStatus}
+                    size={this.size}
                   />
                 </div>
               )
