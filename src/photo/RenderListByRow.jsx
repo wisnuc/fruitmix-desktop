@@ -89,12 +89,12 @@ class RenderListByRow extends React.Component {
           { isScrolling && rowSum > 500 ?
             photos.map(photo => (
               <div
-                style={{ width: 210, height: 210, marginRight: 8, marginBottom: 8, backgroundColor: '#eeeeee' }}
+                style={{ width: this.props.size, height: this.props.size, marginRight: 8, marginBottom: 8, backgroundColor: '#eeeeee' }}
                 key={photo.hash}
               />)) :
             photos.map(photo => (
               <PhotoItem
-                style={{ width: 210, height: 210, marginRight: 8, marginBottom: 8 }}
+                style={{ width: this.props.size, height: this.props.size, marginRight: 8, marginBottom: 8 }}
                 lookPhotoDetail={lookPhotoDetail}
                 digest={photo.hash}
                 key={photo.hash}
@@ -104,6 +104,7 @@ class RenderListByRow extends React.Component {
                 selectedItems={this.props.selectedItems}
                 getHoverPhoto={this.props.getHoverPhoto}
                 shiftStatus={this.props.shiftStatus}
+                size={this.props.size}
               />
             ))
           }
