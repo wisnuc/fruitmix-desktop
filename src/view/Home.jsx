@@ -66,6 +66,8 @@ class Home extends Base {
     this.force = false
     this.changeSortType = (sortType) => {
       this.force = true
+      if (sortType === 'takenUp' || sortType === 'takenDown') this.setState({ takenTime : true })
+      if (sortType === 'timeUp' || sortType === 'timeDown') this.setState({ takenTime : false })
       this.setState({ sortType })
     }
 
@@ -635,6 +637,7 @@ class Home extends Base {
           scrollTo={this.state.scrollTo}
           openSnackBar={openSnackBar}
           toggleDialog={this.toggleDialog}
+          showTakenTime={!!this.state.takenTime}
         />
 
         { this.renderMenu(this.state.contextMenuOpen, toggleDetail, getDetailStatus) }
