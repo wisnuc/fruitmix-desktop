@@ -69,6 +69,7 @@ class PhotoItem extends React.Component {
     this.props.ipcRenderer.send('mediaShowThumb', this.session, this.props.digest, 210, 210)
     this.props.ipcRenderer.on('getThumbSuccess', this.updatePath)
   }
+
   componentWillReceiveProps(nextProps) {
     if (nextProps.selectedItems.length !== this.props.selectedItems.length) {
       this.setState({
