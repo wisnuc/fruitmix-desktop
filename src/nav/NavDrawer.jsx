@@ -101,7 +101,7 @@ class NavDrawer extends React.Component {
 
   render() {
     const { open, onRequestChange, views, nav, navTo } = this.props
-    console.log(' NavDrawer render', this.props)
+    // console.log(' NavDrawer render', this.props)
     const dense = true
 
     const account = views.account.ctx.props.apis.account

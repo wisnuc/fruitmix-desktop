@@ -1,23 +1,24 @@
 import React from 'react'
 import Debug from 'debug'
 import prettysize from 'prettysize'
-import { Avatar } from 'material-ui'
+import { Avatar, Popover, MenuItem, Menu, IconButton } from 'material-ui'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import ToggleCheckBox from 'material-ui/svg-icons/toggle/check-box'
 import ToggleCheckBoxOutlineBlank from 'material-ui/svg-icons/toggle/check-box-outline-blank'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import ArrowUpward from 'material-ui/svg-icons/navigation/arrow-upward'
 import ArrowDownward from 'material-ui/svg-icons/navigation/arrow-downward'
+import CheckIcon from 'material-ui/svg-icons/navigation/check'
 import { List, AutoSizer } from 'react-virtualized'
 import renderFileIcon from '../common/renderFileIcon'
 import { ShareDisk } from '../common/Svg'
+import FlatButton from '../common/FlatButton'
+import { formatDate } from '../common/datetime'
 
 const debug = Debug('component:file:RenderListByRow:')
 
 const formatTime = (mtime) => {
-  if (!mtime) {
-    return null
-  }
+  if (!mtime) return null
 
   const time = new Date()
   time.setTime(parseInt(mtime, 10))
@@ -70,7 +71,8 @@ class Row extends React.PureComponent {
 
       /* these are view-model state */
       entries,
-      select
+      select,
+      showTakenTime,
     } = this.props
 
     const entry = entries[index]
@@ -114,7 +116,8 @@ class Row extends React.PureComponent {
           </div>
 
           <div style={{ flex: '0 1 160px', fontSize: 13, color: 'rgba(0,0,0,0.54)', textAlign: 'right' }}>
-            { entry.mtime && formatTime(entry.mtime) }
+            { showTakenTime ? entry.metadata && entry.metadata.datetime && formatDate(entry.metadata.datetime)
+              : entry.mtime && formatTime(entry.mtime) }
           </div>
 
           <div
@@ -150,6 +153,29 @@ class RenderListByRow extends React.Component {
     }
 
     this.scrollToRow = index => this.ListRef.scrollToRow(index)
+
+    this.handleChange = (type) => {
+      if (this.state.type !== type) {
+        switch (type) {
+          case '修改时间':
+            this.props.changeSortType('timeUp')
+            break
+          case '拍摄时间':
+            this.props.changeSortType('takenUp')
+            break
+          default:
+            debug('this.handleChange no such type', type)
+        }
+        this.setState({ type, open: false })
+      } else {
+        this.setState({ open: false })
+      }
+    }
+
+    this.toggleMenu = (event) => {
+      if (!this.state.open && event && event.preventDefault) event.preventDefault()
+      this.setState({ open: event !== 'clickAway' && !this.state.open, anchorEl: event.currentTarget })
+    }
   }
 
   componentDidUpdate() {
@@ -163,14 +189,99 @@ class RenderListByRow extends React.Component {
     }
   }
 
-  render() {
-    // debug('RenderListByRow redner', this.props)
+  renderHeader(h) {
+    return (
+      <div
+        key={h.title}
+        style={{
+          width: h.width,
+          display: 'flex',
+          alignItems: 'center',
+          cursor: this.state.type === h.title ? 'pointer' : 'default'
+        }}
+        onMouseMove={() => this.enterDiv(h.title)}
+        onMouseLeave={() => this.leaveDiv(h.title)}
+        onTouchTap={() => {
+          this.props.sortType === h.up ? this.props.changeSortType(h.down) : this.props.changeSortType(h.up)
+        }}
+      >
+        <div
+          style={{
+            fontSize: 14,
+            fontWeight: 500,
+            color: this.state.type === h.title ? 'rgba(0,0,0,0.87)' : 'rgba(0,0,0,0.54)'
+          }}
+        >
+          { h.title }
+        </div>
+        <div style={{ marginLeft: 8, marginTop: 6 }}>
+          { this.props.sortType === h.up && <ArrowUpward style={{ height: 18, width: 18, color: '#9E9E9E' }} /> }
+          { this.props.sortType === h.down && <ArrowDownward style={{ height: 18, width: 18, color: '#9E9E9E' }} /> }
+        </div>
+      </div>
+    )
+  }
+
+  renderPopoverHeader() {
     const headers = [
-      { title: '名称', width: 494, up: 'nameUp', down: 'nameDown' },
-      { title: '修改时间', width: 160, up: 'timeUp', down: 'timeDown' },
-      { title: '文件大小', width: 160, up: 'sizeUp', down: 'sizeDown' }
+      { title: '修改时间', up: 'timeUp', down: 'timeDown' },
+      { title: '拍摄时间', up: 'takenUp', down: 'takenDown' }
     ]
 
+    const { sortType, changeSortType } = this.props
+    let h = headers.find(header => (header.up === sortType || header.down === sortType))
+    this.preHeader = h || this.preHeader || headers[0]
+    const isSelected = !!h
+    h = this.preHeader
+    debug('renderPopoverHeader this.props', this.props, sortType, h, isSelected)
+
+    return (
+      <div style={{ display: 'flex', alignItems: 'center ', width: 160, marginLeft: -8, marginTop: 2 }}>
+        <FlatButton
+          label={h.title}
+          labelStyle={{ fontSize: 14, color: 'rgba(0,0,0,0.54)' }}
+          onTouchTap={this.toggleMenu}
+        />
+        {/* menu */}
+        <Popover
+          open={this.state.open}
+          anchorEl={this.state.anchorEl}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+          targetOrigin={{ horizontal: 'right', vertical: 'top' }}
+          onRequestClose={this.toggleMenu}
+        >
+          <Menu style={{ minWidth: 200 }}>
+            <MenuItem
+              style={{ fontSize: 13 }}
+              leftIcon={this.state.type === '修改时间' ? <CheckIcon /> : <div />}
+              primaryText="修改时间"
+              onTouchTap={() => this.handleChange('修改时间')}
+            />
+            <MenuItem
+              style={{ fontSize: 13 }}
+              leftIcon={this.state.type === '拍摄时间' ? <CheckIcon /> : <div />}
+              primaryText="拍摄时间"
+              onTouchTap={() => this.handleChange('拍摄时间')}
+            />
+          </Menu>
+        </Popover>
+
+        {/* direction icon */}
+        <IconButton
+          style={{ height: 36, width: 36, padding: 9, borderRadius: '18px', marginLeft: -8, display: isSelected ? '' : 'none' }}
+          iconStyle={{ height: 18, width: 18, color: 'rgba(0,0,0,0.54)' }}
+          hoveredStyle={{ backgroundColor: 'rgba(153,153,153,0.2)' }}
+          onTouchTap={() => (sortType === h.up || !sortType ? changeSortType(h.down) : changeSortType(h.up))}
+        >
+          { sortType === h.up && <ArrowUpward /> }
+          { sortType === h.down && <ArrowDownward /> }
+        </IconButton>
+      </div>
+    )
+  }
+
+  render() {
+    debug('RenderListByRow redner', this.props)
     const rowRenderer = props => (
       <Row
         {...props}
@@ -187,38 +298,9 @@ class RenderListByRow extends React.Component {
         {/* header */}
         <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }}>
           <div style={{ flex: '0 0 104px' }} />
-          {
-            headers.map(h => (
-              <div
-                key={h.title}
-                style={{
-                  width: h.width,
-                  display: 'flex',
-                  alignItems: 'center',
-                  cursor: this.state.type === h.title ? 'pointer' : 'default'
-                }}
-                onMouseMove={() => this.enterDiv(h.title)}
-                onMouseLeave={() => this.leaveDiv(h.title)}
-                onTouchTap={() => {
-                  this.props.sortType === h.up ? this.props.changeSortType(h.down) : this.props.changeSortType(h.up)
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 500,
-                    color: this.state.type === h.title ? 'rgba(0,0,0,0.87)' : 'rgba(0,0,0,0.54)'
-                  }}
-                >
-                  { h.title }
-                </div>
-                <div style={{ marginLeft: 8, marginTop: 6 }}>
-                  { this.props.sortType === h.up && <ArrowUpward style={{ height: 18, width: 18, color: '#9E9E9E' }} /> }
-                  { this.props.sortType === h.down && <ArrowDownward style={{ height: 18, width: 18, color: '#9E9E9E' }} /> }
-                </div>
-              </div>
-            ))
-          }
+          { this.renderHeader({ title: '名称', width: 494, up: 'nameUp', down: 'nameDown' }) }
+          { this.renderPopoverHeader() }
+          { this.renderHeader({ title: '文件大小', width: 160, up: 'sizeUp', down: 'sizeDown' }) }
           <div style={{ flexGrow: 1 }} />
         </div>
 

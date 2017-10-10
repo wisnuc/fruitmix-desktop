@@ -267,6 +267,7 @@ class Public extends Home {
           scrollTo={this.state.scrollTo}
           openSnackBar={openSnackBar}
           toggleDialog={this.toggleDialog}
+          showTakenTime={!!this.state.takenTime}
         />
 
         { this.renderMenu(!!this.state.contextMenuOpen && !this.state.inRoot, toggleDetail, getDetailStatus) }
