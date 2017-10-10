@@ -261,7 +261,7 @@ class PhotoList extends React.Component {
               )
 
               return (
-                <div onTouchTap={e => this.onRowTouchTap(e, -1)}>
+                <div onTouchTap={e => this.onRowTouchTap(e, -1)} key={this.size}>
                   <List
                     height={height}
                     width={width}
@@ -271,7 +271,7 @@ class PhotoList extends React.Component {
                     rowCount={PhotoInfo.photoDates.length}
                     onScroll={this.onScroll}
                     scrollTop={previousScrollTop}
-                    overscanRowCount={4}
+                    overscanRowCount={2}
                     style={{ outline: 'none' }}
                   />
                 </div>

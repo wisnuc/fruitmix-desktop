@@ -77,11 +77,6 @@ class PhotoItem extends React.Component {
     }
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return true
-    return (this.state !== nextState)
-  }
-
   componentWillUnmount() {
     this.props.ipcRenderer.removeListener('getThumbSuccess', this.updatePath)
     this.props.ipcRenderer.send('mediaHideThumb', this.session)
