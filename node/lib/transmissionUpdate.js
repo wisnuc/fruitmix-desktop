@@ -3,8 +3,9 @@ import Debug from 'debug'
 import child from 'child_process'
 import { ipcMain, powerSaveBlocker, shell } from 'electron'
 
-import { getMainWindow } from './window'
 import store from './store'
+import { clearTmpTrans } from './server'
+import { getMainWindow } from './window'
 
 const debug = Debug('node:lib:transmissionUpdate:')
 
@@ -87,6 +88,7 @@ const clearTasks = () => {
   debug('clearTasks !!')
   Tasks.forEach(task => task.state !== 'finished' && task.pause())
   Tasks.length = 0
+  clearTmpTrans()
   sendMsg()
 }
 
