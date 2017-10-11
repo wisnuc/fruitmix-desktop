@@ -27,6 +27,8 @@ const convert = (code) => {
       return '服务器内部错误'
     case 'EOHTER':
       return '请求失败'
+    case 'ENOSPC':
+      return '磁盘空间已满'
     default:
       return code || '未知错误'
   }
@@ -36,7 +38,10 @@ class Row extends React.PureComponent {
   render() {
     console.log('Row', this.props)
     const { node } = this.props
-    const error = node.error.code ? convert(node.error.code) : node.error.status ? `请求失败： ${node.error.status}` : '未知错误'
+    const code = node.error.code ||
+      (node.error.response && node.error.response[0] && node.error.response[0].error && node.error.response[0].error.code) ||
+      (node.error.response && node.error.response.error && node.error.response.error.code)
+    const error = code ? convert(code) : node.error.status ? `请求失败： ${node.error.status}` : '未知错误'
     let name = ''
     if (node.entry && typeof node.entry === 'object') name = node.entry.name
     if (node.entry && typeof node.entry === 'string') name = node.entry.replace(/^.*\//, '').replace(/^.*\\/, '')
