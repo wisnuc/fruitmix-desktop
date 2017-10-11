@@ -11,10 +11,8 @@ module.exports = {
     filename: 'bundle.js'
   },
   cache: true,
-  target: 'electron',
-  watchOptions: {
-    poll: true
-  },
+  target: 'electron-renderer',
+  watchOptions: { poll: true },
   devtool: 'eval-source-map',
   entry: [
     'webpack/hot/poll?1000',
@@ -41,9 +39,6 @@ module.exports = {
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.DefinePlugin({ 'global.GENTLY': false }),
-    new webpack.ProvidePlugin({
-      'fetch': 'imports-loader?this=>global!exports-loader?global.fetch!whatwg-fetch'
-    })
+    new webpack.DefinePlugin({ 'global.GENTLY': false })
   ]
 }

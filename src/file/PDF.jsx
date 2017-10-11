@@ -60,14 +60,16 @@ class PDFView extends React.Component {
                     return width * page.height / page.width
                   }
                   return (
-                    <List
-                      style={{ outline: 'none' }}
-                      height={height - 8}
-                      width={width}
-                      rowCount={this.state.pages.length}
-                      rowHeight={rowHeight}
-                      rowRenderer={rowRenderer}
-                    />
+                    <div key={height + width}>
+                      <List
+                        style={{ outline: 'none' }}
+                        height={height - 8}
+                        width={width}
+                        rowCount={this.state.pages.length}
+                        rowHeight={rowHeight}
+                        rowRenderer={rowRenderer}
+                      />
+                    </div>
                   )
                 }}
               </AutoSizer>
