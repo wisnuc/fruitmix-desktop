@@ -261,7 +261,7 @@ class Task {
 
     this.upload = new Transform({
       name: 'upload',
-      concurrency: 1,
+      concurrency: 2,
       isBlocked: () => this.paused,
       push(X) {
         X.forEach((x) => {

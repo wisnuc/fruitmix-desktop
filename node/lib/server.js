@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import Debug from 'debug'
+import rimraf from 'rimraf'
 import UUID from 'node-uuid'
 import request from 'superagent'
 import { ipcMain } from 'electron'
@@ -11,6 +12,11 @@ Promise.promisifyAll(fs) // babel would transform Promise to bluebird
 const debug = Debug('node:lib:server')
 const getTmpPath = () => store.getState().config.tmpPath
 const getTmpTransPath = () => store.getState().config.tmpTransPath
+
+export const clearTmpTrans = () => {
+  // console.log('clearTmpTrans', `${getTmpTransPath()}/*`)
+  rimraf(`${getTmpTransPath()}/*`, e => e && console.log('clearTmpTrans error', e))
+}
 
 /* init request */
 let stationID = null
