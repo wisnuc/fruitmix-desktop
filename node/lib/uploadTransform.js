@@ -59,7 +59,7 @@ class Task {
       }
       const speed = this.completeSize - this.lastTimeSize
       this.speed = (this.lastSpeed + speed) / 2
-      this.lastSpeed = speed
+      this.lastSpeed = this.speed
       this.restTime = this.speed && (this.size - this.completeSize) / this.speed
       this.lastTimeSize = this.completeSize
       sendMsg()
