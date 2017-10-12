@@ -1,6 +1,6 @@
 import React from 'react'
 import { TweenMax } from 'gsap'
-import TransitionGroup from 'react-addons-transition-group'
+import TransitionGroup from 'react-transition-group/TransitionGroup'
 
 class CrossNav extends React.Component {
   cardWillEnter(el, callback) {

@@ -9,7 +9,7 @@ import RenderToLayer from 'material-ui/internal/RenderToLayer'
 import keycode from 'keycode'
 import EventListener from 'react-event-listener'
 import { TweenMax } from 'gsap'
-import ReactTransitionGroup from 'react-addons-transition-group'
+import ReactTransitionGroup from 'react-transition-group/TransitionGroup'
 import Preview from './Preview'
 import renderFileIcon from '../common/renderFileIcon'
 
