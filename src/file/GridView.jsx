@@ -19,7 +19,7 @@ import { ShareDisk } from '../common/Svg'
 
 const debug = Debug('component:file:GridView:')
 
-class Row extends React.PureComponent {
+class Row extends React.Component {
   constructor(props) {
     super(props)
 
