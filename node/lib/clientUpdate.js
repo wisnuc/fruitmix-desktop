@@ -18,8 +18,8 @@ const checkAsync = async () => {
   const type = platform === 'win32' ? 'windows' : 'mac' // mac or windows
   // const type = 'mac'
   const url = `https://api.github.com/repos/wisnuc/wisnuc-desktop-${type}/releases`
-  const req = await request.get(url).set('User-Agent': 'request')
-  const rels = JSON.parse(req.body)
+  const req = await request.get(url).set('User-Agent', 'request')
+  const rels = req.body
 
   const ltsRel = rels.filter(rel => !rel.prerelease)[0]
   const asset = ltsRel.assets.find((item) => {
