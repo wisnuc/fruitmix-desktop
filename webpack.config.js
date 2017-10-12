@@ -1,7 +1,8 @@
 /**
  * @description webpack 开发环境配置
  *
- **/
+ */
+
 const path = require('path')
 const webpack = require('webpack')
 
@@ -10,9 +11,7 @@ module.exports = {
     path: path.join(__dirname, 'public'),
     filename: 'bundle.js'
   },
-  cache: true,
   target: 'electron-renderer',
-  watchOptions: { poll: true },
   devtool: 'eval-source-map',
   entry: [
     'webpack/hot/poll?1000',
@@ -25,12 +24,11 @@ module.exports = {
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
-        loader: 'babel-loader'
-        // loader: 'react-hot-loader!babel-loader'
+        use: ['react-hot-loader/webpack', 'babel-loader']
       },
       {
         test: /\.css$/,
-        use: [ 'style-loader', 'css-loader' ]
+        use: ['style-loader', 'css-loader']
       },
       {
         test: /\.json$/,
