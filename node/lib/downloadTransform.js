@@ -4,7 +4,6 @@ const mkdirp = Promise.promisify(require('mkdirp'))
 const path = require('path')
 const childProcess = require('child_process')
 const debug = require('debug')('node:lib:downloadTransform:')
-const request = require('request')
 
 const Transform = require('./transform')
 const { readXattr, setXattr } = require('./xattr')
