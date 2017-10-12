@@ -3,7 +3,7 @@ import EventListener from 'react-event-listener'
 import keycode from 'keycode'
 import { TweenMax } from 'gsap'
 import { Paper } from 'material-ui'
-import ReactTransitionGroup from 'react-addons-transition-group'
+import ReactTransitionGroup from 'react-transition-group/TransitionGroup'
 
 class TransitionItem extends React.Component {
   /*
