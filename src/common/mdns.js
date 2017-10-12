@@ -1,4 +1,4 @@
-import UUID from 'node-uuid'
+import UUID from 'uuid'
 import EventEmitter from 'eventemitter3'
 
 class MDNS {

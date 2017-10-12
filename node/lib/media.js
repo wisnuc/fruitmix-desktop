@@ -1,7 +1,7 @@
 /* import core module */
 import fs from 'fs'
 import path from 'path'
-import UUID from 'node-uuid'
+import UUID from 'uuid'
 import { ipcMain } from 'electron'
 import { EventEmitter } from 'events'
 

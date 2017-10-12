@@ -1,6 +1,6 @@
 import React from 'react'
 import Debug from 'debug'
-import UUID from 'node-uuid'
+import UUID from 'uuid'
 import { CircularProgress } from 'material-ui'
 
 const debug = Debug('component:photoApp:PhotoDetail')
