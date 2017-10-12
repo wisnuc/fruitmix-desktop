@@ -1,6 +1,6 @@
 import React from 'react'
 import Debug from 'debug'
-import UUID from 'node-uuid'
+import UUID from 'uuid'
 import { CircularProgress, RaisedButton } from 'material-ui'
 import OpenIcon from 'material-ui/svg-icons/action/open-with'
 import DownloadIcon from 'material-ui/svg-icons/file/file-download'

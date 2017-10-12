@@ -2,13 +2,12 @@ import fs from 'fs'
 import os from 'os'
 import path from 'path'
 import UUID from 'uuid'
-import request from 'request'
+import request from 'superagent'
 import store from './store'
 import { ftpGet } from './ftp'
 import { getMainWindow } from './window'
 import { ipcMain, shell, app } from 'electron'
 
-Promise.promisifyAll(request) // babel would transform Promise to bluebird
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
 
 const getTmpPath = () => store.getState().config.tmpPath
@@ -19,7 +18,7 @@ const checkAsync = async () => {
   const type = platform === 'win32' ? 'windows' : 'mac' // mac or windows
   // const type = 'mac'
   const url = `https://api.github.com/repos/wisnuc/wisnuc-desktop-${type}/releases`
-  const req = await request.getAsync({ url, headers: { 'User-Agent': 'request' } })
+  const req = await request.get(url).set('User-Agent': 'request')
   const rels = JSON.parse(req.body)
 
   const ltsRel = rels.filter(rel => !rel.prerelease)[0]
@@ -76,7 +75,7 @@ const download = (url, filePath) => {
   stream.on('drain', () => {
     console.log(`Received ${stream.bytesWritten} bytes of data.`)
   })
-  const handle = request(options).on('error', err => console.error(err))
+  const handle = request.get(url).on('error', err => console.error(err))
   handle.pipe(stream)
   return promise
 }

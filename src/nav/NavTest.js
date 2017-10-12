@@ -1,5 +1,5 @@
 import React from 'react'
-import UUID from 'node-uuid'
+import UUID from 'uuid'
 import { Paper } from 'material-ui'
 
 class Layout extends React.PureComponent {

@@ -1,5 +1,5 @@
 import React from 'react'
-import UUID from 'node-uuid'
+import UUID from 'uuid'
 import Debug from 'debug'
 import { Paper, Card, IconButton, CircularProgress } from 'material-ui'
 import ZoomIn from 'material-ui/svg-icons/action/zoom-in'
