@@ -17,9 +17,13 @@ const sort = (a, b, sortType) => {
     case 'timeDown':
       return (a.mtime && b.mtime) ? (b.mtime - a.mtime) : a.name.localeCompare(b.name)
     case 'takenUp':
+      if (a.metadata && a.metadata.datetime && !(b.metadata && b.metadata.datetime)) return -1
+      if (!(a.metadata && a.metadata.datetime) && b.metadata && b.metadata.datetime) return 1
       return (a.metadata && a.metadata.datetime && b.metadata && b.metadata.datetime)
         ? toTimeSecond(a.metadata.datetime) - toTimeSecond(b.metadata.datetime) : a.name.localeCompare(b.name)
     case 'takenDown':
+      if (a.metadata && a.metadata.datetime && !(b.metadata && b.metadata.datetime)) return -1
+      if (!(a.metadata && a.metadata.datetime) && b.metadata && b.metadata.datetime) return 1
       return (a.metadata && a.metadata.datetime && b.metadata && b.metadata.datetime)
         ? toTimeSecond(b.metadata.datetime) - toTimeSecond(a.metadata.datetime) : a.name.localeCompare(b.name)
     default:

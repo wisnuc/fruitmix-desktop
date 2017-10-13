@@ -233,7 +233,7 @@ class RenderListByRow extends React.Component {
     this.preHeader = h || this.preHeader || headers[0]
     const isSelected = !!h
     h = this.preHeader
-    debug('renderPopoverHeader this.props', this.props, sortType, h, isSelected)
+    // debug('renderPopoverHeader this.props', this.props, sortType, h, isSelected)
 
     return (
       <div style={{ display: 'flex', alignItems: 'center ', width: 160, marginLeft: -8, marginTop: 2 }}>
@@ -281,7 +281,7 @@ class RenderListByRow extends React.Component {
   }
 
   render() {
-    debug('RenderListByRow redner', this.props)
+    // debug('RenderListByRow redner', this.props)
     const rowRenderer = props => (
       <Row
         {...props}
