@@ -11,6 +11,8 @@ import DialogOverlay from '../common/DialogOverlay'
 import ChangeAccountDialog from './ChangeAccountDialog'
 import Checkmark from '../common/Checkmark'
 
+import request from 'superagent'
+
 const debug = Debug('component:control:WeChatBind')
 
 class WeChatBind extends React.Component {
@@ -81,19 +83,30 @@ class WeChatBind extends React.Component {
       /* init wx_code */
       this.wxiframe.contentWindow.wx_code = null
       this.setState({ status: 'connectingCloud' })
+
+      /*
+      request.get(`http://www.siyouqun.org:80/c/v1/token`)
+        .query({ code })
+        .query({ platform: 'web' })
+        .end((err, res) => {
+          request.post(`http://www.siyouqun.org:80/c/v1/tickets/${this.ticketId}/users`)
+            .set('Authorization', res.body.data.token)
+            .end((err, res) => console.log('err, res fillTicket', err, res && res.body))
+        })
+      */
+
       this.props.apis.request('getWechatToken', { code, platform: 'web' }, (error, res) => {
         if (error) {
           debug('getWechatToken', code, error)
           this.setState({ error: 'wxBind', status: '' })
         } else {
-          debug('getWechatToken', res)
+          // debug('getWechatToken', res)
           this.userInfo = res.data.user
           this.guid = this.userInfo.id
-          this.props.apis.request('fillTicket', { ticketId: this.ticketId, token: res.data.token }, (err, r) => {
-            if (err) return debug('fillTicket error !!!', err)
-            debug('fillTicket success res', r)
+          setTimeout(() => this.props.apis.request('fillTicket', { ticketId: this.ticketId, token: res.data.token }, (err, r) => {
+            if (err) return debug('fillTicket success res', r)
             return this.setState({ status: 'confirm' })
-          })
+          }), 100)
         }
       })
     }
