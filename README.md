@@ -7,6 +7,23 @@
 * 安装nodejs（由于前端的一些工具是构建在node.js 之上，请确保 已经安装了node.js 和 npm。可以去 <http://nodejs.org/download/> 下载）
 * 安装项目依赖包 ，运行npm install（需要一段时间，可能需要翻墙）
 
+### 部署命令
+
+```
+sudo apt-get install git
+sudo apt-get install npm
+sudo npm install -g n
+sudo n latest
+node -v
+git clone https://github.com/wisnuc/fruitmix-desktop.git
+cd fruitmix-desktop
+npm install --registry=https://registry.npm.taobao.org
+./node_modules/.bin/electron-rebuild -e '~/fruitmix-desktop/node_modules/electron/dist' -v 1.7.9
+./node_modules/.bin/webpack -p
+npm run build
+npm start
+```
+
 ### 常用操作及命令
 
 * 打包后端代码: npm run build
