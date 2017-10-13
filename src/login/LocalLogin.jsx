@@ -125,10 +125,14 @@ class Login extends StateUp(React.Component) {
         compact: false,
         dim: false,
         maint: false,
+        refresh: true,
         pin: ''
       })
 
       this.props.nav('login')
+      clearTimeout(this.refreshHandle)
+      this.refreshHandle = setTimeout(() => this.setState({ refresh: false }), 1000)
+
       debug('this.refresh...')
     }
 
@@ -511,7 +515,7 @@ class Login extends StateUp(React.Component) {
           <div style={{ position: 'absolute', width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.27)', top: 0, left: 0 }} />
         }
         {
-          mdns.length > 0
+          mdns.length > 0 || this.state.refresh || this.state.hello
             ? <div style={{ width: 380, height: 540, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <CrossNav duration={0.35} enter={this.state.enter}>
                 {

@@ -61,9 +61,6 @@ class WechatLogin extends React.Component {
     super(props)
 
     this.state = {
-      wxCode: '',
-      local: true,
-      hello: true,
       error: '', // '', 'net', 'wisnuc'
       wechatLogin: '', // '', 'progress', 'authorization', 'getingList', 'success', 'lastDevice', 'list', 'fail'
       count: 3,
@@ -212,11 +209,13 @@ class WechatLogin extends React.Component {
         const d = this.wxiframe
         // debug('this.initWXLogin this.wxiframe', this.wxiframe, this.state)
         if (f) f.innerHTML = ''
+        if (this.weChatLoadingRef) this.weChatLoadingRef.style.display = 'none'
         if (!window.navigator.onLine) {
           this.setState({ error: 'net' })
         } else {
           f.appendChild(d)
         }
+        console.log('d')
       })
     }
 
@@ -303,6 +302,23 @@ class WechatLogin extends React.Component {
         {
           !this.state.error ?
             <div style={{ width: 332, height: 492, padding: 24, position: 'relative', backgroundColor: '#FAFAFA' }}>
+              {/* CircularProgress */}
+              <div
+                ref={ref => (this.weChatLoadingRef = ref)}
+                style={{
+                  position: 'absolute',
+                  top: 108,
+                  left: 0,
+                  height: 270,
+                  width: '100%',
+                  backgroundColor: '#FAFAFA',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <CircularProgress size={64} thickness={5} />
+              </div>
               <div style={{ height: 42 }} />
               <div
                 style={{ height: 406, width: 300, margin: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
