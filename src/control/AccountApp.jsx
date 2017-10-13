@@ -37,7 +37,7 @@ class AccountApp extends React.Component {
   render() {
     const { account, primaryColor, apis, refresh, openSnackBar } = this.props
     if (!account) return <div />
-    debug('this.props account', this.props, global.config.users)
+    // debug('this.props account', this.props, global.config.users)
 
     let avatarUrl = null
     let nickName = ''
