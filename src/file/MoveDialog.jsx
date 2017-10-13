@@ -232,24 +232,24 @@ class MoveDialog extends React.PureComponent {
 
     /* finish post change dialog content to waiting/result */
     this.finish = (error, data) => {
+      const type = this.props.operation === 'copy' ? '拷贝' : '移动'
       if (error) {
         this.setState({ loading: false })
         this.closeDialog()
         this.props.refresh()
-        this.props.openSnackBar('失败')
-        return
+        return this.props.openSnackBar(`${type}失败`)
       }
       this.getTaskState(data.uuid).asCallback((err) => {
         if (err) {
           this.setState({ loading: false })
           this.closeDialog()
           this.props.refresh()
-          return this.props.openSnackBar('失败')
+          return this.props.openSnackBar(`${type}失败`)
         }
         this.setState({ loading: false })
         this.closeDialog()
         this.props.refresh()
-        return this.props.openSnackBar('成功')
+        return this.props.openSnackBar(`${type}成功`)
       })
     }
 

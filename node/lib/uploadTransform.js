@@ -135,6 +135,7 @@ class Task {
       transform: (x, callback) => {
         const { entry, dirUUID, driveUUID, stat, policy, task } = x
         if (task.state !== 'uploading' && task.state !== 'diffing') task.state = 'hashing'
+        const hashStart = (new Date()).getTime()
         readXattr(entry, (error, attr) => {
           if (!error && attr && attr.parts) {
             callback(null, { entry, dirUUID, driveUUID, parts: attr.parts, type: 'file', stat, policy, task })
@@ -148,6 +149,7 @@ class Task {
           const child = childProcess.fork(path.join(__dirname, './filehash'), [], options)
           child.on('message', (result) => {
             setXattr(entry, result, (err, xattr) => {
+              debug('hash finished', ((new Date()).getTime() - hashStart) / 1000)
               callback(null, { entry, dirUUID, driveUUID, parts: xattr && xattr.parts, type: 'file', stat, policy, task })
             })
           })

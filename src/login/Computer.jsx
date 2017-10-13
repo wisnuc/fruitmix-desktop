@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom'
 const Computer = ({ style, fill, size }) => (
   <div style={Object.assign(style, { width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 300ms' })}>
     <svg
-      style={{ fill, width: Math.floor(size * 128 / 192), height: Math.floor(size * 176 / 192), transition: 'all 300ms' }}
+      style={{ fill, width: Math.floor(size * 128 / 144), height: Math.floor(size * 176 / 144), transition: 'all 300ms' }}
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 89.471 89.471"
     >
