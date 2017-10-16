@@ -44,6 +44,8 @@ class Device extends RequestManager {
       // methods
       request: this.request.bind(this),
       requestAsync: this.requestAsync.bind(this),
+      pureRequest: this.pureRequest.bind(this),
+      pureRequestAsync: this.pureRequestAsync.bind(this),
       clearRequest: this.clearRequest.bind(this),
       initWizard: this.initWizard.bind(this),
       systemStatus: this.systemStatus.bind(this),
@@ -69,20 +71,6 @@ class Device extends RequestManager {
     let r
 
     switch (name) {
-      case 'cloudUsers':
-        r = this.reqCloud('GET', 'users', args.stationID, args.token)
-        break
-
-      case 'localTokenByCloud':
-        r = this.reqCloud('GET', 'token', args.stationID, args.token)
-        break
-
-      case 'info':
-        r = request
-          .get(`http://${args.ip}:3000/station/info`)
-          .timeout(2000)
-        break
-
       case 'device':
         r = request
         .get(`http://${this.mdev.address}:3000/control/system`)
@@ -192,18 +180,6 @@ class Device extends RequestManager {
         .set('Accept', 'application/json')
         break
 
-      case 'wxToken':
-        r = request
-          .get(`${cloudAddress}/c/v1/token`)
-          .query({ code: args.code })
-          .query({ platform: 'web' })
-        break
-
-      case 'getStations':
-        r = request
-          .get(`${cloudAddress}/c/v1/users/${args.guid}/stations`)
-          .set('Authorization', args.token)
-        break
 
       /** FirmwareUpdate API **/
       case 'firm':
@@ -222,6 +198,48 @@ class Device extends RequestManager {
 
   async requestAsync(name, args) {
     return Promise.promisify(this.request).bind(this)(name, args)
+  }
+
+  pureRequest(name, args, next) {
+    let r
+    switch (name) {
+      case 'wxToken':
+        r = request
+          .get(`${cloudAddress}/c/v1/token`)
+          .query({ code: args.code })
+          .query({ platform: 'web' })
+        break
+
+      case 'getStations':
+        r = request
+          .get(`${cloudAddress}/c/v1/users/${args.guid}/stations`)
+          .set('Authorization', args.token)
+        break
+
+      case 'cloudUsers':
+        r = this.reqCloud('GET', 'users', args.stationID, args.token)
+        break
+
+      case 'localTokenByCloud':
+        r = this.reqCloud('GET', 'token', args.stationID, args.token)
+        break
+
+      case 'info':
+        r = request
+          .get(`http://${args.ip}:3000/station/info`)
+          .timeout(2000)
+        break
+
+      default:
+        break
+    }
+
+    if (!r) console.log(`no request handler found for ${name}`)
+    else r.end(next)
+  }
+
+  async pureRequestAsync(name, args) {
+    return Promise.promisify(this.pureRequest).bind(this)(name, args)
   }
 
   start() {
