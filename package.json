@@ -7,13 +7,15 @@
   "private": true,
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
-    "devel": "nodemon --exec electron devel.js",
-    "webpack": "webpack --watch --watch-poll",
     "build": "babel node --out-dir build",
-    "mocha": "mocha --compilers js:babel-core/register --recursive --sort",
+    "devel": "nodemon --exec electron devel.js",
     "devel2": "electron devel.js",
-    "doc": "nodemon --exec jsdoc -c jsdoc.conf.json -t node_modules/ink-docstrap/template"
+    "doc": "nodemon --exec jsdoc -c jsdoc.conf.json -t node_modules/ink-docstrap/template",
+    "mocha": "mocha --compilers js:babel-core/register --recursive --sort",
+    "rebuild": "electron-rebuild",
+    "start": "electron .",
+    "webpack": "webpack --watch --watch-poll",
+    "webpack2": "webpack -p"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

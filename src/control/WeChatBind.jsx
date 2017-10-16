@@ -72,6 +72,9 @@ class WeChatBind extends React.Component {
         if (!window.navigator.onLine) {
           this.setState({ error: 'net' })
         } else {
+          d.onload = () => {
+            if (!d.contentDocument.head || !d.contentDocument.title) this.setState({ error: 'wxConnect' })
+          }
           f.appendChild(d)
         }
       })
@@ -90,7 +93,7 @@ class WeChatBind extends React.Component {
           // debug('getWechatToken', res)
           this.userInfo = res.body.data.user
           this.guid = this.userInfo.id
-          this.props.apis.pureRequest('fillTicket', { ticketId: this.ticketId, token: res.body.data.token }, (err, r) => {
+          this.props.apis.pureRequest('fillTicket', { ticketId: this.ticketId, token: res.body.data.token }, (err) => {
             if (err) {
               debug('fillTicket error', err)
               this.setState({ error: 'fillTicket', status: '' })
@@ -156,6 +159,9 @@ class WeChatBind extends React.Component {
     switch (error) {
       case 'net':
         text = '无法连接到互联网，请检查您的网络设置！'
+        break
+      case 'wxConnect':
+        text = '无法连接到微信，请检查您的网络设置！'
         break
       case 'wxBind':
         text = '绑定失败，无法获取微信授权'

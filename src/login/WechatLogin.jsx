@@ -192,7 +192,6 @@ class WechatLogin extends React.Component {
     this.intiWxScript()
 
     this.initWXLogin = () => {
-      // debug('this.initWXLogin start!')
       this.setState({ wechatLogin: '', error: '' }, () => {
         this.WxLogin({
           id: 'login_container',
@@ -207,13 +206,11 @@ class WechatLogin extends React.Component {
         const f = document.getElementById('login_container')
         const d = this.wxiframe
 
-        // debug('this.initWXLogin this.wxiframe', this.wxiframe, this.state)
         if (f) f.innerHTML = ''
         if (!window.navigator.onLine) {
           this.setState({ error: 'net' })
         } else {
           d.onload = () => {
-            console.log('this.contentDocument', d.contentDocument.head, d.contentDocument.title)
             if (!d.contentDocument.head || !d.contentDocument.title) this.setState({ error: 'wisnuc' })
             else if (this.weChatLoadingRef) this.weChatLoadingRef.style.display = 'none'
           }
