@@ -78,7 +78,8 @@ class WechatLogin extends React.Component {
       let lanip = null
       for (let i = 0; i < ips.length; i++) {
         try {
-          const info = await this.props.selectedDevice.requestAsync('info', { ip: ips[i] })
+          const res = await this.props.selectedDevice.pureRequestAsync('info', { ip: ips[i] })
+          const info = res.body
           if (info && info.id === stationID) {
             lanip = ips[0]
             break
@@ -87,17 +88,22 @@ class WechatLogin extends React.Component {
           debug('this.autologinAsync can not connect lanip', ips[i], e)
         }
       }
-      // lanip = null
+
+      // lanip = null // force to connect cloud
+      
+      const token = this.state.wxData.token
+      const guid = this.state.wxData.user.id
+
+      console.log('before requestAsync cloudUsers', stationID, '\nlanip', lanip)
+      const res = await this.props.selectedDevice.pureRequestAsync('cloudUsers', { stationID, token })
+      console.log('after requestAsync cloudUsers', res && res.body.data)
+      const user = res && res.body.data.find(u => u.global && u.global.id === guid)
+      if (!user) throw Error('no user')
+
       if (lanip) {
-        const token = this.state.wxData.token
-        const guid = this.state.wxData.user.id
-
-        const res = await this.props.selectedDevice.requestAsync('cloudUsers', { stationID, token })
-        const user = res && res.data.find(u => u.global && u.global.id === guid)
-        if (!user) throw Error('no user')
-        const localToken = await this.props.selectedDevice.requestAsync('localTokenByCloud', { stationID, token })
-
-        debug('this.props.selectedDevice, before', this.props.selectedDevice)
+        debug('this.props.selectedDevice, before', this.props.selectedDevice, '\nlanip', lanip)
+        const response = await this.props.selectedDevice.pureRequestAsync('localTokenByCloud', { stationID, token })
+        const localToken = response.body
         Object.assign(this.props.selectedDevice, {
           token: {
             isFulfilled: () => true,
@@ -114,16 +120,10 @@ class WechatLogin extends React.Component {
           },
           mdev: { address: lanip, domain: 'local' }
         })
-        debug('this.props.selectedDevice, after', this.props.selectedDevice)
         this.props.ipcRenderer.send('WECHAT_LOGIN', user.uuid, { weChat: this.state.wxData.user })
         this.done('LOGIN', this.props.selectedDevice, user)
       } else {
-        const token = this.state.wxData.token
-        const guid = this.state.wxData.user.id
-
-        const res = await this.props.selectedDevice.requestAsync('cloudUsers', { stationID, token })
-        const user = res && res.data.find(u => u.global && u.global.id === guid)
-        if (!user) throw Error('no user')
+        debug('no available lanip', this.props.selectedDevice)
         Object.assign(this.props.selectedDevice, {
           token: {
             isFulfilled: () => true,
@@ -132,7 +132,6 @@ class WechatLogin extends React.Component {
           },
           mdev: { address: 'http://www.siyouqun.org', domain: 'remote' }
         })
-        debug('this.autologinAsync this.props.selectedDevice', this.props.selectedDevice)
         this.props.ipcRenderer.send('WECHAT_LOGIN', user.uuid, { weChat: this.state.wxData.user })
         return this.done('LOGIN', this.props.selectedDevice, user)
       }
@@ -224,17 +223,17 @@ class WechatLogin extends React.Component {
     }
 
     this.getStations = (guid, token) => {
-      this.props.selectedDevice.request('getStations', { guid, token }, (err, res) => {
+      this.props.selectedDevice.pureRequest('getStations', { guid, token }, (err, res) => {
         if (err) {
           debug('this.getStations error', err)
           return this.setState({ wechatLogin: 'fail' })
         }
-        debug('this.getStations success', res)
-        const lists = res.data
+        debug('this.getStations success', res.body)
+        const lists = res.body.data
         const available = lists.filter(l => l.isOnline)
         if (available && available.length) {
           const lastAddress = global.config.global.lastDevice && global.config.global.lastDevice.address
-          let index = available.findIndex(l => l.LANIP === lastAddress)
+          let index = available.findIndex(l => l.LANIP[0] === lastAddress)
           if (index < 0) index = 0
           debug('lastDevice', available[index])
           this.setState({ lists })
@@ -252,16 +251,16 @@ class WechatLogin extends React.Component {
       clearInterval(this.interval)
 
       this.setState({ wechatLogin: 'authorization' })
-      this.props.selectedDevice.request('wxToken', { code }, (err, res) => {
+      this.props.selectedDevice.pureRequest('wxToken', { code }, (err, res) => {
         if (err) {
           debug('this.getWXCode', code, err)
           this.setState({ wechatLogin: 'fail' })
         } else {
-          debug('got token!!', res)
+          debug('got token!!', res.body)
           // return console.log(wxLogin)
-          if (res.data) {
-            this.setState({ wxData: res.data, wechatLogin: 'getingList' })
-            setTimeout(() => this.getStations(res.data.user.id, res.data.token), 200)
+          if (res.body && res.body.data) {
+            this.setState({ wxData: res.body.data, wechatLogin: 'getingList' })
+            setTimeout(() => this.getStations(res.body.data.user.id, res.body.data.token), 200)
           } else {
             debug('no wechat Data')
             this.setState({ wechatLogin: 'fail' })
@@ -303,7 +302,6 @@ class WechatLogin extends React.Component {
   }
 
   renderCard() {
-    debug('renderCard', this.state.error)
     return (
       <div style={{ zIndex: 100 }}>
         {
@@ -316,7 +314,7 @@ class WechatLogin extends React.Component {
                   position: 'absolute',
                   top: 108,
                   left: 0,
-                  height: 320,
+                  height: 300,
                   width: '100%',
                   backgroundColor: '#FAFAFA',
                   display: 'flex',
@@ -376,7 +374,7 @@ class WechatLogin extends React.Component {
   }
 
   render() {
-    debug('render wechat login', this.state, this.props)
+    // debug('render wechat login', this.state, this.props)
     if (!this.state.wechatLogin) return this.renderCard()
     let text = ''
     const wcl = this.state.wechatLogin

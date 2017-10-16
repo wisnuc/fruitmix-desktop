@@ -14,7 +14,7 @@ module.exports = {
   target: 'electron-renderer',
   devtool: 'eval-source-map',
   entry: [
-    'webpack/hot/poll?1000',
+    // 'webpack/hot/poll?1000',
     './src/app.js'
   ],
   stats: { colors: true, minimal: true },
@@ -24,7 +24,8 @@ module.exports = {
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
-        use: ['react-hot-loader/webpack', 'babel-loader']
+        use: 'babel-loader'
+        // use: ['react-hot-loader/webpack', 'babel-loader']
       },
       {
         test: /\.css$/,
@@ -37,7 +38,7 @@ module.exports = {
     ]
   },
   plugins: [
-    new webpack.HotModuleReplacementPlugin(),
+    // new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({ 'global.GENTLY': false })
   ]
 }
