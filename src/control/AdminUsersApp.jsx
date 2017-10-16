@@ -40,17 +40,16 @@ class AdminUsersApp extends React.Component {
     }
 
     this.toggleAuth = () => {
-      this.setState({ changeAuth: false, confirmPwd: 'changeAuth' })
+      this.setState({ changeAuth: false }, () => this.updateAccount({ isAdmin: !this.state.user.isAdmin }))
+    }
+
+    this.disableUser = () => {
+      this.setState({ disableUser: false }, () => this.updateAccount({ disabled: !this.state.user.disabled }))
     }
 
     this.resetPwd = () => {
       debug('this.resetPwd', this.state.user)
       this.setState({ resetPwd: false, confirmPwd: 'resetPwd' })
-    }
-
-    this.disableUser = () => {
-      debug('this.resetPwd', this.state.user)
-      this.setState({ disableUser: false, confirmPwd: 'disableUser' })
     }
 
     this.copyText = () => {
@@ -69,29 +68,10 @@ class AdminUsersApp extends React.Component {
           debug('err', args, err, err.message)
           this.props.openSnackBar('出现错误，请重试')
         } else {
-          this.props.refreshUsers()
+          setTimeout(() => this.props.refreshUsers(), 100)
           this.setState({ confirmPwd: '' })
           this.props.openSnackBar('更新成功')
         }
-      })
-    }
-
-    this.getToken = (op) => {
-      const args = {
-        uuid: this.props.apis.account.data.uuid,
-        password: this.state.password
-      }
-
-      this.props.apis.request('getToken', args, (err) => {
-        if (err) {
-          debug('err', args, err, err.message)
-          if (err.message === 'Unauthorized') {
-            this.props.openSnackBar('密码错误')
-          } else {
-            this.props.openSnackBar('出现错误，请重试')
-          }
-        } else if (op === 'disableUser') this.updateAccount({ disabled: !this.state.user.disabled })
-        else this.updateAccount({ isAdmin: !this.state.user.isAdmin })
       })
     }
   }
@@ -176,31 +156,6 @@ class AdminUsersApp extends React.Component {
               onToggle={() => this.toggleDialog('disableUser', user)}
             />
           }
-        </div>
-      </div>
-    )
-  }
-
-  renderConfirmPwd(op) {
-    return (
-      <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
-        <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}> 输入管理员密码 </div>
-        <div style={{ height: 56 }} />
-        <div style={{ height: 56, display: 'flex', marginBottom: 10 }}>
-          <IconBox style={{ marginLeft: -12 }} size={48} icon={CommunicationVpnKey} />
-          <TextField
-            style={{ flexGrow: 1 }}
-            fullWidth
-            hintText="输入管理员密码"
-            type="password"
-            onChange={e => this.updatePassword(e.target.value)}
-            onBlur={e => this.updatePassword(e.target.value)}
-          />
-        </div>
-        <div style={{ height: 24 }} />
-        <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-          <FlatButton label="取消" primary onTouchTap={() => this.setState({ confirmPwd: '', password: '' })} />
-          <FlatButton label="确定" primary onTouchTap={() => this.getToken(op)} disabled={!this.state.password} />
         </div>
       </div>
     )
@@ -296,14 +251,11 @@ class AdminUsersApp extends React.Component {
                   </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                    <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('resetPwd')} keyboardFocused />
+                    <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('resetPwd')} />
                     <FlatButton label="确定" primary onTouchTap={this.resetPwd} />
                   </div>
                 </div>
             }
-
-            {/* render confirm password */}
-            { this.state.confirmPwd && this.renderConfirmPwd(this.state.confirmPwd) }
 
             {
               this.state.randomPwd &&
@@ -338,18 +290,16 @@ class AdminUsersApp extends React.Component {
                     {
                       this.state.user.disabled
                       ? '您启用后，该用户将恢复权限，可登录并访问设备，确定吗？'
-                      : '您禁用后，该用户将无法登录并访问设备，确定吗？'
+                      : '您禁用后，该用户将无法登录并访问设备，\n确定吗？'
                     }
                   </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                    <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('disableUser')} keyboardFocused />
+                    <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('disableUser')} />
                     <FlatButton label="确定" primary onTouchTap={this.disableUser} />
                   </div>
                 </div>
             }
-            {/* render confirm password */}
-            { this.state.confirmPwd && this.renderConfirmPwd(this.state.confirmPwd) }
           </div>
         </DialogOverlay>
 
@@ -377,8 +327,6 @@ class AdminUsersApp extends React.Component {
                   </div>
                 </div>
             }
-            {/* render confirm password */}
-            { this.state.confirmPwd && this.renderConfirmPwd(this.state.confirmPwd) }
           </div>
         </DialogOverlay>
       </div>
