@@ -21,7 +21,9 @@ class Fruitmix extends EventEmitter {
       token,
       stationID,
       request: this.request.bind(this),
-      requestAsync: this.requestAsync.bind(this)
+      requestAsync: this.requestAsync.bind(this),
+      pureRequest: this.pureRequest.bind(this),
+      pureRequestAsync: this.pureRequestAsync.bind(this)
     }
 
     this.reqCloud = (ep, data, type) => {
@@ -161,7 +163,7 @@ class Fruitmix extends EventEmitter {
         r = this.aget('drives')
         break
 
-      /** account APIs **/
+      /* account APIs */
       case 'account':
         r = this.aget(`users/${this.userUUID}`)
         break
@@ -181,7 +183,7 @@ class Fruitmix extends EventEmitter {
         }
         break
 
-      /** admins APIs **/
+      /* admins APIs */
       case 'adminUsers':
         r = this.aget('admin/users')
         break
@@ -214,7 +216,7 @@ class Fruitmix extends EventEmitter {
         })
         break
 
-      /** File APIs **/
+      /* File APIs */
       case 'listDir':
         r = this.aget(`drives/${args.driveUUID}`)
         break
@@ -270,7 +272,7 @@ class Fruitmix extends EventEmitter {
         r = this.aget(`tasks/${args.taskUUID}`)
         break
 
-      /** Ext APIs **/
+      /* Ext APIs */
       case 'extDrives':
         r = this.aget('files/external/fs')
         break
@@ -288,7 +290,7 @@ class Fruitmix extends EventEmitter {
       case 'extDeleteDirOrFile':
          break
 
-      /** Media API **/
+      /* Media API */
       case 'media':
         r = this.aget('media')
         break
@@ -312,12 +314,41 @@ class Fruitmix extends EventEmitter {
         else r = this.adel(`users/${this.userUUID}/media-blacklist`, args)
         break
 
-      /** Docker API **/
+      /* Docker API */
       case 'docker':
         r = request.get('http://10.10.9.86:3000/server')
         break
 
-      /** Ticket and Wechat API **/
+      default:
+        break
+    }
+
+    if (!r) return console.log(`no request handler found for ${name}`)
+    this.setRequest(name, args, cb => r.end(cb), next)
+  }
+
+  async requestAsync(name, args) {
+    return Promise.promisify(this.request).bind(this)(name, args)
+  }
+
+  pureRequest(name, args, next) {
+    let r
+    switch (name) {
+      /* file api */
+      case 'listNavDir':
+        r = this.aget(`drives/${args.driveUUID}/dirs/${args.dirUUID}`)
+        break
+
+      /* task api */
+      case 'tasks':
+        r = this.aget('tasks')
+        break
+
+      case 'task':
+        r = this.aget(`tasks/${args.uuid}`)
+        break
+
+      /* Ticket and Wechat API */
       case 'creatTicket':
         r = this.apost('station/tickets/', { type: 'bind' })
         break
@@ -350,12 +381,12 @@ class Fruitmix extends EventEmitter {
         break
     }
 
-    if (!r) return console.log(`no request handler found for ${name}`)
-    this.setRequest(name, args, cb => r.end(cb), next)
+    if (!r) console.log(`no request handler found for ${name}`)
+    else r.end(next)
   }
 
-  async requestAsync(name, args) {
-    return Promise.promisify(this.request).bind(this)(name, args)
+  async pureRequestAsync(name, args) {
+    return Promise.promisify(this.pureRequest).bind(this)(name, args)
   }
 
   start() {

@@ -7,19 +7,13 @@ import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-fil
 import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import ArrowRight from 'material-ui/svg-icons/hardware/keyboard-arrow-right'
-import Promise from 'bluebird'
-import request from 'superagent'
 import sanitize from 'sanitize-filename'
 import FlatButton from '../common/FlatButton'
 import { ShareDisk } from '../common/Svg'
 
-Promise.promisifyAll(request)
-
 class Row extends React.PureComponent {
   render() {
-    const node = this.props.node
-    const disable = this.props.disable
-    const isSelected = this.props.isSelected
+    const { node, disable, isSelected } = this.props
     return (
       <div
         style={{
@@ -255,12 +249,9 @@ class MoveDialog extends React.PureComponent {
 
     /* request task state */
     this.getTaskState = async (uuid) => {
-      const list = await this.agetAsync('tasks')
-      const data = list.find(l => l.uuid === uuid)
-      // const data = await this.agetAsync(`tasks/${uuid}`)
-      console.log('this.getTaskState', data)
+      const res = await this.props.apis.pureRequestAsync('task', { uuid })
+      const data = this.props.apis.stationID ? res.body.data : res.body
       if (!data.isStopped) {
-        console.log('retry', data)
         await this.sleep(500)
         await this.getTaskState(uuid)
       }
@@ -281,37 +272,12 @@ class MoveDialog extends React.PureComponent {
     this.sleep = time => new Promise(resolve => setTimeout(resolve, time))
 
     /* get file list */
-    this.list = (driveUUID, dirUUID) => new Promise((resolve, reject) => {
+    this.list = async (driveUUID, dirUUID) => {
       this.setState({ loading: true })
-      this.aget(`drives/${driveUUID}/dirs/${dirUUID}`).end((err, res) => {
-        if (err) return reject(err)
-        console.log('this.list', res.body)
-        return resolve(this.sort(this.props.apis.stationID ? res.body.data : res.body))
-      })
-    })
-
-    this.aget = (ep) => {
-      const { address, token, stationID } = this.props.apis
-      this.setState({ loading: true })
-      if (stationID) {
-        const url = `${address}/c/v1/stations/${stationID}/json`
-        const resource = new Buffer(`/${ep}`).toString('base64')
-        return request
-          .get(url)
-          .query({ resource, method: 'GET' })
-          .set('Authorization', token)
-      }
-      const string = `http://${address}:3000/${ep}`
-      return request.get(encodeURI(string)).set('Authorization', `JWT ${token}`)
+      const res = await this.props.apis.pureRequestAsync('listNavDir', { driveUUID, dirUUID })
+      const data = this.props.apis.stationID ? res.body.data : res.body
+      return this.sort(data)
     }
-
-    this.agetAsync = ep => new Promise((resolve, reject) => {
-      this.aget(ep).end((err, res) => {
-        if (err) return reject(err)
-        console.log('this.agetAsync', res)
-        return this.props.apis.stationID ? resolve(res.body.data) : resolve(res.body)
-      })
-    })
   }
 
   componentWillMount() {
