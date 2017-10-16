@@ -11,8 +11,6 @@ import DialogOverlay from '../common/DialogOverlay'
 import ChangeAccountDialog from './ChangeAccountDialog'
 import Checkmark from '../common/Checkmark'
 
-import request from 'superagent'
-
 const debug = Debug('component:control:WeChatBind')
 
 class WeChatBind extends React.Component {
@@ -84,42 +82,33 @@ class WeChatBind extends React.Component {
       this.wxiframe.contentWindow.wx_code = null
       this.setState({ status: 'connectingCloud' })
 
-      /*
-      request.get(`http://www.siyouqun.org:80/c/v1/token`)
-        .query({ code })
-        .query({ platform: 'web' })
-        .end((err, res) => {
-          request.post(`http://www.siyouqun.org:80/c/v1/tickets/${this.ticketId}/users`)
-            .set('Authorization', res.body.data.token)
-            .end((err, res) => console.log('err, res fillTicket', err, res && res.body))
-        })
-      */
-
-      this.props.apis.request('getWechatToken', { code, platform: 'web' }, (error, res) => {
+      this.props.apis.pureRequest('getWechatToken', { code, platform: 'web' }, (error, res) => {
         if (error) {
           debug('getWechatToken', code, error)
           this.setState({ error: 'wxBind', status: '' })
         } else {
           // debug('getWechatToken', res)
-          this.userInfo = res.data.user
+          this.userInfo = res.body.data.user
           this.guid = this.userInfo.id
-          setTimeout(() => this.props.apis.request('fillTicket', { ticketId: this.ticketId, token: res.data.token }, (err, r) => {
-            if (err) return debug('fillTicket success res', r)
-            return this.setState({ status: 'confirm' })
-          }), 100)
+          this.props.apis.pureRequest('fillTicket', { ticketId: this.ticketId, token: res.body.data.token }, (err, r) => {
+            if (err) {
+              debug('fillTicket error', err)
+              this.setState({ error: 'fillTicket', status: '' })
+            } else this.setState({ status: 'confirm' })
+          })
         }
       })
     }
 
     this.bindWechat = () => {
       this.setState({ status: 'connectingWX' }, () => {
-        this.props.apis.request('creatTicket', null, (error, data) => {
+        this.props.apis.pureRequest('creatTicket', null, (error, res) => {
           if (error) {
             debug('this.bindWechat error', error)
             this.setState({ error: 'creatTicket', status: '' })
           } else {
-            debug('this.bindWechat success', data)
-            this.ticketId = data.id
+            debug('this.bindWechat success', res.body)
+            this.ticketId = res.body.id
             this.initWXLogin()
           }
         })
@@ -129,7 +118,7 @@ class WeChatBind extends React.Component {
     this.confirm = () => {
       debug('this.confirm', this.ticketId, this.guid)
       this.setState({ status: 'connectingCloud' })
-      this.props.apis.request('confirmTicket', { ticketId: this.ticketId, guid: this.guid, state: true }, (e) => {
+      this.props.apis.pureRequest('confirmTicket', { ticketId: this.ticketId, guid: this.guid, state: true }, (e) => {
         if (e) {
           debug('confirmTicket error', e)
           this.setState({ error: 'confirmTicket', status: '' })
@@ -170,6 +159,9 @@ class WeChatBind extends React.Component {
         break
       case 'wxBind':
         text = '绑定失败，无法获取微信授权'
+        break
+      case 'fillTicket':
+        text = '绑定失败，无法获取微信信息'
         break
       case 'confirmTicket':
         text = '绑定失败，无法确认绑定信息'
