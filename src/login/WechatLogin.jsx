@@ -207,15 +207,19 @@ class WechatLogin extends React.Component {
         })
         const f = document.getElementById('login_container')
         const d = this.wxiframe
+
         // debug('this.initWXLogin this.wxiframe', this.wxiframe, this.state)
         if (f) f.innerHTML = ''
-        if (this.weChatLoadingRef) this.weChatLoadingRef.style.display = 'none'
         if (!window.navigator.onLine) {
           this.setState({ error: 'net' })
         } else {
+          d.onload = () => {
+            console.log('this.contentDocument', d.contentDocument.head, d.contentDocument.title)
+            if (!d.contentDocument.head || !d.contentDocument.title) this.setState({ error: 'wisnuc' })
+            else if (this.weChatLoadingRef) this.weChatLoadingRef.style.display = 'none'
+          }
           f.appendChild(d)
         }
-        console.log('d')
       })
     }
 
@@ -227,12 +231,15 @@ class WechatLogin extends React.Component {
         }
         debug('this.getStations success', res)
         const lists = res.data
-        const index = lists.findIndex(l => l.isOnline)
-        if (index > -1) {
-          debug('lastDevice', lists[index])
+        const available = lists.filter(l => l.isOnline)
+        if (available && available.length) {
+          const lastAddress = global.config.global.lastDevice && global.config.global.lastDevice.address
+          let index = available.findIndex(l => l.LANIP === lastAddress)
+          if (index < 0) index = 0
+          debug('lastDevice', available[index])
           this.setState({ lists })
           setTimeout(() => this.setState({ wechatLogin: 'success', count: 3 }), 500)
-          setTimeout(() => this.setState({ wechatLogin: 'lastDevice', lastDevice: lists[index] }, this.countDown), 1000)
+          setTimeout(() => this.setState({ wechatLogin: 'lastDevice', lastDevice: available[index] }, this.countDown), 1000)
         } else return this.setState({ wechatLogin: 'fail' })
       })
     }
@@ -254,7 +261,7 @@ class WechatLogin extends React.Component {
           // return console.log(wxLogin)
           if (res.data) {
             this.setState({ wxData: res.data, wechatLogin: 'getingList' })
-            this.getStations(res.data.user.id, res.data.token)
+            setTimeout(() => this.getStations(res.data.user.id, res.data.token), 200)
           } else {
             debug('no wechat Data')
             this.setState({ wechatLogin: 'fail' })
@@ -309,7 +316,7 @@ class WechatLogin extends React.Component {
                   position: 'absolute',
                   top: 108,
                   left: 0,
-                  height: 270,
+                  height: 320,
                   width: '100%',
                   backgroundColor: '#FAFAFA',
                   display: 'flex',
@@ -356,7 +363,7 @@ class WechatLogin extends React.Component {
               </div>
               <div style={{ height: 24 }} />
               <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.87)', fontSize: 20 }}>
-                { this.state.error === 'net' ? '网络连接已断开' : '云服务已断开' }
+                { this.state.error === 'net' ? '网络连接已断开' : '无法连接到云服务' }
               </div>
               <div style={{ height: 24 }} />
               <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.54)', fontSize: 20 }}>
@@ -480,35 +487,39 @@ class WechatLogin extends React.Component {
                   <div>
                     <div style={{ height: 8 }} />
                     <div style={{ fontSize: 16, lineHeight: '24px', color: 'rgba(0,0,0,0.87)' }}> { '闻上盒子' } </div>
-                    <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}> { '' } </div>
-                    <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}> { '远程访问' } </div>
+                    <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}>
+                      { this.state.lastDevice.LANIP }
+                    </div>
+                    <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}> { '微信登录' } </div>
+
                   </div>
                 </div>
                 <div style={{ height: 8 }} />
               </div>
               <Divider />
               <div style={{ height: 32 }} />
-              <div
-                style={{
-                  height: 80,
-                  fontSize: 16,
-                  fontWeight: 500,
-                  color: 'rgba(0,0,0,0.87)',
-                  textAlign: 'center'
-                }}
-              >
-                <span style={{ fontSize: 34 }}> { this.state.count } </span> 秒后将登录
-              </div>
-              <div style={{ display: 'flex' }}>
-                <div style={{ flexGrow: 1 }} />
-                <FlatButton
-                  label="可登录设备列表"
-                  labelPosition="before"
-                  labelStyle={{ color: '#424242', fontWeight: 500 }}
-                  onTouchTap={this.enterList}
-                  icon={<RightIcon color="#424242" />}
-                />
-              </div>
+              {
+                this.state.logining ?
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 16 }}>
+                    <CircularProgress size={48} thickness={3} />
+                  </div>
+                  :
+                  <div>
+                    <div style={{ height: 80, fontSize: 16, fontWeight: 500, color: 'rgba(0,0,0,0.87)', textAlign: 'center' }} >
+                      <span style={{ fontSize: 34 }}> { this.state.count } </span> 秒后将登录
+                    </div>
+                    <div style={{ display: 'flex' }}>
+                      <div style={{ flexGrow: 1 }} />
+                      <FlatButton
+                        label="可登录设备列表"
+                        labelPosition="before"
+                        labelStyle={{ color: '#424242', fontWeight: 500 }}
+                        onTouchTap={this.enterList}
+                        icon={<RightIcon color="#424242" />}
+                      />
+                    </div>
+                  </div>
+              }
             </div>
             : wcl === 'list'
             ? <div>
