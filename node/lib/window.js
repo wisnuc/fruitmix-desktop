@@ -48,7 +48,9 @@ const initMainWindow = () => {
       }, (response, checkboxChecked) => {
         if (response === 1 && checkboxChecked) {
           close = true
-          global.configuration.updateGlobalConfigAsync({ noCloseConfirm: true }).then(() => setImmediate(app.quit)).catch(e => console.log(e))
+          global.configuration.updateGlobalConfigAsync({ noCloseConfirm: true })
+            .then(() => setTimeout(app.quit, 100)) // waiting saving configuration to disk
+            .catch(err => console.log('updateGlobalConfigAsync error', err))
         } else if (response === 1) {
           close = true
           setImmediate(app.quit)
