@@ -8,8 +8,7 @@ import Fruitmix from './Fruitmix'
 
 /* modify debug filter before application starts' */
 const debug = Debug('app')
-localStorage.debug = '*'
-// localStorage.debug = '*component*'
+localStorage.debug = '*component*'
 
 /* required by Material UI */
 injectTapEventPlugin()

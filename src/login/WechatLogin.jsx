@@ -254,10 +254,9 @@ class WechatLogin extends React.Component {
           this.setState({ wechatLogin: 'fail' })
         } else {
           debug('got token!!', res.body)
-          // return console.log(wxLogin)
           if (res.body && res.body.data) {
             this.setState({ wxData: res.body.data, wechatLogin: 'getingList' })
-            setTimeout(() => this.getStations(res.body.data.user.id, res.body.data.token), 200)
+            this.getStations(res.body.data.user.id, res.body.data.token)
           } else {
             debug('no wechat Data')
             this.setState({ wechatLogin: 'fail' })

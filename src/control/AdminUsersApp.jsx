@@ -85,8 +85,6 @@ class AdminUsersApp extends React.Component {
       avatarUrl = weChatInfo.avatarUrl
       nickName = weChatInfo.nickName
     }
-    const u = Object.assign({}, user)
-    debug('renderUserRow user', user.username)
 
     return (
       <div
@@ -122,7 +120,7 @@ class AdminUsersApp extends React.Component {
             label={user.isFirstUser ? '超级管理员' : user.disabled ? '已禁用' : user.isAdmin ? '管理员' : '普通用户'}
             labelStyle={{ fontSize: 14, color: 'rgba(0,0,0,0.54)' }}
             labelPosition="before"
-            onTouchTap={event => this.toggleMenu(event, user)}
+            onTouchTap={event => !user.disabled && this.toggleMenu(event, user)}
             style={{ marginLeft: -4 }}
             disabled={user.isFirstUser || user.disabled || (!this.props.apis.account.data.isFirstUser)}
             icon={user.isFirstUser || user.disabled || (!this.props.apis.account.data.isFirstUser) ? <div /> : <DeltaIcon />}

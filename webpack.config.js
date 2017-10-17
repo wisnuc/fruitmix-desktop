@@ -11,10 +11,10 @@ module.exports = {
     path: path.join(__dirname, 'public'),
     filename: 'bundle.js'
   },
-  target: 'electron-renderer',
+  target: 'electron',
   devtool: 'eval-source-map',
   entry: [
-    // 'webpack/hot/poll?1000',
+    'webpack/hot/poll?1000',
     './src/app.js'
   ],
   stats: { colors: true, minimal: true },
@@ -38,7 +38,7 @@ module.exports = {
     ]
   },
   plugins: [
-    // new webpack.HotModuleReplacementPlugin(),
+    new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({ 'global.GENTLY': false })
   ]
 }
