@@ -81,7 +81,7 @@ class WechatLogin extends React.Component {
           const res = await this.props.selectedDevice.pureRequestAsync('info', { ip: ips[i] })
           const info = res.body
           if (info && info.id === stationID) {
-            lanip = ips[0]
+            lanip = ips[i]
             break
           }
         } catch (e) {
@@ -89,30 +89,21 @@ class WechatLogin extends React.Component {
         }
       }
 
-      lanip = null // force to connect cloud
-      
+      // lanip = null // force to connect cloud
+
       const token = this.state.wxData.token
       const guid = this.state.wxData.user.id
 
-      console.log('before requestAsync cloudUsers', stationID, '\nlanip', lanip)
       const res = await this.props.selectedDevice.pureRequestAsync('cloudUsers', { stationID, token })
-      console.log('after requestAsync cloudUsers', res && res.body.data)
       const user = res && res.body.data.find(u => u.global && u.global.id === guid)
       if (!user) throw Error('no user')
 
       if (lanip) {
-        debug('this.props.selectedDevice, before', this.props.selectedDevice, '\nlanip', lanip)
+        debug('this.props.selectedDevice, with lanip', this.props.selectedDevice, '\nlanip', lanip)
         const response = await this.props.selectedDevice.pureRequestAsync('localTokenByCloud', { stationID, token })
         const localToken = response.body
+        this.props.selectDevice({ address: lanip, domain: 'local' })
         Object.assign(this.props.selectedDevice, {
-          token: {
-            isFulfilled: () => true,
-            ctx: user,
-            data: localToken.data
-          },
-          mdev: { address: lanip, domain: 'local' }
-        })
-        this.props.assignDevice({
           token: {
             isFulfilled: () => true,
             ctx: user,
@@ -130,7 +121,7 @@ class WechatLogin extends React.Component {
             ctx: user,
             data: { token, stationID }
           },
-          mdev: { address: 'http://www.siyouqun.org', domain: 'remote' }
+          mdev: { address: 'http://www.siyouqun.org', domain: 'remote', lanip: ips[0] }
         })
         this.props.ipcRenderer.send('WECHAT_LOGIN', user.uuid, { weChat: this.state.wxData.user })
         return this.done('LOGIN', this.props.selectedDevice, user)
@@ -141,7 +132,7 @@ class WechatLogin extends React.Component {
       if (this.out) return
       this.setState({ logining: true })
       this.autologinAsync().catch((e) => {
-        debug('this.autologin', e)
+        debug('this.autologin error', e)
         this.setState({ wechatLogin: 'fail' })
       })
     }
@@ -212,9 +203,10 @@ class WechatLogin extends React.Component {
         } else {
           d.onload = () => {
             if (!d.contentDocument.head || !d.contentDocument.title) this.setState({ error: 'wisnuc' })
-            else if (this.weChatLoadingRef) this.weChatLoadingRef.style.display = 'none'
+            // else if (this.weChatLoadingRef) this.weChatLoadingRef.style.display = 'none'
           }
           f.appendChild(d)
+          if (this.weChatLoadingRef) this.weChatLoadingRef.style.display = 'none'
         }
       })
     }
@@ -229,7 +221,8 @@ class WechatLogin extends React.Component {
         const lists = res.body.data
         const available = lists.filter(l => l.isOnline)
         if (available && available.length) {
-          const lastAddress = global.config.global.lastDevice && global.config.global.lastDevice.address
+          const lastDevice = global.config.global.lastDevice
+          const lastAddress = lastDevice && (lastDevice.lanip || lastDevice.address)
           let index = available.findIndex(l => l.LANIP[0] === lastAddress)
           if (index < 0) index = 0
           debug('lastDevice', available[index])
@@ -306,6 +299,7 @@ class WechatLogin extends React.Component {
               {/* CircularProgress */}
               <div
                 ref={ref => (this.weChatLoadingRef = ref)}
+                key="weChatLoadingRef"
                 style={{
                   position: 'absolute',
                   top: 108,
