@@ -68,7 +68,7 @@ class AdminUsersApp extends React.Component {
           debug('err', args, err, err.message)
           this.props.openSnackBar('出现错误，请重试')
         } else {
-          setTimeout(() => this.props.refreshUsers(), 100)
+          this.props.refreshUsers()
           this.setState({ confirmPwd: '' })
           this.props.openSnackBar('更新成功')
         }
