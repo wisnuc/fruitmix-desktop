@@ -89,7 +89,7 @@ class WechatLogin extends React.Component {
         }
       }
 
-      // lanip = null // force to connect cloud
+      lanip = null // force to connect cloud
       
       const token = this.state.wxData.token
       const guid = this.state.wxData.user.id
