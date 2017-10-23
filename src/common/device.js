@@ -14,9 +14,8 @@ const cloudAddress = 'http://www.siyouqun.org:80'
   emission may happen DURING calling start. So functions and observers must
   NOT think some reqs is always there. It may be null.
 
-**/
+* */
 class Device extends RequestManager {
-
   // constructor won't emit anything since there is no listeners yet
   // the common way to solve this problem is to use a separate method
   // to trigger actions
@@ -73,115 +72,125 @@ class Device extends RequestManager {
     switch (name) {
       case 'device':
         r = request
-        .get(`http://${this.mdev.address}:3000/control/system`)
+          .get(`http://${this.mdev.address}:3000/control/system`)
+        break
+
+      case 'info':
+        r = request
+          .get(`http://${this.mdev.address}:3000/station/info`)
+        break
+
+      case 'renameStation':
+        r = request
+          .patch(`http://${this.mdev.address}:3000/station/info`, { name: args.name })
         break
 
       case 'boot':
         r = request
-        .get(`http://${this.mdev.address}:3000/boot`)
+          .get(`http://${this.mdev.address}:3000/boot`)
         break
 
       case 'storage':
         r = request
-        .get(`http://${this.mdev.address}:3000/storage`)
+          .get(`http://${this.mdev.address}:3000/storage`)
         break
 
       case 'power':
         r = request
-        .patch(`http://${this.mdev.address}:3000/boot`)
-        .timeout(30000)
-        .send(args)
-        .set('Accept', 'application/json')
+          .patch(`http://${this.mdev.address}:3000/boot`)
+          .timeout(30000)
+          .send(args)
+          .set('Accept', 'application/json')
         break
 
       case 'timedate':
         r = request
-        .get(`http://${this.mdev.address}:3000/control/timedate`)
+          .get(`http://${this.mdev.address}:3000/control/timedate`)
         break
 
       case 'net':
         r = request
-        .get(`http://${this.mdev.address}:3000/control/net/interfaces`)
+          .get(`http://${this.mdev.address}:3000/control/net/interfaces`)
         break
 
       case 'fan':
         r = request
-        .get(`http://${this.mdev.address}:3000/control/fan`)
+          .get(`http://${this.mdev.address}:3000/control/fan`)
         break
 
       case 'setFanScale':
         r = request
-        .patch(`http://${this.mdev.address}:3000/control/fan`)
-        .send(args)
-        .set('Accept', 'application/json')
+          .patch(`http://${this.mdev.address}:3000/control/fan`)
+          .send(args)
+          .set('Accept', 'application/json')
         break
 
       case 'ipaliasing':
         r = request
-        .get(`http://${this.mdev.address}:3000/control/net/ipaliasing`)
+          .get(`http://${this.mdev.address}:3000/control/net/ipaliasing`)
         break
 
       case 'setIpaliasing':
         r = request
-        .post(`http://${this.mdev.address}:3000/control/net/ipaliasing`)
-        .timeout(30000)
-        .send(args)
-        .set('Accept', 'application/json')
+          .post(`http://${this.mdev.address}:3000/control/net/ipaliasing`)
+          .timeout(30000)
+          .send(args)
+          .set('Accept', 'application/json')
         break
 
       case 'users':
         r = request
-        .get(`http://${this.mdev.address}:3000/users`)
+          .get(`http://${this.mdev.address}:3000/users`)
         break
 
       case 'mkfs':
         r = request
-        .post(`http://${this.mdev.address}:3000/storage/volumes`)
-        .timeout(30000)
-        .send(args)
-        .set('Accept', 'application/json')
+          .post(`http://${this.mdev.address}:3000/storage/volumes`)
+          .timeout(30000)
+          .send(args)
+          .set('Accept', 'application/json')
         break
 
       case 'install':
         r = request
-        .patch(`http://${this.mdev.address}:3000/boot`)
-        .timeout(30000)
-        .send(args)
-        .set('Accept', 'application/json')
+          .patch(`http://${this.mdev.address}:3000/boot`)
+          .timeout(30000)
+          .send(args)
+          .set('Accept', 'application/json')
         break
 
       case 'forceBoot':
         r = request
-        .patch(`http://${this.mdev.address}:3000/boot`)
-        .timeout(30000)
-        .send(args)
-        .set('Accept', 'application/json')
+          .patch(`http://${this.mdev.address}:3000/boot`)
+          .timeout(30000)
+          .send(args)
+          .set('Accept', 'application/json')
         break
 
       case 'firstUser':
         r = request
-        .post(`http://${this.mdev.address}:3000/users`)
-        .send(args)
-        .set('Accept', 'application/json')
+          .post(`http://${this.mdev.address}:3000/users`)
+          .send(args)
+          .set('Accept', 'application/json')
         break
 
       case 'run':
         r = request
-        .post(`http://${this.mdev.address}:3000/system/run`)
-        .timeout(30000)
-        .send(args)
-        .set('Accept', 'application/json')
+          .post(`http://${this.mdev.address}:3000/system/run`)
+          .timeout(30000)
+          .send(args)
+          .set('Accept', 'application/json')
         break
 
       case 'token':
         r = request
-        .get(`http://${this.mdev.address}:3000/token`)
-        .auth(args.uuid, args.password)
-        .set('Accept', 'application/json')
+          .get(`http://${this.mdev.address}:3000/token`)
+          .auth(args.uuid, args.password)
+          .set('Accept', 'application/json')
         break
 
 
-      /** FirmwareUpdate API **/
+      /** FirmwareUpdate API * */
       case 'firm':
         r = request
           .get('http://10.10.9.124:3001/state')
@@ -403,7 +412,7 @@ class Device extends RequestManager {
    failLast -> maint
    uninitialized -> init
    failNoAlt -> maint
-  **/
+  * */
   systemStatus() {
     if (!this.device || !this.boot || !this.storage ||
       !this.users || this.device.isPending() || this.boot.isPending()
