@@ -80,7 +80,7 @@ class ModelNameCard extends React.Component {
                     marginBottom: this.props.toggle ? 4 : 12
                   }}
                 >
-                  { '闻上盒子' }
+                  { this.props.name || '闻上盒子' }
                 </div>
                 {
                   !this.props.toggle &&

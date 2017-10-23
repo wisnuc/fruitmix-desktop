@@ -256,12 +256,13 @@ class Device extends RequestManager {
   }
 
   refreshSystemState(next) {
-    let count = 4
+    let count = 5
     const done = next ? () => (!--count) && next() : undefined
     this.request('device', null, done)
     this.request('boot', null, done)
     this.request('storage', null, done)
     this.request('users', null, done)
+    this.request('info', null, done)
   }
 
   async refreshSystemStateAsync() {
@@ -414,8 +415,8 @@ class Device extends RequestManager {
    failNoAlt -> maint
   * */
   systemStatus() {
-    if (!this.device || !this.boot || !this.storage ||
-      !this.users || this.device.isPending() || this.boot.isPending()
+    if (!this.device || !this.boot || !this.storage || !this.info || !this.users
+      || this.device.isPending() || this.boot.isPending() || this.info.isPending()
       || this.storage.isPending() || this.users.isPending()) {
       return 'probing'
     } else if (this.boot.isRejected() || this.storage.isRejected()) {
