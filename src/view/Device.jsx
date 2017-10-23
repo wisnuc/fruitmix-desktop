@@ -14,23 +14,24 @@ class Device extends Base {
     this.address = ctx.props.selectedDevice.mdev.address
     this.state = {
       device: null,
-      storage: null
+      storage: null,
+      boot: null,
+      info: null
     }
   }
 
   willReceiveProps(nextProps) {
-    console.log('device nextProps', nextProps)
+    // console.log('device nextProps', nextProps)
     if (!nextProps.selectedDevice || !nextProps.selectedDevice.device || !nextProps.selectedDevice.storage
-      || !nextProps.selectedDevice.boot) return
-    const device = nextProps.selectedDevice.device
-    if (device.isPending() || device.isRejected()) return
-    const storage = nextProps.selectedDevice.storage
-    if (storage.isPending() || storage.isRejected()) return
-    const boot = nextProps.selectedDevice.boot
-    if (boot.isPending() || boot.isRejected()) return
+      || !nextProps.selectedDevice.boot || !nextProps.selectedDevice.info) return
 
-    if (device.value() !== this.state.device || storage.value() !== this.state.storage || boot.value() !== this.state.boot) {
-      this.setState({ device: device.value(), storage: storage.value(), boot: boot.value() })
+    const { device, storage, boot, info } = nextProps.selectedDevice
+    if (device.isPending() || device.isRejected() || storage.isPending() || storage.isRejected()
+      || boot.isPending() || boot.isRejected() || info.isPending() || info.isRejected()) return
+
+    if (device.value() !== this.state.device || storage.value() !== this.state.storage
+      || boot.value() !== this.state.boot || info.value() !== this.state.info) {
+      this.setState({ device: device.value(), storage: storage.value(), boot: boot.value(), info: info.value() })
     }
   }
 
@@ -38,6 +39,7 @@ class Device extends Base {
     this.ctx.props.selectedDevice.request('device')
     this.ctx.props.selectedDevice.request('storage')
     this.ctx.props.selectedDevice.request('boot')
+    this.ctx.props.selectedDevice.request('info')
   }
 
   navLeave() {
@@ -70,9 +72,7 @@ class Device extends Base {
   renderContent({ openSnackBar }) {
     return (
       <DeviceInfo
-        device={this.state.device}
-        storage={this.state.storage}
-        boot={this.state.boot}
+        {...this.state}
         selectedDevice={this.ctx.props.selectedDevice}
         primaryColor={this.groupPrimaryColor()}
         openSnackBar={openSnackBar}

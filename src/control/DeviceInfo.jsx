@@ -1,15 +1,16 @@
 import React from 'react'
 import Debug from 'debug'
 import prettysize from 'prettysize'
-import { TextField, Divider } from 'material-ui'
-import ActionDns from 'material-ui/svg-icons/action/dns'
-import CPU from 'material-ui/svg-icons/hardware/memory'
+import { TextField, Divider, IconButton, CircularProgress } from 'material-ui'
 import TV from 'material-ui/svg-icons/hardware/tv'
+import CPU from 'material-ui/svg-icons/hardware/memory'
+import ActionDns from 'material-ui/svg-icons/action/dns'
+import DoneIcon from 'material-ui/svg-icons/action/done'
 import Memory from 'material-ui/svg-icons/device/sd-storage'
-import StorageIcon from 'material-ui/svg-icons/device/storage'
-import { RAIDIcon } from '../maintenance/Svg'
 import ModeEdit from 'material-ui/svg-icons/editor/mode-edit'
+import StorageIcon from 'material-ui/svg-icons/device/storage'
 
+import { RAIDIcon } from '../maintenance/Svg'
 
 const debug = Debug('component:control:deviceinfo')
 
@@ -22,17 +23,27 @@ class DeviceInfo extends React.PureComponent {
       titleHover: false
     }
 
-    this.currentLabel = '我的盒子'
     this.updateLabel = (value) => {
-      this.setState({ label: value, errorText: '' })
+      this.setState({ label: value, errorText: '', changed: true })
     }
 
     this.changeDeviceName = () => {
-      this.setState({ modify: false })
-      this.props.selectedDevice.request('renameStation', { name: this.state.label }, (err) => {
-        if (err) this.props.openSnackBar('修改失败')
-        else this.props.openSnackBar('修改成功')
+      this.setState({ progress: true }, () => {
+        this.props.selectedDevice.request('renameStation', { name: this.state.label }, (err) => {
+          if (err) this.props.openSnackBar('修改失败')
+          else {
+            this.props.selectedDevice.request('info', null, (e) => {
+              if (e) this.props.openSnackBar('修改失败')
+              else this.props.openSnackBar('修改成功')
+              this.setState({ modify: false, progress: false, label: '' })
+            })
+          }
+        })
       })
+    }
+
+    this.onKeyDown = (e) => {
+      if (e.which === 13 && !this.state.errorText && this.state.label && this.state.label.length) this.changeDeviceName()
     }
   }
 
@@ -67,10 +78,20 @@ class DeviceInfo extends React.PureComponent {
     )
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.info && this.props.info && (nextProps.info.name !== this.props.info.name)) {
+      this.currentLabel = nextProps.info.name
+      this.setState({
+        label: nextProps.info.name,
+        modify: false,
+        changed: false
+      })
+    }
+  }
+
   render() {
-    debug('this.props.device', this.props)
-    if (!this.props.device || !this.props.storage || !this.props.boot) return <div />
-    debug('this.props.device true render', this.props)
+    if (!this.props.device || !this.props.storage || !this.props.boot || !this.props.info) return <div />
+      // debug('this.props.device true render', this.props)
 
     const { cpuInfo, memInfo, ws215i } = this.props.device
     const volume = this.props.storage.volumes.find(v => v.fileSystemUUID === this.props.boot.current)
@@ -173,23 +194,36 @@ class DeviceInfo extends React.PureComponent {
               <div style={{ height: 16 }} />
               {
                 this.state.modify ?
-                  <div style={{ marginTop: -8 }}>
+                  <div style={{ marginTop: -8, display: 'flex' }}>
                     {/* FIXME */}
                     <TextField
                       name="deviceName"
                       onChange={e => this.updateLabel(e.target.value)}
-                      maxLength={16}
-                      value={this.state.modify ? this.state.label : this.currentLabel}
+                      maxLength={12}
+                      value={this.state.modify ? this.state.label : this.props.info.name}
                       errorText={this.state.errorText}
-                      onBlur={() => this.changeDeviceName()}
                       ref={(input) => { if (input && this.state.modify) { input.focus() } }}
+                      onKeyDown={this.onKeyDown}
                     />
+                    {
+                      this.state.progress ?
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginLeft: 8 }}>
+                          <CircularProgress size={16} thickness={2} />
+                        </div>
+                        :
+                        <IconButton
+                          onTouchTap={() => this.state.changed && this.changeDeviceName()}
+                          disabled={!!this.state.errorText || !this.state.label || !this.state.label.length}
+                        >
+                          <DoneIcon color={this.props.primaryColor} />
+                        </IconButton>
+                    }
                   </div> :
                   <div
                     style={{ display: 'flex', alignItems: 'center', height: 32 }}
                     onTouchTap={() => this.setState({ modify: true })}
                   >
-                    { this.state.label ? this.state.label : this.currentLabel }
+                    { this.state.label ? this.state.label : this.props.info.name }
                     <ModeEdit color={this.props.primaryColor} style={{ marginLeft: 24 }} />
                   </div>
               }

@@ -494,6 +494,7 @@ class Login extends StateUp(React.Component) {
       displayProps = {
         toggle: this.state.compact,
         device: selectedDevice.mdev,
+        name: selectedDevice.info && selectedDevice.info.data && selectedDevice.info.data.name,
         ws215i: selectedDevice.device && selectedDevice.device.data && !!selectedDevice.device.data.ws215i,
         backgroundColor: '#FAFAFA',
         onNavPrev: (!selectedDevice || (selectedDevice && !selectedDevice.mdev.address) || this.isFirst()) ? null : this.navPrevBound,
