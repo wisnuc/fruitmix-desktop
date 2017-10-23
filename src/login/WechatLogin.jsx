@@ -474,7 +474,7 @@ class WechatLogin extends React.Component {
                   </div>
                   <div>
                     <div style={{ height: 8 }} />
-                    <div style={{ fontSize: 16, lineHeight: '24px', color: 'rgba(0,0,0,0.87)' }}> { '闻上盒子' } </div>
+                    <div style={{ fontSize: 16, lineHeight: '24px', color: 'rgba(0,0,0,0.87)' }}> { this.state.lastDevice.name } </div>
                     <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}>
                       { this.state.lastDevice.LANIP }
                     </div>

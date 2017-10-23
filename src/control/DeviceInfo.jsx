@@ -26,6 +26,14 @@ class DeviceInfo extends React.PureComponent {
     this.updateLabel = (value) => {
       this.setState({ label: value, errorText: '' })
     }
+
+    this.changeDeviceName = () => {
+      this.setState({ modify: false })
+      this.props.selectedDevice.request('renameStation', { name: this.state.label }, (err) => {
+        if (err) this.props.openSnackBar('修改失败')
+        else this.props.openSnackBar('修改成功')
+      })
+    }
   }
 
   renderList(Icon, titles, values) {
@@ -167,24 +175,22 @@ class DeviceInfo extends React.PureComponent {
                 this.state.modify ?
                   <div style={{ marginTop: -8 }}>
                     {/* FIXME */}
-                    {/*
                     <TextField
                       name="deviceName"
                       onChange={e => this.updateLabel(e.target.value)}
-                      maxLength={7}
+                      maxLength={16}
                       value={this.state.modify ? this.state.label : this.currentLabel}
                       errorText={this.state.errorText}
-                      onBlur={() => this.setState({ modify: false, changed: true })}
+                      onBlur={() => this.changeDeviceName()}
                       ref={(input) => { if (input && this.state.modify) { input.focus() } }}
                     />
-                    */}
                   </div> :
                   <div
                     style={{ display: 'flex', alignItems: 'center', height: 32 }}
+                    onTouchTap={() => this.setState({ modify: true })}
                   >
-                    {/* onTouchTap={() => this.setState({ modify: true }) */}
                     { this.state.label ? this.state.label : this.currentLabel }
-                    {/* <ModeEdit color={this.props.primaryColor} style={{ marginLeft: 24 }} /> */}
+                    <ModeEdit color={this.props.primaryColor} style={{ marginLeft: 24 }} />
                   </div>
               }
               {

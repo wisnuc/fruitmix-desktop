@@ -67,13 +67,15 @@ class Device extends Base {
     return <div style={style}>设备信息</div>
   }
 
-  renderContent() {
+  renderContent({ openSnackBar }) {
     return (
       <DeviceInfo
         device={this.state.device}
         storage={this.state.storage}
         boot={this.state.boot}
+        selectedDevice={this.ctx.props.selectedDevice}
         primaryColor={this.groupPrimaryColor()}
+        openSnackBar={openSnackBar}
       />
     )
   }
