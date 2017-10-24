@@ -23,7 +23,8 @@ class Public extends Home {
     super(ctx)
 
     this.state = {
-      inRoot: true
+      inRoot: true,
+      sortType: 'nameUp' // nameUp, nameDown, timeUp, timeDown, sizeUp, sizeDown, takenUp, takenDown
     }
 
     this.rootDrive = null
