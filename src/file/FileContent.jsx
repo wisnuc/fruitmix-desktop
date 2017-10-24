@@ -101,7 +101,6 @@ class FileContent extends React.Component {
     this.selectBox = null
 
     this.selectStart = (event) => {
-      debug('this.selectStart', this.props.select.ctrl)
       if (event.nativeEvent.button !== 0) return
       if (!this.props.select.ctrl) this.props.select.addByArray([])
       if (this.selectBox) {
@@ -113,6 +112,7 @@ class FileContent extends React.Component {
         s.top = `${event.clientY - 140}px`
         s.left = `${event.clientX - 80}px`
         this.selectBox = { x: event.clientX, y: event.clientY }
+        debug('this.selectStart top, left', s.top, s.left)
       }
     }
 
@@ -127,13 +127,11 @@ class FileContent extends React.Component {
       this.selectBox = null
     }
 
-    this.selectRow = (event, scrollTop) => {
-      if (!this.selectBox) return
+    this.drawBox = (event) => {
       const s = this.refSelectBox.style
       const dx = event.clientX - this.selectBox.x
       const dy = event.clientY - this.selectBox.y
 
-      /* draw select box */
       if (dx > 0) s.width = `${dx}px`
       else {
         s.width = `${-dx}px`
@@ -144,20 +142,56 @@ class FileContent extends React.Component {
         s.height = `${-dy}px`
         s.top = `${event.clientY - 136 > 0 ? event.clientY - 136 : 0}px`
       }
+    }
 
+    this.selectRow = (event, scrollTop) => {
+      if (!this.selectBox) return
+
+      /* draw select box */
+      this.drawBox(event)
+
+      const s = this.refSelectBox.style
       const lineHeight = 48
       const length = this.props.entries.length
 
       const array = Array
         .from({ length }, (v, i) => i)
         .filter((v, i) => {
-          const header = (i + (dy > 0 ? 1 : 2)) * lineHeight - (parseInt(scrollTop, 10) || 0) // boom !!!
-          return ((parseInt(s.top, 10) < header + (dy > 0 ? lineHeight : 0)) &&
-            (header - (dy > 0 ? 0 : lineHeight) < parseInt(s.top, 10) + parseInt(s.height, 10)))
+          const head = (i + 1) * lineHeight - (parseInt(scrollTop, 10) || 0) // row.tail > top && row.head < top + height
+          return ((parseInt(s.top, 10) < head + lineHeight) &&
+            (head < parseInt(s.top, 10) + parseInt(s.height, 10)))
         })
 
       this.props.select.addByArray(array)
-      // debug('this.selectRow', s.top, s.height, scrollTop, array)
+    }
+
+    this.selectGrid = (event, { scrollTop, allHeight, indexHeightSum, cellWidth, mapData }) => {
+      if (!this.selectBox) return
+      debug('this.selectGrid', scrollTop, allHeight, indexHeightSum, cellWidth, mapData)
+
+      /* draw select box */
+      this.drawBox(event)
+      const s = this.refSelectBox.style
+      const top = parseInt(s.top, 10)
+      const height = parseInt(s.height, 10)
+      const left = parseInt(s.left, 10)
+      const width = parseInt(s.width, 10)
+      const length = this.props.entries.length
+
+      const array = Array
+        .from({ length }, (v, i) => i)
+        .filter((v, i) => {
+          const head = indexHeightSum[mapData[i]] - indexHeightSum[0] + 32 - (parseInt(scrollTop, 10) || 0)
+          const tail = head + allHeight[mapData[i]]
+          const start = (i - mapData.findIndex(va => va === mapData[i])) * cellWidth + 77
+          const end = start + cellWidth
+          // grid.tail > top && grid.head < top + height
+          // grid.start > left && grid.end < left + width
+          debug('i, head, tail', i, head, tail)
+          return ((top < tail) && (head < top + height) && (left < start) && (end < left + width))
+        })
+
+      this.props.select.addByArray(array)
     }
   }
 
@@ -266,6 +300,9 @@ class FileContent extends React.Component {
               onRowMouseEnter={this.onRowMouseEnter}
               onRowMouseLeave={this.onRowMouseLeave}
               onRowDoubleClick={this.onRowDoubleClick}
+              selectStart={this.selectStart}
+              selectEnd={this.selectEnd}
+              selectGrid={this.selectGrid}
               drop={this.drop}
             />
             :

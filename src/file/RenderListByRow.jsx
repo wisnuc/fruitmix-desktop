@@ -327,7 +327,7 @@ class RenderListByRow extends React.Component {
                   onMouseDown={e => this.props.selectStart(e)}
                   onMouseUp={e => this.props.selectEnd(e)}
                   onMouseMove={e => this.props.selectRow(e, this.getScrollToPosition())}
-                  onMouseLeave={e => this.props.selectEnd(e)}
+                  onMouseLeave={e => 0 && this.props.selectEnd(e)}
                   draggable={false}
                   onTouchTap={e => this.props.onRowTouchTap(e, -1)}
                 >

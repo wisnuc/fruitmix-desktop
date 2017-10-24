@@ -232,11 +232,22 @@ class Row extends React.Component {
 class GridView extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {
-      type: ''
-    }
 
     this.scrollToRow = index => this.ListRef.scrollToRow(index)
+
+    this.getStatus = () => {
+      const list = document.getElementsByClassName('ReactVirtualized__List')[0]
+      return ({
+        mapData: this.mapData.reduce((acc, val, index) => {
+          val.entries.forEach(() => acc.push(index))
+          return acc
+        }, []),
+        allHeight: this.allHeight, // const rowHeight = ({ index }) => allHeight[index]
+        indexHeightSum: this.indexHeightSum,
+        scrollTop: parseInt(list.scrollTop, 10),
+        cellWidth: 200
+      })
+    }
   }
 
   componentDidUpdate() {
@@ -325,7 +336,8 @@ class GridView extends React.Component {
             // debug('gridInfo', allHeight, this.props.entries.length)
 
             /* To get row index of scrollToRow */
-            this.mapDate = mapData
+            this.mapData = mapData
+            this.allHeight = allHeight
 
             const estimatedRowSize = rowHeightSum / allHeight.length
             const rowHeight = ({ index }) => allHeight[index]
@@ -346,7 +358,14 @@ class GridView extends React.Component {
             )
 
             return (
-              <div onTouchTap={e => this.props.onRowTouchTap(e, -1)}>
+              <div
+                onMouseDown={e => this.props.selectStart(e)}
+                onMouseUp={e => this.props.selectEnd(e)}
+                onMouseMove={e => this.props.selectGrid(e, this.getStatus())}
+                onMouseLeave={e => this.props.selectEnd(e)}
+                draggable={false}
+                onTouchTap={e => this.props.onRowTouchTap(e, -1)}
+              >
                 <List
                   ref={ref => (this.ListRef = ref)}
                   height={height - 24}
