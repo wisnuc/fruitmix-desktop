@@ -14,7 +14,7 @@ class ListSelect extends EventEmitter {
       rowColor: this.rowColor.bind(this),
       rowLeading: this.rowLeading.bind(this),
       rowCheck: this.rowCheck.bind(this),
-      addByRange: this.addByRange.bind(this)
+      addByArray: this.addByArray.bind(this)
     }
   }
 
@@ -37,12 +37,9 @@ class ListSelect extends EventEmitter {
     return this.state
   }
 
-  addByRange(start, end) {
-    const arr = []
-    for (let i = start; i <= end; i++) {
-      arr.push(i)
-    }
-    this.setState({ selected: arr })
+  addByArray(array) {
+    const set = new Set([...array, ...this.state.selected])
+    this.setState({ selected: this.state.ctrl ? [...set] : array })
   }
 
   keyEvent(ctrl, shift) {

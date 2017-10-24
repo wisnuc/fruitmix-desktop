@@ -21,7 +21,9 @@ class FileContent extends React.Component {
       const { copy, createNewFolder, loading, move, rename, share } = this.props.home
       if (copy || createNewFolder || this.props.home.delete || loading || move || rename || share) return
       if (this.props.select) {
-        if (e.ctrlKey && e.key === 'a') this.props.select.addByRange(0, this.props.entries.length - 1)
+        if (e.ctrlKey && e.key === 'a') {
+          this.props.select.addByArray(Array.from({ length: this.props.entries.length }, (v, i) => i)) // [0, 1, ..., N]
+        }
         if (e.key === 'Delete') this.props.toggleDialog('delete')
         this.props.select.keyEvent(e.ctrlKey, e.shiftKey)
       }
@@ -94,6 +96,68 @@ class FileContent extends React.Component {
       } else {
         this.props.ipcRenderer.send('DRAG_FILE', { files, dirUUID, driveUUID })
       }
+    }
+
+    this.selectBox = null
+
+    this.selectStart = (event) => {
+      debug('this.selectStart', this.props.select.ctrl)
+      if (event.nativeEvent.button !== 0) return
+      if (!this.props.select.ctrl) this.props.select.addByArray([])
+      if (this.selectBox) {
+        this.selectEnd(event)
+      } else {
+        const s = this.refSelectBox.style
+        /* show draw box */
+        s.display = ''
+        s.top = `${event.clientY - 140}px`
+        s.left = `${event.clientX - 80}px`
+        this.selectBox = { x: event.clientX, y: event.clientY }
+      }
+    }
+
+    this.selectEnd = (event) => {
+      debug('this.selectEnd')
+      const s = this.refSelectBox.style
+      s.display = 'none'
+      s.top = '0px'
+      s.left = '0px'
+      s.width = '0px'
+      s.height = '0px'
+      this.selectBox = null
+    }
+
+    this.selectRow = (event, scrollTop) => {
+      if (!this.selectBox) return
+      const s = this.refSelectBox.style
+      const dx = event.clientX - this.selectBox.x
+      const dy = event.clientY - this.selectBox.y
+
+      /* draw select box */
+      if (dx > 0) s.width = `${dx}px`
+      else {
+        s.width = `${-dx}px`
+        s.left = `${event.clientX - 75 > 0 ? event.clientX - 75 : 0}px`
+      }
+      if (dy > 0) s.height = `${dy}px`
+      else {
+        s.height = `${-dy}px`
+        s.top = `${event.clientY - 136 > 0 ? event.clientY - 136 : 0}px`
+      }
+
+      const lineHeight = 48
+      const length = this.props.entries.length
+
+      const array = Array
+        .from({ length }, (v, i) => i)
+        .filter((v, i) => {
+          const header = (i + (dy > 0 ? 1 : 2)) * lineHeight - (parseInt(scrollTop, 10) || 0) // boom !!!
+          return ((parseInt(s.top, 10) < header + (dy > 0 ? lineHeight : 0)) &&
+            (header - (dy > 0 ? 0 : lineHeight) < parseInt(s.top, 10) + parseInt(s.height, 10)))
+        })
+
+      this.props.select.addByArray(array)
+      // debug('this.selectRow', s.top, s.height, scrollTop, array)
     }
   }
 
@@ -211,6 +275,9 @@ class FileContent extends React.Component {
               onRowMouseEnter={this.onRowMouseEnter}
               onRowMouseLeave={this.onRowMouseLeave}
               onRowDoubleClick={this.onRowDoubleClick}
+              selectStart={this.selectStart}
+              selectEnd={this.selectEnd}
+              selectRow={this.selectRow}
               drop={this.drop}
             />
         }
@@ -229,6 +296,39 @@ class FileContent extends React.Component {
           path={this.props.home.path}
           select={this.props.select.touchTap}
         />
+
+        {/* selection */}
+        {/*
+        <div
+          style={{ zIndex: 10000, position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'none' }}
+          onMouseDown={e => this.selectStart(e)}
+          onMouseUp={e => this.selectEnd(e)}
+          onMouseMove={e => this.selectRow(e)}
+          onMouseLeave={e => 0 && this.selectEnd(e)}
+          draggable={false}
+          onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
+        >
+          {
+            this.props.entries.map(() => <div style={{ width: 20, height: 20, margin: 8, backgroundColor: 'grey', float: 'left' }} />)
+          }
+        </div>
+        */}
+        <div
+          ref={ref => (this.refSelectBox = ref)}
+          onMouseDown={e => this.selectStart(e)}
+          onMouseUp={e => this.selectEnd(e)}
+          onMouseMove={e => this.selectRow(e)}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: 0,
+            height: 0,
+            display: 'none',
+            border: '1px red solid'
+          }}
+        >
+        </div>
       </div>
     )
   }
