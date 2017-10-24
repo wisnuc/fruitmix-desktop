@@ -97,7 +97,7 @@ class Row extends React.PureComponent {
           <div style={{ flex: '0 0 8px' }} />
 
           {/* file type may be: folder, public, directory, file, unsupported */}
-          <div style={{ flex: '0 0 48px', display: 'flex', alignItems: 'center' }}>
+          <div style={{ flex: '0 0 48px', display: 'flex', alignItems: 'center' }} >
             <Avatar style={{ backgroundColor: 'white' }}>
               {
                 entry.type === 'directory'
@@ -111,7 +111,10 @@ class Row extends React.PureComponent {
             </Avatar>
           </div>
 
-          <div style={{ flex: '0 0 390px', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+          <div
+            style={{ flex: '0 0 390px', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}
+            onMouseDown={e => 0 && e.stopPropagation()}
+          >
             { entry.name }
           </div>
 
@@ -175,6 +178,11 @@ class RenderListByRow extends React.Component {
     this.toggleMenu = (event) => {
       if (!this.state.open && event && event.preventDefault) event.preventDefault()
       this.setState({ open: event !== 'clickAway' && !this.state.open, anchorEl: event.currentTarget })
+    }
+
+    this.getScrollToPosition = () => {
+      const list = document.getElementsByClassName('ReactVirtualized__List')[0]
+      return list.scrollTop
     }
   }
 
@@ -304,7 +312,10 @@ class RenderListByRow extends React.Component {
           <div style={{ flexGrow: 1 }} />
         </div>
 
-        <div style={{ height: 8 }} />
+        <div
+          style={{ height: 8 }}
+          onTouchTap={() => this.getScrollToPosition()}
+        />
 
         {/* list content */}
         <div style={{ width: '100%', height: 'calc(100% - 48px)' }}>
@@ -312,7 +323,14 @@ class RenderListByRow extends React.Component {
             this.props.entries.length !== 0 &&
             <AutoSizer>
               {({ height, width }) => (
-                <div onTouchTap={e => this.props.onRowTouchTap(e, -1)}>
+                <div
+                  onMouseDown={e => this.props.selectStart(e)}
+                  onMouseUp={e => this.props.selectEnd(e)}
+                  onMouseMove={e => this.props.selectRow(e, this.getScrollToPosition())}
+                  onMouseLeave={e => this.props.selectEnd(e)}
+                  draggable={false}
+                  onTouchTap={e => this.props.onRowTouchTap(e, -1)}
+                >
                   <List
                     ref={ref => (this.ListRef = ref)}
                     style={{ outline: 'none' }}
