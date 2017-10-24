@@ -44,7 +44,7 @@ class Home extends Base {
 
     this.state = {
       gridView: false, // false: list, true: grid
-      sortType: '', // nameUp, nameDown, timeUp, timeDown, sizeUp, sizeDown, takenUp, takenDown
+      sortType: 'nameUp', // nameUp, nameDown, timeUp, timeDown, sizeUp, sizeDown, takenUp, takenDown
       select: this.select.state,
       listNavDir: null, // save a reference
       path: [],
