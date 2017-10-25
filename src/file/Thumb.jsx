@@ -50,7 +50,7 @@ class Thumb extends React.PureComponent {
   }
 
   render() {
-    debug('render Thumb', this.props)
+    // debug('render Thumb', this.props)
     return (
       <div style={{ width: '100%', height: '100%' }} >
         {
@@ -61,6 +61,7 @@ class Thumb extends React.PureComponent {
               height={this.props.height}
               width={this.props.width}
               style={{ objectFit: this.props.full ? 'contain' : 'cover', transition: 'all 225ms cubic-bezier(0.0, 0.0, 0.2, 1)' }}
+              draggable={false}
             />
         }
       </div>

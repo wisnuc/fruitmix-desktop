@@ -167,7 +167,10 @@ class Row extends React.Component {
                   {/* preview or icon */}
                   {
                     entry.type === 'file' &&
-                      <div style={{ height: 136, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                      <div
+                        style={{ height: 136, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}
+                        draggable={false}
+                      >
                         {
                           (rowSum < 500 || !isScrolling) && entry.metadata
                           ? <Thumb
@@ -244,7 +247,7 @@ class GridView extends React.Component {
         }, []),
         allHeight: this.allHeight, // const rowHeight = ({ index }) => allHeight[index]
         indexHeightSum: this.indexHeightSum,
-        scrollTop: parseInt(list.scrollTop, 10),
+        scrollTop: parseInt(list.scrollTop, 10) || 0,
         cellWidth: 200
       })
     }
@@ -362,8 +365,7 @@ class GridView extends React.Component {
                 onMouseDown={e => this.props.selectStart(e)}
                 onMouseUp={e => this.props.selectEnd(e)}
                 onMouseMove={e => this.props.selectGrid(e, this.getStatus())}
-                onMouseLeave={e => this.props.selectEnd(e)}
-                draggable={false}
+                onMouseLeave={e => 0 && this.props.selectEnd(e)}
                 onTouchTap={e => this.props.onRowTouchTap(e, -1)}
               >
                 <List
