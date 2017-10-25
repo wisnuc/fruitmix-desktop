@@ -338,22 +338,7 @@ class FileContent extends React.Component {
           select={this.props.select.touchTap}
         />
 
-        {/* selection */}
-        {/*
-        <div
-          style={{ zIndex: 10000, position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'none' }}
-          onMouseDown={e => this.selectStart(e)}
-          onMouseUp={e => this.selectEnd(e)}
-          onMouseMove={e => this.selectRow(e)}
-          onMouseLeave={e => 0 && this.selectEnd(e)}
-          draggable={false}
-          onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
-        >
-          {
-            this.props.entries.map(() => <div style={{ width: 20, height: 20, margin: 8, backgroundColor: 'grey', float: 'left' }} />)
-          }
-        </div>
-        */}
+        {/* selection box */}
         <div
           ref={ref => (this.refSelectBox = ref)}
           onMouseDown={e => this.selectStart(e)}
@@ -366,10 +351,10 @@ class FileContent extends React.Component {
             width: 0,
             height: 0,
             display: 'none',
-            border: '1px red solid'
+            backgroundColor: 'rgba(0, 137, 123, 0.26)',
+            border: `1px ${this.props.primaryColor} dashed`
           }}
-        >
-        </div>
+        />
       </div>
     )
   }

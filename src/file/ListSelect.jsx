@@ -42,7 +42,7 @@ class ListSelect extends EventEmitter {
     if (this.state.shift) {
       const set = new Set([...array, ...this.state.selected])
       this.setState({ selected: [...set] })
-    } else if (this.state.ctrl) {
+    } else if (this.state.ctrl && session) {
       const isSameBox = this.session === session
       this.session = session
       if (!isSameBox) this.preArray = this.state.selected
