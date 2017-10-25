@@ -102,7 +102,6 @@ class FileContent extends React.Component {
 
     this.selectStart = (event) => {
       if (event.nativeEvent.button !== 0) return
-      if (!this.props.select.ctrl) this.props.select.addByArray([])
       if (this.selectBox) {
         this.selectEnd(event)
       } else {
@@ -111,7 +110,7 @@ class FileContent extends React.Component {
         s.display = ''
         s.top = `${event.clientY - 140}px`
         s.left = `${event.clientX - 80}px`
-        this.selectBox = { x: event.clientX, y: event.clientY }
+        this.selectBox = { x: event.clientX, y: event.clientY, session: (new Date()).getTime() }
         debug('this.selectStart top, left', s.top, s.left)
       }
     }
@@ -163,14 +162,14 @@ class FileContent extends React.Component {
             (head < parseInt(s.top, 10) + parseInt(s.height, 10)))
         })
 
-      this.props.select.addByArray(array)
+      this.props.select.addByArray(array, this.selectBox.session)
     }
 
     this.selectGrid = (event, data) => {
       if (!this.selectBox) return
       this.data = data || this.data
       const { scrollTop, allHeight, indexHeightSum, mapData } = this.data
-      debug('this.selectGrid', scrollTop, allHeight, indexHeightSum, mapData)
+      // debug('this.selectGrid', scrollTop, allHeight, indexHeightSum, mapData)
 
       /* draw select box */
       this.drawBox(event)
@@ -194,9 +193,9 @@ class FileContent extends React.Component {
           // grid.tail > top && grid.head < top + height && grid.end > left && grid.start < left + width
           return ((end > left) && (start < left + width))
         })
-      debug('array', array)
+      // debug('array', array, this.selectBox.session)
 
-      this.props.select.addByArray(array)
+      this.props.select.addByArray(array, this.selectBox.session)
     }
   }
 
