@@ -153,6 +153,7 @@ class Row extends React.Component {
               return (
                 <div
                   style={{
+                    position: 'relative',
                     width: 180,
                     height: entry.type === 'file' ? 184 : 48,
                     marginRight: 20,
@@ -180,6 +181,22 @@ class Row extends React.Component {
                             width={180}
                           />
                           : renderFileIcon(entry.name, entry.metadata, 64)
+                        }
+
+                        {/* overlay */}
+                        {
+                          selected &&
+                            <div
+                              style={{
+                                position: 'absolute',
+                                width: 180,
+                                height: 136,
+                                top: 0,
+                                left: 0,
+                                opacity: 0.38,
+                                backgroundColor: primaryColor
+                              }}
+                            />
                         }
                       </div>
                   }
