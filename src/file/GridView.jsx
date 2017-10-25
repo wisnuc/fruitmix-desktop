@@ -393,6 +393,7 @@ class GridView extends React.Component {
                   rowHeight={rowHeight}
                   rowRenderer={rowRenderer}
                   rowCount={gridInfo.mapData.length}
+                  onScroll={({ scrollTop }) => this.props.drawWhenScroll(scrollTop)}
                   overscanRowCount={10}
                   style={{ outline: 'none' }}
                 />
