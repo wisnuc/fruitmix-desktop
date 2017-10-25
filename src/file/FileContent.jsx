@@ -146,6 +146,7 @@ class FileContent extends React.Component {
 
     this.selectRow = (event, scrollTop) => {
       if (!this.selectBox) return
+      this.scrollTop = scrollTop || this.scrollTop || 0
 
       /* draw select box */
       this.drawBox(event)
@@ -157,7 +158,7 @@ class FileContent extends React.Component {
       const array = Array
         .from({ length }, (v, i) => i)
         .filter((v, i) => {
-          const head = (i + 1) * lineHeight - (parseInt(scrollTop, 10) || 0) // row.tail > top && row.head < top + height
+          const head = (i + 1) * lineHeight - this.scrollTop // row.tail > top && row.head < top + height
           return ((parseInt(s.top, 10) < head + lineHeight) &&
             (head < parseInt(s.top, 10) + parseInt(s.height, 10)))
         })
@@ -165,9 +166,11 @@ class FileContent extends React.Component {
       this.props.select.addByArray(array)
     }
 
-    this.selectGrid = (event, { scrollTop, allHeight, indexHeightSum, cellWidth, mapData }) => {
+    this.selectGrid = (event, data) => {
       if (!this.selectBox) return
-      debug('this.selectGrid', scrollTop, allHeight, indexHeightSum, cellWidth, mapData)
+      this.data = data || this.data
+      const { scrollTop, allHeight, indexHeightSum, mapData } = this.data
+      debug('this.selectGrid', scrollTop, allHeight, indexHeightSum, mapData)
 
       /* draw select box */
       this.drawBox(event)
@@ -181,15 +184,17 @@ class FileContent extends React.Component {
       const array = Array
         .from({ length }, (v, i) => i)
         .filter((v, i) => {
-          const head = indexHeightSum[mapData[i]] - indexHeightSum[0] + 32 - (parseInt(scrollTop, 10) || 0)
-          const tail = head + allHeight[mapData[i]]
-          const start = (i - mapData.findIndex(va => va === mapData[i])) * cellWidth + 77
-          const end = start + cellWidth
-          // grid.tail > top && grid.head < top + height
-          // grid.start > left && grid.end < left + width
-          debug('i, head, tail', i, head, tail)
-          return ((top < tail) && (head < top + height) && (left < start) && (end < left + width))
+          const lineNum = mapData[i]
+          const lineHeight = allHeight[lineNum] // 112, 64, 248, 200
+          const head = (lineNum > 0 ? indexHeightSum[lineNum - 1] + ((lineHeight === 248) && 48) : 48) + 24 - scrollTop
+          const tail = head + (lineHeight < 200 ? 48 : 184)
+          if (!(tail > top) || !(head < top + height)) return false
+          const start = (i - mapData.findIndex(va => va === lineNum)) * 200 + 48
+          const end = start + 180
+          // grid.tail > top && grid.head < top + height && grid.end > left && grid.start < left + width
+          return ((end > left) && (start < left + width))
         })
+      debug('array', array)
 
       this.props.select.addByArray(array)
     }
@@ -354,7 +359,7 @@ class FileContent extends React.Component {
           ref={ref => (this.refSelectBox = ref)}
           onMouseDown={e => this.selectStart(e)}
           onMouseUp={e => this.selectEnd(e)}
-          onMouseMove={e => this.selectRow(e)}
+          onMouseMove={e => (this.props.gridView ? this.selectGrid(e, this.data) : this.selectRow(e, this.scrollTop))}
           style={{
             position: 'absolute',
             top: 0,

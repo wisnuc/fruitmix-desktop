@@ -182,7 +182,7 @@ class RenderListByRow extends React.Component {
 
     this.getScrollToPosition = () => {
       const list = document.getElementsByClassName('ReactVirtualized__List')[0]
-      return list.scrollTop
+      return (parseInt(list.scrollTop, 10) || 0)
     }
   }
 

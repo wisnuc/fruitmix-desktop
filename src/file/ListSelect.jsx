@@ -39,7 +39,7 @@ class ListSelect extends EventEmitter {
 
   addByArray(array) {
     const set = new Set([...array, ...this.state.selected])
-    this.setState({ selected: this.state.ctrl ? [...set] : array })
+    this.setState({ selected: this.state.shift ? [...set] : array })
   }
 
   keyEvent(ctrl, shift) {
