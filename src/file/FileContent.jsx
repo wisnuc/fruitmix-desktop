@@ -100,7 +100,7 @@ class FileContent extends React.Component {
 
     this.selectBox = null
 
-    this.selectStart = (event) => {
+    this.selectStart = (event, scrollTop) => {
       if (event.nativeEvent.button !== 0) return
       if (this.selectBox) {
         this.selectEnd(event)
@@ -111,6 +111,7 @@ class FileContent extends React.Component {
         s.top = `${event.clientY - 140}px`
         s.left = `${event.clientX - 80}px`
         this.selectBox = { x: event.clientX, y: event.clientY, session: (new Date()).getTime() }
+        this.initScrollTop = scrollTop || this.initScrollTop || 0
         debug('this.selectStart top, left', s.top, s.left)
       }
     }
@@ -124,6 +125,7 @@ class FileContent extends React.Component {
       s.width = '0px'
       s.height = '0px'
       this.selectBox = null
+      this.initScrollTop = -1
     }
 
     this.drawBox = (event) => {
@@ -141,6 +143,11 @@ class FileContent extends React.Component {
         s.height = `${-dy}px`
         s.top = `${event.clientY - 136 > 0 ? event.clientY - 136 : 0}px`
       }
+    }
+
+    this.drawWhenScroll = (scrollTop) => {
+      if (!this.selectBox) return
+      debug('this.scroll', scrollTop, this.initScrollTop)
     }
 
     this.selectRow = (event, scrollTop) => {
@@ -307,6 +314,7 @@ class FileContent extends React.Component {
               selectStart={this.selectStart}
               selectEnd={this.selectEnd}
               selectGrid={this.selectGrid}
+              drawWhenScroll={this.drawWhenScroll}
               drop={this.drop}
             />
             :
@@ -319,6 +327,7 @@ class FileContent extends React.Component {
               selectStart={this.selectStart}
               selectEnd={this.selectEnd}
               selectRow={this.selectRow}
+              drawWhenScroll={this.drawWhenScroll}
               drop={this.drop}
             />
         }
