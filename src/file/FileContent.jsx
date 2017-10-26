@@ -98,6 +98,17 @@ class FileContent extends React.Component {
       }
     }
 
+
+    /* selectBox
+     * if mode === row
+     *   selectStart -> selectRow -> drawBox && calcRow -> selectEnd
+     *               -> onScroll ->        calcRow      ->
+     *
+     * if mode === grid
+     *   selectStart -> selectGrid -> drawBox && calcGrid -> selectEnd
+     *               -> onScroll ->        calcGrid       ->
+     */
+
     this.selectBox = null
 
     this.selectStart = (event, scrollTop) => {
@@ -105,14 +116,17 @@ class FileContent extends React.Component {
       if (this.selectBox) {
         this.selectEnd(event)
       } else {
-        const s = this.refSelectBox.style
+        /* when click scroll bar, don't draw select box */
+        const w = event.target.style.width
+        if (w && w !== '100%' && parseInt(w, 10) > 200 && event.clientX - 56 > parseInt(w, 10)) return
+
         /* show draw box */
+        const s = this.refSelectBox.style
         s.display = ''
         s.top = `${event.clientY - 140}px`
         s.left = `${event.clientX - 80}px`
         this.selectBox = { x: event.clientX, y: event.clientY, session: (new Date()).getTime() }
-        this.initScrollTop = scrollTop || this.initScrollTop || 0
-        debug('this.selectStart top, left', s.top, s.left)
+        this.preScrollTop = scrollTop || this.preScrollTop
       }
     }
 
@@ -125,13 +139,17 @@ class FileContent extends React.Component {
       s.width = '0px'
       s.height = '0px'
       this.selectBox = null
-      this.initScrollTop = -1
+      this.preScrollTop = 0
+      this.scrollTop = 0
     }
 
+    /* draw select box */
     this.drawBox = (event) => {
       const s = this.refSelectBox.style
       const dx = event.clientX - this.selectBox.x
       const dy = event.clientY - this.selectBox.y
+      if (dy < 0) this.up = true
+      else this.up = false
 
       if (dx > 0) s.width = `${dx}px`
       else {
@@ -145,18 +163,27 @@ class FileContent extends React.Component {
       }
     }
 
-    this.drawWhenScroll = (scrollTop) => {
+    this.onScroll = (scrollTop) => {
       if (!this.selectBox) return
-      debug('this.scroll', scrollTop, this.initScrollTop)
+      const s = this.refSelectBox.style
+      const dy = scrollTop - this.preScrollTop
+      this.preScrollTop = scrollTop
+
+      if (this.up) {
+        s.height = `${parseInt(s.height, 10) - dy}px`
+      } else {
+        s.top = `${parseInt(s.top, 10) - dy}px`
+        s.height = `${parseInt(s.height, 10) + dy}px`
+      }
+
+      this.selectBox.y -= dy
+
+      if (this.props.gridView) this.calcGrid(Object.assign(this.data, { scrollTop }))
+      else this.calcRow(scrollTop)
     }
 
-    this.selectRow = (event, scrollTop) => {
-      if (!this.selectBox) return
-      this.scrollTop = scrollTop || this.scrollTop || 0
-
-      /* draw select box */
-      this.drawBox(event)
-
+    /* calc rows should be selected */
+    this.calcRow = (scrollTop) => {
       const s = this.refSelectBox.style
       const lineHeight = 48
       const length = this.props.entries.length
@@ -164,7 +191,7 @@ class FileContent extends React.Component {
       const array = Array
         .from({ length }, (v, i) => i)
         .filter((v, i) => {
-          const head = (i + 1) * lineHeight - this.scrollTop // row.tail > top && row.head < top + height
+          const head = (i + 1) * lineHeight - scrollTop // row.tail > top && row.head < top + height
           return ((parseInt(s.top, 10) < head + lineHeight) &&
             (head < parseInt(s.top, 10) + parseInt(s.height, 10)))
         })
@@ -172,14 +199,17 @@ class FileContent extends React.Component {
       this.props.select.addByArray(array, this.selectBox.session)
     }
 
-    this.selectGrid = (event, data) => {
+    this.selectRow = (event, scrollTop) => {
       if (!this.selectBox) return
-      this.data = data || this.data
-      const { scrollTop, allHeight, indexHeightSum, mapData } = this.data
-      // debug('this.selectGrid', scrollTop, allHeight, indexHeightSum, mapData)
-
-      /* draw select box */
+      this.scrollTop = scrollTop || this.scrollTop || 0
+      this.preScrollTop = this.scrollTop
       this.drawBox(event)
+      this.calcRow(this.scrollTop)
+    }
+
+    /* calc rows should be selected */
+    this.calcGrid = (data) => {
+      const { scrollTop, allHeight, indexHeightSum, mapData } = data
       const s = this.refSelectBox.style
       const top = parseInt(s.top, 10)
       const height = parseInt(s.height, 10)
@@ -197,12 +227,19 @@ class FileContent extends React.Component {
           if (!(tail > top) || !(head < top + height)) return false
           const start = (i - mapData.findIndex(va => va === lineNum)) * 200 + 48
           const end = start + 180
-          // grid.tail > top && grid.head < top + height && grid.end > left && grid.start < left + width
+          /* grid.tail > top && grid.head < top + height && grid.end > left && grid.start < left + width */
           return ((end > left) && (start < left + width))
         })
-      // debug('array', array, this.selectBox.session)
-
       this.props.select.addByArray(array, this.selectBox.session)
+    }
+
+    this.selectGrid = (event, data) => {
+      if (!this.selectBox) return
+      this.data = data || this.data
+      const { scrollTop, allHeight, indexHeightSum, mapData } = this.data
+      this.preScrollTop = scrollTop
+      this.drawBox(event)
+      this.calcGrid(this.data)
     }
   }
 
@@ -314,7 +351,7 @@ class FileContent extends React.Component {
               selectStart={this.selectStart}
               selectEnd={this.selectEnd}
               selectGrid={this.selectGrid}
-              drawWhenScroll={this.drawWhenScroll}
+              onScroll={this.onScroll}
               drop={this.drop}
             />
             :
@@ -327,7 +364,7 @@ class FileContent extends React.Component {
               selectStart={this.selectStart}
               selectEnd={this.selectEnd}
               selectRow={this.selectRow}
-              drawWhenScroll={this.drawWhenScroll}
+              onScroll={this.onScroll}
               drop={this.drop}
             />
         }

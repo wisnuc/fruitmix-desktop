@@ -348,6 +348,19 @@ class GridView extends React.Component {
     if (!this.props.entries || this.props.entries.length === 0) return (<div />)
     return (
       <div style={{ width: '100%', height: '100%' }} onDrop={this.props.drop}>
+        <div
+          style={{
+            position: 'absolute',
+            top: -8,
+            left: 0,
+            width: '100%',
+            height: 32,
+            zIndex: 100,
+            backgroundColor: '#FFFFFF'
+          }}
+          onMouseUp={e => this.props.selectEnd(e)}
+          onMouseMove={e => this.props.selectGrid(e, this.getStatus())}
+        />
         <div style={{ height: 24 }} />
         <AutoSizer key={this.props.entries && this.props.entries[0] && this.props.entries[0].uuid}>
           {({ height, width }) => {
@@ -393,7 +406,7 @@ class GridView extends React.Component {
                   rowHeight={rowHeight}
                   rowRenderer={rowRenderer}
                   rowCount={gridInfo.mapData.length}
-                  onScroll={({ scrollTop }) => this.props.drawWhenScroll(scrollTop)}
+                  onScroll={({ scrollTop }) => this.props.onScroll(scrollTop)}
                   overscanRowCount={10}
                   style={{ outline: 'none' }}
                 />
