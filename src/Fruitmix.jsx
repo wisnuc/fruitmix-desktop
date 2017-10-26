@@ -22,6 +22,12 @@ const adjustSeq = (pre) => {
   return mdns
 }
 
+const defaultTheme = getMuiTheme({
+  fontFamily: 'Roboto, Noto Sans SC, sans-serif',
+  color: 'rgba(0,0,0,0.87)',
+  palette: { primary1Color: teal500, accent1Color: pinkA200 }
+})
+
 class Fruitmix extends React.Component {
   constructor() {
     super()
@@ -37,16 +43,9 @@ class Fruitmix extends React.Component {
     }, 0)
 
     this.state = {
-
       view: 'login',
-
       selectedDevice: new Device({ address: '' }),
-
-      theme: getMuiTheme({
-        fontFamily: 'Roboto, Noto Sans SC, sans-serif',
-        color: 'rgba(0,0,0,0.87)',
-        palette: { primary1Color: teal500, accent1Color: pinkA200 }
-      }),
+      theme: defaultTheme,
 
       nav: this.nav.bind(this),
       login: this.login.bind(this),
@@ -109,6 +108,7 @@ class Fruitmix extends React.Component {
 
     switch (this.state.view) {
       case 'login':
+        Object.assign(this.state, { theme: defaultTheme })
         view = <Login mdns={adjustSeq(global.mdnsStore)} primaryColor={teal500} {...this.state} />
         break
 

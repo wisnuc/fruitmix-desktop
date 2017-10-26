@@ -112,7 +112,7 @@ class NavViews extends React.Component {
   }
 
   navTo(nav, target) {
-    debug('navTo', nav, target, this.state.nav)
+    // debug('navTo', nav, target, this.state.nav)
     if (nav === this.state.nav) return
     this.setState({ nav, openDrawer: false, showDetail: false })
     if (this.state.nav) this.views[this.state.nav].navLeave()
@@ -125,7 +125,7 @@ class NavViews extends React.Component {
     const drive = drives.find(d => d.uuid === driveUUID)
     if (drive.tag === 'home') this.navTo('home', { driveUUID, dirUUID })
     else this.navTo('public', { driveUUID, dirUUID })
-    debug('navToDrive', driveUUID, dirUUID, this.props)
+    // debug('navToDrive', driveUUID, dirUUID, this.props)
   }
 
   // not used, decorate onto navmap ? TODO

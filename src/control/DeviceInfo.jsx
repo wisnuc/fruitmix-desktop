@@ -176,9 +176,12 @@ class DeviceInfo extends React.PureComponent {
     }
 
     return (
-      <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'auto' }}>
+      <div
+        style={{ position: 'relative', width: '100%', height: '100%', overflow: 'auto' }}
+        onTouchTap={() => this.setState({ modify: false, label: '' })}
+      >
         <div style={{ height: 16 }} />
-        <div style={{ height: 72, display: 'flex', alignItems: 'center', width: '100%' }}>
+        <div style={{ height: 72, display: 'flex', alignItems: 'center', width: '100%' }} >
           <div style={{ flex: '0 0 24px' }} />
           <div style={{ flex: '0 0 56px' }} >
             <TV color={this.props.primaryColor} />
@@ -190,6 +193,7 @@ class DeviceInfo extends React.PureComponent {
               style={{ height: 48, fontSize: 16, color: 'rgba(0, 0, 0, 0.87)' }}
               onMouseOver={() => this.setState({ titleHover: true })}
               onMouseOut={() => this.setState({ titleHover: false })}
+              onTouchTap={e => e.stopPropagation()}
             >
               <div style={{ height: 16 }} />
               {
@@ -230,7 +234,7 @@ class DeviceInfo extends React.PureComponent {
               {
                 <Divider
                   color="rgba(0, 0, 0, 0.87)"
-                  style={{ opacity: !this.state.modify && this.state.titleHover ? 0 : 0 }}
+                  style={{ opacity: !this.state.modify && this.state.titleHover ? 1 : 0 }}
                 />
               }
             </div>
