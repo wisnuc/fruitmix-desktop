@@ -17,7 +17,7 @@ module.exports = {
     'webpack/hot/poll?1000',
     './src/app.js'
   ],
-  stats: { colors: true, minimal: true },
+  stats: { colors: true },
   resolve: { extensions: ['.js', '.jsx', '.css', '.json'] },
   module: {
     rules: [
