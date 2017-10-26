@@ -64,7 +64,7 @@ class FileContent extends React.Component {
 
     this.onRowDoubleClick = (e, index) => {
       if (index === -1) return
-      debug('rowDoubleClick', this.props, index)
+      // debug('rowDoubleClick', this.props, index)
       const entry = this.props.entries[index]
       this.props.listNavBySelect()
       if (entry.type === 'file') {
@@ -131,7 +131,6 @@ class FileContent extends React.Component {
     }
 
     this.selectEnd = (event) => {
-      debug('this.selectEnd')
       const s = this.refSelectBox.style
       s.display = 'none'
       s.top = '0px'
