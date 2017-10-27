@@ -40,7 +40,7 @@ class ChangeAccountDialog extends React.PureComponent {
             this.setState({ prePasswordErrorText: '原密码错误', loading: false })
           } else {
             this.setState({ loading: false })
-            this.props.openSnackBar('修改失败')
+            this.props.openSnackBar(op === 'createUser' ? '创建失败' : '修改失败')
           }
         } else {
           this.props.onRequestClose(true)
