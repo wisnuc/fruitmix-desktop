@@ -127,10 +127,13 @@ class FileContent extends React.Component {
         s.left = `${event.clientX - 80}px`
         this.selectBox = { x: event.clientX, y: event.clientY, session: (new Date()).getTime() }
         this.preScrollTop = scrollTop || this.preScrollTop
+        document.addEventListener('mousemove', this.exSelect)
+        document.addEventListener('mouseup', this.selectEnd, true)
       }
     }
 
     this.selectEnd = (event) => {
+      if (!this.selectBox) return
       const s = this.refSelectBox.style
       s.display = 'none'
       s.top = '0px'
@@ -140,6 +143,8 @@ class FileContent extends React.Component {
       this.selectBox = null
       this.preScrollTop = 0
       this.scrollTop = 0
+      document.removeEventListener('mousemove', this.exSelect)
+      document.removeEventListener('mouseup', this.selectEnd)
     }
 
     /* draw select box */
@@ -147,18 +152,26 @@ class FileContent extends React.Component {
       const s = this.refSelectBox.style
       const dx = event.clientX - this.selectBox.x
       const dy = event.clientY - this.selectBox.y
+      debug('event.clientX event.clientY', event.clientX, event.clientY)
       if (dy < 0) this.up = true
       else this.up = false
 
       if (dx > 0) s.width = `${dx}px`
-      else {
+      else if (event.clientX - 75 > 0) {
         s.width = `${-dx}px`
-        s.left = `${event.clientX - 75 > 0 ? event.clientX - 75 : 0}px`
+        s.left = `${event.clientX - 75}px`
+      } else {
+        s.width = `${this.selectBox.x - 75}px`
+        s.left = '0px'
       }
+
       if (dy > 0) s.height = `${dy}px`
-      else {
+      else if (event.clientY - 136 > 48) {
         s.height = `${-dy}px`
-        s.top = `${event.clientY - 136 > 0 ? event.clientY - 136 : 0}px`
+        s.top = `${event.clientY - 136}px`
+      } else {
+        s.height = `${this.selectBox.y - 184}px`
+        s.top = '48px'
       }
     }
 
@@ -240,6 +253,8 @@ class FileContent extends React.Component {
       this.drawBox(event)
       this.calcGrid(this.data)
     }
+
+    this.exSelect = e => (this.props.gridView ? this.selectGrid(e, this.data) : this.selectRow(e, this.scrollTop))
   }
 
   componentDidMount() {

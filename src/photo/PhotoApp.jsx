@@ -174,7 +174,8 @@ class PhotoApp extends React.Component {
                 height: 64,
                 backgroundColor: this.props.primaryColor,
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
+                zIndex: 200
               }}
             >
               <div style={{ width: 12 }} />

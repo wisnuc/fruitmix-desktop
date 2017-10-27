@@ -281,7 +281,8 @@ class NavViews extends React.Component {
       width: '100%',
       height: this.appBarHeight(),
       backgroundColor,
-      overflow: 'hidden'
+      overflow: 'hidden',
+      zIndex: 101
     }
 
     const topBarStyle = {

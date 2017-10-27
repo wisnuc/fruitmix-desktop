@@ -146,7 +146,7 @@ class AdminDrives extends React.Component {
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <FloatingActionButton
-          style={{ position: 'absolute', top: -36, left: 24 }}
+          style={{ position: 'absolute', top: -36, left: 24, zIndex: 200 }}
           secondary
           disabled={!users || !drives}
           onTouchTap={() => this.setState({ newDrive: true })}
