@@ -250,6 +250,7 @@ export class DownloadFile {
 
   download() {
     this.handle = adownload(this.endpoint)
+    if (this.size && this.size === this.seek) return setImmediate(() => this.finish(null))
     if (this.size) this.handle.set('Range', `bytes=${this.seek}-`)
     this.handle
       .query(this.qs)
