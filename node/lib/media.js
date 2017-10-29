@@ -26,11 +26,8 @@ class Worker extends EventEmitter {
 
       const stream = fs.createWriteStream(tmpPath)
       stream.on('error', (error) => {
-        console.log(error)
         const e = new Error('write image error')
         e.text = error
-        this.finished = true
-        this.state = 'FINISHED'
         return callback(e)
       })
 
@@ -38,7 +35,6 @@ class Worker extends EventEmitter {
         if (this.finished) return null
         fs.rename(tmpPath, dst, (error) => {
           if (error) {
-            console.log(error)
             const e = new Error('move image error')
             e.text = error
             return callback(e)
@@ -47,9 +43,12 @@ class Worker extends EventEmitter {
         })
       })
 
+      this.stream = stream
+
       this.requestHandler = new DownloadFile(endpoint, qs, name, 0, 0, stream, (error) => {
         if (error) callback(error)
         this.requestHandler = null
+        this.stream = null
       })
       this.requestHandler.download()
     }
@@ -61,6 +60,9 @@ class Worker extends EventEmitter {
     if (this.finished) return
     this.state = 'FINISHED'
     this.finished = true
+    if (this.stream) {
+      this.stream.end()
+    }
     if (this.requestHandler) this.requestHandler.abort()
 
     const e = new Error('request aborted')
@@ -86,7 +88,7 @@ class Worker extends EventEmitter {
     return this.state === 'RUNNING'
   }
 
-  isPadding() {
+  isPendding() {
     return this.state === 'PENDDING'
   }
 
@@ -113,13 +115,14 @@ class GetThumbTask extends Worker {
   run() {
     this.state = 'RUNNING'
     const fpath = path.join(this.dirpath, this.cacheName)
-    fs.lstat(fpath, (err, stat) => {
+    fs.lstat(fpath, (err, stat) => { // aborted when lstat ???
       if (err || !stat.size) return this.request()
       return this.finish(fpath)
     })
   }
 
   request() {
+    if (this.state !== 'RUNNING') return
     const qs = {
       alt: 'thumbnail',
       width: this.width,
@@ -155,6 +158,7 @@ class GetImageTask extends Worker {
   }
 
   request() {
+    if (this.state !== 'RUNNING') return
     const qs = { alt: 'data' }
     this.serverDownloadAsync(`media/${this.digest}`, qs, this.dirpath, this.digest)
       .then((data) => {
@@ -205,14 +209,14 @@ class MediaFileManager {
   schedule() {
     const thumbDiff = this.thumbTaskLimit - this.thumbTaskQueue.filter(worker => worker.isRunning()).length
     if (thumbDiff > 0) {
-      this.thumbTaskQueue.filter(worker => worker.isPadding())
+      this.thumbTaskQueue.filter(worker => worker.isPendding())
         .slice(0, thumbDiff)
         .forEach(worker => worker.run())
     }
 
     const imageDiff = this.imageTaskLimit - this.imageTaskQueue.filter(worker => worker.isRunning()).length
     if (imageDiff > 0) {
-      this.imageTaskQueue.filter(worker => worker.isPadding())
+      this.imageTaskQueue.filter(worker => worker.isPendding())
         .slice(0, imageDiff)
         .forEach(worker => worker.run())
     }
@@ -220,7 +224,11 @@ class MediaFileManager {
 
   abort(id, type, callback) {
     let worker
-    if (type === 'thumb') { worker = this.thumbTaskQueue.find((worker => worker.id === id)) } else { worker = this.imageTaskQueue.find((worker => worker.id === id)) }
+    if (type === 'thumb') {
+      worker = this.thumbTaskQueue.find((worker => worker.id === id))
+    } else {
+      worker = this.imageTaskQueue.find((worker => worker.id === id))
+    }
     if (worker && !worker.isFinished()) {
       worker.abort()
       process.nextTick(() => callback(null, true))
