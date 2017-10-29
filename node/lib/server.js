@@ -270,7 +270,6 @@ export class DownloadFile {
 
   abort() {
     if (this.finished) return
-    debug('download abort', this.fileName)
     this.finish(null)
     if (this.handle) this.handle.abort()
   }
@@ -278,7 +277,6 @@ export class DownloadFile {
   finish(error) {
     if (this.finished) return
     if (error) {
-      // debug('download finish, error:', error.response && error.response.body)
       error.response = error.response && error.response.body
     }
     this.callback(error)
