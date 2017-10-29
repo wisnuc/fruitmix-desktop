@@ -274,7 +274,7 @@ class Task {
             /* combine to one post */
             const { dirUUID, policy } = x
             /* upload N file within one post */
-            const i = this.pending.findIndex(p => !isCloud() && p.length < 1
+            const i = this.pending.findIndex(p => !isCloud() && p.length < 32
               && p[0].dirUUID === dirUUID && policy.mode === p[0].policy.mode)
             if (i > -1) {
               this.pending[i].push(x)

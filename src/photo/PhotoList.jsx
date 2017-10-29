@@ -181,10 +181,19 @@ class PhotoList extends React.Component {
         </div>
       )
     }
+
+    this.onMouseUp = () => (this.onMouseDown = false)
+  }
+
+  componentDidMount() {
+    document.addEventListener('mousemove', this.onMouseMove, true)
+    document.addEventListener('mouseup', this.onMouseUp, true)
   }
 
   componentWillUnmount() {
     clearTimeout(this.time)
+    document.removeEventListener('mousemove', this.onMouseMove)
+    document.removeEventListener('mouseup', this.onMouseUp)
   }
 
 
@@ -195,9 +204,6 @@ class PhotoList extends React.Component {
 
   render() {
     // debug('render PhotoList, this.props', this.props)
-    document.body.onmousemove = this.onMouseMove
-    document.body.onmouseleave = () => (this.onMouseDown = false)
-    document.body.onmouseup = () => (this.onMouseDown = false)
     return (
       <div style={this.props.style}>
         {/* 图片列表 */}
