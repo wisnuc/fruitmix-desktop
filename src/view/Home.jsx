@@ -59,15 +59,15 @@ class Home extends Base {
       move: false,
       copy: false,
       share: false,
-      loading: false
+      loading: true
     }
 
     /* handle update sortType */
     this.force = false
     this.changeSortType = (sortType) => {
       this.force = true
-      if (sortType === 'takenUp' || sortType === 'takenDown') this.setState({ takenTime : true })
-      if (sortType === 'timeUp' || sortType === 'timeDown') this.setState({ takenTime : false })
+      if (sortType === 'takenUp' || sortType === 'takenDown') this.setState({ takenTime: true })
+      if (sortType === 'timeUp' || sortType === 'timeDown') this.setState({ takenTime: false })
       this.setState({ sortType })
     }
 
@@ -189,7 +189,11 @@ class Home extends Base {
     /* op: scrollTo file */
     this.refresh = (op) => {
       if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
-      const rUUID = this.state.path[0].uuid
+      const rUUID = this.state.path[0] && this.state.path[0].uuid
+      if (!rUUID) {
+        this.setState({ loading: true })
+        this.ctx.props.apis.request('drives') // drive root
+      }
       const dUUID = this.state.path[this.state.path.length - 1].uuid
       this.ctx.props.apis.request('listNavDir', { driveUUID: rUUID, dirUUID: dUUID })
       debug('this.refresh op', op)
@@ -271,11 +275,9 @@ class Home extends Base {
   navEnter(target) {
     this.isNavEnter = true
     const apis = this.ctx.props.apis
-    debug('navEnter before', apis, target)
     if (!apis || !apis.drives || !apis.drives.data) return
     if (target && target.driveUUID) {
       const { driveUUID, dirUUID } = target
-      debug('navEnter', driveUUID, dirUUID)
       apis.request('listNavDir', { driveUUID, dirUUID }, (err) => {
         if (!err) return
         this.ctx.openSnackBar('打开目录失败')
@@ -287,6 +289,7 @@ class Home extends Base {
       const preDriveUUID = apis.listNavDir && apis.listNavDir.data && apis.listNavDir.data.path[0].uuid
       if (homeDrive && preDriveUUID !== homeDrive.uuid) {
         apis.request('listNavDir', { driveUUID: homeDrive.uuid, dirUUID: homeDrive.uuid })
+        this.setState({ loading: true })
       } else this.refresh()
     }
   }
@@ -345,7 +348,10 @@ class Home extends Base {
       each one is assigned an action, except for the last one
     */
 
-    const touchTap = node => this.ctx.props.apis.request('listNavDir', { driveUUID: path[0].uuid, dirUUID: node.uuid })
+    const touchTap = (node) => {
+      this.setState({ loading: true })
+      this.ctx.props.apis.request('listNavDir', { driveUUID: path[0].uuid, dirUUID: node.uuid })
+    }
 
     return (
       <div style={Object.assign({}, style, { marginLeft: 168 })}>

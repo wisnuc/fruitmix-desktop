@@ -265,9 +265,9 @@ class FileContent extends React.Component {
 
 
   componentWillReceiveProps(nextProps) {
-    // debug('componentWillReceiveProps', nextProps)
+    // debug('componentWillReceiveProps', this.props, nextProps)
     if (nextProps.home.loading) this.setState({ loading: true })
-    if (this.props.entries !== nextProps.entries) this.setState({ loading: false })
+    if (nextProps.entries && this.props.entries !== nextProps.entries) this.setState({ loading: false })
   }
 
   componentWillUnmount() {
@@ -337,10 +337,13 @@ class FileContent extends React.Component {
   }
 
   render() {
-    // debug('render FileContent loading', this.state.loading)
+    // debug('render FileContent loading', this.props.home.loading, this.state.loading)
+
+    /* loding */
+    if (this.state.loading) return this.renderLoading()
 
     /* not get list yet */
-    if (!this.props.home.path.length) return (<div />)
+    if (!this.props.home.path || !this.props.home.path.length) return (<div />)
 
     /* dir is empty */
     if (this.props.entries && !this.props.entries.length) return this.renderNoFile()
@@ -353,9 +356,7 @@ class FileContent extends React.Component {
       <div style={{ width: '100%', height: '100%' }}>
         {/* render list */}
         {
-          this.state.loading
-            ? this.renderLoading()
-            : this.props.gridView
+          this.props.gridView
             ? <GridView
               {...this.props}
               onRowTouchTap={this.onRowTouchTap}

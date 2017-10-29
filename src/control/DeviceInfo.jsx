@@ -30,8 +30,10 @@ class DeviceInfo extends React.PureComponent {
     this.changeDeviceName = () => {
       this.setState({ progress: true }, () => {
         this.props.selectedDevice.request('renameStation', { name: this.state.label }, (err) => {
-          if (err) this.props.openSnackBar('修改失败')
-          else {
+          if (err) {
+            this.props.openSnackBar('修改失败')
+            this.setState({ modify: false, progress: false, label: '' })
+          } else {
             this.props.selectedDevice.request('info', null, (e) => {
               if (e) this.props.openSnackBar('修改失败')
               else this.props.openSnackBar('修改成功')
@@ -178,7 +180,7 @@ class DeviceInfo extends React.PureComponent {
     return (
       <div
         style={{ position: 'relative', width: '100%', height: '100%', overflow: 'auto' }}
-        onTouchTap={() => this.setState({ modify: false, label: '' })}
+        onTouchTap={() => !this.state.progress && this.setState({ modify: false, label: '' })}
       >
         <div style={{ height: 16 }} />
         <div style={{ height: 72, display: 'flex', alignItems: 'center', width: '100%' }} >
