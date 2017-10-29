@@ -153,7 +153,7 @@ class Task {
 
     this.download = new Transform({
       name: 'download',
-      concurrency: 2,
+      concurrency: 4,
       isBlocked: () => this.paused,
       push(X) {
         const { entries, downloadPath, dirUUID, driveUUID, task } = X

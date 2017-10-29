@@ -91,7 +91,7 @@ class Public extends Home {
   }
 
   willReceiveProps(nextProps) {
-    // console.log('willReceiveProps', nextProps, this.state)
+    console.log('willReceiveProps', nextProps, this.state)
     if (!this.rootDrive) {
       if (!nextProps.apis || !nextProps.apis.drives) return
       const drives = nextProps.apis.drives
@@ -111,7 +111,6 @@ class Public extends Home {
     const apis = this.ctx.props.apis
     if (target && target.driveUUID) {
       const { driveUUID, dirUUID } = target
-      debug('navEnter', driveUUID, dirUUID)
       apis.request('listNavDir', { driveUUID, dirUUID }, (err) => {
         if (!err) return
         this.ctx.openSnackBar('打开目录失败')
@@ -120,7 +119,9 @@ class Public extends Home {
       this.rootDrive = { uuid: driveUUID }
       this.setState({ loading: true })
     } else {
+      debug('navEnter drive', this.state)
       apis.request('drives')
+      this.setState({ loading: true })
     }
   }
 
@@ -152,6 +153,7 @@ class Public extends Home {
             onTouchTap={() => {
               this.rootDrive = null
               this.ctx.props.apis.request('drives')
+              this.setState({ loading: true })
             }}
           />
         </div>
@@ -163,7 +165,10 @@ class Public extends Home {
       each one is assigned an action, except for the last one
     */
 
-    const touchTap = node => this.ctx.props.apis.request('listNavDir', { driveUUID: path[1].uuid, dirUUID: node.uuid })
+    const touchTap = (node) => {
+      this.setState({ loading: true })
+      this.ctx.props.apis.request('listNavDir', { driveUUID: path[1].uuid, dirUUID: node.uuid })
+    }
 
     return (
       <div style={Object.assign({}, style, { marginLeft: 168 })}>
@@ -239,18 +244,18 @@ class Public extends Home {
   }
 
   renderContent({ navTo, toggleDetail, openSnackBar, getDetailStatus }) {
-    // debug('renderContent public', this.state.contextMenuOpen, !this.state.inRoot, this.state.contextMenuY, this.state.contextMenuX)
+    debug('renderContent public', this.state)
 
     /* loading data */
-    if (!this.state.listNavDir && !this.state.drives || !this.state.path.length) return (<div />)
+    // if (!this.state.listNavDir && !this.state.drives || !this.state.path.length) return (<div />)
 
     /* no public drives */
-    if (this.state.path.length === 1 && !this.state.entries.length) return this.renderNoPublic(navTo)
+    if (this.state.path && this.state.path.length === 1 && !this.state.entries.length) return this.renderNoPublic(navTo)
 
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
 
-        { this.state.path.length > 1 && <FileUploadButton upload={this.upload} /> }
+        { this.state.path && this.state.path.length > 1 && <FileUploadButton upload={this.upload} /> }
 
         <FileContent
           home={this.state}
