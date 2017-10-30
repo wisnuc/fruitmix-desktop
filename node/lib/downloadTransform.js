@@ -23,7 +23,7 @@ const getName = async (name, dirPath, entries) => {
     if (!extension || extension === name) {
       newName = `${name}(${i})`
     } else {
-      newName = `${path.parse(name).name}(${i}).${extension}`
+      newName = `${path.parse(name).name}(${i})${extension}`
     }
   }
   return newName

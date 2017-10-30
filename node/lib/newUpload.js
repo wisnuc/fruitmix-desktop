@@ -66,7 +66,7 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
         if (!extension || extension === name) {
           checkedName = `${name}(${j})`
         } else {
-          checkedName = `${path.parse(name).name}(${j}).${extension}`
+          checkedName = `${path.parse(name).name}(${j})${extension}`
         }
       }
       debug('conflicts find', name)

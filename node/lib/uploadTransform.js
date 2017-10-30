@@ -18,7 +18,7 @@ const getName = (name, nameSpace) => {
     if (!extension || extension === name) {
       checkedName = `${name}(${i})`
     } else {
-      checkedName = `${path.parse(name).name}(${i}).${extension}`
+      checkedName = `${path.parse(name).name}(${i})${extension}`
     }
   }
   return checkedName
@@ -290,6 +290,8 @@ class Task {
       transform: (X, callback) => {
         // debug('upload transform start', X.length)
 
+        let uploadedSum = 0
+        let countSum = 0
         const Files = X.map((x) => {
           const { entry, stat, parts, policy, retry, task } = x
           const name = policy.mode === 'rename' ? policy.checkedName : path.parse(entry).base
@@ -303,6 +305,7 @@ class Task {
               if (task.paused) return clearInterval(countReadHandle)
               const gap = rs.bytesRead - lastTimeSize
               task.completeSize += gap
+              uploadedSum += gap
               lastTimeSize = rs.bytesRead
             }
             rs.on('open', () => {
@@ -312,9 +315,13 @@ class Task {
               clearInterval(countReadHandle)
               const gap = rs.bytesRead - lastTimeSize
               task.completeSize += gap
+              uploadedSum += gap
               lastTimeSize = rs.bytesRead
               if (task.paused) return
-              if (i === parts.length - 1) task.finishCount += 1
+              if (i === parts.length - 1) {
+                task.finishCount += 1
+                countSum += 1
+              }
               sendMsg()
             })
           }
@@ -327,7 +334,8 @@ class Task {
           debug('UploadMultipleFiles handle callbak error', error)
           task.reqHandles.splice(task.reqHandles.indexOf(handle), 1)
           if (error) {
-            task.finishCount -= 1
+            task.finishCount -= countSum
+            task.completeSize -= uploadedSum
             X.forEach((x) => {
               if (x.retry > -1) x.retry += 1
               else x.retry = 0
@@ -361,9 +369,11 @@ class Task {
 
       for (let i = this.upload.failed.length - 1; i > -1; i--) {
         const X = this.upload.failed[i]
-        const index = Array.isArray(X) && X.findIndex(x => x.retry < 2)
+        const index = Array.isArray(X) && X.findIndex((x) => {
+          return x.retry < 1 && (x.error && x.error.response.findIndex(r => r.status < 500 && r.code !== 'EEXIST') > -1)
+        })
         if (index > -1) {
-          debug('X retry', X[0].retry)
+          debug('X retry', X[0].retry, X[0].error)
           const files = []
           X.forEach(x => files.push({ entry: x.entry, stat: x.stat, policy: x.policy, retry: x.retry }))
           const { driveUUID, dirUUID, task } = X[0]
