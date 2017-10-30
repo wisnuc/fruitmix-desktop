@@ -292,7 +292,7 @@ const getName = (name, nameSpace) => {
     if (!extension || extension === name) {
       checkedName = `${name}(${i})`
     } else {
-      checkedName = `${path.parse(name).name}(${i}).${extension}`
+      checkedName = `${path.parse(name).name}(${i})${extension}`
     }
   }
   return checkedName
