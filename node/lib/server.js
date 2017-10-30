@@ -125,7 +125,7 @@ export class UploadMultipleFiles {
         const rs = readStreams[i]
         const part = parts[i]
         let formDataOptions = {
-          size: part.end ? part.end - part.start + 1 : 0,
+          size: part.end - part.start + 1,
           sha256: part.sha
         }
         if (part.start) {

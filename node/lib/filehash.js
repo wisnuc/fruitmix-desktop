@@ -4,11 +4,13 @@ const fs = require('fs')
 /* splice file by given size */
 const spliceFile = (size, perSize) => {
   const parts = []
+
   /* empty file */
   if (size === 0) {
-    parts.push({ start: 0, end: 0 })
+    parts.push({ start: 0, end: -1 })
     return parts
   }
+
   let position = 0
   while (position < size) {
     if (position + perSize >= size) {
@@ -26,7 +28,7 @@ const spliceFile = (size, perSize) => {
 const hashFile = (filePath, part) => {
   const hash = crypto.createHash('sha256')
   hash.setEncoding('hex')
-  const fileStream = fs.createReadStream(filePath, { start: part.start, end: part.end })
+  const fileStream = fs.createReadStream(filePath, { start: part.start, end: Math.max(part.end, 0) }, { highWaterMark: 4194304 })
   const promise = new Promise((resolve, reject) => {
     fileStream.on('end', () => {
       hash.end()

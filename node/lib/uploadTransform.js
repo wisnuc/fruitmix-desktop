@@ -291,7 +291,7 @@ class Task {
         const Files = X.map((x) => {
           const { entry, parts, policy, task } = x
           const name = policy.mode === 'rename' ? policy.checkedName : path.parse(entry).base
-          const readStreams = parts.map(part => fs.createReadStream(entry, { start: part.start, end: part.end, autoClose: true }))
+          const readStreams = parts.map(p => fs.createReadStream(entry, { start: p.start, end: Math.max(p.end, 0), autoClose: true }))
           for (let i = 0; i < parts.length; i++) {
             const rs = readStreams[i]
             let lastTimeSize = 0
