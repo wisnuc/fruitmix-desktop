@@ -54,7 +54,6 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
   const listNav = await serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
   let remoteEntries = listNav.entries
   if (isCloud()) remoteEntries = listNav.data.entries
-  debug('listNav', listNav, remoteEntries)
   nameSpace.push(...remoteEntries.map(e => e.name))
   const conflicts = []
   for (let i = 0; i < filtered.length; i++) {
