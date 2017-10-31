@@ -331,9 +331,9 @@ class Task {
         const { driveUUID, dirUUID, task } = X[0]
         task.state = 'uploading'
         const handle = new UploadMultipleFiles(driveUUID, dirUUID, Files, (error) => {
-          debug('UploadMultipleFiles handle callbak error', error)
           task.reqHandles.splice(task.reqHandles.indexOf(handle), 1)
           if (error) {
+            debug('UploadMultipleFiles handle callbak error', error)
             task.finishCount -= countSum
             task.completeSize -= uploadedSum
             X.forEach((x) => {
@@ -370,7 +370,7 @@ class Task {
       for (let i = this.upload.failed.length - 1; i > -1; i--) {
         const X = this.upload.failed[i]
         const index = Array.isArray(X) && X.findIndex((x) => {
-          return x.retry < 1 && (x.error && x.error.response.findIndex(r => r.status < 500 && r.code !== 'EEXIST') > -1)
+          return x.retry < 1 && (x.error && x.error.response && x.error.response.findIndex(r => r.status < 500 && r.code !== 'EEXIST') > -1)
         })
         if (index > -1) {
           debug('X retry', X[0].retry, X[0].error)
@@ -393,7 +393,7 @@ class Task {
         })
       })
       if (this.errors.length !== preLength) this.updateStore()
-      if (this.errors.length > 15 || (this.readDir.isStopped() && this.errors.length)) {
+      if (this.errors.length > 8 || (this.readDir.isStopped() && this.errors.length)) {
         debug('errorCount', this.errors.length)
         this.paused = true
         clearInterval(this.countSpeed)
