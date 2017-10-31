@@ -94,7 +94,7 @@ class RunningTask extends React.Component {
     const finishCount = task.finishCount > 0 ? task.finishCount : 0
     const uploaded = task.count === 1 ? this.formatSize(task.completeSize) : `${finishCount}/${task.count}`
     return (
-      <div style={{ height: 20, width: 160, display: 'flex', alignItems: 'center' }}>
+      <div style={{ height: 20, width: 200, display: 'flex', alignItems: 'center' }}>
         <div> { uploaded } </div>
         <div style={{ flexGrow: 1 }} />
         <div> { speed } </div>
@@ -158,11 +158,11 @@ class RunningTask extends React.Component {
 
 
         {/* progress bar */}
-        <div style={{ flex: '0 0 200px' }}>
+        <div style={{ flex: '0 0 240px' }}>
           <div
             style={{
               display: 'flex',
-              width: 160,
+              width: 200,
               height: 6,
               marginRight: 12,
               borderRadius: 2,
