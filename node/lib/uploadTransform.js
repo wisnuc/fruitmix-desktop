@@ -309,7 +309,7 @@ class Task {
               lastTimeSize = rs.bytesRead
             }
             rs.on('open', () => {
-              countReadHandle = setInterval(countRead, 100)
+              countReadHandle = setInterval(countRead, 200)
             })
             rs.on('end', () => {
               clearInterval(countReadHandle)
