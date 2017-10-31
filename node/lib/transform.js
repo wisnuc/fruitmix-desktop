@@ -110,7 +110,10 @@ class Transform extends EventEmitter {
             if (Array.isArray(x)) x.forEach(c => (c.error = err))
             else x.error = err
             this.failed.push(x)
-            debug('err in', x.entry || (x[0] && x[0].entry) || x, '\nerror': err)
+            console.log(
+              'error in: ', this.name, '\nentry: ', x.entry || (x[0] && x[0].entry) || x,
+              '\nerror: ', Object.assign({}, err, { response: '' }), '\nresponse: ', err.response
+            )
           } else if (this.outs.length) {
             this.outs.forEach(t => t.push(y))
           } else if (this.root().listenerCount('data')) {
