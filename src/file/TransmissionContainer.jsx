@@ -292,7 +292,7 @@ class TrsContainer extends React.Component {
                   />
               }
             <FlatButton
-              label="全部取消"
+              label="全部删除"
               disabled={!userTasks.length}
               icon={<DeleteSvg style={{ color: '#000', opacity: 0.54 }} />}
               onTouchTap={() => this.toggleDialog('clearRunningDialog')}
@@ -436,17 +436,17 @@ class TrsContainer extends React.Component {
               this.state.deleteRunningDialog &&
                 <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
                   <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-                    { '要取消选中的任务吗？' }
+                    { '确定要删除选中的任务吗？' }
                   </div>
                   <div style={{ height: 20 }} />
                   <div style={{ color: 'rgba(0,0,0,0.54)' }}>
-                    { '但如果是下载或上传的是文件夹，文件夹内已完成的文件将保留。' }
+                    { '如果是下载或上传的是文件夹，文件夹内已完成的文件将保留。' }
                   </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                    <FlatButton label="放弃" primary onTouchTap={() => this.toggleDialog('deleteRunningDialog')} keyboardFocused />
+                    <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('deleteRunningDialog')} keyboardFocused />
                     <FlatButton
-                      label="取消任务"
+                      label="确定"
                       primary
                       onTouchTap={() => {
                         this.toggleDialog('deleteRunningDialog')
@@ -466,17 +466,17 @@ class TrsContainer extends React.Component {
               this.state.clearRunningDialog &&
                 <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
                   <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-                    { '要取消所有任务吗？' }
+                    { '确定要删除所有任务吗？' }
                   </div>
                   <div style={{ height: 20 }} />
                   <div style={{ color: 'rgba(0,0,0,0.54)' }}>
-                    { '但如果是下载或上传的是文件夹，文件夹内已完成的文件将保留。' }
+                    { '如果是下载或上传的是文件夹，文件夹内已完成的文件将保留。' }
                   </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                    <FlatButton label="放弃" primary onTouchTap={() => this.toggleDialog('clearRunningDialog')} keyboardFocused />
+                    <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('clearRunningDialog')} keyboardFocused />
                     <FlatButton
-                      label="取消任务"
+                      label="确定"
                       primary
                       onTouchTap={() => {
                         this.toggleDialog('clearRunningDialog')
@@ -496,7 +496,7 @@ class TrsContainer extends React.Component {
               this.state.clearFinishedDialog &&
                 <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
                   <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-                    { '要清除所有上传及下载记录吗？' }
+                    { '确定要删除所有上传及下载记录吗？' }
                   </div>
                   <div style={{ height: 20 }} />
                   <div style={{ color: 'rgba(0,0,0,0.54)' }}>
@@ -506,7 +506,7 @@ class TrsContainer extends React.Component {
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                     <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('clearFinishedDialog')} keyboardFocused />
                     <FlatButton
-                      label="清除"
+                      label="确定"
                       primary
                       onTouchTap={() => {
                         this.handleAll(this.state.finishTasks, 'DELETE')
