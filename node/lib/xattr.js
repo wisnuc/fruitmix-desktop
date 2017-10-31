@@ -4,7 +4,7 @@ const fs = Promise.promisifyAll(require('fs'))
 
 const xattr = Promise.promisifyAll(os.platform() === 'win32' ? require('fs-ads') : require('fs-xattr'))
 
-const FRUITMIX = 'user.fruitmix2'
+const FRUITMIX = 'user.fruitmix3'
 
 const readXattrAsync = async (target) => {
   let attr
@@ -16,7 +16,7 @@ const readXattrAsync = async (target) => {
   }
   const stats = await fs.lstatAsync(target)
   const htime = os.platform() === 'win32' ? stats.atime.getTime() : stats.mtime.getTime()
-  if (attr && attr.htime && attr.htime === htime) return attr
+  if (attr && attr.htime && attr.htime === htime && attr.size === stats.size) return attr
   return null
 }
 
@@ -27,7 +27,8 @@ const readXattr = (target, callback) => {
 const setXattrAsync = async (target, attr) => {
   const stats = await fs.lstatAsync(target)
   const htime = os.platform() === 'win32' ? stats.atime.getTime() : stats.mtime.getTime()
-  const newAttr = Object.assign({}, attr, { htime })
+  const size = stats.size
+  const newAttr = Object.assign({}, attr, { htime, size })
   try {
     await xattr.setAsync(target, FRUITMIX, JSON.stringify(newAttr))
   } catch (e) {
