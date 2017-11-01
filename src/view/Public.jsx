@@ -274,6 +274,7 @@ class Public extends Home {
           openSnackBar={openSnackBar}
           toggleDialog={this.toggleDialog}
           showTakenTime={!!this.state.takenTime}
+          apis={this.ctx.props.apis}
         />
 
         { this.renderMenu(!!this.state.contextMenuOpen && !this.state.inRoot, toggleDetail, getDetailStatus) }

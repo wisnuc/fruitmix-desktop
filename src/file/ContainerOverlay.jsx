@@ -268,6 +268,7 @@ class ContainerOverlayInline extends React.Component {
                   download={this.props.download}
                   path={this.props.path}
                   updateContainerSize={this.updateContainerSize}
+                  apis={this.props.apis}
                 />
               </div>
             ))

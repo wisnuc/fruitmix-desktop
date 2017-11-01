@@ -339,6 +339,11 @@ class Fruitmix extends EventEmitter {
         r = this.aget(`drives/${args.driveUUID}/dirs/${args.dirUUID}`)
         break
 
+      case 'randomSrc':
+        r = this.aget(`media/${args.hash}`)
+          .query({ alt: 'random' })
+        break
+
       /* task api */
       case 'tasks':
         r = this.aget('tasks')

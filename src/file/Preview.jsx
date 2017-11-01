@@ -67,6 +67,14 @@ class Preview extends React.Component {
       })
       this.props.ipcRenderer.on('TEMP_DOWNLOAD_SUCCESS', this.downloadSuccess)
     }
+
+    this.getRandomSrc = () => {
+      this.session = UUID.v4()
+      this.props.apis.pureRequest('randomSrc', { hash: this.props.item.hash }, (error, data) => {
+        if (error) console.log('randomSrc error', error)
+        else this.setState({ filePath: `http://${this.props.apis.address}:3000/media/random/${data.body.key}` })
+      })
+    }
   }
 
   renderPhoto(hash, metadata) {
@@ -99,6 +107,40 @@ class Preview extends React.Component {
   }
 
   renderVideo() {
+    return (
+      <div
+        style={{ height: '80%', width: '80%', backgroundColor: 'rgba(0,0,0,0)' }}
+        onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
+      >
+        <video width="100%" height="100%" controls autoPlay >
+          <source src={this.state.filePath} />
+        </video>
+      </div>
+    )
+  }
+
+  renderKnownVideo(item) {
+    debug('renderVideo', item)
+    if (this.name === this.props.item.name && this.state.filePath) {
+      return (
+        <div
+          style={{ height: '80%', width: '80%', backgroundColor: 'rgba(0,0,0,0)' }}
+          onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
+        >
+          <video width="100%" height="100%" controls autoPlay >
+            <source src={this.state.filePath} />
+          </video>
+        </div>
+      )
+    }
+    if (!this.session) {
+      this.name = this.props.item.name
+      this.getRandomSrc()
+      this.state = Object.assign({}, this.state, { filePath: '', pages: null })
+    }
+    return (
+      <CircularProgress size={64} thickness={5} />
+    )
     return (
       <div
         style={{ height: '80%', width: '80%', backgroundColor: 'rgba(0,0,0,0)' }}
@@ -204,6 +246,16 @@ class Preview extends React.Component {
   render() {
     if (!this.props.item || !this.props.item.name) return (<div />)
 
+    const { magic, metadata, hash } = this.props.item
+    const photoMagic = ['JPEG', 'GIF', 'PNG']
+    const videoMagic = ['3GP', 'MP4', 'MOV']
+
+    const isPhoto = metadata && photoMagic.includes(magic)
+
+    const isVideo = metadata && videoMagic.includes(magic)
+
+    debug('isPhoto, isVideo', this.props.item, isPhoto, isVideo)
+
     return (
       <div
         ref={ref => (this.refBackground = ref)}
@@ -215,7 +267,7 @@ class Preview extends React.Component {
           justifyContent: 'center'
         }}
       >
-        { this.props.item.metadata ? this.renderPhoto(this.props.item.hash, this.props.item.metadata) : this.renderPreview() }
+        { isPhoto ? this.renderPhoto(hash, metadata) : isVideo ? this.renderKnownVideo(this.props.item) : this.renderPreview() }
         {/* dialog */}
         <DialogOverlay open={this.state.alert} >
           {
