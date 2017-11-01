@@ -644,6 +644,7 @@ class Home extends Base {
           openSnackBar={openSnackBar}
           toggleDialog={this.toggleDialog}
           showTakenTime={!!this.state.takenTime}
+          apis={this.ctx.props.apis}
         />
 
         { this.renderMenu(this.state.contextMenuOpen, toggleDetail, getDetailStatus) }

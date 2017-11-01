@@ -397,6 +397,7 @@ class FileContent extends React.Component {
           primaryColor={this.props.primaryColor}
           path={this.props.home.path}
           select={this.props.select.touchTap}
+          apis={this.props.apis}
         />
 
         {/* selection box */}

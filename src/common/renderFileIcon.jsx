@@ -36,9 +36,18 @@ const renderFileIcon = (name, metadata, setSize, dark, white) => {
   const size = setSize || 24
 
   /* media */
-  if (metadata) {
+
+  const photoMagic = ['JPEG', 'GIF', 'PNG']
+  const videoMagic = ['3GP', 'MP4', 'MOV']
+  const isPhoto = metadata && photoMagic.includes(metadata.m)
+  const isVideo = metadata && videoMagic.includes(metadata.m)
+
+  if (isPhoto) {
     Icon = PhotoIcon
     color = '#ea4335'
+  } else if (isVideo) {
+    Icon = VideoIcon
+    color = '#f44336'
   }
 
   /* when background is dark, icon color should adjust to white */
