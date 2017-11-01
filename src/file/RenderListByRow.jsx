@@ -119,7 +119,7 @@ class Row extends React.PureComponent {
           </div>
 
           <div style={{ flex: '0 1 160px', fontSize: 13, color: 'rgba(0,0,0,0.54)', textAlign: 'right' }}>
-            { showTakenTime ? entry.metadata && entry.metadata.datetime && formatDate(entry.metadata.datetime)
+            { showTakenTime ? entry.metadata && entry.metadata.date && formatDate(entry.metadata.date)
               : entry.mtime && formatTime(entry.mtime) }
           </div>
 
