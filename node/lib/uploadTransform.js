@@ -370,7 +370,8 @@ class Task {
       for (let i = this.upload.failed.length - 1; i > -1; i--) {
         const X = this.upload.failed[i]
         const index = Array.isArray(X) && X.findIndex((x) => {
-          return x.retry < 1 && (x.error && x.error.response && x.error.response.findIndex(r => r.status < 500 && r.code !== 'EEXIST') > -1)
+          return x.retry < 1 && (x.error && x.error.response &&
+            x.error.response.findIndex(r => r.error && r.error.status < 500 && r.error.code !== 'EEXIST') > -1)
         })
         if (index > -1) {
           debug('X retry', X[0].retry, X[0].error)
