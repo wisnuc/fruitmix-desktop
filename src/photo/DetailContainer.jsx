@@ -367,7 +367,7 @@ class DetailContainerInline extends React.Component {
   renderInfo() {
     debug('renderInfo', this.props.items.length, this.photo)
     if (!this.photo) return <div />
-    const { datetime, model, make, h, w, size, lat, latr, long, longr } = this.photo
+    const { date, model, make, h, w, size, lat, latr, long, longr } = this.photo
 
     const latitude = convertGPS(lat, latr)
     const longitude = convertGPS(long, longr)
@@ -375,15 +375,15 @@ class DetailContainerInline extends React.Component {
     return (
       <div style={{ padding: '0px 32px 0px 32px', width: 296 }}>
         <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.54)', height: 48, display: 'flex', alignItems: 'center' }}> 详情 </div>
-        { datetime &&
+        { date &&
         <div style={{ height: 72, display: 'flex', alignItems: 'center' }}>
           <DateIcon color="rgba(0,0,0,0.54)" />
           <div style={{ marginLeft: 64 }}>
             <div style={{ color: 'rgba(0,0,0,0.87)', lineHeight: '24px' }}>
-              { phaseExifTime(datetime, 'date') }
+              { phaseExifTime(date, 'date') }
             </div>
             <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14, lineHeight: '20px' }}>
-              { `${phaseExifTime(datetime, 'week')}  ${phaseExifTime(datetime, 'time')}` }
+              { `${phaseExifTime(date, 'week')}  ${phaseExifTime(date, 'time')}` }
             </div>
           </div>
         </div>
