@@ -98,6 +98,7 @@ class RenderListByRow extends React.Component {
                 lookPhotoDetail={lookPhotoDetail}
                 digest={photo.hash}
                 key={photo.hash}
+                item={photo}
                 ipcRenderer={this.props.ipcRenderer}
                 addListToSelection={this.props.addListToSelection}
                 removeListToSelection={this.props.removeListToSelection}

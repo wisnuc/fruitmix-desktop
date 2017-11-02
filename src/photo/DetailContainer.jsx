@@ -448,13 +448,13 @@ class DetailContainerInline extends React.Component {
     )
   }
 
-  renderDetail(item, index) {
+  renderDetail(item, parent) {
     const { m } = item
     const photoMagic = ['JPEG', 'GIF', 'PNG']
     const videoMagic = ['3GP', 'MP4', 'MOV']
     const isPhoto = photoMagic.includes(m)
     const isVideo = videoMagic.includes(m)
-    const props = { item, ipcRenderer: this.props.ipcRenderer, updateContainerSize: this.updateContainerSize, apis: this.props.apis, index }
+    const props = { item, ipcRenderer: this.props.ipcRenderer, updateContainerSize: this.updateContainerSize, apis: this.props.apis, parent }
     debug('renderDetail item', item, isPhoto, isVideo)
     if (isPhoto) return (<PhotoDetail {...props} />)
     if (isVideo) return (<VideoDetail {...props} />)
@@ -541,7 +541,7 @@ class DetailContainerInline extends React.Component {
                     transition: 'all 200ms cubic-bezier(0.0, 0.0, 0.2, 1)'
                   }}
                 >
-                  { this.renderDetail(item, index) }
+                  { this.renderDetail(item, this[`refPreview_${index}`]) }
                 </div>
               ))
             }

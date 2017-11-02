@@ -16,26 +16,31 @@ class PhotoDetail extends React.Component {
       this.props.apis.pureRequest('randomSrc', { hash: this.props.item.hash }, (error, data) => {
         if (error) console.log('randomSrc error', error)
         else this.setState({ filePath: `http://${this.props.apis.address}:3000/media/random/${data.body.key}` })
+        this.session = ''
       })
     }
   }
 
   componentDidUpdate() {
     if (!this.refVideo) return
-    debug('componentDidUpdate', this.props.item, this.refVideo.paused, this.props.index)
-    if (this.props.index === 1 && this.refVideo.paused) this.refVideo.play()
-    else if (this.props.index !== 1) this.refVideo.pause()
+
+    if (this.props.parent.style.left === '0px' && this.refVideo.paused && !this.played) {
+      this.played = true
+      this.refVideo.play()
+    } else if (this.props.parent.style.left !== '0px') {
+      this.played = false
+      this.refVideo.pause()
+    }
   }
 
-  renderKnownVideo(item) {
-    debug('renderVideo', item)
+  renderKnownVideo() {
     if (this.hash === this.props.item.hash && this.state.filePath) {
       return (
         <div
           style={{ height: '80%', width: '80%', backgroundColor: 'rgba(0,0,0,0)' }}
           onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
         >
-          <video width="100%" height="100%" controls ref={ref => (this.refVideo = ref)} >
+          <video width="100%" height="100%" controls ref={ref => (this.refVideo = ref)} controlsList="nodownload" >
             <source src={this.state.filePath} />
           </video>
         </div>

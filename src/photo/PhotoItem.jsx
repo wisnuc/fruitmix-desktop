@@ -4,6 +4,7 @@ import Debug from 'debug'
 import { Paper, Card, IconButton, CircularProgress } from 'material-ui'
 import ZoomIn from 'material-ui/svg-icons/action/zoom-in'
 import CheckIcon from 'material-ui/svg-icons/action/check-circle'
+import PlayIcon from 'material-ui/svg-icons/av/play-circle-filled'
 import { CircleIcon } from '../common/Svg'
 
 const debug = Debug('component:photoApp:photoItem:')
@@ -62,6 +63,15 @@ class PhotoItem extends React.Component {
     this.mouseLeave = () => {
       this.setState({ hover: false })
     }
+
+    this.parseDur = (dur) => {
+      const h = Math.floor(dur / 3600)
+      const m = Math.floor((dur - h * 3600) / 60)
+      const s = Math.floor(dur - h * 3600 - m * 60)
+      if (h > 0) return `${h}:${m}:${s}`
+      if (s < 10) return `${h}:${m}:0${s}`
+      return `${m}:${s}`
+    }
   }
 
   componentDidMount() {
@@ -84,8 +94,16 @@ class PhotoItem extends React.Component {
   }
 
   render() {
-    const { style, shiftStatus, size } = this.props
+    const { style, shiftStatus, size, item } = this.props
     this.showShiftOverlay = shiftStatus.shift && shiftStatus.items.includes(this.props.digest)
+
+    const { m, dur } = item
+
+    const photoMagic = ['JPEG', 'GIF', 'PNG']
+    const videoMagic = ['3GP', 'MP4', 'MOV']
+    const isPhoto = photoMagic.includes(m)
+    const isVideo = videoMagic.includes(m)
+
     // debug('Render PhotoItem this.props', this.props)
     return (
       <div style={style}>
@@ -178,8 +196,8 @@ class PhotoItem extends React.Component {
                 zIndex: 100,
                 width: this.state.selected ? 180 : size,
                 height: 36,
-                left: this.state.selected ? 15 : 0,
-                bottom: this.state.selected ? 15 : 0,
+                left: this.state.selected ? (size - 180) / 2 : 0,
+                bottom: this.state.selected ? (size - 180) / 2 : 0,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'flex-end',
@@ -220,6 +238,27 @@ class PhotoItem extends React.Component {
               width={this.state.selected ? 180 : size}
               style={{ objectFit: 'cover' }}
             />
+            { /* video icon */
+              this.path && isVideo && dur &&
+                <div
+                  style={{
+                    position: 'absolute',
+                    height: 36,
+                    width: '100%',
+                    top: 0,
+                    left: 0,
+                    display: 'flex',
+                    justifyContent: 'flex-end'
+                  }}
+                >
+                  <div style={{ margin: this.state.selected ? (size - 180) / 2 : 8, display: 'flex', alignItems: 'center' }}>
+                    <div style={{ color: '#FFFFFF', fontSize: 13, marginRight: 8, fontWeight: 500 }} >
+                      { this.parseDur(dur) }
+                    </div>
+                    <PlayIcon color="#FFFFFF" />
+                  </div>
+                </div>
+            }
             <div
               style={{
                 position: 'absolute',
@@ -243,8 +282,8 @@ class PhotoItem extends React.Component {
                   zIndex: 100,
                   width: this.state.selected ? 180 : size,
                   height: this.state.selected ? 180 : size,
-                  top: this.state.selected ? 15 : 0,
-                  left: this.state.selected ? 15 : 0,
+                  top: this.state.selected ? (size - 180) / 2 : 0,
+                  left: this.state.selected ? (size - 180) / 2 : 0,
                   backgroundColor: 'rgba(30, 136, 229, 0.26)'
                 }}
                 onTouchTap={this.touchImage}
