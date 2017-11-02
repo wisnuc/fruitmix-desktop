@@ -78,6 +78,18 @@ class Preview extends React.Component {
     }
   }
 
+  componentDidUpdate() {
+    if (!this.refVideo) return
+
+    if (this.props.parent.style.left === '0px' && this.refVideo.paused && !this.played) {
+      this.played = true
+      this.refVideo.play()
+    } else if (this.props.parent.style.left !== '0px') {
+      this.played = false
+      this.refVideo.pause()
+    }
+  }
+
   renderPhoto(hash, metadata) {
     const item = Object.assign({}, metadata, { hash })
     return (
@@ -113,27 +125,16 @@ class Preview extends React.Component {
         style={{ height: '80%', width: '80%', backgroundColor: 'rgba(0,0,0,0)' }}
         onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
       >
-        <video width="100%" height="100%" controls autoPlay >
+        <video width="100%" height="100%" controls controlsList="nodownload" ref={ref => (this.refVideo = ref)} >
           <source src={this.state.filePath} />
         </video>
       </div>
     )
   }
 
-  renderKnownVideo(item) {
-    debug('renderVideo', item)
-    if (this.name === this.props.item.name && this.state.filePath) {
-      return (
-        <div
-          style={{ height: '80%', width: '80%', backgroundColor: 'rgba(0,0,0,0)' }}
-          onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
-        >
-          <video width="100%" height="100%" controls autoPlay >
-            <source src={this.state.filePath} />
-          </video>
-        </div>
-      )
-    }
+  renderKnownVideo() {
+    if (this.name === this.props.item.name && this.state.filePath) return this.renderVideo()
+
     if (!this.session) {
       this.name = this.props.item.name
       this.getRandomSrc()
@@ -239,9 +240,7 @@ class Preview extends React.Component {
     const { magic, metadata, hash } = this.props.item
     const photoMagic = ['JPEG', 'GIF', 'PNG']
     const videoMagic = ['3GP', 'MP4', 'MOV']
-
     const isPhoto = metadata && photoMagic.includes(magic)
-
     const isVideo = metadata && videoMagic.includes(magic)
 
     debug('isPhoto, isVideo', this.props.item, isPhoto, isVideo)
@@ -257,7 +256,7 @@ class Preview extends React.Component {
           justifyContent: 'center'
         }}
       >
-        { isPhoto ? this.renderPhoto(hash, metadata) : isVideo ? this.renderKnownVideo(this.props.item) : this.renderPreview() }
+        { isPhoto ? this.renderPhoto(hash, metadata) : isVideo ? this.renderKnownVideo() : this.renderPreview() }
         {/* dialog */}
         <DialogOverlay open={this.state.alert} >
           {
