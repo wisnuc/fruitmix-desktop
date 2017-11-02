@@ -79,7 +79,7 @@ class Preview extends React.Component {
   }
 
   componentDidUpdate() {
-    if (!this.refVideo) return
+    if (!this.refVideo || !this.props.parent) return
 
     if (this.props.parent.style.left === '0px' && this.refVideo.paused && !this.played) {
       this.played = true
@@ -108,7 +108,6 @@ class Preview extends React.Component {
         onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
       >
         <iframe
-          sandbox
           seamless
           width="100%"
           height="100%"
