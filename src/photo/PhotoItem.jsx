@@ -5,7 +5,7 @@ import { Paper, Card, IconButton, CircularProgress } from 'material-ui'
 import ZoomIn from 'material-ui/svg-icons/action/zoom-in'
 import CheckIcon from 'material-ui/svg-icons/action/check-circle'
 import PlayIcon from 'material-ui/svg-icons/av/play-circle-filled'
-import { CircleIcon } from '../common/Svg'
+import { CircleIcon, GIFFont } from '../common/Svg'
 
 const debug = Debug('component:photoApp:photoItem:')
 
@@ -99,9 +99,8 @@ class PhotoItem extends React.Component {
 
     const { m, dur } = item
 
-    const photoMagic = ['JPEG', 'GIF', 'PNG']
     const videoMagic = ['3GP', 'MP4', 'MOV']
-    const isPhoto = photoMagic.includes(m)
+    const isGIF = (m === 'GIF')
     const isVideo = videoMagic.includes(m)
 
     // debug('Render PhotoItem this.props', this.props)
@@ -238,8 +237,8 @@ class PhotoItem extends React.Component {
               width={this.state.selected ? 180 : size}
               style={{ objectFit: 'cover' }}
             />
-            { /* video icon */
-              this.path && isVideo && dur &&
+            { /* video or GIF icon */
+              this.path && (isVideo || isGIF) &&
                 <div
                   style={{
                     position: 'absolute',
@@ -248,15 +247,27 @@ class PhotoItem extends React.Component {
                     top: 0,
                     left: 0,
                     display: 'flex',
-                    justifyContent: 'flex-end'
+                    justifyContent: 'flex-end',
+                    background: 'linear-gradient(0deg, rgba(0,0,0,0), rgba(0,0,0,0.26))'
                   }}
                 >
-                  <div style={{ margin: this.state.selected ? (size - 180) / 2 : 8, display: 'flex', alignItems: 'center' }}>
-                    <div style={{ color: '#FFFFFF', fontSize: 13, marginRight: 8, fontWeight: 500 }} >
-                      { this.parseDur(dur) }
-                    </div>
-                    <PlayIcon color="#FFFFFF" />
-                  </div>
+                  {
+                    isVideo &&
+                      <div style={{ margin: this.state.selected ? (size - 180) / 2 : 8, display: 'flex', alignItems: 'center' }}>
+                        <div style={{ color: '#FFFFFF', fontSize: 13, marginRight: 8, fontWeight: 500 }} >
+                          { this.parseDur(dur) }
+                        </div>
+                        <PlayIcon color="#FFFFFF" />
+                      </div>
+                  }
+                  {
+                    isGIF &&
+                      <div style={{ margin: this.state.selected ? (size - 180) / 2 : 8, display: 'flex', alignItems: 'center' }}>
+                        <div style={{ color: '#FFFFFF', fontSize: 13, marginRight: 8, fontWeight: 600 }} >
+                          <GIFFont color="#FFFFFF" />
+                        </div>
+                      </div>
+                  }
                 </div>
             }
             <div
