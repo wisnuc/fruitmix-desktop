@@ -73,6 +73,7 @@ class Preview extends React.Component {
       this.props.apis.pureRequest('randomSrc', { hash: this.props.item.hash }, (error, data) => {
         if (error) console.log('randomSrc error', error)
         else this.setState({ filePath: `http://${this.props.apis.address}:3000/media/random/${data.body.key}` })
+        this.session = ''
       })
     }
   }
@@ -138,19 +139,8 @@ class Preview extends React.Component {
       this.getRandomSrc()
       this.state = Object.assign({}, this.state, { filePath: '', pages: null })
     }
-    return (
-      <CircularProgress size={64} thickness={5} />
-    )
-    return (
-      <div
-        style={{ height: '80%', width: '80%', backgroundColor: 'rgba(0,0,0,0)' }}
-        onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
-      >
-        <video width="100%" height="100%" controls >
-          <source src={this.state.filePath} />
-        </video>
-      </div>
-    )
+
+    return (<CircularProgress size={64} thickness={5} />)
   }
 
   renderAudio() {

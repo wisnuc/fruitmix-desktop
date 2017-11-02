@@ -101,6 +101,7 @@ class Assistant extends Media {
       getHoverPhoto={this.getHoverPhoto}
       getShiftStatus={this.getShiftStatus}
       shiftStatus={{ shift: this.state.shift, items: this.state.shiftHoverItems }}
+      apis={this.ctx.props.apis}
     />)
   }
 }

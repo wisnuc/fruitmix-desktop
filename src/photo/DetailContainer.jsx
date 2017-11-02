@@ -22,6 +22,7 @@ import DialogOverlay from '../common/DialogOverlay'
 import FlatButton from '../common/FlatButton'
 import Map from '../common/map'
 import PhotoDetail from './PhotoDetail'
+import VideoDetail from './VideoDetail'
 
 const debug = Debug('component:photoApp:DetailContainer')
 
@@ -58,25 +59,31 @@ const getResolution = (height, width) => {
   return `${res} 像素 ${height} x ${width}`
 }
 
-const convertGPS = (value, direction) => {
-  let d
-  let c
-  if (direction === 'N' || direction === 'E') {
-    d = 1
-  } else if (direction === 'S' || direction === 'W') {
-    d = -1
-  } else {
-    return null
-  }
-  try {
-    c = value.split(',').reduce((acc, data, index) => {
-      const [a, b] = data.split('/')
-      return (acc + (a / b) / 60 ** index)
-    }, 0)
-  } catch (e) {
-    return null
-  }
-  return Math.round(d * c * 1000) / 1000
+const convertGPS = (gps) => {
+  let result = { latitude: null, longitude: null }
+  const array = gps && gps.split(', ').map(a => a.split(' ')).map(b => b.map(c => (/^[0-9]/.test(c) ? parseFloat(c, 10) : c)))
+
+  if (!array || array.length !== 2) return result
+  array.forEach((a) => {
+    const value = Math.round((a[0] + a[2] / 60 + a[3] / 3600) * 1000) / 1000
+    switch (a[4]) {
+      case 'N':
+        result.latitude = value
+        break
+      case 'E':
+        result.longitude = value
+        break
+      case 'S':
+        result.latitude = -1 * value
+        break
+      case 'W':
+        result.longitude = -1 * value
+        break
+      default:
+        result = { latitude: null, longitude: null }
+    }
+  })
+  return result
 }
 
 class DetailContainerInline extends React.Component {
@@ -367,10 +374,9 @@ class DetailContainerInline extends React.Component {
   renderInfo() {
     debug('renderInfo', this.props.items.length, this.photo)
     if (!this.photo) return <div />
-    const { date, model, make, h, w, size, lat, latr, long, longr } = this.photo
+    const { date, model, make, h, w, size, gps } = this.photo
 
-    const latitude = convertGPS(lat, latr)
-    const longitude = convertGPS(long, longr)
+    const { latitude, longitude } = convertGPS(gps)
 
     return (
       <div style={{ padding: '0px 32px 0px 32px', width: 296 }}>
@@ -416,7 +422,7 @@ class DetailContainerInline extends React.Component {
         }
 
         {/* location */}
-        { lat && latr && long && longr && longitude !== null && latitude !== null &&
+        { gps && longitude !== null && latitude !== null &&
         <div style={{ height: 72, display: 'flex', alignItems: 'center' }}>
           <LoactionIcon color="rgba(0,0,0,0.54)" />
           <div style={{ marginLeft: 64 }}>
@@ -429,7 +435,7 @@ class DetailContainerInline extends React.Component {
         }
 
         {/* map */}
-        { lat && latr && long && longr && longitude !== null && latitude !== null &&
+        { gps && longitude !== null && latitude !== null &&
           <div style={{ width: 360, height: 360, marginLeft: -32 }}>
             <Map
               longitude={longitude}
@@ -442,8 +448,21 @@ class DetailContainerInline extends React.Component {
     )
   }
 
+  renderDetail(item, index) {
+    const { m } = item
+    const photoMagic = ['JPEG', 'GIF', 'PNG']
+    const videoMagic = ['3GP', 'MP4', 'MOV']
+    const isPhoto = photoMagic.includes(m)
+    const isVideo = videoMagic.includes(m)
+    const props = { item, ipcRenderer: this.props.ipcRenderer, updateContainerSize: this.updateContainerSize, apis: this.props.apis, index }
+    debug('renderDetail item', item, isPhoto, isVideo)
+    if (isPhoto) return (<PhotoDetail {...props} />)
+    if (isVideo) return (<VideoDetail {...props} />)
+    return (<div />)
+  }
+
   render() {
-    debug('renderContainer', this.leftItem, this.centerItem, this.rightItem)
+    // debug('renderContainer', this.leftItem, this.centerItem, this.rightItem)
     this.changeContainer()
 
     /* show hidden media or just normal view */
@@ -522,11 +541,7 @@ class DetailContainerInline extends React.Component {
                     transition: 'all 200ms cubic-bezier(0.0, 0.0, 0.2, 1)'
                   }}
                 >
-                  <PhotoDetail
-                    item={item}
-                    ipcRenderer={this.props.ipcRenderer}
-                    updateContainerSize={this.updateContainerSize}
-                  />
+                  { this.renderDetail(item, index) }
                 </div>
               ))
             }
