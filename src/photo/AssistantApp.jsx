@@ -139,6 +139,7 @@ class AssistantApp extends PhotoApp {
           hideMedia={this.props.hideMedia}
           removeMedia={this.props.removeMedia}
           startDownload={this.props.startDownload}
+          apis={this.props.apis}
         />
 
         {/* Selected Header */}
