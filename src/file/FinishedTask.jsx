@@ -38,7 +38,6 @@ class FinishedTask extends Component {
   }
 
   getFinishDate(d) {
-    console.log(d, typeof d)
     const date = new Date()
     if (typeof d === 'number') {
       date.setTime(d)
