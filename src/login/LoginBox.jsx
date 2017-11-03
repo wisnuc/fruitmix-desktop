@@ -89,7 +89,7 @@ class LoginBox extends React.Component {
     if (nextProps.user !== this.props.user) {
       this.setState({ password: '' })
       this.props.device.clearRequest('token')
-      this.isSameUser = this.isSameDevice && nextProps.user && this.lastDevice.user.uuid === nextProps.user.uuid
+      this.isSameUser = this.isSameDevice && nextProps.user && this.lastDevice.user && this.lastDevice.user.uuid === nextProps.user.uuid
       const index = global.config.users.findIndex(uc => nextProps.user && (uc.userUUID === nextProps.user.uuid) && uc.saveToken)
       this.token = index > -1 ? global.config.users[index].saveToken : null
       this.setState({
