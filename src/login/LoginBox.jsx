@@ -1,5 +1,5 @@
 import React from 'react'
-import { TextField } from 'material-ui'
+import { TextField, Checkbox } from 'material-ui'
 import muiThemeable from 'material-ui/styles/muiThemeable'
 
 import FlatButton from '../common/FlatButton'
@@ -10,14 +10,28 @@ class LoginBox extends React.Component {
     super(props)
     this.state = {
       password: '',
-      success: 0
     }
+
+    this.handleAutologin = () => {
+      if (this.state.autologin) this.setState({ autologin: false })
+      else this.setState({ autologin: true, saveToken: true })
+    }
+
+    this.handleSaveToken = () => this.setState({ saveToken: !this.state.saveToken })
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.user !== this.props.user) {
       this.setState({ password: '' })
       this.props.device.clearRequest('token')
+    }
+  }
+
+  componentWillMount() {
+    const thisDevice = this.props.device.mdev
+    const lastDevice = global.config && global.config.global.lastDevice || {}
+    if (lastDevice.address === thisDevice.address || lastDevice.serial === thisDevice.serial) {
+      this.setState({ autologin: lastDevice.autologin, saveToken: lastDevice.saveToken, preUser: lastDevice.user })
     }
   }
 
@@ -34,15 +48,39 @@ class LoginBox extends React.Component {
   login() {
     const { uuid, username } = this.props.user
     const password = this.state.password
-    this.props.device.request('token', { uuid, password }, (err) => {
+    this.props.device.request('token', { uuid, password }, (err, data) => {
       if (err) {
         console.log(`err:${err}`)
       } else {
-        console.log('Login !!', uuid, password, this.props.device, this.props.user)
+        console.log('Login !!', uuid, password, this.props.device, this.props.user, data)
+
+        Object.assign(this.props.device.mdev, {
+          autologin: this.state.autologin,
+          saveToken: this.state.saveToken ? data : null,
+          user: this.props.user
+        })
         this.props.done('LOGIN', this.props.device, this.props.user)
       }
     })
   }
+
+  autoLogin() {
+    console.log('this.state.preUser this.state.saveToken', this.state.preUser, this.state.saveToken, this.props.device)
+    Object.assign(this.props.device, {
+      token: {
+        isFulfilled: () => true,
+        ctx: this.state.preUser,
+        data: this.state.saveToken
+      }
+    })
+    Object.assign(this.props.device.mdev, {
+      autologin: this.state.autologin,
+      saveToken: this.state.saveToken,
+      user: this.state.preUser
+    })
+    return this.props.done('LOGIN', this.props.device, this.state.preUser)
+  }
+
   /* auto login */
   autologin() {
     const { uuid, username } = this.props.device.users.value()[0]
@@ -58,7 +96,10 @@ class LoginBox extends React.Component {
     })
   }
 
-  // componentDidMount() { this.autologin() }
+  componentDidMount() {
+    console.log('componentDidMount', this.state.preUser, this.state.autologin, this.state.saveToken)
+    if (this.state.preUser && this.state.autologin && this.state.saveToken) this.autoLogin()
+  }
 
   render() {
     const { token } = this.props.device
@@ -66,13 +107,16 @@ class LoginBox extends React.Component {
     const error = (token && token.isRejected()) ? token.reason().message === 'Unauthorized' ? '密码错误' : token.reason().message : null
     const success = token && token.isFulfilled()
 
+    console.log('LoginBox', this.state, this.props)
+    console.log('config', global.config)
+
     // 24 + 24 + 36 + 20 + 48 + 20 + 36 = ???
     return (
       <div
         style={{
           boxSizing: 'border-box',
           width: '100%',
-          height: this.props.open ? 224 : 0,
+          height: this.props.open ? 272 : 0,
           backgroundColor: '#FFF',
           paddingLeft: 24,
           paddingRight: 24,
@@ -120,15 +164,26 @@ class LoginBox extends React.Component {
                 /> }
             </div>
 
-            <div
-              style={{ width: '100%',
-                flex: '0 0 36px',
-                display: 'flex',
-                position: 'absolute',
-                bottom: 16,
-                right: 40 }}
-            >
+            <div style={{ width: '100%', flex: '0 0 48px' }}>
+              <Checkbox
+                label="记住密码"
+                disableTouchRipple
+                labelStyle={{ fontSize: 14, color: 'rgba(0,0,0,0.54)', marginLeft: -8 }}
+                iconStyle={{ height: 16, width: 16, marginTop: 2 }}
+                checked={!!this.state.saveToken}
+                onCheck={() => this.handleSaveToken()}
+              />
+              <Checkbox
+                label="自动登录"
+                disableTouchRipple
+                labelStyle={{ fontSize: 14, color: 'rgba(0,0,0,0.54)', marginLeft: -8 }}
+                iconStyle={{ height: 16, width: 16, marginTop: 2 }}
+                checked={!!this.state.autologin}
+                onCheck={() => this.handleAutologin()}
+              />
+            </div>
 
+            <div style={{ width: '100%', flex: '0 0 36px', display: 'flex', position: 'absolute', bottom: 16, right: 40 }} >
               <div style={{ flexGrow: 1 }} />
               { !success &&
               <FlatButton
