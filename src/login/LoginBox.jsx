@@ -49,9 +49,8 @@ class LoginBox extends React.Component {
     const { uuid, username } = this.props.user
     const password = this.state.password
     this.props.device.request('token', { uuid, password }, (err, data) => {
-      if (err) {
-        console.log(`err:${err}`)
-      } else {
+      if (err) console.log(`login err: ${err}`)
+      else {
         console.log('Login !!', uuid, password, this.props.device, this.props.user, data)
 
         Object.assign(this.props.device.mdev, {
@@ -98,7 +97,7 @@ class LoginBox extends React.Component {
 
   componentDidMount() {
     console.log('componentDidMount', this.state.preUser, this.state.autologin, this.state.saveToken)
-    if (this.state.preUser && this.state.autologin && this.state.saveToken) this.autoLogin()
+    // if (this.state.preUser && this.state.autologin && this.state.saveToken) this.autoLogin()
   }
 
   render() {

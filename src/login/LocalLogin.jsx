@@ -73,7 +73,6 @@ class Login extends StateUp(React.Component) {
     super(props)
 
     this.state = {
-
       enterUserpass: false,
       maint: false,
       hello: true,
@@ -415,12 +414,10 @@ class Login extends StateUp(React.Component) {
       return null
     } else if (status === 'ready') {
       const users = this.props.selectedDevice.users.value()
-      const style = { width: '100%', transition: 'all 300ms', position: 'relative' }
 
       if (users.length > 0) {
         return (
           <UserBox
-            style={style}
             device={this.props.selectedDevice}
             toggleDisplay={this.toggleDisplay}
             done={this.done.bind(this)}
