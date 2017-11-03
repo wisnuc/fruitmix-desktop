@@ -119,7 +119,7 @@ class Task {
 
     this.hash = new Transform({
       name: 'hash',
-      concurrency: 2,
+      concurrency: 1,
       push(x) {
         const { files, dirUUID, driveUUID, task } = x
         debug('this.hash push', { files, dirUUID, driveUUID })
