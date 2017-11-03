@@ -128,7 +128,7 @@ class WeChatBind extends React.Component {
         } else {
           debug('this.confirm this.userInfo', this.userInfo, this.props.account, this.props)
 
-          this.props.ipcRenderer.send('WECHAT_LOGIN', this.props.account.uuid, { weChat: this.userInfo })
+          this.props.ipcRenderer.send('UPDATE_USER_CONFIG', this.props.account.uuid, { weChat: this.userInfo })
           setTimeout(() => this.setState({ status: 'success', error: '' }), 500)
         }
       })
