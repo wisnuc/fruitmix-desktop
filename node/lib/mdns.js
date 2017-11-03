@@ -37,7 +37,7 @@ const parseHostname = (hostname) => {
   const domain = split[1]
 
   split = split[0].split('-')
-  if (split.length !== 3 || split[0] !== 'wisnuc') { return null }
+  if (split.length < 3 || split[0] !== 'wisnuc') { return null }
 
   return {
     name,
