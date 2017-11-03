@@ -111,7 +111,7 @@ class WechatLogin extends React.Component {
           },
           mdev: { address: lanip, domain: 'local' }
         })
-        this.props.ipcRenderer.send('WECHAT_LOGIN', user.uuid, { weChat: this.state.wxData.user })
+        this.props.ipcRenderer.send('UPDATE_USER_CONFIG', user.uuid, { weChat: this.state.wxData.user })
         this.done('LOGIN', this.props.selectedDevice, user)
       } else {
         debug('no available lanip', this.props.selectedDevice)
@@ -123,7 +123,7 @@ class WechatLogin extends React.Component {
           },
           mdev: { address: 'http://www.siyouqun.org', domain: 'remote', lanip: ips[0] }
         })
-        this.props.ipcRenderer.send('WECHAT_LOGIN', user.uuid, { weChat: this.state.wxData.user })
+        this.props.ipcRenderer.send('UPDATE_USER_CONFIG', user.uuid, { weChat: this.state.wxData.user })
         return this.done('LOGIN', this.props.selectedDevice, user)
       }
     }

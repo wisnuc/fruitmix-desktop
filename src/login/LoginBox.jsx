@@ -8,8 +8,15 @@ import { sharpCurve, sharpCurveDuration } from '../common/motion'
 class LoginBox extends React.Component {
   constructor(props) {
     super(props)
+    this.device = this.props.device.mdev
+    this.lastDevice = global.config.global.lastDevice || {}
+
+    this.isSameDevice = this.lastDevice.address === this.device.address || this.lastDevice.serial === this.device.serial
+
     this.state = {
       password: '',
+      saveToken: this.isSameDevice && this.lastDevice.saveToken,
+      autologin: this.isSameDevice && this.lastDevice.autologin
     }
 
     this.handleAutologin = () => {
@@ -17,87 +24,84 @@ class LoginBox extends React.Component {
       else this.setState({ autologin: true, saveToken: true })
     }
 
-    this.handleSaveToken = () => this.setState({ saveToken: !this.state.saveToken })
+    this.handleSaveToken = () => {
+      if (this.state.saveToken) {
+        this.token = null
+        this.setState({ autologin: false, saveToken: false })
+      }
+      else this.setState({ saveToken: true })
+    }
+
+    this.onInput = (e) => {
+      const value = e.target.value
+      this.setState({ password: value })
+      this.props.device.clearRequest('token')
+    }
+
+    this.login = () => {
+      const { uuid } = this.props.user
+      const password = this.state.password
+      this.props.device.request('token', { uuid, password }, (err, data) => {
+        if (err) console.log(`login err: ${err}`)
+        else {
+          console.log('Login !!', uuid, password, this.props.device, this.props.user, data)
+
+          Object.assign(this.props.device.mdev, {
+            autologin: this.state.autologin,
+            saveToken: this.state.saveToken ? data : null,
+            user: this.props.user
+          })
+          this.props.done('LOGIN', this.props.device, this.props.user)
+        }
+      })
+    }
+
+    this.fakeLogin = () => {
+      Object.assign(this.props.device, {
+        token: {
+          isFulfilled: () => true,
+          ctx: this.props.user,
+          data: this.token
+        }
+      })
+      Object.assign(this.props.device.mdev, {
+        autologin: this.state.autologin,
+        saveToken: this.token,
+        user: this.props.user
+      })
+      this.props.done('LOGIN', this.props.device, this.props.user)
+    }
+
+
+    this.onKeyDown = (e) => {
+      if (e.which !== 13) return
+      if (this.token) this.fakeLogin()
+      else if (this.state.password.length) this.login()
+    }
+
+    this.passwordMode = () => {
+      this.token = null
+      this.forceUpdate()
+    }
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.user !== this.props.user) {
       this.setState({ password: '' })
       this.props.device.clearRequest('token')
+      this.isSameUser = this.isSameDevice && nextProps.user && this.lastDevice.user.uuid === nextProps.user.uuid
+      const index = global.config.users.findIndex(uc => nextProps.user && (uc.userUUID === nextProps.user.uuid) && uc.saveToken)
+      this.token = index > -1 ? global.config.users[index].saveToken : null
+      this.setState({
+        autologin: this.isSameUser && this.lastDevice.autologin,
+        saveToken: this.token
+      })
     }
   }
 
-  componentWillMount() {
-    const thisDevice = this.props.device.mdev
-    const lastDevice = global.config && global.config.global.lastDevice || {}
-    if (lastDevice.address === thisDevice.address || lastDevice.serial === thisDevice.serial) {
-      this.setState({ autologin: lastDevice.autologin, saveToken: lastDevice.saveToken, preUser: lastDevice.user })
-    }
-  }
-
-  onInput(e) {
-    const value = e.target.value
-    this.setState({ password: value })
-    this.props.device.clearRequest('token')
-  }
-
-  onKeyDown(e) {
-    if (e.which === 13 && this.state.password.length) this.login()
-  }
-
-  login() {
-    const { uuid, username } = this.props.user
-    const password = this.state.password
-    this.props.device.request('token', { uuid, password }, (err, data) => {
-      if (err) console.log(`login err: ${err}`)
-      else {
-        console.log('Login !!', uuid, password, this.props.device, this.props.user, data)
-
-        Object.assign(this.props.device.mdev, {
-          autologin: this.state.autologin,
-          saveToken: this.state.saveToken ? data : null,
-          user: this.props.user
-        })
-        this.props.done('LOGIN', this.props.device, this.props.user)
-      }
-    })
-  }
-
-  autoLogin() {
-    console.log('this.state.preUser this.state.saveToken', this.state.preUser, this.state.saveToken, this.props.device)
-    Object.assign(this.props.device, {
-      token: {
-        isFulfilled: () => true,
-        ctx: this.state.preUser,
-        data: this.state.saveToken
-      }
-    })
-    Object.assign(this.props.device.mdev, {
-      autologin: this.state.autologin,
-      saveToken: this.state.saveToken,
-      user: this.state.preUser
-    })
-    return this.props.done('LOGIN', this.props.device, this.state.preUser)
-  }
-
-  /* auto login */
-  autologin() {
-    const { uuid, username } = this.props.device.users.value()[0]
-    const password = this.state.password
-    console.log('uuid', uuid)
-    console.log('password', 'w')
-    console.log('this.props.device', this.props.device)
-    console.log('this.props.user', this.props.user)
-    this.props.device.request('token', { uuid, password: 'w' }, (err) => {
-      if (err) { console.log(`err:${err}`) } else {
-        this.props.done('LOGIN', this.props.device, this.props.user)
-      }
-    })
-  }
 
   componentDidMount() {
-    console.log('componentDidMount', this.state.preUser, this.state.autologin, this.state.saveToken)
-    // if (this.state.preUser && this.state.autologin && this.state.saveToken) this.autoLogin()
+    console.log('componentDidMount', this.state.autologin, this.state.saveToken)
   }
 
   render() {
@@ -150,16 +154,23 @@ class LoginBox extends React.Component {
             <div style={{ flex: '0 0 20px' }} />
             <div style={{ width: '100%', flex: '0 0 48px' }}>
               { !success &&
+                this.token ?
                 <TextField
+                  key={this.props.user.uuid}
+                  fullWidth
+                  hintText="*********"
+                  onTouchTap={this.passwordMode}
+                />
+                : <TextField
                   key={this.props.user.uuid}
                   fullWidth
                   hintText="请输入密码"
                   errorText={error}
                   type="password"
                   disabled={busy}
-                  ref={(input) => { input && input.focus() }}
-                  onChange={this.onInput.bind(this)}
-                  onKeyDown={this.onKeyDown.bind(this)}
+                  ref={input => input && !this.token && input.focus()}
+                  onChange={this.onInput}
+                  onKeyDown={this.onKeyDown}
                 /> }
             </div>
 
@@ -196,8 +207,8 @@ class LoginBox extends React.Component {
                 style={{ marginRight: -16 }}
                 label="确认"
                 primary
-                disabled={this.state.password.length === 0 || busy}
-                onTouchTap={this.login.bind(this)}
+                disabled={!this.token && (this.state.password.length === 0 || busy)}
+                onTouchTap={() => (this.token ? this.fakeLogin() : this.login())}
               /> }
 
             </div>
