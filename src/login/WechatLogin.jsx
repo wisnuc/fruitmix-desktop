@@ -241,7 +241,7 @@ class WechatLogin extends React.Component {
       clearInterval(this.interval)
 
       this.setState({ wechatLogin: 'authorization' })
-      this.props.selectedDevice.pureRequest('wxToken', { code }, (err, res) => {
+      this.props.selectedDevice.pureRequest('getWechatToken', { code }, (err, res) => {
         if (err) {
           debug('this.getWXCode', code, err)
           this.setState({ wechatLogin: 'fail' })

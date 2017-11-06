@@ -2,7 +2,7 @@ import Debug from 'debug'
 import React, { Component, PureComponent } from 'react'
 import ReactDOM from 'react-dom'
 import { FlatButton, CircularProgress, Divider, IconButton, TextField } from 'material-ui'
-import { indigo900, cyan500, cyan900, teal900, lightGreen900, lime900, yellow900
+import { indigo900, cyan500, cyan900, teal900, lightGreen900, lime900, yellow900, teal500
 } from 'material-ui/styles/colors'
 import RefreshIcon from 'material-ui/svg-icons/navigation/refresh'
 
@@ -13,8 +13,10 @@ import DeviceInfo from './ModelNameCard'
 import InitWizard from './InitWizard'
 import MaintGuide from './MaintGuide'
 import NoDevice from './NoDevice'
-
 import UsernamePassword from './UsernamePassword'
+
+import PureDialog from '../common/PureDialog'
+import WeChatBind from '../control/WeChatBind'
 
 const debug = Debug('component:Login')
 const colorArray = [indigo900, cyan900, teal900, lightGreen900, lime900, yellow900]
@@ -159,6 +161,15 @@ class Login extends StateUp(React.Component) {
     this.toggleDisplay = (done) => {
       this.setState({ compact: !this.state.compact, dim: !this.state.dim })
       if (done) setTimeout(() => done(), duration)
+    }
+
+    /* open bind wechat dialog */
+    this.bindWechat = () => {
+      this.setState({ weChat: true })
+    }
+
+    this.bindWechatSuccess = () => {
+      this.setState({ weChatStatus: 'success' })
     }
   }
 
@@ -319,6 +330,8 @@ class Login extends StateUp(React.Component) {
           return (
             <InitWizard
               device={this.props.selectedDevice}
+              bindWechat={this.bindWechat}
+              weChatStatus={this.state.weChatStatus}
               showContent
               onCancel={this.initWizardOnCancelBound}
               onFail={this.initWizardOnFailBound}
@@ -398,6 +411,8 @@ class Login extends StateUp(React.Component) {
             refresh={this.refresh}
             OKAndLogin={this.initWizardOnOKBound}
             enterMaint={() => this.done('maintenance')}
+            bindWechat={this.bindWechat}
+            weChatStatus={this.state.weChatStatus}
           />
         )
       }
@@ -589,6 +604,21 @@ class Login extends StateUp(React.Component) {
               </div>
             </div>
         }
+        {/* wechat bind */}
+
+        <PureDialog open={!!this.state.weChat} onRequestClose={() => this.setState({ weChat: false })}>
+          {
+            this.state.weChat &&
+            <WeChatBind
+              onRequestClose={() => this.setState({ weChat: false })}
+              primaryColor={teal500}
+              account={selectedDevice.firstUser && selectedDevice.firstUser.data}
+              apis={{ pureRequest: selectedDevice.pureRequest }}
+              ipcRenderer={this.props.ipcRenderer}
+              success={this.bindWechatSuccess}
+            />
+          }
+        </PureDialog>
       </div>
     )
   }

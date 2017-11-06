@@ -135,7 +135,8 @@ class WeChatBind extends React.Component {
     }
 
     this.done = () => {
-      this.props.apis.request('account')
+      if (this.props.apis.request) this.props.apis.request('account')
+      if (this.state.status === 'success' && this.props.success) this.props.success()
       this.props.onRequestClose()
     }
   }

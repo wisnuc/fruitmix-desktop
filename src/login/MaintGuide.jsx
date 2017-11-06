@@ -199,6 +199,8 @@ class MaintGuide extends React.Component {
     return (
       <InitWizard
         device={device}
+        bindWechat={this.props.bindWechat}
+        weChatStatus={this.props.weChatStatus}
         showContent
         onCancel={this.backToVolumeCard}
         onFail={this.backToVolumeCard}
