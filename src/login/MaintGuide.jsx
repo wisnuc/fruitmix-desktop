@@ -42,7 +42,7 @@ class MaintGuide extends React.Component {
     this.backToVolumeCard = () => {
       this.setState({ expand: false }, () => {
         this.props.toggleExpanded(true)
-        setTimeout(() => this.setState({ detail: false }), 600)
+        setTimeout(() => this.props.refresh(), 600)
       })
     }
 
