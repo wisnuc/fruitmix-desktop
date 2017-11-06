@@ -212,7 +212,7 @@ class Device extends RequestManager {
   pureRequest(name, args, next) {
     let r
     switch (name) {
-      case 'wxToken':
+      case 'getWechatToken':
         r = request
           .get(`${cloudAddress}/c/v1/token`)
           .query({ code: args.code })
@@ -223,6 +223,29 @@ class Device extends RequestManager {
         r = request
           .get(`${cloudAddress}/c/v1/users/${args.guid}/stations`)
           .set('Authorization', args.token)
+        break
+
+      case 'creatTicket':
+        r = request 
+          .post(`http://${this.mdev.address}:3000/station/tickets/`)
+          .set('Authorization', `JWT ${this.state.token.data.token}`)
+          .send({ type: 'bind' })
+        break
+
+      case 'fillTicket':
+        r = request
+          .post(`${cloudAddress}/c/v1/tickets/${args.ticketId}/users`)
+          .set('Authorization', args.token)
+        break
+
+      case 'confirmTicket':
+        r = request 
+          .post(`http://${this.mdev.address}:3000/station/tickets/wechat/${args.ticketId}`)
+          .set('Authorization', `JWT ${this.state.token.data.token}`)
+          .send({
+            guid: args.guid,
+            state: args.state
+          })
         break
 
       case 'cloudUsers':

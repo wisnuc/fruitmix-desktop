@@ -2,11 +2,16 @@ import React from 'react'
 import prettysize from 'prettysize'
 import { RaisedButton, CircularProgress } from 'material-ui'
 import { Step, Stepper, StepLabel, StepContent } from 'material-ui/Stepper'
+import { teal500, pinkA200 } from 'material-ui/styles/colors'
+import ErrorIcon from 'material-ui/svg-icons/alert/error-outline'
+import CheckIcon from 'material-ui/svg-icons/navigation/check'
 
 import UsernamePassword from './UsernamePassword'
 import CreatingVolumeDiskSelection from './CreatingVolumeDiskSelection'
-import Checkmark from '../common/Checkmark'
 import FlatButton from '../common/FlatButton'
+
+const primaryColor = teal500
+const accentColor = pinkA200
 
 const StateUp = base => class extends base {
   setSubState(name, nextSubState) {
@@ -37,35 +42,32 @@ class InitWizard extends StateUp(React.Component) {
     super(props)
 
     this.state = {
-
-      // stepper
       finished: false,
       stepIndex: 0,
-
       volumeselect: new CreatingVolumeDiskSelection.State(),
       userpass: new UsernamePassword.State()
     }
-  }
 
-  handleNext() {
-    const { stepIndex } = this.state
-    this.setState(Object.assign({}, this.state, {
-      stepIndex: stepIndex + 1,
-      finished: stepIndex >= 2
-    }))
+    this.handleNext = () => {
+      const { stepIndex } = this.state
+      this.setState(Object.assign({}, this.state, {
+        stepIndex: stepIndex === 2 ? stepIndex : stepIndex + 1,
+        finished: stepIndex >= 2
+      }))
 
-    if (stepIndex === 2) {
-      const device = this.props.device
-      const { selection, mode } = this.state.volumeselect
-      const { username, password } = this.state.userpass
+      if (stepIndex === 2) {
+        const device = this.props.device
+        const { selection, mode } = this.state.volumeselect
+        const { username, password } = this.state.userpass
 
-      device.initWizard({ target: selection, mode, username, password })
+        device.initWizard({ target: selection, mode, username, password })
+      }
     }
-  }
 
-  handlePrev() {
-    const { stepIndex } = this.state
-    if (stepIndex > 0) this.setState({ stepIndex: stepIndex - 1 })
+    this.handlePrev = () => {
+      const { stepIndex } = this.state
+      if (stepIndex > 0) this.setState({ stepIndex: stepIndex - 1 })
+    }
   }
 
   renderStepActions(step) {
@@ -73,7 +75,7 @@ class InitWizard extends StateUp(React.Component) {
     return (
       <div style={{ margin: '12px 0' }}>
         <RaisedButton
-          label={stepIndex === 2 ? '完成' : '下一步'}
+          label={stepIndex === 2 ? '创建' : stepIndex === 3 ? '绑定微信' : stepIndex === 4 ? '进入系统' : '下一步'}
           disableTouchRipple
           disableFocusRipple
           disabled={
@@ -84,18 +86,19 @@ class InitWizard extends StateUp(React.Component) {
                 : false
           }
           primary
-          onTouchTap={this.handleNext.bind(this)}
+          onTouchTap={() => (step < 3 ? this.handleNext() : step === 4 ? this.props.onOK() : this.props.bindWechat())}
           style={{ marginRight: 12 }}
         />
-        {step > 0 && (
+        {
+          step > 0 && step < 4 &&
           <FlatButton
-            label="上一步"
+            label={step < 3 ? '上一步' : '忽略'}
             disabled={stepIndex === 0}
             disableTouchRipple
             disableFocusRipple
-            onTouchTap={this.handlePrev.bind(this)}
+            onTouchTap={() => (step < 3 ? this.handlePrev() : this.handleNext())}
           />
-        )}
+        }
       </div>
     )
   }
@@ -167,7 +170,7 @@ class InitWizard extends StateUp(React.Component) {
     } else if (token.isRejected()) {
       return ['error', '登录失败']
     }
-    return ['success', '成功']
+    return ['success', '安装成功']
   }
 
   renderFinished() {
@@ -176,31 +179,37 @@ class InitWizard extends StateUp(React.Component) {
     const info = this.finishedInfo()
 
     return (
-      <div
-        style={{ width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center' }}
-      >
-        <div style={{ flex: '0 0 48px' }}>
-          { info[0] === 'busy' && <CircularProgress /> }
-          { info[0] === 'success' && <Checkmark delay={300} /> }
+      <div style={{ width: '100%' }}>
+        <div style={{ display: 'flex', alignItems: 'center', marginTop: 24 }}>
+          <div style={{ width: 48, marginLeft: 12 }}>
+            { info[0] === 'busy' && <CircularProgress size={32} thickness={2.5} /> }
+            { info[0] === 'success' && <CheckIcon color={primaryColor} style={{ width: 40, height: 40 }} /> }
+            { info[0] === 'error' && <ErrorIcon color={accentColor} style={{ width: 40, height: 40 }} /> }
+          </div>
+          <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.54)', marginLeft: 24 }} >
+            { info[1] }
+          </div>
         </div>
-        <div
-          style={{ flex: '0 0 64px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 24,
-            color: 'rgba(0,0,0,0.54)' }}
-        >
-          { info[1] }
+        <div style={{ height: 36, margin: '24px 0px 12px 0px' }}>
+          {
+            info[0] !== 'busy' &&
+            <RaisedButton
+              label={info[0] === 'success' ? '下一步' : '退出'}
+              disableTouchRipple
+              disableFocusRipple
+              primary
+              onTouchTap={() => (info[0] === 'success' ? this.setState({ stepIndex: 3 }) : this.props.onCancel())}
+              style={{ marginRight: 12 }}
+            />
+          }
         </div>
-        <div style={{ flex: '0 0 48px' }}>
-          { info[0] === 'success'
-              ? <FlatButton label="进入系统" onTouchTap={this.props.onOK} />
-              : <FlatButton label="退出" onTouchTap={this.props.onCancel} /> }
+          {/*
+        <div style={{ flex: '0 0 24px' }}>
+          { info[0] === 'success' &&
+            ? <FlatButton label="进入系统" onTouchTap={this.props.onOK} />
+            : <FlatButton label="退出" onTouchTap={this.props.onCancel} />
         </div>
+        */}
       </div>
     )
   }
@@ -227,9 +236,13 @@ class InitWizard extends StateUp(React.Component) {
           alignItems: 'center',
           justifyContent: 'flex-end' }}
       >
-        { label && <FlatButton label={label} primary onTouchTap={action} /> }
+        { label && !this.state.finished && <FlatButton label={label} primary onTouchTap={action} /> }
       </div>
     )
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps && nextProps.weChatStatus === 'success') this.handleNext()
   }
 
   render() {
@@ -258,14 +271,28 @@ class InitWizard extends StateUp(React.Component) {
               </StepContent>
             </Step>
             <Step>
-              <StepLabel>确认</StepLabel>
+              <StepLabel>确认安装</StepLabel>
               <StepContent>
-                { this.renderConfirmation() }
-                { this.renderStepActions(2) }
+                { !this.state.finished && this.renderConfirmation() }
+                { !this.state.finished && this.renderStepActions(2) }
+                { this.state.finished && this.renderFinished() }
+              </StepContent>
+            </Step>
+            <Step>
+              <StepLabel>绑定微信</StepLabel>
+              <StepContent>
+                <p>您可以选择现在绑定微信，成功绑定后就可通过微信扫码，远程登录设备。</p>
+                { this.renderStepActions(3) }
+              </StepContent>
+            </Step>
+            <Step>
+              <StepLabel>进入系统</StepLabel>
+              <StepContent>
+                <p>您已成功创建了WINUC系统。</p>
+                { this.renderStepActions(4) }
               </StepContent>
             </Step>
           </Stepper>
-          { this.renderFinished() }
         </div>
         { this.renderBottomButton() }
       </div>
