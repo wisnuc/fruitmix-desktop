@@ -77,7 +77,7 @@ class CreatingVolumeDiskSelection extends React.PureComponent {
             }}
           />}
         </div>
-        <div style={{ flex: '0 0 160px' }}>{model}</div>
+        <div style={{ flex: '0 0 180px' }}>{model}</div>
         <div style={{ flex: '0 0 80px' }}>{name}</div>
         <div style={{ flex: '0 0 80px' }}>{size}</div>
         <div style={{ flex: '0 0 80px' }}>{iface}</div>
@@ -96,7 +96,7 @@ class CreatingVolumeDiskSelection extends React.PureComponent {
             <Divider />
             <div style={{ width: '100%', height: 32, display: 'flex', alignItems: 'center' }}>
               <div style={{ flex: '0 0 64px' }} />
-              <div style={{ flex: '0 0 160px' }}>型号</div>
+              <div style={{ flex: '0 0 180px' }}>型号</div>
               <div style={{ flex: '0 0 80px' }}>设备名</div>
               <div style={{ flex: '0 0 80px' }}>容量</div>
               <div style={{ flex: '0 0 80px' }}>接口</div>

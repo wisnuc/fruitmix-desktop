@@ -266,8 +266,8 @@ class Login extends StateUp(React.Component) {
   }
 
   initWizardOnFail() {
-    // FIXME
     this.toggleExpandedAsync().asCallback()
+    setTimeout(() => this.refresh(), 600)
   }
 
   initWizardOnOK() {
