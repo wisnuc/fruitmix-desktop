@@ -226,7 +226,7 @@ class MoveDialog extends React.PureComponent {
 
     /* finish post change dialog content to waiting/result */
     this.finish = (error, data) => {
-      const type = this.props.operation === 'copy' ? '拷贝' : '移动'
+      const type = this.props.type === 'copy' ? '拷贝' : this.props.type === 'move' ? '移动' : '分享'
       if (error) {
         this.setState({ loading: false })
         this.closeDialog()
