@@ -24,7 +24,7 @@ class ErrorBox extends React.PureComponent {
             open={this.state.open}
             onRequestClose={() => this.setState(state => Object.assign({}, state, { open: false }))}
           >
-            <textarea style={{ width: '100%', height: 480, resize: 'none' }} value={this.props.error} readOnly disabled />
+            <textarea style={{ width: '100%', height: 400, resize: 'none' }} value={this.props.error} readOnly disabled />
             <RaisedButton style={{ marginTop: 24 }} label="复制到剪贴板" primary onTouchTap={() => clipboard.writeText(this.props.error)} />
           </Dialog>
         </div>
