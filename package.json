@@ -67,6 +67,7 @@
     "mdns-js": "^0.5.3",
     "mkdirp": "^0.5.1",
     "nedb": "^1.8.0",
+    "nodejs-fs-utils": "^1.0.26",
     "pdfjs-dist": "^1.9.646",
     "prettysize": "^1.1.0",
     "react": "^15.6.1",

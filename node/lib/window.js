@@ -1,8 +1,15 @@
+import fs from 'fs'
 import path from 'path'
 import Debug from 'debug'
+import fsUtils from 'nodejs-fs-utils'
+import mkdirp from 'mkdirp'
+import rimraf from 'rimraf'
 import { ipcMain, BrowserWindow, app, dialog } from 'electron'
 import { clearTasks } from './transmissionUpdate'
 import store from './store'
+
+Promise.promisifyAll(fs) // babel would transform Promise to bluebird
+Promise.promisifyAll(fsUtils)
 
 const debug = Debug('lib:window')
 
@@ -91,14 +98,47 @@ const openNewWindow = (title, url) => {
   newWindow.loadURL(url)
 }
 
+/* clean dir: 'tmp tmpTrans thumb image' */
+const calcCacheSize = async () => {
+  const tmpSize = await fsUtils.fsizeAsync(store.getState().config.tmpPath, { countFolders: false })
+  const tmpTransSize = await fsUtils.fsizeAsync(store.getState().config.tmpTransPath, { countFolders: false })
+  const thumbSize = await fsUtils.fsizeAsync(store.getState().config.thumbPath, { countFolders: false })
+  const imageSize = await fsUtils.fsizeAsync(store.getState().config.imagePath, { countFolders: false })
+  return (tmpSize + tmpTransSize + thumbSize + imageSize)
+}
+
+const cleanCache = async () => {
+  await fsUtils.emptyDirAsync(store.getState().config.tmpPath)
+  await fsUtils.emptyDirAsync(store.getState().config.tmpTransPath)
+  await fsUtils.emptyDirAsync(store.getState().config.thumbPath)
+  await fsUtils.emptyDirAsync(store.getState().config.imagePath)
+  return true
+}
+
 ipcMain.on('newWebWindow', (event, title, url) => openNewWindow(title, url))
 
 ipcMain.on('POWEROFF', () => app.quit())
 
 ipcMain.on('SETCONFIG', (event, args) => {
-  console.log('SETCONFIG:', args)
+  // console.log('SETCONFIG:', args)
   global.configuration.updateGlobalConfigAsync(args)
     .catch(e => console.log('SETCONFIG error', e))
+})
+
+ipcMain.on('GetCacheSize', () => {
+  const wc = (getMainWindow()).webContents
+  calcCacheSize().then(size => wc.send('CacheSize', { error: null, size })).catch((e) => {
+    console.log('GetCacheSize error', e)
+    wc.send('CacheSize', { error: e, size: null })
+  })
+})
+
+ipcMain.on('CleanCache', () => {
+  const wc = (getMainWindow()).webContents
+  cleanCache().then(() => wc.send('CleanCacheResult', null)).catch((e) => {
+    console.log('CleanCache error', e)
+    wc.send('CleanCacheResult', e)
+  })
 })
 
 export { initMainWindow, getMainWindow }
