@@ -11,13 +11,15 @@ import DialogOverlay from '../common/DialogOverlay'
 import ChangeAccountDialog from './ChangeAccountDialog'
 import Checkmark from '../common/Checkmark'
 
+const stationName = '闻上盒子'
+
 const debug = Debug('component:control:WeChatBind')
 
 class WeChatBind extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      status: '',
+      status: 'connectingWX',
       error: ''
     }
 
@@ -103,18 +105,26 @@ class WeChatBind extends React.Component {
       })
     }
 
+    this.getStationInfo = () => {
+      if (this.retryCount > 3) return this.setState({ error: 'wisnucNet', status: '' })
+      this.retryCount += 1
+      // debug('this.getStationInfo', this.retryCount)
+      this.props.apis.pureRequest('info', null, (err, res) => {
+        if (res && res.body && res.body.connectState === 'CONNECTED') this.bindWechat()
+        else setTimeout(() => this.getStationInfo(), this.retryCount * 1000)
+      })
+    }
+
     this.bindWechat = () => {
-      this.setState({ status: 'connectingWX' }, () => {
-        this.props.apis.pureRequest('creatTicket', null, (error, res) => {
-          if (error) {
-            debug('this.bindWechat error', error)
-            this.setState({ error: 'creatTicket', status: '' })
-          } else {
-            debug('this.bindWechat success', res.body)
-            this.ticketId = res.body.id
-            this.initWXLogin()
-          }
-        })
+      this.props.apis.pureRequest('creatTicket', null, (error, res) => {
+        if (error) {
+          debug('this.bindWechat error', error)
+          this.setState({ error: 'creatTicket', status: '' })
+        } else {
+          debug('this.bindWechat success', res.body)
+          this.ticketId = res.body.id
+          this.initWXLogin()
+        }
       })
     }
 
@@ -151,27 +161,37 @@ class WeChatBind extends React.Component {
       }
       return null
     }
-    this.bindWechat()
+
+    this.retryCount = 0
+    this.getStationInfo()
   }
 
   render() {
     const { error, status } = this.state
     let text = ''
+    let tips = ''
     switch (error) {
       case 'net':
-        text = '无法连接到互联网，请检查您的网络设置！'
+        text = '无法连接到互联网'
+        tips = '请检查您的网络设置！'
         break
       case 'wxConnect':
-        text = '无法连接到微信，请检查您的网络设置！'
+        text = '无法连接到微信'
+        tips = '请检查您的网络设置！'
         break
       case 'wxBind':
         text = '绑定失败，无法获取微信授权'
+        break
+      case 'wisnucNet':
+        text = `${stationName}无法连接互联网`
+        tips = '请检查设备的网络设置'
         break
       case 'fillTicket':
         text = '绑定失败，无法获取微信信息'
         break
       case 'confirmTicket':
         text = '绑定失败，无法确认绑定信息'
+        tips = '该微信可能已经绑定过此设备'
         break
       case 'creatTicket':
         text = '绑定失败，无法创建绑定动作'
@@ -272,13 +292,16 @@ class WeChatBind extends React.Component {
             <div style={{ width: 332, height: 492, padding: 24, position: 'relative' }}>
               <div style={{ height: 16 }} />
               <div style={{ height: 270, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CloseIcon style={{ height: 72, width: 72 }} color={this.props.primaryColor} />
+                <CloseIcon style={{ height: 72, width: 72 }} color="#FF4081" />
               </div>
               <div style={{ height: 36 }} />
-              <div style={{ textAlign: 'center', fontSize: 20, height: 36 }}>
+              <div style={{ textAlign: 'center', fontSize: 20, height: 48 }}>
                 { text }
               </div>
-              <div style={{ height: 106 }} />
+              <div style={{ textAlign: 'center', fontSize: 16, height: 36, color: 'rgba(0,0,0,0.54)' }}>
+                { tips }
+              </div>
+              <div style={{ height: 58 }} />
               <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                 <FlatButton label="返回" primary onTouchTap={this.done} />
               </div>
