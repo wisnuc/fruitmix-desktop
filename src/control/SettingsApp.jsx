@@ -77,8 +77,8 @@ class SettingsApp extends React.Component {
               : <div style={{ marginTop: 2 }}> { this.state.cacheSize } </div>
           }
         </div>
-        <div style={{ width: 480, display: 'flex', alignItems: 'center' }}>
-          <RaisedButton primary label="清理" onTouchTap={this.cleanCache} disabled={this.state.loading} />
+        <div style={{ width: 480, display: 'flex', alignItems: 'center', marginLeft: -8 }}>
+          <FlatButton primary label="清理" onTouchTap={this.cleanCache} disabled={this.state.loading} />
         </div>
       </div>
     )
