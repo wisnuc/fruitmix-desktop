@@ -79,7 +79,8 @@ export const serverGet = (endpoint, callback) => {
     if (err) return callback(Object.assign({}, err, { response: err.response && err.response.body }))
     if (res.statusCode !== 200 && res.statusCode !== 206) {
       const e = new Error('http status code not 200')
-      e.code = 'EHTTPSTATUS'
+      // e.code = 'EHTTPSTATUS'
+      e.code = res.code
       e.status = res.statusCode
       return callback(e)
     }
@@ -258,8 +259,9 @@ export class DownloadFile {
       .on('response', (res) => {
         if (res.status !== 200 && res.status !== 206) {
           debug('download http status code not 200', res.error)
-          const e = new Error('http status code not 200')
-          e.error = res.error
+          const e = new Error()
+          e.message = res.error
+          e.code = res.code
           e.status = res.status
           this.finish(e)
         }
