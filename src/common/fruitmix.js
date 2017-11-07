@@ -354,6 +354,10 @@ class Fruitmix extends EventEmitter {
         break
 
       /* Ticket and Wechat API */
+      case 'info':
+        r= request.get(`http://${this.address}:3000/station/info`)
+        break
+
       case 'creatTicket':
         r = this.apost('station/tickets/', { type: 'bind' })
         break

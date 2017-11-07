@@ -257,9 +257,9 @@ class Device extends RequestManager {
         break
 
       case 'info':
-        r = request
-          .get(`http://${args.ip}:3000/station/info`)
-          .timeout(2000)
+        r = args && args.ip
+          ? request.get(`http://${args.ip}:3000/station/info`).timeout(2000)
+          : request.get(`http://${this.mdev.address}:3000/station/info`)
         break
 
       default:
