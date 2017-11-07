@@ -134,6 +134,7 @@ class Task {
       },
       transform: (x, callback) => {
         const { entry, dirUUID, driveUUID, stat, policy, retry, task } = x
+        if (task.paused) return
         if (task.state !== 'uploading' && task.state !== 'diffing') task.state = 'hashing'
         const hashStart = (new Date()).getTime()
         readXattr(entry, (error, attr) => {
