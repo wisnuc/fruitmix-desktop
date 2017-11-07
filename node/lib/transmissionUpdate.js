@@ -12,7 +12,8 @@ const debug = Debug('node:lib:transmissionUpdate:')
 const Tasks = []
 
 /* send message */
-let preLength = 0
+let preUserTasksLength = 0
+let preFinishTasksLength = 0
 let lock = false
 let last = true
 let id = -1 // The power save blocker id returned by powerSaveBlocker.start
@@ -35,14 +36,15 @@ const sendMsg = () => {
   }
 
   /* send message when all tasks finished */
-  if (preLength !== 0 && userTasks.length === 0) {
+  if (preUserTasksLength !== 0 && userTasks.length === 0) {
     if (powerSaveBlocker.isStarted(id)) {
       powerSaveBlocker.stop(id)
       // console.log('powerSaveBlocker stop', id, powerSaveBlocker.isStarted(id))
     }
-    getMainWindow().webContents.send('snackbarMessage', { message: '文件传输任务完成' })
+    if (finishTasks.length !== preFinishTasksLength) getMainWindow().webContents.send('snackbarMessage', { message: '文件传输任务完成' })
   }
-  preLength = userTasks.length
+  preUserTasksLength = userTasks.length
+  preFinishTasksLength = finishTasks.length
 
   /* Error: Object has been destroyed */
   try {
