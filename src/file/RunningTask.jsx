@@ -180,7 +180,7 @@ class RunningTask extends React.Component {
         <div style={{ flex: '0 0 80px' }}>{ this.renderPercent(task) }</div>
 
         {/* task restTime */}
-        <div style={{ flex: '0 0 164px' }}>{ this.formatSeconds(task.restTime) }</div>
+        <div style={{ flex: '0 0 120px' }}>{ this.formatSeconds(task.restTime) }</div>
 
         {/* Status */}
         <div style={{ flex: '0 0 100px' }}>{ this.getStatus(task) }</div>
