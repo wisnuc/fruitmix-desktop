@@ -11,6 +11,7 @@ class NewDriveDialog extends PureComponent {
     super(props)
 
     this.state = {
+      loading: false,
       focusOnce: true,
       label: '',
       writelist: '',
@@ -18,17 +19,21 @@ class NewDriveDialog extends PureComponent {
     }
 
     this.fire = () => {
+      if (this.state.loading) return
       const apis = this.props.apis
       const args = {
         label: this.state.label,
         writelist: this.state.writelist
       }
+      this.setState(Object.assign(this.state, { loading: true }))
       apis.request('adminCreateDrive', args, (err) => {
         if (!err) {
+          this.setState({ loading: false })
           this.props.onRequestClose()
           this.props.refreshDrives()
           this.props.openSnackBar('创建成功')
         } else {
+          this.setState({ loading: false })
           debug('adminCreateDrive failed', err)
           // this.props.openSnackBar(`创建失败: ${err.message}`)
           this.props.openSnackBar('创建失败')
@@ -157,7 +162,7 @@ class NewDriveDialog extends PureComponent {
             label="创建"
             primary={this.props.primary}
             secondary={this.props.accent}
-            disabled={this.state.label.length === 0 || !!this.state.errorText}
+            disabled={this.state.label.length === 0 || !!this.state.errorText || this.state.loading}
             onTouchTap={this.fire}
           />
         </div>
