@@ -185,7 +185,7 @@ class Configuration {
     const index = this.userConfigs.findIndex(uc => uc.getConfig() && uc.getConfig().userUUID === userUUID)
     if (index > -1) this.userConfigs.splice(index, 1)
     this.userConfigs.push(handle)
-    console.log('updateUserConfigAsync', userUUID, newConfig, userConfig)
+    // console.log('updateUserConfigAsync', userUUID, newConfig, userConfig)
     global.dispatch({
       type: 'USER_CONFIG_UPDATE',
       data: this.userConfigs.map(uc => uc.getConfig())

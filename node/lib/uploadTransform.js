@@ -57,8 +57,8 @@ class Task {
         clearInterval(this.countSpeed)
         return
       }
-      const speed = this.completeSize - this.lastTimeSize
-      this.speed = (this.lastSpeed + speed) / 2
+      const speed = Math.max(this.completeSize - this.lastTimeSize, 0)
+      this.speed = (this.lastSpeed + speed * 3) / 4
       this.lastSpeed = this.speed
       this.restTime = this.speed && (this.size - this.completeSize) / this.speed
       this.lastTimeSize = this.completeSize

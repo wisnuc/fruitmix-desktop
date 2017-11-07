@@ -23,12 +23,22 @@ const convert = (code) => {
       return '连接已断开'
     case 'ENOENT':
       return '文件不可读'
+    case 'EPERM':
+      return '访问权限不足'
     case 'ESERVER':
       return '服务器内部错误'
     case 'EOHTER':
       return '请求失败'
     case 'ENOSPC':
       return '磁盘空间已满'
+    case 'EHTTPSTATUS':
+      return '请求失败'
+    case 'ESHA256MISMATCH':
+      return '文件已修改'
+    case 'EOVERSIZE':
+      return '文件已修改'
+    case 'EUNDERSIZE':
+      return '文件已修改'
     default:
       return code || '未知错误'
   }
