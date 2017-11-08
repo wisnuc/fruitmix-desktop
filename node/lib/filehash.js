@@ -1,5 +1,5 @@
 const crypto = require('crypto')
-const fs = require('fs')
+const fs = require('original-fs')
 
 /* splice file by given size */
 const spliceFile = (size, perSize) => {
