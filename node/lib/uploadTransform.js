@@ -1,5 +1,5 @@
 const Promise = require('bluebird')
-const fs = Promise.promisifyAll(require('fs'))
+const fs = Promise.promisifyAll(require('original-fs'))
 const path = require('path')
 const childProcess = require('child_process')
 const debug = require('debug')('node:lib:uploadTransform:')

@@ -1,15 +1,17 @@
-import fs from 'fs'
 import path from 'path'
 import Debug from 'debug'
-import fsUtils from 'nodejs-fs-utils'
+import fs from 'original-fs'
 import mkdirp from 'mkdirp'
 import rimraf from 'rimraf'
+import fsUtils from 'nodejs-fs-utils'
+import Promise from 'bluebird'
 import { ipcMain, BrowserWindow, app, dialog } from 'electron'
 import { clearTasks } from './transmissionUpdate'
 import store from './store'
 
-Promise.promisifyAll(fs) // babel would transform Promise to bluebird
 Promise.promisifyAll(fsUtils)
+Promise.promisifyAll(mkdirp) // mkdirp.mkdirpAsync
+const rimrafAsync = Promise.promisify(rimraf)
 
 const debug = Debug('lib:window')
 
@@ -100,18 +102,22 @@ const openNewWindow = (title, url) => {
 
 /* clean dir: 'tmp tmpTrans thumb image' */
 const calcCacheSize = async () => {
-  const tmpSize = await fsUtils.fsizeAsync(store.getState().config.tmpPath, { countFolders: false })
-  const tmpTransSize = await fsUtils.fsizeAsync(store.getState().config.tmpTransPath, { countFolders: false })
-  const thumbSize = await fsUtils.fsizeAsync(store.getState().config.thumbPath, { countFolders: false })
-  const imageSize = await fsUtils.fsizeAsync(store.getState().config.imagePath, { countFolders: false })
+  const tmpSize = await fsUtils.fsizeAsync(store.getState().config.tmpPath, { countFolders: false, fs })
+  const tmpTransSize = await fsUtils.fsizeAsync(store.getState().config.tmpTransPath, { countFolders: false, fs })
+  const thumbSize = await fsUtils.fsizeAsync(store.getState().config.thumbPath, { countFolders: false, fs })
+  const imageSize = await fsUtils.fsizeAsync(store.getState().config.imagePath, { countFolders: false, fs })
   return (tmpSize + tmpTransSize + thumbSize + imageSize)
 }
 
 const cleanCache = async () => {
-  await fsUtils.emptyDirAsync(store.getState().config.tmpPath)
-  await fsUtils.emptyDirAsync(store.getState().config.tmpTransPath)
-  await fsUtils.emptyDirAsync(store.getState().config.thumbPath)
-  await fsUtils.emptyDirAsync(store.getState().config.imagePath)
+  await rimrafAsync(store.getState().config.tmpPath, fs)
+  await mkdirp.mkdirpAsync(store.getState().config.tmpPath)
+  await rimrafAsync(store.getState().config.tmpTransPath, fs)
+  await mkdirp.mkdirpAsync(store.getState().config.tmpTransPath)
+  await rimrafAsync(store.getState().config.thumbPath, fs)
+  await mkdirp.mkdirpAsync(store.getState().config.thumbPath)
+  await rimrafAsync(store.getState().config.imagePath, fs)
+  await mkdirp.mkdirpAsync(store.getState().config.imagePath)
   return true
 }
 
