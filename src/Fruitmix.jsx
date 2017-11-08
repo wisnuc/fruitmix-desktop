@@ -35,13 +35,6 @@ class Fruitmix extends React.Component {
     this.selectedDevice = null
     this.user = null
 
-    setTimeout(() => {
-      const mdns = adjustSeq(global.mdnsStore)
-      if (mdns.length > 0) {
-        this.selectDevice(mdns[0])
-      }
-    }, 0)
-
     this.state = {
       view: 'login',
       selectedDevice: new Device({ address: '' }),
@@ -54,6 +47,13 @@ class Fruitmix extends React.Component {
       setPalette: this.setPalette.bind(this),
       ipcRenderer
     }
+
+    setTimeout(() => {
+      const mdns = adjustSeq(global.mdnsStore)
+      if (mdns.length > 0) {
+        this.selectDevice(mdns[0])
+      }
+    }, 100) // make sure mdns scan finished
   }
 
   setPalette(primary1Color, accent1Color) {
