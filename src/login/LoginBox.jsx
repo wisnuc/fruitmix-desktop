@@ -192,26 +192,24 @@ class LoginBox extends React.Component {
                 onCheck={() => this.handleAutologin()}
               />
             </div>
-
-            <div style={{ width: '100%', flex: '0 0 36px', display: 'flex', position: 'absolute', bottom: 16, right: 40 }} >
-              <div style={{ flexGrow: 1 }} />
-              { !success &&
-              <FlatButton
-                label="取消"
-                primary
-                disabled={busy}
-                onTouchTap={this.props.cancel}
-              /> }
-              { !success &&
-              <FlatButton
-                style={{ marginRight: -16 }}
-                label="确认"
-                primary
-                disabled={!this.token && (this.state.password.length === 0 || busy)}
-                onTouchTap={() => (this.token ? this.fakeLogin() : this.login())}
-              /> }
-
-            </div>
+            {
+              !success &&
+                <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginTop: 12 }}>
+                  <FlatButton
+                    label="取消"
+                    primary
+                    disabled={busy}
+                    onTouchTap={this.props.cancel}
+                  />
+                  <FlatButton
+                    style={{ marginRight: -16 }}
+                    label="确认"
+                    primary
+                    disabled={!this.token && (this.state.password.length === 0 || busy)}
+                    onTouchTap={() => (this.token ? this.fakeLogin() : this.login())}
+                  />
+                </div>
+            }
           </div>
         )}
       </div>
