@@ -40,6 +40,7 @@ const login = (state = defaultState, action) => {
     const dbPath = path.join(app.getPath('appData'), 'wisnuc', 'dbCache')
     const uuid = action.data.user.uuid
     global.db.task = new nedb({ filename: path.join(dbPath, `${uuid}-task.db`), autoload: true })
+    global.db.task.persistence.setAutocompactionInterval(5000)
   }
 
   switch (action.type) {
