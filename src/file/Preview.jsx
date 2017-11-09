@@ -94,6 +94,10 @@ class Preview extends React.Component {
     }
   }
 
+  componentDidMount() {
+    this.forceUpdate()
+  }
+
   componentDidUpdate() {
     if (!this.refVideo || !this.props.parent) return
 
