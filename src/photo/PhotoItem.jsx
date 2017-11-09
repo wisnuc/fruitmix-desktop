@@ -66,11 +66,11 @@ class PhotoItem extends React.Component {
 
     this.parseDur = (dur) => {
       const h = Math.floor(dur / 3600)
-      const m = Math.floor((dur - h * 3600) / 60)
-      const s = Math.floor(dur - h * 3600 - m * 60)
-      if (h > 0) return `${h}:${m}:${s}`
-      if (s < 10) return `${h}:${m}:0${s}`
-      return `${m}:${s}`
+      let m = Math.floor((dur - h * 3600) / 60)
+      let s = Math.floor(dur - h * 3600 - m * 60)
+      if (s < 10) s = `0${s}`
+      if (h > 0 && m < 10) m = `0${m}`
+      return (h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`)
     }
   }
 
