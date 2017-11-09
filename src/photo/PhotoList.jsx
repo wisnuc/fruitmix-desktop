@@ -34,8 +34,8 @@ class PhotoList extends React.Component {
     this.showDateBar = (op) => {
       // debug('this.showDateBar', op)
       this.hover = op
-      this.refDateBox.style.opacity = op ? 0.87 : 0
-      this.refTimeline.style.opacity = op ? 1 : 0
+      if (this.refDateBox) this.refDateBox.style.opacity = op ? 0.87 : 0
+      if (this.refTimeline) this.refTimeline.style.opacity = op ? 1 : 0
     }
 
     this.onScroll = () => {
@@ -212,6 +212,7 @@ class PhotoList extends React.Component {
             {({ height, width }) => {
               /* get PhotoInfo */
               const PhotoInfo = this.props.setPhotoInfo(height, width, this.props.media)
+              // debug('PhotoInfo', PhotoInfo)
 
               /* set global variant */
               this.height = height

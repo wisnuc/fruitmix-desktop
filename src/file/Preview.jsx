@@ -76,6 +76,22 @@ class Preview extends React.Component {
         this.session = ''
       })
     }
+
+    /* stop video buffer */
+    this.addPauseEvent = (video) => {
+      video.addEventListener('pause', () => {
+        const playtime = video.currentTime
+        const tmpSrc = video.src
+        console.log('this.addPauseEvent', video.src)
+        video.src = ''
+        video.load()
+        video.src = tmpSrc
+        video.currentTime = playtime
+      }, { once: true })
+      video.addEventListener('play', () => {
+        this.addPauseEvent(video)
+      }, { once: true })
+    }
   }
 
   componentDidUpdate() {
@@ -84,6 +100,7 @@ class Preview extends React.Component {
     if (this.props.parent.style.left === '0px' && this.refVideo.paused && !this.played) {
       this.played = true
       this.refVideo.play()
+      this.addPauseEvent(this.refVideo)
     } else if (this.props.parent.style.left !== '0px') {
       this.played = false
       this.refVideo.pause()
@@ -124,9 +141,14 @@ class Preview extends React.Component {
         style={{ height: '80%', width: '80%', backgroundColor: 'rgba(0,0,0,0)' }}
         onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
       >
-        <video width="100%" height="100%" controls controlsList="nodownload" ref={ref => (this.refVideo = ref)} >
-          <source src={this.state.filePath} />
-        </video>
+        <video
+          width="100%"
+          height="100%"
+          controls
+          ref={ref => (this.refVideo = ref)}
+          controlsList="nodownload"
+          src={this.state.filePath}
+        />
       </div>
     )
   }
