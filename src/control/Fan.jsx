@@ -26,7 +26,7 @@ class Fan extends React.Component {
           // this.props.openSnackBar(`调节失败: ${err.message}`)
           this.props.openSnackBar('调节失败')
         }
-        this.propsrefresh()
+        this.props.refresh()
       })
     }
 
