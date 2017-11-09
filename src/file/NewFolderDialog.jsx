@@ -8,7 +8,8 @@ class NewFolderDialog extends React.PureComponent {
     super(props)
     this.state = {
       value: '',
-      errorText: ''
+      errorText: '',
+      loading: false
     }
 
     this.handleChange = (value) => {
@@ -24,6 +25,7 @@ class NewFolderDialog extends React.PureComponent {
     }
 
     this.fire = () => {
+      this.setState({ loading: true })
       const { apis, path } = this.props
       const curr = path[path.length - 1]
       const args = {
@@ -35,8 +37,9 @@ class NewFolderDialog extends React.PureComponent {
       apis.request('mkdir', args, (err) => {
         if (err) {
           console.log('mkdir error', err.code)
-          this.setState({ errorText: '创建失败' })
+          this.setState({ errorText: '创建失败', loading: false })
         } else {
+          this.setState({ loading: false })
           this.props.onRequestClose(true)
           this.props.openSnackBar('创建成功')
           this.props.refresh({ fileName: this.state.value })
@@ -63,6 +66,7 @@ class NewFolderDialog extends React.PureComponent {
             onChange={e => this.handleChange(e.target.value)}
             ref={input => input && input.focus()}
             onKeyDown={this.onKeyDown}
+            disabled={this.state.loading}
           />
         </div>
         <div style={{ height: 24 }} />
@@ -72,7 +76,7 @@ class NewFolderDialog extends React.PureComponent {
             label="确认"
             primary
             onTouchTap={this.fire}
-            disabled={this.state.value.length === 0 || !!this.state.errorText}
+            disabled={this.state.value.length === 0 || !!this.state.errorText || this.state.loading}
           />
         </div>
       </div>
