@@ -43,9 +43,6 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
     const name = path.parse(entry).base
     nameSpace.push(name)
     const stat = await fs.lstatAsync(path.resolve(entry))
-    console.log('stat ++++++')
-    console.log('stat', stat, stat.isDirectory(), stat.isFile())
-    console.log('stat ------')
     const entryType = stat.isDirectory() ? 'directory' : stat.isFile() ? 'file' : 'others'
     /* only upload directory or file, ignore others, such as symbolic link */
     if (entryType !== 'others' && !(isCloud() && stat.size > 1073741824) && !(entryType === 'file' && name === '.DS_Store')) {

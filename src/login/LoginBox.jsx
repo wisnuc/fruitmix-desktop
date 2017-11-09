@@ -110,8 +110,8 @@ class LoginBox extends React.Component {
     const error = (token && token.isRejected()) ? token.reason().message === 'Unauthorized' ? '密码错误' : token.reason().message : null
     const success = token && token.isFulfilled()
 
-    console.log('LoginBox', this.state, this.props)
-    console.log('config', global.config)
+    // console.log('LoginBox', this.state, this.props)
+    // console.log('config', global.config, global)
 
     // 24 + 24 + 36 + 20 + 48 + 20 + 36 = ???
     return (
