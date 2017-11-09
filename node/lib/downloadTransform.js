@@ -288,7 +288,12 @@ class Task {
   }
 
   updateStore() {
-    global.db.task.update({ _id: this.uuid }, { $set: this.status() }, {}, err => err && debug(this.name, 'updateStore error: ', err))
+    if (!this.WIP && !this.storeUpdated) {
+      this.WIP = true
+      global.db.task.update({ _id: this.uuid }, { $set: this.status() }, {}, err => err && debug(this.name, 'updateStore error: ', err))
+      this.storeUpdated = true
+      setTimeout(() => this && !(this.WIP = false) && this.updateStore(), 100)
+    } else this.storeUpdated = false
   }
 
   compactStore() {
