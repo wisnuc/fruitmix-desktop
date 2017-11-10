@@ -1,5 +1,7 @@
 import { toTimeSecond } from '../common/datetime'
 
+const getDateTime = (m) => m.metadata && (m.metadata.date || m.metadata.datetime)
+
 const sort = (a, b, sortType) => {
   if (a.type === 'directory' && b.type === 'file') return -1
   if (a.type === 'file' && b.type === 'directory') return 1
@@ -17,15 +19,13 @@ const sort = (a, b, sortType) => {
     case 'timeDown':
       return (a.mtime && b.mtime) ? (b.mtime - a.mtime) : a.name.localeCompare(b.name)
     case 'takenUp':
-      if (a.metadata && a.metadata.date && !(b.metadata && b.metadata.date)) return -1
-      if (!(a.metadata && a.metadata.date) && b.metadata && b.metadata.date) return 1
-      return (a.metadata && a.metadata.date && b.metadata && b.metadata.date)
-        ? toTimeSecond(a.metadata.date) - toTimeSecond(b.metadata.date) : a.name.localeCompare(b.name)
+      if (getDateTime(a) && !getDateTime(b)) return -1
+      if (!getDateTime(a) && getDateTime(b)) return 1
+      return getDateTime(a) && getDateTime(b) ? toTimeSecond(getDateTime(a)) - toTimeSecond(getDateTime(b)) : a.name.localeCompare(b.name)
     case 'takenDown':
-      if (a.metadata && a.metadata.date && !(b.metadata && b.metadata.date)) return -1
-      if (!(a.metadata && a.metadata.date) && b.metadata && b.metadata.date) return 1
-      return (a.metadata && a.metadata.date && b.metadata && b.metadata.date)
-        ? toTimeSecond(b.metadata.date) - toTimeSecond(a.metadata.date) : a.name.localeCompare(b.name)
+      if (getDateTime(a) && !getDateTime(b)) return -1
+      if (!getDateTime(a) && getDateTime(b)) return 1
+      return getDateTime(a) && getDateTime(b) ? toTimeSecond(getDateTime(b)) - toTimeSecond(getDateTime(a)) : a.name.localeCompare(b.name)
     default:
       return a.name.localeCompare(b.name)
   }

@@ -202,7 +202,7 @@ class FileDetail extends React.PureComponent {
     let height = ''
     let width = ''
     if (metadata) {
-      exifDateTime = metadata.date
+      exifDateTime = metadata.date || metadata.datetime
       exifModel = metadata.model
       height = metadata.h
       width = metadata.w
