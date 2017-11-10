@@ -263,6 +263,7 @@ export class DownloadFile {
           e.message = res.error
           e.code = res.code
           e.status = res.status
+          this.handle.abort()
           this.finish(e)
         }
         res.on('end', () => this.finish(null))
