@@ -151,21 +151,23 @@ class LoginBox extends React.Component {
             >
               {this.props.user.username}
             </div>
-            <div style={{ flex: '0 0 20px' }} />
-            <div style={{ width: '100%', flex: '0 0 48px' }}>
+            <div style={{ width: '100%', flex: '0 0 68px', position: 'relative' }}>
               { !success &&
                 this.token ?
                 <TextField
                   key={this.props.user.uuid}
+                  style={{ position: 'absolute', bottom: 0 }}
                   fullWidth
                   hintText="*********"
                   onTouchTap={this.passwordMode}
                 />
                 : <TextField
+                  style={{ position: 'absolute', bottom: 0 }}
                   key={this.props.user.uuid}
                   fullWidth
                   hintText="请输入密码"
                   errorText={error}
+                  errorStyle={{ marginTop: -48 }}
                   type="password"
                   disabled={busy}
                   ref={input => input && !this.token && input.focus()}
@@ -178,7 +180,7 @@ class LoginBox extends React.Component {
               <Checkbox
                 label="记住密码"
                 disableTouchRipple
-                labelStyle={{ fontSize: 14, color: 'rgba(0,0,0,0.54)', marginLeft: -8 }}
+                labelStyle={{ fontSize: 12, color: 'rgba(0,0,0,0.54)', marginLeft: -9 }}
                 iconStyle={{ height: 16, width: 16, marginTop: 2 }}
                 checked={!!this.state.saveToken}
                 onCheck={() => this.handleSaveToken()}
@@ -186,7 +188,7 @@ class LoginBox extends React.Component {
               <Checkbox
                 label="自动登录"
                 disableTouchRipple
-                labelStyle={{ fontSize: 14, color: 'rgba(0,0,0,0.54)', marginLeft: -8 }}
+                labelStyle={{ fontSize: 12, color: 'rgba(0,0,0,0.54)', marginLeft: -9 }}
                 iconStyle={{ height: 16, width: 16, marginTop: 2 }}
                 checked={!!this.state.autologin}
                 onCheck={() => this.handleAutologin()}
@@ -194,7 +196,17 @@ class LoginBox extends React.Component {
             </div>
             {
               !success &&
-                <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginTop: 12 }}>
+                <div
+                  style={{
+                    position: 'absolute',
+                    right: 0,
+                    bottom: 0,
+                    height: 52,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end'
+                  }}
+                >
                   <FlatButton
                     label="取消"
                     primary
@@ -202,7 +214,6 @@ class LoginBox extends React.Component {
                     onTouchTap={this.props.cancel}
                   />
                   <FlatButton
-                    style={{ marginRight: -16 }}
                     label="确认"
                     primary
                     disabled={!this.token && (this.state.password.length === 0 || busy)}
