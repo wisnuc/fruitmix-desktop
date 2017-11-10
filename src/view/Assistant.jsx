@@ -42,7 +42,7 @@ class Assistant extends Media {
       /* remove photos without hash and filter media by blacklist */
       const value = showBlacklist(preValue, blValue)
       /* sort photos by date */
-      value.sort((prev, next) => (parseDate(next.date) - parseDate(prev.date)) || (
+      value.sort((prev, next) => (parseDate(next.date || next.datetime) - parseDate(prev.date || next.datetime)) || (
         parseInt(`0x${next.hash}`, 16) - parseInt(`0x${prev.hash}`, 16)))
 
       this.setState({ preValue, media: value, blValue })

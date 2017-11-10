@@ -22,10 +22,11 @@ const parseDate = (date) => {
   return parseInt(a, 10)
 }
 const getName = (photo) => {
-  if (!photo.date) {
+  if (!photo.date || !photo.datetime) {
     return `IMG_UnkownDate-${photo.hash.slice(0, 5).toUpperCase()}-PC.${photo.m}`
   }
-  return `IMG-${photo.date.split(/\s+/g)[0].replace(/[:\s]+/g, '')}-${photo.hash.slice(0, 5).toUpperCase()}-PC.${photo.m}`
+  const date = photo.date || photo.datetime
+  return `IMG-${date.split(/\s+/g)[0].replace(/[:\s]+/g, '')}-${photo.hash.slice(0, 5).toUpperCase()}-PC.${photo.m}`
 }
 
 /* increase limit of listeners of EventEmitter */
@@ -82,11 +83,12 @@ class Media extends Base {
         let lineIndex = 0
         const dateUnknown = []
         this.allPhotos.forEach((item) => {
-          if (!item.date || item.date.search(/:/g) !== 4 || item.date.search(/^0/) > -1) { // only allow format: "2017:06:17 17:31:18"
+          const date = item.date || item.datetime
+          if (!date || date.search(/:/g) !== 4 || date.search(/^0/) > -1) { // only allow format: "2017:06:17 17:31:18"
             dateUnknown.push(item)
             return
           }
-          const formatExifDateTime = formatDate(item.date)
+          const formatExifDateTime = formatDate(date)
           const isRepeat = this.photoDates[this.photoDates.length - 1] === formatExifDateTime
           if (!isRepeat || MaxItem === 0) {
             MaxItem = MAX
@@ -395,7 +397,7 @@ class Media extends Base {
       /* remove photos without hash and filter media by blacklist */
       const value = removeBlacklist(preValue, blValue)
       /* sort photos by date */
-      value.sort((prev, next) => (parseDate(next.date) - parseDate(prev.date)) || (
+      value.sort((prev, next) => (parseDate(next.date || next.datetime) - parseDate(prev.date || prev.datetime)) || (
         parseInt(`0x${next.hash}`, 16) - parseInt(`0x${prev.hash}`, 16)))
 
       this.setState({ preValue, media: value, blValue })

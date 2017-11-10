@@ -59,6 +59,27 @@ const getResolution = (height, width) => {
   return `${res} 像素 ${height} x ${width}`
 }
 
+const convertGPS2 = (value, direction) => {
+  let d
+  let c
+  if (direction === 'N' || direction === 'E') {
+    d = 1
+  } else if (direction === 'S' || direction === 'W') {
+    d = -1
+  } else {
+    return null
+  }
+  try {
+    c = value.split(',').reduce((acc, data, index) => {
+      const [a, b] = data.split('/')
+      return (acc + (a / b) / 60 ** index)
+    }, 0)
+  } catch (e) {
+    return null
+  }
+  return Math.round(d * c * 1000) / 1000
+}
+
 const convertGPS = (gps) => {
   let result = { latitude: null, longitude: null }
   const array = gps && gps.split(', ').map(a => a.split(' ')).map(b => b.map(c => (/^[0-9]/.test(c) ? parseFloat(c, 10) : c)))
@@ -374,22 +395,22 @@ class DetailContainerInline extends React.Component {
   renderInfo() {
     debug('renderInfo', this.props.items.length, this.photo)
     if (!this.photo) return <div />
-    const { date, model, make, h, w, size, gps } = this.photo
+    const { date, datetime, model, make, h, w, size, gps, lat, latr, long, longr } = this.photo
 
-    const { latitude, longitude } = convertGPS(gps)
+    const { latitude, longitude } = gps ? convertGPS(gps) : { latitude: convertGPS2(lat, latr), longitude: convertGPS2(long, longr) }
 
     return (
       <div style={{ padding: '0px 32px 0px 32px', width: 296 }}>
         <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.54)', height: 48, display: 'flex', alignItems: 'center' }}> 详情 </div>
-        { date &&
+        { (date || datetime) &&
         <div style={{ height: 72, display: 'flex', alignItems: 'center' }}>
           <DateIcon color="rgba(0,0,0,0.54)" />
           <div style={{ marginLeft: 64 }}>
             <div style={{ color: 'rgba(0,0,0,0.87)', lineHeight: '24px' }}>
-              { phaseExifTime(date, 'date') }
+              { phaseExifTime((date || datetime), 'date') }
             </div>
             <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14, lineHeight: '20px' }}>
-              { `${phaseExifTime(date, 'week')}  ${phaseExifTime(date, 'time')}` }
+              { `${phaseExifTime((date || datetime), 'week')}  ${phaseExifTime((date || datetime), 'time')}` }
             </div>
           </div>
         </div>
@@ -422,7 +443,7 @@ class DetailContainerInline extends React.Component {
         }
 
         {/* location */}
-        { gps && longitude !== null && latitude !== null &&
+        { (gps || (lat && latr && long && longr)) && longitude !== null && latitude !== null &&
         <div style={{ height: 72, display: 'flex', alignItems: 'center' }}>
           <LoactionIcon color="rgba(0,0,0,0.54)" />
           <div style={{ marginLeft: 64 }}>
@@ -435,7 +456,7 @@ class DetailContainerInline extends React.Component {
         }
 
         {/* map */}
-        { gps && longitude !== null && latitude !== null &&
+        { (gps || (lat && latr && long && longr)) && longitude !== null && latitude !== null &&
           <div style={{ width: 360, height: 360, marginLeft: -32 }}>
             <Map
               longitude={longitude}
