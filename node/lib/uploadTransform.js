@@ -467,6 +467,17 @@ class Task {
     this.run()
     sendMsg()
   }
+
+  finish() {
+    this.paused = true
+    this.readDir.clear()
+    this.reqHandles.forEach(h => h.abort())
+    this.finishDate = (new Date()).getTime()
+    this.state = 'finished'
+    clearInterval(this.countSpeed)
+    this.updateStore()
+    sendMsg()
+  }
 }
 
 const createTask = (uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew, policies, preStatus) => {

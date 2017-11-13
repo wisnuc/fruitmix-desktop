@@ -74,6 +74,9 @@ const actionHandler = (e, uuids, type) => {
     case 'RESUME':
       func = task => task.resume()
       break
+    case 'FINISH':
+      func = task => task.finish()
+      break
     default:
       func = () => debug('error in actionHandler: no such action')
   }
@@ -101,6 +104,7 @@ ipcMain.on('OPEN_TRANSMISSION', (e, paths) => paths.forEach(p => shell.openItem(
 
 ipcMain.on('PAUSE_TASK', (e, uuids) => actionHandler(e, uuids, 'PAUSE'))
 ipcMain.on('RESUME_TASK', (e, uuids) => actionHandler(e, uuids, 'RESUME'))
+ipcMain.on('FINISH_TASK', (e, uuids) => actionHandler(e, uuids, 'FINISH'))
 ipcMain.on('DELETE_TASK', (e, uuids) => actionHandler(e, uuids, 'DELETE'))
 
 ipcMain.on('START_TRANSMISSION', () => {

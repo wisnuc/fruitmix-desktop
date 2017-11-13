@@ -317,6 +317,18 @@ class Task {
     this.run()
     sendMsg()
   }
+
+  finish() {
+    this.paused = true
+    this.readRemote.clear()
+    this.reqHandles.forEach(h => h.abort())
+    clearInterval(this.countSpeed)
+    this.state = 'finished'
+    this.finishDate = (new Date()).getTime()
+    this.updateStore()
+    this.compactStore()
+    sendMsg()
+  }
 }
 
 const createTask = (uuid, entries, name, dirUUID, driveUUID, taskType, createTime, isNew, downloadPath, preStatus) => {

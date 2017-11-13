@@ -90,6 +90,12 @@ class ErrorTree extends React.PureComponent {
       this.props.resume(uuid)
       this.props.onRequestClose()
     }
+
+    this.ignore = () => {
+      const uuid = this.props.errors[0].task
+      this.props.ignore(uuid)
+      this.props.onRequestClose()
+    }
   }
 
   render() {
@@ -119,8 +125,8 @@ class ErrorTree extends React.PureComponent {
           <div style={{ flexGrow: 1 }} />
           <FlatButton
             primary
-            label="取消"
-            onTouchTap={() => this.props.onRequestClose()}
+            label="全部忽略"
+            onTouchTap={this.ignore}
           />
           <FlatButton
             primary

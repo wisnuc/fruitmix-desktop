@@ -12,6 +12,7 @@ import FinishedTask from './FinishedTask'
 import ErrorDialogInTrans from './ErrorDialogInTrans'
 import FlatButton from '../common/FlatButton'
 import DialogOverlay from '../common/DialogOverlay'
+import PureDialog from '../common/PureDialog'
 
 const debug = Debug('component:file:TrsContainer:')
 
@@ -196,6 +197,10 @@ class TrsContainer extends React.Component {
 
     this.resume = (uuid) => {
       ipcRenderer.send('RESUME_TASK', [uuid])
+    }
+
+    this.ignore = (uuid) => {
+      ipcRenderer.send('FINISH_TASK', [uuid])
     }
 
     /* type: 'PAUSE', 'RESUME', 'DELETE' */
@@ -520,9 +525,17 @@ class TrsContainer extends React.Component {
         </DialogOverlay>
 
         {/* error dialog */}
-        <DialogOverlay open={!!this.state.errors} onRequestClose={() => this.setState({ errors: null })}>
-          { this.state.errors && <ErrorDialogInTrans errors={this.state.errors} resume={this.resume} /> }
-        </DialogOverlay>
+        <PureDialog open={!!this.state.errors} onRequestClose={() => this.setState({ errors: null })} >
+          {
+            this.state.errors &&
+              <ErrorDialogInTrans
+                errors={this.state.errors}
+                resume={this.resume}
+                ignore={this.ignore}
+                onRequestClose={() => this.setState({ errors: null })}
+              />
+          }
+        </PureDialog>
       </div>
     )
   }
