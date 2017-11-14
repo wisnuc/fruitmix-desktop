@@ -59,7 +59,7 @@ class Task {
         return
       }
       const speed = Math.max(this.completeSize - this.lastTimeSize, 0)
-      this.speed = (this.lastSpeed + speed * 3) / 4
+      this.speed = Math.round((this.lastSpeed + speed * 3) / 4)
       this.lastSpeed = this.speed
       this.restTime = this.speed && (((this.size - this.completeSize) / this.speed) + this.lastRestTime) / 2
       this.lastRestTime = this.restTime
@@ -279,7 +279,7 @@ class Task {
             /* combine to one post */
             const { dirUUID, policy } = x
             /* upload N file within one post */
-            const i = this.pending.findIndex(p => !isCloud() && p.length < 8
+            const i = this.pending.findIndex(p => !isCloud() && p.length < 1024
               && p[0].dirUUID === dirUUID && policy.mode === p[0].policy.mode)
             if (i > -1) {
               this.pending[i].push(x)
@@ -360,7 +360,6 @@ class Task {
       if (!task.paused && task.finishCount === task.count && this.readDir.isStopped() && !task.errors.length) {
         task.finishDate = (new Date()).getTime()
         task.state = 'finished'
-        task.compactStore()
         clearInterval(task.countSpeed)
       }
       task.updateStore()
@@ -435,22 +434,16 @@ class Task {
 
   createStore() {
     if (!this.isNew) return
-    const data = Object.assign({}, { _id: this.uuid }, this.status())
-    global.db.task.insert(data, err => err && debug(this.name, 'createStore error: ', err))
+    global.DB.save(this.uuid, this.status(), err => err && console.log(this.name, 'createStore error: ', err))
   }
 
   updateStore() {
     if (!this.WIP && !this.storeUpdated) {
       this.WIP = true
-      global.db.task.update({ _id: this.uuid }, { $set: this.status() }, {}, err => err && debug(this.name, 'updateStore error: ', err))
+      global.DB.save(this.uuid, this.status(), err => err && console.log(this.name, 'updateStore error: ', err))
       this.storeUpdated = true
       setTimeout(() => this && !(this.WIP = false) && this.updateStore(), 100)
     } else this.storeUpdated = false
-  }
-
-  compactStore() {
-    /* it's necessary to compact the data file to avoid size of db growing too large */
-    global.db.task.persistence.compactDatafile()
   }
 
   pause() {

@@ -66,7 +66,7 @@ const tempDownloadHandle = (e, args) => {
 }
 
 const startTransmissionHandle = () => {
-  global.db.task.find({}, (error, tasks) => {
+  global.DB.loadAll((error, tasks) => {
     if (error) return debug('load nedb store error', error)
     /* add t to load pre status */
     tasks.forEach(t => t.state !== 'finished' && t.trsType === 'download' &&

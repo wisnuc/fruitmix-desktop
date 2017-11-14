@@ -2,6 +2,7 @@ import path from 'path'
 import nedb from 'nedb'
 import { app } from 'electron'
 import { combineReducers, createStore } from 'redux'
+import db from './db'
 
 /* reducer: global config */
 const config = (state = {}, action) => {
@@ -39,8 +40,7 @@ const login = (state = defaultState, action) => {
   if (action.type === 'LOGIN') {
     const dbPath = path.join(app.getPath('appData'), 'wisnuc', 'dbCache')
     const uuid = action.data.user.uuid
-    global.db.task = new nedb({ filename: path.join(dbPath, `${uuid}-task.db`), autoload: true })
-    global.db.task.persistence.setAutocompactionInterval(5000)
+    global.DB = new db(path.join(dbPath, `${uuid}-v1.db`))
   }
 
   switch (action.type) {
