@@ -65,7 +65,7 @@ const actionHandler = (e, uuids, type) => {
       func = (task) => {
         if (typeof task.pause === 'function' && task.state !== 'finished') task.pause()
         Tasks.splice(Tasks.indexOf(task), 1)
-        global.db.task.remove({ _id: task.uuid }, { multi: true }, err => err && debug('DELETE_RUNNING error: ', err))
+        global.DB.remove(task.uuid, err => err && console.log('DELETE_RUNNING error: ', err))
       }
       break
     case 'PAUSE':
@@ -108,7 +108,7 @@ ipcMain.on('FINISH_TASK', (e, uuids) => actionHandler(e, uuids, 'FINISH'))
 ipcMain.on('DELETE_TASK', (e, uuids) => actionHandler(e, uuids, 'DELETE'))
 
 ipcMain.on('START_TRANSMISSION', () => {
-  global.db.task.find({}, (error, tasks) => {
+  global.DB.loadAll((error, tasks) => {
     if (error) return debug('load nedb store error', error)
     // debug('startTransmissionHandle', tasks)
     tasks.forEach(t => t.state === 'finished' && Tasks.push(t))

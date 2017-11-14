@@ -229,7 +229,6 @@ class Task {
         task.state = 'finished'
         clearInterval(task.countSpeed)
         task.finishDate = (new Date()).getTime()
-        task.compactStore()
       }
       task.updateStore()
       sendMsg()
@@ -285,22 +284,16 @@ class Task {
 
   createStore() {
     if (!this.isNew) return
-    const data = Object.assign({}, { _id: this.uuid }, this.status())
-    global.db.task.insert(data, err => err && debug(this.name, 'createStore error: ', err))
+    global.DB.save(this.uuid, this.status(), err => err && console.log(this.name, 'createStore error: ', err))
   }
 
   updateStore() {
     if (!this.WIP && !this.storeUpdated) {
       this.WIP = true
-      global.db.task.update({ _id: this.uuid }, { $set: this.status() }, {}, err => err && debug(this.name, 'updateStore error: ', err))
+      global.DB.save(this.uuid, this.status(), err => err && console.log(this.name, 'createStore error: ', err))
       this.storeUpdated = true
       setTimeout(() => this && !(this.WIP = false) && this.updateStore(), 100)
     } else this.storeUpdated = false
-  }
-
-  compactStore() {
-    /* it's necessary to compact the data file to avoid size of db growing too large */
-    global.db.task.persistence.compactDatafile()
   }
 
   pause() {
@@ -328,7 +321,6 @@ class Task {
     this.state = 'finished'
     this.finishDate = (new Date()).getTime()
     this.updateStore()
-    this.compactStore()
     sendMsg()
   }
 }

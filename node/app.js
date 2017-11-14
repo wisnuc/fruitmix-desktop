@@ -12,7 +12,6 @@ import clientUpdate from './lib/clientUpdate'
 import { initMainWindow, getMainWindow } from './lib/window'
 
 global.entryFileDir = __dirname
-global.db = {}
 
 store.subscribe(configObserver)
 

@@ -184,7 +184,7 @@ const uploadMediaHandle = (event, args) => {
 }
 
 const startTransmissionHandle = (event, args) => {
-  global.db.task.find({}, (error, tasks) => {
+  global.DB.loadAll((error, tasks) => {
     if (error) return debug('load nedb store error', error)
     tasks.forEach(t => t.state !== 'finished' && t.trsType === 'upload' &&
       createTask(t.uuid, t.entries, t.dirUUID, t.driveUUID, t.taskType, t.createTime, false, t.policies, t))
