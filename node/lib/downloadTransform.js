@@ -46,6 +46,7 @@ class Task {
       this.size = 0
       this.speed = 0
       this.lastSpeed = 0
+      this.lastRestTime = 0
       this.state = 'visitless'
       this.trsType = 'download'
       this.errors = []
@@ -60,9 +61,10 @@ class Task {
         return
       }
       const speed = this.completeSize - this.lastTimeSize
-      this.speed = (this.lastSpeed + speed) / 2
-      this.lastSpeed = speed
-      this.restTime = this.speed && (this.size - this.completeSize) / this.speed
+      this.speed = (this.lastSpeed + speed * 3) / 4
+      this.lastSpeed = this.speed
+      this.restTime = this.speed && (((this.size - this.completeSize) / this.speed) + this.lastRestTime) / 2
+      this.lastRestTime = this.restTime
       this.lastTimeSize = this.completeSize
       sendMsg()
     }
