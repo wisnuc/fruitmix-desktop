@@ -1,6 +1,5 @@
 import React from 'react'
 import Debug from 'debug'
-import { IconButton } from 'material-ui'
 import DeleteSvg from 'material-ui/svg-icons/action/delete'
 import FileSvg from 'material-ui/svg-icons/editor/insert-drive-file'
 import FolderSvg from 'material-ui/svg-icons/file/folder'
@@ -10,6 +9,7 @@ import InfoSvg from 'material-ui/svg-icons/action/info'
 import DownloadSvg from 'material-ui/svg-icons/file/file-download'
 import UploadSvg from 'material-ui/svg-icons/file/file-upload'
 import MultiSvg from 'material-ui/svg-icons/content/content-copy'
+import IconButton from '../common/IconButton'
 
 const debug = Debug('component:file:RunningTask: ')
 const svgStyle = { color: '#000', opacity: 0.54 }
