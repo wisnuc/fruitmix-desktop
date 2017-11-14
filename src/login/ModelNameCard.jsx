@@ -92,8 +92,7 @@ class ModelNameCard extends React.Component {
                     color: 'rgba(0,0,0,0.54)',
                     marginBottom: 12,
                     display: 'flex',
-                    alignItems: 'center',
-                    cursor: 'pointer'
+                    alignItems: 'center'
                   }}
                 >
                   { this.props.device.address }

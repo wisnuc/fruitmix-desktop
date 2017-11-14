@@ -132,6 +132,10 @@ class UserBox extends React.Component {
     }
   }
 
+  componentWillUnmount() {
+    clearTimeout(this.timer)
+  }
+
   renderAvatar(user) {
     const { username, uuid } = user
     let avatarUrl = null
