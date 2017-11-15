@@ -45,7 +45,7 @@ class PhotoList extends React.Component {
       const percentage = list.scrollTop / this.maxScrollTop
       this.date = this.photoMapDates[currentIndex].date
       this.currentDigest = this.photoMapDates[currentIndex].photos[0].hash
-      if (!this.firstScroll) this.props.memoize({ currentDigest: '', currentScrollTop: list.scrollTop })
+      if (!this.firstScroll) this.props.memoize({ currentDigest: this.currentDigest, currentScrollTop: list.scrollTop })
       // debug('this.props.memoize()', this.props.memoize())
 
       /* forceUpdate when first two scroll, this is necessary to show timeline */
@@ -190,12 +190,16 @@ class PhotoList extends React.Component {
     document.addEventListener('mouseup', this.onMouseUp, true)
   }
 
+  componentDidUpdate() {
+    console.log('componentDidUpdate componentDidUpdate componentDidUpdate ')
+    this.onScroll()
+  }
+
   componentWillUnmount() {
     clearTimeout(this.time)
     document.removeEventListener('mousemove', this.onMouseMove)
     document.removeEventListener('mouseup', this.onMouseUp)
   }
-
 
   renderLater() {
     clearTimeout(this.timeRenderLater)
