@@ -60,7 +60,7 @@ class Task {
         return
       }
       const speed = Math.max(this.completeSize - this.lastTimeSize, 0)
-      this.speed = Math.round((this.lastSpeed + speed * 3) / 4)
+      this.speed = Math.round((this.lastSpeed * 3 + speed) / 4)
       this.lastSpeed = this.speed
       this.restTime = this.speed && (((this.size - this.completeSize) / this.speed) + this.lastRestTime) / 2
       this.lastRestTime = this.restTime
@@ -461,7 +461,6 @@ class Task {
       global.DB.save(this.uuid, this.status(), err => err && console.log(this.name, 'updateStore error: ', err))
       this.storeUpdated = true
       this.countStore += 1
-      debug('this.countStore', this.countStore)
       setTimeout(() => this && !(this.WIP = false) && this.updateStore(), 100)
     } else this.storeUpdated = false
   }
