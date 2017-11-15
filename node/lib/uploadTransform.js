@@ -134,7 +134,7 @@ class Task {
           }
         })
         this.schedule()
-        debug('this.hash push forEach', files.length)
+        // debug('this.hash push forEach', files.length)
       },
       transform: (x, callback) => {
         const { entry, dirUUID, driveUUID, stat, policy, retry, task } = x

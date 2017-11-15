@@ -361,6 +361,9 @@ export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, ca
             } else callback(res.body)
           })
           .catch(e => callback(Object.assign({}, e, { response: e.response && e.response.body })))
+      } else if(!policy.retry) {
+        console.log('retry create folder', dirname, error.response && error.response.body)
+        createFold(driveUUID, dirUUID, dirname, localEntries, Object.assign({ retry: true }, policy), callback)
       } else callback(Object.assign({}, error, { response: error.response && error.response.body }))
     } else if (res && res.statusCode === 200) {
       // debug('createFold handle.end res.statusCode 200', res.body)
