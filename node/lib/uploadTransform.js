@@ -9,6 +9,7 @@ const { readXattr, setXattr } = require('./xattr')
 const { createFoldAsync, UploadMultipleFiles, serverGetAsync, isCloud } = require('./server')
 const { getMainWindow } = require('./window')
 const { Tasks, sendMsg } = require('./transmissionUpdate')
+const hashFileAsync = require('./filehash')
 
 /* return a new file name */
 const getName = (name, nameSpace) => {
@@ -124,15 +125,16 @@ class Task {
       concurrency: 1,
       push(x) {
         const { files, dirUUID, driveUUID, task } = x
-        debug('this.hash push', { files, dirUUID, driveUUID })
+        debug('this.hash push', files.length)
         files.forEach((f) => {
           if (f.stat.isDirectory()) {
             this.outs.forEach(t => t.push(Object.assign({}, f, { dirUUID, driveUUID, task, type: 'directory' })))
           } else {
             this.pending.push(Object.assign({}, f, { dirUUID, driveUUID, task }))
-            this.schedule()
           }
         })
+        this.schedule()
+        debug('this.hash push forEach', files.length)
       },
       transform: (x, callback) => {
         const { entry, dirUUID, driveUUID, stat, policy, retry, task } = x
@@ -144,21 +146,34 @@ class Task {
             callback(null, { entry, dirUUID, driveUUID, parts: attr.parts, type: 'file', stat, policy, retry, task })
             return
           }
-          const options = {
-            env: { absPath: entry, size: stat.size, partSize: 1024 * 1024 * 1024 },
-            encoding: 'utf8',
-            cwd: process.cwd()
-          }
-          const child = childProcess.fork(path.join(__dirname, './filehash'), [], options)
-          child.on('message', (result) => {
-            setXattr(entry, result, (err, xattr) => {
-              debug('hash finished', ((new Date()).getTime() - hashStart) / 1000)
-              const p = xattr && xattr.parts
-              const r = retry ? retry + 1 : retry
-              callback(null, { entry, dirUUID, driveUUID, parts: p, type: 'file', stat, policy, retry: r, task })
+
+          if (stat.size < 134217728) {
+            hashFileAsync(entry, stat.size, 1024 * 1024 * 1024)
+              .then(parts => setXattr(entry, { parts }, (err, xattr) => {
+                debug('hash finished', ((new Date()).getTime() - hashStart) / 1000)
+                const p = xattr && xattr.parts
+                const r = retry ? retry + 1 : retry
+                callback(null, { entry, dirUUID, driveUUID, parts: p, type: 'file', stat, policy, retry: r, task })
+              }))
+              .catch(callback)
+          } else {
+            const options = {
+              env: { absPath: entry, size: stat.size, partSize: 1024 * 1024 * 1024 },
+              encoding: 'utf8',
+              cwd: process.cwd()
+            }
+
+            const child = childProcess.fork(path.join(__dirname, './filehash'), [], options)
+            child.on('message', (result) => {
+              setXattr(entry, result, (err, xattr) => {
+                debug('hash finished', ((new Date()).getTime() - hashStart) / 1000)
+                const p = xattr && xattr.parts
+                const r = retry ? retry + 1 : retry
+                callback(null, { entry, dirUUID, driveUUID, parts: p, type: 'file', stat, policy, retry: r, task })
+              })
             })
-          })
-          child.on('error', callback)
+            child.on('error', callback)
+          }
         })
       }
     })
@@ -271,6 +286,7 @@ class Task {
       concurrency: 2,
       isBlocked: () => this.paused,
       push(X) {
+        // debug('this.upload push', X.length)
         X.forEach((x) => {
           if (x.type === 'directory') {
             x.task.finishCount += 1
@@ -279,7 +295,7 @@ class Task {
             /* combine to one post */
             const { dirUUID, policy } = x
             /* upload N file within one post */
-            const i = this.pending.findIndex(p => !isCloud() && p.length < 1024
+            const i = this.pending.findIndex(p => !isCloud() && p.length < 256
               && p[0].dirUUID === dirUUID && policy.mode === p[0].policy.mode)
             if (i > -1) {
               this.pending[i].push(x)
@@ -288,6 +304,7 @@ class Task {
             }
           }
         })
+        // debug('this.upload forEach', X.length)
         this.schedule()
       },
       transform: (X, callback) => {
@@ -433,6 +450,7 @@ class Task {
   }
 
   createStore() {
+    this.countStore = 0
     if (!this.isNew) return
     global.DB.save(this.uuid, this.status(), err => err && console.log(this.name, 'createStore error: ', err))
   }
@@ -442,6 +460,8 @@ class Task {
       this.WIP = true
       global.DB.save(this.uuid, this.status(), err => err && console.log(this.name, 'updateStore error: ', err))
       this.storeUpdated = true
+      this.countStore += 1
+      debug('this.countStore', this.countStore)
       setTimeout(() => this && !(this.WIP = false) && this.updateStore(), 100)
     } else this.storeUpdated = false
   }

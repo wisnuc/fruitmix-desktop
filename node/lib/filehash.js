@@ -74,6 +74,10 @@ const hashFileAsync = async (absPath, size, partSize) => {
 
 const env = process.env
 
-hashFileAsync(env.absPath, Number(env.size), Number(env.partSize))
-  .then(parts => process.send({ parts }))
-  .catch(error => console.log('hash error', env.absPath, error))
+if (env && env.absPath && env.size && env.partSize) {
+  hashFileAsync(env.absPath, Number(env.size), Number(env.partSize))
+    .then(parts => process.send({ parts }))
+    .catch(error => console.log('hash error', env.absPath, error))
+}
+
+module.exports = hashFileAsync
