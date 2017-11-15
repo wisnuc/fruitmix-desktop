@@ -58,10 +58,12 @@ class Task {
       if (this.paused) {
         this.speed = 0
         this.restTime = 0
+        sendMsg()
+        clearInterval(this.countSpeed)
         return
       }
-      const speed = this.completeSize - this.lastTimeSize
-      this.speed = (this.lastSpeed + speed * 3) / 4
+      const speed = Math.max(this.completeSize - this.lastTimeSize, 0)
+      this.speed = Math.round((this.lastSpeed * 3 + speed) / 4)
       this.lastSpeed = this.speed
       this.restTime = this.speed && (((this.size - this.completeSize) / this.speed) + this.lastRestTime) / 2
       this.lastRestTime = this.restTime
