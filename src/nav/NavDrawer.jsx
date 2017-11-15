@@ -181,15 +181,15 @@ class NavDrawer extends React.Component {
           selected={nav === 'home' || nav === 'public'}
           onTouchTap={() => navTo('home')}
         />
+        */}
 
         <MenuItem
-          icon={views.transmission.menuIcon()}
-          text={views.transmission.menuName()}
+          icon={views.download.menuIcon()}
+          text={views.download.menuName()}
           primaryColor={primaryColor}
-          selected={nav === 'transmission'}
-          onTouchTap={() => navTo('transmission')}
+          selected={nav === 'download'}
+          onTouchTap={() => navTo('download')}
         />
-        */}
 
         <MenuItem
           icon={views.media.menuIcon()}
