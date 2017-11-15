@@ -23,7 +23,15 @@ class db {
   }
 
   load(id, cb) {
-    fs.readFile(path.join(this.dir, id), (err, data) => cb(err, JSON.parse(data)))
+    fs.readFile(path.join(this.dir, id), (err, data) => {
+      let parsedData
+      try {
+        parsedData = JSON.parse(data)
+      } catch (e) {
+        return cb(e)
+      }
+      cb(err, parsedData)
+    })
   }
 
   loadAll(cb) {
@@ -33,16 +41,19 @@ class db {
       if (!dir.length) return cb(null, list)
       let count = dir.length
       dir.forEach(id => this.load(id, (error, data) => {
-        if (error) return console.log('load db data error: ', error)
-        list.push(data)
-        count -= 1
-        if (count === 0) cb(null, list)
+        if (error) {
+          this.remove(id, e => console.log('remove error data', id, 'error', e))
+        } else {
+          list.push(data)
+          count -= 1
+          if (count === 0) cb(null, list)
+        }
       }))
     })
   }
 
   remove(id, cb) {
-    fs.unlink(path.join(this.dir, id), cb)
+    rimraf(path.join(this.dir, id), cb)
   }
 
   clear(cb) {

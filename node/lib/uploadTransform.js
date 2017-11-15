@@ -43,10 +43,10 @@ class Task {
       this.size = 0
       this.speed = 0
       this.lastSpeed = 0
-      this.lastRestTime = 0
       this.state = 'visitless'
       this.trsType = 'upload'
       this.errors = []
+      this.startUpload = (new Date()).getTime()
     }
 
     this.initStatus()
@@ -62,8 +62,8 @@ class Task {
       const speed = Math.max(this.completeSize - this.lastTimeSize, 0)
       this.speed = Math.round((this.lastSpeed * 3 + speed) / 4)
       this.lastSpeed = this.speed
-      this.restTime = this.speed && (((this.size - this.completeSize) / this.speed) + this.lastRestTime) / 2
-      this.lastRestTime = this.restTime
+      this.averageSpeed = Math.round(this.completeSize / ((new Date()).getTime() - this.startUpload) * 1000)
+      this.restTime = this.speed && (this.size - this.completeSize) / this.averageSpeed
       this.lastTimeSize = this.completeSize
       sendMsg()
     }
