@@ -51,6 +51,8 @@ class Base extends EventEmitter {
         return deepPurple500
       case 'update':
         return blueGrey400
+      case 'download':
+        return indigo600
       case 'other':
         return deepPurple500
       default:

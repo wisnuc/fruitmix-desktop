@@ -35,6 +35,8 @@ import FanControl from '../view/FanControl'
 import ClientUpdate from '../view/ClientUpdate'
 import Settings from '../view/Settings'
 import Power from '../view/Power'
+import Download from '../view/Download'
+import FinishedList from '../view/FinishedList'
 
 const debug = Debug('component:nav:Navigation')
 
@@ -51,6 +53,9 @@ class NavViews extends React.Component {
     this.install('public', Public)
     // this.install('physical', Physical)
     this.install('transmission', Transmission)
+
+    this.install('download', Download)
+    this.install('finishedList', FinishedList)
 
     this.install('media', Media)
     this.install('assistant', Assistant)

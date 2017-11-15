@@ -319,6 +319,19 @@ class Fruitmix extends EventEmitter {
         r = request.get('http://10.10.9.86:3000/server')
         break
 
+      /* BT Download API */
+      case 'BTList':
+        r = this.aget('download')
+        break
+
+      case 'addMagnet':
+        r = this.apost('download', { magnetURL: args.magnetURL, downloadPath: args.downloadPath })
+        break
+
+      case 'handleMagnet': // op: 'pause', 'resume', 'destory'
+        r = this.apatch(`download/${args.id}`, { op: args.op })
+        break
+
       default:
         break
     }
