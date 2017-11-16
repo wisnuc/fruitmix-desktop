@@ -2,12 +2,13 @@ import React from 'react'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
 import { List, AutoSizer } from 'react-virtualized'
-import { CircularProgress, FloatingActionButton, Popover, Paper, Menu, MenuItem, TextField } from 'material-ui'
+import { CircularProgress, FloatingActionButton, Popover, IconButton, Menu, MenuItem, TextField } from 'material-ui'
 import DeleteSvg from 'material-ui/svg-icons/action/delete'
 import PlaySvg from 'material-ui/svg-icons/av/play-arrow'
 import PauseSvg from 'material-ui/svg-icons/av/pause'
 import ContentAdd from 'material-ui/svg-icons/content/add'
 
+import ListSelect from '../file/ListSelect'
 import FlatButton from '../common/FlatButton'
 import DialogOverlay from '../common/PureDialog'
 import PureDialog from '../common/PureDialog'
@@ -49,20 +50,61 @@ class BTDownload extends React.Component {
   constructor(props) {
     super(props)
 
+    /* handle select TODO */
+    this.select = new ListSelect(this)
+    this.select.on('updated', next => this.setState({ select: next }))
+
+
     this.state = {
-      loading: true
+      select: this.select.state,
+      loading: true,
+      WIP: false
     }
 
     this.toggleDialog = op => this.setState({ [op]: !this.state[op] })
 
-    /* actions */
-    this.pause = (uuid) => {
+    this.onRowTouchTap = (e, index) => {
+      /*
+       * using e.nativeEvent.button instead of e.nativeEvent.which
+       * 0 - left
+       * 1 - middle
+       * 2 - right
+       * e.type must be mouseup
+       * must be button 1 or button 2 of mouse
+       */
+
+      e.preventDefault() // important, to prevent other event
+      e.stopPropagation()
+
+      const type = e.type
+      const button = e.nativeEvent.button
+      if (type !== 'mouseup' || !(button === 0 || button === 2)) return
+
+      /* just touch */
+      this.select.touchTap(button, index)
+
+      /* right click */
+      if (button === 2) {
+        this.showContextMenu(e.nativeEvent.clientX, e.nativeEvent.clientY)
+      }
     }
 
-    this.resume = (uuid) => {
+    this.onRowMouseEnter = (e, index) => {
+      this.select.mouseEnter(index)
     }
+
+    this.onRowMouseLeave = (e, index) => {
+      this.deferredLeave = setTimeout(() => this.select.mouseLeave(index), 1)
+    }
+
+    /* actions */
 
     this.destroy = (uuid) => {
+    }
+
+    this.toggleStatus = (e, infoHash) => {
+      e.preventDefault() // important, to prevent other event
+      e.stopPropagation()
     }
 
     this.refresh = () => this.props.apis.request('BTList')
@@ -87,7 +129,7 @@ class BTDownload extends React.Component {
   }
 
   componentDidMount() {
-    this.refreshTimer = setInterval(this.refresh, 1000)
+    // this.refreshTimer = setInterval(this.refresh, 1000)
   }
 
   componentWillReceiveProps(nextProps) {
@@ -156,29 +198,14 @@ class BTDownload extends React.Component {
     )
   }
 
-  renderCircularProgress(progress, color) {
+  renderCircularProgress(progress, color, hovered, infoHash) {
     const p = progress > 1 ? 1 : progress < 0 ? 0 : progress
     const rightDeg = Math.min(45, p * 360 - 135)
     const leftDeg = Math.max(45, p * 360 - 135)
     return (
       <div style={{ width: 56, height: 56, position: 'relative' }}>
-        <div
-          style={{
-            position: 'absolute',
-            top: 6,
-            left: 6,
-            width: 36,
-            height: 36,
-            border: '4px solid #C5CAE9',
-            fontSize: 12,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '50%'
-          }}
-        >
-          { `${Math.round(p * 100)}%` }
-        </div>
+
+        {/* right circular */}
         <div style={{ width: 22, height: 44, marginLeft: 28, marginTop: 6, position: 'absolute', overflow: 'hidden' }}>
           <div
             style={{
@@ -195,8 +222,10 @@ class BTDownload extends React.Component {
             }}
           />
         </div>
+
+        {/* left circular */}
         <div style={{ width: 22, height: 44, marginLeft: 6, marginTop: 6, position: 'absolute', overflow: 'hidden' }}>
-          <div
+           <div
             style={{
               position: 'absolute',
               top: 0,
@@ -211,12 +240,41 @@ class BTDownload extends React.Component {
             }}
           />
         </div>
+
+        {/* process and action */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 6,
+            left: 6,
+            width: 36,
+            height: 36,
+            border: '4px solid #C5CAE9',
+            fontSize: 12,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '50%'
+          }}
+        >
+          {
+            hovered ?
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <IconButton onTouchTap={e => this.toggleStatus(e, infoHash)}>
+                  <PauseSvg color={this.props.primaryColor} />
+                </IconButton>
+              </div>
+              : `${Math.round(p * 100)}%`
+          }
+        </div>
       </div>
     )
   }
 
-  renderRow(task) {
-    const { magnetURL, name, downloadPath, progress, downloadSpeed, downloaded, timeRemaining } = task
+  renderRow(task, index) {
+    const { magnetURL, name, downloadPath, progress, downloadSpeed, downloaded, timeRemaining, infoHash } = task
+    const selected = this.state.select.selected && this.state.select.selected.findIndex(s => s === index) > -1
+    const hovered = this.state.select.hover === index
     return (
       <div
         style={{
@@ -226,12 +284,15 @@ class BTDownload extends React.Component {
           height: 56,
           fontSize: 14,
           color: 'rgba(0,0,0,0.87)',
-          backgroundColor: this.state.isSelected ? '#f4f4f4' : ''
+          backgroundColor: selected ? '#EEEEEE' : hovered ? '#F5F5F5' : ''
         }}
+        onTouchTap={e => this.onRowTouchTap(e, index)}
+        onMouseEnter={e => this.onRowMouseEnter(e, index)}
+        onMouseLeave={e => this.onRowMouseLeave(e, index)}
       >
         {/* CircularProgress */}
         <div style={{ flex: '0 0 56px' }}>
-          { this.renderCircularProgress(progress, this.props.primaryColor) }
+          { this.renderCircularProgress(progress, this.props.primaryColor, hovered, infoHash) }
         </div>
 
         {/* task item name */}
@@ -239,7 +300,6 @@ class BTDownload extends React.Component {
           <div
             style={{
               maxWidth: parseInt(window.innerWidth, 10) - 886,
-              userSelect: 'text',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap'
@@ -374,7 +434,7 @@ class BTDownload extends React.Component {
         <div style={{ height: 48 }} />
         {/* list */}
         <div style={{ overflowY: 'auto', width: '100%', height: 'calc(100% - 48px)' }}>
-          { this.props.tasks.map(task => this.renderRow(task)) }
+          { this.props.tasks.map((task, index) => this.renderRow(task, index)) }
         </div>
       </div>
     )
