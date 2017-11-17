@@ -82,6 +82,7 @@ class BTDownload extends React.Component {
 
       /* just touch */
       this.select.touchTap(button, index)
+      this.setState({ expand: this.state.expand === index ? -1 : index })
 
       /* right click */
       if (button === 2) {
@@ -99,7 +100,10 @@ class BTDownload extends React.Component {
 
     /* actions */
 
-    this.destroy = (uuid) => {
+    this.openDesdroy = (e, infoHash) => {
+      e.preventDefault() // important, to prevent other event
+      e.stopPropagation()
+      this.setState({ id: infoHash, destroy: true })
     }
 
     this.toggleStatus = (e, infoHash) => {
@@ -109,9 +113,23 @@ class BTDownload extends React.Component {
 
     this.refresh = () => this.props.apis.request('BTList')
 
-    this.isInputOK = v => v && v.length === 60 && /^magnet:\?xt=urn:btih:/.test(v)
+    this.isInputOK = v => v && v.length >= 60 && /^magnet:\?xt=urn:btih:/.test(v)
 
     this.handleChange = value => this.setState({ value })
+
+    this.destroy = () => {
+      this.setState({ WIP: true })
+      this.props.apis.request('handleMagnet', { id: this.state.id, op: 'destory' }, (err) => {
+        if (err) {
+          console.log('destroy error', err)
+          this.props.openSnackBar('删除失败！')
+        } else {
+          this.props.openSnackBar('删除成功！')
+        }
+        this.setState({ WIP: false, destroy: false })
+        this.refresh()
+      })
+    }
 
     this.addMagnet = () => {
       this.setState({ WIP: true })
@@ -124,12 +142,13 @@ class BTDownload extends React.Component {
           this.props.openSnackBar('添加成功！')
           this.setState({ WIP: false, magnet: false })
         }
+        this.refresh()
       })
     }
   }
 
   componentDidMount() {
-    // this.refreshTimer = setInterval(this.refresh, 1000)
+    this.refreshTimer = setInterval(this.refresh, 1000)
   }
 
   componentWillReceiveProps(nextProps) {
@@ -158,7 +177,7 @@ class BTDownload extends React.Component {
             backgroundColor: '#FAFAFA'
           }}
         >
-          <UploadIcon style={{ height: 64, width: 64, color: 'rgba(0,0,0,0.27)' }} />
+          <ContentAdd style={{ height: 64, width: 64, color: 'rgba(0,0,0,0.27)' }} />
           <div style={{ color: 'rgba(0,0,0,0.27)' }}> { '请点击左上按钮添加新的下载任务' } </div>
         </div>
       </div>
@@ -204,7 +223,6 @@ class BTDownload extends React.Component {
     const leftDeg = Math.max(45, p * 360 - 135)
     return (
       <div style={{ width: 56, height: 56, position: 'relative' }}>
-
         {/* right circular */}
         <div style={{ width: 22, height: 44, marginLeft: 28, marginTop: 6, position: 'absolute', overflow: 'hidden' }}>
           <div
@@ -276,75 +294,113 @@ class BTDownload extends React.Component {
     const selected = this.state.select.selected && this.state.select.selected.findIndex(s => s === index) > -1
     const hovered = this.state.select.hover === index
     return (
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 24px',
-          height: 56,
-          fontSize: 14,
-          color: 'rgba(0,0,0,0.87)',
-          backgroundColor: selected ? '#EEEEEE' : hovered ? '#F5F5F5' : ''
-        }}
-        onTouchTap={e => this.onRowTouchTap(e, index)}
-        onMouseEnter={e => this.onRowMouseEnter(e, index)}
-        onMouseLeave={e => this.onRowMouseLeave(e, index)}
-      >
-        {/* CircularProgress */}
-        <div style={{ flex: '0 0 56px' }}>
-          { this.renderCircularProgress(progress, this.props.primaryColor, hovered, infoHash) }
-        </div>
+      <div>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 24px',
+            height: 56,
+            fontSize: 14,
+            backgroundColor: selected ? '#EEEEEE' : hovered ? '#F5F5F5' : ''
+          }}
+          onTouchTap={e => this.onRowTouchTap(e, index)}
+          onMouseEnter={e => this.onRowMouseEnter(e, index)}
+          onMouseLeave={e => this.onRowMouseLeave(e, index)}
+        >
+          {/* CircularProgress */}
+          <div style={{ flex: '0 0 56px' }}>
+            { this.renderCircularProgress(progress, this.props.primaryColor, hovered, infoHash) }
+          </div>
 
-        {/* task item name */}
-        <div style={{ display: 'flex', flexGrow: 1, alignItems: 'center', marginLeft: 24 }} >
-          <div
-            style={{
-              maxWidth: parseInt(window.innerWidth, 10) - 886,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            { name || magnetURL }
+          {/* task item name */}
+          <div style={{ display: 'flex', flexGrow: 1, alignItems: 'center', marginLeft: 24 }} >
+            <div
+              style={{
+                maxWidth: parseInt(window.innerWidth, 10) - 886,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                fontWeight: 500
+              }}
+            >
+              { name || magnetURL }
+            </div>
+          </div>
+
+          {/* speed */}
+          <div style={{ flex: '0 0 120px' }}> { formatSpeed(downloadSpeed) } </div>
+          <div style={{ flex: '0 0 400px' }} />
+          <div style={{ flex: '0 0 90px' }} >
+            {
+              hovered &&
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <IconButton onTouchTap={e => this.openDesdroy(e, infoHash)}>
+                    <DeleteSvg color={this.props.primaryColor} />
+                  </IconButton>
+                </div>
+            }
           </div>
         </div>
 
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 96px',
+            fontSize: 14,
+            height: this.state.expand === index ? 72 * 1 : 0,
+            overflow: 'hidden',
+            transition: 'all 225ms'
+          }}
+        >
+          {/* task item name */}
+          <div style={{ display: 'flex', flexGrow: 1, alignItems: 'center', marginLeft: 24 }} >
+            <div
+              style={{
+                maxWidth: parseInt(window.innerWidth, 10) - 886,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              { name || magnetURL }
+            </div>
+          </div>
 
-        {/* progress bar */}
-        <div style={{ flex: '0 0 240px' }}>
-          <div
-            style={{
-              display: 'flex',
-              width: 200,
-              height: 6,
-              marginRight: 12,
-              marginTop: 8,
-              marginBottom: 4,
-              borderRadius: 2,
-              backgroundColor: 'rgba(0,0,0,.12)'
-            }}
-          >
-            <div style={{ backgroundColor: this.props.primaryColor, width: `${progress * 100}%` }} />
-            {/* size and speed */}
+          {/* progress bar */}
+          <div style={{ flex: '0 0 240px' }}>
+            <div
+              style={{
+                display: 'flex',
+                width: 200,
+                height: 6,
+                marginRight: 12,
+                marginTop: 8,
+                marginBottom: 4,
+                borderRadius: 2,
+                backgroundColor: 'rgba(0,0,0,.12)'
+              }}
+            >
+              <div style={{ backgroundColor: this.props.primaryColor, width: `${progress * 100}%` }} />
+              {/* size and speed */}
+            </div>
+            <div style={{ height: 20, width: 200, display: 'flex', alignItems: 'center' }}>
+              <div> { formatSize(downloaded) } </div>
+              <div style={{ flexGrow: 1 }} />
+              <div> { formatSpeed(downloadSpeed) } </div>
+            </div>
           </div>
-          <div style={{ height: 20, width: 200, display: 'flex', alignItems: 'center' }}>
-            <div> { formatSize(downloaded) } </div>
-            <div style={{ flexGrow: 1 }} />
-            <div> { formatSpeed(downloadSpeed) } </div>
-          </div>
+
+          {/* percent */}
+          <div style={{ flex: '0 0 60px' }}> { `${Math.round(progress * 100)}%` } </div>
+
+          {/* Status */}
+          <div style={{ flex: '0 0 120px' }}> { name ? '正在下载' : '获取信息中' } </div>
+
+          {/* task restTime */}
+          <div style={{ flex: '0 0 120px' }}>{ formatSeconds(timeRemaining / 1000) }</div>
         </div>
-
-        {/* percent */}
-        <div style={{ flex: '0 0 60px' }}> { `${Math.round(progress * 100)}%` } </div>
-
-        {/* Status */}
-        <div style={{ flex: '0 0 120px' }}> { name ? '正在下载' : '获取信息中' } </div>
-
-        {/* task restTime */}
-        <div style={{ flex: '0 0 120px' }}>{ formatSeconds(timeRemaining / 1000) }</div>
-
-
-        <div style={{ flex: '0 0 100px' }} />
       </div>
     )
   }
@@ -356,9 +412,6 @@ class BTDownload extends React.Component {
 
     /* loding */
     if (this.state.loading) return this.renderLoading()
-
-    /* no tasks */
-    if (this.props.tasks && !this.props.tasks.length) return this.renderNoTasks()
 
     return (
       <div style={{ position: 'relative', height: '100%', width: '100%' }}>
@@ -397,7 +450,7 @@ class BTDownload extends React.Component {
           </Menu>
         </Popover>
 
-        {/* Delete Runing Tasks Dialog */}
+        {/* Add magnet Dialog */}
         <DialogOverlay open={!!this.state.magnet} onRequestClose={() => this.setState({ magnet: false })}>
           <div>
             {
@@ -430,11 +483,44 @@ class BTDownload extends React.Component {
           </div>
         </DialogOverlay>
 
+        {/* Delete Tasks Dialog */}
+        <DialogOverlay open={!!this.state.destroy} onRequestClose={() => this.setState({ destroy: false })}>
+          <div>
+            {
+              this.state.destroy &&
+                <div style={{ width: 640, padding: '24px 24px 0px 24px' }}>
+                  <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
+                    { '确定要删除该任务吗' }
+                  </div>
+                  <div style={{ height: 20 }} />
+                  <div style={{ height: 24 }} />
+                  <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                    <FlatButton
+                      label="取消"
+                      primary
+                      onTouchTap={() => this.setState({ destroy: false })}
+                    />
+                    <FlatButton
+                      label="确定"
+                      disabled={!this.state.WIP}
+                      primary
+                      onTouchTap={this.destroy}
+                    />
+                  </div>
+                </div>
+            }
+          </div>
+        </DialogOverlay>
+
 
         <div style={{ height: 48 }} />
         {/* list */}
         <div style={{ overflowY: 'auto', width: '100%', height: 'calc(100% - 48px)' }}>
-          { this.props.tasks.map((task, index) => this.renderRow(task, index)) }
+          {
+            (this.props.tasks && !this.props.tasks.length)
+            ? this.renderNoTasks()
+            : this.props.tasks.map((task, index) => this.renderRow(task, index))
+          }
         </div>
       </div>
     )

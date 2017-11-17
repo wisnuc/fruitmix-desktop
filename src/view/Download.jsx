@@ -45,6 +45,10 @@ class Download extends Base {
     return ActionSwapVerticalCircle
   }
 
+  quickName() {
+    return '正在下载'
+  }
+
   appBarStyle() {
     return 'colored'
   }
@@ -62,7 +66,7 @@ class Download extends Base {
   }
 
   renderTitle({ style }) {
-    return <div style={Object.assign({}, style, { marginLeft: 184 })}>BT下载</div>
+    return <div style={Object.assign({}, style, { marginLeft: 184 })}>{ `正在下载（ ${this.state.tasks && this.state.tasks.length} ）`}</div>
   }
 
   renderContent({ navToDrive, openSnackBar }) {

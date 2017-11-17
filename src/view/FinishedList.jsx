@@ -38,7 +38,7 @@ class Download extends Base {
   }
 
   menuName() {
-    return 'BT下载'
+    return '已完成'
   }
 
   menuIcon() {
@@ -62,16 +62,18 @@ class Download extends Base {
   }
 
   renderTitle({ style }) {
-    return <div style={Object.assign({}, style, { marginLeft: 184 })}>BT下载</div>
+    return <div style={Object.assign({}, style, { marginLeft: 184 })}>已完成（ 0 ）</div>
   }
 
   renderContent({ navToDrive, openSnackBar }) {
     return (
-      <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'auto' }}>
+      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <FinishedList
           navToDrive={navToDrive}
-          tasks={this.state.tasks}
+          tasks={[]}
           apis={this.ctx.props.apis}
+          openSnackBar={openSnackBar}
+          primaryColor={this.groupPrimaryColor()}
         />
       </div>
     )
