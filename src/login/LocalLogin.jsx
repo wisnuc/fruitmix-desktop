@@ -304,7 +304,8 @@ class Login extends StateUp(React.Component) {
         storage: storage.isFulfilled() ? storage.value() : storage.reason(),
         users: users.isFulfilled() ? users.value() : users.reason()
       }
-      return JSON.stringify(obj, null, '  ')
+      return obj
+      // return JSON.stringify(obj, null, '  ')
     }
 
     const boxStyle = {
