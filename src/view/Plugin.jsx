@@ -13,7 +13,7 @@ class Plugin extends Base {
   }
 
   navGroup() {
-    return 'settings'
+    return 'device'
   }
 
   menuName() {
