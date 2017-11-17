@@ -1,5 +1,6 @@
 import React from 'react'
 import Debug from 'debug'
+import EventListener from 'react-event-listener'
 import { CircularProgress } from 'material-ui'
 import UploadIcon from 'material-ui/svg-icons/file/cloud-upload'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
@@ -34,6 +35,8 @@ class FileContent extends React.Component {
       if (copy || createNewFolder || this.props.home.delete || loading || move || rename || share) return
       if (this.props.select) this.props.select.keyEvent(e.ctrlKey, e.shiftKey)
     }
+
+    this.handleResize = () => this.forceUpdate()
 
     /* touchTap file */
     this.onRowTouchTap = (e, index) => {
@@ -354,6 +357,7 @@ class FileContent extends React.Component {
     /* got list */
     return (
       <div style={{ width: '100%', height: '100%' }}>
+        <EventListener target="window" onResize={this.handleResize} />
         {/* render list */}
         {
           this.props.gridView

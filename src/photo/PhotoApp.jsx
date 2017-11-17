@@ -34,9 +34,7 @@ class PhotoApp extends React.Component {
       this.setState({ openDetail: true })
     }
 
-    this.handleResize = () => {
-      this.forceUpdate()
-    }
+    this.handleResize = () => this.forceUpdate()
 
     this.toggleDialog = op => this.setState({ [op]: !this.state[op] })
 
