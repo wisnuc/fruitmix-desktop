@@ -3,6 +3,7 @@ const fs = Promise.promisifyAll(require('original-fs'))
 const path = require('path')
 const childProcess = require('child_process')
 const debug = require('debug')('node:lib:uploadTransform:')
+const sanitize = require('sanitize-filename')
 
 const Transform = require('./transform')
 const { readXattr, setXattr } = require('./xattr')
@@ -46,6 +47,7 @@ class Task {
       this.state = 'visitless'
       this.trsType = 'upload'
       this.errors = []
+      this.warnings = []
       this.startUpload = (new Date()).getTime()
     }
 
@@ -84,9 +86,30 @@ class Task {
             const entry = entries[i]
             const stat = await fs.lstatAsync(path.resolve(entry))
             const fullName = path.parse(entry).base
-            if (fullName === '.DS_Store' && !stat.isDirectory()) continue
-            if (!stat.isFile() && !stat.isDirectory()) continue
-            else task.count += 1
+            if (fullName === '.DS_Store' && !stat.isDirectory()) {
+              task.warnings.push(Object.assign({
+                pipe: 'readDir', entry, error: { code: 'EDSSTORE' }, policy, stat, task: task.uuid, type: 'file'
+              }))
+              continue
+            }
+            if (!stat.isFile() && !stat.isDirectory()) {
+              task.warnings.push(Object.assign({
+                pipe: 'readDir', entry, error: { code: 'ETYPE' }, policy, stat, task: task.uuid
+              }))
+              console.log('unsupport type', entry)
+              continue
+            }
+
+            const type = stat.isDirectory() ? 'directory' : 'file'
+            if (fullName !== sanitize(fullName)) {
+              task.warnings.push(Object.assign({
+                pipe: 'readDir', entry, error: { code: 'ENAME' }, policy, stat, task: task.uuid, type
+              }))
+              console.log('invalid name:', entry)
+              continue
+            }
+
+            task.count += 1
 
             if (stat.isDirectory()) {
               /* create fold and return the uuid */
@@ -374,7 +397,8 @@ class Task {
       const { dirUUID, task } = x
       getMainWindow().webContents.send('driveListUpdate', { uuid: dirUUID })
       // debug('this.readDir.on data', task.finishCount, task.count, this.readDir.isStopped())
-      if (!task.paused && task.finishCount === task.count && this.readDir.isStopped() && !task.errors.length) {
+      if (!task.paused && task.finishCount === task.count && this.readDir.isStopped()
+        && !task.errors.length && !task.warnings.length) {
         task.finishDate = (new Date()).getTime()
         task.state = 'finished'
         clearInterval(task.countSpeed)
@@ -413,7 +437,7 @@ class Task {
         })
       })
       if (this.errors.length !== preLength) this.updateStore()
-      if (this.errors.length > 8 || (this.readDir.isStopped() && this.errors.length)) {
+      if (this.errors.length > 8 || (this.readDir.isStopped() && (this.errors.length || this.warnings.length))) {
         debug('errorCount', this.errors.length)
         this.paused = true
         clearInterval(this.countSpeed)
@@ -444,6 +468,7 @@ class Task {
       speed: this.speed,
       lastSpeed: this.lastSpeed,
       state: this.state,
+      warnings: this.warnings,
       errors: this.errors,
       trsType: this.trsType
     })

@@ -6,6 +6,7 @@ import FolderSvg from 'material-ui/svg-icons/file/folder'
 import PlaySvg from 'material-ui/svg-icons/av/play-arrow'
 import PauseSvg from 'material-ui/svg-icons/av/pause'
 import InfoSvg from 'material-ui/svg-icons/action/info'
+import WarningIcon from 'material-ui/svg-icons/alert/warning'
 import DownloadSvg from 'material-ui/svg-icons/file/file-download'
 import UploadSvg from 'material-ui/svg-icons/file/file-upload'
 import MultiSvg from 'material-ui/svg-icons/content/content-copy'
@@ -38,7 +39,8 @@ class RunningTask extends React.Component {
 
     this.checkError = () => {
       debug('this.checkError', this.props.task)
-      this.props.openErrorDialog(this.props.task.errors)
+      const combined = [...this.props.task.errors, ...this.props.task.warnings]
+      this.props.openErrorDialog(combined)
     }
   }
 
@@ -189,7 +191,9 @@ class RunningTask extends React.Component {
         <div style={{ flex: '0 0 120px', display: 'flex', alignItems: 'center' }}>
           {
             task.state === 'failed'
-            ? <IconButton iconStyle={{ color: '#F44336 ' }} onTouchTap={this.checkError} tooltip="查看"> <InfoSvg /> </IconButton>
+            ? <IconButton onTouchTap={this.checkError} tooltip="查看">
+              { task.errors.length ? <InfoSvg color="#F44336" /> : <WarningIcon color="#FF9800" /> }
+            </IconButton>
             : <IconButton iconStyle={svgStyle} onTouchTap={this.toggleTask} tooltip={task.paused ? '开始' : '暂停'}>
               { task.paused ? <PlaySvg /> : <PauseSvg /> }
             </IconButton>
