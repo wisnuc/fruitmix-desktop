@@ -3,8 +3,8 @@ import Debug from 'debug'
 import UpdateIcon from 'material-ui/svg-icons/action/system-update-alt'
 import ListIcon from 'material-ui/svg-icons/action/list'
 import Base from './Base'
-import FirmwareUpdateApp from '../control/FirmwareUpdateApp'
-import FirmDetail from '../control/FirmDetail'
+import FirmwareUpdateApp from '../device/FirmwareUpdateApp'
+import FirmDetail from '../device/FirmDetail'
 import FlatButton from '../common/FlatButton'
 
 const debug = Debug('view:component:update')

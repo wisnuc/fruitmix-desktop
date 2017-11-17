@@ -1,7 +1,7 @@
 import React from 'react'
 import DeviceAccessTime from 'material-ui/svg-icons/device/access-time'
 import Base from './Base'
-import TimeDateInfo from '../control/TimeDateInfo'
+import TimeDateInfo from '../device/TimeDateInfo'
 
 class TimeDate extends Base {
   constructor(ctx) {
