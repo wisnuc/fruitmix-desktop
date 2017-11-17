@@ -192,7 +192,7 @@ class RunningTask extends React.Component {
           {
             task.state === 'failed'
             ? <IconButton onTouchTap={this.checkError} tooltip="查看">
-              { task.errors.length ? <InfoSvg color="#F44336" /> : <WarningIcon color="#FF9800" /> }
+              { task.errors.length ? <InfoSvg color="#F44336" /> : <WarningIcon color="#FB8C00" /> }
             </IconButton>
             : <IconButton iconStyle={svgStyle} onTouchTap={this.toggleTask} tooltip={task.paused ? '开始' : '暂停'}>
               { task.paused ? <PlaySvg /> : <PauseSvg /> }
@@ -200,7 +200,7 @@ class RunningTask extends React.Component {
           }
           {
             task.paused &&
-              <IconButton iconStyle={svgStyle} onTouchTap={this.props.delete} tooltip="取消">
+              <IconButton iconStyle={svgStyle} onTouchTap={this.props.delete} tooltip="删除">
                 <DeleteSvg />
               </IconButton>
           }
