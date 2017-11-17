@@ -37,6 +37,7 @@ import Settings from '../view/Settings'
 import Power from '../view/Power'
 import Download from '../view/Download'
 import FinishedList from '../view/FinishedList'
+import Plugin from '../view/Plugin'
 
 const debug = Debug('component:nav:Navigation')
 
@@ -70,13 +71,15 @@ class NavViews extends React.Component {
     this.install('adminUsers', AdminUsers)
     this.install('adminDrives', AdminDrives)
     this.install('device', Device)
+    this.install('plugin', Plugin)
     this.install('networking', Networking)
     this.install('timeDate', TimeDate)
     this.install('fanControl', FanControl)
+    this.install('power', Power)
+
     this.install('clientSettings', Settings)
     this.install('clientUpdate', ClientUpdate)
     // this.install('firmwareUpdate', FirmwareUpdate)
-    this.install('power', Power)
 
 
     Object.assign(this.state, {
@@ -202,7 +205,7 @@ class NavViews extends React.Component {
             const noRender = <div key={`quicknav-${key}`} />
             if ((!ws215i || !isAdmin) && key === 'fanControl') return noRender
             if (!isAdmin && (key === 'firmwareUpdate' || key === 'power')) return noRender
-            if (isCloud && ['device', 'networking', 'timeDate', 'fanControl', 'power'].includes(key)) return noRender
+            if (isCloud && ['device', 'networking', 'timeDate', 'fanControl', 'power', 'plugin'].includes(key)) return noRender
             return (
               <QuickNav
                 key={`quicknav-${key}`}
