@@ -2,7 +2,7 @@ import React from 'react'
 import Debug from 'debug'
 import ActionPowerSettingsNew from 'material-ui/svg-icons/action/power-settings-new'
 import Base from './Base'
-import PowerApp from '../control/PowerApp'
+import PowerApp from '../device/PowerApp'
 
 const debug = Debug('view:admin:power')
 

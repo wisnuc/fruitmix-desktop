@@ -3,7 +3,7 @@ import React from 'react'
 import Radium from 'radium'
 import ActionDns from 'material-ui/svg-icons/action/dns'
 import Base from './Base'
-import DeviceInfo from '../control/DeviceInfo'
+import DeviceInfo from '../device/DeviceInfo'
 
 const debug = Debug('component:view:device')
 

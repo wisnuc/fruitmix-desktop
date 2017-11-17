@@ -473,7 +473,7 @@ class BTDownload extends React.Component {
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                     <FlatButton
                       label="确定"
-                      disabled={!this.isInputOK(this.state.value) && !this.state.WIP}
+                      disabled={!this.isInputOK(this.state.value) || this.state.WIP}
                       primary
                       onTouchTap={this.addMagnet}
                     />
@@ -502,7 +502,7 @@ class BTDownload extends React.Component {
                     />
                     <FlatButton
                       label="确定"
-                      disabled={!this.state.WIP}
+                      disabled={this.state.WIP}
                       primary
                       onTouchTap={this.destroy}
                     />

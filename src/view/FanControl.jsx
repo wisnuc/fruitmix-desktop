@@ -1,7 +1,7 @@
 import React from 'react'
 import HardwareToys from 'material-ui/svg-icons/hardware/toys'
 import Base from './Base'
-import Fan from '../control/Fan'
+import Fan from '../device/Fan'
 
 class FanControl extends Base {
   constructor(ctx) {

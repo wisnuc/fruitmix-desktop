@@ -1,7 +1,7 @@
 import React from 'react'
 import ActionSettingsEthernet from 'material-ui/svg-icons/action/settings-ethernet'
 import Base from './Base'
-import NetworkInfo from '../control/NetworkInfo'
+import NetworkInfo from '../device/NetworkInfo'
 
 class Ethernet extends Base {
   constructor(ctx) {
