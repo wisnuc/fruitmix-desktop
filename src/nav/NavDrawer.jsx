@@ -183,6 +183,7 @@ class NavDrawer extends React.Component {
         />
         */}
 
+        {/*
         <MenuItem
           icon={views.download.menuIcon()}
           text={views.download.menuName()}
@@ -190,6 +191,7 @@ class NavDrawer extends React.Component {
           selected={nav === 'download'}
           onTouchTap={() => navTo('download')}
         />
+        */}
 
         <MenuItem
           icon={views.media.menuIcon()}

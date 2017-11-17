@@ -55,7 +55,7 @@ class NavViews extends React.Component {
     // this.install('physical', Physical)
     this.install('transmission', Transmission)
 
-    this.install('download', Download)
+    // this.install('download', Download)
     this.install('finishedList', FinishedList)
 
     this.install('media', Media)
@@ -71,7 +71,7 @@ class NavViews extends React.Component {
     this.install('adminUsers', AdminUsers)
     this.install('adminDrives', AdminDrives)
     this.install('device', Device)
-    this.install('plugin', Plugin)
+    // this.install('plugin', Plugin)
     this.install('networking', Networking)
     this.install('timeDate', TimeDate)
     this.install('fanControl', FanControl)
