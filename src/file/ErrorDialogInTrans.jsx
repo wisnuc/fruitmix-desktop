@@ -41,6 +41,12 @@ const convert = (code) => {
       return '文件已修改'
     case 'EUNDERSIZE':
       return '文件已修改'
+    case 'ENAME':
+      return '不支持的名称'
+    case 'ETYPE':
+      return '不支持的类型'
+    case 'EDSSTORE':
+      return '忽略的文件'
     default:
       return code || '未知错误'
   }
