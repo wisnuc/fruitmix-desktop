@@ -15,7 +15,8 @@
     "rebuild": "electron-rebuild",
     "start": "electron .",
     "webpack": "webpack --watch --watch-poll",
-    "webpack2": "webpack -p"
+    "webpack2": "webpack -p",
+    "webpack3": "rm -f public/*.js && rm -f public/*.json && webpack --watch --watch-poll"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

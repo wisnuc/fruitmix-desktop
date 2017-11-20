@@ -189,13 +189,14 @@ class Home extends Base {
     /* op: scrollTo file */
     this.refresh = (op) => {
       if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
+
       const rUUID = this.state.path[0] && this.state.path[0].uuid
-      if (!rUUID) {
+      const dUUID = this.state.path[this.state.path.length - 1].uuid
+      if (!rUUID || !dUUID) {
         this.setState({ loading: true })
         this.ctx.props.apis.request('drives') // drive root
-      }
-      const dUUID = this.state.path[this.state.path.length - 1].uuid
-      this.ctx.props.apis.request('listNavDir', { driveUUID: rUUID, dirUUID: dUUID })
+      } else this.ctx.props.apis.request('listNavDir', { driveUUID: rUUID, dirUUID: dUUID })
+
       debug('this.refresh op', op)
       if (op) this.setState({ scrollTo: op.fileName, loading: !op.noloading })
       else this.setState({ loading: true })
@@ -276,22 +277,11 @@ class Home extends Base {
     this.isNavEnter = true
     const apis = this.ctx.props.apis
     if (!apis || !apis.drives || !apis.drives.data) return
-    if (target && target.driveUUID) {
+    if (target && target.driveUUID) { // jump to specific dir
       const { driveUUID, dirUUID } = target
-      apis.request('listNavDir', { driveUUID, dirUUID }, (err) => {
-        if (!err) return
-        this.ctx.openSnackBar('打开目录失败')
-        this.refresh()
-      })
+      apis.request('listNavDir', { driveUUID, dirUUID })
       this.setState({ loading: true })
-    } else {
-      const homeDrive = apis.drives.data.find(drive => drive.tag === 'home')
-      const preDriveUUID = apis.listNavDir && apis.listNavDir.data && apis.listNavDir.data.path[0].uuid
-      if (homeDrive && preDriveUUID !== homeDrive.uuid) {
-        apis.request('listNavDir', { driveUUID: homeDrive.uuid, dirUUID: homeDrive.uuid })
-        this.setState({ loading: true })
-      } else this.refresh()
-    }
+    } else this.refresh()
   }
 
   navLeave() {

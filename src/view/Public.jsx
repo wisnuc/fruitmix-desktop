@@ -107,22 +107,13 @@ class Public extends Home {
 
   navEnter(target) {
     this.isNavEnter = true
-    this.rootDrive = null
     const apis = this.ctx.props.apis
-    if (target && target.driveUUID) {
+    if (target && target.driveUUID) { // jump to specific dir
       const { driveUUID, dirUUID } = target
-      apis.request('listNavDir', { driveUUID, dirUUID }, (err) => {
-        if (!err) return
-        this.ctx.openSnackBar('打开目录失败')
-        this.refresh()
-      })
+      apis.request('listNavDir', { driveUUID, dirUUID })
       this.rootDrive = { uuid: driveUUID }
       this.setState({ loading: true })
-    } else {
-      debug('navEnter drive', this.state)
-      apis.request('drives')
-      this.setState({ loading: true })
-    }
+    } else this.refresh()
   }
 
   navLeave() {
