@@ -77,6 +77,37 @@ class Preview extends React.Component {
       })
     }
 
+    /* download text file and read file */
+    this.getTextData = () => {
+      this.session = UUID.v4()
+      const driveUUID = this.props.path[0].uuid
+      const dirUUID = this.props.path[this.props.path.length - 1].uuid
+      const entryUUID = this.props.item.uuid
+      const fileName = this.props.item.name
+      this.props.ipcRenderer.send('GET_TEXT_DATA', {
+        session: this.session,
+        driveUUID,
+        dirUUID,
+        entryUUID,
+        fileName
+      })
+      this.props.ipcRenderer.on('GET_TEXT_DATA_SUCCESS', this.getTextDataSuccess)
+    }
+
+    this.getTextDataSuccess = (event, session, res) => {
+      if (this.session === session) {
+        clearTimeout(this.time)
+        this.session = ''
+        if (this.props.item.size > 1024) { // actually, filePath is the content of target file
+          this.time = setTimeout(() => {
+            this.setState({ filePath: res.filePath, data: res.data })
+          }, 500)
+        } else {
+          this.setState({ filePath: res.filePath, data: res.data })
+        }
+      }
+    }
+
     /* stop video buffer */
     this.addPauseEvent = (video) => {
       video.addEventListener('pause', () => {
@@ -137,6 +168,27 @@ class Preview extends React.Component {
         />
       </div>
     )
+  }
+
+  renderRawText() {
+    if (this.name === this.props.item.name && this.state.filePath) {
+      return (
+        <div
+          style={{ height: '80%', width: '80%', backgroundColor: '#FFFFFF', overflowY: 'auto' }}
+          onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
+        >
+          <code><pre style={{ margin: 8 }}>{ this.state.data }</pre></code>
+        </div>
+      )
+    }
+
+    if (!this.session) {
+      this.name = this.props.item.name
+      this.getTextData()
+      this.state = Object.assign({}, this.state, { filePath: '', pages: null })
+    }
+
+    return (<CircularProgress size={64} thickness={5} />)
   }
 
   renderVideo() {
@@ -233,10 +285,10 @@ class Preview extends React.Component {
 
   renderPreview() {
     const extension = this.props.item.name.replace(/^.*\./, '').toUpperCase()
-    const textExtension = ['TXT', 'MD', 'JS', 'JSX', 'HTML', 'MP4']
+    const textExtension = ['TXT', 'MD', 'JS', 'JSX', 'TS', 'JSON', 'HTML', 'CSS', 'LESS', 'CSV', 'XML']
     const videoExtension = ['MP4', 'MOV', 'AVI', 'MKV']
     const audioExtension = ['MP3', 'APE', 'FLAC', 'WMA']
-    const isText = textExtension.findIndex(t => t === extension) > -1 && this.props.item.size < 1024 * 1024
+    const isText = textExtension.findIndex(t => t === extension) > -1 && this.props.item.size < 1024 * 128
     const isVideo = videoExtension.findIndex(t => t === extension) > -1
     const isAudio = audioExtension.findIndex(t => t === extension) > -1
     const isPDF = extension === 'PDF' && global.config.platform !== 'win32'
@@ -268,7 +320,11 @@ class Preview extends React.Component {
     const isPhoto = metadata && photoMagic.includes(magic)
     const isVideo = metadata && videoMagic.includes(magic)
 
-    debug('isPhoto, isVideo', this.props.item, isPhoto, isVideo)
+    const extension = this.props.item.name.replace(/^.*\./, '').toUpperCase()
+    const textExtension = ['TXT', 'MD', 'JS', 'JSX', 'TS', 'JSON', 'HTML', 'CSS', 'LESS', 'CSV', 'XML']
+    const isText = textExtension.findIndex(t => t === extension) > -1 && this.props.item.size < 1024 * 128
+
+    debug('isPhoto, isVideo', this.props.item, isPhoto, isVideo, isText)
 
     return (
       <div
@@ -281,7 +337,12 @@ class Preview extends React.Component {
           justifyContent: 'center'
         }}
       >
-        { isPhoto ? this.renderPhoto(hash, metadata) : isVideo ? this.renderKnownVideo() : this.renderPreview() }
+        {
+          isPhoto ? this.renderPhoto(hash, metadata)
+            : isVideo ? this.renderKnownVideo()
+            : isText ? this.renderRawText()
+            : this.renderPreview()
+        }
         {/* dialog */}
         <DialogOverlay open={this.state.alert} >
           {

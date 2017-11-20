@@ -60,8 +60,21 @@ const openHandle = (event, args) => {
 const tempDownloadHandle = (e, args) => {
   const { session, driveUUID, dirUUID, entryUUID, fileName } = args
   downloadFile(driveUUID, dirUUID, entryUUID, fileName, null, (error, filePath) => {
-    if (error) debug('temp Download error', error)
+    if (error) console.log('temp Download error', error)
     else getMainWindow().webContents.send('TEMP_DOWNLOAD_SUCCESS', session, filePath)
+  })
+}
+
+const getTextDataHandle = (e, args) => {
+  const { session, driveUUID, dirUUID, entryUUID, fileName } = args
+  downloadFile(driveUUID, dirUUID, entryUUID, fileName, null, (error, filePath) => {
+    if (error) console.log('getTextDataHandle error', error)
+    else {
+      fs.readFile(filePath, (err, data) => {
+        if (err) console.log('getTextData readFile error', err)
+        else getMainWindow().webContents.send('GET_TEXT_DATA_SUCCESS', session, { filePath, data: data.toString() })
+      })
+    }
   })
 }
 
@@ -77,4 +90,5 @@ const startTransmissionHandle = () => {
 ipcMain.on('DOWNLOAD', downloadHandle)
 ipcMain.on('TEMP_DOWNLOADING', tempDownloadHandle)
 ipcMain.on('OPEN_FILE', openHandle) // open file use system applications
+ipcMain.on('GET_TEXT_DATA', getTextDataHandle)
 ipcMain.on('START_TRANSMISSION', startTransmissionHandle)
