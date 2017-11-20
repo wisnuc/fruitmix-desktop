@@ -23,6 +23,14 @@ class ContextMenu extends PureComponent {
     }
   }
 
+  componentDidMount() {
+    this.preChildren = this.props.children
+  }
+
+  componentDidUpdate() {
+    this.preChildren = this.props.children
+  }
+
   // top, left, onRequestClose
   render() {
     // console.log('in ContextMenu', this.state, this.props)
@@ -84,7 +92,7 @@ class ContextMenu extends PureComponent {
     return (
       <div style={overlayStyle} onTouchTap={this.props.onRequestClose}>
         <div style={innerStyle}>
-          { this.props.children }
+          { this.state.stage !== 3 ? this.props.children : this.preChildren}
         </div>
       </div>
     )

@@ -130,8 +130,10 @@ class AdminDrives extends Base {
     )
   }
 
-  renderContent({ navTo, toggleDetail, openSnackBar }) {
-    // debug('renderContent openSnackBar', openSnackBar)
+  renderContent({ toggleDetail, openSnackBar, getDetailStatus, navToDrive }) {
+    debug('renderContent getDetailStatus navToDrive', this.state.detailDrive)
+    const userUUID = this.ctx.props.apis.account.data && this.ctx.props.apis.account.data.uuid
+    const writeable = this.state.detailDrive && this.state.detailDrive.writelist.includes(userUUID)
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <AdminDriversApp
@@ -140,7 +142,7 @@ class AdminDrives extends Base {
           apis={this.ctx.props.apis}
           refreshDrives={this.refreshDrives}
           updateDetail={this.updateDetail}
-          navTo={navTo}
+          navToDrive={navToDrive}
           showContextMenu={this.showContextMenu}
           openSnackBar={openSnackBar}
         />
@@ -150,8 +152,12 @@ class AdminDrives extends Base {
           left={this.state.contextMenuX}
           onRequestClose={this.hideContextMenu}
         >
-          <MenuItem primaryText="打开" onTouchTap={() => navTo('public')} />
-          <MenuItem primaryText="修改" onTouchTap={toggleDetail} />
+          <MenuItem
+            primaryText="打开"
+            disabled={!writeable}
+            onTouchTap={() => navToDrive(this.state.detailDrive.uuid, this.state.detailDrive.uuid)}
+          />
+          <MenuItem primaryText={getDetailStatus() ? '关闭修改页' : '修改'} onTouchTap={toggleDetail} />
         </ContextMenu>
       </div>
     )
