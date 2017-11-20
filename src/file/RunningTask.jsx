@@ -39,8 +39,9 @@ class RunningTask extends React.Component {
 
     this.checkError = () => {
       debug('this.checkError', this.props.task)
-      const combined = [...this.props.task.errors, ...this.props.task.warnings]
-      this.props.openErrorDialog(combined)
+      const errors = this.props.task.errors || []
+      const warnings = this.props.task.warnings || []
+      this.props.openErrorDialog([...errors, ...warnings])
     }
   }
 

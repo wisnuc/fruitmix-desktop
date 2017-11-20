@@ -27,12 +27,16 @@ const convert = (code) => {
       return '文件不可读'
     case 'EPERM':
       return '访问权限不足'
+    case 'EACCES':
+      return '访问权限不足'
     case 'ESERVER':
       return '服务器内部错误'
     case 'EOHTER':
       return '请求失败'
     case 'ENOSPC':
       return '磁盘空间已满'
+    case 'ENXIO':
+      return '磁盘不可读'
     case 'EHTTPSTATUS':
       return '请求失败'
     case 'ESHA256MISMATCH':
@@ -49,6 +53,17 @@ const convert = (code) => {
       return '忽略的文件'
     default:
       return code || '未知错误'
+  }
+}
+
+const translateStatus = (statusCode) => {
+  console.log('translateStatus', statusCode)
+  if (translateStatus >= 500) return '服务器内部错误'
+  switch (statusCode) {
+    case 404:
+      return '文件未找到'
+    default:
+      return statusCode ? `请求失败：${statusCode}` : '未知错误'
   }
 }
 
@@ -80,7 +95,7 @@ class ErrorTree extends React.PureComponent {
     const code = node.error.code ||
       (node.error.response && node.error.response[0] && node.error.response[0].error && node.error.response[0].error.code) ||
       (node.error.response && node.error.response.error && node.error.response.error.code)
-    const error = code ? convert(code) : node.error.status ? `请求失败： ${node.error.status}` : '未知错误'
+    const error = code ? convert(code) : translateStatus(node.error.status)
     let name = ''
     if (node.entry && typeof node.entry === 'object') name = node.entry.name
     if (node.entry && typeof node.entry === 'string') name = node.entry.replace(/^.*\//, '').replace(/^.*\\/, '')
