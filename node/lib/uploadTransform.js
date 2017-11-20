@@ -36,12 +36,14 @@ class Task {
       this.completeSize = 0
       this.lastTimeSize = 0
       this.count = 0
+      this.trueCount = 0
       this.finishCount = 0
       this.finishDate = 0
       this.name = props.policies[0] && props.policies[0].checkedName || path.parse(props.entries[0]).base
       this.paused = true
       this.restTime = 0
       this.size = 0
+      this.trueSize = 0
       this.speed = 0
       this.lastSpeed = 0
       this.state = 'visitless'
@@ -116,9 +118,7 @@ class Task {
               const newEntries = []
               children.forEach(c => newEntries.push(path.join(entry, c)))
               await read(newEntries, dirUUID, driveUUID, policies, task)
-            } else {
-              task.size += stat.size
-            }
+            } else task.size += stat.size
           }
           return ({ entries, dirUUID, driveUUID, policies, task })
         }
@@ -145,6 +145,8 @@ class Task {
             if (!stat.isFile() && !stat.isDirectory()) continue
             if (fullName !== sanitize(fullName)) continue
 
+            task.trueCount += 1
+
             if (stat.isDirectory()) {
               /* create fold and return the uuid */
               const dirname = policy.mode === 'rename' ? policy.checkedName : fullName
@@ -165,7 +167,8 @@ class Task {
 
               if (task.paused) break
               this.push({ entries: newEntries, dirUUID: uuid, driveUUID, policies: childPolicies, task })
-            }
+            } else task.trueSize += stat.size
+
             files.push({ entry, stat, policy })
           }
           return ({ files, dirUUID, driveUUID, task, entries })
@@ -440,8 +443,12 @@ class Task {
     })
 
     this.readDir.on('step', () => {
-      /* retry, if upload error && response code ∈ [400, 500) && retry times < 2 */
+      if (this.trueSize > this.size || this.trueCount > this.count || (this.mkdir.isSelfStopped() && !this.mkdir.failed.length)) {
+        this.size = this.trueSize
+        this.count = this.trueCount
+      }
 
+      /* retry, if upload error && response code ∈ [400, 500) && retry times < 2 */
       for (let i = this.upload.failed.length - 1; i > -1; i--) {
         const X = this.upload.failed[i]
         const index = Array.isArray(X) && X.findIndex((x) => {
