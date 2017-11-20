@@ -50,7 +50,7 @@ class DriveRow extends React.PureComponent {
 
 
   render() {
-    const { drive, users, navTo } = this.props
+    const { drive, users, navToDrive } = this.props
     return (
       <div
         key={drive.label}
@@ -61,7 +61,7 @@ class DriveRow extends React.PureComponent {
           ':hover': { backgroundColor: '#F5F5F5' }
         }}
         onTouchTap={this.rowTouchTap}
-        onDoubleClick={() => { navTo('public') }}
+        onDoubleClick={() => navToDrive(drive.uuid, drive.uuid)}
       >
         <div style={{ flex: '0 0 32px' }} />
         <div style={{ flex: '0 0 40px' }}>
@@ -138,7 +138,7 @@ class AdminDrives extends React.Component {
   }
 
   render() {
-    const { users, drives, apis, refreshDrives, updateDetail, navTo, showContextMenu, openSnackBar } = this.props
+    const { users, drives, apis, refreshDrives, updateDetail, navToDrive, showContextMenu, openSnackBar } = this.props
     debug('AdminDrivesAdminDrivesAdminDrives', this.props)
     if (!users || !drives) return (<div />)
     const publicDrives = drives.filter(drive => drive.type === 'public')
@@ -167,7 +167,7 @@ class AdminDrives extends React.Component {
                     drive={drive}
                     users={users}
                     updateDetail={updateDetail}
-                    navTo={navTo}
+                    navToDrive={navToDrive}
                     showContextMenu={showContextMenu}
                   />,
                     <Divider style={{ marginLeft: 104 }} key={`${drive.uuid}Divider`} />])

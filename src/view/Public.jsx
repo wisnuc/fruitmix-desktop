@@ -78,7 +78,8 @@ class Public extends Home {
     } else {
       if (data === this.state.listNavDir && !this.force) return
       path = [{ name: '共享盘', uuid: this.rootDrive.uuid, type: 'publicRoot' }, ...data.path] // important !!
-      path[1].name = this.rootDrive.name || this.state.drives.find(d => d.uuid === this.rootDrive.uuid).label
+      const drives = this.state.drives || this.ctx.props.apis.drives.value()
+      path[1].name = this.rootDrive.name || this.ctx.props.apis.drives.value().find(d => d.uuid === this.rootDrive.uuid).label
       entries = data.entries
 
       /* sort enries */
