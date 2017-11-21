@@ -205,7 +205,7 @@ class DetailContainerInline extends React.Component {
 
     this.updateContainerSize = (zoom) => {
       if (this.refContainer) {
-        this.refContainer.style.overflow = ''
+        this.refContainer.style.overflow = zoom > 1 ? '' : 'hidden'
         this.zoom = zoom
       }
     }
@@ -529,6 +529,7 @@ class DetailContainerInline extends React.Component {
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
+            overflow: 'hidden',
             transition: 'all 225ms cubic-bezier(0.0, 0.0, 0.2, 1)'
           }}
           onMouseMove={this.calcPositon}
