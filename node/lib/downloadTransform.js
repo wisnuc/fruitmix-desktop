@@ -63,7 +63,7 @@ class Task {
         return
       }
       const speed = Math.max(this.completeSize - this.lastTimeSize, 0)
-      this.speed = Math.round((this.lastSpeed * 3 + speed) / 4)
+      this.speed = Math.floor((this.lastSpeed * 3 + speed) / 4)
       this.lastSpeed = this.speed
       this.averageSpeed = Math.round(this.completeSize / ((new Date()).getTime() - this.startUpload) * 1000)
       this.restTime = this.speed && (this.size - this.completeSize) / this.averageSpeed
