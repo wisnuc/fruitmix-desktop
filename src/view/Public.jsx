@@ -22,10 +22,7 @@ class Public extends Home {
   constructor(ctx) {
     super(ctx)
 
-    this.state = {
-      inRoot: true,
-      sortType: 'nameUp' // nameUp, nameDown, timeUp, timeDown, sizeUp, sizeDown, takenUp, takenDown
-    }
+    this.state = Object.assign(this.state, { inRoot: true })
 
     this.rootDrive = null
 

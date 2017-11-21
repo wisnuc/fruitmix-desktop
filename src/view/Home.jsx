@@ -191,7 +191,7 @@ class Home extends Base {
       if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
 
       const rUUID = this.state.path[0] && this.state.path[0].uuid
-      const dUUID = this.state.path[this.state.path.length - 1].uuid
+      const dUUID = this.state.path[0] && this.state.path[this.state.path.length - 1].uuid
       if (!rUUID || !dUUID) {
         this.setState({ loading: true })
         this.ctx.props.apis.request('drives') // drive root
