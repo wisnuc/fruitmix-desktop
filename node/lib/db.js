@@ -19,7 +19,12 @@ class db {
   }
 
   save(id, data, cb) {
-    fs.writeFile(path.join(this.dir, id), JSON.stringify(data), cb)
+    const tmp = path.join(this.dir, `${id}~`)
+    const target = path.join(this.dir, id)
+    fs.writeFile(tmp, JSON.stringify(data), (err) => {
+      if (err) cb(err)
+      else fs.rename(tmp, target, cb)
+    })
   }
 
   load(id, cb) {
