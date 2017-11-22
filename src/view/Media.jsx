@@ -155,6 +155,11 @@ class Media extends Base {
         })
 
         this.maxScrollTop = this.rowHeightSum - height + 16 * 2
+        if (this.maxScrollTop > 1500000) {
+          const r = this.maxScrollTop / 1500000
+          this.indexHeightSum = this.indexHeightSum.map(h => h / r)
+          this.maxScrollTop = 1500000
+        }
       }
       return {
         allPhotos: this.allPhotos,
