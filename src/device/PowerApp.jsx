@@ -14,7 +14,7 @@ class Power extends React.Component {
   constructor(props) {
     super(props)
     this.address = this.props.selectedDevice.mdev.address
-    this.serial = this.props.selectedDevice.mdev.serial
+    this.host = this.props.selectedDevice.mdev.host
 
     /*
      * operation: '', 'confirm', 'progress', done'
@@ -88,7 +88,7 @@ class Power extends React.Component {
           debug('this.scanMdns', store)
           switch (this.state.choice) {
             case 'POWEROFF':
-              if (store.every(d => d.serial !== this.serial)) {
+              if (store.every(d => d.host !== this.host)) {
                 clearInterval(this.interval)
                 this.setState({ operation: 'done' })
               }
@@ -96,13 +96,13 @@ class Power extends React.Component {
             case 'REBOOT':
             case 'REBOOTMAINTENANCE':
               if (hasBeenShutDown) {
-                if (store.find(d => d.serial === this.serial)
+                if (store.find(d => d.host === this.host)
                 || store.find(d => d.address === this.address)) {
                   clearInterval(this.interval)
                   debug('reboot success')
                   this.setState({ operation: 'done' })
                 }
-              } else if (store.every(d => d.serial !== this.serial)) {
+              } else if (store.every(d => d.host !== this.host)) {
                 hasBeenShutDown = true
               }
               break
