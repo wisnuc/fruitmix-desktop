@@ -373,7 +373,7 @@ class Login extends StateUp(React.Component) {
         error = pullError()
         break
       case 'fruitmixError':
-        text = '应用错误：系统启动但应用服务无法连接'
+        text = '应用错误：无法启动WISNUC应用'
         error = pullError()
         break
       case 'userMaint':
@@ -381,7 +381,7 @@ class Login extends StateUp(React.Component) {
         maint = true
         break
       case 'failLast':
-        text = '启动错误：未能启动上次使用的系统'
+        text = '启动错误：未能启动上次系统'
         maint = true
         break
       case 'failMulti':
