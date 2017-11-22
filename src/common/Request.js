@@ -55,7 +55,7 @@ class ReqFulfilled extends ReqState {
 
 class ReqRejected extends ReqState {
 
-  constructor(ctx, err) { super(ctx); this.err = err }
+  constructor(ctx, err) { super(ctx); this.err = Object.assign(err, { response: err && err.response && err.response.body }) }
   isRejected() { return true }
   reason() { return this.err }
 }
