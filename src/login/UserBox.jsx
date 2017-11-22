@@ -81,7 +81,7 @@ class UserBox extends React.Component {
     this.state = {
       selectedIndex: -1,
       auto: isFirst && this.lastUser && this.lastDevice.autologin &&
-      (this.lastDevice.address === this.device.address || this.lastDevice.serial === this.device.serial)
+      (this.lastDevice.address === this.device.address || this.lastDevice.host === this.device.host)
     }
 
     this.selectUser = (index) => {

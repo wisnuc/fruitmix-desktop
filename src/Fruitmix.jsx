@@ -13,9 +13,9 @@ import Device from './common/device'
 const adjustSeq = (pre) => {
   let mdns = pre
   if (!global.config || !global.config.global.lastDevice) return mdns
-  const lastSerial = global.config.global.lastDevice.serial
+  const lastHost = global.config.global.lastDevice.host
   const lastAddress = global.config.global.lastDevice.address
-  const index = mdns.findIndex(m => (m.serial === lastSerial || m.address === lastAddress))
+  const index = mdns.findIndex(m => (m.host === lastHost || m.address === lastAddress))
   if (index > -1) {
     mdns = [mdns[index], ...mdns.slice(0, index), ...mdns.slice(index + 1)]
   }
