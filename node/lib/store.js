@@ -1,5 +1,4 @@
 import path from 'path'
-import nedb from 'nedb'
 import { app } from 'electron'
 import { combineReducers, createStore } from 'redux'
 import db from './db'
@@ -41,6 +40,7 @@ const login = (state = defaultState, action) => {
     const dbPath = path.join(app.getPath('appData'), 'wisnuc', 'dbCache')
     const uuid = action.data.user.uuid
     global.DB = new db(path.join(dbPath, `${uuid}-v1.db`))
+    global.DB.initialize(err => err && console.log('initialize db error', err))
   }
 
   switch (action.type) {
