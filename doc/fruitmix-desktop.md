@@ -13,6 +13,7 @@ ___
 * 2017-5-3 草稿（刘华）
 * 2017-5-31 添加设计逻辑和源码详解（李新炜）
 * 2017-6-12 添加api与状态机模型（李新炜）
+* 2017-11-22 添加与更新内容
 
 **目录**
 
@@ -20,48 +21,46 @@ ___
 
 ## 项目结构
 
-* dbCache : 数据库文件存放目录
+* build: node端代码babel编译转码后文件
 
-* doc : 项目文档目录
+* devel.js: 开发环境使用的入口文件
 
-* media : 缩略图 原图存放目录
+* doc: 项目文档目录
 
-* node : 后端源代码目录
+* jsdoc.conf.json: jsdoc的配置文件
 
-    * lib : electron 相关模块
-    * serve : electron redux存放目录（store, action, reducers）
+* main.js: electron启动的入口
+
+* node: node端源代码目录
+
+    * app.js: 入口文件，引入各种模块
+    * lib: electron 相关模块
 
 * node_modules : 存放项目依赖包（工具相关）
 
-* public : 前端资源文件目录
+* public: 前端资源文件目录
 
     * assets : 存放资源文件（css, images, font)
     * bundle.js : 前端打包输出
 
-* src : 前端源代码目录
+* src: 前端源代码目录
 
-    * app
-        * app.js: js入口, 定义debug关键字 , 挂载组件, 事件监听
-        * Fruitmix.jsx: 顶层React页面
-        * common: 通用组件
-        * control: admin用户管理相关页面
-        * file: 文件页面
-        * login: 登录页面
-        * maintenance: 维护模式
-        * mdc: 测试文件
-        * nav: model
-        * photo: 照片
-        * view: viewmodel
-    * assets : 组件相关样式、图片
-    * index.html : 前端页面入口
+    * app.js: js入口, 定义debug关键字 , 挂载组件, 事件监听
+    * Fruitmix.jsx: 顶层React页面
+    * common: 通用组件
+    * control: admin用户管理相关页面
+    * device: 设备关系相关页面
+    * docker: docker相关页面
+    * download: BT下载相关页面
+    * file: 我的文件及共享盘页面
+    * login: 登录页面，包括初始化和维护模式
+    * nav: model
+    * photo: Media相关页面，包括照片和视频等
+    * view: viewmodel
 
 * test: 模块单元测试目录
 
 * .babelrc : babel工具配置文件
-
-* devel.js : 开发环境使用的入口文件
-
-* Gruntfile.js : grunt 配置文件 [详细说明](https://gruntjs.com/sample-gruntfile)
 
 * package.json : 配置项目依赖及命令 [详细说明](https://docs.npmjs.com/files/package.json)
 
@@ -69,15 +68,9 @@ ___
 
 ## 前端架构设计
 
-### UML
-
-![UML](UML.png)
-
 * components
 
     * Login: 用户登录界面
-
-    * Maintenance: 维护模式页面
 
     * User: 用户登录成功后的使用界面。该部分采用MVVM的架构，即Model-View-ViewModel，View绑定到ViewModel，通过ViewModel来控制View。ViewModel跟Model通讯，告诉它更新来响应UI。
 
@@ -95,75 +88,133 @@ ___
 
     * fruitmix api: 3721端口的api，如File APIs、Media APIs等
 
-    * node: 通过ipcRenderer与node通讯，获取本地文件，如file、media等
+    * Inter-Process Communication: 通过ipc与node通讯，获取本地文件，如file、media等
 
 ### api与状态机模型
 
-* Device APIs
+#### Device APIs
 
 |Device APIs|systemStatus|start|token|initWizard|refreshSystemState|manualBoot|reInstall|device|net|timedate|fan|setFanScale|power|
 | --------- |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-login       | √ | √ | √ |   |   |   |   |   |   |   |   |   |   |
-InitWizard  |   |   |   | √ |   |   |   |   |   |   |   |   |   |
-maintenance |   |   |   |   | √ | √ | √ |   |   |   |   |   |   |
-Device      |   |   |   |   |   |   |   | √ |   |   |   |   |   |
-Networking  |   |   |   |   |   |   |   |   | √ |   |   |   |   |
-TimeDate    |   |   |   |   |   |   |   |   |   | √ |   |   |   |
-FanControl  |   |   |   |   |   |   |   |   |   |   | √ | √ |   |
-Power       |   |   |   |   |   |   |   |   |   |   |   |   | √ |
+|login      | √ | √ | √ |   |   |   |   |   |   |   |   |   |   |
+|InitWizard |   |   |   | √ |   |   |   |   |   |   |   |   |   |
+|maintenance|   |   |   |   | √ | √ | √ |   |   |   |   |   |   |
+|Device     |   |   |   |   |   |   |   | √ |   |   |   |   |   |
+|Networking |   |   |   |   |   |   |   |   | √ |   |   |   |   |
+|TimeDate   |   |   |   |   |   |   |   |   |   | √ |   |   |   |
+|FanControl |   |   |   |   |   |   |   |   |   |   | √ | √ |   |
+|Power      |   |   |   |   |   |   |   |   |   |   |   |   | √ |
 
-* Fruitmix APIs
+#### Fruitmix APIs
 
-|Fruitmix APIs|account|adminDrives|adminUsers|driveListNavDir|listNavDir|login|media|mkdir|renameDirOrFile|updateAccount|extDrives|extListDir|
-| --------- |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|home       |   |   |   |   | √ |   |   | √ | √ |   |   |   |
-|public     |   | √ |   | √ |   |   |   |   |   |   |   |   |
-|physical   |   |   |   |   |   |   |   |   |   |   | √ | √ |
-|media      |   |   |   |   |   |   | √ |   |   |   |   |   |
-|adminUsers |   |   | √ |   |   | √ |   |   |   |   |   |   |
-|adminDrives|   | √ | √ |   |   |   |   |   |   |   |   |   |
-|account    | √ |   |   |   |   | √ |   |   |   | √ |   |   |
+|Fruitmix APIs|account|drives|adminUsers|listNavDir|login|media|mkdir|renameDirOrFile|updateAccount|
+| --------- |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|home       |   | √ |   | √ |   |   | √ | √ |   |
+|public     |   | √ |   | √ |   |   | √ | √ |   |
+|media      |   |   |   |   |   | √ |   |   |   |
+|adminUsers |   |   | √ |   | √ |   |   |   |   |
+|adminDrives|   | √ | √ |   |   |   |   |   |   |
+|account    | √ |   |   |   | √ |   |   |   | √ |
 
 
-* ipcRenderer.send
+#### ipcRenderer 通讯
 
++ 登录登出
+
+```
+# send
 LOGIN
-LOGIN_OFF
-LOGIN_OUT
+LOGOUT
+POWEROFF
+```
 
++ 获取缩略图或原图
+
+```
+# send
 mediaHideImage
 mediaHideThumb
 mediaShowImage
 mediaShowThumb
 
+# on
+donwloadMediaSuccess
+getThumbSuccess
+
+```
+
++ 传输列表相关
+
+```
+# send
 START_TRANSMISSION
 GET_TRANSMISSION
 OPEN_TRANSMISSION
 
-UPLOAD
-DOWNLOAD
-PAUSE_UPLOADING
-RESUME_UPLOADING
-PAUSE_DOWNLOADING
-RESUME_DOWNLOADING
-DELETE_DOWNLOADING
-DELETE_UPLOADING
-
-TRANSFER
-CLEAN_RECORD
-DRAG_FILE
-newWebWindow
-
-* ipcRenderer.on
-
-CONFIG_LOADED
-MDNS_UPDATE
+# on
 UPDATE_TRANSMISSION
-snackbarMessage
-getThumbSuccess
-donwloadMediaSuccess
+```
+
++ 上传下载相关
+
+```
+# send
+DOWNLOAD
+UPLOAD
+UPLOADMEDIA
+FINISH_TASK
+PAUSE_TASK
+RESUME_TASK
+DRAG_FILE
+GET_TEXT_DATA
+TEMP_DOWNLOADING
+OPEN_FILE
+resolveConflicts
+
+# on
+GET_TEXT_DATA_SUCCESS
+TEMP_DOWNLOAD_SUCCESS
+conflicts
 driveListUpdate
-physicalListUpdate
+snackbarMessage
+```
+
++ 查看和清理缓存
+
+```
+# send
+GetCacheSize
+CleanCache
+
+# on
+CacheSize
+CleanCacheResult
+```
+
++ 软件更新和系统配置
+
+```
+# send
+SETCONFIG
+UPDATE_USER_CONFIG
+CHECK_UPDATE
+INSTALL_NEW_VERSION
+
+# on
+CONFIG_LOADED
+CONFIG_UPDATE
+NEW_RELEASE
+```
+
++ MDNS
+
+```
+# send
+MDNS_SCAN
+
+# on
+MDNS_UPDATE
+```
 
 #### login
 
@@ -193,6 +244,7 @@ physicalListUpdate
         * boot: 获取wisnuc fruitmix的启动状态信息
         * storage: 获取设备的存储信息
         * users: 获取当前设备的用户列表
+        * info: 获取station info，主要是设备名称
 
     * token: 根据用户名和密码获取用户token，登陆账户
 
@@ -231,12 +283,19 @@ users: [
     },
     ...
 ]
+
+info: {
+  id,
+  name,
+  connectState,
+  pbk  
+}
 ```
 
 * ipc通讯
 
-    * newWebWindow: 新开窗口，目前是新开固件管理页面
     * LOGIN: 发送给node端登录信息，包括当前设备和用户信息（device、user）
+    * UPDATE_USER_CONFIG: 成功登录时更新用户的配置文件
 
 * state
 
@@ -299,6 +358,8 @@ users: [
 
     * step: 'installing', 安装中，不断请求目前系统状态
 
+    * step: 'bindWechat', 绑定微信（可选）
+
     * step: 'finished', 完成 -> `user`
 
 
@@ -358,24 +419,6 @@ storage
 }
 ```
 
-* state
-
-    * expanded: true, 显示隐藏内容
-    * creatingNewVolume: true, 进入创建磁盘阵列的模式
-    * initVolume: true, 打开安装wisnuc的窗口
-    * disk type: 磁盘类型，不同的类型有不同的view
-
-        * 'BtrfsVolume', 安装了Btrfs文件系统的磁盘，可以安装wisnuc
-        * 'FileSystemUsageDisk', 安装了其它文件系统的磁盘
-        * 'NoUsageDisk', 未使用的磁盘，可以格式化为btrfs
-        * 'PartitionedDisk', 含有分区的磁盘
-
-    * error type: 系统状态包括错误信息
-
-        * 'ENOENT': WISNUC未安装
-        * 'EDATA': WISNUC未正确安装，用户信息未找到或不能正确解析
-        * 'EFAIL': WISNUC无法正常启动
-        * 'READY': WISNUC已安装，但用户可能为空
 
 #### user
 
@@ -399,13 +442,13 @@ storage
 
         * home: 我的文件
         * public: 共享文件夹
-        * physical: 物理磁盘
         * transmission: 文件传输
         * media: 我的照片
         * adminUsers: 用户管理
         * adminDrives: 共享文件夹管理
         * device: 设备信息
         * net: 网络设置
+        * fan: 风扇（仅ws215i）
         * timeDate: 时间与日期
         * power: 重启和关机
         * account: 我的账户
@@ -454,12 +497,17 @@ storage
 
 * ipc通讯
 
+    * DOWNLOAD: 下载文件
+    * UPLOAD: 上传文件
+    * DRAG_FILE: 拖拽上传文件
+    * GET_TEXT_DATA: 下载文本文件并返回文本内容
+    * TEMP_DOWNLOADING: 下载临时文件并预览
+    * OPEN_FILE: 下载并用本地应用打开文件
+    * resolveConflicts: 解决文件命名冲突
     * mediaShowThumb: 发出缩略图的请求
     * mediaHideThumb: 取消缩略图的请求
     * getThumbSuccess: 接收缩略图所在路径
-    * command: fileapp: UPLOAD, 上传文件或文件夹
-    * command: fileapp: DOWNLOAD, 下载选中的文件或文件夹
-    * command: fileapp: TRANSFER, 记录传输文件拷贝或移动
+    * donwloadMediaSuccess: 接收原图所在路径
 
 * state
 
@@ -483,13 +531,13 @@ storage
 
 * fruitmix api
 
-    * adminDrives: 获取共享盘列表
-    * driveListNavDir: 获取共享盘内页面的项目列表及上级目录
+    * drives: 获取共享盘列表
+    * listNavDir: 获取共享盘内页面的项目列表及上级目录
 
-* adminDrives和driveListNavDir的数据结构
+* drives的数据结构
 
 ```js
-adminDrives
+drives
 [
     {
         label,
@@ -501,31 +549,6 @@ adminDrives
     },
     ...
 ]
-
-driveListNavDir
-{
-    entries: [
-        {
-            digest,
-            metadata: [Object],
-            mtime,
-            name,
-            size,
-            type,
-            uuid
-        },
-        ...
-    ]
-    path: [
-        {
-            mtime,
-            name,
-            type,
-            uuid
-        },
-        ...
-    ]
-}
 ```
 * ipc通讯：同Home
 
@@ -543,130 +566,51 @@ driveListNavDir
         * move: 移动项目
         * copy: 拷贝项目
 
-##### physical
-
-* fruitmix api
-
-    * extDrives: 获取物理磁盘列表
-    * extListDir: 获取物理磁盘内的项目列表及上级目录
-
-* extDrives和extListDir的数据结构
-
-```js
-extDrives
-[
-    {
-        devname,
-        fileSystemType,
-        fileSystemUUID,
-        fsUsageDefined,
-        idBus,
-        idFsUsage,
-        isATA,
-        isExt4,
-        isFileSystem,
-        isMounted,
-        isPartition,
-        isRootFS,
-        mountpoint,
-        name,
-        parentName,
-        path,
-        removable,
-        size,
-        type,
-        unformattable: [Object]
-    },
-    ...
-]
-
-extListDir
-[
-    {
-        mtime,
-        name,
-        size,
-        type: "directory"
-    },
-    ...
-]
-
-```
-
-* ipc通讯：无上传，其他同Home
-
-* state
-
-    * selected: 处理选中的项目
-
-    * showMemu: 打开右键菜单
-        * move: 移动项目
-        * copy: 拷贝项目
-
 ##### transmission
 
 * ipc通讯
 
-    * PAUSE_DOWNLOADING: 暂停下载项目
-
-    * RESUME_DOWNLOADING: 重新启动暂定的下载项目
-
-    * PAUSE_UPLOADING: 暂停上传项目
-
-    * RESUME_UPLOADING: 重新启动暂定的上传项目
-
-    * DELETE_UPLOADING: 取消上传项目
-
-    * DELETE_DOWNLOADING: 取消下载项目
-
-    * OPEN_TRANSMISSION: 打开项目所在文件夹
-
-    * GET_TRANSMISSION: 发送获取transmission列表的请求
-
+    * START_TRANSMISSION: 从本地文件中获取传输列表
+    * GET_TRANSMISSION: 发送获取最新列表的请求
+    * OPEN_TRANSMISSION: 打开下载目录
+    * FINISH_TASK: 忽略错误或警告而完成任务
+    * PAUSE_TASK: 暂停任务
+    * RESUME_TASK: 恢复暂停的任务
     * UPDATE_TRANSMISSION: 获取transmission列表
 
         * userTasks: 进行中的任务
         * finishTasks: 已完成的任务
 
+
 * userTasks和finishTasks的数据结构
 
 ```js
-userTasks
 [
-    {
-        abspath,
-        completeSize,
-        count,
-        finishCount,
-        finishDate,
-        name,
-        pause,
-        record: [Array],
-        restTime,
-        size,
-        speed,
-        state,
-        trsType,
-        type,
-        uuid
-    },
-    ...
-]
-finishTasks
-[
-    {
-        _id,
-        abspath,
-        createTime,
-        finishDate: [Array],
-        name,
-        target,
-        trsType,
-        type,
-        uploading: [Array],
-        uuid
-    },
-    ...
+  {
+    completeSize : 3128223528
+    count : 2726
+    createTime : 1511405688591
+    dirUUID : "499a0f8c-443c-4474-8b6b-d43b81946f14"
+    driveUUID : "499a0f8c-443c-4474-8b6b-d43b81946f14"
+    entries : Array(1)
+    errors : Array(0)
+    finishCount : 2726
+    finishDate : 1511405750344
+    isNew : true
+    lastSpeed : 33555269
+    lastTimeSize : 3128223528
+    name : "lightTest"
+    paused : false
+    policies : Array(1)
+    restTime : 0
+    size : 3128223528
+    speed : 33555269
+    state : "finished"
+    taskType : "directory"
+    trsType : "upload"
+    uuid : "cc3fc1cc-8343-4eb0-a16c-fce6cf25ea67"
+    warnings : Array(0)
+  }
 ]
 ```
 
@@ -691,23 +635,21 @@ finishTasks
 
 ```js
 [
-    [
-        digest,
-        {
-            metadata: {
-                exifDateTime,
-                exifMake,
-                exifModel,
-                exifOrientation,
-                format,
-                height,
-                size,
-                width
-            },
-            permittedToShare
-        }
-    ],
-    ...
+  {
+    date : "2017:10:13 01:21:55"
+    datec : "2017:10:13 09:21:55+08:00"
+    dur : 5.23666666666667
+    gps : "31 deg 10' 52.32" N, 121 deg 36' 3.24" E"
+    h : 1080
+    hash : "6e685e7d11ab4c5f3992028a7203557ea54b2886f888dc7e4d1833cad63cff83"
+    m : "MOV"
+    make : "Apple"
+    model : "iPhone 6s"
+    rot : 90
+    size : 10175013
+    w : 1920
+  },
+  ...
 ]
 ```
 
@@ -788,25 +730,14 @@ finishTasks
 ```js
 [
     {
-        avatar
-        email
-        friends: [],
-        home
-        isAdmin
-        isFirstUser
-        lastChangeTime
-        library
-        nologin
-        password
-        service
-        smbPassword
-        type
-        unixPassword
-        unixuid
-        username
-        uuid
-        },
-        ...
+        avatar : null
+        disabled : true
+        global : null
+        isAdmin : false
+        isFirstUser : false
+        username : "ww"
+        uuid : "185cc3f9-0985-4d0c-8e74-f45a7468f301"
+    }
 ]
 ```
 
@@ -985,17 +916,15 @@ finishTasks
 
 * 设备已搜索到，但出现错误：目前只能等待或重启
 
-* 自动登陆：自动登陆上次登陆的设备，功能尚未实现
+* 自动登陆：自动登陆上次登陆的设备
 
 ### Maintenance
 
 维护模式页面，主要显示当前设备的磁盘阵列信息及其他磁盘信息，可进行新建磁盘阵列、启动应用、安装/重新安装应用、回到login页面等操作
 
-* 新建磁盘阵列: 选择磁盘建立磁盘阵列用于安装wisnuc，可以选择single、raid0、raid1等多种模式，该操作会格式化磁盘为Btrfs文件系统
+* 重新安装应用: 相当与重新初始化
 
-* 启动应用: 当应用已安装且没有检测到错误时，会显示启动应用的按钮，启动成功后可回到login页面进行登录
-
-* 安装/重新安装应用: 对于文件系统格式为Btrfs的磁盘，可进行安装wisnuc。对于已安装wisnuc的磁盘可重新安装（目前禁用）
+* 强制启动应用: 当应用已安装且没有检测到错误时，会显示启动应用的按钮，启动成功后可回到login页面进行登录
 
 * 回到login页面: 页面切换到login页面
 
@@ -1031,12 +960,12 @@ finishTasks
 
     * 我的文件
     * 共享文件夹
-    * 物理磁盘
     * 文件传输
 
 * media: 媒体部分，包括
 
     * 我的照片
+    * 智能助理
 
 * settings: admin用户的管理页面，普通用户该部分不展示
 
@@ -1044,6 +973,7 @@ finishTasks
     * 共享文件夹管理
     * 设备信息
     * 网络设置
+    * 风扇信息
     * 时间与日期
     * 重启和关机
 
@@ -1071,7 +1001,7 @@ finishTasks
 
 登陆页面
 
-* Login.jsx: 登陆页面的入口，搭建整体页面
+* LoginApp.jsx: 登陆页面的入口，搭建整体页面
 
 * CrossNavcd.jsx: 处理切换设备时的动画
 
@@ -1096,6 +1026,14 @@ finishTasks
 * UsernamePassword.jsx: 输入用户名、密码的对话框
 
 * CreatingVolumeDiskSelection.jsx: 创建磁盘阵列的信息框
+
+* AutoLogin.jsx: 自动登录
+
+* LocalLogin.jsx: 本地登录
+
+* WechatLogin.jsx: 自动登录
+
+* MaintGuide.jsx: 维护模式向导
 
 ### nav
 
@@ -1183,11 +1121,6 @@ ViewModel 部分
 * FanControl.jsx: 风扇状态与调节，传递与更新fan信息，调用control/Fan
 
 * Power.jsx: 电源管理，传递api，调用control/PowerApp
-* FileSharedWithMe.jsx
-* FileSharedWithOthers.jsx
-* MediaAlbum.jsx
-* MediaShare.jsx
-* Storage.jsx
 
 ### file
 
@@ -1323,50 +1256,6 @@ ViewModel 部分
 
 * TimeDateInfo.jsx: 渲染日期和时间信息
 
-### maintenance
-
-维护模式
-
-* Maintenance.jsx: 维护模式的入口，搭建整体页面，调用BtrfsVolume、NewVolumeTop、PartitionedDisk、FileSystemUsageDisk、
-NoUsageDisk、RenderTitle等组件。主要的函数包括：
-
-    * reloadBootStorage： 调用props.selectedDevice.refreshSystemState 来刷新storage、boot信息，重置创建新磁盘阵列页面。
-    * renderBootStatus： 当设备已经启动时，显示ip、model、serial等信息并隐藏创建新磁盘阵列的按钮
-
-* BtrfsVolume.jsx: 渲染格式为Btrfs的磁盘内容，包括了：
-
-    * startWisnucOnVolume: 启动wisnuc应用
-    * renderFinished: 启动过程反馈页面
-    * VolumeWisnucError: 调用VolumeWisnucError.jsx，渲染wisnuc的错误信息
-    * InitVolumeDialogs: 调用InitVolumeDialogs.jsx，渲染安装或重新安装wisnuc的页面
-    * VerticalExpandable: 渲染可折叠的详细磁盘信息内容
-
-* FileSystemUsageDisk.jsx: 渲染检测到非btrfs文件系统的磁盘的内容
-
-* PartitionedDisk.jsx: 渲染存在文件分区的非btrfs磁盘的内容
-
-* NoUsageDisk.jsx: 渲染未发现文件系统或分区表的磁盘的内容
-
-* NewVolumeTop.jsx: 渲染创建磁盘阵列的组件，主要包括
-
-    * RaidModePopover: 模式选择组件
-    * renderFinished: 创建过程反馈页面
-
-* InitVolumeDialogs.jsx: 渲染安装或重新安装wisnuc的页面，包括
-
-    * ReinitVolumeConfirm: 重新安装时确认删除
-    * UsernamePassword: 输入用户名密码
-    * renderFinished: 安装与启动过程反馈页面
-
-* ConstElement.jsx: 一些不变量及公用组件的合集，包括标题、表格、icon等
-
-* RenderTitle.jsx: 渲染页面顶部toolbar的组件，包括title，两个图表及退出按钮
-
-* Svg.jsx: svg图标的合集
-
-* Users.jsx: 渲染用户列表的组件，以Avatar排列用户
-
-* VolumeWisnucError.jsx: 渲染WISNUC出错信息的组件，因为新的api下错误信息有所改变故可能待更新。
 
 ### common
 
@@ -1390,6 +1279,8 @@ NoUsageDisk、RenderTitle等组件。主要的函数包括：
 
 * DialogOverlay.jsx: 自定义的空对话框
 
+* PureDialog.jsx: 自定义的空对话框，带有modal功能
+
 * Request.js: 基于EventEmitter的自定义request，可以反馈当前请求的状态
 
 * reqman.js: RequestManager，调度request
@@ -1397,16 +1288,17 @@ NoUsageDisk、RenderTitle等组件。主要的函数包括：
 * device.js: 使用自定义的Request.js，设备相关api
 
 * fruitmix.js: 使用自定义的Request.js，fruitmix相关api，一般为登陆成功后涉及的api
-* Dialogs.jsx
-* IconBox.jsx
-* keypress.js
-* Operation.jsx
-* PureDialog.jsx
-* PVState.jsx
-* TreeTable.jsx
 
-### mdc
+* datetime.js: 日期时间处理
 
-一些测试文件
+* Tooltip.jsx: 自定义的Tooltip
 
-* FlatButton.jsx: 测试FlatButton控件
+* IconButton.jsx: 使用自定义的tooltips的IconButton
+
+* map.jsx: 根据GPS信息调用高德地图
+
+* renderFileIcon.jsx: 渲染各种文件图标
+
+* Svg.jsx: svg图标的合集
+
+* slice.js: 处理emoji的slice
