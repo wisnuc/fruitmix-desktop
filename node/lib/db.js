@@ -1,5 +1,6 @@
-const path = require('path')
 const fs = require('fs')
+const path = require('path')
+const uuid = require('uuid')
 const rimraf = require('rimraf')
 const mkdirp = require('mkdirp')
 
@@ -11,7 +12,6 @@ a custom db to store transmisson data
 class db {
   constructor(dir) {
     this.dir = path.resolve(dir)
-    this.initialize(err => err && console.log('initialize db error', err))
   }
 
   initialize(cb) {
@@ -19,7 +19,7 @@ class db {
   }
 
   save(id, data, cb) {
-    const tmp = path.join(this.dir, `${id}~`)
+    const tmp = path.join(this.dir, `${uuid.v4()}~`)
     const target = path.join(this.dir, id)
     fs.writeFile(tmp, JSON.stringify(data), (err) => {
       if (err) cb(err)
@@ -46,13 +46,10 @@ class db {
       if (!dir.length) return cb(null, list)
       let count = dir.length
       dir.forEach(id => this.load(id, (error, data) => {
-        if (error) {
-          this.remove(id, e => console.log('remove error data', id, 'error', e))
-        } else {
-          list.push(data)
-          count -= 1
-          if (count === 0) cb(null, list)
-        }
+        if (error || id.length !== 36) this.remove(id, e => console.log('remove error data', id, 'error', e))
+        else list.push(data)
+        count -= 1
+        if (count === 0) cb(null, list)
       }))
     })
   }
