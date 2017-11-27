@@ -1,6 +1,7 @@
 import React from 'react'
 import Debug from 'debug'
 import RightIcon from 'material-ui/svg-icons/hardware/keyboard-arrow-right'
+import i18n from 'i18n'
 import LocalLogin from './LocalLogin'
 import WechatLogin from './WechatLogin'
 import FlatButton from '../common/FlatButton'
@@ -66,7 +67,7 @@ class LoginApp extends React.Component {
           }}
         >
           <FlatButton
-            label={this.state.local ? '微信扫码登录' : '局域网登录'}
+            label={this.state.local ? '微信扫码登录' : i18n.__('LocalLogin')}
             labelPosition="before"
             labelStyle={{ color: '#FAFAFA', fontWeight: 500 }}
             onTouchTap={this.toggleMode}

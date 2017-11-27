@@ -3,12 +3,21 @@ import ReactDom from 'react-dom'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
 import injectTapEventPlugin from 'react-tap-event-plugin'
+import i18n from 'i18n'
+
 import MDNS from './common/mdns'
 import Fruitmix from './Fruitmix'
 
 /* modify debug filter before application starts' */
 const debug = Debug('app')
 localStorage.debug = '*component*'
+
+/* i18n config */
+i18n.configure({
+  locales: ['en-US', 'zh-CN'],
+  directory: './locales',
+  defaultLocale: 'zh-CN'
+})
 
 /* required by Material UI */
 injectTapEventPlugin()
@@ -29,15 +38,10 @@ document.addEventListener('drop', (e) => {
   e.preventDefault()
 })
 
-/* load config and first render */
-ipcRenderer.on('CONFIG_LOADED', (event, config) => {
-  console.log('CONFIG_LOADED', config)
-  global.config = config
-  render()
-})
-
+/* render after config loaded */
 ipcRenderer.on('CONFIG_UPDATE', (event, config) => {
   console.log('CONFIG_UPDATE', config)
   global.config = config
+  if (config.global && config.global.locales) i18n.setLocale(config.global.locales)
   render()
 })

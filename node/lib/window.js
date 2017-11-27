@@ -78,7 +78,7 @@ const initMainWindow = () => {
   // ipc message will be lost if sent early than 'did-finish-load'
   const contents = _mainWindow.webContents
   contents.on('did-finish-load', () =>
-    contents.send('CONFIG_LOADED', global.configuration.getConfiguration()))
+    contents.send('CONFIG_UPDATE', global.configuration.getConfiguration()))
 
   // console.log('[window] mainWindow initialized')
 }
