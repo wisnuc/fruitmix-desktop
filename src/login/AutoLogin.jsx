@@ -8,11 +8,7 @@ class AutoLogin extends React.Component {
   constructor(props) {
     super(props)
     this.state = { open: false }
-
   }
-
-
-
 
   render() {
     const { user } = this.props.device

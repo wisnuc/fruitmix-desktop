@@ -1,6 +1,6 @@
 import { toTimeSecond } from '../common/datetime'
 
-const getDateTime = (m) => m.metadata && (m.metadata.date || m.metadata.datetime)
+const getDateTime = m => m.metadata && (m.metadata.date || m.metadata.datetime)
 
 const sort = (a, b, sortType) => {
   if (a.type === 'directory' && b.type === 'file') return -1

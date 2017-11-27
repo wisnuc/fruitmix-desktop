@@ -28,8 +28,7 @@ class LoginBox extends React.Component {
       if (this.state.saveToken) {
         this.token = null
         this.setState({ autologin: false, saveToken: false })
-      }
-      else this.setState({ saveToken: true })
+      } else this.setState({ saveToken: true })
     }
 
     this.onInput = (e) => {
@@ -154,13 +153,13 @@ class LoginBox extends React.Component {
             <div style={{ width: '100%', flex: '0 0 68px', position: 'relative' }}>
               { !success &&
                 this.token ?
-                <TextField
-                  key={this.props.user.uuid}
-                  style={{ position: 'absolute', bottom: 0 }}
-                  fullWidth
-                  hintText="*********"
-                  onTouchTap={this.passwordMode}
-                />
+                  <TextField
+                    key={this.props.user.uuid}
+                    style={{ position: 'absolute', bottom: 0 }}
+                    fullWidth
+                    hintText="*********"
+                    onTouchTap={this.passwordMode}
+                  />
                 : <TextField
                   style={{ position: 'absolute', bottom: 0 }}
                   key={this.props.user.uuid}

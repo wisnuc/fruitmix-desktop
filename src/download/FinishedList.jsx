@@ -225,7 +225,7 @@ class BTDownload extends React.Component {
 
         {/* left circular */}
         <div style={{ width: 22, height: 44, marginLeft: 6, marginTop: 6, position: 'absolute', overflow: 'hidden' }}>
-           <div
+          <div
             style={{
               position: 'absolute',
               top: 0,

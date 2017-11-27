@@ -6,7 +6,6 @@ const cloudAddress = 'http://www.siyouqun.org:80'
 
 /* this module encapsulate most fruitmix apis */
 class Fruitmix extends EventEmitter {
-
   constructor(address, userUUID, token, stationID) {
     super()
 
@@ -237,7 +236,7 @@ class Fruitmix extends EventEmitter {
 
       case 'renameDirOrFile':
         if (this.stationID) {
-          r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`, Object.assign({}, args, { op: 'rename' })) 
+          r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`, Object.assign({}, args, { op: 'rename' }))
         } else {
           r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`)
             .field(`${args.oldName}|${args.newName}`, JSON.stringify({ op: 'rename' }))
@@ -288,7 +287,7 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'extDeleteDirOrFile':
-         break
+        break
 
       /* Media API */
       case 'media':
@@ -368,7 +367,7 @@ class Fruitmix extends EventEmitter {
 
       /* Ticket and Wechat API */
       case 'info':
-        r= request.get(`http://${this.address}:3000/station/info`)
+        r = request.get(`http://${this.address}:3000/station/info`)
         break
 
       case 'creatTicket':

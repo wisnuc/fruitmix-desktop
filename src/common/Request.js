@@ -1,7 +1,6 @@
 const EventEmitter = require('eventemitter3')
 
 class ReqState {
-
   constructor(ctx) { this.ctx = ctx }
 
   // fallback
@@ -25,20 +24,15 @@ class ReqState {
   isRejected() { return false }
 
   isFinished() { return !this.isPending() }
-
 }
 
 class ReqPending extends ReqState {
-
   constructor(ctx) {
     super(ctx)
 
     this.handle = this.ctx.func((err, res) => {
       if (this.aborted) return
-      if (err)
-        this.setState(ReqRejected, err)
-      else
-        this.setState(ReqFulfilled, res.body)
+      if (err) { this.setState(ReqRejected, err) } else { this.setState(ReqFulfilled, res.body) }
     })
   }
 
@@ -47,27 +41,23 @@ class ReqPending extends ReqState {
 }
 
 class ReqFulfilled extends ReqState {
-
   constructor(ctx, data) { super(ctx); this.data = data }
-  isFulfilled() { return true } 
+  isFulfilled() { return true }
   value() { return this.data }
 }
 
 class ReqRejected extends ReqState {
-
   constructor(ctx, err) { super(ctx); this.err = Object.assign(err, { response: err && err.response && err.response.body }) }
   isRejected() { return true }
   reason() { return this.err }
 }
 
 class Request extends EventEmitter {
-
   constructor(props, func) {
     super()
     if (typeof props === 'function') {
       this.func = props
-    }
-    else {
+    } else {
       Object.assign(this, props)
       this.func = func
     }

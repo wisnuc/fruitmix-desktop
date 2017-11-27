@@ -226,7 +226,7 @@ class Device extends RequestManager {
         break
 
       case 'creatTicket':
-        r = request 
+        r = request
           .post(`http://${this.mdev.address}:3000/station/tickets/`)
           .set('Authorization', `JWT ${this.state.token.data.token}`)
           .send({ type: 'bind' })
@@ -239,7 +239,7 @@ class Device extends RequestManager {
         break
 
       case 'confirmTicket':
-        r = request 
+        r = request
           .post(`http://${this.mdev.address}:3000/station/tickets/wechat/${args.ticketId}`)
           .set('Authorization', `JWT ${this.state.token.data.token}`)
           .send({

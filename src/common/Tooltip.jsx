@@ -42,8 +42,8 @@ class Tooltip extends React.PureComponent {
       justifyContent: 'center',
       opacity: (['opening', 'closing', 'closed'].includes(status)) ? 0 : 1,
       transition: status === 'opening'
-      ? `all ${this.dur}ms cubic-bezier(0.0, 0.0, 0.2, 1)`
-      : `all ${this.dur}ms cubic-bezier(0.4, 0.0, 1, 1)`
+        ? `all ${this.dur}ms cubic-bezier(0.0, 0.0, 0.2, 1)`
+        : `all ${this.dur}ms cubic-bezier(0.4, 0.0, 1, 1)`
     }, this.props.style)
 
     const listeners = {
