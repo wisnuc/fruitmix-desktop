@@ -72,7 +72,7 @@ class Row extends React.PureComponent {
       /* these are view-model state */
       entries,
       select,
-      showTakenTime,
+      showTakenTime
     } = this.props
 
     const entry = entries[index]

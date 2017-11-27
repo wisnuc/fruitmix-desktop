@@ -145,12 +145,12 @@ class UserBox extends React.Component {
       <div>
         {
           avatarUrl ?
-          <div style={{ borderRadius: 48, width: 96, height: 96, overflow: 'hidden' }}>
-            <img width={96} height={96} alt="" src={avatarUrl} />
-          </div> :
-          <Avatar size={96} >
-            { username.slice(0, 2).toUpperCase() }
-          </Avatar>
+            <div style={{ borderRadius: 48, width: 96, height: 96, overflow: 'hidden' }}>
+              <img width={96} height={96} alt="" src={avatarUrl} />
+            </div> :
+            <Avatar size={96} >
+              { username.slice(0, 2).toUpperCase() }
+            </Avatar>
         }
       </div>
     )
