@@ -64,7 +64,7 @@ class TrsContainer extends React.Component {
     }
 
     this.openMenu = (event, obj) => {
-      debug('this.openMenu', obj.tasks)
+      // debug('this.openMenu', obj.tasks)
       const containerDom = document.getElementById('content-container')
       const maxLeft = containerDom.offsetLeft + containerDom.clientWidth - 168
       const x = event.clientX > maxLeft ? maxLeft : event.clientX
@@ -205,17 +205,17 @@ class TrsContainer extends React.Component {
 
     /* type: 'PAUSE', 'RESUME', 'DELETE' */
     this.handleAll = (tasks, type) => {
-      debug('ipcRenderer.send', `${type}_TASK`, tasks.map(t => t.uuid))
+      // debug('ipcRenderer.send', `${type}_TASK`, tasks.map(t => t.uuid))
       ipcRenderer.send(`${type}_TASK`, tasks.map(t => t.uuid))
     }
 
     this.open = () => {
-      debug('this.open', this.state.tasks)
+      // debug('this.open', this.state.tasks)
       ipcRenderer.send('OPEN_TRANSMISSION', this.state.tasks.map(t => t.downloadPath))
     }
 
     this.openInDrive = () => {
-      debug('this.openInDrive', this.state.tasks)
+      // debug('this.openInDrive', this.state.tasks)
       const { driveUUID, dirUUID } = this.state.tasks[0]
       this.props.navToDrive(driveUUID, dirUUID)
     }
@@ -225,7 +225,7 @@ class TrsContainer extends React.Component {
     }
 
     this.updateTransmission = (e, userTasks, finishTasks) => {
-      debug('this.updateTransmission', userTasks, finishTasks)
+      // debug('this.updateTransmission', userTasks, finishTasks)
       this.setState({ userTasks, finishTasks })
     }
   }

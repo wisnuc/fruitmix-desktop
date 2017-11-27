@@ -105,7 +105,6 @@ class MoveDialog extends React.PureComponent {
         this.list(dirUUID, dirUUID)
           .then((list) => {
             /* reset driveUUID */
-            console.log('reset driveUUID', dirUUID)
             path[0].uuid = dirUUID
             this.updateState(path, currentDir, list)
           })
@@ -157,7 +156,6 @@ class MoveDialog extends React.PureComponent {
 
     /* create new folder */
     this.createNewFolder = () => {
-      console.log('this.createNewFolder', this.props, this.state)
       const args = {
         driveUUID: this.state.path[0].uuid,
         dirUUID: this.state.currentSelectedIndex > -1
@@ -354,7 +352,6 @@ class MoveDialog extends React.PureComponent {
 
   /* 当前所在位置的名称 */
   renderCurrentDir() {
-    console.log('current directory', this.state.currentDir, this.state.path)
     const type = this.state.currentDir.type
     return this.state.currentDir.name === this.state.currentDir.uuid
       ? '我的文件'

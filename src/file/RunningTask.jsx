@@ -38,7 +38,7 @@ class RunningTask extends React.Component {
     }
 
     this.checkError = () => {
-      debug('this.checkError', this.props.task)
+      // debug('this.checkError', this.props.task)
       const errors = this.props.task.errors || []
       const warnings = this.props.task.warnings || []
       this.props.openErrorDialog([...errors, ...warnings])
@@ -112,7 +112,6 @@ class RunningTask extends React.Component {
   }
 
   render() {
-    console.log('RunningTask', this.props)
     const task = this.props.task
     const pColor = task.paused ? 'rgba(0,0,0,.12)' : '#89c2f2'
     let pWidth = task.completeSize / task.size * 100
