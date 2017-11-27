@@ -194,7 +194,7 @@ class FileDetail extends React.PureComponent {
       detailFile = detailIndex.map(i => entries[i])
       return this.renderMultiFiles(detailFile)
     }
-    debug('detailFile', detailFile)
+    // debug('detailFile', detailFile)
 
     const { metadata, hash } = detailFile
     let exifDateTime = ''

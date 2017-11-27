@@ -38,7 +38,6 @@ class Preview extends React.Component {
 
     this.downloadSuccess = (event, session, path) => {
       if (this.session === session) {
-        console.log('this.downloadSuccess', path)
         clearTimeout(this.time)
         this.session = ''
         if (this.props.item.size > 1024) {
@@ -113,7 +112,6 @@ class Preview extends React.Component {
       video.addEventListener('pause', () => {
         const playtime = video.currentTime
         const tmpSrc = video.src
-        console.log('this.addPauseEvent', video.src)
         video.src = ''
         video.load()
         video.src = tmpSrc
@@ -232,7 +230,7 @@ class Preview extends React.Component {
   }
 
   renderOtherFiles() {
-    debug('this.props renderOtherFiles', this.props)
+    // debug('this.props renderOtherFiles', this.props)
     return (
       <div
         style={{
@@ -324,7 +322,7 @@ class Preview extends React.Component {
     const textExtension = ['TXT', 'MD', 'JS', 'JSX', 'TS', 'JSON', 'HTML', 'CSS', 'LESS', 'CSV', 'XML']
     const isText = textExtension.findIndex(t => t === extension) > -1 && this.props.item.size < 1024 * 128
 
-    debug('isPhoto, isVideo', this.props.item, isPhoto, isVideo, isText)
+    // debug('isPhoto, isVideo', this.props.item, isPhoto, isVideo, isText)
 
     return (
       <div

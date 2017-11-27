@@ -27,7 +27,6 @@ class FinishedTask extends Component {
     }
 
     this.openFileLocation = () => {
-      console.log('this.openFileLocation')
       if (this.props.task.trsType === 'download') setImmediate(this.props.open)
       else setImmediate(this.props.openInDrive)
     }

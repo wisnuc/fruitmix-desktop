@@ -73,7 +73,7 @@ class FileContent extends React.Component {
       if (entry.type === 'file') {
         this.setState({ seqIndex: index, preview: true })
       } else {
-        debug('should change to loading')
+        // debug('should change to loading')
         this.setState({ loading: true })
       }
     }
@@ -93,7 +93,7 @@ class FileContent extends React.Component {
       const dir = this.props.home.path
       const dirUUID = dir[dir.length - 1].uuid
       const driveUUID = this.props.home.path[0].uuid
-      debug('drop files!!', files, dirUUID, driveUUID, dir)
+      // debug('drop files!!', files, dirUUID, driveUUID, dir)
       if (!dirUUID || !driveUUID) {
         this.props.openSnackBar('共享盘列表不能上传文件或文件夹')
       } else {
@@ -155,7 +155,7 @@ class FileContent extends React.Component {
       const s = this.refSelectBox.style
       const dx = event.clientX - this.selectBox.x
       const dy = event.clientY - this.selectBox.y
-      debug('event.clientX event.clientY', event.clientX, event.clientY)
+      // debug('event.clientX event.clientY', event.clientX, event.clientY)
       if (dy < 0) this.up = true
       else this.up = false
 

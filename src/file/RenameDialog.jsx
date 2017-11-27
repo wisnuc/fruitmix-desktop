@@ -28,7 +28,6 @@ class RenameDialog extends React.PureComponent {
     }
 
     this.fire = () => {
-      console.log(this.props)
       const { apis, path, entries, select } = this.props
       const curr = path[path.length - 1]
       const args = {
@@ -38,7 +37,6 @@ class RenameDialog extends React.PureComponent {
         newName: this.state.value,
         oldName: entries[select.selected[0]].name
       }
-      console.log('renameDirOrFile', this.props, args)
       apis.request('renameDirOrFile', args, (err) => {
         if (err) {
           // this.setState({ errorText: err.message })

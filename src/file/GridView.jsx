@@ -59,7 +59,7 @@ class Row extends React.Component {
     }
 
     this.toggleMenu = (event) => {
-      debug('this.toggleMenu', this.state.open, event)
+      // debug('this.toggleMenu', this.state.open, event)
       if (!this.state.open && event && event.preventDefault) event.preventDefault()
       this.setState({ open: event !== 'clickAway' && !this.state.open, anchorEl: event.currentTarget })
     }

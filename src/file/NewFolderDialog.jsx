@@ -33,7 +33,6 @@ class NewFolderDialog extends React.PureComponent {
         dirUUID: curr.uuid,
         dirname: this.state.value
       }
-      // console.log('creat new folder', this.props, args)
       apis.request('mkdir', args, (err) => {
         if (err) {
           console.log('mkdir error', err.code)
@@ -53,7 +52,6 @@ class NewFolderDialog extends React.PureComponent {
   }
 
   render() {
-    // console.log('render!', this.props)
     return (
       <div style={{ width: 280, padding: '24px 24px 0px 24px' }}>
         <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>{this.props.title ? this.props.title : '创建新文件夹'}</div>

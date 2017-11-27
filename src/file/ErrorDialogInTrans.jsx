@@ -57,7 +57,6 @@ const convert = (code) => {
 }
 
 const translateStatus = (statusCode) => {
-  console.log('translateStatus', statusCode)
   if (translateStatus >= 500) return '服务器内部错误'
   switch (statusCode) {
     case 404:
@@ -159,7 +158,6 @@ class ErrorTree extends React.PureComponent {
   }
 
   render() {
-    console.log('ErrorDialog', this.props)
     const { expand } = this.state
     return (
       <div

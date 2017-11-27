@@ -35,7 +35,7 @@ class PDFView extends React.Component {
   }
 
   render() {
-    debug('PDFView render', this.state, this.props)
+    // debug('PDFView render', this.state, this.props)
     return (
       <div style={{ height: '100%', width: '100%' }} >
         <PDF
@@ -48,7 +48,6 @@ class PDFView extends React.Component {
             this.state.pages &&
               <AutoSizer>
                 {({ height, width }) => {
-                  debug('AutoSizer', height, width, this.state.pages)
                   const rowRenderer = ({ key, index, style }) => (
                     <div style={style} key={key}>
                       <Page key={this.state.pages[index].key} page={this.state.pages[index]} onError={e => debug(e)} />
@@ -56,7 +55,6 @@ class PDFView extends React.Component {
                   )
                   const rowHeight = ({ index }) => {
                     const page = this.state.pages[index]
-                    debug('rowHeight', width * page.height / page.width)
                     return width * page.height / page.width
                   }
                   return (
