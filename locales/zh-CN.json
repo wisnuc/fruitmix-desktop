@@ -1,5 +1,11 @@
 {
 	"LocalLogin": "局域网登录",
-	"language": "语言",
-	"zh-CN": "简体中文"
+	"zh-CN": "简体中文",
+	"Language Setting": "语言设置",
+	"Global Settings": "全局设置",
+	"Cache Size": "缓存大小：",
+	"Clean": "清理",
+	"Clean Cache Success": "清理成功",
+	"Client Close Tip": "客户端关闭提示",
+	"Prevent Sleep Tip": "有传输任务时，阻止电脑进入休眠"
 }

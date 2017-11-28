@@ -44,8 +44,8 @@ class SettingsApp extends React.Component {
       console.log('CleanCacheResult error', error)
       this.setState({ loading: false })
       this.props.ipcRenderer.send('GetCacheSize')
-      if (!error) this.props.openSnackBar('清理成功')
-      else this.props.openSnackBar('清理失败')
+      if (!error) this.props.openSnackBar(i18n.__('Clean Cache Success'))
+      else this.props.openSnackBar(i18n.__('Clean Cache Failed'))
     }
 
     this.toggleMenu = (event) => {
@@ -66,7 +66,7 @@ class SettingsApp extends React.Component {
         <div style={{ width: 40, display: 'flex', alignItems: 'center', marginRight: 8 }}>
           <InfoIcon color="rgba(0,0,0,0.54)" />
         </div>
-        <div style={{ width: 480, display: 'flex', alignItems: 'center' }}>
+        <div style={{ width: 560, display: 'flex', alignItems: 'center' }}>
           { type }
         </div>
         <Toggle
@@ -79,21 +79,22 @@ class SettingsApp extends React.Component {
   }
 
   renderLocales() {
-    const lan = global.config.global && global.config.global.locales || 'language'
+    const lan = global.config.global && global.config.global.locales || (navigator.language === 'zh-CN' ? 'zh-CN' : 'en-US')
+    console.log('lan', lan, i18n.__(lan))
     return (
       <div style={{ height: 56, width: '100%', display: 'flex', alignItems: 'center', marginLeft: 24 }}>
         <div style={{ width: 40, display: 'flex', alignItems: 'center', marginRight: 8 }}>
           <InfoIcon color="rgba(0,0,0,0.54)" />
         </div>
-        <div style={{ width: 480, display: 'flex', alignItems: 'center' }}>
-          语言设置
+        <div style={{ width: 560, display: 'flex', alignItems: 'center' }}>
+          { i18n.__('Language Setting') }
           <div style={{ width: 8 }} />
         </div>
         <div style={{ width: 480, display: 'flex', alignItems: 'center', marginLeft: -8 }}>
           <div style={{ display: 'flex', alignItems: 'center ', marginRight: 84 }}>
             <FlatButton
+              primary
               label={i18n.__(lan)}
-              labelStyle={{ fontSize: 14, color: 'rgba(0,0,0,0.54)' }}
               onTouchTap={this.toggleMenu}
             />
             {/* menu */}
@@ -107,7 +108,7 @@ class SettingsApp extends React.Component {
               <Menu style={{ minWidth: 240 }}>
                 <MenuItem
                   style={{ fontSize: 13 }}
-                  primaryText="中文"
+                  primaryText="简体中文"
                   onTouchTap={() => this.handleChange('zh-CN')}
                 />
                 <MenuItem
@@ -129,8 +130,8 @@ class SettingsApp extends React.Component {
         <div style={{ width: 40, display: 'flex', alignItems: 'center', marginRight: 8 }}>
           <InfoIcon color="rgba(0,0,0,0.54)" />
         </div>
-        <div style={{ width: 480, display: 'flex', alignItems: 'center' }}>
-          缓存大小
+        <div style={{ width: 560, display: 'flex', alignItems: 'center' }}>
+          { i18n.__('Cache Size') }
           <div style={{ width: 8 }} />
           {
             this.state.cacheSize === -1 ? <CircularProgress size={16} thickness={1.5} />
@@ -138,7 +139,7 @@ class SettingsApp extends React.Component {
           }
         </div>
         <div style={{ width: 480, display: 'flex', alignItems: 'center', marginLeft: -8 }}>
-          <FlatButton primary label="清理" onTouchTap={this.cleanCache} disabled={this.state.loading} />
+          <FlatButton primary label={i18n.__('Clean')} onTouchTap={this.cleanCache} disabled={this.state.loading} />
         </div>
       </div>
     )
@@ -150,12 +151,12 @@ class SettingsApp extends React.Component {
     const { noCloseConfirm, enableSleep } = global.config.global
     const settings = [
       {
-        type: '有传输任务时，阻止电脑进入休眠',
+        type: i18n.__('Prevent Sleep Tip'),
         enabled: !enableSleep,
         func: () => this.toggle('enableSleep')
       },
       {
-        type: '客户端关闭提示',
+        type: i18n.__('Client Close Tip'),
         enabled: !noCloseConfirm,
         func: () => this.toggle('noCloseConfirm')
       }
@@ -163,7 +164,7 @@ class SettingsApp extends React.Component {
     return (
       <div style={{ height: '100%', margin: 16 }}>
         <div style={{ fontSize: 20 }}>
-          { '全局设置' }
+          { i18n.__('Global Settings') }
         </div>
         <div style={{ height: 16 }} />
         { settings.map(op => this.renderRow(op)) }

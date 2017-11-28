@@ -1,4 +1,11 @@
 {
 	"LocalLogin": "Local Login",
-	"en-US": "English"
+	"en-US": "English",
+	"Language Setting": "Language",
+	"Global Settings": "Global Settings",
+	"Cache Size": "Cache size: ",
+	"Clean": "Clean",
+	"Clean Cache Success": "Cleaned the Cache Successfully",
+	"Client Close Tip": "Show tips before closing the client",
+	"Prevent Sleep Tip": "Prevent computer from suspending when the transimisson is in progress"
 }
