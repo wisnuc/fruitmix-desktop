@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Radium from 'radium'
 import { Avatar, TextField, Paper, CircularProgress } from 'material-ui'
 import muiThemeable from 'material-ui/styles/muiThemeable'
@@ -171,7 +172,7 @@ class UserBox extends React.Component {
         }}
       >
         <div style={{ height: 24 }} />
-        <div style={{ height: 24, fontSize: 13, color: 'rgba(0,0,0,0.38)', marginBottom: 8 }} >用户自动登录中</div>
+        <div style={{ height: 24, fontSize: 13, color: 'rgba(0,0,0,0.38)', marginBottom: 8 }} >{ i18n.__('Auto Logining') }</div>
         <div style={{ height: 36, fontSize: 24, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }} >
           {user.username}
         </div>
@@ -180,7 +181,7 @@ class UserBox extends React.Component {
         </div>
         <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
           <FlatButton
-            label="取消"
+            label={i18n.__('Cancel')}
             primary
             disabled={!!this.state.wait}
             onTouchTap={this.cancel}

@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import { TextField, Checkbox, CircularProgress, Avatar } from 'material-ui'
 
 import FlatButton from '../common/FlatButton'
@@ -25,7 +26,7 @@ class AutoLogin extends React.Component {
           transition: sharpCurve('height')
         }}
       >
-        <div style={{ height: 24, fontSize: 13, color: 'rgba(0,0,0,0.38)', marginBottom: 8 }} >用户登录</div>
+        <div style={{ height: 24, fontSize: 13, color: 'rgba(0,0,0,0.38)', marginBottom: 8 }} > { i18n.__('User Login') } </div>
         <div style={{ height: 36, fontSize: 24, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }} >
           {user.username}
         </div>
@@ -34,7 +35,7 @@ class AutoLogin extends React.Component {
         </div>
         <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
           <FlatButton
-            label="取消"
+            label={i18n.__('Cancel')}
             primary
             onTouchTap={this.cancel}
           />

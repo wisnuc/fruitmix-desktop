@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import Radium from 'radium'
 import { CircularProgress, Divider } from 'material-ui'
@@ -325,7 +326,7 @@ class WechatLogin extends React.Component {
               <div style={{ position: 'absolute', top: 0, left: 0, height: 108, width: '100%', backgroundColor: '#FAFAFA' }} >
                 <div style={{ height: 72 }} />
                 <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
-                  { '微信登录' }
+                  {i18n.__('Login via WeChat') }
                 </div>
               </div>
             </div>
@@ -351,11 +352,11 @@ class WechatLogin extends React.Component {
               </div>
               <div style={{ height: 24 }} />
               <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.87)', fontSize: 20 }}>
-                { this.state.error === 'net' ? '网络连接已断开' : '无法连接到云服务' }
+                { this.state.error === 'net' ? i18n.__('Network Error') : i18n.__('Cloud Error') }
               </div>
               <div style={{ height: 24 }} />
               <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.54)', fontSize: 20 }}>
-                { this.state.error === 'net' ? '请检查您的网络设置' : '请您稍后登录或局域网登录' }
+                { this.state.error === 'net' ? i18n.__('Network Error Tip') : i18n.__('Cloud Error Tip') }
               </div>
             </div>
         }
@@ -370,16 +371,16 @@ class WechatLogin extends React.Component {
     const wcl = this.state.wechatLogin
     switch (wcl) {
       case 'connecting':
-        text = '连接服务器中...'
+        text = i18n.__('Connecting Tip')
         break
       case 'authorization':
-        text = '正在进行权限认证...'
+        text = i18n.__('Authenticating Tip')
         break
       case 'getingList':
-        text = '正在获取设备列表...'
+        text = i18n.__('Getting List Tip')
         break
       case 'success':
-        text = '成功获取设备列表'
+        text = i18n.__('Get List Success')
         break
       default:
         text = ''
@@ -394,7 +395,7 @@ class WechatLogin extends React.Component {
           {/* title */}
           <div style={{ height: 72, backgroundColor: '#FAFAFA', display: 'flex', alignItems: 'center' }} >
             <div style={{ marginLeft: 24 }} >
-              { '登录失败' }
+              { i18n.__('WeChat Login Failed') }
             </div>
           </div>
           <Divider />
@@ -403,23 +404,23 @@ class WechatLogin extends React.Component {
           {/* content */}
           <div style={{ height: 400, marginLeft: 24, width: 332 }}>
             <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
-              请确定您是否拥有WISNUC品牌硬件产品或正在使用安装有WISNUC OS的硬件设备。
+              { i18n.__('WeChat Login Failed Comment') }
             </div>
             <div style={{ height: 24 }} />
             <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
-              1. 您可能尚未初始化设备
+              { i18n.__('WeChat Login Failed Tip 1') }
             </div>
             <div style={{ height: 24 }} />
             <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
-              2. 您可能尚未绑定微信
+              { i18n.__('WeChat Login Failed Tip 2') }
             </div>
             <div style={{ height: 24 }} />
             <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
-              3. 您可能尚未加入私有群
+              { i18n.__('WeChat Login Failed Tip 3') }
             </div>
             <div style={{ height: 24 }} />
             <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
-              4. 您绑定的设备都不在线
+              { i18n.__('WeChat Login Failed Tip 4') }
             </div>
           </div>
 
@@ -427,7 +428,7 @@ class WechatLogin extends React.Component {
           <div style={{ display: 'flex' }}>
             <div style={{ flexGrow: 1 }} />
             <FlatButton
-              label="返回"
+              label={i18n.__('Return')}
               labelStyle={{ color: '#424242', fontWeight: 500 }}
               onTouchTap={this.resetWCL}
             />
@@ -440,7 +441,7 @@ class WechatLogin extends React.Component {
       <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA', zIndex: 100 }}>
         <div style={{ height: 72, backgroundColor: '#FAFAFA', display: 'flex', alignItems: 'center' }} >
           <div style={{ marginLeft: 24 }} >
-            { wcl === 'lastDevice' ? '上次登录的设备' : wcl === 'list' ? '请选择登录设备' : '登录设备' }
+            { wcl === 'lastDevice' ? i18n.__('Last Device') : wcl === 'list' ? i18n.__('Select Device to Login') : i18n.__('Login to Device') }
           </div>
         </div>
         <Divider />
@@ -478,7 +479,7 @@ class WechatLogin extends React.Component {
                     <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}>
                       { this.state.lastDevice.LANIP }
                     </div>
-                    <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}> { '微信登录' } </div>
+                    <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}>{ i18n.__('Login via WeChat') } </div>
 
                   </div>
                 </div>
@@ -494,12 +495,12 @@ class WechatLogin extends React.Component {
                   :
                   <div>
                     <div style={{ height: 80, fontSize: 16, fontWeight: 500, color: 'rgba(0,0,0,0.87)', textAlign: 'center' }} >
-                      <span style={{ fontSize: 34 }}> { this.state.count } </span> 秒后将登录
+                      <span style={{ fontSize: 34 }}> { this.state.count } </span>
                     </div>
                     <div style={{ display: 'flex' }}>
                       <div style={{ flexGrow: 1 }} />
                       <FlatButton
-                        label="可登录设备列表"
+                        label={i18n.__('Avaliable Device List')}
                         labelPosition="before"
                         labelStyle={{ color: '#424242', fontWeight: 500 }}
                         onTouchTap={this.enterList}

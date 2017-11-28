@@ -67,7 +67,7 @@ class LoginApp extends React.Component {
           }}
         >
           <FlatButton
-            label={this.state.local ? '微信扫码登录' : i18n.__('LocalLogin')}
+            label={this.state.local ? i18n.__('Login via WeChat') : i18n.__('Login via LAN')}
             labelPosition="before"
             labelStyle={{ color: '#FAFAFA', fontWeight: 500 }}
             onTouchTap={this.toggleMode}
@@ -77,12 +77,12 @@ class LoginApp extends React.Component {
 
         {/* version */}
         <div style={{ position: 'absolute', bottom: 24, left: 24, fontSize: 14, color: '#FAFAFA' }}>
-          { `版本: ${global.config && global.config.appVersion}` }
+          { `${i18n.__('Version')}: ${global.config && global.config.appVersion}` }
         </div>
 
         {/* copyright */}
         <div style={{ position: 'absolute', bottom: 24, right: 24, fontSize: 14, color: '#FAFAFA' }}>
-          ©2017 上海闻上信息科技有限公司 版权所有
+          {i18n.__('Copyright Info')}
         </div>
 
         {/* login card */}

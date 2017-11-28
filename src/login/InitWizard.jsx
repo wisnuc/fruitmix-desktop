@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import prettysize from 'prettysize'
 import { RaisedButton, CircularProgress } from 'material-ui'
 import { Step, Stepper, StepLabel, StepContent } from 'material-ui/Stepper'
@@ -86,7 +87,8 @@ class InitWizard extends StateUp(React.Component) {
     return (
       <div style={{ margin: '12px 0' }}>
         <RaisedButton
-          label={stepIndex === 2 ? '创建' : stepIndex === 3 ? '绑定微信' : stepIndex === 4 ? '进入系统' : '下一步'}
+          label={stepIndex === 2 ? i18n.__('Create') : stepIndex === 3
+              ? i18n.__('Bind WeChat Title') : stepIndex === 4 ? i18n.__('Enter App') : i18n.__('Next Step')}
           disableTouchRipple
           disableFocusRipple
           disabled={
@@ -104,7 +106,7 @@ class InitWizard extends StateUp(React.Component) {
         {
           step > 0 &&
           <FlatButton
-            label={step === 3 ? '忽略' : '上一步'}
+            label={step === 3 ? i18n.__('Ignore') : i18n.__('Previous Step')}
             disabled={stepIndex === 0}
             disableTouchRipple
             disableFocusRipple
@@ -116,12 +118,12 @@ class InitWizard extends StateUp(React.Component) {
   }
 
   blockToString(blk) {
-    const model = blk.model ? blk.model : '(未知型号)'
+    const model = blk.model ? blk.model : i18n.__('Unknown Disk Model')
     const name = blk.name
     const size = prettysize(blk.size * 512)
     const iface = blk.isATA ? 'ATA' :
       blk.isSCSI ? 'SCSI' :
-        blk.isUSB ? 'USB' : '(未知接口)'
+        blk.isUSB ? 'USB' : i18n.__('Unknown Disk Iterface')
 
     return `${model}, ${name}, ${size}, ${iface}`
   }
@@ -135,14 +137,14 @@ class InitWizard extends StateUp(React.Component) {
     const lineStyle = { margin: '20px 0', color: 'rgba(0,0,0,0.87)', fontSize: 14 }
     return (
       <div>
-        <div style={lineStyle}>选择磁盘：</div>
+        <div style={lineStyle}> { i18n.__('Select Disk') }</div>
         <ul style={lineStyle}>
           { storage.blocks
               .filter(blk => this.state.volumeselect.selection.indexOf(blk.name) !== -1)
               .map(blk => (<li key={blk.name}>{this.blockToString(blk)}</li>)) }
         </ul>
-        <div style={lineStyle}>模式：{this.state.volumeselect.mode} </div>
-        <div style={lineStyle}>用户名：{this.state.userpass.username}</div>
+        <div style={lineStyle}>{ i18n.__('Mode Selected')} {this.state.volumeselect.mode} </div>
+        <div style={lineStyle}>{ i18n.__('User Name Used')} {this.state.userpass.username}</div>
       </div>
     )
   }
@@ -153,37 +155,37 @@ class InitWizard extends StateUp(React.Component) {
     const getError = h => h && h.err && h.err.response && h.err.response.body && h.err.response.body.message
 
     if (!mkfs || mkfs.isPending()) {
-      return ['busy', '创建文件系统']
+      return ['busy', i18n.__('Creating Filesystem')]
     } else if (mkfs.isRejected()) {
-      return ['error', '创建文件系统失败', getError(mkfs)]
+      return ['error', i18n.__('Create Filesystem Failed'), getError(mkfs)]
     } else if (!storage || storage.isPending()) {
-      return ['busy', '更新文件系统信息']
+      return ['busy', i18n.__('Updating Filesystem')]
     } else if (storage.isRejected()) {
-      return ['error', '更新文件系统信息失败', getError(storage)]
+      return ['error', i18n.__('Update Filesystem Failed'), getError(storage)]
     } else if (!install || install.isPending()) {
-      return ['busy', '安装应用']
+      return ['busy', i18n.__('Installing App')]
     } else if (install.isRejected()) {
-      return ['error', '安装应用失败', getError(install)]
+      return ['error', i18n.__('Intasll App Failed'), getError(install)]
     } else if (!boot || boot.isPending() || (boot.isFulfilled() && boot.value().fruitmix === null)
       || (boot.isFulfilled() && boot.value().fruitmix && boot.value().fruitmix.state === 'starting')) {
-      return ['busy', '启动应用']
+      return ['busy', i18n.__('Starting App')]
     } else if (boot.isRejected() || (boot.isFulfilled() && boot.value().fruitmix
       && boot.value().fruitmix.state === 'exited')) {
-      return ['error', '启动应用失败', getError(boot)]
+      return ['error', i18n.__('Starting App Failed'), getError(boot)]
     } else if (!firstUser || firstUser.isPending()) {
-      return ['busy', '创建用户']
+      return ['busy', i18n.__('Creating User')]
     } else if (firstUser.isRejected()) {
-      return ['error', '创建用户失败', getError(firstUser)]
+      return ['error', i18n.__('Create User Failed'), getError(firstUser)]
     } else if (!users || users.isPending()) {
-      return ['busy', '获取最新用户列表']
+      return ['busy', i18n.__('Getting User List')]
     } else if (users.isRejected()) {
-      return ['error', '获取最新用户列表失败', getError(users)]
+      return ['error', i18n.__('Get User List Failed'), getError(users)]
     } else if (!token || token.isPending()) {
-      return ['busy', '登录']
+      return ['busy', i18n.__('Logining')]
     } else if (token.isRejected()) {
-      return ['error', '登录失败', getError(token)]
+      return ['error', i18n.__('Login Failed'), getError(token)]
     }
-    return ['success', '安装成功']
+    return ['success', i18n.__('Install App Success')]
   }
 
   renderFinished() {
@@ -214,7 +216,7 @@ class InitWizard extends StateUp(React.Component) {
           {
             info[0] !== 'busy' &&
             <RaisedButton
-              label={info[0] === 'success' ? '下一步' : '重试'}
+              label={info[0] === 'success' ? i18n.__('Next Step') : i18n.__('Retry')}
               disableTouchRipple
               disableFocusRipple
               primary
@@ -223,13 +225,6 @@ class InitWizard extends StateUp(React.Component) {
             />
           }
         </div>
-        {/*
-        <div style={{ flex: '0 0 24px' }}>
-          { info[0] === 'success' &&
-            ? <FlatButton label="进入系统" onTouchTap={this.props.onOK} />
-            : <FlatButton label="退出" onTouchTap={this.props.onCancel} />
-        </div>
-        */}
       </div>
     )
   }
@@ -239,10 +234,10 @@ class InitWizard extends StateUp(React.Component) {
     let action
 
     if (this.state.finished && this.finishedInfo()[0] !== 'busy') {
-      label = '退出'
+      label = i18n.__('Exit')
       action = this.props.onFail
     } else if (!this.state.finished) {
-      label = '放弃'
+      label = i18n.__('Abort')
       action = this.props.onCancel
     }
 
@@ -268,7 +263,7 @@ class InitWizard extends StateUp(React.Component) {
   }
 
   render() {
-    const title = this.props.title || '初始化向导'
+    const title = this.props.title || i18n.__('Initialization Wizard')
     const { finished, stepIndex } = this.state
     const storage = this.props.device.storage.isFulfilled() ? this.props.device.storage.value() : null
 
@@ -282,22 +277,22 @@ class InitWizard extends StateUp(React.Component) {
             connector={<ArrowDownwardIcon color="rgba(0,0,0,0.27)" style={{ height: 16, width: 16, margin: '-2px 10px 10px 18px' }} />}
           >
             <Step>
-              <StepLabel>创建磁盘卷</StepLabel>
+              <StepLabel>{ i18n.__('Create Volume Title') }</StepLabel>
               <StepContent>
                 <CreatingVolumeDiskSelection storage={storage} {...this.bindVState('volumeselect')} />
                 { this.renderStepActions(0) }
               </StepContent>
             </Step>
             <Step style={{ marginTop: -28 }}>
-              <StepLabel>创建第一个用户</StepLabel>
+              <StepLabel>{ i18n.__('Create First User Title') }</StepLabel>
               <StepContent>
-                <p>请输入第一个用户的用户名和密码，该用户会成为系统权限最高的管理员。</p>
+                <p>{ i18n.__('Create First User Tip') }</p>
                 <UsernamePassword {...this.bindVState('userpass')} />
                 { this.renderStepActions(1) }
               </StepContent>
             </Step>
             <Step style={{ marginTop: -28 }}>
-              <StepLabel>确认安装</StepLabel>
+              <StepLabel>{ i18n.__('Confirm') }</StepLabel>
               <StepContent>
                 { !this.state.finished && this.renderConfirmation() }
                 { !this.state.finished && this.renderStepActions(2) }
@@ -305,16 +300,16 @@ class InitWizard extends StateUp(React.Component) {
               </StepContent>
             </Step>
             <Step style={{ marginTop: -28 }}>
-              <StepLabel>绑定微信</StepLabel>
+              <StepLabel>{ i18n.__('Bind WeChat Title') } </StepLabel>
               <StepContent>
-                <p>您可以选择现在绑定微信，成功绑定后就可通过微信扫码，远程登录设备。</p>
+                <p>{ i18n.__('Bind WeChat Tip') }</p>
                 { this.renderStepActions(3) }
               </StepContent>
             </Step>
             <Step style={{ marginTop: -28 }}>
-              <StepLabel>进入系统</StepLabel>
+              <StepLabel>{ i18n.__('Enter App') }</StepLabel>
               <StepContent>
-                <p>您已成功创建了WINUC系统。</p>
+                <p>{i18n.__('Install Wisnuc Success')}</p>
                 { this.renderStepActions(4) }
               </StepContent>
             </Step>

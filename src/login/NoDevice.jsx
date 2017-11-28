@@ -30,13 +30,13 @@ class NoDevice extends React.Component {
 
     this.checkIP = () => {
       if (!validator.isIP(this.state.IP)) {
-        this.setState({ errorText: '请输入正确的IP' })
+        this.setState({ errorText: i18n.__('ErrorText: Wrong IP') })
       } else {
         request.get(`${this.state.IP}:3000/boot`, (error, res) => {
           if (!error && res && res.body && res.body.state) {
             this.updateStore()
           } else {
-            this.setState({ errorText: '连接失败' })
+            this.setState({ errorText: i18n.__('ErrorText: Connect Failed') })
           }
         })
       }
@@ -51,20 +51,20 @@ class NoDevice extends React.Component {
       <div>
         <div style={{ height: 16 }} />
         <div style={{ fontSize: 16, marginBottom: 12 }}>
-          未发现WISNUC OS设备
+          { i18n.__('No Wisnuc Device') }
         </div>
         <div style={{ fontSize: 14, marginBottom: 12, color: 'rgba(0,0,0,0.54)' }}>
-          局域网登录仅支持同一网段的WISNUC设备登录
+          { i18n.__('No Wisnuc Device Comment') }
         </div>
         <div style={{ height: 24 }} />
-        <div> 1. 请确保WISNUC设备电源开启并已连接网络 </div>
+        <div> { i18n.__('No Wisnuc Device Tip 1') }</div>
         <div style={{ height: 24 }} />
-        <div> 2. 请尝试微信扫码登录 </div>
+        <div> { i18n.__('No Wisnuc Device Tip 2') }</div>
         <div style={{ height: 24 }} />
-        <div> 3. 请刷新再次搜索 </div>
+        <div> { i18n.__('No Wisnuc Device Tip 3') }</div>
         <div style={{ height: 12 }} />
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          { '4. 手动输入设备IP:' }
+          { i18n.__('No Wisnuc Device Tip 4') }
           <TextField
             style={{ width: 120, marginLeft: 16, marginRight: 8 }}
             name="setIP"

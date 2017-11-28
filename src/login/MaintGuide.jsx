@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import { Avatar, CircularProgress, Divider, IconButton } from 'material-ui'
 import NavigationChevronLeft from 'material-ui/svg-icons/navigation/chevron-left'
@@ -8,7 +9,6 @@ import DoneIcon from 'material-ui/svg-icons/action/done'
 import ClearIcon from 'material-ui/svg-icons/content/clear'
 import RaidIcon from 'material-ui/svg-icons/device/storage'
 import FlatButton from '../common/FlatButton'
-import BtrfsVolume from './BtrfsVolume'
 import InitWizard from './InitWizard'
 
 const debug = Debug('component:Login:maintenance')
@@ -100,11 +100,11 @@ class MaintGuide extends React.Component {
   renderTest(volume) {
     const { device, enterMaint } = this.props
     const test = [
-      '是否挂载',
-      '磁盘阵列是否完整',
-      '是否是上次启动的文件系统',
-      '是否存在Wisnuc系统',
-      '用户信息是否完整'
+      i18n.__('Test Mount'),
+      i18n.__('Test Missing'),
+      i18n.__('Test Last System'),
+      i18n.__('Test Fruitmix OK'),
+      i18n.__('Test Users OK')
     ]
 
     let allCheck = true
@@ -114,9 +114,9 @@ class MaintGuide extends React.Component {
     return (
       <div style={{ marginLeft: 24 }}>
         <div style={{ fontSize: 20, fontWeight: 500, height: 56, display: 'flex', alignItems: 'center' }}>
-          { '自动检测' }
+          { i18n.__('Auto Test Title') }
           <div style={{ flexGrow: 1 }} />
-          { allCheck && <FlatButton label="启动" onTouchTap={this.forceBoot} style={{ marginRight: 24 }} primary /> }
+          { allCheck && <FlatButton label={i18n.__('Start')} onTouchTap={this.forceBoot} style={{ marginRight: 24 }} primary /> }
         </div>
         {
           test.map((text, index) => (
@@ -124,7 +124,6 @@ class MaintGuide extends React.Component {
               { check[index] ? <DoneIcon color={primaryColor} /> : <ClearIcon color={accentColor} /> }
               <div style={{ width: 28 }} />
               <div style={{ width: 220 }}> { text } </div>
-              {/* !check[index] && '提示' */}
             </div>
           ))
         }
@@ -136,14 +135,14 @@ class MaintGuide extends React.Component {
     return (
       <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
         <FlatButton
-          label="返回"
+          label={i18n.__('Return')}
           onTouchTap={this.state.action ? this.toggleAction : this.props.toggleMaint}
           primary
         />
         {
           !this.state.action &&
           <FlatButton
-            label="进入维护模式"
+            label={i18n.__('Enter Maint')}
             onTouchTap={this.toggleAction}
             primary
           />
@@ -153,11 +152,11 @@ class MaintGuide extends React.Component {
   }
 
   renderActions() {
-    const diskLabels = ['Raid1恢复', '增加磁盘', '删减磁盘', '更换磁盘']
+    const diskLabels = [i18n.__('Recovery Raid1'), i18n.__('Add Disk'), i18n.__('Delete Disk'), i18n.__('Replace Disk')]
     const diskFuncs = [this.recoverRaid1, this.addDisk, this.deleteDisk, this.replaceDisk]
     const diskDisable = [true, true, true, true]
 
-    const wisnucLabels = ['用户信息备份与恢复', '重新安装WISNUC', '导出磁盘数据', '找回数据', '强制启动']
+    const wisnucLabels = [i18n.__('Backup and Restore User Data'), i18n.__('Reinstall Wisnuc'), i18n.__('Export Data'), i18n.__('Restore Data'), i18n.__('Force Start')]
     const wisnucFuncs = [this.backup, this.reinstall, this.exportData, this.recoverData, this.forceBoot]
     const wisnucDisable = [true, false, true, true, false]
 
@@ -177,13 +176,13 @@ class MaintGuide extends React.Component {
       <div style={{ display: 'flex' }}>
         <div style={{ marginLeft: 24 }}>
           <div style={{ height: 56, display: 'flex', alignItems: 'center' }}>
-            { '磁盘与卷管理' }
+            { i18n.__('Disk and Volume Manage Title') }
           </div>
           { diskLabels.map((label, index) => action(label, diskFuncs[index], diskDisable[index])) }
         </div>
         <div style={{ marginLeft: 96 }}>
           <div style={{ height: 56, display: 'flex', alignItems: 'center' }}>
-            { 'WISNUC系统管理' }
+            { i18n.__('Wisnuc Manage Title') }
           </div>
           { wisnucLabels.map((label, index) => action(label, wisnucFuncs[index], wisnucDisable[index])) }
         </div>
@@ -205,7 +204,7 @@ class MaintGuide extends React.Component {
         onCancel={this.backToVolumeCard}
         onFail={this.backToVolumeCard}
         onOK={this.props.OKAndLogin}
-        title="重新安装向导"
+        title={i18n.__('Reinstall Wisnuc Wizard')}
       />
     )
   }
@@ -238,7 +237,7 @@ class MaintGuide extends React.Component {
               <RaidIcon style={{ height: 48, width: 48 }} color={primaryColor} />
               <div style={{ marginLeft: 16, marginTop: -2 }}>
                 <div>
-                  {`磁盘阵列 ${this.state.index + 1}`}
+                  {`${i18n.__('Disk Array')} ${this.state.index + 1}`}
                 </div>
                 <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.54)' }}>
                   {`Brtfs | ${volume && volume.usage && volume.usage.data && volume.usage.data.mode}`}
