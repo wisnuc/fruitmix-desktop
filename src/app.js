@@ -13,10 +13,12 @@ const debug = Debug('app')
 localStorage.debug = '*component*'
 
 /* i18n config */
+
+const lang = navigator.language
 i18n.configure({
   locales: ['en-US', 'zh-CN'],
   directory: './locales',
-  defaultLocale: 'zh-CN'
+  defaultLocale: lang === 'zh-CN' ? 'zh-CN' : 'en-US'
 })
 
 /* required by Material UI */
