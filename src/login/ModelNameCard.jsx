@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import { ipcRenderer } from 'electron'
 import { Paper } from 'material-ui'
 import ActionOpenInBrowser from 'material-ui/svg-icons/action/open-in-browser'
@@ -10,7 +11,7 @@ import HoverNav from './HoverNav'
 
 class ModelNameCard extends React.Component {
   serial = () => {
-    let serial = '未知序列号'
+    let serial = i18n.__('Unknown Serial')
     if (this.props.device.name) {
       const split = this.props.device.name.split('-')
       if (split.length === 3 && split[0] === 'wisnuc') {
@@ -21,7 +22,7 @@ class ModelNameCard extends React.Component {
     return serial
   }
 
-  model = () => (this.props.ws215i ? 'WS215i' : ' 个人计算机')
+  model = () => (this.props.ws215i ? 'WS215i' : i18n.__('PC'))
 
   logoType = () => (this.props.ws215i ? Barcelona : Computer)
 
@@ -80,7 +81,7 @@ class ModelNameCard extends React.Component {
                     marginBottom: this.props.toggle ? 4 : 12
                   }}
                 >
-                  { this.props.name || '闻上盒子' }
+                  { this.props.name || i18n.__('Wisnuc Box') }
                 </div>
                 {
                   !this.props.toggle &&
@@ -96,12 +97,6 @@ class ModelNameCard extends React.Component {
                   }}
                 >
                   { this.props.device.address }
-                  {
-                    /*
-                        onTouchTap={() => ipcRenderer.send('newWebWindow', '固件版本管理', `http://${this.props.device.address}:3001`) }
-                        <ActionOpenInBrowser style={{ marginLeft: 8 }} color="rgba(0,0,0,0.54)" />
-                        */
-                  }
                 </div>
               </div>
             </div>

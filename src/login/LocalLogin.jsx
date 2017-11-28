@@ -1,5 +1,6 @@
-import Debug from 'debug'
 import React, { Component, PureComponent } from 'react'
+import i18n from 'i18n'
+import Debug from 'debug'
 import ReactDOM from 'react-dom'
 import { FlatButton, CircularProgress, Divider, IconButton, TextField } from 'material-ui'
 import { indigo900, cyan500, cyan900, teal900, lightGreen900, lime900, yellow900, teal500
@@ -85,7 +86,7 @@ class Login extends StateUp(React.Component) {
       compact: false,
       dim: false,
 
-      pin: '', // initWizard, pin child UI view, prevent auto dispatch, see footer
+      pin: 'initWizard', // initWizard, pin child UI view, prevent auto dispatch, see footer
 
       bye: false,
       byebye: false,
@@ -343,8 +344,8 @@ class Login extends StateUp(React.Component) {
 
         return (
           <div style={boxStyle}>
-            <div>该设备尚未初始化</div>
-            <FlatButton label="初始化" onTouchTap={() => this.toggleExpanded()} />
+            <div>{ i18n.__('Device Not Initialized') }</div>
+            <FlatButton label={i18n.__('Initialize')} onTouchTap={() => this.toggleExpanded()} />
           </div>
         )
       }
@@ -362,39 +363,39 @@ class Login extends StateUp(React.Component) {
       case 'ready': // users.length === 0 need to add FirstUser Box TODO
         break
       case 'noUser':
-        text = '系统错误：未发现用户'
+        text = i18n.__('Error: No User')
         break
       case 'probing':
-        text = '通讯中....'
+        text = i18n.__('Probing')
         busy = true
         break
       case 'systemError':
-        text = '系统错误：无法与该设备通讯'
+        text = i18n.__('Error: System Error')
         error = pullError()
         break
       case 'fruitmixError':
-        text = '应用错误：无法启动WISNUC应用'
+        text = i18n.__('Error: Fruitmix Error')
         error = pullError()
         break
       case 'userMaint':
-        text = '用户指定进入维护模式'
+        text = i18n.__('User Maintenance Tip')
         maint = true
         break
       case 'failLast':
-        text = '启动错误：未能启动上次系统'
+        text = i18n.__('Error: Fail Last')
         maint = true
         break
       case 'failMulti':
-        text = '启动错误：存在多个可用系统'
+        text = i18n.__('Error: Fail Multi')
         maint = true
         break
       case 'failNoAlt':
-        text = '启动错误：未能发现可用系统'
+        text = i18n.__('Error: Fail No Alt')
         maint = true
         break
       case 'unknownMaint':
       default:
-        text = '未知错误'
+        text = i18n.__('Error: Unknown Error')
         maint = true
         break
     }
@@ -422,7 +423,7 @@ class Login extends StateUp(React.Component) {
         return (
           <div style={boxStyle}>
             <div>{text}</div>
-            <FlatButton label="维护模式" onTouchTap={this.toggleMaint} />
+            <FlatButton label={i18n.__('Maintenance Mode')} onTouchTap={this.toggleMaint} />
           </div>
         )
       }
@@ -453,7 +454,7 @@ class Login extends StateUp(React.Component) {
         return (
           <div style={boxStyle}>
             <div>{text}</div>
-            <FlatButton label="创建用户" onTouchTap={this.toggleFirstUser} />
+            <FlatButton label={i18n.__('Create User')} onTouchTap={this.toggleFirstUser} />
           </div>
         )
       }
@@ -469,16 +470,16 @@ class Login extends StateUp(React.Component) {
         >
           <div style={{ height: 24 }} />
           <div style={{ fontSize: 16, lineHeight: '24px', color: 'rgba(0,0,0,0.87)' }}>
-              请输入第一个用户的用户名和密码
+            { i18n.__('Create User Tip 1') }
           </div>
           <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}>
-              该用户会成为系统权限最高的管理员
+            { i18n.__('Create User Tip 2') }
           </div>
           <div style={{ height: 16 }} />
           <UsernamePassword {...this.bindVState('userpass')} />
           <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -16 }}>
-            <FlatButton label="取消" onTouchTap={this.toggleFirstUser} primary />
-            <FlatButton label="确认" disabled={!this.state.userpass.isInputOK()} onTouchTap={this.addFirstUser} primary />
+            <FlatButton label={i18n.__('Cancel')} onTouchTap={this.toggleFirstUser} primary />
+            <FlatButton label={i18n.__('Confirm')} disabled={!this.state.userpass.isInputOK()} onTouchTap={this.addFirstUser} primary />
           </div>
         </div>
       )
@@ -500,7 +501,7 @@ class Login extends StateUp(React.Component) {
     if (selectedDevice === null || (selectedDevice && !selectedDevice.mdev.address)) {
       cardProps = {
         key: 'info-card',
-        text: '正在搜索网络上的WISNUC OS设备'
+        text: i18n.__('Seaching Device Tip')
       }
     } else {
       cardProps = { key: `device-card-${selectedDevice.mdev.name}` }
@@ -540,7 +541,7 @@ class Login extends StateUp(React.Component) {
                     <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>
                       <div style={{ height: 72, backgroundColor: '#FAFAFA', display: 'flex', alignItems: 'center' }} >
                         <div style={{ marginLeft: 24 }} >
-                          { '局域网登录' }
+                          { i18n.__('Login via LAN') }
                         </div>
                       </div>
                       <Divider />
@@ -551,7 +552,7 @@ class Login extends StateUp(React.Component) {
                       </div>
                       <div style={{ height: 36 }} />
                       <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.87)', fontSize: 20, height: 36 }}>
-                        { '搜索设备中...' }
+                        { i18n.__('Seaching Device') }
                       </div>
                     </div>
                   </DeviceCard>
@@ -560,7 +561,7 @@ class Login extends StateUp(React.Component) {
                       { !this.state.compact &&
                       <div style={{ height: 72, backgroundColor: '#FAFAFA', display: 'flex', alignItems: 'center' }} >
                         <div style={{ marginLeft: 24 }}>
-                          { '局域网登录' }
+                          { i18n.__('Login via LAN') }
                         </div>
                         <div style={{ flexGrow: 1 }} />
                         <div style={{ width: 56 }}>
@@ -581,7 +582,7 @@ class Login extends StateUp(React.Component) {
             : <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>
               <div style={{ height: 72, backgroundColor: '#FAFAFA', display: 'flex', alignItems: 'center' }} >
                 <div style={{ marginLeft: 24 }} >
-                  { '局域网登录' }
+                  { i18n.__('Login via LAN') }
                 </div>
               </div>
               <Divider />
@@ -598,7 +599,7 @@ class Login extends StateUp(React.Component) {
               <div style={{ height: 128 }} />
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginRight: 8 }}>
                 <FlatButton
-                  label="刷新"
+                  label={i18n.__('Refresh')}
                   labelStyle={{ color: '#424242', fontWeight: 500 }}
                   onTouchTap={this.refresh}
                 />

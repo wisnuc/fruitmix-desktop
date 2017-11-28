@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react'
+import i18n from 'i18n'
 import prettysize from 'prettysize'
 import { cyan500 } from 'material-ui/styles/colors'
 import { Checkbox, Divider } from 'material-ui'
@@ -13,28 +14,28 @@ class CreatingVolumeDiskSelection extends React.PureComponent {
   }
 
   renderDiskRow(blk) {
-    const model = blk.model ? blk.model : '未知型号'
+    const model = blk.model ? blk.model : i18n.__('Unknown Disk Model')
     const name = blk.name
     const size = prettysize(blk.size * 512)
     const iface = blk.isATA ? 'ATA' :
       blk.isSCSI ? 'SCSI' :
-        blk.isUSB ? 'USB' : '未知'
+        blk.isUSB ? 'USB' : i18n.__('Unknown Disk Iterface')
 
-    const usage = blk.isFileSystem ? `${blk.fileSystemType} 文件系统` :
-      blk.isPartitioned ? '有文件分区' : '未发现文件系统或分区'
+    const usage = blk.isFileSystem ? `${blk.fileSystemType} ${i18n.__('File System')}` :
+      blk.isPartitioned ? i18n.__('isPartitioned') : i18n.__('No FileSystem or Partition')
 
     const valid = !blk.unformattable
 
     let comment
     if (blk.unformattable === 'isActiveSwap') {
-      comment = '该磁盘含有在使用的交换分区，不可用'
+      comment = i18n.__('Unformattable Comment isActiveSwap')
     } else if (blk.unformattable === 'isRootFS') {
-      comment = '该磁盘含有rootfs，不可用'
+      comment = i18n.__('Unformattable Comment isRootFS')
     } else if (blk.unformattable) {
-      comment = '该磁盘无法格式化，不可用'
+      comment = i18n.__('Unformattable Comment')
     } else if (blk.removable) {
-      comment = '该磁盘为可移动磁盘，可以加入磁盘卷，但请谨慎选择'
-    } else comment = '该磁盘可以加入磁盘卷'
+      comment = i18n.__('Removable Disk Comment')
+    } else comment = i18n.__('Disk All OK Comment')
 
     return (
       <div
@@ -90,18 +91,20 @@ class CreatingVolumeDiskSelection extends React.PureComponent {
   render() {
     return (
       <div>
-        <div style={{ height: 40, display: 'flex', alignItems: 'center', color: cyan500, paddingLeft: 10, paddingBottom: 20 }}>选择磁盘创建新的磁盘卷，所选磁盘的数据会被清除</div>
+        <div style={{ height: 40, display: 'flex', alignItems: 'center', color: cyan500, paddingLeft: 10, paddingBottom: 20 }}>
+          { i18n.__('Create Volume Warning') }
+        </div>
         <div style={{ color: 'rgba(0,0,0,0.87)' }}>
           <div style={{ marginLeft: 10, fontSize: 13 }}>
             <Divider />
             <div style={{ width: '100%', height: 32, display: 'flex', alignItems: 'center' }}>
               <div style={{ flex: '0 0 64px' }} />
-              <div style={{ flex: '0 0 180px' }}>型号</div>
-              <div style={{ flex: '0 0 80px' }}>设备名</div>
-              <div style={{ flex: '0 0 80px' }}>容量</div>
-              <div style={{ flex: '0 0 80px' }}>接口</div>
-              <div style={{ flex: '0 0 180px' }}>状态</div>
-              <div style={{ flex: '0 0 240px' }}>说明</div>
+              <div style={{ flex: '0 0 180px' }}>{ i18n.__('Model') }</div>
+              <div style={{ flex: '0 0 80px' }}>{ i18n.__('Device Name')}</div>
+              <div style={{ flex: '0 0 80px' }}>{ i18n.__('Disk Size') }</div>
+              <div style={{ flex: '0 0 80px' }}>{ i18n.__('Disk Interface') }</div>
+              <div style={{ flex: '0 0 180px' }}>{ i18n.__('Disk Status') }</div>
+              <div style={{ flex: '0 0 240px' }}>{ i18n.__('Disk Comment') }</div>
             </div>
             <Divider />
             <div style={{ maxHeight: 180, overflowY: 'auto' }}>
@@ -111,7 +114,7 @@ class CreatingVolumeDiskSelection extends React.PureComponent {
           </div>
 
           <div style={{ position: 'relative', marginLeft: 10, marginTop: 12, marginBottom: 12, display: 'flex', alignItems: 'center' }}>
-            <div style={{ fontSize: 13 }}>选择磁盘卷模式：</div>
+            <div style={{ fontSize: 13 }}> { i18n.__('Choose Disk Mode') }</div>
             <div style={{ width: 160 }}>
               <RadioButtonGroup
                 style={{ position: 'relative', display: 'flex' }}
@@ -125,7 +128,7 @@ class CreatingVolumeDiskSelection extends React.PureComponent {
                   disableTouchRipple
                   disableFocusRipple
                   value="single"
-                  label="single模式"
+                  label={i18n.__('Single Mode')}
                   disabled={this.props.state.selection.length === 0}
                 />
                 <RadioButton
@@ -134,7 +137,7 @@ class CreatingVolumeDiskSelection extends React.PureComponent {
                   disableTouchRipple
                   disableFocusRipple
                   value="raid0"
-                  label="raid0模式"
+                  label={i18n.__('Raid0 Mode')}
                   disabled={this.props.state.selection.length < 2}
                 />
                 <RadioButton
@@ -143,7 +146,7 @@ class CreatingVolumeDiskSelection extends React.PureComponent {
                   disableTouchRipple
                   disableFocusRipple
                   value="raid1"
-                  label="raid1模式"
+                  label={i18n.__('Raid1 Mode')}
                   disabled={this.props.state.selection.length < 2}
                 />
               </RadioButtonGroup>

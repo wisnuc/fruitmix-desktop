@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react'
+import i18n from 'i18n'
 import { TextField } from 'material-ui'
 
 
@@ -23,7 +24,7 @@ class UsernamePassword extends React.PureComponent {
         <div>
           <TextField
             key="guide-box-username"
-            hintText="用户名"
+            hintText={i18n.__('Username')}
             value={this.props.state.username}
             maxLength={20}
             onChange={e => this.props.setState({ username: e.target.value })}
@@ -32,7 +33,7 @@ class UsernamePassword extends React.PureComponent {
         <div>
           <TextField
             key="guide-box-password"
-            hintText="密码"
+            hintText={i18n.__('Password')}
             value={this.props.state.password}
             type="password"
             maxLength={40}
@@ -42,7 +43,7 @@ class UsernamePassword extends React.PureComponent {
         <div>
           <TextField
             key="guide-box-password-again"
-            hintText="再次输入密码"
+            hintText={i18n.__('Password Again')}
             value={this.props.state.passwordAgain}
             type="password"
             maxLength={40}
@@ -55,4 +56,3 @@ class UsernamePassword extends React.PureComponent {
 }
 
 export default UsernamePassword
-

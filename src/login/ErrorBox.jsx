@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import { clipboard } from 'electron'
 import JSONTree from 'react-json-tree'
 import { IconButton, Dialog, RaisedButton } from 'material-ui'
@@ -40,7 +41,7 @@ class ErrorBox extends React.PureComponent {
           </IconButton>
           <Dialog
             titleStyle={{ fontSize: 20 }}
-            title="错误信息"
+            title={i18n.__('Error Message')}
             modal={false}
             open={this.state.open}
             onRequestClose={() => this.setState(state => Object.assign({}, state, { open: false }))}
@@ -55,7 +56,7 @@ class ErrorBox extends React.PureComponent {
                 valueRenderer={raw => <span style={{ userSelect: 'text' }}>{raw}</span>}
               />
             </div>
-            <RaisedButton style={{ marginTop: 24 }} label="复制到剪贴板" primary onTouchTap={() => clipboard.writeText(this.props.error)} />
+            <RaisedButton style={{ marginTop: 24 }} label={i18n.__('Copy to Clipboard')} primary onTouchTap={() => clipboard.writeText(this.props.error)} />
           </Dialog>
         </div>
       </div>
@@ -64,4 +65,3 @@ class ErrorBox extends React.PureComponent {
 }
 
 export default ErrorBox
-
