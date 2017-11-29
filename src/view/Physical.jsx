@@ -14,7 +14,7 @@ import FileDetail from '../file/FileDetail'
 import { BreadCrumbItem, BreadCrumbSeparator } from '../common/BreadCrumb'
 import ContextMenu from '../common/ContextMenu'
 import DialogOverlay from '../common/DialogOverlay'
-import { HDDIcon } from '../maintenance/Svg'
+import { HDDIcon } from '../common/Svg'
 
 const debug = Debug('component:view:Physical:')
 
