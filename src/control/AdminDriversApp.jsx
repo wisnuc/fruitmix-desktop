@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Radium from 'radium'
 import Debug from 'debug'
 import ContentAdd from 'material-ui/svg-icons/content/add'
@@ -16,10 +17,10 @@ class DriveHeader extends React.PureComponent {
       <div style={{ height: 48, display: 'flex', alignItems: 'center', width: '100%' }}>
         <div style={{ flex: '0 0 104px' }} />
         <div style={{ flex: '0 0 300px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)', marginRight: 24 }}>
-          名称
+          { i18n.__('Name') }
         </div>
         <div style={{ flex: '0 0 480px', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
-          用户
+          { i18n.__('Users') }
         </div>
         <div style={{ flexGrow: 1 }} />
       </div>
@@ -130,8 +131,8 @@ class AdminDrives extends React.Component {
             backgroundColor: '#FAFAFA'
           }}
         >
-          <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.27)' }}> { '尚未建立共享盘' } </div>
-          <div style={{ color: 'rgba(0,0,0,0.27)' }}> { '请点击左上按钮创建' } </div>
+          <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.27)' }}> { i18n.__('No Public Drive') }</div>
+          <div style={{ color: 'rgba(0,0,0,0.27)' }}> { i18n.__('No Public Drive Tip') }</div>
         </div>
       </div>
     )

@@ -25,7 +25,7 @@ class Map extends React.Component {
       const geocoderCallBack = (data) => {
         console.log('address', data)
         /* 返回地址描述 */
-        let address = '其它地区'
+        let address = this.props.unknownRegionText || 'Other Region'
         if (data && data.regeocode) {
           const compo = data.regeocode.addressComponent
           address = `${compo.province} ${compo.district}`

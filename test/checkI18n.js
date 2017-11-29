@@ -20,6 +20,8 @@ const unique_loc = new Set([...keys_loc.sort()])
 
 const not_loc = [...unique_src].filter(k => !unique_loc.has(k))
 const not_src = [...unique_loc].filter(k => !unique_src.has(k))
+const dup_loc = [...lines_loc].filter((l, index) => lines_loc.findIndex(k => k === l) < index)
 
-console.log('keys in src but not in locale:\n ', not_loc)
-console.log('keys in locale but not in src:\n ', not_src)
+console.log('keys in src but not in locale:\n', not_loc, '\n')
+console.log('keys in locale but not in src:\n', not_src, '\n')
+console.log('lines dupped in locale:\n', dup_loc, '\n')

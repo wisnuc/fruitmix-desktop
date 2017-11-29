@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import { TextField, Checkbox, Divider } from 'material-ui'
 import sanitize from 'sanitize-filename'
@@ -31,12 +32,11 @@ class NewDriveDialog extends PureComponent {
           this.setState({ loading: false })
           this.props.onRequestClose()
           this.props.refreshDrives()
-          this.props.openSnackBar('创建成功')
+          this.props.openSnackBar(i18n.__('Create Drive Success'))
         } else {
           this.setState({ loading: false })
           debug('adminCreateDrive failed', err)
-          // this.props.openSnackBar(`创建失败: ${err.message}`)
-          this.props.openSnackBar('创建失败')
+          this.props.openSnackBar(i18n.__('Create Drive Failed'))
         }
       })
     }
@@ -46,9 +46,9 @@ class NewDriveDialog extends PureComponent {
     const drives = this.props.drives
     const newValue = sanitize(value)
     if (drives.findIndex(drive => drive.label === value) > -1) {
-      this.setState({ label: value, errorText: '文件名已存在' })
+      this.setState({ label: value, errorText: i18n.__('Drive Name Exist Error') })
     } else if (value !== newValue) {
-      this.setState({ label: value, errorText: '文件名不合法' })
+      this.setState({ label: value, errorText: i18n.__('Drive Name Invalid Error') })
     } else {
       this.setState({ label: value, errorText: '' })
     }
@@ -82,16 +82,10 @@ class NewDriveDialog extends PureComponent {
     return (
       <div style={{ width: 336, padding: '24px 24px 0px 24px', zIndex: 2000 }}>
 
-        <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>新建共享盘</div>
+        <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>{ i18n.__('Create New Public Drive') }</div>
         <div style={{ height: 20 }} />
-        <div
-          style={{ height: 32,
-            fontSize: 14,
-            fontWeight: 500,
-            color: 'rgba(0,0,0,0.54)',
-            display: 'flex',
-            alignItems: 'center' }}
-        >名称
+        <div style={{ height: 32, fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)', display: 'flex', alignItems: 'center' }} >
+          { i18n.__('Name') }
         </div>
 
         <div style={{ height: 60 }}>
@@ -120,12 +114,12 @@ class NewDriveDialog extends PureComponent {
             alignItems: 'center'
           }}
         >
-          选择用户
+          { i18n.__('People Shared') }
         </div>
 
         <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key="all" >
           <Checkbox
-            label="所有人"
+            label={i18n.__('All Users')}
             labelStyle={{ fontSize: 14 }}
             iconStyle={{ fill: this.state.writelist.length === users.length ? '#5E35B1' : 'rgba(0, 0, 0, 0.54)' }}
             checked={this.state.writelist.length === users.length}
@@ -153,13 +147,13 @@ class NewDriveDialog extends PureComponent {
         <div style={{ height: 16 }} />
         <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
           <FlatButton
-            label="取消"
+            label={i18n.__('Cancel')}
             primary={this.props.primary}
             secondary={this.props.accent}
             onTouchTap={this.props.onRequestClose}
           />
           <FlatButton
-            label="创建"
+            label={i18n.__('Confirm')}
             primary={this.props.primary}
             secondary={this.props.accent}
             disabled={this.state.label.length === 0 || !!this.state.errorText || this.state.loading}

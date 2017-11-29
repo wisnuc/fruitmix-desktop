@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import { Divider, IconButton, CircularProgress } from 'material-ui'
 import ActionAccountCircle from 'material-ui/svg-icons/action/account-circle'
@@ -10,8 +11,6 @@ import FlatButton from '../common/FlatButton'
 import DialogOverlay from '../common/DialogOverlay'
 import ChangeAccountDialog from './ChangeAccountDialog'
 import Checkmark from '../common/Checkmark'
-
-const stationName = '闻上盒子'
 
 const debug = Debug('component:control:WeChatBind')
 
@@ -172,29 +171,29 @@ class WeChatBind extends React.Component {
     let tips = ''
     switch (error) {
       case 'net':
-        text = '无法连接到互联网'
-        tips = '请检查您的网络设置！'
+        text = i18n.__('Network Error')
+        tips = i18n.__('Network Error Tip')
         break
       case 'wxConnect':
-        text = '无法连接到微信'
-        tips = '请检查您的网络设置！'
+        text = i18n.__('WeChat Connect Error')
+        tips = i18n.__('WeChat Connect Error Tip')
         break
       case 'wxBind':
-        text = '绑定失败，无法获取微信授权'
+        text = i18n.__('WeChat Auth Error')
         break
       case 'wisnucNet':
-        text = `${stationName}无法连接互联网`
-        tips = '请检查设备的网络设置'
+        text = i18n.__('Station Connect Error')
+        tips = i18n.__('Station Connect Error Tip')
         break
       case 'fillTicket':
-        text = '绑定失败，无法获取微信信息'
+        text = i18n.__('Fill Ticket Error')
         break
       case 'confirmTicket':
-        text = '绑定失败，无法确认绑定信息'
-        tips = '该微信可能已经绑定过此设备'
+        text = i18n.__('Confirm Ticket Error')
+        tips = i18n.__('Confirm Ticket Error Tip')
         break
       case 'creatTicket':
-        text = '绑定失败，无法创建绑定动作'
+        text = i18n.__('Create Ticket Error')
         break
       default:
         text = ''
@@ -210,7 +209,7 @@ class WeChatBind extends React.Component {
               </div>
               <div style={{ height: 56 }} />
               <div style={{ textAlign: 'center', fontSize: 20, height: 36 }}>
-                { status === 'connectingWX' ? '连接微信中...' : '连接WISNUC云服务器中...' }
+                { status === 'connectingWX' ? i18n.__('Connecting WeChat') : i18n.__('Connecting Wisnuc Cloud') }
               </div>
             </div>
         }
@@ -235,7 +234,7 @@ class WeChatBind extends React.Component {
               >
                 <div style={{ height: 72 }} />
                 <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  { '请使用微信扫码' }
+                  { i18n.__('WeChat QR Code Title') }
                 </div>
               </div>
             </div>
@@ -243,10 +242,10 @@ class WeChatBind extends React.Component {
         {
           status === 'confirm' &&
             <div style={{ width: 332, height: 492, padding: 24, position: 'relative' }}>
-              <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}> 绑定微信 </div>
+              <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}> { i18n.__('Bind WeChat Title') }</div>
               <div style={{ height: 20 }} />
               <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }} >
-                { '确定使用以下帐号绑定Wisnuc吗？'}
+                { i18n.__('Bind WeChat Tip in WeChatBind') }
               </div>
 
               {/* Icon */}
@@ -265,8 +264,8 @@ class WeChatBind extends React.Component {
 
               <div style={{ height: 84 }} />
               <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                <FlatButton label="取消" primary onTouchTap={this.done} />
-                <FlatButton label="绑定" primary onTouchTap={this.confirm} />
+                <FlatButton label={i18n.__('Cancel')} primary onTouchTap={this.done} />
+                <FlatButton label={i18n.__('Confirm')} primary onTouchTap={this.confirm} />
               </div>
             </div>
         }
@@ -279,11 +278,11 @@ class WeChatBind extends React.Component {
               </div>
               <div style={{ height: 36 }} />
               <div style={{ textAlign: 'center', fontSize: 20, height: 36 }}>
-                { '绑定成功' }
+                { i18n.__('Bind WeChat Success') }
               </div>
               <div style={{ height: 106 }} />
               <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                <FlatButton label="确定" primary onTouchTap={this.done} />
+                <FlatButton label={i18n.__('Confirm')} primary onTouchTap={this.done} />
               </div>
             </div>
         }
@@ -303,7 +302,7 @@ class WeChatBind extends React.Component {
               </div>
               <div style={{ height: 58 }} />
               <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                <FlatButton label="返回" primary onTouchTap={this.done} />
+                <FlatButton label={i18n.__('Return')} primary onTouchTap={this.done} />
               </div>
             </div>
         }

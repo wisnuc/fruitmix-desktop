@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import { Divider, IconButton, CircularProgress } from 'material-ui'
 import ActionAccountCircle from 'material-ui/svg-icons/action/account-circle'
@@ -62,9 +63,9 @@ class AccountApp extends React.Component {
           height: 72
         }}
       >
-        { `您当前的用户名为：${account.username}`}
+        { i18n.__('Your Username %s', account.username) }
         <br />
-        设备登录用户名是系统用户名，也是您登录Samba的用户名。
+        { i18n.__('Username Tip')}
       </div>
     )
 
@@ -98,19 +99,18 @@ class AccountApp extends React.Component {
         <div style={{ flex: '0 0 560px' }}>
           <div style={{ fontSize: 14, lineHeight: '26px', color: 'rgba(0, 0, 0, 0.87)', display: 'flex' }}>
             {
-              account.isAdmin && account.isFirstUser ?
-                '您是系统的第一个用户，是最高权限的系统管理员。' :
-                account.isAdmin ? '您是系统管理员。' : '您是系统普通用户。'
+              account.isAdmin && account.isFirstUser ? i18n.__('First User Tip')
+              : account.isAdmin ? i18n.__('Admin User Tip') : i18n.__('Normal User Tip')
             }
             {
               account.global && account.global.wx ?
                 <div style={{ display: 'flex', alignItems: 'center', height: 26 }}>
-                  { nickName ? `您已绑定了您的微信，微信昵称: ${nickName} 。` : '您已绑定了您的微信。' }
+                  { nickName ? i18n.__('WeChat Bound Tip %s', nickName) : i18n.__('WeChat Bound Tip') }
                 </div>
                 :
                 <div style={{ display: 'flex', alignItems: 'center', height: 26 }}>
-                  { '您尚未绑定您的微信帐号。' }
-                  { <FlatButton label="绑定微信" onTouchTap={() => this.setState({ weChat: true })} primary /> }
+                  { i18n.__('WeChat not Bind Tip') }
+                  { <FlatButton label={i18n.__('Bind WeChat Title')} onTouchTap={() => this.setState({ weChat: true })} primary /> }
                 </div>
             }
           </div>
@@ -128,7 +128,7 @@ class AccountApp extends React.Component {
               <Username color={this.props.primaryColor} />
             </div>
             <div style={{ flex: '0 0 560px', color: 'rgba(0, 0, 0, 0.87)', display: 'flex', alignItems: 'center' }}>
-              <div> { '设备登录用户名' } </div>
+              <div> { i18n.__('Username') } </div>
               <IconButton
                 iconStyle={{ width: 18, height: 18, color: primaryColor }}
                 style={{ width: 36, height: 36, padding: 8 }}
@@ -148,7 +148,7 @@ class AccountApp extends React.Component {
             <div style={{ flex: '0 0 56px' }} />
             <div style={{ flex: '0 0 560px' }}>
               <FlatButton
-                label="修改用户名"
+                label={i18n.__('Change Username')}
                 style={{ marginLeft: -8 }}
                 primary
                 onTouchTap={() => this.setState({ openDialog: 'username' })}
@@ -167,7 +167,7 @@ class AccountApp extends React.Component {
               <Password color={this.props.primaryColor} />
             </div>
             <div style={{ flex: '0 0 560px', fontSize: 16, color: 'rgba(0, 0, 0, 0.87)' }}>
-              密码
+              {i18n.__('Password')}
             </div>
           </div>
         </div>
@@ -178,7 +178,7 @@ class AccountApp extends React.Component {
             <div style={{ flex: '0 0 56px' }} />
             <div style={{ flex: '0 0 560px' }}>
               <FlatButton
-                label="修改密码"
+                label={i18n.__('Change Password')}
                 style={{ marginLeft: -8 }}
                 primary
                 onTouchTap={() => this.setState({ openDialog: 'password' })}
@@ -205,10 +205,10 @@ class AccountApp extends React.Component {
           {
             this.state.editAvatar &&
             <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
-              <div style={{ color: 'rgba(0,0,0,0.54)' }}>请绑定微信，将会自动获取您的微信头像。</div>
+              <div style={{ color: 'rgba(0,0,0,0.54)' }}> { i18n.__('Avatar Edit Tip') } </div>
               <div style={{ height: 24 }} />
               <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                <FlatButton label="确定" primary onTouchTap={() => this.toggleDialog('editAvatar')} />
+                <FlatButton label={i18n.__('Confirm')} primary onTouchTap={() => this.toggleDialog('editAvatar')} />
               </div>
             </div>
           }
