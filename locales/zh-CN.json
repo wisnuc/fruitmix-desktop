@@ -6,6 +6,7 @@
 	"Cache Size": "缓存大小：",
 	"Clean": "清理",
 	"Clean Cache Success": "清理成功",
+  "Clean Cache Failed": "清理失败",
 	"Client Close Tip": "客户端关闭提示",
 	"Prevent Sleep Tip": "有传输任务时，阻止电脑进入休眠",
 

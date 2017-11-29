@@ -8,6 +8,7 @@
   "main": "main.js",
   "scripts": {
     "build": "babel node --out-dir build",
+    "checkI18n": "node test/checkI18n.js",
     "devel": "nodemon --exec electron devel.js",
     "devel2": "electron devel.js",
     "doc": "nodemon --exec jsdoc -c jsdoc.conf.json -t node_modules/ink-docstrap/template",
