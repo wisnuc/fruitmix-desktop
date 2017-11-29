@@ -86,7 +86,7 @@ class Login extends StateUp(React.Component) {
       compact: false,
       dim: false,
 
-      pin: 'initWizard', // initWizard, pin child UI view, prevent auto dispatch, see footer
+      pin: '', // initWizard, pin child UI view, prevent auto dispatch, see footer
 
       bye: false,
       byebye: false,
