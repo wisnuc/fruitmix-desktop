@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import prettysize from 'prettysize'
 import { TextField, Divider, IconButton, CircularProgress } from 'material-ui'
@@ -31,12 +32,12 @@ class DeviceInfo extends React.PureComponent {
       this.setState({ progress: true }, () => {
         this.props.selectedDevice.request('renameStation', { name: this.state.label }, (err) => {
           if (err) {
-            this.props.openSnackBar('修改失败')
+            this.props.openSnackBar(i18n.__('Modify Device Name Failed'))
             this.setState({ modify: false, progress: false, label: '' })
           } else {
             this.props.selectedDevice.request('info', null, (e) => {
-              if (e) this.props.openSnackBar('修改失败')
-              else this.props.openSnackBar('修改成功')
+              if (e) this.props.openSnackBar(i18n.__('Modify Device Name Failed'))
+              else this.props.openSnackBar(i18n.__('Modify Device Name Success'))
               this.setState({ modify: false, progress: false, label: '' })
             })
           }
@@ -101,9 +102,9 @@ class DeviceInfo extends React.PureComponent {
     /* File System */
     const fsIcon = RAIDIcon
     const fsTitles = [
-      '文件系统类型',
-      '使用磁盘数量',
-      '磁盘阵列模式'
+      i18n.__('FileSystem Type'),
+      i18n.__('Num of Disks'),
+      i18n.__('Disk Array Mode')
     ]
     const fsValues = [
       'Brtfs',
@@ -114,9 +115,9 @@ class DeviceInfo extends React.PureComponent {
     /* storage */
     const storageIcon = StorageIcon
     const storageTitles = [
-      '总容量',
-      '用户数据空间',
-      '可用空间'
+      i18n.__('Total Size'),
+      i18n.__('User Data Size'),
+      i18n.__('Avail Size')
     ]
 
     const storageValues = [
@@ -130,9 +131,9 @@ class DeviceInfo extends React.PureComponent {
     const cpuIcon = CPU
 
     const cpuTitles = [
-      'CPU核心数',
-      'CPU类型',
-      'Cache'
+      i18n.__('CPU Num'),
+      i18n.__('CPU Name'),
+      i18n.__('CPU Cache')
     ]
 
     const cpuValues = [
@@ -143,9 +144,9 @@ class DeviceInfo extends React.PureComponent {
 
     /* Memory */
     const memTitles = [
-      '总内存',
-      '未使用内存',
-      '可用内存'
+      i18n.__('Memory Total'),
+      i18n.__('Memory Free'),
+      i18n.__('Memory Available')
     ]
 
     const menIcon = Memory
@@ -165,9 +166,9 @@ class DeviceInfo extends React.PureComponent {
       ws215iIcon = ActionDns
 
       ws215iTitles = [
-        '型号',
-        '硬件序列号',
-        'MAC地址'
+        i18n.__('Model'),
+        i18n.__('Serial Number'),
+        i18n.__('Mac Address')
       ]
 
       ws215iValues = [
@@ -240,7 +241,7 @@ class DeviceInfo extends React.PureComponent {
                 />
               }
             </div>
-            <div style={{ fontSize: 14, flex: '0 0 240px', color: 'rgba(0, 0, 0, 0.54)' }}> { '设备名称' } </div>
+            <div style={{ fontSize: 14, flex: '0 0 240px', color: 'rgba(0, 0, 0, 0.54)' }}> { i18n.__('Device Name') } </div>
           </div>
         </div>
         <div style={{ height: 16 }} />

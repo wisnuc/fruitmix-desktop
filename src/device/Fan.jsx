@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import { Paper, FlatButton } from 'material-ui'
 import HardwareKeyboardArrowUp from 'material-ui/svg-icons/hardware/keyboard-arrow-up'
@@ -20,11 +21,10 @@ class Fan extends React.Component {
       this.props.request('setFanScale', { fanScale }, (err, res) => {
         if (!err) {
           debug('this.setFanScale res', res)
-          this.props.openSnackBar('调节成功')
+          this.props.openSnackBar(i18n.__('Adjust FanScale Success'))
           this.setState({ fanScale })
         } else {
-          // this.props.openSnackBar(`调节失败: ${err.message}`)
-          this.props.openSnackBar('调节失败')
+          this.props.openSnackBar(i18n.__('Adjust FanScale Failed'))
         }
         this.props.refresh()
       })
@@ -99,7 +99,7 @@ class Fan extends React.Component {
       <div style={{ width: '100%', height: '100%' }}>
         <div style={{ paddingLeft: 72, paddingTop: 48, display: 'flex' }}>
           <Paper style={{ padding: 0 }}>
-            <div style={titleStyle}>马达动力</div>
+            <div style={titleStyle}>{ i18n.__('Fan Scale') }</div>
             <div style={{ height: 48 }} />
             <div style={{ width: 240, height: 144, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
               <FlatButton
@@ -125,13 +125,12 @@ class Fan extends React.Component {
               />
             </div>
             <div style={footerStyle}>
-              <div>点击上下箭头</div>
-              <div>调节马达动力</div>
+              <div> { i18n.__('Adjust Fan Scale Text') }</div>
             </div>
           </Paper>
 
           <Paper style={{ padding: 0, marginLeft: 24 }}>
-            <div style={titleStyle}>风扇转速</div>
+            <div style={titleStyle}>{ i18n.__('Fan Speed') }</div>
             <div style={{ height: 48 }} />
             <div
               style={{ width: 240,
@@ -144,7 +143,7 @@ class Fan extends React.Component {
             >
               { this.state.fanSpeed ? this.state.fanSpeed : fanSpeed }
             </div>
-            <div style={footerStyle}>单位: RPM</div>
+            <div style={footerStyle}>{ i18n.__('Fan Speed Text') }</div>
           </Paper>
         </div>
       </div>

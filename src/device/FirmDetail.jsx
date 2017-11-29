@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import Radium from 'radium'
 import sanitize from 'sanitize-filename'
@@ -14,11 +15,8 @@ const debug = Debug('component:control:FirmDetail')
 class RelList extends React.PureComponent {
   render() {
     const { rel, onTouchTap, installed } = this.props
-    const date = rel.published_at.split('T')[0].split('-')
-    let label = ''
-    if (installed.id === rel.id) {
-      label = '当前使用的版本'
-    }
+    const date = rel.published_at.split('T')[0]
+    const label = installed.id === rel.id ? i18n.__('Current Firmware Version') : ''
 
     return (
       <div
@@ -53,7 +51,7 @@ class RelList extends React.PureComponent {
           </div>
           <div style={{ height: 8 }} />
           <div style={{ display: 'flex', alignItems: 'center', fontSize: 14, color: 'rgba(0,0,0,0.54)' }}>
-            { `发布日期：${date[0]}年${date[1]}月${date[2]}日` }
+            { i18n.__('Publish Date %s', date) }
           </div>
         </div>
       </div>
@@ -79,7 +77,7 @@ class FirmDetail extends PureComponent {
 
         {/* current installed version */}
         <div style={{ display: 'flex', alignItems: 'center', margin: 24 }}>
-          { '可用版本列表' }
+          { i18n.__('List of Avaliable Version') }
         </div>
 
         <div style={{ height: 'calc(100% - 304px)', overflow: 'auto' }}>

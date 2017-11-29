@@ -119,5 +119,22 @@
 	"Inconsistent Password Error": "Inconsistent Password Error",
 	"Empty Name Error": "Empty Name Error",
 	"Previous Password Hint": "Previous Password Hint",
-	"Empty Password Error": "Empty Password Error"
+	"Empty Password Error": "Empty Password Error",
+	"FileSystem Type": "FileSystem Type",
+	"Num of Disks": "Num of Disks",
+	"Disk Array Mode": "Disk Array Mode",
+	"Total Size": "Total Size",
+	"User Data Size": "User Data Size",
+	"Avail Size": "Avail Size",
+	"CPU Num": "CPU Num",
+	"CPU Name": "CPU Name",
+	"CPU Cache": "CPU Cache",
+	"Memory Total": "Memory Total",
+	"Memory Free": "Memory Free",
+	"Memory Available": "Memory Available",
+	"Normal User": "Normal User",
+	"Fan Scale": "Fan Scale",
+	"Adjust Fan Scale Tip": "Adjust Fan Scale Tip",
+	"Fan Speed": "Fan Speed",
+	"Fan Speed Text": "Fan Speed Text"
 }
