@@ -31,7 +31,7 @@ class FirmwareUpdate extends React.Component {
     debug('render!', this.props)
     if (!firm) return (<div />)
     const current = showRel
-    const date = current.published_at.split('T')[0].split('-')
+    const date = current.published_at.split('T')[0]
 
     this.rel = showRel
     return (
@@ -44,22 +44,22 @@ class FirmwareUpdate extends React.Component {
             <div style={{ width: 8 }} />
             <div style={{ fontSize: 14, height: 40 }}>
               <div style={{ height: 16 }} />
-              { showRel.id === latest.id && '最新稳定版' }
+              { showRel.id === latest.id && i18n.__('LTS') }
             </div>
           </div>
           <div style={{ height: 8 }} />
           <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }}>
-            { `发布日期：${date[0]}年${date[1]}月${date[2]}日` }
+            { i18n.__('Publish Date %s', date) }
           </div>
         </div>
 
         <div style={{ height: 24 }} />
         <div style={{ color: 'rgba(0,0,0,0.54)', height: 36, display: 'flex', alignItems: 'center' }}>
           {
-            installed.id === showRel.id ? '已安装的版本'
+            installed.id === showRel.id ? i18n.__('Version Installed')
             : <FlatButton
               style={{ marginLeft: -8 }}
-              label="安装并使用"
+              label={i18n.__('Install')}
               onTouchTap={() => this.toggleDialog('confirm')}
               primary
             />
@@ -67,7 +67,7 @@ class FirmwareUpdate extends React.Component {
         </div>
         <div style={{ height: 48 }} />
         <div style={{ fontWeight: 500, height: 56, display: 'flex', alignItems: 'center' }}>
-          { '更新内容：' }
+          { i18n.__('Updates') }
         </div>
         {
           current.body ? current.body.split(/[1-9]\./).map(list => list && (
@@ -81,7 +81,7 @@ class FirmwareUpdate extends React.Component {
             <div style={{ marginLeft: 24, height: 40, display: 'flex', alignItems: 'center' }}>
               { '*' }
               <div style={{ width: 16 }} />
-              { '修复bugs' }
+              { i18n.__('Bug Fixes') }
             </div>
           )
         }
@@ -92,25 +92,25 @@ class FirmwareUpdate extends React.Component {
             this.state.confirm &&
               <div style={{ width: 560, padding: '24px 24px 0px 24px' }}>
                 <div style={{ fontSize: 21, fontWeight: 500 }}>
-                  { '固件安装' }
+                  { i18n.__('Install Firmware') }
                 </div>
                 <div style={{ height: 20 }} />
                 <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }}>
-                  { `将要为您安装版本号为 ${this.rel.tag_name} 的固件程序。` }
+                  { i18n.__('Install Firmware Text 1 %s', this.rel.tag_name) }
                 </div>
                 <div style={{ height: 8 }} />
                 <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }} >
-                  { '固件安装后需要重启WISNUC系统，客户端将退出至登录界面，需重新登录。' }
+                  { i18n.__('Install Firmware Text 2') }
                 </div>
                 <div style={{ height: 24 }} />
                 <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                   <FlatButton
-                    label="取消"
+                    label={i18n.__('Cancel')}
                     primary
                     onTouchTap={() => this.toggleDialog('confirm')}
                   />
                   <FlatButton
-                    label="安装"
+                    label={i18n.__('Install')}
                     primary
                     onTouchTap={this.install}
                   />
