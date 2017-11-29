@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import prettysize from 'prettysize'
 import { IconButton } from 'material-ui'
@@ -462,6 +463,7 @@ class DetailContainerInline extends React.Component {
               longitude={longitude}
               latitude={latitude}
               resultId={`map_${this.digest}`}
+              unknownRegionText={i18n.__('Unknown Region')}
             />
           </div>
         }

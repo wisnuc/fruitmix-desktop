@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import { clipboard } from 'electron'
 import Debug from 'debug'
 import { Avatar, Divider, FloatingActionButton, Toggle, TextField, Popover, Menu, MenuItem } from 'material-ui'
@@ -54,7 +55,7 @@ class AdminUsersApp extends React.Component {
 
     this.copyText = () => {
       clipboard.writeText('145343')
-      this.props.openSnackBar('复制成功')
+      this.props.openSnackBar(i18n.__('Copy Text Success'))
     }
 
     this.updatePassword = (password) => {
@@ -66,11 +67,11 @@ class AdminUsersApp extends React.Component {
       this.props.apis.request('adminUpdateUsers', args, (err) => {
         if (err) {
           debug('err', args, err, err.message)
-          this.props.openSnackBar('出现错误，请重试')
+          this.props.openSnackBar(i18n.__('Update Account Failed'))
         } else {
           this.props.refreshUsers()
           this.setState({ confirmPwd: '' })
-          this.props.openSnackBar('更新成功')
+          this.props.openSnackBar(i18n.__('Update Account Success'))
         }
       })
     }
@@ -85,6 +86,9 @@ class AdminUsersApp extends React.Component {
       avatarUrl = weChatInfo.avatarUrl
       nickName = weChatInfo.nickName
     }
+
+    const userLabel = user.isFirstUser ? i18n.__('Super Admin') : user.disabled ? i18n.__('Disabled') :
+      user.isAdmin ? i18n.__('Admin User') : i18n.__('Normal User')
 
     return (
       <div
@@ -110,14 +114,9 @@ class AdminUsersApp extends React.Component {
         <div style={{ flex: '0 0 32px' }} />
         <div style={{ flex: '0 0 320px' }}>{ user.username }</div>
 
-        {/*
-        <div style={{ flex: '0 0 140px' }}>
-          { user.isFirstUser ? '超级管理员' : user.isAdmin ? '管理员' : '普通用户' }
-        </div>
-        */}
         <div style={{ flex: '0 0 140px', display: 'flex', alignItems: 'center ' }}>
           <FlatButton
-            label={user.isFirstUser ? '超级管理员' : user.disabled ? '已禁用' : user.isAdmin ? '管理员' : '普通用户'}
+            label={userLabel}
             labelStyle={{ fontSize: 14, color: 'rgba(0,0,0,0.54)' }}
             labelPosition="before"
             onTouchTap={event => !user.disabled && this.toggleMenu(event, user)}
@@ -127,7 +126,7 @@ class AdminUsersApp extends React.Component {
           />
         </div>
 
-        <div style={{ flex: '0 0 112px' }}>{ user.global && user.global.wx ? '是' : '否' }</div>
+        <div style={{ flex: '0 0 112px' }}>{ user.global && user.global.wx ? i18n.__('Yes') : i18n.__('No') }</div>
         <div style={{ flex: '0 0 256px' }}>{ nickName || '-' }</div>
         <div style={{ flex: '0 0 56px' }} />
         <div style={{ flex: '0 0 56px' }} />
@@ -137,7 +136,7 @@ class AdminUsersApp extends React.Component {
             user.isFirstUser
             ? <div />
             : <FlatButton
-              label="重置密码"
+              label=i18n.__('Reset Password')
               onTouchTap={() => this.toggleDialog('resetPwd', user)}
               primary
               disabled={user.nologin}
@@ -176,16 +175,16 @@ class AdminUsersApp extends React.Component {
           <div style={{ height: 48, display: 'flex', alignItems: 'center', fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}>
             <div style={{ flex: '0 0 104px' }} />
             <div style={{ flex: '0 0 320px' }}>
-              设备登录用户名
+              { i18n.__('Username') }
             </div>
             <div style={{ flex: '0 0 140px' }}>
-              设备使用权限
+              { i18n.__('User Type') }
             </div>
             <div style={{ flex: '0 0 112px' }}>
-              绑定微信
+              { i18n.__('WeChat Bind Status') }
             </div>
             <div style={{ flex: '0 0 256px' }}>
-              微信昵称
+              { i18n.__('WeChat Name') }
             </div>
           </div>
           <div style={{ height: 8 }} />
@@ -209,13 +208,13 @@ class AdminUsersApp extends React.Component {
             <MenuItem
               style={{ fontSize: 13, marginLeft: -8 }}
               leftIcon={this.state.user.isAdmin ? <CircleIcon /> : <div />}
-              primaryText="管理员"
+              primaryText={i18n.__('Admin User')}
               onTouchTap={() => !this.state.user.isAdmin && this.toggleDialog('changeAuth', this.state.user)}
             />
             <MenuItem
               style={{ fontSize: 13, marginLeft: -8 }}
               leftIcon={!this.state.user.isAdmin ? <CircleIcon /> : <div />}
-              primaryText="普通用户"
+              primaryText={i18n.__('Normal User')}
               onTouchTap={() => this.state.user.isAdmin && this.toggleDialog('changeAuth', this.state.user)}
             />
           </Menu>
@@ -241,16 +240,14 @@ class AdminUsersApp extends React.Component {
             {
               this.state.resetPwd &&
                 <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
-                  <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}> 重置密码 </div>
+                  <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}> { i18n.__('Reset Password')} </div>
                   <div style={{ height: 20 }} />
-                  <div style={{ color: 'rgba(0,0,0,0.54)' }}>重置密码后，该用户当前密码将会失效。</div>
-                  <div style={{ color: 'rgba(0,0,0,0.54)' }}>
-                    { '确认后，系统会提供随机密码并仅有一次登录时效。用户登录后请立刻修改密码。' }
-                  </div>
+                  <div style={{ color: 'rgba(0,0,0,0.54)' }}> { i18n.__('Reset Password Tip 1')} </div>
+                  <div style={{ color: 'rgba(0,0,0,0.54)' }}> { i18n.__('Reset Password Tip 2')} </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                    <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('resetPwd')} />
-                    <FlatButton label="确定" primary onTouchTap={this.resetPwd} />
+                    <FlatButton label={i18n.__('Cancel')} primary onTouchTap={() => this.toggleDialog('resetPwd')} />
+                    <FlatButton label={i18n.__('Confirm')} primary onTouchTap={this.resetPwd} />
                   </div>
                 </div>
             }
@@ -258,16 +255,16 @@ class AdminUsersApp extends React.Component {
             {
               this.state.randomPwd &&
                 <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
-                  <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}> 随机密码 </div>
+                  <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}> { i18n.__('Random Password') }</div>
                   <div style={{ height: 20 }} />
                   <div style={{ color: 'rgba(0,0,0,0.87)', fontSize: 34, fontWeight: '500', textAlign: 'center' }}>
                     { '145343' }
                   </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                    <FlatButton label="复制到剪贴板" primary onTouchTap={this.copyText} />
+                    <FlatButton label={i18n.__('Copy to Clipboard')} primary onTouchTap={this.copyText} />
                     <div style={{ width: 158 }} />
-                    <FlatButton label="确定" primary onTouchTap={() => this.toggleDialog('randomPwd')} />
+                    <FlatButton label={i18n.__('Confirm')} primary onTouchTap={() => this.toggleDialog('randomPwd')} />
                   </div>
                 </div>
             }
@@ -281,20 +278,18 @@ class AdminUsersApp extends React.Component {
               this.state.disableUser &&
                 <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
                   <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-                    { this.state.user.disabled ? '启用用户' : '禁用用户' }
+                    { this.state.user.disabled ? i18n.__('Enable User') : i18n.__('Disable User') }
                   </div>
                   <div style={{ height: 20 }} />
                   <div style={{ color: 'rgba(0,0,0,0.54)' }}>
                     {
-                      this.state.user.disabled
-                      ? '您启用后，该用户将恢复权限，可登录并访问设备，确定吗？'
-                      : '您禁用后，该用户将无法登录并访问设备，\n确定吗？'
+                      this.state.user.disabled ? i18n.__('Enable User Tip') : i18n.__('Disable User Tip')
                     }
                   </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                    <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('disableUser')} />
-                    <FlatButton label="确定" primary onTouchTap={this.disableUser} />
+                    <FlatButton label={i18n.__('Cancel')} primary onTouchTap={() => this.toggleDialog('disableUser')} />
+                    <FlatButton label={i18n.__('Confirm')} primary onTouchTap={this.disableUser} />
                   </div>
                 </div>
             }
@@ -308,20 +303,16 @@ class AdminUsersApp extends React.Component {
               this.state.changeAuth &&
                 <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
                   <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-                    { '修改用户权限' }
+                    { i18n.__('Change User Type') }
                   </div>
                   <div style={{ height: 20 }} />
                   <div style={{ color: 'rgba(0,0,0,0.54)' }}>
-                    {
-                      this.state.user.isAdmin
-                      ? '确定将此用户降为普通用户吗？'
-                      : '确定将此用户设为管理员吗？'
-                    }
+                    { this.state.user.isAdmin ? i18n.__('Downgrade User Type Tip') : i18n.__('Upgrade User Type Tip') }
                   </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                    <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('changeAuth')} />
-                    <FlatButton label="确定" primary onTouchTap={this.toggleAuth} />
+                    <FlatButton label={i18n.__('Cancel')} primary onTouchTap={() => this.toggleDialog('changeAuth')} />
+                    <FlatButton label={i18n.__('Confirm')} primary onTouchTap={this.toggleAuth} />
                   </div>
                 </div>
             }

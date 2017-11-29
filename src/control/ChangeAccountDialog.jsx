@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import { TextField } from 'material-ui'
 import CommunicationVpnKey from 'material-ui/svg-icons/communication/vpn-key'
@@ -14,7 +15,6 @@ class ChangeAccountDialog extends React.PureComponent {
     super(props)
     this.state = {
       maxLength: 16,
-      maxLengthPassword: 30,
       focusFirst: true,
       fullLength: false,
       username: '',
@@ -35,17 +35,16 @@ class ChangeAccountDialog extends React.PureComponent {
       const cb = (error) => {
         if (error) {
           debug('error', op, error)
-          // this.props.openSnackBar(`修改失败：${error.message}`)
           if (op === 'password' && error.message === 'Unauthorized') {
-            this.setState({ prePasswordErrorText: '原密码错误', loading: false })
+            this.setState({ prePasswordErrorText: i18n.__('Previous Password Wrong'), loading: false })
           } else {
             this.setState({ loading: false })
-            this.props.openSnackBar(op === 'createUser' ? '创建失败' : '修改失败')
+            this.props.openSnackBar(op === 'createUser' ? i18n.__('Create User Failed') : i18n.__('Modify Account Failed'))
           }
         } else {
           this.props.onRequestClose(true)
           op === 'createUser' ? this.props.refreshUsers() : this.props.refresh()
-          this.props.openSnackBar(op === 'createUser' ? '创建成功' : '修改成功')
+          this.props.openSnackBar(op === 'createUser' ? i18n.__('Create User Success') : i18n.__('Modify Account Success'))
         }
       }
 
@@ -66,16 +65,16 @@ class ChangeAccountDialog extends React.PureComponent {
   updateUsername(text) {
     this.setState({ username: text }, () => {
       if (this.state.username.length === 0) {
-        this.setState({ usernameErrorText: '用户名不能为空' })
+        this.setState({ usernameErrorText: i18n.__('Empty Name Error') })
       } else if (!validateUsername(text)) {
-        this.setState({ usernameErrorText: '用户名不合法' })
+        this.setState({ usernameErrorText: i18n.__('Invalid Name Error') })
       } else if (!this.props.apis.users || !this.props.apis.users.data) {
         this.setState({ usernameErrorText: '' })
-        this.props.openSnackBar('服务器连接错误')
+        this.props.openSnackBar(i18n.__('Connection Error'))
       } else if (this.props.apis.users.data.every(u => u.username !== this.state.username)) {
         this.setState({ usernameErrorText: '' })
       } else {
-        this.setState({ usernameErrorText: '用户名已存在' })
+        this.setState({ usernameErrorText: i18n.__('User Name Exist Error') })
       }
       this.setState({ usernameLengthHint: `${this.state.username.length}/16` })
       if (this.state.username.length === this.state.maxLength) {
@@ -89,7 +88,7 @@ class ChangeAccountDialog extends React.PureComponent {
   updatePrePassword(text) {
     this.setState({ prePassword: text }, () => {
       if (this.state.prePassword.length === 0) {
-        this.setState({ prePasswordErrorText: '密码不能为空' })
+        this.setState({ prePasswordErrorText: i18n.__('Empty Password Error') })
       } else {
         this.setState({ prePasswordErrorText: '' })
       }
@@ -99,16 +98,16 @@ class ChangeAccountDialog extends React.PureComponent {
   updatePassword(text) {
     this.setState({ password: text }, () => {
       if (this.state.password.length === 0 && this.state.passwordAgain.length === 0) {
-        this.setState({ passwordErrorText: '密码不能为空', passwordAgainErrorText: '' })
+        this.setState({ passwordErrorText: i18n.__('Empty Password Error'), passwordAgainErrorText: '' })
       } else if (this.state.password.length === 0) {
-        this.setState({ passwordErrorText: '密码不能为空' })
+        this.setState({ passwordErrorText: i18n.__('Empty Password Error') })
       } else if (!validatePassword(text)) {
-        this.setState({ passwordErrorText: '密码不合法' })
+        this.setState({ passwordErrorText: i18n.__('Invalid Password Error') })
       } else if (this.state.password.length > 30) {
-        this.setState({ passwordErrorText: '密码不能超过30位' })
+        this.setState({ passwordErrorText: i18n.__('Password Too Long Error') })
       } else if (this.state.passwordAgain.length >= this.state.password.length &&
         this.state.passwordAgain !== this.state.password) {
-        this.setState({ passwordAgainErrorText: '两次密码不一致', passwordErrorText: '' })
+        this.setState({ passwordAgainErrorText: i18n.__('Inconsistent Password Error'), passwordErrorText: '' })
       } else if (this.state.passwordAgain === this.state.password) {
         this.setState({ passwordAgainErrorText: '', passwordErrorText: '' })
       } else {
@@ -123,7 +122,7 @@ class ChangeAccountDialog extends React.PureComponent {
         this.state.passwordAgain.length >= this.state.password.length &&
         this.state.passwordAgain !== this.state.password) ||
         (status === 'onBlur' && this.state.passwordAgain !== this.state.password)) {
-        this.setState({ passwordAgainErrorText: '两次密码不一致' })
+        this.setState({ passwordAgainErrorText: i18n.__('Inconsistent Password Error') })
       } else {
         this.setState({ passwordAgainErrorText: '' })
       }
@@ -156,7 +155,7 @@ class ChangeAccountDialog extends React.PureComponent {
       <div style={{ width: 336, padding: '24px 24px 0px 24px' }}>
         {/* title */}
         <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-          { op === 'username' ? '修改用户名' : op === 'createUser' ? '创建新用户' : '修改密码' }
+          { op === 'username' ? i18n.__('Change Username') : op === 'createUser' ? i18n.__('Create New User') : i18n.__('Change Password') }
         </div>
         <div style={{ height: 56 }} />
 
@@ -178,7 +177,7 @@ class ChangeAccountDialog extends React.PureComponent {
               <IconBox style={{ marginLeft: -12 }} size={48} icon={SocialPerson} />
               <TextField
                 fullWidth
-                hintText="用户名"
+                hintText={i18n.__('Username')}
                 maxLength={this.state.maxLength}
                 errorText={this.state.usernameErrorText}
                 onChange={e => this.updateUsername(e.target.value)}
@@ -205,7 +204,7 @@ class ChangeAccountDialog extends React.PureComponent {
                     <TextField
                       style={{ flexGrow: 1 }}
                       fullWidth
-                      hintText="输入原密码"
+                      hintText={i18n.__('Previous Password Hint')}
                       type="password"
                       errorText={this.state.prePasswordErrorText}
                       onChange={e => this.updatePrePassword(e.target.value)}
@@ -224,7 +223,7 @@ class ChangeAccountDialog extends React.PureComponent {
                 <TextField
                   style={{ flexGrow: 1 }}
                   fullWidth
-                  hintText="输入新密码"
+                  hintText={i18n.__('New Password Hint')}
                   type="password"
                   errorText={this.state.passwordErrorText}
                   onChange={e => this.updatePassword(e.target.value)}
@@ -234,7 +233,7 @@ class ChangeAccountDialog extends React.PureComponent {
                 <IconBox style={{ marginLeft: -12 }} size={48} icon={null} />
                 <TextField
                   fullWidth
-                  hintText="再次输入新密码"
+                  hintText={i18n.__('New Password Again Hint')}
                   type="password"
                   errorText={this.state.passwordAgainErrorText}
                   onChange={e => this.updatePasswordAgain(e.target.value, 'onChange')}
@@ -247,8 +246,8 @@ class ChangeAccountDialog extends React.PureComponent {
         <div style={{ height: 24 }} />
         {/* button */}
         <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-          <FlatButton label="取消" onTouchTap={this.props.onRequestClose} primary />
-          <FlatButton label="确认" disabled={!this.inputOK()} onTouchTap={this.fire} primary />
+          <FlatButton label={i18n.__('Cancel')} onTouchTap={this.props.onRequestClose} primary />
+          <FlatButton label={i18n.__('Confirm')} disabled={!this.inputOK()} onTouchTap={this.fire} primary />
         </div>
       </div>
     )

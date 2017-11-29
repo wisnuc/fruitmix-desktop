@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import sanitize from 'sanitize-filename'
 import { TextField, Checkbox, Divider } from 'material-ui'
@@ -34,11 +35,10 @@ class DrivesDetail extends PureComponent {
           this.currentLabel = this.state.label ? this.state.label : this.props.detailDrive.label
           this.setState({ changed: false })
           this.props.refreshDrives()
-          this.props.openSnackBar('修改成功')
+          this.props.openSnackBar(i18n.__('Modify Drive Success'))
         } else {
-          debug('err!!!!!!!!!!!!!!', err)
-          // this.props.openSnackBar(`修改失败 ${err.message}`)
-          this.props.openSnackBar('修改失败')
+          debug('adminUpdateDrive error', err)
+          this.props.openSnackBar(i18n.__('Modify Drive Failed'))
         }
       })
     }
@@ -61,9 +61,9 @@ class DrivesDetail extends PureComponent {
     const newValue = sanitize(value)
     if ((drives.findIndex(drive => (drive.label === value)) > -1) && (value !== detailDrive.label)) {
       // debug('updateLabel', this.props)
-      this.setState({ label: value, errorText: '文件名已存在' })
+      this.setState({ label: value, errorText: i18n.__('Drive Name Exist Error') })
     } else if (value !== newValue) {
-      this.setState({ label: value, errorText: '文件名不合法' })
+      this.setState({ label: value, errorText: i18n.__('Drive Name Invalid Error') })
     } else {
       this.setState({ label: value, errorText: '' })
     }
@@ -159,18 +159,12 @@ class DrivesDetail extends PureComponent {
         {/* content */}
         <div style={{ width: 312, height: 'calc(100% - 152px)', padding: 24 }}>
           {/* users */}
-          <div
-            style={{
-              fontSize: 14,
-              fontWeight: 500,
-              color: 'rgba(0,0,0,0.54)',
-              marginTop: -2
-            }}
-          > 共享用户
+          <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)', marginTop: -2 }}>
+            { i18n.__('People Shared') }
           </div>
           <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key="all" >
             <Checkbox
-              label="所有人"
+              label={i18n.__('All Users')}
               labelStyle={{ fontSize: 14 }}
               iconStyle={{ fill: this.state.writelist.length === users.length ? '#5E35B1' : 'rgba(0, 0, 0, 0.54)' }}
               checked={this.state.writelist.length === users.length}
@@ -198,14 +192,8 @@ class DrivesDetail extends PureComponent {
           {/* button */}
           <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
           <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-            {/*
             <FlatButton
-              label="返回" primary={primary}
-              onTouchTap={toggleDetail}
-            />
-            */}
-            <FlatButton
-              label="应用"
+              label={i18n.__('Apply')}
               primary
               disabled={!this.state.changed || !!this.state.errorText || this.state.modify}
               onTouchTap={this.fire}
