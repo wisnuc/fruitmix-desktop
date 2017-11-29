@@ -10,7 +10,7 @@ import Memory from 'material-ui/svg-icons/device/sd-storage'
 import ModeEdit from 'material-ui/svg-icons/editor/mode-edit'
 import StorageIcon from 'material-ui/svg-icons/device/storage'
 
-import { RAIDIcon } from '../maintenance/Svg'
+import { RAIDIcon } from '../common/Svg'
 
 const debug = Debug('component:control:deviceinfo')
 

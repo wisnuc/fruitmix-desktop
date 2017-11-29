@@ -7,7 +7,6 @@ import { teal500, pinkA200 } from 'material-ui/styles/colors'
 
 import Login from './login/LoginApp'
 import Navigation from './nav/Navigation'
-import Maintenance from './maintenance/Maintenance'
 import Device from './common/device'
 
 const adjustSeq = (pre) => {
@@ -42,7 +41,6 @@ class Fruitmix extends React.Component {
 
       nav: this.nav.bind(this),
       login: this.login.bind(this),
-      maintain: this.maintain.bind(this),
       selectDevice: this.selectDevice.bind(this),
       setPalette: this.setPalette.bind(this),
       ipcRenderer
@@ -95,10 +93,6 @@ class Fruitmix extends React.Component {
     this.setState({ view })
   }
 
-  maintain() {
-    this.setState({ view: 'maintenance' })
-  }
-
   login() {
     this.setState({ view: 'user' })
   }
@@ -110,10 +104,6 @@ class Fruitmix extends React.Component {
       case 'login':
         Object.assign(this.state, { theme: defaultTheme })
         view = <Login mdns={adjustSeq(global.mdnsStore)} primaryColor={teal500} {...this.state} />
-        break
-
-      case 'maintenance':
-        view = <Maintenance {...this.state} />
         break
 
       case 'user':
