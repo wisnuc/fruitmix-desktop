@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import ActionPowerSettingsNew from 'material-ui/svg-icons/action/power-settings-new'
 import Base from './Base'
@@ -11,29 +12,16 @@ class Power extends Base {
     super(ctx)
   }
 
-  willReceiveProps(nextProps) {
-  }
-
-  navEnter() {
-  }
-
-  navLeave() {
-  }
-
   navGroup() {
     return 'device'
   }
 
   menuName() {
-    return '重启与关机'
+    return i18n.__('Power Menu Name')
   }
 
   menuIcon() {
     return ActionPowerSettingsNew
-  }
-
-  quickName() {
-    return '重启关机'
   }
 
   appBarStyle() {

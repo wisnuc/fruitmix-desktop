@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Radium from 'radium'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
@@ -114,8 +115,9 @@ class Media extends Base {
             this.photoListWithSameDate[this.photoListWithSameDate.length - 1].photos.push(item)
           }
         })
+        const dateUnknownText = i18n.__('Date Unknown Text')
         if (dateUnknown.length > 0) {
-          this.photoListWithSameDate.push({ date: '神秘时间', photos: [] })
+          this.photoListWithSameDate.push({ date: dateUnknownText, photos: [] })
           MaxItem = 0
           lineIndex += 1
           let isRepeat = false
@@ -127,7 +129,7 @@ class Media extends Base {
               this.photoMapDates.push({
                 first: !isRepeat,
                 index: lineIndex,
-                date: '神秘时间',
+                date: dateUnknownText,
                 photos: [item]
               })
               lineIndex += 1
@@ -262,7 +264,7 @@ class Media extends Base {
 
     this.addListToSelection = (digest) => {
       if (this.firstSelect) {
-        this.ctx.openSnackBar('按住Shifit并点击，即可一次选择多项内容')
+        this.ctx.openSnackBar(i18n.__('Shift Tips'))
         this.firstSelect = false
       }
       const hadDigest = this.state.selectedItems.findIndex(item => item === digest) >= 0
@@ -326,50 +328,54 @@ class Media extends Base {
 
     this.removeMedia = () => {
       if (this.state.selectedItems.length > 0) {
-        this.ctx.openSnackBar(`移除${this.state.selectedItems.length}张照片`)
+        this.ctx.openSnackBar(i18n.__('Remove Media Success %s', this.state.selectedItems.length))
         this.setState({ selectedItems: [] })
       } else {
-        this.ctx.openSnackBar('移除照片成功')
+        this.ctx.openSnackBar(i18n.__('Remove Media Failed'))
       }
     }
 
     this.hideMedia = (show) => { // show === true ? show media : hide media
       debug('this.hideMedia', this.state.selectedItems)
-      const txt = show ? '恢复' : '隐藏'
+      const txt = show ? i18n.__('Retrieve') : i18n.__('Hide')
       const list = this.state.selectedItems.length
         ? this.state.selectedItems
         : [this.state.media.find(item => item.hash === this.memoizeValue.downloadDigest).hash]
       this.ctx.props.apis.request(show ? 'subtractBlacklist' : 'addBlacklist', list, (error) => {
         if (error) {
-          this.ctx.openSnackBar(`${txt}照片失败！`)
-          return
+          this.ctx.openSnackBar(show ? i18n.__('Retrive Media Failed') : i18n.__('Hide Media Failed'))
+        } else {
+          this.ctx.openSnackBar(show ? i18n.__('Retrive Media Success %s', list.length) : i18n.__('Hide Media Success %s', list.length))
+          this.navEnter()
+          this.setState({ selectedItems: [] })
         }
-        this.ctx.openSnackBar(`${txt}了${list.length}张照片`)
-        this.navEnter()
-        this.setState({ selectedItems: [] })
       })
     }
 
     this.uploadMediaAsync = async () => {
       const driveUUID = this.ctx.props.apis.drives.data.find(d => d.tag === 'home').uuid
       const stationID = this.ctx.props.selectedDevice.token.data.stationID
-      const data = await this.ctx.props.apis.requestAsync('mkdir', { driveUUID, dirUUID: driveUUID, dirname: '上传的照片' })
+      const data = await this.ctx.props.apis.requestAsync('mkdir', {
+        driveUUID,
+        dirUUID: driveUUID,
+        dirname: i18n.__('Media Folder Name')
+      })
       debug('this.uploadMediaAsync data', data)
       const dirUUID = stationID ? data.uuid : data[0].data.uuid
-      const newData = await this.ctx.props.apis.requestAsync('mkdir', { driveUUID, dirUUID, dirname: '来自个人电脑' })
+      const newData = await this.ctx.props.apis.requestAsync('mkdir', { driveUUID, dirUUID, dirname: i18n.__('Media Folder From PC') })
       const targetUUID = stationID ? newData.uuid : newData[0].data.uuid
       debug('this.uploadMediaAsync newdata', newData)
       ipcRenderer.send('UPLOADMEDIA', { driveUUID, dirUUID: targetUUID })
     }
 
     this.uploadMedia = () => {
-      if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
+      if (!window.navigator.onLine) return this.ctx.openSnackBar(i18n.__('Offline Text'))
       this.uploadMediaAsync().catch((e) => {
-        debug('上传失败', e)
+        console.log('uploadMedia failed', e)
         if (e && e.response && e.response.body && e.response.body.code === 'EEXIST') {
-          this.ctx.openSnackBar('无法创建目录‘上传的照片/来自个人电脑‘，可能存在重名文件！')
+          this.ctx.openSnackBar(i18n.__('Upload Media Folder EEXIST Text'))
         } else {
-          this.ctx.openSnackBar('上传失败！')
+          this.ctx.openSnackBar(i18n.__('Upload Media Failed'))
         }
       })
     }
@@ -422,7 +428,7 @@ class Media extends Base {
   }
 
   menuName() {
-    return '我的照片'
+    return i18n.__('Media Menu Name')
   }
 
   menuIcon() {
@@ -430,7 +436,7 @@ class Media extends Base {
   }
 
   quickName() {
-    return '照片'
+    return i18n.__('Media Quick Name')
   }
 
   appBarStyle() {
@@ -472,7 +478,7 @@ class Media extends Base {
     const newStyle = Object.assign(style, { color: 'rgba(0,0,0,0.54)' })
     return (
       <div style={newStyle}>
-        我的照片
+        { i18n.__('Media Title') }
       </div>
     )
   }
@@ -480,7 +486,7 @@ class Media extends Base {
   renderToolBar({ style }) {
     return (
       <div style={style}>
-        <FlatButton label="上传" onTouchTap={this.uploadMedia} primary />
+        <FlatButton label={i18n.__('Upload')} onTouchTap={this.uploadMedia} primary />
       </div>
     )
   }

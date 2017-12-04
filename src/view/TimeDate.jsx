@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import DeviceAccessTime from 'material-ui/svg-icons/device/access-time'
 import Base from './Base'
 import TimeDateInfo from '../device/TimeDateInfo'
@@ -35,7 +36,7 @@ class TimeDate extends Base {
   }
 
   menuName() {
-    return '时间与日期'
+    return i18n.__('TimeDate Menu Name')
   }
 
   menuIcon() {
@@ -43,7 +44,7 @@ class TimeDate extends Base {
   }
 
   quickName() {
-    return '时间'
+    return i18n.__('TimeDate Quick Name')
   }
 
   appBarStyle() {

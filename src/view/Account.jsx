@@ -1,4 +1,5 @@
 import React, { Component, PureComponent } from 'react'
+import i18n from 'i18n'
 import Radium from 'radium'
 import ActionAccountBox from 'material-ui/svg-icons/action/account-box'
 import Debug from 'debug'
@@ -45,7 +46,7 @@ class Account extends Base {
   }
 
   menuName() {
-    return '我'
+    return i18n.__('Account Menu Name')
   }
 
   menuIcon() {

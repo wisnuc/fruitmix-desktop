@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
 import { IconButton, MenuItem } from 'material-ui'
@@ -37,15 +38,11 @@ class Trash extends Home {
   }
 
   menuName() {
-    return '回收站'
+    return i18n.__('Trash Menu Name')
   }
 
   menuIcon() {
     return DeleteIcon
-  }
-
-  quickName() {
-    return '回收站'
   }
 
   quickIcon() {
@@ -55,9 +52,7 @@ class Trash extends Home {
   /* renderers */
   renderTitle({ style }) {
     return (
-      <div style={Object.assign({}, style, { marginLeft: '176px' })}>
-        回收站
-      </div>
+      <div style={Object.assign({}, style, { marginLeft: '176px' })}> { i18n.__('Trash Title') } </div>
     )
   }
 
@@ -84,21 +79,21 @@ class Trash extends Home {
           left={this.state.contextMenuX}
           onRequestClose={this.hideContextMenu}
         >
-          <MenuItem primaryText="详细信息" onTouchTap={toggleDetail} />
-          <MenuItem primaryText="还原" onTouchTap={toggleDetail} />
-          <MenuItem primaryText="永久刪除" onTouchTap={() => this.toggleDialog('delete')} />
+          <MenuItem primaryText={i18n.__('Open Detail')} onTouchTap={toggleDetail} />
+          <MenuItem primaryText={i18n.__('Restore From Trash')} onTouchTap={toggleDetail} />
+          <MenuItem primaryText={i18n.__('Delete From Trash')} onTouchTap={() => this.toggleDialog('delete')} />
         </ContextMenu>
 
         <DialogOverlay open={this.state.delete}>
           {
             this.state.delete &&
             <div style={{ width: 280, padding: '24px 24px 0px 24px' }}>
-              <div style={{ color: 'rgba(0,0,0,0.54)' }}>确定删除？</div>
+              <div style={{ color: 'rgba(0,0,0,0.54)' }}>{ i18n.__('Confirm Detele Trash Text') }</div>
               <div style={{ height: 24 }} />
               <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('delete')} />
+                <FlatButton label={i18n.__('Cancel')} primary onTouchTap={() => this.toggleDialog('delete')} />
                 <FlatButton
-                  label="确认"
+                  label={i18n.__('Confirm')}
                   primary
                   onTouchTap={this.delete}
                 />

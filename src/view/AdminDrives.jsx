@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import FileFolderShared from 'material-ui/svg-icons/file/folder-shared'
 import { MenuItem } from 'material-ui'
@@ -77,11 +78,11 @@ class AdminDrives extends Base {
   }
 
   menuName() {
-    return '共享盘管理'
+    return i18n.__('AdminDrives Menu Name')
   }
 
   quickName() {
-    return '共享盘'
+    return i18n.__('AdminDrives Quick Name')
   }
 
   menuIcon() {
@@ -105,7 +106,7 @@ class AdminDrives extends Base {
   }
 
   renderTitle({ style }) {
-    return <div style={Object.assign({}, style, { marginLeft: 176 })}>共享盘管理</div>
+    return <div style={Object.assign({}, style, { marginLeft: 176 })}>{ i18n.__('AdminDrives Title') }</div>
   }
 
   renderDetail({ style, openSnackBar }) {
@@ -153,11 +154,11 @@ class AdminDrives extends Base {
           onRequestClose={this.hideContextMenu}
         >
           <MenuItem
-            primaryText="打开"
+            primaryText={i18n.__('Open')}
             disabled={!writeable}
             onTouchTap={() => navToDrive(this.state.detailDrive.uuid, this.state.detailDrive.uuid)}
           />
-          <MenuItem primaryText={getDetailStatus() ? '关闭修改页' : '修改'} onTouchTap={toggleDetail} />
+          <MenuItem primaryText={getDetailStatus() ? i18n.__('Close Modify Page') : i18n.__('Modify')} onTouchTap={toggleDetail} />
         </ContextMenu>
       </div>
     )

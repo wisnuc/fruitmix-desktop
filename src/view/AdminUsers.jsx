@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import ActionSupervisorAccount from 'material-ui/svg-icons/action/supervisor-account'
 import AdminUsersApp from '../control/AdminUsersApp'
 import Base from './Base'
@@ -39,7 +40,7 @@ class AdminUsers extends Base {
   }
 
   menuName() {
-    return '用户管理'
+    return i18n.__('AdminUsers Menu Name')
   }
 
   menuIcon() {
@@ -55,7 +56,7 @@ class AdminUsers extends Base {
   }
 
   renderTitle({ style }) {
-    return <div style={Object.assign({}, style, { marginLeft: 176 })}>用户管理</div>
+    return <div style={Object.assign({}, style, { marginLeft: 176 })}>{i18n.__('AdminUsers Title')}</div>
   }
 
   renderContent({ openSnackBar }) {

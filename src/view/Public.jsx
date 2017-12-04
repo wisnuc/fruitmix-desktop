@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
 import { IconButton, MenuItem } from 'material-ui'
@@ -61,7 +62,7 @@ class Public extends Home {
     /* update drives or listNavDir */
     if (type === 'drives') {
       if (data === this.state.drives && !this.force) return
-      path = [{ name: '共享盘', uuid: null, type: 'publicRoot' }]
+      path = [{ name: i18n.__('Public Drive'), uuid: null, type: 'publicRoot' }]
       const myUUID = this.ctx.props.apis.account.data && this.ctx.props.apis.account.data.uuid
       entries = data.filter(drive => drive.type === 'public' && drive.writelist.find(u => u === myUUID))
       entries.forEach(item => Object.assign(item, { name: item.label }))
@@ -74,7 +75,7 @@ class Public extends Home {
       this.setState({ drives: data, path, entries, select, inRoot: true, loading: false })
     } else {
       if (data === this.state.listNavDir && !this.force) return
-      path = [{ name: '共享盘', uuid: this.rootDrive.uuid, type: 'publicRoot' }, ...data.path] // important !!
+      path = [{ name: i18n.__('Public Drive'), uuid: this.rootDrive.uuid, type: 'publicRoot' }, ...data.path] // important !!
       const drives = this.state.drives || this.ctx.props.apis.drives.value()
       path[1].name = this.rootDrive.name || this.ctx.props.apis.drives.value().find(d => d.uuid === this.rootDrive.uuid).label
       entries = data.entries
@@ -119,7 +120,7 @@ class Public extends Home {
   }
 
   menuName() {
-    return '共享盘'
+    return i18n.__('Public Menu Name')
   }
 
   menuIcon() {
@@ -138,7 +139,7 @@ class Public extends Home {
       return (
         <div style={Object.assign({}, style, { marginLeft: 168 })}>
           <BreadCrumbItem
-            text="共享盘"
+            text={i18n.__('Public Drive')}
             onTouchTap={() => {
               this.rootDrive = null
               this.ctx.props.apis.request('drives')
@@ -176,7 +177,7 @@ class Public extends Home {
             /* the first one is always special */
             if (index === 0) {
               acc.push(<BreadCrumbItem
-                text="共享盘"
+                text={i18n.__('Public Drive')}
                 key="root"
                 onTouchTap={() => {
                     this.rootDrive = null
@@ -196,13 +197,20 @@ class Public extends Home {
   renderToolBar({ style }) {
     return (
       <div style={style}>
-        <IconButton onTouchTap={() => this.refresh()} tooltip="刷新" >
+        <IconButton onTouchTap={() => this.refresh()} tooltip={i18n.__('Refresh')} >
           <RefreshIcon color="#FFF" />
         </IconButton>
-        <IconButton onTouchTap={() => this.toggleDialog('gridView')} tooltip={this.state.gridView ? '列表视图' : '网格视图'}>
+        <IconButton
+          onTouchTap={() => this.toggleDialog('gridView')}
+          tooltip={this.state.gridView ? i18n.__('List View') : i18n.__('Grid View')}
+        >
           { this.state.gridView ? <ListIcon color="#FFF" /> : <GridIcon color="#FFF" /> }
         </IconButton>
-        <IconButton onTouchTap={() => this.toggleDialog('createNewFolder')} tooltip="新建文件夹" disabled={this.state.inRoot} >
+        <IconButton
+          disabled={this.state.inRoot}
+          tooltip={i18n.__('Create New Folder')}
+          onTouchTap={() => this.toggleDialog('createNewFolder')}
+        >
           <FileCreateNewFolder color="#FFF" />
         </IconButton>
       </div>
@@ -224,9 +232,11 @@ class Public extends Home {
             backgroundColor: '#FAFAFA'
           }}
         >
-          <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.27)', height: 56 }}> { '尚未建立共享盘' } </div>
-          { this.ctx.props.apis.account && this.ctx.props.apis.account.data && this.ctx.props.apis.account.data.isAdmin &&
-            <FlatButton label="去创建" primary onTouchTap={() => navTo('adminDrives')} /> }
+          <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.27)', height: 56 }}> { i18n.__('No Public Drive Text') } </div>
+          {
+            this.ctx.props.apis.account && this.ctx.props.apis.account.data && this.ctx.props.apis.account.data.isAdmin &&
+              <FlatButton label={i18n.__('Jump to Create')} primary onTouchTap={() => navTo('adminDrives')} />
+          }
         </div>
       </div>
     )

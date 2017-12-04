@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import Base from './Base'
 import AppsIcon from 'material-ui/svg-icons/navigation/apps'
@@ -37,15 +38,11 @@ class InstalledApps extends Base {
   }
 
   menuName() {
-    return '已安装应用'
+    return i18n.__('InstalledApps Menu Name')
   }
 
   menuIcon() {
     return AppsIcon
-  }
-
-  quickName() {
-    return '已安装应用'
   }
 
   appBarStyle() {

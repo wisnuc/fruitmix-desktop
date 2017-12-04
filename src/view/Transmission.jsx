@@ -1,4 +1,5 @@
 import React, { Component, PureComponent } from 'react'
+import i18n from 'i18n'
 import Radium from 'radium'
 import { ipcRenderer } from 'electron'
 
@@ -12,14 +13,8 @@ class Transmission extends Base {
     this.state = {}
   }
 
-  willReceiveProps(nextProps) {
-  }
-
   navEnter() {
     ipcRenderer.send('GET_TRANSMISSION')
-  }
-
-  navLeave() {
   }
 
   navGroup() {
@@ -27,7 +22,7 @@ class Transmission extends Base {
   }
 
   menuName() {
-    return '传输列表'
+    return i18n.__('Transmission Menu Name')
   }
 
   menuIcon() {
@@ -51,7 +46,7 @@ class Transmission extends Base {
   }
 
   renderTitle({ style }) {
-    return <div style={Object.assign({}, style, { marginLeft: 184 })}>文件传输</div>
+    return <div style={Object.assign({}, style, { marginLeft: 184 })}>{ i18n.__('Transmission Title') }</div>
   }
 
   renderContent({ navToDrive }) {

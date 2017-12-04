@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 
 import ActionSwapVerticalCircle from 'material-ui/svg-icons/action/swap-vertical-circle'
 import FinishedList from '../download/FinishedList'
@@ -38,7 +39,7 @@ class Download extends Base {
   }
 
   menuName() {
-    return '已完成'
+    return i18n.__('FinishedList Menu Name')
   }
 
   menuIcon() {
@@ -62,7 +63,11 @@ class Download extends Base {
   }
 
   renderTitle({ style }) {
-    return <div style={Object.assign({}, style, { marginLeft: 184 })}>已完成（ 0 ）</div>
+    return (
+      <div style={Object.assign({}, style, { marginLeft: 184 })}>
+        { i18n.__('FinishedList Title %s', (this.state.tasks && this.state.tasks.length) || 0)}
+      </div>
+    )
   }
 
   renderContent({ navToDrive, openSnackBar }) {

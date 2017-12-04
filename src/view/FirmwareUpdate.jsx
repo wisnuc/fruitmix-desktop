@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import UpdateIcon from 'material-ui/svg-icons/action/system-update-alt'
 import ListIcon from 'material-ui/svg-icons/action/list'
@@ -63,15 +64,11 @@ class FirmwareUpdate extends Base {
   }
 
   menuName() {
-    return '固件升级'
+    return i18n.__('FirmwareUpdate Menu Name')
   }
 
   menuIcon() {
     return UpdateIcon
-  }
-
-  quickName() {
-    return '固件升级'
   }
 
   appBarStyle() {

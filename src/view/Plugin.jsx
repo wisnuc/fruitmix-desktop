@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
 import ActionSettings from 'material-ui/svg-icons/action/settings'
@@ -17,15 +18,11 @@ class Plugin extends Base {
   }
 
   menuName() {
-    return '插件设置'
+    return i18n.__('Plugin Menu Name')
   }
 
   menuIcon() {
     return ActionSettings
-  }
-
-  quickName() {
-    return '插件设置'
   }
 
   appBarStyle() {

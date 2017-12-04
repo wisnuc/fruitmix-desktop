@@ -1,4 +1,5 @@
-import React, { Component, PureComponent } from 'react'
+import React from 'react'
+import i18n from 'i18n'
 import Radium from 'radium'
 import { ipcRenderer } from 'electron'
 
@@ -41,7 +42,7 @@ class MediaAlbum extends Base {
   }
 
   menuName() {
-    return '相册'
+    return i18n.__('MediaAlbum Menu Name')
   }
 
   menuIcon() {

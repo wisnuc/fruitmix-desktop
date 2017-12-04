@@ -1,4 +1,5 @@
 import Debug from 'debug'
+import i18n from 'i18n'
 import React from 'react'
 import Radium from 'radium'
 import ActionDns from 'material-ui/svg-icons/action/dns'
@@ -50,7 +51,7 @@ class Device extends Base {
   }
 
   menuName() {
-    return '设备信息'
+    return i18n.__('Device Menu Name')
   }
 
   menuIcon() {
@@ -58,15 +59,11 @@ class Device extends Base {
   }
 
   quickName() {
-    return '设备'
+    return i18n.__('Device Quick Name')
   }
 
   appBarStyle() {
     return 'colored'
-  }
-
-  renderTitle({ style }) {
-    return <div style={style}>设备信息</div>
   }
 
   renderContent({ openSnackBar }) {
