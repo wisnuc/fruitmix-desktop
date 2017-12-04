@@ -1,14 +1,8 @@
 import React from 'react'
+import i18n from 'i18n'
 import DeviceAccessTime from 'material-ui/svg-icons/device/access-time'
-import { CircularProgress } from 'material-ui'
-
-import request from 'superagent'
 
 class TimeDate extends React.Component {
-  constructor(props) {
-    super(props)
-  }
-
   renderList(Icon, titles, values) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
@@ -44,24 +38,27 @@ class TimeDate extends React.Component {
       'Time zone',
       'NTP synchronized',
       'Network time on'
+      'RTC in local TZ'
     */
 
     const Titles = [
-      '本地时间',
-      '世界时',
-      'RTC 时间',
-      '时区',
-      '已完成时间同步',
-      '使用网络时间'
+      i18n.__('Universal Time'),
+      i18n.__('Local Time'),
+      i18n.__('Time Zone'),
+      i18n.__('Network Time On'),
+      i18n.__('NTP Synchronized'),
+      i18n.__('RTC Time'),
+      i18n.__('RTC in Local TZ')
     ]
 
     const Values = [
-      timedate['Local time'],
       timedate['Universal time'],
-      timedate['RTC time'],
+      timedate['Local time'],
       timedate['Time zone'],
+      timedate['Network time on'],
       timedate['NTP synchronized'],
-      timedate['Network time on']
+      timedate['RTC time'],
+      timedate['RTC in local TZ']
     ]
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>

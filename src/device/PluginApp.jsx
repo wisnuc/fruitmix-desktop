@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import prettysize from 'prettysize'
 import { CircularProgress, Divider, Toggle, RaisedButton } from 'material-ui'
@@ -8,7 +9,7 @@ import { SambaIcon, MiniDLNAIcon, BTIcon } from '../common/Svg'
 
 const debug = Debug('component:control:SettingsApp:')
 
-class SettingsApp extends React.Component {
+class PluginApp extends React.Component {
   constructor(props) {
     super(props)
 
@@ -20,7 +21,7 @@ class SettingsApp extends React.Component {
     this.toggle = (type) => {
       this.setState({ loading: type })
       setTimeout(() => {
-        this.props.openSnackBar('修改成功')
+        this.props.openSnackBar(i18n.__('Modify Plugin Settingsd Success'))
         this.setState({ loading: '' })
       }, 1000)
     }
@@ -65,24 +66,24 @@ class SettingsApp extends React.Component {
     const settings = [
       {
         Icon: SambaIcon,
-        title: 'SAMBA服务',
-        text: 'SAMBA服务是一种在局域网上共享文件和打印机的一种通信协议，它为局域网内的不同计算机之间提供文件及打印机等资源的共享服务。',
+        title: i18n.__('Samba Service Title'),
+        text: i18n.__('Samba Service Text'),
         enabled: samba,
-        func: () => this.toggle('SAMBA服务')
+        func: () => this.toggle(i18n.__('Samba Service Title'))
       },
       {
         Icon: MiniDLNAIcon,
-        title: 'miniDLNA服务',
-        text: 'DLNA是一种多媒体远程播放技术，它允许一台显示设备直接访问并播放网络中其他DLNA设备中的图像、声音或者视频资源。',
+        title: i18n.__('miniDLNA Service Title'),
+        text: i18n.__('miniDLNA Service Text'),
         enabled: miniDLNA,
-        func: () => this.toggle('miniDLNA服务')
+        func: () => this.toggle(i18n.__('miniDLNA Service Title'))
       },
       {
         Icon: BTIcon,
-        title: 'BT下载服务',
-        text: 'BT是一种P2P下载服务，支持通过BT种子和磁力链接地址下载资源。',
+        title: i18n.__('BT Service Title'),
+        text: i18n.__('BT Service Text'),
         enabled: BT,
-        func: () => this.toggle('BT下载服务')
+        func: () => this.toggle(i18n.__('BT Service Title'))
       }
     ]
     return (
@@ -94,4 +95,4 @@ class SettingsApp extends React.Component {
   }
 }
 
-export default SettingsApp
+export default PluginApp

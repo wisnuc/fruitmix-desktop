@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import { CircularProgress, Divider } from 'material-ui'
 import { ipcRenderer } from 'electron'
@@ -30,15 +31,10 @@ class Power extends React.Component {
       this.props.selectedDevice.request('power', op, (err) => {
         if (!err) {
           this.scanMdns()
-          this.setState({
-            operation: 'progress'
-          })
+          this.setState({ operation: 'progress' })
         } else {
-          // this.props.openSnackBar(`操作失败：${err.message}`)
-          this.props.openSnackBar('操作失败')
-          this.setState({
-            operation: ''
-          })
+          this.props.openSnackBar(i18n.__('Operation Failed'))
+          this.setState({ operation: '' })
         }
       })
     }
@@ -128,12 +124,8 @@ class Power extends React.Component {
 
     return (
       <div>
-        <FlatButton label="取消" primary onTouchTap={this.handleClose} />
-        <FlatButton
-          label="确定"
-          primary
-          onTouchTap={() => this.handleStartProgress(operation)}
-        />
+        <FlatButton label={i18n.__('Cancel')} primary onTouchTap={this.handleClose} />
+        <FlatButton label={i18n.__('Confirm')} primary onTouchTap={() => this.handleStartProgress(operation)} />
       </div>
     )
   }
@@ -147,8 +139,8 @@ class Power extends React.Component {
           <div style={{ fontSize: 16, color: 'rgba(0,0,0,0.54)' }}>
             {
               this.state.choice === 'POWEROFF' ?
-              '确定关机？' : this.state.choice === 'REBOOT' ?
-              '确定重启？' : '确定重启并进入维护模式？'
+                i18n.__('Confirm Shut Down Text') : this.state.choice === 'REBOOT' ?
+                i18n.__('Confirm Reboot Text') : i18n.__('Confirm Reboot to Maintenance Text')
             }
           </div>
           <div style={{ height: 24 }} />
@@ -165,13 +157,13 @@ class Power extends React.Component {
       let hintText = ''
       switch (this.state.choice) {
         case 'POWEROFF':
-          hintText = '设备正在关机...'
+          hintText = i18n.__('Shutting Down')
           break
         case 'REBOOT':
-          hintText = '设备正在重启...'
+          hintText = i18n.__('Rebooting')
           break
         case 'REBOOTMAINTENANCE':
-          hintText = '设备正在重启至维护模式 ...'
+          hintText = i18n.__('Rebooting To Maintenance')
           break
       }
       return (
@@ -179,7 +171,7 @@ class Power extends React.Component {
           <CircularProgress style={{ marginTop: 48, marginLeft: 148 }} />
           <div style={{ textAlign: 'center', marginTop: 24 }}>{hintText} </div>
           <div style={{ textAlign: 'center', marginTop: 24 }}>
-            <FlatButton label="退出" primary onTouchTap={this.handleExit} />
+            <FlatButton label={i18n.__('Exit')} primary onTouchTap={this.handleExit} />
           </div>
         </div>
       )
@@ -192,16 +184,16 @@ class Power extends React.Component {
       let linkText = ''
       switch (this.state.choice) {
         case 'POWEROFF':
-          hintText = '设备已关机'
-          linkText = '关闭客户端'
+          hintText = i18n.__('Shut Down Finish Hint')
+          linkText = i18n.__('Shut Down Finish Link')
           break
         case 'REBOOT':
-          hintText = '设备已重启完毕，去'
-          linkText = '登陆'
+          hintText = i18n.__('Reboot Finish Hint')
+          linkText = i18n.__('Reboot Finish Link')
           break
         case 'REBOOTMAINTENANCE':
-          hintText = '设备已重启至维护模式，去'
-          linkText = '维护页面'
+          hintText = i18n.__('Reboot To Maintenance Finish Hint')
+          linkText = i18n.__('Reboot To Maintenance Finish Link')
           break
       }
 
@@ -234,7 +226,7 @@ class Power extends React.Component {
             <PowerSetting color={this.props.primaryColor} />
           </div>
           <div style={{ flex: '0 0 560px', fontSize: 20, color: 'rgba(0, 0, 0, 0.87)' }}>
-              重启和关机
+            { i18n.__('Power Settings Title') }
           </div>
         </div>
         <div style={{ height: 8 }} />
@@ -242,13 +234,13 @@ class Power extends React.Component {
           <div style={{ flex: '0 0 56px' }} />
           <div style={{ flex: '0 0 560px' }}>
             <FlatButton
-              label="关机"
+              label={i18n.__('Shut Down')}
               primary
               style={{ marginLeft: -16 }}
               onTouchTap={() => this.handleOpen('POWEROFF')}
             />
             <FlatButton
-              label="重启"
+              label={i18n.__('Reboot')}
               primary
               style={{ marginLeft: 0 }}
               onTouchTap={() => this.handleOpen('REBOOT')}
@@ -268,23 +260,21 @@ class Power extends React.Component {
             <Build color={this.props.primaryColor} />
           </div>
           <div style={{ flex: '0 0 560px', fontSize: 20, color: 'rgba(0, 0, 0, 0.87)' }}>
-              进入维护模式
+            { i18n.__('Maintenance Title') }
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }} >
           <div style={{ flex: '0 0 56px' }} />
           <div style={{ flex: '0 0 560px' }}>
             <div style={{ fontSize: 14, lineHeight: '26px', color: 'rgba(0, 0, 0, 0.87)' }}>
-              重启后进入维护模式，可以在维护模式下执行磁盘操作或系统维护任务。
+              { i18n.__('Maintenance Text')}
             </div>
             <div style={{ height: 16 }} />
             <FlatButton
-              label="重启进入维护模式"
+              label={i18n.__('Reboot To Maintenance')}
               primary
               style={{ marginLeft: -8 }}
-              onTouchTap={(e) => {
-                this.handleOpen('REBOOTMAINTENANCE')
-              }}
+              onTouchTap={() => this.handleOpen('REBOOTMAINTENANCE')}
             />
           </div>
         </div>

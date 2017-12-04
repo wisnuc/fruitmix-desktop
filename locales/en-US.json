@@ -136,5 +136,18 @@
 	"Fan Scale": "Fan Scale",
 	"Adjust Fan Scale Tip": "Adjust Fan Scale Tip",
 	"Fan Speed": "Fan Speed",
-	"Fan Speed Text": "Fan Speed Text"
+	"Fan Speed Text": "Fan Speed Text",
+	"Power Settings Title": "Power Settings Title",
+	"Shut Down": "Shut Down",
+	"Reboot": "Reboot",
+	"Maintenance Title": "Maintenance Title",
+	"Maintenance Text": "Maintenance Text",
+	"Reboot To Maintenance": "Reboot To Maintenance",
+	"Universal Time": "Universal Time",
+	"Local Time": "Local Time",
+	"Time Zone": "Time Zone",
+	"Network Time On": "Network Time On",
+	"NTP Synchronized": "NTP Synchronized",
+	"RTC Time": "RTC Time",
+	"RTC in Local TZ": "RTC in Local TZ"
 }
