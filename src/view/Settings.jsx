@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
 import ActionSettings from 'material-ui/svg-icons/action/settings'
@@ -17,7 +18,7 @@ class Settings extends Base {
   }
 
   menuName() {
-    return '客户端设置'
+    return i18n.__('Settings Menu Name')
   }
 
   menuIcon() {
@@ -25,7 +26,7 @@ class Settings extends Base {
   }
 
   quickName() {
-    return '设置'
+    return i18n.__('Settings Quick Name')
   }
 
   appBarStyle() {

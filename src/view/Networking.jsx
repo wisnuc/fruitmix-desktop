@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import ActionSettingsEthernet from 'material-ui/svg-icons/action/settings-ethernet'
 import Base from './Base'
 import NetworkInfo from '../device/NetworkInfo'
@@ -27,15 +28,12 @@ class Ethernet extends Base {
     this.ctx.props.selectedDevice.request('net')
   }
 
-  navLeave() {
-  }
-
   navGroup() {
     return 'device'
   }
 
   menuName() {
-    return '网络设置'
+    return i18n.__('Networking Menu Name')
   }
 
   menuIcon() {
@@ -43,7 +41,7 @@ class Ethernet extends Base {
   }
 
   quickName() {
-    return '网络'
+    return i18n.__('Networking Quick Name')
   }
 
   appBarStyle() {

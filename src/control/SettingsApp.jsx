@@ -62,7 +62,7 @@ class SettingsApp extends React.Component {
 
   renderRow({ type, enabled, func }) {
     return (
-      <div style={{ height: 56, width: '100%', display: 'flex', alignItems: 'center', marginLeft: 24 }}>
+      <div style={{ height: 56, width: '100%', display: 'flex', alignItems: 'center', marginLeft: 24 }} key={type}>
         <div style={{ width: 40, display: 'flex', alignItems: 'center', marginRight: 8 }}>
           <InfoIcon color="rgba(0,0,0,0.54)" />
         </div>

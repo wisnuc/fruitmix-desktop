@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 
 import ActionSwapVerticalCircle from 'material-ui/svg-icons/action/swap-vertical-circle'
 import BTDownload from '../download/BTDownload'
@@ -38,7 +39,7 @@ class Download extends Base {
   }
 
   menuName() {
-    return 'BT下载'
+    return i18n.__('Download Menu Name')
   }
 
   menuIcon() {
@@ -46,7 +47,7 @@ class Download extends Base {
   }
 
   quickName() {
-    return '正在下载'
+    return i18n.__('Download Quick Name')
   }
 
   appBarStyle() {
@@ -66,7 +67,11 @@ class Download extends Base {
   }
 
   renderTitle({ style }) {
-    return <div style={Object.assign({}, style, { marginLeft: 184 })}>{ `正在下载（ ${this.state.tasks && this.state.tasks.length} ）`}</div>
+    return (
+      <div style={Object.assign({}, style, { marginLeft: 184 })}>
+        { i18n.__('Download Title %s', (this.state.tasks && this.state.tasks.length) || 0) }
+      </div>
+    )
   }
 
   renderContent({ navToDrive, openSnackBar }) {

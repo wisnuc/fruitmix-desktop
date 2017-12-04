@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import HardwareToys from 'material-ui/svg-icons/hardware/toys'
 import Base from './Base'
 import Fan from '../device/Fan'
@@ -40,7 +41,7 @@ class FanControl extends Base {
   }
 
   menuName() {
-    return '风扇控制'
+    return i18n.__('FanControl Menu Name')
   }
 
   menuIcon() {
@@ -48,7 +49,7 @@ class FanControl extends Base {
   }
 
   quickName() {
-    return '风扇'
+    return i18n.__('FanControl Quick Name')
   }
 
   appBarStyle() {

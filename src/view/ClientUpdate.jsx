@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
 import UpdateIcon from 'material-ui/svg-icons/action/system-update-alt'
@@ -17,7 +18,7 @@ class Update extends Base {
   }
 
   menuName() {
-    return '客户端升级'
+    return i18n.__('ClientUpdate Menu Name')
   }
 
   menuIcon() {
@@ -25,7 +26,7 @@ class Update extends Base {
   }
 
   quickName() {
-    return '升级'
+    return i18n.__('ClientUpdate Quick Name')
   }
 
   appBarStyle() {

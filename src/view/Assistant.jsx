@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import { ipcRenderer } from 'electron'
 import { IconButton } from 'material-ui'
 import AssistantIcon from 'material-ui/svg-icons/image/assistant'
@@ -50,15 +51,11 @@ class Assistant extends Media {
   }
 
   menuName() {
-    return '智能助理'
+    return i18n.__('Assistant Menu Name')
   }
 
   menuIcon() {
     return AssistantIcon
-  }
-
-  quickName() {
-    return '智能助理'
   }
 
   appBarStyle() {
@@ -74,10 +71,6 @@ class Assistant extends Media {
         </IconButton>
       </div>
     )
-  }
-
-  renderTitle({ style }) {
-    return <div style={style}> 智能助手 </div>
   }
 
   renderContent() {

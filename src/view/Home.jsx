@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
 import { IconButton, Divider, CircularProgress } from 'material-ui'
@@ -72,13 +73,13 @@ class Home extends Base {
     }
 
     this.toggleDialog = (type) => {
-      if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
+      if (!window.navigator.onLine) return this.ctx.openSnackBar(i18n.__('Offline Text'))
       this.setState({ [type]: !this.state[type] })
     }
 
     /* file or dir operations */
     this.upload = (type) => {
-      if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
+      if (!window.navigator.onLine) return this.ctx.openSnackBar(i18n.__('Offline Text'))
       const dirPath = this.state.path
       const dirUUID = dirPath[dirPath.length - 1].uuid
       const driveUUID = dirPath[0].uuid
@@ -87,7 +88,7 @@ class Home extends Base {
     }
 
     this.download = () => {
-      if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
+      if (!window.navigator.onLine) return this.ctx.openSnackBar(i18n.__('Offline Text'))
       const selected = this.state.select.selected
       const entries = selected.map(index => this.state.entries[index])
       const path = this.state.path
@@ -95,17 +96,18 @@ class Home extends Base {
     }
 
     this.dupFile = () => {
-      if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
+      if (!window.navigator.onLine) return this.ctx.openSnackBar(i18n.__('Offline Text'))
       const entries = this.state.entries
       const selected = this.state.select.selected
       const path = this.state.path
       const curr = path[path.length - 1]
       const oldName = entries[selected[0]].name
-      const extension = oldName.replace(/^.*\./, '')
-      const nameNoExt = oldName.match(/^.*\./) ? oldName.match(/^.*\./)[0] : oldName
+      const reg = /^.*?\./
+      const extension = oldName.replace(reg, '')
+      const nameNoExt = oldName.match(reg) ? oldName.match(reg)[0] : oldName
       let newName = oldName
       for (let i = 0; entries.findIndex(e => e.name === newName) > -1; i++) {
-        const addText = i ? ` - 副本 (${i})` : ' - 副本'
+        const addText = i ? ` - ${i18n.__('Copy(noun)')} (${i})` : ` - ${i18n.__('Copy(noun)')}`
         if (!extension || extension === oldName || nameNoExt === '.') {
           newName = `${oldName}${addText}`
         } else {
@@ -121,10 +123,10 @@ class Home extends Base {
         oldName
       }
       this.ctx.props.apis.request('dupFile', args, (err, data) => {
-        if (err) this.ctx.openSnackBar('制作副本失败')
+        if (err) this.ctx.openSnackBar(i18n.__('Dup File Failed'))
         else {
           this.refresh()
-          this.ctx.openSnackBar('制作成功')
+          this.ctx.openSnackBar(i18n.__('Dup File Success'))
         }
       })
     }
@@ -159,20 +161,21 @@ class Home extends Base {
     }
 
     this.delete = () => {
-      if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
+      if (!window.navigator.onLine) return this.ctx.openSnackBar(i18n.__('Offline Text'))
       this.setState({ deleteLoading: true })
       this.deleteAsync().then(() => {
         this.setState({ deleteLoading: false, delete: false })
-        this.ctx.openSnackBar('删除成功')
+        this.ctx.openSnackBar(i18n.__('Delete Success'))
       }).catch((e) => {
         this.setState({ deleteLoading: false, delete: false })
-        this.ctx.openSnackBar(`删除失败: ${e}`)
+        console.log('delete error', e)
+        this.ctx.openSnackBar(i18n.__('Delete Failed'))
       })
     }
 
     /* actions */
     this.listNavBySelect = () => {
-      if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
+      if (!window.navigator.onLine) return this.ctx.openSnackBar(i18n.__('Offline Text'))
       // debug('listNavBySelect', this.select, this.state)
       const selected = this.select.state.selected
       if (selected.length !== 1) return
@@ -188,7 +191,7 @@ class Home extends Base {
 
     /* op: scrollTo file */
     this.refresh = (op) => {
-      if (!window.navigator.onLine) return this.ctx.openSnackBar('网络连接已断开，请检查网络设置')
+      if (!window.navigator.onLine) return this.ctx.openSnackBar(i18n.__('Offline Text'))
 
       const rUUID = this.state.path[0] && this.state.path[0].uuid
       const dUUID = this.state.path[0] && this.state.path[this.state.path.length - 1].uuid
@@ -293,7 +296,7 @@ class Home extends Base {
   }
 
   menuName() {
-    return '我的文件'
+    return i18n.__('Home Menu Name')
   }
 
   menuIcon() {
@@ -359,7 +362,7 @@ class Home extends Base {
 
             /* the first one is always special */
             if (index === 0) {
-              acc.push(<BreadCrumbItem text="我的文件" key="root" onTouchTap={() => touchTap(path[0])} />)
+              acc.push(<BreadCrumbItem text={i18n.__('Home Title')} key="root" onTouchTap={() => touchTap(path[0])} />)
             } else {
               acc.push(<BreadCrumbItem text={node.name} key={`Item${node.uuid}`} onTouchTap={() => touchTap(node)} />)
             }
@@ -373,13 +376,16 @@ class Home extends Base {
   renderToolBar({ style }) {
     return (
       <div style={style}>
-        <IconButton onTouchTap={() => this.refresh()} tooltip="刷新" >
+        <IconButton onTouchTap={() => this.refresh()} tooltip={i18n.__('Refresh')} >
           <RefreshIcon color="#FFF" />
         </IconButton>
-        <IconButton onTouchTap={() => this.toggleDialog('gridView')} tooltip={this.state.gridView ? '列表视图' : '网格视图'}>
+        <IconButton
+          onTouchTap={() => this.toggleDialog('gridView')}
+          tooltip={this.state.gridView ? i18n.__('List View') : i18n.__('Grid View')}
+        >
           { this.state.gridView ? <ListIcon color="#FFF" /> : <GridIcon color="#FFF" /> }
         </IconButton>
-        <IconButton onTouchTap={() => this.toggleDialog('createNewFolder')} tooltip="新建文件夹">
+        <IconButton onTouchTap={() => this.toggleDialog('createNewFolder')} tooltip={i18n.__('Create New Folder')}>
           <FileCreateNewFolder color="#FFF" />
         </IconButton>
       </div>
@@ -480,14 +486,14 @@ class Home extends Base {
           {
             this.state.delete &&
             <div style={{ width: 280, padding: '24px 24px 0px 24px' }}>
-              <div style={{ color: 'rgba(0,0,0,0.54)' }}>确定删除？</div>
+              <div style={{ color: 'rgba(0,0,0,0.54)' }}>{ i18n.__('Confirm Delete Text') }</div>
               <div style={{ height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 { this.state.deleteLoading && <CircularProgress size={24} thickness={3} /> }
               </div>
               <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                <FlatButton label="取消" primary disabled={this.state.deleteLoading} onTouchTap={() => this.toggleDialog('delete')} />
+                <FlatButton label={i18n.__('Cancel')} primary disabled={this.state.deleteLoading} onTouchTap={() => this.toggleDialog('delete')} />
                 <FlatButton
-                  label="确认"
+                  label={i18n.__('Confirm')}
                   disabled={this.state.deleteLoading}
                   primary
                   onTouchTap={this.delete}
@@ -501,10 +507,10 @@ class Home extends Base {
           {
             this.state.noAccess &&
             <div style={{ width: 280, padding: '24px 24px 0px 24px' }}>
-              <div style={{ color: 'rgba(0,0,0,0.54)' }}>对不起，您没有访问权限！</div>
+              <div style={{ color: 'rgba(0,0,0,0.54)' }}>{ i18n.__('No Access Text') }</div>
               <div style={{ height: 24 }} />
               <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                <FlatButton label="确定" primary onTouchTap={() => this.toggleDialog('noAccess')} />
+                <FlatButton label={i18n.__('OK')} primary onTouchTap={() => this.toggleDialog('noAccess')} />
               </div>
             </div>
           }
@@ -526,7 +532,7 @@ class Home extends Base {
             this.state.select && this.state.select.selected && !this.state.select.selected.length ?
               <div>
                 <MenuItem
-                  primaryText="新建文件夹"
+                  primaryText={i18n.__('Create New Folder')}
                   leftIcon={<FileCreateNewFolder style={{ height: 20, width: 20, marginTop: 6 }} />}
                   onTouchTap={() => this.toggleDialog('createNewFolder')}
                 />
@@ -535,12 +541,12 @@ class Home extends Base {
                 <div style={{ height: 8 }} />
 
                 <MenuItem
-                  primaryText="上传文件夹"
+                  primaryText={i18n.__('Upload Folder')}
                   leftIcon={<UploadFold style={{ height: 20, width: 20, marginTop: 6 }} />}
                   onTouchTap={() => this.upload('directory')}
                 />
                 <MenuItem
-                  primaryText="上传文件"
+                  primaryText={i18n.__('Upload File')}
                   leftIcon={<UploadFile style={{ height: 20, width: 20, marginTop: 6 }} />}
                   onTouchTap={() => this.upload('file')}
                 />
@@ -551,17 +557,17 @@ class Home extends Base {
                   <div>
                     <MenuItem
                       leftIcon={<ShareIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                      primaryText="分享至共享盘"
+                      primaryText={i18n.__('Share to Public')}
                       onTouchTap={() => this.toggleDialog('share')}
                     />
                     <MenuItem
                       leftIcon={<CopyIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                      primaryText="拷贝至..."
+                      primaryText={i18n.__('Copy to')}
                       onTouchTap={() => this.toggleDialog('copy')}
                     />
                     <MenuItem
                       leftIcon={<MoveIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                      primaryText="移动至..."
+                      primaryText={i18n.__('Move to')}
                       onTouchTap={() => this.toggleDialog('move')}
                     />
                   </div>
@@ -570,7 +576,7 @@ class Home extends Base {
                   this.state.select && this.state.select.selected && this.state.select.selected.length === 1 &&
                     <MenuItem
                       leftIcon={<EditIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                      primaryText="重命名"
+                      primaryText={i18n.__('Rename')}
                       onTouchTap={() => this.toggleDialog('rename')}
                     />
                 }
@@ -579,7 +585,7 @@ class Home extends Base {
                 <div style={{ height: 8 }} />
                 <MenuItem
                   leftIcon={<InfoIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                  primaryText={getDetailStatus() ? '关闭详情' : '详细信息'}
+                  primaryText={getDetailStatus() ? i18n.__('Close Detail') : i18n.__('Open Detail')}
                   onTouchTap={toggleDetail}
                 />
                 {
@@ -587,13 +593,13 @@ class Home extends Base {
                   this.state.entries[this.state.select.selected[0]].type === 'file' &&
                     <MenuItem
                       leftIcon={<CopyIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                      primaryText="制作一个副本"
+                      primaryText={i18n.__('Make a Copy')}
                       onTouchTap={this.dupFile}
                     />
                 }
                 <MenuItem
                   leftIcon={<DownloadIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                  primaryText="下载至本地"
+                  primaryText={i18n.__('Download')}
                   onTouchTap={this.download}
                 />
                 <div style={{ height: 8 }} />
@@ -601,7 +607,7 @@ class Home extends Base {
                 <div style={{ height: 8 }} />
                 <MenuItem
                   leftIcon={<DeleteIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                  primaryText="刪除"
+                  primaryText={i18n.__('Delete')}
                   onTouchTap={() => this.toggleDialog('delete')}
                 />
               </div>

@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import Base from './Base'
 import Market from '../docker/Market'
@@ -37,15 +38,11 @@ class Docker extends Base {
   }
 
   menuName() {
-    return '应用市场'
+    return i18n.__('Docker Menu Name')
   }
 
   menuIcon() {
     return DockerIcon
-  }
-
-  quickName() {
-    return '应用市场'
   }
 
   appBarStyle() {
