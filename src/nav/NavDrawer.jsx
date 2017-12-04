@@ -1,21 +1,16 @@
-import React, { Component, PureComponent } from 'react'
-import muiThemeable from 'material-ui/styles/muiThemeable'
-import { ipcRenderer } from 'electron'
+import React from 'react'
+import i18n from 'i18n'
 import Radium from 'radium'
-
+import { ipcRenderer } from 'electron'
 import { Avatar, IconButton, Drawer, Divider } from 'material-ui'
-import FlatButton from '../common/FlatButton'
 import ActionSettings from 'material-ui/svg-icons/action/settings'
 import ActionExitToApp from 'material-ui/svg-icons/action/exit-to-app'
 import ActionAccountCircle from 'material-ui/svg-icons/action/account-circle'
-import SocialPerson from 'material-ui/svg-icons/social/person'
 import CloudIcon from 'material-ui/svg-icons/file/cloud'
 import ActionDns from 'material-ui/svg-icons/action/dns'
-import { indigo500 } from 'material-ui/styles/colors'
-
 import { DockerIcon } from '../common/Svg'
 
-class SubHeader extends Component {
+class SubHeader extends React.Component {
   render() {
     return (
       <div
@@ -33,14 +28,14 @@ class SubHeader extends Component {
   }
 }
 
-class MenuSpacer extends PureComponent {
+class MenuSpacer extends React.PureComponent {
   render() {
     return <div style={{ height: this.props.dense ? 4 : 8 }} />
   }
 }
 
 @Radium
-class MenuItem extends Component {
+class MenuItem extends React.Component {
   render() {
     const { icon, text, dense, primaryColor, selected, disabled } = this.props
 
@@ -160,7 +155,7 @@ class NavDrawer extends React.Component {
           <div style={{ position: 'absolute', right: 16, top: 8, display: this.props.isCloud ? '' : 'none' }}>
             <IconButton
               iconStyle={{ color: '#FFFFFF' }}
-              tooltip="闻上云连接中"
+              tooltip={i18n.__('Connect via Cloud')}
             >
               <CloudIcon />
             </IconButton>
@@ -169,7 +164,7 @@ class NavDrawer extends React.Component {
 
         <Divider />
 
-        <SubHeader>我的盒子</SubHeader>
+        <SubHeader>{ i18n.__('Box Title') }</SubHeader>
 
         { this.renderGroup('file') }
 
@@ -214,12 +209,12 @@ class NavDrawer extends React.Component {
         <div style={{ height: 4 }} />
         */}
 
-        <SubHeader>管理</SubHeader>
+        <SubHeader>{ i18n.__('Management Title') }</SubHeader>
 
         {/*
         <MenuItem
           icon={views.docker.menuIcon()}
-          text="应用市场"
+          text={i18n.__('Docker')}
           primaryColor={primaryColor}
           selected={views[nav].navGroup() === 'docker'}
           onTouchTap={() => navTo('docker')}
@@ -229,7 +224,7 @@ class NavDrawer extends React.Component {
         {
           isAdmin && <MenuItem
             icon={ActionDns}
-            text="设备管理"
+            text={i18n.__('Device Management')}
             primaryColor={primaryColor}
             selected={views[nav].navGroup() === 'device'}
             onTouchTap={() => navTo('adminUsers')}
@@ -238,7 +233,7 @@ class NavDrawer extends React.Component {
 
         <MenuItem
           icon={ActionSettings}
-          text="客户端设置"
+          text={i18n.__('Client Settings')}
           primaryColor={primaryColor}
           selected={views[nav].navGroup() === 'settings'}
           onTouchTap={() => navTo('clientSettings')}
@@ -250,7 +245,7 @@ class NavDrawer extends React.Component {
 
         <MenuItem
           icon={ActionExitToApp}
-          text="退出"
+          text={i18n.__('Exit')}
           onTouchTap={() => {
             ipcRenderer.send('LOGOUT')
             this.props.navToMain('login')
