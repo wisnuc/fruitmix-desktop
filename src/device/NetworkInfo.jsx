@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import validator from 'validator'
 import { TextField } from 'material-ui'
@@ -80,12 +81,12 @@ class Ethernet extends React.Component {
     const Icon = ActionSettingsEthernet
 
     const Titles = [
-      '网卡名称',
-      '带宽',
-      '地址类型',
-      '网络地址',
-      '子网掩码',
-      'MAC地址'
+      i18n.__('NIC Name'),
+      i18n.__('Bandwidth'),
+      i18n.__('Address Type'),
+      i18n.__('IP Address'),
+      i18n.__('Subnet Mask'),
+      i18n.__('Mac Address')
     ]
 
     const Values = [
@@ -110,7 +111,7 @@ class Ethernet extends React.Component {
             <div style={{ width: 336, padding: '24px 24px 0px 24px' }}>
               {/* title */}
               <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-                { '设置固定IP' }
+                { i18n.__('Set IP Alias Title') }
               </div>
               <div style={{ height: 56 }} />
               <div style={{ height: 56, display: 'flex', marginBottom: 10, position: 'relative' }}>
@@ -130,8 +131,8 @@ class Ethernet extends React.Component {
               {/* button */}
               <div style={{ height: 24 }} />
               <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                <FlatButton label="取消" onTouchTap={this.onCloseDialog} primary />
-                <FlatButton label="确认" disabled={!this.validateAlias()} onTouchTap={this.aliasRequest} primary />
+                <FlatButton label={i18n.__('Cancel')} onTouchTap={this.onCloseDialog} primary />
+                <FlatButton label={i18n.__('Confirm')} disabled={!this.validateAlias()} onTouchTap={this.aliasRequest} primary />
               </div>
             </div>
           }
