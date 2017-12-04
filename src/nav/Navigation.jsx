@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
 
@@ -228,7 +229,7 @@ class NavViews extends React.Component {
     const view = this.currentView()
     if (!view.hasDetail()) return null
     let DetailIcon = ActionInfo
-    let tooltip = '详情'
+    let tooltip = i18n.__('Detail')
     if (view.detailIcon()) {
       DetailIcon = view.detailIcon()
       tooltip = ''

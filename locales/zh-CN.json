@@ -381,7 +381,15 @@
   "Network Time On": "使用网络时间",
   "RTC in Local TZ": "使用本地时间作为RTC时间",
 
-  "==== device/ ====": "",
+  "==== nav/NavDrawer.jsx ====": "",
+  "Connect via Cloud": "闻上云连接中",
+  "Box Title": "我的盒子",
+  "Management Title": "管理",
+  "Docker": "Docker",
+  "Device Management": "设备管理",
+  "Client Settings": "客户端设置",
+
+  "==== nav/ ====": "",
   "": "",
 
   "==== photo/DetailContainer.jsx ====": "",
