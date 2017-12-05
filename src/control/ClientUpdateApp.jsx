@@ -111,7 +111,7 @@ class Update extends React.Component {
             </div>
             : this.state.status === 'latest'
             ? <div style={{ display: 'flex', alignItems: 'center', height: 48 }}>
-              { i18n.__('Already LTS Tip') }
+              { i18n.__('Already LTS Text') }
             </div>
             : this.state.status === 'needUpdate'
             ? this.renderCheckUpdate()

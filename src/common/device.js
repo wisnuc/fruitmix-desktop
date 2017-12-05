@@ -193,7 +193,7 @@ class Device extends RequestManager {
       /** FirmwareUpdate API * */
       case 'firm':
         r = request
-          .get('http://10.10.9.124:3001/state')
+          .get('http://10.10.9.96:3001/v1')
         break
 
       default:
@@ -262,6 +262,27 @@ class Device extends RequestManager {
           : request.get(`http://${this.mdev.address}:3000/station/info`)
         break
 
+      /* bootstrap */
+      case 'installAppifi':
+        r = request
+        // .put(`http://${this.mdev.address}:3001/v1/app`)
+          .put('http://10.10.9.96:3001/v1/app')
+          .send({ tagName: args.tagName })
+        break
+
+      case 'handleAppifi':
+        r = request
+        // .patch(`http://${this.mdev.address}:3001/v1/app`)
+          .patch('http://10.10.9.96:3001/v1/app')
+          .send({ state: args.state })
+        break
+
+      case 'handleRelease':
+        r = request
+        // .patch(`http://${this.mdev.address}:3001/v1/releases/${args.tagName}`)
+          .patch(`http://10.10.9.96:3001/v1/releases/${args.tagName}`)
+          .send({ state: args.state })
+        break
       default:
         break
     }

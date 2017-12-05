@@ -80,7 +80,7 @@ class NavViews extends React.Component {
 
     this.install('clientSettings', Settings)
     this.install('clientUpdate', ClientUpdate)
-    // this.install('firmwareUpdate', FirmwareUpdate)
+    this.install('firmwareUpdate', FirmwareUpdate)
 
 
     Object.assign(this.state, {

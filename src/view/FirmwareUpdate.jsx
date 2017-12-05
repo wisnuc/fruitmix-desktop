@@ -1,14 +1,12 @@
 import React from 'react'
 import i18n from 'i18n'
-import Debug from 'debug'
-import UpdateIcon from 'material-ui/svg-icons/action/system-update-alt'
+import { IconButton } from 'material-ui'
 import ListIcon from 'material-ui/svg-icons/action/list'
+import RefreshIcon from 'material-ui/svg-icons/navigation/refresh'
+import UpdateIcon from 'material-ui/svg-icons/action/system-update-alt'
+
 import Base from './Base'
 import FirmwareUpdateApp from '../device/FirmwareUpdateApp'
-import FirmDetail from '../device/FirmDetail'
-import FlatButton from '../common/FlatButton'
-
-const debug = Debug('view:component:update')
 
 class FirmwareUpdate extends Base {
   constructor(ctx) {
@@ -16,42 +14,27 @@ class FirmwareUpdate extends Base {
 
     this.state = {
       firm: null,
-      showRel: null,
-      latest: null,
-      installed: null
+      error: null
     }
 
-    this.selectRel = (showRel) => {
-      debug('this.selectRel', showRel)
-      this.setState({ showRel })
-    }
+    this.refresh = () => this.ctx.props.selectedDevice.request('firm')
   }
 
   willReceiveProps(nextProps) {
-    debug('FirmwareUpdate in view model', nextProps)
     if (!nextProps.selectedDevice || !nextProps.selectedDevice.firm) return
 
     const firm = nextProps.selectedDevice.firm
-    if (firm.isPending() || firm.isRejected()) return
+    if (firm.isPending()) return
 
-    const value = firm.value()
-
-    if (value && value !== this.state.firm) {
-      const rels = value.locals
-      const installed = rels.findIndex(rel => rel.release.id === value.current.id)
-      const latest = rels.findIndex(rel => !rel.release.prerelease)
-      /*
-      const rels = value.remotes
-      const installed = rels.findIndex(rel => rel.id === value.current.id)
-      const latest = rels.findIndex(rel => !rel.prerelease)
-      */
-      let showRel
-      if (latest < installed) {
-        showRel = rels[latest].release
-      } else {
-        showRel = rels[installed].release
+    if (firm.isRejected()) {
+      const error = firm.reason()
+      console.log('firm.isRejected', error)
+      if (error && error !== this.state.error) this.setState({ error })
+    } else {
+      const value = firm.value()
+      if (value && value !== this.state.firm) {
+        this.setState({ firm: value, error: null })
       }
-      this.setState({ firm: value, showRel, latest: rels[latest].release, installed: rels[installed].release })
     }
   }
 
@@ -75,52 +58,26 @@ class FirmwareUpdate extends Base {
     return 'colored'
   }
 
-  hasDetail() {
-    return true
-  }
-
-  detailEnabled() {
-    return true
-  }
-
   detailIcon() {
     return ListIcon
   }
 
-  renderDetail({ style, openSnackBar }) {
+  renderToolBar({ style }) {
     return (
       <div style={style}>
-        <FirmDetail
-          firm={this.state.firm}
-          showRel={this.state.showRel}
-          latest={this.state.latest}
-          installed={this.state.installed}
-          primaryColor={this.groupPrimaryColor()}
-          selectRel={this.selectRel}
-        />
+        <IconButton onTouchTap={() => this.refresh()} tooltip={i18n.__('Refresh')} >
+          <RefreshIcon color="#FFF" />
+        </IconButton>
       </div>
     )
   }
 
   renderContent({ openSnackBar, toggleDetail }) {
     return (
-      <div style={{ margin: 24 }}>
-        { ` 请访问 http://${this.ctx.props.selectedDevice.mdev.address}:3001` }
-        <FlatButton
-          primary
-          label="打开"
-          href={`http://${this.ctx.props.selectedDevice.mdev.address}:3001`}
-          target="_blank"
-        />
-      </div>
-    )
-    return (
       <FirmwareUpdateApp
         firm={this.state.firm}
-        showRel={this.state.showRel}
-        latest={this.state.latest}
-        installed={this.state.installed}
-        toggleDetail={toggleDetail}
+        error={this.state.error}
+        refresh={this.refresh}
         apis={this.ctx.props.apis}
         nav={this.ctx.props.nav}
         selectedDevice={this.ctx.props.selectedDevice}
