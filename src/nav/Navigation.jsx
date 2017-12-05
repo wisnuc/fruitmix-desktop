@@ -76,11 +76,11 @@ class NavViews extends React.Component {
     this.install('networking', Networking)
     this.install('timeDate', TimeDate)
     this.install('fanControl', FanControl)
+    this.install('firmwareUpdate', FirmwareUpdate)
     this.install('power', Power)
 
     this.install('clientSettings', Settings)
     this.install('clientUpdate', ClientUpdate)
-    this.install('firmwareUpdate', FirmwareUpdate)
 
 
     Object.assign(this.state, {

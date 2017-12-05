@@ -1,7 +1,9 @@
 import React from 'react'
 import i18n from 'i18n'
-import Debug from 'debug'
 import { Divider, CircularProgress } from 'material-ui'
+import UpdateIcon from 'material-ui/svg-icons/action/system-update-alt'
+import NewReleases from 'material-ui/svg-icons/av/new-releases'
+import CheckIcon from 'material-ui/svg-icons/navigation/check'
 import { green500, orange500, grey500 } from 'material-ui/styles/colors'
 import FlatButton from '../common/FlatButton'
 import JSONTree from '../common/jsonTree'
@@ -38,8 +40,10 @@ class Firm extends React.PureComponent {
     }
 
     this.install = (tagName) => {
+      this.setState({ loading: true, confirm: false })
       this.props.selectedDevice.pureRequest('installAppifi', { tagName }, (error) => {
         if (error) console.log('install appifi error', error)
+        this.setState({ loading: 'false' })
         this.refresh()
       })
     }
@@ -112,41 +116,52 @@ class Firm extends React.PureComponent {
     if (!rel) return (<div />)
 
     const show = !current || compareVerison(rel.tag_name, current)
-    if (!show) return (<div style={{ fontSize: 20, marginRight: 32 }}> { i18n.__('Already LTS Text') } </div>)
-
     const date = rel.published_at.split('T')[0]
     const { label, text, color, action } = this.parseReleaseState(state, rel.tag_name)
     return (
-      <div style={{ width: '100%' }}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div style={{ fontSize: 20, marginRight: 32 }}>
-            { i18n.__('New Version Detected %s', rel.tag_name) }
-          </div>
-          <div style={{ fontSize: 14, color, marginRight: 8, border: `1px ${color} solid`, padding: '0px 8px' }}> { text } </div>
+      <div style={{ display: 'flex', width: '100%' }}>
+        <div style={{ flex: '0 0 24px' }} />
+        <div style={{ flex: '0 0 56px' }} >
+          { show ? <NewReleases color={this.props.primaryColor} /> : <CheckIcon color={this.props.primaryColor} /> }
         </div>
-        { action && <FlatButton primary label={label} onTouchTap={action} style={{ margin: '8px 0px 0px -12px' }} /> }
-        <div style={{ height: 16 }} />
-        <div> { i18n.__('Publish Date %s', date) } </div>
-        <div style={{ height: 16 }} />
-        <div> { i18n.__('Updates') } </div>
-        <div style={{ height: 8 }} />
         {
-          rel.body ? rel.body.split(/[1-9]\./).map(list => list && (
-            <div style={{ marginLeft: 24, height: 40, display: 'flex', alignItems: 'center' }} key={list}>
-              { '*' }
-              <div style={{ width: 16 }} />
-              { list }
+          show ?
+            <div style={{ width: '100%' }}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ fontSize: 20, marginRight: 32 }}>
+                  { i18n.__('New Version Detected %s', rel.tag_name) }
+                </div>
+                <div style={{ fontSize: 14, color, marginRight: 8, border: `1px ${color} solid`, padding: '0px 8px' }}> { text } </div>
+              </div>
+              { action && <FlatButton primary label={label} onTouchTap={action} style={{ margin: '8px 0px 0px -12px' }} /> }
+              <div style={{ height: 16 }} />
+              <div> { i18n.__('Publish Date %s', date) } </div>
+              <div style={{ height: 16 }} />
+              <div> { i18n.__('Updates') } </div>
+              <div style={{ height: 8 }} />
+              {
+                rel.body ? rel.body.split(/[1-9]\./).map(list => list && (
+                  <div style={{ marginLeft: 24, height: 40, display: 'flex', alignItems: 'center' }} key={list}>
+                    { '*' }
+                    <div style={{ width: 16 }} />
+                    { list }
+                  </div>
+                ))
+                  :
+                  <div style={{ marginLeft: 24, height: 40, display: 'flex', alignItems: 'center' }}>
+                    { '*' }
+                    <div style={{ width: 16 }} />
+                    { i18n.__('Bug Fixes') }
+                  </div>
+              }
+              <div style={{ height: 16 }} />
+              <Divider style={{ marginLeft: -60 }} />
             </div>
-          ))
-          :
-          <div style={{ marginLeft: 24, height: 40, display: 'flex', alignItems: 'center' }}>
-            { '*' }
-            <div style={{ width: 16 }} />
-            { i18n.__('Bug Fixes') }
-          </div>
+            : 
+            <div style={{ }} >
+              { i18n.__('Already LTS Text') }
+            </div>
         }
-        <div style={{ height: 16 }} />
-        <Divider />
       </div>
     )
   }
@@ -195,17 +210,25 @@ class Firm extends React.PureComponent {
     const { state, tagName } = appifi || {}
     const { label, color, text, action } = this.parseAppifiState(state, tagName)
     return (
-      <div style={{ width: '100%' }}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div style={{ fontSize: 20, marginRight: 32 }}>
-            { tagName ? i18n.__('Current Firmware Version %s', tagName) : i18n.__('No Appifi') }
+      <div>
+        <div style={{ display: 'flex', width: '100%' }}>
+          <div style={{ flex: '0 0 24px' }} />
+          <div style={{ flex: '0 0 56px' }} >
+            <UpdateIcon color={this.props.primaryColor} />
           </div>
-          <div style={{ fontSize: 14, color, marginRight: 8, border: `1px ${color} solid`, padding: '0px 8px' }}> { text } </div>
+          <div style={{ width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{ fontSize: 20, marginRight: 32 }}>
+                { tagName ? i18n.__('Current Firmware Version %s', tagName) : i18n.__('No Appifi') }
+              </div>
+              <div style={{ fontSize: 14, color, marginRight: 8, border: `1px ${color} solid`, padding: '0px 8px' }}> { text } </div>
+            </div>
+            { action && <FlatButton primary label={label} onTouchTap={action} style={{ margin: '8px 0px 0px -12px' }} /> }
+            <div style={{ height: 16 }} />
+            <Divider style={{ marginLeft: -60 }} />
+            <div style={{ height: 16 }} />
+          </div>
         </div>
-        { action && <FlatButton primary label={label} onTouchTap={action} style={{ margin: '8px 0px 0px -12px' }} /> }
-        <div style={{ height: 16 }} />
-        <Divider />
-        <div style={{ height: 16 }} />
         <div style={{ display: 'flex', alignItems: 'center' }}>
           { releases.map(rel => this.renderReleases(rel, tagName)) }
         </div>
@@ -250,7 +273,7 @@ class Firm extends React.PureComponent {
     if (!firm && !error) return this.renderLoading()
 
     return (
-      <div style={{ height: '100%', margin: 16 }}>
+      <div style={{ height: '100%', marginTop: 16 }}>
         <div style={{ height: 16 }} />
         { error ? this.renderError() : this.renderFirm(firm) }
         {/* dialog */}
@@ -279,7 +302,7 @@ class Firm extends React.PureComponent {
                   <FlatButton
                     label={i18n.__('Confirm')}
                     primary
-                    onTouchTap={this.install}
+                    onTouchTap={() => this.install(this.state.confirm)}
                   />
                 </div>
               </div>
