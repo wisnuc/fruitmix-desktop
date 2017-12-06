@@ -37,7 +37,7 @@ class ErrorBox extends React.PureComponent {
         <div>{this.props.text}</div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <IconButton onTouchTap={() => this.setState(state => Object.assign({}, state, { open: true }))}>
-            <AlertError />
+            <AlertError color={this.props.iconColor} />
           </IconButton>
           <Dialog
             titleStyle={{ fontSize: 20 }}

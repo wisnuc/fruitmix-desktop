@@ -193,7 +193,8 @@ class Device extends RequestManager {
       /** FirmwareUpdate API * */
       case 'firm':
         r = request
-          .get('http://10.10.9.96:3001/v1')
+          .get(`http://${this.mdev.address}:3001/v1`)
+        // .get('http://10.10.9.96:3001/v1')
         break
 
       default:
@@ -265,22 +266,22 @@ class Device extends RequestManager {
       /* bootstrap */
       case 'installAppifi':
         r = request
-        // .put(`http://${this.mdev.address}:3001/v1/app`)
-          .put('http://10.10.9.96:3001/v1/app')
+          .put(`http://${this.mdev.address}:3001/v1/app`)
+        // .put('http://10.10.9.96:3001/v1/app')
           .send({ tagName: args.tagName })
         break
 
       case 'handleAppifi':
         r = request
-        // .patch(`http://${this.mdev.address}:3001/v1/app`)
-          .patch('http://10.10.9.96:3001/v1/app')
+          .patch(`http://${this.mdev.address}:3001/v1/app`)
+        // .patch('http://10.10.9.96:3001/v1/app')
           .send({ state: args.state })
         break
 
       case 'handleRelease':
         r = request
-        // .patch(`http://${this.mdev.address}:3001/v1/releases/${args.tagName}`)
-          .patch(`http://10.10.9.96:3001/v1/releases/${args.tagName}`)
+          .patch(`http://${this.mdev.address}:3001/v1/releases/${args.tagName}`)
+        // .patch(`http://10.10.9.96:3001/v1/releases/${args.tagName}`)
           .send({ state: args.state })
         break
       default:
@@ -330,48 +331,31 @@ class Device extends RequestManager {
 
   async initWizardAsync(args) {
     const { target, mode, username, password } = args
-
     const uuid = await this.requestAsync('mkfs', { target, mode })
-    console.log('device initWizard:  mkfs returns uuid', uuid)
 
     // await this.requestAsync('storage', null) // FIXME can't finish ???
-    console.log('device initWizard: storage refreshed')
-
     await this.requestAsync('install', { current: uuid.uuid })
-    console.log('device initWizard: install fruitmix success')
 
     while (true) {
       await Promise.delay(1000)
       await this.requestAsync('boot', null)
-
       const current = this.boot.value().current
       const state = this.boot.value().state
-
       if (current) {
         if (state === 'started') {
           // this may be due to worker not started yet
           await Promise.delay(2000)
-
-          console.log('device initWizard: fruitmix started')
           break
         }
-        if (state === 'stopping') {
-          return console.log('device initWizard: fruitmix stopping (unexpected), stop')
-        }
-        console.log('device initWizard: fruitmix starting, waiting...')
-      } else { console.log('device initWizard: fruitmix is null, legal ???') } // NO!!!
+        if (state === 'stopping') return console.log('device initWizard: fruitmix stopping (unexpected), stop')
+      } else console.log('device initWizard: fruitmix is null, legal ???') // NO!!!
     }
 
     await this.requestAsync('firstUser', { username, password })
 
     const user = this.firstUser.value()
-    console.log('device initWizard: first user created')
-
     await this.requestAsync('users', null)
-    console.log('device initWizard: users refreshed')
-
     await this.requestAsync('token', { uuid: user.uuid, password })
-    console.log('device initWizard: token retrieved')
   }
 
   async addFirstUserAsync(args) {

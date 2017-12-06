@@ -430,16 +430,21 @@ class NavViews extends React.Component {
 
           {/* content + shortcut container */}
           <div
-            style={{ width: '100%',
+            style={{
+              width: '100%',
               height: `calc(100% - ${this.appBarHeight()}px)`,
               display: 'flex',
-              justifyContent: 'space-between' }}
+              justifyContent: 'space-between'
+            }}
           >
 
             { view.showQuickNav() && this.renderQuickNavs() }
 
             {/* content */}
-            <div style={{ width: '100%', height: '100%', paddingLeft: 8, paddingTop: 8, boxSizing: 'border-box' }} id="content-container">
+            <div
+              id="content-container"
+              style={{ width: '100%', height: '100%', paddingLeft: 8, paddingTop: 8, boxSizing: 'border-box' }}
+            >
               {
                 view.renderContent({
                   navTo: this.navTo.bind(this),
