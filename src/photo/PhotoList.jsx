@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import ReactDom from 'react-dom'
 import Debug from 'debug'
 import { List, AutoSizer } from 'react-virtualized'
@@ -151,7 +152,7 @@ class PhotoList extends React.Component {
               let date = data[0]
               const top = data[1]
               const zIndex = data[2]
-              if (date === 0) date = '神秘时间'
+              if (date === 0) date = i18n.__('Date Unknown Text')
               return (
                 <div
                   onTouchTap={this.scrollToPosition}
@@ -210,7 +211,7 @@ class PhotoList extends React.Component {
     // debug('render PhotoList, this.props', this.props)
     return (
       <div style={this.props.style}>
-        {/* 图片列表 */}
+        {/* Photo List */}
         <div style={{ display: 'flex', width: '100%', height: '100%' }} >
           <AutoSizer>
             {({ height, width }) => {
@@ -291,7 +292,7 @@ class PhotoList extends React.Component {
           </AutoSizer>
         </div>
 
-        {/* 时间轴 */}
+        {/* Timeline */}
         <div
           ref={ref => (this.refBackground = ref)}
           style={{ position: 'absolute', height: '100%', width: 80, right: 16 }}
