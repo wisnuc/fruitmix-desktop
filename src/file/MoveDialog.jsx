@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import { IconButton, CircularProgress, RaisedButton, TextField } from 'material-ui'
 import DoneIcon from 'material-ui/svg-icons/action/done'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
@@ -79,7 +80,7 @@ class MoveDialog extends React.PureComponent {
     this.state = {
       list: this.props.entries,
       currentDir: Object.assign({}, this.path[this.path.length - 1], { type: 'directory' }),
-      path: [{ name: '我的盒子', uuid: this.path[0].uuid, type: 'root' }, ...this.path],
+      path: [{ name: i18n.__('Box Title'), uuid: this.path[0].uuid, type: 'root' }, ...this.path],
       loading: false,
       currentSelectedIndex: -1,
       errorText: '',
@@ -143,8 +144,8 @@ class MoveDialog extends React.PureComponent {
       } else if (currentDir.type === 'root') { // root
         const drives = this.props.apis.drives.value()
         const list = [
-          { name: '我的文件', type: 'directory', uuid: drives.find(d => d.tag === 'home').uuid, tag: 'home' },
-          { name: '共享盘', type: 'publicRoot' }
+          { name: i18n.__('Home Title'), type: 'directory', uuid: drives.find(d => d.tag === 'home').uuid, tag: 'home' },
+          { name: i18n.__('Public Drive'), type: 'publicRoot' }
         ]
         setImmediate(() => this.updateState(path, currentDir, list))
       } else if (currentDir.type === 'publicRoot') { // list public drives
@@ -166,8 +167,7 @@ class MoveDialog extends React.PureComponent {
       if (this.state.currentSelectedIndex > -1) this.enter(this.state.list[this.state.currentSelectedIndex])
       this.props.apis.request('mkdir', args, (err, data) => {
         if (err) {
-          // this.setState({ errorText: err.message })
-          this.setState({ errorText: '出现错误，请重试！' })
+          this.setState({ errorText: i18n.__('Mkdir Failed') })
         } else {
           const node = data.find(entry => entry.name === this.state.newFoldName).data
           this.enter(node)
@@ -181,9 +181,9 @@ class MoveDialog extends React.PureComponent {
       const newValue = sanitize(newFoldName)
       const entries = this.state.list
       if (entries.findIndex(entry => entry.name === newFoldName) > -1) {
-        this.setState({ newFoldName, errorText: '名称已存在' })
+        this.setState({ newFoldName, errorText: i18n.__('Name Exist Error') })
       } else if (newFoldName !== newValue) {
-        this.setState({ newFoldName, errorText: '名称不合法' })
+        this.setState({ newFoldName, errorText: i18n.__('Name Invalid Error') })
       } else {
         this.setState({ newFoldName, errorText: '' })
       }
@@ -224,24 +224,24 @@ class MoveDialog extends React.PureComponent {
 
     /* finish post change dialog content to waiting/result */
     this.finish = (error, data) => {
-      const type = this.props.type === 'copy' ? '拷贝' : this.props.type === 'move' ? '移动' : '分享'
+      const type = this.props.type === 'copy' ? i18n.__('Copy') : this.props.type === 'move' ? i18n.__('Move') : i18n.__('Share')
       if (error) {
         this.setState({ loading: false })
         this.closeDialog()
         this.props.refresh()
-        return this.props.openSnackBar(`${type}失败`)
+        return this.props.openSnackBar(type.concat(i18n.__('+Failed')))
       }
       this.getTaskState(data.uuid).asCallback((err) => {
         if (err) {
           this.setState({ loading: false })
           this.closeDialog()
           this.props.refresh()
-          return this.props.openSnackBar(`${type}失败`)
+          return this.props.openSnackBar(type.concat(i18n.__('+Failed')))
         }
         this.setState({ loading: false })
         this.closeDialog()
         this.props.refresh()
-        return this.props.openSnackBar(`${type}成功`)
+        return this.props.openSnackBar(type.concat(i18n.__('+Success')))
       })
     }
 
@@ -279,7 +279,7 @@ class MoveDialog extends React.PureComponent {
   }
 
   componentWillMount() {
-    if (this.props.type === 'share') this.enter({ type: 'publicRoot', name: '共享盘', setRoot: true })
+    if (this.props.type === 'share') this.enter({ type: 'publicRoot', name: i18n.__('Public Drive'), setRoot: true })
   }
 
   /* 移动按钮是否工作 disabled ? */
@@ -312,11 +312,11 @@ class MoveDialog extends React.PureComponent {
 
   /* 按钮文字 */
   getButtonText() {
-    const type = this.props.type === 'copy' ? '拷贝' : this.props.type === 'move' ? '移动' : '分享'
+    const type = this.props.type === 'copy' ? i18n.__('Copy') : this.props.type === 'move' ? i18n.__('Move') : i18n.__('Share')
     if (this.state.currentSelectedIndex !== -1 || this.directory.uuid === this.state.currentDir.uuid) {
-      return `${type}至选中文件夹`
+      return i18n.__('%s To Selected Folder', type)
     }
-    return `${type}至当前文件夹`
+    return i18n.__('%s To Current Folder', type)
   }
 
   /* 是否在同一目录 */
@@ -354,11 +354,11 @@ class MoveDialog extends React.PureComponent {
   renderCurrentDir() {
     const type = this.state.currentDir.type
     return this.state.currentDir.name === this.state.currentDir.uuid
-      ? '我的文件'
+      ? i18n.__('Home Title')
       : type === 'publicRoot'
-        ? '共享盘'
+        ? i18n.__('Public Drive')
         : type === 'root'
-          ? '我的盒子'
+          ? i18n.__('Box Title')
           : this.state.currentDir.name || this.state.currentDir.label
   }
 
@@ -446,9 +446,8 @@ class MoveDialog extends React.PureComponent {
               : this.state.cnf
               ? <div style={{ fontSize: 14, width: 288, margin: 24, textAlign: 'center', wordWrap: 'break-word' }}>
                 {
-                  `在“${this.state.currentSelectedIndex > -1
-                    ? this.state.list[this.state.currentSelectedIndex].name
-                      : this.renderCurrentDir()}”中创建新文件夹`
+                  i18n.__('Create New Folder in %s', this.state.currentSelectedIndex > -1 ?
+                  this.state.list[this.state.currentSelectedIndex].name : this.renderCurrentDir())
                 }
               </div>
               : <div style={{ height: '100%', width: '100%' }}>
@@ -464,13 +463,27 @@ class MoveDialog extends React.PureComponent {
                     />
                   ))
                   : this.state.currentDir.type === 'publicRoot'
-                  ? <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-                    <div> { '尚未创建共享盘' } </div>
-                    { this.props.apis.account && this.props.apis.account.data && this.props.apis.account.data.isAdmin &&
-                    <FlatButton label="去创建" primary onTouchTap={() => { this.closeDialog; this.props.navTo('adminDrives') }} /> }
-                  </div>
+                  ? <div
+                    style={{
+                      height: '100%',
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexDirection: 'column' }}
+                  >
+                    <div> { i18n.__('No Public Drive') } </div>
+                    {
+                      this.props.apis.account && this.props.apis.account.data && this.props.apis.account.data.isAdmin &&
+                        <FlatButton
+                          label={i18n.__('Jump to Create')}
+                          primary
+                          onTouchTap={() => { this.closeDialog; this.props.navTo('adminDrives') }}
+                        />
+                    }
+                    </div>
                   : <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    { '此文件夹为空' }
+                    { i18n.__('Empty Folder Text') }
                   </div>
                 }
               </div>
@@ -491,7 +504,7 @@ class MoveDialog extends React.PureComponent {
           { /* can't add new fold in root or publicRoot */
             this.state.path.length > 1 && (this.state.path.length !== 2 || this.state.path[1].type !== 'publicRoot') &&
               <IconButton
-                tooltip="新建文件夹"
+                tooltip={i18n.__('Create New Folder')}
                 tooltipPosition="top-center"
                 style={{ marginRight: 16 }}
                 onTouchTap={() => this.setState({ cnf: true })}

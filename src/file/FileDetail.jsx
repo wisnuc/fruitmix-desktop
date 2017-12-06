@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import prettysize from 'prettysize'
 import { CircularProgress, Divider } from 'material-ui'
@@ -17,20 +18,20 @@ const phaseDate = (time) => {
   const date = a.getDate()
   const hour = a.getHours()
   const min = a.getMinutes()
-  return `${year}年${month}月${date}日 ${hour} : ${min}`
+  return i18n.__('Phase Date %s %s %s %s %s', year, month, date, hour, min)
 }
 
 const phaseExifTime = (time) => {
   const a = time.replace(/\s+/g, ':').split(':')
-  return `${a[0]}年${a[1]}月${a[2]}日 ${a[3]} : ${a[4]}`
+  return i18n.__('Phase Date %s %s %s %s %s', a[0], a[1], a[2], a[3], a[4])
 }
 
 const getType = (type, name, metadata) => {
-  if (type === 'public') return '共享盘'
-  if (type === 'directory') return '文件夹'
+  if (type === 'public') return i18n.__('Public Drive')
+  if (type === 'directory') return i18n.__('Directory')
   if (metadata && metadata.format) return metadata.format
   let extension = name.replace(/^.*\./, '')
-  if (!extension || extension === name) extension = '未知文件'
+  if (!extension || extension === name) extension = i18n.__('Unknown File Type')
   return extension.toUpperCase()
 }
 
@@ -38,7 +39,7 @@ const getPath = (path) => {
   const newPath = []
   path.map((item, index) => {
     if (!index) {
-      newPath.push(item.type === 'publicRoot' ? '共享盘' : '我的文件')
+      newPath.push(item.type === 'publicRoot' ? i18n.__('Public Drive') : i18n.__('Home Title'))
     } else {
       newPath.push(item.name)
     }
@@ -51,12 +52,12 @@ const getResolution = (height, width) => {
   let res = height * width
   if (res > 100000000) {
     res = Math.ceil(res / 100000000)
-    return `${res} 亿像素 ${height} x ${width}`
+    return i18n.__('Get 100 Million Resolution {{res}} {{alt}} {{height}} {{width}}', { res, alt: res * 100, height, width })
   } else if (res > 10000) {
     res = Math.ceil(res / 10000)
-    return `${res} 万像素 ${height} x ${width}`
+    return i18n.__('Get 0.01 Million Resolution {{res}} {{alt}} {{height}} {{width}}', { res, alt: res / 100, height, width })
   }
-  return `${res} 像素 ${height} x ${width}`
+  return i18n.__('Get Resolution {{res}} {{height}} {{width}}', { res, height, width })
 }
 
 class FileDetail extends React.PureComponent {
@@ -135,8 +136,8 @@ class FileDetail extends React.PureComponent {
     if (!noSize) detailFile.forEach(f => (size += f.size))
     // debug('renderMultiFiles', detailFile, noSize, size)
     const Titles = [
-      '位置',
-      noSize ? '' : '总计大小'
+      i18n.__('Location'),
+      noSize ? '' : i18n.__('Total Size')
     ]
 
     const Values = [
@@ -166,7 +167,7 @@ class FileDetail extends React.PureComponent {
               </div>
               <div style={{ flex: '0 0 16px' }} />
               <div style={{ flexGrow: 1 }}>
-                { `您选择了${detailFile.length}项` }
+                { i18n.__('Selected Item Text %s') }
               </div>
               <div style={{ flex: '0 0 24px' }} />
             </div>
@@ -214,13 +215,13 @@ class FileDetail extends React.PureComponent {
     }
 
     const Titles = [
-      '类型',
-      detailFile.type === 'file' ? '大小' : '',
-      detailFile.type !== 'public' ? '位置' : '',
-      (detailFile.type !== 'public' && detailFile.type !== 'unsupported') ? '修改时间' : '',
-      exifDateTime ? '拍摄时间' : '',
-      exifModel ? '拍摄设备' : '',
-      height && width ? '分辨率' : ''
+      i18n.__('Type'),
+      detailFile.type === 'file' ? i18n.__('Size') : '',
+      detailFile.type !== 'public' ? i18n.__('Location') : '',
+      (detailFile.type !== 'public' && detailFile.type !== 'unsupported') ? i18n.__('Date Modified') : '',
+      exifDateTime ? i18n.__('Date Taken') : '',
+      exifModel ? i18n.__('Camera Model') : '',
+      height && width ? i18n.__('Resolution') : ''
     ]
 
     const Values = [

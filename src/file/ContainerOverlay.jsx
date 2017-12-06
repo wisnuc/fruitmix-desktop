@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import { IconButton, Avatar } from 'material-ui'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
@@ -187,15 +188,6 @@ class ContainerOverlayInline extends React.Component {
     this.leaveTimeout = setTimeout(callback, 200) // matches transition duration
   }
 
-
-  renderInfo() {
-    return (
-      <div style={{ padding: '0px 32px 0px 32px', width: 296 }}>
-        <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.54)', height: 48, display: 'flex', alignItems: 'center' }}> 详情 </div>
-      </div>
-    )
-  }
-
   render() {
     // debug('redner ContainerOverlay', this.props)
     const { primaryColor } = this.props
@@ -328,19 +320,11 @@ class ContainerOverlayInline extends React.Component {
               {/* toolbar */}
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <IconButton
-                  tooltip="下载"
+                  tooltip={i18n.__('Download')}
                   onTouchTap={this.props.download}
                 >
                   <DownloadIcon color="#FFF" />
                 </IconButton>
-                {/*
-                <IconButton
-                  tooltip="信息"
-                  onTouchTap={() => this.toggleDialog('detailInfo')}
-                >
-                  <InfoIcon color="#FFF" />
-                </IconButton>
-                */}
               </div>
               <div style={{ width: 24 }} />
             </div>
