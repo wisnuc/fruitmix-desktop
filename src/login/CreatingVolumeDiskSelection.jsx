@@ -27,10 +27,10 @@ class CreatingVolumeDiskSelection extends React.PureComponent {
     const valid = !blk.unformattable
 
     let comment
-    if (blk.unformattable === 'isActiveSwap') {
-      comment = i18n.__('Unformattable Comment isActiveSwap')
-    } else if (blk.unformattable === 'isRootFS') {
+    if (/RootFS/.test(blk.unformattable)) {
       comment = i18n.__('Unformattable Comment isRootFS')
+    } else if (/ActiveSwap/.test(blk.unformattable)) {
+      comment = i18n.__('Unformattable Comment isActiveSwap')
     } else if (blk.unformattable) {
       comment = i18n.__('Unformattable Comment')
     } else if (blk.removable) {

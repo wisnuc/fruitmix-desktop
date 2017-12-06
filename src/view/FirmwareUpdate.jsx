@@ -65,7 +65,7 @@ class FirmwareUpdate extends Base {
   renderToolBar({ style }) {
     return (
       <div style={style}>
-        <IconButton onTouchTap={() => this.refresh()} tooltip={i18n.__('Refresh')} >
+        <IconButton onTouchTap={() => this.refresh()} tooltip={i18n.__('Refresh')} tooltipStyles={{ marginTop: -12 }}>
           <RefreshIcon color="#FFF" />
         </IconButton>
       </div>
@@ -74,16 +74,18 @@ class FirmwareUpdate extends Base {
 
   renderContent({ openSnackBar, toggleDetail }) {
     return (
-      <FirmwareUpdateApp
-        firm={this.state.firm}
-        error={this.state.error}
-        refresh={this.refresh}
-        apis={this.ctx.props.apis}
-        nav={this.ctx.props.nav}
-        selectedDevice={this.ctx.props.selectedDevice}
-        primaryColor={this.groupPrimaryColor()}
-        openSnackBar={openSnackBar}
-      />
+      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+        <FirmwareUpdateApp
+          firm={this.state.firm}
+          error={this.state.error}
+          refresh={this.refresh}
+          apis={this.ctx.props.apis}
+          nav={this.ctx.props.nav}
+          selectedDevice={this.ctx.props.selectedDevice}
+          primaryColor={this.groupPrimaryColor()}
+          openSnackBar={openSnackBar}
+        />
+      </div>
     )
   }
 }
