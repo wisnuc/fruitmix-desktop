@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import { shell, clipboard } from 'electron'
 import { IconButton, CircularProgress, RaisedButton, TextField } from 'material-ui'
 import ErrorIcon from 'material-ui/svg-icons/alert/error-outline'
@@ -16,53 +17,47 @@ import FlatButton from '../common/FlatButton'
 const convert = (code) => {
   switch (code) {
     case 'EEXIST':
-      return '文件命名冲突'
+      return i18n.__('EEXIST')
     case 'ECONNRESET':
-      return '连接已断开'
+      return i18n.__('ECONNRESET')
     case 'ECONNREFUSED':
-      return '连接已断开'
+      return i18n.__('ECONNREFUSED')
     case 'ECONNEND':
-      return '连接已断开'
+      return i18n.__('ECONNEND')
     case 'ENOENT':
-      return '文件不可读'
+      return i18n.__('ENOENT')
     case 'EPERM':
-      return '访问权限不足'
+      return i18n.__('EPERM')
     case 'EACCES':
-      return '访问权限不足'
-    case 'ESERVER':
-      return '服务器内部错误'
-    case 'EOHTER':
-      return '请求失败'
+      return i18n.__('EACCES')
     case 'ENOSPC':
-      return '磁盘空间已满'
+      return i18n.__('ENOSPC')
     case 'ENXIO':
-      return '磁盘不可读'
-    case 'EHTTPSTATUS':
-      return '请求失败'
+      return i18n.__('ENXIO')
     case 'ESHA256MISMATCH':
-      return '文件已修改'
+      return i18n.__('ESHA256MISMATCH')
     case 'EOVERSIZE':
-      return '文件已修改'
+      return i18n.__('EOVERSIZE')
     case 'EUNDERSIZE':
-      return '文件已修改'
+      return i18n.__('EUNDERSIZE')
     case 'ENAME':
-      return '不支持的名称'
+      return i18n.__('ENAME')
     case 'ETYPE':
-      return '不支持的类型'
-    case 'EDSSTORE':
-      return '忽略的文件'
+      return i18n.__('ETYPE')
+    case 'EIGNORE':
+      return i18n.__('EIGNORE')
     default:
-      return code || '未知错误'
+      return code || i18n.__('Unknown Error')
   }
 }
 
 const translateStatus = (statusCode) => {
-  if (translateStatus >= 500) return '服务器内部错误'
+  if (translateStatus >= 500) return i18n.__('Internal Server Error')
   switch (statusCode) {
     case 404:
-      return '文件未找到'
+      return i18n.__('ENOTFOUND')
     default:
-      return statusCode ? `请求失败：${statusCode}` : '未知错误'
+      return statusCode ? i18n.__('Request Failed %s', statusCode) : i18n.__('Unknown Error')
   }
 }
 
@@ -170,7 +165,7 @@ class ErrorTree extends React.PureComponent {
         }}
       >
         <div style={{ height: 56, display: 'flex', alignItems: 'center' }} >
-          <div style={{ fontSize: 20 }}> { ' 传输问题' } </div>
+          <div style={{ fontSize: 20 }}> { i18n.__('Error Dialog Title') } </div>
           <div style={{ flexGrow: 1 }} />
           <IconButton
             onTouchTap={() => this.props.onRequestClose()}
@@ -180,7 +175,7 @@ class ErrorTree extends React.PureComponent {
             <CloseIcon />
           </IconButton>
         </div>
-        <div style={{ fontSize: 14, marginBottom: 16 }}> { '传输以下文件时出现问题：' } </div>
+        <div style={{ fontSize: 14, marginBottom: 16 }}> { i18n.__('Error Dialog Text') } </div>
 
         {/* list of errors */}
         <div style={{ width: '100%', height: expand ? 574 : 374, overflowY: 'auto', border: 'solid #ccc 1px' }} >
@@ -194,7 +189,7 @@ class ErrorTree extends React.PureComponent {
         <div style={{ height: 52, display: 'flex', alignItems: 'center', marginRight: -24 }}>
           <FlatButton
             primary
-            label={this.state.expand ? '返回' : '查看详细'}
+            label={this.state.expand ? i18n.__('Return') : i18n.__('Open Detail')}
             onTouchTap={() => this.setState({ expand: !this.state.expand })}
           />
           <div style={{ flexGrow: 1 }} />
@@ -202,13 +197,13 @@ class ErrorTree extends React.PureComponent {
             !this.state.expand &&
               <FlatButton
                 primary
-                label="全部忽略"
+                label={i18n.__('Ignore All')}
                 onTouchTap={this.ignore}
               />
           }
           <FlatButton
             primary
-            label={this.state.expand ? '复制到剪贴板' : '全部重试'}
+            label={this.state.expand ? i18n.__('Copy to Clipboard') : i18n.__('Retry All')}
             onTouchTap={this.state.expand ? this.copyText : this.retry}
           />
         </div>

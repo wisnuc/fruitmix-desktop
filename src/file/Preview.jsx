@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import UUID from 'uuid'
 import { CircularProgress, RaisedButton } from 'material-ui'
@@ -246,19 +247,19 @@ class Preview extends React.Component {
         onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
       >
         <div style={{ color: '#FFFFFF', fontSize: 20, fontWeight: 500 }}>
-          { '无法预览' }
+          { i18n.__('Can Not Preview Text')}
         </div>
         <div style={{ height: 8 }} />
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <RaisedButton
-            label="下载"
+            label={i18n.__('Download')}
             primary
             style={{ margin: 12 }}
             icon={<DownloadIcon />}
             onTouchTap={this.props.download}
           />
           <RaisedButton
-            label="使用本地应用打开"
+            label={i18n.__('Open via Local App')}
             style={{ margin: 12 }}
             icon={<OpenIcon />}
             onTouchTap={this.openByLocal}
@@ -350,21 +351,21 @@ class Preview extends React.Component {
                 onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
               >
                 <div style={{ fontSize: 21, fontWeight: 500 }}>
-                  { '提示' }
+                  { i18n.__('Tips') }
                 </div>
                 <div style={{ height: 20 }} />
                 <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }}>
-                  { '该文件大于50M，建议下载后再使用本地应用打开' }
+                  { i18n.__('File Oversize Text') }
                 </div>
                 <div style={{ height: 24 }} />
                 <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                   <FlatButton
-                    label="取消"
+                    label={i18n.__('Cancel')}
                     primary
                     onTouchTap={() => this.setState({ alert: false })}
                   />
                   <FlatButton
-                    label="下载"
+                    label={i18n.__('Download')}
                     primary
                     onTouchTap={() => { this.props.download(); this.setState({ alert: false }) }}
                   />

@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import UUID from 'uuid'
 import prettysize from 'prettysize'
@@ -24,10 +25,10 @@ class Row extends React.Component {
     super(props)
 
     this.headers = [
-      { title: '名称', up: 'nameUp', down: 'nameDown' },
-      { title: '修改时间', up: 'timeUp', down: 'timeDown' },
-      { title: '拍摄时间', up: 'takenUp', down: 'takenDown' },
-      { title: '文件大小', up: 'sizeUp', down: 'sizeDown' }
+      { title: i18n.__('Name'), up: 'nameUp', down: 'nameDown' },
+      { title: i18n.__('Date Modified'), up: 'timeUp', down: 'timeDown' },
+      { title: i18n.__('Date Taken'), up: 'takenUp', down: 'takenDown' },
+      { title: i18n.__('Size'), up: 'sizeUp', down: 'sizeDown' }
     ]
 
     this.header = this.headers.find(header => (header.up === this.props.sortType) ||
@@ -40,13 +41,13 @@ class Row extends React.Component {
     this.handleChange = (type) => {
       if (this.state.type !== type) {
         switch (type) {
-          case '修改时间':
+          case i18n.__('Date Modified'):
             this.props.changeSortType('timeUp')
             break
-          case '文件大小':
+          case i18n.__('Size'):
             this.props.changeSortType('sizeUp')
             break
-          case '拍摄时间':
+          case i18n.__('Date Taken'):
             this.props.changeSortType('takenUp')
             break
           default:
@@ -82,7 +83,11 @@ class Row extends React.Component {
           list.first &&
             <div style={{ height: 40, display: 'flex', alignItems: 'center ', marginBottom: 8 }}>
               <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.54)', width: 64 }}>
-                { list.entries[0].entry.type === 'file' ? '文件' : list.entries[0].entry.type === 'public' ? '共享盘' : '文件夹' }
+                {
+                  list.entries[0].entry.type === 'file' ?
+                  i18n.__('File') : list.entries[0].entry.type === 'public' ?
+                  i18n.__('Public Drive') : i18n.__('Directory')
+                }
               </div>
               <div style={{ flexGrow: 1 }} />
               {
@@ -104,27 +109,27 @@ class Row extends React.Component {
                       <Menu style={{ minWidth: 240 }}>
                         <MenuItem
                           style={{ fontSize: 13 }}
-                          leftIcon={this.state.type === '名称' ? <CheckIcon /> : <div />}
-                          primaryText="名称"
-                          onTouchTap={() => this.handleChange('名称')}
+                          leftIcon={this.state.type === i18n.__('Name') ? <CheckIcon /> : <div />}
+                          primaryText={i18n.__('Name')}
+                          onTouchTap={() => this.handleChange(i18n.__('Name'))}
                         />
                         <MenuItem
                           style={{ fontSize: 13 }}
-                          leftIcon={this.state.type === '修改时间' ? <CheckIcon /> : <div />}
-                          primaryText="修改时间"
-                          onTouchTap={() => this.handleChange('修改时间')}
+                          leftIcon={this.state.type === i18n.__('Date Modified') ? <CheckIcon /> : <div />}
+                          primaryText={i18n.__('Date Modified')}
+                          onTouchTap={() => this.handleChange(i18n.__('Date Modified'))}
                         />
                         <MenuItem
                           style={{ fontSize: 13 }}
-                          leftIcon={this.state.type === '拍摄时间' ? <CheckIcon /> : <div />}
-                          primaryText="拍摄时间"
-                          onTouchTap={() => this.handleChange('拍摄时间')}
+                          leftIcon={this.state.type === i18n.__('Date Taken') ? <CheckIcon /> : <div />}
+                          primaryText={i18n.__('Date Taken')}
+                          onTouchTap={() => this.handleChange(i18n.__('Date Taken'))}
                         />
                         <MenuItem
                           style={{ fontSize: 13 }}
-                          leftIcon={this.state.type === '文件大小' ? <CheckIcon /> : <div />}
-                          primaryText="文件大小"
-                          onTouchTap={() => this.handleChange('文件大小')}
+                          leftIcon={this.state.type === i18n.__('Size') ? <CheckIcon /> : <div />}
+                          primaryText={i18n.__('Size')}
+                          onTouchTap={() => this.handleChange(i18n.__('Size'))}
                         />
                       </Menu>
                     </Popover>

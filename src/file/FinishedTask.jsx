@@ -90,7 +90,7 @@ class FinishedTask extends Component {
             { task.name }
           </div>
           <div>
-            { task.entries.length > 1 && ` 等${task.entries.length}个项目` }
+            { task.entries.length > 1 && i18n.__('And Other %s Items', task.entries.length)}
           </div>
         </div>
 

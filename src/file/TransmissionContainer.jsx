@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
 import { List, AutoSizer } from 'react-virtualized'
@@ -278,26 +279,26 @@ class TrsContainer extends React.Component {
         <div style={{ height: 24 }} />
         <div style={titileStyle} >
           <div style={{ flexGrow: 1 }}>
-            { `传输中（${userTasks.length}）` }
+            { i18n.__('Running Task Title %s', userTasks.length) }
           </div>
           <div style={{ flex: '0 0 240px', display: 'flex', alignItems: 'center' }}>
             {
                 allPaused ?
                   <FlatButton
-                    label="全部开始"
+                    label={i18n.__('Resume All')}
                     disabled={!userTasks.length}
                     icon={<PlaySvg style={{ color: '#000', opacity: 0.54 }} />}
                     onTouchTap={() => this.handleAll(userTasks, 'RESUME')}
                   /> :
                   <FlatButton
-                    label="全部暂停"
+                    label={i18n.__('Pause All')}
                     disabled={!userTasks.length}
                     icon={<PauseSvg style={{ color: '#000', opacity: 0.54 }} />}
                     onTouchTap={() => this.handleAll(userTasks, 'PAUSE')}
                   />
               }
             <FlatButton
-              label="全部删除"
+              label={i18n.__('Clear All')}
               disabled={!userTasks.length}
               icon={<DeleteSvg style={{ color: '#000', opacity: 0.54 }} />}
               onTouchTap={() => this.toggleDialog('clearRunningDialog')}
@@ -333,11 +334,11 @@ class TrsContainer extends React.Component {
       <div>
         <div style={titileStyle}>
           <div style={{ flexGrow: 1 }}>
-            { `已完成（${finishTasks.length}）` }
+            { i18n.__('Finished Task Title %s', finishTasks.length) }
           </div>
           <div style={{ flex: '0 0 120px', display: 'flex', alignItems: 'center' }}>
             <FlatButton
-              label="清除记录"
+              label={i18n.__('Clear All Record')}
               disabled={!finishTasks.length}
               icon={<DeleteSvg style={{ color: '#000', opacity: 0.54 }} />}
               onTouchTap={() => this.toggleDialog('clearFinishedDialog')}
@@ -413,22 +414,30 @@ class TrsContainer extends React.Component {
                   {
                     this.state.play &&
                       <MenuItem
-                        primaryText={this.state.tasks[0].state === 'failed' ? '重试' : '继续'}
+                        primaryText={this.state.tasks[0].state === 'failed' ? i18n.__('Retry') : i18n.__('Resume')}
                         onTouchTap={() => this.handleAll(this.state.tasks, 'RESUME')}
                       />
                   }
-                  { this.state.pause && <MenuItem primaryText="暂停" onTouchTap={() => this.handleAll(this.state.tasks, 'PAUSE')} /> }
+                  {
+                    this.state.pause &&
+                      <MenuItem primaryText={i18n.__('Pause')} onTouchTap={() => this.handleAll(this.state.tasks, 'PAUSE')} />
+                  }
                   {
                     this.state.tasks.length === 1 && this.state.tasks[0].trsType === 'download' &&
-                      <MenuItem primaryText="打开所在文件夹" onTouchTap={this.open} />
+                      <MenuItem primaryText={i18n.__('Open Downloads Folder')} onTouchTap={this.open} />
                   }
                   {
                     this.state.tasks.length === 1 && this.state.tasks[0].trsType === 'upload' &&
-                      <MenuItem primaryText="查看所在目录" onTouchTap={this.openInDrive} />
+                      <MenuItem primaryText={i18n.__('Show in Folder')} onTouchTap={this.openInDrive} />
                   }
-                  { this.state.play && <MenuItem primaryText="删除" onTouchTap={() => this.toggleDialog('deleteRunningDialog')} /> }
-                  { this.state.tasks[0].state === 'finished' &&
-                  <MenuItem primaryText="删除" onTouchTap={() => this.handleAll(this.state.tasks, 'DELETE')} /> }
+                  {
+                    this.state.play &&
+                      <MenuItem primaryText={i18n.__('Delete')} onTouchTap={() => this.toggleDialog('deleteRunningDialog')} />
+                  }
+                  {
+                    this.state.tasks[0].state === 'finished' &&
+                      <MenuItem primaryText={i18n.__('Delete')} onTouchTap={() => this.handleAll(this.state.tasks, 'DELETE')} />
+                  }
                 </Menu>
               </Paper>
             </div>
@@ -441,17 +450,22 @@ class TrsContainer extends React.Component {
               this.state.deleteRunningDialog &&
                 <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
                   <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-                    { '确定要删除选中的任务吗？' }
+                    { i18n.__('Delete Running Task Dialog Text 1') }
                   </div>
                   <div style={{ height: 20 }} />
                   <div style={{ color: 'rgba(0,0,0,0.54)' }}>
-                    { '如果是下载或上传的是文件夹，文件夹内已完成的文件将保留。' }
+                    { i18n.__('Delete Running Task Dialog Text 2') }
                   </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                    <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('deleteRunningDialog')} keyboardFocused />
                     <FlatButton
-                      label="确定"
+                      primary
+                      keyboardFocused
+                      label={i18n.__('Cancel')}
+                      onTouchTap={() => this.toggleDialog('deleteRunningDialog')}
+                    />
+                    <FlatButton
+                      label={i18n.__('Confirm')}
                       primary
                       onTouchTap={() => {
                         this.toggleDialog('deleteRunningDialog')
@@ -471,17 +485,22 @@ class TrsContainer extends React.Component {
               this.state.clearRunningDialog &&
                 <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
                   <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-                    { '确定要删除所有任务吗？' }
+                    { i18n.__('Clear Running Task Dialog Text 1') }
                   </div>
                   <div style={{ height: 20 }} />
                   <div style={{ color: 'rgba(0,0,0,0.54)' }}>
-                    { '如果是下载或上传的是文件夹，文件夹内已完成的文件将保留。' }
+                    { i18n.__('Clear Running Task Dialog Text 2') }
                   </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                    <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('clearRunningDialog')} keyboardFocused />
                     <FlatButton
-                      label="确定"
+                      primary
+                      keyboardFocused
+                      label={i18n.__('Cancel')}
+                      onTouchTap={() => this.toggleDialog('clearRunningDialog')}
+                    />
+                    <FlatButton
+                      label={i18n.__('Confirm')}
                       primary
                       onTouchTap={() => {
                         this.toggleDialog('clearRunningDialog')
@@ -501,17 +520,22 @@ class TrsContainer extends React.Component {
               this.state.clearFinishedDialog &&
                 <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
                   <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-                    { '确定要删除所有上传及下载记录吗？' }
+                    { i18n.__('Clear Finished Task Dialog Text 1') }
                   </div>
                   <div style={{ height: 20 }} />
                   <div style={{ color: 'rgba(0,0,0,0.54)' }}>
-                    { '该操作无法撤销，所有记录将被彻底清除。' }
+                    { i18n.__('Clear Finished Task Dialog Text 2') }
                   </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                    <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('clearFinishedDialog')} keyboardFocused />
                     <FlatButton
-                      label="确定"
+                      label={i18n.__('Cancel')}
+                      primary
+                      onTouchTap={() => this.toggleDialog('clearFinishedDialog')}
+                      keyboardFocused
+                    />
+                    <FlatButton
+                      label={i18n.__('Confirm')}
                       primary
                       onTouchTap={() => {
                         this.handleAll(this.state.finishTasks, 'DELETE')

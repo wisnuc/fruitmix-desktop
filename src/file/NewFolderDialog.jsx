@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import { TextField } from 'material-ui'
 import sanitize from 'sanitize-filename'
 import FlatButton from '../common/FlatButton'
@@ -16,9 +17,9 @@ class NewFolderDialog extends React.PureComponent {
       const newValue = sanitize(value)
       const entries = this.props.entries
       if (entries.findIndex(entry => entry.name === value) > -1) {
-        this.setState({ value, errorText: '名称已存在' })
+        this.setState({ value, errorText: i18n.__('Name Exist Error') })
       } else if (value !== newValue) {
-        this.setState({ value, errorText: '名称不合法' })
+        this.setState({ value, errorText: i18n.__('Name Invalid Error') })
       } else {
         this.setState({ value, errorText: '' })
       }
@@ -36,11 +37,11 @@ class NewFolderDialog extends React.PureComponent {
       apis.request('mkdir', args, (err) => {
         if (err) {
           console.log('mkdir error', err.code)
-          this.setState({ errorText: '创建失败', loading: false })
+          this.setState({ errorText: i18n.__('Mkdir Failed'), loading: false })
         } else {
           this.setState({ loading: false })
           this.props.onRequestClose(true)
-          this.props.openSnackBar('创建成功')
+          this.props.openSnackBar(i18n.__('Mkdir Success'))
           this.props.refresh({ fileName: this.state.value })
         }
       })
@@ -54,12 +55,14 @@ class NewFolderDialog extends React.PureComponent {
   render() {
     return (
       <div style={{ width: 280, padding: '24px 24px 0px 24px' }}>
-        <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>{this.props.title ? this.props.title : '创建新文件夹'}</div>
+        <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
+          { this.props.title ? this.props.title : i18n.__('Create New Folder') }
+        </div>
         <div style={{ height: 20 }} />
         <div style={{ height: 60 }}>
           <TextField
             fullWidth
-            hintText={this.props.hintText ? this.props.hintText : '输入文件夹名称'}
+            hintText={this.props.hintText ? this.props.hintText : i18n.__('Mkdir Hint')}
             errorText={this.state.errorText}
             onChange={e => this.handleChange(e.target.value)}
             ref={input => input && input.focus()}
@@ -69,9 +72,9 @@ class NewFolderDialog extends React.PureComponent {
         </div>
         <div style={{ height: 24 }} />
         <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-          <FlatButton label="取消" primary onTouchTap={this.props.onRequestClose} />
+          <FlatButton label={i18n.__('Cancel')} primary onTouchTap={this.props.onRequestClose} />
           <FlatButton
-            label="确认"
+            label={i18n.__('Confirm')}
             primary
             onTouchTap={this.fire}
             disabled={this.state.value.length === 0 || !!this.state.errorText || this.state.loading}

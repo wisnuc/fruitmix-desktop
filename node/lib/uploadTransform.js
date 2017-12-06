@@ -88,7 +88,7 @@ class Task {
 
             if (fullName === '.DS_Store' && !stat.isDirectory()) {
               task.warnings.push(Object.assign({
-                pipe: 'readDir', entry, error: { code: 'EDSSTORE' }, stat, task: task.uuid, type: 'file'
+                pipe: 'readDir', entry, error: { code: 'EIGNORE' }, stat, task: task.uuid, type: 'file'
               }))
               continue
             }

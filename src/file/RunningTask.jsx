@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import DeleteSvg from 'material-ui/svg-icons/action/delete'
 import FileSvg from 'material-ui/svg-icons/editor/insert-drive-file'
@@ -46,17 +47,17 @@ class RunningTask extends React.Component {
   }
 
   getStatus(task) {
-    if (task.state === 'failed') return '已停止'
-    if (task.paused) return '已暂停'
-    if (task.state === 'visitless') return '正在校验'
-    if (task.state === 'hashing') return '正在校验'
-    if (task.state === 'diffing') return '正在校验'
-    if (task.state === 'uploadless') return '等待上传'
-    if (task.state === 'uploading') return '正在上传'
-    if (task.state === 'downloadless') return '等待下载'
-    if (task.state === 'downloading') return '正在下载'
-    if (task.state === 'finish') return '已完成'
-    return '未知状态'
+    if (task.state === 'failed') return i18n.__('Task Failed')
+    if (task.paused) return i18n.__('Task Paused')
+    if (task.state === 'visitless') return i18n.__('Task Visitless')
+    if (task.state === 'hashing') return i18n.__('Task Hashing')
+    if (task.state === 'diffing') return i18n.__('Task Diffing')
+    if (task.state === 'uploadless') return i18n.__('Task Uploadless')
+    if (task.state === 'uploading') return i18n.__('Task Uploading')
+    if (task.state === 'downloadless') return i18n.__('Task Downloadless')
+    if (task.state === 'downloading') return i18n.__('Task Downloading')
+    if (task.state === 'finish') return i18n.__('Task Finished')
+    return i18n.__('Task Unknown State')
   }
 
   formatSize(s) {
@@ -88,7 +89,7 @@ class RunningTask extends React.Component {
     if (h.toString().length === 1) h = `0${h}`
     if (m.toString().length === 1) m = `0${m}`
     if (s.toString().length === 1) s = `0${s}`
-    if (h > 24) return '> 24 小时'
+    if (h > 24) return i18n.__('More Than 24 Hours')
     return `${h} : ${m} : ${s}`
   }
 
@@ -154,7 +155,7 @@ class RunningTask extends React.Component {
             { task.name }
           </div>
           <div>
-            { task.entries.length > 1 && ` 等${task.entries.length}个项目` }
+            { task.entries.length > 1 && i18n.__('And Other %s Items', task.entries.length)}
           </div>
         </div>
 
@@ -191,16 +192,16 @@ class RunningTask extends React.Component {
         <div style={{ flex: '0 0 120px', display: 'flex', alignItems: 'center' }}>
           {
             task.state === 'failed'
-            ? <IconButton onTouchTap={this.checkError} tooltip="查看">
+            ? <IconButton onTouchTap={this.checkError} tooltip={i18n.__('Open Detail')}>
               { task.errors.length ? <InfoSvg color="#F44336" /> : <WarningIcon color="#FB8C00" /> }
             </IconButton>
-            : <IconButton iconStyle={svgStyle} onTouchTap={this.toggleTask} tooltip={task.paused ? '开始' : '暂停'}>
+            : <IconButton iconStyle={svgStyle} onTouchTap={this.toggleTask} tooltip={task.paused ? i18n.__('Resume') : i18n.__('Pause')}>
               { task.paused ? <PlaySvg /> : <PauseSvg /> }
             </IconButton>
           }
           {
             task.paused &&
-              <IconButton iconStyle={svgStyle} onTouchTap={this.props.delete} tooltip="删除">
+              <IconButton iconStyle={svgStyle} onTouchTap={this.props.delete} tooltip={i18n.__('Delete')}>
                 <DeleteSvg />
               </IconButton>
           }
