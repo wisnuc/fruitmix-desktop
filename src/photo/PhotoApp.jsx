@@ -1,5 +1,6 @@
-import Debug from 'debug'
 import React from 'react'
+import i18n from 'i18n'
+import Debug from 'debug'
 import EventListener from 'react-event-listener'
 import { TweenMax } from 'gsap'
 import { IconButton, CircularProgress } from 'material-ui'
@@ -84,8 +85,8 @@ class PhotoApp extends React.Component {
           }}
         >
           {/* <UploadIcon style={{ height: 64, width: 64, color: 'rgba(0,0,0,0.27)' }} /> */}
-          <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.27)', height: 56 }}> { '没有照片或视频' } </div>
-          <div style={{ color: 'rgba(0,0,0,0.27)' }}> { '请点击上传按钮' } </div>
+          <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.27)', height: 56 }}> { i18n.__('No Media Text 1') } </div>
+          <div style={{ color: 'rgba(0,0,0,0.27)' }}> { i18n.__('No Media Text 2') } </div>
         </div>
       </div>
     )
@@ -185,11 +186,11 @@ class PhotoApp extends React.Component {
               </div>
               <div style={{ width: 12 }} />
               <div style={{ color: '#FFF', fontSize: 20, fontWeight: 500 }} >
-                { `选择了 ${this.props.selectedItems.length} 张照片` }
+                { i18n.__('%s Photo Selected', this.props.selectedItems.length) }
               </div>
               <div style={{ flexGrow: 1 }} />
 
-              <IconButton onTouchTap={this.props.startDownload} tooltip="下载">
+              <IconButton onTouchTap={this.props.startDownload} tooltip={i18n.__('Download')}>
                 <DownloadIcon color="#FFF" />
               </IconButton>
 
@@ -199,7 +200,7 @@ class PhotoApp extends React.Component {
               </IconButton>
               */}
 
-              <IconButton onTouchTap={() => this.toggleDialog('hideDialog')} tooltip="隐藏">
+              <IconButton onTouchTap={() => this.toggleDialog('hideDialog')} tooltip={i18n.__('Hide')}>
                 <VisibilityOff color="#FFF" />
               </IconButton>
               <div style={{ width: 24 }} />
@@ -214,17 +215,17 @@ class PhotoApp extends React.Component {
               this.state.deleteDialog &&
                 <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
                   <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-                    { '要将照片移动到回收站吗？' }
+                    { i18n.__('Delete Photo Dialog Text 1') }
                   </div>
                   <div style={{ height: 20 }} />
                   <div style={{ color: 'rgba(0,0,0,0.54)' }}>
-                    { '内容被移到回收站后，文件中的相应内容也会被移除。' }
+                    { i18n.__('Delete Photo Dialog Text 2') }
                   </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                    <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('deleteDialog')} keyboardFocused />
+                    <FlatButton label={i18n.__('Cancel')} primary onTouchTap={() => this.toggleDialog('deleteDialog')} keyboardFocused />
                     <FlatButton
-                      label="移除"
+                      label={i18n.__('Remove')}
                       primary
                       onTouchTap={() => {
                         this.toggleDialog('deleteDialog')
@@ -244,17 +245,17 @@ class PhotoApp extends React.Component {
               this.state.hideDialog &&
                 <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
                   <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-                    { '要将照片隐藏吗？' }
+                    { i18n.__('Hide Photo Dialog Text 1') }
                   </div>
                   <div style={{ height: 20 }} />
                   <div style={{ color: 'rgba(0,0,0,0.54)' }}>
-                    { '内容被隐藏后，我的照片内将不显示，可在智能助理中恢复。' }
+                    { i18n.__('Hide Photo Dialog Text 2') }
                   </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                    <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('hideDialog')} keyboardFocused />
+                    <FlatButton label={i18n.__('Cancel')} primary onTouchTap={() => this.toggleDialog('hideDialog')} keyboardFocused />
                     <FlatButton
-                      label="隐藏"
+                      label={i18n.__('Hide')}
                       primary
                       onTouchTap={() => {
                         this.toggleDialog('hideDialog')

@@ -491,9 +491,9 @@
   "Remove Media Failed": "移除失败",
   "Retrieve": "恢复",
   "Hide": "隐藏",
-  "Retrive Media Failed": "恢复照片失败",
+  "Retrieve Media Failed": "恢复照片失败",
   "Hide Media Failed": "隐藏照片失败",
-  "Retrive Media Success %s": "成功恢复了%s张照片",
+  "Retrieve Media Success %s": "成功恢复了%s张照片",
   "Hide Media Success %s": "成功隐藏了%s张照片",
   "Media Folder Name": "上传的照片",
   "Media Folder From PC": "来自个人电脑",
@@ -648,9 +648,24 @@
   "Clear Finished Task Dialog Text 1": "确定要删除所有上传及下载记录吗？",
   "Clear Finished Task Dialog Text 2": "该操作无法撤销，所有记录将被彻底清除。",
 
-  "==== photo/ ====": "",
-  "": "",
+  "==== photo/AssistantApp.jsx ====": "",
+  "Hide Photo Title": "隐藏的照片",
+  "Hide Photo Amount Text %s": "数量: %s",
+  "Show": "查看",
+  "Retrieve Photo Dialog Text 1": "要将照片恢复显示吗？",
+  "Retrieve Photo Dialog Text 2": "恢复后，这些照片将在我的照片内显示",
 
   "==== photo/DetailContainer.jsx ====": "",
-  "Unknown Region": "其它地区"
+  "Unknown Region": "其它地区",
+  "": "",
+
+  "==== photo/PhotoApp.jsx ====": "",
+  "No Media Text 1": "没有照片或视频",
+  "No Media Text 2": "请点击上传按钮",
+  "%s Photo Selected": "选择了%s张照片",
+  "Delete Photo Dialog Text 1": "要将照片移动到回收站吗？",
+  "Delete Photo Dialog Text 2": "内容被移到回收站后，文件中的相应内容也会被移除。",
+  "Remove": "移除",
+  "Hide Photo Dialog Text 1": "要将照片隐藏吗？",
+  "Hide Photo Dialog Text 2": "内容被隐藏后，我的照片内将不显示，可在智能助理中恢复。"
 }

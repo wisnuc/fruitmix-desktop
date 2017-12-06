@@ -343,9 +343,9 @@ class Media extends Base {
         : [this.state.media.find(item => item.hash === this.memoizeValue.downloadDigest).hash]
       this.ctx.props.apis.request(show ? 'subtractBlacklist' : 'addBlacklist', list, (error) => {
         if (error) {
-          this.ctx.openSnackBar(show ? i18n.__('Retrive Media Failed') : i18n.__('Hide Media Failed'))
+          this.ctx.openSnackBar(show ? i18n.__('Retrieve Media Failed') : i18n.__('Hide Media Failed'))
         } else {
-          this.ctx.openSnackBar(show ? i18n.__('Retrive Media Success %s', list.length) : i18n.__('Hide Media Success %s', list.length))
+          this.ctx.openSnackBar(show ? i18n.__('Retrieve Media Success %s', list.length) : i18n.__('Hide Media Success %s', list.length))
           this.navEnter()
           this.setState({ selectedItems: [] })
         }
