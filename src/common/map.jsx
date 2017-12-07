@@ -13,7 +13,7 @@ class Map extends React.Component {
     }
 
     this.getMap = () => {
-      /* 已知点坐标 */
+      /* Point with longitude and latitude */
       const lnglatXY = [this.props.longitude, this.props.latitude]
 
       const map = new AMap.Map('mapContainer', {
@@ -24,7 +24,7 @@ class Map extends React.Component {
 
       const geocoderCallBack = (data) => {
         console.log('address', data)
-        /* 返回地址描述 */
+        /* Get address description */
         let address = this.props.unknownRegionText || 'Other Region'
         if (data && data.regeocode) {
           const compo = data.regeocode.addressComponent
@@ -38,7 +38,7 @@ class Map extends React.Component {
         }
       }
 
-      /* 逆地理编码 */
+      /* Reverse geocoding */
       const regeocoder = () => {
         const geocoder = new AMap.Geocoder({
           radius: 1000,
@@ -50,7 +50,7 @@ class Map extends React.Component {
             geocoderCallBack(result)
           }
         })
-        /* 加点 */
+        /* Add marker */
         const marker = new AMap.Marker({
           map,
           position: lnglatXY

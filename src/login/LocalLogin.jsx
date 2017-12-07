@@ -378,7 +378,7 @@ class Login extends StateUp(React.Component) {
         error = pullError()
         break
       case 'userMaint':
-        text = i18n.__('User Maintenance Tip')
+        text = i18n.__('User Maintenance Text')
         maint = true
         break
       case 'failLast':
@@ -470,10 +470,10 @@ class Login extends StateUp(React.Component) {
         >
           <div style={{ height: 24 }} />
           <div style={{ fontSize: 16, lineHeight: '24px', color: 'rgba(0,0,0,0.87)' }}>
-            { i18n.__('Create User Tip 1') }
+            { i18n.__('Create User Text 1') }
           </div>
           <div style={{ fontSize: 14, lineHeight: '20px', color: 'rgba(0,0,0,0.54)' }}>
-            { i18n.__('Create User Tip 2') }
+            { i18n.__('Create User Text 2') }
           </div>
           <div style={{ height: 16 }} />
           <UsernamePassword {...this.bindVState('userpass')} />
@@ -501,7 +501,7 @@ class Login extends StateUp(React.Component) {
     if (selectedDevice === null || (selectedDevice && !selectedDevice.mdev.address)) {
       cardProps = {
         key: 'info-card',
-        text: i18n.__('Seaching Device Tip')
+        text: i18n.__('Seaching Device Text')
       }
     } else {
       cardProps = { key: `device-card-${selectedDevice.mdev.name}` }

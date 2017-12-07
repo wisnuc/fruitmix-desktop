@@ -73,17 +73,17 @@ class PolicyDialog extends React.PureComponent {
     const remoteType = remote.type === 'directory' ? i18n.__('Directory') : i18n.__('File')
     /* file => file */
     const choices = [
-      { value: 'rename', label: i18n.__('Rename Tip %s', type) },
-      { value: 'replace', label: i18n.__('Replace Tip %s %s', type, remoteType) },
-      { value: 'skip', label: i18n.__('Skip Tip %s', type) }
+      { value: 'rename', label: i18n.__('Rename Text %s', type) },
+      { value: 'replace', label: i18n.__('Replace Text %s %s', type, remoteType) },
+      { value: 'skip', label: i18n.__('Skip Text %s', type) }
     ]
 
     /* directory => directory */
     if (entryType === 'directory' && entryType === remote.type) {
       choices.splice(
         0, 2,
-        { value: 'merge', label: i18n.__('Merge Tip') },
-        { value: 'overwrite', label: i18n.__('Overwrite Tip') },
+        { value: 'merge', label: i18n.__('Merge Text') },
+        { value: 'overwrite', label: i18n.__('Overwrite Text') },
       )
     }
 
@@ -141,7 +141,7 @@ class PolicyDialog extends React.PureComponent {
         <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
           { leftCount > 0 &&
             <Checkbox
-              label={i18n.__('Apply All Tip %d', leftCount)}
+              label={i18n.__('Apply All Text %d', leftCount)}
               labelStyle={{ color: '#757575' }}
               iconStyle={{ fill: this.state.checked ? this.props.primaryColor : '#757575' }}
               checked={this.state.checked}

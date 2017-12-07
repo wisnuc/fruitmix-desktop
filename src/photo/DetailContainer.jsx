@@ -37,27 +37,27 @@ const mousePosition = (ev) => {
   }
 }
 
-const phaseExifTime = (time, type) => {
+const parseExifTime = (time, type) => {
   const a = time.replace(/\s+/g, ':').split(':')
   const date = new Date()
-  const week = ['日', '一', '二', '三', '四', '五', '六']
+  const week = [i18n.__('Sunday'), i18n.__('Monday'), i18n.__('Tuesday'), i18n.__('Wednesday'), i18n.__('Thursday'), i18n.__('Friday'), i18n.__('Saturday')]
   date.setFullYear(a[0], a[1] - 1, a[2])
-  if (type === 'date') return `${a[0]}年${a[1]}月${a[2]}日`
+  if (type === 'date') return i18n.__('Parse Date %s %s %s', a[0], a[1], a[2])
   if (type === 'time') return `${a[3]} : ${a[4]}`
-  if (type === 'week') return `星期${week[date.getDay()]}`
-  return `${a[0]}年${a[1]}月${a[2]}日 星期${week[date.getDay()]} ${a[3]} : ${a[4]}`
+  if (type === 'week') return week[date.getDay()]
+  return `${i18n.__('Parse Date %s %s %s', a[0], a[1], a[2])} ${week[date.getDay()]} ${a[3]} : ${a[4]}`
 }
 
 const getResolution = (height, width) => {
   let res = height * width
   if (res > 100000000) {
     res = Math.ceil(res / 100000000)
-    return `${res} 亿像素 ${height} x ${width}`
+    return i18n.__('Get 100 Million Resolution {{res}} {{alt}} {{height}} {{width}}', { res, alt: res * 100, height, width })
   } else if (res > 10000) {
     res = Math.ceil(res / 10000)
-    return `${res} 万像素 ${height} x ${width}`
+    return i18n.__('Get 0.01 Million Resolution {{res}} {{alt}} {{height}} {{width}}', { res, alt: res / 100, height, width })
   }
-  return `${res} 像素 ${height} x ${width}`
+  return i18n.__('Get Resolution {{res}} {{height}} {{width}}', { res, height, width })
 }
 
 const convertGPS2 = (value, direction) => {
@@ -402,16 +402,18 @@ class DetailContainerInline extends React.Component {
 
     return (
       <div style={{ padding: '0px 32px 0px 32px', width: 296 }}>
-        <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.54)', height: 48, display: 'flex', alignItems: 'center' }}> 详情 </div>
+        <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.54)', height: 48, display: 'flex', alignItems: 'center' }}>
+          { i18n.__('Info') }
+        </div>
         { (date || datetime) &&
         <div style={{ height: 72, display: 'flex', alignItems: 'center' }}>
           <DateIcon color="rgba(0,0,0,0.54)" />
           <div style={{ marginLeft: 64 }}>
             <div style={{ color: 'rgba(0,0,0,0.87)', lineHeight: '24px' }}>
-              { phaseExifTime((date || datetime), 'date') }
+              { parseExifTime((date || datetime), 'date') }
             </div>
             <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14, lineHeight: '20px' }}>
-              { `${phaseExifTime((date || datetime), 'week')}  ${phaseExifTime((date || datetime), 'time')}` }
+              { `${parseExifTime((date || datetime), 'week')}  ${parseExifTime((date || datetime), 'time')}` }
             </div>
           </div>
         </div>
@@ -600,7 +602,7 @@ class DetailContainerInline extends React.Component {
               {
               !!this.props.selectedItems.length &&
                 <div style={{ color: '#FFF', fontSize: 20, fontWeight: 500 }} >
-                  { `选择了 ${this.props.selectedItems.length} 张照片` }
+                  { i18n.__('%s Photo Selected', this.props.selectedItems.length) }
                 </div>
               }
               <div style={{ flexGrow: 1 }} />
@@ -609,28 +611,28 @@ class DetailContainerInline extends React.Component {
                 this.props.selectedItems.length ?
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <div style={{ color: '#FFF', fontSize: 14, fontWeight: 500 }} >
-                      { this.state.selected ? '已选择' : '选择' }
+                      { this.state.selected ? i18n.__('Selected') : i18n.__('Select') }
                     </div>
                     <IconButton onTouchTap={this.selectPhoto}>
                       <CheckIcon color={this.state.selected ? '#1E88E5' : '#FFF'} />
                     </IconButton>
                   </div> :
                   <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <IconButton onTouchTap={this.props.startDownload} tooltip="下载">
+                    <IconButton onTouchTap={this.props.startDownload} tooltip={i18n.__('Download')}>
                       <DownloadIcon color="#FFF" />
                     </IconButton>
 
                     {/*
-                    <IconButton onTouchTap={() => this.toggleDialog('deleteDialog')} tooltip="删除">
+                    <IconButton onTouchTap={() => this.toggleDialog('deleteDialog')} tooltip={i18n.__('Delete')}>
                       <DeleteIcon color="#FFF" />
                     </IconButton>
                     */}
 
-                    <IconButton onTouchTap={() => this.toggleDialog('hideDialog')} tooltip={h ? '显示' : '隐藏'}>
+                    <IconButton onTouchTap={() => this.toggleDialog('hideDialog')} tooltip={h ? i18n.__('Retrieve') : i18n.__('Hide')}>
                       { h ? <Visibility color="#FFF" /> : <VisibilityOff color="#FFF" /> }
                     </IconButton>
 
-                    <IconButton onTouchTap={() => this.toggleDialog('detailInfo')} tooltip="信息">
+                    <IconButton onTouchTap={() => this.toggleDialog('detailInfo')} tooltip={i18n.__('Info')}>
                       <InfoIcon color="#FFF" />
                     </IconButton>
                   </div>
@@ -694,7 +696,7 @@ class DetailContainerInline extends React.Component {
           }}
         >
           <div style={{ height: 48, display: 'flex', alignItems: 'center', padding: '8px 16px 8px 32px' }}>
-            <div style={{ fontSize: 20, width: 360 }}> 信息 </div>
+            <div style={{ fontSize: 20, width: 360 }}> {i18n.__('Info')} </div>
             <div style={{ flexGrow: 1 }} />
             <IconButton onTouchTap={() => this.toggleDialog('detailInfo')}>
               <CloseIcon color="rgba(0,0,0,0.54)" />
@@ -710,17 +712,17 @@ class DetailContainerInline extends React.Component {
               this.state.deleteDialog &&
                 <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
                   <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-                    { '要将照片移动到回收站吗？' }
+                    { i18n.__('Delete Photo Dialog Text 1') }
                   </div>
                   <div style={{ height: 20 }} />
                   <div style={{ color: 'rgba(0,0,0,0.54)' }}>
-                    { '内容被移到回收站后，文件中的相应内容也会被移除。' }
+                    { i18n.__('Delete Photo Dialog Text 2') }
                   </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                    <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('deleteDialog')} keyboardFocused />
+                    <FlatButton label={i18n.__('Cancel')} primary onTouchTap={() => this.toggleDialog('deleteDialog')} keyboardFocused />
                     <FlatButton
-                      label="移除"
+                      label={i18n.__('Remove')}
                       primary
                       onTouchTap={() => {
                         this.toggleDialog('deleteDialog')
@@ -740,17 +742,17 @@ class DetailContainerInline extends React.Component {
               this.state.hideDialog &&
                 <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
                   <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-                    { h ? '要恢复照片吗' : '要将照片隐藏吗？' }
+                    { h ? i18n.__('Retrieve Photo Dialog Text 1') : i18n.__('Hide Photo Dialog Text 1') }
                   </div>
                   <div style={{ height: 20 }} />
                   <div style={{ color: 'rgba(0,0,0,0.54)' }}>
-                    { h ? '内容将重新在我的照片内显示' : '内容被隐藏后，我的照片内将不显示，可在智能助理中恢复。' }
+                    { h ? i18n.__('Retrieve Photo Dialog Text 2') : i18n.__('Hide Photo Dialog Text 2') }
                   </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                    <FlatButton label="取消" primary onTouchTap={() => this.toggleDialog('hideDialog')} keyboardFocused />
+                    <FlatButton label={i18n.__('Cancel')} primary onTouchTap={() => this.toggleDialog('hideDialog')} keyboardFocused />
                     <FlatButton
-                      label={h ? '显示' : '隐藏'}
+                      label={h ? i18n.__('Retrieve') : i18n.__('Hide')}
                       primary
                       onTouchTap={() => {
                         this.props.hideMedia(h)

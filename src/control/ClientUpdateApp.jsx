@@ -116,7 +116,7 @@ class Update extends React.Component {
             : this.state.status === 'needUpdate'
             ? this.renderCheckUpdate()
             : <div style={{ display: 'flex', alignItems: 'center', height: 48 }}>
-              { i18n.__('Check Update Failed Tip') }
+              { i18n.__('Check Update Failed Text') }
             </div>
         }
         <div style={{ height: 16 }} />
@@ -140,11 +140,11 @@ class Update extends React.Component {
                 </div>
                 <div style={{ height: 20 }} />
                 <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }}>
-                  { i18n.__('Install New Version Tip 1 %s', this.state.rel.name) }
+                  { i18n.__('Install New Version Text 1 %s', this.state.rel.name) }
                 </div>
                 <div style={{ height: 8 }} />
                 <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }} >
-                  { i18n.__('Install New Version Tip 2') }
+                  { i18n.__('Install New Version Text 2') }
                 </div>
                 <div style={{ height: 24 }} />
                 <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>

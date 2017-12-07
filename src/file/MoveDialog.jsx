@@ -282,26 +282,22 @@ class MoveDialog extends React.PureComponent {
     if (this.props.type === 'share') this.enter({ type: 'publicRoot', name: i18n.__('Public Drive'), setRoot: true })
   }
 
-  /* 移动按钮是否工作 disabled ? */
+  /* Button disabled ? */
   getButtonStatus() {
     const { name, uuid, type } = this.state.currentDir
     const selectedObj = this.state.currentSelectedIndex !== -1 ? this.state.list[this.state.currentSelectedIndex] : null
     if (this.state.loading || this.state.cnf) return true
 
-    /* root 不能被指定为目标, 文件夹、共享盘、home可以被定为目标 */
     if (type !== 'directory' && type !== 'publicRoot' && type !== 'public' && name !== uuid) return true
 
-    /* 列表中有元素被选中时，不能为待移动的文件夹 */
     if (this.state.currentSelectedIndex !== -1) {
       if (type === 'directory') {
         if (!this.selectedArr.findIndex(item => item.uuid === selectedObj.uuid) === -1) {
           return true
         }
       }
-      /* 被选文件夹不能是待移动文件的父文件夹 */
       if (selectedObj.uuid === this.directory.uuid) return true
 
-      /* 列表中没有元素被选中时，当前文件夹不能与被选中元素所在文件夹相同 */
     } else if (type === 'directory' && this.inSameDirectory()) {
       return true
     } else if (type === 'publicRoot') {
@@ -310,7 +306,6 @@ class MoveDialog extends React.PureComponent {
     return false
   }
 
-  /* 按钮文字 */
   getButtonText() {
     const type = this.props.type === 'copy' ? i18n.__('Copy') : this.props.type === 'move' ? i18n.__('Move') : i18n.__('Share')
     if (this.state.currentSelectedIndex !== -1 || this.directory.uuid === this.state.currentDir.uuid) {
@@ -319,12 +314,10 @@ class MoveDialog extends React.PureComponent {
     return i18n.__('%s To Current Folder', type)
   }
 
-  /* 是否在同一目录 */
   inSameDirectory() {
     return this.state.currentDir.uuid === this.directory.uuid
   }
 
-  /* 更新当前显示的目录及文件 */
   updateState(path, currentDir, list) {
     this.setState({
       path: path || this.state.path,
@@ -335,22 +328,20 @@ class MoveDialog extends React.PureComponent {
     })
   }
 
-  /* 行是否能被选中 */
   isRowDisable(node) {
     const type = node.type
-    if (type === 'file') { // 文件不能被选中
+    if (type === 'file') {
       return true
-    } else if (node.type === 'directory') { // drive路径下：节点不在被选中数组内
+    } else if (node.type === 'directory') {
       if (this.inSameDirectory()) {
         if (this.selectedArr.findIndex(item => item.uuid === node.uuid) === -1) return false
-        return true // 被移动的文件夹不能被选中
+        return true
       }
-      return false // 不在同一级文件夹 可以被选中
+      return false
     }
     return false
   }
 
-  /* 当前所在位置的名称 */
   renderCurrentDir() {
     const type = this.state.currentDir.type
     return this.state.currentDir.name === this.state.currentDir.uuid

@@ -151,12 +151,12 @@ class SettingsApp extends React.Component {
     const { noCloseConfirm, enableSleep } = global.config.global
     const settings = [
       {
-        type: i18n.__('Prevent Sleep Tip'),
+        type: i18n.__('Prevent Sleep Text'),
         enabled: !enableSleep,
         func: () => this.toggle('enableSleep')
       },
       {
-        type: i18n.__('Client Close Tip'),
+        type: i18n.__('Client Close Text'),
         enabled: !noCloseConfirm,
         func: () => this.toggle('noCloseConfirm')
       }

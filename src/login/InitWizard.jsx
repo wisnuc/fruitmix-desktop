@@ -286,7 +286,7 @@ class InitWizard extends StateUp(React.Component) {
             <Step style={{ marginTop: -28 }}>
               <StepLabel>{ i18n.__('Create First User Title') }</StepLabel>
               <StepContent>
-                <p>{ i18n.__('Create First User Tip') }</p>
+                <p>{ i18n.__('Create First User Text') }</p>
                 <UsernamePassword {...this.bindVState('userpass')} />
                 { this.renderStepActions(1) }
               </StepContent>
@@ -302,7 +302,7 @@ class InitWizard extends StateUp(React.Component) {
             <Step style={{ marginTop: -28 }}>
               <StepLabel>{ i18n.__('Bind WeChat Title') } </StepLabel>
               <StepContent>
-                <p>{ i18n.__('Bind WeChat Tip') }</p>
+                <p>{ i18n.__('Bind WeChat Text') }</p>
                 { this.renderStepActions(3) }
               </StepContent>
             </Step>

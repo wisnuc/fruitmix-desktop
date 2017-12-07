@@ -65,7 +65,7 @@ class AccountApp extends React.Component {
       >
         { i18n.__('Your Username %s', account.username) }
         <br />
-        { i18n.__('Username Tip')}
+        { i18n.__('Username Text')}
       </div>
     )
 
@@ -99,17 +99,17 @@ class AccountApp extends React.Component {
         <div style={{ flex: '0 0 560px' }}>
           <div style={{ fontSize: 14, lineHeight: '26px', color: 'rgba(0, 0, 0, 0.87)', display: 'flex' }}>
             {
-              account.isAdmin && account.isFirstUser ? i18n.__('First User Tip')
-              : account.isAdmin ? i18n.__('Admin User Tip') : i18n.__('Normal User Tip')
+              account.isAdmin && account.isFirstUser ? i18n.__('First User Text')
+              : account.isAdmin ? i18n.__('Admin User Text') : i18n.__('Normal User Text')
             }
             {
               account.global && account.global.wx ?
                 <div style={{ display: 'flex', alignItems: 'center', height: 26 }}>
-                  { nickName ? i18n.__('WeChat Bound Tip %s', nickName) : i18n.__('WeChat Bound Tip') }
+                  { nickName ? i18n.__('WeChat Bound Text %s', nickName) : i18n.__('WeChat Bound Text') }
                 </div>
                 :
                 <div style={{ display: 'flex', alignItems: 'center', height: 26 }}>
-                  { i18n.__('WeChat not Bind Tip') }
+                  { i18n.__('WeChat not Bind Text') }
                   { <FlatButton label={i18n.__('Bind WeChat Title')} onTouchTap={() => this.setState({ weChat: true })} primary /> }
                 </div>
             }
@@ -205,7 +205,7 @@ class AccountApp extends React.Component {
           {
             this.state.editAvatar &&
             <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
-              <div style={{ color: 'rgba(0,0,0,0.54)' }}> { i18n.__('Avatar Edit Tip') } </div>
+              <div style={{ color: 'rgba(0,0,0,0.54)' }}> { i18n.__('Avatar Edit Text') } </div>
               <div style={{ height: 24 }} />
               <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                 <FlatButton label={i18n.__('Confirm')} primary onTouchTap={() => this.toggleDialog('editAvatar')} />
