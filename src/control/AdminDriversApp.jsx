@@ -132,7 +132,7 @@ class AdminDrives extends React.Component {
           }}
         >
           <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.27)' }}> { i18n.__('No Public Drive') }</div>
-          <div style={{ color: 'rgba(0,0,0,0.27)' }}> { i18n.__('No Public Drive Tip') }</div>
+          <div style={{ color: 'rgba(0,0,0,0.27)' }}> { i18n.__('No Public Drive Text') }</div>
         </div>
       </div>
     )

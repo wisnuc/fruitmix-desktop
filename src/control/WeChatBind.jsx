@@ -172,25 +172,25 @@ class WeChatBind extends React.Component {
     switch (error) {
       case 'net':
         text = i18n.__('Network Error')
-        tips = i18n.__('Network Error Tip')
+        tips = i18n.__('Network Error Text')
         break
       case 'wxConnect':
         text = i18n.__('WeChat Connect Error')
-        tips = i18n.__('WeChat Connect Error Tip')
+        tips = i18n.__('WeChat Connect Error Text')
         break
       case 'wxBind':
         text = i18n.__('WeChat Auth Error')
         break
       case 'wisnucNet':
         text = i18n.__('Station Connect Error')
-        tips = i18n.__('Station Connect Error Tip')
+        tips = i18n.__('Station Connect Error Text')
         break
       case 'fillTicket':
         text = i18n.__('Fill Ticket Error')
         break
       case 'confirmTicket':
         text = i18n.__('Confirm Ticket Error')
-        tips = i18n.__('Confirm Ticket Error Tip')
+        tips = i18n.__('Confirm Ticket Error Text')
         break
       case 'creatTicket':
         text = i18n.__('Create Ticket Error')
@@ -245,7 +245,7 @@ class WeChatBind extends React.Component {
               <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}> { i18n.__('Bind WeChat Title') }</div>
               <div style={{ height: 20 }} />
               <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }} >
-                { i18n.__('Bind WeChat Tip in WeChatBind') }
+                { i18n.__('Bind WeChat Text in WeChatBind') }
               </div>
 
               {/* Icon */}

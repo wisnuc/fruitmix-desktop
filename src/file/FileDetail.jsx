@@ -18,12 +18,12 @@ const phaseDate = (time) => {
   const date = a.getDate()
   const hour = a.getHours()
   const min = a.getMinutes()
-  return i18n.__('Phase Date %s %s %s %s %s', year, month, date, hour, min)
+  return i18n.__('Parse Date Time %s %s %s %s %s', year, month, date, hour, min)
 }
 
 const phaseExifTime = (time) => {
   const a = time.replace(/\s+/g, ':').split(':')
-  return i18n.__('Phase Date %s %s %s %s %s', a[0], a[1], a[2], a[3], a[4])
+  return i18n.__('Parse Date Time %s %s %s %s %s', a[0], a[1], a[2], a[3], a[4])
 }
 
 const getType = (type, name, metadata) => {

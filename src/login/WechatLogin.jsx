@@ -356,7 +356,7 @@ class WechatLogin extends React.Component {
               </div>
               <div style={{ height: 24 }} />
               <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.54)', fontSize: 20 }}>
-                { this.state.error === 'net' ? i18n.__('Network Error Tip') : i18n.__('Cloud Error Tip') }
+                { this.state.error === 'net' ? i18n.__('Network Error Text') : i18n.__('Cloud Error Text') }
               </div>
             </div>
         }
@@ -371,13 +371,13 @@ class WechatLogin extends React.Component {
     const wcl = this.state.wechatLogin
     switch (wcl) {
       case 'connecting':
-        text = i18n.__('Connecting Tip')
+        text = i18n.__('Connecting Text')
         break
       case 'authorization':
-        text = i18n.__('Authenticating Tip')
+        text = i18n.__('Authenticating Text')
         break
       case 'getingList':
-        text = i18n.__('Getting List Tip')
+        text = i18n.__('Getting List Text')
         break
       case 'success':
         text = i18n.__('Get List Success')
@@ -408,19 +408,19 @@ class WechatLogin extends React.Component {
             </div>
             <div style={{ height: 24 }} />
             <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
-              { i18n.__('WeChat Login Failed Tip 1') }
+              { i18n.__('WeChat Login Failed Text 1') }
             </div>
             <div style={{ height: 24 }} />
             <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
-              { i18n.__('WeChat Login Failed Tip 2') }
+              { i18n.__('WeChat Login Failed Text 2') }
             </div>
             <div style={{ height: 24 }} />
             <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
-              { i18n.__('WeChat Login Failed Tip 3') }
+              { i18n.__('WeChat Login Failed Text 3') }
             </div>
             <div style={{ height: 24 }} />
             <div style={{ fontSize: 16, marginBottom: 12, color: 'rgba(0,0,0,0.87)' }}>
-              { i18n.__('WeChat Login Failed Tip 4') }
+              { i18n.__('WeChat Login Failed Text 4') }
             </div>
           </div>
 

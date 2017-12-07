@@ -57,14 +57,14 @@ class NoDevice extends React.Component {
           { i18n.__('No Wisnuc Device Comment') }
         </div>
         <div style={{ height: 24 }} />
-        <div> { i18n.__('No Wisnuc Device Tip 1') }</div>
+        <div> { i18n.__('No Wisnuc Device Text 1') }</div>
         <div style={{ height: 24 }} />
-        <div> { i18n.__('No Wisnuc Device Tip 2') }</div>
+        <div> { i18n.__('No Wisnuc Device Text 2') }</div>
         <div style={{ height: 24 }} />
-        <div> { i18n.__('No Wisnuc Device Tip 3') }</div>
+        <div> { i18n.__('No Wisnuc Device Text 3') }</div>
         <div style={{ height: 12 }} />
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          { i18n.__('No Wisnuc Device Tip 4') }
+          { i18n.__('No Wisnuc Device Text 4') }
           <TextField
             style={{ width: 120, marginLeft: 16, marginRight: 8 }}
             name="setIP"

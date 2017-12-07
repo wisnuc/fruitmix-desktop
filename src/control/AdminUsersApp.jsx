@@ -242,8 +242,8 @@ class AdminUsersApp extends React.Component {
                 <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
                   <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}> { i18n.__('Reset Password')} </div>
                   <div style={{ height: 20 }} />
-                  <div style={{ color: 'rgba(0,0,0,0.54)' }}> { i18n.__('Reset Password Tip 1')} </div>
-                  <div style={{ color: 'rgba(0,0,0,0.54)' }}> { i18n.__('Reset Password Tip 2')} </div>
+                  <div style={{ color: 'rgba(0,0,0,0.54)' }}> { i18n.__('Reset Password Text 1')} </div>
+                  <div style={{ color: 'rgba(0,0,0,0.54)' }}> { i18n.__('Reset Password Text 2')} </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                     <FlatButton label={i18n.__('Cancel')} primary onTouchTap={() => this.toggleDialog('resetPwd')} />
@@ -283,7 +283,7 @@ class AdminUsersApp extends React.Component {
                   <div style={{ height: 20 }} />
                   <div style={{ color: 'rgba(0,0,0,0.54)' }}>
                     {
-                      this.state.user.disabled ? i18n.__('Enable User Tip') : i18n.__('Disable User Tip')
+                      this.state.user.disabled ? i18n.__('Enable User Text') : i18n.__('Disable User Text')
                     }
                   </div>
                   <div style={{ height: 24 }} />
@@ -307,7 +307,7 @@ class AdminUsersApp extends React.Component {
                   </div>
                   <div style={{ height: 20 }} />
                   <div style={{ color: 'rgba(0,0,0,0.54)' }}>
-                    { this.state.user.isAdmin ? i18n.__('Downgrade User Type Tip') : i18n.__('Upgrade User Type Tip') }
+                    { this.state.user.isAdmin ? i18n.__('Downgrade User Type Text') : i18n.__('Upgrade User Type Text') }
                   </div>
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
