@@ -115,7 +115,7 @@ class DeviceInfo extends React.PureComponent {
     /* storage */
     const storageIcon = StorageIcon
     const storageTitles = [
-      i18n.__('Total Size'),
+      i18n.__('Total Capacity'),
       i18n.__('User Data Size'),
       i18n.__('Avail Size')
     ]

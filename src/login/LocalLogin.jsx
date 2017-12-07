@@ -501,7 +501,7 @@ class Login extends StateUp(React.Component) {
     if (selectedDevice === null || (selectedDevice && !selectedDevice.mdev.address)) {
       cardProps = {
         key: 'info-card',
-        text: i18n.__('Seaching Device Text')
+        text: i18n.__('Searching Device Text')
       }
     } else {
       cardProps = { key: `device-card-${selectedDevice.mdev.name}` }
@@ -552,7 +552,7 @@ class Login extends StateUp(React.Component) {
                       </div>
                       <div style={{ height: 36 }} />
                       <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.87)', fontSize: 20, height: 36 }}>
-                        { i18n.__('Seaching Device') }
+                        { i18n.__('Searching Device') }
                       </div>
                     </div>
                   </DeviceCard>
