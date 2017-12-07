@@ -87,11 +87,11 @@ class PolicyDialog extends React.PureComponent {
       )
     }
 
-    let text = i18n.__('Default Conflict Title %s %s', type, name)
+    let text = i18n.__('Default Conflict Title {{type}} {{name}}', { type, name })
 
     /* directory => file || file => directory */
     if (entryType !== remote.type) {
-      text = i18n.__('Alt Conflict Title %s %s %s', type, name, remoteType)
+      text = i18n.__('Alt Conflict Title {{type}} {{name}} {{remoteType}}', { type, name, remoteType })
     }
 
     /* default: choose the first option */
