@@ -126,7 +126,7 @@ class AdminUsersApp extends React.Component {
           />
         </div>
 
-        <div style={{ flex: '0 0 112px' }}>{ user.global && user.global.wx ? i18n.__('Yes') : i18n.__('No') }</div>
+        <div style={{ flex: '0 0 160px' }}>{ user.global && user.global.wx ? i18n.__('Yes') : i18n.__('No') }</div>
         <div style={{ flex: '0 0 256px' }}>{ nickName || '-' }</div>
         <div style={{ flex: '0 0 56px' }} />
         <div style={{ flex: '0 0 56px' }} />
@@ -180,7 +180,7 @@ class AdminUsersApp extends React.Component {
             <div style={{ flex: '0 0 140px' }}>
               { i18n.__('User Type') }
             </div>
-            <div style={{ flex: '0 0 112px' }}>
+            <div style={{ flex: '0 0 160px' }}>
               { i18n.__('WeChat Bind Status') }
             </div>
             <div style={{ flex: '0 0 256px' }}>
