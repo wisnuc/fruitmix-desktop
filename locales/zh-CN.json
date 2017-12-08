@@ -683,5 +683,23 @@
   "Delete Photo Dialog Text 2": "内容被移到回收站后，文件中的相应内容也会被移除。",
   "Remove": "移除",
   "Hide Photo Dialog Text 1": "要将照片隐藏吗？",
-  "Hide Photo Dialog Text 2": "内容被隐藏后，我的照片内将不显示，可在智能助理中恢复。"
+  "Hide Photo Dialog Text 2": "内容被隐藏后，我的照片内将不显示，可在智能助理中恢复。",
+
+  "==== node/lib/window.js ====": "",
+  "Confirm Close Title": "确认关闭",
+  "Close": "关闭",
+  "Do not Show again": "不再提醒",
+  "Confirm Close Text": "确定退出并关闭应用吗？",
+
+  "==== node/lib/transmissionUpdate.js ====": "",
+  "Transmission Finished": "文件传输完成",
+
+  "==== node/lib/newUpload.js ====": "",
+  "%s Add to Transfer List": "%s 个项目添加到传输列表",
+  "%s Ignore Upload Text": "忽略了%s个跳过的或不支持的项目",
+  "Connection Lost": "与设备的连接已断开",
+  "Read Upload Failed": "读取上传文件失败",
+
+  "==== node/lib/newDownload.js ====": "",
+  "Read Download Failed": "读取下载目录失败"
 }

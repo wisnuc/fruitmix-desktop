@@ -1,4 +1,5 @@
 import os from 'os'
+import i18n from 'i18n'
 import Debug from 'debug'
 import child from 'child_process'
 import { ipcMain, powerSaveBlocker, shell } from 'electron'
@@ -41,7 +42,9 @@ const sendMsg = () => {
       powerSaveBlocker.stop(id)
       // console.log('powerSaveBlocker stop', id, powerSaveBlocker.isStarted(id))
     }
-    if (finishTasks.length !== preFinishTasksLength) getMainWindow().webContents.send('snackbarMessage', { message: '文件传输任务完成' })
+    if (finishTasks.length !== preFinishTasksLength) {
+      getMainWindow().webContents.send('snackbarMessage', { message: i18n.__('Transmission Finished') })
+    }
   }
   preUserTasksLength = userTasks.length
   preFinishTasksLength = finishTasks.length

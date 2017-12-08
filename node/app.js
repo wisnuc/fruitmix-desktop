@@ -1,4 +1,5 @@
 import { app } from 'electron'
+import i18n from 'i18n'
 
 import store from './lib/store'
 import configObserver from './lib/configObserver'
@@ -36,6 +37,12 @@ app.on('ready', () => {
     }
   })
   global.configuration = configuration
+
+  i18n.configure({
+    locales: ['en-US', 'zh-CN'],
+    directory: './locales',
+    defaultLocale: /zh/.test(app.getLocale()) ? 'zh-CN' : 'en-US'
+  })
 })
 
 app.on('window-all-closed', () => app.quit())
