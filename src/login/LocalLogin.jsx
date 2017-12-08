@@ -596,7 +596,7 @@ class Login extends StateUp(React.Component) {
               </div>
 
               {/* button */}
-              <div style={{ height: 128 }} />
+              <div style={{ height: i18n.getLocale() === 'zh-CN' ? 128 : 116 }} />
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginRight: 8 }}>
                 <FlatButton
                   label={i18n.__('Refresh')}

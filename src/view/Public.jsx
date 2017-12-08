@@ -236,7 +236,7 @@ class Public extends Home {
             backgroundColor: '#FAFAFA'
           }}
         >
-          <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.27)', height: 56 }}> { i18n.__('No Public Drive Text') } </div>
+          <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.27)', height: 56 }}> { i18n.__('No Public Drive') } </div>
           {
             this.ctx.props.apis.account && this.ctx.props.apis.account.data && this.ctx.props.apis.account.data.isAdmin &&
               <FlatButton label={i18n.__('Jump to Create')} primary onTouchTap={() => navTo('adminDrives')} />

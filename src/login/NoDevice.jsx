@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import request from 'superagent'
 import validator from 'validator'
 import { FlatButton, CircularProgress, Divider, IconButton, TextField } from 'material-ui'

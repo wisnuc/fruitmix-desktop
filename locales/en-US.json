@@ -175,7 +175,7 @@
   "Overwrite Text": "Overwrite, the file with conflict name will replace the original file.",
   "Default Conflict Title {{type}} {{name}}": "A {{type}} named '{{name}}' already exists, please select a policy:",
   "Alt Conflict Title {{type}} {{name}} {{remoteType}}": "When uploading the {{type}} {{name}}, a {{remoteType}} with the same name already exists, please select a policy:",
-  "Apply All Text %d": "Apply this action to all other similar conflicts(%d more).",
+  "Apply All Text %d": "Apply to all other similar conflicts(%d more).",
 
   "==== control/AccountApp.jsx ====": "",
   "Your Username %s": "Your username: %s",
@@ -317,7 +317,7 @@
   "Fan Scale": "Fan scale",
   "Adjust FanScale Failed": "Failed to adjust fan scale.",
   "Adjust FanScale Success": "Fan scale adjusted.",
-  "Adjust Fan Scale Text": "Click the arrow to adjust the fan scale",
+  "Adjust Fan Scale Text": "Click the arrow to adjust the scale",
   "Fan Speed": "Fan speed",
   "Fan Speed Text": "Unit: RPM",
 
@@ -575,7 +575,7 @@
   "No File Text 2": "or use the 'Upload' button",
 
   "==== file/FileDetail.jsx ====": "",
-  "Parse Date Time %s %s %s %s %s": "%s-%s-%s %s : %s",
+  "Parse Date Time %s %s %s %s %s": "%s - %s - %s %s : %s",
   "Unknown File Type": "Unknown file type",
   "Get 100 Million Resolution {{res}} {{alt}} {{height}} {{width}}": "{{alt}}MP {{height}} x {{width}}",
   "Get 0.01 Million Resolution {{res}} {{alt}} {{height}} {{width}}": "{{alt}}MP {{height}} x {{width}}",
@@ -663,7 +663,7 @@
 
   "==== photo/DetailContainer.jsx ====": "",
   "Unknown Region": "Unknown Region",
-  "Parse Date %s %s %s": "%s-%s-%s",
+  "Parse Date %s %s %s": "%s - %s - %s",
   "Sunday": "Sunday",
   "Monday": "Monday",
   "Tuesday": "Tuesday",
@@ -695,8 +695,14 @@
   "Transmission Finished": "Transfer finished.",
 
   "==== node/lib/newUpload.js ====": "",
-  "%s Add to Transfer List": "%s item(s) add to the transfer list.",
-  "%s Ignore Upload Text": "%s unsupported or skipped item(s) ignored.",
+  "%s Add to Transfer List": {
+    "one": "%s item add to the transfer list.",
+    "other": "%s items add to the transfer list."
+  },
+  "%s Ignore Upload Text": {
+    "one": "%s unsupported or skipped item ignored.",
+    "other": "%s unsupported or skipped items ignored."
+  },
   "Connection Lost": "Lost connection to WISNUC.",
   "Read Upload Failed": "Failed to access uploading files.",
 
