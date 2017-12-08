@@ -142,13 +142,14 @@ class PolicyDialog extends React.PureComponent {
           { leftCount > 0 &&
             <Checkbox
               label={i18n.__('Apply All Text %d', leftCount)}
-              labelStyle={{ color: '#757575' }}
+              labelStyle={{ color: '#757575', fontSize: 14 }}
               iconStyle={{ fill: this.state.checked ? this.props.primaryColor : '#757575' }}
               checked={this.state.checked}
               onCheck={this.toggleCheck}
-              style={{ width: 456 }}
+              style={{ width: 410 }}
             />
           }
+          <div style={{ flexGrow: 1 }} />
           <FlatButton label={i18n.__('Cancel')} onTouchTap={this.cancel} primary />
           <FlatButton label={i18n.__('Confirm')} onTouchTap={this.next} primary />
         </div>

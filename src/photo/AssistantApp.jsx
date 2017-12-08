@@ -46,7 +46,7 @@ class AssistantApp extends PhotoApp {
                 </div>
                 <div style={{ flex: '0 0 48px' }} />
                 <FlatButton
-                  label={i18n.__('Show')}
+                  label={this.state.showPhotos ? i18n.__('Hide') : i18n.__('Show')}
                   labelPosition="before"
                   disabled={!!this.props.selectedItems.length}
                   primary

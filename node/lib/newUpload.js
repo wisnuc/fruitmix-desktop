@@ -140,8 +140,8 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
 const readUploadInfo = (entries, dirUUID, driveUUID) => {
   readUploadInfoAsync(entries, dirUUID, driveUUID)
     .then((count) => {
-      let message = i18n.__('%s Add to Transfer List', count)
-      if (count < entries.length) message = `${message} (${i18n.__('%s Ignore Upload Text', entries.length - count)})`
+      let message = i18n.__n('%s Add to Transfer List', count)
+      if (count < entries.length) message = `${message} (${i18n.__n('%s Ignore Upload Text', entries.length - count)})`
       getMainWindow().webContents.send('snackbarMessage', { message })
     })
     .catch((e) => {
