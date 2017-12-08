@@ -1,4 +1,5 @@
 import fs from 'fs'
+import i18n from 'i18n'
 import path from 'path'
 import UUID from 'uuid'
 import Debug from 'debug'
@@ -24,7 +25,7 @@ const downloadHandle = (event, args) => {
   fs.readdir(downloadPath, (err, files) => {
     if (err) {
       debug('downloadHandle fs.readdir error: ', err)
-      getMainWindow().webContents.send('snackbarMessage', { message: '读取下载目录失败' })
+      getMainWindow().webContents.send('snackbarMessage', { message: i18n.__('Read Download Failed')})
     } else {
       entries.forEach((entry) => {
         const name = entry.name
@@ -44,7 +45,7 @@ const downloadHandle = (event, args) => {
         entry.newName = newName
       })
       createTask(taskUUID, entries, entries[0].newName, dirUUID, driveUUID, taskType, createTime, newWork, downloadPath)
-      getMainWindow().webContents.send('snackbarMessage', { message: `${entries.length}个项目添加至下载队列` })
+      getMainWindow().webContents.send('snackbarMessage', { message: i18n.__('%s Add to Transfer List', entries.length) })
     }
   })
 }

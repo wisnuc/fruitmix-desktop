@@ -1,4 +1,5 @@
 import fs from 'original-fs'
+import i18n from 'i18n'
 import path from 'path'
 import UUID from 'uuid'
 import Debug from 'debug'
@@ -139,16 +140,16 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
 const readUploadInfo = (entries, dirUUID, driveUUID) => {
   readUploadInfoAsync(entries, dirUUID, driveUUID)
     .then((count) => {
-      let message = `${count}个项目添加至上传队列`
-      if (count < entries.length) message = `${message} (忽略了${entries.length - count}个跳过或不支持的文件)`
+      let message = i18n.__('%s Add to Transfer List', count)
+      if (count < entries.length) message = `${message} (${i18n.__('%s Ignore Upload Text', entries.length - count)})`
       getMainWindow().webContents.send('snackbarMessage', { message })
     })
     .catch((e) => {
       debug('readUploadInfo error: ', e)
       if (e.code === 'ECONNREFUSED') {
-        getMainWindow().webContents.send('snackbarMessage', { message: '与设备的连接已断开' })
+        getMainWindow().webContents.send('snackbarMessage', { message: i18n.__('Connection Lost') })
       } else if (e.message !== 'cancel') {
-        getMainWindow().webContents.send('snackbarMessage', { message: '读取上传文件失败' })
+        getMainWindow().webContents.send('snackbarMessage', { message: i18n.__('Read Upload Failed') })
       }
     })
 }
