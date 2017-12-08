@@ -54,6 +54,10 @@ class Assistant extends Media {
     return i18n.__('Assistant Menu Name')
   }
 
+  quickName() {
+    return i18n.__('Assistant Quick Name')
+  }
+
   menuIcon() {
     return AssistantIcon
   }
