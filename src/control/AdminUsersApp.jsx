@@ -117,7 +117,7 @@ class AdminUsersApp extends React.Component {
         <div style={{ flex: '0 0 140px', display: 'flex', alignItems: 'center ' }}>
           <FlatButton
             label={userLabel}
-            labelStyle={{ fontSize: 14, color: 'rgba(0,0,0,0.54)' }}
+            labelStyle={{ fontSize: 14, color: 'rgba(0,0,0,0.54)', textTransform: '' }}
             labelPosition="before"
             onTouchTap={event => !user.disabled && this.toggleMenu(event, user)}
             style={{ marginLeft: -4 }}

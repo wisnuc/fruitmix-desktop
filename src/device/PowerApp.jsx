@@ -236,7 +236,7 @@ class Power extends React.Component {
             <FlatButton
               label={i18n.__('Shut Down')}
               primary
-              style={{ marginLeft: -16 }}
+              style={{ marginLeft: i18n.getLocale() === 'zh-CN' ? -16 : -8 }}
               onTouchTap={() => this.handleOpen('POWEROFF')}
             />
             <FlatButton
@@ -265,7 +265,7 @@ class Power extends React.Component {
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }} >
           <div style={{ flex: '0 0 56px' }} />
-          <div style={{ flex: '0 0 560px' }}>
+          <div style={{ flex: '0 0 800px' }}>
             <div style={{ fontSize: 14, lineHeight: '26px', color: 'rgba(0, 0, 0, 0.87)' }}>
               { i18n.__('Maintenance Text')}
             </div>

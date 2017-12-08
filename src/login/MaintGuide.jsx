@@ -164,6 +164,7 @@ class MaintGuide extends React.Component {
       <div style={{ height: 56, display: 'flex', alignItems: 'center' }} key={label}>
         <FlatButton
           label={label}
+          labelStyle={{ textTransform: '' }}
           onTouchTap={func}
           style={{ marginLeft: -8 }}
           disabled={disabled}
@@ -174,13 +175,13 @@ class MaintGuide extends React.Component {
 
     return (
       <div style={{ display: 'flex' }}>
-        <div style={{ marginLeft: 24 }}>
+        <div style={{ width: 142, margin: '0 24px' }}>
           <div style={{ height: 56, display: 'flex', alignItems: 'center' }}>
             { i18n.__('Disk and Volume Manage Title') }
           </div>
           { diskLabels.map((label, index) => action(label, diskFuncs[index], diskDisable[index])) }
         </div>
-        <div style={{ marginLeft: 96 }}>
+        <div style={{ width: 142, margin: '0 24px' }}>
           <div style={{ height: 56, display: 'flex', alignItems: 'center' }}>
             { i18n.__('Wisnuc Manage Title') }
           </div>

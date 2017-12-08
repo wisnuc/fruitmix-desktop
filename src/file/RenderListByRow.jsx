@@ -113,24 +113,18 @@ class Row extends React.PureComponent {
           </div>
 
           <div
-            style={{ flex: '0 0 390px', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}
+            style={{ flex: '0 0 476px', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', marginRight: 24 }}
             onMouseDown={e => 0 && e.stopPropagation()}
           >
             { entry.name }
           </div>
 
-          <div style={{ flex: '0 1 160px', fontSize: 13, color: 'rgba(0,0,0,0.54)', textAlign: 'right' }}>
+          <div style={{ flex: '0 1 144px', fontSize: 13, color: 'rgba(0,0,0,0.54)' }}>
             { showTakenTime ? entry.metadata && (entry.metadata.date || entry.metadata.datetime)
               && formatDate(entry.metadata.date || entry.metadata.datetime) : entry.mtime && formatTime(entry.mtime) }
           </div>
 
-          <div
-            style={{ flex: '0 1 160px',
-              fontSize: 13,
-              color: 'rgba(0,0,0,0.54)',
-              textAlign: 'right',
-              marginRight: 72 }}
-          >
+          <div style={{ flex: '0 1 144px', fontSize: 13, color: 'rgba(0,0,0,0.54)', textAlign: 'right' }} >
             { entry.type === 'file' && prettysize(entry.size, false, true, 2) }
           </div>
 
@@ -245,10 +239,10 @@ class RenderListByRow extends React.Component {
     // debug('renderPopoverHeader this.props', this.props, sortType, h, isSelected)
 
     return (
-      <div style={{ display: 'flex', alignItems: 'center ', width: 168, marginLeft: -8, marginTop: 2 }}>
+      <div style={{ display: 'flex', alignItems: 'center ', width: 172, marginLeft: -10, marginTop: 2, marginRight: 92 }}>
         <FlatButton
           label={h.title}
-          labelStyle={{ fontSize: 14, color: 'rgba(0,0,0,0.54)' }}
+          labelStyle={{ fontSize: 14, color: 'rgba(0,0,0,0.54)', textTransform: '' }}
           onTouchTap={this.toggleMenu}
         />
         {/* menu */}
@@ -321,9 +315,9 @@ class RenderListByRow extends React.Component {
           onMouseMove={e => this.props.selectRow(e, this.getScrollToPosition())}
         >
           <div style={{ flex: '0 0 104px' }} />
-          { this.renderHeader({ title: i18n.__('Name'), width: 494, up: 'nameUp', down: 'nameDown' }) }
+          { this.renderHeader({ title: i18n.__('Name'), width: 500, up: 'nameUp', down: 'nameDown' }) }
           { this.renderPopoverHeader() }
-          { this.renderHeader({ title: i18n.__('Size'), width: 160, up: 'sizeUp', down: 'sizeDown' }) }
+          { this.renderHeader({ title: i18n.__('Size'), width: 60, up: 'sizeUp', down: 'sizeDown' }) }
           <div style={{ flexGrow: 1 }} />
         </div>
 

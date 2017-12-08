@@ -52,7 +52,7 @@ const convert = (code) => {
 }
 
 const translateStatus = (statusCode) => {
-  if (translateStatus >= 500) return i18n.__('Internal Server Error')
+  if (statusCode >= 500) return i18n.__('Internal Server Error')
   switch (statusCode) {
     case 404:
       return i18n.__('ENOTFOUND')
@@ -106,7 +106,7 @@ class ErrorTree extends React.PureComponent {
             : <ErrorIcon style={svgStyle} />
           }
         </div>
-        <div style={{ width: 196, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: 5, fontSize: 13 }} >
+        <div style={{ width: 540, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: 5, fontSize: 13 }} >
           { name }
         </div>
         <div style={{ fontSize: 13 }} >
@@ -157,7 +157,7 @@ class ErrorTree extends React.PureComponent {
     return (
       <div
         style={{
-          width: expand ? 1080 : 336,
+          width: expand ? 1080 : 780,
           height: expand ? 720 : 520,
           padding: '0px 24px 0px 24px',
           transition: 'all 225ms',
@@ -175,7 +175,7 @@ class ErrorTree extends React.PureComponent {
             <CloseIcon />
           </IconButton>
         </div>
-        <div style={{ fontSize: 14, marginBottom: 16 }}> { i18n.__('Error Dialog Text') } </div>
+        <div style={{ fontSize: 14, marginBottom: 16, height: 20 }}> { i18n.__('Error Dialog Text') } </div>
 
         {/* list of errors */}
         <div style={{ width: '100%', height: expand ? 574 : 374, overflowY: 'auto', border: 'solid #ccc 1px' }} >
