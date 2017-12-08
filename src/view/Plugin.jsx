@@ -21,6 +21,10 @@ class Plugin extends Base {
     return i18n.__('Plugin Menu Name')
   }
 
+  quickName() {
+    return i18n.__('Plugin Quick Name')
+  }
+
   menuIcon() {
     return ActionSettings
   }

@@ -353,7 +353,7 @@
   "Set IP Alias Title": "设置固定IP",
 
   "==== device/PluginApp.jsx ====": "",
-  "Modify Plugin Settingsd Success": "修改成功",
+  "Modify Plugin Settings Success": "修改成功",
   "Samba Service Title": "Samba服务",
   "Samba Service Text": "Samba服务是一种在局域网上共享文件和打印机的一种通信协议，它为局域网内的不同计算机之间提供文件及打印机等资源的共享服务。",
   "miniDLNA Service Title": "miniDLNA服务",
@@ -415,6 +415,7 @@
 
   "==== view/AdminUsers.jsx ====": "",
   "AdminUsers Menu Name": "用户管理",
+  "AdminUsers Quick Name": "用户管理",
   "AdminUsers Title": "用户管理",
 
   "==== view/Assistant.jsx ====": "",
@@ -446,6 +447,7 @@
 
   "==== view/FirmwareUpdate.jsx ====": "",
   "FirmwareUpdate Menu Name": "固件升级",
+  "FirmwareUpdate Quick Name": "固件升级",
 
   "==== view/Home.jsx ====": "",
   "Home Menu Name": "我的文件",
@@ -506,9 +508,11 @@
 
   "==== view/Physical.jsx ====": "",
   "Physical Menu Name": "物理磁盘",
+  "Physical Quick Name": "物理磁盘",
 
   "==== view/Plugin.jsx ====": "",
   "Plugin Menu Name": "插件设置",
+  "Plugin Quick Name": "插件设置",
 
   "==== view/Power.jsx ====": "",
   "Power Menu Name": "电源管理",
@@ -516,6 +520,7 @@
   "==== view/Public.jsx ====": "",
   "Public Drive": "共享盘",
   "Public Menu Name": "共享盘",
+  "Public Quick Name": "共享盘",
   "No Public Drive": "尚未建立共享盘",
   "Jump to Create": "去创建",
 

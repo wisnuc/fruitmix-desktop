@@ -50,6 +50,10 @@ class FirmwareUpdate extends Base {
     return i18n.__('FirmwareUpdate Menu Name')
   }
 
+  quickName() {
+    return i18n.__('FirmwareUpdate Quick Name')
+  }
+
   menuIcon() {
     return UpdateIcon
   }
