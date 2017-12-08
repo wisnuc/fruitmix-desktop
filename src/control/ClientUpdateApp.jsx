@@ -54,6 +54,10 @@ class Update extends React.Component {
     this.props.ipcRenderer.on('NEW_RELEASE', this.newRelease)
   }
 
+  componentWillUnmount() {
+    this.props.ipcRenderer.removeListener('NEW_RELEASE', this.newRelease)
+  }
+
   renderCheckUpdate() {
     const rel = this.state.rel
     const date = rel.published_at.split('T')[0]

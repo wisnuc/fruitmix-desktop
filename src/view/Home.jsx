@@ -486,9 +486,9 @@ class Home extends Base {
           {
             this.state.delete &&
             <div style={{ width: 280, padding: '24px 24px 0px 24px' }}>
-              <div style={{ color: 'rgba(0,0,0,0.54)' }}>{ i18n.__('Confirm Delete Text') }</div>
-              <div style={{ height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                { this.state.deleteLoading && <CircularProgress size={24} thickness={3} /> }
+              <div style={{ color: 'rgba(0,0,0,0.54)', height: 24, display: 'flex', alignItems: 'center', marginBottom: 24 }}>
+                { i18n.__('Confirm Delete Text') }
+                { this.state.deleteLoading && <CircularProgress size={16} thickness={2} style={{ marginLeft: 8 }} /> }
               </div>
               <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                 <FlatButton label={i18n.__('Cancel')} primary disabled={this.state.deleteLoading} onTouchTap={() => this.toggleDialog('delete')} />

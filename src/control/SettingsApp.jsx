@@ -60,6 +60,11 @@ class SettingsApp extends React.Component {
     this.props.ipcRenderer.on('CleanCacheResult', this.getCleanCacheResult)
   }
 
+  componentWillUnmount() {
+    this.props.ipcRenderer.removeListener('CacheSize', this.getCacheSize)
+    this.props.ipcRenderer.removeListener('CleanCacheResult', this.getCleanCacheResult)
+  }
+
   renderRow({ type, enabled, func }) {
     return (
       <div style={{ height: 56, width: '100%', display: 'flex', alignItems: 'center', marginLeft: 24 }} key={type}>

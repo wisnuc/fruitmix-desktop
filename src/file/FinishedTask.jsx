@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import i18n from 'i18n'
 import FolderSvg from 'material-ui/svg-icons/file/folder'
 import FileSvg from 'material-ui/svg-icons/editor/insert-drive-file'
 import DownloadSvg from 'material-ui/svg-icons/file/file-download'

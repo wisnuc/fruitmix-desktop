@@ -281,7 +281,7 @@ class TrsContainer extends React.Component {
           <div style={{ flexGrow: 1 }}>
             { i18n.__('Running Task Title %s', userTasks.length) }
           </div>
-          <div style={{ flex: '0 0 240px', display: 'flex', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
             {
                 allPaused ?
                   <FlatButton
@@ -336,7 +336,7 @@ class TrsContainer extends React.Component {
           <div style={{ flexGrow: 1 }}>
             { i18n.__('Finished Task Title %s', finishTasks.length) }
           </div>
-          <div style={{ flex: '0 0 120px', display: 'flex', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
             <FlatButton
               label={i18n.__('Clear All Record')}
               disabled={!finishTasks.length}
