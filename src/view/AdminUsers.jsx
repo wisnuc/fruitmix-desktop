@@ -43,6 +43,10 @@ class AdminUsers extends Base {
     return i18n.__('AdminUsers Menu Name')
   }
 
+  quickName() {
+    return i18n.__('AdminUsers Quick Name')
+  }
+
   menuIcon() {
     return ActionSupervisorAccount
   }

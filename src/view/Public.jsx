@@ -123,6 +123,10 @@ class Public extends Home {
     return i18n.__('Public Menu Name')
   }
 
+  quickName() {
+    return i18n.__('Public Quick Name')
+  }
+
   menuIcon() {
     return ShareDisk
   }

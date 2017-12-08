@@ -28,6 +28,10 @@ class Physical extends Base {
     return i18n.__('Physical Menu Name')
   }
 
+  quickName() {
+    return i18n.__('Physical Quick Name')
+  }
+
   menuIcon() {
     return HardwareDeveloperBoard
   }

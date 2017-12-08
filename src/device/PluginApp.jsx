@@ -21,7 +21,7 @@ class PluginApp extends React.Component {
     this.toggle = (type) => {
       this.setState({ loading: type })
       setTimeout(() => {
-        this.props.openSnackBar(i18n.__('Modify Plugin Settingsd Success'))
+        this.props.openSnackBar(i18n.__('Modify Plugin Settings Success'))
         this.setState({ loading: '' })
       }, 1000)
     }
