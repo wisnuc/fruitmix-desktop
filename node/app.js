@@ -41,8 +41,7 @@ app.on('ready', () => {
 
   i18n.configure({
     locales: ['en-US', 'zh-CN'],
-    directory: './locales',
-    directory: path.resolve(app.getAppPath(), 'locales'),
+    directory: path.resolve(__dirname, '../', 'locales'),
     defaultLocale: /zh/.test(app.getLocale()) ? 'zh-CN' : 'en-US'
   })
 })
