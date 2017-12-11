@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDom from 'react-dom'
 import Debug from 'debug'
-import { ipcRenderer } from 'electron'
+import { ipcRenderer, remote } from 'electron'
 import injectTapEventPlugin from 'react-tap-event-plugin'
 import i18n from 'i18n'
 
@@ -17,7 +17,7 @@ localStorage.debug = '*component*'
 const lang = navigator.language
 i18n.configure({
   locales: ['en-US', 'zh-CN'],
-  directory: './locales',
+  directory: remote.require('path').resolve(remote.app.getAppPath(), 'locales'),
   defaultLocale: lang === 'zh-CN' ? 'zh-CN' : 'en-US'
 })
 
