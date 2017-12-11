@@ -2,9 +2,11 @@ import React, { Component } from 'react'
 import i18n from 'i18n'
 import FolderSvg from 'material-ui/svg-icons/file/folder'
 import FileSvg from 'material-ui/svg-icons/editor/insert-drive-file'
+import WarningIcon from 'material-ui/svg-icons/alert/warning'
 import DownloadSvg from 'material-ui/svg-icons/file/file-download'
 import UploadSvg from 'material-ui/svg-icons/file/file-upload'
 import MultiSvg from 'material-ui/svg-icons/content/content-copy'
+import IconButton from '../common/IconButton'
 
 const svgStyle = { color: '#000', opacity: 0.54 }
 
@@ -30,6 +32,12 @@ class FinishedTask extends Component {
     this.openFileLocation = () => {
       if (this.props.task.trsType === 'download') setImmediate(this.props.open)
       else setImmediate(this.props.openInDrive)
+    }
+
+    this.checkError = () => {
+      const errors = this.props.task.errors || []
+      const warnings = this.props.task.warnings || []
+      this.props.openErrorDialog([...errors, ...warnings], true)
     }
   }
 
@@ -97,8 +105,16 @@ class FinishedTask extends Component {
 
         <div style={{ flex: '0 0 32px' }} />
         {/* task finishDate */}
-        <div style={{ flex: '0 0 224px', color: 'rgba(0, 0, 0, 0.54)' }} >
+        <div style={{ flex: '0 0 288px', color: 'rgba(0, 0, 0, 0.54)' }} >
           { this.getFinishDate(task.finishDate) }
+        </div>
+        <div style={{ flex: '0 0 60px', display: 'flex', alignItems: 'center', marginRight: 8 }}>
+          {
+            task.warnings && !!task.warnings.length &&
+            <IconButton onTouchTap={this.checkError} tooltip={i18n.__('Detail')}>
+              <WarningIcon color="#FB8C00" />
+            </IconButton>
+          }
         </div>
       </div>
     )

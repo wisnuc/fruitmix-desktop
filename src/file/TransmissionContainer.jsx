@@ -34,6 +34,7 @@ class TrsContainer extends React.Component {
       finishTasks: [],
       clearRunningDialog: false,
       clearFinishedDialog: false,
+      finished: false,
       errors: null
     }
 
@@ -221,8 +222,8 @@ class TrsContainer extends React.Component {
       this.props.navToDrive(driveUUID, dirUUID)
     }
 
-    this.openErrorDialog = (errors) => {
-      this.setState({ errors })
+    this.openErrorDialog = (errors, finished) => {
+      this.setState({ errors, finished })
     }
 
     this.updateTransmission = (e, userTasks, finishTasks) => {
@@ -361,6 +362,7 @@ class TrsContainer extends React.Component {
         select={this.select}
         open={this.open}
         openInDrive={this.openInDrive}
+        openErrorDialog={this.openErrorDialog}
       />
     )))
 
@@ -556,6 +558,7 @@ class TrsContainer extends React.Component {
                 errors={this.state.errors}
                 resume={this.resume}
                 ignore={this.ignore}
+                finished={this.state.finished}
                 onRequestClose={() => this.setState({ errors: null })}
               />
           }
