@@ -167,7 +167,7 @@ class FileDetail extends React.PureComponent {
               </div>
               <div style={{ flex: '0 0 16px' }} />
               <div style={{ flexGrow: 1 }}>
-                { i18n.__('Selected Item Text %s') }
+                { i18n.__('Selected Item Text %s', detailFile.length) }
               </div>
               <div style={{ flex: '0 0 24px' }} />
             </div>
