@@ -199,12 +199,14 @@ class ErrorTree extends React.PureComponent {
                 primary
                 label={i18n.__('Ignore All')}
                 onTouchTap={this.ignore}
+                disabled={this.props.finished}
               />
           }
           <FlatButton
             primary
             label={this.state.expand ? i18n.__('Copy to Clipboard') : i18n.__('Retry All')}
             onTouchTap={this.state.expand ? this.copyText : this.retry}
+            disabled={!this.state.expand && this.props.finished}
           />
         </div>
       </div>

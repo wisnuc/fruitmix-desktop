@@ -557,7 +557,7 @@
   "ESHA256MISMATCH": "File modified.",
   "EOVERSIZE": "File modified.",
   "EUNDERSIZE": "File modified.",
-  "ENAME": "Unsupported file name",
+  "ENAME": "Unsupported file or folder name",
   "ETYPE": "Unsupported file type",
   "EIGNORE": "File ignored",
   "Unknown Error": "Unknown error",

@@ -468,7 +468,7 @@ class Device extends RequestManager {
       }
       return 'ready'
     } else if (!boot.error && boot.state === 'starting') {
-      return setTimeout(() => this.requestAsync('boot', null), 1000)
+      return setTimeout(() => this.refreshSystemState(), 1000)
     }
 
     /* maintenance mode */

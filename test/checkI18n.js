@@ -4,6 +4,7 @@
  */
 
 const child = require('child_process')
+
 const string = 'i18n.__'
 const dir = './src ./node'
 const lines_src = child.execSync(`grep -r ${string} ${dir}`).toString().split('\n').map(l => l.trim()).filter(l => l.length)
@@ -11,12 +12,15 @@ const keys_src = lines_src.map(l => l.split('i18n.')).join('__').split('__').fil
 const unique_src = new Set([...keys_src.sort()])
 
 const fs = require('fs')
+
 const filePath = './locales/en-US.json'
 // const filePath = './locales/zh-CN.json'
 const lines_loc = fs.readFileSync(filePath).toString().split('\n').map(l => l.trim()).filter(l => l.length)
 const filtered_loc = lines_loc.filter(l => !(/====/.test(l)))
 const keys_loc = filtered_loc.map(l => l.split('"')[1]).filter(k => !!k)
-const unique_loc = new Set([...keys_loc.sort()])
+const unique_loc = new Set([...keys_loc.sort()]);
+
+['one', 'other', 'zh-CN', 'en-US'].forEach(k => unique_loc.delete(k))
 
 const not_loc = [...unique_src].filter(k => !unique_loc.has(k))
 const not_src = [...unique_loc].filter(k => !unique_src.has(k))

@@ -189,15 +189,15 @@ class RunningTask extends React.Component {
         <div style={{ flex: '0 0 100px' }}>{ this.getStatus(task) }</div>
 
         {/* Pause, resume and delete task */}
-        <div style={{ flex: i18n.getLocale() === 'zh-CN' ? '0 0 120px' : '0 0 132px', display: 'flex', alignItems: 'center' }}>
+        <div style={{ flex: i18n.getLocale() === 'zh-CN' ? '0 0 120px' : '0 0 132px', display: 'flex', alignItems: 'center' }} >
           {
             task.state === 'failed'
-            ? <IconButton onTouchTap={this.checkError} tooltip={i18n.__('Open Detail')}>
-              { task.errors.length ? <InfoSvg color="#F44336" /> : <WarningIcon color="#FB8C00" /> }
-            </IconButton>
-            : <IconButton iconStyle={svgStyle} onTouchTap={this.toggleTask} tooltip={task.paused ? i18n.__('Resume') : i18n.__('Pause')}>
-              { task.paused ? <PlaySvg /> : <PauseSvg /> }
-            </IconButton>
+              ? <IconButton onTouchTap={this.checkError} tooltip={i18n.__('Detail')}>
+                { task.errors.length ? <InfoSvg color="#F44336" /> : <WarningIcon color="#FB8C00" /> }
+                </IconButton>
+              : <IconButton iconStyle={svgStyle} onTouchTap={this.toggleTask} tooltip={task.paused ? i18n.__('Resume') : i18n.__('Pause')}>
+                { task.paused ? <PlaySvg /> : <PauseSvg /> }
+                </IconButton>
           }
           {
             task.paused &&

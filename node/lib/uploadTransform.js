@@ -432,8 +432,7 @@ class Task {
       const { dirUUID, task } = x
       getMainWindow().webContents.send('driveListUpdate', { uuid: dirUUID })
       // debug('this.readDir.on data', task.finishCount, task.count, this.readDir.isStopped())
-      if (!task.paused && task.finishCount === task.count && this.readDir.isStopped()
-        && !task.errors.length && !task.warnings.length) {
+      if (!task.paused && task.finishCount === task.count && this.readDir.isStopped() && !task.errors.length) {
         task.finishDate = (new Date()).getTime()
         task.state = 'finished'
         clearInterval(task.countSpeed)
@@ -476,7 +475,7 @@ class Task {
         })
       })
       if (this.errors.length !== preLength) this.updateStore()
-      if (this.errors.length > 8 || (this.readDir.isStopped() && (this.errors.length || this.warnings.length))) {
+      if (this.errors.length > 8 || (this.readDir.isStopped() && this.errors.length)) {
         debug('errorCount', this.errors.length)
         this.paused = true
         clearInterval(this.countSpeed)
