@@ -152,7 +152,7 @@ class InitWizard extends StateUp(React.Component) {
   finishedInfo() {
     const { mkfs, storage, install, boot, users, firstUser, token } = this.props.device
     console.log('this.props.device', this.props.device)
-    const getError = h => h && h.err && h.err.response && h.err.response.body && h.err.response.body.message
+    const getError = h => h && h.err
 
     if (!mkfs || mkfs.isPending()) {
       return ['busy', i18n.__('Creating Filesystem')]
@@ -274,7 +274,7 @@ class InitWizard extends StateUp(React.Component) {
           <Stepper
             activeStep={stepIndex}
             orientation="vertical"
-            connector={<ArrowDownwardIcon color="rgba(0,0,0,0.27)" style={{ height: 16, width: 16, margin: '-2px 10px 10px 18px' }} />}
+            connector={<div style={{ height: 8, width: 1, backgroundColor: '#bdbdbd', margin: '0px 0px 12px 25px' }} />}
           >
             <Step>
               <StepLabel>{ i18n.__('Create Volume Title') }</StepLabel>
