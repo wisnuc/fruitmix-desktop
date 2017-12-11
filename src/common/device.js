@@ -396,9 +396,13 @@ class Device extends RequestManager {
           break
         }
         if (fruitmix.state === 'exited') {
-          return console.log('device initWizard: fruitmix exited (unexpected), stop')
+          console.log('device initWizard: fruitmix exited (unexpected), stop')
+          break
         }
-      } else console.log('device reInstall: fruitmix is null, legal ???') // NO!!!
+      } else {
+        console.log('device reInstall: fruitmix is null, legal ???') // NO!!!
+        break
+      }
     }
     await this.requestAsync('firstUser', { username, password })
     const user = this.firstUser.value()
@@ -468,16 +472,15 @@ class Device extends RequestManager {
     }
 
     /* maintenance mode */
-    if (boot.mode === 'maintenance') {
-      return 'userMaint'
-    } else if (boot.error === 'ELASTNOTMOUNT' || boot.error === 'ELASTMISSING' || boot.error === 'ELASTDAMAGED') {
+    if (boot.error === 'ELASTNOTMOUNT' || boot.error === 'ELASTMISSING' || boot.error === 'ELASTDAMAGED') {
       return 'failLast'
     } else if (boot.error === 'ENOALT') {
       const { volumes } = storage
       if (volumes && volumes.length === 0) return 'uninitialized'
       return 'failNoAlt'
+    } else if (boot.mode === 'maintenance') {
+      return 'userMaint'
     }
-
     return 'unknownMaint'
   }
 }
