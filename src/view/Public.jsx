@@ -40,7 +40,7 @@ class Public extends Home {
         })
       } else if (entry.type === 'public') {
         const myUUID = this.ctx.props.apis.account.data.uuid
-        const writable = entry.writelist.findIndex(uuid => uuid === myUUID) > -1
+        const writable = entry.writelist === '*' || entry.writelist.findIndex(uuid => uuid === myUUID) > -1
         if (!writable) {
           this.toggleDialog('noAccess')
           return
@@ -64,7 +64,7 @@ class Public extends Home {
       if (data === this.state.drives && !this.force) return
       path = [{ name: i18n.__('Public Drive'), uuid: null, type: 'publicRoot' }]
       const myUUID = this.ctx.props.apis.account.data && this.ctx.props.apis.account.data.uuid
-      entries = data.filter(drive => drive.type === 'public' && drive.writelist.find(u => u === myUUID))
+      entries = data.filter(drive => drive.type === 'public' && (drive.writelist === '*' || drive.writelist.find(u => u === myUUID)))
       entries.forEach(item => Object.assign(item, { name: item.label }))
 
       /* sort enries */

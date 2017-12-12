@@ -134,7 +134,7 @@ class AdminDrives extends Base {
   renderContent({ toggleDetail, openSnackBar, getDetailStatus, navToDrive }) {
     debug('renderContent getDetailStatus navToDrive', this.state.detailDrive)
     const userUUID = this.ctx.props.apis.account.data && this.ctx.props.apis.account.data.uuid
-    const writeable = this.state.detailDrive && this.state.detailDrive.writelist.includes(userUUID)
+    const writeable = this.state.detailDrive && (this.state.detailDrive.writelist === '*' || this.state.detailDrive.writelist.includes(userUUID))
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <AdminDriversApp

@@ -93,8 +93,8 @@ class DriveRow extends React.PureComponent {
           }}
         >
           {
-            drive.writelist
-              .filter(uuid => users.find(u => u.uuid === uuid))
+            drive.writelist === '*' ? i18n.__('All Users')
+              : drive.writelist.filter(uuid => users.find(u => u.uuid === uuid))
               .map(uuid => users.find(u => u.uuid === uuid).username).join(', ')
           }
         </div>
