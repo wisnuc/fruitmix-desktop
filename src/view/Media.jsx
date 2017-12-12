@@ -23,7 +23,8 @@ const parseDate = (date) => {
   return parseInt(a, 10)
 }
 const getName = (photo) => {
-  if (!photo.date || !photo.datetime) {
+  console.log('getName', photo)
+  if (!photo.date && !photo.datetime) {
     return `IMG_UnkownDate-${photo.hash.slice(0, 5).toUpperCase()}-PC.${photo.m}`
   }
   const date = photo.date || photo.datetime
