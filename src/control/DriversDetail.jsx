@@ -70,13 +70,7 @@ class DrivesDetail extends PureComponent {
   }
 
   togglecheckAll() {
-    const users = this.props.users
-    if (this.state.writelist.length === users.length) {
-      this.setState({ writelist: [], changed: true })
-    } else {
-      const allUsers = users.map(user => user.uuid)
-      this.setState({ writelist: allUsers, changed: true })
-    }
+    this.setState({ writelist: this.state.writelist === '*' ? [] : '*', changed: true })
   }
 
   handleCheck(userUUID) {
@@ -96,6 +90,7 @@ class DrivesDetail extends PureComponent {
 
   render() {
     const { users, detailDrive, primaryColor } = this.props
+    console.log('detailDrive', this.props)
     if (!users || !detailDrive) return <div style={{ height: 128, backgroundColor: primaryColor, filter: 'brightness(0.9)' }} />
     return (
       <div style={{ height: '100%' }}>
@@ -113,7 +108,7 @@ class DrivesDetail extends PureComponent {
           >
             <div style={{ height: 16 }} />
             {
-              this.state.modify ?
+              this.state.modify && (detailDrive.tag !== 'built-in') ?
                 <div style={{ marginTop: -8 }}>
                   <TextField
                     name="shareDiskName"
@@ -150,7 +145,7 @@ class DrivesDetail extends PureComponent {
             {
               <Divider
                 color="rgba(0, 0, 0, 0.87)"
-                style={{ opacity: !this.state.modify && this.state.titleHover ? 1 : 0, width: 312, marginTop: -2 }}
+                style={{ opacity: !this.state.modify && this.state.titleHover && detailDrive.tag !== 'built-in' ? 1 : 0, width: 312, marginTop: -2 }}
               />
             }
           </div>
@@ -166,9 +161,10 @@ class DrivesDetail extends PureComponent {
             <Checkbox
               label={i18n.__('All Users')}
               labelStyle={{ fontSize: 14 }}
-              iconStyle={{ fill: this.state.writelist.length === users.length ? '#5E35B1' : 'rgba(0, 0, 0, 0.54)' }}
-              checked={this.state.writelist.length === users.length}
+              iconStyle={{ fill: this.state.writelist === '*' ? '#5E35B1' : 'rgba(0, 0, 0, 0.54)' }}
+              checked={this.state.writelist === '*'}
               onCheck={() => this.togglecheckAll()}
+              disabled={detailDrive.tag === 'built-in'}
             />
           </div>
           <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
@@ -179,9 +175,11 @@ class DrivesDetail extends PureComponent {
                   <Checkbox
                     label={user.username}
                     labelStyle={{ fontSize: 14 }}
-                    iconStyle={{ fill: this.state.writelist.includes(user.uuid) ? '#5E35B1' : 'rgba(0, 0, 0, 0.54)' }}
-                    checked={this.state.writelist.includes(user.uuid)}
+                    iconStyle={{ fill: (this.state.writelist === '*' ||
+                      this.state.writelist.includes(user.uuid)) ? '#5E35B1' : 'rgba(0, 0, 0, 0.54)' }}
+                    checked={this.state.writelist === '*' || this.state.writelist.includes(user.uuid)}
                     onCheck={() => this.handleCheck(user.uuid)}
+                    disabled={detailDrive.tag === 'built-in'}
                   />
                  </div>))
             }
@@ -195,7 +193,7 @@ class DrivesDetail extends PureComponent {
             <FlatButton
               label={i18n.__('Apply')}
               primary
-              disabled={!this.state.changed || !!this.state.errorText || this.state.modify}
+              disabled={!this.state.changed || !!this.state.errorText || this.state.modify || detailDrive.tag === 'built-in'}
               onTouchTap={this.fire}
             />
           </div>
