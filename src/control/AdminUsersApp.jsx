@@ -146,7 +146,7 @@ class AdminUsersApp extends React.Component {
         */}
         <div style={{ flex: '0 0 50px' }}>
           {
-            user.isFirstUser || !this.props.apis.account.data.isFirstUser
+            user.isFirstUser || !this.props.apis.account.data.isAdmin || (!this.props.apis.account.data.isFirstUser && user.isAdmin)
             ? <div />
             : <Toggle
               toggled={!user.disabled}
