@@ -324,10 +324,10 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'addMagnet':
-        r = this.apost('download', { magnetURL: args.magnetURL, downloadPath: args.downloadPath })
+        r = this.apost('download/magnet', { magnetURL: args.magnetURL, dirUUID: args.dirUUID })
         break
 
-      case 'handleMagnet': // op: 'pause', 'resume', 'destory'
+      case 'handleMagnet': // op: 'pause', 'resume', 'destroy'
         r = this.apatch(`download/${args.id}`, { op: args.op, torrentId: args.id })
         break
 

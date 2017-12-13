@@ -79,10 +79,11 @@ class Download extends Base {
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <BTDownload
           navToDrive={navToDrive}
-          tasks={this.state.tasks}
+          tasks={this.state.tasks ? this.state.tasks.running : []}
           apis={this.ctx.props.apis}
           openSnackBar={openSnackBar}
           primaryColor={this.groupPrimaryColor()}
+          selectedDevice={this.ctx.props.selectedDevice}
         />
       </div>
     )

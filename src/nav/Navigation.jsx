@@ -56,7 +56,7 @@ class NavViews extends React.Component {
     // this.install('physical', Physical)
     this.install('transmission', Transmission)
 
-    // this.install('download', Download)
+    this.install('download', Download)
     this.install('finishedList', FinishedList)
 
     this.install('media', Media)
