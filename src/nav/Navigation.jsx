@@ -14,6 +14,7 @@ import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motio
 
 import NavDrawer from './NavDrawer'
 import QuickNav from './QuickNav'
+import Tasks from '../common/Tasks'
 
 import Home from '../view/Home'
 import Public from '../view/Public'
@@ -89,6 +90,7 @@ class NavViews extends React.Component {
       nav: null,
       showDetail: false,
       openDrawer: false,
+      showTasks: false,
       snackBar: '',
       conflicts: null
     })
@@ -345,7 +347,10 @@ class NavViews extends React.Component {
 
           {/* global notification button */}
           <IconButton>
-            <SocialNotifications color={view.appBarStyle() === 'light' ? 'rgba(0,0,0,0.54)' : 'rgba(255,255,255,0.5)'} />
+            <SocialNotifications
+              color={view.appBarStyle() === 'light' ? 'rgba(0,0,0,0.54)' : '#FFF'}
+              onTouchTap={() => this.setState({ showTasks: !this.state.showTasks })}
+            />
           </IconButton>
 
           {/* optional toggle detail button */}
@@ -394,25 +399,8 @@ class NavViews extends React.Component {
   render() {
     if (!this.state.nav) return null
 
-    const style = {
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      justifyContent: 'space-between',
-      overflow: 'hidden'
-    }
-
     const view = this.views[this.state.nav]
     const prominent = view.prominent()
-    const cardTitleStyle = {
-      height: 64,
-      display: 'flex',
-      alignItems: 'center',
-      color: 'rgba(0,0,0,0.54)',
-      fontSize: 20,
-      fontWeight: 500,
-      flexWrap: 'wrap'
-    }
 
     /* is cloud ? */
     let isCloud = false
@@ -420,14 +408,11 @@ class NavViews extends React.Component {
     if (token && token.data && token.data.stationID) isCloud = true
 
     return (
-      <div style={style}>
-
+      <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'space-between', overflow: 'hidden' }} >
         {/* left frame */}
         <div style={{ height: '100%', position: 'relative', flexGrow: 1 }}>
-
           { this.renderAppBar() }
           { this.renderAppBarShadow() }
-
           {/* content + shortcut container */}
           <div
             style={{
@@ -485,6 +470,16 @@ class NavViews extends React.Component {
               />
           }
         </DialogOverlay>
+
+        {/* Tasks */}
+        {
+          this.state.showTasks &&
+            <Tasks
+              apis={this.props.apis}
+              onRequestClose={() => this.setState({ showTasks: false })}
+              showDetail={this.state.showDetail}
+            />
+        }
       </div>
     )
   }

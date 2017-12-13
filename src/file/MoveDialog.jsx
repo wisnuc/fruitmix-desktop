@@ -231,29 +231,35 @@ class MoveDialog extends React.PureComponent {
         this.props.refresh()
         return this.props.openSnackBar(type.concat(i18n.__('+Failed')))
       }
-      this.getTaskState(data.uuid).asCallback((err) => {
+
+      this.getTaskState(data.uuid).asCallback((err, res) => {
         if (err) {
           this.setState({ loading: false })
           this.closeDialog()
           this.props.refresh()
-          return this.props.openSnackBar(type.concat(i18n.__('+Failed')))
+          this.props.openSnackBar(type.concat(i18n.__('+Failed')))
+        } else if (res) {
+          this.setState({ loading: false })
+          this.closeDialog()
+          this.props.refresh()
+          this.props.openSnackBar(type.concat(i18n.__('+Success')))
+        } else {
+          this.setState({ loading: false })
+          this.closeDialog()
+          this.props.refresh()
+          this.props.openSnackBar('Working')
         }
-        this.setState({ loading: false })
-        this.closeDialog()
-        this.props.refresh()
-        return this.props.openSnackBar(type.concat(i18n.__('+Success')))
       })
     }
 
     /* request task state */
     this.getTaskState = async (uuid) => {
+      await this.sleep(500)
       const res = await this.props.apis.pureRequestAsync('task', { uuid })
       const data = this.props.apis.stationID ? res.body.data : res.body
-      if (!data.isStopped) {
-        await this.sleep(500)
-        await this.getTaskState(uuid)
-      }
-      return data
+      console.log('data && data.nodes', data && data.nodes)
+      if (data && data.nodes && data.nodes.findIndex(n => n.parent === null && n.state === 'Finished') > -1) return true
+      return false
     }
 
     /* close dialog */
