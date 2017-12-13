@@ -428,7 +428,7 @@
 
   "==== view/ClientUpdate.jsx ====": "",
   "ClientUpdate Menu Name": "Client update",
-  "ClientUpdate Quick Name": "Update",
+  "ClientUpdate Quick Name": "Client",
 
   "==== view/Device.jsx ====": "",
   "Device Menu Name": "Device Info",
@@ -484,6 +484,10 @@
   "==== view/InstalledApps.jsx ====": "",
   "InstalledApps Menu Name": "Installed Apps",
 
+  "==== view/LanguageApp.jsx ====": "",
+  "Language Menu Name": "Language",
+  "Language Quick Name": "Language",
+
   "==== view/MediaAlbum.jsx ====": "",
   "MediaAlbum Menu Name": "Albums",
 
@@ -530,8 +534,8 @@
   "Jump to Create": "Jump to create",
 
   "==== view/Settings.jsx ====": "",
-  "Settings Menu Name": "Client settings",
-  "Settings Quick Name": "Settings",
+  "Settings Menu Name": "Settings",
+  "Settings Quick Name": "Others",
 
   "==== view/TimeDate.jsx ====": "",
   "TimeDate Menu Name": "Time & Date",

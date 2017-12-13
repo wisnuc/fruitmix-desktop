@@ -47,11 +47,16 @@ class DriveRow extends React.PureComponent {
         this.props.showContextMenu(e.nativeEvent.clientX, e.nativeEvent.clientY)
       }
     }
+
+    this.rowDoubleClick = (writeable) => {
+      if (writeable) this.props.navToDrive(this.props.drive.uuid, this.props.drive.uuid)
+    }
   }
 
 
   render() {
-    const { drive, users, navToDrive } = this.props
+    const { drive, users, myUUID } = this.props
+    const writeable = drive.writelist === '*' || drive.writelist.find(u => u === myUUID)
     return (
       <div
         key={drive.label}
@@ -62,7 +67,7 @@ class DriveRow extends React.PureComponent {
           ':hover': { backgroundColor: '#F5F5F5' }
         }}
         onTouchTap={this.rowTouchTap}
-        onDoubleClick={() => navToDrive(drive.uuid, drive.uuid)}
+        onDoubleClick={() => this.rowDoubleClick(writeable)}
       >
         <div style={{ flex: '0 0 32px' }} />
         <div style={{ flex: '0 0 40px' }}>
@@ -140,9 +145,10 @@ class AdminDrives extends React.Component {
 
   render() {
     const { users, drives, apis, refreshDrives, updateDetail, navToDrive, showContextMenu, openSnackBar } = this.props
+    const myUUID = apis.account.data && apis.account.data.uuid
     debug('AdminDrivesAdminDrivesAdminDrives', this.props)
     if (!users || !drives) return (<div />)
-    const publicDrives = drives.filter(drive => drive.type === 'public')
+    const publicDrives = drives.filter(drive => drive.type === 'public' && drive.tag !== 'built-in')
 
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -167,6 +173,7 @@ class AdminDrives extends React.Component {
                     key={drive.uuid}
                     drive={drive}
                     users={users}
+                    myUUID={myUUID}
                     updateDetail={updateDetail}
                     navToDrive={navToDrive}
                     showContextMenu={showContextMenu}

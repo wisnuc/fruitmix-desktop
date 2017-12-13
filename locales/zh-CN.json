@@ -428,7 +428,7 @@
 
   "==== view/ClientUpdate.jsx ====": "",
   "ClientUpdate Menu Name": "客户端升级",
-  "ClientUpdate Quick Name": "升级",
+  "ClientUpdate Quick Name": "客户端升级",
 
   "==== view/Device.jsx ====": "",
   "Device Menu Name": "设备信息",
@@ -484,6 +484,10 @@
   "==== view/InstalledApps.jsx ====": "",
   "InstalledApps Menu Name": "已安装应用",
 
+  "==== view/LanguageApp.jsx ====": "",
+  "Language Menu Name": "语言设置",
+  "Language Quick Name": "语言",
+
   "==== view/MediaAlbum.jsx ====": "",
   "MediaAlbum Menu Name": "相册",
 
@@ -530,8 +534,8 @@
   "Jump to Create": "去创建",
 
   "==== view/Settings.jsx ====": "",
-  "Settings Menu Name": "客户端设置",
-  "Settings Quick Name": "设置",
+  "Settings Menu Name": "其他设置",
+  "Settings Quick Name": "其他设置",
 
   "==== view/TimeDate.jsx ====": "",
   "TimeDate Menu Name": "时间与日期",
