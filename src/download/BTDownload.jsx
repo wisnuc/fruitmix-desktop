@@ -107,9 +107,17 @@ class BTDownload extends React.Component {
       this.setState({ id: infoHash, destroy: true })
     }
 
-    this.toggleStatus = (e, infoHash) => {
+    this.toggleStatus = (e, infoHash, isPause) => {
       e.preventDefault() // important, to prevent other event
       e.stopPropagation()
+      this.props.apis.request('handleMagnet', { op: isPause ? 'resume' : 'pause', id: infoHash }, (err) => {
+        if (err) {
+          this.props.openSnackBar('操作失败！')
+        } else {
+          this.props.openSnackBar('操作成功！')
+        }
+        this.refresh()
+      })
     }
 
     this.refresh = () => this.props.apis.request('BTList')
@@ -120,7 +128,7 @@ class BTDownload extends React.Component {
 
     this.destroy = () => {
       this.setState({ WIP: true })
-      this.props.apis.request('handleMagnet', { id: this.state.id, op: 'destory' }, (err) => {
+      this.props.apis.request('handleMagnet', { id: this.state.id, op: 'destroy' }, (err) => {
         if (err) {
           console.log('destroy error', err)
           this.props.openSnackBar('删除失败！')
@@ -244,7 +252,7 @@ class BTDownload extends React.Component {
     )
   }
 
-  renderCircularProgress(progress, color, hovered, infoHash) {
+  renderCircularProgress(progress, color, hovered, infoHash, isPause) {
     const p = progress > 1 ? 1 : progress < 0 ? 0 : progress
     const rightDeg = Math.min(45, p * 360 - 135)
     const leftDeg = Math.max(45, p * 360 - 135)
@@ -305,8 +313,8 @@ class BTDownload extends React.Component {
           {
             hovered ?
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <IconButton onTouchTap={e => this.toggleStatus(e, infoHash)}>
-                  <PauseSvg color={this.props.primaryColor} />
+                <IconButton onTouchTap={e => this.toggleStatus(e, infoHash, isPause)}>
+                  { isPause ? <PlaySvg color={this.props.primaryColor} /> : <PauseSvg color={this.props.primaryColor} /> }
                 </IconButton>
               </div>
               : `${Math.round(p * 100)}%`
@@ -317,7 +325,7 @@ class BTDownload extends React.Component {
   }
 
   renderRow(task, index) {
-    const { magnetURL, name, downloadPath, progress, downloadSpeed, downloaded, timeRemaining, infoHash } = task
+    const { magnetURL, name, downloadPath, progress, downloadSpeed, downloaded, timeRemaining, infoHash, isPause } = task
     const selected = this.state.select.selected && this.state.select.selected.findIndex(s => s === index) > -1
     const hovered = this.state.select.hover === index
     return (
@@ -337,7 +345,7 @@ class BTDownload extends React.Component {
         >
           {/* CircularProgress */}
           <div style={{ flex: '0 0 56px' }}>
-            { this.renderCircularProgress(progress, this.props.primaryColor, hovered, infoHash) }
+            { this.renderCircularProgress(progress, this.props.primaryColor, hovered, infoHash, isPause) }
           </div>
 
           {/* task item name */}
@@ -356,7 +364,7 @@ class BTDownload extends React.Component {
           </div>
 
           {/* speed */}
-          <div style={{ flex: '0 0 120px' }}> { formatSpeed(downloadSpeed) } </div>
+          <div style={{ flex: '0 0 120px' }}> { isPause ? '已暂停' : formatSpeed(downloadSpeed) } </div>
           <div style={{ flex: '0 0 400px' }} />
           <div style={{ flex: '0 0 90px' }} >
             {
@@ -423,7 +431,7 @@ class BTDownload extends React.Component {
           <div style={{ flex: '0 0 60px' }}> { `${Math.round(progress * 100)}%` } </div>
 
           {/* Status */}
-          <div style={{ flex: '0 0 120px' }}> { name ? '正在下载' : '获取信息中' } </div>
+          <div style={{ flex: '0 0 120px' }}> { isPause ? '已暂停' : name ? '正在下载' : '获取信息中' } </div>
 
           {/* task restTime */}
           <div style={{ flex: '0 0 120px' }}>{ formatSeconds(timeRemaining / 1000) }</div>

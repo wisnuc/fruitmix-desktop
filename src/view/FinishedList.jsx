@@ -75,7 +75,7 @@ class Download extends Base {
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <FinishedList
           navToDrive={navToDrive}
-          tasks={[]}
+          tasks={this.state.tasks ? this.state.tasks.finish : []}
           apis={this.ctx.props.apis}
           openSnackBar={openSnackBar}
           primaryColor={this.groupPrimaryColor()}

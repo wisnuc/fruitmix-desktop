@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
 import { List, AutoSizer } from 'react-virtualized'
@@ -100,12 +101,23 @@ class BTDownload extends React.Component {
 
     /* actions */
 
-    this.destroy = (uuid) => {
-    }
-
-    this.toggleStatus = (e, infoHash) => {
+    this.openDestroy = (e, infoHash) => {
       e.preventDefault() // important, to prevent other event
       e.stopPropagation()
+      this.setState({ id: infoHash, destroy: true })
+    }
+
+    this.toggleStatus = (e, infoHash, isPause) => {
+      e.preventDefault() // important, to prevent other event
+      e.stopPropagation()
+      this.props.apis.request('handleMagnet', { op: isPause ? 'resume' : 'pause', id: infoHash }, (err) => {
+        if (err) {
+          this.props.openSnackBar('操作失败！')
+        } else {
+          this.props.openSnackBar('操作成功！')
+        }
+        this.refresh()
+      })
     }
 
     this.refresh = () => this.props.apis.request('BTList')
@@ -114,9 +126,23 @@ class BTDownload extends React.Component {
 
     this.handleChange = value => this.setState({ value })
 
+    this.destroy = () => {
+      this.setState({ WIP: true })
+      this.props.apis.request('handleMagnet', { id: this.state.id, op: 'destroy' }, (err) => {
+        if (err) {
+          console.log('destroy error', err)
+          this.props.openSnackBar('删除失败！')
+        } else {
+          this.props.openSnackBar('删除成功！')
+        }
+        this.setState({ WIP: false, destroy: false })
+        this.refresh()
+      })
+    }
+
     this.addMagnet = () => {
       this.setState({ WIP: true })
-      this.props.apis.request('addMagnet', { magnetURL: this.state.value, downloadPath: '/home/lxw/BT' }, (err) => {
+      this.props.apis.request('addMagnet', { magnetURL: this.state.value, dirUUID: this.state.dirUUID }, (err) => {
         if (err) {
           console.log('addMagnet error', err)
           this.props.openSnackBar('添加失败！')
@@ -125,6 +151,33 @@ class BTDownload extends React.Component {
           this.props.openSnackBar('添加成功！')
           this.setState({ WIP: false, magnet: false })
         }
+        this.refresh()
+      })
+    }
+
+    this.mkdirAsync = async () => {
+      const driveUUID = this.props.apis.drives.data.find(d => d.tag === 'home').uuid
+      const stationID = this.props.selectedDevice.token.data.stationID
+      const data = await this.props.apis.requestAsync('mkdir', {
+        driveUUID,
+        dirUUID: driveUUID,
+        dirname: i18n.__('BT Download Folder Name')
+      })
+      const dirUUID = stationID ? data.uuid : data[0].data.uuid
+      return ({ driveUUID, dirUUID })
+    }
+
+    this.openFAB = (event) => {
+      event.preventDefault()
+      const anchorEl = event.currentTarget
+      if (!window.navigator.onLine) return this.props.openSnackBar(i18n.__('Offline Text'))
+      this.mkdirAsync().then(({ driveUUID, dirUUID }) => {
+        this.setState({ openFAB: true, anchorEl, driveUUID, dirUUID })
+      }).catch((e) => {
+        console.log(e)
+        if (e && e.response && e.response[0] && e.response[0].error.code === 'EEXIST') {
+          this.props.openSnackBar(i18n.__('Download Folder EEXIST Text'))
+        } else this.props.openSnackBar(i18n.__('BT Start Failed'))
       })
     }
   }
@@ -199,7 +252,7 @@ class BTDownload extends React.Component {
     )
   }
 
-  renderCircularProgress(progress, color, hovered, infoHash) {
+  renderCircularProgress(progress, color, hovered, infoHash, isPause) {
     const p = progress > 1 ? 1 : progress < 0 ? 0 : progress
     const rightDeg = Math.min(45, p * 360 - 135)
     const leftDeg = Math.max(45, p * 360 - 135)
@@ -260,8 +313,8 @@ class BTDownload extends React.Component {
           {
             hovered ?
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <IconButton onTouchTap={e => this.toggleStatus(e, infoHash)}>
-                  <PauseSvg color={this.props.primaryColor} />
+                <IconButton onTouchTap={e => this.toggleStatus(e, infoHash, isPause)}>
+                  { isPause ? <PlaySvg color={this.props.primaryColor} /> : <PauseSvg color={this.props.primaryColor} /> }
                 </IconButton>
               </div>
               : `${Math.round(p * 100)}%`
@@ -272,7 +325,7 @@ class BTDownload extends React.Component {
   }
 
   renderRow(task, index) {
-    const { magnetURL, name, downloadPath, progress, downloadSpeed, downloaded, timeRemaining, infoHash } = task
+    const { magnetURL, name, downloadPath, progress, downloadSpeed, downloaded, timeRemaining, infoHash, isPause } = task
     const selected = this.state.select.selected && this.state.select.selected.findIndex(s => s === index) > -1
     const hovered = this.state.select.hover === index
     return (
@@ -292,7 +345,7 @@ class BTDownload extends React.Component {
         >
           {/* CircularProgress */}
           <div style={{ flex: '0 0 56px' }}>
-            { this.renderCircularProgress(progress, this.props.primaryColor, hovered, infoHash) }
+            { this.renderCircularProgress(progress, this.props.primaryColor, hovered, infoHash, isPause) }
           </div>
 
           {/* task item name */}
@@ -311,8 +364,18 @@ class BTDownload extends React.Component {
           </div>
 
           {/* speed */}
-          <div style={{ flex: '0 0 120px' }}> { formatSpeed(downloadSpeed) } </div>
-          <div style={{ flex: '0 0 490px' }} />
+          <div style={{ flex: '0 0 120px' }}> { isPause ? '已暂停' : formatSpeed(downloadSpeed) } </div>
+          <div style={{ flex: '0 0 400px' }} />
+          <div style={{ flex: '0 0 90px' }} >
+            {
+              hovered &&
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <IconButton onTouchTap={e => this.openDestroy(e, infoHash)}>
+                    <DeleteSvg color={this.props.primaryColor} />
+                  </IconButton>
+                </div>
+            }
+          </div>
         </div>
 
         <div
@@ -368,7 +431,7 @@ class BTDownload extends React.Component {
           <div style={{ flex: '0 0 60px' }}> { `${Math.round(progress * 100)}%` } </div>
 
           {/* Status */}
-          <div style={{ flex: '0 0 120px' }}> { name ? '正在下载' : '获取信息中' } </div>
+          <div style={{ flex: '0 0 120px' }}> { isPause ? '已暂停' : name ? '正在下载' : '获取信息中' } </div>
 
           {/* task restTime */}
           <div style={{ flex: '0 0 120px' }}>{ formatSeconds(timeRemaining / 1000) }</div>
@@ -391,10 +454,7 @@ class BTDownload extends React.Component {
         <FloatingActionButton
           style={{ position: 'absolute', top: -36, left: 24, zIndex: 200 }}
           secondary
-          onTouchTap={(e) => {
-            e.preventDefault()
-            this.setState({ openFAB: true, anchorEl: e.currentTarget })
-          }}
+          onTouchTap={(e) => this.openFAB(e)}
         >
           <ContentAdd />
         </FloatingActionButton>
@@ -422,7 +482,7 @@ class BTDownload extends React.Component {
           </Menu>
         </Popover>
 
-        {/* Delete Runing Tasks Dialog */}
+        {/* Add magnet Dialog */}
         <DialogOverlay open={!!this.state.magnet} onRequestClose={() => this.setState({ magnet: false })}>
           <div>
             {
@@ -445,9 +505,38 @@ class BTDownload extends React.Component {
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                     <FlatButton
                       label="确定"
-                      disabled={!this.isInputOK(this.state.value) && !this.state.WIP}
+                      disabled={!this.isInputOK(this.state.value) || this.state.WIP}
                       primary
                       onTouchTap={this.addMagnet}
+                    />
+                  </div>
+                </div>
+            }
+          </div>
+        </DialogOverlay>
+
+        {/* Delete Tasks Dialog */}
+        <DialogOverlay open={!!this.state.destroy} onRequestClose={() => this.setState({ destroy: false })}>
+          <div>
+            {
+              this.state.destroy &&
+                <div style={{ width: 640, padding: '24px 24px 0px 24px' }}>
+                  <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
+                    { '确定要删除该任务吗' }
+                  </div>
+                  <div style={{ height: 20 }} />
+                  <div style={{ height: 24 }} />
+                  <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                    <FlatButton
+                      label="取消"
+                      primary
+                      onTouchTap={() => this.setState({ destroy: false })}
+                    />
+                    <FlatButton
+                      label="确定"
+                      disabled={this.state.WIP}
+                      primary
+                      onTouchTap={this.destroy}
                     />
                   </div>
                 </div>
