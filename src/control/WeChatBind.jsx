@@ -109,7 +109,7 @@ class WeChatBind extends React.Component {
       this.retryCount += 1
       // debug('this.getStationInfo', this.retryCount)
       this.props.apis.pureRequest('info', null, (err, res) => {
-        if (res && res.body && res.body.connectState === 'CONNECTED') this.bindWechat()
+        if (res && res.body && (res.body.connectState === 'CONNECTED' || res.body.connectState[0] === 'CONNECTED')) this.bindWechat()
         else setTimeout(() => this.getStationInfo(), this.retryCount * 1000)
       })
     }
