@@ -119,6 +119,10 @@ class Public extends Home {
     this.isNavEnter = false
   }
 
+  navGroup() {
+    return 'public'
+  }
+
   menuName() {
     return i18n.__('Public Menu Name')
   }

@@ -38,6 +38,8 @@ class Base extends EventEmitter {
         return teal600
       case 'media':
         return lightBlue600
+      case 'public':
+        return lightGreen700
       case 'trash':
         return lime800
       case 'physical':
@@ -45,7 +47,6 @@ class Base extends EventEmitter {
       case 'docker':
         return blueGrey500
       case 'settings':
-        // return deepPurple500
         return blueGrey400
       case 'device':
         return deepPurple500
@@ -53,7 +54,7 @@ class Base extends EventEmitter {
         return blueGrey400
       case 'download':
         return indigo600
-      case 'other':
+      case 'user':
         return deepPurple500
       default:
         return 'white'

@@ -42,7 +42,7 @@ class Account extends Base {
   }
 
   navGroup() {
-    return 'other'
+    return 'user'
   }
 
   menuName() {
