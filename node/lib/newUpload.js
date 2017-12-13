@@ -3,6 +3,7 @@ import i18n from 'i18n'
 import path from 'path'
 import UUID from 'uuid'
 import Debug from 'debug'
+import sanitize from 'sanitize-filename'
 import { dialog, ipcMain } from 'electron'
 import { getMainWindow } from './window'
 import { serverGetAsync, isCloud } from './server'
@@ -46,7 +47,7 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
     const stat = await fs.lstatAsync(path.resolve(entry))
     const entryType = stat.isDirectory() ? 'directory' : stat.isFile() ? 'file' : 'others'
     /* only upload directory or file, ignore others, such as symbolic link */
-    if (entryType !== 'others' && !(isCloud() && stat.size > 1073741824) && !(entryType === 'file' && name === '.DS_Store')) {
+    if (entryType !== 'others' && !(isCloud() && stat.size > 1073741824) && !(entryType === 'file' && name === '.DS_Store') && (name === sanitize(name))) {
       if (!taskType) taskType = entryType
       filtered.push({ entry, name, stat, entryType })
     }
