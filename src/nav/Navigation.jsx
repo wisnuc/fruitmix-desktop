@@ -34,6 +34,7 @@ import Networking from '../view/Networking'
 import TimeDate from '../view/TimeDate'
 import FanControl from '../view/FanControl'
 import ClientUpdate from '../view/ClientUpdate'
+import Language from '../view/Language'
 import Settings from '../view/Settings'
 import Power from '../view/Power'
 import Download from '../view/Download'
@@ -76,11 +77,12 @@ class NavViews extends React.Component {
     this.install('networking', Networking)
     this.install('timeDate', TimeDate)
     this.install('fanControl', FanControl)
-    this.install('firmwareUpdate', FirmwareUpdate)
     this.install('power', Power)
 
-    this.install('clientSettings', Settings)
+    this.install('language', Language)
     this.install('clientUpdate', ClientUpdate)
+    this.install('firmwareUpdate', FirmwareUpdate)
+    this.install('clientSettings', Settings)
 
 
     Object.assign(this.state, {
@@ -117,11 +119,14 @@ class NavViews extends React.Component {
 
   navTo(nav, target) {
     // debug('navTo', nav, target, this.state.nav)
-    if (nav === this.state.nav) return
-    this.setState({ nav, openDrawer: false, showDetail: false })
-    if (this.state.nav) this.views[this.state.nav].navLeave()
-    this.props.setPalette(this.views[nav].primaryColor(), this.views[nav].accentColor())
-    this.views[nav].navEnter(target)
+    if (nav === this.state.nav) {
+      this.setState({ openDrawer: false })
+    } else {
+      this.setState({ nav, openDrawer: false, showDetail: false })
+      if (this.state.nav) this.views[this.state.nav].navLeave()
+      this.props.setPalette(this.views[nav].primaryColor(), this.views[nav].accentColor())
+      this.views[nav].navEnter(target)
+    }
   }
 
   navToDrive(driveUUID, dirUUID) {
@@ -199,7 +204,7 @@ class NavViews extends React.Component {
           hasQuickNavs && navGroupList.map((key) => {
             const noRender = <div key={`quicknav-${key}`} />
             if ((!ws215i || !isAdmin) && key === 'fanControl') return noRender
-            if (!isAdmin && (key === 'firmwareUpdate' || key === 'power')) return noRender
+            if (!isAdmin && (['firmwareUpdate', 'power', 'adminUsers', 'adminDrives'].includes(key))) return noRender
             if (isCloud && ['device', 'networking', 'timeDate', 'fanControl', 'power', 'plugin'].includes(key)) return noRender
             return (
               <QuickNav
