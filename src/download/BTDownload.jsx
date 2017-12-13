@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
 import { List, AutoSizer } from 'react-virtualized'
@@ -100,7 +101,7 @@ class BTDownload extends React.Component {
 
     /* actions */
 
-    this.openDesdroy = (e, infoHash) => {
+    this.openDestroy = (e, infoHash) => {
       e.preventDefault() // important, to prevent other event
       e.stopPropagation()
       this.setState({ id: infoHash, destroy: true })
@@ -133,7 +134,7 @@ class BTDownload extends React.Component {
 
     this.addMagnet = () => {
       this.setState({ WIP: true })
-      this.props.apis.request('addMagnet', { magnetURL: this.state.value, downloadPath: '/home/lxw/BT' }, (err) => {
+      this.props.apis.request('addMagnet', { magnetURL: this.state.value, dirUUID: this.state.dirUUID }, (err) => {
         if (err) {
           console.log('addMagnet error', err)
           this.props.openSnackBar('添加失败！')
@@ -145,10 +146,36 @@ class BTDownload extends React.Component {
         this.refresh()
       })
     }
+
+    this.mkdirAsync = async () => {
+      const driveUUID = this.props.apis.drives.data.find(d => d.tag === 'home').uuid
+      const stationID = this.props.selectedDevice.token.data.stationID
+      const data = await this.props.apis.requestAsync('mkdir', {
+        driveUUID,
+        dirUUID: driveUUID,
+        dirname: i18n.__('BT Download Folder Name')
+      })
+      const dirUUID = stationID ? data.uuid : data[0].data.uuid
+      return ({ driveUUID, dirUUID })
+    }
+
+    this.openFAB = (event) => {
+      event.preventDefault()
+      const anchorEl = event.currentTarget
+      if (!window.navigator.onLine) return this.props.openSnackBar(i18n.__('Offline Text'))
+      this.mkdirAsync().then(({ driveUUID, dirUUID }) => {
+        this.setState({ openFAB: true, anchorEl, driveUUID, dirUUID })
+      }).catch((e) => {
+        console.log(e)
+        if (e && e.response && e.response[0] && e.response[0].error.code === 'EEXIST') {
+          this.props.openSnackBar(i18n.__('Download Folder EEXIST Text'))
+        } else this.props.openSnackBar(i18n.__('BT Start Failed'))
+      })
+    }
   }
 
   componentDidMount() {
-    this.refreshTimer = setInterval(this.refresh, 1000)
+    // this.refreshTimer = setInterval(this.refresh, 1000)
   }
 
   componentWillReceiveProps(nextProps) {
@@ -335,7 +362,7 @@ class BTDownload extends React.Component {
             {
               hovered &&
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <IconButton onTouchTap={e => this.openDesdroy(e, infoHash)}>
+                  <IconButton onTouchTap={e => this.openDestroy(e, infoHash)}>
                     <DeleteSvg color={this.props.primaryColor} />
                   </IconButton>
                 </div>
@@ -419,10 +446,7 @@ class BTDownload extends React.Component {
         <FloatingActionButton
           style={{ position: 'absolute', top: -36, left: 24, zIndex: 200 }}
           secondary
-          onTouchTap={(e) => {
-            e.preventDefault()
-            this.setState({ openFAB: true, anchorEl: e.currentTarget })
-          }}
+          onTouchTap={(e) => this.openFAB(e)}
         >
           <ContentAdd />
         </FloatingActionButton>

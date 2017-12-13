@@ -707,5 +707,10 @@
   "Read Upload Failed": "Failed to access uploading files.",
 
   "==== node/lib/newDownload.js ====": "",
-  "Read Download Failed": "Failed to access the downloading fold."
+  "Read Download Failed": "Failed to access the downloading fold.",
+
+  "==== download/BTDownload.js ====": "",
+  "BT Download Folder Name": "Download",
+  "Download Folder EEXIST Text": "Failed to create the folder 'Download', this path may already exist",
+  "BT Start Failed": "Failed to start BT download"
 }

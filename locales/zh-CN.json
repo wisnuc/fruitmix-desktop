@@ -701,5 +701,10 @@
   "Read Upload Failed": "读取上传文件失败",
 
   "==== node/lib/newDownload.js ====": "",
-  "Read Download Failed": "读取下载目录失败"
+  "Read Download Failed": "读取下载目录失败",
+  
+  "==== download/BTDownload.js ====": "",
+  "BT Download Folder Name": "Download",
+  "Download Folder EEXIST Text": "无法创建目录‘Download‘，可能存在重名文件！",
+  "BT Start Failed": "无法启动BT下载"
 }
