@@ -328,7 +328,7 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'handleMagnet': // op: 'pause', 'resume', 'destroy'
-        r = this.apatch(`download/${args.id}`, { op: args.op, torrentId: args.id })
+        r = this.apatch(`download/${args.id}`, { op: args.op })
         break
 
       default:
