@@ -166,17 +166,31 @@ class NavDrawer extends React.Component {
 
         <SubHeader>{ i18n.__('Box Title') }</SubHeader>
 
-        { this.renderGroup('file') }
+        {/* this.renderGroup('file') */}
 
-        {/*
         <MenuItem
           icon={views.home.menuIcon()}
-          text={views.home.menuName()}
+          text={i18n.__('Files')}
           primaryColor={primaryColor}
-          selected={nav === 'home' || nav === 'public'}
+          selected={views[nav].navGroup() === 'file'}
           onTouchTap={() => navTo('home')}
         />
-        */}
+
+        <MenuItem
+          icon={views.media.menuIcon()}
+          text={i18n.__('Photos')}
+          primaryColor={primaryColor}
+          selected={views[nav].navGroup() === 'media'}
+          onTouchTap={() => navTo('media')}
+        />
+
+        <MenuItem
+          icon={views.public.menuIcon()}
+          text={i18n.__('Share Space')}
+          primaryColor={primaryColor}
+          selected={views[nav].navGroup() === 'public'}
+          onTouchTap={() => navTo('public')}
+        />
 
         <MenuItem
           icon={views.download.menuIcon()}
@@ -186,20 +200,8 @@ class NavDrawer extends React.Component {
           onTouchTap={() => navTo('download')}
         />
 
-        <MenuItem
-          icon={views.media.menuIcon()}
-          text={views.media.menuName()}
-          primaryColor={primaryColor}
-          selected={views[nav].navGroup() === 'media'}
-          onTouchTap={() => navTo('media')}
-        />
-
-
-        { this.renderGroup('physical') }
-
-
+        {/* this.renderGroup('physical') */}
         {/* this.renderGroup('trash') */}
-
 
         {/*
         <div style={{ height: 4 }} />
@@ -219,19 +221,27 @@ class NavDrawer extends React.Component {
         />
         */}
 
+        <MenuItem
+          icon={views.account.menuIcon()}
+          text={i18n.__('Users')}
+          primaryColor={primaryColor}
+          selected={views[nav].navGroup() === 'user'}
+          onTouchTap={() => navTo('account')}
+        />
+
         {
           isAdmin && <MenuItem
             icon={ActionDns}
             text={i18n.__('Device Management')}
             primaryColor={primaryColor}
             selected={views[nav].navGroup() === 'device'}
-            onTouchTap={() => navTo('adminUsers')}
+            onTouchTap={() => navTo('device')}
           />
         }
 
         <MenuItem
           icon={ActionSettings}
-          text={i18n.__('Client Settings')}
+          text={i18n.__('System Settings')}
           primaryColor={primaryColor}
           selected={views[nav].navGroup() === 'settings'}
           onTouchTap={() => navTo('clientSettings')}

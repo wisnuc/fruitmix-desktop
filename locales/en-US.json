@@ -398,6 +398,10 @@
   "Docker": "Docker",
   "Device Management": "Device",
   "Client Settings": "Settings",
+  "Files": "Files",
+  "Photos": "Photos",
+  "Share Space": "Share",
+  "System Settings": "System",
 
   "==== nav/Navigation.jsx ====": "",
   "Detail": "Detail",
@@ -407,7 +411,7 @@
 
   "==== view/AdminDrives.jsx ====": "",
   "AdminDrives Menu Name": "Public Drive",
-  "AdminDrives Quick Name": "Public",
+  "AdminDrives Quick Name": "Manage",
   "AdminDrives Title": "Public Drive Management",
   "Open": "Open",
   "Close Modify Page": "Hide modify page",

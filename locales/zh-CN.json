@@ -398,6 +398,10 @@
   "Docker": "Docker",
   "Device Management": "设备管理",
   "Client Settings": "客户端设置",
+  "Files": "文件",
+  "Photos": "照片",
+  "Share Space": "共享空间",
+  "System Settings": "系统设置",
 
   "==== nav/Navigation.jsx ====": "",
   "Detail": "详情",
@@ -407,7 +411,7 @@
 
   "==== view/AdminDrives.jsx ====": "",
   "AdminDrives Menu Name": "共享盘管理",
-  "AdminDrives Quick Name": "共享盘",
+  "AdminDrives Quick Name": "管理",
   "AdminDrives Title": "共享盘管理",
   "Open": "打开",
   "Close Modify Page": "关闭修改页",
