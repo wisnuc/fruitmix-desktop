@@ -100,6 +100,37 @@ class NavViews extends React.Component {
     this.openDrawerBound = this.openDrawer.bind(this)
     this.openSnackBarBound = this.openSnackBar.bind(this)
     this.navToDriveBound = this.navToDrive.bind(this)
+
+    this.openMovePolicy = (data) => {
+      this.setState({ conflicts: data })
+    }
+
+    this.handleTask = (uuid, response, conflicts) => {
+      console.log('this.handleTask', uuid, response, conflicts)
+      conflicts.forEach((c, index) => {
+        let policy
+        switch (response[index]) {
+          case 'rename':
+            policy = ['rename', 'rename']
+            break
+          case 'replace':
+            policy = ['replace', 'replace']
+            break
+          case 'skip':
+            policy = ['skip', 'skip']
+            break
+          case 'merge':
+            policy = ['keep', null]
+            break
+          case 'overwrite':
+            policy = ['keep', null]
+            break
+          default:
+            policy = [null, null]
+        }
+        this.props.apis.pureRequest('handleTask', { taskUUID: uuid, nodeUUID: c.nodeUUID, policy })
+      })
+    }
   }
 
   install(name, View) {
@@ -156,8 +187,9 @@ class NavViews extends React.Component {
     return this.state.showDetail
   }
 
-  openSnackBar(message) {
-    this.setState({ snackBar: message })
+  openSnackBar(message, options) {
+    if (options && options.showTasks) this.setState({ showTasks: true, snackBar: message })
+    else this.setState({ snackBar: message })
   }
 
   currentView() {
@@ -346,12 +378,28 @@ class NavViews extends React.Component {
           { view.renderToolBar({ style: toolBarStyle }) }
 
           {/* global notification button */}
-          <IconButton>
-            <SocialNotifications
-              color={view.appBarStyle() === 'light' ? 'rgba(0,0,0,0.54)' : '#FFF'}
-              onTouchTap={() => this.setState({ showTasks: !this.state.showTasks })}
+          <div style={{ width: 48, height: 48, position: 'relative' }} >
+            <div
+              style={{
+                position: 'absolute',
+                top: 4,
+                left: 4,
+                width: 40,
+                height: 40,
+                backgroundColor: '#FFF',
+                borderRadius: 20,
+                opacity: this.state.showTasks ? 0.3 : 0,
+                transition: 'opacity 300ms'
+              }}
             />
-          </IconButton>
+            <IconButton>
+              <SocialNotifications
+                color={view.appBarStyle() === 'light' ? 'rgba(0,0,0,0.54)' : '#FFF'}
+                onTouchTap={() => this.setState({ showTasks: !this.state.showTasks })}
+                style={{ position: 'absolute' }}
+              />
+            </IconButton>
+          </div>
 
           {/* optional toggle detail button */}
           { this.renderDetailButton() }
@@ -467,6 +515,7 @@ class NavViews extends React.Component {
                 primaryColor={this.currentView().primaryColor()}
                 data={this.state.conflicts}
                 ipcRenderer={ipcRenderer}
+                handleTask={this.handleTask}
               />
           }
         </DialogOverlay>
@@ -478,6 +527,7 @@ class NavViews extends React.Component {
               apis={this.props.apis}
               onRequestClose={() => this.setState({ showTasks: false })}
               showDetail={this.state.showDetail}
+              openMovePolicy={this.openMovePolicy}
             />
         }
       </div>

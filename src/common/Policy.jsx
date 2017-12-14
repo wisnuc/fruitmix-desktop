@@ -34,14 +34,17 @@ class PolicyDialog extends React.PureComponent {
     this.fire = () => {
       const session = this.props.data.session
       const response = this.response
-      debug('this.fire', session, response)
-      this.props.ipcRenderer.send('resolveConflicts', { session, response, conflicts: this.props.data.conflicts })
+      debug('this.fire', session, response, this.props.data)
+
+      if (this.props.data.actionType) this.props.handleTask(session, response, this.props.data.conflicts)
+      else this.props.ipcRenderer.send('resolveConflicts', { session, response, conflicts: this.props.data.conflicts })
+
       this.props.onRequestClose()
     }
 
     this.cancel = () => {
       const session = this.props.data.session
-      this.props.ipcRenderer.send('resolveConflicts', { session, response: null })
+      if (!this.props.data.actionType) this.props.ipcRenderer.send('resolveConflicts', { session, response: null })
       this.props.onRequestClose()
     }
 

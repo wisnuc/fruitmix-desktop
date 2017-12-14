@@ -5,6 +5,7 @@ import { Paper, CircularProgress, LinearProgress, IconButton } from 'material-ui
 import DoneIcon from 'material-ui/svg-icons/action/done'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import BackIcon from 'material-ui/svg-icons/navigation/arrow-back'
+import WarningIcon from 'material-ui/svg-icons/alert/warning'
 import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
 import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
 import FileFolder from 'material-ui/svg-icons/file/folder'
@@ -51,10 +52,34 @@ class Tasks extends React.Component {
         }
       })
     }
+
+    this.handleConflict = (uuid, type, nodes) => {
+      const data = {
+        session: uuid,
+        actionType: 'type',
+        conflicts: nodes.map((n) => {
+          const name = n.src.name
+          const entryType = n.type
+          const nodeUUID = n.src.uuid
+          const remote = { type: n.error.xcode === 'EISDIR' ? 'directory' : 'file' }
+          return ({ name, entryType, remote, nodeUUID })
+        })
+      }
+      this.props.openMovePolicy(data)
+    }
   }
 
   componentDidMount() {
     this.refresh()
+    this.timer = setInterval(() => this.refresh(), 1000)
+  }
+
+  componentWillUnmount() {
+    console.log('componentWillUnmount', this.state.tasks)
+    this.state.tasks.filter(t => t.nodes.findIndex(n => n.parent === null && n.state === 'Finished') > -1).forEach((t) => {
+      this.props.apis.pureRequest('deleteTask', { uuid: t.uuid })
+    })
+    clearInterval(this.timer)
   }
 
   renderLoading() {
@@ -71,27 +96,82 @@ class Tasks extends React.Component {
     </div>
   }
 
+  renderNoTask() {
+    return (
+      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
+        { 'No Running Tasks' }
+      </div>
+    )
+  }
+
   renderTask(task) {
     const { uuid, type, src, dst, entries, nodes } = task
-    const action = 'Copying'
-    const iconStyle = { width: 16, height: 16, color: '#9E9E9E' }
+    const action = type === 'cpoy' ? '拷贝' : '移动'
+    const iStyle = { width: 16, height: 16, color: '#9E9E9E' }
+    const tStyles = { marginTop: -8 }
     const show = this.state.uuid === uuid
-    
+    const conflict = nodes.filter(n => n.state === 'Conflict')
+    const finished = nodes.findIndex(n => n.parent === null && n.state === 'Finished') > -1
+
     return (
-      <div style={{ height: show ? 160 : 72, width: '100%', transition: 'all 225ms' }} >
-        <div style={{ height: 24, width: 300, display: 'flex', alignItems: 'center', marginLeft: 16, fontSize: 13 }} >
-          { `Copying ${entries.length} items` }
-        </div>
-        <div style={{ height: 24, width: 320, display: 'flex', alignItems: 'center', marginLeft: 16, fontSize: 13 }} >
-          <LinearProgress mode="indeterminate" />
+      <div style={{ height: show ? '' : 72, width: '100%', transition: 'all 225ms' }} key={uuid}>
+        <div style={{ height: 24, width: 300, display: 'flex', alignItems: 'center', fontSize: 13 }} >
           <div style={{ width: 16 }} />
-          <IconButton tooltip="Cancel" iconStyle={iconStyle} onTouchTap={() => this.cancelTask(uuid)}>
-            <CloseIcon />
-          </IconButton>
-          <IconButton tooltip="Detail" iconStyle={iconStyle} onTouchTap={() => this.toggleDetail(uuid)}>
-            { show ? <UpIcon /> : <DownIcon /> }
-          </IconButton>
+          { action }
+          <div style={{ width: 4 }} />
+          <div style={{ maxWidth: 96, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} >
+            { entries[0].name }
+          </div>
+          <div style={{ width: 4 }} />
+          { entries.length > 1 && `等${entries.length}个项目` }
         </div>
+
+        <div style={{ height: 24, width: '100%', display: 'flex', alignItems: 'center', fontSize: 13 }} >
+          <div style={{ width: 16 }} />
+          <div style={{ flexGrow: 1 }} >
+            <LinearProgress mode={(finished || conflict.length > 0) ? 'determinate' : 'indeterminate'} value={finished ? 100 : 61.8} />
+          </div>
+          <div style={{ width: 16 }} />
+          <IconButton tooltip={finished ? 'OK' : 'Cancel'} iconStyle={iStyle} tooltipStyles={tStyles} onTouchTap={() => this.cancelTask(uuid)}>
+            { finished ? <DoneIcon /> : <CloseIcon /> }
+          </IconButton>
+          {
+            conflict.length ?
+              <IconButton
+                tooltip="Detail"
+                iconStyle={iStyle}
+                tooltipStyles={tStyles}
+                onTouchTap={() => this.handleConflict(uuid, type, conflict)}
+              >
+                { show ? <UpIcon /> : <WarningIcon /> }
+              </IconButton>
+              : <div style={{ width: 48 }} />
+          }
+        </div>
+        <div style={{ fontSize: 13, marginLeft: 16 }}>
+          { finished ? '已完成' : conflict.length ? '已停止' : '' }
+        </div>
+        { show && <div style={{ height: 16 }} /> }
+        {
+          show && conflict.map(c => (
+            <div style={{ height: 24, width: 300, display: 'flex', alignItems: 'center', fontSize: 11 }}>
+              <div style={{ width: 16 }} />
+              <div style={{ width: 144, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} >
+                { c.src.name }
+              </div>
+              <div style={{ width: 16 }} />
+              { '存在命名冲突' }
+            </div>
+          ))
+        }
+        { show && <div style={{ height: 16 }} /> }
+        {
+          show &&
+            <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+              <FlatButton label="处理" onTouchTap={() => this.handleConflict(uuid, type, conflict)} primary />
+              <FlatButton label="终止" onTouchTap={() => this.cancelTask(uuid)} primary />
+            </div>
+        }
       </div>
     )
   }
@@ -114,8 +194,8 @@ class Tasks extends React.Component {
           }}
           onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
         >
-          { this.state.loading ? this.renderLoading() : this.state.error ?
-              this.renderError() : this.state.tasks.map(t => this.renderTask(t)) }
+          { this.state.loading ? this.renderLoading() : this.state.error ? this.renderError()
+              : this.state.tasks.length ? this.state.tasks.map(t => this.renderTask(t)) : this.renderNoTask() }
         </Paper>
       </div>
     )

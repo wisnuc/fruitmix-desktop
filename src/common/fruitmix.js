@@ -369,6 +369,10 @@ class Fruitmix extends EventEmitter {
         r = this.adel(`tasks/${args.uuid}`)
         break
 
+      case 'handleTask':
+        r = this.apatch(`tasks/${args.taskUUID}/nodes/${args.nodeUUID}`, { policy: args.policy })
+        break
+
       /* Ticket and Wechat API */
       case 'info':
         r = request.get(`http://${this.address}:3000/station/info`)
