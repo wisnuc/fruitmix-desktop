@@ -26,7 +26,16 @@ class Transmission extends Base {
   }
 
   menuIcon() {
-    return ActionSwapVerticalCircle
+    return ({
+      icon: ActionSwapVerticalCircle,
+      gif: {
+        raw: './assets/images/transmission_raw.gif',
+        hover: './assets/images/transmission_hover.gif',
+        selected: './assets/images/transmission_selected.gif',
+        selected_dark: './assets/images/transmission_selected_dark.gif',
+        selected_hover: './assets/images/transmission_selected_hover.gif'
+      }
+    })
   }
 
   appBarStyle() {
