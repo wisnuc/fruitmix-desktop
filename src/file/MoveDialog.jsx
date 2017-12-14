@@ -118,7 +118,8 @@ class MoveDialog extends React.PureComponent {
           .catch(err => console.log(err))
       } else if (node.type === 'publicRoot') { // list public drives
         const myUUID = this.props.apis.account.data && this.props.apis.account.data.uuid
-        const list = this.props.apis.drives.value().filter(d => d.type === 'public' && d.writelist.find(u => u === myUUID))
+        const list = this.props.apis.drives.value().filter(d => d.type === 'public' && 
+          (d.writelist === '*' || d.writelist.find(u => u === myUUID)))
         setImmediate(() => this.updateState(path, currentDir, list))
       }
     }
@@ -150,7 +151,8 @@ class MoveDialog extends React.PureComponent {
         setImmediate(() => this.updateState(path, currentDir, list))
       } else if (currentDir.type === 'publicRoot') { // list public drives
         const myUUID = this.props.apis.account.data && this.props.apis.account.data.uuid
-        const list = this.props.apis.drives.value().filter(d => d.type === 'public' && d.writelist.find(u => u === myUUID))
+        const list = this.props.apis.drives.value().filter(d => d.type === 'public' && 
+          (d.writelist === '*' || d.writelist.find(u => u === myUUID)))
         setImmediate(() => this.updateState(path, currentDir, list))
       }
     }
@@ -238,16 +240,14 @@ class MoveDialog extends React.PureComponent {
           this.closeDialog()
           this.props.refresh()
           this.props.openSnackBar(type.concat(i18n.__('+Failed')))
-        } else if (res) {
-          this.setState({ loading: false })
-          this.closeDialog()
-          this.props.refresh()
-          this.props.openSnackBar(type.concat(i18n.__('+Success')))
         } else {
           this.setState({ loading: false })
           this.closeDialog()
           this.props.refresh()
-          this.props.openSnackBar('Working')
+          let text = 'Working'
+          if (res === 'Finished') text = type.concat(i18n.__('+Success'))
+          if (res === 'Conflict') text = '出现命名冲突'
+          this.props.openSnackBar(text, res !== 'Finished' ? { showTasks: true } : null)
         }
       })
     }
@@ -258,8 +258,9 @@ class MoveDialog extends React.PureComponent {
       const res = await this.props.apis.pureRequestAsync('task', { uuid })
       const data = this.props.apis.stationID ? res.body.data : res.body
       console.log('data && data.nodes', data && data.nodes)
-      if (data && data.nodes && data.nodes.findIndex(n => n.parent === null && n.state === 'Finished') > -1) return true
-      return false
+      if (data && data.nodes && data.nodes.findIndex(n => n.parent === null && n.state === 'Finished') > -1) return 'Finished'
+      if (data && data.nodes && data.nodes.findIndex(n => n.state === 'Conflict') > -1) return 'Conflict'
+      return 'Working'
     }
 
     /* close dialog */
