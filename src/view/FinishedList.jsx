@@ -3,6 +3,7 @@ import i18n from 'i18n'
 
 import ActionSwapVerticalCircle from 'material-ui/svg-icons/action/swap-vertical-circle'
 import FinishedList from '../download/FinishedList'
+import { BTFinishedIcon } from '../common/Svg'
 import Base from './Base'
 
 class Download extends Base {
@@ -43,7 +44,7 @@ class Download extends Base {
   }
 
   menuIcon() {
-    return ActionSwapVerticalCircle
+    return BTFinishedIcon
   }
 
   appBarStyle() {

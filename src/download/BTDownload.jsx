@@ -13,6 +13,7 @@ import ListSelect from '../file/ListSelect'
 import FlatButton from '../common/FlatButton'
 import DialogOverlay from '../common/PureDialog'
 import PureDialog from '../common/PureDialog'
+import { BTTorrentIcon, BTMagnetIcon } from '../common/Svg'
 
 const debug = Debug('component:download:')
 
@@ -469,13 +470,13 @@ class BTDownload extends React.Component {
           <Menu style={{ minWidth: 240 }}>
             <MenuItem
               primaryText="添加BT种子文件"
-              leftIcon={<ContentAdd />}
+              leftIcon={<BTTorrentIcon />}
               onTouchTap={() => console.log('添加BT种子文件 TODO')}
               style={{ fontSize: 13 }}
             />
             <MenuItem
               primaryText="添加磁力链接"
-              leftIcon={<ContentAdd />}
+              leftIcon={<BTMagnetIcon />}
               onTouchTap={() => this.setState({ magnet: true, openFAB: false })}
               style={{ fontSize: 13 }}
             />
