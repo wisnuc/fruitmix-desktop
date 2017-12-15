@@ -102,7 +102,7 @@ class Home extends Base {
       const path = this.state.path
       const curr = path[path.length - 1]
       const oldName = entries[selected[0]].name
-      const reg = /^.*?\./
+      const reg = /^.*\./
       const extension = oldName.replace(reg, '')
       const nameNoExt = oldName.match(reg) ? oldName.match(reg)[0] : oldName
       let newName = oldName

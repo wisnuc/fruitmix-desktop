@@ -379,18 +379,19 @@ class BTDownload extends React.Component {
 
 
           {/* Downloaded size */}
-          <div style={{ flex: '0 0 200px' }}> { `${formatSize(downloaded)} / ${formatSize(downloaded / progress)}` } </div>
+          <div style={{ flex: '0 0 160px' }}> { `${formatSize(downloaded)} / ${formatSize(downloaded / progress)}` } </div>
 
           {/* speed */}
           <div style={{ flex: '0 0 120px' }}> { !isPause && !this.props.alt && formatSpeed(downloadSpeed) } </div>
 
           {/* Status */}
           <div style={{ flex: '0 0 120px' }}>
-            { isPause ? i18n.__('Task Paused') : name ? i18n.__('Task Downloading') : i18n.__('Getting Info')}
+            { this.props.alt ? i18n.__('Finished') : isPause ? i18n.__('Task Paused') :
+              name ? i18n.__('Task Downloading') : i18n.__('Getting Info') }
           </div>
 
           {/* task restTime */}
-          <div style={{ flex: '0 0 120px' }}>
+          <div style={{ flex: '0 0 160px' }}>
             { this.props.alt ? '' : isPause ? '- - : - - : - -' : formatSeconds(timeRemaining / 1000) }
           </div>
           <div style={{ flex: '0 0 90px' }} >
