@@ -1,5 +1,6 @@
 import React from 'react'
 import i18n from 'i18n'
+import { ipcRenderer } from 'electron'
 
 import ActionSwapVerticalCircle from 'material-ui/svg-icons/action/swap-vertical-circle'
 import BTDownload from '../download/BTDownload'
@@ -79,6 +80,7 @@ class Download extends Base {
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <BTDownload
+          ipcRenderer={ipcRenderer}
           navToDrive={navToDrive}
           tasks={this.state.tasks ? this.state.tasks.running : []}
           apis={this.ctx.props.apis}

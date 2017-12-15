@@ -186,6 +186,12 @@ class BTDownload extends React.Component {
         } else this.props.openSnackBar(i18n.__('BT Start Failed'))
       })
     }
+
+    this.addTorrent = () => {
+      this.props.ipcRenderer.send('ADD_TORRENT', { dirUUID: this.state.dirUUID })
+      this.setState({ openFAB: false })
+      this.refresh()
+    }
   }
 
   componentDidMount() {
@@ -486,7 +492,7 @@ class BTDownload extends React.Component {
             <MenuItem
               primaryText="添加BT种子文件"
               leftIcon={<BTTorrentIcon />}
-              onTouchTap={() => console.log('添加BT种子文件 TODO')}
+              onTouchTap={() => this.addTorrent()}
               style={{ fontSize: 13 }}
             />
             <MenuItem

@@ -412,3 +412,7 @@ export const downloadFile = (driveUUID, dirUUID, entryUUID, fileName, downloadPa
     } else callback(null, filePath)
   })
 }
+
+export const uploadTorrent = (dirUUID, filePath, callback) => {
+  const handle = apost('download/torrent').field('dirUUID', dirUUID).attach('torrent', filePath).end(callback)
+}
