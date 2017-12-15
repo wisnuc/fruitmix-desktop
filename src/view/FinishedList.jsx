@@ -66,7 +66,7 @@ class Download extends Base {
   renderTitle({ style }) {
     return (
       <div style={Object.assign({}, style, { marginLeft: 184 })}>
-        { i18n.__('FinishedList Title %s', (this.state.tasks && this.state.tasks.length) || 0)}
+        { i18n.__('FinishedList Title %s', (this.state.tasks && this.state.tasks.finish.length) || 0)}
       </div>
     )
   }

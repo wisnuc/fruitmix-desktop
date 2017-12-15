@@ -61,7 +61,7 @@ class Tasks extends React.Component {
           const name = n.src.name
           const entryType = n.type
           const nodeUUID = n.src.uuid
-          const remote = { type: n.error.xcode === 'EISDIR' ? 'directory' : 'file' }
+          const remote = { type: n.error && n.error.xcode === 'EISDIR' ? 'directory' : 'file' }
           return ({ name, entryType, remote, nodeUUID })
         })
       }

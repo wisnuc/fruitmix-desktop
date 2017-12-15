@@ -60,6 +60,7 @@ class BTDownload extends React.Component {
     this.state = {
       select: this.select.state,
       loading: true,
+      errorText: '',
       WIP: false
     }
 
@@ -123,9 +124,9 @@ class BTDownload extends React.Component {
 
     this.refresh = () => this.props.apis.request('BTList')
 
-    this.isInputOK = v => v && v.length >= 60 && /^magnet:\?xt=urn:btih:/.test(v)
+    this.isInputOK = v => v && v.length >= 60 && /^magnet:\?xt=urn:btih:/.test(v) && !this.state.errorText
 
-    this.handleChange = value => this.setState({ value })
+    this.handleChange = value => this.setState({ value, errorText: '' })
 
     this.destroy = () => {
       this.setState({ WIP: true })
@@ -146,11 +147,15 @@ class BTDownload extends React.Component {
       this.props.apis.request('addMagnet', { magnetURL: this.state.value, dirUUID: this.state.dirUUID }, (err) => {
         if (err) {
           console.log('addMagnet error', err)
-          this.props.openSnackBar('添加失败！')
-          this.setState({ WIP: false })
+          // this.props.openSnackBar('添加失败！')
+          let errorText
+          if (err.response && err.response.message === 'torrent exist') errorText = '任务已存在'
+          else errorText = '添加失败!'
+          
+          this.setState({ WIP: false, errorText })
         } else {
           this.props.openSnackBar('添加成功！')
-          this.setState({ WIP: false, magnet: false })
+          this.setState({ WIP: false, magnet: false, value: 'magnet:?xt=urn:btih:' })
         }
         this.refresh()
       })
@@ -269,7 +274,7 @@ class BTDownload extends React.Component {
               width: 36,
               height: 36,
               transform: `rotate(${rightDeg}deg)`,
-              border: '4px solid transparent',
+              border: '4px solid #C5CAE9',
               borderTop: `4px solid ${color}`,
               borderRight: `4px solid ${color}`,
               borderRadius: '50%'
@@ -287,7 +292,7 @@ class BTDownload extends React.Component {
               width: 36,
               height: 36,
               transform: `rotate(${leftDeg}deg)`,
-              border: '4px solid transparent',
+              border: '4px solid #C5CAE9',
               borderTop: `4px solid ${color}`,
               borderRight: `4px solid ${color}`,
               borderRadius: '50%'
@@ -303,7 +308,7 @@ class BTDownload extends React.Component {
             left: 6,
             width: 36,
             height: 36,
-            border: '4px solid #C5CAE9',
+            border: '4px solid transparent',
             fontSize: 12,
             display: 'flex',
             alignItems: 'center',
@@ -314,7 +319,10 @@ class BTDownload extends React.Component {
           {
             hovered ?
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <IconButton onTouchTap={e => this.toggleStatus(e, infoHash, isPause)}>
+                <IconButton
+                  onTouchTap={e => this.toggleStatus(e, infoHash, isPause)}
+                  tooltip={isPause ? i18n.__('Resume') : i18n.__('Pause')}
+                >
                   { isPause ? <PlaySvg color={this.props.primaryColor} /> : <PauseSvg color={this.props.primaryColor} /> }
                 </IconButton>
               </div>
@@ -340,7 +348,7 @@ class BTDownload extends React.Component {
             fontSize: 14,
             backgroundColor: selected ? '#EEEEEE' : hovered ? '#F5F5F5' : ''
           }}
-          onTouchTap={e => this.onRowTouchTap(e, index)}
+          onTouchTap={e => 0 && this.onRowTouchTap(e, index)}
           onMouseEnter={e => this.onRowMouseEnter(e, index)}
           onMouseLeave={e => this.onRowMouseLeave(e, index)}
         >
@@ -364,14 +372,21 @@ class BTDownload extends React.Component {
             </div>
           </div>
 
+
           {/* speed */}
-          <div style={{ flex: '0 0 120px' }}> { isPause ? '已暂停' : formatSpeed(downloadSpeed) } </div>
-          <div style={{ flex: '0 0 400px' }} />
+          <div style={{ flex: '0 0 120px' }}> { !isPause && formatSpeed(downloadSpeed) } </div>
+
+          {/* Status */}
+          <div style={{ flex: '0 0 120px' }}> { isPause ? '已暂停' : name ? '正在下载' : '获取信息中' } </div>
+
+          {/* task restTime */}
+          <div style={{ flex: '0 0 120px' }}>{ isPause ? '- - : - - : - -' : formatSeconds(timeRemaining / 1000) }</div>
+          <div style={{ flex: '0 0 200px' }} />
           <div style={{ flex: '0 0 90px' }} >
             {
               hovered &&
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <IconButton onTouchTap={e => this.openDestroy(e, infoHash)}>
+                  <IconButton onTouchTap={e => this.openDestroy(e, infoHash)} tooltip={i18n.__('Delete')}>
                     <DeleteSvg color={this.props.primaryColor} />
                   </IconButton>
                 </div>
@@ -498,6 +513,7 @@ class BTDownload extends React.Component {
                     floatingLabelText="请输入磁力链接地址"
                     defaultValue="magnet:?xt=urn:btih:"
                     onChange={e => this.handleChange(e.target.value)}
+                    errorText={this.state.errorText}
                     ref={input => input && input.focus()}
                     fullWidth
                     value={this.state.value}
@@ -521,8 +537,8 @@ class BTDownload extends React.Component {
           <div>
             {
               this.state.destroy &&
-                <div style={{ width: 640, padding: '24px 24px 0px 24px' }}>
-                  <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
+                <div style={{ width: 376, padding: '24px 24px 0px 24px' }}>
+                  <div>
                     { '确定要删除该任务吗' }
                   </div>
                   <div style={{ height: 20 }} />
