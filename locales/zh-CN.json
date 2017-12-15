@@ -397,7 +397,6 @@
   "Management Title": "管理",
   "Docker": "Docker",
   "Device Management": "设备管理",
-  "Client Settings": "客户端设置",
   "Files": "文件",
   "Photos": "照片",
   "Share Space": "共享空间",
@@ -703,8 +702,17 @@
   "Transmission Finished": "文件传输完成",
 
   "==== node/lib/newUpload.js ====": "",
-  "%s Add to Transfer List": "%s 个项目添加到传输列表",
-  "%s Ignore Upload Text": "忽略了%s个跳过的或不支持的项目",
+  "%s Add to Transfer List": {
+    "one": "%s 个项目添加到传输列表",
+    "other": "%s 个项目添加到传输列表"
+  },
+  "%s Ignore Upload Text": {
+    "one": "%s 跳过了%s个忽略的或不支持的项目",
+    "other": "%s 跳过了%s个忽略的或不支持的项目"
+  },
+  "Add Torrent Failed": "添加失败",
+  "Add Torrent Success": "添加成功",
+  "Task Exist": "任务已存在",
   "Connection Lost": "与设备的连接已断开",
   "Read Upload Failed": "读取上传文件失败",
 
@@ -714,5 +722,14 @@
   "==== download/BTDownload.js ====": "",
   "BT Download Folder Name": "Download",
   "Download Folder EEXIST Text": "无法创建目录‘Download‘，可能存在重名文件！",
-  "BT Start Failed": "无法启动BT下载"
+  "BT Start Failed": "无法启动BT下载",
+  "No BT Task Text": "请点击左上按钮添加新的下载任务",
+  "Add Torrent": "添加BT种子文件",
+  "Add Magnet": "添加磁力链接",
+  "Add Magnet Label": "请输入磁力链接地址",
+  "Delete Task Text": "确定要删除该任务吗 ？",
+  "Add Magnet Failed": "添加失败",
+  "Add Magnet Success": "添加成功",
+  "Finished": "已完成",
+  "Getting Info": "获取信息中"
 }

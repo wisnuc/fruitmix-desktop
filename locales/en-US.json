@@ -397,7 +397,6 @@
   "Management Title": "Management",
   "Docker": "Docker",
   "Device Management": "Device",
-  "Client Settings": "Settings",
   "Files": "Files",
   "Photos": "Photos",
   "Share Space": "Share",
@@ -708,9 +707,12 @@
     "other": "%s items add to the transfer list."
   },
   "%s Ignore Upload Text": {
-    "one": "%s unsupported or skipped item ignored.",
-    "other": "%s unsupported or skipped items ignored."
+    "one": "%s unsupported or ignored item skipped.",
+    "other": "%s unsupported or ignored items skipped."
   },
+  "Add Torrent Failed": "Failed to add new torrent.",
+  "Add Torrent Success": "New torrent added.",
+  "Task Exist": "Task already exist",
   "Connection Lost": "Lost connection to WISNUC.",
   "Read Upload Failed": "Failed to access uploading files.",
 
@@ -720,5 +722,14 @@
   "==== download/BTDownload.js ====": "",
   "BT Download Folder Name": "Download",
   "Download Folder EEXIST Text": "Failed to create the folder 'Download', this path may already exist",
-  "BT Start Failed": "Failed to start BT download"
+  "BT Start Failed": "Failed to start BT download",
+  "No BT Task Text": "Click 'Add' button to add a new BT task.",
+  "Add Torrent": "Add torrent file",
+  "Add Magnet": "Add magnet link",
+  "Add Magnet Label": "Enter the magnet link",
+  "Delete Task Text": "Delete selected task ?",
+  "Add Magnet Failed": "Failed to add magnet link.",
+  "Add Magnet Success": "New task created.",
+  "Finished": "Finished",
+  "Getting Info": "Getting information"
 }

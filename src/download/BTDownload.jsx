@@ -44,7 +44,7 @@ const formatSeconds = (seconds) => {
   if (h.toString().length === 1) h = `0${h}`
   if (m.toString().length === 1) m = `0${m}`
   if (s.toString().length === 1) s = `0${s}`
-  if (h > 24) return '> 24 小时'
+  if (h > 24) return i18n.__('More Than 24 Hours')
   return `${h} : ${m} : ${s}`
 }
 
@@ -114,9 +114,9 @@ class BTDownload extends React.Component {
       e.stopPropagation()
       this.props.apis.request('handleMagnet', { op: isPause ? 'resume' : 'pause', id: infoHash }, (err) => {
         if (err) {
-          this.props.openSnackBar('操作失败！')
+          this.props.openSnackBar(i18n.__('Operation Failed'))
         } else {
-          this.props.openSnackBar('操作成功！')
+          this.props.openSnackBar(i18n.__('Operation Success'))
         }
         this.refresh()
       })
@@ -133,9 +133,9 @@ class BTDownload extends React.Component {
       this.props.apis.request('handleMagnet', { id: this.state.id, op: 'destroy' }, (err) => {
         if (err) {
           console.log('destroy error', err)
-          this.props.openSnackBar('删除失败！')
+          this.props.openSnackBar(i18n.__('Delete Failed'))
         } else {
-          this.props.openSnackBar('删除成功！')
+          this.props.openSnackBar(i18n.__('Delete Success'))
         }
         this.setState({ WIP: false, destroy: false })
         this.refresh()
@@ -147,14 +147,13 @@ class BTDownload extends React.Component {
       this.props.apis.request('addMagnet', { magnetURL: this.state.value, dirUUID: this.state.dirUUID }, (err) => {
         if (err) {
           console.log('addMagnet error', err)
-          // this.props.openSnackBar('添加失败！')
           let errorText
-          if (err.response && err.response.message === 'torrent exist') errorText = '任务已存在'
-          else errorText = '添加失败!'
+          if (err.response && err.response.message === 'torrent exist') errorText = i18n.__('Task Exist')
+          else errorText = i18n.__('Add Magnet Failed')
           
           this.setState({ WIP: false, errorText })
         } else {
-          this.props.openSnackBar('添加成功！')
+          this.props.openSnackBar(i18n.__('Add Magnet Success'))
           this.setState({ WIP: false, magnet: false, value: 'magnet:?xt=urn:btih:' })
         }
         this.refresh()
@@ -195,7 +194,7 @@ class BTDownload extends React.Component {
   }
 
   componentDidMount() {
-    // this.refreshTimer = setInterval(this.refresh, 1000)
+    this.refreshTimer = setInterval(this.refresh, 1000)
   }
 
   componentWillReceiveProps(nextProps) {
@@ -225,7 +224,7 @@ class BTDownload extends React.Component {
           }}
         >
           <ContentAdd style={{ height: 64, width: 64, color: 'rgba(0,0,0,0.27)' }} />
-          <div style={{ color: 'rgba(0,0,0,0.27)' }}> { '请点击左上按钮添加新的下载任务' } </div>
+          <div style={{ color: 'rgba(0,0,0,0.27)' }}> { i18n.__('No BT Task Text') } </div>
         </div>
       </div>
     )
@@ -250,7 +249,7 @@ class BTDownload extends React.Component {
           }}
         >
           <ErrorIcon style={{ height: 64, width: 64, color: 'rgba(0,0,0,0.27)' }} />
-          <div style={{ fontSize: 20, color: 'rgba(0,0,0,0.27)' }}> { '网络连接已断开，请检查网络设置' } </div>
+          <div style={{ fontSize: 20, color: 'rgba(0,0,0,0.27)' }}> { i18n.__('Offline Text')} </div>
         </div>
       </div>
     )
@@ -323,7 +322,7 @@ class BTDownload extends React.Component {
           }}
         >
           {
-            hovered ?
+            hovered && !this.props.alt ?
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <IconButton
                   onTouchTap={e => this.toggleStatus(e, infoHash, isPause)}
@@ -379,15 +378,21 @@ class BTDownload extends React.Component {
           </div>
 
 
+          {/* Downloaded size */}
+          <div style={{ flex: '0 0 200px' }}> { `${formatSize(downloaded)} / ${formatSize(downloaded / progress)}` } </div>
+
           {/* speed */}
-          <div style={{ flex: '0 0 120px' }}> { !isPause && formatSpeed(downloadSpeed) } </div>
+          <div style={{ flex: '0 0 120px' }}> { !isPause && !this.props.alt && formatSpeed(downloadSpeed) } </div>
 
           {/* Status */}
-          <div style={{ flex: '0 0 120px' }}> { isPause ? '已暂停' : name ? '正在下载' : '获取信息中' } </div>
+          <div style={{ flex: '0 0 120px' }}>
+            { isPause ? i18n.__('Task Paused') : name ? i18n.__('Task Downloading') : i18n.__('Getting Info')}
+          </div>
 
           {/* task restTime */}
-          <div style={{ flex: '0 0 120px' }}>{ isPause ? '- - : - - : - -' : formatSeconds(timeRemaining / 1000) }</div>
-          <div style={{ flex: '0 0 200px' }} />
+          <div style={{ flex: '0 0 120px' }}>
+            { this.props.alt ? '' : isPause ? '- - : - - : - -' : formatSeconds(timeRemaining / 1000) }
+          </div>
           <div style={{ flex: '0 0 90px' }} >
             {
               hovered &&
@@ -400,6 +405,7 @@ class BTDownload extends React.Component {
           </div>
         </div>
 
+        {/* expand content TODO */}
         <div
           style={{
             display: 'flex',
@@ -453,7 +459,10 @@ class BTDownload extends React.Component {
           <div style={{ flex: '0 0 60px' }}> { `${Math.round(progress * 100)}%` } </div>
 
           {/* Status */}
-          <div style={{ flex: '0 0 120px' }}> { isPause ? '已暂停' : name ? '正在下载' : '获取信息中' } </div>
+          <div style={{ flex: '0 0 120px' }}>
+            { this.props.alt ? i18n.__('Finished') : isPause ? i18n.__('Task Paused') :
+              name ? i18n.__('Task Downloading') : i18n.__('Getting Info') }
+          </div>
 
           {/* task restTime */}
           <div style={{ flex: '0 0 120px' }}>{ formatSeconds(timeRemaining / 1000) }</div>
@@ -490,13 +499,13 @@ class BTDownload extends React.Component {
         >
           <Menu style={{ minWidth: 240 }}>
             <MenuItem
-              primaryText="添加BT种子文件"
+              primaryText={i18n.__('Add Torrent')}
               leftIcon={<BTTorrentIcon />}
               onTouchTap={() => this.addTorrent()}
               style={{ fontSize: 13 }}
             />
             <MenuItem
-              primaryText="添加磁力链接"
+              primaryText={i18n.__('Add Magnet')}
               leftIcon={<BTMagnetIcon />}
               onTouchTap={() => this.setState({ magnet: true, openFAB: false })}
               style={{ fontSize: 13 }}
@@ -511,12 +520,12 @@ class BTDownload extends React.Component {
               this.state.magnet &&
                 <div style={{ width: 640, padding: '24px 24px 0px 24px' }}>
                   <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-                    { '添加磁力链接' }
+                    { i18n.__('Add Magnet') }
                   </div>
                   <div style={{ height: 20 }} />
                   <TextField
                     floatingLabelFixed
-                    floatingLabelText="请输入磁力链接地址"
+                    floatingLabelText={i18n.__('Add Magnet Label')}
                     defaultValue="magnet:?xt=urn:btih:"
                     onChange={e => this.handleChange(e.target.value)}
                     errorText={this.state.errorText}
@@ -527,7 +536,7 @@ class BTDownload extends React.Component {
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                     <FlatButton
-                      label="确定"
+                      label={i18n.__('Confirm')}
                       disabled={!this.isInputOK(this.state.value) || this.state.WIP}
                       primary
                       onTouchTap={this.addMagnet}
@@ -545,18 +554,18 @@ class BTDownload extends React.Component {
               this.state.destroy &&
                 <div style={{ width: 376, padding: '24px 24px 0px 24px' }}>
                   <div>
-                    { '确定要删除该任务吗' }
+                    { i18n.__('Delete Task Text') }
                   </div>
                   <div style={{ height: 20 }} />
                   <div style={{ height: 24 }} />
                   <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                     <FlatButton
-                      label="取消"
+                      label={i18n.__('Cancel')}
                       primary
                       onTouchTap={() => this.setState({ destroy: false })}
                     />
                     <FlatButton
-                      label="确定"
+                      label={i18n.__('Delete')}
                       disabled={this.state.WIP}
                       primary
                       onTouchTap={this.destroy}
