@@ -40,6 +40,7 @@ app.on('ready', () => {
   global.configuration = configuration
 
   i18n.configure({
+    updateFiles: false,
     locales: ['en-US', 'zh-CN'],
     directory: path.resolve(__dirname, '../', 'locales'),
     defaultLocale: /zh/.test(app.getLocale()) ? 'zh-CN' : 'en-US'

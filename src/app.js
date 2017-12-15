@@ -17,6 +17,7 @@ localStorage.debug = '*component*'
 console.log('__dirname', __dirname)
 const lang = navigator.language
 i18n.configure({
+	updateFiles: false,
   locales: ['en-US', 'zh-CN'],
   directory: remote.require('path').resolve('locales'),
   defaultLocale: lang === 'zh-CN' ? 'zh-CN' : 'en-US'
