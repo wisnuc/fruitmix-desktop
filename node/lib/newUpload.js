@@ -6,7 +6,7 @@ import Debug from 'debug'
 import sanitize from 'sanitize-filename'
 import { dialog, ipcMain } from 'electron'
 import { getMainWindow } from './window'
-import { serverGetAsync, isCloud } from './server'
+import { serverGetAsync, isCloud, uploadTorrent } from './server'
 import { createTask } from './uploadTransform'
 
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
@@ -165,6 +165,26 @@ const uploadHandle = (event, args) => {
   })
 }
 
+const addTorrentHandle = (event, args) => {
+  const { dirUUID } = args
+  const filters = [
+    { name: 'Torrent', extensions: ['torrent'] },
+    { name: 'All Files', extensions: ['*'] }
+  ]
+  dialog.showOpenDialog(getMainWindow(), { properties: ['openFile'], filters }, (entries) => {
+    if (!entries || !entries.length) return
+    uploadTorrent(dirUUID, entries[0], (err, res) => {
+      if (err) {
+        let text = i18n.__('Add Torrent Failed')
+        if (err.response && err.response.body && err.response.body.message === 'torrent exist') text = i18n.__('Torrent Exist')
+        getMainWindow().webContents.send('snackbarMessage', { message: text })
+      } else {
+        getMainWindow().webContents.send('snackbarMessage', { message: i18n.__('Add Torrent Success') })
+      }
+    })
+  })
+}
+
 const dragFileHandle = (event, args) => {
   let entries = args.files
   if (!entries || !entries.length) return
@@ -180,7 +200,8 @@ const uploadMediaHandle = (event, args) => {
     type: 'file',
     filters: [
       { name: 'Images', extensions: ['jpg', 'png', 'gif'] },
-      { name: 'Movies', extensions: ['mkv', 'avi', 'mp4'] }
+      { name: 'Movies', extensions: ['mkv', 'avi', 'mp4'] },
+      { name: 'All Files', extensions: ['*'] }
     ]
   })
 }
@@ -199,3 +220,4 @@ ipcMain.on('UPLOADMEDIA', uploadMediaHandle)
 ipcMain.on('DRAG_FILE', dragFileHandle)
 ipcMain.on('resolveConflicts', resolveHandle)
 ipcMain.on('START_TRANSMISSION', startTransmissionHandle)
+ipcMain.on('ADD_TORRENT', addTorrentHandle)

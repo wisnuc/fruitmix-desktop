@@ -1,5 +1,6 @@
 import React from 'react'
 import i18n from 'i18n'
+import { ipcRenderer } from 'electron'
 
 import ActionSwapVerticalCircle from 'material-ui/svg-icons/action/swap-vertical-circle'
 import FinishedList from '../download/FinishedList'
@@ -75,11 +76,13 @@ class Download extends Base {
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <FinishedList
+          ipcRenderer={ipcRenderer}
           navToDrive={navToDrive}
           tasks={this.state.tasks ? this.state.tasks.finish : []}
           apis={this.ctx.props.apis}
           openSnackBar={openSnackBar}
           primaryColor={this.groupPrimaryColor()}
+          selectedDevice={this.ctx.props.selectedDevice}
         />
       </div>
     )
