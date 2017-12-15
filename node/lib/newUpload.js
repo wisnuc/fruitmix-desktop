@@ -175,8 +175,9 @@ const addTorrentHandle = (event, args) => {
     if (!entries || !entries.length) return
     uploadTorrent(dirUUID, entries[0], (err, res) => {
       if (err) {
+        console.log('addTorrent error', err.response && err.response.body)
         let text = i18n.__('Add Torrent Failed')
-        if (err.response && err.response.body && err.response.body.message === 'torrent exist') text = i18n.__('Torrent Exist')
+        if (err.response && err.response.body && err.response.body.message === 'torrent exist') text = i18n.__('Task Exist')
         getMainWindow().webContents.send('snackbarMessage', { message: text })
       } else {
         getMainWindow().webContents.send('snackbarMessage', { message: i18n.__('Add Torrent Success') })

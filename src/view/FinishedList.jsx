@@ -3,7 +3,7 @@ import i18n from 'i18n'
 import { ipcRenderer } from 'electron'
 
 import ActionSwapVerticalCircle from 'material-ui/svg-icons/action/swap-vertical-circle'
-import FinishedList from '../download/FinishedList'
+import BTDownload from '../download/BTDownload'
 import { BTFinishedIcon } from '../common/Svg'
 import Base from './Base'
 
@@ -75,7 +75,7 @@ class Download extends Base {
   renderContent({ navToDrive, openSnackBar }) {
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-        <FinishedList
+        <BTDownload
           ipcRenderer={ipcRenderer}
           navToDrive={navToDrive}
           tasks={this.state.tasks ? this.state.tasks.finish : []}
@@ -83,6 +83,7 @@ class Download extends Base {
           openSnackBar={openSnackBar}
           primaryColor={this.groupPrimaryColor()}
           selectedDevice={this.ctx.props.selectedDevice}
+          alt={true}
         />
       </div>
     )
