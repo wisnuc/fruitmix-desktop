@@ -36,7 +36,6 @@ class Tasks extends React.Component {
 
     this.cancelTask = (uuid) => {
       this.props.apis.pureRequest('deleteTask', { uuid }, (err, res) => {
-        console.log('deleteTask', err, res && res.body)
         if (err) console.log('deleteTask error', err)
         this.refresh()
       })
@@ -44,7 +43,6 @@ class Tasks extends React.Component {
 
     this.refresh = () => {
       this.props.apis.pureRequest('tasks', null, (err, res) => {
-        console.log('refresh', err, res && res.body)
         if (err || !res || !res.body) {
           this.setState({ error: 'NoData' })
         } else {
@@ -56,7 +54,7 @@ class Tasks extends React.Component {
     this.handleConflict = (uuid, type, nodes) => {
       const data = {
         session: uuid,
-        actionType: 'type',
+        actionType: type,
         conflicts: nodes.map((n) => {
           const name = n.src.name
           const entryType = n.type
@@ -75,7 +73,6 @@ class Tasks extends React.Component {
   }
 
   componentWillUnmount() {
-    console.log('componentWillUnmount', this.state.tasks)
     this.state.tasks.filter(t => t.nodes.findIndex(n => n.parent === null && n.state === 'Finished') > -1).forEach((t) => {
       this.props.apis.pureRequest('deleteTask', { uuid: t.uuid })
     })
@@ -92,21 +89,21 @@ class Tasks extends React.Component {
 
   renderError() {
     <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
-      { 'Failed To Load Task Data' }
+      { i18n.__('Failed To Load Task Data') }
     </div>
   }
 
   renderNoTask() {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
-        { 'No Running Tasks' }
+        { i18n.__('No Running Tasks') }
       </div>
     )
   }
 
   renderTask(task) {
     const { uuid, type, src, dst, entries, nodes } = task
-    const action = type === 'cpoy' ? '拷贝' : '移动'
+    const action = type === 'copy' ? i18n.__('Copying') : i18n.__('Moving')
     const iStyle = { width: 16, height: 16, color: '#9E9E9E' }
     const tStyles = { marginTop: -8 }
     const show = this.state.uuid === uuid
@@ -123,7 +120,7 @@ class Tasks extends React.Component {
             { entries[0].name }
           </div>
           <div style={{ width: 4 }} />
-          { entries.length > 1 && `等${entries.length}个项目` }
+          { entries.length > 1 && i18n.__('And Other %s Items', entries.length) }
         </div>
 
         <div style={{ height: 24, width: '100%', display: 'flex', alignItems: 'center', fontSize: 13 }} >
@@ -132,7 +129,12 @@ class Tasks extends React.Component {
             <LinearProgress mode={(finished || conflict.length > 0) ? 'determinate' : 'indeterminate'} value={finished ? 100 : 61.8} />
           </div>
           <div style={{ width: 16 }} />
-          <IconButton tooltip={finished ? 'OK' : 'Cancel'} iconStyle={iStyle} tooltipStyles={tStyles} onTouchTap={() => this.cancelTask(uuid)}>
+          <IconButton
+            iconStyle={iStyle}
+            tooltipStyles={tStyles}
+            onTouchTap={() => this.cancelTask(uuid)}
+            tooltip={finished ? i18n.__('OK') : i18n.__('Cancel')}
+          >
             { finished ? <DoneIcon /> : <CloseIcon /> }
           </IconButton>
           {
@@ -149,7 +151,7 @@ class Tasks extends React.Component {
           }
         </div>
         <div style={{ fontSize: 13, marginLeft: 16 }}>
-          { finished ? '已完成' : conflict.length ? '已停止' : '' }
+          { finished ? i18n.__('Finished') : conflict.length ? i18n.__('Task Conflict Text') : '' }
         </div>
         { show && <div style={{ height: 16 }} /> }
         {
@@ -160,7 +162,7 @@ class Tasks extends React.Component {
                 { c.src.name }
               </div>
               <div style={{ width: 16 }} />
-              { '存在命名冲突' }
+              { i18n.__('Task Conflict Text') }
             </div>
           ))
         }
@@ -168,8 +170,8 @@ class Tasks extends React.Component {
         {
           show &&
             <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-              <FlatButton label="处理" onTouchTap={() => this.handleConflict(uuid, type, conflict)} primary />
-              <FlatButton label="终止" onTouchTap={() => this.cancelTask(uuid)} primary />
+              <FlatButton label={i18n.__('Handle')} onTouchTap={() => this.handleConflict(uuid, type, conflict)} primary />
+              <FlatButton label={i18n.__('Abort')} onTouchTap={() => this.cancelTask(uuid)} primary />
             </div>
         }
       </div>

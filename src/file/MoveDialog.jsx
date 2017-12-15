@@ -118,7 +118,7 @@ class MoveDialog extends React.PureComponent {
           .catch(err => console.log(err))
       } else if (node.type === 'publicRoot') { // list public drives
         const myUUID = this.props.apis.account.data && this.props.apis.account.data.uuid
-        const list = this.props.apis.drives.value().filter(d => d.type === 'public' && 
+        const list = this.props.apis.drives.value().filter(d => d.type === 'public' && d.tag !== 'built-in' &&
           (d.writelist === '*' || d.writelist.find(u => u === myUUID)))
         setImmediate(() => this.updateState(path, currentDir, list))
       }
@@ -151,7 +151,7 @@ class MoveDialog extends React.PureComponent {
         setImmediate(() => this.updateState(path, currentDir, list))
       } else if (currentDir.type === 'publicRoot') { // list public drives
         const myUUID = this.props.apis.account.data && this.props.apis.account.data.uuid
-        const list = this.props.apis.drives.value().filter(d => d.type === 'public' && 
+        const list = this.props.apis.drives.value().filter(d => d.type === 'public' && d.tag !== 'built-in' &&
           (d.writelist === '*' || d.writelist.find(u => u === myUUID)))
         setImmediate(() => this.updateState(path, currentDir, list))
       }
@@ -246,7 +246,7 @@ class MoveDialog extends React.PureComponent {
           this.props.refresh()
           let text = 'Working'
           if (res === 'Finished') text = type.concat(i18n.__('+Success'))
-          if (res === 'Conflict') text = '出现命名冲突'
+          if (res === 'Conflict') text = i18n.__('Task Conflict Text')
           this.props.openSnackBar(text, res !== 'Finished' ? { showTasks: true } : null)
         }
       })
