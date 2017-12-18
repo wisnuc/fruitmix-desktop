@@ -18,6 +18,7 @@ import Tasks from '../common/Tasks'
 
 import Home from '../view/Home'
 import Public from '../view/Public'
+import Share from '../view/Share'
 import Physical from '../view/Physical'
 import Transmission from '../view/Transmission'
 
@@ -54,6 +55,7 @@ class NavViews extends React.Component {
     this.views = {}
 
     this.install('home', Home)
+    this.install('share', Share)
     this.install('public', Public)
     // this.install('physical', Physical)
     this.install('transmission', Transmission)

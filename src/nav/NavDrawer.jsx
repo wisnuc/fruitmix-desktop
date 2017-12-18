@@ -189,7 +189,7 @@ class NavDrawer extends React.Component {
           text={i18n.__('Share Space')}
           primaryColor={primaryColor}
           selected={views[nav].navGroup() === 'public'}
-          onTouchTap={() => navTo('public')}
+          onTouchTap={() => navTo('share')}
         />
 
         <MenuItem

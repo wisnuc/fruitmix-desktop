@@ -39,6 +39,7 @@ class Home extends Base {
   constructor(ctx) {
     super(ctx)
 
+    this.title = i18n.__('Home Title')
     /* handle select TODO */
     this.select = new ListSelect(this)
     this.select.on('updated', next => this.setState({ select: next }))
@@ -362,7 +363,7 @@ class Home extends Base {
 
             /* the first one is always special */
             if (index === 0) {
-              acc.push(<BreadCrumbItem text={i18n.__('Home Title')} key="root" onTouchTap={() => touchTap(path[0])} />)
+              acc.push(<BreadCrumbItem text={this.title} key="root" onTouchTap={() => touchTap(path[0])} />)
             } else {
               acc.push(<BreadCrumbItem text={node.name} key={`Item${node.uuid}`} onTouchTap={() => touchTap(node)} />)
             }
