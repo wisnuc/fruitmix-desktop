@@ -545,6 +545,10 @@
   "Settings Menu Name": "其他设置",
   "Settings Quick Name": "其他设置",
 
+  "==== view/Share.jsx ====": "",
+  "Share Menu Name": "公开共享",
+  "Share Title": "公开共享",
+
   "==== view/TimeDate.jsx ====": "",
   "TimeDate Menu Name": "时间与日期",
   "TimeDate Quick Name": "时间",

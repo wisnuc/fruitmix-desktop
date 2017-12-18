@@ -545,6 +545,10 @@
   "Settings Menu Name": "Settings",
   "Settings Quick Name": "Others",
 
+  "==== view/Share.jsx ====": "",
+  "Share Menu Name": "Share",
+  "Share Title": "Share",
+
   "==== view/TimeDate.jsx ====": "",
   "TimeDate Menu Name": "Time & Date",
   "TimeDate Quick Name": "Time & Date",
