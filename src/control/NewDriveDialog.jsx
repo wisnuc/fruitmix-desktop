@@ -121,7 +121,7 @@ class NewDriveDialog extends PureComponent {
           <Checkbox
             label={i18n.__('All Users')}
             labelStyle={{ fontSize: 14 }}
-            iconStyle={{ fill: this.state.writelist.length === users.length ? '#5E35B1' : 'rgba(0, 0, 0, 0.54)' }}
+            iconStyle={{ fill: this.state.writelist.length === users.length ? this.props.primaryColor : 'rgba(0, 0, 0, 0.54)' }}
             checked={this.state.writelist.length === users.length}
             onCheck={() => this.togglecheckAll()}
           />
@@ -133,7 +133,7 @@ class NewDriveDialog extends PureComponent {
               (<div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.username} >
                 <Checkbox
                   label={user.username}
-                  iconStyle={{ fill: this.state.writelist.includes(user.uuid) ? '#5E35B1' : 'rgba(0, 0, 0, 0.54)' }}
+                  iconStyle={{ fill: this.state.writelist.includes(user.uuid) ? this.props.primaryColor : 'rgba(0, 0, 0, 0.54)' }}
                   labelStyle={{ fontSize: 14 }}
                   checked={this.state.writelist.includes(user.uuid)}
                   onCheck={() => this.handleCheck(user.uuid)}
@@ -147,15 +147,13 @@ class NewDriveDialog extends PureComponent {
         <div style={{ height: 16 }} />
         <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
           <FlatButton
+            primary
             label={i18n.__('Cancel')}
-            primary={this.props.primary}
-            secondary={this.props.accent}
             onTouchTap={this.props.onRequestClose}
           />
           <FlatButton
-            label={i18n.__('Confirm')}
-            primary={this.props.primary}
-            secondary={this.props.accent}
+            primary
+            label={i18n.__('Create')}
             disabled={this.state.label.length === 0 || !!this.state.errorText || this.state.loading}
             onTouchTap={this.fire}
           />
