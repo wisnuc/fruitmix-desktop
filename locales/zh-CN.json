@@ -283,6 +283,8 @@
   "Global Settings": "全局设置",
   "Cache Size": "缓存大小：",
   "Clean": "清理",
+  "Clean Cache": "清理所有缓存文件？",
+  "Clean Cache Text": "所有缓存的照片原图、缩略图、下载文件都将被删除。",
   "Clean Cache Success": "清理成功",
   "Clean Cache Failed": "清理失败",
   "Client Close Text": "客户端关闭提示",

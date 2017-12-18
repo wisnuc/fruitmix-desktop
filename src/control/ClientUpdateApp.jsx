@@ -20,9 +20,7 @@ class Update extends React.Component {
       rel: null
     }
 
-    this.toggleDialog = (op) => {
-      this.setState({ [op]: !this.state[op] })
-    }
+    this.toggleDialog = op => this.setState({ [op]: !this.state[op] })
 
     this.moreVersion = () => {
       const platform = global.config.platform

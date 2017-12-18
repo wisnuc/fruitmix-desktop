@@ -5,6 +5,7 @@ import { CircularProgress, Divider, Toggle, RaisedButton, Menu, MenuItem, Popove
 import InfoIcon from 'material-ui/svg-icons/action/info-outline'
 import i18n from 'i18n'
 import FlatButton from '../common/FlatButton'
+import DialogOverlay from '../common/DialogOverlay'
 
 const debug = Debug('component:control:SettingsApp:')
 
@@ -14,6 +15,7 @@ class SettingsApp extends React.Component {
 
     this.state = {
       loading: false,
+      confirm: false,
       cacheSize: -1
     }
 
@@ -21,8 +23,10 @@ class SettingsApp extends React.Component {
       this.props.ipcRenderer.send('SETCONFIG', { [op]: !global.config.global[op] })
     }
 
+    this.toggleDialog = op => this.setState({ [op]: !this.state[op] })
+
     this.cleanCache = () => {
-      this.setState({ loading: true })
+      this.setState({ loading: true, confirm: false })
       this.props.ipcRenderer.send('CleanCache')
     }
 
@@ -84,7 +88,7 @@ class SettingsApp extends React.Component {
           }
         </div>
         <div style={{ width: 480, display: 'flex', alignItems: 'center', marginLeft: -8 }}>
-          <FlatButton primary label={i18n.__('Clean')} onTouchTap={this.cleanCache} disabled={this.state.loading} />
+          <FlatButton primary label={i18n.__('Clean')} onTouchTap={() => this.toggleDialog('confirm')} disabled={this.state.loading} />
         </div>
       </div>
     )
@@ -114,6 +118,35 @@ class SettingsApp extends React.Component {
         <div style={{ height: 16 }} />
         { settings.map(op => this.renderRow(op)) }
         { this.renderCacheClean() }
+
+        {/* dialog */}
+        <DialogOverlay open={this.state.confirm} >
+          {
+            this.state.confirm &&
+              <div style={{ width: 560, padding: '24px 24px 0px 24px' }}>
+                <div style={{ fontSize: 21, fontWeight: 500 }}>
+                  { i18n.__('Clean Cache') }
+                </div>
+                <div style={{ height: 20 }} />
+                <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }}>
+                  { i18n.__('Clean Cache Text') }
+                </div>
+                <div style={{ height: 24 }} />
+                <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                  <FlatButton
+                    label={i18n.__('Cancel')}
+                    primary
+                    onTouchTap={() => this.toggleDialog('confirm')}
+                  />
+                  <FlatButton
+                    label={i18n.__('Clean')}
+                    primary
+                    onTouchTap={this.cleanCache}
+                  />
+                </div>
+              </div>
+          }
+        </DialogOverlay>
       </div>
     )
   }

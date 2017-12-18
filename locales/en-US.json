@@ -283,6 +283,8 @@
   "Global Settings": "Global settings",
   "Cache Size": "Cache size: ",
   "Clean": "Clean",
+  "Clean Cache": "Clean all cache ?",
+  "Clean Cache Text": "Thumbnails, raw images and temporary downloads will be cleaned.",
   "Clean Cache Success": "Cache cleaned",
   "Clean Cache Failed": "Failed to cleaned the cache",
   "Client Close Text": "Show warnings before closing the client",
