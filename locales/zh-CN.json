@@ -274,8 +274,8 @@
 
   "==== control/NewDriveDialog.jsx ====": "",
   "Create New Public Drive": "创建新的共享盘",
-  "Create Drive Failed": "修改失败",
-  "Create Drive Success": "修改成功",
+  "Create Drive Failed": "创建失败",
+  "Create Drive Success": "创建成功",
 
   "==== control/SettingsApp.jsx ====": "",
   "zh-CN": "简体中文",

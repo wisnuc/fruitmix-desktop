@@ -2,20 +2,25 @@ import React from 'react'
 import i18n from 'i18n'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
-import { IconButton, MenuItem } from 'material-ui'
+import { IconButton, MenuItem, FloatingActionButton } from 'material-ui'
 import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
 import ListIcon from 'material-ui/svg-icons/action/list'
+import ContentAdd from 'material-ui/svg-icons/content/add'
 import GridIcon from 'material-ui/svg-icons/action/view-module'
 import RefreshIcon from 'material-ui/svg-icons/navigation/refresh'
 
 import Home from './Home'
+import FileDetail from '../file/FileDetail'
 import FileContent from '../file/FileContent'
 import FileUploadButton from '../file/FileUploadButton'
+import DriversDetail from '../control/DriversDetail'
+import NewDriveDialog from '../control/NewDriveDialog'
 import ContextMenu from '../common/ContextMenu'
 import sortByType from '../common/sort'
 import { BreadCrumbItem, BreadCrumbSeparator } from '../common/BreadCrumb'
 import FlatButton from '../common/FlatButton'
 import { ShareDisk } from '../common/Svg'
+import DialogOverlay from '../common/DialogOverlay'
 
 const debug = Debug('component:viewModel:public: ')
 
@@ -55,7 +60,7 @@ class Public extends Home {
   }
 
   updateState(type, data) {
-    debug('updateState', type, data)
+     debug('updateState', type, data)
     let path
     let entries
     let select
@@ -64,7 +69,7 @@ class Public extends Home {
       if (data === this.state.drives && !this.force) return
       path = [{ name: i18n.__('Public Drive'), uuid: null, type: 'publicRoot' }]
       const myUUID = this.ctx.props.apis.account.data && this.ctx.props.apis.account.data.uuid
-      entries = data.filter(drive => drive.type === 'public' && drive.tag !== 'built-in' && (drive.writelist === '*' || drive.writelist.find(u => u === myUUID)))
+      entries = data.filter(drive => drive.type === 'public' && drive.tag !== 'built-in')
       entries.forEach(item => Object.assign(item, { name: item.label }))
 
       /* sort enries */
@@ -77,7 +82,7 @@ class Public extends Home {
       if (data === this.state.listNavDir && !this.force) return
       path = [{ name: i18n.__('Public Drive'), uuid: this.rootDrive.uuid, type: 'publicRoot' }, ...data.path] // important !!
       const drives = this.state.drives || this.ctx.props.apis.drives.value()
-      path[1].name = this.rootDrive.name || this.ctx.props.apis.drives.value().find(d => d.uuid === this.rootDrive.uuid).label
+      path[1].name = this.rootDrive.name || drives.find(d => d.uuid === this.rootDrive.uuid).label
       entries = data.entries
 
       /* sort enries */
@@ -90,11 +95,14 @@ class Public extends Home {
   }
 
   willReceiveProps(nextProps) {
-    console.log('willReceiveProps', nextProps, this.state)
+    // console.log('willReceiveProps', nextProps, this.state)
     if (!this.rootDrive) {
       if (!nextProps.apis || !nextProps.apis.drives) return
+      if (!nextProps.apis || !nextProps.apis.users) return
       const drives = nextProps.apis.drives
-      if (drives.isPending() || drives.isRejected()) return
+      const users = nextProps.apis.users
+      if (drives.isPending() || drives.isRejected() || users.isPending() || users.isRejected()) return
+      if (this.state.users !== users.value()) this.setState({ users: users.value() })
       this.updateState('drives', drives.value())
     } else {
       if (!nextProps.apis || !nextProps.apis.listNavDir) return
@@ -112,7 +120,7 @@ class Public extends Home {
       apis.request('listNavDir', { driveUUID, dirUUID })
       this.rootDrive = { uuid: driveUUID }
       this.setState({ loading: true })
-    } else this.refresh()
+     } else this.refresh()
   }
 
   navLeave() {
@@ -250,8 +258,41 @@ class Public extends Home {
     )
   }
 
+  renderDetail({ style, openSnackBar }) {
+    if (!this.state.entries) return (<div />)
+    console.log('renderDetail', this.state.drives, this.select.state.selected)
+    const drives = this.state.drives && this.state.drives.filter(drive => drive.type === 'public' && drive.tag !== 'built-in')
+    return (
+      <div style={style}>
+        {
+          this.state.entries.length && this.select.state.selected.length ?
+          this.state.path.length > 1 ?
+          <FileDetail
+            detailIndex={this.select.state.selected}
+            entries={this.state.entries}
+            path={this.state.path}
+            ipcRenderer={ipcRenderer}
+            primaryColor={this.groupPrimaryColor()}
+          /> :
+          <DriversDetail
+            primary
+            openSnackBar={openSnackBar}
+            users={this.state.users}
+            drives={drives}
+            detailUsers={this.state.users}
+            detailDrive={drives[this.select.state.selected[0]]}
+            apis={this.ctx.props.apis}
+            refreshDrives={this.refresh}
+            primaryColor={this.groupPrimaryColor()}
+          /> :
+          <div style={{ height: 128, backgroundColor: this.groupPrimaryColor(), filter: 'brightness(0.9)' }} />
+        }
+      </div>
+    )
+  }
+
   renderContent({ navTo, toggleDetail, openSnackBar, getDetailStatus }) {
-    debug('renderContent public', this.state)
+    // debug('renderContent public', this.state)
 
     /* loading data */
     // if (!this.state.listNavDir && !this.state.drives || !this.state.path.length) return (<div />)
@@ -262,7 +303,18 @@ class Public extends Home {
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
 
-        { this.state.path && this.state.path.length > 1 && <FileUploadButton upload={this.upload} /> }
+        {
+          this.state.path && (this.state.path.length > 1 ?
+            <FileUploadButton upload={this.upload} /> :
+            <FloatingActionButton
+              style={{ position: 'absolute', top: -36, left: 24, zIndex: 200 }}
+              backgroundColor="#2196F3"
+              disabled={!this.state.users || !this.state.drives}
+              onTouchTap={() => this.setState({ newDrive: true })}
+            >
+              <ContentAdd />
+            </FloatingActionButton>)
+        }
 
         <FileContent
           home={this.state}
@@ -288,8 +340,22 @@ class Public extends Home {
 
         { this.renderDialogs(openSnackBar) }
 
+        <DialogOverlay open={!!this.state.newDrive} onRequestClose={() => this.setState({ newDrive: false })}>
+          {
+            this.state.newDrive && <NewDriveDialog
+              primary
+              apis={this.ctx.props.apis}
+              users={this.state.users}
+              drives={this.state.drives}
+              refreshDrives={this.refresh}
+              openSnackBar={openSnackBar}
+              primaryColor={this.groupPrimaryColor()}
+            />
+          }
+        </DialogOverlay>
+
       </div>
-    )
+    ) 
   }
 }
 
