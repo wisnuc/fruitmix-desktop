@@ -452,6 +452,7 @@ class Task {
         const X = this.upload.failed[i]
         const index = Array.isArray(X) && X.findIndex((x) => {
           let res = x.error && x.error.response
+          if (!res) return false
           if (!Array.isArray(res)) res = [res]
           return x.retry < 1 && (res.findIndex(r => r.error && r.error.status < 500 && r.error.code !== 'EEXIST') > -1)
         })
