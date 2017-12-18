@@ -219,9 +219,10 @@ class MoveDialog extends React.PureComponent {
           : this.state.path[this.state.path.length - 1].uuid
       }
       const entries = this.selectedArr.map(e => e.uuid)
+      const policies = { dir: ['keep', null] }
 
       this.setState({ loading: true })
-      this.props.apis.request('copy', { type, src, dst, entries }, this.finish)
+      this.props.apis.request('copy', { type, src, dst, entries, policies }, this.finish)
     }
 
     /* finish post change dialog content to waiting/result */
