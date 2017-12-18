@@ -230,7 +230,7 @@ class NavDrawer extends React.Component {
         />
 
         {
-          isAdmin && <MenuItem
+          isAdmin && !this.props.isCloud && <MenuItem
             icon={ActionDns}
             text={i18n.__('Device Management')}
             primaryColor={primaryColor}
