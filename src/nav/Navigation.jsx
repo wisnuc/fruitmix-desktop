@@ -76,7 +76,7 @@ class NavViews extends React.Component {
     this.install('adminUsers', AdminUsers)
     this.install('adminDrives', AdminDrives)
     this.install('device', Device)
-    // this.install('plugin', Plugin)
+    this.install('plugin', Plugin)
     this.install('networking', Networking)
     this.install('timeDate', TimeDate)
     this.install('fanControl', FanControl)

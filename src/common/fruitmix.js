@@ -331,6 +331,15 @@ class Fruitmix extends EventEmitter {
         r = this.apatch(`download/${args.id}`, { op: args.op })
         break
 
+      /* Plugin API */
+      case 'samba':
+        r = this.aget('features/samba/status')
+        break
+
+      case 'dlna':
+        r = this.aget('features/dlna/status')
+        break
+
       default:
         break
     }
@@ -404,6 +413,10 @@ class Fruitmix extends EventEmitter {
           guid: args.guid,
           state: args.state
         })
+        break
+
+      case 'handlePlugin':
+        r = this.apost(`features/${args.type}/${args.action}`)
         break
 
       default:

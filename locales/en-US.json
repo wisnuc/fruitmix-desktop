@@ -378,13 +378,14 @@
   "Set IP Alias Title": "Set an IP alias",
 
   "==== device/PluginApp.jsx ====": "",
-  "Modify Plugin Settings Success": "Setting modified.",
   "Samba Service Title": "Samba",
   "Samba Service Text": "Samba allows file and print sharing between computers running Microsoft Windows and computers running Unix.",
   "miniDLNA Service Title": "miniDLNA",
   "miniDLNA Service Text": "MiniDLNA is server software with the aim of being fully compliant with DLNA/UPnP clients. The MiniDNLA daemon serves media files (music, pictures, and video) to clients on a network.",
   "BT Service Title": "BitTorrent",
   "BT Service Text": "BitTorrent is a communication protocol for peer-to-peer file sharing ('P2P') which is used to distribute data and electronic files over the Internet.",
+  "Started": "started",
+  "Stopped": "stopped",
 
   "==== device/PowerApp.jsx ====": "",
   "Operation Failed": "Operation failed",

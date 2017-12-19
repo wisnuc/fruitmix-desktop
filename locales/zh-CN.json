@@ -378,13 +378,14 @@
   "Set IP Alias Title": "设置固定IP",
 
   "==== device/PluginApp.jsx ====": "",
-  "Modify Plugin Settings Success": "修改成功",
   "Samba Service Title": "Samba服务",
   "Samba Service Text": "Samba服务是一种在局域网上共享文件和打印机的一种通信协议，它为局域网内的不同计算机之间提供文件及打印机等资源的共享服务。",
   "miniDLNA Service Title": "miniDLNA服务",
   "miniDLNA Service Text": "DLNA是一种多媒体远程播放技术，它允许一台显示设备直接访问并播放网络中其他DLNA设备中的图像、声音或者视频资源。",
   "BT Service Title": "BT下载服务",
   "BT Service Text": "BT是一种P2P下载服务，支持通过BT种子和磁力链接地址下载资源。",
+  "Started": "已启动",
+  "Stopped": "已停止",
 
   "==== device/PowerApp.jsx ====": "",
   "Operation Failed": "操作失败",
