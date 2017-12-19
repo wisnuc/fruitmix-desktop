@@ -6,7 +6,8 @@ ipcMain.on('LOGIN', (event, device, user) => {
   /* save last Device info */
   const lastDevice = device.mdev
   global.configuration.updateGlobalConfigAsync({ lastDevice }).catch(e => console.log(e))
-  global.configuration.updateUserConfigAsync(user.uuid, { saveToken: lastDevice.saveToken }).catch(e => console.log(e))
+  if (lastDevice.saveToken !== undefined) global.configuration.updateUserConfigAsync(user.uuid, { saveToken: lastDevice.saveToken })
+    .catch(e => console.log(e))
 })
 
 ipcMain.on('LOGOUT', () => {
