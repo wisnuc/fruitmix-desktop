@@ -244,7 +244,7 @@ class NavDrawer extends React.Component {
           text={i18n.__('System Settings')}
           primaryColor={primaryColor}
           selected={views[nav].navGroup() === 'settings'}
-          onTouchTap={() => navTo('language')}
+          onTouchTap={() => navTo('plugin')}
         />
 
         <div style={{ height: 4 }} />
