@@ -36,8 +36,12 @@ class ErrorBox extends React.PureComponent {
       <div style={this.props.style}>
         <div>{this.props.text}</div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <IconButton onTouchTap={() => this.setState(state => Object.assign({}, state, { open: true }))}>
-            <AlertError color={this.props.iconColor} />
+          <IconButton
+            tooltip={this.props.tooltip}
+            iconStyle={this.props.iconStyle}
+            onTouchTap={() => this.setState(state => Object.assign({}, state, { open: true }))}
+          >
+            <AlertError />
           </IconButton>
           <Dialog
             titleStyle={{ fontSize: 20 }}
@@ -56,7 +60,12 @@ class ErrorBox extends React.PureComponent {
                 valueRenderer={raw => <span style={{ userSelect: 'text' }}>{raw}</span>}
               />
             </div>
-            <RaisedButton style={{ marginTop: 24 }} label={i18n.__('Copy to Clipboard')} primary onTouchTap={() => clipboard.writeText(this.props.error)} />
+            <RaisedButton
+              primary
+              style={{ marginTop: 24 }}
+              label={i18n.__('Copy to Clipboard')}
+              onTouchTap={() => clipboard.writeText(JSON.stringify(this.props.error))}
+            />
           </Dialog>
         </div>
       </div>

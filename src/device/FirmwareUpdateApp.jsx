@@ -7,7 +7,7 @@ import CheckIcon from 'material-ui/svg-icons/navigation/check'
 import { green500, orange500, grey500 } from 'material-ui/styles/colors'
 import FlatButton from '../common/FlatButton'
 import DialogOverlay from '../common/DialogOverlay'
-import ErrorBox from '../login/ErrorBox'
+import ErrorBox from '../common/ErrorBox'
 
 const compareVerison = (a, b) => {
   const aArray = a.split('.')
