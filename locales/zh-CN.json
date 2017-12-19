@@ -742,7 +742,7 @@
   "Add Torrent": "添加BT种子文件",
   "Add Magnet": "添加磁力链接",
   "Add Magnet Label": "请输入磁力链接地址",
-  "Delete Task Text": "确定要删除该任务吗 ？",
+  "Delete Task Text": "确定要删除选中的任务吗？",
   "Add Magnet Failed": "添加失败",
   "Add Magnet Success": "添加成功",
   "Finished": "已完成",

@@ -12,7 +12,7 @@ import ContentAdd from 'material-ui/svg-icons/content/add'
 import ListSelect from '../file/ListSelect'
 import FlatButton from '../common/FlatButton'
 import DialogOverlay from '../common/PureDialog'
-import PureDialog from '../common/PureDialog'
+import ContextMenu from '../common/ContextMenu'
 import { BTTorrentIcon, BTMagnetIcon } from '../common/Svg'
 
 const debug = Debug('component:download:')
@@ -61,10 +61,40 @@ class BTDownload extends React.Component {
       select: this.select.state,
       loading: true,
       errorText: '',
+      contextMenuOpen: false,
+      contextMenuX: -1,
+      contextMenuY: -1,
       WIP: false
     }
 
     this.toggleDialog = op => this.setState({ [op]: !this.state[op] })
+
+    this.showContextMenu = (clientX, clientY) => {
+      this.setState({
+        contextMenuOpen: true,
+        contextMenuX: clientX,
+        contextMenuY: clientY
+      })
+    }
+
+    this.hideContextMenu = () => {
+      this.setState({
+        contextMenuOpen: false,
+        contextMenuX: -1,
+        contextMenuY: -1
+      })
+    }
+
+    /* cathc key action */
+    this.keyDown = (e) => {
+      if (e.ctrlKey && e.key === 'a') {
+        this.select.addByArray(Array.from({ length: this.props.tasks.length }, (v, i) => i)) // [0, 1, ..., N]
+      }
+      if (e.key === 'Delete') this.toggleDialog('destroy')
+      this.select.keyEvent(e.ctrlKey, e.shiftKey)
+    }
+
+    this.keyUp = e => this.select.keyEvent(e.ctrlKey, e.shiftKey)
 
     this.onRowTouchTap = (e, index) => {
       /*
@@ -85,10 +115,10 @@ class BTDownload extends React.Component {
 
       /* just touch */
       this.select.touchTap(button, index)
-      this.setState({ expand: this.state.expand === index ? -1 : index })
+      // this.setState({ expand: this.state.expand === index ? -1 : index })
 
       /* right click */
-      if (button === 2) {
+      if (button === 2 && index !== -1) {
         this.showContextMenu(e.nativeEvent.clientX, e.nativeEvent.clientY)
       }
     }
@@ -102,11 +132,11 @@ class BTDownload extends React.Component {
     }
 
     /* actions */
-
     this.openDestroy = (e, infoHash) => {
       e.preventDefault() // important, to prevent other event
       e.stopPropagation()
-      this.setState({ id: infoHash, destroy: true })
+      this.setState({ ids: infoHash, destroy: true })
+      this.hideContextMenu()
     }
 
     this.toggleStatus = (e, infoHash, isPause) => {
@@ -128,17 +158,22 @@ class BTDownload extends React.Component {
 
     this.handleChange = value => this.setState({ value, errorText: '' })
 
+    this.destroyAsync = async (ids) => {
+      console.log('this.destroyAsync', ids)
+      for (let i = 0; i < ids.length; i++) {
+        await this.props.apis.requestAsync('handleMagnet', { id: ids[i], op: 'destroy' })
+      }
+    }
+
     this.destroy = () => {
       this.setState({ WIP: true })
-      this.props.apis.request('handleMagnet', { id: this.state.id, op: 'destroy' }, (err) => {
-        if (err) {
-          console.log('destroy error', err)
-          this.props.openSnackBar(i18n.__('Delete Failed'))
-        } else {
-          this.props.openSnackBar(i18n.__('Delete Success'))
-        }
+      this.destroyAsync(this.state.ids).then(() => {
+        this.props.openSnackBar(i18n.__('Delete Success'))
         this.setState({ WIP: false, destroy: false })
         this.refresh()
+      }).catch((err) => {
+        console.log('destroy error', err)
+        this.props.openSnackBar(i18n.__('Delete Failed'))
       })
     }
 
@@ -191,10 +226,19 @@ class BTDownload extends React.Component {
       this.setState({ openFAB: false })
       this.refresh()
     }
+
+    this.showFolder = () => {
+      const driveUUID = this.props.apis.drives.data.find(d => d.tag === 'home').uuid
+      const dirUUID = this.props.tasks[this.state.select.selected[0]].dirUUID
+      this.props.navToDrive(driveUUID, dirUUID)
+    }
   }
 
   componentDidMount() {
-    this.refreshTimer = setInterval(this.refresh, 1000)
+    // this.refreshTimer = setInterval(this.refresh, 1000)
+    /* bind keydown event */
+    document.addEventListener('keydown', this.keyDown)
+    document.addEventListener('keyup', this.keyUp)
   }
 
   componentWillReceiveProps(nextProps) {
@@ -203,6 +247,9 @@ class BTDownload extends React.Component {
 
   componentWillUnmount() {
     clearInterval(this.refreshTimer)
+    /* remove keydown event */
+    document.removeEventListener('keydown', this.keyDown)
+    document.removeEventListener('keyup', this.keyUp)
   }
 
   renderNoTasks() {
@@ -345,6 +392,7 @@ class BTDownload extends React.Component {
     return (
       <div>
         <div
+          key={infoHash}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -353,7 +401,8 @@ class BTDownload extends React.Component {
             fontSize: 14,
             backgroundColor: selected ? '#EEEEEE' : hovered ? '#F5F5F5' : ''
           }}
-          onTouchTap={e => 0 && this.onRowTouchTap(e, index)}
+          onTouchTap={e => this.onRowTouchTap(e, index)}
+          onDoubleClick={() => this.props.alt && this.showFolder()}
           onMouseEnter={e => this.onRowMouseEnter(e, index)}
           onMouseLeave={e => this.onRowMouseLeave(e, index)}
         >
@@ -398,7 +447,7 @@ class BTDownload extends React.Component {
             {
               hovered &&
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <IconButton onTouchTap={e => this.openDestroy(e, infoHash)} tooltip={i18n.__('Delete')}>
+                  <IconButton onTouchTap={e => this.openDestroy(e, [infoHash])} tooltip={i18n.__('Delete')}>
                     <DeleteSvg color={this.props.primaryColor} />
                   </IconButton>
                 </div>
@@ -481,7 +530,7 @@ class BTDownload extends React.Component {
     if (this.state.loading) return this.renderLoading()
 
     return (
-      <div style={{ position: 'relative', height: '100%', width: '100%' }}>
+      <div style={{ position: 'relative', height: '100%', width: '100%' }} onTouchTap={e => this.onRowTouchTap(e, -1)} >
         {/* FAB */}
         <FloatingActionButton
           style={{ position: 'absolute', top: -36, left: 24, zIndex: 200 }}
@@ -587,6 +636,22 @@ class BTDownload extends React.Component {
             : this.props.tasks.map((task, index) => this.renderRow(task, index))
           }
         </div>
+
+        <ContextMenu
+          open={this.state.contextMenuOpen}
+          top={this.state.contextMenuY}
+          left={this.state.contextMenuX}
+          onRequestClose={this.hideContextMenu}
+        >
+          {
+            this.state.select.selected && this.state.select.selected.length === 1 &&
+              <MenuItem primaryText={i18n.__('Show in Folder')} onTouchTap={this.showFolder} />
+          }
+          <MenuItem
+            primaryText={i18n.__('Delete')}
+            onTouchTap={e => this.openDestroy(e, this.state.select.selected.map(i => this.props.tasks[i].infoHash))}
+          />
+        </ContextMenu>
       </div>
     )
   }
