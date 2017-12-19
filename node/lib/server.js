@@ -142,7 +142,7 @@ export class UploadMultipleFiles {
     })
 
     this.handle.end((err, res) => {
-      console.log('localUpload this.handle.end', err, res && res.body)
+      // console.log('localUpload this.handle.end', err, res && res.body)
       if (err) this.finish(err)
       else if (res && res.statusCode === 200) this.finish(null)
       else this.finish(res.body)
@@ -413,6 +413,16 @@ export const downloadFile = (driveUUID, dirUUID, entryUUID, fileName, downloadPa
   })
 }
 
-export const uploadTorrent = (dirUUID, filePath, callback) => {
-  const handle = apost('download/torrent').field('dirUUID', dirUUID).attach('torrent', filePath).end(callback)
+export const uploadTorrent = (dirUUID, rs, part, callback) => {
+  if (stationID) {
+    const ep = 'download/torrent'
+    const url = `${address}/c/v1/stations/${stationID}/pipe`
+    const resource = Buffer.from(`/${ep}`).toString('base64')
+    const option = { resource, dirUUID, sha256: part.sha, method: 'POST', size: part.end ? part.end - part.start + 1 : 0 }
+    request.post(url).set('Authorization', token).field('manifest', JSON.stringify(option)).attach('torrent', rs).end(callback)
+  } else {
+    apost('download/torrent').field('dirUUID', dirUUID).attach('torrent', rs).end(callback)
+  }
 }
+
+export const uploadTorrentAsync = Promise.promisify(uploadTorrent)
