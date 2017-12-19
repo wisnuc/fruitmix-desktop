@@ -306,6 +306,20 @@
   "Bind WeChat Text in WeChatBind": "Bind your account to the following WeChat account ?",
   "Bind WeChat Success": "WeChat bind successful",
 
+  "==== control/BTDownload.js ====": "",
+  "BT Download Folder Name": "Download",
+  "Download Folder EEXIST Text": "Failed to create the folder 'Download', this path may already exist",
+  "BT Start Failed": "Failed to start BT download",
+  "No BT Task Text": "Click 'Add' button to add a new BT task.",
+  "Add Torrent": "Add torrent file",
+  "Add Magnet": "Add magnet link",
+  "Add Magnet Label": "Enter the magnet link",
+  "Delete Task Text": "Delete selected task ?",
+  "Add Magnet Failed": "Failed to add magnet link.",
+  "Add Magnet Success": "New task created.",
+  "Finished": "Finished",
+  "Getting Info": "Getting information",
+
   "==== device/DeviceInfo.jsx ====": "",
   "Modify Device Name Failed": "Failed to change device name.",
   "Modify Device Name Success": "Device name changed.",
@@ -732,19 +746,5 @@
   "Read Upload Failed": "Failed to access uploading files.",
 
   "==== node/lib/newDownload.js ====": "",
-  "Read Download Failed": "Failed to access the downloading fold.",
-
-  "==== download/BTDownload.js ====": "",
-  "BT Download Folder Name": "Download",
-  "Download Folder EEXIST Text": "Failed to create the folder 'Download', this path may already exist",
-  "BT Start Failed": "Failed to start BT download",
-  "No BT Task Text": "Click 'Add' button to add a new BT task.",
-  "Add Torrent": "Add torrent file",
-  "Add Magnet": "Add magnet link",
-  "Add Magnet Label": "Enter the magnet link",
-  "Delete Task Text": "Delete selected task ?",
-  "Add Magnet Failed": "Failed to add magnet link.",
-  "Add Magnet Success": "New task created.",
-  "Finished": "Finished",
-  "Getting Info": "Getting information"
+  "Read Download Failed": "Failed to access the downloading fold."
 }

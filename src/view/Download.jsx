@@ -3,7 +3,7 @@ import i18n from 'i18n'
 import { ipcRenderer } from 'electron'
 
 import ActionSwapVerticalCircle from 'material-ui/svg-icons/action/swap-vertical-circle'
-import BTDownload from '../download/BTDownload'
+import BTDownload from '../control/BTDownload'
 import { BTDownloadIcon } from '../common/Svg'
 import Base from './Base'
 
