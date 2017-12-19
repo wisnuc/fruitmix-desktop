@@ -11,6 +11,7 @@ import media from './lib/media'
 import newUpload from './lib/newUpload'
 import newDownload from './lib/newDownload'
 import clientUpdate from './lib/clientUpdate'
+import BT from './lib/BT'
 import { initMainWindow, getMainWindow } from './lib/window'
 
 global.entryFileDir = __dirname
