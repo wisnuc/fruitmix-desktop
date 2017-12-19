@@ -48,6 +48,7 @@ class Public extends Home {
         const writable = entry.writelist === '*' || entry.writelist.findIndex(uuid => uuid === myUUID) > -1
         if (!writable) {
           this.toggleDialog('noAccess')
+          this.refresh()
           return
         }
         this.rootDrive = entry
@@ -73,7 +74,7 @@ class Public extends Home {
       entries.forEach(item => Object.assign(item, { name: item.label }))
 
       /* sort enries */
-      entries = [...entries].sort((a, b) => sortByType(a, b, this.state.sortType))
+      // entries = [...entries].sort((a, b) => sortByType(a, b, this.state.sortType))
       select = this.select.reset(entries.length)
 
       this.force = false
@@ -265,15 +266,8 @@ class Public extends Home {
     return (
       <div style={style}>
         {
-          this.state.entries.length && this.select.state.selected.length ?
-          this.state.path.length > 1 ?
-          <FileDetail
-            detailIndex={this.select.state.selected}
-            entries={this.state.entries}
-            path={this.state.path}
-            ipcRenderer={ipcRenderer}
-            primaryColor={this.groupPrimaryColor()}
-          /> :
+          this.ctx.props.apis.account && this.ctx.props.apis.account.data && this.ctx.props.apis.account.data.isAdmin &&
+          this.state.entries.length && this.select.state.selected.length && this.state.path.length === 1 ?
           <DriversDetail
             primary
             openSnackBar={openSnackBar}
@@ -283,6 +277,14 @@ class Public extends Home {
             detailDrive={drives[this.select.state.selected[0]]}
             apis={this.ctx.props.apis}
             refreshDrives={this.refresh}
+            primaryColor={this.groupPrimaryColor()}
+          /> :
+          this.state.entries.length && this.select.state.selected.length ?
+          <FileDetail
+            detailIndex={this.select.state.selected}
+            entries={this.state.entries}
+            path={this.state.path}
+            ipcRenderer={ipcRenderer}
             primaryColor={this.groupPrimaryColor()}
           /> :
           <div style={{ height: 128, backgroundColor: this.groupPrimaryColor(), filter: 'brightness(0.9)' }} />
@@ -303,18 +305,24 @@ class Public extends Home {
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
 
+        {/* add new user FAB */}
         {
-          this.state.path && (this.state.path.length > 1 ?
-            <FileUploadButton upload={this.upload} /> :
-            <FloatingActionButton
-              style={{ position: 'absolute', top: -36, left: 24, zIndex: 200 }}
-              backgroundColor="#2196F3"
-              disabled={!this.state.users || !this.state.drives}
-              onTouchTap={() => this.setState({ newDrive: true })}
-            >
-              <ContentAdd />
-            </FloatingActionButton>)
+          this.ctx.props.apis.account && this.ctx.props.apis.account.data &&
+            this.ctx.props.apis.account.data.isAdmin && this.state.path && this.state.path.length === 1 &&
+            (
+              <FloatingActionButton
+                style={{ position: 'absolute', top: -36, left: 24, zIndex: 200 }}
+                backgroundColor="#2196F3"
+                disabled={!this.state.users || !this.state.drives}
+                onTouchTap={() => this.setState({ newDrive: true })}
+              >
+                <ContentAdd />
+              </FloatingActionButton>
+            )
         }
+
+        {/* upload FAB */}
+        { this.state.path && this.state.path.length > 1 && <FileUploadButton upload={this.upload} /> }
 
         <FileContent
           home={this.state}
@@ -336,25 +344,25 @@ class Public extends Home {
           apis={this.ctx.props.apis}
         />
 
-        { this.renderMenu(!!this.state.contextMenuOpen && !this.state.inRoot, toggleDetail, getDetailStatus) }
+      { this.renderMenu(!!this.state.contextMenuOpen && !this.state.inRoot, toggleDetail, getDetailStatus) }
 
-        { this.renderDialogs(openSnackBar) }
+      { this.renderDialogs(openSnackBar) }
 
-        <DialogOverlay open={!!this.state.newDrive} onRequestClose={() => this.setState({ newDrive: false })}>
-          {
-            this.state.newDrive && <NewDriveDialog
-              primary
-              apis={this.ctx.props.apis}
-              users={this.state.users}
-              drives={this.state.drives}
-              refreshDrives={this.refresh}
-              openSnackBar={openSnackBar}
-              primaryColor={this.groupPrimaryColor()}
-            />
-          }
-        </DialogOverlay>
+      <DialogOverlay open={!!this.state.newDrive} onRequestClose={() => this.setState({ newDrive: false })}>
+        {
+          this.state.newDrive && <NewDriveDialog
+            primary
+            apis={this.ctx.props.apis}
+            users={this.state.users}
+            drives={this.state.drives}
+            refreshDrives={this.refresh}
+            openSnackBar={openSnackBar}
+            primaryColor={this.groupPrimaryColor()}
+          />
+        }
+      </DialogOverlay>
 
-      </div>
+    </div>
     ) 
   }
 }

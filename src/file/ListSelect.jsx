@@ -4,6 +4,7 @@ class ListSelect extends EventEmitter {
   constructor() {
     super()
     this.state = {
+      selected: [],
 
       // put functions here is better to put
       // functions on parent component
