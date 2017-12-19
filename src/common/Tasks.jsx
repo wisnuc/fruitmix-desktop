@@ -6,6 +6,7 @@ import DoneIcon from 'material-ui/svg-icons/action/done'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import BackIcon from 'material-ui/svg-icons/navigation/arrow-back'
 import WarningIcon from 'material-ui/svg-icons/alert/warning'
+import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
 import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
 import FileFolder from 'material-ui/svg-icons/file/folder'
@@ -17,6 +18,7 @@ import request from 'superagent'
 import sanitize from 'sanitize-filename'
 import FlatButton from '../common/FlatButton'
 import { ShareDisk } from '../common/Svg'
+import ErrorBox from '../common/ErrorBox'
 
 const debug = Debug('component:common:Tasks ')
 
@@ -105,9 +107,12 @@ class Tasks extends React.Component {
     const { uuid, type, src, dst, entries, nodes } = task
     const action = type === 'copy' ? i18n.__('Copying') : i18n.__('Moving')
     const iStyle = { width: 16, height: 16, color: '#9E9E9E' }
+    const iStyleWarning = { width: 16, height: 16, color: '#fb8c00' }
+    const iStyleError = { width: 16, height: 16, color: '#FF4081' }
     const tStyles = { marginTop: -8 }
     const show = this.state.uuid === uuid
     const conflict = nodes.filter(n => n.state === 'Conflict')
+    const error = nodes.filter(n => n.state === 'Failed')
     const finished = nodes.findIndex(n => n.parent === null && n.state === 'Finished') > -1
 
     return (
@@ -126,7 +131,10 @@ class Tasks extends React.Component {
         <div style={{ height: 24, width: '100%', display: 'flex', alignItems: 'center', fontSize: 13 }} >
           <div style={{ width: 16 }} />
           <div style={{ flexGrow: 1 }} >
-            <LinearProgress mode={(finished || conflict.length > 0) ? 'determinate' : 'indeterminate'} value={finished ? 100 : 61.8} />
+            <LinearProgress
+              mode={(finished || conflict.length > 0 || error.length > 0) ? 'determinate' : 'indeterminate'}
+              value={finished ? 100 : 61.8}
+            />
           </div>
           <div style={{ width: 16 }} />
           <IconButton
@@ -138,10 +146,17 @@ class Tasks extends React.Component {
             { finished ? <DoneIcon /> : <CloseIcon /> }
           </IconButton>
           {
-            conflict.length ?
+            error.length ?
+              <ErrorBox
+                style={{ display: 'flex', alignItems: 'center' }}
+                tooltip={i18n.__('Detail')}
+                iconStyle={iStyleError}
+                error={error}
+              /> :
+              conflict.length ?
               <IconButton
-                tooltip="Detail"
-                iconStyle={iStyle}
+                tooltip={i18n.__('Detail')}
+                iconStyle={iStyleWarning}
                 tooltipStyles={tStyles}
                 onTouchTap={() => this.handleConflict(uuid, type, conflict)}
               >
@@ -151,7 +166,7 @@ class Tasks extends React.Component {
           }
         </div>
         <div style={{ fontSize: 13, marginLeft: 16 }}>
-          { finished ? i18n.__('Finished') : conflict.length ? i18n.__('Task Conflict Text') : '' }
+          { finished ? i18n.__('Finished') : error.length ? i18n.__('Task Failed') : conflict.length ? i18n.__('Task Conflict Text') : '' }
         </div>
         { show && <div style={{ height: 16 }} /> }
         {

@@ -9,13 +9,13 @@ import RefreshIcon from 'material-ui/svg-icons/navigation/refresh'
 
 import CrossNav from './CrossNav'
 import UserBox from './UserBox'
-import ErrorBox from './ErrorBox'
 import DeviceInfo from './ModelNameCard'
 import InitWizard from './InitWizard'
 import MaintGuide from './MaintGuide'
 import NoDevice from './NoDevice'
 import UsernamePassword from './UsernamePassword'
 
+import ErrorBox from '../common/ErrorBox'
 import PureDialog from '../common/PureDialog'
 import WeChatBind from '../control/WeChatBind'
 

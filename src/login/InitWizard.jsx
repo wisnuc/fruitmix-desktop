@@ -11,7 +11,7 @@ import CloseIcon from 'material-ui/svg-icons/navigation/close'
 
 import UsernamePassword from './UsernamePassword'
 import CreatingVolumeDiskSelection from './CreatingVolumeDiskSelection'
-import ErrorBox from './ErrorBox'
+import ErrorBox from '../common/ErrorBox'
 import FlatButton from '../common/FlatButton'
 
 const primaryColor = teal500
@@ -193,12 +193,7 @@ class InitWizard extends StateUp(React.Component) {
 
     const info = this.finishedInfo()
 
-    const boxStyle = {
-      width: '100%',
-      display: 'flex',
-      alignItems: 'center',
-      marginTop: -6
-    }
+    const boxStyle = { width: '100%', display: 'flex', alignItems: 'center', marginTop: -6 }
 
     return (
       <div style={{ width: '100%' }}>
