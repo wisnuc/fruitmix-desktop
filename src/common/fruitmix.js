@@ -172,8 +172,12 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'updatePassword':
-        if (this.stationID) {
+        if (this.stationID) { // connecting via Cloud, reset password
           r = this.aput(`users/${this.userUUID}/password`, { password: args.newPassword })
+        } if (args.stationID) { // login via WeChat and connecting via LAN, rest password
+          const url = `${cloudAddress}/c/v1/stations/${args.stationID}/json`
+          const resource = new Buffer(`/users/${this.userUUID}/password`).toString('base64')
+          r = request.post(url).set('Authorization', args.token).send({ resource, method: 'PUT', password: args.newPassword })
         } else {
           r = request
             .put(`http://${this.address}:3000/users/${this.userUUID}/password`, { password: args.newPassword })

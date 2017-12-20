@@ -12,6 +12,7 @@ import DialogOverlay from '../common/DialogOverlay'
 import PureDialog from '../common/PureDialog'
 import ChangeAccountDialog from './ChangeAccountDialog'
 import WeChatBind from './WeChatBind'
+import ResetPassword from './ResetPassword'
 import Checkmark from '../common/Checkmark'
 
 const debug = Debug('component:control:device')
@@ -36,7 +37,7 @@ class AccountApp extends React.Component {
   }
 
   render() {
-    const { account, primaryColor, apis, refresh, openSnackBar } = this.props
+    const { account, primaryColor, apis, refresh, openSnackBar, ipcRenderer } = this.props
     if (!account) return <div />
     // debug('this.props account', this.props, global.config.users)
 
@@ -174,17 +175,25 @@ class AccountApp extends React.Component {
 
         <div style={{ height: 8 }} />
         <div style={{ display: 'flex', alignItems: 'center' }} >
-          <div style={{ display: 'flex', alignItems: 'center' }} >
-            <div style={{ flex: '0 0 56px' }} />
-            <div style={{ flex: '0 0 560px' }}>
+          <div style={{ flex: '0 0 48px' }} />
+          {/* not show when connecting via Cloud */}
+          {
+            !this.props.apis.stationID &&
               <FlatButton
-                label={i18n.__('Change Password')}
-                style={{ marginLeft: -8 }}
                 primary
+                label={i18n.__('Change Password')}
                 onTouchTap={() => this.setState({ openDialog: 'password' })}
               />
-            </div>
-          </div>
+          }
+          {/* show when login via WeChat */}
+          { 
+            !!this.props.selectedDevice.mdev.stationID &&
+              <FlatButton
+                primary
+                label={i18n.__('Reset Password')}
+                onTouchTap={() => this.setState({ reset: true })}
+              />
+          }
         </div>
 
         {/* change account dialog */}
@@ -192,6 +201,7 @@ class AccountApp extends React.Component {
           {
             this.state.openDialog &&
               <ChangeAccountDialog
+                ipcRenderer={ipcRenderer}
                 openSnackBar={openSnackBar}
                 refresh={refresh}
                 apis={apis}
@@ -214,8 +224,14 @@ class AccountApp extends React.Component {
           }
         </DialogOverlay>
 
+        {/* Bind weChat */}
         <PureDialog open={!!this.state.weChat} onRequestClose={() => this.setState({ weChat: false })}>
           { this.state.weChat && <WeChatBind {...this.props} onRequestClose={() => this.setState({ weChat: false })} /> }
+        </PureDialog>
+
+        {/* Reset password via weChat */}
+        <PureDialog open={!!this.state.reset} onRequestClose={() => this.setState({ reset: false })}>
+          { this.state.reset && <ResetPassword {...this.props} onRequestClose={() => this.setState({ reset: false })} /> }
         </PureDialog>
       </div>
     )

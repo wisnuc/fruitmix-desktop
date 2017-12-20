@@ -110,7 +110,7 @@ class WechatLogin extends React.Component {
             ctx: user,
             data: localToken.data
           },
-          mdev: { address: lanip, domain: 'local' }
+          mdev: { address: lanip, domain: 'local', stationID }
         })
         this.props.ipcRenderer.send('UPDATE_USER_CONFIG', user.uuid, { weChat: this.state.wxData.user })
         this.done('LOGIN', this.props.selectedDevice, user)
@@ -122,7 +122,7 @@ class WechatLogin extends React.Component {
             ctx: user,
             data: { token, stationID }
           },
-          mdev: { address: 'http://www.siyouqun.org', domain: 'remote', lanip: ips[0] }
+          mdev: { address: 'http://www.siyouqun.org', domain: 'remote', lanip: ips[0], stationID }
         })
         this.props.ipcRenderer.send('UPDATE_USER_CONFIG', user.uuid, { weChat: this.state.wxData.user })
         return this.done('LOGIN', this.props.selectedDevice, user)

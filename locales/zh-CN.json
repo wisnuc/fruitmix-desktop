@@ -199,6 +199,13 @@
   "Change Password": "修改密码",
   "Avatar Edit Text": "请绑定微信，将会自动获取您的微信头像。",
 
+  "==== control/ResetPassword.jsx ====": "",
+  "Authentication Success Text": "微信认证成功",
+  "Reset Password Confirm Text": "您可以通过微信认证身份，然后重置密码。",
+  "Reset Password Title": "重置密码",
+  "WeChat Authentication": "微信认证",
+  "WeChat Reset Password Failed Text": "微信认证失败！",
+
   "==== control/AdminDriversApp.jsx ====": "",
   "Name": "名称",
   "Users": "用户",

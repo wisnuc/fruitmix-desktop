@@ -14,7 +14,8 @@ const adjustSeq = (pre) => {
   if (!global.config || !global.config.global.lastDevice) return mdns
   const lastHost = global.config.global.lastDevice.host
   const lastAddress = global.config.global.lastDevice.address
-  const index = mdns.findIndex(m => (m.host === lastHost || m.address === lastAddress))
+  const lastLANIP = global.config.global.lastDevice.lanip
+  const index = mdns.findIndex(m => (m.host === lastHost || m.address === lastAddress || m.address === lastLANIP))
   if (index > -1) {
     mdns = [mdns[index], ...mdns.slice(0, index), ...mdns.slice(index + 1)]
   }

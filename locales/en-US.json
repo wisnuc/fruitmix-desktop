@@ -199,6 +199,13 @@
   "Change Password": "Change password",
   "Avatar Edit Text": "Please bind WeChat, your WeChat avatar will be used.",
 
+  "==== control/ResetPassword.jsx ====": "",
+  "Authentication Success Text": "WeChat authentication success.",
+  "Reset Password Confirm Text": "You can reset your password via WeChat.",
+  "Reset Password Title": "Reset Password",
+  "WeChat Authentication": "WeChat authentication",
+  "WeChat Reset Password Failed Text": "Authentication failed !",
+
   "==== control/AdminDriversApp.jsx ====": "",
   "Name": "Name",
   "Users": "Users",
