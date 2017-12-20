@@ -48,7 +48,7 @@ class PluginApp extends React.Component {
           <div style={{ width: 40, display: 'flex', alignItems: 'center', marginRight: 8 }}>
             <Icon color="rgba(0,0,0,0.54)" />
           </div>
-          <div style={{ width: 480, display: 'flex', alignItems: 'center' }}>
+          <div style={{ width: 560, display: 'flex', alignItems: 'center' }}>
             { title }
           </div>
           <Toggle
@@ -60,7 +60,7 @@ class PluginApp extends React.Component {
           />
           { isWIP && <CircularProgress size={16} thickness={2} /> }
         </div>
-        <div style={{ height: isExpand ? 80 : 0, width: 480, overflow: 'hidden', marginLeft: 72, transition: 'all 225ms' }}>
+        <div style={{ height: isExpand ? 80 : 0, width: 560, overflow: 'hidden', marginLeft: 72, transition: 'all 225ms' }}>
           { text }
         </div>
       </div>

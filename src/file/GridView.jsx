@@ -91,7 +91,7 @@ class Row extends React.Component {
               </div>
               <div style={{ flexGrow: 1 }} />
               {
-                !list.entries[0].index &&
+                !list.entries[0].index && !this.props.inPublicRoot &&
                   <div style={{ display: 'flex', alignItems: 'center ', marginRight: 84 }}>
                     <FlatButton
                       label={this.state.type}
@@ -145,7 +145,6 @@ class Row extends React.Component {
                     </IconButton>
                   </div>
               }
-
             </div>
         }
 
