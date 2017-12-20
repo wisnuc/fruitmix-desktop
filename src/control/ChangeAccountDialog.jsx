@@ -43,8 +43,21 @@ class ChangeAccountDialog extends React.PureComponent {
           }
         } else {
           this.props.onRequestClose(true)
-          op === 'createUser' ? this.props.refreshUsers() : this.props.refresh()
+
+          /* clear saved token */
+          const uuid = this.props.apis.account.data && this.props.apis.account.data.uuid
+          if (['password', 'reset'].includes(op)) {
+            const lastDevice = Object.assign({}, global.config.global.lastDevice, { autologin: false })
+            this.props.ipcRenderer.send('UPDATE_USER_CONFIG', uuid, { saveToken: null })
+            this.props.ipcRenderer.send('SETCONFIG', { lastDevice })
+          }
+
+          /* snackbar message */
           this.props.openSnackBar(op === 'createUser' ? i18n.__('Create User Success') : i18n.__('Modify Account Success'))
+
+          /* refresh */
+          if (op === 'createUser') this.props.refreshUsers()
+          else this.props.refresh()
         }
       }
 
@@ -54,6 +67,9 @@ class ChangeAccountDialog extends React.PureComponent {
         apis.request('updateAccount', { username: this.state.username }, cb)
       } else if (op === 'password') {
         apis.request('updatePassword', { prePassword: this.state.prePassword, newPassword: this.state.password }, cb)
+      } else if (op === 'reset') {
+        const { stationID, token } = this.props
+        apis.request('updatePassword', { newPassword: this.state.password, stationID, token }, cb)
       }
     }
 
@@ -138,7 +154,7 @@ class ChangeAccountDialog extends React.PureComponent {
     if (this.props.op === 'username') {
       return this.state.username.length > 0 && !this.state.usernameErrorText
     }
-    if (this.props.op === 'password') {
+    if (this.props.op === 'password' || this.props.op === 'reset') {
       return this.state.password.length > 0 && this.state.password === this.state.passwordAgain
     }
     if (this.props.op === 'createUser') {
@@ -155,7 +171,10 @@ class ChangeAccountDialog extends React.PureComponent {
       <div style={{ width: 336, padding: '24px 24px 0px 24px' }}>
         {/* title */}
         <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-          { op === 'username' ? i18n.__('Change Username') : op === 'createUser' ? i18n.__('Create New User') : i18n.__('Change Password') }
+          { op === 'username' ? i18n.__('Change Username') :
+            op === 'createUser' ? i18n.__('Create New User') :
+            op === 'reset' ? i18n.__('Reset Password') :
+            i18n.__('Change Password') }
         </div>
         <div style={{ height: 56 }} />
 
@@ -195,7 +214,7 @@ class ChangeAccountDialog extends React.PureComponent {
 
         {/* password */}
         {
-          (op === 'password' || op === 'createUser') &&
+          (op === 'password' || op === 'createUser' || op === 'reset') &&
             <div>
               {
                 op === 'password' &&
@@ -219,7 +238,7 @@ class ChangeAccountDialog extends React.PureComponent {
                   </div>
               }
               <div style={{ height: 56, display: 'flex', marginBottom: 10 }}>
-                <IconBox style={{ marginLeft: -12 }} size={48} icon={op === 'createUser' ? CommunicationVpnKey : null} />
+                <IconBox style={{ marginLeft: -12 }} size={48} icon={['createUser', 'reset'].includes(op) ? CommunicationVpnKey : null} />
                 <TextField
                   style={{ flexGrow: 1 }}
                   fullWidth

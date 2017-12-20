@@ -12,7 +12,8 @@ class LoginBox extends React.Component {
     this.device = this.props.device.mdev
     this.lastDevice = global.config.global.lastDevice || {}
 
-    this.isSameDevice = this.lastDevice.address === this.device.address || this.lastDevice.host === this.device.host
+    this.isSameDevice = this.lastDevice.address === this.device.address || this.lastDevice.host === this.device.host ||
+      this.lastDevice.lanip === this.device.address
 
     this.state = {
       password: '',

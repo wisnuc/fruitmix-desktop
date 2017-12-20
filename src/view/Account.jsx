@@ -67,6 +67,7 @@ class Account extends Base {
         primaryColor={this.groupPrimaryColor()}
         refresh={this.refreshData}
         ipcRenderer={ipcRenderer}
+        selectedDevice={this.ctx.props.selectedDevice}
       />
     )
   }
