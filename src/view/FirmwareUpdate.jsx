@@ -40,6 +40,7 @@ class FirmwareUpdate extends Base {
 
   navEnter() {
     this.ctx.props.selectedDevice.request('firm')
+    this.ctx.props.selectedDevice.pureRequest('checkUpdates')
   }
 
   navGroup() {

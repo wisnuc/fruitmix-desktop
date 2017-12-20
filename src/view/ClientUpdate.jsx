@@ -2,7 +2,7 @@ import React from 'react'
 import i18n from 'i18n'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
-import UpdateIcon from 'material-ui/svg-icons/action/system-update-alt'
+import UpdateIcon from 'material-ui/svg-icons/action/update'
 import Base from './Base'
 import UpdateApp from '../control/ClientUpdateApp'
 
@@ -37,6 +37,7 @@ class Update extends Base {
     return (
       <UpdateApp
         ipcRenderer={ipcRenderer}
+        primaryColor={this.groupPrimaryColor()}
       />
     )
   }
