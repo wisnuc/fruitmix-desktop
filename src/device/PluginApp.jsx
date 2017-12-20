@@ -19,17 +19,28 @@ class PluginApp extends React.Component {
     }
 
     this.toggle = (type) => {
-      if (type === 'bt') return this.props.openSnackBar(i18n.__('Operation Failed'))
       this.setState({ loading: type })
-      const action = this.props[type].status === 'active' ? 'stop' : 'start'
-      const typeText = type === 'samba' ? i18n.__('Samba Service Title') : i18n.__('miniDLNA Service Title')
-      const actionText = this.props[type].status === 'active' ? i18n.__('Stopped') : i18n.__('Started')
-      this.props.apis.pureRequest('handlePlugin', { type, action }, (err) => {
-        if (!err) this.props.openSnackBar(`${typeText} ${actionText}`)
-        else this.props.openSnackBar(i18n.__('Operation Failed'))
-        this.setState({ loading: '' })
-        this.props.refresh()
-      })
+      if (type === 'bt') {
+        const op = this.props.bt.switch ? 'close' : 'start'
+        const typeText = i18n.__('BT Service Title')
+        const actionText = this.props.bt.switch ? i18n.__('Stopped') : i18n.__('Started')
+        this.props.apis.pureRequest('switchBT', { op }, (err) => {
+          if (!err) this.props.openSnackBar(`${typeText} ${actionText}`)
+          else this.props.openSnackBar(i18n.__('Operation Failed'))
+          this.setState({ loading: '' })
+          this.props.refresh()
+        })
+      } else {
+        const action = this.props[type].status === 'active' ? 'stop' : 'start'
+        const typeText = type === 'samba' ? i18n.__('Samba Service Title') : i18n.__('miniDLNA Service Title')
+        const actionText = this.props[type].status === 'active' ? i18n.__('Stopped') : i18n.__('Started')
+        this.props.apis.pureRequest('handlePlugin', { type, action }, (err) => {
+          if (!err) this.props.openSnackBar(`${typeText} ${actionText}`)
+          else this.props.openSnackBar(i18n.__('Operation Failed'))
+          this.setState({ loading: '' })
+          this.props.refresh()
+        })
+      }
     }
   }
 
@@ -68,7 +79,7 @@ class PluginApp extends React.Component {
   }
 
   render() {
-    const { dlna, samba } = this.props
+    const { dlna, samba, bt } = this.props
     if (!dlna || !samba) return (<div />)
     console.log('plugin this.props', this.props)
 
@@ -94,7 +105,7 @@ class PluginApp extends React.Component {
         Icon: BTIcon,
         title: i18n.__('BT Service Title'),
         text: i18n.__('BT Service Text'),
-        enabled: true,
+        enabled: !!bt.switch,
         func: () => this.toggle('bt')
       }
     ]
