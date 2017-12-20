@@ -1,6 +1,6 @@
 import React from 'react'
 import i18n from 'i18n'
-import ActionSettings from 'material-ui/svg-icons/action/settings'
+import ActionSettings from 'material-ui/svg-icons/action/extension'
 import Base from './Base'
 import PluginApp from '../device/PluginApp'
 
