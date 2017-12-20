@@ -344,6 +344,10 @@ class Fruitmix extends EventEmitter {
         r = this.aget('features/dlna/status')
         break
 
+      case 'bt':
+        r = this.aget('download/switch')
+        break
+
       default:
         break
     }
@@ -421,6 +425,10 @@ class Fruitmix extends EventEmitter {
 
       case 'handlePlugin':
         r = this.apost(`features/${args.type}/${args.action}`)
+        break
+
+      case 'switchBT':
+        r = this.apatch('download/switch', { op: args.op })
         break
 
       default:

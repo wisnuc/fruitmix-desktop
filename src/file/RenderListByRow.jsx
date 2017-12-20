@@ -118,13 +118,13 @@ class Row extends React.PureComponent {
           </div>
 
           <div
-            style={{ flex: '0 0 476px', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', marginRight: 24 }}
+            style={{ flex: inPublicRoot ? '0 1 144px' : '0 0 476px', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', marginRight: 24 }}
             onMouseDown={e => 0 && e.stopPropagation()}
           >
             { entry.name }
           </div>
 
-          <div style={{ flex: '0 1 144px', fontSize: 13, color: 'rgba(0,0,0,0.54)' }}>
+          <div style={{ flex: inPublicRoot ? '0 0 476px' : '0 1 144px', fontSize: 13, color: 'rgba(0,0,0,0.54)' }}>
             { showTakenTime ? entry.metadata && (entry.metadata.date || entry.metadata.datetime)
               && formatDate(entry.metadata.date || entry.metadata.datetime) : entry.mtime && formatTime(entry.mtime) }
             {
@@ -328,7 +328,7 @@ class RenderListByRow extends React.Component {
           <div style={{ flex: '0 0 104px' }} />
           {
             this.props.inPublicRoot
-              ? <div style={{ width: 500, fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}> { i18n.__('Name') } </div>
+              ? <div style={{ width: 168, fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}> { i18n.__('Name') } </div>
               : this.renderHeader({ title: i18n.__('Name'), width: 500, up: 'nameUp', down: 'nameDown' })
           }
           {
