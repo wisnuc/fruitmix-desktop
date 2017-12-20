@@ -4,6 +4,7 @@ import Debug from 'debug'
 import { shell } from 'electron'
 import { CircularProgress, Divider } from 'material-ui'
 import { cyan600 } from 'material-ui/styles/colors'
+import UpdateIcon from 'material-ui/svg-icons/action/update'
 import FlatButton from '../common/FlatButton'
 import DialogOverlay from '../common/DialogOverlay'
 import { GithubIcon } from '../common/Svg'
@@ -94,43 +95,45 @@ class Update extends React.Component {
     const currentVersion = global.config.appVersion
     const platform = global.config.platform
     return (
-      <div style={{ height: '100%', margin: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', fontSize: 20, color: cyan600 }}>
-          { i18n.__('Current Version %s', currentVersion) }
+      <div style={{ height: '100%', margin: 40 }}>
+        <div style={{ display: 'flex', alignItems: 'center', height: 32 }}>
+          <div style={{ flex: '0 0 56px', display: 'flex', alignItems: 'center' }} >
+            <UpdateIcon color={this.props.primaryColor} />
+          </div>
+          <div style={{ fontSize: 20 }}>
+            { i18n.__('Current Version %s', currentVersion) }
+          </div>
         </div>
         <div style={{ height: 16 }} />
         <Divider />
         <div style={{ height: 16 }} />
-        {
-          platform !== 'darwin' && platform !== 'win32'
-            ? <div> { i18n.__('Unsupported to Update') } </div>
+        <div style={{ marginLeft: 56 }}>
+          {
+            platform !== 'darwin' && platform !== 'win32'
+            ? <div style={{ display: 'flex', alignItems: 'center', height: 48 }}> { i18n.__('Unsupported to Update') } </div>
             : this.state.status === 'checking'
-            ? <div>
-              <div>{ i18n.__('Checking Update') } </div>
-              <div style={{ margin: 48 }}>
-                <CircularProgress size={64} />
-              </div>
-            </div>
+            ? <div> <div>{ i18n.__('Checking Update') } </div> <div style={{ margin: 32 }}> <CircularProgress size={48} /> </div> </div>
             : this.state.status === 'latest'
-            ? <div style={{ display: 'flex', alignItems: 'center', height: 48 }}>
-              { i18n.__('Already LTS Text') }
-            </div>
+            ? <div style={{ display: 'flex', alignItems: 'center', height: 48 }}> { i18n.__('Already LTS Text') } </div>
             : this.state.status === 'needUpdate'
             ? this.renderCheckUpdate()
-            : <div style={{ display: 'flex', alignItems: 'center', height: 48 }}>
-              { i18n.__('Check Update Failed Text') }
-            </div>
-        }
+            : <div style={{ display: 'flex', alignItems: 'center', height: 48 }}> { i18n.__('Check Update Failed Text') } </div>
+          }
+        </div>
         <div style={{ height: 16 }} />
         <Divider />
         <div style={{ height: 16 }} />
-        <FlatButton
-          icon={<GithubIcon style={{ marginTop: 4 }} />}
-          style={{ marginLeft: -8 }}
-          primary
-          label={i18n.__('Check More Version')}
-          onTouchTap={this.moreVersion}
-        />
+        <div style={{ display: 'flex', alignItems: 'center', height: 32 }}>
+          <div style={{ flex: '0 0 52px', display: 'flex', alignItems: 'center', marginLeft: 4 }} >
+            <GithubIcon color={this.props.primaryColor} viewBox="0 0 20 20" />
+          </div>
+          <FlatButton
+            style={{ marginLeft: -8 }}
+            primary
+            label={i18n.__('Check More Version')}
+            onTouchTap={this.moreVersion}
+          />
+        </div>
 
         {/* dialog */}
         <DialogOverlay open={this.state.confirm} >
