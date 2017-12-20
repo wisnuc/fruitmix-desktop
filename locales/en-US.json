@@ -209,7 +209,7 @@
   "==== control/AdminDriversApp.jsx ====": "",
   "Name": "Name",
   "Users": "Users",
-  "No Public Drive Text": "Click 'Create' button to add a new public drive.",
+  "No Public Drive Text": "Click 'Create' button to add a new custom drive.",
 
   "==== control/AdminUsersApp.jsx ====": "",
   "Update Account Success": "Account updated.",
@@ -280,7 +280,7 @@
   "Apply": "Apply",
 
   "==== control/NewDriveDialog.jsx ====": "",
-  "Create New Public Drive": "New public drive",
+  "Create New Public Drive": "New custom drive",
   "Create Drive Failed": "Failed to create drvie.",
   "Create Drive Success": "Drive created.",
 
@@ -432,7 +432,7 @@
   "Device Management": "Device",
   "Files": "Files",
   "Photos": "Photos",
-  "Share Space": "Share",
+  "Share Space": "Sharing Space",
   "System Settings": "System",
 
   "==== nav/Navigation.jsx ====": "",
@@ -552,17 +552,17 @@
   "Physical Quick Name": "Physical",
 
   "==== view/Plugin.jsx ====": "",
-  "Plugin Menu Name": "Plugin settings",
-  "Plugin Quick Name": "Plugin",
+  "Plugin Menu Name": "Service",
+  "Plugin Quick Name": "Service",
 
   "==== view/Power.jsx ====": "",
   "Power Menu Name": "Power",
 
   "==== view/Public.jsx ====": "",
-  "Public Drive": "Public drive",
-  "Public Menu Name": "Public drive",
-  "Public Quick Name": "Public drive",
-  "No Public Drive": "No public drive",
+  "Public Drive": "Custom",
+  "Public Menu Name": "Custom",
+  "Public Quick Name": "Custom",
+  "No Public Drive": "No custom drive",
   "Jump to Create": "Jump to create",
 
   "==== view/Settings.jsx ====": "",
@@ -570,8 +570,8 @@
   "Settings Quick Name": "Others",
 
   "==== view/Share.jsx ====": "",
-  "Share Menu Name": "Share",
-  "Share Title": "Share",
+  "Share Menu Name": "To all",
+  "Share Title": "To all",
 
   "==== view/TimeDate.jsx ====": "",
   "TimeDate Menu Name": "Time & Date",

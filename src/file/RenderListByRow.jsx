@@ -60,7 +60,7 @@ const renderCheck = check =>
 
 class Row extends React.PureComponent {
   render() {
-    // debug('renderRow this.props', this.props)
+    debug('renderRow this.props', this.props)
     const {
       /* these are react-virtualized List props */
       index, // Index of row
@@ -73,13 +73,18 @@ class Row extends React.PureComponent {
       /* these are view-model state */
       entries,
       select,
-      showTakenTime
+      showTakenTime,
+      inPublicRoot
     } = this.props
 
     const entry = entries[index]
     const leading = select.rowLeading(index)
     const check = select.rowCheck(index)
     const color = select.rowColor(index)
+
+    /* render drive list */
+    let users = []
+    if (inPublicRoot) users = this.props.apis.users && this.props.apis.users.data
 
     return (
       <div key={entry.name} style={style}>
@@ -122,6 +127,12 @@ class Row extends React.PureComponent {
           <div style={{ flex: '0 1 144px', fontSize: 13, color: 'rgba(0,0,0,0.54)' }}>
             { showTakenTime ? entry.metadata && (entry.metadata.date || entry.metadata.datetime)
               && formatDate(entry.metadata.date || entry.metadata.datetime) : entry.mtime && formatTime(entry.mtime) }
+            {
+              inPublicRoot && (entry.writelist === '*' ? i18n.__('All Users')
+              : entry.writelist.filter(uuid => users.find(u => u.uuid === uuid))
+                .map(uuid => users.find(u => u.uuid === uuid).username).join(', ')
+              )
+            }
           </div>
 
           <div style={{ flex: '0 1 144px', fontSize: 13, color: 'rgba(0,0,0,0.54)', textAlign: 'right' }} >
@@ -315,9 +326,17 @@ class RenderListByRow extends React.Component {
           onMouseMove={e => this.props.selectRow(e, this.getScrollToPosition())}
         >
           <div style={{ flex: '0 0 104px' }} />
-          { this.renderHeader({ title: i18n.__('Name'), width: 500, up: 'nameUp', down: 'nameDown' }) }
-          { this.renderPopoverHeader() }
-          { this.renderHeader({ title: i18n.__('Size'), width: 60, up: 'sizeUp', down: 'sizeDown' }) }
+          {
+            this.props.inPublicRoot
+              ? <div style={{ width: 500, fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}> { i18n.__('Name') } </div>
+              : this.renderHeader({ title: i18n.__('Name'), width: 500, up: 'nameUp', down: 'nameDown' })
+          }
+          {
+            this.props.inPublicRoot
+              ? <div style={{ width: 172, fontSize: 14, fontWeight: 500, color: 'rgba(0,0,0,0.54)' }}> { i18n.__('Users') } </div>
+              : this.renderPopoverHeader()
+          }
+          { !this.props.inPublicRoot && this.renderHeader({ title: i18n.__('Size'), width: 60, up: 'sizeUp', down: 'sizeDown' }) }
           <div style={{ flexGrow: 1 }} />
         </div>
 

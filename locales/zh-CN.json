@@ -209,7 +209,7 @@
   "==== control/AdminDriversApp.jsx ====": "",
   "Name": "名称",
   "Users": "用户",
-  "No Public Drive Text": "请点击'创建'添加新的共享盘",
+  "No Public Drive Text": "请点击'创建'添加新的指定共享盘",
 
   "==== control/AdminUsersApp.jsx ====": "",
   "Update Account Success": "更新成功",
@@ -280,7 +280,7 @@
   "Apply": "应用",
 
   "==== control/NewDriveDialog.jsx ====": "",
-  "Create New Public Drive": "创建新的共享盘",
+  "Create New Public Drive": "创建新的指定共享盘",
   "Create Drive Failed": "创建失败",
   "Create Drive Success": "创建成功",
 
@@ -552,17 +552,17 @@
   "Physical Quick Name": "物理磁盘",
 
   "==== view/Plugin.jsx ====": "",
-  "Plugin Menu Name": "插件设置",
-  "Plugin Quick Name": "插件设置",
+  "Plugin Menu Name": "服务",
+  "Plugin Quick Name": "服务",
 
   "==== view/Power.jsx ====": "",
   "Power Menu Name": "电源管理",
 
   "==== view/Public.jsx ====": "",
-  "Public Drive": "共享盘",
-  "Public Menu Name": "共享盘",
-  "Public Quick Name": "共享盘",
-  "No Public Drive": "尚未建立共享盘",
+  "Public Drive": "指定共享",
+  "Public Menu Name": "指定共享",
+  "Public Quick Name": "指定共享",
+  "No Public Drive": "尚未建立指定共享",
   "Jump to Create": "去创建",
 
   "==== view/Settings.jsx ====": "",
@@ -570,8 +570,8 @@
   "Settings Quick Name": "其他设置",
 
   "==== view/Share.jsx ====": "",
-  "Share Menu Name": "公开共享",
-  "Share Title": "公开共享",
+  "Share Menu Name": "公共盘",
+  "Share Title": "公共盘",
 
   "==== view/TimeDate.jsx ====": "",
   "TimeDate Menu Name": "时间与日期",
