@@ -4,7 +4,6 @@ import Debug from 'debug'
 import { ipcRenderer } from 'electron'
 
 import { Paper, IconButton, Snackbar } from 'material-ui'
-import SocialNotifications from 'material-ui/svg-icons/social/notifications'
 import ActionInfo from 'material-ui/svg-icons/action/info'
 
 import Fruitmix from '../common/fruitmix'
@@ -16,12 +15,14 @@ import NavDrawer from './NavDrawer'
 import QuickNav from './QuickNav'
 import TransNav from './TransNav'
 import Tasks from '../common/Tasks'
+import { TasksIcon } from '../common/Svg'
 
 import Home from '../view/Home'
 import Public from '../view/Public'
 import Share from '../view/Share'
 import Physical from '../view/Physical'
 import Transmission from '../view/Transmission'
+import Transmission2 from '../view/Transmission2'
 
 import Media from '../view/Media'
 import Assistant from '../view/Assistant'
@@ -58,6 +59,7 @@ class NavViews extends React.Component {
     this.install('public', Public)
     // this.install('physical', Physical)
     this.install('transmission', Transmission)
+    this.install('transmission2', Transmission2)
 
     this.install('download', Download)
     this.install('finishedList', FinishedList)
@@ -238,7 +240,7 @@ class NavViews extends React.Component {
             if ((!ws215i || !isAdmin) && key === 'fanControl') return noRender
             if (!isAdmin && (['firmwareUpdate', 'power', 'adminUsers', 'adminDrives'].includes(key))) return noRender
             if (isCloud && ['device', 'networking', 'timeDate', 'fanControl', 'power', 'plugin'].includes(key)) return noRender
-            if (key === 'transmission') return (
+            if (key === 'transmission' || key === 'transmission2') return (
               <TransNav
                 key={`quicknav-${key}`}
                 icon={this.views[key].quickIcon()}
@@ -401,10 +403,10 @@ class NavViews extends React.Component {
               }}
             />
             <IconButton>
-              <SocialNotifications
+              <TasksIcon
                 color={view.appBarStyle() === 'light' ? 'rgba(0,0,0,0.54)' : '#FFF'}
                 onTouchTap={() => this.setState({ showTasks: !this.state.showTasks })}
-                style={{ position: 'absolute' }}
+                style={{ position: 'absolute', width: 20, height: 20 }}
               />
             </IconButton>
           </div>
