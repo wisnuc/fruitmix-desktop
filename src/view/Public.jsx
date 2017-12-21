@@ -234,7 +234,7 @@ class Public extends Home {
     )
   }
 
-  renderNoPublic(navTo) {
+  renderNoPublic() {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
         <div
@@ -250,10 +250,7 @@ class Public extends Home {
           }}
         >
           <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.27)', height: 56 }}> { i18n.__('No Public Drive') } </div>
-          {
-            this.ctx.props.apis.account && this.ctx.props.apis.account.data && this.ctx.props.apis.account.data.isAdmin &&
-              <FlatButton label={i18n.__('Jump to Create')} primary onTouchTap={() => navTo('adminDrives')} />
-          }
+          <div style={{ color: 'rgba(0,0,0,0.27)', height: 56 }}> { i18n.__('No Public Drive Text') } </div>
         </div>
       </div>
     )
@@ -293,18 +290,14 @@ class Public extends Home {
     )
   }
 
-  renderContent({ navTo, toggleDetail, openSnackBar, getDetailStatus }) {
-    // debug('renderContent public', this.state)
+  renderContent({ toggleDetail, openSnackBar, getDetailStatus }) {
+    debug('renderContent public', this.state, this.ctx.props)
 
     /* loading data */
     // if (!this.state.listNavDir && !this.state.drives || !this.state.path.length) return (<div />)
 
-    /* no public drives */
-    if (this.state.path && this.state.path.length === 1 && !this.state.entries.length) return this.renderNoPublic(navTo)
-
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-
         {/* add new user FAB */}
         {
           this.ctx.props.apis.account && this.ctx.props.apis.account.data &&
@@ -324,46 +317,50 @@ class Public extends Home {
         {/* upload FAB */}
         { this.state.path && this.state.path.length > 1 && <FileUploadButton upload={this.upload} /> }
 
-        <FileContent
-          home={this.state}
-          select={this.state.select}
-          entries={this.state.entries}
-          listNavBySelect={this.listNavBySelect}
-          showContextMenu={this.showContextMenu}
-          setAnimation={this.setAnimation}
-          ipcRenderer={ipcRenderer}
-          download={this.download}
-          primaryColor={this.groupPrimaryColor()}
-          sortType={this.state.sortType}
-          changeSortType={this.changeSortType}
-          gridView={this.state.gridView}
-          scrollTo={this.state.scrollTo}
-          openSnackBar={openSnackBar}
-          toggleDialog={this.toggleDialog}
-          showTakenTime={!!this.state.takenTime}
-          apis={this.ctx.props.apis}
-          inPublicRoot={this.state.inRoot}
-        />
-
-      { this.renderMenu(!!this.state.contextMenuOpen && !this.state.inRoot, toggleDetail, getDetailStatus) }
-
-      { this.renderDialogs(openSnackBar) }
-
-      <DialogOverlay open={!!this.state.newDrive} onRequestClose={() => this.setState({ newDrive: false })}>
         {
-          this.state.newDrive && <NewDriveDialog
-            primary
-            apis={this.ctx.props.apis}
-            users={this.state.users}
-            drives={this.state.drives}
-            refreshDrives={this.refresh}
-            openSnackBar={openSnackBar}
-            primaryColor={this.groupPrimaryColor()}
-          />
-        }
-      </DialogOverlay>
+          (this.state.path && this.state.path.length === 1 && !this.state.entries.length) ? this.renderNoPublic() :
 
-    </div>
+            <FileContent
+              home={this.state}
+              select={this.state.select}
+              entries={this.state.entries}
+              listNavBySelect={this.listNavBySelect}
+              showContextMenu={this.showContextMenu}
+              setAnimation={this.setAnimation}
+              ipcRenderer={ipcRenderer}
+              download={this.download}
+              primaryColor={this.groupPrimaryColor()}
+              sortType={this.state.sortType}
+              changeSortType={this.changeSortType}
+              gridView={this.state.gridView}
+              scrollTo={this.state.scrollTo}
+              openSnackBar={openSnackBar}
+              toggleDialog={this.toggleDialog}
+              showTakenTime={!!this.state.takenTime}
+              apis={this.ctx.props.apis}
+              inPublicRoot={this.state.inRoot}
+            />
+        }
+
+        { this.renderMenu(!!this.state.contextMenuOpen && !this.state.inRoot, toggleDetail, getDetailStatus) }
+
+        { this.renderDialogs(openSnackBar) }
+
+        <DialogOverlay open={!!this.state.newDrive} onRequestClose={() => this.setState({ newDrive: false })}>
+          {
+            this.state.newDrive && <NewDriveDialog
+              primary
+              apis={this.ctx.props.apis}
+              users={this.state.users}
+              drives={this.state.drives}
+              refreshDrives={this.refresh}
+              openSnackBar={openSnackBar}
+              primaryColor={this.groupPrimaryColor()}
+            />
+          }
+        </DialogOverlay>
+
+      </div>
     ) 
   }
 }

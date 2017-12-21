@@ -35,7 +35,7 @@ class Row extends React.PureComponent {
           {
             node.type === 'file'
             ? <EditorInsertDriveFile style={{ color: 'rgba(0,0,0,0.54)' }} />
-            : node.type === 'public' || node.type === 'publicRoot'
+            : node.type === 'public' || node.type === 'publicRoot' || node.tag === 'built-in'
             ? <ShareDisk style={{ color: 'rgba(0,0,0,0.54)' }} />
             : <FileFolder style={{ color: 'rgba(0,0,0,0.54)' }} />
           }
@@ -82,6 +82,7 @@ class MoveDialog extends React.PureComponent {
       currentDir: Object.assign({}, this.path[this.path.length - 1], { type: 'directory' }),
       path: [{ name: i18n.__('Box Title'), uuid: this.path[0].uuid, type: 'root' }, ...this.path],
       loading: false,
+      noView: false,
       currentSelectedIndex: -1,
       errorText: '',
       newFoldName: ''
@@ -121,6 +122,15 @@ class MoveDialog extends React.PureComponent {
         const list = this.props.apis.drives.value().filter(d => d.type === 'public' && d.tag !== 'built-in' &&
           (d.writelist === '*' || d.writelist.find(u => u === myUUID)))
         setImmediate(() => this.updateState(path, currentDir, list))
+      } else if (node.tag === 'built-in') {
+        const builtIn = this.props.apis.drives.value().find(d => d.tag === 'built-in')
+        this.list(builtIn.uuid, builtIn.uuid)
+          .then((list) => {
+            /* reset driveUUID */
+            path[0].uuid = builtIn.uuid
+            this.updateState(path, currentDir, list)
+          })
+          .catch(err => console.log(err))
       }
     }
 
@@ -138,7 +148,7 @@ class MoveDialog extends React.PureComponent {
       const dirUUID = currentDir.uuid
       const driveUUID = path[0].uuid
 
-      if (currentDir.type === 'directory' || currentDir.type === 'public') { // normal directory
+      if (currentDir.type === 'directory' || currentDir.type === 'public' || currentDir.tag === 'built-in') { // normal directory
         this.list(driveUUID, dirUUID)
           .then(list => this.updateState(path, currentDir, list))
           .catch(err => console.log(err))
@@ -146,6 +156,7 @@ class MoveDialog extends React.PureComponent {
         const drives = this.props.apis.drives.value()
         const list = [
           { name: i18n.__('Home Title'), type: 'directory', uuid: drives.find(d => d.tag === 'home').uuid, tag: 'home' },
+          { name: i18n.__('Share Title'), type: 'built-in', uuid: drives.find(d => d.tag === 'built-in').uuid, tag: 'built-in' },
           { name: i18n.__('Public Drive'), type: 'publicRoot' }
         ]
         setImmediate(() => this.updateState(path, currentDir, list))
@@ -225,6 +236,19 @@ class MoveDialog extends React.PureComponent {
       this.props.apis.request('copy', { type, src, dst, entries, policies }, this.finish)
     }
 
+    /* share to all directory */
+    this.shareToAll = () => {
+      this.setState({ noView: true })
+      /* set parameter */
+      const type = this.props.operation
+      const builtIn = this.props.apis.drives.value().find(d => d.tag === 'built-in')
+      const src = { drive: this.path[0].uuid, dir: this.directory.uuid }
+      const dst = { drive: builtIn.uuid, dir: builtIn.uuid }
+      const entries = this.selectedArr.map(e => e.uuid)
+      const policies = { dir: ['keep', null] }
+      this.props.apis.request('copy', { type, src, dst, entries, policies }, this.finish)
+    }
+
     /* finish post change dialog content to waiting/result */
     this.finish = (error, data) => {
       const type = this.props.type === 'copy' ? i18n.__('Copy') : this.props.type === 'move' ? i18n.__('Move') : i18n.__('Share')
@@ -287,7 +311,7 @@ class MoveDialog extends React.PureComponent {
   }
 
   componentWillMount() {
-    if (this.props.type === 'share') this.enter({ type: 'publicRoot', name: i18n.__('Public Drive'), setRoot: true })
+    if (this.props.type === 'share') this.shareToAll()
   }
 
   /* Button disabled ? */
@@ -305,7 +329,6 @@ class MoveDialog extends React.PureComponent {
         }
       }
       if (selectedObj.uuid === this.directory.uuid) return true
-
     } else if (type === 'directory' && this.inSameDirectory()) {
       return true
     } else if (type === 'publicRoot') {
@@ -422,6 +445,7 @@ class MoveDialog extends React.PureComponent {
   }
 
   render() {
+    if (this.state.noView) return (<div />)
     return (
       <div style={{ width: 336, height: 448 }}>
         {/* header */}
@@ -477,7 +501,7 @@ class MoveDialog extends React.PureComponent {
                         <FlatButton
                           label={i18n.__('Jump to Create')}
                           primary
-                          onTouchTap={() => { this.closeDialog; this.props.navTo('adminDrives') }}
+                          onTouchTap={() => { this.closeDialog; this.props.navTo('public') }}
                         />
                     }
                     </div>
