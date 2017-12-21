@@ -14,6 +14,7 @@ import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motio
 
 import NavDrawer from './NavDrawer'
 import QuickNav from './QuickNav'
+import TransNav from './TransNav'
 import Tasks from '../common/Tasks'
 
 import Home from '../view/Home'
@@ -237,6 +238,16 @@ class NavViews extends React.Component {
             if ((!ws215i || !isAdmin) && key === 'fanControl') return noRender
             if (!isAdmin && (['firmwareUpdate', 'power', 'adminUsers', 'adminDrives'].includes(key))) return noRender
             if (isCloud && ['device', 'networking', 'timeDate', 'fanControl', 'power', 'plugin'].includes(key)) return noRender
+            if (key === 'transmission') return (
+              <TransNav
+                key={`quicknav-${key}`}
+                icon={this.views[key].quickIcon()}
+                text={this.views[key].quickName()}
+                color={color}
+                selected={key === this.state.nav}
+                onTouchTap={this.navBound(key)}
+              />
+            )
             return (
               <QuickNav
                 key={`quicknav-${key}`}
