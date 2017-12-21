@@ -60,7 +60,6 @@ const renderCheck = check =>
 
 class Row extends React.PureComponent {
   render() {
-    debug('renderRow this.props', this.props)
     const {
       /* these are react-virtualized List props */
       index, // Index of row

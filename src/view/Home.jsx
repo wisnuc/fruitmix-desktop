@@ -556,11 +556,14 @@ class Home extends Base {
               <div>
                 { !this.ctx.props.selectedDevice.token.data.stationID &&
                   <div>
-                    <MenuItem
-                      leftIcon={<ShareIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                      primaryText={i18n.__('Share to Public')}
-                      onTouchTap={() => this.toggleDialog('share')}
-                    />
+                    {
+                      this.title !== i18n.__('Share Title') &&
+                        <MenuItem
+                          leftIcon={<ShareIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
+                          primaryText={i18n.__('Share to Public')}
+                          onTouchTap={() => this.toggleDialog('share')}
+                        />
+                    }
                     <MenuItem
                       leftIcon={<CopyIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
                       primaryText={i18n.__('Copy to')}
