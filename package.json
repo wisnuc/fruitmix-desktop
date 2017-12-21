@@ -1,6 +1,6 @@
 {
   "name": "wisnuc",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "wisnuc",
   "author": "wisnuc <support@winsuntech.cn>",
   "repository": "https://github.com/wisnuc/fruitmix-desktop",
@@ -15,9 +15,8 @@
     "mocha": "mocha --compilers js:babel-core/register --recursive --sort",
     "rebuild": "electron-rebuild",
     "start": "electron .",
-    "webpack": "webpack --watch --watch-poll",
-    "webpack2": "webpack -p",
-    "webpack3": "rm -f public/*.js && rm -f public/*.json && webpack --watch --watch-poll"
+    "webpack": "rm -f public/*.js && rm -f public/*.json && webpack --watch --watch-poll",
+    "webpack2": "webpack -p"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
