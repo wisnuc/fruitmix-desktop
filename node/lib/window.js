@@ -44,7 +44,8 @@ const initMainWindow = () => {
       { label: 'About Application', selector: 'orderFrontStandardAboutPanel:' },
       { type: 'separator' },
       { label: 'Quit', accelerator: 'Command+Q', click() { app.quit() } }
-    ] }, {
+    ]
+  }, {
     label: 'Edit',
     submenu: [
       { label: 'Undo', accelerator: 'CmdOrCtrl+Z', selector: 'undo:' },
@@ -53,9 +54,14 @@ const initMainWindow = () => {
       { label: 'Cut', accelerator: 'CmdOrCtrl+X', selector: 'cut:' },
       { label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:' },
       { label: 'Paste', accelerator: 'CmdOrCtrl+V', selector: 'paste:' },
-      { label: 'Select All', accelerator: 'CmdOrCtrl+A', selector: 'selectAll:' }
-    ] }
-  ]
+      { label: 'Select All', accelerator: 'CmdOrCtrl+A', selector: 'selectAll:' },
+      {
+        label: 'Toggle Developer Tools',
+        accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
+        click: (item, focusedWindow) => focusedWindow && focusedWindow.toggleDevTools()
+      }
+    ]
+  }]
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 

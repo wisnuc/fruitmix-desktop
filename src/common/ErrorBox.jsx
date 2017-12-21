@@ -44,13 +44,13 @@ class ErrorBox extends React.PureComponent {
             <AlertError />
           </IconButton>
           <Dialog
-            titleStyle={{ fontSize: 20 }}
+            titleStyle={{ fontSize: 20, height: 32 }}
             title={i18n.__('Error Message')}
             modal={false}
             open={this.state.open}
             onRequestClose={() => this.setState(state => Object.assign({}, state, { open: false }))}
           >
-            <div style={{ height: 480, overflow: 'auto' }}>
+            <div style={{ height: 400, overflow: 'auto' }}>
               <JSONTree
                 hideRoot
                 theme={theme}
