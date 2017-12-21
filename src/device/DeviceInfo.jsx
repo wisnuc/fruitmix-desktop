@@ -107,7 +107,7 @@ class DeviceInfo extends React.PureComponent {
       i18n.__('Disk Array Mode')
     ]
     const fsValues = [
-      'Brtfs',
+      'Btrfs',
       volume.total,
       volume.usage.data.mode.toUpperCase()
     ]
