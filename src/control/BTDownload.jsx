@@ -235,7 +235,7 @@ class BTDownload extends React.Component {
   }
 
   componentDidMount() {
-    // this.refreshTimer = setInterval(this.refresh, 1000)
+    this.refreshTimer = setInterval(this.refresh, 1000)
     /* bind keydown event */
     document.addEventListener('keydown', this.keyDown)
     document.addEventListener('keyup', this.keyUp)

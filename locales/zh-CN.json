@@ -744,8 +744,8 @@
     "other": "%s 个项目添加到传输列表"
   },
   "%s Ignore Upload Text": {
-    "one": "%s 跳过了%s个忽略的或不支持的项目",
-    "other": "%s 跳过了%s个忽略的或不支持的项目"
+    "one": "跳过了%s个忽略的或不支持的项目",
+    "other": "跳过了%s个忽略的或不支持的项目"
   },
   "Add Torrent Failed": "添加失败",
   "Add Torrent Success": "添加成功",
