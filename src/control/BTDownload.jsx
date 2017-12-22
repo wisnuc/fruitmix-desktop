@@ -8,6 +8,7 @@ import DeleteSvg from 'material-ui/svg-icons/action/delete'
 import PlaySvg from 'material-ui/svg-icons/av/play-arrow'
 import PauseSvg from 'material-ui/svg-icons/av/pause'
 import ContentAdd from 'material-ui/svg-icons/content/add'
+import ErrorIcon from 'material-ui/svg-icons/alert/error'
 
 import ListSelect from '../file/ListSelect'
 import FlatButton from '../common/FlatButton'
@@ -277,6 +278,31 @@ class BTDownload extends React.Component {
     )
   }
 
+  renderError() {
+    return (
+      <div
+        style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        onTouchTap={e => this.onRowTouchTap(e, -1)}
+      >
+        <div
+          style={{
+            width: 360,
+            height: 360,
+            borderRadius: '180px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            backgroundColor: '#FAFAFA'
+          }}
+        >
+          <ErrorIcon style={{ height: 64, width: 64, color: 'rgba(0,0,0,0.27)' }} />
+          <div style={{ fontSize: 20, color: 'rgba(0,0,0,0.27)' }}> { i18n.__('No BT Service Text')} </div>
+        </div>
+      </div>
+    )
+  }
+
   renderOffLine() {
     return (
       <div
@@ -525,6 +551,8 @@ class BTDownload extends React.Component {
     debug('render BTDownload', this.state, this.props)
     /* lost connection to wisnuc */
     if (!window.navigator.onLine) return this.renderOffLine()
+
+    if (this.props.error) return this.renderError()
 
     /* loding */
     if (this.state.loading) return this.renderLoading()

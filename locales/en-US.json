@@ -326,6 +326,7 @@
   "Add Magnet Success": "New task created.",
   "Finished": "Finished",
   "Getting Info": "Getting information",
+  "No BT Service Text": "BT service is turned off",
 
   "==== device/DeviceInfo.jsx ====": "",
   "Modify Device Name Failed": "Failed to change device name.",

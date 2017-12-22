@@ -326,6 +326,7 @@
   "Add Magnet Success": "添加成功",
   "Finished": "已完成",
   "Getting Info": "获取信息中",
+  "No BT Service Text": "BT服务已关闭",
 
   "==== device/DeviceInfo.jsx ====": "",
   "Modify Device Name Failed": "修改失败",
