@@ -18,8 +18,11 @@ class FirmwareUpdate extends Base {
     }
 
     this.refresh = () => {
-      this.ctx.props.selectedDevice.pureRequest('checkUpdates')
       this.ctx.props.selectedDevice.request('firm')
+    }
+
+    this.checkUpdates = () => {
+      this.ctx.props.selectedDevice.pureRequest('checkUpdates')
     }
   }
 
@@ -73,7 +76,7 @@ class FirmwareUpdate extends Base {
   renderToolBar({ style }) {
     return (
       <div style={style}>
-        <IconButton onTouchTap={() => this.refresh()} tooltip={i18n.__('Refresh')} tooltipStyles={{ marginTop: -12 }}>
+        <IconButton onTouchTap={() => this.checkUpdates()} tooltip={i18n.__('Refresh')} tooltipStyles={{ marginTop: -12 }}>
           <RefreshIcon color="#FFF" />
         </IconButton>
       </div>
@@ -87,6 +90,7 @@ class FirmwareUpdate extends Base {
           firm={this.state.firm}
           error={this.state.error}
           refresh={this.refresh}
+          checkUpdates={this.checkUpdates}
           apis={this.ctx.props.apis}
           nav={this.ctx.props.nav}
           selectedDevice={this.ctx.props.selectedDevice}
