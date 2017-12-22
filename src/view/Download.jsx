@@ -11,13 +11,21 @@ class Download extends Base {
   constructor(ctx) {
     super(ctx)
     this.state = {
-      tasks: null
+      tasks: null,
+      error: null
     }
   }
 
   willReceiveProps(nextProps) {
-    console.log('Download nextProps', nextProps)
-    if (!nextProps.apis || !nextProps.apis.BTList) return
+    if (!nextProps.apis || !nextProps.apis.BTList || !nextProps.apis.bt) return
+    const bt = nextProps.apis.bt
+    if (bt.isRejected() && bt.reason() !== this.state.error) return this.setState({ error: bt.reason() })
+    if (bt.isPending() || bt.isRejected()) return
+
+    const BT = bt.value()
+    if (!BT.switch && this.state.error !== BT) return this.setState({ error: BT, tasks: null })
+    if (!BT.switch) return
+
     const BTList = nextProps.apis.BTList
     if (BTList.isPending() || BTList.isRejected()) return
 
@@ -25,12 +33,13 @@ class Download extends Base {
     const tasks = BTList.value()
 
     if (tasks !== this.state.tasks) {
-      this.setState({ tasks })
+      this.setState({ tasks, error: null })
     }
   }
 
   navEnter() {
     this.ctx.props.apis.request('BTList')
+    this.ctx.props.apis.request('bt')
   }
 
   navLeave() {
@@ -87,6 +96,7 @@ class Download extends Base {
           openSnackBar={openSnackBar}
           primaryColor={this.groupPrimaryColor()}
           selectedDevice={this.ctx.props.selectedDevice}
+          error={this.state.error}
         />
       </div>
     )
