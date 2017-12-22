@@ -20,22 +20,20 @@ class NewDriveDialog extends PureComponent {
     }
 
     this.fire = () => {
-      if (this.state.loading) return
+      this.setState({ loading: true })
       const apis = this.props.apis
       const args = {
         label: this.state.label,
         writelist: this.state.writelist
       }
-      this.setState(Object.assign(this.state, { loading: true }))
       apis.request('adminCreateDrive', args, (err) => {
         if (!err) {
-          this.setState({ loading: false })
-          this.props.onRequestClose()
           this.props.refreshDrives()
+          this.props.onRequestClose()
           this.props.openSnackBar(i18n.__('Create Drive Success'))
         } else {
           this.setState({ loading: false })
-          debug('adminCreateDrive failed', err)
+          console.log('adminCreateDrive failed', err)
           this.props.openSnackBar(i18n.__('Create Drive Failed'))
         }
       })
@@ -55,26 +53,15 @@ class NewDriveDialog extends PureComponent {
   }
 
   togglecheckAll() {
-    const users = this.props.users
-    if (this.state.writelist.length === users.length) {
-      this.setState({ writelist: [] })
-    } else {
-      const allUsers = users.map(user => user.uuid)
-      this.setState({ writelist: allUsers })
-    }
+    this.setState({ writelist: this.state.writelist === '*' ? [] : '*' })
   }
 
   handleCheck(userUUID) {
-    // debug('handleCheck', this.state)
-    const index = this.state.writelist.indexOf(userUUID)
-    if (index === -1) { this.setState({ writelist: [...this.state.writelist, userUUID] }) } else {
-      this.setState({
-        writelist: [
-          ...this.state.writelist.slice(0, index),
-          ...this.state.writelist.slice(index + 1)
-        ]
-      })
-    }
+    const wl = this.state.writelist
+    const index = wl.indexOf(userUUID)
+    if (wl === '*') this.setState({ writelist: [userUUID] })
+    else if (index === -1) this.setState({ writelist: [...wl, userUUID] })
+    else this.setState({ writelist: [...wl.slice(0, index), ...wl.writelist.slice(index + 1)] })
   }
 
   render() {
@@ -121,8 +108,8 @@ class NewDriveDialog extends PureComponent {
           <Checkbox
             label={i18n.__('All Users')}
             labelStyle={{ fontSize: 14 }}
-            iconStyle={{ fill: this.state.writelist.length === users.length ? this.props.primaryColor : 'rgba(0, 0, 0, 0.54)' }}
-            checked={this.state.writelist.length === users.length}
+            iconStyle={{ fill: this.state.writelist === '*' ? this.props.primaryColor : 'rgba(0, 0, 0, 0.54)' }}
+            checked={this.state.writelist === '*'}
             onCheck={() => this.togglecheckAll()}
           />
         </div>
@@ -133,9 +120,9 @@ class NewDriveDialog extends PureComponent {
               (<div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.username} >
                 <Checkbox
                   label={user.username}
-                  iconStyle={{ fill: this.state.writelist.includes(user.uuid) ? this.props.primaryColor : 'rgba(0, 0, 0, 0.54)' }}
+                  iconStyle={{ fill: this.state.writelist === '*' || this.state.writelist.includes(user.uuid) ? this.props.primaryColor : 'rgba(0, 0, 0, 0.54)' }}
                   labelStyle={{ fontSize: 14 }}
-                  checked={this.state.writelist.includes(user.uuid)}
+                  checked={this.state.writelist === '*' || this.state.writelist.includes(user.uuid)}
                   onCheck={() => this.handleCheck(user.uuid)}
                 />
                </div>))

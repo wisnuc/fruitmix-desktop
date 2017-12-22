@@ -39,7 +39,6 @@ class NewFolderDialog extends React.PureComponent {
           console.log('mkdir error', err.code)
           this.setState({ errorText: i18n.__('Mkdir Failed'), loading: false })
         } else {
-          this.setState({ loading: false })
           this.props.onRequestClose(true)
           this.props.openSnackBar(i18n.__('Mkdir Success'))
           this.props.refresh({ fileName: this.state.value })

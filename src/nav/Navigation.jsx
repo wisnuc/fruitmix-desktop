@@ -402,12 +402,11 @@ class NavViews extends React.Component {
                 transition: 'opacity 300ms'
               }}
             />
-            <IconButton>
+            <IconButton tooltip={i18n.__('Tasks')} tooltipStyles={{ marginTop: !view.prominent() ? -12 : undefined }}>
               <TasksIcon
                 color={view.appBarStyle() === 'light' ? 'rgba(0,0,0,0.54)' : '#FFF'}
                 onTouchTap={() => this.setState({ showTasks: !this.state.showTasks })}
                 style={{ position: 'absolute', width: 20, height: 20 }}
-                tooltip={i18n.__('Tasks')}
               />
             </IconButton>
           </div>
