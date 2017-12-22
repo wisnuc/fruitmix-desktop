@@ -320,7 +320,7 @@ class MoveDialog extends React.PureComponent {
     const selectedObj = this.state.currentSelectedIndex !== -1 ? this.state.list[this.state.currentSelectedIndex] : null
     if (this.state.loading || this.state.cnf) return true
 
-    if (type !== 'directory' && type !== 'publicRoot' && type !== 'public' && name !== uuid) return true
+    if (type !== 'directory' && type !== 'publicRoot' && type !== 'public' && name !== uuid && type !== 'built-in') return true
 
     if (this.state.currentSelectedIndex !== -1) {
       if (type === 'directory') {

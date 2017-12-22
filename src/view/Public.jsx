@@ -61,7 +61,7 @@ class Public extends Home {
   }
 
   updateState(type, data) {
-     debug('updateState', type, data)
+    // debug('updateState', type, data)
     let path
     let entries
     let select
