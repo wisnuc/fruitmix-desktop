@@ -74,7 +74,7 @@ class AccountApp extends React.Component {
       <div style={{ paddingLeft: 68, paddingTop: 24 }}>
 
         {/* avatar */}
-        <div style={{ height: 67, marginLeft: -4 }} >
+        <div style={{ height: 68, marginLeft: -4 }} >
           {
             avatarUrl ? <div style={{ borderRadius: 28, width: 56, height: 56, overflow: 'hidden', marginLeft: 4 }}>
               <img width={56} height={56} alt="" src={avatarUrl} />
@@ -90,7 +90,7 @@ class AccountApp extends React.Component {
         </div>
 
         {/* username */}
-        <div style={{ flex: '0 0 560px', fontSize: 16, height: 24, display: 'flex', alignItems: 'center', marginTop: -4 }}>
+        <div style={{ flex: '0 0 560px', fontSize: 16, height: 24, display: 'flex', alignItems: 'center' }}>
           { account.username }
         </div>
 
