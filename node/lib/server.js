@@ -77,10 +77,10 @@ export const serverGet = (endpoint, callback) => {
   // debug('serverGet', endpoint)
   aget(endpoint).end((err, res) => {
     if (err) return callback(Object.assign({}, err, { response: err.response && err.response.body }))
-    if (res.statusCode !== 200 && res.statusCode !== 206) {
+    if (res.status !== 200 && res.status !== 206) {
       const e = new Error('http status code not 200')
       e.code = res.code
-      e.status = res.statusCode
+      e.status = res.status
       return callback(e)
     }
     const data = res.body
@@ -406,8 +406,19 @@ export const downloadFile = (driveUUID, dirUUID, entryUUID, fileName, downloadPa
       })
 
       const handle = adownload(dirUUID === 'media' ? `media/${entryUUID}` : `drives/${driveUUID}/dirs/${dirUUID}/entries/${entryUUID}`)
-        .query({ name: fileName })
+      handle.query({ name: fileName })
         .on('error', err => callback(Object.assign({}, err, { response: err.response && err.response.body })))
+        .on('response', (res) => {
+          if (res.status !== 200 && res.status !== 206) {
+            console.log('download http status code not 200', res.error)
+            const e = new Error()
+            e.message = res.error
+            e.code = res.code
+            e.status = res.status
+            handle.abort()
+            callback(e)
+          }
+        })
       handle.pipe(stream)
     } else callback(null, filePath)
   })
