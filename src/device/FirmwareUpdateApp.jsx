@@ -183,17 +183,27 @@ class Firm extends React.PureComponent {
     return (
       <div style={{ display: 'flex', width: '100%' }}>
         <div style={{ flex: '0 0 24px' }} />
-        <div style={{ flex: '0 0 56px' }} >
+        <div style={{ flex: '0 0 56px', marginTop: 12 }} >
           { show ? <NewReleases color={this.props.primaryColor} /> : <CheckIcon color={this.props.primaryColor} /> }
         </div>
         {
           show ?
             <div style={{ width: '100%' }}>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', height: 48 }}>
                 <div style={{ fontSize: 20, marginRight: 32 }}>
                   { i18n.__('New Version Detected %s', rel.tag_name) }
                 </div>
                 <div style={{ fontSize: 14, color, marginRight: 8, border: `1px ${color} solid`, padding: '0px 8px' }}> { text } </div>
+                {
+                  state === 'Failed' && <ErrorBox
+                    error={view}
+                    iconStyle={{ color: orange500 }}
+                  />
+                }
+                {
+                  view && view.length !== 'unknown' && !!view.bytesWritten &&
+                    <div style={{ marginLeft: 24 }}> { `${Math.round(view.bytesWritten * 100 / view.length)} %` } </div>
+                }
               </div>
               <div style={{ display: 'flex', alignItems: 'center', height: 44 }}>
                 {
@@ -204,6 +214,7 @@ class Firm extends React.PureComponent {
               <div style={{ height: 16 }} />
               <div> { i18n.__('Publish Date %s', date) } </div>
               <div style={{ height: 16 }} />
+              {/*
               <div> { i18n.__('Updates') } </div>
               <div style={{ height: 8 }} />
               {
@@ -221,11 +232,12 @@ class Firm extends React.PureComponent {
                   { i18n.__('Bug Fixes') }
                 </div>
               }
+              */}
               <div style={{ height: 16 }} />
               <Divider style={{ marginLeft: -60 }} />
             </div>
             :
-            <div style={{ }} >
+            <div style={{ marginTop: 12 }} >
               { i18n.__('Already LTS Text') }
             </div>
         }
@@ -289,7 +301,7 @@ class Firm extends React.PureComponent {
           <div style={{ width: '100%' }}>
             <ErrorBox
               error={error}
-              iconColor={orange500}
+              iconStyle={{ color: orange500 }}
               text={i18n.__('Get Firmware Data Error Text')}
               style={{ display: 'flex', width: '100%', alignItems: 'center', marginTop: -6 }}
             />
