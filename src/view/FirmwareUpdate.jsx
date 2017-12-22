@@ -17,7 +17,10 @@ class FirmwareUpdate extends Base {
       error: null
     }
 
-    this.refresh = () => this.ctx.props.selectedDevice.request('firm')
+    this.refresh = () => {
+      this.ctx.props.selectedDevice.pureRequest('checkUpdates')
+      this.ctx.props.selectedDevice.request('firm')
+    }
   }
 
   willReceiveProps(nextProps) {

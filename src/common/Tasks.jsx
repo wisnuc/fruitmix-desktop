@@ -4,20 +4,10 @@ import Debug from 'debug'
 import { Paper, CircularProgress, LinearProgress, IconButton } from 'material-ui'
 import DoneIcon from 'material-ui/svg-icons/action/done'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
-import BackIcon from 'material-ui/svg-icons/navigation/arrow-back'
 import WarningIcon from 'material-ui/svg-icons/alert/warning'
-import ErrorIcon from 'material-ui/svg-icons/alert/error'
-import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
-import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
-import FileFolder from 'material-ui/svg-icons/file/folder'
-import ArrowRight from 'material-ui/svg-icons/hardware/keyboard-arrow-right'
-import UpIcon from 'material-ui/svg-icons/hardware/keyboard-arrow-up'
-import DownIcon from 'material-ui/svg-icons/hardware/keyboard-arrow-down'
-import Promise from 'bluebird'
-import request from 'superagent'
-import sanitize from 'sanitize-filename'
-import FlatButton from '../common/FlatButton'
-import { ShareDisk } from '../common/Svg'
+import FolderSvg from 'material-ui/svg-icons/file/folder'
+import FileSvg from 'material-ui/svg-icons/editor/insert-drive-file'
+import MultiSvg from 'material-ui/svg-icons/content/content-copy'
 import ErrorBox from '../common/ErrorBox'
 
 const debug = Debug('component:common:Tasks ')
@@ -106,89 +96,81 @@ class Tasks extends React.Component {
   renderTask(task) {
     const { uuid, type, src, dst, entries, nodes } = task
     const action = type === 'copy' ? i18n.__('Copying') : i18n.__('Moving')
-    const iStyle = { width: 16, height: 16, color: '#9E9E9E' }
-    const iStyleWarning = { width: 16, height: 16, color: '#fb8c00' }
-    const iStyleError = { width: 16, height: 16, color: '#FF4081' }
     const tStyles = { marginTop: -8 }
-    const show = this.state.uuid === uuid
+    const svgStyle = { color: '#000', opacity: 0.54 }
     const conflict = nodes.filter(n => n.state === 'Conflict')
     const error = nodes.filter(n => n.state === 'Failed')
     const finished = nodes.findIndex(n => n.parent === null && n.state === 'Finished') > -1
 
     return (
-      <div style={{ height: show ? '' : 72, width: '100%', transition: 'all 225ms' }} key={uuid}>
-        <div style={{ height: 24, width: 300, display: 'flex', alignItems: 'center', fontSize: 13 }} >
-          <div style={{ width: 16 }} />
-          { action }
-          <div style={{ width: 4 }} />
-          <div style={{ maxWidth: 96, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} >
-            { entries[0].name }
-          </div>
-          <div style={{ width: 4 }} />
-          { entries.length > 1 && i18n.__('And Other %s Items', entries.length) }
+      <div style={{ height: 72, width: '100%', display: 'flex', alignItems: 'center' }} key={uuid}>
+        {/* Icon */}
+        <div style={{ width: 56, display: 'flex', alignItems: 'center' }} >
+          {
+            entries.length > 1 ? <MultiSvg style={svgStyle} /> :
+              entries[0].type === 'file' ? <FileSvg style={svgStyle} /> : <FolderSvg style={svgStyle} />
+          }
         </div>
 
-        <div style={{ height: 24, width: '100%', display: 'flex', alignItems: 'center', fontSize: 13 }} >
-          <div style={{ width: 16 }} />
-          <div style={{ flexGrow: 1 }} >
+        {/* Progress */}
+        <div style={{ flexGrow: 1 }} >
+          <div style={{ width: '100%', display: 'flex', alignItems: 'center', fontSize: 13 }} >
+            { action }
+            <div style={{ width: 4 }} />
+            <div style={{ maxWidth: entries.length > 1 ? 96 : 192, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', fontSize: 13 }} >
+              { entries[0].name }
+            </div>
+            <div style={{ width: 4 }} />
+            { entries.length > 1 && i18n.__('And Other %s Items', entries.length) }
+          </div>
+
+          <div style={{ height: 16, width: '100%', display: 'flex', alignItems: 'center', fontSize: 13 }}>
             <LinearProgress
               mode={(finished || conflict.length > 0 || error.length > 0) ? 'determinate' : 'indeterminate'}
               value={finished ? 100 : 61.8}
+              style={{ backgroundColor: '#E0E0E0' }}
             />
           </div>
-          <div style={{ width: 16 }} />
-          <IconButton
-            iconStyle={iStyle}
-            tooltipStyles={tStyles}
-            onTouchTap={() => this.cancelTask(uuid)}
-            tooltip={finished ? i18n.__('OK') : i18n.__('Cancel')}
-          >
-            { finished ? <DoneIcon /> : <CloseIcon /> }
-          </IconButton>
+
+          <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.54)' }}>
+            {
+              finished ? i18n.__('Finished') : error.length ? i18n.__('Task Failed') :
+              conflict.length ? i18n.__('Task Conflict Text') : ''
+            }
+          </div>
+        </div>
+
+        {/* Button */}
+        <div style={{ width: 8 }} />
+        <IconButton
+          iconStyle={{ color: '#9E9E9E' }}
+          tooltipStyles={tStyles}
+          onTouchTap={() => this.cancelTask(uuid)}
+          tooltip={finished ? i18n.__('OK') : i18n.__('Cancel')}
+        >
+          { finished ? <DoneIcon /> : <CloseIcon /> }
+        </IconButton>
+        <div style={{ marginLeft: -8, marginRight: -12 }}>
           {
             error.length ?
-              <ErrorBox
-                style={{ display: 'flex', alignItems: 'center' }}
-                tooltip={i18n.__('Detail')}
-                iconStyle={iStyleError}
-                error={error}
-              /> :
-              conflict.length ?
-              <IconButton
-                tooltip={i18n.__('Detail')}
-                iconStyle={iStyleWarning}
-                tooltipStyles={tStyles}
-                onTouchTap={() => this.handleConflict(uuid, type, conflict)}
-              >
-                { show ? <UpIcon /> : <WarningIcon /> }
-              </IconButton>
-              : <div style={{ width: 48 }} />
+            <ErrorBox
+              style={{ display: 'flex', alignItems: 'center' }}
+              tooltip={i18n.__('Detail')}
+              iconStyle={{ color: '#db4437' }}
+              error={error}
+            /> :
+            conflict.length ?
+            <IconButton
+              tooltip={i18n.__('Detail')}
+              iconStyle={{ color: '#fb8c00' }}
+              tooltipStyles={tStyles}
+              onTouchTap={() => this.handleConflict(uuid, type, conflict)}
+            >
+              <WarningIcon />
+            </IconButton>
+            : <div style={{ width: 48 }} />
           }
         </div>
-        <div style={{ fontSize: 13, marginLeft: 16 }}>
-          { finished ? i18n.__('Finished') : error.length ? i18n.__('Task Failed') : conflict.length ? i18n.__('Task Conflict Text') : '' }
-        </div>
-        { show && <div style={{ height: 16 }} /> }
-        {
-          show && conflict.map(c => (
-            <div style={{ height: 24, width: 300, display: 'flex', alignItems: 'center', fontSize: 11 }}>
-              <div style={{ width: 16 }} />
-              <div style={{ width: 144, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} >
-                { c.src.name }
-              </div>
-              <div style={{ width: 16 }} />
-              { i18n.__('Task Conflict Text') }
-            </div>
-          ))
-        }
-        { show && <div style={{ height: 16 }} /> }
-        {
-          show &&
-            <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-              <FlatButton label={i18n.__('Handle')} onTouchTap={() => this.handleConflict(uuid, type, conflict)} primary />
-              <FlatButton label={i18n.__('Abort')} onTouchTap={() => this.cancelTask(uuid)} primary />
-            </div>
-        }
       </div>
     )
   }
@@ -204,10 +186,11 @@ class Tasks extends React.Component {
             position: 'absolute',
             top: 72,
             right: this.props.showDetail ? 376 : 16,
-            width: 360,
-            height: 320,
+            padding: 24,
+            width: 416,
+            height: 288,
             overflowY: 'auto',
-            backgroundColor: '#f3f3f3'
+            backgroundColor: '#FAFAFA'
           }}
           onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
         >

@@ -183,8 +183,8 @@
   "No Running Tasks": "没有进行中的任务。",
   "Copying": "复制",
   "Moving": "移动",
-  "Task Conflict Text": "命名冲突",
-  "Handle": "处理",
+  "Task Conflict Text": "出现命名冲突",
+  "Tasks": "任务",
 
   "==== control/AccountApp.jsx ====": "",
   "Your Username %s": "您当前的用户名为：%s 。",
