@@ -77,6 +77,16 @@ class Assistant extends Media {
     )
   }
 
+  renderTitle({ style }) {
+    const newStyle = Object.assign(style, { color: '#FFF' })
+    return (
+      <div style={newStyle}>
+        { i18n.__('Assistant Menu Name') }
+      </div>
+    )
+  }
+
+
   renderContent() {
     return (<AssistantApp
       media={this.state.media}

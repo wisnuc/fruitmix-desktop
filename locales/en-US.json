@@ -635,7 +635,7 @@
   "Resolution": "Resolution",
 
   "==== file/FinishedTask.jsx ====": "",
-  "And Other %s Items": "and other %s items",
+  "And Other %s Items": " and other %s items",
 
   "==== file/MoveDialog.jsx ====": "",
   "Mkdir Failed": "Failed to make directory.",
