@@ -284,6 +284,18 @@ class Home extends Base {
 
   navLeave() {
     this.isNavEnter = false
+    this.setState({
+      contextMenuOpen: false,
+      contextMenuY: -1,
+      contextMenuX: -1,
+      createNewFolder: false,
+      rename: false,
+      delete: false,
+      move: false,
+      copy: false,
+      share: false,
+      loading: false
+    })
   }
 
   navGroup() {

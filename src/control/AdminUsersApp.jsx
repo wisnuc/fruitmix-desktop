@@ -5,7 +5,7 @@ import Debug from 'debug'
 import { Avatar, Divider, FloatingActionButton, Toggle, TextField, Popover, Menu, MenuItem } from 'material-ui'
 import CommunicationVpnKey from 'material-ui/svg-icons/communication/vpn-key'
 import SocialPersonAdd from 'material-ui/svg-icons/social/person-add'
-import CircleIcon from 'material-ui/svg-icons/toggle/radio-button-checked'
+import CheckIcon from 'material-ui/svg-icons/navigation/check'
 import DeltaIcon from 'material-ui/svg-icons/navigation/arrow-drop-down'
 import DialogOverlay from '../common/DialogOverlay'
 import ChangeAccountDialog from './ChangeAccountDialog'
@@ -207,13 +207,13 @@ class AdminUsersApp extends React.Component {
           <Menu>
             <MenuItem
               style={{ fontSize: 13, marginLeft: -8 }}
-              leftIcon={this.state.user.isAdmin ? <CircleIcon /> : <div />}
+              leftIcon={this.state.user.isAdmin ? <CheckIcon /> : <div />}
               primaryText={i18n.__('Admin User')}
               onTouchTap={() => !this.state.user.isAdmin && this.toggleDialog('changeAuth', this.state.user)}
             />
             <MenuItem
               style={{ fontSize: 13, marginLeft: -8 }}
-              leftIcon={!this.state.user.isAdmin ? <CircleIcon /> : <div />}
+              leftIcon={!this.state.user.isAdmin ? <CheckIcon /> : <div />}
               primaryText={i18n.__('Normal User')}
               onTouchTap={() => this.state.user.isAdmin && this.toggleDialog('changeAuth', this.state.user)}
             />
