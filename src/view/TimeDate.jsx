@@ -5,30 +5,12 @@ import Base from './Base'
 import TimeDateInfo from '../device/TimeDateInfo'
 
 class TimeDate extends Base {
-  constructor(ctx) {
-    super(ctx)
-  }
-
   willReceiveProps(nextProps) {
-    // console.log('timedate nextProps', nextProps)
-    if (!nextProps.selectedDevice || !nextProps.selectedDevice.timedate) return
-
-    const timedate = nextProps.selectedDevice.timedate
-    if (timedate.isPending() || timedate.isRejected()) return
-
-    /* now it's fulfilled */
-    const value = timedate.value()
-
-    if (value !== this.state.timedate) {
-      this.setState({ timedate: value })
-    }
+    this.handleProps(nextProps.selectedDevice, ['timedate'])
   }
 
   navEnter() {
     this.ctx.props.selectedDevice.request('timedate')
-  }
-
-  navLeave() {
   }
 
   navGroup() {

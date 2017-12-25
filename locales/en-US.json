@@ -442,14 +442,6 @@
   "==== view/Account.jsx ====": "",
   "Account Menu Name": "Account",
 
-  "==== view/AdminDrives.jsx ====": "",
-  "AdminDrives Menu Name": "Public Drive",
-  "AdminDrives Quick Name": "Manage",
-  "AdminDrives Title": "Public Drive Management",
-  "Open": "Open",
-  "Close Modify Page": "Hide modify page",
-  "Modify": "Modify",
-
   "==== view/AdminUsers.jsx ====": "",
   "AdminUsers Menu Name": "Users Management",
   "AdminUsers Quick Name": "Users",
@@ -458,6 +450,9 @@
   "==== view/Assistant.jsx ====": "",
   "Assistant Menu Name": "Assistant",
   "Assistant Quick Name": "Assistant",
+
+  "==== view/Base.jsx ====": "",
+  "Error in Base Text": "Failed to load page",
 
   "==== view/ClientUpdate.jsx ====": "",
   "ClientUpdate Menu Name": "Client update",
@@ -481,6 +476,7 @@
 
   "==== view/FinishedList.jsx ====": "",
   "FinishedList Menu Name": "Finished",
+  "FinishedList Quick Name": "Finished",
   "FinishedList Title %s": "Finished (%s)",
 
   "==== view/FirmwareUpdate.jsx ====": "",
@@ -517,13 +513,6 @@
   "==== view/InstalledApps.jsx ====": "",
   "InstalledApps Menu Name": "Installed Apps",
 
-  "==== view/LanguageApp.jsx ====": "",
-  "Language Menu Name": "Language",
-  "Language Quick Name": "Language",
-
-  "==== view/MediaAlbum.jsx ====": "",
-  "MediaAlbum Menu Name": "Albums",
-
   "==== view/Media.jsx ====": "",
   "Media Menu Name": "Photos",
   "Media Quick Name": "Photos",
@@ -547,10 +536,6 @@
   "==== view/Networking.jsx ====": "",
   "Networking Menu Name": "Network",
   "Networking Quick Name": "Network",
-
-  "==== view/Physical.jsx ====": "",
-  "Physical Menu Name": "Physical drive",
-  "Physical Quick Name": "Physical",
 
   "==== view/Plugin.jsx ====": "",
   "Plugin Menu Name": "Service",
@@ -581,13 +566,6 @@
   "==== view/Transmission.jsx ====": "",
   "Transmission Menu Name": "Transfers",
   "Transmission Title": "Transfers",
-
-  "==== view/Trash.jsx ====": "",
-  "Trash Menu Name": "Trash",
-  "Trash Title": "Trash",
-  "Confirm Detele Trash Text": "Delete forever ?",
-  "Restore From Trash": "Restore",
-  "Delete From Trash": "Delete forever",
 
   "==== file/ErrorDialogInTrans.jsx ====": "",
   "EEXIST": "File exists.",

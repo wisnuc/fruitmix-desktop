@@ -236,7 +236,7 @@ class BTDownload extends React.Component {
   }
 
   componentDidMount() {
-    this.refreshTimer = setInterval(this.refresh, 1000)
+    this.refreshTimer = setInterval(this.refresh, 2000)
     /* bind keydown event */
     document.addEventListener('keydown', this.keyDown)
     document.addEventListener('keyup', this.keyUp)
@@ -278,7 +278,7 @@ class BTDownload extends React.Component {
     )
   }
 
-  renderError() {
+  renderDisabled() {
     return (
       <div
         style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -412,11 +412,11 @@ class BTDownload extends React.Component {
   }
 
   renderRow(task, index) {
-    const { magnetURL, name, downloadPath, progress, downloadSpeed, downloaded, timeRemaining, infoHash, isPause } = task
+    const { magnetURL, name, torrentPath, progress, downloadSpeed, downloaded, timeRemaining, infoHash, isPause } = task
     const selected = this.state.select.selected && this.state.select.selected.findIndex(s => s === index) > -1
     const hovered = this.state.select.hover === index
     return (
-      <div>
+      <div key={torrentPath}>
         <div
           key={infoHash}
           style={{
@@ -548,11 +548,11 @@ class BTDownload extends React.Component {
   }
 
   render() {
-    debug('render BTDownload', this.state, this.props)
+    // debug('render BTDownload', this.state, this.props)
     /* lost connection to wisnuc */
     if (!window.navigator.onLine) return this.renderOffLine()
 
-    if (this.props.error) return this.renderError()
+    if (this.props.disabled) return this.renderDisabled()
 
     /* loding */
     if (this.state.loading) return this.renderLoading()
