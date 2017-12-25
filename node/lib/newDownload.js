@@ -2,14 +2,11 @@ import fs from 'fs'
 import i18n from 'i18n'
 import path from 'path'
 import UUID from 'uuid'
-import Debug from 'debug'
 import store from './store'
 import { getMainWindow } from './window'
 import { ipcMain, shell } from 'electron'
 import { downloadFile } from './server'
 import { createTask } from './downloadTransform'
-
-const debug = Debug('node:lib:newDownload: ')
 
 const getDownloadPath = () => store.getState().config.downloadPath
 
@@ -19,12 +16,11 @@ const downloadHandle = (event, args) => {
   const taskType = entries[0].type
   const createTime = (new Date()).getTime()
   const newWork = true
-  // debug('downloadHandle', taskUUID, entries, dirUUID, driveUUID, taskType, createTime, newWork)
 
   const downloadPath = getDownloadPath()
   fs.readdir(downloadPath, (err, files) => {
     if (err) {
-      debug('downloadHandle fs.readdir error: ', err)
+      console.log('downloadHandle fs.readdir error: ', err)
       getMainWindow().webContents.send('snackbarMessage', { message: i18n.__('Read Download Failed')})
     } else {
       entries.forEach((entry) => {
@@ -53,7 +49,7 @@ const downloadHandle = (event, args) => {
 const openHandle = (event, args) => {
   const { driveUUID, dirUUID, entryUUID, fileName } = args
   downloadFile(driveUUID, dirUUID, entryUUID, fileName, null, (error, filePath) => {
-    if (error) debug('open file error', error)
+    if (error) console.log('open file error', error)
     else shell.openItem(filePath)
   })
 }
@@ -81,7 +77,7 @@ const getTextDataHandle = (e, args) => {
 
 const startTransmissionHandle = () => {
   global.DB.loadAll((error, tasks) => {
-    if (error) return debug('load nedb store error', error)
+    if (error) return console.log('load db store error', error)
     /* add t to load pre status */
     tasks.forEach(t => t.state !== 'finished' && t.trsType === 'download' &&
       createTask(t.uuid, t.entries, t.name, t.dirUUID, t.driveUUID, t.taskType, t.createTime, false, t.downloadPath, t))

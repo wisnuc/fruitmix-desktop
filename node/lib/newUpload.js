@@ -2,7 +2,6 @@ import fs from 'original-fs'
 import i18n from 'i18n'
 import path from 'path'
 import UUID from 'uuid'
-import Debug from 'debug'
 import sanitize from 'sanitize-filename'
 import { dialog, ipcMain } from 'electron'
 import { getMainWindow } from './window'
@@ -10,8 +9,6 @@ import { serverGetAsync, isCloud } from './server'
 import { createTask } from './uploadTransform'
 
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
-
-const debug = Debug('node:lib:newUpload: ')
 
 /*
 policy: { uuid, promise }
@@ -71,7 +68,7 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
           checkedName = `${path.parse(name).name}(${j})${extension}`
         }
       }
-      debug('conflicts find', name)
+      // console.log('conflicts find', name)
       conflicts.push({ entry, entryType, name, checkedName, stat, remote: remoteEntries[index] })
     }
   }
@@ -132,7 +129,6 @@ const readUploadInfoAsync = async (entries, dirUUID, driveUUID) => {
     const taskUUID = UUID.v4()
     const createTime = (new Date()).getTime()
     const newWork = true
-    // debug('conflicts response', newEntries, policies)
     createTask(taskUUID, newEntries, dirUUID, driveUUID, taskType, createTime, newWork, policies)
   }
   return filtered.length
@@ -146,7 +142,7 @@ const readUploadInfo = (entries, dirUUID, driveUUID) => {
       getMainWindow().webContents.send('snackbarMessage', { message })
     })
     .catch((e) => {
-      debug('readUploadInfo error: ', e)
+      console.log('readUploadInfo error: ', e)
       if (e.code === 'ECONNREFUSED') {
         getMainWindow().webContents.send('snackbarMessage', { message: i18n.__('Connection Lost') })
       } else if (e.message !== 'cancel') {
@@ -188,7 +184,7 @@ const uploadMediaHandle = (event, args) => {
 
 const startTransmissionHandle = (event, args) => {
   global.DB.loadAll((error, tasks) => {
-    if (error) return debug('load nedb store error', error)
+    if (error) return console.log('load db store error', error)
     tasks.forEach(t => t.state !== 'finished' && t.trsType === 'upload' &&
       createTask(t.uuid, t.entries, t.dirUUID, t.driveUUID, t.taskType, t.createTime, false, t.policies, t))
   })
