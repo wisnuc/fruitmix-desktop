@@ -1,16 +1,34 @@
 import React from 'react'
+import i18n from 'i18n'
 
 import { teal600, indigo600, lightBlue600, cyan700, green600, lightGreen700, lime800, blue500, blueGrey400, blueGrey500, brown500, purple300, deepPurple500, indigo300, red400, orange600, pinkA200 } from 'material-ui/styles/colors'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
+import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import { IconButton } from 'material-ui'
 import EventEmitter from 'eventemitter3'
-
 
 class Base extends EventEmitter {
   constructor(ctx) {
     super()
     this.ctx = ctx
     this.state = {}
+
+    this.handleProps = (apis, keys) => {
+      /* waiting */
+      if (!apis || keys.findIndex(key => !apis[key] || apis[key].isPending()) > -1) return null
+
+      /* handle rejected */
+      const rejected = keys.find(key => apis[key].isRejected())
+      const reason = rejected && apis[rejected].reason()
+      if (rejected && reason !== this.state.error) return this.setState({ error: reason })
+      if (rejected) return null
+
+      /* now all keys are fulfilled */
+      keys.forEach((key) => {
+        const value = apis[key].value()
+        if (this.state[key] !== value) this.setState({ [key]: value, error: null })
+      })
+    }
   }
 
   setState(props) {
@@ -40,8 +58,6 @@ class Base extends EventEmitter {
         return lightBlue600
       case 'public':
         return lightGreen700
-      case 'trash':
-        return lime800
       case 'physical':
         return lightGreen700
       case 'docker':
@@ -151,10 +167,37 @@ class Base extends EventEmitter {
     return <div style={style} />
   }
 
+  renderDefaultError() {
+    return (
+      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
+        <div
+          style={{
+            width: 360,
+            height: 360,
+            borderRadius: '180px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            backgroundColor: '#FAFAFA'
+          }}
+        >
+          <ErrorIcon style={{ height: 64, width: 64, color: 'rgba(0,0,0,0.27)' }} />
+          <div style={{ fontSize: 20, color: 'rgba(0,0,0,0.27)' }}> { i18n.__('Error in Base Text') } </div>
+        </div>
+      </div>
+    )
+  }
+
   renderContent() {
     return <div>placeholder</div>
+  }
+
+  /* render error or content */
+  render(props) {
+    if (this.state.error) return this.renderDefaultError(props)
+    return this.renderContent(props)
   }
 }
 
 export default Base
-

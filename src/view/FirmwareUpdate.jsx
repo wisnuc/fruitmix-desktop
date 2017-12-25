@@ -27,21 +27,7 @@ class FirmwareUpdate extends Base {
   }
 
   willReceiveProps(nextProps) {
-    if (!nextProps.selectedDevice || !nextProps.selectedDevice.firm) return
-
-    const firm = nextProps.selectedDevice.firm
-    if (firm.isPending()) return
-
-    if (firm.isRejected()) {
-      const error = firm.reason()
-      console.log('firm.isRejected', error)
-      if (error && error !== this.state.error) this.setState({ error })
-    } else {
-      const value = firm.value()
-      if (value && value !== this.state.firm) {
-        this.setState({ firm: value, error: null })
-      }
-    }
+    this.handleProps(nextProps.selectedDevice, ['firm'])
   }
 
   navEnter() {
@@ -83,7 +69,7 @@ class FirmwareUpdate extends Base {
     )
   }
 
-  renderContent({ openSnackBar, toggleDetail }) {
+  render({ openSnackBar }) {
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <FirmwareUpdateApp

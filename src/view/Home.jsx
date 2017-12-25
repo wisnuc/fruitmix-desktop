@@ -256,27 +256,19 @@ class Home extends Base {
     })
   }
 
-  updateState(listNavDir) {
-    if (listNavDir === this.state.listNavDir && !this.force) return
+  willReceiveProps(nextProps) {
+    this.preValue = this.state.listNavDir
+    this.handleProps(nextProps.apis, ['listNavDir'])
 
-    let { path, entries } = listNavDir
+    /* set force === true  to update sortType forcely */
+    if (this.preValue === this.state.listNavDir && !this.force) return
 
-    /* sort enries */
-    entries = [...entries].sort((a, b) => sortByType(a, b, this.state.sortType))
-
+    const { path, entries } = this.state.listNavDir
     const select = this.select.reset(entries.length)
-    const state = { select, listNavDir, path, entries, loading: false }
 
     this.force = false
-    this.setState(state)
-  }
-
-  willReceiveProps(nextProps) {
-    // console.log('home', nextProps)
-    if (!nextProps.apis || !nextProps.apis.listNavDir) return
-    const listNavDir = nextProps.apis.listNavDir
-    if (listNavDir.isPending() || listNavDir.isRejected()) return
-    this.updateState(listNavDir.value())
+    /* sort entries, reset select, stop loading */
+    this.setState({ path, select, loading: false, entries: [...entries].sort((a, b) => sortByType(a, b, this.state.sortType)) })
   }
 
   navEnter(target) {

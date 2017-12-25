@@ -442,14 +442,6 @@
   "==== view/Account.jsx ====": "",
   "Account Menu Name": "我",
 
-  "==== view/AdminDrives.jsx ====": "",
-  "AdminDrives Menu Name": "共享盘管理",
-  "AdminDrives Quick Name": "管理",
-  "AdminDrives Title": "共享盘管理",
-  "Open": "打开",
-  "Close Modify Page": "关闭修改页",
-  "Modify": "修改",
-
   "==== view/AdminUsers.jsx ====": "",
   "AdminUsers Menu Name": "用户管理",
   "AdminUsers Quick Name": "用户管理",
@@ -458,6 +450,9 @@
   "==== view/Assistant.jsx ====": "",
   "Assistant Menu Name": "智能助理",
   "Assistant Quick Name": "智能助理",
+
+  "==== view/Base.jsx ====": "",
+  "Error in Base Text": "加载页面失败",
 
   "==== view/ClientUpdate.jsx ====": "",
   "ClientUpdate Menu Name": "客户端升级",
@@ -481,6 +476,7 @@
 
   "==== view/FinishedList.jsx ====": "",
   "FinishedList Menu Name": "已完成",
+  "FinishedList Quick Name": "已完成",
   "FinishedList Title %s": "已完成（%s）",
 
   "==== view/FirmwareUpdate.jsx ====": "",
@@ -517,13 +513,6 @@
   "==== view/InstalledApps.jsx ====": "",
   "InstalledApps Menu Name": "已安装应用",
 
-  "==== view/LanguageApp.jsx ====": "",
-  "Language Menu Name": "语言设置",
-  "Language Quick Name": "语言",
-
-  "==== view/MediaAlbum.jsx ====": "",
-  "MediaAlbum Menu Name": "相册",
-
   "==== view/Media.jsx ====": "",
   "Media Menu Name": "我的照片",
   "Media Quick Name": "照片",
@@ -547,10 +536,6 @@
   "==== view/Networking.jsx ====": "",
   "Networking Menu Name": "网络设置",
   "Networking Quick Name": "网络",
-
-  "==== view/Physical.jsx ====": "",
-  "Physical Menu Name": "物理磁盘",
-  "Physical Quick Name": "物理磁盘",
 
   "==== view/Plugin.jsx ====": "",
   "Plugin Menu Name": "服务",
@@ -581,13 +566,6 @@
   "==== view/Transmission.jsx ====": "",
   "Transmission Menu Name": "传输列表",
   "Transmission Title": "传输列表",
-
-  "==== view/Trash.jsx ====": "",
-  "Trash Menu Name": "回收站",
-  "Trash Title": "回收站",
-  "Confirm Detele Trash Text": "确认永久删除吗？",
-  "Restore From Trash": "恢复",
-  "Delete From Trash": "永久删除",
 
   "==== file/ErrorDialogInTrans.jsx ====": "",
   "EEXIST": "文件命名冲突",

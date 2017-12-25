@@ -200,15 +200,6 @@ class NavDrawer extends React.Component {
           onTouchTap={() => navTo('download')}
         />
 
-        {/* this.renderGroup('physical') */}
-        {/* this.renderGroup('trash') */}
-
-        {/*
-        <div style={{ height: 4 }} />
-        <Divider />
-        <div style={{ height: 4 }} />
-        */}
-
         <SubHeader>{ i18n.__('Management Title') }</SubHeader>
 
         {/*

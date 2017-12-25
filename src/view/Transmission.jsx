@@ -1,18 +1,11 @@
-import React, { Component, PureComponent } from 'react'
+import React from 'react'
 import i18n from 'i18n'
-import Radium from 'radium'
 import { ipcRenderer } from 'electron'
-
 import ActionSwapVerticalCircle from 'material-ui/svg-icons/action/swap-vertical-circle'
 import TrsContainer from '../file/TransmissionContainer'
 import Base from './Base'
 
 class Transmission extends Base {
-  constructor(ctx) {
-    super(ctx)
-    this.state = {}
-  }
-
   navEnter() {
     ipcRenderer.send('GET_TRANSMISSION')
   }

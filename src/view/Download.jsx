@@ -2,47 +2,25 @@ import React from 'react'
 import i18n from 'i18n'
 import { ipcRenderer } from 'electron'
 
-import ActionSwapVerticalCircle from 'material-ui/svg-icons/action/swap-vertical-circle'
 import BTDownload from '../control/BTDownload'
 import { BTDownloadIcon } from '../common/Svg'
 import Base from './Base'
 
 class Download extends Base {
-  constructor(ctx) {
-    super(ctx)
-    this.state = {
-      tasks: null,
-      error: null
-    }
-  }
-
   willReceiveProps(nextProps) {
-    if (!nextProps.apis || !nextProps.apis.BTList || !nextProps.apis.bt) return
-    const bt = nextProps.apis.bt
-    if (bt.isRejected() && bt.reason() !== this.state.error) return this.setState({ error: bt.reason() })
-    if (bt.isPending() || bt.isRejected()) return
-
-    const BT = bt.value()
-    if (!BT.switch && this.state.error !== BT) return this.setState({ error: BT, tasks: null })
-    if (!BT.switch) return
-
-    const BTList = nextProps.apis.BTList
-    if (BTList.isPending() || BTList.isRejected()) return
-
-    /* now it's fulfilled */
-    const tasks = BTList.value()
-
-    if (tasks !== this.state.tasks) {
-      this.setState({ tasks, error: null })
+    this.handleProps(nextProps.apis, ['bt'])
+    if (!this.state.bt || !this.state.bt.switch) {
+      this.disabled = true
+      if (this.state.BTList !== null) this.setState({ BTList: null })
+    } else if (!this.state.error) {
+      this.disabled = false
+      this.handleProps(nextProps.apis, ['BTList'])
     }
   }
 
   navEnter() {
     this.ctx.props.apis.request('BTList')
     this.ctx.props.apis.request('bt')
-  }
-
-  navLeave() {
   }
 
   navGroup() {
@@ -80,7 +58,7 @@ class Download extends Base {
   renderTitle({ style }) {
     return (
       <div style={Object.assign({}, style, { marginLeft: 184 })}>
-        { i18n.__('Download Title %s', (this.state.tasks && this.state.tasks.running.length) || 0) }
+        { i18n.__('Download Title %s', (this.state.BTList && this.state.BTList.running.length) || 0) }
       </div>
     )
   }
@@ -91,12 +69,13 @@ class Download extends Base {
         <BTDownload
           ipcRenderer={ipcRenderer}
           navToDrive={navToDrive}
-          tasks={this.state.tasks ? this.state.tasks.running : []}
+          tasks={this.state.BTList ? this.state.BTList.running : []}
           apis={this.ctx.props.apis}
           openSnackBar={openSnackBar}
           primaryColor={this.groupPrimaryColor()}
           selectedDevice={this.ctx.props.selectedDevice}
           error={this.state.error}
+          disabled={this.disabled}
         />
       </div>
     )

@@ -1,6 +1,7 @@
 import React from 'react'
 import i18n from 'i18n'
 import ActionSupervisorAccount from 'material-ui/svg-icons/action/supervisor-account'
+
 import AdminUsersApp from '../control/AdminUsersApp'
 import Base from './Base'
 
@@ -11,17 +12,7 @@ class AdminUsers extends Base {
   }
 
   willReceiveProps(nextProps) {
-    // console.log('adminusers nextProps', nextProps)
-    if (!nextProps.apis || !nextProps.apis.users) return
-    const users = nextProps.apis.users
-    if (users.isPending() || users.isRejected()) return
-
-    /* now it's fulfilled */
-    const value = users.value()
-
-    if (value !== this.state.users) {
-      this.setState({ users: value })
-    }
+    this.handleProps(nextProps.apis, ['users'])
   }
 
   refresh() {
@@ -30,9 +21,6 @@ class AdminUsers extends Base {
 
   navEnter() {
     this.ctx.props.apis.request('users')
-  }
-
-  navLeave() {
   }
 
   navGroup() {

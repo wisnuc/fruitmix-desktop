@@ -93,8 +93,8 @@ class DeviceInfo extends React.PureComponent {
   }
 
   render() {
+    debug('this.props.device true render', this.props)
     if (!this.props.device || !this.props.storage || !this.props.boot || !this.props.info) return <div />
-    // debug('this.props.device true render', this.props)
 
     const { cpuInfo, memInfo, ws215i } = this.props.device
     const volume = this.props.storage.volumes.find(v => v.fileSystemUUID === this.props.boot.current)

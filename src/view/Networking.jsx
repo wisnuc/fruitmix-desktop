@@ -5,23 +5,8 @@ import Base from './Base'
 import NetworkInfo from '../device/NetworkInfo'
 
 class Ethernet extends Base {
-  constructor(ctx) {
-    super(ctx)
-  }
-
   willReceiveProps(nextProps) {
-    console.log('Ethernet nextProps', nextProps)
-    if (!nextProps.selectedDevice || !nextProps.selectedDevice.net) return
-
-    const net = nextProps.selectedDevice.net
-    if (net.isPending() || net.isRejected()) return
-
-    /* now it's fulfilled */
-    const value = net.value()
-
-    if (value !== this.state.net) {
-      this.setState({ net: value })
-    }
+    this.handleProps(nextProps.selectedDevice, ['net'])
   }
 
   navEnter() {

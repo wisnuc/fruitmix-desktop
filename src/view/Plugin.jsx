@@ -8,11 +8,6 @@ class Plugin extends Base {
   constructor(ctx) {
     super(ctx)
 
-    this.state = {
-      sambaStatus: null,
-      dlnaStatus: null
-    }
-
     this.refresh = () => {
       this.ctx.props.apis.request('samba')
       this.ctx.props.apis.request('dlna')
@@ -21,25 +16,11 @@ class Plugin extends Base {
   }
 
   willReceiveProps(nextProps) {
-    console.log('adminusers nextProps', nextProps)
-    if (!nextProps.apis || !nextProps.apis.samba || !nextProps.apis.dlna || !nextProps.apis.bt) return
-    const { samba, dlna, bt } = nextProps.apis
-    if (samba.isPending() || samba.isRejected() || dlna.isPending() || dlna.isRejected() || bt.isPending() || bt.isRejected()) return
-
-    /* now it's fulfilled */
-    const sambaStatus = samba.value()
-    const dlnaStatus = dlna.value()
-    const btStatus = bt.value()
-
-    if (sambaStatus !== this.state.sambaStatus || sambaStatus !== this.state.sambaStatus || btStatus !== this.state.btStatus) {
-      this.setState({ sambaStatus, dlnaStatus, btStatus })
-    }
+    this.handleProps(nextProps.apis, ['samba', 'dlna', 'bt'])
   }
 
   navEnter() {
-    this.ctx.props.apis.request('samba')
-    this.ctx.props.apis.request('dlna')
-    this.ctx.props.apis.request('bt')
+    this.refresh()
   }
 
   navGroup() {
@@ -67,9 +48,9 @@ class Plugin extends Base {
       <PluginApp
         primaryColor={this.groupPrimaryColor()}
         openSnackBar={openSnackBar}
-        dlna={this.state.dlnaStatus}
-        samba={this.state.sambaStatus}
-        bt={this.state.btStatus}
+        dlna={this.state.dlna}
+        samba={this.state.samba}
+        bt={this.state.bt}
         apis={this.ctx.props.apis}
         refresh={this.refresh}
       />

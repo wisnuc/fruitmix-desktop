@@ -1,18 +1,15 @@
-import Debug from 'debug'
-import i18n from 'i18n'
 import React from 'react'
-import Radium from 'radium'
+import i18n from 'i18n'
 import ActionDns from 'material-ui/svg-icons/action/dns'
 import Base from './Base'
 import DeviceInfo from '../device/DeviceInfo'
-
-const debug = Debug('component:view:device')
 
 class Device extends Base {
   constructor(ctx) {
     super(ctx)
 
-    this.address = ctx.props.selectedDevice.mdev.address
+    this.address = ctx.props.selectedDevice.mdev.address // TODO
+
     this.state = {
       device: null,
       storage: null,
@@ -22,18 +19,7 @@ class Device extends Base {
   }
 
   willReceiveProps(nextProps) {
-    // console.log('device nextProps', nextProps)
-    if (!nextProps.selectedDevice || !nextProps.selectedDevice.device || !nextProps.selectedDevice.storage
-      || !nextProps.selectedDevice.boot || !nextProps.selectedDevice.info) return
-
-    const { device, storage, boot, info } = nextProps.selectedDevice
-    if (device.isPending() || device.isRejected() || storage.isPending() || storage.isRejected()
-      || boot.isPending() || boot.isRejected() || info.isPending() || info.isRejected()) return
-
-    if (device.value() !== this.state.device || storage.value() !== this.state.storage
-      || boot.value() !== this.state.boot || info.value() !== this.state.info) {
-      this.setState({ device: device.value(), storage: storage.value(), boot: boot.value(), info: info.value() })
-    }
+    this.handleProps(nextProps.selectedDevice, ['device', 'storage', 'boot', 'info'])
   }
 
   navEnter() {
@@ -41,9 +27,6 @@ class Device extends Base {
     this.ctx.props.selectedDevice.request('storage')
     this.ctx.props.selectedDevice.request('boot')
     this.ctx.props.selectedDevice.request('info')
-  }
-
-  navLeave() {
   }
 
   navGroup() {

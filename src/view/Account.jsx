@@ -1,13 +1,10 @@
-import React, { Component, PureComponent } from 'react'
+import React from 'react'
 import i18n from 'i18n'
-import Radium from 'radium'
-import ActionAccountBox from 'material-ui/svg-icons/action/account-box'
-import Debug from 'debug'
 import { ipcRenderer } from 'electron'
-import Base from './Base'
-import AccountApp from '../control/AccountApp.jsx'
+import ActionAccountBox from 'material-ui/svg-icons/action/account-box'
 
-const debug = Debug('component:viewModel:Account')
+import Base from './Base'
+import AccountApp from '../control/AccountApp'
 
 class Account extends Base {
   constructor(ctx) {
@@ -16,25 +13,16 @@ class Account extends Base {
   }
 
   willReceiveProps(nextProps) {
-    // debug('account nextProps', nextProps)
-    if (!nextProps.apis || !nextProps.apis.account) return
-    const account = nextProps.apis.account
-    if (account.isPending() || account.isRejected()) return
-
-    /* now it's fulfilled */
-    const value = account.value()
-
-    if (value !== this.state.account) {
-      this.setState({ account: value })
-    }
+    this.handleProps(nextProps.apis, ['account', 'users'])
   }
 
   refresh() {
     this.ctx.props.apis.request('account')
     this.ctx.props.apis.request('users')
   }
+
   navEnter() {
-    /* get user list */
+    this.ctx.props.apis.request('account')
     this.ctx.props.apis.request('users')
   }
 
@@ -58,7 +46,6 @@ class Account extends Base {
   }
 
   renderContent({ openSnackBar }) {
-    // debug('renderContent', this.state.account)
     return (
       <AccountApp
         openSnackBar={openSnackBar}
