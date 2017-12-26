@@ -23,6 +23,7 @@ class FirmwareUpdate extends Base {
 
     this.checkUpdates = () => {
       this.ctx.props.selectedDevice.pureRequest('checkUpdates')
+      this.ctx.props.selectedDevice.request('firm')
     }
   }
 
