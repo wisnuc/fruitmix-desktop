@@ -160,6 +160,7 @@ class NavViews extends React.Component {
     const drives = this.props.apis.drives.data // no drives ?
     const drive = drives.find(d => d.uuid === driveUUID)
     if (drive.tag === 'home') this.navTo('home', { driveUUID, dirUUID })
+    else if (drive.tag === 'built-in') this.navTo('share', { driveUUID, dirUUID })
     else this.navTo('public', { driveUUID, dirUUID })
   }
 
