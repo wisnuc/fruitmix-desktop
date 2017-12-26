@@ -2,10 +2,10 @@ import React from 'react'
 import i18n from 'i18n'
 import Debug from 'debug'
 import prettysize from 'prettysize'
-import { CircularProgress, Divider, Toggle, RaisedButton } from 'material-ui'
+import { CircularProgress, Divider, Toggle, RaisedButton, Avatar } from 'material-ui'
 import InfoIcon from 'material-ui/svg-icons/action/info-outline'
 import FlatButton from '../common/FlatButton'
-import { SambaIcon, MiniDLNAIcon, BTIcon } from '../common/Svg'
+import { SambaIcon, MiniDLNAIcon, BTDownloadIcon } from '../common/Svg'
 
 const debug = Debug('component:control:SettingsApp:')
 
@@ -14,8 +14,7 @@ class PluginApp extends React.Component {
     super(props)
 
     this.state = {
-      loading: '',
-      expand: ''
+      loading: ''
     }
 
     this.toggle = (type) => {
@@ -44,23 +43,24 @@ class PluginApp extends React.Component {
     }
   }
 
-  componentDidMount() {
-  }
-
-  renderRow({ key, Icon, title, text, enabled, func }) {
-    const isExpand = this.state.expand === key
+  renderRow({ key, Icon, title, text, enabled, func, bgColor }) {
     const isWIP = this.state.loading === key
     return (
       <div key={title} >
-        <div
-          style={{ height: 56, width: '100%', display: 'flex', alignItems: 'center', marginLeft: 24, cursor: 'pointer' }}
-          onTouchTap={() => this.setState({ expand: this.state.expand === key ? '' : key })}
-        >
-          <div style={{ width: 40, display: 'flex', alignItems: 'center', marginRight: 8 }}>
-            <Icon color="rgba(0,0,0,0.54)" />
+        <div style={{ height: 88, width: '100%', display: 'flex', alignItems: 'center', marginLeft: 24, cursor: 'pointer' }} >
+          <div style={{ width: 40, display: 'flex', alignItems: 'center', marginRight: 24 }}>
+            <Avatar backgroundColor={bgColor}>
+              <Icon style={{ fill: '#FFF' }} />
+            </Avatar>
           </div>
-          <div style={{ width: 560, display: 'flex', alignItems: 'center' }}>
-            { title }
+          <div>
+            <div style={{ width: 560, display: 'flex', alignItems: 'center' }}>
+              { title }
+            </div>
+            <div style={{ height: 3 }} />
+            <div style={{ width: 960, transition: 'all 225ms', fontSize: 14, color: 'rgba(0,0,0,0.54)' }}>
+              { text }
+            </div>
           </div>
           <Toggle
             style={{ width: 64 }}
@@ -70,9 +70,6 @@ class PluginApp extends React.Component {
             onTouchTap={(e) => { e.stopPropagation(); e.preventDefault() }}
           />
           { isWIP && <CircularProgress size={16} thickness={2} /> }
-        </div>
-        <div style={{ height: isExpand ? 80 : 0, width: 560, overflow: 'hidden', marginLeft: 72, transition: 'all 225ms' }}>
-          { text }
         </div>
       </div>
     )
@@ -87,6 +84,7 @@ class PluginApp extends React.Component {
       {
         key: 'samba',
         Icon: SambaIcon,
+        bgColor: '#F44336',
         title: i18n.__('Samba Service Title'),
         text: i18n.__('Samba Service Text'),
         enabled: samba.status === 'active',
@@ -95,6 +93,7 @@ class PluginApp extends React.Component {
       {
         key: 'dlna',
         Icon: MiniDLNAIcon,
+        bgColor: '#4CAF50',
         title: i18n.__('miniDLNA Service Title'),
         text: i18n.__('miniDLNA Service Text'),
         enabled: dlna.status === 'active',
@@ -102,7 +101,8 @@ class PluginApp extends React.Component {
       },
       {
         key: 'bt',
-        Icon: BTIcon,
+        Icon: BTDownloadIcon,
+        bgColor: '#009688',
         title: i18n.__('BT Service Title'),
         text: i18n.__('BT Service Text'),
         enabled: !!bt.switch,
