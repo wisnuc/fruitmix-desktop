@@ -4,6 +4,7 @@ import { Divider, CircularProgress } from 'material-ui'
 import UpdateIcon from 'material-ui/svg-icons/action/system-update-alt'
 import NewReleases from 'material-ui/svg-icons/av/new-releases'
 import CheckIcon from 'material-ui/svg-icons/navigation/check'
+import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import { green500, orange500, grey500 } from 'material-ui/styles/colors'
 import FlatButton from '../common/FlatButton'
 import DialogOverlay from '../common/DialogOverlay'
@@ -172,19 +173,27 @@ class Firm extends React.PureComponent {
     return ({ label, color, text, action })
   }
 
-  renderReleases(release, current) {
+  renderReleases(release, current, fetch) {
     const { state, view, remote, local } = release
     const rel = remote || local
     if (!rel) return (<div />)
 
     const show = !current || compareVerison(rel.tag_name, current) > 0
+    const checking = fetch && fetch.state === 'Working'
+    const checked = fetch && fetch.state === 'Pending' && fetch.last && !fetch.last.error
     const date = rel.published_at.split('T')[0]
     const { label, text, color, action } = this.parseReleaseState(state, rel.tag_name)
     return (
       <div style={{ display: 'flex', width: '100%' }}>
         <div style={{ flex: '0 0 24px' }} />
         <div style={{ flex: '0 0 56px', marginTop: 12 }} >
-          { show ? <NewReleases color={this.props.primaryColor} /> : <CheckIcon color={this.props.primaryColor} /> }
+          {
+            show
+              ? <NewReleases color={this.props.primaryColor} />
+              : checking ? <CircularProgress color={this.props.primaryColor} size={24} thickness={2} />
+              : checked ? <CheckIcon color={this.props.primaryColor} />
+              : <CloseIcon color={this.props.primaryColor} />
+          }
         </div>
         {
           show ?
@@ -236,17 +245,16 @@ class Firm extends React.PureComponent {
               <div style={{ height: 16 }} />
               <Divider style={{ marginLeft: -60 }} />
             </div>
-            :
-            <div style={{ marginTop: 12 }} >
-              { i18n.__('Already LTS Text') }
-            </div>
+            : checking ? <div style={{ marginTop: 12 }} > { i18n.__('Checking Update') } </div>
+            : checked ? <div style={{ marginTop: 12 }} > { i18n.__('Already LTS Text') } </div>
+            : <div style={{ marginTop: 12 }} > { i18n.__('Check Update Failed Text') } </div>
         }
       </div>
     )
   }
 
   renderFirm(firm) {
-    const { appifi, releases } = firm
+    const { appifi, releases, fetch } = firm
     const { state, tagName } = appifi || {}
     const { label, color, text, action } = this.parseAppifiState(state, tagName)
     return (
@@ -282,7 +290,7 @@ class Firm extends React.PureComponent {
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          { releases[0] && this.renderReleases(releases[0], tagName) }
+          { releases[0] && this.renderReleases(releases[0], tagName, fetch) }
         </div>
       </div>
     )
