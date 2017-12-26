@@ -262,6 +262,7 @@ class ContainerOverlayInline extends React.Component {
                   updateContainerSize={this.updateContainerSize}
                   apis={this.props.apis}
                   parent={this[`refPreview_${index}`]}
+                  close={this.close}
                 />
               </div>
             ))

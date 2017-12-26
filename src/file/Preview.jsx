@@ -24,17 +24,20 @@ class Preview extends React.Component {
     this.toggleDialog = op => this.setState({ [op]: !this.state[op] })
 
     this.openByLocal = () => {
-      if (this.props.item.size > 50 * 1024 * 1024) return this.setState({ alert: true })
-      const driveUUID = this.props.path[0].uuid
-      const dirUUID = this.props.path[this.props.path.length - 1].uuid
-      const entryUUID = this.props.item.uuid
-      const fileName = this.props.item.name
-      return this.props.ipcRenderer.send('OPEN_FILE', {
-        driveUUID,
-        dirUUID,
-        entryUUID,
-        fileName
-      })
+      if (this.props.item.size > 50 * 1024 * 1024) this.setState({ alert: true })
+      else {
+        const driveUUID = this.props.path[0].uuid
+        const dirUUID = this.props.path[this.props.path.length - 1].uuid
+        const entryUUID = this.props.item.uuid
+        const fileName = this.props.item.name
+        this.props.ipcRenderer.send('OPEN_FILE', {
+          driveUUID,
+          dirUUID,
+          entryUUID,
+          fileName
+        })
+        this.props.close()
+      }
     }
 
     this.downloadSuccess = (event, session, path) => {
@@ -256,7 +259,7 @@ class Preview extends React.Component {
             primary
             style={{ margin: 12 }}
             icon={<DownloadIcon />}
-            onTouchTap={this.props.download}
+            onTouchTap={() => { this.props.download(); this.props.close() }}
           />
           <RaisedButton
             label={i18n.__('Open via Local App')}
@@ -367,7 +370,7 @@ class Preview extends React.Component {
                   <FlatButton
                     label={i18n.__('Download')}
                     primary
-                    onTouchTap={() => { this.props.download(); this.setState({ alert: false }) }}
+                    onTouchTap={() => { this.props.download(); this.setState({ alert: false }); this.props.close() }}
                   />
                 </div>
               </div>

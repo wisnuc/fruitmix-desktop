@@ -185,7 +185,7 @@ class NavDrawer extends React.Component {
         />
 
         <MenuItem
-          icon={views.public.menuIcon()}
+          icon={views.share.menuIcon()}
           text={i18n.__('Share Space')}
           primaryColor={primaryColor}
           selected={views[nav].navGroup() === 'public'}
