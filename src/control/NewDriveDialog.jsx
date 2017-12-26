@@ -61,7 +61,7 @@ class NewDriveDialog extends PureComponent {
     const index = wl.indexOf(userUUID)
     if (wl === '*') this.setState({ writelist: [userUUID] })
     else if (index === -1) this.setState({ writelist: [...wl, userUUID] })
-    else this.setState({ writelist: [...wl.slice(0, index), ...wl.writelist.slice(index + 1)] })
+    else this.setState({ writelist: [...wl.slice(0, index), ...wl.slice(index + 1)] })
   }
 
   render() {
