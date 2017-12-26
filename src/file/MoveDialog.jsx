@@ -10,7 +10,7 @@ import FileFolder from 'material-ui/svg-icons/file/folder'
 import ArrowRight from 'material-ui/svg-icons/hardware/keyboard-arrow-right'
 import sanitize from 'sanitize-filename'
 import FlatButton from '../common/FlatButton'
-import { ShareDisk } from '../common/Svg'
+import { ShareDisk, ShareIcon } from '../common/Svg'
 
 class Row extends React.PureComponent {
   render() {
@@ -35,8 +35,10 @@ class Row extends React.PureComponent {
           {
             node.type === 'file'
             ? <EditorInsertDriveFile style={{ color: 'rgba(0,0,0,0.54)' }} />
-            : node.type === 'public' || node.type === 'publicRoot' || node.tag === 'built-in'
+            : node.type === 'public' || node.type === 'publicRoot'
             ? <ShareDisk style={{ color: 'rgba(0,0,0,0.54)' }} />
+            : node.tag === 'built-in'
+            ? <ShareIcon style={{ color: 'rgba(0,0,0,0.54)' }} />
             : <FileFolder style={{ color: 'rgba(0,0,0,0.54)' }} />
           }
         </div>

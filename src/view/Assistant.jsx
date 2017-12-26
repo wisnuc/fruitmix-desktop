@@ -45,10 +45,6 @@ class Assistant extends Media {
     }
   }
 
-  willReceiveProps(nextProps) {
-    this.handleProps(nextProps.apis, ['media', 'blacklist'])
-  }
-
   menuName() {
     return i18n.__('Assistant Menu Name')
   }

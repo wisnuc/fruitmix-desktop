@@ -1,5 +1,5 @@
 import i18n from 'i18n'
-import FileFolder from 'material-ui/svg-icons/file/folder'
+import { ShareIcon } from '../common/Svg'
 import Home from './Home'
 
 class Share extends Home {
@@ -33,7 +33,7 @@ class Share extends Home {
   }
 
   menuIcon() {
-    return FileFolder
+    return ShareIcon
   }
 }
 
