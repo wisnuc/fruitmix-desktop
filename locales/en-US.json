@@ -612,6 +612,10 @@
   "Date Taken": "Date taken",
   "Camera Model": "Camera model",
   "Resolution": "Resolution",
+  "Dir Count": "Folders",
+  "File Count": "Files",
+  "File Size": "Total size",
+  "Media Count": "Media files",
 
   "==== file/FinishedTask.jsx ====": "",
   "And Other %s Items": " and other %s items",

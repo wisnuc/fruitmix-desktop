@@ -39,6 +39,7 @@ class Home extends Base {
   constructor(ctx) {
     super(ctx)
 
+    this.type = 'home'
     this.title = i18n.__('Home Title')
     /* handle select TODO */
     this.select = new ListSelect(this)
@@ -263,12 +264,16 @@ class Home extends Base {
     /* set force === true  to update sortType forcely */
     if (this.preValue === this.state.listNavDir && !this.force) return
 
-    const { path, entries } = this.state.listNavDir
+    const { path, entries, counter } = this.state.listNavDir
     const select = this.select.reset(entries.length)
+
+    if (Array.isArray(path) && path[0]) path[0].type = this.type
 
     this.force = false
     /* sort entries, reset select, stop loading */
-    this.setState({ path, select, loading: false, entries: [...entries].sort((a, b) => sortByType(a, b, this.state.sortType)) })
+    this.setState({
+      path, select, loading: false, entries: [...entries].sort((a, b) => sortByType(a, b, this.state.sortType)), counter
+    })
   }
 
   navEnter(target) {
@@ -401,12 +406,14 @@ class Home extends Base {
 
   renderDetail({ style }) {
     if (!this.state.entries) return (<div />)
+    console.log('renderDetail', this.state)
     return (
       <div style={style}>
         {
           this.state.entries.length ?
             <FileDetail
               detailIndex={this.select.state.selected}
+              counter={this.state.counter}
               entries={this.state.entries}
               path={this.state.path}
               ipcRenderer={ipcRenderer}

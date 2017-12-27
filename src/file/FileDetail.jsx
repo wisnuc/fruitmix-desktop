@@ -36,10 +36,11 @@ const getType = (type, name, metadata) => {
 }
 
 const getPath = (path) => {
+  console.log('getPath', path)
   const newPath = []
   path.map((item, index) => {
     if (!index) {
-      newPath.push(item.type === 'publicRoot' ? i18n.__('Public Drive') : i18n.__('Home Title'))
+      newPath.push(item.type === 'publicRoot' ? i18n.__('Public Drive') : item.type === 'share' ? i18n.__('Share Title') : i18n.__('Home Title'))
     } else {
       newPath.push(item.name)
     }
@@ -78,11 +79,11 @@ class FileDetail extends React.PureComponent {
                 }}
                 key={title}
               >
-                <div style={{ flex: '0 0 96px', fontSize: 14 }} > { title } </div>
+                <div style={{ flex: '0 0 112px', fontSize: 14 }} > { title } </div>
                 <div
                   style={{
                     fontSize: 14,
-                    flex: '0 0 216px',
+                    flex: '0 0 200px',
                     color: 'rgba(0, 0, 0, 0.54)',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -182,11 +183,67 @@ class FileDetail extends React.PureComponent {
     )
   }
 
+  renderCounter() {
+    console.log('renderCounter', this.props.counter)
+    const c = this.props.counter
+    const Titles = [
+      i18n.__('Dir Count'),
+      i18n.__('File Count'),
+      i18n.__('File Size'),
+      i18n.__('Media Count')
+    ]
+
+    const Values = [
+      c.dirCount,
+      c.fileCount,
+      prettysize(c.fileSize, false, true, 2),
+      c.mediaCount
+    ]
+
+    return (
+      <div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
+        <div style={{ height: 128, backgroundColor: this.props.primaryColor, filter: 'brightness(0.9)' }}>
+          <div style={{ height: 64 }} />
+          {/* header */}
+          <div style={{ height: 64, marginLeft: 24 }} >
+            <div style={{ height: 16 }} />
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                height: 32,
+                fontSize: 20,
+                fontWeight: 500,
+                color: '#FFFFFF'
+              }}
+            >
+              <div style={{ flex: '0 0 24px', display: 'flex', alignItems: 'center' }}>
+                <FileFolder style={{ color: '#FFFFFF' }} />
+              </div>
+              <div style={{ flex: '0 0 16px' }} />
+              <div style={{ flexGrow: 1 }}>
+                { getPath(this.props.path).split('/').slice(-1)[0] }
+              </div>
+              <div style={{ flex: '0 0 24px' }} />
+            </div>
+          </div>
+        </div>
+
+        {/* data */}
+        <div style={{ width: 312, padding: 24, display: 'flex', flexDirection: 'column' }}>
+          { this.renderList(Titles, Values) }
+        </div>
+      </div>
+    )
+  }
+
   render() {
-    const { detailIndex, entries, path, primaryColor } = this.props
-    if (!detailIndex || !entries || !detailIndex.length) {
+    const { detailIndex, entries, path, primaryColor, counter } = this.props
+    if (!detailIndex || !entries) {
       return (<div style={{ height: 128, backgroundColor: primaryColor, filter: 'brightness(0.9)' }} />)
     }
+
+    if (counter && !detailIndex.length) return this.renderCounter()
 
     let detailFile // object or array of object
     if (detailIndex.length === 1) {
@@ -207,11 +264,6 @@ class FileDetail extends React.PureComponent {
       exifModel = metadata.model
       height = metadata.h
       width = metadata.w
-    }
-
-    let longPic = false
-    if (height && width && (height / width > 2 || width / height > 2)) {
-      longPic = true
     }
 
     const Titles = [

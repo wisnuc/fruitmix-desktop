@@ -84,9 +84,10 @@ class Public extends Home {
 
       const entries = [...this.state.listNavDir.entries].sort((a, b) => sortByType(a, b, this.state.sortType))
       const select = this.select.reset(entries.length)
+      const { counter } = this.state.listNavDir
 
       this.force = false
-      this.setState({ path, entries, select, inRoot: false, loading: false })
+      this.setState({ path, entries, select, counter, inRoot: false, loading: false })
     }
   }
 
@@ -252,9 +253,10 @@ class Public extends Home {
               refreshDrives={this.refresh}
               primaryColor={this.groupPrimaryColor()}
             /> :
-          this.state.entries.length && this.select.state.selected.length ?
+          this.state.entries.length ?
             <FileDetail
               detailIndex={this.select.state.selected}
+              counter={this.state.counter}
               entries={this.state.entries}
               path={this.state.path}
               ipcRenderer={ipcRenderer}
