@@ -20,7 +20,6 @@ class MaintGuide extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      test: null,
       index: 0,
       action: false,
       detail: false,
@@ -31,7 +30,7 @@ class MaintGuide extends React.Component {
       const mounted = volume.isMounted
       const noMissing = !volume.missing
       const lastSystem = boot.last === volume.uuid
-      const fruitmixOK = typeof volume.users === 'object' || volume.users === 'EDATA'
+      const fruitmixOK = Array.isArray(volume.users) || volume.users === 'EDATA'
       const usersOK = typeof volume.users !== 'string'
 
       const check = [mounted, noMissing, lastSystem, fruitmixOK, usersOK]

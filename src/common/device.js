@@ -483,6 +483,8 @@ class Device extends RequestManager {
       if (volumes && volumes.length === 0) return 'uninitialized'
       return 'failNoAlt'
     } else if (boot.mode === 'maintenance') {
+      const { volumes } = storage
+      if (volumes && volumes.length === 0) return 'uninitialized'
       return 'userMaint'
     }
     return 'unknownMaint'

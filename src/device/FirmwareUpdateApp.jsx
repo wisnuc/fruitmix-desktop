@@ -29,7 +29,8 @@ class Firm extends React.PureComponent {
     super(props)
 
     this.state = {
-      showError: false
+      showError: false,
+      loading: false
     }
 
     this.toggleDialog = (op) => {
@@ -49,12 +50,13 @@ class Firm extends React.PureComponent {
         } else {
           this.props.openSnackBar(i18n.__('Operation Success'))
         }
-        this.setState({ loading: 'false' })
+        this.setState({ loading: false })
         this.refresh()
       })
     }
 
     this.handleAppifi = (state) => {
+      this.setState({ loading: true })
       this.props.selectedDevice.pureRequest('handleAppifi', { state }, (error) => {
         if (error) {
           console.log('handleAppifi error', error)
@@ -63,10 +65,12 @@ class Firm extends React.PureComponent {
           this.props.openSnackBar(i18n.__('Operation Success'))
         }
         this.refresh()
+        this.setState({ loading: false })
       })
     }
 
     this.handleRelease = (tagName, state) => {
+      this.setState({ loading: true })
       this.props.selectedDevice.pureRequest('handleRelease', { tagName, state }, (error) => {
         if (error) {
           console.log('handleRelease error', error)
@@ -75,6 +79,7 @@ class Firm extends React.PureComponent {
           this.props.openSnackBar(i18n.__('Operation Success'))
         }
         this.refresh()
+        this.setState({ loading: false })
       })
     }
 
@@ -214,9 +219,10 @@ class Firm extends React.PureComponent {
                     <div style={{ marginLeft: 24 }}> { `${Math.round(view.bytesWritten * 100 / view.length)} %` } </div>
                 }
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', height: 44 }}>
+              <div style={{ height: 8 }} />
+              <div style={{ display: 'flex', alignItems: 'center', height: 36, marginLeft: -8 }}>
                 {
-                  action ? <FlatButton primary label={label} onTouchTap={action} style={{ margin: '8px 0px 0px -8px' }} />
+                  action ? <FlatButton primary label={label} onTouchTap={action} disabled={this.state.loading} />
                   : <CircularProgress size={24} thickness={2} style={{ marginLeft: 8 }} />
                 }
               </div>
@@ -276,12 +282,11 @@ class Firm extends React.PureComponent {
                   </div>
               }
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', height: 44 }}>
+            <div style={{ height: 8 }} />
+            <div style={{ display: 'flex', alignItems: 'center', height: 36, marginLeft: -12 }}>
               {
-                appifi && (
-                  action ? <FlatButton primary label={label} onTouchTap={action} style={{ margin: '8px 0px 0px -12px' }} />
-                  : <CircularProgress size={24} thickness={2} style={{ marginLeft: 8 }} />
-                )
+                appifi && (action ? <FlatButton primary label={label} onTouchTap={action} disabled={this.state.loading} />
+                  : <CircularProgress size={24} thickness={2} style={{ marginLeft: 8 }} />)
               }
             </div>
             <div style={{ height: 16 }} />
@@ -358,13 +363,14 @@ class Firm extends React.PureComponent {
                 <div style={{ height: 24 }} />
                 <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                   <FlatButton
-                    label={i18n.__('Cancel')}
                     primary
+                    label={i18n.__('Cancel')}
                     onTouchTap={() => this.toggleDialog('confirm')}
                   />
                   <FlatButton
-                    label={i18n.__('Confirm')}
                     primary
+                    label={i18n.__('Confirm')}
+                    disabled={this.state.loading}
                     onTouchTap={() => this.install(this.state.confirm)}
                   />
                 </div>
