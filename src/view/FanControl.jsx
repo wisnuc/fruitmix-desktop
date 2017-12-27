@@ -46,7 +46,7 @@ class FanControl extends Base {
       <Fan
         fan={this.state.fan}
         primaryColor={this.groupPrimaryColor()}
-        request={this.request}
+        request={this.ctx.props.selectedDevice.request}
         openSnackBar={openSnackBar}
         refresh={this.refresh}
       />
