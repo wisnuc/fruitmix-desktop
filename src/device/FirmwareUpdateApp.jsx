@@ -193,15 +193,15 @@ class Firm extends React.PureComponent {
         <div style={{ flex: '0 0 24px' }} />
         <div style={{ flex: '0 0 56px', marginTop: 12 }} >
           {
-            show
-              ? <NewReleases color={this.props.primaryColor} />
-              : checking ? <CircularProgress color={this.props.primaryColor} size={24} thickness={2} />
+            checking ? <CircularProgress color={this.props.primaryColor} size={24} thickness={2} />
+              : show ? <NewReleases color={this.props.primaryColor} />
               : checked ? <CheckIcon color={this.props.primaryColor} />
               : <CloseIcon color={this.props.primaryColor} />
           }
         </div>
         {
-          show ?
+          checking ? <div style={{ marginTop: 12 }} > { i18n.__('Checking Update') } </div>
+            : show ?
             <div style={{ width: '100%' }}>
               <div style={{ display: 'flex', alignItems: 'center', height: 48 }}>
                 <div style={{ fontSize: 20, marginRight: 32 }}>
@@ -251,7 +251,6 @@ class Firm extends React.PureComponent {
               <div style={{ height: 16 }} />
               <Divider style={{ marginLeft: -60 }} />
             </div>
-            : checking ? <div style={{ marginTop: 12 }} > { i18n.__('Checking Update') } </div>
             : checked ? <div style={{ marginTop: 12 }} > { i18n.__('Already LTS Text') } </div>
             : <div style={{ marginTop: 12 }} > { i18n.__('Check Update Failed Text') } </div>
         }

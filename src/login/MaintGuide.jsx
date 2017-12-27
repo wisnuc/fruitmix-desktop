@@ -180,7 +180,7 @@ class MaintGuide extends React.Component {
           </div>
           { diskLabels.map((label, index) => action(label, diskFuncs[index], diskDisable[index])) }
         </div>
-        <div style={{ width: 142, margin: '0 24px' }}>
+        <div style={{ width: 154, margin: '0 24px 0 12px' }}>
           <div style={{ height: 56, display: 'flex', alignItems: 'center' }}>
             { i18n.__('Wisnuc Manage Title') }
           </div>
