@@ -8,12 +8,6 @@ import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import Media from './Media'
 import AssistantApp from '../photo/AssistantApp'
 
-const parseDate = (date) => {
-  if (!date) return 0
-  const a = date.replace(/:|\s/g, '')
-  return parseInt(a, 10)
-}
-
 /* Extends Media to get medthods about PhotoList */
 class Assistant extends Media {
   constructor(ctx) {
@@ -21,6 +15,13 @@ class Assistant extends Media {
 
     this.processMedia = (media, blacklist) => {
       if (!Array.isArray(media) || !Array.isArray(blacklist)) return null
+
+      /* data not change */
+      if (media === this.preMedia && blacklist === this.preBL && this.value) return this.value
+
+      /* store data */
+      this.preMedia = media
+      this.preBL = blacklist
 
       const showBlacklist = (m, l) => {
         const bl = []
@@ -35,13 +36,19 @@ class Assistant extends Media {
       }
 
       /* remove photos without hash and filter media by blacklist */
-      const value = showBlacklist(media, blacklist)
+      this.value = showBlacklist(media, blacklist)
+
+      /* formate date */
+      this.value.forEach((v) => {
+        let date = v.date || v.datetime
+        if (!date || date.search(/:/g) !== 4 || date.search(/^0/) > -1) date = ''
+        v.date = date
+      })
 
       /* sort photos by date */
-      value.sort((prev, next) => (parseDate(next.date || next.datetime) - parseDate(prev.date || next.datetime)) || (
-        parseInt(`0x${next.hash}`, 16) - parseInt(`0x${prev.hash}`, 16)))
+      this.value.sort((prev, next) => next.date.localeCompare(prev.date))
 
-      return value
+      return this.value
     }
   }
 
@@ -84,7 +91,7 @@ class Assistant extends Media {
 
   renderContent() {
     return (<AssistantApp
-      media={this.processMedia(this.state.media, this.state.blacklist)}
+      media={this.media}
       setPhotoInfo={this.setPhotoInfo}
       getTimeline={this.getTimeline}
       ipcRenderer={ipcRenderer}
@@ -103,7 +110,6 @@ class Assistant extends Media {
       getHoverPhoto={this.getHoverPhoto}
       getShiftStatus={this.getShiftStatus}
       shiftStatus={{ shift: this.state.shift, items: this.state.shiftHoverItems }}
-      apis={this.ctx.props.apis}
     />)
   }
 }

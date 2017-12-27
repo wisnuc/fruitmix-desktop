@@ -11,14 +11,7 @@ import PhotoApp from '../photo/PhotoApp'
 import { formatDate } from '../common/datetime'
 import FlatButton from '../common/FlatButton'
 
-const parseDate = (date) => {
-  if (!date) return 0
-  const a = date.replace(/:|\s/g, '')
-  return parseInt(a, 10)
-}
-
 const getName = (photo) => {
-  console.log('getName', photo)
   if (!photo.date && !photo.datetime) {
     return `IMG_UnkownDate-${photo.hash.slice(0, 5).toUpperCase()}-PC.${photo.m}`
   }
@@ -41,8 +34,21 @@ class Media extends Base {
       shift: false
     }
 
+    this.preMedia = null
+    this.preBL = null
+    this.value = null
+
     this.processMedia = (media, blacklist) => {
+      // console.log('processMedia start', (new Date()).getTime() - this.timeFlag)
+      /* no data */
       if (!Array.isArray(media) || !Array.isArray(blacklist)) return null
+
+      /* data not change */
+      if (media === this.preMedia && blacklist === this.preBL && this.value) return this.value
+
+      /* store data */
+      this.preMedia = media
+      this.preBL = blacklist
 
       const removeBlacklist = (m, l) => {
         if (!m.length || !l.length) return m
@@ -53,13 +59,20 @@ class Media extends Base {
       }
 
       /* remove photos without hash and filter media by blacklist */
-      const value = removeBlacklist(media, blacklist)
+      this.value = removeBlacklist(media, blacklist)
+
+      /* formate date */
+      this.value.forEach((v) => {
+        let date = v.date || v.datetime
+        if (!date || date.search(/:/g) !== 4 || date.search(/^0/) > -1) date = ''
+        v.date = date
+      })
 
       /* sort photos by date */
-      value.sort((prev, next) => (parseDate(next.date || next.datetime) - parseDate(prev.date || prev.datetime)) || (
-        parseInt(`0x${next.hash}`, 16) - parseInt(`0x${prev.hash}`, 16)))
+      this.value.sort((prev, next) => next.date.localeCompare(prev.date))
 
-      return value
+      console.log('processMedia finished', (new Date()).getTime() - this.timeFlag)
+      return this.value
     }
 
     this.memoizeValue = { currentDigest: '', currentScrollTop: 0 }
@@ -391,12 +404,14 @@ class Media extends Base {
   }
 
   willReceiveProps(nextProps) {
-    this.handleProps(nextProps.apis, ['media', 'blacklist'])
+    this.handleProps(nextProps.apis, ['blacklist', 'media'])
+    this.media = this.processMedia(this.state.media, this.state.blacklist)
   }
 
   navEnter() {
-    this.ctx.props.apis.request('media')
+    this.timeFlag = (new Date()).getTime()
     this.ctx.props.apis.request('blacklist')
+    this.ctx.props.apis.request('media')
   }
 
   navLeave() {
@@ -458,6 +473,7 @@ class Media extends Base {
     return (
       <div style={newStyle}>
         { i18n.__('Media Title') }
+        { !!this.media && ` (${this.media.length})` }
       </div>
     )
   }
@@ -472,7 +488,7 @@ class Media extends Base {
 
   renderContent() {
     return (<PhotoApp
-      media={this.processMedia(this.state.media, this.state.blacklist)}
+      media={this.media}
       setPhotoInfo={this.setPhotoInfo}
       getTimeline={this.getTimeline}
       ipcRenderer={ipcRenderer}
@@ -491,7 +507,6 @@ class Media extends Base {
       getHoverPhoto={this.getHoverPhoto}
       getShiftStatus={this.getShiftStatus}
       shiftStatus={{ shift: this.state.shift, items: this.state.shiftHoverItems }}
-      apis={this.ctx.props.apis}
     />)
   }
 }
