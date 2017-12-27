@@ -42,12 +42,12 @@ class PhotoList extends React.Component {
     this.onScroll = () => {
       if (!this.photoMapDates.length) return
       const list = document.getElementsByClassName('ReactVirtualized__List')[0]
-      const currentIndex = this.indexHeightSum.findIndex(data => data > list.scrollTop + 200)
+      const currentIndex = this.indexHeightSum.findIndex(data => data > list.scrollTop + this.indexHeightSum[0] * 0.9)
       const percentage = list.scrollTop / this.maxScrollTop
       this.date = this.photoMapDates[currentIndex].date
       this.currentDigest = this.photoMapDates[currentIndex].photos[0].hash
       if (!this.firstScroll) this.props.memoize({ currentDigest: this.currentDigest, currentScrollTop: list.scrollTop })
-      // debug('this.props.memoize()', this.props.memoize())
+      // debug('this.props.memoize()', this.props.memoize(), currentIndex, this.indexHeightSum[0])
 
       /* forceUpdate when first two scroll, this is necessary to show timeline */
       if (this.firstScroll) {
@@ -109,7 +109,7 @@ class PhotoList extends React.Component {
 
         /* convert currentScrollTop to currentIndex */
         const currentScrollTop = Math.round((this.maxScrollTop * percentage / 1000))
-        const currentIndex = this.indexHeightSum.findIndex(data => data > currentScrollTop + 200)
+        const currentIndex = this.indexHeightSum.findIndex(data => data > currentScrollTop + this.indexHeightSum[0] * 0.9)
         if (currentIndex > -1) this.date = this.photoMapDates[currentIndex].date
 
         /* change cursor */
@@ -192,7 +192,6 @@ class PhotoList extends React.Component {
   }
 
   componentDidUpdate() {
-    console.log('componentDidUpdate componentDidUpdate componentDidUpdate ')
     this.onScroll()
   }
 
@@ -251,6 +250,7 @@ class PhotoList extends React.Component {
                   }
                 })
               }
+              // console.log('get previousIndex', this.props.memoize(), previousScrollTop)
 
               /* function to render each row */
               const rowRenderer = ({ key, index, style, isScrolling }) => (
