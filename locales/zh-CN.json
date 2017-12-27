@@ -612,6 +612,10 @@
   "Date Taken": "拍摄时间",
   "Camera Model": "拍摄设备",
   "Resolution": "分辨率",
+  "Dir Count": "文件夹数量",
+  "File Count": "文件数量",
+  "File Size": "文件总大小",
+  "Media Count": "媒体文件数量",
 
   "==== file/FinishedTask.jsx ====": "",
   "And Other %s Items": " 等%s个项目",
