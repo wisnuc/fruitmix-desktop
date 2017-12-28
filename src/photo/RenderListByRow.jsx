@@ -3,11 +3,11 @@ import CheckIcon from 'material-ui/svg-icons/action/check-circle'
 import PhotoItem from './PhotoItem'
 
 const includeAll = (parent, child) => {
-  let Got = 0
-  child.forEach((item) => {
-    if (parent.includes(item)) Got += 1
-  })
-  return (Got === child.length)
+  if (child.length > parent.length) return false
+  for (let i = 0; i < child.length; i++) {
+    if (!parent.includes(child[i])) return false
+  }
+  return true
 }
 
 class RenderListByRow extends React.Component {
@@ -15,7 +15,8 @@ class RenderListByRow extends React.Component {
     super(props)
 
     this.state = {
-      selected: includeAll(this.props.selectedItems, this.props.photoListWithSameDate.photos.map(photo => photo.hash))
+      selected: this.props.selectedItems.length > this.props.photoListWithSameDate.photos.length
+      && includeAll(this.props.selectedItems, this.props.photoListWithSameDate.photos.map(photo => photo.hash))
     }
 
     this.onSelectIconButton = () => {
@@ -35,7 +36,8 @@ class RenderListByRow extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.selectedItems.length !== this.props.selectedItems.length) {
       this.setState({
-        selected: includeAll(nextProps.selectedItems, nextProps.photoListWithSameDate.photos.map(photo => photo.hash))
+        selected: nextProps.selectedItems.length > nextProps.photoListWithSameDate.photos.length
+        && includeAll(nextProps.selectedItems, nextProps.photoListWithSameDate.photos.map(photo => photo.hash))
       })
     }
   }
