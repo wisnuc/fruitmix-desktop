@@ -31,7 +31,7 @@ class PhotoDetail extends React.Component {
       this.photo = this.props.item
       this.digest = this.props.item.hash
       this.state = Object.assign({}, this.state, { thumbPath: '', detailPath: '' })
-      this.props.ipcRenderer.send('mediaShowThumb', this.session, this.digest, 210, 210)
+      this.props.ipcRenderer.send('mediaShowThumb', this.session, this.digest, 200, 200)
     }
 
     /* update detail image */

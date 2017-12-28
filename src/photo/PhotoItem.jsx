@@ -76,7 +76,7 @@ class PhotoItem extends React.Component {
 
   componentDidMount() {
     this.session = UUID.v4()
-    this.props.ipcRenderer.send('mediaShowThumb', this.session, this.props.digest, 210, 210)
+    this.props.ipcRenderer.send('mediaShowThumb', this.session, this.props.digest, 200, 200)
     this.props.ipcRenderer.on('getThumbSuccess', this.updatePath)
   }
 
