@@ -149,7 +149,7 @@ class NavViews extends React.Component {
     if (nav === this.state.nav) {
       this.setState({ openDrawer: false })
     } else {
-      this.setState({ nav, openDrawer: false, showDetail: false })
+      this.setState({ nav, openDrawer: false })
       if (this.state.nav) this.views[this.state.nav].navLeave()
       this.props.setPalette(this.views[nav].primaryColor(), this.views[nav].accentColor())
       this.views[nav].navEnter(target)

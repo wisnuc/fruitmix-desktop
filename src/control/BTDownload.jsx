@@ -413,7 +413,6 @@ class BTDownload extends React.Component {
 
   renderRow(task, index) {
     const { magnetURL, name, torrentPath, progress, downloadSpeed, downloaded, timeRemaining, infoHash, isPause, numPeers } = task
-    console.log('task', task)
     const selected = this.state.select.selected && this.state.select.selected.findIndex(s => s === index) > -1
     const hovered = this.state.select.hover === index
     return (

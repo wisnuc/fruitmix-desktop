@@ -406,7 +406,6 @@ class Home extends Base {
 
   renderDetail({ style }) {
     if (!this.state.entries) return (<div />)
-    console.log('renderDetail', this.state)
     return (
       <div style={style}>
         {
