@@ -150,7 +150,7 @@ class MoveDialog extends React.PureComponent {
       const dirUUID = currentDir.uuid
       const driveUUID = path[0].uuid
 
-      if (currentDir.type === 'directory' || currentDir.type === 'public' || currentDir.tag === 'built-in') { // normal directory
+      if (currentDir.type === 'directory' || currentDir.type === 'public' || currentDir.tag === 'built-in' || currentDir.type === 'home' || currentDir.type === 'share') { // normal directory
         this.list(driveUUID, dirUUID)
           .then(list => this.updateState(path, currentDir, list))
           .catch(err => console.log(err))
@@ -284,7 +284,6 @@ class MoveDialog extends React.PureComponent {
       await this.sleep(500)
       const res = await this.props.apis.pureRequestAsync('task', { uuid })
       const data = this.props.apis.stationID ? res.body.data : res.body
-      console.log('data && data.nodes', data && data.nodes)
       if (data && data.nodes && data.nodes.findIndex(n => n.parent === null && n.state === 'Finished') > -1) return 'Finished'
       if (data && data.nodes && data.nodes.findIndex(n => n.state === 'Conflict') > -1) return 'Conflict'
       return 'Working'
@@ -331,7 +330,7 @@ class MoveDialog extends React.PureComponent {
         }
       }
       if (selectedObj.uuid === this.directory.uuid) return true
-    } else if (type === 'directory' && this.inSameDirectory()) {
+    } else if ((type === 'directory' || type === 'home' || type === 'share' || type === 'public') && this.inSameDirectory()) {
       return true
     } else if (type === 'publicRoot') {
       return true
