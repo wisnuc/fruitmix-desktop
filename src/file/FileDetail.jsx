@@ -36,7 +36,6 @@ const getType = (type, name, metadata) => {
 }
 
 const getPath = (path) => {
-  console.log('getPath', path)
   const newPath = []
   path.map((item, index) => {
     if (!index) {
@@ -239,7 +238,7 @@ class FileDetail extends React.PureComponent {
 
   render() {
     const { detailIndex, entries, path, primaryColor, counter } = this.props
-    if (!detailIndex || !entries) {
+    if (!detailIndex || !entries || (path && path.length === 1 && path[0].type === 'publicRoot')) {
       return (<div style={{ height: 128, backgroundColor: primaryColor, filter: 'brightness(0.9)' }} />)
     }
 
