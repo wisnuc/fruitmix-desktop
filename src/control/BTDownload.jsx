@@ -186,7 +186,7 @@ class BTDownload extends React.Component {
           let errorText
           if (err.response && err.response.message === 'torrent exist') errorText = i18n.__('Task Exist')
           else errorText = i18n.__('Add Magnet Failed')
-          
+
           this.setState({ WIP: false, errorText })
         } else {
           this.props.openSnackBar(i18n.__('Add Magnet Success'))
@@ -412,140 +412,76 @@ class BTDownload extends React.Component {
   }
 
   renderRow(task, index) {
-    const { magnetURL, name, torrentPath, progress, downloadSpeed, downloaded, timeRemaining, infoHash, isPause, numPeers } = task
+    const { magnetURL, name, progress, downloadSpeed, downloaded, timeRemaining, infoHash, isPause, numPeers } = task
     const selected = this.state.select.selected && this.state.select.selected.findIndex(s => s === index) > -1
     const hovered = this.state.select.hover === index
     return (
-      <div key={torrentPath}>
-        <div
-          key={infoHash}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            padding: '0 24px',
-            height: 56,
-            fontSize: 14,
-            backgroundColor: selected ? '#EEEEEE' : hovered ? '#F5F5F5' : ''
-          }}
-          onTouchTap={e => this.onRowTouchTap(e, index)}
-          onDoubleClick={() => this.props.alt && this.showFolder()}
-          onMouseEnter={e => this.onRowMouseEnter(e, index)}
-          onMouseLeave={e => this.onRowMouseLeave(e, index)}
-        >
-          {/* CircularProgress */}
-          <div style={{ flex: '0 0 56px' }}>
-            { this.renderCircularProgress(progress, this.props.primaryColor, hovered, infoHash, isPause) }
-          </div>
+      <div
+        key={index.toString()}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 24px',
+          height: 56,
+          fontSize: 14,
+          backgroundColor: selected ? '#EEEEEE' : hovered ? '#F5F5F5' : ''
+        }}
+        onTouchTap={e => this.onRowTouchTap(e, index)}
+        onDoubleClick={() => this.props.alt && this.showFolder()}
+        onMouseEnter={e => this.onRowMouseEnter(e, index)}
+        onMouseLeave={e => this.onRowMouseLeave(e, index)}
+      >
+        {/* CircularProgress */}
+        <div style={{ flex: '0 0 56px' }}>
+          { this.renderCircularProgress(progress, this.props.primaryColor, hovered, infoHash, isPause) }
+        </div>
 
-          {/* task item name */}
-          <div style={{ display: 'flex', flexGrow: 1, alignItems: 'center', marginLeft: 24 }} >
-            <div
-              style={{
-                maxWidth: parseInt(window.innerWidth, 10) - 886,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                fontWeight: 500
-              }}
-            >
-              { name || magnetURL }
-            </div>
-          </div>
-
-
-          {/* Downloaded size */}
-          <div style={{ flex: '0 0 160px' }}> { `${formatSize(downloaded)} / ${formatSize(downloaded / progress)}` } </div>
-
-          {/* speed */}
-          <div style={{ flex: '0 0 120px' }}> { !isPause && !this.props.alt && formatSpeed(downloadSpeed) } </div>
-
-          {/* number of peers */}
-
-          <div style={{ flex: '0 0 120px' }}> { !isPause && !this.props.alt && i18n.__n('Number of Peers %s', numPeers) } </div>
-
-          {/* Status */}
-          <div style={{ flex: '0 0 120px' }}>
-            { this.props.alt ? i18n.__('Finished') : isPause ? i18n.__('Task Paused') :
-              name ? i18n.__('Task Downloading') : i18n.__('Getting Info') }
-          </div>
-
-          {/* task restTime */}
-          <div style={{ flex: '0 0 160px' }}>
-            { this.props.alt ? '' : isPause ? '- - : - - : - -' : formatSeconds(timeRemaining / 1000) }
-          </div>
-          <div style={{ flex: '0 0 90px' }} >
-            {
-              hovered &&
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <IconButton onTouchTap={e => this.openDestroy(e, [infoHash])} tooltip={i18n.__('Delete')}>
-                    <DeleteSvg color={this.props.primaryColor} />
-                  </IconButton>
-                </div>
-            }
+        {/* task item name */}
+        <div style={{ display: 'flex', flexGrow: 1, alignItems: 'center', marginLeft: 24 }} >
+          <div
+            style={{
+              maxWidth: parseInt(window.innerWidth, 10) - 1046,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              fontWeight: 500
+            }}
+          >
+            { name || magnetURL }
           </div>
         </div>
 
-        {/* expand content TODO */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            padding: '0 96px',
-            fontSize: 14,
-            height: this.state.expand === index ? 72 * 1 : 0,
-            overflow: 'hidden',
-            transition: 'all 225ms'
-          }}
-        >
-          {/* task item name */}
-          <div style={{ display: 'flex', flexGrow: 1, alignItems: 'center', marginLeft: 24 }} >
-            <div
-              style={{
-                maxWidth: parseInt(window.innerWidth, 10) - 886,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              { name || magnetURL }
-            </div>
-          </div>
 
-          {/* progress bar */}
-          <div style={{ flex: '0 0 240px' }}>
-            <div
-              style={{
-                display: 'flex',
-                width: 200,
-                height: 6,
-                marginRight: 12,
-                marginTop: 8,
-                marginBottom: 4,
-                borderRadius: 2,
-                backgroundColor: 'rgba(0,0,0,.12)'
-              }}
-            >
-              <div style={{ backgroundColor: this.props.primaryColor, width: `${progress * 100}%` }} />
-              {/* size and speed */}
-            </div>
-            <div style={{ height: 20, width: 200, display: 'flex', alignItems: 'center' }}>
-              <div> { formatSize(downloaded) } </div>
-              <div style={{ flexGrow: 1 }} />
-              <div> { formatSpeed(downloadSpeed) } </div>
-            </div>
-          </div>
+        <div style={{ flex: '0 0 40px' }} />
+        {/* Downloaded size */}
+        <div style={{ flex: '0 0 160px' }}> { `${formatSize(downloaded)} / ${formatSize(downloaded / progress)}` } </div>
 
-          {/* percent */}
-          <div style={{ flex: '0 0 60px' }}> { `${Math.round(progress * 100)}%` } </div>
+        {/* speed */}
+        <div style={{ flex: '0 0 120px' }}> { !isPause && !this.props.alt && formatSpeed(downloadSpeed) } </div>
 
-          {/* Status */}
-          <div style={{ flex: '0 0 120px' }}>
-            { this.props.alt ? i18n.__('Finished') : isPause ? i18n.__('Task Paused') :
-              name ? i18n.__('Task Downloading') : i18n.__('Getting Info') }
-          </div>
+        {/* number of peers */}
 
-          {/* task restTime */}
-          <div style={{ flex: '0 0 120px' }}>{ formatSeconds(timeRemaining / 1000) }</div>
+        <div style={{ flex: '0 0 120px' }}> { !isPause && !this.props.alt && i18n.__n('Number of Peers %s', numPeers) } </div>
+
+        {/* Status */}
+        <div style={{ flex: '0 0 120px' }}>
+          { this.props.alt ? i18n.__('Finished') : isPause ? i18n.__('Task Paused') :
+            name ? i18n.__('Task Downloading') : i18n.__('Getting Info') }
+        </div>
+
+        {/* task restTime */}
+        <div style={{ flex: '0 0 160px' }}>
+          { this.props.alt ? '' : isPause ? '- - : - - : - -' : formatSeconds(timeRemaining / 1000) }
+        </div>
+        <div style={{ flex: '0 0 90px' }} >
+          {
+            hovered &&
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <IconButton onTouchTap={e => this.openDestroy(e, [infoHash])} tooltip={i18n.__('Delete')}>
+                  <DeleteSvg color={this.props.primaryColor} />
+                </IconButton>
+              </div>
+          }
         </div>
       </div>
     )
@@ -567,7 +503,7 @@ class BTDownload extends React.Component {
         <FloatingActionButton
           style={{ position: 'absolute', top: -36, left: 24, zIndex: 200 }}
           secondary
-          onTouchTap={(e) => this.openFAB(e)}
+          onTouchTap={e => this.openFAB(e)}
         >
           <ContentAdd />
         </FloatingActionButton>
