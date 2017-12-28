@@ -155,7 +155,7 @@ class Firm extends React.PureComponent {
         label = i18n.__('Stop')
         text = i18n.__('Appifi Stared')
         color = green500
-        action = () => this.handleAppifi('Stopped')
+        // action = () => this.handleAppifi('Stopped')
         break
       case 'Starting':
         label = i18n.__('Stop')
@@ -200,59 +200,38 @@ class Firm extends React.PureComponent {
           }
         </div>
         {
-          checking ? <div style={{ marginTop: 12 }} > { i18n.__('Checking Update') } </div>
+          checking ?
+            <div style={{ marginTop: 12 }} > { i18n.__('Checking Update') } </div>
             : show ?
-            <div style={{ width: '100%' }}>
-              <div style={{ display: 'flex', alignItems: 'center', height: 48 }}>
-                <div style={{ fontSize: 20, marginRight: 32 }}>
-                  { i18n.__('New Version Detected %s', rel.tag_name) }
+              <div style={{ width: '100%' }}>
+                <div style={{ display: 'flex', alignItems: 'center', height: 48 }}>
+                  <div style={{ fontSize: 20, marginRight: 32 }}> { i18n.__('New Version Detected %s', rel.tag_name) } </div>
+                  <div style={{ fontSize: 14, color, marginRight: 8, border: `1px ${color} solid`, padding: '0px 8px' }}> { text } </div>
+                  { state === 'Failed' && <ErrorBox error={view} iconStyle={{ color: orange500 }} /> }
+                  {
+                    view && view.length !== 'unknown' && !!view.bytesWritten &&
+                      <div style={{ marginLeft: 24 }}> { `${Math.round(view.bytesWritten * 100 / view.length)} %` } </div>
+                  }
                 </div>
-                <div style={{ fontSize: 14, color, marginRight: 8, border: `1px ${color} solid`, padding: '0px 8px' }}> { text } </div>
-                {
-                  state === 'Failed' && <ErrorBox
-                    error={view}
-                    iconStyle={{ color: orange500 }}
-                  />
-                }
-                {
-                  view && view.length !== 'unknown' && !!view.bytesWritten &&
-                    <div style={{ marginLeft: 24 }}> { `${Math.round(view.bytesWritten * 100 / view.length)} %` } </div>
-                }
-              </div>
-              <div style={{ height: 8 }} />
-              <div style={{ display: 'flex', alignItems: 'center', height: 36, marginLeft: -8 }}>
-                {
-                  action ? <FlatButton primary label={label} onTouchTap={action} disabled={this.state.loading} />
-                  : <CircularProgress size={24} thickness={2} style={{ marginLeft: 8 }} />
-                }
-              </div>
-              <div style={{ height: 16 }} />
-              <div> { i18n.__('Publish Date %s', date) } </div>
-              <div style={{ height: 16 }} />
-              {/*
-              <div> { i18n.__('Updates') } </div>
-              <div style={{ height: 8 }} />
-              {
-                rel.body ? rel.body.split(/[1-9]\./).map(list => list && (
-                  <div style={{ marginLeft: 24, height: 40, display: 'flex', alignItems: 'center' }} key={list}>
-                    { '*' }
-                    <div style={{ width: 16 }} />
-                    { list }
-                  </div>
-                ))
-                  :
-                <div style={{ marginLeft: 24, height: 40, display: 'flex', alignItems: 'center' }}>
-                  { '*' }
-                  <div style={{ width: 16 }} />
-                  { i18n.__('Bug Fixes') }
+                <div style={{ height: 8 }} />
+                <div style={{ display: 'flex', alignItems: 'center', height: 36, marginLeft: -8 }}>
+                  {
+                    action ? <FlatButton primary label={label} onTouchTap={action} disabled={this.state.loading} />
+                    : <CircularProgress size={24} thickness={2} style={{ marginLeft: 8 }} />
+                  }
                 </div>
-              }
-              */}
-              <div style={{ height: 16 }} />
-              <Divider style={{ marginLeft: -60 }} />
-            </div>
-            : checked ? <div style={{ marginTop: 12 }} > { i18n.__('Already LTS Text') } </div>
-            : <div style={{ marginTop: 12 }} > { i18n.__('Check Update Failed Text') } </div>
+                <div style={{ height: 16 }} />
+                <div> { i18n.__('Publish Date %s', date) } </div>
+                <div style={{ height: 16 }} />
+                <div style={{ height: 16 }} />
+                <Divider style={{ marginLeft: -60 }} />
+              </div> :
+              <div style={{ marginTop: 12 }}>
+                <div> { checked ? i18n.__('Already LTS Text') : i18n.__('Check Update Failed Text') } </div>
+                <div style={{ margin: '8px 0 0 -8px' }}>
+                  <FlatButton primary label={i18n.__('Check Update')} onTouchTap={() => this.props.checkUpdates()} disabled={this.state.loading} />
+                </div>
+              </div>
         }
       </div>
     )
@@ -280,13 +259,13 @@ class Firm extends React.PureComponent {
                     { text }
                   </div>
               }
+              {
+                state === 'Starting' && <CircularProgress size={24} thickness={2} style={{ marginLeft: 8 }} />
+              }
             </div>
             <div style={{ height: 8 }} />
             <div style={{ display: 'flex', alignItems: 'center', height: 36, marginLeft: -12 }}>
-              {
-                appifi && (action ? <FlatButton primary label={label} onTouchTap={action} disabled={this.state.loading} />
-                  : <CircularProgress size={24} thickness={2} style={{ marginLeft: 8 }} />)
-              }
+              { appifi && action && <FlatButton primary label={label} onTouchTap={action} disabled={this.state.loading} /> }
             </div>
             <div style={{ height: 16 }} />
             <Divider style={{ marginLeft: -60 }} />
