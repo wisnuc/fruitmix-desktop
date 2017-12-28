@@ -327,6 +327,10 @@
   "Finished": "已完成",
   "Getting Info": "获取信息中",
   "No BT Service Text": "BT服务已关闭",
+  "Number of Peers %s": {
+    "one": "1个资源",
+    "other": "%s个资源"
+  },
 
   "==== device/DeviceInfo.jsx ====": "",
   "Modify Device Name Failed": "修改失败",

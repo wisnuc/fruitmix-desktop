@@ -327,6 +327,10 @@
   "Finished": "Finished",
   "Getting Info": "Getting information",
   "No BT Service Text": "BT service is turned off",
+  "Number of Peers %s": {
+    "one": "%s peer",
+    "other": "%s peers"
+  },
 
   "==== device/DeviceInfo.jsx ====": "",
   "Modify Device Name Failed": "Failed to change device name.",
