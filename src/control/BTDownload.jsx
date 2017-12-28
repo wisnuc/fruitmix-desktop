@@ -412,7 +412,8 @@ class BTDownload extends React.Component {
   }
 
   renderRow(task, index) {
-    const { magnetURL, name, torrentPath, progress, downloadSpeed, downloaded, timeRemaining, infoHash, isPause } = task
+    const { magnetURL, name, torrentPath, progress, downloadSpeed, downloaded, timeRemaining, infoHash, isPause, numPeers } = task
+    console.log('task', task)
     const selected = this.state.select.selected && this.state.select.selected.findIndex(s => s === index) > -1
     const hovered = this.state.select.hover === index
     return (
@@ -458,6 +459,10 @@ class BTDownload extends React.Component {
 
           {/* speed */}
           <div style={{ flex: '0 0 120px' }}> { !isPause && !this.props.alt && formatSpeed(downloadSpeed) } </div>
+
+          {/* number of peers */}
+
+          <div style={{ flex: '0 0 120px' }}> { !isPause && !this.props.alt && i18n.__n('Number of Peers %s', numPeers) } </div>
 
           {/* Status */}
           <div style={{ flex: '0 0 120px' }}>
