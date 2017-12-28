@@ -60,16 +60,6 @@ class FirmwareUpdate extends Base {
     return ListIcon
   }
 
-  renderToolBar({ style }) {
-    return (
-      <div style={style}>
-        <IconButton onTouchTap={() => this.checkUpdates()} tooltip={i18n.__('Refresh')} tooltipStyles={{ marginTop: -12 }}>
-          <RefreshIcon color="#FFF" />
-        </IconButton>
-      </div>
-    )
-  }
-
   render({ openSnackBar }) {
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>

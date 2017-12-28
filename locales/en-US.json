@@ -359,6 +359,7 @@
   "Fan Speed Text": "Unit: RPM",
 
   "==== device/FirmwareUpdateApp.jsx ====": "",
+  "Check Update": "Check Update",
   "Operation Success": "Operation Success",
   "Current Firmware Version %s": "Current firmware version: %s",
   "No Appifi": "No Appifi installed",

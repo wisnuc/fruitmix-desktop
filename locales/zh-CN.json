@@ -359,6 +359,7 @@
   "Fan Speed Text": "单位：RPM",
 
   "==== device/FirmwareUpdateApp.jsx ====": "",
+  "Check Update": "检查更新",
   "Operation Success": "操作成功",
   "Current Firmware Version %s": "当前使用的固件版本：%s",
   "No Appifi": "当前未安装任何Appifi固件",
