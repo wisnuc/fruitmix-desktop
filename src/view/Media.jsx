@@ -321,11 +321,11 @@ class Media extends Base {
     this.getHoverPhoto = (digest) => {
       if (!this.state.selectedItems.length) return
       const lastSelect = this.state.selectedItems[this.state.selectedItems.length - 1]
-      const lastSelectIndex = this.state.media.findIndex(photo => photo.hash === lastSelect)
-      const hoverIndex = this.state.media.findIndex(photo => photo.hash === digest)
-      let shiftHoverPhotos = this.state.media.slice(lastSelectIndex, hoverIndex + 1)
+      const lastSelectIndex = this.media.findIndex(photo => photo.hash === lastSelect)
+      const hoverIndex = this.media.findIndex(photo => photo.hash === digest)
+      let shiftHoverPhotos = this.media.slice(lastSelectIndex, hoverIndex + 1)
 
-      if (hoverIndex < lastSelectIndex) shiftHoverPhotos = this.state.media.slice(hoverIndex, lastSelectIndex + 1)
+      if (hoverIndex < lastSelectIndex) shiftHoverPhotos = this.media.slice(hoverIndex, lastSelectIndex + 1)
       this.setState({ shiftHoverItems: shiftHoverPhotos.map(photo => photo.hash) })
     }
 
@@ -339,7 +339,7 @@ class Media extends Base {
         ? this.state.selectedItems
         : [this.memoizeValue.downloadDigest]
 
-      const photos = list.map(digest => this.state.media.find(photo => photo.hash === digest))
+      const photos = list.map(digest => this.media.find(photo => photo.hash === digest))
         .map(photo => ({
           name: getName(photo),
           size: photo.size,
@@ -364,7 +364,7 @@ class Media extends Base {
       const txt = show ? i18n.__('Retrieve') : i18n.__('Hide')
       const list = this.state.selectedItems.length
         ? this.state.selectedItems
-        : [this.state.media.find(item => item.hash === this.memoizeValue.downloadDigest).hash]
+        : [this.media.find(item => item.hash === this.memoizeValue.downloadDigest).hash]
       this.ctx.props.apis.request(show ? 'subtractBlacklist' : 'addBlacklist', list, (error) => {
         if (error) {
           this.ctx.openSnackBar(show ? i18n.__('Retrieve Media Failed') : i18n.__('Hide Media Failed'))
