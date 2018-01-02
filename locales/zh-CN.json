@@ -173,8 +173,8 @@
   "Skip Text {{type}} {{action}}": "跳过，该{{type}}将不会被{{action}}",
   "Merge Text {{action}}": "保留，全部内容均保留，如遇同名但内容不同的文件将自动重命名后{{action}}",
   "Overwrite Text {{action}}": "覆盖，如遇同名文件将使用新{{action}}的文件替换已有文件",
-  "Default Conflict Title {{type}} {{name}} {{action}}": "{{type}}“{{name}}”在目标路径下已经存在，请选择您要执行的操作：",
-  "Alt Conflict Title {{type}} {{name}} {{remoteType}} {{action}}": "{{action}}{{type}}“{{name}}“ 时，发现目标路径下已经存在同名的{{remoteType}}，请选择您要执行的操作：",
+  "Default Conflict Title {{type}} {{name}} {{action}}": "{{type}} “{{name}}” 在目标路径下已经存在，请选择您要执行的操作：",
+  "Alt Conflict Title {{type}} {{name}} {{remoteType}} {{action}}": "{{action}}{{type}} “{{name}}“ 时，发现目标路径下已经存在同名的{{remoteType}}，请选择您要执行的操作：",
   "Apply All Text %d": "其他同类型冲突也执行此操作（还有%d项）",
   "Uploading": "上传",
 
