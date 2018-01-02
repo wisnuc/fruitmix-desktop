@@ -136,8 +136,8 @@ class NavViews extends React.Component {
   componentDidMount() {
     this.navTo('home')
     ipcRenderer.send('START_TRANSMISSION')
-    ipcRenderer.on('snackbarMessage', (e, message) => setTimeout(() => this.openSnackBar(message.message), 200))
-    ipcRenderer.on('conflicts', (e, args) => setTimeout(() => this.setState({ conflicts: args }), 200))
+    ipcRenderer.on('snackbarMessage', (e, message) => this.openSnackBar(message.message))
+    ipcRenderer.on('conflicts', (e, args) => this.setState({ conflicts: args }))
   }
 
   componentDidUpdate() {

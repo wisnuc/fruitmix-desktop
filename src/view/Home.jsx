@@ -134,7 +134,6 @@ class Home extends Base {
     }
 
     this.deleteAsync = async () => {
-      debug('this.deleteAsync this.props', this.ctx)
       const entries = this.state.entries
       const selected = this.state.select.selected
       const path = this.state.path
@@ -204,7 +203,7 @@ class Home extends Base {
         this.ctx.props.apis.request('drives') // drive root
       } else this.ctx.props.apis.request('listNavDir', { driveUUID: rUUID, dirUUID: dUUID })
 
-      debug('this.refresh op', op)
+      // debug('this.refresh op', op)
       if (op) this.setState({ scrollTo: op.fileName, loading: !op.noloading })
       else this.setState({ loading: true })
     }
