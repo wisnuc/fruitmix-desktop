@@ -84,13 +84,12 @@ class FileContent extends React.Component {
     }
 
     this.onRowMouseLeave = (e, index) => {
-      this.deferredLeave = setTimeout(() => this.props.select.mouseLeave(index), 1)
+      this.deferredLeave = setImmediate(() => this.props.select.mouseLeave(index))
     }
 
     /* handle files */
     this.drop = (e) => {
-      const files = []
-      for (const item of e.dataTransfer.files) files.push(item.path)
+      const files = [...e.dataTransfer.files].map(f => f.path)
       const dir = this.props.home.path
       const dirUUID = dir[dir.length - 1].uuid
       const driveUUID = this.props.home.path[0].uuid
