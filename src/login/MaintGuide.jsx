@@ -239,8 +239,8 @@ class MaintGuide extends React.Component {
                 <div>
                   {`${i18n.__('Disk Array')} ${this.state.index + 1}`}
                 </div>
-                <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.54)' }}>
-                  {`Btrfs | ${volume && volume.usage && volume.usage.data && volume.usage.data.mode}`}
+                <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.54)', textTransform: 'capitalize' }}>
+                  { volume && volume.usage && volume.usage.data && `${volume.fileSystemType} | ${volume.usage.data.mode}` }
                 </div>
               </div>
             </div>

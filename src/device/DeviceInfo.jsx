@@ -93,7 +93,6 @@ class DeviceInfo extends React.PureComponent {
   }
 
   render() {
-    debug('this.props.device true render', this.props)
     if (!this.props.device || !this.props.storage || !this.props.boot || !this.props.info) return <div />
 
     const { cpuInfo, memInfo, ws215i } = this.props.device
@@ -107,7 +106,7 @@ class DeviceInfo extends React.PureComponent {
       i18n.__('Disk Array Mode')
     ]
     const fsValues = [
-      'Btrfs',
+      volume.fileSystemType.toUpperCase(),
       volume.total,
       volume.usage.data.mode.toUpperCase()
     ]
