@@ -251,8 +251,9 @@ class Home extends Base {
     }
 
     ipcRenderer.on('driveListUpdate', (e, dir) => {
+      if (this.state.contextMenuOpen) return
+      if (this.state.select && this.state.select.selected && this.state.select.selected.length > 1) return
       const path = this.state.path
-      // console.log(dir, path)
       if (this.isNavEnter && path && path.length && dir.uuid === path[path.length - 1].uuid) this.refresh({ noloading: true })
     })
   }
