@@ -117,7 +117,7 @@ class DetailContainerInline extends React.Component {
     this.dragPosition = { x: 0, y: 0, left: 0, top: 0 }
 
     this.state = {
-      selected: this.props.selectedItems.findIndex(item => item === this.digest) >= 0,
+      selected: this.props.selectedItems.includes(this.digest),
       direction: null,
       hideDialog: false,
       deleteDialog: false,
@@ -132,9 +132,9 @@ class DetailContainerInline extends React.Component {
 
     this.selectPhoto = () => {
       if (this.state.selected) {
-        this.setState({ selected: false }, () => this.props.removeListToSelection(this.digest))
+        this.setState({ selected: false }, () => this.props.removeListToSelection([this.digest]))
       } else {
-        this.setState({ selected: true }, () => this.props.addListToSelection(this.digest))
+        this.setState({ selected: true }, () => this.props.addListToSelection([this.digest]))
       }
     }
 
@@ -291,9 +291,7 @@ class DetailContainerInline extends React.Component {
       this.props.memoize({ currentDigest: this.digest, currentScrollTop: 0, downloadDigest: this.digest })
       this.refContainer.style.overflow = 'hidden'
       this.zoom = 1
-      this.setState({
-        selected: this.props.selectedItems.findIndex(item => item === this.digest) >= 0
-      })
+      this.setState({ selected: this.props.selectedItems.includes(this.digest) })
     }
 
     /* animation */

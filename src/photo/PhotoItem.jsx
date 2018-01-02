@@ -1,7 +1,6 @@
 import React from 'react'
 import UUID from 'uuid'
 import Debug from 'debug'
-import { Paper, Card, IconButton, CircularProgress } from 'material-ui'
 import ZoomIn from 'material-ui/svg-icons/action/zoom-in'
 import CheckIcon from 'material-ui/svg-icons/action/check-circle'
 import PlayIcon from 'material-ui/svg-icons/av/play-circle-filled'
@@ -14,7 +13,7 @@ class PhotoItem extends React.Component {
     super(props)
 
     this.state = {
-      selected: this.props.selectedItems.findIndex(item => item === this.props.digest) >= 0,
+      selected: this.props.selectedItems.includes(this.props.digest),
       hover: false
     }
 
@@ -22,9 +21,9 @@ class PhotoItem extends React.Component {
 
     this.onSelectIconButton = () => {
       if (!this.state.selected) {
-        this.setState({ selected: true }, () => this.props.addListToSelection(this.props.digest))
+        this.setState({ selected: true }, () => this.props.addListToSelection([this.props.digest]))
       } else {
-        this.setState({ selected: false }, () => this.props.removeListToSelection(this.props.digest))
+        this.setState({ selected: false }, () => this.props.removeListToSelection([this.props.digest]))
       }
     }
 
@@ -41,12 +40,12 @@ class PhotoItem extends React.Component {
         /* shift is true */
         if (this.props.shiftStatus.shift) {
           this.setState({ selected: true })
-          this.props.shiftStatus.items.forEach(item => this.props.addListToSelection(item))
+          this.props.addListToSelection(this.props.shiftStatus.items)
         /* shift is false */
         } else if (this.state.selected) {
-          this.setState({ selected: false }, () => this.props.removeListToSelection(this.props.digest))
+          this.setState({ selected: false }, () => this.props.removeListToSelection([this.props.digest]))
         } else {
-          this.setState({ selected: true }, () => this.props.addListToSelection(this.props.digest))
+          this.setState({ selected: true }, () => this.props.addListToSelection([this.props.digest]))
         }
       } else {
         this.props.lookPhotoDetail(this.props.digest)
@@ -83,7 +82,7 @@ class PhotoItem extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.selectedItems.length !== this.props.selectedItems.length) {
       this.setState({
-        selected: nextProps.selectedItems.findIndex(item => item === nextProps.digest) >= 0
+        selected: nextProps.selectedItems.includes(nextProps.digest)
       })
     }
   }
