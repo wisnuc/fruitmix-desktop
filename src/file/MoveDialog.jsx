@@ -318,23 +318,19 @@ class MoveDialog extends React.PureComponent {
   /* Button disabled ? */
   getButtonStatus() {
     const { name, uuid, type } = this.state.currentDir
+    console.log('name, uuid, type this.inSameDirectory', name, uuid, type, this.inSameDirectory())
     const selectedObj = this.state.currentSelectedIndex !== -1 ? this.state.list[this.state.currentSelectedIndex] : null
+
     if (this.state.loading || this.state.cnf) return true
 
     if (type !== 'directory' && type !== 'publicRoot' && type !== 'public' && name !== uuid && type !== 'built-in') return true
 
     if (this.state.currentSelectedIndex !== -1) {
-      if (type === 'directory') {
-        if (!this.selectedArr.findIndex(item => item.uuid === selectedObj.uuid) === -1) {
-          return true
-        }
-      }
+      if (type === 'directory' && !this.selectedArr.findIndex(item => item.uuid === selectedObj.uuid) === -1) return true
       if (selectedObj.uuid === this.directory.uuid) return true
-    } else if ((type === 'directory' || type === 'home' || type === 'share' || type === 'public') && this.inSameDirectory()) {
-      return true
-    } else if (type === 'publicRoot') {
-      return true
-    }
+    } else if (['directory', 'home', 'share', 'public', 'built-in'].includes(type)&& this.inSameDirectory()) return true
+    else if (type === 'publicRoot') return true
+
     return false
   }
 
