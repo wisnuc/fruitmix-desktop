@@ -102,11 +102,10 @@ class PolicyDialog extends React.PureComponent {
 
     /* default: choose the first option */
     if (!this.state.value) Object.assign(this.state, { value: choices[0].value })
-    debug('this.state.value', this.state.value, 'choices[0].value', choices[0].value)
     return (
       <div>
         {/* title */}
-        <div> { text } </div>
+        <div style={{ wordBreak: 'break-all' }}> { text } </div>
         <div style={{ height: 20 }} />
 
         {/* choice */}
