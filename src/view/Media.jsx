@@ -10,6 +10,7 @@ import Base from './Base'
 import PhotoApp from '../photo/PhotoApp'
 import { formatDate } from '../common/datetime'
 import FlatButton from '../common/FlatButton'
+import { combineElement, removeElement } from '../common/array'
 
 const getName = (photo) => {
   if (!photo.date && !photo.datetime) {
@@ -292,28 +293,16 @@ class Media extends Base {
 
     this.requestData = eq => this.ctx.props.apis.request(eq)
 
-    this.addListToSelection = (digest) => {
+    this.addListToSelection = (digests) => {
       if (this.firstSelect) {
         this.ctx.openSnackBar(i18n.__('Shift Tips'))
         this.firstSelect = false
       }
-      const hadDigest = this.state.selectedItems.findIndex(item => item === digest) >= 0
-      if (!hadDigest) {
-        this.setState({ selectedItems: [...this.state.selectedItems, digest] })
-      }
+      this.setState({ selectedItems: combineElement(digests, this.state.selectedItems) })
     }
 
-    this.removeListToSelection = (digest) => {
-      const hadDigest = this.state.selectedItems.findIndex(item => item === digest) >= 0
-      if (hadDigest) {
-        const index = this.state.selectedItems.findIndex(item => item === digest)
-        this.setState({
-          selectedItems: [
-            ...this.state.selectedItems.slice(0, index),
-            ...this.state.selectedItems.slice(index + 1)
-          ]
-        })
-      }
+    this.removeListToSelection = (digests) => {
+      this.setState({ selectedItems: removeElement(digests, this.state.selectedItems) })
     }
 
     this.clearSelect = () => { this.setState({ selectedItems: [] }) }

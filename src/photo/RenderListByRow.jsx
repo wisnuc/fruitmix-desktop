@@ -1,21 +1,14 @@
 import React from 'react'
 import CheckIcon from 'material-ui/svg-icons/action/check-circle'
 import PhotoItem from './PhotoItem'
-
-const includeAll = (parent, child) => {
-  if (child.length > parent.length) return false
-  for (let i = 0; i < child.length; i++) {
-    if (!parent.includes(child[i])) return false
-  }
-  return true
-}
+import { includeAll } from '../common/array'
 
 class RenderListByRow extends React.Component {
   constructor(props) {
     super(props)
 
     this.state = {
-      selected: this.props.selectedItems.length > this.props.photoListWithSameDate.photos.length
+      selected: this.props.list.first && this.props.selectedItems.length > this.props.photoListWithSameDate.photos.length
       && includeAll(this.props.selectedItems, this.props.photoListWithSameDate.photos.map(photo => photo.hash))
     }
 
@@ -23,11 +16,11 @@ class RenderListByRow extends React.Component {
       // console.log('this.onSelectIconButton', this.props)
       if (!this.state.selected) {
         this.setState({ selected: true }, () => {
-          this.props.photoListWithSameDate.photos.forEach(photo => this.props.addListToSelection(photo.hash))
+          this.props.addListToSelection(this.props.photoListWithSameDate.photos.map(p => p.hash))
         })
       } else {
         this.setState({ selected: false }, () => {
-          this.props.photoListWithSameDate.photos.forEach(photo => this.props.removeListToSelection(photo.hash))
+          this.props.removeListToSelection(this.props.photoListWithSameDate.photos.map(p => p.hash))
         })
       }
     }
@@ -36,7 +29,7 @@ class RenderListByRow extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.selectedItems.length !== this.props.selectedItems.length) {
       this.setState({
-        selected: nextProps.selectedItems.length > nextProps.photoListWithSameDate.photos.length
+        selected: nextProps.list.first && nextProps.selectedItems.length > nextProps.photoListWithSameDate.photos.length
         && includeAll(nextProps.selectedItems, nextProps.photoListWithSameDate.photos.map(photo => photo.hash))
       })
     }
