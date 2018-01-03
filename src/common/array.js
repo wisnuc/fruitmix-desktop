@@ -1,24 +1,20 @@
-/* Test whether `parent` includes all elements in `child` or not. */
-export const includeAll = (parent, child) => {
-  if (child.length > parent.length) return false
-  if (child.length > 10 * Math.log(parent.length)) {
-    const c = child.sort()
-    const p = parent.sort()
-    let k = 0
-    for (let i = 0; i < c.length; i++) {
-      let Got = false
-      for (let j = k; j < p.length; j++) {
-        if (c[i] === p[j]) {
-          Got = true
-          k = j
-          break
-        }
+/* Test whether `parent` includes all elements in `child` or not, parent and child are already sort */
+export const includeAll = (p, c) => {
+  if (c.length > p.length) return false
+  let k = 0
+  for (let i = 0; i < c.length; i++) {
+    let Got = false
+    for (let j = k; j < p.length; j++) {
+      if (c[i] === p[j]) {
+        Got = true
+        k = j
+        break
       }
-      if (!Got) return false
     }
-    return true
+    if (!Got) return false
   }
-  return child.every(v => parent.includes(v))
+  return true
+  // return child.every(v => parent.includes(v))
 }
 
 /* renturn the combined array of a and b. */

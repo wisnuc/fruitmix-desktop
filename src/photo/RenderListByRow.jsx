@@ -9,7 +9,7 @@ class RenderListByRow extends React.Component {
 
     this.state = {
       selected: this.props.list.first && this.props.selectedItems.length > this.props.photoListWithSameDate.photos.length
-      && includeAll(this.props.selectedItems, this.props.photoListWithSameDate.photos.map(photo => photo.hash))
+      && includeAll(this.props.selectedItems, this.props.photoListWithSameDate.photos.map(photo => photo.hash).sort())
     }
 
     this.onSelectIconButton = () => {
@@ -30,7 +30,7 @@ class RenderListByRow extends React.Component {
     if (nextProps.selectedItems.length !== this.props.selectedItems.length) {
       this.setState({
         selected: nextProps.list.first && nextProps.selectedItems.length > nextProps.photoListWithSameDate.photos.length
-        && includeAll(nextProps.selectedItems, nextProps.photoListWithSameDate.photos.map(photo => photo.hash))
+        && includeAll(nextProps.selectedItems, nextProps.photoListWithSameDate.photos.map(photo => photo.hash).sort())
       })
     }
   }

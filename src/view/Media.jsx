@@ -298,11 +298,11 @@ class Media extends Base {
         this.ctx.openSnackBar(i18n.__('Shift Tips'))
         this.firstSelect = false
       }
-      this.setState({ selectedItems: combineElement(digests, this.state.selectedItems) })
+      this.setState({ selectedItems: combineElement(digests, this.state.selectedItems).sort() })
     }
 
     this.removeListToSelection = (digests) => {
-      this.setState({ selectedItems: removeElement(digests, this.state.selectedItems) })
+      this.setState({ selectedItems: removeElement(digests, this.state.selectedItems).sort() })
     }
 
     this.clearSelect = () => { this.setState({ selectedItems: [] }) }
