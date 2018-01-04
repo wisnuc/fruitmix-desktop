@@ -174,11 +174,6 @@ class Media extends Base {
           })
         }
 
-        /* simulate large list */
-        for (let i = 1; i <= 0; i++) {
-          this.photoMapDates.push(...this.photoMapDates)
-        }
-
         /* calculate each row's heigth and their sum */
         this.photoMapDates.forEach((list) => {
           const tmp = size * Math.ceil(list.photos.length / Math.floor((width - 60) / size)) + !!list.first * 48
@@ -195,14 +190,12 @@ class Media extends Base {
         }
       }
       return {
-        allPhotos: this.allPhotos,
         photoDates: this.photoDates,
         photoMapDates: this.photoMapDates,
         indexHeightSum: this.indexHeightSum,
         allHeight: this.allHeight,
         maxScrollTop: this.maxScrollTop,
         rowHeightSum: this.rowHeightSum,
-        currentDigest: this.memoizeValue.currentDigest,
         photoListWithSameDate: this.photoListWithSameDate,
         size: size - 8
       }

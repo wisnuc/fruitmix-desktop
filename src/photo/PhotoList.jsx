@@ -201,11 +201,6 @@ class PhotoList extends React.Component {
     document.removeEventListener('mouseup', this.onMouseUp)
   }
 
-  renderLater() {
-    clearTimeout(this.timeRenderLater)
-    this.timeRenderLater = setTimeout(() => ReactDom.render(<div>{ this.renderTimeline() }</div>, document.getElementById('timeline')), 100)
-  }
-
   render() {
     // debug('render PhotoList, this.props', this.props)
     return (
@@ -221,18 +216,13 @@ class PhotoList extends React.Component {
               /* set global variant */
               this.height = height
               this.width = width
-              this.allPhotos = PhotoInfo.allPhotos
-              this.photoDates = PhotoInfo.photoDates
               this.photoMapDates = PhotoInfo.photoMapDates
               this.indexHeightSum = PhotoInfo.indexHeightSum
-              this.allHeight = PhotoInfo.allHeight
               this.maxScrollTop = PhotoInfo.maxScrollTop
-              this.rowHeightSum = PhotoInfo.rowHeightSum
-              this.photoListWithSameDate = PhotoInfo.photoListWithSameDate
               this.size = PhotoInfo.size
 
               /* get timeline */
-              this.timeline = this.props.getTimeline(this.photoDates, this.indexHeightSum, this.maxScrollTop, this.height)
+              this.timeline = this.props.getTimeline(PhotoInfo.photoDates, this.indexHeightSum, this.maxScrollTop, this.height)
               // debug('Get this.timeline', this.timeline, this.height, this.width)
 
               const estimatedRowSize = PhotoInfo.rowHeightSum / PhotoInfo.allHeight.length
@@ -260,7 +250,7 @@ class PhotoList extends React.Component {
                     lookPhotoDetail={this.props.lookPhotoDetail}
                     isScrolling={isScrolling}
                     list={this.photoMapDates[index]}
-                    photoListWithSameDate={this.photoListWithSameDate.find(item => item.date === this.photoMapDates[index].date)}
+                    photoListWithSameDate={PhotoInfo.photoListWithSameDate.find(item => item.date === this.photoMapDates[index].date)}
                     ipcRenderer={this.props.ipcRenderer}
                     addListToSelection={this.props.addListToSelection}
                     removeListToSelection={this.props.removeListToSelection}
@@ -296,10 +286,7 @@ class PhotoList extends React.Component {
         <div
           ref={ref => (this.refBackground = ref)}
           style={{ position: 'absolute', height: '100%', width: 80, right: 16 }}
-          onMouseLeave={() => {
-            if (!this.onMouseDown) this.showDateBar(false)
-            // this.scrollTop = null
-          }}
+          onMouseLeave={() => !this.onMouseDown && this.showDateBar(false)}
           onMouseEnter={() => this.showDateBar(true)}
           onMouseDown={() => (this.onMouseDown = true)}
           onTouchTap={this.scrollToPosition}
@@ -308,10 +295,8 @@ class PhotoList extends React.Component {
             ref={ref => (this.refTimeline = ref)}
             style={{ opacity: this.hover ? 1 : 0, transition: 'opacity 200ms' }}
           >
-            {/* date list */}
-            <div id="timeline" />
             {/* RenderLater is necessary to get this latest value of 'this.timeline' */}
-            { this.renderLater() }
+            { this.renderTimeline() }
 
             {/* position bar */}
             <div

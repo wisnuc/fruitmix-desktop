@@ -48,6 +48,7 @@ class Assistant extends Media {
       /* sort photos by date */
       this.value.sort((prev, next) => next.date.localeCompare(prev.date))
 
+      console.log('Assistant finished', (new Date()).getTime() - this.timeFlag)
       return this.value
     }
   }
@@ -95,7 +96,7 @@ class Assistant extends Media {
       setPhotoInfo={this.setPhotoInfo}
       getTimeline={this.getTimeline}
       ipcRenderer={ipcRenderer}
-      apis={this.apis}
+      apis={this.ctx.props.apis}
       requestData={this.requestData}
       setAnimation={this.setAnimation}
       memoize={this.memoize}
