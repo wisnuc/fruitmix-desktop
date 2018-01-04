@@ -5,6 +5,8 @@ import Debug from 'debug'
 import { List, AutoSizer } from 'react-virtualized'
 import { Paper, Card, IconButton, CircularProgress, FlatButton } from 'material-ui'
 import RenderListByRow from './RenderListByRow'
+import getPhotoInfo from './getPhotoInfo'
+import getTimeline from './getTimeline'
 
 const debug = Debug('component:photoApp:PhotoList')
 const timelineMargin = 26
@@ -210,7 +212,7 @@ class PhotoList extends React.Component {
           <AutoSizer>
             {({ height, width }) => {
               /* get PhotoInfo */
-              const PhotoInfo = this.props.setPhotoInfo(height, width, this.props.media)
+              const PhotoInfo = getPhotoInfo(height, width, this.props.media, i18n.__('Date Unknown Text'))
               // debug('PhotoInfo', PhotoInfo)
 
               /* set global variant */
@@ -222,7 +224,7 @@ class PhotoList extends React.Component {
               this.size = PhotoInfo.size
 
               /* get timeline */
-              this.timeline = this.props.getTimeline(PhotoInfo.photoDates, this.indexHeightSum, this.maxScrollTop, this.height)
+              this.timeline = getTimeline(PhotoInfo.photoDates, this.indexHeightSum, this.maxScrollTop, this.height)
               // debug('Get this.timeline', this.timeline, this.height, this.width)
 
               const estimatedRowSize = PhotoInfo.rowHeightSum / PhotoInfo.allHeight.length
