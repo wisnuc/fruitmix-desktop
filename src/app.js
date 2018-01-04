@@ -32,8 +32,9 @@ global.mdnsStore = []
 global.mdns = MDNS(ipcRenderer, global.mdnsStore, render)
 global.mdns.scan()
 
-window.addEventListener('dragover', e => e.preventDefault(), false)
-window.addEventListener('drop', e => e.preventDefault(), false)
+/* set useCapture true to prevent possible losting event */
+window.addEventListener('dragover', e => e.preventDefault(), true)
+window.addEventListener('drop', e => e.preventDefault(), true)
 
 /* render after config loaded */
 ipcRenderer.on('CONFIG_UPDATE', (event, config) => {
