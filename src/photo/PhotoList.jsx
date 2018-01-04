@@ -144,53 +144,12 @@ class PhotoList extends React.Component {
       list.scrollTop = this.scrollTop
     }
 
-    this.renderTimeline = () => {
-      // debug('this.renderTimeline')
-      if (!this.timeline) { return <div /> }
-      return (
-        <div onMouseEnter={() => this.showDateBar(true)} >
-          {
-            this.timeline.map((data, index) => {
-              let date = data[0]
-              const top = data[1]
-              const zIndex = data[2]
-              if (date === 0) date = i18n.__('Date Unknown Text')
-              return (
-                <div
-                  onTouchTap={this.scrollToPosition}
-                  key={index.toString()}
-                  style={{
-                    position: 'absolute',
-                    boxSizing: 'border-box',
-                    borderRadius: 11,
-                    fontSize: 13,
-                    top,
-                    zIndex,
-                    opacity: 0.54,
-                    color: 'rgba(0, 0, 0, 1)',
-                    backgroundColor: 'white',
-                    paddingTop: 4,
-                    paddingBottom: 4,
-                    paddingLeft: 8,
-                    right: (data[0] === 0) ? 8 : 20,
-                    textAlign: 'center'
-                  }}
-                >
-                  { date }
-                </div>
-              )
-            })
-          }
-        </div>
-      )
-    }
-
     this.onMouseUp = () => (this.onMouseDown = false)
   }
 
   componentDidMount() {
-    document.addEventListener('mousemove', this.onMouseMove, true)
-    document.addEventListener('mouseup', this.onMouseUp, true)
+    document.addEventListener('mousemove', this.onMouseMove)
+    document.addEventListener('mouseup', this.onMouseUp)
   }
 
   componentDidUpdate() {
@@ -201,6 +160,46 @@ class PhotoList extends React.Component {
     clearTimeout(this.time)
     document.removeEventListener('mousemove', this.onMouseMove)
     document.removeEventListener('mouseup', this.onMouseUp)
+  }
+
+  renderTimeline() {
+    if (!this.timeline) { return <div /> }
+    return (
+      <div onMouseEnter={() => this.showDateBar(true)} >
+        {
+          this.timeline.map((data, index) => {
+            let date = data[0]
+            const top = data[1]
+            const zIndex = data[2]
+            if (date === 0) date = i18n.__('Date Unknown Text')
+            return (
+              <div
+                onTouchTap={this.scrollToPosition}
+                key={index.toString()}
+                style={{
+                  position: 'absolute',
+                  boxSizing: 'border-box',
+                  borderRadius: 11,
+                  fontSize: 13,
+                  top,
+                  zIndex,
+                  opacity: 0.54,
+                  color: 'rgba(0, 0, 0, 1)',
+                  backgroundColor: 'white',
+                  paddingTop: 4,
+                  paddingBottom: 4,
+                  paddingLeft: 8,
+                  right: (data[0] === 0) ? 8 : 20,
+                  textAlign: 'center'
+                }}
+              >
+                { date }
+              </div>
+            )
+          })
+        }
+      </div>
+    )
   }
 
   render() {
