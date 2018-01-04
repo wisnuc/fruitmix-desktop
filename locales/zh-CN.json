@@ -269,6 +269,8 @@
   "Client Update": "客户端升级",
   "Install New Version Text 1 %s": "将要为您安装版本号为%s的程序。",
   "Install New Version Text 2": "建议配合最新的WISNUC系统固件使用",
+  "Github Download": "Github下载",
+  "Official Download": "官网下载",
 
   "==== control/DriversDetail.jsx ====": "",
   "Modify Drive Failed": "修改失败",

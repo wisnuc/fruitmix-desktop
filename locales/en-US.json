@@ -269,6 +269,8 @@
   "Client Update": "Client update",
   "Install New Version Text 1 %s": "The version %s client will be installed.",
   "Install New Version Text 2": "Recommended with the latest WISNUC system firmware.",
+  "Github Download": "Github",
+  "Official Download": "Official",
 
   "==== control/DriversDetail.jsx ====": "",
   "Modify Drive Failed": "Failed to modify the drive",
