@@ -1,5 +1,4 @@
-import React from 'react'
-
+const timelineMargin = 26
 const getTimeline = (photoDates, indexHeightSum, maxScrollTop, height) => {
   const month = new Map()
   let dateUnknown = 0
@@ -18,8 +17,9 @@ const getTimeline = (photoDates, indexHeightSum, maxScrollTop, height) => {
   if (dateUnknown) month.set('0', dateUnknown)
 
   let sumCount = 0
-  let spacingCount = 0
+  let preTop = 0
   let currentYear = null
+  let preIsYear = false
   const timeline = [...month].map((data, index) => {
     let percentage = 0
     if (sumCount) {
@@ -28,39 +28,44 @@ const getTimeline = (photoDates, indexHeightSum, maxScrollTop, height) => {
     /* top = percentage * height + headerHeight - adjust */
     let top = percentage * height - 8
 
-    const spacingPercentage = (indexHeightSum[spacingCount] - 200) / maxScrollTop
-    const spacingTop = spacingPercentage * height
+    const spacingTop = top - preTop
 
     sumCount += data[1]
-    spacingCount += data[1]
     let date
-    let zIndex = 2
-    if (currentYear !== parseInt(data[0], 10)) {
-      date = parseInt(data[0], 10)
-    } else {
-      date = <hr style={{ width: 8 }} />
-    }
-    currentYear = parseInt(data[0], 10)
+    const indexYear = parseInt(data[0], 10)
+    if (currentYear !== indexYear) date = indexYear
+    else date = -1 // render <hr />
+
+    currentYear = indexYear
     if (!index) { // first date
       top = 8
-      spacingCount = 0
+      preTop = top
     } else if (index === month.size - 1) { // last date
       top += 20
       if (top > height - 26) top = height - 26
-    } else if (spacingTop > 32 && date === parseInt(data[0], 10)) { // show years with enough spacing
-      spacingCount = 0
-    } else if (date === parseInt(data[0], 10)) { // hide years without enough spacing
-      date = null
-    } else { // show bar
-      zIndex = 1
-    }
+    } else if (spacingTop > timelineMargin && date === indexYear) { // show years with enough spacing
+      preTop = top
+      preIsYear = true
+    } else if (date === indexYear && !preIsYear) { // hide years without enough spacing
+      preTop = top
+      preIsYear = true
+    } else if (spacingTop > timelineMargin) { // show bar
+      preTop = top
+      preIsYear = false
+    } else date = null
 
     /* set range of displaying date */
     if (top < 16 && index) date = null
     if (top > (height - 46) && index !== month.size - 1) date = null
-    return [date, top, zIndex, percentage]
-  })
-  return timeline
+
+    return ({ date, top, percentage, raw: data, spacingTop })
+  }).filter(t => t.date !== null) // remove unused data
+
+  /* remove the bar in the near top of year */
+  for (let i = timeline.length - 1; i > -1; i--) {
+    if (timeline[i].date !== -1 && timeline[i].spacingTop < timelineMargin && i > 0) timeline[i - 1].date = null
+  }
+  return timeline.filter(t => t.date !== null)
 }
 
 export default getTimeline

@@ -1,9 +1,7 @@
 import React from 'react'
 import i18n from 'i18n'
-import ReactDom from 'react-dom'
 import Debug from 'debug'
 import { List, AutoSizer } from 'react-virtualized'
-import { Paper, Card, IconButton, CircularProgress, FlatButton } from 'material-ui'
 import RenderListByRow from './RenderListByRow'
 import getPhotoInfo from './getPhotoInfo'
 import getTimeline from './getTimeline'
@@ -29,8 +27,8 @@ class PhotoList extends React.Component {
     this.hover = false
     this.firstScroll = 2
 
-    this.onRowTouchTap = (e, index) => {
-      e.preventDefault() // important!
+    this.onRowTouchTap = (e) => {
+      e.preventDefault()
       e.stopPropagation()
     }
 
@@ -168,10 +166,26 @@ class PhotoList extends React.Component {
       <div onMouseEnter={() => this.showDateBar(true)} >
         {
           this.timeline.map((data, index) => {
-            let date = data[0]
-            const top = data[1]
-            const zIndex = data[2]
-            if (date === 0) date = i18n.__('Date Unknown Text')
+            const { date, top } = data
+            if (date === -1) {
+              return (
+                <div
+                  onTouchTap={this.scrollToPosition}
+                  key={index.toString()}
+                  style={{
+                    position: 'absolute',
+                    top,
+                    height: 2,
+                    width: 8,
+                    backgroundColor: 'rgba(0, 0, 0, 0.27)',
+                    marginTop: 4,
+                    marginBottom: 4,
+                    marginLeft: 8,
+                    right: 20
+                  }}
+                />
+              )
+            }
             return (
               <div
                 onTouchTap={this.scrollToPosition}
@@ -182,18 +196,17 @@ class PhotoList extends React.Component {
                   borderRadius: 11,
                   fontSize: 13,
                   top,
-                  zIndex,
                   opacity: 0.54,
                   color: 'rgba(0, 0, 0, 1)',
-                  backgroundColor: 'white',
-                  paddingTop: 4,
-                  paddingBottom: 4,
+                  backgroundColor: '#FFFFFF',
+                  paddingTop: 2,
+                  paddingBottom: 2,
                   paddingLeft: 8,
-                  right: (data[0] === 0) ? 8 : 20,
+                  right: date === 0 ? 8 : 20,
                   textAlign: 'center'
                 }}
               >
-                { date }
+                { date === 0 ? i18n.__('Date Unknown Text') : date }
               </div>
             )
           })
@@ -224,7 +237,7 @@ class PhotoList extends React.Component {
 
               /* get timeline */
               this.timeline = getTimeline(PhotoInfo.photoDates, this.indexHeightSum, this.maxScrollTop, this.height)
-              // debug('Get this.timeline', this.timeline, this.height, this.width)
+              console.log('Get this.timeline')
 
               const estimatedRowSize = PhotoInfo.rowHeightSum / PhotoInfo.allHeight.length
               const rowHeight = ({ index }) => PhotoInfo.allHeight[index]
@@ -264,7 +277,7 @@ class PhotoList extends React.Component {
               )
 
               return (
-                <div onTouchTap={e => this.onRowTouchTap(e, -1)} key={this.size}>
+                <div onTouchTap={e => this.onRowTouchTap(e)} key={this.size}>
                   <List
                     height={height}
                     width={width}
@@ -296,7 +309,6 @@ class PhotoList extends React.Component {
             ref={ref => (this.refTimeline = ref)}
             style={{ opacity: this.hover ? 1 : 0, transition: 'opacity 200ms' }}
           >
-            {/* RenderLater is necessary to get this latest value of 'this.timeline' */}
             { this.renderTimeline() }
 
             {/* position bar */}
