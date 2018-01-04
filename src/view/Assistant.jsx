@@ -93,8 +93,6 @@ class Assistant extends Media {
   renderContent() {
     return (<AssistantApp
       media={this.media}
-      setPhotoInfo={this.setPhotoInfo}
-      getTimeline={this.getTimeline}
       ipcRenderer={ipcRenderer}
       apis={this.ctx.props.apis}
       requestData={this.requestData}

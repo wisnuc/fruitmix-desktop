@@ -95,10 +95,8 @@ class AssistantApp extends PhotoApp {
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}
-                setPhotoInfo={this.props.setPhotoInfo}
                 media={this.props.media}
                 lookPhotoDetail={this.lookPhotoDetail}
-                getTimeline={this.props.getTimeline}
                 ipcRenderer={this.props.ipcRenderer}
                 addListToSelection={this.props.addListToSelection}
                 removeListToSelection={this.props.removeListToSelection}
