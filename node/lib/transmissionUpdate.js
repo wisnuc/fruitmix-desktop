@@ -14,7 +14,6 @@ const Tasks = []
 
 /* send message */
 let preUserTasksLength = 0
-let preFinishTasksLength = 0
 let lock = false
 let last = true
 let id = -1 // The power save blocker id returned by powerSaveBlocker.start
@@ -40,14 +39,12 @@ const sendMsg = () => {
   if (preUserTasksLength !== 0 && userTasks.length === 0) {
     if (powerSaveBlocker.isStarted(id)) {
       powerSaveBlocker.stop(id)
-      // console.log('powerSaveBlocker stop', id, powerSaveBlocker.isStarted(id))
     }
-    if (finishTasks.length !== preFinishTasksLength) {
+    if (finishTasks.length) {
       getMainWindow().webContents.send('snackbarMessage', { message: i18n.__('Transmission Finished') })
     }
   }
   preUserTasksLength = userTasks.length
-  preFinishTasksLength = finishTasks.length
 
   /* Error: Object has been destroyed */
   try {
