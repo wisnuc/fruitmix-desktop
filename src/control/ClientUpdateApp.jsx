@@ -3,12 +3,14 @@ import i18n from 'i18n'
 import Debug from 'debug'
 import { shell } from 'electron'
 import { CircularProgress, Divider } from 'material-ui'
-import { cyan600 } from 'material-ui/styles/colors'
+import { orange500 } from 'material-ui/styles/colors'
 import UpdateIcon from 'material-ui/svg-icons/action/update'
-import SearchIcon from 'material-ui/svg-icons/action/search'
+import NewReleases from 'material-ui/svg-icons/av/new-releases'
+import CheckIcon from 'material-ui/svg-icons/navigation/check'
+import CloseIcon from 'material-ui/svg-icons/navigation/close'
+import InfoIcon from 'material-ui/svg-icons/action/info'
 import FlatButton from '../common/FlatButton'
-import DialogOverlay from '../common/DialogOverlay'
-import { GithubIcon } from '../common/Svg'
+import ErrorBox from '../common/ErrorBox'
 
 const debug = Debug('component:control:ClientUpdate:')
 
@@ -19,6 +21,7 @@ class Update extends React.Component {
     this.state = {
       status: 'checking',
       confirm: false,
+      error: null,
       rel: null
     }
 
@@ -46,15 +49,19 @@ class Update extends React.Component {
     this.newRelease = (event, result) => {
       debug('this.getPath', result)
       const { rel, filePath, error } = result
-      if (!rel || error) return this.setState({ status: 'error' })
+      if (!rel || error) return this.setState({ status: 'error' , error })
       let status = 'needUpdate'
-      if (global.config.appVersion.localeCompare(rel.name) >= 0 || !filePath) status = 'latest'
-      return this.setState({ rel, filePath, status })
+      if (global.config.appVersion.localeCompare(rel.name) >= 0) status = 'latest'
+      return this.setState({ rel, filePath, status, error: null })
+    }
+
+    this.sendCheck = () => {
+      this.setState({ status: 'checking' }, () => this.props.ipcRenderer.send('CHECK_UPDATE'))
     }
   }
 
   componentDidMount() {
-    this.props.ipcRenderer.send('CHECK_UPDATE')
+    this.sendCheck()
     this.props.ipcRenderer.on('NEW_RELEASE', this.newRelease)
   }
 
@@ -66,10 +73,11 @@ class Update extends React.Component {
     const rel = this.state.rel
     const date = rel.published_at.split('T')[0]
     return (
-      <div>
+      <div style={{ marginTop: -4 }}>
         <div>
           { i18n.__('New Version Detected %s', rel.name) }
-          <FlatButton style={{ marginLeft: 8 }} label={i18n.__('Install')} onTouchTap={() => this.toggleDialog('confirm')} primary />
+          <FlatButton style={{ marginLeft: 16 }} primary label={i18n.__('Official Download')} onTouchTap={this.openOfficial} />
+          <FlatButton primary label={i18n.__('Github Download')} onTouchTap={this.moreVersion} />
         </div>
         <div style={{ height: 16 }} />
         <div> { i18n.__('Publish Date %s', date) } </div>
@@ -95,26 +103,48 @@ class Update extends React.Component {
     )
   }
 
-  renderChecking() {
+  renderReleases() {
+    const platform = global.config.platform
+    // const platform = 'darwin'
+    const unSupport = platform !== 'darwin' && platform !== 'win32'
     return (
-      <div style={{ display: 'flex', alignItems: 'center', height: 48, marginLeft: -54 }}>
-        <div style={{ flex: '0 0 52px', display: 'flex', alignItems: 'center', marginLeft: 4 }} >
-          <CircularProgress size={24} thickness={2} />
+      <div style={{ display: 'flex', width: '100%', marginTop: 12 }}>
+        <div style={{ flex: '0 0 24px' }} />
+        <div style={{ flex: '0 0 56px' }} >
+          {
+            unSupport ? <InfoIcon color={this.props.primaryColor} />
+              : this.state.status === 'checking' ? <CircularProgress color={this.props.primaryColor} size={24} thickness={2} />
+              : this.state.status === 'needUpdate' ? <NewReleases color={this.props.primaryColor} />
+              : this.state.status === 'latest' ? <CheckIcon color={this.props.primaryColor} />
+              : <CloseIcon color={this.props.primaryColor} />
+          }
         </div>
-        <div style={{ height: 32, display: 'flex', alignItems: 'center' }} >
-          { i18n.__('Checking Update') }
-        </div>
+        {
+          unSupport ? i18n.__('Unsupported to Update')
+            : this.state.status === 'checking' ? i18n.__('Checking Update')
+            : this.state.status === 'needUpdate' ? this.renderCheckUpdate()
+            :
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', height: 48, marginTop: -12 }}>
+                { this.state.status === 'latest' && i18n.__('Already LTS Text') }
+                { this.state.status === 'error' && i18n.__('Check Update Failed Text') }
+                { !!this.state.error && <ErrorBox error={this.state.error} iconStyle={{ color: orange500 }} /> }
+              </div>
+              <div style={{ margin: '8px 0 0 -8px' }}>
+                <FlatButton primary label={i18n.__('Check Update')} onTouchTap={this.sendCheck} disabled={this.state.loading} />
+              </div>
+            </div>
+        }
       </div>
     )
   }
 
   render() {
-    debug('render client', this.props, global.config)
+    // debug('render client', this.props, global.config)
     const currentVersion = global.config.appVersion
-    const platform = global.config.platform
     return (
-      <div style={{ height: '100%', margin: 38 }}>
-        <div style={{ display: 'flex', alignItems: 'center', height: 32 }}>
+      <div style={{ height: '100%', padding: 16, overflowY: 'auto', boxSizing: 'border-box' }}>
+        <div style={{ display: 'flex', alignItems: 'center', height: 32, margin: '24px 0px 0px 24px' }}>
           <div style={{ flex: '0 0 58px', display: 'flex', alignItems: 'center' }} >
             <UpdateIcon color={this.props.primaryColor} />
           </div>
@@ -122,78 +152,11 @@ class Update extends React.Component {
             { i18n.__('Current Version %s', currentVersion) }
           </div>
         </div>
+        <div style={{ height: 44 }} />
         <div style={{ height: 16 }} />
         <Divider />
         <div style={{ height: 16 }} />
-        <div style={{ marginLeft: 58 }}>
-          {
-            platform !== 'darwin' && platform !== 'win32'
-            ? <div style={{ display: 'flex', alignItems: 'center', height: 48 }}> { i18n.__('Unsupported to Update') } </div>
-            : this.state.status === 'checking'
-            ? this.renderChecking()
-            : this.state.status === 'latest'
-            ? <div style={{ display: 'flex', alignItems: 'center', height: 48 }}> { i18n.__('Already LTS Text') } </div>
-            : this.state.status === 'needUpdate'
-            ? this.renderCheckUpdate()
-            : <div style={{ display: 'flex', alignItems: 'center', height: 48 }}> { i18n.__('Check Update Failed Text') } </div>
-          }
-        </div>
-        <div style={{ height: 16 }} />
-        <Divider />
-        <div style={{ height: 16 }} />
-        <div style={{ display: 'flex', alignItems: 'center', height: 32 }}>
-          <div style={{ flex: '0 0 54px', display: 'flex', alignItems: 'center', marginLeft: 4 }} >
-            <SearchIcon color={this.props.primaryColor} viewBox="0 0 20 20" />
-          </div>
-          <div style={{ height: 32, fontSize: 20, display: 'flex', alignItems: 'center' }} >
-            { i18n.__('Check More Version') }
-          </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', height: 32, marginTop: 16, marginLeft: 50 }}>
-          <FlatButton
-            primary
-            label={i18n.__('Official Download')}
-            onTouchTap={this.openOfficial}
-          />
-          <FlatButton
-            primary
-            label={i18n.__('Github Download')}
-            onTouchTap={this.moreVersion}
-          />
-        </div>
-
-        {/* dialog */}
-        <DialogOverlay open={this.state.confirm} >
-          {
-            this.state.confirm &&
-              <div style={{ width: 560, padding: '24px 24px 0px 24px' }}>
-                <div style={{ fontSize: 21, fontWeight: 500 }}>
-                  { i18n.__('Client Update') }
-                </div>
-                <div style={{ height: 20 }} />
-                <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }}>
-                  { i18n.__('Install New Version Text 1 %s', this.state.rel.name) }
-                </div>
-                <div style={{ height: 8 }} />
-                <div style={{ color: 'rgba(0,0,0,0.54)', fontSize: 14 }} >
-                  { i18n.__('Install New Version Text 2') }
-                </div>
-                <div style={{ height: 24 }} />
-                <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                  <FlatButton
-                    label={i18n.__('Cancel')}
-                    primary
-                    onTouchTap={() => this.toggleDialog('confirm')}
-                  />
-                  <FlatButton
-                    label={i18n.__('Confirm')}
-                    primary
-                    onTouchTap={this.install}
-                  />
-                </div>
-              </div>
-          }
-        </DialogOverlay>
+        { this.renderReleases() }
       </div>
     )
   }
