@@ -18,7 +18,7 @@ const checkAsync = async () => {
   const type = platform === 'win32' ? 'windows' : 'mac' // mac or windows
   // const type = 'mac'
   const url = `https://api.github.com/repos/wisnuc/wisnuc-desktop-${type}/releases`
-  const req = await request.get(url).set('User-Agent', 'request')
+  const req = await request.get(url).set('User-Agent', 'request').timeout(10000)
   const rels = req.body
 
   const ltsRel = rels.filter(rel => !rel.prerelease)[0]
@@ -37,7 +37,9 @@ const checkUpdateAsync = async () => {
   let data
   try {
     data = await checkAsync()
-  } catch (error) {
+  } catch (e) {
+    const error = e && e.response && e.response.body || e
+    console.log('checkUpdateAsync error', error)
     return getMainWindow().webContents.send('NEW_RELEASE', { error })
   }
   const { filePath, rel } = data
@@ -112,7 +114,7 @@ const downloadAsync = async () => {
   return console.log('downloadAsync: download success')
 }
 
-downloadAsync().catch(e => console.error(e))
+// downloadAsync().catch(e => console.error(e))
 
 ipcMain.on('CHECK_UPDATE', checkUpdate)
 ipcMain.on('INSTALL_NEW_VERSION', install)
