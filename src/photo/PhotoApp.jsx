@@ -116,16 +116,6 @@ class PhotoApp extends React.Component {
              </div> :
             this.props.media.length ?
               <PhotoList
-                style={{
-                  position: 'relative',
-                  marginTop: -7,
-                  width: '100%',
-                  height: '100%',
-                  backgroundColor: '#FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
                 media={this.props.media}
                 lookPhotoDetail={this.lookPhotoDetail}
                 ipcRenderer={this.props.ipcRenderer}

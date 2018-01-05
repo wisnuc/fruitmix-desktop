@@ -1,4 +1,5 @@
 import React from 'react'
+import ReactDom from 'react-dom'
 import i18n from 'i18n'
 import Debug from 'debug'
 import { List, AutoSizer } from 'react-virtualized'
@@ -156,61 +157,110 @@ class PhotoList extends React.Component {
 
   componentWillUnmount() {
     clearTimeout(this.time)
+    clearTimeout(this.timeRenderLater)
     document.removeEventListener('mousemove', this.onMouseMove)
     document.removeEventListener('mouseup', this.onMouseUp)
   }
 
   renderTimeline() {
-    if (!this.timeline) { return <div /> }
+    if (!this.timeline) return (<div />)
     return (
-      <div onMouseEnter={() => this.showDateBar(true)} >
-        {
-          this.timeline.map((data, index) => {
-            const { date, top } = data
-            if (date === -1) {
-              return (
-                <div
-                  onTouchTap={this.scrollToPosition}
-                  key={index.toString()}
-                  style={{
-                    position: 'absolute',
-                    top,
-                    height: 2,
-                    width: 8,
-                    backgroundColor: 'rgba(0, 0, 0, 0.27)',
-                    marginTop: 4,
-                    marginBottom: 4,
-                    marginLeft: 8,
-                    right: 20
-                  }}
-                />
-              )
+      <div
+        ref={ref => (this.refBackground = ref)}
+        style={{ position: 'fixed', height: `calc(100% - ${this.headerHeight}px)`, width: 80, right: 16, top: this.headerHeight }}
+        onMouseLeave={() => !this.onMouseDown && this.showDateBar(false)}
+        onMouseEnter={() => this.showDateBar(true)}
+        onMouseDown={() => (this.onMouseDown = true)}
+        onTouchTap={this.scrollToPosition}
+      >
+        <div
+          ref={ref => (this.refTimeline = ref)}
+          style={{ opacity: this.hover ? 1 : 0, transition: 'opacity 200ms' }}
+        >
+          {/* datelist */}
+          <div onMouseEnter={() => this.showDateBar(true)} >
+            {
+              this.timeline.map((data, index) => {
+                const { date, top } = data
+                if (date === -1) {
+                  return (
+                    <div
+                      key={index.toString()}
+                      onTouchTap={this.scrollToPosition}
+                      style={{ position: 'absolute', top, height: 2, width: 8, backgroundColor: 'rgba(0, 0, 0, 0.27)', right: 20 }}
+                    />
+                  )
+                }
+                return (
+                  <div
+                    onTouchTap={this.scrollToPosition}
+                    key={index.toString()}
+                    style={{
+                      position: 'absolute',
+                      boxSizing: 'border-box',
+                      borderRadius: 11,
+                      fontSize: 13,
+                      top,
+                      opacity: 0.54,
+                      color: 'rgba(0, 0, 0, 1)',
+                      backgroundColor: '#FFFFFF',
+                      paddingTop: 2,
+                      paddingBottom: 2,
+                      paddingLeft: 8,
+                      right: date === 0 ? 8 : 20,
+                      textAlign: 'center'
+                    }}
+                  >
+                    { date === 0 ? i18n.__('Date Unknown Text') : date }
+                  </div>
+                )
+              })
             }
-            return (
-              <div
-                onTouchTap={this.scrollToPosition}
-                key={index.toString()}
-                style={{
-                  position: 'absolute',
-                  boxSizing: 'border-box',
-                  borderRadius: 11,
-                  fontSize: 13,
-                  top,
-                  opacity: 0.54,
-                  color: 'rgba(0, 0, 0, 1)',
-                  backgroundColor: '#FFFFFF',
-                  paddingTop: 2,
-                  paddingBottom: 2,
-                  paddingLeft: 8,
-                  right: date === 0 ? 8 : 20,
-                  textAlign: 'center'
-                }}
-              >
-                { date === 0 ? i18n.__('Date Unknown Text') : date }
-              </div>
-            )
-          })
-        }
+          </div>
+
+          {/* position bar */}
+          <div
+            ref={ref => (this.refDateBar = ref)}
+            style={{ position: 'absolute', top: -1000, height: 2, width: 32, right: 20, zIndex: 3, backgroundColor: '#4285f4' }}
+          />
+        </div>
+
+        {/* BarFollowMouse */}
+        <div
+          ref={ref => (this.refBarFollowMouse = ref)}
+          style={{
+            position: 'absolute',
+            top: -1000,
+            right: 20,
+            height: 2,
+            width: 32,
+            zIndex: 4,
+            transition: 'opacity 200ms',
+            opacity: this.hover ? 1 : 0,
+            backgroundColor: 'rgba(0,0,0,0.54)'
+          }}
+        />
+
+        {/* DateBox */}
+        <div
+          ref={ref => (this.refDateBox = ref)}
+          style={{
+            position: 'absolute',
+            fontSize: 14,
+            top: -1000,
+            right: 96,
+            padding: 12,
+            width: 84,
+            color: 'white',
+            backgroundColor: 'black',
+            transition: 'opacity 200ms',
+            opacity: this.hover ? 0.87 : 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 2
+          }}
+        />
       </div>
     )
   }
@@ -218,66 +268,74 @@ class PhotoList extends React.Component {
   render() {
     // debug('render PhotoList, this.props', this.props)
     return (
-      <div style={this.props.style}>
+      <div
+        style={{
+          position: 'relative',
+          marginTop: -7,
+          width: '100%',
+          height: '100%',
+          backgroundColor: '#FFFFFF',
+          display: 'flex'
+        }}
+      >
         {/* Photo List */}
-        <div style={{ display: 'flex', width: '100%', height: '100%' }} >
-          <AutoSizer>
-            {({ height, width }) => {
-              /* get PhotoInfo */
-              const PhotoInfo = getPhotoInfo(height, width, this.props.media, i18n.__('Date Unknown Text'))
-              // debug('PhotoInfo', PhotoInfo)
+        <AutoSizer>
+          {({ height, width }) => {
+            /* get PhotoInfo */
+            const PhotoInfo = getPhotoInfo(height, width, this.props.media, i18n.__('Date Unknown Text'))
+            // debug('PhotoInfo', PhotoInfo)
 
-              /* set global variant */
-              this.height = height
-              this.width = width
-              this.photoMapDates = PhotoInfo.photoMapDates
-              this.indexHeightSum = PhotoInfo.indexHeightSum
-              this.maxScrollTop = PhotoInfo.maxScrollTop
-              this.size = PhotoInfo.size
+            /* set global variant */
+            this.height = height
+            this.width = width
+            this.photoMapDates = PhotoInfo.photoMapDates
+            this.indexHeightSum = PhotoInfo.indexHeightSum
+            this.maxScrollTop = PhotoInfo.maxScrollTop
+            this.size = PhotoInfo.size
 
-              /* get timeline */
-              this.timeline = getTimeline(PhotoInfo.photoDates, this.indexHeightSum, this.maxScrollTop, this.height)
-              console.log('Get this.timeline')
+            /* get timeline */
+            this.timeline = getTimeline(PhotoInfo.photoDates, this.indexHeightSum, this.maxScrollTop, this.height)
 
-              const estimatedRowSize = PhotoInfo.rowHeightSum / PhotoInfo.allHeight.length
-              const rowHeight = ({ index }) => PhotoInfo.allHeight[index]
+            const estimatedRowSize = PhotoInfo.rowHeightSum / PhotoInfo.allHeight.length
+            const rowHeight = ({ index }) => PhotoInfo.allHeight[index]
 
-              /* get previousIndex */
-              let previousScrollTop = 0
-              if (this.props.memoize().currentScrollTop) {
-                previousScrollTop = this.props.memoize().currentScrollTop
-              } else if (this.props.memoize().currentDigest) {
-                this.photoMapDates.forEach((list, index) => {
-                  const Got = list.photos.findIndex(photo => photo.hash === this.props.memoize().currentDigest)
-                  if (Got >= 0) {
-                    previousScrollTop = this.indexHeightSum[index - 1]
-                  }
-                })
-              }
-              // console.log('get previousIndex', this.props.memoize(), previousScrollTop)
+            /* get previousIndex */
+            let previousScrollTop = 0
+            if (this.props.memoize().currentScrollTop) {
+              previousScrollTop = this.props.memoize().currentScrollTop
+            } else if (this.props.memoize().currentDigest) {
+              this.photoMapDates.forEach((list, index) => {
+                const Got = list.photos.findIndex(photo => photo.hash === this.props.memoize().currentDigest)
+                if (Got >= 0) {
+                  previousScrollTop = this.indexHeightSum[index - 1]
+                }
+              })
+            }
+            // console.log('get previousIndex', this.props.memoize(), previousScrollTop)
 
-              /* function to render each row */
-              const rowRenderer = ({ key, index, style, isScrolling }) => (
-                <div key={key} style={style} >
-                  <RenderListByRow
-                    rowSum={this.photoMapDates.length}
-                    lookPhotoDetail={this.props.lookPhotoDetail}
-                    isScrolling={isScrolling}
-                    list={this.photoMapDates[index]}
-                    photoListWithSameDate={PhotoInfo.photoListWithSameDate.find(item => item.date === this.photoMapDates[index].date)}
-                    ipcRenderer={this.props.ipcRenderer}
-                    addListToSelection={this.props.addListToSelection}
-                    removeListToSelection={this.props.removeListToSelection}
-                    selectedItems={this.props.selectedItems}
-                    getHoverPhoto={this.props.getHoverPhoto}
-                    shiftStatus={this.props.shiftStatus}
-                    size={this.size}
-                  />
-                </div>
-              )
+            /* function to render each row */
+            const rowRenderer = ({ key, index, style, isScrolling }) => (
+              <div key={key} style={style} >
+                <RenderListByRow
+                  rowSum={this.photoMapDates.length}
+                  lookPhotoDetail={this.props.lookPhotoDetail}
+                  isScrolling={isScrolling}
+                  list={this.photoMapDates[index]}
+                  photoListWithSameDate={PhotoInfo.photoListWithSameDate.find(item => item.date === this.photoMapDates[index].date)}
+                  ipcRenderer={this.props.ipcRenderer}
+                  addListToSelection={this.props.addListToSelection}
+                  removeListToSelection={this.props.removeListToSelection}
+                  selectedItems={this.props.selectedItems}
+                  getHoverPhoto={this.props.getHoverPhoto}
+                  shiftStatus={this.props.shiftStatus}
+                  size={this.size}
+                />
+              </div>
+            )
 
-              return (
-                <div onTouchTap={e => this.onRowTouchTap(e)} key={this.size}>
+            return (
+              <div style={{ position: 'relative', width: '100%', height: '100%' }} >
+                <div key={this.size} onTouchTap={e => this.onRowTouchTap(e)} >
                   <List
                     height={height}
                     width={width}
@@ -291,78 +349,11 @@ class PhotoList extends React.Component {
                     style={{ outline: 'none' }}
                   />
                 </div>
-              )
-            }}
-          </AutoSizer>
-        </div>
-
-        {/* Timeline */}
-        <div
-          ref={ref => (this.refBackground = ref)}
-          style={{ position: 'absolute', height: '100%', width: 80, right: 16 }}
-          onMouseLeave={() => !this.onMouseDown && this.showDateBar(false)}
-          onMouseEnter={() => this.showDateBar(true)}
-          onMouseDown={() => (this.onMouseDown = true)}
-          onTouchTap={this.scrollToPosition}
-        >
-          <div
-            ref={ref => (this.refTimeline = ref)}
-            style={{ opacity: this.hover ? 1 : 0, transition: 'opacity 200ms' }}
-          >
-            { this.renderTimeline() }
-
-            {/* position bar */}
-            <div
-              ref={ref => (this.refDateBar = ref)}
-              style={{
-                position: 'absolute',
-                top: -1000,
-                height: 2,
-                width: 32,
-                right: 20,
-                zIndex: 3,
-                backgroundColor: '#4285f4'
-              }}
-            />
-          </div>
-
-          {/* BarFollowMouse */}
-          <div
-            ref={ref => (this.refBarFollowMouse = ref)}
-            style={{
-              position: 'absolute',
-              top: -1000,
-              right: 20,
-              height: 2,
-              width: 32,
-              zIndex: 4,
-              transition: 'opacity 200ms',
-              opacity: this.hover ? 1 : 0,
-              backgroundColor: 'rgba(0,0,0,0.54)'
-            }}
-          />
-
-          {/* DateBox */}
-          <div
-            ref={ref => (this.refDateBox = ref)}
-            style={{
-              position: 'absolute',
-              fontSize: 14,
-              top: -1000,
-              right: 96,
-              padding: 12,
-              width: 84,
-              color: 'white',
-              backgroundColor: 'black',
-              transition: 'opacity 200ms',
-              opacity: this.hover ? 0.87 : 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 2
-            }}
-          />
-        </div>
+                { this.renderTimeline() }
+              </div>
+            )
+          }}
+        </AutoSizer>
       </div>
     )
   }
