@@ -1,12 +1,15 @@
 import React from 'react'
 import i18n from 'i18n'
-import { Paper, CircularProgress, LinearProgress, IconButton } from 'material-ui'
+import { Paper, CircularProgress, LinearProgress, IconButton, Avatar } from 'material-ui'
 import DoneIcon from 'material-ui/svg-icons/action/done'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import WarningIcon from 'material-ui/svg-icons/alert/warning'
 import FolderSvg from 'material-ui/svg-icons/file/folder'
 import FileSvg from 'material-ui/svg-icons/editor/insert-drive-file'
 import MultiSvg from 'material-ui/svg-icons/content/content-copy'
+import UpdateIcon from 'material-ui/svg-icons/action/system-update-alt'
+import StarIcon from 'material-ui/svg-icons/toggle/star'
+import ReceiveIcon from 'material-ui/svg-icons/communication/call-received'
 import SettingsIcon from 'material-ui/svg-icons/action/settings'
 import BackIcon from 'material-ui/svg-icons/navigation/arrow-back'
 import ClearAllIcon from 'material-ui/svg-icons/communication/clear-all'
@@ -22,6 +25,13 @@ class Notifications extends React.Component {
     }
 
     this.toggleDialog = op => this.setState({ [op]: !this.state[op] })
+
+    this.handleAction = (nt) => {
+      const { action } = nt
+      this.props.removeNts([nt])
+      this.props.onRequestClose()
+      action()
+    }
   }
 
   componentDidMount() {
@@ -49,18 +59,60 @@ class Notifications extends React.Component {
     )
   }
 
-  renderNts(nt, key) {
+  renderNts(nt) {
+    const { id, type, title, body, action } = nt
+
+    let Icon
+    let color
+    switch (type) {
+      case 'wisnuc':
+        Icon = UpdateIcon
+        color = '#DCEDC8'
+        break
+
+      case 'box':
+        Icon = StarIcon
+        color = '#F0F4C3'
+        break
+
+      default:
+        Icon = ReceiveIcon
+        color = 'rgba(0,0,0,0.54)'
+    }
+
     return (
-      <div
-        style={{ height: 60, width: '100%', boxSizing: 'border-box', display: 'flex', alignItems: 'center', padding: 6 }}
-        key={key}
+      <Paper
+        key={id}
+        onTouchTap={() => this.handleAction(nt)}
+        style={{ height: 60, width: 360, display: 'flex', alignItems: 'center', margin: 8, backgroundColor: '#FFF' }}
       >
-        somethings
-      </div>
+        <div style={{ width: 40, margin: 10 }}>
+          <Avatar icon={<Icon />} color={color} />
+        </div>
+        <div style={{ width: 254 }}>
+          <div style={{ fontWeight: 500, fontSize: 14 }}>
+            { title }
+          </div>
+          <div style={{ height: 2 }} />
+          <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.54)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+            { body }
+          </div>
+        </div>
+        <div style={{ marginRight: -2 }} onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}>
+          <IconButton
+            iconStyle={{ color: 'rgba(0,0,0,0.54)' }}
+            onTouchTap={() => {}}
+            tooltip={i18n.__('Delete')}
+          >
+            <CloseIcon />
+          </IconButton>
+        </div>
+      </Paper>
     )
   }
 
   render() {
+    console.log('Notifications', this.props)
     return (
       <div
         style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 200 }}
@@ -115,7 +167,7 @@ class Notifications extends React.Component {
           </div>
           {/* render Content */}
           <div style={{ height: 298 }}>
-            { this.props.nts.length ? this.renderNts() : this.renderNoNts() }
+            { this.props.nts.length ? this.props.nts.map(nt => this.renderNts(nt)) : this.renderNoNts() }
           </div>
           {/* render Tails (filter) */}
           <div style={{ height: 80, backgroundColor: '#F3F3F3' }}>

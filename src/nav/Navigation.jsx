@@ -1,4 +1,5 @@
 import React from 'react'
+import UUID from 'uuid'
 import i18n from 'i18n'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
@@ -83,6 +84,13 @@ class NavViews extends React.Component {
     this.install('clientUpdate', ClientUpdate)
 
     Object.assign(this.state, {
+      /*
+      nts: [
+        { id: '123', type: 'wisnuc', title: '检测到新的固件', body: '点击去安装', action: () => this.navTo('firmwareUpdate') },
+        { id: '321', type: 'box', title: '收到新的文件', body: '点击去查看', action: () => this.navTo('public') }
+      ],
+      */
+      nts: [],
       nav: null,
       showNotifications: false,
       showDetail: false,
@@ -128,6 +136,36 @@ class NavViews extends React.Component {
         this.props.apis.pureRequest('handleTask', { taskUUID: uuid, nodeUUID: c.nodeUUID, policy })
       })
     }
+
+    this.removeNts = (nts) => {
+      this.setState({ nts: this.state.nts.filter(nt => !nts.includes(nt)) })
+    }
+
+    this.addNts = (nts) => {
+      this.setState({ nts: [...this.state.nts, ...nts] })
+    }
+
+    this.checkFirmWareAsync = async () => {
+      await this.props.selectedDevice.pureRequestAsync('checkUpdates')
+      let [WIP, firm] = [true, null]
+      while (WIP) {
+        await Promise.delay(1000)
+        firm = (await this.props.selectedDevice.pureRequestAsync('firm')).body
+        WIP = firm.fetch.state === 'Working'
+      }
+
+      /* find new version */
+      if (firm.appifi.tagName.localeCompare(firm.releases[0].remote.tag_name) > -1) {
+        const nt = {
+          id: UUID.v4(),
+          type: 'wisnuc',
+          title: '检测到新的固件',
+          body: '点击去安装',
+          action: () => this.navTo('firmwareUpdate')
+        }
+        this.addNts([nt])
+      }
+    }
   }
 
   install(name, View) {
@@ -138,6 +176,7 @@ class NavViews extends React.Component {
 
   componentDidMount() {
     this.navTo('home')
+    this.checkFirmWareAsync().catch(e => console.log('checkFirmWareAsync error', e))
     ipcRenderer.send('START_TRANSMISSION')
     ipcRenderer.on('snackbarMessage', (e, message) => this.openSnackBar(message.message))
     ipcRenderer.on('conflicts', (e, args) => this.setState({ conflicts: args }))
@@ -552,10 +591,11 @@ class NavViews extends React.Component {
         {
           this.state.showNotifications &&
             <Notifications
+              removeNts={this.removeNts}
               apis={this.props.apis}
               onRequestClose={() => this.setState({ showNotifications: false })}
               showDetail={this.state.showDetail}
-              nts={[]}
+              nts={this.state.nts}
             />
         }
       </div>

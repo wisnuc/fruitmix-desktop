@@ -194,7 +194,6 @@ class Device extends RequestManager {
       case 'firm':
         r = request
           .get(`http://${this.mdev.address}:3001/v1`)
-        // .get('http://10.10.9.96:3001/v1')
         break
 
       default:
@@ -286,6 +285,11 @@ class Device extends RequestManager {
         r = request
           .patch(`http://${this.mdev.address}:3001/v1/fetch`)
           .send({ state: 'Working' })
+        break
+
+      case 'firm':
+        r = request
+          .get(`http://${this.mdev.address}:3001/v1`)
         break
 
       default:
