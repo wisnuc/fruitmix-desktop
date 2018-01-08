@@ -1,4 +1,4 @@
-import { app } from 'electron'
+import { app, Notification, shell } from 'electron'
 import i18n from 'i18n'
 import path from 'path'
 
@@ -46,6 +46,18 @@ app.on('ready', () => {
     directory: path.resolve(__dirname, '../', 'locales'),
     defaultLocale: /zh/.test(app.getLocale()) ? 'zh-CN' : 'en-US'
   })
+
+  const myNotification = new Notification({
+    title: i18n.__('New Client Version Detected'),
+    body: i18n.__('New Client Version Detected Text')
+  })
+
+  myNotification.on('click', () => {
+    console.log('Notification clicked')
+    shell.openExternal('http://www.wisnuc.com/download')
+  })
+
+  setTimeout(() => myNotification.show(), 3000)
 })
 
 app.on('window-all-closed', () => app.quit())

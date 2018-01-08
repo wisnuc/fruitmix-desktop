@@ -265,10 +265,6 @@
   "Checking Update": "Checking update.",
   "Already LTS Text": "Already latest",
   "Check Update Failed Text": "Failed to check update, please check the network settings or retry later.",
-  "Check More Version": "Check more version",
-  "Client Update": "Client update",
-  "Install New Version Text 1 %s": "The version %s client will be installed.",
-  "Install New Version Text 2": "Recommended with the latest WISNUC system firmware.",
   "Github Download": "Github",
   "Official Download": "Official",
 
@@ -744,5 +740,9 @@
   "Read Upload Failed": "Failed to access uploading files.",
 
   "==== node/lib/newDownload.js ====": "",
-  "Read Download Failed": "Failed to access the downloading fold."
+  "Read Download Failed": "Failed to access the downloading fold.",
+
+  "==== node/app.js ====": "",
+  "New Client Version Detected": "New WINSUC detected",
+  "New Client Version Detected Text": "Click to download the latest client."
 }
