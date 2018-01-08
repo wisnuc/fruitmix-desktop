@@ -286,6 +286,8 @@
   "en-US": "English",
   "Language Setting": "Language",
   "Global Settings": "Global settings",
+  "Download Path:": "Download location: ",
+  "Set Download Path": "Change",
   "Cache Size": "Cache size: ",
   "Clean": "Clean",
   "Clean Cache": "Clean all cache ?",

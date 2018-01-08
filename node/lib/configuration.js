@@ -214,14 +214,18 @@ class Configuration {
     this.globalConfig = new Config(config, persistence)
     this.globalConfig.setConfig(config)
 
+    /* init custom download path */
+    const downloadPath = this.globalConfig.getConfig().downloadPath || this.getWisnucDownloadsDir()
+    await mkdirpAsync(downloadPath)
+
     global.dispatch({
       type: 'CONFIG_UPDATE',
       data: {
+        downloadPath,
         tmpTransPath: this.getTmpTransDir(),
         tmpPath: this.getTmpDir(),
         thumbPath: this.getThumbnailDir(),
         imagePath: this.getImageCacheDir(),
-        downloadPath: this.getWisnucDownloadsDir(),
         lastDevice: this.globalConfig.getConfig().lastDevice,
         noCloseConfirm: this.globalConfig.getConfig().noCloseConfirm,
         enableSleep: this.globalConfig.getConfig().enableSleep
@@ -252,14 +256,19 @@ class Configuration {
     this.globalConfig = globalConfig
     this.userConfigs = userConfigs
 
+    /* init custom download path */
+    const downloadPath = this.globalConfig.getConfig().downloadPath || this.getWisnucDownloadsDir()
+    await mkdirpAsync(downloadPath)
+    console.log('globalConfig', downloadPath)
+
     global.dispatch({
       type: 'CONFIG_INIT',
       data: {
+        downloadPath,
         tmpTransPath: this.getTmpTransDir(),
         tmpPath: this.getTmpDir(),
         thumbPath: this.getThumbnailDir(),
         imagePath: this.getImageCacheDir(),
-        downloadPath: this.getWisnucDownloadsDir(),
         lastDevice: this.globalConfig.getConfig().lastDevice,
         noCloseConfirm: this.globalConfig.getConfig().noCloseConfirm,
         enableSleep: this.globalConfig.getConfig().enableSleep
@@ -270,6 +279,7 @@ class Configuration {
   getConfiguration() {
     return {
       global: this.globalConfig.getConfig(),
+      defaultDownload: this.getWisnucDownloadsDir(),
       users: this.userConfigs.map(uc => uc.getConfig()),
       appVersion: this.getVersion(),
       platform: this.getPlatform()
