@@ -444,6 +444,13 @@
   "==== nav/Navigation.jsx ====": "",
   "Detail": "Detail",
 
+  "==== nav/Notifications.jsx ====": "",
+  "Back": "Back",
+  "Clear All Notifications": "Clear all",
+  "No Notifications": "All caught up!",
+  "Notifications": "Notifications",
+  "Settings": "Settings",
+
   "==== view/Account.jsx ====": "",
   "Account Menu Name": "Account",
 

@@ -5,17 +5,19 @@ import { ipcRenderer } from 'electron'
 
 import { Paper, IconButton, Snackbar } from 'material-ui'
 import ActionInfo from 'material-ui/svg-icons/action/info'
+import SocialNotifications from 'material-ui/svg-icons/social/notifications'
 
 import Fruitmix from '../common/fruitmix'
+import { TasksIcon } from '../common/Svg'
 import DialogOverlay from '../common/DialogOverlay'
-import Policy from '../common/Policy'
 import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
 
-import NavDrawer from './NavDrawer'
+import Tasks from './Tasks'
+import Policy from './Policy'
 import QuickNav from './QuickNav'
 import TransNav from './TransNav'
-import Tasks from '../common/Tasks'
-import { TasksIcon } from '../common/Svg'
+import NavDrawer from './NavDrawer'
+import Notifications from './Notifications'
 
 import Home from '../view/Home'
 import Public from '../view/Public'
@@ -82,6 +84,7 @@ class NavViews extends React.Component {
 
     Object.assign(this.state, {
       nav: null,
+      showNotifications: false,
       showDetail: false,
       openDrawer: false,
       showTasks: false,
@@ -306,6 +309,34 @@ class NavViews extends React.Component {
     )
   }
 
+  renderDialogButton({ type, Icon, tooltip }) {
+    const view = this.currentView()
+    return (
+      <div style={{ width: 48, height: 48, position: 'relative' }} >
+        <div
+          style={{
+            position: 'absolute',
+            top: 4,
+            left: 4,
+            width: 40,
+            height: 40,
+            backgroundColor: '#FFF',
+            borderRadius: 20,
+            opacity: this.state[type] ? 0.3 : 0,
+            transition: 'opacity 300ms'
+          }}
+        />
+        <IconButton tooltip={tooltip} tooltipStyles={{ marginTop: !view.prominent() ? -12 : undefined }}>
+          <Icon
+            color={view.appBarStyle() === 'light' ? 'rgba(0,0,0,0.54)' : '#FFF'}
+            onTouchTap={() => this.setState({ [type]: !this.state[type] })}
+            style={{ position: 'absolute', width: 20, height: 20 }}
+          />
+        </IconButton>
+      </div>
+    )
+  }
+
   renderAppBar() {
     const view = this.currentView()
     let backgroundColor
@@ -321,7 +352,6 @@ class NavViews extends React.Component {
       default:
         break
     }
-
 
     const appBarStyle = {
       position: 'absolute',
@@ -382,29 +412,11 @@ class NavViews extends React.Component {
           {/* context-sensitive toolbar, passing style for component list */}
           { view.renderToolBar({ style: toolBarStyle }) }
 
-          {/* global notification button */}
-          <div style={{ width: 48, height: 48, position: 'relative' }} >
-            <div
-              style={{
-                position: 'absolute',
-                top: 4,
-                left: 4,
-                width: 40,
-                height: 40,
-                backgroundColor: '#FFF',
-                borderRadius: 20,
-                opacity: this.state.showTasks ? 0.3 : 0,
-                transition: 'opacity 300ms'
-              }}
-            />
-            <IconButton tooltip={i18n.__('Tasks')} tooltipStyles={{ marginTop: !view.prominent() ? -12 : undefined }}>
-              <TasksIcon
-                color={view.appBarStyle() === 'light' ? 'rgba(0,0,0,0.54)' : '#FFF'}
-                onTouchTap={() => this.setState({ showTasks: !this.state.showTasks })}
-                style={{ position: 'absolute', width: 20, height: 20 }}
-              />
-            </IconButton>
-          </div>
+          {/* Global tasks button */}
+          { this.renderDialogButton({ type: 'showTasks', Icon: TasksIcon, tooltip: i18n.__('Tasks') }) }
+
+          {/* Global notification button */}
+          { this.renderDialogButton({ type: 'showNotifications', Icon: SocialNotifications, tooltip: i18n.__('Notifications') }) }
 
           {/* optional toggle detail button */}
           { this.renderDetailButton() }
@@ -533,6 +545,17 @@ class NavViews extends React.Component {
               onRequestClose={() => this.setState({ showTasks: false })}
               showDetail={this.state.showDetail}
               openMovePolicy={this.openMovePolicy}
+            />
+        }
+
+        {/* Notifications */}
+        {
+          this.state.showNotifications &&
+            <Notifications
+              apis={this.props.apis}
+              onRequestClose={() => this.setState({ showNotifications: false })}
+              showDetail={this.state.showDetail}
+              nts={[]}
             />
         }
       </div>
