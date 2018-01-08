@@ -265,10 +265,6 @@
   "Checking Update": "检查更新中...",
   "Already LTS Text": "已是最新稳定版",
   "Check Update Failed Text": "检查更新失败，请检查网络设置或重试！",
-  "Check More Version": "查看更多版本",
-  "Client Update": "客户端升级",
-  "Install New Version Text 1 %s": "将要为您安装版本号为%s的程序。",
-  "Install New Version Text 2": "建议配合最新的WISNUC系统固件使用",
   "Github Download": "Github下载",
   "Official Download": "官网下载",
 
@@ -744,5 +740,9 @@
   "Read Upload Failed": "读取上传文件失败",
 
   "==== node/lib/newDownload.js ====": "",
-  "Read Download Failed": "读取下载目录失败"
+  "Read Download Failed": "读取下载目录失败",
+
+  "==== node/app.js ====": "",
+  "New Client Version Detected": "检测到新版本的WISNUC客户端",
+  "New Client Version Detected Text": "点击下载最新的客户端。"
 }

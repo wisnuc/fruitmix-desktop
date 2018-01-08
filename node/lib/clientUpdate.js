@@ -81,6 +81,7 @@ const download = (url, filePath) => {
   handle.pipe(stream)
   return promise
 }
+
 const compareVerison = (a, b) => {
   const aArray = a.split('.')
   const bArray = b.split('.')

@@ -6,7 +6,7 @@ import mkdirp from 'mkdirp'
 import rimraf from 'rimraf'
 import fsUtils from 'nodejs-fs-utils'
 import Promise from 'bluebird'
-import { ipcMain, BrowserWindow, app, dialog, Menu } from 'electron'
+import { ipcMain, BrowserWindow, app, dialog, Menu, Notification } from 'electron'
 import { clearTasks } from './transmissionUpdate'
 import store from './store'
 
