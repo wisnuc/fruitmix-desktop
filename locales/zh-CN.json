@@ -286,6 +286,8 @@
   "zh-CN": "简体中文",
   "Language Setting": "语言设置",
   "Global Settings": "全局设置",
+  "Download Path:": "下载路径： ",
+  "Set Download Path": "修改",
   "Cache Size": "缓存大小：",
   "Clean": "清理",
   "Clean Cache": "清理所有缓存文件？",
