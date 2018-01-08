@@ -1,12 +1,14 @@
 import fs from 'fs'
 import os from 'os'
+import i18n from 'i18n'
 import path from 'path'
 import UUID from 'uuid'
 import request from 'superagent'
+import { ipcMain, shell, app, Notification } from 'electron'
+
 import store from './store'
 import { ftpGet } from './ftp'
 import { getMainWindow } from './window'
-import { ipcMain, shell, app } from 'electron'
 
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
 
@@ -97,7 +99,7 @@ const compareVerison = (a, b) => {
 }
 
 const downloadAsync = async () => {
-  if (os.platform() !== 'win32' && os.platform() !== 'darwin') return
+  if (!['win32', 'darwin'].includes(os.platform())) return
   const { filePath, url, rel, fileName } = await checkAsync()
   console.log('downloadAsync: check release')
   const currVersion = app.getVersion()
@@ -114,6 +116,31 @@ const downloadAsync = async () => {
   }
   return console.log('downloadAsync: download success')
 }
+
+const sendNotification = () => {
+  console.log('sendNotification')
+  const myNotification = new Notification({
+    title: i18n.__('New Client Version Detected'),
+    body: i18n.__('New Client Version Detected Text')
+  })
+
+  myNotification.on('click', () => {
+    console.log('Notification clicked')
+    shell.openExternal('http://www.wisnuc.com/download')
+  })
+
+  myNotification.show()
+}
+
+const firstCheckAsync = async () => {
+  if (!['win32', 'darwin'].includes(os.platform())) return
+  const { rel } = await checkAsync()
+  const currVersion = app.getVersion()
+  if (compareVerison(currVersion, rel.name) >= 0) console.log('already latest')
+  else sendNotification()
+}
+
+setTimeout(() => firstCheckAsync().catch(e => console.log('firstCheck error', e)), 2000)
 
 // downloadAsync().catch(e => console.error(e))
 
