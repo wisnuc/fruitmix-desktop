@@ -259,7 +259,6 @@ class Configuration {
     /* init custom download path */
     const downloadPath = this.globalConfig.getConfig().downloadPath || this.getWisnucDownloadsDir()
     await mkdirpAsync(downloadPath)
-    console.log('globalConfig', downloadPath)
 
     global.dispatch({
       type: 'CONFIG_INIT',

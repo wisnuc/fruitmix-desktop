@@ -2,7 +2,7 @@ import React from 'react'
 import Debug from 'debug'
 import prettysize from 'prettysize'
 import { remote } from 'electron'
-import { CircularProgress, Divider, Toggle, RaisedButton, Menu, MenuItem, Popover } from 'material-ui'
+import { CircularProgress, Divider, Toggle, RaisedButton, Menu, MenuItem, Popover, TextField } from 'material-ui'
 import InfoIcon from 'material-ui/svg-icons/action/info-outline'
 import LanguageIcon from 'material-ui/svg-icons/action/language'
 import CacheIcon from 'material-ui/svg-icons/action/cached'
@@ -64,7 +64,7 @@ class SettingsApp extends React.Component {
 
     this.openDialog = () => {
       remote.dialog.showOpenDialog({ properties: ['openDirectory'] }, (filePaths) => {
-        if (!filePaths.length) return
+        if (!filePaths || !filePaths.length) return
         const path = filePaths[0]
         this.props.ipcRenderer.send('SETCONFIG', { downloadPath: path })
       })
@@ -168,6 +168,7 @@ class SettingsApp extends React.Component {
   }
 
   renderDownloadPath() {
+    const path = global.config.global.downloadPath || global.config.defaultDownload
     return (
       <div style={{ height: 56, width: '100%', display: 'flex', alignItems: 'center', marginLeft: 24 }}>
         <div style={{ width: 40, display: 'flex', alignItems: 'center', marginRight: 8 }}>
@@ -176,7 +177,7 @@ class SettingsApp extends React.Component {
         <div style={{ width: 560, display: 'flex', alignItems: 'center' }}>
           { i18n.__('Download Path:') }
           <div style={{ width: 8 }} />
-          { global.config.global.downloadPath || global.config.defaultDownload }
+          <input value={path} style={{ width: 360, border: '1px solid #bfbfbf', borderRadius: '2px', color: '#444', padding: 3 }} />
         </div>
         <div style={{ width: 480, display: 'flex', alignItems: 'center', marginLeft: -8 }}>
           <FlatButton
@@ -191,7 +192,7 @@ class SettingsApp extends React.Component {
   }
 
   render() {
-    debug('render client', this.props, global.config)
+    // debug('render client', this.props, global.config)
     if (!global.config) return <div />
     const { noCloseConfirm, enableSleep } = global.config.global
     const settings = [
