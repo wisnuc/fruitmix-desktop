@@ -444,6 +444,13 @@
   "==== nav/Navigation.jsx ====": "",
   "Detail": "详情",
 
+  "==== nav/Notifications.jsx ====": "",
+  "Back": "Back",
+  "Clear All Notifications": "全部清除",
+  "No Notifications": "已经看完所有通知！",
+  "Notifications": "通知",
+  "Settings": "设置",
+
   "==== view/Account.jsx ====": "",
   "Account Menu Name": "我",
 
