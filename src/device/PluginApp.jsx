@@ -78,7 +78,7 @@ class PluginApp extends React.Component {
   render() {
     const { dlna, samba, bt } = this.props
     if (!dlna || !samba) return (<div />)
-    console.log('plugin this.props', this.props)
+    // console.log('plugin this.props', this.props)
 
     const settings = [
       {
