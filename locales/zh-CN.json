@@ -97,6 +97,7 @@
   "Password Hint": "请输入密码",
   "Remember Password": "记住密码",
   "Auto Login": "自动登录",
+  "Login": "登录",
 
   "==== login/MaintGuide.jsx ====": "",
   "Test Mount": "是否挂载",
@@ -685,7 +686,8 @@
   "Running Task Title %s": "传输中（%s）",
   "Resume All": "全部开始",
   "Pause All": "全部暂停",
-  "Clear All": "全部清除",
+  "Clear All": "全部删除",
+  "Clear": "清除",
   "Finished Task Title %s": "已完成（%s）",
   "Clear All Record": "清除记录",
   "Open Downloads Folder": "打开下载文件夹",

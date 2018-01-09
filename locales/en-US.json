@@ -97,6 +97,7 @@
   "Password Hint": "Please enter the password",
   "Remember Password": "Remember me",
   "Auto Login": "Auto login",
+  "Login": "Login",
 
   "==== login/MaintGuide.jsx ====": "",
   "Test Mount": "Disks are all mounted",
@@ -446,7 +447,7 @@
 
   "==== nav/Notifications.jsx ====": "",
   "Back": "Back",
-  "Clear All Notifications": "Clear all",
+  "Clear All Notifications": "Delete all",
   "No Notifications": "All caught up!",
   "Notifications": "Notifications",
   "Settings": "Settings",
@@ -685,7 +686,8 @@
   "Running Task Title %s": "Running (%s)",
   "Resume All": "Resume all",
   "Pause All": "Pause all",
-  "Clear All": "Clear all",
+  "Clear All": "Delete all",
+  "Clear": "Clear",
   "Finished Task Title %s": "Finished (%s)",
   "Clear All Record": "Clear all records",
   "Open Downloads Folder": "Open download folder",

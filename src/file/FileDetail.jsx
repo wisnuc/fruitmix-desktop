@@ -79,18 +79,10 @@ class FileDetail extends React.PureComponent {
                 key={title}
               >
                 <div style={{ flex: '0 0 112px', fontSize: 14 }} > { title } </div>
-                <div
-                  style={{
-                    fontSize: 14,
-                    flex: '0 0 200px',
-                    color: 'rgba(0, 0, 0, 0.54)',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  { values[index] }
-                </div>
+                <input
+                  value={values[index]}
+                  style={{ width: 200, border: 0, padding: 3, fontSize: 14, color: 'rgba(0, 0, 0, 0.54)', backgroundColor: '#FAFAFA' }}
+                />
               </div>
             )
           })

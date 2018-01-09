@@ -209,7 +209,7 @@ class LoginBox extends React.Component {
                     onTouchTap={this.props.cancel}
                   />
                   <FlatButton
-                    label={i18n.__('Confirm')}
+                    label={i18n.__('Login')}
                     primary
                     disabled={!this.token && (this.state.password.length === 0 || busy)}
                     onTouchTap={() => (this.token ? this.fakeLogin() : this.login())}
