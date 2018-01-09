@@ -28,7 +28,7 @@ class Fruitmix extends EventEmitter {
     this.reqCloud = (ep, data, type) => {
       const url = `${address}/c/v1/stations/${this.stationID}/json`
       const resource = new Buffer(`/${ep}`).toString('base64')
-      console.log('this.reqCloud', type, ep)
+      // console.log('this.reqCloud', type, ep)
       if (type === 'GET') return request.get(url).set('Authorization', this.token).query({ resource, method: type })
       if (data && data.op) {
         const r = request.post(url).set('Authorization', this.token)

@@ -31,9 +31,9 @@ class FirmwareUpdate extends Base {
     this.handleProps(nextProps.selectedDevice, ['firm'])
   }
 
-  navEnter() {
+  navEnter(t) {
     this.ctx.props.selectedDevice.request('firm')
-    this.ctx.props.selectedDevice.pureRequest('checkUpdates')
+    if (!t || !t.noMoreCheck) this.ctx.props.selectedDevice.pureRequest('checkUpdates')
   }
 
   navGroup() {

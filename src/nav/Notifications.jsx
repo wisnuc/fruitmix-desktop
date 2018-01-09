@@ -1,6 +1,6 @@
 import React from 'react'
 import i18n from 'i18n'
-import { Paper, CircularProgress, LinearProgress, IconButton, Avatar } from 'material-ui'
+import { Paper, CircularProgress, LinearProgress, IconButton, Avatar, Toggle } from 'material-ui'
 import DoneIcon from 'material-ui/svg-icons/action/done'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import WarningIcon from 'material-ui/svg-icons/alert/warning'
@@ -32,12 +32,11 @@ class Notifications extends React.Component {
       this.props.onRequestClose()
       action()
     }
-  }
 
-  componentDidMount() {
-  }
-
-  componentWillUnmount() {
+    this.toggleFirmNoti = () => {
+      const hideFirmNoti = global.config && global.config.global && global.config.global.hideFirmNoti
+      this.props.ipcRenderer.send('SETCONFIG', { hideFirmNoti: !hideFirmNoti })
+    }
   }
 
   renderNoNts() {
@@ -65,9 +64,9 @@ class Notifications extends React.Component {
     let Icon
     let color
     switch (type) {
-      case 'wisnuc':
+      case 'firmware':
         Icon = UpdateIcon
-        color = '#DCEDC8'
+        color = '#4caf50'
         break
 
       case 'box':
@@ -87,7 +86,7 @@ class Notifications extends React.Component {
         style={{ height: 60, width: 360, display: 'flex', alignItems: 'center', margin: 8, backgroundColor: '#FFF' }}
       >
         <div style={{ width: 40, margin: 10 }}>
-          <Avatar icon={<Icon />} color={color} />
+          <Avatar icon={<Icon />} backgroundColor={color} color="#FFF" />
         </div>
         <div style={{ width: 254 }}>
           <div style={{ fontWeight: 500, fontSize: 14 }}>
@@ -112,7 +111,14 @@ class Notifications extends React.Component {
   }
 
   render() {
-    console.log('Notifications', this.props)
+    const hideFirmNoti = global.config && global.config.global && global.config.global.hideFirmNoti
+    const sources = [{
+      Icon: UpdateIcon,
+      color: '#4caf50',
+      title: i18n.__('Firmware Update'),
+      value: !hideFirmNoti,
+      action: this.toggleFirmNoti
+    }]
     return (
       <div
         style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 200 }}
@@ -126,53 +132,100 @@ class Notifications extends React.Component {
             boxSizing: 'border-box',
             width: 376,
             height: 380,
-            overflowY: 'hidden',
+            overflow: 'hidden',
             backgroundColor: '#EEEEEE'
           }}
           onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
         >
-          {/* render Headers */}
-          <div style={{ height: 56, width: 376, display: 'flex', alignItems: 'center' }}>
-            {/* settings */}
-            <div style={{ width: 4 }} />
-            <IconButton
-              iconStyle={{ color: '#9E9E9E' }}
-              onTouchTap={() => this.toggleDialog('settings')}
-              tooltip={this.state.settings ? i18n.__('Back') : i18n.__('Settings')}
-            >
-              { this.state.settings ? <BackIcon /> : <SettingsIcon /> }
-            </IconButton>
-            <div style={{ flexGrow: 1 }} />
+          {/* Notifications */}
+          <div style={{ overflowY: 'hidden', position: 'absolute', left: this.state.settings ? -376 : 0, transition: 'all 225ms' }}>
+            {/* render Headers */}
+            <div style={{ height: 56, width: 376, display: 'flex', alignItems: 'center' }}>
+              {/* settings */}
+              <div style={{ width: 4 }} />
+              <IconButton
+                iconStyle={{ color: '#9E9E9E' }}
+                onTouchTap={() => this.toggleDialog('settings')}
+                tooltip={i18n.__('Settings')}
+              >
+                <SettingsIcon />
+              </IconButton>
+              <div style={{ flexGrow: 1 }} />
 
-            {/* title */}
-            <div style={{ fontSize: 21, fontWeight: 500, color: 'rgba(0,0,0,0.38)' }}>
-              { i18n.__('Notifications') }
+              {/* title */}
+              <div style={{ fontSize: 21, fontWeight: 500, color: 'rgba(0,0,0,0.38)' }}>
+                { i18n.__('Notifications') }
+              </div>
+
+              <div style={{ flexGrow: 1 }} />
+              {/* clear notifications */}
+              <div style={{ width: 48 }}>
+                {
+                  !!this.props.nts.length &&
+                  <IconButton
+                    iconStyle={{ color: '#9E9E9E' }}
+                    onTouchTap={() => this.props.removeNts(this.props.nts)}
+                    tooltip={i18n.__('Clear All Notifications')}
+                  >
+                    <ClearAllIcon />
+                  </IconButton>
+                }
+              </div>
+              <div style={{ width: 4 }} />
+            </div>
+            {/* render Content */}
+            <div style={{ height: 298 }}>
+              { this.props.nts.length ? this.props.nts.map(nt => this.renderNts(nt)) : this.renderNoNts() }
+            </div>
+          </div>
+
+          {/* Settings */}
+          <div style={{ overflowY: 'hidden', position: 'absolute', left: this.state.settings ? 0 : 376, transition: 'all 225ms' }}>
+            {/* render Headers */}
+            <div style={{ height: 56, width: 376, display: 'flex', alignItems: 'center' }}>
+              {/* button */}
+              <div style={{ width: 4 }} />
+              <IconButton
+                iconStyle={{ color: '#9E9E9E' }}
+                onTouchTap={() => this.toggleDialog('settings')}
+                tooltip={i18n.__('Back')}
+              >
+                <BackIcon />
+              </IconButton>
+              <div style={{ flexGrow: 1 }} />
+              {/* title */}
+              <div style={{ fontSize: 21, fontWeight: 500, color: 'rgba(0,0,0,0.38)' }}>
+                { i18n.__('Notifications') }
+              </div>
+              <div style={{ flexGrow: 1 }} />
+              <div style={{ width: 52 }} />
             </div>
 
-            <div style={{ flexGrow: 1 }} />
-            {/* clear notifications */}
-            <div style={{ width: 48 }}>
+            {/* render Content */}
+            <div style={{ height: 298, overflowY: 'auto' }}>
+              <div style={{ fontSize: 14, marginLeft: 16, height: 48, display: 'flex', alignItems: 'center' }}>
+                { i18n.__('Show Notifications From:') }
+              </div>
+
+              {/* Notifications Source */}
               {
-                !!this.props.nts.length &&
-                <IconButton
-                  iconStyle={{ color: '#9E9E9E' }}
-                  onTouchTap={() => {}}
-                  tooltip={i18n.__('Clear All Notifications')}
-                >
-                  <ClearAllIcon />
-                </IconButton>
+                sources.map((s) => {
+                  const { Icon, color, title, value, action } = s
+                  return (
+                    <div style={{ height: 56, display: 'flex', alignItems: 'center' }}>
+                      <div style={{ width: 8 }} />
+                      <div style={{ margin: 10, display: 'flex', alignItems: 'center' }}>
+                        <Icon color={color} />
+                      </div>
+                      <div> { title } </div>
+                      <div style={{ flexGrow: 1 }} />
+                      <div style={{ marginRight: 16 }}>
+                        <Toggle toggled={value} onToggle={action} />
+                      </div>
+                    </div>
+                  )
+                })
               }
-            </div>
-            <div style={{ width: 4 }} />
-          </div>
-          {/* render Content */}
-          <div style={{ height: 298 }}>
-            { this.props.nts.length ? this.props.nts.map(nt => this.renderNts(nt)) : this.renderNoNts() }
-          </div>
-          {/* render Tails (filter) */}
-          <div style={{ height: 80, backgroundColor: '#F3F3F3' }}>
-            <div style={{ height: 26, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <UpIcon style={{ color: 'rgba(0,0,0,0.38)' }} />
             </div>
           </div>
         </Paper>

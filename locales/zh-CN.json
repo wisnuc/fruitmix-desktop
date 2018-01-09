@@ -450,6 +450,10 @@
   "No Notifications": "已经看完所有通知！",
   "Notifications": "通知",
   "Settings": "设置",
+  "Firmware Update": "固件升级",
+  "Show Notifications From:": "显示以下来源的通知: ",
+  "New Firmware Version Detected %s": "发现新的固件: %s",
+  "New Firmware Version Detected Text": "点击去安装该固件。",
 
   "==== view/Account.jsx ====": "",
   "Account Menu Name": "我",

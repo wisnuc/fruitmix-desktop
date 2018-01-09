@@ -450,6 +450,10 @@
   "No Notifications": "All caught up!",
   "Notifications": "Notifications",
   "Settings": "Settings",
+  "Firmware Update": "Firmware update",
+  "Show Notifications From:": "Show notifications from: ",
+  "New Firmware Version Detected %s": "New firmware: %s",
+  "New Firmware Version Detected Text": "Click to update the latest firmware.",
 
   "==== view/Account.jsx ====": "",
   "Account Menu Name": "Account",
