@@ -23,7 +23,8 @@ class MaintGuide extends React.Component {
       index: 0,
       action: false,
       detail: false,
-      expand: false
+      expand: false,
+      loading: false,
     }
 
     this.getStatus = (volume, boot) => {
@@ -81,19 +82,19 @@ class MaintGuide extends React.Component {
     this.recoverData = () => {}
 
     this.forceBoot = () => {
+      this.setState({ loading: true })
       const current = this.props.device.storage.data.volumes[this.state.index].uuid
       this.props.device.request('forceBoot', { current }, (error) => {
         if (error) {
           debug('forceBoot error', error)
+          this.setState({ loading: false })
         } else {
           this.props.refresh()
+          this.setState({ loading: false })
           debug('forceBoot success !')
         }
       })
     }
-  }
-
-  componentDidMount() {
   }
 
   renderTest(volume) {
@@ -115,7 +116,16 @@ class MaintGuide extends React.Component {
         <div style={{ fontSize: 20, fontWeight: 500, height: 56, display: 'flex', alignItems: 'center' }}>
           { i18n.__('Auto Test Title') }
           <div style={{ flexGrow: 1 }} />
-          { allCheck && <FlatButton label={i18n.__('Start')} onTouchTap={this.forceBoot} style={{ marginRight: 24 }} primary /> }
+          {
+            allCheck &&
+              <FlatButton
+                primary
+                label={i18n.__('Start')}
+                onTouchTap={this.forceBoot}
+                style={{ marginRight: 24 }}
+                disabled={this.state.loading }
+              />
+          }
         </div>
         {
           test.map((text, index) => (
@@ -166,7 +176,7 @@ class MaintGuide extends React.Component {
           labelStyle={{ textTransform: '' }}
           onTouchTap={func}
           style={{ marginLeft: -8 }}
-          disabled={disabled}
+          disabled={disabled || this.state.loading}
           primary
         />
       </div>
