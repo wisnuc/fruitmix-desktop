@@ -348,7 +348,7 @@ class NavViews extends React.Component {
     )
   }
 
-  renderDialogButton({ type, Icon, tooltip }) {
+  renderDialogButton({ type, Icon, tooltip, num }) {
     const view = this.currentView()
     return (
       <div style={{ width: 48, height: 48, position: 'relative' }} >
@@ -372,6 +372,51 @@ class NavViews extends React.Component {
             style={{ position: 'absolute', width: 20, height: 20 }}
           />
         </IconButton>
+        {
+          num < 100 ?
+            <div
+              style={{
+                position: 'absolute',
+                right: 8,
+                top: 8,
+                width: 16,
+                height: 16,
+                borderRadius: 8,
+                backgroundColor: '#F44336',
+                fontSize: 10,
+                fontWeight: 500,
+                color: '#FFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: num ? 1 : 0,
+                transition: 'all 225ms'
+              }}
+            >
+              { num }
+            </div>
+            : num > 99 ?
+            <div
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: 9,
+                width: 24,
+                height: 16,
+                borderRadius: 8,
+                backgroundColor: '#F44336',
+                fontSize: 10,
+                fontWeight: 500,
+                color: '#FFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              99+
+            </div>
+            : <div />
+        }
       </div>
     )
   }
@@ -454,11 +499,18 @@ class NavViews extends React.Component {
           {/* Global tasks button */}
           { this.renderDialogButton({ type: 'showTasks', Icon: TasksIcon, tooltip: i18n.__('Tasks') }) }
 
-          {/* Global notification button */}
-          { this.renderDialogButton({ type: 'showNotifications', Icon: SocialNotifications, tooltip: i18n.__('Notifications') }) }
-
           {/* optional toggle detail button */}
           { this.renderDetailButton() }
+
+          {/* Global notification button */}
+          {
+            this.renderDialogButton({
+              type: 'showNotifications',
+              Icon: SocialNotifications,
+              tooltip: i18n.__('Notifications'),
+              num: this.state.nts.length
+            })
+          }
 
           <div style={{ flex: '0 0 12px' }} />
         </div>

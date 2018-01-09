@@ -101,7 +101,7 @@ class Notifications extends React.Component {
         <div style={{ marginRight: -2 }} onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}>
           <IconButton
             iconStyle={{ color: 'rgba(0,0,0,0.54)' }}
-            onTouchTap={() => {}}
+            onTouchTap={() => this.props.removeNts([nt])}
             tooltip={i18n.__('Delete')}
           >
             <CloseIcon />
