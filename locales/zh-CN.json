@@ -294,7 +294,7 @@
   "Clean Cache Text": "所有缓存的照片原图、缩略图、下载文件都将被删除。",
   "Clean Cache Success": "清理成功",
   "Clean Cache Failed": "清理失败",
-  "Client Close Text": "客户端关闭提示",
+  "Client Close Text": "关闭客户端时显示警告",
   "Prevent Sleep Text": "有传输任务时，阻止电脑进入休眠",
 
   "==== control/WeChatBind.jsx ====": "",
