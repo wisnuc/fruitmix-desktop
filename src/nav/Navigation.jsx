@@ -86,7 +86,7 @@ class NavViews extends React.Component {
     Object.assign(this.state, {
       /*
       nts: [
-        { id: '123', type: 'wisnuc', title: '检测到新的固件', body: '点击去安装', action: () => this.navTo('firmwareUpdate') },
+        { id: '123', type: 'firmware', title: '检测到新的固件', body: '点击去安装', action: () => this.navTo('firmwareUpdate') },
         { id: '321', type: 'box', title: '收到新的文件', body: '点击去查看', action: () => this.navTo('public') }
       ],
       */
@@ -146,6 +146,8 @@ class NavViews extends React.Component {
     }
 
     this.checkFirmWareAsync = async () => {
+      const hideFirmNoti = global.config && global.config.global && global.config.global.hideFirmNoti
+      if (hideFirmNoti) return
       await this.props.selectedDevice.pureRequestAsync('checkUpdates')
       let [WIP, firm] = [true, null]
       while (WIP) {
@@ -158,10 +160,10 @@ class NavViews extends React.Component {
       if (firm.appifi.tagName.localeCompare(firm.releases[0].remote.tag_name) > -1) {
         const nt = {
           id: UUID.v4(),
-          type: 'wisnuc',
-          title: '检测到新的固件',
-          body: '点击去安装',
-          action: () => this.navTo('firmwareUpdate')
+          type: 'firmware',
+          title: i18n.__('New Firmware Version Detected %s', firm.releases[0].remote.tag_name),
+          body: i18n.__('New Firmware Version Detected Text'),
+          action: () => this.navTo('firmwareUpdate', { noMoreCheck: true })
         }
         this.addNts([nt])
       }
@@ -643,6 +645,7 @@ class NavViews extends React.Component {
         {
           this.state.showNotifications &&
             <Notifications
+              ipcRenderer={ipcRenderer}
               removeNts={this.removeNts}
               apis={this.props.apis}
               onRequestClose={() => this.setState({ showNotifications: false })}

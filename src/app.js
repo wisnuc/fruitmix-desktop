@@ -12,7 +12,6 @@ localStorage.debug = '*component*'
 
 /* i18n config */
 
-console.log('__dirname', __dirname)
 const lang = navigator.language
 i18n.configure({
   updateFiles: false,
