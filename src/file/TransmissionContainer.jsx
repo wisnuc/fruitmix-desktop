@@ -502,7 +502,7 @@ class TrsContainer extends React.Component {
                       onTouchTap={() => this.toggleDialog('clearRunningDialog')}
                     />
                     <FlatButton
-                      label={i18n.__('Confirm')}
+                      label={i18n.__('Delete')}
                       primary
                       onTouchTap={() => {
                         this.toggleDialog('clearRunningDialog')
@@ -537,7 +537,7 @@ class TrsContainer extends React.Component {
                       keyboardFocused
                     />
                     <FlatButton
-                      label={i18n.__('Confirm')}
+                      label={i18n.__('Clear')}
                       primary
                       onTouchTap={() => {
                         this.handleAll(this.state.finishTasks, 'DELETE')

@@ -73,7 +73,7 @@ class NewFolderDialog extends React.PureComponent {
         <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
           <FlatButton label={i18n.__('Cancel')} primary onTouchTap={this.props.onRequestClose} />
           <FlatButton
-            label={i18n.__('Confirm')}
+            label={i18n.__('Create')}
             primary
             onTouchTap={this.fire}
             disabled={this.state.value.length === 0 || !!this.state.errorText || this.state.loading}
