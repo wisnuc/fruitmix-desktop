@@ -258,6 +258,88 @@ class FileContent extends React.Component {
     }
 
     this.exSelect = e => (this.props.gridView ? this.selectGrid(e, this.data) : this.selectRow(e, this.scrollTop))
+
+    /* drag row */
+    this.dragRow = (e) => {
+      if (!this.props.select.selected.length) {
+        this.props.select.addByArray([this.rowDragStartIndex], (new Date()).getTime())
+      } else {
+        const s = this.refDragedItems.style
+        s.top = `${e.clientY - 130}px`
+        s.left = `${e.clientX - 70}px`
+        s.display = ''
+      }
+    }
+
+    /* request task state */
+    this.getTaskState = async (uuid) => {
+      await Promise.delay(500)
+      const res = await this.props.apis.pureRequestAsync('task', { uuid })
+      const data = this.props.apis.stationID ? res.body.data : res.body
+      if (data && data.nodes && data.nodes.findIndex(n => n.parent === null && n.state === 'Finished') > -1) return 'Finished'
+      if (data && data.nodes && data.nodes.findIndex(n => n.state === 'Conflict') > -1) return 'Conflict'
+      return 'Working'
+    }
+
+    /* finish post change dialog content to waiting/result */
+    this.finish = (error, data) => {
+      console.log('this.finish', error, data)
+      const type = i18n.__('Move')
+      if (error) return this.props.openSnackBar(type.concat(i18n.__('+Failed')), { showTasks: true })
+
+      this.getTaskState(data.uuid).asCallback((err, res) => {
+        console.log('getTaskState', err, res)
+        if (err) {
+          this.props.openSnackBar(type.concat(i18n.__('+Failed')), { showTasks: true })
+        } else {
+          let text = 'Working'
+          if (res === 'Finished') text = type.concat(i18n.__('+Success'))
+          if (res === 'Conflict') text = i18n.__('Task Conflict Text')
+          this.props.refresh()
+          this.props.openSnackBar(text, res !== 'Finished' ? { showTasks: true } : null)
+        }
+      })
+    }
+
+    this.dragEnd = () => {
+      document.removeEventListener('mousemove', this.dragRow)
+      document.removeEventListener('mouseup', this.dragEnd)
+      if (!this.refDragedItems) return
+      const hover = this.props.select.hover
+      if (hover > -1 && this.props.select.rowDrop(hover) && this.props.entries[hover].type === 'directory') {
+        const type = 'move'
+
+        const path = this.props.home.path
+        const dir = path[path.length - 1].uuid
+        const drive = path[0].uuid
+        const src = { drive, dir }
+        const dst = { drive, dir: this.props.entries[hover].uuid }
+
+        const entries = this.props.select.selected.map(i => this.props.entries[i].uuid)
+        const policies = { dir: ['keep', null] }
+
+        this.props.apis.request('copy', { type, src, dst, entries, policies }, this.finish)
+      }
+      const s = this.refDragedItems.style
+      s.top = '0px'
+      s.left = '0px'
+      s.display = 'none'
+      this.props.select.toggleDrag([])
+    }
+
+    this.rowDragStart = (event, index) => {
+      if (this.refDragedItems.style.display !== 'none') {
+        console.log('ffffffffffff')
+        this.dragEnd()
+        return
+      }
+      if (event.nativeEvent.button !== 0) return null
+      this.rowDragStartIndex = index
+      this.props.select.toggleDrag(this.props.select.selected.length ? this.props.select.selected : [this.rowDragStartIndex])
+      document.addEventListener('mousemove', this.dragRow)
+      document.addEventListener('mouseup', this.dragEnd, true)
+      return null
+    }
   }
 
   componentDidMount() {
@@ -383,6 +465,7 @@ class FileContent extends React.Component {
               selectStart={this.selectStart}
               selectEnd={this.selectEnd}
               selectRow={this.selectRow}
+              rowDragStart={this.rowDragStart}
               onScroll={this.onScroll}
               drop={this.drop}
             />
@@ -419,6 +502,22 @@ class FileContent extends React.Component {
             display: 'none',
             backgroundColor: 'rgba(0, 137, 123, 0.26)',
             border: `1px ${this.props.primaryColor} dashed`
+          }}
+        />
+
+        {/*dragged items */}
+        <div
+          ref={ref => (this.refDragedItems = ref)}
+          onMouseUp={e => this.dragEnd(e)}
+          onMouseMove={e => (this.props.gridView ? this.dragGrid(e) : this.dragRow(e))}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: 144,
+            height: 48,
+            display: 'none',
+            backgroundColor: 'rgba(0, 137, 123, 0.26)'
           }}
         />
       </div>

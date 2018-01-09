@@ -657,6 +657,7 @@ class Home extends Base {
           toggleDialog={this.toggleDialog}
           showTakenTime={!!this.state.takenTime}
           apis={this.ctx.props.apis}
+          refresh={this.refresh}
         />
 
         { this.renderMenu(this.state.contextMenuOpen, toggleDetail, getDetailStatus) }

@@ -79,7 +79,16 @@ class Row extends React.PureComponent {
     const entry = entries[index]
     const leading = select.rowLeading(index)
     const check = select.rowCheck(index)
-    const color = select.rowColor(index)
+
+    const onDropping = entry.type === 'directory' && select.rowDrop(index)
+
+    /* border style */
+    const bs = onDropping ? '1px #757575 solid' : ''
+
+    /* backgroud color */
+    const color = onDropping ? '#EEEEEE' : select.rowColor(index)
+
+    const shouldStartDrag = check === 'checked' || (select.selected.length === 1 && select.selected.includes(index))
 
     /* render drive list */
     let users = []
@@ -88,11 +97,12 @@ class Row extends React.PureComponent {
     return (
       <div key={entry.name} style={style}>
         <div
-          style={{ width: '100%', height: '100%', backgroundColor: color, display: 'flex', alignItems: 'center' }}
+          style={{ width: '100%', height: '100%', boxSizing: 'border-box', backgroundColor: color, display: 'flex', alignItems: 'center', border: bs }}
           onTouchTap={e => this.props.onRowTouchTap(e, index)}
           onMouseEnter={e => this.props.onRowMouseEnter(e, index)}
           onMouseLeave={e => this.props.onRowMouseLeave(e, index)}
           onDoubleClick={e => this.props.onRowDoubleClick(e, index)}
+          onMouseDown={e => shouldStartDrag && (e.stopPropagation() || this.props.rowDragStart(e, index))}
         >
           { renderLeading(leading) }
           <div style={{ flex: '0 0 8px' }} />
@@ -116,11 +126,14 @@ class Row extends React.PureComponent {
             </Avatar>
           </div>
 
-          <div
-            style={{ flex: inPublicRoot ? '0 1 144px' : '0 0 476px', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', marginRight: 24 }}
-            onMouseDown={e => 0 && e.stopPropagation()}
-          >
-            { entry.name }
+          <div style={{ flex: inPublicRoot ? '0 1 144px' : '0 0 476px', display: 'flex' }} >
+            <div
+              style={{ width: '', maxWidth: inPublicRoot ? 120 : 452, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}
+              onMouseDown={e => e.stopPropagation() || this.props.rowDragStart(e, index)}
+            >
+              { entry.name }
+            </div>
+            <div style={{ width: 24 }} />
           </div>
 
           <div style={{ flex: inPublicRoot ? '0 0 476px' : '0 1 144px', fontSize: 13, color: 'rgba(0,0,0,0.54)' }}>

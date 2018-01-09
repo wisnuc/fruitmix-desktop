@@ -258,7 +258,7 @@ class MoveDialog extends React.PureComponent {
         this.setState({ loading: false })
         this.closeDialog()
         this.props.refresh()
-        return this.props.openSnackBar(type.concat(i18n.__('+Failed')))
+        return this.props.openSnackBar(type.concat(i18n.__('+Failed')), { showTasks: true })
       }
 
       this.getTaskState(data.uuid).asCallback((err, res) => {
@@ -266,7 +266,7 @@ class MoveDialog extends React.PureComponent {
           this.setState({ loading: false })
           this.closeDialog()
           this.props.refresh()
-          this.props.openSnackBar(type.concat(i18n.__('+Failed')))
+          this.props.openSnackBar(type.concat(i18n.__('+Failed')), { showTasks: true })
         } else {
           this.setState({ loading: false })
           this.closeDialog()
@@ -318,7 +318,7 @@ class MoveDialog extends React.PureComponent {
   /* Button disabled ? */
   getButtonStatus() {
     const { name, uuid, type } = this.state.currentDir
-    console.log('name, uuid, type this.inSameDirectory', name, uuid, type, this.inSameDirectory())
+    // console.log('name, uuid, type this.inSameDirectory', name, uuid, type, this.inSameDirectory())
     const selectedObj = this.state.currentSelectedIndex !== -1 ? this.state.list[this.state.currentSelectedIndex] : null
 
     if (this.state.loading || this.state.cnf) return true
