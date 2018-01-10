@@ -318,6 +318,7 @@ class Public extends Home {
             showTakenTime={!!this.state.takenTime}
             apis={this.ctx.props.apis}
             inPublicRoot={this.state.inRoot}
+            refresh={this.refresh}
           />
         }
 

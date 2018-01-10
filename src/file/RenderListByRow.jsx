@@ -82,11 +82,8 @@ class Row extends React.PureComponent {
 
     const onDropping = entry.type === 'directory' && select.rowDrop(index)
 
-    /* border style */
-    const bs = onDropping ? '1px #757575 solid' : ''
-
     /* backgroud color */
-    const color = onDropping ? '#EEEEEE' : select.rowColor(index)
+    const color = onDropping ? '#FFF' : select.rowColor(index)
 
     const shouldStartDrag = check === 'checked' || (select.selected.length === 1 && select.selected.includes(index))
 
@@ -97,7 +94,15 @@ class Row extends React.PureComponent {
     return (
       <div key={entry.name} style={style}>
         <div
-          style={{ width: '100%', height: '100%', boxSizing: 'border-box', backgroundColor: color, display: 'flex', alignItems: 'center', border: bs }}
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            backgroundColor: color,
+            boxSizing: 'border-box',
+            border: onDropping ? `2px ${this.props.primaryColor} solid` : ''
+          }}
           onTouchTap={e => this.props.onRowTouchTap(e, index)}
           onMouseEnter={e => this.props.onRowMouseEnter(e, index)}
           onMouseLeave={e => this.props.onRowMouseLeave(e, index)}
@@ -106,7 +111,7 @@ class Row extends React.PureComponent {
         >
           { renderLeading(leading) }
           <div style={{ flex: '0 0 8px' }} />
-          <div style={{ flex: '0 0 36px', display: 'flex', alignItems: 'center' }}>
+          <div style={{ flex: '0 0 36px', display: 'flex', alignItems: 'center', marginLeft: onDropping ? -2 : 0 }}>
             { renderCheck(check) }
           </div>
           <div style={{ flex: '0 0 8px' }} />

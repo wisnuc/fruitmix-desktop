@@ -283,7 +283,7 @@ class FileContent extends React.Component {
           let text = 'Working'
           if (res === 'Finished') text = type.concat(i18n.__('+Success'))
           if (res === 'Conflict') text = i18n.__('Task Conflict Text')
-          this.props.refresh()
+          this.props.refresh({ noloading: true })
           this.props.openSnackBar(text, res !== 'Finished' ? { showTasks: true } : null)
         }
       })
@@ -294,11 +294,12 @@ class FileContent extends React.Component {
       //  console.log('this.dragRow', this.props.select.selected[0], this.RDSI)
       const s = this.refDragedItems.style
       if (!this.props.select.selected.includes(this.RDSI)) {
-        this.props.select.addByArray([this.RDSI], (new Date()).getTime())
+        if (this.RDSI > -1) this.props.select.addByArray([this.RDSI], (new Date()).getTime())
       } else if (s.display !== 'flex') {
         s.display = 'flex'
       } else {
         s.width = '180px'
+        s.opacity = 1
 
         const RDTop = `${this.RDSI * 48 + 48 - (this.preScrollTop || 0)}px`
         if (!s.top || s.top === RDTop) s.top = `${e.clientY - 130}px`
@@ -321,7 +322,8 @@ class FileContent extends React.Component {
       document.removeEventListener('mouseup', this.dragEnd)
       if (!this.refDragedItems) return
       const hover = this.props.select.hover
-      if (this.shouldFire()) {
+      const shouldFire = this.shouldFire()
+      if (shouldFire) {
         const type = 'move'
 
         const path = this.props.home.path
@@ -342,6 +344,7 @@ class FileContent extends React.Component {
       s.marginTop = '0px'
       s.marginLeft = '0px'
       s.width = '100%'
+      s.opacity = 0
 
       this.RDSI = -1
       this.props.select.toggleDrag([])
@@ -349,8 +352,8 @@ class FileContent extends React.Component {
       setTimeout(() => {
         s.display = 'none'
         s.transition = 'all 225ms cubic-bezier(.4,0,1,1)'
-        s.transitionProperty = 'top, left, width'
-      }, 450)
+        s.transitionProperty = 'top, left, width, opacity'
+      }, shouldFire ? 0 : 225)
     }
 
     this.rowDragStart = (event, index) => {
@@ -546,20 +549,22 @@ class FileContent extends React.Component {
             top: 0,
             left: 0,
             marginLeft: 0,
+            opacity: 0,
             width: '100%',
             height: 48,
             transition: 'all 225ms cubic-bezier(.4,0,1,1)',
-            transitionProperty: 'top, left, width',
+            transitionProperty: 'top, left, width, opacity',
             display: 'none',
             alignItems: 'center',
             color: '#FFF',
+            boxShadow: '2px 2px 2px rgba(0,0,0,0.27)',
             backgroundColor: this.props.primaryColor
           }}
         >
           <div style={{ flexGrow: 1, maxWidth: 48 }} />
           {/* file type may be: folder, public, directory, file, unsupported */}
-          <div style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', margin: 12 }}>
-            <Avatar style={{ backgroundColor: 'white', width: 30, height: 30 }}>
+          <div style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', margin: 12 }}>
+            <Avatar style={{ backgroundColor: 'white', width: 36, height: 36 }}>
               {
                 this.entry.type === 'directory'
                 ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
