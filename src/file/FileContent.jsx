@@ -292,13 +292,17 @@ class FileContent extends React.Component {
     /* drag row */
     this.dragRow = (e) => {
       //  console.log('this.dragRow', this.props.select.selected[0], this.RDSI)
+      const s = this.refDragedItems.style
       if (!this.props.select.selected.includes(this.RDSI)) {
         this.props.select.addByArray([this.RDSI], (new Date()).getTime())
+      } else if (s.display !== 'flex') {
+        s.display = 'flex'
       } else {
-        const s = this.refDragedItems.style
         s.width = '180px'
-        s.top = `${e.clientY - 130}px`
-        s.opacity = 1
+
+        const RDTop = `${this.RDSI * 48 + 48 - (this.preScrollTop || 0)}px`
+        if (!s.top || s.top === RDTop) s.top = `${e.clientY - 130}px`
+        else s.marginTop = `${e.clientY - 130 - parseInt(s.top, 10)}px`
 
         if (!s.left || s.left === '0px') s.left = `${e.clientX - 70}px`
         else s.marginLeft = `${e.clientX - 70 - parseInt(s.left, 10)}px`
@@ -332,14 +336,21 @@ class FileContent extends React.Component {
         this.props.apis.request('copy', { type, src, dst, entries, policies }, this.finish)
       }
       const s = this.refDragedItems.style
-      s.display = 'none'
-      s.opacity = 0
-      s.top = '0px'
-      s.margiLLeft = '0px'
+      s.transition = 'all 225ms cubic-bezier(.4,0,1,1)'
+      s.top = `${this.RDSI * 48 + 48 - (this.preScrollTop || 0)}px`
       s.left = '0px'
+      s.marginTop = '0px'
+      s.marginLeft = '0px'
       s.width = '100%'
+
       this.RDSI = -1
       this.props.select.toggleDrag([])
+
+      setTimeout(() => {
+        s.display = 'none'
+        s.transition = 'all 225ms cubic-bezier(.4,0,1,1)'
+        s.transitionProperty = 'top, left, width'
+      }, 450)
     }
 
     this.rowDragStart = (event, index) => {
@@ -350,8 +361,11 @@ class FileContent extends React.Component {
       this.RDSI = index // rowDragStartIndex
       const selected = this.props.select.selected
       this.props.select.toggleDrag(selected.includes(this.RDSI) ? selected : [this.RDSI])
+
       /* show drag item */
-      this.refDragedItems.style.display = 'flex'
+      // this.refDragedItems.style.display = 'flex'
+      this.refDragedItems.style.top = `${this.RDSI * 48 + 48 - (this.preScrollTop || 0)}px`
+
       document.addEventListener('mousemove', this.dragRow)
       document.addEventListener('mouseup', this.dragEnd, true)
     }
@@ -534,14 +548,15 @@ class FileContent extends React.Component {
             marginLeft: 0,
             width: '100%',
             height: 48,
-            transition: 'width 225ms, left 225ms',
-            opacity: 0,
+            transition: 'all 225ms cubic-bezier(.4,0,1,1)',
+            transitionProperty: 'top, left, width',
             display: 'none',
             alignItems: 'center',
-            color: 'rgba(255,255,255,0.87)',
+            color: '#FFF',
             backgroundColor: this.props.primaryColor
           }}
         >
+          <div style={{ flexGrow: 1, maxWidth: 48 }} />
           {/* file type may be: folder, public, directory, file, unsupported */}
           <div style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', margin: 12 }}>
             <Avatar style={{ backgroundColor: 'white', width: 30, height: 30 }}>
@@ -556,13 +571,11 @@ class FileContent extends React.Component {
           </div>
           <div
             style={{
-              overflow: 'hidden',
-              whiteSpace: 'nowrap',
-              textOverflow: 'ellipsis',
-              fontSize: 14,
               width: 114,
               marginRight: 12,
-              fontWeight: 500
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+              textOverflow: 'ellipsis'
             }}
           >
             { this.entry.name }
