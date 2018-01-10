@@ -2,12 +2,14 @@ import React from 'react'
 import i18n from 'i18n'
 import Debug from 'debug'
 import EventListener from 'react-event-listener'
-import { CircularProgress } from 'material-ui'
+import { CircularProgress, Avatar } from 'material-ui'
 import UploadIcon from 'material-ui/svg-icons/file/cloud-upload'
+import FileFolder from 'material-ui/svg-icons/file/folder'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import ContainerOverlay from './ContainerOverlay'
 import RenderListByRow from './RenderListByRow'
 import GridView from './GridView'
+import renderFileIcon from '../common/renderFileIcon'
 
 const debug = Debug('component:file:FileContent:')
 
@@ -251,25 +253,13 @@ class FileContent extends React.Component {
     this.selectGrid = (event, data) => {
       if (!this.selectBox) return
       this.data = data || this.data
-      const { scrollTop, allHeight, indexHeightSum, mapData } = this.data
+      const { scrollTop } = this.data
       this.preScrollTop = scrollTop
       this.drawBox(event)
       this.calcGrid(this.data)
     }
 
     this.exSelect = e => (this.props.gridView ? this.selectGrid(e, this.data) : this.selectRow(e, this.scrollTop))
-
-    /* drag row */
-    this.dragRow = (e) => {
-      if (!this.props.select.selected.length) {
-        this.props.select.addByArray([this.rowDragStartIndex], (new Date()).getTime())
-      } else {
-        const s = this.refDragedItems.style
-        s.top = `${e.clientY - 130}px`
-        s.left = `${e.clientX - 70}px`
-        s.display = ''
-      }
-    }
 
     /* request task state */
     this.getTaskState = async (uuid) => {
@@ -283,12 +273,10 @@ class FileContent extends React.Component {
 
     /* finish post change dialog content to waiting/result */
     this.finish = (error, data) => {
-      console.log('this.finish', error, data)
       const type = i18n.__('Move')
       if (error) return this.props.openSnackBar(type.concat(i18n.__('+Failed')), { showTasks: true })
 
       this.getTaskState(data.uuid).asCallback((err, res) => {
-        console.log('getTaskState', err, res)
         if (err) {
           this.props.openSnackBar(type.concat(i18n.__('+Failed')), { showTasks: true })
         } else {
@@ -301,12 +289,35 @@ class FileContent extends React.Component {
       })
     }
 
+    /* drag row */
+    this.dragRow = (e) => {
+      //  console.log('this.dragRow', this.props.select.selected[0], this.RDSI)
+      if (!this.props.select.selected.includes(this.RDSI)) {
+        this.props.select.addByArray([this.RDSI], (new Date()).getTime())
+      } else {
+        const s = this.refDragedItems.style
+        s.width = '180px'
+        s.top = `${e.clientY - 130}px`
+        s.opacity = 1
+
+        if (!s.left || s.left === '0px') s.left = `${e.clientX - 70}px`
+        else s.marginLeft = `${e.clientX - 70 - parseInt(s.left, 10)}px`
+      }
+      if (!this.entry.type) this.forceUpdate()
+    }
+
+    this.shouldFire = () => {
+      const { select, entries } = this.props
+      const { hover } = select
+      return hover > -1 && select.rowDrop(hover) && entries[hover].type === 'directory' && this.RDSI !== hover
+    }
+
     this.dragEnd = () => {
       document.removeEventListener('mousemove', this.dragRow)
       document.removeEventListener('mouseup', this.dragEnd)
       if (!this.refDragedItems) return
       const hover = this.props.select.hover
-      if (hover > -1 && this.props.select.rowDrop(hover) && this.props.entries[hover].type === 'directory') {
+      if (this.shouldFire()) {
         const type = 'move'
 
         const path = this.props.home.path
@@ -321,24 +332,28 @@ class FileContent extends React.Component {
         this.props.apis.request('copy', { type, src, dst, entries, policies }, this.finish)
       }
       const s = this.refDragedItems.style
-      s.top = '0px'
-      s.left = '0px'
       s.display = 'none'
+      s.opacity = 0
+      s.top = '0px'
+      s.margiLLeft = '0px'
+      s.left = '0px'
+      s.width = '100%'
+      this.RDSI = -1
       this.props.select.toggleDrag([])
     }
 
     this.rowDragStart = (event, index) => {
-      if (this.refDragedItems.style.display !== 'none') {
-        console.log('ffffffffffff')
-        this.dragEnd()
-        return
-      }
-      if (event.nativeEvent.button !== 0) return null
-      this.rowDragStartIndex = index
-      this.props.select.toggleDrag(this.props.select.selected.length ? this.props.select.selected : [this.rowDragStartIndex])
+      /* only left click */
+      if (event.nativeEvent.button !== 0) return
+      /* not public */
+      if (this.props.entries[index].type === 'public') return
+      this.RDSI = index // rowDragStartIndex
+      const selected = this.props.select.selected
+      this.props.select.toggleDrag(selected.includes(this.RDSI) ? selected : [this.RDSI])
+      /* show drag item */
+      this.refDragedItems.style.display = 'flex'
       document.addEventListener('mousemove', this.dragRow)
       document.addEventListener('mouseup', this.dragEnd, true)
-      return null
     }
   }
 
@@ -436,6 +451,8 @@ class FileContent extends React.Component {
     /* lost connection to wisnuc */
     if (!window.navigator.onLine) return this.renderOffLine()
 
+    this.entry = this.RDSI > -1 && this.props.entries[this.RDSI] || {}
+
     /* got list */
     return (
       <div style={{ width: '100%', height: '100%' }}>
@@ -505,7 +522,7 @@ class FileContent extends React.Component {
           }}
         />
 
-        {/*dragged items */}
+        {/* dragged items */}
         <div
           ref={ref => (this.refDragedItems = ref)}
           onMouseUp={e => this.dragEnd(e)}
@@ -514,12 +531,67 @@ class FileContent extends React.Component {
             position: 'absolute',
             top: 0,
             left: 0,
-            width: 144,
+            marginLeft: 0,
+            width: '100%',
             height: 48,
+            transition: 'width 225ms, left 225ms',
+            opacity: 0,
             display: 'none',
-            backgroundColor: 'rgba(0, 137, 123, 0.26)'
+            alignItems: 'center',
+            color: 'rgba(255,255,255,0.87)',
+            backgroundColor: this.props.primaryColor
           }}
-        />
+        >
+          {/* file type may be: folder, public, directory, file, unsupported */}
+          <div style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', margin: 12 }}>
+            <Avatar style={{ backgroundColor: 'white', width: 30, height: 30 }}>
+              {
+                this.entry.type === 'directory'
+                ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
+                : this.entry.type === 'file'
+                ? renderFileIcon(this.entry.name, this.entry.metadata, 24)
+                : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
+              }
+            </Avatar>
+          </div>
+          <div
+            style={{
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+              textOverflow: 'ellipsis',
+              fontSize: 14,
+              width: 114,
+              marginRight: 12,
+              fontWeight: 500
+            }}
+          >
+            { this.entry.name }
+          </div>
+          {
+            this.props.select.selected.length > 1 &&
+              <div
+                style={{
+                  position: 'absolute',
+                  top: -12,
+                  right: -12,
+                  width: 24,
+                  height: 24,
+                  borderRadius: 12,
+                  boxSizing: 'border-box',
+                  backgroundColor: this.shouldFire() ? this.props.primaryColor : '#FF4081',
+                  border: '1px solid rgba(0,0,0,0.18)',
+                  color: '#FFF',
+                  fontWeight: 500,
+                  fontSize: 14,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                { this.props.select.selected.length }
+              </div>
+          }
+        </div>
       </div>
     )
   }
