@@ -113,7 +113,7 @@ class Row extends React.PureComponent {
 
           {/* file type may be: folder, public, directory, file, unsupported */}
           <div style={{ flex: '0 0 48px', display: 'flex', alignItems: 'center' }} >
-            <Avatar style={{ backgroundColor: 'white' }}>
+            <Avatar style={{ backgroundColor: 'white' }} onMouseDown={e => e.stopPropagation() || this.props.rowDragStart(e, index)} >
               {
                 entry.type === 'directory'
                 ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
