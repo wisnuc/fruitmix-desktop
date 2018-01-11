@@ -614,6 +614,9 @@ class NavViews extends React.Component {
           isCloud={isCloud}
         />
 
+        {/* drag item */}
+        { view.renderDragItems() }
+
         {/* snackBar */}
         { this.renderSnackBar() }
 

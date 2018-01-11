@@ -2,7 +2,7 @@ import React from 'react'
 import i18n from 'i18n'
 import Debug from 'debug'
 import { ipcRenderer } from 'electron'
-import { IconButton, Divider, CircularProgress } from 'material-ui'
+import { IconButton, Divider, CircularProgress, Avatar } from 'material-ui'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
@@ -32,6 +32,7 @@ import MenuItem from '../common/MenuItem'
 import sortByType from '../common/sort'
 import { BreadCrumbItem, BreadCrumbSeparator } from '../common/BreadCrumb'
 import { UploadFile, UploadFold } from '../common/Svg'
+import renderFileIcon from '../common/renderFileIcon'
 
 const debug = Debug('component:viewModel:Home: ')
 
@@ -249,6 +250,133 @@ class Home extends Base {
       }
     }
 
+    /* request task state */
+    this.getTaskState = async (uuid) => {
+      await Promise.delay(500)
+      const res = await this.ctx.props.apis.pureRequestAsync('task', { uuid })
+      const data = this.ctx.props.apis.stationID ? res.body.data : res.body
+      if (data && data.nodes && data.nodes.findIndex(n => n.parent === null && n.state === 'Finished') > -1) return 'Finished'
+      if (data && data.nodes && data.nodes.findIndex(n => n.state === 'Conflict') > -1) return 'Conflict'
+      return 'Working'
+    }
+
+    /* finish post change dialog content to waiting/result */
+    this.finish = (error, data) => {
+      const type = i18n.__('Move')
+      if (error) return this.ctx.openSnackBar(type.concat(i18n.__('+Failed')), { showTasks: true })
+
+      this.getTaskState(data.uuid).asCallback((err, res) => {
+        if (err) {
+          this.ctx.openSnackBar(type.concat(i18n.__('+Failed')), { showTasks: true })
+        } else {
+          let text = 'Working'
+          if (res === 'Finished') text = type.concat(i18n.__('+Success'))
+          if (res === 'Conflict') text = i18n.__('Task Conflict Text')
+          this.refresh({ noloading: true })
+          this.ctx.openSnackBar(text, res !== 'Finished' ? { showTasks: true } : null)
+        }
+      })
+    }
+
+    this.setScrollTop = scrollTop => (this.scrollTop = scrollTop)
+
+    /* drag row */
+    this.dragRow = (e) => {
+      const s = this.refDragedItems.style
+      if (!this.state.select.selected.includes(this.RDSI)) {
+        if (this.RDSI > -1) this.state.select.addByArray([this.RDSI], (new Date()).getTime())
+      } else if (s.display !== 'flex') {
+        s.display = 'flex'
+      } else {
+        s.width = '180px'
+        s.opacity = 1
+
+        const RDTop = `${this.RDSI * 48 + 176 - (this.scrollTop || 0)}px`
+        if (!s.top || s.top === RDTop) s.top = `${e.clientY + 2}px`
+        else s.marginTop = `${e.clientY + 2 - parseInt(s.top, 10)}px`
+
+        if (!s.left || s.left === '75px') s.left = `${e.clientX + 2}px`
+        else s.marginLeft = `${e.clientX + 2 - parseInt(s.left, 10)}px`
+      }
+      if (!this.entry.type) this.forceUpdate()
+    }
+
+    this.shouldFire = () => {
+      const { select, entries } = this.state
+      const { hover } = select
+      return hover > -1 && select.rowDrop(hover) && entries[hover].type === 'directory' && this.RDSI !== hover
+    }
+
+    this.onHoverHeader = (node) => {
+      this.hoverHeader = node
+      this.forceUpdate()
+    }
+
+    /* verify header node for dropping, return `null` or the node */
+    this.dropHeader = () => {
+      if (!this.hoverHeader || this.hoverHeader.uuid === this.state.path.slice(-1)[0].uuid) return null
+      if (this.hoverHeader.type === 'publicRoot') return null
+      return this.hoverHeader
+    }
+
+    this.dragEnd = () => {
+      document.removeEventListener('mousemove', this.dragRow)
+      document.removeEventListener('mouseup', this.dragEnd)
+      if (!this.refDragedItems || this.RDSI < 0) return
+      const hover = this.state.select.hover
+      const shouldFire = this.shouldFire()
+      const dropHeader = this.dropHeader()
+      if (shouldFire || dropHeader) {
+        const type = 'move'
+
+        const path = this.state.path
+        const dir = path[path.length - 1].uuid
+        const drive = path[0].uuid
+        const src = { drive, dir }
+        const dst = { drive, dir: shouldFire ? this.state.entries[hover].uuid : dropHeader.uuid }
+
+        const entries = this.state.select.selected.map(i => this.state.entries[i].uuid)
+        const policies = { dir: ['keep', null] }
+
+        this.ctx.props.apis.request('copy', { type, src, dst, entries, policies }, this.finish)
+      }
+      const s = this.refDragedItems.style
+      s.transition = 'all 225ms cubic-bezier(.4,0,1,1)'
+      s.top = `${this.RDSI * 48 + 176 - (this.scrollTop || 0)}px`
+      s.left = '75px'
+      s.marginTop = '0px'
+      s.marginLeft = '0px'
+      s.width = '100%'
+      s.opacity = 0
+
+      this.RDSI = -1
+      this.state.select.toggleDrag([])
+
+      setTimeout(() => {
+        s.display = 'none'
+        s.transition = 'all 225ms cubic-bezier(.4,0,1,1)'
+        s.transitionProperty = 'top, left, width, opacity'
+      }, shouldFire || dropHeader ? 0 : 225)
+    }
+
+    this.rowDragStart = (event, index) => {
+      /* only left click */
+      if (event.nativeEvent.button !== 0) return
+      /* not public */
+      if (this.state.entries[index].type === 'public') return
+      this.RDSI = index // rowDragStartIndex
+      const selected = this.state.select.selected
+      this.state.select.toggleDrag(selected.includes(this.RDSI) ? selected : [this.RDSI])
+
+      /* show drag item */
+      // this.refDragedItems.style.display = 'flex'
+      this.refDragedItems.style.top = `${this.RDSI * 48 + 48 + 128 - (this.scrollTop || 0)}px`
+      this.refDragedItems.style.left = '75px'
+
+      document.addEventListener('mousemove', this.dragRow)
+      document.addEventListener('mouseup', this.dragEnd, true)
+    }
+
     ipcRenderer.on('driveListUpdate', (e, dir) => {
       if (this.state.contextMenuOpen) return
       if (this.state.select && this.state.select.selected && this.state.select.selected.length > 1) return
@@ -256,6 +384,82 @@ class Home extends Base {
       if (this.isNavEnter && path && path.length && dir.uuid === path[path.length - 1].uuid) this.refresh({ noloading: true })
     })
   }
+
+  renderDragItems() {
+    this.entry = this.RDSI > -1 && this.state.entries[this.RDSI] || {}
+    return (
+      <div
+        ref={ref => (this.refDragedItems = ref)}
+        style={{
+          position: 'absolute',
+          zIndex: 1000,
+          top: 0,
+          left: 0,
+          marginLeft: 0,
+          opacity: 0,
+          width: '100%',
+          height: 48,
+          transition: 'all 225ms cubic-bezier(.4,0,1,1)',
+          transitionProperty: 'top, left, width, opacity',
+          display: 'none',
+          alignItems: 'center',
+          color: '#FFF',
+          boxShadow: '2px 2px 2px rgba(0,0,0,0.27)',
+          backgroundColor: this.groupPrimaryColor()
+        }}
+      >
+        <div style={{ flexGrow: 1, maxWidth: 48 }} />
+        {/* file type may be: folder, public, directory, file, unsupported */}
+        <div style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', margin: 12 }}>
+          <Avatar style={{ backgroundColor: 'white', width: 36, height: 36 }}>
+            {
+              this.entry.type === 'directory'
+              ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
+              : this.entry.type === 'file'
+              ? renderFileIcon(this.entry.name, this.entry.metadata, 24)
+              : <div />
+            }
+          </Avatar>
+        </div>
+        <div
+          style={{
+            width: 114,
+            marginRight: 12,
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis'
+          }}
+        >
+          { this.entry.name }
+        </div>
+        {
+          this.state.select.selected.length > 1 &&
+            <div
+              style={{
+                position: 'absolute',
+                top: -12,
+                right: -12,
+                width: 24,
+                height: 24,
+                borderRadius: 12,
+                boxSizing: 'border-box',
+                backgroundColor: this.shouldFire() || this.dropHeader() ? this.groupPrimaryColor() : '#FF4081',
+                border: '1px solid rgba(0,0,0,0.18)',
+                color: '#FFF',
+                fontWeight: 500,
+                fontSize: 14,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              { this.state.select.selected.length }
+            </div>
+        }
+      </div>
+    )
+  }
+
 
   willReceiveProps(nextProps) {
     this.preValue = this.state.listNavDir
@@ -343,29 +547,34 @@ class Home extends Base {
     )
   }
 
-  renderTitle({ style }) {
-    if (!this.state.listNavDir) return (<div />)
-
+  renderBreadCrumbItem({ style }) {
     const path = this.state.path
+
+    const touchTap = (node) => {
+      this.setState({ loading: true })
+      if (node.type === 'publicRoot') {
+        this.rootDrive = null
+        this.ctx.props.apis.request('drives')
+      } else this.ctx.props.apis.request('listNavDir', { driveUUID: path[0].uuid, dirUUID: node.uuid })
+    }
 
     /*
       each one is preceded with a separator, except for the first one
       each one is assigned an action, except for the last one
     */
 
-    const touchTap = (node) => {
-      this.setState({ loading: true })
-      this.ctx.props.apis.request('listNavDir', { driveUUID: path[0].uuid, dirUUID: node.uuid })
-    }
-
     return (
       <div style={Object.assign({}, style, { marginLeft: 168 })}>
         {
-          this.state.listNavDir.path.reduce((acc, node, index) => {
+          path.reduce((acc, node, index) => {
+            const isDrop = () => this.state.select.isDrop()
+            const dropable = () => this.state.select.isDrop() && this.dropHeader()
+            const funcs = { node, isDrop, dropable, onHoverHeader: this.onHoverHeader, onTouchTap: () => touchTap(node) }
+
             if (path.length > 4 && index > 0 && index < path.length - 3) {
               if (index === path.length - 4) {
                 acc.push(<BreadCrumbSeparator key={`Separator${node.uuid}`} />)
-                acc.push(<BreadCrumbItem text="..." key="..." onTouchTap={() => touchTap(node)} />)
+                acc.push(<BreadCrumbItem key="..." text="..." {...funcs} />)
               }
               return acc
             }
@@ -373,16 +582,19 @@ class Home extends Base {
             if (index !== 0) acc.push(<BreadCrumbSeparator key={`Separator${node.uuid}`} />)
 
             /* the first one is always special */
-            if (index === 0) {
-              acc.push(<BreadCrumbItem text={this.title} key="root" onTouchTap={() => touchTap(path[0])} />)
-            } else {
-              acc.push(<BreadCrumbItem text={node.name} key={`Item${node.uuid}`} onTouchTap={() => touchTap(node)} />)
-            }
+            if (index === 0) acc.push(<BreadCrumbItem text={this.title} key="root" {...funcs} />)
+            else acc.push(<BreadCrumbItem text={node.name} key={`Item${node.uuid}`} {...funcs} />)
+
             return acc
           }, [])
         }
       </div>
     )
+  }
+
+  renderTitle({ style }) {
+    if (!this.state.listNavDir) return (<div />)
+    return this.renderBreadCrumbItem({ style })
   }
 
   renderToolBar({ style }) {
@@ -658,6 +870,8 @@ class Home extends Base {
           showTakenTime={!!this.state.takenTime}
           apis={this.ctx.props.apis}
           refresh={this.refresh}
+          rowDragStart={this.rowDragStart}
+          setScrollTop={this.setScrollTop}
         />
 
         { this.renderMenu(this.state.contextMenuOpen, toggleDetail, getDetailStatus) }

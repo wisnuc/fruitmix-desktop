@@ -18,6 +18,7 @@ class ListSelect extends EventEmitter {
       rowCheck: this.rowCheck.bind(this),
       rowDrop: this.rowDrop.bind(this),
       toggleDrag: this.toggleDrag.bind(this),
+      isDrop: this.isDrop.bind(this),
       addByArray: this.addByArray.bind(this)
     }
   }
@@ -208,6 +209,10 @@ class ListSelect extends EventEmitter {
 
   rowDrop(index) {
     return index === this.state.hover && this.dragging.length && !this.dragging.includes(index)
+  }
+
+  isDrop() {
+    return this.dragging.length
   }
 
   toggleDrag(arr) {
