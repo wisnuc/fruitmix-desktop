@@ -131,9 +131,9 @@ class Row extends React.PureComponent {
             </Avatar>
           </div>
 
-          <div style={{ flex: inPublicRoot ? '0 1 144px' : '0 0 476px', display: 'flex' }} >
+          <div style={{ flex: inPublicRoot ? '0 1 168px' : '0 0 500px', display: 'flex' }} >
             <div
-              style={{ width: '', maxWidth: inPublicRoot ? 120 : 452, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}
+              style={{ width: '', maxWidth: inPublicRoot ? 144 : 476, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}
               onMouseDown={e => e.stopPropagation() || this.props.rowDragStart(e, index)}
             >
               { entry.name }

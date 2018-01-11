@@ -558,7 +558,6 @@ class NavViews extends React.Component {
     if (!this.state.nav) return null
 
     const view = this.views[this.state.nav]
-    const prominent = view.prominent()
 
     /* is cloud ? */
     let isCloud = false
@@ -566,7 +565,16 @@ class NavViews extends React.Component {
     if (token && token.data && token.data.stationID) isCloud = true
 
     return (
-      <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'space-between', overflow: 'hidden' }} >
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          overflow: 'hidden',
+          position: 'relative',
+          justifyContent: 'space-between'
+        }}
+      >
         {/* left frame */}
         <div style={{ height: '100%', position: 'relative', flexGrow: 1 }}>
           { this.renderAppBar() }
@@ -575,9 +583,9 @@ class NavViews extends React.Component {
           <div
             style={{
               width: '100%',
-              height: `calc(100% - ${this.appBarHeight()}px)`,
               display: 'flex',
-              justifyContent: 'space-between'
+              justifyContent: 'space-between',
+              height: `calc(100% - ${this.appBarHeight()}px)`
             }}
           >
 
