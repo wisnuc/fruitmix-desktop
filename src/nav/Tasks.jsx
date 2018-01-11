@@ -36,9 +36,9 @@ class Tasks extends React.Component {
     this.refresh = () => {
       this.props.apis.pureRequest('tasks', null, (err, res) => {
         if (err || !res || !res.body) {
-          this.setState({ error: 'NoData' })
+          this.setState({ error: 'NoData', loading: false })
         } else {
-          this.setState({ tasks: res.body, loading: false })
+          this.setState({ tasks: [...res.body].reverse(), loading: false })
         }
       })
     }
@@ -80,9 +80,11 @@ class Tasks extends React.Component {
   }
 
   renderError() {
-    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
-      { i18n.__('Failed To Load Task Data') }
-    </div>
+    return (
+      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
+        { i18n.__('Failed To Load Task Data') }
+      </div>
+    )
   }
 
   renderNoTask() {

@@ -369,8 +369,8 @@ class Home extends Base {
       this.state.select.toggleDrag(selected.includes(this.RDSI) ? selected : [this.RDSI])
 
       /* show drag item */
-      // this.refDragedItems.style.display = 'flex'
-      this.refDragedItems.style.top = `${this.RDSI * 48 + 48 + 128 - (this.scrollTop || 0)}px`
+      // console.log('this.scrollTop', this.scrollTop)
+      this.refDragedItems.style.top = `${this.RDSI * 48 + 176 - (this.scrollTop || 0)}px`
       this.refDragedItems.style.left = '75px'
 
       document.addEventListener('mousemove', this.dragRow)
@@ -384,82 +384,6 @@ class Home extends Base {
       if (this.isNavEnter && path && path.length && dir.uuid === path[path.length - 1].uuid) this.refresh({ noloading: true })
     })
   }
-
-  renderDragItems() {
-    this.entry = this.RDSI > -1 && this.state.entries[this.RDSI] || {}
-    return (
-      <div
-        ref={ref => (this.refDragedItems = ref)}
-        style={{
-          position: 'absolute',
-          zIndex: 1000,
-          top: 0,
-          left: 0,
-          marginLeft: 0,
-          opacity: 0,
-          width: '100%',
-          height: 48,
-          transition: 'all 225ms cubic-bezier(.4,0,1,1)',
-          transitionProperty: 'top, left, width, opacity',
-          display: 'none',
-          alignItems: 'center',
-          color: '#FFF',
-          boxShadow: '2px 2px 2px rgba(0,0,0,0.27)',
-          backgroundColor: this.groupPrimaryColor()
-        }}
-      >
-        <div style={{ flexGrow: 1, maxWidth: 48 }} />
-        {/* file type may be: folder, public, directory, file, unsupported */}
-        <div style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', margin: 12 }}>
-          <Avatar style={{ backgroundColor: 'white', width: 36, height: 36 }}>
-            {
-              this.entry.type === 'directory'
-              ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
-              : this.entry.type === 'file'
-              ? renderFileIcon(this.entry.name, this.entry.metadata, 24)
-              : <div />
-            }
-          </Avatar>
-        </div>
-        <div
-          style={{
-            width: 114,
-            marginRight: 12,
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis'
-          }}
-        >
-          { this.entry.name }
-        </div>
-        {
-          this.state.select.selected.length > 1 &&
-            <div
-              style={{
-                position: 'absolute',
-                top: -12,
-                right: -12,
-                width: 24,
-                height: 24,
-                borderRadius: 12,
-                boxSizing: 'border-box',
-                backgroundColor: this.shouldFire() || this.dropHeader() ? this.groupPrimaryColor() : '#FF4081',
-                border: '1px solid rgba(0,0,0,0.18)',
-                color: '#FFF',
-                fontWeight: 500,
-                fontSize: 14,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              { this.state.select.selected.length }
-            </div>
-        }
-      </div>
-    )
-  }
-
 
   willReceiveProps(nextProps) {
     this.preValue = this.state.listNavDir
@@ -536,6 +460,81 @@ class Home extends Base {
   }
 
   /* renderers */
+  renderDragItems() {
+    this.entry = this.RDSI > -1 && this.state.entries[this.RDSI] || {}
+    return (
+      <div
+        ref={ref => (this.refDragedItems = ref)}
+        style={{
+          position: 'absolute',
+          zIndex: 1000,
+          top: 0,
+          left: 0,
+          marginLeft: 0,
+          opacity: 0,
+          width: '100%',
+          height: 48,
+          transition: 'all 225ms cubic-bezier(.4,0,1,1)',
+          transitionProperty: 'top, left, width, opacity',
+          display: 'none',
+          alignItems: 'center',
+          color: '#FFF',
+          boxShadow: '2px 2px 2px rgba(0,0,0,0.27)',
+          backgroundColor: this.groupPrimaryColor()
+        }}
+      >
+        <div style={{ flexGrow: 1, maxWidth: 48 }} />
+        {/* file type may be: folder, public, directory, file, unsupported */}
+        <div style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', margin: 12 }}>
+          <Avatar style={{ backgroundColor: 'white', width: 36, height: 36 }}>
+            {
+              this.entry.type === 'directory'
+              ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
+              : this.entry.type === 'file'
+              ? renderFileIcon(this.entry.name, this.entry.metadata, 24)
+              : <div />
+            }
+          </Avatar>
+        </div>
+        <div
+          style={{
+            width: 114,
+            marginRight: 12,
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis'
+          }}
+        >
+          { this.entry.name }
+        </div>
+        {
+          this.state.select.selected.length > 1 &&
+            <div
+              style={{
+                position: 'absolute',
+                top: -12,
+                right: -12,
+                width: 24,
+                height: 24,
+                borderRadius: 12,
+                boxSizing: 'border-box',
+                backgroundColor: this.shouldFire() || this.dropHeader() ? this.groupPrimaryColor() : '#FF4081',
+                border: '1px solid rgba(0,0,0,0.18)',
+                color: '#FFF',
+                fontWeight: 500,
+                fontSize: 14,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              { this.state.select.selected.length }
+            </div>
+        }
+      </div>
+    )
+  }
+
   renderNavigationMenu({ style, onTouchTap }) {
     const CustomStyle = Object.assign(style, { opacity: 1 })
     return (

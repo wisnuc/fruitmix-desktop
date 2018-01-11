@@ -183,11 +183,11 @@ class FileContent extends React.Component {
     }
 
     this.onScroll = (scrollTop) => {
+      this.props.setScrollTop(scrollTop)
       if (!this.selectBox) return
       const s = this.refSelectBox.style
       const dy = scrollTop - this.preScrollTop
       this.preScrollTop = scrollTop
-      this.props.setScrollTop(scrollTop)
 
       if (this.up) {
         s.height = `${parseInt(s.height, 10) - dy}px`
