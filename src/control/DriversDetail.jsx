@@ -90,7 +90,7 @@ class DrivesDetail extends PureComponent {
 
   render() {
     const { users, detailDrive, primaryColor } = this.props
-    console.log('detailDrive', this.props)
+    // console.log('detailDrive', this.props)
     if (!users || !detailDrive) return <div style={{ height: 128, backgroundColor: primaryColor, filter: 'brightness(0.9)' }} />
     return (
       <div style={{ height: '100%' }}>
