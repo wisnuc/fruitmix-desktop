@@ -36,6 +36,10 @@ class Base extends EventEmitter {
     this.emit('updated', this.state)
   }
 
+  forceUpdate() {
+    this.emit('updated', this.state)
+  }
+
   willReceiveProps(nextProps) {
   }
 
@@ -165,6 +169,10 @@ class Base extends EventEmitter {
 
   renderDetail({ style }) {
     return <div style={style} />
+  }
+
+  renderDragItems() {
+    return <div />
   }
 
   renderDefaultError() {

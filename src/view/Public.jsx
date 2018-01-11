@@ -26,6 +26,8 @@ class Public extends Home {
   constructor(ctx) {
     super(ctx)
 
+    this.title = i18n.__('Public Drive')
+
     this.state = Object.assign(this.state, { inRoot: true })
 
     this.rootDrive = null
@@ -125,68 +127,7 @@ class Public extends Home {
   /* renderers */
   renderTitle({ style }) {
     if (!this.state.listNavDir && !this.state.drives) return (<div />)
-
-    // debug('renderTitle', this.state)
-    const path = this.state.path
-
-    /* in the public drives */
-    if (this.state.inRoot) {
-      return (
-        <div style={Object.assign({}, style, { marginLeft: 168 })}>
-          <BreadCrumbItem
-            text={i18n.__('Public Drive')}
-            onTouchTap={() => {
-              this.rootDrive = null
-              this.ctx.props.apis.request('drives')
-              this.setState({ loading: true })
-            }}
-          />
-        </div>
-      )
-    }
-
-    /*
-      each one is preceded with a separator, except for the first one
-      each one is assigned an action, except for the last one
-    */
-
-    const touchTap = (node) => {
-      this.setState({ loading: true })
-      this.ctx.props.apis.request('listNavDir', { driveUUID: path[1].uuid, dirUUID: node.uuid })
-    }
-
-    return (
-      <div style={Object.assign({}, style, { marginLeft: 168 })}>
-        {
-          this.state.path.reduce((acc, node, index) => {
-            if (path.length > 4 && index > 0 && index < path.length - 3) {
-              if (index === path.length - 4) {
-                acc.push(<BreadCrumbSeparator key={`Separator${node.uuid}`} />)
-                acc.push(<BreadCrumbItem text="..." key="..." onTouchTap={() => touchTap(node)} />)
-              }
-              return acc
-            }
-
-            if (index !== 0) acc.push(<BreadCrumbSeparator key={`Separator${node.uuid}`} />)
-
-            /* the first one is always special */
-            if (index === 0) {
-              acc.push(<BreadCrumbItem
-                text={i18n.__('Public Drive')}
-                key="root"
-                onTouchTap={() => {
-                    this.rootDrive = null
-                    this.ctx.props.apis.request('drives')
-                  }}
-              />)
-            } else {
-              acc.push(<BreadCrumbItem text={node.name} key={`Item${node.uuid}`} onTouchTap={() => touchTap(node)} />)
-            }
-            return acc
-          }, [])
-        }
-      </div>
-    )
+    return this.renderBreadCrumbItem({ style })
   }
 
   renderToolBar({ style }) {
@@ -319,6 +260,8 @@ class Public extends Home {
             apis={this.ctx.props.apis}
             inPublicRoot={this.state.inRoot}
             refresh={this.refresh}
+            rowDragStart={this.rowDragStart}
+            setScrollTop={this.setScrollTop}
           />
         }
 

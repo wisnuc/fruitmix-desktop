@@ -2,14 +2,12 @@ import React from 'react'
 import i18n from 'i18n'
 import Debug from 'debug'
 import EventListener from 'react-event-listener'
-import { CircularProgress, Avatar } from 'material-ui'
+import { CircularProgress } from 'material-ui'
 import UploadIcon from 'material-ui/svg-icons/file/cloud-upload'
-import FileFolder from 'material-ui/svg-icons/file/folder'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import ContainerOverlay from './ContainerOverlay'
 import RenderListByRow from './RenderListByRow'
 import GridView from './GridView'
-import renderFileIcon from '../common/renderFileIcon'
 
 const debug = Debug('component:file:FileContent:')
 
@@ -17,7 +15,11 @@ class FileContent extends React.Component {
   constructor(props) {
     super(props)
 
-    this.state = { contextMenu: false }
+    this.state = {
+      seqIndex: -1,
+      loading: false,
+      preview: false
+    }
 
     /* cathc key action */
     this.keyDown = (e) => {
@@ -185,6 +187,7 @@ class FileContent extends React.Component {
       const s = this.refSelectBox.style
       const dy = scrollTop - this.preScrollTop
       this.preScrollTop = scrollTop
+      this.props.setScrollTop(scrollTop)
 
       if (this.up) {
         s.height = `${parseInt(s.height, 10) - dy}px`
@@ -260,118 +263,6 @@ class FileContent extends React.Component {
     }
 
     this.exSelect = e => (this.props.gridView ? this.selectGrid(e, this.data) : this.selectRow(e, this.scrollTop))
-
-    /* request task state */
-    this.getTaskState = async (uuid) => {
-      await Promise.delay(500)
-      const res = await this.props.apis.pureRequestAsync('task', { uuid })
-      const data = this.props.apis.stationID ? res.body.data : res.body
-      if (data && data.nodes && data.nodes.findIndex(n => n.parent === null && n.state === 'Finished') > -1) return 'Finished'
-      if (data && data.nodes && data.nodes.findIndex(n => n.state === 'Conflict') > -1) return 'Conflict'
-      return 'Working'
-    }
-
-    /* finish post change dialog content to waiting/result */
-    this.finish = (error, data) => {
-      const type = i18n.__('Move')
-      if (error) return this.props.openSnackBar(type.concat(i18n.__('+Failed')), { showTasks: true })
-
-      this.getTaskState(data.uuid).asCallback((err, res) => {
-        if (err) {
-          this.props.openSnackBar(type.concat(i18n.__('+Failed')), { showTasks: true })
-        } else {
-          let text = 'Working'
-          if (res === 'Finished') text = type.concat(i18n.__('+Success'))
-          if (res === 'Conflict') text = i18n.__('Task Conflict Text')
-          this.props.refresh({ noloading: true })
-          this.props.openSnackBar(text, res !== 'Finished' ? { showTasks: true } : null)
-        }
-      })
-    }
-
-    /* drag row */
-    this.dragRow = (e) => {
-      //  console.log('this.dragRow', this.props.select.selected[0], this.RDSI)
-      const s = this.refDragedItems.style
-      if (!this.props.select.selected.includes(this.RDSI)) {
-        if (this.RDSI > -1) this.props.select.addByArray([this.RDSI], (new Date()).getTime())
-      } else if (s.display !== 'flex') {
-        s.display = 'flex'
-      } else {
-        s.width = '180px'
-        s.opacity = 1
-
-        const RDTop = `${this.RDSI * 48 + 48 - (this.preScrollTop || 0)}px`
-        if (!s.top || s.top === RDTop) s.top = `${e.clientY - 130}px`
-        else s.marginTop = `${e.clientY - 130 - parseInt(s.top, 10)}px`
-
-        if (!s.left || s.left === '0px') s.left = `${e.clientX - 70}px`
-        else s.marginLeft = `${e.clientX - 70 - parseInt(s.left, 10)}px`
-      }
-      if (!this.entry.type) this.forceUpdate()
-    }
-
-    this.shouldFire = () => {
-      const { select, entries } = this.props
-      const { hover } = select
-      return hover > -1 && select.rowDrop(hover) && entries[hover].type === 'directory' && this.RDSI !== hover
-    }
-
-    this.dragEnd = () => {
-      document.removeEventListener('mousemove', this.dragRow)
-      document.removeEventListener('mouseup', this.dragEnd)
-      if (!this.refDragedItems) return
-      const hover = this.props.select.hover
-      const shouldFire = this.shouldFire()
-      if (shouldFire) {
-        const type = 'move'
-
-        const path = this.props.home.path
-        const dir = path[path.length - 1].uuid
-        const drive = path[0].uuid
-        const src = { drive, dir }
-        const dst = { drive, dir: this.props.entries[hover].uuid }
-
-        const entries = this.props.select.selected.map(i => this.props.entries[i].uuid)
-        const policies = { dir: ['keep', null] }
-
-        this.props.apis.request('copy', { type, src, dst, entries, policies }, this.finish)
-      }
-      const s = this.refDragedItems.style
-      s.transition = 'all 225ms cubic-bezier(.4,0,1,1)'
-      s.top = `${this.RDSI * 48 + 48 - (this.preScrollTop || 0)}px`
-      s.left = '0px'
-      s.marginTop = '0px'
-      s.marginLeft = '0px'
-      s.width = '100%'
-      s.opacity = 0
-
-      this.RDSI = -1
-      this.props.select.toggleDrag([])
-
-      setTimeout(() => {
-        s.display = 'none'
-        s.transition = 'all 225ms cubic-bezier(.4,0,1,1)'
-        s.transitionProperty = 'top, left, width, opacity'
-      }, shouldFire ? 0 : 225)
-    }
-
-    this.rowDragStart = (event, index) => {
-      /* only left click */
-      if (event.nativeEvent.button !== 0) return
-      /* not public */
-      if (this.props.entries[index].type === 'public') return
-      this.RDSI = index // rowDragStartIndex
-      const selected = this.props.select.selected
-      this.props.select.toggleDrag(selected.includes(this.RDSI) ? selected : [this.RDSI])
-
-      /* show drag item */
-      // this.refDragedItems.style.display = 'flex'
-      this.refDragedItems.style.top = `${this.RDSI * 48 + 48 - (this.preScrollTop || 0)}px`
-
-      document.addEventListener('mousemove', this.dragRow)
-      document.addEventListener('mouseup', this.dragEnd, true)
-    }
   }
 
   componentDidMount() {
@@ -468,8 +359,6 @@ class FileContent extends React.Component {
     /* lost connection to wisnuc */
     if (!window.navigator.onLine) return this.renderOffLine()
 
-    this.entry = this.RDSI > -1 && this.props.entries[this.RDSI] || {}
-
     /* got list */
     return (
       <div style={{ width: '100%', height: '100%' }}>
@@ -499,7 +388,7 @@ class FileContent extends React.Component {
               selectStart={this.selectStart}
               selectEnd={this.selectEnd}
               selectRow={this.selectRow}
-              rowDragStart={this.rowDragStart}
+              rowDragStart={this.props.rowDragStart}
               onScroll={this.onScroll}
               drop={this.drop}
             />
@@ -538,78 +427,6 @@ class FileContent extends React.Component {
             border: `1px ${this.props.primaryColor} dashed`
           }}
         />
-
-        {/* dragged items */}
-        <div
-          ref={ref => (this.refDragedItems = ref)}
-          onMouseUp={e => this.dragEnd(e)}
-          onMouseMove={e => (this.props.gridView ? this.dragGrid(e) : this.dragRow(e))}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            marginLeft: 0,
-            opacity: 0,
-            width: '100%',
-            height: 48,
-            transition: 'all 225ms cubic-bezier(.4,0,1,1)',
-            transitionProperty: 'top, left, width, opacity',
-            display: 'none',
-            alignItems: 'center',
-            color: '#FFF',
-            boxShadow: '2px 2px 2px rgba(0,0,0,0.27)',
-            backgroundColor: this.props.primaryColor
-          }}
-        >
-          <div style={{ flexGrow: 1, maxWidth: 48 }} />
-          {/* file type may be: folder, public, directory, file, unsupported */}
-          <div style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', margin: 12 }}>
-            <Avatar style={{ backgroundColor: 'white', width: 36, height: 36 }}>
-              {
-                this.entry.type === 'directory'
-                ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
-                : this.entry.type === 'file'
-                ? renderFileIcon(this.entry.name, this.entry.metadata, 24)
-                : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
-              }
-            </Avatar>
-          </div>
-          <div
-            style={{
-              width: 114,
-              marginRight: 12,
-              overflow: 'hidden',
-              whiteSpace: 'nowrap',
-              textOverflow: 'ellipsis'
-            }}
-          >
-            { this.entry.name }
-          </div>
-          {
-            this.props.select.selected.length > 1 &&
-              <div
-                style={{
-                  position: 'absolute',
-                  top: -12,
-                  right: -12,
-                  width: 24,
-                  height: 24,
-                  borderRadius: 12,
-                  boxSizing: 'border-box',
-                  backgroundColor: this.shouldFire() ? this.props.primaryColor : '#FF4081',
-                  border: '1px solid rgba(0,0,0,0.18)',
-                  color: '#FFF',
-                  fontWeight: 500,
-                  fontSize: 14,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                { this.props.select.selected.length }
-              </div>
-          }
-        </div>
       </div>
     )
   }
