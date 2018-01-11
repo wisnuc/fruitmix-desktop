@@ -261,7 +261,9 @@ class Public extends Home {
             inPublicRoot={this.state.inRoot}
             refresh={this.refresh}
             rowDragStart={this.rowDragStart}
+            gridDragStart={this.gridDragStart}
             setScrollTop={this.setScrollTop}
+            setGridData={this.setGridData}
           />
         }
 

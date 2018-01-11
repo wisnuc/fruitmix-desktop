@@ -154,19 +154,24 @@ class Row extends React.Component {
             list.entries.map((item) => {
               const { index, entry } = item
               const selected = select.selected.findIndex(s => s === index) > -1
+              const onDropping = entry.type === 'directory' && select.rowDrop(index)
               return (
                 <div
                   style={{
                     position: 'relative',
                     width: 180,
                     height: entry.type === 'file' ? 184 : 48,
-                    marginRight: 20,
-                    marginBottom: 16,
+                    marginRight: onDropping ? 16 : 20,
+                    marginBottom: onDropping ? 12 : 16,
+                    border: onDropping ? `2px ${primaryColor} solid` : '',
                     boxShadow: selected ? 'rgba(0, 0, 0, 0.188235) 0px 10px 30px, rgba(0, 0, 0, 0.227451) 0px 6px 10px'
                     : 'rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px'
                   }}
                   onTouchTap={e => this.props.onRowTouchTap(e, index)}
                   onDoubleClick={e => this.props.onRowDoubleClick(e, index)}
+                  onMouseDown={e => e.stopPropagation() || this.props.gridDragStart(e, index)}
+                  onMouseEnter={e => this.props.onRowMouseEnter(e, index)}
+                  onMouseLeave={e => this.props.onRowMouseLeave(e, index)}
                   key={index}
                 >
                   {/* preview or icon */}
@@ -259,9 +264,11 @@ class GridView extends React.Component {
 
     this.scrollToRow = index => this.ListRef.scrollToRow(index)
 
-    this.getStatus = () => {
+    this.getStatus = () => this.gridData
+
+    this.calcGridData = () => {
       const list = document.getElementsByClassName('ReactVirtualized__List')[0]
-      return ({
+      this.gridData = {
         mapData: this.mapData.reduce((acc, val, index) => {
           val.entries.forEach(() => acc.push(index))
           return acc
@@ -270,8 +277,14 @@ class GridView extends React.Component {
         indexHeightSum: this.indexHeightSum,
         scrollTop: parseInt(list.scrollTop, 10) || 0,
         cellWidth: 200
-      })
+      }
+
+      this.props.setGridData(this.gridData)
     }
+  }
+
+  componentDidMount() {
+    this.calcGridData()
   }
 
   componentDidUpdate() {
@@ -291,6 +304,7 @@ class GridView extends React.Component {
         this.props.select.touchTap(0, index)
       }
     }
+    this.calcGridData()
   }
 
   render() {

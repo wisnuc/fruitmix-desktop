@@ -278,7 +278,35 @@ class Home extends Base {
       })
     }
 
+    this.shouldFire = () => {
+      const { select, entries } = this.state
+      const { hover } = select
+      return hover > -1 && select.rowDrop(hover) && entries[hover].type === 'directory' && this.RDSI !== hover
+    }
+
+    this.onHoverHeader = (node) => {
+      this.hoverHeader = node
+      this.forceUpdate()
+    }
+
+    /* verify header node for dropping, return `null` or the node */
+    this.dropHeader = () => {
+      if (!this.hoverHeader || this.hoverHeader.uuid === this.state.path.slice(-1)[0].uuid) return null
+      if (this.hoverHeader.type === 'publicRoot') return null
+      return this.hoverHeader
+    }
+
     this.setScrollTop = scrollTop => (this.scrollTop = scrollTop)
+
+    this.setGridData = data => (this.gridData = data)
+
+    this.getPosition = (gridData, index) => {
+      const { mapData, indexHeightSum, scrollTop } = gridData
+      const lineNum = mapData[index]
+      const top = indexHeightSum[lineNum] + 104 - scrollTop
+      const left = (index - mapData.findIndex(i => i === lineNum)) * 200 + 123
+      return ({ top, left })
+    }
 
     /* drag row */
     this.dragRow = (e) => {
@@ -301,25 +329,8 @@ class Home extends Base {
       if (!this.entry.type) this.forceUpdate()
     }
 
-    this.shouldFire = () => {
-      const { select, entries } = this.state
-      const { hover } = select
-      return hover > -1 && select.rowDrop(hover) && entries[hover].type === 'directory' && this.RDSI !== hover
-    }
-
-    this.onHoverHeader = (node) => {
-      this.hoverHeader = node
-      this.forceUpdate()
-    }
-
-    /* verify header node for dropping, return `null` or the node */
-    this.dropHeader = () => {
-      if (!this.hoverHeader || this.hoverHeader.uuid === this.state.path.slice(-1)[0].uuid) return null
-      if (this.hoverHeader.type === 'publicRoot') return null
-      return this.hoverHeader
-    }
-
     this.dragEnd = () => {
+      document.removeEventListener('mousemove', this.dragGrid)
       document.removeEventListener('mousemove', this.dragRow)
       document.removeEventListener('mouseup', this.dragEnd)
       if (!this.refDragedItems || this.RDSI < 0) return
@@ -342,11 +353,19 @@ class Home extends Base {
       }
       const s = this.refDragedItems.style
       s.transition = 'all 225ms cubic-bezier(.4,0,1,1)'
-      s.top = `${this.RDSI * 48 + 176 - (this.scrollTop || 0)}px`
-      s.left = '75px'
+
+      if (this.state.gridView) {
+        const { top, left } = this.getPosition(this.gridData, this.RDSI)
+        s.top = `${top}px`
+        s.left = `${left}px`
+        s.width = '180px'
+      } else {
+        s.top = `${this.RDSI * 48 + 176 - (this.scrollTop || 0)}px`
+        s.left = '75px'
+        s.width = '100%'
+      }
       s.marginTop = '0px'
       s.marginLeft = '0px'
-      s.width = '100%'
       s.opacity = 0
 
       this.RDSI = -1
@@ -374,6 +393,46 @@ class Home extends Base {
       this.refDragedItems.style.left = '75px'
 
       document.addEventListener('mousemove', this.dragRow)
+      document.addEventListener('mouseup', this.dragEnd, true)
+    }
+
+    /* drag item in GridView */
+    this.dragGrid = (e) => {
+      const s = this.refDragedItems.style
+      if (!this.state.select.selected.includes(this.RDSI)) {
+        if (this.RDSI > -1) this.state.select.addByArray([this.RDSI], (new Date()).getTime())
+      } else if (s.display !== 'flex') {
+        s.display = 'flex'
+      } else {
+        s.opacity = 1
+
+        const { top, left } = this.getPosition(this.gridData, this.RDSI)
+
+        if (!s.top || s.top === `${top}px`) s.top = `${e.clientY + 2}px`
+        else s.marginTop = `${e.clientY + 2 - parseInt(s.top, 10)}px`
+
+        if (!s.left || s.left === `${left}px`) s.left = `${e.clientX + 2}px`
+        else s.marginLeft = `${e.clientX + 2 - parseInt(s.left, 10)}px`
+      }
+      if (!this.entry.type) this.forceUpdate()
+    }
+
+    this.gridDragStart = (event, index) => {
+      /* only left click */
+      if (event.nativeEvent.button !== 0) return
+      /* not public */
+      if (this.state.entries[index].type === 'public') return
+      this.RDSI = index // rowDragStartIndex
+      const selected = this.state.select.selected
+      this.state.select.toggleDrag(selected.includes(this.RDSI) ? selected : [this.RDSI])
+
+      /* show drag item */
+      const { top, left } = this.getPosition(this.gridData, this.RDSI)
+      this.refDragedItems.style.top = `${top}px`
+      this.refDragedItems.style.left = `${left}px`
+      this.refDragedItems.style.width = '180px'
+
+      document.addEventListener('mousemove', this.dragGrid)
       document.addEventListener('mouseup', this.dragEnd, true)
     }
 
@@ -870,7 +929,9 @@ class Home extends Base {
           apis={this.ctx.props.apis}
           refresh={this.refresh}
           rowDragStart={this.rowDragStart}
+          gridDragStart={this.gridDragStart}
           setScrollTop={this.setScrollTop}
+          setGridData={this.setGridData}
         />
 
         { this.renderMenu(this.state.contextMenuOpen, toggleDetail, getDetailStatus) }

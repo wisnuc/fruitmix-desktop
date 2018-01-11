@@ -375,6 +375,8 @@ class FileContent extends React.Component {
               selectStart={this.selectStart}
               selectEnd={this.selectEnd}
               selectGrid={this.selectGrid}
+              gridDragStart={this.props.gridDragStart}
+              setGridData={this.props.setGridData}
               onScroll={this.onScroll}
               drop={this.drop}
             />

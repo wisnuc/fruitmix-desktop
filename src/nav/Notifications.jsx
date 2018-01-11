@@ -212,7 +212,7 @@ class Notifications extends React.Component {
                 sources.map((s) => {
                   const { Icon, color, title, value, action } = s
                   return (
-                    <div style={{ height: 56, display: 'flex', alignItems: 'center' }}>
+                    <div style={{ height: 56, display: 'flex', alignItems: 'center' }} key={title}>
                       <div style={{ width: 8 }} />
                       <div style={{ margin: 10, display: 'flex', alignItems: 'center' }}>
                         <Icon color={color} />
