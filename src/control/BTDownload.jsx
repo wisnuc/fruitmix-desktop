@@ -464,7 +464,7 @@ class BTDownload extends React.Component {
         <div style={{ flex: '0 0 120px' }}> { !isPause && !this.props.alt && i18n.__n('Number of Peers %s', numPeers) } </div>
 
         {/* Status */}
-        <div style={{ flex: '0 0 120px' }}>
+        <div style={{ flex: '0 0 160px' }}>
           { this.props.alt ? i18n.__('Finished') : isPause ? i18n.__('Task Paused') :
             name ? i18n.__('Task Downloading') : i18n.__('Getting Info') }
         </div>
