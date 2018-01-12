@@ -33,6 +33,7 @@ import sortByType from '../common/sort'
 import { BreadCrumbItem, BreadCrumbSeparator } from '../common/BreadCrumb'
 import { UploadFile, UploadFold } from '../common/Svg'
 import renderFileIcon from '../common/renderFileIcon'
+import { xcopyMsg } from '../common/msg'
 
 const debug = Debug('component:viewModel:Home: ')
 
@@ -270,7 +271,7 @@ class Home extends Base {
           this.ctx.openSnackBar(type.concat(i18n.__('+Failed')), { showTasks: true })
         } else {
           let text = 'Working'
-          if (res === 'Finished') text = type.concat(i18n.__('+Success'))
+          if (res === 'Finished') text = xcopyMsg(Object.assign({ type: 'move' }, this.xcopyData))
           if (res === 'Conflict') text = i18n.__('Task Conflict Text')
           this.refresh({ noloading: true })
           this.ctx.openSnackBar(text, res !== 'Finished' ? { showTasks: true } : null)
@@ -348,6 +349,12 @@ class Home extends Base {
 
         const entries = this.state.select.selected.map(i => this.state.entries[i].uuid)
         const policies = { dir: ['keep', null] }
+
+        this.xcopyData = {
+          srcDir: path[path.length - 1],
+          dstDir: shouldFire ? this.state.entries[hover] : dropHeader,
+          entries: this.state.select.selected.map(i => this.state.entries[i])
+        }
 
         this.ctx.props.apis.request('copy', { type, src, dst, entries, policies }, this.finish)
       }

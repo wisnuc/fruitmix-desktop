@@ -187,6 +187,13 @@
   "Task Conflict Text": "出现命名冲突",
   "Tasks": "任务",
 
+  "==== common/translate.jsx ====": "",
+  "Moved": "移动",
+  "Copied": "复制",
+  "%s Items Have Been": "%s个项目已从",
+  "%s Has Been": "%s已从",
+  "xcopyMsg {{action}} {{srcName}} {{dstName}} {{target}}": "{{target}}“{{srcName}}”{{action}}到“{{dstName}}”。",
+
   "==== control/AccountApp.jsx ====": "",
   "Your Username %s": "您当前的用户名为：%s 。",
   "Username Text": "设备登录用户名是系统用户名，也是您登录Samba的用户名。",
