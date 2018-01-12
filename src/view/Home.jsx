@@ -271,7 +271,7 @@ class Home extends Base {
           this.ctx.openSnackBar(type.concat(i18n.__('+Failed')), { showTasks: true })
         } else {
           let text = 'Working'
-          if (res === 'Finished') text = xcopyMsg(Object.assign({ type: 'move' }, this.xcopyData))
+          if (res === 'Finished') text = xcopyMsg(this.xcopyData)
           if (res === 'Conflict') text = i18n.__('Task Conflict Text')
           this.refresh({ noloading: true })
           this.ctx.openSnackBar(text, res !== 'Finished' ? { showTasks: true } : null)
@@ -351,6 +351,7 @@ class Home extends Base {
         const policies = { dir: ['keep', null] }
 
         this.xcopyData = {
+          type,
           srcDir: path[path.length - 1],
           dstDir: shouldFire ? this.state.entries[hover] : dropHeader,
           entries: this.state.select.selected.map(i => this.state.entries[i])
