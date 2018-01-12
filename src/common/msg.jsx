@@ -6,7 +6,6 @@ import i18n from 'i18n'
 */
 
 export function xcopyMsg(props) {
-  console.log('xcopyMsg props', props)
   const getName = (node) => {
     let name
     switch (node.type) {
