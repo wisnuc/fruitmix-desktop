@@ -581,7 +581,7 @@ class Home extends Base {
                 position: 'absolute',
                 top: -12,
                 right: -12,
-                width: 24,
+                width: 24 + Math.floor(Math.log10(this.state.select.selected.length)) * 6,
                 height: 24,
                 borderRadius: 12,
                 boxSizing: 'border-box',
