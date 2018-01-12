@@ -6,6 +6,7 @@ import i18n from 'i18n'
 */
 
 export function xcopyMsg(props) {
+  console.log('xcopyMsg props', props)
   const getName = (node) => {
     let name
     switch (node.type) {
@@ -13,9 +14,9 @@ export function xcopyMsg(props) {
         name = i18n.__('Home Title')
         break
       case 'public':
-        name = i18n.__('Public Drive')
+        name = node.name !== undefined ? node.name : i18n.__('Share Title')
         break
-      case 'built-in':
+      case 'share':
         name = i18n.__('Share Title')
         break
       default:
@@ -26,7 +27,7 @@ export function xcopyMsg(props) {
   }
 
   const { type, srcDir, dstDir, entries } = props
-  const action = type === 'move' ? i18n.__('Moved') : i18n.__('Copied')
+  const action = type === 'move' ? i18n.__('Moved') : type === 'copy' ? i18n.__('Copied') : i18n.__('Shared')
   const srcName = getName(srcDir)
   const dstName = getName(dstDir)
   const target = entries.length > 1 ? i18n.__('%s Items Have Been', entries.length) : i18n.__('%s Has Been', getName(entries[0]))
