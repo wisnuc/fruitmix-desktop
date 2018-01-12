@@ -157,7 +157,7 @@ class NavViews extends React.Component {
       }
 
       /* find new version */
-      if (firm.appifi.tagName.localeCompare(firm.releases[0].remote.tag_name) > -1) {
+      if (firm.appifi.tagName.localeCompare(firm.releases[0].remote.tag_name) > 0) {
         const nt = {
           id: UUID.v4(),
           type: 'firmware',
