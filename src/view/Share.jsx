@@ -26,7 +26,7 @@ class Share extends Home {
   }
 
   navGroup() {
-    return 'public'
+    return 'file'
   }
 
   menuName() {

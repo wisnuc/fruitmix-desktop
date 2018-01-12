@@ -71,6 +71,7 @@ class MenuItem extends React.Component {
   }
 }
 
+@Radium
 class NavDrawer extends React.Component {
   renderGroup(group, ws215i) {
     const { views, nav, navTo } = this.props
@@ -125,6 +126,16 @@ class NavDrawer extends React.Component {
     const index = global.config.users.findIndex(uc => uc && value && uc.userUUID === value.uuid && uc.weChat)
     if (index > -1) avatarUrl = global.config.users[index].weChat.avatarUrl
 
+    /* station name */
+    console.log('viewsselectedDevice', views.account.ctx.props.selectedDevice)
+    let station = null
+    const info = views.account.ctx.props.selectedDevice.info
+    if (info && info.data && info.data.name) {
+      station = info.data.name
+    }
+
+    const ip = views.account.ctx.props.selectedDevice.mdev.address
+
     return (
 
       <Drawer docked={false} width={256} open={open} onRequestChange={onRequestChange}>
@@ -148,8 +159,14 @@ class NavDrawer extends React.Component {
             }
           </div>
 
-          <div style={{ height: 40, marginLeft: 24, marginTop: -8 }}>
-            <div style={{ fontSize: 16, fontWeight: 500, color: '#FFF' }}>{ username }</div>
+          <div style={{ height: 44, marginLeft: 24, marginTop: -12 }}>
+            <div style={{ fontSize: 14, fontWeight: 500, color: '#FFF' }}>{ username }</div>
+            <div
+              style={{ fontSize: 12, color: 'rgba(225,225,225,.87)', ':hover': { color: '#FFF' }, cursor: 'pointer' }}
+              onTouchTap={() => navTo('device')}
+            >
+              { `${station} ( ${ip} )` }
+            </div>
           </div>
 
           <div style={{ position: 'absolute', right: 16, top: 8, display: this.props.isCloud ? '' : 'none' }}>
@@ -182,14 +199,6 @@ class NavDrawer extends React.Component {
           primaryColor={primaryColor}
           selected={views[nav].navGroup() === 'media'}
           onTouchTap={() => navTo('media')}
-        />
-
-        <MenuItem
-          icon={views.share.menuIcon()}
-          text={i18n.__('Share Space')}
-          primaryColor={primaryColor}
-          selected={views[nav].navGroup() === 'public'}
-          onTouchTap={() => navTo('share')}
         />
 
         <MenuItem
