@@ -187,6 +187,13 @@
   "Task Conflict Text": "Conflict",
   "Tasks": "Tasks",
 
+  "==== common/translate.jsx ====": "",
+  "Moved": "moved",
+  "Copied": "copied",
+  "%s Items Have Been": "%s items have been",
+  "%s Has Been": "%s has been",
+  "xcopyMsg {{action}} {{srcName}} {{dstName}} {{target}}": "{{target}} {{action}} from {{srcName}} to {{dstName}}.",
+
   "==== control/AccountApp.jsx ====": "",
   "Your Username %s": "Your username: %s",
   "Username Text": "This username is used for WISNUC OS as well as Samba.",
