@@ -134,7 +134,9 @@ class NavDrawer extends React.Component {
       station = info.data.name
     }
 
-    const ip = views.account.ctx.props.selectedDevice.mdev.address
+    const mdev = views.account.ctx.props.selectedDevice.mdev
+    const ip = this.props.isCloud ? mdev.lanip : mdev.address
+    if (this.props.isCloud) station = mdev.stationName
 
     return (
 
@@ -160,10 +162,18 @@ class NavDrawer extends React.Component {
           </div>
 
           <div style={{ height: 44, marginLeft: 24, marginTop: -12 }}>
-            <div style={{ fontSize: 14, fontWeight: 500, color: '#FFF' }}>{ username }</div>
+            <div style={{ fontSize: 14, fontWeight: 500, color: '#FFF', height: 20 }}>{ username }</div>
             <div
-              style={{ fontSize: 12, color: 'rgba(225,225,225,.87)', ':hover': { color: '#FFF' }, cursor: 'pointer' }}
-              onTouchTap={() => navTo('device')}
+              style={{
+                fontSize: 12,
+                color: '#E0E0E0',
+                ':hover': { color: this.props.isCloud || !isAdmin ? '#E0E0E0' : '#FFF' },
+                cursor: this.props.isCloud || !isAdmin ? '' : 'pointer',
+                height: 18,
+                display: 'flex',
+                alignItems: 'center'
+              }}
+              onTouchTap={() => isAdmin && !this.props.isCloud && navTo('device')}
             >
               { `${station} ( ${ip} )` }
             </div>
