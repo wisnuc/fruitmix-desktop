@@ -75,6 +75,7 @@ class WechatLogin extends React.Component {
     this.autologinAsync = async () => {
       const stationID = this.state.lastDevice.id
       const ips = this.state.lastDevice.LANIP
+      const stationName = this.state.lastDevice.name
 
       let lanip = null
       for (let i = 0; i < ips.length; i++) {
@@ -110,7 +111,7 @@ class WechatLogin extends React.Component {
             ctx: user,
             data: localToken.data
           },
-          mdev: { address: lanip, domain: 'local', stationID }
+          mdev: { address: lanip, domain: 'local', stationID, stationName }
         })
         this.props.ipcRenderer.send('UPDATE_USER_CONFIG', user.uuid, { weChat: this.state.wxData.user })
         this.done('LOGIN', this.props.selectedDevice, user)
@@ -122,7 +123,7 @@ class WechatLogin extends React.Component {
             ctx: user,
             data: { token, stationID }
           },
-          mdev: { address: 'http://www.siyouqun.com', domain: 'remote', lanip: ips[0], stationID }
+          mdev: { address: 'http://www.siyouqun.com', domain: 'remote', lanip: ips[0], stationID, stationName }
         })
         this.props.ipcRenderer.send('UPDATE_USER_CONFIG', user.uuid, { weChat: this.state.wxData.user })
         return this.done('LOGIN', this.props.selectedDevice, user)
