@@ -15,6 +15,7 @@ import FlatButton from '../common/FlatButton'
 import DialogOverlay from '../common/PureDialog'
 import ContextMenu from '../common/ContextMenu'
 import { BTTorrentIcon, BTMagnetIcon } from '../common/Svg'
+import { formatTime } from '../common/datetime'
 
 const debug = Debug('component:download:')
 
@@ -412,7 +413,7 @@ class BTDownload extends React.Component {
   }
 
   renderRow(task, index) {
-    const { magnetURL, name, progress, downloadSpeed, downloaded, timeRemaining, infoHash, isPause, numPeers } = task
+    const { magnetURL, name, progress, downloadSpeed, downloaded, timeRemaining, infoHash, isPause, numPeers, finishTime } = task
     const selected = this.state.select.selected && this.state.select.selected.findIndex(s => s === index) > -1
     const hovered = this.state.select.hover === index
     return (
@@ -440,7 +441,7 @@ class BTDownload extends React.Component {
         <div style={{ display: 'flex', flexGrow: 1, alignItems: 'center', marginLeft: 24 }} >
           <div
             style={{
-              maxWidth: parseInt(window.innerWidth, 10) - 1046,
+              maxWidth: parseInt(window.innerWidth, 10) - 1086,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
@@ -471,7 +472,7 @@ class BTDownload extends React.Component {
 
         {/* task restTime */}
         <div style={{ flex: '0 0 160px' }}>
-          { this.props.alt ? '' : isPause ? '- - : - - : - -' : formatSeconds(timeRemaining / 1000) }
+          { this.props.alt ? formatTime(finishTime) : isPause ? '- - : - - : - -' : formatSeconds(timeRemaining / 1000) }
         </div>
         <div style={{ flex: '0 0 90px' }} >
           {
