@@ -58,6 +58,8 @@ class Base extends EventEmitter {
     switch (group) {
       case 'file':
         return teal600
+      case 'box':
+        return teal600
       case 'media':
         return lightBlue600
       case 'public':

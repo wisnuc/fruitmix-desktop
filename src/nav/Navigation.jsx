@@ -25,6 +25,8 @@ import Public from '../view/Public'
 import Share from '../view/Share'
 import Transmission from '../view/Transmission'
 
+import Box from '../view/Box'
+import Group from '../view/Group'
 import Media from '../view/Media'
 import Assistant from '../view/Assistant'
 import Account from '../view/Account'
@@ -58,6 +60,9 @@ class NavViews extends React.Component {
     this.install('share', Share)
     this.install('public', Public)
     this.install('transmission', Transmission)
+
+    this.install('box', Box)
+    this.install('group', Group)
 
     this.install('download', Download)
     this.install('finishedList', FinishedList)
