@@ -70,7 +70,7 @@
     "mkdirp": "^0.5.1",
     "nedb": "^1.8.0",
     "nodejs-fs-utils": "^1.0.26",
-    "pdfjs-dist": "^1.9.646",
+    "pdfjs-dist": "^2.0.267",
     "prettysize": "^1.1.0",
     "react": "^15.6.1",
     "react-event-listener": "^0.5.1",
