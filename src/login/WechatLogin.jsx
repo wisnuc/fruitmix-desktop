@@ -90,7 +90,7 @@ class WechatLogin extends React.Component {
         }
       }
 
-      // lanip = null // force to connect cloud
+      lanip = null // force to connect cloud
 
       const token = this.state.wxData.token
       const guid = this.state.wxData.user.id
@@ -121,7 +121,7 @@ class WechatLogin extends React.Component {
             ctx: user,
             data: { token, stationID }
           },
-          mdev: { address: 'http://www.siyouqun.com', domain: 'remote', lanip: ips[0], stationID, stationName }
+          mdev: { address: 'http://test.siyouqun.com', domain: 'remote', lanip: ips[0], stationID, stationName }
         })
         this.props.ipcRenderer.send('UPDATE_USER_CONFIG', user.uuid, { weChat: this.state.wxData.user })
         return this.done('LOGIN', this.props.selectedDevice, user)
