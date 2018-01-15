@@ -127,7 +127,7 @@ class NavDrawer extends React.Component {
     if (index > -1) avatarUrl = global.config.users[index].weChat.avatarUrl
 
     /* station name */
-    console.log('viewsselectedDevice', views.account.ctx.props.selectedDevice)
+    // console.log('viewsselectedDevice', views.account.ctx.props.selectedDevice)
     let station = null
     const info = views.account.ctx.props.selectedDevice.info
     if (info && info.data && info.data.name) {
