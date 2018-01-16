@@ -30,7 +30,7 @@ class Row extends React.PureComponent {
           opacity: disable ? 0.5 : 1
         }}
         onTouchTap={disable ? null : this.props.selectNode}
-        onDoubleClick={() => this.props.enter(node)}
+        onDoubleClick={() => !disable && this.props.enter(node)}
       >
         <div style={{ margin: '0 12px 0 12px', display: 'flex' }}>
           {
