@@ -88,95 +88,19 @@ class Inbox extends React.Component {
     })
 
     if (this.preSelect > -1 && s > -1) { // change selected
-      console.log('same column')
-      if (pos[this.preSelect].left === pos[s].left) { // same column
-        console.log('change selected same column')
-        const { height, left, top, selected, diff } = pos[s]
+      const { height, left, top, selected, diff } = pos[s]
 
-        /* move grids above selected */
-        pos.forEach((p, i) => i < s && p.left !== left && (p.tsd = '0ms') && (p.top -= Math.abs(diff)))
+      /* move grids above selected */
+      pos.forEach((p, i) => i < s && p.left !== left && (p.tsd = '150ms') && (p.top -= Math.abs(diff)))
 
-        /* move grids below selected */
-        pos.forEach((p, i) => i > s && p.left !== left && (p.tsd = '0ms') && (p.top += height + 16 - Math.abs(diff)))
+      /* move grids below selected */
+      pos.forEach((p, i) => i > s && p.left !== left && (p.tsd = '150ms') && (p.top += height + 16 - Math.abs(diff)))
 
-        /* expend selected */
-        pos[s] = { height, left: 15, top, selected, tsd: '300ms' }
-        return pos
-      } else if (s > this.preSelect) {
-        // new > pre : above pre in another column down pre'height
-        //             pre column move
-        const { height, left, top, selected, diff } = this.prePos[s]
-        this.prePos.forEach((p, i) => i < this.preSelect && pos[i].left === pos[s].left && (p.tsd = '0ms') &&
-          (p.top += this.prePos[this.preSelect].height + 16))
-
-        const flag = this.prePos.findIndex(p => p.left !== left && p.top + p.height + 16 >= top)
-        const fDiff = this.prePos[flag].height + this.prePos[flag].top + 16 - top
-        console.log('flag', flag, this.prePos[flag].height + this.prePos[flag].top + 16 - top, height)
-        this.prePos.forEach((p, i) => i <= flag && p.left !== left && (p.tsd = '0ms') && (p.top -= fDiff))
-
-        this.prePos.forEach((p, i) => i > flag && p.left !== left && (p.tsd = '0ms') && (p.top += height + 16 - fDiff))
-
-        /* this.prePos[this.preSelect] is different, need handle it extraly */
-        if (pos[s].left === 15) this.prePos[this.preSelect].top -= fDiff
-
-        this.prePos[s].left = 15
-        this.prePos[s].selected = true
-        this.prePos[s].tsd = '300ms'
-        this.prePos[this.preSelect].left = pos[this.preSelect].left
-        this.prePos[this.preSelect].tsd = '0ms'
-        this.prePos[this.preSelect].selected = false
-        return this.prePos
-      } else if (s < this.preSelect && pos[s].left === 405) {
-        // new < pre : below pre in another column up pre'height
-        //             pre column move
-      
-        const { height, left, top, selected, diff } = this.prePos[s]
-        this.prePos.forEach((p, i) => i > this.preSelect && pos[i].left === pos[s].left && (p.tsd = '0ms') &&
-          (p.top -= this.prePos[this.preSelect].height + 16))
-
-        const flag = this.prePos.findIndex(p => p.left !== left && p.top + p.height + 16 >= top)
-        const fDiff = this.prePos[flag].height + this.prePos[flag].top + 16 - top
-        console.log('flag pos[s].left === 405', flag, this.prePos[flag].height + this.prePos[flag].top + 16 - top, height)
-        this.prePos.forEach((p, i) => i <= flag && p.left !== left && (p.tsd = '0ms') && (p.top -= fDiff))
-
-        this.prePos.forEach((p, i) => i > flag && p.left !== left && (p.tsd = '0ms') && (p.top += height + 16 - fDiff))
-
-        /* this.prePos[this.preSelect] is different, need handle it extraly */
-        // if (pos[s].left === 405) this.prePos[this.preSelect].top -= fDiff
-
-        this.prePos[s].left = 15
-        this.prePos[s].selected = true
-        this.prePos[s].tsd = '300ms'
-        this.prePos[this.preSelect].left = pos[this.preSelect].left
-        this.prePos[this.preSelect].tsd = '0ms'
-        this.prePos[this.preSelect].selected = false
-        return this.prePos
-      } else {
-        console.log('pos[s].left === 15')
-        // new < pre : below pre in another column up pre'height
-        //             pre column move
-      
-        const { height, left, top, selected, diff } = this.prePos[s]
-        this.prePos.forEach((p, i) => i > this.preSelect && pos[i].left === pos[s].left && (p.tsd = '0ms') &&
-          (p.top -= this.prePos[this.preSelect].height + 16))
-
-        const flag = this.prePos.findIndex(p => p.left !== left && p.top + p.height + 16 >= top)
-        const fDiff = this.prePos[flag].height + this.prePos[flag].top + 16 - top
-        this.prePos.forEach((p, i) => i <= flag && p.left !== left && (p.tsd = '0ms') && (p.top -= fDiff))
-
-        this.prePos.forEach((p, i) => i > flag && p.left !== left && (p.tsd = '0ms') && (p.top += height + 16 - fDiff))
-
-        /* this.prePos[this.preSelect] is different, need handle it extraly */
-        this.prePos[this.preSelect].top += fDiff - 16
-
-        this.prePos[s].left = 15
-        this.prePos[s].selected = true
-        this.prePos[s].tsd = '300ms'
-        this.prePos[this.preSelect].left = pos[this.preSelect].left
-        this.prePos[this.preSelect].tsd = '0ms'
-        this.prePos[this.preSelect].selected = false
-        return this.prePos
-      }
+      /* expend selected */
+      pos[s] = { height, left: 15, top, selected, tsd: '0ms', wd: '300ms' }
+      pos[this.preSelect].tsd = '150ms'
+      pos[this.preSelect].wd = '0ms'
+      return pos
     } else if (s > -1) { // first toggle
       const { height, left, top, selected, diff } = pos[s]
 
@@ -187,7 +111,7 @@ class Inbox extends React.Component {
       pos.forEach((p, i) => i > s && p.left !== left && (p.tsd = '0ms') && (p.top += height + 16 - Math.abs(diff)))
 
       /* expend selected */
-      pos[s] = { height, left: 15, top, selected, tsd: '150ms' }
+      pos[s] = { height, left: 15, top, selected, wd: '150ms' }
     } else if (this.preSelect > -1) { // toggle selected
       const { left } = pos[this.preSelect]
       pos.forEach(p => p.left !== left && (p.tsd = '150ms'))
@@ -204,7 +128,7 @@ class Inbox extends React.Component {
         {/* <div style={{ height: 1000, width: 810, transition: curve }} ref={ref => (this.refSpace = ref)} /> */}
         {
           this.calcPos([2.9, 9, 2, 8, 3, 7, 4, 6, 5].map(v => v * 36 + 36), this.state.selected).map((v, i) => {
-            const { height, top, left, selected, tsd } = v
+            const { height, top, left, selected, tsd, wd } = v
             return (
               <Paper
                 key={height}
@@ -213,7 +137,9 @@ class Inbox extends React.Component {
                   position: 'absolute',
                   backgroundColor: '#FFF',
                   width: selected ? 750 : 360,
-                  transitionDelay: tsd || '0ms',
+                  transition: `all 450ms cubic-bezier(0.23, 1, 0.32, 1) ${tsd || '0ms'},
+                    margin-left 450ms cubic-bezier(0.23, 1, 0.32, 1) ${wd || '0ms'},
+                    width 450ms cubic-bezier(0.23, 1, 0.32, 1) ${wd || '0ms'}`,
                   margin: `${top}px 15px 0px ${left}px`
                 }}
                 onTouchTap={() => this.handleSelect(i)}
