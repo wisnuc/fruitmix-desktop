@@ -2,7 +2,7 @@ import React from 'react'
 import i18n from 'i18n'
 import EventListener from 'react-event-listener'
 import { TweenMax } from 'gsap'
-import { IconButton, CircularProgress, Paper } from 'material-ui'
+import { IconButton, CircularProgress, Paper, Avatar } from 'material-ui'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import DeleteIcon from 'material-ui/svg-icons/action/delete'
 import VisibilityOff from 'material-ui/svg-icons/action/visibility-off'
@@ -13,6 +13,14 @@ import FlatButton from '../common/FlatButton'
 
 const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
 
+const imgUrl = 'http://cn.bing.com/th?id=ABT1B401B62BAA3194420276E294380581BC45A4292AE1FF991F97E75ED74A511A1&w=608&h=200&c=2&rs=1&pid=SANGAM'
+
+const calcCurve = (tsd, wd) => {
+  return `all 450ms cubic-bezier(0.23, 1, 0.32, 1) ${tsd || '0ms'},
+          margin-left 450ms cubic-bezier(0.23, 1, 0.32, 1) ${wd || '0ms'},
+          width 450ms cubic-bezier(0.23, 1, 0.32, 1) ${wd || '0ms'},
+          height 450ms cubic-bezier(0.23, 1, 0.32, 1) ${wd || '0ms'}`
+}
 class Inbox extends React.Component {
   constructor(props) {
     super(props)
@@ -66,14 +74,17 @@ class Inbox extends React.Component {
     )
   }
 
-  calcPos(heights, s) {
+  calcPos(data, s) {
     let [h1, h2] = [16, 16]
-    const pos = heights.map((height, i) => {
+    const pos = data.map((d, i) => {
+      const h = d.height
       let top = 0
       let left = 15
 
       const selected = i === s
       const diff = h1 - h2
+
+      const height = selected ? h * 1.5 : h
 
       if (h1 <= h2) { // left
         top = h1
@@ -84,11 +95,11 @@ class Inbox extends React.Component {
         h2 += height + 16
       }
 
-      return ({ height, left, top, selected, diff })
+      return ({ height, left, top, selected, diff, content: d.content })
     })
 
     if (this.preSelect > -1 && s > -1) { // change selected
-      const { height, left, top, selected, diff } = pos[s]
+      const { height, left, top, selected, diff, content } = pos[s]
 
       /* move grids above selected */
       pos.forEach((p, i) => i < s && p.left !== left && (p.tsd = '150ms') && (p.top -= Math.abs(diff)))
@@ -97,12 +108,12 @@ class Inbox extends React.Component {
       pos.forEach((p, i) => i > s && p.left !== left && (p.tsd = '150ms') && (p.top += height + 16 - Math.abs(diff)))
 
       /* expend selected */
-      pos[s] = { height, left: 15, top, selected, tsd: '0ms', wd: '300ms' }
+      pos[s] = { height, left: 15, top, selected, tsd: '0ms', wd: '300ms', content }
       pos[this.preSelect].tsd = '150ms'
       pos[this.preSelect].wd = '0ms'
       return pos
     } else if (s > -1) { // first toggle
-      const { height, left, top, selected, diff } = pos[s]
+      const { height, left, top, selected, diff, content } = pos[s]
 
       /* move grids above selected */
       pos.forEach((p, i) => i < s && p.left !== left && (p.tsd = '0ms') && (p.top -= Math.abs(diff)))
@@ -111,7 +122,7 @@ class Inbox extends React.Component {
       pos.forEach((p, i) => i > s && p.left !== left && (p.tsd = '0ms') && (p.top += height + 16 - Math.abs(diff)))
 
       /* expend selected */
-      pos[s] = { height, left: 15, top, selected, wd: '150ms' }
+      pos[s] = { height, left: 15, top, selected, wd: '150ms', content }
     } else if (this.preSelect > -1) { // toggle selected
       const { left } = pos[this.preSelect]
       pos.forEach(p => p.left !== left && (p.tsd = '150ms'))
@@ -122,29 +133,84 @@ class Inbox extends React.Component {
     return pos
   }
 
+  process(data) {
+    const res = data.map((d) => {
+      const { type, comment, index, tweeter, list, uuid } = d
+      if (list && list.length > 0) {
+        if (list.every(l => l.metadata)) {
+          const { height, width } = list[0].metadata
+          const altH = 360 * height / width
+          return ({ height: (height > width ? 360 : altH > 72 ? altH : 72) + 88, content: d })
+        }
+        return ({ height: 144, content: d })
+      }
+      return ({ height: 144, content: d }) // not list TODO
+    })
+    return res // ({ height, content })
+  }
+
   renderData(data) {
     return (
       <div style={{ width: 810, position: 'relative' }} >
-        {/* <div style={{ height: 1000, width: 810, transition: curve }} ref={ref => (this.refSpace = ref)} /> */}
         {
-          this.calcPos([2.9, 9, 2, 8, 3, 7, 4, 6, 5].map(v => v * 36 + 36), this.state.selected).map((v, i) => {
-            const { height, top, left, selected, tsd, wd } = v
+          this.calcPos(this.process(data), this.state.selected).map((v, i) => {
+            const { height, top, left, selected, tsd, wd, content } = v
+            const { type, comment, index, tweeter, list, uuid } = content
             return (
               <Paper
-                key={height}
+                key={uuid}
                 style={{
                   height,
                   position: 'absolute',
                   backgroundColor: '#FFF',
                   width: selected ? 750 : 360,
-                  transition: `all 450ms cubic-bezier(0.23, 1, 0.32, 1) ${tsd || '0ms'},
-                    margin-left 450ms cubic-bezier(0.23, 1, 0.32, 1) ${wd || '0ms'},
-                    width 450ms cubic-bezier(0.23, 1, 0.32, 1) ${wd || '0ms'}`,
+                  transition: calcCurve(tsd, wd),
                   margin: `${top}px 15px 0px ${left}px`
                 }}
                 onTouchTap={() => this.handleSelect(i)}
               >
-                { height }
+                <div
+                  style={{
+                    height: 72,
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    transition: calcCurve(tsd, wd)
+                  }}
+                >
+                  <div style={{ width: 16 }} />
+                  <div style={{ borderRadius: 20, width: 40, height: 40, overflow: 'hidden' }}>
+                    <img width={40} height={40} alt="face" src={tweeter.avatarUrl} />
+                  </div>
+                  <div style={{ width: 16 }} />
+                  <div style={{ flexGrow: 1 }} >
+                    <div style={{ height: 12 }} />
+                    <div style={{ height: 24, fontWeight: 500, display: 'flex', alignItems: 'center' }} >
+                      <div style={{ maxWidth: 216, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                        { comment }
+                      </div>
+                    </div>
+                    <div style={{ height: 20, fontSize: 14, color: 'rgba(0,0,0,.54)' }} >
+                      { `来自“吃货”群，分享了${list.length}张照片` }
+                    </div>
+                    <div style={{ height: 16 }} />
+                  </div>
+                </div>
+                <div
+                  style={{
+                    width: '100%',
+                    height: height - 72,
+                    transition: calcCurve(tsd, wd)
+                  }}
+                >
+                  <img
+                    width="100%"
+                    src={imgUrl}
+                    alt="photoShared"
+                    height={height - 88}
+                    style={{ objectFit: 'cover', transition: calcCurve(tsd, wd) }}
+                  />
+                </div>
               </Paper>
             )
           })

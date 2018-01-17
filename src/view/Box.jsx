@@ -43,7 +43,11 @@ class Box extends Base {
         comment: 'hello',
         ctime: 1515996423183,
         index: 0,
-        tweeter: { id: 'ocMvos6NjeKLIBqg5Mr9QjxrP1FA', wx: [] },
+        tweeter: {
+          id: 'ocMvos6NjeKLIBqg5Mr9QjxrP1FA',
+          wx: [],
+          avatarUrl: 'http://wx.qlogo.cn/mmopen/vi_32/tetOhypdu92cqPgqOelJWlIqq6wosy4XIAu1ooc2tHweTB3KrKXnibtupeWIaseoADnwLvt8ibRjBCgEXPlic0qYQ/0'
+        },
         list: [
           {
             hash: 'sahjfwiuefjhsdkfhwef',
@@ -57,7 +61,11 @@ class Box extends Base {
         comment: 'hello loooooooooooooooooong',
         ctime: 1515996433183,
         index: 1,
-        tweeter: { id: 'ocMvos6NjeKLIBqg5Mr9QjxrP1FA', wx: [] },
+        tweeter: {
+          id: 'ocMvos6NjeKLIBqg5Mr9QjxrP1FA',
+          wx: [],
+          avatarUrl: 'http://wx.qlogo.cn/mmopen/vi_32/9DBUNd9N1QOQoJps1KGD3rUc3YRGbzLWeQzKXWzrE7Def0yXjdutvbsaF1FgnY5ibDz96G7qUHddrCfAOPQyCKQ/0'
+        },
         list: [
           {
             hash: 'sahjfwiuefjhsdkfhwef',
@@ -111,11 +119,15 @@ class Box extends Base {
         comment: 'a fdf gg ee',
         ctime: 1516996463183,
         index: 4,
-        tweeter: { id: 'ocMvos6NjeKLIBqg5Mr9QjxrP1FA', wx: [] },
+        tweeter: {
+          id: 'ocMvos6NjeKLIBqg5Mr9QjxrP1FA',
+          wx: [],
+          avatarUrl: 'http://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKQiahrEc8rUfECDTUq94WlcaNkTYTKzIKr3p'
+        },
         list: [
           {
             hash: 'sahjfwiuefjhsdkdfdfgdfgef',
-            metadata: { height: 900, width: 300 }
+            metadata: { height: 300, width: 10 }
           },
           {
             hash: 'sahjfwidfgdfgdfdfgef',
@@ -141,7 +153,7 @@ class Box extends Base {
         list: [
           {
             hash: 'sahjfwiuefjhhfhgffff',
-            metadata: { height: 600, width: 300 }
+            metadata: { height: 10, width: 300 }
           }
         ],
         uuid: 'ff5d42b9-4b8f-452d-a102-ebfde5cdf943'
