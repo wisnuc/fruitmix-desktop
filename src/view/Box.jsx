@@ -37,9 +37,144 @@ class Box extends Base {
   }
 
   willReceiveProps(nextProps) {
-    this.data = [{
-      author: ''
-    }]
+    this.data = [
+      {
+        type: 'list', // 1 media
+        comment: 'hello',
+        ctime: 1515996423183,
+        index: 0,
+        tweeter: { id: 'ocMvos6NjeKLIBqg5Mr9QjxrP1FA', wx: [] },
+        list: [
+          {
+            hash: 'sahjfwiuefjhsdkfhwef',
+            metadata: { height: 600, width: 300 }
+          }
+        ],
+        uuid: 'ff5d42b9-4b8f-452d-a102-ebfde5cdf948'
+      },
+      {
+        type: 'list', // 1 file + 1 media
+        comment: 'hello loooooooooooooooooong',
+        ctime: 1515996433183,
+        index: 1,
+        tweeter: { id: 'ocMvos6NjeKLIBqg5Mr9QjxrP1FA', wx: [] },
+        list: [
+          {
+            hash: 'sahjfwiuefjhsdkfhwef',
+            metadata: { height: 600, width: 300 }
+          },
+          {
+            hash: 'asdfwsdfasdasds',
+            name: 'testfile'
+          }
+        ],
+        uuid: 'ff5d42b9-4b8f-452d-a102-ebfde5cdf947'
+      },
+      {
+        type: 'list', // 2 media
+        comment: '23232323',
+        ctime: 1515996443183,
+        index: 2,
+        tweeter: { id: 'ocMvos6NjeKLIBqg5Mr9QjxrP1FA', wx: [] },
+        list: [
+          {
+            hash: 'sahjfsfdfsdfsdfsdfhsdkfhwef',
+            metadata: { height: 300, width: 600 }
+          },
+          {
+            hash: 'sahjfssdfsdfsfdsf',
+            metadata: { height: 300, width: 600 }
+          }
+        ],
+        uuid: 'ff5d42b9-4b8f-452d-a102-ebfde5cdf946'
+      },
+      {
+        type: 'list', // 2 file
+        comment: '世界的发改委i色块的',
+        ctime: 1515996453183,
+        index: 3,
+        tweeter: { id: 'ocMvos6NjeKLIBqg5Mr9QjxrP1FA', wx: [] },
+        list: [
+          {
+            name: 'f-1',
+            hash: 'sahjfsfdfsdfsdfsdfhsdkfhwef'
+          },
+          {
+            name: 'f-2',
+            hash: 'sdfsdfhajsdgahefvswuadfs'
+          }
+        ],
+        uuid: 'ff5d42b9-4b8f-452d-a102-ebfde5cdf945'
+      },
+      {
+        type: 'list', // four media
+        comment: 'a fdf gg ee',
+        ctime: 1516996463183,
+        index: 4,
+        tweeter: { id: 'ocMvos6NjeKLIBqg5Mr9QjxrP1FA', wx: [] },
+        list: [
+          {
+            hash: 'sahjfwiuefjhsdkdfdfgdfgef',
+            metadata: { height: 900, width: 300 }
+          },
+          {
+            hash: 'sahjfwidfgdfgdfdfgef',
+            metadata: { height: 100, width: 300 }
+          },
+          {
+            hash: 's75645dfgdfgdfdfgdfgef',
+            metadata: { height: 900, width: 300 }
+          },
+          {
+            hash: 's75645dfgdfgdfdfgdfgefgfgfdgdfg',
+            metadata: { height: 900, width: 300 }
+          }
+        ],
+        uuid: 'ff5d42b9-4b8f-452d-a102-ebfde5cdf944'
+      },
+      {
+        type: 'list',
+        comment: '/;.,/[[p+_)(*(*&&^&^%%%$$$$#',
+        ctime: 1517996523183,
+        index: 5,
+        tweeter: { id: 'ocMvos6NjeKLIBqg5Mr9QjxrP1FA', wx: [] },
+        list: [
+          {
+            hash: 'sahjfwiuefjhhfhgffff',
+            metadata: { height: 600, width: 300 }
+          }
+        ],
+        uuid: 'ff5d42b9-4b8f-452d-a102-ebfde5cdf943'
+      },
+      {
+        type: 'list',
+        comment: 'weujkrffkjdfwkefde',
+        ctime: 1518996623183,
+        index: 6,
+        tweeter: { id: 'ocMvos6NjeKLIBqg5Mr9QjxrP1FA', wx: [] },
+        list: [
+          {
+            hash: 'sahjfwiuefjhdfhgdgsdf',
+            metadata: { height: 600, width: 300 }
+          }
+        ],
+        uuid: 'ff5d42b9-4b8f-452d-a102-ebfde5cdf942'
+      },
+      {
+        type: 'list',
+        comment: 'hello world',
+        ctime: 1519996723183,
+        index: 7,
+        tweeter: { id: 'ocMvos6NjeKLIBqg5Mr9QjxrP1FA', wx: [] },
+        list: [
+          {
+            hash: 'sahjfwiuefjhsdkfhwefffff',
+            metadata: { height: 600, width: 300 }
+          }
+        ],
+        uuid: 'ff5d42b9-4b8f-452d-a102-ebfde5cdf941'
+      }
+    ]
   }
 
   navEnter() {

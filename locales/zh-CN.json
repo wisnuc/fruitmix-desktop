@@ -443,11 +443,9 @@
   "Connect via Cloud": "闻上云连接中",
   "Box Title": "我的盒子",
   "Management Title": "管理",
-  "Docker": "Docker",
   "Device Management": "设备管理",
   "Files": "文件",
   "Photos": "照片",
-  "Share Space": "共享空间",
   "System Settings": "系统设置",
 
   "==== nav/Navigation.jsx ====": "",
@@ -736,6 +734,14 @@
   "Remove": "移除",
   "Hide Photo Dialog Text 1": "要将照片隐藏吗？",
   "Hide Photo Dialog Text 2": "内容被隐藏后，我的照片内将不显示，可在智能助理中恢复。",
+
+  "==== box/Inbox.js ====": "",
+  "Box": "我的盒子",
+  "Inbox Menu Name": "收件箱",
+  "Inbox Quick Name": "收件箱",
+  "Inbox Title": "收件箱",
+  "No Data in Inbox Text 1": "未收到任何文件！",
+  "No Data in Inbox Text 2": "",
 
   "==== node/lib/window.js ====": "",
   "Confirm Close Title": "确认关闭",

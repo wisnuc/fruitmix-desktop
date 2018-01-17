@@ -443,11 +443,9 @@
   "Connect via Cloud": "Connected via Cloud",
   "Box Title": "WISNUC Box",
   "Management Title": "Management",
-  "Docker": "Docker",
   "Device Management": "Device",
   "Files": "Files",
   "Photos": "Photos",
-  "Share Space": "Sharing Space",
   "System Settings": "System",
 
   "==== nav/Navigation.jsx ====": "",
@@ -736,6 +734,14 @@
   "Remove": "Remove",
   "Hide Photo Dialog Text 1": "Hide selected photos ?",
   "Hide Photo Dialog Text 2": "Photos will not display these hidden items. You can recovery them in Assistant.",
+
+  "==== box/Inbox.js ====": "",
+  "Box": "Box",
+  "Inbox Menu Name": "Inbox",
+  "Inbox Quick Name": "Inbox",
+  "Inbox Title": "Inbox",
+  "No Data in Inbox Text 1": "No data !",
+  "No Data in Inbox Text 2": "",
 
   "==== node/lib/window.js ====": "",
   "Confirm Close Title": "Confirm close",
