@@ -77,49 +77,55 @@ class Inbox extends React.Component {
   calcPos(data, s) {
     let [h1, h2] = [16, 16]
     const pos = data.map((d, i) => {
-      const h = d.height
+      const h = d.height // raw height
       let top = 0
       let left = 15
 
       const selected = i === s
       const diff = h1 - h2
 
-      const height = selected ? h * 1.5 : h
+      const height = selected ? h * 1.2 : h
 
       if (h1 <= h2) { // left
         top = h1
-        h1 += height + 16
+        h1 += h + 16
       } else { // right
         left = 405
         top = h2
-        h2 += height + 16
+        h2 += h + 16
       }
 
-      return ({ height, left, top, selected, diff, content: d.content })
+      return ({ height, h, left, top, selected, diff, content: d.content })
     })
 
     if (this.preSelect > -1 && s > -1) { // change selected
-      const { height, left, top, selected, diff, content } = pos[s]
+      const { height, h, left, top, selected, diff, content } = pos[s]
 
       /* move grids above selected */
       pos.forEach((p, i) => i < s && p.left !== left && (p.tsd = '150ms') && (p.top -= Math.abs(diff)))
 
       /* move grids below selected */
-      pos.forEach((p, i) => i > s && p.left !== left && (p.tsd = '150ms') && (p.top += height + 16 - Math.abs(diff)))
+      pos.forEach((p, i) => i > s && p.left !== left && (p.tsd = '150ms') && (p.top += h + 16 - Math.abs(diff)))
+
+      /* move grids below selected in the same column when height changed */
+      if (height > h) pos.forEach((p, i) => i > s && (p.tsd = '150ms') && (p.top += height - h))
 
       /* expend selected */
       pos[s] = { height, left: 15, top, selected, tsd: '0ms', wd: '300ms', content }
       pos[this.preSelect].tsd = '150ms'
       pos[this.preSelect].wd = '0ms'
-      return pos
     } else if (s > -1) { // first toggle
-      const { height, left, top, selected, diff, content } = pos[s]
+      console.log('first toggle', s)
+      const { height, h, left, top, selected, diff, content } = pos[s]
 
       /* move grids above selected */
       pos.forEach((p, i) => i < s && p.left !== left && (p.tsd = '0ms') && (p.top -= Math.abs(diff)))
 
       /* move grids below selected */
       pos.forEach((p, i) => i > s && p.left !== left && (p.tsd = '0ms') && (p.top += height + 16 - Math.abs(diff)))
+
+      /* move grids below selected in the same column when height changed */
+      if (height > h) pos.forEach((p, i) => i > s && p.left === left && (p.tsd = '150ms') && (p.top += height - h))
 
       /* expend selected */
       pos[s] = { height, left: 15, top, selected, wd: '150ms', content }
@@ -199,16 +205,26 @@ class Inbox extends React.Component {
                 <div
                   style={{
                     width: '100%',
+                    display: 'flex',
+                    overflow: 'hidden',
                     height: height - 72,
+                    alignItems: 'center',
                     transition: calcCurve(tsd, wd)
                   }}
                 >
                   <img
-                    width="100%"
+                    width={360}
                     src={imgUrl}
                     alt="photoShared"
                     height={height - 88}
                     style={{ objectFit: 'cover', transition: calcCurve(tsd, wd) }}
+                  />
+                  <img
+                    width={360}
+                    src={imgUrl}
+                    alt="photoShared"
+                    height={height - 88}
+                    style={{ objectFit: 'cover', transition: calcCurve(tsd, wd), opacity: selected ? 1 : 0, marginLeft: 30 }}
                   />
                 </div>
               </Paper>
