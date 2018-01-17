@@ -25,12 +25,17 @@ class Inbox extends React.Component {
 
     this.toggleDialog = op => this.setState({ [op]: !this.state[op] })
 
-    this.handleSelect = (i, adj) => {
-      if (this.state.selected === i) {
+    this.preSelect = -1
+
+    this.handleSelect = (i) => {
+      if (this.state.selected === i) { // toggle selected
+        this.preSelect = i
         this.setState({ selected: -1 })
-        this.refSpace.style.height = '1000px'
-      } else {
-        if (this.state.selected === -1) this.refSpace.style.height = `${1000 - adj}px`
+      } else if (this.state.selected === -1) { // first toggle
+        this.preSelect = -1
+        this.setState({ selected: i })
+      } else { // change selected
+        this.preSelect = this.state.selected
         this.setState({ selected: i })
       }
     }
@@ -61,74 +66,159 @@ class Inbox extends React.Component {
     )
   }
 
+  calcPos(heights, s) {
+    let [h1, h2] = [16, 16]
+    const pos = heights.map((height, i) => {
+      let top = 0
+      let left = 15
+
+      const selected = i === s
+      const diff = h1 - h2
+
+      if (h1 <= h2) { // left
+        top = h1
+        h1 += height + 16
+      } else { // right
+        left = 405
+        top = h2
+        h2 += height + 16
+      }
+
+      return ({ height, left, top, selected, diff })
+    })
+
+    if (this.preSelect > -1 && s > -1) { // change selected
+      console.log('same column')
+      if (pos[this.preSelect].left === pos[s].left) { // same column
+        console.log('change selected same column')
+        const { height, left, top, selected, diff } = pos[s]
+
+        /* move grids above selected */
+        pos.forEach((p, i) => i < s && p.left !== left && (p.tsd = '0ms') && (p.top -= Math.abs(diff)))
+
+        /* move grids below selected */
+        pos.forEach((p, i) => i > s && p.left !== left && (p.tsd = '0ms') && (p.top += height + 16 - Math.abs(diff)))
+
+        /* expend selected */
+        pos[s] = { height, left: 15, top, selected, tsd: '300ms' }
+        return pos
+      } else if (s > this.preSelect) {
+        // new > pre : above pre in another column down pre'height
+        //             pre column move
+        const { height, left, top, selected, diff } = this.prePos[s]
+        this.prePos.forEach((p, i) => i < this.preSelect && pos[i].left === pos[s].left && (p.tsd = '0ms') &&
+          (p.top += this.prePos[this.preSelect].height + 16))
+
+        const flag = this.prePos.findIndex(p => p.left !== left && p.top + p.height + 16 >= top)
+        const fDiff = this.prePos[flag].height + this.prePos[flag].top + 16 - top
+        console.log('flag', flag, this.prePos[flag].height + this.prePos[flag].top + 16 - top, height)
+        this.prePos.forEach((p, i) => i <= flag && p.left !== left && (p.tsd = '0ms') && (p.top -= fDiff))
+
+        this.prePos.forEach((p, i) => i > flag && p.left !== left && (p.tsd = '0ms') && (p.top += height + 16 - fDiff))
+
+        /* this.prePos[this.preSelect] is different, need handle it extraly */
+        if (pos[s].left === 15) this.prePos[this.preSelect].top -= fDiff
+
+        this.prePos[s].left = 15
+        this.prePos[s].selected = true
+        this.prePos[s].tsd = '300ms'
+        this.prePos[this.preSelect].left = pos[this.preSelect].left
+        this.prePos[this.preSelect].tsd = '0ms'
+        this.prePos[this.preSelect].selected = false
+        return this.prePos
+      } else if (s < this.preSelect && pos[s].left === 405) {
+        // new < pre : below pre in another column up pre'height
+        //             pre column move
+      
+        const { height, left, top, selected, diff } = this.prePos[s]
+        this.prePos.forEach((p, i) => i > this.preSelect && pos[i].left === pos[s].left && (p.tsd = '0ms') &&
+          (p.top -= this.prePos[this.preSelect].height + 16))
+
+        const flag = this.prePos.findIndex(p => p.left !== left && p.top + p.height + 16 >= top)
+        const fDiff = this.prePos[flag].height + this.prePos[flag].top + 16 - top
+        console.log('flag pos[s].left === 405', flag, this.prePos[flag].height + this.prePos[flag].top + 16 - top, height)
+        this.prePos.forEach((p, i) => i <= flag && p.left !== left && (p.tsd = '0ms') && (p.top -= fDiff))
+
+        this.prePos.forEach((p, i) => i > flag && p.left !== left && (p.tsd = '0ms') && (p.top += height + 16 - fDiff))
+
+        /* this.prePos[this.preSelect] is different, need handle it extraly */
+        // if (pos[s].left === 405) this.prePos[this.preSelect].top -= fDiff
+
+        this.prePos[s].left = 15
+        this.prePos[s].selected = true
+        this.prePos[s].tsd = '300ms'
+        this.prePos[this.preSelect].left = pos[this.preSelect].left
+        this.prePos[this.preSelect].tsd = '0ms'
+        this.prePos[this.preSelect].selected = false
+        return this.prePos
+      } else {
+        console.log('pos[s].left === 15')
+        // new < pre : below pre in another column up pre'height
+        //             pre column move
+      
+        const { height, left, top, selected, diff } = this.prePos[s]
+        this.prePos.forEach((p, i) => i > this.preSelect && pos[i].left === pos[s].left && (p.tsd = '0ms') &&
+          (p.top -= this.prePos[this.preSelect].height + 16))
+
+        const flag = this.prePos.findIndex(p => p.left !== left && p.top + p.height + 16 >= top)
+        const fDiff = this.prePos[flag].height + this.prePos[flag].top + 16 - top
+        this.prePos.forEach((p, i) => i <= flag && p.left !== left && (p.tsd = '0ms') && (p.top -= fDiff))
+
+        this.prePos.forEach((p, i) => i > flag && p.left !== left && (p.tsd = '0ms') && (p.top += height + 16 - fDiff))
+
+        /* this.prePos[this.preSelect] is different, need handle it extraly */
+        this.prePos[this.preSelect].top += fDiff - 16
+
+        this.prePos[s].left = 15
+        this.prePos[s].selected = true
+        this.prePos[s].tsd = '300ms'
+        this.prePos[this.preSelect].left = pos[this.preSelect].left
+        this.prePos[this.preSelect].tsd = '0ms'
+        this.prePos[this.preSelect].selected = false
+        return this.prePos
+      }
+    } else if (s > -1) { // first toggle
+      const { height, left, top, selected, diff } = pos[s]
+
+      /* move grids above selected */
+      pos.forEach((p, i) => i < s && p.left !== left && (p.tsd = '0ms') && (p.top -= Math.abs(diff)))
+
+      /* move grids below selected */
+      pos.forEach((p, i) => i > s && p.left !== left && (p.tsd = '0ms') && (p.top += height + 16 - Math.abs(diff)))
+
+      /* expend selected */
+      pos[s] = { height, left: 15, top, selected, tsd: '150ms' }
+    } else if (this.preSelect > -1) { // toggle selected
+      const { left } = pos[this.preSelect]
+      pos.forEach(p => p.left !== left && (p.tsd = '150ms'))
+      pos.forEach(p => p.left === left && (p.tsd = '0ms'))
+    }
+
+    this.prePos = pos
+    return pos
+  }
+
   renderData(data) {
-    let diff = 0
-    let preDiff = 1
     return (
       <div style={{ width: 810, position: 'relative' }} >
-        <div style={{ height: 1000, width: 810, transition: curve }} ref={ref => (this.refSpace = ref)} />
+        {/* <div style={{ height: 1000, width: 810, transition: curve }} ref={ref => (this.refSpace = ref)} /> */}
         {
-          [1, 9, 2, 8, 3, 7, 4, 6, 5].map((v, i) => {
-            const height = v * 36 + 36
-            let top = 0
-            let left = 15
-
-            const selected = i === this.state.selected
-
-            const continueRight = diff > 0 && preDiff > 0
-            const continueLeft = diff <= 0 && preDiff <= 0
-
-            if (!i) { // first
-              top = 8 - 1000
-              preDiff = diff
-              diff += height
-            } else if (diff <= 0 && preDiff > 0) { // new left
-              top += diff + 16
-              preDiff = diff
-              diff += height
-            } else if (diff > 0 && preDiff <= 0) { // new right
-              top -= diff
-              left += 390
-              preDiff = diff
-              diff -= height
-            } else if (diff <= 0 && preDiff <= 0) { // continue left
-              top = 16
-              preDiff = diff
-              diff += height + 16
-            } else { // diff > 0 && preDiff > 0, continue right
-              left += 390
-              top = 16
-              preDiff = diff
-              diff -= height + 16
-            }
-
-            let altTop = i ? 16 : 8 - 1000
-            if (continueRight) altTop = preDiff + 16
-            else if (continueLeft) altTop = -preDiff
-
-            const topChange = Math.abs(altTop - top)
-
-            if (selected) {
-              top = altTop
-              diff = 0
-              preDiff = 1
-              left = 15
-            }
-
-            console.log('selected', i, height, diff, preDiff, top, topChange)
-
+          this.calcPos([2.9, 9, 2, 8, 3, 7, 4, 6, 5].map(v => v * 36 + 36), this.state.selected).map((v, i) => {
+            const { height, top, left, selected, tsd } = v
             return (
               <Paper
-                key={v}
+                key={height}
                 style={{
-                  width: selected ? 750 : 360,
                   height,
+                  position: 'absolute',
                   backgroundColor: '#FFF',
+                  width: selected ? 750 : 360,
+                  transitionDelay: tsd || '0ms',
                   margin: `${top}px 15px 0px ${left}px`
                 }}
-                onTouchTap={() => this.handleSelect(i, topChange)}
+                onTouchTap={() => this.handleSelect(i)}
               >
-                { v }
+                { height }
               </Paper>
             )
           })
