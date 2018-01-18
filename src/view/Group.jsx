@@ -21,6 +21,13 @@ class Group extends Base {
       tweets: [],
       boxes: null
     }
+
+    this.getTweets = (args) => {
+      this.ctx.props.apis.pureRequest('tweets', { boxUUID: args.boxUUID }, (err, res) => {
+        if (!err && res && res.body) this.setState({ tweets: res.body })
+        else console.log('get tweets error', err, res && res.body)
+      })
+    }
   }
 
   willReceiveProps(nextProps) {
@@ -34,12 +41,7 @@ class Group extends Base {
       this.ctx.props.apis.pureRequest('boxes', null, (err, res) => {
         console.log('boxes', err, res && res.body)
         if (!err && res && res.body) this.setState({ boxes: res.body })
-        if (!err && res && res.body && res.body[0]) {
-          this.ctx.props.apis.pureRequest('tweets', { boxUUID: res.body[0].uuid }, (e, r) => {
-            console.log('tweets', e, r && r.body)
-            if (!e && r && r.body) this.setState({ tweets: r.body })
-          })
-        }
+        if (!err && res && res.body && res.body[0]) this.getTweets({ boxUUID: res.body[0].uuid })
       })
     })
   }
@@ -73,6 +75,7 @@ class Group extends Base {
       ipcRenderer={ipcRenderer}
       apis={this.ctx.props.apis}
       primaryColor={this.groupPrimaryColor()}
+      getTweets={this.getTweets}
     />)
   }
 }
