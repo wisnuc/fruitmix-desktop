@@ -741,7 +741,16 @@
   "Inbox Quick Name": "收件箱",
   "Inbox Title": "收件箱",
   "No Data in Inbox Text 1": "未收到任何文件！",
-  "No Data in Inbox Text 2": "",
+  "No Data in Inbox Text 2": " ",
+
+  "==== box/Group.jsx ====": "",
+  "Group Menu Name": "群",
+  "Group Quick Name": "群",
+  "New Box": "新建",
+  "No Boxes in Groups Text 1": "没有群",
+  "No Boxes in Groups Text 2": "点击‘新建’按钮创建您的第一个群",
+  "No Tweets in Groups Text 1": "没有消息",
+  "No Tweets in Groups Text 2": " ",
 
   "==== node/lib/window.js ====": "",
   "Confirm Close Title": "确认关闭",
