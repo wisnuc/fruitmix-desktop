@@ -3,6 +3,7 @@ import i18n from 'i18n'
 import EventListener from 'react-event-listener'
 import { TweenMax } from 'gsap'
 import { IconButton, CircularProgress, Paper, Avatar } from 'material-ui'
+import ContentAdd from 'material-ui/svg-icons/content/add'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import DeleteIcon from 'material-ui/svg-icons/action/delete'
 import VisibilityOff from 'material-ui/svg-icons/action/visibility-off'
@@ -13,7 +14,7 @@ import FlatButton from '../common/FlatButton'
 
 const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
 
-const imgUrl = 'http://cn.bing.com/th?id=ABT1B401B62BAA3194420276E294380581BC45A4292AE1FF991F97E75ED74A511A1&w=608&h=200&c=2&rs=1&pid=SANGAM'
+const imgUrl = 'http://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKQiahrEc8rUfECDTUq94WlcaNkTYTKzIKr3p5xgOPQO1juvtwO1YSUCHOPpup3oWo1AP3nOBVyPCw/132'
 
 class Inbox extends React.Component {
   constructor(props) {
@@ -27,8 +28,14 @@ class Inbox extends React.Component {
 
     this.toggleDialog = op => this.setState({ [op]: !this.state[op] })
 
+    this.newBox = () => {
+      console.log('this.newBox')
+    }
+
     this.selectBox = (index) => {
       console.log('this.selectBox', index)
+      if (!this.props.boxes[index]) return
+      this.props.getTweets({ boxUUID: this.props.boxes[index].uuid })
     }
   }
 
@@ -59,19 +66,56 @@ class Inbox extends React.Component {
     )
   }
 
+  renderAvatars(users) {
+    const n = Math.min(users.length, 5)
+    const r = 20 * n / (2.5 * n - 1.5) // radius
+    return (
+      <div style={{ height: 40, width: 40, position: 'relative' }}>
+        {
+          users.map((u, i) => {
+            if (i > n - 1) return <div />
+            const deg = Math.PI * (i * 2 / n - 1 / 4)
+            const top = (1 - Math.cos(deg)) * (20 - r)
+            const left = (1 + Math.sin(deg)) * (20 - r)
+            return (
+              <Avatar
+                src={imgUrl}
+                style={{
+                  position: 'absolute',
+                  width: r * 2,
+                  height: r * 2,
+                  top,
+                  left
+                }}
+              />
+            )
+          })
+        }
+      </div>
+    )
+  }
+
   renderBox(box, index) {
     const { mtime, name, uuid, users } = box
+    const hovered = this.state.hover === index
     return (
       <div
         key={uuid}
         onTouchTap={() => this.selectBox(index)}
-        style={{ height: 72, boxSizing: 'border-box', display: 'flex', alignItems: 'center', border: '1px solid #EEEEEE' }}
+        onMouseMove={() => !hovered && this.setState({ hover: index })}
+        onMouseLeave={() => hovered && this.setState({ hover: -1 })}
+        style={{
+          height: 72,
+          display: 'flex',
+          alignItems: 'center',
+          boxSizing: 'border-box',
+          border: '1px solid #EEEEEE',
+          backgroundColor: hovered ? '#EEEEEE' : ''
+        }}
       >
         <div style={{ width: 32 }} />
         {/* Avatar */}
-        <div style={{ height: 40, width: 40 }}>
-          <Avatar src={imgUrl} />
-        </div>
+        { this.renderAvatars(users) }
         <div style={{ width: 16 }} />
         <div style={{ width: 200 }} >
           <div style={{ height: 30, display: 'flex', alignItems: 'center' }} >
@@ -114,9 +158,9 @@ class Inbox extends React.Component {
               </div>
             </div>
           </div>
-          <div style={{ fontSize: 20, display: 'flex', alignItems: 'center', borderRadius: 10, backgroundColor: '#FFF', padding: 10 }} >
+          <Paper style={{ fontSize: 20, display: 'flex', alignItems: 'center', borderRadius: 10, backgroundColor: '#FFF', padding: 10 }} >
             { comment }
-          </div>
+          </Paper>
         </div>
       </div>
     )
@@ -151,8 +195,14 @@ class Inbox extends React.Component {
             !this.props.boxes ? this.renderLoading(32) : (
               <div style={{ width: '100%', minHeight: '100%', position: 'relative', backgroundColor: '#FAFAFA' }}>
                 <div style={{ height: 8 }} />
-                <div style={{ height: 24, fontSize: 12, color: 'rgba(0,0,0,.54)', display: 'flex', alignItems: 'center' }}>
-                  { '新建' }
+                <div style={{ marginLeft: 32, height: 24 }}>
+                  <FlatButton
+                    style={{ lineHeight: '', height: 24 }}
+                    label={i18n.__('New Box')}
+                    onTouchTap={this.newBox}
+                    icon={<ContentAdd color="rgba(0,0,0,.54)" style={{ marginLeft: 4 }} />}
+                    labelStyle={{ fontSize: 12, color: 'rgba(0,0,0,.54)', marginLeft: -4 }}
+                  />
                 </div>
                 {
                   this.props.boxes.length > 0 ? this.props.boxes.map((b, i) => this.renderBox(b, i)) : this.renderNoBoxes()
@@ -164,7 +214,7 @@ class Inbox extends React.Component {
         </div>
 
         {/* tweets */}
-        <div style={{ flexGrow: 1, height: '100%', backgroundColor: '#EEEEEE' }}>
+        <div style={{ flexGrow: 1, height: '100%', backgroundColor: '#FAFAFA' }}>
           { !this.props.tweets ? this.renderLoading(32) : this.props.tweets.length > 0
             ? this.props.tweets.map((t, i) => this.renderTweets(t, i)) : this.renderNoTweets() }
         </div>
