@@ -9,40 +9,39 @@ import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import Base from './Base'
 import FlatButton from '../common/FlatButton'
 import { combineElement, removeElement } from '../common/array'
-import Inbox from '../box/Inbox'
+import Groups from '../box/Groups'
 
 /* increase limit of listeners of EventEmitter */
 ipcRenderer.setMaxListeners(1000)
 
-class Box extends Base {
+class Group extends Base {
   constructor(ctx) {
     super(ctx)
     this.state = {
-    }
-
-    this.setAnimation = (component, status) => {
-      if (component === 'NavigationMenu') {
-        /* add animation to NavigationMenu */
-        const transformItem = this.refNavigationMenu
-        const time = 0.4
-        const ease = global.Power4.easeOut
-        if (status === 'In') {
-          TweenMax.to(transformItem, time, { rotation: 180, opacity: 1, ease })
-        }
-        if (status === 'Out') {
-          TweenMax.to(transformItem, time, { rotation: -180, opacity: 0, ease })
-        }
-      }
+      tweets: [],
+      boxes: null
     }
   }
 
   willReceiveProps(nextProps) {
-    this.data = [{
-      author: ''
-    }]
+    this.handleProps(nextProps.apis, ['boxToken'])
   }
 
   navEnter() {
+    const a = this.ctx.props.apis.account
+    const guid = a && a.data && a.data.global && a.data.global.id
+    this.ctx.props.apis.request('boxToken', { guid }, () => {
+      this.ctx.props.apis.pureRequest('boxes', null, (err, res) => {
+        console.log('boxes', err, res && res.body)
+        if (!err && res && res.body) this.setState({ boxes: res.body })
+        if (!err && res && res.body && res.body[0]) {
+          this.ctx.props.apis.pureRequest('tweets', { boxUUID: res.body[0].uuid }, (e, r) => {
+            console.log('tweets', e, r && r.body)
+            if (!e && r && r.body) this.setState({ tweets: r.body })
+          })
+        }
+      })
+    })
   }
 
   navLeave() {
@@ -53,7 +52,7 @@ class Box extends Base {
   }
 
   menuName() {
-    return i18n.__('Inbox Menu Name')
+    return i18n.__('Group Menu Name')
   }
 
   menuIcon() {
@@ -61,60 +60,21 @@ class Box extends Base {
   }
 
   quickName() {
-    return i18n.__('Inbox Quick Name')
+    return i18n.__('Group Quick Name')
   }
 
   appBarStyle() {
-    return 'light'
-  }
-
-  prominent() {
-    return false
-  }
-
-  hasDetail() {
-    return false
-  }
-
-  detailEnabled() {
-    return true
-  }
-
-  detailWidth() {
-    return 400
-  }
-
-  renderNavigationMenu({ style, onTouchTap }) {
-    const CustomStyle = Object.assign(style, { opacity: 1 })
-    return (
-      <div style={CustomStyle} ref={ref => (this.refNavigationMenu = ref)}>
-        <IconButton onTouchTap={onTouchTap}>
-          <NavigationMenu color="rgba(0,0,0,0.54)" />
-        </IconButton>
-      </div>
-    )
-  }
-
-  renderTitle({ style }) {
-    const newStyle = Object.assign(style, { color: 'rgba(0,0,0,0.54)' })
-    return (
-      <div style={newStyle}>
-        { i18n.__('Inbox Title') }
-        { !!this.data && ` (${this.data.length})` }
-      </div>
-    )
+    return 'colored'
   }
 
   renderContent() {
-    return (<Inbox
-      data={this.data}
+    return (<Groups
+      {...this.state}
       ipcRenderer={ipcRenderer}
       apis={this.ctx.props.apis}
-      setAnimation={this.setAnimation}
-      memoize={this.memoize}
       primaryColor={this.groupPrimaryColor()}
     />)
   }
 }
 
-export default Box
+export default Group

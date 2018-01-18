@@ -12,6 +12,7 @@ class Fruitmix extends EventEmitter {
     this.address = address
     this.userUUID = userUUID
     this.token = token
+    this.bToken = null // box Token
     this.stationID = stationID
 
     this.state = {
@@ -66,7 +67,10 @@ class Fruitmix extends EventEmitter {
       }
       this.setState(name, curr)
 
-      // console.log(`${name} updated`, prev, curr, this[name].isFinished(), typeof next === 'function')
+      console.log(`${name} updated`, prev, curr, this[name].isFinished(), typeof next === 'function')
+
+      /* save box token */
+      if (name === 'boxToken' && !this[name].isRejected()) this.bToken = curr.data.token
 
       if (this[name].isFinished() && next) {
         this[name].isRejected()
@@ -95,11 +99,29 @@ class Fruitmix extends EventEmitter {
       .set('Authorization', `JWT ${this.token}`)
   }
 
+  cget(ep) {
+    if (this.stationID) return this.reqCloud(ep, null, 'GET')
+    return request
+      .get(`http://${this.address}:3000/${ep}`)
+      .set('Authorization', `JWT ${this.bToken} ${this.token}`)
+  }
+
   apost(ep, data) {
     if (this.stationID) return this.reqCloud(ep, data, 'POST')
     const r = request
       .post(`http://${this.address}:3000/${ep}`)
       .set('Authorization', `JWT ${this.token}`)
+
+    return typeof data === 'object'
+      ? r.send(data)
+      : r
+  }
+
+  cpost(ep, data) {
+    if (this.stationID) return this.reqCloud(ep, data, 'POST')
+    const r = request
+      .post(`http://${this.address}:3000/${ep}`)
+      .set('Authorization', `JWT ${this.bToken} ${this.token}`)
 
     return typeof data === 'object'
       ? r.send(data)
@@ -133,6 +155,17 @@ class Fruitmix extends EventEmitter {
     const r = request
       .del(`http://${this.address}:3000/${ep}`)
       .set('Authorization', `JWT ${this.token}`)
+
+    return typeof data === 'object'
+      ? r.send(data)
+      : r
+  }
+
+  cdel(ep, data) {
+    if (this.stationID) return this.reqCloud(ep, data, 'DELETE')
+    const r = request
+      .del(`http://${this.address}:3000/${ep}`)
+      .set('Authorization', `JWT ${this.bToken} ${this.token}`)
 
     return typeof data === 'object'
       ? r.send(data)
@@ -176,7 +209,7 @@ class Fruitmix extends EventEmitter {
           r = this.aput(`users/${this.userUUID}/password`, { password: args.newPassword })
         } if (args.stationID) { // login via WeChat and connecting via LAN, rest password
           const url = `${cloudAddress}/c/v1/stations/${args.stationID}/json`
-          const resource = new Buffer(`/users/${this.userUUID}/password`).toString('base64')
+          const resource = Buffer.from(`/users/${this.userUUID}/password`).toString('base64')
           r = request.post(url).set('Authorization', args.token).send({ resource, method: 'PUT', password: args.newPassword })
         } else {
           r = request
@@ -349,6 +382,11 @@ class Fruitmix extends EventEmitter {
         r = this.aget('download/switch')
         break
 
+      /* Box API */
+      case 'boxToken':
+        r = this.aget('cloudToken').query({ guid: args.guid })
+        break
+
       default:
         break
     }
@@ -430,6 +468,31 @@ class Fruitmix extends EventEmitter {
 
       case 'switchBT':
         r = this.apatch('download/switch', { op: args.op })
+        break
+
+      /* box API */
+      case 'createBox':
+        r = this.cpost('boxes', { name: args.name, users: args.users })
+        break
+
+      case 'box':
+        r = this.cget(`boxes/${args.uuid}`)
+        break
+
+      case 'boxes':
+        r = this.cget('boxes')
+        break
+
+      case 'tweets':
+        r = this.cget(`boxes/${args.boxUUID}/tweets`).query({ first: args.first, last: args.last, count: args.count })
+        break
+
+      case 'createTweet':
+        r = this.cpost(`boxes/${args.boxUUID}/tweets`, { comment: args.comment })
+        break
+
+      case 'delTweet':
+        r = this.cdel(`boxes/${args.boxUUID}/tweets`, { indexArr: args.indexs })
         break
 
       default:
