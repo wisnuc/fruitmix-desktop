@@ -1,4 +1,5 @@
 import React from 'react'
+import UUID from 'uuid'
 import i18n from 'i18n'
 import { ipcRenderer } from 'electron'
 import { TweenMax } from 'gsap'
@@ -27,6 +28,12 @@ class Group extends Base {
         if (!err && res && res.body) this.setState({ tweets: res.body })
         else console.log('get tweets error', err, res && res.body)
       })
+    }
+
+    this.localUpload = (args) => {
+      const { type, comment, boxUUID } = args
+      const session = UUID.v4()
+      this.ctx.props.ipcRenderer.send('BOX_UPLOAD', { session, type, comment, boxUUID, bToken: this.state.boxToken.token })
     }
   }
 
@@ -72,6 +79,7 @@ class Group extends Base {
   renderContent() {
     return (<Groups
       {...this.state}
+      localUpload={this.localUpload}
       ipcRenderer={ipcRenderer}
       apis={this.ctx.props.apis}
       primaryColor={this.groupPrimaryColor()}
