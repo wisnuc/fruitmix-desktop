@@ -28,16 +28,17 @@ const readAsync = async (entries, args) => {
 
 /* handler */
 const uploadHandle = (event, args) => {
+	const { session, boxUUID } = args
   const dialogType = 'openFile'
   // const dialogType = type === 'directory' ? 'openDirectory' : 'openFile'
   dialog.showOpenDialog(getMainWindow(), { properties: [dialogType, 'multiSelections'] }, (entries) => {
     if (!entries || !entries.length) return
     readAsync(entries, args).then(() => {
-      getMainWindow().webContents.send('BOX_UPLOAD_SUCCESS', { session: args.session })
+      getMainWindow().webContents.send('BOX_UPLOAD_RESULT', { session, boxUUID, success: true })
     }).catch((err) => {
       const body = err && err.response && err.response.body
       console.log('box upload error', body || err)
-      getMainWindow().webContents.send('BOX_UPLOAD_FAILED', { session: args.session })
+      getMainWindow().webContents.send('BOX_UPLOAD_RESULT', { session, boxUUID, success: false })
     })
   })
 }

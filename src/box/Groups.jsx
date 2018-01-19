@@ -1,4 +1,5 @@
 import React from 'react'
+import UUID from 'uuid'
 import i18n from 'i18n'
 import EventListener from 'react-event-listener'
 import { CircularProgress, Paper, Avatar } from 'material-ui'
@@ -16,8 +17,7 @@ class Inbox extends React.Component {
     super(props)
 
     this.state = {
-      hover: -1,
-      box: null
+      hover: -1
     }
 
     this.handleResize = () => this.forceUpdate()
@@ -31,11 +31,25 @@ class Inbox extends React.Component {
     this.selectBox = (index) => {
       console.log('this.selectBox', index)
       if (!this.props.boxes[index]) return
-      this.setState({ box: this.props.boxes[index] }, () => this.props.getTweets({ boxUUID: this.props.boxes[index].uuid }))
+      this.props.getTweets({ boxUUID: this.props.boxes[index].uuid })
+    }
+
+    this.localUpload = (args) => {
+      const { type, comment, boxUUID } = args
+      const session = UUID.v4()
+      this.props.ipcRenderer.send('BOX_UPLOAD', { session, type, comment, boxUUID, bToken: this.props.boxToken.token })
+    }
+
+    this.onLocalFinish = (event, args) => {
+      const { session, boxUUID, success } = args
+      if (this.props.currentBox && this.props.currentBox === boxUUID) {
+        this.props.getTweets({ boxUUID })
+      }
     }
   }
 
   componentDidMount() {
+    this.props.ipcRenderer.on('BOX_UPLOAD_RESULT', this.onLocalFinish)
   }
 
   renderNoBoxes() {
@@ -127,8 +141,6 @@ class Inbox extends React.Component {
   }
 
   render() {
-    // console.log('Group', this.props, this.state)
-    const currentBox = this.state.box || (this.props.boxes && this.props.boxes[0]) || null
     return (
       <div
         style={{
@@ -167,16 +179,16 @@ class Inbox extends React.Component {
         </div>
 
         {/* tweets */}
-        <Tweets tweets={this.props.tweets} />
+        <Tweets tweets={this.props.tweets} guid={this.props.guid} />
 
         {/* FAB */}
         {
-          currentBox &&
+          this.props.currentBox &&
             <BoxUploadButton
-              box={currentBox}
+              boxUUID={this.props.currentBox}
               uploadMedia={this.uploadMedia}
               uploadFiles={this.uploadFiles}
-              localUpload={this.props.localUpload}
+              localUpload={this.localUpload}
             />
         }
       </div>
