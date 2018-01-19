@@ -20,20 +20,16 @@ class Group extends Base {
     super(ctx)
     this.state = {
       tweets: [],
-      boxes: null
+      boxes: null,
+      currentBox: null
     }
 
     this.getTweets = (args) => {
+      this.setState({ currentBox: null })
       this.ctx.props.apis.pureRequest('tweets', { boxUUID: args.boxUUID }, (err, res) => {
-        if (!err && res && res.body) this.setState({ tweets: res.body })
+        if (!err && res && res.body) this.setState({ tweets: res.body, currentBox: args.boxUUID })
         else console.log('get tweets error', err, res && res.body)
       })
-    }
-
-    this.localUpload = (args) => {
-      const { type, comment, boxUUID } = args
-      const session = UUID.v4()
-      this.ctx.props.ipcRenderer.send('BOX_UPLOAD', { session, type, comment, boxUUID, bToken: this.state.boxToken.token })
     }
   }
 
@@ -43,8 +39,9 @@ class Group extends Base {
 
   navEnter() {
     const a = this.ctx.props.apis.account
-    const guid = a && a.data && a.data.global && a.data.global.id
-    this.ctx.props.apis.request('boxToken', { guid }, () => {
+    this.guid = a && a.data && a.data.global && a.data.global.id
+
+    this.ctx.props.apis.request('boxToken', { guid: this.guid }, () => {
       this.ctx.props.apis.pureRequest('boxes', null, (err, res) => {
         console.log('boxes', err, res && res.body)
         if (!err && res && res.body) this.setState({ boxes: res.body })
@@ -79,11 +76,11 @@ class Group extends Base {
   renderContent() {
     return (<Groups
       {...this.state}
-      localUpload={this.localUpload}
       ipcRenderer={ipcRenderer}
       apis={this.ctx.props.apis}
       primaryColor={this.groupPrimaryColor()}
       getTweets={this.getTweets}
+      guid={this.guid}
     />)
   }
 }

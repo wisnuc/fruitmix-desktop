@@ -38,10 +38,17 @@ class Tweets extends React.PureComponent {
 
   renderTweets(tweet, i) {
     const { ctime, comment, uuid, tweeter, list, index } = tweet
+    const isSelf = this.props.guid === tweeter.id
     return (
       <div
         key={uuid}
-        style={{ width: '100%', display: 'flex', alignItems: 'center', boxSizing: 'border-box', padding: 24 }}
+        style={{
+          width: '100%',
+          display: 'flex',
+          boxSizing: 'border-box',
+          padding: 24,
+          flexDirection: isSelf ? 'row-reverse' : 'row'
+        }}
       >
         <div style={{ width: 32 }} />
         {/* Avatar */}
@@ -50,19 +57,40 @@ class Tweets extends React.PureComponent {
         </div>
         <div style={{ width: 24 }} />
         <div>
-          <div style={{ width: 200 }} >
-            <div style={{ height: 30, display: 'flex', alignItems: 'center' }} >
+          <div>
+            <div style={{ height: 30, display: 'flex', alignItems: 'center', flexDirection: isSelf ? 'row-reverse' : 'row' }}>
               <div style={{ fontSize: 16, color: 'rgba(0,0,0,.54)', fontWeight: 500 }}>
                 { tweeter.id.slice(0, 4) }
               </div>
-              <div style={{ fontSize: 12, color: 'rgba(0,0,0,.54)', marginLeft: 16 }}>
+              <div style={{ width: 16 }} />
+              <div style={{ fontSize: 12, color: 'rgba(0,0,0,.54)' }}>
                 { '45分钟前' }
               </div>
             </div>
           </div>
-          <Paper style={{ fontSize: 20, display: 'flex', alignItems: 'center', borderRadius: 10, backgroundColor: '#FFF', padding: 10 }} >
-            { comment }
-          </Paper>
+          {
+            !list ?
+              <Paper style={{ fontSize: 20, display: 'flex', alignItems: 'center', borderRadius: 10, backgroundColor: '#FFF', padding: 10 }} >
+                { comment }
+              </Paper>
+              :
+              <div style={{ width: 572, maxHeight: 400 }}>
+                {
+                  list.map((l, i) => {
+                    const { sha256, filename } = l
+                    const float = i > 2 || !isSelf ? 'left' : 'right'
+                    return (
+                      <Paper
+                        style={{ width: 186, height: 186, float, backgroundColor: '#FFF', margin: 2 }}
+                        key={sha256}
+                      >
+                        { filename }
+                      </Paper>
+                    )
+                  })
+                }
+              </div>
+          }
         </div>
       </div>
     )
@@ -87,7 +115,7 @@ class Tweets extends React.PureComponent {
           !this.props.tweets ? this.renderLoading(32) : this.props.tweets.length > 0
             ? this.props.tweets.map((t, i) => this.renderTweets(t, i)) : this.renderNoTweets()
         }
-        <div style={{ height: 24 }} />
+        <div style={{ height: 96 }} />
       </div>
     )
   }
