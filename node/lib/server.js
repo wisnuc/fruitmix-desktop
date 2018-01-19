@@ -437,3 +437,20 @@ export const uploadTorrent = (dirUUID, rs, part, callback) => {
 }
 
 export const uploadTorrentAsync = Promise.promisify(uploadTorrent)
+
+export const boxUpload = (files, args, callback) => {
+  const { comment, type, boxUUID, bToken } = args
+  const list = files.map(f => ({ filename: f.filename, size: f.size, sha256: f.sha256 }))
+  const url = `http://${address}:3000/boxes/${boxUUID}/tweets`
+  const r = request
+    .post(url)
+    .set('Authorization', `JWT ${bToken} ${token}`)
+    .field('list', JSON.stringify({ comment, type, list }))
+  for (let i = 0; i < files.length; i++) {
+    const { filename, size, sha256, entry } = files[i]
+    r.attach(filename, entry, JSON.stringify({ size, sha256 }))
+  }
+  r.end(callback)
+}
+
+export const boxUploadAsync = Promise.promisify(boxUpload)
