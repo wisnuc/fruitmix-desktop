@@ -58,15 +58,15 @@ class Tweets extends React.PureComponent {
         <div style={{ height: 40, width: 40 }}>
           <Avatar src={imgUrl} size={40} />
         </div>
-        <div style={{ width: 24 }} />
+        <div style={{ width: 16 }} />
         <div>
           <div>
             <div style={{ height: 30, display: 'flex', alignItems: 'center', flexDirection: isSelf ? 'row-reverse' : 'row' }}>
-              <div style={{ fontSize: 16, color: 'rgba(0,0,0,.54)', fontWeight: 500 }}>
+              <div style={{ fontSize: 12, color: 'rgba(0,0,0,.54)', fontWeight: 500 }}>
                 { Array.from({ length: Math.random() * 16 })
                   .map(() => String.fromCharCode(0x597D - Math.random() * 100)) }
               </div>
-              <div style={{ width: 16 }} />
+              <div style={{ width: 8 }} />
               <div style={{ fontSize: 12, color: 'rgba(0,0,0,.54)' }}>
                 { parseTime(ctime) }
               </div>
@@ -87,7 +87,7 @@ class Tweets extends React.PureComponent {
                 { comment }
               </Paper>
               :
-              <div style={{ width: 572, maxHeight: 400 }}>
+              <div style={{ width: 570, maxHeight: 400 }}>
                 {
                   list.map((l, i) => {
                     const { sha256, filename } = l

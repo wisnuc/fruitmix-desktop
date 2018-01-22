@@ -766,6 +766,11 @@
   "No Tweets in Groups Text 1": "没有消息",
   "No Tweets in Groups Text 2": " ",
 
+  "==== box/BoxUploadButton.jsx ====": "",
+  "Upload Local Files":"添加PC本地文件",
+  "Upload NAS Files":"添加NAS的文件",
+  "Upload NAS Media":"添加NAS的照片",
+
   "==== node/lib/window.js ====": "",
   "Confirm Close Title": "确认关闭",
   "Close": "关闭",

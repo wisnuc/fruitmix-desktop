@@ -9,12 +9,16 @@ class BoxUploadButton extends React.Component {
     super(props)
     this.state = { open: false }
 
-    this.upload = () => {
-      const type = 'list'
-      const comment = '不知疲倦的翻越， 每一座山丘'
-      const boxUUID = this.props.boxUUID
-      this.props.localUpload({ type, comment, boxUUID })
-      this.setState({ open: false })
+    this.upload = (view) => {
+      if (view) {
+        this.setState({ open: false }, () => this.props.toggleView(view))
+      } else {
+        const type = 'list'
+        const comment = '不知疲倦的翻越， 每一座山丘'
+        const boxUUID = this.props.boxUUID
+        this.props.localUpload({ type, comment, boxUUID })
+        this.setState({ open: false })
+      }
     }
   }
 
@@ -55,7 +59,7 @@ class BoxUploadButton extends React.Component {
             <MenuItem
               primaryText={i18n.__('Upload NAS Media')}
               leftIcon={<UploadFile />}
-              onTouchTap={() => this.upload('file')}
+              onTouchTap={() => this.upload('media')}
               style={{ fontSize: 13 }}
             />
           </Menu>
