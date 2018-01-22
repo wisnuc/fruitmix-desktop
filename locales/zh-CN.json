@@ -195,6 +195,20 @@
   "%s Has Been": "%s已从",
   "xcopyMsg {{action}} {{srcName}} {{dstName}} {{target}}": "{{target}}“{{srcName}}”{{action}}到“{{dstName}}”。",
 
+  "==== common/datetime.js ====": "",
+  "%d Hours Ago": {
+    "one": "%d 小时前",
+    "other": "%d 小时前"
+  },
+  "%d Minutes Ago": {
+    "one": "%d 分钟前",
+    "other": "%d 分钟前"
+  },
+  "Hour {{hour}} {{min}}": "{{hour}} : {{min}}",
+  "Month {{mon}} {{day}}": "{{mon}} 月 {{day}} 日",
+  "Year {{year}} {{mon}} {{day}}": "{{year}} 年 {{mon}} 月 {{day}} 日",
+  "Yesterday {{hour}} {{min}}": "昨天 {{hour}} : {{min}}",
+
   "==== control/AccountApp.jsx ====": "",
   "Your Username %s": "您当前的用户名为：%s 。",
   "Username Text": "设备登录用户名是系统用户名，也是您登录Samba的用户名。",

@@ -7,6 +7,7 @@ import ContentAdd from 'material-ui/svg-icons/content/add'
 import FlatButton from '../common/FlatButton'
 import BoxUploadButton from './BoxUploadButton'
 import Tweets from './Tweets'
+import { parseTime } from '../common/datetime'
 
 const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
 
@@ -35,6 +36,7 @@ class Inbox extends React.Component {
     }
 
     this.localUpload = (args) => {
+      console.log('this.localUpload', args)
       const { type, comment, boxUUID } = args
       const session = UUID.v4()
       this.props.ipcRenderer.send('BOX_UPLOAD', { session, type, comment, boxUUID, bToken: this.props.boxToken.token })
@@ -95,8 +97,9 @@ class Inbox extends React.Component {
   }
 
   renderBox(box, index) {
-    const { mtime, name, uuid, users } = box
+    const { ltime, name, uuid, users, lcomment } = box
     const hovered = this.state.hover === index
+    /* width: 376 = 2 + 32 + 40 + 16 + 142 + 120 + 24 */
     return (
       <div
         key={uuid}
@@ -116,16 +119,16 @@ class Inbox extends React.Component {
         {/* Avatar */}
         { this.renderAvatars(users) }
         <div style={{ width: 16 }} />
-        <div style={{ width: 200 }} >
+        <div style={{ width: 142 }} >
           <div style={{ height: 30, display: 'flex', alignItems: 'center' }} >
             { name }
           </div>
-          <div style={{ height: 24, fontSize: 14, display: 'flex', alignItems: 'center', color: 'rgba(0,0,0,.54)' }} >
-            {'我发了个大红包哦！'}
+          <div style={{ height: 24, fontSize: 14, display: 'flex', alignItems: 'center', color: 'rgba(0,0,0,.54)' }}>
+            { lcomment }
           </div>
         </div>
-        <div style={{ width: 64, textAlign: 'right', fontSize: 12, color: 'rgba(0,0,0,.54)' }}>
-          { '45分钟前' }
+        <div style={{ width: 120, textAlign: 'right', fontSize: 12, color: 'rgba(0,0,0,.54)' }}>
+          { parseTime(ltime) }
         </div>
         <div style={{ width: 24 }} />
       </div>

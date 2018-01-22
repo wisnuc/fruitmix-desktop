@@ -195,6 +195,20 @@
   "%s Has Been": "%s has been",
   "xcopyMsg {{action}} {{srcName}} {{dstName}} {{target}}": "{{target}} {{action}} from {{srcName}} to {{dstName}}.",
 
+  "==== common/datetime.js ====": "",
+  "%d Hours Ago": {
+    "one": "%d hour ago",
+    "other": "%d hours ago"
+  },
+  "%d Minutes Ago": {
+    "one": "%d minute ago",
+    "other": "%d minutes ago"
+  },
+  "Hour {{hour}} {{min}}": "{{hour}} : {{min}}",
+  "Month {{mon}} {{day}}": "{{mon}}/{{day}}",
+  "Year {{year}} {{mon}} {{day}}": "{{mon}}/{{day}}/{{year}}",
+  "Yesterday {{hour}} {{min}}": "Yesterday {{hour}} : {{min}}",
+
   "==== control/AccountApp.jsx ====": "",
   "Your Username %s": "Your username: %s",
   "Username Text": "This username is used for WISNUC OS as well as Samba.",
