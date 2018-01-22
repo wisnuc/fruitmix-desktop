@@ -31,6 +31,17 @@ class Group extends Base {
         else console.log('get tweets error', err, res && res.body)
       })
     }
+
+    this.processBox = (d) => {
+      if (!d || !d[0]) return []
+      d.forEach((b) => {
+        b.ltime = (new Date()).getTime() - Math.random() * 86400000 * 60
+        b.lcomment = Array.from({ length: Math.random() * 10 })
+          .map(() => String.fromCharCode(0x597D - Math.random() * 100))
+      })
+      d.sort((a, b) => (b.ltime - a.ltime))
+      return d
+    }
   }
 
   willReceiveProps(nextProps) {
@@ -44,7 +55,7 @@ class Group extends Base {
     this.ctx.props.apis.request('boxToken', { guid: this.guid }, () => {
       this.ctx.props.apis.pureRequest('boxes', null, (err, res) => {
         console.log('boxes', err, res && res.body)
-        if (!err && res && res.body) this.setState({ boxes: res.body })
+        if (!err && res && res.body) this.setState({ boxes: this.processBox(res.body) })
         if (!err && res && res.body && res.body[0]) this.getTweets({ boxUUID: res.body[0].uuid })
       })
     })
