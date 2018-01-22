@@ -18,12 +18,18 @@ class Inbox extends React.Component {
     super(props)
 
     this.state = {
+      view: '', // view of selecting upload files or media
       hover: -1
     }
 
     this.handleResize = () => this.forceUpdate()
 
     this.toggleDialog = op => this.setState({ [op]: !this.state[op] })
+
+    this.toggleView = (view) => {
+      console.log('view', view)
+      this.setState({ view })
+    }
 
     this.newBox = () => {
       console.log('this.newBox')
@@ -182,15 +188,18 @@ class Inbox extends React.Component {
         </div>
 
         {/* tweets */}
-        <Tweets tweets={this.props.tweets} guid={this.props.guid} />
+        {
+          this.state.view && 0 ?
+            <SelectNas boxUUID={this.props.currentBox} addMedia={this.addMedia} addFile={this.addFile} />
+            : <Tweets tweets={this.props.tweets} guid={this.props.guid} />
+        }
 
         {/* FAB */}
         {
           this.props.currentBox &&
             <BoxUploadButton
               boxUUID={this.props.currentBox}
-              uploadMedia={this.uploadMedia}
-              uploadFiles={this.uploadFiles}
+              toggleView={this.toggleView}
               localUpload={this.localUpload}
             />
         }
