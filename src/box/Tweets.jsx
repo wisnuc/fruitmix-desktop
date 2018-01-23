@@ -64,7 +64,7 @@ class Tweets extends React.PureComponent {
             <div style={{ height: 30, display: 'flex', alignItems: 'center', flexDirection: isSelf ? 'row-reverse' : 'row' }}>
               <div style={{ fontSize: 12, color: 'rgba(0,0,0,.54)', fontWeight: 500 }}>
                 { Array.from({ length: Math.random() * 16 })
-                  .map(() => String.fromCharCode(0x597D - Math.random() * 100)) }
+                  .map(() => String.fromCharCode(0x674e - Math.random() * 100)) }
               </div>
               <div style={{ width: 8 }} />
               <div style={{ fontSize: 12, color: 'rgba(0,0,0,.54)' }}>
@@ -95,7 +95,7 @@ class Tweets extends React.PureComponent {
                     return (
                       <Paper
                         style={{ width: 186, height: 186, float, backgroundColor: '#FFF', margin: 2 }}
-                        key={sha256}
+                        key={sha256 + filename}
                       >
                         <img
                           src={`${imgRD}${Math.round(Math.random() * 100)}`}

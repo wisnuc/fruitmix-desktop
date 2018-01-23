@@ -1,20 +1,16 @@
 import React from 'react'
-import UUID from 'uuid'
 import i18n from 'i18n'
-import EventListener from 'react-event-listener'
-import { CircularProgress, Paper, Avatar } from 'material-ui'
+import { CircularProgress, Paper, Avatar, IconButton } from 'material-ui'
 import ContentAdd from 'material-ui/svg-icons/content/add'
+import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import FlatButton from '../common/FlatButton'
-import BoxUploadButton from './BoxUploadButton'
-import Tweets from './Tweets'
-import SelectNas from './SelectNas'
-import { parseTime } from '../common/datetime'
+import FileContent from '../file/FileContent'
 
 const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
 
 const imgUrl = 'http://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKQiahrEc8rUfECDTUq94WlcaNkTYTKzIKr3p5xgOPQO1juvtwO1YSUCHOPpup3oWo1AP3nOBVyPCw/132'
 
-class Inbox extends React.Component {
+class SelectNas extends React.Component {
   constructor(props) {
     super(props)
 
@@ -152,67 +148,62 @@ class Inbox extends React.Component {
 
   render() {
     return (
-      <div
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          overflow: 'hidden',
-          alignItems: 'center'
-        }}
-      >
-        <EventListener target="window" onResize={this.handleResize} />
-
-        {/* boxes */}
-        <div style={{ width: 376, height: '100%', overflow: 'auto' }}>
-          {
-            !this.props.boxes ? this.renderLoading(32) : (
-              <div style={{ width: '100%', minHeight: '100%', position: 'relative', backgroundColor: '#FAFAFA' }}>
-                <div style={{ height: 8 }} />
-                <div style={{ marginLeft: 32, height: 24 }}>
-                  <FlatButton
-                    style={{ lineHeight: '', height: 24 }}
-                    label={i18n.__('New Box')}
-                    onTouchTap={this.newBox}
-                    icon={<ContentAdd color="rgba(0,0,0,.54)" style={{ marginLeft: 4 }} />}
-                    labelStyle={{ fontSize: 12, color: 'rgba(0,0,0,.54)', marginLeft: -4 }}
-                  />
-                </div>
-                {
-                  this.props.boxes.length > 0 ? this.props.boxes.map((b, i) => this.renderBox(b, i)) : this.renderNoBoxes()
-                }
-                <div style={{ height: 24 }} />
-              </div>
-            )
-          }
+      <div style={{ position: 'fixed', width: '100%', height: '100%', top: 0, left: 0 }} >
+        {/* header */}
+        <div
+          style={{
+            width: '100%',
+            height: 64,
+            backgroundColor: this.props.primaryColor,
+            display: 'flex',
+            alignItems: 'center',
+            zIndex: 200
+          }}
+        >
+          <div style={{ width: 12 }} />
+          <div>
+            <IconButton onTouchTap={this.props.onRequestClose}>
+              <CloseIcon color="#FFF" />
+            </IconButton>
+          </div>
         </div>
+        {/* content */}
+        <div style={{ width: '100%', height: 'calc(100% - 64px)', display: 'flex', position: 'relative' }}>
+          <div style={{ width: 72, height: '100%' }}>
 
-        {/* tweets */}
-        <Tweets tweets={this.props.tweets} guid={this.props.guid} />
-
-        {/* FAB */}
-        {
-          this.props.currentBox &&
-            <BoxUploadButton
-              boxUUID={this.props.currentBox}
-              toggleView={this.toggleView}
-              localUpload={this.localUpload}
-            />
-        }
-        {
-          this.state.view && 0 &&
-            <SelectNas
+          </div>
+          <div style={{ flexGrow: 1, height: '100%' }}>
+            <FileContent
+              home={this.state}
+              select={this.state.select}
+              entries={this.state.entries}
+              listNavBySelect={this.listNavBySelect}
+              showContextMenu={this.showContextMenu}
+              setAnimation={this.setAnimation}
+              ipcRenderer={this.props.ipcRenderer}
               primaryColor={this.props.primaryColor}
-              boxUUID={this.props.currentBox}
-              addMedia={this.addMedia}
-              addFile={this.addFile}
-              onRequestClose={() => this.setState({ view: '' })}
+              sortType={this.state.sortType}
+              changeSortType={this.changeSortType}
+              gridView={this.state.gridView}
+              scrollTo={this.state.scrollTo}
+              openSnackBar={openSnackBar}
+              toggleDialog={this.toggleDialog}
+              showTakenTime={!!this.state.takenTime}
+              apis={this.apis}
+              refresh={this.refresh}
+              rowDragStart={this.rowDragStart}
+              gridDragStart={this.gridDragStart}
+              setScrollTop={this.setScrollTop}
+              setGridData={this.setGridData}
             />
-        }
+          </div>
+          <div style={{ width: 360, height: '100%' }}>
+
+          </div>
+        </div>
       </div>
     )
   }
 }
 
-export default Inbox
+export default SelectNas
