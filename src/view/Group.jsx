@@ -35,12 +35,20 @@ class Group extends Base {
     this.processBox = (d) => {
       if (!d || !d[0]) return []
       d.forEach((b) => {
-        b.ltime = (new Date()).getTime() - Math.random() * 86400000 * 60
+        b.ltime = b.ctime
         b.lcomment = Array.from({ length: Math.random() * 10 })
           .map(() => String.fromCharCode(0x674e - Math.random() * 100))
       })
       d.sort((a, b) => (b.ltime - a.ltime))
       return d
+    }
+
+    this.refresh = () => {
+      this.ctx.props.apis.pureRequest('boxes', null, (err, res) => {
+        console.log('boxes', err, res && res.body)
+        if (!err && res && res.body) this.setState({ boxes: this.processBox(res.body) })
+        if (!err && res && res.body && res.body[0]) this.getTweets({ boxUUID: res.body[0].uuid })
+      })
     }
   }
 
@@ -52,13 +60,7 @@ class Group extends Base {
     const a = this.ctx.props.apis.account
     this.guid = a && a.data && a.data.global && a.data.global.id
 
-    this.ctx.props.apis.request('boxToken', { guid: this.guid }, () => {
-      this.ctx.props.apis.pureRequest('boxes', null, (err, res) => {
-        console.log('boxes', err, res && res.body)
-        if (!err && res && res.body) this.setState({ boxes: this.processBox(res.body) })
-        if (!err && res && res.body && res.body[0]) this.getTweets({ boxUUID: res.body[0].uuid })
-      })
-    })
+    this.ctx.props.apis.request('boxToken', { guid: this.guid }, this.refresh)
   }
 
   navLeave() {
@@ -84,13 +86,15 @@ class Group extends Base {
     return 'colored'
   }
 
-  renderContent() {
+  renderContent({ openSnackBar }) {
     return (<Groups
       {...this.state}
       ipcRenderer={ipcRenderer}
       apis={this.ctx.props.apis}
       primaryColor={this.groupPrimaryColor()}
       getTweets={this.getTweets}
+      openSnackBar={openSnackBar}
+      refresh={this.refresh}
       guid={this.guid}
     />)
   }
