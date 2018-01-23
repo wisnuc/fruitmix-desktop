@@ -201,8 +201,10 @@ class Inbox extends React.Component {
             />
         }
         {
-          this.state.view && 0 &&
+          this.state.view &&
             <SelectNas
+              view={this.state.view}
+              ipcRenderer={this.props.ipcRenderer}
               primaryColor={this.props.primaryColor}
               boxUUID={this.props.currentBox}
               addMedia={this.addMedia}
