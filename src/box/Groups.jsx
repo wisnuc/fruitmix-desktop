@@ -4,23 +4,28 @@ import i18n from 'i18n'
 import EventListener from 'react-event-listener'
 import { CircularProgress, Paper, Avatar } from 'material-ui'
 import ContentAdd from 'material-ui/svg-icons/content/add'
-import FlatButton from '../common/FlatButton'
-import BoxUploadButton from './BoxUploadButton'
+
+import NewBox from './NewBox'
 import Tweets from './Tweets'
 import SelectNas from './SelectNas'
+import BoxUploadButton from './BoxUploadButton'
+
+import FlatButton from '../common/FlatButton'
 import { parseTime } from '../common/datetime'
+import DialogOverlay from '../common/DialogOverlay'
 
 const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
 
 const imgUrl = 'http://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKQiahrEc8rUfECDTUq94WlcaNkTYTKzIKr3p5xgOPQO1juvtwO1YSUCHOPpup3oWo1AP3nOBVyPCw/132'
 
-class Inbox extends React.Component {
+class Groups extends React.Component {
   constructor(props) {
     super(props)
 
     this.state = {
       view: '', // view of selecting upload files or media
-      hover: -1
+      hover: -1,
+      newBox: false
     }
 
     this.handleResize = () => this.forceUpdate()
@@ -34,6 +39,7 @@ class Inbox extends React.Component {
 
     this.newBox = () => {
       console.log('this.newBox')
+      this.setState({ newBox: true })
     }
 
     this.selectBox = (index) => {
@@ -212,9 +218,23 @@ class Inbox extends React.Component {
               onRequestClose={() => this.setState({ view: '' })}
             />
         }
+        {/* dialog */}
+        <DialogOverlay open={!!this.state.newBox} onRequestClose={() => this.setState({ newBox: false })}>
+          {
+            this.state.newBox &&
+            <NewBox
+              apis={this.props.apis}
+              guid={this.props.guid}
+              refresh={this.props.refresh}
+              title={i18n.__('Create Box Title')}
+              hintText={i18n.__('Create Box Hint')}
+              openSnackBar={this.props.openSnackBar}
+            />
+            }
+        </DialogOverlay>
       </div>
     )
   }
 }
 
-export default Inbox
+export default Groups
