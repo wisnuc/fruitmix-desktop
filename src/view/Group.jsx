@@ -37,7 +37,7 @@ class Group extends Base {
       d.forEach((b) => {
         b.ltime = (new Date()).getTime() - Math.random() * 86400000 * 60
         b.lcomment = Array.from({ length: Math.random() * 10 })
-          .map(() => String.fromCharCode(0x597D - Math.random() * 100))
+          .map(() => String.fromCharCode(0x674e - Math.random() * 100))
       })
       d.sort((a, b) => (b.ltime - a.ltime))
       return d
