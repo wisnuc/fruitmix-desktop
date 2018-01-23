@@ -214,7 +214,7 @@ class RenderListByRow extends React.Component {
       const index = this.props.entries.findIndex(entry => entry.name === this.props.scrollTo)
       if (index > -1) {
         this.scrollToRow(index)
-        Object.assign(this.props.home, { scrollTo: '' })
+        this.props.resetScrollTo()
         this.props.select.touchTap(0, index)
       }
     }
