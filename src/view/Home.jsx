@@ -210,6 +210,8 @@ class Home extends Base {
       else this.setState({ loading: true })
     }
 
+    this.resetScrollTo = () => Object.assign(this.state, { scrollTo: null })
+
     this.showContextMenu = (clientX, clientY) => {
       if (this.select.state.ctrl || this.select.state.shift) return
       const containerDom = document.getElementById('content-container')
@@ -684,6 +686,7 @@ class Home extends Base {
 
   renderDetail({ style }) {
     if (!this.state.entries) return (<div />)
+    console.log('renderDetail', this.state)
     return (
       <div style={style}>
         {
@@ -919,24 +922,20 @@ class Home extends Base {
         <FileUploadButton upload={this.upload} />
 
         <FileContent
-          home={this.state}
-          select={this.state.select}
-          entries={this.state.entries}
+          {...this.state}
           listNavBySelect={this.listNavBySelect}
           showContextMenu={this.showContextMenu}
           setAnimation={this.setAnimation}
           ipcRenderer={ipcRenderer}
           download={this.download}
           primaryColor={this.groupPrimaryColor()}
-          sortType={this.state.sortType}
           changeSortType={this.changeSortType}
-          gridView={this.state.gridView}
-          scrollTo={this.state.scrollTo}
           openSnackBar={openSnackBar}
           toggleDialog={this.toggleDialog}
           showTakenTime={!!this.state.takenTime}
           apis={this.ctx.props.apis}
           refresh={this.refresh}
+          resetScrollTo={this.resetScrollTo}
           rowDragStart={this.rowDragStart}
           gridDragStart={this.gridDragStart}
           setScrollTop={this.setScrollTop}

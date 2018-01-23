@@ -300,7 +300,7 @@ class GridView extends React.Component {
           rowIndex += 1
         }
         if (rowIndex < this.mapData.length) this.scrollToRow(rowIndex)
-        Object.assign(this.props.home, { scrollTo: '' })
+        this.props.resetScrollTo()
         this.props.select.touchTap(0, index)
       }
     }

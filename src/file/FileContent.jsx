@@ -24,8 +24,8 @@ class FileContent extends React.Component {
     /* cathc key action */
     this.keyDown = (e) => {
       // debug('keyEvent')
-      const { copy, createNewFolder, loading, move, rename, share } = this.props.home
-      if (copy || createNewFolder || this.props.home.delete || loading || move || rename || share) return
+      const { copy, createNewFolder, loading, move, rename, share } = this.props
+      if (copy || createNewFolder || this.props.delete || loading || move || rename || share) return
       if (this.props.select) {
         if (e.ctrlKey && e.key === 'a') {
           this.props.select.addByArray(Array.from({ length: this.props.entries.length }, (v, i) => i)) // [0, 1, ..., N]
@@ -36,8 +36,8 @@ class FileContent extends React.Component {
     }
 
     this.keyUp = (e) => {
-      const { copy, createNewFolder, loading, move, rename, share } = this.props.home
-      if (copy || createNewFolder || this.props.home.delete || loading || move || rename || share) return
+      const { copy, createNewFolder, loading, move, rename, share } = this.props
+      if (copy || createNewFolder || this.props.delete || loading || move || rename || share) return
       if (this.props.select) this.props.select.keyEvent(e.ctrlKey, e.shiftKey)
     }
 
@@ -94,9 +94,9 @@ class FileContent extends React.Component {
     /* handle files */
     this.drop = (e) => {
       const files = [...e.dataTransfer.files].map(f => f.path)
-      const dir = this.props.home.path
+      const dir = this.props.path
       const dirUUID = dir[dir.length - 1].uuid
-      const driveUUID = this.props.home.path[0].uuid
+      const driveUUID = this.props.path[0].uuid
       // debug('drop files!!', files, dirUUID, driveUUID, dir)
       if (!dirUUID || !driveUUID) {
         this.props.openSnackBar(i18n.__('No Drag File Warning in Public'))
@@ -274,7 +274,7 @@ class FileContent extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     // debug('componentWillReceiveProps', this.props, nextProps)
-    if (nextProps.home.loading) this.setState({ loading: true })
+    if (nextProps.loading) this.setState({ loading: true })
     if (nextProps.entries && this.props.entries !== nextProps.entries) this.setState({ loading: false })
   }
 
@@ -345,13 +345,13 @@ class FileContent extends React.Component {
   }
 
   render() {
-    // debug('render FileContent loading', this.props.home.loading, this.state.loading)
+    // debug('render FileContent loading', this.props.loading, this.state.loading)
 
     /* loding */
     if (this.state.loading) return this.renderLoading()
 
     /* not get list yet */
-    if (!this.props.home.path || !this.props.home.path.length) return (<div />)
+    if (!this.props.path || !this.props.path.length) return (<div />)
 
     /* dir is empty */
     if (this.props.entries && !this.props.entries.length) return this.renderNoFile()
@@ -407,7 +407,7 @@ class FileContent extends React.Component {
           memoize={this.props.memoize}
           download={this.props.download}
           primaryColor={this.props.primaryColor}
-          path={this.props.home.path}
+          path={this.props.path}
           select={this.props.select.touchTap}
           apis={this.props.apis}
         />

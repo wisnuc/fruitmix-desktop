@@ -104,14 +104,6 @@ class Public extends Home {
     } else this.refresh()
   }
 
-  navLeave() {
-    this.isNavEnter = false
-  }
-
-  navGroup() {
-    return 'file'
-  }
-
   menuName() {
     return i18n.__('Public Menu Name')
   }
@@ -213,9 +205,6 @@ class Public extends Home {
   renderContent({ toggleDetail, openSnackBar, getDetailStatus }) {
     // debug('renderContent public', this.state, this.ctx.props)
 
-    /* loading data */
-    // if (!this.state.listNavDir && !this.state.drives || !this.state.path.length) return (<div />)
-
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         {/* add new user FAB */}
@@ -241,29 +230,25 @@ class Public extends Home {
           (this.state.path && this.state.path.length === 1 && !this.state.entries.length) ? this.renderNoPublic() :
 
           <FileContent
-            home={this.state}
-            select={this.state.select}
-            entries={this.state.entries}
+            {...this.state}
             listNavBySelect={this.listNavBySelect}
             showContextMenu={this.showContextMenu}
             setAnimation={this.setAnimation}
             ipcRenderer={ipcRenderer}
             download={this.download}
             primaryColor={this.groupPrimaryColor()}
-            sortType={this.state.sortType}
             changeSortType={this.changeSortType}
-            gridView={this.state.gridView}
-            scrollTo={this.state.scrollTo}
             openSnackBar={openSnackBar}
             toggleDialog={this.toggleDialog}
             showTakenTime={!!this.state.takenTime}
             apis={this.ctx.props.apis}
-            inPublicRoot={this.state.inRoot}
             refresh={this.refresh}
+            resetScrollTo={this.resetScrollTo}
             rowDragStart={this.rowDragStart}
             gridDragStart={this.gridDragStart}
             setScrollTop={this.setScrollTop}
             setGridData={this.setGridData}
+            inPublicRoot={this.state.inRoot}
           />
         }
 
