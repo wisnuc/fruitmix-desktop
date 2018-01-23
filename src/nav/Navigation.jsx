@@ -305,10 +305,9 @@ class NavViews extends React.Component {
             return (
               <QuickNav
                 key={`quicknav-${key}`}
-                icon={this.views[key].quickIcon()}
+                Icon={this.views[key].quickIcon()}
                 text={this.views[key].quickName()}
-                color={color}
-                selected={key === this.state.nav}
+                color={key === this.state.nav ? color : 'rgba(0,0,0,0.54)'}
                 onTouchTap={this.navBound(key)}
               />)
           })

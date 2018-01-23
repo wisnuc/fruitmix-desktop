@@ -1,12 +1,7 @@
 import React from 'react'
 
 /**
-
-  icon, text,
-  if selected, highlight; if disabled, light gray
-  selected overrides disabled.
-  onTouchTap
-
+  props = { Icon, text, color, onTouchTap }
 */
 
 class QuickNav extends React.PureComponent {
@@ -16,10 +11,7 @@ class QuickNav extends React.PureComponent {
   }
 
   render() {
-    const { icon, text, selected, disabled } = this.props
-    let { color } = this.props
-    const Icon = icon
-    if (!selected) color = disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.54)'
+    const { Icon, text, color, onTouchTap } = this.props
 
     return (
       <div
@@ -32,7 +24,7 @@ class QuickNav extends React.PureComponent {
           flexDirection: 'column',
           backgroundColor: this.state.hover ? '#EEEEEE' : ''
         }}
-        onTouchTap={this.props.onTouchTap}
+        onTouchTap={onTouchTap}
         onMouseLeave={() => this.setState({ hover: false })}
         onMouseMove={() => !this.state.hover && this.setState({ hover: true })}
       >
