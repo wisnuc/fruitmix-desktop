@@ -215,6 +215,8 @@ class Groups extends React.Component {
               boxUUID={this.props.currentBox}
               addMedia={this.addMedia}
               addFile={this.addFile}
+              apis={this.props.apis}
+              guid={this.props.guid}
               onRequestClose={() => this.setState({ view: '' })}
             />
         }

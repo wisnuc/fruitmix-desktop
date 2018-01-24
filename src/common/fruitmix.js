@@ -484,7 +484,7 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'tweets':
-        r = this.cget(`boxes/${args.boxUUID}/tweets`).query({ first: args.first, last: args.last, count: args.count })
+        r = this.cget(`boxes/${args.boxUUID}/tweets`).query({ first: args.first, last: args.last, count: args.count, metadata: true })
         break
 
       case 'createTweet':
