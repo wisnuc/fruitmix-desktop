@@ -378,7 +378,7 @@ class RenderListByRow extends React.Component {
                     style={{ outline: 'none' }}
                     height={height}
                     width={width}
-                    rowCount={this.props.select.size}
+                    rowCount={this.props.entries.length}
                     onScroll={({ scrollTop }) => this.props.onScroll(scrollTop)}
                     rowHeight={48}
                     rowRenderer={rowRenderer}
