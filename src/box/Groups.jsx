@@ -214,7 +214,12 @@ class Groups extends React.Component {
         </div>
 
         {/* tweets */}
-        <Tweets tweets={this.props.tweets} guid={this.props.guid} />
+        <Tweets
+          guid={this.props.guid}
+          tweets={this.props.tweets}
+          boxUUID={this.props.currentBox}
+          ipcRenderer={this.props.ipcRenderer}
+        />
 
         {/* FAB */}
         {
