@@ -2,12 +2,26 @@ import React from 'react'
 import i18n from 'i18n'
 import { CircularProgress, Paper, Avatar } from 'material-ui'
 import { parseTime } from '../common/datetime'
+import Thumb from '../file/Thumb'
 
 const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
 
 const imgUrl = 'http://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKQiahrEc8rUfECDTUq94WlcaNkTYTKzIKr3p5xgOPQO1juvtwO1YSUCHOPpup3oWo1AP3nOBVyPCw/132'
 
 const imgRD = 'https://picsum.photos/200?image='
+
+const overlayStyle = {
+  top: 0,
+  left: 0,
+  fontSize: 34,
+  color: '#FFF',
+  display: 'flex',
+  fontWeight: 500,
+  position: 'absolute',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: 'rgba(0,0,0,.54)'
+}
 
 class Tweets extends React.PureComponent {
   constructor(props) {
@@ -101,30 +115,16 @@ class Tweets extends React.PureComponent {
                         style={{ width: w, height: w, float, backgroundColor: '#FFF', margin: 2, position: 'relative' }}
                         key={sha256 + filename}
                       >
-                        <img
-                          src={`${imgRD}${Math.round(Math.random() * 100)}`}
-                          width={w}
+                        <Thumb
+                          digest={sha256}
+                          boxUUID={this.props.boxUUID}
+                          ipcRenderer={this.props.ipcRenderer}
                           height={w}
-                          style={{ objectFit: 'cover', filter: i === 5 && isMany ? 'brightness(0.54)' : '' }}
-                          alt={filename}
+                          width={w}
                         />
                         {
                           i === 5 && isMany &&
-                            <div
-                              style={{
-                                top: 0,
-                                left: 0,
-                                width: w,
-                                height: w,
-                                fontSize: 34,
-                                color: '#FFF',
-                                display: 'flex',
-                                fontWeight: 500,
-                                position: 'absolute',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                              }}
-                            >
+                            <div style={Object.assign({ width: w, height: w }, overlayStyle)} >
                               { `+ ${list.length - 6}` }
                             </div>
                         }
@@ -156,13 +156,13 @@ class Tweets extends React.PureComponent {
     return (
       <div
         ref={ref => (this.refContainer = ref)}
-        style={{ flexGrow: 1, height: '100%', backgroundColor: '#FAFAFA', overflowY: 'scroll' }}
+        style={{ flexGrow: 1, height: '100%', backgroundColor: '#FAFAFA', overflow: 'auto' }}
       >
         {
           !this.props.tweets ? this.renderLoading(32) : this.props.tweets.length > 0
             ? this.props.tweets.map((t, i) => this.renderTweets(t, i)) : this.renderNoTweets()
         }
-        <div style={{ height: 96 }} />
+        { this.props.tweets.length > 0 && <div style={{ height: 96 }} /> }
       </div>
     )
   }
