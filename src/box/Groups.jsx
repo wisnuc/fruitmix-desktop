@@ -13,6 +13,7 @@ import BoxUploadButton from './BoxUploadButton'
 import FlatButton from '../common/FlatButton'
 import { parseTime } from '../common/datetime'
 import DialogOverlay from '../common/DialogOverlay'
+import ScrollBar from '../common/ScrollBar'
 
 const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
 
@@ -61,6 +62,8 @@ class Groups extends React.Component {
         this.props.getTweets({ boxUUID })
       }
     }
+
+    this.onScroll = top => this.refBar && (this.refBar.style.top = `${top}px`)
   }
 
   componentDidMount() {
@@ -112,7 +115,7 @@ class Groups extends React.Component {
   renderBox(box, index) {
     const { ltime, name, uuid, users, lcomment } = box
     const hovered = this.state.hover === index
-    /* width: 376 = 2 + 32 + 40 + 16 + 142 + 120 + 24 */
+    /* width: 376 = 2 + 32 + 40 + 16 + 142 + 120 + 24 + 16 */
     return (
       <div
         key={uuid}
@@ -121,6 +124,7 @@ class Groups extends React.Component {
         onMouseLeave={() => hovered && this.setState({ hover: -1 })}
         style={{
           height: 72,
+          width: 376,
           display: 'flex',
           alignItems: 'center',
           boxSizing: 'border-box',
@@ -157,6 +161,8 @@ class Groups extends React.Component {
   }
 
   render() {
+    const boxH = this.props.boxes && Math.min(window.innerHeight - 106, this.props.boxes.length * 72)
+    const { boxes } = this.props
     return (
       <div
         style={{
@@ -171,11 +177,12 @@ class Groups extends React.Component {
         <EventListener target="window" onResize={this.handleResize} />
 
         {/* boxes */}
-        <div style={{ width: 376, height: '100%', overflow: 'auto' }}>
+        <div style={{ width: 376, height: '100%', overflow: 'auto' }} key={window.innerHeight}>
           {
-            !this.props.boxes ? this.renderLoading(32) : (
-              <div style={{ width: '100%', minHeight: '100%', position: 'relative', backgroundColor: '#FAFAFA' }}>
+            !boxes ? this.renderLoading(32) : (
+              <div style={{ width: '100%', height: '100%', position: 'relative', backgroundColor: '#FAFAFA', overflow: 'hidden' }}>
                 <div style={{ height: 8 }} />
+                {/* new Box */}
                 <div style={{ marginLeft: 32, height: 24 }}>
                   <FlatButton
                     style={{ lineHeight: '', height: 24 }}
@@ -185,10 +192,22 @@ class Groups extends React.Component {
                     labelStyle={{ fontSize: 12, color: 'rgba(0,0,0,.54)', marginLeft: -4 }}
                   />
                 </div>
+
+                {/* Boxes: react-virtualized with custom scrollBar */}
                 {
-                  this.props.boxes.length > 0 ? this.props.boxes.map((b, i) => this.renderBox(b, i)) : this.renderNoBoxes()
+                  boxes.length > 0 ?
+                    <ScrollBar
+                      key={window.innerHeight}
+                      allHeight={72 * boxes.length}
+                      style={{ outline: 'none', boxSizing: 'border-box', position: 'absolute', top: 0, left: 0 }}
+                      height={boxH}
+                      width={376}
+                      rowCount={boxes.length}
+                      rowHeight={72}
+                      rowRenderer={({ index }) => this.renderBox(this.props.boxes[index], index)}
+                    />
+                    : this.renderNoBoxes()
                 }
-                <div style={{ height: 24 }} />
               </div>
             )
           }
