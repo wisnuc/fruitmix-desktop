@@ -42,6 +42,9 @@ class Tweets extends React.PureComponent {
   renderTweets(tweet, i) {
     const { ctime, comment, uuid, tweeter, list, index } = tweet
     const isSelf = this.props.guid === tweeter.id
+    const isMedia = list && list.every(l => l.metadata)
+    const isMany = list && list.length > 6
+    const w = 120
     return (
       <div
         key={uuid}
@@ -86,28 +89,53 @@ class Tweets extends React.PureComponent {
               >
                 { comment }
               </Paper>
-              :
-              <div style={{ width: 570, maxHeight: 400 }}>
+              : isMedia ? 
+              <div style={{ width: 3 * w + 12, maxHeight: 400 }}>
                 {
                   list.map((l, i) => {
                     const { sha256, filename } = l
+                    if (i > 5) return (<div key={sha256 + filename} />)
                     const float = i > 2 || !isSelf ? 'left' : 'right'
                     return (
                       <Paper
-                        style={{ width: 186, height: 186, float, backgroundColor: '#FFF', margin: 2 }}
+                        style={{ width: w, height: w, float, backgroundColor: '#FFF', margin: 2, position: 'relative' }}
                         key={sha256 + filename}
                       >
                         <img
                           src={`${imgRD}${Math.round(Math.random() * 100)}`}
-                          width={186}
-                          height={186}
-                          style={{ objectFit: 'cover' }}
+                          width={w}
+                          height={w}
+                          style={{ objectFit: 'cover', filter: i === 5 && isMany ? 'brightness(0.54)' : '' }}
                           alt={filename}
                         />
+                        {
+                          i === 5 && isMany &&
+                            <div
+                              style={{
+                                top: 0,
+                                left: 0,
+                                width: w,
+                                height: w,
+                                fontSize: 34,
+                                color: '#FFF',
+                                display: 'flex',
+                                fontWeight: 500,
+                                position: 'absolute',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                            >
+                              { `+ ${list.length - 6}` }
+                            </div>
+                        }
                       </Paper>
                     )
                   })
                 }
+              </div>
+              :
+              <div style={{ width: 570, maxHeight: 400 }}>
+                { 'list .....' }
               </div>
           }
         </div>
@@ -128,7 +156,7 @@ class Tweets extends React.PureComponent {
     return (
       <div
         ref={ref => (this.refContainer = ref)}
-        style={{ flexGrow: 1, height: '100%', backgroundColor: '#FAFAFA', overflowY: 'auto' }}
+        style={{ flexGrow: 1, height: '100%', backgroundColor: '#FAFAFA', overflowY: 'scroll' }}
       >
         {
           !this.props.tweets ? this.renderLoading(32) : this.props.tweets.length > 0

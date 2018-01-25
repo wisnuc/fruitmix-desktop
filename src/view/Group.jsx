@@ -86,6 +86,14 @@ class Group extends Base {
     return 'colored'
   }
 
+  hasDetail() {
+    return true
+  }
+
+  detailEnabled() {
+    return true
+  }
+
   renderContent({ openSnackBar }) {
     return (<Groups
       {...this.state}
