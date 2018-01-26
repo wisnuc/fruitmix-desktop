@@ -4,6 +4,9 @@ import { CircularProgress, Paper, Avatar, IconButton, RaisedButton } from 'mater
 import ContentAdd from 'material-ui/svg-icons/content/add'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
+import BackIcon from 'material-ui/svg-icons/navigation/arrow-back'
+import ForwardIcon from 'material-ui/svg-icons/navigation/arrow-forward'
+import UpIcon from 'material-ui/svg-icons/navigation/arrow-upward'
 import { ShareIcon, ShareDisk } from '../common/Svg'
 import FlatButton from '../common/FlatButton'
 import FileContent from '../file/FileContent'
@@ -30,6 +33,14 @@ class SelectNas extends React.Component {
       loading: false
     }
 
+    this.listNavBySelect = () => {
+      if (!window.navigator.onLine) return this.props.openSnackBar(i18n.__('Offline Text'))
+      const selected = this.select.state.selected
+      if (selected.length !== 1) return
+
+      const entry = this.state.entries[selected[0]]
+      this.enter(entry)
+    }
 
     /* enter dir */
     this.enter = (node) => {
@@ -77,6 +88,7 @@ class SelectNas extends React.Component {
 
     /* back to parent */
     this.back = () => {
+      console.log('this.back', this.state)
       /* conditions that can not back: loading or in root */
       if (this.state.path.length === 1 || this.state.loading) return
 
@@ -89,7 +101,7 @@ class SelectNas extends React.Component {
       const dirUUID = currentDir.uuid
       const driveUUID = path[0].uuid
 
-      if (currentDir.type === 'directory' || currentDir.type === 'public' || currentDir.tag === 'built-in' || currentDir.type === 'home' || currentDir.type === 'share') { // normal directory
+      if (currentDir.type === 'directory' || currentDir.type === 'public' || currentDir.tag === 'built-in' || currentDir.tag === 'home' || currentDir.type === 'share') { // normal directory
         this.list(driveUUID, dirUUID)
           .then(list => this.updateState(path, currentDir, list))
           .catch(err => console.log(err))
@@ -106,6 +118,26 @@ class SelectNas extends React.Component {
         const list = this.props.apis.drives.value().filter(d => d.type === 'public' && d.tag !== 'built-in' &&
           (d.writelist === '*' || d.writelist.find(u => u === myUUID)))
         setImmediate(() => this.updateState(path, currentDir, list))
+      }
+    }
+
+    this.nav = (nav) => {
+      this.setState({ nav })
+      const d = this.props.apis.drives
+      const drive = d && d.data && d.data.find(dr => dr.tag === 'home')
+      if (!drive) return console.log('no drive error')
+      switch (nav) {
+        case 'home':
+          if (drive) this.enter(Object.assign({ setRoot: true }, drive))
+          break
+        case 'share':
+          this.enter({ tag: 'built-in', setRoot: true })
+          break
+        case 'public':
+          this.enter({ type: 'publicRoot', setRoot: true })
+          break
+        default:
+          break
       }
     }
 
@@ -127,6 +159,7 @@ class SelectNas extends React.Component {
     }
 
     this.updateState = (path, currentDir, entries) => {
+      entries.forEach(e => (e.name = e.name || e.label))
       this.setState({
         path: path || this.state.path,
         entries: entries || this.state.entries,
@@ -157,21 +190,21 @@ class SelectNas extends React.Component {
       {
         key: 'home',
         Icon: FileFolder,
-        onTouchTap: () => this.setState({ nav: 'home' }),
+        onTouchTap: () => this.nav('home'),
         text: i18n.__('Home Menu Name'),
         color: this.state.nav === 'home' ? this.props.primaryColor : 'rgba(0,0,0,0.54)'
       },
       {
         key: 'share',
         Icon: ShareIcon,
-        onTouchTap: () => this.setState({ nav: 'share' }),
+        onTouchTap: () => this.nav('share'),
         text: i18n.__('Share Menu Name'),
         color: this.state.nav === 'share' ? this.props.primaryColor : 'rgba(0,0,0,0.54)'
       },
       {
         key: 'public',
         Icon: ShareDisk,
-        onTouchTap: () => this.setState({ nav: 'public' }),
+        onTouchTap: () => this.nav('public'),
         text: i18n.__('Public Quick Name'),
         color: this.state.nav === 'public' ? this.props.primaryColor : 'rgba(0,0,0,0.54)'
       }
@@ -204,11 +237,22 @@ class SelectNas extends React.Component {
             { this.props.view === 'file' && navs.map(n => <QuickNav {...n} />) }
           </div>
           <div style={{ flexGrow: 1, height: '100%', backgroundColor: '#FFF', overflow: 'hidden', position: 'relative' }}>
-            <div style={{ width: '100%', height: 64, backgroundColor: 'rgba(0,0,0,0.09)' }} />
+            <div style={{ width: '100%', height: 64, backgroundColor: 'rgba(0,0,0,0.09)' }} >
+              <IconButton onTouchTap={this.back}>
+                <BackIcon color="#FFF" />
+              </IconButton>
+              <IconButton onTouchTap={this.back}>
+                <ForwardIcon color="#FFF" />
+              </IconButton>
+              <IconButton onTouchTap={this.back}>
+                <UpIcon color="#FFF" />
+              </IconButton>
+            </div>
             <div style={{ width: '100%', height: 'calc(100% - 64px)', position: 'absolute', top: 64, left: 0 }}>
               <FileContent
                 {...this.state}
-                listNavBySelect={() => {}}
+                showNoFiles
+                listNavBySelect={this.listNavBySelect}
                 showContextMenu={() => {}}
                 setAnimation={() => {}}
                 ipcRenderer={this.props.ipcRenderer}

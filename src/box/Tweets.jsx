@@ -135,7 +135,7 @@ class Tweets extends React.PureComponent {
                 }
               </div>
               :
-              <Paper style={{ width: 3 * w + 12, height: 56, display: 'flex', alignItems: 'center' }}>
+              <Paper style={{ width: 3 * w + 12, height: 56, display: 'flex', alignItems: 'center', fontSize: 14 }}>
                 <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', backgroundColor: '#FF9100', padding: 16 }}>
                   <FileFolder color="#FFF" />
                 </div>
