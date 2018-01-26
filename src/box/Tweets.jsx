@@ -4,6 +4,7 @@ import { CircularProgress, Paper, Avatar } from 'material-ui'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import { parseTime } from '../common/datetime'
 import Thumb from '../file/Thumb'
+import DetailContainer from '../photo/DetailContainer'
 
 const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
 
@@ -104,17 +105,46 @@ class Tweets extends React.PureComponent {
               >
                 { comment }
               </Paper>
-              : isMedia ? 
+              : isMedia ?
               <div style={{ width: 3 * w + 12, maxHeight: 400 }}>
                 {
-                  list.map((l, i) => {
+                  list.slice(0, 3).map((l, i) => {
                     const { sha256, filename } = l
                     if (i > 5) return (<div key={sha256 + filename} />)
                     const float = i > 2 || !isSelf ? 'left' : 'right'
                     return (
                       <Paper
-                        style={{ width: w, height: w, float, backgroundColor: '#FFF', margin: 2, position: 'relative' }}
                         key={sha256 + filename}
+                        onTouchTap={() => this.setState({ openDetail: true, list, seqIndex: i })}
+                        style={{ width: w, height: w, float, backgroundColor: '#FFF', margin: 2, position: 'relative' }}
+                      >
+                        <Thumb
+                          digest={sha256}
+                          boxUUID={this.props.boxUUID}
+                          ipcRenderer={this.props.ipcRenderer}
+                          height={w}
+                          width={w}
+                        />
+                        {
+                          i === 5 && isMany &&
+                            <div style={Object.assign({ width: w, height: w }, overlayStyle)} >
+                              { `+ ${list.length - 6}` }
+                            </div>
+                        }
+                      </Paper>
+                    )
+                  })
+                }
+                {
+                  list.slice(3, 6).map((l, i) => {
+                    const { sha256, filename } = l
+                    if (i > 5) return (<div key={sha256 + filename} />)
+                    const float = i > 2 || !isSelf ? 'left' : 'right'
+                    return (
+                      <Paper
+                        key={sha256 + filename}
+                        onTouchTap={() => this.setState({ openDetail: true, list, seqIndex: i })}
+                        style={{ width: w, height: w, float, backgroundColor: '#FFF', margin: 2, position: 'relative' }}
                       >
                         <Thumb
                           digest={sha256}
@@ -172,6 +202,27 @@ class Tweets extends React.PureComponent {
             ? this.props.tweets.map((t, i) => this.renderTweets(t, i)) : this.renderNoTweets()
         }
         { this.props.tweets.length > 0 && <div style={{ height: 96 }} /> }
+
+        {/* PhotoDetail */}
+        <DetailContainer
+          boxUUID={this.props.boxUUID}
+          onRequestClose={() => this.setState({ openDetail: false })}
+          open={this.state.openDetail}
+          style={{ position: 'fixed', left: 0, top: 0, width: '100%', height: '100%' }}
+          items={this.state.list && this.state.list.map(l => Object.assign({ hash: l.sha256 }, l.metadata))}
+          seqIndex={this.state.seqIndex}
+          ipcRenderer={this.props.ipcRenderer}
+          setAnimation={() => {}}
+          setAnimation2={() => {}}
+          memoize={() => {}}
+          selectedItems={[]}
+          addListToSelection={() => {}}
+          removeListToSelection={() => {}}
+          hideMedia={() => {}}
+          removeMedia={() => {}}
+          startDownload={this.startDownload}
+          apis={this.props.apis}
+        />
       </div>
     )
   }

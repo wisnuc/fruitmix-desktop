@@ -477,15 +477,22 @@ class DetailContainerInline extends React.Component {
     const videoMagic = ['3GP', 'MP4', 'MOV']
     const isPhoto = photoMagic.includes(m)
     const isVideo = videoMagic.includes(m)
-    const props = { item, ipcRenderer: this.props.ipcRenderer, updateContainerSize: this.updateContainerSize, apis: this.props.apis, parent }
-    debug('renderDetail item', item, isPhoto, isVideo)
+    console.log('this.props.boxUUID', this.props.boxUUID)
+    const props = {
+      item,
+      parent,
+      boxUUID: this.props.boxUUID,
+      apis: this.props.apis,
+      ipcRenderer: this.props.ipcRenderer,
+      updateContainerSize: this.updateContainerSize
+    }
     if (isPhoto) return (<PhotoDetail {...props} />)
     if (isVideo) return (<VideoDetail {...props} />)
     return (<div />)
   }
 
   render() {
-    // debug('renderContainer', this.leftItem, this.centerItem, this.rightItem)
+    debug('renderContainer', this.leftItem, this.centerItem, this.rightItem, this.state, this.props)
     this.changeContainer()
 
     /* show hidden media or just normal view */
