@@ -177,6 +177,8 @@ class NavViews extends React.Component {
   componentDidMount() {
     this.navTo('home')
     this.checkFirmWareAsync().catch(e => console.log('checkFirmWareAsync error', e))
+    this.setState({ openDrawer: true })
+    setTimeout(() => this.setState({ openDrawer: false }), 1000)
     ipcRenderer.send('START_TRANSMISSION')
     ipcRenderer.on('snackbarMessage', (e, message) => this.openSnackBar(message.message))
     ipcRenderer.on('conflicts', (e, args) => this.setState({ conflicts: args }))
