@@ -95,6 +95,7 @@ class FileDetail extends React.PureComponent {
     const { name, type, metadata } = detailFile
     return (
       <div
+        key={name}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -114,9 +115,10 @@ class FileDetail extends React.PureComponent {
           }
         </div>
         <div style={{ flex: '0 0 16px' }} />
-        <div style={{ flexGrow: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          { name }
-        </div>
+        <input
+          defaultValue={name}
+          style={{ flexGrow: 1, border: 0, padding: 3, fontSize: 20, fontWeight: 500, backgroundColor: 'transparent', color: '#FFFFFF' }}
+        />
         <div style={{ flex: '0 0 24px' }} />
       </div>
     )
