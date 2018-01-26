@@ -114,7 +114,9 @@ class Groups extends React.Component {
 
   renderBox(box, index) {
     const { ltime, name, uuid, users, lcomment } = box
+    const selected = this.props.currentBox === uuid
     const hovered = this.state.hover === index
+
     /* width: 376 = 2 + 32 + 40 + 16 + 142 + 120 + 24 + 16 */
     return (
       <div
@@ -129,7 +131,7 @@ class Groups extends React.Component {
           alignItems: 'center',
           boxSizing: 'border-box',
           border: '1px solid #EEEEEE',
-          backgroundColor: hovered ? '#EEEEEE' : ''
+          backgroundColor: selected ? '#EEEEEE' : hovered ? '#F5F5F5' : ''
         }}
       >
         <div style={{ width: 32 }} />

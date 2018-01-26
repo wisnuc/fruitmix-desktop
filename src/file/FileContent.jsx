@@ -291,22 +291,25 @@ class FileContent extends React.Component {
         onTouchTap={e => this.onRowTouchTap(e, -1)}
         onDrop={this.drop}
       >
-        <div
-          style={{
-            width: 360,
-            height: 360,
-            borderRadius: '180px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexDirection: 'column',
-            backgroundColor: '#FAFAFA'
-          }}
-        >
-          <UploadIcon style={{ height: 64, width: 64, color: 'rgba(0,0,0,0.27)' }} />
-          <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.27)' }}> { i18n.__('No File Text 1') } </div>
-          <div style={{ color: 'rgba(0,0,0,0.27)' }}> { i18n.__('No File Text 2') } </div>
-        </div>
+        {
+          this.props.showNoFiles ? i18n.__('Empty Folder Text') :
+            <div
+              style={{
+                width: 360,
+                height: 360,
+                borderRadius: '180px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'column',
+                backgroundColor: '#FAFAFA'
+              }}
+            >
+              <UploadIcon style={{ height: 64, width: 64, color: 'rgba(0,0,0,0.27)' }} />
+              <div style={{ fontSize: 24, color: 'rgba(0,0,0,0.27)' }}> { i18n.__('No File Text 1') } </div>
+              <div style={{ color: 'rgba(0,0,0,0.27)' }}> { i18n.__('No File Text 2') } </div>
+            </div>
+        }
       </div>
     )
   }
