@@ -14,6 +14,20 @@ import ErrorBox from '../common/ErrorBox'
 
 const debug = Debug('component:control:ClientUpdate:')
 
+const compareVerison = (a, b) => {
+  const aArray = a.split('.')
+  const bArray = b.split('.')
+
+  const len = Math.min(aArray.length, bArray.length)
+  for (let i = 0; i < len; i++) {
+    if (parseInt(aArray[i], 10) > parseInt(bArray[i], 10)) return 1
+    if (parseInt(aArray[i], 10) < parseInt(bArray[i], 10)) return -1
+  }
+  if (aArray.length > bArray.length) return 1
+  if (aArray.length < bArray.length) return -1
+  return 0
+}
+
 class Update extends React.Component {
   constructor(props) {
     super(props)
@@ -49,9 +63,9 @@ class Update extends React.Component {
     this.newRelease = (event, result) => {
       debug('this.getPath', result)
       const { rel, filePath, error } = result
-      if (!rel || error) return this.setState({ status: 'error' , error })
+      if (!rel || error) return this.setState({ status: 'error', error })
       let status = 'needUpdate'
-      if (global.config.appVersion.localeCompare(rel.name) >= 0) status = 'latest'
+      if (compareVerison(global.config.appVersion, rel.name) >= 0) status = 'latest'
       return this.setState({ rel, filePath, status, error: null })
     }
 
