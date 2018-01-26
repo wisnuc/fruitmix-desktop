@@ -689,6 +689,7 @@ class Home extends Base {
         {
           this.state.entries.length ?
             <FileDetail
+              key={this.state.path.slice(-1)[0].uuid}
               detailIndex={this.select.state.selected}
               counter={this.state.counter}
               entries={this.state.entries}
