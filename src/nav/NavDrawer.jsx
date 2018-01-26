@@ -139,137 +139,139 @@ class NavDrawer extends React.Component {
     if (this.props.isCloud) station = mdev.stationName
 
     return (
-
       <Drawer docked={false} width={256} open={open} onRequestChange={onRequestChange}>
+        <div
+          style={{ width: '100%', height: '100%' }}
+          onMouseMove={this.props.onMouseMove}
+        >
+          <div style={{ position: 'relative', width: '100%', backgroundColor: primaryColor }} >
+            <div style={{ height: 96, width: '100%', display: 'flex', alignItems: 'center' }} >
+              {/* set background of icon */}
+              {
+                avatarUrl ?
+                  <div
+                    style={{ borderRadius: 28, width: 56, height: 56, overflow: 'hidden', marginLeft: 23, cursor: 'pointer' }}
+                    onTouchTap={() => navTo('account')}
+                  >
+                    <img width={56} height={56} alt="" src={avatarUrl} />
+                  </div> :
+                  <IconButton
+                    iconStyle={{ width: 67, height: 67, color: 'white' }}
+                    style={{ width: 105, height: 105, padding: 19 }}
+                    onTouchTap={() => navTo('account')}
+                  >
+                    <ActionAccountCircle />
+                  </IconButton>
+              }
+            </div>
 
-        <div style={{ position: 'relative', width: '100%', backgroundColor: primaryColor }} >
-          <div style={{ height: 96, width: '100%', display: 'flex', alignItems: 'center' }} >
-            {/* set background of icon */}
-            { avatarUrl ? <div
-              style={{ borderRadius: 28, width: 56, height: 56, overflow: 'hidden', marginLeft: 23, cursor: 'pointer' }}
-              onTouchTap={() => navTo('account')}
-            >
-              <img width={56} height={56} alt="" src={avatarUrl} />
-            </div> :
-            <IconButton
-              iconStyle={{ width: 67, height: 67, color: 'white' }}
-              style={{ width: 105, height: 105, padding: 19 }}
-              onTouchTap={() => navTo('account')}
-            >
-              <ActionAccountCircle />
-            </IconButton>
-            }
-          </div>
+            <div style={{ height: 44, marginLeft: 24, marginTop: -12 }}>
+              <div style={{ fontSize: 14, fontWeight: 500, color: '#FFF', height: 20 }}>{ username }</div>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: '#E0E0E0',
+                  ':hover': { color: this.props.isCloud || !isAdmin ? '#E0E0E0' : '#FFF' },
+                  cursor: this.props.isCloud || !isAdmin ? '' : 'pointer',
+                  height: 18,
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+                onTouchTap={() => isAdmin && !this.props.isCloud && navTo('device')}
+              >
+                { `${station} ( ${ip} )` }
+              </div>
+            </div>
 
-          <div style={{ height: 44, marginLeft: 24, marginTop: -12 }}>
-            <div style={{ fontSize: 14, fontWeight: 500, color: '#FFF', height: 20 }}>{ username }</div>
-            <div
-              style={{
-                fontSize: 12,
-                color: '#E0E0E0',
-                ':hover': { color: this.props.isCloud || !isAdmin ? '#E0E0E0' : '#FFF' },
-                cursor: this.props.isCloud || !isAdmin ? '' : 'pointer',
-                height: 18,
-                display: 'flex',
-                alignItems: 'center'
-              }}
-              onTouchTap={() => isAdmin && !this.props.isCloud && navTo('device')}
-            >
-              { `${station} ( ${ip} )` }
+            <div style={{ position: 'absolute', right: 16, top: 8, display: this.props.isCloud ? '' : 'none' }}>
+              <IconButton
+                iconStyle={{ color: '#FFFFFF' }}
+                tooltip={i18n.__('Connect via Cloud')}
+              >
+                <CloudIcon />
+              </IconButton>
             </div>
           </div>
 
-          <div style={{ position: 'absolute', right: 16, top: 8, display: this.props.isCloud ? '' : 'none' }}>
-            <IconButton
-              iconStyle={{ color: '#FFFFFF' }}
-              tooltip={i18n.__('Connect via Cloud')}
-            >
-              <CloudIcon />
-            </IconButton>
-          </div>
-        </div>
+          <Divider />
 
-        <Divider />
+          <SubHeader>{ i18n.__('Box Title') }</SubHeader>
 
-        <SubHeader>{ i18n.__('Box Title') }</SubHeader>
+          {/* this.renderGroup('file') */}
 
-        {/* this.renderGroup('file') */}
-
-        <MenuItem
-          icon={views.home.menuIcon()}
-          text={i18n.__('Files')}
-          primaryColor={primaryColor}
-          selected={views[nav].navGroup() === 'file'}
-          onTouchTap={() => navTo('home')}
-        />
-
-        <MenuItem
-          icon={views.media.menuIcon()}
-          text={i18n.__('Photos')}
-          primaryColor={primaryColor}
-          selected={views[nav].navGroup() === 'media'}
-          onTouchTap={() => navTo('media')}
-        />
-
-        <MenuItem
-          icon={views.download.menuIcon()}
-          text={views.download.menuName()}
-          primaryColor={primaryColor}
-          selected={nav === 'download'}
-          onTouchTap={() => navTo('download')}
-        />
-
-        <SubHeader>{ i18n.__('Management Title') }</SubHeader>
-
-        {/*
-        <MenuItem
-          icon={views.docker.menuIcon()}
-          text={i18n.__('Docker')}
-          primaryColor={primaryColor}
-          selected={views[nav].navGroup() === 'docker'}
-          onTouchTap={() => navTo('docker')}
-        />
-        */}
-
-        <MenuItem
-          icon={views.account.menuIcon()}
-          text={i18n.__('Users')}
-          primaryColor={primaryColor}
-          selected={views[nav].navGroup() === 'user'}
-          onTouchTap={() => navTo('account')}
-        />
-
-        {
-          isAdmin && !this.props.isCloud && <MenuItem
-            icon={ActionDns}
-            text={i18n.__('Device Management')}
+          <MenuItem
+            icon={views.home.menuIcon()}
+            text={i18n.__('Files')}
             primaryColor={primaryColor}
-            selected={views[nav].navGroup() === 'device'}
-            onTouchTap={() => navTo('device')}
+            selected={views[nav].navGroup() === 'file'}
+            onTouchTap={() => navTo('home')}
           />
-        }
 
-        <MenuItem
-          icon={ActionSettings}
-          text={i18n.__('System Settings')}
-          primaryColor={primaryColor}
-          selected={views[nav].navGroup() === 'settings'}
-          onTouchTap={() => navTo('clientSettings')}
-        />
+          <MenuItem
+            icon={views.media.menuIcon()}
+            text={i18n.__('Photos')}
+            primaryColor={primaryColor}
+            selected={views[nav].navGroup() === 'media'}
+            onTouchTap={() => navTo('media')}
+          />
 
-        <div style={{ height: 4 }} />
-        <Divider />
-        <div style={{ height: 4 }} />
+          <MenuItem
+            icon={views.download.menuIcon()}
+            text={views.download.menuName()}
+            primaryColor={primaryColor}
+            selected={nav === 'download'}
+            onTouchTap={() => navTo('download')}
+          />
 
-        <MenuItem
-          icon={ActionExitToApp}
-          text={i18n.__('Exit')}
-          onTouchTap={() => {
-            ipcRenderer.send('LOGOUT')
-            this.props.navToMain('login')
-          }}
-        />
+          <SubHeader>{ i18n.__('Management Title') }</SubHeader>
 
+          {/*
+          <MenuItem
+            icon={views.docker.menuIcon()}
+            text={i18n.__('Docker')}
+            primaryColor={primaryColor}
+            selected={views[nav].navGroup() === 'docker'}
+            onTouchTap={() => navTo('docker')}
+          />
+          */}
+
+          <MenuItem
+            icon={views.account.menuIcon()}
+            text={i18n.__('Users')}
+            primaryColor={primaryColor}
+            selected={views[nav].navGroup() === 'user'}
+            onTouchTap={() => navTo('account')}
+          />
+
+          {
+            isAdmin && !this.props.isCloud &&
+              <MenuItem
+                icon={ActionDns}
+                text={i18n.__('Device Management')}
+                primaryColor={primaryColor}
+                selected={views[nav].navGroup() === 'device'}
+                onTouchTap={() => navTo('device')}
+              />
+          }
+
+          <MenuItem
+            icon={ActionSettings}
+            text={i18n.__('System Settings')}
+            primaryColor={primaryColor}
+            selected={views[nav].navGroup() === 'settings'}
+            onTouchTap={() => navTo('clientSettings')}
+          />
+
+          <div style={{ height: 4 }} />
+          <Divider />
+          <div style={{ height: 4 }} />
+
+          <MenuItem
+            icon={ActionExitToApp}
+            text={i18n.__('Exit')}
+            onTouchTap={() => { ipcRenderer.send('LOGOUT'); this.props.navToMain('login') }}
+          />
+        </div>
       </Drawer>
     )
   }
