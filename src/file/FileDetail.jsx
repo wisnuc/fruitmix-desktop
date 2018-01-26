@@ -80,7 +80,7 @@ class FileDetail extends React.PureComponent {
               >
                 <div style={{ flex: '0 0 112px', fontSize: 14 }} > { title } </div>
                 <input
-                  defaultValue={values[index]}
+                  value={values[index]}
                   style={{ width: 200, border: 0, padding: 3, fontSize: 14, color: 'rgba(0, 0, 0, 0.54)', backgroundColor: '#FAFAFA' }}
                 />
               </div>
@@ -116,7 +116,7 @@ class FileDetail extends React.PureComponent {
         </div>
         <div style={{ flex: '0 0 16px' }} />
         <input
-          defaultValue={name}
+          value={name}
           style={{ flexGrow: 1, border: 0, padding: 3, fontSize: 20, fontWeight: 500, backgroundColor: 'transparent', color: '#FFFFFF' }}
         />
         <div style={{ flex: '0 0 24px' }} />
@@ -206,7 +206,7 @@ class FileDetail extends React.PureComponent {
               </div>
               <div style={{ flex: '0 0 16px' }} />
               <input
-                defaultValue={getPath(this.props.path).split('/').slice(-1)[0]}
+                value={getPath(this.props.path).split('/').slice(-1)[0]}
                 style={{ flexGrow: 1, border: 0, padding: 3, fontSize: 20, fontWeight: 500, backgroundColor: 'transparent', color: '#FFFFFF' }}
               />
               <div style={{ flex: '0 0 24px' }} />
