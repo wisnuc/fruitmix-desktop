@@ -221,6 +221,7 @@ class Groups extends React.Component {
           tweets={this.props.tweets}
           boxUUID={this.props.currentBox}
           ipcRenderer={this.props.ipcRenderer}
+          apis={this.props.apis}
         />
 
         {/* FAB */}

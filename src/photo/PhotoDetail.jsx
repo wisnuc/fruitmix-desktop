@@ -31,7 +31,7 @@ class PhotoDetail extends React.Component {
       this.photo = this.props.item
       this.digest = this.props.item.hash
       this.state = Object.assign({}, this.state, { thumbPath: '', detailPath: '' })
-      this.props.ipcRenderer.send('mediaShowThumb', this.session, this.digest, 200, 200)
+      this.props.ipcRenderer.send('mediaShowThumb', this.session, this.digest, 200, 200, this.props.boxUUID)
     }
 
     /* update detail image */
@@ -61,7 +61,7 @@ class PhotoDetail extends React.Component {
         /* update thumbPath */
         this.setState({ thumbPath: path, detailPath: '' }, () => {
           /* get detail image */
-          this.props.ipcRenderer.send('mediaShowImage', this.session, this.digest)
+          this.props.ipcRenderer.send('mediaShowImage', this.session, this.digest, this.props.boxUUID)
         })
       }
     }

@@ -207,8 +207,6 @@ class NavDrawer extends React.Component {
             onTouchTap={() => navTo('home')}
           />
 
-          <Divider />
-
           <MenuItem
             icon={views.box.menuIcon()}
             text={i18n.__('Box')}
