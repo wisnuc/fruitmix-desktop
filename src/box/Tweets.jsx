@@ -1,6 +1,7 @@
 import React from 'react'
 import i18n from 'i18n'
 import { CircularProgress, Paper, Avatar } from 'material-ui'
+import FileFolder from 'material-ui/svg-icons/file/folder'
 import { parseTime } from '../common/datetime'
 import Thumb from '../file/Thumb'
 
@@ -134,9 +135,17 @@ class Tweets extends React.PureComponent {
                 }
               </div>
               :
-              <div style={{ width: 570, maxHeight: 400 }}>
-                { 'list .....' }
-              </div>
+              <Paper style={{ width: 3 * w + 12, height: 56, display: 'flex', alignItems: 'center' }}>
+                <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', backgroundColor: '#FF9100', padding: 16 }}>
+                  <FileFolder color="#FFF" />
+                </div>
+                <div style={{ width: 16 }} />
+                <div style={{ maxWidth: 1 * w, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                  { list[0].filename }
+                </div>
+                <div style={{ width: 4 }} />
+                { list.length > 1 && i18n.__n('And Other %s Items', list.length)}
+              </Paper>
           }
         </div>
       </div>
