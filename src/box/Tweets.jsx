@@ -39,8 +39,8 @@ class Tweets extends React.PureComponent {
     this.scrollToBottom()
   }
 
-  componentDidUpdate() {
-    this.scrollToBottom()
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.boxUUID !== this.props.boxUUID) this.scrollToBottom()
   }
 
   renderNoTweets() {
@@ -108,43 +108,16 @@ class Tweets extends React.PureComponent {
               : isMedia ?
               <div style={{ width: 3 * w + 12, maxHeight: 400 }}>
                 {
-                  list.slice(0, 3).map((l, i) => {
+                  list.map((l, i) => {
                     const { sha256, filename } = l
                     if (i > 5) return (<div key={sha256 + filename} />)
-                    const float = i > 2 || !isSelf ? 'left' : 'right'
+                    // const float = i > 2 || !isSelf ? 'left' : 'right'
+                    const margin = isSelf && list.length < 3 && i === 0 ? `2px 2px 2px ${360 - list.length * 120 + 2}px` : 2
                     return (
                       <Paper
                         key={sha256 + filename}
                         onTouchTap={() => this.setState({ openDetail: true, list, seqIndex: i })}
-                        style={{ width: w, height: w, float, backgroundColor: '#FFF', margin: 2, position: 'relative' }}
-                      >
-                        <Thumb
-                          digest={sha256}
-                          boxUUID={this.props.boxUUID}
-                          ipcRenderer={this.props.ipcRenderer}
-                          height={w}
-                          width={w}
-                        />
-                        {
-                          i === 5 && isMany &&
-                            <div style={Object.assign({ width: w, height: w }, overlayStyle)} >
-                              { `+ ${list.length - 6}` }
-                            </div>
-                        }
-                      </Paper>
-                    )
-                  })
-                }
-                {
-                  list.slice(3, 6).map((l, i) => {
-                    const { sha256, filename } = l
-                    if (i > 5) return (<div key={sha256 + filename} />)
-                    const float = i > 2 || !isSelf ? 'left' : 'right'
-                    return (
-                      <Paper
-                        key={sha256 + filename}
-                        onTouchTap={() => this.setState({ openDetail: true, list, seqIndex: i })}
-                        style={{ width: w, height: w, float, backgroundColor: '#FFF', margin: 2, position: 'relative' }}
+                        style={{ width: w, height: w, float: 'left', backgroundColor: '#FFF', margin, position: 'relative' }}
                       >
                         <Thumb
                           digest={sha256}
