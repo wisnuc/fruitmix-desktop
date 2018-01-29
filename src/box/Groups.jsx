@@ -135,7 +135,9 @@ class Groups extends React.Component {
           <div style={{ width: 16 }} />
           <div style={{ width: 142 }} >
             <div style={{ height: 30, display: 'flex', alignItems: 'center' }} >
-              { name }
+              <div style={{ width: 142, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                { name || i18n.__('Group Chat (%d)', users.length) }
+              </div>
             </div>
             <div style={{ height: 24, fontSize: 14, display: 'flex', alignItems: 'center', color: 'rgba(0,0,0,.54)' }}>
               { lcomment }
@@ -248,6 +250,7 @@ class Groups extends React.Component {
           {
             this.state.newBox &&
             <NewBox
+              primaryColor={this.props.primaryColor}
               apis={this.props.apis}
               guid={this.props.guid}
               refresh={this.props.refresh}

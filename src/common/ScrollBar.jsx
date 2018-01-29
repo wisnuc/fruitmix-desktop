@@ -32,7 +32,6 @@ class ScrollBar extends React.PureComponent {
       const diff = event.clientY - this.startY
       const percent = Math.min(1, diff / (height - barH))
       const scrollTop = Math.max(0, percent * (allHeight - height) + this.startScrollTop)
-      console.log('scrollTop', scrollTop, this.startScrollTop)
       this.setScrollTop(scrollTop)
       this.onHover()
     }
@@ -69,7 +68,6 @@ class ScrollBar extends React.PureComponent {
   }
 
   render() {
-    console.log('ScrollBar render !')
     const { width, height, allHeight } = this.props
     const barH = Math.max(height * height / allHeight, 48)
     const barStyle = {
