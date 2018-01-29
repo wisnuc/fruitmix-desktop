@@ -378,8 +378,10 @@ class TrsContainer extends React.Component {
 
     /* rowRenderer */
     const rowRenderer = ({ key, index, style }) => (
-      <div key={key} style={Object.assign({ marginLeft: 20 }, style)}>
-        { list[index] }
+      <div key={key} style={style}>
+        <div style={{ marginLeft: 20 }}>
+          { list[index] }
+        </div>
       </div>
     )
     return (
