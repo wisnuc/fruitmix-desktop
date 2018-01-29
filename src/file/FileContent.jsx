@@ -57,7 +57,7 @@ class FileContent extends React.Component {
       e.preventDefault() // important, to prevent other event
       e.stopPropagation()
 
-      if (this.props.fileSelect && this.props.entries[index].type !== 'file') return
+      if (this.props.fileSelect && this.props.entries[index] && this.props.entries[index].type !== 'file') return
 
       const type = e.type
       const button = e.nativeEvent.button

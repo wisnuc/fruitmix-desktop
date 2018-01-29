@@ -14,17 +14,9 @@ import { List, AutoSizer } from 'react-virtualized'
 import renderFileIcon from '../common/renderFileIcon'
 import { ShareDisk } from '../common/Svg'
 import FlatButton from '../common/FlatButton'
-import { formatDate } from '../common/datetime'
+import { formatDate, formatMtime } from '../common/datetime'
 
 const debug = Debug('component:file:RenderListByRow:')
-
-const formatTime = (mtime) => {
-  if (!mtime) return null
-
-  const time = new Date()
-  time.setTime(parseInt(mtime, 10))
-  return `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`
-}
 
 const renderLeading = (leading) => {
   let height = '100%'
@@ -143,7 +135,7 @@ class Row extends React.PureComponent {
 
           <div style={{ flex: inPublicRoot ? '0 0 476px' : '0 1 144px', fontSize: 13, color: 'rgba(0,0,0,0.54)' }}>
             { showTakenTime ? entry.metadata && (entry.metadata.date || entry.metadata.datetime)
-              && formatDate(entry.metadata.date || entry.metadata.datetime) : entry.mtime && formatTime(entry.mtime) }
+              && formatDate(entry.metadata.date || entry.metadata.datetime) : entry.mtime && formatMtime(entry.mtime) }
             {
               inPublicRoot && (entry.writelist === '*' ? i18n.__('All Users')
               : entry.writelist.filter(uuid => users.find(u => u.uuid === uuid))
@@ -203,9 +195,11 @@ class RenderListByRow extends React.Component {
       this.setState({ open: event !== 'clickAway' && !this.state.open, anchorEl: event.currentTarget })
     }
 
-    this.getScrollToPosition = () => {
-      const list = document.getElementsByClassName('ReactVirtualized__List')[0]
-      return (parseInt(list.scrollTop, 10) || 0)
+    this.getScrollToPosition = () => (this.scrollTop || 0)
+
+    this.onScroll = ({ scrollTop }) => {
+      this.scrollTop = scrollTop
+      this.props.onScroll(scrollTop)
     }
   }
 
@@ -379,7 +373,7 @@ class RenderListByRow extends React.Component {
                     height={height}
                     width={width}
                     rowCount={this.props.entries.length}
-                    onScroll={({ scrollTop }) => this.props.onScroll(scrollTop)}
+                    onScroll={this.onScroll}
                     rowHeight={48}
                     rowRenderer={rowRenderer}
                   />

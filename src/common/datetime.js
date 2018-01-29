@@ -81,3 +81,10 @@ export function parseTime(time) {
   else if (t < nt) return i18n.__n('%d Minutes Ago', Math.floor((t - nt) / 60000) || 1)
   return i18n.__('Year {{year}} {{mon}} {{day}}', { year, mon, day })
 }
+
+export function formatMtime(mtime) {
+  if (!mtime) return null
+  const time = new Date()
+  time.setTime(parseInt(mtime, 10))
+  return `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`
+}

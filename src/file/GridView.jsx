@@ -267,7 +267,6 @@ class GridView extends React.Component {
     this.getStatus = () => this.gridData
 
     this.calcGridData = () => {
-      const list = document.getElementsByClassName('ReactVirtualized__List')[0]
       this.gridData = {
         mapData: this.mapData.reduce((acc, val, index) => {
           val.entries.forEach(() => acc.push(index))
@@ -275,11 +274,18 @@ class GridView extends React.Component {
         }, []),
         allHeight: this.allHeight, // const rowHeight = ({ index }) => allHeight[index]
         indexHeightSum: this.indexHeightSum,
-        scrollTop: parseInt(list.scrollTop, 10) || 0,
+        scrollTop: this.getScrollToPosition(),
         cellWidth: 200
       }
 
       this.props.setGridData(this.gridData)
+    }
+
+    this.getScrollToPosition = () => (this.scrollTop || 0)
+
+    this.onScroll = ({ scrollTop }) => {
+      this.scrollTop = scrollTop
+      this.props.onScroll(scrollTop)
     }
   }
 
@@ -424,7 +430,7 @@ class GridView extends React.Component {
                   rowHeight={rowHeight}
                   rowRenderer={rowRenderer}
                   rowCount={gridInfo.mapData.length}
-                  onScroll={({ scrollTop }) => this.props.onScroll(scrollTop)}
+                  onScroll={this.onScroll}
                   overscanRowCount={10}
                   style={{ outline: 'none' }}
                 />

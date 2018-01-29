@@ -165,6 +165,7 @@ class Groups extends React.Component {
   render() {
     const boxH = this.props.boxes && Math.min(window.innerHeight - 106, this.props.boxes.length * 72)
     const { boxes } = this.props
+    console.log('boxH', boxH, window.innerHeight)
     return (
       <div
         style={{
@@ -201,7 +202,7 @@ class Groups extends React.Component {
                     <ScrollBar
                       key={window.innerHeight}
                       allHeight={72 * boxes.length}
-                      style={{ outline: 'none', boxSizing: 'border-box', position: 'absolute', top: 0, left: 0 }}
+                      style={{ outline: 'none' }}
                       height={boxH}
                       width={376}
                       rowCount={boxes.length}

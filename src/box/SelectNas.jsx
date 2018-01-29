@@ -1,17 +1,20 @@
 import React from 'react'
 import i18n from 'i18n'
-import { CircularProgress, Paper, Avatar, IconButton, RaisedButton } from 'material-ui'
+import { CircularProgress, Paper, Avatar, IconButton, RaisedButton, TextField } from 'material-ui'
 import ContentAdd from 'material-ui/svg-icons/content/add'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import BackIcon from 'material-ui/svg-icons/navigation/arrow-back'
 import ForwardIcon from 'material-ui/svg-icons/navigation/arrow-forward'
 import UpIcon from 'material-ui/svg-icons/navigation/arrow-upward'
+import ModeEdit from 'material-ui/svg-icons/editor/mode-edit'
 import { ShareIcon, ShareDisk } from '../common/Svg'
 import FlatButton from '../common/FlatButton'
 import FileContent from '../file/FileContent'
 import QuickNav from '../nav/QuickNav'
 import ListSelect from './ListSelect'
+import renderFileIcon from '../common/renderFileIcon'
+import { formatMtime } from '../common/datetime'
 
 const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
 
@@ -23,7 +26,16 @@ class SelectNas extends React.Component {
 
     this.select = new ListSelect(this)
 
-    this.select.on('updated', next => this.setState({ select: next }))
+    this.selected = new Map()
+    this.select.on('updated', (next) => {
+      this.selected = new Map([...this.selected].filter(([k]) => next.selected.includes(k)))
+      next.selected.forEach((uuid) => {
+        const entry = this.state.entries.find(e => e.uuid === uuid)
+        if (entry) this.selected.set(uuid, entry)
+      })
+
+      this.setState({ select: next })
+    })
 
     this.state = {
       select: this.select.state,
@@ -174,6 +186,46 @@ class SelectNas extends React.Component {
     )
   }
 
+  renderSelected(entry) {
+    const { type, uuid, mtime, metadata, name } = entry
+    const color = '#FFF'
+    return (
+      <div key={uuid} >
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            backgroundColor: color,
+            boxSizing: 'border-box'
+          }}
+          onMouseEnter={() => {}}
+          onMouseLeave={() => {}}
+        >
+          {/* file type may be: folder, public, directory, file, unsupported */}
+          <div style={{ flex: '0 0 48px', display: 'flex', alignItems: 'center' }} >
+            <Avatar style={{ backgroundColor: '#FFF' }}>
+              { renderFileIcon(name, metadata, 24) }
+            </Avatar>
+          </div>
+
+          <div style={{ flex: '0 1 216px', display: 'flex' }} >
+            <div style={{ width: 192, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} >
+              { name }
+            </div>
+            <div style={{ width: 24 }} />
+          </div>
+
+          <div style={{ flex: '0 1 144px', fontSize: 13, color: 'rgba(0,0,0,0.54)' }}>
+            { mtime && formatMtime(mtime) }
+          </div>
+          <div style={{ flexGrow: 1 }} />
+        </div>
+      </div>
+    )
+  }
+
   componentDidMount() {
     const d = this.props.apis.drives
     const drive = d && d.data && d.data.find(dr => dr.tag === 'home')
@@ -181,7 +233,7 @@ class SelectNas extends React.Component {
   }
 
   render() {
-    console.log('SelectNas', this.props, this.state)
+    console.log('SelectNas', this.props, this.state, this.selected)
     const navs = [
       {
         key: 'home',
@@ -289,13 +341,32 @@ class SelectNas extends React.Component {
             </div>
 
             {/* comment */}
-            <div style={{ height: 61, width: '100%', display: 'flex', alignItems: 'center' }}>
-              { '标题' }
+            <div style={{ height: 61, width: '100%', margin: 8, display: 'flex', alignItems: 'center' }}>
+              <TextField
+                name="comment"
+                value={this.state.comment}
+                hintText={i18n.__('Say Something')}
+                onChange={e => this.setState({ comment: e.target.value })}
+              />
+              <ModeEdit color="rgba(0,0,0,.54)" style={{ margin: 8 }} />
             </div>
 
-            {/* file list */}
-            <div style={{ height: 'calc(100% - 196px)', width: '100%', display: 'flex', alignItems: 'center' }}>
-              { 'blabla' }
+            {/* file list title */}
+            <div style={{ height: 40, width: '100%', margin: 8, display: 'flex', alignItems: 'center', fontSize: 13, color: 'rgba(0,0,0,0.54)' }}>
+              <div style={{ flex: '0 0 48px' }} />
+              <div style={{ flex: '0 0 216px', display: 'flex', alignItems: 'center' }}>
+                { i18n.__('Name') }
+              </div>
+
+              <div style={{ flex: '0 0 144px' }}>
+                { i18n.__('Date Modified') }
+              </div>
+              <div style={{ flexGrow: 1 }} />
+            </div>
+
+            {/* file list content */}
+            <div style={{ height: 'calc(100% - 261px)', width: '100%', overflowY: 'auto' }}>
+              { [...this.selected].map(([k, entry]) => this.renderSelected(entry)) }
             </div>
 
             {/* action */}
