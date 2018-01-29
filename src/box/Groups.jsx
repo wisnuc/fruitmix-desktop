@@ -243,6 +243,7 @@ class Groups extends React.Component {
               apis={this.props.apis}
               guid={this.props.guid}
               onRequestClose={() => this.setState({ view: '' })}
+              refresh={this.props.refresh}
             />
         }
         {/* dialog */}

@@ -495,6 +495,10 @@ class Fruitmix extends EventEmitter {
         r = this.cdel(`boxes/${args.boxUUID}/tweets`, { indexArr: args.indexs })
         break
 
+      case 'nasTweets':
+        r = this.cpost(`boxes/${args.boxUUID}/tweets/indrive`, { comment: args.comment, type: args.type, list: args.list })
+        break
+
       default:
         break
     }
