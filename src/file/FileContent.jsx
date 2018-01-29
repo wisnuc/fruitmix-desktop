@@ -57,6 +57,8 @@ class FileContent extends React.Component {
       e.preventDefault() // important, to prevent other event
       e.stopPropagation()
 
+      if (this.props.fileSelect && this.props.entries[index].type !== 'file') return
+
       const type = e.type
       const button = e.nativeEvent.button
       if (type !== 'mouseup' || !(button === 0 || button === 2)) return
@@ -74,7 +76,7 @@ class FileContent extends React.Component {
       if (index === -1) return
       // debug('rowDoubleClick', this.props, index)
       const entry = this.props.entries[index]
-      this.props.listNavBySelect()
+      this.props.listNavBySelect(entry)
       if (entry.type === 'file') {
         this.setState({ seqIndex: index, preview: true })
       } else {
@@ -211,6 +213,7 @@ class FileContent extends React.Component {
       const array = Array
         .from({ length }, (v, i) => i)
         .filter((v, i) => {
+          if (this.props.fileSelect && this.props.entries[i].type !== 'file') return false
           const head = (i + 1) * lineHeight - scrollTop // row.tail > top && row.head < top + height
           return ((parseInt(s.top, 10) < head + lineHeight) &&
             (head < parseInt(s.top, 10) + parseInt(s.height, 10)))
@@ -292,7 +295,7 @@ class FileContent extends React.Component {
         onDrop={this.drop}
       >
         {
-          this.props.showNoFiles ? i18n.__('Empty Folder Text') :
+          this.props.fileSelect ? i18n.__('Empty Folder Text') :
             <div
               style={{
                 width: 360,

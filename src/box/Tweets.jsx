@@ -39,8 +39,9 @@ class Tweets extends React.PureComponent {
     this.scrollToBottom()
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.boxUUID !== this.props.boxUUID) this.scrollToBottom()
+  componentDidUpdate(prevProps) {
+    console.log('Tweets componentWillReceiveProps', prevProps.boxUUID !== this.props.boxUUID)
+    if (prevProps.boxUUID !== this.props.boxUUID) this.scrollToBottom()
   }
 
   renderNoTweets() {
