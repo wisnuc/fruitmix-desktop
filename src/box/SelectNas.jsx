@@ -31,7 +31,9 @@ class SelectNas extends React.Component {
       this.selected = new Map([...this.selected].filter(([k]) => next.selected.includes(k)))
       next.selected.forEach((uuid) => {
         const entry = this.state.entries.find(e => e.uuid === uuid)
-        if (entry) this.selected.set(uuid, entry)
+        const dirUUID = this.state.path.slice(-1)[0].uuid
+        const driveUUID = this.state.path[0].uuid
+        if (entry) this.selected.set(uuid, Object.assign({ dirUUID, driveUUID }, entry))
       })
 
       this.setState({ select: next })
@@ -48,6 +50,24 @@ class SelectNas extends React.Component {
     this.listNavBySelect = (entry) => {
       if (!window.navigator.onLine) return this.props.openSnackBar(i18n.__('Offline Text'))
       this.enter(entry)
+    }
+
+    this.fire = () => {
+      console.log('this.fire', this.selected)
+      const args = {
+        comment: '',
+        type: 'list',
+        boxUUID: this.props.boxUUID,
+        list: [...this.selected].map(([k, v]) => ({ type: 'file', filename: v.name, driveUUID: v.driveUUID, dirUUID: v.dirUUID }))
+      }
+      this.props.apis.pureRequest('nasTweets', args, (err, res) => {
+        console.log('err', err, res && res.body)
+        if (err) console.log('create nasTweets error', err)
+        else {
+          this.props.onRequestClose()
+          this.props.refresh()
+        }
+      })
     }
 
     /* enter dir */
@@ -375,7 +395,7 @@ class SelectNas extends React.Component {
                 style={{ width: 'calc(100% - 32px)' }}
                 primary
                 label={i18n.__('Create Tweet')}
-                onTouchTap={() => console.log('create tweet')}
+                onTouchTap={this.fire}
               />
             </div>
 
