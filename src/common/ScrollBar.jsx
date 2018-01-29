@@ -30,22 +30,25 @@ class ScrollBar extends React.PureComponent {
       const { allHeight, height } = this.props
       const barH = Math.max(height * height / allHeight, 48)
       const diff = event.clientY - this.startY
-      const percent = diff / (height - barH)
-      const scrollTop = percent * (allHeight - height) + this.startScrollTop
+      const percent = Math.min(1, diff / (height - barH))
+      const scrollTop = Math.max(0, percent * (allHeight - height) + this.startScrollTop)
       console.log('scrollTop', scrollTop, this.startScrollTop)
       this.setScrollTop(scrollTop)
       this.onHover()
     }
 
-    this.onScroll = (top) => {
+    this.onScroll = (top, scrollTop) => {
+      console.log('ScrollBar this.onScroll', top, scrollTop)
+      return
+      Object.assign(this.state, { scrollTop })
       if (!this.refBar) return
       this.onHover()
       this.refBar.style.top = `${top}px`
     }
 
-    this.getScrollTop = () => document.getElementsByClassName('ReactVirtualized__List')[0].scrollTop
+    this.getScrollTop = () => (this.state.scrollTop || 0)
 
-    this.setScrollTop = s => (document.getElementsByClassName('ReactVirtualized__List')[0].scrollTop = s)
+    this.setScrollTop = scrollTop => this.setState({ scrollTop })
 
     this.onHover = () => {
       this.setState({ hover: true })
@@ -68,6 +71,7 @@ class ScrollBar extends React.PureComponent {
   }
 
   render() {
+    console.log('ScrollBar render !')
     const { width, height, allHeight } = this.props
     const barH = Math.max(height * height / allHeight, 48)
     const barStyle = {
@@ -83,13 +87,14 @@ class ScrollBar extends React.PureComponent {
     return (
       <div style={{ position: 'relative', width, height, overflow: 'hidden' }}>
         <div
-          style={{ position: 'absolute', width: width + 16, height, overflowY: 'scroll', overflowX: 'hidden' }}
+          style={{ position: 'absolute', width: width + 16, height, overflowY: 'scroll', overflowX: 'hidden', top: 0, left: 0 }}
           onMouseMove={this.onHover}
         >
           <List
             {...this.props}
             width={width + 16}
-            onScroll={({ scrollTop }) => this.onScroll((height - barH) * scrollTop / (allHeight - height))}
+            scrollTop={this.state.scrollTop}
+            onScroll={({ scrollTop }) => this.onScroll((height - barH) * scrollTop / (allHeight - height), scrollTop)}
           />
         </div>
         {/* scrollBar background */}
