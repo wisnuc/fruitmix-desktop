@@ -11,7 +11,7 @@ import { ShareIcon, ShareDisk } from '../common/Svg'
 import FlatButton from '../common/FlatButton'
 import FileContent from '../file/FileContent'
 import QuickNav from '../nav/QuickNav'
-import ListSelect from '../file/ListSelect'
+import ListSelect from './ListSelect'
 
 const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
 
@@ -33,12 +33,8 @@ class SelectNas extends React.Component {
       loading: false
     }
 
-    this.listNavBySelect = () => {
+    this.listNavBySelect = (entry) => {
       if (!window.navigator.onLine) return this.props.openSnackBar(i18n.__('Offline Text'))
-      const selected = this.select.state.selected
-      if (selected.length !== 1) return
-
-      const entry = this.state.entries[selected[0]]
       this.enter(entry)
     }
 
@@ -251,7 +247,7 @@ class SelectNas extends React.Component {
             <div style={{ width: '100%', height: 'calc(100% - 64px)', position: 'absolute', top: 64, left: 0 }}>
               <FileContent
                 {...this.state}
-                showNoFiles
+                fileSelect
                 listNavBySelect={this.listNavBySelect}
                 showContextMenu={() => {}}
                 setAnimation={() => {}}
