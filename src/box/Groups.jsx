@@ -97,13 +97,7 @@ class Groups extends React.Component {
               <Avatar
                 key={u}
                 src={imgUrl}
-                style={{
-                  position: 'absolute',
-                  width: r * 2,
-                  height: r * 2,
-                  top,
-                  left
-                }}
+                style={{ position: 'absolute', width: r * 2, height: r * 2, top, left }}
               />
             )
           })
@@ -112,44 +106,46 @@ class Groups extends React.Component {
     )
   }
 
-  renderBox(box, index) {
+  renderBox({ key, index, style }) {
+    const box = this.props.boxes[index]
     const { ltime, name, uuid, users, lcomment } = box
     const selected = this.props.currentBox === uuid
     const hovered = this.state.hover === index
 
     /* width: 376 = 2 + 32 + 40 + 16 + 142 + 120 + 24 + 16 */
     return (
-      <div
-        key={uuid}
-        onTouchTap={() => this.selectBox(index)}
-        onMouseMove={() => !hovered && this.setState({ hover: index })}
-        onMouseLeave={() => hovered && this.setState({ hover: -1 })}
-        style={{
-          height: 72,
-          width: 376,
-          display: 'flex',
-          alignItems: 'center',
-          boxSizing: 'border-box',
-          border: '1px solid #EEEEEE',
-          backgroundColor: selected ? '#EEEEEE' : hovered ? '#F5F5F5' : ''
-        }}
-      >
-        <div style={{ width: 32 }} />
-        {/* Avatar */}
-        { this.renderAvatars(users) }
-        <div style={{ width: 16 }} />
-        <div style={{ width: 142 }} >
-          <div style={{ height: 30, display: 'flex', alignItems: 'center' }} >
-            { name }
+      <div key={key} style={style}>
+        <div
+          onTouchTap={() => this.selectBox(index)}
+          onMouseMove={() => !hovered && this.setState({ hover: index })}
+          onMouseLeave={() => hovered && this.setState({ hover: -1 })}
+          style={{
+            height: 72,
+            width: 376,
+            display: 'flex',
+            alignItems: 'center',
+            boxSizing: 'border-box',
+            border: '1px solid #EEEEEE',
+            backgroundColor: selected ? '#EEEEEE' : hovered ? '#F5F5F5' : ''
+          }}
+        >
+          <div style={{ width: 32 }} />
+          {/* Avatar */}
+          { this.renderAvatars(users) }
+          <div style={{ width: 16 }} />
+          <div style={{ width: 142 }} >
+            <div style={{ height: 30, display: 'flex', alignItems: 'center' }} >
+              { name }
+            </div>
+            <div style={{ height: 24, fontSize: 14, display: 'flex', alignItems: 'center', color: 'rgba(0,0,0,.54)' }}>
+              { lcomment }
+            </div>
           </div>
-          <div style={{ height: 24, fontSize: 14, display: 'flex', alignItems: 'center', color: 'rgba(0,0,0,.54)' }}>
-            { lcomment }
+          <div style={{ width: 120, textAlign: 'right', fontSize: 12, color: 'rgba(0,0,0,.54)' }}>
+            { parseTime(ltime) }
           </div>
+          <div style={{ width: 24 }} />
         </div>
-        <div style={{ width: 120, textAlign: 'right', fontSize: 12, color: 'rgba(0,0,0,.54)' }}>
-          { parseTime(ltime) }
-        </div>
-        <div style={{ width: 24 }} />
       </div>
     )
   }
@@ -180,7 +176,7 @@ class Groups extends React.Component {
         <EventListener target="window" onResize={this.handleResize} />
 
         {/* boxes */}
-        <div style={{ width: 376, height: '100%', overflow: 'auto' }} key={window.innerHeight}>
+        <div style={{ width: 376, height: '100%', overflow: 'auto' }}>
           {
             !boxes ? this.renderLoading(32) : (
               <div style={{ width: '100%', height: '100%', position: 'relative', backgroundColor: '#FAFAFA', overflow: 'hidden' }}>
@@ -200,14 +196,13 @@ class Groups extends React.Component {
                 {
                   boxes.length > 0 ?
                     <ScrollBar
-                      key={window.innerHeight}
-                      allHeight={72 * boxes.length}
                       style={{ outline: 'none' }}
+                      allHeight={72 * boxes.length}
                       height={boxH}
                       width={376}
                       rowCount={boxes.length}
                       rowHeight={72}
-                      rowRenderer={({ index }) => this.renderBox(this.props.boxes[index], index)}
+                      rowRenderer={({ index, key, style }) => this.renderBox({ index, key, style })}
                     />
                     : this.renderNoBoxes()
                 }
