@@ -256,8 +256,7 @@ class Home extends Base {
     /* request task state */
     this.getTaskState = async (uuid) => {
       await Promise.delay(500)
-      const res = await this.ctx.props.apis.pureRequestAsync('task', { uuid })
-      const data = this.ctx.props.apis.stationID ? res.body.data : res.body
+      const data = await this.ctx.props.apis.pureRequestAsync('task', { uuid })
       if (data && data.nodes && data.nodes.findIndex(n => n.parent === null && n.state === 'Finished') > -1) return 'Finished'
       if (data && data.nodes && data.nodes.findIndex(n => n.state === 'Conflict') > -1) return 'Conflict'
       return 'Working'
@@ -847,28 +846,26 @@ class Home extends Base {
               </div>
               :
               <div>
-                { !this.ctx.props.selectedDevice.token.data.stationID &&
-                  <div>
-                    {
-                      this.title !== i18n.__('Share Title') &&
-                        <MenuItem
-                          leftIcon={<ShareIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                          primaryText={i18n.__('Share to Public')}
-                          onTouchTap={() => this.toggleDialog('share')}
-                        />
-                    }
-                    <MenuItem
-                      leftIcon={<CopyIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                      primaryText={i18n.__('Copy to')}
-                      onTouchTap={() => this.toggleDialog('copy')}
-                    />
-                    <MenuItem
-                      leftIcon={<MoveIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                      primaryText={i18n.__('Move to')}
-                      onTouchTap={() => this.toggleDialog('move')}
-                    />
-                  </div>
-                }
+                <div>
+                  {
+                    this.title !== i18n.__('Share Title') &&
+                      <MenuItem
+                        leftIcon={<ShareIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
+                        primaryText={i18n.__('Share to Public')}
+                        onTouchTap={() => this.toggleDialog('share')}
+                      />
+                  }
+                  <MenuItem
+                    leftIcon={<CopyIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
+                    primaryText={i18n.__('Copy to')}
+                    onTouchTap={() => this.toggleDialog('copy')}
+                  />
+                  <MenuItem
+                    leftIcon={<MoveIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
+                    primaryText={i18n.__('Move to')}
+                    onTouchTap={() => this.toggleDialog('move')}
+                  />
+                </div>
                 {
                   this.state.select && this.state.select.selected && this.state.select.selected.length === 1 &&
                     <MenuItem

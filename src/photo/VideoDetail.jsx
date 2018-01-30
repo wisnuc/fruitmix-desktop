@@ -13,9 +13,9 @@ class PhotoDetail extends React.Component {
 
     this.getRandomSrc = () => {
       this.session = UUID.v4()
-      this.props.apis.pureRequest('randomSrc', { hash: this.props.item.hash }, (error, data) => {
-        if (error) console.log('randomSrc error', error)
-        else this.setState({ filePath: `http://${this.props.apis.address}:3000/media/random/${data.body.key}` })
+      this.props.apis.pureRequest('randomSrc', { hash: this.props.item.hash }, (err, res) => {
+        if (err) console.log('randomSrc error', err)
+        else this.setState({ filePath: `http://${this.props.apis.address}:3000/media/random/${res.key}` })
         this.session = ''
       })
     }

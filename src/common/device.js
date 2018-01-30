@@ -211,18 +211,21 @@ class Device extends RequestManager {
 
   pureRequest(name, args, next) {
     let r
+    let cloud = false
     switch (name) {
       case 'getWechatToken':
         r = request
           .get(`${cloudAddress}/c/v1/token`)
           .query({ code: args.code })
           .query({ platform: 'web' })
+        cloud = true
         break
 
       case 'getStations':
         r = request
           .get(`${cloudAddress}/c/v1/users/${args.guid}/stations`)
           .set('Authorization', args.token)
+        cloud = true
         break
 
       case 'creatTicket':
@@ -236,6 +239,7 @@ class Device extends RequestManager {
         r = request
           .post(`${cloudAddress}/c/v1/tickets/${args.ticketId}/users`)
           .set('Authorization', args.token)
+        cloud = true
         break
 
       case 'confirmTicket':
@@ -250,10 +254,12 @@ class Device extends RequestManager {
 
       case 'cloudUsers':
         r = this.reqCloud('GET', 'users', args.stationID, args.token)
+        cloud = true
         break
 
       case 'localTokenByCloud':
         r = this.reqCloud('GET', 'token', args.stationID, args.token)
+        cloud = true
         break
 
       case 'info':
@@ -297,7 +303,7 @@ class Device extends RequestManager {
     }
 
     if (!r) console.log(`no request handler found for ${name}`)
-    else r.end(next)
+    else r.end((err, res) => (typeof next === 'function') && next(err, cloud ? res && res.body && res.body.data : res && res.body))
   }
 
   async pureRequestAsync(name, args) {

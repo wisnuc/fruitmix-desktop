@@ -90,9 +90,9 @@ class ResetPassword extends React.Component {
           console.log('this.getWXCode', code, error)
           this.setState({ wechatLogin: 'fail' })
         } else {
-          console.log('got token!!', res.body, this.props.apis)
-          if (res.body && res.body.data) {
-            this.weChatToken = res.body.data
+          console.log('got token!!', res, this.props.apis)
+          if (res) {
+            this.weChatToken = res
             this.setState({ wechatLogin: 'success' })
             this.timer = setTimeout(() => this.setState({ wechatLogin: '', reset: true }), 2000)
             // TODO
