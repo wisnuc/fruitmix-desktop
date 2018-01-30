@@ -10,6 +10,7 @@ import DownloadIcon from 'material-ui/svg-icons/file/file-download'
 import UploadIcon from 'material-ui/svg-icons/file/cloud-upload'
 import DialogOverlay from '../common/DialogOverlay'
 import FlatButton from '../common/FlatButton'
+import Thumb from '../file/Thumb'
 
 const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
 
@@ -144,9 +145,9 @@ class Inbox extends React.Component {
       const { type, comment, index, tweeter, list, uuid } = d
       if (list && list.length > 0) {
         if (list.every(l => l.metadata)) {
-          const { height, width } = list[0].metadata
-          const altH = 360 * height / width
-          return ({ height: (height > width ? 360 : altH > 72 ? altH : 72) + 88, content: d })
+          const { h, w } = list[0].metadata
+          const altH = 360 * h / w
+          return ({ height: (h > w ? 360 : altH > 72 ? altH : 72) + 88, content: d })
         }
         return ({ height: 144, content: d })
       }
@@ -161,7 +162,9 @@ class Inbox extends React.Component {
         {
           this.calcPos(this.process(data), this.state.selected).map((v, i) => {
             const { height, top, left, selected, tsd, wd, content } = v
-            const { type, comment, index, tweeter, list, uuid } = content
+            const { type, comment, index, tweeter, list, uuid, boxUUID } = content
+            const isMedia = list && list.every(l => l.metadata)
+            const isMany = list && list.length > 6
             return (
               <Paper
                 key={uuid}
@@ -186,7 +189,7 @@ class Inbox extends React.Component {
                 >
                   <div style={{ width: 16 }} />
                   <div style={{ borderRadius: 20, width: 40, height: 40, overflow: 'hidden' }}>
-                    <img width={40} height={40} alt="face" src={tweeter.avatarUrl} />
+                    <img width={40} height={40} alt="face" src={imgUrl} />
                   </div>
                   <div style={{ width: 16 }} />
                   <div style={{ flexGrow: 1 }} >
@@ -212,20 +215,24 @@ class Inbox extends React.Component {
                     transition: calcCurve(tsd, wd)
                   }}
                 >
-                  <img
-                    width={360}
-                    src={imgUrl}
-                    alt="photoShared"
-                    height={height - 88}
-                    style={{ objectFit: 'cover', transition: calcCurve(tsd, wd) }}
-                  />
-                  <img
-                    width={360}
-                    src={imgUrl}
-                    alt="photoShared"
-                    height={height - 88}
-                    style={{ objectFit: 'cover', transition: calcCurve(tsd, wd), opacity: selected ? 1 : 0, marginLeft: 30 }}
-                  />
+                  {
+                    isMedia ? list.map((l, i) => {
+                      const { sha256 } = l
+                      return (
+                        <Thumb
+                          key={sha256 + i}
+                          digest={sha256}
+                          boxUUID={boxUUID}
+                          ipcRenderer={this.props.ipcRenderer}
+                          height={height - 88}
+                          width={selected ? 750 : 360}
+                          full={selected}
+                          imgStyle={{ objectFit: 'cover', transition: calcCurve(tsd, wd) }}
+                        />
+                      )
+                    })
+                      : <div style={{ height: 72 }}> { list.length } </div>
+                  }
                 </div>
               </Paper>
             )
@@ -254,7 +261,7 @@ class Inbox extends React.Component {
 
         {/* PhotoList */}
         {
-           !this.props.data ?
+           !this.props.tweets ?
              <div
                style={{
                  position: 'relative',
@@ -268,7 +275,7 @@ class Inbox extends React.Component {
              >
                <CircularProgress />
              </div> :
-            this.props.data.length ? this.renderData(this.props.data) : this.renderNoData()
+            this.props.tweets.length ? this.renderData(this.props.tweets) : this.renderNoData()
         }
 
         {/* Selected Header */}
