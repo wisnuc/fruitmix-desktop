@@ -110,6 +110,7 @@ class Tweets extends React.PureComponent {
               <div style={{ width: 3 * w + 12, maxHeight: 400 }}>
                 {
                   list.map((l, i) => {
+                    console.log('list', l)
                     const { sha256, filename } = l
                     if (i > 5) return (<div key={sha256 + filename + i} />)
                     // const float = i > 2 || !isSelf ? 'left' : 'right'

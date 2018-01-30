@@ -217,6 +217,7 @@ class Inbox extends React.Component {
                 >
                   {
                     isMedia ? list.map((l, i) => {
+                      console.log('isMedia', l, boxUUID, content)
                       const { sha256 } = l
                       return (
                         <Thumb
