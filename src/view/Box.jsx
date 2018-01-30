@@ -29,8 +29,7 @@ class Box extends Base {
         b.lcomment = Array.from({ length: Math.random() * 10 })
           .map(() => String.fromCharCode(0x674e - Math.random() * 100))
       })
-      d.sort((a, b) => (b.ltime - a.ltime))
-      return d
+      return [...d].sort((a, b) => (b.ltime - a.ltime))
     }
 
     this.setAnimation = (component, status) => {
@@ -49,16 +48,17 @@ class Box extends Base {
     }
 
     this.getInboxes = (boxes) => {
-      this.setState({ tweets: null, boxes: this.processBox(boxes) })
+      this.setState({ tweets: boxes.length ? null : [], boxes: this.processBox(boxes) })
       let count = boxes.length
       const tweets = []
       const callback = (err, res, boxUUID) => {
+        console.log('callback', count, boxUUID)
         count -= 1
-        if (!err && res) tweets.push(...res)
+        if (!err && res) {
+          tweets.push(...res.filter(t => t.list).map(t => Object.assign({ boxUUID }, t)))
+        }
         if (!count) {
-          this.setState({
-            tweets: tweets.filter(t => t.list).map(t => Object.assign({ boxUUID }, t)).sort((a, b) => b.ctime - a.ctime)
-          })
+          this.setState({ tweets: tweets.sort((a, b) => b.ctime - a.ctime) })
         }
       }
       for (let i = 0; i < boxes.length; i++) {

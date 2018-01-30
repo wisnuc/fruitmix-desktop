@@ -17,6 +17,7 @@ import renderFileIcon from '../common/renderFileIcon'
 import { formatMtime } from '../common/datetime'
 import PhotoList from '../photo/PhotoList'
 import { combineElement, removeElement } from '../common/array'
+import Thumb from '../file/Thumb'
 
 const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
 
@@ -129,6 +130,23 @@ class SelectMedia extends React.Component {
       console.log('processMedia finished', (new Date()).getTime() - this.timeFlag)
       return this.value
     }
+
+    this.fire = () => {
+      const args = {
+        comment: '',
+        type: 'list',
+        boxUUID: this.props.boxUUID,
+        list: this.state.selectedItems.map(d => ({ type: 'media', sha256: d }))
+      }
+
+      this.props.apis.pureRequest('nasTweets', args, (err, res) => {
+        if (err) console.log('create nasTweets error', err)
+        else {
+          this.props.onRequestClose()
+          this.props.refresh()
+        }
+      })
+    }
   }
 
   renderLoading(size) {
@@ -140,7 +158,16 @@ class SelectMedia extends React.Component {
   }
 
   renderSelected(digest) {
-    return (<div style={{ width: 200, height: 200 }}> { digest } </div>)
+    return (
+      <div style={{ width: 100, height: 100, float: 'left', margin: 5 }}>
+        <Thumb
+          digest={digest}
+          ipcRenderer={this.props.ipcRenderer}
+          height={100}
+          width={100}
+        />
+      </div>
+    )
   }
 
   componentDidMount() {
@@ -260,7 +287,7 @@ class SelectMedia extends React.Component {
             </div>
 
             {/* media list content */}
-            <div style={{ height: 'calc(100% - 221px)', width: '100%', overflowY: 'auto' }}>
+            <div style={{ height: 'calc(100% - 221px)', width: '100%', overflowY: 'auto', position: 'relative' }}>
               { this.state.selectedItems.map(digest => this.renderSelected(digest)) }
             </div>
 
