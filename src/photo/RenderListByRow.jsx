@@ -101,6 +101,7 @@ class RenderListByRow extends React.Component {
                 getHoverPhoto={this.props.getHoverPhoto}
                 shiftStatus={this.props.shiftStatus}
                 size={this.props.size}
+                selecting={this.props.selecting}
               />
             ))
           }

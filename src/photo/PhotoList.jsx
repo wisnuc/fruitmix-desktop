@@ -6,6 +6,7 @@ import { List, AutoSizer } from 'react-virtualized'
 import RenderListByRow from './RenderListByRow'
 import getPhotoInfo from './getPhotoInfo'
 import getTimeline from './getTimeline'
+import ScrollBar from '../common/ScrollBar'
 
 const debug = Debug('component:photoApp:PhotoList')
 const timelineMargin = 26
@@ -329,6 +330,7 @@ class PhotoList extends React.Component {
                   getHoverPhoto={this.props.getHoverPhoto}
                   shiftStatus={this.props.shiftStatus}
                   size={this.size}
+                  selecting={this.props.selecting}
                 />
               </div>
             )
@@ -336,9 +338,10 @@ class PhotoList extends React.Component {
             return (
               <div style={{ position: 'relative', width: '100%', height: '100%' }} >
                 <div key={this.size} onTouchTap={e => this.onRowTouchTap(e)} >
-                  <List
+                  <ScrollBar
                     height={height}
                     width={width}
+                    allHeight={PhotoInfo.rowHeightSum}
                     estimatedRowSize={estimatedRowSize}
                     rowHeight={rowHeight}
                     rowRenderer={rowRenderer}
@@ -349,7 +352,7 @@ class PhotoList extends React.Component {
                     style={{ outline: 'none' }}
                   />
                 </div>
-                { this.renderTimeline() }
+                { !this.props.hideTimeline && this.renderTimeline() }
               </div>
             )
           }}

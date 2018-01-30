@@ -53,7 +53,6 @@ class SelectNas extends React.Component {
     }
 
     this.fire = () => {
-      console.log('this.fire', this.selected)
       const args = {
         comment: '',
         type: 'list',
@@ -302,8 +301,10 @@ class SelectNas extends React.Component {
         {/* content */}
         <div style={{ width: '100%', height: 'calc(100% - 64px)', display: 'flex', position: 'relative', marginTop: 8 }}>
           <div style={{ width: 72, height: '100%', backgroundColor: '#FFF' }}>
-            { this.props.view === 'file' && navs.map(n => <QuickNav {...n} />) }
+            { navs.map(n => <QuickNav {...n} />) }
           </div>
+
+          {/* file list */}
           <div style={{ flexGrow: 1, height: '100%', backgroundColor: '#FFF', overflow: 'hidden', position: 'relative' }}>
             <div style={{ width: '100%', height: 64, backgroundColor: 'rgba(0,0,0,0.09)' }} >
               <IconButton onTouchTap={this.back}>
@@ -338,6 +339,8 @@ class SelectNas extends React.Component {
               />
             </div>
           </div>
+
+          {/* rigth frame */}
           <div
             style={{
               width: 360,
@@ -371,8 +374,19 @@ class SelectNas extends React.Component {
               <ModeEdit color="rgba(0,0,0,.54)" style={{ margin: 8 }} />
             </div>
 
+
             {/* file list title */}
-            <div style={{ height: 40, width: '100%', margin: 8, display: 'flex', alignItems: 'center', fontSize: 13, color: 'rgba(0,0,0,0.54)' }}>
+            <div
+              style={{
+                height: 40,
+                width: '100%',
+                margin: 8,
+                display: 'flex',
+                alignItems: 'center',
+                fontSize: 13,
+                color: 'rgba(0,0,0,.54)'
+              }}
+            >
               <div style={{ flex: '0 0 48px' }} />
               <div style={{ flex: '0 0 216px', display: 'flex', alignItems: 'center' }}>
                 { i18n.__('Name') }

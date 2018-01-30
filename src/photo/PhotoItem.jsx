@@ -36,7 +36,7 @@ class PhotoItem extends React.Component {
 
     this.touchImage = () => {
       // debug(this.props.selectedItems)
-      if (this.props.selectedItems.length > 0) {
+      if (this.props.selectedItems.length > 0 || this.props.selecting) {
         /* shift is true */
         if (this.props.shiftStatus.shift) {
           this.setState({ selected: true })
@@ -96,6 +96,8 @@ class PhotoItem extends React.Component {
     const { style, shiftStatus, size, item } = this.props
     this.showShiftOverlay = shiftStatus.shift && shiftStatus.items.includes(this.props.digest)
 
+    const selectMode = this.props.selectedItems.length > 0 || this.props.selecting
+
     const { m, dur } = item
 
     const videoMagic = ['3GP', 'MP4', 'MOV']
@@ -108,7 +110,7 @@ class PhotoItem extends React.Component {
         <div style={{ position: 'relative', height: '100%', width: '100%' }} >
           {/* render circle background */}
           {
-            !this.state.selected && this.props.selectedItems.length > 0 && <div
+            !this.state.selected && selectMode && <div
               style={{
                 position: 'absolute',
                 zIndex: 100,
@@ -128,7 +130,7 @@ class PhotoItem extends React.Component {
 
           {/* renderSelectCircle */}
           {
-            this.props.selectedItems.length > 0 && !this.state.hover && <div
+            selectMode && !this.state.hover && <div
               style={{
                 position: 'absolute',
                 zIndex: 100,
@@ -171,7 +173,7 @@ class PhotoItem extends React.Component {
                 height: 36,
                 display: 'flex',
                 alignItems: 'center',
-                background: this.props.selectedItems.length > 0 ? '' : 'linear-gradient(0deg, rgba(0,0,0,0), rgba(0,0,0,0.26))'
+                background: selectMode ? '' : 'linear-gradient(0deg, rgba(0,0,0,0), rgba(0,0,0,0.26))'
               }}
               onTouchTap={this.touchImage}
               onMouseEnter={this.mouseEnter}
@@ -188,7 +190,7 @@ class PhotoItem extends React.Component {
 
           {/* render hover opendetial */}
           {
-            this.state.hover && this.props.selectedItems.length > 0 && <div
+            this.state.hover && selectMode && !this.props.selecting && <div
               style={{
                 position: 'absolute',
                 zIndex: 100,
