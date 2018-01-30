@@ -7,7 +7,8 @@ import ContentAdd from 'material-ui/svg-icons/content/add'
 
 import NewBox from './NewBox'
 import Tweets from './Tweets'
-import SelectNas from './SelectNas'
+import SelectFile from './SelectFile'
+import SelectMedia from './SelectMedia'
 import BoxUploadButton from './BoxUploadButton'
 
 import FlatButton from '../common/FlatButton'
@@ -231,10 +232,25 @@ class Groups extends React.Component {
               localUpload={this.localUpload}
             />
         }
+
         {
-          this.state.view &&
-            <SelectNas
-              view={this.state.view}
+          this.state.view === 'file' &&
+            <SelectFile
+              ipcRenderer={this.props.ipcRenderer}
+              primaryColor={this.props.primaryColor}
+              boxUUID={this.props.currentBox}
+              addMedia={this.addMedia}
+              addFile={this.addFile}
+              apis={this.props.apis}
+              guid={this.props.guid}
+              onRequestClose={() => this.setState({ view: '' })}
+              refresh={this.props.refresh}
+            />
+        }
+
+        {
+          this.state.view === 'media' &&
+            <SelectMedia
               ipcRenderer={this.props.ipcRenderer}
               primaryColor={this.props.primaryColor}
               boxUUID={this.props.currentBox}
