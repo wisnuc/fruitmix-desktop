@@ -26,9 +26,9 @@ class Group extends Base {
 
     this.getTweets = (args) => {
       this.setState({ currentBox: null })
-      this.ctx.props.apis.pureRequest('tweets', { boxUUID: args.boxUUID }, (err, res) => {
-        if (!err && res && res.body) this.setState({ tweets: res.body, currentBox: args.boxUUID })
-        else console.log('get tweets error', err, res && res.body)
+      this.ctx.props.apis.pureRequest('tweets', { boxUUID: args.boxUUID }, (err, tweets) => {
+        if (!err && tweets) this.setState({ tweets, currentBox: args.boxUUID })
+        else console.log('get tweets error', err, tweets)
       })
     }
 
@@ -44,10 +44,10 @@ class Group extends Base {
     }
 
     this.refresh = () => {
-      this.ctx.props.apis.pureRequest('boxes', null, (err, res) => {
-        console.log('boxes', err, res && res.body)
-        if (!err && res && res.body) this.setState({ boxes: this.processBox(res.body) })
-        if (!err && res && res.body && res.body[0]) this.getTweets({ boxUUID: res.body[0].uuid })
+      this.ctx.props.apis.pureRequest('boxes', null, (err, boxes) => {
+        console.log('boxes', err, boxes)
+        if (!err && boxes) this.setState({ boxes: this.processBox(boxes) })
+        if (!err && boxes && boxes[0]) this.getTweets({ boxUUID: boxes[0].uuid })
       })
     }
   }

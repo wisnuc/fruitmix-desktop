@@ -155,7 +155,7 @@ class NavViews extends React.Component {
       let [WIP, firm] = [true, null]
       while (WIP) {
         await Promise.delay(1000)
-        firm = (await this.props.selectedDevice.pureRequestAsync('firm')).body
+        firm = await this.props.selectedDevice.pureRequestAsync('firm')
         WIP = firm.fetch.state === 'Working'
       }
 

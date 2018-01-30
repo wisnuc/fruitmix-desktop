@@ -87,8 +87,8 @@ class SelectMedia extends React.Component {
     }
 
     this.requestMedia = async () => {
-      const blacklist = (await this.props.apis.pureRequestAsync('blacklist')).body
-      const media = (await this.props.apis.pureRequestAsync('media')).body
+      const blacklist = await this.props.apis.pureRequestAsync('blacklist')
+      const media = await this.props.apis.pureRequestAsync('media')
       console.log({ blacklist, media })
       return ({ blacklist, media })
     }

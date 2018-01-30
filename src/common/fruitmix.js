@@ -45,6 +45,7 @@ class Fruitmix extends EventEmitter {
         }
       }
       if (data) return request.post(url).set('Authorization', this.token).send(Object.assign({ resource, method: type }, data))
+      return request.post(url).set('Authorization', this.token).send(Object.assign({ resource, method: type }))
     }
   }
 
@@ -391,8 +392,8 @@ class Fruitmix extends EventEmitter {
         break
     }
 
-    if (!r) return console.log(`no request handler found for ${name}`)
-    this.setRequest(name, args, cb => r.end(cb), next)
+    if (!r) console.log(`no request handler found for ${name}`)
+    else this.setRequest(name, args, cb => r.end(cb), next)
   }
 
   async requestAsync(name, args) {
@@ -405,6 +406,14 @@ class Fruitmix extends EventEmitter {
       /* file api */
       case 'listNavDir':
         r = this.aget(`drives/${args.driveUUID}/dirs/${args.dirUUID}`)
+        break
+
+      case 'media':
+        r = this.aget('media')
+        break
+
+      case 'blacklist':
+        r = this.aget(`users/${this.userUUID}/media-blacklist`)
         break
 
       case 'randomSrc':
@@ -504,7 +513,7 @@ class Fruitmix extends EventEmitter {
     }
 
     if (!r) console.log(`no request handler found for ${name}`)
-    else r.end(next)
+    else r.end((err, res) => (typeof next === 'function') && next(err, this.stationID ? res && res.body && res.body.data : res && res.body))
   }
 
   async pureRequestAsync(name, args) {

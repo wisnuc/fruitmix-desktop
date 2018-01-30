@@ -60,7 +60,6 @@ class SelectNas extends React.Component {
         list: [...this.selected].map(([k, v]) => ({ type: 'file', filename: v.name, driveUUID: v.driveUUID, dirUUID: v.dirUUID }))
       }
       this.props.apis.pureRequest('nasTweets', args, (err, res) => {
-        console.log('err', err, res && res.body)
         if (err) console.log('create nasTweets error', err)
         else {
           this.props.onRequestClose()
@@ -180,8 +179,7 @@ class SelectNas extends React.Component {
     /* get file list */
     this.list = async (driveUUID, dirUUID) => {
       this.setState({ loading: true })
-      const res = await this.props.apis.pureRequestAsync('listNavDir', { driveUUID, dirUUID })
-      const data = this.props.apis.stationID ? res.body.data : res.body
+      const data = await this.props.apis.pureRequestAsync('listNavDir', { driveUUID, dirUUID })
       return this.sort(data)
     }
 

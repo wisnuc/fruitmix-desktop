@@ -49,12 +49,12 @@ class Box extends Base {
     }
 
     this.getInboxes = (boxes) => {
-      this.setState({ tweets: null })
+      this.setState({ tweets: null, boxes: this.processBox(boxes) })
       let count = boxes.length
       const tweets = []
       const callback = (err, res, boxUUID) => {
         count -= 1
-        if (!err && res && res.body) tweets.push(...res.body)
+        if (!err && res) tweets.push(...res)
         if (!count) {
           this.setState({
             tweets: tweets.filter(t => t.list).map(t => Object.assign({ boxUUID }, t)).sort((a, b) => b.ctime - a.ctime)
@@ -68,11 +68,9 @@ class Box extends Base {
 
     this.refresh = () => {
       this.ctx.props.apis.pureRequest('boxes', null, (err, res) => {
-        console.log('boxes', err, res && res.body)
-        if (!err && res && res.body) this.setState({ boxes: this.processBox(res.body) })
-        if (!err && res && res.body && res.body[0]) {
-          this.getInboxes(res.body)
-        }
+        console.log('boxes', err, res)
+        if (err && !res) this.setState({ error: 'refresh' })
+        else this.getInboxes(res)
       })
     }
   }

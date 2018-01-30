@@ -35,10 +35,10 @@ class Tasks extends React.Component {
 
     this.refresh = () => {
       this.props.apis.pureRequest('tasks', null, (err, res) => {
-        if (err || !res || !res.body) {
+        if (err || !res) {
           this.setState({ error: 'NoData', loading: false })
         } else {
-          this.setState({ tasks: [...res.body].reverse(), loading: false })
+          this.setState({ tasks: [...res].reverse(), loading: false })
         }
       })
     }

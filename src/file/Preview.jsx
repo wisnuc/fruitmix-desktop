@@ -75,7 +75,7 @@ class Preview extends React.Component {
       this.session = UUID.v4()
       this.props.apis.pureRequest('randomSrc', { hash: this.props.item.hash }, (error, data) => {
         if (error) console.log('randomSrc error', error)
-        else this.setState({ filePath: `http://${this.props.apis.address}:3000/media/random/${data.body.key}` })
+        else this.setState({ filePath: `http://${this.props.apis.address}:3000/media/random/${data.key}` })
         this.session = ''
       })
     }

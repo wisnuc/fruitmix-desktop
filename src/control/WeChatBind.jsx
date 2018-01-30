@@ -87,14 +87,14 @@ class WeChatBind extends React.Component {
       this.setState({ status: 'connectingCloud' })
 
       this.props.apis.pureRequest('getWechatToken', { code, platform: 'web' }, (error, res) => {
-        if (error) {
+        if (error || !res) {
           debug('getWechatToken', code, error)
           this.setState({ error: 'wxBind', status: '' })
         } else {
           // debug('getWechatToken', res)
-          this.userInfo = res.body.data.user
+          this.userInfo = res.user
           this.guid = this.userInfo.id
-          this.props.apis.pureRequest('fillTicket', { ticketId: this.ticketId, token: res.body.data.token }, (err) => {
+          this.props.apis.pureRequest('fillTicket', { ticketId: this.ticketId, token: res.token }, (err) => {
             if (err) {
               debug('fillTicket error', err)
               this.setState({ error: 'fillTicket', status: '' })
@@ -109,7 +109,7 @@ class WeChatBind extends React.Component {
       this.retryCount += 1
       // debug('this.getStationInfo', this.retryCount)
       this.props.apis.pureRequest('info', null, (err, res) => {
-        if (res && res.body && res.body.connectState && (res.body.connectState === 'CONNECTED' || res.body.connectState[0] === 'CONNECTED')) this.bindWechat()
+        if (res && res.connectState && (res.connectState === 'CONNECTED' || res.connectState[0] === 'CONNECTED')) this.bindWechat()
         else setTimeout(() => this.getStationInfo(), this.retryCount * 1000)
       })
     }
@@ -120,8 +120,8 @@ class WeChatBind extends React.Component {
           debug('this.bindWechat error', error)
           this.setState({ error: 'creatTicket', status: '' })
         } else {
-          debug('this.bindWechat success', res.body)
-          this.ticketId = res.body.id
+          debug('this.bindWechat success', res)
+          this.ticketId = res.id
           this.initWXLogin()
         }
       })
