@@ -6,7 +6,7 @@ class Share extends Home {
   constructor(ctx) {
     super(ctx)
     this.type = 'share'
-    this.title = i18n.__('Share Title')
+    this.title = () => i18n.__('Share Title')
     this.firstEnter = true
   }
 

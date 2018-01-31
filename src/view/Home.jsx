@@ -42,7 +42,7 @@ class Home extends Base {
     super(ctx)
 
     this.type = 'home'
-    this.title = i18n.__('Home Title')
+    this.title = () => i18n.__('Home Title')
     /* handle select TODO */
     this.select = new ListSelect(this)
     this.select.on('updated', next => this.setState({ select: next }))
@@ -649,7 +649,7 @@ class Home extends Base {
             if (index !== 0) acc.push(<BreadCrumbSeparator key={`Separator${node.uuid}`} />)
 
             /* the first one is always special */
-            if (index === 0) acc.push(<BreadCrumbItem text={this.title} key="root" {...funcs} />)
+            if (index === 0) acc.push(<BreadCrumbItem text={this.title()} key="root" {...funcs} />)
             else acc.push(<BreadCrumbItem text={node.name} key={`Item${node.uuid}`} {...funcs} />)
 
             return acc
@@ -848,7 +848,7 @@ class Home extends Base {
               <div>
                 <div>
                   {
-                    this.title !== i18n.__('Share Title') &&
+                    this.title() !== i18n.__('Share Title') &&
                       <MenuItem
                         leftIcon={<ShareIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
                         primaryText={i18n.__('Share to Public')}

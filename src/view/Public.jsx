@@ -26,7 +26,7 @@ class Public extends Home {
   constructor(ctx) {
     super(ctx)
 
-    this.title = i18n.__('Public Drive')
+    this.title = () => i18n.__('Public Drive')
 
     this.state = Object.assign(this.state, { inRoot: true })
 
