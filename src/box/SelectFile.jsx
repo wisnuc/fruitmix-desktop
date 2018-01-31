@@ -15,6 +15,7 @@ import QuickNav from '../nav/QuickNav'
 import ListSelect from './ListSelect'
 import renderFileIcon from '../common/renderFileIcon'
 import { formatMtime } from '../common/datetime'
+import Row from './Row'
 
 const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
 
@@ -38,6 +39,10 @@ class SelectNas extends React.Component {
 
       this.setState({ select: next })
     })
+
+    this.delSelected = (uuid) => {
+      this.select.delSelected(uuid)
+    }
 
     this.state = {
       select: this.select.state,
@@ -203,46 +208,6 @@ class SelectNas extends React.Component {
     )
   }
 
-  renderSelected(entry) {
-    const { type, uuid, mtime, metadata, name } = entry
-    const color = '#FFF'
-    return (
-      <div key={uuid} >
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            backgroundColor: color,
-            boxSizing: 'border-box'
-          }}
-          onMouseEnter={() => {}}
-          onMouseLeave={() => {}}
-        >
-          {/* file type may be: folder, public, directory, file, unsupported */}
-          <div style={{ flex: '0 0 48px', display: 'flex', alignItems: 'center' }} >
-            <Avatar style={{ backgroundColor: '#FFF' }}>
-              { renderFileIcon(name, metadata, 24) }
-            </Avatar>
-          </div>
-
-          <div style={{ flex: '0 1 216px', display: 'flex' }} >
-            <div style={{ width: 192, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }} >
-              { name }
-            </div>
-            <div style={{ width: 24 }} />
-          </div>
-
-          <div style={{ flex: '0 1 144px', fontSize: 13, color: 'rgba(0,0,0,0.54)' }}>
-            { mtime && formatMtime(mtime) }
-          </div>
-          <div style={{ flexGrow: 1 }} />
-        </div>
-      </div>
-    )
-  }
-
   componentDidMount() {
     const d = this.props.apis.drives
     const drive = d && d.data && d.data.find(dr => dr.tag === 'home')
@@ -398,7 +363,7 @@ class SelectNas extends React.Component {
 
             {/* file list content */}
             <div style={{ height: 'calc(100% - 261px)', width: '100%', overflowY: 'auto' }}>
-              { [...this.selected].map(([k, entry]) => this.renderSelected(entry)) }
+              { [...this.selected].map(([k, entry]) => <Row {...entry} action={this.delSelected} key={entry.uuid} />) }
             </div>
 
             {/* action */}

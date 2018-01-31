@@ -5,6 +5,15 @@ class ListSelect extends FileSelect {
     super(ctx)
     this.ctx = ctx
     this.uuid = index => this.ctx.state.entries[index].uuid
+
+    this.delSelected = (uuid) => {
+      const idx = this.state.selected.indexOf(uuid)
+      if (idx !== -1) {
+        this.setState({
+          selected: [...this.state.selected.slice(0, idx), ...this.state.selected.slice(idx + 1)],
+        })
+      }
+    }
   }
 
   leftClick(index) {
@@ -60,7 +69,7 @@ class ListSelect extends FileSelect {
           specified: index
         })
       }
-    }
+     }
   }
 
   // 1. if not specified, specify and select
