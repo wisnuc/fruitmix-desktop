@@ -1,0 +1,177 @@
+import React from 'react'
+import i18n from 'i18n'
+import { CircularProgress, Divider, Avatar, Toggle, RaisedButton } from 'material-ui'
+import FileFolder from 'material-ui/svg-icons/file/folder'
+import ContentCopy from 'material-ui/svg-icons/content/content-copy'
+import ErrorIcon from 'material-ui/svg-icons/alert/error'
+import AddIcon from 'material-ui/svg-icons/content/add'
+import RemoveIcon from 'material-ui/svg-icons/content/remove'
+import DialogOverlay from '../common/DialogOverlay'
+import FlatButton from '../common/FlatButton'
+
+class BoxDetail extends React.PureComponent {
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      delBox: false,
+      loading: false
+    }
+
+
+    this.deleteBox = () => {
+      this.setState({ loading: true })
+      const { apis, box, openSnackBar, refresh } = this.props
+      apis.pureRequest('delBox', { boxUUID: box.uuid }, (err) => {
+        if (err) openSnackBar(i18n.__('Delete Box Failed'))
+        else openSnackBar(i18n.__('Delete Box Success'))
+        this.setState({ delBox: false, loading: false })
+        refresh()
+      })
+    }
+
+    this.toggle = type => this.setState({ [type]: !this.state[type] })
+  }
+
+  renderTitle(title) {
+    return (
+      <div style={{ height: 48, color: 'rgba(0,0,0,.54)', fontWeight: 500, fontSize: 14, display: 'flex', alignItems: 'center' }}>
+        { title }
+      </div>
+    )
+  }
+
+  renderToggle(title, toggled, onToggle) {
+    return (
+      <div style={{ width: '100%', height: 48, display: 'flex', alignItems: 'center' }}>
+        <div style={{ width: 144, color: 'rgba(0,0,0,.54)', fontWeight: 500, fontSize: 14 }}>
+          { title }
+        </div>
+        <div style={{ width: 108 }} />
+        <div>
+          <Toggle
+            toggled={toggled}
+            onToggle={onToggle}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  renderAvatar(user) {
+    const onTouchTap = user.onTouchTap || (() => {})
+    const name = user
+    const avatarUrl = ''
+    return (
+      <Avatar
+        key={name}
+        style={{
+          margin: 4,
+          float: 'left',
+          color: '#FAFAFA',
+          backgroundColor: '#BDBDBD'
+        }}
+        size={36}
+        onTouchTap={onTouchTap}
+      >
+        <div style={{ lineHeight: '24px', fontSize: 14 }}>
+          {
+            avatarUrl ?
+            <div style={{ borderRadius: 16, width: 32, height: 32, overflow: 'hidden' }}>
+              <img width={32} height={32} alt="" src={avatarUrl} />
+            </div> :
+            name.slice(0, 2).toUpperCase()
+          }
+        </div>
+      </Avatar>
+    )
+  }
+
+  renderAction(Icon, onTouchTap) {
+    return (
+      <div
+        style={{
+          margin: 4,
+          width: 36,
+          height: 36,
+          float: 'left',
+          borderRadius: 18,
+          boxSizing: 'border-box',
+          border: '1px solid #BDBDBD',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        <Icon color="#BDBDBD" />
+      </div>
+    )
+  }
+
+  render() {
+    const { box, primaryColor } = this.props
+    console.log('BoxDetail', this.props)
+    if (!box) return (<div style={{ height: 64, backgroundColor: primaryColor, filter: 'brightness(0.9)' }} />)
+
+    return (
+      <div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
+        <div style={{ height: 64, backgroundColor: primaryColor, filter: 'brightness(0.9)', display: 'flex', alignItems: 'center' }}>
+          <div style={{ margin: '0 0 0 24px', fontSize: 20, color: '#FFF', fontWeight: 500 }}>
+            { i18n.__('Group Settings') }
+          </div>
+        </div>
+        {/* data */}
+        <div style={{ width: 312, padding: 24, overflow: 'auto' }}>
+          { this.renderTitle(i18n.__('Group Members')) }
+          <div style={{ maxHeight: 400, height: 44 * Math.ceil(box.users.length / 3), position: 'relative' }}>
+            { box.users.map((u, i) => (i > 10 ? <div key={u} /> : this.renderAvatar(u))) }
+            { this.renderAction(AddIcon, () => {}) }
+            { this.renderAction(RemoveIcon, () => {}) }
+          </div>
+          <div style={{ height: 24 }} />
+          { this.renderTitle(i18n.__('Group Name')) }
+          { this.renderTitle(i18n.__('Device Info')) }
+          { this.renderToggle(i18n.__('Mute Notifications'), true, () => {}) }
+          { this.renderToggle(i18n.__('Need Confirm'), false, () => {}) }
+
+          {/* action */}
+          <div style={{ height: 64, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <RaisedButton
+              secondary
+              style={{ width: '100%' }}
+              label={i18n.__('Delete Box')}
+              onTouchTap={() => this.toggle('delBox')}
+            />
+          </div>
+        </div>
+        {/* dialog */}
+        <DialogOverlay open={this.state.delBox} >
+          {
+            this.state.delBox &&
+              <div style={{ width: 400, padding: '24px 24px 0px 24px' }}>
+                <div style={{ fontSize: 21, fontWeight: 500 }}>
+                  { i18n.__('Delete Box Text') }
+                </div>
+                <div style={{ height: 24 }} />
+                <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                  <FlatButton
+                    primary
+                    label={i18n.__('Cancel')}
+                    onTouchTap={() => this.toggle('delBox')}
+                  />
+                  <FlatButton
+                    primary
+                    label={i18n.__('Delete')}
+                    onTouchTap={this.deleteBox}
+                    disabled={this.state.loading}
+                  />
+                </div>
+              </div>
+          }
+        </DialogOverlay>
+      </div>
+    )
+  }
+}
+
+export default BoxDetail

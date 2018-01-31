@@ -11,6 +11,7 @@ import Base from './Base'
 import FlatButton from '../common/FlatButton'
 import { combineElement, removeElement } from '../common/array'
 import Groups from '../box/Groups'
+import BoxDetail from '../box/BoxDetail'
 
 /* increase limit of listeners of EventEmitter */
 ipcRenderer.setMaxListeners(1000)
@@ -24,10 +25,10 @@ class Group extends Base {
       currentBox: null
     }
 
-    this.getTweets = (args) => {
+    this.getTweets = (box) => {
       this.setState({ currentBox: null })
-      this.ctx.props.apis.pureRequest('tweets', { boxUUID: args.boxUUID }, (err, tweets) => {
-        if (!err && tweets) this.setState({ tweets, currentBox: args.boxUUID })
+      this.ctx.props.apis.pureRequest('tweets', { boxUUID: box.uuid }, (err, tweets) => {
+        if (!err && tweets) this.setState({ tweets, currentBox: box })
         else console.log('get tweets error', err, tweets)
       })
     }
@@ -47,7 +48,7 @@ class Group extends Base {
       this.ctx.props.apis.pureRequest('boxes', null, (err, boxes) => {
         console.log('boxes', err, boxes)
         if (!err && boxes) this.setState({ boxes: this.processBox(boxes) })
-        if (!err && boxes && boxes[0]) this.getTweets({ boxUUID: boxes[0].uuid })
+        if (!err && boxes && boxes[0]) this.getTweets(boxes[0])
       })
     }
   }
@@ -92,6 +93,20 @@ class Group extends Base {
 
   detailEnabled() {
     return true
+  }
+
+  renderDetail({ style }) {
+    return (
+      <div style={style}>
+        <BoxDetail
+          refresh={this.refresh}
+          box={this.state.currentBox}
+          apis={this.ctx.props.apis}
+          primaryColor={this.groupPrimaryColor()}
+          openSnackBar={msg => this.ctx.openSnackBar(msg)}
+        />
+      </div>
+    )
   }
 
   renderContent({ openSnackBar }) {
