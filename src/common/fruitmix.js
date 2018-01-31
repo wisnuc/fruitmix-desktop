@@ -492,6 +492,10 @@ class Fruitmix extends EventEmitter {
         r = this.cget('boxes')
         break
 
+      case 'delBox':
+        r = this.cdel(`boxes/${args.boxUUID}`)
+        break
+
       case 'tweets':
         r = this.cget(`boxes/${args.boxUUID}/tweets`).query({ first: args.first, last: args.last, count: args.count, metadata: true })
         break

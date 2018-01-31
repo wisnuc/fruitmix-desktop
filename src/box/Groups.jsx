@@ -47,7 +47,7 @@ class Groups extends React.Component {
     this.selectBox = (index) => {
       console.log('this.selectBox', index)
       if (!this.props.boxes[index]) return
-      this.props.getTweets({ boxUUID: this.props.boxes[index].uuid })
+      this.props.getTweets(this.props.boxes[index])
     }
 
     this.localUpload = (args) => {
@@ -59,8 +59,8 @@ class Groups extends React.Component {
 
     this.onLocalFinish = (event, args) => {
       const { session, boxUUID, success } = args
-      if (this.props.currentBox && this.props.currentBox === boxUUID) {
-        this.props.getTweets({ boxUUID })
+      if (this.props.currentBox && this.props.currentBox.uuid === boxUUID) {
+        this.props.getTweets(this.props.currentBox)
       }
     }
 
@@ -110,7 +110,7 @@ class Groups extends React.Component {
   renderBox({ key, index, style }) {
     const box = this.props.boxes[index]
     const { ltime, name, uuid, users, lcomment } = box
-    const selected = this.props.currentBox === uuid
+    const selected = this.props.currentBox && (this.props.currentBox.uuid === uuid)
     const hovered = this.state.hover === index
 
     /* width: 376 = 2 + 32 + 40 + 16 + 142 + 120 + 24 + 16 */
@@ -162,9 +162,9 @@ class Groups extends React.Component {
   }
 
   render() {
-    const boxH = this.props.boxes && Math.min(window.innerHeight - 106, this.props.boxes.length * 72)
-    const { boxes } = this.props
-    console.log('boxH', boxH, window.innerHeight)
+    const { boxes, currentBox, guid, tweets, ipcRenderer, apis, primaryColor, refresh, openSnackBar } = this.props
+    const boxH = boxes && Math.min(window.innerHeight - 106, boxes.length * 72) || 0
+    const boxUUID = currentBox && currentBox.uuid
     return (
       <div
         style={{
@@ -216,18 +216,18 @@ class Groups extends React.Component {
 
         {/* tweets */}
         <Tweets
-          guid={this.props.guid}
-          tweets={this.props.tweets}
-          boxUUID={this.props.currentBox}
-          ipcRenderer={this.props.ipcRenderer}
-          apis={this.props.apis}
+          guid={guid}
+          tweets={tweets}
+          boxUUID={boxUUID}
+          ipcRenderer={ipcRenderer}
+          apis={apis}
         />
 
         {/* FAB */}
         {
-          this.props.currentBox &&
+          boxUUID &&
             <BoxUploadButton
-              boxUUID={this.props.currentBox}
+              boxUUID={boxUUID}
               toggleView={this.toggleView}
               localUpload={this.localUpload}
             />
@@ -236,30 +236,26 @@ class Groups extends React.Component {
         {
           this.state.view === 'file' &&
             <SelectFile
-              ipcRenderer={this.props.ipcRenderer}
-              primaryColor={this.props.primaryColor}
-              boxUUID={this.props.currentBox}
-              addMedia={this.addMedia}
-              addFile={this.addFile}
-              apis={this.props.apis}
-              guid={this.props.guid}
+              apis={apis}
+              guid={guid}
+              boxUUID={boxUUID}
+              refresh={refresh}
+              ipcRenderer={ipcRenderer}
+              primaryColor={primaryColor}
               onRequestClose={() => this.setState({ view: '' })}
-              refresh={this.props.refresh}
             />
         }
 
         {
           this.state.view === 'media' &&
             <SelectMedia
-              ipcRenderer={this.props.ipcRenderer}
-              primaryColor={this.props.primaryColor}
-              boxUUID={this.props.currentBox}
-              addMedia={this.addMedia}
-              addFile={this.addFile}
-              apis={this.props.apis}
-              guid={this.props.guid}
+              apis={apis}
+              guid={guid}
+              boxUUID={boxUUID}
+              refresh={refresh}
+              ipcRenderer={ipcRenderer}
+              primaryColor={primaryColor}
               onRequestClose={() => this.setState({ view: '' })}
-              refresh={this.props.refresh}
             />
         }
         {/* dialog */}
@@ -267,13 +263,11 @@ class Groups extends React.Component {
           {
             this.state.newBox &&
             <NewBox
-              primaryColor={this.props.primaryColor}
-              apis={this.props.apis}
-              guid={this.props.guid}
-              refresh={this.props.refresh}
-              title={i18n.__('Create Box Title')}
-              hintText={i18n.__('Create Box Hint')}
-              openSnackBar={this.props.openSnackBar}
+              primaryColor={primaryColor}
+              apis={apis}
+              guid={guid}
+              refresh={refresh}
+              openSnackBar={openSnackBar}
             />
             }
         </DialogOverlay>
