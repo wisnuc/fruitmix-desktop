@@ -3,27 +3,18 @@ import i18n from 'i18n'
 import { Checkbox, Divider } from 'material-ui'
 import FlatButton from '../common/FlatButton'
 
-class NewBox extends React.PureComponent {
+class UserSelect extends React.PureComponent {
   constructor(props) {
     super(props)
 
     this.state = {
+      fired: false,
       selected: []
     }
 
     this.fire = () => {
-      this.setState({ loading: true })
-      const args = { name: '', users: this.state.selected }
-      this.props.apis.pureRequest('createBox', args, (err) => {
-        if (err) {
-          console.log('Create Box error', err)
-          this.setState({ errorText: i18n.__('Create Box Failed'), loading: false })
-        } else {
-          this.props.onRequestClose(true)
-          this.props.openSnackBar(i18n.__('Create Box Success'))
-          this.props.refresh()
-        }
-      })
+      this.setState({ fired: true })
+      this.props.fire(this.state.selected)
     }
   }
 
@@ -37,27 +28,29 @@ class NewBox extends React.PureComponent {
   }
 
   togglecheckAll() {
-    const users = this.props.apis.users && this.props.apis.users.data.filter(u => !!u.global) || []
-    if (this.state.selected.length < users.length) {
-      this.setState({ selected: users.map(u => u.global.id) })
+    const { defaultUsers, users } = this.props
+    if (this.state.selected.length < users.length - defaultUsers.length) {
+      this.setState({ selected: users.filter(u => !defaultUsers.includes(u)) })
     } else {
       this.setState({ selected: [] })
     }
   }
 
-  handleCheck(userUUID) {
+  handleCheck(user) {
     const sl = this.state.selected
-    const index = sl.indexOf(userUUID)
-    if (index === -1) this.setState({ selected: [...sl, userUUID] })
+    const index = sl.indexOf(user)
+    if (index === -1) this.setState({ selected: [...sl, user] })
     else this.setState({ selected: [...sl.slice(0, index), ...sl.slice(index + 1)] })
   }
 
   render() {
-    const users = this.props.apis.users && this.props.apis.users.data.filter(u => !!u.global) || []
+    console.log('UserSelect.jsx', this.props)
+    const { users, title, onRequestClose, actionLabel, primaryColor, defaultUsers } = this.props
+    const allSelected = this.state.selected.length === (users.length - defaultUsers.length) // TODO when users not includes defaultUsers
     return (
       <div style={{ width: 336, padding: '24px 24px 0px 24px', zIndex: 2000 }}>
 
-        <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>{ i18n.__('Create New Box') }</div>
+        <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>{ title }</div>
 
         <div style={{ height: 24 }} />
 
@@ -78,8 +71,8 @@ class NewBox extends React.PureComponent {
           <Checkbox
             label={i18n.__('All Users')}
             labelStyle={{ fontSize: 14 }}
-            iconStyle={{ fill: this.state.selected.length === users.length ? this.props.primaryColor : 'rgba(0, 0, 0, 0.54)' }}
-            checked={this.state.selected.length === users.length}
+            iconStyle={{ fill: allSelected ? primaryColor : 'rgba(0, 0, 0, 0.54)' }}
+            checked={allSelected}
             onCheck={() => this.togglecheckAll()}
           />
         </div>
@@ -88,13 +81,14 @@ class NewBox extends React.PureComponent {
           {
             users.map(user =>
               (
-                <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.username} >
+                <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.username || user} >
                   <Checkbox
-                    label={user.username}
-                    iconStyle={{ fill: this.state.selected.includes(user.global.id) ? this.props.primaryColor : 'rgba(0, 0, 0, 0.54)' }}
+                    label={user.username || user}
+                    iconStyle={{ fill: this.state.selected.includes(user) ? primaryColor : 'rgba(0, 0, 0, 0.54)' }}
                     labelStyle={{ fontSize: 14 }}
-                    checked={this.state.selected.includes(user.global.id)}
-                    onCheck={() => this.handleCheck(user.global.id)}
+                    checked={this.state.selected.includes(user) || this.props.defaultUsers.includes(user)}
+                    disabled={this.props.defaultUsers.includes(user)}
+                    onCheck={() => this.handleCheck(user)}
                   />
                 </div>
               ))
@@ -108,13 +102,13 @@ class NewBox extends React.PureComponent {
           <FlatButton
             primary
             label={i18n.__('Cancel')}
-            onTouchTap={this.props.onRequestClose}
+            onTouchTap={onRequestClose}
           />
           <FlatButton
             primary
-            label={i18n.__('Create')}
-            disabled={!!this.state.errorText || this.state.loading || !this.state.selected.length}
+            label={actionLabel}
             onTouchTap={this.fire}
+            disabled={this.state.fired || !this.state.selected.length}
           />
         </div>
       </div>
@@ -122,4 +116,4 @@ class NewBox extends React.PureComponent {
   }
 }
 
-export default NewBox
+export default UserSelect

@@ -99,11 +99,13 @@ class Group extends Base {
     return (
       <div style={style}>
         <BoxDetail
+          guid={this.guid}
           refresh={this.refresh}
           box={this.state.currentBox}
           apis={this.ctx.props.apis}
           primaryColor={this.groupPrimaryColor()}
           openSnackBar={msg => this.ctx.openSnackBar(msg)}
+          friends={this.ctx.props.apis.users.data.filter(u => !!u.global) || []}
         />
       </div>
     )
@@ -119,6 +121,7 @@ class Group extends Base {
       openSnackBar={openSnackBar}
       refresh={this.refresh}
       guid={this.guid}
+      friends={this.ctx.props.apis.users.data.filter(u => !!u.global) || []}
     />)
   }
 }

@@ -140,6 +140,17 @@ class Fruitmix extends EventEmitter {
       : r
   }
 
+  cpatch(ep, data) {
+    if (this.stationID) return this.reqCloud(ep, data, 'PATCH')
+    const r = request
+      .patch(`http://${this.address}:3000/${ep}`)
+      .set('Authorization', `JWT ${this.bToken} ${this.token}`)
+
+    return typeof data === 'object'
+      ? r.send(data)
+      : r
+  }
+
   aput(ep, data) {
     if (this.stationID) return this.reqCloud(ep, data, 'PUT')
     const r = request
@@ -402,6 +413,7 @@ class Fruitmix extends EventEmitter {
 
   pureRequest(name, args, next) {
     let r
+    let isCloud = !!this.stationID
     switch (name) {
       /* file api */
       case 'listNavDir':
@@ -456,12 +468,14 @@ class Fruitmix extends EventEmitter {
           .get(`${cloudAddress}/c/v1/token`)
           .query({ code: args.code })
           .query({ platform: args.platform })
+        isCloud = true
         break
 
       case 'fillTicket':
         r = request
           .post(`${cloudAddress}/c/v1/tickets/${args.ticketId}/users`)
           .set('Authorization', args.token)
+        isCloud = true
         break
 
       case 'confirmTicket':
@@ -509,7 +523,12 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'nasTweets':
-        r = this.cpost(`boxes/${args.boxUUID}/tweets/indrive`, { comment: args.comment, type: args.type, list: args.list })
+        r = this.cpost(`boxes/${args.boxUUID}/tweets`)
+          .field('list', JSON.stringify({ comment: args.comment, type: args.type, indrive: args.list }))
+        break
+
+      case 'handleBoxUser':
+        r = this.cpatch(`boxes/${args.boxUUID}`, { users: { op: args.op, value: args.guids } })
         break
 
       default:
@@ -517,7 +536,10 @@ class Fruitmix extends EventEmitter {
     }
 
     if (!r) console.log(`no request handler found for ${name}`)
-    else r.end((err, res) => (typeof next === 'function') && next(err, this.stationID ? res && res.body && res.body.data : res && res.body))
+    else {
+      r.end((err, res) => (typeof next === 'function') &&
+        next(err, isCloud ? res && res.body && res.body.data : res && res.body))
+    }
   }
 
   async pureRequestAsync(name, args) {

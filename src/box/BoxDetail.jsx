@@ -8,6 +8,7 @@ import AddIcon from 'material-ui/svg-icons/content/add'
 import RemoveIcon from 'material-ui/svg-icons/content/remove'
 import DialogOverlay from '../common/DialogOverlay'
 import FlatButton from '../common/FlatButton'
+import UserSelect from './UserSelect'
 
 class BoxDetail extends React.PureComponent {
   constructor(props) {
@@ -30,6 +31,28 @@ class BoxDetail extends React.PureComponent {
       })
     }
 
+    this.addUser = (users) => {
+      this.setState({ loading: true })
+      const { apis, box, openSnackBar, refresh } = this.props
+      apis.pureRequest('handleBoxUser', { boxUUID: box.uuid, op: 'add', guids: users.map(u => u.global.id) }, (err) => {
+        if (err) openSnackBar(i18n.__('Add Users to Box Failed'))
+        else openSnackBar(i18n.__('Add Users to Box Success'))
+        this.setState({ addUser: false, loading: false })
+        refresh()
+      })
+    }
+
+    this.delUser = (users) => {
+      this.setState({ loading: true })
+      const { apis, box, openSnackBar, refresh } = this.props
+      apis.pureRequest('handleBoxUser', { boxUUID: box.uuid, op: 'delete', guids: users }, (err) => {
+        if (err) openSnackBar(i18n.__('Remove Users From Box Failed'))
+        else openSnackBar(i18n.__('Remove Users From Box Success'))
+        this.setState({ delUser: false, loading: false })
+        refresh()
+      })
+    }
+
     this.toggle = type => this.setState({ [type]: !this.state[type] })
   }
 
@@ -37,6 +60,17 @@ class BoxDetail extends React.PureComponent {
     return (
       <div style={{ height: 48, color: 'rgba(0,0,0,.54)', fontWeight: 500, fontSize: 14, display: 'flex', alignItems: 'center' }}>
         { title }
+      </div>
+    )
+  }
+
+  renderGroupName() {
+    return (
+      <div style={{ height: 48, color: 'rgba(0,0,0,.54)', fontWeight: 500, fontSize: 14, display: 'flex', alignItems: 'center' }}>
+        { i18n.__('Group Name') }
+        <div style={{ flexGrow: 1 }} />
+        { i18n.__('Not Set') }
+        <div style={{ width: 16 }} />
       </div>
     )
   }
@@ -96,12 +130,14 @@ class BoxDetail extends React.PureComponent {
           height: 36,
           float: 'left',
           borderRadius: 18,
+          cursor: 'pointer',
           boxSizing: 'border-box',
           border: '1px solid #BDBDBD',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
         }}
+        onTouchTap={onTouchTap}
       >
         <Icon color="#BDBDBD" />
       </div>
@@ -109,7 +145,7 @@ class BoxDetail extends React.PureComponent {
   }
 
   render() {
-    const { box, primaryColor } = this.props
+    const { box, primaryColor, guid, friends } = this.props
     console.log('BoxDetail', this.props)
     if (!box) return (<div style={{ height: 64, backgroundColor: primaryColor, filter: 'brightness(0.9)' }} />)
 
@@ -125,11 +161,11 @@ class BoxDetail extends React.PureComponent {
           { this.renderTitle(i18n.__('Group Members')) }
           <div style={{ maxHeight: 400, height: 44 * Math.ceil(box.users.length / 3), position: 'relative' }}>
             { box.users.map((u, i) => (i > 10 ? <div key={u} /> : this.renderAvatar(u))) }
-            { this.renderAction(AddIcon, () => {}) }
-            { this.renderAction(RemoveIcon, () => {}) }
+            { this.renderAction(AddIcon, () => this.setState({ addUser: true })) }
+            { this.renderAction(RemoveIcon, () => this.setState({ delUser: true })) }
           </div>
           <div style={{ height: 24 }} />
-          { this.renderTitle(i18n.__('Group Name')) }
+          { this.renderGroupName() }
           { this.renderTitle(i18n.__('Device Info')) }
           { this.renderToggle(i18n.__('Mute Notifications'), true, () => {}) }
           { this.renderToggle(i18n.__('Need Confirm'), false, () => {}) }
@@ -167,6 +203,34 @@ class BoxDetail extends React.PureComponent {
                   />
                 </div>
               </div>
+          }
+        </DialogOverlay>
+
+        <DialogOverlay open={!!this.state.addUser} onRequestClose={() => this.setState({ addUser: false })}>
+          {
+            this.state.addUser &&
+            <UserSelect
+              fire={this.addUser}
+              defaultUsers={box.users.map(u => friends.find(f => f.global.id === u)).filter(u => !!u)}
+              primaryColor={primaryColor}
+              actionLabel={i18n.__('Invite')}
+              title={i18n.__('Invite User to Box')}
+              users={friends}
+            />
+          }
+        </DialogOverlay>
+
+        <DialogOverlay open={!!this.state.delUser} onRequestClose={() => this.setState({ delUser: false })}>
+          {
+            this.state.delUser &&
+            <UserSelect
+              fire={this.delUser}
+              defaultUsers={[]}
+              primaryColor={primaryColor}
+              actionLabel={i18n.__('Delete')}
+              title={i18n.__('Remove User From Box')}
+              users={box.users.filter(u => u !== guid)}
+            />
           }
         </DialogOverlay>
       </div>

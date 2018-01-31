@@ -5,7 +5,7 @@ import EventListener from 'react-event-listener'
 import { CircularProgress, Paper, Avatar } from 'material-ui'
 import ContentAdd from 'material-ui/svg-icons/content/add'
 
-import NewBox from './NewBox'
+import UserSelect from './UserSelect'
 import Tweets from './Tweets'
 import SelectFile from './SelectFile'
 import SelectMedia from './SelectMedia'
@@ -39,9 +39,14 @@ class Groups extends React.Component {
       this.setState({ view })
     }
 
-    this.newBox = () => {
-      console.log('this.newBox')
-      this.setState({ newBox: true })
+    this.newBox = (users) => {
+      const args = { name: '', users: [this.props.guid, ...(users.map(u => u.global.id))] }
+      this.props.apis.pureRequest('createBox', args, (err) => {
+        this.setState({ newBox: false })
+        if (err) this.props.openSnackBar(i18n.__('Create Box Failed'))
+        else this.props.openSnackBar(i18n.__('Create Box Success'))
+        this.props.refresh()
+      })
     }
 
     this.selectBox = (index) => {
@@ -162,7 +167,7 @@ class Groups extends React.Component {
   }
 
   render() {
-    const { boxes, currentBox, guid, tweets, ipcRenderer, apis, primaryColor, refresh, openSnackBar } = this.props
+    const { boxes, currentBox, guid, tweets, ipcRenderer, apis, primaryColor, refresh, openSnackBar, friends } = this.props
     const boxH = boxes && Math.min(window.innerHeight - 106, boxes.length * 72) || 0
     const boxUUID = currentBox && currentBox.uuid
     return (
@@ -189,7 +194,7 @@ class Groups extends React.Component {
                   <FlatButton
                     style={{ lineHeight: '', height: 24 }}
                     label={i18n.__('New Box')}
-                    onTouchTap={this.newBox}
+                    onTouchTap={() => this.setState({ newBox: true })}
                     icon={<ContentAdd color="rgba(0,0,0,.54)" style={{ marginLeft: 4 }} />}
                     labelStyle={{ fontSize: 12, color: 'rgba(0,0,0,.54)', marginLeft: -4 }}
                   />
@@ -262,12 +267,13 @@ class Groups extends React.Component {
         <DialogOverlay open={!!this.state.newBox} onRequestClose={() => this.setState({ newBox: false })}>
           {
             this.state.newBox &&
-            <NewBox
+            <UserSelect
+              fire={this.newBox}
+              defaultUsers={[guid]}
               primaryColor={primaryColor}
-              apis={apis}
-              guid={guid}
-              refresh={refresh}
-              openSnackBar={openSnackBar}
+              actionLabel={i18n.__('Create')}
+              title={i18n.__('Create New Box')}
+              users={friends}
             />
             }
         </DialogOverlay>
