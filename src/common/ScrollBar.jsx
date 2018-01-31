@@ -81,6 +81,7 @@ class ScrollBar extends React.PureComponent {
       opacity: this.state.hover ? 1 : 0,
       display: barH < height ? '' : 'none'
     }
+    console.log('ScrollBar', this.props)
     return (
       <div style={{ position: 'relative', width, height, overflow: 'hidden' }}>
         <div

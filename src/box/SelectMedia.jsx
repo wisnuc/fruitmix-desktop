@@ -17,7 +17,7 @@ import renderFileIcon from '../common/renderFileIcon'
 import { formatMtime } from '../common/datetime'
 import PhotoList from '../photo/PhotoList'
 import { combineElement, removeElement } from '../common/array'
-import Thumb from '../file/Thumb'
+import Grid from './Grid'
 
 const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
 
@@ -79,11 +79,11 @@ class SelectMedia extends React.Component {
     this.getHoverPhoto = (digest) => {
       if (!this.state.selectedItems.length) return
       const lastSelect = this.state.selectedItems[this.state.selectedItems.length - 1]
-      const lastSelectIndex = this.media.findIndex(photo => photo.hash === lastSelect)
-      const hoverIndex = this.media.findIndex(photo => photo.hash === digest)
-      let shiftHoverPhotos = this.media.slice(lastSelectIndex, hoverIndex + 1)
+      const lastSelectIndex = this.state.media.findIndex(photo => photo.hash === lastSelect)
+      const hoverIndex = this.state.media.findIndex(photo => photo.hash === digest)
+      let shiftHoverPhotos = this.state.media.slice(lastSelectIndex, hoverIndex + 1)
 
-      if (hoverIndex < lastSelectIndex) shiftHoverPhotos = this.media.slice(hoverIndex, lastSelectIndex + 1)
+      if (hoverIndex < lastSelectIndex) shiftHoverPhotos = this.state.media.slice(hoverIndex, lastSelectIndex + 1)
       this.setState({ shiftHoverItems: shiftHoverPhotos.map(photo => photo.hash) })
     }
 
@@ -153,19 +153,6 @@ class SelectMedia extends React.Component {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
         <CircularProgress size={size || 64} />
-      </div>
-    )
-  }
-
-  renderSelected(digest) {
-    return (
-      <div style={{ width: 100, height: 100, float: 'left', margin: 5 }}>
-        <Thumb
-          digest={digest}
-          ipcRenderer={this.props.ipcRenderer}
-          height={100}
-          width={100}
-        />
       </div>
     )
   }
@@ -288,7 +275,13 @@ class SelectMedia extends React.Component {
 
             {/* media list content */}
             <div style={{ height: 'calc(100% - 221px)', width: '100%', overflowY: 'auto', position: 'relative' }}>
-              { this.state.selectedItems.map(digest => this.renderSelected(digest)) }
+              <Grid
+                items={this.state.selectedItems}
+                ipcRenderer={this.props.ipcRenderer}
+                action={digest => this.removeListToSelection([digest])}
+                num={3}
+                size={100}
+              />
             </div>
 
             {/* action */}
