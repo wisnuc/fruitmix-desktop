@@ -91,7 +91,7 @@ class WeChatBind extends React.Component {
           debug('getWechatToken', code, error)
           this.setState({ error: 'wxBind', status: '' })
         } else {
-          // debug('getWechatToken', res)
+          debug('getWechatToken', res)
           this.userInfo = res.user
           this.guid = this.userInfo.id
           this.props.apis.pureRequest('fillTicket', { ticketId: this.ticketId, token: res.token }, (err) => {
