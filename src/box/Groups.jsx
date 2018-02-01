@@ -269,7 +269,7 @@ class Groups extends React.Component {
             this.state.newBox &&
             <UserSelect
               fire={this.newBox}
-              defaultUsers={[guid]}
+              defaultUsers={[friends.find(f => (f.global.id === guid))]}
               primaryColor={primaryColor}
               actionLabel={i18n.__('Create')}
               title={i18n.__('Create New Box')}
