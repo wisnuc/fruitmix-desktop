@@ -531,6 +531,10 @@ class Fruitmix extends EventEmitter {
         r = this.cpatch(`boxes/${args.boxUUID}`, { users: { op: args.op, value: args.guids } })
         break
 
+      case 'boxName':
+        r = this.cpatch(`boxes/${args.boxUUID}`, { name: args.name })
+        break
+
       default:
         break
     }

@@ -1,14 +1,16 @@
 import React from 'react'
 import i18n from 'i18n'
-import { CircularProgress, Divider, Avatar, Toggle, RaisedButton } from 'material-ui'
+import { CircularProgress, Divider, Avatar, Toggle, RaisedButton, IconButton } from 'material-ui'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import ContentCopy from 'material-ui/svg-icons/content/content-copy'
+import ModeEdit from 'material-ui/svg-icons/editor/mode-edit'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import AddIcon from 'material-ui/svg-icons/content/add'
 import RemoveIcon from 'material-ui/svg-icons/content/remove'
 import DialogOverlay from '../common/DialogOverlay'
 import FlatButton from '../common/FlatButton'
 import UserSelect from './UserSelect'
+import NewNameDialog from './NewNameDialog'
 
 class BoxDetail extends React.PureComponent {
   constructor(props) {
@@ -16,7 +18,8 @@ class BoxDetail extends React.PureComponent {
 
     this.state = {
       delBox: false,
-      loading: false
+      loading: false,
+      newName: false
     }
 
 
@@ -64,13 +67,19 @@ class BoxDetail extends React.PureComponent {
     )
   }
 
-  renderGroupName() {
+  renderGroupName(name) {
     return (
       <div style={{ height: 48, color: 'rgba(0,0,0,.54)', fontWeight: 500, fontSize: 14, display: 'flex', alignItems: 'center' }}>
-        { i18n.__('Group Name') }
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          { i18n.__('Group Name') }
+        </div>
         <div style={{ flexGrow: 1 }} />
-        { i18n.__('Not Set') }
-        <div style={{ width: 16 }} />
+        <div style={{ width: 160, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', textAlign: 'right' }} >
+          { name || i18n.__('Not Set') }
+        </div>
+        <IconButton style={{ margin: 4 }} onTouchTap={() => this.setState({ newName: true })}>
+          <ModeEdit color={this.props.primaryColor} />
+        </IconButton>
       </div>
     )
   }
@@ -145,7 +154,7 @@ class BoxDetail extends React.PureComponent {
   }
 
   render() {
-    const { box, primaryColor, guid, friends } = this.props
+    const { box, primaryColor, guid, friends, refresh, openSnackBar, apis } = this.props
     console.log('BoxDetail', this.props)
     if (!box) return (<div style={{ height: 64, backgroundColor: primaryColor, filter: 'brightness(0.9)' }} />)
 
@@ -165,7 +174,7 @@ class BoxDetail extends React.PureComponent {
             { this.renderAction(RemoveIcon, () => this.setState({ delUser: true })) }
           </div>
           <div style={{ height: 24 }} />
-          { this.renderGroupName() }
+          { this.renderGroupName(box && box.name) }
           { this.renderTitle(i18n.__('Device Info')) }
           { this.renderToggle(i18n.__('Mute Notifications'), true, () => {}) }
           { this.renderToggle(i18n.__('Need Confirm'), false, () => {}) }
@@ -230,6 +239,19 @@ class BoxDetail extends React.PureComponent {
               actionLabel={i18n.__('Delete')}
               title={i18n.__('Remove User From Box')}
               users={box.users.filter(u => u !== guid)}
+            />
+          }
+        </DialogOverlay>
+
+        <DialogOverlay open={!!this.state.newName} onRequestClose={() => this.setState({ newName: false })}>
+          {
+            this.state.newName &&
+            <NewNameDialog
+              openSnackBar={openSnackBar}
+              refresh={refresh}
+              primaryColor={primaryColor}
+              boxUUID={box.uuid}
+              apis={apis}
             />
           }
         </DialogOverlay>
