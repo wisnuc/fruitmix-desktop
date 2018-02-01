@@ -26,20 +26,15 @@ const overlayStyle = {
 class Tweets extends React.PureComponent {
   constructor(props) {
     super(props)
-    this.state = {}
 
-    this.scrollToBottom = () => {
-      this.refContainer.scrollTop = this.refContainer.scrollHeight
+    this.state = {
+      list: [],
+      seqIndex: -1,
+      openDetail: false
     }
   }
 
-  componentDidMount() {
-    this.scrollToBottom()
-  }
-
   componentDidUpdate(prevProps) {
-    console.log('Tweets componentWillReceiveProps', prevProps.boxUUID !== this.props.boxUUID)
-    if (prevProps.boxUUID !== this.props.boxUUID) this.scrollToBottom()
   }
 
   renderNoTweets() {
@@ -91,7 +86,7 @@ class Tweets extends React.PureComponent {
             <div>
               {
                 !list ?
-                  <Paper
+                  <div
                     style={{
                       fontSize: 20,
                       display: 'flex',
@@ -102,18 +97,17 @@ class Tweets extends React.PureComponent {
                     }}
                   >
                     { comment }
-                  </Paper>
+                  </div>
                   : isMedia ?
                   <div style={{ width: 3 * w + 12, maxHeight: 400 }}>
                     {
                       list.map((l, i) => {
-                        console.log('list', l)
                         const { sha256, filename } = l
                         if (i > 5) return (<div key={sha256 + filename + i} />)
                         // const float = i > 2 || !isSelf ? 'left' : 'right'
                         const margin = isSelf && list.length < 3 && i === 0 ? `2px 2px 2px ${360 - list.length * 120 + 2}px` : 2
                         return (
-                          <Paper
+                          <div
                             key={sha256 + filename + i}
                             onTouchTap={() => this.setState({ openDetail: true, list, seqIndex: i })}
                             style={{ width: w, height: w, float: 'left', backgroundColor: '#FFF', margin, position: 'relative' }}
@@ -131,7 +125,7 @@ class Tweets extends React.PureComponent {
                                   { `+ ${list.length - 6}` }
                                 </div>
                             }
-                          </Paper>
+                          </div>
                         )
                       })
                     }
@@ -165,7 +159,6 @@ class Tweets extends React.PureComponent {
   }
 
   render() {
-    console.log('render tweets', this.props)
     const { tweets } = this.props
     const rowCount = tweets && tweets.length || 0
     let allHeight = 0
@@ -190,6 +183,7 @@ class Tweets extends React.PureComponent {
             <AutoSizer>
               {({ height, width }) => (
                 <ScrollBar
+                  scrollTop={allHeight - height}
                   style={{ outline: 'none' }}
                   allHeight={allHeight}
                   height={height}

@@ -48,7 +48,7 @@ class Group extends Base {
       this.ctx.props.apis.pureRequest('boxes', null, (err, boxes) => {
         console.log('boxes', err, boxes)
         if (!err && boxes) this.setState({ boxes: this.processBox(boxes) })
-        if (!err && boxes && boxes[0]) this.getTweets(boxes[0])
+        if (!err && boxes && (this.state.currentBox || boxes[0])) this.getTweets(this.state.currentBox || boxes[0])
       })
     }
   }
