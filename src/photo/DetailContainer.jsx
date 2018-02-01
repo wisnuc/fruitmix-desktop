@@ -633,9 +633,12 @@ class DetailContainerInline extends React.Component {
                     </IconButton>
                     */}
 
-                    <IconButton onTouchTap={() => this.toggleDialog('hideDialog')} tooltip={h ? i18n.__('Retrieve') : i18n.__('Hide')}>
-                      { h ? <Visibility color="#FFF" /> : <VisibilityOff color="#FFF" /> }
-                    </IconButton>
+                    { // not show hide or Retrieve button when in box view
+                      !this.props.boxUUID &&
+                        <IconButton onTouchTap={() => this.toggleDialog('hideDialog')} tooltip={h ? i18n.__('Retrieve') : i18n.__('Hide')}>
+                          { h ? <Visibility color="#FFF" /> : <VisibilityOff color="#FFF" /> }
+                        </IconButton>
+                    }
 
                     <IconButton onTouchTap={() => this.toggleDialog('detailInfo')} tooltip={i18n.__('Info')}>
                       <InfoIcon color="#FFF" />
