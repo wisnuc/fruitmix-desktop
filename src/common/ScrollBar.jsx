@@ -16,11 +16,13 @@ class ScrollBar extends React.PureComponent {
     super(props)
     this.state = {}
 
+    this.scrollTop = 0
+
     this.mouseDown = false
     this.onMouseDown = (event) => {
       this.mouseDown = true
       this.startY = event.clientY
-      this.startScrollTop = this.getScrollTop() || 0
+      this.startScrollTop = this.scrollTop
     }
 
     this.onMouseUp = () => (this.mouseDown = false)
@@ -30,23 +32,20 @@ class ScrollBar extends React.PureComponent {
       const { allHeight, height } = this.props
       const barH = Math.max(height * height / allHeight, 48)
       const diff = event.clientY - this.startY
-      const percent = Math.min(1, diff / (height - barH))
-      const scrollTop = Math.max(0, percent * (allHeight - height) + this.startScrollTop)
-      this.setScrollTop(scrollTop)
+      const percent = diff / (height - barH)
+      const scrollTop = Math.min(allHeight - height, Math.max(0, percent * (allHeight - height) + this.startScrollTop))
+      if (this.refList) this.refList.scrollToPosition(scrollTop)
       this.onHover()
     }
 
     this.onScroll = (top, scrollTop) => {
-      Object.assign(this.state, { scrollTop })
+      this.scrollTop = scrollTop
       if (!this.refBar) return
       this.onHover()
       this.refBar.style.top = `${top}px`
       if (this.props.onScroll) this.props.onScroll({ scrollTop })
     }
 
-    this.getScrollTop = () => (this.state.scrollTop || 0)
-
-    this.setScrollTop = scrollTop => this.setState({ scrollTop })
 
     this.onHover = () => {
       this.setState({ hover: true })
@@ -60,6 +59,15 @@ class ScrollBar extends React.PureComponent {
   componentDidMount() {
     document.addEventListener('mousemove', this.onMouseMove)
     document.addEventListener('mouseup', this.onMouseUp)
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { height, allHeight, scrollTop } = nextProps
+    if (scrollTop) {
+      const barH = Math.max(height * height / allHeight, 48)
+      const top = (height - barH) * scrollTop / (allHeight - height)
+      this.onScroll(top, nextProps.scrollTop)
+    }
   }
 
   componentWillUnmount() {
@@ -81,7 +89,6 @@ class ScrollBar extends React.PureComponent {
       opacity: this.state.hover ? 1 : 0,
       display: barH < height ? '' : 'none'
     }
-    console.log('ScrollBar', this.props)
     return (
       <div style={{ position: 'relative', width, height, overflow: 'hidden' }}>
         <div
@@ -90,8 +97,8 @@ class ScrollBar extends React.PureComponent {
         >
           <List
             {...this.props}
+            ref={ref => (this.refList = ref)}
             width={width + 16}
-            scrollTop={this.state.scrollTop}
             onScroll={({ scrollTop }) => this.onScroll((height - barH) * scrollTop / (allHeight - height), scrollTop)}
           />
         </div>
