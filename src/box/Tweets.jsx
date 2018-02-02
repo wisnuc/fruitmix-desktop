@@ -190,7 +190,7 @@ class Tweets extends React.PureComponent {
   }
 
   render() {
-    const { tweets } = this.props
+    const { tweets, boxUUID } = this.props
     const rowCount = tweets && tweets.length || 0
     let allHeight = 0
     // 326, 202, 134
@@ -209,9 +209,9 @@ class Tweets extends React.PureComponent {
         ref={ref => (this.refContainer = ref)}
         style={{ flexGrow: 1, height: '100%', backgroundColor: '#FAFAFA', overflow: 'hidden' }}
       >
-        {
+        { // add key to AutoSizer to force refresh List
           !tweets ? this.renderLoading(32) : tweets.length > 0 ?
-            <AutoSizer>
+            <AutoSizer key={boxUUID}>
               {({ height, width }) => (
                 <ScrollBar
                   scrollTop={allHeight - height}

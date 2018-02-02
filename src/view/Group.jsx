@@ -26,7 +26,7 @@ class Group extends Base {
     }
 
     this.getTweets = (box) => {
-      this.setState({ currentBox: null })
+      this.setState({ tweets: null })
       this.ctx.props.apis.pureRequest('tweets', { boxUUID: box.uuid }, (err, tweets) => {
         if (!err && tweets) this.setState({ tweets, currentBox: box })
         else console.log('get tweets error', err, tweets)
