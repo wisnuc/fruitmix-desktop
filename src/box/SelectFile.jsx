@@ -65,8 +65,12 @@ class SelectNas extends React.Component {
         list: [...this.selected].map(([k, v]) => ({ type: 'file', filename: v.name, driveUUID: v.driveUUID, dirUUID: v.dirUUID }))
       }
       this.props.apis.pureRequest('nasTweets', args, (err, res) => {
-        if (err) console.log('create nasTweets error', err)
-        else {
+        if (err) {
+          console.log('create nasTweets error', err)
+          this.props.openSnackBar(i18n.__('Send Tweets with Nas Files Failed'))
+          this.props.onRequestClose()
+          this.props.refresh()
+        } else {
           this.props.onRequestClose()
           this.props.refresh()
         }

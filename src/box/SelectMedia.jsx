@@ -53,7 +53,12 @@ class SelectMedia extends React.Component {
     }
 
     this.keyChange = (event) => {
-      this.props.getShiftStatus(event)
+      this.getShiftStatus(event)
+    }
+
+    this.getShiftStatus = (event) => {
+      if (event.shiftKey === this.state.shift) return
+      this.setState({ shift: event.shiftKey })
     }
 
     this.memoizeValue = {}
@@ -90,7 +95,6 @@ class SelectMedia extends React.Component {
     this.requestMedia = async () => {
       const blacklist = await this.props.apis.pureRequestAsync('blacklist')
       const media = await this.props.apis.pureRequestAsync('media')
-      console.log({ blacklist, media })
       return ({ blacklist, media })
     }
 
@@ -140,8 +144,12 @@ class SelectMedia extends React.Component {
       }
 
       this.props.apis.pureRequest('nasTweets', args, (err, res) => {
-        if (err) console.log('create nasTweets error', err)
-        else {
+        if (err) {
+          console.log('create nasTweets error', err)
+          this.props.openSnackBar(i18n.__('Send Tweets with Nas Media Failed'))
+          this.props.onRequestClose()
+          this.props.refresh()
+        } else {
           this.props.onRequestClose()
           this.props.refresh()
         }
@@ -158,14 +166,20 @@ class SelectMedia extends React.Component {
   }
 
   componentDidMount() {
+    document.addEventListener('keydown', this.keyChange)
+    document.addEventListener('keyup', this.keyChange)
     this.requestMedia()
       .then(d => this.setState({ media: this.processMedia(d.media, d.blacklist) }))
       .catch(e => console.log('requestMedi error', e))
   }
 
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.keyChange)
+    document.removeEventListener('keyup', this.keyChange)
+  }
+
   render() {
     console.log('SelectMedia', this.props, this.state, this.selected)
-
     return (
       <div style={{ position: 'fixed', width: '100%', height: '100%', top: 0, left: 0, zIndex: 1000 }}>
         {/* Selected Header */}
