@@ -12,7 +12,7 @@ import FlatButton from '../common/FlatButton'
 import UserSelect from './UserSelect'
 import NewNameDialog from './NewNameDialog'
 
-class BoxDetail extends React.PureComponent {
+class BoxDetail extends React.Component {
   constructor(props) {
     super(props)
 
@@ -194,10 +194,9 @@ class BoxDetail extends React.PureComponent {
           {
             this.state.delBox &&
               <div style={{ width: 400, padding: '24px 24px 0px 24px' }}>
-                <div style={{ fontSize: 21, fontWeight: 500 }}>
+                <div style={{ color: 'rgba(0,0,0,0.54)', height: 24, display: 'flex', alignItems: 'center', marginBottom: 24 }}>
                   { i18n.__('Delete Box Text') }
                 </div>
-                <div style={{ height: 24 }} />
                 <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                   <FlatButton
                     primary

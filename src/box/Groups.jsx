@@ -247,6 +247,7 @@ class Groups extends React.Component {
               refresh={refresh}
               ipcRenderer={ipcRenderer}
               primaryColor={primaryColor}
+              openSnackBar={openSnackBar}
               onRequestClose={() => this.setState({ view: '' })}
             />
         }
@@ -260,6 +261,7 @@ class Groups extends React.Component {
               refresh={refresh}
               ipcRenderer={ipcRenderer}
               primaryColor={primaryColor}
+              openSnackBar={openSnackBar}
               onRequestClose={() => this.setState({ view: '' })}
             />
         }
