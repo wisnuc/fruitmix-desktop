@@ -196,7 +196,7 @@ class Task {
         })
 
         const ep = dirUUID === 'media' ? `media/${entry.uuid}` : `drives/${driveUUID}/dirs/${dirUUID}/entries/${entry.uuid}`
-        const qs = dirUUID === 'media' ? { alt: 'data' } : { name: entry.name }
+        const qs = dirUUID === 'media' ? { alt: 'data', boxUUID: entry.boxUUID } : { name: entry.name }
         const handle = new DownloadFile(ep, qs, entry.name, entry.size, entry.seek, stream, (error) => {
           debug('donwload handle finish', entry.name, task.reqHandles.indexOf(handle))
           task.reqHandles.splice(task.reqHandles.indexOf(handle), 1)
