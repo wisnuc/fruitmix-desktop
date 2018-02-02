@@ -732,6 +732,7 @@ class Home extends Base {
 
         <DialogOverlay open={!!this.state.move} onRequestClose={() => this.toggleDialog('move')}>
           { this.state.move && <MoveDialog
+            title={this.title}
             apis={this.ctx.props.apis}
             path={this.state.path}
             entries={this.state.entries}
@@ -747,6 +748,7 @@ class Home extends Base {
 
         <DialogOverlay open={!!this.state.copy} onRequestClose={() => this.toggleDialog('copy')}>
           { this.state.copy && <MoveDialog
+            title={this.title}
             apis={this.ctx.props.apis}
             path={this.state.path}
             entries={this.state.entries}
@@ -762,6 +764,7 @@ class Home extends Base {
 
         <DialogOverlay open={!!this.state.share} onRequestClose={() => this.toggleDialog('share')}>
           { this.state.share && <MoveDialog
+            title={this.title}
             apis={this.ctx.props.apis}
             path={this.state.path}
             entries={this.state.entries}

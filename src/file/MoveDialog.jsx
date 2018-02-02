@@ -385,8 +385,9 @@ class MoveDialog extends React.PureComponent {
 
   renderCurrentDir() {
     const type = this.state.currentDir.type
+    console.log('this.state.currentDir', this.state.currentDir)
     return this.state.currentDir.name === this.state.currentDir.uuid
-      ? i18n.__('Home Title')
+      ? this.props.title()
       : type === 'publicRoot'
         ? i18n.__('Public Drive')
         : type === 'root'
