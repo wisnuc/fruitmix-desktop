@@ -11,12 +11,22 @@ import ScrollBar from '../common/ScrollBar'
 class Grid extends React.Component {
   constructor(props) {
     super(props)
+
+    this.state = {
+      hover: ''
+    }
   }
 
   renderGrid(digest, size) {
     console.log('renderGrid', digest)
+    const hovered = this.state.hover === digest
     return (
-      <div style={{ width: size, height: size, margin: 5 }}>
+      <div
+        style={{ width: size, height: size, margin: 5, cursor: 'pointer', filter: hovered ? 'brightness(0.5)' : '' }}
+        onTouchTap={() => this.props.action(digest)}
+        onMouseMove={() => !hovered && this.setState({ hover: digest })}
+        onMouseLeave={() => this.setState({ hover: '' })}
+      >
         <Thumb
           digest={digest}
           ipcRenderer={this.props.ipcRenderer}

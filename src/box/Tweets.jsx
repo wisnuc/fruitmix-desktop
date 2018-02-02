@@ -23,6 +23,14 @@ const overlayStyle = {
   backgroundColor: 'rgba(0,0,0,.54)'
 }
 
+const getName = (photo) => {
+  if (!photo.date && !photo.datetime) {
+    return `IMG_UnkownDate-${photo.hash.slice(0, 5).toUpperCase()}-PC.${photo.m}`
+  }
+  const date = photo.date || photo.datetime
+  return `IMG-${date.split(/\s+/g)[0].replace(/[:\s]+/g, '')}-${photo.hash.slice(0, 5).toUpperCase()}-PC.${photo.m}`
+}
+
 class Tweets extends React.PureComponent {
   constructor(props) {
     super(props)
@@ -31,6 +39,29 @@ class Tweets extends React.PureComponent {
       list: [],
       seqIndex: -1,
       openDetail: false
+    }
+
+
+    this.memoizeValue = {}
+
+    this.memoize = (newValue) => {
+      this.memoizeValue = Object.assign(this.memoizeValue, newValue)
+      return this.memoizeValue
+    }
+
+    this.startDownload = () => {
+      const list = [this.memoizeValue.downloadDigest]
+
+      const photos = list.map(digest => this.state.list.find(photo => photo.sha256 === digest))
+        .map(photo => ({
+          boxUUID: this.props.boxUUID,
+          name: getName(Object.assign({ hash: photo.sha256 }, photo.metadata)),
+          size: photo.size,
+          type: 'file',
+          uuid: photo.sha256
+        }))
+
+      this.props.ipcRenderer.send('DOWNLOAD', { entries: photos, dirUUID: 'media' })
     }
   }
 
@@ -209,7 +240,7 @@ class Tweets extends React.PureComponent {
           ipcRenderer={this.props.ipcRenderer}
           setAnimation={() => {}}
           setAnimation2={() => {}}
-          memoize={() => {}}
+          memoize={this.memoize}
           selectedItems={[]}
           addListToSelection={() => {}}
           removeListToSelection={() => {}}
