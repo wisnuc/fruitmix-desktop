@@ -107,7 +107,7 @@ class Tweets extends React.PureComponent {
           <div>
             <div style={{ height: 30, display: 'flex', alignItems: 'center', flexDirection: isSelf ? 'row-reverse' : 'row' }}>
               <div style={{ fontSize: 12, color: 'rgba(0,0,0,.54)', fontWeight: 500 }}>
-                { uuid.slice(0, 8) }
+                { `用户-${tweeter.id.slice(0, 4)}` }
               </div>
               <div style={{ width: 8 }} />
               <div style={{ fontSize: 12, color: 'rgba(0,0,0,.54)' }}>

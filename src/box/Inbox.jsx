@@ -4,12 +4,14 @@ import EventListener from 'react-event-listener'
 import { TweenMax } from 'gsap'
 import { IconButton, CircularProgress, Paper, Avatar } from 'material-ui'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
+import FileFolder from 'material-ui/svg-icons/file/folder'
 import DeleteIcon from 'material-ui/svg-icons/action/delete'
 import VisibilityOff from 'material-ui/svg-icons/action/visibility-off'
 import DownloadIcon from 'material-ui/svg-icons/file/file-download'
 import UploadIcon from 'material-ui/svg-icons/file/cloud-upload'
 import DialogOverlay from '../common/DialogOverlay'
 import FlatButton from '../common/FlatButton'
+import { parseTime } from '../common/datetime'
 import Thumb from '../file/Thumb'
 
 const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
@@ -116,7 +118,6 @@ class Inbox extends React.Component {
       pos[this.preSelect].tsd = '150ms'
       pos[this.preSelect].wd = '0ms'
     } else if (s > -1) { // first toggle
-      console.log('first toggle', s)
       const { height, h, left, top, selected, diff, content } = pos[s]
 
       /* move grids above selected */
@@ -162,7 +163,7 @@ class Inbox extends React.Component {
         {
           this.calcPos(this.process(data), this.state.selected).map((v, i) => {
             const { height, top, left, selected, tsd, wd, content } = v
-            const { type, comment, index, tweeter, list, uuid, boxUUID } = content
+            const { type, comment, index, tweeter, list, uuid, box, ctime } = content
             const isMedia = list && list.every(l => l.metadata)
             const isMany = list && list.length > 6
             return (
@@ -196,11 +197,16 @@ class Inbox extends React.Component {
                     <div style={{ height: 12 }} />
                     <div style={{ height: 24, fontWeight: 500, display: 'flex', alignItems: 'center' }} >
                       <div style={{ maxWidth: 216, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                        { comment }
+                        { `用户-${tweeter.id.slice(0, 4)}` }
                       </div>
+                      <div style={{ flexGrow: 1 }} />
+                      <div style={{ fontSize: 12, color: 'rgba(0,0,0,.54)' }}>
+                        { parseTime(ctime) }
+                      </div>
+                      <div style={{ width: 24 }} />
                     </div>
                     <div style={{ height: 20, fontSize: 14, color: 'rgba(0,0,0,.54)' }} >
-                      { `来自“吃货”群，分享了${list.length}张照片` }
+                      { `来自"${box.name || '未命名'}"群，分享了${list.length}${isMedia ? '张照片' : '个文件'}` }
                     </div>
                     <div style={{ height: 16 }} />
                   </div>
@@ -217,13 +223,12 @@ class Inbox extends React.Component {
                 >
                   {
                     isMedia ? list.map((l, i) => {
-                      console.log('isMedia', l, boxUUID, content)
                       const { sha256 } = l
                       return (
                         <Thumb
                           key={sha256 + i}
                           digest={sha256}
-                          boxUUID={boxUUID}
+                          boxUUID={box.uuid}
                           ipcRenderer={this.props.ipcRenderer}
                           height={height - 88}
                           width={selected ? 750 : 360}
@@ -232,7 +237,33 @@ class Inbox extends React.Component {
                         />
                       )
                     })
-                      : <div style={{ height: 72 }}> { list.length } </div>
+                    :
+                      <div
+                        style={{
+                          height: 72,
+                          display: 'flex',
+                          width: '100%',
+                          alignItems: 'center',
+                          backgroundColor: '#FFA000',
+                          color: '#FFF'
+                        }}
+                      >
+                        <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', padding: 16 }}>
+                          <FileFolder color="#FFF" />
+                        </div>
+                        <div
+                          style={{
+                            maxWidth: list.length === 1 ? 300 : 120,
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                            textOverflow: 'ellipsis'
+                          }}
+                        >
+                          { list[0].filename }
+                        </div>
+                        <div style={{ width: 4 }} />
+                        { list.length > 1 && i18n.__n('And Other %s Items', list.length)}
+                      </div>
                   }
                 </div>
               </Paper>
