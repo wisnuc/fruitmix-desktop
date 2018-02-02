@@ -37,8 +37,7 @@ class Group extends Base {
       if (!d || !d[0]) return []
       d.forEach((b) => {
         b.ltime = b.ctime
-        b.lcomment = Array.from({ length: Math.random() * 10 })
-          .map(() => String.fromCharCode(0x674e - Math.random() * 100))
+        b.lcomment = 'last tweet\'s comment'
       })
       d.sort((a, b) => (b.ltime - a.ltime))
       return d

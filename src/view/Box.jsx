@@ -26,8 +26,7 @@ class Box extends Base {
       if (!d || !d[0]) return []
       d.forEach((b) => {
         b.ltime = b.ctime
-        b.lcomment = Array.from({ length: Math.random() * 10 })
-          .map(() => String.fromCharCode(0x674e - Math.random() * 100))
+        b.lcomment = 'last tweet\'s comment'
       })
       return [...d].sort((a, b) => (b.ltime - a.ltime))
     }
@@ -51,18 +50,17 @@ class Box extends Base {
       this.setState({ tweets: boxes.length ? null : [], boxes: this.processBox(boxes) })
       let count = boxes.length
       const tweets = []
-      const callback = (err, res, boxUUID) => {
-        console.log('callback', count, boxUUID)
+      const callback = (err, res, box) => {
         count -= 1
         if (!err && res) {
-          tweets.push(...res.filter(t => t.list).map(t => Object.assign({ boxUUID }, t)))
+          tweets.push(...res.filter(t => t.list).map(t => Object.assign({ box }, t)))
         }
         if (!count) {
           this.setState({ tweets: tweets.sort((a, b) => b.ctime - a.ctime) })
         }
       }
       for (let i = 0; i < boxes.length; i++) {
-        this.ctx.props.apis.pureRequest('tweets', { boxUUID: boxes[i].uuid }, (err, res) => callback(err, res, boxes[i].uuid))
+        this.ctx.props.apis.pureRequest('tweets', { boxUUID: boxes[i].uuid }, (err, res) => callback(err, res, boxes[i]))
       }
     }
 
