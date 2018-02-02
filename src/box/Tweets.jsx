@@ -7,6 +7,8 @@ import { parseTime } from '../common/datetime'
 import Thumb from '../file/Thumb'
 import DetailContainer from '../photo/DetailContainer'
 import ScrollBar from '../common/ScrollBar'
+import DialogOverlay from '../common/DialogOverlay'
+import Preview from './Preview'
 
 const imgUrl = 'http://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKQiahrEc8rUfECDTUq94WlcaNkTYTKzIKr3p5xgOPQO1juvtwO1YSUCHOPpup3oWo1AP3nOBVyPCw/132'
 
@@ -162,7 +164,10 @@ class Tweets extends React.PureComponent {
                     }
                   </div>
                   :
-                  <Paper style={{ width: 3 * w + 12, height: 56, display: 'flex', alignItems: 'center', fontSize: 14 }}>
+                  <Paper
+                    style={{ width: 3 * w + 12, height: 56, display: 'flex', alignItems: 'center', fontSize: 14 }}
+                    onTouchTap={() => this.setState({ showFiles: true, list  })}
+                  >
                     <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', backgroundColor: '#FF9100', padding: 16 }}>
                       <FileFolder color="#FFF" />
                     </div>
@@ -249,6 +254,10 @@ class Tweets extends React.PureComponent {
           startDownload={this.startDownload}
           apis={this.props.apis}
         />
+
+        <DialogOverlay open={!!this.state.showFiles} onRequestClose={() => this.setState({ showFiles: false })}>
+          { this.state.showFiles && <Preview list={this.state.list} /> }
+        </DialogOverlay>
       </div>
     )
   }

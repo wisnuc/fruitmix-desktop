@@ -17,6 +17,7 @@ class Row extends React.Component {
   }
 
   render() {
+    console.log('Row', this.props)
     const { type, uuid, mtime, metadata, name, action } = this.props
     const color = '#FFF'
     const hoverColor = '#EEEEEE'
@@ -54,24 +55,27 @@ class Row extends React.Component {
             { mtime && formatMtime(mtime) }
           </div>
           <div style={{ flexGrow: 1 }} />
-          <div
-            style={{
-              left: 0,
-              height: '100%',
-              position: 'absolute',
-              opacity: hovered ? 1 : 0,
-              display: 'flex',
-              alignItems: 'center'
-            }}
-          >
-            <IconButton
-              iconStyle={{ width: 24, height: 24, color: '#424242' }}
-              style={{ width: 40, height: 40, padding: 8, backgroundColor: hoverColor }}
-              onTouchTap={() => action(uuid)}
-            >
-              <CloseIcon />
-            </IconButton>
-          </div>
+          {
+            action &&
+              <div
+                style={{
+                  left: 0,
+                  height: '100%',
+                  position: 'absolute',
+                  opacity: hovered ? 1 : 0,
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <IconButton
+                  iconStyle={{ width: 24, height: 24, color: '#424242' }}
+                  style={{ width: 40, height: 40, padding: 8, backgroundColor: hoverColor }}
+                  onTouchTap={() => action(uuid)}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </div>
+          }
         </div>
       </div>
     )
