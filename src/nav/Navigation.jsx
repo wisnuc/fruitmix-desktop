@@ -379,7 +379,7 @@ class NavViews extends React.Component {
             transition: 'opacity 300ms'
           }}
         />
-        <IconButton tooltip={tooltip} tooltipStyles={{ marginTop: !view.prominent() ? -12 : undefined }}>
+        <IconButton tooltip={tooltip}>
           <Icon
             color={view.appBarStyle() === 'light' ? 'rgba(0,0,0,0.54)' : '#FFF'}
             onTouchTap={() => this.setState({ [type]: !this.state[type] })}
@@ -456,7 +456,6 @@ class NavViews extends React.Component {
       width: '100%',
       height: this.appBarHeight(),
       backgroundColor,
-      overflow: 'hidden',
       zIndex: 101
     }
 
