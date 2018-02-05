@@ -118,10 +118,11 @@ class Tweets extends React.PureComponent {
             </div>
             <div>
               {
-                !list ?
-                  <div
+                !list || !list.length ?
+                  <Paper
                     style={{
-                      fontSize: 20,
+                      fontSize: 16,
+                      height: 44,
                       display: 'flex',
                       alignItems: 'center',
                       borderRadius: 10,
@@ -130,7 +131,7 @@ class Tweets extends React.PureComponent {
                     }}
                   >
                     { comment }
-                  </div>
+                  </Paper>
                   : isMedia ?
                   <div style={{ width: 3 * w + 12, maxHeight: 400 }}>
                     {
@@ -196,13 +197,14 @@ class Tweets extends React.PureComponent {
 
   render() {
     const { tweets, boxUUID } = this.props
+    console.log('tweets', tweets)
     const rowCount = tweets && tweets.length || 0
     let allHeight = 0
     // 326, 202, 134
     const hs = []
     for (let i = 0; i < rowCount; i++) {
       const t = tweets[i]
-      const isMedia = t.list && t.list.every(l => l.metadata)
+      const isMedia = t.list && t.list.length && t.list.every(l => l.metadata)
       const h = isMedia && t.list.length > 3 ? 326 : isMedia ? 202 : 134
       hs.push(h)
       allHeight += h

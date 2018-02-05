@@ -15,6 +15,7 @@ import QuickNav from '../nav/QuickNav'
 import ListSelect from './ListSelect'
 import renderFileIcon from '../common/renderFileIcon'
 import { formatMtime } from '../common/datetime'
+import sortByType from '../common/sort'
 import { BreadCrumbItem, BreadCrumbSeparator } from '../common/BreadCrumb'
 import Row from './Row'
 
@@ -46,11 +47,18 @@ class SelectNas extends React.Component {
     }
 
     this.state = {
+      sortType: 'nameUp', // nameUp, nameDown, timeUp, timeDown, sizeUp, sizeDown, takenUp, takenDown
       select: this.select.state,
       path: [{}],
       nav: 'home',
       entries: [],
       loading: false
+    }
+
+    this.changeSortType = (sortType) => {
+      if (sortType === 'takenUp' || sortType === 'takenDown') this.setState({ takenTime: true })
+      if (sortType === 'timeUp' || sortType === 'timeDown') this.setState({ takenTime: false })
+      this.setState({ sortType, entries: [...this.state.entries].sort((a, b) => sortByType(a, b, sortType)) })
     }
 
     this.listNavBySelect = (entry) => {
@@ -60,7 +68,7 @@ class SelectNas extends React.Component {
 
     this.fire = () => {
       const args = {
-        comment: '',
+        comment: this.state.comment || '',
         type: 'list',
         boxUUID: this.props.boxUUID,
         list: [...this.selected].map(([k, v]) => ({ type: 'file', filename: v.name, driveUUID: v.driveUUID, dirUUID: v.dirUUID }))
@@ -177,20 +185,11 @@ class SelectNas extends React.Component {
       }
     }
 
-    /* sort file list */
-    this.sort = data => [...data.entries].sort((a, b) => {
-      if (a.type === 'directory' && b.type === 'file') return -1
-      if (a.type === 'file' && b.type === 'directory') return 1
-      return a.name.localeCompare(b.name)
-    })
-
-    this.sleep = time => new Promise(resolve => setTimeout(resolve, time))
-
     /* get file list */
     this.list = async (driveUUID, dirUUID) => {
       this.setState({ loading: true })
       const data = await this.props.apis.pureRequestAsync('listNavDir', { driveUUID, dirUUID })
-      return this.sort(data)
+      return [...data.entries].sort((a, b) => sortByType(a, b, this.state.sortType))
     }
 
     this.updateState = (path, currentDir, entries) => {
@@ -333,7 +332,7 @@ class SelectNas extends React.Component {
                 setAnimation={() => {}}
                 ipcRenderer={this.props.ipcRenderer}
                 primaryColor={this.props.primaryColor}
-                changeSortType={() => {}}
+                changeSortType={this.changeSortType}
                 openSnackBar={this.props.openSnackBar}
                 toggleDialog={() => {}}
                 showTakenTime={!!this.state.takenTime}

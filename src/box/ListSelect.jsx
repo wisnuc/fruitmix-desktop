@@ -38,17 +38,12 @@ class ListSelect extends FileSelect {
 
   addByArray(indexs, session) {
     const array = indexs.map(i => this.uuid(i))
-    if (this.state.shift) {
-      const set = new Set([...array, ...this.state.selected])
-      this.setState({ selected: [...set] })
-    } else if (this.state.ctrl && session) {
-      const isSameBox = this.session === session
-      this.session = session
-      if (!isSameBox) this.preArray = this.state.selected
-      const set = new Set([...array, ...this.preArray])
-      array.forEach(i => this.preArray.includes(i) && set.delete(i))
-      this.setState({ selected: [...set] })
-    } else this.setState({ selected: array })
+    const isSameBox = this.session === session
+    this.session = session
+    if (!isSameBox) this.preArray = this.state.selected
+    const set = new Set([...array, ...this.preArray])
+    array.forEach(i => this.preArray.includes(i) && set.delete(i))
+    this.setState({ selected: [...set] })
   }
 
   // toggle select and (sort of) specified

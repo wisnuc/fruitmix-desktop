@@ -418,6 +418,7 @@ class Fruitmix extends EventEmitter {
       /* file api */
       case 'listNavDir':
         r = this.aget(`drives/${args.driveUUID}/dirs/${args.dirUUID}`)
+          .query({ metadata: true })
         break
 
       case 'media':
