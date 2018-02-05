@@ -15,6 +15,7 @@ import QuickNav from '../nav/QuickNav'
 import ListSelect from './ListSelect'
 import renderFileIcon from '../common/renderFileIcon'
 import { formatMtime } from '../common/datetime'
+import { BreadCrumbItem, BreadCrumbSeparator } from '../common/BreadCrumb'
 import Row from './Row'
 
 const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
@@ -78,13 +79,13 @@ class SelectNas extends React.Component {
     }
 
     /* enter dir */
-    this.enter = (node) => {
+    this.enter = (node, p) => {
       /* conditions that can not enter */
       if (node.type === 'file') return
 
       /* update current path and dir */
       const currentDir = node
-      const path = node.setRoot ? [node] : [...this.state.path, node]
+      const path = p || (node.setRoot ? [node] : [...this.state.path, node])
 
       /* set parameter to get file list */
       const dirUUID = node.uuid
@@ -204,6 +205,12 @@ class SelectNas extends React.Component {
     }
   }
 
+  componentDidMount() {
+    const d = this.props.apis.drives
+    const drive = d && d.data && d.data.find(dr => dr.tag === 'home')
+    if (drive) this.enter(Object.assign({ setRoot: true }, drive))
+  }
+
   renderLoading(size) {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
@@ -212,10 +219,40 @@ class SelectNas extends React.Component {
     )
   }
 
-  componentDidMount() {
-    const d = this.props.apis.drives
-    const drive = d && d.data && d.data.find(dr => dr.tag === 'home')
-    if (drive) this.enter(Object.assign({ setRoot: true }, drive))
+  renderBreadCrumb(navs) {
+    const path = this.state.path
+
+    const touchTap = node => this.enter(node, path.slice(0, path.indexOf(node) + 1))
+
+    const title = navs.find(n => n.key === this.state.nav).text
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', marginLeft: 8 }}>
+        {
+          path.reduce((acc, node, index) => {
+            const onHoverHeader = () => {}
+            const isDrop = () => false
+            const dropable = () => false
+            const funcs = { node, onTouchTap: () => touchTap(node), onHoverHeader, isDrop, dropable }
+
+            if (path.length > 4 && index > 0 && index < path.length - 3) {
+              if (index === path.length - 4) {
+                acc.push(<BreadCrumbSeparator key={`Separator${node.uuid}`} alt />)
+                acc.push(<BreadCrumbItem key="..." text="..." {...funcs} alt />)
+              }
+              return acc
+            }
+
+            if (index !== 0) acc.push(<BreadCrumbSeparator key={`Separator${node.uuid}`} alt />)
+
+            /* the first one is always special */
+            if (index === 0) acc.push(<BreadCrumbItem text={title} key="root" {...funcs} alt />)
+            else acc.push(<BreadCrumbItem text={node.name} key={`Item${node.uuid}`} {...funcs} alt />)
+
+            return acc
+          }, [])
+        }
+      </div>
+    )
   }
 
   render() {
@@ -273,18 +310,21 @@ class SelectNas extends React.Component {
 
           {/* file list */}
           <div style={{ flexGrow: 1, height: '100%', backgroundColor: '#FFF', overflow: 'hidden', position: 'relative' }}>
-            <div style={{ width: '100%', height: 64, backgroundColor: 'rgba(0,0,0,0.09)' }} >
-              <IconButton onTouchTap={this.back}>
-                <BackIcon color="#FFF" />
-              </IconButton>
-              <IconButton onTouchTap={this.back}>
-                <ForwardIcon color="#FFF" />
-              </IconButton>
-              <IconButton onTouchTap={this.back}>
-                <UpIcon color="#FFF" />
-              </IconButton>
+            <div style={{ width: '100%', height: 56, margin: '-4px 0 0 60px', display: 'flex', alignItems: 'center' }}>
+              <div style={{ width: 32, height: 32 }}>
+                { this.state.path.length > 1 &&
+                  <IconButton
+                    onTouchTap={this.back}
+                    iconStyle={{ width: 18, height: 18 }}
+                    style={{ width: 32, height: 32, padding: 7 }}
+                  >
+                    <BackIcon color="rgba(0,0,0,.54)" />
+                  </IconButton>
+                }
+              </div>
+              { this.renderBreadCrumb(navs) }
             </div>
-            <div style={{ width: '100%', height: 'calc(100% - 64px)', position: 'absolute', top: 64, left: 0 }}>
+            <div style={{ width: '100%', height: 'calc(100% - 64px)', position: 'absolute', top: 48, left: 0 }}>
               <FileContent
                 {...this.state}
                 fileSelect

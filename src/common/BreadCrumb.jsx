@@ -19,21 +19,30 @@ export class BreadCrumbItem extends React.PureComponent {
     }
   }
   render() {
+    /* alt: small version and bgColor is white */
+    const { alt, text } = this.props
+
     /* adjust the different lineHeight of Noto and Roboto */
-    const pureRoboto = !this.props.text.replace(/[a-zA-Z0-9`~!@#$%^&()-_=+{}[\];', ]/g, '').length
+    const pureRoboto = !text.replace(/[a-zA-Z0-9`~!@#$%^&()-_=+{}[\];', ]/g, '').length
+
+    const bgColor = alt ? 'rgba(0,0,0,.09)' : 'rgba(255,255,255,0.28)'
+
     return (
       <div
         style={{
           cursor: 'pointer',
           borderRadius: 2, // mimic a flat button
-          height: 32,
-          paddingLeft: this.state.dropable ? 6 : 8,
-          paddingRight: this.state.dropable ? 6 : 8,
-          paddingTop: pureRoboto ? 4 : 0,
+          height: alt ? 24 : 32,
+          paddingLeft: (this.state.dropable) || alt ? 6 : 8,
+          paddingRight: (this.state.dropable || alt) ? 6 : 8,
+          fontSize: alt ? 12 : 20,
+          fontWeight: 500,
+          paddingTop: pureRoboto ? 4 : alt ? 2 : 0,
+          color: alt ? 'rgba(0,0,0,.54)' : '#FFF',
           display: 'flex',
           alignItems: 'center',
           border: this.state.dropable ? '2px #FAFAFA solid' : '',
-          backgroundColor: this.state.isDrop ? 'transparent' : this.state.hover ? 'rgba(255,255,255,0.28)' : 'transparent'
+          backgroundColor: this.state.isDrop ? 'transparent' : this.state.hover ? bgColor : 'transparent'
         }}
         onTouchTap={this.props.onTouchTap}
         onMouseMove={this.onMouseMove}
@@ -49,9 +58,20 @@ export class BreadCrumbItem extends React.PureComponent {
 
 export class BreadCrumbSeparator extends React.PureComponent {
   render() {
+    const { alt } = this.props
     return (
-      <div style={{ height: 32, width: 24, display: 'flex', alignItems: 'center', marginTop: 4 }}>
-        <RightIcon color="#FFFFFF" />
+      <div
+        style={{
+          height: alt ? 24 : 32,
+          width: alt ? 16 : 24,
+          display: 'flex',
+          alignItems: 'center',
+          marginTop: alt ? 2 : 4,
+          justifyContent: 'center',
+          color: 'rgba(0,0,0,.54)'
+        }}
+      >
+        { alt ? '>' : <RightIcon color="#FFFFFF" /> }
       </div>
     )
   }
