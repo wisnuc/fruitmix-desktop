@@ -53,7 +53,7 @@ class Box extends Base {
       const callback = (err, res, box) => {
         count -= 1
         if (!err && res) {
-          tweets.push(...res.filter(t => t.list).map(t => Object.assign({ box }, t)))
+          tweets.push(...res.filter(t => t.list && t.list.length).map(t => Object.assign({ box }, t)))
         }
         if (!count) {
           this.setState({ tweets: tweets.sort((a, b) => b.ctime - a.ctime) })

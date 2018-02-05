@@ -39,7 +39,7 @@ class NewName extends React.PureComponent {
 
   render() {
     return (
-      <div style={{ width: 280, padding: '24px 24px 0px 24px' }}>
+      <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
         <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
           { i18n.__('Change Group Name') }
         </div>
