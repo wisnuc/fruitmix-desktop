@@ -34,7 +34,7 @@ class ScrollBar extends React.PureComponent {
       const diff = event.clientY - this.startY
       const percent = diff / (height - barH)
       const scrollTop = Math.min(allHeight - height, Math.max(0, percent * (allHeight - height) + this.startScrollTop))
-      if (this.refList) this.refList.scrollToPosition(scrollTop)
+      this.scrollToPosition(scrollTop)
       this.onHover()
     }
 
@@ -74,6 +74,10 @@ class ScrollBar extends React.PureComponent {
     clearTimeout(this.timer)
     document.removeEventListener('mousemove', this.onMouseMove)
     document.removeEventListener('mouseup', this.onMouseUp)
+  }
+
+  scrollToPosition(scrollTop) {
+    if (this.refList) this.refList.scrollToPosition(scrollTop)
   }
 
   render() {

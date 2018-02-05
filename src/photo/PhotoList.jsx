@@ -41,14 +41,13 @@ class PhotoList extends React.Component {
       if (this.refTimeline) this.refTimeline.style.opacity = op ? 1 : 0
     }
 
-    this.onScroll = () => {
+    this.onScroll = ({ scrollTop }) => {
       if (!this.photoMapDates.length) return
-      const list = document.getElementsByClassName('ReactVirtualized__List')[0]
-      const currentIndex = this.indexHeightSum.findIndex(data => data > list.scrollTop + this.indexHeightSum[0] * 0.9)
-      const percentage = list.scrollTop / this.maxScrollTop
+      const currentIndex = this.indexHeightSum.findIndex(data => data > scrollTop + this.indexHeightSum[0] * 0.9)
+      const percentage = scrollTop / this.maxScrollTop
       this.date = this.photoMapDates[currentIndex].date
       this.currentDigest = this.photoMapDates[currentIndex].photos[0].hash
-      if (!this.firstScroll) this.props.memoize({ currentDigest: this.currentDigest, currentScrollTop: list.scrollTop })
+      if (!this.firstScroll) this.props.memoize({ currentDigest: this.currentDigest, currentScrollTop: scrollTop })
       // debug('this.props.memoize()', this.props.memoize(), currentIndex, this.indexHeightSum[0])
 
       /* forceUpdate when first two scroll, this is necessary to show timeline */
@@ -140,8 +139,7 @@ class PhotoList extends React.Component {
     }
 
     this.scrollToPosition = () => {
-      const list = document.getElementsByClassName('ReactVirtualized__List')[0]
-      list.scrollTop = this.scrollTop
+      if (this.refList) this.refList.scrollToPosition(this.scrollTop)
     }
 
     this.onMouseUp = () => (this.onMouseDown = false)
@@ -153,7 +151,7 @@ class PhotoList extends React.Component {
   }
 
   componentDidUpdate() {
-    this.onScroll()
+    this.onScroll({ scrollTop: this.currentScrollTop || 0 })
   }
 
   componentWillUnmount() {
@@ -339,6 +337,7 @@ class PhotoList extends React.Component {
               <div style={{ position: 'relative', width: '100%', height: '100%' }} >
                 <div key={this.size} onTouchTap={e => this.onRowTouchTap(e)} >
                   <ScrollBar
+                    ref={ref => (this.refList = ref)}
                     height={height}
                     width={width}
                     allHeight={PhotoInfo.rowHeightSum}
