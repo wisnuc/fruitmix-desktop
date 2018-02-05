@@ -9,6 +9,7 @@ import DetailContainer from '../photo/DetailContainer'
 import ScrollBar from '../common/ScrollBar'
 import DialogOverlay from '../common/DialogOverlay'
 import Preview from './Preview'
+import ViewMedia from './ViewMedia'
 
 const imgUrl = 'http://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKQiahrEc8rUfECDTUq94WlcaNkTYTKzIKr3p5xgOPQO1juvtwO1YSUCHOPpup3oWo1AP3nOBVyPCw/132'
 
@@ -43,6 +44,10 @@ class Tweets extends React.PureComponent {
       openDetail: false
     }
 
+    this.lookPhotoDetail = (digest) => {
+      const seqIndex = this.state.list.findIndex(item => item.sha256 === digest)
+      this.setState({ openDetail: true, seqIndex })
+    }
 
     this.memoizeValue = {}
 
@@ -155,7 +160,10 @@ class Tweets extends React.PureComponent {
                             />
                             {
                               i === 5 && isMany &&
-                                <div style={Object.assign({ width: w, height: w }, overlayStyle)} >
+                                <div
+                                  style={Object.assign({ width: w, height: w }, overlayStyle)}
+                                  onTouchTap={(e) => { e.stopPropagation(); this.setState({ viewMore: 'media', list }) }}
+                                >
                                   { `+ ${list.length - 6}` }
                                 </div>
                             }
@@ -167,7 +175,7 @@ class Tweets extends React.PureComponent {
                   :
                   <Paper
                     style={{ width: 3 * w + 12, height: 56, display: 'flex', alignItems: 'center', fontSize: 14 }}
-                    onTouchTap={() => this.setState({ showFiles: true, list  })}
+                    onTouchTap={() => this.setState({ showFiles: true, list })}
                   >
                     <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', backgroundColor: '#FF9100', padding: 16 }}>
                       <FileFolder color="#FFF" />
@@ -235,6 +243,17 @@ class Tweets extends React.PureComponent {
             : this.renderNoTweets()
         }
         { tweets && tweets.length > 0 && <div style={{ height: 96 }} /> }
+
+        {
+          this.state.viewMore &&
+            <ViewMedia
+              ipcRenderer={this.props.ipcRenderer}
+              onRequestClose={() => this.setState({ viewMore: false })}
+              lookPhotoDetail={this.lookPhotoDetail}
+              media={this.state.list.map(l => Object.assign({ hash: l.sha256 }, l.metadata))}
+              memoize={this.memoize}
+            />
+        }
 
         {/* PhotoDetail */}
         <DetailContainer
