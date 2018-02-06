@@ -12,11 +12,21 @@ import UploadIcon from 'material-ui/svg-icons/file/cloud-upload'
 import DialogOverlay from '../common/DialogOverlay'
 import FlatButton from '../common/FlatButton'
 import { parseTime } from '../common/datetime'
+import DetailContainer from '../photo/DetailContainer'
 import MediaBox from './MediaBox'
 
 const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
 
 const imgUrl = 'http://cn.bing.com/th?id=ABT1B401B62BAA3194420276E294380581BC45A4292AE1FF991F97E75ED74A511A1&w=608&h=200&c=2&rs=1&pid=SANGAM'
+
+const getName = (photo) => {
+  if (!photo.date && !photo.datetime) {
+    return `IMG_UnkownDate-${photo.hash.slice(0, 5).toUpperCase()}-PC.${photo.m}`
+  }
+  const date = photo.date || photo.datetime
+  return `IMG-${date.split(/\s+/g)[0].replace(/[:\s]+/g, '')}-${photo.hash.slice(0, 5).toUpperCase()}-PC.${photo.m}`
+}
+
 
 class Inbox extends React.Component {
   constructor(props) {
@@ -44,6 +54,33 @@ class Inbox extends React.Component {
         this.preSelect = this.state.selected
         this.setState({ selected: i })
       }
+    }
+
+    this.memoizeValue = {}
+
+    this.memoize = (newValue) => {
+      this.memoizeValue = Object.assign(this.memoizeValue, newValue)
+      return this.memoizeValue
+    }
+
+    this.lookPhotoDetail = ({ list, digest, box }) => {
+      const seqIndex = list.findIndex(item => item.sha256 === digest)
+      this.setState({ openDetail: true, seqIndex, list, boxUUID: box.uuid })
+    }
+
+    this.startDownload = () => {
+      const list = [this.memoizeValue.downloadDigest]
+
+      const photos = list.map(digest => this.state.list.find(photo => photo.sha256 === digest))
+        .map(photo => ({
+          boxUUID: this.state.boxUUID,
+          name: getName(Object.assign({ hash: photo.sha256 }, photo.metadata)),
+          size: photo.size,
+          type: 'file',
+          uuid: photo.sha256
+        }))
+
+      this.props.ipcRenderer.send('DOWNLOAD', { entries: photos, dirUUID: 'media' })
     }
   }
 
@@ -192,8 +229,10 @@ class Inbox extends React.Component {
                     key={v.content.uuid}
                     i={i}
                     data={v}
+                    items={v.content.list}
                     handleSelect={this.handleSelect}
                     ipcRenderer={this.props.ipcRenderer}
+                    lookPhotoDetail={this.lookPhotoDetail}
                   />
                 ))
               }
@@ -201,81 +240,26 @@ class Inbox extends React.Component {
             : this.renderNoData()
         }
 
-        {/* Selected Header */}
-        {
-          !!0 &&
-            <div
-              style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: 64,
-                backgroundColor: this.props.primaryColor,
-                display: 'flex',
-                alignItems: 'center',
-                zIndex: 200
-              }}
-            >
-              <div style={{ width: 12 }} />
-              <div ref={ref => (this.refClearSelected = ref)}>
-                <IconButton onTouchTap={this.props.clearSelect}>
-                  <CloseIcon color="#FFF" />
-                </IconButton>
-              </div>
-              <div style={{ width: 12 }} />
-              <div style={{ color: '#FFF', fontSize: 20, fontWeight: 500 }} >
-                { i18n.__('%s Photo Selected', this.props.selectedItems.length) }
-              </div>
-              <div style={{ flexGrow: 1 }} />
-
-              <IconButton onTouchTap={this.props.startDownload} tooltip={i18n.__('Download')}>
-                <DownloadIcon color="#FFF" />
-              </IconButton>
-
-              {/*
-              <IconButton onTouchTap={() => this.toggleDialog('deleteDialog')}>
-                <DeleteIcon color="#FFF" />
-              </IconButton>
-              */}
-
-              <IconButton onTouchTap={() => this.toggleDialog('hideDialog')} tooltip={i18n.__('Hide')}>
-                <VisibilityOff color="#FFF" />
-              </IconButton>
-              <div style={{ width: 24 }} />
-
-            </div>
-        }
-
-        {/* dialog */}
-        <DialogOverlay open={!!this.state.deleteDialog}>
-          <div>
-            {
-              this.state.deleteDialog &&
-                <div style={{ width: 320, padding: '24px 24px 0px 24px' }}>
-                  <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-                    { i18n.__('Delete Photo Dialog Text 1') }
-                  </div>
-                  <div style={{ height: 20 }} />
-                  <div style={{ color: 'rgba(0,0,0,0.54)' }}>
-                    { i18n.__('Delete Photo Dialog Text 2') }
-                  </div>
-                  <div style={{ height: 24 }} />
-                  <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
-                    <FlatButton label={i18n.__('Cancel')} primary onTouchTap={() => this.toggleDialog('deleteDialog')} keyboardFocused />
-                    <FlatButton
-                      label={i18n.__('Remove')}
-                      primary
-                      onTouchTap={() => {
-                        this.toggleDialog('deleteDialog')
-                        this.props.removeMedia()
-                      }}
-                    />
-                  </div>
-                </div>
-            }
-          </div>
-        </DialogOverlay>
+        {/* PhotoDetail */}
+        <DetailContainer
+          boxUUID={this.state.boxUUID}
+          onRequestClose={() => this.setState({ openDetail: false })}
+          open={this.state.openDetail}
+          style={{ position: 'fixed', left: 0, top: 0, width: '100%', height: '100%' }}
+          items={this.state.list && this.state.list.map(l => Object.assign({ hash: l.sha256 }, l.metadata))}
+          seqIndex={this.state.seqIndex}
+          ipcRenderer={this.props.ipcRenderer}
+          setAnimation={() => {}}
+          setAnimation2={() => {}}
+          memoize={this.memoize}
+          selectedItems={[]}
+          addListToSelection={() => {}}
+          removeListToSelection={() => {}}
+          hideMedia={() => {}}
+          removeMedia={() => {}}
+          startDownload={this.startDownload}
+          apis={this.props.apis}
+        />
       </div>
     )
   }
