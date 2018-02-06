@@ -13,11 +13,14 @@ import DeleteIcon from 'material-ui/svg-icons/action/delete'
 import VisibilityOff from 'material-ui/svg-icons/action/visibility-off'
 import DownloadIcon from 'material-ui/svg-icons/file/file-download'
 import UploadIcon from 'material-ui/svg-icons/file/cloud-upload'
+import { AutoSizer } from 'react-virtualized'
 import DialogOverlay from '../common/DialogOverlay'
 import FlatButton from '../common/FlatButton'
 import { parseTime } from '../common/datetime'
+import ScrollBar from '../common/ScrollBar'
 import Thumb from '../file/Thumb'
 import Grid from './Grid'
+import Row from './Row'
 
 const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
 
@@ -258,24 +261,80 @@ class MediaBox extends React.PureComponent {
   }
 
   renderFile(args) {
-    const { list, height, width } = args
+    const { list, height, width, transition, full, box } = args
     return (
-      <div style={{ height, width, display: 'flex', alignItems: 'center', backgroundColor: '#FFA000', color: '#FFF' }}>
-        <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', padding: 16 }}>
-          <FileFolder color="#FFF" />
-        </div>
-        <div
-          style={{
-            maxWidth: list.length === 1 ? 300 : 120,
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis'
-          }}
-        >
-          { list[0].filename }
-        </div>
-        <div style={{ width: 4 }} />
-        { list.length > 1 && i18n.__n('And Other %s Items', list.length)}
+      <div style={{ height, width, transition, position: 'relative' }}>
+        { full &&
+          <div
+            style={{
+              height: 32,
+              width: '100%',
+              marginTop: 8,
+              display: 'flex',
+              alignItems: 'center',
+              fontSize: 14,
+              color: 'rgba(0,0,0,.38)'
+            }}
+          >
+            <div style={{ flex: '0 0 48px' }} />
+            <div style={{ flex: '0 0 216px', display: 'flex', alignItems: 'center' }}>
+              { i18n.__('Name') }
+            </div>
+
+            <div style={{ flex: '0 0 144px' }}>
+              { i18n.__('Date Modified') }
+            </div>
+            <div style={{ flex: '0 0 144px' }}>
+              { i18n.__('Size') }
+            </div>
+            <div style={{ flexGrow: 1 }} />
+          </div>
+        }
+
+        {/* list */}
+        { full &&
+          <AutoSizer key={box.uuid}>
+            {(props) => {
+              const [h, w] = [props.height, props.width]
+              return (
+                <ScrollBar
+                  style={{ outline: 'none' }}
+                  allHeight={40 * list.length}
+                  height={h - 40}
+                  width={w}
+                  rowCount={list.length}
+                  rowHeight={40}
+                  rowRenderer={({ index, key, style }) => (
+                    <div style={style} key={key} onTouchTap={e => e.stopPropagation()}>
+                      <Row {...list[index]} name={list[index].filename} />
+                    </div>
+                  )}
+                />
+              )
+            }}
+          </AutoSizer>
+        }
+
+        {/* unselected */}
+        { !full &&
+          <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#FFA000', color: '#FFF' }}>
+            <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', padding: 16 }}>
+              <FileFolder color="#FFF" />
+            </div>
+            <div
+              style={{
+                maxWidth: list.length === 1 ? 300 : 120,
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis'
+              }}
+            >
+              { list[0].filename }
+            </div>
+            <div style={{ width: 4 }} />
+            { list.length > 1 && i18n.__n('And Other %s Items', list.length)}
+          </div>
+        }
       </div>
     )
   }
@@ -300,8 +359,10 @@ class MediaBox extends React.PureComponent {
       list,
       box,
       ipcRenderer,
-      height: height - 88,
-      width: selected ? 750 : 360
+      height: height - 72,
+      width: selected ? 750 : 360,
+      full: selected,
+      transition: calcCurve(tsd, wd)
     }
     return (
       <Paper
@@ -328,7 +389,8 @@ class MediaBox extends React.PureComponent {
             width: '100%',
             display: 'flex',
             alignItems: 'center',
-            transition: calcCurve(tsd, wd)
+            transition: calcCurve(tsd, wd),
+            boxShadow: '0px 1px 4px rgba(0,0,0,0.27)'
           }}
         >
           <div style={{ width: 16 }} />
