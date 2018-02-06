@@ -1,7 +1,7 @@
 import request from 'superagent'
 import RequestManager from './reqman'
 
-const cloudAddress = 'http://test.siyouqun.com:80'
+const cloudAddress = 'http://10.10.9.87:4000'
 
 /**
 
