@@ -119,7 +119,7 @@ class Inbox extends React.Component {
       const selected = i === s
       const diff = h1 - h2
 
-      const height = selected ? Math.min(h * 2, 562) : h
+      const height = selected ? Math.min(Math.max(h * 2, 421), 562) : h
 
       if (h1 <= h2) { // left
         top = h1
