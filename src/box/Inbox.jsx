@@ -9,6 +9,7 @@ import DeleteIcon from 'material-ui/svg-icons/action/delete'
 import VisibilityOff from 'material-ui/svg-icons/action/visibility-off'
 import DownloadIcon from 'material-ui/svg-icons/file/file-download'
 import UploadIcon from 'material-ui/svg-icons/file/cloud-upload'
+import { CellMeasurer, CellMeasurerCache, createMasonryCellPositioner, Masonry, AutoSizer } from 'react-virtualized'
 import DialogOverlay from '../common/DialogOverlay'
 import FlatButton from '../common/FlatButton'
 import { parseTime } from '../common/datetime'
@@ -189,6 +190,54 @@ class Inbox extends React.Component {
     return res // ({ height, content })
   }
 
+  renderMasonry(list) {
+    const cache = new CellMeasurerCache({
+      defaultHeight: 360,
+      defaultWidth: 360,
+      fixedWidth: false
+    })
+
+    const cellPositioner = createMasonryCellPositioner({
+      cellMeasurerCache: cache,
+      columnCount: 2,
+      columnWidth: 360,
+      spacer: 30
+    })
+
+    const cellRenderer = ({ index, key, parent, style }) => {
+      const datum = list[index]
+      return (
+        <CellMeasurer
+          cache={cache}
+          index={index}
+          key={key}
+          parent={parent}
+        >
+          <div style={style}>
+            <div style={{ height: 360, width: 360 }}>
+              { datum.ctime }
+            </div>
+          </div>
+        </CellMeasurer>
+      )
+    }
+
+    return (
+      <AutoSizer>
+        {({ height, width }) => (
+          <Masonry
+            cellCount={list.length}
+            cellMeasurerCache={cache}
+            cellPositioner={cellPositioner}
+            cellRenderer={cellRenderer}
+            height={height}
+            width={width}
+          />
+        )}
+      </AutoSizer>
+    )
+  }
+
   render() {
     console.log('Box', this.props, this.state)
     return (
@@ -223,6 +272,7 @@ class Inbox extends React.Component {
              </div> :
             this.props.tweets.length ?
             <div style={{ width: 810, position: 'relative' }}>
+              {/* this.renderMasonry(this.props.tweets) */}
               {
                 this.calcPos(this.process(this.props.tweets), this.state.selected).map((v, i) => (
                   <MediaBox
