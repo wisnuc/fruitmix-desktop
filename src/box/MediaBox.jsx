@@ -323,7 +323,7 @@ class MediaBox extends React.PureComponent {
             </div>
             <div
               style={{
-                maxWidth: list.length === 1 ? 300 : 120,
+                maxWidth: list.length === 1 ? 300 : 180,
                 overflow: 'hidden',
                 whiteSpace: 'nowrap',
                 textOverflow: 'ellipsis'

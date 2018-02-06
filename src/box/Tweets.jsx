@@ -187,7 +187,14 @@ class Tweets extends React.PureComponent {
                       <FileFolder color="#FFF" />
                     </div>
                     <div style={{ width: 16 }} />
-                    <div style={{ maxWidth: 1 * w, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                    <div
+                      style={{
+                        maxWidth: !(list.length - 1) * w + 1.25 * w,
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap',
+                        textOverflow: 'ellipsis'
+                      }}
+                    >
                       { list[0].filename }
                     </div>
                     <div style={{ width: 4 }} />
