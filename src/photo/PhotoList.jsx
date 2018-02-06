@@ -44,6 +44,7 @@ class PhotoList extends React.Component {
     this.onScroll = ({ scrollTop }) => {
       if (!this.photoMapDates.length) return
       const currentIndex = this.indexHeightSum.findIndex(data => data > scrollTop + this.indexHeightSum[0] * 0.9)
+      console.log('currentIndex', currentIndex, scrollTop, this.indexHeightSum)
       const percentage = scrollTop / this.maxScrollTop
       this.date = this.photoMapDates[currentIndex].date
       this.currentDigest = this.photoMapDates[currentIndex].photos[0].hash
@@ -151,7 +152,7 @@ class PhotoList extends React.Component {
   }
 
   componentDidUpdate() {
-    this.onScroll({ scrollTop: this.currentScrollTop || 0 })
+    this.onScroll({ scrollTop: this.scrollTop || 0 })
   }
 
   componentWillUnmount() {

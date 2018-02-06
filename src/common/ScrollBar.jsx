@@ -82,7 +82,7 @@ class ScrollBar extends React.PureComponent {
 
   render() {
     const { width, height, allHeight } = this.props
-    const barH = Math.max(height * height / allHeight, 48)
+    const barH = Math.max(height * height / allHeight, 48) || 48
     const barStyle = {
       top: 0,
       right: 0,

@@ -70,6 +70,12 @@ class Tweets extends React.PureComponent {
 
       this.props.ipcRenderer.send('DOWNLOAD', { entries: photos, dirUUID: 'media' })
     }
+
+    this.openMediaMore = (e, list) => {
+      e.stopPropagation()
+      this.memoizeValue = {}
+      this.setState({ viewMore: 'media', list })
+    }
   }
 
   componentDidUpdate(prevProps) {
@@ -162,7 +168,7 @@ class Tweets extends React.PureComponent {
                               i === 5 && isMany &&
                                 <div
                                   style={Object.assign({ width: w, height: w }, overlayStyle)}
-                                  onTouchTap={(e) => { e.stopPropagation(); this.setState({ viewMore: 'media', list }) }}
+                                  onTouchTap={e => this.openMediaMore(e, list)}
                                 >
                                   { `+ ${list.length - 6}` }
                                 </div>
