@@ -524,8 +524,18 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'nasTweets':
-        r = this.cpost(`boxes/${args.boxUUID}/tweets`)
-          .field('list', JSON.stringify({ comment: args.comment, type: args.type, indrive: args.list }))
+        if (this.stationID) {
+          const ep = `boxes/${args.boxUUID}/tweets`
+          const url = `${this.address}/c/v1/stations/${this.stationID}/pipe`
+          const resource = Buffer.from(`/${ep}`).toString('base64')
+          r = request.post(url).set('Authorization', this.token).field('manifest', JSON.stringify({
+            resource, method: 'POST', comment: args.comment, type: args.type, indrive: args.list
+          }))
+        } else {
+          r = this.cpost(`boxes/${args.boxUUID}/tweets`)
+            .field('list', JSON.stringify({ comment: args.comment, type: args.type, indrive: args.list }))
+        }
+
         break
 
       case 'handleBoxUser':
