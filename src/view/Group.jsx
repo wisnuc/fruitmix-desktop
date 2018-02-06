@@ -46,8 +46,14 @@ class Group extends Base {
     this.refresh = () => {
       this.ctx.props.apis.pureRequest('boxes', null, (err, boxes) => {
         console.log('boxes', err, boxes)
-        if (!err && boxes) this.setState({ boxes: this.processBox(boxes) })
-        if (!err && boxes && (this.state.currentBox || boxes[0])) this.getTweets(this.state.currentBox || boxes[0])
+        if (!err && boxes) {
+          this.setState({ boxes: this.processBox(boxes) })
+          const currentBox = boxes.find(b => this.state.currentBox && (b.uuid === this.state.currentBox.uuid)) || boxes[0]
+          if (currentBox) {
+            this.setState({ currentBox })
+            this.getTweets(currentBox)
+          } else this.setState({ currentBox: null, tweets: [] })
+        }
       })
     }
   }
@@ -96,7 +102,10 @@ class Group extends Base {
 
   renderDetail({ style }) {
     return (
-      <div style={style}>
+      <div
+        style={style}
+        key={this.state.currentBox && (this.state.currentBox.users.length + this.state.currentBox.users.name)}
+      >
         <BoxDetail
           guid={this.guid}
           refresh={this.refresh}
