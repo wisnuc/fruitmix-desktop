@@ -51,6 +51,16 @@ class Groups extends React.Component {
       })
     }
 
+    this.createNasTweets = (args) => {
+      this.props.apis.pureRequest('nasTweets', args, (err, res) => {
+        if (err) {
+          console.log('create nasTweets error', err)
+          this.props.openSnackBar(i18n.__('Send Tweets with Nas Files Failed'))
+        }
+        this.props.refresh()
+      })
+    }
+
     this.selectBox = (index) => {
       console.log('this.selectBox', index)
       if (!this.props.boxes[index]) return
@@ -251,6 +261,8 @@ class Groups extends React.Component {
               stationId={stationId}
               toggleView={this.toggleView}
               localUpload={this.localUpload}
+              offline={false}
+              diffStation={station && station.id !== stationId}
             />
         }
 
@@ -265,6 +277,7 @@ class Groups extends React.Component {
               ipcRenderer={ipcRenderer}
               primaryColor={primaryColor}
               openSnackBar={openSnackBar}
+              createNasTweets={this.createNasTweets}
               onRequestClose={() => this.setState({ view: '' })}
             />
         }
@@ -280,6 +293,7 @@ class Groups extends React.Component {
               ipcRenderer={ipcRenderer}
               primaryColor={primaryColor}
               openSnackBar={openSnackBar}
+              createNasTweets={this.createNasTweets}
               onRequestClose={() => this.setState({ view: '' })}
             />
         }
