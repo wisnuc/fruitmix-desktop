@@ -101,8 +101,8 @@ class Groups extends React.Component {
             const left = (1 + Math.sin(deg)) * (20 - r)
             return (
               <Avatar
-                key={u}
-                src={imgUrl}
+                key={u.id}
+                src={u.avatarUrl}
                 style={{ position: 'absolute', width: r * 2, height: r * 2, top, left }}
               />
             )

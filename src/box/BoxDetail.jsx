@@ -103,11 +103,10 @@ class BoxDetail extends React.Component {
 
   renderAvatar(user) {
     const onTouchTap = user.onTouchTap || (() => {})
-    const name = user
-    const avatarUrl = ''
+    const { nickName, avatarUrl } = user
     return (
       <Avatar
-        key={name}
+        key={nickName}
         style={{
           margin: 4,
           float: 'left',
@@ -123,7 +122,7 @@ class BoxDetail extends React.Component {
             <div style={{ borderRadius: 16, width: 32, height: 32, overflow: 'hidden' }}>
               <img width={32} height={32} alt="" src={avatarUrl} />
             </div> :
-            name.slice(0, 2).toUpperCase()
+            nickName.slice(0, 2).toUpperCase()
           }
         </div>
       </Avatar>
@@ -169,7 +168,7 @@ class BoxDetail extends React.Component {
         <div style={{ width: 312, padding: 24, overflow: 'auto' }}>
           { this.renderTitle(i18n.__('Group Members')) }
           <div style={{ maxHeight: 400, height: 44 * Math.ceil(box.users.length / 3), position: 'relative' }}>
-            { box.users.map((u, i) => (i > 10 ? <div key={u} /> : this.renderAvatar(u))) }
+            { box.users.map((u, i) => (i > 10 ? <div key={u.id} /> : this.renderAvatar(u))) }
             { this.renderAction(AddIcon, () => this.setState({ addUser: true })) }
             { this.renderAction(RemoveIcon, () => this.setState({ delUser: true })) }
           </div>
