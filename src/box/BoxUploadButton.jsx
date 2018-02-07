@@ -24,6 +24,8 @@ class BoxUploadButton extends React.Component {
   }
 
   render() {
+    const { offline, diffStation } = this.props
+    const noNas = offline || diffStation
     return (
       <div style={{ position: 'absolute', right: 48, bottom: 48, zIndex: 1000 }}>
         <FloatingActionButton
@@ -47,19 +49,22 @@ class BoxUploadButton extends React.Component {
           <Menu style={{ minWidth: 240 }}>
             <MenuItem
               primaryText={i18n.__('Upload Local Files')}
-              leftIcon={<UploadFold />}
+              leftIcon={<UploadFold color={offline ? 'rgba(0,0,0,.18)' : 'rgba(0,0,0,.54)'} />}
+              disabled={offline}
               onTouchTap={() => this.upload()}
               style={{ fontSize: 13 }}
             />
             <MenuItem
               primaryText={i18n.__('Upload NAS Files')}
-              leftIcon={<UploadFile />}
+              leftIcon={<UploadFile color={noNas ? 'rgba(0,0,0,.18)' : 'rgba(0,0,0,.54)'} />}
+              disabled={noNas}
               onTouchTap={() => this.upload('file')}
               style={{ fontSize: 13 }}
             />
             <MenuItem
               primaryText={i18n.__('Upload NAS Media')}
-              leftIcon={<UploadFile />}
+              leftIcon={<UploadFile color={noNas ? 'rgba(0,0,0,.18)' : 'rgba(0,0,0,.54)'} />}
+              disabled={noNas}
               onTouchTap={() => this.upload('media')}
               style={{ fontSize: 13 }}
             />

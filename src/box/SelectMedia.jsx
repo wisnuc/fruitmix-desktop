@@ -69,10 +69,6 @@ class SelectMedia extends React.Component {
     }
 
     this.addListToSelection = (digests) => {
-      if (this.firstSelect) {
-        this.ctx.openSnackBar(i18n.__('Shift Tips'))
-        this.firstSelect = false
-      }
       this.setState({ selectedItems: combineElement(digests, this.state.selectedItems).sort() })
     }
 
@@ -144,17 +140,8 @@ class SelectMedia extends React.Component {
         list: this.state.selectedItems.map(d => ({ type: 'media', sha256: d }))
       }
 
-      this.props.apis.pureRequest('nasTweets', args, (err, res) => {
-        if (err) {
-          console.log('create nasTweets error', err)
-          this.props.openSnackBar(i18n.__('Send Tweets with Nas Media Failed'))
-          this.props.onRequestClose()
-          this.props.refresh()
-        } else {
-          this.props.onRequestClose()
-          this.props.refresh()
-        }
-      })
+      this.props.onRequestClose()
+      this.props.createNasTweets(args)
     }
   }
 
