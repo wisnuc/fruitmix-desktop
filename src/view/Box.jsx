@@ -24,11 +24,24 @@ class Box extends Base {
 
     this.processBox = (d) => {
       if (!d || !d[0]) return []
+
       d.forEach((b) => {
-        b.ltime = b.ctime
-        b.lcomment = 'last tweet\'s comment'
+        const { tweet, ctime } = b
+        if (tweet) {
+          b.ltime = tweet.ctime
+          const list = tweet.list
+          const isMedia = list && list.length && list.every(l => l.metadata)
+          const comment = isMedia ? `[${i18n.__('%s Photos', list.length)}]` : list && list.length
+            ? `[${i18n.__('%s Files', list.length)}]` : tweet.comment
+          const nickName = b.users.find(u => u.id === tweet.tweeter).nickName
+          b.lcomment = `${nickName} : ${comment}`
+        } else {
+          b.ltime = ctime
+          b.lcomment = i18n.__('New Group Text')
+        }
       })
-      return [...d].sort((a, b) => (b.ltime - a.ltime))
+      d.sort((a, b) => (b.ltime - a.ltime))
+      return d
     }
 
     this.setAnimation = (component, status) => {
@@ -53,14 +66,20 @@ class Box extends Base {
       const callback = (err, res, box) => {
         count -= 1
         if (!err && res) {
-          tweets.push(...res.filter(t => t.list && t.list.length).map(t => Object.assign({ box }, t)))
+          const getAuthor = id => box.users.find(u => u.id === id)
+          tweets.push(...res.filter(t => t.list && t.list.length)
+            .map(t => Object.assign({ box, author: getAuthor(t.tweeter.id) }, t)))
         }
         if (!count) {
           this.setState({ tweets: tweets.sort((a, b) => b.ctime - a.ctime) })
         }
       }
       for (let i = 0; i < boxes.length; i++) {
-        this.ctx.props.apis.pureRequest('tweets', { boxUUID: boxes[i].uuid }, (err, res) => callback(err, res, boxes[i]))
+        this.ctx.props.apis.pureRequest(
+          'tweets',
+          { boxUUID: boxes[i].uuid, stationId: boxes[i].stationId },
+          (err, res) => callback(err, res, boxes[i])
+        )
       }
     }
 
@@ -74,14 +93,17 @@ class Box extends Base {
   }
 
   willReceiveProps(nextProps) {
-    this.handleProps(nextProps.apis, ['boxToken'])
   }
 
   navEnter() {
-    const a = this.ctx.props.apis.account
-    this.guid = a && a.data && a.data.global && a.data.global.id
-
-    this.ctx.props.apis.request('boxToken', { guid: this.guid }, this.refresh)
+    const apis = this.ctx.props.apis
+    console.log('navEnter', apis)
+    const { userUUID } = apis
+    const userData = global.config.users.find(u => u.userUUID === userUUID)
+    const wxToken = userData && userData.wxToken
+    this.guid = apis.account && apis.account.data && apis.account.data.global.id
+    if (wxToken && this.guid) this.ctx.props.apis.update('wxToken', wxToken, this.refresh)
+    else alert('no wxToken')
   }
 
   navLeave() {

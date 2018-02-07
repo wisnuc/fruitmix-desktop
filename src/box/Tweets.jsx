@@ -94,8 +94,8 @@ class Tweets extends React.PureComponent {
   }
 
   renderTweets({ index, key, style }) {
-    const { ctime, comment, uuid, tweeter, list } = this.props.tweets[index]
-    const isSelf = this.props.guid === tweeter.id
+    const { ctime, comment, uuid, author, list } = this.props.tweets[index]
+    const isSelf = this.props.guid === author.id
     const isMedia = list && list.every(l => l.metadata)
     const isMany = list && list.length > 6
     const w = 120
@@ -114,13 +114,13 @@ class Tweets extends React.PureComponent {
           <div style={{ width: 32 }} />
           {/* Avatar */}
           <div style={{ height: 40, width: 40 }}>
-            <Avatar src={imgUrl} size={40} />
+            <Avatar src={author.avatarUrl} size={40} />
           </div>
           <div style={{ width: 16 }} />
           <div>
             <div style={{ height: 30, display: 'flex', alignItems: 'center', flexDirection: isSelf ? 'row-reverse' : 'row' }}>
               <div style={{ fontSize: 12, color: 'rgba(0,0,0,.54)', fontWeight: 500 }}>
-                { `用户-${tweeter.id.slice(0, 4)}` }
+                { author.nickName }
               </div>
               <div style={{ width: 8 }} />
               <div style={{ fontSize: 12, color: 'rgba(0,0,0,.54)' }}>

@@ -27,9 +27,11 @@ class Group extends Base {
 
     this.getTweets = (box) => {
       this.setState({ tweets: null })
-      this.ctx.props.apis.pureRequest('tweets', { boxUUID: box.uuid }, (err, tweets) => {
-        if (!err && tweets) this.setState({ tweets, currentBox: box })
-        else console.log('get tweets error', err, tweets)
+      const getAuthor = id => box.users.find(u => u.id === id)
+      this.ctx.props.apis.pureRequest('tweets', { boxUUID: box.uuid, stationId: box.stationId }, (err, tweets) => {
+        if (!err && tweets) {
+          this.setState({ tweets: tweets.map(t => Object.assign({ author: getAuthor(t.tweeter.id) }, t)), currentBox: box })
+        } else console.log('get tweets error', err, tweets)
       })
     }
 
@@ -37,11 +39,19 @@ class Group extends Base {
       if (!d || !d[0]) return []
 
       d.forEach((b) => {
-        b.ltime = b.tweet.ctime
-        const list = b.tweet.list
-        const isMedia = list && list.length && list.every(l => l.metadata)
-        b.lcomment = isMedia ? `[${i18n.__('%s Photos', list.length)}]` : list && list.length
-          ? `[${i18n.__('%s Files', list.length)}]` : b.tweet.comment
+        const { tweet, ctime } = b
+        if (tweet) {
+          b.ltime = tweet.ctime
+          const list = tweet.list
+          const isMedia = list && list.length && list.every(l => l.metadata)
+          const comment = isMedia ? `[${i18n.__('%s Photos', list.length)}]` : list && list.length
+            ? `[${i18n.__('%s Files', list.length)}]` : tweet.comment
+          const nickName = b.users.find(u => u.id === tweet.tweeter).nickName
+          b.lcomment = `${nickName} : ${comment}`
+        } else {
+          b.ltime = ctime
+          b.lcomment = i18n.__('New Group Text')
+        }
       })
       d.sort((a, b) => (b.ltime - a.ltime))
       return d
@@ -63,14 +73,17 @@ class Group extends Base {
   }
 
   willReceiveProps(nextProps) {
-    this.handleProps(nextProps.apis, ['boxToken'])
   }
 
   navEnter() {
-    const a = this.ctx.props.apis.account
-    this.guid = a && a.data && a.data.global && a.data.global.id
-
-    this.ctx.props.apis.request('boxToken', { guid: this.guid }, this.refresh)
+    const apis = this.ctx.props.apis
+    console.log('navEnter', apis)
+    const { userUUID } = apis
+    const userData = global.config.users.find(u => u.userUUID === userUUID)
+    const wxToken = userData && userData.wxToken
+    this.guid = apis.account && apis.account.data && apis.account.data.global.id
+    if (wxToken && this.guid) this.ctx.props.apis.update('wxToken', wxToken, this.refresh)
+    else alert('no wxToken')
   }
 
   navLeave() {

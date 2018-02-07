@@ -340,9 +340,10 @@ class MediaBox extends React.PureComponent {
   }
 
   render() {
+    console.log('MediaBox', this.props)
     const { data, i, handleSelect, ipcRenderer } = this.props
     const { height, top, left, selected, tsd, wd, content } = data
-    const { type, comment, index, tweeter, list, uuid, box, ctime } = content
+    const { type, comment, index, author, list, uuid, box, ctime } = content
     const isMedia = list && list.every(l => l.metadata)
     const isMany = list && list.length > 6
     const hovered = this.state.hover
@@ -395,14 +396,14 @@ class MediaBox extends React.PureComponent {
         >
           <div style={{ width: 16 }} />
           <div style={{ borderRadius: 20, width: 40, height: 40, overflow: 'hidden' }}>
-            <img width={40} height={40} alt="face" src={imgUrl} />
+            <img width={40} height={40} alt="avatar" src={author.avatarUrl} />
           </div>
           <div style={{ width: 16 }} />
           <div style={{ flexGrow: 1 }} >
             <div style={{ height: 12 }} />
             <div style={{ height: 24, fontWeight: 500, display: 'flex', alignItems: 'center' }} >
               <div style={{ maxWidth: 216, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                { `用户-${tweeter.id.slice(0, 4)}` }
+                { author.nickName }
               </div>
               <div style={{ flexGrow: 1 }} />
               <div style={{ fontSize: 12, color: 'rgba(0,0,0,.54)' }}>
