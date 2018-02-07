@@ -40,8 +40,10 @@ class Groups extends React.Component {
     }
 
     this.newBox = (users) => {
-      const args = { name: '', users: [this.props.guid, ...(users.map(u => u.global.id))] }
-      this.props.apis.pureRequest('createBox', args, (err) => {
+      const stationId = this.props.station.id
+      const args = { name: '', users: [this.props.guid, ...(users.map(u => u.global.id))], stationId }
+      this.props.apis.pureRequest('createBox', args, (err, res) => {
+        console.log('this.newBox', args, err, res)
         this.setState({ newBox: false })
         if (err) this.props.openSnackBar(i18n.__('Create Box Failed'))
         else this.props.openSnackBar(i18n.__('Create Box Success'))
@@ -177,7 +179,7 @@ class Groups extends React.Component {
   }
 
   render() {
-    const { boxes, currentBox, guid, tweets, ipcRenderer, apis, primaryColor, refresh, openSnackBar, friends } = this.props
+    const { boxes, currentBox, station, guid, tweets, ipcRenderer, apis, primaryColor, refresh, openSnackBar, friends } = this.props
     const boxH = boxes && Math.min(window.innerHeight - 106, boxes.length * 72) || 0
     const boxUUID = currentBox && currentBox.uuid
     const stationId = currentBox && currentBox.stationId
@@ -206,6 +208,7 @@ class Groups extends React.Component {
                     style={{ lineHeight: '', height: 24 }}
                     label={i18n.__('New Box')}
                     onTouchTap={() => this.setState({ newBox: true })}
+                    disabled={!station || !station.id}
                     icon={<ContentAdd color="rgba(0,0,0,.54)" style={{ marginLeft: 4 }} />}
                     labelStyle={{ fontSize: 12, color: 'rgba(0,0,0,.54)', marginLeft: -4 }}
                   />
