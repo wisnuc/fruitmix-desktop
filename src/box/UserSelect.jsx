@@ -8,13 +8,28 @@ class UserSelect extends React.PureComponent {
     super(props)
 
     this.state = {
+      loading: !this.props.users,
       fired: false,
-      selected: []
+      selected: [],
+      users: this.props.users,
+      defaultUsers: this.props.defaultUsers
     }
 
     this.fire = () => {
       this.setState({ fired: true })
       this.props.fire(this.state.selected)
+    }
+
+    this.getUsers = () => {
+      this.props.getUsers((error, users) => {
+        if (error) {
+          console.log('this.getUsers error', error)
+          this.setState({ loading: false, error })
+        } else {
+          const defaultUsers = this.props.defaultUsers.map(id => users.find(u => u.id === id)).filter(u => !!u)
+          this.setState({ defaultUsers, users, loading: false })
+        }
+      })
     }
   }
 
@@ -28,7 +43,7 @@ class UserSelect extends React.PureComponent {
   }
 
   togglecheckAll() {
-    const { defaultUsers, users } = this.props
+    const { defaultUsers, users } = this.state
     if (this.state.selected.length < users.length - defaultUsers.length) {
       this.setState({ selected: users.filter(u => !defaultUsers.includes(u)) })
     } else {
@@ -43,15 +58,20 @@ class UserSelect extends React.PureComponent {
     else this.setState({ selected: [...sl.slice(0, index), ...sl.slice(index + 1)] })
   }
 
+  componentDidMount() {
+    if (!this.props.users) this.getUsers()
+  }
+
   render() {
-    console.log('UserSelect.jsx', this.props)
-    const { users, title, onRequestClose, actionLabel, primaryColor, defaultUsers } = this.props
-    const allSelected = this.state.selected.length === (users.length - defaultUsers.length) // TODO when users not includes defaultUsers
+    console.log('UserSelect.jsx', this.props, this.state)
+    const { title, onRequestClose, actionLabel, primaryColor } = this.props
+    const { users, defaultUsers, loading, selected } = this.state
+    const allSelected = users && defaultUsers && !loading &&
+      this.state.selected.length === (users.length - defaultUsers.length) // TODO when users not includes defaultUsers
+
     return (
       <div style={{ width: 336, padding: '24px 24px 0px 24px', zIndex: 2000 }}>
-
         <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>{ title }</div>
-
         <div style={{ height: 24 }} />
 
         <div
@@ -67,34 +87,39 @@ class UserSelect extends React.PureComponent {
           { i18n.__('Select Users') }
         </div>
 
-        <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key="all" >
-          <Checkbox
-            label={i18n.__('All Users')}
-            labelStyle={{ fontSize: 14 }}
-            iconStyle={{ fill: allSelected ? primaryColor : 'rgba(0, 0, 0, 0.54)' }}
-            checked={allSelected}
-            onCheck={() => this.togglecheckAll()}
-          />
-        </div>
-        <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
-        <div style={{ maxHeight: 40 * 8, overflow: 'auto' }}>
-          {
-            users.map(user =>
-              (
-                <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.username || user} >
-                  <Checkbox
-                    label={user.username || user}
-                    iconStyle={{ fill: this.state.selected.includes(user) ? primaryColor : 'rgba(0, 0, 0, 0.54)' }}
-                    labelStyle={{ fontSize: 14 }}
-                    checked={this.state.selected.includes(user) || this.props.defaultUsers.includes(user)}
-                    disabled={this.props.defaultUsers.includes(user)}
-                    onCheck={() => this.handleCheck(user)}
-                  />
-                </div>
-              ))
-          }
-          <div style={{ height: 8 }} />
-        </div>
+        {
+          loading ? 'loading' :
+            <div style={{ height: 40 * users.length + 48 }}>
+              <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key="all" >
+                <Checkbox
+                  label={i18n.__('All Users')}
+                  labelStyle={{ fontSize: 14 }}
+                  iconStyle={{ fill: allSelected ? primaryColor : 'rgba(0, 0, 0, 0.54)' }}
+                  checked={allSelected}
+                  onCheck={() => this.togglecheckAll()}
+                />
+              </div>
+              <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
+              <div style={{ height: 40 * users.length + 8, overflow: 'auto' }}>
+                {
+                  users.map(user =>
+                    (
+                      <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.id}>
+                        <Checkbox
+                          label={user.nickName}
+                          iconStyle={{ fill: selected.includes(user) ? primaryColor : 'rgba(0, 0, 0, 0.54)' }}
+                          labelStyle={{ fontSize: 14 }}
+                          checked={selected.includes(user) || defaultUsers.includes(user)}
+                          disabled={defaultUsers.includes(user)}
+                          onCheck={() => this.handleCheck(user)}
+                        />
+                      </div>
+                    ))
+                }
+                <div style={{ height: 8 }} />
+              </div>
+            </div>
+        }
 
         {/* button */}
         <div style={{ height: 16 }} />
@@ -108,7 +133,7 @@ class UserSelect extends React.PureComponent {
             primary
             label={actionLabel}
             onTouchTap={this.fire}
-            disabled={this.state.fired || !this.state.selected.length}
+            disabled={this.state.fired || !this.state.selected.length || loading}
           />
         </div>
       </div>

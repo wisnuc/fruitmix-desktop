@@ -27,7 +27,7 @@ class Group extends Base {
 
     this.getTweets = (box) => {
       this.setState({ tweets: null })
-      const getAuthor = id => box.users.find(u => u.id === id)
+      const getAuthor = id => box.users.find(u => u.id === id) || { id, nickName: '已退群' }
       this.ctx.props.apis.pureRequest('tweets', { boxUUID: box.uuid, stationId: box.stationId }, (err, tweets) => {
         if (!err && tweets) {
           this.setState({ tweets: tweets.map(t => Object.assign({ author: getAuthor(t.tweeter.id) }, t)), currentBox: box })
@@ -70,6 +70,8 @@ class Group extends Base {
         }
       })
     }
+
+    this.getUsers = next => this.ctx.props.apis.pureRequest('friends', { userId: this.guid }, next)
   }
 
   willReceiveProps(nextProps) {
@@ -132,7 +134,7 @@ class Group extends Base {
           apis={this.ctx.props.apis}
           primaryColor={this.groupPrimaryColor()}
           openSnackBar={msg => this.ctx.openSnackBar(msg)}
-          friends={this.ctx.props.apis.users.data.filter(u => !!u.global) || []}
+          getUsers={this.getUsers}
         />
       </div>
     )
@@ -147,9 +149,9 @@ class Group extends Base {
       getTweets={this.getTweets}
       openSnackBar={openSnackBar}
       refresh={this.refresh}
+      getUsers={this.getUsers}
       guid={this.guid}
       station={this.station}
-      friends={this.ctx.props.apis.users.data.filter(u => !!u.global) || []}
     />)
   }
 }

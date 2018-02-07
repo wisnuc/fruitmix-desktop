@@ -26,7 +26,7 @@ class BoxDetail extends React.Component {
     this.deleteBox = () => {
       this.setState({ loading: true })
       const { apis, box, openSnackBar, refresh } = this.props
-      apis.pureRequest('delBox', { boxUUID: box.uuid }, (err) => {
+      apis.pureRequest('delBox', { boxUUID: box.uuid, stationId: box.stationId }, (err) => {
         if (err) openSnackBar(i18n.__('Delete Box Failed'))
         else openSnackBar(i18n.__('Delete Box Success'))
         this.setState({ delBox: false, loading: false })
@@ -37,23 +37,33 @@ class BoxDetail extends React.Component {
     this.addUser = (users) => {
       this.setState({ loading: true })
       const { apis, box, openSnackBar, refresh } = this.props
-      apis.pureRequest('handleBoxUser', { boxUUID: box.uuid, op: 'add', guids: users.map(u => u.global.id) }, (err) => {
-        if (err) openSnackBar(i18n.__('Add Users to Box Failed'))
-        else openSnackBar(i18n.__('Add Users to Box Success'))
-        this.setState({ addUser: false, loading: false })
-        refresh()
-      })
+      apis.pureRequest(
+        'handleBoxUser',
+        { boxUUID: box.uuid, op: 'add', guids: users.map(u => u.id), stationId: box.stationId },
+        (err, res) => {
+          console.log('res', res)
+          if (err) openSnackBar(i18n.__('Add Users to Box Failed'))
+          else openSnackBar(i18n.__('Add Users to Box Success'))
+          this.setState({ addUser: false, loading: false })
+          refresh()
+        }
+      )
     }
 
     this.delUser = (users) => {
       this.setState({ loading: true })
       const { apis, box, openSnackBar, refresh } = this.props
-      apis.pureRequest('handleBoxUser', { boxUUID: box.uuid, op: 'delete', guids: users }, (err) => {
-        if (err) openSnackBar(i18n.__('Remove Users From Box Failed'))
-        else openSnackBar(i18n.__('Remove Users From Box Success'))
-        this.setState({ delUser: false, loading: false })
-        refresh()
-      })
+      apis.pureRequest(
+        'handleBoxUser',
+        { boxUUID: box.uuid, op: 'delete', guids: users.map(u => u.id), stationId: box.stationId },
+        (err, res) => {
+          console.log('res', res)
+          if (err) openSnackBar(i18n.__('Remove Users From Box Failed'))
+          else openSnackBar(i18n.__('Remove Users From Box Success'))
+          this.setState({ delUser: false, loading: false })
+          refresh()
+        }
+      )
     }
 
     this.toggle = type => this.setState({ [type]: !this.state[type] })
@@ -153,7 +163,7 @@ class BoxDetail extends React.Component {
   }
 
   render() {
-    const { box, primaryColor, guid, friends, refresh, openSnackBar, apis } = this.props
+    const { box, primaryColor, guid, refresh, openSnackBar, apis, getUsers } = this.props
     console.log('BoxDetail', this.props)
     if (!box) return (<div style={{ height: 64, backgroundColor: primaryColor, filter: 'brightness(0.9)' }} />)
 
@@ -218,11 +228,11 @@ class BoxDetail extends React.Component {
             this.state.addUser &&
             <UserSelect
               fire={this.addUser}
-              defaultUsers={box.users.map(u => friends.find(f => f.global.id === u)).filter(u => !!u)}
+              defaultUsers={box.users.map(u => u.id)}
               primaryColor={primaryColor}
               actionLabel={i18n.__('Invite')}
               title={i18n.__('Invite User to Box')}
-              users={friends}
+              getUsers={getUsers}
             />
           }
         </DialogOverlay>
@@ -236,7 +246,7 @@ class BoxDetail extends React.Component {
               primaryColor={primaryColor}
               actionLabel={i18n.__('Delete')}
               title={i18n.__('Remove User From Box')}
-              users={box.users.filter(u => u !== guid)}
+              users={box.users.filter(u => u.id !== guid)}
             />
           }
         </DialogOverlay>
@@ -250,6 +260,7 @@ class BoxDetail extends React.Component {
               primaryColor={primaryColor}
               boxUUID={box.uuid}
               apis={apis}
+              stationId={box.stationId}
             />
           }
         </DialogOverlay>

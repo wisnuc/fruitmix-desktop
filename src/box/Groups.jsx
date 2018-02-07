@@ -41,7 +41,7 @@ class Groups extends React.Component {
 
     this.newBox = (users) => {
       const stationId = this.props.station.id
-      const args = { name: '', users: [this.props.guid, ...(users.map(u => u.global.id))], stationId }
+      const args = { name: '', users: [this.props.guid, ...(users.map(u => u.id))], stationId }
       this.props.apis.pureRequest('createBox', args, (err, res) => {
         console.log('this.newBox', args, err, res)
         this.setState({ newBox: false })
@@ -189,7 +189,7 @@ class Groups extends React.Component {
   }
 
   render() {
-    const { boxes, currentBox, station, guid, tweets, ipcRenderer, apis, primaryColor, refresh, openSnackBar, friends } = this.props
+    const { boxes, currentBox, station, guid, tweets, ipcRenderer, apis, primaryColor, refresh, openSnackBar, getUsers } = this.props
     const boxH = boxes && Math.min(window.innerHeight - 106, boxes.length * 72) || 0
     const boxUUID = currentBox && currentBox.uuid
     const stationId = currentBox && currentBox.stationId
@@ -303,11 +303,11 @@ class Groups extends React.Component {
             this.state.newBox &&
             <UserSelect
               fire={this.newBox}
-              defaultUsers={[friends.find(f => (f.global.id === guid))]}
+              defaultUsers={[guid]}
               primaryColor={primaryColor}
               actionLabel={i18n.__('Create')}
               title={i18n.__('Create New Box')}
-              users={friends}
+              getUsers={getUsers}
             />
             }
         </DialogOverlay>
