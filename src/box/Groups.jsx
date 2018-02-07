@@ -59,7 +59,7 @@ class Groups extends React.Component {
       console.log('this.localUpload', args)
       const { type, comment, boxUUID } = args
       const session = UUID.v4()
-      this.props.ipcRenderer.send('BOX_UPLOAD', { session, type, comment, boxUUID, bToken: this.props.boxToken.token })
+      this.props.ipcRenderer.send('BOX_UPLOAD', Object.assign({ session, wxToken: this.props.wxToken }, args))
     }
 
     this.onLocalFinish = (event, args) => {
@@ -145,7 +145,17 @@ class Groups extends React.Component {
                 { name || i18n.__('Group Chat (%d)', users.length) }
               </div>
             </div>
-            <div style={{ height: 24, fontSize: 14, display: 'flex', alignItems: 'center', color: 'rgba(0,0,0,.54)' }}>
+            <div
+              style={{
+                width: 144,
+                height: 24,
+                fontSize: 14,
+                color: 'rgba(0,0,0,.54)',
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis'
+              }}
+            >
               { lcomment }
             </div>
           </div>
@@ -170,6 +180,7 @@ class Groups extends React.Component {
     const { boxes, currentBox, guid, tweets, ipcRenderer, apis, primaryColor, refresh, openSnackBar, friends } = this.props
     const boxH = boxes && Math.min(window.innerHeight - 106, boxes.length * 72) || 0
     const boxUUID = currentBox && currentBox.uuid
+    const stationId = currentBox && currentBox.stationId
     return (
       <div
         style={{
@@ -224,6 +235,7 @@ class Groups extends React.Component {
           guid={guid}
           tweets={tweets}
           boxUUID={boxUUID}
+          stationId={stationId}
           ipcRenderer={ipcRenderer}
           apis={apis}
         />
@@ -233,6 +245,7 @@ class Groups extends React.Component {
           boxUUID &&
             <BoxUploadButton
               boxUUID={boxUUID}
+              stationId={stationId}
               toggleView={this.toggleView}
               localUpload={this.localUpload}
             />
@@ -244,6 +257,7 @@ class Groups extends React.Component {
               apis={apis}
               guid={guid}
               boxUUID={boxUUID}
+              stationId={stationId}
               refresh={refresh}
               ipcRenderer={ipcRenderer}
               primaryColor={primaryColor}
@@ -258,6 +272,7 @@ class Groups extends React.Component {
               apis={apis}
               guid={guid}
               boxUUID={boxUUID}
+              stationId={stationId}
               refresh={refresh}
               ipcRenderer={ipcRenderer}
               primaryColor={primaryColor}

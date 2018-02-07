@@ -15,8 +15,9 @@ class BoxUploadButton extends React.Component {
       } else {
         const type = 'list'
         const comment = '不知疲倦的翻越， 每一座山丘'
-        const boxUUID = this.props.boxUUID
-        this.props.localUpload({ type, comment, boxUUID })
+        const boxUUID = this.props.box.uuid
+        const stationId = this.props.box.stationId
+        this.props.localUpload({ type, comment, boxUUID, stationId })
         this.setState({ open: false })
       }
     }

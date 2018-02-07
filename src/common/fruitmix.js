@@ -13,22 +13,30 @@ class Fruitmix extends EventEmitter {
     this.userUUID = userUUID
     this.token = token
     this.bToken = null // box Token
+    this.wxToken = null // stored weChat Token
     this.stationID = stationID
+
+    this.update = (name, data, next) => { // update state, not emit
+      this[name] = data
+      if (typeof next === 'function') next()
+    }
 
     this.state = {
       address,
       userUUID,
       token,
       stationID,
+      update: this.update,
       request: this.request.bind(this),
       requestAsync: this.requestAsync.bind(this),
       pureRequest: this.pureRequest.bind(this),
       pureRequestAsync: this.pureRequestAsync.bind(this)
     }
 
+
     this.reqCloud = (ep, data, type) => {
       const url = `${address}/c/v1/stations/${this.stationID}/json`
-      const resource = new Buffer(`/${ep}`).toString('base64')
+      const resource = Buffer.from(`/${ep}`).toString('base64')
       // console.log('this.reqCloud', type, ep)
       if (type === 'GET') return request.get(url).set('Authorization', this.token).query({ resource, method: type })
       if (data && data.op) {
@@ -44,8 +52,20 @@ class Fruitmix extends EventEmitter {
             return r.send(Object.assign({ resource, method: type, op: 'dup', toName: data.newName, fromName: data.oldName }))
         }
       }
-      if (data) return request.post(url).set('Authorization', this.token).send(Object.assign({ resource, method: type }, data))
-      return request.post(url).set('Authorization', this.token).send(Object.assign({ resource, method: type }))
+      return request.post(url).set('Authorization', this.token).send(Object.assign({ resource, method: type }, data))
+    }
+
+    this.creq = (ep, method, stationId, data) => {
+      console.log('this.creq', ep, method, stationId, data)
+      if (stationId) {
+        const url = `${cloudAddress}/c/v1/stations/${stationId}/json`
+        const resource = Buffer.from(`/${ep}`).toString('base64')
+        if (method === 'GET') return request.get(url).set('Authorization', this.wxToken).query({ resource, method })
+        return request.post(url).set('Authorization', this.wxToken).send(Object.assign({ resource, method }, data))
+      }
+      return request
+        .get(`${cloudAddress}/c/v1/${ep}`)
+        .set('Authorization', this.wxToken)
     }
   }
 
@@ -100,36 +120,11 @@ class Fruitmix extends EventEmitter {
       .set('Authorization', `JWT ${this.token}`)
   }
 
-  cget(ep) {
-    if (this.stationID) return this.reqCloud(ep, null, 'GET')
-    return request
-      .get(`http://${this.address}:3000/${ep}`)
-      .set('Authorization', `JWT ${this.bToken} ${this.token}`)
-  }
- 
-  lget(ep) {
-    console.log('lget', `${cloudAddress}/c/v1/${ep}`)
-    return request
-      .get(`${cloudAddress}/c/v1/${ep}`)
-      .set('Authorization', this.token)
-  }
-
   apost(ep, data) {
     if (this.stationID) return this.reqCloud(ep, data, 'POST')
     const r = request
-      .post(`${cloudAddress}:3000/${ep}`)
-      .set('Authorization', `JWT ${this.token}`)
-
-    return typeof data === 'object'
-      ? r.send(data)
-      : r
-  }
-
-  cpost(ep, data) {
-    if (this.stationID) return this.reqCloud(ep, data, 'POST')
-    const r = request
       .post(`http://${this.address}:3000/${ep}`)
-      .set('Authorization', `JWT ${this.bToken} ${this.token}`)
+      .set('Authorization', `JWT ${this.token}`)
 
     return typeof data === 'object'
       ? r.send(data)
@@ -141,17 +136,6 @@ class Fruitmix extends EventEmitter {
     const r = request
       .patch(`http://${this.address}:3000/${ep}`)
       .set('Authorization', `JWT ${this.token}`)
-
-    return typeof data === 'object'
-      ? r.send(data)
-      : r
-  }
-
-  cpatch(ep, data) {
-    if (this.stationID) return this.reqCloud(ep, data, 'PATCH')
-    const r = request
-      .patch(`http://${this.address}:3000/${ep}`)
-      .set('Authorization', `JWT ${this.bToken} ${this.token}`)
 
     return typeof data === 'object'
       ? r.send(data)
@@ -174,17 +158,6 @@ class Fruitmix extends EventEmitter {
     const r = request
       .del(`http://${this.address}:3000/${ep}`)
       .set('Authorization', `JWT ${this.token}`)
-
-    return typeof data === 'object'
-      ? r.send(data)
-      : r
-  }
-
-  cdel(ep, data) {
-    if (this.stationID) return this.reqCloud(ep, data, 'DELETE')
-    const r = request
-      .del(`http://${this.address}:3000/${ep}`)
-      .set('Authorization', `JWT ${this.bToken} ${this.token}`)
 
     return typeof data === 'object'
       ? r.send(data)
@@ -402,9 +375,11 @@ class Fruitmix extends EventEmitter {
         break
 
       /* Box API */
+      /*
       case 'boxToken':
         r = this.aget('cloudToken').query({ guid: args.guid })
         break
+      */
 
       default:
         break
@@ -503,56 +478,60 @@ class Fruitmix extends EventEmitter {
 
       /* box API */
       case 'createBox':
-        r = this.cpost('boxes', { name: args.name, users: args.users })
+        r = this.creq('boxes', 'POST', args.stationId, { name: args.name, users: args.users })
+        isCloud = true
         break
 
       case 'box':
-        if (this.stationID) r = this.lget(`boxes/${args.uuid}`)
-        else r = this.cget(`boxes/${args.uuid}`)
+        r = this.creq(`boxes/${args.uuid}`, 'GET')
+        isCloud = true
         break
 
       case 'boxes':
-        if (this.stationID) r = this.lget('boxes')
-        else r = this.cget('boxes')
+        r = this.creq('boxes', 'GET')
+        isCloud = true
         break
 
       case 'delBox':
-        r = this.cdel(`boxes/${args.boxUUID}`)
+        r = this.creq(`boxes/${args.boxUUID}`, 'DELETE', args.stationId)
+        isCloud = true
         break
 
       case 'tweets':
-        r = this.cget(`boxes/${args.boxUUID}/tweets`).query({ first: args.first, last: args.last, count: args.count, metadata: true })
+        r = this.creq(`boxes/${args.boxUUID}/tweets`, 'GET', args.stationId)
+          .query({ first: args.first, last: args.last, count: args.count, metadata: true })
+        isCloud = true
         break
 
       case 'createTweet':
-        r = this.cpost(`boxes/${args.boxUUID}/tweets`, { comment: args.comment })
+        r = this.creq(`boxes/${args.boxUUID}/tweets`, 'POST', args.station, { comment: args.comment })
+        isCloud = true
         break
 
       case 'delTweet':
-        r = this.cdel(`boxes/${args.boxUUID}/tweets`, { indexArr: args.indexs })
+        r = this.creq(`boxes/${args.boxUUID}/tweets`, 'DELETE', args.station, { indexArr: args.indexs })
+        isCloud = true
         break
 
-      case 'nasTweets':
-        if (this.stationID) {
-          const ep = `boxes/${args.boxUUID}/tweets`
-          const url = `${this.address}/c/v1/stations/${this.stationID}/pipe`
-          const resource = Buffer.from(`/${ep}`).toString('base64')
-          r = request.post(url).set('Authorization', this.token).field('manifest', JSON.stringify({
-            resource, method: 'POST', comment: args.comment, type: args.type, indrive: args.list
-          }))
-        } else {
-          r = this.cpost(`boxes/${args.boxUUID}/tweets`)
-            .field('list', JSON.stringify({ comment: args.comment, type: args.type, indrive: args.list }))
-        }
-
+      case 'nasTweets': {
+        const ep = `boxes/${args.boxUUID}/tweets`
+        const url = `${cloudAddress}/c/v1/stations/${args.stationId}/pipe`
+        const resource = Buffer.from(`/${ep}`).toString('base64')
+        r = request.post(url).set('Authorization', this.wxToken).field('manifest', JSON.stringify({
+          resource, method: 'POST', comment: args.comment, type: args.type, indrive: args.list
+        }))
+        isCloud = true
         break
+      }
 
       case 'handleBoxUser':
-        r = this.cpatch(`boxes/${args.boxUUID}`, { users: { op: args.op, value: args.guids } })
+        r = this.creq(`boxes/${args.boxUUID}`, 'PATCH', args.stationId, { users: { op: args.op, value: args.guids } })
+        isCloud = true
         break
 
       case 'boxName':
-        r = this.cpatch(`boxes/${args.boxUUID}`, { name: args.name })
+        r = this.creq(`boxes/${args.boxUUID}`, 'PATCH', args.stationId, { name: args.name })
+        isCloud = true
         break
 
       default:

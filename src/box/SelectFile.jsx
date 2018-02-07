@@ -71,6 +71,7 @@ class SelectNas extends React.Component {
         comment: this.state.comment || '',
         type: 'list',
         boxUUID: this.props.boxUUID,
+        stationId: this.props.stationId,
         list: [...this.selected].map(([k, v]) => ({ type: 'file', filename: v.name, driveUUID: v.driveUUID, dirUUID: v.dirUUID }))
       }
       this.props.apis.pureRequest('nasTweets', args, (err, res) => {

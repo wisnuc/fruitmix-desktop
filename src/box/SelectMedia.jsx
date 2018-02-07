@@ -140,6 +140,7 @@ class SelectMedia extends React.Component {
         comment: '',
         type: 'list',
         boxUUID: this.props.boxUUID,
+        stationId: this.props.stationId,
         list: this.state.selectedItems.map(d => ({ type: 'media', sha256: d }))
       }
 
