@@ -94,7 +94,8 @@ class WeChatBind extends React.Component {
           debug('getWechatToken', res)
           this.userInfo = res.user
           this.guid = this.userInfo.id
-          this.props.apis.pureRequest('fillTicket', { ticketId: this.ticketId, token: res.token }, (err) => {
+          this.token = res.token
+          this.props.apis.pureRequest('fillTicket', { ticketId: this.ticketId, token: this.token }, (err) => {
             if (err) {
               debug('fillTicket error', err)
               this.setState({ error: 'fillTicket', status: '' })
@@ -137,7 +138,7 @@ class WeChatBind extends React.Component {
         } else {
           debug('this.confirm this.userInfo', this.userInfo, this.props.account, this.props)
 
-          this.props.ipcRenderer.send('UPDATE_USER_CONFIG', this.props.account.uuid, { weChat: this.userInfo })
+          this.props.ipcRenderer.send('UPDATE_USER_CONFIG', this.props.account.uuid, { weChat: this.userInfo, wxToken: this.token })
           setTimeout(() => this.setState({ status: 'success', error: '' }), 500)
         }
       })

@@ -111,8 +111,6 @@ class WechatLogin extends React.Component {
           },
           mdev: { address: lanip, domain: 'local', stationID, stationName }
         })
-        this.props.ipcRenderer.send('UPDATE_USER_CONFIG', user.uuid, { weChat: this.state.wxData.user })
-        this.done('LOGIN', this.props.selectedDevice, user)
       } else {
         debug('no available lanip', this.props.selectedDevice)
         Object.assign(this.props.selectedDevice, {
@@ -123,9 +121,9 @@ class WechatLogin extends React.Component {
           },
           mdev: { address: 'http://10.10.9.87:4000', domain: 'remote', lanip: ips[0], stationID, stationName }
         })
-        this.props.ipcRenderer.send('UPDATE_USER_CONFIG', user.uuid, { weChat: this.state.wxData.user })
-        return this.done('LOGIN', this.props.selectedDevice, user)
       }
+      this.props.ipcRenderer.send('UPDATE_USER_CONFIG', user.uuid, { weChat: this.state.wxData.user, wxToken: token })
+      this.done('LOGIN', this.props.selectedDevice, user)
     }
 
     this.autologin = () => {
