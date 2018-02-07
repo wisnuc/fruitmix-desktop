@@ -18,8 +18,8 @@ class NewName extends React.PureComponent {
 
     this.fire = () => {
       this.setState({ loading: true })
-      const { apis, onRequestClose, openSnackBar, refresh, boxUUID } = this.props
-      const args = { name: this.state.value, boxUUID }
+      const { apis, onRequestClose, openSnackBar, refresh, boxUUID, stationId } = this.props
+      const args = { name: this.state.value, boxUUID, stationId }
       apis.pureRequest('boxName', args, (err) => {
         if (err) {
           console.log('Change Group Name Error', err)

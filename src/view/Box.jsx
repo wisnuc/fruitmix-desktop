@@ -66,7 +66,7 @@ class Box extends Base {
       const callback = (err, res, box) => {
         count -= 1
         if (!err && res) {
-          const getAuthor = id => box.users.find(u => u.id === id)
+          const getAuthor = id => box.users.find(u => u.id === id) || { id, nickName: '已退群' }
           tweets.push(...res.filter(t => t.list && t.list.length)
             .map(t => Object.assign({ box, author: getAuthor(t.tweeter.id) }, t)))
         }
