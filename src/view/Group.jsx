@@ -82,6 +82,8 @@ class Group extends Base {
     const userData = global.config.users.find(u => u.userUUID === userUUID)
     const wxToken = userData && userData.wxToken
     this.guid = apis.account && apis.account.data && apis.account.data.global.id
+    const info = this.ctx.props.selectedDevice.info && this.ctx.props.selectedDevice.info.data
+    this.station = info && info.connectState === 'CONNECTED' && info
     if (wxToken && this.guid) this.ctx.props.apis.update('wxToken', wxToken, this.refresh)
     else alert('no wxToken')
   }
@@ -146,6 +148,7 @@ class Group extends Base {
       openSnackBar={openSnackBar}
       refresh={this.refresh}
       guid={this.guid}
+      station={this.station}
       friends={this.ctx.props.apis.users.data.filter(u => !!u.global) || []}
     />)
   }
