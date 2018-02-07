@@ -106,11 +106,18 @@ class Fruitmix extends EventEmitter {
       .get(`http://${this.address}:3000/${ep}`)
       .set('Authorization', `JWT ${this.bToken} ${this.token}`)
   }
+ 
+  lget(ep) {
+    console.log('lget', `${cloudAddress}/c/v1/${ep}`)
+    return request
+      .get(`${cloudAddress}/c/v1/${ep}`)
+      .set('Authorization', this.token)
+  }
 
   apost(ep, data) {
     if (this.stationID) return this.reqCloud(ep, data, 'POST')
     const r = request
-      .post(`http://${this.address}:3000/${ep}`)
+      .post(`${cloudAddress}:3000/${ep}`)
       .set('Authorization', `JWT ${this.token}`)
 
     return typeof data === 'object'
@@ -500,11 +507,13 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'box':
-        r = this.cget(`boxes/${args.uuid}`)
+        if (this.stationID) r = this.lget(`boxes/${args.uuid}`)
+        else r = this.cget(`boxes/${args.uuid}`)
         break
 
       case 'boxes':
-        r = this.cget('boxes')
+        if (this.stationID) r = this.lget('boxes')
+        else r = this.cget('boxes')
         break
 
       case 'delBox':

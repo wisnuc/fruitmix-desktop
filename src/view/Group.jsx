@@ -35,9 +35,13 @@ class Group extends Base {
 
     this.processBox = (d) => {
       if (!d || !d[0]) return []
+
       d.forEach((b) => {
-        b.ltime = b.ctime
-        b.lcomment = 'last tweet\'s comment'
+        b.ltime = b.tweet.ctime
+        const list = b.tweet.list
+        const isMedia = list && list.length && list.every(l => l.metadata)
+        b.lcomment = isMedia ? `[${i18n.__('%s Photos', list.length)}]` : list && list.length
+          ? `[${i18n.__('%s Files', list.length)}]` : b.tweet.comment
       })
       d.sort((a, b) => (b.ltime - a.ltime))
       return d
