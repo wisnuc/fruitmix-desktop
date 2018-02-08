@@ -1,6 +1,7 @@
 import React from 'react'
 import i18n from 'i18n'
-import { Checkbox, Divider } from 'material-ui'
+import { Checkbox, Divider, CircularProgress } from 'material-ui'
+import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import FlatButton from '../common/FlatButton'
 
 class UserSelect extends React.PureComponent {
@@ -24,7 +25,7 @@ class UserSelect extends React.PureComponent {
       this.props.getUsers((error, users) => {
         if (error) {
           console.log('this.getUsers error', error)
-          this.setState({ loading: false, error })
+          this.setState({ loading: false, error: 'getUsers' })
         } else {
           const defaultUsers = this.props.defaultUsers.map(id => users.find(u => u.id === id)).filter(u => !!u)
           this.setState({ defaultUsers, users, loading: false })
@@ -62,10 +63,40 @@ class UserSelect extends React.PureComponent {
     if (!this.props.users) this.getUsers()
   }
 
+  renderError() {
+    return (
+      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
+        <div
+          style={{
+            width: 360,
+            height: 180,
+            borderRadius: 24,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column'
+          }}
+        >
+          <ErrorIcon style={{ height: 64, width: 64, color: 'rgba(0,0,0,0.54)' }} />
+          <div style={{ height: 8 }} />
+          <div style={{ fontSize: 20, color: 'rgba(0,0,0,0.54)' }}> { i18n.__('Load Friends Error Text') } </div>
+        </div>
+      </div>
+    )
+  }
+
+  renderLoading(size) {
+    return (
+      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
+        <CircularProgress size={size || 64} />
+      </div>
+    )
+  }
+
   render() {
     console.log('UserSelect.jsx', this.props, this.state)
     const { title, onRequestClose, actionLabel, primaryColor } = this.props
-    const { users, defaultUsers, loading, selected } = this.state
+    const { users, defaultUsers, loading, selected, error } = this.state
     const allSelected = users && defaultUsers && !loading &&
       this.state.selected.length === (users.length - defaultUsers.length) // TODO when users not includes defaultUsers
 
@@ -88,7 +119,7 @@ class UserSelect extends React.PureComponent {
         </div>
 
         {
-          loading ? 'loading' :
+          error ? this.renderError() : loading ? this.renderLoading(32) :
             <div style={{ height: 40 * users.length + 48 }}>
               <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key="all" >
                 <Checkbox
