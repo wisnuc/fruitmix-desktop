@@ -28,10 +28,12 @@ const readAsync = async (entries, args) => {
 
 /* handler */
 const uploadHandle = (event, args) => {
-	const { session, boxUUID } = args
-  const dialogType = 'openFile'
+	const { session, box } = args
+	const boxUUID = box.uuid
+	// only allow upload single File
   // const dialogType = type === 'directory' ? 'openDirectory' : 'openFile'
-  dialog.showOpenDialog(getMainWindow(), { properties: [dialogType, 'multiSelections'] }, (entries) => {
+	// dialog.showOpenDialog(getMainWindow(), { properties: [dialogType, 'multiSelections'] }, (entries) => {
+	dialog.showOpenDialog(getMainWindow(), { properties: ['openFile'] }, (entries) => {
     if (!entries || !entries.length) return
     readAsync(entries, args).then(() => {
       getMainWindow().webContents.send('BOX_UPLOAD_RESULT', { session, boxUUID, success: true })

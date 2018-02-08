@@ -69,9 +69,9 @@ class Groups extends React.Component {
 
     this.localUpload = (args) => {
       console.log('this.localUpload', args)
-      const { type, comment, boxUUID } = args
+      const { type, comment, box } = args
       const session = UUID.v4()
-      this.props.ipcRenderer.send('BOX_UPLOAD', Object.assign({ session, wxToken: this.props.wxToken }, args))
+      this.props.ipcRenderer.send('BOX_UPLOAD', Object.assign({ session }, args))
     }
 
     this.onLocalFinish = (event, args) => {
@@ -256,7 +256,7 @@ class Groups extends React.Component {
         {
           boxUUID &&
             <BoxUploadButton
-              boxUUID={boxUUID}
+              box={currentBox}
               stationId={stationId}
               toggleView={this.toggleView}
               localUpload={this.localUpload}
