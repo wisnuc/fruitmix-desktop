@@ -28,10 +28,11 @@ class Group extends Base {
     this.getTweets = (box) => {
       this.setState({ tweets: null })
       const getAuthor = id => box.users.find(u => u.id === id) || { id, nickName: '已退群' }
+      console.log('this.getTweets', box)
       this.ctx.props.apis.pureRequest('tweets', { boxUUID: box.uuid, stationId: box.stationId }, (err, tweets) => {
         console.log('tweets', tweets)
         if (!err) {
-          this.setState({ tweets: (tweets || []).map(t => Object.assign({ author: getAuthor(t.tweeter.id) }, t)), currentBox: box })
+          this.setState({ tweets: (tweets || []).map(t => Object.assign({ author: getAuthor(t.tweeter.id), box }, t)), currentBox: box })
         } else console.log('get tweets error', err, tweets)
       })
     }
@@ -53,6 +54,7 @@ class Group extends Base {
           b.ltime = ctime
           b.lcomment = i18n.__('New Group Text')
         }
+        b.wxToken = this.wxToken
       })
       d.sort((a, b) => (b.ltime - a.ltime))
       return d
@@ -83,11 +85,11 @@ class Group extends Base {
     console.log('navEnter', apis)
     const { userUUID } = apis
     const userData = global.config.users.find(u => u.userUUID === userUUID)
-    const wxToken = userData && userData.wxToken
+    this.wxToken = userData && userData.wxToken
     this.guid = apis.account && apis.account.data && apis.account.data.global.id
     const info = this.ctx.props.selectedDevice.info && this.ctx.props.selectedDevice.info.data
     this.station = info && info.connectState === 'CONNECTED' && info
-    if (wxToken && this.guid) this.ctx.props.apis.update('wxToken', wxToken, this.refresh)
+    if (this.wxToken && this.guid) this.ctx.props.apis.update('wxToken', this.wxToken, this.refresh)
     else alert('no wxToken')
   }
 

@@ -34,8 +34,9 @@ class Inbox extends React.Component {
     super(props)
 
     this.state = {
-      selected: -1,
-      hover: -1
+      box: {},
+      hover: -1,
+      selected: -1
     }
 
     this.handleResize = () => this.forceUpdate()
@@ -66,7 +67,7 @@ class Inbox extends React.Component {
 
     this.lookPhotoDetail = ({ list, digest, box }) => {
       const seqIndex = list.findIndex(item => item.sha256 === digest)
-      this.setState({ openDetail: true, seqIndex, list, boxUUID: box.uuid })
+      this.setState({ openDetail: true, seqIndex, list, box })
     }
 
     this.startDownload = () => {
@@ -74,7 +75,7 @@ class Inbox extends React.Component {
 
       const photos = list.map(digest => this.state.list.find(photo => photo.sha256 === digest))
         .map(photo => ({
-          boxUUID: this.state.boxUUID,
+          station: { boxUUID: this.state.box.uuid, stationId: this.state.box.stationId, wxToken: this.state.box.wxToken },
           name: getName(Object.assign({ hash: photo.sha256 }, photo.metadata)),
           size: photo.size,
           type: 'file',
@@ -292,7 +293,7 @@ class Inbox extends React.Component {
 
         {/* PhotoDetail */}
         <DetailContainer
-          boxUUID={this.state.boxUUID}
+          station={{ boxUUID: this.state.box.uuid, stationId: this.state.box.stationId, wxToken: this.state.box.wxToken }}
           onRequestClose={() => this.setState({ openDetail: false })}
           open={this.state.openDetail}
           style={{ position: 'fixed', left: 0, top: 0, width: '100%', height: '100%' }}

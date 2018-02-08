@@ -20,7 +20,7 @@ class Worker extends EventEmitter {
     this.id = id
     this.state = 'PENDDING'
 
-    this.serverDownload = (endpoint, qs, downloadPath, name, callback) => {
+    this.serverDownload = (endpoint, qs, downloadPath, name, station, callback) => {
       const tmpPath = path.join(getTmpTransPath(), UUID.v4())
       const dst = path.join(downloadPath, name)
 
@@ -45,7 +45,7 @@ class Worker extends EventEmitter {
 
       this.stream = stream
 
-      this.requestHandler = new DownloadFile(endpoint, qs, name, 0, 0, stream, (error) => {
+      this.requestHandler = new DownloadFile(endpoint, qs, name, 0, 0, stream, station, (error) => {
         if (error) callback(error)
         this.requestHandler = null
         this.stream = null
@@ -102,14 +102,14 @@ class Worker extends EventEmitter {
 }
 
 class GetThumbTask extends Worker {
-  constructor(session, digest, dirpath, height, width, boxUUID) {
+  constructor(session, digest, dirpath, height, width, station) {
     super(session)
     this.session = session
     this.digest = digest
     this.dirpath = dirpath
     this.height = height
     this.width = width
-    this.boxUUID = boxUUID
+    this.station = station
     this.cacheName = `${this.digest}&height=${this.height}&width=${this.width}`
   }
 
@@ -130,9 +130,9 @@ class GetThumbTask extends Worker {
       modifier: 'caret',
       width: this.width,
       height: this.height,
-      boxUUID: this.boxUUID
+      boxUUID: this.station && this.station.boxUUID
     }
-    this.serverDownloadAsync(`media/${this.digest}`, qs, this.dirpath, this.cacheName).then((data) => {
+    this.serverDownloadAsync(`media/${this.digest}`, qs, this.dirpath, this.cacheName, this.station).then((data) => {
       this.finish(path.join(this.dirpath, this.cacheName))
     }).catch((err) => {
       console.log(`fail download of digest:${this.digest} of session: ${this.session} err: ${err}`)
@@ -143,12 +143,12 @@ class GetThumbTask extends Worker {
 }
 
 class GetImageTask extends Worker {
-  constructor(session, digest, dirpath, boxUUID) {
+  constructor(session, digest, dirpath, station) {
     super(session)
     this.session = session
     this.digest = digest
     this.dirpath = dirpath
-    this.boxUUID = boxUUID
+    this.station = station
   }
 
   run() {
@@ -162,8 +162,8 @@ class GetImageTask extends Worker {
 
   request() {
     if (this.state !== 'RUNNING') return
-    const qs = { alt: 'data', boxUUID: this.boxUUID }
-    this.serverDownloadAsync(`media/${this.digest}`, qs, this.dirpath, this.digest)
+    const qs = { alt: 'data', boxUUID: this.station && this.station.boxUUID }
+    this.serverDownloadAsync(`media/${this.digest}`, qs, this.dirpath, this.digest, this.station)
       .then((data) => {
         this.finish(path.join(this.dirpath, this.digest))
       })
@@ -181,8 +181,8 @@ class MediaFileManager {
     this.imageTaskLimit = 10
   }
 
-  createThumbTask(session, digest, dirpath, height, width, boxUUID) {
-    const task = new GetThumbTask(session, digest, dirpath, height, width, boxUUID)
+  createThumbTask(session, digest, dirpath, height, width, station) {
+    const task = new GetThumbTask(session, digest, dirpath, height, width, station)
     task.on('finish', (data) => {
       getMainWindow().webContents.send('getThumbSuccess', session, data)
       this.schedule()
@@ -195,8 +195,8 @@ class MediaFileManager {
     this.schedule()
   }
 
-  createImageTask(session, digest, dirpath, boxUUID) {
-    const task = new GetImageTask(session, digest, dirpath, boxUUID)
+  createImageTask(session, digest, dirpath, station) {
+    const task = new GetImageTask(session, digest, dirpath, station)
     task.on('finish', (data) => {
       getMainWindow().webContents.send('donwloadMediaSuccess', session, data)
       this.schedule()
@@ -247,16 +247,16 @@ const mediaFileManager = new MediaFileManager()
 const getThumbPath = () => store.getState().config.thumbPath
 const getImagePath = () => store.getState().config.imagePath
 
-ipcMain.on('mediaShowThumb', (event, session, digest, height, width, boxUUID) => {
-  mediaFileManager.createThumbTask(session, digest, getThumbPath(), height, width, boxUUID)
+ipcMain.on('mediaShowThumb', (event, session, digest, height, width, station) => {
+  mediaFileManager.createThumbTask(session, digest, getThumbPath(), height, width, station)
 })
 
 ipcMain.on('mediaHideThumb', (event, session) => {
   mediaFileManager.abort(session, 'thumb', () => {})
 })
 
-ipcMain.on('mediaShowImage', (event, session, digest, boxUUID) => {
-  mediaFileManager.createImageTask(session, digest, getImagePath(), boxUUID)
+ipcMain.on('mediaShowImage', (event, session, digest, station) => {
+  mediaFileManager.createImageTask(session, digest, getImagePath(), station)
 })
 
 ipcMain.on('mediaHideImage', (event, session) => {

@@ -28,6 +28,7 @@ class Grid extends React.Component {
         <Thumb
           digest={digest}
           ipcRenderer={this.props.ipcRenderer}
+          station={this.props.station}
           height={size}
           width={size}
         />

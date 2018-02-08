@@ -59,9 +59,11 @@ class Tweets extends React.PureComponent {
     this.startDownload = () => {
       const list = [this.memoizeValue.downloadDigest]
 
+      const { stationId, wxToken } = this.props.box
+      const boxUUID = this.props.box.uuid
       const photos = list.map(digest => this.state.list.find(photo => photo.sha256 === digest))
         .map(photo => ({
-          boxUUID: this.props.boxUUID,
+          station: { boxUUID, stationId, wxToken },
           name: getName(Object.assign({ hash: photo.sha256 }, photo.metadata)),
           size: photo.size,
           type: 'file',
@@ -94,7 +96,9 @@ class Tweets extends React.PureComponent {
   }
 
   renderTweets({ index, key, style }) {
-    const { ctime, comment, uuid, author, list } = this.props.tweets[index]
+    const { ctime, comment, uuid, author, list, box } = this.props.tweets[index]
+    const { stationId, wxToken } = box
+    const boxUUID = box.uuid
     const isSelf = this.props.guid === author.id
     const isMedia = list && list.every(l => l.metadata)
     const isMany = list && list.length > 6
@@ -159,7 +163,7 @@ class Tweets extends React.PureComponent {
                           >
                             <Thumb
                               digest={sha256}
-                              boxUUID={this.props.boxUUID}
+                              station={{ boxUUID, stationId, wxToken }}
                               ipcRenderer={this.props.ipcRenderer}
                               height={w}
                               width={w}
@@ -217,7 +221,9 @@ class Tweets extends React.PureComponent {
   }
 
   render() {
-    const { tweets, boxUUID } = this.props
+    const { tweets, box } = this.props
+    const boxUUID = box && box.uuid
+    const { stationId, wxToken } = (box || {})
     console.log('tweets', tweets)
     const rowCount = tweets && tweets.length || 0
     let allHeight = 0
@@ -270,7 +276,7 @@ class Tweets extends React.PureComponent {
 
         {/* PhotoDetail */}
         <DetailContainer
-          boxUUID={this.props.boxUUID}
+          station={{ boxUUID, stationId, wxToken }}
           onRequestClose={() => this.setState({ openDetail: false })}
           open={this.state.openDetail}
           style={{ position: 'fixed', left: 0, top: 0, width: '100%', height: '100%' }}

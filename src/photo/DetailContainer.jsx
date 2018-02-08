@@ -477,11 +477,10 @@ class DetailContainerInline extends React.Component {
     const videoMagic = ['3GP', 'MP4', 'MOV']
     const isPhoto = photoMagic.includes(m)
     const isVideo = videoMagic.includes(m)
-    console.log('this.props.boxUUID', this.props.boxUUID)
     const props = {
       item,
       parent,
-      boxUUID: this.props.boxUUID,
+      station: this.props.station,
       apis: this.props.apis,
       ipcRenderer: this.props.ipcRenderer,
       updateContainerSize: this.updateContainerSize
@@ -634,7 +633,7 @@ class DetailContainerInline extends React.Component {
                     */}
 
                     { // not show hide or Retrieve button when in box view
-                      !this.props.boxUUID &&
+                      !this.props.station &&
                         <IconButton onTouchTap={() => this.toggleDialog('hideDialog')} tooltip={h ? i18n.__('Retrieve') : i18n.__('Hide')}>
                           { h ? <Visibility color="#FFF" /> : <VisibilityOff color="#FFF" /> }
                         </IconButton>
