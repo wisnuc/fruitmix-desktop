@@ -13,6 +13,8 @@ const debug = Debug('node:lib:server')
 const getTmpPath = () => store.getState().config.tmpPath
 const getTmpTransPath = () => store.getState().config.tmpTransPath
 
+const cloudAddress = 'http://10.10.9.87:4000'
+
 export const clearTmpTrans = () => {
   // console.log('clearTmpTrans', `${getTmpTransPath()}/*`)
   rimraf(`${getTmpTransPath()}/*`, e => e && console.log('clearTmpTrans error', e))
@@ -54,6 +56,13 @@ const adownload = (ep) => {
   return request
     .get(`http://${address}:3000/${ep}`)
     .set('Authorization', `JWT ${token}`)
+}
+
+const cdownload = (ep, station) => {
+  const { stationId, wxToken } = station
+  const url = `${cloudAddress}/c/v1/stations/${stationId}/pipe`
+  const resource = new Buffer(`/${ep}`).toString('base64')
+  return request.get(url).set('Authorization', wxToken).query({ resource, method: 'GET' })
 }
 
 const apost = (ep, data) => {
@@ -237,19 +246,20 @@ download a entire file or part of file
 */
 
 export class DownloadFile {
-  constructor(endpoint, qs, fileName, size, seek, stream, callback) {
+  constructor(endpoint, qs, fileName, size, seek, stream, station, callback) {
     this.endpoint = endpoint
     this.qs = qs
     this.fileName = fileName
     this.seek = seek || 0
     this.size = size
     this.stream = stream
+    this.station = station
     this.callback = callback
     this.handle = null
   }
 
   download() {
-    this.handle = adownload(this.endpoint)
+    this.handle = this.station ? cdownload(this.endpoint, this.station) : adownload(this.endpoint)
     if (this.size && this.size === this.seek) return setImmediate(() => this.finish(null))
     if (this.size) this.handle.set('Range', `bytes=${this.seek}-`)
     this.handle

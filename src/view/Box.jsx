@@ -39,6 +39,7 @@ class Box extends Base {
           b.ltime = ctime
           b.lcomment = i18n.__('New Group Text')
         }
+        b.wxToken = this.wxToken
       })
       d.sort((a, b) => (b.ltime - a.ltime))
       return d
@@ -100,9 +101,9 @@ class Box extends Base {
     console.log('navEnter', apis)
     const { userUUID } = apis
     const userData = global.config.users.find(u => u.userUUID === userUUID)
-    const wxToken = userData && userData.wxToken
+    this.wxToken = userData && userData.wxToken
     this.guid = apis.account && apis.account.data && apis.account.data.global.id
-    if (wxToken && this.guid) this.ctx.props.apis.update('wxToken', wxToken, this.refresh)
+    if (this.wxToken && this.guid) this.ctx.props.apis.update('wxToken', this.wxToken, this.refresh)
     else alert('no wxToken')
   }
 

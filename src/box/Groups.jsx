@@ -247,8 +247,7 @@ class Groups extends React.Component {
         <Tweets
           guid={guid}
           tweets={tweets}
-          boxUUID={boxUUID}
-          stationId={stationId}
+          box={currentBox}
           ipcRenderer={ipcRenderer}
           apis={apis}
         />

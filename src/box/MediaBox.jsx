@@ -169,7 +169,7 @@ class MediaBox extends React.PureComponent {
                 item.sha256 &&
                   <Thumb
                     digest={item.sha256}
-                    boxUUID={box.uuid}
+                    station={{ boxUUID: box.uuid, stationId: box.stationId, wxToken: box.wxToken }}
                     ipcRenderer={ipcRenderer}
                     height={height}
                     width={width}
@@ -251,7 +251,7 @@ class MediaBox extends React.PureComponent {
         <Grid
           items={list.map(l => l.sha256)}
           ipcRenderer={ipcRenderer}
-          boxUUID={box.uuid}
+          station={{ boxUUID: box.uuid, stationId: box.stationId, wxToken: box.wxToken }}
           action={digest => this.props.lookPhotoDetail({ digest, list, box })}
           num={5}
           size={140}
@@ -343,13 +343,14 @@ class MediaBox extends React.PureComponent {
     console.log('MediaBox', this.props)
     const { data, i, handleSelect, ipcRenderer } = this.props
     const { height, top, left, selected, tsd, wd, content } = data
-    const { type, comment, index, author, list, uuid, box, ctime } = content
+    const { type, comment, index, author, list, uuid, box, ctime, wxToken } = content
     const isMedia = list && list.every(l => l.metadata)
     const isMany = list && list.length > 6
     const hovered = this.state.hover
     const mediaArgs = {
       list,
       box,
+      wxToken,
       ipcRenderer,
       height: height - 88,
       width: selected ? 750 : 360,
