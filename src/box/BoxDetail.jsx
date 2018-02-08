@@ -135,6 +135,7 @@ class BoxDetail extends React.Component {
   }
 
   renderAvatar(user) {
+    console.log('renderAvatar', user)
     const onTouchTap = user.onTouchTap || (() => {})
     const { nickName, avatarUrl } = user
     return (
@@ -201,22 +202,23 @@ class BoxDetail extends React.Component {
         {/* data */}
         <div style={{ width: 312, padding: 24, overflow: 'auto' }}>
           { this.renderTitle(i18n.__('Group Members')) }
-          <div style={{ maxHeight: 400, height: 44 * Math.ceil(box.users.length / 3), position: 'relative' }}>
+          <div style={{ maxHeight: 400, height: 44 * Math.ceil((box.users.length + isOwner * 2) / 7), position: 'relative' }}>
             { box.users.map((u, i) => (i > 10 ? <div key={u.id} /> : this.renderAvatar(u))) }
             { isOwner && this.renderAction(AddIcon, () => this.setState({ addUser: true })) }
             { isOwner && this.renderAction(RemoveIcon, () => this.setState({ delUser: true })) }
           </div>
-          <div style={{ height: 24 }} />
+          <div style={{ height: 12 }} />
           { this.renderGroupName(box && box.name) }
           { this.renderDevice() }
-          { this.renderToggle(i18n.__('Mute Notifications'), true, () => {}) }
-          { isOwner && this.renderToggle(i18n.__('Need Confirm'), false, () => {}) }
+          {/* this.renderToggle(i18n.__('Mute Notifications'), true, () => {}) */}
+          {/* isOwner && this.renderToggle(i18n.__('Need Confirm'), false, () => {}) */}
 
+          <div style={{ height: 12 }} />
+          <Divider />
           {/* action */}
           <div style={{ height: 64, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <RaisedButton
+            <FlatButton
               secondary
-              style={{ width: '100%' }}
               label={isOwner ? i18n.__('Delete Box') : i18n.__('Leave Box')}
               onTouchTap={() => this.toggle('delBox')}
             />

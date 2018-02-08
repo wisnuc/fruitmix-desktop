@@ -7,16 +7,13 @@ import { IconButton } from 'material-ui'
 import PhotoIcon from 'material-ui/svg-icons/image/photo'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 
-import Base from './Base'
+import Box from './Box'
 import FlatButton from '../common/FlatButton'
 import { combineElement, removeElement } from '../common/array'
 import Groups from '../box/Groups'
 import BoxDetail from '../box/BoxDetail'
 
-/* increase limit of listeners of EventEmitter */
-ipcRenderer.setMaxListeners(1000)
-
-class Group extends Base {
+class Group extends Box {
   constructor(ctx) {
     super(ctx)
     this.state = {
@@ -37,29 +34,6 @@ class Group extends Base {
       })
     }
 
-    this.processBox = (d) => {
-      if (!d || !d[0]) return []
-
-      d.forEach((b) => {
-        const { tweet, ctime } = b
-        if (tweet) {
-          b.ltime = tweet.ctime
-          const list = tweet.list
-          const isMedia = list && list.length && list.every(l => l.metadata)
-          const comment = isMedia ? `[${i18n.__('%s Photos', list.length)}]` : list && list.length
-            ? `[${i18n.__('%s Files', list.length)}]` : tweet.comment
-          const nickName = b.users.find(u => u.id === tweet.tweeter).nickName
-          b.lcomment = `${nickName} : ${comment}`
-        } else {
-          b.ltime = ctime
-          b.lcomment = i18n.__('New Group Text')
-        }
-        b.wxToken = this.wxToken
-      })
-      d.sort((a, b) => (b.ltime - a.ltime))
-      return d
-    }
-
     this.refresh = () => {
       this.ctx.props.apis.pureRequest('boxes', null, (err, res) => {
         const boxes = Array.isArray(res) && res.filter(b => b && b.station && !!b.station.isOnline)
@@ -78,27 +52,8 @@ class Group extends Base {
     this.getUsers = next => this.ctx.props.apis.pureRequest('friends', { userId: this.guid }, next)
   }
 
-  willReceiveProps(nextProps) {
-  }
-
-  navEnter() {
-    const apis = this.ctx.props.apis
-    console.log('navEnter', apis)
-    const { userUUID } = apis
-    const userData = global.config.users.find(u => u.userUUID === userUUID)
-    this.wxToken = userData && userData.wxToken
-    this.guid = apis.account && apis.account.data && apis.account.data.global.id
-    const info = this.ctx.props.selectedDevice.info && this.ctx.props.selectedDevice.info.data
-    this.station = info && info.connectState === 'CONNECTED' && info
-    if (this.wxToken && this.guid) this.ctx.props.apis.update('wxToken', this.wxToken, this.refresh)
-    else alert('no wxToken')
-  }
-
-  navLeave() {
-  }
-
   navGroup() {
-    return 'box'
+    return 'group'
   }
 
   menuName() {
@@ -123,6 +78,20 @@ class Group extends Base {
 
   detailEnabled() {
     return true
+  }
+
+  renderTitle({ style }) {
+    return <div style={style}>{this.menuName()}</div>
+  }
+
+  renderNavigationMenu({ style, onTouchTap }) {
+    return (
+      <div style={style}>
+        <IconButton onTouchTap={onTouchTap}>
+          <NavigationMenu color="#FFF" />
+        </IconButton>
+      </div>
+    )
   }
 
   renderDetail({ style }) {

@@ -200,19 +200,27 @@ class NavDrawer extends React.Component {
           {/* this.renderGroup('file') */}
 
           <MenuItem
+            icon={views.box.menuIcon()}
+            text={i18n.__('Inboxes')}
+            primaryColor={primaryColor}
+            selected={views[nav].navGroup() === 'box'}
+            onTouchTap={() => navTo('box')}
+          />
+
+          <MenuItem
+            icon={views.box.menuIcon()}
+            text={i18n.__('Groups')}
+            primaryColor={primaryColor}
+            selected={views[nav].navGroup() === 'group'}
+            onTouchTap={() => navTo('group')}
+          />
+
+          <MenuItem
             icon={views.home.menuIcon()}
             text={i18n.__('Files')}
             primaryColor={primaryColor}
             selected={views[nav].navGroup() === 'file'}
             onTouchTap={() => navTo('home')}
-          />
-
-          <MenuItem
-            icon={views.box.menuIcon()}
-            text={i18n.__('Box')}
-            primaryColor={primaryColor}
-            selected={views[nav].navGroup() === 'box'}
-            onTouchTap={() => navTo('box')}
           />
 
           <MenuItem

@@ -117,7 +117,9 @@ class Groups extends React.Component {
               <Avatar
                 key={u.id}
                 src={u.avatarUrl}
-                style={{ position: 'absolute', width: r * 2, height: r * 2, top, left }}
+                style={{
+                  position: 'absolute', width: r * 2, height: r * 2, boxSizing: 'border-box', top, left, border: 'solid 1px #FFF'
+                }}
               />
             )
           })
@@ -199,8 +201,10 @@ class Groups extends React.Component {
       <div
         style={{
           position: 'relative',
-          width: '100%',
-          height: '100%',
+          width: 'calc(100% + 8px)',
+          height: 'calc(100% + 8px)',
+          marginLeft: -8,
+          marginTop: -8,
           display: 'flex',
           overflow: 'hidden',
           alignItems: 'center'
@@ -212,7 +216,7 @@ class Groups extends React.Component {
         <div style={{ width: 376, height: '100%', overflow: 'auto' }}>
           {
             !boxes ? this.renderLoading(32) : (
-              <div style={{ width: '100%', height: '100%', position: 'relative', backgroundColor: '#FAFAFA', overflow: 'hidden' }}>
+              <div style={{ width: '100%', height: '100%', position: 'relative', backgroundColor: '#FFF', overflow: 'hidden' }}>
                 <div style={{ height: 8 }} />
                 {/* new Box */}
                 <div style={{ marginLeft: 32, height: 24 }}>
