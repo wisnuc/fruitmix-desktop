@@ -1,7 +1,9 @@
 import React from 'react'
+import i18n from 'i18n'
 import Debug from 'debug'
 import UUID from 'uuid'
 import { CircularProgress } from 'material-ui'
+import ErrorIcon from 'material-ui/svg-icons/alert/error'
 
 const debug = Debug('component:photoApp:PhotoDetail')
 
@@ -9,13 +11,15 @@ class PhotoDetail extends React.Component {
   constructor(props) {
     super(props)
 
-    this.state = { filePath: '' }
+    this.state = { filePath: '', error: null }
 
     this.getRandomSrc = () => {
       this.session = UUID.v4()
       this.props.apis.pureRequest('randomSrc', { hash: this.props.item.hash }, (err, res) => {
-        if (err) console.log('randomSrc error', err)
-        else this.setState({ filePath: `http://${this.props.apis.address}:3000/media/random/${res.key}` })
+        if (err) {
+          this.setState({ error: 'randomSrc' })
+          console.log('randomSrc error', err)
+        } else this.setState({ filePath: `http://${this.props.apis.address}:3000/media/random/${res.key}` })
         this.session = ''
       })
     }
@@ -76,6 +80,29 @@ class PhotoDetail extends React.Component {
     return (<CircularProgress size={64} thickness={5} />)
   }
 
+  renderError() {
+    return (
+      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
+        <div
+          style={{
+            width: 360,
+            height: 180,
+            borderRadius: 24,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            backgroundColor: '#EEEEEE'
+          }}
+        >
+          <ErrorIcon style={{ height: 64, width: 64, color: 'rgba(0,0,0,0.54)' }} />
+          <div style={{ height: 8 }} />
+          <div style={{ fontSize: 20, color: 'rgba(0,0,0,0.54)' }}> { i18n.__('Load Video Error Text') } </div>
+        </div>
+      </div>
+    )
+  }
+
   render() {
     // debug('render!!!', this.props, this.state)
     if (!this.props.item || !this.props.item.hash) return (<div />)
@@ -91,7 +118,7 @@ class PhotoDetail extends React.Component {
         }}
       >
         {/* main video */}
-        { this.renderKnownVideo() }
+        { this.state.error ? this.renderError() : this.renderKnownVideo() }
       </div>
     )
   }
