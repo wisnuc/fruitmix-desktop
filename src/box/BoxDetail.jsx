@@ -60,7 +60,7 @@ class BoxDetail extends React.Component {
           console.log('res', res)
           if (err) openSnackBar(i18n.__('Remove Users From Box Failed'))
           else openSnackBar(i18n.__('Remove Users From Box Success'))
-          this.setState({ delUser: false, loading: false })
+          this.setState({ delUser: false, delBox: false, loading: false })
           refresh()
         }
       )
@@ -78,6 +78,7 @@ class BoxDetail extends React.Component {
   }
 
   renderGroupName(name) {
+    const isOwner = this.props.box && this.props.box.owner === this.props.guid
     return (
       <div style={{ height: 48, color: 'rgba(0,0,0,.54)', fontWeight: 500, fontSize: 14, display: 'flex', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -87,9 +88,13 @@ class BoxDetail extends React.Component {
         <div style={{ width: 160, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', textAlign: 'right' }} >
           { name || i18n.__('Not Set') }
         </div>
-        <IconButton style={{ margin: 4 }} onTouchTap={() => this.setState({ newName: true })}>
-          <ModeEdit color={this.props.primaryColor} />
-        </IconButton>
+        {
+          isOwner &&
+            <IconButton onTouchTap={() => this.setState({ newName: true })}>
+              <ModeEdit color={this.props.primaryColor} />
+            </IconButton>
+        }
+        <div style={{ width: isOwner ? 4 : 16 }} />
       </div>
     )
   }
@@ -165,6 +170,7 @@ class BoxDetail extends React.Component {
   render() {
     const { box, primaryColor, guid, refresh, openSnackBar, apis, getUsers } = this.props
     console.log('BoxDetail', this.props)
+    const isOwner = box && box.owner === guid
     if (!box) return (<div style={{ height: 64, backgroundColor: primaryColor, filter: 'brightness(0.9)' }} />)
 
     return (
@@ -179,21 +185,21 @@ class BoxDetail extends React.Component {
           { this.renderTitle(i18n.__('Group Members')) }
           <div style={{ maxHeight: 400, height: 44 * Math.ceil(box.users.length / 3), position: 'relative' }}>
             { box.users.map((u, i) => (i > 10 ? <div key={u.id} /> : this.renderAvatar(u))) }
-            { this.renderAction(AddIcon, () => this.setState({ addUser: true })) }
-            { this.renderAction(RemoveIcon, () => this.setState({ delUser: true })) }
+            { isOwner && this.renderAction(AddIcon, () => this.setState({ addUser: true })) }
+            { isOwner && this.renderAction(RemoveIcon, () => this.setState({ delUser: true })) }
           </div>
           <div style={{ height: 24 }} />
           { this.renderGroupName(box && box.name) }
           { this.renderTitle(i18n.__('Device Info')) }
           { this.renderToggle(i18n.__('Mute Notifications'), true, () => {}) }
-          { this.renderToggle(i18n.__('Need Confirm'), false, () => {}) }
+          { isOwner && this.renderToggle(i18n.__('Need Confirm'), false, () => {}) }
 
           {/* action */}
           <div style={{ height: 64, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <RaisedButton
               secondary
               style={{ width: '100%' }}
-              label={i18n.__('Delete Box')}
+              label={isOwner ? i18n.__('Delete Box') : i18n.__('Leave Box')}
               onTouchTap={() => this.toggle('delBox')}
             />
           </div>
@@ -204,7 +210,7 @@ class BoxDetail extends React.Component {
             this.state.delBox &&
               <div style={{ width: 400, padding: '24px 24px 0px 24px' }}>
                 <div style={{ color: 'rgba(0,0,0,0.54)', height: 24, display: 'flex', alignItems: 'center', marginBottom: 24 }}>
-                  { i18n.__('Delete Box Text') }
+                  { isOwner ? i18n.__('Delete Box Text') : i18n.__('Leave Box Text') }
                 </div>
                 <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
                   <FlatButton
@@ -214,8 +220,8 @@ class BoxDetail extends React.Component {
                   />
                   <FlatButton
                     primary
-                    label={i18n.__('Delete')}
-                    onTouchTap={this.deleteBox}
+                    label={isOwner ? i18n.__('Delete') : i18n.__('Leave')}
+                    onTouchTap={isOwner ? this.deleteBox : () => this.delUser([box.users.find(u => u.id === guid)])}
                     disabled={this.state.loading}
                   />
                 </div>

@@ -29,8 +29,9 @@ class Group extends Base {
       this.setState({ tweets: null })
       const getAuthor = id => box.users.find(u => u.id === id) || { id, nickName: '已退群' }
       this.ctx.props.apis.pureRequest('tweets', { boxUUID: box.uuid, stationId: box.stationId }, (err, tweets) => {
-        if (!err && tweets) {
-          this.setState({ tweets: tweets.map(t => Object.assign({ author: getAuthor(t.tweeter.id) }, t)), currentBox: box })
+        console.log('tweets', tweets)
+        if (!err) {
+          this.setState({ tweets: (tweets || []).map(t => Object.assign({ author: getAuthor(t.tweeter.id) }, t)), currentBox: box })
         } else console.log('get tweets error', err, tweets)
       })
     }
