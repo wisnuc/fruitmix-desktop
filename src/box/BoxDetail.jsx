@@ -68,11 +68,29 @@ class BoxDetail extends React.Component {
 
     this.toggle = type => this.setState({ [type]: !this.state[type] })
   }
-
+  
   renderTitle(title) {
     return (
       <div style={{ height: 48, color: 'rgba(0,0,0,.54)', fontWeight: 500, fontSize: 14, display: 'flex', alignItems: 'center' }}>
-        { title }
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          { title }
+        </div>
+      </div>
+    )
+  }
+
+  renderDevice() {
+    const name = this.props.box && this.props.box.station.name
+    const ip = this.props.box && this.props.box.station.LANIP
+    return (
+      <div style={{ height: 48, color: 'rgba(0,0,0,.54)', fontWeight: 500, fontSize: 14, display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          { i18n.__('Device Info') }
+        </div>
+        <div style={{ width: 240, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', textAlign: 'right' }} >
+          { `${name} (${ip})`}
+        </div>
+        <div style={{ width: 16 }} />
       </div>
     )
   }
@@ -190,7 +208,7 @@ class BoxDetail extends React.Component {
           </div>
           <div style={{ height: 24 }} />
           { this.renderGroupName(box && box.name) }
-          { this.renderTitle(i18n.__('Device Info')) }
+          { this.renderDevice() }
           { this.renderToggle(i18n.__('Mute Notifications'), true, () => {}) }
           { isOwner && this.renderToggle(i18n.__('Need Confirm'), false, () => {}) }
 

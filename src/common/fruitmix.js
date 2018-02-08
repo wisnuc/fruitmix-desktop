@@ -488,7 +488,7 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'friends':
-        r = this.creq(`users/${args.userId}/interesting`, 'GET')
+        r = this.creq(`users/${args.userId}/interestingPerson`, 'GET')
         isCloud = true
         break
 

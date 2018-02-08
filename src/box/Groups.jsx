@@ -76,7 +76,9 @@ class Groups extends React.Component {
 
     this.onLocalFinish = (event, args) => {
       const { session, boxUUID, success } = args
-      if (this.props.currentBox && this.props.currentBox.uuid === boxUUID) {
+      if (!success) {
+        this.props.openSnackBar(i18n.__('Send Tweets with Local Files Failed'))
+      } else if (this.props.currentBox && this.props.currentBox.uuid === boxUUID) {
         this.props.getTweets(this.props.currentBox)
       }
     }
