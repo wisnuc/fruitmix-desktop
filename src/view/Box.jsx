@@ -4,11 +4,11 @@ import { ipcRenderer } from 'electron'
 import { TweenMax } from 'gsap'
 import { IconButton } from 'material-ui'
 import PhotoIcon from 'material-ui/svg-icons/image/photo'
+import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 
 import Base from './Base'
 import FlatButton from '../common/FlatButton'
-import { combineElement, removeElement } from '../common/array'
 import Inbox from '../box/Inbox'
 
 /* increase limit of listeners of EventEmitter */
@@ -93,21 +93,17 @@ class Box extends Base {
     }
   }
 
-  willReceiveProps(nextProps) {
-  }
-
   navEnter() {
     const apis = this.ctx.props.apis
     console.log('navEnter', apis)
     const { userUUID } = apis
     const userData = global.config.users.find(u => u.userUUID === userUUID)
     this.wxToken = userData && userData.wxToken
-    this.guid = apis.account && apis.account.data && apis.account.data.global.id
+    this.guid = apis.account && apis.account.data && apis.account.data.global && apis.account.data.global.id
+    const info = this.ctx.props.selectedDevice.info && this.ctx.props.selectedDevice.info.data
+    this.station = info && info.connectState === 'CONNECTED' && info
     if (this.wxToken && this.guid) this.ctx.props.apis.update('wxToken', this.wxToken, this.refresh)
-    else alert('no wxToken')
-  }
-
-  navLeave() {
+    else this.setState({ error: this.guid ? 'Token' : 'WeChat' })
   }
 
   navGroup() {
@@ -163,6 +159,42 @@ class Box extends Base {
       <div style={newStyle}>
         { i18n.__('Inbox Title') }
         { !!this.data && ` (${this.data.length})` }
+      </div>
+    )
+  }
+
+  renderDefaultError() {
+    return (
+      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
+        <div
+          style={{
+            width: 360,
+            height: 360,
+            borderRadius: '180px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            backgroundColor: '#FAFAFA'
+          }}
+        >
+          <ErrorIcon style={{ height: 64, width: 64, color: 'rgba(0,0,0,0.27)' }} />
+          <div style={{ fontSize: 20, color: 'rgba(0,0,0,0.27)' }}>
+            {
+              this.state.error === 'WeChat' ? i18n.__('No WeChat Account Error in Box') :
+              this.state.error === 'Token' ? i18n.__('Token Expired Error in Box') :
+              i18n.__('Error in Base Text')
+            }
+          </div>
+          {
+            this.state.error === 'WeChat' &&
+              <FlatButton
+                label={i18n.__('Jump to Bind WeChat')}
+                primary
+                onTouchTap={() => this.ctx.navTo('account')}
+              />
+          }
+        </div>
       </div>
     )
   }

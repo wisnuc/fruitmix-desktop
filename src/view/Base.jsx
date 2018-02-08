@@ -60,6 +60,8 @@ class Base extends EventEmitter {
         return teal600
       case 'box':
         return teal600
+      case 'group':
+        return teal600
       case 'media':
         return lightBlue600
       case 'public':
