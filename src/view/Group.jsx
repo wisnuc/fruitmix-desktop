@@ -61,7 +61,8 @@ class Group extends Base {
     }
 
     this.refresh = () => {
-      this.ctx.props.apis.pureRequest('boxes', null, (err, boxes) => {
+      this.ctx.props.apis.pureRequest('boxes', null, (err, res) => {
+        const boxes = Array.isArray(res) && res.filter(b => b && b.station && !!b.station.isOnline)
         console.log('boxes', err, boxes)
         if (!err && boxes) {
           this.setState({ boxes: this.processBox(boxes) })
