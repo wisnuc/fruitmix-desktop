@@ -88,7 +88,7 @@ class Box extends Base {
       this.ctx.props.apis.pureRequest('boxes', null, (err, res) => {
         console.log('boxes', err, res)
         if (err && !res) this.setState({ error: 'refresh' })
-        else this.getInboxes(res)
+        else this.getInboxes(res.filter(b => b && b.station && !!b.station.isOnline))
       })
     }
   }
