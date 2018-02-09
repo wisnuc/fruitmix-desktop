@@ -46,10 +46,27 @@ class Group extends Box {
             this.getTweets(currentBox)
           } else this.setState({ currentBox: null, tweets: [] })
         }
-      })
+       })
     }
 
     this.getUsers = next => this.ctx.props.apis.pureRequest('friends', { userId: this.guid }, next)
+
+    this.updateFakeTweet = ({ fakeList, boxUUID }) => {
+      if (!this.state.currentBox || this.state.currentBox.uuid !== boxUUID || !this.state.tweets) return
+      console.log('this.updateFakeTweet', fakeList, boxUUID, this.state.currentBox, this.state, this.props)
+      const author = this.state.currentBox.users.find(u => u.id === this.guid) || { id: this.guid }
+      const tweet = {
+        author,
+        box: this.state.currentBox,
+        comment: '',
+        ctime: (new Date()).getTime(),
+        index: this.state.tweets.length,
+        list: fakeList,
+        type: 'list',
+        uuid: (new Date()).getTime()
+      }
+      this.setState({ tweets: [...this.state.tweets, tweet] })
+    }
   }
 
   willReceiveProps(nextProps) {
@@ -125,6 +142,7 @@ class Group extends Box {
       apis={this.ctx.props.apis}
       primaryColor={this.groupPrimaryColor()}
       getTweets={this.getTweets}
+      updateFakeTweet={this.updateFakeTweet}
       openSnackBar={openSnackBar}
       refresh={this.refresh}
       getUsers={this.getUsers}

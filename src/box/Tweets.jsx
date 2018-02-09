@@ -102,6 +102,7 @@ class Tweets extends React.PureComponent {
     const isSelf = this.props.guid === author.id
     const isMedia = list && list.every(l => l.metadata)
     const isMany = list && list.length > 6
+    const isLocalFake = list && list.every(l => l.fakedata && l.fakedata.magic)
     const w = 120
     return (
       <div key={key} style={style}>
@@ -147,27 +148,36 @@ class Tweets extends React.PureComponent {
                   >
                     { comment }
                   </Paper>
-                  : isMedia ?
+                  : isMedia || isLocalFake ?
                   <div style={{ width: 3 * w + 12, maxHeight: 400 }}>
                     {
                       list.map((l, i) => {
                         const { sha256, filename } = l
+                        if (l.fakedata) console.log('l.fakedata', l.fakedata)
                         if (i > 5) return (<div key={sha256 + filename + i} />)
                         // const float = i > 2 || !isSelf ? 'left' : 'right'
                         const margin = isSelf && list.length < 3 && i === 0 ? `2px 2px 2px ${360 - list.length * 120 + 2}px` : 2
                         return (
                           <div
                             key={sha256 + filename + i}
-                            onTouchTap={() => this.setState({ openDetail: true, list, seqIndex: i })}
+                            onTouchTap={() => isMedia && this.setState({ openDetail: true, list, seqIndex: i })}
                             style={{ width: w, height: w, float: 'left', backgroundColor: '#FFF', margin, position: 'relative' }}
                           >
-                            <Thumb
-                              digest={sha256}
-                              station={{ boxUUID, stationId, wxToken }}
-                              ipcRenderer={this.props.ipcRenderer}
-                              height={w}
-                              width={w}
-                            />
+                            { isMedia &&
+                              <Thumb
+                                digest={sha256}
+                                station={{ boxUUID, stationId, wxToken }}
+                                ipcRenderer={this.props.ipcRenderer}
+                                height={w}
+                                width={w}
+                              />
+                            }
+
+                            { isLocalFake &&
+                                <div style={{ width: w, height: w }}>
+                                  <img src={l.fakedata.entry} width={w} height={w} alt={filename} style={{ objectFit: 'cover' }} />
+                                </div>
+                            }
                             {
                               i === 5 && isMany &&
                                 <div
@@ -231,7 +241,7 @@ class Tweets extends React.PureComponent {
     const hs = []
     for (let i = 0; i < rowCount; i++) {
       const t = tweets[i]
-      const isMedia = t.list && t.list.length && t.list.every(l => l.metadata)
+      const isMedia = t.list && t.list.length && t.list.every(l => l.metadata || (l.fakedata && l.fakedata.magic))
       const h = isMedia && t.list.length > 3 ? 326 : isMedia ? 202 : 134
       hs.push(h)
       allHeight += h

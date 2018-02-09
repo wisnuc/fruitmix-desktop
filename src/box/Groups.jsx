@@ -74,12 +74,23 @@ class Groups extends React.Component {
       this.props.ipcRenderer.send('BOX_UPLOAD', Object.assign({ session }, args))
     }
 
+    this.onFakeData = (event, args) => {
+      const { session, boxUUID, success, fakeList } = args
+      console.log('this.onFakeData', args)
+      if (!success) {
+        this.props.openSnackBar(i18n.__('Read Local Files Failed'))
+      } else {
+        this.props.updateFakeTweet({ fakeList, boxUUID })
+      }
+    }
+
     this.onLocalFinish = (event, args) => {
       const { session, boxUUID, success } = args
       if (!success) {
         this.props.openSnackBar(i18n.__('Send Tweets with Local Files Failed'))
       } else if (this.props.currentBox && this.props.currentBox.uuid === boxUUID) {
-        this.props.getTweets(this.props.currentBox)
+        console.log('this.onLocalFinish success')
+        // this.props.getTweets(this.props.currentBox)
       }
     }
 
@@ -87,6 +98,7 @@ class Groups extends React.Component {
   }
 
   componentDidMount() {
+    this.props.ipcRenderer.on('BOX_UPLOAD_FAKE_DATA', this.onFakeData)
     this.props.ipcRenderer.on('BOX_UPLOAD_RESULT', this.onLocalFinish)
   }
 
