@@ -193,7 +193,7 @@ class Box extends Base {
           }}
         >
           <ErrorIcon style={{ height: 64, width: 64, color: 'rgba(0,0,0,0.27)' }} />
-          <div style={{ fontSize: 20, color: 'rgba(0,0,0,0.27)' }}>
+          <div style={{ fontSize: 20, color: 'rgba(0,0,0,0.27)', width: 320, textAlign: 'center' }}>
             {
               this.state.error === 'WeChat' ? i18n.__('No WeChat Account Error in Box') :
               this.state.error === 'Token' ? i18n.__('Token Expired Error in Box') :

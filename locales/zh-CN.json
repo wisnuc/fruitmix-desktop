@@ -496,9 +496,9 @@
   "==== view/Box.jsx ====": "",
   "%s Files": "%s个文件",
   "%s Photos": "%s张照片",
-  "Jump to Bind WeChat": "去绑定微信页面",
-  "No WeChat Account Error in Box": "请先绑定微信",
-  "Token Expired Error in Box": "微信登录状态已过期，请重新微信登录",
+  "Jump to Bind WeChat": "去绑定微信",
+  "No WeChat Account Error in Box": "私有群和收件箱功能需要先绑定微信",
+  "Token Expired Error in Box": "登录已过期，请重新微信登录",
   "New Group Text": " ",
 
   "==== view/ClientUpdate.jsx ====": "",
