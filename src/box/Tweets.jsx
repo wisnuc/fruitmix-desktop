@@ -1,6 +1,7 @@
 import React from 'react'
 import i18n from 'i18n'
 import { CircularProgress, Paper, Avatar } from 'material-ui'
+import ActionAccountCircle from 'material-ui/svg-icons/action/account-circle'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import { AutoSizer } from 'react-virtualized'
 import { parseTime } from '../common/datetime'
@@ -10,8 +11,6 @@ import ScrollBar from '../common/ScrollBar'
 import DialogOverlay from '../common/DialogOverlay'
 import Preview from './Preview'
 import ViewMedia from './ViewMedia'
-
-const imgUrl = 'http://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKQiahrEc8rUfECDTUq94WlcaNkTYTKzIKr3p5xgOPQO1juvtwO1YSUCHOPpup3oWo1AP3nOBVyPCw/132'
 
 const overlayStyle = {
   top: 0,
@@ -102,7 +101,8 @@ class Tweets extends React.PureComponent {
     const isSelf = this.props.guid === author.id
     const isMedia = list && list.every(l => l.metadata)
     const isMany = list && list.length > 6
-    const isLocalFake = list && list.every(l => l.fakedata && l.fakedata.magic)
+    const isFake = list && list[0] && list[0].fakedata
+    const isFakeMedia = list && list.every(l => l.fakedata && l.fakedata.magic)
     const w = 120
     return (
       <div key={key} style={style}>
@@ -119,7 +119,8 @@ class Tweets extends React.PureComponent {
           <div style={{ width: 32 }} />
           {/* Avatar */}
           <div style={{ height: 40, width: 40 }}>
-            <Avatar src={author.avatarUrl} size={40} />
+            { author.avatarUrl ? <Avatar src={author.avatarUrl} size={40} /> :
+              <ActionAccountCircle style={{ width: 40, height: 40, color: 'rgb(0, 137, 123)' }} /> }
           </div>
           <div style={{ width: 16 }} />
           <div>
@@ -148,8 +149,8 @@ class Tweets extends React.PureComponent {
                   >
                     { comment }
                   </Paper>
-                  : isMedia || isLocalFake ?
-                  <div style={{ width: 3 * w + 12, maxHeight: 400 }}>
+                  : isMedia || isFakeMedia ?
+                  <div style={{ width: 3 * w + 12, maxHeight: 400, filter: isFakeMedia ? 'brightness(0.7)' : '', position: 'relative' }}>
                     {
                       list.map((l, i) => {
                         const { sha256, filename } = l
@@ -173,7 +174,7 @@ class Tweets extends React.PureComponent {
                               />
                             }
 
-                            { isLocalFake &&
+                            { isFakeMedia &&
                                 <div style={{ width: w, height: w }}>
                                   <img src={l.fakedata.entry} width={w} height={w} alt={filename} style={{ objectFit: 'cover' }} />
                                 </div>
@@ -191,10 +192,16 @@ class Tweets extends React.PureComponent {
                         )
                       })
                     }
+                    {
+                      isFakeMedia &&
+                        <div style={{ position: 'absolute', height: 120, width: 120, top: 2, right: 10 }}>
+                          { this.renderLoading(32, '#FFF') }
+                        </div>
+                    }
                   </div>
                   :
                   <Paper
-                    style={{ width: 3 * w + 12, height: 56, display: 'flex', alignItems: 'center', fontSize: 14 }}
+                    style={{ width: 3 * w + 12, height: 56, display: 'flex', alignItems: 'center', fontSize: 14, filter: isFake ? 'brightness(0.7)' : '' }}
                     onTouchTap={() => this.setState({ showFiles: true, list })}
                   >
                     <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', backgroundColor: '#FF9100', padding: 16 }}>
@@ -213,6 +220,12 @@ class Tweets extends React.PureComponent {
                     </div>
                     <div style={{ width: 4 }} />
                     { list.length > 1 && i18n.__n('And Other %s Items', list.length)}
+                    {
+                      isFake &&
+                        <div style={{ position: 'absolute', height: 120, width: 120, top: 22, right: 460 }}>
+                          { this.renderLoading(32, '#E0E0E0') }
+                        </div>
+                    }
                   </Paper>
               }
             </div>
@@ -222,16 +235,25 @@ class Tweets extends React.PureComponent {
     )
   }
 
-  renderLoading(size) {
+  renderLoading(size, color) {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
-        <CircularProgress size={size || 64} />
+        <CircularProgress size={size || 64} color={color} />
+      </div>
+    )
+  }
+
+  renderError() {
+    return (
+      <div style={{ flexGrow: 1, height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        { i18n.__('Load Tweet Error Text') }
       </div>
     )
   }
 
   render() {
-    const { tweets, box } = this.props
+    const { tweets, box, tError } = this.props
+    if (tError) return this.renderError()
     const boxUUID = box && box.uuid
     const { stationId, wxToken } = (box || {})
     console.log('tweets', tweets)
@@ -245,6 +267,10 @@ class Tweets extends React.PureComponent {
       const h = isMedia && t.list.length > 3 ? 326 : isMedia ? 202 : 134
       hs.push(h)
       allHeight += h
+    }
+    if (hs.length) {
+      hs[hs.length - 1] += 100
+      allHeight += 100
     }
     const rowHeight = ({ index }) => hs[index]
 
@@ -265,7 +291,7 @@ class Tweets extends React.PureComponent {
                   width={width - 2}
                   rowCount={rowCount}
                   rowHeight={rowHeight}
-                  rowRenderer={({ index, key, style }) => this.renderTweets({ index, key, style })}
+                  rowRenderer={({ index, key, style }) => this.renderTweets({ index, key, style, rowCount })}
                 />
               )}
             </AutoSizer>
