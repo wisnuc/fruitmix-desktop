@@ -496,9 +496,9 @@
   "==== view/Box.jsx ====": "",
   "%s Files": "%s Files",
   "%s Photos": "%s Photos",
-  "Jump to Bind WeChat": "Jump to Bind WeChat",
-  "No WeChat Account Error in Box": "Please bind weChat firstly",
-  "Token Expired Error in Box": "WeChat login state has expired, please re-login.",
+  "Jump to Bind WeChat": "Go to Bind WeChat",
+  "No WeChat Account Error in Box": "To use Groups and Inboxes, you need to bind WeChat account",
+  "Token Expired Error in Box": "WeChat login expired, please login again.",
   "New Group Text": " ",
 
   "==== view/ClientUpdate.jsx ====": "",
