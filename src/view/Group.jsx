@@ -52,6 +52,11 @@ class Group extends Box {
     this.getUsers = next => this.ctx.props.apis.pureRequest('friends', { userId: this.guid }, next)
   }
 
+  willReceiveProps(nextProps) {
+    // console.log('Group willReceiveProps', nextProps, this.state)
+    // if (!this.state.account) this.handleProps(nextProps.apis, ['account'])
+  }
+
   navGroup() {
     return 'group'
   }

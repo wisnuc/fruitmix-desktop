@@ -108,6 +108,7 @@ class NavViews extends React.Component {
     this.openDrawerBound = this.openDrawer.bind(this)
     this.openSnackBarBound = this.openSnackBar.bind(this)
     this.navToDriveBound = this.navToDrive.bind(this)
+    this.navToBound = this.navTo.bind(this)
 
     this.openMovePolicy = (data) => {
       this.setState({ conflicts: data })
@@ -202,7 +203,7 @@ class NavViews extends React.Component {
   }
 
   navTo(nav, target) {
-    // debug('navTo', nav, target, this.state.nav)
+    debug('navTo', nav, target, this.state.nav)
     if (nav === this.state.nav) {
       this.setState({ openDrawer: false })
     } else {
