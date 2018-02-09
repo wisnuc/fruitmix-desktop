@@ -63,7 +63,7 @@ const initMainWindow = () => {
     ]
   }]
 
-  if (process.platform === 'darwin') Menu.setApplicationMenu(Menu.buildFromTemplate(template))
+  if (1 || process.platform === 'darwin') Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 
   // window title
   _mainWindow.on('page-title-updated', (event) => {
