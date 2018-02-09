@@ -22,6 +22,8 @@ class Box extends Base {
       tweets: null
     }
 
+    this.first = true
+
     this.processBox = (d) => {
       if (!d || !d[0]) return []
 
@@ -93,8 +95,17 @@ class Box extends Base {
     }
   }
 
+  willReceiveProps(nextProps) {
+    this.handleProps(nextProps.apis, ['account'])
+    if (this.first && this.state.account) {
+      this.navEnter()
+      this.first = false
+    }
+  }
+
   navEnter() {
     const apis = this.ctx.props.apis
+    if (!apis || !apis.account || !apis.account.data) return
     console.log('navEnter', apis)
     const { userUUID } = apis
     const userData = global.config.users.find(u => u.userUUID === userUUID)
