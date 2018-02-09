@@ -460,6 +460,8 @@
   "Device Management": "Device",
   "Files": "Files",
   "Photos": "Photos",
+  "Groups": "Groups",
+  "Inboxes": "Inboxes",
   "System Settings": "System",
 
   "==== nav/Navigation.jsx ====": "",
@@ -490,6 +492,14 @@
 
   "==== view/Base.jsx ====": "",
   "Error in Base Text": "Failed to load page",
+
+  "==== view/Box.jsx ====": "",
+  "%s Files": "%s Files",
+  "%s Photos": "%s Photos",
+  "Jump to Bind WeChat": "Jump to Bind WeChat",
+  "No WeChat Account Error in Box": "Please bind weChat firstly",
+  "Token Expired Error in Box": "WeChat login state has expired, please re-login.",
+  "New Group Text": " ",
 
   "==== view/ClientUpdate.jsx ====": "",
   "ClientUpdate Menu Name": "Client update",
@@ -725,6 +735,9 @@
   "Retrieve Photo Dialog Text 1": "Retrieve selected items ?",
   "Retrieve Photo Dialog Text 2": "These items will show in Photos",
 
+  "==== photo/VideoDetail.jsx ====": "",
+  "Load Video Error Text": "加载视频失败",
+
   "==== photo/DetailContainer.jsx ====": "",
   "Unknown Region": "Unknown Region",
   "Parse Date %s %s %s": "%s - %s - %s",
@@ -757,6 +770,9 @@
   "No Data in Inbox Text 1": "No data !",
   "No Data in Inbox Text 2": " ",
 
+  "==== box/ViewMedia.jsx ====": "",
+  "Photo Shared From %s":" Photo shared from %s",
+
   "==== box/Group.jsx ====": "",
   "Group Menu Name": "Group",
   "Group Quick Name": "Group",
@@ -769,6 +785,8 @@
   "Group Chat (%d)": "Group Chat (%d)",
   "New Box": "Create",
   "Create New Box": "Create new group",
+  "Send Tweets with Local Files Failed": "Failed to send the tweet",
+  "Send Tweets with Nas Files Failed": "Failed to send the tweet",
   
   "==== box/BoxDetail.jsx ====": "",
   "Add Users to Box Failed": "Operation failed",
@@ -789,6 +807,10 @@
   "Invite": "Invite",
   "Invite User to Box": "Invite friends to this group",
   "Remove User From Box": "Delete members",
+  "Leave": "Leave",
+  "Leave Box": "Leave and delete",
+  "Leave Box Text": "Sure to leave this groups and delete all data?",
+
 
   "==== box/NewNameDialog.jsx ====": "",
   "Change Group Name Failed": "Failed to change group name",
@@ -803,6 +825,7 @@
 
   "==== box/UserSelect.jsx ====": "",
   "Select Users": "Select",
+  "Load Friends Error Text": "Failed to load user list.",
 
   "==== box/Preview.jsx====": "",
   "Shared Files": "Shared files",

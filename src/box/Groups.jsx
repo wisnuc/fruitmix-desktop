@@ -109,7 +109,7 @@ class Groups extends React.Component {
       <div style={{ height: 40, width: 40, position: 'relative' }}>
         {
           users.map((u, i) => {
-            if (i > n - 1) return <div key={u} />
+            if (i > n - 1) return <div key={u.id} />
             const deg = Math.PI * (i * 2 / n - 1 / 4)
             const top = (1 - Math.cos(deg)) * (20 - r)
             const left = (1 + Math.sin(deg)) * (20 - r)
