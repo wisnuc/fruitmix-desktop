@@ -460,6 +460,8 @@
   "Device Management": "设备管理",
   "Files": "文件",
   "Photos": "照片",
+  "Groups": "群",
+  "Inboxes": "收件箱",
   "System Settings": "系统设置",
 
   "==== nav/Navigation.jsx ====": "",
@@ -490,6 +492,14 @@
 
   "==== view/Base.jsx ====": "",
   "Error in Base Text": "加载页面失败",
+
+  "==== view/Box.jsx ====": "",
+  "%s Files": "%s个文件",
+  "%s Photos": "%s张照片",
+  "Jump to Bind WeChat": "去绑定微信页面",
+  "No WeChat Account Error in Box": "请先绑定微信",
+  "Token Expired Error in Box": "微信登录状态已过期，请重新微信登录",
+  "New Group Text": " ",
 
   "==== view/ClientUpdate.jsx ====": "",
   "ClientUpdate Menu Name": "客户端升级",
@@ -725,6 +735,9 @@
   "Retrieve Photo Dialog Text 1": "要将照片恢复显示吗？",
   "Retrieve Photo Dialog Text 2": "恢复后，这些照片将在我的照片内显示",
 
+  "==== photo/VideoDetail.jsx ====": "",
+  "Load Video Error Text": "加载视频失败",
+
   "==== photo/DetailContainer.jsx ====": "",
   "Unknown Region": "其它地区",
   "Parse Date %s %s %s": "%s年%s月%s日",
@@ -757,6 +770,9 @@
   "No Data in Inbox Text 1": "未收到任何文件！",
   "No Data in Inbox Text 2": " ",
 
+  "==== box/ViewMedia.jsx ====": "",
+  "Photo Shared From %s": "%s 分享的照片",
+
   "==== box/Group.jsx ====": "",
   "Group Menu Name": "群",
   "Group Quick Name": "群",
@@ -769,6 +785,8 @@
   "Group Chat (%d)": "群聊 (%d)",
   "New Box": "新建",
   "Create New Box": "新建群",
+  "Send Tweets with Local Files Failed": "发送失败",
+  "Send Tweets with Nas Files Failed": "发送失败",
 
   "==== box/BoxDetail.jsx ====": "",
   "Add Users to Box Failed": "添加失败",
@@ -789,6 +807,9 @@
   "Invite": "邀请",
   "Invite User to Box": "邀请好友加入",
   "Remove User From Box": "删除成员",
+  "Leave": "退出",
+  "Leave Box": "退出并删除",
+  "Leave Box Text": "确定退出该群并删除历史记录？",
 
   "==== box/NewNameDialog.jsx ====": "",
   "Change Group Name Failed": "修改失败",
@@ -803,6 +824,7 @@
 
   "==== box/UserSelect.jsx ====": "",
   "Select Users": "选择",
+  "Load Friends Error Text": "加载用户列表失败",
 
   "==== box/Preview.jsx====": "",
   "Shared Files": "分享的文件",
