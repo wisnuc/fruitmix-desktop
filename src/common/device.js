@@ -25,6 +25,8 @@ class Device extends RequestManager {
     this.mdev = mdev
     this.backoff = 30
 
+    this.firstRefresh = true
+
     // reqs
     this.device = null
     this.boot = null
@@ -481,20 +483,22 @@ class Device extends RequestManager {
         return 'noUser'
       }
       return 'ready'
-    } else if (!boot.error && boot.state === 'starting') {
+    } else if (!boot.error && boot.state === 'starting' && this.firstRefresh) {
+      this.firstRefresh = false
       return setTimeout(() => this.refreshSystemState(), 1000)
+    }
+
+    /* no volume */
+    if (storage && storage.volumes && storage.volumes.length === 0) {
+      return 'uninitialized'
     }
 
     /* maintenance mode */
     if (boot.error === 'ELASTNOTMOUNT' || boot.error === 'ELASTMISSING' || boot.error === 'ELASTDAMAGED') {
       return 'failLast'
     } else if (boot.error === 'ENOALT') {
-      const { volumes } = storage
-      if (volumes && volumes.length === 0) return 'uninitialized'
       return 'failNoAlt'
     } else if (boot.mode === 'maintenance') {
-      const { volumes } = storage
-      if (volumes && volumes.length === 0) return 'uninitialized'
       return 'userMaint'
     }
     return 'unknownMaint'
