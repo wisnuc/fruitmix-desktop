@@ -96,10 +96,12 @@ class Box extends Base {
   }
 
   willReceiveProps(nextProps) {
-    this.handleProps(nextProps.apis, ['account'])
+    if (!this.state.account) this.handleProps(nextProps.apis, ['account'])
     if (this.first && this.state.account) {
       this.navEnter()
       this.first = false
+      console.log('willReceiveProps', this.wxToken, this.guid, this.ctx)
+      if (!this.wxToken || !this.guid) setImmediate(() => this.ctx.navToBound('home'))
     }
   }
 
@@ -113,6 +115,7 @@ class Box extends Base {
     this.guid = apis.account && apis.account.data && apis.account.data.global && apis.account.data.global.id
     const info = this.ctx.props.selectedDevice.info && this.ctx.props.selectedDevice.info.data
     this.station = info && info.connectState === 'CONNECTED' && info
+    console.log('this.wxToken && this.guid', this.wxToken, this.guid)
     if (this.wxToken && this.guid) this.ctx.props.apis.update('wxToken', this.wxToken, this.refresh)
     else this.setState({ error: this.guid ? 'Token' : 'WeChat' })
   }
