@@ -64,7 +64,7 @@ class Groups extends React.Component {
     this.selectBox = (index) => {
       console.log('this.selectBox', index)
       if (!this.props.boxes[index]) return
-      this.props.getTweets(this.props.boxes[index])
+      this.props.getTweets(this.props.boxes[index], true)
     }
 
     this.localUpload = (args) => {
@@ -89,8 +89,8 @@ class Groups extends React.Component {
       if (!success) {
         this.props.openSnackBar(i18n.__('Send Tweets with Local Files Failed'))
       } else if (this.props.currentBox && this.props.currentBox.uuid === boxUUID) {
-        console.log('this.onLocalFinish success')
-        // this.props.getTweets(this.props.currentBox)
+        // console.log('this.onLocalFinish success')
+        this.props.getTweets(this.props.currentBox)
       }
     }
 
@@ -205,7 +205,8 @@ class Groups extends React.Component {
   }
 
   render() {
-    const { boxes, currentBox, station, guid, tweets, ipcRenderer, apis, primaryColor, refresh, openSnackBar, getUsers } = this.props
+    const { boxes, currentBox, station, guid, tweets, ipcRenderer, apis } = this.props
+    const { primaryColor, refresh, openSnackBar, getUsers, tError } = this.props
     const boxH = boxes && Math.min(window.innerHeight - 106, boxes.length * 72) || 0
     const boxUUID = currentBox && currentBox.uuid
     const stationId = currentBox && currentBox.stationId
@@ -263,6 +264,7 @@ class Groups extends React.Component {
 
         {/* tweets */}
         <Tweets
+          tError={tError}
           guid={guid}
           tweets={tweets}
           box={currentBox}

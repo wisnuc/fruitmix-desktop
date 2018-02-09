@@ -22,15 +22,20 @@ class Group extends Box {
       currentBox: null
     }
 
-    this.getTweets = (box) => {
-      this.setState({ tweets: null })
-      const getAuthor = id => box.users.find(u => u.id === id) || { id, nickName: '已退群' }
+    this.getTweets = (box, full) => {
+      if (full) this.setState({ tweets: null, tError: false })
+      const getAuthor = id => box.users.find(u => u.id === id) || { id, nickName: i18n.__('Leaved Member') }
       console.log('this.getTweets', box)
       this.ctx.props.apis.pureRequest('tweets', { boxUUID: box.uuid, stationId: box.stationId }, (err, tweets) => {
         console.log('tweets', tweets)
-        if (!err) {
-          this.setState({ tweets: (tweets || []).map(t => Object.assign({ author: getAuthor(t.tweeter.id), box }, t)), currentBox: box })
-        } else console.log('get tweets error', err, tweets)
+        if (!err && Array.isArray(tweets)) {
+          this.setState({
+            tError: false, tweets: (tweets || []).map(t => Object.assign({ author: getAuthor(t.tweeter.id), box }, t)), currentBox: box
+          })
+        } else {
+          console.log('get tweets error', err, tweets)
+          this.setState({ tError: true })
+        }
       })
     }
 
@@ -46,7 +51,7 @@ class Group extends Box {
             this.getTweets(currentBox)
           } else this.setState({ currentBox: null, tweets: [] })
         }
-       })
+      })
     }
 
     this.getUsers = next => this.ctx.props.apis.pureRequest('friends', { userId: this.guid }, next)

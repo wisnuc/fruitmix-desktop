@@ -35,7 +35,8 @@ class Box extends Base {
           const isMedia = list && list.length && list.every(l => l.metadata)
           const comment = isMedia ? `[${i18n.__('%s Photos', list.length)}]` : list && list.length
             ? `[${i18n.__('%s Files', list.length)}]` : tweet.comment
-          const nickName = b.users.find(u => u.id === tweet.tweeter).nickName
+          const user = b.users.find(u => u.id === tweet.tweeter)
+          const nickName = user && user.nickName
           b.lcomment = `${nickName} : ${comment}`
         } else {
           b.ltime = ctime
@@ -69,7 +70,7 @@ class Box extends Base {
       const callback = (err, res, box) => {
         count -= 1
         if (!err && res) {
-          const getAuthor = id => box.users.find(u => u.id === id) || { id, nickName: '已退群' }
+          const getAuthor = id => box.users.find(u => u.id === id) || { id, nickName: i18n.__('Leaved Member') }
           tweets.push(...res.filter(t => t.list && t.list.length)
             .map(t => Object.assign({ box, author: getAuthor(t.tweeter.id) }, t)))
         }
