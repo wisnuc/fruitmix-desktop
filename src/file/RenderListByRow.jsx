@@ -317,6 +317,7 @@ class RenderListByRow extends React.Component {
         onRowDoubleClick={this.props.onRowDoubleClick}
       />
     )
+    console.log('RenderListByRow.jsx', this.props)
 
     return (
       <div style={{ width: '100%', height: '100%' }} onDrop={this.props.drop}>

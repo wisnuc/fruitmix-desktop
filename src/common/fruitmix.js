@@ -56,7 +56,7 @@ class Fruitmix extends EventEmitter {
     }
 
     this.creq = (ep, method, stationId, data) => {
-      console.log('this.creq', ep, method, stationId, data)
+      // console.log('this.creq', ep, method, stationId, data)
       if (stationId) {
         const url = `${cloudAddress}/c/v1/stations/${stationId}/json`
         const resource = Buffer.from(`/${ep}`).toString('base64')
