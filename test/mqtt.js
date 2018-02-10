@@ -30,7 +30,7 @@ client.on('connect', (data) => {
 })
 
 client.on('message', (tpc, message) => {
-  console.log('receive:', tpc, message.toString())
+  console.log('receive:', tpc, JSON.parse(message.toString())[0])
   // client.publish('presence', `Hello mqtt, ${Math.round(Math.random() * 10)}`)
   // client.end()
 })

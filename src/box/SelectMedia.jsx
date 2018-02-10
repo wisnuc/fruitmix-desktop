@@ -168,6 +168,7 @@ class SelectMedia extends React.Component {
 
   render() {
     console.log('SelectMedia', this.props, this.state, this.selected)
+    const { currentUser, primaryColor, onRequestClose, ipcRenderer } = this.props
     return (
       <div style={{ position: 'fixed', width: '100%', height: '100%', top: 0, left: 0, zIndex: 1000 }}>
         {/* Selected Header */}
@@ -184,7 +185,7 @@ class SelectMedia extends React.Component {
         >
           <div style={{ width: 12 }} />
           <div ref={ref => (this.refClearSelected = ref)}>
-            <IconButton onTouchTap={this.props.onRequestClose}>
+            <IconButton onTouchTap={onRequestClose}>
               <CloseIcon color="rgba(0,0,0,0.54)" />
             </IconButton>
           </div>
@@ -219,7 +220,7 @@ class SelectMedia extends React.Component {
                 selecting
                 media={this.state.media}
                 lookPhotoDetail={this.lookPhotoDetail}
-                ipcRenderer={this.props.ipcRenderer}
+                ipcRenderer={ipcRenderer}
                 addListToSelection={this.addListToSelection}
                 removeListToSelection={this.removeListToSelection}
                 memoize={this.memoize}
@@ -256,11 +257,11 @@ class SelectMedia extends React.Component {
               <div style={{ width: 16 }} />
               {/* Avatar */}
               <div style={{ height: 40, width: 40 }}>
-                <Avatar src={imgUrl} size={40} />
+                <Avatar src={currentUser.avatarUrl} size={40} />
               </div>
               <div style={{ width: 16 }} />
               <div style={{ width: 100 }}>
-                { '李小龙' }
+                { currentUser.nickName }
               </div>
             </div>
 
@@ -279,7 +280,7 @@ class SelectMedia extends React.Component {
             <div style={{ height: 'calc(100% - 221px)', width: '100%', overflowY: 'auto', position: 'relative' }}>
               <Grid
                 items={this.state.selectedItems}
-                ipcRenderer={this.props.ipcRenderer}
+                ipcRenderer={ipcRenderer}
                 action={digest => this.removeListToSelection([digest])}
                 num={3}
                 size={100}
@@ -289,6 +290,7 @@ class SelectMedia extends React.Component {
             {/* action */}
             <div style={{ height: 61, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <RaisedButton
+                disabled={!this.state.selectedItems.length}
                 style={{ width: 'calc(100% - 32px)' }}
                 primary
                 label={i18n.__('Create Tweet')}

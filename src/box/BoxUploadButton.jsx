@@ -22,6 +22,7 @@ class BoxUploadButton extends React.Component {
   }
 
   render() {
+    console.log('BoxUploadButton.jsx', this.props)
     const { offline, diffStation } = this.props
     const noNas = offline || diffStation
     return (
