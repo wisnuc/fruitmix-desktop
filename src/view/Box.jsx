@@ -3,7 +3,7 @@ import i18n from 'i18n'
 import { ipcRenderer } from 'electron'
 import { TweenMax } from 'gsap'
 import { IconButton } from 'material-ui'
-import PhotoIcon from 'material-ui/svg-icons/image/photo'
+import InboxIcon from 'material-ui/svg-icons/content/inbox'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 
@@ -24,6 +24,35 @@ class Box extends Base {
 
     this.first = true
 
+    this.getMsg = (t, box) => {
+      if (t.type !== 'boxmessage') return ''
+      let text = ''
+      const getName = id => (box.users.find(u => u.id === id) || {}).nickName
+      try {
+        const data = JSON.parse(t.comment)
+        const { op, value } = data
+        switch (op) {
+          case 'createBox':
+            text = i18n.__('%s Create Box', getName(value[0]))
+            break
+          case 'deleteUser':
+            text = ''
+            break
+          case 'addUser':
+            if (getName(value[0])) text = i18n.__('User %s Entered Box', getName(value[0]))
+            break
+          case 'changeBoxName':
+            text = i18n.__('Box Name Changed to %s', value[1])
+            break
+          default:
+            text = ''
+        }
+      } catch (e) {
+        console.log('parse msg error', e)
+      }
+      return text
+    }
+
     this.processBox = (d) => {
       if (!d || !d[0]) return []
 
@@ -34,16 +63,19 @@ class Box extends Base {
           const list = tweet.list
           const isMedia = list && list.length && list.every(l => l.metadata)
           const comment = isMedia ? `[${i18n.__('%s Photos', list.length)}]` : list && list.length
-            ? `[${i18n.__('%s Files', list.length)}]` : tweet.comment
+            ? `[${i18n.__('%s Files', list.length)}]` : tweet.type === 'boxmessage'
+            ? this.getMsg(tweet, b) : tweet.comment
           const user = b.users.find(u => u.id === tweet.tweeter)
           const nickName = user && user.nickName
-          b.lcomment = `${nickName} : ${comment}`
+          /* box message, nickName + content, '' */
+          b.lcomment = tweet.type === 'boxmessage' ? comment : nickName ? `${nickName} : ${comment}` : ''
         } else {
           b.ltime = ctime
           b.lcomment = i18n.__('New Group Text')
         }
         b.wxToken = this.wxToken
       })
+
       d.sort((a, b) => (b.ltime - a.ltime))
       return d
     }
@@ -131,7 +163,7 @@ class Box extends Base {
   }
 
   menuIcon() {
-    return PhotoIcon
+    return InboxIcon
   }
 
   quickName() {

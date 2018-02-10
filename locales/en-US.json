@@ -764,7 +764,6 @@
   "Hide Photo Dialog Text 2": "Photos will not display these hidden items. You can recovery them in Assistant.",
 
   "==== box/Inbox.jsx ====": "",
-  "Box": "Box",
   "Inbox Menu Name": "Inbox",
   "Inbox Quick Name": "Inbox",
   "Inbox Title": "Inbox",
@@ -783,7 +782,6 @@
   "Create Box Success": "New group created",
   "No Boxes in Groups Text 1": "No Groups",
   "No Boxes in Groups Text 2": "Click 'Create' to create your first group.",
-  "Group Chat (%d)": "Group Chat (%d)",
   "New Box": "Create",
   "Create New Box": "Create new group",
   "Send Tweets with Local Files Failed": "Failed to send the tweet",

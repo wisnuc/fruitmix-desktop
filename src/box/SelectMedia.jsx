@@ -170,7 +170,7 @@ class SelectMedia extends React.Component {
     console.log('SelectMedia', this.props, this.state, this.selected)
     const { currentUser, primaryColor, onRequestClose, ipcRenderer } = this.props
     return (
-      <div style={{ position: 'fixed', width: '100%', height: '100%', top: 0, left: 0, zIndex: 1000 }}>
+      <div style={{ position: 'fixed', width: '100%', height: '100%', top: 0, left: 0, zIndex: 1000, backgroundColor: '#FFF' }}>
         {/* Selected Header */}
         <div
           style={{

@@ -4,7 +4,7 @@ import i18n from 'i18n'
 import { ipcRenderer } from 'electron'
 import { TweenMax } from 'gsap'
 import { IconButton } from 'material-ui'
-import PhotoIcon from 'material-ui/svg-icons/image/photo'
+import GroupIcon from 'material-ui/svg-icons/social/group'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 
 import Box from './Box'
@@ -12,35 +12,6 @@ import FlatButton from '../common/FlatButton'
 import { combineElement, removeElement } from '../common/array'
 import Groups from '../box/Groups'
 import BoxDetail from '../box/BoxDetail'
-
-const getMsg = (t, box) => {
-  if (t.type !== 'boxmessage') return ''
-  let text = ''
-  const getName = id => (box.users.find(u => u.id === id) || {}).nickName
-  try {
-    const data = JSON.parse(t.comment)
-    const { op, value } = data
-    switch (op) {
-      case 'createBox':
-        text = i18n.__('%s Create Box', getName(value[0]))
-        break
-      case 'deleteUser':
-        text = ''
-        break
-      case 'addUser':
-        text = i18n.__('User %s Entered Box', getName(value[0]))
-        break
-      case 'changeBoxName':
-        text = i18n.__('Box Name Changed to %s', value[1])
-        break
-      default:
-        text = ''
-    }
-  } catch (e) {
-    console.log('parse msg error', e)
-  }
-  return text
-}
 
 class Group extends Box {
   constructor(ctx) {
@@ -54,19 +25,17 @@ class Group extends Box {
     this.getTweets = (box, full) => {
       if (full) this.setState({ tweets: null, tError: false })
       const getAuthor = id => box.users.find(u => u.id === id) || { id, nickName: i18n.__('Leaved Member') }
-      console.log('this.getTweets', box)
       this.ctx.props.apis.pureRequest('tweets', { boxUUID: box.uuid, stationId: box.stationId }, (err, tweets) => {
         console.log('tweets', tweets)
         if (!err && Array.isArray(tweets)) {
           this.setState({
             tError: false,
             tweets: (tweets || [])
-              .map(t => Object.assign({ author: getAuthor(t.tweeter.id), box, msg: getMsg(t, box) }, t))
-              .filter(t => t.type !== 'boxmessage' || t.msg),
+              .map(t => Object.assign({ author: getAuthor(t.tweeter.id), box, msg: this.getMsg(t, box) }, t))
+              .filter(t => t.type !== 'boxmessage' || (t.msg && t.author.avatarUrl)),
             currentBox: box
           })
         } else {
-          console.log('get tweets error', err, tweets)
           this.setState({ tError: true })
         }
       })
@@ -91,7 +60,6 @@ class Group extends Box {
 
     this.updateFakeTweet = ({ fakeList, boxUUID }) => {
       if (!this.state.currentBox || this.state.currentBox.uuid !== boxUUID || !this.state.tweets) return
-      console.log('this.updateFakeTweet', fakeList, boxUUID, this.state.currentBox, this.state, this.props)
       const author = this.state.currentBox.users.find(u => u.id === this.guid) || { id: this.guid }
       const tweet = {
         author,
@@ -121,7 +89,7 @@ class Group extends Box {
   }
 
   menuIcon() {
-    return PhotoIcon
+    return GroupIcon
   }
 
   quickName() {
