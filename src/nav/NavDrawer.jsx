@@ -199,6 +199,7 @@ class NavDrawer extends React.Component {
 
           {/* this.renderGroup('file') */}
 
+          {/*
           <MenuItem
             icon={views.box.menuIcon()}
             text={i18n.__('Inboxes')}
@@ -206,6 +207,7 @@ class NavDrawer extends React.Component {
             selected={views[nav].navGroup() === 'box'}
             onTouchTap={() => navTo('box')}
           />
+          */}
 
           <MenuItem
             icon={views.group.menuIcon()}

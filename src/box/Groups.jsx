@@ -325,6 +325,7 @@ class Groups extends React.Component {
           {
             this.state.newBox &&
             <UserSelect
+              nolenlmt
               fire={this.newBox}
               defaultUsers={[guid]}
               primaryColor={primaryColor}

@@ -75,10 +75,12 @@ class Group extends Box {
     }
   }
 
+   /*
   willReceiveProps(nextProps) {
     // console.log('Group willReceiveProps', nextProps, this.state)
     // if (!this.state.account) this.handleProps(nextProps.apis, ['account'])
   }
+  */
 
   navGroup() {
     return 'group'
