@@ -208,7 +208,7 @@ class NavDrawer extends React.Component {
           />
 
           <MenuItem
-            icon={views.box.menuIcon()}
+            icon={views.group.menuIcon()}
             text={i18n.__('Groups')}
             primaryColor={primaryColor}
             selected={views[nav].navGroup() === 'group'}

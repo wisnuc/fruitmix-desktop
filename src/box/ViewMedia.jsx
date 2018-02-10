@@ -101,7 +101,7 @@ class SelectMedia extends React.Component {
           </div>
           <div style={{ width: 12 }} />
           <div style={{ color: 'rgba(0,0,0,.54)', fontSize: 20, fontWeight: 500 }} >
-            { i18n.__('Photo Shared From %s', 'Somebody') }
+            { this.props.author && i18n.__('Photo Shared From %s', this.props.author.nickName) }
           </div>
           <div style={{ flexGrow: 1 }} />
         </div>

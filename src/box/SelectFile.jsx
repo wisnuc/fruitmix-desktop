@@ -8,6 +8,7 @@ import BackIcon from 'material-ui/svg-icons/navigation/arrow-back'
 import ForwardIcon from 'material-ui/svg-icons/navigation/arrow-forward'
 import UpIcon from 'material-ui/svg-icons/navigation/arrow-upward'
 import ModeEdit from 'material-ui/svg-icons/editor/mode-edit'
+import { AutoSizer } from 'react-virtualized'
 import { ShareIcon, ShareDisk } from '../common/Svg'
 import FlatButton from '../common/FlatButton'
 import FileContent from '../file/FileContent'
@@ -17,6 +18,7 @@ import renderFileIcon from '../common/renderFileIcon'
 import { formatMtime } from '../common/datetime'
 import sortByType from '../common/sort'
 import { BreadCrumbItem, BreadCrumbSeparator } from '../common/BreadCrumb'
+import ScrollBar from '../common/ScrollBar'
 import Row from './Row'
 
 const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
@@ -275,7 +277,7 @@ class SelectNas extends React.Component {
     ]
 
     return (
-      <div style={{ position: 'fixed', width: '100%', height: '100%', top: 0, left: 0, zIndex: 1000 }}>
+      <div style={{ position: 'fixed', width: '100%', height: '100%', top: 0, left: 0, zIndex: 1000, backgroundColor: '#FFF' }}>
         {/* header */}
         <div
           style={{
@@ -398,8 +400,27 @@ class SelectNas extends React.Component {
             </div>
 
             {/* file list content */}
-            <div style={{ height: 'calc(100% - 261px)', width: '100%', overflowY: 'auto' }}>
-              { [...this.selected].map(([k, entry]) => <Row {...entry} action={this.delSelected} key={entry.uuid} />) }
+            <div style={{ height: 'calc(100% - 261px)', width: '100%', overflowY: 'hidden' }}>
+              <AutoSizer>
+                {({ height, width }) => (
+                  <ScrollBar
+                    style={{ outline: 'none' }}
+                    allHeight={[...this.selected].length * 40}
+                    height={height}
+                    width={width}
+                    rowCount={[...this.selected].length}
+                    rowHeight={40}
+                    rowRenderer={({ index, key, style }) => {
+                      const entry = [...this.selected][index][1]
+                      return (
+                        <div style={style} key={key}>
+                          <Row {...entry} action={this.delSelected} key={entry.uuid} />
+                        </div>
+                      )
+                    }}
+                  />
+                )}
+              </AutoSizer>
             </div>
 
             {/* action */}

@@ -167,15 +167,18 @@ class Groups extends React.Component {
           {/* Avatar */}
           { this.renderAvatars(users) }
           <div style={{ width: 16 }} />
-          <div style={{ width: 142 }} >
+          <div>
             <div style={{ height: 30, display: 'flex', alignItems: 'center' }} >
-              <div style={{ width: 142, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                { name || i18n.__('Group Chat (%d)', users.length) }
+              <div style={{ width: 160, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                { name || users.slice(0, 4).map(u => u.nickName).join(', ') }
+              </div>
+              <div style={{ width: 100, textAlign: 'right', fontSize: 12, color: 'rgba(0,0,0,.54)' }}>
+                { parseTime(ltime) }
               </div>
             </div>
             <div
               style={{
-                width: 144,
+                width: 262,
                 height: 24,
                 fontSize: 14,
                 color: 'rgba(0,0,0,.54)',
@@ -186,9 +189,6 @@ class Groups extends React.Component {
             >
               { lcomment }
             </div>
-          </div>
-          <div style={{ width: 120, textAlign: 'right', fontSize: 12, color: 'rgba(0,0,0,.54)' }}>
-            { parseTime(ltime) }
           </div>
           <div style={{ width: 24 }} />
         </div>
@@ -240,7 +240,7 @@ class Groups extends React.Component {
                     label={i18n.__('New Box')}
                     onTouchTap={() => this.setState({ newBox: true })}
                     disabled={!station || !station.id}
-                    icon={<ContentAdd color="rgba(0,0,0,.54)" style={{ marginLeft: 4 }} />}
+                    icon={<ContentAdd color="rgba(0,0,0,.54)" style={{ marginLeft: 4, marginTop: -2 }} />}
                     labelStyle={{ fontSize: 12, color: 'rgba(0,0,0,.54)', marginLeft: -4 }}
                   />
                 </div>

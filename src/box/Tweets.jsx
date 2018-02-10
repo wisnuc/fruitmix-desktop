@@ -72,10 +72,10 @@ class Tweets extends React.PureComponent {
       this.props.ipcRenderer.send('DOWNLOAD', { entries: photos, dirUUID: 'media' })
     }
 
-    this.openMediaMore = (e, list) => {
+    this.openMediaMore = (e, list, author) => {
       e.stopPropagation()
       this.memoizeValue = {}
-      this.setState({ viewMore: 'media', list })
+      this.setState({ viewMore: 'media', list, author })
     }
   }
 
@@ -107,7 +107,7 @@ class Tweets extends React.PureComponent {
     )
   }
 
-  renderTweets({ index, key, style }) {
+  renderTweets({ index, key, style, rowCount }) {
     const { ctime, comment, uuid, author, list, box, type, msg } = this.props.tweets[index]
     const { stationId, wxToken } = box
     const boxUUID = box.uuid
@@ -198,7 +198,7 @@ class Tweets extends React.PureComponent {
                               i === 5 && isMany &&
                                 <div
                                   style={Object.assign({ width: w, height: w }, overlayStyle)}
-                                  onTouchTap={e => this.openMediaMore(e, list)}
+                                  onTouchTap={e => this.openMediaMore(e, list, author)}
                                 >
                                   { `+ ${list.length - 6}` }
                                 </div>
@@ -271,7 +271,6 @@ class Tweets extends React.PureComponent {
     if (tError) return this.renderError()
     const boxUUID = box && box.uuid
     const { stationId, wxToken } = (box || {})
-    console.log('tweets', tweets)
     const rowCount = tweets && tweets.length || 0
     let allHeight = 0
     // 326, 202, 134
@@ -300,7 +299,7 @@ class Tweets extends React.PureComponent {
             <AutoSizer key={boxUUID}>
               {({ height, width }) => (
                 <ScrollBar
-                  scrollTop={allHeight - height}
+                  scrollTop={Math.max(1, allHeight - height)}
                   style={{ outline: 'none' }}
                   allHeight={allHeight}
                   height={height}
@@ -318,11 +317,12 @@ class Tweets extends React.PureComponent {
         {
           this.state.viewMore &&
             <ViewMedia
+              author={this.state.author || {}}
+              memoize={this.memoize}
               ipcRenderer={this.props.ipcRenderer}
               onRequestClose={() => this.setState({ viewMore: false })}
               lookPhotoDetail={this.lookPhotoDetail}
               media={this.state.list.map(l => Object.assign({ hash: l.sha256 }, l.metadata))}
-              memoize={this.memoize}
             />
         }
 
