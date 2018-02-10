@@ -340,7 +340,7 @@ class MediaBox extends React.PureComponent {
   }
 
   render() {
-    console.log('MediaBox', this.props)
+    // console.log('MediaBox', this.props)
     const { data, i, handleSelect, ipcRenderer } = this.props
     const { height, top, left, selected, tsd, wd, content } = data
     const { type, comment, index, author, list, uuid, box, ctime, wxToken } = content

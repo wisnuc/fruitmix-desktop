@@ -8,7 +8,7 @@ import { parseTime } from '../common/datetime'
 import Thumb from '../file/Thumb'
 import DetailContainer from '../photo/DetailContainer'
 import ScrollBar from '../common/ScrollBar'
-import DialogOverlay from '../common/DialogOverlay'
+import DialogOverlay from '../common/PureDialog'
 import Preview from './Preview'
 import ViewMedia from './ViewMedia'
 
@@ -217,7 +217,7 @@ class Tweets extends React.PureComponent {
                   :
                   <Paper
                     style={{ width: 3 * w + 12, height: 56, display: 'flex', alignItems: 'center', fontSize: 14, filter: isFake ? 'brightness(0.7)' : '' }}
-                    onTouchTap={() => this.setState({ showFiles: true, list })}
+                    onTouchTap={() => this.setState({ showFiles: true, list, author })}
                   >
                     <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', backgroundColor: '#FF9100', padding: 16 }}>
                       <FileFolder color="#FFF" />
@@ -314,17 +314,30 @@ class Tweets extends React.PureComponent {
         }
         { tweets && tweets.length > 0 && <div style={{ height: 96 }} /> }
 
-        {
-          this.state.viewMore &&
+        <DialogOverlay open={!!this.state.showFiles} onRequestClose={() => this.setState({ showFiles: false })} >
+          {
+            this.state.showFiles &&
+              <Preview
+                list={this.state.list}
+                author={this.state.author || {}}
+                onRequestClose={() => this.setState({ showFiles: false })}
+              />
+          }
+        </DialogOverlay>
+
+        <DialogOverlay open={!!this.state.viewMore} onRequestClose={() => this.setState({ viewMore: false })}>
+          {
+            this.state.viewMore &&
             <ViewMedia
               author={this.state.author || {}}
               memoize={this.memoize}
               ipcRenderer={this.props.ipcRenderer}
-              onRequestClose={() => this.setState({ viewMore: false })}
               lookPhotoDetail={this.lookPhotoDetail}
+              onRequestClose={() => this.setState({ viewMore: false })}
               media={this.state.list.map(l => Object.assign({ hash: l.sha256 }, l.metadata))}
             />
-        }
+          }
+        </DialogOverlay>
 
         {/* PhotoDetail */}
         <DetailContainer
@@ -346,10 +359,6 @@ class Tweets extends React.PureComponent {
           startDownload={this.startDownload}
           apis={this.props.apis}
         />
-
-        <DialogOverlay open={!!this.state.showFiles} onRequestClose={() => this.setState({ showFiles: false })}>
-          { this.state.showFiles && <Preview list={this.state.list} /> }
-        </DialogOverlay>
       </div>
     )
   }

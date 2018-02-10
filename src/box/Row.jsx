@@ -18,16 +18,17 @@ class Row extends React.Component {
 
   render() {
     console.log('Row', this.props)
-    const { type, uuid, mtime, metadata, name, action } = this.props
+    const { type, uuid, mtime, metadata, name, action, height } = this.props
     const color = '#FFF'
     const hoverColor = '#EEEEEE'
     const hovered = this.state.hover === uuid
+    if (!name) return <div />
     return (
       <div key={uuid}>
         <div
           style={{
             width: '100%',
-            height: '100%',
+            height: height || '100%',
             display: 'flex',
             alignItems: 'center',
             position: 'relative',

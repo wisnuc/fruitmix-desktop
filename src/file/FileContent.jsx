@@ -351,13 +351,12 @@ class FileContent extends React.Component {
   }
 
   render() {
-    // debug('render FileContent loading', this.props.loading, this.state.loading)
-
+    console.log('render', this.state, this.props)
     /* loding */
     if (this.state.loading) return this.renderLoading()
 
     /* not get list yet */
-    if (!this.props.path || !this.props.path.length) return (<div />)
+    if (!this.props.path || !this.props.path.length || !this.props.select) return (<div />)
 
     /* dir is empty */
     if (this.props.entries && !this.props.entries.length) return this.renderNoFile()

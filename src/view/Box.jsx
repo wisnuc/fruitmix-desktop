@@ -107,7 +107,7 @@ class Box extends Base {
             .map(t => Object.assign({ box, author: getAuthor(t.tweeter.id) }, t)))
         }
         if (!count) {
-          this.setState({ tweets: tweets.sort((a, b) => b.ctime - a.ctime).slice(0, 20) })
+          this.setState({ tweets: tweets.sort((a, b) => b.ctime - a.ctime).slice(0, 10) })
         }
       }
       for (let i = 0; i < boxes.length; i++) {
