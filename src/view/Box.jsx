@@ -75,7 +75,7 @@ class Box extends Base {
             .map(t => Object.assign({ box, author: getAuthor(t.tweeter.id) }, t)))
         }
         if (!count) {
-          this.setState({ tweets: tweets.sort((a, b) => b.ctime - a.ctime) })
+          this.setState({ tweets: tweets.sort((a, b) => b.ctime - a.ctime).slice(0, 20) })
         }
       }
       for (let i = 0; i < boxes.length; i++) {
@@ -115,8 +115,9 @@ class Box extends Base {
     this.wxToken = userData && userData.wxToken
     this.guid = apis.account && apis.account.data && apis.account.data.global && apis.account.data.global.id
     const info = this.ctx.props.selectedDevice.info && this.ctx.props.selectedDevice.info.data
+    /* logged station */
     this.station = info && info.connectState === 'CONNECTED' && info
-    console.log('this.wxToken && this.guid', this.wxToken, this.guid)
+    console.log('this.wxToken && this.guid', this.wxToken, this.guid, this.station)
     if (this.wxToken && this.guid) this.ctx.props.apis.update('wxToken', this.wxToken, this.refresh)
     else this.setState({ error: this.guid ? 'Token' : 'WeChat' })
   }

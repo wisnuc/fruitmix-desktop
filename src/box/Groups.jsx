@@ -209,7 +209,9 @@ class Groups extends React.Component {
     const { primaryColor, refresh, openSnackBar, getUsers, tError } = this.props
     const boxH = boxes && Math.min(window.innerHeight - 106, boxes.length * 72) || 0
     const boxUUID = currentBox && currentBox.uuid
+    const currentUser = currentBox && currentBox.users.find(u => u.id === guid) || {}
     const stationId = currentBox && currentBox.stationId
+    const diffStation = !station || station.id !== stationId
     return (
       <div
         style={{
@@ -281,7 +283,7 @@ class Groups extends React.Component {
               toggleView={this.toggleView}
               localUpload={this.localUpload}
               offline={false}
-              diffStation={station && station.id !== stationId}
+              diffStation={diffStation}
             />
         }
 
@@ -290,6 +292,7 @@ class Groups extends React.Component {
             <SelectFile
               apis={apis}
               guid={guid}
+              currentUser={currentUser}
               boxUUID={boxUUID}
               stationId={stationId}
               refresh={refresh}
@@ -306,6 +309,7 @@ class Groups extends React.Component {
             <SelectMedia
               apis={apis}
               guid={guid}
+              currentUser={currentUser}
               boxUUID={boxUUID}
               stationId={stationId}
               refresh={refresh}

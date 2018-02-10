@@ -248,27 +248,29 @@ class SelectNas extends React.Component {
 
   render() {
     console.log('SelectNas', this.props, this.state, this.selected)
+
+    const { currentUser, primaryColor, onRequestClose, ipcRenderer } = this.props
     const navs = [
       {
         key: 'home',
         Icon: FileFolder,
         onTouchTap: () => this.nav('home'),
         text: i18n.__('Home Menu Name'),
-        color: this.state.nav === 'home' ? this.props.primaryColor : 'rgba(0,0,0,0.54)'
+        color: this.state.nav === 'home' ? primaryColor : 'rgba(0,0,0,0.54)'
       },
       {
         key: 'share',
         Icon: ShareIcon,
         onTouchTap: () => this.nav('share'),
         text: i18n.__('Share Menu Name'),
-        color: this.state.nav === 'share' ? this.props.primaryColor : 'rgba(0,0,0,0.54)'
+        color: this.state.nav === 'share' ? primaryColor : 'rgba(0,0,0,0.54)'
       },
       {
         key: 'public',
         Icon: ShareDisk,
         onTouchTap: () => this.nav('public'),
         text: i18n.__('Public Quick Name'),
-        color: this.state.nav === 'public' ? this.props.primaryColor : 'rgba(0,0,0,0.54)'
+        color: this.state.nav === 'public' ? primaryColor : 'rgba(0,0,0,0.54)'
       }
     ]
 
@@ -288,7 +290,7 @@ class SelectNas extends React.Component {
         >
           <div style={{ width: 12 }} />
           <div>
-            <IconButton onTouchTap={this.props.onRequestClose}>
+            <IconButton onTouchTap={onRequestClose}>
               <CloseIcon color="rgba(0,0,0,0.54)" />
             </IconButton>
           </div>
@@ -322,8 +324,8 @@ class SelectNas extends React.Component {
                 listNavBySelect={this.listNavBySelect}
                 showContextMenu={() => {}}
                 setAnimation={() => {}}
-                ipcRenderer={this.props.ipcRenderer}
-                primaryColor={this.props.primaryColor}
+                ipcRenderer={ipcRenderer}
+                primaryColor={this.primaryColor}
                 changeSortType={this.changeSortType}
                 openSnackBar={this.props.openSnackBar}
                 toggleDialog={() => {}}
@@ -353,23 +355,24 @@ class SelectNas extends React.Component {
               <div style={{ width: 16 }} />
               {/* Avatar */}
               <div style={{ height: 40, width: 40 }}>
-                <Avatar src={imgUrl} size={40} />
+                <Avatar src={currentUser.avatarUrl} size={40} />
               </div>
               <div style={{ width: 16 }} />
               <div style={{ width: 100 }}>
-                { '李小龙' }
+                { currentUser.nickName }
               </div>
             </div>
 
             {/* comment */}
-            <div style={{ height: 61, width: '100%', margin: 8, display: 'flex', alignItems: 'center' }}>
+            <div style={{ height: 61, width: '100%', marginLeft: 16, display: 'flex', alignItems: 'center' }}>
               <TextField
+                style={{ width: 272 }}
                 name="comment"
                 value={this.state.comment}
                 hintText={i18n.__('Say Something')}
                 onChange={e => this.setState({ comment: e.target.value })}
               />
-              <ModeEdit color="rgba(0,0,0,.54)" style={{ margin: 8 }} />
+              <ModeEdit color="rgba(0,0,0,.54)" style={{ marginLeft: 16 }} />
             </div>
 
 
@@ -385,15 +388,13 @@ class SelectNas extends React.Component {
                 color: 'rgba(0,0,0,.54)'
               }}
             >
-              <div style={{ flex: '0 0 48px' }} />
-              <div style={{ flex: '0 0 216px', display: 'flex', alignItems: 'center' }}>
+              <div style={{ flex: '0 0 36px' }} />
+              <div style={{ flex: '0 0 220px', display: 'flex', alignItems: 'center' }}>
                 { i18n.__('Name') }
               </div>
-
-              <div style={{ flex: '0 0 144px' }}>
+              <div style={{ flex: '0 0 96px' }}>
                 { i18n.__('Date Modified') }
               </div>
-              <div style={{ flexGrow: 1 }} />
             </div>
 
             {/* file list content */}
@@ -404,6 +405,7 @@ class SelectNas extends React.Component {
             {/* action */}
             <div style={{ height: 61, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <RaisedButton
+                disabled={![...this.selected].length}
                 style={{ width: 'calc(100% - 32px)' }}
                 primary
                 label={i18n.__('Create Tweet')}
