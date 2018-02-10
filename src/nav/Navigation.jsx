@@ -185,7 +185,7 @@ class NavViews extends React.Component {
   }
 
   componentDidMount() {
-    this.navTo('box')
+    this.navTo('group')
     this.checkFirmWareAsync().catch(e => console.log('checkFirmWareAsync error', e))
     this.setState({ openDrawer: true })
     this.timer = setTimeout(() => this.setState({ openDrawer: false }), 1500)
