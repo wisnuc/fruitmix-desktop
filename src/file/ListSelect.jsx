@@ -19,13 +19,18 @@ class ListSelect extends EventEmitter {
       rowDrop: this.rowDrop.bind(this),
       toggleDrag: this.toggleDrag.bind(this),
       isDrop: this.isDrop.bind(this),
-      addByArray: this.addByArray.bind(this)
+      addByArray: this.addByArray.bind(this),
+      putSelect: this.putSelect.bind(this)
     }
   }
 
   setState(props) {
     this.state = Object.assign({}, this.state, props)
     this.emit('updated', this.state)
+  }
+
+  putSelect(selected) {
+    this.setState({ selected })
   }
 
   // this function does NOT emit !!!

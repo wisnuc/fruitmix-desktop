@@ -772,6 +772,8 @@
 
   "==== box/ViewMedia.jsx ====": "",
   "Photo Shared From %s": "%s 分享的照片",
+  "Files Shared From %s": "%s 分享的文件",
+  "Unknown File": "未知文件",
 
   "==== box/Group.jsx ====": "",
   "Group Menu Name": "私有群",

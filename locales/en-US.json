@@ -772,6 +772,8 @@
 
   "==== box/ViewMedia.jsx ====": "",
   "Photo Shared From %s":" Photo shared from %s",
+  "Files Shared From %s": "Files shared from %s",
+  "Unknown File": "Unknown file",
 
   "==== box/Group.jsx ====": "",
   "Group Menu Name": "Group",

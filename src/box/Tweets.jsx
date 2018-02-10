@@ -318,6 +318,8 @@ class Tweets extends React.PureComponent {
           {
             this.state.showFiles &&
               <Preview
+                station={{ boxUUID, stationId, wxToken }}
+                ipcRenderer={this.props.ipcRenderer}
                 list={this.state.list}
                 author={this.state.author || {}}
                 onRequestClose={() => this.setState({ showFiles: false })}

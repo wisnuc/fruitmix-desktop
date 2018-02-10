@@ -13,6 +13,7 @@ import newDownload from './lib/newDownload'
 import clientUpdate from './lib/clientUpdate'
 import BT from './lib/BT'
 import box from './lib/box'
+import mqtt from './lib/mqtt'
 import { initMainWindow, getMainWindow } from './lib/window'
 
 global.entryFileDir = __dirname
