@@ -500,6 +500,7 @@
   "No WeChat Account Error in Box": "私有群和收件箱功能需要先绑定微信",
   "Token Expired Error in Box": "登录已过期，请重新微信登录",
   "New Group Text": " ",
+  "Leaved Member": "退群用户",
 
   "==== view/ClientUpdate.jsx ====": "",
   "ClientUpdate Menu Name": "客户端升级",
@@ -787,6 +788,10 @@
   "Create New Box": "新建群",
   "Send Tweets with Local Files Failed": "发送失败",
   "Send Tweets with Nas Files Failed": "发送失败",
+  "%s Create Box": "“%s”创建了该私有群",
+  "Box Name Changed to %s": "群名被修改为”%s“",
+  "User %s Entered Box": "”%s“加入了私有群",
+  "Read Local Files Failed": "读取本地文件失败",
 
   "==== box/BoxDetail.jsx ====": "",
   "Add Users to Box Failed": "添加失败",
@@ -833,6 +838,9 @@
   "Upload Local Files":"添加PC本地文件",
   "Upload NAS Files":"添加NAS的文件",
   "Upload NAS Media":"添加NAS的照片",
+
+  "==== box/Tweets.jsx ====": "",
+  "Load Tweet Error Text": "加载消息列表失败",
 
   "==== node/lib/window.js ====": "",
   "Confirm Close Title": "确认关闭",
