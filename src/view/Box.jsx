@@ -1,4 +1,5 @@
 import React from 'react'
+import UUID from 'uuid'
 import i18n from 'i18n'
 import { ipcRenderer } from 'electron'
 import { TweenMax } from 'gsap'
@@ -126,6 +127,24 @@ class Box extends Base {
         else this.getInboxes(res.filter(b => b && b.station && !!b.station.isOnline))
       })
     }
+
+    this.startMqtt = () => {
+      const clientId = `client_pc_${this.guid}`
+      const topic = `client/user/${this.guid}/box`
+      const sess = UUID.v4()
+      ipcRenderer.send('START_MQTT', { clientId, topic, session: sess })
+      ipcRenderer.on('MQTT_MSG', (event, res) => {
+        const { session, msg } = res
+        if (session !== sess) return
+        this.onMessage(msg)
+      })
+      this.onMqtt = true
+    }
+
+    this.onMessage = (msg) => {
+      console.log('this.onMessage', msg)
+      this.refresh()
+    }
   }
 
   willReceiveProps(nextProps) {
@@ -150,8 +169,14 @@ class Box extends Base {
     /* logged station */
     this.station = info && info.connectState === 'CONNECTED' && info
     console.log('this.wxToken && this.guid', this.wxToken, this.guid, this.station)
-    if (this.wxToken && this.guid) this.ctx.props.apis.update('wxToken', this.wxToken, this.refresh)
-    else this.setState({ error: this.guid ? 'Token' : 'WeChat' })
+    if (this.wxToken && this.guid) {
+      this.ctx.props.apis.update('wxToken', this.wxToken, this.refresh)
+      if (!this.onMqtt) this.startMqtt()
+    } else this.setState({ error: this.guid ? 'Token' : 'WeChat' })
+  }
+
+  navLeave() {
+    this.onMqtt = false
   }
 
   navGroup() {

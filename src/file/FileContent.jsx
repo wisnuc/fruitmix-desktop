@@ -121,6 +121,7 @@ class FileContent extends React.Component {
     this.selectBox = null
 
     this.selectStart = (event, scrollTop) => {
+      if (this.props.noGridSelect) return
       if (event.nativeEvent.button !== 0) return
       if (this.selectBox) {
         this.selectEnd(event)
