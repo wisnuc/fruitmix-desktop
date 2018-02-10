@@ -500,6 +500,7 @@
   "No WeChat Account Error in Box": "To use Groups and Inboxes, you need to bind WeChat account",
   "Token Expired Error in Box": "WeChat login expired, please login again.",
   "New Group Text": " ",
+  "Leaved Member": "Leaved Member",
 
   "==== view/ClientUpdate.jsx ====": "",
   "ClientUpdate Menu Name": "Client update",
@@ -787,6 +788,10 @@
   "Create New Box": "Create new group",
   "Send Tweets with Local Files Failed": "Failed to send the tweet",
   "Send Tweets with Nas Files Failed": "Failed to send the tweet",
+  "%s Create Box": "\"%s\" created this box",
+  "Box Name Changed to %s": "Group name changed to \"%s\"",
+  "User %s Entered Box": "\"%s\" entered this group",
+  "Read Local Files Failed": "Failed to read the local files",
   
   "==== box/BoxDetail.jsx ====": "",
   "Add Users to Box Failed": "Operation failed",
@@ -811,7 +816,6 @@
   "Leave Box": "Leave and delete",
   "Leave Box Text": "Sure to leave this groups and delete all data?",
 
-
   "==== box/NewNameDialog.jsx ====": "",
   "Change Group Name Failed": "Failed to change group name",
   "Change Group Name Success": "Group name changed",
@@ -834,6 +838,9 @@
   "Upload Local Files":"Upload local files",
   "Upload NAS Files":"Upload nas files",
   "Upload NAS Media":"Upload nas media",
+
+  "==== box/Tweets.jsx ====": "",
+  "Load Tweet Error Text": "Failed to load the message",
 
   "==== node/lib/window.js ====": "",
   "Confirm Close Title": "Confirm close",
