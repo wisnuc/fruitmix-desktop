@@ -135,7 +135,7 @@ class BoxDetail extends React.Component {
   }
 
   renderAvatar(user) {
-    console.log('renderAvatar', user)
+    // console.log('renderAvatar', user)
     const onTouchTap = user.onTouchTap || (() => {})
     const { nickName, avatarUrl } = user
     return (
@@ -188,7 +188,7 @@ class BoxDetail extends React.Component {
 
   render() {
     const { box, primaryColor, guid, refresh, openSnackBar, apis, getUsers } = this.props
-    console.log('BoxDetail', this.props)
+    // console.log('BoxDetail', this.props)
     const isOwner = box && box.owner === guid
     if (!box) return (<div style={{ height: 64, backgroundColor: primaryColor, filter: 'brightness(0.9)' }} />)
 

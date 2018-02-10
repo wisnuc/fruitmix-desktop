@@ -12,7 +12,7 @@ const args = {
 
 const client = mqtt.connect('mqtt://test.siyouqun.com:1883', args)
 
-const topic = 'user/b20ea9c9-c9a6-4a4f-adde-c8f7c1c11884/box'
+const topic = 'client/user/b20ea9c9-c9a6-4a4f-adde-c8f7c1c11884/box'
 
 client.on('connect', (data) => {
   console.log('connected, current topic is', topic, data)

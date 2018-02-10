@@ -94,8 +94,21 @@ class Tweets extends React.PureComponent {
     )
   }
 
+  renderMsg(msg) {
+    return (
+      <div style={{ height: 32, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 16 }} >
+        {
+          msg &&
+            <div style={{ fontSize: 12, color: '#FFF', backgroundColor: '#BDBDBD', padding: 4, borderRadius: 8 }} >
+              { msg }
+            </div>
+        }
+      </div>
+    )
+  }
+
   renderTweets({ index, key, style }) {
-    const { ctime, comment, uuid, author, list, box } = this.props.tweets[index]
+    const { ctime, comment, uuid, author, list, box, type, msg } = this.props.tweets[index]
     const { stationId, wxToken } = box
     const boxUUID = box.uuid
     const isSelf = this.props.guid === author.id
@@ -103,7 +116,9 @@ class Tweets extends React.PureComponent {
     const isMany = list && list.length > 6
     const isFake = list && list[0] && list[0].fakedata
     const isFakeMedia = list && list.every(l => l.fakedata && l.fakedata.magic)
+    const isMsg = type === 'boxmessage'
     const w = 120
+    if (isMsg) return (<div key={key} style={style}> { this.renderMsg(msg) } </div>)
     return (
       <div key={key} style={style}>
         <div
@@ -264,7 +279,8 @@ class Tweets extends React.PureComponent {
     for (let i = 0; i < rowCount; i++) {
       const t = tweets[i]
       const isMedia = t.list && t.list.length && t.list.every(l => l.metadata || (l.fakedata && l.fakedata.magic))
-      const h = isMedia && t.list.length > 3 ? 326 : isMedia ? 202 : 134
+      const isMsg = t.type === 'boxmessage'
+      const h = isMsg ? 48 : isMedia && t.list.length > 3 ? 326 : isMedia ? 202 : 134
       hs.push(h)
       allHeight += h
     }
