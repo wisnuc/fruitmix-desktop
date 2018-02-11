@@ -2,7 +2,7 @@ import mqtt from 'mqtt'
 import { ipcMain, shell } from 'electron'
 import { getMainWindow } from './window'
 
-const server = 'mqtt://test.siyouqun.com:1883'
+const server = 'mqtt://mqtt.siyouqun.com:1883'
 
 class MQTT {
   constructor(clientId, topic, onMessage) {
