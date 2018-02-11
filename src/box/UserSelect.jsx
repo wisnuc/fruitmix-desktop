@@ -120,7 +120,7 @@ class UserSelect extends React.PureComponent {
 
         {
           error ? this.renderError() : loading ? this.renderLoading(32) :
-            <div style={{ height: 40 * users.length + 48 }}>
+            <div style={{ height: 40 * users.length + 48, maxHeight: 360 }}>
               <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key="all" >
                 <Checkbox
                   label={i18n.__('All Users')}
@@ -131,7 +131,7 @@ class UserSelect extends React.PureComponent {
                 />
               </div>
               <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
-              <div style={{ height: 40 * users.length + 8, overflow: 'auto' }}>
+              <div style={{ height: 40 * users.length + 8, maxHeight: 320, overflow: 'auto' }}>
                 {
                   users.map(user =>
                     (
