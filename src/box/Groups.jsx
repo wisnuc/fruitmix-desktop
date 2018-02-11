@@ -35,7 +35,7 @@ class Groups extends React.Component {
     this.toggleDialog = op => this.setState({ [op]: !this.state[op] })
 
     this.toggleView = (view) => {
-      console.log('view', view)
+      // console.log('view', view)
       this.setState({ view })
     }
 
@@ -43,7 +43,7 @@ class Groups extends React.Component {
       const stationId = this.props.station.id
       const args = { name: '', users: [this.props.guid, ...(users.map(u => u.id))], stationId }
       this.props.apis.pureRequest('createBox', args, (err, res) => {
-        console.log('this.newBox', args, err, res)
+        // console.log('this.newBox', args, err, res)
         this.setState({ newBox: false })
         if (err) this.props.openSnackBar(i18n.__('Create Box Failed'))
         else this.props.openSnackBar(i18n.__('Create Box Success'))
@@ -52,13 +52,13 @@ class Groups extends React.Component {
     }
 
     this.createNasTweets = (args) => {
-      console.log('createNasTweets', args)
+      // console.log('createNasTweets', args)
       const { list, boxUUID } = args
       const fakeList = list.map(l => Object.assign({ fakedata: {} }, l))
       this.updateFakeTweet({ fakeList, boxUUID, isMedia: true })
       this.props.apis.pureRequest('nasTweets', args, (err, res) => {
         if (err) {
-          console.log('create nasTweets error', err)
+          // console.log('create nasTweets error', err)
           this.props.openSnackBar(i18n.__('Send Tweets with Nas Files Failed'))
         }
         this.props.refresh()
@@ -70,7 +70,7 @@ class Groups extends React.Component {
       this.preBox = box
       const getAuthor = id => box.users.find(u => u.id === id) || { id, nickName: i18n.__('Leaved Member') }
       this.props.apis.pureRequest('tweets', { boxUUID: box.uuid, stationId: box.stationId }, (err, tweets) => {
-        console.log('getTweets', err, tweets)
+        // console.log('getTweets', err, tweets)
         if (!err && Array.isArray(tweets)) {
           this.setState({
             tError: false,
@@ -103,7 +103,7 @@ class Groups extends React.Component {
     }
 
     this.localUpload = (args) => {
-      console.log('this.localUpload', args)
+      // console.log('this.localUpload', args)
       const { type, comment, box } = args
       const session = UUID.v4()
       this.props.ipcRenderer.send('BOX_UPLOAD', Object.assign({ session }, args))
@@ -111,7 +111,7 @@ class Groups extends React.Component {
 
     this.onFakeData = (event, args) => {
       const { session, boxUUID, success, fakeList } = args
-      console.log('this.onFakeData', args)
+      // console.log('this.onFakeData', args)
       if (!success) {
         this.props.openSnackBar(i18n.__('Read Local Files Failed'))
       } else {
@@ -138,7 +138,7 @@ class Groups extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log('componentWillReceiveProps', nextProps)
+    // console.log('componentWillReceiveProps', nextProps)
     if (nextProps.currentBox) {
       const isSame = this.preBox && nextProps.currentBox && this.preBox.uuid === nextProps.currentBox.uuid
       this.getTweets(nextProps.currentBox, !isSame)
@@ -250,7 +250,7 @@ class Groups extends React.Component {
   }
 
   render() {
-    console.log('Groups', this.state, this.props)
+    // console.log('Groups', this.state, this.props)
     const { boxes, currentBox, station, guid, ipcRenderer, apis } = this.props
     const { primaryColor, refresh, openSnackBar, getUsers } = this.props
     const { tweets, tError } = this.state

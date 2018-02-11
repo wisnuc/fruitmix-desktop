@@ -176,7 +176,7 @@ class Tweets extends React.PureComponent {
                     {
                       list.map((l, i) => {
                         const { sha256, filename } = l
-                        if (l.fakedata) console.log('l.fakedata', l.fakedata)
+                        // if (l.fakedata) console.log('l.fakedata', l.fakedata)
                         if (i > 5) return (<div key={sha256 + filename + i} />)
                         // const float = i > 2 || !isSelf ? 'left' : 'right'
                         const margin = isSelf && list.length < 3 && i === 0 ? `2px 2px 2px ${360 - list.length * 120 + 2}px` : 2

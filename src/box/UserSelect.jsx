@@ -94,7 +94,7 @@ class UserSelect extends React.PureComponent {
   }
 
   render() {
-    console.log('UserSelect.jsx', this.props, this.state)
+    // console.log('UserSelect.jsx', this.props, this.state)
     const { title, onRequestClose, actionLabel, primaryColor } = this.props
     const { users, defaultUsers, loading, selected, error } = this.state
     const allSelected = users && defaultUsers && !loading &&

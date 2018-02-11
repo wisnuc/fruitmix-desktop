@@ -240,7 +240,7 @@ class Inbox extends React.Component {
   }
 
   render() {
-    console.log('Box', this.props, this.state)
+    // console.log('Box', this.props, this.state)
     return (
       <div
         style={{

@@ -16,7 +16,7 @@ class Grid extends React.Component {
   }
 
   renderGrid(digest, size) {
-    console.log('renderGrid', digest)
+    // console.log('renderGrid', digest)
     const hovered = this.state.hover === digest
     return (
       <div

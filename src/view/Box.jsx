@@ -122,7 +122,7 @@ class Box extends Base {
 
     this.refresh = () => {
       this.ctx.props.apis.pureRequest('boxes', null, (err, res) => {
-        console.log('boxes', err, res)
+        // console.log('boxes', err, res)
         if (err && !Array.isArray(res)) this.setState({ error: 'refresh' })
         else this.getInboxes(res)
       })
@@ -142,7 +142,7 @@ class Box extends Base {
     }
 
     this.onMessage = (msg) => {
-      console.log('this.onMessage', msg)
+      // console.log('this.onMessage', msg)
       this.refresh()
     }
   }
@@ -152,7 +152,7 @@ class Box extends Base {
     if (this.first && this.state.account) {
       this.navEnter()
       this.first = false
-      console.log('willReceiveProps', this.wxToken, this.guid, this.ctx)
+      // console.log('willReceiveProps', this.wxToken, this.guid, this.ctx)
       if (!this.wxToken || !this.guid) setImmediate(() => this.ctx.navToBound('home'))
     }
   }
@@ -160,7 +160,7 @@ class Box extends Base {
   navEnter() {
     const apis = this.ctx.props.apis
     if (!apis || !apis.account || !apis.account.data) return
-    console.log('navEnter', apis)
+    // console.log('navEnter', apis)
     const { userUUID } = apis
     const userData = global.config.users.find(u => u.userUUID === userUUID)
     this.wxToken = userData && userData.wxToken
@@ -168,7 +168,7 @@ class Box extends Base {
     const info = this.ctx.props.selectedDevice.info && this.ctx.props.selectedDevice.info.data
     /* logged station */
     this.station = info && info.connectState === 'CONNECTED' && info
-    console.log('this.wxToken && this.guid', this.wxToken, this.guid, this.station)
+    // console.log('this.wxToken && this.guid', this.wxToken, this.guid, this.station)
     if (this.wxToken && this.guid) {
       this.ctx.props.apis.update('wxToken', this.wxToken, this.refresh)
       if (!this.onMqtt) this.startMqtt()

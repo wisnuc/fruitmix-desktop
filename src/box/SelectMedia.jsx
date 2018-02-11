@@ -127,7 +127,7 @@ class SelectMedia extends React.Component {
       /* sort photos by date */
       this.value.sort((prev, next) => next.date.localeCompare(prev.date))
 
-      console.log('processMedia finished', (new Date()).getTime() - this.timeFlag)
+      // console.log('processMedia finished', (new Date()).getTime() - this.timeFlag)
       return this.value
     }
 
@@ -167,7 +167,7 @@ class SelectMedia extends React.Component {
   }
 
   render() {
-    console.log('SelectMedia', this.props, this.state, this.selected)
+    // console.log('SelectMedia', this.props, this.state, this.selected)
     const { currentUser, primaryColor, onRequestClose, ipcRenderer } = this.props
     return (
       <div style={{ position: 'fixed', width: '100%', height: '100%', top: 0, left: 0, zIndex: 1000, backgroundColor: '#FFF' }}>

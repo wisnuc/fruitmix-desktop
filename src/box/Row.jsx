@@ -17,7 +17,7 @@ class Row extends React.Component {
   }
 
   render() {
-    console.log('Row', this.props)
+    // console.log('Row', this.props)
     const { type, uuid, mtime, metadata, name, action, height } = this.props
     const color = '#FFF'
     const hoverColor = '#EEEEEE'

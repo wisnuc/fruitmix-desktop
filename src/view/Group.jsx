@@ -95,6 +95,7 @@ class Group extends Box {
     )
   }
 
+  /*
   renderToolBar({ style }) {
     return (
       <div style={style}>
@@ -104,6 +105,7 @@ class Group extends Box {
       </div>
     )
   }
+  */
 
   renderDetail({ style }) {
     return (
