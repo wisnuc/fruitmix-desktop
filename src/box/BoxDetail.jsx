@@ -218,6 +218,7 @@ class BoxDetail extends React.Component {
           {/* action */}
           <div style={{ height: 64, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <FlatButton
+              style={{ width: '100%' }}
               secondary
               label={isOwner ? i18n.__('Delete Box') : i18n.__('Leave Box')}
               onTouchTap={() => this.toggle('delBox')}

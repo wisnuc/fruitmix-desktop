@@ -79,9 +79,6 @@ class Tweets extends React.PureComponent {
     }
   }
 
-  componentDidUpdate(prevProps) {
-  }
-
   renderNoTweets() {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -89,6 +86,16 @@ class Tweets extends React.PureComponent {
         <div style={{ color: 'rgba(0,0,0,0.54)' }}> { i18n.__('No Tweets in Groups Text 1') } </div>
         <div style={{ height: 16 }} />
         <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.27)' }}> { i18n.__('No Tweets in Groups Text 2') } </div>
+        <div style={{ flexGrow: 1 }} />
+      </div>
+    )
+  }
+
+  renderOffline() {
+    return (
+      <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ flexGrow: 1 }} />
+        <div style={{ color: 'rgba(0,0,0,0.54)' }}> { i18n.__('Box Offline Text in Tweets') } </div>
         <div style={{ flexGrow: 1 }} />
       </div>
     )
@@ -181,6 +188,7 @@ class Tweets extends React.PureComponent {
                           >
                             { isMedia &&
                               <Thumb
+                                bgColor="rgba(0,0,0,.09)"
                                 digest={sha256}
                                 station={{ boxUUID, stationId, wxToken }}
                                 ipcRenderer={this.props.ipcRenderer}
@@ -260,7 +268,16 @@ class Tweets extends React.PureComponent {
 
   renderError() {
     return (
-      <div style={{ flexGrow: 1, height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div
+        style={{
+          flexGrow: 1,
+          height: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          color: 'rgba(0,0,0,.54)'
+        }}
+      >
         { i18n.__('Load Tweet Error Text') }
       </div>
     )
@@ -270,6 +287,7 @@ class Tweets extends React.PureComponent {
     const { tweets, box, tError } = this.props
     if (tError) return this.renderError()
     const boxUUID = box && box.uuid
+    const isOffline = box && box.station && (!box.station.isOnline)
     const { stationId, wxToken } = (box || {})
     const rowCount = tweets && tweets.length || 0
     let allHeight = 0
@@ -295,7 +313,7 @@ class Tweets extends React.PureComponent {
         style={{ flexGrow: 1, height: '100%', backgroundColor: '#FAFAFA', overflow: 'hidden' }}
       >
         { // add key to AutoSizer to force refresh List
-          !tweets ? this.renderLoading(32) : tweets.length > 0 ?
+          isOffline ? this.renderOffline() : !tweets ? this.renderLoading(32) : tweets.length > 0 ?
             <AutoSizer key={boxUUID}>
               {({ height, width }) => (
                 <ScrollBar

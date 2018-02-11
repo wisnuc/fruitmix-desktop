@@ -53,7 +53,7 @@ class Thumb extends React.PureComponent {
     // debug('render Thumb', this.props)
     const style = Object.assign({ objectFit: this.props.full ? 'contain' : 'cover', transition: 'all 225ms cubic-bezier(0.0, 0.0, 0.2, 1)' }, this.props.imgStyle || {})
     return (
-      <div style={{ width: '100%', height: '100%' }} >
+      <div style={{ width: '100%', height: '100%', backgroundColor: this.props.bgColor || '#FFF' }}>
         {
           this.path &&
             <img

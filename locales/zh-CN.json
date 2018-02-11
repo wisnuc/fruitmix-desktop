@@ -792,6 +792,8 @@
   "Box Name Changed to %s": "群名被修改为”%s“",
   "User %s Entered Box": "”%s“加入了私友群",
   "Read Local Files Failed": "读取本地文件失败",
+  "Box Offline Text in Tweets": "该私友群已离线",
+  "Offline": "已离线",
 
   "==== box/BoxDetail.jsx ====": "",
   "Add Users to Box Failed": "添加失败",
@@ -830,9 +832,6 @@
   "==== box/UserSelect.jsx ====": "",
   "Select Users": "选择",
   "Load Friends Error Text": "加载用户列表失败",
-
-  "==== box/Preview.jsx====": "",
-  "Shared Files": "分享的文件",
 
   "==== box/BoxUploadButton.jsx ====": "",
   "Upload Local Files":"添加本地文件",

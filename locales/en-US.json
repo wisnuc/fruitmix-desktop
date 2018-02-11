@@ -792,6 +792,8 @@
   "Box Name Changed to %s": "Group name changed to \"%s\"",
   "User %s Entered Box": "\"%s\" entered this group",
   "Read Local Files Failed": "Failed to read the local files",
+  "Box Offline Text in Tweets": "Group is offline.",
+  "Offline": "Offline",
   
   "==== box/BoxDetail.jsx ====": "",
   "Add Users to Box Failed": "Operation failed",
@@ -830,9 +832,6 @@
   "==== box/UserSelect.jsx ====": "",
   "Select Users": "Select",
   "Load Friends Error Text": "Failed to load user list.",
-
-  "==== box/Preview.jsx====": "",
-  "Shared Files": "Shared files",
 
   "==== box/BoxUploadButton.jsx ====": "",
   "Upload Local Files":"Upload local files",
