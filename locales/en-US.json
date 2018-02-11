@@ -836,8 +836,8 @@
 
   "==== box/BoxUploadButton.jsx ====": "",
   "Upload Local Files":"Upload local files",
-  "Upload NAS Files":"Upload nas files",
-  "Upload NAS Media":"Upload nas media",
+  "Upload NAS Files":"Upload files in WISNUC",
+  "Upload NAS Media":"Upload media in WISNUC",
 
   "==== box/Tweets.jsx ====": "",
   "Load Tweet Error Text": "Failed to load the message",
