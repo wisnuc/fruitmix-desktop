@@ -13,7 +13,7 @@ const debug = Debug('node:lib:server')
 const getTmpPath = () => store.getState().config.tmpPath
 const getTmpTransPath = () => store.getState().config.tmpTransPath
 
-const cloudAddress = 'http://10.10.9.87:4000'
+const cloudAddress = 'http://www.siyouqun.com:80'
 
 export const clearTmpTrans = () => {
   // console.log('clearTmpTrans', `${getTmpTransPath()}/*`)
