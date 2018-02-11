@@ -70,7 +70,7 @@ class Groups extends React.Component {
       this.preBox = box
       const getAuthor = id => box.users.find(u => u.id === id) || { id, nickName: i18n.__('Leaved Member') }
       this.props.apis.pureRequest('tweets', { boxUUID: box.uuid, stationId: box.stationId }, (err, tweets) => {
-        console.log('getTweets', tweets)
+        console.log('getTweets', err, tweets)
         if (!err && Array.isArray(tweets)) {
           this.setState({
             tError: false,
@@ -314,7 +314,7 @@ class Groups extends React.Component {
         <Tweets
           tError={tError}
           guid={guid}
-          tweets={tweets}
+          tweets={currentBox ? tweets : []}
           box={currentBox}
           ipcRenderer={ipcRenderer}
           apis={apis}
