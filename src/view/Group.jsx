@@ -6,6 +6,7 @@ import { TweenMax } from 'gsap'
 import { IconButton } from 'material-ui'
 import GroupIcon from 'material-ui/svg-icons/social/group'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
+import RefreshIcon from 'material-ui/svg-icons/navigation/refresh'
 
 import Box from './Box'
 import FlatButton from '../common/FlatButton'
@@ -29,7 +30,7 @@ class Group extends Box {
 
     this.refresh = (op) => {
       this.ctx.props.apis.pureRequest('boxes', null, (err, res) => {
-        const boxes = Array.isArray(res) && res.filter(b => b && b.station && !!b.station.isOnline)
+        const boxes = Array.isArray(res) && res.filter(b => b && b.station)
         console.log('boxes', err, boxes)
         if (!err && boxes) {
           this.setState({ boxes: this.processBox(boxes) })
@@ -89,6 +90,16 @@ class Group extends Box {
       <div style={style}>
         <IconButton onTouchTap={onTouchTap}>
           <NavigationMenu color="#FFF" />
+        </IconButton>
+      </div>
+    )
+  }
+
+  renderToolBar({ style }) {
+    return (
+      <div style={style}>
+        <IconButton onTouchTap={() => this.refresh()} tooltip={i18n.__('Refresh')} >
+          <RefreshIcon color="#FFF" />
         </IconButton>
       </div>
     )

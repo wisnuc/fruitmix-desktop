@@ -186,6 +186,7 @@ class Groups extends React.Component {
 
   renderBox({ key, index, style }) {
     const box = this.props.boxes[index]
+    const isOffline = !(box && box.station && box.station.isOnline)
     const { ltime, name, uuid, users, lcomment } = box
     const selected = this.props.currentBox && (this.props.currentBox.uuid === uuid)
     const hovered = this.state.hover === index
@@ -217,7 +218,7 @@ class Groups extends React.Component {
                 { name || users.slice(0, 4).map(u => u.nickName).join(', ') }
               </div>
               <div style={{ width: 100, textAlign: 'right', fontSize: 12, color: 'rgba(0,0,0,.54)' }}>
-                { parseTime(ltime) }
+                { isOffline ? i18n.__('Offline') : parseTime(ltime) }
               </div>
             </div>
             <div
