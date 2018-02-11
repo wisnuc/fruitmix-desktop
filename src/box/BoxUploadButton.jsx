@@ -3,6 +3,7 @@ import i18n from 'i18n'
 import { FloatingActionButton, RaisedButton, Popover, Menu, MenuItem } from 'material-ui'
 import FileFileUpload from 'material-ui/svg-icons/file/file-upload'
 import { UploadFile, UploadFold } from '../common/Svg'
+import { FromPC, FromMedia, FromFiles } from '../common/Svg'
 
 class BoxUploadButton extends React.Component {
   constructor(props) {
@@ -48,21 +49,21 @@ class BoxUploadButton extends React.Component {
           <Menu style={{ minWidth: 240 }}>
             <MenuItem
               primaryText={i18n.__('Upload Local Files')}
-              leftIcon={<UploadFold color={offline ? 'rgba(0,0,0,.18)' : 'rgba(0,0,0,.54)'} />}
+              leftIcon={<FromPC color={offline ? 'rgba(0,0,0,.18)' : 'rgba(0,0,0,.54)'} />}
               disabled={offline}
               onTouchTap={() => this.upload()}
               style={{ fontSize: 13 }}
             />
             <MenuItem
               primaryText={i18n.__('Upload NAS Files')}
-              leftIcon={<UploadFile color={noNas ? 'rgba(0,0,0,.18)' : 'rgba(0,0,0,.54)'} />}
+              leftIcon={<FromFiles color={noNas ? 'rgba(0,0,0,.18)' : 'rgba(0,0,0,.54)'} />}
               disabled={noNas}
               onTouchTap={() => this.upload('file')}
               style={{ fontSize: 13 }}
             />
             <MenuItem
               primaryText={i18n.__('Upload NAS Media')}
-              leftIcon={<UploadFile color={noNas ? 'rgba(0,0,0,.18)' : 'rgba(0,0,0,.54)'} />}
+              leftIcon={<FromMedia color={noNas ? 'rgba(0,0,0,.18)' : 'rgba(0,0,0,.54)'} />}
               disabled={noNas}
               onTouchTap={() => this.upload('media')}
               style={{ fontSize: 13 }}

@@ -17,62 +17,32 @@ class Group extends Box {
   constructor(ctx) {
     super(ctx)
     this.state = {
-      tweets: [],
       boxes: null,
       currentBox: null
     }
 
-    this.getTweets = (box, full) => {
-      if (full) this.setState({ tweets: null, tError: false })
-      const getAuthor = id => box.users.find(u => u.id === id) || { id, nickName: i18n.__('Leaved Member') }
-      this.ctx.props.apis.pureRequest('tweets', { boxUUID: box.uuid, stationId: box.stationId }, (err, tweets) => {
-        console.log('tweets', tweets)
-        if (!err && Array.isArray(tweets)) {
-          this.setState({
-            tError: false,
-            tweets: (tweets || [])
-              .map(t => Object.assign({ author: getAuthor(t.tweeter.id), box, msg: this.getMsg(t, box) }, t))
-              .filter(t => t.type !== 'boxmessage' || (t.msg && t.author.avatarUrl)),
-            currentBox: box
-          })
-        } else {
-          this.setState({ tError: true })
-        }
-      })
+    this.selectBox = (index) => {
+      console.log('this.selectBox', index, this.state)
+      if (!this.state.boxes) return
+      this.setState({ currentBox: this.state.boxes[index] })
     }
 
-    this.refresh = () => {
+    this.refresh = (op) => {
       this.ctx.props.apis.pureRequest('boxes', null, (err, res) => {
         const boxes = Array.isArray(res) && res.filter(b => b && b.station && !!b.station.isOnline)
         console.log('boxes', err, boxes)
         if (!err && boxes) {
           this.setState({ boxes: this.processBox(boxes) })
-          const currentBox = boxes.find(b => this.state.currentBox && (b.uuid === this.state.currentBox.uuid)) || boxes[0]
+          let currentBox = boxes.find(b => this.state.currentBox && (b.uuid === this.state.currentBox.uuid)) || boxes[0]
+          if (op && Number.isInteger(op.index)) currentBox = boxes[op.index]
           if (currentBox) {
             this.setState({ currentBox })
-            this.getTweets(currentBox)
-          } else this.setState({ currentBox: null, tweets: [] })
+          } else this.setState({ currentBox: null })
         }
       })
     }
 
     this.getUsers = next => this.ctx.props.apis.pureRequest('friends', { userId: this.guid }, next)
-
-    this.updateFakeTweet = ({ fakeList, boxUUID }) => {
-      if (!this.state.currentBox || this.state.currentBox.uuid !== boxUUID || !this.state.tweets) return
-      const author = this.state.currentBox.users.find(u => u.id === this.guid) || { id: this.guid }
-      const tweet = {
-        author,
-        box: this.state.currentBox,
-        comment: '',
-        ctime: (new Date()).getTime(),
-        index: this.state.tweets.length,
-        list: fakeList,
-        type: 'list',
-        uuid: (new Date()).getTime()
-      }
-      this.setState({ tweets: [...this.state.tweets, tweet] })
-    }
   }
 
    /*
@@ -146,10 +116,11 @@ class Group extends Box {
   renderContent({ openSnackBar }) {
     return (<Groups
       {...this.state}
+      getMsg={this.getMsg}
+      selectBox={this.selectBox}
       ipcRenderer={ipcRenderer}
       apis={this.ctx.props.apis}
       primaryColor={this.groupPrimaryColor()}
-      getTweets={this.getTweets}
       updateFakeTweet={this.updateFakeTweet}
       openSnackBar={openSnackBar}
       refresh={this.refresh}

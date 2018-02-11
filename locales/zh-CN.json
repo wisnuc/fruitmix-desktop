@@ -841,6 +841,7 @@
 
   "==== box/Tweets.jsx ====": "",
   "Load Tweet Error Text": "加载消息列表失败",
+  "Sending %s Files": "正在发送%s个文件",
 
   "==== node/lib/window.js ====": "",
   "Confirm Close Title": "确认关闭",
