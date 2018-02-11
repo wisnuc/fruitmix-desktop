@@ -41,7 +41,7 @@ class BoxDetail extends React.Component {
         'handleBoxUser',
         { boxUUID: box.uuid, op: 'add', guids: users.map(u => u.id), stationId: box.stationId },
         (err, res) => {
-          console.log('res', res)
+          console.log('addUser', err, res)
           if (err) openSnackBar(i18n.__('Add Users to Box Failed'))
           else openSnackBar(i18n.__('Add Users to Box Success'))
           this.setState({ addUser: false, loading: false })
@@ -57,7 +57,7 @@ class BoxDetail extends React.Component {
         'handleBoxUser',
         { boxUUID: box.uuid, op: 'delete', guids: users.map(u => u.id), stationId: box.stationId },
         (err, res) => {
-          console.log('res', res)
+          console.log('delUser', err, res)
           if (err) openSnackBar(i18n.__('Remove Users From Box Failed'))
           else openSnackBar(i18n.__('Remove Users From Box Success'))
           this.setState({ delUser: false, delBox: false, loading: false })

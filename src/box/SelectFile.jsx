@@ -126,7 +126,7 @@ class SelectNas extends React.Component {
 
     /* back to parent */
     this.back = () => {
-      console.log('this.back', this.state)
+      // console.log('this.back', this.state)
       /* conditions that can not back: loading or in root */
       if (this.state.path.length === 1 || this.state.loading) return
 
@@ -249,7 +249,7 @@ class SelectNas extends React.Component {
   }
 
   render() {
-    console.log('SelectNas', this.props, this.state, this.selected)
+    // console.log('SelectNas', this.props, this.state, this.selected)
 
     const { currentUser, primaryColor, onRequestClose, ipcRenderer } = this.props
     const navs = [

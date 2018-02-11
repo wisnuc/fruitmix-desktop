@@ -35,7 +35,7 @@ class Preview extends React.PureComponent {
     }
 
     this.startDownload = () => {
-      console.log('this.startDownload', this.state, this.props)
+      // console.log('this.startDownload', this.state, this.props)
       const list = this.state.select.selected
       if (!list || !list.length) return
       const files = list.map(uuid => this.props.list.find((l, i) => (l.sha256 + i.toString()) === uuid))
