@@ -231,10 +231,10 @@ class Tweets extends React.PureComponent {
                         textOverflow: 'ellipsis'
                       }}
                     >
-                      { list[0].filename }
+                      { list[0].filename || i18n.__('Sending %s Files', list.length) }
                     </div>
                     <div style={{ width: 4 }} />
-                    { list.length > 1 && i18n.__n('And Other %s Items', list.length)}
+                    { !!list[0].filename && list.length > 1 && i18n.__n('And Other %s Items', list.length)}
                     {
                       isFake &&
                         <div style={{ position: 'absolute', height: 120, width: 120, top: 22, right: 460 }}>
@@ -277,7 +277,7 @@ class Tweets extends React.PureComponent {
     const hs = []
     for (let i = 0; i < rowCount; i++) {
       const t = tweets[i]
-      const isMedia = t.list && t.list.length && t.list.every(l => l.metadata || (l.fakedata && l.fakedata.magic))
+      const isMedia = (t.list && t.list.length && t.list.every(l => l.metadata || (l.fakedata && l.fakedata.magic))) || t.isMedia
       const isMsg = t.type === 'boxmessage'
       const h = isMsg ? 48 : isMedia && t.list.length > 3 ? 326 : isMedia ? 202 : 134
       hs.push(h)

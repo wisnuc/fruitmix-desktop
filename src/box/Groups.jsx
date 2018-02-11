@@ -47,11 +47,15 @@ class Groups extends React.Component {
         this.setState({ newBox: false })
         if (err) this.props.openSnackBar(i18n.__('Create Box Failed'))
         else this.props.openSnackBar(i18n.__('Create Box Success'))
-        this.props.refresh()
+        this.props.refresh({ index: 0 })
       })
     }
 
     this.createNasTweets = (args) => {
+      console.log('createNasTweets', args)
+      const { list, boxUUID } = args
+      const fakeList = list.map(l => Object.assign({ fakedata: {} }, l))
+      this.updateFakeTweet({ fakeList, boxUUID, isMedia: true })
       this.props.apis.pureRequest('nasTweets', args, (err, res) => {
         if (err) {
           console.log('create nasTweets error', err)
@@ -61,10 +65,41 @@ class Groups extends React.Component {
       })
     }
 
-    this.selectBox = (index) => {
-      console.log('this.selectBox', index)
-      if (!this.props.boxes[index]) return
-      this.props.getTweets(this.props.boxes[index], true)
+    this.getTweets = (box, full) => {
+      if (full) this.setState({ tweets: null, tError: false })
+      this.preBox = box
+      const getAuthor = id => box.users.find(u => u.id === id) || { id, nickName: i18n.__('Leaved Member') }
+      this.props.apis.pureRequest('tweets', { boxUUID: box.uuid, stationId: box.stationId }, (err, tweets) => {
+        console.log('getTweets', tweets)
+        if (!err && Array.isArray(tweets)) {
+          this.setState({
+            tError: false,
+            tweets: (tweets || [])
+              .map(t => Object.assign({ author: getAuthor(t.tweeter.id), box, msg: this.props.getMsg(t, box) }, t))
+              .filter(t => t.type !== 'boxmessage' || (t.msg && t.author.avatarUrl)),
+            currentBox: box
+          })
+        } else {
+          this.setState({ tError: true })
+        }
+      })
+    }
+
+    this.updateFakeTweet = ({ fakeList, boxUUID, isMedia }) => {
+      if (!this.props.currentBox || this.props.currentBox.uuid !== boxUUID || !this.state.tweets) return
+      const author = this.props.currentBox.users.find(u => u.id === this.props.guid) || { id: this.props.guid }
+      const tweet = {
+        author,
+        isMedia,
+        box: this.props.currentBox,
+        comment: '',
+        ctime: (new Date()).getTime(),
+        index: this.state.tweets.length,
+        list: fakeList,
+        type: 'list',
+        uuid: (new Date()).getTime()
+      }
+      this.setState({ tweets: [...this.state.tweets, tweet] })
     }
 
     this.localUpload = (args) => {
@@ -80,7 +115,7 @@ class Groups extends React.Component {
       if (!success) {
         this.props.openSnackBar(i18n.__('Read Local Files Failed'))
       } else {
-        this.props.updateFakeTweet({ fakeList, boxUUID })
+        this.updateFakeTweet({ fakeList, boxUUID })
       }
     }
 
@@ -90,7 +125,7 @@ class Groups extends React.Component {
         this.props.openSnackBar(i18n.__('Send Tweets with Local Files Failed'))
       } else if (this.props.currentBox && this.props.currentBox.uuid === boxUUID) {
         // console.log('this.onLocalFinish success')
-        this.props.getTweets(this.props.currentBox)
+        this.getTweets(this.props.currentBox)
       }
     }
 
@@ -101,6 +136,15 @@ class Groups extends React.Component {
     this.props.ipcRenderer.on('BOX_UPLOAD_FAKE_DATA', this.onFakeData)
     this.props.ipcRenderer.on('BOX_UPLOAD_RESULT', this.onLocalFinish)
   }
+
+  componentWillReceiveProps(nextProps) {
+    console.log('componentWillReceiveProps', nextProps)
+    if (nextProps.currentBox) {
+      const isSame = this.preBox && nextProps.currentBox && this.preBox.uuid === nextProps.currentBox.uuid
+      this.getTweets(nextProps.currentBox, !isSame)
+    }
+  }
+
 
   renderNoBoxes() {
     return (
@@ -150,7 +194,7 @@ class Groups extends React.Component {
     return (
       <div key={key} style={style}>
         <div
-          onTouchTap={() => this.selectBox(index)}
+          onTouchTap={() => this.props.selectBox(index)}
           onMouseMove={() => !hovered && this.setState({ hover: index })}
           onMouseLeave={() => hovered && this.setState({ hover: -1 })}
           style={{
@@ -205,8 +249,10 @@ class Groups extends React.Component {
   }
 
   render() {
-    const { boxes, currentBox, station, guid, tweets, ipcRenderer, apis } = this.props
-    const { primaryColor, refresh, openSnackBar, getUsers, tError } = this.props
+    console.log('Groups', this.state, this.props)
+    const { boxes, currentBox, station, guid, ipcRenderer, apis } = this.props
+    const { primaryColor, refresh, openSnackBar, getUsers } = this.props
+    const { tweets, tError } = this.state
     const boxH = boxes && Math.min(window.innerHeight - 106, boxes.length * 72) || 0
     const boxUUID = currentBox && currentBox.uuid
     const currentUser = currentBox && currentBox.users.find(u => u.id === guid) || {}
