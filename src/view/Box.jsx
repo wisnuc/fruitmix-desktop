@@ -34,13 +34,13 @@ class Box extends Base {
         const { op, value } = data
         switch (op) {
           case 'createBox':
-            text = i18n.__('%s Create Box', getName(value[0]))
+            text = i18n.__('%s Create Box', getName(box.owner))
             break
           case 'deleteUser':
             text = ''
             break
           case 'addUser':
-            if (getName(value[0])) text = i18n.__('User %s Entered Box', getName(value[0]))
+            if (getName(value[0])) text = i18n.__('User %s Entered Box', value.map(v => getName(v)).filter(v => !!v).join('", "'))
             break
           case 'changeBoxName':
             text = i18n.__('Box Name Changed to %s', value[1])
@@ -58,7 +58,7 @@ class Box extends Base {
       if (!d || !d[0]) return []
 
       d.forEach((b) => {
-        const { tweet, ctime } = b
+        const { tweet, ctime, owner, users } = b
         if (tweet) {
           b.ltime = tweet.ctime
           const list = tweet.list
@@ -75,6 +75,11 @@ class Box extends Base {
           b.lcomment = i18n.__('New Group Text')
         }
         b.wxToken = this.wxToken
+
+        /* move owner to the first pos */
+        const i = users.findIndex(u => u.id === owner)
+        if (i > -1) b.users = [users[i], ...users.slice(0, i), ...users.slice(i + 1)]
+        console.log('this.processBox', i, b.users, b)
       })
 
       d.sort((a, b) => (b.ltime - a.ltime))
