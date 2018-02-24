@@ -106,7 +106,17 @@ class Tweets extends React.PureComponent {
       <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 16 }} >
         {
           msg &&
-            <div style={{ maxWidth: 520, fontSize: 12, color: '#FFF', backgroundColor: '#BDBDBD', padding: 4, borderRadius: 8 }} >
+            <div
+              style={{
+                maxWidth: 520,
+                fontSize: 12,
+                color: '#FFF',
+                backgroundColor: '#BDBDBD',
+                padding: 4,
+                borderRadius: 8,
+                userSelect: 'text'
+              }}
+            >
               { msg }
             </div>
         }
@@ -165,6 +175,7 @@ class Tweets extends React.PureComponent {
                       display: 'flex',
                       alignItems: 'center',
                       borderRadius: 10,
+                      userSelect: 'text',
                       backgroundColor: '#FFF',
                       padding: 10
                     }}
@@ -224,16 +235,27 @@ class Tweets extends React.PureComponent {
                   </div>
                   :
                   <Paper
-                    style={{ width: 3 * w + 12, height: 56, display: 'flex', alignItems: 'center', fontSize: 14, filter: isFake ? 'brightness(0.7)' : '' }}
+                    style={{
+                      height: 56,
+                      fontSize: 14,
+                      width: 3 * w + 12,
+                      userSelect: 'text',
+                      display: 'flex',
+                      alignItems: 'center',
+                      filter: isFake ? 'brightness(0.7)' : ''
+                    }}
                     onTouchTap={() => this.setState({ showFiles: true, list, author })}
                   >
-                    <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', backgroundColor: '#FF9100', padding: 16 }}>
+                    <div
+                      style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', backgroundColor: '#FF9100', padding: 16 }}
+                    >
                       <FileFolder color="#FFF" />
                     </div>
                     <div style={{ width: 16 }} />
                     <div
                       style={{
                         maxWidth: !(list.length - 1) * w + 1.25 * w,
+                        userSelect: 'text',
                         overflow: 'hidden',
                         whiteSpace: 'nowrap',
                         textOverflow: 'ellipsis'
