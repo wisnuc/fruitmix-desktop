@@ -203,7 +203,7 @@ class BoxDetail extends React.Component {
         <div style={{ width: 312, padding: 24, overflow: 'auto' }}>
           { this.renderTitle(i18n.__('Group Members')) }
           <div style={{ maxHeight: 400, height: 44 * Math.ceil((box.users.length + isOwner * 2) / 7), position: 'relative' }}>
-            { box.users.map((u, i) => (i > 10 ? <div key={u.id} /> : this.renderAvatar(u))) }
+            { box.users.map((u, i) => this.renderAvatar(u)) }
             { isOwner && this.renderAction(AddIcon, () => this.setState({ addUser: true })) }
             { isOwner && this.renderAction(RemoveIcon, () => this.setState({ delUser: true })) }
           </div>
