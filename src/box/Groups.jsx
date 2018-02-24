@@ -39,6 +39,11 @@ class Groups extends React.Component {
       this.setState({ view })
     }
 
+    this.openNewBox = () => {
+      if (!window.navigator.onLine) this.props.openSnackBar(i18n.__('Offline Text'))
+      else this.setState({ newBox: true })
+    }
+
     this.newBox = (users) => {
       const stationId = this.props.station.id
       const args = { name: '', users: [this.props.guid, ...(users.map(u => u.id))], stationId }
@@ -285,7 +290,7 @@ class Groups extends React.Component {
                   <FlatButton
                     style={{ lineHeight: '', height: 24 }}
                     label={i18n.__('New Box')}
-                    onTouchTap={() => this.setState({ newBox: true })}
+                    onTouchTap={this.openNewBox}
                     disabled={!station || !station.id}
                     icon={<ContentAdd color="rgba(0,0,0,.54)" style={{ marginLeft: 4, marginTop: -2 }} />}
                     labelStyle={{ fontSize: 12, color: 'rgba(0,0,0,.54)', marginLeft: -4 }}
@@ -331,6 +336,7 @@ class Groups extends React.Component {
               localUpload={this.localUpload}
               offline={false}
               diffStation={diffStation}
+              openSnackBar={openSnackBar}
             />
         }
 

@@ -164,7 +164,7 @@ class UserSelect extends React.PureComponent {
             primary
             label={actionLabel}
             onTouchTap={this.fire}
-            disabled={this.state.fired || (!this.props.nolenlmt && !this.state.selected.length) || loading}
+            disabled={this.state.fired || (!this.props.nolenlmt && !this.state.selected.length) || loading || error}
           />
         </div>
       </div>

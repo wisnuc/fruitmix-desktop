@@ -20,6 +20,13 @@ class BoxUploadButton extends React.Component {
         this.setState({ open: false })
       }
     }
+
+    this.openPopover = (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (!window.navigator.onLine) this.props.openSnackBar(i18n.__('Offline Text'))
+      else this.setState({ open: true, anchorEl: e.currentTarget })
+    }
   }
 
   render() {
@@ -31,10 +38,7 @@ class BoxUploadButton extends React.Component {
         <FloatingActionButton
           backgroundColor="#2196F3"
           zDepth={3}
-          onTouchTap={(e) => {
-            e.preventDefault()
-            this.setState({ open: true, anchorEl: e.currentTarget })
-          }}
+          onTouchTap={this.openPopover}
         >
           <FileFileUpload />
         </FloatingActionButton>
