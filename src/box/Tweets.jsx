@@ -103,10 +103,10 @@ class Tweets extends React.PureComponent {
 
   renderMsg(msg) {
     return (
-      <div style={{ height: 32, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 16 }} >
+      <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 16 }} >
         {
           msg &&
-            <div style={{ fontSize: 12, color: '#FFF', backgroundColor: '#BDBDBD', padding: 4, borderRadius: 8 }} >
+            <div style={{ maxWidth: 520, fontSize: 12, color: '#FFF', backgroundColor: '#BDBDBD', padding: 4, borderRadius: 8 }} >
               { msg }
             </div>
         }
@@ -297,7 +297,7 @@ class Tweets extends React.PureComponent {
       const t = tweets[i]
       const isMedia = (t.list && t.list.length && t.list.every(l => l.metadata || (l.fakedata && l.fakedata.magic))) || t.isMedia
       const isMsg = t.type === 'boxmessage'
-      const h = isMsg ? 48 : isMedia && t.list.length > 3 ? 326 : isMedia ? 202 : 134
+      const h = isMsg ? 12 * Math.ceil(3 + t.msg.length / 48) : isMedia && t.list.length > 3 ? 326 : isMedia ? 202 : 134
       hs.push(h)
       allHeight += h
     }
