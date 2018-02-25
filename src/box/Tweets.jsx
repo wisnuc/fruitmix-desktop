@@ -306,6 +306,7 @@ class Tweets extends React.PureComponent {
   }
 
   render() {
+    console.log('render tweets', this.props)
     const { tweets, box, tError } = this.props
     if (tError) return this.renderError()
     const boxUUID = box && box.uuid
