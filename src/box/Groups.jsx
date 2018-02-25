@@ -70,23 +70,31 @@ class Groups extends React.Component {
       })
     }
 
-    this.getTweets = (box, full) => {
-      if (full) this.setState({ tweets: null, tError: false })
+    this.getTweets = (box, showLoading) => {
+      if (showLoading) this.setState({ tweets: null, tError: false }) // show loading state
+      this.props.ada.removeAllListeners('tweets')
+      this.props.ada.on('tweets', (prev, next) => this.updateTweets(box, next))
+      const args = { boxUUID: box.uuid, stationId: box.stationId }
+      this.props.ada.loadTweets(box.uuid).then(tweets => this.updateTweets(box, tweets)).catch((e) => {
+        console.log('loadTweets error', e)
+        this.setState({ tError: true })
+      })
+
+      this.props.ada.reqTweets(args).catch((e) => { // TODO update manually
+        console.log('reqTweets error', e)
+      })
+    }
+
+    this.updateTweets = (box, tweets) => {
       this.preBox = box
       const getAuthor = id => box.users.find(u => u.id === id) || { id, nickName: i18n.__('Leaved Member') }
-      this.props.apis.pureRequest('tweets', { boxUUID: box.uuid, stationId: box.stationId }, (err, tweets) => {
-        console.log('getTweets', err, tweets)
-        if (!err && Array.isArray(tweets)) {
-          this.setState({
-            tError: false,
-            tweets: (tweets || [])
-              .map(t => Object.assign({ author: getAuthor(t.tweeter.id), box, msg: this.props.getMsg(t, box) }, t))
-              .filter(t => t.type !== 'boxmessage' || (t.msg && t.author.avatarUrl)),
-            currentBox: box
-          })
-        } else {
-          this.setState({ tError: true })
-        }
+      console.log('updateTweets', box, tweets)
+      this.setState({
+        tError: false,
+        tweets: (tweets || [])
+          .map(t => Object.assign({ author: getAuthor(t.tweeter.id), box, msg: this.props.getMsg(t, box) }, t))
+          .filter(t => t.type !== 'boxmessage' || (t.msg && t.author.avatarUrl)),
+        currentBox: box
       })
     }
 
@@ -145,8 +153,9 @@ class Groups extends React.Component {
   componentWillReceiveProps(nextProps) {
     // console.log('componentWillReceiveProps', nextProps)
     if (nextProps.currentBox) {
-      const isSame = this.preBox && nextProps.currentBox && this.preBox.uuid === nextProps.currentBox.uuid
-      this.getTweets(nextProps.currentBox, !isSame)
+      const showLoading = !(this.preBox && nextProps.currentBox && this.preBox.uuid === nextProps.currentBox.uuid)
+      console.log('this.isSameBox', this.isSameBox)
+      this.getTweets(nextProps.currentBox, showLoading)
     }
   }
 
@@ -255,7 +264,7 @@ class Groups extends React.Component {
   }
 
   render() {
-    // console.log('Groups', this.state, this.props)
+    // console.log('render Groups', this.state, this.props)
     const { boxes, currentBox, station, guid, ipcRenderer, apis } = this.props
     const { primaryColor, refresh, openSnackBar, getUsers } = this.props
     const { tweets, tError } = this.state

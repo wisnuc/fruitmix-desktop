@@ -82,6 +82,10 @@ class Configuration {
     return path.join(this.root, 'imagecache')
   }
 
+  getBoxDir() {
+    return path.join(this.root, 'boxCache')
+  }
+
   getVersion() {
     return app.getVersion()
   }
@@ -145,6 +149,7 @@ class Configuration {
     await mkdirpAsync(this.getTmpDir())
     await mkdirpAsync(this.getThumbnailDir())
     await mkdirpAsync(this.getImageCacheDir())
+    await mkdirpAsync(this.getBoxDir())
   }
 
   // load a js object from given path, return null if any error
@@ -222,6 +227,7 @@ class Configuration {
       type: 'CONFIG_UPDATE',
       data: {
         downloadPath,
+        boxPath: this.getBoxDir(),
         tmpTransPath: this.getTmpTransDir(),
         tmpPath: this.getTmpDir(),
         thumbPath: this.getThumbnailDir(),
@@ -264,6 +270,7 @@ class Configuration {
       type: 'CONFIG_INIT',
       data: {
         downloadPath,
+        boxPath: this.getBoxDir(),
         tmpTransPath: this.getTmpTransDir(),
         tmpPath: this.getTmpDir(),
         thumbPath: this.getThumbnailDir(),
@@ -277,11 +284,12 @@ class Configuration {
 
   getConfiguration() {
     return {
+      boxPath: this.getBoxDir(),
+      platform: this.getPlatform(),
+      appVersion: this.getVersion(),
       global: this.globalConfig.getConfig(),
       defaultDownload: this.getWisnucDownloadsDir(),
-      users: this.userConfigs.map(uc => uc.getConfig()),
-      appVersion: this.getVersion(),
-      platform: this.getPlatform()
+      users: this.userConfigs.map(uc => uc.getConfig())
     }
   }
 }
