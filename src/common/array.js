@@ -22,3 +22,17 @@ export const combineElement = (a, b) => [...(new Set([...a, ...b]))]
 
 /* remove any elements found in a from b, renturn the new array. */
 export const removeElement = (a, b) => b.filter(e => !a.includes(e))
+
+/* union two Object array by id */
+export const unionBy = (a, b, key) => {
+  const keys = [...(new Set([...a.map(x => x[key]), ...b.map(x => x[key])].filter(x => !!x)))]
+  const union = Array.from({ length: keys.length }).map((v, i) => {
+    const id = keys[i]
+    const aa = a.find(x => x[key] === id) || {}
+    const bb = b.find(x => x[key] === id) || {}
+    const ele = Object.assign({}, aa, bb)
+    return ele
+  })
+  return union
+}
+
