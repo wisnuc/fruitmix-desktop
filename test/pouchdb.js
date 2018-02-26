@@ -13,11 +13,26 @@ const fire = async () => {
 
   const db = new PouchDB('my_db')
 
-  console.log('bulkDocs start')
+  const doc = docs[0]
+  const _id = doc._id
+  console.log('bulkDocs start', doc)
 
-  await db.bulkDocs(docs.slice(0, 3000))
+  await db.put(doc)
   console.log('put doc success')
 
+  const newDoc = await db.get(_id)
+  console.log('newDOc', newDoc)
+
+  await db.put(Object.assign({}, doc, { _rev: newDoc._rev }))
+  console.log('put doc again success')
+
+  const newerDoc = await db.get(_id)
+  console.log('newerDoc', newerDoc)
+
+  await db.put(Object.assign({}, doc, { _rev: newerDoc._rev }))
+  console.log('put doc third times success')
+
+  /*
   const res = await db.createIndex({ index: { fields: ['m'] } })
   console.log('res', res)
 
@@ -26,6 +41,7 @@ const fire = async () => {
     fields: ['m']
   })
   console.log('find doc success', find)
+  */
 
 
   // await db.remove(res._id, res._rev)
