@@ -75,7 +75,7 @@ class Groups extends React.Component {
       this.props.ada.removeAllListeners('tweets')
       this.props.ada.on('tweets', (prev, next) => this.updateTweets(box, next))
       const args = { boxUUID: box.uuid, stationId: box.stationId }
-      this.props.ada.loadTweets(box.uuid).then(tweets => this.updateTweets(box, tweets)).catch((e) => {
+      this.props.ada.getTweets(box.uuid).then(tweets => this.updateTweets(box, tweets)).catch((e) => {
         console.log('loadTweets error', e)
         this.setState({ tError: true })
       })
