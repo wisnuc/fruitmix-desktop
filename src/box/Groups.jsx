@@ -79,10 +79,6 @@ class Groups extends React.Component {
         console.log('loadTweets error', e)
         this.setState({ tError: true })
       })
-
-      this.props.ada.reqTweets(args).catch((e) => { // TODO update manually
-        console.log('reqTweets error', e)
-      })
     }
 
     this.updateTweets = (box, tweets) => {
@@ -200,9 +196,10 @@ class Groups extends React.Component {
   renderBox({ key, index, style }) {
     const box = this.props.boxes[index]
     const isOffline = !(box && box.station && box.station.isOnline)
-    const { ltime, name, uuid, users, lcomment } = box
+    const { ltime, name, uuid, users, lcomment, lri, ltsi } = box
     const selected = this.props.currentBox && (this.props.currentBox.uuid === uuid)
     const hovered = this.state.hover === index
+    const newMsg = !selected && (ltsi - lri)
 
     /* width: 376 = 2 + 32 + 40 + 16 + 142 + 120 + 24 + 16 */
     return (
@@ -234,18 +231,40 @@ class Groups extends React.Component {
                 { isOffline ? i18n.__('Offline') : parseTime(ltime) }
               </div>
             </div>
-            <div
-              style={{
-                width: 262,
-                height: 24,
-                fontSize: 14,
-                color: 'rgba(0,0,0,.54)',
-                overflow: 'hidden',
-                whiteSpace: 'nowrap',
-                textOverflow: 'ellipsis'
-              }}
-            >
-              { lcomment }
+            <div style={{ width: 262, display: 'flex', alignItems: 'center' }}>
+              <div
+                style={{
+                  width: 238,
+                  height: 24,
+                  fontSize: 14,
+                  color: 'rgba(0,0,0,.54)',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis'
+                }}
+              >
+                { lcomment }
+              </div>
+              {
+                !!newMsg &&
+                  <div
+                    style={{
+                      width: 16,
+                      height: 16,
+                      fontSize: 11,
+                      color: '#FFF',
+                      fontWeigth: 500,
+                      backgroundColor: 'red',
+                      border: '1px solid #FFF',
+                      borderRadius: 9,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    { (newMsg > 0 && newMsg < 99) ? newMsg : 99 }
+                  </div>
+              }
             </div>
           </div>
           <div style={{ width: 24 }} />
@@ -263,7 +282,7 @@ class Groups extends React.Component {
   }
 
   render() {
-    // console.log('render Groups', this.state, this.props)
+    console.log('render Groups', this.state, this.props)
     const { boxes, currentBox, station, guid, ipcRenderer, apis } = this.props
     const { primaryColor, refresh, openSnackBar, getUsers } = this.props
     const { tweets, tError } = this.state

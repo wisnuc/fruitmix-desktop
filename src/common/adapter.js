@@ -57,6 +57,13 @@ class Adapter extends EventEmitter {
     const boxes = unionBox(preBoxes, newBoxes)
     await this.DB.saveBoxes(guid, boxes)
     this.setState('boxes', boxes)
+    console.log('reqBoxes', boxes)
+    for (let i = 0; i < boxes.length; i++) {
+      const box = boxes[i]
+      if (!box.ltsi || (box.tweet.index > box.ltsi)) {
+        await this.reqTweets({ boxUUID: box.uuid, stationId: box.stationId })
+      }
+    }
   }
 
   /* request tweets, and save to tweetsDB */
@@ -80,6 +87,7 @@ class Adapter extends EventEmitter {
       const bs = this.state.boxes
       const i = bs.findIndex(b => b.uuid === boxUUID)
       bs[i].ltsi = docs.slice(-1)[0].index
+      console.log('update ltsi', bs[i].ltsi)
       this.setState('boxes', bs)
     }
   }
@@ -97,7 +105,7 @@ class Adapter extends EventEmitter {
     const tweets = await this.DB.loadTweets(boxUUID)
 
     /* update last read index */
-    const lri = tweets.length ? tweets.slice(-1)[0].index : 0
+    const lri = tweets.length ? tweets.slice(-1)[0].index : -1
     const index = this.state.boxes.findIndex(b => b.uuid === boxUUID)
     if (this.state.boxes[index].lri !== lri) {
       this.state.boxes[index].lri = lri
