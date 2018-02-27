@@ -19,7 +19,7 @@ class boxDB {
       this.bRev = doc._rev
       boxes = doc.boxes
     } catch (e) {
-      console.log('loadBoxes error', 'e')
+      console.log('loadBoxes error', e)
     }
     return boxes
   }
