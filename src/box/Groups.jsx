@@ -151,10 +151,9 @@ class Groups extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    // console.log('componentWillReceiveProps', nextProps)
+    console.log('Groups componentWillReceiveProps', nextProps)
     if (nextProps.currentBox) {
       const showLoading = !(this.preBox && nextProps.currentBox && this.preBox.uuid === nextProps.currentBox.uuid)
-      console.log('this.isSameBox', this.isSameBox)
       this.getTweets(nextProps.currentBox, showLoading)
     }
   }

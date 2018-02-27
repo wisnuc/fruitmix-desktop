@@ -5,6 +5,7 @@ import { ipcRenderer } from 'electron'
 import { TweenMax } from 'gsap'
 import { IconButton } from 'material-ui'
 import GroupIcon from 'material-ui/svg-icons/social/group'
+import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import RefreshIcon from 'material-ui/svg-icons/navigation/refresh'
 
@@ -132,8 +133,8 @@ class Group extends Base {
     }
 
     this.refresh = (op) => {
-      // this.op = op
-      // this.ada.reqBoxes()
+      this.op = op
+      this.ada.reqBoxes(this.guid).catch(e => console.log('reqBoxes error', e))
     }
 
     this.startMqtt = () => {
