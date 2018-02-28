@@ -333,7 +333,6 @@ class SelectNas extends React.Component {
                 toggleDialog={() => {}}
                 showTakenTime={!!this.state.takenTime}
                 apis={this.props.apis}
-                refresh={this.refresh}
                 rowDragStart={() => {}}
                 gridDragStart={() => {}}
                 setScrollTop={() => {}}

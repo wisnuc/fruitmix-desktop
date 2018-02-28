@@ -66,15 +66,15 @@ class Groups extends React.Component {
           // console.log('create nasTweets error', err)
           this.props.openSnackBar(i18n.__('Send Tweets with Nas Files Failed'))
         }
-        this.props.refresh()
+        // this.props.refresh()
       })
     }
 
     this.getTweets = (box, showLoading) => {
       if (showLoading) this.setState({ tweets: null, tError: false }) // show loading state
+
       this.props.ada.removeAllListeners('tweets')
       this.props.ada.on('tweets', (prev, next) => this.updateTweets(box, next))
-      const args = { boxUUID: box.uuid, stationId: box.stationId }
       this.props.ada.getTweets(box.uuid).then(tweets => this.updateTweets(box, tweets)).catch((e) => {
         console.log('loadTweets error', e)
         this.setState({ tError: true })
@@ -84,7 +84,6 @@ class Groups extends React.Component {
     this.updateTweets = (box, tweets) => {
       this.preBox = box
       const getAuthor = id => box.users.find(u => u.id === id) || { id, nickName: i18n.__('Leaved Member') }
-      console.log('updateTweets', box, tweets)
       this.setState({
         tError: false,
         tweets: (tweets || [])
@@ -134,7 +133,7 @@ class Groups extends React.Component {
         this.props.openSnackBar(i18n.__('Send Tweets with Local Files Failed'))
       } else if (this.props.currentBox && this.props.currentBox.uuid === boxUUID) {
         // console.log('this.onLocalFinish success')
-        this.getTweets(this.props.currentBox)
+        // this.getTweets(this.props.currentBox)
       }
     }
 
@@ -147,9 +146,17 @@ class Groups extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log('Groups componentWillReceiveProps', nextProps)
+    // console.log('Groups componentWillReceiveProps', nextProps)
     if (nextProps.currentBox) {
+      /* check if change box */
       const showLoading = !(this.preBox && nextProps.currentBox && this.preBox.uuid === nextProps.currentBox.uuid)
+
+      /* check if have new stored tweets */
+      const ltc = nextProps.currentBox.ltsst && nextProps.currentBox.ltsst.ctime // last tweet's ctime
+      const currentTweet = this.state.tweets && this.state.tweets.slice(-1)[0]
+      const ctc = currentTweet && currentTweet.ctime // current tweet's ctime
+      if (!showLoading && ltc && ltc <= ctc) return // same box and no new tweets
+      console.log('will getTweets', showLoading, ltc, ctc, nextProps.currentBox)
       this.getTweets(nextProps.currentBox, showLoading)
     }
   }
@@ -196,10 +203,10 @@ class Groups extends React.Component {
   renderBox({ key, index, style }) {
     const box = this.props.boxes[index]
     const isOffline = !(box && box.station && box.station.isOnline)
-    const { ltime, name, uuid, users, lcomment, lri, ltsi } = box
+    const { ltime, name, uuid, users, lcomment, lri, ltsst } = box
     const selected = this.props.currentBox && (this.props.currentBox.uuid === uuid)
     const hovered = this.state.hover === index
-    const newMsg = !selected && (ltsi - lri)
+    const newMsg = !selected && ltsst && (ltsst.index - lri)
 
     /* width: 376 = 2 + 32 + 40 + 16 + 142 + 120 + 24 + 16 */
     return (
@@ -282,9 +289,9 @@ class Groups extends React.Component {
   }
 
   render() {
-    console.log('render Groups', this.state, this.props)
+    // console.log('render Groups', this.state, this.props)
     const { boxes, currentBox, station, guid, ipcRenderer, apis } = this.props
-    const { primaryColor, refresh, openSnackBar, getUsers } = this.props
+    const { primaryColor, openSnackBar, getUsers } = this.props
     const { tweets, tError } = this.state
     const boxH = boxes && Math.min(window.innerHeight - 106, boxes.length * 72) || 0
     const boxUUID = currentBox && currentBox.uuid
@@ -375,7 +382,6 @@ class Groups extends React.Component {
               currentUser={currentUser}
               boxUUID={boxUUID}
               stationId={stationId}
-              refresh={refresh}
               ipcRenderer={ipcRenderer}
               primaryColor={primaryColor}
               openSnackBar={openSnackBar}
@@ -392,7 +398,6 @@ class Groups extends React.Component {
               currentUser={currentUser}
               boxUUID={boxUUID}
               stationId={stationId}
-              refresh={refresh}
               ipcRenderer={ipcRenderer}
               primaryColor={primaryColor}
               openSnackBar={openSnackBar}

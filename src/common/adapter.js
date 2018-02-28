@@ -23,17 +23,17 @@ class Adapter extends EventEmitter {
     this.ctx = ctx
 
     this.state = {
-      boxes: null,
-      tweets: []
+      boxes: null
     }
   }
 
-  setState(name, nextState) {
-    if (nextState && nextState[0]) console.log('this.updateBoxes in setState', name, nextState, nextState[0].lri, nextState[0].ltsi)
+  updateBoxes(boxes, noSave) {
     const state = this.state
-    this.state = Object.assign({}, state, { [name]: nextState })
-    /* name, preState, nextState */
-    this.emit(name, state, this.state)
+    this.state = Object.assign({}, this.state, { boxes })
+    if (!noSave) {
+      this.DB.saveBoxes(this.ctx.guid, boxes).catch(e => console.log('saveBoxes error', e))
+    }
+    this.emit('boxes', state, this.state)
   }
 
   init() {
@@ -43,7 +43,7 @@ class Adapter extends EventEmitter {
     const tweetsPath = path.join(boxDir, `${guid}-Tweets-v1.db`)
     this.DB = new BoxDB(boxesPath, tweetsPath)
 
-    this.getBoxes(guid).then(boxes => this.setState('boxes', boxes)).catch(e => this.error('getBoxes', e))
+    this.getBoxes(guid).then(boxes => this.updateBoxes(boxes, true)).catch(e => this.error('getBoxes', e))
   }
 
   error(type, err) {
@@ -51,30 +51,38 @@ class Adapter extends EventEmitter {
   }
 
   /* request boxes, union previous data, and save to DB */
-  async reqBoxes(guid) {
+  async reqBoxes() {
     const newBoxes = await this.ctx.reqAsync('boxes', null)
-    const preBoxes = await this.getBoxes(guid)
+    const preBoxes = await this.getBoxes()
     const boxes = unionBox(preBoxes, newBoxes)
-    await this.DB.saveBoxes(guid, boxes)
-    this.setState('boxes', boxes)
+    this.updateBoxes(boxes)
     console.log('reqBoxes', boxes)
     for (let i = 0; i < boxes.length; i++) {
       const box = boxes[i]
-      if (!box.ltsi || (box.tweet.index > box.ltsi)) {
+      const ltsi = box.ltsst && box.ltsst.index
+      const lti = box.tweet && box.tweet.index || Infinity // last tweet's index
+      if (ltsi === undefined || (box.tweet.index > ltsi)) {
         await this.reqTweets({ boxUUID: box.uuid, stationId: box.stationId })
       }
     }
+  }
+
+  async deleteBox(boxUUID) {
+    const boxes = await this.getBoxes()
+    const index = boxes.findIndex(b => b.uuid === boxUUID)
+    if (index > -1) {
+      const rest = [...boxes.slice(0, index), ...boxes.slice(index + 1)]
+      this.updateBoxes(rest)
+    } else throw Error(`no such box with uuid: ${boxUUID}`)
   }
 
   /* request tweets, and save to tweetsDB */
   async reqTweets(args) {
     const { boxUUID, stationId } = args
     const box = this.state.boxes.find(b => b.uuid === boxUUID)
-    const lti = box.tweet.index // last tweet's index
-    const lri = box.lri > -1 ? box.lri : -1 // last read index
-    const ltsi = box.ltsi > -1 ? box.ltsi : -1 // the latest stored tweet's index
+    const ltsi = box.ltsst && box.ltsst.index // the latest stored tweet's index
     const props = { boxUUID, stationId }
-    if (ltsi > -1) Object.assign(props, { first: 0, last: ltsi, count: 0 })
+    if (ltsi !== undefined) Object.assign(props, { first: 0, last: ltsi, count: 0 })
     const res = await this.ctx.reqAsync('tweets', props)
     console.log('reqTweets res', props, res)
     if (Array.isArray(res) && res.length) {
@@ -83,19 +91,19 @@ class Adapter extends EventEmitter {
         .sort((a, b) => (a.index - b.index))
       await this.DB.saveTweets(docs)
 
-      /* update the latest stored tweet's index */
+      /* update the latest stored tweet and its index */
       const bs = this.state.boxes
       const i = bs.findIndex(b => b.uuid === boxUUID)
-      bs[i].ltsi = docs.slice(-1)[0].index
-      console.log('update ltsi', bs[i].ltsi)
-      this.setState('boxes', bs)
+      bs[i].ltsst = docs.slice(-1)[0] // latest stored tweet
+      console.log('update latest stored tweet', bs[i].ltsst)
+      this.updateBoxes(bs)
     }
   }
 
-  async getBoxes(guid) {
+  async getBoxes() {
     let boxes = this.state.boxes
     if (!boxes) {
-      boxes = await this.DB.loadBoxes(guid)
+      boxes = await this.DB.loadBoxes(this.ctx.guid)
       boxes.forEach(b => b.station.isOnline = true)
     }
     return boxes
@@ -109,7 +117,7 @@ class Adapter extends EventEmitter {
     const index = this.state.boxes.findIndex(b => b.uuid === boxUUID)
     if (this.state.boxes[index].lri !== lri) {
       this.state.boxes[index].lri = lri
-      this.setState('boxes', this.state.boxes)
+      this.updateBoxes(this.state.boxes)
     }
     return tweets
   }

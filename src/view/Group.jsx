@@ -134,7 +134,7 @@ class Group extends Base {
 
     this.refresh = (op) => {
       this.op = op
-      this.ada.reqBoxes(this.guid).catch(e => console.log('reqBoxes error', e))
+      this.ada.reqBoxes().catch(e => console.log('reqBoxes error', e))
     }
 
     this.startMqtt = () => {
@@ -260,6 +260,7 @@ class Group extends Base {
         key={this.state.currentBox && (this.state.currentBox.users.length + this.state.currentBox.users.name)}
       >
         <BoxDetail
+          ada={this.ada}
           guid={this.guid}
           refresh={this.refresh}
           box={this.state.currentBox}
