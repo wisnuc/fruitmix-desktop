@@ -59,18 +59,18 @@ class Group extends Base {
       if (!d || !d[0]) return []
 
       d.forEach((b) => {
-        const { tweet, ctime, owner, users } = b
-        if (tweet) {
-          b.ltime = tweet.ctime
-          const list = tweet.list
+        const { ltsst, ctime, owner, users } = b
+        if (ltsst) { // the latest stored tweet's index
+          b.ltime = ltsst.ctime
+          const list = ltsst.list
           const isMedia = list && list.length && list.every(l => l.metadata)
           const comment = isMedia ? `[${i18n.__('%s Photos', list.length)}]` : list && list.length
-            ? `[${i18n.__('%s Files', list.length)}]` : tweet.type === 'boxmessage'
-            ? this.getMsg(tweet, b) : tweet.comment
-          const user = b.users.find(u => u.id === tweet.tweeter)
+            ? `[${i18n.__('%s Files', list.length)}]` : ltsst.type === 'boxmessage'
+              ? this.getMsg(ltsst, b) : ltsst.comment
+          const user = b.users.find(u => u.id === (ltsst.tweeter && ltsst.tweeter.id))
           const nickName = user && user.nickName
           /* box message, nickName + content, '' */
-          b.lcomment = tweet.type === 'boxmessage' ? comment : nickName ? `${nickName} : ${comment}` : ''
+          b.lcomment = ltsst.type === 'boxmessage' ? comment : nickName ? `${nickName} : ${comment}` : ''
         } else {
           b.ltime = ctime
           b.lcomment = i18n.__('New Group Text')
