@@ -22,16 +22,21 @@ class BoxDetail extends React.Component {
       newName: false
     }
 
+    this.deleteBoxAsync = async () => {
+      const { apis, box, ada } = this.props
+      await apis.pureRequestAsync('delBox', { boxUUID: box.uuid, stationId: box.stationId })
+      await ada.deleteBox(box.uuid)
+    }
 
     this.deleteBox = () => {
       this.setState({ loading: true })
-      const { apis, box, openSnackBar, refresh } = this.props
-      apis.pureRequest('delBox', { boxUUID: box.uuid, stationId: box.stationId }, (err) => {
+      const { openSnackBar, refresh } = this.props
+      const cb = (err) => {
         if (err) openSnackBar(i18n.__('Delete Box Failed'))
         else openSnackBar(i18n.__('Delete Box Success'))
         this.setState({ delBox: false, loading: false })
-        refresh()
-      })
+      }
+      this.deleteBoxAsync().then(cb).catch(cb)
     }
 
     this.addUser = (users) => {
