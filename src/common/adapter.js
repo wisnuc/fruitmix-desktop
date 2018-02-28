@@ -41,7 +41,8 @@ class Adapter extends EventEmitter {
     const { boxDir, guid } = this.ctx
     const boxesPath = path.join(boxDir, 'Boxes-v1.db')
     const tweetsPath = path.join(boxDir, `${guid}-Tweets-v1.db`)
-    this.DB = new BoxDB(boxesPath, tweetsPath)
+    const draftsPath = path.join(boxDir, `${guid}-Drafts-v1.db`)
+    this.DB = new BoxDB(boxesPath, tweetsPath, draftsPath)
 
     this.getBoxes(guid).then(boxes => this.updateBoxes(boxes, true)).catch(e => this.error('getBoxes', e))
   }

@@ -6,9 +6,10 @@ const Find = remote.require('pouchdb-find')
 const DB = Pouchdb.plugin(Find)
 
 class boxDB {
-  constructor(boxesPath, tweetsPath) {
+  constructor(boxesPath, tweetsPath, draftsPath) {
     this.boxesDB = new DB(boxesPath)
     this.tweetsDB = new DB(tweetsPath)
+    this.draftsDB = new DB(draftsPath)
     this.bRev = undefined // _rev of boxes
   }
 
@@ -43,6 +44,33 @@ class boxDB {
     })).docs
 
     return tweets
+  }
+
+  async updateDraft(data) {
+    let doc = null
+    try {
+      doc = await this.draftsDB.get(data._id)
+    } catch (e) {
+      console.log('get drafts error', e)
+    }
+    if (doc) await this.draftsDB.put(Object.assign({}, data, { _rev: doc._rev }))
+    else await this.draftsDB.put(data)
+  }
+
+  async deleteDraft(id) {
+    const doc = await this.draftsDB.get(id)
+    const res = await this.draftsDB.remove(doc)
+    return res
+  }
+
+  async loadDrafts(boxUUID) {
+    await this.draftsDB.createIndex({ index: { fields: ['ctime'] } })
+    const drafts = (await this.draftsDB.find({
+      selector: { boxUUID, ctime: { $gte: null } },
+      sort: ['ctime']
+    })).docs
+
+    return drafts
   }
 }
 

@@ -24,13 +24,13 @@ class BoxDetail extends React.Component {
 
     this.deleteBoxAsync = async () => {
       const { apis, box, ada } = this.props
-      await apis.pureRequestAsync('delBox', { boxUUID: box.uuid, stationId: box.stationId })
+      if (!box.deleted) await apis.pureRequestAsync('delBox', { boxUUID: box.uuid, stationId: box.stationId })
       await ada.deleteBox(box.uuid)
     }
 
     this.deleteBox = () => {
       this.setState({ loading: true })
-      const { openSnackBar, refresh } = this.props
+      const { openSnackBar } = this.props
       const cb = (err) => {
         if (err) openSnackBar(i18n.__('Delete Box Failed'))
         else openSnackBar(i18n.__('Delete Box Success'))
