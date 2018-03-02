@@ -32,9 +32,13 @@ class boxDB {
     await Promise.promisify(this.tweetsDB.insert)(docs)
   }
 
+  async updateTweet(_id, value) {
+    await Promise.promisify(this.draftsDB.update)({ _id }, { $set: value })
+  }
+
   async loadTweets(boxUUID) {
     const tweets = await Promise.promisify(this.tweetsDB.find)({ boxUUID })
-    return tweets.sort((a, b) => a.ctime - b.ctime)
+    return tweets
   }
 
   async createDraft(doc) {
@@ -55,7 +59,7 @@ class boxDB {
   async loadDrafts(boxUUID) {
     const drafts = await Promise.promisify(this.draftsDB.find)({ boxUUID })
     console.log('loadDraft', boxUUID, drafts)
-    return drafts.sort((a, b) => a.ctime - b.ctime)
+    return drafts
   }
 }
 
