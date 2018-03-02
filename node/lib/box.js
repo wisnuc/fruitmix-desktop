@@ -45,8 +45,8 @@ const uploadHandle = (event, args) => {
       .then(({ fakeList, files }) => {
         getMainWindow().webContents.send('BOX_UPLOAD_FAKE_DATA', { session, boxUUID, success: true, fakeList })
         boxUploadAsync(files, args)
-          .then(() => {
-            getMainWindow().webContents.send('BOX_UPLOAD_RESULT', { session, boxUUID, success: true })
+          .then((res) => {
+						getMainWindow().webContents.send('BOX_UPLOAD_RESULT', { session, boxUUID, success: true, data: res.body.data }) // TODO
           }).catch((err) => {
             const body = err && err.response && err.response.body
             console.log('box upload error', body || err)

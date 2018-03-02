@@ -31,7 +31,7 @@ class Adapter extends EventEmitter {
     const state = this.state
     this.state = Object.assign({}, this.state, { boxes })
     if (!noSave) {
-      this.DB.saveBoxes(this.ctx.guid, boxes).catch(e => console.log('saveBoxes error', e))
+      this.DB.saveBoxes(this.ctx.guid, boxes).catch(e => console.log('saveBoxes error', boxes, e))
     }
     this.emit('boxes', state, this.state)
   }
@@ -111,15 +111,44 @@ class Adapter extends EventEmitter {
   }
 
   async getTweets(boxUUID) {
-    const tweets = await this.DB.loadTweets(boxUUID)
+    console.log(' async getTweets', boxUUID)
+
+    const trueTweets = await this.DB.loadTweets(boxUUID)
+    // const drafts = await this.DB.loadDrafts(boxUUID)
+    const drafts = []
+
+    /* remove finished drafts */
+    for (let i = 0; i < drafts.length; i++) {
+      const t = drafts[i]
+      if (t.trueUUID) { // already finished
+        const index = trueTweets.findIndex(tt => tt.uuid === t.trueUUID) // already stored
+        if (index > -1) await this.DB.deleteDraft(t._id)
+        drafts[i] = null
+      } else if (new Date().getTime() - t.ctime > 120000) { // set old tweets to failed state
+        drafts[i].failed = true
+      }
+    }
+
+    const tweets = [...trueTweets, ...drafts.filter(v => !!v)]
+
+    console.log('getTweets', trueTweets, drafts)
+    return tweets
 
     /* update last read index */
     const lri = tweets.length ? tweets.slice(-1)[0].index : -1
     const index = this.state.boxes.findIndex(b => b.uuid === boxUUID)
-    if (this.state.boxes[index].lri !== lri) {
+    if (!this.state.boxes[index].lri || (this.state.boxes[index].lri < lri)) {
       this.state.boxes[index].lri = lri
       this.updateBoxes(this.state.boxes)
     }
+    return tweets
+  }
+
+  async updateDraft(boxUUID, data) {
+    return
+    console.log('updateDraft', boxUUID, data)
+    await this.DB.updateDraft(data)
+    const tweets = await this.getTweets(boxUUID)
     return tweets
   }
 }
