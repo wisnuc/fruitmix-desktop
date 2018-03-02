@@ -10,14 +10,12 @@ class boxDB {
     this.boxesDB = new DB(boxesPath)
     this.tweetsDB = new DB(tweetsPath)
     this.draftsDB = new DB(draftsPath)
-    this.bRev = undefined // _rev of boxes
   }
 
   async loadBoxes(guid) {
     let boxes = []
     try {
       const doc = await this.boxesDB.get(`_local/${guid}`) // use local doc
-      this.bRev = doc._rev
       boxes = doc.boxes
     } catch (e) {
       console.log('loadBoxes error', e)
@@ -26,49 +24,83 @@ class boxDB {
   }
 
   async saveBoxes(guid, boxes) {
-    const doc = { _id: `_local/${guid}`, _rev: this.bRev, boxes }
-    const res = await this.boxesDB.put(doc)
-    this.bRev = res.rev
-    return res.rev
+    let doc = {}
+    try {
+      doc = await this.boxesDB.get(`_local/${guid}`)
+    } catch (e) {
+      console.log('get boxes error in saveBoxes', e)
+    }
+    try {
+      const res = await this.boxesDB.put(Object.assign({}, doc, { boxes, _id: `_local/${guid}` }))
+    } catch (e) {
+      console.log('saveBoxes put', e, doc)
+    }
   }
 
   async saveTweets(docs) {
-    await this.tweetsDB.bulkDocs(docs)
+    try {
+      await this.tweetsDB.bulkDocs(docs)
+    } catch (e) {
+      console.log('saveTweets error', e, docs)
+    }
   }
 
   async loadTweets(boxUUID) {
     await this.tweetsDB.createIndex({ index: { fields: ['ctime'] } })
-    const tweets = (await this.tweetsDB.find({
+    let tweets = []
+    try {
+      tweets = (await this.tweetsDB.find({
       selector: { boxUUID, ctime: { $gte: null } },
       sort: ['ctime']
     })).docs
+    } catch (e) {
+      console.log('loadTweets find error', e)
+    }
 
     return tweets
   }
 
   async updateDraft(data) {
+    return
     let doc = null
+    let res = null
     try {
       doc = await this.draftsDB.get(data._id)
     } catch (e) {
-      console.log('get drafts error', e)
+      console.log('get draft error in updateDraft', e)
     }
-    if (doc) await this.draftsDB.put(Object.assign({}, data, { _rev: doc._rev }))
-    else await this.draftsDB.put(data)
+    try {
+      if (doc) res = await this.draftsDB.put(Object.assign({}, data, { _rev: doc._rev }))
+      else res = await this.draftsDB.put(data)
+    } catch (e) {
+      console.log('updateDraft put', e)
+    }
+    return res
   }
 
   async deleteDraft(id) {
-    const doc = await this.draftsDB.get(id)
-    const res = await this.draftsDB.remove(doc)
-    return res
+    let doc = null
+    try {
+      doc = await this.draftsDB.get(id)
+    } catch (e) {
+      console.log('get drafts error in deleteDraft', e)
+      return false
+    }
+    await this.draftsDB.remove(doc)
+    return true
   }
 
   async loadDrafts(boxUUID) {
     await this.draftsDB.createIndex({ index: { fields: ['ctime'] } })
-    const drafts = (await this.draftsDB.find({
-      selector: { boxUUID, ctime: { $gte: null } },
-      sort: ['ctime']
-    })).docs
+    let drafts = []
+    try {
+      drafts = (await this.draftsDB.find({
+        selector: { boxUUID, ctime: { $gte: null } },
+        sort: ['ctime']
+      })).docs
+    } catch (e) {
+      console.log('load drafts error find', e)
+    }
 
     return drafts
   }

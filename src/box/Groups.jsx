@@ -30,6 +30,8 @@ class Groups extends React.Component {
       newBox: false
     }
 
+    this.sessions = {}
+
     this.handleResize = () => this.forceUpdate()
 
     this.toggleDialog = op => this.setState({ [op]: !this.state[op] })
@@ -60,13 +62,18 @@ class Groups extends React.Component {
       // console.log('createNasTweets', args)
       const { list, boxUUID } = args
       const fakeList = list.map(l => Object.assign({ fakedata: {} }, l))
-      this.updateFakeTweet({ fakeList, boxUUID, isMedia: true })
+      /* create the fake tweet */
+      const tweet = this.updateFakeTweet({ fakeList, boxUUID, isMedia: true })
       this.props.apis.pureRequest('nasTweets', args, (err, res) => {
-        if (err) {
-          // console.log('create nasTweets error', err)
+        if (err || !res || !res.uuid) {
+          console.log('create nasTweets error', err)
           this.props.openSnackBar(i18n.__('Send Tweets with Nas Files Failed'))
+          this.props.ada.updateDraft(boxUUID, Object.assign({ failed: true }, tweet))
+            .catch(error => console.log('this.updateDraft error', error))
+        } else {
+          this.props.ada.updateDraft(boxUUID, Object.assign({ trueUUID: res.uuid }, tweet))
+            .catch(error => console.log('this.updateDraft error', error))
         }
-        // this.props.refresh()
       })
     }
 
@@ -74,8 +81,10 @@ class Groups extends React.Component {
       if (showLoading) this.setState({ tweets: null, tError: false }) // show loading state
 
       this.props.ada.removeAllListeners('tweets')
-      this.props.ada.on('tweets', (prev, next) => this.updateTweets(box, next))
-      this.props.ada.getTweets(box.uuid).then(tweets => this.updateTweets(box, tweets)).catch((e) => {
+      this.props.ada.getTweets(box.uuid).then((tweets) => {
+        console.log('loadTweets sucess', box, tweets)
+        this.updateTweets(box, tweets)
+      }).catch((e) => {
         console.log('loadTweets error', e)
         this.setState({ tError: true })
       })
@@ -94,46 +103,60 @@ class Groups extends React.Component {
     }
 
     this.updateFakeTweet = ({ fakeList, boxUUID, isMedia }) => {
-      if (!this.props.currentBox || this.props.currentBox.uuid !== boxUUID || !this.state.tweets) return
+      // if (!this.props.currentBox || this.props.currentBox.uuid !== boxUUID || !this.state.tweets) return
       const author = this.props.currentBox.users.find(u => u.id === this.props.guid) || { id: this.props.guid }
+      const uuid = UUID.v4()
       const tweet = {
+        uuid,
         author,
         isMedia,
+        tweeter: author,
         box: this.props.currentBox,
+        boxUUID: this.props.currentBox.uuid,
         comment: '',
         ctime: (new Date()).getTime(),
         index: this.state.tweets.length,
         list: fakeList,
+        msg: '',
+        stationId: this.props.currentBox.stationId,
         type: 'list',
-        uuid: (new Date()).getTime()
+        _id: uuid
       }
+
+      this.props.ada.updateDraft(boxUUID, tweet).catch(e => console.log('this.updateDraft error', e))
       this.setState({ tweets: [...this.state.tweets, tweet] })
+      return tweet
     }
 
     this.localUpload = (args) => {
-      // console.log('this.localUpload', args)
-      const { type, comment, box } = args
+      console.log('this.localUpload', args)
       const session = UUID.v4()
       this.props.ipcRenderer.send('BOX_UPLOAD', Object.assign({ session }, args))
     }
 
     this.onFakeData = (event, args) => {
       const { session, boxUUID, success, fakeList } = args
-      // console.log('this.onFakeData', args)
+      console.log('this.onFakeData', args)
       if (!success) {
         this.props.openSnackBar(i18n.__('Read Local Files Failed'))
       } else {
-        this.updateFakeTweet({ fakeList, boxUUID })
+        const tweet = this.updateFakeTweet({ fakeList, boxUUID })
+        this.sessions[session] = tweet
       }
     }
 
     this.onLocalFinish = (event, args) => {
-      const { session, boxUUID, success } = args
+      const { session, boxUUID, success, data } = args
+      const tweet = this.sessions[session]
+      console.log('args this.onLocalFinish', args, tweet)
+      if (!tweet) return
       if (!success) {
         this.props.openSnackBar(i18n.__('Send Tweets with Local Files Failed'))
-      } else if (this.props.currentBox && this.props.currentBox.uuid === boxUUID) {
-        // console.log('this.onLocalFinish success')
-        // this.getTweets(this.props.currentBox)
+        this.props.ada.updateDraft(boxUUID, Object.assign({ failed: true }, tweet))
+          .catch(error => console.log('this.updateDraft error', error))
+      } else {
+        this.props.ada.updateDraft(boxUUID, Object.assign({ trueUUID: data.uuid }, tweet))
+          .catch(error => console.log('this.updateDraft error', error))
       }
     }
 

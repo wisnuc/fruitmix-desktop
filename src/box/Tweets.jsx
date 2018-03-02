@@ -330,6 +330,8 @@ class Tweets extends React.PureComponent {
     }
     const rowHeight = ({ index }) => hs[index]
 
+    console.log('render tweets boxUUID', boxUUID)
+
     return (
       <div
         ref={ref => (this.refContainer = ref)}
