@@ -2,6 +2,7 @@ import React from 'react'
 import i18n from 'i18n'
 import { CircularProgress, Paper, Avatar } from 'material-ui'
 import ActionAccountCircle from 'material-ui/svg-icons/action/account-circle'
+import FailedIcon from 'material-ui/svg-icons/action/info'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import { AutoSizer } from 'react-virtualized'
 import { parseTime } from '../common/datetime'
@@ -125,7 +126,7 @@ class Tweets extends React.PureComponent {
   }
 
   renderTweets({ index, key, style, rowCount }) {
-    const { ctime, comment, uuid, author, list, box, type, msg } = this.props.tweets[index]
+    const { ctime, comment, uuid, author, list, box, type, msg, failed } = this.props.tweets[index]
     const { stationId, wxToken } = box
     const boxUUID = box.uuid
     const isSelf = this.props.guid === author.id
@@ -183,7 +184,9 @@ class Tweets extends React.PureComponent {
                     { comment }
                   </Paper>
                   : isMedia || isFakeMedia ?
-                  <div style={{ width: 3 * w + 12, maxHeight: 400, filter: isFakeMedia ? 'brightness(0.7)' : '', position: 'relative' }}>
+                  <div
+                    style={{ width: 3 * w + 12, maxHeight: 400, position: 'relative' }}
+                  >
                     {
                       list.map((l, i) => {
                         const { sha256, filename } = l
@@ -228,8 +231,16 @@ class Tweets extends React.PureComponent {
                     }
                     {
                       isFakeMedia &&
-                        <div style={{ position: 'absolute', height: 120, width: 120, top: 2, right: 10 }}>
-                          { this.renderLoading(32, '#FFF') }
+                        <div
+                          style={{
+                            position: 'absolute',
+                            height: 120,
+                            width: 120,
+                            top: list.length > 3 ? 32 : 2,
+                            right: 120 * Math.min(list.length, 3)
+                          }}
+                        >
+                          { failed ? this.renderFailed(this.props.tweets[index]) : this.renderLoading(32, '#E0E0E0') }
                         </div>
                     }
                   </div>
@@ -241,8 +252,7 @@ class Tweets extends React.PureComponent {
                       width: 3 * w + 12,
                       userSelect: 'text',
                       display: 'flex',
-                      alignItems: 'center',
-                      filter: isFake ? 'brightness(0.7)' : ''
+                      alignItems: 'center'
                     }}
                     onTouchTap={() => this.setState({ showFiles: true, list, author })}
                   >
@@ -268,7 +278,7 @@ class Tweets extends React.PureComponent {
                     {
                       isFake &&
                         <div style={{ position: 'absolute', height: 120, width: 120, top: 22, right: 460 }}>
-                          { this.renderLoading(32, '#E0E0E0') }
+                          { failed ? this.renderFailed(this.props.tweets[index]) : this.renderLoading(32, '#E0E0E0') }
                         </div>
                     }
                   </Paper>
@@ -276,6 +286,14 @@ class Tweets extends React.PureComponent {
             </div>
           </div>
         </div>
+      </div>
+    )
+  }
+
+  renderFailed() {
+    return (
+      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
+        <FailedIcon color="red" />
       </div>
     )
   }

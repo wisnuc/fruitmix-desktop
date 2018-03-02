@@ -35,7 +35,6 @@ const readAsync = async (entries, args) => {
 /* handler */
 const uploadHandle = (event, args) => {
   const { session, box } = args
-  const boxUUID = box.uuid
   // only allow upload single File
   // const dialogType = type === 'directory' ? 'openDirectory' : 'openFile'
   // dialog.showOpenDialog(getMainWindow(), { properties: [dialogType, 'multiSelections'] }, (entries) => {
@@ -43,17 +42,17 @@ const uploadHandle = (event, args) => {
     if (!entries || !entries.length) return
     readAsync(entries, args)
       .then(({ fakeList, files }) => {
-        getMainWindow().webContents.send('BOX_UPLOAD_FAKE_DATA', { session, boxUUID, success: true, fakeList })
+        getMainWindow().webContents.send('BOX_UPLOAD_FAKE_DATA', { session, box, success: true, fakeList })
         boxUploadAsync(files, args)
           .then((res) => {
-						getMainWindow().webContents.send('BOX_UPLOAD_RESULT', { session, boxUUID, success: true, data: res.body.data }) // TODO
+						getMainWindow().webContents.send('BOX_UPLOAD_RESULT', { session, box, success: true, data: res.body.data }) // TODO
           }).catch((err) => {
             const body = err && err.response && err.response.body
             console.log('box upload error', body || err)
-            getMainWindow().webContents.send('BOX_UPLOAD_RESULT', { session, boxUUID, success: false })
+            getMainWindow().webContents.send('BOX_UPLOAD_RESULT', { session, box, success: false })
           })
       }).catch(() => {
-        getMainWindow().webContents.send('BOX_UPLOAD_FAKE_DATA', { session, boxUUID, success: false })
+        getMainWindow().webContents.send('BOX_UPLOAD_FAKE_DATA', { session, box, success: false })
       })
   })
 }

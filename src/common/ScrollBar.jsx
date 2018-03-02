@@ -20,6 +20,8 @@ class ScrollBar extends React.PureComponent {
 
     this.mouseDown = false
     this.onMouseDown = (event) => {
+      event.preventDefault()
+      event.stopPropagation()
       this.mouseDown = true
       this.startY = event.clientY
       this.startScrollTop = this.scrollTop

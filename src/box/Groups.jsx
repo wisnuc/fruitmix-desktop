@@ -61,9 +61,10 @@ class Groups extends React.Component {
     this.createNasTweets = (args) => {
       // console.log('createNasTweets', args)
       const { list, boxUUID } = args
+      const box = this.props.boxes.find(b => b.uuid === boxUUID)
       const fakeList = list.map(l => Object.assign({ fakedata: {} }, l))
       /* create the fake tweet */
-      const tweet = this.updateFakeTweet({ fakeList, boxUUID, isMedia: true })
+      const tweet = this.updateFakeTweet({ fakeList, box, isMedia: true })
       this.props.apis.pureRequest('nasTweets', args, (err, res) => {
         if (err || !res || !res.uuid) {
           console.log('create nasTweets error', err)
@@ -102,17 +103,18 @@ class Groups extends React.Component {
       })
     }
 
-    this.updateFakeTweet = ({ fakeList, boxUUID, isMedia }) => {
+    this.updateFakeTweet = ({ fakeList, box, isMedia }) => {
       // if (!this.props.currentBox || this.props.currentBox.uuid !== boxUUID || !this.state.tweets) return
-      const author = this.props.currentBox.users.find(u => u.id === this.props.guid) || { id: this.props.guid }
+      console.log('this.updateFakeTweet', box)
+      const author = box.users.find(u => u.id === this.props.guid) || { id: this.props.guid }
       const uuid = UUID.v4()
       const tweet = {
         uuid,
         author,
         isMedia,
         tweeter: author,
-        box: this.props.currentBox,
-        boxUUID: this.props.currentBox.uuid,
+        box,
+        boxUUID: box.uuid,
         comment: '',
         ctime: (new Date()).getTime(),
         index: this.state.tweets.length,
@@ -135,27 +137,27 @@ class Groups extends React.Component {
     }
 
     this.onFakeData = (event, args) => {
-      const { session, boxUUID, success, fakeList } = args
+      const { session, box, success, fakeList } = args
       console.log('this.onFakeData', args)
       if (!success) {
         this.props.openSnackBar(i18n.__('Read Local Files Failed'))
       } else {
-        const tweet = this.updateFakeTweet({ fakeList, boxUUID })
+        const tweet = this.updateFakeTweet({ fakeList, box })
         this.sessions[session] = tweet
       }
     }
 
     this.onLocalFinish = (event, args) => {
-      const { session, boxUUID, success, data } = args
+      const { session, box, success, data } = args
       const tweet = this.sessions[session]
       console.log('args this.onLocalFinish', args, tweet)
       if (!tweet) return
       if (!success) {
         this.props.openSnackBar(i18n.__('Send Tweets with Local Files Failed'))
-        this.props.ada.updateDraft(boxUUID, Object.assign({ failed: true }, tweet))
+        this.props.ada.updateDraft(box.uuid, Object.assign({ failed: true }, tweet))
           .catch(error => console.log('this.updateDraft error', error))
       } else {
-        this.props.ada.updateDraft(boxUUID, Object.assign({ trueUUID: data.uuid }, tweet))
+        this.props.ada.updateDraft(box.uuid, Object.assign({ trueUUID: data.uuid }, tweet))
           .catch(error => console.log('this.updateDraft error', error))
       }
     }
@@ -276,7 +278,7 @@ class Groups extends React.Component {
                 { lcomment }
               </div>
               {
-                !!newMsg &&
+                newMsg > 0 &&
                   <div
                     style={{
                       width: 16,
@@ -292,7 +294,7 @@ class Groups extends React.Component {
                       justifyContent: 'center'
                     }}
                   >
-                    { newMsg < 0 ? '' : newMsg < 99 ? newMsg : 99 }
+                    { newMsg < 99 ? newMsg : 99 }
                   </div>
               }
             </div>

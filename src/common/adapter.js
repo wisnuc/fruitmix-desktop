@@ -121,14 +121,18 @@ class Adapter extends EventEmitter {
       const t = drafts[i]
       if (t.trueUUID) { // already finished
         const index = trueTweets.findIndex(tt => tt.uuid === t.trueUUID) // already stored
-        if (index > -1) await this.DB.deleteDraft(t._id)
-        drafts[i] = null
+        if (index > -1) {
+          trueTweets[index].ctime = t.ctime
+          await this.DB.updateTweet(t.trueUUID, { ctime: t.ctime })
+          await this.DB.deleteDraft(t._id)
+          drafts[i] = null
+        }
       } else if (new Date().getTime() - t.ctime > 120000) { // set old tweets to failed state
         drafts[i].failed = true
       }
     }
 
-    const tweets = [...trueTweets, ...drafts.filter(v => !!v)]
+    const tweets = [...trueTweets, ...drafts.filter(v => !!v)].sort((a, b) => a.ctime - b.ctime)
 
     console.log('getTweets', trueTweets, drafts)
 
