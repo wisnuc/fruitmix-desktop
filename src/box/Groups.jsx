@@ -123,7 +123,7 @@ class Groups extends React.Component {
         _id: uuid
       }
 
-      this.props.ada.updateDraft(boxUUID, tweet).catch(e => console.log('this.updateDraft error', e))
+      this.props.ada.createDraft(tweet).catch(e => console.log('this.updateDraft error', e))
       this.setState({ tweets: [...this.state.tweets, tweet] })
       return tweet
     }
@@ -292,7 +292,7 @@ class Groups extends React.Component {
                       justifyContent: 'center'
                     }}
                   >
-                    { (newMsg > 0 && newMsg < 99) ? newMsg : 99 }
+                    { newMsg < 0 ? '' : newMsg < 99 ? newMsg : 99 }
                   </div>
               }
             </div>

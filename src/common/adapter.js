@@ -111,11 +111,10 @@ class Adapter extends EventEmitter {
   }
 
   async getTweets(boxUUID) {
-    console.log(' async getTweets', boxUUID)
-
     const trueTweets = await this.DB.loadTweets(boxUUID)
-    // const drafts = await this.DB.loadDrafts(boxUUID)
-    const drafts = []
+    const drafts = await this.DB.loadDrafts(boxUUID)
+
+    console.log('async getTweets trueTweets drafts', boxUUID, trueTweets, drafts)
 
     /* remove finished drafts */
     for (let i = 0; i < drafts.length; i++) {
@@ -132,20 +131,22 @@ class Adapter extends EventEmitter {
     const tweets = [...trueTweets, ...drafts.filter(v => !!v)]
 
     console.log('getTweets', trueTweets, drafts)
-    return tweets
 
     /* update last read index */
     const lri = tweets.length ? tweets.slice(-1)[0].index : -1
     const index = this.state.boxes.findIndex(b => b.uuid === boxUUID)
-    if (!this.state.boxes[index].lri || (this.state.boxes[index].lri < lri)) {
+    if (!this.state.boxes[index].lri || (this.state.boxes[index].lri !== lri)) {
       this.state.boxes[index].lri = lri
       this.updateBoxes(this.state.boxes)
     }
     return tweets
   }
 
+  async createDraft(doc) {
+    await this.DB.createDraft(doc)
+  }
+
   async updateDraft(boxUUID, data) {
-    return
     console.log('updateDraft', boxUUID, data)
     await this.DB.updateDraft(data)
     const tweets = await this.getTweets(boxUUID)
