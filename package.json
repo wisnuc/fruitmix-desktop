@@ -73,8 +73,6 @@
     "nedb": "^1.8.0",
     "nodejs-fs-utils": "^1.0.26",
     "pdfjs-dist": "^2.0.267",
-    "pouchdb": "^6.4.3",
-    "pouchdb-find": "^6.4.3",
     "prettysize": "^1.1.0",
     "react": "^15.6.1",
     "react-event-listener": "^0.5.1",

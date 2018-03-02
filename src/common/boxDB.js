@@ -1,108 +1,61 @@
+const Promise = require('bluebird')
 const remote = require('electron').remote
 
-const Pouchdb = remote.require('pouchdb')
-const Find = remote.require('pouchdb-find')
-
-const DB = Pouchdb.plugin(Find)
+const DB = remote.require('nedb')
 
 class boxDB {
   constructor(boxesPath, tweetsPath, draftsPath) {
-    this.boxesDB = new DB(boxesPath)
-    this.tweetsDB = new DB(tweetsPath)
-    this.draftsDB = new DB(draftsPath)
+    this.boxesDB = new DB({ filename: boxesPath, autoload: true })
+    this.tweetsDB = new DB({ filename: tweetsPath, autoload: true })
+    this.draftsDB = new DB({ filename: draftsPath, autoload: true })
   }
 
   async loadBoxes(guid) {
+    let doc = null
     let boxes = []
     try {
-      const doc = await this.boxesDB.get(`_local/${guid}`) // use local doc
-      boxes = doc.boxes
+      doc = await Promise.promisify(this.boxesDB.findOne)({ _id: guid })
     } catch (e) {
-      console.log('loadBoxes error', e)
+      console.log('async loadBoxes error', guid, e)
     }
+    if (doc) boxes = doc.boxes
     return boxes
   }
 
   async saveBoxes(guid, boxes) {
-    let doc = {}
-    try {
-      doc = await this.boxesDB.get(`_local/${guid}`)
-    } catch (e) {
-      console.log('get boxes error in saveBoxes', e)
-    }
-    try {
-      const res = await this.boxesDB.put(Object.assign({}, doc, { boxes, _id: `_local/${guid}` }))
-    } catch (e) {
-      console.log('saveBoxes put', e, doc)
-    }
+    const doc = await Promise.promisify(this.boxesDB.findOne)({ _id: guid })
+    if (doc) await Promise.promisify(this.boxesDB.update)({ _id: guid }, { boxes })
+    else await Promise.promisify(this.boxesDB.insert)({ _id: guid, boxes })
   }
 
   async saveTweets(docs) {
-    try {
-      await this.tweetsDB.bulkDocs(docs)
-    } catch (e) {
-      console.log('saveTweets error', e, docs)
-    }
+    await Promise.promisify(this.tweetsDB.insert)(docs)
   }
 
   async loadTweets(boxUUID) {
-    await this.tweetsDB.createIndex({ index: { fields: ['ctime'] } })
-    let tweets = []
-    try {
-      tweets = (await this.tweetsDB.find({
-      selector: { boxUUID, ctime: { $gte: null } },
-      sort: ['ctime']
-    })).docs
-    } catch (e) {
-      console.log('loadTweets find error', e)
-    }
-
-    return tweets
+    const tweets = await Promise.promisify(this.tweetsDB.find)({ boxUUID })
+    return tweets.sort((a, b) => a.ctime - b.ctime)
   }
 
-  async updateDraft(data) {
-    return
-    let doc = null
-    let res = null
-    try {
-      doc = await this.draftsDB.get(data._id)
-    } catch (e) {
-      console.log('get draft error in updateDraft', e)
-    }
-    try {
-      if (doc) res = await this.draftsDB.put(Object.assign({}, data, { _rev: doc._rev }))
-      else res = await this.draftsDB.put(data)
-    } catch (e) {
-      console.log('updateDraft put', e)
-    }
-    return res
+  async createDraft(doc) {
+    const res = await Promise.promisify(this.draftsDB.insert)(doc)
+    console.log('createDraft', doc, res)
+  }
+
+  async updateDraft(doc) {
+    const res = await Promise.promisify(this.draftsDB.update)({ _id: doc._id }, doc)
+    console.log('updateDraft', doc, res)
   }
 
   async deleteDraft(id) {
-    let doc = null
-    try {
-      doc = await this.draftsDB.get(id)
-    } catch (e) {
-      console.log('get drafts error in deleteDraft', e)
-      return false
-    }
-    await this.draftsDB.remove(doc)
-    return true
+    const res = await Promise.promisify(this.draftsDB.remove)({ _id: id }, {})
+    console.log('deleteDraft', id, res)
   }
 
   async loadDrafts(boxUUID) {
-    await this.draftsDB.createIndex({ index: { fields: ['ctime'] } })
-    let drafts = []
-    try {
-      drafts = (await this.draftsDB.find({
-        selector: { boxUUID, ctime: { $gte: null } },
-        sort: ['ctime']
-      })).docs
-    } catch (e) {
-      console.log('load drafts error find', e)
-    }
-
-    return drafts
+    const drafts = await Promise.promisify(this.draftsDB.find)({ boxUUID })
+    console.log('loadDraft', boxUUID, drafts)
+    return drafts.sort((a, b) => a.ctime - b.ctime)
   }
 }
 
