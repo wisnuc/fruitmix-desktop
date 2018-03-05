@@ -185,6 +185,9 @@ class Home extends Base {
       const selected = this.select.state.selected
       if (selected.length !== 1) return
 
+      /* reset jump action of files or drives */
+      this.resetScrollTo()
+
       const entry = this.state.entries[selected[0]]
       if (entry.type === 'directory') {
         this.ctx.props.apis.request('listNavDir', {
@@ -203,10 +206,13 @@ class Home extends Base {
       if (!rUUID || !dUUID) {
         this.setState({ loading: true })
         this.ctx.props.apis.request('drives') // drive root
-      } else this.ctx.props.apis.request('listNavDir', { driveUUID: rUUID, dirUUID: dUUID })
+      } else {
+        this.ctx.props.apis.request('listNavDir', { driveUUID: rUUID, dirUUID: dUUID })
+      }
+      this.resetScrollTo()
 
       // debug('this.refresh op', op)
-      if (op) this.setState({ scrollTo: op.fileName, loading: !op.noloading })
+      if (op) this.setState({ scrollTo: op.fileName || op.uuid, loading: !op.noloading }) // fileName for files, uuid for drives
       else this.setState({ loading: true })
     }
 
