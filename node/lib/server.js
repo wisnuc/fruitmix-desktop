@@ -24,15 +24,17 @@ export const clearTmpTrans = () => {
 let stationID = null
 let address = null
 let token = null
+let isCloud = false
 
 ipcMain.on('LOGIN', (event, device, user) => {
   address = device.mdev.address
   token = device.token.data.token
-  stationID = device.token.data.stationID
-  debug('Got device, address, token, stationID: ', address, stationID)
+  stationID = device.mdev.stationID
+  cloud = !!device.mdev.isCloud
+  debug('Got device, address, token, stationID: ', address, stationID, cloud)
 })
 
-export const isCloud = () => !!stationID
+export const isCloud = () => cloud 
 
 const reqCloud = (ep, data, type) => {
   const url = `${address}/c/v1/stations/${stationID}/json`
@@ -45,14 +47,14 @@ const reqCloud = (ep, data, type) => {
 }
 
 const aget = (ep) => {
-  if (stationID) return reqCloud(ep, null, 'GET')
+  if (cloud) return reqCloud(ep, null, 'GET')
   return request
     .get(`http://${address}:3000/${ep}`)
     .set('Authorization', `JWT ${token}`)
 }
 
 const adownload = (ep) => {
-  if (stationID) return reqCloud(ep, null, 'DOWNLOAD')
+  if (cloud) return reqCloud(ep, null, 'DOWNLOAD')
   return request
     .get(`http://${address}:3000/${ep}`)
     .set('Authorization', `JWT ${token}`)
@@ -66,7 +68,7 @@ const cdownload = (ep, station) => {
 }
 
 const apost = (ep, data) => {
-  if (stationID) return reqCloud(ep, data, 'POST')
+  if (cloud) return reqCloud(ep, data, 'POST')
   const r = request
     .post(`http://${address}:3000/${ep}`)
     .set('Authorization', `JWT ${token}`)
@@ -205,13 +207,12 @@ export class UploadMultipleFiles {
         this.handle = null
         if (err) this.finish(err)
         else this.cloudUpload()
-        // else setImmediate(() => this.cloudUpload())
       })
   }
 
   upload() {
-    if (stationID && this.Files[0].policy && this.Files[0].policy.mode === 'replace') this.remove()
-    else if (stationID) this.cloudUpload()
+    if (cloud && this.Files[0].policy && this.Files[0].policy.mode === 'replace') this.remove()
+    else if (cloud) this.cloudUpload()
     else this.localUpload()
   }
 
@@ -339,7 +340,7 @@ export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, ca
   const parents = true // mkdirp
   const ep = `drives/${driveUUID}/dirs/${dirUUID}/entries`
   let handle = null
-  if (stationID) {
+  if (cloud) {
     const url = `${address}/c/v1/stations/${stationID}/json`
     const resource = Buffer.from(`/${ep}`).toString('base64')
     handle = request.post(url).set('Authorization', token)
@@ -358,7 +359,7 @@ export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, ca
         /* when a file with the same name in remote, retry if given policy of overwrite or merge */
         serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
           .then((listNav) => {
-            const entries = stationID ? listNav.data.entries : listNav.entries
+            const entries = cloud ? listNav.data.entries : listNav.entries
             // debug('retry creat fold entries', entries)
             const index = entries.findIndex(e => e.name === dirname)
             if (index > -1) {
@@ -378,9 +379,9 @@ export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, ca
     } else if (res && res.statusCode === 200) {
       // debug('createFold handle.end res.statusCode 200', res.body)
       /* mode === 'replace' && stationID: need to retry creatFold */
-      if (stationID && policy && policy.mode === 'replace') createFold(driveUUID, dirUUID, dirname, localEntries, { mode: 'normal' }, callback)
+      if (cloud && policy && policy.mode === 'replace') createFold(driveUUID, dirUUID, dirname, localEntries, { mode: 'normal' }, callback)
       /* callback the created dir entry */
-      else callback(null, stationID ? res.body.data : res.body[res.body.length - 1].data)
+      else callback(null, cloud ? res.body.data : res.body[res.body.length - 1].data)
     } else {
       debug('createFold no error but res not 200', res.body)
       callback(res.body) // response code not 200 and no policy
@@ -436,7 +437,7 @@ export const downloadFile = (driveUUID, dirUUID, entryUUID, fileName, downloadPa
 }
 
 export const uploadTorrent = (dirUUID, rs, part, callback) => {
-  if (stationID) {
+  if (cloud) {
     const ep = 'download/torrent'
     const url = `${address}/c/v1/stations/${stationID}/pipe`
     const resource = Buffer.from(`/${ep}`).toString('base64')
