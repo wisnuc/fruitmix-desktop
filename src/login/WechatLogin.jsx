@@ -119,7 +119,7 @@ class WechatLogin extends React.Component {
             ctx: user,
             data: { token, stationID }
           },
-          mdev: { address: 'http://www.siyouqun.com:80', domain: 'remote', lanip: ips[0], stationID, stationName }
+          mdev: { address: 'http://www.siyouqun.com:80', domain: 'remote', lanip: ips[0], stationID, stationName, isCloud: true }
         })
       }
       this.props.ipcRenderer.send('UPDATE_USER_CONFIG', user.uuid, { weChat: this.state.wxData.user, wxToken: token })

@@ -1,19 +1,21 @@
-import Request from './Request'
 import request from 'superagent'
 import EventEmitter from 'eventemitter3'
+
+import Request from './Request'
 
 const cloudAddress = 'http://www.siyouqun.com:80'
 
 /* this module encapsulate most fruitmix apis */
 class Fruitmix extends EventEmitter {
-  constructor(address, userUUID, token, stationID) {
+  constructor(address, userUUID, token, isCloud, stationID) {
     super()
 
     this.address = address
     this.userUUID = userUUID
-    this.token = token
-    this.bToken = null // box Token
+    this.token = token // local token to access station resource
+    this.bToken = null // Token to access box resource
     this.wxToken = null // stored weChat Token
+    this.isCloud = isCloud
     this.stationID = stationID
 
     this.update = (name, data, next) => { // update state, not emit
@@ -34,6 +36,7 @@ class Fruitmix extends EventEmitter {
     }
 
 
+    /* adapter of cloud apis */
     this.reqCloud = (ep, data, type) => {
       const url = `${address}/c/v1/stations/${this.stationID}/json`
       const resource = Buffer.from(`/${ep}`).toString('base64')
@@ -55,6 +58,7 @@ class Fruitmix extends EventEmitter {
       return request.post(url).set('Authorization', this.token).send(Object.assign({ resource, method: type }, data))
     }
 
+    /* adapter of box api via cloud */
     this.creq = (ep, method, stationId, data) => {
       // console.log('this.creq', ep, method, stationId, data)
       if (stationId) {
@@ -83,7 +87,7 @@ class Fruitmix extends EventEmitter {
 
     this[name] = new Request(props, f)
     this[name].on('updated', (prev, curr) => {
-      if (this.stationID && this[name].isFinished() && !this[name].isRejected()) {
+      if (this.isCloud && this[name].isFinished() && !this[name].isRejected()) {
         curr.data = curr.data.data
       }
       this.setState(name, curr)
@@ -94,9 +98,8 @@ class Fruitmix extends EventEmitter {
       if (name === 'boxToken' && !this[name].isRejected()) this.bToken = curr.data.token
 
       if (this[name].isFinished() && next) {
-        this[name].isRejected()
-          ? next(this[name].reason())
-          : next(null, this[name].value())
+        if (this[name].isRejected()) next(this[name].reason())
+        else next(null, this[name].value())
       }
     })
 
@@ -114,14 +117,14 @@ class Fruitmix extends EventEmitter {
   }
 
   aget(ep) {
-    if (this.stationID) return this.reqCloud(ep, null, 'GET')
+    if (this.isCloud) return this.reqCloud(ep, null, 'GET')
     return request
       .get(`http://${this.address}:3000/${ep}`)
       .set('Authorization', `JWT ${this.token}`)
   }
 
   apost(ep, data) {
-    if (this.stationID) return this.reqCloud(ep, data, 'POST')
+    if (this.isCloud) return this.reqCloud(ep, data, 'POST')
     const r = request
       .post(`http://${this.address}:3000/${ep}`)
       .set('Authorization', `JWT ${this.token}`)
@@ -132,7 +135,7 @@ class Fruitmix extends EventEmitter {
   }
 
   apatch(ep, data) {
-    if (this.stationID) return this.reqCloud(ep, data, 'PATCH')
+    if (this.isCloud) return this.reqCloud(ep, data, 'PATCH')
     const r = request
       .patch(`http://${this.address}:3000/${ep}`)
       .set('Authorization', `JWT ${this.token}`)
@@ -143,7 +146,7 @@ class Fruitmix extends EventEmitter {
   }
 
   aput(ep, data) {
-    if (this.stationID) return this.reqCloud(ep, data, 'PUT')
+    if (this.isCloud) return this.reqCloud(ep, data, 'PUT')
     const r = request
       .put(`http://${this.address}:3000/${ep}`)
       .set('Authorization', `JWT ${this.token}`)
@@ -154,7 +157,7 @@ class Fruitmix extends EventEmitter {
   }
 
   adel(ep, data) {
-    if (this.stationID) return this.reqCloud(ep, data, 'DELETE')
+    if (this.isCloud) return this.reqCloud(ep, data, 'DELETE')
     const r = request
       .del(`http://${this.address}:3000/${ep}`)
       .set('Authorization', `JWT ${this.token}`)
@@ -169,7 +172,7 @@ class Fruitmix extends EventEmitter {
 
     switch (name) {
       case 'getToken':
-        if (this.stationID) {
+        if (this.isCloud) {
           r = this.aget('token')
         } else {
           r = request
@@ -197,7 +200,7 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'updatePassword':
-        if (this.stationID) { // connecting via Cloud, reset password
+        if (this.isCloud) { // connecting via Cloud, reset password
           r = this.aput(`users/${this.userUUID}/password`, { password: args.newPassword })
         } if (args.stationID) { // login via WeChat and connecting via LAN, rest password
           const url = `${cloudAddress}/c/v1/stations/${args.stationID}/json`
@@ -238,6 +241,7 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'adminUpdateDrive':
+        console.log('adminUpdateDrive', args)
         r = this.apatch(`drives/${args.uuid}`, {
           label: args.label,
           writelist: args.writelist
@@ -256,7 +260,7 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'mkdir':
-        if (this.stationID) {
+        if (this.isCloud) {
           r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`, Object.assign({}, args, { op: 'mkdir' }))
         } else {
           r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`)
@@ -265,7 +269,7 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'renameDirOrFile':
-        if (this.stationID) {
+        if (this.isCloud) {
           r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`, Object.assign({}, args, { op: 'rename' }))
         } else {
           r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`)
@@ -274,7 +278,7 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'deleteDirOrFile':
-        if (this.stationID) {
+        if (this.isCloud) {
           r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`, Object.assign({}, args, { op: 'remove' }))
         } else {
           r = this.apost(`drives/${args[0].driveUUID}/dirs/${args[0].dirUUID}/entries`)
@@ -285,7 +289,7 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'dupFile':
-        if (this.stationID) {
+        if (this.isCloud) {
           r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`, Object.assign({}, args, { op: 'dup' }))
         } else {
           r = this.apost(`drives/${args.driveUUID}/dirs/${args.dirUUID}/entries`)
@@ -329,17 +333,17 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'addBlacklist':
-        if (this.stationID) r = this.apost(`users/${this.userUUID}/media-blacklist`, { blacklist: args })
+        if (this.isCloud) r = this.apost(`users/${this.userUUID}/media-blacklist`, { blacklist: args })
         else r = this.apost(`users/${this.userUUID}/media-blacklist`, args)
         break
 
       case 'putBlacklist':
-        if (this.stationID) r = this.aput(`users/${this.userUUID}/media-blacklist`, { blacklist: args })
+        if (this.isCloud) r = this.aput(`users/${this.userUUID}/media-blacklist`, { blacklist: args })
         else r = this.aput(`users/${this.userUUID}/media-blacklist`, args)
         break
 
       case 'subtractBlacklist':
-        if (this.stationID) r = this.adel(`users/${this.userUUID}/media-blacklist`, { blacklist: args })
+        if (this.isCloud) r = this.adel(`users/${this.userUUID}/media-blacklist`, { blacklist: args })
         else r = this.adel(`users/${this.userUUID}/media-blacklist`, args)
         break
 
@@ -395,7 +399,7 @@ class Fruitmix extends EventEmitter {
 
   pureRequest(name, args, next) {
     let r
-    let isCloud = !!this.stationID
+    let isCloud = this.isCloud
     switch (name) {
       /* file api */
       case 'listNavDir':
