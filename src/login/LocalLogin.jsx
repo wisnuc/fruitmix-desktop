@@ -492,7 +492,7 @@ class Login extends StateUp(React.Component) {
 
   render() {
     const { mdns, selectedDevice } = this.props
-    // debug('Local Login render', this.props)
+    debug('Local Login render', this.props)
 
     let cardProps
     let displayProps
