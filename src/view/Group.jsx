@@ -76,6 +76,7 @@ class Group extends Base {
           b.lcomment = i18n.__('New Group Text')
         }
         b.wxToken = this.wxToken
+        b.guid = this.guid
 
         /* move owner to the first pos */
         const i = users.findIndex(u => u.id === owner)
