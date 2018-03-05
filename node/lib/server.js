@@ -30,9 +30,9 @@ ipcMain.on('LOGIN', (event, device, user) => {
   address = device.mdev.address
   token = device.token.data.token
   cloud = !!device.mdev.isCloud
-  const info = device.mdev.info
+  const info = device.info
   if (info && info.data) stationID = info.data.id
-  debug('Got device, address, token, stationID: ', address, stationID, cloud)
+  debug('Got device, user', device, user, cloud, stationID)
 })
 
 export const isCloud = () => cloud
@@ -452,7 +452,7 @@ export const uploadTorrent = (dirUUID, rs, part, callback) => {
 
 export const uploadTorrentAsync = Promise.promisify(uploadTorrent)
 
-export const boxUpload = (files, args, callback) => {
+export const boxUploadCloud = (files, args, callback) => {
   const { comment, type, box } = args
   const boxUUID = box.uuid
   const { stationId, wxToken } = box
@@ -472,4 +472,42 @@ export const boxUpload = (files, args, callback) => {
   r.end(callback)
 }
 
-export const boxUploadAsync = Promise.promisify(boxUpload)
+export const boxUploadLocal = (files, bToken, args, callback) => {
+  const { comment, type, box } = args
+  const boxUUID = box.uuid
+  const list = files.map(f => ({ filename: f.filename, size: f.size, sha256: f.sha256 }))
+  const url = `http://${address}:3000/boxes/${boxUUID}/tweets`
+  const r = request
+    .post(url)
+    .set('Authorization', `JWT ${bToken} ${token}`)
+    .field('list', JSON.stringify({ comment, type, list }))
+  for (let i = 0; i < files.length; i++) {
+    const { filename, size, sha256, entry } = files[i]
+    r.attach(filename, entry, JSON.stringify({ size, sha256 }))
+  }
+  r.end(callback)
+  console.log('boxUploadLocal', bToken, token)
+}
+
+const getBToken = (guid, callback) => {
+  const r = aget('cloudToken').query({ guid })
+  r.end(callback)
+}
+
+export const boxUploadAsync = async (files, args) => {
+  const { box } = args
+  const { stationId, guid } = box
+  let bToken = null
+  if (!cloud && stationID && stationID === stationId) {
+    try {
+      bToken = (await Promise.promisify(getBToken)(guid)).body.token
+    } catch (e) {
+      console.log('req bToken error', e)
+    }
+  }
+  let res = null
+  if (bToken) res = await Promise.promisify(boxUploadLocal)(files, bToken, args)
+  else res = await Promise.promisify(boxUploadCloud)(files, args)
+  return res
+}
+
