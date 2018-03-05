@@ -171,18 +171,24 @@ class Public extends Home {
   renderDetail({ style, openSnackBar }) {
     if (!this.state.entries) return (<div />)
     const drives = this.state.drives && this.state.drives.filter(drive => drive.type === 'public' && drive.tag !== 'built-in')
+    /* pre selected drive */
+    const preDrive = drives && drives.find(d => d.uuid === this.state.scrollTo)
+    const account = this.ctx.props.apis.account
+    const isAdmin = account && account.data && account.data.isAdmin
+    const rightPos = this.state.entries.length && (this.state.path.length === 1)
+    const isSelected = this.select.state.selected.length || preDrive
+    const detailDrive = this.select.state.selected.length ? drives[this.select.state.selected[0]] : preDrive
     return (
       <div style={style}>
         {
-          this.ctx.props.apis.account && this.ctx.props.apis.account.data && this.ctx.props.apis.account.data.isAdmin &&
-          this.state.entries.length && this.select.state.selected.length && this.state.path.length === 1 ?
+          isAdmin && rightPos && isSelected ?
             <DriversDetail
               primary
               openSnackBar={openSnackBar}
               users={this.state.users}
               drives={drives}
               detailUsers={this.state.users}
-              detailDrive={drives[this.select.state.selected[0]]}
+              detailDrive={detailDrive}
               apis={this.ctx.props.apis}
               refreshDrives={this.refresh}
               primaryColor={this.groupPrimaryColor()}

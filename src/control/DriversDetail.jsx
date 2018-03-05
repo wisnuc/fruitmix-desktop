@@ -30,11 +30,12 @@ class DrivesDetail extends PureComponent {
         label: this.state.label ? this.state.label : undefined,
         writelist: this.state.writelist
       }
+      console.log('this.fire', args, this.props.detailDrive.uuid)
       apis.request('adminUpdateDrive', args, (err) => {
         if (!err) {
           this.currentLabel = this.state.label ? this.state.label : this.props.detailDrive.label
           this.setState({ changed: false })
-          this.props.refreshDrives()
+          this.props.refreshDrives({ uuid: this.props.detailDrive.uuid, noloading: true })
           this.props.openSnackBar(i18n.__('Modify Drive Success'))
         } else {
           debug('adminUpdateDrive error', err)
@@ -76,7 +77,7 @@ class DrivesDetail extends PureComponent {
   handleCheck(userUUID) {
     const index = this.state.writelist.indexOf(userUUID)
     if (index === -1) {
-      this.setState({ changed: true, writelist: [...this.state.writelist, userUUID] })
+      this.setState({ changed: true, writelist: [...this.state.writelist, userUUID].filter(u => u !== '*') })
     } else {
       this.setState({
         changed: true,

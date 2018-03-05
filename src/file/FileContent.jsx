@@ -65,6 +65,7 @@ class FileContent extends React.Component {
 
       /* just touch */
       this.props.select.touchTap(button, index)
+      this.props.resetScrollTo()
 
       /* right click */
       if (button === 2) {
@@ -352,7 +353,7 @@ class FileContent extends React.Component {
   }
 
   render() {
-    console.log('render', this.state, this.props)
+    // console.log('render', this.state, this.props)
     /* loding */
     if (this.state.loading) return this.renderLoading()
 
