@@ -24,17 +24,18 @@ export const clearTmpTrans = () => {
 let stationID = null
 let address = null
 let token = null
-let isCloud = false
+let cloud = false
 
 ipcMain.on('LOGIN', (event, device, user) => {
   address = device.mdev.address
   token = device.token.data.token
-  stationID = device.mdev.stationID
   cloud = !!device.mdev.isCloud
+  const info = device.mdev.info
+  if (info && info.data) stationID = info.data.id
   debug('Got device, address, token, stationID: ', address, stationID, cloud)
 })
 
-export const isCloud = () => cloud 
+export const isCloud = () => cloud
 
 const reqCloud = (ep, data, type) => {
   const url = `${address}/c/v1/stations/${stationID}/json`
@@ -61,8 +62,8 @@ const adownload = (ep) => {
 }
 
 const cdownload = (ep, station) => {
-  const { stationId, wxToken } = station
-  const url = `${cloudAddress}/c/v1/stations/${stationId}/pipe`
+  const { stationId, wxToken, boxUUID } = station
+  const url = `${cloudAddress}/c/v1/boxes/${boxUUID}/stations/${stationId}/pipe`
   const resource = Buffer.from(`/${ep}`).toString('base64')
   return request.get(url).set('Authorization', wxToken).query({ resource, method: 'GET' })
 }
@@ -457,7 +458,7 @@ export const boxUpload = (files, args, callback) => {
   const { stationId, wxToken } = box
   const list = files.map(f => ({ filename: f.filename, size: f.size, sha256: f.sha256 }))
   const ep = `boxes/${boxUUID}/tweets`
-  const url = `${cloudAddress}/c/v1/stations/${stationId}/pipe`
+  const url = `${cloudAddress}/c/v1/boxes/${boxUUID}/stations/${stationId}/pipe`
   const resource = Buffer.from(`/${ep}`).toString('base64')
   const { filename, size, sha256, entry } = files[0]
   const option = { type, list, comment, resource, method: 'POST' }
