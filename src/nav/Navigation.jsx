@@ -272,9 +272,8 @@ class NavViews extends React.Component {
     if (!account.isPending() && !account.isRejected() && account.value() && account.value().isAdmin) isAdmin = true
 
     /* is cloud ? */
-    let isCloud = false
-    const token = this.props.selectedDevice.token
-    if (token && token.data && token.data.stationID) isCloud = true
+    const mdev = this.props.selectedDevice.mdev
+    const isCloud = mdev && !!mdev.isCloud
 
     return (
       <div
@@ -572,9 +571,8 @@ class NavViews extends React.Component {
     const view = this.views[this.state.nav]
 
     /* is cloud ? */
-    let isCloud = false
-    const token = this.props.selectedDevice.token
-    if (token && token.data && token.data.stationID) isCloud = true
+    const mdev = this.props.selectedDevice.mdev
+    const isCloud = mdev && !!mdev.isCloud
 
     return (
       <div
@@ -696,10 +694,9 @@ class Navigation extends React.Component {
     const token = props.selectedDevice.token
     if (!token.isFulfilled()) throw new Error('token not fulfilled')
 
-    const address = props.selectedDevice.mdev.address
+    const { address, isCloud } = props.selectedDevice.mdev
     const userUUID = token.ctx.uuid
-    // debug('init Fruitmix', address, userUUID, token.data.token, token.data.stationID)
-    this.fruitmix = new Fruitmix(address, userUUID, token.data.token, token.data.stationID)
+    this.fruitmix = new Fruitmix(address, userUUID, token.data.token, isCloud, token.data.stationID)
     this.fruitmix.on('updated', (prev, next) => this.setState({ apis: next }))
 
     this.state = { apis: null }
