@@ -42,8 +42,8 @@ class PhotoList extends React.Component {
     }
 
     this.onScroll = ({ scrollTop }) => {
-      if (!this.photoMapDates.length) return
       const currentIndex = this.indexHeightSum.findIndex(data => data > scrollTop + this.indexHeightSum[0] * 0.9)
+      if (!this.photoMapDates.length || currentIndex < 0) return
       const percentage = scrollTop / this.maxScrollTop
       this.date = this.photoMapDates[currentIndex].date
       this.currentDigest = this.photoMapDates[currentIndex].photos[0].hash
@@ -106,7 +106,7 @@ class PhotoList extends React.Component {
         /* calculate position and percentage */
         let position = y - this.headerHeight
         if (position < 0) position = 0
-        const percentage = Math.round(position / this.height * 1000)
+        const percentage = Math.min(1000, Math.round(position / this.height * 1000))
 
         /* convert currentScrollTop to currentIndex */
         const currentScrollTop = Math.round((this.maxScrollTop * percentage / 1000))
