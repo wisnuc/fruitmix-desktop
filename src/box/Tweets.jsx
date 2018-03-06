@@ -59,11 +59,12 @@ class Tweets extends React.PureComponent {
     this.startDownload = () => {
       const list = [this.memoizeValue.downloadDigest]
 
-      const { stationId, wxToken } = this.props.box
-      const boxUUID = this.props.box.uuid
+      const { guid, box } = this.props
+      const { stationId, wxToken } = box
+      const boxUUID = box.uuid
       const photos = list.map(digest => this.state.list.find(photo => photo.sha256 === digest))
         .map(photo => ({
-          station: { boxUUID, stationId, wxToken },
+          station: { boxUUID, stationId, wxToken, guid, isMedia: true },
           name: getName(Object.assign({ hash: photo.sha256 }, photo.metadata)),
           size: photo.size,
           type: 'file',
@@ -204,7 +205,7 @@ class Tweets extends React.PureComponent {
                               <Thumb
                                 bgColor="rgba(0,0,0,.09)"
                                 digest={sha256}
-                                station={{ boxUUID, stationId, wxToken }}
+                                station={{ boxUUID, stationId, wxToken, guid: this.props.guid, isMedia: true }}
                                 ipcRenderer={this.props.ipcRenderer}
                                 height={w}
                                 width={w}
@@ -325,7 +326,7 @@ class Tweets extends React.PureComponent {
 
   render() {
     console.log('render tweets', this.props)
-    const { tweets, box, tError } = this.props
+    const { tweets, box, tError, guid } = this.props
     if (tError) return this.renderError()
     const boxUUID = box && box.uuid
     const isOffline = box && box.station && (!box.station.isOnline)
@@ -379,7 +380,7 @@ class Tweets extends React.PureComponent {
           {
             this.state.showFiles &&
               <Preview
-                station={{ boxUUID, stationId, wxToken }}
+                station={{ boxUUID, stationId, wxToken, guid }}
                 ipcRenderer={this.props.ipcRenderer}
                 list={this.state.list}
                 author={this.state.author || {}}
@@ -404,7 +405,7 @@ class Tweets extends React.PureComponent {
 
         {/* PhotoDetail */}
         <DetailContainer
-          station={{ boxUUID, stationId, wxToken }}
+          station={{ boxUUID, stationId, wxToken, guid, isMedia: true }}
           onRequestClose={() => this.setState({ openDetail: false })}
           open={this.state.openDetail}
           style={{ position: 'fixed', left: 0, top: 0, width: '100%', height: '100%' }}

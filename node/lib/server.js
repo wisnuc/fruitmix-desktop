@@ -37,6 +37,7 @@ ipcMain.on('LOGIN', (event, device, user) => {
 
 export const isCloud = () => cloud
 
+/* adapter of cloud api */
 const reqCloud = (ep, data, type) => {
   const url = `${address}/c/v1/stations/${stationID}/json`
   const url2 = `${address}/c/v1/stations/${stationID}/pipe`
@@ -54,18 +55,33 @@ const aget = (ep) => {
     .set('Authorization', `JWT ${token}`)
 }
 
-const adownload = (ep) => {
+const adownload = (ep, bToken) => {
   if (cloud) return reqCloud(ep, null, 'DOWNLOAD')
+  const newToken = bToken ? `JWT ${bToken} ${token}` : `JWT ${token}`
   return request
     .get(`http://${address}:3000/${ep}`)
-    .set('Authorization', `JWT ${token}`)
+    .set('Authorization', newToken)
 }
 
+/* download box resouces via cloud */
 const cdownload = (ep, station) => {
   const { stationId, wxToken, boxUUID } = station
   const url = `${cloudAddress}/c/v1/boxes/${boxUUID}/stations/${stationId}/pipe`
   const resource = Buffer.from(`/${ep}`).toString('base64')
   return request.get(url).set('Authorization', wxToken).query({ resource, method: 'GET' })
+}
+
+/* request box local token, callback error or bToken */
+const getBToken = (guid, callback) => {
+  console.log('getBToken guid', guid)
+  const r = aget('cloudToken').query({ guid })
+  r.end((err, res) => {
+    if (err) callback(err, null)
+    else if (!res || !res.body || !res.body.token) {
+      const error = new Error('no token')
+      callback(error, null)
+    } else callback(null, res.body.token)
+  })
 }
 
 const apost = (ep, data) => {
@@ -260,7 +276,7 @@ export class DownloadFile {
     this.handle = null
   }
 
-  download() {
+  normalDownload() {
     this.handle = this.station ? cdownload(this.endpoint, this.station) : adownload(this.endpoint)
     if (this.size && this.size === this.seek) return setImmediate(() => this.finish(null))
     if (this.size) this.handle.set('Range', `bytes=${this.seek}-`)
@@ -281,6 +297,46 @@ export class DownloadFile {
       })
     this.handle.pipe(this.stream)
     return null
+  }
+
+  forceLocalDownload() {
+    const { guid, isMedia } = this.station
+    getBToken(guid, (err, bToken) => {
+      if (err) {
+        // console.log('getBToken error', err)
+        this.finish(err)
+      } else {
+        /* access box file need bToken, however box media does not !!! */
+        this.handle = adownload(this.endpoint, isMedia ? null : bToken)
+        if (this.size && this.size === this.seek) return setImmediate(() => this.finish(null))
+        if (this.size) this.handle.set('Range', `bytes=${this.seek}-`)
+        this.handle
+          .query(this.qs)
+          .on('error', error => this.finish(error))
+          .on('response', (res) => {
+            if (res.status !== 200 && res.status !== 206) {
+              debug('download http status code not 200', res.error)
+              const e = new Error()
+              e.message = res.error
+              e.code = res.code
+              e.status = res.status
+              this.handle.abort()
+              this.finish(e)
+            }
+            res.on('end', () => this.finish(null))
+          })
+        this.handle.pipe(this.stream)
+        return null
+      }
+      return null
+    })
+  }
+
+  download() {
+    const localable = !cloud && stationID && this.station && stationID === this.station.stationId
+    console.log('download localable', localable)
+    if (localable) this.forceLocalDownload()
+    else this.normalDownload()
   }
 
   abort() {
@@ -418,7 +474,8 @@ export const downloadFile = (driveUUID, dirUUID, entryUUID, fileName, downloadPa
         })
       })
 
-      const handle = adownload(dirUUID === 'media' ? `media/${entryUUID}` : `drives/${driveUUID}/dirs/${dirUUID}/entries/${entryUUID}`)
+      const ep = dirUUID === 'media' ? `media/${entryUUID}` : `drives/${driveUUID}/dirs/${dirUUID}/entries/${entryUUID}`
+      const handle = adownload(ep)
       handle.query({ name: fileName })
         .on('error', err => callback(Object.assign({}, err, { response: err.response && err.response.body })))
         .on('response', (res) => {
@@ -452,7 +509,7 @@ export const uploadTorrent = (dirUUID, rs, part, callback) => {
 
 export const uploadTorrentAsync = Promise.promisify(uploadTorrent)
 
-export const boxUploadCloud = (files, args, callback) => {
+const boxUploadCloud = (files, args, callback) => {
   const { comment, type, box } = args
   const boxUUID = box.uuid
   const { stationId, wxToken } = box
@@ -472,7 +529,7 @@ export const boxUploadCloud = (files, args, callback) => {
   r.end(callback)
 }
 
-export const boxUploadLocal = (files, bToken, args, callback) => {
+const boxUploadLocal = (files, bToken, args, callback) => {
   const { comment, type, box } = args
   const boxUUID = box.uuid
   const list = files.map(f => ({ filename: f.filename, size: f.size, sha256: f.sha256 }))
@@ -489,25 +546,22 @@ export const boxUploadLocal = (files, bToken, args, callback) => {
   console.log('boxUploadLocal', bToken, token)
 }
 
-const getBToken = (guid, callback) => {
-  const r = aget('cloudToken').query({ guid })
-  r.end(callback)
-}
-
 export const boxUploadAsync = async (files, args) => {
   const { box } = args
   const { stationId, guid } = box
   let bToken = null
   if (!cloud && stationID && stationID === stationId) {
     try {
-      bToken = (await Promise.promisify(getBToken)(guid)).body.token
+      bToken = (await Promise.promisify(getBToken)(guid))
     } catch (e) {
       console.log('req bToken error', e)
+      bToken = null
     }
   }
   let res = null
-  if (bToken) res = await Promise.promisify(boxUploadLocal)(files, bToken, args)
-  else res = await Promise.promisify(boxUploadCloud)(files, args)
+  if (bToken) res = (await Promise.promisify(boxUploadLocal)(files, bToken, args)).body
+  else res = (await Promise.promisify(boxUploadCloud)(files, args)).body.data
+  console.log('boxUploadAsync res', res)
   return res
 }
 

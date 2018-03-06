@@ -322,6 +322,7 @@ class SelectNas extends React.Component {
             <div style={{ width: '100%', height: 'calc(100% - 64px)', position: 'absolute', top: 48, left: 0 }}>
               <FileContent
                 {...this.state}
+                resetScrollTo={() => {}}
                 fileSelect
                 listNavBySelect={this.listNavBySelect}
                 showContextMenu={() => {}}
