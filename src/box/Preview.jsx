@@ -102,6 +102,7 @@ class Preview extends React.PureComponent {
             {...this.state}
             fileSelect
             noGridSelect
+            resetScrollTo={() => {}}
             listNavBySelect={() => {}}
             showContextMenu={() => {}}
             setAnimation={() => {}}
