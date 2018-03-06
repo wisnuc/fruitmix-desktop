@@ -10,6 +10,7 @@ import Thumb from '../file/Thumb'
 import DetailContainer from '../photo/DetailContainer'
 import ScrollBar from '../common/ScrollBar'
 import DialogOverlay from '../common/PureDialog'
+import FlatButton from '../common/FlatButton'
 import Preview from './Preview'
 import ViewMedia from './ViewMedia'
 
@@ -41,6 +42,7 @@ class Tweets extends React.PureComponent {
     this.state = {
       list: [],
       seqIndex: -1,
+      retry: null,
       openDetail: false
     }
 
@@ -78,6 +80,16 @@ class Tweets extends React.PureComponent {
       e.stopPropagation()
       this.memoizeValue = {}
       this.setState({ viewMore: 'media', list, author })
+    }
+
+    this.retry = (tweet) => {
+      console.log('retry', tweet)
+      this.setState({ retry: null })
+      this.props.retry(tweet)
+    }
+
+    this.openRetryDialog = (tweet) => {
+      this.setState({ retry: tweet })
     }
   }
 
@@ -127,7 +139,8 @@ class Tweets extends React.PureComponent {
   }
 
   renderTweets({ index, key, style, rowCount }) {
-    const { ctime, comment, uuid, author, list, box, type, msg, failed } = this.props.tweets[index]
+    const tweet = this.props.tweets[index]
+    const { ctime, comment, uuid, author, list, box, type, msg, failed } = tweet
     const { stationId, wxToken } = box
     const boxUUID = box.uuid
     const isSelf = this.props.guid === author.id
@@ -191,14 +204,14 @@ class Tweets extends React.PureComponent {
                     {
                       list.map((l, i) => {
                         const { sha256, filename } = l
-                        // if (l.fakedata) console.log('l.fakedata', l.fakedata)
                         if (i > 5) return (<div key={sha256 + filename + i} />)
-                        // const float = i > 2 || !isSelf ? 'left' : 'right'
                         const margin = isSelf && list.length < 3 && i === 0 ? `2px 2px 2px ${360 - list.length * 120 + 2}px` : 2
+                        const onTouchTap = () => failed ? this.openRetryDialog(tweet)
+                          : isMedia && this.setState({ openDetail: true, list, seqIndex: i })
                         return (
                           <div
                             key={sha256 + filename + i}
-                            onTouchTap={() => isMedia && this.setState({ openDetail: true, list, seqIndex: i })}
+                            onTouchTap={onTouchTap}
                             style={{ width: w, height: w, float: 'left', backgroundColor: '#FFF', margin, position: 'relative' }}
                           >
                             { isMedia &&
@@ -221,7 +234,7 @@ class Tweets extends React.PureComponent {
                               i === 5 && isMany &&
                                 <div
                                   style={Object.assign({ width: w, height: w }, overlayStyle)}
-                                  onTouchTap={e => this.openMediaMore(e, list, author)}
+                                  onTouchTap={e => !failed && this.openMediaMore(e, list, author)}
                                 >
                                   { `+ ${list.length - 6}` }
                                 </div>
@@ -255,7 +268,7 @@ class Tweets extends React.PureComponent {
                       display: 'flex',
                       alignItems: 'center'
                     }}
-                    onTouchTap={() => this.setState({ showFiles: true, list, author })}
+                    onTouchTap={() => failed ? this.openRetryDialog(tweet) : this.setState({ showFiles: true, list, author })}
                   >
                     <div
                       style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', backgroundColor: '#FF9100', padding: 16 }}
@@ -423,6 +436,32 @@ class Tweets extends React.PureComponent {
           startDownload={this.startDownload}
           apis={this.props.apis}
         />
+
+        <DialogOverlay open={!!this.state.retry} onRequestClose={() => this.setState({ retry: null })} >
+          {
+            this.state.retry &&
+              <div style={{ width: 280, padding: '24px 24px 0px 24px' }}>
+                <div style={{ height: 24, color: 'rgba(0,0,0,0.54)', display: 'flex', alignItems: 'center' }} >
+                  { i18n.__('Resend Tweet Text') }
+                </div>
+
+                {/* button */}
+                <div style={{ height: 24 }} />
+                <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginRight: -24 }}>
+                  <FlatButton
+                    primary
+                    label={i18n.__('Cancel')}
+                    onTouchTap={() => this.setState({ retry: null })}
+                  />
+                  <FlatButton
+                    primary
+                    label={i18n.__('Retry')}
+                    onTouchTap={() => this.retry(this.state.retry)}
+                  />
+                </div>
+              </div>
+          }
+        </DialogOverlay>
       </div>
     )
   }

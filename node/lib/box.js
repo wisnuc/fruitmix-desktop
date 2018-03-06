@@ -10,7 +10,7 @@ import { fileMagicAsync } from './magic'
 Promise.promisifyAll(fs) // babel would transform Promise to bluebird
 
 /* only read files */
-const readAsync = async (entries, args) => {
+const readAsync = async (entries) => {
   const files = []
   const fakeList = []
   for (let i = 0; i < entries.length; i++) {
@@ -40,12 +40,14 @@ const uploadHandle = (event, args) => {
   // dialog.showOpenDialog(getMainWindow(), { properties: [dialogType, 'multiSelections'] }, (entries) => {
   dialog.showOpenDialog(getMainWindow(), { properties: ['openFile'] }, (entries) => {
     if (!entries || !entries.length) return
-    readAsync(entries, args)
+    readAsync(entries)
       .then(({ fakeList, files }) => {
-        getMainWindow().webContents.send('BOX_UPLOAD_FAKE_DATA', { session, box, success: true, fakeList })
+        getMainWindow().webContents.send('BOX_UPLOAD_FAKE_DATA', {
+          session, box, success: true, fakeList, raw: { type: 'local', args, entries }
+        })
         boxUploadAsync(files, args)
           .then((data) => {
-						getMainWindow().webContents.send('BOX_UPLOAD_RESULT', { session, box, success: true, data }) // TODO
+            getMainWindow().webContents.send('BOX_UPLOAD_RESULT', { session, box, success: true, data })
           }).catch((err) => {
             const body = err && err.response && err.response.body
             console.log('box upload error', body || err)
@@ -57,5 +59,24 @@ const uploadHandle = (event, args) => {
   })
 }
 
+const retryHandle = (event, props) => {
+  const { args, entries } = props
+  const { session, box } = args
+  readAsync(entries, args)
+    .then(({ files }) => {
+      boxUploadAsync(files, args)
+        .then((data) => {
+          getMainWindow().webContents.send('BOX_UPLOAD_RESULT', { session, box, success: true, data })
+        }).catch((err) => {
+          const body = err && err.response && err.response.body
+          console.log('box upload error', body || err)
+          getMainWindow().webContents.send('BOX_UPLOAD_RESULT', { session, box, success: false })
+        })
+    }).catch(() => {
+      getMainWindow().webContents.send('BOX_UPLOAD_FAKE_DATA', { session, box, success: false })
+    })
+}
+
 /* ipc listener */
 ipcMain.on('BOX_UPLOAD', uploadHandle)
+ipcMain.on('BOX_RETRY_UPLOAD', retryHandle)

@@ -58,13 +58,13 @@ class Groups extends React.Component {
       })
     }
 
-    this.createNasTweets = (args) => {
+    this.createNasTweets = (args, retryTweet) => {
       // console.log('createNasTweets', args)
       const { list, boxUUID } = args
       const box = this.props.boxes.find(b => b.uuid === boxUUID)
       const fakeList = list.map(l => Object.assign({ fakedata: {} }, l))
       /* create the fake tweet */
-      const tweet = this.updateFakeTweet({ fakeList, box, isMedia: true })
+      const tweet = retryTweet || this.updateFakeTweet({ fakeList, box, isMedia: true, raw: { type: 'indrive', args } })
       this.props.apis.pureRequest('nasTweets', args, (err, res) => {
         if (err || !res || !res.uuid) {
           console.log('create nasTweets error', err)
@@ -76,6 +76,27 @@ class Groups extends React.Component {
             .catch(error => console.log('this.updateDraft error', error))
         }
       })
+    }
+
+    this.retryLocalUpload = (entries, args, tweet) => {
+      const session = UUID.v4()
+      this.sessions[session] = tweet
+      this.props.ipcRenderer.send('BOX_RETRY_UPLOAD', { entries, args: Object.assign(args, { session }) })
+    }
+
+    this.retry = (tweet) => {
+      const { boxUUID, uuid, raw } = tweet
+      const newTweet = Object.assign({}, tweet, { failed: false })
+      const { type, args, entries } = raw
+      console.log('this.retry raw', raw)
+      if (type === 'indrive') this.createNasTweets(args, tweet)
+      else this.retryLocalUpload(entries, args, tweet)
+
+      this.props.ada.updateDraft(boxUUID, newTweet)
+        .catch(error => console.log('this.updateDraft error', error))
+      const index = this.state.tweets.findIndex(t => t.uuid === uuid)
+      const tweets = [...this.state.tweets.slice(0, index), newTweet, ...this.state.tweets.slice(index + 1)]
+      if (index > -1) this.setState({ tweets })
     }
 
     this.getTweets = (box, showLoading) => {
@@ -103,12 +124,13 @@ class Groups extends React.Component {
       })
     }
 
-    this.updateFakeTweet = ({ fakeList, box, isMedia }) => {
+    this.updateFakeTweet = ({ fakeList, box, isMedia, raw }) => {
       // if (!this.props.currentBox || this.props.currentBox.uuid !== boxUUID || !this.state.tweets) return
       console.log('this.updateFakeTweet', box)
       const author = box.users.find(u => u.id === this.props.guid) || { id: this.props.guid }
       const uuid = UUID.v4()
       const tweet = {
+        raw, // the original request args
         uuid,
         author,
         isMedia,
@@ -137,12 +159,12 @@ class Groups extends React.Component {
     }
 
     this.onFakeData = (event, args) => {
-      const { session, box, success, fakeList } = args
+      const { session, box, success, fakeList, raw } = args
       console.log('this.onFakeData', args)
       if (!success) {
         this.props.openSnackBar(i18n.__('Read Local Files Failed'))
       } else {
-        const tweet = this.updateFakeTweet({ fakeList, box })
+        const tweet = this.updateFakeTweet({ fakeList, box, raw })
         this.sessions[session] = tweet
       }
     }
@@ -377,6 +399,7 @@ class Groups extends React.Component {
 
         {/* tweets */}
         <Tweets
+          retry={this.retry}
           tError={tError}
           guid={guid}
           tweets={currentBox ? tweets : []}
