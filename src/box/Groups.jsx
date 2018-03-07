@@ -39,7 +39,6 @@ class Groups extends React.Component {
     this.toggleDialog = op => this.setState({ [op]: !this.state[op] })
 
     this.toggleView = (view) => {
-      // console.log('view', view)
       this.setState({ view })
     }
 
@@ -52,7 +51,6 @@ class Groups extends React.Component {
       const stationId = this.props.station.id
       const args = { name: '', users: [this.props.guid, ...(users.map(u => u.id))], stationId }
       this.props.apis.pureRequest('createBox', args, (err, res) => {
-        // console.log('this.newBox', args, err, res)
         this.setState({ newBox: false })
         if (err) this.props.openSnackBar(i18n.__('Create Box Failed'))
         else this.props.openSnackBar(i18n.__('Create Box Success'))
@@ -61,7 +59,6 @@ class Groups extends React.Component {
     }
 
     this.createNasTweets = (args, retryTweet) => {
-      // console.log('createNasTweets', args)
       const { list, boxUUID, isMedia } = args
       const box = this.props.boxes.find(b => b.uuid === boxUUID)
       const fakeList = list.map(l => Object.assign({ fakedata: {} }, l))
@@ -69,11 +66,11 @@ class Groups extends React.Component {
       const tweet = retryTweet || this.updateFakeTweet({ fakeList, box, isMedia, raw: { type: 'indrive', args } })
       this.props.apis.pureRequest('nasTweets', args, (err, res) => {
         if (err || !res || !res.uuid) {
-          console.log('create nasTweets error', err)
+          console.error('create nasTweets error', err)
           const newTweet = Object.assign({}, tweet, { failed: true })
           this.updateDraft(newTweet)
         } else {
-          console.log('create nasTweets success', res)
+          // console.log('create nasTweets success', res)
           const newTweet = Object.assign({}, tweet, { trueUUID: res.uuid, finished: true })
           this.updateDraft(newTweet)
         }
@@ -82,7 +79,7 @@ class Groups extends React.Component {
 
     this.updateDraft = (tweet) => {
       this.props.ada.updateDraft(tweet.boxUUID, tweet)
-        .catch(error => console.log('this.updateDraft error', error))
+        .catch(error => console.error('this.updateDraft error', error))
       const index = this.state.tweets.findIndex(t => t.uuid === tweet.uuid)
       const tweets = [...this.state.tweets.slice(0, index), tweet, ...this.state.tweets.slice(index + 1)]
       if (index > -1) this.setState({ tweets })
@@ -95,25 +92,24 @@ class Groups extends React.Component {
     }
 
     this.retry = (tweet) => {
-      const { boxUUID, uuid, raw } = tweet
+      const { raw } = tweet
       const newTweet = Object.assign({}, tweet, { failed: false })
       const { type, args, entries } = raw
-      console.log('this.retry raw', raw)
       if (type === 'indrive') this.createNasTweets(args, tweet)
       else this.retryLocalUpload(entries, args, tweet)
       this.updateDraft(newTweet)
     }
 
     this.getTweets = (box, showLoading) => {
+      // console.log('this.getTweets fire')
       if (showLoading) this.setState({ tweets: null, tError: false }) // show loading state
 
       this.props.ada.removeAllListeners('tweets')
       this.props.ada.getTweets(box.uuid).then((tweets) => {
-        console.log('loadTweets sucess', box, tweets)
         this.WIP = false
         this.updateTweets(box, tweets)
       }).catch((e) => {
-        console.log('loadTweets error', e)
+        console.error('loadTweets error', e)
         this.WIP = false
         this.setState({ tError: true })
       })
@@ -132,8 +128,6 @@ class Groups extends React.Component {
     }
 
     this.updateFakeTweet = ({ fakeList, box, isMedia, raw }) => {
-      // if (!this.props.currentBox || this.props.currentBox.uuid !== boxUUID || !this.state.tweets) return
-      console.log('this.updateFakeTweet', box)
       const author = box.users.find(u => u.id === this.props.guid) || { id: this.props.guid }
       const uuid = UUID.v4()
       const tweet = {
@@ -154,20 +148,18 @@ class Groups extends React.Component {
         _id: uuid
       }
 
-      this.props.ada.createDraft(tweet).catch(e => console.log('this.updateDraft error', e))
+      this.props.ada.createDraft(tweet).catch(e => console.error('this.updateDraft error', e))
       this.setState({ tweets: [...this.state.tweets, tweet] })
       return tweet
     }
 
     this.localUpload = (args) => {
-      console.log('this.localUpload', args)
       const session = UUID.v4()
       this.props.ipcRenderer.send('BOX_UPLOAD', Object.assign({ session }, args))
     }
 
     this.onFakeData = (event, args) => {
       const { session, box, success, fakeList, raw } = args
-      console.log('this.onFakeData', args)
       if (!success) {
         this.props.openSnackBar(i18n.__('Read Local Files Failed'))
       } else {
@@ -179,13 +171,13 @@ class Groups extends React.Component {
     this.onLocalFinish = (event, args) => {
       const { session, box, success, data } = args
       const tweet = this.sessions[session]
-      console.log('args this.onLocalFinish', args, tweet)
       if (!tweet) return
       if (!success) {
         this.props.openSnackBar(i18n.__('Send Tweets with Local Files Failed'))
         const newTweet = Object.assign({}, tweet, { failed: true, boxUUID: box.uuid })
         this.updateDraft(newTweet)
       } else {
+        // console.log('create tweets via local success', data)
         const newTweet = Object.assign({}, tweet, { finished: true, trueUUID: data.uuid, boxUUID: box.uuid })
         this.updateDraft(newTweet)
       }
@@ -200,7 +192,6 @@ class Groups extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    // console.log('Groups componentWillReceiveProps', nextProps)
     if (nextProps.currentBox) {
       /* check if change box */
       const showLoading = !(this.preBox && nextProps.currentBox && this.preBox.uuid === nextProps.currentBox.uuid)
@@ -210,7 +201,7 @@ class Groups extends React.Component {
       const currentTweet = this.state.tweets && this.state.tweets.slice(-1)[0]
       const ctc = currentTweet && currentTweet.ctime // current tweet's ctime
       if (!showLoading && (ltc && ltc <= ctc || this.WIP)) return // same box and no new tweets
-      console.log('will getTweets', showLoading, ltc, ctc, nextProps.currentBox)
+      // console.log('will getTweets', showLoading, ltc, ctc, nextProps.currentBox)
       this.WIP = true
       this.getTweets(nextProps.currentBox, showLoading)
     }
@@ -344,8 +335,9 @@ class Groups extends React.Component {
   }
 
   render() {
-    // console.log('render Groups', this.state, this.props)
     const { boxes, currentBox, station, guid, ipcRenderer, apis } = this.props
+    if (!boxes) return this.renderLoading(32)
+    // console.log('render Groups', this.props, this.state)
     const { primaryColor, openSnackBar, getUsers } = this.props
     const { tweets, tError } = this.state
     const boxH = boxes && Math.min(window.innerHeight - 106, boxes.length * 72) || 0
@@ -369,39 +361,33 @@ class Groups extends React.Component {
         <EventListener target="window" onResize={this.handleResize} />
 
         {/* boxes */}
-        <div style={{ width: 376, height: '100%', overflow: 'auto' }}>
-          {
-            !boxes ? this.renderLoading(32) : (
-              <div style={{ width: '100%', height: '100%', position: 'relative', backgroundColor: '#FFF', overflow: 'hidden' }}>
-                <div style={{ height: 8 }} />
-                {/* new Box */}
-                <div style={{ marginLeft: 32, height: 24 }}>
-                  <FlatButton
-                    style={{ lineHeight: '', height: 24 }}
-                    label={i18n.__('New Box')}
-                    onTouchTap={this.openNewBox}
-                    disabled={!station || !station.id}
-                    icon={<ContentAdd color="rgba(0,0,0,.54)" style={{ marginLeft: 4, marginTop: -2 }} />}
-                    labelStyle={{ fontSize: 12, color: 'rgba(0,0,0,.54)', marginLeft: -4 }}
-                  />
-                </div>
+        <div style={{ width: 376, height: '100%', position: 'relative', backgroundColor: '#FFF', overflow: 'hidden' }}>
+          <div style={{ height: 8 }} />
+          {/* new Box */}
+          <div style={{ marginLeft: 32, height: 24 }}>
+            <FlatButton
+              style={{ lineHeight: '', height: 24 }}
+              label={i18n.__('New Box')}
+              onTouchTap={this.openNewBox}
+              disabled={!station || !station.id}
+              icon={<ContentAdd color="rgba(0,0,0,.54)" style={{ marginLeft: 4, marginTop: -2 }} />}
+              labelStyle={{ fontSize: 12, color: 'rgba(0,0,0,.54)', marginLeft: -4 }}
+            />
+          </div>
 
-                {/* Boxes: react-virtualized with custom scrollBar */}
-                {
-                  boxes.length > 0 ?
-                    <ScrollBar
-                      style={{ outline: 'none' }}
-                      allHeight={72 * boxes.length}
-                      height={boxH}
-                      width={376}
-                      rowCount={boxes.length}
-                      rowHeight={72}
-                      rowRenderer={({ index, key, style }) => this.renderBox({ index, key, style })}
-                    />
-                    : this.renderNoBoxes()
-                }
-              </div>
-            )
+          {/* Boxes: react-virtualized with custom scrollBar */}
+          {
+            boxes.length > 0 ?
+              <ScrollBar
+                style={{ outline: 'none' }}
+                allHeight={72 * boxes.length}
+                height={boxH}
+                width={376}
+                rowCount={boxes.length}
+                rowHeight={72}
+                rowRenderer={({ index, key, style }) => this.renderBox({ index, key, style })}
+              />
+              : this.renderNoBoxes()
           }
         </div>
 

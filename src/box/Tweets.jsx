@@ -83,7 +83,6 @@ class Tweets extends React.PureComponent {
     }
 
     this.retry = (tweet) => {
-      console.log('retry', tweet)
       this.setState({ retry: null })
       this.props.retry(tweet)
     }
@@ -368,7 +367,7 @@ class Tweets extends React.PureComponent {
   }
 
   render() {
-    console.log('render tweets', this.props)
+    // console.log('render tweets', this.props)
     const { tweets, box, tError, guid } = this.props
     if (tError) return this.renderError()
     const boxUUID = box && box.uuid
@@ -392,15 +391,13 @@ class Tweets extends React.PureComponent {
     }
     const rowHeight = ({ index }) => hs[index]
 
-    console.log('render tweets boxUUID', boxUUID)
-
     return (
       <div
         ref={ref => (this.refContainer = ref)}
         style={{ flexGrow: 1, height: '100%', backgroundColor: '#FAFAFA', overflow: 'hidden' }}
       >
         { // add key to AutoSizer to force refresh List
-          isOffline ? this.renderOffline() : !tweets ? this.renderLoading(32) : tweets.length > 0 ?
+          !tweets ? this.renderLoading(32) : tweets.length > 0 ?
             <AutoSizer key={boxUUID}>
               {({ height, width }) => (
                 <ScrollBar
