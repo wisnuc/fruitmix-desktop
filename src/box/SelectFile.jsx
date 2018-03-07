@@ -74,8 +74,12 @@ class SelectNas extends React.Component {
         type: 'list',
         boxUUID: this.props.boxUUID,
         stationId: this.props.stationId,
-        list: [...this.selected].map(([k, v]) => ({ type: 'file', filename: v.name, driveUUID: v.driveUUID, dirUUID: v.dirUUID }))
+        isMedia: [...this.selected].every(([k, v]) => !!v.metadata),
+        list: [...this.selected].map(([k, v]) => ({
+          type: 'file', filename: v.name, driveUUID: v.driveUUID, dirUUID: v.dirUUID, localMedia: !!v.metadata, sha256: v.hash
+        }))
       }
+      console.log('this.fire', this.selected, args)
       this.props.onRequestClose()
       this.props.createNasTweets(args)
     }
