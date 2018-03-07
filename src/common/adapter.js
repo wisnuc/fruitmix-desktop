@@ -17,6 +17,19 @@ const unionBox = (a, b) => {
   return union
 }
 
+const isSameArray = (a, b) => {
+  let res = false
+  if (!Array.isArray(a) || !Array.isArray(b)) return res
+  try {
+    const aj = JSON.stringify(a)
+    const bj = JSON.stringify(b)
+    res = aj === bj
+  } catch (e) {
+    console.error('isSameArray JSON.parse error', e)
+  }
+  return res
+}
+
 class Adapter extends EventEmitter {
   constructor(ctx) {
     super(ctx)
@@ -55,12 +68,12 @@ class Adapter extends EventEmitter {
     const newBoxes = await this.ctx.reqAsync('boxes', null)
     const preBoxes = await this.getBoxes()
     const boxes = unionBox(preBoxes, newBoxes)
-    this.updateBoxes(boxes)
+    if (!isSameArray(boxes, preBoxes)) this.updateBoxes(boxes)
     for (let i = 0; i < boxes.length; i++) {
       const box = boxes[i]
       const ltsi = box.ltsst && box.ltsst.index
-      const lti = box.tweet && box.tweet.index || Infinity // last tweet's index
-      if (ltsi === undefined || (box.tweet.index > ltsi)) {
+      const lti = box.tweet ? box.tweet.index : 0 // last tweet's index
+      if (ltsi === undefined || (lti > ltsi)) {
         await this.reqTweets({ boxUUID: box.uuid, stationId: box.stationId })
       }
     }
@@ -82,7 +95,9 @@ class Adapter extends EventEmitter {
     const ltsi = box.ltsst && box.ltsst.index // the latest stored tweet's index
     const props = { boxUUID, stationId }
     if (ltsi !== undefined) Object.assign(props, { first: 0, last: ltsi, count: 0 })
+
     const res = await this.ctx.reqAsync('tweets', props)
+
     if (Array.isArray(res) && res.length) {
       const docs = [...res]
         .map(x => Object.assign({}, x, { _id: x.uuid, boxUUID, stationId }))
@@ -101,7 +116,7 @@ class Adapter extends EventEmitter {
     let boxes = this.state.boxes
     if (!boxes) {
       boxes = await this.DB.loadBoxes(this.ctx.guid)
-      boxes.forEach(b => b.station.isOnline = true)
+      boxes.forEach(b => b.station.isOnline = 1)
     }
     return boxes
   }
@@ -117,6 +132,7 @@ class Adapter extends EventEmitter {
       const t = drafts[i]
       if (t.trueUUID) { // already finished
         const index = trueTweets.findIndex(tt => tt.uuid === t.trueUUID) // already stored
+        t.finished = true
         if (index > -1) {
           trueTweets[index].ctime = t.ctime
           await this.DB.updateTweet(t.trueUUID, { ctime: t.ctime })
@@ -124,7 +140,7 @@ class Adapter extends EventEmitter {
           drafts[i] = null
         }
       } else if (new Date().getTime() - t.ctime > 120000) { // set old tweets to failed state
-        drafts[i].failed = true
+        t.failed = true
       }
     }
 
@@ -133,7 +149,7 @@ class Adapter extends EventEmitter {
     // console.log('getTweets', trueTweets, drafts)
 
     /* update last read index */
-    const lri = tweets.length ? tweets.length - 1 : -1
+    const lri = tweets.length - 1
     const index = this.state.boxes.findIndex(b => b.uuid === boxUUID)
     if (index > -1 && (!this.state.boxes[index].lri || (this.state.boxes[index].lri !== lri))) {
       this.state.boxes[index].lri = lri

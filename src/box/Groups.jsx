@@ -337,7 +337,7 @@ class Groups extends React.Component {
   render() {
     const { boxes, currentBox, station, guid, ipcRenderer, apis } = this.props
     if (!boxes) return this.renderLoading(32)
-    // console.log('render Groups', this.props, this.state)
+    console.log('render Groups', this.props, this.state)
     const { primaryColor, openSnackBar, getUsers } = this.props
     const { tweets, tError } = this.state
     const boxH = boxes && Math.min(window.innerHeight - 106, boxes.length * 72) || 0

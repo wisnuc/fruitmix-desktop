@@ -158,23 +158,16 @@ class Group extends Base {
 
   willReceiveProps(nextProps) {
     if (!this.state.account) this.handleProps(nextProps.apis, ['account'])
-    if (this.first && this.state.account) {
+    else if (this.first) {
       this.navEnter()
       this.first = false
       if (!this.wxToken || !this.guid) setImmediate(() => this.ctx.navToBound('home'))
     }
   }
 
-  /*
-  willReceiveProps(nextProps) {
-    // console.log('Group willReceiveProps', nextProps, this.state)
-    // if (!this.state.account) this.handleProps(nextProps.apis, ['account'])
-  }
-  */
-
   navEnter() {
     const apis = this.ctx.props.apis
-    if (!apis || !apis.account || !apis.account.data) return
+    if (!apis || !apis.account || !apis.account.data || !this.state.account) return
     const { userUUID } = apis
     const userData = global.config.users.find(u => u.userUUID === userUUID)
     this.boxDir = global.config.boxPath
@@ -314,7 +307,6 @@ class Group extends Base {
       ipcRenderer={ipcRenderer}
       apis={this.ctx.props.apis}
       primaryColor={this.groupPrimaryColor()}
-      updateFakeTweet={this.updateFakeTweet}
       openSnackBar={openSnackBar}
       refresh={this.refresh}
       getUsers={this.getUsers}
