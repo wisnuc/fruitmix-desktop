@@ -16,8 +16,7 @@ const getTmpTransPath = () => store.getState().config.tmpTransPath
 const cloudAddress = 'http://www.siyouqun.com:80'
 
 export const clearTmpTrans = () => {
-  // console.log('clearTmpTrans', `${getTmpTransPath()}/*`)
-  rimraf(`${getTmpTransPath()}/*`, e => e && console.log('clearTmpTrans error', e))
+  rimraf(`${getTmpTransPath()}/*`, e => e && console.error('clearTmpTrans error', e))
 }
 
 /* init request */
@@ -73,7 +72,6 @@ const cdownload = (ep, station) => {
 
 /* request box local token, callback error or bToken */
 const getBToken = (guid, callback) => {
-  console.log('getBToken guid', guid)
   const r = aget('cloudToken').query({ guid })
   r.end((err, res) => {
     if (err) callback(err, null)
@@ -170,7 +168,6 @@ export class UploadMultipleFiles {
     })
 
     this.handle.end((err, res) => {
-      // console.log('localUpload this.handle.end', err, res && res.body)
       if (err) this.finish(err)
       else if (res && res.statusCode === 200) this.finish(null)
       else this.finish(res.body)
@@ -303,7 +300,7 @@ export class DownloadFile {
     const { guid, isMedia } = this.station
     getBToken(guid, (err, bToken) => {
       if (err) {
-        // console.log('getBToken error', err)
+        console.error('getBToken error', err)
         this.finish(err)
       } else {
         /* access box file need bToken, however box media does not !!! */
@@ -334,7 +331,6 @@ export class DownloadFile {
 
   download() {
     const localable = !cloud && stationID && this.station && stationID === this.station.stationId
-    console.log('download localable', localable)
     if (localable) this.forceLocalDownload()
     else this.normalDownload()
   }
@@ -480,7 +476,7 @@ export const downloadFile = (driveUUID, dirUUID, entryUUID, fileName, downloadPa
         .on('error', err => callback(Object.assign({}, err, { response: err.response && err.response.body })))
         .on('response', (res) => {
           if (res.status !== 200 && res.status !== 206) {
-            console.log('download http status code not 200', res.error)
+            console.error('download http status code not 200', res.error)
             const e = new Error()
             e.message = res.error
             e.code = res.code
@@ -543,7 +539,6 @@ const boxUploadLocal = (files, bToken, args, callback) => {
     r.attach(filename, entry, JSON.stringify({ size, sha256 }))
   }
   r.end(callback)
-  console.log('boxUploadLocal', bToken, token)
 }
 
 export const boxUploadAsync = async (files, args) => {
@@ -554,14 +549,13 @@ export const boxUploadAsync = async (files, args) => {
     try {
       bToken = (await Promise.promisify(getBToken)(guid))
     } catch (e) {
-      console.log('req bToken error', e)
+      console.error('req bToken error', e)
       bToken = null
     }
   }
   let res = null
   if (bToken) res = (await Promise.promisify(boxUploadLocal)(files, bToken, args)).body
   else res = (await Promise.promisify(boxUploadCloud)(files, args)).body.data
-  console.log('boxUploadAsync res', res)
   return res
 }
 
