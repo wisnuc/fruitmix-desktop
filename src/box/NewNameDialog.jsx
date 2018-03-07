@@ -22,7 +22,7 @@ class NewName extends React.PureComponent {
       const args = { name: this.state.value, boxUUID, stationId }
       apis.pureRequest('boxName', args, (err) => {
         if (err) {
-          console.log('Change Group Name Error', err)
+          console.error('Change Group Name Error', err)
           this.setState({ errorText: i18n.__('Change Group Name Failed'), loading: false })
         } else {
           onRequestClose()

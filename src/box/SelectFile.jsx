@@ -104,13 +104,13 @@ class SelectNas extends React.Component {
             path[0].uuid = dirUUID
             this.updateState(path, currentDir, list)
           })
-          .catch(err => console.log(err))
+          .catch(err => console.error(err))
       } else if (node.type === 'directory') { // normal directory in drives
         this.list(driveUUID, dirUUID)
           .then((list) => {
             this.updateState(path, currentDir, list)
           })
-          .catch(err => console.log(err))
+          .catch(err => console.error(err))
       } else if (node.type === 'publicRoot') { // list public drives
         const myUUID = this.props.apis.account.data && this.props.apis.account.data.uuid
         const list = this.props.apis.drives.value().filter(d => d.type === 'public' && d.tag !== 'built-in' &&
@@ -124,7 +124,7 @@ class SelectNas extends React.Component {
             path[0].uuid = builtIn.uuid
             this.updateState(path, currentDir, list)
           })
-          .catch(err => console.log(err))
+          .catch(err => console.error(err))
       }
     }
 
@@ -146,7 +146,7 @@ class SelectNas extends React.Component {
       if (currentDir.type === 'directory' || currentDir.type === 'public' || currentDir.tag === 'built-in' || currentDir.tag === 'home' || currentDir.type === 'share') { // normal directory
         this.list(driveUUID, dirUUID)
           .then(list => this.updateState(path, currentDir, list))
-          .catch(err => console.log(err))
+          .catch(err => console.error(err))
       } else if (currentDir.type === 'root') { // root
         const drives = this.props.apis.drives.value()
         const list = [
@@ -167,7 +167,7 @@ class SelectNas extends React.Component {
       this.setState({ nav })
       const d = this.props.apis.drives
       const drive = d && d.data && d.data.find(dr => dr.tag === 'home')
-      if (!drive) return console.log('no drive error')
+      if (!drive) return console.error('no drive error')
       switch (nav) {
         case 'home':
           if (drive) this.enter(Object.assign({ setRoot: true }, drive))

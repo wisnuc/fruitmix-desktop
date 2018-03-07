@@ -31,13 +31,12 @@ class Adapter extends EventEmitter {
     const state = this.state
     this.state = Object.assign({}, this.state, { boxes })
     if (!noSave) {
-      this.DB.saveBoxes(this.ctx.guid, boxes).catch(e => console.log('saveBoxes error', boxes, e))
+      this.DB.saveBoxes(this.ctx.guid, boxes).catch(e => console.error('saveBoxes error', boxes, e))
     }
     this.emit('boxes', state, this.state)
   }
 
   init() {
-    console.log('init', this, this.state, this.ctx)
     const { boxDir, guid } = this.ctx
     const boxesPath = path.join(boxDir, 'Boxes-v1.db')
     const tweetsPath = path.join(boxDir, `${guid}-Tweets-v1.db`)
@@ -48,7 +47,7 @@ class Adapter extends EventEmitter {
   }
 
   error(type, err) {
-    console.log('Error in Adapter', type, err)
+    console.error('Error in Adapter', type, err)
   }
 
   /* request boxes, union previous data, and save to DB */
@@ -57,7 +56,6 @@ class Adapter extends EventEmitter {
     const preBoxes = await this.getBoxes()
     const boxes = unionBox(preBoxes, newBoxes)
     this.updateBoxes(boxes)
-    console.log('reqBoxes', boxes)
     for (let i = 0; i < boxes.length; i++) {
       const box = boxes[i]
       const ltsi = box.ltsst && box.ltsst.index
@@ -84,9 +82,7 @@ class Adapter extends EventEmitter {
     const ltsi = box.ltsst && box.ltsst.index // the latest stored tweet's index
     const props = { boxUUID, stationId }
     if (ltsi !== undefined) Object.assign(props, { first: 0, last: ltsi, count: 0 })
-    console.log('before reqAsync tweets', props)
     const res = await this.ctx.reqAsync('tweets', props)
-    console.log('reqTweets res', props, res)
     if (Array.isArray(res) && res.length) {
       const docs = [...res]
         .map(x => Object.assign({}, x, { _id: x.uuid, boxUUID, stationId }))
@@ -97,7 +93,6 @@ class Adapter extends EventEmitter {
       const bs = this.state.boxes
       const i = bs.findIndex(b => b.uuid === boxUUID)
       bs[i].ltsst = docs.slice(-1)[0] // latest stored tweet
-      console.log('update latest stored tweet', bs[i].ltsst)
       this.updateBoxes(bs)
     }
   }
@@ -115,14 +110,13 @@ class Adapter extends EventEmitter {
     const trueTweets = await this.DB.loadTweets(boxUUID)
     const drafts = await this.DB.loadDrafts(boxUUID)
 
-    console.log('async getTweets trueTweets drafts', boxUUID, trueTweets, drafts)
+    // console.log('async getTweets trueTweets drafts', boxUUID, trueTweets, drafts)
 
     /* remove finished drafts */
     for (let i = 0; i < drafts.length; i++) {
       const t = drafts[i]
       if (t.trueUUID) { // already finished
         const index = trueTweets.findIndex(tt => tt.uuid === t.trueUUID) // already stored
-        console.log('adapter getTweets draft trueUUID', t.trueUUID, t.ctime, index)
         if (index > -1) {
           trueTweets[index].ctime = t.ctime
           await this.DB.updateTweet(t.trueUUID, { ctime: t.ctime })
@@ -136,7 +130,7 @@ class Adapter extends EventEmitter {
 
     const tweets = [...trueTweets, ...drafts.filter(v => !!v)].sort((a, b) => a.ctime - b.ctime)
 
-    console.log('getTweets', trueTweets, drafts)
+    // console.log('getTweets', trueTweets, drafts)
 
     /* update last read index */
     const lri = tweets.length ? tweets.length - 1 : -1
@@ -153,7 +147,6 @@ class Adapter extends EventEmitter {
   }
 
   async updateDraft(boxUUID, data) {
-    console.log('updateDraft', boxUUID, data)
     await this.DB.updateDraft(data)
     const tweets = await this.getTweets(boxUUID)
     return tweets

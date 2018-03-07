@@ -50,7 +50,7 @@ class Group extends Base {
             text = ''
         }
       } catch (e) {
-        console.log('parse msg error', e)
+        console.error('parse msg error', e)
       }
       return text
     }
@@ -81,7 +81,6 @@ class Group extends Base {
         /* move owner to the first pos */
         const i = users.findIndex(u => u.id === owner)
         if (i > -1) b.users = [users[i], ...users.slice(0, i), ...users.slice(i + 1)]
-        // console.log('this.processBox', i, b.users, b)
       })
 
       d.sort((a, b) => (b.ltime - a.ltime))
@@ -106,7 +105,6 @@ class Group extends Base {
     this.reqData = () => {}
 
     this.initDB = () => {
-      console.log('this.initDB')
       const props = { guid: this.guid, reqAsync: this.ctx.props.apis.pureRequestAsync, boxDir: this.boxDir }
       this.ada = new Adapter(props)
       this.ada.init()
@@ -114,13 +112,12 @@ class Group extends Base {
     }
 
     this.selectBox = (index) => {
-      console.log('this.selectBox', index, this.state)
+      // console.log('this.selectBox', index, this.state)
       if (!this.state.boxes) return
       this.setState({ currentBox: this.state.boxes[index] })
     }
 
     this.updateBoxes = (prev, curr) => {
-      console.log('this.updateBoxes', prev, curr)
       const boxes = curr.boxes
       this.setState({ boxes: this.processBox(boxes) })
       let currentBox = boxes.find(b => this.state.currentBox && (b.uuid === this.state.currentBox.uuid)) || boxes[0]
@@ -135,7 +132,7 @@ class Group extends Base {
 
     this.refresh = (op) => {
       this.op = op
-      this.ada.reqBoxes().catch(e => console.log('reqBoxes error', e))
+      this.ada.reqBoxes().catch(e => console.error('reqBoxes error', e))
     }
 
     this.startMqtt = () => {
@@ -164,7 +161,6 @@ class Group extends Base {
     if (this.first && this.state.account) {
       this.navEnter()
       this.first = false
-      // console.log('willReceiveProps', this.wxToken, this.guid, this.ctx)
       if (!this.wxToken || !this.guid) setImmediate(() => this.ctx.navToBound('home'))
     }
   }
@@ -179,7 +175,6 @@ class Group extends Base {
   navEnter() {
     const apis = this.ctx.props.apis
     if (!apis || !apis.account || !apis.account.data) return
-    // console.log('navEnter', apis)
     const { userUUID } = apis
     const userData = global.config.users.find(u => u.userUUID === userUUID)
     this.boxDir = global.config.boxPath

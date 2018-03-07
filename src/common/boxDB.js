@@ -16,7 +16,7 @@ class boxDB {
     try {
       doc = await Promise.promisify(this.boxesDB.findOne)({ _id: guid })
     } catch (e) {
-      console.log('async loadBoxes error', guid, e)
+      console.error('async loadBoxes error', guid, e)
     }
     if (doc) boxes = doc.boxes
     return boxes
@@ -34,7 +34,6 @@ class boxDB {
 
   async updateTweet(_id, value) {
     const res = await Promise.promisify(this.tweetsDB.update)({ _id }, { $set: value })
-    console.log('boxDB updateTweet res', _id, value, res)
   }
 
   async loadTweets(boxUUID) {
@@ -44,22 +43,18 @@ class boxDB {
 
   async createDraft(doc) {
     const res = await Promise.promisify(this.draftsDB.insert)(doc)
-    console.log('createDraft', doc, res)
   }
 
   async updateDraft(doc) {
     const res = await Promise.promisify(this.draftsDB.update)({ _id: doc._id }, doc)
-    console.log('updateDraft', doc, res)
   }
 
   async deleteDraft(id) {
     const res = await Promise.promisify(this.draftsDB.remove)({ _id: id }, {})
-    console.log('deleteDraft', id, res)
   }
 
   async loadDrafts(boxUUID) {
     const drafts = await Promise.promisify(this.draftsDB.find)({ boxUUID })
-    console.log('loadDraft', boxUUID, drafts)
     return drafts
   }
 }

@@ -24,7 +24,7 @@ class UserSelect extends React.PureComponent {
     this.getUsers = () => {
       this.props.getUsers((error, users) => {
         if (error) {
-          console.log('this.getUsers error', error)
+          console.error('this.getUsers error', error)
           this.setState({ loading: false, error: 'getUsers' })
         } else {
           const defaultUsers = this.props.defaultUsers.map(id => users.find(u => u.id === id)).filter(u => !!u)

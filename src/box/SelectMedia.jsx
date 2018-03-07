@@ -159,7 +159,7 @@ class SelectMedia extends React.Component {
     document.addEventListener('keyup', this.keyChange)
     this.requestMedia()
       .then(d => this.setState({ media: this.processMedia(d.media, d.blacklist) }))
-      .catch(e => console.log('requestMedi error', e))
+      .catch(e => console.error('requestMedi error', e))
   }
 
   componentWillUnmount() {
