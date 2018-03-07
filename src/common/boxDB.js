@@ -33,7 +33,8 @@ class boxDB {
   }
 
   async updateTweet(_id, value) {
-    await Promise.promisify(this.draftsDB.update)({ _id }, { $set: value })
+    const res = await Promise.promisify(this.tweetsDB.update)({ _id }, { $set: value })
+    console.log('boxDB updateTweet res', _id, value, res)
   }
 
   async loadTweets(boxUUID) {
