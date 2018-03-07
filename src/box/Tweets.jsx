@@ -140,7 +140,7 @@ class Tweets extends React.PureComponent {
 
   renderTweets({ index, key, style, rowCount }) {
     const tweet = this.props.tweets[index]
-    const { ctime, comment, uuid, author, list, box, type, msg, failed } = tweet
+    const { ctime, comment, uuid, author, list, box, type, msg, failed, finished } = tweet
     const { stationId, wxToken } = box
     const boxUUID = box.uuid
     const isSelf = this.props.guid === author.id
@@ -246,7 +246,7 @@ class Tweets extends React.PureComponent {
                       })
                     }
                       {
-                      (isFakeMedia || isLocalMedia) &&
+                      (isFakeMedia || isLocalMedia) && !finished &&
                         <div
                           style={{
                             position: 'absolute',
@@ -292,11 +292,11 @@ class Tweets extends React.PureComponent {
                       <div style={{ width: 4 }} />
                       { !!list[0].filename && list.length > 1 && i18n.__n('And Other %s Items', list.length)}
                       {
-                      isFake &&
+                        isFake && !finished &&
                         <div style={{ position: 'absolute', height: 120, width: 120, top: 22, right: 460 }}>
                           { failed ? this.renderFailed(this.props.tweets[index]) : this.renderLoading(32, '#E0E0E0') }
                         </div>
-                    }
+                      }
                     </Paper>
               }
             </div>

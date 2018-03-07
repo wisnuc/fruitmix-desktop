@@ -140,7 +140,7 @@ class Adapter extends EventEmitter {
     /* update last read index */
     const lri = tweets.length ? tweets.slice(-1)[0].index : -1
     const index = this.state.boxes.findIndex(b => b.uuid === boxUUID)
-    if (!this.state.boxes[index].lri || (this.state.boxes[index].lri !== lri)) {
+    if (index > -1 && (!this.state.boxes[index].lri || (this.state.boxes[index].lri !== lri))) {
       this.state.boxes[index].lri = lri
       this.updateBoxes(this.state.boxes)
     }
@@ -149,16 +149,6 @@ class Adapter extends EventEmitter {
 
   async createDraft(doc) {
     await this.DB.createDraft(doc)
-    /*
-    const { boxUUID } = doc
-    const bs = this.state.boxes
-    const index = bs.findIndex(b => b.uuid === boxUUID)
-    if (index > -1) {
-      bs[index].ltsst = doc
-      bs[index].lri = doc.index
-      this.updateBoxes(bs)
-    }
-    */
   }
 
   async updateDraft(boxUUID, data) {
