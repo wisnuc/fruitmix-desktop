@@ -145,6 +145,7 @@ class Tweets extends React.PureComponent {
     const boxUUID = box.uuid
     const isSelf = this.props.guid === author.id
     const isMedia = list && list.every(l => l.metadata)
+    const isLocalMedia = list && list.every(l => !!l.localMedia)
     const isMany = list && list.length > 6
     const isFake = list && list[0] && list[0].fakedata
     const isFakeMedia = list && list.every(l => l.fakedata && l.fakedata.magic)
@@ -167,7 +168,7 @@ class Tweets extends React.PureComponent {
           {/* Avatar */}
           <div style={{ height: 40, width: 40 }}>
             { author.avatarUrl ? <Avatar src={author.avatarUrl} size={40} /> :
-              <ActionAccountCircle style={{ width: 40, height: 40, color: 'rgb(0, 137, 123)' }} /> }
+            <ActionAccountCircle style={{ width: 40, height: 40, color: 'rgb(0, 137, 123)' }} /> }
           </div>
           <div style={{ width: 16 }} />
           <div>
@@ -197,28 +198,29 @@ class Tweets extends React.PureComponent {
                   >
                     { comment }
                   </Paper>
-                  : isMedia || isFakeMedia ?
-                  <div
-                    style={{ width: 3 * w + 12, maxHeight: 400, position: 'relative' }}
-                  >
-                    {
+                  : (isMedia || isFakeMedia || isLocalMedia) ?
+                    <div
+                      style={{ width: 3 * w + 12, maxHeight: 400, position: 'relative' }}
+                    >
+                      {
                       list.map((l, i) => {
                         const { sha256, filename } = l
-                        if (i > 5) return (<div key={sha256 + filename + i} />)
+                        if (i > 5) return (<div key={i.toString()} />)
                         const margin = isSelf && list.length < 3 && i === 0 ? `2px 2px 2px ${360 - list.length * 120 + 2}px` : 2
-                        const onTouchTap = () => failed ? this.openRetryDialog(tweet)
-                          : isMedia && this.setState({ openDetail: true, list, seqIndex: i })
+                        const onTouchTap = () => (failed ? this.openRetryDialog(tweet)
+                          : isMedia && this.setState({ openDetail: true, list, seqIndex: i }))
+                        const station = isLocalMedia ? undefined : { boxUUID, stationId, wxToken, guid: this.props.guid, isMedia: true }
                         return (
                           <div
-                            key={sha256 + filename + i}
+                            key={i.toString()}
                             onTouchTap={onTouchTap}
                             style={{ width: w, height: w, float: 'left', backgroundColor: '#FFF', margin, position: 'relative' }}
                           >
-                            { isMedia &&
+                            { (isMedia || isLocalMedia) &&
                               <Thumb
                                 bgColor="rgba(0,0,0,.09)"
                                 digest={sha256}
-                                station={{ boxUUID, stationId, wxToken, guid: this.props.guid, isMedia: true }}
+                                station={station}
                                 ipcRenderer={this.props.ipcRenderer}
                                 height={w}
                                 width={w}
@@ -226,9 +228,9 @@ class Tweets extends React.PureComponent {
                             }
 
                             { isFakeMedia &&
-                                <div style={{ width: w, height: w }}>
-                                  <img src={l.fakedata.entry} width={w} height={w} alt={filename} style={{ objectFit: 'cover' }} />
-                                </div>
+                            <div style={{ width: w, height: w }}>
+                              <img src={l.fakedata.entry} width={w} height={w} alt={filename} style={{ objectFit: 'cover' }} />
+                            </div>
                             }
                             {
                               i === 5 && isMany &&
@@ -243,8 +245,8 @@ class Tweets extends React.PureComponent {
                         )
                       })
                     }
-                    {
-                      isFakeMedia &&
+                      {
+                      (isFakeMedia || isLocalMedia) &&
                         <div
                           style={{
                             position: 'absolute',
@@ -257,10 +259,10 @@ class Tweets extends React.PureComponent {
                           { failed ? this.renderFailed(this.props.tweets[index]) : this.renderLoading(32, '#E0E0E0') }
                         </div>
                     }
-                  </div>
+                    </div>
                   :
-                  <Paper
-                    style={{
+                    <Paper
+                      style={{
                       height: 56,
                       fontSize: 14,
                       width: 3 * w + 12,
@@ -268,34 +270,34 @@ class Tweets extends React.PureComponent {
                       display: 'flex',
                       alignItems: 'center'
                     }}
-                    onTouchTap={() => failed ? this.openRetryDialog(tweet) : this.setState({ showFiles: true, list, author })}
-                  >
-                    <div
-                      style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', backgroundColor: '#FF9100', padding: 16 }}
+                      onTouchTap={() => (failed ? this.openRetryDialog(tweet) : this.setState({ showFiles: true, list, author }))}
                     >
-                      <FileFolder color="#FFF" />
-                    </div>
-                    <div style={{ width: 16 }} />
-                    <div
-                      style={{
+                      <div
+                        style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', backgroundColor: '#FF9100', padding: 16 }}
+                      >
+                        <FileFolder color="#FFF" />
+                      </div>
+                      <div style={{ width: 16 }} />
+                      <div
+                        style={{
                         maxWidth: !(list.length - 1) * w + 1.25 * w,
                         userSelect: 'text',
                         overflow: 'hidden',
                         whiteSpace: 'nowrap',
                         textOverflow: 'ellipsis'
                       }}
-                    >
-                      { list[0].filename || i18n.__('Sending %s Files', list.length) }
-                    </div>
-                    <div style={{ width: 4 }} />
-                    { !!list[0].filename && list.length > 1 && i18n.__n('And Other %s Items', list.length)}
-                    {
+                      >
+                        { list[0].filename || i18n.__('Sending %s Files', list.length) }
+                      </div>
+                      <div style={{ width: 4 }} />
+                      { !!list[0].filename && list.length > 1 && i18n.__n('And Other %s Items', list.length)}
+                      {
                       isFake &&
                         <div style={{ position: 'absolute', height: 120, width: 120, top: 22, right: 460 }}>
                           { failed ? this.renderFailed(this.props.tweets[index]) : this.renderLoading(32, '#E0E0E0') }
                         </div>
                     }
-                  </Paper>
+                    </Paper>
               }
             </div>
           </div>

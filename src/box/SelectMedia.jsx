@@ -137,7 +137,7 @@ class SelectMedia extends React.Component {
         type: 'list',
         boxUUID: this.props.boxUUID,
         stationId: this.props.stationId,
-        list: this.state.selectedItems.map(d => ({ type: 'media', sha256: d }))
+        list: this.state.selectedItems.map(d => ({ type: 'media', sha256: d, localMedia: true }))
       }
 
       this.props.onRequestClose()
