@@ -76,7 +76,7 @@ class SelectNas extends React.Component {
         stationId: this.props.stationId,
         isMedia: [...this.selected].every(([k, v]) => !!v.metadata),
         list: [...this.selected].map(([k, v]) => ({
-          type: 'file', filename: v.name, driveUUID: v.driveUUID, dirUUID: v.dirUUID, localMedia: !!v.metadata, sha256: v.hash
+          type: 'file', filename: v.name, driveUUID: v.driveUUID, dirUUID: v.dirUUID, nasMedia: !!v.metadata, sha256: v.hash
         }))
       }
       console.log('this.fire', this.selected, args)

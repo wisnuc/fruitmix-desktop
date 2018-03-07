@@ -137,7 +137,27 @@ class Tweets extends React.PureComponent {
       </div>
     )
   }
+  /*
+   * tweet's type: [files, media, boxmessage]
+   * media: [
+   *   {
+   *     des: true Media from tweet,
+   *     rule: list.every(l => l.metadata),
+   *     req: station + sha256 via box api with box token // to be so
+   *   },
+   *   {
+   *     des: fakeMedia from nas,
+   *     rule: list.every(l => !!l.nasMedia),
+   *     req: sha256 via meida api with local token
+   *   }
+   *   {
+   *     des: fakeMedia from local upload,
+   *     rule: list.every(l => l.fakedata && l.fakedata.magic),
+   *     req: fakedata.entry 
+   *   }
+   * ]
 
+  */
   renderTweets({ index, key, style, rowCount }) {
     const tweet = this.props.tweets[index]
     const { ctime, comment, uuid, author, list, box, type, msg, failed, finished } = tweet
@@ -145,7 +165,7 @@ class Tweets extends React.PureComponent {
     const boxUUID = box.uuid
     const isSelf = this.props.guid === author.id
     const isMedia = list && list.every(l => l.metadata)
-    const isLocalMedia = list && list.every(l => !!l.localMedia)
+    const isNasMedia = list && list.every(l => !!l.nasMedia)
     const isMany = list && list.length > 6
     const isFake = list && list[0] && list[0].fakedata
     const isFakeMedia = list && list.every(l => l.fakedata && l.fakedata.magic)
@@ -198,94 +218,99 @@ class Tweets extends React.PureComponent {
                   >
                     { comment }
                   </Paper>
-                  : (isMedia || isFakeMedia || isLocalMedia) ?
-                    <div
-                      style={{ width: 3 * w + 12, maxHeight: 400, position: 'relative' }}
-                    >
+                  : (isMedia || isFakeMedia || isNasMedia) ?
+                    <div style={{ width: 3 * w + 12, maxHeight: 400, position: 'relative' }} >
                       {
-                      list.map((l, i) => {
-                        const { sha256, filename } = l
-                        if (i > 5) return (<div key={i.toString()} />)
-                        const margin = isSelf && list.length < 3 && i === 0 ? `2px 2px 2px ${360 - list.length * 120 + 2}px` : 2
-                        const onTouchTap = () => (failed ? this.openRetryDialog(tweet)
-                          : isMedia && this.setState({ openDetail: true, list, seqIndex: i }))
-                        const station = isLocalMedia ? undefined : { boxUUID, stationId, wxToken, guid: this.props.guid, isMedia: true }
-                        return (
-                          <div
-                            key={i.toString()}
-                            onTouchTap={onTouchTap}
-                            style={{ width: w, height: w, float: 'left', backgroundColor: '#FFF', margin, position: 'relative' }}
-                          >
-                            { (isMedia || isLocalMedia) &&
-                              <Thumb
-                                bgColor="rgba(0,0,0,.09)"
-                                digest={sha256}
-                                station={station}
-                                ipcRenderer={this.props.ipcRenderer}
-                                height={w}
-                                width={w}
-                              />
-                            }
+                        list.map((l, i) => {
+                          const { sha256, filename } = l
+                          if (i > 5) return (<div key={i.toString()} />)
+                          const margin = isSelf && list.length < 3 && i === 0 ? `2px 2px 2px ${360 - list.length * 120 + 2}px` : 2
+                          const station = isNasMedia ? undefined : { boxUUID, stationId, wxToken, guid: this.props.guid, isMedia: true }
+                          return (
+                            <div
+                              key={i.toString()}
+                              onTouchTap={() => !failed && isMedia && this.setState({ openDetail: true, list, seqIndex: i })}
+                              style={{ width: w, height: w, float: 'left', backgroundColor: '#FFF', margin, position: 'relative' }}
+                            >
+                              { (isMedia || isNasMedia) &&
+                                  <Thumb
+                                    bgColor="rgba(0,0,0,.09)"
+                                    digest={sha256}
+                                    station={station}
+                                    ipcRenderer={this.props.ipcRenderer}
+                                    height={w}
+                                    width={w}
+                                  />
+                              }
 
-                            { isFakeMedia &&
-                            <div style={{ width: w, height: w }}>
-                              <img src={l.fakedata.entry} width={w} height={w} alt={filename} style={{ objectFit: 'cover' }} />
+                              { isFakeMedia &&
+                                  <div style={{ width: w, height: w }}>
+                                    <img src={l.fakedata.entry} width={w} height={w} alt={filename} style={{ objectFit: 'cover' }} />
+                                  </div>
+                              }
+                              {
+                                i === 5 && isMany &&
+                                  <div
+                                    style={Object.assign({ width: w, height: w }, overlayStyle)}
+                                    onTouchTap={e => !failed && this.openMediaMore(e, list, author)}
+                                  >
+                                    { `+ ${list.length - 6}` }
+                                  </div>
+                              }
                             </div>
-                            }
-                            {
-                              i === 5 && isMany &&
-                                <div
-                                  style={Object.assign({ width: w, height: w }, overlayStyle)}
-                                  onTouchTap={e => !failed && this.openMediaMore(e, list, author)}
-                                >
-                                  { `+ ${list.length - 6}` }
-                                </div>
-                            }
-                          </div>
-                        )
-                      })
-                    }
+                          )
+                        })
+                      }
                       {
-                      (isFakeMedia || isLocalMedia) && !finished &&
-                        <div
-                          style={{
-                            position: 'absolute',
-                            height: 120,
-                            width: 120,
-                            top: list.length > 3 ? 32 : 2,
-                            right: 120 * Math.min(list.length, 3)
-                          }}
-                        >
-                          { failed ? this.renderFailed(this.props.tweets[index]) : this.renderLoading(32, '#E0E0E0') }
-                        </div>
-                    }
+                        (isFakeMedia || isNasMedia) && !finished &&
+                          <div
+                            style={{
+                              width: 120,
+                              height: 120,
+                              cursor: 'pointer',
+                              position: 'absolute',
+                              top: list.length > 3 ? 32 : 2,
+                              right: 120 * Math.min(list.length, 3)
+                            }}
+                            onTouchTap={() => failed && this.openRetryDialog(tweet)}
+                          >
+                            { failed ? this.renderFailed(this.props.tweets[index]) : this.renderLoading(32, '#E0E0E0') }
+                          </div>
+                      }
                     </div>
                   :
                     <Paper
                       style={{
-                      height: 56,
-                      fontSize: 14,
-                      width: 3 * w + 12,
-                      userSelect: 'text',
-                      display: 'flex',
-                      alignItems: 'center'
-                    }}
-                      onTouchTap={() => (failed ? this.openRetryDialog(tweet) : this.setState({ showFiles: true, list, author }))}
+                        height: 56,
+                        fontSize: 14,
+                        width: 3 * w + 12,
+                        userSelect: 'text',
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}
+                      onTouchTap={() => (!failed && !!list[0].filename && this.setState({ showFiles: true, list, author }))}
                     >
                       <div
-                        style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', backgroundColor: '#FF9100', padding: 16 }}
+                        style={{
+                          width: 24,
+                          height: 24,
+                          padding: 16,
+                          display: 'flex',
+                          alignItems: 'center',
+                          backgroundColor: '#FF9100'
+                        }}
                       >
                         <FileFolder color="#FFF" />
                       </div>
                       <div style={{ width: 16 }} />
                       <div
                         style={{
-                        maxWidth: !(list.length - 1) * w + 1.25 * w,
-                        userSelect: 'text',
-                        overflow: 'hidden',
-                        whiteSpace: 'nowrap',
-                        textOverflow: 'ellipsis'
-                      }}
+                          maxWidth: !(list.length - 1) * w + 1.25 * w,
+                          userSelect: 'text',
+                          overflow: 'hidden',
+                          whiteSpace: 'nowrap',
+                          textOverflow: 'ellipsis'
+                        }}
                       >
                         { list[0].filename || i18n.__('Sending %s Files', list.length) }
                       </div>
@@ -293,9 +318,12 @@ class Tweets extends React.PureComponent {
                       { !!list[0].filename && list.length > 1 && i18n.__n('And Other %s Items', list.length)}
                       {
                         isFake && !finished &&
-                        <div style={{ position: 'absolute', height: 120, width: 120, top: 22, right: 460 }}>
-                          { failed ? this.renderFailed(this.props.tweets[index]) : this.renderLoading(32, '#E0E0E0') }
-                        </div>
+                          <div
+                            style={{ position: 'absolute', height: 120, width: 120, top: 22, right: 460, cursor: 'pointer' }}
+                            onTouchTap={() => failed && this.openRetryDialog(tweet)}
+                          >
+                            { failed ? this.renderFailed(this.props.tweets[index]) : this.renderLoading(32, '#E0E0E0') }
+                          </div>
                       }
                     </Paper>
               }

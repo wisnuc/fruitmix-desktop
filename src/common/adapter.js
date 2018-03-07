@@ -122,6 +122,7 @@ class Adapter extends EventEmitter {
       const t = drafts[i]
       if (t.trueUUID) { // already finished
         const index = trueTweets.findIndex(tt => tt.uuid === t.trueUUID) // already stored
+        console.log('adapter getTweets draft trueUUID', t.trueUUID, t.ctime, index)
         if (index > -1) {
           trueTweets[index].ctime = t.ctime
           await this.DB.updateTweet(t.trueUUID, { ctime: t.ctime })
@@ -138,7 +139,7 @@ class Adapter extends EventEmitter {
     console.log('getTweets', trueTweets, drafts)
 
     /* update last read index */
-    const lri = tweets.length ? tweets.slice(-1)[0].index : -1
+    const lri = tweets.length ? tweets.length - 1 : -1
     const index = this.state.boxes.findIndex(b => b.uuid === boxUUID)
     if (index > -1 && (!this.state.boxes[index].lri || (this.state.boxes[index].lri !== lri))) {
       this.state.boxes[index].lri = lri

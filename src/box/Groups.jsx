@@ -73,6 +73,7 @@ class Groups extends React.Component {
           const newTweet = Object.assign({}, tweet, { failed: true })
           this.updateDraft(newTweet)
         } else {
+          console.log('create nasTweets success', res)
           const newTweet = Object.assign({}, tweet, { trueUUID: res.uuid, finished: true })
           this.updateDraft(newTweet)
         }
@@ -185,7 +186,7 @@ class Groups extends React.Component {
         const newTweet = Object.assign({}, tweet, { failed: true, boxUUID: box.uuid })
         this.updateDraft(newTweet)
       } else {
-        const newTweet = Object.assign({}, tweet, { failed: false, trueUUID: data.uuid, boxUUID: box.uuid })
+        const newTweet = Object.assign({}, tweet, { finished: true, trueUUID: data.uuid, boxUUID: box.uuid })
         this.updateDraft(newTweet)
       }
     }
