@@ -30,7 +30,9 @@ class Groups extends React.Component {
       newBox: false
     }
 
-    this.sessions = {}
+    this.sessions = {} // store tweets for local upload
+
+    this.WIP = false // Working in Process for requesting new tweet
 
     this.handleResize = () => this.forceUpdate()
 
@@ -60,22 +62,29 @@ class Groups extends React.Component {
 
     this.createNasTweets = (args, retryTweet) => {
       // console.log('createNasTweets', args)
-      const { list, boxUUID } = args
+      const { list, boxUUID, isMedia } = args
       const box = this.props.boxes.find(b => b.uuid === boxUUID)
       const fakeList = list.map(l => Object.assign({ fakedata: {} }, l))
       /* create the fake tweet */
-      const tweet = retryTweet || this.updateFakeTweet({ fakeList, box, isMedia: true, raw: { type: 'indrive', args } })
+      const tweet = retryTweet || this.updateFakeTweet({ fakeList, box, isMedia, raw: { type: 'indrive', args } })
       this.props.apis.pureRequest('nasTweets', args, (err, res) => {
         if (err || !res || !res.uuid) {
           console.log('create nasTweets error', err)
-          this.props.openSnackBar(i18n.__('Send Tweets with Nas Files Failed'))
-          this.props.ada.updateDraft(boxUUID, Object.assign({ failed: true }, tweet))
-            .catch(error => console.log('this.updateDraft error', error))
+          const newTweet = Object.assign({}, tweet, { failed: true })
+          this.updateDraft(newTweet)
         } else {
-          this.props.ada.updateDraft(boxUUID, Object.assign({ trueUUID: res.uuid }, tweet))
-            .catch(error => console.log('this.updateDraft error', error))
+          const newTweet = Object.assign({}, tweet, { trueUUID: res.uuid })
+          this.updateDraft(newTweet)
         }
       })
+    }
+
+    this.updateDraft = (tweet) => {
+      this.props.ada.updateDraft(tweet.boxUUID, tweet)
+        .catch(error => console.log('this.updateDraft error', error))
+      const index = this.state.tweets.findIndex(t => t.uuid === tweet.uuid)
+      const tweets = [...this.state.tweets.slice(0, index), tweet, ...this.state.tweets.slice(index + 1)]
+      if (index > -1) this.setState({ tweets })
     }
 
     this.retryLocalUpload = (entries, args, tweet) => {
@@ -91,12 +100,7 @@ class Groups extends React.Component {
       console.log('this.retry raw', raw)
       if (type === 'indrive') this.createNasTweets(args, tweet)
       else this.retryLocalUpload(entries, args, tweet)
-
-      this.props.ada.updateDraft(boxUUID, newTweet)
-        .catch(error => console.log('this.updateDraft error', error))
-      const index = this.state.tweets.findIndex(t => t.uuid === uuid)
-      const tweets = [...this.state.tweets.slice(0, index), newTweet, ...this.state.tweets.slice(index + 1)]
-      if (index > -1) this.setState({ tweets })
+      this.updateDraft(newTweet)
     }
 
     this.getTweets = (box, showLoading) => {
@@ -105,9 +109,11 @@ class Groups extends React.Component {
       this.props.ada.removeAllListeners('tweets')
       this.props.ada.getTweets(box.uuid).then((tweets) => {
         console.log('loadTweets sucess', box, tweets)
+        this.WIP = false
         this.updateTweets(box, tweets)
       }).catch((e) => {
         console.log('loadTweets error', e)
+        this.WIP = false
         this.setState({ tError: true })
       })
     }
@@ -176,11 +182,11 @@ class Groups extends React.Component {
       if (!tweet) return
       if (!success) {
         this.props.openSnackBar(i18n.__('Send Tweets with Local Files Failed'))
-        this.props.ada.updateDraft(box.uuid, Object.assign({ failed: true }, tweet))
-          .catch(error => console.log('this.updateDraft error', error))
+        const newTweet = Object.assign({}, tweet, { failed: true, boxUUID: box.uuid })
+        this.updateDraft(newTweet)
       } else {
-        this.props.ada.updateDraft(box.uuid, Object.assign({ trueUUID: data.uuid }, tweet))
-          .catch(error => console.log('this.updateDraft error', error))
+        const newTweet = Object.assign({}, tweet, { failed: false, trueUUID: data.uuid, boxUUID: box.uuid })
+        this.updateDraft(newTweet)
       }
     }
 
@@ -202,8 +208,9 @@ class Groups extends React.Component {
       const ltc = nextProps.currentBox.ltsst && nextProps.currentBox.ltsst.ctime // last tweet's ctime
       const currentTweet = this.state.tweets && this.state.tweets.slice(-1)[0]
       const ctc = currentTweet && currentTweet.ctime // current tweet's ctime
-      if (!showLoading && ltc && ltc <= ctc) return // same box and no new tweets
+      if (!showLoading && (ltc && ltc <= ctc || this.WIP)) return // same box and no new tweets
       console.log('will getTweets', showLoading, ltc, ctc, nextProps.currentBox)
+      this.WIP = true
       this.getTweets(nextProps.currentBox, showLoading)
     }
   }

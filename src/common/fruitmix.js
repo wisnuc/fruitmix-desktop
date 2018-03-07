@@ -59,10 +59,11 @@ class Fruitmix extends EventEmitter {
     }
 
     /* adapter of box api via cloud */
-    this.creq = (ep, method, stationId, data) => {
+    this.creq = (ep, method, boxUUID, stationId, data) => {
       // console.log('this.creq', ep, method, stationId, data)
+      const url = boxUUID ? `${cloudAddress}/c/v1/boxes/${boxUUID}/stations/${stationId}/json`
+        : `${cloudAddress}/c/v1/stations/${stationId}/json`
       if (stationId) {
-        const url = `${cloudAddress}/c/v1/stations/${stationId}/json`
         const resource = Buffer.from(`/${ep}`).toString('base64')
         if (method === 'GET') return request.get(url).set('Authorization', this.wxToken).query({ resource, method })
         return request.post(url).set('Authorization', this.wxToken).send(Object.assign({ resource, method }, data))
@@ -482,7 +483,7 @@ class Fruitmix extends EventEmitter {
 
       /* box API */
       case 'createBox':
-        r = this.creq('boxes', 'POST', args.stationId, { name: args.name, users: args.users })
+        r = this.creq('boxes', 'POST', null, args.stationId, { name: args.name, users: args.users })
         isCloud = true
         break
 
@@ -502,29 +503,29 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'delBox':
-        r = this.creq(`boxes/${args.boxUUID}`, 'DELETE', args.stationId)
+        r = this.creq(`boxes/${args.boxUUID}`, 'DELETE', args.boxUUID, args.stationId)
         isCloud = true
         break
 
       case 'tweets':
-        r = this.creq(`boxes/${args.boxUUID}/tweets`, 'GET', args.stationId)
+        r = this.creq(`boxes/${args.boxUUID}/tweets`, 'GET', args.boxUUID, args.stationId)
           .query({ first: args.first, last: args.last, count: args.count, metadata: true })
         isCloud = true
         break
 
       case 'createTweet':
-        r = this.creq(`boxes/${args.boxUUID}/tweets`, 'POST', args.station, { comment: args.comment })
+        r = this.creq(`boxes/${args.boxUUID}/tweets`, 'POST', args.boxUUID, args.station, { comment: args.comment })
         isCloud = true
         break
 
       case 'delTweet':
-        r = this.creq(`boxes/${args.boxUUID}/tweets`, 'DELETE', args.station, { indexArr: args.indexs })
+        r = this.creq(`boxes/${args.boxUUID}/tweets`, 'DELETE', args.boxUUID, args.station, { indexArr: args.indexs })
         isCloud = true
         break
 
       case 'nasTweets': {
         const ep = `boxes/${args.boxUUID}/tweets`
-        const url = `${cloudAddress}/c/v1/stations/${args.stationId}/pipe`
+        const url = `${cloudAddress}/c/v1/boxes/${args.boxUUID}/stations/${args.stationId}/pipe`
         const resource = Buffer.from(`/${ep}`).toString('base64')
         r = request.post(url).set('Authorization', this.wxToken).field('manifest', JSON.stringify({
           resource, method: 'POST', comment: args.comment, type: args.type, indrive: args.list
@@ -534,12 +535,12 @@ class Fruitmix extends EventEmitter {
       }
 
       case 'handleBoxUser':
-        r = this.creq(`boxes/${args.boxUUID}`, 'PATCH', args.stationId, { users: { op: args.op, value: args.guids } })
+        r = this.creq(`boxes/${args.boxUUID}`, 'PATCH', args.boxUUID, args.stationId, { users: { op: args.op, value: args.guids } })
         isCloud = true
         break
 
       case 'boxName':
-        r = this.creq(`boxes/${args.boxUUID}`, 'PATCH', args.stationId, { name: args.name })
+        r = this.creq(`boxes/${args.boxUUID}`, 'PATCH', args.boxUUID, args.stationId, { name: args.name })
         isCloud = true
         break
 

@@ -84,6 +84,7 @@ class Adapter extends EventEmitter {
     const ltsi = box.ltsst && box.ltsst.index // the latest stored tweet's index
     const props = { boxUUID, stationId }
     if (ltsi !== undefined) Object.assign(props, { first: 0, last: ltsi, count: 0 })
+    console.log('before reqAsync tweets', props)
     const res = await this.ctx.reqAsync('tweets', props)
     console.log('reqTweets res', props, res)
     if (Array.isArray(res) && res.length) {
@@ -148,6 +149,16 @@ class Adapter extends EventEmitter {
 
   async createDraft(doc) {
     await this.DB.createDraft(doc)
+    /*
+    const { boxUUID } = doc
+    const bs = this.state.boxes
+    const index = bs.findIndex(b => b.uuid === boxUUID)
+    if (index > -1) {
+      bs[index].ltsst = doc
+      bs[index].lri = doc.index
+      this.updateBoxes(bs)
+    }
+    */
   }
 
   async updateDraft(boxUUID, data) {
