@@ -16,10 +16,6 @@ import { parseTime } from '../common/datetime'
 import DialogOverlay from '../common/DialogOverlay'
 import ScrollBar from '../common/ScrollBar'
 
-const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
-
-const imgUrl = 'http://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKQiahrEc8rUfECDTUq94WlcaNkTYTKzIKr3p5xgOPQO1juvtwO1YSUCHOPpup3oWo1AP3nOBVyPCw/132'
-
 class Groups extends React.Component {
   constructor(props) {
     super(props)
@@ -101,8 +97,7 @@ class Groups extends React.Component {
     }
 
     this.getTweets = (box, showLoading) => {
-      // console.log('this.getTweets fire')
-      if (showLoading) this.setState({ tweets: null, tError: false }) // show loading state
+      if (showLoading) this.setState({ tweets: null, tError: false }) // show loading state, such as the selected box changed
 
       this.props.ada.removeAllListeners('tweets')
       this.props.ada.getTweets(box.uuid).then((tweets) => {
@@ -337,7 +332,6 @@ class Groups extends React.Component {
   render() {
     const { boxes, currentBox, station, guid, ipcRenderer, apis } = this.props
     if (!boxes) return this.renderLoading(32)
-    console.log('render Groups', this.props, this.state)
     const { primaryColor, openSnackBar, getUsers } = this.props
     const { tweets, tError } = this.state
     const boxH = boxes && Math.min(window.innerHeight - 106, boxes.length * 72) || 0
@@ -392,15 +386,18 @@ class Groups extends React.Component {
         </div>
 
         {/* tweets */}
-        <Tweets
-          retry={this.retry}
-          tError={tError}
-          guid={guid}
-          tweets={currentBox ? tweets : []}
-          box={currentBox}
-          ipcRenderer={ipcRenderer}
-          apis={apis}
-        />
+        {
+          currentBox &&
+            <Tweets
+              retry={this.retry}
+              tError={tError}
+              guid={guid}
+              tweets={tweets}
+              box={currentBox}
+              ipcRenderer={ipcRenderer}
+              apis={apis}
+            />
+        }
 
         {/* FAB */}
         {

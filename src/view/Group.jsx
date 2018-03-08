@@ -112,7 +112,6 @@ class Group extends Base {
     }
 
     this.selectBox = (index) => {
-      // console.log('this.selectBox', index, this.state)
       if (!this.state.boxes) return
       this.setState({ currentBox: this.state.boxes[index] })
     }
@@ -120,6 +119,7 @@ class Group extends Base {
     this.updateBoxes = (prev, curr) => {
       const boxes = curr.boxes
       this.setState({ boxes: this.processBox(boxes) })
+      /*
       let currentBox = boxes.find(b => this.state.currentBox && (b.uuid === this.state.currentBox.uuid)) || boxes[0]
       if (this.op && Number.isInteger(this.op.index)) {
         currentBox = boxes[this.op.index]
@@ -128,6 +128,7 @@ class Group extends Base {
       if (currentBox) {
         this.setState({ currentBox })
       } else this.setState({ currentBox: null })
+      */
     }
 
     this.refresh = (op) => {
@@ -149,7 +150,6 @@ class Group extends Base {
     }
 
     this.onMessage = (msg) => {
-      // console.log('this.onMessage', msg)
       this.refresh()
     }
 
@@ -159,8 +159,8 @@ class Group extends Base {
   willReceiveProps(nextProps) {
     if (!this.state.account) this.handleProps(nextProps.apis, ['account'])
     else if (this.first) {
-      this.navEnter()
       this.first = false
+      this.navEnter()
       if (!this.wxToken || !this.guid) setImmediate(() => this.ctx.navToBound('home'))
     }
   }
@@ -174,9 +174,9 @@ class Group extends Base {
     this.wxToken = userData && userData.wxToken
     this.guid = apis.account && apis.account.data && apis.account.data.global && apis.account.data.global.id
     const info = this.ctx.props.selectedDevice.info && this.ctx.props.selectedDevice.info.data
+
     /* logged station */
     this.station = info && info.connectState === 'CONNECTED' && info
-    // console.log('this.wxToken && this.guid', this.wxToken, this.guid, this.station)
     if (this.wxToken && this.guid) {
       this.initDB()
       this.ctx.props.apis.update('wxToken', this.wxToken, this.refresh)
