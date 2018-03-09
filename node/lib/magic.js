@@ -14,7 +14,6 @@ const getFileType = (fpath, callback) =>
 
 const fileMagic = (target, callback) =>
   getFileType(target, (err, type) => {
-    console.log('fileMagic', err, type)
     if (err) callback(null, 0)
     let ext = (type && type.ext && type.ext.toUpperCase()) || 0
     if (ext === 'JPG') ext = 'JPEG'

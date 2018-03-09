@@ -118,7 +118,7 @@ class Group extends Base {
     }
 
     this.updateBoxes = (prev, curr) => {
-      console.log('this.updateBoxes', curr, this.op)
+      // console.log('this.updateBoxes', curr, this.op)
       const boxes = curr.boxes
       this.setState({ boxes: this.processBox(boxes) })
       const boxUUID = this.op && this.op.boxUUID
@@ -131,7 +131,7 @@ class Group extends Base {
     }
 
     this.refresh = (op) => {
-      console.log('this.refresh op', op)
+      // console.log('this.refresh op', op)
       if (op) this.op = op
       this.ada.reqBoxes().catch(e => console.error('reqBoxes error', e))
     }

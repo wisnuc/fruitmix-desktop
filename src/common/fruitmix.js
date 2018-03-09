@@ -93,7 +93,7 @@ class Fruitmix extends EventEmitter {
       }
       this.setState(name, curr)
 
-      console.log(`${name} updated`, prev, curr, this[name].isFinished(), typeof next === 'function')
+      // console.log(`${name} updated`, prev, curr, this[name].isFinished(), typeof next === 'function')
 
       /* save box token */
       if (name === 'boxToken' && !this[name].isRejected()) this.bToken = curr.data.token
@@ -242,7 +242,6 @@ class Fruitmix extends EventEmitter {
         break
 
       case 'adminUpdateDrive':
-        console.log('adminUpdateDrive', args)
         r = this.apatch(`drives/${args.uuid}`, {
           label: args.label,
           writelist: args.writelist
@@ -390,7 +389,7 @@ class Fruitmix extends EventEmitter {
         break
     }
 
-    if (!r) console.log(`no request handler found for ${name}`)
+    if (!r) console.error(`no request handler found for ${name}`)
     else this.setRequest(name, args, cb => r.end(cb), next)
   }
 
@@ -548,7 +547,7 @@ class Fruitmix extends EventEmitter {
         break
     }
 
-    if (!r) console.log(`no request handler found for ${name}`)
+    if (!r) console.error(`no request handler found for ${name}`)
     else {
       r.end((err, res) => (typeof next === 'function') &&
         next(err, isCloud ? res && res.body && res.body.data : res && res.body))

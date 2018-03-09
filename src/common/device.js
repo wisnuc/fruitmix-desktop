@@ -60,7 +60,7 @@ class Device extends RequestManager {
     this.reqCloud = (type, ep, stationID, token) => {
       const url = `${cloudAddress}/c/v1/stations/${stationID}/json`
       const resource = new Buffer(`/${ep}`).toString('base64')
-      console.log('this.reqCloud device', type, ep, url, token)
+      // console.log('this.reqCloud device', type, ep, url, token)
       return request
         .get(url)
         .query({ resource, method: type })
@@ -202,7 +202,7 @@ class Device extends RequestManager {
         break
     }
 
-    if (!r) return console.log(`no request handler found for ${name}`)
+    if (!r) return console.error(`no request handler found for ${name}`)
 
     this.setRequest(name, args, cb => r.end(cb), next)
   }
@@ -304,7 +304,7 @@ class Device extends RequestManager {
         break
     }
 
-    if (!r) console.log(`no request handler found for ${name}`)
+    if (!r) console.error(`no request handler found for ${name}`)
     else r.end((err, res) => (typeof next === 'function') && next(err, cloud ? res && res.body && res.body.data : res && res.body))
   }
 

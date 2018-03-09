@@ -273,8 +273,7 @@ class Media extends Base {
     const newStyle = Object.assign(style, { color: 'rgba(0,0,0,0.54)' })
     return (
       <div style={newStyle}>
-        { i18n.__('Media Title') }
-        { !!this.media && ` (${this.media.length})` }
+        { i18n.__n('Media Title and Count %s', this.media ? this.media.length : 0) }
       </div>
     )
   }

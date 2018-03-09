@@ -42,7 +42,6 @@ class Adapter extends EventEmitter {
     if (!noSave) {
       this.DB.saveBoxes(this.ctx.guid, boxes).catch(e => console.error('saveBoxes error', boxes, e))
     }
-    console.log('updateBoxes state', this.state)
     this.emit('boxes', state, this.state)
   }
 
@@ -121,7 +120,7 @@ class Adapter extends EventEmitter {
   }
 
   async getTweets(boxUUID) {
-    console.time('getTweets')
+    // console.time('getTweets')
     const trueTweets = await this.DB.loadTweets(boxUUID)
     const drafts = await this.DB.loadDrafts(boxUUID)
 
@@ -153,7 +152,7 @@ class Adapter extends EventEmitter {
       this.state.boxes[index].lri = lri
       this.updateBoxes(this.state.boxes)
     }
-    console.timeEnd('getTweets')
+    // console.timeEnd('getTweets')
     return tweets
   }
 

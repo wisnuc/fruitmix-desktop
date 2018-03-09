@@ -564,7 +564,10 @@
   "==== view/Media.jsx ====": "",
   "Media Menu Name": "我的照片",
   "Media Quick Name": "照片",
-  "Media Title": "我的照片",
+  "Media Title and Count %s": {
+    "zero": "我的照片",
+    "other": "我的照片（%s）"
+  },
   "Date Unknown Text": "神秘时间",
   "Shift Tips": "按住Shifit并点击，即可一次选择多项内容",
   "Remove Media Success %s": "移除了%s张照片",
@@ -787,13 +790,13 @@
   "New Box": "新建",
   "Create New Box": "新建私友群",
   "Send Tweets with Local Files Failed": "发送失败",
-  "Send Tweets with Nas Files Failed": "发送失败",
   "%s Create Box": "“%s”创建了该私友群",
   "Box Name Changed to %s": "群名被修改为”%s“",
   "User %s Entered Box": "”%s“加入了私友群",
   "Read Local Files Failed": "读取本地文件失败",
   "Box Offline Text in Tweets": "该私友群已离线",
   "Offline": "已离线",
+  "Deleted Box": "已退出",
 
   "==== box/BoxDetail.jsx ====": "",
   "Add Users to Box Failed": "添加失败",
@@ -841,6 +844,7 @@
   "==== box/Tweets.jsx ====": "",
   "Load Tweet Error Text": "加载消息列表失败",
   "Sending %s Files": "正在发送%s个文件",
+  "Resend Tweet Text": "重新发送？",
 
   "==== node/lib/window.js ====": "",
   "Confirm Close Title": "确认关闭",
