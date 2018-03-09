@@ -106,18 +106,22 @@ class Media extends Base {
         this.firstSelect = false
       }
       this.setState({ selectedItems: combineElement(digests, this.state.selectedItems).sort() })
+      this.lastSelect = digests.length === 1 ? digests[0] : null
     }
 
     this.removeListToSelection = (digests) => {
       this.setState({ selectedItems: removeElement(digests, this.state.selectedItems).sort() })
+      this.lastSelect = null
     }
 
-    this.clearSelect = () => { this.setState({ selectedItems: [] }) }
+    this.clearSelect = () => {
+      this.lastSelect = null
+      this.setState({ selectedItems: [] })
+    }
 
     this.getHoverPhoto = (digest) => {
-      if (!this.state.selectedItems.length) return
-      const lastSelect = this.state.selectedItems[this.state.selectedItems.length - 1]
-      const lastSelectIndex = this.media.findIndex(photo => photo.hash === lastSelect)
+      if (!this.state.selectedItems.length || !this.state.shift || !this.lastSelect) return
+      const lastSelectIndex = this.media.findIndex(photo => photo.hash === this.lastSelect)
       const hoverIndex = this.media.findIndex(photo => photo.hash === digest)
       let shiftHoverPhotos = this.media.slice(lastSelectIndex, hoverIndex + 1)
 
@@ -128,6 +132,7 @@ class Media extends Base {
     this.getShiftStatus = (event) => {
       if (event.shiftKey === this.state.shift) return
       this.setState({ shift: event.shiftKey })
+      if (!event.shiftKey) this.setState({ shiftHoverItems: [] })
     }
 
     this.startDownload = () => {

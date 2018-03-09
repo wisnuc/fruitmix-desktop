@@ -42,13 +42,13 @@ class PhotoList extends React.Component {
     }
 
     this.onScroll = ({ scrollTop }) => {
+      this.currentScrollTop = scrollTop
       const currentIndex = this.indexHeightSum.findIndex(data => data > scrollTop + this.indexHeightSum[0] * 0.9)
       if (!this.photoMapDates.length || currentIndex < 0) return
       const percentage = scrollTop / this.maxScrollTop
       this.date = this.photoMapDates[currentIndex].date
       this.currentDigest = this.photoMapDates[currentIndex].photos[0].hash
       if (!this.firstScroll) this.props.memoize({ currentDigest: this.currentDigest, currentScrollTop: scrollTop })
-      // debug('this.props.memoize()', this.props.memoize(), currentIndex, this.indexHeightSum[0])
 
       /* forceUpdate when first two scroll, this is necessary to show timeline */
       if (this.firstScroll) {
@@ -98,7 +98,6 @@ class PhotoList extends React.Component {
       if (top > this.height - timelineMargin) top = this.height - timelineMargin
 
       if (this.onMouseDown || ((x > this.width - 96 && y > this.headerHeight) && this.hover)) {
-        // debug('this.onMouseMove')
         /* showTimeline and clear setTimeout */
         this.showDateBar(true)
         clearTimeout(this.time)
@@ -127,7 +126,7 @@ class PhotoList extends React.Component {
           this.refBarFollowMouse.style.opacity = 1
           this.refBarFollowMouse.style.top = `${top}px`
 
-          this.scrollTop = currentScrollTop
+          this.mouseScrollTop = currentScrollTop
           if (this.onMouseDown) {
             this.scrollToPosition()
           }
@@ -139,7 +138,9 @@ class PhotoList extends React.Component {
     }
 
     this.scrollToPosition = () => {
-      if (this.refList) this.refList.scrollToPosition(this.scrollTop)
+      if (!this.refList) return
+      this.currentScrollTop = this.mouseScrollTop
+      this.refList.scrollToPosition(this.mouseScrollTop)
     }
 
     this.onMouseUp = () => (this.onMouseDown = false)
@@ -151,7 +152,7 @@ class PhotoList extends React.Component {
   }
 
   componentDidUpdate() {
-    this.onScroll({ scrollTop: this.scrollTop || 0 })
+    this.onScroll({ scrollTop: this.currentScrollTop || 0 })
   }
 
   componentWillUnmount() {
