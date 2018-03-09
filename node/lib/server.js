@@ -74,10 +74,8 @@ const cdownload = (ep, station) => {
 let storedToken = null
 const getBToken = (guid, callback) => {
   if (storedToken && storedToken.guid === guid && (new Date().getTime() - storedToken.ctime < 6000000)) {
-    console.log('get saved Token')
     setImmediate(() => callback(null, storedToken.token))
   } else {
-    console.log('req new Token')
     const r = aget('cloudToken').query({ guid })
     r.end((err, res) => {
       if (err) console.error('getBToken error', err)

@@ -36,7 +36,7 @@ class MQTT {
 }
 
 const startMqtt = (event, args) => {
-  console.log('startMqtt', args)
+  // console.log('startMqtt', args)
   const { clientId, topic, session } = args
   const onMessage = msg => getMainWindow().webContents.send('MQTT_MSG', { session, msg })
   const handle = new MQTT(clientId, topic, onMessage)

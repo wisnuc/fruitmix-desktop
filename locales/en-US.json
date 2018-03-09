@@ -564,7 +564,10 @@
   "==== view/Media.jsx ====": "",
   "Media Menu Name": "Photos",
   "Media Quick Name": "Photos",
-  "Media Title": "Photos",
+  "Media Title and Count %s": {
+    "zero": "Photos",
+    "other": "Photos (%s)"
+  },
   "Date Unknown Text": "Unknown",
   "Shift Tips": "Hold Shift and click to select many items at once",
   "Remove Media Success %s": "%s photo(s) removed",
@@ -787,13 +790,13 @@
   "New Box": "Create",
   "Create New Box": "Create new group",
   "Send Tweets with Local Files Failed": "Failed to send the tweet",
-  "Send Tweets with Nas Files Failed": "Failed to send the tweet",
   "%s Create Box": "\"%s\" created this box",
   "Box Name Changed to %s": "Group name changed to \"%s\"",
   "User %s Entered Box": "\"%s\" entered this group",
   "Read Local Files Failed": "Failed to read the local files",
   "Box Offline Text in Tweets": "Group is offline.",
   "Offline": "Offline",
+  "Deleted Box": "Exited",
   
   "==== box/BoxDetail.jsx ====": "",
   "Add Users to Box Failed": "Operation failed",
@@ -841,6 +844,7 @@
   "==== box/Tweets.jsx ====": "",
   "Load Tweet Error Text": "Failed to load the message",
   "Sending %s Files": "Sending %s files",
+  "Resend Tweet Text": "Resend ?",
 
   "==== node/lib/window.js ====": "",
   "Confirm Close Title": "Confirm close",

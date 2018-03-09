@@ -24,7 +24,7 @@ entries.forEach(filePath => {
   const keys_loc = filtered_loc.map(l => l.split('"')[1]).filter(k => !!k)
   const unique_loc = new Set([...keys_loc.sort()]);
 
-  ['one', 'other', 'zh-CN', 'en-US'].forEach(k => unique_loc.delete(k))
+  ['zero', 'one', 'other', 'zh-CN', 'en-US'].forEach(k => unique_loc.delete(k))
 
   const not_loc = [...unique_src].filter(k => !unique_loc.has(k))
   const not_src = [...unique_loc].filter(k => !unique_src.has(k))

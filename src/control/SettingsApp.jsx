@@ -177,7 +177,11 @@ class SettingsApp extends React.Component {
         <div style={{ width: 560, display: 'flex', alignItems: 'center' }}>
           { i18n.__('Download Path:') }
           <div style={{ width: 8 }} />
-          <input value={path} style={{ width: 360, border: '1px solid #bfbfbf', borderRadius: '2px', color: '#444', padding: 3 }} />
+          <input
+            value={path}
+            onChange={() => {}}
+            style={{ width: 360, border: '1px solid #bfbfbf', borderRadius: '2px', color: '#444', padding: 3 }}
+          />
         </div>
         <div style={{ width: 480, display: 'flex', alignItems: 'center', marginLeft: -8 }}>
           <FlatButton
