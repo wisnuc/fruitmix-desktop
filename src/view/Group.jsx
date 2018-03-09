@@ -112,27 +112,27 @@ class Group extends Base {
     }
 
     this.selectBox = (index) => {
-      if (!this.state.boxes) return
-      this.setState({ currentBox: this.state.boxes[index] })
+      const currentBox = this.state.boxes && this.state.boxes[index]
+      if (currentBox) this.setState({ currentBox })
+      else this.setState({ currentBox: null })
     }
 
     this.updateBoxes = (prev, curr) => {
+      console.log('this.updateBoxes', curr, this.op)
       const boxes = curr.boxes
       this.setState({ boxes: this.processBox(boxes) })
-      /*
-      let currentBox = boxes.find(b => this.state.currentBox && (b.uuid === this.state.currentBox.uuid)) || boxes[0]
-      if (this.op && Number.isInteger(this.op.index)) {
-        currentBox = boxes[this.op.index]
+      const boxUUID = this.op && this.op.boxUUID
+      const delBox = this.op && this.op.delBox
+      if (boxUUID) {
+        const currentBox = boxes.find(b => b.uuid === boxUUID)
         this.op = null
-      }
-      if (currentBox) {
         this.setState({ currentBox })
-      } else this.setState({ currentBox: null })
-      */
+      } else if (delBox) this.setState({ currentBox: null })
     }
 
     this.refresh = (op) => {
-      this.op = op
+      console.log('this.refresh op', op)
+      if (op) this.op = op
       this.ada.reqBoxes().catch(e => console.error('reqBoxes error', e))
     }
 
@@ -252,6 +252,7 @@ class Group extends Base {
           ada={this.ada}
           guid={this.guid}
           refresh={this.refresh}
+          selectBox={this.selectBox}
           box={this.state.currentBox}
           apis={this.ctx.props.apis}
           primaryColor={this.groupPrimaryColor()}

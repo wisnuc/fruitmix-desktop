@@ -23,12 +23,17 @@ class boxDB {
 
   async saveBoxes(guid, boxes) {
     const doc = await Promise.promisify(this.boxesDB.findOne, { context: this.boxesDB })({ _id: guid })
+    console.log('async saveBoxes', doc)
     if (doc) await Promise.promisify(this.boxesDB.update, { context: this.boxesDB })({ _id: guid }, { boxes })
     else await Promise.promisify(this.boxesDB.insert, { context: this.boxesDB })({ _id: guid, boxes })
   }
 
   async saveTweets(docs) {
-    await Promise.promisify(this.tweetsDB.insert, { context: this.tweetsDB })(docs)
+    try {
+      await Promise.promisify(this.tweetsDB.insert, { context: this.tweetsDB })(docs)
+    } catch (e) {
+      console.error('async saveTweets error', docs)
+    }
   }
 
   async updateTweet(_id, value) {

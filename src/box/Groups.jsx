@@ -28,7 +28,7 @@ class Groups extends React.Component {
 
     this.sessions = {} // store tweets for local upload
 
-    this.WIP = false // Working in Process for requesting new tweet
+    this.WIP = null // Working in Process for requesting new tweet
 
     this.handleResize = () => this.forceUpdate()
 
@@ -50,7 +50,7 @@ class Groups extends React.Component {
         this.setState({ newBox: false })
         if (err) this.props.openSnackBar(i18n.__('Create Box Failed'))
         else this.props.openSnackBar(i18n.__('Create Box Success'))
-        this.props.refresh({ index: 0 })
+        if (res && res.uuid) this.props.refresh({ boxUUID: res.uuid })
       })
     }
 
@@ -101,11 +101,11 @@ class Groups extends React.Component {
 
       this.props.ada.removeAllListeners('tweets')
       this.props.ada.getTweets(box.uuid).then((tweets) => {
-        this.WIP = false
+        this.WIP = null
         this.updateTweets(box, tweets)
       }).catch((e) => {
         console.error('loadTweets error', e)
-        this.WIP = false
+        this.WIP = null
         this.setState({ tError: true })
       })
     }
@@ -189,15 +189,17 @@ class Groups extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.currentBox) {
       /* check if change box */
-      const showLoading = !(this.preBox && nextProps.currentBox && this.preBox.uuid === nextProps.currentBox.uuid)
+      const nextBoxUUID = nextProps.currentBox && nextProps.currentBox.uuid
+      const currBoxUUID = this.preBox && this.preBox.uuid
+      const showLoading = !(nextBoxUUID && currBoxUUID && nextBoxUUID === currBoxUUID)
 
       /* check if have new stored tweets */
       const ltc = nextProps.currentBox.ltsst && nextProps.currentBox.ltsst.ctime // last tweet's ctime
       const currentTweet = this.state.tweets && this.state.tweets.slice(-1)[0]
       const ctc = currentTweet && currentTweet.ctime // current tweet's ctime
-      if (!showLoading && (ltc && ltc <= ctc || this.WIP)) return // same box and no new tweets
-      // console.log('will getTweets', showLoading, ltc, ctc, this.WIP, nextProps.currentBox)
-      this.WIP = true
+      if ((!showLoading && ltc && ltc <= ctc) || this.WIP === nextBoxUUID) return // same box and no new tweets
+      // console.log('will getTweets', showLoading, ltc, ctc, this.WIP)
+      this.WIP = nextBoxUUID
       this.getTweets(nextProps.currentBox, showLoading)
     }
   }
