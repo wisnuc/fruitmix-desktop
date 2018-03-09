@@ -123,6 +123,7 @@ class Groups extends React.Component {
     }
 
     this.updateFakeTweet = ({ fakeList, box, isMedia, raw }) => {
+      // console.log('this.updateFakeTweet', this.state)
       const author = box.users.find(u => u.id === this.props.guid) || { id: this.props.guid }
       const uuid = UUID.v4()
       const tweet = {
@@ -204,6 +205,10 @@ class Groups extends React.Component {
     }
   }
 
+  componentWillUnmount() {
+    this.props.ipcRenderer.removeAllListeners('BOX_UPLOAD_FAKE_DATA')
+    this.props.ipcRenderer.removeAllListeners('BOX_UPLOAD_RESULT')
+  }
 
   renderNoBoxes() {
     return (

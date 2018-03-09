@@ -185,6 +185,10 @@ class Group extends Base {
   }
 
   navLeave() {
+    this.first = true
+    this.ada.removeAllListeners('boxes')
+    this.ada = null
+    ipcRenderer.removeAllListeners('MQTT_MSG')
     this.onMqtt = false
   }
 

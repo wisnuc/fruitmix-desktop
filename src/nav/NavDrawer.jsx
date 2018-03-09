@@ -138,6 +138,11 @@ class NavDrawer extends React.Component {
     const ip = this.props.isCloud ? mdev.lanip : mdev.address
     if (this.props.isCloud) station = mdev.stationName
 
+    const exit = () => {
+      ipcRenderer.send('LOGOUT')
+      views[nav].navLeave()
+      this.props.navToMain('login')
+    }
     return (
       <Drawer docked={false} width={256} open={open} onRequestChange={onRequestChange}>
         <div
@@ -277,7 +282,7 @@ class NavDrawer extends React.Component {
           <MenuItem
             icon={ActionExitToApp}
             text={i18n.__('Exit')}
-            onTouchTap={() => { ipcRenderer.send('LOGOUT'); this.props.navToMain('login') }}
+            onTouchTap={exit}
           />
         </div>
       </Drawer>
