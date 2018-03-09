@@ -46,6 +46,7 @@ class Adapter extends EventEmitter {
     if (!noSave) {
       this.DB.saveBoxes(this.ctx.guid, boxes).catch(e => console.error('saveBoxes error', boxes, e))
     }
+    console.log('updateBoxes state', this.state)
     this.emit('boxes', state, this.state)
   }
 

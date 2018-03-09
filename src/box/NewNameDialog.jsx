@@ -27,7 +27,7 @@ class NewName extends React.PureComponent {
         } else {
           onRequestClose()
           openSnackBar(i18n.__('Change Group Name Success'))
-          refresh()
+          refresh({ boxUUID })
         }
       })
     }

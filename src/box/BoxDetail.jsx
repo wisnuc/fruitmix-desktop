@@ -30,11 +30,12 @@ class BoxDetail extends React.Component {
 
     this.deleteBox = () => {
       this.setState({ loading: true })
-      const { openSnackBar } = this.props
+      const { openSnackBar, selectBox } = this.props
       const cb = (err) => {
         if (err) openSnackBar(i18n.__('Delete Box Failed'))
         else openSnackBar(i18n.__('Delete Box Success'))
         this.setState({ delBox: false, loading: false })
+        selectBox(-1)
       }
       this.deleteBoxAsync().then(cb).catch(cb)
     }
@@ -50,7 +51,7 @@ class BoxDetail extends React.Component {
           if (err) openSnackBar(i18n.__('Add Users to Box Failed'))
           else openSnackBar(i18n.__('Add Users to Box Success'))
           this.setState({ addUser: false, loading: false })
-          refresh()
+          refresh({ boxUUID: box.uuid })
         }
       )
     }
@@ -66,7 +67,7 @@ class BoxDetail extends React.Component {
           if (err) openSnackBar(i18n.__('Remove Users From Box Failed'))
           else openSnackBar(i18n.__('Remove Users From Box Success'))
           this.setState({ delUser: false, delBox: false, loading: false })
-          refresh()
+          refresh({ boxUUID: box.uuid })
         }
       )
     }

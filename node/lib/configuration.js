@@ -83,7 +83,7 @@ class Configuration {
   }
 
   getBoxDir() {
-    return path.join(this.root, 'boxCache')
+    return path.join(this.root, 'IndexedDB')
   }
 
   getVersion() {
