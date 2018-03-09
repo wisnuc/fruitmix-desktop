@@ -196,7 +196,7 @@ class Groups extends React.Component {
       const currentTweet = this.state.tweets && this.state.tweets.slice(-1)[0]
       const ctc = currentTweet && currentTweet.ctime // current tweet's ctime
       if (!showLoading && (ltc && ltc <= ctc || this.WIP)) return // same box and no new tweets
-      // console.log('will getTweets', showLoading, ltc, ctc, nextProps.currentBox)
+      // console.log('will getTweets', showLoading, ltc, ctc, this.WIP, nextProps.currentBox)
       this.WIP = true
       this.getTweets(nextProps.currentBox, showLoading)
     }
