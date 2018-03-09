@@ -50,10 +50,10 @@ class Adapter extends EventEmitter {
   }
 
   init() {
-    const { boxDir, guid } = this.ctx
-    const boxesPath = path.join(boxDir, 'Boxes-v1.db')
-    const tweetsPath = path.join(boxDir, `${guid}-Tweets-v1.db`)
-    const draftsPath = path.join(boxDir, `${guid}-Drafts-v1.db`)
+    const { guid } = this.ctx
+    const boxesPath = path.join('Boxes-v1.db')
+    const tweetsPath = path.join(`${guid}-Tweets-v1.db`)
+    const draftsPath = path.join(`${guid}-Drafts-v1.db`)
     this.DB = new BoxDB(boxesPath, tweetsPath, draftsPath)
 
     this.getBoxes(guid).then(boxes => this.updateBoxes(boxes, true)).catch(e => this.error('getBoxes', e))
@@ -124,10 +124,9 @@ class Adapter extends EventEmitter {
   }
 
   async getTweets(boxUUID) {
+    console.time('getTweets')
     const trueTweets = await this.DB.loadTweets(boxUUID)
     const drafts = await this.DB.loadDrafts(boxUUID)
-
-    // console.log('async getTweets trueTweets drafts', boxUUID, trueTweets, drafts)
 
     /* remove finished drafts */
     for (let i = 0; i < drafts.length; i++) {
@@ -153,10 +152,11 @@ class Adapter extends EventEmitter {
     /* update last read index */
     const lri = tweets.length - 1
     const index = this.state.boxes.findIndex(b => b.uuid === boxUUID)
-    if (index > -1 && (!this.state.boxes[index].lri || (this.state.boxes[index].lri !== lri))) {
+    if (index > -1 && (this.state.boxes[index].lri !== lri)) {
       this.state.boxes[index].lri = lri
       this.updateBoxes(this.state.boxes)
     }
+    console.timeEnd('getTweets')
     return tweets
   }
 
