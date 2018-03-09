@@ -69,11 +69,11 @@ class SelectMedia extends React.Component {
     }
 
     this.addListToSelection = (digests) => {
-      this.setState({ selectedItems: combineElement(digests, this.state.selectedItems).sort() })
+      this.setState({ selectedItems: combineElement(this.state.selectedItems, digests) })
     }
 
     this.removeListToSelection = (digests) => {
-      this.setState({ selectedItems: removeElement(digests, this.state.selectedItems).sort() })
+      this.setState({ selectedItems: removeElement(digests, this.state.selectedItems) })
     }
 
     this.clearSelect = () => { this.setState({ selectedItems: [] }) }

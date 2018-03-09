@@ -93,7 +93,6 @@ class PhotoApp extends React.Component {
   }
 
   render() {
-    // debug('PhotoApp, this.props', this.props, this.state)
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%', marginTop: 2 }}>
         <EventListener target="window" onResize={this.handleResize} />
