@@ -1,8 +1,4 @@
 const EventEmitter = require('eventemitter3')
-const remote = require('electron').remote
-
-const path = remote.require('path')
-
 const BoxDB = require('./boxDB')
 
 const unionBox = (a, b) => {
@@ -52,9 +48,9 @@ class Adapter extends EventEmitter {
 
   init() {
     const { guid } = this.ctx
-    const boxesPath = path.join('Boxes-v1.db')
-    const tweetsPath = path.join(`${guid}-Tweets-v1.db`)
-    const draftsPath = path.join(`${guid}-Drafts-v1.db`)
+    const boxesPath = 'Boxes-v1.db'
+    const tweetsPath = `${guid}-Tweets-v1.db`
+    const draftsPath = `${guid}-Drafts-v1.db`
     this.DB = new BoxDB(boxesPath, tweetsPath, draftsPath)
 
     this.getBoxes(guid).then(boxes => this.updateBoxes(boxes, true)).catch(e => this.error('getBoxes', e))

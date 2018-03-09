@@ -194,16 +194,18 @@ class NavViews extends React.Component {
     ipcRenderer.on('conflicts', (e, args) => this.setState({ conflicts: args }))
   }
 
-  componentWillUnmount() {
-    clearTimeout(this.timer)
-  }
-
   componentDidUpdate() {
     this.currentView().willReceiveProps(this.props)
   }
 
+  componentWillUnmount() {
+    clearTimeout(this.timer)
+    ipcRenderer.removeAllListeners('snackbarMessage')
+    ipcRenderer.removeAllListeners('conflicts')
+  }
+
   navTo(nav, target) {
-    debug('navTo', nav, target, this.state.nav)
+    // debug('navTo', nav, target, this.state.nav)
     if (nav === this.state.nav) {
       this.setState({ openDrawer: false })
     } else {
