@@ -12,9 +12,34 @@ import SelectMedia from './SelectMedia'
 import BoxUploadButton from './BoxUploadButton'
 
 import FlatButton from '../common/FlatButton'
-import { parseTime } from '../common/datetime'
+import { parseFullTime, parseTime } from '../common/datetime'
 import DialogOverlay from '../common/DialogOverlay'
 import ScrollBar from '../common/ScrollBar'
+
+/*
+ * Rules to show timestamp
+ *
+ * 1. First tweet
+ * 2. last tweets's time is more than 3 min ago and is newer than the latest timestamp
+ * 3. last timestamp is more than 5 min ago
+ *
+ */
+const addTweetsTime = (tweets) => {
+  /* if not array or length eq 0, return the input */
+  if (!Array.isArray(tweets) || !tweets.length) return tweets
+  /* add the time msg */
+  let lt = 0 // last timestamp
+  const adjTweets = tweets.reduce((acc, cur, idx, arr) => {
+    if (!idx || (cur.ctime - arr[idx - 1].ctime > 3 * 60 * 1000 && cur.ctime > lt) || cur.ctime - lt > 5 * 60 * 1000) {
+      const msg = Object.assign({}, cur, { type: 'boxmessage', msg: parseFullTime(cur.ctime) })
+      acc.push(msg)
+      lt = cur.ctime
+    }
+    acc.push(cur)
+    return acc
+  }, [])
+  return adjTweets
+}
 
 class Groups extends React.Component {
   constructor(props) {
@@ -399,7 +424,7 @@ class Groups extends React.Component {
               retry={this.retry}
               tError={tError}
               guid={guid}
-              tweets={tweets}
+              tweets={addTweetsTime(tweets)}
               box={currentBox}
               ipcRenderer={ipcRenderer}
               apis={apis}

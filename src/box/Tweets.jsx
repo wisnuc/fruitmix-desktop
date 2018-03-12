@@ -125,7 +125,7 @@ class Tweets extends React.PureComponent {
                 fontSize: 12,
                 color: '#FFF',
                 backgroundColor: '#BDBDBD',
-                padding: 4,
+                padding: '4px 8px',
                 borderRadius: 8,
                 userSelect: 'text'
               }}
@@ -191,15 +191,18 @@ class Tweets extends React.PureComponent {
           </div>
           <div style={{ width: 16 }} />
           <div>
-            <div style={{ height: 30, display: 'flex', alignItems: 'center', flexDirection: isSelf ? 'row-reverse' : 'row' }}>
-              <div style={{ fontSize: 12, color: 'rgba(0,0,0,.54)', fontWeight: 500 }}>
-                { author.nickName }
-              </div>
-              <div style={{ width: 8 }} />
-              <div style={{ fontSize: 12, color: 'rgba(0,0,0,.54)' }}>
-                { parseTime(ctime) }
-              </div>
-            </div>
+            {
+              !isSelf &&
+                <div style={{ height: 30, display: 'flex', alignItems: 'center', flexDirection: isSelf ? 'row-reverse' : 'row' }}>
+                  <div style={{ fontSize: 12, color: 'rgba(0,0,0,.54)', fontWeight: 500 }}>
+                    { author.nickName }
+                  </div>
+                  <div style={{ width: 8 }} />
+                  <div style={{ fontSize: 12, color: 'rgba(0,0,0,.54)' }}>
+                    {/* parseTime(ctime) */}
+                  </div>
+                </div>
+            }
             <div>
               {
                 !list || !list.length ?
@@ -367,7 +370,7 @@ class Tweets extends React.PureComponent {
   }
 
   render() {
-    // console.log('render tweets', this.props)
+    console.log('render tweets', this.props)
     const { tweets, box, tError, guid } = this.props
     if (tError) return this.renderError()
     const boxUUID = box && box.uuid

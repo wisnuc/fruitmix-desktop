@@ -150,6 +150,7 @@ class Group extends Base {
     }
 
     this.onMessage = (msg) => {
+      // console.log('this.onMessage', msg)
       this.refresh()
     }
 

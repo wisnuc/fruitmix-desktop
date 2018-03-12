@@ -204,10 +204,10 @@
     "one": "%d minute ago",
     "other": "%d minutes ago"
   },
-  "Hour {{hour}} {{min}}": "{{hour}} : {{min}}",
-  "Month {{mon}} {{day}}": "{{mon}}/{{day}}",
-  "Year {{year}} {{mon}} {{day}}": "{{mon}}/{{day}}/{{year}}",
-  "Yesterday {{hour}} {{min}}": "Yesterday {{hour}} : {{min}}",
+  "Hour {{hour}} {{min}}": "{{hour}}:{{min}}",
+  "Month {{mon}} {{day}}": "{{day}}/{{mon}}",
+  "Year {{year}} {{mon}} {{day}}": "{{day}}/{{mon}}/{{year}}",
+  "Yesterday {{hour}} {{min}}": "Yesterday {{hour}}:{{min}}",
 
   "==== control/AccountApp.jsx ====": "",
   "Your Username %s": "Your username: %s",
