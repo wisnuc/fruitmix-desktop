@@ -58,8 +58,8 @@ class Tweets extends React.PureComponent {
       return this.memoizeValue
     }
 
-    this.startDownload = () => {
-      const list = [this.memoizeValue.downloadDigest]
+    this.startDownload = (items) => {
+      const list = items || [this.memoizeValue.downloadDigest]
 
       const { guid, box } = this.props
       const { stationId, wxToken } = box
@@ -147,7 +147,7 @@ class Tweets extends React.PureComponent {
    *   {
    *     des: fakeMedia from nas,
    *     rule: list.every(l => !!l.nasMedia),
-   *     req: sha256 via meida api with local token
+   *     req: sha256 via media api with local token
    *   }
    *   {
    *     des: fakeMedia from local upload,
@@ -437,8 +437,9 @@ class Tweets extends React.PureComponent {
           {
             this.state.viewMore &&
             <ViewMedia
-              author={this.state.author || {}}
               memoize={this.memoize}
+              author={this.state.author || {}}
+              startDownload={this.startDownload}
               ipcRenderer={this.props.ipcRenderer}
               lookPhotoDetail={this.lookPhotoDetail}
               onRequestClose={() => this.setState({ viewMore: false })}
