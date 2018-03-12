@@ -46,25 +46,26 @@ const downloadHandle = (event, args) => {
   })
 }
 
+/* args: { driveUUID, dirUUID, entryUUID, fileName, station } */
 const openHandle = (event, args) => {
-  const { driveUUID, dirUUID, entryUUID, fileName } = args
-  downloadFile(driveUUID, dirUUID, entryUUID, fileName, null, (error, filePath) => {
+  downloadFile(args, null, (error, filePath) => {
     if (error) console.log('open file error', error)
     else shell.openItem(filePath)
   })
 }
 
+/* args: { driveUUID, dirUUID, entryUUID, fileName, session, station } */
 const tempDownloadHandle = (e, args) => {
-  const { session, driveUUID, dirUUID, entryUUID, fileName } = args
-  downloadFile(driveUUID, dirUUID, entryUUID, fileName, null, (error, filePath) => {
+  const { session } = args
+  downloadFile(args, null, (error, filePath) => {
     if (error) console.log('temp Download error', error)
     else getMainWindow().webContents.send('TEMP_DOWNLOAD_SUCCESS', session, filePath)
   })
 }
 
 const getTextDataHandle = (e, args) => {
-  const { session, driveUUID, dirUUID, entryUUID, fileName } = args
-  downloadFile(driveUUID, dirUUID, entryUUID, fileName, null, (error, filePath) => {
+  const { session } = args
+  downloadFile(args, null, (error, filePath) => {
     if (error) console.log('getTextDataHandle error', error)
     else {
       fs.readFile(filePath, (err, data) => {

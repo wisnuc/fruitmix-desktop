@@ -75,13 +75,12 @@ class FileContent extends React.Component {
 
     this.onRowDoubleClick = (e, index) => {
       if (index === -1) return
-      // debug('rowDoubleClick', this.props, index)
       const entry = this.props.entries[index]
       this.props.listNavBySelect(entry)
       if (entry.type === 'file') {
+        /* do nothing when fileSelect is true */
         if (!this.props.fileSelect) this.setState({ seqIndex: index, preview: true })
       } else {
-        // debug('should change to loading')
         this.setState({ loading: true })
       }
     }

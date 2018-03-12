@@ -462,9 +462,13 @@ download tmp File
 @param {string} fileName
 @param {string} downloadPath
 @param {function} callback
+
+file type: [media, boxFiles, driveFiles]
 */
 
-export const downloadFile = (driveUUID, dirUUID, entryUUID, fileName, downloadPath, callback) => {
+export const downloadFile = (entry, downloadPath, callback) => {
+  const { driveUUID, dirUUID, entryUUID, fileName, station } = entry
+  console.log('downloadFile', entry)
   const filePath = downloadPath ? path.join(downloadPath, fileName) : path.join(getTmpPath(), `${entryUUID}AND${fileName}`)
   fs.access(filePath, (error) => {
     if (error) {
@@ -479,8 +483,13 @@ export const downloadFile = (driveUUID, dirUUID, entryUUID, fileName, downloadPa
         })
       })
 
-      const ep = dirUUID === 'media' ? `media/${entryUUID}` : `drives/${driveUUID}/dirs/${dirUUID}/entries/${entryUUID}`
-      const handle = adownload(ep)
+      // TODO download via LAN
+      const ep = dirUUID === 'media' ? `media/${entryUUID}`
+        : dirUUID === 'boxFiles' ? `boxes/${station.boxUUID}/files/${entryUUID.slice(0, 64)}`
+          : `drives/${driveUUID}/dirs/${dirUUID}/entries/${entryUUID}`
+
+      const handle = station ? cdownload(ep, station) : adownload(ep)
+
       handle.query({ name: fileName })
         .on('error', err => callback(Object.assign({}, err, { response: err.response && err.response.body })))
         .on('response', (res) => {
