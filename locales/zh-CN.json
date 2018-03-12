@@ -204,10 +204,10 @@
     "one": "%d 分钟前",
     "other": "%d 分钟前"
   },
-  "Hour {{hour}} {{min}}": "{{hour}} : {{min}}",
-  "Month {{mon}} {{day}}": "{{mon}} 月 {{day}} 日",
-  "Year {{year}} {{mon}} {{day}}": "{{year}} 年 {{mon}} 月 {{day}} 日",
-  "Yesterday {{hour}} {{min}}": "昨天 {{hour}} : {{min}}",
+  "Hour {{hour}} {{min}}": "{{hour}}:{{min}}",
+  "Month {{mon}} {{day}}": "{{mon}}月{{day}}日",
+  "Year {{year}} {{mon}} {{day}}": "{{year}}年{{mon}}月{{day}}日",
+  "Yesterday {{hour}} {{min}}": "昨天 {{hour}}:{{min}}",
 
   "==== control/AccountApp.jsx ====": "",
   "Your Username %s": "您当前的用户名为：%s 。",
@@ -334,7 +334,7 @@
   "Connecting Wisnuc Cloud": "连接WISNUC云服务器中...",
   "WeChat QR Code Title": "请使用微信扫码",
   "Bind WeChat Text in WeChatBind": "确定使用以下帐号绑定Wisnuc吗？",
-  "Bind WeChat Success": "成功绑定微信成功",
+  "Bind WeChat Success": "绑定微信成功",
  
   "==== control/BTDownload.js ====": "",
   "BT Download Folder Name": "Download",
