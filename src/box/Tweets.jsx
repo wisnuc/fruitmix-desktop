@@ -11,7 +11,7 @@ import DetailContainer from '../photo/DetailContainer'
 import ScrollBar from '../common/ScrollBar'
 import DialogOverlay from '../common/PureDialog'
 import FlatButton from '../common/FlatButton'
-import Preview from './Preview'
+import ViewFiles from './ViewFiles'
 import ViewMedia from './ViewMedia'
 
 const overlayStyle = {
@@ -271,7 +271,7 @@ class Tweets extends React.PureComponent {
                               height: 120,
                               cursor: 'pointer',
                               position: 'absolute',
-                              top: list.length > 3 ? 32 : 2,
+                              top: list.length > 3 ? 62 : 2,
                               right: 120 * Math.min(list.length, 3)
                             }}
                             onTouchTap={() => failed && this.openRetryDialog(tweet)}
@@ -321,7 +321,7 @@ class Tweets extends React.PureComponent {
                       {
                         isFake && !finished &&
                           <div
-                            style={{ position: 'absolute', height: 120, width: 120, top: 22, right: 460, cursor: 'pointer' }}
+                            style={{ position: 'absolute', height: 120, width: 120, top: -8, right: 460, cursor: 'pointer' }}
                             onTouchTap={() => failed && this.openRetryDialog(tweet)}
                           >
                             { failed ? this.renderFailed(this.props.tweets[index]) : this.renderLoading(32, '#E0E0E0') }
@@ -370,7 +370,7 @@ class Tweets extends React.PureComponent {
   }
 
   render() {
-    console.log('render tweets', this.props)
+    // console.log('render tweets', this.props)
     const { tweets, box, tError, guid } = this.props
     if (tError) return this.renderError()
     const boxUUID = box && box.uuid
@@ -423,7 +423,7 @@ class Tweets extends React.PureComponent {
         <DialogOverlay open={!!this.state.showFiles} onRequestClose={() => this.setState({ showFiles: false })} >
           {
             this.state.showFiles &&
-              <Preview
+              <ViewFiles
                 station={{ boxUUID, stationId, wxToken, guid }}
                 ipcRenderer={this.props.ipcRenderer}
                 list={this.state.list}

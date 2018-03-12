@@ -27,10 +27,12 @@ class Preview extends React.Component {
       if (this.props.item.size > 50 * 1024 * 1024) this.setState({ alert: true })
       else {
         const driveUUID = this.props.path[0].uuid
+        const station = this.props.path[0].station // files from boxes
         const dirUUID = this.props.path[this.props.path.length - 1].uuid
         const entryUUID = this.props.item.uuid
         const fileName = this.props.item.name
         this.props.ipcRenderer.send('OPEN_FILE', {
+          station,
           driveUUID,
           dirUUID,
           entryUUID,
@@ -58,11 +60,13 @@ class Preview extends React.Component {
       this.session = UUID.v4()
       // debug('this.startDownload', this.state, this.props)
       const driveUUID = this.props.path[0].uuid
+      const station = this.props.path[0].station // files from boxes
       const dirUUID = this.props.path[this.props.path.length - 1].uuid
       const entryUUID = this.props.item.uuid
       const fileName = this.props.item.name
       this.props.ipcRenderer.send('TEMP_DOWNLOADING', {
         session: this.session,
+        station,
         driveUUID,
         dirUUID,
         entryUUID,
@@ -84,11 +88,13 @@ class Preview extends React.Component {
     this.getTextData = () => {
       this.session = UUID.v4()
       const driveUUID = this.props.path[0].uuid
+      const station = this.props.path[0].station // files from boxes
       const dirUUID = this.props.path[this.props.path.length - 1].uuid
       const entryUUID = this.props.item.uuid
       const fileName = this.props.item.name
       this.props.ipcRenderer.send('GET_TEXT_DATA', {
         session: this.session,
+        station,
         driveUUID,
         dirUUID,
         entryUUID,
@@ -325,7 +331,7 @@ class Preview extends React.Component {
     const textExtension = ['TXT', 'MD', 'JS', 'JSX', 'TS', 'JSON', 'HTML', 'CSS', 'LESS', 'CSV', 'XML']
     const isText = textExtension.findIndex(t => t === extension) > -1 && this.props.item.size < 1024 * 128
 
-    // debug('isPhoto, isVideo', this.props.item, isPhoto, isVideo, isText)
+    // console.log('isPhoto, isVideo', this.props.item, isPhoto, isVideo, isText)
 
     return (
       <div
