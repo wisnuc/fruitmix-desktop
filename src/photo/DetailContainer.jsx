@@ -622,7 +622,7 @@ class DetailContainerInline extends React.Component {
                     </IconButton>
                   </div> :
                   <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <IconButton onTouchTap={this.props.startDownload} tooltip={i18n.__('Download')}>
+                    <IconButton onTouchTap={() => this.props.startDownload()} tooltip={i18n.__('Download')}>
                       <DownloadIcon color="#FFF" />
                     </IconButton>
 

@@ -1,27 +1,10 @@
 import React from 'react'
 import i18n from 'i18n'
-import { CircularProgress, Paper, Avatar, IconButton, RaisedButton, TextField } from 'material-ui'
-import ContentAdd from 'material-ui/svg-icons/content/add'
-import FileFolder from 'material-ui/svg-icons/file/folder'
+import { IconButton } from 'material-ui'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
-import BackIcon from 'material-ui/svg-icons/navigation/arrow-back'
-import ForwardIcon from 'material-ui/svg-icons/navigation/arrow-forward'
-import UpIcon from 'material-ui/svg-icons/navigation/arrow-upward'
-import ModeEdit from 'material-ui/svg-icons/editor/mode-edit'
-import { ShareIcon, ShareDisk } from '../common/Svg'
-import FlatButton from '../common/FlatButton'
-import FileContent from '../file/FileContent'
-import QuickNav from '../nav/QuickNav'
-import ListSelect from './ListSelect'
-import renderFileIcon from '../common/renderFileIcon'
-import { formatMtime } from '../common/datetime'
+import DownloadIcon from 'material-ui/svg-icons/file/file-download'
 import PhotoList from '../photo/PhotoList'
 import { combineElement, removeElement } from '../common/array'
-import Grid from './Grid'
-
-const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
-
-const imgUrl = 'http://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKQiahrEc8rUfECDTUq94WlcaNkTYTKzIKr3p5xgOPQO1juvtwO1YSUCHOPpup3oWo1AP3nOBVyPCw/132'
 
 class SelectMedia extends React.Component {
   constructor(props) {
@@ -52,6 +35,11 @@ class SelectMedia extends React.Component {
 
     this.removeListToSelection = (digests) => {
       this.setState({ selectedItems: removeElement(digests, this.state.selectedItems).sort() })
+    }
+
+    this.download = () => {
+      this.props.startDownload(this.state.selectedItems)
+      this.setState({ selectedItems: [] })
     }
 
     this.clearSelect = () => { this.setState({ selectedItems: [] }) }
@@ -104,6 +92,13 @@ class SelectMedia extends React.Component {
             { this.props.author && i18n.__('Photo Shared From %s', this.props.author.nickName) }
           </div>
           <div style={{ flexGrow: 1 }} />
+          {
+            !!this.state.selectedItems && !!this.state.selectedItems.length &&
+              <IconButton onTouchTap={this.download} tooltip={i18n.__('Download')}>
+                <DownloadIcon color="rgba(0,0,0,.54)" />
+              </IconButton>
+          }
+          <div style={{ width: 24 }} />
         </div>
         {/* content */}
         <div style={{ width: '100%', height: 'calc(100% - 64px)', display: 'flex', position: 'relative', marginTop: 8 }}>
