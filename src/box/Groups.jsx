@@ -405,7 +405,6 @@ class Groups extends React.Component {
           {
             boxes.length > 0 ?
               <ScrollBar
-                style={{ outline: 'none' }}
                 allHeight={72 * boxes.length}
                 height={boxH}
                 width={376}

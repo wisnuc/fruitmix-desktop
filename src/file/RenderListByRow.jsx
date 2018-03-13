@@ -10,7 +10,8 @@ import FileFolder from 'material-ui/svg-icons/file/folder'
 import ArrowUpward from 'material-ui/svg-icons/navigation/arrow-upward'
 import ArrowDownward from 'material-ui/svg-icons/navigation/arrow-downward'
 import CheckIcon from 'material-ui/svg-icons/navigation/check'
-import { List, AutoSizer } from 'react-virtualized'
+import { AutoSizer } from 'react-virtualized'
+import ScrollBar from '../common/ScrollBar'
 import renderFileIcon from '../common/renderFileIcon'
 import { ShareDisk } from '../common/Svg'
 import FlatButton from '../common/FlatButton'
@@ -368,11 +369,11 @@ class RenderListByRow extends React.Component {
                   draggable={false}
                   onTouchTap={e => this.props.onRowTouchTap(e, -1)}
                 >
-                  <List
+                  <ScrollBar
                     ref={ref => (this.ListRef = ref)}
-                    style={{ outline: 'none' }}
                     height={height}
                     width={width}
+                    allHeight={this.props.entries.length * 48}
                     rowCount={this.props.entries.length}
                     onScroll={this.onScroll}
                     rowHeight={48}

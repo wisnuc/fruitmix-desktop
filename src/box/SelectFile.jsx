@@ -408,7 +408,6 @@ class SelectNas extends React.Component {
               <AutoSizer>
                 {({ height, width }) => (
                   <ScrollBar
-                    style={{ outline: 'none' }}
                     allHeight={[...this.selected].length * 40}
                     height={height}
                     width={width}

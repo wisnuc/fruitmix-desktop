@@ -406,7 +406,6 @@ class Tweets extends React.PureComponent {
               {({ height, width }) => (
                 <ScrollBar
                   scrollTop={Math.max(1, allHeight - height)}
-                  style={{ outline: 'none' }}
                   allHeight={allHeight}
                   height={height}
                   width={width - 2}

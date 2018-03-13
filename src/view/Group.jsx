@@ -179,6 +179,7 @@ class Group extends Base {
     /* logged station */
     this.station = info && info.connectState === 'CONNECTED' && info
     if (this.wxToken && this.guid) {
+      if (this.state.error) this.setState({ error: null })
       this.initDB()
       this.ctx.props.apis.update('wxToken', this.wxToken, this.refresh)
       if (!this.onMqtt) this.startMqtt()
