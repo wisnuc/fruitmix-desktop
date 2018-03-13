@@ -11,6 +11,7 @@
     "checkI18n": "node test/checkI18n.js",
     "devel": "NODE_ENV=dev nodemon --exec electron devel.js",
     "devel2": "electron devel.js",
+    "forceCloud": "NODE_ENV=cloud electron .",
     "doc": "nodemon --exec jsdoc -c jsdoc.conf.json -t node_modules/ink-docstrap/template",
     "mocha": "mocha --compilers js:babel-core/register --recursive --sort",
     "rebuild": "electron-rebuild",
