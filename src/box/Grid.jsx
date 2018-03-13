@@ -58,7 +58,6 @@ class Grid extends React.Component {
         <AutoSizer>
           {({ height, width }) => (
             <ScrollBar
-              style={{ outline: 'none' }}
               allHeight={rowCount * rowHeight}
               height={height}
               width={width}

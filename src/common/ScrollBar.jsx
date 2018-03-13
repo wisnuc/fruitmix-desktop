@@ -82,6 +82,10 @@ class ScrollBar extends React.PureComponent {
     if (this.refList) this.refList.scrollToPosition(scrollTop)
   }
 
+  scrollToRow(index) {
+    if (this.refList) this.refList.scrollToRow(index)
+  }
+
   render() {
     const { width, height, allHeight } = this.props
     const barH = Math.max(height * height / allHeight, 48) || 48
@@ -103,6 +107,7 @@ class ScrollBar extends React.PureComponent {
         >
           <List
             {...this.props}
+            style={Object.assign({ outline: 'none' }, this.props.style)}
             ref={ref => (this.refList = ref)}
             width={width + 16}
             onScroll={({ scrollTop }) => this.onScroll((height - barH) * scrollTop / (allHeight - height), scrollTop)}

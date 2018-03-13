@@ -11,9 +11,10 @@ import FileFolder from 'material-ui/svg-icons/file/folder'
 import ArrowUpward from 'material-ui/svg-icons/navigation/arrow-upward'
 import ArrowDownward from 'material-ui/svg-icons/navigation/arrow-downward'
 import CheckIcon from 'material-ui/svg-icons/navigation/check'
-import { List, AutoSizer } from 'react-virtualized'
+import { AutoSizer } from 'react-virtualized'
 
 import Thumb from './Thumb'
+import ScrollBar from '../common/ScrollBar'
 import renderFileIcon from '../common/renderFileIcon'
 import FlatButton from '../common/FlatButton'
 import { ShareDisk } from '../common/Svg'
@@ -422,8 +423,9 @@ class GridView extends React.Component {
                 onMouseLeave={e => 0 && this.props.selectEnd(e)}
                 onTouchTap={e => this.props.onRowTouchTap(e, -1)}
               >
-                <List
+                <ScrollBar
                   ref={ref => (this.ListRef = ref)}
+                  allHeight={rowHeightSum}
                   height={height - 24}
                   width={width}
                   estimatedRowSize={estimatedRowSize}

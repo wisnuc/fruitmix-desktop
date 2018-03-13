@@ -298,7 +298,6 @@ class MediaBox extends React.PureComponent {
               const [h, w] = [props.height, props.width]
               return (
                 <ScrollBar
-                  style={{ outline: 'none' }}
                   allHeight={40 * list.length}
                   height={h - 40}
                   width={w}

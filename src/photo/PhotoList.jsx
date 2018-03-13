@@ -349,7 +349,6 @@ class PhotoList extends React.Component {
                     onScroll={this.onScroll}
                     scrollTop={previousScrollTop}
                     overscanRowCount={2}
-                    style={{ outline: 'none' }}
                   />
                 </div>
                 { !this.props.hideTimeline && this.renderTimeline() }
