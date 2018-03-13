@@ -18,7 +18,12 @@ class ViewFiles extends React.PureComponent {
       select: this.select.state,
       path: [{ type: 'box', uuid: 'boxFiles', name: 'box', station: this.props.station }],
       entries: this.props.list.map((l, i) => ({
-        uuid: l.sha256 + i.toString(), name: l.filename || i18n.__('Unknown File'), size: l.size, type: 'file'
+        uuid: l.sha256 + i.toString(),
+        name: l.filename || i18n.__('Unknown File'),
+        size: l.size,
+        type: 'file',
+        hash: l.sha256,
+        metadata: l.metadata
       }))
     }
 
@@ -47,6 +52,7 @@ class ViewFiles extends React.PureComponent {
 
   render() {
     const { openSnackBar, ipcRenderer, apis } = this.props
+    console.log('ViewFiles', this.props)
     return (
       <div style={{ position: 'fixed', width: '100%', height: '100%', top: 0, left: 0, zIndex: 1000, backgroundColor: '#FFF' }}>
         {/* Selected Header */}
