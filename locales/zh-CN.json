@@ -760,6 +760,7 @@
   "No Media Text 1": "没有照片或视频",
   "No Media Text 2": "请点击上传按钮",
   "%s Photo Selected": "选择了%s张照片",
+  "%s File Selected": "选择了%s个文件",
   "Delete Photo Dialog Text 1": "要将照片移动到回收站吗？",
   "Delete Photo Dialog Text 2": "内容被移到回收站后，文件中的相应内容也会被移除。",
   "Remove": "移除",

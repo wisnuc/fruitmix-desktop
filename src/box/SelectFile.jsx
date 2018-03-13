@@ -300,6 +300,11 @@ class SelectNas extends React.Component {
               <CloseIcon color="rgba(0,0,0,0.54)" />
             </IconButton>
           </div>
+          <div style={{ width: 12 }} />
+          <div style={{ color: 'rgba(0,0,0,.54)', fontSize: 20, fontWeight: 500 }} >
+            { i18n.__('%s File Selected', [...this.selected].length) }
+          </div>
+          <div style={{ flexGrow: 1 }} />
         </div>
         {/* content */}
         <div style={{ width: '100%', height: 'calc(100% - 64px)', display: 'flex', position: 'relative', marginTop: 8 }}>

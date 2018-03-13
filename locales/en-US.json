@@ -760,6 +760,7 @@
   "No Media Text 1": "No Photos",
   "No Media Text 2": "Click Upload to add photos",
   "%s Photo Selected": "%s selected",
+  "%s File Selected": "%s selected",
   "Delete Photo Dialog Text 1": "Remove selected photos ?",
   "Delete Photo Dialog Text 2": "Remove from My Drive and Public Drive ?",
   "Remove": "Remove",
