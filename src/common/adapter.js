@@ -8,7 +8,8 @@ const unionBox = (a, b) => {
     const id = keys[i]
     const aa = a.find(x => x[key] === id)
     const bb = b.find(x => x[key] === id)
-    return !aa ? bb : !bb ? Object.assign({ deleted: true }, aa) : Object.assign({}, aa, bb)
+    /* deleted or rejoined */
+    return !aa ? bb : !bb ? Object.assign({ deleted: true }, aa) : Object.assign({}, aa, bb, { deleted: undefined })
   })
   return union
 }
