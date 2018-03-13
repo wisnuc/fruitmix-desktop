@@ -28,7 +28,7 @@ class Tasks extends React.Component {
 
     this.cancelTask = (uuid) => {
       this.props.apis.pureRequest('deleteTask', { uuid }, (err, res) => {
-        if (err) console.log('deleteTask error', err)
+        if (err) console.error('deleteTask error', err)
         this.refresh()
       })
     }
@@ -61,7 +61,8 @@ class Tasks extends React.Component {
 
   componentDidMount() {
     this.refresh()
-    this.timer = setInterval(() => this.refresh(), 1000)
+    this.timer = setInterval(() => this.state.tasks.some(t => t && t.nodes && t.nodes[0] && t.nodes[0].state !== 'Finished')
+      && this.refresh(), 1000)
   }
 
   componentWillUnmount() {
