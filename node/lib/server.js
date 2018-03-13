@@ -310,7 +310,7 @@ export class DownloadFile {
     getBToken(guid, (err, bToken) => {
       if (err) {
         console.error('getBToken error', err)
-        this.finish(err)
+        this.normalDownload() // retry download via cloud
       } else {
         /* access box file need bToken, however box media does not !!! */
         this.handle = adownload(this.endpoint, isMedia ? null : bToken)
@@ -466,44 +466,59 @@ download tmp File
 file type: [media, boxFiles, driveFiles]
 */
 
+export const downloadReq = (ep, fileName, filePath, station, bToken, callback) => {
+  const tmpPath = path.join(getTmpTransPath(), UUID.v4())
+  const stream = fs.createWriteStream(tmpPath)
+  stream.on('error', err => callback(err))
+  stream.on('finish', () => {
+    fs.rename(tmpPath, filePath, (err) => {
+      if (err) return callback(err)
+      return callback(null, filePath)
+    })
+  })
+
+  const handle = bToken ? adownload(ep, bToken) : station ? cdownload(ep, station) : adownload(ep)
+
+  handle.query({ name: fileName })
+    .on('error', err => callback(Object.assign({}, err, { response: err.response && err.response.body })))
+    .on('response', (res) => {
+      if (res.status !== 200 && res.status !== 206) {
+        console.error('download http status code not 200', res.error)
+        const e = new Error()
+        e.message = res.error
+        e.code = res.code
+        e.status = res.status
+        handle.abort()
+        callback(e)
+      }
+    })
+
+  handle.pipe(stream)
+}
+
 export const downloadFile = (entry, downloadPath, callback) => {
   const { driveUUID, dirUUID, entryUUID, fileName, station } = entry
-  console.log('downloadFile', entry)
-  const filePath = downloadPath ? path.join(downloadPath, fileName) : path.join(getTmpPath(), `${entryUUID}AND${fileName}`)
+  const filePath = downloadPath ? path.join(downloadPath, fileName)
+    : path.join(getTmpPath(), `${entryUUID.slice(0, 64)}AND${fileName}`)
+
+  /* check local file cache */
   fs.access(filePath, (error) => {
     if (error) {
-      debug('no cache download file', fileName)
-      const tmpPath = path.join(getTmpTransPath(), UUID.v4())
-      const stream = fs.createWriteStream(tmpPath)
-      stream.on('error', err => callback(err))
-      stream.on('finish', () => {
-        fs.rename(tmpPath, filePath, (err) => {
-          if (err) return callback(err)
-          return callback(null, filePath)
-        })
-      })
-
-      // TODO download via LAN
       const ep = dirUUID === 'media' ? `media/${entryUUID}`
         : dirUUID === 'boxFiles' ? `boxes/${station.boxUUID}/files/${entryUUID.slice(0, 64)}`
           : `drives/${driveUUID}/dirs/${dirUUID}/entries/${entryUUID}`
 
-      const handle = station ? cdownload(ep, station) : adownload(ep)
-
-      handle.query({ name: fileName })
-        .on('error', err => callback(Object.assign({}, err, { response: err.response && err.response.body })))
-        .on('response', (res) => {
-          if (res.status !== 200 && res.status !== 206) {
-            console.error('download http status code not 200', res.error)
-            const e = new Error()
-            e.message = res.error
-            e.code = res.code
-            e.status = res.status
-            handle.abort()
-            callback(e)
-          }
+      /* check whether boxFile and localable */
+      const localable = !cloud && stationID && station && stationID === station.stationId
+      if (localable) {
+        /* get box token */
+        getBToken(station.guid, (err, bToken) => {
+          if (err) {
+            console.error('getBToken error', err)
+            downloadReq(ep, fileName, filePath, station, null, callback)
+          } else downloadReq(ep, fileName, filePath, station, bToken, callback)
         })
-      handle.pipe(stream)
+      } else downloadReq(ep, fileName, filePath, station, null, callback)
     } else callback(null, filePath)
   })
 }
