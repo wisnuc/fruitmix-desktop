@@ -237,7 +237,9 @@ class BTDownload extends React.Component {
   }
 
   componentDidMount() {
-    this.refreshTimer = setInterval(this.refresh, 1000)
+    this.refreshTimer = setInterval(() => this.props.tasks.some(t => t.state === 'downloading' && !t.isPause)
+      && this.refresh(), 1000)
+
     /* bind keydown event */
     document.addEventListener('keydown', this.keyDown)
     document.addEventListener('keyup', this.keyUp)
@@ -493,10 +495,10 @@ class BTDownload extends React.Component {
     /* lost connection to wisnuc */
     if (!window.navigator.onLine) return this.renderOffLine()
 
-    if (this.props.disabled) return this.renderDisabled()
-
     /* loding */
-    if (this.state.loading) return this.renderLoading()
+    if (this.props.loading || this.state.loading) return this.renderLoading()
+
+    if (this.props.disabled) return this.renderDisabled()
 
     return (
       <div style={{ position: 'relative', height: '100%', width: '100%' }} onTouchTap={e => this.onRowTouchTap(e, -1)} >

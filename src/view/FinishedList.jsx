@@ -40,6 +40,7 @@ class FinishedList extends Download {
           primaryColor={this.groupPrimaryColor()}
           selectedDevice={this.ctx.props.selectedDevice}
           error={this.state.error}
+          loading={this.loading}
           disabled={this.disabled}
         />
       </div>
