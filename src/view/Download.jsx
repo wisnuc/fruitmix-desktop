@@ -9,16 +9,19 @@ import Base from './Base'
 class Download extends Base {
   willReceiveProps(nextProps) {
     this.handleProps(nextProps.apis, ['bt'])
-    if (!this.state.bt || !this.state.bt.switch) {
+    if (this.state.bt && !this.state.bt.switch) {
       this.disabled = true
+      this.loading = false
       if (this.state.BTList !== null) this.setState({ BTList: null })
-    } else if (!this.state.error) {
+    } else if (this.state.bt && this.state.bt.switch && !this.state.error) {
       this.disabled = false
+      this.loading = false
       this.handleProps(nextProps.apis, ['BTList'])
     }
   }
 
   navEnter() {
+    this.loading = true
     this.ctx.props.apis.request('BTList')
     this.ctx.props.apis.request('bt')
   }
@@ -75,6 +78,7 @@ class Download extends Base {
           primaryColor={this.groupPrimaryColor()}
           selectedDevice={this.ctx.props.selectedDevice}
           error={this.state.error}
+          loading={this.loading}
           disabled={this.disabled}
         />
       </div>
