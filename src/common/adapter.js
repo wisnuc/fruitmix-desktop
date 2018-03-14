@@ -69,9 +69,10 @@ class Adapter extends EventEmitter {
     const promises = []
     for (let i = 0; i < boxes.length; i++) {
       const box = boxes[i]
-      const ltsi = box.ltsst && box.ltsst.index
+      const isOnline = box.station && box.station.isOnline
+      const ltsi = box.ltsst && box.ltsst.index // latest stored tweet's index
       const lti = box.tweet ? box.tweet.index : 0 // last tweet's index
-      if (ltsi === undefined || (lti > ltsi)) {
+      if (isOnline && (ltsi === undefined || (lti > ltsi))) {
         promises.push(this.reqTweets({ boxUUID: box.uuid, stationId: box.stationId }))
       }
     }
