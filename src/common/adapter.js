@@ -100,7 +100,7 @@ class Adapter extends EventEmitter {
 
     if (Array.isArray(res) && res.length) {
       const docs = [...res]
-        .map(x => Object.assign({}, x, { _id: x.uuid, boxUUID, stationId }))
+        .map(x => Object.assign({}, x, { _id: x.uuid, boxUUID, stationId, rtime: new Date().getTime() }))
         .sort((a, b) => (a.index - b.index))
       await this.DB.saveTweets(docs)
 
@@ -134,7 +134,8 @@ class Adapter extends EventEmitter {
         t.finished = true
         if (index > -1) {
           trueTweets[index].ctime = t.ctime
-          await this.DB.updateTweet(t.trueUUID, { ctime: t.ctime })
+          trueTweets[index].rtime = t.rtime
+          await this.DB.updateTweet(t.trueUUID, { ctime: t.ctime, rtime: t.rtime })
           await this.DB.deleteDraft(t._id)
           drafts[i] = null
         }
@@ -143,7 +144,8 @@ class Adapter extends EventEmitter {
       }
     }
 
-    const tweets = [...trueTweets, ...drafts.filter(v => !!v)].sort((a, b) => a.ctime - b.ctime)
+    /* use receive time to sort tweets */
+    const tweets = [...trueTweets, ...drafts.filter(v => !!v)].sort((a, b) => a.rtime - b.rtime || a.index - b.index)
 
     // console.log('getTweets', trueTweets, drafts)
 
