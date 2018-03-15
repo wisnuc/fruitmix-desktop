@@ -139,8 +139,6 @@ class Adapter extends EventEmitter {
           await this.DB.deleteDraft(t._id)
           drafts[i] = null
         }
-      } else if (new Date().getTime() - t.ctime > 120000) { // set old tweets to failed state
-        t.failed = true
       }
     }
 

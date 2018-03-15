@@ -51,6 +51,27 @@ class Groups extends React.Component {
       newBox: false
     }
 
+    this.tcQueue = [] // the tweet creating queue
+
+    this.pushQueue = (uuid) => {
+      console.log('this.pushQueue', uuid, this.tcQueue)
+      const index = this.tcQueue.indexOf(uuid)
+      if (index === -1) this.tcQueue.push(uuid)
+    }
+
+    this.popQueue = (uuid) => {
+      console.log('this.popQueue', uuid, this.tcQueue)
+      const index = this.tcQueue.indexOf(uuid)
+      if (index > -1) this.tcQueue.splice(index, 1)
+    }
+
+    /* set failed, excepting : 1. not fake, 2. finished, 3. running */
+    this.setFakeTweetState = ts => {
+      console.log('this.setFakeTweetState')
+      return ts && ts.map(t => ((!t.faked || t.finished || this.tcQueue.indexOf(t.uuid) > -1) ? t
+      : Object.assign({}, t, { failed: true })))
+    }
+
     this.sessions = {} // store tweets for local upload
 
     this.WIP = null // Working in Process for requesting new tweet
@@ -85,14 +106,17 @@ class Groups extends React.Component {
       const fakeList = list.map(l => Object.assign({ fakedata: {} }, l))
       /* create the fake tweet */
       const tweet = retryTweet || this.updateFakeTweet({ fakeList, box, isMedia, raw: { type: 'indrive', args } })
+      this.pushQueue(tweet.uuid)
       this.props.apis.pureRequest('nasTweets', args, (err, res) => {
         if (err || !res || !res.uuid) {
           console.error('create nasTweets error', err)
           const newTweet = Object.assign({}, tweet, { failed: true })
+          this.popQueue(tweet.uuid)
           this.updateDraft(newTweet)
         } else {
           // console.log('create nasTweets success', res)
           const newTweet = Object.assign({}, tweet, { trueUUID: res.uuid, finished: true })
+          this.popQueue(tweet.uuid)
           this.updateDraft(newTweet)
         }
       })
@@ -109,6 +133,7 @@ class Groups extends React.Component {
     this.retryLocalUpload = (entries, args, tweet) => {
       const session = UUID.v4()
       this.sessions[session] = tweet
+      this.pushQueue(tweet.uuid)
       this.props.ipcRenderer.send('BOX_RETRY_UPLOAD', { entries, args: Object.assign(args, { session }) })
     }
 
@@ -167,11 +192,12 @@ class Groups extends React.Component {
         msg: '',
         stationId: this.props.currentBox.stationId,
         type: 'list',
+        faked: true,
         _id: uuid
       }
 
       this.props.ada.createDraft(tweet).catch(e => console.error('this.updateDraft error', e))
-      this.setState({ tweets: [...this.state.tweets, tweet] })
+      setImmediate(() => this.setState({ tweets: [...this.state.tweets, tweet] })) // set new state after tcQueue updated
       return tweet
     }
 
@@ -185,7 +211,11 @@ class Groups extends React.Component {
       if (!success) {
         this.props.openSnackBar(i18n.__('Read Local Files Failed'))
       } else {
+        console.log('this.onFakeData before this.updateFakeTweet')
         const tweet = this.updateFakeTweet({ fakeList, box, raw })
+        console.log('this.onFakeData after this.updateFakeTweet')
+        this.pushQueue(tweet.uuid)
+        console.log('this.onFakeData after push')
         this.sessions[session] = tweet
       }
     }
@@ -197,10 +227,12 @@ class Groups extends React.Component {
       if (!success) {
         this.props.openSnackBar(i18n.__('Send Tweets with Local Files Failed'))
         const newTweet = Object.assign({}, tweet, { failed: true, boxUUID: box.uuid })
+        this.popQueue(tweet.uuid)
         this.updateDraft(newTweet)
       } else {
         // console.log('create tweets via local success', data)
         const newTweet = Object.assign({}, tweet, { finished: true, trueUUID: data.uuid, boxUUID: box.uuid })
+        this.popQueue(tweet.uuid)
         this.updateDraft(newTweet)
       }
     }
@@ -424,7 +456,7 @@ class Groups extends React.Component {
               retry={this.retry}
               tError={tError}
               guid={guid}
-              tweets={addTweetsTime(tweets)}
+              tweets={addTweetsTime(this.setFakeTweetState(tweets))}
               box={currentBox}
               ipcRenderer={ipcRenderer}
               apis={apis}
