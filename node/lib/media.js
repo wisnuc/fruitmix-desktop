@@ -1,16 +1,16 @@
-/* import core module */
-import fs from 'fs'
-import path from 'path'
-import UUID from 'uuid'
-import { ipcMain } from 'electron'
-import { EventEmitter } from 'events'
-
-/* import file module */
-import store from './store'
-import { DownloadFile } from './server'
-import { getMainWindow } from './window'
+const fs = require('fs')
+const path = require('path')
+const UUID = require('uuid')
+const Promise = require('bluebird')
+const { ipcMain } = require('electron')
+const { EventEmitter } = require('events')
+const store = require('./store')
+const { DownloadFile } = require('./server')
+const { getMainWindow } = require('./window')
 
 /* init */
+const getThumbPath = () => store.getState().config.thumbPath
+const getImagePath = () => store.getState().config.imagePath
 const getTmpTransPath = () => store.getState().config.tmpTransPath
 
 class Worker extends EventEmitter {
@@ -244,8 +244,6 @@ class MediaFileManager {
 }
 
 const mediaFileManager = new MediaFileManager()
-const getThumbPath = () => store.getState().config.thumbPath
-const getImagePath = () => store.getState().config.imagePath
 
 ipcMain.on('mediaShowThumb', (event, session, digest, height, width, station) => {
   mediaFileManager.createThumbTask(session, digest, getThumbPath(), height, width, station)

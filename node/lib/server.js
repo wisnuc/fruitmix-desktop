@@ -1,21 +1,19 @@
-import fs from 'fs'
-import path from 'path'
-import Debug from 'debug'
-import rimraf from 'rimraf'
-import UUID from 'uuid'
-import request from 'superagent'
-import { ipcMain } from 'electron'
-import store from './store'
+const path = require('path')
+const Promise = require('bluebird')
+const rimraf = require('rimraf')
+const UUID = require('uuid')
+const request = require('superagent')
+const { ipcMain } = require('electron')
+const fs = Promise.promisifyAll(require('fs'))
 
-Promise.promisifyAll(fs) // babel would transform Promise to bluebird
+const store = require('./store')
 
-const debug = Debug('node:lib:server')
 const getTmpPath = () => store.getState().config.tmpPath
 const getTmpTransPath = () => store.getState().config.tmpTransPath
 
 const cloudAddress = 'http://www.siyouqun.com:80'
 
-export const clearTmpTrans = () => {
+const clearTmpTrans = () => {
   rimraf(`${getTmpTransPath()}/*`, e => e && console.error('clearTmpTrans error', e))
 }
 
@@ -31,17 +29,15 @@ ipcMain.on('LOGIN', (event, device, user) => {
   cloud = !!device.mdev.isCloud
   const info = device.info
   if (info && info.data) stationID = info.data.id
-  debug('Got device, user', device, user, cloud, stationID)
 })
 
-export const isCloud = () => cloud
+const isCloud = () => cloud
 
 /* adapter of cloud api */
 const reqCloud = (ep, data, type) => {
   const url = `${address}/c/v1/stations/${stationID}/json`
   const url2 = `${address}/c/v1/stations/${stationID}/pipe`
   const resource = Buffer.from(`/${ep}`).toString('base64')
-  // debug('reqCloud', type, ep)
   if (type === 'GET') return request.get(url).set('Authorization', token).query({ resource, method: type })
   if (type === 'DOWNLOAD') return request.get(url2).set('Authorization', token).query({ resource, method: 'GET' })
   return request.post(url).set('Authorization', token).send(Object.assign({ resource, method: type }, data))
@@ -108,8 +104,7 @@ get json data from server
 @param {function} callback
 */
 
-export const serverGet = (endpoint, callback) => {
-  // debug('serverGet', endpoint)
+const serverGet = (endpoint, callback) => {
   aget(endpoint).end((err, res) => {
     if (err) return callback(Object.assign({}, err, { response: err.response && err.response.body }))
     if (res.status !== 200 && res.status !== 206) {
@@ -123,7 +118,7 @@ export const serverGet = (endpoint, callback) => {
   })
 }
 
-export const serverGetAsync = Promise.promisify(serverGet)
+const serverGetAsync = Promise.promisify(serverGet)
 
 /**
 Upload multiple files in one request.post
@@ -142,7 +137,7 @@ Upload multiple files in one request.post
 @param {function} callback
 */
 
-export class UploadMultipleFiles {
+class UploadMultipleFiles {
   constructor(driveUUID, dirUUID, Files, callback) {
     this.driveUUID = driveUUID
     this.dirUUID = dirUUID
@@ -205,7 +200,6 @@ export class UploadMultipleFiles {
     }
     this.handle = request.post(url).set('Authorization', token).field('manifest', JSON.stringify(option)).attach(name, rs)
 
-    // debug('cloudUpload', name, policy)
     this.handle.on('error', (err) => {
       this.finish(err)
     })
@@ -226,7 +220,6 @@ export class UploadMultipleFiles {
     this.handle = request.post(url).set('Authorization', token)
       .send({ resource, method: 'POST', toName: name, uuid: policy.remoteUUID, op: 'remove' })
       .end((err, res) => {
-        debug('remove !!!!', err, res && res.body)
         this.handle = null
         if (err) this.finish(err)
         else this.cloudUpload()
@@ -240,10 +233,8 @@ export class UploadMultipleFiles {
   }
 
   finish(error) {
-    // debug('cloudUpload error', error)
     if (this.finished) return
     if (error) {
-      debug('upload error', error.response && error.response.body)
       error.response = error.response && error.response.body
     }
     this.finished = true
@@ -269,7 +260,7 @@ download a entire file or part of file
 @param {function} callback
 */
 
-export class DownloadFile {
+class DownloadFile {
   constructor(endpoint, qs, fileName, size, seek, stream, station, callback) {
     this.endpoint = endpoint
     this.qs = qs
@@ -291,7 +282,6 @@ export class DownloadFile {
       .on('error', error => this.finish(error))
       .on('response', (res) => {
         if (res.status !== 200 && res.status !== 206) {
-          debug('download http status code not 200', res.error)
           const e = new Error()
           e.message = res.error
           e.code = res.code
@@ -321,7 +311,7 @@ export class DownloadFile {
           .on('error', error => this.finish(error))
           .on('response', (res) => {
             if (res.status !== 200 && res.status !== 206) {
-              debug('download http status code not 200', res.error)
+              console.error('download http status code not 200', res.error)
               const e = new Error()
               e.message = res.error
               e.code = res.code
@@ -398,7 +388,7 @@ createFold -> if error -> remove -> retry createFold -> callback
 TODO: fix this callback hell
 */
 
-export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, callback) => {
+const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, callback) => {
   const parents = true // mkdirp
   const ep = `drives/${driveUUID}/dirs/${dirUUID}/entries`
   let handle = null
@@ -416,20 +406,18 @@ export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, ca
 
   handle.end((error, res) => {
     if (error) {
-      debug('createFold error', error.response && error.response.body, driveUUID, dirUUID, dirname, policy)
+      console.error('createFold error', error.response && error.response.body, driveUUID, dirUUID, dirname, policy)
       if (policy.mode === 'overwrite' || policy.mode === 'merge') {
         /* when a file with the same name in remote, retry if given policy of overwrite or merge */
         serverGetAsync(`drives/${driveUUID}/dirs/${dirUUID}`)
           .then((listNav) => {
             const entries = cloud ? listNav.data.entries : listNav.entries
-            // debug('retry creat fold entries', entries)
             const index = entries.findIndex(e => e.name === dirname)
             if (index > -1) {
               const nameSpace = [...entries.map(e => e.name), localEntries.map(e => path.parse(e).base)]
               const mode = policy.mode === 'overwrite' ? 'replace' : 'rename'
               const checkedName = policy.mode === 'overwrite' ? dirname : getName(dirname, nameSpace)
               const remoteUUID = entries[index].uuid
-              debug('retry createFold', dirname, mode, checkedName, remoteUUID)
               createFold(driveUUID, dirUUID, checkedName, localEntries, { mode, checkedName, remoteUUID }, callback)
             } else callback(res.body)
           })
@@ -439,19 +427,17 @@ export const createFold = (driveUUID, dirUUID, dirname, localEntries, policy, ca
         createFold(driveUUID, dirUUID, dirname, localEntries, Object.assign({ retry: true }, policy), callback)
       } else callback(Object.assign({}, error, { response: error.response && error.response.body }))
     } else if (res && res.statusCode === 200) {
-      // debug('createFold handle.end res.statusCode 200', res.body)
       /* mode === 'replace' && stationID: need to retry creatFold */
       if (cloud && policy && policy.mode === 'replace') createFold(driveUUID, dirUUID, dirname, localEntries, { mode: 'normal' }, callback)
       /* callback the created dir entry */
       else callback(null, cloud ? res.body.data : res.body[res.body.length - 1].data)
     } else {
-      debug('createFold no error but res not 200', res.body)
       callback(res.body) // response code not 200 and no policy
     }
   })
 }
 
-export const createFoldAsync = Promise.promisify(createFold)
+const createFoldAsync = Promise.promisify(createFold)
 
 /**
 download tmp File
@@ -466,7 +452,7 @@ download tmp File
 file type: [media, boxFiles, driveFiles]
 */
 
-export const downloadReq = (ep, fileName, filePath, station, bToken, callback) => {
+const downloadReq = (ep, fileName, filePath, station, bToken, callback) => {
   const tmpPath = path.join(getTmpTransPath(), UUID.v4())
   const stream = fs.createWriteStream(tmpPath)
   stream.on('error', err => callback(err))
@@ -496,7 +482,7 @@ export const downloadReq = (ep, fileName, filePath, station, bToken, callback) =
   handle.pipe(stream)
 }
 
-export const downloadFile = (entry, downloadPath, callback) => {
+const downloadFile = (entry, downloadPath, callback) => {
   const { driveUUID, dirUUID, entryUUID, fileName, station } = entry
   const filePath = downloadPath ? path.join(downloadPath, fileName)
     : path.join(getTmpPath(), `${entryUUID.slice(0, 64)}AND${fileName}`)
@@ -523,7 +509,7 @@ export const downloadFile = (entry, downloadPath, callback) => {
   })
 }
 
-export const uploadTorrent = (dirUUID, rs, part, callback) => {
+const uploadTorrent = (dirUUID, rs, part, callback) => {
   if (cloud) {
     const ep = 'download/torrent'
     const url = `${address}/c/v1/stations/${stationID}/pipe`
@@ -536,7 +522,7 @@ export const uploadTorrent = (dirUUID, rs, part, callback) => {
   }
 }
 
-export const uploadTorrentAsync = Promise.promisify(uploadTorrent)
+const uploadTorrentAsync = Promise.promisify(uploadTorrent)
 
 const boxUploadCloud = (files, args, callback) => {
   const { comment, type, box } = args
@@ -574,7 +560,7 @@ const boxUploadLocal = (files, bToken, args, callback) => {
   r.end(callback)
 }
 
-export const boxUploadAsync = async (files, args) => {
+const boxUploadAsync = async (files, args) => {
   const { box } = args
   const { stationId, guid } = box
   let bToken = null
@@ -590,5 +576,21 @@ export const boxUploadAsync = async (files, args) => {
   if (bToken) res = (await Promise.promisify(boxUploadLocal)(files, bToken, args)).body
   else res = (await Promise.promisify(boxUploadCloud)(files, args)).body.data
   return res
+}
+
+module.exports = {
+  clearTmpTrans,
+  isCloud,
+  serverGet,
+  serverGetAsync,
+  UploadMultipleFiles,
+  DownloadFile,
+  createFold,
+  createFoldAsync,
+  downloadReq,
+  downloadFile,
+  uploadTorrent,
+  uploadTorrentAsync,
+  boxUploadAsync
 }
 

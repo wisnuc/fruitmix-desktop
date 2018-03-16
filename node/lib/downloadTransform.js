@@ -338,4 +338,5 @@ const createTask = (uuid, entries, name, dirUUID, driveUUID, taskType, createTim
   sendMsg()
 }
 
-export { createTask }
+module.exports = { createTask }
+

@@ -1,9 +1,10 @@
-const path = require('path')
-const fs = Promise.promisifyAll(require('fs'))
 const os = require('os')
+const path = require('path')
+const Promise = require('bluebird')
 const app = require('electron').app
-const mkdirpAsync = Promise.promisify(require('mkdirp'))
 const validator = require('validator')
+const fs = Promise.promisifyAll(require('fs'))
+const mkdirpAsync = Promise.promisify(require('mkdirp'))
 const createPersistenceAsync = require('./persistence')
 
 class Config {
@@ -295,3 +296,4 @@ class Configuration {
 }
 
 module.exports = Configuration
+

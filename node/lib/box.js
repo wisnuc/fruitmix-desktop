@@ -1,13 +1,13 @@
-import fs from 'original-fs'
-import i18n from 'i18n'
-import path from 'path'
-import { dialog, ipcMain } from 'electron'
-import { getMainWindow } from './window'
-import { boxUploadAsync } from './server'
-import hashFileAsync from './filehash'
-import { fileMagicAsync } from './magic'
+const i18n = require('i18n')
+const path = require('path')
+const Promise = require('bluebird')
+const { dialog, ipcMain } = require('electron')
+const fs = Promise.promisifyAll(require('original-fs'))
 
-Promise.promisifyAll(fs) // babel would transform Promise to bluebird
+const { getMainWindow } = require('./window')
+const { boxUploadAsync } = require('./server')
+const hashFileAsync = require('./filehash')
+const { fileMagicAsync } = require('./magic')
 
 /* only read files */
 const readAsync = async (entries) => {

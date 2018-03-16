@@ -1,3 +1,3 @@
 global.rootPath = __dirname
 
-require('./build/app')
+require('./node/app')

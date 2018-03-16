@@ -11,9 +11,8 @@ node -v
 git clone https://github.com/wisnuc/fruitmix-desktop.git
 cd fruitmix-desktop
 npm install --registry=https://registry.npm.taobao.org
-npm run rebuild || ./node_modules/.bin/electron-rebuild -e '~/fruitmix-desktop/node_modules/electron/dist' -v 1.7.9
+npm run rebuild (alt: ./node_modules/.bin/electron-rebuild -e '~/fruitmix-desktop/node_modules/electron/dist' -v 1.7.9)
 npm run webpack2
-npm run build
 npm start
 ```
 
@@ -22,7 +21,6 @@ npm start
 ```
 npm run webpack                     // 热替换打包文件
 npm run devel                       // 开发模式启动，文件变化时自动重启
-DEBUG='node:lib:*' npm run devel    // node端有debug输出的调试模式
 ```
 
 * 更多命令见package.json

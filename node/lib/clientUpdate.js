@@ -1,16 +1,15 @@
-import fs from 'fs'
-import os from 'os'
-import i18n from 'i18n'
-import path from 'path'
-import UUID from 'uuid'
-import request from 'superagent'
-import { ipcMain, shell, app, Notification } from 'electron'
+const os = require('os')
+const i18n = require('i18n')
+const path = require('path')
+const UUID = require('uuid')
+const Promise = require('bluebird')
+const request = require('superagent')
+const fs = Promise.promisifyAll(require('original-fs'))
+const { ipcMain, shell, app, Notification } = require('electron')
 
-import store from './store'
-import { ftpGet } from './ftp'
-import { getMainWindow } from './window'
-
-Promise.promisifyAll(fs) // babel would transform Promise to bluebird
+const store = require('./store')
+const { ftpGet } = require('./ftp')
+const { getMainWindow } = require('./window')
 
 const getTmpPath = () => store.getState().config.tmpPath
 

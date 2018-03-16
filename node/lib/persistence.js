@@ -1,8 +1,9 @@
-const path = require('path')
 const fs = require('fs')
+const path = require('path')
+const UUID = require('uuid')
+const Promise = require('bluebird')
 
 const mkdirpAsync = Promise.promisify(require('mkdirp'))
-const UUID = require('uuid')
 
 // state: IDLE, PENDING, WIP
 //
@@ -106,3 +107,4 @@ const createPersistenceAsync = async (target, tmpdir, delay) => {
 }
 
 module.exports = createPersistenceAsync
+

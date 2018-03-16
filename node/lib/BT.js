@@ -1,13 +1,12 @@
-import i18n from 'i18n'
-import path from 'path'
-import fs from 'original-fs'
-import { dialog, ipcMain } from 'electron'
+const i18n = require('i18n')
+const path = require('path')
+const Promise = require('bluebird')
+const { dialog, ipcMain } = require('electron')
+const fs = Promise.promisifyAll(require('original-fs'))
 
-import hashFileAsync from './filehash'
-import { getMainWindow } from './window'
-import { uploadTorrentAsync } from './server'
-
-Promise.promisifyAll(fs) // babel would transform Promise to bluebird
+const hashFileAsync = require('./filehash')
+const { getMainWindow } = require('./window')
+const { uploadTorrentAsync } = require('./server')
 
 const uploadAsync = async (dirUUID, entry) => {
   const stat = await fs.lstatAsync(path.resolve(entry))

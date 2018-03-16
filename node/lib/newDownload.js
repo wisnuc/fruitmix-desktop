@@ -1,12 +1,12 @@
-import fs from 'fs'
-import i18n from 'i18n'
-import path from 'path'
-import UUID from 'uuid'
-import store from './store'
-import { getMainWindow } from './window'
-import { ipcMain, shell } from 'electron'
-import { downloadFile } from './server'
-import { createTask } from './downloadTransform'
+const fs = require('fs')
+const i18n = require('i18n')
+const path = require('path')
+const UUID = require('uuid')
+const store = require('./store')
+const { getMainWindow } = require('./window')
+const { ipcMain, shell } = require('electron')
+const { downloadFile } = require('./server')
+const { createTask } = require('./downloadTransform')
 
 const getDownloadPath = () => store.getState().config.downloadPath
 

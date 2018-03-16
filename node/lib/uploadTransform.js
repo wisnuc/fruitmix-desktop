@@ -570,4 +570,5 @@ const createTask = (uuid, entries, dirUUID, driveUUID, taskType, createTime, isN
 }
 
 
-export { createTask }
+module.exports = { createTask }
+

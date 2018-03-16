@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+const { ipcMain } = require('electron')
 
 /*  Config will update 4 times:
  *    init: before LOGIN, get all kind of app path, get lastDevice info
