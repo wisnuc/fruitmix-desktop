@@ -107,8 +107,8 @@ class RunningTask extends React.Component {
   }
 
   renderPercent(task) {
-    if (task.size === 0) return '0%'
-    const percent = (Math.abs(task.completeSize / task.size) * 100).toFixed(2)
+    if (!task.size) return '0%'
+    const percent = (Math.min(task.completeSize / task.size, 1) * 100).toFixed(2)
     return `${percent}%`
   }
 
