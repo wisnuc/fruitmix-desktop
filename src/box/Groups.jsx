@@ -54,20 +54,17 @@ class Groups extends React.Component {
     this.tcQueue = [] // the tweet creating queue
 
     this.pushQueue = (uuid) => {
-      console.log('this.pushQueue', uuid, this.tcQueue)
       const index = this.tcQueue.indexOf(uuid)
       if (index === -1) this.tcQueue.push(uuid)
     }
 
     this.popQueue = (uuid) => {
-      console.log('this.popQueue', uuid, this.tcQueue)
       const index = this.tcQueue.indexOf(uuid)
       if (index > -1) this.tcQueue.splice(index, 1)
     }
 
     /* set failed, excepting : 1. not fake, 2. finished, 3. running */
     this.setFakeTweetState = ts => {
-      console.log('this.setFakeTweetState')
       return ts && ts.map(t => ((!t.faked || t.finished || this.tcQueue.indexOf(t.uuid) > -1) ? t
       : Object.assign({}, t, { failed: true })))
     }
@@ -211,11 +208,8 @@ class Groups extends React.Component {
       if (!success) {
         this.props.openSnackBar(i18n.__('Read Local Files Failed'))
       } else {
-        console.log('this.onFakeData before this.updateFakeTweet')
         const tweet = this.updateFakeTweet({ fakeList, box, raw })
-        console.log('this.onFakeData after this.updateFakeTweet')
         this.pushQueue(tweet.uuid)
-        console.log('this.onFakeData after push')
         this.sessions[session] = tweet
       }
     }
