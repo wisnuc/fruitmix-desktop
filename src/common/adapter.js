@@ -148,10 +148,10 @@ class Adapter extends EventEmitter {
     // console.log('getTweets', trueTweets, drafts)
 
     /* update last read index */
-    const lri = tweets.length - 1
-    const index = this.state.boxes.findIndex(b => b.uuid === boxUUID)
-    if (index > -1 && (this.state.boxes[index].lri !== lri)) {
-      this.state.boxes[index].lri = lri
+    const box = this.state.boxes.find(b => b.uuid === boxUUID)
+    const lri = box && box.ltsst && box.ltsst.index
+    if (lri > -1 && box.lri !== lri) {
+      box.lri = lri
       this.updateBoxes(this.state.boxes)
     }
     // console.timeEnd('getTweets')
