@@ -1,12 +1,12 @@
-import os from 'os'
-import i18n from 'i18n'
-import Debug from 'debug'
-import child from 'child_process'
-import { ipcMain, powerSaveBlocker, shell } from 'electron'
+const os = require('os')
+const i18n = require('i18n')
+const Debug = require('debug')
+const child = require('child_process')
+const { ipcMain, powerSaveBlocker, shell } = require('electron')
 
-import store from './store'
-import { clearTmpTrans } from './server'
-import { getMainWindow } from './window'
+const store = require('./store')
+const { clearTmpTrans } = require('./server')
+const { getMainWindow } = require('./window')
 
 const debug = Debug('node:lib:transmissionUpdate:')
 
@@ -117,4 +117,5 @@ ipcMain.on('START_TRANSMISSION', () => {
 
 ipcMain.on('LOGOUT', clearTasks)
 
-export { Tasks, sendMsg, clearTasks }
+module.exports = { Tasks, sendMsg, clearTasks }
+

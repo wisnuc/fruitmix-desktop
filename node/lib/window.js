@@ -1,14 +1,14 @@
-import path from 'path'
-import i18n from 'i18n'
-import Debug from 'debug'
-import fs from 'original-fs'
-import mkdirp from 'mkdirp'
-import rimraf from 'rimraf'
-import fsUtils from 'nodejs-fs-utils'
-import Promise from 'bluebird'
-import { ipcMain, BrowserWindow, app, dialog, Menu } from 'electron'
-import { clearTasks } from './transmissionUpdate'
-import store from './store'
+const path = require('path')
+const i18n = require('i18n')
+const Debug = require('debug')
+const mkdirp = require('mkdirp')
+const rimraf = require('rimraf')
+const fs = require('original-fs')
+const Promise = require('bluebird')
+const fsUtils = require('nodejs-fs-utils')
+const { ipcMain, BrowserWindow, app, dialog, Menu } = require('electron')
+
+const store = require('./store')
 
 Promise.promisifyAll(fsUtils)
 Promise.promisifyAll(mkdirp) // mkdirp.mkdirpAsync
@@ -25,8 +25,8 @@ const initMainWindow = () => {
   _mainWindow = new BrowserWindow({
     frame: true,
     height: 768,
-    resizable: true,
     width: 1366,
+    resizable: true,
     minWidth: 1366,
     minHeight: 768,
     title: 'WISNUC',
@@ -70,64 +70,15 @@ const initMainWindow = () => {
     event.preventDefault()
   })
 
-  let close = false
-  _mainWindow.on('close', (e) => {
-    // console.log('global.configuration', global.configuration.globalConfig.getConfig().noCloseConfirm)
-    if (close || (store.getState().config && store.getState().config.noCloseConfirm)) {
-      clearTasks()
-    } else {
-      dialog.showMessageBox(_mainWindow, {
-        type: 'warning',
-        title: i18n.__('Confirm Close Title'),
-        buttons: [i18n.__('Cancel'), i18n.__('Close')],
-        checkboxLabel: i18n.__('Do not Show again'),
-        checkboxChecked: false,
-        message: i18n.__('Confirm Close Text')
-      }, (response, checkboxChecked) => {
-        if (response === 1 && checkboxChecked) {
-          close = true
-          global.configuration.updateGlobalConfigAsync({ noCloseConfirm: true })
-            .then(() => setTimeout(app.quit, 100)) // waiting saving configuration to disk
-            .catch(err => console.log('updateGlobalConfigAsync error', err))
-        } else if (response === 1) {
-          close = true
-          setImmediate(app.quit)
-        }
-      })
-      e.preventDefault()
-    }
-  })
-
   // debug mode
   if (process.env.NODE_ENV === 'dev') _mainWindow.webContents.openDevTools()
 
-  // _mainWindow.maximize()
-
-  if (global.BABEL_IS_RUNNING) { _mainWindow.loadURL(`file://${process.cwd()}/public/index.html`) } else { _mainWindow.loadURL(`file://${path.join(global.entryFileDir, '../public', 'index.html')}`) }
+  _mainWindow.loadURL(`file://${path.join(global.rootPath, 'public', 'index.html')}`)
 
   // ipc message will be lost if sent early than 'did-finish-load'
   const contents = _mainWindow.webContents
   contents.on('did-finish-load', () =>
     contents.send('CONFIG_UPDATE', global.configuration.getConfiguration()))
-
-  // console.log('[window] mainWindow initialized')
-}
-
-const openNewWindow = (title, url) => {
-  debug('openNewWindow', url)
-
-  const newWindow = new BrowserWindow({
-    frame: true,
-    height: 768,
-    width: 1366,
-    resizable: true,
-    title
-  })
-
-  newWindow.on('page-title-updated', event => event.preventDefault())
-  newWindow.maximize()
-
-  newWindow.loadURL(url)
 }
 
 /* clean dir: 'tmp tmpTrans thumb image' */
@@ -154,8 +105,6 @@ const cleanCache = async () => {
   return true
 }
 
-ipcMain.on('newWebWindow', (event, title, url) => openNewWindow(title, url))
-
 ipcMain.on('POWEROFF', () => app.quit())
 
 ipcMain.on('SETCONFIG', (event, args) => {
@@ -180,4 +129,5 @@ ipcMain.on('CleanCache', () => {
   })
 })
 
-export { initMainWindow, getMainWindow }
+module.exports = { initMainWindow, getMainWindow }
+

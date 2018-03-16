@@ -1,32 +1,36 @@
-import mdns from 'mdns-js'
-import Debug from 'debug'
-import { ipcMain } from 'electron'
+const mdns = require('mdns-js')
+const { ipcMain } = require('electron')
 
-const debug = Debug('lib:mdns2')
 mdns.excludeInterface('0.0.0.0')
 
 /** mdns data example
-{ addresses: [ '192.168.5.60' ],
+{
+  addresses: [ '192.168.5.60' ],
   query: [ '_http._tcp.local' ],
-  type:
-   [ { name: 'http',
-       protocol: 'tcp',
-       subtypes: [],
-       description: 'Web Site' },
-     { name: 'http',
-       protocol: 'tcp',
-       subtypes: [],
-       description: 'Web Site' } ],
+  type: [
+    {
+      name: 'http',
+      protocol: 'tcp',
+      subtypes: [],
+      description: 'Web Site'
+    },
+    {
+      name: 'http',
+      protocol: 'tcp',
+      subtypes: [],
+      description: 'Web Site'
+    }
+  ],
   txt: [ '', '' ],
   port: 3000,
   fullname: 'WISNUC AppStation #2._http._tcp.local',
   host: 'wisnuc-generic-04AF2BFC.local',
   interfaceIndex: 0,
-  networkInterface: 'enp14s0' }
+  networkInterface: 'enp14s0'
+}
 */
 
-// return null if not wisnuc device
-// otherwise return { model, serial }
+/* return null if not wisnuc device, otherwise return { model, serial } */
 const parseHostname = (hostname) => {
   if (typeof hostname !== 'string') return null
 
@@ -51,9 +55,7 @@ const parseHostname = (hostname) => {
 let browser = null
 
 ipcMain.on('MDNS_SCAN', (event, session) => {
-  // console.log(`new mdns scan session, ${session}`)
   if (browser) browser.stop()
-
   const b = mdns.createBrowser(mdns.tcp('http'))
   b.on('ready', () => b.discover())
   b.on('update', (data) => {
@@ -64,7 +66,6 @@ ipcMain.on('MDNS_SCAN', (event, session) => {
     const parsed = parseHostname(data.host)
     if (parsed) {
       const message = Object.assign(parsed, { address: data.addresses[0] })
-
       // console.log('mdns send message', message)
 
       event.sender.send('MDNS_UPDATE', session, message)
@@ -74,6 +75,5 @@ ipcMain.on('MDNS_SCAN', (event, session) => {
   browser = b
 })
 
-// console.log('node/lib/mdns loaded')
+module.exports = browser
 
-export default browser

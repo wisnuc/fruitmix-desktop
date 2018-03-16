@@ -1,5 +1,5 @@
-const Promise = require('bluebird')
 const os = require('os')
+const Promise = require('bluebird')
 const fs = Promise.promisifyAll(require('fs'))
 
 const xattr = Promise.promisifyAll(os.platform() === 'win32' ? require('fs-ads') : require('fs-xattr'))
@@ -41,4 +41,4 @@ const setXattr = (target, attr, callback) => {
   setXattrAsync(target, attr).then(na => callback(null, na)).catch(error => callback(error))
 }
 
-export { readXattrAsync, readXattr, setXattrAsync, setXattr }
+module.exports = { readXattrAsync, readXattr, setXattrAsync, setXattr }

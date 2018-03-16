@@ -1,6 +1,6 @@
-import mqtt from 'mqtt'
-import { ipcMain, shell } from 'electron'
-import { getMainWindow } from './window'
+const mqtt = require('mqtt')
+const { ipcMain, shell } = require('electron')
+const { getMainWindow } = require('./window')
 
 const server = 'mqtt://mqtt.siyouqun.com:1883'
 

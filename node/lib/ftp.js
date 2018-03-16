@@ -31,4 +31,5 @@ const ftpGet = (remotePath, tmpPath, localPath) => {
   return promise
 }
 
-export { ftpGet }
+module.exports = { ftpGet }
+

@@ -1,7 +1,7 @@
-import path from 'path'
-import { app } from 'electron'
-import { combineReducers, createStore } from 'redux'
-import db from './db'
+const path = require('path')
+const { app } = require('electron')
+const { combineReducers, createStore } = require('redux')
+const db = require('./db')
 
 /* reducer: global config */
 const config = (state = {}, action) => {
@@ -59,4 +59,5 @@ const store = createStore(combineReducers({ config, userConfig, login }))
 
 global.dispatch = action => store.dispatch(action)
 
-export default store
+module.exports = store
+
