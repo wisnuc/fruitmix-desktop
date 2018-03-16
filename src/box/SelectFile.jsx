@@ -79,7 +79,6 @@ class SelectNas extends React.Component {
           type: 'file', filename: v.name, driveUUID: v.driveUUID, dirUUID: v.dirUUID, nasMedia: !!v.metadata, sha256: v.hash
         }))
       }
-      console.log('this.fire', this.selected, args)
       this.props.onRequestClose()
       this.props.createNasTweets(args)
     }

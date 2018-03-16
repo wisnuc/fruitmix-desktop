@@ -251,7 +251,7 @@ class Tweets extends React.PureComponent {
                                   </div>
                               }
                               {
-                                i === 5 && isMany &&
+                                i === 5 && isMany && isMedia &&
                                   <div
                                     style={Object.assign({ width: w, height: w }, overlayStyle)}
                                     onTouchTap={e => !failed && this.openMediaMore(e, list, author)}
@@ -290,7 +290,7 @@ class Tweets extends React.PureComponent {
                         display: 'flex',
                         alignItems: 'center'
                       }}
-                      onTouchTap={() => (!failed && !!list[0].filename && this.setState({ showFiles: true, list, author }))}
+                      onTouchTap={() => (!isFake && !failed && !!list[0].filename && this.setState({ showFiles: true, list, author }))}
                     >
                       <div
                         style={{
