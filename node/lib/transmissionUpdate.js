@@ -31,7 +31,7 @@ const sendMsg = () => {
   finishTasks.sort((a, b) => b.finishDate - a.finishDate) // Descending
 
   if (!powerSaveBlocker.isStarted(id) && userTasks.length !== 0 && !store.getState().config.enableSleep) {
-    id = powerSaveBlocker.start('prevent-display-sleep')
+    id = powerSaveBlocker.start('prevent-app-suspension')
     // console.log('powerSaveBlocker start', id, powerSaveBlocker.isStarted(id))
   }
 
