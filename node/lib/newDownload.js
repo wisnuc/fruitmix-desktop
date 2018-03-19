@@ -21,7 +21,7 @@ const downloadHandle = (event, args) => {
   fs.readdir(downloadPath, (err, files) => {
     if (err) {
       console.log('downloadHandle fs.readdir error: ', err)
-      getMainWindow().webContents.send('snackbarMessage', { message: i18n.__('Read Download Failed')})
+      getMainWindow().webContents.send('snackbarMessage', { message: i18n.__('Read Download Failed') })
     } else {
       entries.forEach((entry) => {
         const name = entry.name

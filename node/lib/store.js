@@ -1,7 +1,7 @@
 const path = require('path')
 const { app } = require('electron')
 const { combineReducers, createStore } = require('redux')
-const db = require('./db')
+const DB = require('./db')
 
 /* reducer: global config */
 const config = (state = {}, action) => {
@@ -39,7 +39,7 @@ const login = (state = defaultState, action) => {
   if (action.type === 'LOGIN') {
     const dbPath = path.join(app.getPath('appData'), 'wisnuc', 'dbCache')
     const uuid = action.data.user.uuid
-    global.DB = new db(path.join(dbPath, `${uuid}-v1.db`))
+    global.DB = new DB(path.join(dbPath, `${uuid}-v1.db`))
     global.DB.initialize(err => err && console.log('initialize db error', err))
   }
 
@@ -60,4 +60,3 @@ const store = createStore(combineReducers({ config, userConfig, login }))
 global.dispatch = action => store.dispatch(action)
 
 module.exports = store
-

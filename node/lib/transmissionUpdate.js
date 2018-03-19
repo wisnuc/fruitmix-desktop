@@ -1,7 +1,5 @@
-const os = require('os')
 const i18n = require('i18n')
 const Debug = require('debug')
-const child = require('child_process')
 const { ipcMain, powerSaveBlocker, shell } = require('electron')
 
 const store = require('./store')
@@ -118,4 +116,3 @@ ipcMain.on('START_TRANSMISSION', () => {
 ipcMain.on('LOGOUT', clearTasks)
 
 module.exports = { Tasks, sendMsg, clearTasks }
-

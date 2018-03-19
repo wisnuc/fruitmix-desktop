@@ -1,4 +1,3 @@
-const fs = require('fs')
 const Promise = require('bluebird')
 const fileType = require('file-type')
 const readChunk = require('read-chunk')
@@ -29,7 +28,7 @@ Parse file magic from libmagic/file string
 @param {string} text
 @returns {(string|number)}
 */
-const parse = text => {
+const parse = (text) => {
   if (text.startsWith('JPEG image data')) {
     return 'JPEG'
   } else if (text.startsWith('PNG image data')) {
@@ -42,12 +41,11 @@ const parse = text => {
     return 'MP4'
   } else if (text.startsWith('ISO Media, Apple QuickTime movie, Apple QuickTime (.MOV/QT)')) {
     return 'MOV'
-  } else {
-    return MAGICVER
   }
+  return MAGICVER
 }
 
-const isValidMagic = magic => 
+const isValidMagic = magic =>
   allMagics.includes(magic) ||
   (Number.isInteger(magic) && magic >= MAGICVER)
 
@@ -56,7 +54,7 @@ const isStaticImage = magic => magic === 'JPEG' || magic === 'PNG'
 const isAnimation = magic => magic === 'GIF'
 const isImage = magic => isStaticImage(magic) || isAnimation(magic)
 const isVideo = magic => magic === '3GP' || magic === 'MP4' || magic === 'MOV'
-const isMedia = magic => 
+const isMedia = magic =>
   magic === 'JPEG' ||
   magic === 'PNG' ||
   magic === 'GIF' ||

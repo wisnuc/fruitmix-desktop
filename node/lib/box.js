@@ -1,4 +1,3 @@
-const i18n = require('i18n')
 const path = require('path')
 const Promise = require('bluebird')
 const { dialog, ipcMain } = require('electron')

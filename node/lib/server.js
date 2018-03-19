@@ -138,7 +138,7 @@ Upload multiple files in one request.post
 */
 
 class UploadMultipleFiles {
-  constructor(driveUUID, dirUUID, Files, callback) {
+  constructor (driveUUID, dirUUID, Files, callback) {
     this.driveUUID = driveUUID
     this.dirUUID = dirUUID
     this.Files = Files
@@ -146,7 +146,7 @@ class UploadMultipleFiles {
     this.handle = null
   }
 
-  localUpload() {
+  localUpload () {
     this.handle = apost(`drives/${this.driveUUID}/dirs/${this.dirUUID}/entries`)
     this.Files.forEach((file) => {
       const { name, parts, readStreams, policy } = file
@@ -178,12 +178,12 @@ class UploadMultipleFiles {
     })
   }
 
-  cloudUpload() {
+  cloudUpload () {
     if (this.finished) return
     const ep = `drives/${this.driveUUID}/dirs/${this.dirUUID}/entries`
     const file = this.Files[0]
 
-    const { name, parts, readStreams, policy } = file
+    const { name, parts, readStreams } = file
     const rs = readStreams[0]
     const part = parts[0]
 
@@ -211,7 +211,7 @@ class UploadMultipleFiles {
     })
   }
 
-  remove() {
+  remove () {
     const ep = `drives/${this.driveUUID}/dirs/${this.dirUUID}/entries`
     const file = this.Files[0]
     const { name, policy } = file
@@ -219,20 +219,20 @@ class UploadMultipleFiles {
     const resource = Buffer.from(`/${ep}`).toString('base64')
     this.handle = request.post(url).set('Authorization', token)
       .send({ resource, method: 'POST', toName: name, uuid: policy.remoteUUID, op: 'remove' })
-      .end((err, res) => {
+      .end((err) => {
         this.handle = null
         if (err) this.finish(err)
         else this.cloudUpload()
       })
   }
 
-  upload() {
+  upload () {
     if (cloud && this.Files[0].policy && this.Files[0].policy.mode === 'replace') this.remove()
     else if (cloud) this.cloudUpload()
     else this.localUpload()
   }
 
-  finish(error) {
+  finish (error) {
     if (this.finished) return
     if (error) {
       error.response = error.response && error.response.body
@@ -241,7 +241,7 @@ class UploadMultipleFiles {
     this.callback(error)
   }
 
-  abort() {
+  abort () {
     this.finished = true
     if (this.handle) this.handle.abort()
   }
@@ -261,7 +261,7 @@ download a entire file or part of file
 */
 
 class DownloadFile {
-  constructor(endpoint, qs, fileName, size, seek, stream, station, callback) {
+  constructor (endpoint, qs, fileName, size, seek, stream, station, callback) {
     this.endpoint = endpoint
     this.qs = qs
     this.fileName = fileName
@@ -273,7 +273,7 @@ class DownloadFile {
     this.handle = null
   }
 
-  normalDownload() {
+  normalDownload () {
     this.handle = this.station ? cdownload(this.endpoint, this.station) : adownload(this.endpoint)
     if (this.size && this.size === this.seek) return setImmediate(() => this.finish(null))
     if (this.size) this.handle.set('Range', `bytes=${this.seek}-`)
@@ -295,7 +295,7 @@ class DownloadFile {
     return null
   }
 
-  forceLocalDownload() {
+  forceLocalDownload () {
     const { guid, isMedia } = this.station
     getBToken(guid, (err, bToken) => {
       if (err) {
@@ -328,19 +328,19 @@ class DownloadFile {
     })
   }
 
-  download() {
+  download () {
     const localable = !cloud && stationID && this.station && stationID === this.station.stationId
     if (localable) this.forceLocalDownload()
     else this.normalDownload()
   }
 
-  abort() {
+  abort () {
     if (this.finished) return
     this.finish(null)
     if (this.handle) this.handle.abort()
   }
 
-  finish(error) {
+  finish (error) {
     if (this.finished) return
     if (error) {
       error.response = error.response && error.response.body
@@ -593,4 +593,3 @@ module.exports = {
   uploadTorrentAsync,
   boxUploadAsync
 }
-

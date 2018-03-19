@@ -27,7 +27,7 @@ const getName = (name, nameSpace) => {
 }
 
 class Task {
-  constructor(props) {
+  constructor (props) {
     /* props: { uuid, entries, dirUUID, driveUUID, taskType, createTime, isNew, policies } */
 
     this.initStatus = () => {
@@ -39,7 +39,7 @@ class Task {
       this.trueCount = 0
       this.finishCount = 0
       this.finishDate = 0
-      this.name = props.policies[0] && props.policies[0].checkedName || path.parse(props.entries[0]).base
+      this.name = (props.policies[0] && props.policies[0].checkedName) || path.parse(props.entries[0]).base
       this.paused = true
       this.restTime = 0
       this.size = 0
@@ -78,7 +78,7 @@ class Task {
     this.readDir = new Transform({
       name: 'readDir',
       concurrency: 4,
-      transform(x, callback) {
+      transform (x, callback) {
         const read = async (entries, dirUUID, driveUUID, policies, task) => {
           for (let i = 0; i < entries.length; i++) {
             if (task.paused) break
@@ -130,7 +130,7 @@ class Task {
     this.mkdir = new Transform({
       name: 'mkdir',
       concurrency: 4,
-      transform(x, callback) {
+      transform (x, callback) {
         const read = async (entries, dirUUID, driveUUID, policies, task) => {
           const files = []
           for (let i = 0; i < entries.length; i++) {
@@ -181,7 +181,7 @@ class Task {
     this.hash = new Transform({
       name: 'hash',
       concurrency: 1,
-      push(x) {
+      push (x) {
         const { files, dirUUID, driveUUID, task } = x
         debug('this.hash push', files.length)
         files.forEach((f) => {
@@ -198,7 +198,7 @@ class Task {
         const { entry, dirUUID, driveUUID, stat, policy, retry, task } = x
         if (task.paused) return
         if (task.state !== 'uploading' && task.state !== 'diffing') task.state = 'hashing'
-        const hashStart = (new Date()).getTime()
+        // const hashStart = (new Date()).getTime()
         readXattr(entry, (error, attr) => {
           if (!error && attr && attr.parts && retry === undefined) {
             callback(null, { entry, dirUUID, driveUUID, parts: attr.parts, type: 'file', stat, policy, retry, task })
@@ -208,7 +208,8 @@ class Task {
           if (stat.size < 134217728) {
             hashFileAsync(entry, stat.size, 1024 * 1024 * 1024)
               .then(parts => setXattr(entry, { parts }, (err, xattr) => {
-                debug('hash finished', ((new Date()).getTime() - hashStart) / 1000)
+                if (err) console.error('set xattar error', err)
+                // debug('hash finished', ((new Date()).getTime() - hashStart) / 1000)
                 const p = xattr && xattr.parts
                 const r = retry ? retry + 1 : retry
                 callback(null, { entry, dirUUID, driveUUID, parts: p, type: 'file', stat, policy, retry: r, task })
@@ -224,7 +225,8 @@ class Task {
             const child = childProcess.fork(path.join(__dirname, './filehash'), [], options)
             child.on('message', (result) => {
               setXattr(entry, result, (err, xattr) => {
-                debug('hash finished', ((new Date()).getTime() - hashStart) / 1000)
+                if (err) console.error('set xattr error', err)
+                // debug('hash finished', ((new Date()).getTime() - hashStart) / 1000)
                 const p = xattr && xattr.parts
                 const r = retry ? retry + 1 : retry
                 callback(null, { entry, dirUUID, driveUUID, parts: p, type: 'file', stat, policy, retry: r, task })
@@ -239,8 +241,8 @@ class Task {
     this.diff = new Transform({
       name: 'diff',
       concurrency: 4,
-      push(x) {
-        if (x.type === 'directory' || !(x.policy.mode === 'merge' || x.policy.mode === 'overwrite') && x.task.isNew && !x.retry) {
+      push (x) {
+        if (x.type === 'directory' || (!(x.policy.mode === 'merge' || x.policy.mode === 'overwrite') && x.task.isNew && !x.retry)) {
           this.outs.forEach(t => t.push([x]))
         } else {
           /* combine to one post */
@@ -343,7 +345,7 @@ class Task {
       name: 'upload',
       concurrency: 2,
       isBlocked: () => this.paused,
-      push(X) {
+      push (X) {
         // debug('this.upload push', X.length)
         X.forEach((x) => {
           if (x.type === 'directory') {
@@ -353,8 +355,8 @@ class Task {
             /* combine to one post */
             const { dirUUID, policy } = x
             /* upload N file within one post */
-            const i = this.pending.findIndex(p => !isCloud() && p.length < 256
-              && p[0].dirUUID === dirUUID && policy.mode === p[0].policy.mode)
+            const i = this.pending.findIndex(p => !isCloud() && p.length < 256 &&
+              p[0].dirUUID === dirUUID && policy.mode === p[0].policy.mode)
             if (i > -1) {
               this.pending[i].push(x)
             } else {
@@ -488,13 +490,13 @@ class Task {
     })
   }
 
-  run() {
+  run () {
     this.paused = false
     this.countSpeed = setInterval(this.countSpeedFunc, 1000)
     this.readDir.push({ entries: this.entries, dirUUID: this.dirUUID, driveUUID: this.driveUUID, policies: this.policies, task: this })
   }
 
-  status() {
+  status () {
     return Object.assign({}, this.props, {
       completeSize: this.completeSize,
       lastTimeSize: this.lastTimeSize,
@@ -514,13 +516,13 @@ class Task {
     })
   }
 
-  createStore() {
+  createStore () {
     this.countStore = 0
     if (!this.isNew) return
     global.DB.save(this.uuid, this.status(), err => err && console.log(this.name, 'createStore error: ', err))
   }
 
-  updateStore() {
+  updateStore () {
     if (!this.WIP && !this.storeUpdated) {
       this.WIP = true
       global.DB.save(this.uuid, this.status(), err => err && console.log(this.name, 'updateStore error: ', err))
@@ -530,7 +532,7 @@ class Task {
     } else this.storeUpdated = false
   }
 
-  pause() {
+  pause () {
     if (this.paused) return
     this.paused = true
     this.reqHandles.forEach(h => h.abort())
@@ -539,7 +541,7 @@ class Task {
     sendMsg()
   }
 
-  resume() {
+  resume () {
     this.readDir.clear()
     this.initStatus()
     this.isNew = false
@@ -547,7 +549,7 @@ class Task {
     sendMsg()
   }
 
-  finish() {
+  finish () {
     this.paused = true
     this.readDir.clear()
     this.reqHandles.forEach(h => h.abort())
@@ -569,6 +571,4 @@ const createTask = (uuid, entries, dirUUID, driveUUID, taskType, createTime, isN
   sendMsg()
 }
 
-
 module.exports = { createTask }
-

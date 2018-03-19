@@ -8,33 +8,33 @@ const mkdirpAsync = Promise.promisify(require('mkdirp'))
 const createPersistenceAsync = require('./persistence')
 
 class Config {
-  constructor(config, persistence) {
+  constructor (config, persistence) {
     this.config = config
     this.persistence = persistence
   }
 
-  getConfig() {
+  getConfig () {
     return this.config
   }
 
-  setConfig(props) {
+  setConfig (props) {
     this.config = Object.assign({}, props)
     this.persistence.save(this.config)
   }
 }
 
 class UserConfig {
-  constructor(config, persistence, userUUID) {
+  constructor (config, persistence, userUUID) {
     this.config = config
     this.persistence = persistence
     this.userUUID = userUUID
   }
 
-  getConfig() {
+  getConfig () {
     return Object.assign({}, this.config, { userUUID: this.userUUID })
   }
 
-  setConfig(props) {
+  setConfig (props) {
     this.config = Object.assign({}, props)
     this.persistence.save(this.config)
   }
@@ -51,7 +51,7 @@ class UserConfig {
 //        /thumbnail/                 thumbnail folder
 //        /imagecache/                image folder
 class Configuration {
-  constructor(root) {
+  constructor (root) {
     this.root = path.join(root, 'wisnuc')
   }
 
@@ -59,72 +59,72 @@ class Configuration {
      synchronous methods for abspath
   */
 
-  getGlobalConfigPath() {
+  getGlobalConfigPath () {
     return path.join(this.root, 'config.json')
   }
 
   // public
-  getTmpTransDir() {
+  getTmpTransDir () {
     return path.join(this.root, 'tmpTrans')
   }
 
   // public
-  getTmpDir() {
+  getTmpDir () {
     return path.join(this.root, 'tmp')
   }
 
   // public
-  getThumbnailDir() {
+  getThumbnailDir () {
     return path.join(this.root, 'thumbnail')
   }
 
   // public
-  getImageCacheDir() {
+  getImageCacheDir () {
     return path.join(this.root, 'imagecache')
   }
 
-  getBoxDir() {
+  getBoxDir () {
     return path.join(this.root, 'IndexedDB')
   }
 
-  getVersion() {
+  getVersion () {
     return app.getVersion()
   }
 
-  getPlatform() {
+  getPlatform () {
     return os.platform()
   }
 
-  getUsersDir() {
+  getUsersDir () {
     return path.join(this.root, 'users')
   }
 
-  getUserDir(uuid) {
+  getUserDir (uuid) {
     return path.join(this.root, 'users', uuid)
   }
 
-  getUserConfigFilePath(uuid) {
+  getUserConfigFilePath (uuid) {
     return path.join(this.root, 'users', uuid, 'config.json')
   }
 
   // public
-  getUserDownloadDir(uuid) {
+  getUserDownloadDir (uuid) {
     return path.join(this.root, 'users', uuid, 'download')
   }
 
   // public
-  getUserDatabaseDir(uuid) {
+  getUserDatabaseDir (uuid) {
     return path.join(this.root, 'users', uuid, 'database')
   }
 
   // currently only two USER directories supported
   // public
-  getWisnucDownloadsDir() {
+  getWisnucDownloadsDir () {
     return path.join(app.getPath('downloads'), 'wisnuc')
   }
 
   // public
-  getWisnucPicturesDir() {
+  getWisnucPicturesDir () {
     return path.join(app.getPath('pictures'), 'wisnuc')
   }
 
@@ -132,19 +132,19 @@ class Configuration {
     prepare directories for user or global
   */
 
-  async makeWisnucDirsAsync() {
+  async makeWisnucDirsAsync () {
     await mkdirpAsync(this.getWisnucDownloadsDir())
     await mkdirpAsync(this.getWisnucPicturesDir())
   }
 
-  async makeUserDirsAsync(uuid) {
+  async makeUserDirsAsync (uuid) {
     await mkdirpAsync(this.getUserDir(uuid))
     // await mkdirpAsync(this.getUserDownloadDir(uuid))
     // await mkdirpAsync(this.getUserDatabaseDir(uuid))
   }
 
   // init global dirs during startup
-  async makeGlobalDirsAsync() {
+  async makeGlobalDirsAsync () {
     await mkdirpAsync(this.getUsersDir())
     await mkdirpAsync(this.getTmpTransDir())
     await mkdirpAsync(this.getTmpDir())
@@ -154,7 +154,7 @@ class Configuration {
   }
 
   // load a js object from given path, return null if any error
-  async loadObjectAsync(fpath) {
+  async loadObjectAsync (fpath) {
     let obj = null
     // console.log('Loading config...')
     try { obj = JSON.parse(await fs.readFileAsync(fpath)) } catch (e) {
@@ -166,7 +166,7 @@ class Configuration {
   }
 
   // load or create config for single user
-  async initUserConfigAsync(userUUID) {
+  async initUserConfigAsync (userUUID) {
     await this.makeUserDirsAsync(userUUID)
 
     const configPath = this.getUserConfigFilePath(userUUID)
@@ -178,7 +178,7 @@ class Configuration {
   }
 
   // update user config
-  async updateUserConfigAsync(userUUID, newConfig) {
+  async updateUserConfigAsync (userUUID, newConfig) {
     await this.makeUserDirsAsync(userUUID)
 
     const userConfigPath = this.getUserConfigFilePath(userUUID)
@@ -199,9 +199,8 @@ class Configuration {
     return userConfig
   }
 
-
   // load or create global config
-  async initGlobalConfigAsync() {
+  async initGlobalConfigAsync () {
     const configPath = this.getGlobalConfigPath()
     const config = await this.loadObjectAsync(configPath) || {}
     const tmpdir = this.getTmpDir()
@@ -211,7 +210,7 @@ class Configuration {
   }
 
   // update global config
-  async updateGlobalConfigAsync(newConfig) {
+  async updateGlobalConfigAsync (newConfig) {
     const configPath = this.getGlobalConfigPath()
     const oldConfig = await this.loadObjectAsync(configPath) || {}
     const config = Object.assign({}, oldConfig, newConfig)
@@ -242,7 +241,7 @@ class Configuration {
   }
 
   // init
-  async initAsync() {
+  async initAsync () {
     // prepare directories
     await this.makeWisnucDirsAsync()
     await this.makeGlobalDirsAsync()
@@ -283,7 +282,7 @@ class Configuration {
     })
   }
 
-  getConfiguration() {
+  getConfiguration () {
     return {
       boxPath: this.getBoxDir(),
       platform: this.getPlatform(),
@@ -296,4 +295,3 @@ class Configuration {
 }
 
 module.exports = Configuration
-

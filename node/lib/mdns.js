@@ -59,9 +59,7 @@ ipcMain.on('MDNS_SCAN', (event, session) => {
   const b = mdns.createBrowser(mdns.tcp('http'))
   b.on('ready', () => b.discover())
   b.on('update', (data) => {
-    if (!Array.isArray(data.addresses)
-      || data.addresses.length === 0
-      || typeof data.host !== 'string') { return }
+    if (!Array.isArray(data.addresses) || data.addresses.length === 0 || typeof data.host !== 'string') return
 
     const parsed = parseHostname(data.host)
     if (parsed) {
@@ -76,4 +74,3 @@ ipcMain.on('MDNS_SCAN', (event, session) => {
 })
 
 module.exports = browser
-

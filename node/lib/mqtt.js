@@ -1,11 +1,11 @@
 const mqtt = require('mqtt')
-const { ipcMain, shell } = require('electron')
+const { ipcMain } = require('electron')
 const { getMainWindow } = require('./window')
 
 const server = 'mqtt://mqtt.siyouqun.com:1883'
 
 class MQTT {
-  constructor(clientId, topic, onMessage) {
+  constructor (clientId, topic, onMessage) {
     this.clientId = this.clientId
     this.topic = topic
     this.onMessage = onMessage
@@ -19,7 +19,7 @@ class MQTT {
     }
   }
 
-  start() {
+  start () {
     this.client = mqtt.connect(server, this.args)
 
     this.client.on('connect', (data) => {

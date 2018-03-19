@@ -14,7 +14,7 @@ const getImagePath = () => store.getState().config.imagePath
 const getTmpTransPath = () => store.getState().config.tmpTransPath
 
 class Worker extends EventEmitter {
-  constructor(id) {
+  constructor (id) {
     super()
     this.finished = false
     this.id = id
@@ -56,7 +56,7 @@ class Worker extends EventEmitter {
     this.serverDownloadAsync = Promise.promisify(this.serverDownload)
   }
 
-  abort() {
+  abort () {
     if (this.finished) return
     this.state = 'FINISHED'
     this.finished = true
@@ -70,39 +70,39 @@ class Worker extends EventEmitter {
     this.emit('error', e)
   }
 
-  finish(data) {
+  finish (data) {
     if (this.finished) return
     this.finished = true
     this.state = 'FINISHED'
     this.emit('finish', data)
   }
 
-  error(err) {
+  error (err) {
     if (this.finished) return
     this.finished = true
     this.state = 'FINISHED'
     this.emit('error', err)
   }
 
-  isRunning() {
+  isRunning () {
     return this.state === 'RUNNING'
   }
 
-  isPendding() {
+  isPendding () {
     return this.state === 'PENDDING'
   }
 
-  isFinished() {
+  isFinished () {
     return this.state === 'FINISHED'
   }
 
-  run() {}
+  run () {}
 
-  cleanup() {}
+  cleanup () {}
 }
 
 class GetThumbTask extends Worker {
-  constructor(session, digest, dirpath, height, width, station) {
+  constructor (session, digest, dirpath, height, width, station) {
     super(session)
     this.session = session
     this.digest = digest
@@ -113,7 +113,7 @@ class GetThumbTask extends Worker {
     this.cacheName = `${this.digest}&height=${this.height}&width=${this.width}`
   }
 
-  run() {
+  run () {
     this.state = 'RUNNING'
     const fpath = path.join(this.dirpath, this.cacheName)
     fs.lstat(fpath, (err, stat) => { // aborted when lstat ???
@@ -122,7 +122,7 @@ class GetThumbTask extends Worker {
     })
   }
 
-  request() {
+  request () {
     if (this.state !== 'RUNNING') return
     const qs = {
       alt: 'thumbnail',
@@ -143,7 +143,7 @@ class GetThumbTask extends Worker {
 }
 
 class GetImageTask extends Worker {
-  constructor(session, digest, dirpath, station) {
+  constructor (session, digest, dirpath, station) {
     super(session)
     this.session = session
     this.digest = digest
@@ -151,7 +151,7 @@ class GetImageTask extends Worker {
     this.station = station
   }
 
-  run() {
+  run () {
     this.state = 'RUNNING'
     const fpath = path.join(this.dirpath, this.digest)
     fs.lstat(fpath, (err, stat) => {
@@ -160,7 +160,7 @@ class GetImageTask extends Worker {
     })
   }
 
-  request() {
+  request () {
     if (this.state !== 'RUNNING') return
     const qs = { alt: 'data', boxUUID: this.station && this.station.boxUUID }
     this.serverDownloadAsync(`media/${this.digest}`, qs, this.dirpath, this.digest, this.station)
@@ -174,42 +174,42 @@ class GetImageTask extends Worker {
 }
 
 class MediaFileManager {
-  constructor() {
+  constructor () {
     this.thumbTaskQueue = []
     this.imageTaskQueue = []
     this.thumbTaskLimit = 20
     this.imageTaskLimit = 10
   }
 
-  createThumbTask(session, digest, dirpath, height, width, station) {
+  createThumbTask (session, digest, dirpath, height, width, station) {
     const task = new GetThumbTask(session, digest, dirpath, height, width, station)
     task.on('finish', (data) => {
       getMainWindow().webContents.send('getThumbSuccess', session, data)
       this.schedule()
     })
     task.on('error', (err) => {
-      // undefined
+      console.error('createThumbTask error', err)
       this.schedule()
     })
     this.thumbTaskQueue.push(task)
     this.schedule()
   }
 
-  createImageTask(session, digest, dirpath, station) {
+  createImageTask (session, digest, dirpath, station) {
     const task = new GetImageTask(session, digest, dirpath, station)
     task.on('finish', (data) => {
       getMainWindow().webContents.send('donwloadMediaSuccess', session, data)
       this.schedule()
     })
     task.on('error', (err) => {
-      // undefined
+      console.error('createImageTask error', err)
       this.schedule()
     })
     this.imageTaskQueue.push(task)
     this.schedule()
   }
 
-  schedule() {
+  schedule () {
     const thumbDiff = this.thumbTaskLimit - this.thumbTaskQueue.filter(worker => worker.isRunning()).length
     if (thumbDiff > 0) {
       this.thumbTaskQueue.filter(worker => worker.isPendding())
@@ -225,12 +225,12 @@ class MediaFileManager {
     }
   }
 
-  abort(id, type, callback) {
+  abort (id, type, callback) {
     let worker
     if (type === 'thumb') {
-      worker = this.thumbTaskQueue.find((worker => worker.id === id))
+      worker = this.thumbTaskQueue.find(worker => worker.id === id)
     } else {
-      worker = this.imageTaskQueue.find((worker => worker.id === id))
+      worker = this.imageTaskQueue.find(worker => worker.id === id)
     }
     if (worker && !worker.isFinished()) {
       worker.abort()
