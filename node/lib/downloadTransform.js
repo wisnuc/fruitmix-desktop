@@ -2,35 +2,14 @@ const Promise = require('bluebird')
 const fs = Promise.promisifyAll(require('fs'))
 const mkdirp = Promise.promisify(require('mkdirp'))
 const path = require('path')
-const childProcess = require('child_process')
 const debug = require('debug')('node:lib:downloadTransform:')
 
 const Transform = require('./transform')
-const { readXattr, setXattr } = require('./xattr')
 const { serverGetAsync, DownloadFile, isCloud } = require('./server')
-const { getMainWindow } = require('./window')
 const { Tasks, sendMsg } = require('./transmissionUpdate')
 
-/* return a new file name */
-const getName = async (name, dirPath, entries) => {
-  const list = await fs.readdirAsync(dirPath)
-  if (!list.includes(name)) return name
-  const nameSpace = entries.map(e => e.name)
-  nameSpace.push(...list)
-  let newName = name
-  const extension = path.parse(name).ext
-  for (let i = 1; nameSpace.includes(newName) || nameSpace.includes(`${newName}.download`); i++) {
-    if (!extension || extension === name) {
-      newName = `${name}(${i})`
-    } else {
-      newName = `${path.parse(name).name}(${i})${extension}`
-    }
-  }
-  return newName
-}
-
 class Task {
-  constructor(props) {
+  constructor (props) {
     /* props: { uuid, downloadPath, name, entries, dirUUID, driveUUID, taskType, createTime, isNew } */
 
     this.initStatus = () => {
@@ -78,7 +57,7 @@ class Task {
       name: 'readRemote',
       concurrency: 4,
       isBlocked: () => this.paused,
-      transform(x, callback) {
+      transform (x, callback) {
         const read = async (entries, downloadPath, dirUUID, driveUUID, task) => {
           for (let i = 0; i < entries.length; i++) {
             if (task.paused) throw Error('task paused !')
@@ -115,7 +94,7 @@ class Task {
       name: 'diff',
       concurrency: 1,
       isBlocked: () => this.paused,
-      push(X) {
+      push (X) {
         const { entries, downloadPath, dirUUID, driveUUID, task } = X
         if (task.isNew) {
           this.outs.forEach(t => t.push(X))
@@ -159,7 +138,7 @@ class Task {
       name: 'download',
       concurrency: 4,
       isBlocked: () => this.paused,
-      push(X) {
+      push (X) {
         const { entries, downloadPath, dirUUID, driveUUID, task } = X
         entries.forEach((entry) => {
           if (entry.type === 'directory' || entry.finished) {
@@ -192,12 +171,16 @@ class Task {
           entry.lastTimeSize = 0
           task.updateStore()
           if (entry.seek === entry.size) callback(null, { entry, downloadPath, dirUUID, driveUUID, task })
-          if (!task.paused && entry.seek !== entry.size) callback({ code: 'ECONNEND' })
+          if (!task.paused && entry.seek !== entry.size) {
+            const error = new Error('connection ended without finished')
+            error.code = 'ECONNEND'
+            callback(error)
+          }
         })
 
         const ep = dirUUID === 'media' ? `media/${entry.uuid}`
           : dirUUID === 'boxFiles' ? `boxes/${entry.station && entry.station.boxUUID}/files/${entry.sha256}`
-          : `drives/${driveUUID}/dirs/${dirUUID}/entries/${entry.uuid}`
+            : `drives/${driveUUID}/dirs/${dirUUID}/entries/${entry.uuid}`
         const qs = dirUUID === 'media' ? { alt: 'data', boxUUID: entry.station && entry.station.boxUUID } : { name: entry.name }
         const handle = new DownloadFile(ep, qs, entry.name, entry.size, entry.seek, stream, entry.station, (error) => {
           debug('donwload handle finish', entry.name, task.reqHandles.indexOf(handle))
@@ -262,13 +245,13 @@ class Task {
     })
   }
 
-  run() {
+  run () {
     this.paused = false
     this.countSpeed = setInterval(this.countSpeedFunc, 1000)
     this.readRemote.push({ entries: this.entries, downloadPath: this.downloadPath, dirUUID: this.dirUUID, driveUUID: this.driveUUID, task: this })
   }
 
-  status() {
+  status () {
     return Object.assign({}, this.props, {
       completeSize: this.completeSize,
       lastTimeSize: this.lastTimeSize,
@@ -286,12 +269,12 @@ class Task {
     })
   }
 
-  createStore() {
+  createStore () {
     if (!this.isNew) return
     global.DB.save(this.uuid, this.status(), err => err && console.log(this.name, 'createStore error: ', err))
   }
 
-  updateStore() {
+  updateStore () {
     if (!this.WIP && !this.storeUpdated) {
       this.WIP = true
       global.DB.save(this.uuid, this.status(), err => err && console.log(this.name, 'createStore error: ', err))
@@ -300,7 +283,7 @@ class Task {
     } else this.storeUpdated = false
   }
 
-  pause() {
+  pause () {
     if (this.paused) return
     this.paused = true
     this.reqHandles.forEach(h => h.abort())
@@ -309,7 +292,7 @@ class Task {
     sendMsg()
   }
 
-  resume() {
+  resume () {
     this.readRemote.clear()
     this.initStatus()
     this.isNew = false
@@ -317,7 +300,7 @@ class Task {
     sendMsg()
   }
 
-  finish() {
+  finish () {
     this.paused = true
     this.readRemote.clear()
     this.reqHandles.forEach(h => h.abort())
@@ -339,4 +322,3 @@ const createTask = (uuid, entries, name, dirUUID, driveUUID, taskType, createTim
 }
 
 module.exports = { createTask }
-

@@ -39,7 +39,7 @@ const checkUpdateAsync = async () => {
   try {
     data = await checkAsync()
   } catch (e) {
-    const error = e && e.response && e.response.body || e
+    const error = (e && e.response && e.response.body) || e
     console.log('checkUpdateAsync error', error)
     return getMainWindow().webContents.send('NEW_RELEASE', { error })
   }
@@ -62,15 +62,14 @@ const install = (e, filePath) => {
   setTimeout(() => app.quit(), 100)
 }
 
-const download = (url, filePath) => {
+const download = (url, filePath) => { // eslint-disable-line
   const tmpPath = path.join(getTmpPath(), UUID.v4())
-  const options = { method: 'GET', url }
   const stream = fs.createWriteStream(tmpPath)
   const promise = new Promise((resolve, reject) => {
     stream.on('finish', () => {
       fs.rename(tmpPath, filePath, (err) => {
         if (!err) return resolve(filePath)
-        return reject()
+        return reject(err)
       })
     })
     stream.on('error', reject)
@@ -97,9 +96,9 @@ const compareVerison = (a, b) => {
   return 0
 }
 
-const downloadAsync = async () => {
+const downloadAsync = async () => { // eslint-disable-line
   if (!['win32', 'darwin'].includes(os.platform())) return
-  const { filePath, url, rel, fileName } = await checkAsync()
+  const { filePath, url, rel, fileName } = await checkAsync() // eslint-disable-line
   console.log('downloadAsync: check release')
   const currVersion = app.getVersion()
   if (compareVerison(currVersion, rel.name) >= 0) return console.log('already latest')

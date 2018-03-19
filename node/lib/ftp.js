@@ -7,14 +7,14 @@ const ftpGet = (remotePath, tmpPath, localPath) => {
   const promise = new Promise((resolve, reject) => {
     c.on('ready', () => {
       c.get(remotePath, (err, stream) => {
-        if (err) return reject()
+        if (err) return reject(err)
         console.log(fileName)
         stream.once('close', () => { c.end() })
         const ws = fs.createWriteStream(tmpPath)
         ws.on('finish', () => {
-          fs.rename(tmpPath, localPath, (err) => {
-            if (!err) return resolve(localPath)
-            return reject()
+          fs.rename(tmpPath, localPath, (error) => {
+            if (!error) return resolve(localPath)
+            return reject(error)
           })
         })
         stream.pipe(ws)
@@ -32,4 +32,3 @@ const ftpGet = (remotePath, tmpPath, localPath) => {
 }
 
 module.exports = { ftpGet }
-

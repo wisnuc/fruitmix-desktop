@@ -1,20 +1,16 @@
 const path = require('path')
-const i18n = require('i18n')
-const Debug = require('debug')
 const mkdirp = require('mkdirp')
 const rimraf = require('rimraf')
 const fs = require('original-fs')
 const Promise = require('bluebird')
 const fsUtils = require('nodejs-fs-utils')
-const { ipcMain, BrowserWindow, app, dialog, Menu } = require('electron')
+const { ipcMain, BrowserWindow, app, Menu } = require('electron')
 
 const store = require('./store')
 
 Promise.promisifyAll(fsUtils)
 Promise.promisifyAll(mkdirp) // mkdirp.mkdirpAsync
 const rimrafAsync = Promise.promisify(rimraf)
-
-const debug = Debug('lib:window')
 
 let _mainWindow = null
 
@@ -43,7 +39,7 @@ const initMainWindow = () => {
     submenu: [
       { label: 'About Application', selector: 'orderFrontStandardAboutPanel:' },
       { type: 'separator' },
-      { label: 'Quit', accelerator: 'Command+Q', click() { app.quit() } }
+      { label: 'Quit', accelerator: 'Command+Q', click () { app.quit() } }
     ]
   }, {
     label: 'Edit',
@@ -130,4 +126,3 @@ ipcMain.on('CleanCache', () => {
 })
 
 module.exports = { initMainWindow, getMainWindow }
-
