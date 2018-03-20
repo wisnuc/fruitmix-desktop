@@ -14,7 +14,7 @@ import { ShareDisk, ShareIcon } from '../common/Svg'
 import { xcopyMsg } from '../common/msg'
 
 class Row extends React.PureComponent {
-  render() {
+  render () {
     const { node, disable, isSelected } = this.props
     return (
       <div
@@ -35,12 +35,12 @@ class Row extends React.PureComponent {
         <div style={{ margin: '0 12px 0 12px', display: 'flex' }}>
           {
             node.type === 'file'
-            ? <EditorInsertDriveFile style={{ color: 'rgba(0,0,0,0.54)' }} />
-            : node.type === 'public' || node.type === 'publicRoot'
-            ? <ShareDisk style={{ color: 'rgba(0,0,0,0.54)' }} />
-            : node.tag === 'built-in'
-            ? <ShareIcon style={{ color: 'rgba(0,0,0,0.54)' }} />
-            : <FileFolder style={{ color: 'rgba(0,0,0,0.54)' }} />
+              ? <EditorInsertDriveFile style={{ color: 'rgba(0,0,0,0.54)' }} />
+              : node.type === 'public' || node.type === 'publicRoot'
+                ? <ShareDisk style={{ color: 'rgba(0,0,0,0.54)' }} />
+                : node.tag === 'built-in'
+                  ? <ShareIcon style={{ color: 'rgba(0,0,0,0.54)' }} />
+                  : <FileFolder style={{ color: 'rgba(0,0,0,0.54)' }} />
           }
         </div>
         <div
@@ -73,7 +73,7 @@ class Row extends React.PureComponent {
 }
 
 class MoveDialog extends React.PureComponent {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.path = this.props.path
@@ -324,12 +324,12 @@ class MoveDialog extends React.PureComponent {
     }
   }
 
-  componentWillMount() {
+  componentWillMount () {
     if (this.props.type === 'share') this.shareToAll()
   }
 
   /* Button disabled ? */
-  getButtonStatus() {
+  getButtonStatus () {
     const { name, uuid, type } = this.state.currentDir
     // console.log('name, uuid, type this.inSameDirectory', name, uuid, type, this.inSameDirectory())
     const selectedObj = this.state.currentSelectedIndex !== -1 ? this.state.list[this.state.currentSelectedIndex] : null
@@ -341,13 +341,13 @@ class MoveDialog extends React.PureComponent {
     if (this.state.currentSelectedIndex !== -1) {
       if (type === 'directory' && !this.selectedArr.findIndex(item => item.uuid === selectedObj.uuid) === -1) return true
       if (selectedObj.uuid === this.directory.uuid) return true
-    } else if (['directory', 'home', 'share', 'public', 'built-in'].includes(type)&& this.inSameDirectory()) return true
+    } else if (['directory', 'home', 'share', 'public', 'built-in'].includes(type) && this.inSameDirectory()) return true
     else if (type === 'publicRoot') return true
 
     return false
   }
 
-  getButtonText() {
+  getButtonText () {
     const type = this.props.type === 'copy' ? i18n.__('Copy') : this.props.type === 'move' ? i18n.__('Move') : i18n.__('Share')
     if (this.state.currentSelectedIndex !== -1 || this.directory.uuid === this.state.currentDir.uuid) {
       return i18n.__('%s To Selected Folder', type)
@@ -355,11 +355,11 @@ class MoveDialog extends React.PureComponent {
     return i18n.__('%s To Current Folder', type)
   }
 
-  inSameDirectory() {
+  inSameDirectory () {
     return this.state.currentDir.uuid === this.directory.uuid
   }
 
-  updateState(path, currentDir, list) {
+  updateState (path, currentDir, list) {
     this.setState({
       path: path || this.state.path,
       list: list || this.state.list,
@@ -369,7 +369,7 @@ class MoveDialog extends React.PureComponent {
     })
   }
 
-  isRowDisable(node) {
+  isRowDisable (node) {
     const type = node.type
     if (type === 'file') {
       return true
@@ -383,7 +383,7 @@ class MoveDialog extends React.PureComponent {
     return false
   }
 
-  renderCurrentDir() {
+  renderCurrentDir () {
     const type = this.state.currentDir.type
     console.log('this.state.currentDir', this.state.currentDir)
     return this.state.currentDir.name === this.state.currentDir.uuid
@@ -395,7 +395,7 @@ class MoveDialog extends React.PureComponent {
           : this.state.currentDir.name || this.state.currentDir.label
   }
 
-  renderHeader() {
+  renderHeader () {
     return (
       <div
         style={{
@@ -430,16 +430,16 @@ class MoveDialog extends React.PureComponent {
           }}
         >
           { this.state.cnf
-              ? <TextField
-                fullWidth
-                name="createNewFolder"
-                value={this.state.newFoldName}
-                errorText={this.state.errorText}
-                onChange={e => this.handleChange(e.target.value)}
-                ref={input => input && input.focus()}
-                onKeyDown={this.onKeyDown}
-              />
-              : this.renderCurrentDir() }
+            ? <TextField
+              fullWidth
+              name="createNewFolder"
+              value={this.state.newFoldName}
+              errorText={this.state.errorText}
+              onChange={e => this.handleChange(e.target.value)}
+              ref={input => input && input.focus()}
+              onKeyDown={this.onKeyDown}
+            />
+            : this.renderCurrentDir() }
         </div>
 
         {/* confirm or close button */}
@@ -455,7 +455,7 @@ class MoveDialog extends React.PureComponent {
     )
   }
 
-  render() {
+  render () {
     if (this.state.noView) return (<div />)
     return (
       <div style={{ width: 336, height: 448 }}>
@@ -478,49 +478,49 @@ class MoveDialog extends React.PureComponent {
             this.state.loading
               ? <CircularProgress />
               : this.state.cnf
-              ? <div style={{ fontSize: 14, width: 288, margin: 24, textAlign: 'center', wordWrap: 'break-word' }}>
-                {
-                  i18n.__('Create New Folder in %s', this.state.currentSelectedIndex > -1 ?
-                  this.state.list[this.state.currentSelectedIndex].name : this.renderCurrentDir())
-                }
-              </div>
-              : <div style={{ height: '100%', width: '100%' }}>
-                {
-                  this.state.list.length ? this.state.list.map((item, index) => (
-                    <Row
-                      key={item.uuid || item.path || item.name}
-                      node={item}
-                      selectNode={() => this.selectNode(index)}
-                      enter={this.enter}
-                      disable={this.isRowDisable(item)}
-                      isSelected={index === this.state.currentSelectedIndex}
-                    />
-                  ))
-                  : this.state.currentDir.type === 'publicRoot'
-                  ? <div
-                    style={{
-                      height: '100%',
-                      width: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexDirection: 'column' }}
-                  >
-                    <div> { i18n.__('No Public Drive') } </div>
-                    {
-                      this.props.apis.account && this.props.apis.account.data && this.props.apis.account.data.isAdmin &&
-                        <FlatButton
-                          label={i18n.__('Jump to Create')}
-                          primary
-                          onTouchTap={() => { this.closeDialog; this.props.navTo('public') }}
-                        />
-                    }
-                    </div>
-                  : <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    { i18n.__('Empty Folder Text') }
-                  </div>
-                }
-              </div>
+                ? <div style={{ fontSize: 14, width: 288, margin: 24, textAlign: 'center', wordWrap: 'break-word' }}>
+                  {
+                    i18n.__('Create New Folder in %s', this.state.currentSelectedIndex > -1
+                      ? this.state.list[this.state.currentSelectedIndex].name : this.renderCurrentDir())
+                  }
+                </div>
+                : <div style={{ height: '100%', width: '100%' }}>
+                  {
+                    this.state.list.length ? this.state.list.map((item, index) => (
+                      <Row
+                        key={item.uuid || item.path || item.name}
+                        node={item}
+                        selectNode={() => this.selectNode(index)}
+                        enter={this.enter}
+                        disable={this.isRowDisable(item)}
+                        isSelected={index === this.state.currentSelectedIndex}
+                      />
+                    ))
+                      : this.state.currentDir.type === 'publicRoot'
+                        ? <div
+                          style={{
+                            height: '100%',
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexDirection: 'column' }}
+                        >
+                          <div> { i18n.__('No Public Drive') } </div>
+                          {
+                            this.props.apis.account && this.props.apis.account.data && this.props.apis.account.data.isAdmin &&
+                            <FlatButton
+                              label={i18n.__('Jump to Create')}
+                              primary
+                              onTouchTap={() => { this.closeDialog; this.props.navTo('public') }}
+                            />
+                          }
+                        </div>
+                        : <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          { i18n.__('Empty Folder Text') }
+                        </div>
+                  }
+                </div>
           }
         </div>
 

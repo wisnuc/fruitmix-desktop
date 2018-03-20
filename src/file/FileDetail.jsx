@@ -61,7 +61,7 @@ const getResolution = (height, width) => {
 }
 
 class FileDetail extends React.PureComponent {
-  renderList(titles, values) {
+  renderList (titles, values) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
         {
@@ -92,7 +92,7 @@ class FileDetail extends React.PureComponent {
     )
   }
 
-  renderTitle(detailFile) {
+  renderTitle (detailFile) {
     const { name, type, metadata } = detailFile
     return (
       <div
@@ -109,10 +109,10 @@ class FileDetail extends React.PureComponent {
         <div style={{ flex: '0 0 24px', display: 'flex', alignItems: 'center' }}>
           {
             type === 'public' || type === 'directory'
-            ? <FileFolder style={{ color: '#FFFFFF' }} />
-            : type === 'file'
-            ? renderFileIcon(name, metadata, 24, false, true) // name, metadata, size, dark, white
-            : <ErrorIcon style={{ color: '#FFFFFF' }} />
+              ? <FileFolder style={{ color: '#FFFFFF' }} />
+              : type === 'file'
+                ? renderFileIcon(name, metadata, 24, false, true) // name, metadata, size, dark, white
+                : <ErrorIcon style={{ color: '#FFFFFF' }} />
           }
         </div>
         <div style={{ flex: '0 0 16px' }} />
@@ -126,7 +126,7 @@ class FileDetail extends React.PureComponent {
     )
   }
 
-  renderMultiFiles(detailFile) {
+  renderMultiFiles (detailFile) {
     let size = 0
     const noSize = detailFile.findIndex(f => f.size === undefined) > -1
     if (!noSize) detailFile.forEach(f => (size += f.size))
@@ -178,7 +178,7 @@ class FileDetail extends React.PureComponent {
     )
   }
 
-  renderCounter() {
+  renderCounter () {
     // console.log('renderCounter', this.props.counter)
     const c = this.props.counter
     const Titles = [
@@ -227,7 +227,7 @@ class FileDetail extends React.PureComponent {
     )
   }
 
-  render() {
+  render () {
     const { detailIndex, entries, path, primaryColor, counter } = this.props
     if (!detailIndex || !entries || (path && path.length === 1 && path[0].type === 'publicRoot') || (!counter && !detailIndex.length)) {
       return (<div style={{ height: 128, backgroundColor: primaryColor, filter: 'brightness(0.9)' }} />)

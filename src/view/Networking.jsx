@@ -5,35 +5,35 @@ import Base from './Base'
 import NetworkInfo from '../device/NetworkInfo'
 
 class Ethernet extends Base {
-  willReceiveProps(nextProps) {
+  willReceiveProps (nextProps) {
     this.handleProps(nextProps.selectedDevice, ['net'])
   }
 
-  navEnter() {
+  navEnter () {
     this.ctx.props.selectedDevice.request('net')
   }
 
-  navGroup() {
+  navGroup () {
     return 'device'
   }
 
-  menuName() {
+  menuName () {
     return i18n.__('Networking Menu Name')
   }
 
-  menuIcon() {
+  menuIcon () {
     return ActionSettingsEthernet
   }
 
-  quickName() {
+  quickName () {
     return i18n.__('Networking Quick Name')
   }
 
-  appBarStyle() {
+  appBarStyle () {
     return 'colored'
   }
 
-  renderContent({ openSnackBar }) {
+  renderContent ({ openSnackBar }) {
     return (
       <NetworkInfo
         net={this.state.net}

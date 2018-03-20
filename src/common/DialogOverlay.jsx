@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react'
 import { dialogBoxShadow } from '../common/boxShadow'
 
 class DialogOverlay extends PureComponent {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.distance = 16
     this.state = {
@@ -15,7 +15,7 @@ class DialogOverlay extends PureComponent {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps (nextProps) {
     if (nextProps.open === true && this.props.open === false) {
       this.setState({ status: 'opening' })
       setTimeout(() => this.setState({ status: 'open' }), 0)
@@ -24,7 +24,7 @@ class DialogOverlay extends PureComponent {
     }
   }
 
-  render() {
+  render () {
     const status = this.state.status
     if (status === 'closed') return null
 
@@ -44,15 +44,15 @@ class DialogOverlay extends PureComponent {
           backgroundColor: 'rgba(0,0,0,0.4)',
           opacity: (status === 'opening' || status === 'closing') ? 0 : 1,
           transition: status === 'opening'
-          ? 'all 225ms cubic-bezier(0.0, 0.0, 0.2, 1)'
-          : 'all 195ms cubic-bezier(0.4, 0.0, 1, 1)'
+            ? 'all 225ms cubic-bezier(0.0, 0.0, 0.2, 1)'
+            : 'all 195ms cubic-bezier(0.4, 0.0, 1, 1)'
         }}
       >
         <div style={{ backgroundColor: 'white', boxShadow: dialogBoxShadow }}>
           {
-            !!this.props.children && this.props.onRequestClose ?
-            React.cloneElement(this.props.children, { onRequestClose: this.onRequestClose }) :
-            React.cloneElement(this.props.children)
+            !!this.props.children && this.props.onRequestClose
+              ? React.cloneElement(this.props.children, { onRequestClose: this.onRequestClose })
+              : React.cloneElement(this.props.children)
           }
         </div>
         <div style={{ height: '10%' }} />

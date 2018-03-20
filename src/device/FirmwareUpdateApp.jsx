@@ -25,7 +25,7 @@ const compareVerison = (a, b) => {
 }
 
 class Firm extends React.PureComponent {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -88,15 +88,15 @@ class Firm extends React.PureComponent {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.timer = setInterval(() => this.refresh(), 3000)
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     clearInterval(this.timer)
   }
 
-  parseReleaseState(state, tagName) {
+  parseReleaseState (state, tagName) {
     let label = ''
     let action = null
     let text = ''
@@ -139,7 +139,7 @@ class Firm extends React.PureComponent {
     return ({ label, text, color, action })
   }
 
-  parseAppifiState(state, tagName) {
+  parseAppifiState (state, tagName) {
     let label = ''
     let color = ''
     let text = ''
@@ -178,7 +178,7 @@ class Firm extends React.PureComponent {
     return ({ label, color, text, action })
   }
 
-  renderReleases(release, current, fetch) {
+  renderReleases (release, current, fetch) {
     const { state, view, remote, local } = release
     const rel = remote || local
     if (!rel) return (<div />)
@@ -195,15 +195,15 @@ class Firm extends React.PureComponent {
           {
             checking ? <CircularProgress color={this.props.primaryColor} size={24} thickness={2} />
               : show ? <NewReleases color={this.props.primaryColor} />
-              : checked ? <CheckIcon color={this.props.primaryColor} />
-              : <CloseIcon color={this.props.primaryColor} />
+                : checked ? <CheckIcon color={this.props.primaryColor} />
+                  : <CloseIcon color={this.props.primaryColor} />
           }
         </div>
         {
-          checking ?
-            <div style={{ marginTop: 12 }} > { i18n.__('Checking Update') } </div>
-            : show ?
-              <div style={{ width: '100%' }}>
+          checking
+            ? <div style={{ marginTop: 12 }} > { i18n.__('Checking Update') } </div>
+            : show
+              ? <div style={{ width: '100%' }}>
                 <div style={{ display: 'flex', alignItems: 'center', height: 48 }}>
                   <div style={{ fontSize: 20, marginRight: 32 }}> { i18n.__('New Version Detected %s', rel.tag_name) } </div>
                   <div style={{ fontSize: 14, color, marginRight: 8, border: `1px ${color} solid`, padding: '0px 8px' }}> { text } </div>
@@ -217,7 +217,7 @@ class Firm extends React.PureComponent {
                 <div style={{ display: 'flex', alignItems: 'center', height: 36, marginLeft: -8 }}>
                   {
                     action ? <FlatButton primary label={label} onTouchTap={action} disabled={this.state.loading} />
-                    : <CircularProgress size={24} thickness={2} style={{ marginLeft: 8 }} />
+                      : <CircularProgress size={24} thickness={2} style={{ marginLeft: 8 }} />
                   }
                 </div>
                 <div style={{ height: 16 }} />
@@ -225,8 +225,8 @@ class Firm extends React.PureComponent {
                 <div style={{ height: 16 }} />
                 <div style={{ height: 16 }} />
                 <Divider style={{ marginLeft: -60 }} />
-              </div> :
-              <div style={{ marginTop: 12 }}>
+              </div>
+              : <div style={{ marginTop: 12 }}>
                 <div> { checked ? i18n.__('Already LTS Text') : i18n.__('Check Update Failed Text') } </div>
                 <div style={{ margin: '8px 0 0 -8px' }}>
                   <FlatButton primary label={i18n.__('Check Update')} onTouchTap={() => this.props.checkUpdates()} disabled={this.state.loading} />
@@ -237,7 +237,7 @@ class Firm extends React.PureComponent {
     )
   }
 
-  renderFirm(firm) {
+  renderFirm (firm) {
     const { appifi, releases, fetch } = firm
     const { state, tagName } = appifi || {}
     const { label, color, text, action } = this.parseAppifiState(state, tagName)
@@ -279,7 +279,7 @@ class Firm extends React.PureComponent {
     )
   }
 
-  renderError() {
+  renderError () {
     const error = this.props.error
     console.log('error', error)
     return (
@@ -306,7 +306,7 @@ class Firm extends React.PureComponent {
     )
   }
 
-  renderLoading() {
+  renderLoading () {
     return (
       <div style={{ width: '100%', height: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
         <CircularProgress size={32} thickness={3} />
@@ -314,7 +314,7 @@ class Firm extends React.PureComponent {
     )
   }
 
-  render() {
+  render () {
     const { firm, error } = this.props
     if (!firm && !error) return this.renderLoading()
 

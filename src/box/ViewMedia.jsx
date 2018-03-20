@@ -7,7 +7,7 @@ import PhotoList from '../photo/PhotoList'
 import { combineElement, removeElement } from '../common/array'
 
 class SelectMedia extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       selectedItems: [],
@@ -55,17 +55,17 @@ class SelectMedia extends React.Component {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     document.addEventListener('keydown', this.keyChange)
     document.addEventListener('keyup', this.keyChange)
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     document.removeEventListener('keydown', this.keyChange)
     document.removeEventListener('keyup', this.keyChange)
   }
 
-  render() {
+  render () {
     // console.log('ViewMedia', this.props, this.state, this.selected)
     return (
       <div style={{ position: 'fixed', width: '100%', height: '100%', top: 0, left: 0, zIndex: 1000, backgroundColor: '#FFF' }}>

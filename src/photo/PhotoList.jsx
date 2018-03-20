@@ -22,7 +22,7 @@ const mousePosition = (ev) => {
 }
 
 class PhotoList extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.headerHeight = this.props.headerHeight
@@ -146,23 +146,23 @@ class PhotoList extends React.Component {
     this.onMouseUp = () => (this.onMouseDown = false)
   }
 
-  componentDidMount() {
+  componentDidMount () {
     document.addEventListener('mousemove', this.onMouseMove)
     document.addEventListener('mouseup', this.onMouseUp)
   }
 
-  componentDidUpdate() {
+  componentDidUpdate () {
     this.onScroll({ scrollTop: this.currentScrollTop || 0 })
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     clearTimeout(this.time)
     clearTimeout(this.timeRenderLater)
     document.removeEventListener('mousemove', this.onMouseMove)
     document.removeEventListener('mouseup', this.onMouseUp)
   }
 
-  renderTimeline() {
+  renderTimeline () {
     if (!this.timeline) return (<div />)
     return (
       <div
@@ -265,7 +265,7 @@ class PhotoList extends React.Component {
     )
   }
 
-  render() {
+  render () {
     // debug('render PhotoList, this.props', this.props)
     return (
       <div

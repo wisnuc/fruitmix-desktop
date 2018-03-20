@@ -8,7 +8,7 @@ import Apps from '../docker/Apps'
 const debug = Debug('view:component:Docker:')
 
 class InstalledApps extends Base {
-  constructor(ctx) {
+  constructor (ctx) {
     super(ctx)
 
     this.state = {
@@ -16,7 +16,7 @@ class InstalledApps extends Base {
     }
   }
 
-  willReceiveProps(nextProps) {
+  willReceiveProps (nextProps) {
     // console.log('media nextProps', nextProps)
     if (!nextProps.apis || !nextProps.apis.docker) return
     const docker = nextProps.apis.docker
@@ -29,27 +29,27 @@ class InstalledApps extends Base {
     }
   }
 
-  navEnter() {
+  navEnter () {
     this.ctx.props.apis.request('docker')
   }
 
-  navGroup() {
+  navGroup () {
     return 'docker'
   }
 
-  menuName() {
+  menuName () {
     return i18n.__('InstalledApps Menu Name')
   }
 
-  menuIcon() {
+  menuIcon () {
     return AppsIcon
   }
 
-  appBarStyle() {
+  appBarStyle () {
     return 'colored'
   }
 
-  renderContent({ openSnackBar }) {
+  renderContent ({ openSnackBar }) {
     return (
       <Apps
         apis={this.ctx.props.apis}

@@ -3,14 +3,14 @@ import { ShareIcon } from '../common/Svg'
 import Home from './Home'
 
 class Share extends Home {
-  constructor(ctx) {
+  constructor (ctx) {
     super(ctx)
     this.type = 'share'
     this.title = () => i18n.__('Share Title')
     this.firstEnter = true
   }
 
-  navEnter(target) {
+  navEnter (target) {
     this.isNavEnter = true
     const apis = this.ctx.props.apis
     if (!apis || !apis.drives || !apis.drives.data) return
@@ -25,15 +25,15 @@ class Share extends Home {
     } else this.refresh()
   }
 
-  navGroup() {
+  navGroup () {
     return 'file'
   }
 
-  menuName() {
+  menuName () {
     return i18n.__('Share Menu Name')
   }
 
-  menuIcon() {
+  menuIcon () {
     return ShareIcon
   }
 }

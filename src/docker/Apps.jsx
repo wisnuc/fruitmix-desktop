@@ -12,7 +12,7 @@ import DialogOverlay from '../common/PureDialog'
 const debug = Debug('component:control:deviceinfo')
 
 class Market extends React.PureComponent {
-  constructor(props) {
+  constructor (props) {
     super(props)
     /* CId, id of container; CState, state of container */
     this.state = {
@@ -47,7 +47,7 @@ class Market extends React.PureComponent {
     }
   }
 
-  renderCard(app, appstore, containers) {
+  renderCard (app, appstore, containers) {
     const container = containers.find(c => c.Id === app.containerIds[0]) // more than one container ? TODO
     // debug('renderCard', container, this.props)
     const CState = container.State === 'running'
@@ -99,20 +99,20 @@ class Market extends React.PureComponent {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', margin: '-4px 0px 8px 8px' }}>
           {
-            CState ?
-              <FlatButton
+            CState
+              ? <FlatButton
                 style={{ color: this.props.primaryColor }}
                 label="进入应用"
                 onTouchTap={() => this.setState({ openURL: `http://10.10.9.86:${container.Ports[0].PublicPort}/` })}
               />
-            : <div style={{ height: 36, display: 'flex', alignItems: 'center', marginLeft: 8, fontSize: 15 }}>应用未启动</div>
+              : <div style={{ height: 36, display: 'flex', alignItems: 'center', marginLeft: 8, fontSize: 15 }}>应用未启动</div>
           }
         </div>
       </Paper>
     )
   }
 
-  render() {
+  render () {
     if (!this.props.docker || !this.props.docker.appstore) {
       return (
         <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

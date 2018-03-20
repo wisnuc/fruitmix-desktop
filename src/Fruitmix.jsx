@@ -1,5 +1,4 @@
 import React from 'react'
-import ReactDom from 'react-dom'
 import { ipcRenderer } from 'electron'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
@@ -29,7 +28,7 @@ const defaultTheme = getMuiTheme({
 })
 
 class Fruitmix extends React.Component {
-  constructor() {
+  constructor () {
     super()
 
     this.selectedDevice = null
@@ -55,7 +54,7 @@ class Fruitmix extends React.Component {
     }, 100) // make sure mdns scan finished
   }
 
-  setPalette(primary1Color, accent1Color) {
+  setPalette (primary1Color, accent1Color) {
     // console.log('main setPalette, primary, accent', primary1Color, accent1Color)
 
     this.setState({
@@ -69,7 +68,7 @@ class Fruitmix extends React.Component {
     })
   }
 
-  selectDevice(mdev) {
+  selectDevice (mdev) {
     // assert mdev must be in mdns list TODO
 
     if (this.selectedDevice) {
@@ -82,7 +81,7 @@ class Fruitmix extends React.Component {
     this.selectedDevice.start()
   }
 
-  nav(view) {
+  nav (view) {
     global.mdns.scan()
     setTimeout(() => {
       const mdns = adjustSeq(global.mdnsStore)
@@ -94,11 +93,11 @@ class Fruitmix extends React.Component {
     this.setState({ view })
   }
 
-  login() {
+  login () {
     this.setState({ view: 'user' })
   }
 
-  render() {
+  render () {
     let view = null
 
     switch (this.state.view) {

@@ -38,7 +38,7 @@ import { xcopyMsg } from '../common/msg'
 const debug = Debug('component:viewModel:Home: ')
 
 class Home extends Base {
-  constructor(ctx) {
+  constructor (ctx) {
     super(ctx)
 
     this.type = 'home'
@@ -459,7 +459,7 @@ class Home extends Base {
     })
   }
 
-  willReceiveProps(nextProps) {
+  willReceiveProps (nextProps) {
     this.preValue = this.state.listNavDir
     this.handleProps(nextProps.apis, ['listNavDir'])
 
@@ -478,7 +478,7 @@ class Home extends Base {
     })
   }
 
-  navEnter(target) {
+  navEnter (target) {
     this.isNavEnter = true
     const apis = this.ctx.props.apis
     if (!apis || !apis.drives || !apis.drives.data) return
@@ -489,7 +489,7 @@ class Home extends Base {
     } else this.refresh()
   }
 
-  navLeave() {
+  navLeave () {
     this.isNavEnter = false
     this.setState({
       contextMenuOpen: false,
@@ -505,36 +505,36 @@ class Home extends Base {
     })
   }
 
-  navGroup() {
+  navGroup () {
     return 'file'
   }
 
-  menuName() {
+  menuName () {
     return i18n.__('Home Menu Name')
   }
 
-  menuIcon() {
+  menuIcon () {
     return FileFolder
   }
 
-  appBarStyle() {
+  appBarStyle () {
     return 'colored'
   }
 
-  prominent() {
+  prominent () {
     return true
   }
 
-  hasDetail() {
+  hasDetail () {
     return true
   }
 
-  detailEnabled() {
+  detailEnabled () {
     return true
   }
 
   /* renderers */
-  renderDragItems() {
+  renderDragItems () {
     this.entry = this.RDSI > -1 && this.state.entries[this.RDSI] || {}
     return (
       <div
@@ -563,10 +563,10 @@ class Home extends Base {
           <Avatar style={{ backgroundColor: 'white', width: 36, height: 36 }}>
             {
               this.entry.type === 'directory'
-              ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
-              : this.entry.type === 'file'
-              ? renderFileIcon(this.entry.name, this.entry.metadata, 24)
-              : <div />
+                ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
+                : this.entry.type === 'file'
+                  ? renderFileIcon(this.entry.name, this.entry.metadata, 24)
+                  : <div />
             }
           </Avatar>
         </div>
@@ -609,7 +609,7 @@ class Home extends Base {
     )
   }
 
-  renderNavigationMenu({ style, onTouchTap }) {
+  renderNavigationMenu ({ style, onTouchTap }) {
     const CustomStyle = Object.assign(style, { opacity: 1 })
     return (
       <div style={CustomStyle} ref={ref => (this.refNavigationMenu = ref)}>
@@ -620,7 +620,7 @@ class Home extends Base {
     )
   }
 
-  renderBreadCrumbItem({ style }) {
+  renderBreadCrumbItem ({ style }) {
     const path = this.state.path
 
     const touchTap = (node) => {
@@ -665,12 +665,12 @@ class Home extends Base {
     )
   }
 
-  renderTitle({ style }) {
+  renderTitle ({ style }) {
     if (!this.state.listNavDir) return (<div />)
     return this.renderBreadCrumbItem({ style })
   }
 
-  renderToolBar({ style }) {
+  renderToolBar ({ style }) {
     return (
       <div style={style}>
         <IconButton onTouchTap={() => this.refresh()} tooltip={i18n.__('Refresh')} >
@@ -689,13 +689,13 @@ class Home extends Base {
     )
   }
 
-  renderDetail({ style }) {
+  renderDetail ({ style }) {
     if (!this.state.entries) return (<div />)
     return (
       <div style={style}>
         {
-          this.state.entries.length ?
-            <FileDetail
+          this.state.entries.length
+            ? <FileDetail
               key={this.state.path.slice(-1)[0].uuid}
               detailIndex={this.select.state.selected}
               counter={this.state.counter}
@@ -703,14 +703,14 @@ class Home extends Base {
               path={this.state.path}
               ipcRenderer={ipcRenderer}
               primaryColor={this.groupPrimaryColor()}
-            /> :
-            <div style={{ height: 128, backgroundColor: this.groupPrimaryColor(), filter: 'brightness(0.9)' }} />
+            />
+            : <div style={{ height: 128, backgroundColor: this.groupPrimaryColor(), filter: 'brightness(0.9)' }} />
         }
       </div>
     )
   }
 
-  renderDialogs(openSnackBar, navTo) {
+  renderDialogs (openSnackBar, navTo) {
     return (
       <div style={{ width: '100%', height: '100%' }}>
         <DialogOverlay open={!!this.state.createNewFolder} onRequestClose={() => this.toggleDialog('createNewFolder')}>
@@ -821,7 +821,7 @@ class Home extends Base {
     )
   }
 
-  renderMenu(open, toggleDetail, getDetailStatus) {
+  renderMenu (open, toggleDetail, getDetailStatus) {
     // debug('renderMenu', open, this.state.contextMenuY, this.state.contextMenuX)
     return (
       <ContextMenu
@@ -831,95 +831,94 @@ class Home extends Base {
         onRequestClose={this.hideContextMenu}
       >
         {
-            this.state.select && this.state.select.selected && !this.state.select.selected.length ?
-              <div>
-                <MenuItem
-                  primaryText={i18n.__('Create New Folder')}
-                  leftIcon={<FileCreateNewFolder style={{ height: 20, width: 20, marginTop: 6 }} />}
-                  onTouchTap={() => this.toggleDialog('createNewFolder')}
-                />
-                <div style={{ height: 8 }} />
-                <Divider />
-                <div style={{ height: 8 }} />
+          this.state.select && this.state.select.selected && !this.state.select.selected.length
+            ? <div>
+              <MenuItem
+                primaryText={i18n.__('Create New Folder')}
+                leftIcon={<FileCreateNewFolder style={{ height: 20, width: 20, marginTop: 6 }} />}
+                onTouchTap={() => this.toggleDialog('createNewFolder')}
+              />
+              <div style={{ height: 8 }} />
+              <Divider />
+              <div style={{ height: 8 }} />
 
+              <MenuItem
+                primaryText={i18n.__('Upload Folder')}
+                leftIcon={<UploadFold style={{ height: 20, width: 20, marginTop: 6 }} />}
+                onTouchTap={() => this.upload('directory')}
+              />
+              <MenuItem
+                primaryText={i18n.__('Upload File')}
+                leftIcon={<UploadFile style={{ height: 20, width: 20, marginTop: 6 }} />}
+                onTouchTap={() => this.upload('file')}
+              />
+            </div>
+            : <div>
+              <div>
+                {
+                  this.title() !== i18n.__('Share Title') &&
+                  <MenuItem
+                    leftIcon={<ShareIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
+                    primaryText={i18n.__('Share to Public')}
+                    onTouchTap={() => this.toggleDialog('share')}
+                  />
+                }
                 <MenuItem
-                  primaryText={i18n.__('Upload Folder')}
-                  leftIcon={<UploadFold style={{ height: 20, width: 20, marginTop: 6 }} />}
-                  onTouchTap={() => this.upload('directory')}
+                  leftIcon={<CopyIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
+                  primaryText={i18n.__('Copy to')}
+                  onTouchTap={() => this.toggleDialog('copy')}
                 />
                 <MenuItem
-                  primaryText={i18n.__('Upload File')}
-                  leftIcon={<UploadFile style={{ height: 20, width: 20, marginTop: 6 }} />}
-                  onTouchTap={() => this.upload('file')}
+                  leftIcon={<MoveIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
+                  primaryText={i18n.__('Move to')}
+                  onTouchTap={() => this.toggleDialog('move')}
                 />
               </div>
-              :
-              <div>
-                <div>
-                  {
-                    this.title() !== i18n.__('Share Title') &&
-                      <MenuItem
-                        leftIcon={<ShareIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                        primaryText={i18n.__('Share to Public')}
-                        onTouchTap={() => this.toggleDialog('share')}
-                      />
-                  }
-                  <MenuItem
-                    leftIcon={<CopyIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                    primaryText={i18n.__('Copy to')}
-                    onTouchTap={() => this.toggleDialog('copy')}
-                  />
-                  <MenuItem
-                    leftIcon={<MoveIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                    primaryText={i18n.__('Move to')}
-                    onTouchTap={() => this.toggleDialog('move')}
-                  />
-                </div>
-                {
-                  this.state.select && this.state.select.selected && this.state.select.selected.length === 1 &&
-                    <MenuItem
-                      leftIcon={<EditIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                      primaryText={i18n.__('Rename')}
-                      onTouchTap={() => this.toggleDialog('rename')}
-                    />
-                }
-                <div style={{ height: 8 }} />
-                <Divider />
-                <div style={{ height: 8 }} />
+              {
+                this.state.select && this.state.select.selected && this.state.select.selected.length === 1 &&
                 <MenuItem
-                  leftIcon={<InfoIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                  primaryText={getDetailStatus() ? i18n.__('Close Detail') : i18n.__('Open Detail')}
-                  onTouchTap={toggleDetail}
+                  leftIcon={<EditIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
+                  primaryText={i18n.__('Rename')}
+                  onTouchTap={() => this.toggleDialog('rename')}
                 />
-                {
-                  this.state.select && this.state.select.selected && this.state.select.selected.length === 1 &&
+              }
+              <div style={{ height: 8 }} />
+              <Divider />
+              <div style={{ height: 8 }} />
+              <MenuItem
+                leftIcon={<InfoIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
+                primaryText={getDetailStatus() ? i18n.__('Close Detail') : i18n.__('Open Detail')}
+                onTouchTap={toggleDetail}
+              />
+              {
+                this.state.select && this.state.select.selected && this.state.select.selected.length === 1 &&
                   this.state.entries[this.state.select.selected[0]].type === 'file' &&
                     <MenuItem
                       leftIcon={<CopyIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
                       primaryText={i18n.__('Make a Copy')}
                       onTouchTap={this.dupFile}
                     />
-                }
-                <MenuItem
-                  leftIcon={<DownloadIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                  primaryText={i18n.__('Download')}
-                  onTouchTap={this.download}
-                />
-                <div style={{ height: 8 }} />
-                <Divider />
-                <div style={{ height: 8 }} />
-                <MenuItem
-                  leftIcon={<DeleteIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
-                  primaryText={i18n.__('Delete')}
-                  onTouchTap={() => this.toggleDialog('delete')}
-                />
-              </div>
-          }
+              }
+              <MenuItem
+                leftIcon={<DownloadIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
+                primaryText={i18n.__('Download')}
+                onTouchTap={this.download}
+              />
+              <div style={{ height: 8 }} />
+              <Divider />
+              <div style={{ height: 8 }} />
+              <MenuItem
+                leftIcon={<DeleteIcon style={{ height: 20, width: 20, marginTop: 6 }} />}
+                primaryText={i18n.__('Delete')}
+                onTouchTap={() => this.toggleDialog('delete')}
+              />
+            </div>
+        }
       </ContextMenu>
     )
   }
 
-  renderContent({ toggleDetail, openSnackBar, navTo, getDetailStatus }) {
+  renderContent ({ toggleDetail, openSnackBar, navTo, getDetailStatus }) {
     // debug('renderContent', this.state, this.select.state)
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>

@@ -12,7 +12,7 @@ import GridView from './GridView'
 const debug = Debug('component:file:FileContent:')
 
 class FileContent extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -106,7 +106,6 @@ class FileContent extends React.Component {
         this.props.ipcRenderer.send('DRAG_FILE', { files, dirUUID, driveUUID })
       }
     }
-
 
     /* selectBox
      * if mode === row
@@ -269,26 +268,25 @@ class FileContent extends React.Component {
     this.exSelect = e => (this.props.gridView ? this.selectGrid(e, this.data) : this.selectRow(e, this.scrollTop))
   }
 
-  componentDidMount() {
+  componentDidMount () {
     /* bind keydown event */
     document.addEventListener('keydown', this.keyDown)
     document.addEventListener('keyup', this.keyUp)
   }
 
-
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps (nextProps) {
     // debug('componentWillReceiveProps', this.props, nextProps)
     if (nextProps.loading) this.setState({ loading: true })
     if (nextProps.entries && this.props.entries !== nextProps.entries) this.setState({ loading: false })
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     /* remove keydown event */
     document.removeEventListener('keydown', this.keyDown)
     document.removeEventListener('keyup', this.keyUp)
   }
 
-  renderNoFile() {
+  renderNoFile () {
     return (
       <div
         style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -296,8 +294,8 @@ class FileContent extends React.Component {
         onDrop={this.drop}
       >
         {
-          this.props.fileSelect ? i18n.__('Empty Folder Text') :
-            <div
+          this.props.fileSelect ? i18n.__('Empty Folder Text')
+            : <div
               style={{
                 width: 360,
                 height: 360,
@@ -318,7 +316,7 @@ class FileContent extends React.Component {
     )
   }
 
-  renderOffLine() {
+  renderOffLine () {
     return (
       <div
         style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -343,7 +341,7 @@ class FileContent extends React.Component {
     )
   }
 
-  renderLoading() {
+  renderLoading () {
     return (
       <div style={{ width: '100%', height: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
         <CircularProgress size={32} thickness={3} />
@@ -351,7 +349,7 @@ class FileContent extends React.Component {
     )
   }
 
-  render() {
+  render () {
     // console.log('render', this.state, this.props)
     /* loding */
     if (this.state.loading) return this.renderLoading()
@@ -386,8 +384,7 @@ class FileContent extends React.Component {
               onScroll={this.onScroll}
               drop={this.drop}
             />
-            :
-            <RenderListByRow
+            : <RenderListByRow
               {...this.props}
               onRowTouchTap={this.onRowTouchTap}
               onRowMouseEnter={this.onRowMouseEnter}

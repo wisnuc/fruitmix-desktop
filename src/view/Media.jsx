@@ -23,7 +23,7 @@ const getName = (photo) => {
 ipcRenderer.setMaxListeners(1000)
 
 class Media extends Base {
-  constructor(ctx) {
+  constructor (ctx) {
     super(ctx)
     this.state = {
       media: null,
@@ -204,61 +204,61 @@ class Media extends Base {
     }
   }
 
-  willReceiveProps(nextProps) {
+  willReceiveProps (nextProps) {
     this.handleProps(nextProps.apis, ['blacklist', 'media'])
     this.media = this.processMedia(this.state.media, this.state.blacklist)
   }
 
-  navEnter() {
+  navEnter () {
     this.timeFlag = (new Date()).getTime()
     this.ctx.props.apis.request('blacklist')
     this.ctx.props.apis.request('media')
   }
 
-  navLeave() {
+  navLeave () {
   }
 
-  navGroup() {
+  navGroup () {
     return 'media'
   }
 
-  menuName() {
+  menuName () {
     return i18n.__('Media Menu Name')
   }
 
-  menuIcon() {
+  menuIcon () {
     return PhotoIcon
   }
 
-  quickName() {
+  quickName () {
     return i18n.__('Media Quick Name')
   }
 
-  appBarStyle() {
+  appBarStyle () {
     return 'light'
   }
 
-  prominent() {
+  prominent () {
     return false
   }
 
-  hasDetail() {
+  hasDetail () {
     return false
   }
 
-  detailEnabled() {
+  detailEnabled () {
     return true
   }
 
-  detailWidth() {
+  detailWidth () {
     return 400
   }
 
-  hasQuickNav() {
+  hasQuickNav () {
     return !this.state.selectedItems.length
   }
 
-  renderNavigationMenu({ style, onTouchTap }) {
+  renderNavigationMenu ({ style, onTouchTap }) {
     const CustomStyle = Object.assign(style, { opacity: 1 })
     return (
       <div style={CustomStyle} ref={ref => (this.refNavigationMenu = ref)}>
@@ -269,7 +269,7 @@ class Media extends Base {
     )
   }
 
-  renderTitle({ style }) {
+  renderTitle ({ style }) {
     const newStyle = Object.assign(style, { color: 'rgba(0,0,0,0.54)' })
     return (
       <div style={newStyle}>
@@ -278,7 +278,7 @@ class Media extends Base {
     )
   }
 
-  renderToolBar({ style }) {
+  renderToolBar ({ style }) {
     return (
       <div style={style}>
         <FlatButton label={i18n.__('Upload')} onTouchTap={this.uploadMedia} primary />
@@ -286,7 +286,7 @@ class Media extends Base {
     )
   }
 
-  renderContent() {
+  renderContent () {
     return (<PhotoApp
       media={this.media}
       ipcRenderer={ipcRenderer}

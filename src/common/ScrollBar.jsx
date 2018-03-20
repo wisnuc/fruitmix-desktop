@@ -12,7 +12,7 @@ const mousePosition = (ev) => {
 }
 
 class ScrollBar extends React.PureComponent {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {}
 
@@ -48,7 +48,6 @@ class ScrollBar extends React.PureComponent {
       if (this.props.onScroll) this.props.onScroll({ scrollTop })
     }
 
-
     this.onHover = () => {
       this.setState({ hover: true })
       clearTimeout(this.timer)
@@ -58,12 +57,12 @@ class ScrollBar extends React.PureComponent {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     document.addEventListener('mousemove', this.onMouseMove)
     document.addEventListener('mouseup', this.onMouseUp)
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps (nextProps) {
     const { height, allHeight, scrollTop } = nextProps
     if (scrollTop) {
       const barH = Math.max(height * height / allHeight, 48)
@@ -72,21 +71,21 @@ class ScrollBar extends React.PureComponent {
     }
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     clearTimeout(this.timer)
     document.removeEventListener('mousemove', this.onMouseMove)
     document.removeEventListener('mouseup', this.onMouseUp)
   }
 
-  scrollToPosition(scrollTop) {
+  scrollToPosition (scrollTop) {
     if (this.refList) this.refList.scrollToPosition(scrollTop)
   }
 
-  scrollToRow(index) {
+  scrollToRow (index) {
     if (this.refList) this.refList.scrollToRow(index)
   }
 
-  render() {
+  render () {
     const { width, height, allHeight } = this.props
     const barH = Math.max(height * height / allHeight, 48) || 48
     const barStyle = {

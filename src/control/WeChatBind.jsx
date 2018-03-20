@@ -15,7 +15,7 @@ import Checkmark from '../common/Checkmark'
 const debug = Debug('component:control:WeChatBind')
 
 class WeChatBind extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       status: 'connectingWX',
@@ -151,7 +151,7 @@ class WeChatBind extends React.Component {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     /* catch CODE of wechat login */
     window.onbeforeunload = () => {
       if (this.wxiframe && this.wxiframe.contentWindow.wx_code) {
@@ -166,7 +166,7 @@ class WeChatBind extends React.Component {
     this.getStationInfo()
   }
 
-  render() {
+  render () {
     const { error, status } = this.state
     let text = ''
     let tips = ''

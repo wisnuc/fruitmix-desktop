@@ -18,7 +18,7 @@ const primaryColor = teal500
 const accentColor = pinkA200
 
 const StateUp = base => class extends base {
-  setSubState(name, nextSubState) {
+  setSubState (name, nextSubState) {
     const state = this.props.state || this.state
     const subState = state[name]
     const nextSubStateMerged = Object.assign(new subState.constructor(), subState, nextSubState)
@@ -28,12 +28,12 @@ const StateUp = base => class extends base {
       : this.setState(nextState)
   }
 
-  setSubStateBound(name) {
+  setSubStateBound (name) {
     const obj = this.setSubStateBoundObj || (this.setSubStateBoundObj = {})
     return obj[name] ? obj[name] : (obj[name] = this.setSubState.bind(this, name))
   }
 
-  bindVState(name) {
+  bindVState (name) {
     return {
       state: this.props.state ? this.props.state[name] : this.state[name],
       setState: this.setSubStateBound(name)
@@ -42,7 +42,7 @@ const StateUp = base => class extends base {
 }
 
 class InitWizard extends StateUp(React.Component) {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -82,13 +82,13 @@ class InitWizard extends StateUp(React.Component) {
     }
   }
 
-  renderStepActions(step) {
+  renderStepActions (step) {
     const { stepIndex } = this.state
     return (
       <div style={{ margin: '12px 0' }}>
         <RaisedButton
           label={stepIndex === 2 ? i18n.__('Create') : stepIndex === 3
-              ? i18n.__('Bind WeChat Title') : stepIndex === 4 ? i18n.__('Enter App') : i18n.__('Next Step')}
+            ? i18n.__('Bind WeChat Title') : stepIndex === 4 ? i18n.__('Enter App') : i18n.__('Next Step')}
           disableTouchRipple
           disableFocusRipple
           disabled={
@@ -96,8 +96,8 @@ class InitWizard extends StateUp(React.Component) {
               ? this.state.volumeselect.selection.length === 0 || !this.state.volumeselect.mode
               : stepIndex === 1
                 ? !this.state.userpass.isInputOK()
-              : stepIndex === 3 ? this.props.weChatStatus === 'success'
-              : false
+                : stepIndex === 3 ? this.props.weChatStatus === 'success'
+                  : false
           }
           primary
           onTouchTap={() => (step < 3 ? this.handleNext() : step === 4 ? this.props.onOK() : this.props.bindWechat())}
@@ -117,18 +117,18 @@ class InitWizard extends StateUp(React.Component) {
     )
   }
 
-  blockToString(blk) {
+  blockToString (blk) {
     const model = blk.model ? blk.model : i18n.__('Unknown Disk Model')
     const name = blk.name
     const size = prettysize(blk.size * 512)
-    const iface = blk.isATA ? 'ATA' :
-      blk.isSCSI ? 'SCSI' :
-        blk.isUSB ? 'USB' : i18n.__('Unknown Disk Iterface')
+    const iface = blk.isATA ? 'ATA'
+      : blk.isSCSI ? 'SCSI'
+        : blk.isUSB ? 'USB' : i18n.__('Unknown Disk Iterface')
 
     return `${model}, ${name}, ${size}, ${iface}`
   }
 
-  renderConfirmation() {
+  renderConfirmation () {
     const storage = this.props.device.storage.isFulfilled()
       ? this.props.device.storage.value() : null
 
@@ -140,8 +140,8 @@ class InitWizard extends StateUp(React.Component) {
         <div style={lineStyle}> { i18n.__('Select Disk') }</div>
         <ul style={lineStyle}>
           { storage.blocks
-              .filter(blk => this.state.volumeselect.selection.indexOf(blk.name) !== -1)
-              .map(blk => (<li key={blk.name}>{this.blockToString(blk)}</li>)) }
+            .filter(blk => this.state.volumeselect.selection.indexOf(blk.name) !== -1)
+            .map(blk => (<li key={blk.name}>{this.blockToString(blk)}</li>)) }
         </ul>
         <div style={lineStyle}>{ i18n.__('Mode Selected')} {this.state.volumeselect.mode} </div>
         <div style={lineStyle}>{ i18n.__('User Name Used')} {this.state.userpass.username}</div>
@@ -149,7 +149,7 @@ class InitWizard extends StateUp(React.Component) {
     )
   }
 
-  finishedInfo() {
+  finishedInfo () {
     const { mkfs, storage, install, boot, users, firstUser, token } = this.props.device
     console.log('this.props.device', this.props.device)
     const getError = h => h && h.err
@@ -166,11 +166,11 @@ class InitWizard extends StateUp(React.Component) {
       return ['busy', i18n.__('Installing App')]
     } else if (install.isRejected()) {
       return ['error', i18n.__('Intasll App Failed'), getError(install)]
-    } else if (!boot || boot.isPending() || (boot.isFulfilled() && boot.value().fruitmix === null)
-      || (boot.isFulfilled() && boot.value().fruitmix && boot.value().fruitmix.state === 'starting')) {
+    } else if (!boot || boot.isPending() || (boot.isFulfilled() && boot.value().fruitmix === null) ||
+      (boot.isFulfilled() && boot.value().fruitmix && boot.value().fruitmix.state === 'starting')) {
       return ['busy', i18n.__('Starting App')]
-    } else if (boot.isRejected() || (boot.isFulfilled() && boot.value().fruitmix
-      && boot.value().fruitmix.state === 'exited')) {
+    } else if (boot.isRejected() || (boot.isFulfilled() && boot.value().fruitmix &&
+      boot.value().fruitmix.state === 'exited')) {
       return ['error', i18n.__('Starting App Failed'), getError(boot)]
     } else if (!firstUser || firstUser.isPending()) {
       return ['busy', i18n.__('Creating User')]
@@ -188,7 +188,7 @@ class InitWizard extends StateUp(React.Component) {
     return ['success', i18n.__('Install App Success')]
   }
 
-  renderFinished() {
+  renderFinished () {
     if (!this.state.finished) return null
 
     const info = this.finishedInfo()
@@ -224,7 +224,7 @@ class InitWizard extends StateUp(React.Component) {
     )
   }
 
-  renderBottomButton() {
+  renderBottomButton () {
     let label
     let action
 
@@ -253,11 +253,11 @@ class InitWizard extends StateUp(React.Component) {
     )
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps (nextProps) {
     if (nextProps && nextProps.weChatStatus === 'success') this.handleNext()
   }
 
-  render() {
+  render () {
     const title = this.props.title || i18n.__('Initialization Wizard')
     const { finished, stepIndex } = this.state
     const storage = this.props.device.storage.isFulfilled() ? this.props.device.storage.value() : null

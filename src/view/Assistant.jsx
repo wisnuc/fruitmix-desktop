@@ -10,7 +10,7 @@ import AssistantApp from '../photo/AssistantApp'
 
 /* Extends Media to get medthods about PhotoList */
 class Assistant extends Media {
-  constructor(ctx) {
+  constructor (ctx) {
     super(ctx)
 
     this.processMedia = (media, blacklist) => {
@@ -53,23 +53,23 @@ class Assistant extends Media {
     }
   }
 
-  menuName() {
+  menuName () {
     return i18n.__('Assistant Menu Name')
   }
 
-  quickName() {
+  quickName () {
     return i18n.__('Assistant Quick Name')
   }
 
-  menuIcon() {
+  menuIcon () {
     return AssistantIcon
   }
 
-  appBarStyle() {
+  appBarStyle () {
     return 'colored'
   }
 
-  renderNavigationMenu({ style, onTouchTap }) {
+  renderNavigationMenu ({ style, onTouchTap }) {
     const CustomStyle = Object.assign(style, { opacity: 1 })
     return (
       <div style={CustomStyle} ref={ref => (this.refNavigationMenu = ref)}>
@@ -80,7 +80,7 @@ class Assistant extends Media {
     )
   }
 
-  renderTitle({ style }) {
+  renderTitle ({ style }) {
     const newStyle = Object.assign(style, { color: '#FFF' })
     return (
       <div style={newStyle}>
@@ -89,8 +89,7 @@ class Assistant extends Media {
     )
   }
 
-
-  renderContent() {
+  renderContent () {
     return (<AssistantApp
       media={this.media}
       ipcRenderer={ipcRenderer}

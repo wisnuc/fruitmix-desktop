@@ -6,7 +6,7 @@ import { FlatButton, CircularProgress, Divider, IconButton, TextField } from 'ma
 import DoneIcon from 'material-ui/svg-icons/action/done'
 
 class NoDevice extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       IP: '',
@@ -47,7 +47,7 @@ class NoDevice extends React.Component {
       if (e.which === 13 && !this.state.errorText && !!this.state.IP) this.checkIP()
     }
   }
-  render() {
+  render () {
     return (
       <div>
         <div style={{ height: 16 }} />

@@ -2,11 +2,10 @@ import React from 'react'
 import i18n from 'i18n'
 import { FloatingActionButton, RaisedButton, Popover, Menu, MenuItem } from 'material-ui'
 import FileFileUpload from 'material-ui/svg-icons/file/file-upload'
-import { UploadFile, UploadFold } from '../common/Svg'
-import { FromPC, FromMedia, FromFiles } from '../common/Svg'
+import { UploadFile, UploadFold, FromPC, FromMedia, FromFiles } from '../common/Svg'
 
 class BoxUploadButton extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = { open: false }
 
@@ -29,7 +28,7 @@ class BoxUploadButton extends React.Component {
     }
   }
 
-  render() {
+  render () {
     // console.log('BoxUploadButton.jsx', this.props)
     const { offline, diffStation } = this.props
     const noNas = offline || diffStation

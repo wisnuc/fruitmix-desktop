@@ -5,7 +5,7 @@ import FileFileUpload from 'material-ui/svg-icons/file/file-upload'
 import { UploadFile, UploadFold } from '../common/Svg'
 
 class FileUploadButton extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = { open: false }
 
@@ -15,7 +15,7 @@ class FileUploadButton extends React.Component {
     }
   }
 
-  render() {
+  render () {
     return (
       <div style={{ position: 'absolute', top: -36, left: 24, zIndex: 1000 }}>
         <FloatingActionButton
@@ -57,4 +57,3 @@ class FileUploadButton extends React.Component {
 }
 
 export default FileUploadButton
-

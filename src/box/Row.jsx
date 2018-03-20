@@ -9,14 +9,14 @@ import renderFileIcon from '../common/renderFileIcon'
 const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
 
 class Row extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       hover: ''
     }
   }
 
-  render() {
+  render () {
     // console.log('Row', this.props)
     const { type, uuid, mtime, metadata, name, action, height } = this.props
     const color = '#FFF'

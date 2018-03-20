@@ -52,7 +52,7 @@ const renderCheck = check =>
       : null)
 
 class Row extends React.PureComponent {
-  render() {
+  render () {
     const {
       /* these are react-virtualized List props */
       index, // Index of row
@@ -114,12 +114,12 @@ class Row extends React.PureComponent {
             <Avatar style={{ backgroundColor: 'white' }} onMouseDown={e => e.stopPropagation() || this.props.rowDragStart(e, index)} >
               {
                 entry.type === 'directory'
-                ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
-                : entry.type === 'public'
-                ? <ShareDisk style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
-                : entry.type === 'file'
-                ? renderFileIcon(entry.name, entry.metadata, 24)
-                : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
+                  ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
+                  : entry.type === 'public'
+                    ? <ShareDisk style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
+                    : entry.type === 'file'
+                      ? renderFileIcon(entry.name, entry.metadata, 24)
+                      : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
               }
             </Avatar>
           </div>
@@ -135,12 +135,12 @@ class Row extends React.PureComponent {
           </div>
 
           <div style={{ flex: inPublicRoot ? '0 0 476px' : '0 1 144px', fontSize: 13, color: 'rgba(0,0,0,0.54)' }}>
-            { showTakenTime ? entry.metadata && (entry.metadata.date || entry.metadata.datetime)
-              && formatDate(entry.metadata.date || entry.metadata.datetime) : entry.mtime && formatMtime(entry.mtime) }
+            { showTakenTime ? entry.metadata && (entry.metadata.date || entry.metadata.datetime) &&
+              formatDate(entry.metadata.date || entry.metadata.datetime) : entry.mtime && formatMtime(entry.mtime) }
             {
               inPublicRoot && (entry.writelist === '*' ? i18n.__('All Users')
-              : entry.writelist.filter(uuid => users.find(u => u.uuid === uuid))
-                .map(uuid => users.find(u => u.uuid === uuid).username).join(', ')
+                : entry.writelist.filter(uuid => users.find(u => u.uuid === uuid))
+                  .map(uuid => users.find(u => u.uuid === uuid).username).join(', ')
               )
             }
           </div>
@@ -157,7 +157,7 @@ class Row extends React.PureComponent {
 }
 
 class RenderListByRow extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       type: ''
@@ -204,7 +204,7 @@ class RenderListByRow extends React.Component {
     }
   }
 
-  componentDidUpdate() {
+  componentDidUpdate () {
     if (this.props.scrollTo) {
       const index = this.props.entries.findIndex(entry => entry.name === this.props.scrollTo)
       if (index > -1) {
@@ -215,7 +215,7 @@ class RenderListByRow extends React.Component {
     }
   }
 
-  renderHeader(h) {
+  renderHeader (h) {
     return (
       <div
         key={h.title}
@@ -248,7 +248,7 @@ class RenderListByRow extends React.Component {
     )
   }
 
-  renderPopoverHeader() {
+  renderPopoverHeader () {
     const headers = [
       { title: i18n.__('Date Modified'), up: 'timeUp', down: 'timeDown' },
       { title: i18n.__('Date Taken'), up: 'takenUp', down: 'takenDown' }
@@ -306,7 +306,7 @@ class RenderListByRow extends React.Component {
     )
   }
 
-  render() {
+  render () {
     // debug('RenderListByRow redner', this.props)
     const rowRenderer = props => (
       <Row

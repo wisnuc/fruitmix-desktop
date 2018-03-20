@@ -6,12 +6,12 @@ import { IconButton, Dialog, RaisedButton } from 'material-ui'
 import AlertError from 'material-ui/svg-icons/alert/error'
 
 class ErrorBox extends React.PureComponent {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = { open: false }
   }
 
-  render() {
+  render () {
     const theme = {
       scheme: 'wisnuc',
       author: 'lxw',

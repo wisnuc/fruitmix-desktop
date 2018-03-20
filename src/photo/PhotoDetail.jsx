@@ -6,7 +6,7 @@ import { CircularProgress } from 'material-ui'
 const debug = Debug('component:photoApp:PhotoDetail')
 
 class PhotoDetail extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.digest = ''
@@ -176,13 +176,13 @@ class PhotoDetail extends React.Component {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.props.ipcRenderer.on('donwloadMediaSuccess', this.updatePath)
     this.props.ipcRenderer.on('getThumbSuccess', this.updateThumbPath)
     if (this.refContainer) this.refContainer.addEventListener('mousewheel', this.handleZoom)
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     clearTimeout(this.enterTimeout)
     clearTimeout(this.leaveTimeout)
     if (this.refContainer) this.refContainer.removeEventListener('mousewheel', this.handleZoom)
@@ -192,7 +192,7 @@ class PhotoDetail extends React.Component {
     this.props.ipcRenderer.send('mediaHideImage', this.session)
   }
 
-  renderDetail() {
+  renderDetail () {
     /* calculate photoHeight and photoWidth */
     if (this.digest === this.props.item.hash && (this.state.thumbPath || this.state.detailPath)) {
       this.calcSize()
@@ -256,7 +256,7 @@ class PhotoDetail extends React.Component {
     )
   }
 
-  render() {
+  render () {
     // debug('render!!!', this.props, this.state)
     if (!this.props.item || !this.props.item.hash) return (<div />)
     return (

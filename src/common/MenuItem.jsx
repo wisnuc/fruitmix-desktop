@@ -7,4 +7,3 @@ export default (props) => {
 
   return <MenuItem {...props} style={style} />
 }
-

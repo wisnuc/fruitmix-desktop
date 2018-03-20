@@ -17,7 +17,7 @@ import UpIcon from 'material-ui/svg-icons/hardware/keyboard-arrow-up'
 import ErrorBox from '../common/ErrorBox'
 
 class Notifications extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       loading: false,
@@ -39,7 +39,7 @@ class Notifications extends React.Component {
     }
   }
 
-  renderNoNts() {
+  renderNoNts () {
     return (
       <div
         style={{
@@ -58,7 +58,7 @@ class Notifications extends React.Component {
     )
   }
 
-  renderNts(nt) {
+  renderNts (nt) {
     const { id, type, title, body, action } = nt
 
     let Icon
@@ -110,7 +110,7 @@ class Notifications extends React.Component {
     )
   }
 
-  render() {
+  render () {
     const hideFirmNoti = global.config && global.config.global && global.config.global.hideFirmNoti
     const sources = [{
       Icon: UpdateIcon,

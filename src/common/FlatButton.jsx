@@ -11,4 +11,3 @@ export default (props) => {
 
   return <FlatButton {...props} style={style} labelStyle={labelStyle} />
 }
-

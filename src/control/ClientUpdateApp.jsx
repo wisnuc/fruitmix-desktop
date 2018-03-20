@@ -29,7 +29,7 @@ const compareVerison = (a, b) => {
 }
 
 class Update extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -74,16 +74,16 @@ class Update extends React.Component {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.sendCheck()
     this.props.ipcRenderer.on('NEW_RELEASE', this.newRelease)
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     this.props.ipcRenderer.removeListener('NEW_RELEASE', this.newRelease)
   }
 
-  renderCheckUpdate() {
+  renderCheckUpdate () {
     const rel = this.state.rel
     const date = rel.published_at.split('T')[0]
     return (
@@ -106,18 +106,17 @@ class Update extends React.Component {
               { list }
             </div>
           ))
-            :
-          <div style={{ marginLeft: 24, height: 40, display: 'flex', alignItems: 'center' }}>
-            { '*' }
-            <div style={{ width: 16 }} />
-            { i18n.__('Bug Fixes') }
-          </div>
+            : <div style={{ marginLeft: 24, height: 40, display: 'flex', alignItems: 'center' }}>
+              { '*' }
+              <div style={{ width: 16 }} />
+              { i18n.__('Bug Fixes') }
+            </div>
         }
       </div>
     )
   }
 
-  renderReleases() {
+  renderReleases () {
     const platform = global.config.platform
     // const platform = 'darwin'
     const unSupport = platform !== 'darwin' && platform !== 'win32'
@@ -128,32 +127,31 @@ class Update extends React.Component {
           {
             unSupport ? <InfoIcon color={this.props.primaryColor} />
               : this.state.status === 'checking' ? <CircularProgress color={this.props.primaryColor} size={24} thickness={2} />
-              : this.state.status === 'needUpdate' ? <NewReleases color={this.props.primaryColor} />
-              : this.state.status === 'latest' ? <CheckIcon color={this.props.primaryColor} />
-              : <CloseIcon color={this.props.primaryColor} />
+                : this.state.status === 'needUpdate' ? <NewReleases color={this.props.primaryColor} />
+                  : this.state.status === 'latest' ? <CheckIcon color={this.props.primaryColor} />
+                    : <CloseIcon color={this.props.primaryColor} />
           }
         </div>
         {
           unSupport ? i18n.__('Unsupported to Update')
             : this.state.status === 'checking' ? i18n.__('Checking Update')
-            : this.state.status === 'needUpdate' ? this.renderCheckUpdate()
-            :
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', height: 48, marginTop: -12 }}>
-                { this.state.status === 'latest' && i18n.__('Already LTS Text') }
-                { this.state.status === 'error' && i18n.__('Check Update Failed Text') }
-                { !!this.state.error && <ErrorBox error={this.state.error} iconStyle={{ color: orange500 }} /> }
-              </div>
-              <div style={{ margin: '8px 0 0 -8px' }}>
-                <FlatButton primary label={i18n.__('Check Update')} onTouchTap={this.sendCheck} disabled={this.state.loading} />
-              </div>
-            </div>
+              : this.state.status === 'needUpdate' ? this.renderCheckUpdate()
+                : <div>
+                  <div style={{ display: 'flex', alignItems: 'center', height: 48, marginTop: -12 }}>
+                    { this.state.status === 'latest' && i18n.__('Already LTS Text') }
+                    { this.state.status === 'error' && i18n.__('Check Update Failed Text') }
+                    { !!this.state.error && <ErrorBox error={this.state.error} iconStyle={{ color: orange500 }} /> }
+                  </div>
+                  <div style={{ margin: '8px 0 0 -8px' }}>
+                    <FlatButton primary label={i18n.__('Check Update')} onTouchTap={this.sendCheck} disabled={this.state.loading} />
+                  </div>
+                </div>
         }
       </div>
     )
   }
 
-  render() {
+  render () {
     // debug('render client', this.props, global.config)
     const currentVersion = global.config.appVersion
     return (

@@ -18,7 +18,7 @@ const duration = 300
 */
 
 class ResetPassword extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -109,7 +109,7 @@ class ResetPassword extends React.Component {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     /* catch CODE of wechat login */
     window.onbeforeunload = () => {
       if (this.wxiframe && this.wxiframe.contentWindow.wx_code) {
@@ -121,84 +121,83 @@ class ResetPassword extends React.Component {
     }
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     clearTimeout(this.timer)
   }
 
-  renderCard() {
+  renderCard () {
     return (
       <div style={{ zIndex: 100 }}>
         {
-          !this.state.error ?
-          <div style={{ width: 332, height: 492, padding: 24, position: 'relative', backgroundColor: '#FAFAFA' }}>
-            {/* CircularProgress */}
-            <div
-              ref={ref => (this.weChatLoadingRef = ref)}
-              key="weChatLoadingRef"
-              style={{
-                position: 'absolute',
-                top: 108,
-                left: 0,
-                height: 300,
-                width: '100%',
-                backgroundColor: '#FAFAFA',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <CircularProgress size={64} thickness={5} />
-            </div>
-            <div style={{ height: 42 }} />
-            <div
-              style={{ height: 406, width: 300, margin: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              id="login_container"
-            />
-            <div style={{ height: 36 }} />
+          !this.state.error
+            ? <div style={{ width: 332, height: 492, padding: 24, position: 'relative', backgroundColor: '#FAFAFA' }}>
+              {/* CircularProgress */}
+              <div
+                ref={ref => (this.weChatLoadingRef = ref)}
+                key="weChatLoadingRef"
+                style={{
+                  position: 'absolute',
+                  top: 108,
+                  left: 0,
+                  height: 300,
+                  width: '100%',
+                  backgroundColor: '#FAFAFA',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <CircularProgress size={64} thickness={5} />
+              </div>
+              <div style={{ height: 42 }} />
+              <div
+                style={{ height: 406, width: 300, margin: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                id="login_container"
+              />
+              <div style={{ height: 36 }} />
 
-            {/* overlay text */}
-            <div style={{ position: 'absolute', top: 0, left: 0, height: 108, width: '100%', backgroundColor: '#FAFAFA' }} >
-              <div style={{ height: 72 }} />
-              <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
-                {i18n.__('WeChat Authentication') }
+              {/* overlay text */}
+              <div style={{ position: 'absolute', top: 0, left: 0, height: 108, width: '100%', backgroundColor: '#FAFAFA' }} >
+                <div style={{ height: 72 }} />
+                <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
+                  {i18n.__('WeChat Authentication') }
+                </div>
               </div>
             </div>
-          </div>
-          :
-          <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>
-            <div
-              style={{
-                width: 270,
-                height: 270,
-                margin: '42px auto 12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <img
-                width={96}
-                height={96}
-                alt=""
-                src="./assets/images/icon.png"
-                style={{ filter: 'grayscale(100%)' }}
-              />
+            : <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>
+              <div
+                style={{
+                  width: 270,
+                  height: 270,
+                  margin: '42px auto 12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <img
+                  width={96}
+                  height={96}
+                  alt=""
+                  src="./assets/images/icon.png"
+                  style={{ filter: 'grayscale(100%)' }}
+                />
+              </div>
+              <div style={{ height: 24 }} />
+              <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.87)', fontSize: 20 }}>
+                { this.state.error === 'net' ? i18n.__('Network Error') : i18n.__('Cloud Error') }
+              </div>
+              <div style={{ height: 24 }} />
+              <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.54)', fontSize: 20 }}>
+                { this.state.error === 'net' ? i18n.__('Network Error Text') : i18n.__('Cloud Error Text') }
+              </div>
             </div>
-            <div style={{ height: 24 }} />
-            <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.87)', fontSize: 20 }}>
-              { this.state.error === 'net' ? i18n.__('Network Error') : i18n.__('Cloud Error') }
-            </div>
-            <div style={{ height: 24 }} />
-            <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.54)', fontSize: 20 }}>
-              { this.state.error === 'net' ? i18n.__('Network Error Text') : i18n.__('Cloud Error Text') }
-            </div>
-          </div>
         }
       </div>
     )
   }
 
-  renderConfirm() {
+  renderConfirm () {
     return (
       <div style={{ width: 336, padding: '24px 24px 0px 24px' }}>
         {/* title */}
@@ -219,7 +218,7 @@ class ResetPassword extends React.Component {
     )
   }
 
-  renderProcess() {
+  renderProcess () {
     let text = ''
     const wcl = this.state.wechatLogin
     switch (wcl) {
@@ -247,9 +246,9 @@ class ResetPassword extends React.Component {
           <div style={{ height: 16 }} />
           <div style={{ height: 270, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {
-              wcl === 'failed' ? <CloseIcon style={{ height: 72, width: 72 }} color="#FF4081" /> :
-              wcl === 'success' ? <Checkmark delay={300} color={this.props.primaryColor} /> :
-              <CircularProgress size={64} thickness={5} />
+              wcl === 'failed' ? <CloseIcon style={{ height: 72, width: 72 }} color="#FF4081" />
+                : wcl === 'success' ? <Checkmark delay={300} color={this.props.primaryColor} />
+                  : <CircularProgress size={64} thickness={5} />
             }
           </div>
           <div style={{ height: 36 }} />
@@ -261,7 +260,7 @@ class ResetPassword extends React.Component {
     )
   }
 
-  renderReset() {
+  renderReset () {
     const { openSnackBar, refresh, apis, onRequestClose, selectedDevice, ipcRenderer } = this.props
     return (
       <Password
@@ -277,14 +276,14 @@ class ResetPassword extends React.Component {
     )
   }
 
-  render() {
+  render () {
     return (
       <Paper>
         {
-          this.state.confirm ? this.renderConfirm() :
-            this.state.wechatLogin ? this.renderProcess() :
-            this.state.reset ? this.renderReset() :
-            this.renderCard()
+          this.state.confirm ? this.renderConfirm()
+            : this.state.wechatLogin ? this.renderProcess()
+              : this.state.reset ? this.renderReset()
+                : this.renderCard()
         }
       </Paper>
     )

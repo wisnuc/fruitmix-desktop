@@ -8,14 +8,13 @@ import HardwareKeyboardArrowDown from 'material-ui/svg-icons/hardware/keyboard-a
 const debug = Debug('component:control:Fan')
 
 class Fan extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
       fanScale: '',
       fanSpeed: ''
     }
-
 
     this.setFanScale = (fanScale) => {
       this.props.request('setFanScale', { fanScale }, (err, res) => {
@@ -51,7 +50,7 @@ class Fan extends React.Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps (nextProps) {
     if (nextProps.fan && (nextProps.fan !== this.props.fan)) {
       this.setState({
         fanScale: nextProps.fan.fanScale,
@@ -60,15 +59,15 @@ class Fan extends React.Component {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.autoRefresh = setInterval(() => this.props.refresh(), 1000)
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     clearInterval(this.autoRefresh)
   }
 
-  render() {
+  render () {
     // debug('fan, this.props', this.props, this.state)
     if (!this.props.fan) return <div />
     const { fanScale, fanSpeed } = this.props.fan

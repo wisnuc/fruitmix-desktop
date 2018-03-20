@@ -9,7 +9,7 @@ import { CircleIcon, GIFFont } from '../common/Svg'
 const debug = Debug('component:photoApp:photoItem:')
 
 class PhotoItem extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -73,13 +73,13 @@ class PhotoItem extends React.Component {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.session = UUID.v4()
     this.props.ipcRenderer.send('mediaShowThumb', this.session, this.props.digest, 200, 200)
     this.props.ipcRenderer.on('getThumbSuccess', this.updatePath)
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps (nextProps) {
     if (nextProps.selectedItems.length !== this.props.selectedItems.length) {
       this.setState({
         selected: nextProps.selectedItems.includes(nextProps.digest)
@@ -87,12 +87,12 @@ class PhotoItem extends React.Component {
     }
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     this.props.ipcRenderer.removeListener('getThumbSuccess', this.updatePath)
     this.props.ipcRenderer.send('mediaHideThumb', this.session)
   }
 
-  render() {
+  render () {
     const { style, shiftStatus, size, item } = this.props
     this.showShiftOverlay = shiftStatus.shift && shiftStatus.items.includes(this.props.digest)
 

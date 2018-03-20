@@ -36,7 +36,7 @@ const getName = (photo) => {
 }
 
 class Tweets extends React.PureComponent {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -92,7 +92,7 @@ class Tweets extends React.PureComponent {
     }
   }
 
-  renderNoTweets() {
+  renderNoTweets () {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <div style={{ flexGrow: 1 }} />
@@ -104,7 +104,7 @@ class Tweets extends React.PureComponent {
     )
   }
 
-  renderOffline() {
+  renderOffline () {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <div style={{ flexGrow: 1 }} />
@@ -114,7 +114,7 @@ class Tweets extends React.PureComponent {
     )
   }
 
-  renderMsg(msg) {
+  renderMsg (msg) {
     return (
       <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 16 }} >
         {
@@ -152,12 +152,12 @@ class Tweets extends React.PureComponent {
    *   {
    *     des: fakeMedia from local upload,
    *     rule: list.every(l => l.fakedata && l.fakedata.magic),
-   *     req: fakedata.entry 
+   *     req: fakedata.entry
    *   }
    * ]
 
   */
-  renderTweets({ index, key, style, rowCount }) {
+  renderTweets ({ index, key, style, rowCount }) {
     const tweet = this.props.tweets[index]
     const { ctime, comment, uuid, author, list, box, type, msg, failed, finished } = tweet
     const { stationId, wxToken } = box
@@ -186,8 +186,8 @@ class Tweets extends React.PureComponent {
           <div style={{ width: 32 }} />
           {/* Avatar */}
           <div style={{ height: 40, width: 40 }}>
-            { author.avatarUrl ? <Avatar src={author.avatarUrl} size={40} /> :
-            <ActionAccountCircle style={{ width: 40, height: 40, color: 'rgb(0, 137, 123)' }} /> }
+            { author.avatarUrl ? <Avatar src={author.avatarUrl} size={40} />
+              : <ActionAccountCircle style={{ width: 40, height: 40, color: 'rgb(0, 137, 123)' }} /> }
           </div>
           <div style={{ width: 16 }} />
           <div>
@@ -205,8 +205,8 @@ class Tweets extends React.PureComponent {
             }
             <div>
               {
-                !list || !list.length ?
-                  <Paper
+                !list || !list.length
+                  ? <Paper
                     style={{
                       fontSize: 16,
                       height: 44,
@@ -220,8 +220,8 @@ class Tweets extends React.PureComponent {
                   >
                     { comment }
                   </Paper>
-                  : (isMedia || isFakeMedia || isNasMedia) ?
-                    <div style={{ width: 3 * w + 12, maxHeight: 400, position: 'relative' }} >
+                  : (isMedia || isFakeMedia || isNasMedia)
+                    ? <div style={{ width: 3 * w + 12, maxHeight: 400, position: 'relative' }} >
                       {
                         list.map((l, i) => {
                           const { sha256, filename } = l
@@ -235,20 +235,20 @@ class Tweets extends React.PureComponent {
                               style={{ width: w, height: w, float: 'left', backgroundColor: '#FFF', margin, position: 'relative' }}
                             >
                               { (isMedia || isNasMedia) &&
-                                  <Thumb
-                                    bgColor="rgba(0,0,0,.09)"
-                                    digest={sha256}
-                                    station={station}
-                                    ipcRenderer={this.props.ipcRenderer}
-                                    height={w}
-                                    width={w}
-                                  />
+                              <Thumb
+                                bgColor="rgba(0,0,0,.09)"
+                                digest={sha256}
+                                station={station}
+                                ipcRenderer={this.props.ipcRenderer}
+                                height={w}
+                                width={w}
+                              />
                               }
 
                               { isFakeMedia &&
-                                  <div style={{ width: w, height: w }}>
-                                    <img src={l.fakedata.entry} width={w} height={w} alt={filename} style={{ objectFit: 'cover' }} />
-                                  </div>
+                              <div style={{ width: w, height: w }}>
+                                <img src={l.fakedata.entry} width={w} height={w} alt={filename} style={{ objectFit: 'cover' }} />
+                              </div>
                               }
                               {
                                 i === 5 && isMany && isMedia &&
@@ -280,8 +280,7 @@ class Tweets extends React.PureComponent {
                           </div>
                       }
                     </div>
-                  :
-                    <Paper
+                    : <Paper
                       style={{
                         height: 56,
                         fontSize: 14,
@@ -336,7 +335,7 @@ class Tweets extends React.PureComponent {
     )
   }
 
-  renderFailed() {
+  renderFailed () {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
         <FailedIcon color="red" />
@@ -344,7 +343,7 @@ class Tweets extends React.PureComponent {
     )
   }
 
-  renderLoading(size, color) {
+  renderLoading (size, color) {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
         <CircularProgress size={size || 64} color={color} />
@@ -352,7 +351,7 @@ class Tweets extends React.PureComponent {
     )
   }
 
-  renderError() {
+  renderError () {
     return (
       <div
         style={{
@@ -369,7 +368,7 @@ class Tweets extends React.PureComponent {
     )
   }
 
-  render() {
+  render () {
     // console.log('render tweets', this.props)
     const { tweets, box, tError, guid } = this.props
     if (tError) return this.renderError()
@@ -400,9 +399,9 @@ class Tweets extends React.PureComponent {
       >
         {
           // !tweets ? this.renderLoading(32) : tweets.length > 0 ?
-          !tweets ? <div /> : tweets.length > 0 ?
+          !tweets ? <div /> : tweets.length > 0
             // add key to AutoSizer to force refresh List
-            <AutoSizer key={boxUUID}>
+            ? <AutoSizer key={boxUUID}>
               {({ height, width }) => (
                 <ScrollBar
                   scrollTop={Math.max(1, allHeight - height)}

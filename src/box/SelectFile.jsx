@@ -26,7 +26,7 @@ const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
 const imgUrl = 'http://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKQiahrEc8rUfECDTUq94WlcaNkTYTKzIKr3p5xgOPQO1juvtwO1YSUCHOPpup3oWo1AP3nOBVyPCw/132'
 
 class SelectNas extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.select = new ListSelect(this)
@@ -201,13 +201,13 @@ class SelectNas extends React.Component {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     const d = this.props.apis.drives
     const drive = d && d.data && d.data.find(dr => dr.tag === 'home')
     if (drive) this.enter(Object.assign({ setRoot: true }, drive))
   }
 
-  renderLoading(size) {
+  renderLoading (size) {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
         <CircularProgress size={size || 64} />
@@ -215,7 +215,7 @@ class SelectNas extends React.Component {
     )
   }
 
-  renderBreadCrumb(navs) {
+  renderBreadCrumb (navs) {
     const path = this.state.path
 
     const touchTap = node => this.enter(node, path.slice(0, path.indexOf(node) + 1))
@@ -251,7 +251,7 @@ class SelectNas extends React.Component {
     )
   }
 
-  render() {
+  render () {
     // console.log('SelectNas', this.props, this.state, this.selected)
 
     const { currentUser, primaryColor, onRequestClose, ipcRenderer } = this.props
@@ -384,7 +384,6 @@ class SelectNas extends React.Component {
               />
               <ModeEdit color="rgba(0,0,0,.54)" style={{ marginLeft: 16 }} />
             </div>
-
 
             {/* file list title */}
             <div

@@ -42,7 +42,7 @@ const addTweetsTime = (tweets) => {
 }
 
 class Groups extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -64,10 +64,8 @@ class Groups extends React.Component {
     }
 
     /* set failed, excepting : 1. not fake, 2. finished, 3. running */
-    this.setFakeTweetState = ts => {
-      return ts && ts.map(t => ((!t.faked || t.finished || this.tcQueue.indexOf(t.uuid) > -1) ? t
+    this.setFakeTweetState = ts => ts && ts.map(t => ((!t.faked || t.finished || this.tcQueue.indexOf(t.uuid) > -1) ? t
       : Object.assign({}, t, { failed: true })))
-    }
 
     this.sessions = {} // store tweets for local upload
 
@@ -234,12 +232,12 @@ class Groups extends React.Component {
     this.onScroll = top => this.refBar && (this.refBar.style.top = `${top}px`)
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.props.ipcRenderer.on('BOX_UPLOAD_FAKE_DATA', this.onFakeData)
     this.props.ipcRenderer.on('BOX_UPLOAD_RESULT', this.onLocalFinish)
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps (nextProps) {
     if (nextProps.currentBox) {
       /* check if change box */
       const nextBoxUUID = nextProps.currentBox && nextProps.currentBox.uuid
@@ -257,12 +255,12 @@ class Groups extends React.Component {
     }
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     this.props.ipcRenderer.removeAllListeners('BOX_UPLOAD_FAKE_DATA')
     this.props.ipcRenderer.removeAllListeners('BOX_UPLOAD_RESULT')
   }
 
-  renderNoBoxes() {
+  renderNoBoxes () {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <div style={{ flexGrow: 1 }} />
@@ -274,7 +272,7 @@ class Groups extends React.Component {
     )
   }
 
-  renderAvatars(users) {
+  renderAvatars (users) {
     const n = Math.min(users.length, 5)
     const r = 20 * n / (2.5 * n - 1.5) // radius
     return (
@@ -300,7 +298,7 @@ class Groups extends React.Component {
     )
   }
 
-  renderBox({ key, index, style }) {
+  renderBox ({ key, index, style }) {
     const box = this.props.boxes[index]
     const { ltime, name, uuid, users, lcomment, lri, ltsst, station, deleted } = box
     const isOffline = !(station && station.isOnline)
@@ -380,7 +378,7 @@ class Groups extends React.Component {
     )
   }
 
-  renderLoading(size) {
+  renderLoading (size) {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
         <CircularProgress size={size || 64} />
@@ -388,7 +386,7 @@ class Groups extends React.Component {
     )
   }
 
-  render() {
+  render () {
     const { boxes, currentBox, station, guid, ipcRenderer, apis } = this.props
     if (!boxes) return this.renderLoading(32)
     const { primaryColor, openSnackBar, getUsers } = this.props
@@ -430,8 +428,8 @@ class Groups extends React.Component {
 
           {/* Boxes: react-virtualized with custom scrollBar */}
           {
-            boxes.length > 0 ?
-              <ScrollBar
+            boxes.length > 0
+              ? <ScrollBar
                 allHeight={72 * boxes.length}
                 height={boxH}
                 width={376}
@@ -515,7 +513,7 @@ class Groups extends React.Component {
               title={i18n.__('Create New Box')}
               getUsers={getUsers}
             />
-            }
+          }
         </DialogOverlay>
       </div>
     )

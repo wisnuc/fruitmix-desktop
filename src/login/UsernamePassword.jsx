@@ -2,23 +2,22 @@ import React, { PureComponent } from 'react'
 import i18n from 'i18n'
 import { TextField } from 'material-ui'
 
-
 class UsernamePassword extends React.PureComponent {
   static State = class State {
-    constructor() {
+    constructor () {
       this.username = ''
       this.password = ''
       this.passwordAgain = ''
     }
 
-    isInputOK() {
-      return this.username.length > 0
-        && this.password.length > 0
-        && this.password === this.passwordAgain
+    isInputOK () {
+      return this.username.length > 0 &&
+        this.password.length > 0 &&
+        this.password === this.passwordAgain
     }
   }
 
-  render() {
+  render () {
     return (
       <div>
         <div>

@@ -1,5 +1,5 @@
 const PVState = base => class extends base {
-  setSubPState(name, nextSubState) {
+  setSubPState (name, nextSubState) {
     const state = this.props.state
     const subState = state[name]
     const nextSubStateMerged = Object.assign(new subState.constructor(), subState, nextSubState)
@@ -7,19 +7,19 @@ const PVState = base => class extends base {
     this.props.setState(nextState)
   }
 
-  setSubPStateBound(name) {
+  setSubPStateBound (name) {
     const obj = this.setSubPStateBoundObj || (this.setSubVStateBoundObj = {})
     return obj[name] ? obj[name] : (obj[name] = this.setSubPState.bind(this, name))
   }
 
-  bindPState(name) {
+  bindPState (name) {
     return {
       state: this.props.state[name],
       setState: this.setSubPStateBound(name)
     }
   }
 
-  setSubVState(name, nextSubState) {
+  setSubVState (name, nextSubState) {
     const state = this.state
     const subState = state[name]
     const nextSubStateMerged = Object.assign(new subState.constructor(), subState, nextSubState)
@@ -27,12 +27,12 @@ const PVState = base => class extends base {
     this.setState(nextState)
   }
 
-  setSubVStateBound(name) {
+  setSubVStateBound (name) {
     const obj = this.setSubVStateBoundObj || (this.setSubPStateBoundObj = {})
     return obj[name] ? obj[name] : (obj[name] = this.setSubVState.bind(this, name))
   }
 
-  bindVState(name) {
+  bindVState (name) {
     return {
       state: this.state[name],
       setState: this.setSubVStateBound(name)

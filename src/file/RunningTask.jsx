@@ -1,6 +1,5 @@
 import React from 'react'
 import i18n from 'i18n'
-import Debug from 'debug'
 import DeleteSvg from 'material-ui/svg-icons/action/delete'
 import FileSvg from 'material-ui/svg-icons/editor/insert-drive-file'
 import FolderSvg from 'material-ui/svg-icons/file/folder'
@@ -13,10 +12,9 @@ import UploadSvg from 'material-ui/svg-icons/file/file-upload'
 import MultiSvg from 'material-ui/svg-icons/content/content-copy'
 import IconButton from '../common/IconButton'
 
-const debug = Debug('component:file:RunningTask: ')
 const svgStyle = { color: '#000', opacity: 0.54 }
 class RunningTask extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -39,14 +37,13 @@ class RunningTask extends React.Component {
     }
 
     this.checkError = () => {
-      // debug('this.checkError', this.props.task)
       const errors = this.props.task.errors || []
       const warnings = this.props.task.warnings || []
       this.props.openErrorDialog([...errors, ...warnings])
     }
   }
 
-  getStatus(task) {
+  getStatus (task) {
     if (task.state === 'failed') return i18n.__('Task Failed')
     if (task.paused) return i18n.__('Task Paused')
     if (task.state === 'visitless') return i18n.__('Task Visitless')
@@ -60,7 +57,7 @@ class RunningTask extends React.Component {
     return i18n.__('Task Unknown State')
   }
 
-  formatSize(s) {
+  formatSize (s) {
     const size = parseFloat(s, 10)
     if (!size) return `${0} KB`
     if (size < 1024) return `${size.toFixed(2)} B`
@@ -69,21 +66,21 @@ class RunningTask extends React.Component {
     return `${(size / 1024 / 1024 / 1024).toFixed(2)} GB`
   }
 
-  formatSpeed(size) {
+  formatSpeed (size) {
     return `${this.formatSize(size)}/s`
   }
 
-  formatSeconds(seconds) {
+  formatSeconds (seconds) {
     if (!seconds || seconds === Infinity || seconds === -Infinity || this.props.task.paused) return '- - : - - : - -'
     let s = parseInt(seconds, 10)
     let m = 0
     let h = 0
     if (s >= 60) {
-      m = parseInt(s / 60)
-      s = parseInt(s % 60)
+      m = parseInt(s / 60, 10)
+      s = parseInt(s % 60, 10)
       if (m >= 60) {
-        h = parseInt(m / 60)
-        m = parseInt(m % 60)
+        h = parseInt(m / 60, 10)
+        m = parseInt(m % 60, 10)
       }
     }
     if (h.toString().length === 1) h = `0${h}`
@@ -93,7 +90,7 @@ class RunningTask extends React.Component {
     return `${h} : ${m} : ${s}`
   }
 
-  renderSizeAndSpeed(task) {
+  renderSizeAndSpeed (task) {
     const speed = this.props.task.paused ? '' : this.formatSpeed(task.speed)
     const finishCount = task.finishCount > 0 ? task.finishCount : 0
     const uploaded = task.count === 1 ? this.formatSize(task.completeSize) : `${finishCount}/${task.count}`
@@ -106,13 +103,13 @@ class RunningTask extends React.Component {
     )
   }
 
-  renderPercent(task) {
+  renderPercent (task) {
     if (!task.size) return '0%'
     const percent = (Math.min(task.completeSize / task.size, 1) * 100).toFixed(2)
     return `${percent}%`
   }
 
-  render() {
+  render () {
     const task = this.props.task
     const pColor = task.paused ? 'rgba(0,0,0,.12)' : '#89c2f2'
     let pWidth = task.completeSize / task.size * 100
@@ -139,7 +136,7 @@ class RunningTask extends React.Component {
         {/* task item type */}
         <div style={{ flex: '0 0 32px' }}>
           { task.entries.length > 1 ? <MultiSvg style={svgStyle} />
-          : task.taskType === 'file' ? <FileSvg style={svgStyle} /> : <FolderSvg style={svgStyle} /> }
+            : task.taskType === 'file' ? <FileSvg style={svgStyle} /> : <FolderSvg style={svgStyle} /> }
         </div>
 
         {/* task item name */}
@@ -158,7 +155,6 @@ class RunningTask extends React.Component {
             { task.entries.length > 1 && i18n.__('And Other %s Items', task.entries.length)}
           </div>
         </div>
-
 
         {/* progress bar */}
         <div style={{ flex: '0 0 240px' }}>
@@ -192,12 +188,16 @@ class RunningTask extends React.Component {
         <div style={{ flex: i18n.getLocale() === 'zh-CN' ? '0 0 120px' : '0 0 132px', display: 'flex', alignItems: 'center' }} >
           {
             task.state === 'failed'
-              ? <IconButton onTouchTap={this.checkError} tooltip={i18n.__('Detail')}>
-                { task.errors.length ? <InfoSvg color="#F44336" /> : <WarningIcon color="#FB8C00" /> }
+              ? (
+                <IconButton onTouchTap={this.checkError} tooltip={i18n.__('Detail')}>
+                  { task.errors.length ? <InfoSvg color="#F44336" /> : <WarningIcon color="#FB8C00" /> }
                 </IconButton>
-              : <IconButton iconStyle={svgStyle} onTouchTap={this.toggleTask} tooltip={task.paused ? i18n.__('Resume') : i18n.__('Pause')}>
-                { task.paused ? <PlaySvg /> : <PauseSvg /> }
+              )
+              : (
+                <IconButton iconStyle={svgStyle} onTouchTap={this.toggleTask} tooltip={task.paused ? i18n.__('Resume') : i18n.__('Pause')}>
+                  { task.paused ? <PlaySvg /> : <PauseSvg /> }
                 </IconButton>
+              )
           }
           {
             task.paused &&

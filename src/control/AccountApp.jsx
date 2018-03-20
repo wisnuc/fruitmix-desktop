@@ -18,7 +18,7 @@ import Checkmark from '../common/Checkmark'
 const debug = Debug('component:control:device')
 
 class AccountApp extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       status: '',
@@ -36,7 +36,7 @@ class AccountApp extends React.Component {
     }
   }
 
-  render() {
+  render () {
     const { account, primaryColor, apis, refresh, openSnackBar, ipcRenderer } = this.props
     if (!account) return <div />
     // debug('this.props account', this.props, global.config.users)
@@ -78,14 +78,14 @@ class AccountApp extends React.Component {
           {
             avatarUrl ? <div style={{ borderRadius: 28, width: 56, height: 56, overflow: 'hidden', marginLeft: 4 }}>
               <img width={56} height={56} alt="" src={avatarUrl} />
-            </div> :
-            <IconButton
-              iconStyle={{ width: 67, height: 67, color: primaryColor }}
-              style={{ width: 67, height: 67, padding: 0 }}
-              onTouchTap={() => !(account.global && account.global.wx) && this.toggleDialog('editAvatar')}
-            >
-              <ActionAccountCircle />
-            </IconButton>
+            </div>
+              : <IconButton
+                iconStyle={{ width: 67, height: 67, color: primaryColor }}
+                style={{ width: 67, height: 67, padding: 0 }}
+                onTouchTap={() => !(account.global && account.global.wx) && this.toggleDialog('editAvatar')}
+              >
+                <ActionAccountCircle />
+              </IconButton>
           }
         </div>
 
@@ -101,15 +101,14 @@ class AccountApp extends React.Component {
           <div style={{ fontSize: 14, lineHeight: '26px', color: 'rgba(0, 0, 0, 0.87)', display: 'flex' }}>
             {
               account.isAdmin && account.isFirstUser ? i18n.__('First User Text')
-              : account.isAdmin ? i18n.__('Admin User Text') : i18n.__('Normal User Text')
+                : account.isAdmin ? i18n.__('Admin User Text') : i18n.__('Normal User Text')
             }
             {
-              account.global && account.global.wx ?
-                <div style={{ display: 'flex', alignItems: 'center', height: 26 }}>
+              account.global && account.global.wx
+                ? <div style={{ display: 'flex', alignItems: 'center', height: 26 }}>
                   { nickName ? i18n.__('WeChat Bound Text %s', nickName) : i18n.__('WeChat Bound Text') }
                 </div>
-                :
-                <div style={{ display: 'flex', alignItems: 'center', height: 26 }}>
+                : <div style={{ display: 'flex', alignItems: 'center', height: 26 }}>
                   { i18n.__('WeChat not Bind Text') }
                   { <FlatButton label={i18n.__('Bind WeChat Title')} onTouchTap={() => this.setState({ weChat: true })} primary /> }
                 </div>
@@ -186,7 +185,7 @@ class AccountApp extends React.Component {
               />
           }
           {/* show when login via WeChat */}
-          { 
+          {
             !!this.props.selectedDevice.mdev.stationID &&
               <FlatButton
                 primary

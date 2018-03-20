@@ -5,7 +5,7 @@ import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import FlatButton from '../common/FlatButton'
 
 class UserSelect extends React.PureComponent {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -34,16 +34,14 @@ class UserSelect extends React.PureComponent {
     }
   }
 
-  renderUser(user) {
+  renderUser (user) {
     const { name } = user
     return (
-      <div style={{ height: 48, width: '100%' }}>
-
-      </div>
+      <div style={{ height: 48, width: '100%' }} />
     )
   }
 
-  togglecheckAll() {
+  togglecheckAll () {
     const { defaultUsers, users } = this.state
     if (this.state.selected.length < users.length - defaultUsers.length) {
       this.setState({ selected: users.filter(u => !defaultUsers.includes(u)) })
@@ -52,18 +50,18 @@ class UserSelect extends React.PureComponent {
     }
   }
 
-  handleCheck(user) {
+  handleCheck (user) {
     const sl = this.state.selected
     const index = sl.indexOf(user)
     if (index === -1) this.setState({ selected: [...sl, user] })
     else this.setState({ selected: [...sl.slice(0, index), ...sl.slice(index + 1)] })
   }
 
-  componentDidMount() {
+  componentDidMount () {
     if (!this.props.users) this.getUsers()
   }
 
-  renderError() {
+  renderError () {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
         <div
@@ -85,7 +83,7 @@ class UserSelect extends React.PureComponent {
     )
   }
 
-  renderLoading(size) {
+  renderLoading (size) {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
         <CircularProgress size={size || 64} />
@@ -93,7 +91,7 @@ class UserSelect extends React.PureComponent {
     )
   }
 
-  render() {
+  render () {
     // console.log('UserSelect.jsx', this.props, this.state)
     const { title, onRequestClose, actionLabel, primaryColor } = this.props
     const { users, defaultUsers, loading, selected, error } = this.state
@@ -119,8 +117,8 @@ class UserSelect extends React.PureComponent {
         </div>
 
         {
-          error ? this.renderError() : loading ? this.renderLoading(32) :
-            <div style={{ height: 40 * users.length + 48, maxHeight: 360 }}>
+          error ? this.renderError() : loading ? this.renderLoading(32)
+            : <div style={{ height: 40 * users.length + 48, maxHeight: 360 }}>
               <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key="all" >
                 <Checkbox
                   label={i18n.__('All Users')}

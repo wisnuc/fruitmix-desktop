@@ -9,7 +9,7 @@ import DialogOverlay from '../common/PureDialog'
 const debug = Debug('component:control:deviceinfo')
 
 class Market extends React.PureComponent {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -29,7 +29,7 @@ class Market extends React.PureComponent {
     }
   }
 
-  renderCard(app, installeds, containers) {
+  renderCard (app, installeds, containers) {
     // debug('renderCard', app, installeds, containers)
     const installed = installeds.find(i => i.recipe.appname === app.appname)
     let container = null
@@ -72,9 +72,9 @@ class Market extends React.PureComponent {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', margin: '-4px 0px 8px 8px' }}>
           {
-            installed ?
-              <div style={{ height: 18, width: 91, fontSize: 15, margin: '8px 0px 0px 8px' }}>已安装</div> :
-              <FlatButton
+            installed
+              ? <div style={{ height: 18, width: 91, fontSize: 15, margin: '8px 0px 0px 8px' }}>已安装</div>
+              : <FlatButton
                 primary
                 label="下载并安装"
                 onTouchTap={() => this.setState({ uninstall: detail })}
@@ -85,7 +85,7 @@ class Market extends React.PureComponent {
     )
   }
 
-  render() {
+  render () {
     if (!this.props.docker || !this.props.docker.appstore) {
       return (
         <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

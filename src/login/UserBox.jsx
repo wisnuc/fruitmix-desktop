@@ -31,7 +31,7 @@ const RadiumAvatar = Radium(Avatar)
 let isFirst = true // only auto login the first time
 
 class NamedAvatar extends React.Component {
-  render() {
+  render () {
     const { style, name, selected, onTouchTap, uuid } = this.props
     let avatarUrl = null
     const index = global.config.users.findIndex(uc => uc && uc.userUUID === uuid && uc.weChat)
@@ -56,11 +56,11 @@ class NamedAvatar extends React.Component {
           >
             <div style={{ lineHeight: '24px', fontSize: 14 }}>
               {
-                avatarUrl ?
-                  <div style={{ borderRadius: 16, width: 32, height: 32, overflow: 'hidden' }}>
+                avatarUrl
+                  ? <div style={{ borderRadius: 16, width: 32, height: 32, overflow: 'hidden' }}>
                     <img width={32} height={32} alt="" src={avatarUrl} />
-                  </div> :
-                name.slice(0, 2).toUpperCase()
+                  </div>
+                  : name.slice(0, 2).toUpperCase()
               }
             </div>
           </RadiumAvatar>
@@ -71,7 +71,7 @@ class NamedAvatar extends React.Component {
 }
 
 class UserBox extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.users = this.props.device.users.value().filter(u => !u.disabled)
@@ -124,7 +124,7 @@ class UserBox extends React.Component {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     isFirst = false
     if (this.state.auto) {
       this.props.toggleDisplay()
@@ -133,11 +133,11 @@ class UserBox extends React.Component {
     }
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     clearTimeout(this.timer)
   }
 
-  renderAvatar(user) {
+  renderAvatar (user) {
     const { username, uuid } = user
     let avatarUrl = null
     const index = global.config.users.findIndex(uc => uc && uc.userUUID === uuid && uc.weChat)
@@ -145,11 +145,11 @@ class UserBox extends React.Component {
     return (
       <div>
         {
-          avatarUrl ?
-            <div style={{ borderRadius: 48, width: 96, height: 96, overflow: 'hidden' }}>
+          avatarUrl
+            ? <div style={{ borderRadius: 48, width: 96, height: 96, overflow: 'hidden' }}>
               <img width={96} height={96} alt="" src={avatarUrl} />
-            </div> :
-            <Avatar size={96} >
+            </div>
+            : <Avatar size={96} >
               { username.slice(0, 2).toUpperCase() }
             </Avatar>
         }
@@ -157,7 +157,7 @@ class UserBox extends React.Component {
     )
   }
 
-  renderAutoLogin(user) {
+  renderAutoLogin (user) {
     return (
       <div
         style={{
@@ -191,7 +191,7 @@ class UserBox extends React.Component {
     )
   }
 
-  render() {
+  render () {
     const users = this.props.device.users.value().filter(u => !u.disabled)
     const userSelected = this.state.selectedIndex > -1 ? users[this.state.selectedIndex] : null
     return (
@@ -210,12 +210,11 @@ class UserBox extends React.Component {
           }}
         >
           {
-            this.state.auto ?
-              <div style={{ width: '100%', height: this.state.open ? 216 : 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            this.state.auto
+              ? <div style={{ width: '100%', height: this.state.open ? 216 : 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 { this.renderAvatar(this.lastUser) }
               </div>
-              :
-              <div style={{ ...styles.flexWrap, padding: 8 }}>
+              : <div style={{ ...styles.flexWrap, padding: 8 }}>
                 {
                   users.map((user, index) => (
                     <NamedAvatar

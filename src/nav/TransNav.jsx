@@ -2,7 +2,7 @@ import React from 'react'
 import { ipcRenderer } from 'electron'
 
 class TransNav extends React.PureComponent {
-  constructor() {
+  constructor () {
     super()
     this.state = {
       num: 0,
@@ -27,17 +27,17 @@ class TransNav extends React.PureComponent {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     ipcRenderer.on('UPDATE_TRANSMISSION', this.updateTransmission)
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     ipcRenderer.removeListener('UPDATE_TRANSMISSION', this.updateTransmission)
     clearTimeout(this.timer2)
     clearTimeout(this.timer)
   }
 
-  render() {
+  render () {
     const { icon, text, selected, disabled } = this.props
     let { color } = this.props
     if (!selected) color = disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.54)'
@@ -50,10 +50,10 @@ class TransNav extends React.PureComponent {
     selected_hover: './assets/images/transmission_selected_hover.gif'
     */
 
-    const path = selected && this.state.hover ? icon.gif.selected_hover :
-      selected ? icon.gif.selected :
-      this.state.hover ? icon.gif.hover :
-      icon.gif.raw
+    const path = selected && this.state.hover ? icon.gif.selected_hover
+      : selected ? icon.gif.selected
+        : this.state.hover ? icon.gif.hover
+          : icon.gif.raw
 
     /* svg icon */
     const Icon = icon.icon
@@ -80,8 +80,8 @@ class TransNav extends React.PureComponent {
         <div style={{ marginTop: 6, fontSize: 11, fontWeight: 700, lineHeight: '12px', color }}>{text}</div>
         {/* render num */}
         {
-          this.state.num < 100 ?
-            <div
+          this.state.num < 100
+            ? <div
               style={{
                 position: 'absolute',
                 right: 14,
@@ -103,28 +103,28 @@ class TransNav extends React.PureComponent {
             >
               { this.state.num }
             </div>
-            : this.state.num > 99 ?
-            <div
-              style={{
-                position: 'absolute',
-                right: 4,
-                top: 14,
-                width: 24,
-                height: 14,
-                borderRadius: 9,
-                border: '2px #FFF solid',
-                backgroundColor: '#4CAF50',
-                fontSize: 10,
-                fontWeight: 500,
-                color: '#FFF',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
+            : this.state.num > 99
+              ? <div
+                style={{
+                  position: 'absolute',
+                  right: 4,
+                  top: 14,
+                  width: 24,
+                  height: 14,
+                  borderRadius: 9,
+                  border: '2px #FFF solid',
+                  backgroundColor: '#4CAF50',
+                  fontSize: 10,
+                  fontWeight: 500,
+                  color: '#FFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
               99+
-            </div>
-            : <div />
+              </div>
+              : <div />
         }
       </div>
     )

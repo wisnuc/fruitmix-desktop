@@ -11,7 +11,7 @@ import FlatButton from '../common/FlatButton'
 const debug = Debug('component:control:ethernet')
 
 class Ethernet extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       open: false,
@@ -38,7 +38,7 @@ class Ethernet extends React.Component {
     }
   }
 
-  renderList(Icon, titles, values) {
+  renderList (Icon, titles, values) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
         {
@@ -60,7 +60,7 @@ class Ethernet extends React.Component {
     )
   }
 
-  render() {
+  render () {
     const net = this.props.net
     if (!net) return (<div />)
 

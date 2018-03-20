@@ -2,20 +2,20 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 
 class Checkmark extends React.Component {
-  constructor() {
+  constructor () {
     super()
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.canvas = ReactDOM.findDOMNode(this.refs.canvas)
     setTimeout(() => this.animate(this.canvas), this.props.delay || 0)
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     this.unmounted = true
   }
 
-  animate(canvas) {
+  animate (canvas) {
     const start = 20
     const mid = 40
     const end = 80
@@ -56,7 +56,7 @@ class Checkmark extends React.Component {
     }
   }
 
-  render() {
+  render () {
     return <canvas width={96} height={48} ref="canvas" />
   }
 }

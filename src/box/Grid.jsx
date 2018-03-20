@@ -7,7 +7,7 @@ import Thumb from '../file/Thumb'
 import ScrollBar from '../common/ScrollBar'
 
 class Grid extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -15,7 +15,7 @@ class Grid extends React.Component {
     }
   }
 
-  renderGrid(digest, size) {
+  renderGrid (digest, size) {
     // console.log('renderGrid', digest)
     const hovered = this.state.hover === digest
     return (
@@ -36,7 +36,7 @@ class Grid extends React.Component {
     )
   }
 
-  renderRow({ index, key, style }) {
+  renderRow ({ index, key, style }) {
     const { items, size, num } = this.props
     const f = index * num
     return (
@@ -48,7 +48,7 @@ class Grid extends React.Component {
     )
   }
 
-  render() {
+  render () {
     const { items, size, num } = this.props
     const rowCount = Math.ceil(items.length / num)
     const rowHeight = size + 4

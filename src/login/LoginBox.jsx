@@ -7,7 +7,7 @@ import FlatButton from '../common/FlatButton'
 import { sharpCurve, sharpCurveDuration } from '../common/motion'
 
 class LoginBox extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.device = this.props.device.mdev
     this.lastDevice = global.config.global.lastDevice || {}
@@ -73,7 +73,6 @@ class LoginBox extends React.Component {
       this.props.done('LOGIN', this.props.device, this.props.user)
     }
 
-
     this.onKeyDown = (e) => {
       if (e.which !== 13) return
       if (this.token) this.fakeLogin()
@@ -86,7 +85,7 @@ class LoginBox extends React.Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps (nextProps) {
     if (nextProps.user !== this.props.user) {
       this.setState({ password: '' })
       this.props.device.clearRequest('token')
@@ -100,7 +99,7 @@ class LoginBox extends React.Component {
     }
   }
 
-  render() {
+  render () {
     const { token } = this.props.device
     const busy = token && token.isPending()
     const error = (token && token.isRejected()) ? token.reason().message === 'Unauthorized' ? i18n.__('Wrong Password') : token.reason().message : null
@@ -143,14 +142,14 @@ class LoginBox extends React.Component {
             </div>
             <div style={{ width: '100%', flex: '0 0 68px', position: 'relative' }}>
               { !success &&
-                this.token ?
-                  <TextField
-                    key={this.props.user.uuid}
-                    style={{ position: 'absolute', bottom: 0 }}
-                    fullWidth
-                    hintText="*********"
-                    onTouchTap={this.passwordMode}
-                  />
+                this.token
+                ? <TextField
+                  key={this.props.user.uuid}
+                  style={{ position: 'absolute', bottom: 0 }}
+                  fullWidth
+                  hintText="*********"
+                  onTouchTap={this.passwordMode}
+                />
                 : <TextField
                   style={{ position: 'absolute', bottom: 0 }}
                   key={this.props.user.uuid}

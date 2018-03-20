@@ -6,52 +6,52 @@ import AdminUsersApp from '../control/AdminUsersApp'
 import Base from './Base'
 
 class AdminUsers extends Base {
-  constructor(ctx) {
+  constructor (ctx) {
     super(ctx)
     this.refreshUsers = this.refresh.bind(this)
   }
 
-  willReceiveProps(nextProps) {
+  willReceiveProps (nextProps) {
     this.handleProps(nextProps.apis, ['users'])
   }
 
-  refresh() {
+  refresh () {
     this.ctx.props.apis.request('users')
   }
 
-  navEnter() {
+  navEnter () {
     this.ctx.props.apis.request('users')
   }
 
-  navGroup() {
+  navGroup () {
     return 'user'
   }
 
-  menuName() {
+  menuName () {
     return i18n.__('AdminUsers Menu Name')
   }
 
-  quickName() {
+  quickName () {
     return i18n.__('AdminUsers Quick Name')
   }
 
-  menuIcon() {
+  menuIcon () {
     return ActionSupervisorAccount
   }
 
-  appBarStyle() {
+  appBarStyle () {
     return 'colored'
   }
 
-  prominent() {
+  prominent () {
     return true
   }
 
-  renderTitle({ style }) {
+  renderTitle ({ style }) {
     return <div style={Object.assign({}, style, { marginLeft: 176 })}>{i18n.__('AdminUsers Title')}</div>
   }
 
-  renderContent({ openSnackBar }) {
+  renderContent ({ openSnackBar }) {
     return (
       <AdminUsersApp
         users={this.state.users}

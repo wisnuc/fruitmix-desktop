@@ -10,7 +10,7 @@ import FlatButton from '../common/FlatButton'
 const debug = Debug('component:control:NewDriveDialog')
 
 class DrivesDetail extends PureComponent {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -45,7 +45,7 @@ class DrivesDetail extends PureComponent {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps (nextProps) {
     if (nextProps.detailDrive.uuid !== this.props.detailDrive.uuid) {
       this.currentLabel = nextProps.detailDrive.label
       this.setState({
@@ -57,7 +57,7 @@ class DrivesDetail extends PureComponent {
     }
   }
 
-  updateLabel(value) {
+  updateLabel (value) {
     const { drives, detailDrive } = this.props
     const newValue = sanitize(value)
     if ((drives.findIndex(drive => (drive.label === value)) > -1) && (value !== detailDrive.label)) {
@@ -70,11 +70,11 @@ class DrivesDetail extends PureComponent {
     }
   }
 
-  togglecheckAll() {
+  togglecheckAll () {
     this.setState({ writelist: this.state.writelist === '*' ? [] : '*', changed: true })
   }
 
-  handleCheck(userUUID) {
+  handleCheck (userUUID) {
     const index = this.state.writelist.indexOf(userUUID)
     if (index === -1) {
       this.setState({ changed: true, writelist: [...this.state.writelist, userUUID].filter(u => u !== '*') })
@@ -89,7 +89,7 @@ class DrivesDetail extends PureComponent {
     }
   }
 
-  render() {
+  render () {
     const { users, detailDrive, primaryColor } = this.props
     // console.log('detailDrive', this.props)
     if (!users || !detailDrive) return <div style={{ height: 128, backgroundColor: primaryColor, filter: 'brightness(0.9)' }} />
@@ -109,8 +109,8 @@ class DrivesDetail extends PureComponent {
           >
             <div style={{ height: 16 }} />
             {
-              this.state.modify && (detailDrive.tag !== 'built-in') ?
-                <div style={{ marginTop: -8 }}>
+              this.state.modify && (detailDrive.tag !== 'built-in')
+                ? <div style={{ marginTop: -8 }}>
                   <TextField
                     name="shareDiskName"
                     fullWidth
@@ -124,8 +124,8 @@ class DrivesDetail extends PureComponent {
                     underlineStyle={{ borderColor: primaryColor }}
                     errorStyle={{ marginTop: 16 }}
                   />
-                </div> :
-                <div
+                </div>
+                : <div
                   style={{
                     width: 312,
                     height: 32,
@@ -182,7 +182,7 @@ class DrivesDetail extends PureComponent {
                     onCheck={() => this.handleCheck(user.uuid)}
                     disabled={detailDrive.tag === 'built-in'}
                   />
-                 </div>))
+                </div>))
             }
             <div style={{ height: 8 }} />
           </div>

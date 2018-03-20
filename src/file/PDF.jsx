@@ -11,7 +11,7 @@ PDFJS.cMapPacked = true
 const debug = Debug('component:file:preview: ')
 
 class PDFView extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       pages: null,
@@ -34,7 +34,7 @@ class PDFView extends React.Component {
     }
   }
 
-  render() {
+  render () {
     // debug('PDFView render', this.state, this.props)
     return (
       <div style={{ height: '100%', width: '100%' }} >

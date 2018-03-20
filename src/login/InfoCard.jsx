@@ -3,19 +3,19 @@ import ReactDOM from 'react-dom'
 import { LinearProgress } from 'material-ui'
 
 class InfoCard extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
   }
 
-  componentWillEnter(callback) {
+  componentWillEnter (callback) {
     this.props.onWillEnter(ReactDOM.findDOMNode(this), callback)
   }
 
-  componentWillLeave(callback) {
+  componentWillLeave (callback) {
     this.props.onWillLeave(ReactDOM.findDOMNode(this), callback)
   }
 
-  render() {
+  render () {
     return (
       <div style={this.props.style}>
         <div
@@ -37,4 +37,3 @@ class InfoCard extends React.Component {
 }
 
 export default InfoCard
-

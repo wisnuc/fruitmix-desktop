@@ -5,7 +5,7 @@ import Base from './Base'
 import PluginApp from '../device/PluginApp'
 
 class Plugin extends Base {
-  constructor(ctx) {
+  constructor (ctx) {
     super(ctx)
 
     this.refresh = () => {
@@ -15,35 +15,35 @@ class Plugin extends Base {
     }
   }
 
-  willReceiveProps(nextProps) {
+  willReceiveProps (nextProps) {
     this.handleProps(nextProps.apis, ['samba', 'dlna', 'bt'])
   }
 
-  navEnter() {
+  navEnter () {
     this.refresh()
   }
 
-  navGroup() {
+  navGroup () {
     return 'settings'
   }
 
-  menuName() {
+  menuName () {
     return i18n.__('Plugin Menu Name')
   }
 
-  quickName() {
+  quickName () {
     return i18n.__('Plugin Quick Name')
   }
 
-  menuIcon() {
+  menuIcon () {
     return ActionSettings
   }
 
-  appBarStyle() {
+  appBarStyle () {
     return 'colored'
   }
 
-  renderContent({ openSnackBar }) {
+  renderContent ({ openSnackBar }) {
     return (
       <PluginApp
         primaryColor={this.groupPrimaryColor()}

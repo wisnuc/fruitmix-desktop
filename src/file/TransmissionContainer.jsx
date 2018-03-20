@@ -18,7 +18,7 @@ import PureDialog from '../common/PureDialog'
 const debug = Debug('component:file:TrsContainer:')
 
 class TrsContainer extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -232,19 +232,19 @@ class TrsContainer extends React.Component {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     document.addEventListener('keydown', this.keydown)
     document.addEventListener('keyup', this.keyup)
     ipcRenderer.on('UPDATE_TRANSMISSION', this.updateTransmission)
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     document.removeEventListener('keydown', this.keydown)
     document.removeEventListener('keyup', this.keyup)
     ipcRenderer.removeListener('UPDATE_TRANSMISSION', this.updateTransmission)
   }
 
-  render() {
+  render () {
     // debug('render TrsContainer')
     const userTasks = this.state.userTasks
     const finishTasks = this.state.finishTasks
@@ -284,20 +284,20 @@ class TrsContainer extends React.Component {
           </div>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {
-                allPaused ?
-                  <FlatButton
-                    label={i18n.__('Resume All')}
-                    disabled={!userTasks.length}
-                    icon={<PlaySvg style={{ color: '#000', opacity: 0.54 }} />}
-                    onTouchTap={() => this.handleAll(userTasks, 'RESUME')}
-                  /> :
-                  <FlatButton
-                    label={i18n.__('Pause All')}
-                    disabled={!userTasks.length}
-                    icon={<PauseSvg style={{ color: '#000', opacity: 0.54 }} />}
-                    onTouchTap={() => this.handleAll(userTasks, 'PAUSE')}
-                  />
-              }
+              allPaused
+                ? <FlatButton
+                  label={i18n.__('Resume All')}
+                  disabled={!userTasks.length}
+                  icon={<PlaySvg style={{ color: '#000', opacity: 0.54 }} />}
+                  onTouchTap={() => this.handleAll(userTasks, 'RESUME')}
+                />
+                : <FlatButton
+                  label={i18n.__('Pause All')}
+                  disabled={!userTasks.length}
+                  icon={<PauseSvg style={{ color: '#000', opacity: 0.54 }} />}
+                  onTouchTap={() => this.handleAll(userTasks, 'PAUSE')}
+                />
+            }
             <FlatButton
               label={i18n.__('Clear All')}
               disabled={!userTasks.length}
@@ -397,7 +397,7 @@ class TrsContainer extends React.Component {
               overscanRowCount={3}
               style={{ outline: 'none' }}
             />
-            )}
+          )}
         </AutoSizer>
 
         {/* menu */}

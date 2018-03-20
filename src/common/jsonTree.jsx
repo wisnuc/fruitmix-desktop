@@ -7,7 +7,7 @@ import JSONTree from 'react-json-tree'
 */
 
 class Tree extends React.PureComponent {
-  render() {
+  render () {
     const theme = {
       scheme: 'wisnuc',
       author: 'lxw',

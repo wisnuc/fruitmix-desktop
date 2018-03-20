@@ -24,7 +24,7 @@ i18n.configure({
 injectTapEventPlugin()
 
 /* render method */
-const render = () => ReactDom.render(<Fruitmix />, document.getElementById('app'))
+const render = () => ReactDom.render(React.createElement(Fruitmix), document.getElementById('app'))
 
 /* start mdns scan */
 global.mdnsStore = []

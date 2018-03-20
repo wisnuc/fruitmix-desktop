@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3'
 
 class ListSelect extends EventEmitter {
-  constructor() {
+  constructor () {
     super()
     this.dragging = []
     this.state = {
@@ -24,17 +24,17 @@ class ListSelect extends EventEmitter {
     }
   }
 
-  setState(props) {
+  setState (props) {
     this.state = Object.assign({}, this.state, props)
     this.emit('updated', this.state)
   }
 
-  putSelect(selected) {
+  putSelect (selected) {
     this.setState({ selected })
   }
 
   // this function does NOT emit !!!
-  reset(size) {
+  reset (size) {
     this.state = Object.assign({}, this.state, {
       size,
       ctrl: false,
@@ -47,7 +47,7 @@ class ListSelect extends EventEmitter {
     return this.state
   }
 
-  addByArray(array, session) {
+  addByArray (array, session) {
     // console.log('addByArray', array, session, this.state.ctrl, this.state.shift)
     if (this.state.shift) {
       const set = new Set([...array, ...this.state.selected])
@@ -62,21 +62,21 @@ class ListSelect extends EventEmitter {
     } else this.setState({ selected: array })
   }
 
-  keyEvent(ctrl, shift) {
+  keyEvent (ctrl, shift) {
     if (ctrl === this.state.ctrl && shift === this.state.shift) return
     this.setState({ ctrl, shift })
   }
 
-  mouseEnter(index) {
+  mouseEnter (index) {
     if (index !== this.state.hover) { this.setState({ hover: index }) }
   }
 
-  mouseLeave(index) {
+  mouseLeave (index) {
     if (index === this.state.hover) { this.setState({ hover: -1 }) }
   }
 
   // select and specify one
-  leftClick(index) {
+  leftClick (index) {
     this.setState({
       selected: index === -1 ? [] : [index],
       specified: index
@@ -84,7 +84,7 @@ class ListSelect extends EventEmitter {
   }
 
   // toggle select and (sort of) specified
-  ctrlLeftClick(index) {
+  ctrlLeftClick (index) {
     if (index === -1) { // click outside
       // this.setState({ selected: [], specified: -1, hover: -1 })
     } else {
@@ -105,7 +105,7 @@ class ListSelect extends EventEmitter {
 
   // 1. if not specified, specify and select
   // 2. range select if specified, and unspecify
-  shiftLeftClick(index) {
+  shiftLeftClick (index) {
     const { specified, selected } = this.state
 
     if (index === -1) { // click outside
@@ -132,20 +132,20 @@ class ListSelect extends EventEmitter {
   // if there is single selection and index === -1, clear selection and context menu
   // if there is single selection and index !== -1, update select and context menu
   // if there is multiple selection, context menu
-  rightClick(index) {
+  rightClick (index) {
     if (this.state.selected.length > 1) return
     return this.leftClick(index)
   }
 
-  ctrlRightClick(index) {
+  ctrlRightClick (index) {
     // no action
   }
 
-  shiftRightClick(index) {
+  shiftRightClick (index) {
     // no action
   }
 
-  touchTap(button, index) {
+  touchTap (button, index) {
     switch (button) {
       case 0:
         return this.state.shift
@@ -165,7 +165,7 @@ class ListSelect extends EventEmitter {
     }
   }
 
-  shiftInRange(index) {
+  shiftInRange (index) {
     const { shift, specified, hover } = this.state
 
     if (!shift) return false
@@ -175,13 +175,13 @@ class ListSelect extends EventEmitter {
     return index >= min && index <= max
   }
 
-  rowColor(index) {
+  rowColor (index) {
     if (this.shiftInRange(index) || (index === this.state.hover && !this.dragging.length)) return '#EEEEEE'
     else if (this.state.selected.includes(index)) return '#F5F5F5'
     return '#FFFFFF'
   }
 
-  rowLeading(index) {
+  rowLeading (index) {
     if (this.state.shift) {
       if (this.shiftInRange(index)) { return 'fullOn' } else if (index === this.state.hover) { return 'activeHint' }
       return 'none'
@@ -197,7 +197,7 @@ class ListSelect extends EventEmitter {
     return 'none'
   }
 
-  rowCheck(index) {
+  rowCheck (index) {
     if (this.state.shift) {
       if (this.state.selected.includes(index)) return 'checked'
       else if (this.shiftInRange(index) || index === this.state.hover) return 'checking'
@@ -212,15 +212,15 @@ class ListSelect extends EventEmitter {
     return 'none'
   }
 
-  rowDrop(index) {
+  rowDrop (index) {
     return index === this.state.hover && this.dragging.length && !this.dragging.includes(index)
   }
 
-  isDrop() {
+  isDrop () {
     return this.dragging.length
   }
 
-  toggleDrag(arr) {
+  toggleDrag (arr) {
     this.dragging = arr
   }
 }

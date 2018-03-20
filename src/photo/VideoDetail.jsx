@@ -8,7 +8,7 @@ import ErrorIcon from 'material-ui/svg-icons/alert/error'
 const debug = Debug('component:photoApp:PhotoDetail')
 
 class PhotoDetail extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = { filePath: '', error: null }
@@ -41,7 +41,7 @@ class PhotoDetail extends React.Component {
     }
   }
 
-  componentDidUpdate() {
+  componentDidUpdate () {
     if (!this.refVideo) return
 
     if (this.props.parent.style.left === '0px' && this.refVideo.paused && !this.played) {
@@ -54,7 +54,7 @@ class PhotoDetail extends React.Component {
     }
   }
 
-  renderKnownVideo() {
+  renderKnownVideo () {
     if (this.hash === this.props.item.hash && this.state.filePath) {
       return (
         <div
@@ -80,7 +80,7 @@ class PhotoDetail extends React.Component {
     return (<CircularProgress size={64} thickness={5} />)
   }
 
-  renderError() {
+  renderError () {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
         <div
@@ -103,7 +103,7 @@ class PhotoDetail extends React.Component {
     )
   }
 
-  render() {
+  render () {
     // debug('render!!!', this.props, this.state)
     if (!this.props.item || !this.props.item.hash) return (<div />)
     return (

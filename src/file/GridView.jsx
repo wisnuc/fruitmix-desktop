@@ -22,7 +22,7 @@ import { ShareDisk } from '../common/Svg'
 const debug = Debug('component:file:GridView:')
 
 class Row extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.headers = [
@@ -67,11 +67,11 @@ class Row extends React.Component {
     }
   }
 
-  shouldComponentUpdate(nextProps) {
+  shouldComponentUpdate (nextProps) {
     return (!nextProps.isScrolling)
   }
 
-  render() {
+  render () {
     const { select, list, primaryColor, sortType, changeSortType, isScrolling, rowSum } = this.props
 
     const h = this.headers.find(header => header.title === this.state.type) || this.headers[0]
@@ -85,9 +85,9 @@ class Row extends React.Component {
             <div style={{ height: 40, display: 'flex', alignItems: 'center ', marginBottom: 8 }}>
               <div style={{ fontSize: 14, color: 'rgba(0,0,0,0.54)', width: 64 }}>
                 {
-                  list.entries[0].entry.type === 'file' ?
-                  i18n.__('File') : list.entries[0].entry.type === 'public' ?
-                  i18n.__('Public Drive') : i18n.__('Directory')
+                  list.entries[0].entry.type === 'file'
+                    ? i18n.__('File') : list.entries[0].entry.type === 'public'
+                      ? i18n.__('Public Drive') : i18n.__('Directory')
                 }
               </div>
               <div style={{ flexGrow: 1 }} />
@@ -166,7 +166,7 @@ class Row extends React.Component {
                     marginBottom: onDropping ? 12 : 16,
                     border: onDropping ? `2px ${primaryColor} solid` : '',
                     boxShadow: selected ? 'rgba(0, 0, 0, 0.188235) 0px 10px 30px, rgba(0, 0, 0, 0.227451) 0px 6px 10px'
-                    : 'rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px'
+                      : 'rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px'
                   }}
                   onTouchTap={e => this.props.onRowTouchTap(e, index)}
                   onDoubleClick={e => this.props.onRowDoubleClick(e, index)}
@@ -184,13 +184,13 @@ class Row extends React.Component {
                       >
                         {
                           (rowSum < 500 || !isScrolling) && entry.metadata
-                          ? <Thumb
-                            digest={entry.hash}
-                            ipcRenderer={this.props.ipcRenderer}
-                            height={180}
-                            width={180}
-                          />
-                          : renderFileIcon(entry.name, entry.metadata, 64)
+                            ? <Thumb
+                              digest={entry.hash}
+                              ipcRenderer={this.props.ipcRenderer}
+                              height={180}
+                              width={180}
+                            />
+                            : renderFileIcon(entry.name, entry.metadata, 64)
                         }
 
                         {/* overlay */}
@@ -226,12 +226,12 @@ class Row extends React.Component {
                       <Avatar style={{ backgroundColor: 'white', width: 30, height: 30 }}>
                         {
                           entry.type === 'directory'
-                          ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
-                          : entry.type === 'public'
-                          ? <ShareDisk style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
-                          : entry.type === 'file'
-                          ? renderFileIcon(entry.name, entry.metadata, 24)
-                          : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
+                            ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
+                            : entry.type === 'public'
+                              ? <ShareDisk style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
+                              : entry.type === 'file'
+                                ? renderFileIcon(entry.name, entry.metadata, 24)
+                                : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)', width: 24, height: 24 }} />
                         }
                       </Avatar>
                     </div>
@@ -260,7 +260,7 @@ class Row extends React.Component {
 }
 
 class GridView extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.scrollToRow = index => this.ListRef.scrollToRow(index)
@@ -290,11 +290,11 @@ class GridView extends React.Component {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.calcGridData()
   }
 
-  componentDidUpdate() {
+  componentDidUpdate () {
     if (this.props.scrollTo) {
       const index = this.props.entries.findIndex(entry => entry.name === this.props.scrollTo)
       if (index > -1) {
@@ -314,7 +314,7 @@ class GridView extends React.Component {
     this.calcGridData()
   }
 
-  render() {
+  render () {
     const calcGridInfo = (height, width, entries) => {
       const MAX = Math.floor((width - 52) / 200) - 1
       let MaxItem = 0

@@ -7,7 +7,7 @@ import { BTDownloadIcon } from '../common/Svg'
 import Base from './Base'
 
 class Download extends Base {
-  willReceiveProps(nextProps) {
+  willReceiveProps (nextProps) {
     this.handleProps(nextProps.apis, ['bt'])
     if (this.state.bt && !this.state.bt.switch) {
       this.disabled = true
@@ -20,45 +20,45 @@ class Download extends Base {
     }
   }
 
-  navEnter() {
+  navEnter () {
     this.loading = true
     this.ctx.props.apis.request('BTList')
     this.ctx.props.apis.request('bt')
   }
 
-  navGroup() {
+  navGroup () {
     return 'download'
   }
 
-  menuName() {
+  menuName () {
     return i18n.__('Download Menu Name')
   }
 
-  menuIcon() {
+  menuIcon () {
     return BTDownloadIcon
   }
 
-  quickName() {
+  quickName () {
     return i18n.__('Download Quick Name')
   }
 
-  appBarStyle() {
+  appBarStyle () {
     return 'colored'
   }
 
-  prominent() {
+  prominent () {
     return true
   }
 
-  hasDetail() {
+  hasDetail () {
     return false
   }
 
-  detailEnabled() {
+  detailEnabled () {
     return false
   }
 
-  renderTitle({ style }) {
+  renderTitle ({ style }) {
     return (
       <div style={Object.assign({}, style, { marginLeft: 184 })}>
         { i18n.__('Download Title %s', (this.state.BTList && this.state.BTList.running.length) || 0) }
@@ -66,7 +66,7 @@ class Download extends Base {
     )
   }
 
-  renderContent({ navToDrive, openSnackBar }) {
+  renderContent ({ navToDrive, openSnackBar }) {
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <BTDownload

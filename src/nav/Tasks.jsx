@@ -13,7 +13,7 @@ import ErrorBox from '../common/ErrorBox'
 const debug = Debug('component:common:Tasks ')
 
 class Tasks extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       error: null,
@@ -59,20 +59,20 @@ class Tasks extends React.Component {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.refresh()
-    this.timer = setInterval(() => this.state.tasks.some(t => t && t.nodes && t.nodes[0] && t.nodes[0].state !== 'Finished')
-      && this.refresh(), 1000)
+    this.timer = setInterval(() => this.state.tasks.some(t => t && t.nodes && t.nodes[0] && t.nodes[0].state !== 'Finished') &&
+      this.refresh(), 1000)
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     this.state.tasks.filter(t => t.nodes.findIndex(n => n.parent === null && n.state === 'Finished') > -1).forEach((t) => {
       this.props.apis.pureRequest('deleteTask', { uuid: t.uuid })
     })
     clearInterval(this.timer)
   }
 
-  renderLoading() {
+  renderLoading () {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
         <CircularProgress size={32} thickness={3} />
@@ -80,7 +80,7 @@ class Tasks extends React.Component {
     )
   }
 
-  renderError() {
+  renderError () {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
         { i18n.__('Failed To Load Task Data') }
@@ -88,7 +88,7 @@ class Tasks extends React.Component {
     )
   }
 
-  renderNoTask() {
+  renderNoTask () {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
         { i18n.__('No Running Tasks') }
@@ -96,7 +96,7 @@ class Tasks extends React.Component {
     )
   }
 
-  renderTask(task) {
+  renderTask (task) {
     const { uuid, type, src, dst, entries, nodes } = task
     const action = type === 'copy' ? i18n.__('Copying') : i18n.__('Moving')
     const tStyles = { marginTop: -8 }
@@ -110,8 +110,8 @@ class Tasks extends React.Component {
         {/* Icon */}
         <div style={{ width: 56, display: 'flex', alignItems: 'center' }} >
           {
-            entries.length > 1 ? <MultiSvg style={svgStyle} /> :
-              entries[0].type === 'file' ? <FileSvg style={svgStyle} /> : <FolderSvg style={svgStyle} />
+            entries.length > 1 ? <MultiSvg style={svgStyle} />
+              : entries[0].type === 'file' ? <FileSvg style={svgStyle} /> : <FolderSvg style={svgStyle} />
           }
         </div>
 
@@ -137,8 +137,8 @@ class Tasks extends React.Component {
 
           <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.54)' }}>
             {
-              finished ? i18n.__('Finished') : error.length ? i18n.__('Task Failed') :
-              conflict.length ? i18n.__('Task Conflict Text') : ''
+              finished ? i18n.__('Finished') : error.length ? i18n.__('Task Failed')
+                : conflict.length ? i18n.__('Task Conflict Text') : ''
             }
           </div>
         </div>
@@ -155,30 +155,30 @@ class Tasks extends React.Component {
         </IconButton>
         <div style={{ marginLeft: -8, marginRight: -12 }}>
           {
-            error.length ?
-            <ErrorBox
-              style={{ display: 'flex', alignItems: 'center' }}
-              tooltip={i18n.__('Detail')}
-              iconStyle={{ color: '#db4437' }}
-              error={error}
-            /> :
-            conflict.length ?
-            <IconButton
-              tooltip={i18n.__('Detail')}
-              iconStyle={{ color: '#fb8c00' }}
-              tooltipStyles={tStyles}
-              onTouchTap={() => this.handleConflict(uuid, type, conflict)}
-            >
-              <WarningIcon />
-            </IconButton>
-            : <div style={{ width: 48 }} />
+            error.length
+              ? <ErrorBox
+                style={{ display: 'flex', alignItems: 'center' }}
+                tooltip={i18n.__('Detail')}
+                iconStyle={{ color: '#db4437' }}
+                error={error}
+              />
+              : conflict.length
+                ? <IconButton
+                  tooltip={i18n.__('Detail')}
+                  iconStyle={{ color: '#fb8c00' }}
+                  tooltipStyles={tStyles}
+                  onTouchTap={() => this.handleConflict(uuid, type, conflict)}
+                >
+                  <WarningIcon />
+                </IconButton>
+                : <div style={{ width: 48 }} />
           }
         </div>
       </div>
     )
   }
 
-  render() {
+  render () {
     return (
       <div
         style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 200 }}
@@ -198,7 +198,7 @@ class Tasks extends React.Component {
           onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
         >
           { this.state.loading ? this.renderLoading() : this.state.error ? this.renderError()
-              : this.state.tasks.length ? this.state.tasks.map(t => this.renderTask(t)) : this.renderNoTask() }
+            : this.state.tasks.length ? this.state.tasks.map(t => this.renderTask(t)) : this.renderNoTask() }
         </Paper>
       </div>
     )

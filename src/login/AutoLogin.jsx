@@ -6,12 +6,12 @@ import FlatButton from '../common/FlatButton'
 import { sharpCurve, sharpCurveDuration } from '../common/motion'
 
 class AutoLogin extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = { open: false }
   }
 
-  render() {
+  render () {
     const { user } = this.props.device
     return (
       <div

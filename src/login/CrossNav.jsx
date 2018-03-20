@@ -3,7 +3,7 @@ import { TweenMax } from 'gsap'
 import TransitionGroup from 'react-transition-group/TransitionGroup'
 
 class CrossNav extends React.Component {
-  cardWillEnter(el, callback) {
+  cardWillEnter (el, callback) {
     const { enter, duration } = this.props
 
     if (enter === 'right') {
@@ -44,7 +44,7 @@ class CrossNav extends React.Component {
     }
   }
 
-  cardWillLeave(el, callback) {
+  cardWillLeave (el, callback) {
     const { enter, duration } = this.props
 
     if (enter === 'left') {
@@ -75,7 +75,7 @@ class CrossNav extends React.Component {
     }
   }
 
-  render() {
+  render () {
     const cardProps = {
       style: { position: 'absolute',
         width: 380,
