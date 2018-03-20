@@ -13,7 +13,7 @@ import PhotoDetail from '../photo/PhotoDetail'
 const debug = Debug('component:file:preview: ')
 
 class Preview extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -133,11 +133,11 @@ class Preview extends React.Component {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.forceUpdate()
   }
 
-  componentDidUpdate() {
+  componentDidUpdate () {
     if (!this.refVideo || !this.props.parent) return
 
     if (this.props.parent.style.left === '0px' && this.refVideo.paused && !this.played) {
@@ -150,7 +150,7 @@ class Preview extends React.Component {
     }
   }
 
-  renderPhoto(hash, metadata) {
+  renderPhoto (hash, metadata) {
     const item = Object.assign({}, metadata, { hash })
     return (
       <PhotoDetail
@@ -161,7 +161,7 @@ class Preview extends React.Component {
     )
   }
 
-  renderText() {
+  renderText () {
     return (
       <div
         style={{ height: '80%', width: '80%', backgroundColor: '#FFFFFF' }}
@@ -178,7 +178,7 @@ class Preview extends React.Component {
     )
   }
 
-  renderRawText() {
+  renderRawText () {
     if (this.name === this.props.item.name && this.state.filePath) {
       return (
         <div
@@ -199,7 +199,7 @@ class Preview extends React.Component {
     return (<CircularProgress size={64} thickness={5} />)
   }
 
-  renderVideo() {
+  renderVideo () {
     return (
       <div
         style={{ height: '80%', width: '80%', backgroundColor: 'rgba(0,0,0,0)' }}
@@ -217,7 +217,7 @@ class Preview extends React.Component {
     )
   }
 
-  renderKnownVideo() {
+  renderKnownVideo () {
     if (this.name === this.props.item.name && this.state.filePath) return this.renderVideo()
 
     if (!this.session) {
@@ -229,7 +229,7 @@ class Preview extends React.Component {
     return (<CircularProgress size={64} thickness={5} />)
   }
 
-  renderAudio() {
+  renderAudio () {
     return (
       <div onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }} >
         <audio width="100%" height="100%" controls >
@@ -239,7 +239,7 @@ class Preview extends React.Component {
     )
   }
 
-  renderOtherFiles() {
+  renderOtherFiles () {
     // debug('this.props renderOtherFiles', this.props)
     return (
       <div
@@ -278,7 +278,7 @@ class Preview extends React.Component {
     )
   }
 
-  renderPDF() {
+  renderPDF () {
     return (
       <div
         style={{ height: '80%', width: '80%', overflowY: 'auto', overflowX: 'hidden' }}
@@ -291,7 +291,7 @@ class Preview extends React.Component {
     )
   }
 
-  renderPreview() {
+  renderPreview () {
     const extension = this.props.item.name.replace(/^.*\./, '').toUpperCase()
     const textExtension = ['TXT', 'MD', 'JS', 'JSX', 'TS', 'JSON', 'HTML', 'CSS', 'LESS', 'CSV', 'XML']
     const videoExtension = ['MP4', 'MOV', 'AVI', 'MKV']
@@ -318,7 +318,7 @@ class Preview extends React.Component {
     )
   }
 
-  render() {
+  render () {
     if (!this.props.item || !this.props.item.name) return (<div />)
 
     const { magic, metadata, hash } = this.props.item
@@ -347,8 +347,8 @@ class Preview extends React.Component {
         {
           isPhoto ? this.renderPhoto(hash, metadata)
             : isVideo ? this.renderKnownVideo()
-            : isText ? this.renderRawText()
-            : this.renderPreview()
+              : isText ? this.renderRawText()
+                : this.renderPreview()
         }
         {/* dialog */}
         <DialogOverlay open={this.state.alert} >

@@ -5,35 +5,35 @@ import Base from './Base'
 import TimeDateInfo from '../device/TimeDateInfo'
 
 class TimeDate extends Base {
-  willReceiveProps(nextProps) {
+  willReceiveProps (nextProps) {
     this.handleProps(nextProps.selectedDevice, ['timedate'])
   }
 
-  navEnter() {
+  navEnter () {
     this.ctx.props.selectedDevice.request('timedate')
   }
 
-  navGroup() {
+  navGroup () {
     return 'device'
   }
 
-  menuName() {
+  menuName () {
     return i18n.__('TimeDate Menu Name')
   }
 
-  menuIcon() {
+  menuIcon () {
     return DeviceAccessTime
   }
 
-  quickName() {
+  quickName () {
     return i18n.__('TimeDate Quick Name')
   }
 
-  appBarStyle() {
+  appBarStyle () {
     return 'colored'
   }
 
-  renderContent() {
+  renderContent () {
     return (
       <TimeDateInfo
         timedate={this.state.timedate}

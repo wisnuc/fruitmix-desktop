@@ -3,7 +3,7 @@ import i18n from 'i18n'
 import DeviceAccessTime from 'material-ui/svg-icons/device/access-time'
 
 class TimeDate extends React.Component {
-  renderList(Icon, titles, values) {
+  renderList (Icon, titles, values) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
         {
@@ -25,7 +25,7 @@ class TimeDate extends React.Component {
     )
   }
 
-  render() {
+  render () {
     const timedate = this.props.timedate
     if (!timedate) return <div />
 

@@ -6,19 +6,19 @@ import TrsContainer from '../file/TransmissionContainer'
 import Base from './Base'
 
 class Transmission extends Base {
-  navEnter() {
+  navEnter () {
     ipcRenderer.send('GET_TRANSMISSION')
   }
 
-  navGroup() {
+  navGroup () {
     return 'file'
   }
 
-  menuName() {
+  menuName () {
     return i18n.__('Transmission Menu Name')
   }
 
-  menuIcon() {
+  menuIcon () {
     return ({
       icon: ActionSwapVerticalCircle,
       gif: {
@@ -31,27 +31,27 @@ class Transmission extends Base {
     })
   }
 
-  appBarStyle() {
+  appBarStyle () {
     return 'colored'
   }
 
-  prominent() {
+  prominent () {
     return true
   }
 
-  hasDetail() {
+  hasDetail () {
     return false
   }
 
-  detailEnabled() {
+  detailEnabled () {
     return false
   }
 
-  renderTitle({ style }) {
+  renderTitle ({ style }) {
     return <div style={Object.assign({}, style, { marginLeft: 184 })}>{ i18n.__('Transmission Title') }</div>
   }
 
-  renderContent({ navToDrive }) {
+  renderContent ({ navToDrive }) {
     return (
       <div style={{ width: '100%', height: '100%', overflow: 'auto' }}>
         <TrsContainer navToDrive={navToDrive} />

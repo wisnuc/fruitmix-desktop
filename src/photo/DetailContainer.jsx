@@ -109,7 +109,7 @@ const convertGPS = (gps) => {
 }
 
 class DetailContainerInline extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.digest = this.props.items[this.props.seqIndex].hash
@@ -326,7 +326,7 @@ class DetailContainerInline extends React.Component {
     }
   }
 
-  componentWillMount() {
+  componentWillMount () {
     // debug('componentWillMount', this.currentIndex, this.props.items.length)
 
     /* init three items' content */
@@ -343,12 +343,12 @@ class DetailContainerInline extends React.Component {
     this.props.memoize({ downloadDigest: this.centerItem.hash })
   }
 
-  componentDidMount() {
+  componentDidMount () {
     /* update refContainer size */
     this.forceUpdate()
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate (nextProps, nextState) {
     // debug('shouldComponentUpdate', nextProps.items.length, this.currentIndex)
     /* when nextProps.items.length === 0, close this DetailContainer */
     if (!nextProps.items.length || this.currentIndex > nextProps.items.length - 1) {
@@ -358,7 +358,7 @@ class DetailContainerInline extends React.Component {
     return true
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate (prevProps, prevState) {
     if (this.forceChange && prevProps && this.props && prevProps.items.length !== this.props.items.length) {
       // debug('componentDidUpdate', prevProps, this.props)
       this.currentIndex -= 1
@@ -367,31 +367,31 @@ class DetailContainerInline extends React.Component {
     }
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     clearTimeout(this.enterTimeout)
     clearTimeout(this.leaveTimeout)
   }
 
   /* ReactTransitionGroup */
-  componentWillEnter(callback) {
+  componentWillEnter (callback) {
     this.componentWillAppear(callback)
   }
 
-  componentWillAppear(callback) {
+  componentWillAppear (callback) {
     this.props.setAnimation('NavigationMenu', 'Out')
     if (this.props.selectedItems.length > 0) this.props.setAnimation2('ClearSelected', 'Out')
     this.animation('In')
     this.enterTimeout = setTimeout(callback, 200) // matches transition duration
   }
 
-  componentWillLeave(callback) {
+  componentWillLeave (callback) {
     this.props.setAnimation('NavigationMenu', 'In')
     if (this.props.selectedItems.length > 0) this.props.setAnimation2('ClearSelected', 'In')
     this.animation('Out')
     this.leaveTimeout = setTimeout(callback, 200) // matches transition duration
   }
 
-  renderInfo() {
+  renderInfo () {
     // debug('renderInfo', this.props.items.length, this.photo)
     if (!this.photo) return <div />
     const { date, datetime, model, make, h, w, size, gps, lat, latr, long, longr } = this.photo
@@ -471,7 +471,7 @@ class DetailContainerInline extends React.Component {
     )
   }
 
-  renderDetail(item, parent) {
+  renderDetail (item, parent) {
     const { m } = item
     const photoMagic = ['JPEG', 'GIF', 'PNG']
     const videoMagic = ['3GP', 'MP4', 'MOV']
@@ -490,7 +490,7 @@ class DetailContainerInline extends React.Component {
     return (<div />)
   }
 
-  render() {
+  render () {
     debug('renderContainer', this.leftItem, this.centerItem, this.rightItem, this.state, this.props)
     this.changeContainer()
 
@@ -604,7 +604,7 @@ class DetailContainerInline extends React.Component {
                 </div>
               </IconButton>
               {
-              !!this.props.selectedItems.length &&
+                !!this.props.selectedItems.length &&
                 <div style={{ color: '#FFF', fontSize: 20, fontWeight: 500 }} >
                   { i18n.__('%s Photo Selected', this.props.selectedItems.length) }
                 </div>
@@ -612,16 +612,16 @@ class DetailContainerInline extends React.Component {
               <div style={{ flexGrow: 1 }} />
               {/* toolbar */}
               {
-                this.props.selectedItems.length ?
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                this.props.selectedItems.length
+                  ? <div style={{ display: 'flex', alignItems: 'center' }}>
                     <div style={{ color: '#FFF', fontSize: 14, fontWeight: 500 }} >
                       { this.state.selected ? i18n.__('Selected') : i18n.__('Select') }
                     </div>
                     <IconButton onTouchTap={this.selectPhoto}>
                       <CheckIcon color={this.state.selected ? '#1E88E5' : '#FFF'} />
                     </IconButton>
-                  </div> :
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    </div>
+                  : <div style={{ display: 'flex', alignItems: 'center' }}>
                     <IconButton onTouchTap={() => this.props.startDownload()} tooltip={i18n.__('Download')}>
                       <DownloadIcon color="#FFF" />
                     </IconButton>
@@ -642,7 +642,7 @@ class DetailContainerInline extends React.Component {
                     <IconButton onTouchTap={() => this.toggleDialog('detailInfo')} tooltip={i18n.__('Info')}>
                       <InfoIcon color="#FFF" />
                     </IconButton>
-                  </div>
+                    </div>
               }
               <div style={{ width: 24 }} />
             </div>
@@ -788,7 +788,7 @@ class DetailContainer extends React.Component {
     </ReactTransitionGroup>
   )
 
-  render() {
+  render () {
     return (
       <RenderToLayer render={this.renderLayer} open useLayerForClickAway={false} />
     )

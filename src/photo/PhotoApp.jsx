@@ -18,7 +18,7 @@ import PhotoList from './PhotoList'
 const debug = Debug('component:photoApp:')
 
 class PhotoApp extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -59,17 +59,17 @@ class PhotoApp extends React.Component {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     document.addEventListener('keydown', this.keyChange)
     document.addEventListener('keyup', this.keyChange)
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     document.removeEventListener('keydown', this.keyChange)
     document.removeEventListener('keyup', this.keyChange)
   }
 
-  renderNoMedia() {
+  renderNoMedia () {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
         <div
@@ -92,29 +92,29 @@ class PhotoApp extends React.Component {
     )
   }
 
-  render() {
+  render () {
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%', marginTop: 2 }}>
         <EventListener target="window" onResize={this.handleResize} />
 
         {/* PhotoList */}
         {
-           !this.props.media ?
-             <div
-               style={{
-                 position: 'relative',
-                 marginTop: -7,
-                 width: '100%',
-                 height: '100%',
-                 display: 'flex',
-                 alignItems: 'center',
-                 justifyContent: 'center'
-               }}
-             >
-               <CircularProgress />
-             </div> :
-            this.props.media.length ?
-              <PhotoList
+          !this.props.media
+            ? <div
+              style={{
+                position: 'relative',
+                marginTop: -7,
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <CircularProgress />
+            </div>
+            : this.props.media.length
+              ? <PhotoList
                 media={this.props.media}
                 lookPhotoDetail={this.lookPhotoDetail}
                 ipcRenderer={this.props.ipcRenderer}
@@ -125,8 +125,8 @@ class PhotoApp extends React.Component {
                 getHoverPhoto={this.props.getHoverPhoto}
                 shiftStatus={this.props.shiftStatus}
                 headerHeight={66}
-              /> :
-              this.renderNoMedia()
+              />
+              : this.renderNoMedia()
         }
 
         {/* PhotoDetail */}

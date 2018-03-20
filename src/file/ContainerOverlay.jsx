@@ -27,7 +27,7 @@ const mousePosition = (ev) => {
 }
 
 class ContainerOverlayInline extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.dragPosition = { x: 0, y: 0, left: 0, top: 0 }
@@ -152,7 +152,7 @@ class ContainerOverlayInline extends React.Component {
     }
   }
 
-  componentWillMount() {
+  componentWillMount () {
     /* init three items' content */
     this.centerItem = this.props.items[this.currentIndex]
     this.leftItem = {}
@@ -165,30 +165,30 @@ class ContainerOverlayInline extends React.Component {
     }
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     clearTimeout(this.enterTimeout)
     clearTimeout(this.leaveTimeout)
   }
 
   /* ReactTransitionGroup */
 
-  componentWillEnter(callback) {
+  componentWillEnter (callback) {
     this.componentWillAppear(callback)
   }
 
-  componentWillAppear(callback) {
+  componentWillAppear (callback) {
     this.props.setAnimation('NavigationMenu', 'Out')
     this.animation('In')
     this.enterTimeout = setTimeout(callback, 200) // matches transition duration
   }
 
-  componentWillLeave(callback) {
+  componentWillLeave (callback) {
     this.props.setAnimation('NavigationMenu', 'In')
     this.animation('Out')
     this.leaveTimeout = setTimeout(callback, 200) // matches transition duration
   }
 
-  render() {
+  render () {
     // debug('redner ContainerOverlay', this.props)
     const { primaryColor } = this.props
     const entry = this.props.items[this.currentIndex]
@@ -299,8 +299,8 @@ class ContainerOverlayInline extends React.Component {
                 entry.type === 'public' || entry.type === 'directory'
                   ? <FileFolder style={{ color: 'rgba(0,0,0,0.54)' }} />
                   : entry.type === 'file'
-                  ? renderFileIcon(entry.name, entry.metadata, 24, true) // name, metadata, size, dark
-                  : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)' }} />
+                    ? renderFileIcon(entry.name, entry.metadata, 24, true) // name, metadata, size, dark
+                    : <ErrorIcon style={{ color: 'rgba(0,0,0,0.54)' }} />
               }
               <div style={{ width: 16 }} />
               <div
@@ -393,7 +393,7 @@ class ContainerOverlay extends React.Component {
     </ReactTransitionGroup>
   )
 
-  render() {
+  render () {
     return (
       <RenderToLayer render={this.renderLayer} open useLayerForClickAway={false} />
     )

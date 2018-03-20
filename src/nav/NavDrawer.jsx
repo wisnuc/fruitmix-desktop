@@ -11,7 +11,7 @@ import ActionDns from 'material-ui/svg-icons/action/dns'
 import { DockerIcon } from '../common/Svg'
 
 class SubHeader extends React.Component {
-  render() {
+  render () {
     return (
       <div
         style={{ height: 48,
@@ -29,14 +29,14 @@ class SubHeader extends React.Component {
 }
 
 class MenuSpacer extends React.PureComponent {
-  render() {
+  render () {
     return <div style={{ height: this.props.dense ? 4 : 8 }} />
   }
 }
 
 @Radium
 class MenuItem extends React.Component {
-  render() {
+  render () {
     const { icon, text, dense, primaryColor, selected, disabled } = this.props
 
     const iconColor = selected
@@ -73,7 +73,7 @@ class MenuItem extends React.Component {
 
 @Radium
 class NavDrawer extends React.Component {
-  renderGroup(group, ws215i) {
+  renderGroup (group, ws215i) {
     const { views, nav, navTo } = this.props
 
     const primaryColor = views[nav].primaryColor()
@@ -95,7 +95,7 @@ class NavDrawer extends React.Component {
       })
   }
 
-  render() {
+  render () {
     const { open, onRequestChange, views, nav, navTo } = this.props
     // console.log(' NavDrawer render', this.props)
     const dense = true
@@ -153,20 +153,20 @@ class NavDrawer extends React.Component {
             <div style={{ height: 96, width: '100%', display: 'flex', alignItems: 'center' }} >
               {/* set background of icon */}
               {
-                avatarUrl ?
-                  <div
+                avatarUrl
+                  ? <div
                     style={{ borderRadius: 28, width: 56, height: 56, overflow: 'hidden', marginLeft: 23, cursor: 'pointer' }}
                     onTouchTap={() => navTo('account')}
                   >
                     <img width={56} height={56} alt="" src={avatarUrl} />
-                  </div> :
-                  <IconButton
+                    </div>
+                  : <IconButton
                     iconStyle={{ width: 67, height: 67, color: 'white' }}
                     style={{ width: 105, height: 105, padding: 19 }}
                     onTouchTap={() => navTo('account')}
                   >
                     <ActionAccountCircle />
-                  </IconButton>
+                    </IconButton>
               }
             </div>
 

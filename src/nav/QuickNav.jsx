@@ -5,12 +5,12 @@ import React from 'react'
 */
 
 class QuickNav extends React.PureComponent {
-  constructor() {
+  constructor () {
     super()
     this.state = { hover: false }
   }
 
-  render() {
+  render () {
     const { Icon, text, color, onTouchTap } = this.props
 
     return (

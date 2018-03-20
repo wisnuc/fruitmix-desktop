@@ -18,7 +18,7 @@ import { ShareDisk } from '../common/Svg'
 const debug = Debug('component:file:GridView:')
 
 class Thumb extends React.PureComponent {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.path = ''
@@ -31,25 +31,25 @@ class Thumb extends React.PureComponent {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.session = UUID.v4()
     this.props.ipcRenderer.send('mediaShowThumb', this.session, this.props.digest, 200, 200, this.props.station)
     this.props.ipcRenderer.on('getThumbSuccess', this.updatePath)
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps (nextProps) {
     if (nextProps.digest !== this.props.digest) {
       this.session = UUID.v4()
       this.props.ipcRenderer.send('mediaShowThumb', this.session, nextProps.digest, 200, 200, this.props.station)
     }
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     this.props.ipcRenderer.removeListener('getThumbSuccess', this.updatePath)
     this.props.ipcRenderer.send('mediaHideThumb', this.session)
   }
 
-  render() {
+  render () {
     // debug('render Thumb', this.props)
     const style = Object.assign({ objectFit: this.props.full ? 'contain' : 'cover', transition: 'all 225ms cubic-bezier(0.0, 0.0, 0.2, 1)' }, this.props.imgStyle || {})
     return (

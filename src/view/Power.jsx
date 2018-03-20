@@ -5,23 +5,23 @@ import Base from './Base'
 import PowerApp from '../device/PowerApp'
 
 class Power extends Base {
-  navGroup() {
+  navGroup () {
     return 'device'
   }
 
-  menuName() {
+  menuName () {
     return i18n.__('Power Menu Name')
   }
 
-  menuIcon() {
+  menuIcon () {
     return ActionPowerSettingsNew
   }
 
-  appBarStyle() {
+  appBarStyle () {
     return 'colored'
   }
 
-  renderContent({ openSnackBar }) {
+  renderContent ({ openSnackBar }) {
     return (
       <PowerApp
         nav={this.ctx.props.nav}

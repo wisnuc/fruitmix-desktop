@@ -4,12 +4,12 @@ import PhotoItem from './PhotoItem'
 import { includeAll } from '../common/array'
 
 class RenderListByRow extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
-      selected: this.props.list.first && this.props.selectedItems.length >= this.props.photoListWithSameDate.photos.length
-      && includeAll([...this.props.selectedItems].sort(), this.props.photoListWithSameDate.photos.map(photo => photo.hash).sort())
+      selected: this.props.list.first && this.props.selectedItems.length >= this.props.photoListWithSameDate.photos.length &&
+      includeAll([...this.props.selectedItems].sort(), this.props.photoListWithSameDate.photos.map(photo => photo.hash).sort())
     }
 
     this.onSelectIconButton = () => {
@@ -26,20 +26,20 @@ class RenderListByRow extends React.Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps (nextProps) {
     if (nextProps.selectedItems.length !== this.props.selectedItems.length) {
       this.setState({
-        selected: nextProps.list.first && nextProps.selectedItems.length >= nextProps.photoListWithSameDate.photos.length
-        && includeAll([...nextProps.selectedItems].sort(), nextProps.photoListWithSameDate.photos.map(photo => photo.hash).sort())
+        selected: nextProps.list.first && nextProps.selectedItems.length >= nextProps.photoListWithSameDate.photos.length &&
+        includeAll([...nextProps.selectedItems].sort(), nextProps.photoListWithSameDate.photos.map(photo => photo.hash).sort())
       })
     }
   }
 
-  shouldComponentUpdate(nextProps) {
+  shouldComponentUpdate (nextProps) {
     return (!nextProps.isScrolling)
   }
 
-  render() {
+  render () {
     const { list, lookPhotoDetail, isScrolling, rowSum } = this.props
     const { photos, first, date } = list
     const selected = this.props.selectedItems.length > 0
@@ -81,13 +81,13 @@ class RenderListByRow extends React.Component {
           </div>
         }
         <div style={{ display: 'flex', flexFlow: 'row wrap', justifyContent: 'flex-start' }}>
-          { isScrolling && rowSum > 500 ?
-            photos.map(photo => (
+          { isScrolling && rowSum > 500
+            ? photos.map(photo => (
               <div
                 style={{ width: this.props.size, height: this.props.size, marginRight: 8, marginBottom: 8, backgroundColor: '#eeeeee' }}
                 key={photo.hash}
-              />)) :
-            photos.map(photo => (
+              />))
+            : photos.map(photo => (
               <PhotoItem
                 style={{ width: this.props.size, height: this.props.size, marginRight: 8, marginBottom: 8 }}
                 lookPhotoDetail={lookPhotoDetail}

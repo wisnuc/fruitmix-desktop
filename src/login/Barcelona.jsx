@@ -15,4 +15,3 @@ const Barcelona = ({ style, fill, size }) => (
 )
 
 export default Barcelona
-

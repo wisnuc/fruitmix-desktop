@@ -1,7 +1,7 @@
 import React from 'react'
 
 class Tooltip extends React.PureComponent {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.distance = 8
     this.dur = 120
@@ -24,7 +24,7 @@ class Tooltip extends React.PureComponent {
     }
   }
 
-  render() {
+  render () {
     const status = this.state.status
 
     const style = Object.assign({

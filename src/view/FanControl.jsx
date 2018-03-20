@@ -5,7 +5,7 @@ import Base from './Base'
 import Fan from '../device/Fan'
 
 class FanControl extends Base {
-  constructor(ctx) {
+  constructor (ctx) {
     super(ctx)
     this.state = {
       fan: null
@@ -13,35 +13,35 @@ class FanControl extends Base {
     this.refresh = () => this.navEnter()
   }
 
-  willReceiveProps(nextProps) {
+  willReceiveProps (nextProps) {
     this.handleProps(nextProps.selectedDevice, ['fan'])
   }
 
-  navEnter() {
+  navEnter () {
     this.ctx.props.selectedDevice.request('fan')
   }
 
-  navGroup() {
+  navGroup () {
     return 'device'
   }
 
-  menuName() {
+  menuName () {
     return i18n.__('FanControl Menu Name')
   }
 
-  menuIcon() {
+  menuIcon () {
     return HardwareToys
   }
 
-  quickName() {
+  quickName () {
     return i18n.__('FanControl Quick Name')
   }
 
-  appBarStyle() {
+  appBarStyle () {
     return 'colored'
   }
 
-  renderContent({ openSnackBar }) {
+  renderContent ({ openSnackBar }) {
     return (
       <Fan
         fan={this.state.fan}

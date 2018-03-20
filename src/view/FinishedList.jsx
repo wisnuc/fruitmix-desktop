@@ -7,19 +7,19 @@ import { BTFinishedIcon } from '../common/Svg'
 import Download from './Download'
 
 class FinishedList extends Download {
-  menuName() {
+  menuName () {
     return i18n.__('FinishedList Menu Name')
   }
 
-  menuIcon() {
+  menuIcon () {
     return BTFinishedIcon
   }
 
-  quickName() {
+  quickName () {
     return i18n.__('FinishedList Quick Name')
   }
 
-  renderTitle({ style }) {
+  renderTitle ({ style }) {
     return (
       <div style={Object.assign({}, style, { marginLeft: 184 })}>
         { i18n.__('FinishedList Title %s', (this.state.BTList && this.state.BTList.finish.length) || 0)}
@@ -27,7 +27,7 @@ class FinishedList extends Download {
     )
   }
 
-  renderContent({ navToDrive, openSnackBar }) {
+  renderContent ({ navToDrive, openSnackBar }) {
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <BTDownload

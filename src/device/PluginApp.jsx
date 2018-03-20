@@ -10,7 +10,7 @@ import { SambaIcon, MiniDLNAIcon, BTDownloadIcon } from '../common/Svg'
 const debug = Debug('component:control:SettingsApp:')
 
 class PluginApp extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -43,7 +43,7 @@ class PluginApp extends React.Component {
     }
   }
 
-  renderRow({ key, Icon, title, text, enabled, func, bgColor }) {
+  renderRow ({ key, Icon, title, text, enabled, func, bgColor }) {
     const isWIP = this.state.loading === key
     return (
       <div key={title} >
@@ -75,7 +75,7 @@ class PluginApp extends React.Component {
     )
   }
 
-  render() {
+  render () {
     const { dlna, samba, bt } = this.props
     if (!dlna || !samba) return (<div />)
     // console.log('plugin this.props', this.props)

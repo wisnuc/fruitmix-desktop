@@ -18,7 +18,7 @@ const debug = Debug('component:control:deviceinfo')
 const phaseData = value => prettysize(parseInt(value, 10) * 1024)
 
 class DeviceInfo extends React.PureComponent {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       titleHover: false
@@ -50,7 +50,7 @@ class DeviceInfo extends React.PureComponent {
     }
   }
 
-  renderList(Icon, titles, values) {
+  renderList (Icon, titles, values) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: 420 }}>
         {
@@ -71,7 +71,7 @@ class DeviceInfo extends React.PureComponent {
     )
   }
 
-  renderDivider() {
+  renderDivider () {
     return (
       <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', marginLeft: 80 }}>
         <div style={{ height: 8 }} />
@@ -81,7 +81,7 @@ class DeviceInfo extends React.PureComponent {
     )
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps (nextProps) {
     if (nextProps.info && this.props.info && (nextProps.info.name !== this.props.info.name)) {
       this.currentLabel = nextProps.info.name
       this.setState({
@@ -92,7 +92,7 @@ class DeviceInfo extends React.PureComponent {
     }
   }
 
-  render() {
+  render () {
     if (!this.props.device || !this.props.storage || !this.props.boot || !this.props.info) return <div />
 
     const { cpuInfo, memInfo, ws215i } = this.props.device
@@ -124,7 +124,6 @@ class DeviceInfo extends React.PureComponent {
       prettysize(volume.usage.data.size),
       prettysize(volume.usage.overall.free)
     ]
-
 
     /* CPU */
     const cpuIcon = CPU
@@ -199,8 +198,8 @@ class DeviceInfo extends React.PureComponent {
             >
               <div style={{ height: 16 }} />
               {
-                this.state.modify ?
-                  <div style={{ marginTop: -8, display: 'flex' }}>
+                this.state.modify
+                  ? <div style={{ marginTop: -8, display: 'flex' }}>
                     {/* FIXME */}
                     <TextField
                       name="deviceName"
@@ -212,20 +211,19 @@ class DeviceInfo extends React.PureComponent {
                       onKeyDown={this.onKeyDown}
                     />
                     {
-                      this.state.progress ?
-                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginLeft: 8 }}>
+                      this.state.progress
+                        ? <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginLeft: 8 }}>
                           <CircularProgress size={16} thickness={2} />
                         </div>
-                        :
-                        <IconButton
+                        : <IconButton
                           onTouchTap={() => this.state.changed && this.changeDeviceName()}
                           disabled={!!this.state.errorText || !this.state.label || !this.state.label.length}
                         >
                           <DoneIcon color={this.props.primaryColor} />
                         </IconButton>
                     }
-                  </div> :
-                  <div
+                  </div>
+                  : <div
                     style={{ display: 'flex', alignItems: 'center', height: 32 }}
                     onTouchTap={() => this.setState({ modify: true })}
                   >

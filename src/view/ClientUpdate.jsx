@@ -6,27 +6,27 @@ import Base from './Base'
 import UpdateApp from '../control/ClientUpdateApp'
 
 class Update extends Base {
-  navGroup() {
+  navGroup () {
     return 'settings'
   }
 
-  menuName() {
+  menuName () {
     return i18n.__('ClientUpdate Menu Name')
   }
 
-  menuIcon() {
+  menuIcon () {
     return UpdateIcon
   }
 
-  quickName() {
+  quickName () {
     return i18n.__('ClientUpdate Quick Name')
   }
 
-  appBarStyle() {
+  appBarStyle () {
     return 'colored'
   }
 
-  renderContent({ openSnackBar }) {
+  renderContent ({ openSnackBar }) {
     return (
       <UpdateApp
         ipcRenderer={ipcRenderer}

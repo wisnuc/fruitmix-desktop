@@ -1,7 +1,7 @@
 import FileSelect from '../file/ListSelect'
 
 class ListSelect extends FileSelect {
-  constructor(ctx) {
+  constructor (ctx) {
     super(ctx)
     this.ctx = ctx
     this.uuid = index => this.ctx.state.entries[index].uuid
@@ -10,17 +10,17 @@ class ListSelect extends FileSelect {
       const idx = this.state.selected.indexOf(uuid)
       if (idx !== -1) {
         this.setState({
-          selected: [...this.state.selected.slice(0, idx), ...this.state.selected.slice(idx + 1)],
+          selected: [...this.state.selected.slice(0, idx), ...this.state.selected.slice(idx + 1)]
         })
       }
     }
   }
 
-  leftClick(index) {
+  leftClick (index) {
     this.ctrlLeftClick(index)
   }
 
-  rowCheck(index) {
+  rowCheck (index) {
     const uuid = this.uuid(index)
     if (this.state.shift) {
       if (this.state.selected.includes(uuid)) return 'checked'
@@ -36,7 +36,7 @@ class ListSelect extends FileSelect {
     return 'none'
   }
 
-  addByArray(indexs, session) {
+  addByArray (indexs, session) {
     const array = indexs.map(i => this.uuid(i))
     const isSameBox = this.session === session
     this.session = session
@@ -47,7 +47,7 @@ class ListSelect extends FileSelect {
   }
 
   // toggle select and (sort of) specified
-  ctrlLeftClick(index) {
+  ctrlLeftClick (index) {
     if (index === -1) { // click outside
       // this.setState({ selected: [], specified: -1, hover: -1 })
     } else {
@@ -64,12 +64,12 @@ class ListSelect extends FileSelect {
           specified: index
         })
       }
-     }
+    }
   }
 
   // 1. if not specified, specify and select
   // 2. range select if specified, and unspecify
-  shiftLeftClick(index) {
+  shiftLeftClick (index) {
     const { specified, selected } = this.state
     const uuid = this.uuid(index)
 
@@ -92,7 +92,7 @@ class ListSelect extends FileSelect {
     }
   }
 
-  rowColor(index) {
+  rowColor (index) {
     const uuid = this.uuid(index)
     if (this.shiftInRange(index) || (index === this.state.hover && !this.dragging.length)) return '#EEEEEE'
     else if (this.state.selected.includes(uuid)) return '#F5F5F5'

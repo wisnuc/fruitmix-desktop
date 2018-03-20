@@ -16,7 +16,7 @@ import slice from '../common/slice'
 const debug = Debug('component:control:AdminUsers: ')
 
 class AdminUsersApp extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       user: null,
@@ -77,7 +77,7 @@ class AdminUsersApp extends React.Component {
     }
   }
 
-  renderUserRow(user) {
+  renderUserRow (user) {
     let avatarUrl = null
     let nickName = ''
     const index = global.config.users.findIndex(uc => uc && uc.userUUID === user.uuid && uc.weChat)
@@ -87,8 +87,8 @@ class AdminUsersApp extends React.Component {
       nickName = weChatInfo.nickName
     }
 
-    const userLabel = user.isFirstUser ? i18n.__('Super Admin') : user.disabled ? i18n.__('Disabled') :
-      user.isAdmin ? i18n.__('Admin User') : i18n.__('Normal User')
+    const userLabel = user.isFirstUser ? i18n.__('Super Admin') : user.disabled ? i18n.__('Disabled')
+      : user.isAdmin ? i18n.__('Admin User') : i18n.__('Normal User')
 
     return (
       <div
@@ -104,11 +104,11 @@ class AdminUsersApp extends React.Component {
         <div style={{ flex: '0 0 32px' }} />
         <div style={{ flex: '0 0 40px' }}>
           {
-            avatarUrl ?
-              <div style={{ borderRadius: 20, width: 40, height: 40, overflow: 'hidden' }}>
+            avatarUrl
+              ? <div style={{ borderRadius: 20, width: 40, height: 40, overflow: 'hidden' }}>
                 <img width={40} height={40} alt="" src={avatarUrl} />
-              </div> :
-              <Avatar>{ slice(user.username, 0, 2).toUpperCase() }</Avatar>
+              </div>
+              : <Avatar>{ slice(user.username, 0, 2).toUpperCase() }</Avatar>
           }
         </div>
         <div style={{ flex: '0 0 32px' }} />
@@ -147,18 +147,18 @@ class AdminUsersApp extends React.Component {
         <div style={{ flex: '0 0 50px' }}>
           {
             user.isFirstUser || !this.props.apis.account.data.isAdmin || (!this.props.apis.account.data.isFirstUser && user.isAdmin)
-            ? <div />
-            : <Toggle
-              toggled={!user.disabled}
-              onToggle={() => this.toggleDialog('disableUser', user)}
-            />
+              ? <div />
+              : <Toggle
+                toggled={!user.disabled}
+                onToggle={() => this.toggleDialog('disableUser', user)}
+              />
           }
         </div>
       </div>
     )
   }
 
-  render() {
+  render () {
     const { users, apis, refreshUsers, openSnackBar } = this.props
     if (!users) return <div />
     debug('this.props', this.props, users)

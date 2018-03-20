@@ -16,7 +16,7 @@ import Inbox from '../box/Inbox'
 ipcRenderer.setMaxListeners(1000)
 
 class Box extends Base {
-  constructor(ctx) {
+  constructor (ctx) {
     super(ctx)
     this.state = {
       boxes: null,
@@ -65,7 +65,7 @@ class Box extends Base {
           const isMedia = list && list.length && list.every(l => l.metadata)
           const comment = isMedia ? `[${i18n.__('%s Photos', list.length)}]` : list && list.length
             ? `[${i18n.__('%s Files', list.length)}]` : tweet.type === 'boxmessage'
-            ? this.getMsg(tweet, b) : tweet.comment
+              ? this.getMsg(tweet, b) : tweet.comment
           const user = b.users.find(u => u.id === tweet.tweeter)
           const nickName = user && user.nickName
           /* box message, nickName + content, '' */
@@ -152,7 +152,7 @@ class Box extends Base {
     }
   }
 
-  willReceiveProps(nextProps) {
+  willReceiveProps (nextProps) {
     if (!this.state.account) this.handleProps(nextProps.apis, ['account'])
     if (this.first && this.state.account) {
       this.navEnter()
@@ -162,7 +162,7 @@ class Box extends Base {
     }
   }
 
-  navEnter() {
+  navEnter () {
     const apis = this.ctx.props.apis
     if (!apis || !apis.account || !apis.account.data) return
     // console.log('navEnter', apis)
@@ -180,47 +180,47 @@ class Box extends Base {
     } else this.setState({ error: this.guid ? 'Token' : 'WeChat' })
   }
 
-  navLeave() {
+  navLeave () {
     this.onMqtt = false
   }
 
-  navGroup() {
+  navGroup () {
     return 'box'
   }
 
-  menuName() {
+  menuName () {
     return i18n.__('Inbox Menu Name')
   }
 
-  menuIcon() {
+  menuIcon () {
     return InboxIcon
   }
 
-  quickName() {
+  quickName () {
     return i18n.__('Inbox Quick Name')
   }
 
-  appBarStyle() {
+  appBarStyle () {
     return 'light'
   }
 
-  prominent() {
+  prominent () {
     return false
   }
 
-  hasDetail() {
+  hasDetail () {
     return false
   }
 
-  detailEnabled() {
+  detailEnabled () {
     return true
   }
 
-  detailWidth() {
+  detailWidth () {
     return 400
   }
 
-  renderNavigationMenu({ style, onTouchTap }) {
+  renderNavigationMenu ({ style, onTouchTap }) {
     const CustomStyle = Object.assign(style, { opacity: 1 })
     return (
       <div style={CustomStyle} ref={ref => (this.refNavigationMenu = ref)}>
@@ -231,7 +231,7 @@ class Box extends Base {
     )
   }
 
-  renderTitle({ style }) {
+  renderTitle ({ style }) {
     const newStyle = Object.assign(style, { color: 'rgba(0,0,0,0.54)' })
     return (
       <div style={newStyle}>
@@ -241,7 +241,7 @@ class Box extends Base {
     )
   }
 
-  renderDefaultError() {
+  renderDefaultError () {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
         <div
@@ -259,9 +259,9 @@ class Box extends Base {
           <ErrorIcon style={{ height: 64, width: 64, color: 'rgba(0,0,0,0.27)' }} />
           <div style={{ fontSize: 20, color: 'rgba(0,0,0,0.27)', width: 320, textAlign: 'center' }}>
             {
-              this.state.error === 'WeChat' ? i18n.__('No WeChat Account Error in Box') :
-              this.state.error === 'Token' ? i18n.__('Token Expired Error in Box') :
-              i18n.__('Error in Base Text')
+              this.state.error === 'WeChat' ? i18n.__('No WeChat Account Error in Box')
+                : this.state.error === 'Token' ? i18n.__('Token Expired Error in Box')
+                  : i18n.__('Error in Base Text')
             }
           </div>
           {
@@ -277,7 +277,7 @@ class Box extends Base {
     )
   }
 
-  renderContent() {
+  renderContent () {
     return (<Inbox
       boxes={this.state.boxes}
       tweets={this.state.tweets}

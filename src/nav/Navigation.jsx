@@ -48,7 +48,7 @@ import Plugin from '../view/Plugin'
 const debug = Debug('component:nav:Navigation')
 
 class NavViews extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.navBoundObj = {}
@@ -178,13 +178,13 @@ class NavViews extends React.Component {
     }
   }
 
-  install(name, View) {
+  install (name, View) {
     this.views[name] = new View(this)
     this.views[name].on('updated', next => this.setState({ [name]: next }))
     this.state.home = this.views[name].state
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.navTo('group')
     this.checkFirmWareAsync().catch(e => console.log('checkFirmWareAsync error', e))
     this.setState({ openDrawer: true })
@@ -194,17 +194,17 @@ class NavViews extends React.Component {
     ipcRenderer.on('conflicts', (e, args) => this.setState({ conflicts: args }))
   }
 
-  componentDidUpdate() {
+  componentDidUpdate () {
     this.currentView().willReceiveProps(this.props)
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     clearTimeout(this.timer)
     ipcRenderer.removeAllListeners('snackbarMessage')
     ipcRenderer.removeAllListeners('conflicts')
   }
 
-  navTo(nav, target) {
+  navTo (nav, target) {
     // debug('navTo', nav, target, this.state.nav)
     if (nav === this.state.nav) {
       this.setState({ openDrawer: false })
@@ -216,7 +216,7 @@ class NavViews extends React.Component {
     }
   }
 
-  navToDrive(driveUUID, dirUUID) {
+  navToDrive (driveUUID, dirUUID) {
     const drives = this.props.apis.drives.data // no drives ?
     const drive = drives.find(d => d.uuid === driveUUID)
     if (drive.tag === 'home') this.navTo('home', { driveUUID, dirUUID })
@@ -225,34 +225,34 @@ class NavViews extends React.Component {
   }
 
   // not used, decorate onto navmap ? TODO
-  navBound(navname) {
-    return this.navBoundObj[navname]
-      || (this.navBoundObj[navname] = this.navTo.bind(this, navname))
+  navBound (navname) {
+    return this.navBoundObj[navname] ||
+      (this.navBoundObj[navname] = this.navTo.bind(this, navname))
   }
 
-  openDrawer(open) {
+  openDrawer (open) {
     this.setState({ openDrawer: open })
   }
 
-  toggleDetail() {
+  toggleDetail () {
     this.setState({ showDetail: !this.state.showDetail })
   }
 
-  getDetailStatus() {
+  getDetailStatus () {
     return this.state.showDetail
   }
 
-  openSnackBar(message, options) {
+  openSnackBar (message, options) {
     if (options && options.showTasks) this.setState({ showTasks: true, snackBar: message })
     else this.setState({ snackBar: message })
   }
 
-  currentView() {
+  currentView () {
     if (!this.state.nav) throw new Error('no nav')
     return this.views[this.state.nav]
   }
 
-  renderQuickNavs() {
+  renderQuickNavs () {
     if (!this.state.nav) return null
 
     const color = this.currentView().primaryColor()
@@ -294,16 +294,18 @@ class NavViews extends React.Component {
             if ((!ws215i || !isAdmin) && key === 'fanControl') return noRender
             if (!isAdmin && (['firmwareUpdate', 'power', 'adminUsers', 'adminDrives', 'plugin'].includes(key))) return noRender
             if (isCloud && ['device', 'networking', 'timeDate', 'fanControl', 'power', 'firmwareUpdate'].includes(key)) return noRender
-            if (key === 'transmission' || key === 'transmission2') return (
-              <TransNav
-                key={`quicknav-${key}`}
-                icon={this.views[key].quickIcon()}
-                text={this.views[key].quickName()}
-                color={color}
-                selected={key === this.state.nav}
-                onTouchTap={this.navBound(key)}
-              />
-            )
+            if (key === 'transmission' || key === 'transmission2') {
+              return (
+                <TransNav
+                  key={`quicknav-${key}`}
+                  icon={this.views[key].quickIcon()}
+                  text={this.views[key].quickName()}
+                  color={color}
+                  selected={key === this.state.nav}
+                  onTouchTap={this.navBound(key)}
+                />
+              )
+            }
             return (
               <QuickNav
                 key={`quicknav-${key}`}
@@ -318,11 +320,11 @@ class NavViews extends React.Component {
     )
   }
 
-  appBarHeight() {
+  appBarHeight () {
     return this.currentView().prominent() ? 128 : 64
   }
 
-  renderDetailButton() {
+  renderDetailButton () {
     const view = this.currentView()
     if (!view.hasDetail()) return null
     let DetailIcon = ActionInfo
@@ -364,7 +366,7 @@ class NavViews extends React.Component {
     )
   }
 
-  renderDialogButton({ type, Icon, tooltip, num }) {
+  renderDialogButton ({ type, Icon, tooltip, num }) {
     const view = this.currentView()
     return (
       <div style={{ width: 48, height: 48, position: 'relative' }} >
@@ -389,8 +391,8 @@ class NavViews extends React.Component {
           />
         </IconButton>
         {
-          num < 100 ?
-            <div
+          num < 100
+            ? <div
               style={{
                 position: 'absolute',
                 right: 8,
@@ -411,33 +413,33 @@ class NavViews extends React.Component {
             >
               { num }
             </div>
-            : num > 99 ?
-            <div
-              style={{
-                position: 'absolute',
-                right: 0,
-                top: 9,
-                width: 24,
-                height: 16,
-                borderRadius: 8,
-                backgroundColor: '#F44336',
-                fontSize: 10,
-                fontWeight: 500,
-                color: '#FFF',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
+            : num > 99
+              ? <div
+                style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: 9,
+                  width: 24,
+                  height: 16,
+                  borderRadius: 8,
+                  backgroundColor: '#F44336',
+                  fontSize: 10,
+                  fontWeight: 500,
+                  color: '#FFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
               99+
-            </div>
-            : <div />
+              </div>
+              : <div />
         }
       </div>
     )
   }
 
-  renderAppBar() {
+  renderAppBar () {
     const view = this.currentView()
     let backgroundColor
     switch (view.appBarStyle()) {
@@ -535,11 +537,11 @@ class NavViews extends React.Component {
     )
   }
 
-  renderAppBarShadow() {
+  renderAppBarShadow () {
     return <div style={{ width: '100%', height: this.appBarHeight(), transition: 'height 300ms' }} />
   }
 
-  renderDetail() {
+  renderDetail () {
     const view = this.currentView()
 
     if (!view.hasDetail() || !view.detailEnabled()) return null
@@ -555,7 +557,7 @@ class NavViews extends React.Component {
     return view.renderDetail({ style, openSnackBar: this.openSnackBarBound })
   }
 
-  renderSnackBar() {
+  renderSnackBar () {
     // debug('renderSnackBar', this.state.snackBar)
     return (
       <Snackbar
@@ -567,7 +569,7 @@ class NavViews extends React.Component {
     )
   }
 
-  render() {
+  render () {
     if (!this.state.nav) return null
 
     const view = this.views[this.state.nav]
@@ -689,7 +691,7 @@ class NavViews extends React.Component {
   event routing.
 */
 class Navigation extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     /* init apis */
@@ -704,11 +706,11 @@ class Navigation extends React.Component {
     this.state = { apis: null }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.fruitmix.start()
   }
 
-  render() {
+  render () {
     return <NavViews apis={this.state.apis} {...this.props} />
   }
 }

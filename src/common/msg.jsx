@@ -5,7 +5,7 @@ import i18n from 'i18n'
  * @return { String } i18n message
 */
 
-export function xcopyMsg(props) {
+export function xcopyMsg (props) {
   const getName = (node) => {
     let name
     switch (node.type) {

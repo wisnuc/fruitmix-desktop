@@ -7,45 +7,45 @@ import Base from './Base'
 import AccountApp from '../control/AccountApp'
 
 class Account extends Base {
-  constructor(ctx) {
+  constructor (ctx) {
     super(ctx)
     this.refreshData = this.refresh.bind(this)
   }
 
-  willReceiveProps(nextProps) {
+  willReceiveProps (nextProps) {
     this.handleProps(nextProps.apis, ['account', 'users'])
   }
 
-  refresh() {
+  refresh () {
     this.ctx.props.apis.request('account')
     this.ctx.props.apis.request('users')
   }
 
-  navEnter() {
+  navEnter () {
     this.ctx.props.apis.request('account')
     this.ctx.props.apis.request('users')
   }
 
-  navLeave() {
+  navLeave () {
   }
 
-  navGroup() {
+  navGroup () {
     return 'user'
   }
 
-  menuName() {
+  menuName () {
     return i18n.__('Account Menu Name')
   }
 
-  menuIcon() {
+  menuIcon () {
     return ActionAccountBox
   }
 
-  appBarStyle() {
+  appBarStyle () {
     return 'colored'
   }
 
-  renderContent({ openSnackBar }) {
+  renderContent ({ openSnackBar }) {
     return (
       <AccountApp
         openSnackBar={openSnackBar}

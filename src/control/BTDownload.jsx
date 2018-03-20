@@ -51,13 +51,12 @@ const formatSeconds = (seconds) => {
 }
 
 class BTDownload extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     /* handle select TODO */
     this.select = new ListSelect(this)
     this.select.on('updated', next => this.setState({ select: next }))
-
 
     this.state = {
       select: this.select.state,
@@ -236,27 +235,27 @@ class BTDownload extends React.Component {
     }
   }
 
-  componentDidMount() {
-    this.refreshTimer = setInterval(() => this.props.tasks.some(t => t.state === 'downloading' && !t.isPause)
-      && this.refresh(), 1000)
+  componentDidMount () {
+    this.refreshTimer = setInterval(() => this.props.tasks.some(t => t.state === 'downloading' && !t.isPause) &&
+      this.refresh(), 1000)
 
     /* bind keydown event */
     document.addEventListener('keydown', this.keyDown)
     document.addEventListener('keyup', this.keyUp)
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps (nextProps) {
     if (nextProps.tasks && this.props.tasks !== nextProps.tasks) this.setState({ loading: false })
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     clearInterval(this.refreshTimer)
     /* remove keydown event */
     document.removeEventListener('keydown', this.keyDown)
     document.removeEventListener('keyup', this.keyUp)
   }
 
-  renderNoTasks() {
+  renderNoTasks () {
     return (
       <div
         style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -281,7 +280,7 @@ class BTDownload extends React.Component {
     )
   }
 
-  renderDisabled() {
+  renderDisabled () {
     return (
       <div
         style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -306,7 +305,7 @@ class BTDownload extends React.Component {
     )
   }
 
-  renderOffLine() {
+  renderOffLine () {
     return (
       <div
         style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -331,7 +330,7 @@ class BTDownload extends React.Component {
     )
   }
 
-  renderLoading() {
+  renderLoading () {
     return (
       <div style={{ width: '100%', height: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
         <CircularProgress size={32} thickness={3} />
@@ -339,7 +338,7 @@ class BTDownload extends React.Component {
     )
   }
 
-  renderCircularProgress(progress, color, hovered, infoHash, isPause) {
+  renderCircularProgress (progress, color, hovered, infoHash, isPause) {
     const p = progress > 1 ? 1 : progress < 0 ? 0 : progress
     const rightDeg = Math.min(45, p * 360 - 135)
     const leftDeg = Math.max(45, p * 360 - 135)
@@ -398,8 +397,8 @@ class BTDownload extends React.Component {
           }}
         >
           {
-            hovered && !this.props.alt ?
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            hovered && !this.props.alt
+              ? <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <IconButton
                   onTouchTap={e => this.toggleStatus(e, infoHash, isPause)}
                   tooltip={isPause ? i18n.__('Resume') : i18n.__('Pause')}
@@ -414,7 +413,7 @@ class BTDownload extends React.Component {
     )
   }
 
-  renderRow(task, index) {
+  renderRow (task, index) {
     const { magnetURL, name, progress, downloadSpeed, downloaded, timeRemaining, infoHash, isPause, numPeers, finishTime } = task
     const selected = this.state.select.selected && this.state.select.selected.findIndex(s => s === index) > -1
     const hovered = this.state.select.hover === index
@@ -454,7 +453,6 @@ class BTDownload extends React.Component {
           </div>
         </div>
 
-
         <div style={{ flex: '0 0 40px' }} />
         {/* Downloaded size */}
         <div style={{ flex: '0 0 160px' }}> { `${formatSize(downloaded)} / ${formatSize(downloaded / progress)}` } </div>
@@ -468,8 +466,8 @@ class BTDownload extends React.Component {
 
         {/* Status */}
         <div style={{ flex: '0 0 160px' }}>
-          { this.props.alt ? i18n.__('Finished') : isPause ? i18n.__('Task Paused') :
-            name ? i18n.__('Task Downloading') : i18n.__('Getting Info') }
+          { this.props.alt ? i18n.__('Finished') : isPause ? i18n.__('Task Paused')
+            : name ? i18n.__('Task Downloading') : i18n.__('Getting Info') }
         </div>
 
         {/* task restTime */}
@@ -490,7 +488,7 @@ class BTDownload extends React.Component {
     )
   }
 
-  render() {
+  render () {
     // debug('render BTDownload', this.state, this.props)
     /* lost connection to wisnuc */
     if (!window.navigator.onLine) return this.renderOffLine()
@@ -597,14 +595,13 @@ class BTDownload extends React.Component {
           </div>
         </DialogOverlay>
 
-
         <div style={{ height: 48 }} />
         {/* list */}
         <div style={{ overflowY: 'auto', width: '100%', height: 'calc(100% - 48px)' }}>
           {
             (this.props.tasks && !this.props.tasks.length)
-            ? this.renderNoTasks()
-            : this.props.tasks.map((task, index) => this.renderRow(task, index))
+              ? this.renderNoTasks()
+              : this.props.tasks.map((task, index) => this.renderRow(task, index))
           }
         </div>
 

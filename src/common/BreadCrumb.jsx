@@ -2,7 +2,7 @@ import React from 'react'
 import RightIcon from 'material-ui/svg-icons/navigation/chevron-right'
 
 export class BreadCrumbItem extends React.PureComponent {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = { hover: false, isDrop: false }
     this.onMouseMove = () => {
@@ -18,7 +18,7 @@ export class BreadCrumbItem extends React.PureComponent {
       this.setState({ hover: false, isDrop: false, dropable: false })
     }
   }
-  render() {
+  render () {
     /* alt: small version and bgColor is white */
     const { alt, text } = this.props
 
@@ -57,7 +57,7 @@ export class BreadCrumbItem extends React.PureComponent {
 }
 
 export class BreadCrumbSeparator extends React.PureComponent {
-  render() {
+  render () {
     const { alt } = this.props
     return (
       <div

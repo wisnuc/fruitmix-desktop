@@ -20,7 +20,7 @@ const duration = 300
 
 @Radium
 class DeviceList extends React.PureComponent {
-  render() {
+  render () {
     const { list, primaryColor, select } = this.props
     return (
       <div
@@ -38,11 +38,11 @@ class DeviceList extends React.PureComponent {
         {
           list.LANIP
             ? list.isOnline
-            ? <CloudDoneIcon color={primaryColor} />
-            : <CloudOffIcon color="rgba(0,0,0,0.54)" />
+              ? <CloudDoneIcon color={primaryColor} />
+              : <CloudOffIcon color="rgba(0,0,0,0.54)" />
             : list.isOnline
-            ? <WifiIcon color={primaryColor} />
-            : <WifiIcon color="rgba(0,0,0,0.54)" />
+              ? <WifiIcon color={primaryColor} />
+              : <WifiIcon color="rgba(0,0,0,0.54)" />
         }
         <div style={{ marginLeft: 24 }}>
           <div style={{ color: 'rgba(0,0,0,0.87)', lineHeight: '24px' }}>
@@ -58,7 +58,7 @@ class DeviceList extends React.PureComponent {
 }
 
 class WechatLogin extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -256,7 +256,7 @@ class WechatLogin extends React.Component {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.initWXLogin()
 
     /* catch CODE of wechat login */
@@ -270,11 +270,11 @@ class WechatLogin extends React.Component {
     }
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     this.out = true
   }
 
-  async doneAsync(view, device, user) {
+  async doneAsync (view, device, user) {
     await Promise.delay(360)
     if (view === 'maintenance') { this.props.maintain() } else {
       this.props.ipcRenderer.send('LOGIN', device, user)
@@ -282,12 +282,12 @@ class WechatLogin extends React.Component {
     }
   }
 
-  renderCard() {
+  renderCard () {
     return (
       <div style={{ zIndex: 100 }}>
         {
-          !this.state.error ?
-            <div style={{ width: 332, height: 492, padding: 24, position: 'relative', backgroundColor: '#FAFAFA' }}>
+          !this.state.error
+            ? <div style={{ width: 332, height: 492, padding: 24, position: 'relative', backgroundColor: '#FAFAFA' }}>
               {/* CircularProgress */}
               <div
                 ref={ref => (this.weChatLoadingRef = ref)}
@@ -320,9 +320,8 @@ class WechatLogin extends React.Component {
                   {i18n.__('Login via WeChat') }
                 </div>
               </div>
-            </div>
-          :
-            <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>
+              </div>
+            : <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>
               <div
                 style={{
                   width: 270,
@@ -349,13 +348,13 @@ class WechatLogin extends React.Component {
               <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.54)', fontSize: 20 }}>
                 { this.state.error === 'net' ? i18n.__('Network Error Text') : i18n.__('Cloud Error Text') }
               </div>
-            </div>
+              </div>
         }
       </div>
     )
   }
 
-  render() {
+  render () {
     // debug('render wechat login', this.state, this.props)
     if (!this.state.wechatLogin) return this.renderCard()
     let text = ''
@@ -479,12 +478,11 @@ class WechatLogin extends React.Component {
               <Divider />
               <div style={{ height: 32 }} />
               {
-                this.state.logining ?
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 16 }}>
+                this.state.logining
+                  ? <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 16 }}>
                     <CircularProgress size={48} thickness={3} />
-                  </div>
-                  :
-                  <div>
+                    </div>
+                  : <div>
                     <div style={{ height: 80, fontSize: 16, fontWeight: 500, color: 'rgba(0,0,0,0.87)', textAlign: 'center' }} >
                       <span style={{ fontSize: 34 }}> { this.state.count } </span>
                     </div>
@@ -498,35 +496,35 @@ class WechatLogin extends React.Component {
                         icon={<RightIcon color="#424242" />}
                       />
                     </div>
-                  </div>
+                    </div>
               }
             </div>
             : wcl === 'list'
-            ? <div>
-              <div style={{ height: 16 }} />
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ width: '100%', height: 436, overflowY: 'auto' }}>
+              ? <div>
+                <div style={{ height: 16 }} />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: '100%', height: 436, overflowY: 'auto' }}>
+                    {
+                      this.state.lists.map((list, index) => (
+                        <DeviceList list={list} primaryColor={this.props.primaryColor} key={index} select={this.select} />))
+                    }
+                  </div>
+                </div>
+                </div>
+              : <div>
+                <div style={{ height: 16 }} />
+                <div style={{ height: 270, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {
-                    this.state.lists.map((list, index) => (
-                      <DeviceList list={list} primaryColor={this.props.primaryColor} key={index} select={this.select} />))
+                    wcl === 'success'
+                      ? <Checkmark delay={300} color={this.props.primaryColor} />
+                      : <CircularProgress size={64} thickness={5} />
                   }
                 </div>
-              </div>
-            </div>
-            : <div>
-              <div style={{ height: 16 }} />
-              <div style={{ height: 270, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {
-                  wcl === 'success'
-                  ? <Checkmark delay={300} color={this.props.primaryColor} />
-                  : <CircularProgress size={64} thickness={5} />
-                }
-              </div>
-              <div style={{ height: 36 }} />
-              <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.87)', fontSize: 20, height: 36 }}>
-                { text }
-              </div>
-            </div>
+                <div style={{ height: 36 }} />
+                <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.87)', fontSize: 20, height: 36 }}>
+                  { text }
+                </div>
+                </div>
         }
       </div>
     )

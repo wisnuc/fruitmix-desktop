@@ -1,7 +1,7 @@
 import Base from './Transmission'
 
 class Transmission extends Base {
-  navGroup() {
+  navGroup () {
     return 'public'
   }
 }

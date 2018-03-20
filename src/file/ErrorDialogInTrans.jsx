@@ -62,7 +62,7 @@ const translateStatus = (statusCode) => {
 }
 
 class ErrorTree extends React.PureComponent {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       expand: false
@@ -85,7 +85,7 @@ class ErrorTree extends React.PureComponent {
     }
   }
 
-  renderRow(node, key) {
+  renderRow (node, key) {
     const code = node.error.code ||
       (node.error.response && node.error.response[0] && node.error.response[0].error && node.error.response[0].error.code) ||
       (node.error.response && node.error.response.error && node.error.response.error.code)
@@ -102,8 +102,8 @@ class ErrorTree extends React.PureComponent {
         <div style={{ margin: '-2px 4px 0 4px', display: 'flex' }}>
           {
             node.type === 'directory' ? <FileFolder style={svgStyle} />
-            : node.type === 'file' ? <EditorInsertDriveFile style={svgStyle} />
-            : <ErrorIcon style={svgStyle} />
+              : node.type === 'file' ? <EditorInsertDriveFile style={svgStyle} />
+                : <ErrorIcon style={svgStyle} />
           }
         </div>
         <div style={{ width: 540, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: 5, fontSize: 13 }} >
@@ -116,7 +116,7 @@ class ErrorTree extends React.PureComponent {
     )
   }
 
-  renderSource(errors) {
+  renderSource (errors) {
     const theme = {
       scheme: 'wisnuc',
       author: 'lxw',
@@ -152,7 +152,7 @@ class ErrorTree extends React.PureComponent {
     )
   }
 
-  render() {
+  render () {
     const { expand } = this.state
     return (
       <div

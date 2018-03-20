@@ -24,7 +24,7 @@ const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
 const imgUrl = 'http://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKQiahrEc8rUfECDTUq94WlcaNkTYTKzIKr3p5xgOPQO1juvtwO1YSUCHOPpup3oWo1AP3nOBVyPCw/132'
 
 class SelectMedia extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       selectedItems: []
@@ -146,7 +146,7 @@ class SelectMedia extends React.Component {
     }
   }
 
-  renderLoading(size) {
+  renderLoading (size) {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
         <CircularProgress size={size || 64} />
@@ -154,7 +154,7 @@ class SelectMedia extends React.Component {
     )
   }
 
-  componentDidMount() {
+  componentDidMount () {
     document.addEventListener('keydown', this.keyChange)
     document.addEventListener('keyup', this.keyChange)
     this.requestMedia()
@@ -162,12 +162,12 @@ class SelectMedia extends React.Component {
       .catch(e => console.error('requestMedi error', e))
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     document.removeEventListener('keydown', this.keyChange)
     document.removeEventListener('keyup', this.keyChange)
   }
 
-  render() {
+  render () {
     // console.log('SelectMedia', this.props, this.state, this.selected)
     const { currentUser, primaryColor, onRequestClose, ipcRenderer } = this.props
     return (
@@ -201,47 +201,47 @@ class SelectMedia extends React.Component {
           {/* media */}
           <div style={{ flexGrow: 1, height: '100%', backgroundColor: '#FFF', paddingLeft: 80, paddingTop: 2 }}>
             {
-              !this.state.media ?
-              <div
-                style={{
-                  position: 'relative',
-                  marginTop: -7,
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <CircularProgress />
-              </div> :
-              this.state.media.length ?
-              <PhotoList
-                hideTimeline
-                selecting
-                media={this.state.media}
-                lookPhotoDetail={this.lookPhotoDetail}
-                ipcRenderer={ipcRenderer}
-                addListToSelection={this.addListToSelection}
-                removeListToSelection={this.removeListToSelection}
-                memoize={this.memoize}
-                selectedItems={this.state.selectedItems}
-                getHoverPhoto={this.getHoverPhoto}
-                shiftStatus={{ shift: this.state.shift, items: this.state.shiftHoverItems }}
-                headerHeight={186}
-              /> :
-              <div
-                style={{
-                  position: 'relative',
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                { i18n.__('No Media Text 1') }
-              </div>
+              !this.state.media
+                ? <div
+                  style={{
+                    position: 'relative',
+                    marginTop: -7,
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <CircularProgress />
+                </div>
+                : this.state.media.length
+                  ? <PhotoList
+                    hideTimeline
+                    selecting
+                    media={this.state.media}
+                    lookPhotoDetail={this.lookPhotoDetail}
+                    ipcRenderer={ipcRenderer}
+                    addListToSelection={this.addListToSelection}
+                    removeListToSelection={this.removeListToSelection}
+                    memoize={this.memoize}
+                    selectedItems={this.state.selectedItems}
+                    getHoverPhoto={this.getHoverPhoto}
+                    shiftStatus={{ shift: this.state.shift, items: this.state.shiftHoverItems }}
+                    headerHeight={186}
+                  />
+                  : <div
+                    style={{
+                      position: 'relative',
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    { i18n.__('No Media Text 1') }
+                  </div>
             }
           </div>
           <div

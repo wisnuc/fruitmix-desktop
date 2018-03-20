@@ -13,7 +13,7 @@ import UserSelect from './UserSelect'
 import NewNameDialog from './NewNameDialog'
 
 class BoxDetail extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -72,8 +72,8 @@ class BoxDetail extends React.Component {
 
     this.toggle = type => this.setState({ [type]: !this.state[type] })
   }
-  
-  renderTitle(title) {
+
+  renderTitle (title) {
     return (
       <div style={{ height: 48, color: 'rgba(0,0,0,.54)', fontWeight: 500, fontSize: 14, display: 'flex', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -83,7 +83,7 @@ class BoxDetail extends React.Component {
     )
   }
 
-  renderDevice() {
+  renderDevice () {
     const name = this.props.box && this.props.box.station.name
     const ip = this.props.box && this.props.box.station.LANIP
     return (
@@ -99,7 +99,7 @@ class BoxDetail extends React.Component {
     )
   }
 
-  renderGroupName(name) {
+  renderGroupName (name) {
     const isOwner = this.props.box && this.props.box.owner === this.props.guid
     return (
       <div style={{ height: 48, color: 'rgba(0,0,0,.54)', fontWeight: 500, fontSize: 14, display: 'flex', alignItems: 'center' }}>
@@ -121,7 +121,7 @@ class BoxDetail extends React.Component {
     )
   }
 
-  renderToggle(title, toggled, onToggle) {
+  renderToggle (title, toggled, onToggle) {
     return (
       <div style={{ width: '100%', height: 48, display: 'flex', alignItems: 'center' }}>
         <div style={{ width: 144, color: 'rgba(0,0,0,.54)', fontWeight: 500, fontSize: 14 }}>
@@ -138,7 +138,7 @@ class BoxDetail extends React.Component {
     )
   }
 
-  renderAvatar(user) {
+  renderAvatar (user) {
     // console.log('renderAvatar', user)
     const onTouchTap = user.onTouchTap || (() => {})
     const { nickName, avatarUrl } = user
@@ -156,18 +156,18 @@ class BoxDetail extends React.Component {
       >
         <div style={{ lineHeight: '24px', fontSize: 14 }}>
           {
-            avatarUrl ?
-            <div style={{ borderRadius: 16, width: 32, height: 32, overflow: 'hidden' }}>
-              <img width={32} height={32} alt="" src={avatarUrl} />
-            </div> :
-            nickName.slice(0, 2).toUpperCase()
+            avatarUrl
+              ? <div style={{ borderRadius: 16, width: 32, height: 32, overflow: 'hidden' }}>
+                <img width={32} height={32} alt="" src={avatarUrl} />
+              </div>
+              : nickName.slice(0, 2).toUpperCase()
           }
         </div>
       </Avatar>
     )
   }
 
-  renderAction(Icon, onTouchTap) {
+  renderAction (Icon, onTouchTap) {
     return (
       <div
         style={{
@@ -190,7 +190,7 @@ class BoxDetail extends React.Component {
     )
   }
 
-  render() {
+  render () {
     const { box, primaryColor, guid, refresh, openSnackBar, apis, getUsers } = this.props
     // console.log('BoxDetail', this.props)
     const isOwner = box && box.owner === guid

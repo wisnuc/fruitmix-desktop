@@ -17,14 +17,14 @@ const primaryColor = teal500
 const accentColor = pinkA200
 
 class MaintGuide extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       index: 0,
       action: false,
       detail: false,
       expand: false,
-      loading: false,
+      loading: false
     }
 
     this.getStatus = (volume, boot) => {
@@ -56,7 +56,6 @@ class MaintGuide extends React.Component {
       if (index < 0 || index > length - 1) return
       this.setState({ index })
     }
-
 
     /* Disk Funcs */
     this.recoverRaid1 = () => {}
@@ -97,7 +96,7 @@ class MaintGuide extends React.Component {
     }
   }
 
-  renderTest(volume) {
+  renderTest (volume) {
     const { device, enterMaint } = this.props
     const test = [
       i18n.__('Test Mount'),
@@ -123,7 +122,7 @@ class MaintGuide extends React.Component {
                 label={i18n.__('Start')}
                 onTouchTap={this.forceBoot}
                 style={{ marginRight: 24 }}
-                disabled={this.state.loading }
+                disabled={this.state.loading}
               />
           }
         </div>
@@ -140,7 +139,7 @@ class MaintGuide extends React.Component {
     )
   }
 
-  renderButton() {
+  renderButton () {
     return (
       <div style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
         <FlatButton
@@ -160,7 +159,7 @@ class MaintGuide extends React.Component {
     )
   }
 
-  renderActions() {
+  renderActions () {
     const diskLabels = [i18n.__('Recovery Raid1'), i18n.__('Add Disk'), i18n.__('Delete Disk'), i18n.__('Replace Disk')]
     const diskFuncs = [this.recoverRaid1, this.addDisk, this.deleteDisk, this.replaceDisk]
     const diskDisable = [true, true, true, true]
@@ -200,7 +199,7 @@ class MaintGuide extends React.Component {
     )
   }
 
-  renderDetail() {
+  renderDetail () {
     if (!this.state.expand) return (<div />)
     const device = this.props.device
     const blocks = this.props.device.storage.data.blocks
@@ -219,7 +218,7 @@ class MaintGuide extends React.Component {
     )
   }
 
-  render() {
+  render () {
     debug('render!', this.props, this.state)
     const { device, toggleMaint, enterMaint } = this.props
     if (!device) return (<div />)
@@ -264,8 +263,8 @@ class MaintGuide extends React.Component {
               <div style={{ height: 344 }}>
                 {
                   this.state.action
-                  ? this.renderActions()
-                  : this.renderTest(volume, this.state.index)
+                    ? this.renderActions()
+                    : this.renderTest(volume, this.state.index)
                 }
               </div>
 

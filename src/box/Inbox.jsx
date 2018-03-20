@@ -28,9 +28,8 @@ const getName = (photo) => {
   return `IMG-${date.split(/\s+/g)[0].replace(/[:\s]+/g, '')}-${photo.hash.slice(0, 5).toUpperCase()}-PC.${photo.m}`
 }
 
-
 class Inbox extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -86,10 +85,10 @@ class Inbox extends React.Component {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
   }
 
-  renderNoData() {
+  renderNoData () {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
         <div
@@ -111,7 +110,7 @@ class Inbox extends React.Component {
     )
   }
 
-  calcPos(data, s) {
+  calcPos (data, s) {
     let [h1, h2] = [16, 16]
     const pos = data.map((d, i) => {
       const h = d.height // raw height
@@ -175,7 +174,7 @@ class Inbox extends React.Component {
     return pos
   }
 
-  process(data) {
+  process (data) {
     const res = data.map((d) => {
       const { type, comment, index, tweeter, list, uuid } = d
       if (list && list.length > 0) {
@@ -191,7 +190,7 @@ class Inbox extends React.Component {
     return res // ({ height, content })
   }
 
-  renderMasonry(list) {
+  renderMasonry (list) {
     const cache = new CellMeasurerCache({
       defaultHeight: 360,
       defaultWidth: 360,
@@ -239,7 +238,7 @@ class Inbox extends React.Component {
     )
   }
 
-  render() {
+  render () {
     // console.log('Box', this.props, this.state)
     return (
       <div
@@ -257,38 +256,38 @@ class Inbox extends React.Component {
 
         {/* PhotoList */}
         {
-           !this.props.tweets ?
-             <div
-               style={{
-                 position: 'relative',
-                 marginTop: -7,
-                 width: '100%',
-                 height: '100%',
-                 display: 'flex',
-                 alignItems: 'center',
-                 justifyContent: 'center'
-               }}
-             >
-               <CircularProgress />
-             </div> :
-            this.props.tweets.length ?
-            <div style={{ width: 810, position: 'relative' }}>
-              {/* this.renderMasonry(this.props.tweets) */}
-              {
-                this.calcPos(this.process(this.props.tweets), this.state.selected).map((v, i) => (
-                  <MediaBox
-                    key={v.content.uuid}
-                    i={i}
-                    data={v}
-                    items={v.content.list}
-                    handleSelect={this.handleSelect}
-                    ipcRenderer={this.props.ipcRenderer}
-                    lookPhotoDetail={this.lookPhotoDetail}
-                  />
-                ))
-              }
+          !this.props.tweets
+            ? <div
+              style={{
+                position: 'relative',
+                marginTop: -7,
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <CircularProgress />
             </div>
-            : this.renderNoData()
+            : this.props.tweets.length
+              ? <div style={{ width: 810, position: 'relative' }}>
+                {/* this.renderMasonry(this.props.tweets) */}
+                {
+                  this.calcPos(this.process(this.props.tweets), this.state.selected).map((v, i) => (
+                    <MediaBox
+                      key={v.content.uuid}
+                      i={i}
+                      data={v}
+                      items={v.content.list}
+                      handleSelect={this.handleSelect}
+                      ipcRenderer={this.props.ipcRenderer}
+                      lookPhotoDetail={this.lookPhotoDetail}
+                    />
+                  ))
+                }
+              </div>
+              : this.renderNoData()
         }
 
         {/* PhotoDetail */}

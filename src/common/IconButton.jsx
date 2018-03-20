@@ -3,7 +3,7 @@ import { IconButton } from 'material-ui'
 import Tooltip from '../common/Tooltip'
 
 class IconButtonWithTooltips extends React.PureComponent {
-  render() {
+  render () {
     const props = Object.assign({}, this.props)
     delete props.tooltip
     return (

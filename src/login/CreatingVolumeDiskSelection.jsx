@@ -7,22 +7,22 @@ import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
 
 class CreatingVolumeDiskSelection extends React.PureComponent {
   static State = class State {
-    constructor() {
+    constructor () {
       this.selection = []
       this.mode = null
     }
   }
 
-  renderDiskRow(blk) {
+  renderDiskRow (blk) {
     const model = blk.model ? blk.model : i18n.__('Unknown Disk Model')
     const name = blk.name
     const size = prettysize(blk.size * 512)
-    const iface = blk.isATA ? 'ATA' :
-      blk.isSCSI ? 'SCSI' :
-        blk.isUSB ? 'USB' : i18n.__('Unknown Disk Iterface')
+    const iface = blk.isATA ? 'ATA'
+      : blk.isSCSI ? 'SCSI'
+        : blk.isUSB ? 'USB' : i18n.__('Unknown Disk Iterface')
 
-    const usage = blk.isFileSystem ? `${blk.fileSystemType} ${i18n.__('File System')}` :
-      blk.isPartitioned ? i18n.__('isPartitioned') : i18n.__('No FileSystem or Partition')
+    const usage = blk.isFileSystem ? `${blk.fileSystemType} ${i18n.__('File System')}`
+      : blk.isPartitioned ? i18n.__('isPartitioned') : i18n.__('No FileSystem or Partition')
 
     const valid = !blk.unformattable
 
@@ -88,7 +88,7 @@ class CreatingVolumeDiskSelection extends React.PureComponent {
     )
   }
 
-  render() {
+  render () {
     return (
       <div>
         <div style={{ height: 40, display: 'flex', alignItems: 'center', color: cyan500, paddingLeft: 10, paddingBottom: 20 }}>

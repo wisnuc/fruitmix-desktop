@@ -6,27 +6,27 @@ import Base from './Base'
 import SettingsApp from '../control/SettingsApp'
 
 class Settings extends Base {
-  navGroup() {
+  navGroup () {
     return 'settings'
   }
 
-  menuName() {
+  menuName () {
     return i18n.__('Settings Menu Name')
   }
 
-  menuIcon() {
+  menuIcon () {
     return ActionSettings
   }
 
-  quickName() {
+  quickName () {
     return i18n.__('Settings Quick Name')
   }
 
-  appBarStyle() {
+  appBarStyle () {
     return 'colored'
   }
 
-  renderContent({ openSnackBar }) {
+  renderContent ({ openSnackBar }) {
     return (
       <SettingsApp
         primaryColor={this.groupPrimaryColor()}

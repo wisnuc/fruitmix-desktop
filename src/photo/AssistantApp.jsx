@@ -21,11 +21,11 @@ import PhotoList from './PhotoList'
 const debug = Debug('component:AssistantApp:')
 
 class AssistantApp extends PhotoApp {
-  constructor(props) {
+  constructor (props) {
     super(props)
   }
 
-  render() {
+  render () {
     // debug('PhotoApp, this.props', this.props)
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -69,8 +69,8 @@ class AssistantApp extends PhotoApp {
         {/* PhotoList */}
         <div style={{ height: 'calc(100% - 120px)', marginLeft: 80, display: this.state.showPhotos ? '' : 'none' }}>
           {
-            !this.props.media ?
-              <div
+            !this.props.media
+              ? <div
                 style={{
                   position: 'relative',
                   marginTop: -7,
@@ -82,32 +82,32 @@ class AssistantApp extends PhotoApp {
                 }}
               >
                 <CircularProgress />
-              </div> :
-            this.props.media.length ?
-              <PhotoList
-                media={this.props.media}
-                lookPhotoDetail={this.lookPhotoDetail}
-                ipcRenderer={this.props.ipcRenderer}
-                addListToSelection={this.props.addListToSelection}
-                removeListToSelection={this.props.removeListToSelection}
-                memoize={this.props.memoize}
-                selectedItems={this.props.selectedItems}
-                getHoverPhoto={this.props.getHoverPhoto}
-                shiftStatus={this.props.shiftStatus}
-                headerHeight={186}
-              /> :
-              <div
-                style={{
-                  position: 'relative',
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                { i18n.__('No Media Text 1') }
               </div>
+              : this.props.media.length
+                ? <PhotoList
+                  media={this.props.media}
+                  lookPhotoDetail={this.lookPhotoDetail}
+                  ipcRenderer={this.props.ipcRenderer}
+                  addListToSelection={this.props.addListToSelection}
+                  removeListToSelection={this.props.removeListToSelection}
+                  memoize={this.props.memoize}
+                  selectedItems={this.props.selectedItems}
+                  getHoverPhoto={this.props.getHoverPhoto}
+                  shiftStatus={this.props.shiftStatus}
+                  headerHeight={186}
+                />
+                : <div
+                  style={{
+                    position: 'relative',
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  { i18n.__('No Media Text 1') }
+                </div>
           }
         </div>
 

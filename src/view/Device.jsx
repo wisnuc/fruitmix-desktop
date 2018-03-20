@@ -5,7 +5,7 @@ import Base from './Base'
 import DeviceInfo from '../device/DeviceInfo'
 
 class Device extends Base {
-  constructor(ctx) {
+  constructor (ctx) {
     super(ctx)
 
     this.address = ctx.props.selectedDevice.mdev.address // TODO
@@ -18,38 +18,38 @@ class Device extends Base {
     }
   }
 
-  willReceiveProps(nextProps) {
+  willReceiveProps (nextProps) {
     this.handleProps(nextProps.selectedDevice, ['device', 'storage', 'boot', 'info'])
   }
 
-  navEnter() {
+  navEnter () {
     this.ctx.props.selectedDevice.request('device')
     this.ctx.props.selectedDevice.request('storage')
     this.ctx.props.selectedDevice.request('boot')
     this.ctx.props.selectedDevice.request('info')
   }
 
-  navGroup() {
+  navGroup () {
     return 'device'
   }
 
-  menuName() {
+  menuName () {
     return i18n.__('Device Menu Name')
   }
 
-  menuIcon() {
+  menuIcon () {
     return ActionDns
   }
 
-  quickName() {
+  quickName () {
     return i18n.__('Device Quick Name')
   }
 
-  appBarStyle() {
+  appBarStyle () {
     return 'colored'
   }
 
-  renderContent({ openSnackBar }) {
+  renderContent ({ openSnackBar }) {
     return (
       <DeviceInfo
         {...this.state}

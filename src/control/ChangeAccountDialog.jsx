@@ -11,7 +11,7 @@ import { validateUsername, validatePassword } from '../common/validate'
 const debug = Debug('component:control:Account')
 
 class ChangeAccountDialog extends React.PureComponent {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       maxLength: 16,
@@ -78,7 +78,7 @@ class ChangeAccountDialog extends React.PureComponent {
     }
   }
 
-  updateUsername(text) {
+  updateUsername (text) {
     this.setState({ username: text }, () => {
       if (this.state.username.length === 0) {
         this.setState({ usernameErrorText: i18n.__('Empty Name Error') })
@@ -101,7 +101,7 @@ class ChangeAccountDialog extends React.PureComponent {
     })
   }
 
-  updatePrePassword(text) {
+  updatePrePassword (text) {
     this.setState({ prePassword: text }, () => {
       if (this.state.prePassword.length === 0) {
         this.setState({ prePasswordErrorText: i18n.__('Empty Password Error') })
@@ -111,7 +111,7 @@ class ChangeAccountDialog extends React.PureComponent {
     })
   }
 
-  updatePassword(text) {
+  updatePassword (text) {
     this.setState({ password: text }, () => {
       if (this.state.password.length === 0 && this.state.passwordAgain.length === 0) {
         this.setState({ passwordErrorText: i18n.__('Empty Password Error'), passwordAgainErrorText: '' })
@@ -132,7 +132,7 @@ class ChangeAccountDialog extends React.PureComponent {
     })
   }
 
-  updatePasswordAgain(text, status) {
+  updatePasswordAgain (text, status) {
     this.setState({ passwordAgain: text }, () => {
       if ((status === 'onChange' &&
         this.state.passwordAgain.length >= this.state.password.length &&
@@ -145,9 +145,9 @@ class ChangeAccountDialog extends React.PureComponent {
     })
   }
 
-  inputOK() {
-    if (this.state.usernameErrorText || this.state.passwordAgainErrorText
-      || this.state.passwordErrorText || this.state.prePasswordErrorText) {
+  inputOK () {
+    if (this.state.usernameErrorText || this.state.passwordAgainErrorText ||
+      this.state.passwordErrorText || this.state.prePasswordErrorText) {
       return false
     }
     if (this.state.loading) return false
@@ -165,16 +165,16 @@ class ChangeAccountDialog extends React.PureComponent {
     return false
   }
 
-  render() {
+  render () {
     const { op } = this.props
     return (
       <div style={{ width: 336, padding: '24px 24px 0px 24px' }}>
         {/* title */}
         <div style={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-          { op === 'username' ? i18n.__('Change Username') :
-            op === 'createUser' ? i18n.__('Create New User') :
-            op === 'reset' ? i18n.__('Reset Password') :
-            i18n.__('Change Password') }
+          { op === 'username' ? i18n.__('Change Username')
+            : op === 'createUser' ? i18n.__('Create New User')
+              : op === 'reset' ? i18n.__('Reset Password')
+                : i18n.__('Change Password') }
         </div>
         <div style={{ height: 56 }} />
 

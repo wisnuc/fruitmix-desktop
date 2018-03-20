@@ -23,7 +23,7 @@ import DialogOverlay from '../common/DialogOverlay'
 const debug = Debug('component:viewModel:public: ')
 
 class Public extends Home {
-  constructor(ctx) {
+  constructor (ctx) {
     super(ctx)
 
     this.title = () => i18n.__('Public Drive')
@@ -60,7 +60,7 @@ class Public extends Home {
     }
   }
 
-  willReceiveProps(nextProps) {
+  willReceiveProps (nextProps) {
     if (!this.rootDrive) {
       this.preDriveValue = this.state.drives
       this.handleProps(nextProps.apis, ['drives', 'users'])
@@ -93,7 +93,7 @@ class Public extends Home {
     }
   }
 
-  navEnter(target) {
+  navEnter (target) {
     this.isNavEnter = true
     const apis = this.ctx.props.apis
     if (target && target.driveUUID) { // jump to specific dir
@@ -104,25 +104,25 @@ class Public extends Home {
     } else this.refresh()
   }
 
-  menuName() {
+  menuName () {
     return i18n.__('Public Menu Name')
   }
 
-  quickName() {
+  quickName () {
     return i18n.__('Public Quick Name')
   }
 
-  menuIcon() {
+  menuIcon () {
     return ShareDisk
   }
 
   /* renderers */
-  renderTitle({ style }) {
+  renderTitle ({ style }) {
     if (!this.state.listNavDir && !this.state.drives) return (<div />)
     return this.renderBreadCrumbItem({ style })
   }
 
-  renderToolBar({ style }) {
+  renderToolBar ({ style }) {
     return (
       <div style={style}>
         <IconButton onTouchTap={() => this.refresh()} tooltip={i18n.__('Refresh')} >
@@ -145,7 +145,7 @@ class Public extends Home {
     )
   }
 
-  renderNoPublic() {
+  renderNoPublic () {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
         <div
@@ -168,7 +168,7 @@ class Public extends Home {
     )
   }
 
-  renderDetail({ style, openSnackBar }) {
+  renderDetail ({ style, openSnackBar }) {
     if (!this.state.entries) return (<div />)
     const drives = this.state.drives && this.state.drives.filter(drive => drive.type === 'public' && drive.tag !== 'built-in')
     /* pre selected drive */
@@ -181,8 +181,8 @@ class Public extends Home {
     return (
       <div style={style}>
         {
-          isAdmin && rightPos && isSelected ?
-            <DriversDetail
+          isAdmin && rightPos && isSelected
+            ? <DriversDetail
               primary
               openSnackBar={openSnackBar}
               users={this.state.users}
@@ -192,23 +192,23 @@ class Public extends Home {
               apis={this.ctx.props.apis}
               refreshDrives={this.refresh}
               primaryColor={this.groupPrimaryColor()}
-            /> :
-          this.state.entries.length ?
-            <FileDetail
-              detailIndex={this.select.state.selected}
-              counter={this.state.counter}
-              entries={this.state.entries}
-              path={this.state.path}
-              ipcRenderer={ipcRenderer}
-              primaryColor={this.groupPrimaryColor()}
-            /> :
-            <div style={{ height: 128, backgroundColor: this.groupPrimaryColor(), filter: 'brightness(0.9)' }} />
+            />
+            : this.state.entries.length
+              ? <FileDetail
+                detailIndex={this.select.state.selected}
+                counter={this.state.counter}
+                entries={this.state.entries}
+                path={this.state.path}
+                ipcRenderer={ipcRenderer}
+                primaryColor={this.groupPrimaryColor()}
+              />
+              : <div style={{ height: 128, backgroundColor: this.groupPrimaryColor(), filter: 'brightness(0.9)' }} />
         }
       </div>
     )
   }
 
-  renderContent({ toggleDetail, openSnackBar, getDetailStatus }) {
+  renderContent ({ toggleDetail, openSnackBar, getDetailStatus }) {
     // debug('renderContent public', this.state, this.ctx.props)
 
     return (
@@ -233,29 +233,29 @@ class Public extends Home {
         { this.state.path && this.state.path.length > 1 && <FileUploadButton upload={this.upload} /> }
 
         {
-          (this.state.path && this.state.path.length === 1 && !this.state.entries.length) ? this.renderNoPublic() :
+          (this.state.path && this.state.path.length === 1 && !this.state.entries.length) ? this.renderNoPublic()
 
-          <FileContent
-            {...this.state}
-            listNavBySelect={this.listNavBySelect}
-            showContextMenu={this.showContextMenu}
-            setAnimation={this.setAnimation}
-            ipcRenderer={ipcRenderer}
-            download={this.download}
-            primaryColor={this.groupPrimaryColor()}
-            changeSortType={this.changeSortType}
-            openSnackBar={openSnackBar}
-            toggleDialog={this.toggleDialog}
-            showTakenTime={!!this.state.takenTime}
-            apis={this.ctx.props.apis}
-            refresh={this.refresh}
-            resetScrollTo={this.resetScrollTo}
-            rowDragStart={this.rowDragStart}
-            gridDragStart={this.gridDragStart}
-            setScrollTop={this.setScrollTop}
-            setGridData={this.setGridData}
-            inPublicRoot={this.state.inRoot}
-          />
+            : <FileContent
+              {...this.state}
+              listNavBySelect={this.listNavBySelect}
+              showContextMenu={this.showContextMenu}
+              setAnimation={this.setAnimation}
+              ipcRenderer={ipcRenderer}
+              download={this.download}
+              primaryColor={this.groupPrimaryColor()}
+              changeSortType={this.changeSortType}
+              openSnackBar={openSnackBar}
+              toggleDialog={this.toggleDialog}
+              showTakenTime={!!this.state.takenTime}
+              apis={this.ctx.props.apis}
+              refresh={this.refresh}
+              resetScrollTo={this.resetScrollTo}
+              rowDragStart={this.rowDragStart}
+              gridDragStart={this.gridDragStart}
+              setScrollTop={this.setScrollTop}
+              setGridData={this.setGridData}
+              inPublicRoot={this.state.inRoot}
+            />
         }
 
         { this.renderMenu(!!this.state.contextMenuOpen && !this.state.inRoot, toggleDetail, getDetailStatus) }

@@ -2,13 +2,13 @@ import React, { PureComponent } from 'react'
 import { menuBoxShadow } from './boxShadow'
 
 class ContextMenu extends PureComponent {
-  constructor() {
+  constructor () {
     super()
     this.out = 195
     this.state = { stage: 0 }
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps (nextProps) {
     if (nextProps.open === true && this.props.open === false) {
       this.setState({
         stage: 1,
@@ -23,16 +23,16 @@ class ContextMenu extends PureComponent {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     this.preChildren = this.props.children
   }
 
-  componentDidUpdate() {
+  componentDidUpdate () {
     this.preChildren = this.props.children
   }
 
   // top, left, onRequestClose
-  render() {
+  render () {
     // console.log('in ContextMenu', this.state, this.props)
     if (this.state.stage === 0) return null
 

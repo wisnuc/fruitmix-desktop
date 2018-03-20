@@ -4,14 +4,14 @@ import NavigationChevronLeft from 'material-ui/svg-icons/navigation/chevron-left
 import NavigationChevronRight from 'material-ui/svg-icons/navigation/chevron-right'
 
 class HoverNav extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       hover: false
     }
   }
 
-  renderIcon(Icon) {
+  renderIcon (Icon) {
     return (
       <Avatar
         icon={<Icon style={{ width: 32, height: 32 }} color="#FFF" />}
@@ -20,7 +20,7 @@ class HoverNav extends React.Component {
     )
   }
 
-  render() {
+  render () {
     const enabled = !!this.props.onTouchTap
     return (
       <div style={this.props.style}>

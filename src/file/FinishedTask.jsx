@@ -11,7 +11,7 @@ import IconButton from '../common/IconButton'
 const svgStyle = { color: '#000', opacity: 0.54 }
 
 class FinishedTask extends Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -41,11 +41,11 @@ class FinishedTask extends Component {
     }
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate (nextProps, nextState) {
     return (this.state !== nextState)
   }
 
-  getFinishDate(d) {
+  getFinishDate (d) {
     const date = new Date()
     if (typeof d === 'number') {
       date.setTime(d)
@@ -60,7 +60,7 @@ class FinishedTask extends Component {
     return `${year}-${mouth}-${day} ${hour}:${minute}`
   }
 
-  render() {
+  render () {
     const task = this.props.task
     return (
       <div

@@ -17,7 +17,7 @@ import BoxDetail from '../box/BoxDetail'
 import Adapter from '../common/adapter'
 
 class Group extends Base {
-  constructor(ctx) {
+  constructor (ctx) {
     super(ctx)
     this.state = {
       boxes: null,
@@ -157,7 +157,7 @@ class Group extends Base {
     this.getUsers = next => this.ctx.props.apis.pureRequest('friends', { userId: this.guid }, next)
   }
 
-  willReceiveProps(nextProps) {
+  willReceiveProps (nextProps) {
     if (!this.state.account) this.handleProps(nextProps.apis, ['account'])
     else if (this.first) {
       this.first = false
@@ -166,7 +166,7 @@ class Group extends Base {
     }
   }
 
-  navEnter() {
+  navEnter () {
     const apis = this.ctx.props.apis
     if (!apis || !apis.account || !apis.account.data || !this.state.account) return
     const { userUUID } = apis
@@ -186,7 +186,7 @@ class Group extends Base {
     } else this.setState({ error: this.guid ? 'Token' : 'WeChat' })
   }
 
-  navLeave() {
+  navLeave () {
     this.first = true
     this.onMqtt = false
     if (this.ada) this.ada.removeAllListeners('boxes')
@@ -194,39 +194,39 @@ class Group extends Base {
     ipcRenderer.removeAllListeners('MQTT_MSG')
   }
 
-  navGroup() {
+  navGroup () {
     return 'group'
   }
 
-  menuName() {
+  menuName () {
     return i18n.__('Group Menu Name')
   }
 
-  menuIcon() {
+  menuIcon () {
     return GroupIcon
   }
 
-  quickName() {
+  quickName () {
     return i18n.__('Group Quick Name')
   }
 
-  appBarStyle() {
+  appBarStyle () {
     return 'colored'
   }
 
-  hasDetail() {
+  hasDetail () {
     return true
   }
 
-  detailEnabled() {
+  detailEnabled () {
     return true
   }
 
-  renderTitle({ style }) {
+  renderTitle ({ style }) {
     return <div style={style}>{this.menuName()}</div>
   }
 
-  renderNavigationMenu({ style, onTouchTap }) {
+  renderNavigationMenu ({ style, onTouchTap }) {
     return (
       <div style={style}>
         <IconButton onTouchTap={onTouchTap}>
@@ -248,7 +248,7 @@ class Group extends Base {
   }
   */
 
-  renderDetail({ style }) {
+  renderDetail ({ style }) {
     return (
       <div
         style={style}
@@ -269,7 +269,7 @@ class Group extends Base {
     )
   }
 
-  renderDefaultError() {
+  renderDefaultError () {
     return (
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
         <div
@@ -287,9 +287,9 @@ class Group extends Base {
           <ErrorIcon style={{ height: 64, width: 64, color: 'rgba(0,0,0,0.27)' }} />
           <div style={{ fontSize: 20, color: 'rgba(0,0,0,0.27)', width: 320, textAlign: 'center' }}>
             {
-              this.state.error === 'WeChat' ? i18n.__('No WeChat Account Error in Box') :
-              this.state.error === 'Token' ? i18n.__('Token Expired Error in Box') :
-              i18n.__('Error in Base Text')
+              this.state.error === 'WeChat' ? i18n.__('No WeChat Account Error in Box')
+                : this.state.error === 'Token' ? i18n.__('Token Expired Error in Box')
+                  : i18n.__('Error in Base Text')
             }
           </div>
           {
@@ -305,7 +305,7 @@ class Group extends Base {
     )
   }
 
-  renderContent({ openSnackBar }) {
+  renderContent ({ openSnackBar }) {
     return (<Groups
       {...this.state}
       ada={this.ada}

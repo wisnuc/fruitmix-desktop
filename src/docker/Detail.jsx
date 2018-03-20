@@ -12,7 +12,7 @@ const formatNumber = num => ((num > 999999)
     ? `${(num / 1000).toFixed(1)}K` : num)
 
 class Detail extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = { opacity: 0 }
@@ -26,15 +26,14 @@ class Detail extends React.Component {
     }
   }
 
-  componentWillMount() {
+  componentWillMount () {
     console.log('componentWillReceiveProps!!!!!!!')
     // this.setState({ opacity: 0 })
     clearTimeout(this.time)
     setTimeout(() => this.setState({ opacity: 1 }), 100)
   }
 
-
-  render() {
+  render () {
     const { detail, primaryColor, uninstall } = this.props
     const { appname, imageLink, repo, installed } = detail
 

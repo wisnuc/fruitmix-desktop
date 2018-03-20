@@ -26,7 +26,7 @@ class ModelNameCard extends React.Component {
 
   logoType = () => (this.props.ws215i ? Barcelona : Computer)
 
-  render() {
+  render () {
     const bcolor = this.props.toggle ? '#FAFAFA' : this.props.backgroundColor || '#3f51B5'
     const paperStyle = {
       // height: this.props.toggle ? '' : 404,
