@@ -1,13 +1,7 @@
 import React from 'react'
 import i18n from 'i18n'
-import Debug from 'debug'
-import prettysize from 'prettysize'
-import { CircularProgress, Divider, Toggle, RaisedButton, Avatar } from 'material-ui'
-import InfoIcon from 'material-ui/svg-icons/action/info-outline'
-import FlatButton from '../common/FlatButton'
+import { CircularProgress, Toggle, Avatar } from 'material-ui'
 import { SambaIcon, MiniDLNAIcon, BTDownloadIcon } from '../common/Svg'
-
-const debug = Debug('component:control:SettingsApp:')
 
 class PluginApp extends React.Component {
   constructor (props) {

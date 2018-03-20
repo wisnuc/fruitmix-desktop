@@ -28,7 +28,7 @@ const isSameArray = (a, b) => {
 }
 
 class Adapter extends EventEmitter {
-  constructor(ctx) {
+  constructor (ctx) {
     super(ctx)
     this.ctx = ctx
 
@@ -37,7 +37,7 @@ class Adapter extends EventEmitter {
     }
   }
 
-  updateBoxes(boxes, noSave) {
+  updateBoxes (boxes, noSave) {
     const state = this.state
     this.state = Object.assign({}, this.state, { boxes })
     if (!noSave) {
@@ -46,7 +46,7 @@ class Adapter extends EventEmitter {
     this.emit('boxes', state, this.state)
   }
 
-  init() {
+  init () {
     const { guid } = this.ctx
     const boxesPath = 'Boxes-v1.db'
     const tweetsPath = `${guid}-Tweets-v1.db`
@@ -56,12 +56,12 @@ class Adapter extends EventEmitter {
     this.getBoxes(guid).then(boxes => this.updateBoxes(boxes, true)).catch(e => this.error('getBoxes', e))
   }
 
-  error(type, err) {
+  error (type, err) {
     console.error('Error in Adapter', type, err)
   }
 
   /* request boxes, union previous data, and save to DB */
-  async reqBoxes() {
+  async reqBoxes () {
     const newBoxes = await this.ctx.reqAsync('boxes', null)
     const preBoxes = await this.getBoxes()
     const boxes = unionBox(preBoxes, newBoxes)
@@ -79,7 +79,7 @@ class Adapter extends EventEmitter {
     await Promise.all(promises)
   }
 
-  async deleteBox(boxUUID) {
+  async deleteBox (boxUUID) {
     const boxes = await this.getBoxes()
     const index = boxes.findIndex(b => b.uuid === boxUUID)
     if (index > -1) {
@@ -89,7 +89,7 @@ class Adapter extends EventEmitter {
   }
 
   /* request tweets, and save to tweetsDB */
-  async reqTweets(args) {
+  async reqTweets (args) {
     const { boxUUID, stationId } = args
     const box = this.state.boxes.find(b => b.uuid === boxUUID)
     const ltsi = box.ltsst && box.ltsst.index // the latest stored tweet's index
@@ -112,16 +112,16 @@ class Adapter extends EventEmitter {
     }
   }
 
-  async getBoxes() {
+  async getBoxes () {
     let boxes = this.state.boxes
     if (!boxes) {
       boxes = await this.DB.loadBoxes(this.ctx.guid)
-      boxes.forEach(b => b.station.isOnline = 1)
+      boxes.forEach(b => (b.station.isOnline = 1))
     }
     return boxes
   }
 
-  async getTweets(boxUUID) {
+  async getTweets (boxUUID) {
     // console.time('getTweets')
     const trueTweets = await this.DB.loadTweets(boxUUID)
     const drafts = await this.DB.loadDrafts(boxUUID)
@@ -158,11 +158,11 @@ class Adapter extends EventEmitter {
     return tweets
   }
 
-  async createDraft(doc) {
+  async createDraft (doc) {
     await this.DB.createDraft(doc)
   }
 
-  async updateDraft(boxUUID, data) {
+  async updateDraft (boxUUID, data) {
     await this.DB.updateDraft(data)
     const tweets = await this.getTweets(boxUUID)
     return tweets

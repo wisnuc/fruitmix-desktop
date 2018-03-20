@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react'
+import React from 'react'
 import i18n from 'i18n'
 import prettysize from 'prettysize'
 import { cyan500 } from 'material-ui/styles/colors'

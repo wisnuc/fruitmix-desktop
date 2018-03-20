@@ -3,8 +3,6 @@ import i18n from 'i18n'
 import Debug from 'debug'
 import sanitize from 'sanitize-filename'
 import { TextField, Checkbox, Divider } from 'material-ui'
-import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
-import ModeEdit from 'material-ui/svg-icons/editor/mode-edit'
 import FlatButton from '../common/FlatButton'
 
 const debug = Debug('component:control:NewDriveDialog')
@@ -93,6 +91,8 @@ class DrivesDetail extends PureComponent {
     const { users, detailDrive, primaryColor } = this.props
     // console.log('detailDrive', this.props)
     if (!users || !detailDrive) return <div style={{ height: 128, backgroundColor: primaryColor, filter: 'brightness(0.9)' }} />
+
+    const showDivider = !this.state.modify && this.state.titleHover && detailDrive.tag !== 'built-in'
     return (
       <div style={{ height: '100%' }}>
         <div style={{ height: 128, backgroundColor: primaryColor, filter: 'brightness(0.9)' }}>
@@ -104,49 +104,53 @@ class DrivesDetail extends PureComponent {
               marginLeft: 24,
               marginRight: 24
             }}
-            onMouseOver={() => this.setState({ titleHover: true })}
-            onMouseOut={() => this.setState({ titleHover: false })}
+            onMouseMove={() => this.setState({ titleHover: true })}
+            onMouseLeave={() => this.setState({ titleHover: false })}
           >
             <div style={{ height: 16 }} />
             {
               this.state.modify && (detailDrive.tag !== 'built-in')
-                ? <div style={{ marginTop: -8 }}>
-                  <TextField
-                    name="shareDiskName"
-                    fullWidth
-                    onChange={e => this.updateLabel(e.target.value)}
-                    value={this.state.modify ? this.state.label : detailDrive.label}
-                    errorText={this.state.errorText}
-                    onBlur={() => this.setState({ modify: false, changed: true })}
-                    ref={(input) => { if (input && this.state.modify) { input.focus() } }}
-                    inputStyle={{ fontSize: 20, fontWeight: 500, color: '#FFFFFF' }}
-                    underlineFocusStyle={{ borderColor: '#FFFFFF' }}
-                    underlineStyle={{ borderColor: primaryColor }}
-                    errorStyle={{ marginTop: 16 }}
-                  />
-                </div>
-                : <div
-                  style={{
-                    width: 312,
-                    height: 32,
-                    fontSize: 20,
-                    fontWeight: 500,
-                    marginTop: 2,
-                    color: '#FFFFFF',
-                    overflow: 'hidden',
-                    whiteSpace: 'nowrap',
-                    textOverflow: 'ellipsis'
-                  }}
-                  onTouchTap={() => this.setState({ modify: true })}
-                >
-                  { this.state.label ? this.state.label : this.currentLabel }
-                  {/* <ModeEdit color="FAFAFA" style={{ marginLeft: 24 }} /> */}
-                </div>
+                ? (
+                  <div style={{ marginTop: -8 }}>
+                    <TextField
+                      name="shareDiskName"
+                      fullWidth
+                      onChange={e => this.updateLabel(e.target.value)}
+                      value={this.state.modify ? this.state.label : detailDrive.label}
+                      errorText={this.state.errorText}
+                      onBlur={() => this.setState({ modify: false, changed: true })}
+                      ref={(input) => { if (input && this.state.modify) { input.focus() } }}
+                      inputStyle={{ fontSize: 20, fontWeight: 500, color: '#FFFFFF' }}
+                      underlineFocusStyle={{ borderColor: '#FFFFFF' }}
+                      underlineStyle={{ borderColor: primaryColor }}
+                      errorStyle={{ marginTop: 16 }}
+                    />
+                  </div>
+                )
+                : (
+                  <div
+                    style={{
+                      width: 312,
+                      height: 32,
+                      fontSize: 20,
+                      fontWeight: 500,
+                      marginTop: 2,
+                      color: '#FFFFFF',
+                      overflow: 'hidden',
+                      whiteSpace: 'nowrap',
+                      textOverflow: 'ellipsis'
+                    }}
+                    onTouchTap={() => this.setState({ modify: true })}
+                  >
+                    { this.state.label ? this.state.label : this.currentLabel }
+                    {/* <ModeEdit color="FAFAFA" style={{ marginLeft: 24 }} /> */}
+                  </div>
+                )
             }
             {
               <Divider
                 color="rgba(0, 0, 0, 0.87)"
-                style={{ opacity: !this.state.modify && this.state.titleHover && detailDrive.tag !== 'built-in' ? 1 : 0, width: 312, marginTop: -2 }}
+                style={{ opacity: showDivider ? 1 : 0, width: 312, marginTop: -2 }}
               />
             }
           </div>
@@ -171,8 +175,8 @@ class DrivesDetail extends PureComponent {
           <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
           <div style={{ overflowY: 'auto', height: 'calc(100% - 126px)', width: 336 }}>
             {
-              users.map(user =>
-                (<div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.username} >
+              users.map(user => (
+                <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.username} >
                   <Checkbox
                     label={user.username}
                     labelStyle={{ fontSize: 14 }}
@@ -182,7 +186,8 @@ class DrivesDetail extends PureComponent {
                     onCheck={() => this.handleCheck(user.uuid)}
                     disabled={detailDrive.tag === 'built-in'}
                   />
-                </div>))
+                </div>
+              ))
             }
             <div style={{ height: 8 }} />
           </div>

@@ -1,8 +1,6 @@
 import React from 'react'
 import i18n from 'i18n'
-import { IconButton } from 'material-ui'
 import ListIcon from 'material-ui/svg-icons/action/list'
-import RefreshIcon from 'material-ui/svg-icons/navigation/refresh'
 import UpdateIcon from 'material-ui/svg-icons/action/system-update-alt'
 
 import Base from './Base'

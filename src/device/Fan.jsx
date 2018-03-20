@@ -50,6 +50,10 @@ class Fan extends React.Component {
     }
   }
 
+  componentDidMount () {
+    this.autoRefresh = setInterval(() => this.props.refresh(), 1000)
+  }
+
   componentWillReceiveProps (nextProps) {
     if (nextProps.fan && (nextProps.fan !== this.props.fan)) {
       this.setState({
@@ -57,10 +61,6 @@ class Fan extends React.Component {
         fanSpeed: nextProps.fan.fanSpeed
       })
     }
-  }
-
-  componentDidMount () {
-    this.autoRefresh = setInterval(() => this.props.refresh(), 1000)
   }
 
   componentWillUnmount () {
@@ -100,7 +100,16 @@ class Fan extends React.Component {
           <Paper style={{ padding: 0 }}>
             <div style={titleStyle}>{ i18n.__('Fan Scale') }</div>
             <div style={{ height: 48 }} />
-            <div style={{ width: 240, height: 144, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <div
+              style={{
+                width: 240,
+                height: 144,
+                display: 'flex',
+                alignItems: 'center',
+                flexDirection: 'column',
+                justifyContent: 'center'
+              }}
+            >
               <FlatButton
                 primary
                 onTouchTap={this.increment}

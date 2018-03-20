@@ -162,15 +162,16 @@ class Media extends Base {
     }
 
     this.hideMedia = (show) => { // show === true ? show media : hide media
-      const txt = show ? i18n.__('Retrieve') : i18n.__('Hide')
       const list = this.state.selectedItems.length
         ? this.state.selectedItems
         : [this.media.find(item => item.hash === this.memoizeValue.downloadDigest).hash]
+
       this.ctx.props.apis.request(show ? 'subtractBlacklist' : 'addBlacklist', list, (error) => {
         if (error) {
           this.ctx.openSnackBar(show ? i18n.__('Retrieve Media Failed') : i18n.__('Hide Media Failed'))
         } else {
-          this.ctx.openSnackBar(show ? i18n.__('Retrieve Media Success %s', list.length) : i18n.__('Hide Media Success %s', list.length))
+          this.ctx.openSnackBar(show ? i18n.__('Retrieve Media Success %s', list.length)
+            : i18n.__('Hide Media Success %s', list.length))
           this.navEnter()
           this.setState({ selectedItems: [] })
         }
@@ -192,15 +193,17 @@ class Media extends Base {
     }
 
     this.uploadMedia = () => {
-      if (!window.navigator.onLine) return this.ctx.openSnackBar(i18n.__('Offline Text'))
-      this.uploadMediaAsync().catch((e) => {
-        console.log('uploadMedia failed', e)
-        if (e && e.response && e.response.body && e.response.body.code === 'EEXIST') {
-          this.ctx.openSnackBar(i18n.__('Upload Media Folder EEXIST Text'))
-        } else {
-          this.ctx.openSnackBar(i18n.__('Upload Media Failed'))
-        }
-      })
+      if (!window.navigator.onLine) this.ctx.openSnackBar(i18n.__('Offline Text'))
+      else {
+        this.uploadMediaAsync().catch((e) => {
+          console.log('uploadMedia failed', e)
+          if (e && e.response && e.response.body && e.response.body.code === 'EEXIST') {
+            this.ctx.openSnackBar(i18n.__('Upload Media Folder EEXIST Text'))
+          } else {
+            this.ctx.openSnackBar(i18n.__('Upload Media Failed'))
+          }
+        })
+      }
     }
   }
 

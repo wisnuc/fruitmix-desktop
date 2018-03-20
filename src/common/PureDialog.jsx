@@ -124,16 +124,10 @@ class TransitionItem extends React.Component {
 }
 
 export default class CDialog extends React.Component {
-  /*
-  static propTypes = {
-    open: PropTypes.bool.isRequired
-  }
-  */
-
   render () {
     return (
       <ReactTransitionGroup>
-        {this.props.open && <TransitionItem {...this.props} />}
+        { this.props.open && <TransitionItem {...this.props} /> }
       </ReactTransitionGroup>
     )
   }

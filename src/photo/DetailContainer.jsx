@@ -4,7 +4,6 @@ import Debug from 'debug'
 import prettysize from 'prettysize'
 import { IconButton } from 'material-ui'
 import CheckIcon from 'material-ui/svg-icons/action/check-circle'
-import DeleteIcon from 'material-ui/svg-icons/action/delete'
 import DateIcon from 'material-ui/svg-icons/action/today'
 import ImageIcon from 'material-ui/svg-icons/image/image'
 import CameraIcon from 'material-ui/svg-icons/image/camera'
@@ -613,36 +612,43 @@ class DetailContainerInline extends React.Component {
               {/* toolbar */}
               {
                 this.props.selectedItems.length
-                  ? <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <div style={{ color: '#FFF', fontSize: 14, fontWeight: 500 }} >
-                      { this.state.selected ? i18n.__('Selected') : i18n.__('Select') }
+                  ? (
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <div style={{ color: '#FFF', fontSize: 14, fontWeight: 500 }} >
+                        { this.state.selected ? i18n.__('Selected') : i18n.__('Select') }
+                      </div>
+                      <IconButton onTouchTap={this.selectPhoto}>
+                        <CheckIcon color={this.state.selected ? '#1E88E5' : '#FFF'} />
+                      </IconButton>
                     </div>
-                    <IconButton onTouchTap={this.selectPhoto}>
-                      <CheckIcon color={this.state.selected ? '#1E88E5' : '#FFF'} />
-                    </IconButton>
-                    </div>
-                  : <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <IconButton onTouchTap={() => this.props.startDownload()} tooltip={i18n.__('Download')}>
-                      <DownloadIcon color="#FFF" />
-                    </IconButton>
+                  )
+                  : (
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <IconButton onTouchTap={() => this.props.startDownload()} tooltip={i18n.__('Download')}>
+                        <DownloadIcon color="#FFF" />
+                      </IconButton>
 
-                    {/*
+                      {/*
                     <IconButton onTouchTap={() => this.toggleDialog('deleteDialog')} tooltip={i18n.__('Delete')}>
                       <DeleteIcon color="#FFF" />
                     </IconButton>
                     */}
 
-                    { // not show hide or Retrieve button when in box view
-                      !this.props.station &&
-                        <IconButton onTouchTap={() => this.toggleDialog('hideDialog')} tooltip={h ? i18n.__('Retrieve') : i18n.__('Hide')}>
+                      { // not show hide or Retrieve button when in box view
+                        !this.props.station &&
+                        <IconButton
+                          onTouchTap={() => this.toggleDialog('hideDialog')}
+                          tooltip={h ? i18n.__('Retrieve') : i18n.__('Hide')}
+                        >
                           { h ? <Visibility color="#FFF" /> : <VisibilityOff color="#FFF" /> }
                         </IconButton>
-                    }
+                      }
 
-                    <IconButton onTouchTap={() => this.toggleDialog('detailInfo')} tooltip={i18n.__('Info')}>
-                      <InfoIcon color="#FFF" />
-                    </IconButton>
+                      <IconButton onTouchTap={() => this.toggleDialog('detailInfo')} tooltip={i18n.__('Info')}>
+                        <InfoIcon color="#FFF" />
+                      </IconButton>
                     </div>
+                  )
               }
               <div style={{ width: 24 }} />
             </div>

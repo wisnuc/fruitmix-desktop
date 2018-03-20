@@ -1,19 +1,8 @@
 import React from 'react'
 import i18n from 'i18n'
 import Debug from 'debug'
-import { IconButton, Checkbox, RaisedButton, TextField, RadioButtonGroup, RadioButton } from 'material-ui'
-import DoneIcon from 'material-ui/svg-icons/action/done'
-import CloseIcon from 'material-ui/svg-icons/navigation/close'
-import BackIcon from 'material-ui/svg-icons/navigation/arrow-back'
-import EditorInsertDriveFile from 'material-ui/svg-icons/editor/insert-drive-file'
-import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
-import FileFolder from 'material-ui/svg-icons/file/folder'
-import ArrowRight from 'material-ui/svg-icons/hardware/keyboard-arrow-right'
-import Promise from 'bluebird'
-import request from 'superagent'
-import sanitize from 'sanitize-filename'
+import { Checkbox, RadioButtonGroup, RadioButton } from 'material-ui'
 import FlatButton from '../common/FlatButton'
-import { ShareDisk } from '../common/Svg'
 
 const debug = Debug('component:file:Policy: ')
 

@@ -1,7 +1,6 @@
 import React from 'react'
 import UUID from 'uuid'
 import i18n from 'i18n'
-import Debug from 'debug'
 import { ipcRenderer } from 'electron'
 
 import { Paper, IconButton, Snackbar } from 'material-ui'
@@ -11,7 +10,7 @@ import SocialNotifications from 'material-ui/svg-icons/social/notifications'
 import Fruitmix from '../common/fruitmix'
 import { TasksIcon } from '../common/Svg'
 import DialogOverlay from '../common/DialogOverlay'
-import { sharpCurve, sharpCurveDuration, sharpCurveDelay } from '../common/motion'
+import { sharpCurve } from '../common/motion'
 
 import Tasks from './Tasks'
 import Policy from './Policy'
@@ -44,8 +43,6 @@ import Power from '../view/Power'
 import Download from '../view/Download'
 import FinishedList from '../view/FinishedList'
 import Plugin from '../view/Plugin'
-
-const debug = Debug('component:nav:Navigation')
 
 class NavViews extends React.Component {
   constructor (props) {
@@ -176,19 +173,17 @@ class NavViews extends React.Component {
     this.onMoveInDrawer = () => {
       clearTimeout(this.timer)
     }
-  }
 
-  install (name, View) {
-    this.views[name] = new View(this)
-    this.views[name].on('updated', next => this.setState({ [name]: next }))
-    this.state.home = this.views[name].state
+    this.init = () => {
+      this.navTo('group')
+      this.setState({ openDrawer: true })
+      this.timer = setTimeout(() => this.setState({ openDrawer: false }), 1500)
+      this.checkFirmWareAsync().catch(e => console.error('checkFirmWareAsync error', e))
+    }
   }
 
   componentDidMount () {
-    this.navTo('group')
-    this.checkFirmWareAsync().catch(e => console.log('checkFirmWareAsync error', e))
-    this.setState({ openDrawer: true })
-    this.timer = setTimeout(() => this.setState({ openDrawer: false }), 1500)
+    this.init()
     ipcRenderer.send('START_TRANSMISSION')
     ipcRenderer.on('snackbarMessage', (e, message) => this.openSnackBar(message.message))
     ipcRenderer.on('conflicts', (e, args) => this.setState({ conflicts: args }))
@@ -204,8 +199,17 @@ class NavViews extends React.Component {
     ipcRenderer.removeAllListeners('conflicts')
   }
 
+  getDetailStatus () {
+    return this.state.showDetail
+  }
+
+  install (name, View) {
+    this.views[name] = new View(this)
+    this.views[name].on('updated', next => this.setState({ [name]: next }))
+    this.state.home = this.views[name].state
+  }
+
   navTo (nav, target) {
-    // debug('navTo', nav, target, this.state.nav)
     if (nav === this.state.nav) {
       this.setState({ openDrawer: false })
     } else {
@@ -238,10 +242,6 @@ class NavViews extends React.Component {
     this.setState({ showDetail: !this.state.showDetail })
   }
 
-  getDetailStatus () {
-    return this.state.showDetail
-  }
-
   openSnackBar (message, options) {
     if (options && options.showTasks) this.setState({ showTasks: true, snackBar: message })
     else this.setState({ snackBar: message })
@@ -252,11 +252,14 @@ class NavViews extends React.Component {
     return this.views[this.state.nav]
   }
 
+  appBarHeight () {
+    return this.currentView().prominent() ? 128 : 64
+  }
+
   renderQuickNavs () {
     if (!this.state.nav) return null
 
     const color = this.currentView().primaryColor()
-    const group = this.views[this.state.nav].navGroup()
     const hasQuickNavs = this.currentView().hasQuickNav()
     const navGroupList = Object.keys(this.views).filter(key => this.views[key].navGroup() === this.views[this.state.nav].navGroup())
 
@@ -318,10 +321,6 @@ class NavViews extends React.Component {
         }
       </div>
     )
-  }
-
-  appBarHeight () {
-    return this.currentView().prominent() ? 128 : 64
   }
 
   renderDetailButton () {
@@ -392,34 +391,13 @@ class NavViews extends React.Component {
         </IconButton>
         {
           num < 100
-            ? <div
-              style={{
-                position: 'absolute',
-                right: 8,
-                top: 8,
-                width: 16,
-                height: 16,
-                borderRadius: 8,
-                backgroundColor: '#F44336',
-                fontSize: 10,
-                fontWeight: 500,
-                color: '#FFF',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                opacity: num ? 1 : 0,
-                transition: 'all 225ms'
-              }}
-            >
-              { num }
-            </div>
-            : num > 99
-              ? <div
+            ? (
+              <div
                 style={{
                   position: 'absolute',
-                  right: 0,
-                  top: 9,
-                  width: 24,
+                  right: 8,
+                  top: 8,
+                  width: 16,
                   height: 16,
                   borderRadius: 8,
                   backgroundColor: '#F44336',
@@ -428,11 +406,36 @@ class NavViews extends React.Component {
                   color: '#FFF',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  opacity: num ? 1 : 0,
+                  transition: 'all 225ms'
                 }}
               >
-              99+
+                { num }
               </div>
+            )
+            : num > 99
+              ? (
+                <div
+                  style={{
+                    position: 'absolute',
+                    right: 0,
+                    top: 9,
+                    width: 24,
+                    height: 16,
+                    borderRadius: 8,
+                    backgroundColor: '#F44336',
+                    fontSize: 10,
+                    fontWeight: 500,
+                    color: '#FFF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+              99+
+                </div>
+              )
               : <div />
         }
       </div>
@@ -558,7 +561,6 @@ class NavViews extends React.Component {
   }
 
   renderSnackBar () {
-    // debug('renderSnackBar', this.state.snackBar)
     return (
       <Snackbar
         open={!!this.state.snackBar}
@@ -632,7 +634,7 @@ class NavViews extends React.Component {
           onRequestChange={this.openDrawerBound}
           views={this.views}
           nav={this.state.nav}
-          navTo={this.navTo.bind(this)}
+          navTo={this.navToBound}
           navToMain={this.props.nav}
           isCloud={isCloud}
         />

@@ -32,14 +32,13 @@ class Worker extends EventEmitter {
       })
 
       stream.on('finish', () => {
-        if (this.finished) return null
+        if (this.finished) return
         fs.rename(tmpPath, dst, (error) => {
           if (error) {
             const e = new Error('move image error')
             e.text = error
-            return callback(e)
-          }
-          return callback(null)
+            callback(e)
+          } else callback(null)
         })
       })
 
@@ -135,7 +134,7 @@ class GetThumbTask extends Worker {
     this.serverDownloadAsync(`media/${this.digest}`, qs, this.dirpath, this.cacheName, this.station).then((data) => {
       this.finish(path.join(this.dirpath, this.cacheName))
     }).catch((err) => {
-      console.log(`fail download of digest:${this.digest} of session: ${this.session} err: ${err}`)
+      // console.log(`Download media error: \n${err}\n`)
       // setTimeout(() => getThumb(digest, cacheName, mediaPath, session), 2000)
       this.error(err)
     })
@@ -188,7 +187,7 @@ class MediaFileManager {
       this.schedule()
     })
     task.on('error', (err) => {
-      console.error('createThumbTask error', err)
+      console.error(`createThumbTask error: \n${err}`)
       this.schedule()
     })
     this.thumbTaskQueue.push(task)
@@ -202,7 +201,7 @@ class MediaFileManager {
       this.schedule()
     })
     task.on('error', (err) => {
-      console.error('createImageTask error', err)
+      console.error(`createImageTask error: \n${err}`)
       this.schedule()
     })
     this.imageTaskQueue.push(task)
@@ -228,9 +227,9 @@ class MediaFileManager {
   abort (id, type, callback) {
     let worker
     if (type === 'thumb') {
-      worker = this.thumbTaskQueue.find(worker => worker.id === id)
+      worker = this.thumbTaskQueue.find(w => w.id === id)
     } else {
-      worker = this.imageTaskQueue.find(worker => worker.id === id)
+      worker = this.imageTaskQueue.find(w => w.id === id)
     }
     if (worker && !worker.isFinished()) {
       worker.abort()

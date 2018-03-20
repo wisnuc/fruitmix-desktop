@@ -1,9 +1,9 @@
 import React from 'react'
 import i18n from 'i18n'
-import { TextField, Checkbox, CircularProgress, Avatar } from 'material-ui'
+import { CircularProgress } from 'material-ui'
 
 import FlatButton from '../common/FlatButton'
-import { sharpCurve, sharpCurveDuration } from '../common/motion'
+import { sharpCurve } from '../common/motion'
 
 class AutoLogin extends React.Component {
   constructor (props) {

@@ -1,3 +1,5 @@
+/* global AMap */
+
 import React from 'react'
 
 class Map extends React.Component {
@@ -23,7 +25,6 @@ class Map extends React.Component {
       })
 
       const geocoderCallBack = (data) => {
-        console.log('address', data)
         /* Get address description */
         let address = this.props.unknownRegionText || 'Other Region'
         if (data && data.regeocode) {
@@ -45,7 +46,6 @@ class Map extends React.Component {
           extensions: 'all'
         })
         geocoder.getAddress(lnglatXY, (status, result) => {
-          console.log(status, result)
           if ((status === 'complete' && result.info === 'OK') || status === 'no_data') {
             geocoderCallBack(result)
           }
@@ -55,6 +55,7 @@ class Map extends React.Component {
           map,
           position: lnglatXY
         })
+        console.log(marker.getPosition())
       }
       regeocoder()
     }
@@ -79,7 +80,6 @@ class Map extends React.Component {
   }
 
   render () {
-    console.log('map render')
     const height = this.props.height || 360
     const width = this.props.height || 360
     return (

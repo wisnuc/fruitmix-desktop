@@ -1,8 +1,5 @@
 import React from 'react'
 import i18n from 'i18n'
-import Debug from 'debug'
-import { ipcRenderer } from 'electron'
-import { List, AutoSizer } from 'react-virtualized'
 import { CircularProgress, FloatingActionButton, Popover, IconButton, Menu, MenuItem, TextField } from 'material-ui'
 import DeleteSvg from 'material-ui/svg-icons/action/delete'
 import PlaySvg from 'material-ui/svg-icons/av/play-arrow'
@@ -16,8 +13,6 @@ import DialogOverlay from '../common/PureDialog'
 import ContextMenu from '../common/ContextMenu'
 import { BTTorrentIcon, BTMagnetIcon } from '../common/Svg'
 import { formatTime } from '../common/datetime'
-
-const debug = Debug('component:download:')
 
 const formatSize = (s) => {
   const size = parseFloat(s, 10)
@@ -36,11 +31,11 @@ const formatSeconds = (seconds) => {
   let m = 0
   let h = 0
   if (s > 60) {
-    m = parseInt(s / 60)
-    s = parseInt(s % 60)
+    m = parseInt(s / 60, 10)
+    s = parseInt(s % 60, 10)
     if (m > 60) {
-      h = parseInt(m / 60)
-      m = parseInt(m % 60)
+      h = parseInt(m / 60, 10)
+      m = parseInt(m % 60, 10)
     }
   }
   if (h.toString().length === 1) h = `0${h}`
@@ -160,7 +155,6 @@ class BTDownload extends React.Component {
     this.handleChange = value => this.setState({ value, errorText: '' })
 
     this.destroyAsync = async (ids) => {
-      console.log('this.destroyAsync', ids)
       for (let i = 0; i < ids.length; i++) {
         await this.props.apis.requestAsync('handleMagnet', { id: ids[i], op: 'destroy' })
       }
@@ -173,7 +167,7 @@ class BTDownload extends React.Component {
         this.setState({ WIP: false, destroy: false })
         this.refresh()
       }).catch((err) => {
-        console.log('destroy error', err)
+        console.error('destroy error', err)
         this.props.openSnackBar(i18n.__('Delete Failed'))
       })
     }
@@ -182,7 +176,7 @@ class BTDownload extends React.Component {
       this.setState({ WIP: true })
       this.props.apis.request('addMagnet', { magnetURL: this.state.value, dirUUID: this.state.dirUUID }, (err) => {
         if (err) {
-          console.log('addMagnet error', err)
+          console.error('addMagnet error', err)
           let errorText
           if (err.response && err.response.message === 'torrent exist') errorText = i18n.__('Task Exist')
           else errorText = i18n.__('Add Magnet Failed')
@@ -210,16 +204,18 @@ class BTDownload extends React.Component {
 
     this.openFAB = (event) => {
       event.preventDefault()
-      const anchorEl = event.currentTarget
-      if (!window.navigator.onLine) return this.props.openSnackBar(i18n.__('Offline Text'))
-      this.mkdirAsync().then(({ driveUUID, dirUUID }) => {
-        this.setState({ openFAB: true, anchorEl, driveUUID, dirUUID })
-      }).catch((e) => {
-        console.log(e)
-        if (e && e.response && e.response[0] && e.response[0].error.code === 'EEXIST') {
-          this.props.openSnackBar(i18n.__('Download Folder EEXIST Text'))
-        } else this.props.openSnackBar(i18n.__('BT Start Failed'))
-      })
+      if (!window.navigator.onLine) this.props.openSnackBar(i18n.__('Offline Text'))
+      else {
+        const anchorEl = event.currentTarget
+        this.mkdirAsync().then(({ driveUUID, dirUUID }) => {
+          this.setState({ openFAB: true, anchorEl, driveUUID, dirUUID })
+        }).catch((e) => {
+          console.error('openFAB error', e)
+          if (e && e.response && e.response[0] && e.response[0].error.code === 'EEXIST') {
+            this.props.openSnackBar(i18n.__('Download Folder EEXIST Text'))
+          } else this.props.openSnackBar(i18n.__('BT Start Failed'))
+        })
+      }
     }
 
     this.addTorrent = () => {
@@ -398,14 +394,16 @@ class BTDownload extends React.Component {
         >
           {
             hovered && !this.props.alt
-              ? <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <IconButton
-                  onTouchTap={e => this.toggleStatus(e, infoHash, isPause)}
-                  tooltip={isPause ? i18n.__('Resume') : i18n.__('Pause')}
-                >
-                  { isPause ? <PlaySvg color={this.props.primaryColor} /> : <PauseSvg color={this.props.primaryColor} /> }
-                </IconButton>
-              </div>
+              ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <IconButton
+                    onTouchTap={e => this.toggleStatus(e, infoHash, isPause)}
+                    tooltip={isPause ? i18n.__('Resume') : i18n.__('Pause')}
+                  >
+                    { isPause ? <PlaySvg color={this.props.primaryColor} /> : <PauseSvg color={this.props.primaryColor} /> }
+                  </IconButton>
+                </div>
+              )
               : `${Math.round(p * 100)}%`
           }
         </div>
@@ -477,11 +475,11 @@ class BTDownload extends React.Component {
         <div style={{ flex: '0 0 90px' }} >
           {
             hovered &&
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <IconButton onTouchTap={e => this.openDestroy(e, [infoHash])} tooltip={i18n.__('Delete')}>
-                  <DeleteSvg color={this.props.primaryColor} />
-                </IconButton>
-              </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <IconButton onTouchTap={e => this.openDestroy(e, [infoHash])} tooltip={i18n.__('Delete')}>
+                <DeleteSvg color={this.props.primaryColor} />
+              </IconButton>
+            </div>
           }
         </div>
       </div>
@@ -489,7 +487,6 @@ class BTDownload extends React.Component {
   }
 
   render () {
-    // debug('render BTDownload', this.state, this.props)
     /* lost connection to wisnuc */
     if (!window.navigator.onLine) return this.renderOffLine()
 

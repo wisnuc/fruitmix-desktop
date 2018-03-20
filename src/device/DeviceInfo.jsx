@@ -1,6 +1,5 @@
 import React from 'react'
 import i18n from 'i18n'
-import Debug from 'debug'
 import prettysize from 'prettysize'
 import { TextField, Divider, IconButton, CircularProgress } from 'material-ui'
 import TV from 'material-ui/svg-icons/hardware/tv'
@@ -12,8 +11,6 @@ import ModeEdit from 'material-ui/svg-icons/editor/mode-edit'
 import StorageIcon from 'material-ui/svg-icons/device/storage'
 
 import { RAIDIcon } from '../common/Svg'
-
-const debug = Debug('component:control:deviceinfo')
 
 const phaseData = value => prettysize(parseInt(value, 10) * 1024)
 
@@ -50,6 +47,17 @@ class DeviceInfo extends React.PureComponent {
     }
   }
 
+  componentWillReceiveProps (nextProps) {
+    if (nextProps.info && this.props.info && (nextProps.info.name !== this.props.info.name)) {
+      this.currentLabel = nextProps.info.name
+      this.setState({
+        label: nextProps.info.name,
+        modify: false,
+        changed: false
+      })
+    }
+  }
+
   renderList (Icon, titles, values) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: 420 }}>
@@ -79,17 +87,6 @@ class DeviceInfo extends React.PureComponent {
         <div style={{ height: 8 }} />
       </div>
     )
-  }
-
-  componentWillReceiveProps (nextProps) {
-    if (nextProps.info && this.props.info && (nextProps.info.name !== this.props.info.name)) {
-      this.currentLabel = nextProps.info.name
-      this.setState({
-        label: nextProps.info.name,
-        modify: false,
-        changed: false
-      })
-    }
   }
 
   render () {
@@ -192,44 +189,52 @@ class DeviceInfo extends React.PureComponent {
           <div>
             <div
               style={{ height: 48, fontSize: 16, color: 'rgba(0, 0, 0, 0.87)' }}
-              onMouseOver={() => this.setState({ titleHover: true })}
-              onMouseOut={() => this.setState({ titleHover: false })}
+              onMouseMove={() => this.setState({ titleHover: true })}
+              onMouseLeave={() => this.setState({ titleHover: false })}
               onTouchTap={e => e.stopPropagation()}
             >
               <div style={{ height: 16 }} />
               {
                 this.state.modify
-                  ? <div style={{ marginTop: -8, display: 'flex' }}>
-                    {/* FIXME */}
-                    <TextField
-                      name="deviceName"
-                      onChange={e => this.updateLabel(e.target.value)}
-                      maxLength={12}
-                      value={this.state.modify ? this.state.label : this.props.info.name}
-                      errorText={this.state.errorText}
-                      ref={(input) => { if (input && this.state.modify) { input.focus() } }}
-                      onKeyDown={this.onKeyDown}
-                    />
-                    {
-                      this.state.progress
-                        ? <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginLeft: 8 }}>
-                          <CircularProgress size={16} thickness={2} />
-                        </div>
-                        : <IconButton
-                          onTouchTap={() => this.state.changed && this.changeDeviceName()}
-                          disabled={!!this.state.errorText || !this.state.label || !this.state.label.length}
-                        >
-                          <DoneIcon color={this.props.primaryColor} />
-                        </IconButton>
-                    }
-                  </div>
-                  : <div
-                    style={{ display: 'flex', alignItems: 'center', height: 32 }}
-                    onTouchTap={() => this.setState({ modify: true })}
-                  >
-                    { this.state.label ? this.state.label : this.props.info.name }
-                    <ModeEdit color={this.props.primaryColor} style={{ marginLeft: 24 }} />
-                  </div>
+                  ? (
+                    <div style={{ marginTop: -8, display: 'flex' }}>
+                      {/* FIXME */}
+                      <TextField
+                        name="deviceName"
+                        onChange={e => this.updateLabel(e.target.value)}
+                        maxLength={12}
+                        value={this.state.modify ? this.state.label : this.props.info.name}
+                        errorText={this.state.errorText}
+                        ref={(input) => { if (input && this.state.modify) { input.focus() } }}
+                        onKeyDown={this.onKeyDown}
+                      />
+                      {
+                        this.state.progress
+                          ? (
+                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginLeft: 8 }}>
+                              <CircularProgress size={16} thickness={2} />
+                            </div>
+                          )
+                          : (
+                            <IconButton
+                              onTouchTap={() => this.state.changed && this.changeDeviceName()}
+                              disabled={!!this.state.errorText || !this.state.label || !this.state.label.length}
+                            >
+                              <DoneIcon color={this.props.primaryColor} />
+                            </IconButton>
+                          )
+                      }
+                    </div>
+                  )
+                  : (
+                    <div
+                      style={{ display: 'flex', alignItems: 'center', height: 32 }}
+                      onTouchTap={() => this.setState({ modify: true })}
+                    >
+                      { this.state.label ? this.state.label : this.props.info.name }
+                      <ModeEdit color={this.props.primaryColor} style={{ marginLeft: 24 }} />
+                    </div>
+                  )
               }
               {
                 <Divider

@@ -8,6 +8,10 @@ class ContextMenu extends PureComponent {
     this.state = { stage: 0 }
   }
 
+  componentDidMount () {
+    this.preChildren = this.props.children
+  }
+
   componentWillReceiveProps (nextProps) {
     if (nextProps.open === true && this.props.open === false) {
       this.setState({
@@ -21,10 +25,6 @@ class ContextMenu extends PureComponent {
       this.setState({ stage: 3 })
       setTimeout(() => this.setState({ stage: 0 }), this.out)
     }
-  }
-
-  componentDidMount () {
-    this.preChildren = this.props.children
   }
 
   componentDidUpdate () {

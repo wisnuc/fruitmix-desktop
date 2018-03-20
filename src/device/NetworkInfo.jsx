@@ -1,14 +1,10 @@
 import React from 'react'
 import i18n from 'i18n'
-import Debug from 'debug'
 import validator from 'validator'
 import { TextField } from 'material-ui'
 import ActionSettingsEthernet from 'material-ui/svg-icons/action/settings-ethernet'
-import ModeEdit from 'material-ui/svg-icons/editor/mode-edit'
 import DialogOverlay from '../common/DialogOverlay'
 import FlatButton from '../common/FlatButton'
-
-const debug = Debug('component:control:ethernet')
 
 class Ethernet extends React.Component {
   constructor (props) {
@@ -33,7 +29,6 @@ class Ethernet extends React.Component {
     }
 
     this.aliasRequest = () => {
-      debug('this.aliasRequest', this.state, this.props)
       this.setState({ open: false })
     }
   }
@@ -67,16 +62,16 @@ class Ethernet extends React.Component {
     const NIC = net.find(card => card.ipAddresses && card.ipAddresses.length > 0)
     const ipv4 = NIC.ipAddresses.find(addr => addr.internal === false && addr.family === 'IPv4')
 
+    /*
     const getAddress = () => (
       <div>
-        {/*
         <div onTouchTap={this.setIp}>
           {data.address}
           <ModeEdit color={this.props.primaryColor} style={{ marginLeft: 8 }} viewBox="0 0 36 12" />
         </div>
-        */}
       </div>
     )
+    */
 
     const Icon = ActionSettingsEthernet
 
@@ -98,7 +93,6 @@ class Ethernet extends React.Component {
       ipv4.mac.toUpperCase()
     ]
 
-    // debug('this.props', this.props, NIC)
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <div style={{ height: 16 }} />
@@ -117,7 +111,7 @@ class Ethernet extends React.Component {
               <div style={{ height: 56, display: 'flex', marginBottom: 10, position: 'relative' }}>
                 <TextField
                   fullWidth
-                  hintText={data.address}
+                  hintText=""
                   onChange={e => this.setState({ alias: e.target.value })}
                   ref={(input) => {
                     if (input && this.state.focusFirst) {

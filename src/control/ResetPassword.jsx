@@ -1,17 +1,10 @@
 import React from 'react'
 import i18n from 'i18n'
 import { CircularProgress, Divider, Paper } from 'material-ui'
-import RightIcon from 'material-ui/svg-icons/hardware/keyboard-arrow-right'
-import CloudDoneIcon from 'material-ui/svg-icons/file/cloud-done'
-import CloudOffIcon from 'material-ui/svg-icons/file/cloud-off'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
-import WifiIcon from 'material-ui/svg-icons/notification/wifi'
 import FlatButton from '../common/FlatButton'
 import Checkmark from '../common/Checkmark'
 import Password from './ChangeAccountDialog'
-import { Barcelona, WISNUC } from '../common/Svg'
-
-const duration = 300
 
 /*
   http://res.wx.qq.com/connect/zh_CN/htmledition/js/wxLogin.js
@@ -130,68 +123,72 @@ class ResetPassword extends React.Component {
       <div style={{ zIndex: 100 }}>
         {
           !this.state.error
-            ? <div style={{ width: 332, height: 492, padding: 24, position: 'relative', backgroundColor: '#FAFAFA' }}>
-              {/* CircularProgress */}
-              <div
-                ref={ref => (this.weChatLoadingRef = ref)}
-                key="weChatLoadingRef"
-                style={{
-                  position: 'absolute',
-                  top: 108,
-                  left: 0,
-                  height: 300,
-                  width: '100%',
-                  backgroundColor: '#FAFAFA',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <CircularProgress size={64} thickness={5} />
-              </div>
-              <div style={{ height: 42 }} />
-              <div
-                style={{ height: 406, width: 300, margin: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                id="login_container"
-              />
-              <div style={{ height: 36 }} />
+            ? (
+              <div style={{ width: 332, height: 492, padding: 24, position: 'relative', backgroundColor: '#FAFAFA' }}>
+                {/* CircularProgress */}
+                <div
+                  ref={ref => (this.weChatLoadingRef = ref)}
+                  key="weChatLoadingRef"
+                  style={{
+                    position: 'absolute',
+                    top: 108,
+                    left: 0,
+                    height: 300,
+                    width: '100%',
+                    backgroundColor: '#FAFAFA',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <CircularProgress size={64} thickness={5} />
+                </div>
+                <div style={{ height: 42 }} />
+                <div
+                  style={{ height: 406, width: 300, margin: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  id="login_container"
+                />
+                <div style={{ height: 36 }} />
 
-              {/* overlay text */}
-              <div style={{ position: 'absolute', top: 0, left: 0, height: 108, width: '100%', backgroundColor: '#FAFAFA' }} >
-                <div style={{ height: 72 }} />
-                <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
-                  {i18n.__('WeChat Authentication') }
+                {/* overlay text */}
+                <div style={{ position: 'absolute', top: 0, left: 0, height: 108, width: '100%', backgroundColor: '#FAFAFA' }} >
+                  <div style={{ height: 72 }} />
+                  <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
+                    {i18n.__('WeChat Authentication') }
+                  </div>
                 </div>
               </div>
-            </div>
-            : <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>
-              <div
-                style={{
-                  width: 270,
-                  height: 270,
-                  margin: '42px auto 12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <img
-                  width={96}
-                  height={96}
-                  alt=""
-                  src="./assets/images/icon.png"
-                  style={{ filter: 'grayscale(100%)' }}
-                />
+            )
+            : (
+              <div style={{ width: 380, height: 540, backgroundColor: '#FAFAFA' }}>
+                <div
+                  style={{
+                    width: 270,
+                    height: 270,
+                    margin: '42px auto 12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <img
+                    width={96}
+                    height={96}
+                    alt=""
+                    src="./assets/images/icon.png"
+                    style={{ filter: 'grayscale(100%)' }}
+                  />
+                </div>
+                <div style={{ height: 24 }} />
+                <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.87)', fontSize: 20 }}>
+                  { this.state.error === 'net' ? i18n.__('Network Error') : i18n.__('Cloud Error') }
+                </div>
+                <div style={{ height: 24 }} />
+                <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.54)', fontSize: 20 }}>
+                  { this.state.error === 'net' ? i18n.__('Network Error Text') : i18n.__('Cloud Error Text') }
+                </div>
               </div>
-              <div style={{ height: 24 }} />
-              <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.87)', fontSize: 20 }}>
-                { this.state.error === 'net' ? i18n.__('Network Error') : i18n.__('Cloud Error') }
-              </div>
-              <div style={{ height: 24 }} />
-              <div style={{ textAlign: 'center', color: 'rgba(0,0,0,0.54)', fontSize: 20 }}>
-                { this.state.error === 'net' ? i18n.__('Network Error Text') : i18n.__('Cloud Error Text') }
-              </div>
-            </div>
+            )
         }
       </div>
     )

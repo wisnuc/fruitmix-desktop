@@ -1,9 +1,6 @@
 import React from 'react'
 import i18n from 'i18n'
-import { ipcRenderer } from 'electron'
 import { Paper } from 'material-ui'
-import ActionOpenInBrowser from 'material-ui/svg-icons/action/open-in-browser'
-import { grey500 } from 'material-ui/styles/colors'
 
 import Barcelona from './Barcelona'
 import Computer from './Computer'

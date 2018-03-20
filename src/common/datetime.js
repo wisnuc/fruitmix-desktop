@@ -4,7 +4,7 @@ import i18n from 'i18n'
  * @param { String } "2016:05:03 17:30:45"
  * @return { String } 2016/05/03
 */
-export function toDateString(datetime) {
+export function toDateString (datetime) {
   const dateStr = datetime.trim().split(/\s+/)[0]
 
   return dateStr.replace(/:/g, '/').replace(/\//g, '/')
@@ -14,7 +14,7 @@ export function toDateString(datetime) {
  * @param { String } "2016:05:03 17:30:45"
  * @return { String } 2016-05-03
 */
-export function formatDate(datetime = '', formatStr = '-') {
+export function formatDate (datetime = '', formatStr = '-') {
   const dateStr = toDateString(datetime || '')
 
   return dateStr.replace(/\//g, formatStr)
@@ -24,7 +24,7 @@ export function formatDate(datetime = '', formatStr = '-') {
  * @param { String } "2016:05:03 17:30:45"
  * @return { String } 1464946245000
 */
-export function toTimeSecond(datetime) {
+export function toTimeSecond (datetime) {
   const dateStr = datetime.trim().split(/[\s:]+/)
   if (!dateStr || dateStr.length !== 6) return 0
   return (new Date(...dateStr).getTime())
@@ -35,7 +35,7 @@ export function toTimeSecond(datetime) {
  * @return { String } 2016-05-03 17:30
 */
 
-export function formatTime(d) {
+export function formatTime (d) {
   const date = new Date()
   if (typeof d === 'number') {
     date.setTime(d)
@@ -55,7 +55,7 @@ export function formatTime(d) {
  *
  */
 
-export function parseTime(time) {
+export function parseTime (time) {
   const d = new Date()
   if (typeof time === 'number') d.setTime(time)
   else return '-'
@@ -85,7 +85,7 @@ export function parseTime(time) {
  * parseTime: return the full timestamp
 */
 
-export function parseFullTime(time) {
+export function parseFullTime (time) {
   const d = new Date()
   if (typeof time === 'number') d.setTime(time)
   else return '-'
@@ -115,7 +115,7 @@ export function parseFullTime(time) {
   return d.toLocaleString(locale, op.year)
 }
 
-export function formatMtime(mtime) {
+export function formatMtime (mtime) {
   if (!mtime) return null
   const time = new Date()
   time.setTime(parseInt(mtime, 10))

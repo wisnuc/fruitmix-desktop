@@ -1,8 +1,8 @@
 import React from 'react'
 import i18n from 'i18n'
-import { FloatingActionButton, RaisedButton, Popover, Menu, MenuItem } from 'material-ui'
+import { FloatingActionButton, Popover, Menu, MenuItem } from 'material-ui'
 import FileFileUpload from 'material-ui/svg-icons/file/file-upload'
-import { UploadFile, UploadFold, FromPC, FromMedia, FromFiles } from '../common/Svg'
+import { FromPC, FromMedia, FromFiles } from '../common/Svg'
 
 class BoxUploadButton extends React.Component {
   constructor (props) {

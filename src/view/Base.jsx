@@ -1,7 +1,7 @@
 import React from 'react'
 import i18n from 'i18n'
-
-import { teal600, indigo600, lightBlue600, cyan700, green600, lightGreen700, lime800, blue500, blueGrey400, blueGrey500, brown500, purple300, deepPurple500, indigo300, red400, orange600, pinkA200 } from 'material-ui/styles/colors'
+import { teal600, indigo600, lightBlue600, lightGreen700, blueGrey400, blueGrey500, deepPurple500, pinkA200
+} from 'material-ui/styles/colors'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import { IconButton } from 'material-ui'
@@ -15,19 +15,19 @@ class Base extends EventEmitter {
 
     this.handleProps = (apis, keys) => {
       /* waiting */
-      if (!apis || keys.findIndex(key => !apis[key] || apis[key].isPending()) > -1) return null
+      if (!apis || keys.findIndex(key => !apis[key] || apis[key].isPending()) > -1) return
 
       /* handle rejected */
       const rejected = keys.find(key => apis[key].isRejected())
       const reason = rejected && apis[rejected].reason()
-      if (rejected && reason !== this.state.error) return this.setState({ error: reason })
-      if (rejected) return null
-
-      /* now all keys are fulfilled */
-      keys.forEach((key) => {
-        const value = apis[key].value()
-        if (this.state[key] !== value) this.setState({ [key]: value, error: null })
-      })
+      if (rejected && reason !== this.state.error) this.setState({ error: reason })
+      else if (!rejected) {
+        /* now all keys are fulfilled */
+        keys.forEach((key) => {
+          const value = apis[key].value()
+          if (this.state[key] !== value) this.setState({ [key]: value, error: null })
+        })
+      }
     }
   }
 

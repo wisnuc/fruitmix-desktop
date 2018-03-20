@@ -2,8 +2,6 @@ import React from 'react'
 import Debug from 'debug'
 import { shell, clipboard } from 'electron'
 import { Paper, IconButton, Toggle } from 'material-ui'
-import Star from 'material-ui/svg-icons/toggle/star'
-import FileDownload from 'material-ui/svg-icons/file/file-download'
 
 import Detail from './Detail'
 import FlatButton from '../common/FlatButton'

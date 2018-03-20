@@ -1,20 +1,13 @@
 import React from 'react'
 import i18n from 'i18n'
-import { Paper, CircularProgress, LinearProgress, IconButton, Avatar, Toggle } from 'material-ui'
-import DoneIcon from 'material-ui/svg-icons/action/done'
+import { Paper, IconButton, Avatar, Toggle } from 'material-ui'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
-import WarningIcon from 'material-ui/svg-icons/alert/warning'
-import FolderSvg from 'material-ui/svg-icons/file/folder'
-import FileSvg from 'material-ui/svg-icons/editor/insert-drive-file'
-import MultiSvg from 'material-ui/svg-icons/content/content-copy'
 import UpdateIcon from 'material-ui/svg-icons/action/system-update-alt'
 import StarIcon from 'material-ui/svg-icons/toggle/star'
 import ReceiveIcon from 'material-ui/svg-icons/communication/call-received'
 import SettingsIcon from 'material-ui/svg-icons/action/settings'
 import BackIcon from 'material-ui/svg-icons/navigation/arrow-back'
 import ClearAllIcon from 'material-ui/svg-icons/communication/clear-all'
-import UpIcon from 'material-ui/svg-icons/hardware/keyboard-arrow-up'
-import ErrorBox from '../common/ErrorBox'
 
 class Notifications extends React.Component {
   constructor (props) {
@@ -59,8 +52,7 @@ class Notifications extends React.Component {
   }
 
   renderNts (nt) {
-    const { id, type, title, body, action } = nt
-
+    const { id, type, title, body } = nt
     let Icon
     let color
     switch (type) {

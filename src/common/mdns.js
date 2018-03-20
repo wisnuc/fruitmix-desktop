@@ -2,7 +2,7 @@ import UUID from 'uuid'
 import EventEmitter from 'eventemitter3'
 
 class MDNS {
-  constructor(ipc, store, callback) {
+  constructor (ipc, store, callback) {
     // console.log('constructing mdns', ipc, store)
     this.ipc = ipc
     this.store = store
@@ -24,7 +24,7 @@ class MDNS {
     this.ipc.on('MDNS_UPDATE', this.handleUpdate)
   }
 
-  scan() {
+  scan () {
     this.session = UUID.v4()
     console.log('mdns store', this.store)
     const manual = this.store.find(s => s && s.domain === 'manual')

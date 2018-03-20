@@ -102,6 +102,8 @@ class Power extends React.Component {
                 hasBeenShutDown = true
               }
               break
+            default:
+              break
           }
         }, 500)
       }, 1000)
@@ -119,6 +121,8 @@ class Power extends React.Component {
         break
       case 'REBOOTMAINTENANCE':
         operation = { state: 'reboot', mode: 'maintenance' }
+        break
+      default:
         break
     }
 
@@ -165,6 +169,8 @@ class Power extends React.Component {
         case 'REBOOTMAINTENANCE':
           hintText = i18n.__('Rebooting To Maintenance')
           break
+        default:
+          break
       }
       return (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -194,6 +200,8 @@ class Power extends React.Component {
         case 'REBOOTMAINTENANCE':
           hintText = i18n.__('Reboot To Maintenance Finish Hint')
           linkText = i18n.__('Reboot To Maintenance Finish Link')
+          break
+        default:
           break
       }
 

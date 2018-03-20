@@ -1,8 +1,7 @@
 import React from 'react'
 import i18n from 'i18n'
-import Debug from 'debug'
 import { ipcRenderer } from 'electron'
-import { IconButton, MenuItem, FloatingActionButton } from 'material-ui'
+import { IconButton, FloatingActionButton } from 'material-ui'
 import FileCreateNewFolder from 'material-ui/svg-icons/file/create-new-folder'
 import ListIcon from 'material-ui/svg-icons/action/list'
 import ContentAdd from 'material-ui/svg-icons/content/add'
@@ -16,11 +15,8 @@ import FileUploadButton from '../file/FileUploadButton'
 import DriversDetail from '../control/DriversDetail'
 import NewDriveDialog from '../control/NewDriveDialog'
 import sortByType from '../common/sort'
-import { BreadCrumbItem, BreadCrumbSeparator } from '../common/BreadCrumb'
 import { ShareDisk } from '../common/Svg'
 import DialogOverlay from '../common/DialogOverlay'
-
-const debug = Debug('component:viewModel:public: ')
 
 class Public extends Home {
   constructor (ctx) {
@@ -33,7 +29,6 @@ class Public extends Home {
     this.rootDrive = null
 
     this.listNavBySelect = () => {
-      // debug('listNavBySelect', this.select, this.state)
       const selected = this.select.state.selected
       if (selected.length !== 1) return
 
@@ -209,8 +204,6 @@ class Public extends Home {
   }
 
   renderContent ({ toggleDetail, openSnackBar, getDetailStatus }) {
-    // debug('renderContent public', this.state, this.ctx.props)
-
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         {/* add new user FAB */}

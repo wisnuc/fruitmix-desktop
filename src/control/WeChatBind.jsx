@@ -1,18 +1,9 @@
 import React from 'react'
 import i18n from 'i18n'
-import Debug from 'debug'
-import { Divider, IconButton, CircularProgress } from 'material-ui'
-import ActionAccountCircle from 'material-ui/svg-icons/action/account-circle'
-import Username from 'material-ui/svg-icons/action/perm-identity'
-import Password from 'material-ui/svg-icons/action/lock-outline'
-import HelpIcon from 'material-ui/svg-icons/action/help-outline'
+import { CircularProgress } from 'material-ui'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import FlatButton from '../common/FlatButton'
-import DialogOverlay from '../common/DialogOverlay'
-import ChangeAccountDialog from './ChangeAccountDialog'
 import Checkmark from '../common/Checkmark'
-
-const debug = Debug('component:control:WeChatBind')
 
 class WeChatBind extends React.Component {
   constructor (props) {
@@ -88,16 +79,15 @@ class WeChatBind extends React.Component {
 
       this.props.apis.pureRequest('getWechatToken', { code, platform: 'web' }, (error, res) => {
         if (error || !res) {
-          debug('getWechatToken', code, error)
+          console.error('getWechatToken', code, error)
           this.setState({ error: 'wxBind', status: '' })
         } else {
-          debug('getWechatToken', res)
           this.userInfo = res.user
           this.guid = this.userInfo.id
           this.token = res.token
           this.props.apis.pureRequest('fillTicket', { ticketId: this.ticketId, token: this.token }, (err) => {
             if (err) {
-              debug('fillTicket error', err)
+              console.error('fillTicket error', err)
               this.setState({ error: 'fillTicket', status: '' })
             } else this.setState({ status: 'confirm' })
           })
@@ -106,22 +96,23 @@ class WeChatBind extends React.Component {
     }
 
     this.getStationInfo = () => {
-      if (this.retryCount > 3) return this.setState({ error: 'wisnucNet', status: '' })
-      this.retryCount += 1
-      // debug('this.getStationInfo', this.retryCount)
-      this.props.apis.pureRequest('info', null, (err, res) => {
-        if (res && res.connectState && (res.connectState === 'CONNECTED' || res.connectState[0] === 'CONNECTED')) this.bindWechat()
-        else setTimeout(() => this.getStationInfo(), this.retryCount * 1000)
-      })
+      if (this.retryCount > 3) this.setState({ error: 'wisnucNet', status: '' })
+      else {
+        this.retryCount += 1
+        this.props.apis.pureRequest('info', null, (err, res) => {
+          const resOK = res && res.connectState && (res.connectState === 'CONNECTED' || res.connectState[0] === 'CONNECTED')
+          if (!err && resOK) this.bindWechat()
+          else setTimeout(() => this.getStationInfo(), this.retryCount * 1000)
+        })
+      }
     }
 
     this.bindWechat = () => {
       this.props.apis.pureRequest('creatTicket', null, (error, res) => {
         if (error) {
-          debug('this.bindWechat error', error)
+          console.error('this.bindWechat error', error)
           this.setState({ error: 'creatTicket', status: '' })
         } else {
-          debug('this.bindWechat success', res)
           this.ticketId = res.id
           this.initWXLogin()
         }
@@ -129,15 +120,12 @@ class WeChatBind extends React.Component {
     }
 
     this.confirm = () => {
-      debug('this.confirm', this.ticketId, this.guid)
       this.setState({ status: 'connectingCloud' })
       this.props.apis.pureRequest('confirmTicket', { ticketId: this.ticketId, guid: this.guid, state: true }, (e) => {
         if (e) {
-          debug('confirmTicket error', e)
+          console.error('confirmTicket error', e)
           this.setState({ error: 'confirmTicket', status: '' })
         } else {
-          debug('this.confirm this.userInfo', this.userInfo, this.props.account, this.props)
-
           this.props.ipcRenderer.send('UPDATE_USER_CONFIG', this.props.account.uuid, { weChat: this.userInfo, wxToken: this.token })
           setTimeout(() => this.setState({ status: 'success', error: '' }), 500)
         }

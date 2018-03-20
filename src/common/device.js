@@ -19,7 +19,7 @@ class Device extends RequestManager {
   // constructor won't emit anything since there is no listeners yet
   // the common way to solve this problem is to use a separate method
   // to trigger actions
-  constructor(mdev) {
+  constructor (mdev) {
     super()
 
     this.mdev = mdev
@@ -59,7 +59,7 @@ class Device extends RequestManager {
 
     this.reqCloud = (type, ep, stationID, token) => {
       const url = `${cloudAddress}/c/v1/stations/${stationID}/json`
-      const resource = new Buffer(`/${ep}`).toString('base64')
+      const resource = Buffer.from(`/${ep}`).toString('base64')
       // console.log('this.reqCloud device', type, ep, url, token)
       return request
         .get(url)
@@ -68,7 +68,7 @@ class Device extends RequestManager {
     }
   }
 
-  request(name, args, next) {
+  request (name, args, next) {
     let r
 
     switch (name) {
@@ -191,7 +191,6 @@ class Device extends RequestManager {
           .set('Accept', 'application/json')
         break
 
-
       /** FirmwareUpdate API * */
       case 'firm':
         r = request
@@ -202,16 +201,15 @@ class Device extends RequestManager {
         break
     }
 
-    if (!r) return console.error(`no request handler found for ${name}`)
-
-    this.setRequest(name, args, cb => r.end(cb), next)
+    if (!r) console.error(`no request handler found for ${name}`)
+    else this.setRequest(name, args, cb => r.end(cb), next)
   }
 
-  async requestAsync(name, args) {
+  async requestAsync (name, args) {
     return Promise.promisify(this.request).bind(this)(name, args)
   }
 
-  pureRequest(name, args, next) {
+  pureRequest (name, args, next) {
     let r
     let cloud = false
     switch (name) {
@@ -308,17 +306,17 @@ class Device extends RequestManager {
     else r.end((err, res) => (typeof next === 'function') && next(err, cloud ? res && res.body && res.body.data : res && res.body))
   }
 
-  async pureRequestAsync(name, args) {
+  async pureRequestAsync (name, args) {
     return Promise.promisify(this.pureRequest).bind(this)(name, args)
   }
 
-  start() {
+  start () {
     this.refreshSystemState(() => console.log('init refresh done', this))
   }
 
-  refreshSystemState(next) {
+  refreshSystemState (next) {
     let count = 5
-    const done = next ? () => (!--count) && next() : undefined
+    const done = next ? () => !(count -= 1) && next() : undefined
     this.request('device', null, done)
     this.request('boot', null, done)
     this.request('storage', null, done)
@@ -326,7 +324,7 @@ class Device extends RequestManager {
     this.request('info', null, done)
   }
 
-  async refreshSystemStateAsync() {
+  async refreshSystemStateAsync () {
     return Promise.promisify(this.refreshSystemState).bind(this)()
   }
 
@@ -345,7 +343,7 @@ class Device extends RequestManager {
   // *  13. retrieving token
   //    14. retrieving token failed
 
-  async initWizardAsync(args) {
+  async initWizardAsync (args) {
     const { target, mode, username, password } = args
     const uuid = await this.requestAsync('mkfs', { target, mode })
 
@@ -372,9 +370,10 @@ class Device extends RequestManager {
     const user = this.firstUser.value()
     await this.requestAsync('users', null)
     await this.requestAsync('token', { uuid: user.uuid, password })
+    return null
   }
 
-  async addFirstUserAsync(args) {
+  async addFirstUserAsync (args) {
     const { username, password } = args
 
     await this.requestAsync('firstUser', { username, password })
@@ -389,19 +388,15 @@ class Device extends RequestManager {
     console.log('device initWizard: token retrieved')
   }
 
-  async mkfsAsync(args) {
+  async mkfsAsync (args) {
     const { target, mode } = args
-    const uuid = await this.requestAsync('mkfs', { target, mode })
+    await this.requestAsync('mkfs', { target, mode })
     await this.requestAsync('storage', null)
   }
 
-  async reInstallAsync(args) {
-    const { target, username, password, remove } = args
-    const install = true
-    let reinstall = false
-    if (remove === 'wisnuc') reinstall = true // FIXME
+  async reInstallAsync (args) {
+    const { target, username, password } = args
     await this.requestAsync('install', { current: target })
-    // await this.requestAsync('install', { target, username, password, install, reinstall })
     while (true) {
       await Promise.delay(1000)
       await this.requestAsync('boot', null)
@@ -421,32 +416,32 @@ class Device extends RequestManager {
       }
     }
     await this.requestAsync('firstUser', { username, password })
-    const user = this.firstUser.value()
+    // console.log('firstUser', this.firstUser.value())
     await this.requestAsync('users', null)
   }
 
-  async manualBootAsync(args) {
+  async manualBootAsync (args) {
     const { target } = args
     await this.requestAsync('run', { target })
   }
 
-  initWizard(args) {
+  initWizard (args) {
     this.initWizardAsync(args).asCallback(() => {})
   }
 
-  addFirstUser(args) {
+  addFirstUser (args) {
     this.addFirstUserAsync(args).asCallback(() => {})
   }
 
-  mkFileSystem(args) {
+  mkFileSystem (args) {
     this.mkfsAsync(args).asCallback(() => {})
   }
 
-  reInstall(args) {
+  reInstall (args) {
     this.reInstallAsync(args).asCallback(() => {})
   }
 
-  manualBoot(args) {
+  manualBoot (args) {
     this.manualBootAsync(args).asCallback(() => {})
   }
 
@@ -462,10 +457,10 @@ class Device extends RequestManager {
    uninitialized -> init
    failNoAlt -> maint
   * */
-  systemStatus() {
-    if (!this.device || !this.boot || !this.storage || !this.info || !this.users
-      || this.device.isPending() || this.boot.isPending() || this.info.isPending()
-      || this.storage.isPending() || this.users.isPending()) {
+  systemStatus () {
+    if (!this.device || !this.boot || !this.storage || !this.info || !this.users ||
+      this.device.isPending() || this.boot.isPending() || this.info.isPending() ||
+      this.storage.isPending() || this.users.isPending()) {
       return 'probing'
     } else if (this.boot.isRejected() || this.storage.isRejected()) {
       return 'systemError'

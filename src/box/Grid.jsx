@@ -1,7 +1,4 @@
 import React from 'react'
-import i18n from 'i18n'
-import { CircularProgress, Paper, Avatar, IconButton, RaisedButton, TextField } from 'material-ui'
-import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import { AutoSizer } from 'react-virtualized'
 import Thumb from '../file/Thumb'
 import ScrollBar from '../common/ScrollBar'

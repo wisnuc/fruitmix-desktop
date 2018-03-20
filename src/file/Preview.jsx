@@ -1,6 +1,5 @@
 import React from 'react'
 import i18n from 'i18n'
-import Debug from 'debug'
 import UUID from 'uuid'
 import { CircularProgress, RaisedButton } from 'material-ui'
 import OpenIcon from 'material-ui/svg-icons/action/open-with'
@@ -9,8 +8,6 @@ import PDFView from './PDF'
 import DialogOverlay from '../common/DialogOverlay'
 import FlatButton from '../common/FlatButton'
 import PhotoDetail from '../photo/PhotoDetail'
-
-const debug = Debug('component:file:preview: ')
 
 class Preview extends React.Component {
   constructor (props) {
@@ -168,6 +165,7 @@ class Preview extends React.Component {
         onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
       >
         <iframe
+          title="Text"
           seamless
           width="100%"
           height="100%"
@@ -212,7 +210,9 @@ class Preview extends React.Component {
           ref={ref => (this.refVideo = ref)}
           controlsList="nodownload"
           src={this.state.filePath}
-        />
+        >
+          <track kind="captions" />
+        </video>
       </div>
     )
   }
@@ -234,6 +234,7 @@ class Preview extends React.Component {
       <div onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }} >
         <audio width="100%" height="100%" controls >
           <source src={this.state.filePath} />
+          <track kind="captions" />
         </audio>
       </div>
     )
@@ -293,18 +294,16 @@ class Preview extends React.Component {
 
   renderPreview () {
     const extension = this.props.item.name.replace(/^.*\./, '').toUpperCase()
-    const textExtension = ['TXT', 'MD', 'JS', 'JSX', 'TS', 'JSON', 'HTML', 'CSS', 'LESS', 'CSV', 'XML']
     const videoExtension = ['MP4', 'MOV', 'AVI', 'MKV']
     const audioExtension = ['MP3', 'APE', 'FLAC', 'WMA']
-    const isText = textExtension.findIndex(t => t === extension) > -1 && this.props.item.size < 1024 * 128
     const isVideo = videoExtension.findIndex(t => t === extension) > -1
     const isAudio = audioExtension.findIndex(t => t === extension) > -1
     const isPDF = extension === 'PDF'
 
-    if ((!isText && !isVideo && !isAudio && !isPDF) || this.props.item.size > 1024 * 1024 * 50) return this.renderOtherFiles()
+    if ((!isVideo && !isAudio && !isPDF) || this.props.item.size > 1024 * 1024 * 50) return this.renderOtherFiles()
 
     if (this.name === this.props.item.name && this.state.filePath) {
-      return isVideo ? this.renderVideo() : isPDF ? this.renderPDF() : isAudio ? this.renderAudio() : this.renderText()
+      return isVideo ? this.renderVideo() : isPDF ? this.renderPDF() : isAudio ? this.renderAudio() : <div />
     }
 
     // debug('before this.startDownload()', this.props.item.name, this.name, this.session)
@@ -331,7 +330,7 @@ class Preview extends React.Component {
     const textExtension = ['TXT', 'MD', 'JS', 'JSX', 'TS', 'JSON', 'HTML', 'CSS', 'LESS', 'CSV', 'XML']
     const isText = textExtension.findIndex(t => t === extension) > -1 && this.props.item.size < 1024 * 128
 
-    console.log('isPhoto, isVideo', this.props.item, isPhoto, isVideo, isText)
+    // console.log('isPhoto, isVideo', this.props.item, isPhoto, isVideo, isText)
 
     return (
       <div

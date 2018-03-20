@@ -1,14 +1,14 @@
 const EventEmitter = require('eventemitter3')
 
 class ReqState {
-  constructor(ctx) { this.ctx = ctx }
+  constructor (ctx) { this.ctx = ctx }
 
   // fallback
-  exit() {}
+  exit () {}
 
-  setState(nextState, ...args) {
+  setState (NextState, ...args) {
     this.exit()
-    this.ctx.state = new nextState(this.ctx, ...args)
+    this.ctx.state = new NextState(this.ctx, ...args)
     this.ctx.emit('updated', this, this.ctx.state)
   }
 
@@ -17,17 +17,17 @@ class ReqState {
   // 2. some resource should be recycled as early as possible
   // 3. or merely blocking any further transition
   // NO FURTHER TRANSITION keeps UI stable!
-  abort() { this.aborted = true }
+  abort () { this.aborted = true }
 
-  isPending() { return false }
-  isFulfilled() { return false }
-  isRejected() { return false }
+  isPending () { return false }
+  isFulfilled () { return false }
+  isRejected () { return false }
 
-  isFinished() { return !this.isPending() }
+  isFinished () { return !this.isPending() }
 }
 
 class ReqPending extends ReqState {
-  constructor(ctx) {
+  constructor (ctx) {
     super(ctx)
 
     this.handle = this.ctx.func((err, res) => {
@@ -36,24 +36,24 @@ class ReqPending extends ReqState {
     })
   }
 
-  isPending() { return true }
-  value() { return this.ctx.previousValue }
+  isPending () { return true }
+  value () { return this.ctx.previousValue }
 }
 
 class ReqFulfilled extends ReqState {
-  constructor(ctx, data) { super(ctx); this.data = data }
-  isFulfilled() { return true }
-  value() { return this.data }
+  constructor (ctx, data) { super(ctx); this.data = data }
+  isFulfilled () { return true }
+  value () { return this.data }
 }
 
 class ReqRejected extends ReqState {
-  constructor(ctx, err) { super(ctx); this.err = Object.assign(err, { response: err && err.response && err.response.body }) }
-  isRejected() { return true }
-  reason() { return this.err }
+  constructor (ctx, err) { super(ctx); this.err = Object.assign(err, { response: err && err.response && err.response.body }) }
+  isRejected () { return true }
+  reason () { return this.err }
 }
 
 class Request extends EventEmitter {
-  constructor(props, func) {
+  constructor (props, func) {
     super()
     if (typeof props === 'function') {
       this.func = props
@@ -65,15 +65,15 @@ class Request extends EventEmitter {
     this.state = new ReqPending(this)
   }
 
-  abort() { this.state.abort() }
+  abort () { this.state.abort() }
 
-  isPending() { return this.state.isPending() }
-  isFulfilled() { return this.state.isFulfilled() }
-  value() { return this.state.value() }
-  isRejected() { return this.state.isRejected() }
-  reason() { return this.state.reason() }
+  isPending () { return this.state.isPending() }
+  isFulfilled () { return this.state.isFulfilled() }
+  value () { return this.state.value() }
+  isRejected () { return this.state.isRejected() }
+  reason () { return this.state.reason() }
 
-  isFinished() { return this.state.isFinished() }
+  isFinished () { return this.state.isFinished() }
 }
 
 export default Request

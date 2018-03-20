@@ -106,11 +106,13 @@ class Update extends React.Component {
               { list }
             </div>
           ))
-            : <div style={{ marginLeft: 24, height: 40, display: 'flex', alignItems: 'center' }}>
-              { '*' }
-              <div style={{ width: 16 }} />
-              { i18n.__('Bug Fixes') }
-            </div>
+            : (
+              <div style={{ marginLeft: 24, height: 40, display: 'flex', alignItems: 'center' }}>
+                { '*' }
+                <div style={{ width: 16 }} />
+                { i18n.__('Bug Fixes') }
+              </div>
+            )
         }
       </div>
     )
@@ -136,16 +138,18 @@ class Update extends React.Component {
           unSupport ? i18n.__('Unsupported to Update')
             : this.state.status === 'checking' ? i18n.__('Checking Update')
               : this.state.status === 'needUpdate' ? this.renderCheckUpdate()
-                : <div>
-                  <div style={{ display: 'flex', alignItems: 'center', height: 48, marginTop: -12 }}>
-                    { this.state.status === 'latest' && i18n.__('Already LTS Text') }
-                    { this.state.status === 'error' && i18n.__('Check Update Failed Text') }
-                    { !!this.state.error && <ErrorBox error={this.state.error} iconStyle={{ color: orange500 }} /> }
+                : (
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', height: 48, marginTop: -12 }}>
+                      { this.state.status === 'latest' && i18n.__('Already LTS Text') }
+                      { this.state.status === 'error' && i18n.__('Check Update Failed Text') }
+                      { !!this.state.error && <ErrorBox error={this.state.error} iconStyle={{ color: orange500 }} /> }
+                    </div>
+                    <div style={{ margin: '8px 0 0 -8px' }}>
+                      <FlatButton primary label={i18n.__('Check Update')} onTouchTap={this.sendCheck} disabled={this.state.loading} />
+                    </div>
                   </div>
-                  <div style={{ margin: '8px 0 0 -8px' }}>
-                    <FlatButton primary label={i18n.__('Check Update')} onTouchTap={this.sendCheck} disabled={this.state.loading} />
-                  </div>
-                </div>
+                )
         }
       </div>
     )

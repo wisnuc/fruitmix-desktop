@@ -1,29 +1,19 @@
 import React from 'react'
 import i18n from 'i18n'
-import { CircularProgress, Paper, Avatar, IconButton, RaisedButton, TextField } from 'material-ui'
-import ContentAdd from 'material-ui/svg-icons/content/add'
+import { CircularProgress, Avatar, IconButton, RaisedButton, TextField } from 'material-ui'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import BackIcon from 'material-ui/svg-icons/navigation/arrow-back'
-import ForwardIcon from 'material-ui/svg-icons/navigation/arrow-forward'
-import UpIcon from 'material-ui/svg-icons/navigation/arrow-upward'
 import ModeEdit from 'material-ui/svg-icons/editor/mode-edit'
 import { AutoSizer } from 'react-virtualized'
 import { ShareIcon, ShareDisk } from '../common/Svg'
-import FlatButton from '../common/FlatButton'
 import FileContent from '../file/FileContent'
 import QuickNav from '../nav/QuickNav'
 import ListSelect from './ListSelect'
-import renderFileIcon from '../common/renderFileIcon'
-import { formatMtime } from '../common/datetime'
 import sortByType from '../common/sort'
 import { BreadCrumbItem, BreadCrumbSeparator } from '../common/BreadCrumb'
 import ScrollBar from '../common/ScrollBar'
 import Row from './Row'
-
-const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
-
-const imgUrl = 'http://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKQiahrEc8rUfECDTUq94WlcaNkTYTKzIKr3p5xgOPQO1juvtwO1YSUCHOPpup3oWo1AP3nOBVyPCw/132'
 
 class SelectNas extends React.Component {
   constructor (props) {
@@ -64,8 +54,8 @@ class SelectNas extends React.Component {
     }
 
     this.listNavBySelect = (entry) => {
-      if (!window.navigator.onLine) return this.props.openSnackBar(i18n.__('Offline Text'))
-      this.enter(entry)
+      if (!window.navigator.onLine) this.props.openSnackBar(i18n.__('Offline Text'))
+      else this.enter(entry)
     }
 
     this.fire = () => {
@@ -180,6 +170,7 @@ class SelectNas extends React.Component {
         default:
           break
       }
+      return null
     }
 
     /* get file list */

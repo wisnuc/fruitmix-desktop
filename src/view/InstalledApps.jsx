@@ -1,11 +1,8 @@
 import React from 'react'
 import i18n from 'i18n'
-import Debug from 'debug'
-import Base from './Base'
 import AppsIcon from 'material-ui/svg-icons/navigation/apps'
+import Base from './Base'
 import Apps from '../docker/Apps'
-
-const debug = Debug('view:component:Docker:')
 
 class InstalledApps extends Base {
   constructor (ctx) {

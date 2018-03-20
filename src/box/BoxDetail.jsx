@@ -1,10 +1,7 @@
 import React from 'react'
 import i18n from 'i18n'
-import { CircularProgress, Divider, Avatar, Toggle, RaisedButton, IconButton } from 'material-ui'
-import FileFolder from 'material-ui/svg-icons/file/folder'
-import ContentCopy from 'material-ui/svg-icons/content/content-copy'
+import { Divider, Avatar, Toggle, IconButton } from 'material-ui'
 import ModeEdit from 'material-ui/svg-icons/editor/mode-edit'
-import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import AddIcon from 'material-ui/svg-icons/content/add'
 import RemoveIcon from 'material-ui/svg-icons/content/remove'
 import DialogOverlay from '../common/DialogOverlay'
@@ -157,9 +154,11 @@ class BoxDetail extends React.Component {
         <div style={{ lineHeight: '24px', fontSize: 14 }}>
           {
             avatarUrl
-              ? <div style={{ borderRadius: 16, width: 32, height: 32, overflow: 'hidden' }}>
-                <img width={32} height={32} alt="" src={avatarUrl} />
-              </div>
+              ? (
+                <div style={{ borderRadius: 16, width: 32, height: 32, overflow: 'hidden' }}>
+                  <img width={32} height={32} alt="" src={avatarUrl} />
+                </div>
+              )
               : nickName.slice(0, 2).toUpperCase()
           }
         </div>
