@@ -2,17 +2,17 @@ import EventEmitter from 'events'
 import Request from './Request'
 
 class RequestManager extends EventEmitter {
-  abort() {
+  abort () {
     // TODO
   }
 
-  setState(name, nextState) {
+  setState (name, nextState) {
     const state = this.state
     this.state = Object.assign({}, state, { [name]: nextState })
     this.emit('updated', state, this.state)
   }
 
-  setRequest(name, props, f, next) {
+  setRequest (name, props, f, next) {
     if (this[name]) {
       this[name].abort()
       this[name].removeAllListeners()
@@ -35,7 +35,7 @@ class RequestManager extends EventEmitter {
     this.setState(name, this[name].state)
   }
 
-  clearRequest(name) {
+  clearRequest (name) {
     if (this[name]) {
       this[name].abort()
       this[name].removeAllListeners()
@@ -46,4 +46,3 @@ class RequestManager extends EventEmitter {
 }
 
 export default RequestManager
-

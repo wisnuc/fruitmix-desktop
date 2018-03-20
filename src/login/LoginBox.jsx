@@ -4,7 +4,7 @@ import { TextField, Checkbox } from 'material-ui'
 import muiThemeable from 'material-ui/styles/muiThemeable'
 
 import FlatButton from '../common/FlatButton'
-import { sharpCurve, sharpCurveDuration } from '../common/motion'
+import { sharpCurve } from '../common/motion'
 
 class LoginBox extends React.Component {
   constructor (props) {

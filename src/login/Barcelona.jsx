@@ -1,5 +1,4 @@
 import React from 'react'
-import ReactDom from 'react-dom'
 
 const Barcelona = ({ style, fill, size }) => (
   <div style={Object.assign(style, { width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 300ms' })}>

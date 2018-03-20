@@ -1,10 +1,6 @@
 import React, { PureComponent } from 'react'
 
 class IconBox extends PureComponent {
-  constructor (props) {
-    super(props)
-  }
-
   render () {
     return (
       <div style={this.props.style}>

@@ -1,7 +1,6 @@
 import React from 'react'
 import i18n from 'i18n'
-import Debug from 'debug'
-import { Avatar, CircularProgress, Divider, IconButton } from 'material-ui'
+import { IconButton } from 'material-ui'
 import NavigationChevronLeft from 'material-ui/svg-icons/navigation/chevron-left'
 import NavigationChevronRight from 'material-ui/svg-icons/navigation/chevron-right'
 import { teal500, pinkA200 } from 'material-ui/styles/colors'
@@ -11,8 +10,6 @@ import RaidIcon from 'material-ui/svg-icons/device/storage'
 import FlatButton from '../common/FlatButton'
 import InitWizard from './InitWizard'
 
-const debug = Debug('component:Login:maintenance')
-const duration = 300
 const primaryColor = teal500
 const accentColor = pinkA200
 
@@ -35,7 +32,6 @@ class MaintGuide extends React.Component {
       const usersOK = typeof volume.users !== 'string'
 
       const check = [mounted, noMissing, lastSystem, fruitmixOK, usersOK]
-      // debug('this.getStatus', check)
       return check
     }
 
@@ -85,19 +81,17 @@ class MaintGuide extends React.Component {
       const current = this.props.device.storage.data.volumes[this.state.index].uuid
       this.props.device.request('forceBoot', { current }, (error) => {
         if (error) {
-          debug('forceBoot error', error)
+          console.error('forceBoot error', error)
           this.setState({ loading: false })
         } else {
           this.props.refresh()
           this.setState({ loading: false })
-          debug('forceBoot success !')
         }
       })
     }
   }
 
   renderTest (volume) {
-    const { device, enterMaint } = this.props
     const test = [
       i18n.__('Test Mount'),
       i18n.__('Test Missing'),
@@ -164,7 +158,13 @@ class MaintGuide extends React.Component {
     const diskFuncs = [this.recoverRaid1, this.addDisk, this.deleteDisk, this.replaceDisk]
     const diskDisable = [true, true, true, true]
 
-    const wisnucLabels = [i18n.__('Backup and Restore User Data'), i18n.__('Reinstall Wisnuc'), i18n.__('Export Data'), i18n.__('Restore Data'), i18n.__('Force Start')]
+    const wisnucLabels = [
+      i18n.__('Backup and Restore User Data'),
+      i18n.__('Reinstall Wisnuc'),
+      i18n.__('Export Data'),
+      i18n.__('Restore Data'),
+      i18n.__('Force Start')
+    ]
     const wisnucFuncs = [this.backup, this.reinstall, this.exportData, this.recoverData, this.forceBoot]
     const wisnucDisable = [true, false, true, true, false]
 
@@ -202,8 +202,6 @@ class MaintGuide extends React.Component {
   renderDetail () {
     if (!this.state.expand) return (<div />)
     const device = this.props.device
-    const blocks = this.props.device.storage.data.blocks
-    const volume = this.props.device.storage.data.volumes[this.state.index]
     return (
       <InitWizard
         device={device}
@@ -219,17 +217,12 @@ class MaintGuide extends React.Component {
   }
 
   render () {
-    debug('render!', this.props, this.state)
-    const { device, toggleMaint, enterMaint } = this.props
+    const { device } = this.props
     if (!device) return (<div />)
-
-    const boot = device.boot.data
-    const storage = device.storage.data
 
     const volumes = device.storage.data.volumes
     const length = volumes.length
     const volume = volumes[this.state.index]
-    debug('volume!!!!!!!!', volume)
 
     return (
       <div
@@ -259,44 +252,46 @@ class MaintGuide extends React.Component {
         {
           this.state.detail
             ? this.renderDetail()
-            : <div>
-              <div style={{ height: 344 }}>
+            : (
+              <div>
+                <div style={{ height: 344 }}>
+                  {
+                    this.state.action
+                      ? this.renderActions()
+                      : this.renderTest(volume, this.state.index)
+                  }
+                </div>
+
+                {/* action button */}
+                { this.renderButton() }
+
+                {/* change card button */}
                 {
-                  this.state.action
-                    ? this.renderActions()
-                    : this.renderTest(volume, this.state.index)
+                  this.state.index > 0 &&
+                    <div style={{ position: 'absolute', right: 72, top: 88 }}>
+                      <IconButton
+                        iconStyle={{ width: 24, height: 24 }}
+                        style={{ width: 40, height: 40, padding: 8 }}
+                        onTouchTap={() => this.changeIndex(-1)}
+                      >
+                        <NavigationChevronLeft />
+                      </IconButton>
+                    </div>
+                }
+                {
+                  this.state.index < length - 1 &&
+                    <div style={{ position: 'absolute', right: 24, top: 88 }}>
+                      <IconButton
+                        iconStyle={{ width: 24, height: 24 }}
+                        style={{ width: 40, height: 40, padding: 8 }}
+                        onTouchTap={() => this.changeIndex(1)}
+                      >
+                        <NavigationChevronRight />
+                      </IconButton>
+                    </div>
                 }
               </div>
-
-              {/* action button */}
-              { this.renderButton() }
-
-              {/* change card button */}
-              {
-                this.state.index > 0 &&
-                  <div style={{ position: 'absolute', right: 72, top: 88 }}>
-                    <IconButton
-                      iconStyle={{ width: 24, height: 24 }}
-                      style={{ width: 40, height: 40, padding: 8 }}
-                      onTouchTap={() => this.changeIndex(-1)}
-                    >
-                      <NavigationChevronLeft />
-                    </IconButton>
-                  </div>
-              }
-              {
-                this.state.index < length - 1 &&
-                  <div style={{ position: 'absolute', right: 24, top: 88 }}>
-                    <IconButton
-                      iconStyle={{ width: 24, height: 24 }}
-                      style={{ width: 40, height: 40, padding: 8 }}
-                      onTouchTap={() => this.changeIndex(1)}
-                    >
-                      <NavigationChevronRight />
-                    </IconButton>
-                  </div>
-              }
-            </div>
+            )
         }
       </div>
     )

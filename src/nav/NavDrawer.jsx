@@ -2,15 +2,14 @@ import React from 'react'
 import i18n from 'i18n'
 import Radium from 'radium'
 import { ipcRenderer } from 'electron'
-import { Avatar, IconButton, Drawer, Divider } from 'material-ui'
+import { IconButton, Drawer, Divider } from 'material-ui'
 import ActionSettings from 'material-ui/svg-icons/action/settings'
 import ActionExitToApp from 'material-ui/svg-icons/action/exit-to-app'
 import ActionAccountCircle from 'material-ui/svg-icons/action/account-circle'
 import CloudIcon from 'material-ui/svg-icons/file/cloud'
 import ActionDns from 'material-ui/svg-icons/action/dns'
-import { DockerIcon } from '../common/Svg'
 
-class SubHeader extends React.Component {
+class SubHeader extends React.PureComponent {
   render () {
     return (
       <div
@@ -22,30 +21,19 @@ class SubHeader extends React.Component {
           color: 'rgba(0,0,0,0.54)' }}
       >
         <div style={{ flex: '0 0 24px' }} />
-        {this.props.children}
+        { this.props.children }
       </div>
     )
-  }
-}
-
-class MenuSpacer extends React.PureComponent {
-  render () {
-    return <div style={{ height: this.props.dense ? 4 : 8 }} />
   }
 }
 
 @Radium
 class MenuItem extends React.Component {
   render () {
-    const { icon, text, dense, primaryColor, selected, disabled } = this.props
+    const { text, dense, primaryColor, selected, disabled } = this.props
 
-    const iconColor = selected
-      ? this.props.primaryColor
-      : (disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.54)')
-
-    const fontColor = selected
-      ? this.props.primaryColor
-      : (disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.87)')
+    const iconColor = selected ? primaryColor : (disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.54)')
+    const fontColor = selected ? primaryColor : (disabled ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0.87)')
 
     return (
       <div
@@ -98,7 +86,6 @@ class NavDrawer extends React.Component {
   render () {
     const { open, onRequestChange, views, nav, navTo } = this.props
     // console.log(' NavDrawer render', this.props)
-    const dense = true
 
     const account = views.account.ctx.props.apis.account
     let value = null
@@ -115,11 +102,13 @@ class NavDrawer extends React.Component {
 
     const primaryColor = views[nav].primaryColor()
 
+    /*
     let ws215i = false
     const device = views.account.ctx.props.selectedDevice.device
     if (device && device.data && device.data.ws215i) {
       ws215i = true
     }
+    */
 
     /* avatar */
     let avatarUrl = null
@@ -154,19 +143,23 @@ class NavDrawer extends React.Component {
               {/* set background of icon */}
               {
                 avatarUrl
-                  ? <div
-                    style={{ borderRadius: 28, width: 56, height: 56, overflow: 'hidden', marginLeft: 23, cursor: 'pointer' }}
-                    onTouchTap={() => navTo('account')}
-                  >
-                    <img width={56} height={56} alt="" src={avatarUrl} />
+                  ? (
+                    <div
+                      style={{ borderRadius: 28, width: 56, height: 56, overflow: 'hidden', marginLeft: 23, cursor: 'pointer' }}
+                      onTouchTap={() => navTo('account')}
+                    >
+                      <img width={56} height={56} alt="" src={avatarUrl} />
                     </div>
-                  : <IconButton
-                    iconStyle={{ width: 67, height: 67, color: 'white' }}
-                    style={{ width: 105, height: 105, padding: 19 }}
-                    onTouchTap={() => navTo('account')}
-                  >
-                    <ActionAccountCircle />
+                  )
+                  : (
+                    <IconButton
+                      iconStyle={{ width: 67, height: 67, color: 'white' }}
+                      style={{ width: 105, height: 105, padding: 19 }}
+                      onTouchTap={() => navTo('account')}
+                    >
+                      <ActionAccountCircle />
                     </IconButton>
+                  )
               }
             </div>
 

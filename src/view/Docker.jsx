@@ -1,11 +1,8 @@
 import React from 'react'
 import i18n from 'i18n'
-import Debug from 'debug'
 import Base from './Base'
 import Market from '../docker/Market'
 import { DockerIcon } from '../common/Svg'
-
-const debug = Debug('view:component:Docker:')
 
 class Docker extends Base {
   constructor (ctx) {

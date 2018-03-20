@@ -2,29 +2,18 @@ import React from 'react'
 import i18n from 'i18n'
 import EventListener from 'react-event-listener'
 import keycode from 'keycode'
-import { TweenMax } from 'gsap'
-import { IconButton, CircularProgress, Paper, Avatar } from 'material-ui'
+import { IconButton, Paper } from 'material-ui'
 import ListIcon from 'material-ui/svg-icons/action/list'
 import GridIcon from 'material-ui/svg-icons/action/view-module'
 import ShareIcon from 'material-ui/svg-icons/social/share'
-import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import FileFolder from 'material-ui/svg-icons/file/folder'
-import DeleteIcon from 'material-ui/svg-icons/action/delete'
-import VisibilityOff from 'material-ui/svg-icons/action/visibility-off'
 import DownloadIcon from 'material-ui/svg-icons/file/file-download'
-import UploadIcon from 'material-ui/svg-icons/file/cloud-upload'
 import { AutoSizer } from 'react-virtualized'
-import DialogOverlay from '../common/DialogOverlay'
-import FlatButton from '../common/FlatButton'
 import { parseTime } from '../common/datetime'
 import ScrollBar from '../common/ScrollBar'
 import Thumb from '../file/Thumb'
 import Grid from './Grid'
 import Row from './Row'
-
-const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
-
-const imgUrl = 'http://cn.bing.com/th?id=ABT1B401B62BAA3194420276E294380581BC45A4292AE1FF991F97E75ED74A511A1&w=608&h=200&c=2&rs=1&pid=SANGAM'
 
 const calcCurve = (tsd, wd) => `all 450ms cubic-bezier(0.23, 1, 0.32, 1) ${tsd || '0ms'},
           margin-left 450ms cubic-bezier(0.23, 1, 0.32, 1) ${wd || '0ms'},
@@ -338,11 +327,10 @@ class MediaBox extends React.PureComponent {
 
   render () {
     // console.log('MediaBox', this.props)
-    const { data, i, handleSelect, ipcRenderer } = this.props
+    const { data, ipcRenderer } = this.props
     const { height, top, left, selected, tsd, wd, content } = data
-    const { type, comment, index, author, list, uuid, box, ctime, wxToken } = content
+    const { author, list, uuid, box, ctime, wxToken } = content
     const isMedia = list && list.every(l => l.metadata)
-    const isMany = list && list.length > 6
     const hovered = this.state.hover
     const mediaArgs = {
       list,

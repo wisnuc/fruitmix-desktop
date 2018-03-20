@@ -7,7 +7,7 @@ const cloudAddress = 'http://www.siyouqun.com:80'
 
 /* this module encapsulate most fruitmix apis */
 class Fruitmix extends EventEmitter {
-  constructor(address, userUUID, token, isCloud, stationID) {
+  constructor (address, userUUID, token, isCloud, stationID) {
     super()
 
     this.address = address
@@ -35,7 +35,6 @@ class Fruitmix extends EventEmitter {
       pureRequestAsync: this.pureRequestAsync.bind(this)
     }
 
-
     /* adapter of cloud apis */
     this.reqCloud = (ep, data, type) => {
       const url = `${address}/c/v1/stations/${this.stationID}/json`
@@ -53,6 +52,8 @@ class Fruitmix extends EventEmitter {
             return r.send(Object.assign({ resource, method: type, op: 'remove', toName: data.entryName, uuid: data.entryUUID }))
           case 'dup':
             return r.send(Object.assign({ resource, method: type, op: 'dup', toName: data.newName, fromName: data.oldName }))
+          default:
+            return console.error('no such op in reqCloud !')
         }
       }
       return request.post(url).set('Authorization', this.token).send(Object.assign({ resource, method: type }, data))
@@ -74,13 +75,13 @@ class Fruitmix extends EventEmitter {
     }
   }
 
-  setState(name, nextState) {
+  setState (name, nextState) {
     const state = this.state
     this.state = Object.assign({}, state, { [name]: nextState })
     this.emit('updated', state, this.state)
   }
 
-  setRequest(name, props, f, next) {
+  setRequest (name, props, f, next) {
     if (this[name]) {
       this[name].abort()
       this[name].removeAllListeners()
@@ -108,7 +109,7 @@ class Fruitmix extends EventEmitter {
     this.setState(name, this[name].state)
   }
 
-  clearRequest(name) {
+  clearRequest (name) {
     if (this[name]) {
       this[name].abort()
       this[name].removeAllListeners()
@@ -117,14 +118,14 @@ class Fruitmix extends EventEmitter {
     }
   }
 
-  aget(ep) {
+  aget (ep) {
     if (this.isCloud) return this.reqCloud(ep, null, 'GET')
     return request
       .get(`http://${this.address}:3000/${ep}`)
       .set('Authorization', `JWT ${this.token}`)
   }
 
-  apost(ep, data) {
+  apost (ep, data) {
     if (this.isCloud) return this.reqCloud(ep, data, 'POST')
     const r = request
       .post(`http://${this.address}:3000/${ep}`)
@@ -135,7 +136,7 @@ class Fruitmix extends EventEmitter {
       : r
   }
 
-  apatch(ep, data) {
+  apatch (ep, data) {
     if (this.isCloud) return this.reqCloud(ep, data, 'PATCH')
     const r = request
       .patch(`http://${this.address}:3000/${ep}`)
@@ -146,7 +147,7 @@ class Fruitmix extends EventEmitter {
       : r
   }
 
-  aput(ep, data) {
+  aput (ep, data) {
     if (this.isCloud) return this.reqCloud(ep, data, 'PUT')
     const r = request
       .put(`http://${this.address}:3000/${ep}`)
@@ -157,7 +158,7 @@ class Fruitmix extends EventEmitter {
       : r
   }
 
-  adel(ep, data) {
+  adel (ep, data) {
     if (this.isCloud) return this.reqCloud(ep, data, 'DELETE')
     const r = request
       .del(`http://${this.address}:3000/${ep}`)
@@ -168,7 +169,7 @@ class Fruitmix extends EventEmitter {
       : r
   }
 
-  request(name, args, next) {
+  request (name, args, next) {
     let r
 
     switch (name) {
@@ -393,11 +394,11 @@ class Fruitmix extends EventEmitter {
     else this.setRequest(name, args, cb => r.end(cb), next)
   }
 
-  async requestAsync(name, args) {
+  async requestAsync (name, args) {
     return Promise.promisify(this.request).bind(this)(name, args)
   }
 
-  pureRequest(name, args, next) {
+  pureRequest (name, args, next) {
     let r
     let isCloud = this.isCloud
     switch (name) {
@@ -554,15 +555,16 @@ class Fruitmix extends EventEmitter {
     }
   }
 
-  async pureRequestAsync(name, args) {
+  async pureRequestAsync (name, args) {
     return Promise.promisify(this.pureRequest).bind(this)(name, args)
   }
 
-  start() {
+  start () {
     this.request('account')
     this.request('users')
     this.requestAsync('drives').asCallback((err, drives) => {
-      if (drives) {
+      if (err || !drives) console.error('requestAsync drives error', err)
+      else {
         const drive = drives.find(d => d.tag === 'home')
         this.request('listNavDir', { driveUUID: drive.uuid, dirUUID: drive.uuid })
       }

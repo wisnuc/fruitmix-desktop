@@ -73,6 +73,7 @@ class FinishedTask extends Component {
           color: 'rgba(0,0,0,0.87)',
           backgroundColor: this.state.isSelected ? '#f4f4f4' : ''
         }}
+        role="presentation"
         onMouseUp={this.selectFinishItem}
         onDoubleClick={this.openFileLocation}
       >

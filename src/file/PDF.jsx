@@ -1,21 +1,17 @@
 import React from 'react'
-import Debug from 'debug'
 import PDF, { Page } from 'react-pdf-pages'
 import { List, AutoSizer } from 'react-virtualized'
 import 'pdfjs-dist'
 
-PDFJS.workerSrc = '../node_modules/pdfjs-dist/build/pdf.worker.js'
-PDFJS.cMapUrl = '../node_modules/pdfjs-dist/cmaps/'
-PDFJS.cMapPacked = true
-
-const debug = Debug('component:file:preview: ')
+window.PDFJS.workerSrc = '../node_modules/pdfjs-dist/build/pdf.worker.js'
+window.PDFJS.cMapUrl = '../node_modules/pdfjs-dist/cmaps/'
+window.PDFJS.cMapPacked = true
 
 class PDFView extends React.Component {
   constructor (props) {
     super(props)
     this.state = {
-      pages: null,
-      show: null
+      pages: null
     }
     this.handlePages = (pages) => {
       let count = pages.length
@@ -35,11 +31,10 @@ class PDFView extends React.Component {
   }
 
   render () {
-    // debug('PDFView render', this.state, this.props)
     return (
       <div style={{ height: '100%', width: '100%' }} >
         <PDF
-          onError={e => debug(e)}
+          onError={e => console.error('pdf error', e)}
           url={this.props.filePath}
           style={{ height: '100%', width: '100%' }}
           onComplete={pages => this.handlePages(pages)}
@@ -50,7 +45,11 @@ class PDFView extends React.Component {
                 {({ height, width }) => {
                   const rowRenderer = ({ key, index, style }) => (
                     <div style={style} key={key}>
-                      <Page key={this.state.pages[index].key} page={this.state.pages[index]} onError={e => debug(e)} />
+                      <Page
+                        page={this.state.pages[index]}
+                        key={this.state.pages[index].key}
+                        onError={e => console.error('pdf page error', e)}
+                      />
                     </div>
                   )
                   const rowHeight = ({ index }) => {

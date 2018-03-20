@@ -1,16 +1,6 @@
 import React from 'react'
 import { List } from 'react-virtualized'
 
-const mousePosition = (ev) => {
-  if (ev.pageX || ev.pageY) {
-    return { x: ev.pageX, y: ev.pageY }
-  }
-  return {
-    x: ev.clientX + document.body.scrollLeft - document.body.clientLeft,
-    y: ev.clientY + document.body.scrollTop - document.body.clientTop
-  }
-}
-
 class ScrollBar extends React.PureComponent {
   constructor (props) {
     super(props)
@@ -120,10 +110,11 @@ class ScrollBar extends React.PureComponent {
         />
         {/* scrollBar */}
         <div
-          ref={ref => (this.refBar = ref)}
-          onMouseDown={this.onMouseDown}
-          style={Object.assign({ backgroundColor: '#BDBDBD', height: barH }, barStyle)}
+          role="presentation"
           onMouseMove={this.onHover}
+          onMouseDown={this.onMouseDown}
+          ref={ref => (this.refBar = ref)}
+          style={Object.assign({ backgroundColor: '#BDBDBD', height: barH }, barStyle)}
         />
       </div>
     )

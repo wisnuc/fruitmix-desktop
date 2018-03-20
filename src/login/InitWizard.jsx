@@ -4,9 +4,7 @@ import prettysize from 'prettysize'
 import { RaisedButton, CircularProgress } from 'material-ui'
 import { Step, Stepper, StepLabel, StepContent } from 'material-ui/Stepper'
 import { teal500, pinkA200 } from 'material-ui/styles/colors'
-import ErrorIcon from 'material-ui/svg-icons/alert/error-outline'
 import CheckIcon from 'material-ui/svg-icons/navigation/check'
-import ArrowDownwardIcon from 'material-ui/svg-icons/navigation/arrow-downward'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
 
 import UsernamePassword from './UsernamePassword'
@@ -289,9 +287,9 @@ class InitWizard extends StateUp(React.Component) {
             <Step style={{ marginTop: -28 }}>
               <StepLabel>{ i18n.__('Confirm') }</StepLabel>
               <StepContent>
-                { !this.state.finished && this.renderConfirmation() }
-                { !this.state.finished && this.renderStepActions(2) }
-                { this.state.finished && this.renderFinished() }
+                { !finished && this.renderConfirmation() }
+                { !finished && this.renderStepActions(2) }
+                { finished && this.renderFinished() }
               </StepContent>
             </Step>
             <Step style={{ marginTop: -28 }}>

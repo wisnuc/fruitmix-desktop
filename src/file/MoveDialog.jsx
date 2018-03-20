@@ -274,24 +274,24 @@ class MoveDialog extends React.PureComponent {
         this.setState({ loading: false })
         this.closeDialog()
         this.props.refresh()
-        return this.props.openSnackBar(type.concat(i18n.__('+Failed')), { showTasks: true })
+        this.props.openSnackBar(type.concat(i18n.__('+Failed')), { showTasks: true })
+      } else {
+        this.getTaskState(data.uuid).asCallback((err, res) => {
+          if (err) {
+            this.setState({ loading: false })
+            this.closeDialog()
+            this.props.refresh()
+            this.props.openSnackBar(type.concat(i18n.__('+Failed')), { showTasks: true })
+          } else {
+            this.setState({ loading: false })
+            this.closeDialog()
+            this.props.refresh()
+            let text = 'Working'
+            if (res === 'Finished') text = xcopyMsg(this.xcopyData)
+            this.props.openSnackBar(text, res !== 'Finished' ? { showTasks: true } : null)
+          }
+        })
       }
-
-      this.getTaskState(data.uuid).asCallback((err, res) => {
-        if (err) {
-          this.setState({ loading: false })
-          this.closeDialog()
-          this.props.refresh()
-          this.props.openSnackBar(type.concat(i18n.__('+Failed')), { showTasks: true })
-        } else {
-          this.setState({ loading: false })
-          this.closeDialog()
-          this.props.refresh()
-          let text = 'Working'
-          if (res === 'Finished') text = xcopyMsg(this.xcopyData)
-          this.props.openSnackBar(text, res !== 'Finished' ? { showTasks: true } : null)
-        }
-      })
     }
 
     /* request task state */
@@ -478,49 +478,59 @@ class MoveDialog extends React.PureComponent {
             this.state.loading
               ? <CircularProgress />
               : this.state.cnf
-                ? <div style={{ fontSize: 14, width: 288, margin: 24, textAlign: 'center', wordWrap: 'break-word' }}>
-                  {
-                    i18n.__('Create New Folder in %s', this.state.currentSelectedIndex > -1
-                      ? this.state.list[this.state.currentSelectedIndex].name : this.renderCurrentDir())
-                  }
-                </div>
-                : <div style={{ height: '100%', width: '100%' }}>
-                  {
-                    this.state.list.length ? this.state.list.map((item, index) => (
-                      <Row
-                        key={item.uuid || item.path || item.name}
-                        node={item}
-                        selectNode={() => this.selectNode(index)}
-                        enter={this.enter}
-                        disable={this.isRowDisable(item)}
-                        isSelected={index === this.state.currentSelectedIndex}
-                      />
-                    ))
-                      : this.state.currentDir.type === 'publicRoot'
-                        ? <div
-                          style={{
-                            height: '100%',
-                            width: '100%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexDirection: 'column' }}
-                        >
-                          <div> { i18n.__('No Public Drive') } </div>
-                          {
-                            this.props.apis.account && this.props.apis.account.data && this.props.apis.account.data.isAdmin &&
-                            <FlatButton
-                              label={i18n.__('Jump to Create')}
-                              primary
-                              onTouchTap={() => { this.closeDialog; this.props.navTo('public') }}
-                            />
-                          }
-                        </div>
-                        : <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          { i18n.__('Empty Folder Text') }
-                        </div>
-                  }
-                </div>
+                ? (
+                  <div style={{ fontSize: 14, width: 288, margin: 24, textAlign: 'center', wordWrap: 'break-word' }}>
+                    {
+                      i18n.__('Create New Folder in %s', this.state.currentSelectedIndex > -1
+                        ? this.state.list[this.state.currentSelectedIndex].name : this.renderCurrentDir())
+                    }
+                  </div>
+                )
+                : (
+                  <div style={{ height: '100%', width: '100%' }}>
+                    {
+                      this.state.list.length ? this.state.list.map((item, index) => (
+                        <Row
+                          key={item.uuid || item.path || item.name}
+                          node={item}
+                          selectNode={() => this.selectNode(index)}
+                          enter={this.enter}
+                          disable={this.isRowDisable(item)}
+                          isSelected={index === this.state.currentSelectedIndex}
+                        />
+                      ))
+                        : this.state.currentDir.type === 'publicRoot'
+                          ? (
+                            <div
+                              style={{
+                                height: '100%',
+                                width: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexDirection: 'column' }}
+                            >
+                              <div> { i18n.__('No Public Drive') } </div>
+                              {
+                                this.props.apis.account && this.props.apis.account.data && this.props.apis.account.data.isAdmin &&
+                                <FlatButton
+                                  primary
+                                  label={i18n.__('Jump to Create')}
+                                  onTouchTap={() => { this.closeDialog(); this.props.navTo('public') }}
+                                />
+                              }
+                            </div>
+                          )
+                          : (
+                            <div
+                              style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            >
+                              { i18n.__('Empty Folder Text') }
+                            </div>
+                          )
+                    }
+                  </div>
+                )
           }
         </div>
 

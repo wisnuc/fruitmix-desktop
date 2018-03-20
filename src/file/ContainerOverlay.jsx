@@ -1,10 +1,8 @@
 import React from 'react'
 import i18n from 'i18n'
-import Debug from 'debug'
-import { IconButton, Avatar } from 'material-ui'
+import { IconButton } from 'material-ui'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import FileFolder from 'material-ui/svg-icons/file/folder'
-import CloseIcon from 'material-ui/svg-icons/navigation/close'
 import DownloadIcon from 'material-ui/svg-icons/file/file-download'
 import RenderToLayer from 'material-ui/internal/RenderToLayer'
 import keycode from 'keycode'
@@ -13,18 +11,6 @@ import { TweenMax } from 'gsap'
 import ReactTransitionGroup from 'react-transition-group/TransitionGroup'
 import Preview from './Preview'
 import renderFileIcon from '../common/renderFileIcon'
-
-const debug = Debug('component:file:ContainerOverlay')
-
-const mousePosition = (ev) => {
-  if (ev.pageX || ev.pageY) {
-    return { x: ev.pageX, y: ev.pageY }
-  }
-  return {
-    x: ev.clientX + document.body.scrollLeft - document.body.clientLeft,
-    y: ev.clientY + document.body.scrollTop - document.body.clientTop
-  }
-}
 
 class ContainerOverlayInline extends React.Component {
   constructor (props) {
@@ -46,7 +32,6 @@ class ContainerOverlayInline extends React.Component {
     }
 
     this.changeIndex = (direction) => {
-      // debug('this.changeIndex', direction, this)
       if (direction === 'right' && this.currentIndex < this.props.items.length - 1) {
         this.currentIndex += 1
 
@@ -81,7 +66,6 @@ class ContainerOverlayInline extends React.Component {
         this.currentIndex -= 1
 
         /* hidden right div which move 200%, show other divs */
-        // debug('direction === left', this.leftItem, this.centerItem, this.rightItem)
         for (let i = 0; i < 3; i++) {
           if (this[`refPreview_${i}`].style.left === '20%') {
             /* update div content */
@@ -136,7 +120,6 @@ class ContainerOverlayInline extends React.Component {
     }
 
     this.handleKeyUp = (event) => {
-      // debug('this.handleKeyUp', keycode(event))
       switch (keycode(event)) {
         case 'esc': return this.close()
         case 'left': return this.changeIndex('left')
@@ -146,7 +129,6 @@ class ContainerOverlayInline extends React.Component {
     }
 
     this.updateContainerSize = (zoom) => {
-      // debug('this.updateContainerSize', zoom)
       this.zoom = zoom
       this.forceUpdate()
     }
@@ -189,7 +171,6 @@ class ContainerOverlayInline extends React.Component {
   }
 
   render () {
-    // debug('redner ContainerOverlay', this.props)
     const { primaryColor } = this.props
     const entry = this.props.items[this.currentIndex]
     this.firstFileIndex = this.props.items.findIndex(item => item.type === 'file')

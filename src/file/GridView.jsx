@@ -1,12 +1,7 @@
 import React from 'react'
 import i18n from 'i18n'
-import Debug from 'debug'
-import UUID from 'uuid'
-import prettysize from 'prettysize'
-import { Avatar, IconButton, Paper, MenuItem, Popover, Menu } from 'material-ui'
+import { Avatar, IconButton, MenuItem, Popover, Menu } from 'material-ui'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
-import ToggleCheckBox from 'material-ui/svg-icons/toggle/check-box'
-import ToggleCheckBoxOutlineBlank from 'material-ui/svg-icons/toggle/check-box-outline-blank'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import ArrowUpward from 'material-ui/svg-icons/navigation/arrow-upward'
 import ArrowDownward from 'material-ui/svg-icons/navigation/arrow-downward'
@@ -18,8 +13,6 @@ import ScrollBar from '../common/ScrollBar'
 import renderFileIcon from '../common/renderFileIcon'
 import FlatButton from '../common/FlatButton'
 import { ShareDisk } from '../common/Svg'
-
-const debug = Debug('component:file:GridView:')
 
 class Row extends React.Component {
   constructor (props) {
@@ -61,7 +54,6 @@ class Row extends React.Component {
     }
 
     this.toggleMenu = (event) => {
-      // debug('this.toggleMenu', this.state.open, event)
       if (!this.state.open && event && event.preventDefault) event.preventDefault()
       this.setState({ open: event !== 'clickAway' && !this.state.open, anchorEl: event.currentTarget })
     }
@@ -76,7 +68,6 @@ class Row extends React.Component {
 
     const h = this.headers.find(header => header.title === this.state.type) || this.headers[0]
 
-    // debug('sortType', sortType, this.state, this.props)
     return (
       <div style={{ height: '100%', width: '100%', marginLeft: 52 }} >
         {/* header */}
@@ -168,6 +159,7 @@ class Row extends React.Component {
                     boxShadow: selected ? 'rgba(0, 0, 0, 0.188235) 0px 10px 30px, rgba(0, 0, 0, 0.227451) 0px 6px 10px'
                       : 'rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px'
                   }}
+                  role="presentation"
                   onTouchTap={e => this.props.onRowTouchTap(e, index)}
                   onDoubleClick={e => this.props.onRowDoubleClick(e, index)}
                   onMouseDown={e => e.stopPropagation() || this.props.gridDragStart(e, index)}
@@ -368,8 +360,6 @@ class GridView extends React.Component {
       }
     }
 
-    // debug('GridView render', this.props)
-
     if (!this.props.entries || this.props.entries.length === 0) return (<div />)
     return (
       <div style={{ width: '100%', height: '100%' }} onDrop={this.props.drop}>
@@ -383,6 +373,7 @@ class GridView extends React.Component {
             zIndex: 100,
             backgroundColor: '#FFFFFF'
           }}
+          role="presentation"
           onMouseUp={e => this.props.selectEnd(e)}
           onMouseMove={e => this.props.selectGrid(e, this.getStatus())}
         />
@@ -390,8 +381,8 @@ class GridView extends React.Component {
         <AutoSizer key={this.props.entries && this.props.entries[0] && this.props.entries[0].uuid}>
           {({ height, width }) => {
             const gridInfo = calcGridInfo(height, width, this.props.entries)
-            const { mapData, allHeight, rowHeightSum, indexHeightSum, maxScrollTop } = gridInfo
-            // debug('gridInfo', allHeight, this.props.entries.length)
+            // const { mapData, allHeight, rowHeightSum, indexHeightSum, maxScrollTop } = gridInfo
+            const { mapData, allHeight, rowHeightSum } = gridInfo
 
             /* To get row index of scrollToRow */
             this.mapData = mapData
@@ -417,6 +408,7 @@ class GridView extends React.Component {
 
             return (
               <div
+                role="presentation"
                 onMouseDown={e => this.props.selectStart(e)}
                 onMouseUp={e => this.props.selectEnd(e)}
                 onMouseMove={e => this.props.selectGrid(e, this.getStatus())}

@@ -1,12 +1,9 @@
 import React from 'react'
 import UUID from 'uuid'
-import Debug from 'debug'
 import ZoomIn from 'material-ui/svg-icons/action/zoom-in'
 import CheckIcon from 'material-ui/svg-icons/action/check-circle'
 import PlayIcon from 'material-ui/svg-icons/av/play-circle-filled'
 import { CircleIcon, GIFFont } from '../common/Svg'
-
-const debug = Debug('component:photoApp:photoItem:')
 
 class PhotoItem extends React.Component {
   constructor (props) {
@@ -35,7 +32,6 @@ class PhotoItem extends React.Component {
     }
 
     this.touchImage = () => {
-      // debug(this.props.selectedItems)
       if (this.props.selectedItems.length > 0 || this.props.selecting) {
         /* shift is true */
         if (this.props.shiftStatus.shift) {
@@ -55,7 +51,6 @@ class PhotoItem extends React.Component {
     this.mouseEnter = () => {
       this.setState({ hover: true })
       if (!this.state.hover) {
-        // debug('this.mouseEnter', this.props)
         this.props.getHoverPhoto(this.props.digest)
       }
     }
@@ -104,7 +99,6 @@ class PhotoItem extends React.Component {
     const isGIF = (m === 'GIF')
     const isVideo = videoMagic.includes(m)
 
-    // debug('Render PhotoItem this.props', this.props)
     return (
       <div style={style}>
         <div style={{ position: 'relative', height: '100%', width: '100%' }} >
@@ -130,22 +124,23 @@ class PhotoItem extends React.Component {
 
           {/* renderSelectCircle */}
           {
-            selectMode && !this.state.hover && <div
-              style={{
-                position: 'absolute',
-                zIndex: 100,
-                width: 24,
-                height: 20,
-                display: 'flex',
-                margin: 8,
-                alignItems: 'center'
-              }}
-              onTouchTap={(e) => { this.onSelectIconButton(); e.stopPropagation() }}
-              onMouseEnter={this.mouseEnter}
-              onMouseLeave={this.mouseLeave}
-            >
-              <CircleIcon />
-            </div>
+            selectMode && !this.state.hover &&
+              <div
+                style={{
+                  position: 'absolute',
+                  zIndex: 100,
+                  width: 24,
+                  height: 20,
+                  display: 'flex',
+                  margin: 8,
+                  alignItems: 'center'
+                }}
+                onTouchTap={(e) => { this.onSelectIconButton(); e.stopPropagation() }}
+                onMouseEnter={this.mouseEnter}
+                onMouseLeave={this.mouseLeave}
+              >
+                <CircleIcon />
+              </div>
           }
 
           {/* renderSelectedBackground */}
@@ -165,54 +160,56 @@ class PhotoItem extends React.Component {
 
           {/* renderHoverCheck */}
           {
-            (this.state.selected || this.state.hover) && <div
-              style={{
-                position: 'absolute',
-                zIndex: 100,
-                width: this.state.selected ? '' : '100%',
-                height: 36,
-                display: 'flex',
-                alignItems: 'center',
-                background: selectMode ? '' : 'linear-gradient(0deg, rgba(0,0,0,0), rgba(0,0,0,0.26))'
-              }}
-              onTouchTap={this.touchImage}
-              onMouseEnter={this.mouseEnter}
-              onMouseLeave={this.mouseLeave}
-            >
-              <CheckIcon
-                style={{ margin: 8 }}
-                hoverColor={this.state.selected ? '#1E88E5' : '#FFF'}
-                color={this.state.selected ? '#1E88E5' : 'rgba(255,255,255,0.54)'}
-                onTouchTap={(e) => { this.onSelectIconButton(); e.stopPropagation() }}
-              />
-            </div>
+            (this.state.selected || this.state.hover) &&
+              <div
+                style={{
+                  position: 'absolute',
+                  zIndex: 100,
+                  width: this.state.selected ? '' : '100%',
+                  height: 36,
+                  display: 'flex',
+                  alignItems: 'center',
+                  background: selectMode ? '' : 'linear-gradient(0deg, rgba(0,0,0,0), rgba(0,0,0,0.26))'
+                }}
+                onTouchTap={this.touchImage}
+                onMouseEnter={this.mouseEnter}
+                onMouseLeave={this.mouseLeave}
+              >
+                <CheckIcon
+                  style={{ margin: 8 }}
+                  hoverColor={this.state.selected ? '#1E88E5' : '#FFF'}
+                  color={this.state.selected ? '#1E88E5' : 'rgba(255,255,255,0.54)'}
+                  onTouchTap={(e) => { this.onSelectIconButton(); e.stopPropagation() }}
+                />
+              </div>
           }
 
           {/* render hover opendetial */}
           {
-            this.state.hover && selectMode && !this.props.selecting && <div
-              style={{
-                position: 'absolute',
-                zIndex: 100,
-                width: this.state.selected ? 180 : size,
-                height: 36,
-                left: this.state.selected ? (size - 180) / 2 : 0,
-                bottom: this.state.selected ? (size - 180) / 2 : 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-end',
-                background: 'linear-gradient(0deg, rgba(0,0,0,0.26), rgba(0,0,0,0))'
-              }}
-              onMouseEnter={this.mouseEnter}
-              onMouseLeave={this.mouseLeave}
-            >
-              <ZoomIn
-                onTouchTap={(e) => { this.props.lookPhotoDetail(this.props.digest); e.stopPropagation() }}
-                style={{ margin: 8 }}
-                hoverColor="#FFF"
-                color="rgba(255,255,255,0.54)"
-              />
-            </div>
+            this.state.hover && selectMode && !this.props.selecting &&
+              <div
+                style={{
+                  position: 'absolute',
+                  zIndex: 100,
+                  width: this.state.selected ? 180 : size,
+                  height: 36,
+                  left: this.state.selected ? (size - 180) / 2 : 0,
+                  bottom: this.state.selected ? (size - 180) / 2 : 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-end',
+                  background: 'linear-gradient(0deg, rgba(0,0,0,0.26), rgba(0,0,0,0))'
+                }}
+                onMouseEnter={this.mouseEnter}
+                onMouseLeave={this.mouseLeave}
+              >
+                <ZoomIn
+                  onTouchTap={(e) => { this.props.lookPhotoDetail(this.props.digest); e.stopPropagation() }}
+                  style={{ margin: 8 }}
+                  hoverColor="#FFF"
+                  color="rgba(255,255,255,0.54)"
+                />
+              </div>
           }
 
           {/* renderImage */}

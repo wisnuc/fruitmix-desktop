@@ -2,7 +2,7 @@ import React from 'react'
 import UUID from 'uuid'
 import i18n from 'i18n'
 import EventListener from 'react-event-listener'
-import { CircularProgress, Paper, Avatar } from 'material-ui'
+import { CircularProgress, Avatar } from 'material-ui'
 import ContentAdd from 'material-ui/svg-icons/content/add'
 
 import UserSelect from './UserSelect'
@@ -391,9 +391,9 @@ class Groups extends React.Component {
     if (!boxes) return this.renderLoading(32)
     const { primaryColor, openSnackBar, getUsers } = this.props
     const { tweets, tError } = this.state
-    const boxH = boxes && Math.min(window.innerHeight - 106, boxes.length * 72) || 0
+    const boxH = (boxes && Math.min(window.innerHeight - 106, boxes.length * 72)) || 0
     const boxUUID = currentBox && currentBox.uuid
-    const currentUser = currentBox && currentBox.users.find(u => u.id === guid) || {}
+    const currentUser = (currentBox && currentBox.users.find(u => u.id === guid)) || {}
     const stationId = currentBox && currentBox.stationId
     const diffStation = !station || station.id !== stationId
     return (

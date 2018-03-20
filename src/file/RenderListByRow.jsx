@@ -39,6 +39,8 @@ const renderLeading = (leading) => {
       backgroundColor = '#FF0000'
       opacity = 1
       break
+    default:
+      break
   }
 
   return <div style={{ flex: '0 0 4px', height, backgroundColor, opacity, zIndex: 1000 }} />
@@ -56,9 +58,9 @@ class Row extends React.PureComponent {
     const {
       /* these are react-virtualized List props */
       index, // Index of row
-      isScrolling, // The List is currently being scrolled
-      isVisible, // This row is visible within the List (eg it is not an overscanned row)
-      parent, // Reference to the parent List (instance)
+      // isScrolling, // The List is currently being scrolled
+      // isVisible, // This row is visible within the List (eg it is not an overscanned row)
+      // parent, // Reference to the parent List (instance)
       style, // Style object to be applied to row (to position it);
       // This must be passed through to the rendered row element.
 
@@ -96,6 +98,7 @@ class Row extends React.PureComponent {
             boxSizing: 'border-box',
             border: onDropping ? `2px ${this.props.primaryColor} solid` : ''
           }}
+          role="presentation"
           onTouchTap={e => this.props.onRowTouchTap(e, index)}
           onMouseEnter={e => this.props.onRowMouseEnter(e, index)}
           onMouseLeave={e => this.props.onRowMouseLeave(e, index)}
@@ -126,7 +129,10 @@ class Row extends React.PureComponent {
 
           <div style={{ flex: inPublicRoot ? '0 1 168px' : '0 0 500px', display: 'flex' }} >
             <div
-              style={{ width: '', maxWidth: inPublicRoot ? 144 : 476, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}
+              style={{
+                width: '', maxWidth: inPublicRoot ? 144 : 476, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis'
+              }}
+              role="presentation"
               onMouseDown={e => e.stopPropagation() || this.props.rowDragStart(e, index)}
             >
               { entry.name }
@@ -335,6 +341,7 @@ class RenderListByRow extends React.Component {
             paddingTop: 8,
             top: -8
           }}
+          role="presentation"
           onMouseUp={e => this.props.selectEnd(e)}
           onMouseMove={e => this.props.selectRow(e, this.getScrollToPosition())}
         >
@@ -362,6 +369,7 @@ class RenderListByRow extends React.Component {
             <AutoSizer>
               {({ height, width }) => (
                 <div
+                  role="presentation"
                   onMouseDown={e => this.props.selectStart(e)}
                   onMouseUp={e => this.props.selectEnd(e)}
                   onMouseMove={e => this.props.selectRow(e, this.getScrollToPosition())}

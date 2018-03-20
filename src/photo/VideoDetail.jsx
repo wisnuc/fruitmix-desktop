@@ -1,11 +1,8 @@
 import React from 'react'
 import i18n from 'i18n'
-import Debug from 'debug'
 import UUID from 'uuid'
 import { CircularProgress } from 'material-ui'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
-
-const debug = Debug('component:photoApp:PhotoDetail')
 
 class PhotoDetail extends React.Component {
   constructor (props) {
@@ -68,7 +65,9 @@ class PhotoDetail extends React.Component {
             ref={ref => (this.refVideo = ref)}
             controlsList="nodownload"
             src={this.state.filePath}
-          />
+          >
+            <track kind="captions" />
+          </video>
         </div>
       )
     }
@@ -104,7 +103,6 @@ class PhotoDetail extends React.Component {
   }
 
   render () {
-    // debug('render!!!', this.props, this.state)
     if (!this.props.item || !this.props.item.hash) return (<div />)
     return (
       <div

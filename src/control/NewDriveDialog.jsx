@@ -1,11 +1,8 @@
 import React, { PureComponent } from 'react'
 import i18n from 'i18n'
-import Debug from 'debug'
 import { TextField, Checkbox, Divider } from 'material-ui'
 import sanitize from 'sanitize-filename'
 import FlatButton from '../common/FlatButton'
-
-const debug = Debug('component:control:NewDriveDialog')
 
 class NewDriveDialog extends PureComponent {
   constructor (props) {
@@ -116,8 +113,8 @@ class NewDriveDialog extends PureComponent {
         <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
         <div style={{ maxHeight: 40 * 8, overflow: 'auto' }}>
           {
-            users.map(user =>
-              (<div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.username} >
+            users.map(user => (
+              <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.username} >
                 <Checkbox
                   label={user.username}
                   iconStyle={{ fill: this.state.writelist === '*' || this.state.writelist.includes(user.uuid) ? this.props.primaryColor : 'rgba(0, 0, 0, 0.54)' }}
@@ -125,7 +122,8 @@ class NewDriveDialog extends PureComponent {
                   checked={this.state.writelist === '*' || this.state.writelist.includes(user.uuid)}
                   onCheck={() => this.handleCheck(user.uuid)}
                 />
-              </div>))
+              </div>
+            ))
           }
           <div style={{ height: 8 }} />
         </div>

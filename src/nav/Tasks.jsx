@@ -1,6 +1,5 @@
 import React from 'react'
 import i18n from 'i18n'
-import Debug from 'debug'
 import { Paper, CircularProgress, LinearProgress, IconButton } from 'material-ui'
 import DoneIcon from 'material-ui/svg-icons/action/done'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
@@ -9,8 +8,6 @@ import FolderSvg from 'material-ui/svg-icons/file/folder'
 import FileSvg from 'material-ui/svg-icons/editor/insert-drive-file'
 import MultiSvg from 'material-ui/svg-icons/content/content-copy'
 import ErrorBox from '../common/ErrorBox'
-
-const debug = Debug('component:common:Tasks ')
 
 class Tasks extends React.Component {
   constructor (props) {
@@ -97,7 +94,7 @@ class Tasks extends React.Component {
   }
 
   renderTask (task) {
-    const { uuid, type, src, dst, entries, nodes } = task
+    const { uuid, type, entries, nodes } = task
     const action = type === 'copy' ? i18n.__('Copying') : i18n.__('Moving')
     const tStyles = { marginTop: -8 }
     const svgStyle = { color: '#000', opacity: 0.54 }
@@ -120,7 +117,15 @@ class Tasks extends React.Component {
           <div style={{ width: '100%', display: 'flex', alignItems: 'center', fontSize: 13 }} >
             { action }
             <div style={{ width: 4 }} />
-            <div style={{ maxWidth: entries.length > 1 ? 96 : 192, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', fontSize: 13 }} >
+            <div
+              style={{
+                fontSize: 13,
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis',
+                maxWidth: entries.length > 1 ? 96 : 192
+              }}
+            >
               { entries[0].name }
             </div>
             <div style={{ width: 4 }} />
@@ -156,21 +161,25 @@ class Tasks extends React.Component {
         <div style={{ marginLeft: -8, marginRight: -12 }}>
           {
             error.length
-              ? <ErrorBox
-                style={{ display: 'flex', alignItems: 'center' }}
-                tooltip={i18n.__('Detail')}
-                iconStyle={{ color: '#db4437' }}
-                error={error}
-              />
-              : conflict.length
-                ? <IconButton
+              ? (
+                <ErrorBox
+                  style={{ display: 'flex', alignItems: 'center' }}
                   tooltip={i18n.__('Detail')}
-                  iconStyle={{ color: '#fb8c00' }}
-                  tooltipStyles={tStyles}
-                  onTouchTap={() => this.handleConflict(uuid, type, conflict)}
-                >
-                  <WarningIcon />
-                </IconButton>
+                  iconStyle={{ color: '#db4437' }}
+                  error={error}
+                />
+              )
+              : conflict.length
+                ? (
+                  <IconButton
+                    tooltip={i18n.__('Detail')}
+                    iconStyle={{ color: '#fb8c00' }}
+                    tooltipStyles={tStyles}
+                    onTouchTap={() => this.handleConflict(uuid, type, conflict)}
+                  >
+                    <WarningIcon />
+                  </IconButton>
+                )
                 : <div style={{ width: 48 }} />
           }
         </div>

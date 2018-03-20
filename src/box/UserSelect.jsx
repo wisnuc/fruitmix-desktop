@@ -34,11 +34,8 @@ class UserSelect extends React.PureComponent {
     }
   }
 
-  renderUser (user) {
-    const { name } = user
-    return (
-      <div style={{ height: 48, width: '100%' }} />
-    )
+  componentDidMount () {
+    if (!this.props.users) this.getUsers()
   }
 
   togglecheckAll () {
@@ -55,10 +52,6 @@ class UserSelect extends React.PureComponent {
     const index = sl.indexOf(user)
     if (index === -1) this.setState({ selected: [...sl, user] })
     else this.setState({ selected: [...sl.slice(0, index), ...sl.slice(index + 1)] })
-  }
-
-  componentDidMount () {
-    if (!this.props.users) this.getUsers()
   }
 
   renderError () {
@@ -118,36 +111,38 @@ class UserSelect extends React.PureComponent {
 
         {
           error ? this.renderError() : loading ? this.renderLoading(32)
-            : <div style={{ height: 40 * users.length + 48, maxHeight: 360 }}>
-              <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key="all" >
-                <Checkbox
-                  label={i18n.__('All Users')}
-                  labelStyle={{ fontSize: 14 }}
-                  iconStyle={{ fill: allSelected ? primaryColor : 'rgba(0, 0, 0, 0.54)' }}
-                  checked={allSelected}
-                  onCheck={() => this.togglecheckAll()}
-                />
+            : (
+              <div style={{ height: 40 * users.length + 48, maxHeight: 360 }}>
+                <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key="all" >
+                  <Checkbox
+                    label={i18n.__('All Users')}
+                    labelStyle={{ fontSize: 14 }}
+                    iconStyle={{ fill: allSelected ? primaryColor : 'rgba(0, 0, 0, 0.54)' }}
+                    checked={allSelected}
+                    onCheck={() => this.togglecheckAll()}
+                  />
+                </div>
+                <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
+                <div style={{ height: 40 * users.length + 8, maxHeight: 320, overflow: 'auto' }}>
+                  {
+                    users.map(user =>
+                      (
+                        <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.id}>
+                          <Checkbox
+                            label={user.nickName}
+                            iconStyle={{ fill: selected.includes(user) ? primaryColor : 'rgba(0, 0, 0, 0.54)' }}
+                            labelStyle={{ fontSize: 14 }}
+                            checked={selected.includes(user) || defaultUsers.includes(user)}
+                            disabled={defaultUsers.includes(user)}
+                            onCheck={() => this.handleCheck(user)}
+                          />
+                        </div>
+                      ))
+                  }
+                  <div style={{ height: 8 }} />
+                </div>
               </div>
-              <Divider style={{ color: 'rgba(0, 0, 0, 0.54)' }} />
-              <div style={{ height: 40 * users.length + 8, maxHeight: 320, overflow: 'auto' }}>
-                {
-                  users.map(user =>
-                    (
-                      <div style={{ width: '100%', height: 40, display: 'flex', alignItems: 'center' }} key={user.id}>
-                        <Checkbox
-                          label={user.nickName}
-                          iconStyle={{ fill: selected.includes(user) ? primaryColor : 'rgba(0, 0, 0, 0.54)' }}
-                          labelStyle={{ fontSize: 14 }}
-                          checked={selected.includes(user) || defaultUsers.includes(user)}
-                          disabled={defaultUsers.includes(user)}
-                          onCheck={() => this.handleCheck(user)}
-                        />
-                      </div>
-                    ))
-                }
-                <div style={{ height: 8 }} />
-              </div>
-            </div>
+            )
         }
 
         {/* button */}

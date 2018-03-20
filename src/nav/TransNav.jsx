@@ -81,35 +81,13 @@ class TransNav extends React.PureComponent {
         {/* render num */}
         {
           this.state.num < 100
-            ? <div
-              style={{
-                position: 'absolute',
-                right: 14,
-                top: 14,
-                width: 14,
-                height: 14,
-                borderRadius: 9,
-                border: '2px #FFF solid',
-                backgroundColor: '#4CAF50',
-                fontSize: 10,
-                fontWeight: 500,
-                color: '#FFF',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                opacity: !this.state.num ? 0 : 1,
-                transition: 'all 225ms'
-              }}
-            >
-              { this.state.num }
-            </div>
-            : this.state.num > 99
-              ? <div
+            ? (
+              <div
                 style={{
                   position: 'absolute',
-                  right: 4,
+                  right: 14,
                   top: 14,
-                  width: 24,
+                  width: 14,
                   height: 14,
                   borderRadius: 9,
                   border: '2px #FFF solid',
@@ -119,11 +97,37 @@ class TransNav extends React.PureComponent {
                   color: '#FFF',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  opacity: !this.state.num ? 0 : 1,
+                  transition: 'all 225ms'
                 }}
               >
-              99+
+                { this.state.num }
               </div>
+            )
+            : this.state.num > 99
+              ? (
+                <div
+                  style={{
+                    position: 'absolute',
+                    right: 4,
+                    top: 14,
+                    width: 24,
+                    height: 14,
+                    borderRadius: 9,
+                    border: '2px #FFF solid',
+                    backgroundColor: '#4CAF50',
+                    fontSize: 10,
+                    fontWeight: 500,
+                    color: '#FFF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  99+
+                </div>
+              )
               : <div />
         }
       </div>

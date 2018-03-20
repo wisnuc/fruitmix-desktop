@@ -1,14 +1,11 @@
 import React from 'react'
-import ReactDom from 'react-dom'
 import i18n from 'i18n'
-import Debug from 'debug'
-import { List, AutoSizer } from 'react-virtualized'
+import { AutoSizer } from 'react-virtualized'
 import RenderListByRow from './RenderListByRow'
 import getPhotoInfo from './getPhotoInfo'
 import getTimeline from './getTimeline'
 import ScrollBar from '../common/ScrollBar'
 
-const debug = Debug('component:photoApp:PhotoList')
 const timelineMargin = 26
 
 const mousePosition = (ev) => {
@@ -35,7 +32,6 @@ class PhotoList extends React.Component {
     }
 
     this.showDateBar = (op) => {
-      // debug('this.showDateBar', op)
       this.hover = op
       if (this.refDateBox) this.refDateBox.style.opacity = op ? 0.87 : 0
       if (this.refTimeline) this.refTimeline.style.opacity = op ? 1 : 0
@@ -71,7 +67,6 @@ class PhotoList extends React.Component {
         this.refDateBox.innerHTML = this.date
 
         /* show timeline */
-        // debug('show timeline', this.timeline)
         this.refTimeline.style.opacity = 1
 
         /* hide dateBarFollowMouse */
@@ -166,6 +161,7 @@ class PhotoList extends React.Component {
     if (!this.timeline) return (<div />)
     return (
       <div
+        role="presentation"
         ref={ref => (this.refBackground = ref)}
         style={{ position: 'fixed', height: `calc(100% - ${this.headerHeight}px)`, width: 80, right: 16, top: this.headerHeight }}
         onMouseLeave={() => !this.onMouseDown && this.showDateBar(false)}
@@ -266,7 +262,6 @@ class PhotoList extends React.Component {
   }
 
   render () {
-    // debug('render PhotoList, this.props', this.props)
     return (
       <div
         style={{
@@ -283,7 +278,6 @@ class PhotoList extends React.Component {
           {({ height, width }) => {
             /* get PhotoInfo */
             const PhotoInfo = getPhotoInfo(height, width, this.props.media, i18n.__('Date Unknown Text'))
-            // debug('PhotoInfo', PhotoInfo)
 
             /* set global variant */
             this.height = height

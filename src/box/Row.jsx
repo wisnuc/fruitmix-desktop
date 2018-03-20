@@ -1,12 +1,9 @@
 import React from 'react'
-import i18n from 'i18n'
 import { Avatar, IconButton } from 'material-ui'
 import CloseIcon from 'material-ui/svg-icons/navigation/close'
 
 import { formatMtime } from '../common/datetime'
 import renderFileIcon from '../common/renderFileIcon'
-
-const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
 
 class Row extends React.Component {
   constructor (props) {
@@ -18,7 +15,7 @@ class Row extends React.Component {
 
   render () {
     // console.log('Row', this.props)
-    const { type, uuid, mtime, metadata, name, action, height } = this.props
+    const { uuid, mtime, metadata, name, action, height } = this.props
     const color = '#FFF'
     const hoverColor = '#EEEEEE'
     const hovered = this.state.hover === uuid

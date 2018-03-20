@@ -1,27 +1,13 @@
-import React from 'react'
 import i18n from 'i18n'
-import { CircularProgress, Paper, Avatar, IconButton, RaisedButton, TextField } from 'material-ui'
-import ContentAdd from 'material-ui/svg-icons/content/add'
-import FileFolder from 'material-ui/svg-icons/file/folder'
-import CloseIcon from 'material-ui/svg-icons/navigation/close'
-import BackIcon from 'material-ui/svg-icons/navigation/arrow-back'
-import ForwardIcon from 'material-ui/svg-icons/navigation/arrow-forward'
-import UpIcon from 'material-ui/svg-icons/navigation/arrow-upward'
+import React from 'react'
+import { TweenMax } from 'gsap'
 import ModeEdit from 'material-ui/svg-icons/editor/mode-edit'
-import { ShareIcon, ShareDisk } from '../common/Svg'
-import FlatButton from '../common/FlatButton'
-import FileContent from '../file/FileContent'
-import QuickNav from '../nav/QuickNav'
-import ListSelect from './ListSelect'
-import renderFileIcon from '../common/renderFileIcon'
-import { formatMtime } from '../common/datetime'
+import CloseIcon from 'material-ui/svg-icons/navigation/close'
+import { CircularProgress, Avatar, IconButton, RaisedButton, TextField } from 'material-ui'
+
+import Grid from './Grid'
 import PhotoList from '../photo/PhotoList'
 import { combineElement, removeElement } from '../common/array'
-import Grid from './Grid'
-
-const curve = 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
-
-const imgUrl = 'http://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKQiahrEc8rUfECDTUq94WlcaNkTYTKzIKr3p5xgOPQO1juvtwO1YSUCHOPpup3oWo1AP3nOBVyPCw/132'
 
 class SelectMedia extends React.Component {
   constructor (props) {
@@ -34,7 +20,7 @@ class SelectMedia extends React.Component {
 
     this.lookPhotoDetail = (digest) => {
       this.seqIndex = this.state.media.findIndex(item => item.hash === digest)
-      this.setState({ openDetail: true })
+      // this.setState({ openDetail: true })
     }
 
     this.setAnimation2 = (component, status) => {
@@ -146,14 +132,6 @@ class SelectMedia extends React.Component {
     }
   }
 
-  renderLoading (size) {
-    return (
-      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
-        <CircularProgress size={size || 64} />
-      </div>
-    )
-  }
-
   componentDidMount () {
     document.addEventListener('keydown', this.keyChange)
     document.addEventListener('keyup', this.keyChange)
@@ -167,9 +145,17 @@ class SelectMedia extends React.Component {
     document.removeEventListener('keyup', this.keyChange)
   }
 
+  renderLoading (size) {
+    return (
+      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
+        <CircularProgress size={size || 64} />
+      </div>
+    )
+  }
+
   render () {
     // console.log('SelectMedia', this.props, this.state, this.selected)
-    const { currentUser, primaryColor, onRequestClose, ipcRenderer } = this.props
+    const { currentUser, onRequestClose, ipcRenderer } = this.props
     return (
       <div style={{ position: 'fixed', width: '100%', height: '100%', top: 0, left: 0, zIndex: 1000, backgroundColor: '#FFF' }}>
         {/* Selected Header */}
@@ -202,37 +188,11 @@ class SelectMedia extends React.Component {
           <div style={{ flexGrow: 1, height: '100%', backgroundColor: '#FFF', paddingLeft: 80, paddingTop: 2 }}>
             {
               !this.state.media
-                ? <div
-                  style={{
-                    position: 'relative',
-                    marginTop: -7,
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <CircularProgress />
-                </div>
-                : this.state.media.length
-                  ? <PhotoList
-                    hideTimeline
-                    selecting
-                    media={this.state.media}
-                    lookPhotoDetail={this.lookPhotoDetail}
-                    ipcRenderer={ipcRenderer}
-                    addListToSelection={this.addListToSelection}
-                    removeListToSelection={this.removeListToSelection}
-                    memoize={this.memoize}
-                    selectedItems={this.state.selectedItems}
-                    getHoverPhoto={this.getHoverPhoto}
-                    shiftStatus={{ shift: this.state.shift, items: this.state.shiftHoverItems }}
-                    headerHeight={186}
-                  />
-                  : <div
+                ? (
+                  <div
                     style={{
                       position: 'relative',
+                      marginTop: -7,
                       width: '100%',
                       height: '100%',
                       display: 'flex',
@@ -240,8 +200,40 @@ class SelectMedia extends React.Component {
                       justifyContent: 'center'
                     }}
                   >
-                    { i18n.__('No Media Text 1') }
+                    <CircularProgress />
                   </div>
+                )
+                : this.state.media.length
+                  ? (
+                    <PhotoList
+                      hideTimeline
+                      selecting
+                      media={this.state.media}
+                      lookPhotoDetail={this.lookPhotoDetail}
+                      ipcRenderer={ipcRenderer}
+                      addListToSelection={this.addListToSelection}
+                      removeListToSelection={this.removeListToSelection}
+                      memoize={this.memoize}
+                      selectedItems={this.state.selectedItems}
+                      getHoverPhoto={this.getHoverPhoto}
+                      shiftStatus={{ shift: this.state.shift, items: this.state.shiftHoverItems }}
+                      headerHeight={186}
+                    />
+                  )
+                  : (
+                    <div
+                      style={{
+                        position: 'relative',
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      { i18n.__('No Media Text 1') }
+                    </div>
+                  )
             }
           </div>
           <div

@@ -1,15 +1,12 @@
 import React from 'react'
 import i18n from 'i18n'
-import Debug from 'debug'
 import prettysize from 'prettysize'
-import { CircularProgress, Divider } from 'material-ui'
+import { Divider } from 'material-ui'
 import FileFolder from 'material-ui/svg-icons/file/folder'
 import ContentCopy from 'material-ui/svg-icons/content/content-copy'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import Thumb from './Thumb'
 import renderFileIcon from '../common/renderFileIcon'
-
-const debug = Debug('component:file:FileDetail:')
 
 const phaseDate = (time) => {
   const a = new Date(time)
@@ -130,7 +127,6 @@ class FileDetail extends React.PureComponent {
     let size = 0
     const noSize = detailFile.findIndex(f => f.size === undefined) > -1
     if (!noSize) detailFile.forEach(f => (size += f.size))
-    // debug('renderMultiFiles', detailFile, noSize, size)
     const Titles = [
       i18n.__('Location'),
       noSize ? '' : i18n.__('Total Size')
@@ -242,7 +238,6 @@ class FileDetail extends React.PureComponent {
       detailFile = detailIndex.map(i => entries[i])
       return this.renderMultiFiles(detailFile)
     }
-    // debug('detailFile', detailFile)
 
     const { metadata, hash } = detailFile
     let exifDateTime = ''
