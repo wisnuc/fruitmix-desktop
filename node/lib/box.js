@@ -1,7 +1,7 @@
 const path = require('path')
 const Promise = require('bluebird')
 const { dialog, ipcMain } = require('electron')
-const fs = Promise.promisifyAll(require('original-fs'))
+const fs = Promise.promisifyAll(require('original-fs')) // eslint-disable-line
 
 const { getMainWindow } = require('./window')
 const { boxUploadAsync } = require('./server')

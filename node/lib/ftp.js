@@ -2,22 +2,22 @@ const fs = require('fs')
 const FTP = require('ftp')
 
 const ftpGet = (remotePath, tmpPath, localPath) => {
-  const fileName = remotePath.replace(/.*\//, '')
   const c = new FTP()
   const promise = new Promise((resolve, reject) => {
     c.on('ready', () => {
       c.get(remotePath, (err, stream) => {
-        if (err) return reject(err)
-        console.log(fileName)
-        stream.once('close', () => { c.end() })
-        const ws = fs.createWriteStream(tmpPath)
-        ws.on('finish', () => {
-          fs.rename(tmpPath, localPath, (error) => {
-            if (!error) return resolve(localPath)
-            return reject(error)
+        if (err) reject(err)
+        else {
+          stream.once('close', () => { c.end() })
+          const ws = fs.createWriteStream(tmpPath)
+          ws.on('finish', () => {
+            fs.rename(tmpPath, localPath, (error) => {
+              if (!error) return resolve(localPath)
+              return reject(error)
+            })
           })
-        })
-        stream.pipe(ws)
+          stream.pipe(ws)
+        }
       })
     })
   })

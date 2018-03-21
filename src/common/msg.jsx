@@ -32,3 +32,5 @@ export const xcopyMsg = (props) => {
   const target = entries.length > 1 ? i18n.__('%s Items Have Been', entries.length) : i18n.__('%s Has Been', getName(entries[0]))
   return i18n.__('xcopyMsg {{action}} {{srcName}} {{dstName}} {{target}}', { action, srcName, dstName, target })
 }
+
+export const i18nMsg = key => i18n.__(key)

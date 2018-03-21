@@ -107,9 +107,8 @@ ipcMain.on('DELETE_TASK', (e, uuids) => actionHandler(e, uuids, 'DELETE'))
 
 ipcMain.on('START_TRANSMISSION', () => {
   global.DB.loadAll((error, tasks) => {
-    if (error) return debug('load nedb store error', error)
-    // debug('startTransmissionHandle', tasks)
-    tasks.forEach(t => t.state === 'finished' && Tasks.push(t))
+    if (error) console.error('load nedb store error', error)
+    else tasks.forEach(t => t.state === 'finished' && Tasks.push(t))
   })
 })
 
