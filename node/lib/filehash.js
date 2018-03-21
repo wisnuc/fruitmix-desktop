@@ -1,5 +1,5 @@
 const crypto = require('crypto')
-const fs = require('original-fs')
+const fs = require('original-fs') // eslint-disable-line
 
 /* splice file by given size */
 const spliceFile = (size, perSize) => {

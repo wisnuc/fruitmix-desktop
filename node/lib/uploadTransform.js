@@ -1,5 +1,5 @@
 const Promise = require('bluebird')
-const fs = Promise.promisifyAll(require('original-fs'))
+const fs = Promise.promisifyAll(require('original-fs')) // eslint-disable-line
 const path = require('path')
 const childProcess = require('child_process')
 const debug = require('debug')('node:lib:uploadTransform:')
@@ -380,18 +380,20 @@ class Task {
             const rs = readStreams[i]
             let lastTimeSize = 0
             let countReadHandle = null
-            const countRead = () => {
+            const countRead = () => { // eslint-disable-line
               sendMsg()
-              if (task.paused) return clearInterval(countReadHandle)
-              const gap = rs.bytesRead - lastTimeSize
-              task.completeSize += gap
-              uploadedSum += gap
-              lastTimeSize = rs.bytesRead
+              if (task.paused) clearInterval(countReadHandle)
+              else {
+                const gap = rs.bytesRead - lastTimeSize
+                task.completeSize += gap
+                uploadedSum += gap
+                lastTimeSize = rs.bytesRead
+              }
             }
             rs.on('open', () => {
               countReadHandle = setInterval(countRead, 200)
             })
-            rs.on('end', () => {
+            rs.on('end', () => { // eslint-disable-line
               clearInterval(countReadHandle)
               const gap = rs.bytesRead - lastTimeSize
               task.completeSize += gap

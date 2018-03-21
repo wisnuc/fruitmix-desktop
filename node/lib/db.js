@@ -25,9 +25,9 @@ class db {
       fs.writeFile(tmp, JSON.stringify(data), (err) => {
         if (err) cb(err)
         else {
-          fs.rename(tmp, target, (err) => {
+          fs.rename(tmp, target, (error) => {
             this.WIP[id] = false
-            cb(err)
+            cb(error)
             if (this.next[id]) this.write(id)
           })
         }
@@ -51,7 +51,8 @@ class db {
       try {
         parsedData = JSON.parse(data)
       } catch (e) {
-        return cb(e)
+        cb(e)
+        return
       }
       cb(err, parsedData)
     })
@@ -59,22 +60,26 @@ class db {
 
   loadAll (cb) {
     fs.readdir(this.dir, (err, dir) => {
-      if (err) return cb(err)
-      const list = []
-      if (!dir.length) return cb(null, list)
-      let count = dir.length
-      const newDir = dir.filter((id) => {
-        if (id.length === 36) return true
-        this.remove(id, e => console.log('remove error data', id, 'error', e))
-        return false
-      })
+      if (err) cb(err)
+      else {
+        const list = []
+        if (!dir.length) cb(null, list)
+        else {
+          let count = dir.length
+          const newDir = dir.filter((id) => {
+            if (id.length === 36) return true
+            this.remove(id, e => console.log('remove error data', id, 'error', e))
+            return false
+          })
 
-      newDir.forEach(id => this.load(id, (error, data) => {
-        if (error) this.remove(id, e => console.log('remove error data', id, 'error', e))
-        else list.push(data)
-        count -= 1
-        if (count === 0) cb(null, list)
-      }))
+          newDir.forEach(id => this.load(id, (error, data) => {
+            if (error) this.remove(id, e => console.log('remove error data', id, 'error', e))
+            else list.push(data)
+            count -= 1
+            if (count === 0) cb(null, list)
+          }))
+        }
+      }
     })
   }
 

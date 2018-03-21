@@ -1,7 +1,6 @@
 import React from 'react'
 import i18n from 'i18n'
 import Debug from 'debug'
-import ReactDOM from 'react-dom'
 import { FlatButton, CircularProgress, Divider, IconButton } from 'material-ui'
 import { teal500 } from 'material-ui/styles/colors'
 import RefreshIcon from 'material-ui/svg-icons/navigation/refresh'
@@ -48,16 +47,16 @@ const StateUp = base => class extends base {
 // pure animation frame !
 class DeviceCard extends React.PureComponent {
   componentWillEnter (callback) {
-    this.props.onWillEnter(ReactDOM.findDOMNode(this), callback)
+    this.props.onWillEnter(this.refComp, callback)
   }
 
   componentWillLeave (callback) {
-    this.props.onWillLeave(ReactDOM.findDOMNode(this), callback)
+    this.props.onWillLeave(this.refComp, callback)
   }
 
   render () {
     return (
-      <div style={this.props.style}>
+      <div style={this.props.style} ref={ref => (this.refComp = ref)}>
         { this.props.children }
       </div>
     )

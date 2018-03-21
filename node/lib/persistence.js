@@ -56,17 +56,15 @@ class Working extends State {
     super(ctx)
     this.data = data
 
-    // console.log('start saving data', data)
-
     const tmpfile = path.join(this.ctx.tmpdir, UUID.v4())
     fs.writeFile(tmpfile, JSON.stringify(this.data), (err) => {
-      if (err) return this.error(err)
-      fs.rename(tmpfile, this.ctx.target, (err) => {
-        // console.log('finished saving data', data, err)
-
-        if (err) return this.error(err)
-        this.success()
-      })
+      if (err) this.error(err)
+      else {
+        fs.rename(tmpfile, this.ctx.target, (e) => {
+          if (e) this.error(e)
+          else this.success()
+        })
+      }
     })
   }
 

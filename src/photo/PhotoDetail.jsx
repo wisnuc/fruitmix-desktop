@@ -222,8 +222,14 @@ class PhotoDetail extends React.Component {
 
           {/* DetailImage */}
           <div
+            role="presentation"
             style={{ position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             ref={ref => (this.refTransition = ref)}
+            onMouseDown={() => this.setState({ drag: true })}
+            onMouseUp={() => { this.setState({ drag: false }); this.dragPosition.x = 0; this.dragPosition.y = 0 }}
+            onMouseMove={this.dragImage}
+            onMouseLeave={() => { this.setState({ drag: false }); this.dragPosition.x = 0; this.dragPosition.y = 0 }}
+            onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
           >
             {
               this.state.detailPath &&
@@ -234,12 +240,7 @@ class PhotoDetail extends React.Component {
                   src={this.state.detailPath}
                   ref={ref => (this.refDetailImage = ref)}
                   style={{ zoom: 1, transition: 'translate .5s cubic-bezier(0.0, 0.0, 0.2, 1)' }}
-                  onMouseDown={() => this.setState({ drag: true })}
-                  onMouseUp={() => { this.setState({ drag: false }); this.dragPosition.x = 0; this.dragPosition.y = 0 }}
-                  onMouseMove={this.dragImage}
-                  onMouseLeave={() => { this.setState({ drag: false }); this.dragPosition.x = 0; this.dragPosition.y = 0 }}
                   draggable={false}
-                  onTouchTap={(e) => { e.preventDefault(); e.stopPropagation() }}
                 />
             }
           </div>

@@ -78,10 +78,12 @@ const getTextDataHandle = (e, args) => {
 
 const startTransmissionHandle = () => {
   global.DB.loadAll((error, tasks) => {
-    if (error) return console.log('load db store error', error)
-    /* add t to load pre status */
-    tasks.forEach(t => t.state !== 'finished' && t.trsType === 'download' &&
-      createTask(t.uuid, t.entries, t.name, t.dirUUID, t.driveUUID, t.taskType, t.createTime, false, t.downloadPath, t))
+    if (error) console.error('load db store error', error)
+    else {
+      /* add t to load pre status */
+      tasks.forEach(t => t.state !== 'finished' && t.trsType === 'download' &&
+        createTask(t.uuid, t.entries, t.name, t.dirUUID, t.driveUUID, t.taskType, t.createTime, false, t.downloadPath, t))
+    }
   })
 }
 

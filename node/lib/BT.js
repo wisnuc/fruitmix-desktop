@@ -2,7 +2,7 @@ const i18n = require('i18n')
 const path = require('path')
 const Promise = require('bluebird')
 const { dialog, ipcMain } = require('electron')
-const fs = Promise.promisifyAll(require('original-fs'))
+const fs = Promise.promisifyAll(require('original-fs')) // eslint-disable-line
 
 const hashFileAsync = require('./filehash')
 const { getMainWindow } = require('./window')

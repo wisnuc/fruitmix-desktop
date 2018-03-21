@@ -105,7 +105,7 @@ class Transform extends EventEmitter {
         this.transform(x, (err, y) => {
           const index = this.working.indexOf(x)
           const curr = index > -1 ? this.working.splice(index, 1) : null
-          if (!curr) return debug('there is no this x', x)// error ? FIXME
+          if (!curr) return
           if (err) {
             if (Array.isArray(x)) x.forEach(c => (c.error = err))
             else x.error = err
@@ -130,7 +130,7 @@ class Transform extends EventEmitter {
 
         t.on('data', (data) => {
           if (this.outs.length) {
-            this.outs.forEach(t => t.push(data))
+            this.outs.forEach(out => out.push(data))
           } else if (this.root().listenerCount('data')) {
             this.root().emit('data', data)
           } else {

@@ -1,3 +1,5 @@
+/* global Power4 */
+
 import React from 'react'
 import EventListener from 'react-event-listener'
 import keycode from 'keycode'
@@ -123,12 +125,10 @@ class TransitionItem extends React.Component {
   }
 }
 
-export default class CDialog extends React.Component {
-  render () {
-    return (
-      <ReactTransitionGroup>
-        { this.props.open && <TransitionItem {...this.props} /> }
-      </ReactTransitionGroup>
-    )
-  }
-}
+const CDialog = props => (
+  <ReactTransitionGroup>
+    { props.open && <TransitionItem {...props} /> }
+  </ReactTransitionGroup>
+)
+
+export default CDialog

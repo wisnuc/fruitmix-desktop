@@ -1,7 +1,7 @@
 const path = require('path')
 const mkdirp = require('mkdirp')
 const rimraf = require('rimraf')
-const fs = require('original-fs')
+const fs = require('original-fs') // eslint-disable-line
 const Promise = require('bluebird')
 const fsUtils = require('nodejs-fs-utils')
 const { ipcMain, BrowserWindow, app, Menu } = require('electron')

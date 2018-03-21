@@ -4,7 +4,7 @@ const path = require('path')
 const UUID = require('uuid')
 const Promise = require('bluebird')
 const request = require('superagent')
-const fs = Promise.promisifyAll(require('original-fs'))
+const fs = Promise.promisifyAll(require('original-fs')) // eslint-disable-line
 const { ipcMain, shell, app, Notification } = require('electron')
 
 const store = require('./store')
@@ -97,7 +97,7 @@ const compareVerison = (a, b) => {
 }
 
 const downloadAsync = async () => { // eslint-disable-line
-  if (!['win32', 'darwin'].includes(os.platform())) return
+  if (!['win32', 'darwin'].includes(os.platform())) return console.log('not support platform')
   const { filePath, url, rel, fileName } = await checkAsync() // eslint-disable-line
   console.log('downloadAsync: check release')
   const currVersion = app.getVersion()

@@ -4,7 +4,7 @@ const UUID = require('uuid')
 const Promise = require('bluebird')
 const sanitize = require('sanitize-filename')
 const { dialog, ipcMain } = require('electron')
-const fs = Promise.promisifyAll(require('original-fs'))
+const fs = Promise.promisifyAll(require('original-fs')) // eslint-disable-line
 
 const { getMainWindow } = require('./window')
 const { createTask } = require('./uploadTransform')
@@ -184,9 +184,11 @@ const uploadMediaHandle = (event, args) => {
 
 const startTransmissionHandle = (event, args) => {
   global.DB.loadAll((error, tasks) => {
-    if (error) return console.log('load db store error', error)
-    tasks.forEach(t => t.state !== 'finished' && t.trsType === 'upload' &&
-      createTask(t.uuid, t.entries, t.dirUUID, t.driveUUID, t.taskType, t.createTime, false, t.policies, t))
+    if (error) console.error('load db store error', error)
+    else {
+      tasks.forEach(t => t.state !== 'finished' && t.trsType === 'upload' &&
+        createTask(t.uuid, t.entries, t.dirUUID, t.driveUUID, t.taskType, t.createTime, false, t.policies, t))
+    }
   })
 }
 
