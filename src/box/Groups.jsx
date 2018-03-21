@@ -304,7 +304,7 @@ class Groups extends React.Component {
     const isOffline = !(station && station.isOnline)
     const selected = this.props.currentBox && (this.props.currentBox.uuid === uuid)
     const hovered = this.state.hover === index
-    const newMsg = !selected && ltsst && (ltsst.index - lri)
+    const newMsg = !selected && ltsst && (ltsst.index - (lri || 0))
 
     /* width: 376 = 2 + 32 + 40 + 16 + 142 + 120 + 24 + 16 */
     return (
@@ -354,13 +354,12 @@ class Groups extends React.Component {
                 newMsg > 0 &&
                   <div
                     style={{
-                      width: 16,
-                      height: 16,
+                      width: 18,
+                      height: 18,
                       fontSize: 11,
                       color: '#FFF',
-                      fontWeigth: 500,
+                      fontWeight: 500,
                       backgroundColor: 'red',
-                      border: '1px solid #FFF',
                       borderRadius: 9,
                       display: 'flex',
                       alignItems: 'center',

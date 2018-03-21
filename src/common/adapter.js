@@ -149,7 +149,8 @@ class Adapter extends EventEmitter {
 
     /* update last read index */
     const box = this.state.boxes.find(b => b.uuid === boxUUID)
-    const lri = box && box.ltsst && box.ltsst.index
+    const lri = tweets.length - 1
+    // const lri = box && box.ltsst && box.ltsst.index
     if (lri > -1 && box.lri !== lri) {
       box.lri = lri
       this.updateBoxes(this.state.boxes)
