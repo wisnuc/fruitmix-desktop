@@ -798,6 +798,7 @@
   "Box Offline Text in Tweets": "Group is offline.",
   "Offline": "Offline",
   "Deleted Box": "Exited",
+  "Get Boxes Error": "Failed to update the list !",
   
   "==== box/BoxDetail.jsx ====": "",
   "Add Users to Box Failed": "Operation failed",

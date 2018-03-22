@@ -183,7 +183,7 @@ class Groups extends React.Component {
         comment: '',
         ctime: new Date().getTime(),
         rtime: new Date().getTime(),
-        index: this.state.tweets.length,
+        index: this.state.tweets.length - 1,
         list: fakeList,
         msg: '',
         stationId: this.props.currentBox.stationId,
@@ -246,11 +246,12 @@ class Groups extends React.Component {
       const showLoading = !(nextBoxUUID && currBoxUUID && nextBoxUUID === currBoxUUID)
 
       /* check if have new stored tweets */
-      const ltc = nextProps.currentBox.ltsst && nextProps.currentBox.ltsst.ctime // last tweet's ctime
+      const lti = nextProps.currentBox.ltsst && nextProps.currentBox.ltsst.index // last tweet's rtime
       const currentTweet = this.state.tweets && this.state.tweets.slice(-1)[0]
-      const ctc = currentTweet && currentTweet.ctime // current tweet's ctime
-      if ((!showLoading && ltc && ltc <= ctc) || this.WIP === nextBoxUUID) return // same box and no new tweets
-      // console.log('will getTweets', showLoading, ltc, ctc, this.WIP)
+      const cti = currentTweet && currentTweet.index // current latest tweet's ctime
+      // console.log('before getTweets', nextProps.currentBox, currentTweet)
+      if ((!showLoading && lti && lti <= cti) || this.WIP === nextBoxUUID) return // same box and no new tweets
+      // console.log('will getTweets', showLoading, lti, cti, this.WIP)
       this.WIP = nextBoxUUID
       this.getTweets(nextProps.currentBox, showLoading)
     }
@@ -301,11 +302,11 @@ class Groups extends React.Component {
 
   renderBox ({ key, index, style }) {
     const box = this.props.boxes[index]
-    const { ltime, name, uuid, users, lcomment, lri, ltsst, station, deleted } = box
+    const { ltime, name, uuid, users, lcomment, lri, station, deleted, outc } = box
     const isOffline = !(station && station.isOnline)
     const selected = this.props.currentBox && (this.props.currentBox.uuid === uuid)
     const hovered = this.state.hover === index
-    const newMsg = !selected && ltsst && (ltsst.index - (lri || 0))
+    const newMsg = !selected && ((outc || 0) - (lri || 0))
 
     /* width: 376 = 2 + 32 + 40 + 16 + 142 + 120 + 24 + 16 */
     return (

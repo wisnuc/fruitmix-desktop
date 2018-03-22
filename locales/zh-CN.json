@@ -798,6 +798,7 @@
   "Box Offline Text in Tweets": "该私友群已离线",
   "Offline": "已离线",
   "Deleted Box": "已退出",
+  "Get Boxes Error": "更新列表失败！",
 
   "==== box/BoxDetail.jsx ====": "",
   "Add Users to Box Failed": "添加失败",
