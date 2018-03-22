@@ -131,7 +131,12 @@ class Group extends Base {
         const currentBox = boxes.find(b => b.uuid === boxUUID)
         this.op = null
         this.setState({ currentBox })
-      } else if (delBox) this.setState({ currentBox: null })
+      } else if (delBox) {
+        this.setState({ currentBox: null })
+      } else if (this.state.currentBox) {
+        const currentBox = boxes.find(b => b.uuid === this.state.currentBox.uuid) || null
+        this.setState({ currentBox })
+      }
     }
 
     /* handle req box failed */

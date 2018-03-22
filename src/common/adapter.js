@@ -105,10 +105,13 @@ class Adapter extends EventEmitter {
         .sort((a, b) => (a.index - b.index))
       await this.DB.saveTweets(docs)
 
+      const newMsgCount = docs.filter(d => d.tweeter && d.tweeter.id !== this.ctx.guid).length
+
       /* update the latest stored tweet and its index */
       const bs = this.state.boxes
       const i = bs.findIndex(b => b.uuid === boxUUID)
       bs[i].ltsst = docs.slice(-1)[0] // latest stored tweet
+      bs[i].outc = (bs[i].outc || 0) + newMsgCount // other users's tweets count
       this.updateBoxes(bs)
     }
   }
@@ -146,14 +149,13 @@ class Adapter extends EventEmitter {
     /* use receive time to sort tweets */
     const tweets = [...trueTweets, ...drafts.filter(v => !!v)].sort((a, b) => a.rtime - b.rtime || a.index - b.index)
 
-    // console.log('getTweets', trueTweets, drafts)
-
     /* update last read index */
     const box = this.state.boxes.find(b => b.uuid === boxUUID)
-    const lri = tweets.length - 1
+    const lri = tweets.filter(t => t.tweeter && t.tweeter.id !== this.ctx.guid).length
     // const lri = box && box.ltsst && box.ltsst.index
     if (lri > -1 && box.lri !== lri) {
       box.lri = lri
+      box.outc = lri
       this.updateBoxes(this.state.boxes)
     }
     // console.timeEnd('getTweets')
