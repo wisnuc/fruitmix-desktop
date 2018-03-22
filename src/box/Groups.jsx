@@ -3,6 +3,7 @@ import UUID from 'uuid'
 import i18n from 'i18n'
 import EventListener from 'react-event-listener'
 import { CircularProgress, Avatar } from 'material-ui'
+import InfoIcon from 'material-ui/svg-icons/action/info'
 import ContentAdd from 'material-ui/svg-icons/content/add'
 
 import UserSelect from './UserSelect'
@@ -390,7 +391,7 @@ class Groups extends React.Component {
     if (!boxes) return this.renderLoading(32)
     const { primaryColor, openSnackBar, getUsers } = this.props
     const { tweets, tError } = this.state
-    const boxH = (boxes && Math.min(window.innerHeight - 106, boxes.length * 72)) || 0
+    const boxH = (boxes && Math.min(window.innerHeight - 106 - (this.props.boxError ? 32 : 0), boxes.length * 72)) || 0
     const boxUUID = currentBox && currentBox.uuid
     const currentUser = (currentBox && currentBox.users.find(u => u.id === guid)) || {}
     const stationId = currentBox && currentBox.stationId
@@ -414,7 +415,7 @@ class Groups extends React.Component {
         <div style={{ width: 376, height: '100%', position: 'relative', backgroundColor: '#FFF', overflow: 'hidden' }}>
           <div style={{ height: 8 }} />
           {/* new Box */}
-          <div style={{ marginLeft: 32, height: 24 }}>
+          <div style={{ marginLeft: 32, height: 24, display: 'flex', alignItems: 'center' }}>
             <FlatButton
               style={{ lineHeight: '', height: 24 }}
               label={i18n.__('New Box')}
@@ -423,7 +424,19 @@ class Groups extends React.Component {
               icon={<ContentAdd color="rgba(0,0,0,.54)" style={{ marginLeft: 4, marginTop: -2 }} />}
               labelStyle={{ fontSize: 12, color: 'rgba(0,0,0,.54)', marginLeft: -4 }}
             />
+            <div style={{ width: 228 }} />
+            { this.props.boxLoading && <CircularProgress size={16} thickness={1.5} /> }
           </div>
+
+          {
+            this.props.boxError &&
+              <div style={{ height: 32, backgroundColor: '#FFCDD2', display: 'flex', alignItems: 'center' }}>
+                <div style={{ width: 40 }} />
+                <InfoIcon color="#F44336" />
+                <div style={{ width: 20 }} />
+                <div style={{ fontSize: 12 }}> { i18n.__('Get Boxes Error') } </div>
+              </div>
+          }
 
           {/* Boxes: react-virtualized with custom scrollBar */}
           {

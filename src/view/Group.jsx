@@ -7,6 +7,7 @@ import { IconButton } from 'material-ui'
 import GroupIcon from 'material-ui/svg-icons/social/group'
 import ErrorIcon from 'material-ui/svg-icons/alert/error'
 import NavigationMenu from 'material-ui/svg-icons/navigation/menu'
+import RefreshIcon from 'material-ui/svg-icons/navigation/refresh'
 
 import Base from './Base'
 import FlatButton from '../common/FlatButton'
@@ -106,7 +107,8 @@ class Group extends Base {
       const props = { guid: this.guid, reqAsync: this.ctx.props.apis.pureRequestAsync, boxDir: this.boxDir }
       this.ada = new Adapter(props)
       this.ada.init()
-      this.ada.on('boxes', this.updateBoxes)
+      this.ada.on('boxes', this.updateBoxes) // req success and boxes changed
+      this.ada.on('reqBoxSuccess', this.onReqBoxSuccess) // req success and boxes do not change
     }
 
     this.selectBox = (index) => {
@@ -115,10 +117,14 @@ class Group extends Base {
       else this.setState({ currentBox: null })
     }
 
+    this.onReqBoxSuccess = () => {
+      this.setState({ boxLoading: false, boxError: null })
+    }
+
     this.updateBoxes = (prev, curr) => {
       // console.log('this.updateBoxes', curr, this.op)
       const boxes = curr.boxes
-      this.setState({ boxes: this.processBox(boxes) })
+      this.setState({ boxes: this.processBox(boxes), boxError: null, boxLoading: false })
       const boxUUID = this.op && this.op.boxUUID
       const delBox = this.op && this.op.delBox
       if (boxUUID) {
@@ -128,10 +134,17 @@ class Group extends Base {
       } else if (delBox) this.setState({ currentBox: null })
     }
 
+    /* handle req box failed */
+    this.handleBoxesError = (e) => {
+      console.error('reqBoxes error', e)
+      this.setState({ boxError: e, boxLoading: false })
+    }
+
     this.refresh = (op) => {
       // console.log('this.refresh op', op)
       if (op) this.op = op
-      this.ada.reqBoxes().catch(e => console.error('reqBoxes error', e))
+      this.setState({ boxLoading: true })
+      this.ada.reqBoxes().catch(this.handleBoxesError)
     }
 
     this.startMqtt = () => {
@@ -187,7 +200,10 @@ class Group extends Base {
   navLeave () {
     this.first = true
     this.onMqtt = false
-    if (this.ada) this.ada.removeAllListeners('boxes')
+    if (this.ada) {
+      this.ada.removeAllListeners('boxes')
+      this.ada.removeAllListeners('onReqBoxSuccess')
+    }
     this.ada = null
     ipcRenderer.removeAllListeners('MQTT_MSG')
   }
@@ -234,8 +250,7 @@ class Group extends Base {
     )
   }
 
-  /*
-  renderToolBar({ style }) {
+  renderToolBar ({ style }) {
     return (
       <div style={style}>
         <IconButton onTouchTap={() => this.refresh()} tooltip={i18n.__('Refresh')} >
@@ -244,7 +259,6 @@ class Group extends Base {
       </div>
     )
   }
-  */
 
   renderDetail ({ style }) {
     return (

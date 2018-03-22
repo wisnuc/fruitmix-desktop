@@ -66,6 +66,7 @@ class Adapter extends EventEmitter {
     const preBoxes = await this.getBoxes()
     const boxes = unionBox(preBoxes, newBoxes)
     if (!isSameArray(boxes, preBoxes)) this.updateBoxes(boxes)
+    else this.emit('reqBoxSuccess', boxes)
     const promises = []
     for (let i = 0; i < boxes.length; i++) {
       const box = boxes[i]
