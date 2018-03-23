@@ -83,8 +83,9 @@ const calcCacheSize = async () => {
   const tmpTransSize = await fsUtils.fsizeAsync(store.getState().config.tmpTransPath, { countFolders: false, fs })
   const thumbSize = await fsUtils.fsizeAsync(store.getState().config.thumbPath, { countFolders: false, fs })
   const imageSize = await fsUtils.fsizeAsync(store.getState().config.imagePath, { countFolders: false, fs })
-  const boxSize = await fsUtils.fsizeAsync(store.getState().config.boxPath, { countFolders: false, fs })
-  return (tmpSize + tmpTransSize + thumbSize + imageSize + boxSize)
+  // const boxSize = await fsUtils.fsizeAsync(store.getState().config.boxPath, { countFolders: false, fs })
+  // return (tmpSize + tmpTransSize + thumbSize + imageSize + boxSize)
+  return (tmpSize + tmpTransSize + thumbSize + imageSize)
 }
 
 const cleanCache = async () => {
@@ -96,8 +97,8 @@ const cleanCache = async () => {
   await mkdirp.mkdirpAsync(store.getState().config.thumbPath)
   await rimrafAsync(store.getState().config.imagePath, fs)
   await mkdirp.mkdirpAsync(store.getState().config.imagePath)
-  await rimrafAsync(store.getState().config.boxPath, fs)
-  await mkdirp.mkdirpAsync(store.getState().config.boxPath, fs)
+  // await rimrafAsync(store.getState().config.boxPath, fs)
+  // await mkdirp.mkdirpAsync(store.getState().config.boxPath, fs)
   return true
 }
 
