@@ -23,7 +23,6 @@ class boxDB {
 
   async saveBoxes (guid, boxes) {
     const doc = await Promise.promisify(this.boxesDB.findOne, { context: this.boxesDB })({ _id: guid })
-    console.log('async saveBoxes', doc)
     if (doc) await Promise.promisify(this.boxesDB.update, { context: this.boxesDB })({ _id: guid }, { boxes })
     else await Promise.promisify(this.boxesDB.insert, { context: this.boxesDB })({ _id: guid, boxes })
   }
