@@ -302,11 +302,11 @@ class Groups extends React.Component {
 
   renderBox ({ key, index, style }) {
     const box = this.props.boxes[index]
-    const { ltime, name, uuid, users, lcomment, lri, station, deleted, outc } = box
+    const { ltime, name, uuid, users, lcomment, nmc, station, deleted } = box
     const isOffline = !(station && station.isOnline)
     const selected = this.props.currentBox && (this.props.currentBox.uuid === uuid)
     const hovered = this.state.hover === index
-    const newMsg = !selected && ((outc || 0) - (lri || 0))
+    const newMsg = !selected && (nmc || 0)
 
     /* width: 376 = 2 + 32 + 40 + 16 + 142 + 120 + 24 + 16 */
     return (

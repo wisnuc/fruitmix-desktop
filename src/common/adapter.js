@@ -111,7 +111,7 @@ class Adapter extends EventEmitter {
       const bs = this.state.boxes
       const i = bs.findIndex(b => b.uuid === boxUUID)
       bs[i].ltsst = docs.slice(-1)[0] // latest stored tweet
-      bs[i].outc = (bs[i].outc || 0) + newMsgCount // other users's tweets count
+      bs[i].nmc = (bs[i].nmc || 0) + newMsgCount // other users's tweets count
       this.updateBoxes(bs)
     }
   }
@@ -151,11 +151,8 @@ class Adapter extends EventEmitter {
 
     /* update last read index */
     const box = this.state.boxes.find(b => b.uuid === boxUUID)
-    const lri = tweets.filter(t => t.tweeter && t.tweeter.id !== this.ctx.guid).length
-    // const lri = box && box.ltsst && box.ltsst.index
-    if (lri > -1 && box.lri !== lri) {
-      box.lri = lri
-      box.outc = lri
+    if (box && box.nmc) {
+      box.nmc = 0
       this.updateBoxes(this.state.boxes)
     }
     // console.timeEnd('getTweets')
