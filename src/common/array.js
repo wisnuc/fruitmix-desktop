@@ -35,3 +35,16 @@ export const unionBy = (a, b, key) => {
   })
   return union
 }
+
+/* chunk array's element by size, chunk([1,2,3,4,5], 2) => [[1,2], [3,4], [5]] */
+export const chunk = (arr, s) => {
+  const size = Math.max(s, 0)
+  if (!Array.isArray(arr) || !arr.length || !size) return []
+  let i = 0
+  const array = []
+  while (arr.length > i * size) {
+    array.push(arr.slice(i * size, i * size + size))
+    i += 1
+  }
+  return array
+}

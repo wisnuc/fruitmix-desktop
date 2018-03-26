@@ -7,7 +7,7 @@ import { CircularProgress, Avatar, IconButton, RaisedButton, TextField } from 'm
 
 import Grid from './Grid'
 import PhotoList from '../photo/PhotoList'
-import { combineElement, removeElement } from '../common/array'
+import { combineElement, removeElement, chunk } from '../common/array'
 
 class SelectMedia extends React.Component {
   constructor (props) {
@@ -118,17 +118,19 @@ class SelectMedia extends React.Component {
     }
 
     this.fire = () => {
-      const args = {
-        comment: '',
-        type: 'list',
-        boxUUID: this.props.boxUUID,
-        stationId: this.props.stationId,
-        isMedia: true,
-        list: this.state.selectedItems.map(d => ({ type: 'media', sha256: d, nasMedia: true }))
-      }
-
+      const arr = chunk(this.state.selectedItems, 1024 * 1024) // FIXME
+      arr.forEach((selected) => {
+        const args = {
+          comment: '',
+          type: 'list',
+          boxUUID: this.props.boxUUID,
+          stationId: this.props.stationId,
+          isMedia: true,
+          list: selected.map(d => ({ type: 'media', sha256: d, nasMedia: true }))
+        }
+        this.props.createNasTweets(args)
+      })
       this.props.onRequestClose()
-      this.props.createNasTweets(args)
     }
   }
 
