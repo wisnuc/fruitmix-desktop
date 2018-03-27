@@ -118,7 +118,7 @@ class SelectMedia extends React.Component {
     }
 
     this.fire = () => {
-      const arr = chunk(this.state.selectedItems, 1024 * 1024) // FIXME
+      const arr = chunk(this.state.selectedItems, 105)
       arr.forEach((selected) => {
         const args = {
           comment: '',

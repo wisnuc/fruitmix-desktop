@@ -60,7 +60,7 @@ class SelectNas extends React.Component {
     }
 
     this.fire = () => {
-      const arr = chunk([...this.selected], 1024 * 1024) // FIXME
+      const arr = chunk([...this.selected], 105)
       arr.forEach((selected) => {
         const args = {
           comment: this.state.comment || '',

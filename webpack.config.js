@@ -1,8 +1,3 @@
-/**
- * @description webpack 开发环境配置
- *
- */
-
 const path = require('path')
 const webpack = require('webpack')
 
@@ -24,8 +19,6 @@ module.exports = {
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
-        // use: 'babel-loader'
-        // use: ['react-hot-loader/webpack', 'babel-loader']
         loader: 'react-hot-loader!babel-loader'
       },
       {
