@@ -80,6 +80,30 @@ class Adapter extends EventEmitter {
     await Promise.all(promises)
   }
 
+  async updateSingleBoxes (b) {
+    const preBoxes = await this.getBoxes()
+    const index = preBoxes.findIndex(box => box.uuid === b.uuid)
+    let boxes
+    if (index > -1) {
+      const newBox = Object.assign({}, preBoxes[index], b, { deleted: undefined })
+      boxes = [...preBoxes.slice(0, index), newBox, ...preBoxes.slice(index + 1)]
+    } else boxes = [b, ...preBoxes]
+
+    if (!isSameArray(boxes, preBoxes)) this.updateBoxes(boxes)
+    else this.emit('reqBoxSuccess', boxes)
+    const promises = []
+    for (let i = 0; i < boxes.length; i++) {
+      const box = boxes[i]
+      const isOnline = box.station && box.station.isOnline && !box.deleted
+      const ltsi = box.ltsst && box.ltsst.index // latest stored tweet's index
+      const lti = box.tweet ? box.tweet.index : 0 // last tweet's index
+      if (isOnline && (ltsi === undefined || (lti > ltsi))) {
+        promises.push(this.reqTweets({ boxUUID: box.uuid, stationId: box.stationId }))
+      }
+    }
+    await Promise.all(promises)
+  }
+
   async deleteBox (boxUUID) {
     const boxes = await this.getBoxes()
     const index = boxes.findIndex(b => b.uuid === boxUUID)
