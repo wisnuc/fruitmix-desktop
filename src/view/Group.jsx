@@ -166,8 +166,8 @@ class Group extends Base {
     }
 
     this.onMessage = (msg) => {
-      // console.log('this.onMessage', msg)
-      this.refresh()
+      if (Array.isArray(msg) && msg.length === 1) this.ada.updateSingleBoxes(msg[0]).catch(this.handleBoxesError)
+      else this.refresh()
     }
 
     this.getUsers = next => this.ctx.props.apis.pureRequest('friends', { userId: this.guid }, next)
