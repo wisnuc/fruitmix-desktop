@@ -14,16 +14,13 @@ ___
 * 2017-5-31 添加设计逻辑和源码详解（李新炜）
 * 2017-6-12 添加api与状态机模型（李新炜）
 * 2017-11-22 添加与更新内容
+* 2018-03-29 添加box部分及更新内容
 
 **目录**
 
 [TOC]
 
 ## 项目结构
-
-* build: node端代码babel编译转码后文件
-
-* devel.js: 开发环境使用的入口文件
 
 * doc: 项目文档目录
 
@@ -42,6 +39,7 @@ ___
 
     * assets : 存放资源文件（css, images, font)
     * bundle.js : 前端打包输出
+    * index.html : 入口文件
 
 * src: 前端源代码目录
 
@@ -57,6 +55,7 @@ ___
     * nav: model
     * photo: Media相关页面，包括照片和视频等
     * view: viewmodel
+    * box: 私友群模块
 
 * test: 模块单元测试目录
 
@@ -1256,6 +1255,25 @@ ViewModel 部分
 
 * TimeDateInfo.jsx: 渲染日期和时间信息
 
+### box
+
+私友群
+
+* BoxDetail.jsx: 群成员管理与设置页面
+* BoxUploadButton.jsx: 私友群上传文件，包括客户端本地文件和nas的文件或照片
+* Grid.jsx: 列表视图框架，被MediaBox.jsx调用
+* MediaBox.jsx: 渲染收件箱页面中的单个media
+* Inbox.jsx: 渲染收件箱页面
+* Groups.jsx: 渲染群列表的页面
+* ListSelect.jsx: 处理各种文件被选中的状态，继承自file里的ListSelect.jsx
+* NewNameDialog.jsx: 修改群名的对话框
+* Row.jsx: 列表视图框架，被SelectFile.jsx和MediaBox.jsx调用
+* SelectFile.jsx: 在全部NAS文件中选择文件并上传私友群的页面
+* SelectMedia.jsx: 在Media中选择并照片上传私友群的页面
+* Tweets.jsx: 渲染tweets列表
+* UserSelect.jsx: 选择私友群用户列表，用于新建box、增减用户时选择用户
+* ViewFiles.jsx: 在Tweets列表中预览文件
+* ViewMedia.jsx: 在Tweets列表中预览照片
 
 ### common
 
