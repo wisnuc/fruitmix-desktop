@@ -99,12 +99,12 @@ class WechatLogin extends React.Component {
         const localToken = await this.props.selectedDevice.pureRequestAsync('localTokenByCloud', { stationID, token })
         this.props.selectDevice({ address: lanip, domain: 'local' })
         Object.assign(this.props.selectedDevice, {
-          token: {
+          token: { isFulfilled: () => true, ctx: user, data: localToken },
+          mdev: { address: lanip, domain: 'local', stationID, stationName },
+          info: {
             isFulfilled: () => true,
-            ctx: user,
-            data: localToken
-          },
-          mdev: { address: lanip, domain: 'local', stationID, stationName }
+            data: { id: stationID, name: stationName, connectState: 'CONNECTED' }
+          }
         })
       } else {
         Object.assign(this.props.selectedDevice, {
@@ -113,7 +113,11 @@ class WechatLogin extends React.Component {
             ctx: user,
             data: { token, stationID }
           },
-          mdev: { address: 'http://www.siyouqun.com:80', domain: 'remote', lanip: ips[0], stationID, stationName, isCloud: true }
+          mdev: { address: 'http://www.siyouqun.com:80', domain: 'remote', lanip: ips[0], stationID, stationName, isCloud: true },
+          info: {
+            isFulfilled: () => true,
+            data: { id: stationID, name: stationName, connectState: 'CONNECTED' }
+          }
         })
       }
       this.props.ipcRenderer.send('UPDATE_USER_CONFIG', user.uuid, { weChat: this.state.wxData.user, wxToken: token })
