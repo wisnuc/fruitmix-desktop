@@ -109,7 +109,7 @@ class PhotoItem extends React.Component {
                 position: 'absolute',
                 zIndex: 100,
                 width: size,
-                height: 56,
+                height: 36,
                 left: 0,
                 top: 0,
                 display: 'flex',
@@ -202,6 +202,7 @@ class PhotoItem extends React.Component {
                 }}
                 onMouseEnter={this.mouseEnter}
                 onMouseLeave={this.mouseLeave}
+                onTouchTap={(e) => { this.onSelectIconButton(); e.stopPropagation() }}
               >
                 <ZoomIn
                   onTouchTap={(e) => { this.props.lookPhotoDetail(this.props.digest); e.stopPropagation() }}
