@@ -203,9 +203,14 @@ class Groups extends React.Component {
     }
 
     this.onFakeData = (event, args) => {
-      const { session, box, success, fakeList, raw } = args
+      const { session, box, success, fakeList, raw, error } = args
       if (!success) {
-        this.props.openSnackBar(i18n.__('Read Local Files Failed'))
+        let text = i18n.__('Read Local Files Failed')
+
+        if (error && error.code === 'ELARGE') text = i18n.__('Too Large File in Box Uploading')
+        else if (error && error.code === 'ENOTFILE') text = i18n.__('Unsupported File Type in Box Uploading')
+
+        this.props.openSnackBar(text)
       } else {
         const tweet = this.updateFakeTweet({ fakeList, box, raw })
         this.pushQueue(tweet.uuid)
