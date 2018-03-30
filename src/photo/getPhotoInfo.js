@@ -97,11 +97,11 @@ const getPhotoInfo = (height, w, media, dateUnknownText) => {
       indexHeightSum.push(rowHeightSum)
     })
 
-    maxScrollTop = rowHeightSum - height + 16 * 2
-    if (maxScrollTop > 1500000) {
-      const r = maxScrollTop / 1500000
+    maxScrollTop = rowHeightSum - height
+    if (rowHeightSum > 1500000) {
+      const r = rowHeightSum / 1500000
       indexHeightSum = indexHeightSum.map(h => h / r)
-      maxScrollTop = 1500000
+      maxScrollTop = 1500000 - height
     }
   }
   return ({ photoDates, photoMapDates, indexHeightSum, allHeight, maxScrollTop, rowHeightSum, photoListWithSameDate, size: size - 8 })
