@@ -16,9 +16,20 @@ const readAsync = async (entries) => {
     const entry = entries[i]
     const filename = path.parse(entry).base
     const stat = await fs.lstatAsync(path.resolve(entry))
-    if (!stat.isFile()) continue
+    /* only file */
+    if (!stat.isFile()) {
+      const e = new Error('Not A File')
+      e.code = 'ENOTFILE'
+      throw e
+    }
 
+    /* no large than 1G */
     const size = stat.size
+    if (size > 1024 * 1024 * 1024) {
+      const e = new Error('File large than 1G')
+      e.code = 'ELARGE'
+      throw e
+    }
     const parts = await hashFileAsync(entry, size, 1024 * 1024 * 1024)
     const sha256 = parts.slice(-1)[0].fingerprint
     files.push({ entry, filename, size, sha256 })
@@ -52,8 +63,8 @@ const uploadHandle = (event, args) => {
             console.log('box upload error', body || err)
             getMainWindow().webContents.send('BOX_UPLOAD_RESULT', { session, box, success: false })
           })
-      }).catch(() => {
-        getMainWindow().webContents.send('BOX_UPLOAD_FAKE_DATA', { session, box, success: false })
+      }).catch((e) => {
+        getMainWindow().webContents.send('BOX_UPLOAD_FAKE_DATA', { session, box, success: false, error: e })
       })
   })
 }
