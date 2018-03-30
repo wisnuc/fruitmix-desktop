@@ -255,7 +255,7 @@ class SelectMedia extends React.Component {
                 <Avatar src={currentUser.avatarUrl} size={40} />
               </div>
               <div style={{ width: 16 }} />
-              <div style={{ width: 100 }}>
+              <div style={{ width: 240 }}>
                 { currentUser.nickName }
               </div>
             </div>
