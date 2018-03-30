@@ -335,7 +335,7 @@ class PhotoList extends React.Component {
                     ref={ref => (this.refList = ref)}
                     height={height}
                     width={width}
-                    allHeight={PhotoInfo.rowHeightSum}
+                    allHeight={Math.min(1500000, PhotoInfo.rowHeightSum)}
                     estimatedRowSize={estimatedRowSize}
                     rowHeight={rowHeight}
                     rowRenderer={rowRenderer}
