@@ -24,8 +24,6 @@ import Public from '../view/Public'
 import Share from '../view/Share'
 import Transmission from '../view/Transmission'
 
-import Box from '../view/Box'
-import Group from '../view/Group'
 import Media from '../view/Media'
 import Assistant from '../view/Assistant'
 import Account from '../view/Account'
@@ -58,8 +56,8 @@ class NavViews extends React.Component {
     this.install('public', Public)
     this.install('transmission', Transmission)
 
-    this.install('box', Box)
-    this.install('group', Group)
+    // this.install('box', Box)
+    // this.install('group', Group)
 
     this.install('download', Download)
     this.install('finishedList', FinishedList)
@@ -84,12 +82,6 @@ class NavViews extends React.Component {
     this.install('clientUpdate', ClientUpdate)
 
     Object.assign(this.state, {
-      /*
-      nts: [
-        { id: '123', type: 'firmware', title: '检测到新的固件', body: '点击去安装', action: () => this.navTo('firmwareUpdate') },
-        { id: '321', type: 'box', title: '收到新的文件', body: '点击去查看', action: () => this.navTo('public') }
-      ],
-      */
       nts: [],
       nav: null,
       showNotifications: false,
@@ -175,7 +167,7 @@ class NavViews extends React.Component {
     }
 
     this.init = () => {
-      this.navTo('group')
+      this.navTo('home')
       this.setState({ openDrawer: true })
       this.timer = setTimeout(() => this.setState({ openDrawer: false }), 1500)
       this.checkFirmWareAsync().catch(e => console.error('checkFirmWareAsync error', e))

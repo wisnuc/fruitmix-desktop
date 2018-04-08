@@ -102,6 +102,12 @@ class Firm extends React.PureComponent {
     let text = ''
     let color = ''
     switch (state) {
+      case 'Stopped':
+        label = i18n.__('Download')
+        action = () => this.handleRelease(tagName, 'Ready')
+        text = i18n.__('Release Idle')
+        color = grey500
+        break
       case 'Idle':
         label = i18n.__('Download')
         action = () => this.handleRelease(tagName, 'Ready')
@@ -122,7 +128,7 @@ class Firm extends React.PureComponent {
         break
       case 'Downloading':
         label = i18n.__('Stop Download')
-        action = () => this.handleRelease(tagName, 'Idle')
+        action = () => this.handleRelease(tagName, 'Stopped')
         text = i18n.__('Release Downloading')
         color = grey500
         break
