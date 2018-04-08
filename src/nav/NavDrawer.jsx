@@ -205,8 +205,6 @@ class NavDrawer extends React.Component {
             selected={views[nav].navGroup() === 'box'}
             onTouchTap={() => navTo('box')}
           />
-          */}
-
           <MenuItem
             icon={views.group.menuIcon()}
             text={i18n.__('Groups')}
@@ -214,6 +212,7 @@ class NavDrawer extends React.Component {
             selected={views[nav].navGroup() === 'group'}
             onTouchTap={() => navTo('group')}
           />
+          */}
 
           <MenuItem
             icon={views.home.menuIcon()}
