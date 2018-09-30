@@ -8,7 +8,6 @@ import DeltaIcon from 'material-ui/svg-icons/navigation/arrow-drop-down'
 import DialogOverlay from '../common/DialogOverlay'
 import ChangeAccountDialog from './ChangeAccountDialog'
 import FlatButton from '../common/FlatButton'
-import slice from '../common/slice'
 
 class AdminUsersApp extends React.Component {
   constructor (props) {
@@ -103,7 +102,7 @@ class AdminUsersApp extends React.Component {
                   <img width={40} height={40} alt="" src={avatarUrl} />
                 </div>
               )
-              : <Avatar>{ slice(user.username, 0, 2).toUpperCase() }</Avatar>
+              : <Avatar> { Array.from(user.username).slice(0, 2).join('').toUpperCase() } </Avatar>
           }
         </div>
         <div style={{ flex: '0 0 32px' }} />

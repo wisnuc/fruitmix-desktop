@@ -1,8 +1,10 @@
 {
   "extends": [
-    "airbnb",
+    "eslint:recommended",
+    "airbnb-base",
     "standard",
-    "standard-jsx"
+    "standard-jsx",
+    "standard-react"
   ],
   "parser": "babel-eslint",
   "env": {
@@ -11,11 +13,18 @@
   },
   "settings": {
     "ecmascript": 6,
-    "jsx": true
+    "jsx": true,
+    "import/resolver": {
+      "node": {
+        "extensions": [
+          ".js",
+          ".jsx"
+        ]
+      }
+    },
   },
   "plugins": [
     "react",
-    "jsx-a11y",
     "import"
   ],
   "rules": {
